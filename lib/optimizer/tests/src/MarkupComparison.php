@@ -23,10 +23,26 @@ trait MarkupComparison
         $actual   = preg_replace('/(?<=>)\s+(?=<)/', '', trim($actual));
         $expected = preg_replace('/(?<=>)\s+(?=<)/', '', trim($expected));
 
-        $this->assertEquals(
-            array_filter(preg_split('#(<[^>]+>|[^<>]+)#', $expected, -1, PREG_SPLIT_DELIM_CAPTURE)),
-            array_filter(preg_split('#(<[^>]+>|[^<>]+)#', $actual, -1, PREG_SPLIT_DELIM_CAPTURE))
-        );
+        $normalize_attributes = static function( $token ) {
+            if ( preg_match( '#^(<[a-z0-9-]+)(\s[^>]+)#is', $token, $matches ) ) {
+                $token = $matches[1];
+
+                $attrs = array_map( 'trim', array_filter( preg_split( '#(\s+[^"\'\s=]+(?:=(?:"[^"]+"|\'[^\']+\'|[^"\'\s]+))?)#', $matches[2], -1, PREG_SPLIT_DELIM_CAPTURE ) ) );
+                sort( $attrs );
+                $attrs = array_map(
+                    static function( $attr ) {
+                        return ' ' . $attr;
+                    },
+                    $attrs
+                );
+            }
+            return $token;
+        };
+
+        $expected_tokens = array_map( $normalize_attributes, array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $expected, -1, PREG_SPLIT_DELIM_CAPTURE ) ) );
+        $actual_tokens   = array_map( $normalize_attributes, array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $actual, -1, PREG_SPLIT_DELIM_CAPTURE ) ) );
+
+        $this->assertEquals( $expected_tokens, $actual_tokens );
     }
 
     /**
