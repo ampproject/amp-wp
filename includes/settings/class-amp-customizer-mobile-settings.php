@@ -39,6 +39,7 @@ class AMP_Customizer_Mobile_Settings {
 			$settings,
 			[
 				'display_exit_link' => false,
+				'exit_link_text'    => __( 'Exit mobile version', 'amp' ),
 			]
 		);
 
@@ -58,6 +59,17 @@ class AMP_Customizer_Mobile_Settings {
 				'type'              => 'option',
 				'default'           => false,
 				'sanitize_callback' => 'rest_sanitize_boolean',
+				'transport'         => 'postMessage',
+			]
+		);
+
+		// Exit link text.
+		$wp_customize->add_setting(
+			'amp_customizer[exit_link_text]',
+			[
+				'type'              => 'option',
+				'default'           => __( 'Exit mobile version', 'amp' ),
+				'sanitize_callback' => 'sanitize_text_field',
 				'transport'         => 'postMessage',
 			]
 		);
@@ -82,9 +94,20 @@ class AMP_Customizer_Mobile_Settings {
 			'amp_display_exit_link',
 			[
 				'settings' => 'amp_customizer[display_exit_link]',
-				'label'    => __( 'Display link to exit reader mode?', 'amp' ),
+				'label'    => __( 'Display link to exit reader mode', 'amp' ),
 				'section'  => 'amp_mobile',
 				'type'     => 'checkbox',
+			]
+		);
+
+		// Exit link text.
+		$wp_customize->add_control(
+			'amp_exit_link_text',
+			[
+				'settings' => 'amp_customizer[exit_link_text]',
+				'label'    => __( 'Exit link text', 'amp' ),
+				'section'  => 'amp_mobile',
+				'type'     => 'text',
 			]
 		);
 	}

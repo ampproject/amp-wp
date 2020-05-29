@@ -188,7 +188,7 @@ class AMP_Customizer_Design_Settings {
 			'amp-wp-footer',
 			[
 				'selector'            => '.amp-wp-footer',
-				'settings'            => [ 'blogname', 'amp_customizer[display_exit_link]' ],
+				'settings'            => [ 'blogname', 'amp_customizer[display_exit_link]', 'amp_customizer[exit_link_text]' ],
 				'render_callback'     => [ __CLASS__, 'render_footer' ],
 				'fallback_refresh'    => false,
 				'container_inclusive' => true,
