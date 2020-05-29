@@ -69,7 +69,15 @@ export function ChooseReaderTheme() {
 			</p>
 			<form>
 				<ul className="amp-wp-choose-reader-theme__grid">
-					{ themes && themes.map( ( theme ) => <ThemeCard key={ `${ instanceId }-${ theme.slug }` } { ...theme } /> ) }
+					{
+						themes && themes.map( ( theme ) => (
+							<ThemeCard
+								key={ `${ instanceId }-${ theme.slug }` }
+								screenshotUrl={ theme.screenshot_url }
+								{ ...theme }
+							/> ),
+						)
+					}
 				</ul>
 			</form>
 		</div>

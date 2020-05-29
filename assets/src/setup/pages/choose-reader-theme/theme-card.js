@@ -1,8 +1,8 @@
-/* eslint-disable camelcase */
+
 /**
  * WordPress dependencies
  */
-import { useContext, useMemo } from '@wordpress/element';
+import { useContext } from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
 import { decodeEntities } from '@wordpress/html-entities';
 
@@ -17,7 +17,7 @@ import PropTypes from 'prop-types';
 import './style.css';
 import { Options } from '../../components/options-context-provider';
 
-export function ThemeCard( { description, screenshot_url, slug, name } ) {
+export function ThemeCard( { description, screenshotUrl, slug, name } ) {
 	const instanceId = useInstanceId( ThemeCard );
 	const { options: { reader_theme: readerTheme }, updateOptions } = useContext( Options );
 
@@ -38,7 +38,7 @@ export function ThemeCard( { description, screenshot_url, slug, name } ) {
 					</h2>
 				</div>
 				<img
-					src={ screenshot_url }
+					src={ screenshotUrl }
 					alt={ name }
 				/>
 				<p>
@@ -51,7 +51,7 @@ export function ThemeCard( { description, screenshot_url, slug, name } ) {
 
 ThemeCard.propTypes = {
 	description: PropTypes.string.isRequired,
-	screenshot_url: PropTypes.string.isRequired,
+	screenshotUrl: PropTypes.string.isRequired,
 	slug: PropTypes.string.isRequired,
 	name: PropTypes.string.isRequired,
 };
