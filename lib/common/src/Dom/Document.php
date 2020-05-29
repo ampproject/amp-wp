@@ -1500,11 +1500,11 @@ final class Document extends DOMDocument
 
         if (array_key_exists($prefix, $this->indexCounter)) {
             ++$this->indexCounter[$prefix];
-            $id = "{$prefix}-{$this->indexCounter[ $prefix ]}";
         } else {
-            $id                          = $prefix;
-            $this->indexCounter[$prefix] = 1;
+            $this->indexCounter[$prefix] = 0;
         }
+
+        $id = "{$prefix}-{$this->indexCounter[ $prefix ]}";
 
         while ($this->getElementById($id) instanceof DOMElement) {
             ++$this->indexCounter[$prefix];
