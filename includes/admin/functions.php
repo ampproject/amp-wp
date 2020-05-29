@@ -28,7 +28,7 @@ function amp_init_customizer() {
 	}
 
 	// Fire up the AMP Customizer.
-	add_action( 'customize_register', [ 'AMP_Customizer', 'init' ], 500 );
+	add_action( 'customize_register', [ 'AMP_Template_Customizer', 'init' ], 500 );
 
 	// Add some basic design settings + controls to the Customizer.
 	add_action( 'amp_init', [ 'AMP_Customizer_Design_Settings', 'init' ] );
@@ -105,7 +105,7 @@ function amp_add_customizer_link() {
 
 	$menu_slug = add_query_arg(
 		[
-			'autofocus[panel]' => AMP_Customizer::PANEL_ID,
+			'autofocus[panel]' => AMP_Template_Customizer::PANEL_ID,
 			'return'           => rawurlencode( admin_url() ),
 		],
 		'customize.php'

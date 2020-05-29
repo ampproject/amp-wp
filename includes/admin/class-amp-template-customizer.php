@@ -1,11 +1,9 @@
 <?php
 /**
- * Class AMP_Customizer
+ * Class AMP_Template_Customizer
  *
  * @package AMP
  */
-
-use AmpProject\AmpWP\Option;
 
 /**
  * AMP class that implements a template style editor in the Customizer.
@@ -15,7 +13,7 @@ use AmpProject\AmpWP\Option;
  *
  * @since 0.4
  */
-class AMP_Customizer {
+class AMP_Template_Customizer {
 
 	/**
 	 * AMP template editor panel ID.
@@ -54,7 +52,7 @@ class AMP_Customizer {
 		 * In practice the `customize_register` hook should be used instead.
 		 *
 		 * @since 0.4
-		 * @param AMP_Customizer $self Instance.
+		 * @param AMP_Template_Customizer $self Instance.
 		 */
 		do_action( 'amp_customizer_init', $self );
 

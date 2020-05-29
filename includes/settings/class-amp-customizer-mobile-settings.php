@@ -85,7 +85,7 @@ class AMP_Customizer_Mobile_Settings {
 			'amp_mobile',
 			[
 				'title' => __( 'Mobile', 'amp' ),
-				'panel' => AMP_Customizer::PANEL_ID,
+				'panel' => AMP_Template_Customizer::PANEL_ID,
 			]
 		);
 

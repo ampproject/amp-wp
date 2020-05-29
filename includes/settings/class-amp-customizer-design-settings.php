@@ -127,7 +127,7 @@ class AMP_Customizer_Design_Settings {
 			'amp_design',
 			[
 				'title' => __( 'Design', 'amp' ),
-				'panel' => AMP_Customizer::PANEL_ID,
+				'panel' => AMP_Template_Customizer::PANEL_ID,
 			]
 		);
 
