@@ -87,22 +87,6 @@ final class AMP_Reader_Themes {
 	}
 
 	/**
-	 * Installs a theme from the WP repo.
-	 *
-	 * @param string $slug Theme slug.
-	 * @return bool|WP_Error True if the installation was successful, false or a WP_Error object otherwise.
-	 */
-	public function install_reader_theme( $slug ) {
-		// @todo Use or emulate wp_ajax_install_theme.
-
-		if ( 'classic' === $slug ) {
-			return true;
-		}
-
-		return true;
-	}
-
-	/**
 	 * Retrieves theme data.
 	 *
 	 * @since 1.6.0
