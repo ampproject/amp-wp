@@ -29,9 +29,9 @@
 		<?php $canonical_link_text = $this->get( 'post_canonical_link_text' ); ?>
 		<div id="site-version-switcher">
 			<a
-					id="version-switch-link"
-					rel="noamphtml"
-					href="<?php echo esc_url( $canonical_link_url ); ?>"
+				id="version-switch-link"
+				rel="noamphtml"
+				href="<?php echo esc_url( $canonical_link_url ); ?>"
 			>
 				<?php echo esc_html( $canonical_link_text ); ?>
 			</a>

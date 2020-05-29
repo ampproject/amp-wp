@@ -29,7 +29,7 @@ class AMP_Options_Manager {
 		Option::SUPPORTED_POST_TYPES    => [ 'post' ],
 		Option::ANALYTICS               => [],
 		Option::ALL_TEMPLATES_SUPPORTED => true,
-		Option::MOBILE_REDIRECT         => true,
+		Option::MOBILE_REDIRECT         => false,
 		Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
 		Option::VERSION                 => AMP__VERSION,
 	];
