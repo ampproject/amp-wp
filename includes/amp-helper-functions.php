@@ -156,6 +156,7 @@ function amp_init() {
 		'rest_api_init',
 		static function() {
 			$reader_theme_controller = new AMP_Reader_Theme_REST_Controller( new AMP_Reader_Themes() );
+			$reader_theme_controller->init();
 			$reader_theme_controller->register_routes();
 		}
 	);

@@ -51,7 +51,7 @@ final class AMP_Reader_Themes {
 			return $this->themes;
 		}
 
-		$themes   = $this->get_default_supported_reader_themes( true );
+		$themes   = $this->get_default_supported_reader_themes();
 		$themes   = array_map( [ $this, 'prepare_theme' ], $themes );
 		$themes[] = $this->get_classic_mode();
 
@@ -270,7 +270,7 @@ final class AMP_Reader_Themes {
 			'name'           => 'AMP Classic',
 			'slug'           => 'classic',
 			'preview_url'    => 'https://amp-wp.org',
-			'screenshot_url' => '//ts.w.org/wp-content/themes/twentynineteen/screenshot.png?ver=1.5',
+			'screenshot_url' => '//via.placeholder.com/218x472',
 			'homepage'       => 'https://amp-wp.org',
 			'description'    => __(
 				// @todo Improved description text.
@@ -299,6 +299,7 @@ final class AMP_Reader_Themes {
 	 */
 	public static function get_default_raw_reader_themes() {
 		// Copied from JSON data returned from Wordpress.org themes endpoint. See ::get_default_supported_reader_themes.
+		// Note: Descriptions are made translatable in the AMP_Reader_Theme_REST_Controller.
 		return [
 			[
 				'name'           => 'Twenty Twenty',
@@ -316,7 +317,7 @@ final class AMP_Reader_Themes {
 				'rating'         => 86,
 				'num_ratings'    => '37',
 				'homepage'       => 'https://wordpress.org/themes/twentytwenty/',
-				'description'    => __( 'Our default theme for 2020 is designed to take full advantage of the flexibility of the block editor. Organizations and businesses have the ability to create dynamic landing pages with endless layouts using the group and column blocks. The centered content column and fine-tuned typography also makes it perfect for traditional blogs. Complete editor styles give you a good idea of what your content will look like, even before you publish. You can give your site a personal touch by changing the background colors and the accent color in the Customizer. The colors of all elements on your site are automatically calculated based on the colors you pick, ensuring a high, accessible color contrast for your visitors.', 'amp' ),
+				'description'    => 'Our default theme for 2020 is designed to take full advantage of the flexibility of the block editor. Organizations and businesses have the ability to create dynamic landing pages with endless layouts using the group and column blocks. The centered content column and fine-tuned typography also makes it perfect for traditional blogs. Complete editor styles give you a good idea of what your content will look like, even before you publish. You can give your site a personal touch by changing the background colors and the accent color in the Customizer. The colors of all elements on your site are automatically calculated based on the colors you pick, ensuring a high, accessible color contrast for your visitors.',
 				'requires'       => '4.7',
 				'requires_php'   => '5.2.4',
 			],
@@ -336,7 +337,7 @@ final class AMP_Reader_Themes {
 				'rating'         => 72,
 				'num_ratings'    => '54',
 				'homepage'       => 'https://wordpress.org/themes/twentynineteen/',
-				'description'    => __( 'Our 2019 default theme is designed to show off the power of the block editor. It features custom styles for all the default blocks, and is built so that what you see in the editor looks like what you\'ll see on your website. Twenty Nineteen is designed to be adaptable to a wide range of websites, whether you’re running a photo blog, launching a new business, or supporting a non-profit. Featuring ample whitespace and modern sans-serif headlines paired with classic serif body text, it\'s built to be beautiful on all screen sizes.', 'amp' ),
+				'description'    => 'Our 2019 default theme is designed to show off the power of the block editor. It features custom styles for all the default blocks, and is built so that what you see in the editor looks like what you\'ll see on your website. Twenty Nineteen is designed to be adaptable to a wide range of websites, whether you’re running a photo blog, launching a new business, or supporting a non-profit. Featuring ample whitespace and modern sans-serif headlines paired with classic serif body text, it\'s built to be beautiful on all screen sizes.',
 				'requires'       => '4.9.6',
 				'requires_php'   => '5.2.4',
 			],
@@ -356,7 +357,7 @@ final class AMP_Reader_Themes {
 				'rating'         => 90,
 				'num_ratings'    => '110',
 				'homepage'       => 'https://wordpress.org/themes/twentyseventeen/',
-				'description'    => __( 'Twenty Seventeen brings your site to life with header video and immersive featured images. With a focus on business sites, it features multiple sections on the front page as well as widgets, navigation and social menus, a logo, and more. Personalize its asymmetrical grid with a custom color scheme and showcase your multimedia content with post formats. Our default theme for 2017 works great in many languages, for any abilities, and on any device.', 'amp' ),
+				'description'    => 'Twenty Seventeen brings your site to life with header video and immersive featured images. With a focus on business sites, it features multiple sections on the front page as well as widgets, navigation and social menus, a logo, and more. Personalize its asymmetrical grid with a custom color scheme and showcase your multimedia content with post formats. Our default theme for 2017 works great in many languages, for any abilities, and on any device.',
 				'requires'       => '4.7',
 				'requires_php'   => '5.2.4',
 			],
@@ -376,7 +377,7 @@ final class AMP_Reader_Themes {
 				'rating'         => 82,
 				'num_ratings'    => '76',
 				'homepage'       => 'https://wordpress.org/themes/twentysixteen/',
-				'description'    => __( 'Twenty Sixteen is a modernized take on an ever-popular WordPress layout — the horizontal masthead with an optional right sidebar that works perfectly for blogs and websites. It has custom color options with beautiful default color schemes, a harmonious fluid grid using a mobile-first approach, and impeccable polish in every detail. Twenty Sixteen will make your WordPress look beautiful everywhere.', 'amp' ),
+				'description'    => 'Twenty Sixteen is a modernized take on an ever-popular WordPress layout — the horizontal masthead with an optional right sidebar that works perfectly for blogs and websites. It has custom color options with beautiful default color schemes, a harmonious fluid grid using a mobile-first approach, and impeccable polish in every detail. Twenty Sixteen will make your WordPress look beautiful everywhere.',
 				'requires'       => '4.4',
 				'requires_php'   => '5.2.4',
 			],
@@ -416,7 +417,7 @@ final class AMP_Reader_Themes {
 				'rating'         => 88,
 				'num_ratings'    => '93',
 				'homepage'       => 'https://wordpress.org/themes/twentyfourteen/',
-				'description'    => __( 'In 2014, our default theme lets you create a responsive magazine website with a sleek, modern design. Feature your favorite homepage content in either a grid or a slider. Use the three widget areas to customize your website, and change your content\'s layout with a full-width page template and a contributor page to show off your authors. Creating a magazine website with WordPress has never been easier.', 'amp' ),
+				'description'    => 'In 2014, our default theme lets you create a responsive magazine website with a sleek, modern design. Feature your favorite homepage content in either a grid or a slider. Use the three widget areas to customize your website, and change your content\'s layout with a full-width page template and a contributor page to show off your authors. Creating a magazine website with WordPress has never been easier.',
 				'requires'       => false,
 				'requires_php'   => '5.2.4',
 			],
@@ -436,7 +437,7 @@ final class AMP_Reader_Themes {
 				'rating'         => 82,
 				'num_ratings'    => '62',
 				'homepage'       => 'https://wordpress.org/themes/twentythirteen/',
-				'description'    => __( 'The 2013 theme for WordPress takes us back to the blog, featuring a full range of post formats, each displayed beautifully in their own unique way. Design details abound, starting with a vibrant color scheme and matching header images, beautiful typography and icons, and a flexible layout that looks great on any device, big or small.', 'amp' ),
+				'description'    => 'The 2013 theme for WordPress takes us back to the blog, featuring a full range of post formats, each displayed beautifully in their own unique way. Design details abound, starting with a vibrant color scheme and matching header images, beautiful typography and icons, and a flexible layout that looks great on any device, big or small.',
 				'requires'       => '3.6',
 				'requires_php'   => '5.2.4',
 			],
@@ -456,7 +457,7 @@ final class AMP_Reader_Themes {
 				'rating'         => 92,
 				'num_ratings'    => '155',
 				'homepage'       => 'https://wordpress.org/themes/twentytwelve/',
-				'description'    => __( 'The 2012 theme for WordPress is a fully responsive theme that looks great on any device. Features include a front page template with its own widgets, an optional display font, styling for post formats on both index and single views, and an optional no-sidebar page template. Make it yours with a custom menu, header image, and background.', 'amp' ),
+				'description'    => 'The 2012 theme for WordPress is a fully responsive theme that looks great on any device. Features include a front page template with its own widgets, an optional display font, styling for post formats on both index and single views, and an optional no-sidebar page template. Make it yours with a custom menu, header image, and background.',
 				'requires'       => '3.5',
 				'requires_php'   => '5.2.4',
 			],
@@ -476,7 +477,7 @@ final class AMP_Reader_Themes {
 				'rating'         => 94,
 				'num_ratings'    => '45',
 				'homepage'       => 'https://wordpress.org/themes/twentyeleven/',
-				'description'    => __( 'The 2011 theme for WordPress is sophisticated, lightweight, and adaptable. Make it yours with a custom menu, header image, and background -- then go further with available theme options for light or dark color scheme, custom link colors, and three layout choices. Twenty Eleven comes equipped with a Showcase page template that transforms your front page into a showcase to show off your best content, widget support galore (sidebar, three footer areas, and a Showcase page widget area), and a custom "Ephemera" widget to display your Aside, Link, Quote, or Status posts. Included are styles for print and for the admin editor, support for featured images (as custom header images on posts and pages and as large images on featured "sticky" posts), and special styles for six different post formats.', 'amp' ),
+				'description'    => 'The 2011 theme for WordPress is sophisticated, lightweight, and adaptable. Make it yours with a custom menu, header image, and background -- then go further with available theme options for light or dark color scheme, custom link colors, and three layout choices. Twenty Eleven comes equipped with a Showcase page template that transforms your front page into a showcase to show off your best content, widget support galore (sidebar, three footer areas, and a Showcase page widget area), and a custom "Ephemera" widget to display your Aside, Link, Quote, or Status posts. Included are styles for print and for the admin editor, support for featured images (as custom header images on posts and pages and as large images on featured "sticky" posts), and special styles for six different post formats.',
 				'requires'       => false,
 				'requires_php'   => '5.2.4',
 			],
