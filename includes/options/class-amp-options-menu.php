@@ -249,7 +249,6 @@ class AMP_Options_Menu {
 	 * @since 1.6
 	 */
 	public function render_mobile_redirect() {
-		$can_customize_mobile_settings = apply_filters( 'amp_customizer_is_enabled', true );
 		?>
 		<p>
 			<label for="mobile_redirect">
@@ -257,23 +256,6 @@ class AMP_Options_Menu {
 				<?php esc_html_e( 'Redirect mobile visitors to the AMP version of a page.', 'amp' ); ?>
 			</label>
 		</p>
-		<?php
-		if ( $can_customize_mobile_settings ) :
-			$mobile_customizer_url = add_query_arg(
-				[
-					'autofocus[section]' => 'amp_mobile',
-					'return'             => rawurlencode( add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, admin_url( 'admin.php' ) ) ),
-				],
-				'customize.php'
-			);
-			?>
-			<p class="description">
-				<?php
-					/* translators: %s: Link to Mobile section in AMP panel of the Customizer */
-					echo wp_kses_post( sprintf( __( 'This can be further customized in the <a href="%s">Mobile section</a> of the Customizer for AMP.', 'amp' ), $mobile_customizer_url ) );
-				?>
-			</p>
-		<?php endif; ?>
 		<script>
 			( function( $ ) {
 				const templateModeInputs = $( 'input[type=radio][name="amp-options[theme_support]"]' );

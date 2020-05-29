@@ -285,15 +285,9 @@ class AMP_Post_Template {
 			'post_publish_timestamp'   => $post_publish_timestamp,
 			'post_modified_timestamp'  => $post_modified_timestamp,
 			'post_author'              => $post_author,
-			'post_canonical_link_url'  => '',
-			'post_canonical_link_text' => '',
+			'post_canonical_link_url'  => get_permalink( $this->ID ),
+			'post_canonical_link_text' => 'Exit mobile version',
 		];
-
-		$customizer_settings = AMP_Customizer_Settings::get_settings();
-		if ( ! empty( $customizer_settings['display_exit_link'] ) && ! empty( $customizer_settings['exit_link_text'] ) ) {
-			$data['post_canonical_link_url']  = get_permalink( $this->ID );
-			$data['post_canonical_link_text'] = $customizer_settings['exit_link_text'];
-		}
 
 		$this->add_data( $data );
 

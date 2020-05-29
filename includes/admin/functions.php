@@ -23,7 +23,7 @@ define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
  * And this does not need to toggle between the AMP and normal display.
  */
 function amp_init_customizer() {
-	if ( amp_is_canonical() ) {
+	if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
 		return;
 	}
 
@@ -32,9 +32,6 @@ function amp_init_customizer() {
 
 	// Add some basic design settings + controls to the Customizer.
 	add_action( 'amp_init', [ 'AMP_Customizer_Design_Settings', 'init' ] );
-
-	// Add mobile settings to the Customizer.
-	add_action( 'amp_init', [ 'AMP_Customizer_Mobile_Settings', 'init' ] );
 
 	// Add a link to the Customizer.
 	add_action( 'admin_menu', 'amp_add_customizer_link' );
