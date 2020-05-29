@@ -83,7 +83,7 @@ class AMP_Theme_Support {
 
 	/**
 	 * The default reader theme. Indicates the plugin-provided classic mode should be used.
-	 * 
+	 *
 	 * @var string
 	 */
 	const DEFAULT_READER_THEME = 'classic';
