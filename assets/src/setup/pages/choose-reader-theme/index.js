@@ -51,7 +51,10 @@ export function ChooseReaderTheme() {
 	return (
 		<div className="amp-wp-choose-reader-theme">
 			<p>
-				{ 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In placerat justo sed risus viverra, eu viverra ligula tincidunt. Suspendisse finibus sed nisi ac efficitur.' }
+				{
+					// @todo Probably improve this text.
+					__( 'Select a theme to use on AMP-compatible pages on mobile devices', 'amp' )
+				}
 			</p>
 			<form>
 				<ul className="amp-wp-choose-reader-theme__grid">
