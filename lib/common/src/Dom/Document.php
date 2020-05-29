@@ -1492,7 +1492,7 @@ final class Document extends DOMDocument
      * @param string     $prefix  Optional. The prefix to use (should not have a trailing dash). Defaults to 'i-amp-id'.
      * @return string ID to use.
      */
-    public function getElementId(DOMElement $element, $prefix = 'i-amp-id')
+    public function getElementId(DOMElement $element, $prefix = 'i-amp')
     {
         if ($element->hasAttribute('id')) {
             return $element->getAttribute('id');
