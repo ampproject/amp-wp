@@ -105,7 +105,8 @@ export function ReaderThemesContextProvider( { ajaxurl, children, readerThemesEn
 					return;
 				}
 
-				setThemes( fetchedThemes );
+				// Screenshots are required.
+				setThemes( fetchedThemes.filter( ( theme ) => theme.screenshot_url ) );
 			} catch ( e ) {
 				if ( hasUnmounted.current === true ) {
 					return;
