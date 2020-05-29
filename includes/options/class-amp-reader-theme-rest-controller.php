@@ -14,13 +14,25 @@
 final class AMP_Reader_Theme_REST_Controller extends WP_REST_Controller {
 
 	/**
+	 * Undocumented variable
+	 *
+	 * @since 1.6.0
+	 *
+	 * @var AMP_Reader_Themes
+	 */
+	private $reader_themes;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 1.6.0
+	 *
+	 * @param AMP_Reader_Themes $reader_themes AMP_Reader_Themes instance to provide theme data.
 	 */
-	public function __construct() {
-		$this->namespace = 'amp-wp/v1';
-		$this->rest_base = 'reader-themes';
+	public function __construct( $reader_themes ) {
+		$this->reader_themes = $reader_themes;
+		$this->namespace     = 'amp-wp/v1';
+		$this->rest_base     = 'reader-themes';
 	}
 
 	/**
@@ -52,6 +64,6 @@ final class AMP_Reader_Theme_REST_Controller extends WP_REST_Controller {
 	 * @return WP_REST_Response Response object.
 	 */
 	public function get_items( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		return rest_ensure_response( amp_get_reader_themes() );
+		return rest_ensure_response( $this->reader_themes->get_themes() );
 	}
 }

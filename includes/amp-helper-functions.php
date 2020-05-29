@@ -155,7 +155,7 @@ function amp_init() {
 	add_action(
 		'rest_api_init',
 		static function() {
-			$reader_theme_controller = new AMP_Reader_Theme_REST_Controller();
+			$reader_theme_controller = new AMP_Reader_Theme_REST_Controller( new AMP_Reader_Themes() );
 			$reader_theme_controller->register_routes();
 		}
 	);
@@ -1722,21 +1722,4 @@ function amp_generate_script_hash( $script ) {
 		base64_encode( $sha384 ) // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 	);
 	return 'sha384-' . $hash;
-}
-
-/**
- * Provides AMP reader themes.
- *
- * @since 1.6.0
- *
- * @return array List of reader theme data objects.
- */
-function amp_get_reader_themes() {
-	static $amp_reader_themes;
-
-	if ( is_null( $amp_reader_themes ) ) {
-		$amp_reader_themes = ( new AMP_Reader_Themes() )->get_themes();
-	}
-
-	return $amp_reader_themes;
 }
