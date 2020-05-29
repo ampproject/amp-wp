@@ -2,22 +2,16 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useEffect, useContext, useRef, useState } from '@wordpress/element';
-import apiFetch from '@wordpress/api-fetch';
+import { useEffect, useContext } from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
-
-/**
- * External dependencies
- */
-import { READER_THEMES_ENDPOINT } from 'amp-setup'; // WP data passed via inline script.
 
 /**
  * Internal dependencies
  */
-import { Cache } from '../../components/cache-context-provider';
 import { Loading } from '../../components/loading';
 import { Navigation } from '../../components/navigation-context-provider';
 import { Options } from '../../components/options-context-provider';
+import { ReaderThemes } from '../../components/reader-themes-context-provider';
 import { ThemeCard } from './theme-card';
 
 /**
@@ -25,46 +19,9 @@ import { ThemeCard } from './theme-card';
  */
 export function ChooseReaderTheme() {
 	const instanceId = useInstanceId( ChooseReaderTheme );
-	const [ themes, setThemes ] = useState( null );
-	const [ themeFetchError, setThemeFetchError ] = useState( null );
-	const { cacheSet, cacheGet } = useContext( Cache );
 	const { canGoForward, setCanGoForward } = useContext( Navigation );
 	const { options: { reader_theme: readerTheme } } = useContext( Options );
-
-	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
-	const hasUnmounted = useRef( false );
-
-	/**
-	 * Fetches theme data on component mount.
-	 */
-	useEffect( () => {
-		async function fetchThemes() {
-			let fetchedThemes = cacheGet( READER_THEMES_ENDPOINT );
-
-			if ( ! fetchedThemes ) {
-				try {
-					fetchedThemes = await apiFetch( { url: READER_THEMES_ENDPOINT } );
-					cacheSet( READER_THEMES_ENDPOINT, fetchedThemes );
-
-					if ( hasUnmounted.current === true ) {
-						return;
-					}
-				} catch ( e ) {
-					if ( hasUnmounted.current === true ) {
-						return;
-					}
-
-					setThemeFetchError( e );
-				}
-			}
-
-			setThemes( fetchedThemes );
-		}
-
-		if ( null === themes ) {
-			fetchThemes();
-		}
-	}, [ cacheSet, cacheGet, themes ] );
+	const { themes, themeFetchError } = useContext( ReaderThemes );
 
 	/**
 	 * Allow moving forward.
@@ -76,10 +33,6 @@ export function ChooseReaderTheme() {
 			}
 		}
 	}, [ canGoForward, setCanGoForward, readerTheme, themes ] );
-
-	useEffect( () => () => {
-		hasUnmounted.current = true;
-	}, [] );
 
 	if ( themeFetchError ) {
 		return (
