@@ -20,8 +20,10 @@ import { ThemeCard } from './theme-card';
 export function ChooseReaderTheme() {
 	const instanceId = useInstanceId( ChooseReaderTheme );
 	const { canGoForward, setCanGoForward } = useContext( Navigation );
-	const { options: { reader_theme: readerTheme } } = useContext( Options );
-	const { fetchingThemes, themes, themeFetchError } = useContext( ReaderThemes );
+	const { options } = useContext( Options );
+	const { fetchingThemes, setShouldFetchThemes, shouldFetchThemes, themes, themeFetchError } = useContext( ReaderThemes );
+
+	const { reader_theme: readerTheme } = options || {};
 
 	/**
 	 * Allow moving forward.
@@ -33,6 +35,15 @@ export function ChooseReaderTheme() {
 			}
 		}
 	}, [ canGoForward, setCanGoForward, readerTheme, themes ] );
+
+	/**
+	 * Triggers fetching themes if they have not yet been fetched.
+	 */
+	useEffect( () => {
+		if ( ! shouldFetchThemes ) {
+			setShouldFetchThemes( true );
+		}
+	}, [ setShouldFetchThemes, shouldFetchThemes ] );
 
 	if ( themeFetchError ) {
 		return (
@@ -58,7 +69,7 @@ export function ChooseReaderTheme() {
 			</p>
 			<form>
 				<ul className="amp-wp-choose-reader-theme__grid">
-					{ themes.map( ( theme ) => <ThemeCard key={ `${ instanceId }-${ theme.slug }` } { ...theme } /> ) }
+					{ themes && themes.map( ( theme ) => <ThemeCard key={ `${ instanceId }-${ theme.slug }` } { ...theme } /> ) }
 				</ul>
 			</form>
 		</div>

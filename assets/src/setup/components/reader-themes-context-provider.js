@@ -26,6 +26,7 @@ export const ReaderThemes = createContext();
  */
 export function ReaderThemesContextProvider( { ajaxurl, children, readerThemesEndpoint, updatesNonce } ) {
 	const [ themes, setThemes ] = useState( null );
+	const [ shouldFetchThemes, setShouldFetchThemes ] = useState( false );
 	const [ fetchingThemes, setFetchingThemes ] = useState( false );
 	const [ themeFetchError, setThemeFetchError ] = useState( null );
 	const [ downloadingTheme, setDownloadingTheme ] = useState( false );
@@ -45,11 +46,15 @@ export function ReaderThemesContextProvider( { ajaxurl, children, readerThemesEn
 	 * Downloads the selected reader theme, if necessary, when options are saved.
 	 */
 	useEffect( () => {
+		if ( ! selectedTheme ) {
+			return;
+		}
+
 		if ( ! savingOptions || downloadingTheme ) {
 			return;
 		}
 
-		if ( selectedTheme && false === selectedTheme.availability.is_installed ) {
+		if ( selectedTheme && true === selectedTheme.availability.is_installed ) {
 			return;
 		}
 
@@ -112,10 +117,10 @@ export function ReaderThemesContextProvider( { ajaxurl, children, readerThemesEn
 			setFetchingThemes( false );
 		}
 
-		if ( readerThemesEndpoint && null === themes && ! fetchingThemes ) {
+		if ( shouldFetchThemes && readerThemesEndpoint && null === themes && ! fetchingThemes ) {
 			fetchThemes();
 		}
-	}, [ fetchingThemes, readerThemesEndpoint, themes ] );
+	}, [ fetchingThemes, readerThemesEndpoint, shouldFetchThemes, themes ] );
 
 	useEffect( () => () => {
 		hasUnmounted.current = true;
@@ -127,6 +132,8 @@ export function ReaderThemesContextProvider( { ajaxurl, children, readerThemesEn
 				{
 					downloadingTheme,
 					fetchingThemes,
+					setShouldFetchThemes,
+					shouldFetchThemes,
 					themeFetchError,
 					themes,
 				}
