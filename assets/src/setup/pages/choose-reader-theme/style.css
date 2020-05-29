@@ -1,8 +1,11 @@
+.amp-wp-choose-reader-theme > form {
+	margin-left: -8px;
+	margin-right: -8px;
+}
+
 .amp-wp-choose-reader-theme__grid {
 	display: flex;
 	flex-wrap: wrap;
-	margin-left: -8px;
-	margin-right: -8px;
 	max-height: 1000px;
 	overflow: scroll;
 }
