@@ -239,6 +239,7 @@ final class AMP_Reader_Themes {
 			'can_install'       => $this->get_can_install(),
 			'is_compatible_wp'  => empty( $theme['requires'] ) || is_wp_version_compatible( $theme['requires'] ),
 			'is_compatible_php' => empty( $theme['requires_php'] ) || is_php_version_compatible( $theme['requires_php'] ),
+			'is_installed'      => wp_get_theme( $theme['slug'] )->exists(),
 		];
 
 		return $theme;

@@ -129,6 +129,7 @@ final class AMP_Setup_Wizard_Submenu_Page {
 						'EXIT_LINK'              => admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ),
 						'OPTIONS_REST_ENDPOINT'  => rest_url( 'wp/v2/settings' ),
 						'READER_THEMES_ENDPOINT' => rest_url( 'amp-wp/v1/reader-themes' ),
+						'UPDATES_NONCE'          => wp_create_nonce( 'updates' ),
 					]
 				)
 			),
