@@ -26,6 +26,7 @@ export const ReaderThemes = createContext();
  */
 export function ReaderThemesContextProvider( { ajaxurl, children, readerThemesEndpoint, updatesNonce } ) {
 	const [ themes, setThemes ] = useState( null );
+	const [ fetchingThemes, setFetchingThemes ] = useState( false );
 	const [ themeFetchError, setThemeFetchError ] = useState( null );
 	const [ downloadingTheme, setDownloadingTheme ] = useState( false );
 
@@ -48,36 +49,38 @@ export function ReaderThemesContextProvider( { ajaxurl, children, readerThemesEn
 			return;
 		}
 
+		if ( selectedTheme && false === selectedTheme.availability.is_installed ) {
+			return;
+		}
+
 		async function downloadReaderTheme() {
-			if ( selectedTheme && false === selectedTheme.availability.is_installed ) {
-				setDownloadingTheme( true );
+			setDownloadingTheme( true );
 
-				try {
-					const body = new global.FormData();
-					body.append( 'action', 'install-theme' );
-					body.append( 'slug', selectedTheme.slug );
-					body.append( '_wpnonce', updatesNonce );
+			try {
+				const body = new global.FormData();
+				body.append( 'action', 'install-theme' );
+				body.append( 'slug', selectedTheme.slug );
+				body.append( '_wpnonce', updatesNonce );
 
-					// This is the only fetch request in the setup wizard that doesn't go to a REST endpoint.
-					// We need to use window.fetch to bypass the apiFetch middlewares that are useful for other requests.
-					await global.fetch( ajaxurl, {
-						body,
-						method: 'POST',
-					} );
+				// This is the only fetch request in the setup wizard that doesn't go to a REST endpoint.
+				// We need to use window.fetch to bypass the apiFetch middlewares that are useful for other requests.
+				await global.fetch( ajaxurl, {
+					body,
+					method: 'POST',
+				} );
 
-					if ( true === hasUnmounted.current ) {
-						return;
-					}
-				} catch ( e ) {
-					if ( true === hasUnmounted.current ) {
-						return;
-					}
-
-					setThemeFetchError( e );
+				if ( true === hasUnmounted.current ) {
+					return;
+				}
+			} catch ( e ) {
+				if ( true === hasUnmounted.current ) {
+					return;
 				}
 
-				setDownloadingTheme( false );
+				setThemeFetchError( e );
 			}
+
+			setDownloadingTheme( false );
 		}
 
 		downloadReaderTheme();
@@ -88,10 +91,10 @@ export function ReaderThemesContextProvider( { ajaxurl, children, readerThemesEn
 	 */
 	useEffect( () => {
 		async function fetchThemes() {
-			let fetchedThemes;
+			setFetchingThemes( true );
 
 			try {
-				fetchedThemes = await apiFetch( { url: readerThemesEndpoint } );
+				const fetchedThemes = await apiFetch( { url: readerThemesEndpoint } );
 
 				if ( hasUnmounted.current === true ) {
 					return;
@@ -106,13 +109,13 @@ export function ReaderThemesContextProvider( { ajaxurl, children, readerThemesEn
 				setThemeFetchError( e );
 			}
 
-			setThemes( fetchedThemes );
+			setFetchingThemes( false );
 		}
 
-		if ( null === themes ) {
+		if ( readerThemesEndpoint && null === themes && ! fetchingThemes ) {
 			fetchThemes();
 		}
-	}, [ readerThemesEndpoint, themes ] );
+	}, [ fetchingThemes, readerThemesEndpoint, themes ] );
 
 	useEffect( () => () => {
 		hasUnmounted.current = true;
@@ -123,6 +126,7 @@ export function ReaderThemesContextProvider( { ajaxurl, children, readerThemesEn
 			value={
 				{
 					downloadingTheme,
+					fetchingThemes,
 					themeFetchError,
 					themes,
 				}

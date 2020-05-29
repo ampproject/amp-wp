@@ -21,6 +21,7 @@ export const Options = createContext();
  */
 export function OptionsContextProvider( { children, optionsKey, optionsRestEndpoint } ) {
 	const [ options, setOptions ] = useState( null );
+	const [ fetchingOptions, setFetchingOptions ] = useState( false );
 	const [ fetchOptionsError, setFetchOptionsError ] = useState( null );
 	const [ savingOptions, setSavingOptions ] = useState( false );
 	const [ saveOptionsError, setSaveOptionsError ] = useState( null );
@@ -29,29 +30,6 @@ export function OptionsContextProvider( { children, optionsKey, optionsRestEndpo
 
 	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
 	const hasUnmounted = useRef( false );
-
-	/**
-	 * Fetches plugin options from the REST endpoint.
-	 */
-	const fetchOptions = useCallback( async () => {
-		let fetchedOptions;
-
-		try {
-			fetchedOptions = await apiFetch( { url: optionsRestEndpoint } );
-
-			if ( true === hasUnmounted.current ) {
-				return;
-			}
-
-			setOptions( fetchedOptions[ optionsKey ] );
-		} catch ( e ) {
-			if ( true === hasUnmounted.current ) {
-				return;
-			}
-
-			setFetchOptionsError( e );
-		}
-	}, [ optionsKey, optionsRestEndpoint ] );
 
 	/**
 	 * Sends options to the REST endpoint to be saved.
@@ -95,10 +73,35 @@ export function OptionsContextProvider( { children, optionsKey, optionsRestEndpo
 	}, [ hasChanges, options, setHasChanges, setOptions ] );
 
 	useEffect( () => {
-		if ( ! options ) {
+		/**
+		 * Fetches plugin options from the REST endpoint.
+		 */
+		const fetchOptions = async () => {
+			setFetchingOptions( true );
+
+			try {
+				const fetchedOptions = await apiFetch( { url: optionsRestEndpoint } );
+
+				if ( true === hasUnmounted.current ) {
+					return;
+				}
+
+				setOptions( fetchedOptions[ optionsKey ] );
+			} catch ( e ) {
+				if ( true === hasUnmounted.current ) {
+					return;
+				}
+
+				setFetchOptionsError( e );
+			}
+
+			setFetchingOptions( false );
+		};
+
+		if ( ! options && ! fetchingOptions ) {
 			fetchOptions();
 		}
-	}, [ fetchOptions, options ] );
+	}, [ fetchingOptions, options, optionsKey, optionsRestEndpoint ] );
 
 	useEffect( () => () => {
 		hasUnmounted.current = true;
@@ -108,7 +111,7 @@ export function OptionsContextProvider( { children, optionsKey, optionsRestEndpo
 		<Options.Provider
 			value={
 				{
-					fetchingOptions: null === options,
+					fetchingOptions,
 					fetchOptionsError,
 					hasChanges,
 					hasSaved,

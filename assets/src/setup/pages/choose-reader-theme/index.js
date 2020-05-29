@@ -21,7 +21,7 @@ export function ChooseReaderTheme() {
 	const instanceId = useInstanceId( ChooseReaderTheme );
 	const { canGoForward, setCanGoForward } = useContext( Navigation );
 	const { options: { reader_theme: readerTheme } } = useContext( Options );
-	const { themes, themeFetchError } = useContext( ReaderThemes );
+	const { fetchingThemes, themes, themeFetchError } = useContext( ReaderThemes );
 
 	/**
 	 * Allow moving forward.
@@ -42,7 +42,7 @@ export function ChooseReaderTheme() {
 		);
 	}
 
-	if ( ! themes ) {
+	if ( fetchingThemes ) {
 		return (
 			<Loading />
 		);

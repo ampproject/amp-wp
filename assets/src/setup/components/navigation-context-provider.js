@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { createContext, useState, useCallback, useMemo } from '@wordpress/element';
+import { createContext, useState, useMemo } from '@wordpress/element';
 
 /**
  * External dependencies
@@ -25,17 +25,17 @@ export function NavigationContextProvider( { children, pages } ) {
 	/**
 	 * Navigates back to the previous page.
 	 */
-	const goBack = useCallback( () => {
+	const goBack = () => {
 		setActivePageIndex( activePageIndex - 1 );
-	}, [ setActivePageIndex, activePageIndex ] );
+	};
 
 	/**
 	 * Navigates to the next page. Pages are expected to set canGoForward to true when required actions have been taken.
 	 */
-	const goForward = useCallback( () => {
+	const goForward = () => {
 		setActivePageIndex( activePageIndex + 1 );
 		setCanGoForward( false );
-	}, [ setActivePageIndex, setCanGoForward, activePageIndex ] );
+	};
 
 	return (
 		<Navigation.Provider
