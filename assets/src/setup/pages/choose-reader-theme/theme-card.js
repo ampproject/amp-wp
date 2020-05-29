@@ -20,7 +20,8 @@ import { Options } from '../../components/options-context-provider';
 
 export function ThemeCard( { description, homepage, screenshotUrl, slug, name } ) {
 	const instanceId = useInstanceId( ThemeCard );
-	const { options: { reader_theme: readerTheme }, updateOptions } = useContext( Options );
+	const { options, updateOptions } = useContext( Options );
+	const { reader_theme: readerTheme } = options || {};
 
 	return (
 		<li className={ `amp-wp-theme-card ${ readerTheme === slug ? 'amp-wp-theme-card--selected' : '' }` }>

@@ -26,12 +26,17 @@ describe( 'AMP Setup Screen', () => {
 		titleText = await getTitleText();
 		expect( titleText ).toBe( 'Technical background' );
 
+		await page.waitForSelector( '.amp-setup-nav__next:not([disabled])' );
+		await page.click( '.amp-setup-nav__next' );
+		titleText = await getTitleText();
+		expect( titleText ).toBe( 'Site goals' );
+
 		await page.click( '.amp-setup-nav__prev' );
 		titleText = await getTitleText();
-		expect( titleText ).toBe( 'Site scan' );
+		expect( titleText ).toBe( 'Technical background' );
 	} );
 
-	it( 'hides prev button page one and disables next button on last page', async () => {
+	it( 'hides prev button page one and two and disables next button on last page', async () => {
 		// On page 1 of 7.
 		let prevButton = await page.$( '.amp-setup-nav__prev' );
 		expect( prevButton ).toBeNull();
@@ -40,14 +45,18 @@ describe( 'AMP Setup Screen', () => {
 		await page.click( '.amp-setup-nav__next' ); // 2 of 7.
 
 		prevButton = await page.$( '.amp-setup-nav__prev' );
-		expect( prevButton ).not.toBeNull();
+		expect( prevButton ).toBeNull();
 
 		let disabledNextButton = await page.$( '.amp-setup-nav__next[disabled]' );
 		expect( disabledNextButton ).toBeNull();
 
-		// Click to last page.
 		await page.waitForSelector( '.amp-setup-nav__next:not([disabled])' );
 		await page.click( '.amp-setup-nav__next' ); // 3 of 7.
+
+		prevButton = await page.$( '.amp-setup-nav__prev' );
+		expect( prevButton ).not.toBeNull();
+
+		// Click to last page.
 		await page.waitForSelector( '.amp-setup-nav__next:not([disabled])' );
 		await page.click( '.amp-setup-nav__next' ); // 4 of 7.
 		await page.waitForSelector( '.amp-setup-nav__next:not([disabled])' );

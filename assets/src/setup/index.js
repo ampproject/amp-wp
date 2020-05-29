@@ -9,8 +9,7 @@ import '@wordpress/components/build-style/style.css';
  * External dependencies
  */
 import { AMP_OPTIONS_KEY, APP_ROOT_ID, EXIT_LINK, OPTIONS_REST_ENDPOINT, READER_THEMES_ENDPOINT, UPDATES_NONCE } from 'amp-setup'; // From WP inline script.
-
-const { ajaxurl } = global;
+import PropTypes from 'prop-types';
 
 /**
  * Internal dependencies
@@ -22,25 +21,39 @@ import { SetupWizard } from './setup-wizard';
 import { NavigationContextProvider } from './components/navigation-context-provider';
 import { ReaderThemesContextProvider } from './components/reader-themes-context-provider';
 
+const { ajaxurl } = global;
+
+export function Providers( { children } ) {
+	return (
+		<OptionsContextProvider
+			optionsKey={ AMP_OPTIONS_KEY }
+			optionsRestEndpoint={ OPTIONS_REST_ENDPOINT }
+		>
+			<ReaderThemesContextProvider
+				ajaxurl={ ajaxurl }
+				readerThemesEndpoint={ READER_THEMES_ENDPOINT }
+				updatesNonce={ UPDATES_NONCE }
+			>
+				<NavigationContextProvider pages={ PAGES }>
+					{ children }
+				</NavigationContextProvider>
+			</ReaderThemesContextProvider>
+		</OptionsContextProvider>
+	);
+}
+
+Providers.propTypes = {
+	children: PropTypes.any,
+};
+
 domReady( () => {
 	const root = document.getElementById( APP_ROOT_ID );
 
 	if ( root ) {
 		render(
-			<OptionsContextProvider
-				optionsKey={ AMP_OPTIONS_KEY }
-				optionsRestEndpoint={ OPTIONS_REST_ENDPOINT }
-			>
-				<ReaderThemesContextProvider
-					ajaxurl={ ajaxurl }
-					readerThemesEndpoint={ READER_THEMES_ENDPOINT }
-					updatesNonce={ UPDATES_NONCE }
-				>
-					<NavigationContextProvider pages={ PAGES }>
-						<SetupWizard exitLink={ EXIT_LINK } />
-					</NavigationContextProvider>
-				</ReaderThemesContextProvider>
-			</OptionsContextProvider>,
+			<Providers>
+				<SetupWizard exitLink={ EXIT_LINK } />
+			</Providers>,
 			root,
 		);
 	}

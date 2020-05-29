@@ -59,7 +59,6 @@ export function ChooseReaderTheme() {
 		);
 	}
 
-	console.log( themes );
 	return (
 		<div className="amp-wp-choose-reader-theme">
 			<p>
