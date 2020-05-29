@@ -300,7 +300,7 @@ function amp_is_canonical() {
 function amp_add_frontend_actions() {
 	add_action( 'wp_head', 'amp_add_amphtml_link' );
 
-	if ( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) && amp_version_is_available() ) {
+	if ( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) && is_amp_available() ) {
 		// Insert the mobile redirect script as early as possible.
 		add_action( 'wp_head', 'amp_add_mobile_redirect_script', ~PHP_INT_MAX );
 	}
@@ -351,15 +351,34 @@ function amp_add_mobile_redirect_script() {
 }
 
 /**
- * Determine whether there is an AMP version available for this URL.
+ * Determine whether AMP is available for the current URL.
  *
+ * @todo This should go into the AmpProject\AmpWP namespace?
  * @since 1.6
- * @global WP_Query $wp_query
  *
  * @return bool True if there is an AMP version, false otherwise.
  */
-function amp_version_is_available() {
+function is_amp_available() {
 	global $wp_query;
+
+	if ( ! $wp_query instanceof WP_Query || ! did_action( 'wp' ) ) {
+		_doing_it_wrong(
+			__FUNCTION__,
+			esc_html(
+				sprintf(
+						/* translators: %1$s: function name, %2$s: the current action, %3$s: the wp action, %4$s: the WP_Query class, %5$s: the amp_skip_post() function */
+					__( '%1$s was called too early and so it will not work properly. WordPress is currently doing the "%2$s" action. Calling this function before the "%3$s" action means it will not have access to %4$s and the queried object to determine if it is an AMP response, thus neither the "%5$s" filter nor the AMP enabled toggle will be considered.', 'amp' ),
+					__FUNCTION__ . '()',
+					current_action(),
+					'wp',
+					'WP_Query',
+					'amp_skip_post()'
+				)
+			),
+			'1.6.0'
+		);
+		return false;
+	}
 
 	$queried_object = get_queried_object();
 	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
@@ -594,7 +613,7 @@ function amp_add_amphtml_link() {
 
 	$current_url = amp_get_current_url();
 
-	if ( ! amp_version_is_available() ) {
+	if ( ! is_amp_available() ) {
 		printf( '<!-- %s -->', esc_html__( 'There is no amphtml version available for this URL.', 'amp' ) );
 		return;
 	}
