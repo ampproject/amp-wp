@@ -82,6 +82,13 @@ class AMP_Theme_Support {
 	const PAIRED_BROWSING_QUERY_VAR = 'amp-paired-browsing';
 
 	/**
+	 * Query parameter to indicate that the page in question should not be served as AMP.
+	 *
+	 * @var string
+	 */
+	const NO_AMP_QUERY_VAR = 'noamp';
+
+	/**
 	 * Sanitizers, with keys as class names and values as arguments.
 	 *
 	 * @var array[]
@@ -397,12 +404,27 @@ class AMP_Theme_Support {
 				self::redirect_non_amp_url( current_user_can( 'manage_options' ) ? 302 : 301 );
 			}
 
-			if (
-				AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) &&
-				wp_is_mobile()
-			) {
-				$amp_url = add_query_arg( amp_get_slug(), '1', amp_get_current_url() );
-				wp_safe_redirect( $amp_url, current_user_can( 'manage_options' ) ? 302 : 301 );
+			if ( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) && wp_is_mobile() && is_amp_available() ) {
+				// Redirect to AMP version if `noamp` query var not present.
+				if ( ! isset( $_GET[ self::NO_AMP_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+					$amp_url = add_query_arg( amp_get_slug(), '1', amp_get_current_url() );
+					wp_safe_redirect( $amp_url, current_user_can( 'manage_options' ) ? 302 : 301 );
+				}
+
+				// Add link to exit go to mobile version in footer.
+				add_action(
+					'wp_footer',
+					static function () {
+						if ( AMP_Theme_Support::is_paired_available() ) {
+							$amp_url = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
+						} else {
+							$amp_url = amp_get_permalink( get_queried_object_id() );
+						}
+
+						$amp_url = remove_query_arg( self::NO_AMP_QUERY_VAR, $amp_url );
+						echo amp_get_mobile_version_switcher_markup( $amp_url, __( 'Go to mobile version', 'amp' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					}
+				);
 			}
 
 			amp_add_frontend_actions();
@@ -410,6 +432,23 @@ class AMP_Theme_Support {
 		}
 
 		self::ensure_proper_amp_location();
+
+		if (
+			AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) &&
+			( $is_reader_mode || $has_query_var ) &&
+			wp_is_mobile()
+		) {
+			// Add link to exit mobile version in footer.
+			$action = $is_reader_mode ? 'amp_post_template_footer' : 'wp_footer';
+
+			add_action(
+				$action,
+				static function() {
+					$url = add_query_arg( self::NO_AMP_QUERY_VAR, '1', self::get_current_canonical_url() );
+					echo amp_get_mobile_version_switcher_markup( $url, __( 'Exit mobile version', 'amp' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				}
+			);
+		}
 
 		$theme_support = self::get_theme_support_args();
 		if ( ! empty( $theme_support['template_dir'] ) ) {
@@ -422,15 +461,6 @@ class AMP_Theme_Support {
 				},
 				PHP_INT_MAX
 			);
-		}
-
-		if ( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) && ( $is_reader_mode || $has_query_var ) ) {
-			$action = $is_reader_mode ? 'amp_post_template_footer' : 'wp_footer';
-
-			add_action( $action, static function() {
-				$url = self::get_current_canonical_url();
-				echo amp_get_mobile_version_switcher_markup( $url, __( 'Exit mobile version', 'amp' ) );
-			} );
 		}
 
 		self::add_hooks();

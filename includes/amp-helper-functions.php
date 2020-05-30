@@ -299,18 +299,6 @@ function amp_is_canonical() {
  */
 function amp_add_frontend_actions() {
 	add_action( 'wp_head', 'amp_add_amphtml_link' );
-
-	if ( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) && is_amp_available() ) {
-		add_action( 'wp_footer', static function () {
-			if ( AMP_Theme_Support::is_paired_available() ) {
-				$amp_url = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
-			} else {
-				$amp_url = amp_get_permalink( get_queried_object_id() );
-			}
-
-			echo amp_get_mobile_version_switcher_markup( $amp_url, __( 'Go to mobile version', 'amp' ) );
-		} );
-	}
 }
 
 /**
@@ -318,11 +306,11 @@ function amp_add_frontend_actions() {
  *
  * @since 1.6
  *
- * @param string $url  URL to canonical version of page
+ * @param string $url  URL to canonical version of page.
  * @param string $text Text for the anchor element.
  * @return string HTML markup.
  */
-function amp_get_mobile_version_switcher_markup($url, $text ) {
+function amp_get_mobile_version_switcher_markup( $url, $text ) {
 	ob_start();
 	?>
 	<style>

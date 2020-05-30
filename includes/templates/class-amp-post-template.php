@@ -279,12 +279,12 @@ class AMP_Post_Template {
 		$post_author             = get_userdata( $this->post->post_author );
 
 		$data = [
-			'post'                     => $this->post,
-			'post_id'                  => $this->ID,
-			'post_title'               => $post_title,
-			'post_publish_timestamp'   => $post_publish_timestamp,
-			'post_modified_timestamp'  => $post_modified_timestamp,
-			'post_author'              => $post_author,
+			'post'                    => $this->post,
+			'post_id'                 => $this->ID,
+			'post_title'              => $post_title,
+			'post_publish_timestamp'  => $post_publish_timestamp,
+			'post_modified_timestamp' => $post_modified_timestamp,
+			'post_author'             => $post_author,
 		];
 
 		$this->add_data( $data );

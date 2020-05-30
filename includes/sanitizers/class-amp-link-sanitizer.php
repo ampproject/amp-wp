@@ -149,6 +149,14 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			$href = $element->getAttribute( 'href' );
+
+			// Skip element if href has the `noamp` query parameter.
+			parse_str( wp_parse_url( $href, PHP_URL_QUERY ), $query_params );
+
+			if ( isset( $query_params[ AMP_Theme_Support::NO_AMP_QUERY_VAR ] ) ) {
+				continue;
+			}
+
 			/**
 			 * One or more rel values that were attributed to the href.
 			 *
@@ -164,6 +172,12 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 				} else {
 					$element->setAttribute( 'rel', implode( ' ', $rel ) );
 				}
+
+				// Append the `noamp` query param to prevent mobile redirection.
+				if ( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) && wp_is_mobile() ) {
+					$href = add_query_arg( AMP_Theme_Support::NO_AMP_QUERY_VAR, '1', $href );
+					$element->setAttribute( 'href', $href );
+				}
 			} elseif (
 				$this->is_frontend_url( $href )
 				&&
@@ -172,7 +186,7 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 				! in_array( strtok( $href, '#' ), $this->args['excluded_urls'], true )
 			) {
 				// Always add the amphtml link relation when linking enabled.
-				array_push( $rel, self::REL_VALUE_AMP );
+				$rel[] = self::REL_VALUE_AMP;
 				$element->setAttribute( 'rel', implode( ' ', $rel ) );
 
 				// Only add the AMP query var when requested (in Transitional or Reader mode).
