@@ -1108,12 +1108,13 @@ function amp_print_analytics( $analytics ) {
 		);
 
 		$amp_analytics_attr = array_merge(
-			[
-				'id'   => $id,
-				'type' => $analytics_entry['type'],
-			],
+			compact( 'id' ),
 			$analytics_entry['attributes']
 		);
+
+		if ( ! empty( $analytics_entry['type'] ) ) {
+			$amp_analytics_attr['type'] = $analytics_entry['type'];
+		}
 
 		echo AMP_HTML_Utils::build_tag( 'amp-analytics', $amp_analytics_attr, $script_element ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
