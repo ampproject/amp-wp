@@ -51,11 +51,7 @@ class AMP_Analytics_Options_Submenu_Page {
 							<input class="option-input" type="text" name="<?php echo esc_attr( $id_base . '[type]' ); ?>" placeholder="<?php esc_attr_e( 'e.g. googleanalytics', 'amp' ); ?>" value="<?php echo esc_attr( $type ); ?>" />
 							<small><?php esc_html_e( '(omit for in-house analytics)', 'amp' ); ?></small>
 						</label>
-						<label>
-							<?php esc_html_e( 'ID:', 'amp' ); ?>
-							<input type="text" value="<?php echo esc_attr( $is_existing_entry ? $id : '' ); ?>" readonly />
-						</label>
-							<input type="hidden" name="<?php echo esc_attr( $id_base . '[id]' ); ?>" value="<?php echo esc_attr( $id ); ?>" />
+						<input type="hidden" name="<?php echo esc_attr( $id_base . '[id]' ); ?>" value="<?php echo esc_attr( $id ); ?>" />
 					</p>
 					<p>
 						<label>
