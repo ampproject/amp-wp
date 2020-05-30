@@ -186,20 +186,6 @@ blockquote p:last-child {
 	text-decoration: none;
 }
 
-<?php if ( $this->get( 'post_canonical_link_url' ) || is_customize_preview() ) : ?>
-	#version-switch-link {
-		display: block;
-		width: 100%;
-		padding: 15px 0;
-		font-size: 16px;
-		font-weight: 600;
-		color: #eaeaea;
-		text-align: center;
-		background-color: #444;
-		border: 0;
-	}
-<?php endif; ?>
-
 .amp-wp-header .amp-wp-site-icon {
 	/** site icon is 32px **/
 	background-color: <?php echo sanitize_hex_color( $header_color ); ?>;

@@ -301,53 +301,55 @@ function amp_add_frontend_actions() {
 	add_action( 'wp_head', 'amp_add_amphtml_link' );
 
 	if ( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) && is_amp_available() ) {
-		// Insert the mobile redirect script as early as possible.
-		add_action( 'wp_head', 'amp_add_mobile_redirect_script', ~PHP_INT_MAX );
+		add_action( 'wp_footer', static function () {
+			if ( AMP_Theme_Support::is_paired_available() ) {
+				$amp_url = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
+			} else {
+				$amp_url = amp_get_permalink( get_queried_object_id() );
+			}
+
+			echo amp_get_mobile_version_switcher_markup( $amp_url, __( 'Go to mobile version', 'amp' ) );
+		} );
 	}
 }
 
 /**
- * Add mobile redirect script.
+ * Get the markup for the mobile version switcher.
  *
  * @since 1.6
+ *
+ * @param string $url  URL to canonical version of page
+ * @param string $text Text for the anchor element.
+ * @return string HTML markup.
  */
-function amp_add_mobile_redirect_script() {
+function amp_get_mobile_version_switcher_markup($url, $text ) {
+	ob_start();
 	?>
-	<script>
-		(function ( ampSlug ) {
-			var hasTouchScreen;
-
-			if ("maxTouchPoints" in navigator) {
-				hasTouchScreen = navigator.maxTouchPoints > 0;
-			} else if ("msMaxTouchPoints" in navigator) {
-				hasTouchScreen = navigator.msMaxTouchPoints > 0;
-			} else {
-				var mQ = window.matchMedia && matchMedia("(pointer:coarse)");
-				if (mQ && mQ.media === "(pointer:coarse)") {
-					hasTouchScreen = !!mQ.matches;
-				} else if ('orientation' in window) {
-					hasTouchScreen = true; // deprecated, but good fallback
-				} else {
-					// Only as a last resort, fall back to user agent sniffing
-					var UA = navigator.userAgent;
-					hasTouchScreen = /\b(Mobile|Android|Silk\/|Kindle|BlackBerry|Opera Mini|Opera Mobi|webOS|iPhone|IEMobile|Windows Phone|iPad|iPod)\b/.test( UA );
-				}
-			}
-
-			var url = new URL( location.href );
-
-			if ( hasTouchScreen && ! url.searchParams.has( ampSlug ) ) {
-				window.stop(); // Stop loading the page! This should cancel all loading resources.
-
-				// Replace the current page with the AMP version.
-				url.searchParams.append( ampSlug, '1' );
-				location.replace( url.href );
-			}
-		})(
-			<?php echo wp_json_encode( amp_get_slug() ); ?>
-		)
-	</script>
+	<style>
+		#version-switch-link {
+			display: block;
+			width: 100%;
+			padding: 15px 0;
+			font-size: 16px;
+			font-weight: 600;
+			color: #eaeaea;
+			text-align: center;
+			background-color: #444;
+			border: 0;
+		}
+	</style>
+	<div>
+		<a
+			id="version-switch-link"
+			rel="noamphtml"
+			href="<?php echo esc_url( $url ); ?>"
+		>
+			<?php echo esc_html( $text ); ?>
+		</a>
+	</div>
 	<?php
+
+	return ob_get_clean();
 }
 
 /**
@@ -383,14 +385,15 @@ function is_amp_available() {
 	$queried_object = get_queried_object();
 	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 		// Abort if in Transitional mode and AMP is not available for the URL.
-		if ( ! AMP_Theme_Support::is_paired_available() ) {
-			return false;
-		}
-	} elseif ( ! (
-			$queried_object instanceof WP_Post &&
-			$wp_query instanceof WP_Query &&
-			( $wp_query->is_singular() || $wp_query->is_posts_page ) &&
-			post_supports_amp( $queried_object ) )
+		$availability = AMP_Theme_Support::get_template_availability( $wp_query );
+		return $availability['supported'];
+	}
+
+	if ( ! (
+		$queried_object instanceof WP_Post &&
+		$wp_query instanceof WP_Query &&
+		( $wp_query->is_singular() || $wp_query->is_posts_page ) &&
+		post_supports_amp( $queried_object ) )
 	) {
 		// Abort if in Reader mode and the post doesn't support AMP.
 		return false;
@@ -611,12 +614,12 @@ function amp_add_amphtml_link() {
 		return;
 	}
 
-	$current_url = amp_get_current_url();
-
 	if ( ! is_amp_available() ) {
 		printf( '<!-- %s -->', esc_html__( 'There is no amphtml version available for this URL.', 'amp' ) );
 		return;
 	}
+
+	$current_url = amp_get_current_url();
 
 	if ( AMP_Theme_Support::is_paired_available() ) {
 		$amp_url = add_query_arg( amp_get_slug(), '', $current_url );

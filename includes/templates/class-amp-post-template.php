@@ -285,8 +285,6 @@ class AMP_Post_Template {
 			'post_publish_timestamp'   => $post_publish_timestamp,
 			'post_modified_timestamp'  => $post_modified_timestamp,
 			'post_author'              => $post_author,
-			'post_canonical_link_url'  => get_permalink( $this->ID ),
-			'post_canonical_link_text' => 'Exit mobile version',
 		];
 
 		$this->add_data( $data );
