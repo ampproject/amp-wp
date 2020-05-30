@@ -23,7 +23,7 @@ class AMP_Analytics_Options_Submenu_Page {
 		$is_existing_entry = ! empty( $id );
 
 		if ( $is_existing_entry ) {
-			$entry_slug = sprintf( '%s%s', ( $type ? $type . '-' : '' ), substr( $id, - 6 ) );
+			$entry_slug = sprintf( '%s%s', ( $type ? $type . '-' : '' ), $id );
 			/* translators: %s: the entry slug. */
 			$analytics_title = sprintf( __( 'Analytics: %s', 'amp' ), $entry_slug );
 		} else {
