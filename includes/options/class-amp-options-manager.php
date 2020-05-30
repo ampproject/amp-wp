@@ -226,8 +226,8 @@ class AMP_Options_Manager {
 			foreach ( $new_options[ Option::ANALYTICS ] as $id => $data ) {
 
 				// Check save/delete pre-conditions and proceed if correct.
-				if ( empty( $data['type'] ) || empty( $data['config'] ) ) {
-					add_settings_error( self::OPTION_NAME, 'missing_analytics_vendor_or_config', __( 'Missing vendor type or config.', 'amp' ) );
+				if ( empty( $data['config'] ) ) {
+					add_settings_error( self::OPTION_NAME, 'missing_analytics_config', __( 'Missing config.', 'amp' ) );
 					continue;
 				}
 

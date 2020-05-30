@@ -48,7 +48,8 @@ class AMP_Analytics_Options_Submenu_Page {
 					<p>
 						<label>
 							<?php esc_html_e( 'Type:', 'amp' ); ?>
-							<input class="option-input" type="text" required name="<?php echo esc_attr( $id_base . '[type]' ); ?>" placeholder="<?php esc_attr_e( 'e.g. googleanalytics', 'amp' ); ?>" value="<?php echo esc_attr( $type ); ?>" />
+							<input class="option-input" type="text" name="<?php echo esc_attr( $id_base . '[type]' ); ?>" placeholder="<?php esc_attr_e( 'e.g. googleanalytics', 'amp' ); ?>" value="<?php echo esc_attr( $type ); ?>" />
+							<small><?php esc_html_e( '(omit for in-house analytics)', 'amp' ); ?></small>
 						</label>
 						<label>
 							<?php esc_html_e( 'ID:', 'amp' ); ?>

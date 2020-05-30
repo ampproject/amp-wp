@@ -145,7 +145,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 			]
 		);
 		$errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
-		$this->assertEquals( 'missing_analytics_vendor_or_config', $errors[0]['code'] );
+		$this->assertEquals( 'missing_analytics_config', $errors[0]['code'] );
 		$wp_settings_errors = [];
 
 		// Test analytics validation with bad JSON.
