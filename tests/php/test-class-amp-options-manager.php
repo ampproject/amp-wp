@@ -120,6 +120,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				Option::ALL_TEMPLATES_SUPPORTED => true,
 				Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
 				Option::VERSION                 => AMP__VERSION,
+				Option::MOBILE_REDIRECT         => false,
 			],
 			AMP_Options_Manager::get_options()
 		);

@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Option;
 use AmpProject\Dom\Document;
 
 /**
@@ -150,33 +151,20 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 
 			$href = $element->getAttribute( 'href' );
 
-			// Skip element if href has the `noamp` query parameter.
-			parse_str( wp_parse_url( $href, PHP_URL_QUERY ), $query_params );
-
-			if ( isset( $query_params[ AMP_Theme_Support::NO_AMP_QUERY_VAR ] ) ) {
-				continue;
-			}
-
 			/**
 			 * One or more rel values that were attributed to the href.
 			 *
 			 * @var string[] $rel
 			 */
 			$rel = $element->hasAttribute( 'rel' ) ? array_filter( preg_split( '/\s+/', $element->getAttribute( 'rel' ) ) ) : [];
-			$pos = array_search( self::REL_VALUE_NON_AMP_TO_AMP, $rel, true );
-			if ( false !== $pos ) {
+			$has_no_amphtml_rel = array_search( self::REL_VALUE_NON_AMP_TO_AMP, $rel, true );
+			if ( true === $has_no_amphtml_rel ) {
 				// The rel has a value to opt-out of AMP-to-AMP links, so strip it and ensure the link is to non-AMP.
-				unset( $rel[ $pos ] );
+				unset( $rel[ $has_no_amphtml_rel ] );
 				if ( empty( $rel ) ) {
 					$element->removeAttribute( 'rel' );
 				} else {
 					$element->setAttribute( 'rel', implode( ' ', $rel ) );
-				}
-
-				// Append the `noamp` query param to prevent mobile redirection.
-				if ( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) && wp_is_mobile() ) {
-					$href = add_query_arg( AMP_Theme_Support::NO_AMP_QUERY_VAR, '1', $href );
-					$element->setAttribute( 'href', $href );
 				}
 			} elseif (
 				$this->is_frontend_url( $href )
@@ -194,6 +182,17 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 					$href = add_query_arg( amp_get_slug(), '', $href );
 					$element->setAttribute( 'href', $href );
 				}
+			}
+
+			parse_str( wp_parse_url( $href, PHP_URL_QUERY ), $query_params );
+			$has_no_amp_query_var = isset( $query_params[ AMP_Theme_Support::NO_AMP_QUERY_VAR ] );
+			$should_redirect_mobile = AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) && wp_is_mobile();
+			$link_opt_out = in_array( strtok( $href, '#' ), $this->args['excluded_urls'], true ) || false !== $has_no_amphtml_rel;
+
+			// Append the `noamp` query param to prevent mobile redirection.
+			if ( ! $has_no_amp_query_var && $should_redirect_mobile && $link_opt_out ) {
+				$href = add_query_arg( AMP_Theme_Support::NO_AMP_QUERY_VAR, '1', $href );
+				$element->setAttribute( 'href', $href );
 			}
 		}
 
