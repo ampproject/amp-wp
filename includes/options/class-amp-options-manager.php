@@ -301,11 +301,11 @@ class AMP_Options_Manager {
 	/**
 	 * Validate suppressed plugins.
 	 *
-	 * @param string[] $new_suppressed_plugins New suppressed plugins.
+	 * @param string[] $posted_suppressed_plugins New suppressed plugins.
 	 * @param array    $old_option             Old option.
 	 * @return array New option value.
 	 */
-	private static function validate_suppressed_plugins( $new_suppressed_plugins, $old_option ) {
+	private static function validate_suppressed_plugins( $posted_suppressed_plugins, $old_option ) {
 		$option = $old_option;
 
 		// Update the suppressed plugins.
@@ -315,25 +315,27 @@ class AMP_Options_Manager {
 			$plugins[ strtok( $plugin_file, '/' ) ] = $plugin;
 		}
 
-		$deleted_suppressed_plugins = array_diff( array_keys( $old_option ), $new_suppressed_plugins );
-		foreach ( $deleted_suppressed_plugins as $deleted_suppressed_plugin ) {
-			unset( $option[ $deleted_suppressed_plugin ] );
-		}
-		$inserted_suppressed_plugins = array_diff( $new_suppressed_plugins, array_keys( $old_option ) );
-		foreach ( $inserted_suppressed_plugins as $inserted_suppressed_plugin ) {
-			if ( array_key_exists( $inserted_suppressed_plugin, $plugins ) ) {
-				$option[ $inserted_suppressed_plugin ] = [
+		$changes = 0;
+		foreach ( $posted_suppressed_plugins as $plugin_slug => $suppressed ) {
+			$suppressed = rest_sanitize_boolean( $suppressed );
+			if ( isset( $option[ $plugin_slug ] ) && ! $suppressed ) {
+				unset( $option[ $plugin_slug ] );
+				$changes++;
+			} elseif ( ! isset( $option[ $plugin_slug ] ) && $suppressed && array_key_exists( $plugin_slug, $plugins ) ) {
+				$option[ $plugin_slug ] = [
 					// Note that we store the version that was suppressed so that we can alert the user when to check again.
-					Option::SUPPRESSED_PLUGINS_LAST_VERSION => $plugins[ $inserted_suppressed_plugin ]['Version'],
+					Option::SUPPRESSED_PLUGINS_LAST_VERSION => $plugins[ $plugin_slug ]['Version'],
+					Option::SUPPRESSED_PLUGINS_TIMESTAMP => time(),
 					// @todo Store the URLs that had the error!
 				];
+				$changes++;
 			}
 		}
 
 		// When the suppressed plugins changed, re-check the most recently validated URL so validation errors can be
 		// re-computed with the plugins newly-suppressed or un-suppressed.
 		// @todo Instead of checking the most recently-validated URL, instead check the URL(s) that the plugin's validation errors were known to occur on.
-		if ( ! empty( $deleted_suppressed_plugins ) || ! empty( $inserted_suppressed_plugins ) ) {
+		if ( $changes > 0 ) {
 			add_action(
 				'update_option_' . self::OPTION_NAME,
 				static function () {
