@@ -596,9 +596,29 @@ class AMP_Options_Menu {
 								</select>
 							</th>
 							<td class="column-plugin">
-								<label for="<?php echo esc_attr( $element_name ); ?>">
-									<strong><?php echo esc_html( $plugin['Name'] ); ?></strong>
-								</label>
+								<?php if ( ! empty( $plugin['PluginURI'] ) ) : ?>
+									<a href="<?php echo esc_url( $plugin['PluginURI'] ); ?>" target="_blank">
+								<?php endif; ?>
+								<strong><?php echo esc_html( $plugin['Name'] ); ?></strong>
+								<?php if ( ! empty( $plugin['PluginURI'] ) ) : ?>
+									</a>
+								<?php endif; ?>
+
+								<?php
+								if ( ! empty( $plugin['Author'] ) ) {
+									if ( ! empty( $plugin['AuthorURI'] ) ) {
+										$author = sprintf( '<a href="%s" target="_blank">%s</a>', esc_url( $plugin['AuthorURI'] ), esc_html( $plugin['Author'] ) );
+									} else {
+										$author = esc_html( $plugin['Author'] );
+									}
+									/* translators: %s is author name */
+									echo wp_kses_post( sprintf( __( 'by %s', 'amp' ), $author ) );
+								}
+								?>
+
+								<?php if ( ! empty( $plugin['Description'] ) ) : ?>
+									<p><?php echo wp_kses_post( $plugin['Description'] ); ?></p>
+								<?php endif; ?>
 							</td>
 							<td class="column-details">
 								<?php if ( $is_suppressed ) : ?>
