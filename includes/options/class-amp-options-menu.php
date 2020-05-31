@@ -629,14 +629,14 @@ class AMP_Options_Menu {
 										);
 										?>
 									<?php endif; ?>
-									<?php if ( version_compare( $suppressed_plugins[ $plugin_slug ][ Option::SUPPRESSED_PLUGINS_LAST_VERSION ], $plugins[ $plugin_file ]['Version'], '!=' ) ) : ?>
-										<?php if ( $plugins[ $plugin_file ]['Version'] ) : ?>
+									<?php if ( version_compare( $suppressed_plugins[ $plugin_slug ][ Option::SUPPRESSED_PLUGINS_LAST_VERSION ], $plugin['Version'], '!=' ) ) : ?>
+										<?php if ( $plugin['Version'] ) : ?>
 											<?php
 											echo esc_html(
 												sprintf(
 													/* translators: %1: version at which suppressed, %2: current version */
 													__( 'Now updated to version %1$s since suppressed at %2$s.', 'amp' ),
-													$plugins[ $plugin_file ]['Version'],
+													$plugin['Version'],
 													$suppressed_plugins[ $plugin_slug ][ Option::SUPPRESSED_PLUGINS_LAST_VERSION ]
 												)
 											);
