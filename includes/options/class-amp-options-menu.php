@@ -495,12 +495,6 @@ class AMP_Options_Menu {
 				unset( $plugins[ $plugin_file ] );
 			}
 		}
-		uasort(
-			$plugins,
-			static function ( $a, $b ) {
-				return strcmp( $a['Name'], $b['Name'] );
-			}
-		);
 
 		?>
 		<fieldset>
@@ -587,7 +581,7 @@ class AMP_Options_Menu {
 						?>
 						<tr>
 							<th class="column-status" scope="row">
-								<select id="<?php echo esc_attr( $element_name ); ?>" name="<?php echo esc_attr( $element_name ); ?>">
+								<select name="<?php echo esc_attr( $element_name ); ?>">
 									<?php foreach ( $select_options as $value => $text ) : ?>
 										<option value="<?php echo esc_attr( $value ); ?>" <?php selected( (string) $is_suppressed, $value ); ?>>
 											<?php echo esc_html( $text ); ?>

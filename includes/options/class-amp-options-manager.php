@@ -301,8 +301,8 @@ class AMP_Options_Manager {
 	/**
 	 * Validate suppressed plugins.
 	 *
-	 * @param string[] $posted_suppressed_plugins New suppressed plugins.
-	 * @param array    $old_option             Old option.
+	 * @param string[] $posted_suppressed_plugins Posted suppressed plugins, mapping of plugin slug to '0' or '1'.
+	 * @param array    $old_option                Old option.
 	 * @return array New option value.
 	 */
 	private static function validate_suppressed_plugins( $posted_suppressed_plugins, $old_option ) {
