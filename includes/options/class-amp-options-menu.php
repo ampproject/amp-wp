@@ -646,44 +646,7 @@ class AMP_Options_Menu {
 										<?php endif; ?>
 									<?php endif; ?>
 								<?php elseif ( ! $is_suppressed && ! empty( $errors_by_sources[ $plugin_slug ] ) ) : ?>
-									<details>
-										<summary>
-											<?php
-											echo esc_html(
-												sprintf(
-													/* translators: %s is the error count */
-													_n(
-														'%s validation error',
-														'%s validation errors',
-														count( $errors_by_sources[ $plugin_slug ] ),
-														'amp'
-													),
-													number_format_i18n( count( $errors_by_sources[ $plugin_slug ] ) )
-												)
-											);
-											?>
-										</summary>
-										<ul>
-											<?php foreach ( $errors_by_sources[ $plugin_slug ] as $validation_error ) : ?>
-												<?php
-												$edit_term_url = admin_url(
-													add_query_arg(
-														[
-															AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG => $validation_error['term']->name,
-															'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-														],
-														'edit.php'
-													)
-												)
-												?>
-												<li>
-													<a href="<?php echo esc_url( $edit_term_url ); ?>" target="_blank">
-														<?php echo wp_kses_post( AMP_Validation_Error_Taxonomy::get_error_title_from_code( $validation_error['data'] ) ); ?>
-													</a>
-												</li>
-											<?php endforeach; ?>
-										</ul>
-									</details>
+									<?php self::render_validation_error_details( $errors_by_sources[ $plugin_slug ] ); ?>
 								<?php endif ?>
 							</td>
 						</tr>
@@ -691,6 +654,54 @@ class AMP_Options_Menu {
 				</tbody>
 			</table>
 		</fieldset>
+		<?php
+	}
+
+	/**
+	 * Render validation errors into <details> element.
+	 *
+	 * @param array $validation_errors Validation errors.
+	 */
+	private static function render_validation_error_details( $validation_errors ) {
+		?>
+		<details>
+			<summary>
+				<?php
+				echo esc_html(
+					sprintf(
+					/* translators: %s is the error count */
+						_n(
+							'%s validation error',
+							'%s validation errors',
+							count( $validation_errors ),
+							'amp'
+						),
+						number_format_i18n( count( $validation_errors ) )
+					)
+				);
+				?>
+			</summary>
+			<ul>
+				<?php foreach ( $validation_errors as $validation_error ) : ?>
+					<?php
+					$edit_term_url = admin_url(
+						add_query_arg(
+							[
+								AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG => $validation_error['term']->name,
+								'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+							],
+							'edit.php'
+						)
+					)
+					?>
+					<li>
+						<a href="<?php echo esc_url( $edit_term_url ); ?>" target="_blank">
+							<?php echo wp_kses_post( AMP_Validation_Error_Taxonomy::get_error_title_from_code( $validation_error['data'] ) ); ?>
+						</a>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+		</details>
 		<?php
 	}
 
