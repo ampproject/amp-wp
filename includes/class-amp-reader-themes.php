@@ -37,7 +37,43 @@ final class AMP_Reader_Themes {
 	 *
 	 * @var bool
 	 */
-	private $can_install;
+	private $can_install_themes;
+
+	/**
+	 * Status indicating a reader theme is active on the site.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @var string
+	 */
+	const ACTIVE_STATUS = 'active';
+
+	/**
+	 * Status indicating a reader theme is installed but not active.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @var string
+	 */
+	const INSTALLED_STATUS = 'installed';
+
+	/**
+	 * Status indicating a reader theme is not installed but is installable.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @var string
+	 */
+	const INSTALLABLE_STATUS = 'installable';
+
+	/**
+	 * Status indicating a reader theme is not installed and can't be installed.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @var string
+	 */
+	const NON_INSTALLABLE_STATUS = 'non-installable';
 
 	/**
 	 * Retrieves all AMP plugin options specified in the endpoint schema.
@@ -75,7 +111,11 @@ final class AMP_Reader_Themes {
 		 */
 		$themes = apply_filters( 'amp_reader_themes', $themes );
 
-		$this->themes = array_map( [ $this, 'prepare_theme_availability' ], $themes );
+		foreach ( $themes as &$theme ) {
+			$theme['availability'] = $this->get_theme_availability( $theme );
+		}
+
+		$this->themes = $themes;
 
 		return $this->themes;
 	}
@@ -207,55 +247,56 @@ final class AMP_Reader_Themes {
 	 *
 	 * @since 1.6.0
 	 *
+	 * @param array $theme Theme data.
 	 * @return bool True if themes can be installed.
 	 */
-	private function get_can_install() {
-		if ( is_null( $this->can_install ) ) {
+	private function can_install_theme( $theme ) {
+		if ( is_null( $this->can_install_themes ) ) {
 			if ( ! class_exists( 'WP_Upgrader' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/file.php';
 				require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 			}
 
-			$this->can_install = true === ( new WP_Upgrader() )->fs_connect( [ get_theme_root() ] );
+			$this->can_install_themes = true === ( new WP_Upgrader() )->fs_connect( [ get_theme_root() ] );
 		}
 
-		return $this->can_install;
+		if ( ! $this->can_install_themes ) {
+			return false;
+		}
+
+		if ( ! empty( $theme['requires'] ) && ! is_wp_version_compatible( $theme['requires'] ) ) {
+			return false;
+		}
+
+		if ( ! empty( $theme['requires_php'] ) && ! is_php_version_compatible( $theme['requires_php'] ) ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
-	 * Adds information about theme availability and compatibility to the theme data.
+	 * Returns reader theme availability status.
 	 *
 	 * @since 1.6.0
 	 *
 	 * @param array $theme Theme data.
-	 * @return array Theme data with fields added.
+	 * @return array Theme availability status.
 	 */
-	public function prepare_theme_availability( $theme ) {
-		$availability = [
-			'is_active'         => $this->get_current_theme_name() === $theme['name'],
-			'can_install'       => $this->get_can_install(),
-			'is_compatible_wp'  => empty( $theme['requires'] ) || is_wp_version_compatible( $theme['requires'] ),
-			'is_compatible_php' => empty( $theme['requires_php'] ) || is_php_version_compatible( $theme['requires_php'] ),
-			'is_installed'      => wp_get_theme( $theme['slug'] )->exists(),
-		];
+	public function get_theme_availability( $theme ) {
+		switch ( true ) {
+			case $this->get_current_theme_name() === $theme['name']:
+				return self::ACTIVE_STATUS;
 
-		/**
-		 * Filters availability details for a reader theme.
-		 *
-		 * @param array $availability {
-		 *     Availability details.
-		 *
-		 *     @type boolean $is_active         Whether the theme is the currently active theme on the site.
-		 *     @type boolean $can_install       Whether the theme can be installed on the current installation.
-		 *     @type boolean $is_compatible_wp  Whether the theme is compatibile with the current version of WordPress.
-		 *     @type boolean $is_compatible_php Whether the theme is compatible with the current PHP version.
-		 *     @type boolean $is_installed      Whether the theme is already installed on the system.
-		 * }
-		 * @param array $theme Array of theme info.
-		 */
-		$theme['availability'] = apply_filters( 'amp_reader_theme_availability', $availability, $theme );
+			case wp_get_theme( $theme['slug'] )->exists():
+				return self::INSTALLED_STATUS;
 
-		return $theme;
+			case $this->can_install_theme( $theme ):
+				return self::INSTALLABLE_STATUS;
+
+			default:
+				return self::NON_INSTALLABLE_STATUS;
+		}
 	}
 
 	/**

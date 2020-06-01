@@ -76,40 +76,79 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test for prepare_theme_availability.
+	 * Provides test themes to test availability.
 	 *
-	 * @covers AMP_Reader_Themes::prepare_theme_availability
-	 * @covers AMP_Reader_Themes::get_can_install
-	 * @covers AMP_Reader_Themes::get_current_theme_name
+	 * @return array
 	 */
-	public function test_prepare_theme_availability() {
-		$prepared_theme = $this->reader_themes->prepare_theme_availability(
+	public function get_availability_test_themes() {
+		return [
 			[
-				'name'         => 'Some Theme',
-				'requires'     => '99.9',
-				'requires_php' => '99.9',
-				'slug'         => 'some-theme',
-			]
-		);
-
-		$this->assertFalse( $prepared_theme['availability']['is_active'] );
-		$this->assertFalse( $prepared_theme['availability']['is_compatible_wp'] );
-		$this->assertFalse( $prepared_theme['availability']['is_compatible_php'] );
-		$this->assertFalse( $prepared_theme['availability']['is_installed'] );
-
-		$prepared_theme = $this->reader_themes->prepare_theme_availability(
+				'non-installable',
+				[
+					'name'         => 'Some Theme',
+					'requires'     => '99.9',
+					'requires_php' => '5.2',
+					'slug'         => 'some-theme',
+				],
+			],
 			[
-				'name'         => 'WordPress Default',
-				'requires'     => '4.4',
-				'requires_php' => '5.2',
-				'slug'         => 'default',
-			]
-		);
+				'non-installable',
+				[
+					'name'         => 'Some Theme',
+					'requires'     => '4.9',
+					'requires_php' => '99.9',
+					'slug'         => 'some-theme',
+				],
+			],
+			[
+				'installable',
+				[
+					'name'         => 'Some Theme',
+					'requires'     => false,
+					'requires_php' => '5.2',
+					'slug'         => 'some-theme',
+				],
+			],
+			[
+				'installable',
+				[
+					'name'         => 'Some Theme',
+					'requires'     => '4.9',
+					'requires_php' => false,
+					'slug'         => 'some-theme',
+				],
+			],
+			[
+				'active',
+				[
+					'name'         => 'WordPress Default',
+					'requires'     => '4.4',
+					'requires_php' => '5.2',
+					'slug'         => 'default',
+				],
+			],
+			[
+				'installed',
+				[
+					'name'         => 'Twenty Twenty',
+					'requires'     => '4.4',
+					'requires_php' => '5.2',
+					'slug'         => 'twentytwenty',
+				],
+			],
+		];
+	}
 
-		$this->assertTrue( $prepared_theme['availability']['is_active'] );
-		$this->assertTrue( $prepared_theme['availability']['is_compatible_wp'] );
-		$this->assertTrue( $prepared_theme['availability']['is_compatible_php'] );
-		$this->assertTrue( $prepared_theme['availability']['is_installed'] );
-		$this->assertTrue( $prepared_theme['availability']['can_install'] );
+	/**
+	 * Test for get_theme_availability.
+	 *
+	 * @covers AMP_Reader_Themes::get_theme_availability
+	 * @covers AMP_Reader_Themes::can_install_theme
+	 * @covers AMP_Reader_Themes::get_current_theme_name
+	 *
+	 * @dataProvider get_availability_test_themes
+	 */
+	public function test_get_theme_availability( $expected, $theme ) {
+		$this->assertEquals( $expected, $this->reader_themes->get_theme_availability( $theme ) );
 	}
 }

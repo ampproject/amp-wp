@@ -314,7 +314,7 @@ class AMP_Options_Manager {
 			}
 		}
 
-		if ( isset( $new_options[ Option::READER_THEME ] ) ) { 
+		if ( isset( $new_options[ Option::READER_THEME ] ) ) {
 			$options[ Option::READER_THEME ] = $new_options[ Option::READER_THEME ];
 		}
 
