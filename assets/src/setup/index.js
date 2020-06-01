@@ -23,6 +23,12 @@ import { ReaderThemesContextProvider } from './components/reader-themes-context-
 
 const { ajaxurl } = global;
 
+/**
+ * Context providers for the application.
+ *
+ * @param {Object} props Component props.
+ * @param {any} props.children Component children.
+ */
 export function Providers( { children } ) {
 	return (
 		<OptionsContextProvider
