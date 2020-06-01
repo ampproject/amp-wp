@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\PluginRegistry;
 
 /**
  * AMP_Options_Menu class.
@@ -463,12 +464,7 @@ class AMP_Options_Menu {
 	private static function get_suppressible_plugin_sources() {
 		$erroring_plugin_slugs   = array_keys( self::get_plugin_errors_by_sources() );
 		$suppressed_plugin_slugs = array_keys( AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS ) );
-		$active_plugin_slugs     = array_map(
-			static function ( $plugin_file ) {
-				return strtok( $plugin_file, '/' );
-			},
-			get_option( 'active_plugins', [] )
-		);
+		$active_plugin_slugs     = array_keys( PluginRegistry::get_plugins( true, true ) );
 
 		// The suppressible plugins are the set of plugins which are erroring and/or suppressed, which are also active.
 		return array_unique(
@@ -487,14 +483,7 @@ class AMP_Options_Menu {
 	public function render_suppressed_plugins() {
 		$suppressed_plugins = AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS );
 
-		require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		$plugins = get_plugins();
-		unset( $plugins['amp/amp.php'] );
-		foreach ( array_keys( $plugins ) as $plugin_file ) {
-			if ( ! is_plugin_active( $plugin_file ) ) {
-				unset( $plugins[ $plugin_file ] );
-			}
-		}
+		$plugins = PluginRegistry::get_plugins( true, true );
 
 		?>
 		<fieldset>
@@ -568,10 +557,8 @@ class AMP_Options_Menu {
 					<th class="column-details" scope="col"><?php esc_html_e( 'Details', 'amp' ); ?></th>
 				</thead>
 				<tbody>
-					<?php foreach ( $plugins as $plugin_file => $plugin ) : ?>
+					<?php foreach ( $plugins as $plugin_slug => $plugin ) : ?>
 						<?php
-						$plugin_slug = strtok( $plugin_file, '/' );
-
 						$is_suppressed = array_key_exists( $plugin_slug, $suppressed_plugins );
 						if ( ! $is_suppressed && ! isset( $errors_by_sources[ $plugin_slug ] ) ) {
 							continue;

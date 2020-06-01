@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\Icon;
+use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\Dom\Document;
 
 /**
@@ -2309,7 +2310,7 @@ class AMP_Validation_Manager {
 			if ( isset( $invalid_plugins ) ) {
 				$reported_plugins = [];
 				foreach ( $invalid_plugins as $plugin_slug ) {
-					$plugin_data        = AMP_Validation_Error_Taxonomy::get_plugin_from_slug( $plugin_slug );
+					$plugin_data        = PluginRegistry::get_plugin_from_slug( $plugin_slug );
 					$plugin_name        = is_array( $plugin_data ) ? $plugin_data['data']['Name'] : $plugin_slug;
 					$reported_plugins[] = $plugin_name;
 				}

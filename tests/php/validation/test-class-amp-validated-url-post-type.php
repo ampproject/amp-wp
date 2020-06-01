@@ -572,8 +572,8 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		wp_cache_set( 'plugins', [ '' => $plugins ], 'plugins' );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$last_staleness = AMP_Validated_URL_Post_Type::get_post_staleness( $invalid_url_post_id );
-		$this->assertEqualSets( [ 'foo/foo.php', 'baz.php' ], $last_staleness['plugins']['new'] );
-		$this->assertEqualSets( [ 'foo/foo.php', 'bar.php' ], $last_staleness['plugins']['old'] );
+		$this->assertEqualSets( [ 'foo', 'baz.php' ], $last_staleness['plugins']['new'] );
+		$this->assertEqualSets( [ 'foo', 'bar.php' ], $last_staleness['plugins']['old'] );
 		$this->assertArrayHasKey( 'options', $last_staleness );
 		$this->assertEquals( [ Option::THEME_SUPPORT => AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ], $last_staleness['options'] );
 

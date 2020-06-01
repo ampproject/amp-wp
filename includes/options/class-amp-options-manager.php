@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\PluginRegistry;
 
 /**
  * Class AMP_Options_Manager
@@ -308,15 +309,14 @@ class AMP_Options_Manager {
 	private static function validate_suppressed_plugins( $posted_suppressed_plugins, $old_option ) {
 		$option = $old_option;
 
-		// Update the suppressed plugins.
-		require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		$plugins = [];
-		foreach ( get_plugins() as $plugin_file => $plugin ) {
-			$plugins[ strtok( $plugin_file, '/' ) ] = $plugin;
-		}
-
+		$plugins = PluginRegistry::get_plugins( true );
 		$changes = 0;
 		foreach ( $posted_suppressed_plugins as $plugin_slug => $suppressed ) {
+			if ( ! isset( $plugins[ $plugin_slug ] ) ) {
+				unset( $option[ $plugin_slug ] );
+				continue;
+			}
+
 			$suppressed = rest_sanitize_boolean( $suppressed );
 			if ( isset( $option[ $plugin_slug ] ) && ! $suppressed ) {
 				unset( $option[ $plugin_slug ] );

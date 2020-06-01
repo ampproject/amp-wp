@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\Icon;
+use AmpProject\AmpWP\PluginRegistry;
 
 /**
  * Class AMP_Validation_Error_Taxonomy
@@ -2303,35 +2304,6 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * Find a plugin from a slug.
-	 *
-	 * A slug is a plugin directory name like 'amp' or if the plugin is just a single file, then the PHP file in
-	 * the plugins directory.
-	 *
-	 * @param string $plugin_slug Plugin slug.
-	 * @return array|null
-	 */
-	public static function get_plugin_from_slug( $plugin_slug ) {
-		require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		$plugins = get_plugins();
-		if ( isset( $plugins[ $plugin_slug ] ) ) {
-			return [
-				'name' => $plugin_slug,
-				'data' => $plugins[ $plugin_slug ],
-			];
-		}
-		foreach ( $plugins as $plugin_file => $plugin_data ) {
-			if ( strtok( $plugin_file, '/' ) === $plugin_slug ) {
-				return [
-					'name' => $plugin_file,
-					'data' => $plugin_data,
-				];
-			}
-		}
-		return null;
-	}
-
-	/**
 	 * Get the URL for opening the file for a AMP validation error in an external editor.
 	 *
 	 * @since 1.4
@@ -2423,7 +2395,7 @@ class AMP_Validation_Error_Taxonomy {
 		// Fall back to using the theme/plugin editors if no external editor is offered.
 		if ( ! $edit_url ) {
 			if ( 'plugin' === $source['type'] && current_user_can( 'edit_plugins' ) ) {
-				$plugin = self::get_plugin_from_slug( $source['name'] );
+				$plugin = PluginRegistry::get_plugin_from_slug( $source['name'] );
 				if ( $plugin ) {
 					$file = $source['file'];
 
@@ -2475,7 +2447,7 @@ class AMP_Validation_Error_Taxonomy {
 				}
 				break;
 			case 'plugin':
-				$plugin = self::get_plugin_from_slug( $name );
+				$plugin = PluginRegistry::get_plugin_from_slug( $name );
 				if ( $plugin && ! empty( $plugin['data']['Name'] ) ) {
 					$nicename = $plugin['data']['Name'];
 				}
