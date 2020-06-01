@@ -577,12 +577,22 @@ class AMP_Options_Menu {
 								</select>
 							</th>
 							<td class="column-plugin">
+								<?php $needs_details = ( ! empty( $plugin['Description'] ) || ! empty( $plugin['Author'] ) ); ?>
+
+								<?php if ( $needs_details ) : ?>
+									<details><summary>
+								<?php endif; ?>
+
 								<?php if ( ! empty( $plugin['PluginURI'] ) ) : ?>
 									<a href="<?php echo esc_url( $plugin['PluginURI'] ); ?>" target="_blank">
 								<?php endif; ?>
 								<strong><?php echo esc_html( $plugin['Name'] ); ?></strong>
 								<?php if ( ! empty( $plugin['PluginURI'] ) ) : ?>
 									</a>
+								<?php endif; ?>
+
+								<?php if ( $needs_details ) : ?>
+									</summary>
 								<?php endif; ?>
 
 								<?php
@@ -593,12 +603,16 @@ class AMP_Options_Menu {
 										$author = esc_html( $plugin['Author'] );
 									}
 									/* translators: %s is author name */
-									echo wp_kses_post( sprintf( __( 'by %s', 'amp' ), $author ) );
+									echo '<p>' . wp_kses_post( sprintf( __( 'By %s', 'amp' ), $author ) ) . '</p>';
 								}
 								?>
 
 								<?php if ( ! empty( $plugin['Description'] ) ) : ?>
 									<p><?php echo wp_kses_post( $plugin['Description'] ); ?></p>
+								<?php endif; ?>
+
+								<?php if ( $needs_details ) : ?>
+									</details>
 								<?php endif; ?>
 							</td>
 							<td class="column-details">
