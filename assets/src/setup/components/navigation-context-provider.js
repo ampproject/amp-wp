@@ -2,6 +2,7 @@
  * WordPress dependencies
  */
 import { createContext, useState, useMemo } from '@wordpress/element';
+import { getQueryArg } from '@wordpress/url';
 
 /**
  * External dependencies
@@ -17,7 +18,10 @@ export const Navigation = createContext();
  * @param {?any} props.children Component children.
  */
 export function NavigationContextProvider( { children, pages } ) {
-	const [ activePageIndex, setActivePageIndex ] = useState( 0 );
+	const [ activePageIndex, setActivePageIndex ] = useState( () => {
+		const index = pages.findIndex( ( { slug } ) => slug === getQueryArg( global.location.href, 'amp-setup-screen' ) );
+		return -1 < index ? index : 0;
+	} );
 	const [ canGoForward, setCanGoForward ] = useState( false );
 
 	const currentPage = useMemo( () => pages[ activePageIndex ], [ activePageIndex, pages ] );
