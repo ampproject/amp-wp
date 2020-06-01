@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\Icon;
+use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\Option;
 
 /**
@@ -928,21 +929,9 @@ class AMP_Validated_URL_Post_Type {
 	 * @return array Environment.
 	 */
 	public static function get_validated_environment() {
-		require_once ABSPATH . 'wp-admin/includes/plugin.php';
-
-		// The version is included so that plugin updates will encourage users to re-check validated URLs as they'll be marked stale.
-		$plugins = wp_array_slice_assoc(
-			wp_list_pluck( get_plugins(), 'Version' ),
-			get_option( 'active_plugins', [] )
-		);
-
-		// We want to sort the list of plugins to avoid fluctuations due to plugins fighting for first spot
-		// to constantly invalidate our cache.
-		asort( $plugins );
-
 		return [
 			'theme'   => get_stylesheet(),
-			'plugins' => $plugins,
+			'plugins' => wp_list_pluck( PluginRegistry::get_plugins( true ), 'Version' ), // @todo What about multiple plugins being in the same directory?
 			'options' => [
 				Option::THEME_SUPPORT => AMP_Options_Manager::get_option( Option::THEME_SUPPORT ),
 			],
@@ -1228,7 +1217,7 @@ class AMP_Validated_URL_Post_Type {
 					}
 
 					$plugin_name = $plugin_slug;
-					$plugin      = AMP_Validation_Error_Taxonomy::get_plugin_from_slug( $plugin_slug );
+					$plugin      = PluginRegistry::get_plugin_from_slug( $plugin_slug );
 					if ( $plugin ) {
 						$plugin_name = $plugin['data']['Name'];
 					}
