@@ -87,7 +87,8 @@ class AMP_Options_Manager {
 								],
 							],
 							Option::VERSION              => [
-								'type' => 'string',
+								'type'     => 'string',
+								'readonly' => true,
 							],
 						],
 					],
