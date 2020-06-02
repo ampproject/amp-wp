@@ -242,7 +242,23 @@ const setup = {
 	...defaultConfig,
 	...sharedConfig,
 	entry: {
-		'amp-setup': './assets/src/setup',
+		'amp-setup': [
+			'./assets/src/setup',
+		],
+	},
+	module: {
+		...defaultConfig.module,
+		rules: [
+			...defaultConfig.module.rules,
+			{
+				test: /\.css$/,
+				use: [
+					MiniCssExtractPlugin.loader,
+					'css-loader',
+					'postcss-loader',
+				],
+			},
+		],
 	},
 	externals: {
 		'amp-setup': 'ampSetup',
@@ -250,13 +266,33 @@ const setup = {
 	plugins: [
 		new DependencyExtractionWebpackPlugin( {
 			useDefaults: false,
-			// All dependencies will be bundled for the AMP setup screen for compatibility across WP versions.
-			requestToHandle: () => {
-				return undefined;
+			// Most dependencies will be bundled for the AMP setup screen for compatibility across WP versions.
+			requestToHandle: ( handle ) => {
+				switch ( handle ) {
+					case '@wordpress/api-fetch':
+					case '@wordpress/dom-ready':
+						return defaultRequestToHandle( handle );
+
+					default:
+						return undefined;
+				}
 			},
-			requestToExternal: () => {
-				return undefined;
+			requestToExternal: ( external ) => {
+				switch ( external ) {
+					case '@wordpress/api-fetch':
+					case '@wordpress/dom-ready':
+						return defaultRequestToExternal( external );
+
+					default:
+						return undefined;
+				}
 			},
+		} ),
+		new MiniCssExtractPlugin( {
+			filename: '../css/[name]-compiled.css',
+		} ),
+		new RtlCssPlugin( {
+			filename: '../css/[name]-compiled-rtl.css',
 		} ),
 		new WebpackBar( {
 			name: 'Setup',

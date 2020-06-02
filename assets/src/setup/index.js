@@ -3,25 +3,30 @@
  */
 import { render } from '@wordpress/element';
 import domReady from '@wordpress/dom-ready';
-import { __ } from '@wordpress/i18n';
+import '@wordpress/components/build-style/style.css';
 
 /**
  * External dependencies
  */
-import { APP_ROOT_ID } from 'amp-setup'; // WP localized data.
+import { AMP_OPTIONS_KEY, APP_ROOT_ID, EXIT_LINK, OPTIONS_REST_ENDPOINT } from 'amp-setup'; // From WP inline script.
 
-function Setup() {
-	return (
-		<div>
-			{ __( 'Setup Wizard', 'amp' ) }
-		</div>
-	);
-}
+/**
+ * Internal dependencies
+ */
+import './style.css';
+import { PAGES } from './pages';
+import { OptionsContextProvider } from './components/options-context-provider';
+import { SetupWizard } from './setup-wizard';
 
 domReady( () => {
 	const root = document.getElementById( APP_ROOT_ID );
 
 	if ( root ) {
-		render( <Setup />, root );
+		render(
+			<OptionsContextProvider optionsKey={ AMP_OPTIONS_KEY } optionsRestEndpoint={ OPTIONS_REST_ENDPOINT }>
+				<SetupWizard exitLink={ EXIT_LINK } pages={ PAGES } />
+			</OptionsContextProvider>,
+			root,
+		);
 	}
 } );

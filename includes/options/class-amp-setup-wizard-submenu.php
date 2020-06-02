@@ -3,13 +3,13 @@
  * AMP setup wizard.
  *
  * @package AMP
- * @since @todo NEW_ONBOARDING_RELEASE_VERSION
+ * @since 1.6.0
  */
 
 /**
  * AMP setup wizard class.
  *
- * @since @todo NEW_ONBOARDING_RELEASE_VERSION
+ * @since 1.6.0
  */
 final class AMP_Setup_Wizard_Submenu {
 	/**

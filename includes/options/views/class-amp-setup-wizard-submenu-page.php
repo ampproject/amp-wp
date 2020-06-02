@@ -3,17 +3,19 @@
  * AMP setup wizard page.
  *
  * @package AMP
- * @since @todo NEW_ONBOARDING_RELEASE_VERSION
+ * @since 1.6.0
  */
 
 /**
  * AMP setup wizard submenu page class.
  *
- * @since @todo NEW_ONBOARDING_RELEASE_VERSION
+ * @since 1.6.0
  */
 final class AMP_Setup_Wizard_Submenu_Page {
 	/**
 	 * Handle for JS file.
+	 *
+	 * @since 1.6.0
 	 *
 	 * @var string
 	 */
@@ -22,28 +24,59 @@ final class AMP_Setup_Wizard_Submenu_Page {
 	/**
 	 * HTML ID for the app root element.
 	 *
+	 * @since 1.6.0
+	 *
 	 * @var string
 	 */
 	const APP_ROOT_ID = 'amp-setup';
 
 	/**
 	 * Sets up hooks.
+	 *
+	 * @since 1.6.0
 	 */
 	public function init() {
+		add_action( 'admin_head-' . $this->screen_handle(), [ $this, 'override_template' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 	}
 
 	/**
-	 * Renders the setup screen markup.
+	 * Renders the setup wizard screen output and exits.
+	 *
+	 * @since 1.6.0
+	 */
+	public function override_template() {
+		$this->render();
+
+		exit();
+	}
+
+	/**
+	 * Renders the setup wizard screen output, beginning just before the closing head tag.
 	 */
 	public function render() {
+		// Remove standard admin footer content.
+		add_filter( 'admin_footer_text', '__return_empty_string' );
+		remove_all_filters( 'update_footer' );
+
+		// <head> tag was opened prior to this action and hasn't been closed.
 		?>
+		</head>
+		<body>
+			<?php // The admin footer template closes three divs. ?>
+			<div>
+			<div>
+			<div>
 			<div id="<?php echo esc_attr( static::APP_ROOT_ID ); ?>"></div>
 		<?php
+
+		require_once ABSPATH . 'wp-admin/admin-footer.php';
 	}
 
 	/**
 	 * Provides the setup screen handle.
+	 *
+	 * @since 1.6.0
 	 *
 	 * @return string
 	 */
@@ -53,6 +86,8 @@ final class AMP_Setup_Wizard_Submenu_Page {
 
 	/**
 	 * Enqueues setup assets.
+	 *
+	 * @since 1.6.0
 	 *
 	 * @param string $hook_suffix The current admin page.
 	 */
@@ -74,13 +109,25 @@ final class AMP_Setup_Wizard_Submenu_Page {
 			true
 		);
 
+		wp_enqueue_style(
+			self::JS_HANDLE,
+			amp_get_asset_url( 'css/amp-setup-compiled.css' ),
+			[],
+			AMP__VERSION
+		);
+
+		wp_styles()->add_data( self::JS_HANDLE, 'rtl', 'replace' );
+
 		wp_add_inline_script(
 			self::JS_HANDLE,
 			sprintf(
 				'var ampSetup = %s;',
 				wp_json_encode(
 					[
-						'APP_ROOT_ID' => self::APP_ROOT_ID,
+						'AMP_OPTIONS_KEY'       => AMP_Options_Manager::OPTION_NAME,
+						'APP_ROOT_ID'           => self::APP_ROOT_ID,
+						'EXIT_LINK'             => admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ),
+						'OPTIONS_REST_ENDPOINT' => rest_url( 'wp/v2/settings' ),
 					]
 				)
 			),

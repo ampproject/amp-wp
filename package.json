@@ -20,6 +20,8 @@
   },
   "dependencies": {
     "@babel/polyfill": "7.8.7",
+    "@wordpress/api-fetch": "3.15.0",
+    "@wordpress/compose": "3.15.0",
     "@wordpress/dom-ready": "2.9.0",
     "@wordpress/element": "2.14.0",
     "@wordpress/escape-html": "1.8.0",
@@ -36,7 +38,6 @@
     "@wordpress/blocks": "6.16.0",
     "@wordpress/browserslist-config": "2.6.0",
     "@wordpress/components": "9.6.0",
-    "@wordpress/compose": "3.12.0",
     "@wordpress/data": "4.15.0",
     "@wordpress/e2e-test-utils": "4.7.0",
     "@wordpress/edit-post": "3.14.0",
