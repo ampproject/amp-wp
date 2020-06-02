@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 
 /**
@@ -236,6 +237,50 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 		$meta_tag = $dom->xpath->query( "//meta[ @name = 'amp-to-amp-navigation' ]" )->item( 0 );
 		$this->assertInstanceOf( 'DOMElement', $meta_tag );
 		$this->assertEquals( $expected_meta, $meta_tag->getAttribute( 'content' ) );
+	}
+
+	/**
+	 * Test disabling mobile redirection if the URL is excluded.
+	 */
+	public function test_disable_mobile_redirect_for_excluded_url() {
+		$enable_mobile_redirect = static function () {
+			return [ Option::MOBILE_REDIRECT => true ];
+		};
+
+		add_filter( 'pre_option_'. AMP_Options_Manager::OPTION_NAME, $enable_mobile_redirect );
+
+		$link = home_url( '/' );
+		$dom = AMP_DOM_Utils::get_dom_from_content( "<a id='link' href='$link'>Foo</a>" );
+
+		$sanitizer = new AMP_Link_Sanitizer( $dom, [ 'excluded_urls' => [ $link ] ] );
+		$sanitizer->sanitize();
+
+		$a_tag = $dom->getElementById( 'link' );
+		$this->assertEquals( $link . '?noamp=1', $a_tag->getAttribute( 'href' ) );
+
+		remove_filter( 'pre_option_'. AMP_Options_Manager::OPTION_NAME, $enable_mobile_redirect );
+	}
+
+	/**
+	 * Test disabling mobile redirection if the link has the `noamphtml` relationship.
+	 */
+	public function test_disable_mobile_redirect_for_url_with_noamphtml_rel() {
+		$enable_mobile_redirect = static function () {
+			return [ Option::MOBILE_REDIRECT => true ];
+		};
+
+		add_filter( 'pre_option_'. AMP_Options_Manager::OPTION_NAME, $enable_mobile_redirect );
+
+		$link = home_url( '/' );
+		$dom = AMP_DOM_Utils::get_dom_from_content( "<a id='link' href='$link' rel='noamphtml'>Foo</a>" );
+
+		$sanitizer = new AMP_Link_Sanitizer( $dom );
+		$sanitizer->sanitize();
+
+		$a_tag = $dom->getElementById( 'link' );
+		$this->assertEquals( $link . '?noamp=1', $a_tag->getAttribute( 'href' ) );
+
+		remove_filter( 'pre_option_'. AMP_Options_Manager::OPTION_NAME, $enable_mobile_redirect );
 	}
 
 	/**

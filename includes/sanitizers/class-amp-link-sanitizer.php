@@ -158,40 +158,43 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 			 */
 			$rel                = $element->hasAttribute( 'rel' ) ? array_filter( preg_split( '/\s+/', $element->getAttribute( 'rel' ) ) ) : [];
 			$no_amphtml_rel_pos = array_search( self::REL_VALUE_NON_AMP_TO_AMP, $rel, true );
-			if ( false !== $no_amphtml_rel_pos ) {
-				// The rel has a value to opt-out of AMP-to-AMP links, so strip it and ensure the link is to non-AMP.
-				unset( $rel[ $no_amphtml_rel_pos ] );
-				if ( empty( $rel ) ) {
-					$element->removeAttribute( 'rel' );
-				} else {
-					$element->setAttribute( 'rel', implode( ' ', $rel ) );
-				}
-			} elseif (
-				$this->is_frontend_url( $href )
-				&&
-				'#' !== substr( $href, 0, 1 )
-				&&
-				! in_array( strtok( $href, '#' ), $this->args['excluded_urls'], true )
-			) {
-				// Always add the amphtml link relation when linking enabled.
-				$rel[] = self::REL_VALUE_AMP;
-				$element->setAttribute( 'rel', implode( ' ', $rel ) );
-
-				// Only add the AMP query var when requested (in Transitional or Reader mode).
-				if ( ! empty( $this->args['paired'] ) ) {
-					$href = add_query_arg( amp_get_slug(), '', $href );
-					$element->setAttribute( 'href', $href );
-				}
-			}
 
 			parse_str( wp_parse_url( $href, PHP_URL_QUERY ), $query_params );
 			$has_no_amp_query_var = isset( $query_params[ MobileRedirectManager::NO_AMP_QUERY_VAR ] );
-			$link_opt_out         = in_array( strtok( $href, '#' ), $this->args['excluded_urls'], true ) || false !== $no_amphtml_rel_pos;
+			$is_excluded_url      = in_array( strtok( $href, '#' ), $this->args['excluded_urls'], true );
 
-			// Append the `noamp` query param to prevent mobile redirection.
-			if ( ! $has_no_amp_query_var && $link_opt_out && MobileRedirectManager::is_enabled() ) {
-				$href = add_query_arg( MobileRedirectManager::NO_AMP_QUERY_VAR, '1', $href );
-				$element->setAttribute( 'href', $href );
+			if ( ! $has_no_amp_query_var ) {
+				if ( false !== $no_amphtml_rel_pos ) {
+					// The rel has a value to opt-out of AMP-to-AMP links, so strip it and ensure the link is to non-AMP.
+					unset( $rel[ $no_amphtml_rel_pos ] );
+					if ( empty( $rel ) ) {
+						$element->removeAttribute( 'rel' );
+					} else {
+						$element->setAttribute( 'rel', implode( ' ', $rel ) );
+					}
+				} elseif (
+					! $is_excluded_url
+					&&
+					$this->is_frontend_url( $href )
+					&&
+					'#' !== substr( $href, 0, 1 )
+				) {
+					// Always add the amphtml link relation when linking enabled.
+					$rel[] = self::REL_VALUE_AMP;
+					$element->setAttribute( 'rel', implode( ' ', $rel ) );
+
+					// Only add the AMP query var when requested (in Transitional or Reader mode).
+					if ( ! empty( $this->args['paired'] ) ) {
+						$href = add_query_arg( amp_get_slug(), '', $href );
+						$element->setAttribute( 'href', $href );
+					}
+				}
+
+				// Append the `noamp` query param to excluded URLs to prevent mobile redirection.
+				if ( ( $is_excluded_url || false !== $no_amphtml_rel_pos ) && MobileRedirectManager::is_enabled() ) {
+					$href = add_query_arg( MobileRedirectManager::NO_AMP_QUERY_VAR, '1', $href );
+					$element->setAttribute( 'href', $href );
+				}
 			}
 		}
 
