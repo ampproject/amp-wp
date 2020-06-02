@@ -50,7 +50,7 @@ class CssRuleTest extends TestCase
             'normalizes selectors and properties' => [
                 " \t\t  ,  #some-id  \n  \n\n >  \t .some-class  \t \n  .another-class  \t \n +  element  ~ another-element  \n   \t    ,  ,,   #another-id \n  .with-class  \n \t  ,  ",
                 " \t\t  ;  color \n \t : \n \t\n  red  ;;;   ; \n ; \t \n   background-color:white;;  \t  \n ; ",
-                '#another-id .with-class,#some-id>.some-class .another-class+element~another-element{background-color:white;color:red}'
+                '#some-id>.some-class .another-class+element~another-element,#another-id .with-class{background-color:white;color:red}'
             ],
         ];
     }
@@ -165,7 +165,6 @@ class CssRuleTest extends TestCase
             $this->assertEquals($expectedMergedRuleValues[0], $mergedRuleFromB->getMediaQuery());
 
             $this->assertEquals($expectedMergedRuleValues[1], $mergedRuleFromA->getSelectors());
-            $this->assertEquals($expectedMergedRuleValues[1], $mergedRuleFromB->getSelectors());
 
             $this->assertEquals($expectedMergedRuleValues[2], $mergedRuleFromA->getProperties());
             $this->assertEquals($expectedMergedRuleValues[2], $mergedRuleFromB->getProperties());

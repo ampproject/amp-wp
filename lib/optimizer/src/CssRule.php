@@ -67,10 +67,28 @@ final class CssRule
      */
     public function __construct($selectors, $properties)
     {
-        $this->selectors  = array_unique(array_filter(array_map([$this, 'normalizeSelector'], $this->separateSelectors($selectors))));
-        $this->properties = array_unique(array_filter(array_map([$this, 'normalizeProperty'], $this->separateProperties($properties))));
+        $this->selectors = array_values(
+            array_unique(
+                array_filter(
+                    array_map(
+                        [$this, 'normalizeSelector'],
+                        $this->separateSelectors($selectors)
+                    )
+                )
+            )
+        );
 
-        sort($this->selectors);
+        $this->properties = array_values(
+            array_unique(
+                array_filter(
+                    array_map(
+                        [$this, 'normalizeProperty'],
+                        $this->separateProperties($properties)
+                    )
+                )
+            )
+        );
+
         sort($this->properties);
     }
 

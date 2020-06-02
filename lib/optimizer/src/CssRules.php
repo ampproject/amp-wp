@@ -73,8 +73,8 @@ final class CssRules
         }
 
         foreach ($clone->cssRules as $index => $existingCssRule) {
-            if ($cssRule->canBeMerged($existingCssRule)) {
-                $clone->cssRules[$index] = $cssRule->mergeWith($existingCssRule);
+            if ($existingCssRule->canBeMerged($cssRule)) {
+                $clone->cssRules[$index] = $existingCssRule->mergeWith($cssRule);
                 // Rendered CSS and byte count need to be rebuilt, as some previously rendered CSS rule has changed.
                 $clone->renderedCss = null;
                 $clone->byteCount   = null;
