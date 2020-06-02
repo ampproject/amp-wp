@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { useContext } from '@wordpress/element';
+import { useContext, useEffect, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Panel } from '@wordpress/components';
 
@@ -51,6 +51,21 @@ function Page( { children, exitLink } ) {
 }
 
 /**
+ * Side effect wrapper for page component.
+ *
+ * @param {Object} props Component props.
+ * @param {?any} props.children Component children.
+ */
+function PageComponentSideEffects( { children } ) {
+	useEffect( () => {
+		document.body.scrollTop = 0;
+		document.documentElement.scrollTop = 0;
+	}, [] );
+
+	return children;
+}
+
+/**
  * Setup wizard root component.
  *
  * @param {Object} props Component props.
@@ -59,6 +74,13 @@ function Page( { children, exitLink } ) {
 export function SetupWizard( { exitLink } ) {
 	const { activePageIndex, currentPage: { title, PageComponent }, goBack, goForward, pages } = useContext( Navigation );
 	const { fetchOptionsError } = useContext( Options );
+
+	const PageComponentWithSideEffects = useMemo( () => () => (
+		<PageComponentSideEffects>
+			<PageComponent />
+		</PageComponentSideEffects>
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	), [ PageComponent ] );
 
 	return (
 		<div className="amp-setup-container">
@@ -79,7 +101,7 @@ export function SetupWizard( { exitLink } ) {
 							{ ! fetchOptionsError ? title : __( 'Error', 'amp' ) }
 						</h1>
 						<Page exitLink={ exitLink }>
-							<PageComponent />
+							<PageComponentWithSideEffects />
 						</Page>
 					</Panel>
 					<Nav
