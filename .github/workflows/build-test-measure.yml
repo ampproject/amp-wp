@@ -325,7 +325,7 @@ jobs:
 
       - name: Install and activate the Yoast WordPress SEO plugin
         run: |
-          wp plugin install wordress-seo \
+          wp plugin install wordpress-seo \
           --activate \
           --force \
           --allow-root
