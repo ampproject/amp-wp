@@ -323,6 +323,13 @@ jobs:
           --force \
           --allow-root
 
+      - name: Install and activate the Yoast WordPress SEO plugin
+        run: |
+          wp plugin install wordress-seo \
+          --activate \
+          --force \
+          --allow-root
+
       - name: Switch site into Transitional mode
         run: |
           wp eval \
