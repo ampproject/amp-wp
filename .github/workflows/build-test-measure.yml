@@ -330,6 +330,11 @@ jobs:
           --force \
           --allow-root
 
+      - name: Install the URL Toggles plugin as a must-use plugin
+        run: |
+          mkdir -p www/wp-content/mu-plugins
+          cp tests/e2e/plugins/url-toggles.php www/wp-content/mu-plugins
+
       - name: Create basic robots.txt file
         run: |
           echo "User-agent: *\nDisallow: /wp-admin/\nAllow: /wp-admin/admin-ajax.php\n" > www/robots.txt

@@ -6,7 +6,10 @@ module.exports = {
 
 			// List of URLs to run the audit against.
 			url: [
-				'http://localhost:8080/?amp',
+				'http://localhost:8080/',
+				'http://localhost:8080/?amp=1&amp_optimizer=0&amp_ssr=0',
+				'http://localhost:8080/?amp=1&amp_optimizer=1&amp_ssr=0',
+				'http://localhost:8080/?amp=1&amp_optimizer=1&amp_ssr=1',
 			],
 
 			// How many runs to use for averaging out variability.
