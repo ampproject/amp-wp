@@ -25,7 +25,7 @@ import { WizardUnsavedChangesWarning } from './components/unsaved-changes-warnin
  *
  * @param {Object} props Component props.
  * @param {?any} props.children Component children.
- * @param {string} props.string Exit link.
+ * @param {string} props.exitLink Exit link.
  */
 function Page( { children, exitLink } ) {
 	const { fetchingOptions, fetchOptionsError } = useContext( Options );
