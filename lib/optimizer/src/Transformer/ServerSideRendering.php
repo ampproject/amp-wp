@@ -1023,7 +1023,9 @@ final class ServerSideRendering implements Transformer
         $attributeValue = preg_replace('/^not\s+/i', '', $attributeValue, 1, $notFound);
         $not            = $notFound ? '' : 'not ';
 
-        if ($attributeValue[0] === '(') {
+        if ($attributeValue[0] === '(' && ! $notFound) {
+            // 'not' can only be used with a media type, so we use 'all' as media type if it is missing.
+            // See quirksmode.org/blog/archives/2012/11/what_the_hells.html#c15586
             $attributeValue = 'all and ' . $attributeValue;
         }
 
