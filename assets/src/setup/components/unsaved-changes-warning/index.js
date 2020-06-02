@@ -6,6 +6,7 @@ import { useEffect, useContext, useCallback } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { Options } from '../options-context-provider';
 
 export function WizardUnsavedChangesWarning() {
@@ -18,7 +19,7 @@ export function WizardUnsavedChangesWarning() {
 	 */
 	const warnIfUnsavedChanges = useCallback( ( event ) => {
 		if ( hasChanges && ! hasSaved ) {
-			event.returnValue = '';
+			event.returnValue = __( 'This page has unsaved changes. Are you sure you want to leave?', 'amp' );
 		}
 
 		return null;
