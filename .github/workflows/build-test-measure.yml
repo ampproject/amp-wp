@@ -323,17 +323,14 @@ jobs:
           --force \
           --allow-root
 
-      - name: Install and activate the Yoast WordPress SEO plugin
-        run: |
-          wp plugin install wordpress-seo \
-          --activate \
-          --force \
-          --allow-root
-
       - name: Install the URL Toggles plugin as a must-use plugin
         run: |
           mkdir -p www/wp-content/mu-plugins
           cp tests/e2e/plugins/url-toggles.php www/wp-content/mu-plugins
+
+      - name: Install the Meta Description plugin as a must-use plugin
+        run: |
+          cp tests/e2e/plugins/add-meta-description.php www/wp-content/mu-plugins
 
       - name: Create basic robots.txt file
         run: |
