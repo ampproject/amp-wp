@@ -89,9 +89,7 @@ export function OptionsContextProvider( { children, optionsKey, optionsRestEndpo
 			setHasChanges( true );
 		}
 
-		if ( 'object' === typeof newOptions ) {
-			setOptions( { ...options, ...newOptions } );
-		}
+		setOptions( { ...options, ...newOptions } );
 	}, [ hasChanges, options, setHasChanges, setOptions ] );
 
 	useEffect( () => {
