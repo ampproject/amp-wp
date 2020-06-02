@@ -40,6 +40,13 @@ final class AMP_Reader_Themes {
 	private $can_install_themes;
 
 	/**
+	 * The default reader theme. Indicates the plugin-provided classic mode should be used.
+	 *
+	 * @var string
+	 */
+	const DEFAULT_READER_THEME = 'classic';
+
+	/**
 	 * Status indicating a reader theme is active on the site.
 	 *
 	 * @since 1.6.0

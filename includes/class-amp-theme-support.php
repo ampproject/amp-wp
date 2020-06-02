@@ -82,13 +82,6 @@ class AMP_Theme_Support {
 	const PAIRED_BROWSING_QUERY_VAR = 'amp-paired-browsing';
 
 	/**
-	 * The default reader theme. Indicates the plugin-provided classic mode should be used.
-	 *
-	 * @var string
-	 */
-	const DEFAULT_READER_THEME = 'classic';
-
-	/**
 	 * Sanitizers, with keys as class names and values as arguments.
 	 *
 	 * @var array[]
