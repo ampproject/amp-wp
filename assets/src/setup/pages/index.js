@@ -19,27 +19,27 @@ import { SiteScan } from './site-scan';
  */
 export const PAGES = [
 	{
-		title: __( 'Site scan', 'amp' ),
+		title: __( 'Site Scan', 'amp' ),
 		PageComponent: SiteScan,
 	},
 	{
-		title: __( 'Technical background', 'amp' ),
+		title: __( 'Technical Background', 'amp' ),
 		PageComponent: TechnicalBackground,
 	},
 	{
-		title: __( 'Site goals', 'amp' ),
+		title: __( 'Goals', 'amp' ),
 		PageComponent: Goals,
 	},
 	{
-		title: __( 'Template modes', 'amp' ),
+		title: __( 'Template Mode', 'amp' ),
 		PageComponent: TemplateMode,
 	},
 	{
-		title: __( 'Reader themes', 'amp' ),
+		title: __( 'Reader Theme', 'amp' ),
 		PageComponent: ChooseReaderTheme,
 	},
 	{
-		title: __( 'Site configuration', 'amp' ),
+		title: __( 'Summary', 'amp' ),
 		PageComponent: SiteConfigurationSummary,
 	},
 	{
