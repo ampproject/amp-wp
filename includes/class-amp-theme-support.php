@@ -6,6 +6,7 @@
  */
 
 use AmpProject\Amp;
+use AmpProject\AmpWP\MobileRedirectManager;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\ConfigurationArgument;
@@ -80,13 +81,6 @@ class AMP_Theme_Support {
 	 * @var string
 	 */
 	const PAIRED_BROWSING_QUERY_VAR = 'amp-paired-browsing';
-
-	/**
-	 * Query parameter to indicate that the page in question should not be served as AMP.
-	 *
-	 * @var string
-	 */
-	const NO_AMP_QUERY_VAR = 'noamp';
 
 	/**
 	 * Sanitizers, with keys as class names and values as arguments.
@@ -404,27 +398,37 @@ class AMP_Theme_Support {
 				self::redirect_non_amp_url( current_user_can( 'manage_options' ) ? 302 : 301 );
 			}
 
-			if ( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) && wp_is_mobile() && is_amp_available() ) {
-				// Redirect to AMP version if `noamp` query var not present.
-				if ( ! isset( $_GET[ self::NO_AMP_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			if ( MobileRedirectManager::is_enabled() && is_amp_available() ) {
+				$mobile_redirection_disabled = isset( $_GET[ MobileRedirectManager::NO_AMP_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+				// If `noamp` query var is present, set a cookie to persist disabling of mobile redirection (if one has not already been set).
+				if ( $mobile_redirection_disabled && ! MobileRedirectManager::redirection_disabled() ) {
+					setcookie(
+						MobileRedirectManager::DISABLED_COOKIE_NAME,
+						'1',
+						[
+							'expires'  => 0, // Cookie will only last for the current browser session.
+							'path'     => '/',
+							'secure'   => isset( $_SERVER['HTTPS'] ),
+							'httponly' => true,
+							'samesite' => 'strict',
+						]
+					);
+				}
+
+				// Redirect if `noamp` query parameter is not present and JS redirection is disabled.
+				if ( ! $mobile_redirection_disabled && ! MobileRedirectManager::should_redirect_via_js() ) {
 					$amp_url = add_query_arg( amp_get_slug(), '1', amp_get_current_url() );
 					wp_safe_redirect( $amp_url, current_user_can( 'manage_options' ) ? 302 : 301 );
 				}
 
-				// Add link to exit go to mobile version in footer.
-				add_action(
-					'wp_footer',
-					static function () {
-						if ( AMP_Theme_Support::is_paired_available() ) {
-							$amp_url = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
-						} else {
-							$amp_url = amp_get_permalink( get_queried_object_id() );
-						}
+				// Add mobile redirection script if user has opted for that solution.
+				if ( MobileRedirectManager::should_redirect_via_js() ) {
+					add_action( 'wp_head', [ MobileRedirectManager::class, 'add_mobile_redirect_script' ], ~PHP_INT_MAX );
+				}
 
-						$amp_url = remove_query_arg( self::NO_AMP_QUERY_VAR, $amp_url );
-						echo amp_get_mobile_version_switcher_markup( $amp_url, __( 'Go to mobile version', 'amp' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					}
-				);
+				// Add a link to the footer to navigate to the AMP version.
+				add_action( 'wp_footer', [ __CLASS__, 'add_amp_mobile_version_switcher' ] );
 			}
 
 			amp_add_frontend_actions();
@@ -433,21 +437,12 @@ class AMP_Theme_Support {
 
 		self::ensure_proper_amp_location();
 
-		if (
-			AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) &&
-			( $is_reader_mode || $has_query_var ) &&
-			wp_is_mobile()
-		) {
-			// Add link to exit mobile version in footer.
+		if ( ! amp_is_canonical() && MobileRedirectManager::is_enabled() && is_amp_available() ) {
+			// @todo The `amp_post_template_footer` should only be used for the reader mode Classic theme.
 			$action = $is_reader_mode ? 'amp_post_template_footer' : 'wp_footer';
 
-			add_action(
-				$action,
-				static function() {
-					$url = add_query_arg( self::NO_AMP_QUERY_VAR, '1', self::get_current_canonical_url() );
-					echo amp_get_mobile_version_switcher_markup( $url, __( 'Exit mobile version', 'amp' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				}
-			);
+			// Add a link to the footer to navigate to the non-AMP version.
+			add_action( $action, [ __CLASS__, 'add_non_amp_mobile_version_switcher' ] );
 		}
 
 		$theme_support = self::get_theme_support_args();
@@ -476,6 +471,26 @@ class AMP_Theme_Support {
 				call_user_func( [ $sanitizer_class, 'add_buffering_hooks' ], $args );
 			}
 		}
+	}
+
+	/**
+	 * Output the markup that allows the user to switch to the non-AMP version of the page.
+	 */
+	public static function add_non_amp_mobile_version_switcher() {
+		$url = add_query_arg( MobileRedirectManager::NO_AMP_QUERY_VAR, '1', self::get_current_canonical_url() );
+		MobileRedirectManager::add_mobile_version_switcher_markup( $url, __( 'Exit mobile version', 'amp' ) );
+	}
+
+	/**
+	 * Output the markup that allows the user to switch to the AMP version of the page.
+	 */
+	public static function add_amp_mobile_version_switcher() {
+		$amp_url = self::is_paired_available()
+				? add_query_arg( amp_get_slug(), '', amp_get_current_url() )
+				: amp_get_permalink( get_queried_object_id() );
+		$amp_url = remove_query_arg( MobileRedirectManager::NO_AMP_QUERY_VAR, $amp_url );
+
+		MobileRedirectManager::add_mobile_version_switcher_markup( $amp_url, __( 'Go to mobile version', 'amp' ) );
 	}
 
 	/**

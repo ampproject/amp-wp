@@ -302,45 +302,6 @@ function amp_add_frontend_actions() {
 }
 
 /**
- * Get the markup for the mobile version switcher.
- *
- * @since 1.6
- *
- * @param string $url  URL to canonical version of page.
- * @param string $text Text for the anchor element.
- * @return string HTML markup.
- */
-function amp_get_mobile_version_switcher_markup( $url, $text ) {
-	ob_start();
-	?>
-	<style>
-		#version-switch-link {
-			display: block;
-			width: 100%;
-			padding: 15px 0;
-			font-size: 16px;
-			font-weight: 600;
-			color: #eaeaea;
-			text-align: center;
-			background-color: #444;
-			border: 0;
-		}
-	</style>
-	<div>
-		<a
-			id="version-switch-link"
-			rel="noamphtml"
-			href="<?php echo esc_url( $url ); ?>"
-		>
-			<?php echo esc_html( $text ); ?>
-		</a>
-	</div>
-	<?php
-
-	return ob_get_clean();
-}
-
-/**
  * Determine whether AMP is available for the current URL.
  *
  * @todo This should go into the AmpProject\AmpWP namespace?
