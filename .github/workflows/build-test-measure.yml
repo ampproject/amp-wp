@@ -330,6 +330,10 @@ jobs:
           --force \
           --allow-root
 
+      - name: Create basic robots.txt file
+        run: |
+          echo "User-agent: *\nDisallow: /wp-admin/\nAllow: /wp-admin/admin-ajax.php\n" > www/robots.txt
+
       - name: Switch site into Transitional mode
         run: |
           wp eval \
