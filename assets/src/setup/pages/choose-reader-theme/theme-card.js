@@ -3,7 +3,6 @@
  * WordPress dependencies
  */
 import { useContext } from '@wordpress/element';
-import { useInstanceId } from '@wordpress/compose';
 import { decodeEntities } from '@wordpress/html-entities';
 
 /**
@@ -19,13 +18,14 @@ import { __ } from '@wordpress/i18n';
 import { Options } from '../../components/options-context-provider';
 
 export function ThemeCard( { description, homepage, screenshotUrl, slug, name } ) {
-	const instanceId = useInstanceId( ThemeCard );
 	const { options, updateOptions } = useContext( Options );
 	const { reader_theme: readerTheme } = options || {};
 
+	const id = `theme-card__${ slug }`;
+
 	return (
 		<li className={ `amp-wp-theme-card ${ readerTheme === slug ? 'amp-wp-theme-card--selected' : '' }` }>
-			<label htmlFor={ instanceId } className="amp-wp-theme-card__label">
+			<label htmlFor={ id } className="amp-wp-theme-card__label">
 				<img
 					src={ screenshotUrl }
 					alt={ name }
@@ -33,7 +33,7 @@ export function ThemeCard( { description, homepage, screenshotUrl, slug, name } 
 				<div className="amp-wp-theme-card__label-header">
 					<input
 						type="radio"
-						id={ instanceId }
+						id={ id }
 						checked={ readerTheme === slug }
 						onChange={ ( ) => {
 							updateOptions( { reader_theme: slug } );
