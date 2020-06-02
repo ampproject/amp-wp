@@ -7,6 +7,9 @@
  * Author URI:  https://github.com/ampproject/amp-wp/graphs/contributors
  */
 
-add_action( 'wp_head', static function () {
-	echo '<meta name="description" content="Dummy description to make Lighthouse happy.">';
-} );
+add_action(
+	'wp_head',
+	static function () {
+		echo '<meta name="description" content="Dummy description to make Lighthouse happy.">';
+	}
+);
