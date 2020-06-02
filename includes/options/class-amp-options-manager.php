@@ -99,6 +99,42 @@ class AMP_Options_Manager {
 				],
 			]
 		);
+
+		add_filter( 'rest_pre_get_setting', [ __CLASS__, 'rest_get_options' ] );
+	}
+
+	/**
+	 * In REST, the option will be invalid and returned as null if its schema doesn't exactly match what's defined in
+	 * register_setting. This filter will prevent errors from occurring during development or when users switch between
+	 * plugin versions.
+	 *
+	 * @see WP_REST_Settings_Controller::get_item
+	 *
+	 * @param mixed  $result Value to use to hijack the setting. Can be a scalar matching the registered schema for the
+	 *                       setting, or null to follow the default get_option() behavior.
+	 * @param string $name   Setting name (as shown in REST API responses).
+	 * @return mixed Null to use built-in behavior in the settings endpoint. Any other value will override core behavior.
+	 */
+	public static function rest_get_options( $result, $name ) {
+		if ( self::OPTION_NAME !== $name ) {
+			return $result;
+		}
+
+		$options = self::get_options();
+
+		foreach ( array_keys( $options ) as $key ) {
+			if ( ! array_key_exists( $key, self::$defaults ) ) {
+				unset( $options[ $key ] );
+			}
+		}
+
+		foreach ( array_keys( self::$defaults ) as $default_key => $default_value ) {
+			if ( ! array_key_exists( $default_key, $options ) ) {
+				$options[ $default_key ] = $default_value;
+			}
+		}
+
+		return $options;
 	}
 
 	/**
