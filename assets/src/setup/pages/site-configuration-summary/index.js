@@ -26,7 +26,7 @@ export function SiteConfigurationSummary() {
 
 	return (
 		<div>
-			{ __( 'Site Configuration Summary', 'amp' ) }
+			{ __( 'Summary', 'amp' ) }
 		</div>
 	);
 }

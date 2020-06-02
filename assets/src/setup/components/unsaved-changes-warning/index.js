@@ -1,36 +1,39 @@
 /**
  * WordPress dependencies
  */
-import { useEffect, useContext, useCallback } from '@wordpress/element';
+import { useEffect, useContext } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { Options } from '../options-context-provider';
 
+/**
+ * If there are unsaved changes in the wizard, warns the user before exiting the page.
+ *
+ * @return {null} Renders nothing.
+ */
 export function WizardUnsavedChangesWarning() {
 	const { hasChanges, hasSaved } = useContext( Options );
 
-	/**
-	 * Warns the user if there are unsaved changes before leaving the wizard.
-	 *
-	 * @param {Event} event `beforeunload` event.
-	 */
-	const warnIfUnsavedChanges = useCallback( ( event ) => {
-		if ( hasChanges && ! hasSaved ) {
-			event.returnValue = '';
+	useEffect( () => {
+		if ( ! hasChanges || hasSaved ) {
+			const warnIfUnsavedChanges = ( event ) => {
+				event.returnValue = __( 'This page has unsaved changes. Are you sure you want to leave?', 'amp' );
+
+				return null;
+			};
+
+			window.addEventListener( 'beforeunload', warnIfUnsavedChanges );
+
+			return () => {
+				window.removeEventListener( 'beforeunload', warnIfUnsavedChanges );
+			};
 		}
 
-		return null;
+		return () => undefined;
 	}, [ hasChanges, hasSaved ] );
-
-	useEffect( () => {
-		window.addEventListener( 'beforeunload', warnIfUnsavedChanges );
-
-		return () => {
-			window.removeEventListener( 'beforeunload', warnIfUnsavedChanges );
-		};
-	}, [ warnIfUnsavedChanges ] );
 
 	return null;
 }

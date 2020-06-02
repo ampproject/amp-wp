@@ -66,8 +66,16 @@
 .amp-setup-panel {
 	max-width: var(--amp-wp-setup-page-max-width);
 	min-height: 496px;
-	padding: 40px;
+	padding: 20px;
 	width: 100%;
+
+	@media screen and (min-width: 783px) {
+		padding: 40px;
+	}
+}
+
+.amp-setup-panel h1 {
+	line-height: 1.1;
 }
 
 /**
@@ -188,8 +196,11 @@
 	align-items: center;
 	display: flex;
 	font-size: 14px;
-	padding: 15px 21px 8px;
 	position: relative;
+
+	@media screen and (min-width: 783px) {
+		padding: 15px 21px 8px;
+	}
 }
 
 .amp-stepper__item--active {

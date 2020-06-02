@@ -26,7 +26,7 @@ export function SiteScan() {
 
 	return (
 		<div>
-			{ __( 'Site scan', 'amp' ) }
+			{ __( 'Site Scan', 'amp' ) }
 		</div>
 	);
 }

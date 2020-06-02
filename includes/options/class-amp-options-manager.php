@@ -88,7 +88,8 @@ class AMP_Options_Manager {
 								],
 							],
 							Option::VERSION              => [
-								'type' => 'string',
+								'type'     => 'string',
+								'readonly' => true,
 							],
 							Option::READER_THEME         => [
 								'type' => 'string',
