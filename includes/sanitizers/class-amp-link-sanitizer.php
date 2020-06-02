@@ -157,10 +157,10 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 			 * @var string[] $rel
 			 */
 			$rel                = $element->hasAttribute( 'rel' ) ? array_filter( preg_split( '/\s+/', $element->getAttribute( 'rel' ) ) ) : [];
-			$has_no_amphtml_rel = array_search( self::REL_VALUE_NON_AMP_TO_AMP, $rel, true );
-			if ( true === $has_no_amphtml_rel ) {
+			$no_amphtml_rel_pos = array_search( self::REL_VALUE_NON_AMP_TO_AMP, $rel, true );
+			if ( false !== $no_amphtml_rel_pos ) {
 				// The rel has a value to opt-out of AMP-to-AMP links, so strip it and ensure the link is to non-AMP.
-				unset( $rel[ $has_no_amphtml_rel ] );
+				unset( $rel[ $no_amphtml_rel_pos ] );
 				if ( empty( $rel ) ) {
 					$element->removeAttribute( 'rel' );
 				} else {
@@ -186,7 +186,7 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 
 			parse_str( wp_parse_url( $href, PHP_URL_QUERY ), $query_params );
 			$has_no_amp_query_var = isset( $query_params[ MobileRedirectManager::NO_AMP_QUERY_VAR ] );
-			$link_opt_out         = in_array( strtok( $href, '#' ), $this->args['excluded_urls'], true ) || false !== $has_no_amphtml_rel;
+			$link_opt_out         = in_array( strtok( $href, '#' ), $this->args['excluded_urls'], true ) || false !== $no_amphtml_rel_pos;
 
 			// Append the `noamp` query param to prevent mobile redirection.
 			if ( ! $has_no_amp_query_var && $link_opt_out && MobileRedirectManager::is_enabled() ) {

@@ -42,6 +42,10 @@ class AMP_Customizer_Design_Settings {
 	 * @return bool AMP Customizer design settings enabled.
 	 */
 	public static function is_amp_customizer_enabled() {
+		if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
+			return false;
+		}
+
 		/**
 		 * Filter whether to enable the AMP default template design settings.
 		 *

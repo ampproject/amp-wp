@@ -364,9 +364,9 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$assert_amphtml_link_present();
 
 		// Make sure adding the filter hides the amphtml link.
-		add_filter( 'amp_frontend_show_canonical', '__return_false' );
+		add_filter( 'amp_frontend_show_amphtml', '__return_false' );
 		$this->assertEmpty( $get_amp_html_link() );
-		remove_filter( 'amp_frontend_show_canonical', '__return_false' );
+		remove_filter( 'amp_frontend_show_amphtml', '__return_false' );
 		$assert_amphtml_link_present();
 	}
 
@@ -467,9 +467,9 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$assert_amphtml_link_present();
 
 		// Make sure adding the filter hides the amphtml link.
-		add_filter( 'amp_frontend_show_canonical', '__return_false' );
+		add_filter( 'amp_frontend_show_amphtml', '__return_false' );
 		$this->assertEmpty( $get_amp_html_link() );
-		remove_filter( 'amp_frontend_show_canonical', '__return_false' );
+		remove_filter( 'amp_frontend_show_amphtml', '__return_false' );
 		$assert_amphtml_link_present();
 		$this->assertEquals( $available, AMP_Theme_Support::is_paired_available() );
 

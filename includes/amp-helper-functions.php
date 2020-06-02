@@ -555,10 +555,10 @@ function amp_add_amphtml_link() {
 	if ( has_filter( 'amp_frontend_show_canonical' ) ) {
 		_deprecated_hook( 'amp_frontend_show_canonical', '1.6', 'amp_frontend_show_amphtml' );
 	}
-	if ( false === (
-			apply_filters( 'amp_frontend_show_amphtml', true ) ||
-			apply_filters( 'amp_frontend_show_canonical', true )
-		)
+
+	if (
+		false === apply_filters( 'amp_frontend_show_amphtml', true ) ||
+		false === apply_filters( 'amp_frontend_show_canonical', true )
 	) {
 		return;
 	}
