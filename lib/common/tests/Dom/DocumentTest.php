@@ -734,35 +734,35 @@ class DocumentTest extends TestCase
 
             'single check without existing ID'      => [
                 [
-                    [ $elementFactory, null, 'some-prefix', 'some-prefix' ],
+                    [ $elementFactory, null, 'some-prefix', 'some-prefix-0' ],
                 ],
             ],
 
             'consecutive checks count upwards'      => [
                 [
-                    [ $elementFactory, null, 'some-prefix', 'some-prefix' ],
-                    [ $elementFactory, null, 'some-prefix', 'some-prefix-2' ],
+                    [ $elementFactory, null, 'some-prefix', 'some-prefix-0' ],
+                    [ $elementFactory, null, 'some-prefix', 'some-prefix-1' ],
                 ],
             ],
 
             'consecutive checks for same element return same ID' => [
                 [
-                    [ $elementFactory, null, 'some-prefix', 'some-prefix' ],
-                    [ null, null, 'some-prefix', 'some-prefix' ],
+                    [ $elementFactory, null, 'some-prefix', 'some-prefix-0' ],
+                    [ null, null, 'some-prefix', 'some-prefix-0' ],
                 ],
             ],
 
             'mixing prefixes keeps counts separate' => [
                 [
                     [ $elementFactory, 'my-id', 'some-prefix', 'my-id' ],
-                    [ $elementFactory, null, 'some-prefix', 'some-prefix' ],
+                    [ $elementFactory, null, 'some-prefix', 'some-prefix-0' ],
+                    [ $elementFactory, null, 'some-prefix', 'some-prefix-1' ],
+                    [ $elementFactory, null, 'other-prefix', 'other-prefix-0' ],
+                    [ $elementFactory, null, 'other-prefix', 'other-prefix-1' ],
                     [ $elementFactory, null, 'some-prefix', 'some-prefix-2' ],
-                    [ $elementFactory, null, 'other-prefix', 'other-prefix' ],
-                    [ $elementFactory, null, 'other-prefix', 'other-prefix-2' ],
-                    [ $elementFactory, null, 'some-prefix', 'some-prefix-3' ],
                     [ $elementFactory, 'another-id', 'some-prefix', 'another-id' ],
-                    [ $elementFactory, null, 'some-prefix', 'some-prefix-4' ],
-                    [ null, null, 'some-prefix', 'some-prefix-4' ],
+                    [ $elementFactory, null, 'some-prefix', 'some-prefix-3' ],
+                    [ null, null, 'some-prefix', 'some-prefix-3' ],
                 ],
             ],
         ];
@@ -798,12 +798,12 @@ class DocumentTest extends TestCase
     public function testGetElementIdOnPreexistingIds()
     {
         $dom = Document::fromHtml(
-            '<body><div id="some-prefix"><div id="some-prefix-2"><div id="some-prefix-3"></body>'
+            '<body><div id="some-prefix-0"><div id="some-prefix-1"><div id="some-prefix-2"></body>'
         );
 
         $element = $dom->createElement('div');
         $dom->body->appendChild($element);
 
-        $this->assertEquals('some-prefix-4', $dom->getElementId($element, 'some-prefix'));
+        $this->assertEquals('some-prefix-3', $dom->getElementId($element, 'some-prefix'));
     }
 }
