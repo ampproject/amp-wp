@@ -384,13 +384,32 @@ function amp_get_slug() {
  * @return string Current URL.
  */
 function amp_get_current_url() {
-	$url = preg_replace( '#(^https?://[^/]+)/.*#', '$1', home_url( '/' ) );
-	if ( isset( $_SERVER['REQUEST_URI'] ) ) {
-		$url = esc_url_raw( $url . wp_unslash( $_SERVER['REQUEST_URI'] ) );
-	} else {
-		$url .= '/';
+	$parsed_url = wp_parse_url( home_url() );
+	if ( empty( $parsed_url['scheme'] ) ) {
+		$parsed_url['scheme'] = is_ssl() ? 'https' : 'http';
 	}
-	return $url;
+	if ( ! isset( $parsed_url['host'] ) ) {
+		$parsed_url['host'] = wp_unslash( $_SERVER['HTTP_HOST'] );
+	}
+
+	$current_url = $parsed_url['scheme'] . '://';
+	if ( isset( $parsed_url['user'] ) ) {
+		$current_url .= $parsed_url['user'];
+		if ( isset( $parsed_url['pass'] ) ) {
+			$current_url .= ':' . $parsed_url['pass'];
+		}
+		$current_url .= '@';
+	}
+	$current_url .= $parsed_url['host'];
+	if ( isset( $parsed_url['port'] ) ) {
+		$current_url .= ':' . $parsed_url['port'];
+	}
+	$current_url .= '/';
+
+	if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+		$current_url .= ltrim( wp_unslash( $_SERVER['REQUEST_URI'] ), '/' );
+	}
+	return esc_url_raw( $current_url );
 }
 
 /**
