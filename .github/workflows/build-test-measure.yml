@@ -104,7 +104,7 @@ jobs:
     # Only run this job if it's a PR. One way to check for that is if `github.head_ref` is not empty.
     if: ${{ github.head_ref && github.head_ref != null }}
     runs-on: ubuntu-latest
-    needs: deploy-to-wiki
+    needs: deploy-to-gs
 
     outputs:
       pr_number: ${{ steps.get-pr-number.outputs.num }}
