@@ -44,7 +44,7 @@
     "@wordpress/eslint-plugin": "5.1.0",
     "@wordpress/hooks": "2.7.0",
     "@wordpress/jest-puppeteer-axe": "1.8.0",
-    "@wordpress/plugins": "2.16.0",
+    "@wordpress/plugins": "2.17.0",
     "@wordpress/scripts": "9.1.0",
     "autoprefixer": "9.8.0",
     "babel-eslint": "10.1.0",
