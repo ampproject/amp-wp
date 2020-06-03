@@ -140,6 +140,7 @@ jobs:
         uses: peter-evans/create-or-update-comment@v1
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          edit-mode: replace
           body: |
             Plugin builds for ${{ github.sha }} are ready :cook:!
             - Download the development build [here](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/dev/amp.zip)
