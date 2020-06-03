@@ -54,18 +54,18 @@ jobs:
         # Prevent malicious scripts from being run with `--ignore-scripts`
         run: npm install --ignore-scripts
 
-      - name: Create destination directory
-        run: mkdir -p ${{ github.ref }}
+      - name: Create destination directories
+        run: mkdir -p builds/{dev,prod}
 
       - name: Build develop version
         run: |
           npm run build:dev
-          mv amp.zip ${{ github.ref }}/amp-dev.zip
+          mv amp.zip builds/dev/amp.zip
 
       - name: Build production version
         run: |
           npm run build:prod
-          mv amp.zip ${{ github.ref }}/amp.zip
+          mv amp.zip builds/prod/amp.zip
 
       - name: Retrieve branch name
         id: retrieve-branch-name
@@ -79,7 +79,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: amp-${{ steps.retrieve-branch-name.outputs.branch_name }}-${{ steps.retrieve-git-sha-8.outputs.sha8 }}
-          path: ${{ github.ref }}
+          path: builds
 
   deploy-to-gs:
     runs-on: ubuntu-latest
@@ -89,6 +89,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: amp-${{ needs.release-zip.outputs.branch-name }}-${{ needs.release-zip.outputs.git-sha-8 }}
+          path: builds
 
       - name: Setup Google Cloud SDK
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
@@ -97,7 +98,7 @@ jobs:
           service_account_key: ${{ secrets.GCS_APPLICATION_CREDENTIALS }}
 
       - name: Upload artifacts to bucket
-        run: gsutil cp -r amp*.zip gs://ampwp_github_artifacts/${{ github.ref }}
+        run: gsutil cp -r builds gs://ampwp_github_artifacts/${{ github.ref }}
 
   comment-on-pr:
     # Only run this job if it's a PR. One way to check for that is if `github.head_ref` is not empty.
@@ -128,5 +129,5 @@ jobs:
           issue-number: ${{ steps.get-pr-number.outputs.num }}
           body: |
             Plugin builds are ready :cook:!
-            - Download the development build [here](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/amp-dev.zip)
-            - Download the production build [here](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/amp.zip)
+            - Download the development build [here](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/dev/amp.zip)
+            - Download the production build [here](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/prod/amp.zip)
