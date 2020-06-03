@@ -59,16 +59,6 @@ class AMP_Template_Customizer {
 		$self->register_settings();
 		$self->register_ui();
 
-		/**
-		 * Fires when plugins should register settings for AMP.
-		 *
-		 * In practice the `customize_controls_enqueue_scripts` hook should be used instead.
-		 *
-		 * @since 0.4
-		 * @param WP_Customize_Manager $manager Manager.
-		 */
-		do_action( 'amp_customizer_enqueue_scripts', $self->wp_customize );
-
 		add_action( 'customize_controls_enqueue_scripts', [ $self, 'add_customizer_scripts' ] );
 		add_action( 'customize_controls_print_footer_scripts', [ $self, 'print_controls_templates' ] );
 		add_action( 'customize_preview_init', [ $self, 'init_preview' ] );
@@ -143,45 +133,57 @@ class AMP_Template_Customizer {
 	 * @since 0.6
 	 */
 	public function add_customizer_scripts() {
-		$asset_file   = AMP__DIR__ . '/assets/js/amp-customize-controls.asset.php';
-		$asset        = require $asset_file;
-		$dependencies = $asset['dependencies'];
-		$version      = $asset['version'];
+		if ( ! amp_is_canonical() ) {
+			$asset_file   = AMP__DIR__ . '/assets/js/amp-customize-controls.asset.php';
+			$asset        = require $asset_file;
+			$dependencies = $asset['dependencies'];
+			$version      = $asset['version'];
 
-		wp_enqueue_script(
-			'amp-customize-controls',
-			amp_get_asset_url( 'js/amp-customize-controls.js' ),
-			array_merge( $dependencies, [ 'jquery', 'customize-controls' ] ),
-			$version,
-			true
-		);
+			wp_enqueue_script(
+				'amp-customize-controls',
+				amp_get_asset_url( 'js/amp-customize-controls.js' ),
+				array_merge( $dependencies, [ 'jquery', 'customize-controls' ] ),
+				$version,
+				true
+			);
 
-		wp_add_inline_script(
-			'amp-customize-controls',
-			sprintf(
-				'ampCustomizeControls.boot( %s );',
-				wp_json_encode(
-					[
-						'queryVar' => amp_get_slug(),
-						'panelId'  => self::PANEL_ID,
-						'ampUrl'   => amp_admin_get_preview_permalink(),
-						'l10n'     => [
-							'unavailableMessage'  => __( 'AMP is not available for the page currently being previewed.', 'amp' ),
-							'unavailableLinkText' => __( 'Navigate to an AMP compatible page', 'amp' ),
-						],
-					]
+			wp_add_inline_script(
+				'amp-customize-controls',
+				sprintf(
+					'ampCustomizeControls.boot( %s );',
+					wp_json_encode(
+						[
+							'queryVar' => amp_get_slug(),
+							'panelId'  => self::PANEL_ID,
+							'ampUrl'   => amp_admin_get_preview_permalink(),
+							'l10n'     => [
+								'unavailableMessage'  => __( 'AMP is not available for the page currently being previewed.', 'amp' ),
+								'unavailableLinkText' => __( 'Navigate to an AMP compatible page', 'amp' ),
+							],
+						]
+					)
 				)
-			)
-		);
+			);
 
-		wp_enqueue_style(
-			'amp-customizer',
-			amp_get_asset_url( 'css/amp-customizer.css' ),
-			[],
-			AMP__VERSION
-		);
+			wp_enqueue_style(
+				'amp-customizer',
+				amp_get_asset_url( 'css/amp-customizer.css' ),
+				[],
+				AMP__VERSION
+			);
 
-		wp_styles()->add_data( 'amp-customizer', 'rtl', 'replace' );
+			wp_styles()->add_data( 'amp-customizer', 'rtl', 'replace' );
+		}
+
+		/**
+		 * Fires when plugins should register settings for AMP.
+		 *
+		 * In practice the `customize_controls_enqueue_scripts` hook should be used instead.
+		 *
+		 * @since 0.4
+		 * @param WP_Customize_Manager $manager Manager.
+		 */
+		do_action( 'amp_customizer_enqueue_scripts', $this->wp_customize );
 	}
 
 	/**

@@ -96,7 +96,7 @@ function amp_admin_get_preview_permalink() {
  */
 function amp_add_customizer_link() {
 	/** This filter is documented in includes/settings/class-amp-customizer-design-settings.php */
-	if ( ! apply_filters( 'amp_customizer_is_enabled', true ) || amp_is_canonical() ) {
+	if ( ! apply_filters( 'amp_customizer_is_enabled', true ) || current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 		return;
 	}
 

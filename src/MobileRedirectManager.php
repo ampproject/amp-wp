@@ -140,9 +140,9 @@ final class MobileRedirectManager {
 					location.replace( url.href );
 				}
 			} )(
-					<?php echo wp_json_encode( amp_get_slug() ); ?>,
-					<?php echo wp_json_encode( self::DISABLED_COOKIE_NAME ); ?>,
-					<?php echo '[' . implode( ',', array_map( 'wp_json_encode', self::get_user_agents() ) ) . ']'; ?>
+				<?php echo wp_json_encode( amp_get_slug() ); ?>,
+				<?php echo wp_json_encode( self::DISABLED_COOKIE_NAME ); ?>,
+				<?php echo wp_json_encode( self::get_user_agents() ); ?>
 			)
 		</script>
 		<?php

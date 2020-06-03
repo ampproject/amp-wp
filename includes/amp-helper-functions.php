@@ -317,7 +317,7 @@ function is_amp_available() {
 			__FUNCTION__,
 			esc_html(
 				sprintf(
-						/* translators: %1$s: function name, %2$s: the current action, %3$s: the wp action, %4$s: the WP_Query class, %5$s: the amp_skip_post() function */
+					/* translators: %1$s: function name, %2$s: the current action, %3$s: the wp action, %4$s: the WP_Query class, %5$s: the amp_skip_post() function */
 					__( '%1$s was called too early and so it will not work properly. WordPress is currently doing the "%2$s" action. Calling this function before the "%3$s" action means it will not have access to %4$s and the queried object to determine if it is an AMP response, thus neither the "%5$s" filter nor the AMP enabled toggle will be considered.', 'amp' ),
 					__FUNCTION__ . '()',
 					current_action(),
