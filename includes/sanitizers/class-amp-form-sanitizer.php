@@ -6,6 +6,9 @@
  * @since 0.7
  */
 
+use AmpProject\DevMode;
+use AmpProject\Dom\Document;
+
 /**
  * Class AMP_Form_Sanitizer
  *
@@ -35,7 +38,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 		/**
 		 * Node list.
 		 *
-		 * @var DOMNodeList $node
+		 * @var DOMNodeList $nodes
 		 */
 		$nodes     = $this->dom->getElementsByTagName( self::$tag );
 		$num_nodes = $nodes->length;
@@ -46,7 +49,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node = $nodes->item( $i );
-			if ( ! $node instanceof DOMElement || $this->has_dev_mode_exemption( $node ) ) {
+			if ( ! $node instanceof DOMElement || DevMode::hasExemptionForNode( $node ) ) {
 				continue;
 			}
 
@@ -192,23 +195,20 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param DOMElement $form The form node to check.
 	 */
 	public function ensure_response_message_elements( $form ) {
-		/**
-		 * Parent node.
-		 *
-		 * @var DOMElement $parent
-		 */
 		$elements = [
 			'submit-error'   => null,
 			'submit-success' => null,
 			'submitting'     => null,
 		];
 
-		$templates = $form->getElementsByTagName( 'template' );
-		for ( $i = $templates->length - 1; $i >= 0; $i-- ) {
-			$parent = $templates->item( $i )->parentNode;
-			foreach ( array_keys( $elements ) as $attribute ) {
-				if ( $parent->hasAttribute( $attribute ) ) {
-					$elements[ $attribute ] = $parent;
+		$templates = $this->dom->xpath->query( Document::XPATH_MUSTACHE_TEMPLATE_ELEMENTS_QUERY, $form );
+		foreach ( $templates as $template ) {
+			$parent = $template->parentNode;
+			if ( $parent instanceof DOMElement ) {
+				foreach ( array_keys( $elements ) as $attribute ) {
+					if ( $parent->hasAttribute( $attribute ) ) {
+						$elements[ $attribute ] = $parent;
+					}
 				}
 			}
 		}

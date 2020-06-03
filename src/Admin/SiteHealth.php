@@ -2,14 +2,16 @@
 /**
  * Class SiteHealth.
  *
- * @package Amp\AmpWP
+ * @package AmpProject\AmpWP
  */
 
-namespace Amp\AmpWP\Admin;
+namespace AmpProject\AmpWP\Admin;
 
 use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AMP_Post_Type_Support;
+use AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching;
+use AmpProject\AmpWP\Option;
 
 /**
  * Class SiteHealth
@@ -27,6 +29,9 @@ final class SiteHealth {
 		add_filter( 'site_status_tests', [ $this, 'add_tests' ] );
 		add_filter( 'debug_information', [ $this, 'add_debug_information' ] );
 		add_filter( 'site_status_test_php_modules', [ $this, 'add_extensions' ] );
+		add_action( 'admin_print_styles', [ $this, 'add_styles' ] );
+
+		( new ReenableCssTransientCachingAjaxAction() )->register();
 	}
 
 	/**
@@ -44,12 +49,39 @@ final class SiteHealth {
 			'label' => esc_html__( 'cURL multi functions', 'amp' ),
 			'test'  => [ $this, 'curl_multi_functions' ],
 		];
-		$tests['direct']['amp_icu_version']             = [
-			'label' => esc_html__( 'ICU version', 'amp' ),
-			'test'  => [ $this, 'icu_version' ],
+
+		if ( $this->is_intl_extension_needed() ) {
+			$tests['direct']['amp_icu_version'] = [
+				'label' => esc_html__( 'ICU version', 'amp' ),
+				'test'  => [ $this, 'icu_version' ],
+			];
+		}
+
+		$tests['direct']['amp_css_transient_caching'] = [
+			'label' => esc_html__( 'Transient caching of stylesheets', 'amp' ),
+			'test'  => [ $this, 'css_transient_caching' ],
+		];
+		$tests['direct']['amp_xdebug_extension']      = [
+			'label' => esc_html__( 'Xdebug extension', 'amp' ),
+			'test'  => [ $this, 'xdebug_extension' ],
 		];
 
 		return $tests;
+	}
+
+	/**
+	 * Get action HTML for the link to learn more about persistent object caching.
+	 *
+	 * @return string HTML.
+	 */
+	private function get_persistent_object_cache_learn_more_action() {
+		return sprintf(
+			'<p><a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
+			esc_url( 'https://make.wordpress.org/hosting/handbook/handbook/performance/#object-cache' ),
+			esc_html__( 'Learn more about persistent object caching', 'amp' ),
+			/* translators: The accessibility text. */
+			esc_html__( '(opens in a new tab)', 'amp' )
+		);
 	}
 
 	/**
@@ -64,34 +96,23 @@ final class SiteHealth {
 				'label' => esc_html__( 'AMP', 'amp' ),
 				'color' => $is_using_object_cache ? 'green' : 'orange',
 			],
-			'description' => esc_html__( 'The AMP plugin performs at its best when persistent object cache is enabled. Object caching is used to more effectively store image dimensions and parsed CSS. It also allows for post-processor caching to be used.', 'amp' ),
-			'actions'     => sprintf(
-				'<p><a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
-				'https://codex.wordpress.org/Class_Reference/WP_Object_Cache#Persistent_Caching',
-				esc_html__( 'Learn more about persistent object caching', 'amp' ),
-				/* translators: The accessibility text. */
-				esc_html__( '(opens in a new tab)', 'amp' )
-			),
+			'description' => esc_html__( 'The AMP plugin performs at its best when persistent object cache is enabled. Object caching is used to more effectively store image dimensions and parsed CSS.', 'amp' ),
+			'actions'     => $this->get_persistent_object_cache_learn_more_action(),
 			'test'        => 'amp_persistent_object_cache',
 		];
 
-		if ( $is_using_object_cache ) {
-			return array_merge(
-				$data,
-				[
-					'status' => 'good',
-					'label'  => esc_html__( 'Persistent object caching is enabled', 'amp' ),
-				]
-			);
-		} else {
-			return array_merge(
-				$data,
-				[
-					'status' => 'recommended',
-					'label'  => esc_html__( 'Persistent object caching is not enabled', 'amp' ),
-				]
-			);
-		}
+		$status = $is_using_object_cache ? 'good' : 'recommended';
+		$label  = $is_using_object_cache
+			? __( 'Persistent object caching is enabled', 'amp' )
+			: __( 'Persistent object caching is not enabled', 'amp' );
+
+		return array_merge(
+			$data,
+			[
+				'status' => $status,
+				'label'  => esc_html( $label ),
+			]
+		);
 	}
 
 	/**
@@ -163,15 +184,15 @@ final class SiteHealth {
 					),
 				]
 			);
-		} else {
-			return array_merge(
-				$data,
-				[
-					'status' => 'good',
-					'label'  => esc_html__( 'The cURL multi functions are defined', 'amp' ),
-				]
-			);
 		}
+
+		return array_merge(
+			$data,
+			[
+				'status' => 'good',
+				'label'  => esc_html__( 'The cURL multi functions are defined', 'amp' ),
+			]
+		);
 	}
 
 	/**
@@ -207,33 +228,121 @@ final class SiteHealth {
 		];
 
 		if ( ! defined( 'INTL_ICU_VERSION' ) ) {
-			return array_merge(
-				$data,
-				[
-					'status' => 'recommended',
-					/* translators: %s: the constant for the ICU version */
-					'label'  => esc_html( sprintf( __( 'The ICU version is unknown, as the constant %s is not defined', 'amp' ), 'INTL_ICU_VERSION' ) ),
-				]
-			);
-		}
-
-		if ( ! $is_proper_version ) {
-			return array_merge(
-				$data,
-				[
-					'status' => 'recommended',
-					/* translators: %s: the ICU version */
-					'label'  => esc_html( sprintf( __( 'The version of ICU (v%s) is out of date', 'amp' ), $icu_version ) ),
-				]
-			);
+			$status = 'recommended';
+			/* translators: %s: the constant for the ICU version */
+			$label = sprintf( __( 'The ICU version is unknown, as the constant %s is not defined', 'amp' ), 'INTL_ICU_VERSION' );
+		} elseif ( ! $is_proper_version ) {
+			$status = 'recommended';
+			/* translators: %s: the ICU version */
+			$label = sprintf( __( 'The version of ICU (v%s) is out of date', 'amp' ), $icu_version );
+		} else {
+			$status = 'good';
+			/* translators: %s: the ICU version */
+			$label = sprintf( __( 'The version of ICU (v%s) looks good', 'amp' ), $icu_version );
 		}
 
 		return array_merge(
 			$data,
 			[
-				'status' => 'good',
-				/* translators: %s the ICU version */
-				'label'  => esc_html( sprintf( __( 'The version of ICU (v%s) looks good', 'amp' ), $icu_version ) ),
+				'status' => $status,
+				'label'  => esc_html( $label ),
+			]
+		);
+	}
+
+	/**
+	 * Gets the test result data for whether transient caching for stylesheets was disabled.
+	 *
+	 * @return array The test data.
+	 */
+	public function css_transient_caching() {
+		$disabled = AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
+
+		if ( wp_using_ext_object_cache() ) {
+			$status = 'good';
+			$color  = 'blue';
+			$label  = __( 'Transient caching of parsed stylesheets is not used due to external object cache', 'amp' );
+		} elseif ( $disabled ) {
+			$status = 'recommended';
+			$color  = 'orange';
+			$label  = __( 'Transient caching of parsed stylesheets is disabled', 'amp' );
+		} else {
+			$status = 'good';
+			$color  = 'green';
+			$label  = __( 'Transient caching of parsed stylesheets is enabled', 'amp' );
+		}
+
+		$data = [
+			'badge'       => [
+				'label' => esc_html__( 'AMP', 'amp' ),
+				'color' => $color,
+			],
+			'description' => wp_kses(
+				sprintf(
+					/* translators: %1$s is wp_options table, %2$s is the amp_css_transient_monitoring_threshold filter, and %3$s is the amp_css_transient_monitoring_sampling_range filter */
+					__( 'On sites which have highly variable CSS and are not using a persistent object cache, the transient caching of parsed stylesheets may be automatically disabled in order to prevent a site from filling up its <code>%1$s</code> table with too many transients. Examples of highly variable CSS include dynamically-generated style rules with selectors referring to user IDs or elements being given randomized background colors. There are two filters which may be used to configure the CSS transient monitoring: <code>%2$s</code> and <code>%3$s</code>.', 'amp' ),
+					'wp_options',
+					'amp_css_transient_monitoring_threshold',
+					'amp_css_transient_monitoring_sampling_range'
+				),
+				[
+					'code' => [],
+				]
+			),
+			'test'        => 'amp_css_transient_caching',
+			'status'      => $status,
+			'label'       => esc_html( $label ),
+		];
+
+		if ( $disabled ) {
+			$data['description'] .= ' ' . esc_html__( 'If you have identified and eliminated the cause of the variable CSS, please re-enable transient caching to reduce the amount of CSS processing required to generate AMP pages.', 'amp' );
+			$data['actions']      = sprintf(
+				'<p><a class="button reenable-css-transient-caching" href="#">%s</a><span class="dashicons dashicons-yes success-icon"></span><span class="dashicons dashicons-no failure-icon"></span><span class="success-text">%s</span><span class="failure-text">%s</span></p>',
+				esc_html__( 'Re-enable transient caching', 'amp' ),
+				esc_html__( 'Reload the page to refresh the diagnostic check.', 'amp' ),
+				esc_html__( 'The operation failed, please reload the page and try again.', 'amp' )
+			);
+			$data['actions']     .= $this->get_persistent_object_cache_learn_more_action();
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Gets the test result data for whether the Xdebug extension is loaded.
+	 *
+	 * @since 1.5
+	 *
+	 * @return array The test data.
+	 */
+	public function xdebug_extension() {
+		$status      = 'good';
+		$color       = 'green';
+		$description = esc_html__( 'The Xdebug extension can cause some of the AMP plugin&#8217;s processes to time out depending on your system resources and configuration. It should not be enabled on a live site (production environment).', 'amp' );
+
+		if ( extension_loaded( 'xdebug' ) ) {
+			$label = esc_html__( 'Your server currently has the Xdebug PHP extension loaded', 'amp' );
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				/* translators: %s: the WP_DEBUG constant */
+				$description .= ' ' . sprintf( esc_html__( 'Nevertheless, %s is enabled which suggests that this site is currently under development or is undergoing debugging.', 'amp' ), '<code>WP_DEBUG</code>' );
+			} else {
+				$status = 'recommended';
+				$color  = 'orange';
+				/* translators: %s: the WP_DEBUG constant */
+				$description .= ' ' . sprintf( esc_html__( 'Please deactivate Xdebug to improve performance. Otherwise, you may enable %s to indicate that this site is currently under development or is undergoing debugging.', 'amp' ), '<code>WP_DEBUG</code>' );
+			}
+		} else {
+			$label = esc_html__( 'Your server currently does not have the Xdebug PHP extension loaded', 'amp' );
+		}
+
+		return array_merge(
+			compact( 'status', 'label', 'description' ),
+			[
+				'badge' => [
+					'label' => esc_html__( 'AMP', 'amp' ),
+					'color' => $color,
+				],
+				'test'  => 'amp_xdebug_extension',
 			]
 		);
 	}
@@ -257,11 +366,6 @@ final class SiteHealth {
 							'value'   => AMP_Theme_Support::get_support_mode(),
 							'private' => false,
 						],
-						'amp_experiences_enabled' => [
-							'label'   => esc_html__( 'AMP experiences enabled', 'amp' ),
-							'value'   => $this->get_experiences_enabled(),
-							'private' => false,
-						],
 						'amp_templates_enabled'   => [
 							'label'   => esc_html__( 'Templates enabled', 'amp' ),
 							'value'   => $this->get_supported_templates(),
@@ -272,6 +376,31 @@ final class SiteHealth {
 							'value'   => $this->get_serve_all_templates(),
 							'private' => false,
 						],
+						'amp_css_transient_caching_disabled' => [
+							'label'   => esc_html__( 'Transient caching for stylesheets disabled', 'amp' ),
+							'value'   => $this->get_css_transient_caching_disabled(),
+							'private' => false,
+						],
+						'amp_css_transient_caching_threshold' => [
+							'label'   => esc_html__( 'Threshold for monitoring stylesheet caching', 'amp' ),
+							'value'   => $this->get_css_transient_caching_threshold(),
+							'private' => false,
+						],
+						'amp_css_transient_caching_sampling_range' => [
+							'label'   => esc_html__( 'Sampling range for monitoring stylesheet caching', 'amp' ),
+							'value'   => $this->get_css_transient_caching_sampling_range(),
+							'private' => false,
+						],
+						'amp_css_transient_caching_transient_count' => [
+							'label'   => esc_html__( 'Number of stylesheet transient cache entries', 'amp' ),
+							'value'   => MonitorCssTransientCaching::query_css_transient_count(),
+							'private' => false,
+						],
+						'amp_css_transient_caching_time_series' => [
+							'label'   => esc_html__( 'Calculated time series for monitoring the stylesheet caching', 'amp' ),
+							'value'   => MonitorCssTransientCaching::get_time_series(),
+							'private' => false,
+						],
 					],
 				],
 			]
@@ -279,26 +408,12 @@ final class SiteHealth {
 	}
 
 	/**
-	 * Gets the AMP experiences that are enabled.
-	 *
-	 * @return string The experiences, in a comma-separated string.
-	 */
-	public function get_experiences_enabled() {
-		$experiences = AMP_Options_Manager::get_option( 'experiences' );
-		if ( empty( $experiences ) ) {
-			return esc_html__( 'No experience enabled', 'amp' );
-		}
-
-		return implode( ', ', $experiences );
-	}
-
-	/**
 	 * Gets the templates that support AMP.
 	 *
 	 * @return string The supported template(s), in a comma-separated string.
 	 */
-	public function get_supported_templates() {
-		$possible_post_types = AMP_Options_Manager::get_option( 'supported_post_types' );
+	private function get_supported_templates() {
+		$possible_post_types = AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES );
 
 		// Get the supported content types, like 'post'.
 		$supported_templates = array_filter(
@@ -308,7 +423,7 @@ final class SiteHealth {
 				return (
 					post_type_supports( $post_type->name, AMP_Post_Type_Support::SLUG )
 					||
-					( ! AMP_Options_Manager::is_website_experience_enabled() && in_array( $post_type->name, $possible_post_types, true ) )
+					in_array( $post_type->name, $possible_post_types, true )
 				);
 			}
 		);
@@ -344,44 +459,151 @@ final class SiteHealth {
 	 *
 	 * @return string The value of the option to serve all templates.
 	 */
-	public function get_serve_all_templates() {
+	private function get_serve_all_templates() {
 		if ( AMP_Theme_Support::READER_MODE_SLUG === AMP_Theme_Support::get_support_mode() ) {
 			return esc_html__( 'This option does not apply to Reader mode.', 'amp' );
 		}
 
 		// Not translated, as this is debugging information, and it could be confusing getting this from different languages.
-		return AMP_Options_Manager::get_option( 'all_templates_supported' ) ? 'true' : 'false';
+		return AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) ? 'true' : 'false';
+	}
+
+	/**
+	 * Gets whether the transient caching of stylesheets was disabled.
+	 *
+	 * @return string Whether the transient caching of stylesheets was disabled.
+	 */
+	private function get_css_transient_caching_disabled() {
+		if ( wp_using_ext_object_cache() ) {
+			return 'n/a';
+		}
+
+		$disabled = AMP_Options_Manager::get_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
+
+		return $disabled ? 'true' : 'false';
+	}
+
+	/**
+	 * Gets the threshold being used to when monitoring the transient caching of stylesheets.
+	 *
+	 * @return string Threshold for the transient caching of stylesheets.
+	 */
+	private function get_css_transient_caching_threshold() {
+		/** This filter is documented in src/BackgroundTask/MonitorCssTransientCaching.php */
+		$threshold = (float) apply_filters(
+			'amp_css_transient_monitoring_threshold',
+			MonitorCssTransientCaching::DEFAULT_THRESHOLD
+		);
+
+		return "{$threshold} transients per day";
+	}
+
+	/**
+	 * Gets the sampling range being used to when monitoring the transient caching of stylesheets.
+	 *
+	 * @return string Sampling range for the transient caching of stylesheets.
+	 */
+	private function get_css_transient_caching_sampling_range() {
+		/** This filter is documented in src/BackgroundTask/MonitorCssTransientCaching.php */
+		$sampling_range = (float) apply_filters(
+			'amp_css_transient_monitoring_sampling_range',
+			MonitorCssTransientCaching::DEFAULT_SAMPLING_RANGE
+		);
+
+		return "{$sampling_range} days";
 	}
 
 	/**
 	 * Adds suggested PHP extensions to those that Core depends on.
 	 *
-	 * @param array $extensions The existing extensions from Core.
+	 * @param array $core_extensions The existing extensions from Core.
 	 * @return array The extensions, including those for AMP.
 	 */
-	public function add_extensions( $extensions ) {
-		return array_merge(
-			$extensions,
+	public function add_extensions( $core_extensions ) {
+		$extensions = [
+			'json'     => [
+				'extension' => 'json',
+				'function'  => 'json_encode',
+				'required'  => false,
+			],
+			'mbstring' => [
+				'extension' => 'mbstring',
+				'required'  => false,
+			],
+			'zip'      => [
+				'extension' => 'zip',
+				'required'  => false,
+			],
+		];
+
+		if ( $this->is_intl_extension_needed() ) {
+			$extensions['intl'] = [
+				'extension' => 'intl',
+				'function'  => 'idn_to_utf8',
+				'required'  => false,
+			];
+		}
+
+		return array_merge( $core_extensions, $extensions );
+	}
+
+	/**
+	 * Add needed styles for the Site Health integration.
+	 */
+	public function add_styles() {
+		echo '
+			<style>
+				.wp-core-ui .button.reenable-css-transient-caching ~ .success-icon,
+				.wp-core-ui .button.reenable-css-transient-caching ~ .success-text,
+				.wp-core-ui .button.reenable-css-transient-caching ~ .failure-icon,
+				.wp-core-ui .button.reenable-css-transient-caching ~ .failure-text {
+					display: none;
+				}
+
+				.wp-core-ui .button.reenable-css-transient-caching ~ .success-icon,
+				.wp-core-ui .button.reenable-css-transient-caching ~ .failure-icon {
+					font-size: xx-large;
+					padding-right: 1rem;
+				}
+
+				.wp-core-ui .button.reenable-css-transient-caching.ajax-success ~ .success-icon,
+				.wp-core-ui .button.reenable-css-transient-caching.ajax-success ~ .success-text,
+				.wp-core-ui .button.reenable-css-transient-caching.ajax-failure ~ .failure-icon,
+				.wp-core-ui .button.reenable-css-transient-caching.ajax-failure ~ .failure-text {
+					display: inline-block;
+				}
+
+				.wp-core-ui .button.reenable-css-transient-caching.ajax-success ~ .success-icon {
+					color: #46b450;
+				}
+
+				.wp-core-ui .button.reenable-css-transient-caching.ajax-failure ~ .failure-icon {
+					color: #dc3232;
+				}
+			</style>
+		';
+	}
+
+	/**
+	 * Determine if the `intl` extension is needed.
+	 *
+	 * @return bool True if the `intl` extension is needed, otherwise false.
+	 */
+	private function is_intl_extension_needed() {
+		// Publisher's own origins.
+		$domains = array_unique(
 			[
-				'intl'     => [
-					'extension' => 'intl',
-					'function'  => 'idn_to_utf8',
-					'required'  => false,
-				],
-				'json'     => [
-					'extension' => 'json',
-					'function'  => 'json_encode',
-					'required'  => false,
-				],
-				'mbstring' => [
-					'extension' => 'mbstring',
-					'required'  => false,
-				],
-				'zip'      => [
-					'extension' => 'zip',
-					'required'  => false,
-				],
+				wp_parse_url( site_url(), PHP_URL_HOST ),
+				wp_parse_url( home_url(), PHP_URL_HOST ),
 			]
 		);
+
+		foreach ( $domains as $domain ) {
+			if ( preg_match( '/(^|\.)xn--/', $domain ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

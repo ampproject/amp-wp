@@ -41,7 +41,7 @@ export default createHigherOrderComponent(
 
 			const actions = [
 				{
-					label: __( 'Remove Element', 'amp' ),
+					label: __( 'Remove Block', 'amp' ),
 					onClick: () => onReplace( [] ),
 				},
 			];
@@ -56,6 +56,7 @@ export default createHigherOrderComponent(
 						<details className="amp-block-validation-errors">
 							<summary className="amp-block-validation-errors__summary">
 								{ sprintf(
+									/* translators: %s is the number of issues */
 									_n(
 										'There is %s issue from AMP validation.',
 										'There are %s issues from AMP validation.',

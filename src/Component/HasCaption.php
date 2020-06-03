@@ -2,10 +2,10 @@
 /**
  * Interface HasCaption
  *
- * @package Amp\AmpWP
+ * @package AmpProject\AmpWP
  */
 
-namespace Amp\AmpWP\Component;
+namespace AmpProject\AmpWP\Component;
 
 /**
  * Interface HasCaption
@@ -14,6 +14,7 @@ namespace Amp\AmpWP\Component;
  * @since 1.5.0
  */
 interface HasCaption {
+
 	/**
 	 * Gets the caption.
 	 *

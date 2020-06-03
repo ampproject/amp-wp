@@ -5,7 +5,9 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Tests\PrivateAccess;
+use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\PrivateAccess;
 
 /**
  * Tests for Test_AMP_CLI_Validation_Command class.
@@ -14,6 +16,7 @@ use Amp\AmpWP\Tests\PrivateAccess;
  */
 class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 
+	use AssertContainsCompatibility;
 	use PrivateAccess;
 
 	/**
@@ -160,7 +163,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		$custom_taxonomy = 'foo_custom_taxonomy';
 		register_taxonomy( $custom_taxonomy, 'post' );
 		$taxonomies_to_test = [ $custom_taxonomy, 'category', 'post_tag' ];
-		AMP_Options_Manager::update_option( 'supported_templates', [ 'is_category', 'is_tag', sprintf( 'is_tax[%s]', $custom_taxonomy ) ] );
+		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, [ 'is_category', 'is_tag', sprintf( 'is_tax[%s]', $custom_taxonomy ) ] );
 
 		// When these templates are not unchecked in the 'AMP Settings' UI, these should be supported.
 		foreach ( $taxonomies_to_test as $taxonomy ) {
@@ -168,8 +171,8 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		}
 
 		// When the user has not checked the boxes for 'Categories' and 'Tags,' this should be false.
-		AMP_Options_Manager::update_option( 'supported_templates', [ 'is_author' ] );
-		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, [ 'is_author' ] );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		foreach ( $taxonomies_to_test as $taxonomy ) {
 			$this->assertFalse( $this->call_private_method( $this->validation, 'does_taxonomy_support_amp', [ $taxonomy ] ) );
 		}
@@ -181,12 +184,12 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		}
 		$this->validation->force_crawl_urls = false;
 
-		// When the user has checked the 'all_templates_supported' box, this should always be true.
-		AMP_Options_Manager::update_option( 'all_templates_supported', true );
+		// When the user has checked the Option::ALL_TEMPLATES_SUPPORTED box, this should always be true.
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, true );
 		foreach ( $taxonomies_to_test as $taxonomy ) {
 			$this->assertTrue( $this->call_private_method( $this->validation, 'does_taxonomy_support_amp', [ $taxonomy ] ) );
 		}
-		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 
 		/*
 		 * If the user passed allowed conditionals to the WP-CLI command like wp amp validate-site --include=is_category,is_tag
@@ -209,12 +212,12 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		$author_conditional = 'is_author';
 		$search_conditional = 'is_search';
 
-		AMP_Options_Manager::update_option( 'supported_templates', [ $author_conditional ] );
-		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, [ $author_conditional ] );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		$this->assertTrue( $this->call_private_method( $this->validation, 'is_template_supported', [ $author_conditional ] ) );
 		$this->assertFalse( $this->call_private_method( $this->validation, 'is_template_supported', [ $search_conditional ] ) );
 
-		AMP_Options_Manager::update_option( 'supported_templates', [ $search_conditional ] );
+		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, [ $search_conditional ] );
 		$this->assertTrue( $this->call_private_method( $this->validation, 'is_template_supported', [ $search_conditional ] ) );
 		$this->assertFalse( $this->call_private_method( $this->validation, 'is_template_supported', [ $author_conditional ] ) );
 	}
@@ -374,7 +377,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		$year = gmdate( 'Y' );
 
 		// Normally, this should return the date page, unless the user has opted out of that template.
-		$this->assertContains( $year, $this->call_private_method( $this->validation, 'get_date_page' ) );
+		$this->assertStringContains( $year, $this->call_private_method( $this->validation, 'get_date_page' ) );
 
 		// If $include_conditionals is set and does not have is_date, this should not return a URL.
 		$this->validation->include_conditionals = [ 'is_search' ];
@@ -383,7 +386,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		// If $include_conditionals has is_date, this should return a URL.
 		$this->validation->include_conditionals = [ 'is_date' ];
 		$parsed_page_url                        = wp_parse_url( $this->call_private_method( $this->validation, 'get_date_page' ) );
-		$this->assertContains( $year, $parsed_page_url['query'] );
+		$this->assertStringContains( $year, $parsed_page_url['query'] );
 		$this->validation->include_conditionals = [];
 	}
 

@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Dom\Document;
+use AmpProject\Dom\Document;
 
 /**
  * Class AMP_Content_Sanitizer
@@ -22,9 +22,9 @@ class AMP_Content_Sanitizer {
 	 * @codeCoverageIgnore
 	 * @deprecated Since 1.0
 	 *
-	 * @param string   $content HTML content string or DOM document.
-	 * @param string[] $sanitizer_classes Sanitizer classes.
-	 * @param array    $global_args       Global args.
+	 * @param string  $content HTML content string or DOM document.
+	 * @param array[] $sanitizer_classes Sanitizers, with keys as class names and values as arguments.
+	 * @param array   $global_args       Global args.
 	 * @return array Tuple containing sanitized HTML, scripts array, and styles array (or stylesheets, if return_styles=false is passed in $global_args).
 	 */
 	public static function sanitize( $content, array $sanitizer_classes, $global_args = [] ) {
@@ -49,7 +49,7 @@ class AMP_Content_Sanitizer {
 	 * @since 0.7
 	 *
 	 * @param Document $dom               HTML document.
-	 * @param string[] $sanitizer_classes Sanitizer classes.
+	 * @param array[]  $sanitizer_classes Sanitizers, with keys as class names and values as arguments.
 	 * @param array    $args              Global args passed into sanitizers.
 	 * @return array {
 	 *     Scripts and stylesheets needed by sanitizers.

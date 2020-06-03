@@ -5,7 +5,8 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Dom\Document;
+use AmpProject\AmpWP\Icon;
+use AmpProject\Dom\Document;
 
 /**
  * Class AMP_Validation_Manager
@@ -212,7 +213,7 @@ class AMP_Validation_Manager {
 		AMP_Validation_Error_Taxonomy::register();
 
 		// Short-circuit if AMP is not supported as only the post types should be available.
-		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) && ! AMP_Options_Manager::is_stories_experience_enabled() ) {
+		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 			return;
 		}
 
@@ -222,7 +223,7 @@ class AMP_Validation_Manager {
 		add_action( 'rest_api_init', [ __CLASS__, 'add_rest_api_fields' ] );
 
 		// Add actions for checking theme support is present to determine plugin compatibility and show validation links in the admin bar.
-		if ( AMP_Options_Manager::is_website_experience_enabled() && current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 			// Actions and filters involved in validation.
 			add_action(
 				'activate_plugin',
@@ -280,13 +281,8 @@ class AMP_Validation_Manager {
 			return false;
 		}
 
-		// Story post type always supports validation.
-		if ( AMP_Story_Post_Type::POST_TYPE_SLUG === $post->post_type ) {
-			return AMP_Options_Manager::is_stories_experience_enabled();
-		}
-
-		// Prevent doing post validation in Reader mode or if the Website experience is not enabled.
-		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) || ! AMP_Options_Manager::is_website_experience_enabled() ) {
+		// Prevent doing post validation in Reader mode.
+		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 			return false;
 		}
 
@@ -428,20 +424,28 @@ class AMP_Validation_Manager {
 
 		// Construct the parent admin bar item.
 		if ( is_amp_endpoint() ) {
-			$icon = '&#x2705;'; // WHITE HEAVY CHECK MARK. This will get overridden in AMP_Validation_Manager::finalize_validation() if there are unaccepted errors.
+			$icon = Icon::valid(); // This will get overridden in AMP_Validation_Manager::finalize_validation() if there are unaccepted errors.
 			$href = $validate_url;
 		} elseif ( $error_count > 0 ) {
-			$icon = '&#x274C;'; // CROSS MARK.
+			$icon = Icon::invalid();
 			$href = $validate_url;
 		} else {
-			$icon = '&#x1F517;'; // LINK SYMBOL.
+			$icon = Icon::link();
 			$href = $amp_url;
 		}
+
+		$icon_html = $icon->to_html(
+			[
+				'id'    => 'amp-admin-bar-item-status-icon',
+				'class' => 'ab-icon',
+			]
+		);
+
 		$parent = [
 			'id'    => 'amp',
 			'title' => sprintf(
-				'<span id="amp-admin-bar-item-status-icon">%s</span> %s',
-				$icon,
+				'%s %s',
+				$icon_html,
 				esc_html__( 'AMP', 'amp' )
 			),
 			'href'  => esc_url( $href ),
@@ -507,7 +511,7 @@ class AMP_Validation_Manager {
 			$paired_browsing_item = [
 				'parent' => 'amp',
 				'id'     => 'amp-paired-browsing',
-				'title'  => esc_html__( 'Paired browsing', 'amp' ),
+				'title'  => esc_html__( 'Paired Browsing', 'amp' ),
 				'href'   => AMP_Theme_Support::get_paired_browsing_url(),
 			];
 
@@ -596,6 +600,12 @@ class AMP_Validation_Manager {
 		if ( true === $should_validate_response ) {
 			self::add_validation_error_sourcing();
 			self::$is_validate_request = true;
+
+			if ( '1' === (string) ini_get( 'display_errors' ) ) {
+				// Suppress the display of fatal errors that may arise during validation so that they will not be counted
+				// as actual validation errors.
+				ini_set( 'display_errors', 0 ); // phpcs:ignore WordPress.PHP.IniSet.display_errors_Blacklisted
+			}
 		} else {
 			self::$is_validate_request = false;
 
@@ -731,7 +741,7 @@ class AMP_Validation_Manager {
 						[
 							'invalid_url_post' => $invalid_url_post_id,
 						],
-						wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets' ] )
+						wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets', 'php_fatal_error' ] )
 					)
 				);
 
@@ -751,23 +761,8 @@ class AMP_Validation_Manager {
 	 * @return void
 	 */
 	public static function add_rest_api_fields() {
-		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-			$object_types = [ AMP_Story_Post_Type::POST_TYPE_SLUG ]; // Eventually validation should be done in Reader mode as well, but for now, limit to stories.
-		} elseif ( amp_is_canonical() ) {
-			$object_types = get_post_types_by_support( 'editor' ); // @todo Shouldn't this actually only be those with 'amp' support, or if if all_templates_supported?
-		} else {
-			$object_types = array_intersect(
-				get_post_types_by_support( 'amp' ),
-				get_post_types(
-					[
-						'show_in_rest' => true,
-					]
-				)
-			);
-		}
-
 		register_rest_field(
-			$object_types,
+			AMP_Post_Type_Support::get_post_types_for_rest_api(),
 			self::VALIDITY_REST_FIELD_NAME,
 			[
 				'get_callback' => [ __CLASS__, 'get_amp_validity_rest_field' ],
@@ -821,6 +816,7 @@ class AMP_Validation_Manager {
 			foreach ( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $validation_status_post ) as $result ) {
 				$field['results'][] = [
 					'sanitized'   => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $result['status'],
+					'title'       => AMP_Validation_Error_Taxonomy::get_error_title_from_code( $result['data'] ),
 					'error'       => $result['data'],
 					'status'      => $result['status'],
 					'term_status' => $result['term_status'],
@@ -1137,7 +1133,7 @@ class AMP_Validation_Manager {
 	 * }
 	 */
 	public static function locate_sources( DOMNode $node ) {
-		$dom      = Document::from_node( $node );
+		$dom      = Document::fromNode( $node );
 		$comments = $dom->xpath->query( 'preceding::comment()[ starts-with( ., "amp-source-stack" ) or starts-with( ., "/amp-source-stack" ) ]', $node );
 		$sources  = [];
 		$matches  = [];
@@ -1227,11 +1223,6 @@ class AMP_Validation_Manager {
 			}
 		}
 
-		/**
-		 * Script dependency.
-		 *
-		 * @var _WP_Dependency $script_dependency
-		 */
 		if ( $node instanceof DOMElement && 'script' === $node->nodeName ) {
 			$enqueued_script_handles = array_intersect( wp_scripts()->done, array_keys( self::$enqueued_script_sources ) );
 
@@ -1871,6 +1862,32 @@ class AMP_Validation_Manager {
 	}
 
 	/**
+	 * Remove source stack comments which appear inside of script and style tags.
+	 *
+	 * HTML comments that appear inside of script and style elements get parsed as text content. AMP does not allow
+	 * such HTML comments to appear inside of CDATA, resulting in validation errors to be emitted when validating a
+	 * page that happens to have source stack comments output when generating JSON data (e.g. All in One SEO).
+	 * Additionally, when source stack comments are output inside of style elements the result can either be CSS
+	 * parse errors or incorrect stylesheet sizes being reported due to the presence of the source stack comments.
+	 * So to prevent these issues from occurring, the source stack comments need to be removed from the document prior
+	 * to sanitizing.
+	 *
+	 * @since 1.5
+	 *
+	 * @param Document $dom Document.
+	 */
+	public static function remove_illegal_source_stack_comments( Document $dom ) {
+		/**
+		 * Script element.
+		 *
+		 * @var DOMText $text
+		 */
+		foreach ( $dom->xpath->query( '//text()[ contains( ., "<!--amp-source-stack" ) ][ parent::script or parent::style ]' ) as $text ) {
+			$text->nodeValue = preg_replace( '#<!--/?amp-source-stack.*?-->#s', '', $text->nodeValue );
+		}
+	}
+
+	/**
 	 * Finalize validation.
 	 *
 	 * @see AMP_Validation_Manager::add_admin_bar_menu_items()
@@ -1922,7 +1939,7 @@ class AMP_Validation_Manager {
 
 		$admin_bar_icon = $dom->getElementById( 'amp-admin-bar-item-status-icon' );
 		if ( $admin_bar_icon ) {
-			$admin_bar_icon->firstChild->nodeValue = "\xE2\x9A\xA0\xEF\xB8\x8F"; // WARNING SIGN: U+26A0, U+FE0F.
+			$admin_bar_icon->setAttribute( 'class', 'ab-icon amp-icon ' . Icon::WARNING );
 		}
 	}
 
@@ -2028,7 +2045,7 @@ class AMP_Validation_Manager {
 				$validation_url,
 				[
 					'cookies'     => wp_unslash( $_COOKIE ), // Pass along cookies so private pages and drafts can be accessed.
-					'timeout'     => 15, // Increase from default of 5 to give extra time for the plugin to identify the sources for any given validation errors; also, response caching is disabled when validating.
+					'timeout'     => 15, // Increase from default of 5 to give extra time for the plugin to identify the sources for any given validation errors.
 					'sslverify'   => false,
 					'redirection' => 0, // Because we're in a loop for redirection.
 					'headers'     => [
@@ -2062,7 +2079,7 @@ class AMP_Validation_Manager {
 				break;
 			}
 
-			$validation_url = $location_header;
+			$validation_url = add_query_arg( $added_query_vars, $location_header );
 		}
 
 		if ( is_wp_error( $r ) ) {
@@ -2089,6 +2106,17 @@ class AMP_Validation_Manager {
 			array_keys( $added_query_vars ),
 			$validation_url
 		);
+
+		// Strip byte order mark (BOM).
+		while ( "\xEF\xBB\xBF" === substr( $response, 0, 3 ) ) {
+			$response = substr( $response, 3 );
+		}
+
+		// Strip any leading whitespace.
+		$response = ltrim( $response );
+
+		// Strip HTML comments that may have been injected at the end of the response (e.g. by a caching plugin).
+		$response = preg_replace( '/<!--.*?-->\s*$/s', '', $response );
 
 		if ( '' === $response ) {
 			return new WP_Error( 'white_screen_of_death' );
@@ -2227,6 +2255,13 @@ class AMP_Validation_Manager {
 						$support_forum_message,
 					]
 				);
+			case 'fatal_error_during_validation':
+				return $implode_non_empty_strings_with_spaces_and_sanitize(
+					[
+						esc_html__( 'A PHP fatal error occurred while validating the URL. This may indicate either a bug in theme/plugin code or it may be due to an issue in the AMP plugin itself. The error details appear below.', 'amp' ),
+						$support_forum_message,
+					]
+				);
 			case 'response_not_json':
 				return $implode_non_empty_strings_with_spaces_and_sanitize(
 					[
@@ -2327,11 +2362,7 @@ class AMP_Validation_Manager {
 		$should_enqueue_block_validation = (
 			self::has_cap()
 			&&
-			(
-				( AMP_Options_Manager::is_website_experience_enabled() && current_theme_supports( AMP_Theme_Support::SLUG ) )
-				||
-				( AMP_Options_Manager::is_stories_experience_enabled() && AMP_Story_Post_Type::POST_TYPE_SLUG === get_post_type() )
-			)
+			current_theme_supports( AMP_Theme_Support::SLUG )
 		);
 		if ( ! $should_enqueue_block_validation ) {
 			return;
@@ -2361,13 +2392,8 @@ class AMP_Validation_Manager {
 
 		wp_styles()->add_data( $slug, 'rtl', 'replace' );
 
-		$status_and_errors = AMP_Post_Meta_Box::get_status_and_errors( get_post() );
-		$enabled_status    = $status_and_errors['status'];
-
 		$data = [
 			'isSanitizationAutoAccepted' => self::is_sanitization_auto_accepted(),
-			'possibleStatuses'           => [ AMP_Post_Meta_Box::ENABLED_STATUS, AMP_Post_Meta_Box::DISABLED_STATUS ],
-			'defaultStatus'              => $enabled_status,
 		];
 
 		wp_localize_script(

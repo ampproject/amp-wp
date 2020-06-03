@@ -5,10 +5,14 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+
 /**
  * Class AMP_Link_Sanitizer_Test
  */
 class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/**
 	 * Data for test_amp_to_amp_navigation.
@@ -184,9 +188,9 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 			}
 
 			if ( $paired && $link_data['expected_amp'] ) {
-				$this->assertContains( '?' . amp_get_slug(), $element->getAttribute( 'href' ) );
+				$this->assertStringContains( '?' . amp_get_slug(), $element->getAttribute( 'href' ) );
 			} elseif ( ! $paired || ! $link_data['expected_amp'] ) {
-				$this->assertNotContains( '?' . amp_get_slug(), $element->getAttribute( 'href' ) );
+				$this->assertStringNotContains( '?' . amp_get_slug(), $element->getAttribute( 'href' ) );
 			}
 		}
 

@@ -5,15 +5,15 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Dom\Document;
-use Amp\AmpWP\Dom\ElementList;
-use Amp\AmpWP\Component\CaptionedSlide;
+use AmpProject\Dom\Document;
+use AmpProject\AmpWP\Dom\ElementList;
+use AmpProject\AmpWP\Component\CaptionedSlide;
 
 /**
  * Tests for AMP carousel and slide classes.
  *
- * @covers Amp\AmpWP\Dom\ElementList
- * @covers Amp\AmpWP\Component\CaptionedSlide
+ * @covers AmpProject\AmpWP\Dom\ElementList
+ * @covers AmpProject\AmpWP\Component\CaptionedSlide
  */
 class Test_DOM_Element_List extends \WP_UnitTestCase {
 
@@ -49,8 +49,8 @@ class Test_DOM_Element_List extends \WP_UnitTestCase {
 	 * Test adding images and counting them.
 	 *
 	 * @dataProvider get_dom_element_list_data
-	 * @covers Amp\AmpWP\Dom\ElementList::add()
-	 * @covers Amp\AmpWP\Dom\ElementList::count()
+	 * @covers AmpProject\AmpWP\Dom\ElementList::add()
+	 * @covers AmpProject\AmpWP\Dom\ElementList::count()
 	 *
 	 * @param DOMElement[] $images         The images to add.
 	 * @param string       $expected_count The expected count after adding the images.
@@ -68,8 +68,8 @@ class Test_DOM_Element_List extends \WP_UnitTestCase {
 	 * Test the iteration of the images.
 	 *
 	 * @dataProvider get_dom_element_list_data
-	 * @covers Amp\AmpWP\Dom\ElementList::add()
-	 * @covers Amp\AmpWP\Dom\ElementList::getIterator()
+	 * @covers AmpProject\AmpWP\Dom\ElementList::add()
+	 * @covers AmpProject\AmpWP\Dom\ElementList::getIterator()
 	 *
 	 * @param DOMElement[] $images         The images to add.
 	 * @param string       $expected_count The expected count after adding the images.
@@ -92,7 +92,7 @@ class Test_DOM_Element_List extends \WP_UnitTestCase {
 	/**
 	 * Test get_caption.
 	 *
-	 * @covers \Amp\AmpWP\Component\CaptionedSlide::get_caption()
+	 * @covers \AmpProject\AmpWP\Component\CaptionedSlide::get_caption()
 	 */
 	public function test_get_caption() {
 		$image_node      = AMP_DOM_Utils::create_node( new Document(), 'amp-img', [] );
@@ -104,7 +104,7 @@ class Test_DOM_Element_List extends \WP_UnitTestCase {
 	/**
 	 * Test get_slide_node.
 	 *
-	 * @covers \Amp\AmpWP\Component\CaptionedSlide::get_slide_node()
+	 * @covers \AmpProject\AmpWP\Component\CaptionedSlide::get_slide_node()
 	 */
 	public function test_get_slide_node() {
 		$image_node = AMP_DOM_Utils::create_node( new Document(), 'amp-img', [] );

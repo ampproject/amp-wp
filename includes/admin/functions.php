@@ -5,13 +5,13 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Admin\SiteHealth;
+use AmpProject\AmpWP\Admin\SiteHealth;
+use AmpProject\AmpWP\Option;
 
 /**
  * Obsolete constant for flagging when Customizer is opened for AMP.
  *
  * @deprecated
- * @var string
  */
 define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
 
@@ -23,7 +23,7 @@ define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
  * And this does not need to toggle between the AMP and normal display.
  */
 function amp_init_customizer() {
-	if ( ! AMP_Options_Manager::is_website_experience_enabled() || AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( 'theme_support' ) ) {
+	if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
 		return;
 	}
 
@@ -83,7 +83,7 @@ function amp_admin_get_preview_permalink() {
 	);
 
 	if ( empty( $post_ids ) ) {
-		return false;
+		return null;
 	}
 
 	$post_id = $post_ids[0];
@@ -196,11 +196,24 @@ function amp_bootstrap_admin() {
 }
 
 /**
- * Bootstrap the Story Templates needed in editor.
+ * Whether to activate the new onboarding feature.
  *
- * @since 1.?
+ * @return bool
  */
-function amp_story_templates() {
-	$story_templates = new AMP_Story_Templates();
-	$story_templates->init();
+function amp_should_use_new_onboarding() {
+	if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
+		return false;
+	}
+
+	// @todo Remove this check when the onboarding feature is released.
+	if ( isset( $_GET['amp-new-onboarding'] ) && '1' === $_GET['amp-new-onboarding'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return true;
+	}
+
+	// @todo Remove this check when the onboarding feature is released.
+	if ( defined( 'AMP_NEW_ONBOARDING' ) && AMP_NEW_ONBOARDING ) {
+		return true;
+	}
+
+	return false;
 }

@@ -166,5 +166,4 @@ class AMP_Scribd_Embed_Handler_Test extends WP_UnitTestCase {
 
 		$this->assertEquals( $expected, $scripts );
 	}
-
 }

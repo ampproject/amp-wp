@@ -2,13 +2,13 @@
 /**
  * Class Carousel.
  *
- * @package Amp\AmpWP
+ * @package AmpProject\AmpWP
  */
 
-namespace Amp\AmpWP\Component;
+namespace AmpProject\AmpWP\Component;
 
-use Amp\AmpWP\Dom\Document;
-use Amp\AmpWP\Dom\ElementList;
+use AmpProject\Dom\Document;
+use AmpProject\AmpWP\Dom\ElementList;
 use DOMElement;
 use AMP_DOM_Utils;
 
@@ -80,7 +80,7 @@ final class Carousel {
 		);
 
 		foreach ( $this->slides as $slide ) {
-			$slide_node      = $slide instanceof HasCaption ? $slide->get_slide_node() : $slide;
+			$slide_node      = $slide instanceof CaptionedSlide ? $slide->get_slide_node() : $slide;
 			$caption         = $slide instanceof HasCaption ? $slide->get_caption() : null;
 			$slide_container = AMP_DOM_Utils::create_node(
 				$this->dom,
@@ -144,7 +144,7 @@ final class Carousel {
 		$carousel_height  = 0;
 
 		foreach ( $this->slides as $slide ) {
-			$slide_node = $slide instanceof HasCaption ? $slide->get_slide_node() : $slide;
+			$slide_node = $slide instanceof CaptionedSlide ? $slide->get_slide_node() : $slide;
 			// Account for an <amp-img> that's wrapped in an <a>.
 			if ( ! $this->is_image_element( $slide_node ) && $slide_node->firstChild instanceof DOMElement && $this->is_image_element( $slide_node->firstChild ) ) {
 				$slide_node = $slide_node->firstChild;

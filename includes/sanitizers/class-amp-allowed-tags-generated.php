@@ -13,10 +13,110 @@
  */
 class AMP_Allowed_Tags_Generated {
 
-	private static $spec_file_revision = 961;
-	private static $minimum_validator_revision_required = 375;
+	private static $spec_file_revision = 1043;
+	private static $minimum_validator_revision_required = 455;
 
 	private static $descendant_tag_lists = array(
+		'amp-mega-menu-allowed-descendants' => array(
+			'a',
+			'amp-ad',
+			'amp-carousel',
+			'amp-embed',
+			'amp-img',
+			'amp-lightbox',
+			'amp-list',
+			'amp-video',
+			'b',
+			'br',
+			'button',
+			'col',
+			'colgroup',
+			'div',
+			'em',
+			'fieldset',
+			'form',
+			'h1',
+			'h2',
+			'h3',
+			'h4',
+			'h5',
+			'h6',
+			'i',
+			'input',
+			'label',
+			'li',
+			'mark',
+			'nav',
+			'ol',
+			'option',
+			'p',
+			'path',
+			'section',
+			'span',
+			'strike',
+			'strong',
+			'sub',
+			'sup',
+			'svg',
+			'table',
+			'tbody',
+			'td',
+			'template',
+			'th',
+			'time',
+			'title',
+			'tr',
+			'u',
+			'ul',
+		),
+		'amp-nested-menu-allowed-descendants' => array(
+			'a',
+			'amp-accordion',
+			'amp-img',
+			'amp-list',
+			'b',
+			'br',
+			'button',
+			'col',
+			'colgroup',
+			'div',
+			'em',
+			'fieldset',
+			'form',
+			'h1',
+			'h2',
+			'h3',
+			'h4',
+			'h5',
+			'h6',
+			'i',
+			'input',
+			'label',
+			'li',
+			'mark',
+			'nav',
+			'ol',
+			'option',
+			'p',
+			'path',
+			'section',
+			'span',
+			'strike',
+			'strong',
+			'sub',
+			'sup',
+			'svg',
+			'table',
+			'tbody',
+			'td',
+			'template',
+			'th',
+			'time',
+			'title',
+			'tr',
+			'u',
+			'ul',
+		),
 		'amp-story-bookend-allowed-descendants' => array(
 			'script',
 		),
@@ -107,6 +207,7 @@ class AMP_Allowed_Tags_Generated {
 			'small',
 			'solidcolor',
 			'span',
+			'stop',
 			'strong',
 			'sub',
 			'sup',
@@ -138,7 +239,6 @@ class AMP_Allowed_Tags_Generated {
 			'amp-experiment',
 			'amp-fit-text',
 			'amp-font',
-			'amp-gfycat',
 			'amp-gist',
 			'amp-google-vrview-image',
 			'amp-img',
@@ -146,6 +246,7 @@ class AMP_Allowed_Tags_Generated {
 			'amp-list',
 			'amp-live-list',
 			'amp-pixel',
+			'amp-state',
 			'amp-timeago',
 			'amp-twitter',
 			'amp-video',
@@ -234,6 +335,7 @@ class AMP_Allowed_Tags_Generated {
 			'solidcolor',
 			'source',
 			'span',
+			'stop',
 			'strong',
 			'sub',
 			'sup',
@@ -243,6 +345,7 @@ class AMP_Allowed_Tags_Generated {
 			'table',
 			'tbody',
 			'td',
+			'template',
 			'text',
 			'textpath',
 			'tfoot',
@@ -288,11 +391,8 @@ class AMP_Allowed_Tags_Generated {
 			'amp-fx-collection',
 			'amp-fx-flying-carpet',
 			'amp-gfycat',
-			'amp-gfycat',
-			'amp-gist',
 			'amp-gist',
 			'amp-google-document-embed',
-			'amp-google-vrview-image',
 			'amp-google-vrview-image',
 			'amp-hulu',
 			'amp-ima-video',
@@ -304,8 +404,6 @@ class AMP_Allowed_Tags_Generated {
 			'amp-jwplayer',
 			'amp-kaltura-player',
 			'amp-list',
-			'amp-list',
-			'amp-live-list',
 			'amp-live-list',
 			'amp-mathml',
 			'amp-megaphone',
@@ -417,6 +515,7 @@ class AMP_Allowed_Tags_Generated {
 			'solidcolor',
 			'source',
 			'span',
+			'stop',
 			'strong',
 			'sub',
 			'sup',
@@ -467,9 +566,12 @@ class AMP_Allowed_Tags_Generated {
 								'maps',
 								'bip',
 								'bbmi',
+								'chrome',
 								'itms-services',
+								'facetime',
 								'fb-me',
 								'fb-messenger',
+								'feed',
 								'intent',
 								'line',
 								'skype',
@@ -497,6 +599,12 @@ class AMP_Allowed_Tags_Generated {
 						'blacklisted_value_regex' => '(^|\\s)(components|dns-prefetch|import|manifest|preconnect|prefetch|preload|prerender|serviceworker|stylesheet|subresource)(\\s|$)',
 					),
 					'role' => array(),
+					'show-tooltip' => array(
+						'value' => array(
+							'auto',
+							'true',
+						),
+					),
 					'tabindex' => array(),
 					'target' => array(
 						'value' => array(
@@ -508,6 +616,7 @@ class AMP_Allowed_Tags_Generated {
 					'type' => array(
 						'value_casei' => array(
 							'text/html',
+							'application/rss+xml',
 						),
 					),
 				),
@@ -913,6 +1022,7 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'src' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
+						'mandatory' => true,
 						'value_url' => array(
 							'allow_relative' => false,
 							'protocol' => array(
@@ -1326,6 +1436,7 @@ class AMP_Allowed_Tags_Generated {
 				'attr_spec_list' => array(
 					'data-amp-bind-src' => array(),
 					'filter' => array(
+						'mandatory' => true,
 						'value_casei' => array(
 							'custom',
 							'fuzzy',
@@ -1342,6 +1453,7 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'filter-value' => array(),
 					'highlight-user-entry' => array(),
+					'inline' => array(),
 					'items' => array(),
 					'max-entries' => array(),
 					'media' => array(),
@@ -1351,6 +1463,7 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'query' => array(),
 					'src' => array(
 						'value_url' => array(
 							'allow_relative' => true,
@@ -1686,6 +1799,11 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'data-video' => array(
 						'value_regex' => '[0-9]+',
+					),
+					'dock' => array(
+						'requires_extension' => array(
+							'amp-video-docking',
+						),
 					),
 					'media' => array(),
 					'noloading' => array(
@@ -2294,6 +2412,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'hide-keyboard-shortcuts-panel' => array(
+						'value' => array(
+							'',
+						),
+					),
 					'highlighted' => array(),
 					'input-selector' => array(),
 					'locale' => array(),
@@ -2382,6 +2505,11 @@ class AMP_Allowed_Tags_Generated {
 						'value_regex' => '[0-6]',
 					),
 					'format' => array(),
+					'hide-keyboard-shortcuts-panel' => array(
+						'value' => array(
+							'',
+						),
+					),
 					'highlighted' => array(),
 					'input-selector' => array(),
 					'locale' => array(),
@@ -2474,6 +2602,11 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'format' => array(),
 					'fullscreen' => array(
+						'value' => array(
+							'',
+						),
+					),
+					'hide-keyboard-shortcuts-panel' => array(
 						'value' => array(
 							'',
 						),
@@ -2575,6 +2708,11 @@ class AMP_Allowed_Tags_Generated {
 						'value_regex' => '[0-6]',
 					),
 					'format' => array(),
+					'hide-keyboard-shortcuts-panel' => array(
+						'value' => array(
+							'',
+						),
+					),
 					'highlighted' => array(),
 					'locale' => array(),
 					'max' => array(),
@@ -3523,6 +3661,130 @@ class AMP_Allowed_Tags_Generated {
 				),
 			),
 		),
+		'amp-inline-gallery' => array(
+			array(
+				'attr_spec_list' => array(
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							5,
+						),
+					),
+					'requires_extension' => array(
+						'amp-inline-gallery',
+					),
+					'spec_url' => 'https://amp.dev/documentation/components/amp-inline-gallery',
+				),
+			),
+		),
+		'amp-inline-gallery-pagination' => array(
+			array(
+				'attr_spec_list' => array(
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							6,
+							2,
+							3,
+							7,
+							9,
+							1,
+							4,
+						),
+					),
+					'mandatory_ancestor' => 'amp-inline-gallery',
+					'requires_extension' => array(
+						'amp-inline-gallery',
+					),
+					'spec_name' => 'amp-inline-gallery-pagination',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-inline-gallery',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'inset' => array(
+						'mandatory' => true,
+					),
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							1,
+						),
+					),
+					'mandatory_ancestor' => 'amp-inline-gallery',
+					'requires_extension' => array(
+						'amp-inline-gallery',
+					),
+					'spec_name' => 'amp-inline-gallery-pagination [inset]',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-inline-gallery',
+				),
+			),
+		),
+		'amp-inline-gallery-thumbnails' => array(
+			array(
+				'attr_spec_list' => array(
+					'aspect-ratio-height' => array(
+						'blacklisted_value_regex' => '^0+(\\.0+)?$',
+						'value_regex' => '\\d+(\\.\\d+)?',
+					),
+					'aspect-ratio-width' => array(
+						'blacklisted_value_regex' => '^0+(\\.0+)?$',
+						'value_regex' => '\\d+(\\.\\d+)?',
+					),
+					'loop' => array(
+						'value' => array(
+							'true',
+							'false',
+						),
+					),
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							6,
+							2,
+							3,
+							7,
+							9,
+							1,
+							4,
+						),
+					),
+					'mandatory_ancestor' => 'amp-inline-gallery',
+					'requires_extension' => array(
+						'amp-inline-gallery',
+					),
+					'spec_url' => 'https://amp.dev/documentation/components/amp-inline-gallery',
+				),
+			),
+		),
 		'amp-instagram' => array(
 			array(
 				'attr_spec_list' => array(
@@ -3784,7 +4046,6 @@ class AMP_Allowed_Tags_Generated {
 					'credentials' => array(),
 					'data-amp-bind-is-layout-container' => array(),
 					'data-amp-bind-src' => array(),
-					'data-amp-bind-state' => array(),
 					'diffable' => array(
 						'value' => array(
 							'',
@@ -3819,10 +4080,12 @@ class AMP_Allowed_Tags_Generated {
 							'allow_relative' => true,
 							'protocol' => array(
 								'https',
+								'amp-state',
 							),
 						),
 					),
 					'template' => array(),
+					'xssi-prefix' => array(),
 				),
 				'tag_spec' => array(
 					'amp_layout' => array(
@@ -3961,6 +4224,47 @@ class AMP_Allowed_Tags_Generated {
 				),
 			),
 		),
+		'amp-mega-menu' => array(
+			array(
+				'attr_spec_list' => array(
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							3,
+						),
+					),
+					'child_tags' => array(
+						'child_tag_name_oneof' => array(
+							'nav',
+							'amp-list',
+						),
+						'mandatory_num_child_tags' => 1,
+					),
+					'descendant_tag_list' => 'amp-mega-menu-allowed-descendants',
+					'reference_points' => array(
+						'AMP-MEGA-MENU > AMP-LIST' => array(
+							'mandatory' => false,
+							'unique' => false,
+						),
+						'AMP-MEGA-MENU > NAV' => array(
+							'mandatory' => false,
+							'unique' => false,
+						),
+					),
+					'requires_extension' => array(
+						'amp-mega-menu',
+					),
+					'spec_url' => 'https://amp.dev/documentation/components/amp-mega-menu',
+				),
+			),
+		),
 		'amp-megaphone' => array(
 			array(
 				'attr_spec_list' => array(
@@ -4057,8 +4361,8 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'curated',
-							'specific',
 							'semantic',
+							'specific',
 						),
 					),
 					'data-minimum-date-factor' => array(),
@@ -4087,11 +4391,11 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'amp_layout' => array(
 						'supported_layouts' => array(
-							4,
 							6,
 							2,
 							3,
 							7,
+							4,
 						),
 					),
 					'requires_extension' => array(
@@ -4132,17 +4436,59 @@ class AMP_Allowed_Tags_Generated {
 				),
 			),
 		),
+		'amp-nested-menu' => array(
+			array(
+				'attr_spec_list' => array(
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+					'side' => array(
+						'value' => array(
+							'left',
+							'right',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							6,
+						),
+					),
+					'descendant_tag_list' => 'amp-nested-menu-allowed-descendants',
+					'mandatory_ancestor' => 'amp-sidebar',
+					'requires_extension' => array(
+						'amp-sidebar',
+					),
+					'spec_url' => 'https://amp.dev/documentation/components/amp-nested-menu',
+				),
+			),
+		),
 		'amp-next-page' => array(
 			array(
-				'attr_spec_list' => array(),
+				'attr_spec_list' => array(
+					'deep-parsing' => array(),
+					'max-pages' => array(),
+				),
 				'tag_spec' => array(
 					'reference_points' => array(
-						'AMP-NEXT-PAGE > [separator]' => array(
+						'AMP-NEXT-PAGE > SCRIPT[type=application/json]' => array(
+							'mandatory' => true,
+							'unique' => true,
+						),
+						'AMP-NEXT-PAGE > [footer]' => array(
 							'mandatory' => false,
 							'unique' => true,
 						),
-						'amp-next-page extension .json configuration' => array(
-							'mandatory' => true,
+						'AMP-NEXT-PAGE > [recommendation-box]' => array(
+							'mandatory' => false,
+							'unique' => true,
+						),
+						'AMP-NEXT-PAGE > [separator]' => array(
+							'mandatory' => false,
 							'unique' => true,
 						),
 					),
@@ -4156,6 +4502,8 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
+					'deep-parsing' => array(),
+					'max-pages' => array(),
 					'src' => array(
 						'blacklisted_value_regex' => '__amp_source_origin',
 						'mandatory' => true,
@@ -4166,9 +4514,22 @@ class AMP_Allowed_Tags_Generated {
 							),
 						),
 					),
+					'xssi-prefix' => array(),
 				),
 				'tag_spec' => array(
 					'reference_points' => array(
+						'AMP-NEXT-PAGE > SCRIPT[type=application/json]' => array(
+							'mandatory' => false,
+							'unique' => true,
+						),
+						'AMP-NEXT-PAGE > [footer]' => array(
+							'mandatory' => false,
+							'unique' => true,
+						),
+						'AMP-NEXT-PAGE > [recommendation-box]' => array(
+							'mandatory' => false,
+							'unique' => true,
+						),
 						'AMP-NEXT-PAGE > [separator]' => array(
 							'mandatory' => false,
 							'unique' => true,
@@ -4190,6 +4551,8 @@ class AMP_Allowed_Tags_Generated {
 					'data-slot' => array(
 						'mandatory' => true,
 					),
+					'deep-parsing' => array(),
+					'max-pages' => array(),
 					'type' => array(
 						'mandatory' => true,
 						'value' => array(
@@ -4199,6 +4562,18 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'reference_points' => array(
+						'AMP-NEXT-PAGE > SCRIPT[type=application/json]' => array(
+							'mandatory' => false,
+							'unique' => true,
+						),
+						'AMP-NEXT-PAGE > [footer]' => array(
+							'mandatory' => false,
+							'unique' => true,
+						),
+						'AMP-NEXT-PAGE > [recommendation-box]' => array(
+							'mandatory' => false,
+							'unique' => true,
+						),
 						'AMP-NEXT-PAGE > [separator]' => array(
 							'mandatory' => false,
 							'unique' => true,
@@ -4677,6 +5052,37 @@ class AMP_Allowed_Tags_Generated {
 				),
 			),
 		),
+		'amp-redbull-player' => array(
+			array(
+				'attr_spec_list' => array(
+					'data-param-videoid' => array(
+						'mandatory' => true,
+					),
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							2,
+							3,
+							4,
+							6,
+							7,
+							8,
+							9,
+						),
+					),
+					'requires_extension' => array(
+						'amp-redbull-player',
+					),
+				),
+			),
+		),
 		'amp-reddit' => array(
 			array(
 				'attr_spec_list' => array(
@@ -4785,6 +5191,7 @@ class AMP_Allowed_Tags_Generated {
 							2,
 							3,
 							7,
+							9,
 							1,
 							4,
 						),
@@ -4893,6 +5300,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-sidebar',
 					),
+					'spec_name' => 'amp-sidebar',
 					'spec_url' => 'https://amp.dev/documentation/components/amp-sidebar',
 				),
 			),
@@ -5291,7 +5699,6 @@ class AMP_Allowed_Tags_Generated {
 							'amp-geo',
 							'amp-pixel',
 							'amp-sidebar',
-							'amp-story-access',
 							'amp-story-auto-ads',
 							'amp-story-bookend',
 							'amp-story-page',
@@ -5301,30 +5708,6 @@ class AMP_Allowed_Tags_Generated {
 					'mandatory_parent' => 'body',
 					'requires_extension' => array(
 						'amp-story',
-					),
-				),
-			),
-		),
-		'amp-story-access' => array(
-			array(
-				'attr_spec_list' => array(
-					'media' => array(),
-					'noloading' => array(
-						'value' => array(
-							'',
-						),
-					),
-					'type' => array(
-						'value' => array(
-							'blocking',
-							'notification',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'mandatory_parent' => 'amp-story',
-					'requires_extension' => array(
-						'amp-access',
 					),
 				),
 			),
@@ -5412,6 +5795,9 @@ class AMP_Allowed_Tags_Generated {
 		'amp-story-grid-layer' => array(
 			array(
 				'attr_spec_list' => array(
+					'aspect-ratio' => array(
+						'value_regex' => '\\d+:\\d+',
+					),
 					'position' => array(
 						'value' => array(
 							'landscape-half-left',
@@ -5460,6 +5846,7 @@ class AMP_Allowed_Tags_Generated {
 						'blacklisted_value_regex' => '(^|\\s)(__amp_\\S*|__count__|__defineGetter__|__defineSetter__|__lookupGetter__|__lookupSetter__|__noSuchMethod__|__parent__|__proto__|__AMP_\\S*|\\$p|\\$proxy|acceptCharset|addEventListener|appendChild|assignedSlot|attachShadow|AMP|baseURI|checkValidity|childElementCount|childNodes|classList|className|clientHeight|clientLeft|clientTop|clientWidth|compareDocumentPosition|computedName|computedRole|contentEditable|createShadowRoot|enqueAction|firstChild|firstElementChild|getAnimations|getAttribute|getAttributeNS|getAttributeNode|getAttributeNodeNS|getBoundingClientRect|getClientRects|getDestinationInsertionPoints|getElementsByClassName|getElementsByTagName|getElementsByTagNameNS|getRootNode|hasAttribute|hasAttributeNS|hasAttributes|hasChildNodes|hasPointerCapture|i-amphtml-\\S*|innerHTML|innerText|inputMode|insertAdjacentElement|insertAdjacentHTML|insertAdjacentText|isContentEditable|isDefaultNamespace|isEqualNode|isSameNode|lastChild|lastElementChild|lookupNamespaceURI|namespaceURI|nextElementSibling|nextSibling|nodeName|nodeType|nodeValue|offsetHeight|offsetLeft|offsetParent|offsetTop|offsetWidth|outerHTML|outerText|ownerDocument|parentElement|parentNode|previousElementSibling|previousSibling|querySelector|querySelectorAll|releasePointerCapture|removeAttribute|removeAttributeNS|removeAttributeNode|removeChild|removeEventListener|replaceChild|reportValidity|requestPointerLock|scrollHeight|scrollIntoView|scrollIntoViewIfNeeded|scrollLeft|scrollWidth|setAttribute|setAttributeNS|setAttributeNode|setAttributeNodeNS|setPointerCapture|shadowRoot|styleMap|tabIndex|tagName|textContent|toString|valueOf|(webkit|ms|moz|o)dropzone|(webkit|moz|ms|o)MatchesSelector|(webkit|moz|ms|o)RequestFullScreen|(webkit|moz|ms|o)RequestFullscreen)(\\s|$)',
 						'mandatory' => true,
 					),
+					'next-page-no-ad' => array(),
 				),
 				'tag_spec' => array(
 					'child_tags' => array(
@@ -5482,6 +5869,38 @@ class AMP_Allowed_Tags_Generated {
 		'amp-story-page-attachment' => array(
 			array(
 				'attr_spec_list' => array(
+					'href' => array(
+						'mandatory' => true,
+						'value_url' => array(
+							'protocol' => array(
+								'http',
+								'https',
+							),
+						),
+					),
+					'layout' => array(
+						'mandatory' => true,
+						'value' => array(
+							'nodisplay',
+						),
+					),
+					'theme' => array(
+						'value' => array(
+							'dark',
+							'light',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'child_tags' => array(
+						'mandatory_num_child_tags' => 0,
+					),
+					'mandatory_ancestor' => 'amp-story-page',
+					'spec_name' => 'amp-story-page-attachment[href]',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
 					'layout' => array(
 						'mandatory' => true,
 						'value' => array(
@@ -5498,6 +5917,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'descendant_tag_list' => 'amp-story-page-attachment-allowed-descendants',
 					'mandatory_ancestor' => 'amp-story-page',
+					'spec_name' => 'amp-story-page-attachment',
 				),
 			),
 		),
@@ -5575,6 +5995,7 @@ class AMP_Allowed_Tags_Generated {
 		'amp-twitter' => array(
 			array(
 				'attr_spec_list' => array(
+					'data-amp-bind-data-tweetid' => array(),
 					'data-cards' => array(),
 					'data-conversation' => array(),
 					'data-limit' => array(),
@@ -5628,41 +6049,6 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-twitter',
 					),
-				),
-			),
-		),
-		'amp-user-location' => array(
-			array(
-				'attr_spec_list' => array(
-					'id' => array(
-						'blacklisted_value_regex' => '(^|\\s)(__amp_\\S*|__count__|__defineGetter__|__defineSetter__|__lookupGetter__|__lookupSetter__|__noSuchMethod__|__parent__|__proto__|__AMP_\\S*|\\$p|\\$proxy|acceptCharset|addEventListener|appendChild|assignedSlot|attachShadow|AMP|baseURI|checkValidity|childElementCount|childNodes|classList|className|clientHeight|clientLeft|clientTop|clientWidth|compareDocumentPosition|computedName|computedRole|contentEditable|createShadowRoot|enqueAction|firstChild|firstElementChild|getAnimations|getAttribute|getAttributeNS|getAttributeNode|getAttributeNodeNS|getBoundingClientRect|getClientRects|getDestinationInsertionPoints|getElementsByClassName|getElementsByTagName|getElementsByTagNameNS|getRootNode|hasAttribute|hasAttributeNS|hasAttributes|hasChildNodes|hasPointerCapture|i-amphtml-\\S*|innerHTML|innerText|inputMode|insertAdjacentElement|insertAdjacentHTML|insertAdjacentText|isContentEditable|isDefaultNamespace|isEqualNode|isSameNode|lastChild|lastElementChild|lookupNamespaceURI|namespaceURI|nextElementSibling|nextSibling|nodeName|nodeType|nodeValue|offsetHeight|offsetLeft|offsetParent|offsetTop|offsetWidth|outerHTML|outerText|ownerDocument|parentElement|parentNode|previousElementSibling|previousSibling|querySelector|querySelectorAll|releasePointerCapture|removeAttribute|removeAttributeNS|removeAttributeNode|removeChild|removeEventListener|replaceChild|reportValidity|requestPointerLock|scrollHeight|scrollIntoView|scrollIntoViewIfNeeded|scrollLeft|scrollWidth|setAttribute|setAttributeNS|setAttributeNode|setAttributeNodeNS|setPointerCapture|shadowRoot|styleMap|tabIndex|tagName|textContent|toString|valueOf|(webkit|ms|moz|o)dropzone|(webkit|moz|ms|o)MatchesSelector|(webkit|moz|ms|o)RequestFullScreen|(webkit|moz|ms|o)RequestFullscreen)(\\s|$)',
-						'mandatory' => true,
-					),
-					'media' => array(),
-					'noloading' => array(
-						'value' => array(
-							'',
-						),
-					),
-					'src' => array(
-						'value_url' => array(
-							'allow_relative' => false,
-							'protocol' => array(
-								'https',
-							),
-						),
-					),
-				),
-				'tag_spec' => array(
-					'amp_layout' => array(
-						'supported_layouts' => array(
-							1,
-						),
-					),
-					'requires_extension' => array(
-						'amp-user-location',
-					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-user-location',
 				),
 			),
 		),
@@ -6742,6 +7128,16 @@ class AMP_Allowed_Tags_Generated {
 					'spec_name' => 'amp-list-load-more button[load-more-clickable]',
 				),
 			),
+			array(
+				'attr_spec_list' => array(
+					'amp-nested-submenu-close' => array(),
+					'amp-nested-submenu-open' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'amp-nested-menu',
+					'spec_name' => 'button amp-nested-menu',
+				),
+			),
 		),
 		'canvas' => array(
 			array(
@@ -6833,9 +7229,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -6923,9 +7317,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -7048,9 +7440,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -7093,9 +7483,7 @@ class AMP_Allowed_Tags_Generated {
 		'desc' => array(
 			array(
 				'attr_spec_list' => array(
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'xml:lang' => array(),
 					'xml:space' => array(),
 					'xmlns' => array(),
@@ -7283,6 +7671,25 @@ class AMP_Allowed_Tags_Generated {
 					'spec_name' => 'AMP-LIST DIV [fetch-error]',
 				),
 			),
+			array(
+				'attr_spec_list' => array(
+					'amp-nested-submenu' => array(),
+					'amp-nested-submenu-close' => array(),
+					'amp-nested-submenu-open' => array(),
+				),
+				'tag_spec' => array(
+					'disallowed_ancestor' => array(
+						'amp-accordion',
+					),
+					'mandatory_ancestor' => 'amp-nested-menu',
+					'mandatory_oneof' => array(
+						'amp-nested-submenu',
+						'amp-nested-submenu-close',
+						'amp-nested-submenu-open',
+					),
+					'spec_name' => 'div amp-nested-menu',
+				),
+			),
 		),
 		'dl' => array(
 			array(
@@ -7360,9 +7767,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -7449,9 +7854,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
 					'text-rendering' => array(),
@@ -7541,9 +7944,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
 					'text-rendering' => array(),
@@ -7624,9 +8025,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
 					'text-rendering' => array(),
@@ -7710,9 +8109,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
 					'text-rendering' => array(),
@@ -7793,9 +8190,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
 					'text-rendering' => array(),
@@ -7822,9 +8217,7 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(
 					'in' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'xml:lang' => array(),
 					'xml:space' => array(),
 					'xmlns' => array(),
@@ -7897,9 +8290,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
 					'text-rendering' => array(),
@@ -8007,9 +8398,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
 					'text-rendering' => array(),
@@ -8242,9 +8631,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -8327,9 +8714,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
 					'text-rendering' => array(),
@@ -8413,9 +8798,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
 					'text-rendering' => array(),
@@ -8470,6 +8853,16 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(),
 			),
+			array(
+				'attr_spec_list' => array(
+					'amp-nested-submenu-close' => array(),
+					'amp-nested-submenu-open' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'amp-nested-menu',
+					'spec_name' => 'h2 amp-nested-menu',
+				),
+			),
 		),
 		'h3' => array(
 			array(
@@ -8477,6 +8870,16 @@ class AMP_Allowed_Tags_Generated {
 					'align' => array(),
 				),
 				'tag_spec' => array(),
+			),
+			array(
+				'attr_spec_list' => array(
+					'amp-nested-submenu-close' => array(),
+					'amp-nested-submenu-open' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'amp-nested-menu',
+					'spec_name' => 'h3 amp-nested-menu',
+				),
 			),
 		),
 		'h4' => array(
@@ -8486,6 +8889,16 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(),
 			),
+			array(
+				'attr_spec_list' => array(
+					'amp-nested-submenu-close' => array(),
+					'amp-nested-submenu-open' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'amp-nested-menu',
+					'spec_name' => 'h4 amp-nested-menu',
+				),
+			),
 		),
 		'h5' => array(
 			array(
@@ -8494,6 +8907,16 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(),
 			),
+			array(
+				'attr_spec_list' => array(
+					'amp-nested-submenu-close' => array(),
+					'amp-nested-submenu-open' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'amp-nested-menu',
+					'spec_name' => 'h5 amp-nested-menu',
+				),
+			),
 		),
 		'h6' => array(
 			array(
@@ -8501,6 +8924,16 @@ class AMP_Allowed_Tags_Generated {
 					'align' => array(),
 				),
 				'tag_spec' => array(),
+			),
+			array(
+				'attr_spec_list' => array(
+					'amp-nested-submenu-close' => array(),
+					'amp-nested-submenu-open' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'amp-nested-menu',
+					'spec_name' => 'h6 amp-nested-menu',
+				),
 			),
 		),
 		'head' => array(
@@ -8532,9 +8965,7 @@ class AMP_Allowed_Tags_Generated {
 					'g1' => array(),
 					'g2' => array(),
 					'k' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'u1' => array(),
 					'u2' => array(),
 					'xml:lang' => array(),
@@ -8556,7 +8987,14 @@ class AMP_Allowed_Tags_Generated {
 		),
 		'html' => array(
 			array(
-				'attr_spec_list' => array(),
+				'attr_spec_list' => array(
+					'data-amp-autocomplete-opt-in' => array(
+						'blacklisted_value_regex' => 'false',
+						'value' => array(
+							'false',
+						),
+					),
+				),
 				'tag_spec' => array(
 					'mandatory' => true,
 					'mandatory_parent' => '!doctype',
@@ -8683,9 +9121,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -8814,6 +9250,7 @@ class AMP_Allowed_Tags_Generated {
 					'data-amp-bind-value' => array(),
 					'data-amp-bind-width' => array(),
 					'disabled' => array(),
+					'enterkeyhint' => array(),
 					'height' => array(),
 					'inputmode' => array(),
 					'list' => array(),
@@ -8840,7 +9277,7 @@ class AMP_Allowed_Tags_Generated {
 					'step' => array(),
 					'tabindex' => array(),
 					'type' => array(
-						'blacklisted_value_regex' => '(^|\\s)(button|file|image|password|)(\\s|$)',
+						'blacklisted_value_regex' => '(^|\\s)(file|image|password|)(\\s|$)',
 					),
 					'value' => array(),
 					'width' => array(),
@@ -8880,6 +9317,7 @@ class AMP_Allowed_Tags_Generated {
 					'data-amp-bind-value' => array(),
 					'data-amp-bind-width' => array(),
 					'disabled' => array(),
+					'enterkeyhint' => array(),
 					'height' => array(),
 					'inputmode' => array(),
 					'list' => array(),
@@ -8952,6 +9390,7 @@ class AMP_Allowed_Tags_Generated {
 					'data-amp-bind-value' => array(),
 					'data-amp-bind-width' => array(),
 					'disabled' => array(),
+					'enterkeyhint' => array(),
 					'height' => array(),
 					'inputmode' => array(),
 					'list' => array(),
@@ -9038,6 +9477,7 @@ class AMP_Allowed_Tags_Generated {
 					'data-amp-bind-value' => array(),
 					'data-amp-bind-width' => array(),
 					'disabled' => array(),
+					'enterkeyhint' => array(),
 					'height' => array(),
 					'inputmode' => array(),
 					'list' => array(),
@@ -9116,6 +9556,7 @@ class AMP_Allowed_Tags_Generated {
 					'data-amp-bind-value' => array(),
 					'data-amp-bind-width' => array(),
 					'disabled' => array(),
+					'enterkeyhint' => array(),
 					'height' => array(),
 					'inputmode' => array(),
 					'list' => array(),
@@ -9193,6 +9634,7 @@ class AMP_Allowed_Tags_Generated {
 					'data-amp-bind-value' => array(),
 					'data-amp-bind-width' => array(),
 					'disabled' => array(),
+					'enterkeyhint' => array(),
 					'height' => array(),
 					'inputmode' => array(),
 					'list' => array(),
@@ -9270,6 +9712,7 @@ class AMP_Allowed_Tags_Generated {
 					'data-amp-bind-value' => array(),
 					'data-amp-bind-width' => array(),
 					'disabled' => array(),
+					'enterkeyhint' => array(),
 					'height' => array(),
 					'inputmode' => array(),
 					'list' => array(),
@@ -9347,6 +9790,7 @@ class AMP_Allowed_Tags_Generated {
 					'data-amp-bind-value' => array(),
 					'data-amp-bind-width' => array(),
 					'disabled' => array(),
+					'enterkeyhint' => array(),
 					'height' => array(),
 					'inputmode' => array(),
 					'list' => array(),
@@ -9424,6 +9868,7 @@ class AMP_Allowed_Tags_Generated {
 					'data-amp-bind-value' => array(),
 					'data-amp-bind-width' => array(),
 					'disabled' => array(),
+					'enterkeyhint' => array(),
 					'height' => array(),
 					'inputmode' => array(),
 					'list' => array(),
@@ -9581,9 +10026,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -9669,9 +10112,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
 					'text-rendering' => array(),
@@ -9857,7 +10298,7 @@ class AMP_Allowed_Tags_Generated {
 					'crossorigin' => array(),
 					'href' => array(
 						'mandatory' => true,
-						'value_regex' => 'https://cdn\\.materialdesignicons\\.com/([0-9]+\\.?)+/css/materialdesignicons\\.min\\.css|https://cloud\\.typography\\.com/[0-9]*/[0-9]*/css/fonts\\.css|https://fast\\.fonts\\.net/.*|https://fonts\\.googleapis\\.com/css\\?.*|https://fonts\\.googleapis\\.com/icon\\?.*|https://fonts\\.googleapis\\.com/earlyaccess/.*\\.css|https://maxcdn\\.bootstrapcdn\\.com/font-awesome/([0-9]+\\.?)+/css/font-awesome\\.min\\.css(\\?.*)?|https://(use|pro)\\.fontawesome\\.com/releases/v([0-9]+\\.?)+/css/(all|brands|solid|regular|light|fontawesome)\\.css|https://(use|pro)\\.fontawesome\\.com/[0-9a-zA-Z]+\\.css|https://use\\.typekit\\.net/[\\w\\p{L}\\p{N}_]+\\.css',
+						'value_regex' => 'https://cdn\\.materialdesignicons\\.com/([0-9]+\\.?)+/css/materialdesignicons\\.min\\.css|https://cloud\\.typography\\.com/[0-9]*/[0-9]*/css/fonts\\.css|https://fast\\.fonts\\.net/.*|https://fonts\\.googleapis\\.com/css2?\\?.*|https://fonts\\.googleapis\\.com/icon\\?.*|https://fonts\\.googleapis\\.com/earlyaccess/.*\\.css|https://maxcdn\\.bootstrapcdn\\.com/font-awesome/([0-9]+\\.?)+/css/font-awesome\\.min\\.css(\\?.*)?|https://(use|pro)\\.fontawesome\\.com/releases/v([0-9]+\\.?)+/css/[0-9a-zA-Z-]+\\.css|https://(use|pro)\\.fontawesome\\.com/[0-9a-zA-Z-]+\\.css|https://use\\.typekit\\.net/[\\w\\p{L}\\p{N}_]+\\.css',
 					),
 					'integrity' => array(),
 					'media' => array(),
@@ -10046,9 +10487,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
 					'text-rendering' => array(),
@@ -10132,9 +10571,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -10681,9 +11118,7 @@ class AMP_Allowed_Tags_Generated {
 		'metadata' => array(
 			array(
 				'attr_spec_list' => array(
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'xml:lang' => array(),
 					'xml:space' => array(),
 					'xmlns' => array(),
@@ -10912,9 +11347,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -11000,9 +11433,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -11115,9 +11546,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -11200,9 +11629,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -11322,9 +11749,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
 					'text-rendering' => array(),
@@ -11431,9 +11856,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -11503,6 +11926,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'src' => array(
 						'dispatch_key' => 2,
@@ -11519,14 +11947,59 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'contents',
-						'regex' => '.',
+						array(
+							'error_message' => 'contents',
+							'regex' => '.',
+						),
 					),
 				),
 				'tag_spec' => array(
-					'mandatory' => true,
+					'mandatory_alternatives' => 'amphtml engine v0.js script',
 					'mandatory_parent' => 'head',
 					'spec_name' => 'amphtml engine v0.js script',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup',
+					'unique' => true,
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
+					'nonce' => array(),
+					'src' => array(
+						'dispatch_key' => 2,
+						'mandatory' => true,
+						'value' => array(
+							'https://cdn.ampproject.org/lts/v0.js',
+						),
+					),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'cdata' => array(
+					'blacklisted_cdata_regex' => array(
+						array(
+							'error_message' => 'contents',
+							'regex' => '.',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_alternatives' => 'amphtml engine v0.js script',
+					'mandatory_parent' => 'head',
+					'spec_name' => 'amphtml engine v0.js lts script',
 					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup',
 					'unique' => true,
 				),
@@ -11544,8 +12017,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -11571,8 +12046,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -11593,8 +12070,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -11608,6 +12087,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -11635,6 +12119,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -11658,6 +12147,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -11689,6 +12183,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -11717,6 +12216,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -11743,6 +12247,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -11781,8 +12290,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -11800,6 +12311,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -11827,6 +12343,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -11850,6 +12371,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -11878,6 +12404,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -11904,6 +12435,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -11927,6 +12463,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -11959,8 +12500,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -11978,6 +12521,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -12003,6 +12551,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -12035,8 +12588,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -12053,6 +12608,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -12080,6 +12640,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -12103,6 +12668,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -12130,6 +12700,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -12153,6 +12728,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -12185,8 +12765,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -12203,6 +12785,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -12230,6 +12817,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -12253,6 +12845,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -12285,8 +12882,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 					'max_bytes' => 100000,
 					'max_bytes_spec_url' => 'https://amp.dev/documentation/components/amp-bind#state',
@@ -12306,6 +12905,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -12333,6 +12937,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -12356,6 +12965,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -12383,6 +12997,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -12408,6 +13027,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -12431,6 +13055,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -12459,6 +13088,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -12482,6 +13116,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -12514,8 +13153,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -12533,6 +13174,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -12560,6 +13206,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -12583,6 +13234,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -12610,6 +13266,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -12633,6 +13294,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -12660,6 +13326,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -12685,6 +13356,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -12708,6 +13384,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -12741,8 +13422,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 					'max_bytes' => 15000,
 					'max_bytes_spec_url' => 'https://amp.dev/documentation/components/amp-experiment#configuration',
@@ -12759,6 +13442,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -12786,6 +13474,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -12809,6 +13502,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -12836,6 +13534,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -12859,6 +13562,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -12886,6 +13594,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -12909,6 +13622,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -12936,6 +13654,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -12961,6 +13684,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -12984,6 +13712,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -13016,8 +13749,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -13035,6 +13770,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -13062,6 +13802,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -13085,6 +13830,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -13112,6 +13862,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -13135,6 +13890,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -13162,6 +13922,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -13185,6 +13950,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -13212,6 +13982,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -13235,6 +14010,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -13262,6 +14042,41 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
+						'name' => 'amp-inline-gallery',
+						'requires_usage' => true,
+						'version' => array(
+							'0.1',
+						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -13285,6 +14100,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -13312,6 +14132,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -13335,6 +14160,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -13362,6 +14192,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -13385,6 +14220,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -13412,6 +14252,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -13437,6 +14282,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -13460,6 +14310,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -13492,8 +14347,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -13510,6 +14367,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -13535,6 +14397,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -13564,6 +14431,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -13587,6 +14459,41 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
+						'name' => 'amp-mega-menu',
+						'requires_usage' => true,
+						'version' => array(
+							'0.1',
+						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -13614,6 +14521,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -13637,6 +14549,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -13664,6 +14581,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -13684,6 +14606,9 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
+					'id' => array(
+						'blacklisted_value_regex' => '(^|\\s)(__amp_\\S*|__count__|__defineGetter__|__defineSetter__|__lookupGetter__|__lookupSetter__|__noSuchMethod__|__parent__|__proto__|__AMP_\\S*|\\$p|\\$proxy|acceptCharset|addEventListener|appendChild|assignedSlot|attachShadow|AMP|baseURI|checkValidity|childElementCount|childNodes|classList|className|clientHeight|clientLeft|clientTop|clientWidth|compareDocumentPosition|computedName|computedRole|contentEditable|createShadowRoot|enqueAction|firstChild|firstElementChild|getAnimations|getAttribute|getAttributeNS|getAttributeNode|getAttributeNodeNS|getBoundingClientRect|getClientRects|getDestinationInsertionPoints|getElementsByClassName|getElementsByTagName|getElementsByTagNameNS|getRootNode|hasAttribute|hasAttributeNS|hasAttributes|hasChildNodes|hasPointerCapture|i-amphtml-\\S*|innerHTML|innerText|inputMode|insertAdjacentElement|insertAdjacentHTML|insertAdjacentText|isContentEditable|isDefaultNamespace|isEqualNode|isSameNode|lastChild|lastElementChild|lookupNamespaceURI|namespaceURI|nextElementSibling|nextSibling|nodeName|nodeType|nodeValue|offsetHeight|offsetLeft|offsetParent|offsetTop|offsetWidth|outerHTML|outerText|ownerDocument|parentElement|parentNode|previousElementSibling|previousSibling|querySelector|querySelectorAll|releasePointerCapture|removeAttribute|removeAttributeNS|removeAttributeNode|removeChild|removeEventListener|replaceChild|reportValidity|requestPointerLock|scrollHeight|scrollIntoView|scrollIntoViewIfNeeded|scrollLeft|scrollWidth|setAttribute|setAttributeNS|setAttributeNode|setAttributeNodeNS|setPointerCapture|shadowRoot|styleMap|tabIndex|tagName|textContent|toString|valueOf|(webkit|ms|moz|o)dropzone|(webkit|moz|ms|o)MatchesSelector|(webkit|moz|ms|o)RequestFullScreen|(webkit|moz|ms|o)RequestFullscreen)(\\s|$)',
+					),
 					'nonce' => array(),
 					'template' => array(
 						'dispatch_key' => 2,
@@ -13701,8 +14626,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -13728,6 +14655,41 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
+						'name' => 'amp-nested-menu',
+						'requires_usage' => true,
+						'version' => array(
+							'0.1',
+						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -13741,6 +14703,7 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => true,
 						'version' => array(
 							'0.1',
+							'1.0',
 						),
 					),
 				),
@@ -13760,7 +14723,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-next-page',
 					),
-					'spec_name' => 'amp-next-page extension .json configuration',
+					'spec_name' => 'AMP-NEXT-PAGE > SCRIPT[type=application/json]',
 					'spec_url' => 'https://amp.dev/documentation/components/amp-next-page',
 				),
 			),
@@ -13770,6 +14733,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -13797,6 +14765,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -13820,6 +14793,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -13847,6 +14825,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -13870,6 +14853,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -13897,6 +14885,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -13920,6 +14913,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -13947,6 +14945,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -13970,6 +14973,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -13997,6 +15005,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -14020,6 +15033,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -14047,6 +15065,41 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
+						'name' => 'amp-redbull-player',
+						'requires_usage' => true,
+						'version' => array(
+							'0.1',
+						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -14072,6 +15125,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -14095,6 +15153,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -14137,8 +15200,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 					'max_bytes' => 10000,
 					'max_bytes_spec_url' => 'https://amp.dev/documentation/components/amp-script#faq',
@@ -14157,6 +15222,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -14184,6 +15254,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -14207,6 +15282,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -14234,6 +15314,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -14257,6 +15342,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -14284,6 +15374,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -14307,6 +15402,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -14334,6 +15434,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -14358,6 +15463,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -14390,8 +15500,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -14409,6 +15521,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -14430,6 +15547,7 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
+					'nonce' => array(),
 					'type' => array(
 						'dispatch_key' => 3,
 						'mandatory' => true,
@@ -14460,8 +15578,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -14487,8 +15607,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 					'max_bytes' => 15000,
 					'max_bytes_spec_url' => 'https://amp.dev/documentation/components/amp-experiment#configuration',
@@ -14505,6 +15627,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -14543,8 +15670,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -14562,6 +15691,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -14586,10 +15720,70 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
+					'cryptokeys' => array(
+						'dispatch_key' => 2,
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'sha-256-hash' => array(
+						'mandatory' => true,
+					),
+					'type' => array(
+						'mandatory' => true,
+						'value_casei' => array(
+							'application/json',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_parent' => 'head',
+					'requires_extension' => array(
+						'amp-subscriptions',
+					),
+					'spec_name' => 'cryptokeys .json script',
+					'unique' => true,
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'ciphertext' => array(
+						'dispatch_key' => 1,
+						'mandatory' => true,
+					),
+					'type' => array(
+						'mandatory' => true,
+						'value_casei' => array(
+							'application/octet-stream',
+						),
+					),
+				),
+				'cdata' => array(
+					'blacklisted_cdata_regex' => array(
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'body',
+					'mandatory_parent' => 'subscriptions-section content swg_amp_cache_nonce',
+					'spec_name' => 'subscriptions script ciphertext',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
 					'async' => array(
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -14617,6 +15811,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -14640,6 +15839,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -14667,55 +15871,9 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
-						'name' => 'amp-user-location',
-						'requires_usage' => true,
-						'version' => array(
-							'0.1',
-						),
-					),
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'nonce' => array(),
-					'type' => array(
-						'dispatch_key' => 3,
-						'mandatory' => true,
-						'value_casei' => array(
-							'application/json',
-						),
-					),
-				),
-				'cdata' => array(
-					'blacklisted_cdata_regex' => array(
-						'error_message' => 'html comments',
-						'regex' => '<!--',
-					),
-				),
-				'tag_spec' => array(
-					'mandatory_parent' => 'amp-user-location',
-					'requires_extension' => array(
-						'amp-user-location',
-					),
-					'spec_name' => 'amp-user-location extension .json script',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-user-location',
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
+					'crossorigin' => array(
 						'value' => array(
-							'',
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -14741,6 +15899,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -14769,6 +15932,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -14792,6 +15960,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -14820,6 +15993,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -14843,6 +16021,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -14870,6 +16053,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -14893,6 +16081,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -14920,6 +16113,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -14943,6 +16141,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -14970,6 +16173,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
 					'nonce' => array(),
 					'type' => array(
 						'value_casei' => array(
@@ -14994,6 +16202,11 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 						'value' => array(
 							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
 						),
 					),
 					'nonce' => array(),
@@ -15058,6 +16271,26 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'mandatory_parent' => 'amp-accordion',
 					'spec_name' => 'amp-accordion > section',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'encrypted' => array(
+						'dispatch_key' => 1,
+						'mandatory' => true,
+					),
+					'subscriptions-section' => array(
+						'value_casei' => array(
+							'content',
+						),
+					),
+					'swg_amp_cache_nonce' => array(
+						'mandatory' => true,
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'body',
+					'spec_name' => 'subscriptions-section content swg_amp_cache_nonce',
 				),
 			),
 		),
@@ -15162,9 +16395,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
 					'text-rendering' => array(),
@@ -15334,6 +16565,31 @@ class AMP_Allowed_Tags_Generated {
 				'attr_spec_list' => array(),
 				'tag_spec' => array(),
 			),
+			array(
+				'attr_spec_list' => array(
+					'amp-nested-submenu-close' => array(),
+					'amp-nested-submenu-open' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'amp-nested-menu',
+					'spec_name' => 'span amp-nested-menu',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'swg_amp_cache_nonce' => array(
+						'dispatch_key' => 1,
+						'mandatory' => true,
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'body',
+					'requires_extension' => array(
+						'amp-subscriptions',
+					),
+					'spec_name' => 'span swg_amp_cache_nonce',
+				),
+			),
 		),
 		'stop' => array(
 			array(
@@ -15341,9 +16597,7 @@ class AMP_Allowed_Tags_Generated {
 					'offset' => array(),
 					'stop-color' => array(),
 					'stop-opacity' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'lineargradient',
@@ -15356,9 +16610,7 @@ class AMP_Allowed_Tags_Generated {
 					'offset' => array(),
 					'stop-color' => array(),
 					'stop-opacity' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'radialgradient',
@@ -15397,8 +16649,14 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
-						'error_message' => 'CSS !important',
-						'regex' => '!\\s*important',
+						array(
+							'error_message' => 'html comments',
+							'regex' => '<!--',
+						),
+						array(
+							'error_message' => 'CSS i-amphtml- name prefix',
+							'regex' => '(^|\\W)i-amphtml-',
+						),
 					),
 					'css_spec' => array(
 						'allowed_at_rules' => array(
@@ -15409,25 +16667,9 @@ class AMP_Allowed_Tags_Generated {
 							'supports',
 						),
 						'declaration' => array(),
-						'font_url_spec' => array(
-							'allow_empty' => true,
-							'protocol' => array(
-								'https',
-								'http',
-								'data',
-							),
-						),
-						'image_url_spec' => array(
-							'allow_empty' => true,
-							'protocol' => array(
-								'https',
-								'http',
-								'data',
-								'absolute',
-							),
-						),
 						'validate_keyframes' => false,
 					),
+					'doc_css_bytes' => true,
 					'max_bytes' => 75000,
 					'max_bytes_spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size',
 				),
@@ -15451,6 +16693,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'cdata_regex' => '\\s*body\\s*{\\s*-webkit-animation:\\s*-amp-start\\s+8s\\s+steps\\(1,\\s*end\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*-moz-animation:\\s*-amp-start\\s+8s\\s+steps\\s*\\(1\\s*,\\s*end\\s*\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*-ms-animation:\\s*-amp-start\\s+8s\\s+steps\\s*\\(1\\s*,\\s*end\\s*\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*animation:\\s*-amp-start\\s+8s\\s+steps\\(1,\\s*end\\)\\s+0s\\s+1\\s+normal\\s+both;?\\s*}\\s*@-webkit-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-moz-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-ms-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-o-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*',
+					'doc_css_bytes' => false,
 				),
 				'tag_spec' => array(
 					'mandatory' => true,
@@ -15473,6 +16716,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'cdata' => array(
 					'cdata_regex' => '\\s*body\\s*{\\s*-webkit-animation:\\s*none;\\s*-moz-animation:\\s*none;\\s*-ms-animation:\\s*none;\\s*animation:\\s*none;?\\s*}\\s*',
+					'doc_css_bytes' => false,
 				),
 				'tag_spec' => array(
 					'mandatory' => true,
@@ -15507,10 +16751,9 @@ class AMP_Allowed_Tags_Generated {
 							'transform',
 							'visibility',
 						),
-						'font_url_spec' => array(),
-						'image_url_spec' => array(),
 						'validate_keyframes' => true,
 					),
+					'doc_css_bytes' => false,
 					'max_bytes' => 500000,
 					'max_bytes_spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#keyframes-stylesheet',
 				),
@@ -15604,9 +16847,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -15695,9 +16936,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -15777,9 +17016,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
 					'text-rendering' => array(),
@@ -16010,9 +17247,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -16154,9 +17389,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -16229,6 +17462,11 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(
 					'datetime' => array(),
+					'pubdate' => array(
+						'value' => array(
+							'',
+						),
+					),
 				),
 				'tag_spec' => array(),
 			),
@@ -16244,9 +17482,7 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'xml:lang' => array(),
 					'xml:space' => array(),
 					'xmlns' => array(),
@@ -16680,9 +17916,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -16784,9 +18018,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -16888,9 +18120,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-miterlimit' => array(),
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -16974,9 +18204,7 @@ class AMP_Allowed_Tags_Generated {
 				'attr_spec_list' => array(
 					'externalresourcesrequired' => array(),
 					'preserveaspectratio' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'viewbox' => array(),
 					'viewtarget' => array(),
 					'xml:lang' => array(),
@@ -16997,9 +18225,7 @@ class AMP_Allowed_Tags_Generated {
 					'g1' => array(),
 					'g2' => array(),
 					'k' => array(),
-					'style' => array(
-						'blacklisted_value_regex' => '!\\s*important',
-					),
+					'style' => array(),
 					'u1' => array(),
 					'u2' => array(),
 					'xml:lang' => array(),
@@ -17024,6 +18250,7 @@ class AMP_Allowed_Tags_Generated {
 	private static $layout_allowed_attrs = array(
 		'data-amp-bind-height' => array(),
 		'data-amp-bind-width' => array(),
+		'disable-inline-width' => array(),
 		'height' => array(),
 		'heights' => array(),
 		'layout' => array(),
@@ -17155,6 +18382,16 @@ class AMP_Allowed_Tags_Generated {
 		'itemscope' => array(),
 		'itemtype' => array(),
 		'lang' => array(),
+		'next-page-hide' => array(
+			'requires_extension' => array(
+				'amp-next-page',
+			),
+		),
+		'next-page-replace' => array(
+			'requires_extension' => array(
+				'amp-next-page',
+			),
+		),
 		'on' => array(),
 		'overflow' => array(),
 		'placeholder' => array(
@@ -17171,9 +18408,7 @@ class AMP_Allowed_Tags_Generated {
 		'rev' => array(),
 		'role' => array(),
 		'slot' => array(),
-		'style' => array(
-			'blacklisted_value_regex' => '(!\\s*important|<!--)',
-		),
+		'style' => array(),
 		'subscriptions-action' => array(
 			'requires_extension' => array(
 				'amp-subscriptions',
@@ -17240,6 +18475,7 @@ class AMP_Allowed_Tags_Generated {
 				'rangeUnderflow',
 				'stepMismatch',
 				'tooLong',
+				'tooShort',
 				'typeMismatch',
 				'valueMissing',
 			),
@@ -17343,6 +18579,166 @@ class AMP_Allowed_Tags_Generated {
 			'tag_spec' => array(
 				'spec_name' => 'AMP-LIVE-LIST [update]',
 				'spec_url' => 'https://amp.dev/documentation/components/amp-live-list#update',
+			),
+		),
+		'AMP-MEGA-MENU > AMP-LIST' => array(
+			'attr_spec_list' => array(
+				'data-amp-bind-src' => array(),
+				'src' => array(),
+			),
+			'tag_spec' => array(
+				'child_tags' => array(
+					'child_tag_name_oneof' => array(
+						'template',
+					),
+					'mandatory_num_child_tags' => 1,
+				),
+				'mandatory_anyof' => array(
+					'data-amp-bind-src',
+					'src',
+				),
+				'reference_points' => array(
+					'AMP-MEGA-MENU > AMP-LIST > TEMPLATE' => array(
+						'mandatory' => false,
+						'unique' => false,
+					),
+				),
+				'spec_name' => 'AMP-MEGA-MENU > AMP-LIST',
+			),
+		),
+		'AMP-MEGA-MENU > AMP-LIST > TEMPLATE' => array(
+			'attr_spec_list' => array(),
+			'tag_spec' => array(
+				'child_tags' => array(
+					'child_tag_name_oneof' => array(
+						'nav',
+					),
+					'mandatory_num_child_tags' => 1,
+				),
+				'mandatory_parent' => 'amp-list',
+				'reference_points' => array(
+					'AMP-MEGA-MENU > NAV' => array(
+						'mandatory' => false,
+						'unique' => false,
+					),
+				),
+				'spec_name' => 'AMP-MEGA-MENU > AMP-LIST > TEMPLATE',
+			),
+		),
+		'AMP-MEGA-MENU > NAV' => array(
+			'attr_spec_list' => array(),
+			'tag_spec' => array(
+				'child_tags' => array(
+					'child_tag_name_oneof' => array(
+						'ol',
+						'ul',
+					),
+					'mandatory_num_child_tags' => 1,
+				),
+				'reference_points' => array(
+					'AMP-MEGA-MENU NAV > UL/OL' => array(
+						'mandatory' => false,
+						'unique' => false,
+					),
+				),
+				'spec_name' => 'AMP-MEGA-MENU > NAV',
+			),
+		),
+		'AMP-MEGA-MENU NAV > UL/OL' => array(
+			'attr_spec_list' => array(),
+			'tag_spec' => array(
+				'child_tags' => array(
+					'child_tag_name_oneof' => array(
+						'li',
+					),
+					'mandatory_min_num_child_tags' => 1,
+				),
+				'mandatory_parent' => 'nav',
+				'reference_points' => array(
+					'AMP-MEGA-MENU NAV > UL/OL > LI' => array(
+						'mandatory' => false,
+						'unique' => false,
+					),
+				),
+				'spec_name' => 'AMP-MEGA-MENU NAV > UL/OL',
+			),
+		),
+		'AMP-MEGA-MENU NAV > UL/OL > LI' => array(
+			'attr_spec_list' => array(),
+			'tag_spec' => array(
+				'child_tags' => array(
+					'child_tag_name_oneof' => array(
+						'a',
+						'button',
+						'div',
+						'h1',
+						'h2',
+						'h3',
+						'h4',
+						'h5',
+						'h6',
+						'span',
+					),
+					'mandatory_min_num_child_tags' => 1,
+				),
+				'reference_points' => array(
+					'AMP-MEGA-MENU item-content' => array(
+						'mandatory' => false,
+						'unique' => true,
+					),
+					'AMP-MEGA-MENU item-heading' => array(
+						'mandatory' => true,
+						'unique' => true,
+					),
+				),
+				'spec_name' => 'AMP-MEGA-MENU NAV > UL/OL > LI',
+			),
+		),
+		'AMP-MEGA-MENU item-content' => array(
+			'attr_spec_list' => array(
+				'role' => array(
+					'mandatory' => true,
+					'value' => array(
+						'dialog',
+					),
+				),
+			),
+			'tag_spec' => array(
+				'spec_name' => 'AMP-MEGA-MENU item-content',
+			),
+		),
+		'AMP-MEGA-MENU item-heading' => array(
+			'attr_spec_list' => array(
+				'role' => array(
+					'value' => array(
+						'button',
+					),
+				),
+			),
+			'tag_spec' => array(
+				'spec_name' => 'AMP-MEGA-MENU item-heading',
+			),
+		),
+		'AMP-NEXT-PAGE > [footer]' => array(
+			'attr_spec_list' => array(
+				'footer' => array(
+					'mandatory' => true,
+				),
+			),
+			'tag_spec' => array(
+				'mandatory_parent' => 'amp-next-page',
+				'spec_name' => 'AMP-NEXT-PAGE > [footer]',
+			),
+		),
+		'AMP-NEXT-PAGE > [recommendation-box]' => array(
+			'attr_spec_list' => array(
+				'recommendation-box' => array(
+					'mandatory' => true,
+				),
+			),
+			'tag_spec' => array(
+				'mandatory_parent' => 'amp-next-page',
+				'spec_name' => 'AMP-NEXT-PAGE > [recommendation-box]',
 			),
 		),
 		'AMP-NEXT-PAGE > [separator]' => array(

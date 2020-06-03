@@ -5,7 +5,12 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Dom\Document;
+use AmpProject\Attribute;
+use AmpProject\CssLength;
+use AmpProject\Dom\Document;
+use AmpProject\Layout;
+use AmpProject\Extension;
+use AmpProject\Tag;
 
 /**
  * Strips the tags and attributes from the content that are not allowed by the AMP spec.
@@ -25,56 +30,65 @@ use Amp\AmpWP\Dom\Document;
  */
 class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
-	const DISALLOWED_TAG                       = 'DISALLOWED_TAG';
-	const DISALLOWED_TAG_MULTIPLE_CHOICES      = 'DISALLOWED_TAG_MULTIPLE_CHOICES';
-	const DISALLOWED_CHILD_TAG                 = 'DISALLOWED_CHILD_TAG';
-	const DISALLOWED_FIRST_CHILD_TAG           = 'DISALLOWED_FIRST_CHILD_TAG';
-	const INCORRECT_NUM_CHILD_TAGS             = 'INCORRECT_NUM_CHILD_TAGS';
-	const INCORRECT_MIN_NUM_CHILD_TAGS         = 'INCORRECT_MIN_NUM_CHILD_TAGS';
-	const WRONG_PARENT_TAG                     = 'WRONG_PARENT_TAG';
-	const DISALLOWED_TAG_ANCESTOR              = 'DISALLOWED_TAG_ANCESTOR';
-	const MANDATORY_TAG_ANCESTOR               = 'MANDATORY_TAG_ANCESTOR';
-	const DISALLOWED_DESCENDANT_TAG            = 'DISALLOWED_DESCENDANT_TAG';
-	const DISALLOWED_ATTR                      = 'DISALLOWED_ATTR';
-	const DISALLOWED_PROCESSING_INSTRUCTION    = 'DISALLOWED_PROCESSING_INSTRUCTION';
-	const CDATA_VIOLATES_BLACKLIST             = 'CDATA_VIOLATES_BLACKLIST';
-	const DUPLICATE_UNIQUE_TAG                 = 'DUPLICATE_UNIQUE_TAG';
-	const MANDATORY_CDATA_MISSING_OR_INCORRECT = 'MANDATORY_CDATA_MISSING_OR_INCORRECT';
+	const ATTR_REQUIRED_BUT_MISSING            = 'ATTR_REQUIRED_BUT_MISSING';
 	const CDATA_TOO_LONG                       = 'CDATA_TOO_LONG';
-	const INVALID_CDATA_CSS_IMPORTANT          = 'INVALID_CDATA_CSS_IMPORTANT';
-	const INVALID_CDATA_CONTENTS               = 'INVALID_CDATA_CONTENTS';
-	const INVALID_CDATA_HTML_COMMENTS          = 'INVALID_CDATA_HTML_COMMENTS';
+	const CDATA_VIOLATES_BLACKLIST             = 'CDATA_VIOLATES_BLACKLIST';
+	const DISALLOWED_ATTR                      = 'DISALLOWED_ATTR';
+	const DISALLOWED_CHILD_TAG                 = 'DISALLOWED_CHILD_TAG';
+	const DISALLOWED_DESCENDANT_TAG            = 'DISALLOWED_DESCENDANT_TAG';
+	const DISALLOWED_FIRST_CHILD_TAG           = 'DISALLOWED_FIRST_CHILD_TAG';
+	const DISALLOWED_PROCESSING_INSTRUCTION    = 'DISALLOWED_PROCESSING_INSTRUCTION';
+	const DISALLOWED_PROPERTY_IN_ATTR_VALUE    = 'DISALLOWED_PROPERTY_IN_ATTR_VALUE';
+	const DISALLOWED_RELATIVE_URL              = 'DISALLOWED_RELATIVE_URL';
+	const DISALLOWED_TAG                       = 'DISALLOWED_TAG';
+	const DISALLOWED_TAG_ANCESTOR              = 'DISALLOWED_TAG_ANCESTOR';
+	const DUPLICATE_ONEOF_ATTRS                = 'DUPLICATE_ONEOF_ATTRS';
+	const DUPLICATE_UNIQUE_TAG                 = 'DUPLICATE_UNIQUE_TAG';
+	const IMPLIED_LAYOUT_INVALID               = 'IMPLIED_LAYOUT_INVALID';
+	const INCORRECT_MIN_NUM_CHILD_TAGS         = 'INCORRECT_MIN_NUM_CHILD_TAGS';
+	const INCORRECT_NUM_CHILD_TAGS             = 'INCORRECT_NUM_CHILD_TAGS';
 	const INVALID_ATTR_VALUE                   = 'INVALID_ATTR_VALUE';
 	const INVALID_ATTR_VALUE_CASEI             = 'INVALID_ATTR_VALUE_CASEI';
 	const INVALID_ATTR_VALUE_REGEX             = 'INVALID_ATTR_VALUE_REGEX';
 	const INVALID_ATTR_VALUE_REGEX_CASEI       = 'INVALID_ATTR_VALUE_REGEX_CASEI';
-	const INVALID_URL_PROTOCOL                 = 'INVALID_URL_PROTOCOL';
-	const INVALID_URL                          = 'INVALID_URL';
-	const DISALLOWED_RELATIVE_URL              = 'DISALLOWED_RELATIVE_URL';
-	const DISALLOWED_EMPTY_URL                 = 'DISALLOWED_EMPTY_URL';
 	const INVALID_BLACKLISTED_VALUE_REGEX      = 'INVALID_BLACKLISTED_VALUE_REGEX';
-	const DISALLOWED_PROPERTY_IN_ATTR_VALUE    = 'DISALLOWED_PROPERTY_IN_ATTR_VALUE';
+	const INVALID_CDATA_CONTENTS               = 'INVALID_CDATA_CONTENTS';
+	const INVALID_CDATA_CSS_I_AMPHTML_NAME     = 'INVALID_CDATA_CSS_I_AMPHTML_NAME';
+	const INVALID_CDATA_CSS_IMPORTANT          = 'INVALID_CDATA_CSS_IMPORTANT';
+	const INVALID_CDATA_HTML_COMMENTS          = 'INVALID_CDATA_HTML_COMMENTS';
+	const INVALID_LAYOUT_AUTO_HEIGHT           = 'INVALID_LAYOUT_AUTO_HEIGHT';
+	const INVALID_LAYOUT_AUTO_WIDTH            = 'INVALID_LAYOUT_AUTO_WIDTH';
+	const INVALID_LAYOUT_FIXED_HEIGHT          = 'INVALID_LAYOUT_FIXED_HEIGHT';
+	const INVALID_LAYOUT_HEIGHT                = 'INVALID_LAYOUT_HEIGHT';
+	const INVALID_LAYOUT_HEIGHTS               = 'INVALID_LAYOUT_HEIGHTS';
+	const INVALID_LAYOUT_NO_HEIGHT             = 'INVALID_LAYOUT_NO_HEIGHT';
+	const INVALID_LAYOUT_UNIT_DIMENSIONS       = 'INVALID_LAYOUT_UNIT_DIMENSIONS';
+	const INVALID_LAYOUT_WIDTH                 = 'INVALID_LAYOUT_WIDTH';
+	const INVALID_URL                          = 'INVALID_URL';
+	const INVALID_URL_PROTOCOL                 = 'INVALID_URL_PROTOCOL';
+	const JSON_ERROR_CTRL_CHAR                 = 'JSON_ERROR_CTRL_CHAR';
+	const JSON_ERROR_DEPTH                     = 'JSON_ERROR_DEPTH';
+	const JSON_ERROR_EMPTY                     = 'JSON_ERROR_EMPTY';
+	const JSON_ERROR_STATE_MISMATCH            = 'JSON_ERROR_STATE_MISMATCH';
+	const JSON_ERROR_SYNTAX                    = 'JSON_ERROR_SYNTAX';
+	const JSON_ERROR_UTF8                      = 'JSON_ERROR_UTF8';
+	const MANDATORY_ANYOF_ATTR_MISSING         = 'MANDATORY_ANYOF_ATTR_MISSING';
+	const MANDATORY_CDATA_MISSING_OR_INCORRECT = 'MANDATORY_CDATA_MISSING_OR_INCORRECT';
+	const MANDATORY_ONEOF_ATTR_MISSING         = 'MANDATORY_ONEOF_ATTR_MISSING';
+	const MANDATORY_TAG_ANCESTOR               = 'MANDATORY_TAG_ANCESTOR';
+	const MISSING_LAYOUT_ATTRIBUTES            = 'MISSING_LAYOUT_ATTRIBUTES';
 	const MISSING_MANDATORY_PROPERTY           = 'MISSING_MANDATORY_PROPERTY';
 	const MISSING_REQUIRED_PROPERTY_VALUE      = 'MISSING_REQUIRED_PROPERTY_VALUE';
-	const ATTR_REQUIRED_BUT_MISSING            = 'ATTR_REQUIRED_BUT_MISSING';
-	const MANDATORY_ANYOF_ATTR_MISSING         = 'MANDATORY_ANYOF_ATTR_MISSING';
-	const MANDATORY_ONEOF_ATTR_MISSING         = 'MANDATORY_ONEOF_ATTR_MISSING';
-	const DUPLICATE_ONEOF_ATTRS                = 'DUPLICATE_ONEOF_ATTRS';
-	const INVALID_LAYOUT_WIDTH                 = 'INVALID_LAYOUT_WIDTH';
-	const INVALID_LAYOUT_HEIGHT                = 'INVALID_LAYOUT_HEIGHT';
-	const INVALID_LAYOUT_AUTO_HEIGHT           = 'INVALID_LAYOUT_AUTO_HEIGHT';
-	const INVALID_LAYOUT_NO_HEIGHT             = 'INVALID_LAYOUT_NO_HEIGHT';
-	const INVALID_LAYOUT_FIXED_HEIGHT          = 'INVALID_LAYOUT_FIXED_HEIGHT';
-	const INVALID_LAYOUT_AUTO_WIDTH            = 'INVALID_LAYOUT_AUTO_WIDTH';
-	const INVALID_LAYOUT_UNIT_DIMENSIONS       = 'INVALID_LAYOUT_UNIT_DIMENSIONS';
-	const INVALID_LAYOUT_HEIGHTS               = 'INVALID_LAYOUT_HEIGHTS';
+	const MISSING_URL                          = 'MISSING_URL';
+	const SPECIFIED_LAYOUT_INVALID             = 'SPECIFIED_LAYOUT_INVALID';
+	const WRONG_PARENT_TAG                     = 'WRONG_PARENT_TAG';
 
 	/**
 	 * Allowed tags.
 	 *
 	 * @since 0.5
 	 *
-	 * @var string[]
+	 * @var array
 	 */
 	protected $allowed_tags;
 
@@ -332,6 +346,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// ancestor nodes in AMP_Tag_And_Attribute_Sanitizer::remove_node().
 		$this_child = $element->firstChild;
 		while ( $this_child && $element->parentNode ) {
+			$prev_child = $this_child->previousSibling;
 			$next_child = $this_child->nextSibling;
 			if ( $this_child instanceof DOMElement ) {
 				$result = $this->sanitize_element( $this_child );
@@ -344,7 +359,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( $this_child instanceof DOMProcessingInstruction ) {
 				$this->remove_invalid_child( $this_child, [ 'code' => self::DISALLOWED_PROCESSING_INSTRUCTION ] );
 			}
-			$this_child = $next_child;
+
+			if ( ! $this_child->parentNode ) {
+				// Handle case where this child is replaced with children.
+				$this_child = $prev_child ? $prev_child->nextSibling : $element->firstChild;
+			} else {
+				$this_child = $next_child;
+			}
 		}
 
 		// If the element is still in the tree, process it.
@@ -498,7 +519,15 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					array_unique(
 						array_map(
 							static function ( $validation_error ) {
-								unset( $validation_error['spec_name'] );
+								unset(
+									$validation_error['spec_name'],
+									// Remove other keys that may make the error unique.
+									$validation_error['required_parent_name'],
+									$validation_error['required_ancestor_name'],
+									$validation_error['required_child_count'],
+									$validation_error['required_min_child_count'],
+									$validation_error['required_attr_value']
+								);
 								return $validation_error;
 							},
 							$validation_errors
@@ -520,13 +549,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					);
 				} else {
 					// Otherwise, we have a rare condition where multiple tag specs fail for different reasons.
-					$this->remove_invalid_child(
-						$node,
-						[
-							'code'   => self::DISALLOWED_TAG_MULTIPLE_CHOICES,
-							'errors' => $validation_errors,
-						]
-					);
+					foreach ( $validation_errors as $validation_error ) {
+						if ( true === $this->remove_invalid_child( $node, $validation_error ) ) {
+							break; // Once removed, ignore remaining errors.
+						}
+					}
 				}
 			}
 			return null;
@@ -632,7 +659,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			$merged_attr_spec_list = array_merge( $merged_attr_spec_list, $this->layout_allowed_attributes );
 
 			if ( isset( $tag_spec['amp_layout']['supported_layouts'] ) ) {
-				$layouts = wp_array_slice_assoc( AMP_Rule_Spec::$layout_enum, $tag_spec['amp_layout']['supported_layouts'] );
+				$layouts = wp_array_slice_assoc( Layout::FROM_SPEC, $tag_spec['amp_layout']['supported_layouts'] );
 
 				$merged_attr_spec_list['layout'][ AMP_Rule_Spec::VALUE_REGEX_CASEI ] = '(' . implode( '|', $layouts ) . ')';
 			}
@@ -900,21 +927,23 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			];
 		}
 		if ( isset( $cdata_spec['blacklisted_cdata_regex'] ) ) {
-			if ( preg_match( '@' . $cdata_spec['blacklisted_cdata_regex']['regex'] . '@u', $element->textContent ) ) {
-				if ( isset( $cdata_spec['blacklisted_cdata_regex']['error_message'] ) ) {
-					// There are only a few error messages, so map them to error codes.
-					switch ( $cdata_spec['blacklisted_cdata_regex']['error_message'] ) {
-						case 'CSS !important':
-							return [ 'code' => self::INVALID_CDATA_CSS_IMPORTANT ];
-						case 'contents':
-							return [ 'code' => self::INVALID_CDATA_CONTENTS ];
-						case 'html comments':
-							return [ 'code' => self::INVALID_CDATA_HTML_COMMENTS ];
+			foreach ( $cdata_spec['blacklisted_cdata_regex'] as $blacklisted_cdata_regex ) {
+				if ( preg_match( '@' . $blacklisted_cdata_regex['regex'] . '@u', $element->textContent ) ) {
+					if ( isset( $blacklisted_cdata_regex['error_message'] ) ) {
+						// There are only a few error messages, so map them to error codes.
+						switch ( $blacklisted_cdata_regex['error_message'] ) {
+							case 'CSS i-amphtml- name prefix':
+								return [ 'code' => self::INVALID_CDATA_CSS_I_AMPHTML_NAME ]; // @todo This really should be done as part of the CSS sanitizer.
+							case 'contents':
+								return [ 'code' => self::INVALID_CDATA_CONTENTS ];
+							case 'html comments':
+								return [ 'code' => self::INVALID_CDATA_HTML_COMMENTS ];
+						}
 					}
-				}
 
-				// Note: This fallback case is not currently reachable because all error messages are accounted for in the switch statement.
-				return [ 'code' => self::CDATA_VIOLATES_BLACKLIST ];
+					// Note: This fallback case is not currently reachable because all error messages are accounted for in the switch statement.
+					return [ 'code' => self::CDATA_VIOLATES_BLACKLIST ];
+				}
 			}
 		} elseif ( isset( $cdata_spec['cdata_regex'] ) ) {
 			$delimiter = false === strpos( $cdata_spec['cdata_regex'], '@' ) ? '@' : '#';
@@ -922,7 +951,48 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				return [ 'code' => self::MANDATORY_CDATA_MISSING_OR_INCORRECT ];
 			}
 		}
+
+		// When the CDATA is expected to be JSON, ensure it's valid JSON.
+		if ( 'script' === $element->nodeName && 'application/json' === $element->getAttribute( 'type' ) ) {
+			if ( '' === trim( $element->textContent ) ) {
+				return [ 'code' => self::JSON_ERROR_EMPTY ];
+			}
+
+			json_decode( $element->textContent );
+			$json_last_error = json_last_error();
+
+			if ( JSON_ERROR_NONE !== $json_last_error ) {
+				return [ 'code' => $this->get_json_error_code( $json_last_error ) ];
+			}
+		}
+
 		return true;
+	}
+
+	/**
+	 * Gets the JSON error code for the last error.
+	 *
+	 * @link https://www.php.net/manual/en/function.json-last-error.php#refsect1-function.json-last-error-returnvalues
+	 *
+	 * @param int $json_last_error The last JSON error code.
+	 * @return string The error code for the last JSON error.
+	 */
+	private function get_json_error_code( $json_last_error ) {
+		static $possible_json_errors = [
+			'JSON_ERROR_CTRL_CHAR',
+			'JSON_ERROR_DEPTH',
+			'JSON_ERROR_STATE_MISMATCH',
+			'JSON_ERROR_SYNTAX',
+			'JSON_ERROR_UTF8',
+		];
+
+		foreach ( $possible_json_errors as $possible_error ) {
+			if ( constant( $possible_error ) === $json_last_error ) {
+				return $possible_error;
+			}
+		}
+
+		return 'JSON_ERROR_SYNTAX';
 	}
 
 	/**
@@ -945,14 +1015,16 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ] ) && ! $this->has_parent( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ] ) ) {
 			return [
-				'code' => self::WRONG_PARENT_TAG,
+				'code'                 => self::WRONG_PARENT_TAG,
+				'required_parent_name' => $tag_spec[ AMP_Rule_Spec::MANDATORY_PARENT ],
 			];
 		}
 
 		// Extension scripts must be in the head. Note this currently never fails because all AMP scripts are moved to the head before sanitization.
 		if ( isset( $tag_spec['extension_spec'] ) && ! $this->has_parent( $node, 'head' ) ) {
 			return [
-				'code' => self::WRONG_PARENT_TAG,
+				'code'                 => self::WRONG_PARENT_TAG,
+				'required_parent_name' => 'head',
 			];
 		}
 
@@ -969,7 +1041,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_ANCESTOR ] ) && ! $this->has_ancestor( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_ANCESTOR ] ) ) {
 			return [
-				'code' => self::MANDATORY_TAG_ANCESTOR,
+				'code'                   => self::MANDATORY_TAG_ANCESTOR,
+				'required_ancestor_name' => $tag_spec[ AMP_Rule_Spec::MANDATORY_ANCESTOR ],
 			];
 		}
 
@@ -1190,7 +1263,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 			// Check the context to see if we are currently within a template tag.
 			// If this is the case and the attribute value contains a template placeholder, we skip sanitization.
-			if ( ! empty( $this->open_elements['template'] ) && preg_match( '/{{.*?}}/', $attr_node->nodeValue ) ) {
+			if ( $this->is_inside_mustache_template( $node ) && preg_match( '/{{[^}]+?}}/', $attr_node->nodeValue ) ) {
 				continue;
 			}
 
@@ -1227,9 +1300,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_valid_url( $node, $attr_name, $attr_spec_rule ) ) {
 				$attrs_to_remove[] = [ $attr_node, self::INVALID_URL, null ];
-			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) &&
+			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_disallowed_empty( $node, $attr_name, $attr_spec_rule ) ) {
-				$attrs_to_remove[] = [ $attr_node, self::DISALLOWED_EMPTY_URL, null ];
+				$attrs_to_remove[] = [ $attr_node, self::MISSING_URL, null ];
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_disallowed_relative( $node, $attr_name, $attr_spec_rule ) ) {
 				$attrs_to_remove[] = [ $attr_node, self::DISALLOWED_RELATIVE_URL, null ];
@@ -1270,93 +1343,181 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return true;
 		}
 
-		// Elements without a width or height don't need to be validated.
-		if ( ! $node->hasAttribute( 'width' ) && ! $node->hasAttribute( 'height' ) ) {
+		// We disable validating layout for tags where one of the layout attributes contains mustache syntax.
+		// See <https://github.com/ampproject/amphtml/blob/19f1b72/validator/engine/validator.js#L4301-L4311>.
+		if ( $this->is_inside_mustache_template( $node ) && $this->has_layout_attribute_with_mustache_variable( $node ) ) {
 			return true;
 		}
 
-		$layout_attr = $node->getAttribute( 'layout' );
-		$allow_fluid = AMP_Rule_Spec::LAYOUT_FLUID === $layout_attr;
-		$allow_auto  = true;
+		$layout_attr  = $node->getAttribute( Attribute::LAYOUT );
+		$sizes_attr   = $node->getAttribute( Attribute::SIZES );
+		$heights_attr = $node->getAttribute( Attribute::HEIGHTS );
+		$allow_fluid  = Layout::FLUID === $layout_attr;
+		$allow_auto   = true;
 
-		$input_width  = new AMP_CSS_Length( $node->getAttribute( 'width' ) );
-		$input_height = new AMP_CSS_Length( $node->getAttribute( 'height' ) );
-
+		$input_width = new CssLength( $node->getAttribute( Attribute::WIDTH ) );
 		$input_width->validate( $allow_auto, $allow_fluid );
+		if ( ! $input_width->isValid() ) {
+			return [
+				'code'      => self::INVALID_LAYOUT_WIDTH,
+				'attribute' => Attribute::WIDTH,
+			];
+		}
+
+		$input_height = new CssLength( $node->getAttribute( Attribute::HEIGHT ) );
 		$input_height->validate( $allow_auto, $allow_fluid );
-
-		if ( ! $input_width->is_valid() ) {
-			return [ 'code' => self::INVALID_LAYOUT_WIDTH ];
+		if ( ! $input_height->isValid() ) {
+			return [
+				'code'      => self::INVALID_LAYOUT_HEIGHT,
+				'attribute' => Attribute::HEIGHT,
+			];
 		}
-
-		if ( ! $input_height->is_valid() ) {
-			return [ 'code' => self::INVALID_LAYOUT_HEIGHT ];
-		}
-
-		// No need to go further if there is no layout attribute.
-		if ( ! $node->hasAttribute( 'layout' ) ) {
-			return true;
-		}
-
-		$sizes_attr   = $node->getAttribute( 'sizes' );
-		$heights_attr = $node->getAttribute( 'heights' );
 
 		// Now calculate the effective layout attributes.
 		$width  = $this->calculate_width( $tag_spec['amp_layout'], $layout_attr, $input_width );
 		$height = $this->calculate_height( $tag_spec['amp_layout'], $layout_attr, $input_height );
 		$layout = $this->calculate_layout( $layout_attr, $width, $height, $sizes_attr, $heights_attr );
 
+		// Does the tag support the computed layout?
+		// See <https://github.com/ampproject/amphtml/blob/19f1b72d/validator/engine/validator.js#L4364-L4391>.
+		if ( ! $this->supports_layout( $tag_spec, $layout ) ) {
+			/*
+			 * Special case. If no layout related attributes were provided, this implies
+			 * the CONTAINER layout. However, telling the user that the implied layout
+			 * is unsupported for this tag is confusing if all they need is to provide
+			 * width and height in, for example, the common case of creating
+			 * an AMP-IMG without specifying dimensions. In this case, we emit a
+			 * less correct, but simpler error message that could be more useful to
+			 * the average user.
+			 *
+			 * See https://github.com/ampproject/amp-wp/issues/4465
+			 */
+			if (
+				! $layout_attr &&
+				Layout::CONTAINER === $layout &&
+				$this->supports_layout( $tag_spec, Layout::RESPONSIVE )
+			) {
+				return [
+					'code'      => self::MISSING_LAYOUT_ATTRIBUTES,
+					'node_name' => $node->tagName,
+				];
+			}
+			return [
+				'code'      => ! $layout_attr ? self::IMPLIED_LAYOUT_INVALID : self::SPECIFIED_LAYOUT_INVALID,
+				'layout'    => $layout,
+				'node_name' => $node->tagName,
+			];
+		}
+
+		// No need to go further if there is no layout attribute.
+		if ( ! $layout_attr ) {
+			return true;
+		}
+
 		// Only FLEX_ITEM allows for height to be set to auto.
-		if ( $height->is_auto() && AMP_Rule_Spec::LAYOUT_FLEX_ITEM !== $layout ) {
-			return [ 'code' => self::INVALID_LAYOUT_AUTO_HEIGHT ];
+		if ( $height->isAuto() && Layout::FLEX_ITEM !== $layout ) {
+			return [
+				'code'      => self::INVALID_LAYOUT_AUTO_HEIGHT,
+				'attribute' => Attribute::HEIGHT,
+			];
 		}
 
 		// FIXED, FIXED_HEIGHT, INTRINSIC, RESPONSIVE must have height set.
-		if (
-			(
-				AMP_Rule_Spec::LAYOUT_FIXED === $layout ||
-				AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT === $layout ||
-				AMP_Rule_Spec::LAYOUT_INTRINSIC === $layout ||
-				AMP_Rule_Spec::LAYOUT_RESPONSIVE === $layout
-			) &&
-			! $height->is_set()
+		if ( in_array( $layout, [ Layout::FIXED, Layout::FIXED_HEIGHT, Layout::INTRINSIC, Layout::RESPONSIVE ], true )
+			&& ! $height->isDefined()
 		) {
-			return [ 'code' => self::INVALID_LAYOUT_NO_HEIGHT ];
+			return [
+				'code'      => self::INVALID_LAYOUT_NO_HEIGHT,
+				'attribute' => Attribute::HEIGHT,
+			];
 		}
 
 		// For FIXED_HEIGHT if width is set it must be auto.
-		if ( AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT === $layout && $width->is_set() && ! $width->is_auto() ) {
-			return [ 'code' => self::INVALID_LAYOUT_FIXED_HEIGHT ];
+		if ( Layout::FIXED_HEIGHT === $layout && $width->isDefined() && ! $width->isAuto() ) {
+			return [
+				'code'                => self::INVALID_LAYOUT_FIXED_HEIGHT,
+				'attribute'           => Attribute::WIDTH,
+				'required_attr_value' => CssLength::AUTO,
+			];
 		}
 
 		// FIXED, INTRINSIC, RESPONSIVE must have width set and not be auto.
-		if (
-			AMP_Rule_Spec::LAYOUT_FIXED === $layout ||
-			AMP_Rule_Spec::LAYOUT_INTRINSIC === $layout ||
-			AMP_Rule_Spec::LAYOUT_RESPONSIVE === $layout
-		) {
-			if ( ! $width->is_set() || $width->is_auto() ) {
-				return [ 'code' => self::INVALID_LAYOUT_AUTO_WIDTH ];
+		if ( in_array( $layout, [ Layout::FIXED, Layout::INTRINSIC, Layout::RESPONSIVE ], true ) ) {
+			if ( ! $width->isDefined() || $width->isAuto() ) {
+				return [
+					'code'      => self::INVALID_LAYOUT_AUTO_WIDTH,
+					'attribute' => Attribute::WIDTH,
+				];
 			}
 		}
 
 		// INTRINSIC, RESPONSIVE must have same units for height and width.
-		if (
-			(
-				AMP_Rule_Spec::LAYOUT_INTRINSIC === $layout ||
-				AMP_Rule_Spec::LAYOUT_RESPONSIVE === $layout
-			) &&
-			$width->get_unit() !== $height->get_unit()
+		if ( in_array( $layout, [ Layout::INTRINSIC, Layout::RESPONSIVE ], true )
+			&& $width->getUnit() !== $height->getUnit()
 		) {
 			return [ 'code' => self::INVALID_LAYOUT_UNIT_DIMENSIONS ];
 		}
 
 		// Heights attribute is only allowed for RESPONSIVE layout.
-		if ( ! $this->is_empty_attribute_value( $heights_attr ) && AMP_Rule_Spec::LAYOUT_RESPONSIVE !== $layout ) {
-			return [ 'code' => self::INVALID_LAYOUT_HEIGHTS ];
+		if ( ! $this->is_empty_attribute_value( $heights_attr ) && Layout::RESPONSIVE !== $layout ) {
+			return [
+				'code'                => self::INVALID_LAYOUT_HEIGHTS,
+				'attribute'           => Attribute::LAYOUT,
+				'required_attr_value' => Layout::RESPONSIVE,
+			];
 		}
 
 		return true;
+	}
+
+	/**
+	 * Whether the node is inside a mustache template.
+	 *
+	 * @since 1.5.3
+	 *
+	 * @param DOMElement $node The node to examine.
+	 * @return bool Whether the node is inside a valid mustache template.
+	 */
+	private function is_inside_mustache_template( DOMElement $node ) {
+		if ( ! empty( $this->open_elements[ Tag::TEMPLATE ] ) ) {
+			while ( $node->parentNode instanceof DOMElement ) {
+				$node = $node->parentNode;
+				if ( Tag::TEMPLATE === $node->nodeName && Extension::MUSTACHE === $node->getAttribute( Attribute::TYPE ) ) {
+					return true;
+				}
+			}
+		} elseif ( ! empty( $this->open_elements[ Tag::SCRIPT ] ) ) {
+			while ( $node->parentNode instanceof DOMElement ) {
+				$node = $node->parentNode;
+				if ( Tag::SCRIPT === $node->nodeName && Extension::MUSTACHE === $node->getAttribute( Attribute::TEMPLATE ) && Attribute::TYPE_TEXT_PLAIN === $node->getAttribute( Attribute::TYPE ) ) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Whether the node has a layout attribute with variable syntax, like {{foo}}.
+	 *
+	 * This is important for whether to validate the layout of the node.
+	 * Similar to the validation logic in the AMP validator.
+	 *
+	 * @see https://github.com/ampproject/amphtml/blob/c083d2c6120a251dcc9b0beb33c0336c7d3ca5a8/validator/engine/validator.js#L4038-L4054
+	 *
+	 * @since 1.5.3
+	 *
+	 * @param DOMElement $node The node to examine.
+	 * @return bool Whether the node has a layout attribute with variable syntax.
+	 */
+	private function has_layout_attribute_with_mustache_variable( DOMElement $node ) {
+		foreach ( [ Attribute::LAYOUT, Attribute::WIDTH, Attribute::HEIGHT, Attribute::SIZES, Attribute::HEIGHTS ] as $attribute ) {
+			if ( preg_match( '/{{[^}]+?}}/', $node->getAttribute( $attribute ) ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -1372,18 +1533,21 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @version 1911070201440
 	 * @link https://github.com/ampproject/amphtml/blob/1911070201440/validator/engine/validator.js#L3451
 	 *
-	 * @param array          $amp_layout_spec AMP layout specifications for tag.
-	 * @param string         $input_layout    Layout for tag.
-	 * @param AMP_CSS_Length $input_width     Parsed width.
-	 * @return AMP_CSS_Length
+	 * @param array     $amp_layout_spec AMP layout specifications for tag.
+	 * @param string    $input_layout    Layout for tag.
+	 * @param CssLength $input_width     Parsed width.
+	 * @return CssLength
 	 */
-	private function calculate_width( $amp_layout_spec, $input_layout, AMP_CSS_Length $input_width ) {
+	private function calculate_width( $amp_layout_spec, $input_layout, CssLength $input_width ) {
 		if (
-			( ! $this->is_empty_attribute_value( $input_layout ) || AMP_Rule_Spec::LAYOUT_FIXED === $input_layout ) &&
-			! $input_width->is_set() &&
+			(
+				! array_key_exists( $input_layout, Layout::TO_SPEC ) ||
+				Layout::FIXED === $input_layout
+			) &&
+			! $input_width->isDefined() &&
 			isset( $amp_layout_spec['defines_default_width'] )
 		) {
-			$css_length = new AMP_CSS_Length( '1px' );
+			$css_length = new CssLength( '1px' );
 			$css_length->validate( false, false );
 			return $css_length;
 		}
@@ -1400,22 +1564,21 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @version 1911070201440
 	 * @link https://github.com/ampproject/amphtml/blob/1911070201440/validator/engine/validator.js#L3493
 	 *
-	 * @param array          $amp_layout_spec AMP layout specifications for tag.
-	 * @param string         $input_layout    Layout for tag.
-	 * @param AMP_CSS_Length $input_height    Parsed height.
-	 * @return AMP_CSS_Length
+	 * @param array     $amp_layout_spec AMP layout specifications for tag.
+	 * @param string    $input_layout    Layout for tag.
+	 * @param CssLength $input_height    Parsed height.
+	 * @return CssLength
 	 */
-	private function calculate_height( $amp_layout_spec, $input_layout, AMP_CSS_Length $input_height ) {
+	private function calculate_height( $amp_layout_spec, $input_layout, CssLength $input_height ) {
 		if (
 			(
-				! $this->is_empty_attribute_value( $input_layout ) ||
-				AMP_Rule_Spec::LAYOUT_FIXED === $input_layout ||
-				AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT === $input_layout
+				! array_key_exists( $input_layout, Layout::TO_SPEC ) ||
+				in_array( $input_layout, [ Layout::FIXED, Layout::FIXED_HEIGHT ], true )
 			) &&
-			! $input_height->is_set() &&
-			isset( $amp_layout_spec['defines_default_width'] )
+			! $input_height->isDefined() &&
+			isset( $amp_layout_spec['defines_default_height'] )
 		) {
-			$css_length = new AMP_CSS_Length( '1px' );
+			$css_length = new CssLength( '1px' );
 			$css_length->validate( false, false );
 			return $css_length;
 		}
@@ -1437,39 +1600,39 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @version 1911070201440
 	 * @link https://github.com/ampproject/amphtml/blob/1911070201440/validator/engine/validator.js#L3516
 	 *
-	 * @param string         $layout_attr  Layout attribute.
-	 * @param AMP_CSS_Length $width        Parsed width.
-	 * @param AMP_CSS_Length $height       Parsed height.
-	 * @param string         $sizes_attr   Sizes attribute.
-	 * @param string         $heights_attr Heights attribute.
+	 * @param string    $layout_attr  Layout attribute.
+	 * @param CssLength $width        Parsed width.
+	 * @param CssLength $height       Parsed height.
+	 * @param string    $sizes_attr   Sizes attribute.
+	 * @param string    $heights_attr Heights attribute.
 	 * @return string Layout type.
 	 */
-	private function calculate_layout( $layout_attr, AMP_CSS_Length $width, AMP_CSS_Length $height, $sizes_attr, $heights_attr ) {
+	private function calculate_layout( $layout_attr, CssLength $width, CssLength $height, $sizes_attr, $heights_attr ) {
 		if ( ! $this->is_empty_attribute_value( $layout_attr ) ) {
 			return $layout_attr;
-		} elseif ( ! $width->is_set() && ! $height->is_set() ) {
-			return AMP_Rule_Spec::LAYOUT_CONTAINER;
+		} elseif ( ! $width->isDefined() && ! $height->isDefined() ) {
+			return Layout::CONTAINER;
 		} elseif (
-			( $height->is_set() && $height->is_fluid() ) ||
-			( $width->is_set() && $width->is_fluid() )
+			( $height->isDefined() && $height->isFluid() ) ||
+			( $width->isDefined() && $width->isFluid() )
 		) {
-			return AMP_Rule_Spec::LAYOUT_FLUID;
+			return Layout::FLUID;
 		} elseif (
-			$height->is_set() &&
-			( ! $width->is_set() || $width->is_auto() )
+			$height->isDefined() &&
+			( ! $width->isDefined() || $width->isAuto() )
 		) {
-			return AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT;
+			return Layout::FIXED_HEIGHT;
 		} elseif (
-			$height->is_set() &&
-			$width->is_set() &&
+			$height->isDefined() &&
+			$width->isDefined() &&
 			(
 				! $this->is_empty_attribute_value( $sizes_attr ) ||
 				! $this->is_empty_attribute_value( $heights_attr )
 			)
 		) {
-			return AMP_Rule_Spec::LAYOUT_RESPONSIVE;
+			return Layout::RESPONSIVE;
 		} else {
-			return AMP_Rule_Spec::LAYOUT_FIXED;
+			return Layout::FIXED;
 		}
 	}
 
@@ -1482,7 +1645,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string     $attr_name      Attribute name.
 	 * @param array[]    $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return string:
+	 * @return int:
 	 *      - AMP_Rule_Spec::PASS - $attr_name is mandatory and it exists
 	 *      - AMP_Rule_Spec::FAIL - $attr_name is mandatory, but doesn't exist
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name is not mandatory
@@ -1532,7 +1695,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string     $attr_name      Attribute name.
 	 * @param array      $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return string:
+	 * @return int:
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
 	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
@@ -1607,7 +1770,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string       $attr_name      Attribute name.
 	 * @param array|string $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return string:
+	 * @return int:
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
 	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
@@ -1652,7 +1815,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string           $attr_name      Attribute name.
 	 * @param array[]|string[] $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return string:
+	 * @return int:
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
 	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
@@ -1686,7 +1849,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string           $attr_name      Attribute name.
 	 * @param array[]|string[] $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return string:
+	 * @return int:
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
 	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
@@ -1717,7 +1880,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string           $attr_name      Attribute name.
 	 * @param array[]|string[] $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return string:
+	 * @return int:
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
 	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
@@ -1789,7 +1952,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string           $attr_name      Attribute name.
 	 * @param array[]|string[] $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return string:
+	 * @return int:
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
 	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
@@ -1860,7 +2023,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string           $attr_name      Attribute name.
 	 * @param array[]|string[] $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return string:
+	 * @return int:
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
 	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
@@ -1918,14 +2081,19 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string           $attr_name      Attribute name.
 	 * @param array[]|string[] $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return string:
+	 * @return int:
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
 	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
 	 *                                        is no rule for this attribute.
 	 */
 	private function check_attr_spec_rule_disallowed_empty( DOMElement $node, $attr_name, $attr_spec_rule ) {
-		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) && ! $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] && $node->hasAttribute( $attr_name ) ) {
+		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) ) {
+			$allow_empty = $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ];
+		} else {
+			$allow_empty = empty( $attr_spec_rule[ AMP_Rule_Spec::MANDATORY ] );
+		}
+		if ( ! $allow_empty && $node->hasAttribute( $attr_name ) ) {
 			$attr_value = $node->getAttribute( $attr_name );
 			if ( empty( $attr_value ) ) {
 				return AMP_Rule_Spec::FAIL;
@@ -1944,7 +2112,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string           $attr_name      Attribute name.
 	 * @param array[]|string[] $attr_spec_rule Attribute spec rule.
 	 *
-	 * @return string:
+	 * @return int:
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
 	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
@@ -2013,7 +2181,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			)
 		);
 	}
-
 
 	/**
 	 * Check if attribute has valid properties.
@@ -2176,7 +2343,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.5
 	 *
-	 * @todo It would be more robust if the the actual tag spec were looked up and then matched against the parent, but this is currently overkill.
+	 * @todo It would be more robust if the the actual tag spec were looked up (see https://github.com/ampproject/amp-wp/pull/3817) and then matched against the parent. This is needed to support the spec 'subscriptions script ciphertext'.
 	 *
 	 * @param DOMElement $node             Node.
 	 * @param string     $parent_spec_name Parent spec name, for example 'body' or 'form [method=post]'.
@@ -2288,6 +2455,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					[
 						'code'                => self::DISALLOWED_DESCENDANT_TAG,
 						'allowed_descendants' => $allowed_descendants,
+						'disallowed_ancestor' => $node->parentNode->nodeName,
 						'spec_name'           => $spec_name,
 					]
 				);
@@ -2347,8 +2515,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				return true;
 			} else {
 				return [
-					'code'           => self::INCORRECT_NUM_CHILD_TAGS,
-					'children_count' => $child_element_count,
+					'code'                 => self::INCORRECT_NUM_CHILD_TAGS,
+					'children_count'       => $child_element_count,
+					'required_child_count' => $child_tags['mandatory_num_child_tags'],
 				];
 			}
 		}
@@ -2360,8 +2529,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				return true;
 			} else {
 				return [
-					'code'           => self::INCORRECT_MIN_NUM_CHILD_TAGS,
-					'children_count' => $child_element_count,
+					'code'                     => self::INCORRECT_MIN_NUM_CHILD_TAGS,
+					'children_count'           => $child_element_count,
+					'required_min_child_count' => $child_tags['mandatory_min_num_child_tags'],
 				];
 			}
 		}
@@ -2384,19 +2554,17 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Do quick check to see if the the ancestor element is even open.
 		// Note first isset check is for the sake of \AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test::test_get_ancestor_with_matching_spec_name().
-		if ( isset( $this->open_element['html'] ) && empty( $this->open_elements[ $parsed_spec_name['tag_name'] ] ) ) {
+		if ( isset( $this->open_elements['html'] ) && empty( $this->open_elements[ $parsed_spec_name['tag_name'] ] ) ) {
 			return null;
 		}
 
-		while ( $node && $node->parentNode ) {
+		while ( $node->parentNode instanceof DOMElement ) {
 			$node = $node->parentNode;
 			if ( $node->nodeName === $parsed_spec_name['tag_name'] ) {
 
 				// Ensure attributes match; if not move up to the next node.
 				foreach ( $parsed_spec_name['attributes'] as $attr_name => $attr_value ) {
 					$match = (
-						$node instanceof DOMElement
-						&&
 						true === $attr_value ? $node->hasAttribute( $attr_name ) : strtolower( $node->getAttribute( $attr_name ) ) === $attr_value
 					);
 					if ( ! $match ) {
@@ -2487,5 +2655,25 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				$parent->removeChild( $node );
 			}
 		}
+	}
+
+	/**
+	 * Check whether a given tag spec supports a layout.
+	 *
+	 * @param array  $tag_spec Tag spec to check.
+	 * @param string $layout   Layout to check support for. Based on the constants in the Layout interface.
+	 * @param bool   $fallback Value to use for fallback if no explicit support is defined.
+	 * @return bool Whether the given tag spec supports the layout.
+	 */
+	private function supports_layout( $tag_spec, $layout, $fallback = false ) {
+		if ( ! isset( $tag_spec['amp_layout']['supported_layouts'] ) ) {
+			return $fallback;
+		}
+
+		if ( ! array_key_exists( $layout, LAYOUT::TO_SPEC ) ) {
+			return false;
+		}
+
+		return in_array( Layout::TO_SPEC[ $layout ], $tag_spec['amp_layout']['supported_layouts'], true );
 	}
 }

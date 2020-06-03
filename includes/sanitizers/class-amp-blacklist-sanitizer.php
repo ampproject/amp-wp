@@ -73,6 +73,11 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 		if ( $node->hasAttributes() ) {
 			$length = $node->attributes->length;
 			for ( $i = $length - 1; $i >= 0; $i-- ) {
+				/**
+				 * Attribute node to check.
+				 *
+				 * @var DOMAttr $attribute
+				 */
 				$attribute      = $node->attributes->item( $i );
 				$attribute_name = strtolower( $attribute->name );
 				if ( in_array( $attribute_name, $bad_attributes, true ) ) {

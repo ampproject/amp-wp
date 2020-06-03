@@ -6,12 +6,16 @@
  * @since 1.1
  */
 
+use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+
 /**
  * Tests for AMP_Service_Worker.
  *
  * @covers AMP_Service_Worker
  */
 class Test_AMP_Service_Worker extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/**
 	 * Set up.
@@ -211,7 +215,7 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 	public function test_install_service_worker() {
 		$output = get_echo( [ 'AMP_Service_Worker', 'install_service_worker' ] );
 
-		$this->assertContains( '<amp-install-serviceworker', $output );
+		$this->assertStringContains( '<amp-install-serviceworker', $output );
 	}
 
 	/**
@@ -243,10 +247,9 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 		$this->assertInstanceOf( 'Exception', $exception );
 		$this->assertEquals( 'exited', $exception->getMessage() );
 		$output = ob_get_clean();
-		$this->assertContains( '<script>navigator.serviceWorker.register', $output );
+		$this->assertStringContains( '<script>navigator.serviceWorker.register', $output );
 
 		// Go back home to clean up 🤷!
 		$this->go_to( home_url() );
 	}
-
 }

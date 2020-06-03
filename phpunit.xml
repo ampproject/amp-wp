@@ -8,17 +8,15 @@
 	defaultTestSuite="default"
 	>
 	<php>
-		<const name="WP_TEST_ACTIVATED_PLUGINS" value="jetpack/jetpack.php,gutenberg/gutenberg.php,pwa/pwa.php" />
+		<const name="WP_TEST_ACTIVATED_PLUGINS" value="gutenberg/gutenberg.php,pwa/pwa.php" />
 	</php>
 	<testsuites>
 		<!-- Default test suite to run all tests -->
 		<testsuite name="default">
-			<directory prefix="test-" suffix=".php">./tests/</directory>
-			<exclude>tests/php/test-amp-image-dimension-extract-download.php</exclude>
+			<directory prefix="test-" suffix=".php">./tests/php/</directory>
 		</testsuite>
 		<testsuite name="external-http">
 			<directory prefix="test-" suffix="embed-handler.php">tests/</directory>
-			<file>tests/php/test-amp-image-dimension-extract-download.php</file>
 		</testsuite>
 	</testsuites>
 	<groups>

@@ -1,7 +1,7 @@
 {
   "root": true,
   "extends": [
-    "plugin:@wordpress/eslint-plugin/recommended",
+    "plugin:@wordpress/eslint-plugin/recommended-with-formatting",
     "plugin:import/recommended",
     "plugin:eslint-comments/recommended"
   ],
@@ -57,7 +57,7 @@
     "react/no-unused-prop-types": "error",
     "react/self-closing-comp": "error",
     "import/no-unresolved": [ "error", {
-      "ignore": [ "jquery", "amp-block-editor-data" ]
+      "ignore": [ "jquery", "amp-block-editor-data", "amp-setup" ]
     } ],
     "import/order": [ "error", { "groups": [ "builtin", [ "external", "unknown" ], "internal", "parent", "sibling", "index" ] } ],
     "jsdoc/check-indentation": "error",

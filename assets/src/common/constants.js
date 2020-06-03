@@ -2,7 +2,4 @@
 export const MIN_FONT_SIZE = 6;
 export const MAX_FONT_SIZE = 72;
 export const MINIMUM_FEATURED_IMAGE_WIDTH = 1200;
-export const MEGABYTE_IN_BYTES = 1000000;
-export const VIDEO_ALLOWED_MEGABYTES_PER_SECOND = 1;
 export const FILE_TYPE_ERROR_VIEW = 'select-file-type-error';
-export const FILE_SIZE_ERROR_VIEW = 'select-file-size-error';

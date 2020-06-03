@@ -2,6 +2,7 @@
  * External dependencies
  */
 const path = require( 'path' );
+const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const OptimizeCSSAssetsPlugin = require( 'optimize-css-assets-webpack-plugin' );
 const RtlCssPlugin = require( 'rtlcss-webpack-plugin' );
@@ -13,7 +14,7 @@ const WebpackBar = require( 'webpackbar' );
  */
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
-const { defaultRequestToExternal, defaultRequestToHandle } = require( '@wordpress/dependency-extraction-webpack-plugin/util' );
+const { defaultRequestToExternal, defaultRequestToHandle, camelCaseDash } = require( '@wordpress/dependency-extraction-webpack-plugin/util' );
 
 const sharedConfig = {
 	output: {
@@ -36,62 +37,6 @@ const sharedConfig = {
 			} ),
 			new OptimizeCSSAssetsPlugin( { } ),
 		],
-	},
-};
-
-const ampStories = {
-	...defaultConfig,
-	...sharedConfig,
-	entry: {
-		'amp-stories-editor': './assets/src/stories-editor/index.js',
-	},
-	output: {
-		path: path.resolve( process.cwd(), 'assets', 'js' ),
-		filename: '[name].js',
-	},
-	module: {
-		...defaultConfig.module,
-		rules: [
-			...defaultConfig.module.rules,
-			{
-				test: /\.svg$/,
-				loader: 'svg-inline-loader',
-			},
-			{
-				test: /\.css$/,
-				use: [
-					MiniCssExtractPlugin.loader,
-					'css-loader',
-					'postcss-loader',
-				],
-			},
-		],
-	},
-	plugins: [
-		...defaultConfig.plugins,
-		new MiniCssExtractPlugin( {
-			filename: '../css/[name]-compiled.css',
-		} ),
-		new RtlCssPlugin( {
-			filename: '../css/[name]-compiled-rtl.css',
-		} ),
-		new WebpackBar( {
-			name: 'AMP Stories',
-			color: '#fddb33',
-		} ),
-	],
-	optimization: {
-		...sharedConfig.optimization,
-		splitChunks: {
-			cacheGroups: {
-				stories: {
-					name: 'amp-stories-editor',
-					test: /\.css$/,
-					chunks: 'all',
-					enforce: true,
-				},
-			},
-		},
 	},
 };
 
@@ -222,60 +167,146 @@ const customizer = {
 	],
 };
 
+const WORDPRESS_NAMESPACE = '@wordpress/';
+const BABEL_NAMESPACE = '@babel/';
+const gutenbergPackages = [ '@babel/polyfill', '@wordpress/dom-ready', '@wordpress/i18n', '@wordpress/url' ].map(
+	( packageName ) => {
+		if ( 0 !== packageName.indexOf( WORDPRESS_NAMESPACE ) && 0 !== packageName.indexOf( BABEL_NAMESPACE ) ) {
+			return null;
+		}
+
+		const camelCaseName = '@wordpress/i18n' === packageName
+			? 'i18n'
+			: camelCaseDash( packageName.replace( WORDPRESS_NAMESPACE, '' ).replace( BABEL_NAMESPACE, '' ) );
+
+		const handle = packageName.replace( WORDPRESS_NAMESPACE, 'wp-' ).replace( BABEL_NAMESPACE, 'wp-' );
+
+		return {
+			camelCaseName,
+			entryPath: 'polyfill' === camelCaseName ? path.resolve( __dirname, 'assets/src/polyfills/wp-polyfill' ) : packageName,
+			handle,
+			packageName,
+		};
+	},
+).filter( ( packageData ) => packageData );
+
 const wpPolyfills = {
 	...defaultConfig,
 	...sharedConfig,
 	externals: {},
+	entry: gutenbergPackages.reduce(
+		( memo, { camelCaseName, entryPath } ) =>
+			( { ...memo, [ camelCaseName ]: entryPath } ),
+		{} ),
+	output: {
+		devtoolNamespace: 'wp',
+		filename: ( pathData ) => `${ gutenbergPackages.find(
+			( gutenbergPackage ) => pathData.chunk.name === gutenbergPackage.camelCaseName,
+		).handle }.js`,
+		path: path.resolve( __dirname, 'assets/js' ),
+		library: [ 'wp', '[name]' ],
+		libraryTarget: 'this',
+	},
 	plugins: [
 		new DependencyExtractionWebpackPlugin( {
 			useDefaults: false,
 			requestToHandle: ( request ) => {
-				switch ( request ) {
-					case '@wordpress/dom-ready':
-					case '@wordpress/i18n':
-					case '@wordpress/polyfill':
-					case '@wordpress/server-side-render':
-					case '@wordpress/url':
-						return undefined;
-
-					default:
-						return defaultRequestToHandle( request );
+				if ( gutenbergPackages.find( ( { packageName } ) => packageName === request ) ) {
+					return undefined;
 				}
+
+				return defaultRequestToHandle( request );
 			},
 			requestToExternal: ( request ) => {
-				switch ( request ) {
-					case '@wordpress/dom-ready':
-					case '@wordpress/i18n':
-					case '@wordpress/polyfill':
-					case '@wordpress/server-side-render':
-					case '@wordpress/url':
-						return undefined;
-
-					default:
-						return defaultRequestToExternal( request );
+				if ( gutenbergPackages.find( ( { packageName } ) => packageName === request ) ) {
+					return undefined;
 				}
+
+				return defaultRequestToExternal( request );
 			},
 		} ),
+		new CopyWebpackPlugin( [
+			{
+				from: 'node_modules/lodash/lodash.js',
+				to: './vendor/lodash.js',
+			},
+		] ),
 		new WebpackBar( {
 			name: 'WordPress Polyfills',
 			color: '#21a0d0',
 		} ),
 	],
+};
+
+const setup = {
+	...defaultConfig,
+	...sharedConfig,
 	entry: {
-		'wp-i18n': './assets/src/polyfills/wp-i18n.js',
-		'wp-dom-ready': './assets/src/polyfills/wp-dom-ready.js',
-		'wp-polyfill': './assets/src/polyfills/wp-polyfill.js',
-		'wp-server-side-render': './assets/src/polyfills/wp-server-side-render.js',
-		'wp-url': './assets/src/polyfills/wp-url.js',
+		'amp-setup': [
+			'./assets/src/setup',
+		],
 	},
+	module: {
+		...defaultConfig.module,
+		rules: [
+			...defaultConfig.module.rules,
+			{
+				test: /\.css$/,
+				use: [
+					MiniCssExtractPlugin.loader,
+					'css-loader',
+					'postcss-loader',
+				],
+			},
+		],
+	},
+	externals: {
+		'amp-setup': 'ampSetup',
+	},
+	plugins: [
+		new DependencyExtractionWebpackPlugin( {
+			useDefaults: false,
+			// Most dependencies will be bundled for the AMP setup screen for compatibility across WP versions.
+			requestToHandle: ( handle ) => {
+				switch ( handle ) {
+					case '@wordpress/api-fetch':
+					case '@wordpress/dom-ready':
+						return defaultRequestToHandle( handle );
+
+					default:
+						return undefined;
+				}
+			},
+			requestToExternal: ( external ) => {
+				switch ( external ) {
+					case '@wordpress/api-fetch':
+					case '@wordpress/dom-ready':
+						return defaultRequestToExternal( external );
+
+					default:
+						return undefined;
+				}
+			},
+		} ),
+		new MiniCssExtractPlugin( {
+			filename: '../css/[name]-compiled.css',
+		} ),
+		new RtlCssPlugin( {
+			filename: '../css/[name]-compiled-rtl.css',
+		} ),
+		new WebpackBar( {
+			name: 'Setup',
+			color: '#1773a8',
+		} ),
+	],
 };
 
 module.exports = [
-	ampStories,
 	ampValidation,
 	blockEditor,
 	classicEditor,
 	admin,
 	customizer,
 	wpPolyfills,
+	setup,
 ];
