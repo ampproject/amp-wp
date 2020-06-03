@@ -120,13 +120,15 @@ jobs:
         with:
           issue-number: ${{ steps.get-pr-number.outputs.num }}
           comment-author: github-actions[bot]
-          body-includes: ${{ github.sha }}
+          body-includes: Download the development build
 
-      - name: Comment on PR with links to plugin builds
-        if: ${{ steps.find-comment.outputs.comment-id == '' }}
+      - name: Create or update comment on PR with links to plugin builds
         uses: peter-evans/create-or-update-comment@v1
         with:
-          issue-number: ${{ steps.get-pr-number.outputs.num }}
+          # If the comment ID has been found, specify the ID so it can be updated.
+          comment-id: $([ '${{ steps.find-comment.outputs.comment-id }}' != '' ]) && echo '${{ steps.find-comment.outputs.comment-id }}')
+          # If the comment ID was not found, specify the issue number so that a new comment can be created.
+          issue-number: $([ '${{ steps.find-comment.outputs.comment-id }}' == '' ]) && echo '${{ steps.get-pr-number.outputs.num }}')
           body: |
             Plugin builds for ${{ github.sha }} are ready :cook:!
             - Download the development build [here](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/dev/amp.zip)
