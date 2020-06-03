@@ -45,9 +45,17 @@ final class MobileRedirectManager {
 	/**
 	 * Determine if the current request is from a mobile device.
 	 *
-	 * @return bool True if current request if from a mobile device, otherwise false.
+	 * @return bool True if current request is from a mobile device, otherwise false.
 	 */
 	public static function is_mobile() {
+		/**
+		 * Filters whether the current request is from a mobile device. This is provided as a means to short-circuit
+		 * the normal determination of a mobile request below.
+		 *
+		 * @since 1.6
+		 *
+		 * @param bool $is_mobile Whether the current request is from a mobile device.
+		 */
 		$pre_is_mobile = apply_filters( 'amp_pre_is_mobile', false );
 
 		if ( true === $pre_is_mobile ) {
@@ -70,7 +78,7 @@ final class MobileRedirectManager {
 			}
 		}
 
-		return apply_filters( 'amp_is_mobile', $is_mobile );
+		return $is_mobile;
 	}
 
 	/**
@@ -79,6 +87,13 @@ final class MobileRedirectManager {
 	 * @return bool True if mobile redirection should be done, false otherwise.
 	 */
 	public static function should_redirect_via_js() {
+		/**
+		 * Filters whether mobile redirection should be done via JavaScript. If false, a server-side solution will be used instead.
+		 *
+		 * @since 1.6
+		 *
+		 * @param bool $should_redirect_via_js Whether JS redirection should be used.
+		 */
 		return (bool) apply_filters( 'amp_redirect_via_js', true );
 	}
 
@@ -99,6 +114,13 @@ final class MobileRedirectManager {
 			'Opera Mobi',
 		];
 
+		/**
+		 * Filters the list of user agents used to determine if the user agent from the current request is a mobile one.
+		 *
+		 * @since 1.6
+		 *
+		 * @param string[] $user_agents List of user agents.
+		 */
 		return apply_filters( 'amp_mobile_user_agents', $default_user_agents );
 	}
 
