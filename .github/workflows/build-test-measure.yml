@@ -120,7 +120,7 @@ jobs:
         with:
           issue-number: ${{ steps.get-pr-number.outputs.num }}
           comment-author: github-actions[bot]
-          body-includes: Plugin builds are ready
+          body-includes: ${{ github.sha }}
 
       - name: Comment on PR with links to plugin builds
         if: ${{ steps.find-comment.outputs.comment-id == '' }}
@@ -128,6 +128,6 @@ jobs:
         with:
           issue-number: ${{ steps.get-pr-number.outputs.num }}
           body: |
-            Plugin builds are ready :cook:!
+            Plugin builds for ${{ github.sha }} are ready :cook:!
             - Download the development build [here](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/dev/amp.zip)
             - Download the production build [here](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/prod/amp.zip)
