@@ -247,10 +247,10 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 			return [ Option::MOBILE_REDIRECT => true ];
 		};
 
-		add_filter( 'pre_option_'. AMP_Options_Manager::OPTION_NAME, $enable_mobile_redirect );
+		add_filter( 'pre_option_' . AMP_Options_Manager::OPTION_NAME, $enable_mobile_redirect );
 
 		$link = home_url( '/' );
-		$dom = AMP_DOM_Utils::get_dom_from_content( "<a id='link' href='$link'>Foo</a>" );
+		$dom  = AMP_DOM_Utils::get_dom_from_content( "<a id='link' href='$link'>Foo</a>" );
 
 		$sanitizer = new AMP_Link_Sanitizer( $dom, [ 'excluded_urls' => [ $link ] ] );
 		$sanitizer->sanitize();
@@ -258,7 +258,7 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 		$a_tag = $dom->getElementById( 'link' );
 		$this->assertEquals( $link . '?noamp=1', $a_tag->getAttribute( 'href' ) );
 
-		remove_filter( 'pre_option_'. AMP_Options_Manager::OPTION_NAME, $enable_mobile_redirect );
+		remove_filter( 'pre_option_' . AMP_Options_Manager::OPTION_NAME, $enable_mobile_redirect );
 	}
 
 	/**
@@ -269,10 +269,10 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 			return [ Option::MOBILE_REDIRECT => true ];
 		};
 
-		add_filter( 'pre_option_'. AMP_Options_Manager::OPTION_NAME, $enable_mobile_redirect );
+		add_filter( 'pre_option_' . AMP_Options_Manager::OPTION_NAME, $enable_mobile_redirect );
 
 		$link = home_url( '/' );
-		$dom = AMP_DOM_Utils::get_dom_from_content( "<a id='link' href='$link' rel='noamphtml'>Foo</a>" );
+		$dom  = AMP_DOM_Utils::get_dom_from_content( "<a id='link' href='$link' rel='noamphtml'>Foo</a>" );
 
 		$sanitizer = new AMP_Link_Sanitizer( $dom );
 		$sanitizer->sanitize();
@@ -280,7 +280,7 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 		$a_tag = $dom->getElementById( 'link' );
 		$this->assertEquals( $link . '?noamp=1', $a_tag->getAttribute( 'href' ) );
 
-		remove_filter( 'pre_option_'. AMP_Options_Manager::OPTION_NAME, $enable_mobile_redirect );
+		remove_filter( 'pre_option_' . AMP_Options_Manager::OPTION_NAME, $enable_mobile_redirect );
 	}
 
 	/**
