@@ -6,10 +6,13 @@ on:
       - develop
       - master
   pull_request:
+    # Run workflow whenever a PR is opened, updated (synchronized), or marked ready for review.
+    types: [opened, synchronize, ready_for_review]
 
 jobs:
   # Build a release ZIP file and upload it as a GitHub Actions artifact.
   release-zip:
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     outputs:
       branch-name: ${{ steps.retrieve-branch-name.outputs.branch_name }}
