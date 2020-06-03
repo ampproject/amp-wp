@@ -98,7 +98,7 @@ jobs:
           service_account_key: ${{ secrets.GCS_APPLICATION_CREDENTIALS }}
 
       - name: Upload artifacts to bucket
-        run: gsutil cp -r builds gs://ampwp_github_artifacts/${{ github.ref }}
+        run: gsutil cp -r builds/* gs://ampwp_github_artifacts/${{ github.ref }}
 
   comment-on-pr:
     # Only run this job if it's a PR. One way to check for that is if `github.head_ref` is not empty.
