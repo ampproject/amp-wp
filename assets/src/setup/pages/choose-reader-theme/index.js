@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useEffect, useContext } from '@wordpress/element';
-import { useInstanceId } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -18,7 +17,6 @@ import { ThemeCard } from './theme-card';
  * Screen for choosing the Reader theme.
  */
 export function ChooseReaderTheme() {
-	const instanceId = useInstanceId( ChooseReaderTheme );
 	const { canGoForward, setCanGoForward } = useContext( Navigation );
 	const { options } = useContext( Options );
 	const { fetchingThemes, themes, themeFetchError } = useContext( ReaderThemes );
@@ -63,7 +61,7 @@ export function ChooseReaderTheme() {
 					{
 						themes && themes.map( ( theme ) => (
 							<ThemeCard
-								key={ `${ instanceId }-${ theme.slug }` }
+								key={ `theme-card-${ theme.slug }` }
 								screenshotUrl={ theme.screenshot_url }
 								{ ...theme }
 							/> ),
