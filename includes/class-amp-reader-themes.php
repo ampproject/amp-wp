@@ -261,7 +261,7 @@ final class AMP_Reader_Themes {
 	 * @param array $theme Theme data.
 	 * @return bool True if themes can be installed.
 	 */
-	private function can_install_theme( $theme ) {
+	public function can_install_theme( $theme ) {
 		// @todo Add support for installing non-default reader themes. Until that is done, themes that are provided via
 		// the amp_reader_themes fitler will show on the reader themes screen but will need to be manually installed on
 		// the site.

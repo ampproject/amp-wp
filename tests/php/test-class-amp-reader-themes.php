@@ -164,7 +164,8 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 	 *
 	 * @dataProvider get_availability_test_themes
 	 */
-	public function test_get_theme_availability( $expected, $theme, $can_install ) {
+	public function test_get_theme_availability( $expected, $can_install, $theme ) {
 		$this->assertEquals( $expected, $this->reader_themes->get_theme_availability( $theme ) );
+		$this->assertEquals( $can_install, $this->reader_themes->can_install_theme( $theme ) );
 	}
 }
