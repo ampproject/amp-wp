@@ -103,9 +103,7 @@ final class AMP_Reader_Theme_REST_Controller extends WP_REST_Controller {
 				break;
 		}
 
-		if ( 'classic' !== $theme['slug'] ) {
-			$theme['screenshot_url'] = amp_get_asset_url( "images/reader-themes/{$theme['slug']}.png" );
-		}
+		$theme['screenshot_url'] = amp_get_asset_url( "images/reader-themes/{$theme['slug']}.png" );
 
 		return $theme;
 	}
