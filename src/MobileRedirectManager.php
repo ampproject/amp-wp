@@ -211,10 +211,10 @@ final class MobileRedirectManager {
 				border: 0;
 			}
 		</style>
-		<div id="site-version-switcher" <?php echo esc_attr( $hidden_attr ) ?>>
+		<div id="site-version-switcher" <?php echo esc_attr( $hidden_attr ); ?>>
 			<a
 				id="version-switch-link"
-				rel="<?php echo esc_attr( $rel )  ?>"
+				rel="<?php echo esc_attr( $rel ); ?>"
 				href="<?php echo esc_url( $url ); ?>"
 			>
 				<?php echo esc_html( $text ); ?>
