@@ -20,12 +20,15 @@ describe( 'AMP wizard: reader themes', () => {
 	it( 'should allow different themes to be selected', async () => {
 		await page.waitForSelector( '.amp-wp-theme-card' );
 
-		await page.click( 'label[for="theme-card__twentysixteen"]' );
 		let titleText = await page.$eval( '.amp-wp-theme-card--selected h2', ( el ) => el.innerText );
-		expect( titleText ).toBe( 'Twenty Sixteen' );
+		expect( titleText ).toBe( 'AMP Classic' );
 
-		await page.click( 'label[for="theme-card__twentytwenty"]' );
+		await page.$eval( '[for="theme-card__twentytwenty"]', ( el ) => el.click() );
 		titleText = await page.$eval( '.amp-wp-theme-card--selected h2', ( el ) => el.innerText );
 		expect( titleText ).toBe( 'Twenty Twenty' );
+
+		await page.$eval( '[for="theme-card__twentysixteen"]', ( el ) => el.click() );
+		titleText = await page.$eval( '.amp-wp-theme-card--selected h2', ( el ) => el.innerText );
+		expect( titleText ).toBe( 'Twenty Sixteen' );
 	} );
 } );

@@ -69,6 +69,7 @@ export function OptionsContextProvider( { children, optionsKey, optionsRestEndpo
 		}
 
 		setOptions( { ...options, ...newOptions } );
+		setHasSaved( false );
 	}, [ hasChanges, options, setHasChanges, setOptions ] );
 
 	useEffect( () => {

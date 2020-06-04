@@ -29,7 +29,7 @@ describe( 'AMP Setup Screen', () => {
 		await page.waitForSelector( '.amp-setup-nav__next:not([disabled])' );
 		await page.click( '.amp-setup-nav__next' );
 		titleText = await getTitleText();
-		expect( titleText ).toBe( 'Site goals' );
+		expect( titleText ).toBe( 'Template modes' );
 
 		await page.click( '.amp-setup-nav__prev' );
 		titleText = await getTitleText();
@@ -37,34 +37,33 @@ describe( 'AMP Setup Screen', () => {
 	} );
 
 	it( 'hides prev button page one and two and disables next button on last page', async () => {
-		// On page 1 of 7.
+		// On page 1 of 6.
 		let prevButton = await page.$( '.amp-setup-nav__prev' );
 		expect( prevButton ).toBeNull();
 
 		await page.waitForSelector( '.amp-setup-nav__next:not([disabled])' );
-		await page.click( '.amp-setup-nav__next' ); // 2 of 7.
+		await page.click( '.amp-setup-nav__next' ); // 2 of 6.
 
 		prevButton = await page.$( '.amp-setup-nav__prev' );
 		expect( prevButton ).toBeNull();
 
+		await page.waitFor( 25 );
 		let disabledNextButton = await page.$( '.amp-setup-nav__next[disabled]' );
 		expect( disabledNextButton ).toBeNull();
 
 		await page.waitForSelector( '.amp-setup-nav__next:not([disabled])' );
-		await page.click( '.amp-setup-nav__next' ); // 3 of 7.
+		await page.click( '.amp-setup-nav__next' ); // 3 of 6.
 
 		prevButton = await page.$( '.amp-setup-nav__prev' );
 		expect( prevButton ).not.toBeNull();
 
 		// Click to last page.
 		await page.waitForSelector( '.amp-setup-nav__next:not([disabled])' );
-		await page.click( '.amp-setup-nav__next' ); // 4 of 7.
+		await page.click( '.amp-setup-nav__next' ); // 4 of 6.
 		await page.waitForSelector( '.amp-setup-nav__next:not([disabled])' );
-		await page.click( '.amp-setup-nav__next' ); // 5 of 7.
+		await page.click( '.amp-setup-nav__next' ); // 5 of 6.
 		await page.waitForSelector( '.amp-setup-nav__next:not([disabled])' );
-		await page.click( '.amp-setup-nav__next' ); // 6 of 7.
-		await page.waitForSelector( '.amp-setup-nav__next:not([disabled])' );
-		await page.click( '.amp-setup-nav__next' ); // 7 of 7.
+		await page.click( '.amp-setup-nav__next' ); // 6 of 6.
 
 		disabledNextButton = await page.$( '.amp-setup-nav__next[disabled]' );
 		expect( disabledNextButton ).not.toBeNull();
@@ -73,6 +72,6 @@ describe( 'AMP Setup Screen', () => {
 	it( 'should have stepper items', async () => {
 		const itemCount = await page.$$eval( '.amp-stepper__item', ( els ) => els.length );
 
-		expect( itemCount ).toBe( 7 );
+		expect( itemCount ).toBe( 6 );
 	} );
 } );
