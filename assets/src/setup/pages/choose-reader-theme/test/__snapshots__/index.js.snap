@@ -6,7 +6,7 @@ exports[`ThemeCard matches snapshot 1`] = `
 >
   <label
     className="amp-wp-theme-card__label"
-    htmlFor={0}
+    htmlFor="theme-card__theme-slug"
   >
     <img
       alt="Theme name"
@@ -17,7 +17,7 @@ exports[`ThemeCard matches snapshot 1`] = `
     >
       <input
         checked={false}
-        id={0}
+        id="theme-card__theme-slug"
         onChange={[Function]}
         type="radio"
       />
