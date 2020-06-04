@@ -120,10 +120,9 @@ final class AMP_Reader_Theme_REST_Controller extends WP_REST_Controller {
 			[
 				[
 					'methods'  => WP_REST_Server::READABLE,
-					'callback' => [ $this, 'get_items' ],
+					'callback' => [ $this	, 'get_items' ],
 					'args'     => [],
 				],
-				'schema' => $this->get_public_item_schema(),
 			]
 		);
 	}
