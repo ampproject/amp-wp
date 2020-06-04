@@ -83,7 +83,8 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 	public function get_availability_test_themes() {
 		return [
 			[
-				'non-installable',
+				'installed', // Is installed in CI environment.
+				false,
 				[
 					'name'         => 'Some Theme',
 					'requires'     => '99.9',
@@ -92,7 +93,8 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 				],
 			],
 			[
-				'non-installable',
+				'non-installable',  // Is installed in CI environment.
+				false,
 				[
 					'name'         => 'Some Theme',
 					'requires'     => '4.9',
@@ -102,6 +104,7 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 			],
 			[
 				'non-installable',
+				false,
 				[
 					'name'         => 'Some Theme',
 					'requires'     => false,
@@ -110,16 +113,18 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 				],
 			],
 			[
-				'installable',
+				'installed', // Is installed in CI environment.
+				true,
 				[
 					'name'         => 'Some Theme',
 					'requires'     => false,
 					'requires_php' => '5.2',
-					'slug'         => 'twentysixteen',
+					'slug'         => 'twentytwelve',
 				],
 			],
 			[
-				'installable',
+				'installed', // Is installed in CI environment.
+				true,
 				[
 					'name'         => 'Some Theme',
 					'requires'     => '4.9',
@@ -128,16 +133,18 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 				],
 			],
 			[
-				'active',
+				'active', // Is installed in CI environment.
+				true,
 				[
 					'name'         => 'WordPress Default',
 					'requires'     => '4.4',
 					'requires_php' => '5.2',
-					'slug'         => 'twentysixteen',
+					'slug'         => 'twentytwenty',
 				],
 			],
 			[
-				'installed',
+				'installed', // Is installed in CI environment.
+				true,
 				[
 					'name'         => 'Twenty Twenty',
 					'requires'     => '4.4',
@@ -157,7 +164,7 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 	 *
 	 * @dataProvider get_availability_test_themes
 	 */
-	public function test_get_theme_availability( $expected, $theme ) {
+	public function test_get_theme_availability( $expected, $theme, $can_install ) {
 		$this->assertEquals( $expected, $this->reader_themes->get_theme_availability( $theme ) );
 	}
 }
