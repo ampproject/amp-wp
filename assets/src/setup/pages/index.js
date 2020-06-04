@@ -7,7 +7,6 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { TechnicalBackground } from './technical-background';
-import { Goals } from './goals';
 import { TemplateMode } from './template-mode';
 import { ChooseReaderTheme } from './choose-reader-theme';
 import { SiteConfigurationSummary } from './site-configuration-summary';
@@ -27,11 +26,6 @@ export const PAGES = [
 		slug: 'technical-background',
 		title: __( 'Technical background', 'amp' ),
 		PageComponent: TechnicalBackground,
-	},
-	{
-		slug: 'site-goals',
-		title: __( 'Site goals', 'amp' ),
-		PageComponent: Goals,
 	},
 	{
 		slug: 'template-modes',
