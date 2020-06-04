@@ -296,7 +296,7 @@ final class AMP_Reader_Themes {
 	 * @since 1.6.0
 	 *
 	 * @param array $theme Theme data.
-	 * @return array Theme availability status.
+	 * @return string Theme availability status.
 	 */
 	public function get_theme_availability( $theme ) {
 		switch ( true ) {
