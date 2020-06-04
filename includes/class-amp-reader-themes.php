@@ -258,6 +258,14 @@ final class AMP_Reader_Themes {
 	 * @return bool True if themes can be installed.
 	 */
 	private function can_install_theme( $theme ) {
+		// @todo Add support for installing non-default reader themes. Until that is done, themes that are provided via
+		// the amp_reader_themes fitler will show on the reader themes screen but will need to be manually installed on
+		// the site.
+		$default_reader_theme_slugs = wp_list_pluck( $this->get_default_raw_reader_themes(), 'slug' );
+		if ( ! in_array( $theme['slug'], $default_reader_theme_slugs, true ) ) {
+			return false;
+		}
+
 		if ( is_null( $this->can_install_themes ) ) {
 			if ( ! class_exists( 'WP_Upgrader' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/file.php';

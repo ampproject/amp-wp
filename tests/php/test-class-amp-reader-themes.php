@@ -88,7 +88,7 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 					'name'         => 'Some Theme',
 					'requires'     => '99.9',
 					'requires_php' => '5.2',
-					'slug'         => 'some-theme',
+					'slug'         => 'twentysixteen',
 				],
 			],
 			[
@@ -97,7 +97,16 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 					'name'         => 'Some Theme',
 					'requires'     => '4.9',
 					'requires_php' => '99.9',
-					'slug'         => 'some-theme',
+					'slug'         => 'twentysixteen',
+				],
+			],
+			[
+				'non-installable',
+				[
+					'name'         => 'Some Theme',
+					'requires'     => false,
+					'requires_php' => '5.2',
+					'slug'         => 'some-nondefault-theme',
 				],
 			],
 			[
@@ -106,7 +115,7 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 					'name'         => 'Some Theme',
 					'requires'     => false,
 					'requires_php' => '5.2',
-					'slug'         => 'some-theme',
+					'slug'         => 'twentysixteen',
 				],
 			],
 			[
@@ -115,7 +124,7 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 					'name'         => 'Some Theme',
 					'requires'     => '4.9',
 					'requires_php' => false,
-					'slug'         => 'some-theme',
+					'slug'         => 'twentysixteen',
 				],
 			],
 			[
@@ -124,7 +133,7 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 					'name'         => 'WordPress Default',
 					'requires'     => '4.4',
 					'requires_php' => '5.2',
-					'slug'         => 'default',
+					'slug'         => 'twentysixteen',
 				],
 			],
 			[

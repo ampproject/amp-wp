@@ -17,6 +17,15 @@ import './style.css';
 import { __ } from '@wordpress/i18n';
 import { Options } from '../../components/options-context-provider';
 
+/**
+ * A selectable card showing a theme in a list of themes.
+ *
+ * @param {Object} props Component props.
+ * @param {string} props.description Theme description.
+ * @param {string} props.homepage Link to view more information about the theme.
+ * @param {string} props.name Theme name.
+ * @param {string} props.slug Theme slug.
+ */
 export function ThemeCard( { description, homepage, screenshotUrl, slug, name } ) {
 	const { options, updateOptions } = useContext( Options );
 	const { reader_theme: readerTheme } = options || {};
