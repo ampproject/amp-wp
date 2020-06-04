@@ -34,7 +34,10 @@ function Page( { children, exitLink } ) {
 	if ( fetchOptionsError ) {
 		return (
 			<p>
-				{ fetchOptionsError.message || __( 'There was an error loading the setup wizard.', 'amp' ) }
+				{ /* dangerouslySetInnerHTML reason: WordPress sometimes sends back HTML as error messages. */ }
+				<span
+					dangerouslySetInnerHTML={ { __html: fetchOptionsError.message || __( 'There was an error loading the setup wizard.', 'amp' ) } }
+				/>
 				{ ' ' }
 				<a href={ exitLink }>
 					{ __( 'Return to AMP Settings.', 'amp' ) }

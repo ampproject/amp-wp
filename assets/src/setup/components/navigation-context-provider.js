@@ -16,8 +16,12 @@ export const Navigation = createContext();
  *
  * @param {Object} props Component props.
  * @param {?any} props.children Component children.
+ * @param {Array} props.pages Pages in the app.
  */
 export function NavigationContextProvider( { children, pages } ) {
+	/**
+	 * Initialize page from URL `amp-setup-screen` parameter. If not set, current page is 0.
+	 */
 	const [ activePageIndex, setActivePageIndex ] = useState( () => {
 		const index = pages.findIndex( ( { slug } ) => slug === getQueryArg( global.location.href, 'amp-setup-screen' ) );
 		return -1 < index ? index : 0;
@@ -38,7 +42,7 @@ export function NavigationContextProvider( { children, pages } ) {
 	 */
 	const goForward = () => {
 		setActivePageIndex( activePageIndex + 1 );
-		setCanGoForward( false );
+		setCanGoForward( false ); // Each page is responsible for setting this to true.
 	};
 
 	return (

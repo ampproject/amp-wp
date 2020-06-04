@@ -26,7 +26,6 @@ export const ReaderThemes = createContext();
  */
 export function ReaderThemesContextProvider( { ajaxurl, children, readerThemesEndpoint, updatesNonce } ) {
 	const [ themes, setThemes ] = useState( null );
-	const [ shouldFetchThemes, setShouldFetchThemes ] = useState( false );
 	const [ fetchingThemes, setFetchingThemes ] = useState( false );
 	const [ themeFetchError, setThemeFetchError ] = useState( null );
 	const [ downloadingTheme, setDownloadingTheme ] = useState( false );
@@ -118,10 +117,10 @@ export function ReaderThemesContextProvider( { ajaxurl, children, readerThemesEn
 			setFetchingThemes( false );
 		}
 
-		if ( shouldFetchThemes && readerThemesEndpoint && null === themes && ! fetchingThemes ) {
+		if ( readerThemesEndpoint && null === themes && ! fetchingThemes ) {
 			fetchThemes();
 		}
-	}, [ fetchingThemes, readerThemesEndpoint, shouldFetchThemes, themes ] );
+	}, [ fetchingThemes, readerThemesEndpoint, themes ] );
 
 	useEffect( () => () => {
 		hasUnmounted.current = true;
@@ -133,8 +132,6 @@ export function ReaderThemesContextProvider( { ajaxurl, children, readerThemesEn
 				{
 					downloadingTheme,
 					fetchingThemes,
-					setShouldFetchThemes,
-					shouldFetchThemes,
 					themeFetchError,
 					themes,
 				}

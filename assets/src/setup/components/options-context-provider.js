@@ -96,10 +96,10 @@ export function OptionsContextProvider( { children, optionsKey, optionsRestEndpo
 			setFetchingOptions( false );
 		};
 
-		if ( ! options && ! fetchingOptions ) {
+		if ( ! options && ! fetchingOptions && ! fetchOptionsError ) {
 			fetchOptions();
 		}
-	}, [ fetchingOptions, options, optionsKey, optionsRestEndpoint ] );
+	}, [ fetchingOptions, options, optionsKey, optionsRestEndpoint, fetchOptionsError ] );
 
 	useEffect( () => () => {
 		hasUnmounted.current = true;

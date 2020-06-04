@@ -21,7 +21,7 @@ export function ChooseReaderTheme() {
 	const instanceId = useInstanceId( ChooseReaderTheme );
 	const { canGoForward, setCanGoForward } = useContext( Navigation );
 	const { options } = useContext( Options );
-	const { fetchingThemes, setShouldFetchThemes, shouldFetchThemes, themes, themeFetchError } = useContext( ReaderThemes );
+	const { fetchingThemes, themes, themeFetchError } = useContext( ReaderThemes );
 
 	const { reader_theme: readerTheme } = options || {};
 
@@ -35,15 +35,6 @@ export function ChooseReaderTheme() {
 			}
 		}
 	}, [ canGoForward, setCanGoForward, readerTheme, themes ] );
-
-	/**
-	 * Triggers fetching themes if they have not yet been fetched.
-	 */
-	useEffect( () => {
-		if ( ! shouldFetchThemes ) {
-			setShouldFetchThemes( true );
-		}
-	}, [ setShouldFetchThemes, shouldFetchThemes ] );
 
 	if ( themeFetchError ) {
 		return (
