@@ -93,7 +93,7 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 				],
 			],
 			[
-				'non-installable',  // Is installed in CI environment.
+				'installed',  // Is installed in CI environment.
 				false,
 				[
 					'name'         => 'Some Theme',
@@ -137,16 +137,6 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 				true,
 				[
 					'name'         => 'WordPress Default',
-					'requires'     => '4.4',
-					'requires_php' => '5.2',
-					'slug'         => 'twentytwenty',
-				],
-			],
-			[
-				'installed', // Is installed in CI environment.
-				true,
-				[
-					'name'         => 'Twenty Twenty',
 					'requires'     => '4.4',
 					'requires_php' => '5.2',
 					'slug'         => 'twentytwenty',
