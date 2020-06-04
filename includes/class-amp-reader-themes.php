@@ -173,6 +173,10 @@ final class AMP_Reader_Themes {
 				return $response;
 			}
 
+			if ( is_array( $response ) ) {
+				$response = (object) $response;
+			}
+
 			$supported_themes = array_diff(
 				AMP_Core_Theme_Sanitizer::get_supported_themes(),
 				[ 'twentyten' ] // Excluded because not responsive.
