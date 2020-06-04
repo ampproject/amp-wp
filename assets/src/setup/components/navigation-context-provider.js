@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { createContext, useState, useMemo } from '@wordpress/element';
+import { createContext, useState } from '@wordpress/element';
 import { getQueryArg } from '@wordpress/url';
 
 /**
@@ -19,16 +19,15 @@ export const Navigation = createContext();
  * @param {Array} props.pages Pages in the app.
  */
 export function NavigationContextProvider( { children, pages } ) {
-	/**
-	 * Initialize page from URL `amp-setup-screen` parameter. If not set, current page is 0.
-	 */
+	// Initialize page from URL `amp-setup-screen` parameter. If not set, current page is 0.
+	// This is primarily for testing.
 	const [ activePageIndex, setActivePageIndex ] = useState( () => {
 		const index = pages.findIndex( ( { slug } ) => slug === getQueryArg( global.location.href, 'amp-setup-screen' ) );
 		return -1 < index ? index : 0;
 	} );
 	const [ canGoForward, setCanGoForward ] = useState( false );
 
-	const currentPage = useMemo( () => pages[ activePageIndex ], [ activePageIndex, pages ] );
+	const currentPage = pages[ activePageIndex ];
 
 	/**
 	 * Navigates back to the previous page.
