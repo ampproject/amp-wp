@@ -155,7 +155,7 @@ final class AMP_Reader_Themes {
 	 * @return array Theme ecosystem posts copied the amp-wp.org website.
 	 */
 	public function get_default_supported_reader_themes( $from_api = false ) {
-		// Note: This can be used to manually refresh the hardcoded raw theme data.
+		// Note: This can be used to refresh the hardcoded raw theme data.
 		if ( $from_api ) {
 			if ( ! function_exists( 'themes_api' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/theme.php';
@@ -347,7 +347,7 @@ final class AMP_Reader_Themes {
 	 */
 	public static function get_default_raw_reader_themes() {
 		// Copied from JSON data returned from Wordpress.org themes endpoint. See ::get_default_supported_reader_themes.
-		// Note: Descriptions are made translatable in the AMP_Reader_Theme_REST_Controller.
+		// Note: Descriptions are shortened and made translatable in the AMP_Reader_Theme_REST_Controller.
 		return [
 			[
 				'name'           => 'Twenty Twenty',

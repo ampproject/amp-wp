@@ -65,6 +65,30 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test for the rest_get_options method.
+	 *
+	 * @covers AMP_Options_Manager::rest_get_options()
+	 */
+	public function test_rest_get_options() {
+		$defaults = [ // Copied from protected property.
+			Option::THEME_SUPPORT           => AMP_Theme_Support::READER_MODE_SLUG,
+			Option::SUPPORTED_POST_TYPES    => [ 'post' ],
+			Option::ANALYTICS               => [],
+			Option::ALL_TEMPLATES_SUPPORTED => true,
+			Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
+			Option::VERSION                 => AMP__VERSION,
+			Option::READER_THEME            => 'classic',
+		];
+
+		// Confirm unrelated options are unchanged.
+		$test_data = [ 'key' => 'value' ];
+		$this->assertEquals( $test_data, AMP_Options_Manager::rest_get_options( $test_data, 'some-unrelated-option' ) );
+
+		// Defaults should be returned.
+		$this->assertEquals( $defaults, AMP_Options_Manager::rest_get_options( null, 'amp-options' ) );
+	}
+
+	/**
 	 * Test maybe_flush_rewrite_rules.
 	 *
 	 * @covers AMP_Options_Manager::maybe_flush_rewrite_rules()
@@ -129,6 +153,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				Option::ALL_TEMPLATES_SUPPORTED => true,
 				Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
 				Option::VERSION                 => AMP__VERSION,
+				Option::READER_THEME            => 'classic',
 			],
 			AMP_Options_Manager::get_options()
 		);
