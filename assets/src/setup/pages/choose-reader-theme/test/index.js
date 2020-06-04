@@ -10,19 +10,7 @@ import { create } from 'react-test-renderer';
 import { ThemeCard } from '../theme-card';
 import { Providers } from '../../..';
 
-let container;
-
 describe( 'ThemeCard', () => {
-	beforeEach( () => {
-		container = document.createElement( 'div' );
-		document.body.appendChild( container );
-	} );
-
-	afterEach( () => {
-		document.body.removeChild( container );
-		container = null;
-	} );
-
 	it( 'matches snapshot', () => {
 		const wrapper = create(
 			<Providers>
