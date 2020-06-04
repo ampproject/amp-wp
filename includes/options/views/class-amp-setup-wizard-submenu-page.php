@@ -63,7 +63,7 @@ final class AMP_Setup_Wizard_Submenu_Page {
 		?>
 		</head>
 		<body>
-			<?php // The admin footer template closes three divs assumed to have been opened in the header template. ?>
+			<?php // The admin footer template closes three divs. ?>
 			<div>
 			<div>
 			<div>
