@@ -54,7 +54,7 @@ export function ReaderThemesContextProvider( { ajaxurl, children, readerThemesEn
 			return;
 		}
 
-		if ( selectedTheme && true === selectedTheme.availability.is_installed ) {
+		if ( 'installable' !== selectedTheme ) {
 			return;
 		}
 
