@@ -18,7 +18,7 @@ export function WizardUnsavedChangesWarning() {
 	const { hasChanges, hasSaved } = useContext( Options );
 
 	useEffect( () => {
-		if ( ! hasChanges || hasSaved ) {
+		if ( hasChanges && ! hasSaved ) {
 			const warnIfUnsavedChanges = ( event ) => {
 				event.returnValue = __( 'This page has unsaved changes. Are you sure you want to leave?', 'amp' );
 
