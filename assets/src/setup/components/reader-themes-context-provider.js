@@ -57,6 +57,9 @@ export function ReaderThemesContextProvider( { ajaxurl, children, readerThemesEn
 			return;
 		}
 
+		/**
+		 * Downloads a theme from WordPress.org using the traditional AJAX action.
+		 */
 		async function downloadReaderTheme() {
 			setDownloadingTheme( true );
 
@@ -117,10 +120,10 @@ export function ReaderThemesContextProvider( { ajaxurl, children, readerThemesEn
 			setFetchingThemes( false );
 		}
 
-		if ( readerThemesEndpoint && null === themes && ! fetchingThemes ) {
+		if ( readerThemesEndpoint && ! themes && ! fetchingThemes && ! themeFetchError ) {
 			fetchThemes();
 		}
-	}, [ fetchingThemes, readerThemesEndpoint, themes ] );
+	}, [ fetchingThemes, readerThemesEndpoint, themes, themeFetchError ] );
 
 	useEffect( () => () => {
 		hasUnmounted.current = true;
