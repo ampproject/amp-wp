@@ -335,7 +335,19 @@ function is_amp_available() {
 	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 		// Abort if in Transitional mode and AMP is not available for the URL.
 		$availability = AMP_Theme_Support::get_template_availability( $wp_query );
-		return $availability['supported'];
+
+		if ( ! $availability['supported'] ) {
+			return false;
+		}
+
+		// Check to see if there are known unaccepted validation errors for this URL.
+		$current_url       = amp_get_current_url();
+		$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $current_url, [ 'ignore_accepted' => true ] );
+		$error_count       = count( $validation_errors );
+
+		if ( $error_count > 0 ) {
+			return false;
+		}
 	}
 
 	if ( ! (

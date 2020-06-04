@@ -2179,6 +2179,11 @@ class AMP_Theme_Support {
 				// Indicate the number of validation errors detected at runtime in a query var on the non-AMP page for display in the admin bar.
 				if ( AMP_Validation_Manager::has_cap() ) {
 					$non_amp_url = add_query_arg( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR, $blocking_error_count, $non_amp_url );
+
+					if ( MobileRedirectManager::is_mobile_request() ) {
+						// Disable mobile redirection to prevent an infinite loop.
+						$non_amp_url = add_query_arg( MobileRedirectManager::NO_AMP_QUERY_VAR, '1', $non_amp_url );
+					}
 				}
 
 				/*
