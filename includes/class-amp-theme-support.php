@@ -410,7 +410,7 @@ class AMP_Theme_Support {
 							'expires'  => 0, // Cookie will only last for the current browser session.
 							'path'     => '/',
 							'secure'   => isset( $_SERVER['HTTPS'] ),
-							'httponly' => true,
+							'httponly' => false,
 							'samesite' => 'strict',
 						]
 					);
@@ -424,10 +424,11 @@ class AMP_Theme_Support {
 
 				// Add mobile redirection script if user has opted for that solution.
 				if ( MobileRedirectManager::should_redirect_via_js() ) {
+					// The redirect script will add the mobile version switcher link.
 					add_action( 'wp_head', [ MobileRedirectManager::class, 'add_mobile_redirect_script' ], ~PHP_INT_MAX );
 				}
 
-				// Add a link to the footer to navigate to the AMP version.
+				// Add a link to the footer to allow for navigation to the AMP version.
 				add_action( 'wp_footer', [ __CLASS__, 'add_amp_mobile_version_switcher' ] );
 			}
 
@@ -441,7 +442,7 @@ class AMP_Theme_Support {
 			// @todo The `amp_post_template_footer` should only be used for the reader mode Classic theme.
 			$action = $is_reader_mode ? 'amp_post_template_footer' : 'wp_footer';
 
-			// Add a link to the footer to navigate to the non-AMP version.
+			// Add a link to the footer to allow for navigation to the non-AMP version.
 			add_action( $action, [ __CLASS__, 'add_non_amp_mobile_version_switcher' ] );
 		}
 
@@ -478,7 +479,7 @@ class AMP_Theme_Support {
 	 */
 	public static function add_non_amp_mobile_version_switcher() {
 		$url = add_query_arg( MobileRedirectManager::NO_AMP_QUERY_VAR, '1', self::get_current_canonical_url() );
-		MobileRedirectManager::add_mobile_version_switcher_markup( $url, __( 'Exit mobile version', 'amp' ) );
+		MobileRedirectManager::add_mobile_version_switcher_markup( true, $url, __( 'Exit mobile version', 'amp' ) );
 	}
 
 	/**
@@ -490,7 +491,7 @@ class AMP_Theme_Support {
 				: amp_get_permalink( get_queried_object_id() );
 		$amp_url = remove_query_arg( MobileRedirectManager::NO_AMP_QUERY_VAR, $amp_url );
 
-		MobileRedirectManager::add_mobile_version_switcher_markup( $amp_url, __( 'Go to mobile version', 'amp' ) );
+		MobileRedirectManager::add_mobile_version_switcher_markup( false, $amp_url, __( 'Go to mobile version', 'amp' ) );
 	}
 
 	/**

@@ -39,7 +39,7 @@ final class MobileRedirectManager {
 	public static function is_enabled() {
 		$option_enabled = AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT );
 
-		return self::should_redirect_via_js() ? $option_enabled : $option_enabled && self::is_mobile();
+		return self::should_redirect_via_js() ? $option_enabled : $option_enabled && self::is_mobile_request();
 	}
 
 	/**
@@ -47,7 +47,7 @@ final class MobileRedirectManager {
 	 *
 	 * @return bool True if current request is from a mobile device, otherwise false.
 	 */
-	public static function is_mobile() {
+	public static function is_mobile_request() {
 		/**
 		 * Filters whether the current request is from a mobile device. This is provided as a means to short-circuit
 		 * the normal determination of a mobile request below.
@@ -140,6 +140,27 @@ final class MobileRedirectManager {
 		?>
 		<script>
 			(function ( ampSlug, disabledCookieName, userAgents ) {
+				const currentUserAgent = navigator.userAgent;
+				const isMobile = userAgents.some( ( userAgent ) => currentUserAgent.includes( userAgent ) );
+
+				if ( isMobile ) {
+					document.addEventListener( 'DOMContentLoaded', () => {
+						// Show the mobile version switcher link once the DOM has loaded.
+						const siteVersionSwitcher = document.getElementById( 'site-version-switcher' );
+						if ( siteVersionSwitcher ) {
+							siteVersionSwitcher.hidden = false;
+						}
+
+						// Disable mobile redirection if the user opts for the mobile version.
+						const versionSwitchLink = document.getElementById( 'version-switch-link' );
+						if ( versionSwitchLink ) {
+							versionSwitchLink.addEventListener( 'click', () => {
+								document.cookie = `${disabledCookieName}=;path=/;samesite=strict${ 'https:' === location.protocol ? ';secure' : '' }`;
+							} )
+						}
+					} );
+				}
+
 				const mobileRedirectionDisabled = document.cookie
 						.split(';')
 						.some( ( item ) => `${ disabledCookieName }=1` === item.trim() );
@@ -149,11 +170,7 @@ final class MobileRedirectManager {
 					return;
 				}
 
-				const currentUserAgent = navigator.userAgent;
-				const isMobile = userAgents.some( ( userAgent ) => currentUserAgent.includes( userAgent ) );
-
 				const url = new URL( location.href );
-
 				if ( isMobile && ! url.searchParams.has( ampSlug ) ) {
 					window.stop(); // Stop loading the page! This should cancel all loading resources.
 
@@ -173,10 +190,13 @@ final class MobileRedirectManager {
 	/**
 	 * Output the markup for the mobile version switcher.
 	 *
-	 * @param string $url  URL to canonical version of page.
-	 * @param string $text Text for the anchor element.
+	 * @param bool   $is_amp Modifies markup to be AMP compatible if true.
+	 * @param string $url    URL to canonical version of page.
+	 * @param string $text   Text for the anchor element.
 	 */
-	public static function add_mobile_version_switcher_markup( $url, $text ) {
+	public static function add_mobile_version_switcher_markup( $is_amp, $url, $text ) {
+		$rel         = $is_amp ? 'amphtml' : 'noamphtml';
+		$hidden_attr = $is_amp ? '' : 'hidden';
 		?>
 		<style>
 			#version-switch-link {
@@ -191,10 +211,10 @@ final class MobileRedirectManager {
 				border: 0;
 			}
 		</style>
-		<div>
+		<div id="site-version-switcher" <?php echo esc_attr( $hidden_attr ) ?>>
 			<a
 				id="version-switch-link"
-				rel="noamphtml"
+				rel="<?php echo esc_attr( $rel )  ?>"
 				href="<?php echo esc_url( $url ); ?>"
 			>
 				<?php echo esc_html( $text ); ?>
