@@ -8,6 +8,7 @@ import apiFetch from '@wordpress/api-fetch';
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { __ } from '@wordpress/i18n';
 
 export const Options = createContext();
 
@@ -84,6 +85,10 @@ export function OptionsContextProvider( { children, optionsKey, optionsRestEndpo
 					return;
 				}
 
+				if ( ! ( optionsKey in fetchedOptions ) || ! fetchedOptions[ optionsKey ] ) { // The option is null if it doesn't pass schema validation.
+					throw new Error( __( 'There was an error fetching options from the AMP plugin. ', 'amp' ) );
+				}
+
 				setOptions( fetchedOptions[ optionsKey ] );
 			} catch ( e ) {
 				if ( true === hasUnmounted.current ) {
@@ -95,7 +100,6 @@ export function OptionsContextProvider( { children, optionsKey, optionsRestEndpo
 
 			setFetchingOptions( false );
 		};
-
 		if ( ! options && ! fetchingOptions && ! fetchOptionsError ) {
 			fetchOptions();
 		}

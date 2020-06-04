@@ -100,7 +100,7 @@ class AMP_Options_Manager {
 			]
 		);
 
-		add_filter( 'rest_pre_get_setting', [ __CLASS__, 'rest_get_options' ] );
+		add_filter( 'rest_pre_get_setting', [ __CLASS__, 'rest_get_options' ], 10, 2 );
 	}
 
 	/**
@@ -128,11 +128,7 @@ class AMP_Options_Manager {
 			}
 		}
 
-		foreach ( array_keys( self::$defaults ) as $default_key => $default_value ) {
-			if ( ! array_key_exists( $default_key, $options ) ) {
-				$options[ $default_key ] = $default_value;
-			}
-		}
+		$options = wp_parse_args( $options, self::$defaults );
 
 		return $options;
 	}
