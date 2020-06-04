@@ -9,6 +9,7 @@ namespace AmpProject\AmpWP;
 
 use AMP_Options_Manager;
 use AMP_Validation_Manager;
+use AMP_Validated_URL_Post_Type;
 use WP_Block_Type_Registry;
 use WP_Hook;
 
@@ -48,6 +49,26 @@ final class PluginSuppression implements Service {
 		$this->suppress_shortcodes( $suppressed_plugin_slugs );
 		$this->suppress_blocks( $suppressed_plugin_slugs );
 		$this->suppress_widgets( $suppressed_plugin_slugs );
+	}
+
+	/**
+	 * Get suppressible plugin slugs.
+	 *
+	 * @return string[] Plugin slugs which are suppressible.
+	 */
+	public static function get_suppressible_plugins() {
+		$errors_by_source        = AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source();
+		$erroring_plugin_slugs   = isset( $errors_by_source['plugin'] ) ? array_keys( $errors_by_source['plugin'] ) : [];
+		$suppressed_plugin_slugs = array_keys( AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS ) );
+		$active_plugin_slugs     = array_keys( PluginRegistry::get_plugins( true, true ) );
+
+		// The suppressible plugins are the set of plugins which are erroring and/or suppressed, which are also active.
+		return array_unique(
+			array_intersect(
+				array_merge( $erroring_plugin_slugs, $suppressed_plugin_slugs ),
+				$active_plugin_slugs
+			)
+		);
 	}
 
 	/**

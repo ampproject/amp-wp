@@ -7,6 +7,7 @@
 
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\PluginRegistry;
+use AmpProject\AmpWP\PluginSuppression;
 
 /**
  * AMP_Options_Menu class.
@@ -104,7 +105,7 @@ class AMP_Options_Menu {
 			]
 		);
 
-		if ( count( self::get_suppressible_plugin_sources() ) > 0 ) {
+		if ( count( PluginSuppression::get_suppressible_plugins() ) > 0 ) {
 			add_settings_field(
 				Option::SUPPRESSED_PLUGINS,
 				__( 'Suppressed Plugins', 'amp' ),
@@ -442,49 +443,11 @@ class AMP_Options_Menu {
 	}
 
 	/**
-	 * Get plugin errors by sources.
-	 *
-	 * @return array Plugin errors by source.
-	 */
-	private static function get_plugin_errors_by_sources() {
-		$errors_by_sources = AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source(); // @todo Exclude reviewed errors?
-		unset( $errors_by_sources['plugin']['gutenberg'] ); // Omit Gutenberg to prevent unintentional attribution for shortcodes.
-		unset( $errors_by_sources['plugin']['amp'] ); // Omit AMP because disabling in AMP responses would be bad!
-		if ( isset( $errors_by_sources['plugin'] ) ) {
-			return $errors_by_sources['plugin'];
-		}
-		return [];
-	}
-
-	/**
-	 * Get suppressible plugin sources.
-	 *
-	 * @return string[] Plugin sources which are suppressible.
-	 */
-	private static function get_suppressible_plugin_sources() {
-		$erroring_plugin_slugs   = array_keys( self::get_plugin_errors_by_sources() );
-		$suppressed_plugin_slugs = array_keys( AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS ) );
-		$active_plugin_slugs     = array_keys( PluginRegistry::get_plugins( true, true ) );
-
-		// The suppressible plugins are the set of plugins which are erroring and/or suppressed, which are also active.
-		return array_unique(
-			array_intersect(
-				array_merge( $erroring_plugin_slugs, $suppressed_plugin_slugs ),
-				$active_plugin_slugs
-			)
-		);
-	}
-
-	/**
 	 * Render suppressed plugins.
 	 *
 	 * @since 1.6
 	 */
 	public function render_suppressed_plugins() {
-		$suppressed_plugins = AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS );
-
-		$plugins = PluginRegistry::get_plugins( true, true );
-
 		?>
 		<fieldset>
 			<h4 class="title hidden"><?php esc_html_e( 'Suppressed Plugins', 'amp' ); ?></h4>
@@ -542,9 +505,13 @@ class AMP_Options_Menu {
 			</style>
 
 			<?php
-			$element_name_base = AMP_Options_Manager::OPTION_NAME . '[' . Option::SUPPRESSED_PLUGINS . ']';
+			$suppressed_plugins = AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS );
+			$plugins            = wp_array_slice_assoc(
+				PluginRegistry::get_plugins( true, true ),
+				PluginSuppression::get_suppressible_plugins()
+			);
 
-			$errors_by_sources = self::get_plugin_errors_by_sources();
+			$errors_by_sources = AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source();
 			$select_options    = [
 				'0' => __( 'Active', 'amp' ),
 				'1' => __( 'Suppressed', 'amp' ),
@@ -560,15 +527,10 @@ class AMP_Options_Menu {
 					<?php foreach ( $plugins as $plugin_slug => $plugin ) : ?>
 						<?php
 						$is_suppressed = array_key_exists( $plugin_slug, $suppressed_plugins );
-						if ( ! $is_suppressed && ! isset( $errors_by_sources[ $plugin_slug ] ) ) {
-							continue;
-						}
-
-						$element_name = sprintf( '%s[%s]', $element_name_base, $plugin_slug );
 						?>
 						<tr>
 							<th class="column-status" scope="row">
-								<select name="<?php echo esc_attr( $element_name ); ?>">
+								<select name="<?php echo esc_attr( sprintf( '%s[%s][%s]', AMP_Options_Manager::OPTION_NAME, Option::SUPPRESSED_PLUGINS, $plugin_slug ) ); ?>">
 									<?php foreach ( $select_options as $value => $text ) : ?>
 										<option value="<?php echo esc_attr( $value ); ?>" <?php selected( (string) $is_suppressed, $value ); ?>>
 											<?php echo esc_html( $text ); ?>
@@ -646,8 +608,8 @@ class AMP_Options_Menu {
 											<?php esc_html_e( 'Plugin updated since last suppressed.', 'amp' ); ?>
 										<?php endif; ?>
 									<?php endif; ?>
-								<?php elseif ( ! $is_suppressed && ! empty( $errors_by_sources[ $plugin_slug ] ) ) : ?>
-									<?php self::render_validation_error_details( $errors_by_sources[ $plugin_slug ] ); ?>
+								<?php elseif ( ! $is_suppressed && ! empty( $errors_by_sources['plugin'][ $plugin_slug ] ) ) : ?>
+									<?php self::render_validation_error_details( $errors_by_sources['plugin'][ $plugin_slug ] ); ?>
 								<?php endif ?>
 							</td>
 						</tr>
