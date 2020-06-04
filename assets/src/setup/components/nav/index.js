@@ -22,7 +22,7 @@ import { Navigation } from '../navigation-context-provider';
  * @param {string} props.exitLink Link to exit the application.
  */
 export function Nav( { exitLink } ) {
-	const { activePageIndex, canGoForward, goBack, goForward } = useContext( Navigation );
+	const { activePageIndex, canGoForward, moveBack, moveForward } = useContext( Navigation );
 
 	return (
 		<div className="amp-setup-nav">
@@ -41,7 +41,7 @@ export function Nav( { exitLink } ) {
 					: (
 						<Button
 							className="amp-setup-nav__prev"
-							onClick={ goBack }
+							onClick={ moveBack }
 						>
 							<Icon className="amp-mobile-hide" icon="arrow-left-alt2" size={ 18 } />
 							<span className="amp-mobile-hide">
@@ -57,7 +57,7 @@ export function Nav( { exitLink } ) {
 				<Button
 					className="amp-setup-nav__next"
 					disabled={ ! canGoForward }
-					onClick={ goForward }
+					onClick={ moveForward }
 				>
 					<span className="amp-mobile-hide">
 						{ __( 'Next Step', 'amp' ) }

@@ -32,14 +32,14 @@ export function NavigationContextProvider( { children, pages } ) {
 	/**
 	 * Navigates back to the previous page.
 	 */
-	const goBack = () => {
+	const moveBack = () => {
 		setActivePageIndex( activePageIndex - 1 );
 	};
 
 	/**
 	 * Navigates to the next page. Pages are expected to set canGoForward to true when required actions have been taken.
 	 */
-	const goForward = () => {
+	const moveForward = () => {
 		setActivePageIndex( activePageIndex + 1 );
 		setCanGoForward( false ); // Each page is responsible for setting this to true.
 	};
@@ -51,8 +51,8 @@ export function NavigationContextProvider( { children, pages } ) {
 					activePageIndex,
 					canGoForward,
 					currentPage,
-					goBack,
-					goForward,
+					moveBack,
+					moveForward,
 					pages,
 					setCanGoForward,
 				}

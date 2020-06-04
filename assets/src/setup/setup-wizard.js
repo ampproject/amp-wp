@@ -75,7 +75,7 @@ function PageComponentSideEffects( { children } ) {
  * @param {Array} props.pages List of page configuration objects.
  */
 export function SetupWizard( { exitLink } ) {
-	const { activePageIndex, currentPage: { title, PageComponent }, goBack, goForward, pages } = useContext( Navigation );
+	const { activePageIndex, currentPage: { title, PageComponent }, moveBack, moveForward, pages } = useContext( Navigation );
 	const { fetchOptionsError } = useContext( Options );
 
 	const PageComponentWithSideEffects = useMemo( () => () => (
@@ -110,8 +110,8 @@ export function SetupWizard( { exitLink } ) {
 					<Nav
 						activePageIndex={ activePageIndex }
 						exitLink={ exitLink }
-						goBack={ goBack }
-						goForward={ goForward }
+						moveBack={ moveBack }
+						moveForward={ moveForward }
 						pages={ pages }
 					/>
 				</div>

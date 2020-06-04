@@ -29,6 +29,7 @@ export function ReaderThemesContextProvider( { ajaxurl, children, readerThemesEn
 	const [ fetchingThemes, setFetchingThemes ] = useState( false );
 	const [ themeFetchError, setThemeFetchError ] = useState( null );
 	const [ downloadingTheme, setDownloadingTheme ] = useState( false );
+	const [ downloadingThemeError, setDownloadingThemeError ] = useState( null );
 
 	const { options, savingOptions } = useContext( Options );
 	const { reader_theme: readerTheme } = options || {};
@@ -84,7 +85,7 @@ export function ReaderThemesContextProvider( { ajaxurl, children, readerThemesEn
 					return;
 				}
 
-				setThemeFetchError( e );
+				setDownloadingThemeError( e );
 			}
 
 			setDownloadingTheme( false );
