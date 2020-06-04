@@ -54,7 +54,7 @@ export function ReaderThemesContextProvider( { ajaxurl, children, readerThemesEn
 			return;
 		}
 
-		if ( 'installable' !== selectedTheme ) {
+		if ( 'installable' !== selectedTheme.availability ) {
 			return;
 		}
 
@@ -135,6 +135,7 @@ export function ReaderThemesContextProvider( { ajaxurl, children, readerThemesEn
 			value={
 				{
 					downloadingTheme,
+					downloadingThemeError,
 					fetchingThemes,
 					themeFetchError,
 					themes,

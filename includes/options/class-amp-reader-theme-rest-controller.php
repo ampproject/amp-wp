@@ -67,49 +67,44 @@ final class AMP_Reader_Theme_REST_Controller extends WP_REST_Controller {
 	public function prepare_default_reader_theme_for_rest( $theme ) {
 		switch ( $theme['slug'] ) {
 			case 'twentytwenty':
-				$theme['description']    = __( 'Our default theme for 2020 is designed to take full advantage of the flexibility of the block editor.', 'amp' );
-				$theme['screenshot_url'] = '//via.placeholder.com/218x472';
+				$theme['description'] = __( 'Our default theme for 2020 is designed to take full advantage of the flexibility of the block editor.', 'amp' );
 				break;
 
 			case 'twentynineteen':
-				$theme['description']    = __( 'Our 2019 default theme is designed to show off the power of the block editor.', 'amp' );
-				$theme['screenshot_url'] = '//via.placeholder.com/218x472';
+				$theme['description'] = __( 'Our 2019 default theme is designed to show off the power of the block editor.', 'amp' );
 				break;
 
 			case 'twentyseventeen':
-				$theme['description']    = __( 'Twenty Seventeen brings your site to life with header video and immersive featured images.', 'amp' );
-				$theme['screenshot_url'] = '//via.placeholder.com/218x472';
+				$theme['description'] = __( 'Twenty Seventeen brings your site to life with header video and immersive featured images.', 'amp' );
 				break;
 
 			case 'twentysixteen':
-				$theme['description']    = __( 'Twenty Sixteen is a modernized take on an ever-popular WordPress layout.', 'amp' );
-				$theme['screenshot_url'] = '//via.placeholder.com/218x472';
+				$theme['description'] = __( 'Twenty Sixteen is a modernized take on an ever-popular WordPress layout.', 'amp' );
 				break;
 
 			case 'twentyfifteen':
-				$theme['description']    = __( 'Our 2015 default theme is clean, blog-focused, and designed for clarity.', 'amp' );
-				$theme['screenshot_url'] = '//via.placeholder.com/218x472';
+				$theme['description'] = __( 'Our 2015 default theme is clean, blog-focused, and designed for clarity.', 'amp' );
 				break;
 
 			case 'twentyfourteen':
-				$theme['description']    = __( 'In 2014, our default theme lets you create a responsive magazine website with a sleek, modern design.', 'amp' );
-				$theme['screenshot_url'] = '//via.placeholder.com/218x472';
+				$theme['description'] = __( 'In 2014, our default theme lets you create a responsive magazine website with a sleek, modern design.', 'amp' );
 				break;
 
 			case 'twentythirteen':
-				$theme['description']    = __( 'The 2013 theme for WordPress takes us back to the blog, featuring a full range of post formats, each displayed beautifully in their own unique way.', 'amp' );
-				$theme['screenshot_url'] = '//via.placeholder.com/218x472';
+				$theme['description'] = __( 'The 2013 theme for WordPress takes us back to the blog, featuring a full range of post formats, each displayed beautifully in their own unique way.', 'amp' );
 				break;
 
 			case 'twentytwelve':
-				$theme['description']    = __( 'The 2012 theme for WordPress is a fully responsive theme that looks great on any device.', 'amp' );
-				$theme['screenshot_url'] = '//via.placeholder.com/218x472';
+				$theme['description'] = __( 'The 2012 theme for WordPress is a fully responsive theme that looks great on any device.', 'amp' );
 				break;
 
 			case 'twentyeleven':
-				$theme['description']    = __( 'The 2011 theme for WordPress is sophisticated, lightweight, and adaptable.', 'amp' );
-				$theme['screenshot_url'] = '//via.placeholder.com/218x472';
+				$theme['description'] = __( 'The 2011 theme for WordPress is sophisticated, lightweight, and adaptable.', 'amp' );
 				break;
+		}
+
+		if ( 'classic' !== $theme['slug'] ) {
+			$theme['screenshot_url'] = amp_get_asset_url( "images/reader-themes/{$theme['slug']}.png" );
 		}
 
 		return $theme;
