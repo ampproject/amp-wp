@@ -108,7 +108,7 @@ class AMP_Options_Menu {
 		if ( count( PluginSuppression::get_suppressible_plugins() ) > 0 ) {
 			add_settings_field(
 				Option::SUPPRESSED_PLUGINS,
-				__( 'Suppressed Plugins', 'amp' ),
+				__( 'Plugin Suppression', 'amp' ),
 				[ $this, 'render_suppressed_plugins' ],
 				AMP_Options_Manager::OPTION_NAME,
 				'general',
