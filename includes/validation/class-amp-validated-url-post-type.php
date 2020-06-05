@@ -874,7 +874,7 @@ class AMP_Validated_URL_Post_Type {
 	 * @todo This can be stored in object cache, invalidated whenever a validated URL post is inserted/updated/deleted.
 	 *
 	 * @param int $count Maximum count of validated URLs to gather validation errors from.
-	 * @return array Multidimensional array where root keys are source types, sub-keys are source names, and leaf arrays are the validation error terms & data.
+	 * @return array Multidimensional array where root keys are source types, sub-keys are source names, and leaf arrays are the validation error terms, data, and the post IDs the error occurs on.
 	 */
 	public static function get_recent_validation_errors_by_source( $count = 100 ) {
 		$posts = get_posts(
@@ -912,10 +912,14 @@ class AMP_Validated_URL_Post_Type {
 						continue;
 					}
 
-					$errors_by_source[ $source['type'] ][ $source['name'] ][ $validation_error['term']->slug ] = [
-						'term' => $validation_error['term'],
-						'data' => $data,
-					];
+					if ( ! isset( $errors_by_source[ $source['type'] ][ $source['name'] ][ $validation_error['term']->slug ] ) ) {
+						$errors_by_source[ $source['type'] ][ $source['name'] ][ $validation_error['term']->slug ] = [
+							'term'     => $validation_error['term'],
+							'data'     => $data,
+							'post_ids' => [],
+						];
+					}
+					$errors_by_source[ $source['type'] ][ $source['name'] ][ $validation_error['term']->slug ]['post_ids'][] = $post->ID;
 				}
 			}
 		}

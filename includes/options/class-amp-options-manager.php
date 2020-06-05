@@ -310,6 +310,11 @@ class AMP_Options_Manager {
 		$option = $old_option;
 
 		$plugins = PluginRegistry::get_plugins( true );
+
+		$errors_by_source = AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source();
+
+		$erroring_urls_by_frequency = [];
+
 		$changes = 0;
 		foreach ( $posted_suppressed_plugins as $plugin_slug => $suppressed ) {
 			if ( ! isset( $plugins[ $plugin_slug ] ) ) {
@@ -319,37 +324,68 @@ class AMP_Options_Manager {
 
 			$suppressed = rest_sanitize_boolean( $suppressed );
 			if ( isset( $option[ $plugin_slug ] ) && ! $suppressed ) {
+
+				// Gather the URLs on which the error occurred, keeping track of the frequency so that we can use the URL with the most errors to re-validate.
+				if ( ! empty( $option[ $plugin_slug ][ Option::SUPPRESSED_PLUGINS_ERRORING_URLS ] ) ) {
+					foreach ( $option[ $plugin_slug ][ Option::SUPPRESSED_PLUGINS_ERRORING_URLS ] as $url ) {
+						if ( ! isset( $erroring_urls_by_frequency[ $url ] ) ) {
+							$erroring_urls_by_frequency[ $url ] = 0;
+						}
+						$erroring_urls_by_frequency[ $url ]++;
+					}
+				}
+
+				// Remove the plugin from being suppressed.
 				unset( $option[ $plugin_slug ] );
+
 				$changes++;
 			} elseif ( ! isset( $option[ $plugin_slug ] ) && $suppressed && array_key_exists( $plugin_slug, $plugins ) ) {
+
+				// Capture the URLs that the error occurred on so we can check them again when the plugin is re-activated.
+				$urls = [];
+				if ( isset( $errors_by_source['plugin'][ $plugin_slug ] ) ) {
+					foreach ( $errors_by_source['plugin'][ $plugin_slug ] as $validation_error ) {
+						$urls = array_merge(
+							$urls,
+							array_map(
+								[ AMP_Validated_URL_Post_Type::class, 'get_url_from_post' ],
+								$validation_error['post_ids']
+							)
+						);
+					}
+				}
+
 				$option[ $plugin_slug ] = [
 					// Note that we store the version that was suppressed so that we can alert the user when to check again.
 					Option::SUPPRESSED_PLUGINS_LAST_VERSION => $plugins[ $plugin_slug ]['Version'],
 					Option::SUPPRESSED_PLUGINS_TIMESTAMP => time(),
-					// @todo Store the URLs that had the error!
+					Option::SUPPRESSED_PLUGINS_ERRORING_URLS => array_unique( array_filter( $urls ) ),
 				];
 				$changes++;
 			}
 		}
 
-		// When the suppressed plugins changed, re-check the most recently validated URL so validation errors can be
-		// re-computed with the plugins newly-suppressed or un-suppressed.
-		// @todo Instead of checking the most recently-validated URL, instead check the URL(s) that the plugin's validation errors were known to occur on.
+		// When the suppressed plugins changed, re-validate so validation errors can be re-computed with the plugins newly-suppressed or un-suppressed.
 		if ( $changes > 0 ) {
 			add_action(
 				'update_option_' . self::OPTION_NAME,
-				static function () {
-					$validated_url_posts = get_posts(
-						[
-							'post_type'      => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-							'posts_per_page' => 1,
-						]
-					);
-					if ( count( $validated_url_posts ) === 0 ) {
-						return;
+				static function () use ( $erroring_urls_by_frequency ) {
+					$url = null;
+					if ( count( $erroring_urls_by_frequency ) > 0 ) {
+						arsort( $erroring_urls_by_frequency );
+						$url = key( $erroring_urls_by_frequency );
+					} else {
+						$validated_url_posts = get_posts(
+							[
+								'post_type'      => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+								'posts_per_page' => 1,
+							]
+						);
+						if ( count( $validated_url_posts ) > 0 ) {
+							$url = AMP_Validated_URL_Post_Type::get_url_from_post( $validated_url_posts[0] );
+						}
 					}
-					$url = AMP_Validated_URL_Post_Type::get_url_from_post( $validated_url_posts[0] );
-					if ( ! $url ) {
+					if ( empty( $url ) ) {
 						return;
 					}
 					$validity = AMP_Validation_Manager::validate_url( $url );

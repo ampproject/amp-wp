@@ -60,7 +60,7 @@ final class PluginSuppression implements Service {
 		$errors_by_source        = AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source();
 		$erroring_plugin_slugs   = isset( $errors_by_source['plugin'] ) ? array_keys( $errors_by_source['plugin'] ) : [];
 		$suppressed_plugin_slugs = array_keys( AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS ) );
-		$active_plugin_slugs     = array_keys( PluginRegistry::get_plugins( true, true ) );
+		$active_plugin_slugs     = array_keys( PluginRegistry::get_plugins( true ) );
 
 		// The suppressible plugins are the set of plugins which are erroring and/or suppressed, which are also active.
 		return array_unique(
