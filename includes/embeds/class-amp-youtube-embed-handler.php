@@ -43,6 +43,13 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	protected $amp_tag = 'amp-youtube';
 
 	/**
+	 * List of domains that are applicable for this embed.
+	 *
+	 * @var string[]
+	 */
+	protected $applicable_domains = [ 'youtu.be', 'youtube.com', 'youtube-nocookie.com' ];
+
+	/**
 	 * AMP_YouTube_Embed_Handler constructor.
 	 *
 	 * @param array $args Height, width and maximum width for embed.
@@ -65,7 +72,11 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return DOMNodeList A list of DOMElement nodes.
 	 */
 	protected function get_raw_embed_nodes( Document $dom ) {
-		return $dom->xpath->query( '//iframe[ @src ]' );
+		$query_segments = array_map( static function ( $domain ) {
+			return sprintf( 'contains( @src, "%s" )', $domain );
+		}, $this->applicable_domains );
+		$query = implode( ' or ', $query_segments );
+		return $dom->xpath->query( sprintf( '//iframe[ %s ]', $query ) );
 	}
 
 	/**
@@ -161,7 +172,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		$domain = implode( '.', array_slice( explode( '.', $parsed_url['host'] ), -2 ) );
-		if ( ! in_array( $domain, [ 'youtu.be', 'youtube.com', 'youtube-nocookie.com' ], true ) ) {
+		if ( ! in_array( $domain, $this->applicable_domains, true ) ) {
 			return false;
 		}
 
