@@ -1,20 +1,20 @@
 <?php
 /**
- * Reader theme management.
+ * Reader theme controller.
  *
  * @package AMP
  * @since 1.6.0
  */
 
 /**
- * AMP reader theme manager class.
+ * AMP reader theme REST contruller.
  *
  * @since 1.6.0
  */
 final class AMP_Reader_Theme_REST_Controller extends WP_REST_Controller {
 
 	/**
-	 * Undocumented variable
+	 * Reader themes provider class.
 	 *
 	 * @since 1.6.0
 	 *
