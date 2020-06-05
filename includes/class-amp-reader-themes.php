@@ -254,7 +254,7 @@ final class AMP_Reader_Themes {
 	}
 
 	/**
-	 * Returns whether the themes can be installed on the system.
+	 * Returns whether a theme can be installed on the system.
 	 *
 	 * @since 1.6.0
 	 *
@@ -263,7 +263,7 @@ final class AMP_Reader_Themes {
 	 */
 	public function can_install_theme( $theme ) {
 		// @todo Add support for installing non-default reader themes. Until that is done, themes that are provided via
-		// the amp_reader_themes fitler will show on the reader themes screen but will need to be manually installed on
+		// the amp_reader_themes filter will show on the reader themes screen but will need to be manually installed on
 		// the site.
 		$default_reader_theme_slugs = wp_list_pluck( $this->get_default_raw_reader_themes(), 'slug' );
 		if ( ! in_array( $theme['slug'], $default_reader_theme_slugs, true ) ) {
