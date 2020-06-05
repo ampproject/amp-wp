@@ -41,26 +41,31 @@ class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 			$node = $nodes->item( $i );
 
 			// We are only looking for <figure> elements which have wp-block-embed as class.
-			$class = (string) $node->getAttribute( 'class' );
-			if ( false === strpos( $class, 'wp-block-embed' ) ) {
+			$classes = preg_split( '/\s+/', trim( $node->getAttribute( 'class' ) ) );
+
+			if ( ! in_array( 'wp-block-embed', $classes, true ) ) {
 				continue;
 			}
 
-			// Remove classes like wp-embed-aspect-16-9 since responsive layout is handled by AMP's layout system.
+			// Remove classes pertaining to aspect ratios as the embed's responsiveness will be handled by AMP's layout system.
+			if ( in_array( 'wp-has-aspect-ratio', $classes, true ) ) {
+				$classes = array_diff( $classes, [ 'wp-has-aspect-ratio' ] );
+			}
+
 			$responsive_width  = null;
 			$responsive_height = null;
-			$node->setAttribute(
-				'class',
-				preg_replace_callback(
-					'/(?<=^|\s)wp-embed-aspect-(?P<width>\d+)-(?P<height>\d+)(?=\s|$)/',
-					function ( $matches ) use ( &$responsive_width, &$responsive_height ) {
-						$responsive_width  = $matches['width'];
-						$responsive_height = $matches['height'];
-						return '';
-					},
-					$class
-				)
+
+			$classes = preg_replace_callback(
+				'/wp-embed-aspect-(?P<width>\d+)-(?P<height>\d+)/',
+				static function ( $matches ) use ( &$responsive_width, &$responsive_height ) {
+					$responsive_width  = $matches['width'];
+					$responsive_height = $matches['height'];
+					return '';
+				},
+				$classes
 			);
+
+			$node->setAttribute( 'class', implode( ' ', array_filter( $classes ) ) );
 
 			// We're looking for <figure> elements that have one child node only.
 			if ( 1 !== count( $node->childNodes ) ) {
