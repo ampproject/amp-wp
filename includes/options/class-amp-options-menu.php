@@ -506,9 +506,9 @@ class AMP_Options_Menu {
 
 			<?php
 			$suppressed_plugins = AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS );
-			$plugins            = wp_array_slice_assoc(
-				PluginRegistry::get_plugins( true, true ),
-				PluginSuppression::get_suppressible_plugins()
+			$plugins            = array_intersect_key( // Note that wp_array_slice_assoc() doesn't preserve sort order.
+				PluginRegistry::get_plugins( true ),
+				array_fill_keys( PluginSuppression::get_suppressible_plugins(), true )
 			);
 
 			$errors_by_sources = AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source();
