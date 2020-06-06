@@ -578,16 +578,16 @@ function amp_add_amphtml_link() {
 		if ( $error_count > 0 ) {
 			echo "<!--\n";
 			echo esc_html(
-					sprintf(
+				sprintf(
 					/* translators: %s: error count */
-							_n(
-									'There is %s validation error that is blocking the amphtml version from being available.',
-									'There are %s validation errors that are blocking the amphtml version from being available.',
-									$error_count,
-									'amp'
-							),
-							number_format_i18n( $error_count )
-					)
+					_n(
+						'There is %s validation error that is blocking the amphtml version from being available.',
+						'There are %s validation errors that are blocking the amphtml version from being available.',
+						$error_count,
+						'amp'
+					),
+					number_format_i18n( $error_count )
+				)
 			);
 			echo "\n-->";
 			return;

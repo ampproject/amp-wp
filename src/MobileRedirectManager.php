@@ -31,6 +31,17 @@ final class MobileRedirectManager {
 	const NO_AMP_QUERY_VAR = 'noamp';
 
 	/**
+	 * Indicates whether the the `amp_mobile_redirect_disabled` cookie has been set during the current request.
+	 *
+	 * When a cookie is set, it cannot be accessed via the `$_COOKIE` array until the next page load. This circumvent thia,
+	 * whenever the cookie is set during the current request, this variable becomes true and can be used as a fallback to
+	 * detect whether redirection has been disabled for the session.
+	 *
+	 * @var bool
+	 */
+	private static $disabled_cookie_is_set = false;
+
+	/**
 	 * Get whether mobile redirection is enabled or not.
 	 *
 	 * @return bool If JS redirection is disabled, only the status of the mobile redirection option is returned.
@@ -129,8 +140,44 @@ final class MobileRedirectManager {
 	 *
 	 * @return bool True if disabled, false otherwise.
 	 */
-	public static function redirection_disabled() {
-		return isset( $_COOKIE[ self::DISABLED_COOKIE_NAME ] ) && '1' === $_COOKIE[ self::DISABLED_COOKIE_NAME ];
+	public static function redirection_disabled_for_session() {
+		return ( isset( $_COOKIE[ self::DISABLED_COOKIE_NAME ] ) && '1' === $_COOKIE[ self::DISABLED_COOKIE_NAME ] ) || self::$disabled_cookie_is_set;
+	}
+
+	/**
+	 * Sets a cookie to disable mobile redirection for the current browser session.
+	 *
+	 * @return void
+	 */
+	public static function disable_redirect_for_session() {
+		// Pre PHP 7.3, the `samesite` cookie attribute had to be set via unconventional means. This was
+		// addressed in PHP 7.3 (see <https://github.com/php/php-src/commit/5cb825df7251aeb28b297f071c35b227a3949f01>),
+		// which now allows setting the cookie attribute via an options array.
+		if ( 70300 <= PHP_VERSION_ID ) {
+			setcookie(
+				self::DISABLED_COOKIE_NAME,
+				'1',
+				[
+					'expires'  => 0, // Cookie will only last for the current browser session.
+					'path'     => '/',
+					'secure'   => isset( $_SERVER['HTTPS'] ),
+					'httponly' => false,
+					'samesite' => 'strict',
+				]
+			);
+		} else {
+			setcookie(
+				self::DISABLED_COOKIE_NAME,
+				'1',                        // Cookie value.
+				0,                          // Time till expiry. Setting it to `0` means the cookie will only last for the current browser session.
+				'/; samesite=strict',       // Path. Includes the samesite option as a hack for setting the cookie option. See <https://stackoverflow.com/a/46971326>.
+				$_SERVER['HTTP_HOST'],      // Domain.
+				isset( $_SERVER['HTTPS'] ), // Whether cookie should be transmitted over a secure HTTPS connection.
+				false                       // Whether cookie should be made accessible only through the HTTP protocol.
+			);
+		}
+
+		self::$disabled_cookie_is_set = true;
 	}
 
 	/**
@@ -149,14 +196,6 @@ final class MobileRedirectManager {
 						const siteVersionSwitcher = document.getElementById( 'site-version-switcher' );
 						if ( siteVersionSwitcher ) {
 							siteVersionSwitcher.hidden = false;
-						}
-
-						// Disable mobile redirection if the user opts for the mobile version.
-						const versionSwitchLink = document.getElementById( 'version-switch-link' );
-						if ( versionSwitchLink ) {
-							versionSwitchLink.addEventListener( 'click', () => {
-								document.cookie = `${disabledCookieName}=;path=/;samesite=strict${ 'https:' === location.protocol ? ';secure' : '' }`;
-							} )
 						}
 					} );
 				}
@@ -195,8 +234,6 @@ final class MobileRedirectManager {
 	 * @param string $text   Text for the anchor element.
 	 */
 	public static function add_mobile_version_switcher_markup( $is_amp, $url, $text ) {
-		$rel         = $is_amp ? 'amphtml' : 'noamphtml';
-		$hidden_attr = $is_amp ? '' : 'hidden';
 		?>
 		<style>
 			#version-switch-link {
@@ -211,11 +248,20 @@ final class MobileRedirectManager {
 				border: 0;
 			}
 		</style>
-		<div id="site-version-switcher" <?php echo esc_attr( $hidden_attr ); ?>>
+		<div id="site-version-switcher" <?php printf( ! $is_amp && self::should_redirect_via_js() ? 'hidden' : '' ); ?>>
 			<a
 				id="version-switch-link"
-				rel="<?php echo esc_attr( $rel ); ?>"
+				rel="<?php printf( esc_attr( $is_amp ? 'noamphtml' : 'amphtml' ) ); ?>"
 				href="<?php echo esc_url( $url ); ?>"
+				<?php
+				if ( ! $is_amp ) {
+					// Add `onclick` attribute to enable mobile redirection when the user clicks to go to the mobile version.
+					printf(
+						'onclick="%s"',
+						esc_attr( 'document.cookie = "' . self::DISABLED_COOKIE_NAME . '=0;path=/;samesite=strict" + ( "https:" === location.protocol ? ";secure" : "" );' )
+					);
+				}
+				?>
 			>
 				<?php echo esc_html( $text ); ?>
 			</a>

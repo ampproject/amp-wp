@@ -399,25 +399,16 @@ class AMP_Theme_Support {
 			}
 
 			if ( MobileRedirectManager::is_enabled() && is_amp_available() ) {
-				$mobile_redirection_disabled = isset( $_GET[ MobileRedirectManager::NO_AMP_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-
-				// If `noamp` query var is present, set a cookie to persist disabling of mobile redirection (if one has not already been set).
-				if ( $mobile_redirection_disabled && ! MobileRedirectManager::redirection_disabled() ) {
-					setcookie(
-						MobileRedirectManager::DISABLED_COOKIE_NAME,
-						'1',
-						[
-							'expires'  => 0, // Cookie will only last for the current browser session.
-							'path'     => '/',
-							'secure'   => isset( $_SERVER['HTTPS'] ),
-							'httponly' => false,
-							'samesite' => 'strict',
-						]
-					);
+				// Persist disabling mobile redirection for the session if the `noamp` query var value is `1`.
+				if (
+					! MobileRedirectManager::redirection_disabled_for_session() &&
+					( isset( $_GET[ MobileRedirectManager::NO_AMP_QUERY_VAR ] ) && '1' === $_GET[ MobileRedirectManager::NO_AMP_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				) {
+					MobileRedirectManager::disable_redirect_for_session();
 				}
 
-				// Redirect if `noamp` query parameter is not present and JS redirection is disabled.
-				if ( ! $mobile_redirection_disabled && ! MobileRedirectManager::should_redirect_via_js() ) {
+				// Redirect if mobile redirection is not disabled for the session and JS redirection is disabled.
+				if ( ! MobileRedirectManager::redirection_disabled_for_session() && ! MobileRedirectManager::should_redirect_via_js() ) {
 					$amp_url = add_query_arg( amp_get_slug(), '1', amp_get_current_url() );
 					wp_safe_redirect( $amp_url, current_user_can( 'manage_options' ) ? 302 : 301 );
 				}
