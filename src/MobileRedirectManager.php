@@ -187,20 +187,20 @@ final class MobileRedirectManager {
 		?>
 		<script>
 			(function ( ampSlug, disabledCookieName, userAgents ) {
-				const currentUserAgent = navigator.userAgent;
-				const isMobile = userAgents.some( ( userAgent ) => currentUserAgent.includes( userAgent ) );
+				var re = new RegExp( userAgents.join( '|' ) )
+				var isMobile = re.test( navigator.userAgent );
 
 				if ( isMobile ) {
-					document.addEventListener( 'DOMContentLoaded', () => {
+					document.addEventListener( 'DOMContentLoaded', function () {
 						// Show the mobile version switcher link once the DOM has loaded.
-						const siteVersionSwitcher = document.getElementById( 'site-version-switcher' );
+						var siteVersionSwitcher = document.getElementById( 'site-version-switcher' );
 						if ( siteVersionSwitcher ) {
 							siteVersionSwitcher.hidden = false;
 						}
 					} );
 				}
 
-				const mobileRedirectionDisabled = document.cookie
+				var mobileRedirectionDisabled = document.cookie
 						.split(';')
 						.some( ( item ) => `${ disabledCookieName }=1` === item.trim() );
 
@@ -209,7 +209,7 @@ final class MobileRedirectManager {
 					return;
 				}
 
-				const url = new URL( location.href );
+				var url = new URL( location.href );
 				if ( isMobile && ! url.searchParams.has( ampSlug ) ) {
 					window.stop(); // Stop loading the page! This should cancel all loading resources.
 
