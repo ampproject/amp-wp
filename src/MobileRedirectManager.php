@@ -79,14 +79,19 @@ final class MobileRedirectManager {
 			return false;
 		}
 
-		$is_mobile   = false;
-		$user_agents = self::get_user_agents();
+		$is_mobile         = false;
+		$user_agents_regex = implode(
+			'|',
+			array_map(
+				static function ( $user_agent ) {
+					return preg_quote( $user_agent, '/' );
+				},
+				self::get_user_agents()
+			)
+		);
 
-		foreach ( $user_agents as $user_agent ) {
-			if ( false !== strpos( $current_user_agent, $user_agent ) ) {
-				$is_mobile = true;
-				break;
-			}
+		if ( preg_match( "/$user_agents_regex/", $current_user_agent ) ) {
+			$is_mobile = true;
 		}
 
 		return $is_mobile;
@@ -187,7 +192,14 @@ final class MobileRedirectManager {
 		?>
 		<script>
 			(function ( ampSlug, disabledCookieName, userAgents ) {
-				var re = new RegExp( userAgents.join( '|' ) )
+				var regExp = userAgents
+						// Escape each user agent string before forming the regex expression.
+						.map( function ( userAgent ) {
+							// See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Escaping.
+							return userAgent.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+						} )
+						.join( '|' );
+				var re = new RegExp( regExp );
 				var isMobile = re.test( navigator.userAgent );
 
 				if ( isMobile ) {
