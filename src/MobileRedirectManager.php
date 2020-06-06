@@ -155,30 +155,32 @@ final class MobileRedirectManager {
 	 * @return void
 	 */
 	public static function disable_redirect_for_session() {
+		$value    = '1';                                           // Cookie value.
+		$expires  = 0;                                             // Time till expiry. Setting it to `0` means the cookie will only last for the current browser session.
+		$path     = wp_parse_url( home_url( '/' ), PHP_URL_PATH ); // Path.
+		$domain   = $_SERVER['HTTP_HOST'];                         // Domain.
+		$secure   = is_ssl();                                      // Whether cookie should be transmitted over a secure HTTPS connection.
+		$httponly = false;                                         // Whether cookie should be made accessible only through the HTTP protocol.
+		$samesite = 'strict';                                      // Prevents the cookie from being sent by the browser to the target site in all cross-site browsing context.
+
 		// Pre PHP 7.3, the `samesite` cookie attribute had to be set via unconventional means. This was
 		// addressed in PHP 7.3 (see <https://github.com/php/php-src/commit/5cb825df7251aeb28b297f071c35b227a3949f01>),
 		// which now allows setting the cookie attribute via an options array.
 		if ( 70300 <= PHP_VERSION_ID ) {
 			setcookie(
 				self::DISABLED_COOKIE_NAME,
-				'1',
-				[
-					'expires'  => 0, // Cookie will only last for the current browser session.
-					'path'     => '/',
-					'secure'   => isset( $_SERVER['HTTPS'] ),
-					'httponly' => false,
-					'samesite' => 'strict',
-				]
+				$value,
+				compact( 'expires', 'path', 'domain', 'secure', 'httponly', 'samesite' )
 			);
 		} else {
 			setcookie(
 				self::DISABLED_COOKIE_NAME,
-				'1',                        // Cookie value.
-				0,                          // Time till expiry. Setting it to `0` means the cookie will only last for the current browser session.
-				'/; samesite=strict',       // Path. Includes the samesite option as a hack for setting the cookie option. See <https://stackoverflow.com/a/46971326>.
-				$_SERVER['HTTP_HOST'],      // Domain.
-				isset( $_SERVER['HTTPS'] ), // Whether cookie should be transmitted over a secure HTTPS connection.
-				false                       // Whether cookie should be made accessible only through the HTTP protocol.
+				$value,
+				$expires,
+				$path . ';samesite=' . $samesite, // Includes the samesite option as a hack to be set in the cookie. See <https://stackoverflow.com/a/46971326>.
+				$domain,
+				$secure,
+				$httponly
 			);
 		}
 
