@@ -234,7 +234,9 @@ final class MobileRedirectManager {
 
 				var mobileRedirectionDisabled = document.cookie
 						.split(';')
-						.some( ( item ) => `${ disabledCookieName }=1` === item.trim() );
+						.some( function ( item ) {
+							return ( disabledCookieName + '=1' ) === item.trim();
+						} );
 
 				// Short-circuit if mobile redirection is disabled.
 				if ( mobileRedirectionDisabled ) {
