@@ -427,11 +427,9 @@ class AMP_Theme_Support {
 		self::ensure_proper_amp_location();
 
 		if ( ! amp_is_canonical() && MobileRedirectManager::is_available_for_request() ) {
-			// @todo The `amp_post_template_footer` should only be used for the reader mode Classic theme.
-			$action = $is_reader_mode ? 'amp_post_template_footer' : 'wp_footer';
-
 			// Add a link to the footer to allow for navigation to the non-AMP version.
-			add_action( $action, [ __CLASS__, 'add_non_amp_mobile_version_switcher' ] );
+			add_action( 'amp_post_template_footer', [ __CLASS__, 'add_non_amp_mobile_version_switcher' ] ); // For Classic reader mode theme.
+			add_action( 'wp_footer', [ __CLASS__, 'add_non_amp_mobile_version_switcher' ] );
 		}
 
 		$theme_support = self::get_theme_support_args();
