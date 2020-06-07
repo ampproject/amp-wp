@@ -75,11 +75,11 @@ final class MobileRedirectManager {
 		 *
 		 * @since 1.6
 		 *
-		 * @param bool $is_mobile Whether the current request is from a mobile device.
+		 * @param null $is_mobile Whether the current request is from a mobile device.
 		 */
-		$pre_is_mobile = apply_filters( 'amp_pre_is_mobile', false );
+		$pre_is_mobile = apply_filters( 'amp_pre_is_mobile', null );
 
-		if ( true === $pre_is_mobile ) {
+		if ( null !== $pre_is_mobile ) {
 			return (bool) $pre_is_mobile;
 		}
 

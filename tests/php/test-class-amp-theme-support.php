@@ -2323,6 +2323,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		AMP_Validation_Manager::add_validation_error_sourcing();
 
+		add_filter( 'amp_pre_is_mobile', '__return_false' );
+
 		AMP_Validation_Manager::reset_validation_results();
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 		$this->assertStringStartsWith( 'Redirecting to non-AMP version', $sanitized_html );
@@ -2336,6 +2338,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertCount( 4, $redirects );
 		$this->assertEquals( home_url( '/?amp_validation_errors=1' ), $redirects[0] );
 		$this->assertEquals( 4, AMP_Theme_Support_Sanitizer_Counter::$count, 'Expected sanitizer to be invoked again although validation results are cached.' );
+
+		remove_filter( 'amp_pre_is_mobile', '__return_false' );
 	}
 
 	/**
