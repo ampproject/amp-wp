@@ -398,12 +398,9 @@ class AMP_Theme_Support {
 				self::redirect_non_amp_url( current_user_can( 'manage_options' ) ? 302 : 301 );
 			}
 
-			if ( MobileRedirectManager::is_enabled() && is_amp_available() ) {
-				// Persist disabling mobile redirection for the session if the `noamp` query var value is `1`.
-				if (
-					! MobileRedirectManager::redirection_disabled_for_session() &&
-					( isset( $_GET[ MobileRedirectManager::NO_AMP_QUERY_VAR ] ) && '1' === $_GET[ MobileRedirectManager::NO_AMP_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				) {
+			if ( MobileRedirectManager::is_available_for_request() ) {
+				// Persist disabling mobile redirection for the session if redirection is disabled for the current request.
+				if ( ! MobileRedirectManager::redirection_disabled_for_session() && MobileRedirectManager::redirection_disabled_for_request() ) {
 					MobileRedirectManager::disable_redirect_for_session();
 				}
 
@@ -429,7 +426,7 @@ class AMP_Theme_Support {
 
 		self::ensure_proper_amp_location();
 
-		if ( ! amp_is_canonical() && MobileRedirectManager::is_enabled() && is_amp_available() ) {
+		if ( ! amp_is_canonical() && MobileRedirectManager::is_available_for_request() ) {
 			// @todo The `amp_post_template_footer` should only be used for the reader mode Classic theme.
 			$action = $is_reader_mode ? 'amp_post_template_footer' : 'wp_footer';
 

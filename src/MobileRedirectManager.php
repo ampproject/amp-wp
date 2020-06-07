@@ -55,6 +55,15 @@ final class MobileRedirectManager {
 	}
 
 	/**
+	 * Determine if mobile redirection is available for the current request.
+	 *
+	 * @return bool True if available, false otherwise.
+	 */
+	public static function is_available_for_request() {
+		return self::is_enabled() && is_amp_available();
+	}
+
+	/**
 	 * Determine if the current request is from a mobile device.
 	 *
 	 * @return bool True if current request is from a mobile device, otherwise false.
@@ -138,6 +147,15 @@ final class MobileRedirectManager {
 		 * @param string[] $user_agents List of user agents.
 		 */
 		return apply_filters( 'amp_mobile_user_agents', $default_user_agents );
+	}
+
+	/**
+	 * Determine if mobile redirection is disabled for the current request.
+	 *
+	 * @return bool True if disabled, false otherwise.
+	 */
+	public static function redirection_disabled_for_request() {
+		return ( isset( $_GET[ self::NO_AMP_QUERY_VAR ] ) && '1' === $_GET[ self::NO_AMP_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**
@@ -265,7 +283,7 @@ final class MobileRedirectManager {
 		<div id="site-version-switcher" <?php printf( ! $is_amp && self::should_redirect_via_js() ? 'hidden' : '' ); ?>>
 			<a
 				id="version-switch-link"
-				rel="<?php printf( esc_attr( $is_amp ? 'noamphtml' : 'amphtml' ) ); ?> nofollow"
+				rel="<?php printf( esc_attr( $is_amp ? 'noamphtml nofollow' : 'amphtml' ) ); ?>"
 				href="<?php echo esc_url( $url ); ?>"
 				<?php
 				if ( ! $is_amp ) {
