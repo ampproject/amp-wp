@@ -348,9 +348,7 @@ function is_amp_available() {
 		if ( $error_count > 0 ) {
 			return false;
 		}
-	}
-
-	if ( ! (
+	} elseif ( ! (
 		$queried_object instanceof WP_Post &&
 		$wp_query instanceof WP_Query &&
 		( $wp_query->is_singular() || $wp_query->is_posts_page ) &&

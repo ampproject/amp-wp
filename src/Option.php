@@ -44,9 +44,9 @@ interface Option {
 	/**
 	 * Redirect mobile visitors to the AMP version of a page when the site is in Transitional or Reader mode.
 	 *
-	 * Default value: true
+	 * Default value: false
 	 *
-	 *@var string
+	 * @var string
 	 */
 	const MOBILE_REDIRECT = 'mobile_redirect';
 

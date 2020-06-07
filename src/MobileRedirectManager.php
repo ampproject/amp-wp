@@ -48,9 +48,10 @@ final class MobileRedirectManager {
 	 *              Otherwise, returns true if mobile redirection option is enabled and current request is from a mobile device.
 	 */
 	public static function is_enabled() {
-		$option_enabled = AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT );
-
-		return self::should_redirect_via_js() ? $option_enabled : $option_enabled && self::is_mobile_request();
+		if ( ! AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ) {
+			return false;
+		}
+		return self::should_redirect_via_js() || self::is_mobile_request();
 	}
 
 	/**
@@ -73,13 +74,12 @@ final class MobileRedirectManager {
 			return (bool) $pre_is_mobile;
 		}
 
-		$current_user_agent = $_SERVER['HTTP_USER_AGENT'];
+		$current_user_agent = wp_unslash( $_SERVER['HTTP_USER_AGENT'] );
 
 		if ( empty( $current_user_agent ) ) {
 			return false;
 		}
 
-		$is_mobile         = false;
 		$user_agents_regex = implode(
 			'|',
 			array_map(
@@ -91,10 +91,10 @@ final class MobileRedirectManager {
 		);
 
 		if ( preg_match( "/$user_agents_regex/", $current_user_agent ) ) {
-			$is_mobile = true;
+			return true;
 		}
 
-		return $is_mobile;
+		return false;
 	}
 
 	/**
@@ -265,7 +265,7 @@ final class MobileRedirectManager {
 		<div id="site-version-switcher" <?php printf( ! $is_amp && self::should_redirect_via_js() ? 'hidden' : '' ); ?>>
 			<a
 				id="version-switch-link"
-				rel="<?php printf( esc_attr( $is_amp ? 'noamphtml' : 'amphtml' ) ); ?>"
+				rel="<?php printf( esc_attr( $is_amp ? 'noamphtml' : 'amphtml' ) ); ?> nofollow"
 				href="<?php echo esc_url( $url ); ?>"
 				<?php
 				if ( ! $is_amp ) {
