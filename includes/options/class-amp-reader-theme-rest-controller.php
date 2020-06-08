@@ -16,16 +16,12 @@ final class AMP_Reader_Theme_REST_Controller extends WP_REST_Controller {
 	/**
 	 * Reader themes provider class.
 	 *
-	 * @since 1.6.0
-	 *
 	 * @var AMP_Reader_Themes
 	 */
 	private $reader_themes;
 
 	/**
 	 * Constructor.
-	 *
-	 * @since 1.6.0
 	 *
 	 * @param AMP_Reader_Themes $reader_themes AMP_Reader_Themes instance to provide theme data.
 	 */
@@ -37,8 +33,6 @@ final class AMP_Reader_Theme_REST_Controller extends WP_REST_Controller {
 
 	/**
 	 * Sets up hooks.
-	 *
-	 * @since 1.6.0
 	 */
 	public function init() {
 		add_filter( 'amp_reader_themes', [ $this, 'prepare_default_reader_themes_for_rest' ] );
@@ -46,8 +40,6 @@ final class AMP_Reader_Theme_REST_Controller extends WP_REST_Controller {
 
 	/**
 	 * Overrides data for default themes.
-	 *
-	 * @since 1.6.0
 	 *
 	 * @param array $themes Default reader themes.
 	 * @return array Filtered default reader themes.
@@ -58,8 +50,6 @@ final class AMP_Reader_Theme_REST_Controller extends WP_REST_Controller {
 
 	/**
 	 * Overrides data for a default theme.
-	 *
-	 * @since 1.6.0
 	 *
 	 * @param array $theme Reader theme data.
 	 * @return array Filtered reader theme data.
@@ -129,8 +119,6 @@ final class AMP_Reader_Theme_REST_Controller extends WP_REST_Controller {
 
 	/**
 	 * Retrieves all AMP plugin options specified in the endpoint schema.
-	 *
-	 * @since 1.6.0
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response Response object.
