@@ -63,7 +63,7 @@ class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			);
 
-			$node->setAttribute( 'class', implode( ' ', array_filter( $classes ) ) );
+			$node->setAttribute( 'class', implode( ' ', $classes ) );
 
 			// We're looking for <figure> elements that have one child node only.
 			if ( 1 !== count( $node->childNodes ) ) {
