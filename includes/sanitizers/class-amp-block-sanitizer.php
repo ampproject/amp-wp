@@ -47,22 +47,20 @@ class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			// Remove classes pertaining to aspect ratios as the embed's responsiveness will be handled by AMP's layout system.
-			if ( in_array( 'wp-has-aspect-ratio', $classes, true ) ) {
-				$classes = array_diff( $classes, [ 'wp-has-aspect-ratio' ] );
-			}
-
 			$responsive_width  = null;
 			$responsive_height = null;
 
-			$classes = preg_replace_callback(
-				'/wp-embed-aspect-(?P<width>\d+)-(?P<height>\d+)/',
-				static function ( $matches ) use ( &$responsive_width, &$responsive_height ) {
-					$responsive_width  = $matches['width'];
-					$responsive_height = $matches['height'];
-					return '';
-				},
-				$classes
+			// Remove classes related to aspect ratios as the embed's responsiveness will be handled by AMP's layout system.
+			$classes = array_filter(
+				$classes,
+				static function ( $class ) use ( &$responsive_width, &$responsive_height ) {
+					if ( preg_match( '/^wp-embed-aspect-(?P<width>\d+)-(?P<height>\d+)$/', $class, $matches ) ) {
+						$responsive_width  = $matches['width'];
+						$responsive_height = $matches['height'];
+						return false;
+					}
+					return 'wp-has-aspect-ratio' !== $class;
+				}
 			);
 
 			$node->setAttribute( 'class', implode( ' ', array_filter( $classes ) ) );
