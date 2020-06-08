@@ -58,7 +58,7 @@ export function ThemeCard( { description, homepage, screenshotUrl, slug, name } 
 				</p>
 			</label>
 			<p className="amp-wp-theme-card__theme-link">
-				<a href={ homepage } target="_blank" rel="noreferrer">
+				<a href={ homepage } target="_blank" rel="noreferrer noopener">
 					{ __( 'Learn more', 'amp' ) }
 				</a>
 			</p>
