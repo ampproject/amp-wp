@@ -373,8 +373,7 @@ final class AMP_Reader_Themes {
 	 * @return array|object Prepared theme array.
 	 */
 	public function prepare_theme( $theme ) {
-		$prepared_theme = [];
-		$theme_array    = (array) $theme;
+		$theme_array = (array) $theme;
 
 		$keys = [
 			'name',
