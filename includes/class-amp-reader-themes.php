@@ -90,7 +90,7 @@ final class AMP_Reader_Themes {
 	 * @return array Formatted theme data.
 	 */
 	public function get_themes() {
-		if ( ! is_null( $this->themes ) ) {
+		if ( null !== $this->themes ) {
 			return $this->themes;
 		}
 
@@ -244,7 +244,7 @@ final class AMP_Reader_Themes {
 	 * @return string|bool The theme name, or false if the theme has errors.
 	 */
 	private function get_current_theme_name() {
-		if ( is_null( $this->current_theme_name ) ) {
+		if ( null === $this->current_theme_name ) {
 			$current_theme = wp_get_theme();
 
 			$this->current_theme_name = $current_theme->exists() ? $current_theme->get( 'Name' ) : false;
@@ -270,7 +270,7 @@ final class AMP_Reader_Themes {
 			return false;
 		}
 
-		if ( is_null( $this->can_install_themes ) ) {
+		if ( null === $this->can_install_themes ) {
 			if ( ! class_exists( 'WP_Upgrader' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/file.php';
 				require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
