@@ -490,7 +490,7 @@ final class AMP_Reader_Themes {
 			'name'           => 'AMP Classic',
 			'slug'           => 'classic',
 			'preview_url'    => 'https://amp-wp.org',
-			'screenshot_url' => '//via.placeholder.com/218x472',
+			'screenshot_url' => '',
 			'homepage'       => 'https://amp-wp.org',
 			'description'    => __(
 				// @todo Improved description text.
