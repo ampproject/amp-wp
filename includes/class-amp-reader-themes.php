@@ -259,11 +259,11 @@ final class AMP_Reader_Themes {
 			return false;
 		}
 
-		if ( ! empty( $theme['requires'] ) && ! version_compare( get_bloginfo( 'version' ), $theme['requires'], '>=' ) ) {
+		if ( ! empty( $theme['requires'] ) && version_compare( get_bloginfo( 'version' ), $theme['requires'], '<' ) ) {
 			return false;
 		}
 
-		if ( ! empty( $theme['requires_php'] ) && ! version_compare( phpversion(), $theme['requires_php'], '>=' ) ) {
+		if ( ! empty( $theme['requires_php'] ) && version_compare( phpversion(), $theme['requires_php'], '<' ) ) {
 			return false;
 		}
 
