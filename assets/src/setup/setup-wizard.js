@@ -72,7 +72,7 @@ function PageComponentSideEffects( { children } ) {
  * Setup wizard root component.
  *
  * @param {Object} props Component props.
- * @param {Array} props.pages List of page configuration objects.
+ * @param {Array} props.exitLink Exit link.
  */
 export function SetupWizard( { exitLink } ) {
 	const { activePageIndex, currentPage: { title, PageComponent }, moveBack, moveForward, pages } = useContext( Navigation );

@@ -108,11 +108,11 @@ final class AMP_Reader_Themes {
 		 *         @type string         $slug           Theme slug.
 		 *         @type string         $slug           URL of theme preview.
 		 *         @type string         $screenshot_url The URL of a mobile screenshot. Note: if this is empty, the theme may not display.
-		 *         @type string         $homepage        A link to a page with more information about the theme.
-		 *         @type string         $description     A description of the theme.
-		 *         @type string|boolean $requires        Minimum version of WordPress required by the theme. False if all versions are supported.
-		 *         @type string|boolean $requires_php    Minimum version of PHP required by the theme. False if all versions are supported.
-		 *         @type string         $download_link   A link to the theme's zip file. If empty, the plugin will attempt to download the theme from wordpress.org.
+		 *         @type string         $homepage       A link to a page with more information about the theme.
+		 *         @type string         $description    A description of the theme.
+		 *         @type string|boolean $requires       Minimum version of WordPress required by the theme. False if all versions are supported.
+		 *         @type string|boolean $requires_php   Minimum version of PHP required by the theme. False if all versions are supported.
+		 *         @type string         $download_link  A link to the theme's zip file. If empty, the plugin will attempt to download the theme from wordpress.org.
 		 *     }
 		 * ]
 		 */
@@ -203,7 +203,7 @@ final class AMP_Reader_Themes {
 	 * @since 1.6.0
 	 *
 	 * @param array $theme Theme data from the wordpress.org themes API.
-	 * @return array Prepared theme array.
+	 * @return array|object Prepared theme array.
 	 */
 	public function prepare_theme( $theme ) {
 		$prepared_theme = [];
