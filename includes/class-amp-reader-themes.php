@@ -34,7 +34,7 @@ final class AMP_Reader_Themes {
 	private $can_install_themes;
 
 	/**
-	 * The default reader theme. Indicates the plugin-provided classic mode should be used.
+	 * The default reader theme.
 	 *
 	 * @var string
 	 */
@@ -45,28 +45,28 @@ final class AMP_Reader_Themes {
 	 *
 	 * @var string
 	 */
-	const ACTIVE_STATUS = 'active';
+	const STATUS_ACTIVE = 'active';
 
 	/**
 	 * Status indicating a reader theme is installed but not active.
 	 *
 	 * @var string
 	 */
-	const INSTALLED_STATUS = 'installed';
+	const STATUS_INSTALLED = 'installed';
 
 	/**
 	 * Status indicating a reader theme is not installed but is installable.
 	 *
 	 * @var string
 	 */
-	const INSTALLABLE_STATUS = 'installable';
+	const STATUS_INSTALLABLE = 'installable';
 
 	/**
 	 * Status indicating a reader theme is not installed and can't be installed.
 	 *
 	 * @var string
 	 */
-	const NON_INSTALLABLE_STATUS = 'non-installable';
+	const STATUS_NON_INSTALLABLE = 'non-installable';
 
 	/**
 	 * Retrieves all AMP plugin options specified in the endpoint schema.
@@ -279,16 +279,16 @@ final class AMP_Reader_Themes {
 	public function get_theme_availability( $theme ) {
 		switch ( true ) {
 			case $this->get_current_theme_name() === $theme['name']:
-				return self::ACTIVE_STATUS;
+				return self::STATUS_ACTIVE;
 
 			case wp_get_theme( $theme['slug'] )->exists():
-				return self::INSTALLED_STATUS;
+				return self::STATUS_INSTALLED;
 
 			case $this->can_install_theme( $theme ):
-				return self::INSTALLABLE_STATUS;
+				return self::STATUS_INSTALLABLE;
 
 			default:
-				return self::NON_INSTALLABLE_STATUS;
+				return self::STATUS_NON_INSTALLABLE;
 		}
 	}
 
