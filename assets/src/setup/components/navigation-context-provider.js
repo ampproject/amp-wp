@@ -34,6 +34,7 @@ export function NavigationContextProvider( { children, pages } ) {
 	 */
 	const moveBack = () => {
 		setActivePageIndex( activePageIndex - 1 );
+		setCanGoForward( true );
 	};
 
 	/**
