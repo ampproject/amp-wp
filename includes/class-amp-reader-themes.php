@@ -121,7 +121,7 @@ final class AMP_Reader_Themes {
 		return current(
 			array_filter(
 				$this->get_themes(),
-				static function( $theme ) use ( $slug ) {
+				static function ( $theme ) use ( $slug ) {
 					return $theme['slug'] === $slug;
 				}
 			)
@@ -164,7 +164,7 @@ final class AMP_Reader_Themes {
 
 			$supported_themes_from_response = array_filter(
 				$response->themes,
-				static function( $theme ) use ( $supported_themes ) {
+				static function ( $theme ) use ( $supported_themes ) {
 					return in_array( $theme->slug, $supported_themes, true );
 				}
 			);
@@ -201,7 +201,7 @@ final class AMP_Reader_Themes {
 
 		$prepared_theme = array_filter(
 			$theme_array,
-			function( $key ) use ( $keys ) {
+			static function ( $key ) use ( $keys ) {
 				return in_array( $key, $keys, true );
 			},
 			ARRAY_FILTER_USE_KEY
