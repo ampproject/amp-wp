@@ -116,7 +116,7 @@ final class AMP_Reader_Themes {
 		 *     }
 		 * ]
 		 */
-		$themes = apply_filters( 'amp_reader_themes', $themes );
+		$themes = array_filter( (array) apply_filters( 'amp_reader_themes', $themes ) );
 
 		foreach ( $themes as &$theme ) {
 			$theme['availability'] = $this->get_theme_availability( $theme );
