@@ -348,7 +348,7 @@ class AMP_Options_Manager {
 		}
 
 		if ( isset( $new_options[ Option::READER_THEME ] ) ) {
-			$options[ Option::READER_THEME ] = $new_options[ Option::READER_THEME ];
+			$options[ Option::READER_THEME ] = sanitize_key( $new_options[ Option::READER_THEME ] );
 		}
 
 		if ( array_key_exists( Option::DISABLE_CSS_TRANSIENT_CACHING, $new_options ) && true === $new_options[ Option::DISABLE_CSS_TRANSIENT_CACHING ] ) {
