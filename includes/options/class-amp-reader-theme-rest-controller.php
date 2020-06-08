@@ -7,7 +7,7 @@
  */
 
 /**
- * AMP reader theme REST contruller.
+ * AMP reader theme REST controller.
  *
  * @since 1.6.0
  */
