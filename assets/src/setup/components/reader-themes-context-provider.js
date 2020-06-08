@@ -19,12 +19,12 @@ export const ReaderThemes = createContext();
  * Context provider for options retrieval and updating.
  *
  * @param {Object} props Component props.
- * @param {string} props.ajaxurl WP AJAX URL.
+ * @param {string} props.wpAjaxUrl WP AJAX URL.
  * @param {?any} props.children Component children.
  * @param {string} props.readerThemesEndpoint REST endpoint to fetch reader themes.
  * @param {string} props.updatesNonce Nonce for the AJAX request to install a theme.
  */
-export function ReaderThemesContextProvider( { ajaxurl, children, readerThemesEndpoint, updatesNonce } ) {
+export function ReaderThemesContextProvider( { wpAjaxUrl, children, readerThemesEndpoint, updatesNonce } ) {
 	const [ themes, setThemes ] = useState( null );
 	const [ fetchingThemes, setFetchingThemes ] = useState( false );
 	const [ themeFetchError, setThemeFetchError ] = useState( null );
@@ -72,7 +72,7 @@ export function ReaderThemesContextProvider( { ajaxurl, children, readerThemesEn
 
 				// This is the only fetch request in the setup wizard that doesn't go to a REST endpoint.
 				// We need to use window.fetch to bypass the apiFetch middlewares that are useful for other requests.
-				await global.fetch( ajaxurl, {
+				await global.fetch( wpAjaxUrl, {
 					body,
 					method: 'POST',
 				} );
@@ -90,7 +90,7 @@ export function ReaderThemesContextProvider( { ajaxurl, children, readerThemesEn
 
 			setDownloadingTheme( false );
 		} )();
-	}, [ ajaxurl, downloadingTheme, savingOptions, selectedTheme, updatesNonce ] );
+	}, [ wpAjaxUrl, downloadingTheme, savingOptions, selectedTheme, updatesNonce ] );
 
 	/**
 	 * Fetches theme data on component mount.
@@ -149,7 +149,7 @@ export function ReaderThemesContextProvider( { ajaxurl, children, readerThemesEn
 }
 
 ReaderThemesContextProvider.propTypes = {
-	ajaxurl: PropTypes.string.isRequired,
+	wpAjaxUrl: PropTypes.string.isRequired,
 	children: PropTypes.any,
 	readerThemesEndpoint: PropTypes.string.isRequired,
 	updatesNonce: PropTypes.string.isRequired,

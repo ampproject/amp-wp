@@ -21,7 +21,7 @@ import { SetupWizard } from './setup-wizard';
 import { NavigationContextProvider } from './components/navigation-context-provider';
 import { ReaderThemesContextProvider } from './components/reader-themes-context-provider';
 
-const { ajaxurl } = global;
+const { ajaxurl: wpAjaxUrl } = global;
 
 /**
  * Context providers for the application.
@@ -36,7 +36,7 @@ export function Providers( { children } ) {
 			optionsRestEndpoint={ OPTIONS_REST_ENDPOINT }
 		>
 			<ReaderThemesContextProvider
-				ajaxurl={ ajaxurl }
+				wpAjaxUrl={ wpAjaxUrl }
 				readerThemesEndpoint={ READER_THEMES_ENDPOINT }
 				updatesNonce={ UPDATES_NONCE }
 			>

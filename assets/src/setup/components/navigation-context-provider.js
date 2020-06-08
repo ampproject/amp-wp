@@ -68,6 +68,8 @@ NavigationContextProvider.propTypes = {
 	children: PropTypes.any,
 	pages: PropTypes.arrayOf(
 		PropTypes.shape( {
+			PageComponent: PropTypes.func.isRequired,
+			slug: PropTypes.string.isRequired,
 			title: PropTypes.string.isRequired,
 		} ),
 	).isRequired,

@@ -70,7 +70,9 @@ describe( 'Nav', () => {
 				container );
 		} );
 
-		const { nextButton } = getNavButtons( container );
+		const { prevButton, nextButton } = getNavButtons( container );
+
+		expect( prevButton ).not.toBeNull();
 
 		expect( nextButton.hasAttribute( 'disabled' ) ).toBe( true );
 	} );
