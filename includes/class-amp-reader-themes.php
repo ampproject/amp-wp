@@ -135,46 +135,46 @@ final class AMP_Reader_Themes {
 	 * @return array Theme ecosystem posts copied the amp-wp.org website.
 	 */
 	public function get_default_supported_reader_themes( $from_api = false ) {
-		// Note: This can be used to refresh the hardcoded raw theme data.
-		if ( $from_api ) {
-			if ( ! function_exists( 'themes_api' ) ) {
-				require_once ABSPATH . 'wp-admin/includes/theme.php';
-			}
+		if ( ! $from_api ) {
+			$themes = self::get_default_raw_reader_themes();
 
-			$response = themes_api(
-				'query_themes',
-				[
-					'author'   => 'wordpressdotorg',
-					'per_page' => 24, // There are only 12 as of 05/2020.
-				]
-			);
-
-			if ( ! $response || is_wp_error( $response ) ) {
-				return $response;
-			}
-
-			if ( is_array( $response ) ) {
-				$response = (object) $response;
-			}
-
-			$supported_themes = array_diff(
-				AMP_Core_Theme_Sanitizer::get_supported_themes(),
-				[ 'twentyten' ] // Excluded because not responsive.
-			);
-
-			$supported_themes_from_response = array_filter(
-				$response->themes,
-				static function ( $theme ) use ( $supported_themes ) {
-					return in_array( $theme->slug, $supported_themes, true );
-				}
-			);
-
-			return $supported_themes_from_response;
+			return $themes;
 		}
 
-		$themes = self::get_default_raw_reader_themes();
+		// Note: This can be used to refresh the hardcoded raw theme data.
+		if ( ! function_exists( 'themes_api' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/theme.php';
+		}
 
-		return $themes;
+		$response = themes_api(
+			'query_themes',
+			[
+				'author'   => 'wordpressdotorg',
+				'per_page' => 24, // There are only 12 as of 05/2020.
+			]
+		);
+
+		if ( ! $response || is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		if ( is_array( $response ) ) {
+			$response = (object) $response;
+		}
+
+		$supported_themes = array_diff(
+			AMP_Core_Theme_Sanitizer::get_supported_themes(),
+			[ 'twentyten' ] // Excluded because not responsive.
+		);
+
+		$supported_themes_from_response = array_filter(
+			$response->themes,
+			static function ( $theme ) use ( $supported_themes ) {
+				return in_array( $theme->slug, $supported_themes, true );
+			}
+		);
+
+		return $supported_themes_from_response;
 	}
 
 	/**
