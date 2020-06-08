@@ -132,7 +132,7 @@ final class AMP_Reader_Themes {
 	 * Retrieves theme data.
 	 *
 	 * @param boolean $from_api Whether to return theme data from the wordpress.org API. Default false.
-	 * @return array Theme ecosystem posts copied the amp-wp.org website.
+	 * @return array Theme data from the wordpress.org API.
 	 */
 	public function get_default_supported_reader_themes( $from_api = false ) {
 		if ( ! $from_api ) {
@@ -155,7 +155,7 @@ final class AMP_Reader_Themes {
 		);
 
 		if ( ! $response || is_wp_error( $response ) ) {
-			return $response;
+			return [];
 		}
 
 		if ( is_array( $response ) ) {
