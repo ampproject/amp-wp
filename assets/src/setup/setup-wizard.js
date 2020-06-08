@@ -123,5 +123,4 @@ export function SetupWizard( { exitLink } ) {
 
 SetupWizard.propTypes = {
 	exitLink: PropTypes.string.isRequired,
-
 };
