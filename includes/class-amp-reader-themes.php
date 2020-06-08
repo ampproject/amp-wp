@@ -15,8 +15,6 @@ final class AMP_Reader_Themes {
 	/**
 	 * Formatted theme data.
 	 *
-	 * @since 1.6.0
-	 *
 	 * @var array
 	 */
 	private $themes;
@@ -24,16 +22,12 @@ final class AMP_Reader_Themes {
 	/**
 	 * The name of the currently active theme.
 	 *
-	 * @since 1.6.0
-	 *
 	 * @var string
 	 */
 	private $current_theme_name;
 
 	/**
 	 * Whether themes can be installed in the current WordPress installation.
-	 *
-	 * @since 1.6.0
 	 *
 	 * @var bool
 	 */
@@ -49,16 +43,12 @@ final class AMP_Reader_Themes {
 	/**
 	 * Status indicating a reader theme is active on the site.
 	 *
-	 * @since 1.6.0
-	 *
 	 * @var string
 	 */
 	const ACTIVE_STATUS = 'active';
 
 	/**
 	 * Status indicating a reader theme is installed but not active.
-	 *
-	 * @since 1.6.0
 	 *
 	 * @var string
 	 */
@@ -67,8 +57,6 @@ final class AMP_Reader_Themes {
 	/**
 	 * Status indicating a reader theme is not installed but is installable.
 	 *
-	 * @since 1.6.0
-	 *
 	 * @var string
 	 */
 	const INSTALLABLE_STATUS = 'installable';
@@ -76,16 +64,12 @@ final class AMP_Reader_Themes {
 	/**
 	 * Status indicating a reader theme is not installed and can't be installed.
 	 *
-	 * @since 1.6.0
-	 *
 	 * @var string
 	 */
 	const NON_INSTALLABLE_STATUS = 'non-installable';
 
 	/**
 	 * Retrieves all AMP plugin options specified in the endpoint schema.
-	 *
-	 * @since 1.6.0
 	 *
 	 * @return array Formatted theme data.
 	 */
@@ -130,8 +114,6 @@ final class AMP_Reader_Themes {
 	/**
 	 * Gets a reader theme by slug.
 	 *
-	 * @since 1.6.0
-	 *
 	 * @param string $slug Theme slug.
 	 * @return array Theme data.
 	 */
@@ -148,8 +130,6 @@ final class AMP_Reader_Themes {
 
 	/**
 	 * Retrieves theme data.
-	 *
-	 * @since 1.6.0
 	 *
 	 * @param boolean $from_api Whether to return theme data from the wordpress.org API. Default false.
 	 * @return array Theme ecosystem posts copied the amp-wp.org website.
@@ -199,8 +179,6 @@ final class AMP_Reader_Themes {
 
 	/**
 	 * Prepares a single theme.
-	 *
-	 * @since 1.6.0
 	 *
 	 * @param array $theme Theme data from the wordpress.org themes API.
 	 * @return array|object Prepared theme array.
@@ -256,8 +234,6 @@ final class AMP_Reader_Themes {
 	/**
 	 * Returns whether a theme can be installed on the system.
 	 *
-	 * @since 1.6.0
-	 *
 	 * @param array $theme Theme data.
 	 * @return bool True if themes can be installed.
 	 */
@@ -297,8 +273,6 @@ final class AMP_Reader_Themes {
 	/**
 	 * Returns reader theme availability status.
 	 *
-	 * @since 1.6.0
-	 *
 	 * @param array $theme Theme data.
 	 * @return string Theme availability status.
 	 */
@@ -320,8 +294,6 @@ final class AMP_Reader_Themes {
 
 	/**
 	 * Provides details for the classic theme included with the plugin.
-	 *
-	 * @since 1.6.0
 	 *
 	 * @return array
 	 */
@@ -352,8 +324,6 @@ final class AMP_Reader_Themes {
 
 	/**
 	 * Provides raw data for the default reader themes. Descriptions are translatable.
-	 *
-	 * @since 1.6.0
 	 *
 	 * @return array
 	 */
