@@ -406,6 +406,10 @@ class AMP_Theme_Support {
 
 				// Redirect if mobile redirection is not disabled for the session and JS redirection is disabled.
 				if ( ! MobileRedirectManager::redirection_disabled_for_session() && ! MobileRedirectManager::should_redirect_via_js() ) {
+					if ( ! headers_sent() ) {
+						header( 'Vary: User-Agent' );
+					}
+
 					$amp_url = add_query_arg( amp_get_slug(), '1', amp_get_current_url() );
 					wp_safe_redirect( $amp_url, 302 );
 				}
