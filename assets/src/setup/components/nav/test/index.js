@@ -24,7 +24,7 @@ const getNavButtons = ( containerElement ) => ( {
 } );
 
 const MyPageComponent = () => <div />;
-const testPages = [ { PageComponent: MyPageComponent, title: 'Page 0' }, { PageComponent: 'div', title: 'Page 1' } ];
+const testPages = [ { PageComponent: MyPageComponent, slug: 'slug', title: 'Page 0' }, { PageComponent: MyPageComponent, slug: 'slug-2', title: 'Page 1' } ];
 
 describe( 'Nav', () => {
 	beforeEach( () => {
