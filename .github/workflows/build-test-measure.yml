@@ -113,6 +113,7 @@ jobs:
 
     outputs:
       pr_number: ${{ steps.get-pr-number.outputs.num }}
+      comment_body: ${{ steps.get-comment-body.outputs.body }}
 
     steps:
       - name: Get PR number
@@ -127,15 +128,21 @@ jobs:
           comment-author: github-actions[bot]
           body-includes: Download the development build
 
+      - name: Get comment body
+        id: get-comment-body
+        run: |
+          echo "::set-output name=body::$(cat <<-EOF
+          Plugin builds for ${{ github.sha }} are ready :cook:!
+          - Download the development build [here](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/dev/amp.zip)
+          - Download the production build [here](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/prod/amp.zip)
+          EOF)"
+
       - name: Create comment on PR with links to plugin builds
         if: ${{ steps.find-comment.outputs.comment-id == '' }}
         uses: peter-evans/create-or-update-comment@v1
         with:
           issue-number: ${{ steps.get-pr-number.outputs.num }}
-          body: |
-            Plugin builds for ${{ github.sha }} are ready :cook:!
-            - Download the development build [here](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/dev/amp.zip)
-            - Download the production build [here](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/prod/amp.zip)
+          body: ${{ steps.get-comment-body.outputs.body }}
 
       - name: Update comment on PR with links to plugin builds
         if: ${{ steps.find-comment.outputs.comment-id != '' }}
@@ -143,7 +150,4 @@ jobs:
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
           edit-mode: replace
-          body: |
-            Plugin builds for ${{ github.sha }} are ready :cook:!
-            - Download the development build [here](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/dev/amp.zip)
-            - Download the production build [here](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/prod/amp.zip)
+          body: ${{ steps.get-comment-body.outputs.body }}
