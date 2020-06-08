@@ -61,7 +61,7 @@ export function ReaderThemesContextProvider( { ajaxurl, children, readerThemesEn
 		/**
 		 * Downloads a theme from WordPress.org using the traditional AJAX action.
 		 */
-		async function downloadReaderTheme() {
+		( async () => {
 			setDownloadingTheme( true );
 
 			try {
@@ -89,16 +89,21 @@ export function ReaderThemesContextProvider( { ajaxurl, children, readerThemesEn
 			}
 
 			setDownloadingTheme( false );
-		}
-
-		downloadReaderTheme();
+		} )();
 	}, [ ajaxurl, downloadingTheme, savingOptions, selectedTheme, updatesNonce ] );
 
 	/**
 	 * Fetches theme data on component mount.
 	 */
 	useEffect( () => {
-		async function fetchThemes() {
+		if ( fetchingThemes || ! readerThemesEndpoint || themes || themeFetchError ) {
+			return;
+		}
+
+		/**
+		 * Fetch themes from the REST endpoint.
+		 */
+		( async () => {
 			setFetchingThemes( true );
 
 			try {
@@ -119,11 +124,7 @@ export function ReaderThemesContextProvider( { ajaxurl, children, readerThemesEn
 			}
 
 			setFetchingThemes( false );
-		}
-
-		if ( readerThemesEndpoint && ! themes && ! fetchingThemes && ! themeFetchError ) {
-			fetchThemes();
-		}
+		} )();
 	}, [ fetchingThemes, readerThemesEndpoint, themes, themeFetchError ] );
 
 	useEffect( () => () => {
