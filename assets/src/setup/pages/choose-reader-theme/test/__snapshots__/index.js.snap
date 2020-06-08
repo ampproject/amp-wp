@@ -34,7 +34,7 @@ exports[`ThemeCard matches snapshot 1`] = `
   >
     <a
       href="http://mysite.com"
-      rel="noreferrer"
+      rel="noreferrer noopener"
       target="_blank"
     >
       Learn more

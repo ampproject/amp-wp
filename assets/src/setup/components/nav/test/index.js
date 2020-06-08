@@ -23,7 +23,8 @@ const getNavButtons = ( containerElement ) => ( {
 	prevButton: containerElement.querySelector( '.amp-setup-nav__prev' ),
 } );
 
-const testPages = [ { PageComponent: 'div', title: 'Page 0' }, { PageComponent: 'div', title: 'Page 1' } ];
+const MyPageComponent = () => <div />;
+const testPages = [ { PageComponent: MyPageComponent, title: 'Page 0' }, { PageComponent: 'div', title: 'Page 1' } ];
 
 describe( 'Nav', () => {
 	beforeEach( () => {
@@ -70,9 +71,7 @@ describe( 'Nav', () => {
 				container );
 		} );
 
-		const { prevButton, nextButton } = getNavButtons( container );
-
-		expect( prevButton ).not.toBeNull();
+		const { nextButton } = getNavButtons( container );
 
 		expect( nextButton.hasAttribute( 'disabled' ) ).toBe( true );
 	} );
