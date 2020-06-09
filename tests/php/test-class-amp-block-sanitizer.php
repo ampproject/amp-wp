@@ -24,7 +24,7 @@ class AMP_Block_Sanitizer_Test extends WP_UnitTestCase {
 
 			'more_than_one_child'  => [
 				'<figure class="wp-block-embed wp-embed-aspect-16-9 wp-has-aspect-ratio"><amp-facebook></amp-facebook><amp-facebook></amp-facebook></figure>',
-				'<figure class="wp-block-embed  wp-has-aspect-ratio"><amp-facebook></amp-facebook><amp-facebook></amp-facebook></figure>',
+				'<figure class="wp-block-embed"><amp-facebook></amp-facebook><amp-facebook></amp-facebook></figure>',
 			],
 
 			'no_wp_block_embed'    => [
@@ -44,7 +44,7 @@ class AMP_Block_Sanitizer_Test extends WP_UnitTestCase {
 
 			'responsive_layout'    => [
 				'<figure class="wp-block-embed-soundcloud wp-block-embed is-type-rich is-provider-soundcloud wp-embed-aspect-4-3 wp-has-aspect-ratio"><div class="wp-block-embed__wrapper"><amp-soundcloud data-trackid="90097394" data-visual="true" height="400" width="640" layout="responsive"></amp-soundcloud></div></figure>',
-				'<figure class="wp-block-embed-soundcloud wp-block-embed is-type-rich is-provider-soundcloud  wp-has-aspect-ratio"><div class="wp-block-embed__wrapper"><amp-soundcloud data-trackid="90097394" data-visual="true" height="3" width="4" layout="responsive"></amp-soundcloud></div></figure>',
+				'<figure class="wp-block-embed-soundcloud wp-block-embed is-type-rich is-provider-soundcloud"><div class="wp-block-embed__wrapper"><amp-soundcloud data-trackid="90097394" data-visual="true" height="3" width="4" layout="responsive"></amp-soundcloud></div></figure>',
 			],
 		];
 	}
