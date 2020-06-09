@@ -130,6 +130,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 			'ip_host'                     => function () {
 				$this->set_home_url_with_filter( 'http://127.0.0.1:1234' );
+				$this->go_to( '/' );
 				$this->assertEquals( 'http://127.0.0.1:1234/', amp_get_current_url() );
 			},
 
