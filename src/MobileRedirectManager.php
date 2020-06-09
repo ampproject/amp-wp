@@ -211,12 +211,12 @@ final class MobileRedirectManager {
 	public static function add_mobile_redirect_script() {
 		?>
 		<script>
-			(function ( ampSlug, disabledCookieName, userAgents ) {
+			( function ( ampSlug, disabledCookieName, userAgents ) {
 				var regExp = userAgents
 						// Escape each user agent string before forming the regex expression.
 						.map( function ( userAgent ) {
 							// See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Escaping.
-							return userAgent.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+							return userAgent.replace( /[.*+\-?^${}()|[\]\\]/g, '\\$&' ); // $& means the whole matched string
 						} )
 						.join( '|' );
 				var re = new RegExp( regExp );

@@ -307,7 +307,7 @@ function amp_add_frontend_actions() {
  * @todo This should go into the AmpProject\AmpWP namespace?
  * @since 1.6
  *
- * @return bool True if there is an AMP version, false otherwise.
+ * @return bool Whether there is an AMP version for the provided URL.
  */
 function is_amp_available() {
 	global $wp_query;
