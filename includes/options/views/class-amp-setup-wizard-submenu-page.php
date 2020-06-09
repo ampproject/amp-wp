@@ -118,19 +118,26 @@ final class AMP_Setup_Wizard_Submenu_Page {
 
 		wp_styles()->add_data( self::JS_HANDLE, 'rtl', 'replace' );
 
+		$setup_wizard_data = [
+			'AMP_OPTIONS_KEY'             => AMP_Options_Manager::OPTION_NAME,
+			'APP_ROOT_ID'                 => self::APP_ROOT_ID,
+			'EXIT_LINK'                   => admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ),
+			'OPTIONS_REST_ENDPOINT'       => rest_url( 'wp/v2/settings' ),
+			'READER_THEMES_REST_ENDPOINT' => rest_url( 'amp-wp/v1/reader-themes' ),
+			'UPDATES_NONCE'               => wp_create_nonce( 'updates' ),
+		];
+
 		wp_add_inline_script(
 			self::JS_HANDLE,
 			sprintf(
 				'var ampSetup = %s;',
 				wp_json_encode(
-					[
-						'AMP_OPTIONS_KEY'        => AMP_Options_Manager::OPTION_NAME,
-						'APP_ROOT_ID'            => self::APP_ROOT_ID,
-						'EXIT_LINK'              => admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ),
-						'OPTIONS_REST_ENDPOINT'  => rest_url( 'wp/v2/settings' ),
-						'READER_THEMES_ENDPOINT' => rest_url( 'amp-wp/v1/reader-themes' ),
-						'UPDATES_NONCE'          => wp_create_nonce( 'updates' ),
-					]
+					/**
+					 * Filters the array of data passed to the setup wizard application.
+					 *
+					 * @param array $setup_wizard_data Associateive array of data.
+					 */
+					apply_filters( 'amp_setup_wizard_data', $setup_wizard_data )
 				)
 			),
 			'before'
