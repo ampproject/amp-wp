@@ -82,6 +82,13 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 	protected $admin_path;
 
 	/**
+	 * Instance of MobileRedirectManager class.
+	 *
+	 * @var MobileRedirectManager
+	 */
+	protected $mobile_redirect_manager;
+
+	/**
 	 * Sanitizer constructor.
 	 *
 	 * @param Document $dom  Document.
@@ -97,6 +104,7 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 		$this->home_host    = wp_parse_url( home_url(), PHP_URL_HOST );
 		$this->content_path = wp_parse_url( content_url( '/' ), PHP_URL_PATH );
 		$this->admin_path   = wp_parse_url( admin_url(), PHP_URL_PATH );
+		$this->mobile_redirect_manager = new MobileRedirectManager();
 	}
 
 	/**
@@ -191,7 +199,7 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 				}
 
 				// Append the `noamp` query param to excluded URLs to prevent mobile redirection.
-				if ( ( $is_excluded_url || false !== $no_amphtml_rel_pos ) && MobileRedirectManager::is_enabled() ) {
+				if ( ( $is_excluded_url || false !== $no_amphtml_rel_pos ) && $this->mobile_redirect_manager->is_enabled() ) {
 					$href = add_query_arg( MobileRedirectManager::NO_AMP_QUERY_VAR, '1', $href );
 					$element->setAttribute( 'href', $href );
 				}

@@ -39,7 +39,14 @@ final class MobileRedirectManager {
 	 *
 	 * @var bool
 	 */
-	private static $disabled_cookie_is_set = false;
+	private $disabled_cookie_is_set;
+
+	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		$this->disabled_cookie_is_set = false;
+	}
 
 	/**
 	 * Get whether mobile redirection is enabled or not.
@@ -47,11 +54,11 @@ final class MobileRedirectManager {
 	 * @return bool If JS redirection is disabled, only the status of the mobile redirection option is returned.
 	 *              Otherwise, returns true if mobile redirection option is enabled and current request is from a mobile device.
 	 */
-	public static function is_enabled() {
+	public function is_enabled() {
 		if ( ! AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ) {
 			return false;
 		}
-		return self::should_redirect_via_js() || self::is_mobile_request();
+		return $this->should_redirect_via_js() || $this->is_mobile_request();
 	}
 
 	/**
@@ -59,8 +66,8 @@ final class MobileRedirectManager {
 	 *
 	 * @return bool True if available, false otherwise.
 	 */
-	public static function is_available_for_request() {
-		return self::is_enabled() && is_amp_available();
+	public function is_available_for_request() {
+		return $this->is_enabled() && is_amp_available();
 	}
 
 	/**
@@ -68,7 +75,7 @@ final class MobileRedirectManager {
 	 *
 	 * @return bool True if current request is from a mobile device, otherwise false.
 	 */
-	public static function is_mobile_request() {
+	public function is_mobile_request() {
 		/**
 		 * Filters whether the current request is from a mobile device. This is provided as a means to short-circuit
 		 * the normal determination of a mobile request below.
@@ -95,7 +102,7 @@ final class MobileRedirectManager {
 				static function ( $user_agent ) {
 					return preg_quote( $user_agent, '/' );
 				},
-				self::get_user_agents()
+				$this->get_user_agents()
 			)
 		);
 
@@ -111,7 +118,7 @@ final class MobileRedirectManager {
 	 *
 	 * @return bool True if mobile redirection should be done, false otherwise.
 	 */
-	public static function should_redirect_via_js() {
+	public function should_redirect_via_js() {
 		/**
 		 * Filters whether mobile redirection should be done via JavaScript. If false, a server-side solution will be used instead.
 		 *
@@ -127,7 +134,7 @@ final class MobileRedirectManager {
 	 *
 	 * @return string[] An array of user agents.
 	 */
-	public static function get_user_agents() {
+	public function get_user_agents() {
 		// Default list compiled from the user agents listed in `wp_is_mobile()`.
 		$default_user_agents = [
 			'Mobile',
@@ -154,7 +161,7 @@ final class MobileRedirectManager {
 	 *
 	 * @return bool True if disabled, false otherwise.
 	 */
-	public static function redirection_disabled_for_request() {
+	public function redirection_disabled_for_request() {
 		return ( isset( $_GET[ self::NO_AMP_QUERY_VAR ] ) && '1' === $_GET[ self::NO_AMP_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 
@@ -163,8 +170,8 @@ final class MobileRedirectManager {
 	 *
 	 * @return bool True if disabled, false otherwise.
 	 */
-	public static function redirection_disabled_for_session() {
-		return ( isset( $_COOKIE[ self::DISABLED_COOKIE_NAME ] ) && '1' === $_COOKIE[ self::DISABLED_COOKIE_NAME ] ) || self::$disabled_cookie_is_set;
+	public function redirection_disabled_for_session() {
+		return ( isset( $_COOKIE[ self::DISABLED_COOKIE_NAME ] ) && '1' === $_COOKIE[ self::DISABLED_COOKIE_NAME ] ) || $this->disabled_cookie_is_set;
 	}
 
 	/**
@@ -172,7 +179,7 @@ final class MobileRedirectManager {
 	 *
 	 * @return void
 	 */
-	public static function disable_redirect_for_session() {
+	public function disable_redirect_for_session() {
 		$value    = '1';                                           // Cookie value.
 		$expires  = 0;                                             // Time till expiry. Setting it to `0` means the cookie will only last for the current browser session.
 		$path     = wp_parse_url( home_url( '/' ), PHP_URL_PATH ); // Path.
@@ -202,13 +209,13 @@ final class MobileRedirectManager {
 			);
 		}
 
-		self::$disabled_cookie_is_set = true;
+		$this->disabled_cookie_is_set = true;
 	}
 
 	/**
 	 * Output the mobile redirection Javascript code.
 	 */
-	public static function add_mobile_redirect_script() {
+	public function add_mobile_redirect_script() {
 		?>
 		<script>
 			( function ( ampSlug, disabledCookieName, userAgents ) {
@@ -254,7 +261,7 @@ final class MobileRedirectManager {
 			} )(
 				<?php echo wp_json_encode( amp_get_slug() ); ?>,
 				<?php echo wp_json_encode( self::DISABLED_COOKIE_NAME ); ?>,
-				<?php echo wp_json_encode( self::get_user_agents() ); ?>
+				<?php echo wp_json_encode( $this->get_user_agents() ); ?>
 			)
 		</script>
 		<?php
@@ -267,7 +274,7 @@ final class MobileRedirectManager {
 	 * @param string $url    URL to canonical version of page.
 	 * @param string $text   Text for the anchor element.
 	 */
-	public static function add_mobile_version_switcher_markup( $is_amp, $url, $text ) {
+	public function add_mobile_version_switcher_markup( $is_amp, $url, $text ) {
 		?>
 		<style>
 			#version-switch-link {
@@ -282,7 +289,7 @@ final class MobileRedirectManager {
 				border: 0;
 			}
 		</style>
-		<div id="site-version-switcher" <?php printf( ! $is_amp && self::should_redirect_via_js() ? 'hidden' : '' ); ?>>
+		<div id="site-version-switcher" <?php printf( ! $is_amp && $this->should_redirect_via_js() ? 'hidden' : '' ); ?>>
 			<a
 				id="version-switch-link"
 				rel="<?php printf( esc_attr( $is_amp ? 'noamphtml nofollow' : 'amphtml' ) ); ?>"
