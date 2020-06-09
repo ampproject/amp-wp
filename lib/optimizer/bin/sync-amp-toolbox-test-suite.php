@@ -1,12 +1,13 @@
 #!/usr/bin/env php
 <?php
-
-$sourceUrl       = 'https://github.com/ampproject/amp-toolbox/archive/master.zip';
+$version         = 'v2.0.0';
+$sourceUrl       = "https://github.com/ampproject/amp-toolbox/archive/{$version}.zip";
 $targetFolder    = realpath(dirname(__DIR__) . '/tests') . '/spec';
 $tmpFilePath     = tempnam(sys_get_temp_dir(), 'amp-optimizer-');
 $tmpFile         = null;
 $zip             = null;
-$targetSubFolder = 'amp-toolbox-master/packages/optimizer/spec/';
+$version_string  = ltrim( $version, 'v' );
+$targetSubFolder = "amp-toolbox-{$version_string}/packages/optimizer/spec/";
 
 function cleanUp()
 {
