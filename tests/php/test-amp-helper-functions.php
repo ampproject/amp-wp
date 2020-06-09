@@ -116,6 +116,23 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 				);
 			},
 
+			'idn_domain'                  => function () {
+				$this->set_home_url_with_filter( 'https://⚡️.example.com' );
+				$this->go_to( '/?s=lightning' );
+				$this->assertEquals( 'https://⚡️.example.com/?s=lightning', amp_get_current_url() );
+			},
+
+			'punycode_domain'             => function () {
+				$this->set_home_url_with_filter( 'https://xn--57h.example.com' );
+				$this->go_to( '/?s=thunder' );
+				$this->assertEquals( 'https://xn--57h.example.com/?s=thunder', amp_get_current_url() );
+			},
+
+			'ip_host'                     => function () {
+				$this->set_home_url_with_filter( 'http://127.0.0.1:1234' );
+				$this->assertEquals( 'http://127.0.0.1:1234/', amp_get_current_url() );
+			},
+
 			'permalink'                   => function () {
 				global $wp_rewrite;
 				update_option( 'permalink_structure', '/%year%/%monthnum%/%day%/%postname%/' );
@@ -148,12 +165,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 				$_SERVER['HTTPS']       = 'on';
 				$_SERVER['REQUEST_URI'] = '/about/';
 				$_SERVER['HTTP_HOST']   = 'foo.example.org';
-				add_filter(
-					'home_url',
-					static function() {
-						return '/';
-					}
-				);
+				$this->set_home_url_with_filter( '/' );
 				$this->assertEquals(
 					'https://foo.example.org/about/',
 					amp_get_current_url()
@@ -161,15 +173,20 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			},
 
 			'home_url_with_trimmings'     => function () {
-				add_filter(
-					'home_url',
-					static function() {
-						return 'https://user:pass@example.museum:8080';
-					}
-				);
+				$this->set_home_url_with_filter( 'https://user:pass@example.museum:8080' );
 				$_SERVER['REQUEST_URI'] = '/about/';
 				$this->assertEquals(
 					'https://user:pass@example.museum:8080/about/',
+					amp_get_current_url()
+				);
+			},
+
+			'complete_parse_fail'         => function () {
+				$_SERVER['HTTP_HOST'] = 'env.example.org';
+				unset( $_SERVER['REQUEST_URI'] );
+				$this->set_home_url_with_filter( ':' );
+				$this->assertEquals(
+					'http://env.example.org/',
 					amp_get_current_url()
 				);
 			},
@@ -179,6 +196,20 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 				return [ $assertion ];
 			},
 			$assertions
+		);
+	}
+
+	/**
+	 * Set home_url with filter.
+	 *
+	 * @param string $home_url Home URL.
+	 */
+	private function set_home_url_with_filter( $home_url ) {
+		add_filter(
+			'home_url',
+			static function() use ( $home_url ) {
+				return $home_url;
+			}
 		);
 	}
 

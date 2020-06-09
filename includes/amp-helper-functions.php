@@ -385,6 +385,9 @@ function amp_get_slug() {
  */
 function amp_get_current_url() {
 	$parsed_url = wp_parse_url( home_url() );
+	if ( ! is_array( $parsed_url ) ) {
+		$parsed_url = [];
+	}
 	if ( empty( $parsed_url['scheme'] ) ) {
 		$parsed_url['scheme'] = is_ssl() ? 'https' : 'http';
 	}
