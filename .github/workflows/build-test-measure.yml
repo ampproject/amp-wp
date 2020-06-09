@@ -135,7 +135,8 @@ jobs:
           Plugin builds for ${{ github.sha }} are ready :cook:!
           - Download the development build [here](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/dev/amp.zip)
           - Download the production build [here](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/prod/amp.zip)
-          EOF)"
+          EOF
+          )"
 
       - name: Create comment on PR with links to plugin builds
         if: ${{ steps.find-comment.outputs.comment-id == '' }}
