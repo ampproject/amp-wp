@@ -24,6 +24,8 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 
 	/**
 	 * Constructor.
+	 *
+	 * @param AMP_Reader_Themes $reader_themes Reader themes helper class instance.
 	 */
 	public function __construct( $reader_themes ) {
 		$this->namespace     = 'amp/v1';
