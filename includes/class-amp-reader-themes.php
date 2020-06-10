@@ -291,6 +291,13 @@ final class AMP_Reader_Themes {
 		 */
 		$themes = array_filter( (array) apply_filters( 'amp_reader_themes', $themes ) );
 
+		$themes = array_filter(
+			$themes,
+			function( $theme ) {
+				return is_array( $theme ) && ! empty( $theme ) && ! empty( $theme['screenshot_url'] ); // Screenshots are required.
+			}
+		);
+
 		foreach ( $themes as &$theme ) {
 			$theme['availability'] = $this->get_theme_availability( $theme );
 		}
@@ -490,7 +497,7 @@ final class AMP_Reader_Themes {
 			'name'           => 'AMP Classic',
 			'slug'           => 'classic',
 			'preview_url'    => 'https://amp-wp.org',
-			'screenshot_url' => '',
+			'screenshot_url' => amp_get_asset_url( 'images/reader-themes/classic.png' ),
 			'homepage'       => 'https://amp-wp.org',
 			'description'    => __(
 				// @todo Improved description text.

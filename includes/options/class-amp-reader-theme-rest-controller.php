@@ -130,13 +130,6 @@ final class AMP_Reader_Theme_REST_Controller extends WP_REST_Controller {
 	public function get_items( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		$themes = $this->reader_themes->get_themes();
 
-		$themes = array_filter(
-			$themes,
-			function( $theme ) {
-				return ! empty( $theme['screenshot_url'] ); // Screenshots are required.
-			}
-		);
-
 		return rest_ensure_response( $themes );
 	}
 }
