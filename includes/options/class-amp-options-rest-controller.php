@@ -16,11 +16,19 @@ use AmpProject\AmpWP\Option;
 final class AMP_Options_REST_Controller extends WP_REST_Controller {
 
 	/**
+	 * Reader themes provider class.
+	 *
+	 * @var AMP_Reader_Themes
+	 */
+	private $reader_themes;
+
+	/**
 	 * Constructor.
 	 */
-	public function __construct() {
-		$this->namespace = 'amp/v1';
-		$this->rest_base = 'options';
+	public function __construct( $reader_themes ) {
+		$this->namespace     = 'amp/v1';
+		$this->rest_base     = 'options';
+		$this->reader_themes = $reader_themes;
 	}
 
 	/**
@@ -109,9 +117,15 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 				'properties' => [
 					Option::THEME_SUPPORT => [
 						'type' => 'string',
+						'enum' => [
+							AMP_Theme_Support::READER_MODE_SLUG,
+							AMP_Theme_Support::STANDARD_MODE_SLUG,
+							AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
+						],
 					],
 					Option::READER_THEME  => [
 						'type' => 'string',
+						'enum' => wp_list_pluck( $this->reader_themes->get_themes(), 'slug' ),
 					],
 				],
 			];
