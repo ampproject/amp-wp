@@ -61,8 +61,6 @@ final class AMP_Reader_Theme_REST_Controller extends WP_REST_Controller {
 			$theme['screenshot_url'] = amp_get_asset_url( "images/reader-themes/{$theme['slug']}.png" );
 		}
 
-		$theme['description'] = wp_trim_words( $theme['description'], 25 );
-
 		return $theme;
 	}
 
