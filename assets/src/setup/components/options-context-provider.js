@@ -101,7 +101,7 @@ export function OptionsContextProvider( { children, optionsKey, optionsRestEndpo
 
 			setFetchingOptions( false );
 		};
-		if ( ! options && 0 === fetchingOptions && ! fetchOptionsError ) {
+		if ( ! options && ! fetchingOptions && ! fetchOptionsError ) {
 			fetchOptions();
 		}
 	}, [ fetchingOptions, options, optionsKey, optionsRestEndpoint, fetchOptionsError ] );
