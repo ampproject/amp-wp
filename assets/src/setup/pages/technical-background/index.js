@@ -9,7 +9,7 @@ import { useContext, useEffect } from '@wordpress/element';
  */
 import { Navigation } from '../../components/navigation-context-provider';
 import { User } from '../../components/user-context-provider';
-import { User1, User2 } from '../../components/svg/users';
+import { User1, User2 } from '../../components/svg/user-icons';
 import { Loading } from '../../components/loading';
 import './style.css';
 

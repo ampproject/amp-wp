@@ -1,3 +1,7 @@
+/**
+ * Decorative images representing users.
+ */
+
 export function User1() {
 	return (
 		<svg width="80" height="70" viewBox="0 0 80 70" fill="none" xmlns="http://www.w3.org/2000/svg">
