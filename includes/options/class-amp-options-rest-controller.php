@@ -76,11 +76,7 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 		$options    = AMP_Options_Manager::get_options();
 		$properties = $this->get_item_schema()['properties'];
 
-		foreach ( array_keys( $options ) as $option ) {
-			if ( ! array_key_exists( $option, $properties ) ) {
-				unset( $options[ $option ] );
-			}
-		}
+		$options = wp_array_slice_assoc( $options, array_keys( $properties ) );
 		return rest_ensure_response( $options );
 	}
 
