@@ -350,6 +350,21 @@ class AMP_Options_Manager {
 	}
 
 	/**
+	 * Update plugin options.
+	 *
+	 * @param array $options Plugin option name.
+	 * @return bool Whether update succeeded.
+	 */
+	public static function update_options( $options ) {
+		$amp_options = array_merge(
+			self::get_options(),
+			$options
+		);
+
+		return update_option( self::OPTION_NAME, $amp_options, false );
+	}
+
+	/**
 	 * Handle analytics submission.
 	 */
 	public static function handle_analytics_submit() {
