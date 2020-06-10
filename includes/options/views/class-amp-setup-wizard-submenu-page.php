@@ -109,10 +109,19 @@ final class AMP_Setup_Wizard_Submenu_Page {
 			true
 		);
 
+		// PHPCS ignore reason: WP will strip multiple `family` args from the Google fonts URL while adding the version string,
+		// so we need to avoid specifying a version at all.
+		wp_enqueue_style( // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+			self::JS_HANDLE . '-fonts',
+			'https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600&family=Poppins:wght@400;600&display=swap',
+			[],
+			null
+		);
+
 		wp_enqueue_style(
 			self::JS_HANDLE,
 			amp_get_asset_url( 'css/amp-setup-compiled.css' ),
-			[],
+			[ self::JS_HANDLE . '-fonts' ],
 			AMP__VERSION
 		);
 
