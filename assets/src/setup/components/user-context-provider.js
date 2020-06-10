@@ -90,14 +90,23 @@ export function UserContextProvider( {
 		}
 
 		setSavingUserOptions( false );
-		setHasUserOptionsChanges( true );
-	}, [ user, setSaveUserOptionsError, setSavingUserOptions, setHasUserOptionsChanges, userRestEndpoint ] );
+		setHasSavedUserOptions( true );
+	}, [ user, setSaveUserOptionsError, setSavingUserOptions, setHasSavedUserOptions, userRestEndpoint ] );
 
 	useEffect( () => () => {
 		hasUnmounted.current = true;
 	}, [] );
 
+	/**
+	 * Handles changes to user options.
+	 *
+	 * @param {Object} newValue AMP user options to update.
+	 */
 	const setDeveloperToolsOption = ( newValue ) => {
+		if ( false === hasUserOptionsChanges ) {
+			setHasUserOptionsChanges( true );
+		}
+
 		setUser( {
 			...user,
 			meta: {
@@ -108,6 +117,8 @@ export function UserContextProvider( {
 				},
 			},
 		} );
+
+		setHasSavedUserOptions( false );
 	};
 
 	return (
@@ -117,7 +128,11 @@ export function UserContextProvider( {
 					developerToolsOption,
 					fetchingUser,
 					fetchUserError,
+					hasSavedUserOptions,
+					hasUserOptionsChanges,
 					saveUserOptions,
+					saveUserOptionsError,
+					savingUserOptions,
 					setDeveloperToolsOption,
 				}
 			}
