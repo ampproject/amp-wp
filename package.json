@@ -92,7 +92,8 @@
     "webpackbar": "4.0.0"
   },
   "scripts": {
-    "build": "npm-run-all build:*",
+    "build:dev": "cross-env NODE_ENV=development npm-run-all 'build:!(dev|prod)'",
+    "build:prod": "cross-env NODE_ENV=production npm-run-all 'build:!(dev|prod)'",
     "build:prepare": "grunt clean",
     "build:css": "npm-run-all build:css:*",
     "build:css:copy": "cp -R assets/css/src/* assets/css",
