@@ -77,7 +77,7 @@ jobs:
       - name: Upload build as artifact
         uses: actions/upload-artifact@v2
         with:
-          name: amp-${{ steps.retrieve-branch-name.outputs.branch_name }}-${{ steps.retrieve-git-sha-8.outputs.sha8 }}
+          name: amp-${{ steps.retrieve-branch-name.outputs.branch_name }}-${{ steps.retrieve-git-sha-8.outputs.sha8 }}-dev
           path: builds/dev
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -148,7 +148,7 @@ jobs:
       - name: Upload build as artifact
         uses: actions/upload-artifact@v2
         with:
-          name: amp-${{ steps.retrieve-branch-name.outputs.branch_name }}-${{ steps.retrieve-git-sha-8.outputs.sha8 }}
+          name: amp-${{ steps.retrieve-branch-name.outputs.branch_name }}-${{ steps.retrieve-git-sha-8.outputs.sha8 }}-prod
           path: builds/prod
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -163,13 +163,13 @@ jobs:
       - name: Download dev build
         uses: actions/download-artifact@v2
         with:
-          name: amp-${{ needs.dev-zip.outputs.branch-name }}-${{ needs.dev-zip.outputs.git-sha-8 }}
+          name: amp-${{ needs.dev-zip.outputs.branch-name }}-${{ needs.dev-zip.outputs.git-sha-8 }}-dev
           path: builds/dev
 
       - name: Download prod build
         uses: actions/download-artifact@v2
         with:
-          name: amp-${{ needs.prod-zip.outputs.branch-name }}-${{ needs.prod-zip.outputs.git-sha-8 }}
+          name: amp-${{ needs.prod-zip.outputs.branch-name }}-${{ needs.prod-zip.outputs.git-sha-8 }}-prod
           path: builds/prod
 
       - name: Setup Google Cloud SDK
