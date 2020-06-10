@@ -69,7 +69,7 @@ final class AMP_Reader_Themes {
 	const STATUS_NON_INSTALLABLE = 'non-installable';
 
 	/**
-	 * Reader themes copied from JSON data freturn ed from Wordpress.org themes endpoint. See ::get_default_supported_reader_themes.
+	 * Reader themes copied from JSON data returned from WordPress.org themes endpoint. See ::get_default_supported_reader_themes.
 	 * Note: Descriptions are shortened and made translatable in the AMP_Reader_Theme_REST_Controller.
 	 *
 	 * @var array
