@@ -150,7 +150,6 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 	 *
 	 * @covers AMP_Reader_Themes::get_theme_availability
 	 * @covers AMP_Reader_Themes::can_install_theme
-	 * @covers AMP_Reader_Themes::get_current_theme_name
 	 *
 	 * @dataProvider get_availability_test_themes
 	 */

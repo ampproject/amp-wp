@@ -404,21 +404,6 @@ final class AMP_Reader_Themes {
 	}
 
 	/**
-	 * Provides the current theme name.
-	 *
-	 * @return string|bool The theme name, or false if the theme has errors.
-	 */
-	private function get_current_theme_name() {
-		if ( null === $this->current_theme_name ) {
-			$current_theme = wp_get_theme();
-
-			$this->current_theme_name = $current_theme->exists() ? $current_theme->get( 'Name' ) : false;
-		}
-
-		return $this->current_theme_name;
-	}
-
-	/**
 	 * Returns whether a theme can be installed on the system.
 	 *
 	 * @param array $theme Theme data.
@@ -465,7 +450,7 @@ final class AMP_Reader_Themes {
 	 */
 	public function get_theme_availability( $theme ) {
 		switch ( true ) {
-			case $this->get_current_theme_name() === $theme['name']:
+			case get_template() === $theme['slug']:
 				return self::STATUS_ACTIVE;
 
 			case wp_get_theme( $theme['slug'] )->exists():
