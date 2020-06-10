@@ -5,7 +5,6 @@
  * @package AMP
  */
 
-
 /**
  * Class AMP_User_Options
  */
@@ -24,27 +23,6 @@ class AMP_User_Options {
 	 * @var string
 	 */
 	const OPTION_DEVELOPER_TOOLS = 'developer_tools';
-
-	/**
-	 * Value for the developer tools option when disabled.
-	 *
-	 * @var string
-	 */
-	const DEVELOPER_TOOLS_DISABLED = 'disabled';
-
-	/**
-	 * Value for the developer tools option when enabled.
-	 *
-	 * @var string
-	 */
-	const DEVELOPER_TOOLS_ENABLED = 'enabled';
-
-	/**
-	 * Value for the developer tools option has not yet been set.
-	 *
-	 * @var string
-	 */
-	const DEVELOPER_TOOLS_UNSET = 'unset';
 
 	/**
 	 * Sets up hooks.
@@ -67,23 +45,23 @@ class AMP_User_Options {
 				'show_in_rest' => [
 					'schema' => [
 						'default'    => [
-							self::OPTION_DEVELOPER_TOOLS => self::DEVELOPER_TOOLS_UNSET,
+							self::OPTION_DEVELOPER_TOOLS => 'unset',
 						],
 						'type'       => 'object',
 						'properties' => [
 							self::OPTION_DEVELOPER_TOOLS => [
 								'type' => 'string',
 								'enum' => [
-									self::DEVELOPER_TOOLS_UNSET,
-									self::DEVELOPER_TOOLS_ENABLED,
-									self::DEVELOPER_TOOLS_DISABLED,
+									'disabled',
+									'enabled',
+									'unset',
 								],
 							],
 						],
 					],
 				],
 				'single'       => true,
-				'type'         => 'object',	
+				'type'         => 'object',
 			]
 		);
 	}

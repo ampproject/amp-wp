@@ -15,10 +15,10 @@ import { Options } from '../options-context-provider';
  * @return {null} Renders nothing.
  */
 export function WizardUnsavedChangesWarning() {
-	const { hasChanges, hasSaved } = useContext( Options );
+	const { hasOptionsChanges, hasSavedOptions } = useContext( Options );
 
 	useEffect( () => {
-		if ( hasChanges && ! hasSaved ) {
+		if ( hasOptionsChanges && ! hasSavedOptions ) {
 			const warnIfUnsavedChanges = ( event ) => {
 				event.returnValue = __( 'This page has unsaved changes. Are you sure you want to leave?', 'amp' );
 
@@ -33,7 +33,7 @@ export function WizardUnsavedChangesWarning() {
 		}
 
 		return () => undefined;
-	}, [ hasChanges, hasSaved ] );
+	}, [ hasOptionsChanges, hasSavedOptions ] );
 
 	return null;
 }

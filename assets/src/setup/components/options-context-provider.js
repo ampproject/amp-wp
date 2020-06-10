@@ -26,8 +26,8 @@ export function OptionsContextProvider( { children, optionsKey, optionsRestEndpo
 	const [ fetchOptionsError, setFetchOptionsError ] = useState( null );
 	const [ savingOptions, setSavingOptions ] = useState( false );
 	const [ saveOptionsError, setSaveOptionsError ] = useState( null );
-	const [ hasChanges, setHasChanges ] = useState( false );
-	const [ hasSaved, setHasSaved ] = useState( false );
+	const [ hasOptionsChanges, setHasOptionsChanges ] = useState( false );
+	const [ hasSavedOptions, setHasSavedOptions ] = useState( false );
 
 	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
 	const hasUnmounted = useRef( false );
@@ -55,7 +55,7 @@ export function OptionsContextProvider( { children, optionsKey, optionsRestEndpo
 		}
 
 		setSavingOptions( false );
-		setHasSaved( true );
+		setHasSavedOptions( true );
 	}, [ options, optionsKey, optionsRestEndpoint ] );
 
 	/**
@@ -64,13 +64,13 @@ export function OptionsContextProvider( { children, optionsKey, optionsRestEndpo
 	 * @param {Object} Updated options values.
 	 */
 	const updateOptions = useCallback( ( newOptions ) => {
-		if ( false === hasChanges ) {
-			setHasChanges( true );
+		if ( false === hasOptionsChanges ) {
+			setHasOptionsChanges( true );
 		}
 
 		setOptions( { ...options, ...newOptions } );
-		setHasSaved( false );
-	}, [ hasChanges, options, setHasChanges, setOptions ] );
+		setHasSavedOptions( false );
+	}, [ hasOptionsChanges, options, setHasOptionsChanges, setOptions ] );
 
 	useEffect( () => {
 		/**
@@ -116,8 +116,8 @@ export function OptionsContextProvider( { children, optionsKey, optionsRestEndpo
 				{
 					fetchingOptions,
 					fetchOptionsError,
-					hasChanges,
-					hasSaved,
+					hasOptionsChanges,
+					hasSavedOptions,
 					options,
 					saveOptions,
 					saveOptionsError,
