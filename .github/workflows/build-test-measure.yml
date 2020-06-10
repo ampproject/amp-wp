@@ -78,7 +78,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: amp-${{ steps.retrieve-branch-name.outputs.branch_name }}-${{ steps.retrieve-git-sha-8.outputs.sha8 }}
-          path: builds
+          path: builds/dev
 
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -149,7 +149,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: amp-${{ steps.retrieve-branch-name.outputs.branch_name }}-${{ steps.retrieve-git-sha-8.outputs.sha8 }}
-          path: builds
+          path: builds/prod
 
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -160,11 +160,17 @@ jobs:
       - dev-zip
       - prod-zip
     steps:
-      - name: Download artifacts
+      - name: Download dev build
         uses: actions/download-artifact@v2
         with:
-          name: amp-${{ needs.release-zip.outputs.branch-name }}-${{ needs.release-zip.outputs.git-sha-8 }}
-          path: builds
+          name: amp-${{ needs.dev-zip.outputs.branch-name }}-${{ needs.dev-zip.outputs.git-sha-8 }}
+          path: builds/dev
+
+      - name: Download prod build
+        uses: actions/download-artifact@v2
+        with:
+          name: amp-${{ needs.prod-zip.outputs.branch-name }}-${{ needs.prod-zip.outputs.git-sha-8 }}
+          path: builds/prod
 
       - name: Setup Google Cloud SDK
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
