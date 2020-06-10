@@ -97,7 +97,7 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 	public function update_items( $request ) {
 		$params = $request->get_params();
 
-		AMP_Options_Manager::update_options( $params, array_keys( $this->get_item_schema()['properties'] ) );
+		AMP_Options_Manager::update_options( wp_array_slice_assoc( $params, array_keys( $this->get_item_schema()['properties'] ) ) );
 
 		return rest_ensure_response( $this->get_items( $request ) );
 	}
@@ -113,7 +113,6 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 				'$schema'    => 'http://json-schema.org/draft-04/schema#',
 				'title'      => 'amp-wp-options',
 				'type'       => 'object',
-				// Validation and sanitization occur in AMP_Options_Manager.
 				'properties' => [
 					Option::THEME_SUPPORT => [
 						'type' => 'string',

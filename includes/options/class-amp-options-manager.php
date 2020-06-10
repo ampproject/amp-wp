@@ -51,7 +51,7 @@ class AMP_Options_Manager {
 			self::OPTION_NAME,
 			self::OPTION_NAME,
 			[
-				'type'              => 'object',
+				'type'              => 'array',
 				'sanitize_callback' => [ __CLASS__, 'validate_options' ],
 			]
 		);
