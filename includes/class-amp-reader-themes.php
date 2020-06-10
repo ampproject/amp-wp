@@ -298,9 +298,13 @@ final class AMP_Reader_Themes {
 			}
 		);
 
-		foreach ( $themes as &$theme ) {
-			$theme['availability'] = $this->get_theme_availability( $theme );
-		}
+		$themes = array_map(
+			function ( $theme ) {
+				$theme['availability'] = $this->get_theme_availability( $theme );
+				return $theme;
+			},
+			$themes
+		);
 
 		$this->themes = $themes;
 
