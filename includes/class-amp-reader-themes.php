@@ -69,7 +69,7 @@ final class AMP_Reader_Themes {
 	const STATUS_NON_INSTALLABLE = 'non-installable';
 
 	/**
-	 * Reader themes copied from JSON data freturn ed from Wordpress.org themes endpoint. See ::get_default_supported_reader_themes.
+	 * Reader themes copied from JSON data returned from WordPress.org themes endpoint. See ::get_default_supported_reader_themes.
 	 * Note: Descriptions are shortened and made translatable in the AMP_Reader_Theme_REST_Controller.
 	 *
 	 * @var array
@@ -291,9 +291,20 @@ final class AMP_Reader_Themes {
 		 */
 		$themes = array_filter( (array) apply_filters( 'amp_reader_themes', $themes ) );
 
-		foreach ( $themes as &$theme ) {
-			$theme['availability'] = $this->get_theme_availability( $theme );
-		}
+		$themes = array_filter(
+			$themes,
+			function( $theme ) {
+				return is_array( $theme ) && ! empty( $theme ) && ! empty( $theme['screenshot_url'] ); // Screenshots are required.
+			}
+		);
+
+		$themes = array_map(
+			function ( $theme ) {
+				$theme['availability'] = $this->get_theme_availability( $theme );
+				return $theme;
+			},
+			$themes
+		);
 
 		$this->themes = $themes;
 
@@ -304,9 +315,9 @@ final class AMP_Reader_Themes {
 	 * Gets a reader theme by slug.
 	 *
 	 * @param string $slug Theme slug.
-	 * @return array Theme data.
+	 * @return array|false Theme data or false if the theme is not found.
 	 */
-	public function get_reader_theme( $slug ) {
+	public function get_reader_theme_by_slug( $slug ) {
 		return current(
 			array_filter(
 				$this->get_themes(),
@@ -351,10 +362,7 @@ final class AMP_Reader_Themes {
 			$response = (object) $response;
 		}
 
-		$supported_themes = array_diff(
-			AMP_Core_Theme_Sanitizer::get_supported_themes(),
-			[ 'twentyten' ] // Excluded because not responsive.
-		);
+		$supported_themes = wp_list_pluck( self::DEFAULT_READER_THEMES, 'slug' );
 
 		$supported_themes_from_response = array_filter(
 			$response->themes,
@@ -387,36 +395,12 @@ final class AMP_Reader_Themes {
 			'download_link',
 		];
 
-		$prepared_theme = array_filter(
-			$theme_array,
-			static function ( $key ) use ( $keys ) {
-				return in_array( $key, $keys, true );
-			},
-			ARRAY_FILTER_USE_KEY
+		$prepared_theme = array_merge(
+			array_fill_keys( $keys, '' ),
+			wp_array_slice_assoc( $theme_array, $keys )
 		);
 
-		foreach ( $keys as $key ) {
-			if ( ! array_key_exists( $key, $prepared_theme ) ) {
-				$prepared_theme[ $key ] = '';
-			}
-		}
-
 		return $prepared_theme;
-	}
-
-	/**
-	 * Provides the current theme name.
-	 *
-	 * @return string|bool The theme name, or false if the theme has errors.
-	 */
-	private function get_current_theme_name() {
-		if ( null === $this->current_theme_name ) {
-			$current_theme = wp_get_theme();
-
-			$this->current_theme_name = $current_theme->exists() ? $current_theme->get( 'Name' ) : false;
-		}
-
-		return $this->current_theme_name;
 	}
 
 	/**
@@ -466,7 +450,7 @@ final class AMP_Reader_Themes {
 	 */
 	public function get_theme_availability( $theme ) {
 		switch ( true ) {
-			case $this->get_current_theme_name() === $theme['name']:
+			case get_stylesheet() === $theme['slug']:
 				return self::STATUS_ACTIVE;
 
 			case wp_get_theme( $theme['slug'] )->exists():
@@ -490,7 +474,7 @@ final class AMP_Reader_Themes {
 			'name'           => 'AMP Classic',
 			'slug'           => 'classic',
 			'preview_url'    => 'https://amp-wp.org',
-			'screenshot_url' => '',
+			'screenshot_url' => amp_get_asset_url( 'images/reader-themes/classic.png' ),
 			'homepage'       => 'https://amp-wp.org',
 			'description'    => __(
 				// @todo Improved description text.

@@ -268,7 +268,9 @@ class AMP_Options_Manager {
 		}
 
 		if ( isset( $new_options[ Option::READER_THEME ] ) ) {
-			$options[ Option::READER_THEME ] = sanitize_key( $new_options[ Option::READER_THEME ] );
+			if ( in_array( $new_options[ Option::READER_THEME ], wp_list_pluck( AMP_Reader_Themes::DEFAULT_READER_THEMES, 'slug' ), true ) ) {
+				$options[ Option::READER_THEME ] = sanitize_key( $new_options[ Option::READER_THEME ] );
+			}
 		}
 
 		if ( array_key_exists( Option::DISABLE_CSS_TRANSIENT_CACHING, $new_options ) && true === $new_options[ Option::DISABLE_CSS_TRANSIENT_CACHING ] ) {

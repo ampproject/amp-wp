@@ -114,7 +114,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, readerThemes
 				}
 
 				// Screenshots are required.
-				setThemes( fetchedThemes.filter( ( theme ) => theme.screenshot_url ) );
+				setThemes( fetchedThemes );
 			} catch ( e ) {
 				if ( hasUnmounted.current === true ) {
 					return;
