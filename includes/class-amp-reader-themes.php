@@ -450,7 +450,7 @@ final class AMP_Reader_Themes {
 	 */
 	public function get_theme_availability( $theme ) {
 		switch ( true ) {
-			case get_template() === $theme['slug']:
+			case get_stylesheet() === $theme['slug']:
 				return self::STATUS_ACTIVE;
 
 			case wp_get_theme( $theme['slug'] )->exists():

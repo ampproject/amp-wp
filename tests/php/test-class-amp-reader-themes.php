@@ -29,6 +29,7 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
+		switch_theme( 'twentytwenty' );
 		$this->reader_themes = new AMP_Reader_Themes();
 	}
 
