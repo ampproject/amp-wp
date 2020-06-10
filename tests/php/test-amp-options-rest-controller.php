@@ -2,8 +2,6 @@
 /**
  * Tests for AMP_Options_REST_Controller.
  *
- * @group options
- *
  * @package AMP
  */
 
@@ -38,15 +36,6 @@ class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Provides a test request.
-	 *
-	 * @return WP_REST_Request
-	 */
-	public function get_request() {
-		return new WP_REST_Request( 'GET', '/amp-wp/v1/options' );
-	}
-
-	/**
 	 * Tests AMP_Options_REST_Controller::register_routes.
 	 *
 	 * @covers AMP_Options_REST_Controller::register_routes
@@ -54,8 +43,8 @@ class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
 	public function test_register_routes() {
 		$this->controller->register_routes();
 
-		$this->assertContains( 'amp-wp/v1', rest_get_server()->get_namespaces() );
-		$this->assertContains( '/amp-wp/v1/options', array_keys( rest_get_server()->get_routes( 'amp-wp/v1' ) ) );
+		$this->assertContains( 'amp/v1', rest_get_server()->get_namespaces() );
+		$this->assertContains( '/amp/v1/options', array_keys( rest_get_server()->get_routes( 'amp/v1' ) ) );
 	}
 
 	/**
@@ -64,11 +53,11 @@ class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
 	 * @covers AMP_Options_REST_Controller::get_items_permissions_check
 	 */
 	public function test_get_items_permissions_check() {
-		$this->assertWPError( $this->controller->get_items_permissions_check( $this->get_request() ) );
+		$this->assertWPError( $this->controller->get_items_permissions_check( new WP_REST_Request( 'GET', '/amp/v1/options' ) ) );
 
 		wp_set_current_user( 1 );
 
-		$this->assertTrue( $this->controller->get_items_permissions_check( $this->get_request() ) );
+		$this->assertTrue( $this->controller->get_items_permissions_check( new WP_REST_Request( 'GET', '/amp/v1/options' ) ) );
 	}
 
 	/**
@@ -78,9 +67,10 @@ class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
 	 */
 	public function test_get_items() {
 		$this->assertEquals(
-			array_keys( $this->controller->get_items( $this->get_request() )->get_data() ),
+			array_keys( $this->controller->get_items( new WP_REST_Request( 'GET', '/amp/v1/options' ) )->get_data() ),
 			[
-				'theme_support',
+                'theme_support',
+                'reader_theme',
 			]
 		);
 	}
@@ -93,10 +83,10 @@ class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
 	public function test_update_items() {
 		$this->assertEquals(
 			'reader',
-			$this->controller->get_items( $this->get_request() )->get_data()['theme_support']
+			$this->controller->get_items( new WP_REST_Request( 'GET', '/amp/v1/options' ) )->get_data()['theme_support']
 		);
 
-		$request = new WP_REST_Request( 'POST', '/amp-wp/v1/options' );
+		$request = new WP_REST_Request( 'POST', '/amp/v1/options' );
 		$request->set_body_params( [ 'theme_support' => 'transitional' ] );
 		$response = $this->controller->update_items( $request );
 
