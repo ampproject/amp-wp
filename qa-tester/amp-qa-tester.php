@@ -18,7 +18,12 @@ namespace AmpProject\AmpWP_QA_Tester;
 
 use WP_Error;
 
-global $load_errors;
+/**
+ * Errors encountered while loading the plugin.
+ *
+ * @var WP_Error
+ */
+$load_errors = new WP_Error();
 
 /**
  * Loads the plugin.
@@ -26,19 +31,18 @@ global $load_errors;
  * @since 1.0.0
  */
 function load_plugin() {
-	global $load_errors;
+	global $_amp_qa_load_errors;
 
 	$min_php_version = '5.6';
 	$min_wp_version  = '5.0';
-	$load_errors     = new WP_Error();
 
 	// If the AMP plugin is not active, we simply bail.
 	if ( ! defined( 'AMP__VERSION' ) ) {
 		return;
 	}
 
-	if ( version_compare( phpversion(), $min_php_version, '<' ) ) {
-		$load_errors->add(
+	if ( version_compare( PHP_VERSION, $min_php_version, '<' ) ) {
+		$_amp_qa_load_errors->add(
 			'insufficient_php_version',
 			sprintf(
 				/* translators: 1: required version, 2: currently used version */
@@ -50,7 +54,7 @@ function load_plugin() {
 	}
 
 	if ( version_compare( get_bloginfo( 'version' ), $min_wp_version, '<' ) ) {
-		$load_errors->add(
+		$_amp_qa_load_errors->add(
 			'insufficient_wp_version',
 			sprintf(
 				/* translators: 1: required version, 2: currently used version */
@@ -62,11 +66,11 @@ function load_plugin() {
 	}
 
 	if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
-		$load_errors->add( 'build_required', __( 'Failed to autoload the PHP files.', 'amp-qa-tester' ) );
+		$_amp_qa_load_errors->add( 'build_required', __( 'Failed to autoload the PHP files.', 'amp-qa-tester' ) );
 	}
 
 	// Bail if there were errors loading the plugin.
-	if ( ! empty( $load_errors->errors ) ) {
+	if ( ! empty( $_amp_qa_load_errors->errors ) ) {
 		add_action( 'admin_notices', __NAMESPACE__ . '\display_errors_admin_notice' );
 		return;
 	}
@@ -84,14 +88,14 @@ function load_plugin() {
  * @since 1.0.0
  */
 function display_errors_admin_notice() {
-	global $load_errors;
+	global $_amp_qa_load_errors;
 	?>
 	<div class="notice notice-error">
 		<p>
 			<strong><?php esc_html_e( 'AMP QA Tester failed to initialize.', 'amp-qa-tester' ); ?></strong>
 			<ul>
-				<?php foreach ( array_keys( $load_errors->errors ) as $error_code ) : ?>
-					<?php foreach ( $load_errors->get_error_messages( $error_code ) as $message ) : ?>
+				<?php foreach ( array_keys( $_amp_qa_load_errors->errors ) as $error_code ) : ?>
+					<?php foreach ( $_amp_qa_load_errors->get_error_messages( $error_code ) as $message ) : ?>
 						<li>
 							<?php echo wp_kses_post( $message ); ?>
 						</li>
