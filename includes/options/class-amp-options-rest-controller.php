@@ -49,15 +49,15 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Checks whether the current user has permission to retrieve options.
+	 * Checks whether the current user has permission to manage options.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
+	 * @return true|WP_Error True if the request has permission; WP_Error object otherwise.
 	 */
 	public function get_items_permissions_check( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return new WP_Error(
-				'amp_rest_cannot_view',
+				'amp_rest_cannot_manage_options',
 				__( 'Sorry, you are not allowed to manage options for the AMP plugin for WordPress.', 'amp' ),
 				[ 'status' => rest_authorization_required_code() ]
 			);
