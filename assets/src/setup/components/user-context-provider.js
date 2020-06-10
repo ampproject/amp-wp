@@ -76,7 +76,8 @@ export function UserContextProvider( {
 		setSavingUserOptions( true );
 
 		try {
-			await apiFetch( { method: 'post', url: userRestEndpoint, data: user } );
+			// To be extra careful, let's only send back meta instead of the entire user data object.
+			await apiFetch( { method: 'post', url: userRestEndpoint, data: { meta: user.meta } } );
 
 			if ( true === hasUnmounted.current ) {
 				return;

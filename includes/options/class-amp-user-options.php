@@ -1,14 +1,18 @@
 <?php
 /**
  * Class AMP_User_Options.
+ * 
+ * @since 1.6.0
  *
  * @package AMP
  */
 
 /**
  * Class AMP_User_Options
+ * 
+ * @since 1.6.0
  */
-class AMP_User_Options {
+final class AMP_User_Options {
 
 	/**
 	 * Key for a user meta field storing preferences related to the plugin.
