@@ -13,7 +13,7 @@
  */
 class AMP_Allowed_Tags_Generated {
 
-	private static $spec_file_revision = 1043;
+	private static $spec_file_revision = 1045;
 	private static $minimum_validator_revision_required = 455;
 
 	private static $descendant_tag_lists = array(
@@ -3884,6 +3884,11 @@ class AMP_Allowed_Tags_Generated {
 		'amp-jwplayer' => array(
 			array(
 				'attr_spec_list' => array(
+					'autoplay' => array(
+						'value' => array(
+							'',
+						),
+					),
 					'data-media-id' => array(
 						'value_regex_casei' => '[0-9a-z]{8}',
 					),
@@ -3893,6 +3898,11 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'data-playlist-id' => array(
 						'value_regex_casei' => '[0-9a-z]{8}',
+					),
+					'dock' => array(
+						'requires_extension' => array(
+							'amp-video-docking',
+						),
 					),
 				),
 				'tag_spec' => array(
@@ -3913,6 +3923,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-jwplayer',
 					),
+					'spec_url' => 'https://amp.dev/documentation/components/amp-jwplayer',
 				),
 			),
 		),
