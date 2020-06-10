@@ -35,7 +35,7 @@
     "@babel/plugin-proposal-class-properties": "7.10.1",
     "@wordpress/babel-preset-default": "4.12.1",
     "@wordpress/block-editor": "4.0.0",
-    "@wordpress/blocks": "6.16.0",
+    "@wordpress/blocks": "6.17.0",
     "@wordpress/browserslist-config": "2.6.0",
     "@wordpress/components": "9.6.0",
     "@wordpress/data": "4.19.0",
