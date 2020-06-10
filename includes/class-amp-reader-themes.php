@@ -78,7 +78,7 @@ final class AMP_Reader_Themes {
 			return $this->themes;
 		}
 
-		$themes   = $this->get_default_supported_reader_themes();
+		$themes   = $this->get_default_reader_themes();
 		$themes   = array_map( [ $this, 'prepare_theme' ], $themes );
 		$themes[] = $this->get_classic_mode();
 

@@ -37,7 +37,7 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 	 * Test for get_themes.
 	 *
 	 * @covers AMP_Reader_Themes::get_themes
-	 * @covers AMP_Reader_Themes::get_default_supported_reader_themes
+	 * @covers AMP_Reader_Themes::get_default_reader_themes
 	 * @covers AMP_Reader_Themes::get_classic_mode
 	 * @covers AMP_Reader_Themes::get_default_raw_reader_themes
 	 */
