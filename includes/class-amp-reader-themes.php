@@ -315,9 +315,9 @@ final class AMP_Reader_Themes {
 	 * Gets a reader theme by slug.
 	 *
 	 * @param string $slug Theme slug.
-	 * @return array Theme data.
+	 * @return array|false Theme data or false if the theme is not found.
 	 */
-	public function get_reader_theme( $slug ) {
+	public function get_reader_theme_by_slug( $slug ) {
 		return current(
 			array_filter(
 				$this->get_themes(),
@@ -362,10 +362,7 @@ final class AMP_Reader_Themes {
 			$response = (object) $response;
 		}
 
-		$supported_themes = array_diff(
-			AMP_Core_Theme_Sanitizer::get_supported_themes(),
-			[ 'twentyten' ] // Excluded because not responsive.
-		);
+		$supported_themes = wp_list_pluck( self::DEFAULT_READER_THEMES, 'slug' );
 
 		$supported_themes_from_response = array_filter(
 			$response->themes,
@@ -398,19 +395,10 @@ final class AMP_Reader_Themes {
 			'download_link',
 		];
 
-		$prepared_theme = array_filter(
-			$theme_array,
-			static function ( $key ) use ( $keys ) {
-				return in_array( $key, $keys, true );
-			},
-			ARRAY_FILTER_USE_KEY
+		$prepared_theme = array_merge(
+			array_fill_keys( $keys, '' ),
+			wp_array_slice_assoc( $theme_array, $keys )
 		);
-
-		foreach ( $keys as $key ) {
-			if ( ! array_key_exists( $key, $prepared_theme ) ) {
-				$prepared_theme[ $key ] = '';
-			}
-		}
 
 		return $prepared_theme;
 	}

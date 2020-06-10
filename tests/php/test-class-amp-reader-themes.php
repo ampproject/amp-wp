@@ -48,13 +48,13 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test for get_reader_theme.
+	 * Test for get_reader_theme_by_slug.
 	 *
-	 * @covers AMP_Reader_Themes::get_reader_theme
+	 * @covers AMP_Reader_Themes::get_reader_theme_by_slug
 	 */
-	public function test_get_reader_theme() {
-		$this->assertFalse( $this->reader_themes->get_reader_theme( 'some-theme' ) );
-		$this->assertArrayHasKey( 'slug', $this->reader_themes->get_reader_theme( 'classic' ) );
+	public function test_get_reader_theme_by_slug() {
+		$this->assertFalse( $this->reader_themes->get_reader_theme_by_slug( 'some-theme' ) );
+		$this->assertArrayHasKey( 'slug', $this->reader_themes->get_reader_theme_by_slug( 'classic' ) );
 	}
 
 	/**
