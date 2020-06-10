@@ -72,7 +72,7 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
-	public function get_items( $request ) {
+	public function get_items( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		$options    = AMP_Options_Manager::get_options();
 		$properties = $this->get_item_schema()['properties'];
 
