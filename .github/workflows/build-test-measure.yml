@@ -252,6 +252,7 @@ jobs:
 #-----------------------------------------------------------------------------------------------------------------------
 
   lighthouse:
+    name: Audit and track performance via Lighthouse CI
     runs-on: ubuntu-latest
     needs: release-zip
 
