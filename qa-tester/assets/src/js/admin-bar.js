@@ -10,7 +10,6 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import '../css/admin-bar.css';
-import getPullRequests from './get-pulls';
 
 class AdminBar extends Component {
 	constructor( props ) {
@@ -43,19 +42,34 @@ class AdminBar extends Component {
 		clearTimeout( this.errorTimeout );
 	}
 
+	getPullRequests() {
+		const url = new URL( 'https://api.github.com/search/issues' );
+		const params = {
+			q: 'repo:ampproject/amp-wp is:pr is:open commenter:app/github-actions in:comments "Download development build"',
+			sort: 'created',
+			order: 'desc',
+		};
+
+		url.search = new URLSearchParams( params ).toString();
+
+		return fetch( url )
+			.then( ( response ) => response.json() )
+			.then( ( json ) => json.items || [] );
+	}
+
 	addPullRequestOptions() {
 		// Retrieve the PRs from GitHub and append them to the list of builds above.
-		getPullRequests().then( ( pulls ) => {
-			const pullOptions = pulls.map( ( pull ) => {
+		this.getPullRequests().then( ( results ) => {
+			const prOptions = results.map( ( pr ) => {
 				return {
-					label: `PR #${ pull.number }: ${ pull.title }`,
-					value: pull.url,
+					label: `PR #${ pr.number }: ${ pr.title }`,
+					value: pr.number,
 				};
 			} );
 
 			this.setState( {
 				isLoading: false,
-				buildOptions: this.state.buildOptions.concat( pullOptions ),
+				buildOptions: this.state.buildOptions.concat( prOptions ),
 			} );
 		} );
 	}
@@ -82,8 +96,8 @@ class AdminBar extends Component {
 			path: '/amp-qa-tester/v1/switch',
 			method: 'POST',
 			data: {
-				url: buildOption.value,
-				isDevBuild,
+				id: buildOption.value,
+				isDev: isDevBuild,
 			},
 		} )
 			.then( () => {
@@ -191,6 +205,6 @@ class AdminBar extends Component {
 domReady( () => {
 	render(
 		<AdminBar />,
-		document.getElementById( 'amp-qa-tester-pull-request-selector' )
+		document.getElementById( 'amp-qa-tester-build-selector' )
 	);
 } );

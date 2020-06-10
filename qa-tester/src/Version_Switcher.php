@@ -23,21 +23,21 @@ trait Version_Switcher {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string $url    The plugin update URL.
-	 * @param string $branch The branch being used.
+	 * @param string $url      The plugin update URL.
+	 * @param string $build_id The build ID being used.
 	 * @return array|false|WP_Error An array of results indexed by plugin file.
 	 *                             False if the user has insufficient permissions, update lock is set, or unable to connect to the filesystem.
 	 *                             Otherwise, a WP_Error.
 	 */
-	public function switch_version( $url, $branch ) {
+	public function switch_version( $url, $build_id ) {
 		static $switching_lock_key = 'amp_qa_tester_switching_lock';
 
-		// Ensure plugin build for PR exists before attempting to switch.
-		if ( 'release' !== $branch ) {
+		// Ensure plugin build for develop branch or PR exists before attempting to switch.
+		if ( 'develop' === $build_id || filter_var( $build_id, FILTER_VALIDATE_INT ) ) {
 			$request = wp_safe_remote_head( $url );
 
 			if ( 200 !== $request['response']['code'] ) {
-				$name = 'develop' === $branch ? 'develop branch' : 'PR #' . $branch;
+				$name = 'develop' === $build_id ? 'develop branch' : 'PR #' . $build_id;
 				return new WP_Error(
 					'build_not_found',
 					sprintf(
@@ -85,7 +85,7 @@ trait Version_Switcher {
 
 		// Set the plugin to update from our custom URL.
 		$current->response[ $plugin_name ]->package     = $url;
-		$current->response[ $plugin_name ]->new_version = Plugin::PLUGIN_SLUG . '@' . $branch;
+		$current->response[ $plugin_name ]->new_version = Plugin::PLUGIN_SLUG . '@' . $build_id;
 
 		// Temporarily replace the site plugin upgrade info and upgrade the plugin.
 		set_site_transient( 'update_plugins', $current );

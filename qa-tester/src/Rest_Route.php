@@ -45,27 +45,27 @@ class Rest_Route {
 				return current_user_can( 'update_plugins' );
 			},
 			'args'                => [
-				'developBuild' => [
+				'isDev' => [
 					'validate_callback' => static function ( $param ) {
-						return is_bool( $param );
+						return filter_var( $param, FILTER_VALIDATE_BOOLEAN );
 					},
 					'sanitize_callback' => static function ( $param ) {
-						return sanitize_key( $param );
+						return rest_sanitize_boolean( $param );
 					},
-					'default'           => false,
+					'required'          => true,
 				],
-				'url'          => [
+				'id'    => [
 					'validate_callback' => static function ( $param ) {
 						if ( 'release' === $param || 'develop' === $param ) {
 							return true;
 						}
-						return wp_http_validate_url( $param );
+						return filter_var( $param, FILTER_VALIDATE_INT );
 					},
 					'sanitize_callback' => static function ( $param ) {
 						if ( 'release' === $param || 'develop' === $param ) {
 							return $param;
 						}
-						return esc_url_raw( $param );
+						return (int) $param;
 					},
 					'required'          => true,
 				],
@@ -82,11 +82,11 @@ class Rest_Route {
 	 * @return array|false|WP_Error
 	 */
 	public function switch_callback( WP_REST_Request $request ) {
-		$url          = $request->get_param( 'url' );
-		$is_dev_build = $request->get_param( 'isDevBuild' );
+		$build_id     = $request->get_param( 'id' );
+		$is_dev_build = $request->get_param( 'isDev' );
 
 		// If the request is for the release version, retrieve the latest version from the wordpress.org API.
-		if ( 'release' === $url ) {
+		if ( 'release' === $build_id ) {
 			$args = [
 				'slug'   => Plugin::PLUGIN_SLUG,
 				'fields' => [
@@ -109,27 +109,20 @@ class Rest_Route {
 				$returned_object = unserialize( wp_remote_retrieve_body( $response ) );
 
 				if ( $returned_object ) {
-					update_site_option( Plugin::URL_STORAGE_KEY, '' );
+					update_site_option( Plugin::ID_STORAGE_KEY, '' );
 					return $this->switch_version( $returned_object->download_link, $returned_object->version );
 				}
 			}
 		} else {
-			// If the develop version is requested, the download url is different.
-			if ( 'develop' === $url ) {
-				$version      = 'develop';
-				$download_url = str_replace( '{PR}/merge', 'heads/develop', Plugin::DOWNLOAD_BASE ) . ( $is_dev_build ? '-dev' : '' ) . '.zip';
-			} else {
-				$url          = str_replace( Plugin::REPO_BASE, '', $url );
-				$url          = str_replace( 'pulls/', 'pull/', $url );
-				$version      = str_replace( 'pull/', '', $url );
-				$download_url = str_replace( '{PR}', rawurlencode( $url ), Plugin::DOWNLOAD_BASE ) . ( $is_dev_build ? '-dev' : '' ) . '.zip';
-			}
+			$ref   = 'develop' === $build_id ? 'heads/develop' : "{$build_id}/merge";
+			$build = ( $is_dev_build ? 'dev' : 'prod' );
 
-			$result = $this->switch_version( $download_url, $version );
+			$download_url = str_replace( [ '{ref}', '{build}' ], [ $ref, $build ], Plugin::DOWNLOAD_BASE );
+			$result       = $this->switch_version( $download_url, $build_id );
 
 			if ( ! empty( $result ) && ! $result instanceof WP_Error ) {
-				// Store the url so we can reference it later in the selector.
-				update_site_option( Plugin::URL_STORAGE_KEY, $url );
+				// Store the ID so we can reference it later in the selector.
+				update_site_option( Plugin::ID_STORAGE_KEY, $build_id );
 			}
 
 			return $result;

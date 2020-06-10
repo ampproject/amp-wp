@@ -15,12 +15,12 @@ namespace AmpProject\AmpWP_QA_Tester;
 class Admin_Bar {
 
 	/**
-	 * URL base of the currently installed plugin version.
+	 * Build ID of the currently installed plugin version.
 	 *
 	 * @since 1.0.0
 	 * @var string
 	 */
-	protected $test_url;
+	protected $build_id;
 
 	/**
 	 * Constructor.
@@ -28,7 +28,7 @@ class Admin_Bar {
 	 * @since 1.0.0
 	 */
 	public function __construct() {
-		$this->test_url = get_site_option( Plugin::URL_STORAGE_KEY );
+		$this->build_id = get_site_option( Plugin::ID_STORAGE_KEY );
 	}
 
 	/**
@@ -85,12 +85,12 @@ class Admin_Bar {
 	 * @param object $wp_admin_bar The WP AdminBar object.
 	 */
 	public function add_menu_button( $wp_admin_bar ) {
-		$on = str_replace( Plugin::REPO_BASE, '', $this->test_url );
-		$on = str_replace( 'pulls/', 'PR #', $on );
-		$on = str_replace( 'develop', __( 'develop branch', 'amp-qa-tester' ), $on );
-		$on = str_replace( 'release', __( 'latest release', 'amp-qa-tester' ), $on );
-		if ( '' === $on ) {
+		if ( '' === $this->build_id || false === $this->build_id ) {
 			$on = __( 'latest release', 'amp-qa-tester' );
+		} elseif ( 'develop' === $this->build_id ) {
+			$on = __( 'develop branch', 'amp-qa-tester' );
+		} else {
+			$on = 'PR #' . $this->build_id;
 		}
 
 		/* translators: %s: the version of plugin currently running */
@@ -124,7 +124,7 @@ class Admin_Bar {
 			<div id="amp-qa-tester-adminbar-inner">
 				<ul class="ab-submenu">
 					<li>
-						<div id="amp-qa-tester-pull-request-selector"></div>
+						<div id="amp-qa-tester-build-selector"></div>
 					</li>
 				</ul>
 			</div>

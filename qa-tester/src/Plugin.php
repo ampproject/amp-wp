@@ -14,10 +14,9 @@ namespace AmpProject\AmpWP_QA_Tester;
  */
 class Plugin {
 
-	const DOWNLOAD_BASE   = 'https://raw.githubusercontent.com/wiki/ampproject/amp-wp/refs/{PR}/merge/amp-wp';
-	const PLUGIN_SLUG     = 'amp';
-	const URL_STORAGE_KEY = 'amp_qa_tester_url';
-	const REPO_BASE       = 'https://api.github.com/repos/ampproject/amp-wp/';
+	const DOWNLOAD_BASE  = 'https://storage.googleapis.com/ampwp_github_artifacts/refs/{ref}/{build}/amp.zip';
+	const PLUGIN_SLUG    = 'amp';
+	const ID_STORAGE_KEY = 'amp_qa_tester_id';
 
 	/**
 	 * Main instance of the plugin.
