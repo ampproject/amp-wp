@@ -178,8 +178,11 @@ jobs:
           project_id: ${{ secrets.GCS_PROJECT_ID }}
           service_account_key: ${{ secrets.GCS_APPLICATION_CREDENTIALS }}
 
-      - name: Upload artifacts to bucket
-        run: gsutil cp -r builds/* gs://ampwp_github_artifacts/${{ github.ref }}
+      - name: Upload dev build to bucket
+        run: gsutil cp -r builds/dev/amp.zip gs://ampwp_github_artifacts/${{ github.ref }}/dev/amp.zip
+
+      - name: Upload prod build to bucket
+        run: gsutil cp -r builds/prod/amp.zip gs://ampwp_github_artifacts/${{ github.ref }}/prod/amp.zip
 
 #-----------------------------------------------------------------------------------------------------------------------
 
