@@ -91,14 +91,9 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 	 * @return array|WP_Error Array on success, or error object on failure.
 	 */
 	public function update_items( $request ) {
-		$params     = $request->get_params();
-		$properties = array_keys( $this->get_item_schema()['properties'] );
+		$params = $request->get_params();
 
-		foreach ( $params as $option => $new_value ) {
-			if ( in_array( $option, $properties, true ) ) {
-				AMP_Options_Manager::update_option( $option, $new_value );
-			}
-		}
+		AMP_Options_Manager::update_options( $params, array_keys( $this->get_item_schema()['properties'] ) );
 
 		return rest_ensure_response( $this->get_items( $request ) );
 	}
