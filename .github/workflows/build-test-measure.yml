@@ -266,7 +266,7 @@ jobs:
         with:
           # Downloaded file name will actually be amp.zip again.
           name: amp-${{ needs.release-zip.outputs.branch-name }}-${{ needs.release-zip.outputs.git-sha-8 }}
-          path: build
+          path: builds
 
       - name: Install MySQL client
         run: |
