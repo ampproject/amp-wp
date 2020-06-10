@@ -35,16 +35,6 @@ class AMP_Options_Manager {
 	];
 
 	/**
-	 * Sets up hooks.
-	 */
-	public static function init() {
-		add_action( 'update_option_' . self::OPTION_NAME, [ __CLASS__, 'maybe_flush_rewrite_rules' ], 10, 2 );
-		add_action( 'admin_notices', [ __CLASS__, 'render_welcome_notice' ] );
-		add_action( 'admin_notices', [ __CLASS__, 'render_php_css_parser_conflict_notice' ] );
-		add_action( 'admin_notices', [ __CLASS__, 'insecure_connection_notice' ] );
-	}
-
-	/**
 	 * Register settings.
 	 */
 	public static function register_settings() {
@@ -54,83 +44,13 @@ class AMP_Options_Manager {
 			[
 				'type'              => 'object',
 				'sanitize_callback' => [ __CLASS__, 'validate_options' ],
-				'show_in_rest'      => [
-					'schema' => [
-						'type'       => 'object',
-						'properties' => [
-							Option::THEME_SUPPORT        => [
-								'type' => 'string',
-								'enum' => [
-									AMP_Theme_Support::READER_MODE_SLUG,
-									AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
-									AMP_Theme_Support::STANDARD_MODE_SLUG,
-								],
-							],
-							Option::SUPPORTED_POST_TYPES => [
-								'type'  => 'array',
-								'items' => [
-									'type' => 'string',
-								],
-							],
-							Option::ANALYTICS            => [
-								'type'  => 'array',
-								'items' => [
-									'type' => 'string',
-								],
-							],
-							Option::ALL_TEMPLATES_SUPPORTED => [
-								'type' => 'bool',
-							],
-							Option::SUPPORTED_TEMPLATES  => [
-								'type'  => 'array',
-								'items' => [
-									'type' => 'string',
-								],
-							],
-							Option::VERSION              => [
-								'type'     => 'string',
-								'readonly' => true,
-							],
-							Option::READER_THEME         => [
-								'type' => 'string',
-							],
-						],
-					],
-				],
 			]
 		);
 
-		add_filter( 'rest_pre_get_setting', [ __CLASS__, 'rest_get_options' ], 10, 2 );
-	}
-
-	/**
-	 * In REST, the option will be invalid and returned as null if its schema doesn't exactly match what's defined in
-	 * register_setting. This filter will prevent errors from occurring during development or when users switch between
-	 * plugin versions.
-	 *
-	 * @see WP_REST_Settings_Controller::get_item
-	 *
-	 * @param mixed  $result Value to use to hijack the setting. Can be a scalar matching the registered schema for the
-	 *                       setting, or null to follow the default get_option() behavior.
-	 * @param string $name   Setting name (as shown in REST API responses).
-	 * @return mixed Null to use built-in behavior in the settings endpoint. Any other value will override core behavior.
-	 */
-	public static function rest_get_options( $result, $name ) {
-		if ( self::OPTION_NAME !== $name ) {
-			return $result;
-		}
-
-		$options = self::get_options();
-
-		foreach ( array_keys( $options ) as $key ) {
-			if ( ! array_key_exists( $key, self::$defaults ) ) {
-				unset( $options[ $key ] );
-			}
-		}
-
-		$options = wp_parse_args( $options, self::$defaults );
-
-		return $options;
+		add_action( 'update_option_' . self::OPTION_NAME, [ __CLASS__, 'maybe_flush_rewrite_rules' ], 10, 2 );
+		add_action( 'admin_notices', [ __CLASS__, 'render_welcome_notice' ] );
+		add_action( 'admin_notices', [ __CLASS__, 'render_php_css_parser_conflict_notice' ] );
+		add_action( 'admin_notices', [ __CLASS__, 'insecure_connection_notice' ] );
 	}
 
 	/**
@@ -495,7 +415,7 @@ class AMP_Options_Manager {
 			<div class="amp-welcome-icon-holder">
 				<img width="200" height="200" class="amp-welcome-icon" src="<?php echo esc_url( amp_get_asset_url( 'images/amp-welcome-icon.svg' ) ); ?>" alt="<?php esc_attr_e( 'Illustration of WordPress running AMP plugin.', 'amp' ); ?>" />
 			</div>
-			<h2><?php esc_html_e( 'Welcome to AMP for WordPress', 'amp' ); ?></h2>
+			<h2><?php esc_html_e( 'Welcome to AMP', 'amp' ); ?></h2>
 			<h3><?php esc_html_e( 'Bring the speed and features of the open source AMP project to your site, complete with the tools to support content authoring and website development.', 'amp' ); ?></h3>
 			<h3><?php esc_html_e( 'From granular controls that help you create AMP content, to Core Gutenberg support, to a sanitizer that only shows visitors error-free pages, to a full error workflow for developers, this release enables rich, performant experiences for your WordPress site.', 'amp' ); ?></h3>
 			<a href="https://amp-wp.org/getting-started/" target="_blank" class="button button-primary"><?php esc_html_e( 'Learn More', 'amp' ); ?></a>

@@ -27,7 +27,7 @@ final class AMP_Reader_Theme_REST_Controller extends WP_REST_Controller {
 	 */
 	public function __construct( $reader_themes ) {
 		$this->reader_themes = $reader_themes;
-		$this->namespace     = 'amp-wp/v1';
+		$this->namespace     = 'amp/v1';
 		$this->rest_base     = 'reader-themes';
 	}
 

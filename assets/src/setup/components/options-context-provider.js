@@ -17,10 +17,9 @@ export const Options = createContext();
  *
  * @param {Object} props Component props.
  * @param {?any} props.children Component children.
- * @param {string} props.optionsKey The key of the option to use from the settings endpoint.
  * @param {string} props.optionsRestEndpoint REST endpoint to retrieve options.
  */
-export function OptionsContextProvider( { children, optionsKey, optionsRestEndpoint } ) {
+export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 	const [ options, setOptions ] = useState( null );
 	const [ fetchingOptions, setFetchingOptions ] = useState( false );
 	const [ fetchOptionsError, setFetchOptionsError ] = useState( null );
@@ -41,7 +40,7 @@ export function OptionsContextProvider( { children, optionsKey, optionsRestEndpo
 		setSavingOptions( true );
 
 		try {
-			await apiFetch( { method: 'post', url: optionsRestEndpoint, data: { [ optionsKey ]: options } } );
+			await apiFetch( { method: 'post', url: optionsRestEndpoint, data: options } );
 
 			if ( true === hasUnmounted.current ) {
 				return;
@@ -56,7 +55,7 @@ export function OptionsContextProvider( { children, optionsKey, optionsRestEndpo
 
 		setSavingOptions( false );
 		setHasSaved( true );
-	}, [ options, optionsKey, optionsRestEndpoint ] );
+	}, [ options, optionsRestEndpoint ] );
 
 	/**
 	 * Updates options in state.
@@ -73,10 +72,14 @@ export function OptionsContextProvider( { children, optionsKey, optionsRestEndpo
 	}, [ hasChanges, options, setHasChanges, setOptions ] );
 
 	useEffect( () => {
+		if ( options || fetchingOptions || fetchOptionsError ) {
+			return;
+		}
+
 		/**
 		 * Fetches plugin options from the REST endpoint.
 		 */
-		const fetchOptions = async () => {
+		( async () => {
 			setFetchingOptions( true );
 
 			try {
@@ -86,11 +89,7 @@ export function OptionsContextProvider( { children, optionsKey, optionsRestEndpo
 					return;
 				}
 
-				if ( ! ( optionsKey in fetchedOptions ) || ! fetchedOptions[ optionsKey ] ) { // The option is null if it doesn't pass schema validation.
-					throw new Error( __( 'There was an error fetching options from the AMP plugin. ', 'amp' ) );
-				}
-
-				setOptions( fetchedOptions[ optionsKey ] );
+				setOptions( fetchedOptions );
 			} catch ( e ) {
 				if ( true === hasUnmounted.current ) {
 					return;
@@ -100,11 +99,8 @@ export function OptionsContextProvider( { children, optionsKey, optionsRestEndpo
 			}
 
 			setFetchingOptions( false );
-		};
-		if ( ! options && ! fetchingOptions && ! fetchOptionsError ) {
-			fetchOptions();
-		}
-	}, [ fetchingOptions, options, optionsKey, optionsRestEndpoint, fetchOptionsError ] );
+		} )();
+	}, [ fetchingOptions, options, optionsRestEndpoint, fetchOptionsError ] );
 
 	useEffect( () => () => {
 		hasUnmounted.current = true;
@@ -133,6 +129,5 @@ export function OptionsContextProvider( { children, optionsKey, optionsRestEndpo
 
 OptionsContextProvider.propTypes = {
 	children: PropTypes.any,
-	optionsKey: PropTypes.string.isRequired,
 	optionsRestEndpoint: PropTypes.string.isRequired,
 };
