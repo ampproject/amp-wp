@@ -348,8 +348,9 @@ class AMP_Options_Manager {
 		}
 
 		if ( isset( $new_options[ Option::READER_THEME ] ) ) {
-			if ( in_array( $new_options[ Option::READER_THEME ], wp_list_pluck( AMP_Reader_Themes::DEFAULT_READER_THEMES, 'slug' ), true ) ) {
-				$options[ Option::READER_THEME ] = sanitize_key( $new_options[ Option::READER_THEME ] );
+			$reader_theme_slugs = wp_list_pluck( ( new AMP_Reader_Themes() )->get_themes(), 'slug' );
+			if ( in_array( $new_options[ Option::READER_THEME ], $reader_theme_slugs, true ) ) {
+				$options[ Option::READER_THEME ] = $new_options[ Option::READER_THEME ];
 			}
 		}
 

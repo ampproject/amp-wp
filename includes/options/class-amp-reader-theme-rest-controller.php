@@ -55,7 +55,7 @@ final class AMP_Reader_Theme_REST_Controller extends WP_REST_Controller {
 	 * @return array Filtered reader theme data.
 	 */
 	public function prepare_default_reader_theme_for_rest( $theme ) {
-		$theme_slugs = wp_list_pluck( AMP_Reader_Themes::DEFAULT_READER_THEMES, 'slug' );
+		$theme_slugs = wp_list_pluck( $this->reader_themes->get_default_reader_themes(), 'slug' );
 
 		if ( in_array( $theme['slug'], $theme_slugs, true ) || 'classic' === $theme['slug'] ) {
 			$theme['screenshot_url'] = amp_get_asset_url( "images/reader-themes/{$theme['slug']}.png" );
