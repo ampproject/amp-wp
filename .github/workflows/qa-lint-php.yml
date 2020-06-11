@@ -42,7 +42,7 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
 
       - name: Install Composer dependencies
-        run: composer install --prefer-dist --optimize-autoloader --no-scripts
+        run: composer install --prefer-dist --optimize-autoloader  --no-suggest --no-progress --no-interaction
 
       - name: Validate composer.json
         run: composer --no-interaction validate --no-check-all
