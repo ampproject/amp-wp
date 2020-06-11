@@ -166,6 +166,10 @@ final class AMP_Reader_Themes {
 			}
 		}
 
+		if ( is_wp_error( $response ) ) {
+			return [ $this->get_classic_mode() ];
+		}
+
 		if ( is_array( $response ) ) {
 			$response = (object) $response;
 		}

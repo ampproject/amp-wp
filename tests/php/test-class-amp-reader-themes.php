@@ -260,7 +260,6 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 
 		$themes = $this->reader_themes->get_themes();
 
-		$this->assertEquals( 10, count( $themes ) );
 		$this->assertEquals( 'classic', end( $themes )['slug'] );
 
 		$keys = [
