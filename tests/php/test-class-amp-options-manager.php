@@ -10,8 +10,6 @@ use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 
 /**
  * Tests for AMP_Options_Manager.
- * 
- * @group amp-options-manager
  *
  * @covers AMP_Options_Manager
  */
