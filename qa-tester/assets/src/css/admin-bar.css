@@ -1,4 +1,4 @@
-#amp-qa-tester-pull-request-selector {
+#amp-qa-tester-build-selector {
 	min-width: 250px;
 }
 
@@ -30,11 +30,11 @@
 	margin: 4px 0 0;
 }
 
-#amp-qa-tester-pull-request-selector .error {
+#amp-qa-tester-build-selector .error {
 	background-color: #8b0000;
 }
 
-#amp-qa-tester-pull-request-selector input[type="checkbox"] {
+#amp-qa-tester-build-selector input[type="checkbox"] {
 	border: 1px solid #b4b9be;
 	background: #fff;
 	color: #555;
@@ -55,7 +55,7 @@
 	transition: .05s border-color ease-in-out;
 }
 
-#amp-qa-tester-pull-request-selector .switching {
+#amp-qa-tester-build-selector .switching {
 	border: 2px solid #eee;
 	border-radius: 50%;
 	border-top: 2px solid #333;
