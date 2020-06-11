@@ -158,7 +158,6 @@ function amp_init() {
 			$reader_themes = new AMP_Reader_Themes();
 
 			$reader_theme_controller = new AMP_Reader_Theme_REST_Controller( $reader_themes );
-			$reader_theme_controller->init();
 			$reader_theme_controller->register_routes();
 
 			$options_controller = new AMP_Options_REST_Controller( $reader_themes );

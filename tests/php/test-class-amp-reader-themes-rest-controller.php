@@ -34,17 +34,6 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests AMP_Reader_Theme_REST_Controller::init
-	 *
-	 * @covers AMP_Reader_Theme_REST_Controller::init
-	 */
-	public function test_init() {
-		$this->controller->init();
-
-		$this->assertEquals( 10, has_action( 'amp_reader_themes', [ $this->controller, 'prepare_default_reader_themes_for_rest' ] ) );
-	}
-
-	/**
 	 * Tests AMP_Reader_Theme_REST_Controller::register_routes.
 	 *
 	 * @covers AMP_Reader_Theme_REST_Controller::register_routes

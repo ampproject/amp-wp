@@ -32,39 +32,6 @@ final class AMP_Reader_Theme_REST_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Sets up hooks.
-	 */
-	public function init() {
-		add_filter( 'amp_reader_themes', [ $this, 'prepare_default_reader_themes_for_rest' ] );
-	}
-
-	/**
-	 * Overrides data for default themes.
-	 *
-	 * @param array $themes Default reader themes.
-	 * @return array Filtered default reader themes.
-	 */
-	public function prepare_default_reader_themes_for_rest( $themes ) {
-		return array_map( [ $this, 'prepare_default_reader_theme_for_rest' ], $themes );
-	}
-
-	/**
-	 * Overrides data for a default theme.
-	 *
-	 * @param array $theme Reader theme data.
-	 * @return array Filtered reader theme data.
-	 */
-	public function prepare_default_reader_theme_for_rest( $theme ) {
-		$theme_slugs = wp_list_pluck( $this->reader_themes->get_default_reader_themes(), 'slug' );
-
-		if ( in_array( $theme['slug'], $theme_slugs, true ) || 'classic' === $theme['slug'] ) {
-			$theme['screenshot_url'] = amp_get_asset_url( "images/reader-themes/{$theme['slug']}.png" );
-		}
-
-		return $theme;
-	}
-
-	/**
 	 * Registers routes for the controller.
 	 *
 	 * @since 1.6.0

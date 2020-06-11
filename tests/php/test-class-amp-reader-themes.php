@@ -46,6 +46,21 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 
 		$this->assertEquals( 10, count( $themes ) );
 		$this->assertEquals( 'classic', end( $themes )['slug'] );
+
+		$keys = [
+			'name',
+			'slug',
+			'preview_url',
+			'screenshot_url',
+			'homepage',
+			'description',
+			'requires',
+			'requires_php',
+			'availability',
+		];
+		foreach ( $themes as $theme ) {
+			$this->assertEqualSets( $keys, array_keys( $theme ) );
+		}
 	}
 
 	/**

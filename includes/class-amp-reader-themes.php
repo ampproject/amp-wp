@@ -78,9 +78,7 @@ final class AMP_Reader_Themes {
 			return $this->themes;
 		}
 
-		$themes   = $this->get_default_reader_themes();
-		$themes   = array_map( [ $this, 'prepare_theme' ], $themes );
-		$themes[] = $this->get_classic_mode();
+		$themes = $this->get_default_reader_themes();
 
 		/**
 		 * Filters supported reader themes.
@@ -172,27 +170,16 @@ final class AMP_Reader_Themes {
 
 		$supported_themes = array_diff(
 			AMP_Core_Theme_Sanitizer::get_supported_themes(),
-			[ 'twentyten' ]
+			[ 'twentyten' ] // Because it is not responsive.
 		);
 
-		$this->default_reader_themes = array_filter(
+		// Get the subset of themes.
+		$reader_themes = array_filter(
 			$response->themes,
 			static function ( $theme ) use ( $supported_themes ) {
 				return in_array( $theme->slug, $supported_themes, true );
 			}
 		);
-
-		return $this->default_reader_themes;
-	}
-
-	/**
-	 * Prepares a single theme.
-	 *
-	 * @param array|object $theme Theme data from the wordpress.org themes API.
-	 * @return array|object Prepared theme array.
-	 */
-	public function prepare_theme( $theme ) {
-		$theme_array = (array) $theme;
 
 		$keys = [
 			'name',
@@ -203,15 +190,23 @@ final class AMP_Reader_Themes {
 			'description',
 			'requires',
 			'requires_php',
-			'download_link',
 		];
 
-		$prepared_theme = array_merge(
-			array_fill_keys( $keys, '' ),
-			wp_array_slice_assoc( $theme_array, $keys )
+		// Supply the screenshots.
+		$reader_themes = array_map(
+			static function ( $theme ) use ( $keys ) {
+				return array_merge(
+					wp_array_slice_assoc( (array) $theme, $keys ),
+					[ 'screenshot_url' => amp_get_asset_url( "images/reader-themes/{$theme->slug}.png" ) ]
+				);
+			},
+			$reader_themes
 		);
 
-		return $prepared_theme;
+		$reader_themes[] = $this->get_classic_mode();
+
+		$this->default_reader_themes = $reader_themes;
+		return $this->default_reader_themes;
 	}
 
 	/**
@@ -298,14 +293,7 @@ final class AMP_Reader_Themes {
 			),
 			'requires'       => false,
 			'requires_php'   => false,
-			'download_link'  => '',
-			'availability'   => [
-				'is_active'         => false,
-				'can_install'       => true,
-				'is_compatible_wp'  => true,
-				'is_compatible_php' => true,
-				'is_installed'      => true,
-			],
+			'availability'   => self::STATUS_INSTALLED,
 		];
 	}
 }
