@@ -5,8 +5,6 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Option;
-
 /**
  * Tests for AMP_Options_REST_Controller.
  *
@@ -81,6 +79,8 @@ class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
 	 * @covers AMP_Options_REST_Controller::update_items.
 	 */
 	public function test_update_items() {
+		Test_AMP_Reader_Themes::add_reader_themes_request_filter();
+
 		$this->assertEquals(
 			'reader',
 			$this->controller->get_items( new WP_REST_Request( 'GET', '/amp/v1/options' ) )->get_data()['theme_support']
