@@ -92,8 +92,12 @@ class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
 		);
 		$response = rest_get_server()->dispatch( $request );
 
-		$this->assertEquals( 'transitional', $response->get_data()['theme_support'] );
-		$this->assertEquals( 'twentysixteen', $response->get_data()['reader_theme'] );
+		if ( isset( $response->get_data()['code'] ) ) { // Result is different pre-WP 5.0.
+			$this->assertEquals( 'rest_invalid_param', $response->get_data()['code'] );
+		} else {
+			$this->assertEquals( 'transitional', $response->get_data()['theme_support'] );
+			$this->assertEquals( 'twentysixteen', $response->get_data()['reader_theme'] );
+		}
 
 		// Test that invalid values are not accepted.
 		$request = new WP_REST_Request( 'POST', '/amp/v1/options' );
@@ -104,7 +108,6 @@ class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
 			]
 		);
 		$response = rest_get_server()->dispatch( $request );
-
 		$this->assertEquals( 'rest_invalid_param', $response->get_data()['code'] );
 	}
 
