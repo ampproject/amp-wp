@@ -1,0 +1,98 @@
+name: QA - Build
+
+on:
+  push:
+    paths:
+      - 'qa-tester/**'
+    branches:
+      - develop
+      - master
+      # Include all release branches.
+      - '*.*'
+  pull_request:
+    # Run workflow whenever a PR is opened, updated (synchronized), or marked ready for review.
+    types: [opened, synchronize, ready_for_review]
+
+defaults:
+  run:
+    working-directory: qa-tester
+
+jobs:
+  release-zip:
+    name: Build release build ZIP and upload as GHA artifact
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    outputs:
+      branch-name: ${{ steps.retrieve-branch-name.outputs.branch_name }}
+      git-sha-8: ${{ steps.retrieve-git-sha-8.outputs.sha8 }}
+
+    steps:
+      - name: Check out source files
+        uses: actions/checkout@v2
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Configure Composer cache
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --optimize-autoloader --ignore --no-scripts
+
+      - name: Get npm cache directory
+        id: npm-cache
+        run: echo "::set-output name=dir::$(npm config get cache)"
+
+      - name: Configure npm cache
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Build release version
+        run: npm run build
+
+      - name: Retrieve branch name
+        id: retrieve-branch-name
+        run: echo "::set-output name=branch_name::$(REF=${GITHUB_HEAD_REF:-$GITHUB_REF} && echo ${REF#refs/heads/} | sed 's/\//-/g')"
+
+      - name: Retrieve git SHA-8 string
+        id: retrieve-git-sha-8
+        run: echo "::set-output name=sha8::$(echo ${GITHUB_SHA} | cut -c1-8)"
+
+      - name: Upload build as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: amp-qa-tester-${{ steps.retrieve-branch-name.outputs.branch_name }}-${{ steps.retrieve-git-sha-8.outputs.sha8 }}
+          path: amp-qa-tester.zip
+
+#-----------------------------------------------------------------------------------------------------------------------
+
+  upload-to-gcs:
+    name: Upload plugin ZIP to Google Cloud Storage
+    runs-on: ubuntu-latest
+    needs:
+      - release-zip
+    steps:
+      - name: Download plugin build
+        uses: actions/download-artifact@v2
+        with:
+          name: amp-qa-tester-${{ needs.dev-zip.outputs.branch-name }}-${{ needs.dev-zip.outputs.git-sha-8 }}
+
+      - name: Setup Google Cloud SDK
+        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          project_id: ${{ secrets.GCS_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCS_APPLICATION_CREDENTIALS }}
+
+      - name: Upload build to bucket
+        run: gsutil cp amp-qa-tester.zip gs://ampwp_github_artifacts/${{ github.ref }}/

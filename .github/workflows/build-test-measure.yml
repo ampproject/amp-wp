@@ -2,6 +2,8 @@ name: Build, test & measure
 
 on:
   push:
+    paths-ignore:
+      - 'qa-tester/**'
     branches:
       - develop
       # Include all release branches.
