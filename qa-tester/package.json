@@ -24,6 +24,7 @@
     "@wordpress/eslint-plugin": "^6.0.0",
     "@wordpress/scripts": "^9.1.0",
     "browserslist": "^4.12.0",
+    "eslint-plugin-import": "^2.21.2",
     "grunt": "^1.1.0",
     "grunt-contrib-clean": "^2.0.0",
     "grunt-contrib-copy": "^1.0.0",

@@ -42,7 +42,7 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
 
       - name: Install Composer dependencies
-        run: composer install --prefer-dist --optimize-autoloader --ignore --no-scripts
+        run: composer install --prefer-dist --optimize-autoloader --no-scripts
 
       - name: Get npm cache directory
         id: npm-cache
