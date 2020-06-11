@@ -54,6 +54,7 @@
     "lint": "npm-run-all --parallel lint:*",
     "lint:css": "wp-scripts lint-style",
     "lint:js": "wp-scripts lint-js",
+    "lint:js:report": "npm run lint:js -- --output-file lint-js-report.json --format json .",
     "lint:php": "composer cs",
     "lint:pkg-json": "wp-scripts lint-pkg-json --ignorePath .gitignore",
     "test": "npm-run-all --parallel test:js test:php",
