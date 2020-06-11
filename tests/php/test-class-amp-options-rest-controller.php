@@ -79,6 +79,10 @@ class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
 	 * @covers AMP_Options_REST_Controller::update_items.
 	 */
 	public function test_update_items() {
+		if ( ! amp_should_use_new_onboarding() ) {
+			return; // Skip if WP version is < 5.0.
+		}
+
 		Test_AMP_Reader_Themes::add_reader_themes_request_filter();
 
 		wp_set_current_user( 1 );
