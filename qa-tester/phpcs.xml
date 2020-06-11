@@ -29,15 +29,17 @@
 
 	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
 		<exclude-pattern>src/*</exclude-pattern>
-		<exclude-pattern>test/php/*</exclude-pattern>
+		<exclude-pattern>tests/php/*</exclude-pattern>
 	</rule>
 
 	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
 		<exclude-pattern>src/*</exclude-pattern>
+		<exclude-pattern>tests/php/*</exclude-pattern>
 	</rule>
 
 	<rule ref="Squiz.Classes.ClassFileName">
 		<include-pattern>src/*</include-pattern>
+		<include-pattern>tests/php/*</include-pattern>
 	</rule>
 
 	<config name="testVersion" value="5.6-" />
