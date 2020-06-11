@@ -85,9 +85,13 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_availability_test_themes() {
+		$is_installed = static function ( $theme ) {
+			return wp_get_theme( $theme )->exists();
+		};
+
 		return [
-			[
-				'installed', // Is installed in CI environment.
+			'twentysixteen_from_wp_future'           => [
+				$is_installed( 'twentysixteen' ) ? AMP_Reader_Themes::STATUS_INSTALLED : AMP_Reader_Themes::STATUS_NON_INSTALLABLE,
 				false,
 				[
 					'name'         => 'Some Theme',
@@ -96,8 +100,8 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 					'slug'         => 'twentysixteen',
 				],
 			],
-			[
-				'installed',  // Is installed in CI environment.
+			'twentysixteen_from_php_future'          => [
+				$is_installed( 'twentysixteen' ) ? AMP_Reader_Themes::STATUS_INSTALLED : AMP_Reader_Themes::STATUS_NON_INSTALLABLE,
 				false,
 				[
 					'name'         => 'Some Theme',
@@ -106,8 +110,8 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 					'slug'         => 'twentysixteen',
 				],
 			],
-			[
-				'non-installable',
+			'non_reader_theme'                       => [
+				AMP_Reader_Themes::STATUS_NON_INSTALLABLE,
 				false,
 				[
 					'name'         => 'Some Theme',
@@ -116,8 +120,8 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 					'slug'         => 'some-nondefault-theme',
 				],
 			],
-			[
-				'installed', // Is installed in CI environment.
+			'twentytwelve_not_requiring_wp_version'  => [
+				$is_installed( 'twentytwelve' ) ? AMP_Reader_Themes::STATUS_INSTALLED : AMP_Reader_Themes::STATUS_INSTALLABLE,
 				true,
 				[
 					'name'         => 'Some Theme',
@@ -126,8 +130,8 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 					'slug'         => 'twentytwelve',
 				],
 			],
-			[
-				'installed', // Is installed in CI environment.
+			'twentytwelve_not_requiring_php_version' => [
+				$is_installed( 'twentysixteen' ) ? AMP_Reader_Themes::STATUS_INSTALLED : AMP_Reader_Themes::STATUS_INSTALLABLE,
 				true,
 				[
 					'name'         => 'Some Theme',
@@ -136,8 +140,8 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 					'slug'         => 'twentysixteen',
 				],
 			],
-			[
-				'active', // Is installed in CI environment.
+			'twentytwenty_active'                    => [
+				AMP_Reader_Themes::STATUS_ACTIVE,
 				true,
 				[
 					'name'         => 'WordPress Default',
@@ -156,6 +160,10 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 	 * @covers AMP_Reader_Themes::can_install_theme
 	 *
 	 * @dataProvider get_availability_test_themes
+	 *
+	 * @param string $expected    Expected.
+	 * @param bool   $can_install Can install.
+	 * @param array  $theme       Theme.
 	 */
 	public function test_get_theme_availability( $expected, $can_install, $theme ) {
 		$this->assertEquals( $expected, $this->reader_themes->get_theme_availability( $theme ) );
