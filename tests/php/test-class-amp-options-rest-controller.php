@@ -85,13 +85,12 @@ class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
 	public function test_update_items() {
 		wp_set_current_user( 1 );
 
-		$request = new WP_REST_Request( 'POST', '/amp/v1/options' );
-		$request->set_body_params(
-			[
-				'reader_theme'  => 'twentysixteen',
-				'theme_support' => 'transitional',
-			]
-		);
+		$request      = new WP_REST_Request( 'POST', '/amp/v1/options' );
+		$valid_params = [
+			'reader_theme'  => 'twentysixteen',
+			'theme_support' => 'transitional',
+		];
+		$request->set_body_params( $valid_params );
 		$response = rest_get_server()->dispatch( $request );
 
 		if ( isset( $response->get_data()['code'] ) ) { // Result is different pre-WP 5.0.
@@ -100,17 +99,30 @@ class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
 			$this->assertEquals( 'transitional', $response->get_data()['theme_support'] );
 			$this->assertEquals( 'twentysixteen', $response->get_data()['reader_theme'] );
 		}
+		$this->assertArraySubset( $valid_params, AMP_Options_Manager::get_options() );
 
-		// Test that invalid values are not accepted.
+		// Test that illegal theme_support is not accepted.
 		$request = new WP_REST_Request( 'POST', '/amp/v1/options' );
 		$request->set_body_params(
 			[
-				'reader_theme'  => 'twentyten',
 				'theme_support' => 'some-unknown-value',
 			]
 		);
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 'rest_invalid_param', $response->get_data()['code'] );
+
+		// Test that invalid reader_theme is not accepted.
+		$request = new WP_REST_Request( 'POST', '/amp/v1/options' );
+		$request->set_body_params(
+			[
+				'reader_theme' => 'twentyninety',
+			]
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 'rest_invalid_param', $response->get_data()['code'] );
+
+		// Verify the invalid settings were not set.
+		$this->assertArraySubset( $valid_params, AMP_Options_Manager::get_options() );
 	}
 
 	/**

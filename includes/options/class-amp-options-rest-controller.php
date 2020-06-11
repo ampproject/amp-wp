@@ -123,6 +123,7 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 				'title'      => 'amp-wp-options',
 				'type'       => 'object',
 				'properties' => [
+					// Note: The sanitize_callback from AMP_Options_Manager::register_settings() is applying to this option.
 					Option::THEME_SUPPORT => [
 						'type' => 'string',
 						'enum' => [

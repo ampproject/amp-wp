@@ -17,7 +17,7 @@ trait ThemesApiRequestMocking {
 	/**
 	 * Reader themes from wordpress.org.
 	 */
-	public static $api_reader_themes = [
+	protected static $api_reader_themes = [
 		[
 			'name'           => 'Twenty Twenty',
 			'slug'           => 'twentytwenty',
