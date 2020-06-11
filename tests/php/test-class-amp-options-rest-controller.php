@@ -79,6 +79,10 @@ class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
 	 * @covers AMP_Options_REST_Controller::update_items.
 	 */
 	public function test_update_items() {
+		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
+			$this->markTestSkipped( 'Requires WordPress 5.0.' );
+		}
+
 		Test_AMP_Reader_Themes::add_reader_themes_request_filter();
 
 		wp_set_current_user( 1 );
@@ -92,12 +96,8 @@ class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
 		);
 		$response = rest_get_server()->dispatch( $request );
 
-		if ( isset( $response->get_data()['code'] ) ) { // Result is different pre-WP 5.0.
-			$this->assertEquals( 'rest_invalid_param', $response->get_data()['code'] );
-		} else {
-			$this->assertEquals( 'transitional', $response->get_data()['theme_support'] );
-			$this->assertEquals( 'twentysixteen', $response->get_data()['reader_theme'] );
-		}
+		$this->assertEquals( 'transitional', $response->get_data()['theme_support'] );
+		$this->assertEquals( 'twentysixteen', $response->get_data()['reader_theme'] );
 
 		// Test that invalid values are not accepted.
 		$request = new WP_REST_Request( 'POST', '/amp/v1/options' );

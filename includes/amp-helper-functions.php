@@ -155,13 +155,15 @@ function amp_init() {
 	add_action(
 		'rest_api_init',
 		static function() {
-			$reader_themes = new AMP_Reader_Themes();
+			if ( amp_should_use_new_onboarding() ) {
+				$reader_themes = new AMP_Reader_Themes();
 
-			$reader_theme_controller = new AMP_Reader_Theme_REST_Controller( $reader_themes );
-			$reader_theme_controller->register_routes();
+				$reader_theme_controller = new AMP_Reader_Theme_REST_Controller( $reader_themes );
+				$reader_theme_controller->register_routes();
 
-			$options_controller = new AMP_Options_REST_Controller( $reader_themes );
-			$options_controller->register_routes();
+				$options_controller = new AMP_Options_REST_Controller( $reader_themes );
+				$options_controller->register_routes();
+			}
 		}
 	);
 }
