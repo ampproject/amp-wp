@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP_QA_Tester;
 use Plugin_Upgrader;
 use WP_Ajax_Upgrader_Skin;
 use WP_Error;
+use WP_Filesystem_Base;
 
 /**
  * Trait housing logic related to plugin updates.
@@ -84,16 +85,27 @@ trait Version_Switcher {
 		unset( $current->no_update[ $plugin_name ] );
 
 		// Set the plugin to update from our custom URL.
-		$current->response[ $plugin_name ]->package     = $url;
-		$current->response[ $plugin_name ]->new_version = Plugin::PLUGIN_SLUG . '@' . $build_id;
+		$current->response[ $plugin_name ] = (object) [
+			'id'          => str_replace( '.php', '', $plugin_name ),
+			'slug'        => Plugin::PLUGIN_SLUG,
+			'plugin'      => $plugin_name,
+			'new_version' => Plugin::PLUGIN_SLUG . '@' . $build_id,
+			'url'         => 'https://wordpress.org/plugins/' . Plugin::PLUGIN_SLUG,
+			'package'     => $url,
+		];
 
 		// Temporarily replace the site plugin upgrade info and upgrade the plugin.
 		set_site_transient( 'update_plugins', $current );
 		$skin     = new WP_Ajax_Upgrader_Skin();
 		$upgrader = new Plugin_Upgrader( $skin );
 
+		// Ensure the plugin folder has the correct name before installing.
+		add_filter( 'upgrader_source_selection', [ $this, 'ensure_correct_folder' ] );
+
 		// Run the upgrade.
 		$result = $upgrader->bulk_upgrade( [ $plugin_name ] );
+
+		remove_filter( 'upgrader_source_selection', [ $this, 'ensure_correct_folder' ] );
 
 		// Restore the site plugin upgrade info.
 		set_site_transient( 'update_plugins', $original );
@@ -102,5 +114,39 @@ trait Version_Switcher {
 		delete_transient( $switching_lock_key );
 
 		return $result;
+	}
+
+	/**
+	 * Ensure the folder name of the AMP plugin is set to its plugin slug.
+	 *
+	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+	 *
+	 * @param string $source File source location.
+	 * @return string|WP_Error New file source location, or WP_Error if the folder could not be renamed.
+	 */
+	public function ensure_correct_folder( $source ) {
+		global $wp_filesystem;
+
+		$folder_name = basename( $source );
+
+		if ( Plugin::PLUGIN_SLUG === $folder_name ) {
+			return $source;
+		}
+
+		$new_source = trailingslashit( trailingslashit( dirname( $source ) ) . Plugin::PLUGIN_SLUG );
+		$moved      = $wp_filesystem->move( $source, $new_source );
+
+		if ( ! $moved ) {
+			return new WP_Error(
+				'amp_plugin_folder_not_correct',
+				'Failed to rename the AMP plugin folder before installing the plugin.',
+				[
+					'old_source' => $source,
+					'new_source' => $new_source,
+				]
+			);
+		}
+
+		return $new_source;
 	}
 }

@@ -47,7 +47,7 @@ class Rest_Route {
 			'args'                => [
 				'isDev' => [
 					'validate_callback' => static function ( $param ) {
-						return filter_var( $param, FILTER_VALIDATE_BOOLEAN );
+						return is_bool( $param );
 					},
 					'sanitize_callback' => static function ( $param ) {
 						return rest_sanitize_boolean( $param );
@@ -65,7 +65,7 @@ class Rest_Route {
 						if ( 'release' === $param || 'develop' === $param ) {
 							return $param;
 						}
-						return (int) $param;
+						return filter_var( $param, FILTER_SANITIZE_NUMBER_INT );
 					},
 					'required'          => true,
 				],
@@ -114,7 +114,7 @@ class Rest_Route {
 				}
 			}
 		} else {
-			$ref   = 'develop' === $build_id ? 'heads/develop' : "{$build_id}/merge";
+			$ref   = 'develop' === $build_id ? 'heads/develop' : "pull/{$build_id}/merge";
 			$build = ( $is_dev_build ? 'dev' : 'prod' );
 
 			$download_url = str_replace( [ '{ref}', '{build}' ], [ $ref, $build ], Plugin::DOWNLOAD_BASE );

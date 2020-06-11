@@ -40,12 +40,14 @@ class AdminBar extends Component {
 
 	componentWillUnmount() {
 		clearTimeout( this.errorTimeout );
+		clearTimeout( this.pageReloadTimeout );
 	}
 
 	getPullRequests() {
 		const url = new URL( 'https://api.github.com/search/issues' );
 		const params = {
-			q: 'repo:ampproject/amp-wp is:pr is:open commenter:app/github-actions in:comments "Download development build"',
+			q:
+				'repo:ampproject/amp-wp is:pr is:open commenter:app/github-actions in:comments "Download development build"',
 			sort: 'created',
 			order: 'desc',
 		};
@@ -77,10 +79,12 @@ class AdminBar extends Component {
 	handleChangeBuildOption( event ) {
 		const value = event.target.value;
 		const buildOption = this.state.buildOptions.find(
-			( option ) => value === option.value
+			( option ) => value === option.value.toString()
 		);
 
-		this.setState( { buildOption } );
+		if ( undefined !== buildOption ) {
+			this.setState( { buildOption } );
+		}
 	}
 
 	handleChangeDevBuild( event ) {
@@ -101,7 +105,11 @@ class AdminBar extends Component {
 			},
 		} )
 			.then( () => {
-				window.location.reload();
+				// @todo Could this be handled better?
+				// Set a 1 second delay before reloading the page to allow for the new plugin to activate without any error.
+				this.pageReloadTimeout = setTimeout( () => {
+					window.location.reload();
+				}, 1000 );
 			} )
 			.catch( ( error ) => {
 				if ( error.message ) {

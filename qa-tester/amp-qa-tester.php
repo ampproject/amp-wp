@@ -11,6 +11,8 @@
  * Requires at least: 5.0
  * Requires PHP: 5.6
  *
+ * Props to @adamsilverstein (https://github.com/adamsilverstein) for laying the groundwork for this plugin.
+ *
  * @package AmpProject\AmpWP_QA_Tester
  */
 
