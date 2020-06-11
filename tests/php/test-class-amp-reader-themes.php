@@ -36,7 +36,7 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 	/**
 	 * Reader themes from wordpress.org.
 	 */
-	const API_READER_THEMES = [
+	public static $api_reader_themes = [
 		[
 			'name'           => 'Twenty Twenty',
 			'slug'           => 'twentytwenty',
@@ -235,7 +235,7 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 				}
 
 				return [
-					'body'     => wp_json_encode( [ 'themes' => self::API_READER_THEMES ] ),
+					'body'     => wp_json_encode( [ 'themes' => self::$api_reader_themes ] ),
 					'response' => [
 						'code'    => 200,
 						'message' => 'OK',
