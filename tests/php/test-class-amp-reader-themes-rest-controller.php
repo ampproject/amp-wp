@@ -41,7 +41,6 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 	public function test_register_routes() {
 		$this->controller->register_routes();
 
-
 		$this->assertContains( 'amp/v1', rest_get_server()->get_namespaces() );
 		$this->assertContains( '/amp/v1/reader-themes', array_keys( rest_get_server()->get_routes( 'amp/v1' ) ) );
 	}
