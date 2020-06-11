@@ -23,6 +23,13 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 	private $reader_themes;
 
 	/**
+	 * Cached results of get_item_schema.
+	 *
+	 * @var array
+	 */
+	protected $schema;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param AMP_Reader_Themes $reader_themes Reader themes helper class instance.
@@ -53,7 +60,7 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 					'permission_callback' => [ $this, 'get_items_permissions_check' ],
 				],
-				'schema' => $this->get_item_schema(),
+				'schema' => $this->get_public_item_schema(),
 			]
 		);
 	}
