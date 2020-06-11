@@ -147,21 +147,23 @@ final class AMP_Reader_Themes {
 			return $this->default_reader_themes;
 		}
 
-		// Note: This can be used to refresh the hardcoded raw theme data.
-		if ( ! function_exists( 'themes_api' ) ) {
+		$cache_key = 'amp_themes_wporg';
+		$response  = get_transient( $cache_key );
+		if ( ! $response ) {
+			// Note: This can be used to refresh the hardcoded raw theme data.
 			require_once ABSPATH . 'wp-admin/includes/theme.php';
-		}
 
-		$response = themes_api(
-			'query_themes',
-			[
-				'author'   => 'wordpressdotorg',
-				'per_page' => 24, // There are only 12 as of 05/2020.
-			]
-		);
+			$response = themes_api(
+				'query_themes',
+				[
+					'author'   => 'wordpressdotorg',
+					'per_page' => 24, // There are only 12 as of 05/2020.
+				]
+			);
 
-		if ( ! $response || is_wp_error( $response ) ) {
-			return [];
+			if ( ! is_wp_error( $response ) ) {
+				set_transient( $cache_key, $response, DAY_IN_SECONDS );
+			}
 		}
 
 		if ( is_array( $response ) ) {
