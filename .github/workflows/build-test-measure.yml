@@ -5,6 +5,8 @@ on:
     branches:
       - develop
       - master
+      # Include all release branches.
+      - '*.*'
   pull_request:
     # Run workflow whenever a PR is opened, updated (synchronized), or marked ready for review.
     types: [opened, synchronize, ready_for_review]
