@@ -50,4 +50,4 @@ jobs:
         uses: ataylorme/eslint-annotate-action@1.0.4
         with:
           repo-token: '${{ secrets.GITHUB_TOKEN }}'
-          report-json: 'lint-js-report.json'
+          report-json: 'qa-tester/lint-js-report.json'
