@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\ThemesApiRequestMocking;
+
 /**
  * Tests for AMP_Options_REST_Controller.
  *
@@ -13,6 +15,8 @@
  * @covers AMP_Options_REST_Controller
  */
 class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
+
+	use ThemesApiRequestMocking;
 
 	/**
 	 * Test instance.
@@ -27,7 +31,7 @@ class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
-		Test_AMP_Reader_Themes::add_reader_themes_request_filter();
+		$this->add_reader_themes_request_filter();
 
 		do_action( 'rest_api_init' );
 		$this->controller = new AMP_Options_REST_Controller( new AMP_Reader_Themes() );
@@ -79,8 +83,6 @@ class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
 	 * @covers AMP_Options_REST_Controller::update_items.
 	 */
 	public function test_update_items() {
-		Test_AMP_Reader_Themes::add_reader_themes_request_filter();
-
 		wp_set_current_user( 1 );
 
 		$request = new WP_REST_Request( 'POST', '/amp/v1/options' );
