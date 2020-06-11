@@ -32,7 +32,7 @@ class Plugin {
 	 * @since 1.0.0
 	 * @var Admin_Bar|null
 	 */
-	protected $admin_bar;
+	public $admin_bar;
 
 	/**
 	 * Rest Route.
@@ -40,7 +40,7 @@ class Plugin {
 	 * @since 1.0.0
 	 * @var Rest_Route|null
 	 */
-	protected $rest_route;
+	public $rest_route;
 
 	/**
 	 * Absolute path to the plugin main file.
