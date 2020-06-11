@@ -30,7 +30,6 @@ class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
 		parent::setUp();
 
 		Test_AMP_Reader_Themes::add_reader_themes_request_filter();
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 
 		do_action( 'rest_api_init' );
 		$this->controller = new AMP_Options_REST_Controller( new AMP_Reader_Themes() );

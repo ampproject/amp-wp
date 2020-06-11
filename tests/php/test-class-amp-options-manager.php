@@ -253,7 +253,14 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$entries = AMP_Options_Manager::get_option( Option::ANALYTICS );
 		$this->assertCount( 1, $entries );
 		$this->assertArrayNotHasKey( $id, $entries );
+	}
 
+	/**
+	 * Tests the update_options method.
+	 *
+	 * @covers AMP_Options_Manager::update_options
+	 */
+	public function test_update_options() {
 		// Confirm updating multple entries at once works.
 		AMP_Options_Manager::update_options(
 			[
