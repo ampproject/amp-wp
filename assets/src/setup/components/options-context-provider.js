@@ -8,7 +8,6 @@ import apiFetch from '@wordpress/api-fetch';
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { __ } from '@wordpress/i18n';
 
 export const Options = createContext();
 
