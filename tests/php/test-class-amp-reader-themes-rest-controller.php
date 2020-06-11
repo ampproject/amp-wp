@@ -41,8 +41,9 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 	public function test_register_routes() {
 		$this->controller->register_routes();
 
-		$this->assertContains( 'amp-wp/v1', rest_get_server()->get_namespaces() );
-		$this->assertContains( '/amp-wp/v1/reader-themes', array_keys( rest_get_server()->get_routes( 'amp-wp/v1' ) ) );
+
+		$this->assertContains( 'amp/v1', rest_get_server()->get_namespaces() );
+		$this->assertContains( '/amp/v1/reader-themes', array_keys( rest_get_server()->get_routes( 'amp/v1' ) ) );
 	}
 
 	/**
@@ -51,7 +52,7 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 	 * @covers AMP_Reader_Theme_REST_Controller::get_items
 	 */
 	public function test_get_items() {
-		$this->assertEquals( 10, count( $this->controller->get_items( new WP_REST_Request( 'GET', 'amp-wp/v1' ) )->data ) );
+		$this->assertEquals( 10, count( $this->controller->get_items( new WP_REST_Request( 'GET', 'amp/v1' ) )->data ) );
 
 		$filter = function() {
 			return [
@@ -66,7 +67,7 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 		// Test that a theme with no screenshot_url is filtered out.
 		$this->controller = new AMP_Reader_Theme_REST_Controller( new AMP_Reader_Themes() );
 		add_filter( 'amp_reader_themes', $filter );
-		$this->assertEquals( 0, count( $this->controller->get_items( new WP_REST_Request( 'GET', 'amp-wp/v1' ) )->data ) );
+		$this->assertEquals( 0, count( $this->controller->get_items( new WP_REST_Request( 'GET', 'amp/v1' ) )->data ) );
 		remove_filter( 'amp_reader_themes', $filter );
 	}
 }

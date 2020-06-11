@@ -125,8 +125,13 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 						],
 					],
 					Option::READER_THEME  => [
-						'type' => 'string',
-						'enum' => wp_list_pluck( $this->reader_themes->get_themes(), 'slug' ),
+						'type'        => 'string',
+						'arg_options' => [
+							'validate_callback' => function ( $value ) {
+								// Note: The validate_callback is used instead of enum in order to prevent leaking the list of themes.
+								return in_array( $value, wp_list_pluck( $this->reader_themes->get_themes(), 'slug' ), true );
+							},
+						],
 					],
 				],
 			];

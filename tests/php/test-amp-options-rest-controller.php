@@ -29,6 +29,7 @@ class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
+		Test_AMP_Reader_Themes::add_reader_themes_request_filter();
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 
 		do_action( 'rest_api_init' );
@@ -89,10 +90,28 @@ class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
 		wp_set_current_user( 1 );
 
 		$request = new WP_REST_Request( 'POST', '/amp/v1/options' );
-		$request->set_body_params( [ 'theme_support' => 'transitional' ] );
+		$request->set_body_params(
+			[
+				'reader_theme'  => 'twentysixteen',
+				'theme_support' => 'transitional',
+			]
+		);
 		$response = $this->controller->update_items( $request );
 
 		$this->assertEquals( 'transitional', $response->get_data()['theme_support'] );
+		$this->assertEquals( 'twentysixteen', $response->get_data()['reader_theme'] );
+
+		// Test that invalid values are not accepted.
+		$request = new WP_REST_Request( 'POST', '/amp/v1/options' );
+		$request->set_body_params(
+			[
+				'reader_theme'  => 'twentyten',
+				'theme_support' => 'some-unknown-value',
+			]
+		);
+		$response = $this->controller->update_items( $request );
+		$this->assertEquals( 'transitional', $response->get_data()['theme_support'] );
+		$this->assertEquals( 'twentysixteen', $response->get_data()['reader_theme'] );
 	}
 
 	/**
