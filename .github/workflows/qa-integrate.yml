@@ -118,6 +118,73 @@ jobs:
 
 #-----------------------------------------------------------------------------------------------------------------------
 
+  # Adapted from workflow for running PHP unit tests on google/web-stories-wp.
+  # See https://github.com/google/web-stories-wp/blob/cb2ebada48039171e25c279bdb27d3712dd70b22/.github/workflows/continuous-integration-lint-php.yml.
+  unit-test-php:
+    name: 'PHP ${{ matrix.php }}: Unit test'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['7.4', '7.0', '5.6']
+        wp: ['latest']
+        include:
+          - php: '8.0'
+            wp: 'trunk'
+            experimental: true
+    continue-on-error: ${{ matrix.experimental == true }}
+    services:
+      mysql:
+        image: mariadb:latest
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
+          MYSQL_ROOT_PASSWORD:
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mysql
+          tools: composer, cs2pr
+
+      - name: Shutdown default MySQL service
+        run: sudo service mysql stop
+
+      - name: Verify MariaDB connection
+        run: |
+          while ! mysqladmin ping -h"127.0.0.1" -P"${{ job.services.mysql.ports[3306] }}" --silent; do
+            sleep 1
+          done
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Configure Composer cache
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --optimize-autoloader  --no-suggest --no-progress --no-interaction
+
+      - name: Set up tests
+        run: bash bin/install-wp-tests.sh wordpress_test root '' 127.0.0.1:${{ job.services.mysql.ports['3306'] }} ${{ matrix.wp }} true
+
+      - name: Run tests
+        run: composer unit
+
+#-----------------------------------------------------------------------------------------------------------------------
+
   release-zip:
     name: Build release build ZIP and upload as GHA artifact
     needs: [lint-css, lint-js, lint-php]
