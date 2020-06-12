@@ -17,7 +17,7 @@ import { Selectable } from '..';
 
 let container;
 
-describe( 'Nav', () => {
+describe( 'Selectable', () => {
 	beforeEach( () => {
 		container = document.createElement( 'div' );
 		document.body.appendChild( container );
