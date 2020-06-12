@@ -10,6 +10,10 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import '../css/admin-bar.css';
+import {
+	getProtectedBranches,
+	getPullRequestsWithBuilds,
+} from './utils/github';
 
 class AdminBar extends Component {
 	constructor( props ) {
@@ -20,10 +24,12 @@ class AdminBar extends Component {
 			{
 				label: __( 'Latest release', 'amp-qa-tester' ),
 				value: 'release',
+				origin: 'release',
 			},
 			{
 				label: __( 'Develop branch', 'amp-qa-tester' ),
 				value: 'develop',
+				origin: 'branch',
 			},
 		];
 
@@ -36,6 +42,7 @@ class AdminBar extends Component {
 			buildOptions,
 		};
 
+		this.addReleaseBranchOptions();
 		this.addPullRequestOptions();
 	}
 
@@ -45,24 +52,34 @@ class AdminBar extends Component {
 	}
 
 	/**
-	 * Fetches all open PRs that have build zips available for download.
-	 *
-	 * @return {Promise} Promise containing a list of PR items.
+	 * Append to the default build options a list of PRs that have build zips available for download.
 	 */
-	getPullRequests() {
-		const url = new URL( 'https://api.github.com/search/issues' );
-		const params = {
-			q:
-				'repo:ampproject/amp-wp is:pr is:open commenter:app/github-actions in:comments "Download development build"',
-			sort: 'created',
-			order: 'desc',
-		};
+	addReleaseBranchOptions() {
+		// Retrieve the PRs from GitHub and append them to the list of builds above.
+		getProtectedBranches().then( ( branches ) => {
+			const releaseBranchNames = branches
+				.map( ( branch ) => branch.name )
+				.filter( ( branchName ) =>
+					/[0-9]+\.[0-9]+/.test( branchName )
+				);
 
-		url.search = new URLSearchParams( params ).toString();
+			// We only need the release branches 1.5 and after, since only they would have built zips.
+			const releasesWithBuilds = releaseBranchNames
+				.sort()
+				.slice( releaseBranchNames.indexOf( '1.5' ) );
 
-		return fetch( url )
-			.then( ( response ) => response.json() )
-			.then( ( json ) => json.items || [] );
+			const branchOptions = releasesWithBuilds.map( ( branch ) => {
+				return {
+					label: `${ branch } release branch`,
+					value: branch,
+					origin: 'branch',
+				};
+			} );
+
+			this.setState( {
+				buildOptions: this.state.buildOptions.concat( branchOptions ),
+			} );
+		} );
 	}
 
 	/**
@@ -70,11 +87,12 @@ class AdminBar extends Component {
 	 */
 	addPullRequestOptions() {
 		// Retrieve the PRs from GitHub and append them to the list of builds above.
-		this.getPullRequests().then( ( results ) => {
+		getPullRequestsWithBuilds().then( ( results ) => {
 			const prOptions = results.map( ( pr ) => {
 				return {
 					label: `PR #${ pr.number }: ${ pr.title }`,
 					value: pr.number,
+					origin: 'pr',
 				};
 			} );
 
@@ -123,6 +141,7 @@ class AdminBar extends Component {
 			method: 'POST',
 			data: {
 				id: buildOption.value,
+				origin: buildOption.origin,
 				isDev: isDevBuild,
 			},
 		} )

@@ -24,25 +24,26 @@ trait Version_Switcher {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string $url      The plugin update URL.
-	 * @param string $build_id The build ID being used.
+	 * @param string $url          The plugin update URL.
+	 * @param string $build_id     The build ID being used.
+	 * @param string $build_origin The origin of the build.
 	 * @return array|false|WP_Error An array of results indexed by plugin file.
 	 *                             False if the user has insufficient permissions, update lock is set, or unable to connect to the filesystem.
 	 *                             Otherwise, a WP_Error.
 	 */
-	public function switch_version( $url, $build_id ) {
-		static $switching_lock_key = 'amp_qa_tester_switching_lock';
+	public function switch_version( $url, $build_id, $build_origin ) {
+		$switching_lock_key = 'amp_qa_tester_switching_lock';
 
 		// Ensure plugin build for develop branch or PR exists before attempting to switch.
-		if ( 'develop' === $build_id || filter_var( $build_id, FILTER_VALIDATE_INT ) ) {
+		if ( 'release' !== $build_origin ) {
 			$request = wp_safe_remote_head( $url );
 
 			if ( 200 !== $request['response']['code'] ) {
-				$name = 'develop' === $build_id ? 'develop branch' : 'PR #' . $build_id;
+				$name = 'branch' === $build_origin ? $build_id . ' branch' : 'PR #' . $build_id;
 				return new WP_Error(
 					'build_not_found',
 					sprintf(
-						/* translators: %s: Build name */
+					/* translators: %s: Build name */
 						__( 'The build for %s could not be retrieved', 'amp-qa-tester' ),
 						$name
 					),

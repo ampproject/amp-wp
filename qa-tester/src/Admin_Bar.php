@@ -87,10 +87,11 @@ class Admin_Bar {
 	public function add_menu_button( $wp_admin_bar ) {
 		if ( '' === $this->build_id || false === $this->build_id ) {
 			$on = __( 'latest release', 'amp-qa-tester' );
-		} elseif ( 'develop' === $this->build_id ) {
-			$on = __( 'develop branch', 'amp-qa-tester' );
-		} else {
+		} elseif ( filter_var( $this->build_id, FILTER_VALIDATE_INT ) ) {
 			$on = 'PR #' . $this->build_id;
+		} else {
+			/* translators: %s is the name of the branch */
+			$on = sprintf( __( '%s branch', 'amp-qa-tester' ), $this->build_id );
 		}
 
 		/* translators: %s: the version of plugin currently running */
