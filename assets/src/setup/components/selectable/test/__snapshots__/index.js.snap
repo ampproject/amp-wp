@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Nav matches snapshot 1`] = `
+exports[`Selectable matches snapshot 1`] = `
 <div
   className="selectable selectable--selected selectable--left"
 >
@@ -10,7 +10,7 @@ exports[`Nav matches snapshot 1`] = `
 </div>
 `;
 
-exports[`Nav matches snapshot 2`] = `
+exports[`Selectable matches snapshot 2`] = `
 <section
   className="my-cool-class selectable selectable--selected selectable--top"
 >
