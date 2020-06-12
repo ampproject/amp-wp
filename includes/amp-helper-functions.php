@@ -97,9 +97,9 @@ function amp_init() {
 	AMP_Theme_Support::init();
 	AMP_Validation_Manager::init();
 	AMP_Service_Worker::init();
+	add_action( 'admin_init', 'AMP_Options_Manager::init' );
 	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
 	add_action( 'rest_api_init', 'AMP_Options_Manager::register_settings' );
-	add_action( 'admin_init', 'AMP_Options_Manager::init' );
 	add_action( 'wp_loaded', 'amp_add_options_menu' );
 	add_action( 'wp_loaded', 'amp_bootstrap_admin' );
 
@@ -155,9 +155,15 @@ function amp_init() {
 	add_action(
 		'rest_api_init',
 		static function() {
-			$reader_theme_controller = new AMP_Reader_Theme_REST_Controller( new AMP_Reader_Themes() );
-			$reader_theme_controller->init();
-			$reader_theme_controller->register_routes();
+			if ( amp_should_use_new_onboarding() ) {
+				$reader_themes = new AMP_Reader_Themes();
+
+				$reader_theme_controller = new AMP_Reader_Theme_REST_Controller( $reader_themes );
+				$reader_theme_controller->register_routes();
+
+				$options_controller = new AMP_Options_REST_Controller( $reader_themes );
+				$options_controller->register_routes();
+			}
 		}
 	);
 }

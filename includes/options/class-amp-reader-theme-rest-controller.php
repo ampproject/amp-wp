@@ -27,41 +27,8 @@ final class AMP_Reader_Theme_REST_Controller extends WP_REST_Controller {
 	 */
 	public function __construct( $reader_themes ) {
 		$this->reader_themes = $reader_themes;
-		$this->namespace     = 'amp-wp/v1';
+		$this->namespace     = 'amp/v1';
 		$this->rest_base     = 'reader-themes';
-	}
-
-	/**
-	 * Sets up hooks.
-	 */
-	public function init() {
-		add_filter( 'amp_reader_themes', [ $this, 'prepare_default_reader_themes_for_rest' ] );
-	}
-
-	/**
-	 * Overrides data for default themes.
-	 *
-	 * @param array $themes Default reader themes.
-	 * @return array Filtered default reader themes.
-	 */
-	public function prepare_default_reader_themes_for_rest( $themes ) {
-		return array_map( [ $this, 'prepare_default_reader_theme_for_rest' ], $themes );
-	}
-
-	/**
-	 * Overrides data for a default theme.
-	 *
-	 * @param array $theme Reader theme data.
-	 * @return array Filtered reader theme data.
-	 */
-	public function prepare_default_reader_theme_for_rest( $theme ) {
-		$theme_slugs = wp_list_pluck( $this->reader_themes->get_default_reader_themes(), 'slug' );
-
-		if ( in_array( $theme['slug'], $theme_slugs, true ) || 'classic' === $theme['slug'] ) {
-			$theme['screenshot_url'] = amp_get_asset_url( "images/reader-themes/{$theme['slug']}.png" );
-		}
-
-		return $theme;
 	}
 
 	/**
@@ -75,12 +42,31 @@ final class AMP_Reader_Theme_REST_Controller extends WP_REST_Controller {
 			'/' . $this->rest_base,
 			[
 				[
-					'methods'  => WP_REST_Server::READABLE,
-					'callback' => [ $this, 'get_items' ],
-					'args'     => [],
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => [ $this, 'get_items' ],
+					'permission_callback' => [ $this, 'get_items_permissions_check' ],
+					'args'                => [],
 				],
 			]
 		);
+	}
+
+	/**
+	 * Checks whether the current user has permission to manage options.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return true|WP_Error True if the request has permission; WP_Error object otherwise.
+	 */
+	public function get_items_permissions_check( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return new WP_Error(
+				'amp_rest_cannot_manage_options',
+				__( 'Sorry, you are not allowed to manage options for the AMP plugin for WordPress.', 'amp' ),
+				[ 'status' => rest_authorization_required_code() ]
+			);
+		}
+
+		return true;
 	}
 
 	/**
