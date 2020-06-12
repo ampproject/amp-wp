@@ -24,7 +24,7 @@ exports[`Nav matches snapshot 1`] = `
     </span>
     <button
       className="components-button amp-setup-nav__next"
-      disabled={false}
+      disabled={true}
       onClick={[Function]}
       type="button"
     >

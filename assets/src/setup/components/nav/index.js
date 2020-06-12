@@ -3,21 +3,26 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button, Icon } from '@wordpress/components';
-import { useCallback } from '@wordpress/element';
+import { useContext } from '@wordpress/element';
 
 /**
  * External dependencies
  */
 import PropTypes from 'prop-types';
 
-export function Nav( { activePageIndex, exitLink, pages, setActivePageIndex } ) {
-	const moveForward = useCallback( () => {
-		setActivePageIndex( activePageIndex + 1 );
-	}, [ activePageIndex, setActivePageIndex ] );
+/**
+ * Internal dependencies
+ */
+import { Navigation } from '../navigation-context-provider';
 
-	const moveBack = useCallback( () => {
-		setActivePageIndex( activePageIndex - 1 );
-	}, [ activePageIndex, setActivePageIndex ] );
+/**
+ * Navigation component.
+ *
+ * @param {Object} props Component props.
+ * @param {string} props.exitLink Link to exit the application.
+ */
+export function Nav( { exitLink } ) {
+	const { activePageIndex, canGoForward, moveBack, moveForward } = useContext( Navigation );
 
 	return (
 		<div className="amp-setup-nav">
@@ -27,7 +32,7 @@ export function Nav( { activePageIndex, exitLink, pages, setActivePageIndex } ) 
 				</Button>
 			</div>
 			<div className="amp-setup-nav__prev-next">
-				{ 0 === activePageIndex
+				{ 2 > activePageIndex // The first screen doesn't need to be returned to.
 					? (
 						<span className="amp-setup-nav__placeholder">
 							{ ' ' }
@@ -51,7 +56,7 @@ export function Nav( { activePageIndex, exitLink, pages, setActivePageIndex } ) 
 
 				<Button
 					className="amp-setup-nav__next"
-					disabled={ pages.length - 1 === activePageIndex }
+					disabled={ ! canGoForward }
 					onClick={ moveForward }
 				>
 					<span className="amp-mobile-hide">
@@ -69,12 +74,5 @@ export function Nav( { activePageIndex, exitLink, pages, setActivePageIndex } ) 
 }
 
 Nav.propTypes = {
-	activePageIndex: PropTypes.number.isRequired,
 	exitLink: PropTypes.string.isRequired,
-	pages: PropTypes.arrayOf(
-		PropTypes.shape( {
-			title: PropTypes.string.isRequired,
-		} ),
-	).isRequired,
-	setActivePageIndex: PropTypes.func.isRequired,
 };

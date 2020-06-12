@@ -7,7 +7,6 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { TechnicalBackground } from './technical-background';
-import { Goals } from './goals';
 import { TemplateMode } from './template-mode';
 import { ChooseReaderTheme } from './choose-reader-theme';
 import { SiteConfigurationSummary } from './site-configuration-summary';
@@ -19,30 +18,32 @@ import { SiteScan } from './site-scan';
  */
 export const PAGES = [
 	{
-		title: __( 'Site Scan', 'amp' ),
+		slug: 'site-scan',
+		title: __( 'Site scan', 'amp' ),
 		PageComponent: SiteScan,
 	},
 	{
-		title: __( 'Technical Background', 'amp' ),
+		slug: 'technical-background',
+		title: __( 'Technical background', 'amp' ),
 		PageComponent: TechnicalBackground,
 	},
 	{
-		title: __( 'Goals', 'amp' ),
-		PageComponent: Goals,
-	},
-	{
-		title: __( 'Template Mode', 'amp' ),
+		slug: 'template-modes',
+		title: __( 'Template modes', 'amp' ),
 		PageComponent: TemplateMode,
 	},
 	{
-		title: __( 'Reader Theme', 'amp' ),
+		slug: 'reader-themes',
+		title: __( 'Reader themes', 'amp' ),
 		PageComponent: ChooseReaderTheme,
 	},
 	{
-		title: __( 'Summary', 'amp' ),
+		slug: 'site-configuration',
+		title: __( 'Site configuration', 'amp' ),
 		PageComponent: SiteConfigurationSummary,
 	},
 	{
+		slug: 'done',
 		title: __( 'Done', 'amp' ),
 		PageComponent: Save,
 	},

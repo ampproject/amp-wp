@@ -14,6 +14,7 @@ import { render } from '@wordpress/element';
  * Internal dependencies
  */
 import { Nav } from '..';
+import { NavigationContextProvider } from '../../navigation-context-provider';
 
 let container;
 
@@ -22,7 +23,8 @@ const getNavButtons = ( containerElement ) => ( {
 	prevButton: containerElement.querySelector( '.amp-setup-nav__prev' ),
 } );
 
-const testPages = [ { PageComponent: 'div', title: 'Page 0' }, { PageComponent: 'div', title: 'Page 1' } ];
+const MyPageComponent = () => <div />;
+const testPages = [ { PageComponent: MyPageComponent, slug: 'slug', title: 'Page 0' }, { PageComponent: MyPageComponent, slug: 'slug-2', title: 'Page 1' } ];
 
 describe( 'Nav', () => {
 	beforeEach( () => {
@@ -36,13 +38,22 @@ describe( 'Nav', () => {
 	} );
 
 	it( 'matches snapshot', () => {
-		const wrapper = create( <Nav activePageIndex={ 0 } exitLink="http://site.test" pages={ testPages } setActivePageIndex={ () => null } /> );
+		const wrapper = create(
+			<NavigationContextProvider pages={ testPages }>
+				<Nav exitLink="http://site.test" />
+			</NavigationContextProvider>,
+		);
 		expect( wrapper.toJSON() ).toMatchSnapshot();
 	} );
 
 	it( 'hides previous button on first page', () => {
 		act( () => {
-			render( <Nav activePageIndex={ 0 } exitLink="http://site.test" pages={ testPages } setActivePageIndex={ () => null } />, container );
+			render(
+				<NavigationContextProvider pages={ testPages }>
+					<Nav exitLink="http://site.test" />
+				</NavigationContextProvider>,
+				container,
+			);
 		} );
 
 		const { nextButton, prevButton } = getNavButtons( container );
@@ -53,12 +64,15 @@ describe( 'Nav', () => {
 
 	it( 'disables next button on last page', () => {
 		act( () => {
-			render( <Nav activePageIndex={ 1 } exitLink="http://site.test" pages={ testPages } setActivePageIndex={ () => null } />, container );
+			render(
+				<NavigationContextProvider pages={ [ testPages[ 0 ] ] }>
+					<Nav exitLink="http://site.test" />
+				</NavigationContextProvider>,
+				container );
 		} );
 
-		const { nextButton, prevButton } = getNavButtons( container );
+		const { nextButton } = getNavButtons( container );
 
-		expect( prevButton ).not.toBeNull();
 		expect( nextButton.hasAttribute( 'disabled' ) ).toBe( true );
 	} );
 } );

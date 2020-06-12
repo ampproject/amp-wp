@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { useState, useMemo, useContext } from '@wordpress/element';
+import { useContext, useEffect, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Panel } from '@wordpress/components';
 
@@ -19,6 +19,7 @@ import { Nav } from './components/nav';
 import { Options } from './components/options-context-provider';
 import { Loading } from './components/loading';
 import { WizardUnsavedChangesWarning } from './components/unsaved-changes-warning';
+import { Navigation } from './components/navigation-context-provider';
 
 /**
  * State wrapper for the page component.
@@ -33,7 +34,10 @@ function Page( { children, exitLink } ) {
 	if ( fetchOptionsError ) {
 		return (
 			<p>
-				{ fetchOptionsError.message || __( 'There was an error loading the setup wizard.', 'amp' ) }
+				{ /* dangerouslySetInnerHTML reason: WordPress sometimes sends back HTML as error messages. */ }
+				<span
+					dangerouslySetInnerHTML={ { __html: fetchOptionsError.message || __( 'There was an error loading the setup wizard.', 'amp' ) } }
+				/>
 				{ ' ' }
 				<a href={ exitLink }>
 					{ __( 'Return to AMP Settings.', 'amp' ) }
@@ -50,16 +54,36 @@ function Page( { children, exitLink } ) {
 }
 
 /**
+ * Side effect wrapper for page component.
+ *
+ * @param {Object} props Component props.
+ * @param {?any} props.children Component children.
+ */
+function PageComponentSideEffects( { children } ) {
+	useEffect( () => {
+		document.body.scrollTop = 0;
+		document.documentElement.scrollTop = 0;
+	}, [] );
+
+	return children;
+}
+
+/**
  * Setup wizard root component.
  *
  * @param {Object} props Component props.
- * @param {Array} props.pages List of page configuration objects.
+ * @param {Array} props.exitLink Exit link.
  */
-export function SetupWizard( { exitLink, pages } ) {
-	const [ activePageIndex, setActivePageIndex ] = useState( 0 );
+export function SetupWizard( { exitLink } ) {
+	const { activePageIndex, currentPage: { title, PageComponent }, moveBack, moveForward, pages } = useContext( Navigation );
 	const { fetchOptionsError } = useContext( Options );
 
-	const { title, PageComponent } = useMemo( () => pages[ activePageIndex ], [ activePageIndex, pages ] );
+	const PageComponentWithSideEffects = useMemo( () => () => (
+		<PageComponentSideEffects>
+			<PageComponent />
+		</PageComponentSideEffects>
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	), [ PageComponent ] );
 
 	return (
 		<div className="amp-setup-container">
@@ -80,14 +104,15 @@ export function SetupWizard( { exitLink, pages } ) {
 							{ ! fetchOptionsError ? title : __( 'Error', 'amp' ) }
 						</h1>
 						<Page exitLink={ exitLink }>
-							<PageComponent />
+							<PageComponentWithSideEffects />
 						</Page>
 					</Panel>
 					<Nav
 						activePageIndex={ activePageIndex }
 						exitLink={ exitLink }
+						moveBack={ moveBack }
+						moveForward={ moveForward }
 						pages={ pages }
-						setActivePageIndex={ setActivePageIndex }
 					/>
 				</div>
 			</div>
@@ -98,9 +123,4 @@ export function SetupWizard( { exitLink, pages } ) {
 
 SetupWizard.propTypes = {
 	exitLink: PropTypes.string.isRequired,
-	pages: PropTypes.arrayOf(
-		PropTypes.shape( {
-			title: PropTypes.string.isRequired,
-		} ),
-	).isRequired,
 };

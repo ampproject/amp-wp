@@ -76,6 +76,15 @@ interface Option {
 	const THEME_SUPPORT = 'theme_support';
 
 	/**
+	 * The slug of the theme selected to be used on AMP pages in reader mode.
+	 *
+	 * Default value: classic
+	 *
+	 * @var string
+	 */
+	const READER_THEME = 'reader_theme';
+
+	/**
 	 * Version of the AMP plugin for which the options were last saved.
 	 *
 	 * This allows for recognizing updates and triggering update-specific logic.

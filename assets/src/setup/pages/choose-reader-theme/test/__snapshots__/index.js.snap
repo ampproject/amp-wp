@@ -1,0 +1,44 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ThemeCard matches snapshot 1`] = `
+<li
+  className="amp-wp-theme-card "
+>
+  <label
+    className="amp-wp-theme-card__label"
+    htmlFor="theme-card__theme-slug"
+  >
+    <img
+      alt="Theme name"
+      src="http://screenshot.jpeg"
+    />
+    <div
+      className="amp-wp-theme-card__label-header"
+    >
+      <input
+        checked={false}
+        id="theme-card__theme-slug"
+        onChange={[Function]}
+        type="radio"
+      />
+      <h2>
+        Theme name
+      </h2>
+    </div>
+    <p>
+      Theme card
+    </p>
+  </label>
+  <p
+    className="amp-wp-theme-card__theme-link"
+  >
+    <a
+      href="http://mysite.com"
+      rel="noreferrer noopener"
+      target="_blank"
+    >
+      Learn more
+    </a>
+  </p>
+</li>
+`;
