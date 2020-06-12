@@ -17,6 +17,7 @@ import './style.css';
 import { __ } from '@wordpress/i18n';
 import { Options } from '../../components/options-context-provider';
 import { Selectable } from '../../components/selectable';
+import { Phone } from '../../components/phone';
 
 /**
  * A selectable card showing a theme in a list of themes.
@@ -45,12 +46,12 @@ export function ThemeCard( { description, homepage, screenshotUrl, slug, name } 
 	return (
 		<Selectable className={ `amp-wp-theme-card` } direction="bottom" HTMLElement="li" selected={ readerTheme === slug }>
 			<label htmlFor={ id } className="amp-wp-theme-card__label">
-				<div className="phone">
+				<Phone>
 					<img
 						src={ screenshotUrl }
 						alt={ name }
 					/>
-				</div>
+				</Phone>
 				<div className="amp-wp-theme-card__label-header">
 					<input
 						type="radio"

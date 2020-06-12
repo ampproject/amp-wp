@@ -51,21 +51,3 @@
 .amp-wp-theme-card__theme-link {
 	margin-top: auto;
 }
-
-.phone {
-	background: #f1f1f1;
-	border-radius: 10px;
-	margin-bottom: 1rem;
-	padding: 12px;
-	position: relative;
-}
-
-.phone::before {
-	background: #e6e6e6;
-	border-radius: 3px;
-	content: "";
-	display: block;
-	height: 5px;
-	margin: 9px auto;
-	width: 43px;
-}
