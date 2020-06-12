@@ -288,10 +288,9 @@ class AMP_Options_Manager {
 			unset( $options[ Option::DISABLE_CSS_TRANSIENT_CACHING ] );
 		}
 
-		$options[ Option::SUPPRESSED_PLUGINS ] = self::validate_suppressed_plugins(
-			array_key_exists( Option::SUPPRESSED_PLUGINS, $new_options ) ? $new_options[ Option::SUPPRESSED_PLUGINS ] : [],
-			$options[ Option::SUPPRESSED_PLUGINS ]
-		);
+		if ( isset( $new_options[ Option::SUPPRESSED_PLUGINS ] ) ) {
+			$options[ Option::SUPPRESSED_PLUGINS ] = self::validate_suppressed_plugins( $new_options[ Option::SUPPRESSED_PLUGINS ], $options[ Option::SUPPRESSED_PLUGINS ] );
+		}
 
 		// Store the current version with the options so we know the format.
 		$options[ Option::VERSION ] = AMP__VERSION;
