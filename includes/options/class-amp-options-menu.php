@@ -492,8 +492,12 @@ class AMP_Options_Menu {
 			#suppressed-plugins-table summary {
 				user-select: none;
 				cursor: pointer;
+				line-height: 30px; /* To match .wp-core-ui select */
 			}
 			@media screen and (max-width: 782px) {
+				#suppressed-plugins-table summary {
+					line-height: 40px; /* To match .wp-core-ui select */
+				}
 				#suppressed-plugins-table {
 					display: table;
 				}
@@ -579,6 +583,7 @@ class AMP_Options_Menu {
 							</td>
 							<td class="column-details">
 								<?php if ( $is_suppressed ) : ?>
+									<p>
 									<?php if ( isset( $suppressed_plugins[ $plugin_slug ][ Option::SUPPRESSED_PLUGINS_TIMESTAMP ] ) ) : ?>
 										<?php
 										printf(
@@ -608,6 +613,7 @@ class AMP_Options_Menu {
 											<?php esc_html_e( 'Plugin updated since last suppressed.', 'amp' ); ?>
 										<?php endif; ?>
 									<?php endif; ?>
+									</p>
 								<?php elseif ( ! $is_suppressed && ! empty( $errors_by_sources['plugin'][ $plugin_slug ] ) ) : ?>
 									<?php self::render_validation_error_details( $errors_by_sources['plugin'][ $plugin_slug ] ); ?>
 								<?php endif ?>
