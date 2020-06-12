@@ -601,11 +601,29 @@ class AMP_Options_Menu {
 											sprintf(
 												'<time datetime="%s">%s</time>',
 												esc_attr( gmdate( 'c', $suppressed_plugins[ $plugin_slug ][ Option::SUPPRESSED_PLUGINS_TIMESTAMP ] ) ),
-												esc_html( gmdate( get_option( 'date_format' ), $suppressed_plugins[ $plugin_slug ][ Option::SUPPRESSED_PLUGINS_TIMESTAMP ] ) )
+												esc_html( date_i18n( get_option( 'date_format' ), $suppressed_plugins[ $plugin_slug ][ Option::SUPPRESSED_PLUGINS_TIMESTAMP ] ) )
 											)
 										);
 										?>
 									<?php endif; ?>
+
+									<?php if ( isset( $suppressed_plugins[ $plugin_slug ][ Option::SUPPRESSED_PLUGINS_USERNAME ] ) ) : ?>
+										<?php
+										$user = get_user_by( 'slug', $suppressed_plugins[ $plugin_slug ][ Option::SUPPRESSED_PLUGINS_USERNAME ] );
+										if ( $user instanceof WP_User ) {
+											if ( wp_get_current_user()->user_nicename === $user->user_nicename ) {
+												esc_html_e( 'Done by you.', 'amp' );
+											} else {
+												/* translators: %s is a user */
+												echo esc_html( sprintf( __( 'Done by %s.', 'amp' ), $user->display_name ) );
+											}
+										} else {
+											/* translators: %s is a user */
+											echo esc_html( sprintf( __( 'Done by %s.', 'amp' ), $suppressed_plugins[ $plugin_slug ][ Option::SUPPRESSED_PLUGINS_USERNAME ] ) );
+										}
+										?>
+									<?php endif; ?>
+
 									<?php if ( version_compare( $suppressed_plugins[ $plugin_slug ][ Option::SUPPRESSED_PLUGINS_LAST_VERSION ], $plugin['Version'], '!=' ) ) : ?>
 										<?php if ( $plugin['Version'] ) : ?>
 											<?php

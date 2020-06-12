@@ -106,6 +106,13 @@ interface Option {
 	const SUPPRESSED_PLUGINS_TIMESTAMP = 'timestamp';
 
 	/**
+	 * Suppressed plugins, username.
+	 *
+	 * @var string
+	 */
+	const SUPPRESSED_PLUGINS_USERNAME = 'username';
+
+	/**
 	 * Suppressed plugins, erroring URLs.
 	 *
 	 * @var string
