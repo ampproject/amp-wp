@@ -16,6 +16,7 @@ import PropTypes from 'prop-types';
 import './style.css';
 import { __ } from '@wordpress/i18n';
 import { Options } from '../../components/options-context-provider';
+import { Selectable } from '../../components/selectable';
 
 /**
  * A selectable card showing a theme in a list of themes.
@@ -42,7 +43,7 @@ export function ThemeCard( { description, homepage, screenshotUrl, slug, name } 
 	}, [ description ] );
 
 	return (
-		<li className={ `amp-wp-theme-card selectable selectable--bottom ${ readerTheme === slug ? 'selectable--selected' : '' }` }>
+		<Selectable className={ `amp-wp-theme-card` } direction="bottom" HTMLElement="li" selected={ readerTheme === slug }>
 			<label htmlFor={ id } className="amp-wp-theme-card__label">
 				<div className="phone">
 					<img
@@ -73,7 +74,7 @@ export function ThemeCard( { description, homepage, screenshotUrl, slug, name } 
 					{ __( 'Learn more', 'amp' ) }
 				</a>
 			</p>
-		</li>
+		</Selectable>
 	);
 }
 
