@@ -61,7 +61,7 @@ class Admin_Bar {
 		wp_enqueue_script(
 			'amp-qa-tester-admin-bar-script',
 			Plugin::get_asset_url( 'js/admin-bar.js' ),
-			$dependencies,
+			array_merge( [ 'admin-bar' ], $dependencies ),
 			$version,
 			true
 		);
@@ -70,7 +70,7 @@ class Admin_Bar {
 		wp_enqueue_style(
 			'amp-qa-tester-admin-bar-style',
 			Plugin::get_asset_url( 'css/admin-bar-compiled.css' ),
-			[],
+			[ 'admin-bar' ],
 			$version
 		);
 
