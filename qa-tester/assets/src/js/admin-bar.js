@@ -15,6 +15,7 @@ class AdminBar extends Component {
 	constructor( props ) {
 		super( props );
 
+		// Default build options to choose from.
 		const buildOptions = [
 			{
 				label: __( 'Latest release', 'amp-qa-tester' ),
@@ -43,6 +44,11 @@ class AdminBar extends Component {
 		clearTimeout( this.pageReloadTimeout );
 	}
 
+	/**
+	 * Fetches all open PRs that have build zips available for download.
+	 *
+	 * @return {Promise} Promise containing a list of PR items.
+	 */
 	getPullRequests() {
 		const url = new URL( 'https://api.github.com/search/issues' );
 		const params = {
@@ -59,6 +65,9 @@ class AdminBar extends Component {
 			.then( ( json ) => json.items || [] );
 	}
 
+	/**
+	 * Append to the default build options a list of PRs that have build zips available for download.
+	 */
 	addPullRequestOptions() {
 		// Retrieve the PRs from GitHub and append them to the list of builds above.
 		this.getPullRequests().then( ( results ) => {
@@ -76,6 +85,11 @@ class AdminBar extends Component {
 		} );
 	}
 
+	/**
+	 * Set the selected build option.
+	 *
+	 * @param {Event<HTMLSelectElement>} event Change event.
+	 */
 	handleChangeBuildOption( event ) {
 		const value = event.target.value;
 		const buildOption = this.state.buildOptions.find(
@@ -87,11 +101,19 @@ class AdminBar extends Component {
 		}
 	}
 
+	/**
+	 * Set whether a dev build is needed or not.
+	 *
+	 * @param {Event<HTMLInputElement>} event Change event.
+	 */
 	handleChangeDevBuild( event ) {
 		const checked = event.target.checked;
 		this.setState( { isDevBuild: checked } );
 	}
 
+	/**
+	 * Switches the AMP plugin to the selected build option.
+	 */
 	handleActivation() {
 		const { isDevBuild, buildOption } = this.state;
 		this.setState( { isSwitching: true } );
@@ -120,10 +142,15 @@ class AdminBar extends Component {
 			} );
 	}
 
-	showError( message = null ) {
+	/**
+	 * Display an error message.
+	 *
+	 * @param {string} message Message.
+	 */
+	showError( message = '' ) {
 		if ( ! message ) {
 			message = __(
-				'An unknown error occurred activating build',
+				'An unknown error occurred while switching build',
 				'amp-qa-tester'
 			);
 		}

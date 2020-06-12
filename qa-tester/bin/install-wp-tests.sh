@@ -21,7 +21,6 @@ WP_CORE_DIR=${WP_CORE_DIR-$TMPDIR/wordpress/}
 
 download() {
     if [ "$(command -v curl)" ]; then
-        #curl -s "$1" > "$2";
         # WordPress.org seems to block requests without proper user agent.
         curl -H "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (K HTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36" -s "$1" > "$2";
     elif [ "$(command -v wget)" ]; then

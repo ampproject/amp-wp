@@ -139,7 +139,7 @@ trait Version_Switcher {
 		if ( ! $moved ) {
 			return new WP_Error(
 				'amp_plugin_folder_not_correct',
-				'Failed to rename the AMP plugin folder before installing the plugin.',
+				__( 'Failed to rename the AMP plugin folder before installing the plugin.', 'amp-qa-tester' ),
 				[
 					'old_source' => $source,
 					'new_source' => $new_source,
