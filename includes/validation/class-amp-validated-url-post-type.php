@@ -1377,18 +1377,13 @@ class AMP_Validated_URL_Post_Type {
 				continue;
 			}
 
-			$validity = AMP_Validation_Manager::validate_url( $url );
+			$validity = AMP_Validation_Manager::validate_url_and_store( $url );
 			if ( is_wp_error( $validity ) ) {
 				$errors[] = AMP_Validation_Manager::get_validate_url_error_message( $validity->get_error_code(), $validity->get_error_message() );
 				continue;
 			}
 
-			$validation_errors = wp_list_pluck( $validity['results'], 'error' );
-			self::store_validation_errors(
-				$validation_errors,
-				$validity['url'],
-				wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets', 'php_fatal_error' ] )
-			);
+			$validation_errors      = wp_list_pluck( $validity['results'], 'error' );
 			$unaccepted_error_count = count(
 				array_filter(
 					$validation_errors,
@@ -1645,26 +1640,13 @@ class AMP_Validated_URL_Post_Type {
 				throw new Exception( 'missing_url' );
 			}
 
-			$validity = AMP_Validation_Manager::validate_url( $url );
+			$validity = AMP_Validation_Manager::validate_url_and_store( $url );
 			if ( is_wp_error( $validity ) ) {
 				throw new Exception( AMP_Validation_Manager::get_validate_url_error_message( $validity->get_error_code(), $validity->get_error_message() ) );
 			}
 
-			$errors = wp_list_pluck( $validity['results'], 'error' );
-			$stored = self::store_validation_errors(
-				$errors,
-				$validity['url'],
-				array_merge(
-					[
-						'invalid_url_post' => $post,
-					],
-					wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets', 'php_fatal_error' ] )
-				)
-			);
-			if ( is_wp_error( $stored ) ) {
-				throw new Exception( AMP_Validation_Manager::get_validate_url_error_message( $stored->get_error_code(), $stored->get_error_message() ) );
-			}
-			$redirect = get_edit_post_link( $stored, 'raw' );
+			$errors   = wp_list_pluck( $validity['results'], 'error' );
+			$redirect = get_edit_post_link( $validity['post_id'], 'raw' );
 
 			$error_count = count(
 				array_filter(
@@ -1718,23 +1700,13 @@ class AMP_Validated_URL_Post_Type {
 			return new WP_Error( 'missing_url' );
 		}
 
-		$validity = AMP_Validation_Manager::validate_url( $url );
+		$validity = AMP_Validation_Manager::validate_url_and_store( $url, $post );
 		if ( is_wp_error( $validity ) ) {
 			return $validity;
 		}
 
 		$validation_errors  = wp_list_pluck( $validity['results'], 'error' );
 		$validation_results = [];
-		self::store_validation_errors(
-			$validation_errors,
-			$validity['url'],
-			array_merge(
-				[
-					'invalid_url_post' => $post,
-				],
-				wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets', 'php_fatal_error' ] )
-			)
-		);
 		foreach ( $validation_errors  as $error ) {
 			$sanitized = AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error ); // @todo Consider re-using $validity['results'][x]['sanitized'], unless auto-sanitize is causing problem.
 

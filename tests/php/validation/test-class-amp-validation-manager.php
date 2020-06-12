@@ -2131,9 +2131,10 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test for validate_url().
+	 * Test for validate_url() and validate_url_and_store().
 	 *
 	 * @covers AMP_Validation_Manager::validate_url()
+	 * @covers AMP_Validation_Manager::validate_url_and_store()
 	 */
 	public function test_validate_url() {
 		add_theme_support( AMP_Theme_Support::SLUG );
@@ -2156,21 +2157,32 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$r = AMP_Validation_Manager::validate_url( home_url( '/' ) );
 		$this->assertInstanceOf( 'WP_Error', $r );
 		$this->assertEquals( 'white_screen_of_death', $r->get_error_code() );
+
+		$r2 = AMP_Validation_Manager::validate_url_and_store( home_url( '/' ) );
+		$this->assertInstanceOf( 'WP_Error', $r2 );
+		$this->assertEquals( $r->get_error_code(), $r2->get_error_code() );
 		remove_filter( 'pre_http_request', $filter );
 
 		// Test success.
-		$that          = $this;
-		$validated_url = home_url( '/foo/' );
-		$filter        = static function( $pre, $r, $url ) use ( $validation_errors, $validated_url, $that ) {
-			$that->assertStringStartsWith(
-				add_query_arg(
-					AMP_Validation_Manager::VALIDATE_QUERY_VAR,
-					'',
-					$validated_url
-				),
-				$url
-			);
-			$validation = [ 'results' => [] ];
+		$validated_url  = home_url( '/foo/' );
+		$php_error      = [
+			'type'    => E_ERROR,
+			'message' => 'Bad thing happened!',
+		];
+		$queried_object = [
+			'type' => 'post',
+			'id'   => 123,
+		];
+		$stylesheets = [ [ 'CSS!' ] ];
+		$filter        = function( $pre, $r, $url ) use ( $validation_errors, $php_error, $queried_object, $stylesheets ) {
+			$this->assertStringContains( AMP_Validation_Manager::VALIDATE_QUERY_VAR . '=', $url );
+
+			$validation = [
+				'results'         => [],
+				'stylesheets'     => $stylesheets,
+				'php_fatal_error' => $php_error,
+				'queried_object'  => $queried_object,
+			];
 			foreach ( $validation_errors as $error ) {
 				$sanitized            = false;
 				$validation['results'][] = compact( 'error', 'sanitized' );
@@ -2184,11 +2196,36 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 				],
 			];
 		};
+
 		add_filter( 'pre_http_request', $filter, 10, 3 );
 		$r = AMP_Validation_Manager::validate_url( $validated_url );
 		$this->assertInternalType( 'array', $r );
-		$this->assertEquals( $validated_url, $r['url'] );
 		$this->assertEquals( $validation_errors, wp_list_pluck( $r['results'], 'error' ) );
+		$this->assertEquals( $validated_url, $r['url'] );
+		$this->assertEquals( $stylesheets, $r['stylesheets'] );
+		$this->assertEquals( $php_error, $r['php_fatal_error'] );
+		$this->assertEquals( $queried_object, $r['queried_object'] );
+
+		// Now try the same, but store the results.
+		$r = AMP_Validation_Manager::validate_url_and_store( $validated_url );
+		$this->assertInternalType( 'array', $r );
+		$this->assertEquals( $validation_errors, wp_list_pluck( $r['results'], 'error' ) );
+		$this->assertEquals( $validated_url, $r['url'] );
+		$this->assertEquals( $stylesheets, $r['stylesheets'] );
+		$this->assertEquals( $php_error, $r['php_fatal_error'] );
+		$this->assertEquals( $queried_object, $r['queried_object'] );
+		$this->assertArrayHasKey( 'post_id', $r );
+		$this->assertEquals( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, get_post_type( $r['post_id'] ) );
+		$this->assertEquals( $r['url'], AMP_Validated_URL_Post_Type::get_url_from_post( $r['post_id'] ) );
+		$this->assertEquals( $php_error, json_decode( get_post_meta( $r['post_id'], '_amp_php_fatal_error', true ), true ) );
+		$this->assertEquals( $queried_object, get_post_meta( $r['post_id'], '_amp_queried_object', true ) );
+		$this->assertEquals( $stylesheets, json_decode( get_post_meta( $r['post_id'], '_amp_stylesheets', true ), true ) );
+
+		$updated_validated_url = home_url( '/bar/' );
+		$previous_post_id      = $r['post_id'];
+		$r = AMP_Validation_Manager::validate_url_and_store( $updated_validated_url, $previous_post_id );
+		$this->assertEquals( $previous_post_id, $r['post_id'] );
+		$this->assertEquals( $updated_validated_url, AMP_Validated_URL_Post_Type::get_url_from_post( $r['post_id'] ) );
 		remove_filter( 'pre_http_request', $filter );
 	}
 
