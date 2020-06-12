@@ -385,18 +385,9 @@ class AMP_Options_Manager {
 							$url = AMP_Validated_URL_Post_Type::get_url_from_post( $validated_url_posts[0] );
 						}
 					}
-					if ( empty( $url ) ) {
-						return;
+					if ( $url ) {
+						AMP_Validation_Manager::validate_url_and_store( $url );
 					}
-					$validity = AMP_Validation_Manager::validate_url( $url );
-					if ( is_wp_error( $validity ) ) {
-						return;
-					}
-					AMP_Validated_URL_Post_Type::store_validation_errors(
-						wp_list_pluck( $validity['results'], 'error' ),
-						$url,
-						wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets', 'php_fatal_error' ] )
-					);
 				}
 			);
 		}
@@ -705,7 +696,7 @@ class AMP_Options_Manager {
 		$notice_type     = 'updated';
 		$review_messages = [];
 		if ( $url && $has_theme_support ) {
-			$validation = AMP_Validation_Manager::validate_url( $url );
+			$validation = AMP_Validation_Manager::validate_url_and_store( $url );
 
 			if ( is_wp_error( $validation ) ) {
 				$review_messages[] = esc_html__( 'However, there was an error when checking the AMP validity for your site.', 'amp' );
@@ -727,11 +718,7 @@ class AMP_Options_Manager {
 					}
 				}
 
-				$invalid_url_post_id    = AMP_Validated_URL_Post_Type::store_validation_errors(
-					$errors,
-					$url,
-					wp_array_slice_assoc( $validation, [ 'queried_object', 'stylesheets', 'php_fatal_error' ] )
-				);
+				$invalid_url_post_id    = $validation['post_id'];
 				$invalid_url_screen_url = ! is_wp_error( $invalid_url_post_id ) ? get_edit_post_link( $invalid_url_post_id, 'raw' ) : null;
 
 				if ( $rejected_errors > 0 ) {
