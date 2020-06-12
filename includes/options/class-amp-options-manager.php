@@ -350,25 +350,21 @@ class AMP_Options_Manager {
 	 * @return bool Whether update succeeded.
 	 */
 	public static function update_option( $option, $value ) {
-		$amp_options = self::get_options();
-
-		$amp_options[ $option ] = $value;
-		return update_option( self::OPTION_NAME, $amp_options, false );
+		// Note: The registered sanitize_callback for this option will preserve any existing keys!
+		return update_option( self::OPTION_NAME, [ $option => $value ], false );
 	}
 
 	/**
 	 * Update plugin options.
 	 *
+	 * @see AMP_Options_Manager::validate_options()
+	 *
 	 * @param array $options Plugin option name.
 	 * @return bool Whether update succeeded.
 	 */
 	public static function update_options( $options ) {
-		$amp_options = array_merge(
-			self::get_options(),
-			$options
-		);
-
-		return update_option( self::OPTION_NAME, $amp_options, false );
+		// Note: The registered sanitize_callback for this option will preserve any existing keys!
+		return update_option( self::OPTION_NAME, $options, false );
 	}
 
 	/**
