@@ -29,6 +29,10 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
+		if ( ! amp_should_use_new_onboarding() ) {
+			$this->markTestSkipped( 'Requires WordPress 5.0.' );
+		}
+
 		do_action( 'rest_api_init' );
 		$this->controller = new AMP_Reader_Theme_REST_Controller( new AMP_Reader_Themes() );
 	}

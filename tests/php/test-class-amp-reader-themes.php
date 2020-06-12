@@ -34,6 +34,10 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
+		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
+			$this->markTestSkipped( 'Requires WordPress 5.0.' );
+		}
+
 		$this->add_reader_themes_request_filter();
 
 		switch_theme( 'twentytwenty' );

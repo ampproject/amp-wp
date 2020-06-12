@@ -31,6 +31,10 @@ class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
+		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
+			$this->markTestSkipped( 'Requires WordPress 5.0.' );
+		}
+
 		$this->add_reader_themes_request_filter();
 
 		do_action( 'rest_api_init' );
@@ -83,10 +87,6 @@ class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
 	 * @covers AMP_Options_REST_Controller::update_items.
 	 */
 	public function test_update_items() {
-		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
-			$this->markTestSkipped( 'Requires WordPress 5.0.' );
-		}
-
 		wp_set_current_user( 1 );
 
 		$request      = new WP_REST_Request( 'POST', '/amp/v1/options' );
