@@ -18,10 +18,18 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	use AssertContainsCompatibility;
 
 	/**
+	 * Whether the external object cache was enabled.
+	 *
+	 * @var bool
+	 */
+	private $was_wp_using_ext_object_cache;
+
+	/**
 	 * Set up.
 	 */
 	public function setUp() {
 		parent::setUp();
+		$this->was_wp_using_ext_object_cache = $GLOBALS['_wp_using_ext_object_cache'];
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		delete_option( AMP_Options_Manager::OPTION_NAME ); // Make sure default reader mode option does not override theme support being added.
 	}
@@ -31,6 +39,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 */
 	public function tearDown() {
 		parent::tearDown();
+		$GLOBALS['_wp_using_ext_object_cache'] = $this->was_wp_using_ext_object_cache;
 		unregister_post_type( 'foo' );
 	}
 
@@ -297,12 +306,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				],
 				AMP_Theme_Support::STANDARD_MODE_SLUG,
 			],
-			'standard_paired_false'                => [
-				[
-					'paired' => false,
-				],
-				AMP_Theme_Support::STANDARD_MODE_SLUG,
-			],
 			'standard_no_args'                     => [
 				[],
 				AMP_Theme_Support::STANDARD_MODE_SLUG,
@@ -314,7 +317,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 					Option::THEME_SUPPORT => 'native',
 				],
 			],
-			'standard_via_native'                  => [
+			'standard_via_paired'                  => [
 				null,
 				AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
 				[

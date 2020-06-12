@@ -229,7 +229,7 @@ class AMP_Options_Manager {
 		}
 
 		// Validate analytics.
-		if ( isset( $new_options[ Option::ANALYTICS ] ) ) {
+		if ( isset( $new_options[ Option::ANALYTICS ] ) && $new_options[ Option::ANALYTICS ] !== $options[ Option::ANALYTICS ] ) {
 			foreach ( $new_options[ Option::ANALYTICS ] as $id => $data ) {
 
 				// Check save/delete pre-conditions and proceed if correct.
@@ -350,21 +350,25 @@ class AMP_Options_Manager {
 	 * @return bool Whether update succeeded.
 	 */
 	public static function update_option( $option, $value ) {
-		// Note: The registered sanitize_callback for this option will preserve any existing keys!
-		return update_option( self::OPTION_NAME, [ $option => $value ], false );
+		$amp_options = self::get_options();
+
+		$amp_options[ $option ] = $value;
+		return update_option( self::OPTION_NAME, $amp_options, false );
 	}
 
 	/**
 	 * Update plugin options.
 	 *
-	 * @see AMP_Options_Manager::validate_options()
-	 *
 	 * @param array $options Plugin option name.
 	 * @return bool Whether update succeeded.
 	 */
 	public static function update_options( $options ) {
-		// Note: The registered sanitize_callback for this option will preserve any existing keys!
-		return update_option( self::OPTION_NAME, $options, false );
+		$amp_options = array_merge(
+			self::get_options(),
+			$options
+		);
+
+		return update_option( self::OPTION_NAME, $amp_options, false );
 	}
 
 	/**
