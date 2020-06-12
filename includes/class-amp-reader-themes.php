@@ -202,6 +202,14 @@ final class AMP_Reader_Themes {
 		$reader_themes = array_map(
 			static function ( $theme ) use ( $keys ) {
 				return array_merge(
+					array_reduce( // Provide empty defaults to make sure all keys are present.
+						$keys,
+						function( $result, $key ) {
+							$result[ $key ] = in_array( $key, [ 'requires', 'requires_php' ], true ) ? false : '';
+							return $result;
+						},
+						[]
+					),
 					wp_array_slice_assoc( (array) $theme, $keys ),
 					[ 'screenshot_url' => amp_get_asset_url( "images/reader-themes/{$theme->slug}.png" ) ]
 				);
