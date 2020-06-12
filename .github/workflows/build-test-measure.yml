@@ -216,7 +216,7 @@ jobs:
         id: get-comment-body
         # Setting a multi-line output requires escaping line-feeds. See <https://github.community/t/set-output-truncates-multiline-strings/16852/3>.
         run: |
-          body="Plugin builds for ${{ github.sha }} are ready :bellhop_bell:!
+          body="Plugin builds for ${{ github.event.pull_request.head.sha }} are ready :bellhop_bell:!
           - Download [development build](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/dev/amp.zip)
           - Download [production build](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/prod/amp.zip)"
           body="${body//$'\n'/'%0A'}"
