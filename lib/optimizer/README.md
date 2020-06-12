@@ -33,7 +33,7 @@ The AMP Optimizer is a `AmpProject\Optimizer\TransformationEngine` object that s
 
 During the process, errors might occur that make parts of the optimization impossible. These are collected within an `AmpProject\Optimizer\ErrorCollection` object that you can then iterate over to find out more and provide feedback as needed.
 
-![Diagram showing the conceptual parts of the AMP Optimizer](https://via.placeholder.com/1200x400.png?text=Conceptual overview diagram)
+![Diagram showing the conceptual parts of the AMP Optimizer](https://via.placeholder.com/1200x400.png?text=Conceptual%20overview%20diagram)
 
 ## Installation
 
