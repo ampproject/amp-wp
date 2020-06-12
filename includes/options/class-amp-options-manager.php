@@ -308,13 +308,10 @@ class AMP_Options_Manager {
 	private static function validate_suppressed_plugins( $posted_suppressed_plugins, $old_option ) {
 		$option = $old_option;
 
-		$plugins = PluginRegistry::get_plugins( true );
-
-		$errors_by_source = AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source();
-
-		$erroring_urls_by_frequency = [];
-
-		$changes = 0;
+		$plugins           = PluginRegistry::get_plugins( true );
+		$errors_by_source  = AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source();
+		$urls_by_frequency = [];
+		$changes           = 0;
 		foreach ( $posted_suppressed_plugins as $plugin_slug => $suppressed ) {
 			if ( ! isset( $plugins[ $plugin_slug ] ) ) {
 				unset( $option[ $plugin_slug ] );
@@ -327,10 +324,10 @@ class AMP_Options_Manager {
 				// Gather the URLs on which the error occurred, keeping track of the frequency so that we can use the URL with the most errors to re-validate.
 				if ( ! empty( $option[ $plugin_slug ][ Option::SUPPRESSED_PLUGINS_ERRORING_URLS ] ) ) {
 					foreach ( $option[ $plugin_slug ][ Option::SUPPRESSED_PLUGINS_ERRORING_URLS ] as $url ) {
-						if ( ! isset( $erroring_urls_by_frequency[ $url ] ) ) {
-							$erroring_urls_by_frequency[ $url ] = 0;
+						if ( ! isset( $urls_by_frequency[ $url ] ) ) {
+							$urls_by_frequency[ $url ] = 0;
 						}
-						$erroring_urls_by_frequency[ $url ]++;
+						$urls_by_frequency[ $url ]++;
 					}
 				}
 
@@ -368,11 +365,11 @@ class AMP_Options_Manager {
 		if ( $changes > 0 ) {
 			add_action(
 				'update_option_' . self::OPTION_NAME,
-				static function () use ( $erroring_urls_by_frequency ) {
+				static function () use ( $urls_by_frequency ) {
 					$url = null;
-					if ( count( $erroring_urls_by_frequency ) > 0 ) {
-						arsort( $erroring_urls_by_frequency );
-						$url = key( $erroring_urls_by_frequency );
+					if ( count( $urls_by_frequency ) > 0 ) {
+						arsort( $urls_by_frequency );
+						$url = key( $urls_by_frequency );
 					} else {
 						$validated_url_posts = get_posts(
 							[
