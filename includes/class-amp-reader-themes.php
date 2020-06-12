@@ -98,11 +98,11 @@ final class AMP_Reader_Themes {
 		 *     }
 		 * ]
 		 */
-		$themes = array_filter( (array) apply_filters( 'amp_reader_themes', $themes ) );
+		$themes = (array) apply_filters( 'amp_reader_themes', $themes );
 
 		$themes = array_filter(
 			$themes,
-			function( $theme ) {
+			static function( $theme ) {
 				return is_array( $theme ) && ! empty( $theme ) && ! empty( $theme['screenshot_url'] ); // Screenshots are required.
 			}
 		);
@@ -202,14 +202,7 @@ final class AMP_Reader_Themes {
 		$reader_themes = array_map(
 			static function ( $theme ) use ( $keys ) {
 				return array_merge(
-					array_reduce( // Provide empty defaults to make sure all keys are present.
-						$keys,
-						function( $result, $key ) {
-							$result[ $key ] = in_array( $key, [ 'requires', 'requires_php' ], true ) ? false : '';
-							return $result;
-						},
-						[]
-					),
+					array_fill_keys( $keys, '' ), // Provide empty defaults to make sure all keys are present.
 					wp_array_slice_assoc( (array) $theme, $keys ),
 					[ 'screenshot_url' => amp_get_asset_url( "images/reader-themes/{$theme->slug}.png" ) ]
 				);

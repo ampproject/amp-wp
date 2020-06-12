@@ -57,7 +57,7 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 	public function test_get_items() {
 		$this->assertEquals( 10, count( $this->controller->get_items( new WP_REST_Request( 'GET', 'amp/v1' ) )->data ) );
 
-		$filter = function() {
+		$filter = static function() {
 			return [
 				[
 					'name'           => 'My theme',
