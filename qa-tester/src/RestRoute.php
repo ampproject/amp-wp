@@ -1,6 +1,6 @@
 <?php
 /**
- * Class Rest_Route.
+ * Class RestRoute.
  *
  * @package AmpProject\AmpWP_QA_Tester
  */
@@ -16,9 +16,9 @@ use WP_REST_Server;
  *
  * @since 1.0.0
  */
-class Rest_Route {
+class RestRoute {
 
-	use Version_Switcher;
+	use VersionSwitcher;
 
 	const REST_ROOT = 'amp-qa-tester/v1';
 

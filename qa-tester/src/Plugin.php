@@ -30,7 +30,7 @@ class Plugin {
 	 * Admin Bar.
 	 *
 	 * @since 1.0.0
-	 * @var Admin_Bar|null
+	 * @var AdminBar|null
 	 */
 	public $admin_bar;
 
@@ -38,7 +38,7 @@ class Plugin {
 	 * Rest Route.
 	 *
 	 * @since 1.0.0
-	 * @var Rest_Route|null
+	 * @var RestRoute|null
 	 */
 	public $rest_route;
 
@@ -59,8 +59,8 @@ class Plugin {
 	 */
 	public function __construct( $main_file ) {
 		$this->main_file  = $main_file;
-		$this->admin_bar  = new Admin_Bar();
-		$this->rest_route = new Rest_Route();
+		$this->admin_bar  = new AdminBar();
+		$this->rest_route = new RestRoute();
 	}
 
 	/**

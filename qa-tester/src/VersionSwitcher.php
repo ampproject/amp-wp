@@ -1,6 +1,6 @@
 <?php
 /**
- * Trait Version_Switcher.
+ * Trait VersionSwitcher.
  *
  * @package AmpProject\AmpWP_QA_Tester
  */
@@ -17,7 +17,7 @@ use WP_Filesystem_Base;
  *
  * @since 1.0.0
  */
-trait Version_Switcher {
+trait VersionSwitcher {
 
 	/**
 	 * Update the plugin to a specific version by zip URL.

@@ -1,6 +1,6 @@
 <?php
 /**
- * Class Admin_Bar.
+ * Class AdminBar.
  *
  * @package AmpProject\AmpWP_QA_Tester
  */
@@ -12,7 +12,7 @@ namespace AmpProject\AmpWP_QA_Tester;
  *
  * @since 1.0.0
  */
-class Admin_Bar {
+class AdminBar {
 
 	/**
 	 * Build ID of the currently installed plugin version.
