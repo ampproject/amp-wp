@@ -14,7 +14,7 @@ export const getPullRequestsWithBuilds = () => {
 	const url = new URL( `${ baseUrl }/search/issues` );
 	const params = {
 		/* eslint-disable-next-line prettier/prettier */
-		q: 'repo:ampproject/amp-wp is:pr is:open commenter:app/github-actions in:comments "Download development build"',
+		q: 'repo:ampproject/amp-wp is:pr commenter:app/github-actions in:comments "Download development build"',
 		sort: 'created',
 		order: 'desc',
 	};
