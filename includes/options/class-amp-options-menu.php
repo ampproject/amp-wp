@@ -475,6 +475,9 @@ class AMP_Options_Menu {
 			#suppressed-plugins-table .column-plugin {
 				width: 45%;
 			}
+			#suppressed-plugins-table .column-plugin .plugin-author-uri {
+				margin-top: 0;
+			}
 			#suppressed-plugins-table .column-details {
 				width: 50%;
 			}
@@ -561,20 +564,26 @@ class AMP_Options_Menu {
 									</summary>
 								<?php endif; ?>
 
-								<?php
-								if ( ! empty( $plugin['Author'] ) ) {
-									if ( ! empty( $plugin['AuthorURI'] ) ) {
-										$author = sprintf( '<a href="%s" target="_blank">%s</a>', esc_url( $plugin['AuthorURI'] ), esc_html( $plugin['Author'] ) );
-									} else {
-										$author = esc_html( $plugin['Author'] );
-									}
-									/* translators: %s is author name */
-									echo '<p>' . wp_kses_post( sprintf( __( 'By %s', 'amp' ), $author ) ) . '</p>';
-								}
-								?>
+								<?php if ( ! empty( $plugin['Author'] ) ) : ?>
+									<p class="plugin-author-uri">
+										<small>
+										<?php
+										if ( ! empty( $plugin['AuthorURI'] ) ) {
+											$author = sprintf( '<a href="%s" target="_blank">%s</a>', esc_url( $plugin['AuthorURI'] ), esc_html( $plugin['Author'] ) );
+										} else {
+											$author = esc_html( $plugin['Author'] );
+										}
+										/* translators: %s is author name */
+										echo wp_kses_post( sprintf( __( 'By %s', 'amp' ), $author ) );
+										?>
+										</small>
+									</p>
+								<?php endif; ?>
 
 								<?php if ( ! empty( $plugin['Description'] ) ) : ?>
-									<p><?php echo wp_kses_post( $plugin['Description'] ); ?></p>
+									<div class="plugin-description">
+										<?php echo wp_kses_post( wpautop( $plugin['Description'] ) ); ?>
+									</div>
 								<?php endif; ?>
 
 								<?php if ( $needs_details ) : ?>
