@@ -21,7 +21,6 @@ class Plugin {
 	/**
 	 * Main instance of the plugin.
 	 *
-	 * @since 1.0.0
 	 * @var Plugin|null
 	 */
 	protected static $instance;
@@ -29,7 +28,6 @@ class Plugin {
 	/**
 	 * Admin Bar.
 	 *
-	 * @since 1.0.0
 	 * @var AdminBar|null
 	 */
 	public $admin_bar;
@@ -37,7 +35,6 @@ class Plugin {
 	/**
 	 * Rest Route.
 	 *
-	 * @since 1.0.0
 	 * @var RestRoute|null
 	 */
 	public $rest_route;
@@ -45,15 +42,12 @@ class Plugin {
 	/**
 	 * Absolute path to the plugin main file.
 	 *
-	 * @since 1.0.0
 	 * @var string
 	 */
 	protected $main_file;
 
 	/**
 	 * Sets the plugin main file.
-	 *
-	 * @since 1.0.0
 	 *
 	 * @param string $main_file Absolute path to the plugin main file.
 	 */
@@ -65,8 +59,6 @@ class Plugin {
 
 	/**
 	 * Registers the plugin with WordPress.
-	 *
-	 * @since 1.0.0
 	 */
 	public function register() {
 		$this->admin_bar->register();
@@ -90,8 +82,6 @@ class Plugin {
 	/**
 	 * Gets the absolute path for a path relative to the plugin directory.
 	 *
-	 * @since 1.0.0
-	 *
 	 * @param string $relative_path Optional. Relative path. Default '/'.
 	 * @return string Absolute path.
 	 */
@@ -101,8 +91,6 @@ class Plugin {
 
 	/**
 	 * Loads the plugin main instance and initializes it.
-	 *
-	 * @since 1.0.0
 	 *
 	 * @param string $main_file Absolute path to the plugin main file.
 	 * @return bool True if the plugin main instance could be loaded, false otherwise.

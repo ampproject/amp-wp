@@ -33,8 +33,6 @@ class AdminBar {
 
 	/**
 	 * Registers functionality through WordPress hooks.
-	 *
-	 * @since 1.0.0
 	 */
 	public function register() {
 		add_action( 'admin_bar_menu', [ $this, 'add_menu_button' ], 99 );
@@ -43,8 +41,6 @@ class AdminBar {
 
 	/**
 	 * Enqueue the plugin assets.
-	 *
-	 * @since 1.0.0
 	 */
 	public function enqueue_plugin_assets() {
 		// Only active if the admin bar is showing.
@@ -80,7 +76,6 @@ class AdminBar {
 	/**
 	 * Render the admin bar button.
 	 *
-	 * @since 1.0.0
 	 *
 	 * @param object $wp_admin_bar The WP AdminBar object.
 	 */
@@ -98,7 +93,7 @@ class AdminBar {
 		$menu_title = sprintf( __( 'Using AMP: %s', 'amp-qa-tester' ), $on );
 		$args       = [
 			'id'     => 'amp-qa-tester',
-			'title'  => '<span class="amp-qa-tester-adminbar__icon"></span> <span class="amp-qa-tester-adminbar__label">' . $menu_title . '</span>',
+			'title'  => '<span class="amp-qa-tester-adminbar__label">' . $menu_title . '</span>',
 			'href'   => '#',
 			'meta'   => [
 				'class' => 'menupop amp-qa-tester-adminbar',
@@ -112,8 +107,6 @@ class AdminBar {
 
 	/**
 	 * Return the admin bar content markup.
-	 *
-	 * @since 1.0.0
 	 *
 	 * @return string HTML markup.
 	 */

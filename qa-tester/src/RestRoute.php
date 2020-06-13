@@ -24,8 +24,6 @@ class RestRoute {
 
 	/**
 	 * Registers functionality through WordPress hooks.
-	 *
-	 * @since 1.0.0
 	 */
 	public function register() {
 		add_action( 'rest_api_init', [ $this, 'register_route' ] );
@@ -33,8 +31,6 @@ class RestRoute {
 
 	/**
 	 * Registers the `/switch` route that is used to switch the plugin version.
-	 *
-	 * @since 1.0.0
 	 */
 	public function register_route() {
 		$route_uri = '/switch';
