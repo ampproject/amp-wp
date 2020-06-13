@@ -20,7 +20,7 @@ Features and capabilities provided by the plugin include:
 - **Core Theme Support**: enabling AMP compatibility for all core themes, from Twenty Ten all the way through Twenty Twenty.
 - **Compatibility Tool**: when automatic conversion of markup to AMP is not possible, debug AMP validation errors with detailed information including the invalid markup and the specific components responsible on site (e.g theme, plugin, embed); validation errors are shown contextually with their respective blocks in the editor.
 - **CSS Tree Shaking**: automatically remove the majority of unused CSS to bring the total under AMP's 75KB limit; when the total after tree shaking is still over this limit, prioritization is used so that the all-important theme stylesheet important is retained, leaving less important ones to be excluded (e.g. print styles).
-- **Serverside Rendering**: full integration of the AMP Optimizer library that provides automated serverside rendering of AMP markup, drastically improving your [LCP](https://web.dev/lcp/).
+- **Server-side Rendering**: full integration of the [AMP Optimizer library](https://github.com/ampproject/amp-toolbox/tree/master/packages/optimizer) providing automated server-side rendering of AMP pages, drastically improving the [Last Contenful Paint](https://web.dev/lcp/) metric.
 
 Please note that the [Stories](https://amp.dev/about/stories) experience has been removed from the AMP plugin in favor of the feature being released as a standalone plugin. It will be available soon!
 
