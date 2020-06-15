@@ -15,8 +15,6 @@ import PropTypes from 'prop-types';
  */
 import './style.css';
 import { __ } from '@wordpress/i18n';
-import { Tooltip, Button } from '@wordpress/components';
-import { Icon, info } from '@wordpress/icons';
 import { Options } from '../../components/options-context-provider';
 import { Selectable } from '../../components/selectable';
 import { Phone } from '../../components/phone';
