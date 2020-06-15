@@ -84,7 +84,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 			setFetchingOptions( true );
 
 			try {
-				const fetchedOptions = await apiFetch( { url: optionsRestEndpoint + 'awefawefwaef' } );
+				const fetchedOptions = await apiFetch( { url: optionsRestEndpoint } );
 
 				if ( true === hasUnmounted.current ) {
 					return;
