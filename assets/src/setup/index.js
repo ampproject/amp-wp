@@ -15,7 +15,6 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import './style.css';
-import { withNotices } from '@wordpress/components';
 import { PAGES } from './pages';
 import { OptionsContextProvider } from './components/options-context-provider';
 import { SetupWizard } from './setup-wizard';
