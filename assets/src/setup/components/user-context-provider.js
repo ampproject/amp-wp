@@ -9,6 +9,11 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import PropTypes from 'prop-types';
 
+/**
+ * Internal dependencies
+ */
+import { useError } from '../utils/use-error';
+
 export const User = createContext();
 
 /**
@@ -19,27 +24,24 @@ export const User = createContext();
  * @param {string} props.optionsKey The key of the option to use from the settings endpoint.
  * @param {string} props.optionsRestEndpoint REST endpoint to retrieve options.
  */
-export function UserContextProvider( {
-	children, userOptionsKey, userOptionDeveloperTools, userRestEndpoint } ) {
+export function UserContextProvider( { children, userOptionDeveloperTools, userRestEndpoint } ) {
 	const [ user, setUser ] = useState( null );
 	const [ fetchingUser, setFetchingUser ] = useState( false );
-	const [ fetchUserError, setFetchUserError ] = useState( null );
 	const [ savingUserOptions, setSavingUserOptions ] = useState( false );
-	const [ saveUserOptionsError, setSaveUserOptionsError ] = useState( null );
 	const [ hasUserOptionsChanges, setHasUserOptionsChanges ] = useState( false );
 	const [ hasSavedUserOptions, setHasSavedUserOptions ] = useState( false );
 
+	const { setError } = useError();
+
 	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
 	const hasUnmounted = useRef( false );
-
-	const options = user && 'meta' in user ? user.meta[ userOptionsKey ] : {};
-	const developerToolsOption = options[ userOptionDeveloperTools ];
+	const developerToolsOption = user ? user.meta[ userOptionDeveloperTools ] : null;
 
 	/**
 	 * Fetch user options on mount.
 	 */
 	useEffect( () => {
-		if ( ! userRestEndpoint || user || fetchingUser || fetchUserError ) {
+		if ( ! userRestEndpoint || user || fetchingUser ) {
 			return;
 		}
 
@@ -58,16 +60,13 @@ export function UserContextProvider( {
 
 				setUser( fetchedUser );
 			} catch ( e ) {
-				if ( true === hasUnmounted.current ) {
-					return;
-				}
-
-				setFetchUserError( e );
+				setError( e );
+				return;
 			}
 
 			setFetchingUser( false );
 		} )();
-	}, [ user, fetchingUser, fetchUserError, userRestEndpoint ] );
+	}, [ user, fetchingUser, setError, userRestEndpoint ] );
 
 	/**
 	 * Sends user options to the REST endpoint to be saved.
@@ -83,16 +82,13 @@ export function UserContextProvider( {
 				return;
 			}
 		} catch ( e ) {
-			if ( true === hasUnmounted.current ) {
-				return;
-			}
-
-			setSaveUserOptionsError( e );
+			setError( e );
+			return;
 		}
 
 		setSavingUserOptions( false );
 		setHasSavedUserOptions( true );
-	}, [ user, setSaveUserOptionsError, setSavingUserOptions, setHasSavedUserOptions, userRestEndpoint ] );
+	}, [ user, setError, setSavingUserOptions, setHasSavedUserOptions, userRestEndpoint ] );
 
 	useEffect( () => () => {
 		hasUnmounted.current = true;
@@ -112,10 +108,7 @@ export function UserContextProvider( {
 			...user,
 			meta: {
 				...user.meta,
-				[ userOptionsKey ]: {
-					...user.meta[ userOptionsKey ],
-					[ userOptionDeveloperTools ]: newValue,
-				},
+				[ userOptionDeveloperTools ]: newValue,
 			},
 		} );
 
@@ -128,11 +121,9 @@ export function UserContextProvider( {
 				{
 					developerToolsOption,
 					fetchingUser,
-					fetchUserError,
 					hasSavedUserOptions,
 					hasUserOptionsChanges,
 					saveUserOptions,
-					saveUserOptionsError,
 					savingUserOptions,
 					setDeveloperToolsOption,
 				}
@@ -146,6 +137,5 @@ export function UserContextProvider( {
 UserContextProvider.propTypes = {
 	children: PropTypes.any,
 	userOptionDeveloperTools: PropTypes.string.isRequired,
-	userOptionsKey: PropTypes.string.isRequired,
 	userRestEndpoint: PropTypes.string.isRequired,
 };
