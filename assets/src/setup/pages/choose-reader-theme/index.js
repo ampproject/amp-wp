@@ -19,7 +19,7 @@ import { ThemeCard } from './theme-card';
 export function ChooseReaderTheme() {
 	const { canGoForward, setCanGoForward } = useContext( Navigation );
 	const { options } = useContext( Options );
-	const { fetchingThemes, themes, themeFetchError } = useContext( ReaderThemes );
+	const { fetchingThemes, themes } = useContext( ReaderThemes );
 
 	const { reader_theme: readerTheme } = options || {};
 
@@ -33,14 +33,6 @@ export function ChooseReaderTheme() {
 			}
 		}
 	}, [ canGoForward, setCanGoForward, readerTheme, themes ] );
-
-	if ( themeFetchError ) {
-		return (
-			<p>
-				{ __( 'There was an error fetching theme data.', 'amp' ) }
-			</p>
-		);
-	}
 
 	if ( fetchingThemes ) {
 		return (
