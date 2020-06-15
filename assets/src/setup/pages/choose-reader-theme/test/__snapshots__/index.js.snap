@@ -2,7 +2,7 @@
 
 exports[`ThemeCard matches snapshot 1`] = `
 <li
-  className="amp-wp-theme-card selectable selectable--bottom"
+  className="amp-wp-theme-card selectable  selectable--bottom"
 >
   <label
     className="amp-wp-theme-card__label"

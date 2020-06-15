@@ -23,8 +23,6 @@ export function Selectable( { children, className, direction, HTMLElement, selec
 		<HTMLElement
 			className={
 				`${ className } selectable ${ selected ? 'selectable--selected' : '' } selectable--${ direction }`
-					.replace( /  /g, ' ' )
-					.trim()
 			}
 			{ ...props }
 		>

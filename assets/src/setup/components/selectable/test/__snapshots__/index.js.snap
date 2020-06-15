@@ -2,7 +2,7 @@
 
 exports[`Selectable matches snapshot 1`] = `
 <div
-  className="selectable selectable--selected selectable--left"
+  className=" selectable selectable--selected selectable--left"
 >
   <div>
     Component children
