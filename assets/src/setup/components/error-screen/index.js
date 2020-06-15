@@ -28,7 +28,7 @@ export function ErrorScreen( { error, exitLink } ) {
 					/>
 					{ ' ' }
 					<a href={ exitLink }>
-						{ __( 'Return to AMP Settings.', 'amp' ) }
+						{ __( 'Return to AMP settings.', 'amp' ) }
 					</a>
 				</p>
 			</Panel>
