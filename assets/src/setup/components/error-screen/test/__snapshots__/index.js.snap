@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ErrorScreen matches snapshot 1`] = `
+<div
+  className="error-screen-container"
+>
+  <div
+    className="error-screen components-panel"
+  >
+    <h1>
+      The setup wizard has experienced an error.
+    </h1>
+    <p>
+      <span
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "The application failed",
+          }
+        }
+      />
+       
+      <a
+        href="http://my-exit-link.com"
+      >
+        Return to AMP settings.
+      </a>
+    </p>
+  </div>
+</div>
+`;
