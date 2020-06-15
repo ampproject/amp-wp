@@ -2,16 +2,20 @@
 
 exports[`ThemeCard matches snapshot 1`] = `
 <li
-  className="amp-wp-theme-card "
+  className="amp-wp-theme-card selectable selectable--bottom"
 >
   <label
     className="amp-wp-theme-card__label"
     htmlFor="theme-card__theme-slug"
   >
-    <img
-      alt="Theme name"
-      src="http://screenshot.jpeg"
-    />
+    <div
+      className="phone"
+    >
+      <img
+        alt="Theme name"
+        src="http://screenshot.jpeg"
+      />
+    </div>
     <div
       className="amp-wp-theme-card__label-header"
     >

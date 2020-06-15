@@ -18,10 +18,18 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	use AssertContainsCompatibility;
 
 	/**
+	 * Whether the external object cache was enabled.
+	 *
+	 * @var bool
+	 */
+	private $was_wp_using_ext_object_cache;
+
+	/**
 	 * Set up.
 	 */
 	public function setUp() {
 		parent::setUp();
+		$this->was_wp_using_ext_object_cache = $GLOBALS['_wp_using_ext_object_cache'];
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		delete_option( AMP_Options_Manager::OPTION_NAME ); // Make sure default reader mode option does not override theme support being added.
 	}
@@ -31,6 +39,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 */
 	public function tearDown() {
 		parent::tearDown();
+		$GLOBALS['_wp_using_ext_object_cache'] = $this->was_wp_using_ext_object_cache;
 		unregister_post_type( 'foo' );
 	}
 
@@ -48,7 +57,9 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 */
 	public function test_init() {
 		AMP_Options_Manager::init();
-		$this->assertEquals( 10, has_action( 'update_option_' . AMP_Options_Manager::OPTION_NAME, [ 'AMP_Options_Manager', 'maybe_flush_rewrite_rules' ] ) );
+		$this->assertEquals( 10, has_action( 'admin_notices', [ AMP_Options_Manager::class, 'render_welcome_notice' ] ) );
+		$this->assertEquals( 10, has_action( 'admin_notices', [ AMP_Options_Manager::class, 'render_php_css_parser_conflict_notice' ] ) );
+		$this->assertEquals( 10, has_action( 'admin_notices', [ AMP_Options_Manager::class, 'insecure_connection_notice' ] ) );
 	}
 
 	/**
@@ -61,31 +72,8 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		AMP_Options_Manager::init();
 		$registered_settings = get_registered_settings();
 		$this->assertArrayHasKey( AMP_Options_Manager::OPTION_NAME, $registered_settings );
-		$this->assertEquals( 'object', $registered_settings[ AMP_Options_Manager::OPTION_NAME ]['type'] );
-	}
-
-	/**
-	 * Test for the rest_get_options method.
-	 *
-	 * @covers AMP_Options_Manager::rest_get_options()
-	 */
-	public function test_rest_get_options() {
-		$defaults = [ // Copied from protected property.
-			Option::THEME_SUPPORT           => AMP_Theme_Support::READER_MODE_SLUG,
-			Option::SUPPORTED_POST_TYPES    => [ 'post' ],
-			Option::ANALYTICS               => [],
-			Option::ALL_TEMPLATES_SUPPORTED => true,
-			Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
-			Option::VERSION                 => AMP__VERSION,
-			Option::READER_THEME            => 'classic',
-		];
-
-		// Confirm unrelated options are unchanged.
-		$test_data = [ 'key' => 'value' ];
-		$this->assertEquals( $test_data, AMP_Options_Manager::rest_get_options( $test_data, 'some-unrelated-option' ) );
-
-		// Defaults should be returned.
-		$this->assertEquals( $defaults, AMP_Options_Manager::rest_get_options( null, 'amp-options' ) );
+		$this->assertEquals( 'array', $registered_settings[ AMP_Options_Manager::OPTION_NAME ]['type'] );
+		$this->assertEquals( 10, has_action( 'update_option_' . AMP_Options_Manager::OPTION_NAME, [ 'AMP_Options_Manager', 'maybe_flush_rewrite_rules' ] ) );
 	}
 
 	/**
@@ -276,6 +264,24 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertArrayNotHasKey( $id, $entries );
 	}
 
+	/**
+	 * Tests the update_options method.
+	 *
+	 * @covers AMP_Options_Manager::update_options
+	 */
+	public function test_update_options() {
+		// Confirm updating multple entries at once works.
+		AMP_Options_Manager::update_options(
+			[
+				Option::THEME_SUPPORT => 'reader',
+				Option::READER_THEME  => 'twentysixteen',
+			]
+		);
+
+		$this->assertEquals( 'reader', AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
+		$this->assertEquals( 'twentysixteen', AMP_Options_Manager::get_option( Option::READER_THEME ) );
+	}
+
 	public function get_test_get_options_defaults_data() {
 		return [
 			'reader'                               => [
@@ -300,12 +306,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				],
 				AMP_Theme_Support::STANDARD_MODE_SLUG,
 			],
-			'standard_paired_false'                => [
-				[
-					'paired' => false,
-				],
-				AMP_Theme_Support::STANDARD_MODE_SLUG,
-			],
 			'standard_no_args'                     => [
 				[],
 				AMP_Theme_Support::STANDARD_MODE_SLUG,
@@ -317,7 +317,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 					Option::THEME_SUPPORT => 'native',
 				],
 			],
-			'standard_via_native'                  => [
+			'standard_via_paired'                  => [
 				null,
 				AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
 				[

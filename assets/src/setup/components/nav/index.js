@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button, Icon } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import { useContext } from '@wordpress/element';
 
 /**
@@ -40,32 +40,19 @@ export function Nav( { exitLink } ) {
 					)
 					: (
 						<Button
-							className="amp-setup-nav__prev"
 							onClick={ moveBack }
 						>
-							<Icon className="amp-mobile-hide" icon="arrow-left-alt2" size={ 18 } />
-							<span className="amp-mobile-hide">
-								{ __( 'Previous Step', 'amp' ) }
-							</span>
-							<span className="amp-mobile-show">
-								{ __( 'Previous', 'amp' ) }
-							</span>
+							{ __( 'Previous', 'amp' ) }
 						</Button>
 					)
 				}
 
 				<Button
-					className="amp-setup-nav__next"
 					disabled={ ! canGoForward }
+					isPrimary
 					onClick={ moveForward }
 				>
-					<span className="amp-mobile-hide">
-						{ __( 'Next Step', 'amp' ) }
-					</span>
-					<span className="amp-mobile-show">
-						{ __( 'Next', 'amp' ) }
-					</span>
-					<Icon className="amp-mobile-hide" icon="arrow-right-alt2" size={ 18 } />
+					{ __( 'Next', 'amp' ) }
 				</Button>
 
 			</div>

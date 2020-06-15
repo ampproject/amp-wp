@@ -6,6 +6,8 @@
  * @since 1.6
  */
 
+use AmpProject\AmpWP\Tests\ThemesApiRequestMocking;
+
 /**
  * Tests for reader themes.
  *
@@ -14,6 +16,9 @@
  * @covers AMP_Reader_Themes
  */
 class Test_AMP_Reader_Themes extends WP_UnitTestCase {
+
+	use ThemesApiRequestMocking;
+
 	/**
 	 * Test instance.
 	 *
@@ -29,6 +34,13 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
+		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
+			$this->markTestSkipped( 'Requires WordPress 5.0.' );
+		}
+
+		$this->add_reader_themes_request_filter();
+
+		switch_theme( 'twentytwenty' );
 		$this->reader_themes = new AMP_Reader_Themes();
 	}
 
@@ -36,43 +48,39 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 	 * Test for get_themes.
 	 *
 	 * @covers AMP_Reader_Themes::get_themes
-	 * @covers AMP_Reader_Themes::get_default_supported_reader_themes
+	 * @covers AMP_Reader_Themes::get_default_reader_themes
 	 * @covers AMP_Reader_Themes::get_classic_mode
 	 * @covers AMP_Reader_Themes::get_default_raw_reader_themes
 	 */
 	public function test_get_themes() {
 		$themes = $this->reader_themes->get_themes();
 
-		$this->assertEquals( 10, count( $themes ) );
 		$this->assertEquals( 'classic', end( $themes )['slug'] );
+
+		$keys = [
+			'name',
+			'slug',
+			'preview_url',
+			'screenshot_url',
+			'homepage',
+			'description',
+			'requires',
+			'requires_php',
+			'availability',
+		];
+		foreach ( $themes as $theme ) {
+			$this->assertEqualSets( $keys, array_keys( $theme ) );
+		}
 	}
 
 	/**
-	 * Test for get_reader_theme.
+	 * Test for get_reader_theme_by_slug.
 	 *
-	 * @covers AMP_Reader_Themes::get_reader_theme
+	 * @covers AMP_Reader_Themes::get_reader_theme_by_slug
 	 */
-	public function test_get_reader_theme() {
-		$this->assertFalse( $this->reader_themes->get_reader_theme( 'some-theme' ) );
-		$this->assertArrayHasKey( 'slug', $this->reader_themes->get_reader_theme( 'classic' ) );
-	}
-
-	/**
-	 * Test for prepare_theme.
-	 *
-	 * @covers AMP_Reader_Themes::prepare_theme
-	 */
-	public function test_prepare_theme() {
-		$prepared_theme = $this->reader_themes->prepare_theme(
-			[
-				'disallowed_key' => '',
-				'name'           => 'Theme Name',
-			]
-		);
-
-		$this->assertArrayNotHasKey( 'disallowed_key', $prepared_theme );
-		$this->assertEquals( 'Theme Name', $prepared_theme['name'] );
-		$this->assertEquals( '', $prepared_theme['slug'] );
+	public function test_get_reader_theme_by_slug() {
+		$this->assertFalse( $this->reader_themes->get_reader_theme_by_slug( 'some-theme' ) );
+		$this->assertArrayHasKey( 'slug', $this->reader_themes->get_reader_theme_by_slug( 'classic' ) );
 	}
 
 	/**
@@ -81,9 +89,13 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_availability_test_themes() {
+		$is_installed = static function ( $theme ) {
+			return wp_get_theme( $theme )->exists();
+		};
+
 		return [
-			[
-				'installed', // Is installed in CI environment.
+			'twentysixteen_from_wp_future'           => [
+				$is_installed( 'twentysixteen' ) ? AMP_Reader_Themes::STATUS_INSTALLED : AMP_Reader_Themes::STATUS_NON_INSTALLABLE,
 				false,
 				[
 					'name'         => 'Some Theme',
@@ -92,8 +104,8 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 					'slug'         => 'twentysixteen',
 				],
 			],
-			[
-				'installed',  // Is installed in CI environment.
+			'twentysixteen_from_php_future'          => [
+				$is_installed( 'twentysixteen' ) ? AMP_Reader_Themes::STATUS_INSTALLED : AMP_Reader_Themes::STATUS_NON_INSTALLABLE,
 				false,
 				[
 					'name'         => 'Some Theme',
@@ -102,8 +114,8 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 					'slug'         => 'twentysixteen',
 				],
 			],
-			[
-				'non-installable',
+			'non_reader_theme'                       => [
+				AMP_Reader_Themes::STATUS_NON_INSTALLABLE,
 				false,
 				[
 					'name'         => 'Some Theme',
@@ -112,8 +124,8 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 					'slug'         => 'some-nondefault-theme',
 				],
 			],
-			[
-				'installed', // Is installed in CI environment.
+			'twentytwelve_not_requiring_wp_version'  => [
+				$is_installed( 'twentytwelve' ) ? AMP_Reader_Themes::STATUS_INSTALLED : AMP_Reader_Themes::STATUS_INSTALLABLE,
 				true,
 				[
 					'name'         => 'Some Theme',
@@ -122,8 +134,8 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 					'slug'         => 'twentytwelve',
 				],
 			],
-			[
-				'installed', // Is installed in CI environment.
+			'twentytwelve_not_requiring_php_version' => [
+				$is_installed( 'twentysixteen' ) ? AMP_Reader_Themes::STATUS_INSTALLED : AMP_Reader_Themes::STATUS_INSTALLABLE,
 				true,
 				[
 					'name'         => 'Some Theme',
@@ -132,8 +144,8 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 					'slug'         => 'twentysixteen',
 				],
 			],
-			[
-				'active', // Is installed in CI environment.
+			'twentytwenty_active'                    => [
+				AMP_Reader_Themes::STATUS_ACTIVE,
 				true,
 				[
 					'name'         => 'WordPress Default',
@@ -150,9 +162,12 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 	 *
 	 * @covers AMP_Reader_Themes::get_theme_availability
 	 * @covers AMP_Reader_Themes::can_install_theme
-	 * @covers AMP_Reader_Themes::get_current_theme_name
 	 *
 	 * @dataProvider get_availability_test_themes
+	 *
+	 * @param string $expected    Expected.
+	 * @param bool   $can_install Can install.
+	 * @param array  $theme       Theme.
 	 */
 	public function test_get_theme_availability( $expected, $can_install, $theme ) {
 		$this->assertEquals( $expected, $this->reader_themes->get_theme_availability( $theme ) );

@@ -2,7 +2,7 @@
 /**
  * WordPress dependencies
  */
-import { useContext } from '@wordpress/element';
+import { useContext, useMemo } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 
 /**
@@ -16,6 +16,8 @@ import PropTypes from 'prop-types';
 import './style.css';
 import { __ } from '@wordpress/i18n';
 import { Options } from '../../components/options-context-provider';
+import { Selectable } from '../../components/selectable';
+import { Phone } from '../../components/phone';
 
 /**
  * A selectable card showing a theme in a list of themes.
@@ -32,13 +34,24 @@ export function ThemeCard( { description, homepage, screenshotUrl, slug, name } 
 
 	const id = `theme-card__${ slug }`;
 
+	const truncatedDescription = useMemo( () => {
+		const splitDescription = description.split( ' ' );
+		if ( splitDescription.length < 21 ) {
+			return description;
+		}
+
+		return splitDescription.slice( 0, 20 ).join( ' ' ) + ' [...]';
+	}, [ description ] );
+
 	return (
-		<li className={ `amp-wp-theme-card ${ readerTheme === slug ? 'amp-wp-theme-card--selected' : '' }` }>
+		<Selectable className={ `amp-wp-theme-card` } direction="bottom" HTMLElement="li" selected={ readerTheme === slug }>
 			<label htmlFor={ id } className="amp-wp-theme-card__label">
-				<img
-					src={ screenshotUrl }
-					alt={ name }
-				/>
+				<Phone>
+					<img
+						src={ screenshotUrl }
+						alt={ name }
+					/>
+				</Phone>
 				<div className="amp-wp-theme-card__label-header">
 					<input
 						type="radio"
@@ -54,7 +67,7 @@ export function ThemeCard( { description, homepage, screenshotUrl, slug, name } 
 				</div>
 
 				<p>
-					{ decodeEntities( description ) }
+					{ decodeEntities( truncatedDescription ) }
 				</p>
 			</label>
 			<p className="amp-wp-theme-card__theme-link">
@@ -62,7 +75,7 @@ export function ThemeCard( { description, homepage, screenshotUrl, slug, name } 
 					{ __( 'Learn more', 'amp' ) }
 				</a>
 			</p>
-		</li>
+		</Selectable>
 	);
 }
 

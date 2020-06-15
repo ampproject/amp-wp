@@ -19,7 +19,7 @@ final class AMP_Setup_Wizard_Submenu_Page {
 	 *
 	 * @var string
 	 */
-	const JS_HANDLE = 'amp-setup';
+	const ASSET_HANDLE = 'amp-setup';
 
 	/**
 	 * HTML ID for the app root element.
@@ -96,27 +96,38 @@ final class AMP_Setup_Wizard_Submenu_Page {
 			return;
 		}
 
-		$asset_file   = AMP__DIR__ . '/assets/js/' . self::JS_HANDLE . '.asset.php';
+		$asset_file   = AMP__DIR__ . '/assets/js/' . self::ASSET_HANDLE . '.asset.php';
 		$asset        = require $asset_file;
 		$dependencies = $asset['dependencies'];
 		$version      = $asset['version'];
 
 		wp_enqueue_script(
-			self::JS_HANDLE,
-			amp_get_asset_url( 'js/' . self::JS_HANDLE . '.js' ),
+			self::ASSET_HANDLE,
+			amp_get_asset_url( 'js/' . self::ASSET_HANDLE . '.js' ),
 			$dependencies,
 			$version,
 			true
 		);
 
-		wp_enqueue_style(
-			self::JS_HANDLE,
-			amp_get_asset_url( 'css/amp-setup-compiled.css' ),
+		$fonts_handle = self::ASSET_HANDLE . '-google-fonts';
+
+		// PHPCS ignore reason: WP will strip multiple `family` args from the Google fonts URL while adding the version string,
+		// so we need to avoid specifying a version at all.
+		wp_enqueue_style( // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+			$fonts_handle,
+			'https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&family=Poppins:wght@400;600&display=swap',
 			[],
+			null
+		);
+
+		wp_enqueue_style(
+			self::ASSET_HANDLE,
+			amp_get_asset_url( 'css/amp-setup-compiled.css' ),
+			[ $fonts_handle ],
 			AMP__VERSION
 		);
 
-		wp_styles()->add_data( self::JS_HANDLE, 'rtl', 'replace' );
+		wp_styles()->add_data( self::ASSET_HANDLE, 'rtl', 'replace' );
 
 		$setup_wizard_data = [
 			'AMP_OPTIONS_KEY'             => AMP_Options_Manager::OPTION_NAME,
@@ -128,7 +139,7 @@ final class AMP_Setup_Wizard_Submenu_Page {
 		];
 
 		wp_add_inline_script(
-			self::JS_HANDLE,
+			self::ASSET_HANDLE,
 			sprintf(
 				'var ampSetup = %s;',
 				wp_json_encode(
@@ -144,13 +155,13 @@ final class AMP_Setup_Wizard_Submenu_Page {
 		);
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {
-			wp_set_script_translations( self::JS_HANDLE, 'amp' );
+			wp_set_script_translations( self::ASSET_HANDLE, 'amp' );
 		} elseif ( function_exists( 'wp_get_jed_locale_data' ) || function_exists( 'gutenberg_get_jed_locale_data' ) ) {
 			$locale_data  = function_exists( 'wp_get_jed_locale_data' ) ? wp_get_jed_locale_data( 'amp' ) : gutenberg_get_jed_locale_data( 'amp' );
 			$translations = wp_json_encode( $locale_data );
 
 			wp_add_inline_script(
-				self::JS_HANDLE,
+				self::ASSET_HANDLE,
 				'wp.i18n.setLocaleData( ' . $translations . ', "amp" );',
 				'after'
 			);

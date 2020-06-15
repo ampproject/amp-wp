@@ -29,19 +29,12 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
+		if ( ! amp_should_use_new_onboarding() ) {
+			$this->markTestSkipped( 'Requires WordPress 5.0.' );
+		}
+
 		do_action( 'rest_api_init' );
 		$this->controller = new AMP_Reader_Theme_REST_Controller( new AMP_Reader_Themes() );
-	}
-
-	/**
-	 * Tests AMP_Reader_Theme_REST_Controller::init
-	 *
-	 * @covers AMP_Reader_Theme_REST_Controller::init
-	 */
-	public function test_init() {
-		$this->controller->init();
-
-		$this->assertEquals( 10, has_action( 'amp_reader_themes', [ $this->controller, 'prepare_default_reader_themes_for_rest' ] ) );
 	}
 
 	/**
@@ -52,7 +45,32 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 	public function test_register_routes() {
 		$this->controller->register_routes();
 
-		$this->assertContains( 'amp-wp/v1', rest_get_server()->get_namespaces() );
-		$this->assertContains( '/amp-wp/v1/reader-themes', array_keys( rest_get_server()->get_routes( 'amp-wp/v1' ) ) );
+		$this->assertContains( 'amp/v1', rest_get_server()->get_namespaces() );
+		$this->assertContains( '/amp/v1/reader-themes', array_keys( rest_get_server()->get_routes( 'amp/v1' ) ) );
+	}
+
+	/**
+	 * Tests AMP_Reader_Theme_REST_Controller::get_items.
+	 *
+	 * @covers AMP_Reader_Theme_REST_Controller::get_items
+	 */
+	public function test_get_items() {
+		$this->assertEquals( 10, count( $this->controller->get_items( new WP_REST_Request( 'GET', 'amp/v1' ) )->data ) );
+
+		$filter = static function() {
+			return [
+				[
+					'name'           => 'My theme',
+					'slug'           => 'my-theme',
+					'screenshot_url' => '',
+				],
+			];
+		};
+
+		// Test that a theme with no screenshot_url is filtered out.
+		$this->controller = new AMP_Reader_Theme_REST_Controller( new AMP_Reader_Themes() );
+		add_filter( 'amp_reader_themes', $filter );
+		$this->assertEquals( 0, count( $this->controller->get_items( new WP_REST_Request( 'GET', 'amp/v1' ) )->data ) );
+		remove_filter( 'amp_reader_themes', $filter );
 	}
 }

@@ -53,7 +53,7 @@ export function ChooseReaderTheme() {
 			<p>
 				{
 					// @todo Probably improve this text.
-					__( 'Select a theme to use on AMP-compatible pages on mobile devices', 'amp' )
+					__( 'Select the theme template for mobile visitors', 'amp' )
 				}
 			</p>
 			<form>
