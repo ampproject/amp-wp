@@ -16,6 +16,8 @@ import PropTypes from 'prop-types';
 import './style.css';
 import { __ } from '@wordpress/i18n';
 import { Options } from '../../components/options-context-provider';
+import { Selectable } from '../../components/selectable';
+import { Phone } from '../../components/phone';
 
 /**
  * A selectable card showing a theme in a list of themes.
@@ -33,13 +35,15 @@ export function ThemeCard( { description, homepage, screenshotUrl, slug, name } 
 	const id = `theme-card__${ slug }`;
 
 	return (
-		<li className={ `amp-wp-theme-card ${ readerTheme === slug ? 'amp-wp-theme-card--selected' : '' }` }>
-			<label htmlFor={ id } className="amp-wp-theme-card__label">
-				<img
-					src={ screenshotUrl }
-					alt={ name }
-				/>
-				<div className="amp-wp-theme-card__label-header">
+		<Selectable className={ `theme-card` } direction="bottom" HTMLElement="li" selected={ readerTheme === slug }>
+			<label htmlFor={ id } className="theme-card__label">
+				<Phone>
+					<img
+						src={ screenshotUrl }
+						alt={ name }
+					/>
+				</Phone>
+				<div className="theme-card__label-header">
 					<input
 						type="radio"
 						id={ id }
@@ -53,16 +57,17 @@ export function ThemeCard( { description, homepage, screenshotUrl, slug, name } 
 					</h2>
 				</div>
 
-				<p>
+				<p className="theme-card__description">
 					{ decodeEntities( description ) }
+
 				</p>
 			</label>
-			<p className="amp-wp-theme-card__theme-link">
+			<p className="theme-card__theme-link">
 				<a href={ homepage } target="_blank" rel="noreferrer noopener">
 					{ __( 'Learn more', 'amp' ) }
 				</a>
 			</p>
-		</li>
+		</Selectable>
 	);
 }
 

@@ -49,15 +49,15 @@ export function ChooseReaderTheme() {
 	}
 
 	return (
-		<div className="amp-wp-choose-reader-theme">
+		<div className="choose-reader-theme">
 			<p>
 				{
 					// @todo Probably improve this text.
-					__( 'Select a theme to use on AMP-compatible pages on mobile devices', 'amp' )
+					__( 'Select the theme template for mobile visitors', 'amp' )
 				}
 			</p>
 			<form>
-				<ul className="amp-wp-choose-reader-theme__grid">
+				<ul className="choose-reader-theme__grid">
 					{
 						themes && themes.map( ( theme ) => (
 							<ThemeCard

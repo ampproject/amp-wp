@@ -11,6 +11,7 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
+import { addQueryArgs } from '@wordpress/url';
 import { Options } from './options-context-provider';
 
 export const ReaderThemes = createContext();
@@ -107,7 +108,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, readerThemes
 			setFetchingThemes( true );
 
 			try {
-				const fetchedThemes = await apiFetch( { url: readerThemesEndpoint } );
+				const fetchedThemes = await apiFetch( { url: addQueryArgs( readerThemesEndpoint, { 'amp-new-onboarding': '1' } ) } );
 
 				if ( hasUnmounted.current === true ) {
 					return;
