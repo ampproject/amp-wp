@@ -2,10 +2,10 @@
 
 exports[`ThemeCard matches snapshot 1`] = `
 <li
-  className="amp-wp-theme-card selectable  selectable--bottom"
+  className="theme-card selectable selectable--bottom"
 >
   <label
-    className="amp-wp-theme-card__label"
+    className="theme-card__label"
     htmlFor="theme-card__theme-slug"
   >
     <div
@@ -17,7 +17,7 @@ exports[`ThemeCard matches snapshot 1`] = `
       />
     </div>
     <div
-      className="amp-wp-theme-card__label-header"
+      className="theme-card__label-header"
     >
       <input
         checked={false}
@@ -29,12 +29,14 @@ exports[`ThemeCard matches snapshot 1`] = `
         Theme name
       </h2>
     </div>
-    <p>
+    <p
+      className="theme-card__description"
+    >
       Theme card
     </p>
   </label>
   <p
-    className="amp-wp-theme-card__theme-link"
+    className="theme-card__theme-link"
   >
     <a
       href="http://mysite.com"

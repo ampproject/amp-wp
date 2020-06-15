@@ -73,6 +73,6 @@ describe( 'Selectable', () => {
 			);
 		} );
 
-		expect( container.querySelector( 'section' ).getAttribute( 'class' ) ).toBe( ' selectable  selectable--left' );
+		expect( container.querySelector( 'section' ).getAttribute( 'class' ) ).toBe( 'selectable selectable--left' );
 	} );
 } );

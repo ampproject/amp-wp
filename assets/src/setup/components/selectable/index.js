@@ -19,11 +19,13 @@ import './style.css';
  * @param {boolean} props.selected Whether the element is selected.
  */
 export function Selectable( { children, className, direction, HTMLElement, selected, ...props } ) {
+	const classNames = [ className, 'selectable', ( selected ? 'selectable--selected' : '' ), `selectable--${ direction }` ]
+		.filter( ( name ) => name )
+		.join( ' ' );
+
 	return (
 		<HTMLElement
-			className={
-				`${ className } selectable ${ selected ? 'selectable--selected' : '' } selectable--${ direction }`
-			}
+			className={ classNames }
 			{ ...props }
 		>
 			{ children }
