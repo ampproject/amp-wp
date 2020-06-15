@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { render } from '@wordpress/element';
+import { render, Component } from '@wordpress/element';
 import domReady from '@wordpress/dom-ready';
 import '@wordpress/components/build-style/style.css';
 
@@ -21,6 +21,7 @@ import { SetupWizard } from './setup-wizard';
 import { NavigationContextProvider } from './components/navigation-context-provider';
 import { ReaderThemesContextProvider } from './components/reader-themes-context-provider';
 import { UserContextProvider } from './components/user-context-provider';
+import { ErrorScreen } from './components/error-screen';
 
 const { ajaxurl: wpAjaxUrl } = global;
 
@@ -32,25 +33,27 @@ const { ajaxurl: wpAjaxUrl } = global;
  */
 export function Providers( { children } ) {
 	return (
-		<OptionsContextProvider
-			optionsRestEndpoint={ OPTIONS_REST_ENDPOINT }
-		>
-			<ReaderThemesContextProvider
-				wpAjaxUrl={ wpAjaxUrl }
-				readerThemesEndpoint={ READER_THEMES_REST_ENDPOINT }
-				updatesNonce={ UPDATES_NONCE }
+		<NavigationContextProvider pages={ PAGES }>
+			<OptionsContextProvider
+				optionsRestEndpoint={ OPTIONS_REST_ENDPOINT }
 			>
-				<UserContextProvider
-					userOptionDeveloperTools={ USER_OPTION_DEVELOPER_TOOLS }
-					userOptionsKey={ USER_OPTIONS_KEY }
-					userRestEndpoint={ USER_REST_ENDPOINT }
+				<ReaderThemesContextProvider
+					wpAjaxUrl={ wpAjaxUrl }
+					readerThemesEndpoint={ READER_THEMES_REST_ENDPOINT }
+					updatesNonce={ UPDATES_NONCE }
 				>
-					<NavigationContextProvider pages={ PAGES }>
+					<UserContextProvider
+						userOptionDeveloperTools={ USER_OPTION_DEVELOPER_TOOLS }
+						userOptionsKey={ USER_OPTIONS_KEY }
+						userRestEndpoint={ USER_REST_ENDPOINT }
+					>
+
 						{ children }
-					</NavigationContextProvider>
-				</UserContextProvider>
-			</ReaderThemesContextProvider>
-		</OptionsContextProvider>
+					</UserContextProvider>
+
+				</ReaderThemesContextProvider>
+			</OptionsContextProvider>
+		</NavigationContextProvider>
 	);
 }
 
@@ -58,14 +61,49 @@ Providers.propTypes = {
 	children: PropTypes.any,
 };
 
+/**
+ * Catches errors in the application and displays a fallback screen.
+ *
+ * @see https://reactjs.org/docs/error-boundaries.html
+ */
+class ErrorBoundary extends Component {
+	static propTypes = {
+		children: PropTypes.any,
+	}
+
+	constructor( props ) {
+		super( props );
+
+		this.state = { error: null };
+	}
+
+	componentDidCatch( error ) {
+		this.setState( { error } );
+	}
+
+	render() {
+		const { error } = this.state;
+
+		if ( error ) {
+			return (
+				<ErrorScreen error={ error } exitLink={ EXIT_LINK } />
+			);
+		}
+
+		return this.props.children;
+	}
+}
+
 domReady( () => {
 	const root = document.getElementById( APP_ROOT_ID );
 
 	if ( root ) {
 		render(
-			<Providers>
-				<SetupWizard exitLink={ EXIT_LINK } />
-			</Providers>,
+			<ErrorBoundary>
+				<Providers>
+					<SetupWizard exitLink={ EXIT_LINK } />
+				</Providers>
+			</ErrorBoundary>,
 			root,
 		);
 	}

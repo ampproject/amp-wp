@@ -15,8 +15,8 @@ import { User } from '../../components/user-context-provider';
  * Final screen, where data is saved.
  */
 export function Save() {
-	const { hasSavedOptions, saveOptions, saveOptionsError, savingOptions } = useContext( Options );
-	const { hasSavedUserOptions, saveUserOptions, saveUserOptionsError, savingUserOptions } = useContext( User );
+	const { hasSavedOptions, saveOptions, savingOptions } = useContext( Options );
+	const { hasSavedUserOptions, saveUserOptions, savingUserOptions } = useContext( User );
 
 	/**
 	 * Triggers saving of options on arrival of this screen.
@@ -24,10 +24,10 @@ export function Save() {
 	 * @todo Possibly wait for a different user action to save.
 	 */
 	useEffect( () => {
-		if ( ! hasSavedOptions && ! savingOptions && ! saveOptionsError ) {
+		if ( ! hasSavedOptions && ! savingOptions ) {
 			saveOptions();
 		}
-	}, [ hasSavedOptions, saveOptions, savingOptions, saveOptionsError ] );
+	}, [ hasSavedOptions, saveOptions, savingOptions ] );
 
 	/**
 	 * Triggers saving of user options on arrival of this screen.
@@ -35,18 +35,10 @@ export function Save() {
 	 * @todo Possibly wait for a different user action to save.
 	 */
 	useEffect( () => {
-		if ( ! hasSavedUserOptions && ! savingUserOptions && ! saveUserOptionsError ) {
+		if ( ! hasSavedUserOptions && ! savingUserOptions ) {
 			saveUserOptions();
 		}
-	}, [ hasSavedUserOptions, savingUserOptions, saveUserOptions, saveUserOptionsError ] );
-
-	if ( saveOptionsError || saveUserOptionsError ) {
-		return (
-			<p>
-				{ __( 'There was an error saving options.', 'amp' ) }
-			</p>
-		);
-	}
+	}, [ hasSavedUserOptions, savingUserOptions, saveUserOptions ] );
 
 	if ( savingOptions || savingUserOptions ) {
 		return <Loading />;
