@@ -28,23 +28,8 @@ import { Navigation } from './components/navigation-context-provider';
  * @param {?any} props.children Component children.
  * @param {string} props.exitLink Exit link.
  */
-function Page( { children, exitLink } ) {
-	const { fetchingOptions, fetchOptionsError } = useContext( Options );
-
-	if ( fetchOptionsError ) {
-		return (
-			<p>
-				{ /* dangerouslySetInnerHTML reason: WordPress sometimes sends back HTML as error messages. */ }
-				<span
-					dangerouslySetInnerHTML={ { __html: fetchOptionsError.message || __( 'There was an error loading the setup wizard.', 'amp' ) } }
-				/>
-				{ ' ' }
-				<a href={ exitLink }>
-					{ __( 'Return to AMP Settings.', 'amp' ) }
-				</a>
-			</p>
-		);
-	}
+function Page( { children } ) {
+	const { fetchingOptions } = useContext( Options );
 
 	if ( fetchingOptions ) {
 		return <Loading />;
@@ -76,7 +61,6 @@ function PageComponentSideEffects( { children } ) {
  */
 export function SetupWizard( { exitLink } ) {
 	const { activePageIndex, currentPage: { title, PageComponent }, moveBack, moveForward, pages } = useContext( Navigation );
-	const { fetchOptionsError } = useContext( Options );
 
 	const PageComponentWithSideEffects = useMemo( () => () => (
 		<PageComponentSideEffects>
@@ -101,7 +85,7 @@ export function SetupWizard( { exitLink } ) {
 				<div className="amp-setup-panel-container">
 					<Panel className="amp-setup-panel">
 						<h1>
-							{ ! fetchOptionsError ? title : __( 'Error', 'amp' ) }
+							{ title }
 						</h1>
 						<Page exitLink={ exitLink }>
 							<PageComponentWithSideEffects />

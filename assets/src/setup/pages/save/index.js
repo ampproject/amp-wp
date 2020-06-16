@@ -14,7 +14,7 @@ import { Loading } from '../../components/loading';
  * Final screen, where data is saved.
  */
 export function Save() {
-	const { hasSaved, saveOptions, saveOptionsError, savingOptions } = useContext( Options );
+	const { hasSaved, saveOptions, savingOptions } = useContext( Options );
 
 	/**
 	 * Triggers saving of options on arrival of this screen.
@@ -26,14 +26,6 @@ export function Save() {
 			saveOptions();
 		}
 	}, [ hasSaved, saveOptions, savingOptions ] );
-
-	if ( saveOptionsError ) {
-		return (
-			<p>
-				{ __( 'There was an error saving options.', 'amp' ) }
-			</p>
-		);
-	}
 
 	if ( savingOptions ) {
 		return <Loading />;

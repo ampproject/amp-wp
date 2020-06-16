@@ -3,15 +3,17 @@
  */
 import { createContext, useEffect, useState, useRef, useContext, useMemo } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * External dependencies
  */
 import PropTypes from 'prop-types';
+
 /**
  * Internal dependencies
  */
-import { addQueryArgs } from '@wordpress/url';
+import { useError } from '../utils/use-error';
 import { Options } from './options-context-provider';
 
 export const ReaderThemes = createContext();
@@ -28,9 +30,9 @@ export const ReaderThemes = createContext();
 export function ReaderThemesContextProvider( { wpAjaxUrl, children, readerThemesEndpoint, updatesNonce } ) {
 	const [ themes, setThemes ] = useState( null );
 	const [ fetchingThemes, setFetchingThemes ] = useState( false );
-	const [ themeFetchError, setThemeFetchError ] = useState( null );
 	const [ downloadingTheme, setDownloadingTheme ] = useState( false );
-	const [ downloadingThemeError, setDownloadingThemeError ] = useState( null );
+
+	const { setError } = useError();
 
 	const { options, savingOptions } = useContext( Options );
 	const { reader_theme: readerTheme } = options || {};
@@ -82,22 +84,19 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, readerThemes
 					return;
 				}
 			} catch ( e ) {
-				if ( true === hasUnmounted.current ) {
-					return;
-				}
-
-				setDownloadingThemeError( e );
+				setError( e );
+				return;
 			}
 
 			setDownloadingTheme( false );
 		} )();
-	}, [ wpAjaxUrl, downloadingTheme, savingOptions, selectedTheme, updatesNonce ] );
+	}, [ wpAjaxUrl, downloadingTheme, savingOptions, selectedTheme, setError, updatesNonce ] );
 
 	/**
 	 * Fetches theme data on component mount.
 	 */
 	useEffect( () => {
-		if ( fetchingThemes || ! readerThemesEndpoint || themes || themeFetchError ) {
+		if ( fetchingThemes || ! readerThemesEndpoint || themes ) {
 			return;
 		}
 
@@ -117,16 +116,13 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, readerThemes
 				// Screenshots are required.
 				setThemes( fetchedThemes );
 			} catch ( e ) {
-				if ( hasUnmounted.current === true ) {
-					return;
-				}
-
-				setThemeFetchError( e );
+				setError( e );
+				return;
 			}
 
 			setFetchingThemes( false );
 		} )();
-	}, [ fetchingThemes, readerThemesEndpoint, themes, themeFetchError ] );
+	}, [ fetchingThemes, readerThemesEndpoint, setError, themes ] );
 
 	useEffect( () => () => {
 		hasUnmounted.current = true;
@@ -137,9 +133,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, readerThemes
 			value={
 				{
 					downloadingTheme,
-					downloadingThemeError,
 					fetchingThemes,
-					themeFetchError,
 					themes,
 				}
 			}
