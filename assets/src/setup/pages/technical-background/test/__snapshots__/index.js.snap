@@ -11,14 +11,14 @@ exports[`TechnicalBackground matches snapshot 1`] = `
     >
       <label
         className="technical-background-option"
-        htmlFor="technical-background-disable"
+        htmlFor="technical-background-enable"
       >
         <div
           className="technical-background-option__input-container"
         >
           <input
             checked={false}
-            id="technical-background-disable"
+            id="technical-background-enable"
             onChange={[Function]}
             type="radio"
           />
@@ -252,14 +252,14 @@ exports[`TechnicalBackground matches snapshot 1`] = `
     >
       <label
         className="technical-background-option"
-        htmlFor="technical-background-enable"
+        htmlFor="technical-background-disable"
       >
         <div
           className="technical-background-option__input-container"
         >
           <input
             checked={false}
-            id="technical-background-enable"
+            id="technical-background-disable"
             onChange={[Function]}
             type="radio"
           />

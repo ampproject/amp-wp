@@ -48,11 +48,11 @@ export function TechnicalBackground() {
 			</p>
 			<form>
 				<Selectable className={ `technical-background-option-container` } selected={ true === developerToolsOption }>
-					<label htmlFor={ disableInputID } className="technical-background-option">
+					<label htmlFor={ enableInputID } className="technical-background-option">
 						<div className="technical-background-option__input-container">
 							<input
 								type="radio"
-								id={ disableInputID }
+								id={ enableInputID }
 								checked={ true === developerToolsOption }
 								onChange={ () => {
 									setDeveloperToolsOption( true );
@@ -72,11 +72,11 @@ export function TechnicalBackground() {
 				</Selectable>
 
 				<Selectable className={ `technical-background-option-container` } selected={ false === developerToolsOption }>
-					<label htmlFor={ enableInputID } className="technical-background-option">
+					<label htmlFor={ disableInputID } className="technical-background-option">
 						<div className="technical-background-option__input-container">
 							<input
 								type="radio"
-								id={ enableInputID }
+								id={ disableInputID }
 								checked={ false === developerToolsOption }
 								onChange={ () => {
 									setDeveloperToolsOption( false );
