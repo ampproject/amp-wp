@@ -1,6 +1,6 @@
 <?php
 /**
- * Class AMP_User.
+ * Class AMP_User_Manager.
  *
  * @since 1.6.0
  *
@@ -8,11 +8,11 @@
  */
 
 /**
- * Class AMP_User
+ * Class AMP_User_Manager
  *
  * @since 1.6.0
  */
-final class AMP_User {
+final class AMP_User_Manager {
 
 	/**
 	 * Custom user capability allowing dev tools
