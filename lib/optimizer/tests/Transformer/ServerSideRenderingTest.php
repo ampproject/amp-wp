@@ -161,18 +161,6 @@ final class ServerSideRenderingTest extends TestCase
                 $expectWithBoilerplate('<amp-img height="300" layout="responsive" sizes="(min-width: 320px) 320px, 100vw" src="https://acme.org/image1.png" width="400" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block;padding-top:75.0000%;"></i-amphtml-sizer></amp-img>'),
                 [Error\CannotRemoveBoilerplate::class],
             ],
-
-            // @todo Remove floor when ampproject/amphtml#27528 is resolved.
-            'decimal dimensions intrinsic closer to floor' => [
-                $input('<amp-img src="https://blog.amp.dev/wp-content/uploads/2020/03/AMP_camp_Blog.png" alt="" height="100.2" width="200.4" layout="intrinsic"></amp-img>'),
-                $expectWithoutBoilerplate('<amp-img src="https://blog.amp.dev/wp-content/uploads/2020/03/AMP_camp_Blog.png" alt="" height="100.2" width="200.4" layout="intrinsic" class="i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" i-amphtml-layout="intrinsic"><i-amphtml-sizer class="i-amphtml-sizer"><img alt="" aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9JzEwMCcgd2lkdGg9JzIwMCcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2ZXJzaW9uPScxLjEnLz4="></i-amphtml-sizer></amp-img>'),
-            ],
-
-            // @todo Remove floor when ampproject/amphtml#27528 is resolved.
-            'decimal dimensions intrinsic closer to ceiling' => [
-                $input('<amp-img src="https://blog.amp.dev/wp-content/uploads/2020/03/AMP_camp_Blog.png" alt="" height="100.6" width="200.8" layout="intrinsic"></amp-img>'),
-                $expectWithoutBoilerplate('<amp-img src="https://blog.amp.dev/wp-content/uploads/2020/03/AMP_camp_Blog.png" alt="" height="100.6" width="200.8" layout="intrinsic" class="i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" i-amphtml-layout="intrinsic"><i-amphtml-sizer class="i-amphtml-sizer"><img alt="" aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9JzEwMCcgd2lkdGg9JzIwMCcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2ZXJzaW9uPScxLjEnLz4="></i-amphtml-sizer></amp-img>'),
-            ],
         ];
     }
 
