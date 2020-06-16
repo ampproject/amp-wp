@@ -59,11 +59,16 @@ final class AmpSchemaOrgMetadata implements Transformer {
 			return;
 		}
 
+		$metadata = $this->configuration->get( AmpSchemaOrgMetadataConfiguration::METADATA );
+
+		if ( ! $metadata ) {
+			return;
+		}
+
 		$script = $document->createElement( Tag::SCRIPT );
 		$script->setAttribute( Attribute::TYPE, Attribute::TYPE_LD_JSON );
 
-		$metadata = $this->configuration->get( AmpSchemaOrgMetadataConfiguration::METADATA );
-		$json     = wp_json_encode( $metadata, JSON_UNESCAPED_UNICODE );
+		$json = wp_json_encode( $metadata, JSON_UNESCAPED_UNICODE );
 		$script->appendChild( $document->createTextNode( $json ) );
 
 		$document->head->appendChild( $script );
