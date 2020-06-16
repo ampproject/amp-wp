@@ -8,7 +8,3 @@ parameters:
 		- src/
 	ignoreErrors:
 		- '#^PHPDoc tag @throws with type AmpProject\\Exception\\FailedRemoteRequest is not subtype of Throwable$#'
-		-
-			message: '#^If condition is always false\.$#'
-			path: 'src/Dom/Document.php'
-			# See https://github.com/phpstan/phpstan/issues/3291
