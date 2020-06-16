@@ -1,0 +1,30 @@
+# Specify location of manifest files for each package manager
+
+version: 2
+
+updates:
+  - package-ecosystem: 'npm'
+    directory: "/"
+    schedule:
+      interval: 'daily'
+    open-pull-requests-limit: 10
+    reviewers:
+      - 'swissspidy'
+
+  - package-ecosystem: 'composer'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    reviewers:
+      - 'schlessera'
+      - 'westonruter'
+      - 'pierlon'
+
+  - package-ecosystem: 'github-actions'
+    # Workflow files stored in the default location `.github/workflows`
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    reviewers:
+      - 'pierlon'
+      - 'schlessera'
