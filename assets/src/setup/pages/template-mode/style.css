@@ -1,0 +1,25 @@
+.template-mode-selection label {
+	display: flex;
+	padding: 1.5rem 0;
+}
+
+.template-mode-selection__input-container {
+	padding: 1.5rem;
+}
+
+.template-mode-selection__illustration {
+	flex-shrink: 0;
+	width: 80px;
+}
+
+
+.template-mode-selection__description {
+	padding: 0 2rem;
+}
+
+.template-mode-selection__description h2 {
+	font-size: 1.5rem;
+	line-height: 1.5;
+	margin-top: 0;
+	margin-bottom: 0;
+}
