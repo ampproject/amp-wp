@@ -41,7 +41,7 @@ export function ChooseReaderTheme() {
 	}
 
 	return (
-		<div className="amp-wp-choose-reader-theme">
+		<div className="choose-reader-theme">
 			<p>
 				{
 					// @todo Probably improve this text.
@@ -49,7 +49,7 @@ export function ChooseReaderTheme() {
 				}
 			</p>
 			<form>
-				<ul className="amp-wp-choose-reader-theme__grid">
+				<ul className="choose-reader-theme__grid">
 					{
 						themes && themes.map( ( theme ) => (
 							<ThemeCard
