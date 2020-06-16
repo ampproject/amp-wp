@@ -80,8 +80,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 		setSavingUserOptions( true );
 
 		try {
-			// To be extra careful, let's only send back meta instead of the entire user data object.
-			await apiFetch( { method: 'post', url: userRestEndpoint, data: { meta: user.meta } } );
+			await apiFetch( { method: 'post', url: userRestEndpoint, data: { meta: { [ userOptionDeveloperTools ]: user.meta[ userOptionDeveloperTools ] } } } );
 
 			if ( true === hasUnmounted.current ) {
 				return;
@@ -93,7 +92,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 
 		setSavingUserOptions( false );
 		setDidSaveUserOptions( true );
-	}, [ user, setError, setSavingUserOptions, setDidSaveUserOptions, userRestEndpoint ] );
+	}, [ user, setError, setSavingUserOptions, setDidSaveUserOptions, userOptionDeveloperTools, userRestEndpoint ] );
 
 	useEffect( () => () => {
 		hasUnmounted.current = true;
