@@ -58,7 +58,7 @@
       "@cs",
       "@analyze"
     ],
-    "analyze": "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan analyze --ansi; fi",
+    "analyze": "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan --version; phpstan analyze --ansi; fi",
     "unit": "if [ -z $TEST_SKIP_PHPUNIT ]; then phpunit --colors=always; fi"
   }
 }
