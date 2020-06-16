@@ -22,7 +22,7 @@ final class AMP_User_Manager {
 	const VALIDATE_CAP = 'amp_validate';
 
 	/**
-	 * Key for the user option (stored in amp_features user meta) enabling or disabling developer tools.
+	 * User meta key enabling or disabling developer tools.
 	 *
 	 * @var string
 	 */
