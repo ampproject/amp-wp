@@ -62,10 +62,10 @@ export function TechnicalBackground() {
 						<User1 />
 						<div className="technical-background-option__description">
 							<h2>
-								{ __( 'Developer or Technically Savvy', 'amp' ) }
+								{ __( 'Developer or technically savvy', 'amp' ) }
 							</h2>
 							<p>
-								{ __( 'I am a “Developer or Technically Savvy” user. I can do WordPress development such as making changes to themes and plugins. I have some familiarity with HTML, CSS, JavaScript, and PHP. I am technically savvy enough to build full WordPress sites out of plugins and themes and can address configuration issues and understand', 'amp' ) }
+								{ __( 'I am a “Developer or technically savvy” user. I can do WordPress development such as making changes to themes and plugins. I have some familiarity with HTML, CSS, JavaScript, and PHP. I am technically savvy enough to build full WordPress sites out of plugins and themes and can address configuration issues and understand', 'amp' ) }
 							</p>
 						</div>
 					</label>

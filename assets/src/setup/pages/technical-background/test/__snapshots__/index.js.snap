@@ -239,10 +239,10 @@ exports[`TechnicalBackground matches snapshot 1`] = `
           className="technical-background-option__description"
         >
           <h2>
-            Developer or Technically Savvy
+            Developer or technically savvy
           </h2>
           <p>
-            I am a “Developer or Technically Savvy” user. I can do WordPress development such as making changes to themes and plugins. I have some familiarity with HTML, CSS, JavaScript, and PHP. I am technically savvy enough to build full WordPress sites out of plugins and themes and can address configuration issues and understand
+            I am a “Developer or technically savvy” user. I can do WordPress development such as making changes to themes and plugins. I have some familiarity with HTML, CSS, JavaScript, and PHP. I am technically savvy enough to build full WordPress sites out of plugins and themes and can address configuration issues and understand
           </p>
         </div>
       </label>

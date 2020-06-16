@@ -22,12 +22,12 @@ describe( 'AMP wizard: technical background', () => {
 
 		let titleText;
 
-		await page.$eval( '[for="amp-technical-background-disable"]', ( el ) => el.click() );
-		titleText = await page.$eval( '.amp-technical-background-option-container--active h2', ( el ) => el.innerText );
-		expect( titleText ).toBe( 'Developer or Technically Savvy' );
+		await page.$eval( '[for="technical-background-disable"]', ( el ) => el.click() );
+		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
+		expect( titleText ).toBe( 'Developer or technically savvy' );
 
 		await page.$eval( '[for="amp-technical-background-enable"]', ( el ) => el.click() );
-		titleText = await page.$eval( '.amp-technical-background-option-container--active h2', ( el ) => el.innerText );
+		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
 		expect( titleText ).toBe( 'Non-technically savvy or wanting a simpler setup' );
 	} );
 } );
