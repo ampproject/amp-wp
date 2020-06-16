@@ -1,18 +1,22 @@
 <?php
 /**
- * Class AMP_User_Manager.
+ * Class UserManager.
  *
  * @since 1.6.0
  *
  * @package AMP
  */
 
+namespace AmpProject\AmpWP\Admin;
+
+use AmpProject\AmpWP\Service;
+
 /**
- * Class AMP_User_Manager
+ * Class UserManager
  *
  * @since 1.6.0
  */
-final class AMP_User_Manager {
+final class UserManager implements Service {
 
 	/**
 	 * Custom user capability allowing dev tools
@@ -31,7 +35,7 @@ final class AMP_User_Manager {
 	/**
 	 * Sets up hooks.
 	 */
-	public static function init() {
+	public function register() {
 		add_filter( 'amp_setup_wizard_data', [ __CLASS__, 'inject_setup_wizard_data' ] );
 		add_action( 'rest_api_init', [ __CLASS__, 'register_user_meta' ] );
 		add_filter( 'get_user_metadata', [ __CLASS__, 'get_default_enable_developer_tools_setting' ], 10, 3 );

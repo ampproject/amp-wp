@@ -7,6 +7,7 @@
 
 namespace AmpProject\AmpWP;
 
+use AmpProject\AmpWP\Admin\UserManager;
 use AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching;
 
 /**
@@ -23,6 +24,7 @@ final class Services {
 	 */
 	const ALL = [
 		MonitorCssTransientCaching::class,
+		UserManager::class,
 	];
 
 	/**
