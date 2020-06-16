@@ -251,15 +251,7 @@ class AMP_Options_Manager {
 				if ( ! empty( $data['id'] ) && '__new__' !== $data['id'] ) {
 					$entry_id = sanitize_key( $data['id'] );
 				} else {
-
-					// Generate a hash string to uniquely identify this entry.
-					$entry_id = substr( md5( $entry_vendor_type . $entry_config ), 0, 12 );
-
-					// Avoid duplicates.
-					if ( isset( $options[ Option::ANALYTICS ][ $entry_id ] ) ) {
-						self::add_settings_error( self::OPTION_NAME, 'duplicate_analytics_entry', __( 'Duplicate analytics entry found.', 'amp' ) );
-						continue;
-					}
+					$entry_id = wp_generate_uuid4();
 				}
 
 				if ( isset( $data['delete'] ) ) {

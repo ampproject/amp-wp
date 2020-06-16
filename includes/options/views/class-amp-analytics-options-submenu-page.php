@@ -23,11 +23,9 @@ class AMP_Analytics_Options_Submenu_Page {
 		$is_existing_entry = ! empty( $id );
 
 		if ( $is_existing_entry ) {
-			$entry_slug = sprintf( '%s%s', ( $type ? $type . '-' : '' ), $id );
-			/* translators: %s: the entry slug. */
-			$analytics_title = sprintf( __( 'Analytics: %s', 'amp' ), $entry_slug );
+			$analytics_title = __( 'Analytics Entry', 'amp' );
 		} else {
-			$analytics_title = __( 'Add new entry:', 'amp' );
+			$analytics_title = __( 'New Analytics Entry', 'amp' );
 			$id              = '__new__';
 		}
 
@@ -39,7 +37,7 @@ class AMP_Analytics_Options_Submenu_Page {
 
 		$id_base = sprintf( '%s[analytics][%s]', AMP_Options_Manager::OPTION_NAME, $id );
 		?>
-		<div class="analytics-data-container">
+		<li class="analytics-data-container">
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<h2>
 					<?php echo esc_html( $analytics_title ); ?>
@@ -79,7 +77,7 @@ class AMP_Analytics_Options_Submenu_Page {
 					?>
 				</p>
 			</form>
-		</div><!-- #analytics-data-container -->
+		</li><!-- #analytics-data-container -->
 		<?php
 	}
 
@@ -190,12 +188,14 @@ class AMP_Analytics_Options_Submenu_Page {
 		$this->render_title( ! empty( $analytics_entries ) );
 
 		// Render entries stored in the DB.
+		echo '<ol>';
 		foreach ( $analytics_entries as $entry_id => $entry ) {
 			$this->render_entry( $entry_id, $entry['type'], $entry['config'] );
 		}
 
 		// Empty form for adding more entries.
 		$this->render_entry();
+		echo '</ol>';
 
 		$this->render_scripts();
 	}
