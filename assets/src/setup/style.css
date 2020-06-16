@@ -231,10 +231,6 @@ input[type="radio"]:focus {
 .amp-stepper__item--active {
 	border-radius: 4px;
 	font-weight: 600;
-
-	@media screen and (min-width: 783px) {
-		background-color: var(--light-blue);
-	}
 }
 
 .amp-stepper__item::before {
