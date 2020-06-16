@@ -62,24 +62,24 @@ class Test_AMP_User_Manager extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Provides test users to test initializing the developer tools setting.
+	 * Provides test users to test initializing and updating the developer tools setting.
 	 *
 	 * @return array
 	 */
 	public function get_test_users() {
 		return [
 			'administrator'               => [
-				'1',
+				true,
 				'administrator',
 				false,
 			],
 			'author_without_amp_validate' => [
-				'',
+				false,
 				'author',
 				false,
 			],
 			'author_with_amp_validate'    => [
-				'1',
+				true,
 				'author',
 				true,
 			],
@@ -93,11 +93,11 @@ class Test_AMP_User_Manager extends WP_UnitTestCase {
 	 *
 	 * @dataProvider get_test_users
 	 *
-	 * @param string $expected             The expected meta valud after the test method runs.
-	 * @param string $role                 The user role to test.
-	 * @param bool   $has_amp_validate_cap Whether the user has the amp_validate cap added.
+	 * @param string $user_can_have_dev_tools Whether the user is allowed to have dev tools enabled.
+	 * @param string $role                    The user role to test.
+	 * @param bool   $has_amp_validate_cap    Whether the user has the amp_validate cap added.
 	 */
-	public function test_get_default_enable_developer_tools_setting( $expected, $role, $has_amp_validate_cap ) {
+	public function test_get_default_enable_developer_tools_setting( $user_can_have_dev_tools, $role, $has_amp_validate_cap ) {
 		$user = self::factory()->user->create( compact( 'role' ) );
 
 		if ( $has_amp_validate_cap ) {
@@ -111,6 +111,7 @@ class Test_AMP_User_Manager extends WP_UnitTestCase {
 		$meta = get_user_meta( $user );
 		$this->assertFalse( array_key_exists( 'amp_dev_tools_enabled', $meta ) );
 
+		$expected = $user_can_have_dev_tools ? '1' : '';
 		AMP_User_Manager::get_default_enable_developer_tools_setting( null, $user, 'amp_dev_tools_enabled' );
 		$this->assertEquals( $expected, get_user_meta( $user, 'amp_dev_tools_enabled', true ) );
 	}
@@ -122,11 +123,11 @@ class Test_AMP_User_Manager extends WP_UnitTestCase {
 	 *
 	 * @dataProvider get_test_users
 	 *
-	 * @param string $expected             The expected meta valud after the test method runs.
-	 * @param string $role                 The user role to test.
-	 * @param bool   $has_amp_validate_cap Whether the user has the amp_validate cap added.
+	 * @param string $user_can_have_dev_tools Whether the user is allowed to have dev tools enabled.
+	 * @param string $role                    The user role to test.
+	 * @param bool   $has_amp_validate_cap    Whether the user has the amp_validate cap added.
 	 */
-	public function test_update_enable_developer_tools_permission_check( $expected, $role, $has_amp_validate_cap ) {
+	public function test_update_enable_developer_tools_permission_check( $user_can_have_dev_tools, $role, $has_amp_validate_cap ) {
 		$user = self::factory()->user->create( compact( 'role' ) );
 
 		if ( $has_amp_validate_cap ) {
@@ -137,7 +138,8 @@ class Test_AMP_User_Manager extends WP_UnitTestCase {
 		// Anyone can set it to false.
 		$this->assertNull( AMP_User_Manager::update_enable_developer_tools_permission_check( null, $user, 'amp_dev_tools_enabled', false ) );
 
+		$expected = '1' === $user_can_have_dev_tools ? null : false;
 		// Only users with permissions can set it to true.
-		$this->assertEquals( '1' === $expected ? null : false, AMP_User_Manager::update_enable_developer_tools_permission_check( null, $user, 'amp_dev_tools_enabled', true ) );
+		$this->assertEquals( $expected, AMP_User_Manager::update_enable_developer_tools_permission_check( null, $user, 'amp_dev_tools_enabled', true ) );
 	}
 }
