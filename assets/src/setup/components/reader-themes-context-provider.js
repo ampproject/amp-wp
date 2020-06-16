@@ -3,15 +3,16 @@
  */
 import { createContext, useEffect, useState, useRef, useContext, useMemo } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * External dependencies
  */
 import PropTypes from 'prop-types';
+
 /**
  * Internal dependencies
  */
-import { addQueryArgs } from '@wordpress/url';
 import { useError } from '../utils/use-error';
 import { Options } from './options-context-provider';
 

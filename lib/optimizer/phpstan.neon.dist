@@ -5,6 +5,4 @@ parameters:
 	level: 4
 	inferPrivatePropertyTypeFromConstructor: true
 	paths:
-		- %currentWorkingDirectory%/src/
-	autoload_files:
-		- %currentWorkingDirectory%/vendor/autoload.php
+		- src/

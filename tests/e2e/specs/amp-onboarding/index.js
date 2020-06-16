@@ -18,6 +18,12 @@ describe( 'AMP Setup Screen', () => {
 
 	const getTitleText = () => page.$eval( 'h1', ( el ) => el.innerText );
 
+	it( 'should have stepper items', async () => {
+		const itemCount = await page.$$eval( '.amp-stepper__item', ( els ) => els.length );
+
+		expect( itemCount ).toBe( 6 );
+	} );
+
 	it( 'should be navigable', async () => {
 		let titleText;
 
@@ -70,11 +76,5 @@ describe( 'AMP Setup Screen', () => {
 
 		disabledNextButton = await page.$( `${ NEXT_BUTTON_SELECTOR }[disabled]` );
 		expect( disabledNextButton ).not.toBeNull();
-	} );
-
-	it( 'should have stepper items', async () => {
-		const itemCount = await page.$$eval( '.amp-stepper__item', ( els ) => els.length );
-
-		expect( itemCount ).toBe( 6 );
 	} );
 } );
