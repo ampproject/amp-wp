@@ -35,6 +35,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 
 	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
 	const hasUnmounted = useRef( false );
+
 	const developerToolsOption = user ? user.meta[ userOptionDeveloperTools ] : null;
 
 	/**
@@ -72,6 +73,10 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 	 * Sends user options to the REST endpoint to be saved.
 	 */
 	const saveUserOptions = useCallback( async () => {
+		if ( ! user ) {
+			return;
+		}
+
 		setSavingUserOptions( true );
 
 		try {

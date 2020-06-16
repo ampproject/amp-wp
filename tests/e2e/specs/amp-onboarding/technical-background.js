@@ -26,7 +26,7 @@ describe( 'AMP wizard: technical background', () => {
 		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
 		expect( titleText ).toBe( 'Developer or technically savvy' );
 
-		await page.$eval( '[for="amp-technical-background-enable"]', ( el ) => el.click() );
+		await page.$eval( '[for="technical-background-enable"]', ( el ) => el.click() );
 		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
 		expect( titleText ).toBe( 'Non-technically savvy or wanting a simpler setup' );
 	} );
