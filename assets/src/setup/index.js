@@ -22,6 +22,7 @@ import { NavigationContextProvider } from './components/navigation-context-provi
 import { ReaderThemesContextProvider } from './components/reader-themes-context-provider';
 import { UserContextProvider } from './components/user-context-provider';
 import { ErrorScreen } from './components/error-screen';
+import { SiteScanContextProvider } from './components/site-scan-context-provider';
 
 const { ajaxurl: wpAjaxUrl } = global;
 
@@ -46,8 +47,9 @@ export function Providers( { children } ) {
 						userOptionDeveloperTools={ USER_FIELD_DEVELOPER_TOOLS_ENABLED }
 						userRestEndpoint={ USER_REST_ENDPOINT }
 					>
-
-						{ children }
+						<SiteScanContextProvider>
+							{ children }
+						</SiteScanContextProvider>
 					</UserContextProvider>
 
 				</ReaderThemesContextProvider>
