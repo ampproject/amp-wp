@@ -8,6 +8,7 @@ import apiFetch from '@wordpress/api-fetch';
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -44,7 +45,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 		setSavingOptions( true );
 
 		try {
-			await apiFetch( { method: 'post', url: optionsRestEndpoint, data: options } );
+			await apiFetch( { method: 'post', url: addQueryArgs( optionsRestEndpoint, { 'amp-new-onboarding': '1' } ), data: options } );
 
 			if ( true === hasUnmounted.current ) {
 				return;
@@ -84,7 +85,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 			setFetchingOptions( true );
 
 			try {
-				const fetchedOptions = await apiFetch( { url: optionsRestEndpoint } );
+				const fetchedOptions = await apiFetch( { url: addQueryArgs( optionsRestEndpoint, { 'amp-new-onboarding': '1' } ) } );
 
 				if ( true === hasUnmounted.current ) {
 					return;

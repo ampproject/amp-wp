@@ -3,11 +3,13 @@
  */
 import { createContext, useEffect, useState, useRef, useContext, useMemo } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * External dependencies
  */
 import PropTypes from 'prop-types';
+
 /**
  * Internal dependencies
  */
@@ -105,7 +107,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, readerThemes
 			setFetchingThemes( true );
 
 			try {
-				const fetchedThemes = await apiFetch( { url: readerThemesEndpoint } );
+				const fetchedThemes = await apiFetch( { url: addQueryArgs( readerThemesEndpoint, { 'amp-new-onboarding': '1' } ) } );
 
 				if ( hasUnmounted.current === true ) {
 					return;

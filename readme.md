@@ -105,3 +105,4 @@ If you are a developer, we encourage you to [follow along](https://github.com/am
 ## Changelog ##
 
 For the plugin’s changelog, please see [the Releases page on GitHub](https://github.com/ampproject/amp-wp/releases).
+

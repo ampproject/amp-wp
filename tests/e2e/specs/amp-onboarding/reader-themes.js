@@ -10,25 +10,25 @@ describe( 'AMP wizard: reader themes', () => {
 	} );
 
 	it( 'should have themes', async () => {
-		await page.waitForSelector( '.amp-wp-theme-card' );
+		await page.waitForSelector( '.theme-card' );
 
-		const itemCount = await page.$$eval( '.amp-wp-theme-card', ( els ) => els.length );
+		const itemCount = await page.$$eval( '.theme-card', ( els ) => els.length );
 
 		expect( itemCount ).toBe( 10 );
 	} );
 
 	it( 'should allow different themes to be selected', async () => {
-		await page.waitForSelector( '.amp-wp-theme-card' );
+		await page.waitForSelector( '.theme-card' );
 
-		let titleText = await page.$eval( '.amp-wp-theme-card--selected h2', ( el ) => el.innerText );
+		let titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
 		expect( titleText ).toBe( 'AMP Classic' );
 
 		await page.$eval( '[for="theme-card__twentytwenty"]', ( el ) => el.click() );
-		titleText = await page.$eval( '.amp-wp-theme-card--selected h2', ( el ) => el.innerText );
+		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
 		expect( titleText ).toBe( 'Twenty Twenty' );
 
 		await page.$eval( '[for="theme-card__twentysixteen"]', ( el ) => el.click() );
-		titleText = await page.$eval( '.amp-wp-theme-card--selected h2', ( el ) => el.innerText );
+		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
 		expect( titleText ).toBe( 'Twenty Sixteen' );
 	} );
 } );

@@ -19,8 +19,8 @@ import { NavigationContextProvider } from '../../navigation-context-provider';
 let container;
 
 const getNavButtons = ( containerElement ) => ( {
-	nextButton: containerElement.querySelector( '.amp-setup-nav__next' ),
-	prevButton: containerElement.querySelector( '.amp-setup-nav__prev' ),
+	nextButton: containerElement.querySelector( '.amp-setup-nav__prev-next button.is-primary' ),
+	prevButton: containerElement.querySelector( '.amp-setup-nav__prev-next button:not(.is-primary)' ),
 } );
 
 const MyPageComponent = () => <div />;
