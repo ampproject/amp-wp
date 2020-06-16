@@ -269,18 +269,6 @@ final class ServerSideRenderingTest extends TestCase
                 ],
             ],
 
-            // @todo Remove floor when ampproject/amphtml#27528 is resolved.
-            'decimal dimensions intrinsic closer to floor' => [
-                $input('<amp-img src="https://blog.amp.dev/wp-content/uploads/2020/03/AMP_camp_Blog.png" alt="" height="100.2" width="200.4" layout="intrinsic"></amp-img>'),
-                $expectWithoutBoilerplate('<amp-img src="https://blog.amp.dev/wp-content/uploads/2020/03/AMP_camp_Blog.png" alt="" height="100.2" width="200.4" layout="intrinsic" class="i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" i-amphtml-layout="intrinsic"><i-amphtml-sizer class="i-amphtml-sizer"><img alt="" aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="data:image/svg+xml;charset=utf-8,<svg height=&quot;100&quot; width=&quot;200&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; version=&quot;1.1&quot;/>"></i-amphtml-sizer></amp-img>'),
-            ],
-
-            // @todo Remove floor when ampproject/amphtml#27528 is resolved.
-            'decimal dimensions intrinsic closer to ceiling' => [
-                $input('<amp-img src="https://blog.amp.dev/wp-content/uploads/2020/03/AMP_camp_Blog.png" alt="" height="100.6" width="200.8" layout="intrinsic"></amp-img>'),
-                $expectWithoutBoilerplate('<amp-img src="https://blog.amp.dev/wp-content/uploads/2020/03/AMP_camp_Blog.png" alt="" height="100.6" width="200.8" layout="intrinsic" class="i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" i-amphtml-layout="intrinsic"><i-amphtml-sizer class="i-amphtml-sizer"><img alt="" aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="data:image/svg+xml;charset=utf-8,<svg height=&quot;100&quot; width=&quot;200&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; version=&quot;1.1&quot;/>"></i-amphtml-sizer></amp-img>'),
-            ],
-
             'media attribute without amp-custom' => [
                 $input('<amp-img height="355" layout="fixed" media="(min-width: 650px)" src="wide.jpg" width="466"></amp-img>'),
                 $expectWithoutBoilerplate(
