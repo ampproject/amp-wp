@@ -29,7 +29,7 @@ final class SiteHealth {
 		add_filter( 'site_status_tests', [ $this, 'add_tests' ] );
 		add_filter( 'debug_information', [ $this, 'add_debug_information' ] );
 		add_filter( 'site_status_test_php_modules', [ $this, 'add_extensions' ] );
-		add_action( 'admin_print_styles', [ $this, 'add_styles' ] );
+		add_action( 'admin_print_styles-site-health.php', [ $this, 'add_styles' ] );
 
 		( new ReenableCssTransientCachingAjaxAction() )->register();
 	}
