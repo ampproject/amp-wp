@@ -73,10 +73,10 @@ final class AMP_User_Manager {
 	 *
 	 * @see get_metadata
 	 *
-	 * @param any    $value Null if the value has not yet been filtered.
+	 * @param mixed  $value Null if the value has not yet been filtered.
 	 * @param int    $object_id Object ID associated with the meta data.
 	 * @param string $key The metadata key.
-	 * @return any Null to prevent filtering.
+	 * @return mixed Null to prevent filtering.
 	 */
 	public static function get_default_enable_developer_tools_setting( $value, $object_id, $key ) {
 		if ( self::USER_OPTION_DEVELOPER_TOOLS !== $key ) {
@@ -101,7 +101,7 @@ final class AMP_User_Manager {
 	 * @param false|null $check Null if the setting can be updated. False to block updating.
 	 * @param int        $object_id The object ID.
 	 * @param string     $meta_key The meta key.
-	 * @param any        $meta_value The new value.
+	 * @param mixed      $meta_value The new value.
 	 * @return false|null The filtered result.
 	 */
 	public static function update_enable_developer_tools_permission_check( $check, $object_id, $meta_key, $meta_value ) {
