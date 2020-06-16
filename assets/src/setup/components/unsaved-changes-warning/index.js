@@ -16,11 +16,11 @@ import { User } from '../user-context-provider';
  * @return {null} Renders nothing.
  */
 export function WizardUnsavedChangesWarning() {
-	const { hasOptionsChanges, hasSavedOptions } = useContext( Options );
-	const { hasUserOptionsChanges, hasSavedUserOptions } = useContext( User );
+	const { hasOptionsChanges, didSaveOptions } = useContext( Options );
+	const { hasUserOptionsChanges, didSaveUserOptions } = useContext( User );
 
 	useEffect( () => {
-		if ( ( hasOptionsChanges && ! hasSavedOptions ) || ( hasUserOptionsChanges && ! hasSavedUserOptions ) ) {
+		if ( ( hasOptionsChanges && ! didSaveOptions ) || ( hasUserOptionsChanges && ! didSaveUserOptions ) ) {
 			const warnIfUnsavedChanges = ( event ) => {
 				event.returnValue = __( 'This page has unsaved changes. Are you sure you want to leave?', 'amp' );
 
@@ -35,7 +35,7 @@ export function WizardUnsavedChangesWarning() {
 		}
 
 		return () => undefined;
-	}, [ hasOptionsChanges, hasSavedOptions, hasUserOptionsChanges, hasSavedUserOptions ] );
+	}, [ hasOptionsChanges, didSaveOptions, hasUserOptionsChanges, didSaveUserOptions ] );
 
 	return null;
 }

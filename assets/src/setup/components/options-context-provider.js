@@ -29,7 +29,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 	const [ fetchingOptions, setFetchingOptions ] = useState( false );
 	const [ savingOptions, setSavingOptions ] = useState( false );
 	const [ hasOptionsChanges, setHasOptionsChanges ] = useState( false );
-	const [ hasSavedOptions, setHasSavedOptions ] = useState( false );
+	const [ didSaveOptions, setDidSaveOptions ] = useState( false );
 
 	const { setError } = useError();
 
@@ -56,7 +56,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 		}
 
 		setSavingOptions( false );
-		setHasSavedOptions( true );
+		setDidSaveOptions( true );
 	}, [ options, optionsRestEndpoint, setError ] );
 
 	/**
@@ -70,7 +70,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 		}
 
 		setOptions( { ...options, ...newOptions } );
-		setHasSavedOptions( false );
+		setDidSaveOptions( false );
 	}, [ hasOptionsChanges, options, setHasOptionsChanges, setOptions ] );
 
 	useEffect( () => {
@@ -111,7 +111,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 				{
 					fetchingOptions,
 					hasOptionsChanges,
-					hasSavedOptions,
+					didSaveOptions,
 					options,
 					saveOptions,
 					savingOptions,

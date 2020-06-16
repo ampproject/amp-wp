@@ -15,8 +15,8 @@ import { User } from '../../components/user-context-provider';
  * Final screen, where data is saved.
  */
 export function Save() {
-	const { hasSavedOptions, saveOptions, savingOptions } = useContext( Options );
-	const { hasSavedUserOptions, saveUserOptions, savingUserOptions } = useContext( User );
+	const { didSaveOptions, saveOptions, savingOptions } = useContext( Options );
+	const { didSaveUserOptions, saveUserOptions, savingUserOptions } = useContext( User );
 
 	/**
 	 * Triggers saving of options on arrival of this screen.
@@ -24,10 +24,10 @@ export function Save() {
 	 * @todo Possibly wait for a different user action to save.
 	 */
 	useEffect( () => {
-		if ( ! hasSavedOptions && ! savingOptions ) {
+		if ( ! didSaveOptions && ! savingOptions ) {
 			saveOptions();
 		}
-	}, [ hasSavedOptions, saveOptions, savingOptions ] );
+	}, [ didSaveOptions, saveOptions, savingOptions ] );
 
 	/**
 	 * Triggers saving of user options on arrival of this screen.
@@ -35,16 +35,16 @@ export function Save() {
 	 * @todo Possibly wait for a different user action to save.
 	 */
 	useEffect( () => {
-		if ( ! hasSavedUserOptions && ! savingUserOptions ) {
+		if ( ! didSaveUserOptions && ! savingUserOptions ) {
 			saveUserOptions();
 		}
-	}, [ hasSavedUserOptions, savingUserOptions, saveUserOptions ] );
+	}, [ didSaveUserOptions, savingUserOptions, saveUserOptions ] );
 
 	if ( savingOptions || savingUserOptions ) {
 		return <Loading />;
 	}
 
-	if ( ! hasSavedOptions || ! hasSavedUserOptions ) {
+	if ( ! didSaveOptions || ! didSaveUserOptions ) {
 		return null;
 	}
 

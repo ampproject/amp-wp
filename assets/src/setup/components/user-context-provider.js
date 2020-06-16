@@ -29,7 +29,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 	const [ fetchingUser, setFetchingUser ] = useState( false );
 	const [ savingUserOptions, setSavingUserOptions ] = useState( false );
 	const [ hasUserOptionsChanges, setHasUserOptionsChanges ] = useState( false );
-	const [ hasSavedUserOptions, setHasSavedUserOptions ] = useState( false );
+	const [ didSaveUserOptions, setDidSaveUserOptions ] = useState( false );
 
 	const { setError } = useError();
 
@@ -87,8 +87,8 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 		}
 
 		setSavingUserOptions( false );
-		setHasSavedUserOptions( true );
-	}, [ user, setError, setSavingUserOptions, setHasSavedUserOptions, userRestEndpoint ] );
+		setDidSaveUserOptions( true );
+	}, [ user, setError, setSavingUserOptions, setDidSaveUserOptions, userRestEndpoint ] );
 
 	useEffect( () => () => {
 		hasUnmounted.current = true;
@@ -112,7 +112,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 			},
 		} );
 
-		setHasSavedUserOptions( false );
+		setDidSaveUserOptions( false );
 	};
 
 	return (
@@ -121,7 +121,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 				{
 					developerToolsOption,
 					fetchingUser,
-					hasSavedUserOptions,
+					didSaveUserOptions,
 					hasUserOptionsChanges,
 					saveUserOptions,
 					savingUserOptions,
