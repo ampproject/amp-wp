@@ -1,6 +1,6 @@
 <?php
 /**
- * Class AMP_User_Options.
+ * Class AMP_User.
  *
  * @since 1.6.0
  *
@@ -8,11 +8,18 @@
  */
 
 /**
- * Class AMP_User_Options
+ * Class AMP_User
  *
  * @since 1.6.0
  */
-final class AMP_User_Options {
+final class AMP_User {
+
+	/**
+	 * Custom user capability allowing dev tools
+	 *
+	 * @var string
+	 */
+	const VALIDATE_CAP = 'amp_validate';
 
 	/**
 	 * Key for the user option (stored in amp_features user meta) enabling or disabling developer tools.
@@ -27,7 +34,7 @@ final class AMP_User_Options {
 	public static function init() {
 		add_filter( 'amp_setup_wizard_data', [ __CLASS__, 'inject_setup_wizard_data' ] );
 		add_action( 'rest_api_init', [ __CLASS__, 'register_user_meta' ] );
-		add_filter( 'get_user_metadata', [ __CLASS__, 'maybe_initialize_enable_developer_tools_setting' ], 10, 3 );
+		add_filter( 'get_user_metadata', [ __CLASS__, 'get_default_enable_developer_tools_setting' ], 10, 3 );
 		add_filter( 'update_user_metadata', [ __CLASS__, 'update_enable_developer_tools_permission_check' ], 10, 4 );
 	}
 
@@ -71,23 +78,19 @@ final class AMP_User_Options {
 	 * @param string $key The metadata key.
 	 * @return any Null to prevent filtering.
 	 */
-	public static function maybe_initialize_enable_developer_tools_setting( $value, $object_id, $key ) {
+	public static function get_default_enable_developer_tools_setting( $value, $object_id, $key ) {
 		if ( self::USER_OPTION_DEVELOPER_TOOLS !== $key ) {
 			return $value;
 		}
 
 		$meta            = get_user_meta( $object_id );
-		$metadata_exists = array_key_exists( self::USER_OPTION_DEVELOPER_TOOLS, $meta );
+		$metadata_exists = is_array( $meta ) && array_key_exists( 'amp_dev_tools_enabled', $meta );
 
-		if ( ! $metadata_exists ) {
-			if ( ! current_user_can( 'manage_options' ) && ! current_user_can( 'amp_validate' ) ) {
-				update_user_meta( $object_id, $key, false );
-			} else {
-				update_user_meta( $object_id, $key, true );
-			}
+		if ( $metadata_exists ) {
+			return $value;
 		}
 
-		return $value; // Should stay null. The new value is retrieved and cached at the calling location after the hook.
+		return current_user_can( 'manage_options' ) || current_user_can( self::VALIDATE_CAP );
 	}
 
 	/**
@@ -107,7 +110,7 @@ final class AMP_User_Options {
 		}
 
 		// Only users with specified permissions can have it set to true.
-		if ( true === $meta_value && ! current_user_can( 'manage_options' ) && ! current_user_can( 'amp_valudate' ) ) {
+		if ( true === $meta_value && ! current_user_can( 'manage_options' ) && ! current_user_can( self::VALIDATE_CAP ) ) {
 			return false;
 		}
 

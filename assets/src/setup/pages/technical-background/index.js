@@ -11,6 +11,7 @@ import { Navigation } from '../../components/navigation-context-provider';
 import { User } from '../../components/user-context-provider';
 import { User1, User2 } from '../../components/svg/user-icons';
 import { Loading } from '../../components/loading';
+import { Selectable } from '../../components/selectable';
 import './style.css';
 
 /**
@@ -28,13 +29,13 @@ export function TechnicalBackground() {
 	 * Allow moving forward.
 	 */
 	useEffect( () => {
-		if ( canGoForward === false && developerToolsOption && 'unset' !== developerToolsOption ) {
+		if ( canGoForward === false ) {
 			setCanGoForward( true );
 		}
 	}, [ canGoForward, developerToolsOption, setCanGoForward ] );
 
-	const disableInputID = 'amp-technical-background-disable';
-	const enableInputID = 'amp-technical-background-enable';
+	const disableInputID = 'technical-background-disable';
+	const enableInputID = 'technical-background-enable';
 
 	if ( fetchingUser ) {
 		return <Loading />;
@@ -46,20 +47,20 @@ export function TechnicalBackground() {
 				{ __( 'In order to recommend the best AMP experience for your site, we\'d like to know if you\'re a more technical user', 'amp' ) }
 			</p>
 			<form>
-				<div className={ `amp-technical-background-option-container ${ 'enabled' === developerToolsOption ? 'amp-technical-background-option-container--active' : '' }` }>
-					<label htmlFor={ disableInputID } className="amp-technical-background-option">
-						<div className="amp-technical-background-option__input-container">
+				<Selectable className={ `technical-background-option-container` } selected={ true === developerToolsOption }>
+					<label htmlFor={ disableInputID } className="technical-background-option">
+						<div className="technical-background-option__input-container">
 							<input
 								type="radio"
 								id={ disableInputID }
-								checked={ 'enabled' === developerToolsOption }
+								checked={ true === developerToolsOption }
 								onChange={ () => {
-									setDeveloperToolsOption( 'enabled' );
+									setDeveloperToolsOption( true );
 								} }
 							/>
 						</div>
 						<User1 />
-						<div className="amp-technical-background-option__description">
+						<div className="technical-background-option__description">
 							<h2>
 								{ __( 'Developer or Technically Savvy', 'amp' ) }
 							</h2>
@@ -68,31 +69,31 @@ export function TechnicalBackground() {
 							</p>
 						</div>
 					</label>
-				</div>
+				</Selectable>
 
-				<div className={ `amp-technical-background-option-container ${ 'disabled' === developerToolsOption ? 'amp-technical-background-option-container--active' : '' }` }>
-					<label htmlFor={ enableInputID } className="amp-technical-background-option">
-						<div className="amp-technical-background-option__input-container">
+				<Selectable className={ `technical-background-option-container` } selected={ false === developerToolsOption }>
+					<label htmlFor={ enableInputID } className="technical-background-option">
+						<div className="technical-background-option__input-container">
 							<input
 								type="radio"
 								id={ enableInputID }
-								checked={ 'disabled' === developerToolsOption }
+								checked={ false === developerToolsOption }
 								onChange={ () => {
-									setDeveloperToolsOption( 'disabled' );
+									setDeveloperToolsOption( false );
 								} }
 							/>
 						</div>
 						<User2 />
-						<div className="amp-technical-background-option__description">
+						<div className="technical-background-option__description">
 							<h2>
-								{ __( 'Non-technically Savvy or Wanting a simpler setup', 'amp' ) }
+								{ __( 'Non-technically savvy or wanting a simpler setup', 'amp' ) }
 							</h2>
 							<p>
 								{ __( 'I am not a developer and I am not responsible for configuring and fixing issues on my site. I am a site owner and/or content creator who wants to take advantage of AMP performance.', 'amp' ) }
 							</p>
 						</div>
 					</label>
-				</div>
+				</Selectable>
 			</form>
 		</div>
 	);

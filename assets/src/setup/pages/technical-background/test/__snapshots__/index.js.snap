@@ -7,18 +7,18 @@ exports[`TechnicalBackground matches snapshot 1`] = `
   </p>
   <form>
     <div
-      className="amp-technical-background-option-container "
+      className="technical-background-option-container selectable selectable--left"
     >
       <label
-        className="amp-technical-background-option"
-        htmlFor="amp-technical-background-disable"
+        className="technical-background-option"
+        htmlFor="technical-background-disable"
       >
         <div
-          className="amp-technical-background-option__input-container"
+          className="technical-background-option__input-container"
         >
           <input
             checked={false}
-            id="amp-technical-background-disable"
+            id="technical-background-disable"
             onChange={[Function]}
             type="radio"
           />
@@ -236,7 +236,7 @@ exports[`TechnicalBackground matches snapshot 1`] = `
           </defs>
         </svg>
         <div
-          className="amp-technical-background-option__description"
+          className="technical-background-option__description"
         >
           <h2>
             Developer or Technically Savvy
@@ -248,18 +248,18 @@ exports[`TechnicalBackground matches snapshot 1`] = `
       </label>
     </div>
     <div
-      className="amp-technical-background-option-container "
+      className="technical-background-option-container selectable selectable--left"
     >
       <label
-        className="amp-technical-background-option"
-        htmlFor="amp-technical-background-enable"
+        className="technical-background-option"
+        htmlFor="technical-background-enable"
       >
         <div
-          className="amp-technical-background-option__input-container"
+          className="technical-background-option__input-container"
         >
           <input
             checked={false}
-            id="amp-technical-background-enable"
+            id="technical-background-enable"
             onChange={[Function]}
             type="radio"
           />
@@ -405,10 +405,10 @@ exports[`TechnicalBackground matches snapshot 1`] = `
           </defs>
         </svg>
         <div
-          className="amp-technical-background-option__description"
+          className="technical-background-option__description"
         >
           <h2>
-            Non-technically Savvy or Wanting a simpler setup
+            Non-technically savvy or wanting a simpler setup
           </h2>
           <p>
             I am not a developer and I am not responsible for configuring and fixing issues on my site. I am a site owner and/or content creator who wants to take advantage of AMP performance.

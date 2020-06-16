@@ -1,36 +1,26 @@
-.amp-technical-background-option-container {
-	border: 2px solid #e8e8e8;
-	box-sizing: border-box;
-	box-shadow: -10px 0 0 #e8e8e8;
-	border-radius: 8px;
+.technical-background-option-container {
 	margin-bottom: 2rem;
 	padding: 1.5rem 0;
 }
 
-.amp-technical-background-option-container--active {
-	border-color: #005af0;
-	box-shadow: -10px 0 0 #005af0;
-}
-
-.amp-technical-background-option {
+.technical-background-option {
 	display: flex;
-
 }
 
-.amp-technical-background-option__input-container {
+.technical-background-option__input-container {
 	padding: 1.5rem;
 }
 
-.amp-technical-background-option svg {
+.technical-background-option svg {
 	flex-shrink: 0;
 	width: 80px;
 }
 
-.amp-technical-background-option__description {
+.technical-background-option__description {
 	padding: 0 2rem;
 }
 
-.amp-technical-background-option__description h2 {
+.technical-background-option__description h2 {
 	font-size: 1.5rem;
 	line-height: 1.5;
 	margin-top: 0;
