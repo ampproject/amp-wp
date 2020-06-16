@@ -14,6 +14,13 @@ import PropTypes from 'prop-types';
  */
 import './style.css';
 
+/**
+ * Screen that shows when an error has broken the application.
+ *
+ * @param {Object} props Component props.
+ * @param {Object} props.error Error object containing a message string.
+ * @param {string} props.exitLink The link to return to the admin.
+ */
 export function ErrorScreen( { error, exitLink } ) {
 	return (
 		<div className="error-screen-container">
