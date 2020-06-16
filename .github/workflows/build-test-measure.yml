@@ -15,7 +15,7 @@ jobs:
 
   dev-zip:
     name: Build dev build ZIP and upload as GHA artifact
-    if: github.event.pull_request.draft == false
+    if: github.event.pull_request.draft == false && github.event.repository.fork == false
     runs-on: ubuntu-latest
     outputs:
       branch-name: ${{ steps.retrieve-branch-name.outputs.branch_name }}
@@ -86,7 +86,7 @@ jobs:
 
   prod-zip:
     name: Build prod build ZIP and upload as GHA artifact
-    if: github.event.pull_request.draft == false
+    if: github.event.pull_request.draft == false && github.event.repository.fork == false
     runs-on: ubuntu-latest
     outputs:
       branch-name: ${{ steps.retrieve-branch-name.outputs.branch_name }}
