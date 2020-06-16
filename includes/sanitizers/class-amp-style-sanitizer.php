@@ -1498,7 +1498,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$parsed         = null;
 		$cache_key      = null;
 		$cached         = true;
-		$cache_group    = 'amp-parsed-stylesheet-v27'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
+		$cache_group    = 'amp-parsed-stylesheet-v28'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
 		$use_transients = $this->should_use_transient_caching();
 
 		$cache_impacting_options = array_merge(
@@ -2078,11 +2078,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				}
 				if ( ! $sanitized ) {
 					$at_rule_processed_list = $this->process_css_list( $css_item, $options );
-					if ( ! empty( $at_rule_processed_list['viewport_rules'] ) ) {
-						$viewport_rules[] = $at_rule_processed_list['viewport_rules'];
-					}
-
-					$validation_results = array_merge(
+					$viewport_rules         = array_merge( $viewport_rules, $at_rule_processed_list['viewport_rules'] );
+					$validation_results     = array_merge(
 						$validation_results,
 						$at_rule_processed_list['validation_results']
 					);
