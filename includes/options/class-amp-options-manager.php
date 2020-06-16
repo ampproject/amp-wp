@@ -31,7 +31,17 @@ class AMP_Options_Manager {
 		Option::ALL_TEMPLATES_SUPPORTED => true,
 		Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
 		Option::VERSION                 => AMP__VERSION,
+		Option::READER_THEME            => AMP_Reader_Themes::DEFAULT_READER_THEME,
 	];
+
+	/**
+	 * Sets up hooks.
+	 */
+	public static function init() {
+		add_action( 'admin_notices', [ __CLASS__, 'render_welcome_notice' ] );
+		add_action( 'admin_notices', [ __CLASS__, 'render_php_css_parser_conflict_notice' ] );
+		add_action( 'admin_notices', [ __CLASS__, 'insecure_connection_notice' ] );
+	}
 
 	/**
 	 * Register settings.
@@ -47,9 +57,6 @@ class AMP_Options_Manager {
 		);
 
 		add_action( 'update_option_' . self::OPTION_NAME, [ __CLASS__, 'maybe_flush_rewrite_rules' ], 10, 2 );
-		add_action( 'admin_notices', [ __CLASS__, 'render_welcome_notice' ] );
-		add_action( 'admin_notices', [ __CLASS__, 'render_php_css_parser_conflict_notice' ] );
-		add_action( 'admin_notices', [ __CLASS__, 'insecure_connection_notice' ] );
 	}
 
 	/**
@@ -198,7 +205,7 @@ class AMP_Options_Manager {
 
 			foreach ( $new_options[ Option::SUPPORTED_POST_TYPES ] as $post_type ) {
 				if ( ! post_type_exists( $post_type ) ) {
-					add_settings_error( self::OPTION_NAME, 'unknown_post_type', __( 'Unrecognized post type.', 'amp' ) );
+					self::add_settings_error( self::OPTION_NAME, 'unknown_post_type', __( 'Unrecognized post type.', 'amp' ) );
 				} else {
 					$options[ Option::SUPPORTED_POST_TYPES ][] = $post_type;
 				}
@@ -222,19 +229,19 @@ class AMP_Options_Manager {
 		}
 
 		// Validate analytics.
-		if ( isset( $new_options[ Option::ANALYTICS ] ) ) {
+		if ( isset( $new_options[ Option::ANALYTICS ] ) && $new_options[ Option::ANALYTICS ] !== $options[ Option::ANALYTICS ] ) {
 			foreach ( $new_options[ Option::ANALYTICS ] as $id => $data ) {
 
 				// Check save/delete pre-conditions and proceed if correct.
 				if ( empty( $data['config'] ) ) {
-					add_settings_error( self::OPTION_NAME, 'missing_analytics_config', __( 'Missing config.', 'amp' ) );
+					self::add_settings_error( self::OPTION_NAME, 'missing_analytics_config', __( 'Missing config.', 'amp' ) );
 					continue;
 				}
 
 				// Validate JSON configuration.
 				$is_valid_json = AMP_HTML_Utils::is_valid_json( $data['config'] );
 				if ( ! $is_valid_json ) {
-					add_settings_error( self::OPTION_NAME, 'invalid_analytics_config_json', __( 'Invalid analytics config JSON.', 'amp' ) );
+					self::add_settings_error( self::OPTION_NAME, 'invalid_analytics_config_json', __( 'Invalid analytics config JSON.', 'amp' ) );
 					continue;
 				}
 
@@ -250,7 +257,7 @@ class AMP_Options_Manager {
 
 					// Avoid duplicates.
 					if ( isset( $options[ Option::ANALYTICS ][ $entry_id ] ) ) {
-						add_settings_error( self::OPTION_NAME, 'duplicate_analytics_entry', __( 'Duplicate analytics entry found.', 'amp' ) );
+						self::add_settings_error( self::OPTION_NAME, 'duplicate_analytics_entry', __( 'Duplicate analytics entry found.', 'amp' ) );
 						continue;
 					}
 				}
@@ -263,6 +270,13 @@ class AMP_Options_Manager {
 						'config' => $entry_config,
 					];
 				}
+			}
+		}
+
+		if ( isset( $new_options[ Option::READER_THEME ] ) ) {
+			$reader_theme_slugs = wp_list_pluck( ( new AMP_Reader_Themes() )->get_themes(), 'slug' );
+			if ( in_array( $new_options[ Option::READER_THEME ], $reader_theme_slugs, true ) ) {
+				$options[ Option::READER_THEME ] = $new_options[ Option::READER_THEME ];
 			}
 		}
 
@@ -313,7 +327,7 @@ class AMP_Options_Manager {
 			}
 
 			if ( isset( $error, $code ) ) {
-				add_settings_error(
+				self::add_settings_error(
 					self::OPTION_NAME,
 					$code,
 					esc_html(
@@ -339,6 +353,20 @@ class AMP_Options_Manager {
 		$amp_options = self::get_options();
 
 		$amp_options[ $option ] = $value;
+		return update_option( self::OPTION_NAME, $amp_options, false );
+	}
+
+	/**
+	 * Update plugin options.
+	 *
+	 * @param array $options Plugin option name.
+	 * @return bool Whether update succeeded.
+	 */
+	public static function update_options( $options ) {
+		$amp_options = array_merge(
+			self::get_options(),
+			$options
+		);
 
 		return update_option( self::OPTION_NAME, $amp_options, false );
 	}
@@ -361,7 +389,7 @@ class AMP_Options_Manager {
 
 			$errors = get_settings_errors( self::OPTION_NAME );
 			if ( empty( $errors ) ) {
-				add_settings_error( self::OPTION_NAME, 'settings_updated', __( 'The analytics entry was successfully saved!', 'amp' ), 'updated' );
+				self::add_settings_error( self::OPTION_NAME, 'settings_updated', __( 'The analytics entry was successfully saved!', 'amp' ), 'updated' );
 				$errors = get_settings_errors( self::OPTION_NAME );
 			}
 			set_transient( 'settings_errors', $errors );
@@ -674,7 +702,24 @@ class AMP_Options_Manager {
 		}
 
 		if ( isset( $message ) ) {
-			add_settings_error( self::OPTION_NAME, 'template_mode_updated', wp_kses_post( $message ), $notice_type );
+			self::add_settings_error( self::OPTION_NAME, 'template_mode_updated', wp_kses_post( $message ), $notice_type );
 		}
+	}
+
+	/**
+	 * Register a settings error to be displayed to the user.
+	 *
+	 * @see add_settings_error()
+	 *
+	 * @param string $setting Slug title of the setting to which this error applies.
+	 * @param string $code    Slug-name to identify the error. Used as part of 'id' attribute in HTML output.
+	 * @param string $message The formatted message text to display to the user (will be shown inside styled
+	 *                        `<div>` and `<p>` tags).
+	 * @param string $type    Optional. Message type, controls HTML class. Possible values include 'error',
+	 *                        'success', 'warning', 'info'. Default 'error'.
+	 */
+	private static function add_settings_error( $setting, $code, $message, $type = 'error' ) {
+		require_once ABSPATH . 'wp-admin/includes/template.php';
+		add_settings_error( $setting, $code, $message, $type );
 	}
 }

@@ -370,35 +370,35 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 
 			'single check without existing ID'      => [
 				[
-					[ $element_factory, null, 'some-prefix', 'some-prefix' ],
+					[ $element_factory, null, 'some-prefix', 'some-prefix-0' ],
 				],
 			],
 
 			'consecutive checks count upwards'      => [
 				[
-					[ $element_factory, null, 'some-prefix', 'some-prefix' ],
-					[ $element_factory, null, 'some-prefix', 'some-prefix-2' ],
+					[ $element_factory, null, 'some-prefix', 'some-prefix-0' ],
+					[ $element_factory, null, 'some-prefix', 'some-prefix-1' ],
 				],
 			],
 
 			'consecutive checks for same element return same ID' => [
 				[
-					[ $element_factory, null, 'some-prefix', 'some-prefix' ],
-					[ null, null, 'some-prefix', 'some-prefix' ],
+					[ $element_factory, null, 'some-prefix', 'some-prefix-0' ],
+					[ null, null, 'some-prefix', 'some-prefix-0' ],
 				],
 			],
 
 			'mixing prefixes keeps counts separate' => [
 				[
 					[ $element_factory, 'my-id', 'some-prefix', 'my-id' ],
-					[ $element_factory, null, 'some-prefix', 'some-prefix' ],
+					[ $element_factory, null, 'some-prefix', 'some-prefix-0' ],
+					[ $element_factory, null, 'some-prefix', 'some-prefix-1' ],
+					[ $element_factory, null, 'other-prefix', 'other-prefix-0' ],
+					[ $element_factory, null, 'other-prefix', 'other-prefix-1' ],
 					[ $element_factory, null, 'some-prefix', 'some-prefix-2' ],
-					[ $element_factory, null, 'other-prefix', 'other-prefix' ],
-					[ $element_factory, null, 'other-prefix', 'other-prefix-2' ],
-					[ $element_factory, null, 'some-prefix', 'some-prefix-3' ],
 					[ $element_factory, 'another-id', 'some-prefix', 'another-id' ],
-					[ $element_factory, null, 'some-prefix', 'some-prefix-4' ],
-					[ null, null, 'some-prefix', 'some-prefix-4' ],
+					[ $element_factory, null, 'some-prefix', 'some-prefix-3' ],
+					[ null, null, 'some-prefix', 'some-prefix-3' ],
 				],
 			],
 		];

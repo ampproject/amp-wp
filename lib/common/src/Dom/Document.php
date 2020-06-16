@@ -1492,7 +1492,7 @@ final class Document extends DOMDocument
      * @param string     $prefix  Optional. The prefix to use (should not have a trailing dash). Defaults to 'i-amp-id'.
      * @return string ID to use.
      */
-    public function getElementId(DOMElement $element, $prefix = 'i-amp-id')
+    public function getElementId(DOMElement $element, $prefix = 'i-amp')
     {
         if ($element->hasAttribute('id')) {
             return $element->getAttribute('id');
@@ -1500,11 +1500,11 @@ final class Document extends DOMDocument
 
         if (array_key_exists($prefix, $this->indexCounter)) {
             ++$this->indexCounter[$prefix];
-            $id = "{$prefix}-{$this->indexCounter[ $prefix ]}";
         } else {
-            $id                          = $prefix;
-            $this->indexCounter[$prefix] = 1;
+            $this->indexCounter[$prefix] = 0;
         }
+
+        $id = "{$prefix}-{$this->indexCounter[ $prefix ]}";
 
         while ($this->getElementById($id) instanceof DOMElement) {
             ++$this->indexCounter[$prefix];
