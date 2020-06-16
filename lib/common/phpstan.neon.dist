@@ -5,9 +5,7 @@ parameters:
 	level: 4
 	inferPrivatePropertyTypeFromConstructor: true
 	paths:
-		- %currentWorkingDirectory%/src/
-	autoload_files:
-		- %currentWorkingDirectory%/vendor/autoload.php
+		- src/
 	ignoreErrors:
 		- '#^PHPDoc tag @throws with type AmpProject\\Exception\\FailedRemoteRequest is not subtype of Throwable$#'
 		-
