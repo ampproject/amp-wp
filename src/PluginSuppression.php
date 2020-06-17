@@ -106,28 +106,36 @@ final class PluginSuppression implements Service, Registerable {
 				#suppressed-plugins-table {
 					margin-top: 20px;
 				}
+
 				#suppressed-plugins-table th {
 					font-weight: 400;
 				}
+
 				#suppressed-plugins-table th,
 				#suppressed-plugins-table td {
 					padding: 8px 10px;
 				}
+
 				#suppressed-plugins-table .column-status {
 					width: 120px;
 				}
+
 				#suppressed-plugins-table .column-status > select {
 					width: 100%;
 				}
+
 				#suppressed-plugins-table .column-plugin {
 					width: 45%;
 				}
+
 				#suppressed-plugins-table .column-plugin .plugin-author-uri {
 					margin-top: 0;
 				}
+
 				#suppressed-plugins-table .column-details {
 					width: 50%;
 				}
+
 				#suppressed-plugins-table tbody th,
 				#suppressed-plugins-table tbody td {
 					vertical-align: top;
@@ -139,28 +147,35 @@ final class PluginSuppression implements Service, Registerable {
 					margin-bottom: 1em;
 					list-style-type: disc;
 				}
+
 				#suppressed-plugins-table summary {
 					user-select: none;
 					cursor: pointer;
 					line-height: 30px; /* To match .wp-core-ui select */
 				}
+
 				li.error-removed {
 					color: <?php echo esc_html( Icon::valid()->get_color() ); ?>;
 				}
+
 				li.error-kept {
 					color: <?php echo esc_html( Icon::invalid()->get_color() ); ?>;
 				}
+
 				li.error-unreviewed > a {
-					background-color: #fef7f1;
-					text-shadow: #d54e21 0 0 1px;
+					font-weight: bold;
 				}
+
 				@media screen and (max-width: 782px) {
+
 					#suppressed-plugins-table summary {
 						line-height: 40px; /* To match .wp-core-ui select */
 					}
+
 					#suppressed-plugins-table {
 						display: table;
 					}
+
 					#suppressed-plugins-table th,
 					#suppressed-plugins-table td {
 						display: table-cell;
