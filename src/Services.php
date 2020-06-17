@@ -35,7 +35,7 @@ final class Services {
 	 *
 	 * @return ServiceContainer
 	 */
-	public static function get_container(  ) {
+	public static function get_container() {
 		static $container = null;
 
 		if ( null === $container ) {
