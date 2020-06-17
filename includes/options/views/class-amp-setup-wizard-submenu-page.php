@@ -6,6 +6,8 @@
  * @since 1.6.0
  */
 
+use AmpProject\AmpWP\Admin\DevToolsUserAccess;
+
 /**
  * AMP setup wizard submenu page class.
  *
@@ -136,20 +138,15 @@ final class AMP_Setup_Wizard_Submenu_Page {
 			'OPTIONS_REST_ENDPOINT'       => rest_url( 'amp/v1/options' ),
 			'READER_THEMES_REST_ENDPOINT' => rest_url( 'amp/v1/reader-themes' ),
 			'UPDATES_NONCE'               => wp_create_nonce( 'updates' ),
+			'USER_OPTION_DEVELOPER_TOOLS' => DevToolsUserAccess::USER_OPTION_DEVELOPER_TOOLS,
+			'USER_REST_ENDPOINT'          => rest_url( 'wp/v2/users/me' ),
 		];
 
 		wp_add_inline_script(
 			self::ASSET_HANDLE,
 			sprintf(
 				'var ampSetup = %s;',
-				wp_json_encode(
-					/**
-					 * Filters the array of data passed to the setup wizard application.
-					 *
-					 * @param array $setup_wizard_data Associateive array of data.
-					 */
-					apply_filters( 'amp_setup_wizard_data', $setup_wizard_data )
-				)
+				wp_json_encode( $setup_wizard_data )
 			),
 			'before'
 		);

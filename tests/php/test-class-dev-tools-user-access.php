@@ -39,7 +39,6 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 	public function test_register() {
 		$this->dev_tools_user_access->register();
 
-		$this->assertEquals( 10, has_filter( 'amp_setup_wizard_data', [ $this->dev_tools_user_access, 'inject_setup_wizard_data' ] ) );
 		$this->assertEquals( 10, has_action( 'rest_api_init', [ $this->dev_tools_user_access, 'register_user_meta' ] ) );
 		$this->assertEquals( 10, has_filter( 'get_user_metadata', [ $this->dev_tools_user_access, 'get_default_enable_developer_tools_setting' ] ) );
 		$this->assertEquals( 10, has_filter( 'update_user_metadata', [ $this->dev_tools_user_access, 'update_enable_developer_tools_permission_check' ] ) );
@@ -56,24 +55,6 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 		$this->dev_tools_user_access->register_user_meta();
 
 		$this->assertArrayHasKey( 'amp_dev_tools_enabled', $wp_meta_keys['user'][''] );
-	}
-
-	/**
-	 * Tests DevToolsUserAccess::inject_setup_wizard_data
-	 *
-	 * @covers DevToolsUserAccess::inject_setup_wizard_data
-	 */
-	public function test_inject_setup_wizard_data() {
-		$data = $this->dev_tools_user_access->inject_setup_wizard_data( [ 'pre_filtered_data' => 1 ] );
-
-		$this->assertEquals(
-			[
-				'pre_filtered_data'           => 1,
-				'USER_OPTION_DEVELOPER_TOOLS' => 'amp_dev_tools_enabled',
-				'USER_REST_ENDPOINT'          => rest_url( 'wp/v2/users/me' ),
-			],
-			$data
-		);
 	}
 
 	/**

@@ -36,7 +36,6 @@ final class DevToolsUserAccess implements Service {
 	 * Sets up hooks.
 	 */
 	public function register() {
-		add_filter( 'amp_setup_wizard_data', [ $this, 'inject_setup_wizard_data' ] );
 		add_action( 'rest_api_init', [ $this, 'register_user_meta' ] );
 		add_filter( 'get_user_metadata', [ $this, 'get_default_enable_developer_tools_setting' ], 10, 3 );
 		add_filter( 'update_user_metadata', [ $this, 'update_enable_developer_tools_permission_check' ], 10, 4 );
@@ -57,19 +56,6 @@ final class DevToolsUserAccess implements Service {
 				'type'         => 'boolean',
 			]
 		);
-	}
-
-	/**
-	 * Add fields relevant to user options to the data passed to the setup wizard app.
-	 *
-	 * @param array $data Associative array of data provided to the app.
-	 * @return array Filtered array.
-	 */
-	public function inject_setup_wizard_data( $data ) {
-		$data['USER_OPTION_DEVELOPER_TOOLS'] = self::USER_OPTION_DEVELOPER_TOOLS;
-		$data['USER_REST_ENDPOINT']          = rest_url( 'wp/v2/users/me' );
-
-		return $data;
 	}
 
 	/**
