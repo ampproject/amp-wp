@@ -11,6 +11,8 @@ use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AMP_Post_Type_Support;
 use AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching;
+use AmpProject\AmpWP\Infrastructure\Conditional;
+use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
@@ -22,7 +24,7 @@ use AmpProject\AmpWP\Option;
  *
  * @since 1.5.0
  */
-final class SiteHealth implements Service, Registerable {
+final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 
 	/**
 	 * Service that monitors and controls the CSS transient caching.
@@ -31,6 +33,24 @@ final class SiteHealth implements Service, Registerable {
 	 * @var MonitorCssTransientCaching
 	 */
 	private $css_transient_caching;
+
+	/**
+	 * Check whether the conditional object is currently needed.
+	 *
+	 * @return bool Whether the conditional object is needed.
+	 */
+	public static function is_needed() {
+		return is_admin() && ! wp_doing_ajax();
+	}
+
+	/**
+	 * Get the action to use for registering the service.
+	 *
+	 * @return string Registration action to use.
+	 */
+	public static function get_registration_action() {
+		return 'wp_loaded';
+	}
 
 	/**
 	 * SiteHealth constructor.

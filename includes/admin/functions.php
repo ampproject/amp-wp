@@ -5,7 +5,6 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Admin\SiteHealth;
 use AmpProject\AmpWP\Option;
 
 /**
