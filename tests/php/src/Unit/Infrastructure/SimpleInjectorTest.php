@@ -44,7 +44,7 @@ final class SimpleInjectorTest extends TestCase {
 				Fixture\DummyInterface::class,
 				Fixture\DummyClassWithDependency::class
 			);
-		$object = $injector->make( Fixture\DummyInterface::class );
+		$object   = $injector->make( Fixture\DummyInterface::class );
 
 		$this->assertInstanceOf( Fixture\DummyInterface::class, $object );
 		$this->assertInstanceOf( Fixture\DummyClassWithDependency::class, $object );
@@ -72,7 +72,10 @@ final class SimpleInjectorTest extends TestCase {
 		$object = ( new SimpleInjector() )
 			->make(
 				Fixture\DummyClassWithNamedArguments::class,
-				[ 'argument_a' => 42, 'argument_b' => 'Mr Alderson' ]
+				[
+					'argument_a' => 42,
+					'argument_b' => 'Mr Alderson',
+				]
 			);
 
 		$this->assertInstanceOf( Fixture\DummyClassWithNamedArguments::class, $object );
@@ -115,13 +118,13 @@ final class SimpleInjectorTest extends TestCase {
 		$injector = ( new SimpleInjector() )
 			->delegate(
 				Fixture\DummyInterface::class,
-				function ( string $class ) {
-					$object = new stdClass();
+				static function ( $class ) {
+					$object             = new stdClass();
 					$object->class_name = $class;
 					return $object;
 				}
 			);
-		$object = $injector->make( Fixture\DummyInterface::class );
+		$object   = $injector->make( Fixture\DummyInterface::class );
 
 		$this->assertInstanceOf( stdClass::class, $object );
 		$this->assertObjectHasAttribute( 'class_name', $object );
@@ -136,13 +139,13 @@ final class SimpleInjectorTest extends TestCase {
 			)
 			->delegate(
 				Fixture\DummyClassWithDependency::class,
-				function ( string $class ) {
-					$object = new stdClass();
+				static function ( $class ) {
+					$object             = new stdClass();
 					$object->class_name = $class;
 					return $object;
 				}
 			);
-		$object = $injector->make( Fixture\DummyInterface::class );
+		$object   = $injector->make( Fixture\DummyInterface::class );
 
 		$this->assertInstanceOf( stdClass::class, $object );
 		$this->assertObjectHasAttribute( 'class_name', $object );

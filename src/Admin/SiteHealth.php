@@ -29,7 +29,6 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 	/**
 	 * Service that monitors and controls the CSS transient caching.
 	 *
-	 *
 	 * @var MonitorCssTransientCaching
 	 */
 	private $css_transient_caching;

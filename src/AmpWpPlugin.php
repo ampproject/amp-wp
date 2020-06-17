@@ -21,10 +21,6 @@ use AmpProject\AmpWP\Infrastructure\ServiceBasedPlugin;
  */
 final class AmpWpPlugin extends ServiceBasedPlugin {
 
-	/*--------------------------------------------------------------------------
-	 *-- 1. Define the services that make up this plugin.                     --
-	 *------------------------------------------------------------------------*/
-
 	/*
 	 * The "plugin" is only a tool to hook arbitrary code up to the WordPress
 	 * execution flow.
@@ -51,10 +47,6 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		];
 	}
 
-	/*--------------------------------------------------------------------------
-	 *-- 2. Configure the injector so it knows how to assemble them.          --
-	 *------------------------------------------------------------------------*/
-
 	/**
 	 * Get the bindings for the dependency injector.
 	 *
@@ -70,8 +62,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 * @return array<string> Associative array of fully qualified class names.
 	 */
 	protected function get_bindings() {
-		return [
-		];
+		return [];
 	}
 
 	/**
@@ -86,8 +77,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 *                      to argument values.
 	 */
 	protected function get_arguments() {
-		return [
-		];
+		return [];
 	}
 
 	/**
@@ -103,8 +93,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 * @return array<string> Array of fully qualified class names.
 	 */
 	protected function get_shared_instances() {
-		return [
-		];
+		return [];
 	}
 
 	/**
@@ -119,7 +108,6 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 * @return array<callable> Associative array of callables.
 	 */
 	protected function get_delegations() {
-		return [
-		];
+		return [];
 	}
 }
