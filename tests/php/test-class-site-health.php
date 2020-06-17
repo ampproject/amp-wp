@@ -33,9 +33,12 @@ class Test_Site_Health extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
-		$this->instance = AmpWpPluginFactory::create()
+
+		$injector = AmpWpPluginFactory::create()
 			->get_container()
-			->get( 'site_health_integration' );
+			->get( 'injector' );
+
+		$this->instance = $injector->make( SiteHealth::class );
 	}
 
 	/**
