@@ -24,6 +24,8 @@
     "@wordpress/browserslist-config": "^2.6.0",
     "@wordpress/eslint-plugin": "^6.0.0",
     "@wordpress/scripts": "^9.1.0",
+    "babel-plugin-inline-react-svg": "^1.1.1",
+    "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
     "browserslist": "^4.12.0",
     "eslint-plugin-eslint-comments": "^3.2.0",
     "eslint-plugin-import": "^2.21.2",
