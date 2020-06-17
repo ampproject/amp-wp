@@ -162,10 +162,6 @@ final class PluginSuppression implements Service, Registerable {
 					color: <?php echo esc_html( Icon::invalid()->get_color() ); ?>;
 				}
 
-				li.error-unreviewed > a {
-					font-weight: bold;
-				}
-
 				@media screen and (max-width: 782px) {
 
 					#suppressed-plugins-table summary {
@@ -337,6 +333,28 @@ final class PluginSuppression implements Service, Registerable {
 	 * @param array $validation_errors Validation errors.
 	 */
 	private function render_validation_error_details( $validation_errors ) {
+		// Sort unreviewed errors before reviewed ones, and kept markup before removed markup.
+		usort(
+			$validation_errors,
+			static function ( $a, $b ) {
+				/** @var WP_Term */
+				$a_term = $a['term'];
+
+				/** @var WP_Term */
+				$b_term = $b['term'];
+
+				$a_reviewed = ( (int) $a_term->term_group & AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
+				$b_reviewed = ( (int) $b_term->term_group & AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
+				if ( $a_reviewed !== $b_reviewed ) {
+					return (int) $a_reviewed - (int) $b_reviewed;
+				}
+
+				$a_removed = ( (int) $a_term->term_group & AMP_Validation_Error_Taxonomy::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
+				$b_removed = ( (int) $b_term->term_group & AMP_Validation_Error_Taxonomy::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
+				return (int) $a_removed - (int) $b_removed;
+			}
+		);
+
 		?>
 		<details>
 			<summary>
@@ -381,9 +399,15 @@ final class PluginSuppression implements Service, Registerable {
 					);
 					?>
 					<li class="<?php echo esc_attr( sprintf( 'error-%s error-%s', $is_removed ? 'removed' : 'kept', $is_reviewed ? 'reviewed' : 'unreviewed' ) ); ?>">
+						<?php if ( ! $is_reviewed ) : ?>
+							<strong>
+						<?php endif; ?>
 						<a href="<?php echo esc_url( $edit_term_url ); ?>" target="_blank" title="<?php echo esc_attr( $tooltip ); ?>">
 							<?php echo wp_kses_post( AMP_Validation_Error_Taxonomy::get_error_title_from_code( $validation_error['data'] ) ); ?>
 						</a>
+						<?php if ( ! $is_reviewed ) : ?>
+							</strong>
+						<?php endif; ?>
 					</li>
 				<?php endforeach; ?>
 			</ul>
