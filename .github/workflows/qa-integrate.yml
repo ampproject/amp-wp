@@ -262,7 +262,7 @@ jobs:
       - name: Download plugin build
         uses: actions/download-artifact@v2
         with:
-          name: amp-qa-tester-${{ needs.dev-zip.outputs.branch-name }}-${{ needs.dev-zip.outputs.git-sha-8 }}
+          name: amp-qa-tester-${{ needs.release-zip.outputs.branch-name }}-${{ needs.release-zip.outputs.git-sha-8 }}
 
       - name: Setup Google Cloud SDK
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
