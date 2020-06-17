@@ -1,6 +1,6 @@
 <?php
 /**
- * Class UserManager.
+ * Class DevToolsUserAccess.
  *
  * @since 1.6.0
  *
@@ -12,11 +12,11 @@ namespace AmpProject\AmpWP\Admin;
 use AmpProject\AmpWP\Service;
 
 /**
- * Class UserManager
+ * Class DevToolsUserAccess
  *
  * @since 1.6.0
  */
-final class UserManager implements Service {
+final class DevToolsUserAccess implements Service {
 
 	/**
 	 * Custom user capability allowing dev tools
