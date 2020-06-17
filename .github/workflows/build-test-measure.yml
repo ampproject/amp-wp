@@ -570,7 +570,7 @@ jobs:
         with:
           issue-number: ${{ steps.get-pr-number.outputs.num }}
           comment-author: github-actions[bot]
-          body-includes: Download [development build]
+          body-includes: Plugin builds for
 
       - name: Get comment body
         id: get-comment-body

@@ -272,3 +272,53 @@ jobs:
 
       - name: Upload build to bucket
         run: gsutil cp amp-qa-tester.zip gs://ampwp_github_artifacts/${{ github.ref }}/
+
+  #-----------------------------------------------------------------------------------------------------------------------
+
+  comment-on-pr:
+    name: Comment on PR with links to plugin ZIP
+    # Only run this job if it's a PR. One way to check for that is if `github.head_ref` is not empty.
+    if: ${{ github.head_ref && github.head_ref != null }}
+    runs-on: ubuntu-latest
+    needs: upload-to-gcs
+
+    outputs:
+      pr_number: ${{ steps.get-pr-number.outputs.num }}
+      comment_body: ${{ steps.get-comment-body.outputs.body }}
+
+    steps:
+      - name: Get PR number
+        id: get-pr-number
+        run: echo "::set-output name=num::$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')"
+
+      - name: Check if a comment was already made
+        id: find-comment
+        uses: peter-evans/find-comment@v1
+        with:
+          issue-number: ${{ steps.get-pr-number.outputs.num }}
+          comment-author: github-actions[bot]
+          body-includes: QA tester plugin build for
+
+      - name: Get comment body
+        id: get-comment-body
+        # Setting a multi-line output requires escaping line-feeds. See <https://github.community/t/set-output-truncates-multiline-strings/16852/3>.
+        run: |
+          body="QA tester plugin build for ${{ github.sha }} is ready :bellhop_bell:!
+          Download the build [here](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/amp-qa-tester.zip)"
+          body="${body//$'\n'/'%0A'}"
+          echo "::set-output name=body::$body"
+
+      - name: Create comment on PR with links to plugin build
+        if: ${{ steps.find-comment.outputs.comment-id == '' }}
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          issue-number: ${{ steps.get-pr-number.outputs.num }}
+          body: ${{ steps.get-comment-body.outputs.body }}
+
+      - name: Update comment on PR with links to plugin build
+        if: ${{ steps.find-comment.outputs.comment-id != '' }}
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          edit-mode: replace
+          body: ${{ steps.get-comment-body.outputs.body }}
