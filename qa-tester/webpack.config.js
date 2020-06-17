@@ -65,7 +65,7 @@ const adminBar = {
 	...defaultConfig,
 	...sharedConfig,
 	entry: {
-		'admin-bar': [ './assets/src/js/admin-bar.js' ],
+		'admin-bar': [ './assets/src/js/admin-bar/index.js' ],
 	},
 	plugins: [
 		...sharedConfig.plugins,

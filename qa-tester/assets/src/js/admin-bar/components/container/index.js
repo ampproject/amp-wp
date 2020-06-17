@@ -1,21 +1,21 @@
 /**
  * WordPress dependencies
  */
-import React, { Component, render } from '@wordpress/element';
-import domReady from '@wordpress/dom-ready';
-import apiFetch from '@wordpress/api-fetch';
+import React, { Component } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
  */
-import '../css/admin-bar.css';
+import './index.css';
 import {
 	getProtectedBranches,
 	getPullRequestsWithBuilds,
-} from './utils/github';
+} from '../../utils/github';
+import { BuildSelector } from '../build-selector';
 
-class AdminBar extends Component {
+export default class Container extends Component {
 	constructor( props ) {
 		super( props );
 
@@ -38,7 +38,7 @@ class AdminBar extends Component {
 			isSwitching: false,
 			isDevBuild: false,
 			error: null,
-			buildOption: { value: '' },
+			buildOption: { label: '', value: '' },
 			buildOptions,
 		};
 
@@ -106,17 +106,10 @@ class AdminBar extends Component {
 	/**
 	 * Set the selected build option.
 	 *
-	 * @param {Event<HTMLSelectElement>} event Change event.
+	 * @param {Object} newOption Selected build option.
 	 */
-	handleChangeBuildOption( event ) {
-		const value = event.target.value;
-		const buildOption = this.state.buildOptions.find(
-			( option ) => value === option.value.toString()
-		);
-
-		if ( undefined !== buildOption ) {
-			this.setState( { buildOption } );
-		}
+	handleChangeBuildOption( newOption ) {
+		this.setState( { buildOption: newOption } );
 	}
 
 	/**
@@ -199,20 +192,11 @@ class AdminBar extends Component {
 
 		return (
 			<>
-				{ /* eslint-disable-next-line jsx-a11y/no-onchange */ }
-				<select
-					value={ buildOption.value }
-					onChange={ this.handleChangeBuildOption.bind( this ) }
-				>
-					<option disabled={ true } value="">
-						{ __( 'Select a version…', 'amp-qa-tester' ) }
-					</option>
-					{ buildOptions.map( ( option, index ) => (
-						<option key={ index } value={ option.value }>
-							{ option.label }
-						</option>
-					) ) }
-				</select>
+				<BuildSelector
+					buildOption={ buildOption }
+					buildOptions={ buildOptions }
+					onOptionSelect={ this.handleChangeBuildOption.bind( this ) }
+				/>
 
 				{ 'release' !== buildOption.value && (
 					<div className={ 'amp-qa-tester-checkbox' }>
@@ -255,10 +239,3 @@ class AdminBar extends Component {
 		);
 	}
 }
-
-domReady( () => {
-	render(
-		<AdminBar />,
-		document.getElementById( 'amp-qa-tester-build-selector' )
-	);
-} );
