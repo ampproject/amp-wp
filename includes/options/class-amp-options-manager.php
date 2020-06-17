@@ -7,6 +7,7 @@
 
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\PluginRegistry;
+use AmpProject\AmpWP\Services;
 
 /**
  * Class AMP_Options_Manager
@@ -308,7 +309,9 @@ class AMP_Options_Manager {
 	private static function validate_suppressed_plugins( $posted_suppressed_plugins, $old_option ) {
 		$option = $old_option;
 
-		$plugins           = PluginRegistry::get_plugins( true );
+		/** @var PluginRegistry $plugin_registry */
+		$plugin_registry   = Services::get( 'plugin_registry' );
+		$plugins           = $plugin_registry->get_plugins( true );
 		$errors_by_source  = AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source();
 		$urls_by_frequency = [];
 		$changes           = 0;

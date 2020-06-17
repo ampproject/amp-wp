@@ -8,6 +8,7 @@
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Services;
 
 /**
  * Class AMP_Validated_URL_Post_Type
@@ -933,9 +934,12 @@ class AMP_Validated_URL_Post_Type {
 	 * @return array Environment.
 	 */
 	public static function get_validated_environment() {
+		/** @var PluginRegistry $plugin_registry */
+		$plugin_registry = Services::get( 'plugin_registry' );
+
 		return [
 			'theme'   => get_stylesheet(),
-			'plugins' => wp_list_pluck( PluginRegistry::get_plugins( true ), 'Version' ), // @todo What about multiple plugins being in the same directory?
+			'plugins' => wp_list_pluck( $plugin_registry->get_plugins( true ), 'Version' ), // @todo What about multiple plugins being in the same directory?
 			'options' => [
 				Option::THEME_SUPPORT => AMP_Options_Manager::get_option( Option::THEME_SUPPORT ),
 			],
