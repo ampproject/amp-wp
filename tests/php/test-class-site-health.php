@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\Admin\SiteHealth;
+use AmpProject\AmpWP\AmpWpPluginFactory;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\PrivateAccess;
@@ -32,7 +33,12 @@ class Test_Site_Health extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
-		$this->instance = new SiteHealth();
+
+		$injector = AmpWpPluginFactory::create()
+			->get_container()
+			->get( 'injector' );
+
+		$this->instance = $injector->make( SiteHealth::class );
 	}
 
 	/**
@@ -51,7 +57,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::init()
 	 */
 	public function test_init() {
-		$this->instance->init();
+		$this->instance->register();
 		$this->assertEquals( 10, has_action( 'site_status_tests', [ $this->instance, 'add_tests' ] ) );
 		$this->assertEquals( 10, has_action( 'debug_information', [ $this->instance, 'add_debug_information' ] ) );
 		$this->assertEquals( 10, has_action( 'site_status_test_php_modules', [ $this->instance, 'add_extensions' ] ) );
