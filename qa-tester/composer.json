@@ -50,13 +50,11 @@
     "cbf": "phpcbf -n src tests",
     "cs": "if [ -z $TEST_SKIP_PHPCS ]; then phpcs -s -n src tests; fi",
     "lint": "if [ -z $TEST_SKIP_LINTING ]; then parallel-lint -j 10 --colors --exclude vendor .; fi",
-    "analyze": "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan analyze --ansi; fi",
     "unit": "if [ -z $TEST_SKIP_PHPUNIT ]; then phpunit --colors=always; fi",
     "test": [
       "@lint",
       "@unit",
-      "@cs",
-      "@analyze"
+      "@cs"
     ]
   }
 }

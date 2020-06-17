@@ -61,7 +61,7 @@
     "lint:php": "composer cs",
     "lint:pkg-json": "wp-scripts lint-pkg-json --ignorePath .gitignore",
     "test": "npm-run-all --parallel test:js test:php",
-    "test:unit": "wp-scripts test-unit-js",
+    "test:js": "wp-scripts test-unit-js",
     "test:php": "composer test"
   },
   "npmpackagejsonlint": {
