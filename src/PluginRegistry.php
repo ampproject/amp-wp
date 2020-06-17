@@ -7,12 +7,21 @@
 
 namespace AmpProject\AmpWP;
 
+use AmpProject\AmpWP\Infrastructure\Service;
+
 /**
  * Suppress plugins from running by removing their hooks and nullifying their shortcodes, widgets, and blocks.
  *
  * @package AmpProject\AmpWP
  */
-final class PluginRegistry {
+final class PluginRegistry implements Service {
+
+	/**
+	 * Array of plugins data.
+	 *
+	 * @var array[]
+	 */
+	private $plugins;
 
 	/**
 	 * Get plugin slug from file.
@@ -25,7 +34,7 @@ final class PluginRegistry {
 	 * @param string $plugin_file Plugin file.
 	 * @return string Plugin slug.
 	 */
-	public static function get_plugin_slug_from_file( $plugin_file ) {
+	public function get_plugin_slug_from_file( $plugin_file ) {
 		return strtok( $plugin_file, '/' );
 	}
 
@@ -36,17 +45,16 @@ final class PluginRegistry {
 	 * @param bool $omit_core   Omit core plugins that should never be listed. These are in particular AMP and Gutenberg.
 	 * @return array Plugins keyed by slug.
 	 */
-	public static function get_plugins( $active_only = false, $omit_core = true ) {
+	public function get_plugins( $active_only = false, $omit_core = true ) {
 		$active_plugins = get_option( 'active_plugins', [] );
 
 		$plugins = [];
-		require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		foreach ( get_plugins() as $plugin_file => $plugin ) {
+		foreach ( $this->get_plugins_data() as $plugin_file => $plugin ) {
 			if ( $active_only && ! in_array( $plugin_file, $active_plugins, true ) ) {
 				continue;
 			}
 
-			$plugin_slug = self::get_plugin_slug_from_file( $plugin_file );
+			$plugin_slug = $this->get_plugin_slug_from_file( $plugin_file );
 
 			/*
 			 * When a plugin has a nested plugin, such as foo/foo.php also having foo/extra.php, discard the extra.php
@@ -81,9 +89,8 @@ final class PluginRegistry {
 	 * @param string $plugin_slug Plugin slug.
 	 * @return array|null
 	 */
-	public static function get_plugin_from_slug( $plugin_slug ) {
-		require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		$plugins = get_plugins();
+	public function get_plugin_from_slug( $plugin_slug ) {
+		$plugins = $this->get_plugins_data();
 		if ( isset( $plugins[ $plugin_slug ] ) ) {
 			return [
 				'name' => $plugin_slug, // @todo Rename 'name' to 'file'. Or create a new 'File' array key?
@@ -99,5 +106,19 @@ final class PluginRegistry {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Get the plugins data from WordPress.
+	 *
+	 * @return array[]
+	 */
+	private function get_plugins_data() {
+		if ( null === $this->plugins ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			$this->plugins = get_plugins();
+		}
+
+		return $this->plugins;
 	}
 }
