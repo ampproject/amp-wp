@@ -271,7 +271,7 @@ jobs:
           service_account_key: ${{ secrets.GCS_APPLICATION_CREDENTIALS }}
 
       - name: Upload build to bucket
-        run: gsutil cp qa-tester/amp-qa-tester.zip gs://ampwp_github_artifacts/${{ github.ref }}/
+        run: gsutil cp amp-qa-tester.zip gs://ampwp_github_artifacts/${{ github.ref }}/
 
   #-----------------------------------------------------------------------------------------------------------------------
 
