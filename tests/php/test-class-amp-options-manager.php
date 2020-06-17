@@ -6,6 +6,8 @@
  */
 
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\PluginRegistry;
+use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 
 /**
@@ -266,12 +268,222 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test validating suppressed plugins.
+	 *
+	 * @covers AMP_Options_Manager::update_option()
+	 * @covers AMP_Options_Manager::validate_suppressed_plugins()
+	 * @covers PluginRegistry::get_plugins()
+	 * @covers AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source()
+	 */
+	public function test_option_for_suppressed_plugins() {
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Validation_Manager::init();
+		AMP_Options_Manager::register_settings(); // Adds validate_options as filter.
+
+		$slugify = static function( $plugin_file ) {
+			return strtok( $plugin_file, '/' );
+		};
+
+		// Create bogus plugins.
+		$amp_plugin = 'amp/amp.php';
+		$gut_plugin = 'gutenberg/gutenberg.php';
+		$foo_plugin = 'foo/foo.php';
+		$bar_plugin = 'bar.php';
+		$baz_plugin = 'baz/baz.php';
+		update_option( 'active_plugins', [ $foo_plugin, $bar_plugin, $amp_plugin, $gut_plugin ] );
+		$plugins = [
+			$foo_plugin => [
+				'Name'    => 'Foo',
+				'Version' => '0.1',
+			],
+			$bar_plugin => [
+				'Name'    => 'Bar',
+				'Version' => '0.2',
+			],
+			$baz_plugin => [
+				'Name'    => 'Baz',
+				'Version' => '0.3',
+			],
+			$gut_plugin => [
+				'Name'    => 'Gutenberg',
+				'Version' => '8.2',
+			],
+			$amp_plugin => [
+				'Name'    => 'AMP',
+				'Version' => AMP__VERSION,
+			],
+		];
+		wp_cache_set( 'plugins', [ '' => $plugins ], 'plugins' );
+
+		// Test initial state.
+		$this->assertEquals( [], AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS ) );
+
+		// Test updating empty array.
+		AMP_Options_Manager::update_option( Option::SUPPRESSED_PLUGINS, [] );
+		$this->assertEquals( [], AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS ) );
+
+		/** @var PluginRegistry $plugin_registry */
+		$plugin_registry = Services::get( 'plugin_registry' );
+
+		$this->assertEqualSets(
+			array_map( $slugify, [ $foo_plugin, $bar_plugin, $baz_plugin, $gut_plugin, $amp_plugin ] ),
+			array_keys( $plugin_registry->get_plugins( false, false ) )
+		);
+
+		$this->assertEqualSets(
+			array_map( $slugify, [ $foo_plugin, $bar_plugin, $baz_plugin ] ),
+			array_keys( $plugin_registry->get_plugins( false, true ) )
+		);
+
+		$this->assertEqualSets(
+			array_map( $slugify, [ $foo_plugin, $bar_plugin ] ),
+			array_keys( $plugin_registry->get_plugins( true ) )
+		);
+
+		$this->assertEmpty( AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source() );
+
+		$foo_slug = $slugify( $foo_plugin );
+		$bar_slug = $slugify( $bar_plugin );
+
+		$errors = [
+			[
+				'code'    => 'removed',
+				'sources' => [
+					[
+						'type' => 'plugin',
+						'name' => $foo_slug,
+					],
+				],
+			],
+			[
+				'code'    => 'kept',
+				'sources' => [
+					[
+						'type' => 'plugin',
+						'name' => $bar_slug,
+					],
+				],
+			],
+			[
+				'code'    => 'removed',
+				'sources' => [
+					[
+						'type' => 'plugin',
+						'name' => $bar_slug,
+					],
+				],
+			],
+		];
+
+		add_filter(
+			'amp_validation_error_default_sanitized',
+			static function( $sanitized, $error ) {
+				if ( 'kept' === $error['code'] ) {
+					$sanitized = false;
+				}
+				return $sanitized;
+			},
+			10,
+			2
+		);
+
+		$r = AMP_Validated_URL_Post_Type::store_validation_errors( $errors, home_url( '/' ) );
+		$this->assertInternalType( 'int', $r );
+
+		$errors_by_source = AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source();
+		$this->assertEqualSets( [ 'plugin' ], array_keys( $errors_by_source ) );
+		$this->assertEqualSets( [ $foo_slug, $bar_slug ], array_keys( $errors_by_source['plugin'] ) );
+		$foo_plugin_errors = $errors_by_source['plugin'][ $foo_slug ];
+		$bar_plugin_errors = $errors_by_source['plugin'][ $bar_slug ];
+		$this->assertCount( 2, $bar_plugin_errors );
+		$this->assertCount( 1, $foo_plugin_errors );
+
+		$attempted_validate_request_urls = [];
+		add_filter(
+			'pre_http_request',
+			function( $r, $args, $url ) use ( &$attempted_validate_request_urls ) {
+				$attempted_validate_request_urls[] = remove_query_arg( [ 'amp_validate', 'amp_cache_bust' ], $url );
+				return [
+					'body'     => '',
+					'response' => [
+						'code'    => 503,
+						'message' => 'Service Unavailable',
+					],
+				];
+			},
+			10,
+			3
+		);
+
+		// When updating plugins that don't exit or can't be suppressed, do nothing.
+		AMP_Options_Manager::update_option(
+			Option::SUPPRESSED_PLUGINS,
+			[
+				$slugify( $gut_plugin ) => '1',
+				$slugify( $amp_plugin ) => '1',
+				'bogus'                 => '1',
+			]
+		);
+		remove_all_actions( 'update_option_' . AMP_Options_Manager::OPTION_NAME );
+		$this->assertEquals( [], AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS ) );
+
+		// When updating option but both plugins are not suppressed, then no change is made.
+		AMP_Options_Manager::update_option(
+			Option::SUPPRESSED_PLUGINS,
+			[
+				$foo_slug => '0',
+				$bar_slug => '0',
+			]
+		);
+		remove_all_actions( 'update_option_' . AMP_Options_Manager::OPTION_NAME );
+		$this->assertEquals( [], AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS ) );
+		$this->assertCount( 0, $attempted_validate_request_urls, 'Expected no validation request to have been made since no changes were made (as both plugins are still unsuppressed).' );
+
+		// When updating option and both are now suppressed, then a change is made.
+		AMP_Options_Manager::update_option(
+			Option::SUPPRESSED_PLUGINS,
+			[
+				$foo_slug => '1',
+				$bar_slug => '1',
+			]
+		);
+		remove_all_actions( 'update_option_' . AMP_Options_Manager::OPTION_NAME );
+		$this->assertEquals( array_fill( 0, 1, home_url( '/' ) ), $attempted_validate_request_urls, 'Expected one validation request to have been made since no changes were made (as both plugins are still unsuppressed).' );
+
+		$suppressed_plugins = AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS );
+		$this->assertEqualSets( [ $foo_slug, $bar_slug ], array_keys( $suppressed_plugins ) );
+		foreach ( $suppressed_plugins as $slug => $suppressed_plugin ) {
+			$this->assertArrayHasKey( Option::SUPPRESSED_PLUGINS_LAST_VERSION, $suppressed_plugin );
+			$this->assertArrayHasKey( Option::SUPPRESSED_PLUGINS_TIMESTAMP, $suppressed_plugin );
+			$this->assertArrayHasKey( Option::SUPPRESSED_PLUGINS_USERNAME, $suppressed_plugin );
+			$this->assertEquals( wp_get_current_user()->user_nicename, $suppressed_plugin[ Option::SUPPRESSED_PLUGINS_USERNAME ] );
+			$this->assertArrayHasKey( Option::SUPPRESSED_PLUGINS_ERRORING_URLS, $suppressed_plugin );
+			$this->assertEquals( [ home_url( '/' ) ], $suppressed_plugin[ Option::SUPPRESSED_PLUGINS_ERRORING_URLS ] );
+		}
+		$this->assertEquals( $plugins[ $foo_plugin ]['Version'], $suppressed_plugins[ $foo_slug ][ Option::SUPPRESSED_PLUGINS_LAST_VERSION ] );
+		$this->assertEquals( $plugins[ $bar_plugin ]['Version'], $suppressed_plugins[ $bar_slug ][ Option::SUPPRESSED_PLUGINS_LAST_VERSION ] );
+
+		// Stop suppressing only one plugin.
+		AMP_Options_Manager::update_option(
+			Option::SUPPRESSED_PLUGINS,
+			[
+				$foo_slug => '1',
+				$bar_slug => '0',
+			]
+		);
+		remove_all_actions( 'update_option_' . AMP_Options_Manager::OPTION_NAME );
+		$this->assertEquals( array_fill( 0, 2, home_url( '/' ) ), $attempted_validate_request_urls, 'Expected one validation request to have been made since no changes were made (as both plugins are still unsuppressed).' );
+		$this->assertEqualSets( [ $foo_slug ], array_keys( AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS ) ) );
+	}
+
+	/**
 	 * Tests the update_options method.
 	 *
 	 * @covers AMP_Options_Manager::update_options
 	 */
 	public function test_update_options() {
-		// Confirm updating multple entries at once works.
+		// Confirm updating multiple entries at once works.
 		AMP_Options_Manager::update_options(
 			[
 				Option::THEME_SUPPORT => 'reader',
