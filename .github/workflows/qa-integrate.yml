@@ -290,9 +290,7 @@ jobs:
     steps:
       - name: Get PR number
         id: get-pr-number
-        run: |
-          cd ..
-          echo "::set-output name=num::$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')"
+        run: echo "::set-output name=num::$(echo $GITHUB_REF | cut -d'/' -f3)"
 
       - name: Check if a comment was already made
         id: find-comment
