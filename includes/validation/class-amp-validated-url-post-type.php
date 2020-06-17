@@ -1212,6 +1212,8 @@ class AMP_Validated_URL_Post_Type {
 		}
 
 		$output = [];
+		/** @var PluginRegistry $plugin_registry */
+		$plugin_registry = Services::get( 'plugin_registry' );
 		foreach ( wp_array_slice_assoc( $sources, [ 'plugin', 'mu-plugin' ] ) as $type => $slugs ) {
 			$plugin_names = [];
 			$plugin_slugs = array_unique( $slugs );
@@ -1225,7 +1227,7 @@ class AMP_Validated_URL_Post_Type {
 					}
 
 					$plugin_name = $plugin_slug;
-					$plugin      = PluginRegistry::get_plugin_from_slug( $plugin_slug );
+					$plugin      = $plugin_registry->get_plugin_from_slug( $plugin_slug );
 					if ( $plugin ) {
 						$plugin_name = $plugin['data']['Name'];
 					}
