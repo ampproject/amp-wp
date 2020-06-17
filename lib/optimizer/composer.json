@@ -33,7 +33,7 @@
     },
     "downloads": {
       "phpstan": {
-        "url": "https://github.com/phpstan/phpstan/releases/download/0.12.14/phpstan.phar",
+        "url": "https://github.com/phpstan/phpstan/raw/master/phpstan.phar",
         "path": "vendor/bin/phpstan",
         "type": "phar"
       }
@@ -71,7 +71,7 @@
       "@cs",
       "@analyze"
     ],
-    "analyze": "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan analyze --ansi; fi",
+    "analyze": "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan --version; phpstan analyze --ansi; fi",
     "unit": "if [ -z $TEST_SKIP_PHPUNIT ]; then phpunit --colors=always; fi",
     "update-test-specs":  "rm -rf tests/spec && bin/sync-amp-toolbox-test-suite.php"
   }

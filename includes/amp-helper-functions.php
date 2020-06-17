@@ -5,9 +5,9 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\AmpWpPluginFactory;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Services;
 
 /**
  * Handle activation of plugin.
@@ -17,7 +17,7 @@ use AmpProject\AmpWP\Services;
  * @param bool $network_wide Whether the activation was done network-wide.
  */
 function amp_activate( $network_wide = false ) {
-	Services::activate( $network_wide );
+	AmpWpPluginFactory::create()->activate( $network_wide );
 	amp_after_setup_theme();
 	if ( ! did_action( 'amp_init' ) ) {
 		amp_init();
@@ -33,7 +33,7 @@ function amp_activate( $network_wide = false ) {
  * @param bool $network_wide Whether the activation was done network-wide.
  */
 function amp_deactivate( $network_wide = false ) {
-	Services::deactivate( $network_wide );
+	AmpWpPluginFactory::create()->deactivate( $network_wide );
 	// We need to manually remove the amp endpoint.
 	global $wp_rewrite;
 	foreach ( $wp_rewrite->endpoints as $index => $endpoint ) {
@@ -52,7 +52,7 @@ function amp_deactivate( $network_wide = false ) {
  * @since 1.5
  */
 function amp_bootstrap_plugin() {
-	Services::register();
+	AmpWpPluginFactory::create()->register();
 
 	// The plugins_loaded action is the earliest we can run this since that is when pluggable.php has been required and wp_hash() is available.
 	add_action( 'plugins_loaded', [ 'AMP_Validation_Manager', 'init_validate_request' ], ~PHP_INT_MAX );
@@ -97,7 +97,9 @@ function amp_init() {
 	AMP_Theme_Support::init();
 	AMP_Validation_Manager::init();
 	AMP_Service_Worker::init();
+	add_action( 'admin_init', 'AMP_Options_Manager::init' );
 	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
+	add_action( 'rest_api_init', 'AMP_Options_Manager::register_settings' );
 	add_action( 'wp_loaded', 'amp_add_options_menu' );
 	add_action( 'wp_loaded', 'amp_bootstrap_admin' );
 
@@ -149,6 +151,21 @@ function amp_init() {
 		do_action( 'amp_plugin_update', $old_version );
 		AMP_Options_Manager::update_option( Option::VERSION, AMP__VERSION );
 	}
+
+	add_action(
+		'rest_api_init',
+		static function() {
+			if ( amp_should_use_new_onboarding() ) {
+				$reader_themes = new AMP_Reader_Themes();
+
+				$reader_theme_controller = new AMP_Reader_Theme_REST_Controller( $reader_themes );
+				$reader_theme_controller->register_routes();
+
+				$options_controller = new AMP_Options_REST_Controller( $reader_themes );
+				$options_controller->register_routes();
+			}
+		}
+	);
 }
 
 /**
@@ -382,13 +399,35 @@ function amp_get_slug() {
  * @return string Current URL.
  */
 function amp_get_current_url() {
-	$url = preg_replace( '#(^https?://[^/]+)/.*#', '$1', home_url( '/' ) );
-	if ( isset( $_SERVER['REQUEST_URI'] ) ) {
-		$url = esc_url_raw( $url . wp_unslash( $_SERVER['REQUEST_URI'] ) );
-	} else {
-		$url .= '/';
+	$parsed_url = wp_parse_url( home_url() );
+	if ( ! is_array( $parsed_url ) ) {
+		$parsed_url = [];
 	}
-	return $url;
+	if ( empty( $parsed_url['scheme'] ) ) {
+		$parsed_url['scheme'] = is_ssl() ? 'https' : 'http';
+	}
+	if ( ! isset( $parsed_url['host'] ) ) {
+		$parsed_url['host'] = wp_unslash( $_SERVER['HTTP_HOST'] );
+	}
+
+	$current_url = $parsed_url['scheme'] . '://';
+	if ( isset( $parsed_url['user'] ) ) {
+		$current_url .= $parsed_url['user'];
+		if ( isset( $parsed_url['pass'] ) ) {
+			$current_url .= ':' . $parsed_url['pass'];
+		}
+		$current_url .= '@';
+	}
+	$current_url .= $parsed_url['host'];
+	if ( isset( $parsed_url['port'] ) ) {
+		$current_url .= ':' . $parsed_url['port'];
+	}
+	$current_url .= '/';
+
+	if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+		$current_url .= ltrim( wp_unslash( $_SERVER['REQUEST_URI'] ), '/' );
+	}
+	return esc_url_raw( $current_url );
 }
 
 /**
@@ -1284,8 +1323,9 @@ function amp_get_content_sanitizers( $post = null ) {
 		'AMP_Audio_Sanitizer'             => [],
 		'AMP_Playbuzz_Sanitizer'          => [],
 		'AMP_Iframe_Sanitizer'            => [
-			'add_placeholder' => true,
-			'current_origin'  => $current_origin,
+			'add_placeholder'    => true,
+			'current_origin'     => $current_origin,
+			'align_wide_support' => current_theme_supports( 'align-wide' ),
 		],
 		'AMP_Gallery_Block_Sanitizer'     => [ // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
 			'carousel_required' => ! is_array( $theme_support_args ), // For back-compat.
@@ -1534,20 +1574,20 @@ function amp_get_schemaorg_metadata() {
 		$metadata['publisher']['logo'] = $publisher_logo;
 	}
 
-	$post = get_queried_object();
-	if ( $post instanceof WP_Post ) {
+	$queried_object = get_queried_object();
+	if ( $queried_object instanceof WP_Post ) {
 		$metadata = array_merge(
 			$metadata,
 			[
 				'@type'            => is_page() ? 'WebPage' : 'BlogPosting',
 				'mainEntityOfPage' => get_permalink(),
 				'headline'         => get_the_title(),
-				'datePublished'    => mysql2date( 'c', $post->post_date_gmt, false ),
-				'dateModified'     => mysql2date( 'c', $post->post_modified_gmt, false ),
+				'datePublished'    => mysql2date( 'c', $queried_object->post_date_gmt, false ),
+				'dateModified'     => mysql2date( 'c', $queried_object->post_modified_gmt, false ),
 			]
 		);
 
-		$post_author = get_userdata( $post->post_author );
+		$post_author = get_userdata( $queried_object->post_author );
 		if ( $post_author ) {
 			$metadata['author'] = [
 				'@type' => 'Person',
@@ -1555,7 +1595,7 @@ function amp_get_schemaorg_metadata() {
 			];
 		}
 
-		$image_metadata = amp_get_post_image_metadata( $post );
+		$image_metadata = amp_get_post_image_metadata( $queried_object );
 		if ( $image_metadata ) {
 			$metadata['image'] = $image_metadata['url'];
 		}
@@ -1568,10 +1608,12 @@ function amp_get_schemaorg_metadata() {
 		 *
 		 * @since 0.3
 		 *
-		 * @param array   $metadata Metadata.
-		 * @param WP_Post $post     Post.
+		 * @param array   $metadata       Metadata.
+		 * @param WP_Post $queried_object Post.
 		 */
-		$metadata = apply_filters( 'amp_post_template_metadata', $metadata, $post );
+		$metadata = apply_filters( 'amp_post_template_metadata', $metadata, $queried_object );
+	} elseif ( is_archive() ) {
+		$metadata['@type'] = 'CollectionPage';
 	}
 
 	/**
@@ -1709,122 +1751,4 @@ function amp_generate_script_hash( $script ) {
 		base64_encode( $sha384 ) // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 	);
 	return 'sha384-' . $hash;
-}
-
-/*
- * The function below is copied from the ramsey/array_column package.
- *
- * Changes were made to code style to pass PHPCS requirements, but logic is unchanged.
- *
- * This can be removed once the required PHP version moves to PHP 5.5+.
- *
- * @link https://github.com/ramsey/array_column
- *
- * @copyright Copyright (c) Ben Ramsey (http://benramsey.com)
- * @license   http://opensource.org/licenses/MIT MIT
- */
-if ( ! function_exists( 'array_column' ) ) {
-
-	/**
-	 * Returns the values from a single column of the input array, identified by
-	 * the $columnKey.
-	 *
-	 * Optionally, you may provide an $indexKey to index the values in the returned
-	 * array by the values from the $indexKey column in the input array.
-	 *
-	 * @param array $input      A multi-dimensional array (record set) from which to pull
-	 *                          a column of values.
-	 * @param mixed $column_key The column of values to return. This value may be the
-	 *                          integer key of the column you wish to retrieve, or it
-	 *                          may be the string key name for an associative array.
-	 * @param mixed $index_key  (Optional.) The column to use as the index/keys for
-	 *                          the returned array. This value may be the integer key
-	 *                          of the column, or it may be the string key name.
-	 * @return array|bool
-	 */
-	function array_column( $input = [], $column_key = null, $index_key = null ) {
-		// Using func_get_args() in order to check for proper number of
-		// parameters and trigger errors exactly as the built-in array_column()
-		// does in PHP 5.5.
-		$argc   = func_num_args();
-		$params = func_get_args();
-
-		if ( $argc < 2 ) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error,WordPress.Security.EscapeOutput.OutputNotEscaped
-			trigger_error( "array_column() expects at least 2 parameters, {$argc} given", E_USER_WARNING );
-			return null;
-		}
-
-		if ( ! is_array( $params[0] ) ) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error,WordPress.Security.EscapeOutput.OutputNotEscaped
-			trigger_error( 'array_column() expects parameter 1 to be array, ' . gettype( $params[0] ) . ' given', E_USER_WARNING );
-			return null;
-		}
-
-		if ( ! is_int( $params[1] )
-			&& ! is_float( $params[1] )
-			&& ! is_string( $params[1] )
-			&& null !== $params[1]
-			&& ! ( is_object( $params[1] ) && method_exists( $params[1], '__toString' ) )
-		) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-			trigger_error( 'array_column(): The column key should be either a string or an integer', E_USER_WARNING );
-			return false;
-		}
-
-		if ( isset( $params[2] )
-			&& ! is_int( $params[2] )
-			&& ! is_float( $params[2] )
-			&& ! is_string( $params[2] )
-			&& ! ( is_object( $params[2] ) && method_exists( $params[2], '__toString' ) )
-		) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-			trigger_error( 'array_column(): The index key should be either a string or an integer', E_USER_WARNING );
-			return false;
-		}
-
-		$params_input      = $params[0];
-		$params_column_key = ( null !== $params[1] ) ? (string) $params[1] : null;
-
-		$params_index_key = null;
-		if ( isset( $params[2] ) ) {
-			if ( is_float( $params[2] ) || is_int( $params[2] ) ) {
-				$params_index_key = (int) $params[2];
-			} else {
-				$params_index_key = (string) $params[2];
-			}
-		}
-
-		$result_array = [];
-
-		foreach ( $params_input as $row ) {
-			$key       = null;
-			$value     = null;
-			$key_set   = false;
-			$value_set = false;
-
-			if ( null !== $params_index_key && array_key_exists( $params_index_key, $row ) ) {
-				$key_set = true;
-				$key     = (string) $row[ $params_index_key ];
-			}
-
-			if ( null === $params_column_key ) {
-				$value_set = true;
-				$value     = $row;
-			} elseif ( is_array( $row ) && array_key_exists( $params_column_key, $row ) ) {
-				$value_set = true;
-				$value     = $row[ $params_column_key ];
-			}
-
-			if ( $value_set ) {
-				if ( $key_set ) {
-					$result_array[ $key ] = $value;
-				} else {
-					$result_array[] = $value;
-				}
-			}
-		}
-
-		return $result_array;
-	}
 }

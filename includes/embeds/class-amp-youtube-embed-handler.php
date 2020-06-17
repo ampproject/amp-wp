@@ -162,7 +162,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Determine the video ID from the URL.
 	 *
 	 * @param string $url URL.
-	 * @return int|false Video ID, or false if none could be retrieved.
+	 * @return string|false Video ID, or false if none could be retrieved.
 	 */
 	private function get_video_id_from_url( $url ) {
 		$parsed_url = wp_parse_url( $url );

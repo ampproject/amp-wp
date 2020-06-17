@@ -3,7 +3,7 @@
 module.exports = function( grunt ) {
 	'use strict';
 
-	// Root paths to include in the plugin build ZIP when running `npm run build`.
+	// Root paths to include in the plugin build ZIP when running `npm run build:prod`.
 	const productionIncludedRootFiles = [
 		'LICENSE',
 		'amp.php',

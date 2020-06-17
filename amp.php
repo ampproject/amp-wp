@@ -158,9 +158,9 @@ if ( ! file_exists( AMP__DIR__ . '/vendor/autoload.php' ) || ! file_exists( AMP_
 	$_amp_load_errors->add(
 		'build_required',
 		sprintf(
-			/* translators: %s: composer install && npm install && npm run build */
+			/* translators: %s: composer install && npm install && npm run build:prod */
 			__( 'You appear to be running the AMP plugin from source. Please do %s to finish installation.', 'amp' ), // phpcs:ignore WordPress.Security.EscapeOutput
-			'<code>composer install &amp;&amp; npm install &amp;&amp; npm run build</code>'
+			'<code>composer install &amp;&amp; npm install &amp;&amp; npm run build:prod</code>'
 		)
 	);
 }

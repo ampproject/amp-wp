@@ -144,7 +144,7 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 
 		if (
-			version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.2', '<' )
+			version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.1', '<' )
 			&& null !== $fallback_for_expected
 		) {
 			$this->assertEquals( $fallback_for_expected, $content );

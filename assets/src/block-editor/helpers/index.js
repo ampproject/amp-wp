@@ -901,15 +901,8 @@ export const isGalleryShortcode = ( attributes ) => {
  * @return {boolean} Whether AMP is enabled.
  */
 export const isAMPEnabled = () => {
-	const { getDefaultStatus, getPossibleStatuses } = select( 'amp/block-editor' );
 	const { getEditedPostAttribute } = select( 'core/editor' );
-	const meta = getEditedPostAttribute( 'meta' );
-
-	if ( meta && meta.amp_status && getPossibleStatuses().includes( meta.amp_status ) ) {
-		return 'enabled' === meta.amp_status;
-	}
-
-	return 'enabled' === getDefaultStatus();
+	return getEditedPostAttribute( 'amp_enabled' ) || false;
 };
 
 /**

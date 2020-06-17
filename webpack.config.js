@@ -14,7 +14,7 @@ const WebpackBar = require( 'webpackbar' );
  */
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
-const { defaultRequestToExternal, defaultRequestToHandle } = require( '@wordpress/dependency-extraction-webpack-plugin/util' );
+const { defaultRequestToExternal, defaultRequestToHandle, camelCaseDash } = require( '@wordpress/dependency-extraction-webpack-plugin/util' );
 
 const sharedConfig = {
 	output: {
@@ -167,36 +167,62 @@ const customizer = {
 	],
 };
 
+const WORDPRESS_NAMESPACE = '@wordpress/';
+const BABEL_NAMESPACE = '@babel/';
+const gutenbergPackages = [ '@babel/polyfill', '@wordpress/dom-ready', '@wordpress/i18n', '@wordpress/url' ].map(
+	( packageName ) => {
+		if ( 0 !== packageName.indexOf( WORDPRESS_NAMESPACE ) && 0 !== packageName.indexOf( BABEL_NAMESPACE ) ) {
+			return null;
+		}
+
+		const camelCaseName = '@wordpress/i18n' === packageName
+			? 'i18n'
+			: camelCaseDash( packageName.replace( WORDPRESS_NAMESPACE, '' ).replace( BABEL_NAMESPACE, '' ) );
+
+		const handle = packageName.replace( WORDPRESS_NAMESPACE, 'wp-' ).replace( BABEL_NAMESPACE, 'wp-' );
+
+		return {
+			camelCaseName,
+			entryPath: 'polyfill' === camelCaseName ? path.resolve( __dirname, 'assets/src/polyfills/wp-polyfill' ) : packageName,
+			handle,
+			packageName,
+		};
+	},
+).filter( ( packageData ) => packageData );
+
 const wpPolyfills = {
 	...defaultConfig,
 	...sharedConfig,
 	externals: {},
+	entry: gutenbergPackages.reduce(
+		( memo, { camelCaseName, entryPath } ) =>
+			( { ...memo, [ camelCaseName ]: entryPath } ),
+		{} ),
+	output: {
+		devtoolNamespace: 'wp',
+		filename: ( pathData ) => `${ gutenbergPackages.find(
+			( gutenbergPackage ) => pathData.chunk.name === gutenbergPackage.camelCaseName,
+		).handle }.js`,
+		path: path.resolve( __dirname, 'assets/js' ),
+		library: [ 'wp', '[name]' ],
+		libraryTarget: 'this',
+	},
 	plugins: [
 		new DependencyExtractionWebpackPlugin( {
 			useDefaults: false,
 			requestToHandle: ( request ) => {
-				switch ( request ) {
-					case '@wordpress/dom-ready':
-					case '@wordpress/i18n':
-					case '@wordpress/polyfill':
-					case '@wordpress/url':
-						return undefined;
-
-					default:
-						return defaultRequestToHandle( request );
+				if ( gutenbergPackages.find( ( { packageName } ) => packageName === request ) ) {
+					return undefined;
 				}
+
+				return defaultRequestToHandle( request );
 			},
 			requestToExternal: ( request ) => {
-				switch ( request ) {
-					case '@wordpress/dom-ready':
-					case '@wordpress/i18n':
-					case '@wordpress/polyfill':
-					case '@wordpress/url':
-						return undefined;
-
-					default:
-						return defaultRequestToExternal( request );
+				if ( gutenbergPackages.find( ( { packageName } ) => packageName === request ) ) {
+					return undefined;
 				}
+
+				return defaultRequestToExternal( request );
 			},
 		} ),
 		new CopyWebpackPlugin( [
@@ -210,12 +236,71 @@ const wpPolyfills = {
 			color: '#21a0d0',
 		} ),
 	],
+};
+
+const setup = {
+	...defaultConfig,
+	...sharedConfig,
 	entry: {
-		'wp-i18n': './assets/src/polyfills/wp-i18n.js',
-		'wp-dom-ready': './assets/src/polyfills/wp-dom-ready.js',
-		'wp-polyfill': './assets/src/polyfills/wp-polyfill.js',
-		'wp-url': './assets/src/polyfills/wp-url.js',
+		'amp-setup': [
+			'./assets/src/setup',
+		],
 	},
+	module: {
+		...defaultConfig.module,
+		rules: [
+			...defaultConfig.module.rules,
+			{
+				test: /\.css$/,
+				use: [
+					MiniCssExtractPlugin.loader,
+					'css-loader',
+					'postcss-loader',
+				],
+			},
+		],
+	},
+	externals: {
+		'amp-setup': 'ampSetup',
+	},
+	plugins: [
+		new DependencyExtractionWebpackPlugin( {
+			useDefaults: false,
+			// Most dependencies will be bundled for the AMP setup screen for compatibility across WP versions.
+			requestToHandle: ( handle ) => {
+				switch ( handle ) {
+					case '@wordpress/api-fetch':
+					case '@wordpress/dom-ready':
+					case '@wordpress/html-entities':
+						return defaultRequestToHandle( handle );
+
+					default:
+						return undefined;
+				}
+			},
+			requestToExternal: ( external ) => {
+				switch ( external ) {
+					case '@wordpress/api-fetch':
+					case '@wordpress/dom-ready':
+					case '@wordpress/html-entities':
+						return defaultRequestToExternal( external );
+
+					default:
+						return undefined;
+				}
+			},
+		} ),
+		new MiniCssExtractPlugin( {
+			filename: '../css/[name]-compiled.css',
+		} ),
+		new RtlCssPlugin( {
+			filename: '../css/[name]-compiled-rtl.css',
+		} ),
+		new WebpackBar( {
+			name: 'Setup',
+			color: '#1773a8',
+		} ),
+	],
 };
 
 module.exports = [
@@ -225,4 +310,5 @@ module.exports = [
 	admin,
 	customizer,
 	wpPolyfills,
+	setup,
 ];

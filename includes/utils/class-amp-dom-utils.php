@@ -309,7 +309,7 @@ class AMP_DOM_Utils {
 			/*
 			 * Ensure there is no text content to accidentally force a child
 			 */
-			$node->textContent = null;
+			$node->textContent = '';
 			return;
 		}
 

@@ -25,6 +25,21 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	const MOCK_SITE_ICON = 'https://example.com/new-site-icon.jpg';
 
 	/**
+	 * Backup of $_SERVER.
+	 *
+	 * @var array
+	 */
+	private $server_var_backup;
+
+	/**
+	 * Set up.
+	 */
+	public function setUp() {
+		parent::setUp();
+		$this->server_var_backup = $_SERVER;
+	}
+
+	/**
 	 * After a test method runs, reset any state in WordPress the test method might have changed.
 	 */
 	public function tearDown() {
@@ -34,6 +49,13 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$wp_scripts     = null;
 		$show_admin_bar = null;
 		$pagenow        = 'index.php'; // Since clean_up_global_scope() doesn't.
+		$_SERVER        = $this->server_var_backup;
+
+		global $wp_rewrite;
+		delete_option( 'permalink_structure' );
+		$wp_rewrite->use_trailing_slashes = true;
+		$wp_rewrite->init();
+		$wp_rewrite->flush_rules();
 
 		if ( class_exists( 'WP_Block_Type_Registry' ) ) {
 			foreach ( WP_Block_Type_Registry::get_instance()->get_all_registered() as $block ) {
@@ -72,29 +94,135 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Get data for testing amp_get_current_url().
+	 *
+	 * @return array
+	 */
+	public function get_amp_get_current_url_test_data() {
+		$assertions = [
+			'path'                        => function () {
+				$_SERVER['REQUEST_URI'] = wp_slash( '/foo/' );
+				$this->assertEquals(
+					home_url( '/foo/' ),
+					amp_get_current_url()
+				);
+			},
+
+			'query'                       => function () {
+				$_SERVER['REQUEST_URI'] = wp_slash( '/bar/?baz=1' );
+				$this->assertEquals(
+					home_url( '/bar/?baz=1' ),
+					amp_get_current_url()
+				);
+			},
+
+			'idn_domain'                  => function () {
+				$this->set_home_url_with_filter( 'https://⚡️.example.com' );
+				$this->go_to( '/?s=lightning' );
+				$this->assertEquals( 'https://⚡️.example.com/?s=lightning', amp_get_current_url() );
+			},
+
+			'punycode_domain'             => function () {
+				$this->set_home_url_with_filter( 'https://xn--57h.example.com' );
+				$this->go_to( '/?s=thunder' );
+				$this->assertEquals( 'https://xn--57h.example.com/?s=thunder', amp_get_current_url() );
+			},
+
+			'ip_host'                     => function () {
+				$this->set_home_url_with_filter( 'http://127.0.0.1:1234' );
+				$this->go_to( '/' );
+				$this->assertEquals( 'http://127.0.0.1:1234/', amp_get_current_url() );
+			},
+
+			'permalink'                   => function () {
+				global $wp_rewrite;
+				update_option( 'permalink_structure', '/%year%/%monthnum%/%day%/%postname%/' );
+				$wp_rewrite->use_trailing_slashes = true;
+				$wp_rewrite->init();
+				$wp_rewrite->flush_rules();
+
+				$permalink = get_permalink( $this->factory()->post->create() );
+
+				$this->go_to( $permalink );
+				$this->assertEquals( $permalink, amp_get_current_url() );
+			},
+
+			'unset_request_uri'           => function () {
+				unset( $_SERVER['REQUEST_URI'] );
+				$this->assertEquals( home_url( '/' ), amp_get_current_url() );
+			},
+
+			'empty_request_uri'           => function () {
+				$_SERVER['REQUEST_URI'] = '';
+				$this->assertEquals( home_url( '/' ), amp_get_current_url() );
+			},
+
+			'no_slash_prefix_request_uri' => function () {
+				$_SERVER['REQUEST_URI'] = 'foo/';
+				$this->assertEquals( home_url( '/foo/' ), amp_get_current_url() );
+			},
+
+			'reconstructed_home_url'      => function () {
+				$_SERVER['HTTPS']       = 'on';
+				$_SERVER['REQUEST_URI'] = '/about/';
+				$_SERVER['HTTP_HOST']   = 'foo.example.org';
+				$this->set_home_url_with_filter( '/' );
+				$this->assertEquals(
+					'https://foo.example.org/about/',
+					amp_get_current_url()
+				);
+			},
+
+			'home_url_with_trimmings'     => function () {
+				$this->set_home_url_with_filter( 'https://user:pass@example.museum:8080' );
+				$_SERVER['REQUEST_URI'] = '/about/';
+				$this->assertEquals(
+					'https://user:pass@example.museum:8080/about/',
+					amp_get_current_url()
+				);
+			},
+
+			'complete_parse_fail'         => function () {
+				$_SERVER['HTTP_HOST'] = 'env.example.org';
+				unset( $_SERVER['REQUEST_URI'] );
+				$this->set_home_url_with_filter( ':' );
+				$this->assertEquals(
+					'http://env.example.org/',
+					amp_get_current_url()
+				);
+			},
+		];
+		return array_map(
+			function ( $assertion ) {
+				return [ $assertion ];
+			},
+			$assertions
+		);
+	}
+
+	/**
+	 * Set home_url with filter.
+	 *
+	 * @param string $home_url Home URL.
+	 */
+	private function set_home_url_with_filter( $home_url ) {
+		add_filter(
+			'home_url',
+			static function() use ( $home_url ) {
+				return $home_url;
+			}
+		);
+	}
+
+	/**
 	 * Test amp_get_current_url().
 	 *
+	 * @param callable $assert Assert.
+	 * @dataProvider get_amp_get_current_url_test_data
 	 * @covers ::amp_get_current_url()
 	 */
-	public function test_amp_get_current_url() {
-		$request_uris = [
-			'/foo',
-			'/bar?baz',
-			null,
-		];
-
-		foreach ( $request_uris as $request_uri ) {
-			if ( $request_uri ) {
-				$_SERVER['REQUEST_URI'] = wp_slash( $request_uri );
-			} else {
-				unset( $_SERVER['REQUEST_URI'] );
-			}
-			$this->assertEquals(
-				home_url( $request_uri ?: '/' ),
-				amp_get_current_url(),
-				sprintf( 'Unexpected for URI: %s', wp_json_encode( $request_uri, 64 /* JSON_UNESCAPED_SLASHES */ ) )
-			);
-		}
+	public function test_amp_get_current_url( $assert ) {
+		call_user_func( $assert );
 	}
 
 	/**
@@ -1210,6 +1338,11 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			$metadata['author']
 		);
 		$this->assertEquals( $metadata['publisher']['logo'], amp_get_publisher_logo() );
+
+		// Test author archive.
+		$this->go_to( get_author_posts_url( $user_id ) );
+		$metadata = amp_get_schemaorg_metadata();
+		$this->assertEquals( 'CollectionPage', $metadata['@type'] );
 
 		// Test override.
 		$this->go_to( get_permalink( $post_id ) );

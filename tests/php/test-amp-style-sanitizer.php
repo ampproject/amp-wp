@@ -2147,6 +2147,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'http://fonts.googleapis.com/css?family=Tangerine',
 				[],
 			],
+			'tangerine4'  => [
+				'https://fonts.googleapis.com/css2?family=Tangerine',
+				[],
+			],
 			'typekit'     => [
 				'https://use.typekit.net/abc.css',
 				[],
@@ -3008,6 +3012,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			'viewport_merged_rules' => [
 				'<meta name="viewport" content="width=device-width,user-scalable=no"><style>@viewport{ initial-scale: 1; }</style><style>@-moz-viewport{ user-scalable: yes; }</style><style>@-o-viewport { minimum-scale: 0.5; }</style><style>@-baz-viewport { unrecognized: 1; }</style>',
 				'<meta name="viewport" content="width=device-width,user-scalable=yes,initial-scale=1,minimum-scale=.5,unrecognized=1">',
+			],
+			'nested_viewport_in_at_rule' => [
+				'<style>@media screen { @viewport{ width: device-width; } }</style>',
+				'<meta name="viewport" content="width=device-width">',
 			],
 		];
 	}

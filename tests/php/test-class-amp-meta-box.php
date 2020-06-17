@@ -7,12 +7,14 @@
 
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\AssertRestApiField;
 
 /**
  * Tests for AMP_Post_Meta_Box.
  */
 class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 
+	use AssertRestApiField;
 	use AssertContainsCompatibility;
 
 	/**
@@ -58,6 +60,8 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'enqueue_block_editor_assets', [ $this->instance, 'enqueue_block_assets' ] ) );
 		$this->assertEquals( 10, has_action( 'post_submitbox_misc_actions', [ $this->instance, 'render_status' ] ) );
 		$this->assertEquals( 10, has_action( 'save_post', [ $this->instance, 'save_amp_status' ] ) );
+		$this->assertEquals( 10, has_action( 'rest_api_init', [ $this->instance, 'add_rest_api_fields' ] ) );
+		$this->assertEquals( 10, has_filter( 'preview_post_link', [ $this->instance, 'preview_post_link' ] ) );
 	}
 
 	/**
@@ -159,8 +163,6 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$this->assertContains( 'ampBlockEditor', $block_script->extra['data'] );
 		$expected_localized_values = [
 			'ampSlug',
-			'possibleStatuses',
-			'defaultStatus',
 			'errorMessages',
 			'hasThemeSupport',
 			'isStandardMode',
@@ -323,7 +325,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	/**
 	 * Test save_amp_status.
 	 *
-	 * @see AMP_Settings::save_amp_status()
+	 * @covers AMP_Post_Meta_Box::save_amp_status()
 	 */
 	public function test_save_amp_status() {
 		// Test failure.
@@ -373,12 +375,111 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	/**
 	 * Test preview_post_link.
 	 *
-	 * @see AMP_Settings::preview_post_link()
+	 * @covers AMP_Post_Meta_Box::preview_post_link()
 	 */
 	public function test_preview_post_link() {
 		$link = 'https://foo.bar';
 		$this->assertEquals( 'https://foo.bar', $this->instance->preview_post_link( $link ) );
 		$_POST['amp-preview'] = 'do-preview';
 		$this->assertEquals( 'https://foo.bar?' . amp_get_slug() . '=1', $this->instance->preview_post_link( $link ) );
+	}
+
+	/**
+	 * Test data for test_add_rest_api_fields().
+	 *
+	 * @return array[] Test data.
+	 */
+	public function get_theme_support_data() {
+		return [
+			'transitional' => [ AMP_Theme_Support::SLUG, [ AMP_Theme_Support::PAIRED_FLAG => true ] ],
+			'canonical'    => [ AMP_Theme_Support::SLUG, [] ],
+		];
+	}
+
+	/**
+	 * Test add_rest_api_fields.
+	 *
+	 * @dataProvider get_theme_support_data
+	 * @covers AMP_Post_Meta_Box::add_rest_api_fields()
+	 *
+	 * @param string $theme_feature Theme feature being added.
+	 * @param array  $support_args Theme support arguments.
+	 */
+	public function test_add_rest_api_fields( $theme_feature, $support_args ) {
+		add_theme_support( $theme_feature, $support_args );
+		AMP_Theme_Support::read_theme_support();
+		$this->instance->add_rest_api_fields();
+		$this->assertRestApiFieldPresent(
+			AMP_Post_Type_Support::get_post_types_for_rest_api(),
+			AMP_Post_Meta_Box::REST_ATTRIBUTE_NAME,
+			[
+				'get_callback'    => [ $this->instance, 'get_amp_enabled_rest_field' ],
+				'update_callback' => [ $this->instance, 'update_amp_enabled_rest_field' ],
+				'schema'          => [
+					'description' => __( 'AMP enabled', 'amp' ),
+					'type'        => 'boolean',
+				],
+			]
+		);
+	}
+
+	/**
+	 * Test get_amp_enabled_rest_field.
+	 *
+	 * @covers AMP_Post_Meta_Box::get_amp_enabled_rest_field()
+	 */
+	public function test_get_amp_enabled_rest_field() {
+		// AMP status should be disabled if AMP is not supported for the `post` post type.
+		remove_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
+		$id = self::factory()->post->create();
+		$this->assertFalse(
+			$this->instance->get_amp_enabled_rest_field( compact( 'id' ) )
+		);
+
+		// AMP status should be enabled if AMP is supported for the `post` post type.
+		add_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
+		$id = self::factory()->post->create();
+		$this->assertTrue(
+			$this->instance->get_amp_enabled_rest_field( compact( 'id' ) )
+		);
+
+		// AMP status should be enabled if the `amp_status` post meta equals 'enabled'.
+		$id = self::factory()->post->create();
+		add_metadata( 'post', $id, AMP_Post_Meta_Box::STATUS_POST_META_KEY, AMP_Post_Meta_Box::ENABLED_STATUS );
+		$this->assertTrue(
+			$this->instance->get_amp_enabled_rest_field( compact( 'id' ) )
+		);
+
+		// AMP status should be disabled if the `amp_status` post meta equals 'disabled'.
+		$id = self::factory()->post->create();
+		add_metadata( 'post', $id, AMP_Post_Meta_Box::STATUS_POST_META_KEY, AMP_Post_Meta_Box::DISABLED_STATUS );
+		$this->assertFalse(
+			$this->instance->get_amp_enabled_rest_field( compact( 'id' ) )
+		);
+	}
+
+	/**
+	 * Test update_amp_enabled_rest_field.
+	 *
+	 * @covers AMP_Post_Meta_Box::update_amp_enabled_rest_field()
+	 */
+	public function test_update_amp_enabled_rest_field() {
+		// User should not be able to update AMP status if they do not have the `edit_post` capability.
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'subscriber' ] ) );
+		$post = self::factory()->post->create_and_get();
+		add_metadata( 'post', $post->ID, AMP_Post_Meta_Box::STATUS_POST_META_KEY, AMP_Post_Meta_Box::ENABLED_STATUS );
+		$result = $this->instance->update_amp_enabled_rest_field( false, $post );
+
+		$this->assertEquals( AMP_Post_Meta_Box::ENABLED_STATUS, get_post_meta( $post->ID, AMP_Post_Meta_Box::STATUS_POST_META_KEY, true ) );
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertEquals( 'rest_insufficient_permission', $result->get_error_code() );
+
+		// User should be able to update AMP status if they have the sufficient capabilities.
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$post = self::factory()->post->create_and_get();
+		add_metadata( 'post', $post->ID, AMP_Post_Meta_Box::STATUS_POST_META_KEY, AMP_Post_Meta_Box::ENABLED_STATUS );
+		$this->assertNull( $this->instance->update_amp_enabled_rest_field( false, $post ) );
+
+		$this->assertEquals( AMP_Post_Meta_Box::DISABLED_STATUS, get_post_meta( $post->ID, AMP_Post_Meta_Box::STATUS_POST_META_KEY, true ) );
 	}
 }

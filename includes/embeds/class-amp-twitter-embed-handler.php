@@ -193,7 +193,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Extracts Tweet id.
 	 *
 	 * @param DOMElement $node The DOMNode to adjust and replace.
-	 * @return string Tweet ID.
+	 * @return string Tweet ID, or null if not found.
 	 */
 	private function get_tweet_id( DOMElement $node ) {
 		$anchors = $node->getElementsByTagName( 'a' );

@@ -83,8 +83,7 @@ export const render = compose(
 	withDispatch( ( dispatch ) => {
 		return {
 			onChange: ( isEnabled ) => {
-				const newStatus = isEnabled ? 'enabled' : 'disabled';
-				dispatch( 'core/editor' ).editPost( { meta: { amp_status: newStatus } } );
+				dispatch( 'core/editor' ).editPost( { amp_enabled: isEnabled } );
 			},
 		};
 	} ),
