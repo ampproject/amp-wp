@@ -6,8 +6,10 @@
  */
 
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\HandleValidation;
+use AmpProject\AmpWP\Tests\PrivateAccess;
 
 // phpcs:disable WordPress.Variables.GlobalVariables.OverrideProhibited
 
@@ -20,6 +22,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 
 	use AssertContainsCompatibility;
 	use HandleValidation;
+	use PrivateAccess;
 
 	const TESTED_CLASS = 'AMP_Validated_URL_Post_Type';
 
@@ -544,6 +547,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 			],
 		];
 		wp_cache_set( 'plugins', [ '' => $plugins ], 'plugins' );
+		$this->set_private_property( Services::get( 'plugin_registry' ), 'plugins', null );
 
 		$invalid_url_post_id = AMP_Validated_URL_Post_Type::store_validation_errors( [ $error ], home_url( '/' ) );
 		$this->assertInternalType( 'int', $invalid_url_post_id );
@@ -570,6 +574,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		// Test updating plugin version, as well as the template mode.
 		$plugins['foo/foo.php']['Version'] = '0.2';
 		wp_cache_set( 'plugins', [ '' => $plugins ], 'plugins' );
+		$this->set_private_property( Services::get( 'plugin_registry' ), 'plugins', null );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$last_staleness = AMP_Validated_URL_Post_Type::get_post_staleness( $invalid_url_post_id );
 		$this->assertEqualSets( [ 'foo', 'baz.php' ], $last_staleness['plugins']['new'] );
