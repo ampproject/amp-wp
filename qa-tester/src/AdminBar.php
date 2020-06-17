@@ -76,7 +76,6 @@ class AdminBar {
 	/**
 	 * Render the admin bar button.
 	 *
-	 *
 	 * @param object $wp_admin_bar The WP AdminBar object.
 	 */
 	public function add_menu_button( $wp_admin_bar ) {

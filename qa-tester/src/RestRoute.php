@@ -20,7 +20,7 @@ class RestRoute {
 
 	use VersionSwitcher;
 
-	const REST_ROOT = 'amp-qa-tester/v1';
+	const REST_NAMESPACE = 'amp-qa-tester/v1';
 
 	/**
 	 * Registers functionality through WordPress hooks.
@@ -93,7 +93,7 @@ class RestRoute {
 			],
 		];
 
-		register_rest_route( self::REST_ROOT, $route_uri, $args );
+		register_rest_route( self::REST_NAMESPACE, $route_uri, $args );
 	}
 
 	/**
