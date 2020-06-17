@@ -284,19 +284,19 @@ jobs:
     needs: upload-to-gcs
 
     outputs:
-      pr_number: ${{ steps.get-pr-number.outputs.num }}
+      pr_number: ${{ steps.get-pr-number.outputs.pr_num }}
       comment_body: ${{ steps.get-comment-body.outputs.body }}
 
     steps:
       - name: Get PR number
         id: get-pr-number
-        run: echo "::set-output name=num::$(echo ${{ github.ref }} | cut -d'/' -f3)"
+        run: echo "::set-output name=pr_num::$(echo ${{ github.ref }} | cut -d'/' -f3)"
 
       - name: Check if a comment was already made
         id: find-comment
         uses: peter-evans/find-comment@v1
         with:
-          issue-number: ${{ steps.get-pr-number.outputs.num }}
+          issue-number: ${{ steps.get-pr-number.outputs.pr_num }}
           comment-author: github-actions[bot]
           body-includes: QA tester plugin build for
 
@@ -313,7 +313,7 @@ jobs:
         if: ${{ steps.find-comment.outputs.comment-id == '' }}
         uses: peter-evans/create-or-update-comment@v1
         with:
-          issue-number: ${{ steps.get-pr-number.outputs.num }}
+          issue-number: ${{ steps.get-pr-number.outputs.pr_num }}
           body: ${{ steps.get-comment-body.outputs.body }}
 
       - name: Update comment on PR with links to plugin build
