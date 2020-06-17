@@ -337,7 +337,8 @@ final class SimpleInjector implements Injector {
 			// we need to provide a work-around for PHP 5.6 while we officially
 			// support it.
 
-			$type = $parameter->getClass()->name;
+			$reflection_class = $parameter->getClass();
+			$type             = $reflection_class ? $reflection_class->name : null;
 
 			if ( null === $type ) {
 				return $this->resolve_argument_by_name(
