@@ -559,10 +559,6 @@ jobs:
       comment_body: ${{ steps.get-comment-body.outputs.body }}
 
     steps:
-      - name: Get PR number
-        id: get-pr-number
-        run: echo "::set-output name=num::$(echo $GITHUB_REF | cut -d'/' -f3)"
-
       - name: Check if a comment was already made
         id: find-comment
         uses: peter-evans/find-comment@v1
