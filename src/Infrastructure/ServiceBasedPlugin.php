@@ -83,14 +83,15 @@ abstract class ServiceBasedPlugin implements Plugin {
 	/**
 	 * Activate the plugin.
 	 *
+	 * @param bool $network_wide Whether the activation was done network-wide.
 	 * @return void
 	 */
-	public function activate() {
+	public function activate( $network_wide ) {
 		$this->register_services();
 
 		foreach ( $this->service_container as $service ) {
 			if ( $service instanceof Activateable ) {
-				$service->activate();
+				$service->activate( $network_wide );
 			}
 		}
 
@@ -100,14 +101,15 @@ abstract class ServiceBasedPlugin implements Plugin {
 	/**
 	 * Deactivate the plugin.
 	 *
+	 * @param bool $network_wide Whether the deactivation was done network-wide.
 	 * @return void
 	 */
-	public function deactivate() {
+	public function deactivate( $network_wide ) {
 		$this->register_services();
 
 		foreach ( $this->service_container as $service ) {
 			if ( $service instanceof Deactivateable ) {
-				$service->deactivate();
+				$service->deactivate( $network_wide );
 			}
 		}
 

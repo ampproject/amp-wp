@@ -21,7 +21,8 @@ interface Deactivateable {
 	/**
 	 * Deactivate the service.
 	 *
+	 * @param bool $network_wide Whether the deactivation was done network-wide.
 	 * @return void
 	 */
-	public function deactivate();
+	public function deactivate( $network_wide );
 }

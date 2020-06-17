@@ -190,9 +190,6 @@ function amp_bootstrap_admin() {
 
 	$post_meta_box = new AMP_Post_Meta_Box();
 	$post_meta_box->init();
-
-	$site_health = new SiteHealth();
-	$site_health->init();
 }
 
 /**

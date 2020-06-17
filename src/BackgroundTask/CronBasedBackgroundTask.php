@@ -7,16 +7,16 @@
 
 namespace AmpProject\AmpWP\BackgroundTask;
 
-use AmpProject\AmpWP\HasDeactivation;
 use AmpProject\AmpWP\Icon;
-use AmpProject\AmpWP\Service;
+use AmpProject\AmpWP\Infrastructure\Deactivateable;
+use AmpProject\AmpWP\Infrastructure\Service;
 
 /**
  * Abstract base class for using cron to execute a background task.
  *
  * @package AmpProject\AmpWP
  */
-abstract class CronBasedBackgroundTask implements Service, HasDeactivation {
+abstract class CronBasedBackgroundTask implements Service, Deactivateable {
 
 	const DEFAULT_INTERVAL_HOURLY      = 'hourly';
 	const DEFAULT_INTERVAL_TWICE_DAILY = 'twicedaily';
