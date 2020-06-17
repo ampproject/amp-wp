@@ -8,12 +8,15 @@
 namespace AmpProject\AmpWP;
 
 use AMP_Options_Manager;
+use AMP_Validation_Error_Taxonomy;
 use AMP_Validation_Manager;
 use AMP_Validated_URL_Post_Type;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use WP_Block_Type_Registry;
 use WP_Hook;
+use WP_Term;
+use WP_User;
 
 /**
  * Suppress plugins from running by removing their hooks and nullifying their shortcodes, widgets, and blocks.
@@ -180,18 +183,24 @@ final class PluginSuppression implements Service, Registerable {
 			?>
 			<table id="suppressed-plugins-table" class="wp-list-table widefat fixed striped">
 				<thead>
-				<th class="column-status" scope="col"><?php esc_html_e( 'Status', 'amp' ); ?></th>
-				<th class="column-plugin" scope="col"><?php esc_html_e( 'Plugin', 'amp' ); ?></th>
-				<th class="column-details" scope="col"><?php esc_html_e( 'Details', 'amp' ); ?></th>
+					<tr>
+						<th class="column-status" scope="col"><?php esc_html_e( 'Status', 'amp' ); ?></th>
+						<th class="column-plugin" scope="col"><?php esc_html_e( 'Plugin', 'amp' ); ?></th>
+						<th class="column-details" scope="col"><?php esc_html_e( 'Details', 'amp' ); ?></th>
+					</tr>
 				</thead>
 				<tbody>
 				<?php foreach ( $plugins as $plugin_slug => $plugin ) : ?>
 					<?php
 					$is_suppressed = array_key_exists( $plugin_slug, $suppressed_plugins );
+					$select_name   = sprintf( '%s[%s][%s]', AMP_Options_Manager::OPTION_NAME, Option::SUPPRESSED_PLUGINS, $plugin_slug );
 					?>
 					<tr>
 						<th class="column-status" scope="row">
-							<select name="<?php echo esc_attr( sprintf( '%s[%s][%s]', AMP_Options_Manager::OPTION_NAME, Option::SUPPRESSED_PLUGINS, $plugin_slug ) ); ?>">
+							<label for="<?php echo esc_attr( $select_name ); ?>" class="screen-reader-text">
+								<?php esc_html_e( 'Plugin status:', 'amp' ); ?>
+							</label>
+							<select id="<?php echo esc_attr( $select_name ); ?>" name="<?php echo esc_attr( $select_name ); ?>">
 								<?php foreach ( $select_options as $value => $text ) : ?>
 									<option value="<?php echo esc_attr( $value ); ?>" <?php selected( (string) $is_suppressed, $value ); ?>>
 										<?php echo esc_html( $text ); ?>
@@ -296,7 +305,7 @@ final class PluginSuppression implements Service, Registerable {
 									<?php endif; ?>
 								</p>
 							<?php elseif ( ! $is_suppressed && ! empty( $errors_by_sources['plugin'][ $plugin_slug ] ) ) : ?>
-								<?php self::render_validation_error_details( $errors_by_sources['plugin'][ $plugin_slug ] ); ?>
+								<?php $this->render_validation_error_details( $errors_by_sources['plugin'][ $plugin_slug ] ); ?>
 							<?php endif ?>
 						</td>
 					</tr>
@@ -304,6 +313,66 @@ final class PluginSuppression implements Service, Registerable {
 				</tbody>
 			</table>
 		</fieldset>
+		<?php
+	}
+
+	/**
+	 * Render validation errors into <details> element.
+	 *
+	 * @param array $validation_errors Validation errors.
+	 */
+	private function render_validation_error_details( $validation_errors ) {
+		?>
+		<details>
+			<summary>
+				<?php
+				echo esc_html(
+					sprintf(
+						/* translators: %s is the error count */
+						_n(
+							'%s validation error',
+							'%s validation errors',
+							count( $validation_errors ),
+							'amp'
+						),
+						number_format_i18n( count( $validation_errors ) )
+					)
+				);
+				?>
+			</summary>
+			<ul>
+				<?php foreach ( $validation_errors as $validation_error ) : ?>
+					<?php
+					/** @var WP_Term */
+					$term = $validation_error['term'];
+
+					$edit_term_url = admin_url(
+						add_query_arg(
+							[
+								AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG => $term->name,
+								'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+							],
+							'edit.php'
+						)
+					);
+
+					$is_removed  = ( (int) $term->term_group & AMP_Validation_Error_Taxonomy::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
+					$is_reviewed = ( (int) $term->term_group & AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
+					$tooltip     = sprintf(
+						/* translators: %1 is whether validation error is 'removed' or 'kept', %2 is whether validation error is 'reviewed' or 'unreviewed' */
+						__( 'Invalid markup causing the validation error is %1$s and %2$s. See all validated URL(s) with this validation error.', 'amp' ),
+						$is_removed ? __( 'removed', 'amp' ) : __( 'kept', 'amp' ),
+						$is_reviewed ? __( 'reviewed', 'amp' ) : __( 'unreviewed', 'amp' )
+					);
+					?>
+					<li class="<?php echo esc_attr( sprintf( 'error-%s error-%s', $is_removed ? 'removed' : 'kept', $is_reviewed ? 'reviewed' : 'unreviewed' ) ); ?>">
+						<a href="<?php echo esc_url( $edit_term_url ); ?>" target="_blank" title="<?php echo esc_attr( $tooltip ); ?>">
+							<?php echo wp_kses_post( AMP_Validation_Error_Taxonomy::get_error_title_from_code( $validation_error['data'] ) ); ?>
+						</a>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+		</details>
 		<?php
 	}
 

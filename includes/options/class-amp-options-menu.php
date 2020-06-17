@@ -5,10 +5,7 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\PluginRegistry;
-use AmpProject\AmpWP\PluginSuppression;
 
 /**
  * AMP_Options_Menu class.
@@ -433,70 +430,6 @@ class AMP_Options_Menu {
 				</li>
 			<?php endforeach; ?>
 		</ul>
-		<?php
-	}
-
-	/**
-	 * Render validation errors into <details> element.
-	 *
-	 * @param array $validation_errors Validation errors.
-	 */
-	private static function render_validation_error_details( $validation_errors ) {
-		?>
-		<details>
-			<summary>
-				<?php
-				echo esc_html(
-					sprintf(
-						/* translators: %s is the error count */
-						_n(
-							'%s validation error',
-							'%s validation errors',
-							count( $validation_errors ),
-							'amp'
-						),
-						number_format_i18n( count( $validation_errors ) )
-					)
-				);
-				?>
-			</summary>
-			<ul>
-				<?php foreach ( $validation_errors as $validation_error ) : ?>
-					<?php
-					/**
-					 * Term from amp_validation_error taxonomy.
-					 *
-					 * @var WP_Term
-					 */
-					$term = $validation_error['term'];
-
-					$edit_term_url = admin_url(
-						add_query_arg(
-							[
-								AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG => $term->name,
-								'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-							],
-							'edit.php'
-						)
-					);
-
-					$is_removed  = ( (int) $term->term_group & AMP_Validation_Error_Taxonomy::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
-					$is_reviewed = ( (int) $term->term_group & AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
-					$tooltip     = sprintf(
-						/* translators: %1 is whether validation error is 'removed' or 'kept', %2 is whether validation error is 'reviewed' or 'unreviewed' */
-						__( 'Invalid markup causing the validation error is %1$s and %2$s. See all validated URL(s) with this validation error.', 'amp' ),
-						$is_removed ? __( 'removed', 'amp' ) : __( 'kept', 'amp' ),
-						$is_reviewed ? __( 'reviewed', 'amp' ) : __( 'unreviewed', 'amp' )
-					);
-					?>
-					<li class="<?php echo esc_attr( sprintf( 'error-%s error-%s', $is_removed ? 'removed' : 'kept', $is_reviewed ? 'reviewed' : 'unreviewed' ) ); ?>">
-						<a href="<?php echo esc_url( $edit_term_url ); ?>" target="_blank" title="<?php echo esc_attr( $tooltip ); ?>">
-							<?php echo wp_kses_post( AMP_Validation_Error_Taxonomy::get_error_title_from_code( $validation_error['data'] ) ); ?>
-						</a>
-					</li>
-				<?php endforeach; ?>
-			</ul>
-		</details>
 		<?php
 	}
 
