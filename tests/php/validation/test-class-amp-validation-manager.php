@@ -8,6 +8,7 @@
 // phpcs:disable Generic.Formatting.MultipleStatementAlignment.NotSameWarning
 
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\HandleValidation;
 use AmpProject\AmpWP\Tests\PrivateAccess;
@@ -129,6 +130,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		AMP_Validation_Manager::$hook_source_stack   = [];
 		AMP_Validation_Manager::$validation_results  = [];
 		AMP_Validation_Manager::reset_validation_results();
+		$this->set_private_property( Services::get( 'plugin_registry' ), 'plugins', null );
 		parent::tearDown();
 	}
 
