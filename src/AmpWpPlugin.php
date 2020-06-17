@@ -103,7 +103,9 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 * @return array<string> Array of fully qualified class names.
 	 */
 	protected function get_shared_instances() {
-		return [];
+		return [
+			PluginRegistry::class,
+		];
 	}
 
 	/**
