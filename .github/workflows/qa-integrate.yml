@@ -301,7 +301,7 @@ jobs:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
             QA tester plugin build for ${{ github.event.pull_request.head.sha }} is ready :bellhop_bell:!
-            Download the build [here](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/amp-qa-tester.zip)"
+            Download the build [here](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/amp-qa-tester.zip)
 
       - name: Update comment on PR with links to plugin build
         if: ${{ steps.find-comment.outputs.comment-id != '' }}
@@ -311,4 +311,4 @@ jobs:
           edit-mode: replace
           body: |
             QA tester plugin build for ${{ github.event.pull_request.head.sha }} is ready :bellhop_bell:!
-            Download the build [here](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/amp-qa-tester.zip)"
+            Download the build [here](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/amp-qa-tester.zip)
