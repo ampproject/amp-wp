@@ -20,7 +20,6 @@ use AmpProject\AmpWP\Infrastructure\ServiceBasedPlugin;
  * can hook themselves into the WordPress lifecycle.
  */
 final class AmpWpPlugin extends ServiceBasedPlugin {
-
 	/*
 	 * The "plugin" is only a tool to hook arbitrary code up to the WordPress
 	 * execution flow.
@@ -29,6 +28,15 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 * what makes up the actual plugin, and they provide self-contained pieces
 	 * of code that can work independently.
 	 */
+
+	/**
+	 * Prefix to use for all actions and filters.
+	 *
+	 * This is used to make the filters for the dependency injector unique.
+	 *
+	 * @var string
+	 */
+	const HOOK_PREFIX = 'amp_';
 
 	/**
 	 * Get the list of services to register.
