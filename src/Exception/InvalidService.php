@@ -12,7 +12,7 @@ use InvalidArgumentException;
 /**
  * Exception thrown when an invalid service was requested.
  */
-class InvalidService
+final class InvalidService
 	extends InvalidArgumentException
 	implements AmpWpException {
 
@@ -23,7 +23,7 @@ class InvalidService
 	 * @param string|object $service Class name of the service that was not
 	 *                               recognized.
 	 *
-	 * @return static
+	 * @return self
 	 */
 	public static function from_service( $service ) {
 		$message = \sprintf(
@@ -33,7 +33,7 @@ class InvalidService
 				: (string) $service
 		);
 
-		return new static( $message );
+		return new self( $message );
 	}
 
 	/**
@@ -43,7 +43,7 @@ class InvalidService
 	 * @param string $service_id Identifier of the service that is not being
 	 *                           recognized.
 	 *
-	 * @return static
+	 * @return self
 	 */
 	public static function from_service_id( $service_id ) {
 		$message = \sprintf(
@@ -51,6 +51,6 @@ class InvalidService
 			$service_id
 		);
 
-		return new static( $message );
+		return new self( $message );
 	}
 }

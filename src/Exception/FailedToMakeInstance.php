@@ -13,7 +13,7 @@ use RuntimeException;
  * Exception thrown when the injector couldn't instantiate a given class or
  * interface.
  */
-class FailedToMakeInstance
+final class FailedToMakeInstance
 	extends RuntimeException
 	implements AmpWpException {
 
@@ -33,7 +33,7 @@ class FailedToMakeInstance
 	 * @param string $interface_or_class Interface or class name that generated
 	 *                                   the circular reference.
 	 *
-	 * @return static
+	 * @return self
 	 */
 	public static function for_circular_reference( $interface_or_class ) {
 		$message = \sprintf(
@@ -41,7 +41,7 @@ class FailedToMakeInstance
 			$interface_or_class
 		);
 
-		return new static( $message, static::CIRCULAR_REFERENCE );
+		return new self( $message, self::CIRCULAR_REFERENCE );
 	}
 
 	/**
@@ -50,7 +50,7 @@ class FailedToMakeInstance
 	 *
 	 * @param string $interface Interface that was left unresolved.
 	 *
-	 * @return static
+	 * @return self
 	 */
 	public static function for_unresolved_interface( $interface ) {
 		$message = \sprintf(
@@ -58,7 +58,7 @@ class FailedToMakeInstance
 			$interface
 		);
 
-		return new static( $message, static::UNRESOLVED_INTERFACE );
+		return new self( $message, self::UNRESOLVED_INTERFACE );
 	}
 
 	/**
@@ -68,7 +68,7 @@ class FailedToMakeInstance
 	 * @param string $interface_or_class Interface or class that could not be
 	 *                                   reflected upon.
 	 *
-	 * @return static
+	 * @return self
 	 */
 	public static function for_unreflectable_class( $interface_or_class ) {
 		$message = \sprintf(
@@ -76,7 +76,7 @@ class FailedToMakeInstance
 			$interface_or_class
 		);
 
-		return new static( $message, static::UNREFLECTABLE_CLASS );
+		return new self( $message, self::UNREFLECTABLE_CLASS );
 	}
 
 	/**
@@ -87,7 +87,7 @@ class FailedToMakeInstance
 	 *                              resolved.
 	 * @param string $class         Class that had the argument in its
 	 *                              constructor.
-	 * @return static
+	 * @return self
 	 */
 	public static function for_unresolved_argument( $argument_name, $class ) {
 		$message = \sprintf(
@@ -96,7 +96,7 @@ class FailedToMakeInstance
 			$class
 		);
 
-		return new static( $message, static::UNRESOLVED_ARGUMENT );
+		return new self( $message, self::UNRESOLVED_ARGUMENT );
 	}
 
 	/**
@@ -105,7 +105,7 @@ class FailedToMakeInstance
 	 *
 	 * @param string $class Class that was not yet instantiated.
 	 *
-	 * @return static
+	 * @return self
 	 */
 	public static function for_uninstantiated_shared_instance( $class ) {
 		$message = \sprintf(
@@ -113,7 +113,7 @@ class FailedToMakeInstance
 			$class
 		);
 
-		return new static( $message, static::UNINSTANTIATED_SHARED_INSTANCE );
+		return new self( $message, self::UNINSTANTIATED_SHARED_INSTANCE );
 	}
 
 	/**
@@ -122,7 +122,7 @@ class FailedToMakeInstance
 	 *
 	 * @param string $class Class for which there is no delegate.
 	 *
-	 * @return static
+	 * @return self
 	 */
 	public static function for_invalid_delegate( $class ) {
 		$message = \sprintf(
@@ -130,6 +130,6 @@ class FailedToMakeInstance
 			$class
 		);
 
-		return new static( $message, static::INVALID_DELEGATE );
+		return new self( $message, self::INVALID_DELEGATE );
 	}
 }
