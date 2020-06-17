@@ -37,6 +37,7 @@ final class PluginSuppression implements Service, Registerable {
 	public function __construct( PluginRegistry $plugin_registry ) {
 		$this->plugin_registry = $plugin_registry;
 	}
+
 	/**
 	 * Register the service with the system.
 	 *
@@ -69,7 +70,10 @@ final class PluginSuppression implements Service, Registerable {
 		$this->suppress_widgets( $suppressed_plugin_slugs );
 	}
 
-	public function add_settings_field(  ) {
+	/**
+	 * Add settings field.
+	 */
+	public function add_settings_field() {
 		if ( count( $this->get_suppressible_plugins() ) > 0 ) {
 			add_settings_field(
 				Option::SUPPRESSED_PLUGINS,
@@ -387,7 +391,7 @@ final class PluginSuppression implements Service, Registerable {
 	 */
 	private function suppress_widgets( $suppressed_plugins ) {
 		global $wp_registered_widgets;
-		foreach ( $wp_registered_widgets as $widget_id => &$registered_widget ) {
+		foreach ( $wp_registered_widgets as &$registered_widget ) {
 			if ( $this->is_callback_plugin_suppressed( $registered_widget['callback'], $suppressed_plugins ) ) {
 				$registered_widget['callback'] = '__return_null';
 			}
