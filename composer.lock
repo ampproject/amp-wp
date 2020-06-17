@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "be1aab0c1b2b2e620c2db83d99cc3dcd",
+    "content-hash": "33d3a5cac78dd8988336e5878feb0874",
     "packages": [
         {
             "name": "ampproject/common",
@@ -12,7 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "lib/common",
-                "reference": "9ada7ae0569dc2d0544867c74d3a18e1408ec916"
+                "reference": "4ab7dd96419d90b7333163d844bebafd8e1e72ad"
             },
             "require": {
                 "ext-dom": "*",
@@ -38,7 +38,7 @@
                 },
                 "downloads": {
                     "phpstan": {
-                        "url": "https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar",
+                        "url": "https://github.com/phpstan/phpstan/raw/master/phpstan.phar",
                         "path": "vendor/bin/phpstan",
                         "type": "phar"
                     }
@@ -92,7 +92,7 @@
             "dist": {
                 "type": "path",
                 "url": "lib/optimizer",
-                "reference": "f9c39e52ece00ea8fb3bd6a1d60d662847f2715e"
+                "reference": "1cf044ad9af973a2be714326699c35d3dca3d11b"
             },
             "require": {
                 "ampproject/common": "^1",
@@ -119,7 +119,7 @@
                 },
                 "downloads": {
                     "phpstan": {
-                        "url": "https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar",
+                        "url": "https://github.com/phpstan/phpstan/raw/master/phpstan.phar",
                         "path": "vendor/bin/phpstan",
                         "type": "phar"
                     }
@@ -156,7 +156,7 @@
                     "@analyze"
                 ],
                 "analyze": [
-                    "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan version; phpstan analyze --ansi; fi"
+                    "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan --version; phpstan analyze --ansi; fi"
                 ],
                 "unit": [
                     "if [ -z $TEST_SKIP_PHPUNIT ]; then phpunit --colors=always; fi"
@@ -348,12 +348,6 @@
                 "phpunit/phpunit": "~4.8"
             },
             "type": "library",
-            "extra": {
-                "patches_applied": {
-                    "Validate name-start code points for identifier <https://github.com/sabberworm/PHP-CSS-Parser/pull/185>": "patches/php-css-parser-pull-185.patch",
-                    "Fix parsing CSS selectors which contain commas <https://github.com/westonruter/PHP-CSS-Parser/pull/1>": "patches/php-css-parser-commit-10a2501.patch"
-                }
-            },
             "autoload": {
                 "psr-0": {
                     "Sabberworm\\CSS\\": "lib/"
@@ -1075,16 +1069,16 @@
         },
         {
             "name": "sirbrillig/phpcs-variable-analysis",
-            "version": "v2.8.1",
+            "version": "v2.8.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sirbrillig/phpcs-variable-analysis.git",
-                "reference": "5be26b4d719acaf7a433d1cad469159cbf034f2a"
+                "reference": "4a60e8bc9eebdb054a8a4ad41e4518d43d458c47"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sirbrillig/phpcs-variable-analysis/zipball/5be26b4d719acaf7a433d1cad469159cbf034f2a",
-                "reference": "5be26b4d719acaf7a433d1cad469159cbf034f2a",
+                "url": "https://api.github.com/repos/sirbrillig/phpcs-variable-analysis/zipball/4a60e8bc9eebdb054a8a4ad41e4518d43d458c47",
+                "reference": "4a60e8bc9eebdb054a8a4ad41e4518d43d458c47",
                 "shasum": ""
             },
             "require": {
@@ -1093,9 +1087,9 @@
             },
             "require-dev": {
                 "dealerdirect/phpcodesniffer-composer-installer": "^0.4.4 || ^0.5 || ^0.6",
-                "limedeck/phpunit-detailed-printer": "^3.1",
+                "limedeck/phpunit-detailed-printer": "^3.1 || ^4.0 || ^5.0",
                 "phpstan/phpstan": "^0.11.8",
-                "phpunit/phpunit": "^5.0 || ^6.5",
+                "phpunit/phpunit": "^5.0 || ^6.5 || ^7.0 || ^8.0",
                 "sirbrillig/phpcs-import-detection": "^1.1"
             },
             "type": "phpcodesniffer-standard",
@@ -1119,7 +1113,7 @@
                 }
             ],
             "description": "A PHPCS sniff to detect problems with variables.",
-            "time": "2020-02-11T22:18:48+00:00"
+            "time": "2020-05-25T17:00:12+00:00"
         },
         {
             "name": "squizlabs/php_codesniffer",
