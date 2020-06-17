@@ -284,19 +284,14 @@ jobs:
     needs: upload-to-gcs
 
     outputs:
-      pr_number: ${{ steps.get-pr-number.outputs.pr_num }}
       comment_body: ${{ steps.get-comment-body.outputs.body }}
 
     steps:
-      - name: Get PR number
-        id: get-pr-number
-        run: echo "::set-output name=pr_num::$(echo ${{ github.ref }} | cut -d'/' -f3)"
-
       - name: Check if a comment was already made
         id: find-comment
         uses: peter-evans/find-comment@v1
         with:
-          issue-number: ${{ steps.get-pr-number.outputs.pr_num }}
+          issue-number: ${{ github.event.pull_request.number }}
           comment-author: github-actions[bot]
           body-includes: QA tester plugin build for
 
@@ -304,7 +299,7 @@ jobs:
         id: get-comment-body
         # Setting a multi-line output requires escaping line-feeds. See <https://github.community/t/set-output-truncates-multiline-strings/16852/3>.
         run: |
-          body="QA tester plugin build for ${{ github.sha }} is ready :bellhop_bell:!
+          body="QA tester plugin build for ${{ github.event.pull_request.head.sha }} is ready :bellhop_bell:!
           Download the build [here](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/amp-qa-tester.zip)"
           body="${body//$'\n'/'%0A'}"
           echo "::set-output name=body::$body"
@@ -313,7 +308,7 @@ jobs:
         if: ${{ steps.find-comment.outputs.comment-id == '' }}
         uses: peter-evans/create-or-update-comment@v1
         with:
-          issue-number: ${{ steps.get-pr-number.outputs.pr_num }}
+          issue-number: ${{ github.event.pull_request.number }}
           body: ${{ steps.get-comment-body.outputs.body }}
 
       - name: Update comment on PR with links to plugin build

@@ -556,7 +556,6 @@ jobs:
     needs: upload-to-gcs
 
     outputs:
-      pr_number: ${{ steps.get-pr-number.outputs.num }}
       comment_body: ${{ steps.get-comment-body.outputs.body }}
 
     steps:
@@ -568,7 +567,7 @@ jobs:
         id: find-comment
         uses: peter-evans/find-comment@v1
         with:
-          issue-number: ${{ steps.get-pr-number.outputs.num }}
+          issue-number: ${{ github.event.pull_request.number }}
           comment-author: github-actions[bot]
           body-includes: Plugin builds for
 
@@ -586,7 +585,7 @@ jobs:
         if: ${{ steps.find-comment.outputs.comment-id == '' }}
         uses: peter-evans/create-or-update-comment@v1
         with:
-          issue-number: ${{ steps.get-pr-number.outputs.num }}
+          issue-number: ${{ github.event.pull_request.number }}
           body: ${{ steps.get-comment-body.outputs.body }}
 
       - name: Update comment on PR with links to plugin builds
