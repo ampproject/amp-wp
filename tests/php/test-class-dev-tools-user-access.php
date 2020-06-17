@@ -19,17 +19,30 @@ use AmpProject\AmpWP\Admin\DevToolsUserAccess;
 class Test_DevToolsUserAccess extends WP_UnitTestCase {
 
 	/**
+	 * Test instance.
+	 *
+	 * @var DevToolsUserAccess
+	 */
+	private $dev_tools_user_access;
+
+	public function setUp() {
+		parent::setUp();
+
+		$this->dev_tools_user_access = new DevToolsUserAccess();
+	}
+
+	/**
 	 * Tests DevToolsUserAccess::register
 	 *
 	 * @covers DevToolsUserAccess::register
 	 */
 	public function test_register() {
-		( new DevToolsUserAccess() )->register();
+		$this->dev_tools_user_access->register();
 
-		$this->assertEquals( 10, has_filter( 'amp_setup_wizard_data', [ DevToolsUserAccess::class, 'inject_setup_wizard_data' ] ) );
-		$this->assertEquals( 10, has_action( 'rest_api_init', [ DevToolsUserAccess::class, 'register_user_meta' ] ) );
-		$this->assertEquals( 10, has_filter( 'get_user_metadata', [ DevToolsUserAccess::class, 'get_default_enable_developer_tools_setting' ] ) );
-		$this->assertEquals( 10, has_filter( 'update_user_metadata', [ DevToolsUserAccess::class, 'update_enable_developer_tools_permission_check' ] ) );
+		$this->assertEquals( 10, has_filter( 'amp_setup_wizard_data', [ $this->dev_tools_user_access, 'inject_setup_wizard_data' ] ) );
+		$this->assertEquals( 10, has_action( 'rest_api_init', [ $this->dev_tools_user_access, 'register_user_meta' ] ) );
+		$this->assertEquals( 10, has_filter( 'get_user_metadata', [ $this->dev_tools_user_access, 'get_default_enable_developer_tools_setting' ] ) );
+		$this->assertEquals( 10, has_filter( 'update_user_metadata', [ $this->dev_tools_user_access, 'update_enable_developer_tools_permission_check' ] ) );
 	}
 
 	/**
@@ -40,7 +53,7 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 	public function test_register_user_meta() {
 		global $wp_meta_keys;
 
-		DevToolsUserAccess::register_user_meta();
+		$this->dev_tools_user_access->register_user_meta();
 
 		$this->assertArrayHasKey( 'amp_dev_tools_enabled', $wp_meta_keys['user'][''] );
 	}
@@ -51,7 +64,7 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 	 * @covers DevToolsUserAccess::inject_setup_wizard_data
 	 */
 	public function test_inject_setup_wizard_data() {
-		$data = DevToolsUserAccess::inject_setup_wizard_data( [ 'pre_filtered_data' => 1 ] );
+		$data = $this->dev_tools_user_access->inject_setup_wizard_data( [ 'pre_filtered_data' => 1 ] );
 
 		$this->assertEquals(
 			[
@@ -114,7 +127,7 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 		$this->assertFalse( array_key_exists( 'amp_dev_tools_enabled', $meta ) );
 
 		$expected = $user_can_have_dev_tools ? '1' : '';
-		DevToolsUserAccess::get_default_enable_developer_tools_setting( null, $user, 'amp_dev_tools_enabled' );
+		$this->dev_tools_user_access->get_default_enable_developer_tools_setting( null, $user, 'amp_dev_tools_enabled' );
 		$this->assertEquals( $expected, get_user_meta( $user, 'amp_dev_tools_enabled', true ) );
 	}
 
@@ -138,10 +151,10 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 		}
 
 		// Anyone can set it to false.
-		$this->assertNull( DevToolsUserAccess::update_enable_developer_tools_permission_check( null, $user, 'amp_dev_tools_enabled', false ) );
+		$this->assertNull( $this->dev_tools_user_access->update_enable_developer_tools_permission_check( null, $user, 'amp_dev_tools_enabled', false ) );
 
 		$expected = '1' === $user_can_have_dev_tools ? null : false;
 		// Only users with permissions can set it to true.
-		$this->assertEquals( $expected, DevToolsUserAccess::update_enable_developer_tools_permission_check( null, $user, 'amp_dev_tools_enabled', true ) );
+		$this->assertEquals( $expected, $this->dev_tools_user_access->update_enable_developer_tools_permission_check( null, $user, 'amp_dev_tools_enabled', true ) );
 	}
 }

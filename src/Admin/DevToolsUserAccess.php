@@ -36,10 +36,10 @@ final class DevToolsUserAccess implements Service {
 	 * Sets up hooks.
 	 */
 	public function register() {
-		add_filter( 'amp_setup_wizard_data', [ __CLASS__, 'inject_setup_wizard_data' ] );
-		add_action( 'rest_api_init', [ __CLASS__, 'register_user_meta' ] );
-		add_filter( 'get_user_metadata', [ __CLASS__, 'get_default_enable_developer_tools_setting' ], 10, 3 );
-		add_filter( 'update_user_metadata', [ __CLASS__, 'update_enable_developer_tools_permission_check' ], 10, 4 );
+		add_filter( 'amp_setup_wizard_data', [ $this, 'inject_setup_wizard_data' ] );
+		add_action( 'rest_api_init', [ $this, 'register_user_meta' ] );
+		add_filter( 'get_user_metadata', [ $this, 'get_default_enable_developer_tools_setting' ], 10, 3 );
+		add_filter( 'update_user_metadata', [ $this, 'update_enable_developer_tools_permission_check' ], 10, 4 );
 	}
 
 	/**
@@ -47,7 +47,7 @@ final class DevToolsUserAccess implements Service {
 	 *
 	 * @since 1.6.0
 	 */
-	public static function register_user_meta() {
+	public function register_user_meta() {
 		register_meta(
 			'user',
 			self::USER_OPTION_DEVELOPER_TOOLS,
@@ -65,7 +65,7 @@ final class DevToolsUserAccess implements Service {
 	 * @param array $data Associative array of data provided to the app.
 	 * @return array Filtered array.
 	 */
-	public static function inject_setup_wizard_data( $data ) {
+	public function inject_setup_wizard_data( $data ) {
 		$data['USER_OPTION_DEVELOPER_TOOLS'] = self::USER_OPTION_DEVELOPER_TOOLS;
 		$data['USER_REST_ENDPOINT']          = rest_url( 'wp/v2/users/me' );
 
@@ -82,7 +82,7 @@ final class DevToolsUserAccess implements Service {
 	 * @param string $key The metadata key.
 	 * @return mixed Null to prevent filtering.
 	 */
-	public static function get_default_enable_developer_tools_setting( $value, $object_id, $key ) {
+	public function get_default_enable_developer_tools_setting( $value, $object_id, $key ) {
 		if ( self::USER_OPTION_DEVELOPER_TOOLS !== $key ) {
 			return $value;
 		}
@@ -108,7 +108,7 @@ final class DevToolsUserAccess implements Service {
 	 * @param mixed      $meta_value The new value.
 	 * @return false|null The filtered result.
 	 */
-	public static function update_enable_developer_tools_permission_check( $check, $object_id, $meta_key, $meta_value ) {
+	public function update_enable_developer_tools_permission_check( $check, $object_id, $meta_key, $meta_value ) {
 		if ( self::USER_OPTION_DEVELOPER_TOOLS !== $meta_key ) {
 			return $check;
 		}
