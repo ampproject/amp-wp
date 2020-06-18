@@ -72,10 +72,13 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return DOMNodeList A list of DOMElement nodes.
 	 */
 	protected function get_raw_embed_nodes( Document $dom ) {
-		$query_segments = array_map( static function ( $domain ) {
-			return sprintf( 'contains( @src, "%s" )', $domain );
-		}, $this->applicable_domains );
-		$query = implode( ' or ', $query_segments );
+		$query_segments = array_map(
+			static function ( $domain ) {
+				return sprintf( 'contains( @src, "%s" )', $domain );
+			},
+			$this->applicable_domains
+		);
+		$query          = implode( ' or ', $query_segments );
 		return $dom->xpath->query( sprintf( '//iframe[ %s ]', $query ) );
 	}
 
