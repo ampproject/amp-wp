@@ -6,6 +6,29 @@
 const baseUrl = 'https://api.github.com';
 
 /**
+ * Wrapper for `fetch` to catch any errors while making a request.
+ *
+ * @private
+ *
+ * @param {Request|string} resource The resource that you wish to fetch.
+ * @param {Object} opts An object containing any custom settings that you want to apply to the request.
+ * @return {Promise<Response>} A Promise that resolves to a Response object.
+ */
+const _fetch = ( resource, opts = {} ) => {
+	return fetch( resource, opts )
+		.then( ( response ) => {
+			if ( ! response.ok ) {
+				return Promise.reject( response.statusText );
+			}
+
+			return response;
+		} )
+		.catch( ( error ) => {
+			return Promise.reject( error );
+		} );
+};
+
+/**
  * Fetches all open PRs that have build zips available for download.
  *
  * @return {Promise<Object[]>} Promise containing a list of PR items.
@@ -21,7 +44,7 @@ export const getPullRequestsWithBuilds = () => {
 
 	url.search = new URLSearchParams( params ).toString();
 
-	return fetch( url )
+	return _fetch( url )
 		.then( ( response ) => response.json() )
 		.then( ( json ) => json.items || [] );
 };
@@ -36,5 +59,5 @@ export const getProtectedBranches = () => {
 	/* eslint-disable-next-line prettier/prettier */
 	const url = `${ baseUrl }/repos/ampproject/amp-wp/branches?protected=true`;
 
-	return fetch( url ).then( ( response ) => response.json() );
+	return _fetch( url ).then( ( response ) => response.json() );
 };

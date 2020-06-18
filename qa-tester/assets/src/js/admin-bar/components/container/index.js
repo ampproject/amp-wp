@@ -53,9 +53,13 @@ export default class Container extends Component {
 		Promise.all( [
 			this.addReleaseBranchOptions(),
 			this.addPullRequestOptions(),
-		] ).then( () => {
-			this.setState( { isLoading: false } );
-		} );
+		] )
+			.then( () => {
+				this.setState( { isLoading: false } );
+			} )
+			.catch( ( error ) => {
+				this.setState( { isLoading: false, error } );
+			} );
 	}
 
 	componentWillUnmount() {
