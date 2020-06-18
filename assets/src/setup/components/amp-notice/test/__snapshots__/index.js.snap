@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Selectable matches snapshots 1`] = `
+exports[`AMPNotice matches snapshots 1`] = `
 <div
   className="amp-notice amp-notice--success amp-notice--large"
 >
@@ -25,7 +25,7 @@ exports[`Selectable matches snapshots 1`] = `
 </div>
 `;
 
-exports[`Selectable matches snapshots 2`] = `
+exports[`AMPNotice matches snapshots 2`] = `
 <div
   className="amp-notice amp-notice--warning amp-notice--small"
 >
