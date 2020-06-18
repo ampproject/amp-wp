@@ -60,7 +60,7 @@ final class DevToolsUserAccess implements Delayed, Service, Registerable {
 				'get_callback'    => [ $this, 'rest_get_dev_tools_enabled' ],
 				'update_callback' => [ $this, 'rest_update_dev_tools_enabled' ],
 				'schema'          => [
-					'description' => __( 'Whether AMP development tools are available to the user', 'amp' ),
+					'description' => __( 'Whether the user has enabled dev tools.', 'amp' ),
 					'type'        => 'boolean',
 				],
 			]
