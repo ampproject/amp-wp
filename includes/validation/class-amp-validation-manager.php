@@ -1620,10 +1620,13 @@ class AMP_Validation_Manager {
 
 		$source = compact( 'reflection' );
 
+		/** @var PluginRegistry $plugin_registry */
+		$plugin_registry = Services::get( 'plugin_registry' );
+
 		// Identify the type, name, and relative file path.
 		$file         = wp_normalize_path( $reflection->getFileName() );
 		$slug_pattern = '(?<slug>[^/]+)';
-		if ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WP_PLUGIN_DIR ) ), ':' ) . $slug_pattern . '(/(?P<file>.*$))?:s', $file, $matches ) ) {
+		if ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( $plugin_registry->get_plugin_dir() ) ), ':' ) . $slug_pattern . '(/(?P<file>.*$))?:s', $file, $matches ) ) {
 			$source['type'] = 'plugin';
 			$source['name'] = $matches['slug'];
 			$source['file'] = isset( $matches['file'] ) ? $matches['file'] : $matches['slug'];

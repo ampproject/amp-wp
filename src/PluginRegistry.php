@@ -17,6 +17,27 @@ use AmpProject\AmpWP\Infrastructure\Service;
 final class PluginRegistry implements Service {
 
 	/**
+	 * Plugin folder.
+	 *
+	 * @var string
+	 */
+	private $plugin_folder = '';
+
+	/**
+	 * Get absolute path to plugin directory.
+	 *
+	 * @see WP_PLUGIN_DIR
+	 * @return string Plugin directory.
+	 */
+	public function get_plugin_dir() {
+		$plugin_dir = WP_PLUGIN_DIR;
+		if ( $this->plugin_folder ) {
+			$plugin_dir .= '/' . trim( $this->plugin_folder, '/' );
+		}
+		return $plugin_dir;
+	}
+
+	/**
 	 * Get plugin slug from file.
 	 *
 	 * If the plugin file is in a directory, then the slug is just the directory name. Otherwise, if the file is not
@@ -113,6 +134,6 @@ final class PluginRegistry implements Service {
 	 */
 	private function get_plugins_data() {
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		return get_plugins();
+		return get_plugins( $this->plugin_folder );
 	}
 }
