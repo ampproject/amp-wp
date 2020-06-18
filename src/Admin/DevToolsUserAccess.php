@@ -9,6 +9,7 @@
 
 namespace AmpProject\AmpWP\Admin;
 
+use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use WP_Error;
@@ -19,7 +20,7 @@ use WP_User;
  *
  * @since 1.6.0
  */
-final class DevToolsUserAccess implements Service, Registerable {
+final class DevToolsUserAccess implements Delayed, Service, Registerable {
 
 	/**
 	 * User meta key enabling or disabling developer tools.
@@ -29,10 +30,21 @@ final class DevToolsUserAccess implements Service, Registerable {
 	const USER_FIELD_DEVELOPER_TOOLS_ENABLED = 'amp_dev_tools_enabled';
 
 	/**
-	 * Sets up hooks.
+	 * Get the action to use for registering the service.
+	 *
+	 * @return string Registration action to use.
+	 */
+	public static function get_registration_action() {
+		return 'rest_api_init';
+	}
+
+	/**
+	 * Runs on instantiation.
+	 *
+	 * @action rest_api_init
 	 */
 	public function register() {
-		add_action( 'rest_api_init', [ $this, 'register_rest_field' ] );
+		$this->register_rest_field();
 	}
 
 	/**
