@@ -32,17 +32,6 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests DevToolsUserAccess::register
-	 *
-	 * @covers DevToolsUserAccess::register
-	 */
-	public function test_register() {
-		$this->dev_tools_user_access->register();
-
-		$this->assertEquals( 10, has_action( 'rest_api_init', [ $this->dev_tools_user_access, 'register_rest_field' ] ) );
-	}
-
-	/**
 	 * Tests DevToolsUserAccess::register_rest_field
 	 *
 	 * @covers DevToolsUserAccess::register_rest_field
