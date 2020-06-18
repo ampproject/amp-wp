@@ -17,13 +17,6 @@ use AmpProject\AmpWP\Infrastructure\Service;
 final class PluginRegistry implements Service {
 
 	/**
-	 * Array of plugins data.
-	 *
-	 * @var array[]
-	 */
-	private $plugins;
-
-	/**
 	 * Get plugin slug from file.
 	 *
 	 * If the plugin file is in a directory, then the slug is just the directory name. Otherwise, if the file is not
@@ -114,11 +107,7 @@ final class PluginRegistry implements Service {
 	 * @return array[]
 	 */
 	private function get_plugins_data() {
-		if ( null === $this->plugins ) {
-			require_once ABSPATH . 'wp-admin/includes/plugin.php';
-			$this->plugins = get_plugins();
-		}
-
-		return $this->plugins;
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		return get_plugins();
 	}
 }
