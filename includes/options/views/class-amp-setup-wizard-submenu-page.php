@@ -132,14 +132,14 @@ final class AMP_Setup_Wizard_Submenu_Page {
 		wp_styles()->add_data( self::ASSET_HANDLE, 'rtl', 'replace' );
 
 		$setup_wizard_data = [
-			'AMP_OPTIONS_KEY'             => AMP_Options_Manager::OPTION_NAME,
-			'APP_ROOT_ID'                 => self::APP_ROOT_ID,
-			'EXIT_LINK'                   => admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ),
-			'OPTIONS_REST_ENDPOINT'       => rest_url( 'amp/v1/options' ),
-			'READER_THEMES_REST_ENDPOINT' => rest_url( 'amp/v1/reader-themes' ),
-			'UPDATES_NONCE'               => wp_create_nonce( 'updates' ),
+			'AMP_OPTIONS_KEY'                    => AMP_Options_Manager::OPTION_NAME,
+			'APP_ROOT_ID'                        => self::APP_ROOT_ID,
+			'EXIT_LINK'                          => admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ),
+			'OPTIONS_REST_ENDPOINT'              => rest_url( 'amp/v1/options' ),
+			'READER_THEMES_REST_ENDPOINT'        => rest_url( 'amp/v1/reader-themes' ),
+			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
 			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
-			'USER_REST_ENDPOINT'          => rest_url( 'wp/v2/users/me' ),
+			'USER_REST_ENDPOINT'                 => rest_url( 'wp/v2/users/me' ),
 		];
 
 		wp_add_inline_script(
