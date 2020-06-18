@@ -10,8 +10,9 @@ import domReady from '@wordpress/dom-ready';
 import Container from './components/container';
 
 domReady( () => {
-	render(
-		<Container />,
-		document.getElementById( 'amp-qa-tester-build-selector' )
-	);
+	const root = document.getElementById( 'amp-qa-tester-build-selector' );
+
+	if ( root ) {
+		render( <Container />, root );
+	}
 } );
