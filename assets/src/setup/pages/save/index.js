@@ -16,7 +16,7 @@ import { User } from '../../components/user-context-provider';
  */
 export function Save() {
 	const { didSaveOptions, saveOptions, savingOptions } = useContext( Options );
-	const { didSaveUserOptions, saveUserOptions, savingUserOptions } = useContext( User );
+	const { didSaveDeveloperToolsOption, saveDeveloperToolsOption, savingDeveloperToolsOption } = useContext( User );
 
 	/**
 	 * Triggers saving of options on arrival of this screen.
@@ -35,16 +35,16 @@ export function Save() {
 	 * @todo Possibly wait for a different user action to save.
 	 */
 	useEffect( () => {
-		if ( ! didSaveUserOptions && ! savingUserOptions ) {
-			saveUserOptions();
+		if ( ! didSaveDeveloperToolsOption && ! savingDeveloperToolsOption ) {
+			saveDeveloperToolsOption();
 		}
-	}, [ didSaveUserOptions, savingUserOptions, saveUserOptions ] );
+	}, [ didSaveDeveloperToolsOption, savingDeveloperToolsOption, saveDeveloperToolsOption ] );
 
-	if ( savingOptions || savingUserOptions ) {
+	if ( savingOptions || savingDeveloperToolsOption ) {
 		return <Loading />;
 	}
 
-	if ( ! didSaveOptions || ! didSaveUserOptions ) {
+	if ( ! didSaveOptions || ! didSaveDeveloperToolsOption ) {
 		return null;
 	}
 

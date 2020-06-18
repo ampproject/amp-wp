@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { createContext, useEffect, useState, useRef, useCallback } from '@wordpress/element';
+import { createContext, useEffect, useState, useRef, useCallback, useMemo } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -27,16 +27,19 @@ export const User = createContext();
 export function UserContextProvider( { children, userOptionDeveloperTools, userRestEndpoint } ) {
 	const [ user, setUser ] = useState( null );
 	const [ fetchingUser, setFetchingUser ] = useState( false );
-	const [ savingUserOptions, setSavingUserOptions ] = useState( false );
-	const [ hasUserOptionsChanges, setHasUserOptionsChanges ] = useState( false );
-	const [ didSaveUserOptions, setDidSaveUserOptions ] = useState( false );
+	const [ developerToolsOption, setDeveloperToolsOption ] = useState( null );
+	const [ savingDeveloperToolsOption, setSavingDeveloperToolsOption ] = useState( false );
+	const [ didSaveDeveloperToolsOption, setDidSaveDeveloperToolsOption ] = useState( false );
 
 	const { setError } = useError();
 
 	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
 	const hasUnmounted = useRef( false );
 
-	const developerToolsOption = user ? user.meta[ userOptionDeveloperTools ] : null;
+	const hasDeveloperToolsOptionChange = useMemo(
+		() => user && developerToolsOption === user[ userOptionDeveloperTools ],
+		[ user, developerToolsOption, userOptionDeveloperTools ],
+	);
 
 	/**
 	 * Fetch user options on mount.
@@ -59,6 +62,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 					return;
 				}
 
+				setDeveloperToolsOption( fetchedUser[ userOptionDeveloperTools ] );
 				setUser( fetchedUser );
 			} catch ( e ) {
 				setError( e );
@@ -67,20 +71,20 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 
 			setFetchingUser( false );
 		} )();
-	}, [ user, fetchingUser, setError, userRestEndpoint ] );
+	}, [ user, fetchingUser, setError, userOptionDeveloperTools, userRestEndpoint ] );
 
 	/**
-	 * Sends user options to the REST endpoint to be saved.
+	 * Sends the option back to the REST endpoint to be saved.
 	 */
-	const saveUserOptions = useCallback( async () => {
+	const saveDeveloperToolsOption = useCallback( async () => {
 		if ( ! user ) {
 			return;
 		}
 
-		setSavingUserOptions( true );
+		setSavingDeveloperToolsOption( true );
 
 		try {
-			await apiFetch( { method: 'post', url: userRestEndpoint, data: { meta: { [ userOptionDeveloperTools ]: user.meta[ userOptionDeveloperTools ] } } } );
+			await apiFetch( { method: 'post', url: userRestEndpoint, data: { [ userOptionDeveloperTools ]: developerToolsOption } } );
 
 			if ( true === hasUnmounted.current ) {
 				return;
@@ -90,34 +94,13 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 			return;
 		}
 
-		setSavingUserOptions( false );
-		setDidSaveUserOptions( true );
-	}, [ user, setError, setSavingUserOptions, setDidSaveUserOptions, userOptionDeveloperTools, userRestEndpoint ] );
+		setSavingDeveloperToolsOption( false );
+		setDidSaveDeveloperToolsOption( true );
+	}, [ user, developerToolsOption, setError, setSavingDeveloperToolsOption, setDidSaveDeveloperToolsOption, userOptionDeveloperTools, userRestEndpoint ] );
 
 	useEffect( () => () => {
 		hasUnmounted.current = true;
 	}, [] );
-
-	/**
-	 * Handles changes to user options.
-	 *
-	 * @param {Object} newValue AMP user options to update.
-	 */
-	const setDeveloperToolsOption = ( newValue ) => {
-		if ( false === hasUserOptionsChanges ) {
-			setHasUserOptionsChanges( true );
-		}
-
-		setUser( {
-			...user,
-			meta: {
-				...user.meta,
-				[ userOptionDeveloperTools ]: newValue,
-			},
-		} );
-
-		setDidSaveUserOptions( false );
-	};
 
 	return (
 		<User.Provider
@@ -125,10 +108,10 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 				{
 					developerToolsOption,
 					fetchingUser,
-					didSaveUserOptions,
-					hasUserOptionsChanges,
-					saveUserOptions,
-					savingUserOptions,
+					didSaveDeveloperToolsOption,
+					hasDeveloperToolsOptionChange,
+					saveDeveloperToolsOption,
+					savingDeveloperToolsOption,
 					setDeveloperToolsOption,
 				}
 			}

@@ -8,7 +8,7 @@ import '@wordpress/components/build-style/style.css';
 /**
  * External dependencies
  */
-import { APP_ROOT_ID, EXIT_LINK, OPTIONS_REST_ENDPOINT, READER_THEMES_REST_ENDPOINT, UPDATES_NONCE, USER_OPTION_DEVELOPER_TOOLS, USER_REST_ENDPOINT } from 'amp-setup'; // From WP inline script.
+import { APP_ROOT_ID, EXIT_LINK, OPTIONS_REST_ENDPOINT, READER_THEMES_REST_ENDPOINT, UPDATES_NONCE, USER_FIELD_DEVELOPER_TOOLS_ENABLED, USER_REST_ENDPOINT } from 'amp-setup'; // From WP inline script.
 import PropTypes from 'prop-types';
 
 /**
@@ -43,7 +43,7 @@ export function Providers( { children } ) {
 					updatesNonce={ UPDATES_NONCE }
 				>
 					<UserContextProvider
-						userOptionDeveloperTools={ USER_OPTION_DEVELOPER_TOOLS }
+						userOptionDeveloperTools={ USER_FIELD_DEVELOPER_TOOLS_ENABLED }
 						userRestEndpoint={ USER_REST_ENDPOINT }
 					>
 
