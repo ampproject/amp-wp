@@ -27,7 +27,19 @@
 }
 
 #amp-qa-tester-build-selector .error {
+	display: flex;
+	margin: 4px 0 0;
+	padding: 0 4px;
 	background-color: #8b0000;
+}
+
+#amp-qa-tester-build-selector .error > span {
+	flex: auto;
+	color: #f1f1f1;
+}
+
+#amp-qa-tester-build-selector .error > button.notice-dismiss::before {
+	color: #f1f1f1;
 }
 
 #amp-qa-tester-build-selector input[type="checkbox"] {

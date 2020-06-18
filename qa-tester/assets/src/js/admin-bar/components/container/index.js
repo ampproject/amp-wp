@@ -42,6 +42,7 @@ export default class Container extends Component {
 			buildOptions,
 		};
 
+		this.handleActivation = this.handleActivation.bind( this );
 		this.handleChangeDevBuild = this.handleChangeDevBuild.bind( this );
 		this.handleChangeBuildOption = this.handleChangeBuildOption.bind(
 			this
@@ -58,7 +59,6 @@ export default class Container extends Component {
 	}
 
 	componentWillUnmount() {
-		clearTimeout( this.errorTimeout );
 		clearTimeout( this.pageReloadTimeout );
 	}
 
@@ -181,10 +181,6 @@ export default class Container extends Component {
 			isSwitching: false,
 			error: message,
 		} );
-
-		this.errorTimeout = setTimeout( () => {
-			this.setState( { error: null } );
-		}, 5000 );
 	}
 
 	render() {
@@ -227,7 +223,7 @@ export default class Container extends Component {
 					disabled={
 						buildOption.value === '' || isSwitching || error
 					}
-					onClick={ this.handleActivation.bind( this ) }
+					onClick={ this.handleActivation }
 				>
 					{ __( 'Activate selection', 'amp-qa-tester' ) }
 				</button>
@@ -241,7 +237,15 @@ export default class Container extends Component {
 
 				{ error && (
 					<div className="error">
-						{ `${ __( 'Error', 'amp-qa-tester' ) }: ${ error }` }
+						<span>
+							{ /* eslint-disable-next-line prettier/prettier */ }
+							{ `${ __( 'Error', 'amp-qa-tester' ) }: ${ error }` }
+						</span>
+						<button
+							type="button"
+							className="notice-dismiss"
+							onClick={ () => this.setState( { error: null } ) }
+						/>
 					</div>
 				) }
 			</>
