@@ -44,7 +44,7 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return DOMNodeList A list of DOMElement nodes.
 	 */
 	protected function get_raw_embed_nodes( Document $dom ) {
-		return $dom->getElementsByTagName( 'blockquote' );
+		return $dom->xpath->query( '//blockquote[ @data-instgrm-permalink ]' );
 	}
 
 	/**
@@ -53,10 +53,6 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param DOMElement $node DOM element.
 	 */
 	protected function sanitize_raw_embed( DOMElement $node ) {
-		if ( ! $node->hasAttribute( 'data-instgrm-permalink' ) ) {
-			return;
-		}
-
 		$instagram_id = $this->get_instagram_id_from_url( $node->getAttribute( 'data-instgrm-permalink' ) );
 
 		$node_args = [
