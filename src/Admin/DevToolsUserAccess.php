@@ -35,7 +35,7 @@ final class DevToolsUserAccess implements Service, Registerable {
 	}
 
 	/**
-	 * Registers user meta related to validation management.
+	 * Registers a rest field corresponding to the dev tools enabled user meta field.
 	 *
 	 * @since 1.6.0
 	 */
@@ -55,7 +55,7 @@ final class DevToolsUserAccess implements Service, Registerable {
 	}
 
 	/**
-	 * Provides the user's dev tools setting.
+	 * Provides the user's dev tools enabled setting.
 	 *
 	 * @param array $user Array of user data prepared for REST.
 	 * @return null|boolean Whether tools are enabled for the user, or null if the option has not been set.
@@ -76,11 +76,11 @@ final class DevToolsUserAccess implements Service, Registerable {
 	}
 
 	/**
-	 * Checks whether a user is allowed to update their enable developer tools setting.
+	 * Updates a user's dev tools enabled setting.
 	 *
 	 * @param boolean $new_value New setting for whether dev tools are enabled for the user.
 	 * @param WP_User $user      The WP user to update.
-	 * @return int|bool The result of update_user_meta.
+	 * @return int|bool|WP_Error The result of update_user_meta, or WP_Error if the current user lacks permission.
 	 */
 	public function rest_update_dev_tools_enabled( $new_value, $user ) {
 		if ( ! current_user_can( 'manage_options' ) || ! current_user_can( 'edit_user', $user->ID ) ) {
