@@ -15,6 +15,7 @@ import { render } from '@wordpress/element';
  */
 import { Nav } from '..';
 import { NavigationContextProvider } from '../../navigation-context-provider';
+import { OptionsContextProvider } from '../../options-context-provider';
 
 let container;
 
@@ -39,9 +40,11 @@ describe( 'Nav', () => {
 
 	it( 'matches snapshot', () => {
 		const wrapper = create(
-			<NavigationContextProvider pages={ testPages }>
-				<Nav exitLink="http://site.test" />
-			</NavigationContextProvider>,
+			<OptionsContextProvider optionsRestEndpoint={ null }>
+				<NavigationContextProvider pages={ testPages }>
+					<Nav exitLink="http://site.test" />
+				</NavigationContextProvider>
+			</OptionsContextProvider>,
 		);
 		expect( wrapper.toJSON() ).toMatchSnapshot();
 	} );
@@ -49,9 +52,11 @@ describe( 'Nav', () => {
 	it( 'hides previous button on first page', () => {
 		act( () => {
 			render(
-				<NavigationContextProvider pages={ testPages }>
-					<Nav exitLink="http://site.test" />
-				</NavigationContextProvider>,
+				<OptionsContextProvider optionsRestEndpoint={ null }>
+					<NavigationContextProvider pages={ testPages }>
+						<Nav exitLink="http://site.test" />
+					</NavigationContextProvider>
+				</OptionsContextProvider>,
 				container,
 			);
 		} );
@@ -65,9 +70,11 @@ describe( 'Nav', () => {
 	it( 'disables next button on last page', () => {
 		act( () => {
 			render(
-				<NavigationContextProvider pages={ [ testPages[ 0 ] ] }>
-					<Nav exitLink="http://site.test" />
-				</NavigationContextProvider>,
+				<OptionsContextProvider optionsRestEndpoint={ null }>
+					<NavigationContextProvider pages={ [ testPages[ 0 ] ] }>
+						<Nav exitLink="http://site.test" />
+					</NavigationContextProvider>
+				</OptionsContextProvider>,
 				container );
 		} );
 

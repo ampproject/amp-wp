@@ -25,7 +25,7 @@ export const Options = createContext();
  * @param {string} props.optionsRestEndpoint REST endpoint to retrieve options.
  */
 export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
-	const [ options, setOptions ] = useState( null );
+	const [ options, setOptions ] = useState( () => {} );
 	const [ fetchingOptions, setFetchingOptions ] = useState( false );
 	const [ savingOptions, setSavingOptions ] = useState( false );
 	const [ hasOptionsChanges, setHasOptionsChanges ] = useState( false );
@@ -42,6 +42,10 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 	 * @param {Object} data Plugin options to update.
 	 */
 	const saveOptions = useCallback( async () => {
+		if ( ! optionsRestEndpoint ) {
+			return;
+		}
+
 		setSavingOptions( true );
 
 		try {
@@ -74,7 +78,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 	}, [ hasOptionsChanges, options, setHasOptionsChanges, setOptions ] );
 
 	useEffect( () => {
-		if ( options || fetchingOptions ) {
+		if ( options || fetchingOptions || ! optionsRestEndpoint ) {
 			return;
 		}
 
@@ -126,5 +130,5 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 
 OptionsContextProvider.propTypes = {
 	children: PropTypes.any,
-	optionsRestEndpoint: PropTypes.string.isRequired,
+	optionsRestEndpoint: PropTypes.string,
 };
