@@ -193,7 +193,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Extracts Tweet id.
 	 *
 	 * @param DOMElement $node The DOMNode to adjust and replace.
-	 * @return string Tweet ID, or null if not found.
+	 * @return string|null Tweet ID, or null if not found.
 	 */
 	private function get_tweet_id( DOMElement $node ) {
 		$anchors = $node->getElementsByTagName( 'a' );
@@ -217,7 +217,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Parse Twitter timeline attributes from a URL.
 	 *
 	 * @param string $url URL.
-	 * @return array Timeline attributes.
+	 * @return array|null Timeline attributes, or null if the attributes were not found.
 	 */
 	private function get_timeline_attributes( $url ) {
 		$found = preg_match( self::URL_PATTERN_TIMELINE, $url, $matches );
@@ -232,7 +232,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Parse Twitter moment ID from a URL.
 	 *
 	 * @param string $url URL.
-	 * @return array Timeline attributes.
+	 * @return array|null Timeline attributes, or null if the moment ID was not found.
 	 */
 	private function get_moment_id( $url ) {
 		$found = preg_match( self::URL_PATTERN_MOMENT, $url, $matches );
