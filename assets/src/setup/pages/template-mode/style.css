@@ -33,7 +33,7 @@
 	flex-grow: 1;
 	flex-wrap: wrap;
 	justify-content: space-between;
-	padding: 0 2rem;
+	padding: 0 0 0 2rem;
 }
 
 .template-mode-selection__description h2 {
