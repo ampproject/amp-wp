@@ -9,6 +9,7 @@ use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\MockPluginEnvironment;
 
 /**
  * Tests for AMP_Options_Manager.
@@ -281,40 +282,12 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		AMP_Validation_Manager::init();
 		AMP_Options_Manager::register_settings(); // Adds validate_options as filter.
 
-		$slugify = static function( $plugin_file ) {
-			return strtok( $plugin_file, '/' );
-		};
+		/** @var PluginRegistry $plugin_registry */
+		$plugin_registry = Services::get( 'plugin_registry' );
 
 		// Create bogus plugins.
-		$amp_plugin = 'amp/amp.php';
-		$gut_plugin = 'gutenberg/gutenberg.php';
-		$foo_plugin = 'foo/foo.php';
-		$bar_plugin = 'bar.php';
-		$baz_plugin = 'baz/baz.php';
-		update_option( 'active_plugins', [ $foo_plugin, $bar_plugin, $amp_plugin, $gut_plugin ] );
-		$plugins = [
-			$foo_plugin => [
-				'Name'    => 'Foo',
-				'Version' => '0.1',
-			],
-			$bar_plugin => [
-				'Name'    => 'Bar',
-				'Version' => '0.2',
-			],
-			$baz_plugin => [
-				'Name'    => 'Baz',
-				'Version' => '0.3',
-			],
-			$gut_plugin => [
-				'Name'    => 'Gutenberg',
-				'Version' => '8.2',
-			],
-			$amp_plugin => [
-				'Name'    => 'AMP',
-				'Version' => AMP__VERSION,
-			],
-		];
-		wp_cache_set( 'plugins', [ '' => $plugins ], 'plugins' );
+		update_option( 'active_plugins', [ MockPluginEnvironment::FOO_PLUGIN_FILE, MockPluginEnvironment::BAR_PLUGIN_FILE, MockPluginEnvironment::AMP_PLUGIN_FILE, MockPluginEnvironment::GUTENBERG_PLUGIN_FILE ] );
+		wp_cache_set( 'plugins', [ '' => MockPluginEnvironment::PLUGINS_DATA ], 'plugins' );
 
 		// Test initial state.
 		$this->assertEquals( [], AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS ) );
@@ -323,28 +296,10 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( Option::SUPPRESSED_PLUGINS, [] );
 		$this->assertEquals( [], AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS ) );
 
-		/** @var PluginRegistry $plugin_registry */
-		$plugin_registry = Services::get( 'plugin_registry' );
-
-		$this->assertEqualSets(
-			array_map( $slugify, [ $foo_plugin, $bar_plugin, $baz_plugin, $gut_plugin, $amp_plugin ] ),
-			array_keys( $plugin_registry->get_plugins( false, false ) )
-		);
-
-		$this->assertEqualSets(
-			array_map( $slugify, [ $foo_plugin, $bar_plugin, $baz_plugin ] ),
-			array_keys( $plugin_registry->get_plugins( false, true ) )
-		);
-
-		$this->assertEqualSets(
-			array_map( $slugify, [ $foo_plugin, $bar_plugin ] ),
-			array_keys( $plugin_registry->get_plugins( true ) )
-		);
-
 		$this->assertEmpty( AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source() );
 
-		$foo_slug = $slugify( $foo_plugin );
-		$bar_slug = $slugify( $bar_plugin );
+		$foo_slug = $plugin_registry->get_plugin_slug_from_file( MockPluginEnvironment::FOO_PLUGIN_FILE );
+		$bar_slug = $plugin_registry->get_plugin_slug_from_file( MockPluginEnvironment::BAR_PLUGIN_FILE );
 
 		$errors = [
 			[
@@ -420,9 +375,9 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option(
 			Option::SUPPRESSED_PLUGINS,
 			[
-				$slugify( $gut_plugin ) => '1',
-				$slugify( $amp_plugin ) => '1',
-				'bogus'                 => '1',
+				$plugin_registry->get_plugin_slug_from_file( MockPluginEnvironment::GUTENBERG_PLUGIN_FILE ) => '1',
+				$plugin_registry->get_plugin_slug_from_file( MockPluginEnvironment::AMP_PLUGIN_FILE ) => '1',
+				'bogus' => '1',
 			]
 		);
 		remove_all_actions( 'update_option_' . AMP_Options_Manager::OPTION_NAME );
@@ -461,8 +416,8 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 			$this->assertArrayHasKey( Option::SUPPRESSED_PLUGINS_ERRORING_URLS, $suppressed_plugin );
 			$this->assertEquals( [ home_url( '/' ) ], $suppressed_plugin[ Option::SUPPRESSED_PLUGINS_ERRORING_URLS ] );
 		}
-		$this->assertEquals( $plugins[ $foo_plugin ]['Version'], $suppressed_plugins[ $foo_slug ][ Option::SUPPRESSED_PLUGINS_LAST_VERSION ] );
-		$this->assertEquals( $plugins[ $bar_plugin ]['Version'], $suppressed_plugins[ $bar_slug ][ Option::SUPPRESSED_PLUGINS_LAST_VERSION ] );
+		$this->assertEquals( MockPluginEnvironment::PLUGINS_DATA[ MockPluginEnvironment::FOO_PLUGIN_FILE ]['Version'], $suppressed_plugins[ $foo_slug ][ Option::SUPPRESSED_PLUGINS_LAST_VERSION ] );
+		$this->assertEquals( MockPluginEnvironment::PLUGINS_DATA[ MockPluginEnvironment::BAR_PLUGIN_FILE ]['Version'], $suppressed_plugins[ $bar_slug ][ Option::SUPPRESSED_PLUGINS_LAST_VERSION ] );
 
 		// Stop suppressing only one plugin.
 		AMP_Options_Manager::update_option(
