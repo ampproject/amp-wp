@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { PanelBody } from '@wordpress/components';
+import { PanelBody, PanelRow } from '@wordpress/components';
 import { useMemo } from '@wordpress/element';
 
 /**
@@ -16,32 +16,46 @@ import PropTypes from 'prop-types';
  */
 import './style.css';
 import { Selectable } from '../../components/selectable';
+import { AMPNotice, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_INFO, NOTICE_TYPE_WARNING, NOTICE_SIZE_SMALL, NOTICE_SIZE_LARGE } from '../../components/amp-notice';
 import { Standard } from './svg-standard';
 import { Transitional } from './svg-transitional';
 import { Reader } from './svg-reader';
+import { getSelectionDetails } from './get-selection-details';
 
-export function Selection( { compatibility, id, illustration, moreDetails, onChange, recommendationLevel, selected, shortDescription, title } ) {
-	const { recommendationLevelClass, recommendationLevelText } = useMemo( () => {
-		switch ( recommendationLevel ) {
-			case 0:
-				return {
-					recommendationLevelText: __( 'The best option for your site.', 'amp' ),
-					recommendationLevelClass: '',
-				};
-
+/**
+ * An individual mode selection component.
+ *
+ * @param {Object} props Component props.
+ * @param {string|Object} props.compatibility Compatibility content.
+ * @param {string|Object} props.illustration An illustration for the selection.
+ * @param {Array} props.details Array of strings representing details about the mode and recommendation.
+ * @param {Function} props.onChange Callback to select the mode.
+ * @param {number} props.recommended Recommendation level. -1: not recommended. 0: good. 1: Most recommended.
+ * @param {boolean} props.selected Whether the mode is selected.
+ * @param {string} props.title The title for the selection.
+ */
+export function Selection( { compatibility, id, illustration, details, onChange, recommended, selected, title } ) {
+	const { recommendationLevelType, recommendationLevelText } = useMemo( () => {
+		switch ( recommended ) {
 			case 1:
 				return {
+					recommendationLevelText: __( 'The best option for your site.', 'amp' ),
+					recommendationLevelType: NOTICE_TYPE_SUCCESS,
+				};
+
+			case 0:
+				return {
 					recommendationLevelText: __( 'A good option for your site.', 'amp' ),
-					recommendationLevelClass: '',
+					recommendationLevelType: NOTICE_TYPE_INFO,
 				};
 
 			default:
 				return {
-					recommendationLevelText: __( 'Not recommended for your site', 'amp' ),
-					recommendationLevelClass: '',
+					recommendationLevelText: __( 'Not recommended for your site.', 'amp' ),
+					recommendationLevelType: NOTICE_TYPE_WARNING,
 				};
 		}
-	}, [ recommendationLevel ] );
+	}, [ recommended ] );
 
 	return (
 		<Selectable className="template-mode-selection" selected={ selected }>
@@ -61,24 +75,33 @@ export function Selection( { compatibility, id, illustration, moreDetails, onCha
 					<h2>
 						{ title }
 					</h2>
-					<p>
-						{ shortDescription }
-					</p>
-					<p className={ recommendationLevelClass }>
+
+					<AMPNotice size={ NOTICE_SIZE_SMALL } type={ recommendationLevelType }>
 						{ recommendationLevelText }
-					</p>
+					</AMPNotice>
 				</div>
 			</label>
-			<PanelBody title={ __( 'Details', 'amp' ) }>
-				<p>
-					{ moreDetails }
-				</p>
-				<h4>
-					{ __( 'Compatibility', 'amp' ) }
-				</h4>
-				<p>
-					{ compatibility }
-				</p>
+			<PanelBody title={ __( 'Details', 'amp' ) } initialOpen={ 1 === recommended }>
+				<PanelRow>
+
+					<ul>
+						{ details.map( ( detail, index ) => (
+							<li key={ `${ id }-detail-${ index }` }>
+								{ detail }
+							</li>
+						) ) }
+					</ul>
+				</PanelRow>
+			</PanelBody>
+			<PanelBody title={ __( 'Compatibility', 'amp' ) } initialOpen={ false }>
+				<PanelRow>
+					<AMPNotice size={ NOTICE_SIZE_LARGE } type={ recommendationLevelType }>
+						{ __( 'Lorem ipsum dolor sit amet', 'amp' ) }
+					</AMPNotice>
+					<p>
+						{ compatibility }
+					</p>
+				</PanelRow>
 			</PanelBody>
 		</Selectable>
 	);
@@ -88,64 +111,70 @@ Selection.propTypes = {
 	compatibility: PropTypes.node.isRequired,
 	id: PropTypes.string.isRequired,
 	illustration: PropTypes.node.isRequired,
-	moreDetails: PropTypes.string.isRequired,
+	details: PropTypes.arrayOf( PropTypes.string.isRequired ),
 	onChange: PropTypes.func.isRequired,
-	recommendationLevel: PropTypes.number.isRequired,
+	recommended: PropTypes.oneOf( [ -1, 0, 1 ] ).isRequired,
 	selected: PropTypes.bool.isRequired,
-	shortDescription: PropTypes.string.isRequired,
 	title: PropTypes.string.isRequired,
 };
 
-function getSelectionConfig() {
-
-}
-
-export function ScreenUI( { recommendedModes, currentMode, setCurrentMode } ) {
+/**
+ * The interface for the mode selection screen. Avoids using context for easier testing.
+ *
+ * @param {Object} props Component props.
+ * @param {string} props.currentMode The selected mode.
+ * @param {boolean} props.developerToolsOption Whether the user has enabled developer tools.
+ * @param {Array} props.pluginIssues The plugin issues found in the site scan.
+ * @param {Function} props.setCurrentMode The callback to update the selected mode.
+ * @param {Array} props.themeIssues The theme issues found in the site scan.
+ */
+export function ScreenUI( { currentMode, developerToolsOption, pluginIssues, setCurrentMode, themeIssues } ) {
 	const standardId = 'standard-mode';
 	const transitionalId = 'transitional-mode';
 	const readerId = 'reader-mode';
 
+	const selectionConfig = useMemo( () => {
+		return getSelectionDetails(
+			{
+				userIsTechnical: developerToolsOption === true,
+				hasPluginIssues: 0 < pluginIssues.length,
+				hasThemeIssues: 0 < themeIssues.length,
+			},
+		);
+	}, [ developerToolsOption, pluginIssues.length, themeIssues.length ] );
+
 	return (
 		<form>
 			<Selection
-				compatibility={ __( 'Compatibility details' ) }
+				{ ...selectionConfig.standard }
 				id={ standardId }
 				illustration={ <Standard /> }
-				moreDetails={ __( 'More details', 'amp' ) }
 				onChange={ () => {
 					setCurrentMode( 'standard' );
 				} }
-				recommendationLevel={ recommendedModes.indexOf( 'standard' ) }
 				selected={ currentMode === 'standard' }
-				shortDescription={ 'Lorem ipsum' }
 				title={ __( 'Standard', 'amp' ) }
 			/>
 
 			<Selection
-				compatibility={ __( 'Compatibility details' ) }
+				{ ...selectionConfig.transitional }
 				id={ transitionalId }
 				illustration={ <Transitional /> }
-				moreDetails={ __( 'More details', 'amp' ) }
 				onChange={ () => {
 					setCurrentMode( 'transitional' );
 				} }
-				recommendationLevel={ recommendedModes.indexOf( 'transitional' ) }
 				selected={ currentMode === 'transitional' }
-				shortDescription={ 'Lorem ipsum' }
 				title={ __( 'Transitional', 'amp' ) }
 			/>
 
 			<Selection
-				compatibility={ __( 'Compatibility details' ) }
+				{ ...selectionConfig.reader }
 				id={ readerId }
 				illustration={ <Reader /> }
-				moreDetails={ __( 'More details', 'amp' ) }
 				onChange={ () => {
 					setCurrentMode( 'reader' );
 				} }
-				recommendationLevel={ recommendedModes.indexOf( 'reader' ) }
 				selected={ currentMode === 'reader' }
-				shortDescription={ 'Lorem ipsum' }
 				title={ __( 'Reader', 'amp' ) }
 			/>
 		</form>
@@ -154,6 +183,8 @@ export function ScreenUI( { recommendedModes, currentMode, setCurrentMode } ) {
 
 ScreenUI.propTypes = {
 	currentMode: PropTypes.string.isRequired,
+	developerToolsOption: PropTypes.bool.isRequired,
 	setCurrentMode: PropTypes.func.isRequired,
-	recommendedModes: PropTypes.arrayOf( PropTypes.string ).isRequired,
+	pluginIssues: PropTypes.arrayOf( PropTypes.string ).isRequired,
+	themeIssues: PropTypes.arrayOf( PropTypes.string ).isRequired,
 };

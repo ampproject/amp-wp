@@ -7,6 +7,7 @@ import { createContext, useEffect, useState } from '@wordpress/element';
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { getQueryArg } from '@wordpress/url';
 
 export const SiteScan = createContext();
 
@@ -26,13 +27,16 @@ export function SiteScanContextProvider( { children } ) {
 	 */
 	useEffect( () => {
 		if ( ! scanningSite && ! themeIssues ) {
-			setThemeIssues( [ 'Theme issue 1' ] );
+			setThemeIssues( getQueryArg( global.location.href, 'amp-theme-issues' ) ? [ 'Theme issue 1' ] : [] ); // URL param is for testing.
 		}
 	}, [ scanningSite, themeIssues ] );
 
+	/**
+	 * @todo This temporary code is for development purposes.
+	 */
 	useEffect( () => {
 		if ( ! scanningSite && ! pluginIssues ) {
-			setPluginIssues( [ 'P1ugin issue 1' ] );
+			setPluginIssues( getQueryArg( global.location.href, 'amp-plugin-issues' ) ? [ 'Plugin issue 1' ] : [] ); // URL param is for testing.
 		}
 	}, [ scanningSite, pluginIssues ] );
 

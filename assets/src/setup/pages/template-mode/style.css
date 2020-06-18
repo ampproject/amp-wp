@@ -1,10 +1,24 @@
+.template-mode-selection {
+	margin-bottom: 3rem;
+	padding-bottom: 1.5rem;
+}
+
 .template-mode-selection label {
 	display: flex;
-	padding: 1.5rem 0;
+	flex-wrap: wrap;
+	padding: 1.5rem;
+	padding-bottom: 0.75rem;
+}
+
+.template-mode-selection label::after {
+	border-bottom: 1px solid #e2e4e7;
+	content: "";
+	margin: 1rem auto 0;
+	width: 100%;
 }
 
 .template-mode-selection__input-container {
-	padding: 1.5rem;
+	padding: 1.5rem 1.5rem 1.5rem 0;
 }
 
 .template-mode-selection__illustration {
@@ -14,6 +28,11 @@
 
 
 .template-mode-selection__description {
+	align-items: flex-start;
+	display: flex;
+	flex-grow: 1;
+	flex-wrap: wrap;
+	justify-content: space-between;
 	padding: 0 2rem;
 }
 
@@ -22,4 +41,29 @@
 	line-height: 1.5;
 	margin-top: 0;
 	margin-bottom: 0;
+}
+
+.template-mode-selection .components-panel__arrow {
+	height: 2rem;
+	width: 2rem;
+}
+
+.template-mode-selection .components-panel__body {
+	border-bottom-width: 0;
+	border-top-width: 0;
+}
+
+.template-mode-selection .components-panel__body-title button {
+	padding-left: 1.5rem;
+	padding-right: 1.5rem;
+}
+
+.template-mode-selection .components-panel__row {
+	flex-wrap: wrap;
+	padding-left: 0.75rem;
+	padding-right: 0.75rem;
+}
+
+.template-mode-selection .components-panel__row > * {
+	width: 100%;
 }
