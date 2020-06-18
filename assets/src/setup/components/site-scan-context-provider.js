@@ -7,7 +7,6 @@ import { createContext, useEffect, useState } from '@wordpress/element';
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { shuffle } from 'lodash';
 
 export const SiteScan = createContext();
 
@@ -18,17 +17,24 @@ export const SiteScan = createContext();
  * @param {?any} props.children Component children.
  */
 export function SiteScanContextProvider( { children } ) {
-	const [ recommendedModes, setRecommendedModes ] = useState( null );
+	const [ themeIssues, setThemeIssues ] = useState( null );
+	const [ pluginIssues, setPluginIssues ] = useState( null );
 	const [ scanningSite, setScanningSite ] = useState( true );
 
 	/**
 	 * @todo This temporary code is for development purposes.
 	 */
 	useEffect( () => {
-		if ( ! scanningSite && ! recommendedModes ) {
-			setRecommendedModes( shuffle( [ 'standard', 'transitional', 'reader' ] ) );
+		if ( ! scanningSite && ! themeIssues ) {
+			setThemeIssues( [ 'Theme issue 1' ] );
 		}
-	}, [ scanningSite, recommendedModes ] );
+	}, [ scanningSite, themeIssues ] );
+
+	useEffect( () => {
+		if ( ! scanningSite && ! pluginIssues ) {
+			setPluginIssues( [ 'P1ugin issue 1' ] );
+		}
+	}, [ scanningSite, pluginIssues ] );
 
 	/**
 	 * @todo This temporary code is for development purposes.
@@ -43,8 +49,9 @@ export function SiteScanContextProvider( { children } ) {
 		<SiteScan.Provider
 			value={
 				{
-					recommendedModes,
+					pluginIssues,
 					scanningSite,
+					themeIssues,
 				}
 			}
 		>

@@ -10,7 +10,8 @@ import { Navigation } from '../../components/navigation-context-provider';
 import { Options } from '../../components/options-context-provider';
 import { SiteScan } from '../../components/site-scan-context-provider';
 import { Loading } from '../../components/loading';
-import { Selections } from './selections';
+import { User } from '../../components/user-context-provider';
+import { ScreenUI } from './screen-ui';
 
 /**
  * Screen for selecting the template mode.
@@ -18,7 +19,8 @@ import { Selections } from './selections';
 export function TemplateMode() {
 	const { canGoForward, setCanGoForward } = useContext( Navigation );
 	const { options, updateOptions } = useContext( Options );
-	const { recommendedModes, scanningSite } = useContext( SiteScan );
+	const { developerToolsOption } = useContext( User );
+	const { pluginIssues, themeIssues, scanningSite } = useContext( SiteScan );
 
 	const { theme_support: themeSupport } = options || {};
 
@@ -35,13 +37,16 @@ export function TemplateMode() {
 		return <Loading />;
 	}
 
+	// The actual display component should avoid using global context directly to facilitate developing and testing the UI for the complexity of options.
 	return (
-		<Selections
-			recommendedModes={ recommendedModes }
+		<ScreenUI
 			currentMode={ themeSupport }
+			developerToolsOption={ developerToolsOption }
+			pluginIssues={ pluginIssues }
 			setCurrentMode={ ( mode ) => {
 				updateOptions( { theme_support: mode } );
 			} }
+			themeIssues={ themeIssues }
 		/>
 	);
 }
