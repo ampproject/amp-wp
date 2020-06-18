@@ -44,15 +44,6 @@ final class DevToolsUserAccess implements Delayed, Service, Registerable {
 	 * @action rest_api_init
 	 */
 	public function register() {
-		$this->register_rest_field();
-	}
-
-	/**
-	 * Registers a rest field corresponding to the dev tools enabled user meta field.
-	 *
-	 * @since 1.6.0
-	 */
-	public function register_rest_field() {
 		register_rest_field(
 			'user',
 			self::USER_FIELD_DEVELOPER_TOOLS_ENABLED,

@@ -32,14 +32,14 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests DevToolsUserAccess::register_rest_field
+	 * Tests DevToolsUserAccess::register
 	 *
-	 * @covers DevToolsUserAccess::register_rest_field
+	 * @covers DevToolsUserAccess::register
 	 */
-	public function test_register_rest_field() {
+	public function test_register() {
 		global $wp_rest_additional_fields;
 
-		$this->dev_tools_user_access->register_rest_field();
+		$this->dev_tools_user_access->register();
 
 		$this->assertArrayHasKey( 'amp_dev_tools_enabled', $wp_rest_additional_fields['user'] );
 	}
