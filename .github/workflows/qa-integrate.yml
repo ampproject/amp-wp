@@ -283,6 +283,13 @@ jobs:
     runs-on: ubuntu-latest
     needs: upload-to-gcs
 
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}
+
+    outputs:
+      comment_body: ${{ steps.get-comment-body.outputs.body }}
+
     steps:
       - name: Check if a comment was already made
         id: find-comment
@@ -292,16 +299,21 @@ jobs:
           comment-author: github-actions[bot]
           body-includes: QA tester plugin build for
 
-      # Duplicate comment bodies as (for some reason) we can't set outputs on this job
-      # like in the `build-test-measure` workflow.
+      - name: Get comment body
+        id: get-comment-body
+        # Setting a multi-line output requires escaping line-feeds. See <https://github.community/t/set-output-truncates-multiline-strings/16852/3>.
+        run: |
+          body="QA tester plugin build for ${{ github.event.pull_request.head.sha }} is ready :bellhop_bell:!
+          Download the build [here](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/amp-qa-tester.zip)"
+          body="${body//$'\n'/'%0A'}"
+          echo "::set-output name=body::$body"
+
       - name: Create comment on PR with links to plugin build
         if: ${{ steps.find-comment.outputs.comment-id == '' }}
         uses: peter-evans/create-or-update-comment@v1
         with:
           issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            QA tester plugin build for ${{ github.event.pull_request.head.sha }} is ready :bellhop_bell:!
-            Download the build [here](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/amp-qa-tester.zip)
+          body: ${{ steps.get-comment-body.outputs.body }}
 
       - name: Update comment on PR with links to plugin build
         if: ${{ steps.find-comment.outputs.comment-id != '' }}
@@ -309,6 +321,4 @@ jobs:
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
           edit-mode: replace
-          body: |
-            QA tester plugin build for ${{ github.event.pull_request.head.sha }} is ready :bellhop_bell:!
-            Download the build [here](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/amp-qa-tester.zip)
+          body: ${{ steps.get-comment-body.outputs.body }}
