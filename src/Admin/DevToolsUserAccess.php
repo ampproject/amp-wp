@@ -9,7 +9,8 @@
 
 namespace AmpProject\AmpWP\Admin;
 
-use AmpProject\AmpWP\Service;
+use AmpProject\AmpWP\Infrastructure\Registerable;
+use AmpProject\AmpWP\Infrastructure\Service;
 use WP_Error;
 
 /**
@@ -17,7 +18,7 @@ use WP_Error;
  *
  * @since 1.6.0
  */
-final class DevToolsUserAccess implements Service {
+final class DevToolsUserAccess implements Service, Registerable {
 
 	/**
 	 * User meta key enabling or disabling developer tools.

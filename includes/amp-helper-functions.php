@@ -5,9 +5,9 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\AmpWpPluginFactory;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Services;
 
 /**
  * Handle activation of plugin.
@@ -17,7 +17,7 @@ use AmpProject\AmpWP\Services;
  * @param bool $network_wide Whether the activation was done network-wide.
  */
 function amp_activate( $network_wide = false ) {
-	Services::activate( $network_wide );
+	AmpWpPluginFactory::create()->activate( $network_wide );
 	amp_after_setup_theme();
 	if ( ! did_action( 'amp_init' ) ) {
 		amp_init();
@@ -33,7 +33,7 @@ function amp_activate( $network_wide = false ) {
  * @param bool $network_wide Whether the activation was done network-wide.
  */
 function amp_deactivate( $network_wide = false ) {
-	Services::deactivate( $network_wide );
+	AmpWpPluginFactory::create()->deactivate( $network_wide );
 	// We need to manually remove the amp endpoint.
 	global $wp_rewrite;
 	foreach ( $wp_rewrite->endpoints as $index => $endpoint ) {
@@ -52,7 +52,7 @@ function amp_deactivate( $network_wide = false ) {
  * @since 1.5
  */
 function amp_bootstrap_plugin() {
-	Services::register();
+	AmpWpPluginFactory::create()->register();
 
 	// The plugins_loaded action is the earliest we can run this since that is when pluggable.php has been required and wp_hash() is available.
 	add_action( 'plugins_loaded', [ 'AMP_Validation_Manager', 'init_validate_request' ], ~PHP_INT_MAX );
