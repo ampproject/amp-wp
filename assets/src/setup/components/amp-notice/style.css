@@ -1,0 +1,38 @@
+.amp-notice {
+	border-radius: 12px;
+	display: flex;
+}
+
+.amp-notice--success {
+	background-color: #ecfef1;
+}
+
+.amp-notice--info {
+	background-color: #effbff;
+}
+
+.amp-notice--warning {
+	background-color: #ffefef;
+}
+
+.amp-notice--small {
+	padding: 0.5rem 1rem 0.5rem 0.5rem;
+}
+
+.amp-notice--small svg {
+	flex-grow: 0;
+	margin-right: 0.5rem;
+	height: 18px;
+	width: 18px;
+}
+
+.amp-notice--large {
+	padding: 13px 18px;
+}
+
+.amp-notice--large svg {
+	flex-grow: 0;
+	margin-right: 1rem;
+	height: 42px;
+	width: 42px;
+}

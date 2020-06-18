@@ -33,11 +33,11 @@ export function TemplateMode() {
 		}
 	}, [ canGoForward, setCanGoForward, scanningSite, themeSupport ] );
 
-	if ( scanningSite ) {
+	if ( scanningSite || null === developerToolsOption ) {
 		return <Loading />;
 	}
 
-	// The actual display component should avoid using global context directly to facilitate developing and testing the UI for the complexity of options.
+	// The actual display component should avoid using global context directly. This will facilitate developing and testing the UI using different options..
 	return (
 		<ScreenUI
 			currentMode={ themeSupport }
