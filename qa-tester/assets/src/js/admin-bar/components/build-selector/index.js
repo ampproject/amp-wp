@@ -23,10 +23,12 @@ import './style.css';
 
 export function BuildSelector( { buildOptions, onOptionSelect } ) {
 	const [ term, setTerm ] = useState( '' );
-	const results = useLabelMatch( term );
 
 	const handleInputChange = ( event ) => {
-		setTerm( event.target.value );
+		const newTerm = event.target.value.trim().toLowerCase();
+		if ( newTerm !== term ) {
+			setTerm( newTerm );
+		}
 	};
 
 	const handleOptionSelect = ( buildLabel ) => {
@@ -36,21 +38,13 @@ export function BuildSelector( { buildOptions, onOptionSelect } ) {
 		onOptionSelect( newOption );
 	};
 
-	function useLabelMatch( buildLabel ) {
-		return useMemo(
-			() =>
-				buildLabel.trim() === ''
-					? buildOptions.slice( 0, 5 ) // Show the first 5 options by default.
-					: buildOptions.filter( ( option ) =>
-							option.label
-								.toLowerCase()
-								.includes(
-									buildLabel.trim().toLocaleLowerCase()
-								)
-					  ),
-			[ buildLabel ]
-		);
-	}
+	const results = useMemo( () => {
+		return term === ''
+			? buildOptions.slice( 0, 5 ) // Show the first 5 options by default.
+			: buildOptions.filter( ( option ) =>
+					option.label.toLowerCase().includes( term )
+			  );
+	}, [ term, buildOptions ] );
 
 	return (
 		<Combobox openOnFocus onSelect={ handleOptionSelect }>
