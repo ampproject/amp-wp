@@ -27,7 +27,8 @@
 }
 
 .amp-notice--large {
-	padding: 13px 18px;
+	align-items: center;
+	padding: 0.5rem 1rem 0.5rem 0.5rem;
 }
 
 .amp-notice--large svg {

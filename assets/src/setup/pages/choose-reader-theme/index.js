@@ -5,41 +5,39 @@ import { __ } from '@wordpress/i18n';
 import { useEffect, useContext } from '@wordpress/element';
 
 /**
- * External dependencies
- */
-import { READER_THEMES_REST_ENDPOINT, UPDATES_NONCE } from 'amp-setup'; // From WP inline script.
-
-/**
  * Internal dependencies
  */
 import { Loading } from '../../components/loading';
 import { Navigation } from '../../components/navigation-context-provider';
 import { Options } from '../../components/options-context-provider';
-import { ReaderThemes, ReaderThemesContextProvider } from '../../components/reader-themes-context-provider';
+import { ReaderThemes } from '../../components/reader-themes-context-provider';
 import { ThemeCard } from './theme-card';
 
-const { ajaxurl: wpAjaxUrl } = global;
-
 /**
- * The actual screen UI with full context.
+ * Screen for choosing the Reader theme.
  */
-function Screen() {
+export function ChooseReaderTheme() {
 	const { canGoForward, setCanGoForward } = useContext( Navigation );
 	const { options } = useContext( Options );
 	const { fetchingThemes, themes } = useContext( ReaderThemes );
 
-	const { reader_theme: readerTheme } = options || {};
+	const { reader_theme: readerTheme, theme_support: themeSupport } = options || {};
 
 	/**
 	 * Allow moving forward.
 	 */
 	useEffect( () => {
+		if ( 'reader' !== themeSupport ) {
+			setCanGoForward( true );
+			return;
+		}
+
 		if ( themes && readerTheme && canGoForward === false ) {
 			if ( themes.map( ( { slug } ) => slug ).includes( readerTheme ) ) {
 				setCanGoForward( true );
 			}
 		}
-	}, [ canGoForward, setCanGoForward, readerTheme, themes ] );
+	}, [ canGoForward, setCanGoForward, readerTheme, themes, themeSupport ] );
 
 	if ( fetchingThemes ) {
 		return (
@@ -69,45 +67,5 @@ function Screen() {
 				</ul>
 			</form>
 		</div>
-	);
-}
-
-/**
- * Checks whether the reader theme UI should load before rendering. Allows deferral of fetching themes.
- */
-export function ChooseReaderTheme() {
-	const { options } = useContext( Options );
-	const { canGoForward, setCanGoForward } = useContext( Navigation );
-
-	const { theme_support: themeSupport } = options || {};
-
-	/**
-	 * Allow moving forward.
-	 */
-	useEffect( () => {
-		if ( 'reader' !== themeSupport && ! canGoForward ) {
-			setCanGoForward( true );
-		}
-	}, [ canGoForward, setCanGoForward, themeSupport ] );
-
-	if ( 'reader' === themeSupport ) {
-		return (
-			<ReaderThemesContextProvider
-				wpAjaxUrl={ wpAjaxUrl }
-				readerThemesEndpoint={ READER_THEMES_REST_ENDPOINT }
-				updatesNonce={ UPDATES_NONCE }
-			>
-				<Screen />
-			</ReaderThemesContextProvider>
-		);
-	}
-
-	return (
-		<p>
-			{
-				// @todo Probably improve this text.
-				__( 'This screen is for choosing a reader theme, which is only applicable in reader mode.', 'amp' )
-			}
-		</p>
 	);
 }
