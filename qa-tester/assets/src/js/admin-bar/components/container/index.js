@@ -193,7 +193,6 @@ export default class Container extends Component {
 		return (
 			<>
 				<BuildSelector
-					buildOption={ buildOption }
 					buildOptions={ buildOptions }
 					onOptionSelect={ this.handleChangeBuildOption.bind( this ) }
 				/>

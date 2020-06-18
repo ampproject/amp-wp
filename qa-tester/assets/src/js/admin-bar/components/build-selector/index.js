@@ -21,8 +21,7 @@ import '@reach/combobox/styles.css';
  */
 import './style.css';
 
-export function BuildSelector( { buildOption, buildOptions, onOptionSelect } ) {
-	const [ , setSelectedOption ] = useState( buildOption );
+export function BuildSelector( { buildOptions, onOptionSelect } ) {
 	const [ term, setTerm ] = useState( '' );
 	const results = useLabelMatch( term );
 
@@ -34,7 +33,6 @@ export function BuildSelector( { buildOption, buildOptions, onOptionSelect } ) {
 		const newOption = buildOptions.find(
 			( option ) => option.label === buildLabel
 		);
-		setSelectedOption( newOption );
 		onOptionSelect( newOption );
 	};
 
