@@ -42,8 +42,19 @@ export default class Container extends Component {
 			buildOptions,
 		};
 
-		this.addReleaseBranchOptions();
-		this.addPullRequestOptions();
+		this.handleChangeDevBuild = this.handleChangeDevBuild.bind( this );
+		this.handleChangeBuildOption = this.handleChangeBuildOption.bind(
+			this
+		);
+	}
+
+	componentDidMount() {
+		Promise.all( [
+			this.addReleaseBranchOptions(),
+			this.addPullRequestOptions(),
+		] ).then( () => {
+			this.setState( { isLoading: false } );
+		} );
 	}
 
 	componentWillUnmount() {
@@ -52,54 +63,53 @@ export default class Container extends Component {
 	}
 
 	/**
-	 * Append to the default build options a list of PRs that have build zips available for download.
+	 * Append to the default build options a list of release branches that would have build zips available for download.
 	 */
-	addReleaseBranchOptions() {
-		// Retrieve the PRs from GitHub and append them to the list of builds above.
-		getProtectedBranches().then( ( branches ) => {
-			const releaseBranchNames = branches
-				.map( ( branch ) => branch.name )
-				.filter( ( branchName ) =>
-					/[0-9]+\.[0-9]+/.test( branchName )
-				);
+	async addReleaseBranchOptions() {
+		// Retrieve the list of protected branches.
+		const branches = await getProtectedBranches();
 
-			// We only need the release branches 1.5 and after, since only they would have built zips.
-			const releasesWithBuilds = releaseBranchNames
-				.sort()
-				.slice( releaseBranchNames.indexOf( '1.5' ) );
+		// Filter the release branches.
+		const releaseBranchNames = branches
+			.map( ( branch ) => branch.name )
+			.filter( ( branchName ) => /[0-9]+\.[0-9]+/.test( branchName ) );
 
-			const branchOptions = releasesWithBuilds.map( ( branch ) => {
-				return {
-					label: `${ branch } release branch`,
-					value: branch,
-					origin: 'branch',
-				};
-			} );
+		// We only need the release branches 1.5 and after, since only they would have plugin builds.
+		const releasesWithBuilds = releaseBranchNames
+			.sort()
+			.slice( releaseBranchNames.indexOf( '1.5' ) );
 
-			this.setState( {
-				buildOptions: this.state.buildOptions.concat( branchOptions ),
-			} );
+		// Create build options from list of release branches with plugin builds.
+		const branchOptions = releasesWithBuilds.map( ( branch ) => {
+			return {
+				label: `${ branch } release branch`,
+				value: branch,
+				origin: 'branch',
+			};
+		} );
+
+		this.setState( {
+			buildOptions: this.state.buildOptions.concat( branchOptions ),
 		} );
 	}
 
 	/**
 	 * Append to the default build options a list of PRs that have build zips available for download.
 	 */
-	addPullRequestOptions() {
-		// Retrieve the PRs from GitHub and append them to the list of builds above.
-		getPullRequestsWithBuilds().then( ( results ) => {
-			const prOptions = results.map( ( pr ) => {
-				return {
-					label: `PR #${ pr.number }: ${ pr.title }`,
-					value: pr.number,
-					origin: 'pr',
-				};
-			} );
+	async addPullRequestOptions() {
+		const pullRequests = await getPullRequestsWithBuilds();
 
-			this.setState( {
-				isLoading: false,
-				buildOptions: this.state.buildOptions.concat( prOptions ),
-			} );
+		// Create build options from list of PRs with plugin builds.
+		const prOptions = pullRequests.map( ( pr ) => {
+			return {
+				label: `PR #${ pr.number }: ${ pr.title }`,
+				value: pr.number,
+				origin: 'pr',
+			};
+		} );
+
+		this.setState( {
+			buildOptions: this.state.buildOptions.concat( prOptions ),
 		} );
 	}
 
@@ -194,16 +204,16 @@ export default class Container extends Component {
 			<>
 				<BuildSelector
 					buildOptions={ buildOptions }
-					onOptionSelect={ this.handleChangeBuildOption.bind( this ) }
+					onOptionSelect={ this.handleChangeBuildOption }
 				/>
 
 				{ 'release' !== buildOption.value && (
-					<div className={ 'amp-qa-tester-checkbox' }>
+					<div className="amp-qa-tester-checkbox">
 						<input
 							id="amp-qa-tester-is-development-build"
 							type="checkbox"
 							checked={ this.state.isDevBuild }
-							onChange={ this.handleChangeDevBuild.bind( this ) }
+							onChange={ this.handleChangeDevBuild }
 						/>
 
 						<label htmlFor="amp-qa-tester-is-development-build">
@@ -213,7 +223,7 @@ export default class Container extends Component {
 				) }
 
 				<button
-					className={ 'button button-primary' }
+					className="button button-primary"
 					disabled={
 						buildOption.value === '' || isSwitching || error
 					}
@@ -224,13 +234,13 @@ export default class Container extends Component {
 
 				{ isSwitching && (
 					<div>
-						<div className={ 'switching' } />
+						<div className="switching" />
 						{ __( 'Switching versions…', 'amp-qa-tester' ) }
 					</div>
 				) }
 
 				{ error && (
-					<div className={ 'error' }>
+					<div className="error">
 						{ `${ __( 'Error', 'amp-qa-tester' ) }: ${ error }` }
 					</div>
 				) }
