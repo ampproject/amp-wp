@@ -8,7 +8,7 @@ import '@wordpress/components/build-style/style.css';
 /**
  * External dependencies
  */
-import { APP_ROOT_ID, EXIT_LINK, OPTIONS_REST_ENDPOINT, USER_FIELD_DEVELOPER_TOOLS_ENABLED, USER_REST_ENDPOINT } from 'amp-setup'; // From WP inline script.
+import { APP_ROOT_ID, EXIT_LINK, OPTIONS_REST_ENDPOINT, READER_THEMES_REST_ENDPOINT, UPDATES_NONCE, USER_FIELD_DEVELOPER_TOOLS_ENABLED, USER_REST_ENDPOINT } from 'amp-setup'; // From WP inline script.
 import PropTypes from 'prop-types';
 
 /**
@@ -19,9 +19,12 @@ import { PAGES } from './pages';
 import { OptionsContextProvider } from './components/options-context-provider';
 import { SetupWizard } from './setup-wizard';
 import { NavigationContextProvider } from './components/navigation-context-provider';
+import { ReaderThemesContextProvider } from './components/reader-themes-context-provider';
 import { UserContextProvider } from './components/user-context-provider';
 import { ErrorScreen } from './components/error-screen';
 import { SiteScanContextProvider } from './components/site-scan-context-provider';
+
+const { ajaxurl: wpAjaxUrl } = global;
 
 /**
  * Context providers for the application.
@@ -35,14 +38,21 @@ export function Providers( { children } ) {
 			optionsRestEndpoint={ OPTIONS_REST_ENDPOINT }
 		>
 			<NavigationContextProvider pages={ PAGES }>
-				<UserContextProvider
-					userOptionDeveloperTools={ USER_FIELD_DEVELOPER_TOOLS_ENABLED }
-					userRestEndpoint={ USER_REST_ENDPOINT }
+				<ReaderThemesContextProvider
+					wpAjaxUrl={ wpAjaxUrl }
+					readerThemesEndpoint={ READER_THEMES_REST_ENDPOINT }
+					updatesNonce={ UPDATES_NONCE }
 				>
-					<SiteScanContextProvider>
-						{ children }
-					</SiteScanContextProvider>
-				</UserContextProvider>
+					<UserContextProvider
+						userOptionDeveloperTools={ USER_FIELD_DEVELOPER_TOOLS_ENABLED }
+						userRestEndpoint={ USER_REST_ENDPOINT }
+					>
+						<SiteScanContextProvider>
+							{ children }
+						</SiteScanContextProvider>
+					</UserContextProvider>
+
+				</ReaderThemesContextProvider>
 			</NavigationContextProvider>
 		</OptionsContextProvider>
 	);

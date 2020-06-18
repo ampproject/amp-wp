@@ -35,7 +35,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, readerThemes
 	const { setError } = useError();
 
 	const { options, savingOptions } = useContext( Options );
-	const { reader_theme: readerTheme } = options || {};
+	const { reader_theme: readerTheme, theme_support: themeSupport } = options || {};
 
 	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
 	const hasUnmounted = useRef( false );
@@ -49,8 +49,10 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, readerThemes
 	 * Downloads the selected reader theme, if necessary, when options are saved.
 	 */
 	useEffect( () => {
-		if ( ! selectedTheme ) {
-			return;
+		if ( ! 'reader' === themeSupport ) {
+			if ( ! selectedTheme ) {
+				return;
+			}
 		}
 
 		if ( ! savingOptions || downloadingTheme ) {
@@ -90,13 +92,13 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, readerThemes
 
 			setDownloadingTheme( false );
 		} )();
-	}, [ wpAjaxUrl, downloadingTheme, savingOptions, selectedTheme, setError, updatesNonce ] );
+	}, [ wpAjaxUrl, downloadingTheme, savingOptions, selectedTheme, setError, themeSupport, updatesNonce ] );
 
 	/**
-	 * Fetches theme data on component mount.
+	 * Fetches theme data when needed.
 	 */
 	useEffect( () => {
-		if ( fetchingThemes || ! readerThemesEndpoint || themes ) {
+		if ( fetchingThemes || ! readerThemesEndpoint || themes || 'reader' !== themeSupport ) {
 			return;
 		}
 
@@ -122,7 +124,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, readerThemes
 
 			setFetchingThemes( false );
 		} )();
-	}, [ fetchingThemes, readerThemesEndpoint, setError, themes ] );
+	}, [ fetchingThemes, readerThemesEndpoint, setError, themes, themeSupport ] );
 
 	useEffect( () => () => {
 		hasUnmounted.current = true;
