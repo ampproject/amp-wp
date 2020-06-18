@@ -2403,14 +2403,14 @@ class AMP_Validation_Error_Taxonomy {
 					$file = $source['file'];
 
 					// Prepend the plugin directory name to the file name as the plugin editor requires.
-					$i = strpos( $plugin['name'], '/' );
+					$i = strpos( $plugin['file'], '/' );
 					if ( false !== $i ) {
-						$file = substr( $plugin['name'], 0, $i ) . '/' . $file;
+						$file = substr( $plugin['file'], 0, $i ) . '/' . $file;
 					}
 
 					$edit_url = add_query_arg(
 						[
-							'plugin' => rawurlencode( $plugin['name'] ),
+							'plugin' => rawurlencode( $plugin['file'] ),
 							'file'   => rawurlencode( $file ),
 							'line'   => rawurlencode( $source['line'] ),
 						],

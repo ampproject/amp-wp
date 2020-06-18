@@ -80,20 +80,25 @@ final class PluginRegistry implements Service {
 	 * the plugins directory.
 	 *
 	 * @param string $plugin_slug Plugin slug.
-	 * @return array|null
+	 * @return array|null {
+	 *     Plugin data if found, otherwise null.
+	 *
+	 *     @type string $name Plugin name (file).
+	 *     @type array  $data Plugin data.
+	 * }
 	 */
 	public function get_plugin_from_slug( $plugin_slug ) {
 		$plugins = $this->get_plugins_data();
 		if ( isset( $plugins[ $plugin_slug ] ) ) {
 			return [
-				'name' => $plugin_slug, // @todo Rename 'name' to 'file'. Or create a new 'File' array key?
+				'file' => $plugin_slug,
 				'data' => $plugins[ $plugin_slug ],
 			];
 		}
 		foreach ( $plugins as $plugin_file => $plugin_data ) {
 			if ( strtok( $plugin_file, '/' ) === $plugin_slug ) {
 				return [
-					'name' => $plugin_file, // @todo Rename 'name' to 'file'.
+					'file' => $plugin_file,
 					'data' => $plugin_data,
 				];
 			}
