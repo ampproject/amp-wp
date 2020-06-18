@@ -12,6 +12,7 @@ namespace AmpProject\AmpWP\Admin;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use WP_Error;
+use WP_User;
 
 /**
  * Class DevToolsUserAccess
@@ -78,11 +79,11 @@ final class DevToolsUserAccess implements Service, Registerable {
 	/**
 	 * Updates a user's dev tools enabled setting.
 	 *
-	 * @param boolean $new_value New setting for whether dev tools are enabled for the user.
+	 * @param bool    $new_value New setting for whether dev tools are enabled for the user.
 	 * @param WP_User $user      The WP user to update.
 	 * @return int|bool|WP_Error The result of update_user_meta, or WP_Error if the current user lacks permission.
 	 */
-	public function rest_update_dev_tools_enabled( $new_value, $user ) {
+	public function rest_update_dev_tools_enabled( $new_value, WP_User $user ) {
 		if ( ! current_user_can( 'manage_options' ) || ! current_user_can( 'edit_user', $user->ID ) ) {
 			return new WP_Error(
 				'amp_rest_cannot_edit_user',
