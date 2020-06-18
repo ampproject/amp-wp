@@ -96,7 +96,11 @@ Selection.propTypes = {
 	title: PropTypes.string.isRequired,
 };
 
-export function Selections( { recommendedModes, currentMode, setCurrentMode } ) {
+function getSelectionConfig() {
+
+}
+
+export function ScreenUI( { recommendedModes, currentMode, setCurrentMode } ) {
 	const standardId = 'standard-mode';
 	const transitionalId = 'transitional-mode';
 	const readerId = 'reader-mode';
@@ -148,7 +152,7 @@ export function Selections( { recommendedModes, currentMode, setCurrentMode } ) 
 	);
 }
 
-Selections.propTypes = {
+ScreenUI.propTypes = {
 	currentMode: PropTypes.string.isRequired,
 	setCurrentMode: PropTypes.func.isRequired,
 	recommendedModes: PropTypes.arrayOf( PropTypes.string ).isRequired,
