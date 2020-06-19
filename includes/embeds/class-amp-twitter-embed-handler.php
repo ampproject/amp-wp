@@ -119,6 +119,16 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 				'layout' => 'responsive',
 			];
 
+			if ( $node->hasAttribute( 'data-width' ) ) {
+				$attributes['width'] = $node->getAttribute( 'data-width' );
+				$node->removeAttribute( 'data-width' );
+			}
+
+			if ( $node->hasAttribute( 'data-height' ) ) {
+				$attributes['height'] = $node->getAttribute( 'data-height' );
+				$node->removeAttribute( 'data-height' );
+			}
+
 			switch ( $embed_type ) {
 				case 'tweet':
 					$tweet_id = $this->get_tweet_id( $node );
@@ -157,9 +167,10 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 
 			if ( $node->hasAttributes() ) {
 				foreach ( $node->attributes as $attr ) {
-					// Copy only `data-` attributes.
+					// Strip `data-` attributes and apply them to the AMP component.
 					if ( false !== strpos( $attr->nodeName, 'data-', 0 ) ) {
 						$attributes[ $attr->nodeName ] = $attr->nodeValue;
+						$node->removeAttribute( $attr->nodeName );
 					}
 				}
 			}

@@ -58,12 +58,17 @@ class AMP_Gfycat_Embed_Handler extends AMP_Base_Embed_Handler {
 			'width'      => $this->args['width'],
 		];
 
-		if ( $node->hasAttribute( 'width' ) ) {
-			$attributes['width'] = $node->getAttribute( 'width' );
-		}
+		if ( '100%' === $node->getAttribute( 'width' ) && '100%' === $node->getAttribute( 'height' ) ) {
+			$attributes['layout'] = 'fill';
+			unset( $attributes['width'], $attributes['height'] );
+		} else {
+			if ( $node->hasAttribute( 'width' ) ) {
+				$attributes['width'] = $node->getAttribute( 'width' );
+			}
 
-		if ( $node->hasAttribute( 'height' ) ) {
-			$attributes['height'] = $node->getAttribute( 'height' );
+			if ( $node->hasAttribute( 'height' ) ) {
+				$attributes['height'] = $node->getAttribute( 'height' );
+			}
 		}
 
 		$amp_node = AMP_DOM_Utils::create_node(

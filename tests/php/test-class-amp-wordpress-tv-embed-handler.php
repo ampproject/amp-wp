@@ -74,7 +74,7 @@ class Test_AMP_WordPress_TV_Embed_Handler extends WP_UnitTestCase {
 
 			'correct_url'                   => [
 				'https://wordpress.tv/2019/10/08/the-history-of-wordpress-in-four-minutes/',
-				'<iframe width="500" height="281" src="https://video.wordpress.com/embed/yFCmLMGL?hd=0" frameborder="0" allowfullscreen layout="responsive"></iframe>' . PHP_EOL,
+				'<iframe width="500" height="281" src="https://video.wordpress.com/embed/yFCmLMGL?hd=1" frameborder="0" allowfullscreen layout="responsive"></iframe>' . PHP_EOL,
 			],
 		];
 	}
