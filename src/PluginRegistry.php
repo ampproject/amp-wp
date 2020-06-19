@@ -82,7 +82,7 @@ final class PluginRegistry implements Service {
 			}
 
 			$plugins[ $plugin_slug ] = array_merge(
-				[ 'File' => $plugin_file ], // Camel case is used for consistency with the other keys.
+				[ 'File' => $plugin_file ], // PascalCase is used for consistency with the other keys.
 				$plugin
 			);
 		}
