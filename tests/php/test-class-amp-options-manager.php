@@ -140,6 +140,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				Option::ANALYTICS               => [],
 				Option::ALL_TEMPLATES_SUPPORTED => true,
 				Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
+				Option::SUPPRESSED_PLUGINS      => [],
 				Option::VERSION                 => AMP__VERSION,
 				Option::READER_THEME            => 'classic',
 			],
@@ -270,7 +271,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 * @covers AMP_Options_Manager::update_options
 	 */
 	public function test_update_options() {
-		// Confirm updating multple entries at once works.
+		// Confirm updating multiple entries at once works.
 		AMP_Options_Manager::update_options(
 			[
 				Option::THEME_SUPPORT => 'reader',

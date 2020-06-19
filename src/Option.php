@@ -85,6 +85,41 @@ interface Option {
 	const READER_THEME = 'reader_theme';
 
 	/**
+	 * Suppressed plugins
+	 *
+	 * @var string
+	 */
+	const SUPPRESSED_PLUGINS = 'suppressed_plugins';
+
+	/**
+	 * Suppressed plugins, last version.
+	 *
+	 * @var string
+	 */
+	const SUPPRESSED_PLUGINS_LAST_VERSION = 'last_version';
+
+	/**
+	 * Suppressed plugins, timestamp.
+	 *
+	 * @var string
+	 */
+	const SUPPRESSED_PLUGINS_TIMESTAMP = 'timestamp';
+
+	/**
+	 * Suppressed plugins, username.
+	 *
+	 * @var string
+	 */
+	const SUPPRESSED_PLUGINS_USERNAME = 'username';
+
+	/**
+	 * Suppressed plugins, erroring URLs.
+	 *
+	 * @var string
+	 */
+	const SUPPRESSED_PLUGINS_ERRORING_URLS = 'erroring_urls';
+
+	/**
 	 * Version of the AMP plugin for which the options were last saved.
 	 *
 	 * This allows for recognizing updates and triggering update-specific logic.

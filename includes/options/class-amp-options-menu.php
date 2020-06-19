@@ -103,6 +103,15 @@ class AMP_Options_Menu {
 			]
 		);
 
+		/**
+		 * This fires when settings fields for the AMP Options menu need to be registered.
+		 *
+		 * This action is intended for internal use only, not to be used by other plugins.
+		 *
+		 * @internal
+		 */
+		do_action( 'amp_options_menu_items' );
+
 		$submenus = [
 			new AMP_Analytics_Options_Submenu( AMP_Options_Manager::OPTION_NAME ),
 		];
