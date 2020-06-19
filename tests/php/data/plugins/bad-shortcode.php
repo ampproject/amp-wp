@@ -2,6 +2,7 @@
 /**
  * Plugin Name: Bad Shortcode
  * Description: Shortcode which outputs a script.
+ * Version: 0.4
  */
 
 add_action(

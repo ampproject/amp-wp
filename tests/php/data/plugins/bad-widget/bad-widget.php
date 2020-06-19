@@ -2,6 +2,7 @@
 /**
  * Plugin Name: Bad Widget
  * Description: Widget which outputs a script.
+ * Version: 0.2
  */
 
 // phpcs:ignoreFile

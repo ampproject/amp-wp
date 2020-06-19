@@ -2,6 +2,7 @@
 
 namespace AmpProject\AmpWP\Tests\Unit;
 
+use AmpProject\AmpWP\Infrastructure\Plugin;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
@@ -11,17 +12,21 @@ use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\MockPluginEnvironment;
 use AmpProject\AmpWP\Tests\PrivateAccess;
+use AmpProject\AmpWP\Tests\ThemesApiRequestMocking;
+use AMP_Options_Manager;
+use AMP_Theme_Support;
+use AMP_Validated_URL_Post_Type;
+use AMP_Validation_Manager;
+use Exception;
 use WP_Block_Type_Registry;
 use WP_UnitTestCase;
-use AMP_Options_Manager;
-use AMP_Validated_URL_Post_Type;
-use Exception;
 
 /** @covers PluginSuppression */
 final class PluginSuppressionTest extends WP_UnitTestCase {
 
 	use PrivateAccess;
 	use AssertContainsCompatibility;
+	use ThemesApiRequestMocking;
 
 	private $attempted_validate_request_urls = [];
 
@@ -34,7 +39,12 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		add_filter(
 			'pre_http_request',
 			function( $r, $args, $url ) {
-				unset( $r, $args );
+				unset( $args );
+
+				if ( false === strpos( $url, 'amp_validate=' ) ) {
+					return $r;
+				}
+
 				$this->attempted_validate_request_urls[] = remove_query_arg( [ 'amp_validate', 'amp_cache_bust' ], $url );
 				return [
 					'body'     => '',
@@ -277,6 +287,97 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		$this->assertTrue( $instance->suppress_plugins() );
 		$this->assert_plugin_suppressed_state( true, $suppressed_slugs );
 		$this->assert_plugin_suppressed_state( false, $unsuppressed_slugs );
+	}
+
+	/**
+	 * Test validating suppressed plugins.
+	 *
+	 * @covers PluginSuppression::sanitize_options()
+	 * @covers AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source()
+	 */
+	public function test_sanitize_options() {
+		$this->add_reader_themes_request_filter();
+		$instance = $this->get_instance();
+		$instance->register();
+
+		/** @var PluginRegistry $plugin_registry */
+		$plugin_registry = Services::get( 'plugin_registry' );
+
+		$this->init_plugins();
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		AMP_Options_Manager::register_settings(); // Adds validate_options as filter.
+		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Validation_Manager::init();
+
+		$bad_plugin_file_slugs = $this->get_bad_plugin_file_slugs();
+		// Test initial state.
+		$this->assertEquals( [], AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS ) );
+
+		// Test updating empty array.
+		AMP_Options_Manager::update_option( Option::SUPPRESSED_PLUGINS, [] );
+		$this->assertEquals( [], AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS ) );
+
+		$this->assertCount( 0, $this->attempted_validate_request_urls );
+		$this->assertEmpty( AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source() );
+
+		$this->populate_validation_errors( home_url( '/' ), $bad_plugin_file_slugs );
+
+		$errors_by_source = AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source();
+		$this->assertEqualSets( [ 'plugin' ], array_keys( $errors_by_source ) );
+		$this->assertEqualSets( $bad_plugin_file_slugs, array_keys( $errors_by_source['plugin'] ) );
+
+		// When updating plugins that don't exit or can't be suppressed, do nothing.
+		$this->update_suppressed_plugins_option(
+			array_fill_keys(
+				[ 'bogus', 'amp' ],
+				'1'
+			)
+		);
+
+		$this->assertEquals( [], AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS ) );
+		$this->assertCount( 0, $this->attempted_validate_request_urls );
+
+		// When updating option but both plugins are not suppressed, then no change is made.
+		$this->update_suppressed_plugins_option(
+			array_fill_keys(
+				$bad_plugin_file_slugs,
+				'0'
+			)
+		);
+		$this->assertEquals( [], AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS ) );
+		$this->assertCount( 0, $this->attempted_validate_request_urls, 'Expected no validation request to have been made since no changes were made (as both plugins are still unsuppressed).' );
+
+		// When updating option and both are now suppressed, then a change is made.
+		$this->update_suppressed_plugins_option(
+			array_fill_keys(
+				$bad_plugin_file_slugs,
+				'1'
+			)
+		);
+		$this->assertCount( 1, $this->attempted_validate_request_urls, 'Expected one validation request to have been made since no changes were made (as both plugins are still unsuppressed).' );
+		$suppressed_plugins = AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS );
+		$this->assertEqualSets( $bad_plugin_file_slugs, array_keys( $suppressed_plugins ) );
+		foreach ( $suppressed_plugins as $slug => $suppressed_plugin ) {
+			$this->assertArrayHasKey( Option::SUPPRESSED_PLUGINS_LAST_VERSION, $suppressed_plugin );
+			$this->assertArrayHasKey( Option::SUPPRESSED_PLUGINS_TIMESTAMP, $suppressed_plugin );
+			$this->assertArrayHasKey( Option::SUPPRESSED_PLUGINS_USERNAME, $suppressed_plugin );
+			$this->assertEquals( wp_get_current_user()->user_nicename, $suppressed_plugin[ Option::SUPPRESSED_PLUGINS_USERNAME ] );
+			$this->assertArrayHasKey( Option::SUPPRESSED_PLUGINS_ERRORING_URLS, $suppressed_plugin );
+			$this->assertEquals( [ home_url( '/' ) ], $suppressed_plugin[ Option::SUPPRESSED_PLUGINS_ERRORING_URLS ] );
+			$this->assertEquals( $plugin_registry->get_plugin_from_slug( $slug )['data']['Version'], $suppressed_plugin[ Option::SUPPRESSED_PLUGINS_LAST_VERSION ] );
+		}
+
+		// Stop suppressing only some plugins.
+		$unsuppressed_plugins = array_slice( $bad_plugin_file_slugs, 0, 2 );
+		$suppressed_plugins   = array_slice( $bad_plugin_file_slugs, 2 );
+		$this->update_suppressed_plugins_option(
+			array_merge(
+				array_fill_keys( $suppressed_plugins, '1' ),
+				array_fill_keys( $unsuppressed_plugins, '0' )
+			)
+		);
+		$this->assertCount( 2, $this->attempted_validate_request_urls, 'Expected one validation request to have been made since no changes were made (as both plugins are still unsuppressed).' );
+		$this->assertEqualSets( $suppressed_plugins, array_keys( AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS ) ) );
 	}
 
 	/** @covers PluginSuppression::add_settings_field() */
