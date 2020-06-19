@@ -104,7 +104,7 @@ final class PluginSuppression implements Service, Registerable {
 		<fieldset>
 			<h4 class="title hidden"><?php esc_html_e( 'Suppressed Plugins', 'amp' ); ?></h4>
 			<p>
-				<?php esc_html_e( 'When a plugin emits invalid markup that causes an AMP validation error, one option is to review the invalid markup and allow it to be removed. Another option is to suppress the plugin from doing anything when rendering AMP pages. What follows is the list of active plugins with any causing validation errors being highlighted. If a plugin is emitting invalid markup that is causing validation errors and this plugin is not necessary on the AMP version of the page, it can be suppressed.', 'amp' ); ?>
+				<?php esc_html_e( 'When a plugin adds markup which is invalid on AMP pages, you have two options: you can review the validation error, determine that the invalid markup is not needed, and let the AMP plugin remove it. Alternatively, you can suppress the offending plugin from running on AMP pages. Below is the list of active plugins which have caused validation issues.', 'amp' ); ?>
 			</p>
 
 			<style>
