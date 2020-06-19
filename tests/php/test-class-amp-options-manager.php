@@ -358,6 +358,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		add_filter(
 			'pre_http_request',
 			function( $r, $args, $url ) use ( &$attempted_validate_request_urls ) {
+				unset( $r, $args );
 				$attempted_validate_request_urls[] = remove_query_arg( [ 'amp_validate', 'amp_cache_bust' ], $url );
 				return [
 					'body'     => '',
