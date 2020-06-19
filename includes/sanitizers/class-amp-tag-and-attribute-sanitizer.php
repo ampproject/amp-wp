@@ -17,7 +17,7 @@ use AmpProject\Tag;
  *
  * Allowed tags array is generated from this protocol buffer:
  *
- *     https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii
+ *     https://github.com/ampproject/amphtml/blob/bd29b0eb1b28d900d4abed2c1883c6980f18db8e/validator/validator-main.protoascii
  *     by the python script in amp-wp/bin/amp_wp_build.py. See the comment at the top
  *     of that file for instructions to generate class-amp-allowed-tags-generated.php.
  *
