@@ -44,7 +44,7 @@ class Test_AMP_WordPress_TV_Embed_Handler extends WP_UnitTestCase {
 		}
 
 		return [
-			'body'          => '{"type":"video","version":"1.0","title":null,"width":400,"height":225,"html":"<iframe width=\'400\' height=\'225\' src=\'https:\/\/video.wordpress.com\/embed\/yFCmLMGL?hd=1\' frameborder=\'0\' allowfullscreen><\/iframe><script src=\'https:\/\/v0.wordpress.com\/js\/next\/videopress-iframe.js?m=1435166243\'><\/script>"}', // phpcs:ignore
+			'body'          => '{"type":"video","version":"1.0","title":null,"width":500,"height":281,"html":"<iframe width=\'500\' height=\'281\' src=\'https:\/\/video.wordpress.com\/embed\/yFCmLMGL?hd=1\' frameborder=\'0\' allowfullscreen><\/iframe><script src=\'https:\/\/v0.wordpress.com\/js\/next\/videopress-iframe.js?m=1435166243\'><\/script>"}', // phpcs:ignore
 			'headers'       => [],
 			'response'      => [
 				'code'    => 200,
