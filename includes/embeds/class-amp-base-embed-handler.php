@@ -210,17 +210,19 @@ abstract class AMP_Base_Embed_Handler {
 	 * @param DOMElement $node         The DOMNode to whose sibling is the script to be removed.
 	 * @param string     $base_src_url Script URL to match against.
 	 * @param string     $content      Text content of node to match against.
+	 * @param bool       $is_next_to   Whether the script sibling is next or preceding the specified element.
 	 */
-	protected function remove_script_sibling( DOMElement $node, $base_src_url, $content = '' ) {
-		$next_element_sibling = $node->nextSibling;
+	protected function remove_script_sibling( DOMElement $node, $base_src_url, $content = '', $is_next_to = true ) {
+		$sibling_location = $is_next_to ? 'nextSibling' : 'previousSibling';
+		$element_sibling  = $node->{$sibling_location};
 
-		while ( $next_element_sibling && ! ( $next_element_sibling instanceof DOMElement ) ) {
-			$next_element_sibling = $next_element_sibling->nextSibling;
+		while ( $element_sibling && ! ( $element_sibling instanceof DOMElement ) ) {
+			$element_sibling = $element_sibling->{$sibling_location};
 		}
 
 		// Handle case where script is wrapped in paragraph by wpautop.
-		if ( $next_element_sibling instanceof DOMElement && 'p' === $next_element_sibling->nodeName ) {
-			$children_elements = array_values( $this->get_child_elements( $next_element_sibling ) );
+		if ( $element_sibling instanceof DOMElement && 'p' === $element_sibling->nodeName ) {
+			$children_elements = array_values( $this->get_child_elements( $element_sibling ) );
 
 			if (
 				1 === count( $children_elements ) &&
@@ -230,22 +232,22 @@ abstract class AMP_Base_Embed_Handler {
 					( $content && false !== strpos( $children_elements[0]->textContent, $content ) )
 				)
 			) {
-				$next_element_sibling->parentNode->removeChild( $next_element_sibling );
+				$element_sibling->parentNode->removeChild( $element_sibling );
 				return;
 			}
 		}
 
 		// Handle case where script is immediately following.
 		$is_embed_script = (
-			$next_element_sibling instanceof DOMElement &&
-			'script' === strtolower( $next_element_sibling->nodeName ) &&
+			$element_sibling instanceof DOMElement &&
+			'script' === strtolower( $element_sibling->nodeName ) &&
 			(
-				( $base_src_url && false !== strpos( $next_element_sibling->getAttribute( 'src' ), $base_src_url ) ) ||
-				( $content && false !== strpos( $next_element_sibling->textContent, $content ) )
+				( $base_src_url && false !== strpos( $element_sibling->getAttribute( 'src' ), $base_src_url ) ) ||
+				( $content && false !== strpos( $element_sibling->textContent, $content ) )
 			)
 		);
 		if ( $is_embed_script ) {
-			$next_element_sibling->parentNode->removeChild( $next_element_sibling );
+			$element_sibling->parentNode->removeChild( $element_sibling );
 		}
 	}
 }
