@@ -735,8 +735,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Style_Sanitizer( $dom, $args );
 		$sanitizer->sanitize();
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom, $args );
-		$whitelist_sanitizer->sanitize();
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom, $args );
+		$validating_sanitizer->sanitize();
 
 		$sanitized_html     = $dom->saveHTML( $dom->documentElement );
 		$actual_stylesheets = array_values( array_filter( $sanitizer->get_stylesheets() ) );
@@ -1897,7 +1897,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				[],
 			],
 
-			'blacklisted_and_whitelisted_keyframe_properties' => [
+			'denylisted_and_allowlisted_keyframe_properties' => [
 				'<style amp-keyframes>@keyframes anim1 { 50% { width: 50%; animation-timing-function: ease; opacity: 0.5; height:10%; offset-distance: 50%; visibility: visible; transform: rotate(0.5turn); -webkit-transform: rotate(0.5turn); color:red; } }</style>',
 				'<style amp-keyframes="">@keyframes anim1{50%{animation-timing-function:ease;opacity:.5;offset-distance:50%;visibility:visible;transform:rotate(.5 turn);-webkit-transform:rotate(.5 turn)}}</style>',
 				array_fill( 0, 3, AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_PROPERTY ),
@@ -2735,8 +2735,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Style_Sanitizer( $amphtml_dom, $args );
 		$sanitizer->sanitize();
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $amphtml_dom, $args );
-		$whitelist_sanitizer->sanitize();
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $amphtml_dom, $args );
+		$validating_sanitizer->sanitize();
 
 		$assert( $original_dom, $html, $amphtml_dom, $amphtml_dom->saveHTML(), $sanitizer->get_stylesheets() );
 	}

@@ -92,7 +92,7 @@ final class AMP_CLI_Validation_Command {
 	public $force_crawl_urls = false;
 
 	/**
-	 * A whitelist of conditionals to use for validation.
+	 * An allowlist of conditionals to use for validation.
 	 *
 	 * Usually, this script will validate all of the templates that don't have AMP disabled.
 	 * But this allows validating based on only these conditionals.

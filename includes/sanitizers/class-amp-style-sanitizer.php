@@ -1263,7 +1263,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$stylesheet,
 			[
 				'allowed_at_rules'   => $cdata_spec['css_spec']['allowed_at_rules'],
-				'property_whitelist' => $cdata_spec['css_spec']['declaration'],
+				'property_allowlist' => $cdata_spec['css_spec']['declaration'],
 				'validate_keyframes' => $cdata_spec['css_spec']['validate_keyframes'],
 				'spec_name'          => $is_keyframes ? self::STYLE_AMP_KEYFRAMES_SPEC_NAME : self::STYLE_AMP_CUSTOM_SPEC_NAME,
 			]
@@ -1363,7 +1363,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$stylesheet,
 			[
 				'allowed_at_rules'   => $this->style_custom_cdata_spec['css_spec']['allowed_at_rules'],
-				'property_whitelist' => $this->style_custom_cdata_spec['css_spec']['declaration'],
+				'property_allowlist' => $this->style_custom_cdata_spec['css_spec']['declaration'],
 				'stylesheet_url'     => $href,
 				'spec_name'          => self::STYLE_AMP_CUSTOM_SPEC_NAME,
 			]
@@ -1474,12 +1474,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param array  $options {
 	 *     Options.
 	 *
-	 *     @type string[] $property_whitelist          Exclusively-allowed properties.
-	 *     @type string[] $property_blacklist          Disallowed properties.
-	 *     @type string   $stylesheet_url              Original URL for stylesheet when originating via link or @import.
-	 *     @type array    $allowed_at_rules            Allowed @-rules.
-	 *     @type bool     $validate_keyframes          Whether keyframes should be validated.
-	 *     @type string   $spec_name                   Spec name.
+	 *     @type string[] $property_allowlist Exclusively-allowed properties.
+	 *     @type string[] $property_denylist  Disallowed properties.
+	 *     @type string   $stylesheet_url     Original URL for stylesheet when originating via link or @import.
+	 *     @type array    $allowed_at_rules   Allowed @-rules.
+	 *     @type bool     $validate_keyframes Whether keyframes should be validated.
+	 *     @type string   $spec_name          Spec name.
 	 * }
 	 * @return array {
 	 *    Processed stylesheet.
@@ -1498,13 +1498,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$parsed         = null;
 		$cache_key      = null;
 		$cached         = true;
-		$cache_group    = 'amp-parsed-stylesheet-v29'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
+		$cache_group    = 'amp-parsed-stylesheet-v30'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
 		$use_transients = $this->should_use_transient_caching();
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
 				$options,
-				[ 'property_whitelist', 'property_blacklist', 'stylesheet_url', 'allowed_at_rules' ]
+				[ 'property_allowlist', 'property_denylist', 'stylesheet_url', 'allowed_at_rules' ]
 			),
 			wp_array_slice_assoc(
 				$this->args,
@@ -1790,12 +1790,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$options = array_merge(
 			[
 				'allowed_at_rules'   => [],
-				'property_blacklist' => [
+				'property_denylist'  => [
 					// See <https://www.ampproject.org/docs/design/responsive/style_pages#disallowed-styles>.
 					'behavior',
 					'-moz-binding',
 				],
-				'property_whitelist' => [],
+				'property_allowlist' => [],
 				'validate_keyframes' => false,
 				'stylesheet_url'     => null,
 				'spec_name'          => null,
@@ -2241,11 +2241,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Remove disallowed properties.
-		if ( ! empty( $options['property_whitelist'] ) ) {
+		if ( ! empty( $options['property_allowlist'] ) ) {
 			$properties = $ruleset->getRules();
 			foreach ( $properties as $property ) {
 				$vendorless_property_name = preg_replace( '/^-\w+-/', '', $property->getRule() );
-				if ( ! in_array( $vendorless_property_name, $options['property_whitelist'], true ) ) {
+				if ( ! in_array( $vendorless_property_name, $options['property_allowlist'], true ) ) {
 					$error     = [
 						'code'               => self::CSS_SYNTAX_INVALID_PROPERTY,
 						'css_property_name'  => $property->getRule(),
@@ -2261,7 +2261,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 		} else {
-			foreach ( $options['property_blacklist'] as $illegal_property_name ) {
+			foreach ( $options['property_denylist'] as $illegal_property_name ) {
 				$properties = $ruleset->getRules( $illegal_property_name );
 				foreach ( $properties as $property ) {
 					$error     = [
@@ -2491,7 +2491,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function process_css_keyframes( KeyFrame $css_list, $options ) {
 		$results = [];
-		if ( ! empty( $options['property_whitelist'] ) ) {
+		if ( ! empty( $options['property_allowlist'] ) ) {
 			foreach ( $css_list->getContents() as $rules ) {
 				if ( ! ( $rules instanceof DeclarationBlock ) ) {
 					$error     = [
@@ -2516,7 +2516,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$properties = $rules->getRules();
 				foreach ( $properties as $property ) {
 					$vendorless_property_name = preg_replace( '/^-\w+-/', '', $property->getRule() );
-					if ( ! in_array( $vendorless_property_name, $options['property_whitelist'], true ) ) {
+					if ( ! in_array( $vendorless_property_name, $options['property_allowlist'], true ) ) {
 						$error     = [
 							'code'               => self::CSS_SYNTAX_INVALID_PROPERTY,
 							'css_property_name'  => $property->getRule(),
@@ -2679,7 +2679,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$rule,
 			[
 				'allowed_at_rules'   => [],
-				'property_whitelist' => $this->style_custom_cdata_spec['css_spec']['declaration'],
+				'property_allowlist' => $this->style_custom_cdata_spec['css_spec']['declaration'],
 				'spec_name'          => self::STYLE_AMP_CUSTOM_SPEC_NAME,
 			]
 		);
