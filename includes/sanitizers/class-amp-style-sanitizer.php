@@ -485,7 +485,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			 */
 			'amp-viewer',
 
-			// Classes added based on input mode. See <https://github.com/ampproject/amphtml/blob/master/spec/amp-css-classes.md#input-mode-classes>.
+			// Classes added based on input mode. See <https://github.com/ampproject/amphtml/blob/bd29b0eb1b28d900d4abed2c1883c6980f18db8e/spec/amp-css-classes.md#input-mode-classes>.
 			'amp-mode-touch',
 			'amp-mode-mouse',
 			'amp-mode-keyboard-active',
@@ -614,7 +614,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 							return false;
 						}
 						continue 2;
-					// Class names for amp-video-docking, see <https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-docking/amp-video-docking.md#styling>.
+					// Class names for amp-video-docking, see <https://amp.dev/documentation/components/amp-video-docking/#styling>.
 					case 'amp-docked-':
 						if ( ! $this->has_used_attributes( [ 'dock' ] ) ) {
 							return false;

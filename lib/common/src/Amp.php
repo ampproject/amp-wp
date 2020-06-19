@@ -59,7 +59,7 @@ final class Amp
      *
      * This list should be kept in sync with the list of dynamic components at:
      *
-     * @see https://github.com/ampproject/amphtml/blob/master/spec/amp-cache-guidelines.md#guidelines-adding-a-new-cache-to-the-amp-ecosystem
+     * @see https://github.com/ampproject/amphtml/blob/292dc66b8c0bb078bbe3a1bca960e8f494f7fc8f/spec/amp-cache-guidelines.md#guidelines-adding-a-new-cache-to-the-amp-ecosystem
      *
      * @var array[]
      */

@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - develop
-      - master
       # Include all release branches.
       - '*.*'
   pull_request:
