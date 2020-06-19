@@ -483,6 +483,10 @@ final class PluginSuppression implements Service, Registerable {
 	 * @param string[] $suppressed_plugins Suppressed plugins.
 	 */
 	private function suppress_blocks( $suppressed_plugins ) {
+		if ( ! class_exists( 'WP_Block_Type_Registry' ) ) {
+			return;
+		}
+
 		$registry = WP_Block_Type_Registry::get_instance();
 
 		foreach ( $registry->get_all_registered() as $block_type ) {
