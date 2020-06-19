@@ -1336,7 +1336,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		'AMP_Meta_Sanitizer'              => [],
 		'AMP_Layout_Sanitizer'            => [],
 		'AMP_Accessibility_Sanitizer'     => [],
-		'AMP_Tag_And_Attribute_Sanitizer' => [], // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
+		'AMP_Tag_And_Attribute_Sanitizer' => [], // Note: This validating sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
 	];
 
 	if ( ! empty( $theme_support_args['nav_menu_toggle'] ) ) {
@@ -1418,7 +1418,7 @@ function amp_get_content_sanitizers( $post = null ) {
 	 */
 	$sanitizers['AMP_Style_Sanitizer']['allow_transient_caching'] = apply_filters( 'amp_parsed_css_transient_caching_allowed', true );
 
-	// Force style sanitizer and whitelist sanitizer to be at end.
+	// Force style sanitizer, meta sanitizer, and validating sanitizer to be at end.
 	foreach ( [ 'AMP_Style_Sanitizer', 'AMP_Meta_Sanitizer', 'AMP_Tag_And_Attribute_Sanitizer' ] as $class_name ) {
 		if ( isset( $sanitizers[ $class_name ] ) ) {
 			$sanitizer = $sanitizers[ $class_name ];

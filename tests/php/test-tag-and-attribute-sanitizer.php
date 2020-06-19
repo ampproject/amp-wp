@@ -162,13 +162,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_CHILD_TAG ],
 			],
 
-			'amp-call-tracking_blacklisted_config'         => [
+			'amp-call-tracking_disallowed_config'          => [
 				'<amp-call-tracking config="__amp_source_origin"><a href="tel:123456789">+1 (23) 456-789</a></amp-call-tracking>',
 				'',
 				[], // Important: This needs to be empty because the amp-call-tracking is stripped.
 				[
 					[
-						'code'      => AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX,
+						'code'      => AMP_Tag_And_Attribute_Sanitizer::INVALID_DISALLOWED_VALUE_REGEX,
 						'node_name' => 'config',
 					],
 					[
@@ -825,11 +825,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR ],
 			],
 
-			'attribute_value_blacklisted_by_regex_removed' => [
+			'attribute_value_disallowed_by_regex_removed'  => [
 				'<a href="__amp_source_origin">Click me.</a>',
 				'<a>Click me.</a>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX ],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_DISALLOWED_VALUE_REGEX ],
 			],
 
 			'host_relative_url_allowed'                    => [
@@ -840,15 +840,15 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<a href="//example.com/path/to/content">Click me.</a>',
 			],
 
-			'node_with_whitelisted_protocol_http_allowed'  => [
+			'node_with_allowlisted_protocol_http_allowed'  => [
 				'<a href="http://example.com/path/to/content">Click me.</a>',
 			],
 
-			'node_with_whitelisted_protocol_https_allowed' => [
+			'node_with_allowlisted_protocol_https_allowed' => [
 				'<a href="https://example.com/path/to/content">Click me.</a>',
 			],
 
-			'node_with_whitelisted_protocol_other_allowed' => [
+			'node_with_allowlisted_protocol_other_allowed' => [
 				implode(
 					'',
 					[
@@ -978,18 +978,18 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				}
 			),
 
-			'attribute_value_with_blacklisted_regex_removed' => [
+			'attribute_value_with_disallowed_regex_removed' => [
 				'<a rel="import">Click me.</a>',
 				'<a>Click me.</a>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX ],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_DISALLOWED_VALUE_REGEX ],
 			],
 
-			'attribute_value_with_blacklisted_multi-part_regex_removed' => [
+			'attribute_value_with_disallowed_multi-part_regex_removed' => [
 				'<a rel="something else import">Click me.</a>',
 				'<a>Click me.</a>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX ],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_DISALLOWED_VALUE_REGEX ],
 			],
 
 			'attribute_value_with_required_regex'          => [
@@ -1140,28 +1140,28 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-analytics' ],
 			],
 
-			'nodes_with_non_whitelisted_tags_replaced_by_children' => [
+			'nodes_with_non_allowlisted_tags_replaced_by_children' => [
 				'<invalid_tag>this is some text inside the invalid node</invalid_tag>',
 				'this is some text inside the invalid node',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
 			],
 
-			'empty_parent_nodes_of_non_whitelisted_tags_removed' => [
+			'empty_parent_nodes_of_non_allowlisted_tags_removed' => [
 				'<div><span><span><invalid_tag></invalid_tag></span></span></div>',
 				'',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
 			],
 
-			'non_empty_parent_nodes_of_non_whitelisted_tags_removed' => [
+			'non_empty_parent_nodes_of_non_allowlisted_tags_removed' => [
 				'<div><span><span class="not-empty"><invalid_tag></invalid_tag></span></span></div>',
 				'<div><span><span class="not-empty"></span></span></div>',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
 			],
 
-			'replace_non_whitelisted_node_with_children'   => [
+			'replace_non_allowlisted_node_with_children'   => [
 				'<p>This is some text <invalid_tag>with a disallowed tag</invalid_tag> in the middle of it.</p>',
 				'<p>This is some text with a disallowed tag in the middle of it.</p>',
 				[],
@@ -1366,7 +1366,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<a name=shadowRoot>Shadow Root!</a>',
 				'<a>Shadow Root!</a>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX ],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_DISALLOWED_VALUE_REGEX ],
 			],
 
 			'a_with_attachment_rel_plus_another_valid_value' => [
