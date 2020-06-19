@@ -6,6 +6,8 @@
  */
 
 use AmpProject\AmpWP\Icon;
+use AmpProject\AmpWP\PluginRegistry;
+use AmpProject\AmpWP\Services;
 
 /**
  * Class AMP_Validation_Error_Taxonomy
@@ -2303,34 +2305,6 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * Find a plugin from a slug.
-	 *
-	 * A slug is a plugin directory name like 'amp' or if the plugin is just a single file, then the PHP file in
-	 * the plugins directory.
-	 *
-	 * @param string $plugin_slug Plugin slug.
-	 * @return array|null
-	 */
-	public static function get_plugin_from_slug( $plugin_slug ) {
-		$plugins = get_plugins();
-		if ( isset( $plugins[ $plugin_slug ] ) ) {
-			return [
-				'name' => $plugin_slug,
-				'data' => $plugins[ $plugin_slug ],
-			];
-		}
-		foreach ( $plugins as $plugin_file => $plugin_data ) {
-			if ( strtok( $plugin_file, '/' ) === $plugin_slug ) {
-				return [
-					'name' => $plugin_file,
-					'data' => $plugin_data,
-				];
-			}
-		}
-		return null;
-	}
-
-	/**
 	 * Get the URL for opening the file for a AMP validation error in an external editor.
 	 *
 	 * @since 1.4
@@ -2422,19 +2396,21 @@ class AMP_Validation_Error_Taxonomy {
 		// Fall back to using the theme/plugin editors if no external editor is offered.
 		if ( ! $edit_url ) {
 			if ( 'plugin' === $source['type'] && current_user_can( 'edit_plugins' ) ) {
-				$plugin = self::get_plugin_from_slug( $source['name'] );
+				/** @var PluginRegistry $plugin_registry */
+				$plugin_registry = Services::get( 'plugin_registry' );
+				$plugin          = $plugin_registry->get_plugin_from_slug( $source['name'] );
 				if ( $plugin ) {
 					$file = $source['file'];
 
 					// Prepend the plugin directory name to the file name as the plugin editor requires.
-					$i = strpos( $plugin['name'], '/' );
+					$i = strpos( $plugin['file'], '/' );
 					if ( false !== $i ) {
-						$file = substr( $plugin['name'], 0, $i ) . '/' . $file;
+						$file = substr( $plugin['file'], 0, $i ) . '/' . $file;
 					}
 
 					$edit_url = add_query_arg(
 						[
-							'plugin' => rawurlencode( $plugin['name'] ),
+							'plugin' => rawurlencode( $plugin['file'] ),
 							'file'   => rawurlencode( $file ),
 							'line'   => rawurlencode( $source['line'] ),
 						],
@@ -2474,7 +2450,9 @@ class AMP_Validation_Error_Taxonomy {
 				}
 				break;
 			case 'plugin':
-				$plugin = self::get_plugin_from_slug( $name );
+				/** @var PluginRegistry $plugin_registry */
+				$plugin_registry = Services::get( 'plugin_registry' );
+				$plugin          = $plugin_registry->get_plugin_from_slug( $name );
 				if ( $plugin && ! empty( $plugin['data']['Name'] ) ) {
 					$nicename = $plugin['data']['Name'];
 				}

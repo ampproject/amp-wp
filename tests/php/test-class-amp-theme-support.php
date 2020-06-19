@@ -2104,7 +2104,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		add_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
-		$wp_widget_factory = new WP_Widget_Factory();
+		$wp_widget_factory->widgets = [];
 		wp_widgets_init();
 
 		$this->assertTrue( is_amp_endpoint() );

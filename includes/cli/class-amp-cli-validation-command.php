@@ -685,7 +685,7 @@ final class AMP_CLI_Validation_Command {
 	 * @param string $type The type of template, post, or taxonomy.
 	 */
 	private function validate_and_store_url( $url, $type ) {
-		$validity = AMP_Validation_Manager::validate_url( $url );
+		$validity = AMP_Validation_Manager::validate_url_and_store( $url );
 
 		/*
 		 * If the request to validate this returns a WP_Error, return.
@@ -699,12 +699,7 @@ final class AMP_CLI_Validation_Command {
 			$this->wp_cli_progress->tick();
 		}
 
-		$validation_errors = wp_list_pluck( $validity['results'], 'error' );
-		AMP_Validated_URL_Post_Type::store_validation_errors(
-			$validation_errors,
-			$validity['url'],
-			wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets', 'php_fatal_error' ] )
-		);
+		$validation_errors      = wp_list_pluck( $validity['results'], 'error' );
 		$unaccepted_error_count = count(
 			array_filter(
 				$validation_errors,

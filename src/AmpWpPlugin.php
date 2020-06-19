@@ -52,6 +52,8 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			'css_transient_cache.monitor'      => MonitorCssTransientCaching::class,
 			'css_transient_cache.ajax_handler' => ReenableCssTransientCachingAjaxAction::class,
 			'site_health_integration'          => SiteHealth::class,
+			'plugin_registry'                  => PluginRegistry::class,
+			'plugin_suppression'               => PluginSuppression::class,
 		];
 	}
 
@@ -101,7 +103,9 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 * @return array<string> Array of fully qualified class names.
 	 */
 	protected function get_shared_instances() {
-		return [];
+		return [
+			PluginRegistry::class,
+		];
 	}
 
 	/**
