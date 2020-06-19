@@ -3037,7 +3037,7 @@ class AMP_Validation_Error_Taxonomy {
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_HTML_COMMENTS:
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_CSS_I_AMPHTML_NAME:
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_CONTENTS:
-			case AMP_Tag_And_Attribute_Sanitizer::CDATA_VIOLATES_BLACKLIST:
+			case AMP_Tag_And_Attribute_Sanitizer::CDATA_VIOLATES_DENYLIST:
 				return esc_html__( 'Illegal text content', 'amp' );
 			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_CTRL_CHAR:
 			case AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_DEPTH:
@@ -3195,7 +3195,7 @@ class AMP_Validation_Error_Taxonomy {
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_CASEI:
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX:
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX_CASEI:
-			case AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX:
+			case AMP_Tag_And_Attribute_Sanitizer::INVALID_DISALLOWED_VALUE_REGEX:
 				return sprintf(
 					/* translators: %1$s is the attribute name, %2$s is the invalid attribute value */
 					esc_html__( 'The attribute %1$s is set to the invalid value %2$s', 'amp' ),

@@ -93,7 +93,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 					}
 				)
 			);
-			$pattern  = '/' . $tag_spec['attr_spec_list']['name']['blacklisted_value_regex'] . '/';
+			$pattern  = '/' . $tag_spec['attr_spec_list']['name']['disallowed_value_regex'] . '/';
 		}
 		return $pattern;
 	}
