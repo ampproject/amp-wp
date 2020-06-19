@@ -139,6 +139,10 @@ class AMP_Hulu_Embed_Handler_Test extends WP_UnitTestCase {
 		$dom              = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
 		$embed->sanitize_raw_embeds( $dom );
 
+		if ( self::is_external_http_test_suite() && "<p>$url</p>" === trim( $filtered_content ) ) {
+			$this->markTestSkipped( 'Endpoint is down.' );
+		}
+
 		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$whitelist_sanitizer->sanitize();
 
