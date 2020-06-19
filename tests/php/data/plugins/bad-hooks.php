@@ -2,6 +2,7 @@
 /**
  * Plugin Name: Bad Hooks
  * Description: Action and filter which add bad markup.
+ * Version: 0.3
  */
 
 add_action(

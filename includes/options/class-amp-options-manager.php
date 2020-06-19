@@ -6,8 +6,6 @@
  */
 
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\PluginRegistry;
-use AmpProject\AmpWP\Services;
 
 /**
  * Class AMP_Options_Manager
@@ -289,112 +287,21 @@ class AMP_Options_Manager {
 			unset( $options[ Option::DISABLE_CSS_TRANSIENT_CACHING ] );
 		}
 
-		if ( isset( $new_options[ Option::SUPPRESSED_PLUGINS ] ) ) {
-			$options[ Option::SUPPRESSED_PLUGINS ] = self::validate_suppressed_plugins( $new_options[ Option::SUPPRESSED_PLUGINS ], $options[ Option::SUPPRESSED_PLUGINS ] );
-		}
+		/**
+		 * Filter the options being updated, so services can handle the sanitization and validation of
+		 * their respective options.
+		 *
+		 * @internal
+		 *
+		 * @param array $options     Existing options with already-sanitized values for updating.
+		 * @param array $new_options Unsanitized options being submitted for updating.
+		 */
+		$options = apply_filters( 'amp_options_updating', $options, $new_options );
 
 		// Store the current version with the options so we know the format.
 		$options[ Option::VERSION ] = AMP__VERSION;
 
 		return $options;
-	}
-
-	/**
-	 * Validate suppressed plugins.
-	 *
-	 * @param string[] $posted_suppressed_plugins Posted suppressed plugins, mapping of plugin slug to '0' or '1'.
-	 * @param array    $old_option                Old option.
-	 * @return array New option value.
-	 */
-	private static function validate_suppressed_plugins( $posted_suppressed_plugins, $old_option ) {
-		$option = $old_option;
-
-		/** @var PluginRegistry $plugin_registry */
-		$plugin_registry   = Services::get( 'plugin_registry' );
-		$plugins           = $plugin_registry->get_plugins( true );
-		$errors_by_source  = AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source();
-		$urls_by_frequency = [];
-		$changes           = 0;
-		foreach ( $posted_suppressed_plugins as $plugin_slug => $suppressed ) {
-			if ( ! isset( $plugins[ $plugin_slug ] ) ) {
-				unset( $option[ $plugin_slug ] );
-				continue;
-			}
-
-			$suppressed = rest_sanitize_boolean( $suppressed );
-			if ( isset( $option[ $plugin_slug ] ) && ! $suppressed ) {
-
-				// Gather the URLs on which the error occurred, keeping track of the frequency so that we can use the URL with the most errors to re-validate.
-				if ( ! empty( $option[ $plugin_slug ][ Option::SUPPRESSED_PLUGINS_ERRORING_URLS ] ) ) {
-					foreach ( $option[ $plugin_slug ][ Option::SUPPRESSED_PLUGINS_ERRORING_URLS ] as $url ) {
-						if ( ! isset( $urls_by_frequency[ $url ] ) ) {
-							$urls_by_frequency[ $url ] = 0;
-						}
-						$urls_by_frequency[ $url ]++;
-					}
-				}
-
-				// Remove the plugin from being suppressed.
-				unset( $option[ $plugin_slug ] );
-
-				$changes++;
-			} elseif ( ! isset( $option[ $plugin_slug ] ) && $suppressed && array_key_exists( $plugin_slug, $plugins ) ) {
-
-				// Capture the URLs that the error occurred on so we can check them again when the plugin is re-activated.
-				$urls = [];
-				if ( isset( $errors_by_source['plugin'][ $plugin_slug ] ) ) {
-					foreach ( $errors_by_source['plugin'][ $plugin_slug ] as $validation_error ) {
-						$urls = array_merge(
-							$urls,
-							array_map(
-								[ AMP_Validated_URL_Post_Type::class, 'get_url_from_post' ],
-								$validation_error['post_ids']
-							)
-						);
-					}
-				}
-
-				$user = wp_get_current_user();
-
-				$option[ $plugin_slug ] = [
-					// Note that we store the version that was suppressed so that we can alert the user when to check again.
-					Option::SUPPRESSED_PLUGINS_LAST_VERSION => $plugins[ $plugin_slug ]['Version'],
-					Option::SUPPRESSED_PLUGINS_TIMESTAMP => time(),
-					Option::SUPPRESSED_PLUGINS_USERNAME  => $user instanceof WP_User ? $user->user_nicename : null,
-					Option::SUPPRESSED_PLUGINS_ERRORING_URLS => array_unique( array_filter( $urls ) ),
-				];
-				$changes++;
-			}
-		}
-
-		// When the suppressed plugins changed, re-validate so validation errors can be re-computed with the plugins newly-suppressed or un-suppressed.
-		if ( $changes > 0 ) {
-			add_action(
-				'update_option_' . self::OPTION_NAME,
-				static function () use ( $urls_by_frequency ) {
-					$url = null;
-					if ( count( $urls_by_frequency ) > 0 ) {
-						arsort( $urls_by_frequency );
-						$url = key( $urls_by_frequency );
-					} else {
-						$validated_url_posts = get_posts(
-							[
-								'post_type'      => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-								'posts_per_page' => 1,
-							]
-						);
-						if ( count( $validated_url_posts ) > 0 ) {
-							$url = AMP_Validated_URL_Post_Type::get_url_from_post( $validated_url_posts[0] );
-						}
-					}
-					if ( $url ) {
-						AMP_Validation_Manager::validate_url_and_store( $url );
-					}
-				}
-			);
-		}
-
-		return $option;
 	}
 
 	/**

@@ -2,6 +2,7 @@
 /**
  * Plugin Name: Bad Block
  * Description: Block that outputs a script in both its dynamic and static content.
+ * Version: 0.1
  */
 
 if ( ! function_exists( 'register_block_type' ) ) {
