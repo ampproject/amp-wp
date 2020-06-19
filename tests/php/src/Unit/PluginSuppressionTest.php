@@ -71,7 +71,8 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		parent::tearDown();
 		$this->attempted_validate_request_urls = [];
 
-		$GLOBALS['wp_settings_fields'] = [];
+		$GLOBALS['wp_settings_fields']     = [];
+		$GLOBALS['wp_registered_settings'] = [];
 
 		if ( class_exists( 'WP_Block_Type_Registry' ) && WP_Block_Type_Registry::get_instance()->is_registered( 'bad/bad-block' ) ) {
 			WP_Block_Type_Registry::get_instance()->unregister( 'bad/bad-block' );
@@ -453,30 +454,36 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 
 	/** @covers PluginSuppression::get_suppressible_plugins() */
 	public function test_get_suppressible_plugins_active_but_no_errors_since_already_suppressed() {
+		$instance = $this->get_instance( true );
 		$this->init_plugins();
 		$bad_plugin_file_slugs = $this->get_bad_plugin_file_slugs();
 		$this->update_suppressed_plugins_option( array_fill_keys( $bad_plugin_file_slugs, true ) );
-		$this->assertEqualSets( $bad_plugin_file_slugs, $this->call_private_method( $this->get_instance( true ), 'get_suppressible_plugins' ) );
+		$this->assertEqualSets( $bad_plugin_file_slugs, $this->call_private_method( $instance, 'get_suppressible_plugins' ) );
 	}
 
 	/** @covers PluginSuppression::get_suppressible_plugins() */
 	public function test_get_suppressible_plugins_active_with_errors_but_not_already_suppressed() {
+		$instance = $this->get_instance( true );
 		$this->init_plugins();
 		$bad_plugin_file_slugs = $this->get_bad_plugin_file_slugs();
 		$this->update_suppressed_plugins_option( array_fill_keys( $bad_plugin_file_slugs, false ) );
 		$this->populate_validation_errors( home_url( '/' ), $bad_plugin_file_slugs );
-		$this->assertEqualSets( $bad_plugin_file_slugs, $this->call_private_method( $this->get_instance( true ), 'get_suppressible_plugins' ) );
+		$this->assertEqualSets( $bad_plugin_file_slugs, $this->call_private_method( $instance, 'get_suppressible_plugins' ) );
 	}
 
 	/** @covers PluginSuppression::get_suppressible_plugins() */
 	public function test_get_suppressible_plugins_one_active_with_errors_others_already_suppressed() {
+		$instance = $this->get_instance( true );
 		$this->init_plugins();
-		$bad_plugin_file_slugs   = $this->get_bad_plugin_file_slugs();
-		$plugins_with_errors     = array_slice( $bad_plugin_file_slugs, 0, 1 );
-		$plugins_with_suppressed = array_slice( $bad_plugin_file_slugs, 1 );
-		$this->update_suppressed_plugins_option( array_fill_keys( $plugins_with_suppressed, false ) );
+		$bad_plugin_file_slugs      = $this->get_bad_plugin_file_slugs();
+		$plugins_with_errors        = array_slice( $bad_plugin_file_slugs, 0, 1 );
+		$plugins_already_suppressed = array_slice( $bad_plugin_file_slugs, 1 );
+		$this->update_suppressed_plugins_option( array_fill_keys( $plugins_already_suppressed, true ) );
 		$this->populate_validation_errors( home_url( '/' ), $plugins_with_errors );
-		$this->assertEqualSets( $bad_plugin_file_slugs, $this->call_private_method( $this->get_instance( true ), 'get_suppressible_plugins' ) );
+		$this->assertEqualSets(
+			array_merge( $plugins_already_suppressed, $plugins_with_errors ),
+			$this->call_private_method( $instance, 'get_suppressible_plugins' )
+		);
 	}
 
 	/**
