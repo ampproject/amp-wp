@@ -16,6 +16,7 @@ use AmpProject\AmpWP\Infrastructure\Service;
 use WP_Block_Type_Registry;
 use WP_Hook;
 use WP_Term;
+use WP_Widget;
 use WP_User;
 
 /**
@@ -54,15 +55,17 @@ final class PluginSuppression implements Service, Registerable {
 
 	/**
 	 * Suppress plugins.
+	 *
+	 * @return bool Whether plugins are being suppressed.
 	 */
 	public function suppress_plugins() {
 		if ( ! is_amp_endpoint() ) {
-			return;
+			return false;
 		}
 
 		$suppressed = AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS );
 		if ( empty( $suppressed ) ) {
-			return;
+			return false;
 		}
 
 		$suppressed_plugin_slugs = array_keys( $suppressed );
@@ -71,6 +74,8 @@ final class PluginSuppression implements Service, Registerable {
 		$this->suppress_shortcodes( $suppressed_plugin_slugs );
 		$this->suppress_blocks( $suppressed_plugin_slugs );
 		$this->suppress_widgets( $suppressed_plugin_slugs );
+
+		return true;
 	}
 
 	/**
@@ -492,7 +497,7 @@ final class PluginSuppression implements Service, Registerable {
 	/**
 	 * Suppress plugin widgets.
 	 *
-	 * @see \AMP_Validation_Manager::wrap_widget_callbacks() Which needs to run after this.
+	 * @see AMP_Validation_Manager::wrap_widget_callbacks() Which needs to run after this.
 	 *
 	 * @param string[] $suppressed_plugins Suppressed plugins.
 	 * @global array $wp_registered_widgets
@@ -501,9 +506,33 @@ final class PluginSuppression implements Service, Registerable {
 		global $wp_registered_widgets;
 		foreach ( $wp_registered_widgets as &$registered_widget ) {
 			if ( $this->is_callback_plugin_suppressed( $registered_widget['callback'], $suppressed_plugins ) ) {
+				// This is primarily needed for widgets registered without WP_Widget.
 				$registered_widget['callback'] = '__return_null';
 			}
 		}
+
+		// The above will ensure that widgets registered via WP_Widget or wp_register_sidebar_widget() will both be
+		// suppressed from being output. One additional case, which also applies to WP_Widget, is when the_widget()
+		// is used to render a widget. For that, the 'widget_display_callback' filter below is used.
+
+		add_filter(
+			'widget_display_callback',
+			/**
+			 * Prevent WP_Widgets from suppressed plugins from being rendered in sidebars and via the_widget().
+			 *
+			 * @param array     $instance   The current widget instance's settings.
+			 * @param WP_Widget $widget_obj The current widget instance.
+			 * @return array|false Instance or false if suppressed.
+			 */
+			function ( $instance, $widget_obj ) use ( $suppressed_plugins ) {
+				if ( $this->is_callback_plugin_suppressed( [ $widget_obj, 'display_callback' ], $suppressed_plugins ) ) {
+					$instance = false;
+				}
+				return $instance;
+			},
+			PHP_INT_MAX,
+			2
+		);
 	}
 
 	/**

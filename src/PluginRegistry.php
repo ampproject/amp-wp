@@ -134,6 +134,8 @@ final class PluginRegistry implements Service {
 	 */
 	private function get_plugins_data() {
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		return get_plugins( $this->plugin_folder );
+		return get_plugins(
+			$this->plugin_folder ? '/' . trim( $this->plugin_folder, '/' ) : ''
+		);
 	}
 }

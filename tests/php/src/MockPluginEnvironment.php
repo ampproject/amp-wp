@@ -37,4 +37,18 @@ interface MockPluginEnvironment {
 			'Version' => '0.3',
 		],
 	];
+
+	const BAD_WIDGET_PLUGIN_FILE    = 'bad-widget/bad-widget.php';
+	const BAD_BLOCK_PLUGIN_FILE     = 'bad-block.php';
+	const BAD_HOOKS_PLUGIN_FILE     = 'bad-hooks.php';
+	const BAD_SHORTCODE_PLUGIN_FILE = 'bad-shortcode.php';
+
+	const BAD_PLUGIN_FILES = [
+		self::BAD_BLOCK_PLUGIN_FILE,
+		self::BAD_HOOKS_PLUGIN_FILE,
+		self::BAD_SHORTCODE_PLUGIN_FILE,
+		self::BAD_WIDGET_PLUGIN_FILE,
+	];
+
+	const BAD_PLUGINS_DIR = 'tests/php/data/plugins';
 }
