@@ -517,7 +517,7 @@ final class PluginSuppression implements Service, Registerable {
 
 		// The above will ensure that widgets registered via WP_Widget or wp_register_sidebar_widget() will both be
 		// suppressed from being output. One additional case, which also applies to WP_Widget, is when the_widget()
-		// is used to render a widget. For that, the 'widget_display_callback' filter below is used.
+		// is used to render a widget. For that, the 'widget_display_callback' filter below is used (in WP>=5.3).
 
 		add_filter(
 			'widget_display_callback',

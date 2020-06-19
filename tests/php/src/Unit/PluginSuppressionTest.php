@@ -33,6 +33,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		add_filter(
 			'pre_http_request',
 			function( $r, $args, $url ) {
+				unset( $r, $args );
 				$this->attempted_validate_request_urls[] = remove_query_arg( [ 'amp_validate', 'amp_cache_bust' ], $url );
 				return [
 					'body'     => '',
@@ -345,8 +346,11 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 
 			ob_start();
 			dynamic_sidebar( 'sidebar-1' );
-			echo "And here is the_widget()\n";
-			the_widget( 'Bad_Widget', array_fill_keys( [ 'before_widget', 'after_widget', 'before_title', 'after_title' ], '' ), [] );
+			if ( version_compare( get_bloginfo( 'version' ), '5.3', '>=' ) ) {
+				// Suppressing widgets printed by the widget() is only supported since WP>=5.3 when the 'widget_display_callback'
+				// filter was added to the_widget().
+				the_widget( 'Bad_Widget', array_fill_keys( [ 'before_widget', 'after_widget', 'before_title', 'after_title' ], '' ), [] );
+			}
 			$rendered_sidebar = ob_get_clean();
 
 			$this->assertStringContains( 'searchform', $rendered_sidebar, 'Expected search widget to be present.' );
