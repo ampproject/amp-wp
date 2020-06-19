@@ -4,6 +4,10 @@
  * Description: Block that outputs a script in both its dynamic and static content.
  */
 
+if ( ! function_exists( 'register_block_type' ) ) {
+	return;
+}
+
 wp_register_script(
 	'bad-block-editor',
 	plugins_url( 'block.js', __FILE__ ),

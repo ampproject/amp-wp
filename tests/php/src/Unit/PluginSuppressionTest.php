@@ -60,7 +60,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		parent::tearDown();
 		$this->attempted_validate_request_urls = [];
 
-		if ( WP_Block_Type_Registry::get_instance()->is_registered( 'bad/bad-block' ) ) {
+		if ( class_exists( 'WP_Block_Type_Registry' ) && WP_Block_Type_Registry::get_instance()->is_registered( 'bad/bad-block' ) ) {
 			WP_Block_Type_Registry::get_instance()->unregister( 'bad/bad-block' );
 		}
 		$this->reset_widgets();
@@ -116,13 +116,25 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		wp_widgets_init(); // For bad-widget.php
 	}
 
+	/**
+	 * Get bad plugin file slugs.
+	 *
+	 * @return string[] Plugin file slugs.
+	 */
 	private function get_bad_plugin_file_slugs() {
 		/** @var PluginRegistry $plugin_registry */
 		$plugin_registry = Services::get( 'plugin_registry' );
-		return array_map(
+
+		$plugin_file_slugs = array_map(
 			[ $plugin_registry, 'get_plugin_slug_from_file' ],
 			MockPluginEnvironment::BAD_PLUGIN_FILES
 		);
+
+		if ( ! function_exists( 'register_block_type' ) || ! class_exists( 'WP_Block_Registry' ) ) {
+			$plugin_file_slugs = array_diff( $plugin_file_slugs, [ MockPluginEnvironment::BAD_BLOCK_PLUGIN_FILE ] );
+		}
+
+		return $plugin_file_slugs;
 	}
 
 	private function get_instance() {
@@ -217,7 +229,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		$this->init_plugins();
 
 		$bad_plugin_file_slugs = $this->get_bad_plugin_file_slugs();
-		$this->assertCount( 4, $bad_plugin_file_slugs );
+		$this->assertGreaterThan( 0, $bad_plugin_file_slugs );
 		$this->populate_validation_errors( $url, $bad_plugin_file_slugs );
 		$instance = $this->get_instance();
 		$this->go_to( $url );
@@ -245,7 +257,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		$this->init_plugins();
 
 		$bad_plugin_file_slugs = $this->get_bad_plugin_file_slugs();
-		$this->assertCount( 4, $bad_plugin_file_slugs );
+		$this->assertGreaterThan( 0, $bad_plugin_file_slugs );
 		$suppressed_slugs   = array_slice( $bad_plugin_file_slugs, 0, 2 );
 		$unsuppressed_slugs = array_slice( $bad_plugin_file_slugs, 2 );
 
