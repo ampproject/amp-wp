@@ -32,7 +32,7 @@ class AMP_Gfycat_Embed_Handler_Test extends WP_UnitTestCase {
 				if ( false === strpos( $url, 'tautwhoppingcougar' ) ) {
 					return $pre;
 				}
-				return '<iframe src=\'https://gfycat.com/ifr/tautwhoppingcougar#?secret=aBCUbiiIh5\' frameborder=\'0\' scrolling=\'no\' width=\'100\' height=\'100\'  allowfullscreen></iframe>';
+				return '<iframe class="wp-embedded-content" sandbox="allow-scripts" security="restricted" title="Melanie Raccoon riding bike-side angle (reddit)" src=\'https://gfycat.com/ifr/tautwhoppingcougar#?secret=Brq0P9wYCr\' data-secret=\'Brq0P9wYCr\' frameborder=\'0\' scrolling=\'no\' width=\'100%\' height=\'100%\'></iframe>';
 			},
 			10,
 			2
