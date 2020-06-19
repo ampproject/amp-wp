@@ -2151,15 +2151,15 @@ class AMP_Validation_Manager {
 			$args['invalid_url_post'] = $post;
 		}
 
-		$r = AMP_Validated_URL_Post_Type::store_validation_errors(
+		$result = AMP_Validated_URL_Post_Type::store_validation_errors(
 			wp_list_pluck( $validity['results'], 'error' ),
 			$validity['url'],
 			$args
 		);
-		if ( $r instanceof WP_Error ) {
-			return $r;
+		if ( $result instanceof WP_Error ) {
+			return $result;
 		}
-		$validity['post_id'] = $r;
+		$validity['post_id'] = $result;
 		return $validity;
 	}
 
