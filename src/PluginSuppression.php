@@ -407,7 +407,7 @@ final class PluginSuppression implements Service, Registerable {
 										?>
 									<?php endif; ?>
 
-									<?php if ( version_compare( $suppressed_plugins[ $plugin_slug ][ Option::SUPPRESSED_PLUGINS_LAST_VERSION ], $plugin['Version'], '!=' ) ) : ?>
+									<?php if ( $suppressed_plugins[ $plugin_slug ][ Option::SUPPRESSED_PLUGINS_LAST_VERSION ] !== $plugin['Version'] ) : ?>
 										<?php if ( $plugin['Version'] ) : ?>
 											<?php
 											echo esc_html(
