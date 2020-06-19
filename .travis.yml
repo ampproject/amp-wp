@@ -34,6 +34,7 @@ install:
   - composer install
   - export DEV_LIB_PATH=vendor/xwp/wp-dev-lib/scripts
   - export DIFF_HEAD=HEAD
+  - export DEFAULT_BASE_BRANCH=develop
   - source "$DEV_LIB_PATH/travis.install.sh"
 
 before_script:
