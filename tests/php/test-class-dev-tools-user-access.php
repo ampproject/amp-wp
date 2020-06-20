@@ -64,10 +64,10 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 
 		$this->assertNull( $this->dev_tools_user_access->rest_get_dev_tools_enabled( [ 'id' => $user ] ) );
 
-		update_user_meta( $user, 'amp_dev_tools_enabled', false );
+		update_user_meta( $user, 'amp_dev_tools_enabled', 'false' );
 		$this->assertFalse( $this->dev_tools_user_access->rest_get_dev_tools_enabled( [ 'id' => $user ] ) );
 
-		update_user_meta( $user, 'amp_dev_tools_enabled', true );
+		update_user_meta( $user, 'amp_dev_tools_enabled', 'true' );
 		$this->assertTrue( $this->dev_tools_user_access->rest_get_dev_tools_enabled( [ 'id' => $user ] ) );
 	}
 
@@ -89,6 +89,9 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 		wp_set_current_user( $administrator );
 
 		$this->assertInternalType( 'int', $this->dev_tools_user_access->rest_update_dev_tools_enabled( true, $author_user ) );
-		$this->assertTrue( (bool) get_user_meta( $author, 'amp_dev_tools_enabled', true ) );
+		$this->assertEquals( 'true', get_user_meta( $author, 'amp_dev_tools_enabled', true ) );
+
+		$this->assertTrue( $this->dev_tools_user_access->rest_update_dev_tools_enabled( false, $author_user ) );
+		$this->assertEquals( 'false', get_user_meta( $author, 'amp_dev_tools_enabled', true ) );
 	}
 }

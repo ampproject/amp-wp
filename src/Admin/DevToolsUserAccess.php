@@ -63,14 +63,10 @@ final class DevToolsUserAccess implements Service, Registerable {
 	 * @return null|boolean Whether tools are enabled for the user, or null if the option has not been set.
 	 */
 	public function rest_get_dev_tools_enabled( $user ) {
-		$meta = get_user_meta( $user['id'] );
+		$meta_value = get_user_meta( $user['id'], self::USER_FIELD_DEVELOPER_TOOLS_ENABLED, true );
 
-		if ( is_array( $meta ) && array_key_exists( self::USER_FIELD_DEVELOPER_TOOLS_ENABLED, $meta ) ) {
-			return boolval(
-				is_array( $meta[ self::USER_FIELD_DEVELOPER_TOOLS_ENABLED ] ) && ! empty( $meta[ self::USER_FIELD_DEVELOPER_TOOLS_ENABLED ] )
-					? reset( $meta[ self::USER_FIELD_DEVELOPER_TOOLS_ENABLED ] )
-					: $meta[ self::USER_FIELD_DEVELOPER_TOOLS_ENABLED ]
-			);
+		if ( '' !== $meta_value ) {
+			return rest_sanitize_boolean( $meta_value );
 		}
 
 		// If the field is not yet set, don't make a default selection in the setup wizard.
@@ -93,6 +89,6 @@ final class DevToolsUserAccess implements Service, Registerable {
 			);
 		}
 
-		return update_user_meta( $user->ID, self::USER_FIELD_DEVELOPER_TOOLS_ENABLED, boolval( $new_value ) );
+		return update_user_meta( $user->ID, self::USER_FIELD_DEVELOPER_TOOLS_ENABLED, wp_json_encode( (bool) $new_value ) );
 	}
 }
