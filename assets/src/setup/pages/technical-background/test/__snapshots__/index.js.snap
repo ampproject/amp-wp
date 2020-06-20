@@ -3,7 +3,7 @@
 exports[`TechnicalBackground matches snapshot 1`] = `
 <div>
   <p>
-    In order to recommend the best AMP experience for your site, we'd like to know if you're a more technical user
+    In order to recommend the best AMP experience for your site, please indicate what level of technical experience you have.
   </p>
   <form>
     <div
