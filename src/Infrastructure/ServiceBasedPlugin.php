@@ -27,7 +27,7 @@ abstract class ServiceBasedPlugin implements Plugin {
 	const INJECTOR_ID = 'injector';
 
 	// WordPress action to trigger the service registration on.
-	const REGISTRATION_ACTION = 'after_setup_theme';
+	const REGISTRATION_ACTION = 'plugins_loaded';
 
 	// Prefixes to use.
 	const HOOK_PREFIX    = '';

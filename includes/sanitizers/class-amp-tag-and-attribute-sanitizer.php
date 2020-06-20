@@ -2,6 +2,8 @@
 /**
  * Class AMP_Tag_And_Attribute_Sanitizer
  *
+ * Also referred to the "Validating Sanitizer".
+ *
  * @package AMP
  */
 
@@ -17,7 +19,7 @@ use AmpProject\Tag;
  *
  * Allowed tags array is generated from this protocol buffer:
  *
- *     https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii
+ *     https://github.com/ampproject/amphtml/blob/bd29b0eb1b28d900d4abed2c1883c6980f18db8e/validator/validator-main.protoascii
  *     by the python script in amp-wp/bin/amp_wp_build.py. See the comment at the top
  *     of that file for instructions to generate class-amp-allowed-tags-generated.php.
  *
@@ -32,7 +34,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 	const ATTR_REQUIRED_BUT_MISSING            = 'ATTR_REQUIRED_BUT_MISSING';
 	const CDATA_TOO_LONG                       = 'CDATA_TOO_LONG';
-	const CDATA_VIOLATES_BLACKLIST             = 'CDATA_VIOLATES_BLACKLIST';
+	const CDATA_VIOLATES_DENYLIST              = 'CDATA_VIOLATES_DENYLIST';
 	const DISALLOWED_ATTR                      = 'DISALLOWED_ATTR';
 	const DISALLOWED_CHILD_TAG                 = 'DISALLOWED_CHILD_TAG';
 	const DISALLOWED_DESCENDANT_TAG            = 'DISALLOWED_DESCENDANT_TAG';
@@ -51,7 +53,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	const INVALID_ATTR_VALUE_CASEI             = 'INVALID_ATTR_VALUE_CASEI';
 	const INVALID_ATTR_VALUE_REGEX             = 'INVALID_ATTR_VALUE_REGEX';
 	const INVALID_ATTR_VALUE_REGEX_CASEI       = 'INVALID_ATTR_VALUE_REGEX_CASEI';
-	const INVALID_BLACKLISTED_VALUE_REGEX      = 'INVALID_BLACKLISTED_VALUE_REGEX';
+	const INVALID_DISALLOWED_VALUE_REGEX       = 'INVALID_DISALLOWED_VALUE_REGEX';
 	const INVALID_CDATA_CONTENTS               = 'INVALID_CDATA_CONTENTS';
 	const INVALID_CDATA_CSS_I_AMPHTML_NAME     = 'INVALID_CDATA_CSS_I_AMPHTML_NAME';
 	const INVALID_CDATA_CSS_IMPORTANT          = 'INVALID_CDATA_CSS_IMPORTANT';
@@ -244,7 +246,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			];
 		}
 
-		// Prepare whitelists.
+		// Prepare allowlists.
 		$this->allowed_tags = $this->args['amp_allowed_tags'];
 		foreach ( AMP_Rule_Spec::$additional_allowed_tags as $tag_name => $tag_rule_spec ) {
 			$this->allowed_tags[ $tag_name ][] = $tag_rule_spec;
@@ -473,7 +475,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function process_node( DOMElement $node ) {
 
-		// Remove nodes with tags that have not been whitelisted.
+		// Remove nodes with tags that have not been put in the allowlist.
 		if ( ! $this->is_amp_allowed_tag( $node ) ) {
 
 			// If it's not an allowed tag, replace the node with it's children.
@@ -926,12 +928,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				'code' => self::CDATA_TOO_LONG,
 			];
 		}
-		if ( isset( $cdata_spec['blacklisted_cdata_regex'] ) ) {
-			foreach ( $cdata_spec['blacklisted_cdata_regex'] as $blacklisted_cdata_regex ) {
-				if ( preg_match( '@' . $blacklisted_cdata_regex['regex'] . '@u', $element->textContent ) ) {
-					if ( isset( $blacklisted_cdata_regex['error_message'] ) ) {
+		if ( isset( $cdata_spec['disallowed_cdata_regex'] ) ) {
+			foreach ( $cdata_spec['disallowed_cdata_regex'] as $disallowed_cdata_regex ) {
+				if ( preg_match( '@' . $disallowed_cdata_regex['regex'] . '@u', $element->textContent ) ) {
+					if ( isset( $disallowed_cdata_regex['error_message'] ) ) {
 						// There are only a few error messages, so map them to error codes.
-						switch ( $blacklisted_cdata_regex['error_message'] ) {
+						switch ( $disallowed_cdata_regex['error_message'] ) {
 							case 'CSS i-amphtml- name prefix':
 								return [ 'code' => self::INVALID_CDATA_CSS_I_AMPHTML_NAME ]; // @todo This really should be done as part of the CSS sanitizer.
 							case 'contents':
@@ -942,7 +944,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					}
 
 					// Note: This fallback case is not currently reachable because all error messages are accounted for in the switch statement.
-					return [ 'code' => self::CDATA_VIOLATES_BLACKLIST ];
+					return [ 'code' => self::CDATA_VIOLATES_DENYLIST ];
 				}
 			}
 		} elseif ( isset( $cdata_spec['cdata_regex'] ) ) {
@@ -1069,7 +1071,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *  433: value
 	 *  400: mandatory
 	 *  222: value_casei
-	 *  147: blacklisted_value_regex
+	 *  147: disallowed_value_regex
 	 *  115: value_regex
 	 *  101: value_url
 	 *   77: dispatch_key
@@ -1306,9 +1308,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_disallowed_relative( $node, $attr_name, $attr_spec_rule ) ) {
 				$attrs_to_remove[] = [ $attr_node, self::DISALLOWED_RELATIVE_URL, null ];
-			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::BLACKLISTED_VALUE_REGEX ] ) &&
-				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_blacklisted_value_regex( $node, $attr_name, $attr_spec_rule ) ) {
-				$attrs_to_remove[] = [ $attr_node, self::INVALID_BLACKLISTED_VALUE_REGEX, null ];
+			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::DISALLOWED_VALUE_REGEX ] ) &&
+				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_disallowed_value_regex( $node, $attr_name, $attr_spec_rule ) ) {
+				$attrs_to_remove[] = [ $attr_node, self::INVALID_DISALLOWED_VALUE_REGEX, null ];
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_PROPERTIES ] ) ) {
 				$result = $this->check_attr_spec_rule_value_properties( $node, $attr_name, $attr_spec_rule );
 				if ( AMP_Rule_Spec::FAIL === $result[0] ) {
@@ -2104,7 +2106,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Check if attribute has blacklisted value via regex match and determine if value matches.
+	 * Check if attribute has disallowed value via regex match and determine if value matches.
 	 *
 	 * @since 0.5
 	 *
@@ -2118,9 +2120,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there
 	 *                                        is no rule for this attribute.
 	 */
-	private function check_attr_spec_rule_blacklisted_value_regex( DOMElement $node, $attr_name, $attr_spec_rule ) {
-		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::BLACKLISTED_VALUE_REGEX ] ) ) {
-			$pattern = '/' . $attr_spec_rule[ AMP_Rule_Spec::BLACKLISTED_VALUE_REGEX ] . '/u';
+	private function check_attr_spec_rule_disallowed_value_regex( DOMElement $node, $attr_name, $attr_spec_rule ) {
+		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::DISALLOWED_VALUE_REGEX ] ) ) {
+			$pattern = '/' . $attr_spec_rule[ AMP_Rule_Spec::DISALLOWED_VALUE_REGEX ] . '/u';
 			if ( $node->hasAttribute( $attr_name ) ) {
 				$attr_value = $node->getAttribute( $attr_name );
 				if ( preg_match( $pattern, $attr_value ) ) {
@@ -2429,7 +2431,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Loop through node's descendants and remove the ones that are not whitelisted.
+	 * Loop through node's descendants and remove the ones that are not in the allowlist.
 	 *
 	 * @param DOMElement $node                Node.
 	 * @param string[]   $allowed_descendants List of allowed descendant tags.

@@ -39,20 +39,20 @@ abstract class AMP_Rule_Spec {
 	/*
 	 * HTML Element Attribute rule names
 	 */
-	const ALLOW_EMPTY             = 'allow_empty';
-	const ALLOW_RELATIVE          = 'allow_relative';
-	const ALLOWED_PROTOCOL        = 'protocol';
-	const ALTERNATIVE_NAMES       = 'alternative_names';
-	const BLACKLISTED_VALUE_REGEX = 'blacklisted_value_regex';
-	const MANDATORY               = 'mandatory';
-	const MANDATORY_ANYOF         = 'mandatory_anyof';
-	const MANDATORY_ONEOF         = 'mandatory_oneof';
-	const VALUE                   = 'value';
-	const VALUE_CASEI             = 'value_casei';
-	const VALUE_REGEX             = 'value_regex';
-	const VALUE_REGEX_CASEI       = 'value_regex_casei';
-	const VALUE_PROPERTIES        = 'value_properties';
-	const VALUE_URL               = 'value_url';
+	const ALLOW_EMPTY            = 'allow_empty';
+	const ALLOW_RELATIVE         = 'allow_relative';
+	const ALLOWED_PROTOCOL       = 'protocol';
+	const ALTERNATIVE_NAMES      = 'alternative_names';
+	const DISALLOWED_VALUE_REGEX = 'disallowed_value_regex';
+	const MANDATORY              = 'mandatory';
+	const MANDATORY_ANYOF        = 'mandatory_anyof';
+	const MANDATORY_ONEOF        = 'mandatory_oneof';
+	const VALUE                  = 'value';
+	const VALUE_CASEI            = 'value_casei';
+	const VALUE_REGEX            = 'value_regex';
+	const VALUE_REGEX_CASEI      = 'value_regex_casei';
+	const VALUE_PROPERTIES       = 'value_properties';
+	const VALUE_URL              = 'value_url';
 
 	/*
 	 * AMP layout types.

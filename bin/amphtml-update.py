@@ -146,7 +146,7 @@ def GenerateHeaderPHP(out):
 	out.append(' *')
 	out.append(' * Note: This file only contains tags that are relevant to the `body` of')
 	out.append(' * an AMP page. To include additional elements modify the variable')
-	out.append(' * `mandatory_parent_blacklist` in the amp_wp_build.py script.')
+	out.append(' * `mandatory_parent_denylist` in the amp_wp_build.py script.')
 	out.append(' *')
 	out.append(' * phpcs:ignoreFile')
 	out.append(' */')
@@ -373,7 +373,7 @@ def ParseRules(out_dir):
 	# Don't include tags that have a mandatory parent with one of these tag names
 	# since we're only concerned with using this tag list to validate the HTML
 	# of the DOM
-	mandatory_parent_blacklist = [
+	mandatory_parent_denylist = [
 		'$ROOT',
 		'!DOCTYPE',
 	]
@@ -383,7 +383,7 @@ def ParseRules(out_dir):
 			for tag_spec in field_val:
 
 				# Ignore tags that are outside of the body
-				if tag_spec.HasField('mandatory_parent') and tag_spec.mandatory_parent in mandatory_parent_blacklist and tag_spec.tag_name != 'HTML':
+				if tag_spec.HasField('mandatory_parent') and tag_spec.mandatory_parent in mandatory_parent_denylist and tag_spec.tag_name != 'HTML':
 					continue
 
 				# Ignore deprecated tags
@@ -486,12 +486,12 @@ def GetTagSpec(tag_spec, attr_lists):
 
 				cdata_dict['css_spec'] = css_spec
 		if len( cdata_dict ) > 0:
-			if 'blacklisted_cdata_regex' in cdata_dict:
-				for entry in cdata_dict['blacklisted_cdata_regex']:
+			if 'disallowed_cdata_regex' in cdata_dict:
+				for entry in cdata_dict['disallowed_cdata_regex']:
 					if 'error_message' not in entry:
-						raise Exception( 'Missing error_message for blacklisted_cdata_regex.' );
+						raise Exception( 'Missing error_message for disallowed_cdata_regex.' );
 					if entry['error_message'] not in ( 'contents', 'html comments', 'CSS i-amphtml- name prefix' ):
-						raise Exception( 'Unexpected error_message "%s" for blacklisted_cdata_regex.' % entry['error_message'] );
+						raise Exception( 'Unexpected error_message "%s" for disallowed_cdata_regex.' % entry['error_message'] );
 			tag_spec_dict['cdata'] = cdata_dict
 
 	if 'spec_name' not in tag_spec_dict['tag_spec']:
@@ -715,9 +715,9 @@ def GetValues(attr_spec):
 			alt_names_list.append(UnicodeEscape(alternative_name))
 		value_dict['alternative_names'] = alt_names_list
 
-	# Add blacklisted value regex
-	if attr_spec.HasField('blacklisted_value_regex'):
-		value_dict['blacklisted_value_regex'] = attr_spec.blacklisted_value_regex
+	# Add disallowed value regex
+	if attr_spec.HasField('disallowed_value_regex'):
+		value_dict['disallowed_value_regex'] = attr_spec.disallowed_value_regex
 
 	# dispatch_key is an int
 	if attr_spec.HasField('dispatch_key'):

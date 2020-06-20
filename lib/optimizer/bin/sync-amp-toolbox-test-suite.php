@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 
-$version         = 'master';
+$version         = 'main';
 $sourceUrl       = "https://github.com/ampproject/amp-toolbox/archive/{$version}.zip";
 $targetFolder    = realpath(dirname(__DIR__) . '/tests') . '/spec';
 $tmpFilePath     = tempnam(sys_get_temp_dir(), 'amp-optimizer-');
