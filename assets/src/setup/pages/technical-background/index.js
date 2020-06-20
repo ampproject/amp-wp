@@ -44,7 +44,7 @@ export function TechnicalBackground() {
 	return (
 		<div>
 			<p>
-				{ __( 'In order to recommend the best AMP experience for your site, we\'d like to know if you\'re a more technical user', 'amp' ) }
+				{ __( 'In order to recommend the best AMP experience for your site, please indicate what level of technical experience you have.', 'amp' ) }
 			</p>
 			<form>
 				<Selectable className={ `technical-background-option-container` } selected={ true === developerToolsOption }>
