@@ -28,8 +28,8 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 	const [ options, setOptions ] = useState( null );
 	const [ fetchingOptions, setFetchingOptions ] = useState( false );
 	const [ savingOptions, setSavingOptions ] = useState( false );
-	const [ hasChanges, setHasChanges ] = useState( false );
-	const [ hasSaved, setHasSaved ] = useState( false );
+	const [ hasOptionsChanges, setHasOptionsChanges ] = useState( false );
+	const [ didSaveOptions, setDidSaveOptions ] = useState( false );
 
 	const { setError } = useError();
 
@@ -56,7 +56,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 		}
 
 		setSavingOptions( false );
-		setHasSaved( true );
+		setDidSaveOptions( true );
 	}, [ options, optionsRestEndpoint, setError ] );
 
 	/**
@@ -65,13 +65,13 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 	 * @param {Object} Updated options values.
 	 */
 	const updateOptions = useCallback( ( newOptions ) => {
-		if ( false === hasChanges ) {
-			setHasChanges( true );
+		if ( false === hasOptionsChanges ) {
+			setHasOptionsChanges( true );
 		}
 
 		setOptions( { ...options, ...newOptions } );
-		setHasSaved( false );
-	}, [ hasChanges, options, setHasChanges, setOptions ] );
+		setDidSaveOptions( false );
+	}, [ hasOptionsChanges, options, setHasOptionsChanges, setOptions ] );
 
 	useEffect( () => {
 		if ( options || fetchingOptions ) {
@@ -110,8 +110,8 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 			value={
 				{
 					fetchingOptions,
-					hasChanges,
-					hasSaved,
+					hasOptionsChanges,
+					didSaveOptions,
 					options,
 					saveOptions,
 					savingOptions,

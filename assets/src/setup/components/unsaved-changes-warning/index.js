@@ -8,6 +8,7 @@ import { useEffect, useContext } from '@wordpress/element';
  */
 import { __ } from '@wordpress/i18n';
 import { Options } from '../options-context-provider';
+import { User } from '../user-context-provider';
 
 /**
  * If there are unsaved changes in the wizard, warns the user before exiting the page.
@@ -15,10 +16,11 @@ import { Options } from '../options-context-provider';
  * @return {null} Renders nothing.
  */
 export function WizardUnsavedChangesWarning() {
-	const { hasChanges, hasSaved } = useContext( Options );
+	const { hasOptionsChanges, didSaveOptions } = useContext( Options );
+	const { hasDeveloperToolsOptionChange, didSaveDeveloperToolsOption } = useContext( User );
 
 	useEffect( () => {
-		if ( hasChanges && ! hasSaved ) {
+		if ( ( hasOptionsChanges && ! didSaveOptions ) || ( hasDeveloperToolsOptionChange && ! didSaveDeveloperToolsOption ) ) {
 			const warnIfUnsavedChanges = ( event ) => {
 				event.returnValue = __( 'This page has unsaved changes. Are you sure you want to leave?', 'amp' );
 
@@ -33,7 +35,7 @@ export function WizardUnsavedChangesWarning() {
 		}
 
 		return () => undefined;
-	}, [ hasChanges, hasSaved ] );
+	}, [ hasOptionsChanges, didSaveOptions, hasDeveloperToolsOptionChange, didSaveDeveloperToolsOption ] );
 
 	return null;
 }

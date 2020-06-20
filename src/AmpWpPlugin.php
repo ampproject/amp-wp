@@ -7,6 +7,7 @@
 
 namespace AmpProject\AmpWP;
 
+use AmpProject\AmpWP\Admin\DevToolsUserAccess;
 use AmpProject\AmpWP\Admin\ReenableCssTransientCachingAjaxAction;
 use AmpProject\AmpWP\Admin\SiteHealth;
 use AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching;
@@ -49,6 +50,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 */
 	protected function get_service_classes() {
 		return [
+			'dev_tools.user_access'            => DevToolsUserAccess::class,
 			'css_transient_cache.monitor'      => MonitorCssTransientCaching::class,
 			'css_transient_cache.ajax_handler' => ReenableCssTransientCachingAjaxAction::class,
 			'site_health_integration'          => SiteHealth::class,

@@ -50,31 +50,12 @@ describe( 'AMP Setup Screen', () => {
 		let prevButton = await page.$( PREV_BUTTON_SELECTOR );
 		expect( prevButton ).toBeNull();
 
-		await page.waitForSelector( `${ NEXT_BUTTON_SELECTOR }:not([disabled])` );
-		await page.click( NEXT_BUTTON_SELECTOR ); // 2 of 6.
-
+		await visitAdminPage( 'admin.php', 'page=amp-setup&amp-setup-screen=technical-background' );
 		prevButton = await page.$( PREV_BUTTON_SELECTOR );
 		expect( prevButton ).toBeNull();
 
-		await page.waitFor( 25 );
-		let disabledNextButton = await page.$( `${ NEXT_BUTTON_SELECTOR }[disabled]` );
-		expect( disabledNextButton ).toBeNull();
-
-		await page.waitForSelector( `${ NEXT_BUTTON_SELECTOR }:not([disabled])` );
-		await page.click( NEXT_BUTTON_SELECTOR ); // 3 of 6.
-
-		prevButton = await page.$( PREV_BUTTON_SELECTOR );
-		expect( prevButton ).not.toBeNull();
-
-		// Click to last page.
-		await page.waitForSelector( `${ NEXT_BUTTON_SELECTOR }:not([disabled])` );
-		await page.click( NEXT_BUTTON_SELECTOR ); // 4 of 6.
-		await page.waitForSelector( `${ NEXT_BUTTON_SELECTOR }:not([disabled])` );
-		await page.click( NEXT_BUTTON_SELECTOR ); // 5 of 6.
-		await page.waitForSelector( `${ NEXT_BUTTON_SELECTOR }:not([disabled])` );
-		await page.click( NEXT_BUTTON_SELECTOR ); // 6 of 6.
-
-		disabledNextButton = await page.$( `${ NEXT_BUTTON_SELECTOR }[disabled]` );
+		await visitAdminPage( 'admin.php', 'page=amp-setup&amp-setup-screen=done' );
+		const disabledNextButton = await page.$( `${ NEXT_BUTTON_SELECTOR }[disabled]` );
 		expect( disabledNextButton ).not.toBeNull();
 	} );
 } );

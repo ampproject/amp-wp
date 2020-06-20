@@ -9,12 +9,14 @@ import { useContext, useEffect } from '@wordpress/element';
  */
 import { Options } from '../../components/options-context-provider';
 import { Loading } from '../../components/loading';
+import { User } from '../../components/user-context-provider';
 
 /**
  * Final screen, where data is saved.
  */
 export function Save() {
-	const { hasSaved, saveOptions, savingOptions } = useContext( Options );
+	const { didSaveOptions, saveOptions, savingOptions } = useContext( Options );
+	const { didSaveDeveloperToolsOption, saveDeveloperToolsOption, savingDeveloperToolsOption } = useContext( User );
 
 	/**
 	 * Triggers saving of options on arrival of this screen.
@@ -22,16 +24,27 @@ export function Save() {
 	 * @todo Possibly wait for a different user action to save.
 	 */
 	useEffect( () => {
-		if ( ! hasSaved && ! savingOptions ) {
+		if ( ! didSaveOptions && ! savingOptions ) {
 			saveOptions();
 		}
-	}, [ hasSaved, saveOptions, savingOptions ] );
+	}, [ didSaveOptions, saveOptions, savingOptions ] );
 
-	if ( savingOptions ) {
+	/**
+	 * Triggers saving of user options on arrival of this screen.
+	 *
+	 * @todo Possibly wait for a different user action to save.
+	 */
+	useEffect( () => {
+		if ( ! didSaveDeveloperToolsOption && ! savingDeveloperToolsOption ) {
+			saveDeveloperToolsOption();
+		}
+	}, [ didSaveDeveloperToolsOption, savingDeveloperToolsOption, saveDeveloperToolsOption ] );
+
+	if ( savingOptions || savingDeveloperToolsOption ) {
 		return <Loading />;
 	}
 
-	if ( ! hasSaved ) {
+	if ( ! didSaveOptions || ! didSaveDeveloperToolsOption ) {
 		return null;
 	}
 
