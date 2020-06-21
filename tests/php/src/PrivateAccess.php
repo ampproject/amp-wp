@@ -76,13 +76,11 @@ trait PrivateAccess {
 		$class    = new ReflectionClass( $object );
 		$property = $class->getProperty( $property_name );
 
-		if ( $property->isStatic() ) {
-			return $class->getStaticPropertyValue( $property_name );
-		}
-
-		// Note: `ReflectionProperty::getValue()` requires the argument to be an object in PHP 8`.
 		$property->setAccessible( true );
-		return $property->getValue( $object );
+
+		// Note: In PHP 8, `ReflectionProperty::getValue()` now requires that an object be supplied if it's a
+		// non-static property.
+		return $property->isStatic() ? $property->getValue() : $property->getValue( $object );
 	}
 
 	/**
