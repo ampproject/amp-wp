@@ -8,13 +8,15 @@
 namespace AmpProject\AmpWP;
 
 use AMP_Options_Manager;
+use AmpProject\AmpWP\Infrastructure\Registerable;
+use AmpProject\AmpWP\Infrastructure\Service;
 
 /**
  * Centralized manager to handle mobile redirection of a page.
  *
  * @package AmpProject\AmpWP
  */
-final class MobileRedirectManager {
+final class MobileRedirectManager implements Service, Registerable {
 
 	/**
 	 * The name of the cookie that persists the user's preference for viewing the non-AMP version of a page when on mobile.
@@ -46,6 +48,13 @@ final class MobileRedirectManager {
 	 */
 	public function __construct() {
 		$this->disabled_cookie_is_set = false;
+	}
+
+	/**
+	 * Register.
+	 */
+	public function register() {
+		// @todo
 	}
 
 	/**

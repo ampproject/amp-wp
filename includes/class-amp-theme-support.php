@@ -10,6 +10,7 @@ use AmpProject\AmpWP\MobileRedirectManager;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\ConfigurationArgument;
+use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Transformer;
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
@@ -157,13 +158,6 @@ class AMP_Theme_Support {
 	protected static $support_added_via_theme;
 
 	/**
-	 * An instance of the MobileRedirectManager class.
-	 *
-	 * @var MobileRedirectManager
-	 */
-	protected static $mobile_redirect_manager;
-
-	/**
 	 * Initialize.
 	 *
 	 * @since 0.7
@@ -171,8 +165,7 @@ class AMP_Theme_Support {
 	public static function init() {
 		self::read_theme_support();
 
-		self::$init_start_time         = microtime( true );
-		self::$mobile_redirect_manager = new MobileRedirectManager();
+		self::$init_start_time = microtime( true );
 
 		if ( self::READER_MODE_SLUG !== self::get_support_mode() ) {
 			// Ensure extra theme support for core themes is in place.
@@ -395,6 +388,9 @@ class AMP_Theme_Support {
 			false !== get_query_var( amp_get_slug(), false )
 		);
 
+		/** @var @var MobileRedirectManager */
+		$mobile_redirect_manager = Services::get( 'mobile_redirection' );
+
 		if ( ! is_amp_endpoint() ) {
 			/*
 			 * Redirect to AMP-less URL if AMP is not available for this URL and yet the query var is present.
@@ -406,14 +402,14 @@ class AMP_Theme_Support {
 				self::redirect_non_amp_url( current_user_can( 'manage_options' ) ? 302 : 301 );
 			}
 
-			if ( self::$mobile_redirect_manager->is_available_for_request() ) {
+			if ( $mobile_redirect_manager->is_available_for_request() ) {
 				// Persist disabling mobile redirection for the session if redirection is disabled for the current request.
-				if ( ! self::$mobile_redirect_manager->redirection_disabled_for_session() && self::$mobile_redirect_manager->redirection_disabled_for_request() ) {
-					self::$mobile_redirect_manager->disable_redirect_for_session();
+				if ( ! $mobile_redirect_manager->redirection_disabled_for_session() && $mobile_redirect_manager->redirection_disabled_for_request() ) {
+					$mobile_redirect_manager->disable_redirect_for_session();
 				}
 
 				// Redirect if mobile redirection is not disabled for the session and JS redirection is disabled.
-				if ( ! self::$mobile_redirect_manager->redirection_disabled_for_session() && ! self::$mobile_redirect_manager->should_redirect_via_js() ) {
+				if ( ! $mobile_redirect_manager->redirection_disabled_for_session() && ! $mobile_redirect_manager->should_redirect_via_js() ) {
 					if ( ! headers_sent() ) {
 						header( 'Vary: User-Agent' );
 					}
@@ -423,9 +419,9 @@ class AMP_Theme_Support {
 				}
 
 				// Add mobile redirection script if user has opted for that solution.
-				if ( self::$mobile_redirect_manager->should_redirect_via_js() ) {
+				if ( $mobile_redirect_manager->should_redirect_via_js() ) {
 					// The redirect script will add the mobile version switcher link.
-					add_action( 'wp_head', [ self::$mobile_redirect_manager, 'add_mobile_redirect_script' ], ~PHP_INT_MAX );
+					add_action( 'wp_head', [ $mobile_redirect_manager, 'add_mobile_redirect_script' ], ~PHP_INT_MAX );
 				}
 
 				// Add a link to the footer to allow for navigation to the AMP version.
@@ -438,7 +434,7 @@ class AMP_Theme_Support {
 
 		self::ensure_proper_amp_location();
 
-		if ( ! amp_is_canonical() && self::$mobile_redirect_manager->is_available_for_request() ) {
+		if ( ! amp_is_canonical() && $mobile_redirect_manager->is_available_for_request() ) {
 			// Add a link to the footer to allow for navigation to the non-AMP version.
 			add_action( 'amp_post_template_footer', [ __CLASS__, 'add_non_amp_mobile_version_switcher' ] ); // For Classic reader mode theme.
 			add_action( 'wp_footer', [ __CLASS__, 'add_non_amp_mobile_version_switcher' ] );
@@ -477,7 +473,9 @@ class AMP_Theme_Support {
 	 */
 	public static function add_non_amp_mobile_version_switcher() {
 		$url = add_query_arg( MobileRedirectManager::NO_AMP_QUERY_VAR, '1', self::get_current_canonical_url() );
-		self::$mobile_redirect_manager->add_mobile_version_switcher_markup( true, $url, __( 'Exit mobile version', 'amp' ) );
+		/** @var @var MobileRedirectManager */
+		$mobile_redirect_manager = Services::get( 'mobile_redirection' );
+		$mobile_redirect_manager->add_mobile_version_switcher_markup( true, $url, __( 'Exit mobile version', 'amp' ) );
 	}
 
 	/**
@@ -489,7 +487,9 @@ class AMP_Theme_Support {
 				: amp_get_permalink( get_queried_object_id() );
 		$amp_url = remove_query_arg( MobileRedirectManager::NO_AMP_QUERY_VAR, $amp_url );
 
-		self::$mobile_redirect_manager->add_mobile_version_switcher_markup( false, $amp_url, __( 'Go to mobile version', 'amp' ) );
+		/** @var @var MobileRedirectManager */
+		$mobile_redirect_manager = Services::get( 'mobile_redirection' );
+		$mobile_redirect_manager->add_mobile_version_switcher_markup( false, $amp_url, __( 'Go to mobile version', 'amp' ) );
 	}
 
 	/**
@@ -2178,7 +2178,9 @@ class AMP_Theme_Support {
 				if ( AMP_Validation_Manager::has_cap() ) {
 					$non_amp_url = add_query_arg( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR, $blocking_error_count, $non_amp_url );
 
-					if ( self::$mobile_redirect_manager->is_mobile_request() ) {
+					/** @var @var MobileRedirectManager */
+					$mobile_redirect_manager = Services::get( 'mobile_redirection' );
+					if ( $mobile_redirect_manager->is_mobile_request() ) {
 						// Disable mobile redirection to prevent an infinite loop.
 						$non_amp_url = add_query_arg( MobileRedirectManager::NO_AMP_QUERY_VAR, '1', $non_amp_url );
 					}
