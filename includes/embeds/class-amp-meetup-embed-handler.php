@@ -30,7 +30,7 @@ class AMP_Meetup_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Get all raw embeds from the DOM.
 	 *
 	 * @param Document $dom Document.
-	 * @return DOMNodeList A list of DOMElement nodes.
+	 * @return DOMNodeList|null A list of DOMElement nodes, or null if not implemented.
 	 */
 	protected function get_raw_embed_nodes( Document $dom ) {
 		return $dom->xpath->query( '//div[ @id="meetup_oembed" ]//div[ @class="photo" ]/img' );

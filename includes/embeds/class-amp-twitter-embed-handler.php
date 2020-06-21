@@ -87,12 +87,21 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
+	 * Get all raw embeds from the DOM.
+	 *
+	 * @param Document $dom Document.
+	 * @return DOMNodeList|null A list of DOMElement nodes, or null if not implemented.
+	 */
+	protected function get_raw_embed_nodes( Document $dom ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+		return null;
+	}
+
+	/**
 	 * Make embed AMP compatible.
 	 *
 	 * @param DOMElement $node DOM element.
 	 */
 	protected function sanitize_raw_embed( DOMElement $node ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		// Not implemented.
 	}
 
 	/**
