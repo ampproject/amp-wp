@@ -10,7 +10,7 @@ class AMP_Vine_Embed_Handler_Test extends WP_UnitTestCase {
 			],
 			'simple_url' => [
 				'https://vine.co/v/MdKjXez002d' . PHP_EOL,
-				'<p><amp-vine data-vineid="MdKjXez002d" layout="responsive" width="400" height="400"></amp-vine></p>' . PHP_EOL,
+				'<amp-vine data-vineid="MdKjXez002d" layout="responsive" width="400" height="400"></amp-vine>' . PHP_EOL,
 			],
 		];
 	}
@@ -21,9 +21,14 @@ class AMP_Vine_Embed_Handler_Test extends WP_UnitTestCase {
 	public function test__conversion( $source, $expected ) {
 		$embed = new AMP_Vine_Embed_Handler();
 		$embed->register_embed();
-		$filtered_content = apply_filters( 'the_content', $source );
 
-		$this->assertEquals( $expected, $filtered_content );
+		$filtered_content = apply_filters( 'the_content', $source );
+		$dom              = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
+		$embed->sanitize_raw_embeds( $dom );
+
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+
+		$this->assertEquals( $expected, $content );
 	}
 
 	public function get_scripts_data() {
@@ -45,9 +50,12 @@ class AMP_Vine_Embed_Handler_Test extends WP_UnitTestCase {
 	public function test__get_scripts( $source, $expected ) {
 		$embed = new AMP_Vine_Embed_Handler();
 		$embed->register_embed();
-		$source = apply_filters( 'the_content', $source );
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( AMP_DOM_Utils::get_dom_from_content( $source ) );
+		$filtered_content = apply_filters( 'the_content', $source );
+		$dom              = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
+		$embed->sanitize_raw_embeds( $dom );
+
+		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$whitelist_sanitizer->sanitize();
 
 		$scripts = array_merge(
