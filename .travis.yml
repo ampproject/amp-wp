@@ -3,6 +3,9 @@ language: php
 
 dist: xenial
 
+services:
+  - mysql
+
 addons:
   apt:
     packages:
