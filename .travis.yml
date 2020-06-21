@@ -1,8 +1,7 @@
 # Tell Travis CI we're using PHP
 language: php
 
-# Using trusty instead of precise because we don't need PHP 5.2 or 5.3 anymore.
-dist: trusty
+dist: xenial
 
 addons:
   apt:
@@ -169,9 +168,7 @@ jobs:
     - name: Libraries that are meant to be externalized (7.4)
       php: "7.4"
       before_script:
-        - |
-          phpenv config-rm xdebug.ini || echo "xdebug.ini does not exist."
-          echo "extension = zip.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+        - phpenv config-rm xdebug.ini || echo "xdebug.ini does not exist."
       install:
         - composer --working-dir=lib/common install
         - composer --working-dir=lib/optimizer install
