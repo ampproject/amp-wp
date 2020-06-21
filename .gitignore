@@ -16,3 +16,5 @@ built
 .idea/
 /lib/*/vendor/
 /lib/*/composer.lock
+/phpcs.xml
+/phpunit.xml

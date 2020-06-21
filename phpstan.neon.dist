@@ -1,5 +1,5 @@
 includes:
-	# @see https://github.com/phpstan/phpstan-src/blob/master/conf/bleedingEdge.neon
+	# @see https://github.com/phpstan/phpstan-src/blob/b9f62d63f2deaa0a5e97f51073e41a422c48aa01/conf/bleedingEdge.neon
 	- phar://phpstan.phar/conf/bleedingEdge.neon
 parameters:
 	level: 3
@@ -25,3 +25,7 @@ parameters:
 	ignoreErrors:
 		# Uses func_get_args()
 		- '#^Function apply_filters(_ref_array)? invoked with [34567] parameters, 2 required\.$#'
+		# Missing declaration in PHPStan/PHPStorm stubs
+		# See https://github.com/phpstan/phpstan/issues/3492
+		# and https://github.com/JetBrains/phpstorm-stubs/pull/845
+		- '#^Access to an undefined property DOMNamedNodeMap::\$length.$#'

@@ -5,9 +5,9 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\AmpWpPluginFactory;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Services;
 
 /**
  * Handle activation of plugin.
@@ -17,7 +17,7 @@ use AmpProject\AmpWP\Services;
  * @param bool $network_wide Whether the activation was done network-wide.
  */
 function amp_activate( $network_wide = false ) {
-	Services::activate( $network_wide );
+	AmpWpPluginFactory::create()->activate( $network_wide );
 	amp_after_setup_theme();
 	if ( ! did_action( 'amp_init' ) ) {
 		amp_init();
@@ -33,7 +33,7 @@ function amp_activate( $network_wide = false ) {
  * @param bool $network_wide Whether the activation was done network-wide.
  */
 function amp_deactivate( $network_wide = false ) {
-	Services::deactivate( $network_wide );
+	AmpWpPluginFactory::create()->deactivate( $network_wide );
 	// We need to manually remove the amp endpoint.
 	global $wp_rewrite;
 	foreach ( $wp_rewrite->endpoints as $index => $endpoint ) {
@@ -52,7 +52,7 @@ function amp_deactivate( $network_wide = false ) {
  * @since 1.5
  */
 function amp_bootstrap_plugin() {
-	Services::register();
+	AmpWpPluginFactory::create()->register();
 
 	// The plugins_loaded action is the earliest we can run this since that is when pluggable.php has been required and wp_hash() is available.
 	add_action( 'plugins_loaded', [ 'AMP_Validation_Manager', 'init_validate_request' ], ~PHP_INT_MAX );
@@ -97,7 +97,9 @@ function amp_init() {
 	AMP_Theme_Support::init();
 	AMP_Validation_Manager::init();
 	AMP_Service_Worker::init();
+	add_action( 'admin_init', 'AMP_Options_Manager::init' );
 	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
+	add_action( 'rest_api_init', 'AMP_Options_Manager::register_settings' );
 	add_action( 'wp_loaded', 'amp_add_options_menu' );
 	add_action( 'wp_loaded', 'amp_bootstrap_admin' );
 
@@ -149,6 +151,21 @@ function amp_init() {
 		do_action( 'amp_plugin_update', $old_version );
 		AMP_Options_Manager::update_option( Option::VERSION, AMP__VERSION );
 	}
+
+	add_action(
+		'rest_api_init',
+		static function() {
+			if ( amp_should_use_new_onboarding() ) {
+				$reader_themes = new AMP_Reader_Themes();
+
+				$reader_theme_controller = new AMP_Reader_Theme_REST_Controller( $reader_themes );
+				$reader_theme_controller->register_routes();
+
+				$options_controller = new AMP_Options_REST_Controller( $reader_themes );
+				$options_controller->register_routes();
+			}
+		}
+	);
 }
 
 /**
@@ -442,13 +459,35 @@ function amp_get_slug() {
  * @return string Current URL.
  */
 function amp_get_current_url() {
-	$url = preg_replace( '#(^https?://[^/]+)/.*#', '$1', home_url( '/' ) );
-	if ( isset( $_SERVER['REQUEST_URI'] ) ) {
-		$url = esc_url_raw( $url . wp_unslash( $_SERVER['REQUEST_URI'] ) );
-	} else {
-		$url .= '/';
+	$parsed_url = wp_parse_url( home_url() );
+	if ( ! is_array( $parsed_url ) ) {
+		$parsed_url = [];
 	}
-	return $url;
+	if ( empty( $parsed_url['scheme'] ) ) {
+		$parsed_url['scheme'] = is_ssl() ? 'https' : 'http';
+	}
+	if ( ! isset( $parsed_url['host'] ) ) {
+		$parsed_url['host'] = wp_unslash( $_SERVER['HTTP_HOST'] );
+	}
+
+	$current_url = $parsed_url['scheme'] . '://';
+	if ( isset( $parsed_url['user'] ) ) {
+		$current_url .= $parsed_url['user'];
+		if ( isset( $parsed_url['pass'] ) ) {
+			$current_url .= ':' . $parsed_url['pass'];
+		}
+		$current_url .= '@';
+	}
+	$current_url .= $parsed_url['host'];
+	if ( isset( $parsed_url['port'] ) ) {
+		$current_url .= ':' . $parsed_url['port'];
+	}
+	$current_url .= '/';
+
+	if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+		$current_url .= ltrim( wp_unslash( $_SERVER['REQUEST_URI'] ), '/' );
+	}
+	return esc_url_raw( $current_url );
 }
 
 /**
@@ -1351,7 +1390,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		'AMP_Meta_Sanitizer'              => [],
 		'AMP_Layout_Sanitizer'            => [],
 		'AMP_Accessibility_Sanitizer'     => [],
-		'AMP_Tag_And_Attribute_Sanitizer' => [], // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
+		'AMP_Tag_And_Attribute_Sanitizer' => [], // Note: This validating sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
 	];
 
 	if ( ! empty( $theme_support_args['nav_menu_toggle'] ) ) {
@@ -1433,7 +1472,7 @@ function amp_get_content_sanitizers( $post = null ) {
 	 */
 	$sanitizers['AMP_Style_Sanitizer']['allow_transient_caching'] = apply_filters( 'amp_parsed_css_transient_caching_allowed', true );
 
-	// Force style sanitizer and whitelist sanitizer to be at end.
+	// Force style sanitizer, meta sanitizer, and validating sanitizer to be at end.
 	foreach ( [ 'AMP_Style_Sanitizer', 'AMP_Meta_Sanitizer', 'AMP_Tag_And_Attribute_Sanitizer' ] as $class_name ) {
 		if ( isset( $sanitizers[ $class_name ] ) ) {
 			$sanitizer = $sanitizers[ $class_name ];

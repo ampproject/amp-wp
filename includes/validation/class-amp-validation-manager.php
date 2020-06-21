@@ -6,6 +6,8 @@
  */
 
 use AmpProject\AmpWP\Icon;
+use AmpProject\AmpWP\PluginRegistry;
+use AmpProject\AmpWP\Services;
 use AmpProject\Dom\Document;
 
 /**
@@ -728,28 +730,16 @@ class AMP_Validation_Manager {
 			// Prevent re-validating.
 			self::$posts_pending_frontend_validation[ $post->ID ] = false;
 
-			$validity = self::validate_url( $url );
-			if ( is_wp_error( $validity ) ) {
-				$validation_posts[ $post->ID ] = $validity;
-			} else {
-				$invalid_url_post_id = (int) get_post_meta( $post->ID, '_amp_validated_url_post_id', true );
+			$invalid_url_post_id = (int) get_post_meta( $post->ID, '_amp_validated_url_post_id', true );
 
-				$validation_posts[ $post->ID ] = AMP_Validated_URL_Post_Type::store_validation_errors(
-					wp_list_pluck( $validity['results'], 'error' ),
-					$validity['url'],
-					array_merge(
-						[
-							'invalid_url_post' => $invalid_url_post_id,
-						],
-						wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets', 'php_fatal_error' ] )
-					)
-				);
+			$validity = self::validate_url_and_store( $url, $invalid_url_post_id );
 
-				// Remember the amp_validated_url post so that when the slug changes the old amp_validated_url post can be updated.
-				if ( ! is_wp_error( $validation_posts[ $post->ID ] ) && $invalid_url_post_id !== $validation_posts[ $post->ID ] ) {
-					update_post_meta( $post->ID, '_amp_validated_url_post_id', $validation_posts[ $post->ID ] );
-				}
+			// Remember the amp_validated_url post so that when the slug changes the old amp_validated_url post can be updated.
+			if ( ! is_wp_error( $validity ) && $invalid_url_post_id !== $validity['post_id'] ) {
+				update_post_meta( $post->ID, '_amp_validated_url_post_id', $validity['post_id'] );
 			}
+
+			$validation_posts[ $post->ID ] = $validity instanceof WP_Error ? $validity : $validity['post_id'];
 		}
 
 		return $validation_posts;
@@ -1370,8 +1360,8 @@ class AMP_Validation_Manager {
 	/**
 	 * Wrap callbacks for registered widgets to keep track of queued assets and the source for anything printed for validation.
 	 *
-	 * @global array $wp_filter
 	 * @return void
+	 * @global array $wp_registered_widgets
 	 */
 	public static function wrap_widget_callbacks() {
 		global $wp_registered_widgets;
@@ -1630,10 +1620,13 @@ class AMP_Validation_Manager {
 
 		$source = compact( 'reflection' );
 
+		/** @var PluginRegistry $plugin_registry */
+		$plugin_registry = Services::get( 'plugin_registry' );
+
 		// Identify the type, name, and relative file path.
 		$file         = wp_normalize_path( $reflection->getFileName() );
 		$slug_pattern = '(?<slug>[^/]+)';
-		if ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WP_PLUGIN_DIR ) ), ':' ) . $slug_pattern . '(/(?P<file>.*$))?:s', $file, $matches ) ) {
+		if ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( $plugin_registry->get_plugin_dir() ) ), ':' ) . $slug_pattern . '(/(?P<file>.*$))?:s', $file, $matches ) ) {
 			$source['type'] = 'plugin';
 			$source['name'] = $matches['slug'];
 			$source['file'] = isset( $matches['file'] ) ? $matches['file'] : $matches['slug'];
@@ -1994,17 +1987,12 @@ class AMP_Validation_Manager {
 		if ( ! $url ) {
 			return new WP_Error( 'no_published_post_url_available' );
 		}
-		$validity = self::validate_url( $url );
+		$validity = self::validate_url_and_store( $url );
 		if ( is_wp_error( $validity ) ) {
 			return $validity;
 		}
 		$validation_errors = wp_list_pluck( $validity['results'], 'error' );
 		if ( is_array( $validity ) && count( $validation_errors ) > 0 ) { // @todo This should only warn when there are unaccepted validation errors.
-			AMP_Validated_URL_Post_Type::store_validation_errors(
-				$validation_errors,
-				$validity['url'],
-				wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets' ] )
-			);
 			set_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY, $validation_errors, 60 );
 		} else {
 			delete_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY );
@@ -2026,6 +2014,7 @@ class AMP_Validation_Manager {
 	 *     @type string $url              Final URL that was checked or redirected to.
 	 *     @type array  $queried_object   Queried object, including keys for 'type' and 'id'.
 	 *     @type array  $stylesheets      Stylesheet data.
+	 *     @type string $php_fatal_error  PHP fatal error which occurred during validation.
 	 * }
 	 */
 	public static function validate_url( $url ) {
@@ -2133,6 +2122,45 @@ class AMP_Validation_Manager {
 			$validation,
 			compact( 'url' )
 		);
+	}
+
+	/**
+	 * Validate URL and store result.
+	 *
+	 * @param string      $url  URL to validate.
+	 * @param int|WP_Post $post The amp_validated_url post to update. Optional. If empty, then post is looked up by URL.
+	 * @return WP_Error|array {
+	 *     Error on failure, or array on success.
+	 *
+	 *     @type int    $post_id          ID for the amp_validated_url post.
+	 *     @type array  $results          Validation results, where each nested array contains an error key and sanitized key.
+	 *     @type string $url              Final URL that was checked or redirected to.
+	 *     @type array  $queried_object   Queried object, including keys for 'type' and 'id'.
+	 *     @type array  $stylesheets      Stylesheet data.
+	 *     @type string $php_fatal_error  PHP fatal error which occurred during validation.
+	 * }
+	 */
+	public static function validate_url_and_store( $url, $post = null ) {
+		$validity = self::validate_url( $url );
+		if ( $validity instanceof WP_Error ) {
+			return $validity;
+		}
+
+		$args = wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets', 'php_fatal_error' ] );
+		if ( $post ) {
+			$args['invalid_url_post'] = $post;
+		}
+
+		$result = AMP_Validated_URL_Post_Type::store_validation_errors(
+			wp_list_pluck( $validity['results'], 'error' ),
+			$validity['url'],
+			$args
+		);
+		if ( $result instanceof WP_Error ) {
+			return $result;
+		}
+		$validity['post_id'] = $result;
+		return $validity;
 	}
 
 	/**
@@ -2308,8 +2336,10 @@ class AMP_Validation_Manager {
 			$invalid_plugins = isset( $errors[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ]['plugin'] ) ? array_unique( $errors[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ]['plugin'] ) : null;
 			if ( isset( $invalid_plugins ) ) {
 				$reported_plugins = [];
+				/** @var PluginRegistry $plugin_registry */
+				$plugin_registry = Services::get( 'plugin_registry' );
 				foreach ( $invalid_plugins as $plugin_slug ) {
-					$plugin_data        = AMP_Validation_Error_Taxonomy::get_plugin_from_slug( $plugin_slug );
+					$plugin_data        = $plugin_registry->get_plugin_from_slug( $plugin_slug );
 					$plugin_name        = is_array( $plugin_data ) ? $plugin_data['data']['Name'] : $plugin_slug;
 					$reported_plugins[] = $plugin_name;
 				}

@@ -1,0 +1,28 @@
+.technical-background-option-container {
+	margin-bottom: 2rem;
+	padding: 1.5rem 0;
+}
+
+.technical-background-option {
+	display: flex;
+}
+
+.technical-background-option__input-container {
+	padding: 1.5rem;
+}
+
+.technical-background-option svg {
+	flex-shrink: 0;
+	width: 80px;
+}
+
+.technical-background-option__description {
+	padding: 0 2rem;
+}
+
+.technical-background-option__description h2 {
+	font-size: 1.5rem;
+	line-height: 1.5;
+	margin-top: 0;
+	margin-bottom: 0;
+}

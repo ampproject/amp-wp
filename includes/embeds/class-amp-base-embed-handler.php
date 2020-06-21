@@ -67,7 +67,7 @@ abstract class AMP_Base_Embed_Handler {
 	/**
 	 * Get mapping of AMP component names to AMP script URLs.
 	 *
-	 * This is normally no longer needed because the whitelist
+	 * This is normally no longer needed because the validating
 	 * sanitizer will automatically detect the need for them via
 	 * the spec.
 	 *

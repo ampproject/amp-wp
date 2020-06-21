@@ -89,12 +89,12 @@ class AMP_Vimeo_Embed_Handler_Test extends WP_UnitTestCase {
 		$embed->register_embed();
 		$source = apply_filters( 'the_content', $source );
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( AMP_DOM_Utils::get_dom_from_content( $source ) );
-		$whitelist_sanitizer->sanitize();
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( AMP_DOM_Utils::get_dom_from_content( $source ) );
+		$validating_sanitizer->sanitize();
 
 		$scripts = array_merge(
 			$embed->get_scripts(),
-			$whitelist_sanitizer->get_scripts()
+			$validating_sanitizer->get_scripts()
 		);
 
 		$this->assertEquals( $expected, $scripts );
