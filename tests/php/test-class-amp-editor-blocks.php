@@ -37,7 +37,7 @@ class Test_AMP_Editor_Blocks extends WP_UnitTestCase {
 	public function test_init() {
 		$this->instance->init();
 		if ( function_exists( 'register_block_type' ) ) {
-			$this->assertEquals( 10, has_filter( 'wp_kses_allowed_html', [ $this->instance, 'whitelist_block_atts_in_wp_kses_allowed_html' ] ) );
+			$this->assertEquals( 10, has_filter( 'wp_kses_allowed_html', [ $this->instance, 'include_block_atts_in_wp_kses_allowed_html' ] ) );
 
 			// Because amp_is_canonical() is false, these should not be hooked.
 			$this->assertFalse( has_filter( 'the_content', [ $this->instance, 'tally_content_requiring_amp_scripts' ] ) );

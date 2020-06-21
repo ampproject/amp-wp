@@ -63,8 +63,8 @@ class AMP_Script_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertSame( 1, $dom->getElementsByTagName( 'noscript' )->length );
 		$sanitizer = new AMP_Script_Sanitizer( $dom );
 		$sanitizer->sanitize();
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$whitelist_sanitizer->sanitize();
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$validating_sanitizer->sanitize();
 		$content = $dom->saveHTML( $dom->documentElement );
 		$this->assertEquals( $expected, $content );
 	}

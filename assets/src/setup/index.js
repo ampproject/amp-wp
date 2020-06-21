@@ -8,7 +8,7 @@ import '@wordpress/components/build-style/style.css';
 /**
  * External dependencies
  */
-import { APP_ROOT_ID, EXIT_LINK, OPTIONS_REST_ENDPOINT, READER_THEMES_ENDPOINT, UPDATES_NONCE } from 'amp-setup'; // From WP inline script.
+import { APP_ROOT_ID, EXIT_LINK, OPTIONS_REST_ENDPOINT, READER_THEMES_REST_ENDPOINT, UPDATES_NONCE, USER_FIELD_DEVELOPER_TOOLS_ENABLED, USER_REST_ENDPOINT } from 'amp-setup'; // From WP inline script.
 import PropTypes from 'prop-types';
 
 /**
@@ -20,6 +20,7 @@ import { OptionsContextProvider } from './components/options-context-provider';
 import { SetupWizard } from './setup-wizard';
 import { NavigationContextProvider } from './components/navigation-context-provider';
 import { ReaderThemesContextProvider } from './components/reader-themes-context-provider';
+import { UserContextProvider } from './components/user-context-provider';
 import { ErrorScreen } from './components/error-screen';
 
 const { ajaxurl: wpAjaxUrl } = global;
@@ -38,11 +39,16 @@ export function Providers( { children } ) {
 			>
 				<ReaderThemesContextProvider
 					wpAjaxUrl={ wpAjaxUrl }
-					readerThemesEndpoint={ READER_THEMES_ENDPOINT }
+					readerThemesEndpoint={ READER_THEMES_REST_ENDPOINT }
 					updatesNonce={ UPDATES_NONCE }
 				>
+					<UserContextProvider
+						userOptionDeveloperTools={ USER_FIELD_DEVELOPER_TOOLS_ENABLED }
+						userRestEndpoint={ USER_REST_ENDPOINT }
+					>
 
-					{ children }
+						{ children }
+					</UserContextProvider>
 
 				</ReaderThemesContextProvider>
 			</OptionsContextProvider>

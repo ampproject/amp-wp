@@ -969,16 +969,16 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertEquals( $handlers, $this->last_filter_call['args'][0] );
 		$this->assertEquals( $post, $this->last_filter_call['args'][1] );
 
-		// Make sure the style and whitelist sanitizers are always at the end, even after filtering.
+		// Make sure the style and validating sanitizers are always at the end, even after filtering.
 		add_filter(
 			'amp_content_sanitizers',
 			static function( $classes ) {
-				$classes['Even_After_Whitelist_Sanitizer'] = [];
+				$classes['Even_After_Validating_Sanitizer'] = [];
 				return $classes;
 			}
 		);
 		$ordered_sanitizers = array_keys( amp_get_content_sanitizers() );
-		$this->assertEquals( 'Even_After_Whitelist_Sanitizer', $ordered_sanitizers[ count( $ordered_sanitizers ) - 4 ] );
+		$this->assertEquals( 'Even_After_Validating_Sanitizer', $ordered_sanitizers[ count( $ordered_sanitizers ) - 4 ] );
 		$this->assertEquals( 'AMP_Style_Sanitizer', $ordered_sanitizers[ count( $ordered_sanitizers ) - 3 ] );
 		$this->assertEquals( 'AMP_Meta_Sanitizer', $ordered_sanitizers[ count( $ordered_sanitizers ) - 2 ] );
 		$this->assertEquals( 'AMP_Tag_And_Attribute_Sanitizer', $ordered_sanitizers[ count( $ordered_sanitizers ) - 1 ] );

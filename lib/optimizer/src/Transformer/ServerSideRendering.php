@@ -352,7 +352,7 @@ final class ServerSideRendering implements Transformer
     {
         if ((empty($inputLayout) || $inputLayout === Layout::FIXED) && ! $inputWidth->isDefined()) {
             // These values come from AMP's runtime and can be found in
-            // https://github.com/ampproject/amphtml/blob/master/src/layout.js#L70
+            // https://github.com/ampproject/amphtml/blob/292dc66b8c0bb078bbe3a1bca960e8f494f7fc8f/src/layout.js#L70-L86
             switch ($tagName) {
                 case Extension::ANALYTICS:
                 case Extension::PIXEL:
@@ -385,7 +385,7 @@ final class ServerSideRendering implements Transformer
     {
         if ((empty($inputLayout) || $inputLayout === Layout::FIXED || $inputLayout === Layout::FIXED_HEIGHT) && ! $inputHeight->isDefined()) {
             // These values come from AMP's runtime and can be found in
-            // https://github.com/ampproject/amphtml/blob/master/src/layout.js#L70
+            // https://github.com/ampproject/amphtml/blob/292dc66b8c0bb078bbe3a1bca960e8f494f7fc8f/src/layout.js#L70-L86
             switch ($tagName) {
                 case Extension::ANALYTICS:
                 case Extension::PIXEL:

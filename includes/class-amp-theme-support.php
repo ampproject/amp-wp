@@ -1093,7 +1093,7 @@ class AMP_Theme_Support {
 		add_filter( 'cancel_comment_reply_link', [ __CLASS__, 'filter_cancel_comment_reply_link' ], 10, 3 );
 		add_action( 'comment_form', [ __CLASS__, 'amend_comment_form' ], 100 );
 		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' );
-		add_filter( 'wp_kses_allowed_html', [ __CLASS__, 'whitelist_layout_in_wp_kses_allowed_html' ], 10 );
+		add_filter( 'wp_kses_allowed_html', [ __CLASS__, 'include_layout_in_wp_kses_allowed_html' ], 10 );
 		add_filter( 'get_header_image_tag', [ __CLASS__, 'amend_header_image_with_video_header' ], PHP_INT_MAX );
 		add_action(
 			'wp_print_footer_scripts',
@@ -1589,7 +1589,7 @@ class AMP_Theme_Support {
 	/**
 	 * Ensure the markup exists as required by AMP and elements are in the optimal loading order.
 	 *
-	 * Ensure meta[charset], meta[name=viewport], and link[rel=canonical] exist, as the whitelist sanitizer
+	 * Ensure meta[charset], meta[name=viewport], and link[rel=canonical] exist, as the validating sanitizer
 	 * may have removed an illegal meta[http-equiv] or meta[name=viewport]. For a singular post, core only outputs a
 	 * canonical URL by default. Adds the preload links.
 	 *
@@ -2230,7 +2230,7 @@ class AMP_Theme_Support {
 	 * @param array $context Allowed tags and their allowed attributes.
 	 * @return array $context Filtered allowed tags and attributes.
 	 */
-	public static function whitelist_layout_in_wp_kses_allowed_html( $context ) {
+	public static function include_layout_in_wp_kses_allowed_html( $context ) {
 		if ( ! empty( $context[ Tag::IMG ][ Attribute::WIDTH ] ) && ! empty( $context[ Tag::IMG ][ Attribute::HEIGHT ] ) ) {
 			$context[ Tag::IMG ]['data-amp-layout'] = true;
 		}
@@ -2282,7 +2282,7 @@ class AMP_Theme_Support {
 			true
 		);
 
-		// Whitelist enqueued script for AMP dev mode so that it is not removed.
+		// Mark enqueued script for AMP dev mode so that it is not removed.
 		// @todo Revisit with <https://github.com/google/site-kit-wp/pull/505#discussion_r348683617>.
 		add_filter(
 			'script_loader_tag',
