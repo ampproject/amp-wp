@@ -78,6 +78,11 @@ abstract class AMP_Base_Embed_Handler {
 	public function sanitize_raw_embeds( Document $dom ) {
 		$nodes = $this->get_raw_embed_nodes( $dom );
 
+		if ( null === $nodes ) {
+			// Bail since embed handler does not sanitize embeds.
+			return;
+		}
+
 		if ( 0 === $nodes->length ) {
 			return;
 		}
@@ -92,13 +97,12 @@ abstract class AMP_Base_Embed_Handler {
 
 	/**
 	 * Get all raw embeds from the DOM.
-	 * // @todo This method can be made abstract once all embed handlers can sanitize raw embeds.
 	 *
 	 * @param Document $dom Document.
-	 * @return DOMNodeList A list of DOMElement nodes.
+	 * @return DOMNodeList|null A list of DOMElement nodes, otherwise null if method is not implemented.
 	 */
 	protected function get_raw_embed_nodes( Document $dom ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		return new DOMNodeList();
+		return null;
 	}
 
 	/**
@@ -113,12 +117,12 @@ abstract class AMP_Base_Embed_Handler {
 
 	/**
 	 * Make embed AMP compatible.
-	 * // @todo Make this method abstract once all embed handlers have `sanitize_raw_embeds` implemented.
 	 *
 	 * @param DOMElement $node DOM element.
+	 * @return null If method is not implemented.
 	 */
 	protected function sanitize_raw_embed( DOMElement $node ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		// To be overridden.
+		return null;
 	}
 
 	/**

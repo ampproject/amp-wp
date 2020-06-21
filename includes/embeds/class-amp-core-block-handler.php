@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Embed\Registerable;
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
 
@@ -13,7 +14,7 @@ use AmpProject\Dom\Document;
  *
  * @since 1.0
  */
-class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
+class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler implements Registerable {
 
 	/**
 	 * Attribute to store the original width on a video or iframe just before WordPress removes it.

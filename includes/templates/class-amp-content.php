@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Embed\Registerable;
+
 /**
  * Class AMP_Content
  *
@@ -184,8 +186,7 @@ class AMP_Content {
 				continue;
 			}
 
-			// @todo Conditional below can be removed once all embed handlers can sanitize raw embeds.
-			if ( method_exists( $embed_handler, 'register_embed' ) ) {
+			if ( $embed_handler instanceof Registerable ) {
 				$embed_handler->register_embed();
 			}
 			$embed_handlers[] = $embed_handler;
@@ -201,8 +202,7 @@ class AMP_Content {
 	 */
 	private function unregister_embed_handlers( $embed_handlers ) {
 		foreach ( $embed_handlers as $embed_handler ) {
-			// @todo Conditional below can be removed once all embed handlers can sanitize raw embeds.
-			if ( method_exists( $embed_handler, 'unregister_embed' ) ) {
+			if ( $embed_handler instanceof Registerable ) {
 				$embed_handler->unregister_embed();
 			}
 		}

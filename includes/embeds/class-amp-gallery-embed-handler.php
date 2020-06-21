@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Embed\Registerable;
 use AmpProject\Dom\Document;
 use AmpProject\AmpWP\Dom\ElementList;
 use AmpProject\AmpWP\Component\Carousel;
@@ -14,7 +15,7 @@ use AmpProject\AmpWP\Component\Carousel;
  *
  * @since 0.2
  */
-class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
+class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler implements Registerable {
 
 	/**
 	 * Register embed.
@@ -220,7 +221,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		$images = new ElementList();
 		foreach ( $args['images'] as $props ) {
-			$image_atts = [
+			$image_attrs = [
 				'src'    => $props['url'],
 				'width'  => $props['width'],
 				'height' => $props['height'],
@@ -228,16 +229,16 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 				'alt'    => $props['alt'],
 			];
 			if ( ! empty( $props['srcset'] ) ) {
-				$image_atts['srcset'] = $props['srcset'];
+				$image_attrs['srcset'] = $props['srcset'];
 			}
 
 			if ( ! empty( $args['lightbox'] ) ) {
-				$image_atts['lightbox'] = '';
+				$image_attrs['lightbox'] = '';
 			}
 			$image = AMP_DOM_Utils::create_node(
 				$dom,
 				'img',
-				$image_atts
+				$image_attrs
 			);
 
 			if ( ! empty( $props['href'] ) ) {

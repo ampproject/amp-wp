@@ -6,6 +6,8 @@
  * @since 0.7
  */
 
+use AmpProject\AmpWP\Embed\Registerable;
+
 /**
  * Class AMP_Playlist_Embed_Handler
  *
@@ -13,7 +15,7 @@
  *
  * @package AMP
  */
-class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
+class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler implements Registerable {
 
 	/**
 	 * The tag of the shortcode.
