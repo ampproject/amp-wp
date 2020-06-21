@@ -171,7 +171,7 @@ class AMP_Theme_Support {
 	public static function init() {
 		self::read_theme_support();
 
-		self::$init_start_time = microtime( true );
+		self::$init_start_time         = microtime( true );
 		self::$mobile_redirect_manager = new MobileRedirectManager();
 
 		if ( self::READER_MODE_SLUG !== self::get_support_mode() ) {

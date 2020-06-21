@@ -101,9 +101,9 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 
 		parent::__construct( $dom, $args );
 
-		$this->home_host    = wp_parse_url( home_url(), PHP_URL_HOST );
-		$this->content_path = wp_parse_url( content_url( '/' ), PHP_URL_PATH );
-		$this->admin_path   = wp_parse_url( admin_url(), PHP_URL_PATH );
+		$this->home_host               = wp_parse_url( home_url(), PHP_URL_HOST );
+		$this->content_path            = wp_parse_url( content_url( '/' ), PHP_URL_PATH );
+		$this->admin_path              = wp_parse_url( admin_url(), PHP_URL_PATH );
 		$this->mobile_redirect_manager = new MobileRedirectManager();
 	}
 
