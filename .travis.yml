@@ -170,8 +170,7 @@ jobs:
 
     - name: Libraries that are meant to be externalized (7.4)
       php: "7.4"
-      before_script:
-        - phpenv config-rm xdebug.ini || echo "xdebug.ini does not exist."
+
       install:
         - composer --working-dir=lib/common install
         - composer --working-dir=lib/optimizer install
