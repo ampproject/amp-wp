@@ -193,7 +193,7 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 
 				// Append the `noamp` query param to excluded URLs to prevent mobile redirection.
 
-				/** @var @var MobileRedirectManager */
+				/** @var MobileRedirectManager */
 				$mobile_redirect_manager = Services::get( 'mobile_redirection' );
 				if ( ( $is_excluded_url || false !== $no_amphtml_rel_pos ) && $mobile_redirect_manager->is_enabled() ) {
 					$href = add_query_arg( MobileRedirectManager::NO_AMP_QUERY_VAR, '1', $href );

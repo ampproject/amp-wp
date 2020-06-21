@@ -388,7 +388,7 @@ class AMP_Theme_Support {
 			false !== get_query_var( amp_get_slug(), false )
 		);
 
-		/** @var @var MobileRedirectManager */
+		/** @var MobileRedirectManager */
 		$mobile_redirect_manager = Services::get( 'mobile_redirection' );
 
 		if ( ! is_amp_endpoint() ) {
@@ -473,7 +473,7 @@ class AMP_Theme_Support {
 	 */
 	public static function add_non_amp_mobile_version_switcher() {
 		$url = add_query_arg( MobileRedirectManager::NO_AMP_QUERY_VAR, '1', self::get_current_canonical_url() );
-		/** @var @var MobileRedirectManager */
+		/** @var MobileRedirectManager */
 		$mobile_redirect_manager = Services::get( 'mobile_redirection' );
 		$mobile_redirect_manager->add_mobile_version_switcher_markup( true, $url, __( 'Exit mobile version', 'amp' ) );
 	}
@@ -487,7 +487,7 @@ class AMP_Theme_Support {
 				: amp_get_permalink( get_queried_object_id() );
 		$amp_url = remove_query_arg( MobileRedirectManager::NO_AMP_QUERY_VAR, $amp_url );
 
-		/** @var @var MobileRedirectManager */
+		/** @var MobileRedirectManager */
 		$mobile_redirect_manager = Services::get( 'mobile_redirection' );
 		$mobile_redirect_manager->add_mobile_version_switcher_markup( false, $amp_url, __( 'Go to mobile version', 'amp' ) );
 	}
@@ -2178,7 +2178,7 @@ class AMP_Theme_Support {
 				if ( AMP_Validation_Manager::has_cap() ) {
 					$non_amp_url = add_query_arg( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR, $blocking_error_count, $non_amp_url );
 
-					/** @var @var MobileRedirectManager */
+					/** @var MobileRedirectManager */
 					$mobile_redirect_manager = Services::get( 'mobile_redirection' );
 					if ( $mobile_redirect_manager->is_mobile_request() ) {
 						// Disable mobile redirection to prevent an infinite loop.
