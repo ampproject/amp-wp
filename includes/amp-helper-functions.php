@@ -606,38 +606,13 @@ function amp_add_amphtml_link() {
 		return;
 	}
 
-	$current_url = amp_get_current_url();
-
-	// Check to see if there are known unaccepted validation errors for this URL.
-	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-		$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $current_url, [ 'ignore_accepted' => true ] );
-		$error_count       = count( $validation_errors );
-		if ( $error_count > 0 ) {
-			echo "<!--\n";
-			echo esc_html(
-				sprintf(
-					/* translators: %s: error count */
-					_n(
-						'There is %s validation error that is blocking the amphtml version from being available.',
-						'There are %s validation errors that are blocking the amphtml version from being available.',
-						$error_count,
-						'amp'
-					),
-					number_format_i18n( $error_count )
-				)
-			);
-			echo "\n-->";
-			return;
-		}
-	}
-
 	if ( ! is_amp_available() ) {
 		printf( '<!-- %s -->', esc_html__( 'There is no amphtml version available for this URL.', 'amp' ) );
 		return;
 	}
 
 	if ( AMP_Theme_Support::is_paired_available() ) {
-		$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
+		$amp_url = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
 	} else {
 		$amp_url = amp_get_permalink( get_queried_object_id() );
 	}
