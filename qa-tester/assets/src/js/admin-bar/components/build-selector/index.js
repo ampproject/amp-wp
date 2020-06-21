@@ -24,19 +24,20 @@ import './style.css';
 export function BuildSelector( { buildOptions, onOptionSelect } ) {
 	const [ term, setTerm ] = useState( '' );
 
-	const handleInputChange = ( event ) => {
+	const handleInputChange = useCallback( ( event ) => {
 		const newTerm = event.target.value.trim().toLowerCase();
-		if ( newTerm !== term ) {
-			setTerm( newTerm );
-		}
-	};
+		setTerm( newTerm );
+	}, [] );
 
-	const handleOptionSelect = ( buildLabel ) => {
-		const newOption = buildOptions.find(
-			( option ) => option.label === buildLabel
-		);
-		onOptionSelect( newOption );
-	};
+	const handleOptionSelect = useCallback(
+		( buildLabel ) => {
+			const newOption = buildOptions.find(
+				( option ) => option.label === buildLabel
+			);
+			onOptionSelect( newOption );
+		},
+		[ buildOptions, onOptionSelect ]
+	);
 
 	const results = useMemo( () => {
 		return term === ''
