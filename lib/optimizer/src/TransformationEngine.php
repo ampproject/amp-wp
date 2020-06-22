@@ -116,7 +116,7 @@ final class TransformationEngine
 
             // The use of `ReflectionParameter::getClass()` is deprecated in PHP 8, and is superseded
             // by `ReflectionParameter::getType()`. See https://github.com/php/php-src/pull/5209.
-            if (version_compare('7.1', PHP_VERSION, '<')) {
+            if (PHP_VERSION_ID >= 70100)) {
                 if ($parameter->getType()) {
                     /** @var \ReflectionNamedType $returnType */
                     $returnType = $parameter->getType();
