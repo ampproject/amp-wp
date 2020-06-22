@@ -17,7 +17,7 @@ trait WithoutBlockPreRendering {
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
+	public function setUp() { //phpcs:ignore WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
 		if (
 			defined( 'GUTENBERG_VERSION' ) &&
 			version_compare( '8.1.0', GUTENBERG_VERSION, '<=' )
