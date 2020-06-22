@@ -704,19 +704,19 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test is_amp_endpoint() function before the parse_query action happens.
 	 *
-	 * @covers ::is_amp_endpoint()
-	 * @expectedIncorrectUsage is_amp_endpoint
+	 * @covers ::is_amp_available()
+	 * @expectedIncorrectUsage is_amp_available
 	 */
-	public function test_is_amp_endpoint_before_parse_query_action() {
+	public function test_is_amp_available_before_parse_query_action() {
 		global $wp_actions;
 		unset( $wp_actions['parse_query'] );
-		$this->assertFalse( is_amp_endpoint() );
+		$this->assertFalse( is_amp_available() );
 	}
 
 	/**
 	 * Test is_amp_endpoint() function when there is no WP_Query.
 	 *
-	 * @covers ::is_amp_endpoint()
+	 * @covers ::is_amp_available()
 	 * @expectedIncorrectUsage is_amp_endpoint
 	 */
 	public function test_is_amp_endpoint_when_no_wp_query() {
