@@ -6,6 +6,10 @@
 	position: relative;
 }
 
+.phone > * {
+	max-width: 100%;
+}
+
 .phone::before {
 	background: #e6e6e6;
 	border-radius: 3px;

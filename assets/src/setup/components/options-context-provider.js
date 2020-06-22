@@ -116,7 +116,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 					fetchingOptions,
 					hasOptionsChanges,
 					didSaveOptions,
-					options,
+					options: options || {},
 					saveOptions,
 					savingOptions,
 					updateOptions,

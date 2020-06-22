@@ -1,0 +1,12 @@
+.reader-summary__screens {
+
+	@media screen and (min-width: 783px) {
+		display: grid;
+		gap: 40px;
+		grid-template-columns: 2fr 1fr;
+	}
+}
+
+.reader-summary__screens .selectable {
+	padding: 35px 30px;
+}

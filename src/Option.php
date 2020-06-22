@@ -42,6 +42,15 @@ interface Option {
 	const DISABLE_CSS_TRANSIENT_CACHING = 'amp_css_transient_monitor_disable_caching';
 
 	/**
+	 * Redirect mobile visitors to the AMP version of a page when the site is in Transitional or Reader mode.
+	 *
+	 * Default value: false
+	 *
+	 * @var string
+	 */
+	const MOBILE_REDIRECT = 'mobile_redirect';
+
+	/**
 	 * The list of post types that have support for AMP.
 	 *
 	 * The provided value should be an array of WordPress post-type slugs.

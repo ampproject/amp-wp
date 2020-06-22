@@ -131,10 +131,18 @@ final class AMP_Setup_Wizard_Submenu_Page {
 
 		wp_styles()->add_data( self::ASSET_HANDLE, 'rtl', 'replace' );
 
+		$theme = wp_get_theme();
+
 		$setup_wizard_data = [
 			'AMP_OPTIONS_KEY'                    => AMP_Options_Manager::OPTION_NAME,
 			'APP_ROOT_ID'                        => self::APP_ROOT_ID,
 			'EXIT_LINK'                          => admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ),
+			// @todo Upcoming WP version will allow this to be retrieved via REST.
+			'CURRENT_THEME'                      => [
+				'name'        => $theme->name,
+				'description' => $theme->description,
+				'screenshot'  => $theme->get_screenshot(),
+			],
 			'OPTIONS_REST_ENDPOINT'              => rest_url( 'amp/v1/options' ),
 			'READER_THEMES_REST_ENDPOINT'        => rest_url( 'amp/v1/reader-themes' ),
 			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
