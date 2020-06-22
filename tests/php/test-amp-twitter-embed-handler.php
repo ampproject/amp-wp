@@ -5,12 +5,18 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\WithoutBlockPreRendering;
+
 /**
  * Class AMP_Twitter_Embed_Handler_Test
  *
  * @covers AMP_Twitter_Embed_Handler
  */
 class AMP_Twitter_Embed_Handler_Test extends WP_UnitTestCase {
+
+	use WithoutBlockPreRendering {
+		setUp as public prevent_block_pre_render;
+	}
 
 	/**
 	 * oEmbed response for the tweet ID 987437752164737025.
@@ -31,6 +37,8 @@ class AMP_Twitter_Embed_Handler_Test extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
+		$this->prevent_block_pre_render();
+
 		add_filter( 'pre_http_request', [ $this, 'mock_http_request' ], 10, 3 );
 	}
 

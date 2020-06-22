@@ -7,6 +7,7 @@
  */
 
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\WithoutBlockPreRendering;
 
 /**
  * Tests for AMP_Core_Block_Handler.
@@ -17,6 +18,9 @@ use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 
 	use AssertContainsCompatibility;
+	use WithoutBlockPreRendering {
+		setUp as public prevent_block_pre_render;
+	}
 
 	/**
 	 * Set up.
@@ -29,6 +33,7 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 			$this->markTestSkipped( 'Missing required render_block filter.' );
 		}
 		parent::setUp();
+		$this->prevent_block_pre_render();
 	}
 
 	/**

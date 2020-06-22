@@ -7,6 +7,7 @@
  */
 
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\WithoutBlockPreRendering;
 
 /**
  * Tests for AMP_WordPress_TV_Embed_Handler.
@@ -17,12 +18,17 @@ use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 class Test_AMP_WordPress_TV_Embed_Handler extends WP_UnitTestCase {
 
 	use AssertContainsCompatibility;
+	use WithoutBlockPreRendering {
+		setUp as public prevent_block_pre_render;
+	}
 
 	/**
 	 * Set up.
 	 */
 	public function setUp() {
 		parent::setUp();
+		$this->prevent_block_pre_render();
+
 		add_filter( 'pre_http_request', [ $this, 'mock_http_request' ], 10, 3 );
 	}
 

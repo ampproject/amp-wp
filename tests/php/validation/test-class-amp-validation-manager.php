@@ -12,6 +12,7 @@ use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\HandleValidation;
 use AmpProject\AmpWP\Tests\PrivateAccess;
 use AmpProject\AmpWP\Tests\AssertRestApiField;
+use AmpProject\AmpWP\Tests\WithoutBlockPreRendering;
 use AmpProject\Dom\Document;
 
 /**
@@ -26,6 +27,9 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	use HandleValidation;
 	use PrivateAccess;
 	use AssertRestApiField;
+	use WithoutBlockPreRendering {
+		setUp as public prevent_block_pre_render;
+	}
 
 	/**
 	 * The name of the tested class.
@@ -99,6 +103,8 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	public function setUp() {
 		unset( $GLOBALS['wp_scripts'], $GLOBALS['wp_styles'] );
 		parent::setUp();
+		$this->prevent_block_pre_render();
+
 		$dom_document = new Document( '1.0', 'utf-8' );
 		$this->node   = $dom_document->createElement( self::TAG_NAME );
 		$dom_document->appendChild( $this->node );

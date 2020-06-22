@@ -5,12 +5,18 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\WithoutBlockPreRendering;
+
 /**
  * Class AMP_SoundCloud_Embed_Handler_Test
  *
  * @covers AMP_SoundCloud_Embed_Handler
  */
 class AMP_SoundCloud_Embed_Handler_Test extends WP_UnitTestCase {
+
+	use WithoutBlockPreRendering {
+		setUp as public prevent_block_pre_render;
+	}
 
 	/**
 	 * Track URL.
@@ -44,22 +50,10 @@ class AMP_SoundCloud_Embed_Handler_Test extends WP_UnitTestCase {
 
 	/**
 	 * Set up.
-	 *
-	 * @global WP_Post $post
 	 */
 	public function setUp() {
-		global $post;
 		parent::setUp();
-
-		/*
-		 * As #34115 in 4.9 a post is not needed for context to run oEmbeds. Prior ot 4.9, the WP_Embed::shortcode()
-		 * method would short-circuit when this is the case:
-		 * https://github.com/WordPress/wordpress-develop/blob/4.8.4/src/wp-includes/class-wp-embed.php#L192-L193
-		 * So on WP<4.9 we set a post global to ensure oEmbeds get processed.
-		 */
-		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '4.9', '<' ) ) {
-			$post = $this->factory()->post->create_and_get();
-		}
+		$this->prevent_block_pre_render();
 
 		add_filter( 'pre_http_request', [ $this, 'mock_http_request' ], 10, 3 );
 	}

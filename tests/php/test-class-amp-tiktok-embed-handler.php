@@ -5,16 +5,23 @@
  * @package AMP.
  */
 
+use AmpProject\AmpWP\Tests\WithoutBlockPreRendering;
+
 /**
  * Class Test_AMP_TikTok_Embed_Handler
  */
 class Test_AMP_TikTok_Embed_Handler extends WP_UnitTestCase {
+
+	use WithoutBlockPreRendering {
+		setUp as public prevent_block_pre_render;
+	}
 
 	/**
 	 * Set up.
 	 */
 	public function setUp() {
 		parent::setUp();
+		$this->prevent_block_pre_render();
 
 		// Mock the HTTP request.
 		add_filter( 'pre_http_request', [ $this, 'mock_http_request' ], 10, 3 );
