@@ -16,9 +16,14 @@ describe( 'AMP Setup Screen', () => {
 		await expect( page ).toMatchElement( '#amp-setup' );
 	} );
 
-	const getTitleText = () => page.$eval( 'h1', ( el ) => el.innerText );
+	const getTitleText = async () => {
+		await page.waitForSelector( 'h1' );
+		const titleText = await page.$eval( 'h1', ( el ) => el.innerText );
+		return titleText;
+	};
 
 	it( 'should have stepper items', async () => {
+		await page.waitForSelector( '.amp-stepper__item' );
 		const itemCount = await page.$$eval( '.amp-stepper__item', ( els ) => els.length );
 
 		expect( itemCount ).toBe( 6 );

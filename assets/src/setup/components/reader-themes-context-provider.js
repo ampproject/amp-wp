@@ -49,10 +49,8 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, readerThemes
 	 * Downloads the selected reader theme, if necessary, when options are saved.
 	 */
 	useEffect( () => {
-		if ( ! 'reader' === themeSupport ) {
-			if ( ! selectedTheme ) {
-				return;
-			}
+		if ( ! selectedTheme ) {
+			return;
 		}
 
 		if ( ! savingOptions || downloadingTheme ) {
