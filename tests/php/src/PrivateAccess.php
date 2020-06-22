@@ -73,9 +73,14 @@ trait PrivateAccess {
 	 * @throws ReflectionException If the object could not be reflected upon.
 	 */
 	private function get_private_property( $object, $property_name ) {
-		$property = ( new ReflectionClass( $object ) )->getProperty( $property_name );
+		$class    = new ReflectionClass( $object );
+		$property = $class->getProperty( $property_name );
+
 		$property->setAccessible( true );
-		return $property->getValue( $object );
+
+		// Note: In PHP 8, `ReflectionProperty::getValue()` now requires that an object be supplied if it's a
+		// non-static property.
+		return $property->isStatic() ? $property->getValue() : $property->getValue( $object );
 	}
 
 	/**
