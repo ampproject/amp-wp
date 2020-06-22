@@ -1,6 +1,6 @@
 <?php
 /**
- * Class MobileRedirect.
+ * Class MobileRedirection.
  *
  * @package AmpProject\AmpWP
  */
@@ -12,11 +12,11 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 
 /**
- * Centralized manager to handle mobile redirection of a page.
+ * Service for redirecting mobile users to the AMP version of a page.
  *
  * @package AmpProject\AmpWP
  */
-final class MobileRedirectManager implements Service, Registerable {
+final class MobileRedirection implements Service, Registerable {
 
 	/**
 	 * The name of the cookie that persists the user's preference for viewing the non-AMP version of a page when on mobile.

@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\MobileRedirectManager;
+use AmpProject\AmpWP\MobileRedirection;
 use AmpProject\AmpWP\Services;
 use AmpProject\Dom\Document;
 
@@ -161,7 +161,7 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 			$no_amphtml_rel_pos = array_search( self::REL_VALUE_NON_AMP_TO_AMP, $rel, true );
 
 			parse_str( wp_parse_url( $href, PHP_URL_QUERY ), $query_params );
-			$has_no_amp_query_var = isset( $query_params[ MobileRedirectManager::NO_AMP_QUERY_VAR ] );
+			$has_no_amp_query_var = isset( $query_params[ MobileRedirection::NO_AMP_QUERY_VAR ] );
 			$is_excluded_url      = in_array( strtok( $href, '#' ), $this->args['excluded_urls'], true );
 
 			if ( ! $has_no_amp_query_var ) {
@@ -193,10 +193,10 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 
 				// Append the `noamp` query param to excluded URLs to prevent mobile redirection.
 
-				/** @var MobileRedirectManager */
+				/** @var MobileRedirection */
 				$mobile_redirect_manager = Services::get( 'mobile_redirection' );
 				if ( ( $is_excluded_url || false !== $no_amphtml_rel_pos ) && $mobile_redirect_manager->is_enabled() ) {
-					$href = add_query_arg( MobileRedirectManager::NO_AMP_QUERY_VAR, '1', $href );
+					$href = add_query_arg( MobileRedirection::NO_AMP_QUERY_VAR, '1', $href );
 					$element->setAttribute( 'href', $href );
 				}
 			}
