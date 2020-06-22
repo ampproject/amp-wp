@@ -37,7 +37,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 	const hasUnmounted = useRef( false );
 
 	const hasDeveloperToolsOptionChange = useMemo(
-		() => user && developerToolsOption === user[ userOptionDeveloperTools ],
+		() => user && developerToolsOption !== user[ userOptionDeveloperTools ],
 		[ user, developerToolsOption, userOptionDeveloperTools ],
 	);
 
