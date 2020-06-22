@@ -5,6 +5,10 @@
  */
 import { __ } from '@wordpress/i18n';
 
+export const MOST_RECOMMENDED = 'most-recommended';
+export const RECOMMENDED = 'recommended';
+export const LEAST_RECOMMENDED = 'least-recommended';
+
 /**
  * Provides details on copy and UI for the template modes screen.
  *
@@ -31,14 +35,14 @@ export function getSelectionDetails( { userIsTechnical, hasPluginIssues, hasThem
 						__( 'Lorem ipsum', 'amp' ),
 						__( 'Lorem ipsum', 'amp' ),
 					],
-					recommended: 1,
+					recommended: MOST_RECOMMENDED,
 				},
 				standard: {
 					compatibility: __( 'Lorem ipsum', 'amp' ),
 					details: [
 						STANDARD_TECHNICAL_DO_NOT_USE,
 					],
-					recommended: -1,
+					recommended: LEAST_RECOMMENDED,
 				},
 				transitional: {
 					compatibility: __( 'Lorem ipsum', 'amp' ),
@@ -46,7 +50,7 @@ export function getSelectionDetails( { userIsTechnical, hasPluginIssues, hasThem
 						__( 'Lorem ipsum', 'amp' ),
 						__( 'Lorem ipsum', 'amp' ),
 					],
-					recommended: 0,
+					recommended: RECOMMENDED,
 				},
 			};
 
@@ -59,21 +63,21 @@ export function getSelectionDetails( { userIsTechnical, hasPluginIssues, hasThem
 						__( 'Lorem ipsum', 'amp' ),
 						__( 'Lorem ipsum', 'amp' ),
 					],
-					recommended: 1,
+					recommended: MOST_RECOMMENDED,
 				},
 				standard: {
 					compatibility: __( 'Lorem ipsum', 'amp' ),
 					details: [
 						STANDARD_NONTECHNICAL_DO_NOT_USE,
 					],
-					recommended: -1,
+					recommended: LEAST_RECOMMENDED,
 				},
 				transitional: {
 					compatibility: __( 'Lorem ipsum', 'amp' ),
 					details: [
 						TRANSITIONAL_DO_NOT_USE,
 					],
-					recommended: -1,
+					recommended: LEAST_RECOMMENDED,
 				},
 			};
 
@@ -84,21 +88,21 @@ export function getSelectionDetails( { userIsTechnical, hasPluginIssues, hasThem
 					details: [
 						READER_DO_NOT_USE,
 					],
-					recommended: -1,
+					recommended: LEAST_RECOMMENDED,
 				},
 				standard: {
 					compatibility: __( 'Lorem ipsum', 'amp' ),
 					details: [
 						STANDARD_TECHNICAL_DO_NOT_USE,
 					],
-					recommended: -1,
+					recommended: LEAST_RECOMMENDED,
 				},
 				transitional: {
 					compatibility: __( 'Lorem ipsum', 'amp' ),
 					details: [
 						__( 'Lorem ipsum', 'amp' ),
 					],
-					recommended: 1,
+					recommended: MOST_RECOMMENDED,
 				},
 			};
 
@@ -109,21 +113,21 @@ export function getSelectionDetails( { userIsTechnical, hasPluginIssues, hasThem
 					details: [
 						READER_DO_NOT_USE,
 					],
-					recommended: -1,
+					recommended: LEAST_RECOMMENDED,
 				},
 				standard: {
 					compatibility: __( 'Lorem ipsum', 'amp' ),
 					details: [
 						STANDARD_NONTECHNICAL_DO_NOT_USE,
 					],
-					recommended: -1,
+					recommended: LEAST_RECOMMENDED,
 				},
 				transitional: {
 					compatibility: __( 'Lorem ipsum', 'amp' ),
 					details: [
 						__( 'Lorem ipsum', 'amp' ),
 					],
-					recommended: 1,
+					recommended: MOST_RECOMMENDED,
 				},
 			};
 
@@ -134,21 +138,21 @@ export function getSelectionDetails( { userIsTechnical, hasPluginIssues, hasThem
 					details: [
 						READER_DO_NOT_USE,
 					],
-					recommended: -1,
+					recommended: LEAST_RECOMMENDED,
 				},
 				standard: {
 					compatibility: __( 'Lorem ipsum', 'amp' ),
 					details: [
 						__( 'Lorem ipsum', 'amp ' ),
 					],
-					recommended: 1,
+					recommended: MOST_RECOMMENDED,
 				},
 				transitional: {
 					compatibility: __( 'Lorem ipsum', 'amp' ),
 					details: [
 						TRANSITIONAL_DO_NOT_USE,
 					],
-					recommended: -1,
+					recommended: LEAST_RECOMMENDED,
 				},
 			};
 
@@ -159,21 +163,21 @@ export function getSelectionDetails( { userIsTechnical, hasPluginIssues, hasThem
 					details: [
 						READER_DO_NOT_USE,
 					],
-					recommended: -1,
+					recommended: LEAST_RECOMMENDED,
 				},
 				standard: {
 					compatibility: __( 'Lorem ipsum', 'amp' ),
 					details: [
 						STANDARD_NONTECHNICAL_DO_NOT_USE,
 					],
-					recommended: -1,
+					recommended: LEAST_RECOMMENDED,
 				},
 				transitional: {
 					compatibility: __( 'Lorem ipsum', 'amp' ),
 					details: [
 						__( 'Lorem ipsum', 'amp ' ),
 					],
-					recommended: 1,
+					recommended: MOST_RECOMMENDED,
 				},
 			};
 

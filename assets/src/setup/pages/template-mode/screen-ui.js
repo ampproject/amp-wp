@@ -20,7 +20,7 @@ import { AMPNotice, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_INFO, NOTICE_TYPE_WARNING, 
 import { Standard } from './svg-standard';
 import { Transitional } from './svg-transitional';
 import { Reader } from './svg-reader';
-import { getSelectionDetails } from './get-selection-details';
+import { getSelectionDetails, MOST_RECOMMENDED, RECOMMENDED } from './get-selection-details';
 
 /**
  * An individual mode selection component.
@@ -37,13 +37,13 @@ import { getSelectionDetails } from './get-selection-details';
 export function Selection( { compatibility, id, illustration, details, onChange, recommended, selected, title } ) {
 	const { recommendationLevelType, recommendationLevelText } = useMemo( () => {
 		switch ( recommended ) {
-			case 1:
+			case MOST_RECOMMENDED:
 				return {
 					recommendationLevelText: __( 'The best option for your site.', 'amp' ),
 					recommendationLevelType: NOTICE_TYPE_SUCCESS,
 				};
 
-			case 0:
+			case RECOMMENDED:
 				return {
 					recommendationLevelText: __( 'A good option for your site.', 'amp' ),
 					recommendationLevelType: NOTICE_TYPE_INFO,
