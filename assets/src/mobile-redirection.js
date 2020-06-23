@@ -38,4 +38,7 @@
 		url.searchParams.append( ampSlug, '1' );
 		location.replace( url.href );
 	}
-}( AMP_MOBILE_REDIRECTION ) );
+}(
+	// Note: The argument here is replaced with JSON in PHP by \AmpProject\AmpWP\MobileRedirection::add_mobile_redirect_script().
+	AMP_MOBILE_REDIRECTION,
+) );
