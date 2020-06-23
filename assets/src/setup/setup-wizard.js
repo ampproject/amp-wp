@@ -26,7 +26,6 @@ import { Navigation } from './components/navigation-context-provider';
  *
  * @param {Object} props Component props.
  * @param {?any} props.children Component children.
- * @param {string} props.exitLink Exit link.
  */
 function Page( { children } ) {
 	const { fetchingOptions } = useContext( Options );
