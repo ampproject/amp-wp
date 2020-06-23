@@ -93,17 +93,6 @@ class AMP_Options_Menu {
 		);
 
 		add_settings_field(
-			Option::MOBILE_REDIRECT,
-			__( 'Mobile Redirect', 'amp' ),
-			[ $this, 'render_mobile_redirect' ],
-			AMP_Options_Manager::OPTION_NAME,
-			'general',
-			[
-				'class' => 'amp-mobile-redirect',
-			]
-		);
-
-		add_settings_field(
 			Option::SUPPORTED_TEMPLATES,
 			__( 'Supported Templates', 'amp' ),
 			[ $this, 'render_supported_templates' ],
@@ -249,34 +238,6 @@ class AMP_Options_Menu {
 				</p>
 			<?php endif; ?>
 		</fieldset>
-		<?php
-	}
-
-	/**
-	 * Render mobile redirect setting.
-	 *
-	 * @since 1.6
-	 */
-	public function render_mobile_redirect() {
-		?>
-		<p>
-			<label for="mobile_redirect">
-				<input id="mobile_redirect" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[mobile_redirect]' ); ?>" <?php checked( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ); ?>>
-				<?php esc_html_e( 'Redirect mobile visitors to the AMP version of a page.', 'amp' ); ?>
-			</label>
-		</p>
-		<script>
-			( function( $ ) {
-				const templateModeInputs = $( 'input[type=radio][name="amp-options[theme_support]"]' );
-				const mobileRedirectSetting = $( 'tr.amp-mobile-redirect' );
-
-				function toggleMobileRedirectSetting( e ) {
-					mobileRedirectSetting.toggleClass( 'hidden', 'standard' === e.target.value )
-				}
-
-				templateModeInputs.on( 'change', toggleMobileRedirectSetting );
-			} )( jQuery )
-		</script>
 		<?php
 	}
 

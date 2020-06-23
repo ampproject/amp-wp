@@ -51,7 +51,7 @@ final class PluginSuppression implements Service, Registerable {
 		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
 		add_action( 'wp', [ $this, 'suppress_plugins' ], $priority );
 		add_filter( 'amp_default_options', [ $this, 'filter_default_options' ] );
-		add_action( 'amp_options_menu_items', [ $this, 'add_settings_field' ] );
+		add_action( 'amp_options_menu_items', [ $this, 'add_settings_field' ], 11 );
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
 	}
 
