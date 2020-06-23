@@ -1188,6 +1188,19 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 * @param callable $assert   Function to assert the expected sources.
 	 */
 	public function test_locate_sources_e2e( $callback, $xpath, $assert ) {
+		// @todo Remove once https://github.com/WordPress/gutenberg/pull/23104 is in a release.
+		// Temporary fixes an issue with PHP errors being thrown in Gutenberg v8.3.0 on PHP 7.4.
+		if ( ! (
+				current_theme_supports( 'editor-color-palette' ) &&
+				current_theme_supports( 'editor-gradient-presets' ) &&
+				current_theme_supports( 'editor-font-sizes' )
+		) ) {
+			$args = [];
+			add_theme_support( 'editor-color-palette', $args );
+			add_theme_support( 'editor-gradient-presets', $args );
+			add_theme_support( 'editor-font-sizes', $args );
+		}
+
 		add_theme_support( 'amp' );
 		AMP_Validation_Manager::add_validation_error_sourcing();
 		$callback();
