@@ -20,7 +20,6 @@ class Test_AMP_TikTok_Embed_Handler extends WP_UnitTestCase {
 	 * Set up.
 	 */
 	public function setUp() {
-		parent::setUp();
 		$this->prevent_block_pre_render();
 
 		// Mock the HTTP request.

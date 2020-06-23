@@ -32,7 +32,6 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
 			$this->markTestSkipped( 'Missing required render_block filter.' );
 		}
-		parent::setUp();
 		$this->prevent_block_pre_render();
 	}
 

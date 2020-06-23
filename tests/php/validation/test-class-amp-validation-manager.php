@@ -102,7 +102,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		unset( $GLOBALS['wp_scripts'], $GLOBALS['wp_styles'] );
-		parent::setUp();
 		$this->prevent_block_pre_render();
 
 		$dom_document = new Document( '1.0', 'utf-8' );

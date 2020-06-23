@@ -37,7 +37,6 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 	 * Set up.
 	 */
 	public function setUp() {
-		parent::setUp();
 		$this->prevent_block_pre_render();
 
 		$this->reset_widgets();

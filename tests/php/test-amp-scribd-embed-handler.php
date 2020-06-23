@@ -29,7 +29,6 @@ class AMP_Scribd_Embed_Handler_Test extends WP_UnitTestCase {
 	 * Set up.
 	 */
 	public function setUp() {
-		parent::setUp();
 		$this->prevent_block_pre_render();
 
 		add_filter( 'pre_http_request', [ $this, 'mock_http_request' ], 10, 3 );

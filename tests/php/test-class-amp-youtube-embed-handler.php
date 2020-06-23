@@ -44,7 +44,6 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 	 * Set up each test.
 	 */
 	public function setUp() {
-		parent::setUp();
 		$this->prevent_block_pre_render();
 
 		$this->handler = new AMP_YouTube_Embed_Handler();

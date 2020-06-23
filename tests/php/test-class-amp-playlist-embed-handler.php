@@ -47,7 +47,6 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 	 * Set up test.
 	 */
 	public function setUp() {
-		parent::setUp();
 		$this->prevent_block_pre_render();
 		$this->instance = new AMP_Playlist_Embed_Handler();
 	}
