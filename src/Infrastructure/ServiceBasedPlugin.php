@@ -27,7 +27,8 @@ abstract class ServiceBasedPlugin implements Plugin {
 	const INJECTOR_ID = 'injector';
 
 	// WordPress action to trigger the service registration on.
-	const REGISTRATION_ACTION = 'plugins_loaded';
+	// Use false to register as soon as the code is loaded.
+	const REGISTRATION_ACTION = false;
 
 	// Prefixes to use.
 	const HOOK_PREFIX    = '';
@@ -123,10 +124,14 @@ abstract class ServiceBasedPlugin implements Plugin {
 	 * @throws InvalidService If a service is not valid.
 	 */
 	public function register() {
-		\add_action(
-			static::REGISTRATION_ACTION,
-			[ $this, 'register_services' ]
-		);
+		if ( false !== static::REGISTRATION_ACTION ) {
+			\add_action(
+				static::REGISTRATION_ACTION,
+				[ $this, 'register_services' ]
+			);
+		} else {
+			$this->register_services();
+		}
 	}
 
 	/**
