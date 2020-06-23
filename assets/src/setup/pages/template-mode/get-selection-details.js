@@ -4,9 +4,6 @@
 /**
  * WordPress dependencies
  */
-/**
- * WordPress dependencies
- */
 import { __ } from '@wordpress/i18n';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 
