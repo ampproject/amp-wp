@@ -270,11 +270,11 @@ const setup = {
 };
 
 module.exports = [
-	// ampValidation,
-	// blockEditor,
-	// classicEditor,
-	// admin,
-	// customizer,
-	// wpPolyfills,
+	ampValidation,
+	blockEditor,
+	classicEditor,
+	admin,
+	customizer,
+	wpPolyfills,
 	setup,
 ];
