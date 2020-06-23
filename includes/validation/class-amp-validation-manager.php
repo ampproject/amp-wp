@@ -530,13 +530,10 @@ class AMP_Validation_Manager {
 					?>
 					<script>
 					(function( queryVar ) {
-						var urlParser = document.createElement( 'a' );
-						urlParser.href = location.href;
-						urlParser.search = urlParser.search.substr( 1 ).split( /&/ ).filter( function( part ) {
-							return 0 !== part.indexOf( queryVar + '=' );
-						} );
-						if ( urlParser.href !== location.href ) {
-							history.replaceState( {}, '', urlParser.href );
+						const url = new URL( location.href );
+						if ( url.searchParams.has( queryVar ) ) {
+							url.searchParams.delete( queryVar );
+							history.replaceState( {}, '', url.href );
 						}
 					})( <?php echo wp_json_encode( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR ); ?> );
 					</script>
