@@ -298,55 +298,24 @@ final class MobileRedirection implements Service, Registerable {
 	 * Output the mobile redirection Javascript code.
 	 */
 	public function add_mobile_redirect_script() {
-		?>
-		<script>
-			( function ( ampSlug, disabledCookieName, userAgents ) {
-				var regExp = userAgents
-						// Escape each user agent string before forming the regex expression.
-						.map( function ( userAgent ) {
-							// See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Escaping.
-							return userAgent.replace( /[.*+\-?^${}()|[\]\\]/g, '\\$&' ); // $& means the whole matched string
-						} )
-						.join( '|' );
-				var re = new RegExp( regExp );
-				var isMobile = re.test( navigator.userAgent );
+		$source = file_get_contents( __DIR__ . '/../assets/js/mobile-redirection.js' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 
-				if ( isMobile ) {
-					document.addEventListener( 'DOMContentLoaded', function () {
-						// Show the mobile version switcher link once the DOM has loaded.
-						var siteVersionSwitcher = document.getElementById( 'site-version-switcher' );
-						if ( siteVersionSwitcher ) {
-							siteVersionSwitcher.hidden = false;
-						}
-					} );
-				}
+		// Inject global variables.
+		$source  = preg_replace( '#/\*\s*global\s.+?\*/#', '', $source );
+		$globals = [
+			'AMP_SLUG'    => amp_get_slug(),
+			'STORAGE_KEY' => self::DISABLED_COOKIE_NAME,
+			'USER_AGENTS' => $this->get_user_agents(),
+		];
+		$source  = preg_replace_callback(
+			sprintf( '/\b(%s)\b/', implode( '|', array_keys( $globals ) ) ),
+			static function ( $matches ) use ( $globals ) {
+				return wp_json_encode( $globals[ $matches[0] ] );
+			},
+			$source
+		);
 
-				var mobileRedirectionDisabled = document.cookie
-						.split(';')
-						.some( function ( item ) {
-							return ( disabledCookieName + '=1' ) === item.trim();
-						} );
-
-				// Short-circuit if mobile redirection is disabled.
-				if ( mobileRedirectionDisabled ) {
-					return;
-				}
-
-				var url = new URL( location.href );
-				if ( isMobile && ! url.searchParams.has( ampSlug ) ) {
-					window.stop(); // Stop loading the page! This should cancel all loading resources.
-
-					// Replace the current page with the AMP version.
-					url.searchParams.append( ampSlug, '1' );
-					location.replace( url.href );
-				}
-			} )(
-				<?php echo wp_json_encode( amp_get_slug() ); ?>,
-				<?php echo wp_json_encode( self::DISABLED_COOKIE_NAME ); ?>,
-				<?php echo wp_json_encode( $this->get_user_agents() ); ?>
-			)
-		</script>
-		<?php
+		printf( '<script>%s</script>', $source ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**

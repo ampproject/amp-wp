@@ -303,6 +303,21 @@ const setup = {
 	],
 };
 
+const mobileRedirection = {
+	...defaultConfig,
+	...sharedConfig,
+	entry: {
+		'mobile-redirection': './assets/src/mobile-redirection.js',
+	},
+	plugins: [
+		...defaultConfig.plugins,
+		new WebpackBar( {
+			name: 'Mobile Redirection',
+			color: '#f27136',
+		} ),
+	],
+};
+
 module.exports = [
 	ampValidation,
 	blockEditor,
@@ -311,4 +326,5 @@ module.exports = [
 	customizer,
 	wpPolyfills,
 	setup,
+	mobileRedirection,
 ];
