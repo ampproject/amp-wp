@@ -12,6 +12,7 @@ use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\HandleValidation;
 use AmpProject\AmpWP\Tests\PrivateAccess;
 use AmpProject\AmpWP\Tests\AssertRestApiField;
+use AmpProject\AmpWP\Tests\WithoutBlockPreRendering;
 use AmpProject\Dom\Document;
 
 /**
@@ -26,6 +27,9 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	use HandleValidation;
 	use PrivateAccess;
 	use AssertRestApiField;
+	use WithoutBlockPreRendering {
+		setUp as public prevent_block_pre_render;
+	}
 
 	/**
 	 * The name of the tested class.
@@ -98,7 +102,8 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		unset( $GLOBALS['wp_scripts'], $GLOBALS['wp_styles'] );
-		parent::setUp();
+		$this->prevent_block_pre_render();
+
 		$dom_document = new Document( '1.0', 'utf-8' );
 		$this->node   = $dom_document->createElement( self::TAG_NAME );
 		$dom_document->appendChild( $this->node );
@@ -1190,6 +1195,19 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 * @param callable $assert   Function to assert the expected sources.
 	 */
 	public function test_locate_sources_e2e( $callback, $xpath, $assert ) {
+		// @todo Remove once https://github.com/WordPress/gutenberg/pull/23104 is in a release.
+		// Temporarily fixes an issue with PHP errors being thrown in Gutenberg v8.3.0 on PHP 7.4.
+		$theme_features = [
+			'editor-color-palette',
+			'editor-gradient-presets',
+			'editor-font-sizes',
+		];
+		foreach ( $theme_features as $theme_feature ) {
+			if ( ! current_theme_supports( $theme_feature ) ) {
+				add_theme_support( $theme_feature, [] );
+			}
+		}
+
 		add_theme_support( 'amp' );
 		AMP_Validation_Manager::add_validation_error_sourcing();
 		$callback();
@@ -2322,7 +2340,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertContains( $slug, wp_scripts()->queue );
 
 		$style = wp_styles()->registered[ $slug ];
-		$this->assertStringContains( 'css/amp-block-validation-compiled.css', $style->src );
+		$this->assertStringContains( 'css/amp-block-validation.css', $style->src );
 		$this->assertEquals( AMP__VERSION, $style->ver );
 		$this->assertContains( $slug, wp_styles()->queue );
 	}
