@@ -25,6 +25,14 @@ export const RECOMMENDED = 'recommended';
 export const TECHNICAL = 'technical';
 export const NON_TECHNICAL = 'nonTechnical';
 
+/**
+ * Returns the degree to which each mode is recommended for the current site and user.
+ *
+ * @param {Object} args
+ * @param {boolean} args.userIsTechnical Whether the user answered yes to the technical question.
+ * @param {boolean} args.hasPluginIssues Whether the site scan found plugin issues.
+ * @param {boolean} args.hasThemeIssues Whether the site scan found theme issues.
+ */
 export function getRecommendationLevels( { userIsTechnical, hasPluginIssues, hasThemeIssues } ) {
 	switch ( true ) {
 		case hasThemeIssues && hasPluginIssues && userIsTechnical:
