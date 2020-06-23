@@ -5,10 +5,14 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\WithoutBlockPreRendering;
+
 /**
  * Class AMP_Gallery_Embed_Handler_Test
  */
 class AMP_Gallery_Embed_Handler_Test extends WP_UnitTestCase {
+
+	use WithoutBlockPreRendering;
 
 	/**
 	 * Tear down.
