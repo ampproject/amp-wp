@@ -8,6 +8,7 @@
 namespace AmpProject\AmpWP;
 
 use AMP_Options_Manager;
+use AMP_Theme_Support;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 
@@ -54,7 +55,79 @@ final class MobileRedirection implements Service, Registerable {
 	 * Register.
 	 */
 	public function register() {
-		// @todo
+		add_action( 'wp', [ $this, 'redirect' ] );
+		add_filter( 'amp_unavailable_redirect_url', [ $this, 'ensure_noamp_unavailable_redirect_url' ] );
+	}
+
+	/**
+	 * Add redirection logic if available for request.
+	 */
+	public function redirect() {
+		if ( ! $this->is_available_for_request() ) {
+			return;
+		}
+
+		if ( ! is_amp_endpoint() ) {
+			// Persist disabling mobile redirection for the session if redirection is disabled for the current request.
+			if ( ! $this->redirection_disabled_for_session() && $this->redirection_disabled_for_request() ) {
+				$this->disable_redirect_for_session();
+			}
+
+			// Redirect if mobile redirection is not disabled for the session and JS redirection is disabled.
+			if ( ! $this->redirection_disabled_for_session() && ! $this->should_redirect_via_js() ) {
+				if ( ! headers_sent() ) {
+					header( 'Vary: User-Agent' ); // @todo This needs to not replace existing.
+				}
+
+				$amp_url = add_query_arg( amp_get_slug(), '1', amp_get_current_url() );
+				wp_safe_redirect( $amp_url, 302 );
+			}
+
+			// Add mobile redirection script if user has opted for that solution.
+			if ( $this->should_redirect_via_js() ) {
+				// The redirect script will add the mobile version switcher link.
+				add_action( 'wp_head', [ $this, 'add_mobile_redirect_script' ], ~PHP_INT_MAX );
+			}
+
+			// Add a link to the footer to allow for navigation to the AMP version.
+			add_action( 'wp_footer', [ $this, 'add_amp_mobile_version_switcher' ] );
+		} elseif ( ! amp_is_canonical() ) {
+			// Add a link to the footer to allow for navigation to the non-AMP version.
+			add_action( 'amp_post_template_footer', [ $this, 'add_non_amp_mobile_version_switcher' ] ); // For Classic reader mode theme.
+			add_action( 'wp_footer', [ $this, 'add_non_amp_mobile_version_switcher' ] );
+		}
+	}
+
+	/**
+	 * Add the noamp query var when redirecting to the non-AMP version due to AMP not being available.
+	 *
+	 * This is to avoid the possibility of a mobile device endlessly redirecting between the AMP and non-AMP URLs.
+	 *
+	 * @param string $redirect_url Redirect URL.
+	 * @return string Redirect URL.
+	 */
+	public function ensure_noamp_unavailable_redirect_url( $redirect_url ) {
+		return add_query_arg( self::NO_AMP_QUERY_VAR, '1', $redirect_url );
+	}
+
+	/**
+	 * Output the markup that allows the user to switch to the non-AMP version of the page.
+	 */
+	public function add_non_amp_mobile_version_switcher() {
+		$url = add_query_arg( self::NO_AMP_QUERY_VAR, '1', AMP_Theme_Support::get_current_canonical_url() ); // @todo Just use amp_remove_endpoint( amp_get_current_url() ).
+		$this->add_mobile_version_switcher_markup( true, $url, __( 'Exit mobile version', 'amp' ) );
+	}
+
+	/**
+	 * Output the markup that allows the user to switch to the AMP version of the page.
+	 */
+	public function add_amp_mobile_version_switcher() {
+		$amp_url = AMP_Theme_Support::is_paired_available()
+			? add_query_arg( amp_get_slug(), '', amp_get_current_url() )
+			: amp_get_permalink( get_queried_object_id() );
+		$amp_url = remove_query_arg( self::NO_AMP_QUERY_VAR, $amp_url );
+
+		$this->add_mobile_version_switcher_markup( false, $amp_url, __( 'Go to mobile version', 'amp' ) );
 	}
 
 	/**

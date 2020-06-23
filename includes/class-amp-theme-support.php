@@ -6,11 +6,9 @@
  */
 
 use AmpProject\Amp;
-use AmpProject\AmpWP\MobileRedirection;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\ConfigurationArgument;
-use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Transformer;
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
@@ -388,9 +386,6 @@ class AMP_Theme_Support {
 			false !== get_query_var( amp_get_slug(), false )
 		);
 
-		/** @var MobileRedirection */
-		$mobile_redirect_manager = Services::get( 'mobile_redirection' );
-
 		if ( ! is_amp_endpoint() ) {
 			/*
 			 * Redirect to AMP-less URL if AMP is not available for this URL and yet the query var is present.
@@ -402,43 +397,11 @@ class AMP_Theme_Support {
 				self::redirect_non_amp_url( current_user_can( 'manage_options' ) ? 302 : 301 );
 			}
 
-			if ( $mobile_redirect_manager->is_available_for_request() ) {
-				// Persist disabling mobile redirection for the session if redirection is disabled for the current request.
-				if ( ! $mobile_redirect_manager->redirection_disabled_for_session() && $mobile_redirect_manager->redirection_disabled_for_request() ) {
-					$mobile_redirect_manager->disable_redirect_for_session();
-				}
-
-				// Redirect if mobile redirection is not disabled for the session and JS redirection is disabled.
-				if ( ! $mobile_redirect_manager->redirection_disabled_for_session() && ! $mobile_redirect_manager->should_redirect_via_js() ) {
-					if ( ! headers_sent() ) {
-						header( 'Vary: User-Agent' );
-					}
-
-					$amp_url = add_query_arg( amp_get_slug(), '1', amp_get_current_url() );
-					wp_safe_redirect( $amp_url, 302 );
-				}
-
-				// Add mobile redirection script if user has opted for that solution.
-				if ( $mobile_redirect_manager->should_redirect_via_js() ) {
-					// The redirect script will add the mobile version switcher link.
-					add_action( 'wp_head', [ $mobile_redirect_manager, 'add_mobile_redirect_script' ], ~PHP_INT_MAX );
-				}
-
-				// Add a link to the footer to allow for navigation to the AMP version.
-				add_action( 'wp_footer', [ __CLASS__, 'add_amp_mobile_version_switcher' ] );
-			}
-
 			amp_add_frontend_actions();
 			return;
 		}
 
 		self::ensure_proper_amp_location();
-
-		if ( ! amp_is_canonical() && $mobile_redirect_manager->is_available_for_request() ) {
-			// Add a link to the footer to allow for navigation to the non-AMP version.
-			add_action( 'amp_post_template_footer', [ __CLASS__, 'add_non_amp_mobile_version_switcher' ] ); // For Classic reader mode theme.
-			add_action( 'wp_footer', [ __CLASS__, 'add_non_amp_mobile_version_switcher' ] );
-		}
 
 		$theme_support = self::get_theme_support_args();
 		if ( ! empty( $theme_support['template_dir'] ) ) {
@@ -466,30 +429,6 @@ class AMP_Theme_Support {
 				call_user_func( [ $sanitizer_class, 'add_buffering_hooks' ], $args );
 			}
 		}
-	}
-
-	/**
-	 * Output the markup that allows the user to switch to the non-AMP version of the page.
-	 */
-	public static function add_non_amp_mobile_version_switcher() {
-		$url = add_query_arg( MobileRedirection::NO_AMP_QUERY_VAR, '1', self::get_current_canonical_url() );
-		/** @var MobileRedirection */
-		$mobile_redirect_manager = Services::get( 'mobile_redirection' );
-		$mobile_redirect_manager->add_mobile_version_switcher_markup( true, $url, __( 'Exit mobile version', 'amp' ) );
-	}
-
-	/**
-	 * Output the markup that allows the user to switch to the AMP version of the page.
-	 */
-	public static function add_amp_mobile_version_switcher() {
-		$amp_url = self::is_paired_available()
-				? add_query_arg( amp_get_slug(), '', amp_get_current_url() )
-				: amp_get_permalink( get_queried_object_id() );
-		$amp_url = remove_query_arg( MobileRedirection::NO_AMP_QUERY_VAR, $amp_url );
-
-		/** @var MobileRedirection */
-		$mobile_redirect_manager = Services::get( 'mobile_redirection' );
-		$mobile_redirect_manager->add_mobile_version_switcher_markup( false, $amp_url, __( 'Go to mobile version', 'amp' ) );
 	}
 
 	/**
@@ -2043,9 +1982,6 @@ class AMP_Theme_Support {
 			$args
 		);
 
-		$current_url = amp_get_current_url();
-		$non_amp_url = amp_remove_endpoint( $current_url );
-
 		AMP_HTTP::send_server_timing( 'amp_output_buffer', -self::$init_start_time, 'AMP Output Buffer' );
 
 		$dom_parse_start = microtime( true );
@@ -2086,17 +2022,6 @@ class AMP_Theme_Support {
 			}
 			$data = array_merge( $data, AMP_Validation_Manager::get_validate_response_data( $sanitization_results ) );
 			return wp_json_encode( $data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
-		}
-
-		// Determine what the validation errors are.
-		$blocking_error_count = 0;
-		$validation_results   = [];
-		foreach ( AMP_Validation_Manager::$validation_results as $validation_result ) {
-			if ( ! $validation_result['sanitized'] ) {
-				$blocking_error_count++;
-			}
-			unset( $validation_result['error']['sources'] );
-			$validation_results[] = $validation_result;
 		}
 
 		$dom_serialize_start = microtime( true );
@@ -2153,49 +2078,23 @@ class AMP_Theme_Support {
 
 		self::ensure_required_markup( $dom, array_keys( $amp_scripts ) );
 
-		if ( $blocking_error_count > 0 && empty( AMP_Validation_Manager::$validation_error_status_overrides ) ) {
-			/*
-			 * In AMP-first, strip html@amp attribute to prevent GSC from complaining about a validation error
-			 * already surfaced inside of WordPress. This is intended to not serve dirty AMP, but rather a
-			 * non-AMP document (intentionally not valid AMP) that contains the AMP runtime and AMP components.
+		$valid_amp_document = AMP_Validation_Manager::finalize_validation( $dom );
+
+		// Redirect to the non-AMP version if not on an AMP-first site.
+		if ( ! $valid_amp_document && ! amp_is_canonical() ) {
+			$non_amp_url = amp_remove_endpoint( amp_get_current_url() );
+
+			/**
+			 * Filters the non-AMP URL to redirect to when AMP has been determined to be unavailable.
+			 *
+			 * @internal
+			 * @param string $non_amp_url Non-AMP URL.
 			 */
-			if ( amp_is_canonical() ) {
-				$dom->documentElement->removeAttribute( Attribute::AMP );
-				$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI );
-				$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI_ALT );
+			$non_amp_url = apply_filters( 'amp_unavailable_redirect_url', $non_amp_url );
 
-				/*
-				 * Make sure that document.write() is disabled to prevent dynamically-added content (such as added
-				 * via amp-live-list) from wiping out the page by introducing any scripts that call this function.
-				 */
-				$script = $dom->createElement( Tag::SCRIPT );
-				$script->appendChild( $dom->createTextNode( 'document.addEventListener( "DOMContentLoaded", function() { document.write = function( text ) { throw new Error( "[AMP-WP] Prevented document.write() call with: "  + text ); }; } );' ) );
-				$dom->head->appendChild( $script );
-			} elseif ( ! self::is_customize_preview_iframe() ) {
-				$response = esc_html__( 'Redirecting to non-AMP version.', 'amp' );
-
-				// Indicate the number of validation errors detected at runtime in a query var on the non-AMP page for display in the admin bar.
-				if ( AMP_Validation_Manager::has_cap() ) {
-					$non_amp_url = add_query_arg( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR, $blocking_error_count, $non_amp_url );
-
-					/** @var MobileRedirection */
-					$mobile_redirect_manager = Services::get( 'mobile_redirection' );
-					if ( $mobile_redirect_manager->is_mobile_request() ) {
-						// Disable mobile redirection to prevent an infinite loop.
-						$non_amp_url = add_query_arg( MobileRedirection::NO_AMP_QUERY_VAR, '1', $non_amp_url );
-					}
-				}
-
-				/*
-				 * Temporary redirect because AMP page may return with blocking validation errors when auto-accepting sanitization
-				 * is not enabled. A 302 will allow the errors to be fixed without needing to bust any redirect caches.
-				 */
-				wp_safe_redirect( $non_amp_url, 302 );
-				return $response;
-			}
+			wp_safe_redirect( $non_amp_url, 302 );
+			return esc_html__( 'Redirecting since AMP version not available.', 'amp' );
 		}
-
-		AMP_Validation_Manager::finalize_validation( $dom );
 
 		$response = $dom->saveHTML();
 

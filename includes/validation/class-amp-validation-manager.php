@@ -8,6 +8,8 @@
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\Services;
+use AmpProject\Attribute;
+use AmpProject\Tag;
 use AmpProject\Dom\Document;
 
 /**
@@ -1886,53 +1888,103 @@ class AMP_Validation_Manager {
 	 * @see AMP_Validation_Manager::add_admin_bar_menu_items()
 	 *
 	 * @param Document $dom Document.
+	 * @return bool Whether a valid AMP document (or intentionally dirty).
 	 */
 	public static function finalize_validation( Document $dom ) {
-		/*
-		 * Override AMP status in admin bar set in \AMP_Validation_Manager::add_admin_bar_menu_items()
-		 * when there are validation errors which have not been explicitly accepted.
-		 */
-		if ( ! is_admin_bar_showing() || ! self::$amp_admin_bar_item_added ) {
-			return;
-		}
-
 		$error_count = 0;
 		foreach ( self::$validation_results as $validation_result ) {
-			$validation_status = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $validation_result['error'] );
-
-			$is_unaccepted = 'with_preview' === $validation_status['forced'] ?
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $validation_status['status']
-				:
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $validation_status['term_status'];
-			if ( $is_unaccepted ) {
+			if ( ! $validation_result['sanitized'] ) {
 				$error_count++;
 			}
 		}
 
 		if ( 0 === $error_count ) {
-			return;
+			return true; // It will be served as a valid document.
 		}
 
-		$validate_item = $dom->getElementById( 'wp-admin-bar-amp-validity' );
-		if ( $validate_item ) {
-			$link = $validate_item->getElementsByTagName( 'a' )->item( 0 );
-			if ( $link ) {
-				$link->firstChild->nodeValue = sprintf(
-					/* translators: %s is count of validation errors */
-					_n(
-						'Review %s validation issue',
-						'Review %s validation issues',
-						$error_count,
-						'amp'
-					),
-					number_format_i18n( $error_count )
-				);
+		/*
+		 * Override AMP status in admin bar set in \AMP_Validation_Manager::add_admin_bar_menu_items()
+		 * when there are validation errors which have not been explicitly accepted.
+		 */
+		if ( is_admin_bar_showing() && self::$amp_admin_bar_item_added ) {
+			$validate_item = $dom->getElementById( 'wp-admin-bar-amp-validity' );
+			if ( $validate_item ) {
+				$link = $validate_item->getElementsByTagName( 'a' )->item( 0 );
+				if ( $link ) {
+					$link->firstChild->nodeValue = sprintf(
+						/* translators: %s is count of validation errors */
+						_n(
+							'Review %s validation issue',
+							'Review %s validation issues',
+							$error_count,
+							'amp'
+						),
+						number_format_i18n( $error_count )
+					);
+				}
+			}
+
+			$admin_bar_icon = $dom->getElementById( 'amp-admin-bar-item-status-icon' );
+			if ( $admin_bar_icon ) {
+				$admin_bar_icon->setAttribute( 'class', 'ab-icon amp-icon ' . Icon::WARNING );
 			}
 		}
 
-		$admin_bar_icon = $dom->getElementById( 'amp-admin-bar-item-status-icon' );
-		if ( $admin_bar_icon ) {
-			$admin_bar_icon->setAttribute( 'class', 'ab-icon amp-icon ' . Icon::WARNING );
+		// When overrides are present, go ahead and pretend it's going to be valid.
+		if ( ! empty( self::$validation_error_status_overrides ) ) {
+			return true;
+		}
+
+		self::handle_blocking_validation_errors( $dom, $error_count );
+
+		return false; // It will not be served as a valid AMP document.
+	}
+
+	/**
+	 * Handle validation errors which are blocking the page from being served as valid AMP due to invalid markup being kept.
+	 *
+	 * In paired AMP, keeping invalid markup normally causes redirection to the non-AMP version unless, whereas in
+	 * AMP-first the `amp` attribute is removed from the document element.
+	 *
+	 * @param Document $dom         Document.
+	 * @param int      $error_count Blocking error count.
+	 * @global WP_Customize_Manager $wp_customize
+	 */
+	public static function handle_blocking_validation_errors( Document $dom, $error_count ) {
+		global $wp_customize;
+
+		/*
+		 * In AMP-first, strip html@amp attribute to prevent GSC from complaining about a validation error
+		 * already surfaced inside of WordPress. This is intended to not serve dirty AMP, but rather a
+		 * non-AMP document (intentionally not valid AMP) that contains the AMP runtime and AMP components.
+		 */
+		if ( amp_is_canonical() ) {
+			$dom->documentElement->removeAttribute( Attribute::AMP );
+			$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI );
+			$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI_ALT );
+
+			/*
+			 * Make sure that document.write() is disabled to prevent dynamically-added content (such as added
+			 * via amp-live-list) from wiping out the page by introducing any scripts that call this function.
+			 */
+			$script = $dom->createElement( Tag::SCRIPT );
+			$script->appendChild( $dom->createTextNode( 'document.addEventListener( "DOMContentLoaded", function() { document.write = function( text ) { throw new Error( "[AMP-WP] Prevented document.write() call with: "  + text ); }; } );' ) );
+			$dom->head->appendChild( $script );
+		} elseif ( ! (
+			is_customize_preview() &&
+			$wp_customize instanceof WP_Customize_Manager &&
+			$wp_customize->get_messenger_channel()
+		) ) {
+			// Indicate the number of validation errors detected at runtime in a query var on the non-AMP page for display in the admin bar.
+			add_filter(
+				'amp_unavailable_redirect_url',
+				function ( $url ) use ( $error_count ) {
+					if ( self::has_cap() ) { // @todo In reality this should not do a redirect at all.
+						$url = add_query_arg( self::VALIDATION_ERRORS_QUERY_VAR, $error_count, $url );
+					}
+					return $url;
+				}
+			);
 		}
 	}
 
