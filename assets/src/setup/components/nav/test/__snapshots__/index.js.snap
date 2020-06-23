@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Nav matches snapshot 1`] = `
+<div
+  className="amp-setup-nav"
+>
+  <div
+    className="amp-setup-nav__close"
+  >
+    <a
+      className="components-button is-link"
+      href="http://site.test"
+    >
+      Close
+    </a>
+  </div>
+  <div
+    className="amp-setup-nav__prev-next"
+  >
+    <span
+      className="amp-setup-nav__placeholder"
+    >
+       
+    </span>
+    <button
+      className="components-button is-primary"
+      disabled={true}
+      onClick={[Function]}
+      type="button"
+    >
+      Next
+    </button>
+  </div>
+</div>
+`;

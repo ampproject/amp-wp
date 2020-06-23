@@ -134,7 +134,7 @@ final class Document extends DOMDocument
     const PROPERTY_GETTER_ERROR_MESSAGE = 'Undefined property: AmpProject\\Dom\\Document::';
 
     // Regex patterns and values used for adding and removing http-equiv charsets for compatibility.
-    const HTML_GET_HEAD_OPENING_TAG_PATTERN     = '/(?><!--.*?-->\s*)*<head(?>\s+[^>]*)?>/is'; // This pattern contains a comment to make sure we don't match a <head> tag within a comment.    const HTML_GET_HEAD_OPENING_TAG_REPLACEMENT = '$0<meta http-equiv="content-type" content="text/html; charset=utf-8">';
+    const HTML_GET_HEAD_OPENING_TAG_PATTERN     = '/(?><!--.*?-->\s*)*<head(?>\s+[^>]*)?>/is'; // This pattern contains a comment to make sure we don't match a <head> tag within a comment.
     const HTML_GET_HEAD_OPENING_TAG_REPLACEMENT = '$0<meta http-equiv="content-type" content="text/html; charset=utf-8">';
     const HTML_GET_HTTP_EQUIV_TAG_PATTERN       = '#<meta http-equiv=([\'"])content-type\1 content=([\'"])text/html; charset=utf-8\2>#i';
     const HTML_HTTP_EQUIV_VALUE                 = 'content-type';
@@ -1492,7 +1492,7 @@ final class Document extends DOMDocument
      * @param string     $prefix  Optional. The prefix to use (should not have a trailing dash). Defaults to 'i-amp-id'.
      * @return string ID to use.
      */
-    public function getElementId(DOMElement $element, $prefix = 'i-amp-id')
+    public function getElementId(DOMElement $element, $prefix = 'i-amp')
     {
         if ($element->hasAttribute('id')) {
             return $element->getAttribute('id');
@@ -1500,11 +1500,11 @@ final class Document extends DOMDocument
 
         if (array_key_exists($prefix, $this->indexCounter)) {
             ++$this->indexCounter[$prefix];
-            $id = "{$prefix}-{$this->indexCounter[ $prefix ]}";
         } else {
-            $id                          = $prefix;
-            $this->indexCounter[$prefix] = 1;
+            $this->indexCounter[$prefix] = 0;
         }
+
+        $id = "{$prefix}-{$this->indexCounter[ $prefix ]}";
 
         while ($this->getElementById($id) instanceof DOMElement) {
             ++$this->indexCounter[$prefix];

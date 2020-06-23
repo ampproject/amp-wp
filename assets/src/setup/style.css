@@ -1,0 +1,297 @@
+body {
+	background-color: #fafafc;
+	font-family: "Noto Sans", sans-serif;
+}
+
+/**
+ * CSS variables for the AMP setup wizard.
+ */
+#amp-setup { /* React app root element. */
+	--stepper-max-width: 280px;
+	--setup-page-max-width: 1000px;
+	--black: #212121;
+	--brand: #2459e7;
+	--light-blue: #ceeeff;
+	--gray: #6c7781;
+	--light-gray: #e8e8e8;
+	--very-light-gray: #fafafc;
+	--white: #fff;
+	--font-poppins: poppins, sans-serif;
+
+	padding-bottom: 4rem;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6,
+.components-button {
+	font-family: var(--font-poppins);
+}
+
+.amp-setup-container,
+.amp-setup-container::before,
+.amp-setup-container::after,
+.amp-setup-container *,
+.amp-setup-container *::before,
+.amp-setup-container *::after {
+	box-sizing: border-box;
+}
+
+/**
+ * Buttons.
+ */
+.components-button {
+	align-items: center;
+	border-radius: 3px;
+	color: var(--brand);
+	font-size: 1rem;
+	font-weight: 600;
+}
+
+.components-button.is-link,
+.components-button.is-link:hover,
+.components-button.is-link:hover:not(:disabled),
+.components-button:focus,
+.components-button:focus:not(:disabled),
+.components-button:hover {
+	box-shadow: none;
+	color: var(--brand);
+	text-decoration: none;
+}
+
+.components-button.is-primary {
+	box-shadow: 0 25px 20px rgba(0, 0, 0, 0.1);
+}
+
+.components-button.is-primary,
+.components-button.is-primary:hover,
+.components-button.is-primary:hover:not(:disabled),
+.components-button.is-primary:focus,
+.components-button.is-primary:focus:not(:disabled),
+.components-button.is-primary:active {
+	background: var(--brand);
+}
+
+.components-button.is-primary:disabled {
+	color: var(--very-light-gray);
+	background: var(--brand);
+	border-color: var(--brand);
+	opacity: 0.5;
+}
+
+/**
+ * Radio inputs.
+ */
+input[type="radio"] {
+	border-color: var(--light-gray);
+	border-width: 2px;
+	box-shadow: none;
+	height: 1.5rem;
+	width: 1.5rem;
+}
+
+input[type="radio"]:checked {
+	border-color: var(--brand);
+}
+
+input[type="radio"]:checked::before {
+	background-color: var(--brand);
+	height: 12px;
+	margin: 0.25rem;
+	width: 12px;
+}
+
+input[type="radio"]:focus {
+	border-color: var(--brand);
+	box-shadow: 0 0 0 1px var(--brand);
+}
+
+/**
+ * Main container.
+ */
+.amp-setup-container {
+	margin: 0 auto;
+	max-width: calc(var(--stepper-max-width) + var(--setup-page-max-width));
+	padding: 20px;
+	width: 100%;
+}
+
+.amp-setup {
+	display: flex;
+	flex-direction: column;
+	margin: 0 auto;
+	width: 100%;
+
+	@media screen and (min-width: 783px) {
+		flex-direction: row;
+	}
+}
+
+/**
+ * Main app panel.
+ */
+.amp-setup-panel-container {
+	width: 100%;
+}
+
+.amp-setup-panel {
+	border-color: rgba(0, 0, 0, 0);
+	border-radius: 10px;
+	box-shadow: 0 25px 60px rgba(0, 0, 0, 0.1);
+	max-width: var(--setup-page-max-width);
+	min-height: 496px;
+	padding: 20px;
+	width: 100%;
+
+	@media screen and (min-width: 783px) {
+		padding: 40px;
+	}
+}
+
+.amp-setup-panel h1 {
+	line-height: 1.1;
+}
+
+/**
+ * Nav component.
+ */
+.amp-setup-nav {
+	align-items: center;
+	display: flex;
+	justify-content: space-between;
+	margin-top: 24px;
+}
+
+.amp-setup-nav__prev-next {
+	display: flex;
+}
+
+.amp-setup-nav__prev-next > * {
+	display: block;
+	height: 36px;
+}
+
+/**
+ * Sidebar.
+ */
+.amp-setup-plugin-name {
+	color: var(--black);
+	font-size: 22px;
+	line-height: 1.5;
+	padding: 15px 0;
+}
+
+.amp-setup-plugin-name::after {
+	border-bottom: 1px solid var(--light-gray);
+	display: block;
+	content: "";
+	margin: 15px auto 0;
+	width: 170px;
+}
+
+.amp-stepper-container {
+	width: 100%;
+
+	@media screen and (min-width: 783px) {
+		padding-right: 40px;
+		max-width: var(--stepper-max-width);
+	}
+}
+
+.amp-stepper ul {
+	display: flex;
+	justify-content: space-between;
+	width: 100%;
+
+	@media screen and (min-width: 783px) {
+		flex-direction: column;
+	}
+}
+
+.amp-stepper__item {
+	align-items: center;
+	display: flex;
+	font-size: 14px;
+	position: relative;
+
+	@media screen and (min-width: 783px) {
+		padding: 15px 21px 8px;
+	}
+}
+
+.amp-stepper__item--active {
+	border-radius: 4px;
+	font-weight: 600;
+}
+
+.amp-stepper__item::before {
+	bottom: -50%;
+	border-left: 2px solid var(--light-gray);
+	content: "";
+	left: 32px;
+	position: absolute;
+	top: 60%;
+	z-index: 1;
+
+	@media screen and (max-width: 784px) {
+		display: none;
+	}
+}
+
+.amp-stepper__item:last-of-type::before {
+	display: none;
+}
+
+.amp-stepper__item--active::before {
+	border-left-color: var(--brand);
+}
+
+.amp-stepper__item-title {
+	display: none;
+	margin-left: 18px;
+
+	@media screen and (min-width: 783px) {
+		display: inline-block;
+	}
+}
+
+.amp-stepper__bullet {
+	align-items: center;
+	background-color: var(--white);
+	border: 2px solid var(--light-gray);
+	border-radius: 12px;
+	color: var(--gray);
+	content: attr(data-index);
+	display: flex;
+	height: 24px;
+	justify-content: center;
+	position: relative;
+	width: 24px;
+	z-index: 2;
+}
+
+.amp-stepper__bullet--check {
+	background-color: var(--brand);
+	border-color: var(--brand);
+}
+
+.amp-stepper__bullet--dot {
+	border-color: rgba(0, 0, 0, 0);
+}
+
+.amp-stepper__bullet--dot span {
+	background-color: var(--brand);
+	border-radius: 5px;
+	height: 10px;
+	width: 10px;
+}
+

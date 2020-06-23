@@ -183,7 +183,7 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 		$filtered_content = apply_filters( 'the_content', $source );
 
 		if (
-			version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.2', '<' )
+			version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.1', '<' )
 			&& null !== $fallback_for_expected
 		) {
 			$this->assertEquals( $fallback_for_expected, $filtered_content );
@@ -315,12 +315,12 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 		$this->handler->register_embed();
 		$source = apply_filters( 'the_content', $source );
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( AMP_DOM_Utils::get_dom_from_content( $source ) );
-		$whitelist_sanitizer->sanitize();
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( AMP_DOM_Utils::get_dom_from_content( $source ) );
+		$validating_sanitizer->sanitize();
 
 		$scripts = array_merge(
 			$this->handler->get_scripts(),
-			$whitelist_sanitizer->get_scripts()
+			$validating_sanitizer->get_scripts()
 		);
 
 		$this->assertEquals( $expected, $scripts );
