@@ -1,3 +1,17 @@
+.reader-summary .components-toggle-control__label {
+	font-weight: 600;
+}
+
+.reader-summary .components-base-control__help {
+	padding-left: 52px;
+	font-style: normal;
+	margin-bottom: 1rem;
+}
+
+.reader-summary__description {
+	margin-bottom: 1.5rem;
+}
+
 .reader-summary__screens {
 
 	@media screen and (min-width: 783px) {
@@ -9,4 +23,13 @@
 
 .reader-summary__screens .selectable {
 	padding: 35px 30px;
+}
+
+.reader-summary__caption {
+	padding-top: 1rem;
+}
+
+.reader-summary__caption svg {
+	float: left;
+	margin-right: 1rem;
 }

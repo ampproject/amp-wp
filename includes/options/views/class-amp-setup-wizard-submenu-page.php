@@ -142,6 +142,7 @@ final class AMP_Setup_Wizard_Submenu_Page {
 				'name'        => $theme->name,
 				'description' => $theme->description,
 				'screenshot'  => $theme->get_screenshot(),
+				'url'         => $theme->get( 'ThemeURI' ),
 			],
 			'OPTIONS_REST_ENDPOINT'              => rest_url( 'amp/v1/options' ),
 			'READER_THEMES_REST_ENDPOINT'        => rest_url( 'amp/v1/reader-themes' ),
