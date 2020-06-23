@@ -1,6 +1,4 @@
-/* global AMP_SLUG, STORAGE_KEY, USER_AGENTS, location, navigator  */
-
-( function( ampSlug, disabledCookieName, userAgents ) {
+( function( { ampSlug, disabledCookieName, userAgents } ) {
 	const regExp = userAgents
 		// Escape each user agent string before forming the regex expression.
 		.map( function( userAgent ) {
@@ -40,8 +38,4 @@
 		url.searchParams.append( ampSlug, '1' );
 		location.replace( url.href );
 	}
-}(
-	AMP_SLUG,
-	STORAGE_KEY,
-	USER_AGENTS,
-) );
+}( AMP_MOBILE_REDIRECTION ) );

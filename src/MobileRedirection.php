@@ -301,19 +301,13 @@ final class MobileRedirection implements Service, Registerable {
 		$source = file_get_contents( __DIR__ . '/../assets/js/mobile-redirection.js' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 
 		// Inject global variables.
-		$source  = preg_replace( '#/\*\s*global\s.+?\*/#', '', $source );
 		$globals = [
-			'AMP_SLUG'    => amp_get_slug(),
-			'STORAGE_KEY' => self::DISABLED_COOKIE_NAME,
-			'USER_AGENTS' => $this->get_user_agents(),
+			'ampSlug'            => amp_get_slug(),
+			'disabledCookieName' => self::DISABLED_COOKIE_NAME,
+			'userAgents'         => $this->get_user_agents(),
 		];
-		$source  = preg_replace_callback(
-			sprintf( '/\b(%s)\b/', implode( '|', array_keys( $globals ) ) ),
-			static function ( $matches ) use ( $globals ) {
-				return wp_json_encode( $globals[ $matches[0] ] );
-			},
-			$source
-		);
+
+		$source = preg_replace( '/\bAMP_MOBILE_REDIRECTION\b/', wp_json_encode( $globals ), $source );
 
 		printf( '<script>%s</script>', $source ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
