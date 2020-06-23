@@ -33,7 +33,6 @@ class AMP_Options_Manager {
 		Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
 		Option::VERSION                 => AMP__VERSION,
 		Option::READER_THEME            => AMP_Reader_Themes::DEFAULT_READER_THEME,
-		Option::SUPPRESSED_PLUGINS      => [],
 	];
 
 	/**
@@ -97,6 +96,14 @@ class AMP_Options_Manager {
 		if ( current_theme_supports( 'amp' ) ) {
 			$defaults[ Option::THEME_SUPPORT ] = amp_is_canonical() ? AMP_Theme_Support::STANDARD_MODE_SLUG : AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
 		}
+
+		/**
+		 * Filters default options.
+		 *
+		 * @internal
+		 * @param array $defaults Default options.
+		 */
+		$defaults = apply_filters( 'amp_default_options', $defaults );
 
 		$options = array_merge( $defaults, $options );
 
