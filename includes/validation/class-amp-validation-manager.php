@@ -2415,7 +2415,7 @@ class AMP_Validation_Manager {
 
 		wp_enqueue_style(
 			$slug,
-			amp_get_asset_url( "css/{$slug}-compiled.css" ),
+			amp_get_asset_url( "css/{$slug}.css" ),
 			false,
 			AMP__VERSION
 		);
