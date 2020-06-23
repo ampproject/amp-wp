@@ -3,7 +3,7 @@
  */
 .amp-setup-nav {
 	align-items: center;
-	background: linear-gradient(180deg, #fff 64.06%, rgba(255, 255, 255, 0.8) 99.99%, rgba(255, 255, 255, 0.8) 100%);
+	background: linear-gradient(0deg, #fff 64.06%, rgba(255, 255, 255, 0.8) 99.99%, rgba(255, 255, 255, 0.8) 100%);
 	bottom: 0;
 	display: flex;
 	justify-content: flex-end;
@@ -13,11 +13,15 @@
 }
 
 .amp-setup-nav__inner {
+	align-items: center;
 	display: flex;
 	justify-content: space-between;
-	max-width: 1020px;
-	padding: 40px 45px;
+	padding: 40px 15px;
 	width: 100%;
+
+	@media screen and (min-width: 783px) {
+		padding: 40px 30px;
+	}
 }
 
 .amp-setup-nav__prev-next {
@@ -31,9 +35,14 @@
 }
 
 .amp-setup-nav__prev-next svg {
+	display: none;
 	margin-left: 0.5rem;
 	height: 18px;
 	width: 18px;
+
+	@media screen and (min-width: 783px) {
+		display: block;
+	}
 }
 
 .amp-setup-nav__prev svg {

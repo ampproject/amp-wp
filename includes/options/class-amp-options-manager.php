@@ -231,7 +231,7 @@ class AMP_Options_Manager {
 		}
 
 		// Validate mobile redirect.
-		if ( isset( $new_options[ Option::MOBILE_REDIRECT ] ) && 'on' === $new_options[ Option::MOBILE_REDIRECT ] ) {
+		if ( isset( $new_options[ Option::MOBILE_REDIRECT ] ) && 'on' === $new_options[ Option::MOBILE_REDIRECT ] || true === $new_options[ Option::MOBILE_REDIRECT ] ) {
 			$options[ Option::MOBILE_REDIRECT ] = true;
 		} else {
 			$options[ Option::MOBILE_REDIRECT ] = false;

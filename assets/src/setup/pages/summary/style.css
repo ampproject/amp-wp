@@ -82,3 +82,35 @@
 .transitional-summary__footer-illustration {
 	padding: 0 1.5rem;
 }
+
+.transitional-summary__footer .components-form-toggle {
+	margin-bottom: 2.25rem;
+}
+
+.standard-summary {
+	padding-bottom: 3rem;
+	position: relative;
+}
+
+.standard-summary > div {
+	padding: 40px;
+}
+
+.standard-summary p {
+	font-size: 1rem;
+	line-height: 1.5;
+}
+
+.standard-summary__screenshot {
+	text-align: center;
+}
+
+.standard-summary .plus-icon {
+	position: absolute;
+	bottom: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	left: calc(50% - 25px);
+	top: 0;
+}
