@@ -2705,16 +2705,16 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		global $wp_theme_directories; // Note that get_theme_roots() does not work, for some reason.
 
 		// @todo Remove once https://github.com/WordPress/gutenberg/pull/23104 is in a release.
-		// Temporary fixes an issue with PHP errors being thrown in Gutenberg v8.3.0 on PHP 7.4.
-		if ( ! (
-			current_theme_supports( 'editor-color-palette' ) &&
-			current_theme_supports( 'editor-gradient-presets' ) &&
-			current_theme_supports( 'editor-font-sizes' )
-		) ) {
-			$args = [];
-			add_theme_support( 'editor-color-palette', $args );
-			add_theme_support( 'editor-gradient-presets', $args );
-			add_theme_support( 'editor-font-sizes', $args );
+		// Temporarily fixes an issue with PHP errors being thrown in Gutenberg v8.3.0 on PHP 7.4.
+		$theme_features = [
+				'editor-color-palette',
+				'editor-gradient-presets',
+				'editor-font-sizes',
+		];
+		foreach ( $theme_features as $theme_feature ) {
+			if ( ! current_theme_supports( $theme_feature ) ) {
+				add_theme_support( $theme_feature, [] );
+			}
 		}
 
 		$theme_exists = false;
