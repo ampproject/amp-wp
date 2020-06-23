@@ -1190,9 +1190,9 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		// @todo Remove once https://github.com/WordPress/gutenberg/pull/23104 is in a release.
 		// Temporarily fixes an issue with PHP errors being thrown in Gutenberg v8.3.0 on PHP 7.4.
 		$theme_features = [
-				'editor-color-palette',
-				'editor-gradient-presets',
-				'editor-font-sizes',
+			'editor-color-palette',
+			'editor-gradient-presets',
+			'editor-font-sizes',
 		];
 		foreach ( $theme_features as $theme_feature ) {
 			if ( ! current_theme_supports( $theme_feature ) ) {

@@ -26,9 +26,9 @@ trait WithoutBlockPreRendering {
 				global $post;
 
 				if (
-				null === $post &&
-				defined( 'GUTENBERG_VERSION' ) &&
-				version_compare( '8.1.0', GUTENBERG_VERSION, '<=' )
+					null === $post &&
+					defined( 'GUTENBERG_VERSION' ) &&
+					version_compare( '8.1.0', GUTENBERG_VERSION, '<=' )
 				) {
 					// Add a marker to indicate that this is not a block to be pre-rendered.
 					$parsed_block['remove_post_data'] = true;
