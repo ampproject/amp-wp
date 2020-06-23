@@ -1,0 +1,35 @@
+.is-amp-fit-text + .blocks-font-size > .components-font-size-picker__buttons,
+.is-amp-fit-text + .blocks-font-size > .components-font-size-picker__custom-input {
+	display: none;
+}
+
+/* AMP preview button wrapper */
+.wp-core-ui #amp-wrapper-post-preview {
+	margin-right: -6px;
+	margin-left: 6px;
+}
+
+/* AMP preview button */
+.wp-core-ui .amp-editor-post-preview {
+	height: 34px;
+	padding: 6px 12px;
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+	justify-content: center;
+	align-items: center;
+}
+
+.wp-core-ui .amp-editor-post-preview svg {
+	width: 18px;
+	height: 18px;
+	margin: 0;
+}
+
+/*
+ * Ensure the non-AMP preview button is the same height as the AMP preview one.
+ * 34px is the height of the non-AMP preview button in WordPress 5.3, though the height before was 33px.
+ * Without this style rule, the non-AMP AMP preview button will be 1 px shorter than the AMP one, before WP 5.3.
+ */
+.wp-core-ui .edit-post-header .editor-post-preview {
+	height: 34px;
+}
