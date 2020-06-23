@@ -17,9 +17,9 @@ import PropTypes from 'prop-types';
 import './style.css';
 import { Selectable } from '../../components/selectable';
 import { AMPNotice, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_INFO, NOTICE_TYPE_WARNING, NOTICE_SIZE_LARGE } from '../../components/amp-notice';
-import { Standard } from './svg-standard';
-import { Transitional } from './svg-transitional';
-import { Reader } from './svg-reader';
+import { Standard } from '../../components/svg/standard';
+import { Transitional } from '../../components/svg/transitional';
+import { Reader } from '../../components/svg/reader';
 import { MOST_RECOMMENDED, RECOMMENDED, getRecommendationLevels, getAllSelectionText, TECHNICAL, NON_TECHNICAL, STANDARD, TRANSITIONAL, READER, NOT_RECOMMENDED } from './get-selection-details';
 
 /**

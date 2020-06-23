@@ -167,25 +167,6 @@ input[type="radio"]:focus {
 }
 
 /**
- * Nav component.
- */
-.amp-setup-nav {
-	align-items: center;
-	display: flex;
-	justify-content: space-between;
-	margin-top: 24px;
-}
-
-.amp-setup-nav__prev-next {
-	display: flex;
-}
-
-.amp-setup-nav__prev-next > * {
-	display: block;
-	height: 36px;
-}
-
-/**
  * Sidebar.
  */
 .amp-setup-plugin-name {
@@ -300,3 +281,33 @@ input[type="radio"]:focus {
 	width: 10px;
 }
 
+/**
+ * Utils.
+ */
+.grid {
+
+	@media screen and (min-width: 783px) {
+		display: grid;
+		gap: 40px;
+	}
+}
+
+.grid-1-1 {
+	grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-1-2 {
+	grid-template-columns: 1fr 2fr;
+}
+
+.grid-2-1 {
+	grid-template-columns: 2fr 1fr;
+}
+
+.grid-1-3 {
+	grid-template-columns: 1fr 3fr;
+}
+
+.grid-3-1 {
+	grid-template-columns: 3fr 1fr;
+}

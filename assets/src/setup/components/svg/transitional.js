@@ -1,6 +1,7 @@
-export function Transitional() {
+// eslint-disable-next-line react/prop-types
+export function Transitional( { props } ) {
 	return (
-		<svg width="80" height="64" viewBox="0 0 80 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+		<svg width="80" height="64" viewBox="0 0 80 64" fill="none" xmlns="http://www.w3.org/2000/svg" { ...props }>
 			<path d="M15.0067 10.0961C16.1067 10.0961 17.0067 9.19609 17.0067 7.99609C17.0067 6.79609 16.1067 5.99609 15.0067 5.99609C13.9067 5.99609 12.9067 6.89609 12.9067 8.09609C12.9067 9.29609 13.8067 10.0961 15.0067 10.0961Z" fill="#285BE7" />
 			<path d="M21.7068 7.99609H24.7068" stroke="#285BE7" strokeWidth="2" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
 			<path d="M13.2068 37.5977H24.0068" stroke="#285BE7" strokeWidth="2" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />

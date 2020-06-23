@@ -2,6 +2,7 @@
  * WordPress dependencies
  */
 import { useContext, useEffect } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * External dependencies
@@ -34,17 +35,21 @@ export function Summary() {
 		setCanGoForward( true );
 	}, [ setCanGoForward ] );
 
+	if ( undefined === themeSupport ) {
+		return null;
+	}
+
 	switch ( themeSupport ) {
 		case 'reader':
 			return <Reader currentTheme={ CURRENT_THEME } />;
 
 		case 'standard':
-			return <Standard />;
+			return <Standard currentTheme={ CURRENT_THEME } />;
 
 		case 'transitional':
-			return <Transitional />;
+			return <Transitional currentTheme={ CURRENT_THEME } />;
 
 		default:
-			return null;
+			throw new Error( __( 'A mode option was not accounted for on the summary screen.', 'amp' ) );
 	}
 }
