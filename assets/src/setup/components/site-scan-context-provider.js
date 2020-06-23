@@ -27,7 +27,7 @@ export function SiteScanContextProvider( { children } ) {
 	 */
 	useEffect( () => {
 		if ( ! scanningSite && ! themeIssues ) {
-			setThemeIssues( getQueryArg( global.location.href, 'amp-theme-issues' ) ? [ 'Theme issue 1' ] : [] ); // URL param is for testing.
+			setThemeIssues( getQueryArg( global.location.href, 'amp-theme-issues' ) ? [ 'Theme issue 1' ] : null ); // URL param is for testing.
 		}
 	}, [ scanningSite, themeIssues ] );
 
@@ -36,7 +36,7 @@ export function SiteScanContextProvider( { children } ) {
 	 */
 	useEffect( () => {
 		if ( ! scanningSite && ! pluginIssues ) {
-			setPluginIssues( getQueryArg( global.location.href, 'amp-plugin-issues' ) ? [ 'Plugin issue 1' ] : [] ); // URL param is for testing.
+			setPluginIssues( getQueryArg( global.location.href, 'amp-plugin-issues' ) ? [ 'Plugin issue 1' ] : null ); // URL param is for testing.
 		}
 	}, [ scanningSite, pluginIssues ] );
 

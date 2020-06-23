@@ -93,6 +93,7 @@
 
 .template-mode-selection .components-panel__body-title button .components-panel__arrow {
 	top: 1.125rem;
+	display: none; /* @todo Drawer will be expandable in 1.7 when site scan results are available. */
 }
 
 

@@ -33,7 +33,23 @@ export const NON_TECHNICAL = 'nonTechnical';
  * @param {boolean} args.hasPluginIssues Whether the site scan found plugin issues.
  * @param {boolean} args.hasThemeIssues Whether the site scan found theme issues.
  */
-export function getRecommendationLevels( { userIsTechnical, hasPluginIssues, hasThemeIssues } ) {
+export function getRecommendationLevels( { userIsTechnical, hasPluginIssues, hasThemeIssues, hasScanResults = true } ) {
+	// Handle case where scanning has failed or did not run.
+	if ( ! hasScanResults ) {
+		if ( userIsTechnical ) {
+			return {
+				[ READER ]: RECOMMENDED,
+				[ STANDARD ]: RECOMMENDED,
+				[ TRANSITIONAL ]: RECOMMENDED,
+			};
+		}
+		return {
+			[ READER ]: MOST_RECOMMENDED,
+			[ STANDARD ]: RECOMMENDED,
+			[ TRANSITIONAL ]: RECOMMENDED,
+		};
+	}
+
 	switch ( true ) {
 		case hasThemeIssues && hasPluginIssues && userIsTechnical:
 		case hasThemeIssues && ! hasPluginIssues && userIsTechnical:
@@ -100,11 +116,11 @@ export function getSelectionText( ...args ) {
 	switch ( true ) {
 		case match( COMPATIBILITY, READER, MOST_RECOMMENDED, NON_TECHNICAL ):
 		case match( COMPATIBILITY, READER, MOST_RECOMMENDED, TECHNICAL ):
-			return __( 'Best choice that makes it easy to turn AMP on despite the issues detected during the site scan', 'amp' );
+			return __( 'Reader mode is the best choice for users who don\'t have a technical background or would like a simpler setup.', 'amp' );
 
 		case match( COMPATIBILITY, READER, RECOMMENDED, NON_TECHNICAL ):
 		case match( COMPATIBILITY, READER, RECOMMENDED, TECHNICAL ):
-			return __( 'Acceptable choice that makes it easy to bring AMP content to your site, but this mode requires you to maintain two versions of your site.', 'amp' );
+			return __( 'Reader mode makes it easy to bring AMP content to your site, but the AMP version of your site will have a different theme.', 'amp' );
 
 		case match( COMPATIBILITY, READER, NOT_RECOMMENDED, NON_TECHNICAL ):
 		case match( COMPATIBILITY, READER, NOT_RECOMMENDED, TECHNICAL ):
@@ -114,19 +130,19 @@ export function getSelectionText( ...args ) {
 
 		case match( COMPATIBILITY, STANDARD, NOT_RECOMMENDED, NON_TECHNICAL ):
 		case match( COMPATIBILITY, STANDARD, NOT_RECOMMENDED, TECHNICAL ):
-			return __( 'Not recommended as key functionality may be missing and development work might be required. ', 'amp' );
+			return __( 'Standard mode is not recommended as key functionality may be missing and development work might be required. ', 'amp' );
 
 		case match( COMPATIBILITY, STANDARD, MOST_RECOMMENDED, NON_TECHNICAL ):
 		case match( COMPATIBILITY, STANDARD, MOST_RECOMMENDED, TECHNICAL ):
-			return __( 'This is a good choice since you have an AMP-compatible theme and no plugin issues were detected.', 'amp' );
+			return __( 'Standard mode is the best choice for your site because you are using an AMP-compatible theme and no plugin issues were detected.', 'amp' );
 
 		case match( COMPATIBILITY, TRANSITIONAL, MOST_RECOMMENDED, NON_TECHNICAL ):
 		case match( COMPATIBILITY, TRANSITIONAL, MOST_RECOMMENDED, TECHNICAL ):
-			return __( 'Recommended choice. It will make it easy to keep AMP content even if non-AMP-compatible plugins are used later on.', 'amp' );
+			return __( 'Transitional mode is recommended because it will make it easy to keep AMP content even if you install non-AMP-compatible plugins later', 'amp' );
 
 		case match( COMPATIBILITY, TRANSITIONAL, RECOMMENDED, NON_TECHNICAL ):
 		case match( COMPATIBILITY, TRANSITIONAL, RECOMMENDED, TECHNICAL ):
-			return __( 'A good choice if development work is pursued to fix the issues for critical functionality', 'amp' );
+			return __( 'Traditional mode is a good choice if you are able to address any issues around AMP-compatibility that may arise as you work on your site.', 'amp' );
 
 		case match( DETAILS, READER, NOT_RECOMMENDED, NON_TECHNICAL ):
 		case match( DETAILS, READER, NOT_RECOMMENDED, TECHNICAL ):
@@ -134,7 +150,7 @@ export function getSelectionText( ...args ) {
 		case match( DETAILS, READER, MOST_RECOMMENDED, TECHNICAL ):
 		case match( DETAILS, READER, RECOMMENDED, NON_TECHNICAL ):
 		case match( DETAILS, READER, RECOMMENDED, TECHNICAL ):
-			return __( 'In reader mode there are two themes and two versions of your site. It is the best choice if your site uses a theme that is not compatible with AMP (i.e. critical functionality is powered by JavaScript or it uses excessive CSS). With this mode you can keep your active theme, and bring AMP to your content strategy using any AMP-first theme.', 'amp' );
+			return __( 'In Reader mode <b>your site will have a non-AMP and an AMP version</b>, and <b>each version will use its own theme</b>. If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content.', 'amp' );
 
 		case match( DETAILS, TRANSITIONAL, NOT_RECOMMENDED, NON_TECHNICAL ):
 		case match( DETAILS, TRANSITIONAL, NOT_RECOMMENDED, TECHNICAL ):
@@ -142,7 +158,7 @@ export function getSelectionText( ...args ) {
 		case match( DETAILS, TRANSITIONAL, MOST_RECOMMENDED, TECHNICAL ):
 		case match( DETAILS, TRANSITIONAL, RECOMMENDED, NON_TECHNICAL ):
 		case match( DETAILS, TRANSITIONAL, RECOMMENDED, TECHNICAL ):
-			return __( 'A single theme and two versions of your full site. A plausible choice if your site\'s theme is only partially AMP compatible. If you are a power user, you can leverage the transitional mode while you work towards making the site fully AMP compatible.', 'amp' );
+			return __( 'In Transitional mode <b>your site will have a non-AMP and an AMP version</b>, and <b>both will use the same theme</b>. If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content. ', 'amp' );
 
 		case match( DETAILS, STANDARD, RECOMMENDED, NON_TECHNICAL ):
 		case match( DETAILS, STANDARD, RECOMMENDED, TECHNICAL ):
@@ -150,12 +166,12 @@ export function getSelectionText( ...args ) {
 		case match( DETAILS, STANDARD, MOST_RECOMMENDED, TECHNICAL ):
 		case match( DETAILS, STANDARD, NOT_RECOMMENDED, NON_TECHNICAL ):
 		case match( DETAILS, STANDARD, NOT_RECOMMENDED, TECHNICAL ):
-			return __( 'In Standard Mode your site uses a single theme and there is a single version of your content. In this mode, AMP is the framework of your site and there is reduced development and maintenance costs by having a single site to maintain.', 'amp' );
+			return __( 'In Standard mode <b>your site will be completely AMP</b> (except in cases where you opt-out of AMP for specific content types), and <b>it will use a single theme</b>. ', 'amp' );
 
 		// Cases potentially never used.
 		case match( COMPATIBILITY, STANDARD, RECOMMENDED, NON_TECHNICAL ):
 		case match( COMPATIBILITY, STANDARD, RECOMMENDED, TECHNICAL ):
-			return '';
+			return 'Standard mode is a good choice if your site has an AMP-compatible theme and only uses AMP-compatible plugins. If you\'re not sure of the compatibility of your themes and plugins, Reader mode may be a better option.';
 
 		default: {
 			throw new Error( __( 'A selection text recommentation was not accounted for. ', 'amp' ) + JSON.stringify( args ) );

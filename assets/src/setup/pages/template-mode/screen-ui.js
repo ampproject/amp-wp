@@ -72,7 +72,7 @@ export function Selection( { compatibility, id, illustration, details, onChange,
 				className="template-mode-selection__details"
 			>
 				<p>
-					{ details }
+					<span dangerouslySetInnerHTML={ { __html: details } } />
 					{ ' ' }
 					{ /* @todo Temporary URL. */ }
 					<a href="http://amp-wp.org">
@@ -81,7 +81,7 @@ export function Selection( { compatibility, id, illustration, details, onChange,
 				</p>
 			</div>
 			<AMPNotice size={ NOTICE_SIZE_LARGE } type={ recommendationLevelType }>
-				<PanelBody title={ compatibility } initialOpen={ false }>
+				<PanelBody title={ compatibility } initialOpen={ false } opened={ false }>
 					<PanelRow>
 						<h3>
 							{ __( 'Compatibility', 'amp' ) }
@@ -131,10 +131,11 @@ export function ScreenUI( { currentMode, developerToolsOption, pluginIssues, set
 	const recommendationLevels = useMemo( () => getRecommendationLevels(
 		{
 			userIsTechnical,
-			hasPluginIssues: 0 < pluginIssues.length,
-			hasThemeIssues: 0 < themeIssues.length,
+			hasScanResults: null !== pluginIssues && null !== themeIssues,
+			hasPluginIssues: pluginIssues && 0 < pluginIssues.length,
+			hasThemeIssues: themeIssues && 0 < themeIssues.length,
 		},
-	), [ pluginIssues.length, themeIssues.length, userIsTechnical ] );
+	), [ themeIssues, pluginIssues, userIsTechnical ] );
 
 	const sectionText = useMemo( () => getAllSelectionText( recommendationLevels, userIsTechnical ? TECHNICAL : NON_TECHNICAL ), [ recommendationLevels, userIsTechnical ] );
 
@@ -186,6 +187,6 @@ ScreenUI.propTypes = {
 	currentMode: PropTypes.string.isRequired,
 	developerToolsOption: PropTypes.bool.isRequired,
 	setCurrentMode: PropTypes.func.isRequired,
-	pluginIssues: PropTypes.arrayOf( PropTypes.string ).isRequired,
-	themeIssues: PropTypes.arrayOf( PropTypes.string ).isRequired,
+	pluginIssues: PropTypes.arrayOf( PropTypes.string ),
+	themeIssues: PropTypes.arrayOf( PropTypes.string ),
 };
