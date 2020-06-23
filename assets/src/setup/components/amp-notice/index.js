@@ -86,7 +86,7 @@ export function AMPNotice( { children, className, icon, size, type } ) {
 			<div className="amp-notice__icon">
 				{ noticeIcon }
 			</div>
-			<div>
+			<div className="amp-notice__body">
 				{ children }
 			</div>
 		</div>

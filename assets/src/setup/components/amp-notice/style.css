@@ -3,6 +3,10 @@
 	display: flex;
 }
 
+.amp-notice__body {
+	flex-grow: 1;
+}
+
 .amp-notice--success {
 	background-color: #ecfef1;
 }
@@ -27,8 +31,11 @@
 }
 
 .amp-notice--large {
-	align-items: center;
 	padding: 0.5rem 1rem 0.5rem 0.5rem;
+}
+
+.amp-notice--large .amp-notice__icon {
+	margin-top: 0.5rem;
 }
 
 .amp-notice--large svg {
@@ -36,4 +43,13 @@
 	margin-right: 1rem;
 	height: 42px;
 	width: 42px;
+}
+
+.amp-notice--large.amp-notice--success .amp-notice__icon {
+	padding: 7px;
+}
+
+.amp-notice--large.amp-notice--success svg {
+	height: 35px;
+	width: 35px;
 }

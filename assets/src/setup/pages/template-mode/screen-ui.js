@@ -16,11 +16,11 @@ import PropTypes from 'prop-types';
  */
 import './style.css';
 import { Selectable } from '../../components/selectable';
-import { AMPNotice, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_INFO, NOTICE_TYPE_WARNING, NOTICE_SIZE_SMALL, NOTICE_SIZE_LARGE } from '../../components/amp-notice';
+import { AMPNotice, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_INFO, NOTICE_TYPE_WARNING, NOTICE_SIZE_LARGE } from '../../components/amp-notice';
 import { Standard } from './svg-standard';
 import { Transitional } from './svg-transitional';
 import { Reader } from './svg-reader';
-import { getSelectionDetails, MOST_RECOMMENDED, RECOMMENDED } from './get-selection-details';
+import { MOST_RECOMMENDED, RECOMMENDED, getRecommendationLevels, getAllSelectionText, TECHNICAL, NON_TECHNICAL, STANDARD, TRANSITIONAL, READER, NOT_RECOMMENDED } from './get-selection-details';
 
 /**
  * An individual mode selection component.
@@ -35,25 +35,16 @@ import { getSelectionDetails, MOST_RECOMMENDED, RECOMMENDED } from './get-select
  * @param {string} props.title The title for the selection.
  */
 export function Selection( { compatibility, id, illustration, details, onChange, recommended, selected, title } ) {
-	const { recommendationLevelType, recommendationLevelText } = useMemo( () => {
+	const recommendationLevelType = useMemo( () => {
 		switch ( recommended ) {
 			case MOST_RECOMMENDED:
-				return {
-					recommendationLevelText: __( 'The best option for your site.', 'amp' ),
-					recommendationLevelType: NOTICE_TYPE_SUCCESS,
-				};
+				return NOTICE_TYPE_SUCCESS;
 
 			case RECOMMENDED:
-				return {
-					recommendationLevelText: __( 'A good option for your site.', 'amp' ),
-					recommendationLevelType: NOTICE_TYPE_INFO,
-				};
+				return NOTICE_TYPE_INFO;
 
 			default:
-				return {
-					recommendationLevelText: __( 'Not recommended for your site.', 'amp' ),
-					recommendationLevelType: NOTICE_TYPE_WARNING,
-				};
+				return NOTICE_TYPE_WARNING;
 		}
 	}, [ recommended ] );
 
@@ -75,45 +66,38 @@ export function Selection( { compatibility, id, illustration, details, onChange,
 					<h2>
 						{ title }
 					</h2>
-
-					<AMPNotice size={ NOTICE_SIZE_SMALL } type={ recommendationLevelType }>
-						{ recommendationLevelText }
-					</AMPNotice>
 				</div>
 			</label>
-			<PanelBody title={ __( 'Details', 'amp' ) } initialOpen={ 1 === recommended }>
-				<PanelRow>
-
-					<ul>
-						{ details.map( ( detail, index ) => (
-							<li key={ `${ id }-detail-${ index }` }>
-								{ detail }
-							</li>
-						) ) }
-					</ul>
-				</PanelRow>
-			</PanelBody>
-			<PanelBody title={ __( 'Compatibility', 'amp' ) } initialOpen={ false }>
-				<PanelRow>
-					<AMPNotice size={ NOTICE_SIZE_LARGE } type={ recommendationLevelType }>
-						{ __( 'Lorem ipsum dolor sit amet', 'amp' ) }
-					</AMPNotice>
-					<p>
-						{ compatibility }
-					</p>
-				</PanelRow>
-			</PanelBody>
+			<div
+				className="template-mode-selection__details"
+			>
+				<p>
+					{ details }
+				</p>
+			</div>
+			<AMPNotice size={ NOTICE_SIZE_LARGE } type={ recommendationLevelType }>
+				<PanelBody title={ compatibility } initialOpen={ false }>
+					<PanelRow>
+						<h3>
+							{ __( 'Compatibility', 'amp' ) }
+						</h3>
+						<p>
+							{ 'Lorem ipsum dolar sit amet' }
+						</p>
+					</PanelRow>
+				</PanelBody>
+			</AMPNotice>
 		</Selectable>
 	);
 }
 
 Selection.propTypes = {
 	compatibility: PropTypes.node.isRequired,
+	details: PropTypes.node.isRequired,
 	id: PropTypes.string.isRequired,
 	illustration: PropTypes.node.isRequired,
-	details: PropTypes.arrayOf( PropTypes.string.isRequired ),
 	onChange: PropTypes.func.isRequired,
-	recommended: PropTypes.oneOf( [ -1, 0, 1 ] ).isRequired,
+	recommended: PropTypes.oneOf( [ RECOMMENDED, NOT_RECOMMENDED, MOST_RECOMMENDED ] ).isRequired,
 	selected: PropTypes.bool.isRequired,
 	title: PropTypes.string.isRequired,
 };
@@ -133,47 +117,55 @@ export function ScreenUI( { currentMode, developerToolsOption, pluginIssues, set
 	const transitionalId = 'transitional-mode';
 	const readerId = 'reader-mode';
 
-	const selectionConfig = useMemo( () => {
-		return getSelectionDetails(
-			{
-				userIsTechnical: developerToolsOption === true,
-				hasPluginIssues: 0 < pluginIssues.length,
-				hasThemeIssues: 0 < themeIssues.length,
-			},
-		);
-	}, [ developerToolsOption, pluginIssues.length, themeIssues.length ] );
+	const userIsTechnical = useMemo( () => developerToolsOption === true, [ developerToolsOption ] );
+
+	const recommendationLevels = useMemo( () => getRecommendationLevels(
+		{
+			userIsTechnical,
+			hasPluginIssues: 0 < pluginIssues.length,
+			hasThemeIssues: 0 < themeIssues.length,
+		},
+	), [ pluginIssues.length, themeIssues.length, userIsTechnical ] );
+
+	const sectionText = useMemo( () => getAllSelectionText( recommendationLevels, userIsTechnical ? TECHNICAL : NON_TECHNICAL ), [ recommendationLevels, userIsTechnical ] );
 
 	return (
 		<form>
 			<Selection
-				{ ...selectionConfig.standard }
+				compatibility={ sectionText.standard.compatibility }
+				details={ sectionText.standard.details }
 				id={ standardId }
 				illustration={ <Standard /> }
 				onChange={ () => {
 					setCurrentMode( 'standard' );
 				} }
+				recommended={ recommendationLevels[ STANDARD ] }
 				selected={ currentMode === 'standard' }
 				title={ __( 'Standard', 'amp' ) }
 			/>
 
 			<Selection
-				{ ...selectionConfig.transitional }
+				compatibility={ sectionText.transitional.compatibility }
+				details={ sectionText.transitional.details }
 				id={ transitionalId }
 				illustration={ <Transitional /> }
 				onChange={ () => {
 					setCurrentMode( 'transitional' );
 				} }
+				recommended={ recommendationLevels[ TRANSITIONAL ] }
 				selected={ currentMode === 'transitional' }
 				title={ __( 'Transitional', 'amp' ) }
 			/>
 
 			<Selection
-				{ ...selectionConfig.reader }
+				compatibility={ sectionText.reader.compatibility }
+				details={ sectionText.reader.details }
 				id={ readerId }
 				illustration={ <Reader /> }
 				onChange={ () => {
 					setCurrentMode( 'reader' );
 				} }
+				recommended={ recommendationLevels[ READER ] }
 				selected={ currentMode === 'reader' }
 				title={ __( 'Reader', 'amp' ) }
 			/>
