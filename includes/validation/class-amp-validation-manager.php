@@ -560,9 +560,9 @@ class AMP_Validation_Manager {
 		$override_validation_error_statuses = (
 			isset( $_REQUEST['preview'] )
 			&&
-			isset( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			! empty( $_REQUEST[ AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			&&
-			is_array( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			is_array( $_REQUEST[ AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		);
 		if ( ! $override_validation_error_statuses ) {
 			return;
@@ -574,15 +574,18 @@ class AMP_Validation_Manager {
 				[ 'response' => 401 ]
 			);
 		}
-		$statuses = $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ]; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		/*
 		 * This can't just easily add an amp_validation_error_sanitized filter because the the filter_sanitizer_args() method
 		 * currently needs to obtain the list of overrides to create a parsed_cache_variant.
 		 */
-		foreach ( $statuses as $slug => $status ) {
+		foreach ( $_REQUEST[ AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY ] as $slug => $data ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			if ( ! isset( $data[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) ) {
+				continue;
+			}
+
 			$slug   = sanitize_key( $slug );
-			$status = (int) $status;
+			$status = (int) $data[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ];
 			self::$validation_error_status_overrides[ $slug ] = $status;
 			ksort( self::$validation_error_status_overrides );
 		}
