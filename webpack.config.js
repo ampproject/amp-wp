@@ -14,7 +14,7 @@ const WebpackBar = require( 'webpackbar' );
  */
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
-const { defaultRequestToExternal, defaultRequestToHandle, camelCaseDash } = require( '@wordpress/dependency-extraction-webpack-plugin/util' );
+const { defaultRequestToExternal, defaultRequestToHandle, camelCaseDash } = require( '@wordpress/dependency-extraction-webpack-plugin/lib/util' );
 
 const sharedConfig = {
 	output: {
@@ -225,12 +225,14 @@ const wpPolyfills = {
 				return defaultRequestToExternal( request );
 			},
 		} ),
-		new CopyWebpackPlugin( [
-			{
-				from: 'node_modules/lodash/lodash.js',
-				to: './vendor/lodash.js',
-			},
-		] ),
+		new CopyWebpackPlugin( [ {
+			patterns: [
+				{
+					from: 'node_modules/lodash/lodash.js',
+					to: './vendor/lodash.js',
+				},
+			],
+		} ] ),
 		new WebpackBar( {
 			name: 'WordPress Polyfills',
 			color: '#21a0d0',
