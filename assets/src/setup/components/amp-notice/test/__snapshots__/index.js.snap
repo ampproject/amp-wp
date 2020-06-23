@@ -19,7 +19,9 @@ exports[`AMPNotice matches snapshots 1`] = `
       />
     </svg>
   </div>
-  <div>
+  <div
+    className="amp-notice__body"
+  >
     Component children
   </div>
 </div>
@@ -36,7 +38,9 @@ exports[`AMPNotice matches snapshots 2`] = `
       amazing icon
     </div>
   </div>
-  <div>
+  <div
+    className="amp-notice__body"
+  >
     Component children
   </div>
 </div>
