@@ -73,6 +73,11 @@ export function Selection( { compatibility, id, illustration, details, onChange,
 			>
 				<p>
 					{ details }
+					{ ' ' }
+					{ /* @todo Temporary URL. */ }
+					<a href="http://amp-wp.org">
+						{ __( 'Learn more.', 'amp' ) }
+					</a>
 				</p>
 			</div>
 			<AMPNotice size={ NOTICE_SIZE_LARGE } type={ recommendationLevelType }>
@@ -82,7 +87,11 @@ export function Selection( { compatibility, id, illustration, details, onChange,
 							{ __( 'Compatibility', 'amp' ) }
 						</h3>
 						<p>
-							{ 'Lorem ipsum dolar sit amet' }
+							{ 'Lorem ipsum dolar sit amet. ' }
+							{ /* @todo Temporary URL. */ }
+							<a href="http://amp-wp.org">
+								{ __( 'Learn more.', 'amp' ) }
+							</a>
 						</p>
 					</PanelRow>
 				</PanelBody>

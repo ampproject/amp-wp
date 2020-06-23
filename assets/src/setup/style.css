@@ -22,6 +22,10 @@ body {
 	padding-bottom: 4rem;
 }
 
+a {
+	color: var(--brand);
+}
+
 h1,
 h2,
 h3,
