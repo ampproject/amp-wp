@@ -55,8 +55,40 @@ final class MobileRedirection implements Service, Registerable {
 	 * Register.
 	 */
 	public function register() {
+		add_filter( 'amp_default_options', [ $this, 'filter_default_options' ] );
+
+		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
+
 		add_action( 'wp', [ $this, 'redirect' ] );
 		add_filter( 'amp_unavailable_redirect_url', [ $this, 'ensure_noamp_unavailable_redirect_url' ] );
+	}
+
+	/**
+	 * Add default option.
+	 *
+	 * @param array $defaults Default options.
+	 * @return array Defaults.
+	 */
+	public function filter_default_options( $defaults ) {
+		$defaults[ Option::MOBILE_REDIRECT ] = false;
+		return $defaults;
+	}
+
+	/**
+	 * Sanitize options.
+	 *
+	 * @param array $options     Existing options with already-sanitized values for updating.
+	 * @param array $new_options Unsanitized options being submitted for updating.
+	 *
+	 * @return array Sanitized options.
+	 */
+	public function sanitize_options( $options, $new_options ) {
+		if ( isset( $new_options[ Option::MOBILE_REDIRECT ] ) && 'on' === $new_options[ Option::MOBILE_REDIRECT ] ) {
+			$options[ Option::MOBILE_REDIRECT ] = true;
+		} else {
+			$options[ Option::MOBILE_REDIRECT ] = false;
+		}
+		return $options;
 	}
 
 	/**

@@ -29,7 +29,6 @@ class AMP_Options_Manager {
 		Option::SUPPORTED_POST_TYPES    => [ 'post' ],
 		Option::ANALYTICS               => [],
 		Option::ALL_TEMPLATES_SUPPORTED => true,
-		Option::MOBILE_REDIRECT         => false,
 		Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
 		Option::VERSION                 => AMP__VERSION,
 		Option::READER_THEME            => AMP_Reader_Themes::DEFAULT_READER_THEME,
@@ -235,13 +234,6 @@ class AMP_Options_Manager {
 					array_keys( AMP_Theme_Support::get_supportable_templates() )
 				);
 			}
-		}
-
-		// Validate mobile redirect.
-		if ( isset( $new_options[ Option::MOBILE_REDIRECT ] ) && 'on' === $new_options[ Option::MOBILE_REDIRECT ] ) {
-			$options[ Option::MOBILE_REDIRECT ] = true;
-		} else {
-			$options[ Option::MOBILE_REDIRECT ] = false;
 		}
 
 		// Validate analytics.
