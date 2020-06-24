@@ -34,6 +34,7 @@ class AMP_Options_Manager {
 		Option::VERSION                 => AMP__VERSION,
 		Option::READER_THEME            => AMP_Reader_Themes::DEFAULT_READER_THEME,
 		Option::SUPPRESSED_PLUGINS      => [],
+		Option::WIZARD_COMPLETED        => false,
 	];
 
 	/**
@@ -235,6 +236,11 @@ class AMP_Options_Manager {
 			$options[ Option::MOBILE_REDIRECT ] = true;
 		} else {
 			$options[ Option::MOBILE_REDIRECT ] = false;
+		}
+
+		// Validate wizard completion.
+		if ( isset( $new_options[ Option::WIZARD_COMPLETED ] ) ) {
+			$options[ Option::WIZARD_COMPLETED ] = (bool) $new_options[ OPTION::WIZARD_COMPLETED ];
 		}
 
 		// Validate analytics.

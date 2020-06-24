@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { createContext, useEffect, useState, useRef, useCallback, useMemo } from '@wordpress/element';
+import { createContext, useEffect, useState, useRef, useCallback, useMemo, useContext } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -13,6 +13,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import { useError } from '../utils/use-error';
+import { Options } from './options-context-provider';
 
 export const User = createContext();
 
@@ -25,6 +26,7 @@ export const User = createContext();
  * @param {string} props.userRestEndpoint REST endpoint to retrieve options.
  */
 export function UserContextProvider( { children, userOptionDeveloperTools, userRestEndpoint } ) {
+	const { options } = useContext( Options );
 	const [ user, setUser ] = useState( null );
 	const [ fetchingUser, setFetchingUser ] = useState( false );
 	const [ developerToolsOption, setDeveloperToolsOption ] = useState( null );
@@ -45,6 +47,15 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 	 * Fetch user options on mount.
 	 */
 	useEffect( () => {
+		if ( ! options ) {
+			return;
+		}
+
+		// On initial run, keep the option null until the user makes a selection.
+		if ( true !== options.wizard_completed ) {
+			return;
+		}
+
 		if ( ! userRestEndpoint || user || fetchingUser ) {
 			return;
 		}
@@ -71,7 +82,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 
 			setFetchingUser( false );
 		} )();
-	}, [ user, fetchingUser, setError, userOptionDeveloperTools, userRestEndpoint ] );
+	}, [ user, fetchingUser, options, setError, userOptionDeveloperTools, userRestEndpoint ] );
 
 	/**
 	 * Sends the option back to the REST endpoint to be saved.

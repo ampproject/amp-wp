@@ -144,6 +144,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				Option::VERSION                 => AMP__VERSION,
 				Option::READER_THEME            => 'classic',
 				Option::MOBILE_REDIRECT         => false,
+				Option::WIZARD_COMPLETED        => false,
 			],
 			AMP_Options_Manager::get_options()
 		);

@@ -185,8 +185,8 @@ export function ScreenUI( { currentMode, developerToolsOption, pluginIssues, set
 }
 
 ScreenUI.propTypes = {
-	currentMode: PropTypes.string.isRequired,
-	developerToolsOption: PropTypes.bool.isRequired,
+	currentMode: PropTypes.string,
+	developerToolsOption: PropTypes.bool,
 	setCurrentMode: PropTypes.func.isRequired,
 	pluginIssues: PropTypes.arrayOf( PropTypes.string ),
 	themeIssues: PropTypes.arrayOf( PropTypes.string ),

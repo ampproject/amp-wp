@@ -45,7 +45,13 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 		setSavingOptions( true );
 
 		try {
-			await apiFetch( { method: 'post', url: addQueryArgs( optionsRestEndpoint, { 'amp-new-onboarding': '1' } ), data: options } );
+			await apiFetch(
+				{
+					method: 'post',
+					url: addQueryArgs( optionsRestEndpoint, { 'amp-new-onboarding': '1' } ),
+					data: { ...options, wizard_completed: true },
+				},
+			);
 
 			if ( true === hasUnmounted.current ) {
 				return;
@@ -91,7 +97,11 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 					return;
 				}
 
-				setOptions( fetchedOptions );
+				setOptions(
+					true === fetchedOptions.wizard_completed
+						? { ...fetchedOptions, theme_support: null } // Reset mode for the current session to force user to make a choice.
+						: {},
+				);
 			} catch ( e ) {
 				setError( e );
 				return;

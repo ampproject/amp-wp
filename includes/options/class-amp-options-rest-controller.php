@@ -124,7 +124,7 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 				'type'       => 'object',
 				'properties' => [
 					// Note: The sanitize_callback from AMP_Options_Manager::register_settings() is applying to this option.
-					Option::THEME_SUPPORT   => [
+					Option::THEME_SUPPORT    => [
 						'type' => 'string',
 						'enum' => [
 							AMP_Theme_Support::READER_MODE_SLUG,
@@ -132,7 +132,7 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 							AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
 						],
 					],
-					Option::READER_THEME    => [
+					Option::READER_THEME     => [
 						'type'        => 'string',
 						'arg_options' => [
 							'validate_callback' => function ( $value ) {
@@ -141,7 +141,11 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 							},
 						],
 					],
-					Option::MOBILE_REDIRECT => [
+					Option::MOBILE_REDIRECT  => [
+						'type'    => 'boolean',
+						'default' => false,
+					],
+					Option::WIZARD_COMPLETED => [
 						'type'    => 'boolean',
 						'default' => false,
 					],
