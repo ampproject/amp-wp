@@ -36,7 +36,14 @@ export function Standard( { currentTheme } ) {
 					{ currentTheme.name }
 				</h3>
 				<Desktop>
-					<img src={ currentTheme.screenshot } alt={ currentTheme.name } />
+					<img
+						src={ currentTheme.screenshot }
+						alt={ currentTheme.name }
+						loading="lazy"
+						decoding="async"
+						height="900"
+						width="1200"
+					/>
 				</Desktop>
 			</div>
 

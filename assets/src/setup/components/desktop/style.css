@@ -2,6 +2,7 @@
 	background: #f1f1f1;
 	border-radius: 12px;
 	margin-bottom: 1.5rem;
+	min-height: 230px;
 	padding: 17px 13px;
 	position: relative;
 }

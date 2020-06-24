@@ -58,9 +58,16 @@ export function Transitional( { currentTheme } ) {
 					</h4>
 				</div>
 
-				<div className="grid grid-1-2">
+				<div className="grid grid-1-2 transitional-summary__screenshot">
 					<Desktop>
-						<img src={ currentTheme.screenshot } alt={ currentTheme.name } />
+						<img
+							src={ currentTheme.screenshot }
+							alt={ currentTheme.name }
+							loading="lazy"
+							decoding="async"
+							height="900"
+							width="1200"
+						/>
 					</Desktop>
 					<div>
 						{ currentTheme.description }

@@ -49,7 +49,14 @@ export function Reader( { currentTheme } ) {
 				<div>
 					<div className="selectable selectable--bottom">
 						<Desktop>
-							<img src={ currentTheme.screenshot } alt={ currentTheme.name } />
+							<img
+								src={ currentTheme.screenshot }
+								alt={ currentTheme.name }
+								loading="lazy"
+								decoding="async"
+								height="900"
+								width="1200"
+							/>
 
 						</Desktop>
 
@@ -75,7 +82,14 @@ export function Reader( { currentTheme } ) {
 				<div>
 					<div className="selectable selectable--bottom">
 						<Phone>
-							<img src={ readerThemeData.screenshot_url } alt={ readerThemeData.name } />
+							<img
+								src={ readerThemeData.screenshot_url }
+								alt={ readerThemeData.name }
+								loading="lazy"
+								decoding="async"
+								height="2165"
+								width="1000"
+							/>
 						</Phone>
 
 						<h3>

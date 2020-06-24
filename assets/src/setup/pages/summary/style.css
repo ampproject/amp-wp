@@ -21,6 +21,11 @@
 	}
 }
 
+.reader-summary__screens img {
+	height: auto;
+	width: 100%;
+}
+
 .reader-summary__screens .selectable {
 	padding: 35px 30px;
 }
@@ -70,9 +75,9 @@
 	line-height: 1.5;
 }
 
-.transitional-summary__screenshot {
-	padding: 40px;
-	text-align: center;
+.transitional-summary__screenshot img {
+	width: 100%;
+	height: auto;
 }
 
 .transitional-summary .transitional-summary__footer .components-toggle-control__label {
@@ -108,6 +113,11 @@
 
 .standard-summary__screenshot {
 	text-align: center;
+}
+
+.standard-summary__screenshot img {
+	width: 100%;
+	height: auto;
 }
 
 .standard-summary .plus-icon {
