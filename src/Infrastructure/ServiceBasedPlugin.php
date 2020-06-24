@@ -216,7 +216,7 @@ abstract class ServiceBasedPlugin implements Plugin {
 	 * @param mixed    $services Services to validate.
 	 * @param string[] $fallback Fallback value to use if $services is not
 	 *                           salvageable.
-	 * @return string[]
+	 * @return string[] Validated array of service mappings.
 	 */
 	protected function validate_services( $services, $fallback ) {
 		// If we don't have an array, something went wrong with filtering.
