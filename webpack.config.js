@@ -50,7 +50,6 @@ const sharedConfig = {
 		} ),
 	],
 	optimization: {
-		...defaultConfig.optimization,
 		minimizer: [
 			new TerserPlugin( {
 				parallel: true,

@@ -29,7 +29,7 @@ export function TechnicalBackground() {
 	 * Allow moving forward.
 	 */
 	useEffect( () => {
-		if ( canGoForward === false ) {
+		if ( canGoForward === false && 'boolean' === typeof developerToolsOption ) {
 			setCanGoForward( true );
 		}
 	}, [ canGoForward, developerToolsOption, setCanGoForward ] );

@@ -33,8 +33,8 @@ export const PAGES = [
 		PageComponent: TemplateMode,
 	},
 	{
-		slug: 'reader-themes',
-		title: __( 'Reader themes', 'amp' ),
+		slug: 'theme-selection',
+		title: __( 'Theme selection', 'amp' ),
 		PageComponent: ChooseReaderTheme,
 	},
 	{
@@ -48,3 +48,4 @@ export const PAGES = [
 		PageComponent: Save,
 	},
 ];
+

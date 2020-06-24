@@ -22,6 +22,7 @@ import { NavigationContextProvider } from './components/navigation-context-provi
 import { ReaderThemesContextProvider } from './components/reader-themes-context-provider';
 import { UserContextProvider } from './components/user-context-provider';
 import { ErrorScreen } from './components/error-screen';
+import { SiteScanContextProvider } from './components/site-scan-context-provider';
 
 const { ajaxurl: wpAjaxUrl } = global;
 
@@ -33,10 +34,10 @@ const { ajaxurl: wpAjaxUrl } = global;
  */
 export function Providers( { children } ) {
 	return (
-		<NavigationContextProvider pages={ PAGES }>
-			<OptionsContextProvider
-				optionsRestEndpoint={ OPTIONS_REST_ENDPOINT }
-			>
+		<OptionsContextProvider
+			optionsRestEndpoint={ OPTIONS_REST_ENDPOINT }
+		>
+			<NavigationContextProvider pages={ PAGES }>
 				<ReaderThemesContextProvider
 					wpAjaxUrl={ wpAjaxUrl }
 					readerThemesEndpoint={ READER_THEMES_REST_ENDPOINT }
@@ -46,13 +47,14 @@ export function Providers( { children } ) {
 						userOptionDeveloperTools={ USER_FIELD_DEVELOPER_TOOLS_ENABLED }
 						userRestEndpoint={ USER_REST_ENDPOINT }
 					>
-
-						{ children }
+						<SiteScanContextProvider>
+							{ children }
+						</SiteScanContextProvider>
 					</UserContextProvider>
 
 				</ReaderThemesContextProvider>
-			</OptionsContextProvider>
-		</NavigationContextProvider>
+			</NavigationContextProvider>
+		</OptionsContextProvider>
 	);
 }
 
