@@ -96,7 +96,7 @@ h6,
  * Inputs.
  */
 input[type="radio"] {
-	border-color: var(--light-gray);
+	border-color: var(--gray);
 	border-width: 2px;
 	box-shadow: none;
 	height: 1.5rem;
