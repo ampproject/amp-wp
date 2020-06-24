@@ -39,6 +39,8 @@ describe( 'AMP Setup Screen', () => {
 		titleText = await getTitleText();
 		expect( titleText ).toBe( 'Technical background' );
 
+		await page.$eval( '#technical-background-disable', ( el ) => el.click() );
+
 		await page.waitForSelector( `${ NEXT_BUTTON_SELECTOR }:not([disabled])` );
 		await page.click( NEXT_BUTTON_SELECTOR );
 		titleText = await getTitleText();
