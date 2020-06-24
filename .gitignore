@@ -6,7 +6,6 @@ wiki
 amp.zip
 /assets/css/*
 !/assets/css/src/
-assets/js/*.css
 assets/js/**/*.js
 assets/js/*.asset.php
 !assets/js/amp-service-worker-runtime-precaching.js
