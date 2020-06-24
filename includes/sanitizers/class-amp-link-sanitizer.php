@@ -34,25 +34,6 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 	const DEFAULT_META_CONTENT = 'AMP-Redirect-To; AMP.navigateTo';
 
 	/**
-	 * The rel attribute value for AMP links.
-	 *
-	 * @deprecated Use Attribute::REL_AMPHTML instead.
-	 * @var string
-	 */
-	const REL_VALUE_AMP = 'amphtml';
-
-	/**
-	 * The rel attribute value that will force non-AMP links.
-	 *
-	 * Normally, in a paired mode, links to the same origin will be for AMP.
-	 * But by adding this rel value, the link will be to non-AMP.
-	 *
-	 * @deprecated Use Attribute::REL_NOAMPHTML instead.
-	 * @var string
-	 */
-	const REL_VALUE_NON_AMP_TO_AMP = 'noamphtml';
-
-	/**
 	 * Placeholder for default arguments, to be set in child classes.
 	 *
 	 * @var array
