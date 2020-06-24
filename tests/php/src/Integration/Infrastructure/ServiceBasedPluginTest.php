@@ -4,6 +4,7 @@ namespace AmpProject\AmpWP\Tests\Integration\Infrastructure;
 
 use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Infrastructure\ServiceBasedPlugin;
+use AmpProject\AmpWP\Infrastructure\ServiceContainer;
 use AmpProject\AmpWP\Infrastructure\ServiceContainer\SimpleServiceContainer;
 use AmpProject\AmpWP\Tests\Fixture\DummyService;
 use AmpProject\AmpWP\Tests\Fixture\DummyServiceBasedPlugin;
@@ -15,6 +16,17 @@ final class ServiceBasedPluginTest extends WP_UnitTestCase {
 		$plugin = $this->createMock( ServiceBasedPlugin::class );
 
 		$this->assertInstanceOf( ServiceBasedPlugin::class, $plugin );
+	}
+
+	public function test_it_can_return_its_container() {
+		$plugin = $this->getMockBuilder( ServiceBasedPlugin::class )
+			->setMethodsExcept( [ 'get_container' ] )
+			->enableOriginalConstructor()
+			->getMock();
+
+		$container = $plugin->get_container();
+
+		$this->assertInstanceOf( ServiceContainer::class, $plugin->get_container() );
 	}
 
 	public function test_it_can_be_registered() {
@@ -212,5 +224,36 @@ final class ServiceBasedPluginTest extends WP_UnitTestCase {
 		$this->assertInstanceof( DummyService::class, $container->get( 'service_a' ) );
 		$this->assertTrue( $container->has( 'service_b' ) );
 		$this->assertInstanceof( DummyService::class, $container->get( 'service_b' ) );
+	}
+
+	public function test_it_can_have_filtering_disabled() {
+		$container = new SimpleServiceContainer();
+		$plugin    = $this->getMockBuilder( DummyServiceBasedPlugin::class )
+			->setConstructorArgs( [ false, null, $container ] )
+			->enableOriginalConstructor()
+			->setMethodsExcept(
+				[
+					'register',
+					'register_services',
+					'get_service_classes',
+				]
+			)
+			->getMock();
+
+		add_filter(
+			'services',
+			static function () {
+				return [ 'filtered_service' => DummyService::class ];
+			}
+		);
+
+		$plugin->register();
+
+		$this->assertEquals( 3, count( $container ) );
+		$this->assertTrue( $container->has( 'service_a' ) );
+		$this->assertInstanceof( DummyService::class, $container->get( 'service_a' ) );
+		$this->assertTrue( $container->has( 'service_b' ) );
+		$this->assertInstanceof( DummyService::class, $container->get( 'service_b' ) );
+		$this->assertFalse( $container->has( 'filtered_service' ) );
 	}
 }
