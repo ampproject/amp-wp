@@ -33,7 +33,7 @@ export function TemplateMode() {
 		}
 	}, [ canGoForward, setCanGoForward, scanningSite, themeSupport ] );
 
-	if ( scanningSite || null === developerToolsOption ) {
+	if ( scanningSite ) {
 		return <Loading />;
 	}
 
