@@ -48,7 +48,7 @@ export function ChooseReaderTheme() {
 	if ( 'reader' !== themeSupport ) {
 		return (
 			<p>
-				{ __( 'This screen is only relevant to sites that use Reader mode.', 'amp' ) }
+				{ __( 'This screen is only relevant to sites that use Reader mode. Please continue', 'amp' ) }
 			</p>
 		);
 	}
