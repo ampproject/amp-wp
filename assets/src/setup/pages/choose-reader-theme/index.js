@@ -21,22 +21,35 @@ export function ChooseReaderTheme() {
 	const { options } = useContext( Options );
 	const { fetchingThemes, themes } = useContext( ReaderThemes );
 
-	const { reader_theme: readerTheme } = options || {};
+	const { reader_theme: readerTheme, theme_support: themeSupport } = options || {};
 
 	/**
 	 * Allow moving forward.
 	 */
 	useEffect( () => {
+		if ( 'reader' !== themeSupport ) {
+			setCanGoForward( true );
+			return;
+		}
+
 		if ( themes && readerTheme && canGoForward === false ) {
 			if ( themes.map( ( { slug } ) => slug ).includes( readerTheme ) ) {
 				setCanGoForward( true );
 			}
 		}
-	}, [ canGoForward, setCanGoForward, readerTheme, themes ] );
+	}, [ canGoForward, setCanGoForward, readerTheme, themes, themeSupport ] );
 
 	if ( fetchingThemes ) {
 		return (
 			<Loading />
+		);
+	}
+
+	if ( 'reader' !== themeSupport ) {
+		return (
+			<p>
+				{ __( 'This screen is only relevant to sites that use Reader mode. Please continue', 'amp' ) }
+			</p>
 		);
 	}
 
