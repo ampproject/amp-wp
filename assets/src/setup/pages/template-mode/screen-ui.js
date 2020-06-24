@@ -27,6 +27,7 @@ import { MOST_RECOMMENDED, RECOMMENDED, getRecommendationLevels, getAllSelection
  *
  * @param {Object} props Component props.
  * @param {string|Object} props.compatibility Compatibility content.
+ * @param {string} props.id A string for the input's HTML ID.
  * @param {string|Object} props.illustration An illustration for the selection.
  * @param {Array} props.details Array of strings representing details about the mode and recommendation.
  * @param {Function} props.onChange Callback to select the mode.
