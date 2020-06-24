@@ -50,11 +50,13 @@ final class ServiceBasedPluginTest extends WP_UnitTestCase {
 			->enableOriginalConstructor()
 			->setConstructorArgs( [ true, null, $container ] )
 			->setMethods()
-			->setMethodsExcept( [
-				'register',
-				'register_services',
-				'get_service_classes'
-			] )
+			->setMethodsExcept(
+				[
+					'register',
+					'register_services',
+					'get_service_classes',
+				]
+			)
 			->getMock();
 
 		$this->assertEquals( 0, count( $container ) );
@@ -73,16 +75,21 @@ final class ServiceBasedPluginTest extends WP_UnitTestCase {
 		$plugin    = $this->getMockBuilder( DummyServiceBasedPlugin::class )
 			->enableOriginalConstructor()
 			->setConstructorArgs( [ true, null, $container ] )
-			->setMethodsExcept( [
-				'register',
-				'register_services',
-				'get_service_classes'
-			] )
+			->setMethodsExcept(
+				[
+					'register',
+					'register_services',
+					'get_service_classes',
+				]
+			)
 			->getMock();
 
-		add_filter( 'services', static function () {
-			return [ 'filtered_service' => DummyService::class ];
-		} );
+		add_filter(
+			'services',
+			static function () {
+				return [ 'filtered_service' => DummyService::class ];
+			}
+		);
 
 		$this->assertFalse( $container->has( 'filtered_service' ) );
 
@@ -98,21 +105,26 @@ final class ServiceBasedPluginTest extends WP_UnitTestCase {
 	public function test_it_provides_default_services_for_filtering() {
 		$container = new SimpleServiceContainer();
 		$plugin    = $this->getMockBuilder( DummyServiceBasedPlugin::class )
-		                  ->enableOriginalConstructor()
-		                  ->setConstructorArgs( [ true, null, $container ] )
-		                  ->setMethodsExcept( [
-			                  'register',
-			                  'register_services',
-			                  'get_service_classes'
-		                  ] )
-		                  ->getMock();
+			->enableOriginalConstructor()
+			->setConstructorArgs( [ true, null, $container ] )
+			->setMethodsExcept(
+				[
+					'register',
+					'register_services',
+					'get_service_classes',
+				]
+			)
+			->getMock();
 
-		add_filter( 'services', static function ( $services ) {
-			return array_merge(
-				$services,
-				[ 'filtered_service' => DummyService::class ]
-			);
-		} );
+		add_filter(
+			'services',
+			static function ( $services ) {
+				return array_merge(
+					$services,
+					[ 'filtered_service' => DummyService::class ]
+				);
+			}
+		);
 
 		$this->assertFalse( $container->has( 'filtered_service' ) );
 
@@ -135,9 +147,12 @@ final class ServiceBasedPluginTest extends WP_UnitTestCase {
 			->setMethodsExcept( [ 'register', 'register_services' ] )
 			->getMock();
 
-		add_filter( 'services', static function () {
-			return [ DummyService::class ];
-		} );
+		add_filter(
+			'services',
+			static function () {
+				return [ DummyService::class ];
+			}
+		);
 
 		$plugin->register();
 
@@ -154,11 +169,14 @@ final class ServiceBasedPluginTest extends WP_UnitTestCase {
 			->setMethodsExcept( [ 'register', 'register_services' ] )
 			->getMock();
 
-		add_filter( 'services', static function () {
-			return [
-				'unknown_class' => 'UnknownClass',
-			];
-		} );
+		add_filter(
+			'services',
+			static function () {
+				return [
+					'unknown_class' => 'UnknownClass',
+				];
+			}
+		);
 
 		$plugin->register();
 
@@ -171,16 +189,21 @@ final class ServiceBasedPluginTest extends WP_UnitTestCase {
 		$plugin    = $this->getMockBuilder( DummyServiceBasedPlugin::class )
 			->enableOriginalConstructor()
 			->setConstructorArgs( [ true, null, $container ] )
-			->setMethodsExcept( [
-				'register',
-				'register_services',
-				'get_service_classes'
-			] )
-		    ->getMock();
+			->setMethodsExcept(
+				[
+					'register',
+					'register_services',
+					'get_service_classes',
+				]
+			)
+			->getMock();
 
-		add_filter( 'services', static function () {
-			return null;
-		} );
+		add_filter(
+			'services',
+			static function () {
+				return null;
+			}
+		);
 
 		$plugin->register();
 
