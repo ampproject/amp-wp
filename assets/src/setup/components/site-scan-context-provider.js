@@ -23,7 +23,9 @@ export function SiteScanContextProvider( { children } ) {
 	const [ scanningSite, setScanningSite ] = useState( true );
 
 	/**
-	 * @todo This temporary code is for development purposes.
+	 * @todo Note: The following effects will be updated for version 1.7 when site scan is implemented in the wizard. For now,
+	 * we will keep themeIssues and pluginIssues set to null, emulating an unsuccessful site scan. The wizard will then make
+	 * a mode recommendation based only on how the user has answered the technical question.
 	 */
 	useEffect( () => {
 		if ( ! scanningSite && ! themeIssues ) {
@@ -31,18 +33,14 @@ export function SiteScanContextProvider( { children } ) {
 		}
 	}, [ scanningSite, themeIssues ] );
 
-	/**
-	 * @todo This temporary code is for development purposes.
-	 */
+	// See note above.
 	useEffect( () => {
 		if ( ! scanningSite && ! pluginIssues ) {
 			setPluginIssues( getQueryArg( global.location.href, 'amp-plugin-issues' ) ? [ 'Plugin issue 1' ] : null ); // URL param is for testing.
 		}
 	}, [ scanningSite, pluginIssues ] );
 
-	/**
-	 * @todo This temporary code is for development purposes.
-	 */
+	// See note above.
 	useEffect( () => {
 		if ( true === scanningSite ) {
 			setScanningSite( false );

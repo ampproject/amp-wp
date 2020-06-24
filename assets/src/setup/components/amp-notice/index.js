@@ -8,11 +8,6 @@ import PropTypes from 'prop-types';
  */
 import './style.css';
 
-/**
- * WordPress dependencies
- */
-import { useMemo } from '@wordpress/element';
-
 export const NOTICE_TYPE_WARNING = 'warning';
 export const NOTICE_TYPE_INFO = 'info';
 export const NOTICE_TYPE_SUCCESS = 'success';
@@ -25,7 +20,7 @@ export const NOTICE_SIZE_LARGE = 'large';
  *
  * @param {string} type Notice type.
  */
-function getDefaultNoticeIcon( type ) {
+function getNoticeIcon( type ) {
 	let Icon;
 
 	switch ( type ) {
@@ -67,12 +62,11 @@ function getDefaultNoticeIcon( type ) {
  * @param {Object} props Component props.
  * @param {string} props.children Notice content, not including the icon.
  * @param {string} props.className Optional extra class names.
- * @param {?string|Object} props.icon An icon to render in the notice. If not supplied, a default will be used.
  * @param {string} props.size The notice size.
  * @param {string} props.type The notice type.
  */
-export function AMPNotice( { children, className, icon, size, type } ) {
-	const noticeIcon = useMemo( () => icon ? icon : getDefaultNoticeIcon( type ), [ icon, type ] );
+export function AMPNotice( { children, className, size, type } ) {
+	const noticeIcon = getNoticeIcon( type );
 
 	const classNames = [
 		className ? className : '',
@@ -96,7 +90,6 @@ export function AMPNotice( { children, className, icon, size, type } ) {
 AMPNotice.propTypes = {
 	children: PropTypes.node,
 	className: PropTypes.string,
-	icon: PropTypes.node,
-	size: PropTypes.oneOf( [ NOTICE_SIZE_LARGE, NOTICE_SIZE_SMALL ] ),
+	size: PropTypes.oneOf( [ NOTICE_SIZE_LARGE, NOTICE_SIZE_SMALL ] ).isRequired,
 	type: PropTypes.oneOf( [ NOTICE_TYPE_INFO, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_WARNING ] ).isRequired,
 };

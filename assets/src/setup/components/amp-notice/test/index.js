@@ -37,12 +37,6 @@ describe( 'AMPNotice', () => {
 
 		wrapper = create(
 			<AMPNotice
-				icon={
-					(
-						<div>
-							{ 'amazing icon' }
-						</div>
-					) }
 				type={ NOTICE_TYPE_WARNING }
 				size={ NOTICE_SIZE_SMALL }>
 				{ 'Component children' }

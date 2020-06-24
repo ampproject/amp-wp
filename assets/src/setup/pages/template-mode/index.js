@@ -37,7 +37,7 @@ export function TemplateMode() {
 		return <Loading />;
 	}
 
-	// The actual display component should avoid using global context directly. This will facilitate developing and testing the UI using different options..
+	// The actual display component should avoid using global context directly. This will facilitate developing and testing the UI using different options.
 	return (
 		<ScreenUI
 			currentMode={ themeSupport }
