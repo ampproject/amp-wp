@@ -208,7 +208,7 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 		 * @param string[]   $rel        Link relations.
 		 * @param DOMElement $element    Element.
 		 */
-		$query_vars = apply_filters( 'amp_to_amp_element_query_vars', $query_vars, $excluded, $url, $element, $rel );
+		$query_vars = apply_filters( 'amp_to_amp_linking_element_query_vars', $query_vars, $excluded, $url, $element, $rel );
 
 		if ( $query_vars ) {
 			if ( Tag::FORM === $element->nodeName ) {

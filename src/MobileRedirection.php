@@ -60,7 +60,7 @@ final class MobileRedirection implements Service, Registerable {
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
 
 		add_action( 'wp', [ $this, 'redirect' ] );
-		add_filter( 'amp_unavailable_redirect_url', [ $this, 'ensure_noamp_unavailable_redirect_url' ] );
+		add_filter( 'amp_unavailable_redirect_url', [ $this, 'ensure_noamp_unavailable_redirect_url' ] ); // @todo Move this inside of the redirect method.
 	}
 
 	/**
@@ -167,7 +167,7 @@ final class MobileRedirection implements Service, Registerable {
 			add_action( 'wp_footer', [ $this, 'add_amp_mobile_version_switcher' ] );
 		} elseif ( ! amp_is_canonical() ) {
 			add_filter( 'amp_to_amp_linking_element_excluded', [ $this, 'filter_amp_to_amp_linking_element_excluded' ], 100, 2 );
-			add_filter( 'amp_to_amp_element_query_vars', [ $this, 'filter_amp_to_amp_element_query_vars' ], 10, 2 );
+			add_filter( 'amp_to_amp_linking_element_query_vars', [ $this, 'filter_amp_to_amp_linking_element_query_vars' ], 10, 2 );
 
 			// Add a link to the footer to allow for navigation to the non-AMP version.
 			add_action( 'amp_post_template_footer', [ $this, 'add_non_amp_mobile_version_switcher' ] ); // For Classic reader mode theme.
@@ -210,10 +210,10 @@ final class MobileRedirection implements Service, Registerable {
 	 * Ensure that links/forms which point to ?noamp up-front are excluded from AMP-to-AMP linking.
 	 *
 	 * @param string[] $query_vars Query vars.
-	 * @param bool     $excluded   Whether the element was excluded.
+	 * @param bool     $excluded   Whether the element was excluded from AMP-to-AMP linking.
 	 * @return string[] Query vars to add to the element.
 	 */
-	public function filter_amp_to_amp_element_query_vars( $query_vars, $excluded ) {
+	public function filter_amp_to_amp_linking_element_query_vars( $query_vars, $excluded ) {
 		if ( $excluded ) {
 			$query_vars[ self::NO_AMP_QUERY_VAR ] = '1';
 		}
