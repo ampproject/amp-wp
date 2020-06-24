@@ -76,7 +76,7 @@ export function Selection( { compatibility, id, illustration, details, onChange,
 					<span dangerouslySetInnerHTML={ { __html: details } } />
 					{ ' ' }
 					{ /* @todo Temporary URL. */ }
-					<a href="http://amp-wp.org">
+					<a href="http://amp-wp.org" target="_blank" rel="noreferrer">
 						{ __( 'Learn more.', 'amp' ) }
 					</a>
 				</p>
@@ -90,7 +90,7 @@ export function Selection( { compatibility, id, illustration, details, onChange,
 						<p>
 							{ 'Lorem ipsum dolar sit amet. ' }
 							{ /* @todo Temporary URL. */ }
-							<a href="http://amp-wp.org">
+							<a href="http://amp-wp.org" target="_blank" rel="noreferrer">
 								{ __( 'Learn more.', 'amp' ) }
 							</a>
 						</p>
