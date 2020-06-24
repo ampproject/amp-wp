@@ -42,10 +42,6 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 	 * @param {Object} data Plugin options to update.
 	 */
 	const saveOptions = useCallback( async () => {
-		if ( ! optionsRestEndpoint ) {
-			return;
-		}
-
 		setSavingOptions( true );
 
 		try {
@@ -78,7 +74,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 	}, [ hasOptionsChanges, options, setHasOptionsChanges, setOptions ] );
 
 	useEffect( () => {
-		if ( options || fetchingOptions || ! optionsRestEndpoint ) {
+		if ( options || fetchingOptions ) {
 			return;
 		}
 
@@ -130,5 +126,5 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 
 OptionsContextProvider.propTypes = {
 	children: PropTypes.any,
-	optionsRestEndpoint: PropTypes.string,
+	optionsRestEndpoint: PropTypes.string.isRequired,
 };

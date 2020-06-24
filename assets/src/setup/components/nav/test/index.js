@@ -4,6 +4,7 @@
  */
 import { act } from 'react-dom/test-utils';
 import { create } from 'react-test-renderer';
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
@@ -15,7 +16,21 @@ import { render } from '@wordpress/element';
  */
 import { Nav } from '..';
 import { NavigationContextProvider } from '../../navigation-context-provider';
-import { OptionsContextProvider } from '../../options-context-provider';
+import { Options } from '../../options-context-provider';
+function OptionsContextProvider( { children } ) {
+	return (
+		<Options.Provider value={
+			{
+				options: {},
+			}
+		}>
+			{ children }
+		</Options.Provider>
+	);
+}
+OptionsContextProvider.propTypes = {
+	children: PropTypes.any,
+};
 
 let container;
 
@@ -40,7 +55,7 @@ describe( 'Nav', () => {
 
 	it( 'matches snapshot', () => {
 		const wrapper = create(
-			<OptionsContextProvider optionsRestEndpoint={ null }>
+			<OptionsContextProvider>
 				<NavigationContextProvider pages={ testPages }>
 					<Nav exitLink="http://site.test" />
 				</NavigationContextProvider>
@@ -52,7 +67,7 @@ describe( 'Nav', () => {
 	it( 'hides previous button on first page', () => {
 		act( () => {
 			render(
-				<OptionsContextProvider optionsRestEndpoint={ null }>
+				<OptionsContextProvider>
 					<NavigationContextProvider pages={ testPages }>
 						<Nav exitLink="http://site.test" />
 					</NavigationContextProvider>
@@ -70,7 +85,7 @@ describe( 'Nav', () => {
 	it( 'disables next button on last page', () => {
 		act( () => {
 			render(
-				<OptionsContextProvider optionsRestEndpoint={ null }>
+				<OptionsContextProvider>
 					<NavigationContextProvider pages={ [ testPages[ 0 ] ] }>
 						<Nav exitLink="http://site.test" />
 					</NavigationContextProvider>
