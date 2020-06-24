@@ -132,7 +132,6 @@ Selection.propTypes = {
  * @param {string} props.savedCurrentMode The current selected mode saved in the database.
  * @param {Function} props.setCurrentMode The callback to update the selected mode.
  * @param {Array} props.themeIssues The theme issues found in the site scan.
- * @param props.savedCurrentMode
  */
 export function ScreenUI( { currentMode, developerToolsOption, pluginIssues, savedCurrentMode, setCurrentMode, themeIssues } ) {
 	const standardId = 'standard-mode';
