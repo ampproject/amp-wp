@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import './style.css';
 
 /**
- * Component resembling a phone with a screen.
+ * Component resembling a desktop computer with a screen.
  *
  * @param {Object} props Component props.
  * @param {any} props.children The elements to display in the screen.
