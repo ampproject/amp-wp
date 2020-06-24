@@ -31,6 +31,9 @@ abstract class ServiceBasedPlugin implements Plugin {
 	// Use false to register as soon as the code is loaded.
 	const REGISTRATION_ACTION = false;
 
+	// Whether to enable filtering by default or not.
+	const ENABLE_FILTERS_DEFAULT = true;
+
 	// Prefixes to use.
 	const HOOK_PREFIX    = '';
 	const SERVICE_PREFIX = '';
@@ -50,7 +53,7 @@ abstract class ServiceBasedPlugin implements Plugin {
 	/**
 	 * Instantiate a Theme object.
 	 *
-	 * @param bool                  $enable_filters    Optional. Whether to
+	 * @param bool|null             $enable_filters    Optional. Whether to
 	 *                                                 enable filtering of the
 	 *                                                 injector configuration.
 	 * @param Injector|null         $injector          Optional. Injector
@@ -60,7 +63,7 @@ abstract class ServiceBasedPlugin implements Plugin {
 	 *                                                 use.
 	 */
 	public function __construct(
-		$enable_filters = true,
+		$enable_filters = null,
 		Injector $injector = null,
 		ServiceContainer $service_container = null
 	) {
@@ -72,7 +75,9 @@ abstract class ServiceBasedPlugin implements Plugin {
 		 * optional and provide default implementations for easy regular usage.
 		 */
 
-		$this->enable_filters = $enable_filters;
+		$this->enable_filters = null !== $enable_filters
+			? $enable_filters
+			: static::ENABLE_FILTERS_DEFAULT;
 
 		$this->injector = null !== $injector
 			? $injector
