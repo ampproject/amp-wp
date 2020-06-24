@@ -25,7 +25,7 @@ export const Options = createContext();
  * @param {string} props.optionsRestEndpoint REST endpoint to retrieve options.
  */
 export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
-	const [ options, setOptions ] = useState( () => {} );
+	const [ options, setOptions ] = useState( {} );
 	const [ fetchingOptions, setFetchingOptions ] = useState( false );
 	const [ savingOptions, setSavingOptions ] = useState( false );
 	const [ hasOptionsChanges, setHasOptionsChanges ] = useState( false );
