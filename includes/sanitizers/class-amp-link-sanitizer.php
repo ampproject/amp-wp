@@ -5,9 +5,9 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\MobileRedirection;
-use AmpProject\AmpWP\Services;
 use AmpProject\Dom\Document;
+use AmpProject\Attribute;
+use AmpProject\Tag;
 
 /**
  * Class AMP_Link_Sanitizer.
@@ -36,6 +36,7 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * The rel attribute value for AMP links.
 	 *
+	 * @deprecated Use Attribute::REL_AMPHTML instead.
 	 * @var string
 	 */
 	const REL_VALUE_AMP = 'amphtml';
@@ -46,6 +47,7 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 	 * Normally, in a paired mode, links to the same origin will be for AMP.
 	 * But by adding this rel value, the link will be to non-AMP.
 	 *
+	 * @deprecated Use Attribute::REL_NOAMPHTML instead.
 	 * @var string
 	 */
 	const REL_VALUE_NON_AMP_TO_AMP = 'noamphtml';
@@ -140,81 +142,106 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 			$admin_bar_container->parentNode->replaceChild( $admin_bar_placeholder, $admin_bar_container );
 		}
 
-		/**
-		 * Element.
-		 *
-		 * @var DOMElement $element
-		 */
-		foreach ( $this->dom->xpath->query( '//*[ local-name() = "a" or local-name() = "area" ]' ) as $element ) {
-			if ( ! $element->hasAttribute( 'href' ) ) {
-				continue;
-			}
-
-			$href = $element->getAttribute( 'href' );
-
-			/**
-			 * One or more rel values that were attributed to the href.
-			 *
-			 * @var string[] $rel
-			 */
-			$rel                = $element->hasAttribute( 'rel' ) ? array_filter( preg_split( '/\s+/', $element->getAttribute( 'rel' ) ) ) : [];
-			$no_amphtml_rel_pos = array_search( self::REL_VALUE_NON_AMP_TO_AMP, $rel, true );
-
-			parse_str( wp_parse_url( $href, PHP_URL_QUERY ), $query_params );
-			$has_no_amp_query_var = isset( $query_params[ MobileRedirection::NO_AMP_QUERY_VAR ] );
-			$is_excluded_url      = in_array( strtok( $href, '#' ), $this->args['excluded_urls'], true );
-
-			if ( ! $has_no_amp_query_var ) {
-				if ( false !== $no_amphtml_rel_pos ) {
-					// The rel has a value to opt-out of AMP-to-AMP links, so strip it and ensure the link is to non-AMP.
-					unset( $rel[ $no_amphtml_rel_pos ] );
-					if ( empty( $rel ) ) {
-						$element->removeAttribute( 'rel' );
-					} else {
-						$element->setAttribute( 'rel', implode( ' ', $rel ) );
-					}
-				} elseif (
-					! $is_excluded_url
-					&&
-					$this->is_frontend_url( $href )
-					&&
-					'#' !== substr( $href, 0, 1 )
-				) {
-					// Always add the amphtml link relation when linking enabled.
-					$rel[] = self::REL_VALUE_AMP;
-					$element->setAttribute( 'rel', implode( ' ', $rel ) );
-
-					// Only add the AMP query var when requested (in Transitional or Reader mode).
-					if ( ! empty( $this->args['paired'] ) ) {
-						$href = add_query_arg( amp_get_slug(), '', $href );
-						$element->setAttribute( 'href', $href );
-					}
-				}
-
-				// Append the `noamp` query param to excluded URLs to prevent mobile redirection.
-
-				/** @var MobileRedirection */
-				$mobile_redirect_manager = Services::get( 'mobile_redirection' );
-				if ( ( $is_excluded_url || false !== $no_amphtml_rel_pos ) && $mobile_redirect_manager->is_enabled() ) {
-					$href = add_query_arg( MobileRedirection::NO_AMP_QUERY_VAR, '1', $href );
-					$element->setAttribute( 'href', $href );
-				}
-			}
+		$link_query = $this->dom->xpath->query( '//*[ local-name() = "a" or local-name() = "area" ][ @href ]' );
+		foreach ( $link_query as $link ) {
+			$this->process_element( $link, Attribute::HREF );
 		}
 
-		foreach ( $this->dom->xpath->query( '//form[ @action and translate( @method, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz") = "get" ]' ) as $element ) {
-			if ( $this->is_frontend_url( $element->getAttribute( 'action' ) ) ) {
-				$input = $this->dom->createElement( 'input' );
-				$input->setAttribute( 'name', amp_get_slug() );
-				$input->setAttribute( 'value', '' );
-				$input->setAttribute( 'type', 'hidden' );
-				$element->appendChild( $input );
-			}
+		$form_query = $this->dom->xpath->query( '//form[ @action and translate( @method, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz") = "get" ]' );
+		foreach ( $form_query as $form ) {
+			$this->process_element( $form, Attribute::ACTION );
 		}
 
 		// Replace the admin bar after mutations are done.
 		if ( $admin_bar_container && $admin_bar_placeholder ) {
 			$admin_bar_placeholder->parentNode->replaceChild( $admin_bar_container, $admin_bar_placeholder );
+		}
+	}
+
+	/**
+	 * Process element.
+	 *
+	 * @param DOMElement $element        Element to process.
+	 * @param string     $attribute_name Attribute name that contains the URL.
+	 */
+	private function process_element( DOMElement $element, $attribute_name ) {
+		$url = $element->getAttribute( $attribute_name );
+
+		// Skip page anchor links or non-frontend links.
+		if ( empty( $url ) || '#' === substr( $url, 0, 1 ) || ! $this->is_frontend_url( $url ) ) {
+			return;
+		}
+
+		// Gather the rel values that were attributed to the element.
+		// Note that links and forms may both have this attribute.
+		// See <https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/rel>.
+		if ( $element->hasAttribute( Attribute::REL ) ) {
+			$rel = array_filter( preg_split( '/\s+/', trim( $element->getAttribute( Attribute::REL ) ) ) );
+		} else {
+			$rel = [];
+		}
+
+		$excluded = (
+			in_array( Attribute::REL_NOAMPHTML, $rel, true )
+			||
+			in_array( strtok( $url, '#' ), $this->args['excluded_urls'], true )
+		);
+
+		/**
+		 * Filters whether AMP-to-AMP is excluded for an element.
+		 *
+		 * The element may be either a link (`a` or `area`) or a `form`.
+		 *
+		 * @param bool       $excluded Excluded. Default value is whether element already has a `noamphtml` link relation or the URL is among `excluded_urls`.
+		 * @param string     $url      URL considered for exclusion.
+		 * @param string[]   $rel      Link relations.
+		 * @param DOMElement $element  The element considered for excluding from AMP-to-AMP linking. May be instance of `a`, `area`, or `form`.
+		 */
+		$excluded = (bool) apply_filters( 'amp_to_amp_linking_element_excluded', $excluded, $url, $rel, $element );
+
+		$query_vars = [];
+
+		if ( ! $excluded ) {
+			$rel[] = Attribute::REL_AMPHTML;
+			$rel   = array_diff(
+				$rel,
+				[ Attribute::REL_NOAMPHTML ]
+			);
+
+			$element->setAttribute( Attribute::REL, implode( ' ', $rel ) );
+
+			// Only add the AMP query var when requested (in Transitional or Reader mode).
+			if ( ! empty( $this->args['paired'] ) ) {
+				$query_vars[ amp_get_slug() ] = '';
+			}
+		}
+
+		/**
+		 * Filters the query vars that are added to the link/form which is considered for AMP-to-AMP linking.
+		 *
+		 * @internal
+		 *
+		 * @param string[]   $query_vars Query vars.
+		 * @param bool       $excluded   Whether the element was excluded.
+		 * @param string     $url        URL considered for exclusion.
+		 * @param string[]   $rel        Link relations.
+		 * @param DOMElement $element    Element.
+		 */
+		$query_vars = apply_filters( 'amp_to_amp_element_query_vars', $query_vars, $excluded, $url, $element, $rel );
+
+		if ( $query_vars ) {
+			if ( Tag::FORM === $element->nodeName ) {
+				foreach ( $query_vars as $name => $value ) {
+					$input = $this->dom->createElement( 'input' );
+					$input->setAttribute( 'name', $name );
+					$input->setAttribute( 'value', $value );
+					$input->setAttribute( 'type', 'hidden' );
+					$element->appendChild( $input );
+				}
+			} else {
+				$url = add_query_arg( $query_vars, $url );
+				$element->setAttribute( $attribute_name, $url );
+			}
 		}
 	}
 

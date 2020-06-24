@@ -166,6 +166,9 @@ final class MobileRedirection implements Service, Registerable {
 			// Add a link to the footer to allow for navigation to the AMP version.
 			add_action( 'wp_footer', [ $this, 'add_amp_mobile_version_switcher' ] );
 		} elseif ( ! amp_is_canonical() ) {
+			add_filter( 'amp_to_amp_linking_element_excluded', [ $this, 'filter_amp_to_amp_linking_element_excluded' ], 100, 2 );
+			add_filter( 'amp_to_amp_element_query_vars', [ $this, 'filter_amp_to_amp_element_query_vars' ], 10, 2 );
+
 			// Add a link to the footer to allow for navigation to the non-AMP version.
 			add_action( 'amp_post_template_footer', [ $this, 'add_non_amp_mobile_version_switcher' ] ); // For Classic reader mode theme.
 			add_action( 'wp_footer', [ $this, 'add_non_amp_mobile_version_switcher' ] );
@@ -182,6 +185,39 @@ final class MobileRedirection implements Service, Registerable {
 	 */
 	public function ensure_noamp_unavailable_redirect_url( $redirect_url ) {
 		return add_query_arg( self::NO_AMP_QUERY_VAR, '1', $redirect_url );
+	}
+
+	/**
+	 * Ensure that links/forms which point to ?noamp up-front are excluded from AMP-to-AMP linking.
+	 *
+	 * @param bool   $excluded Excluded.
+	 * @param string $url      URL considered for exclusion.
+	 * @return bool Element excluded from AMP-to-AMP linking.
+	 */
+	public function filter_amp_to_amp_linking_element_excluded( $excluded, $url ) {
+		if ( ! $excluded ) {
+			$query_string = wp_parse_url( $url, PHP_URL_QUERY );
+			if ( ! empty( $query_string ) ) {
+				$query_vars = [];
+				parse_str( $query_string, $query_vars );
+				$excluded = array_key_exists( self::NO_AMP_QUERY_VAR, $query_vars );
+			}
+		}
+		return $excluded;
+	}
+
+	/**
+	 * Ensure that links/forms which point to ?noamp up-front are excluded from AMP-to-AMP linking.
+	 *
+	 * @param string[] $query_vars Query vars.
+	 * @param bool     $excluded   Whether the element was excluded.
+	 * @return string[] Query vars to add to the element.
+	 */
+	public function filter_amp_to_amp_element_query_vars( $query_vars, $excluded ) {
+		if ( $excluded ) {
+			$query_vars[ self::NO_AMP_QUERY_VAR ] = '1';
+		}
+		return $query_vars;
 	}
 
 	/**
