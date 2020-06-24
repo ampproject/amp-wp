@@ -29,6 +29,8 @@ final class MobileRedirection implements Service, Registerable {
 	/**
 	 * Query parameter to indicate that the page in question should not be served as AMP.
 	 *
+	 * @todo This needs to not be specific to mobile.
+	 *
 	 * @var string
 	 */
 	const NO_AMP_QUERY_VAR = 'noamp';
@@ -60,7 +62,6 @@ final class MobileRedirection implements Service, Registerable {
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
 
 		add_action( 'wp', [ $this, 'redirect' ] );
-		add_filter( 'amp_unavailable_redirect_url', [ $this, 'ensure_noamp_unavailable_redirect_url' ] ); // @todo Move this inside of the redirect method.
 	}
 
 	/**
@@ -173,18 +174,6 @@ final class MobileRedirection implements Service, Registerable {
 			add_action( 'amp_post_template_footer', [ $this, 'add_non_amp_mobile_version_switcher' ] ); // For Classic reader mode theme.
 			add_action( 'wp_footer', [ $this, 'add_non_amp_mobile_version_switcher' ] );
 		}
-	}
-
-	/**
-	 * Add the noamp query var when redirecting to the non-AMP version due to AMP not being available.
-	 *
-	 * This is to avoid the possibility of a mobile device endlessly redirecting between the AMP and non-AMP URLs.
-	 *
-	 * @param string $redirect_url Redirect URL.
-	 * @return string Redirect URL.
-	 */
-	public function ensure_noamp_unavailable_redirect_url( $redirect_url ) {
-		return add_query_arg( self::NO_AMP_QUERY_VAR, '1', $redirect_url );
 	}
 
 	/**

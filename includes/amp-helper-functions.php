@@ -396,6 +396,11 @@ function is_amp_available() {
 		return false;
 	}
 
+	// @todo If redirected to this page because AMP is not available due to validation errors, we need to return false here!
+	if ( isset( $_GET['noamp'] ) && 'validation' === $_GET['noamp'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return false;
+	}
+
 	/*
 	 * If this is a URL for validation, and validation is forced for all URLs, return true.
 	 * Normally, this would be false if the user has deselected a template,
@@ -415,9 +420,10 @@ function is_amp_available() {
 			return false;
 		}
 
-		// If not in an AMP-first mode, check if there is any kept invalid markup for this URL.
-		// And if so, then AMP is not available.
-		if ( ! amp_is_canonical() ) {
+		// If not in an AMP-first mode, check if there are any validation errors with kept invalid markup for this URL.
+		// And if so, and if the user cannot do validation (since they can always get fresh validation results), then
+		// AMP is not available.
+		if ( ! amp_is_canonical() && ! AMP_Validation_Manager::has_cap() ) {
 			$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors(
 				amp_get_current_url(),
 				[ 'ignore_accepted' => true ]

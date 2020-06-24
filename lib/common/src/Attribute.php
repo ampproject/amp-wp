@@ -65,7 +65,9 @@ interface Attribute
     const SRC                   = 'src';
     const TABINDEX              = 'tabindex';
     const TEMPLATE              = 'template';
+    const TITLE                 = 'title';
     const TYPE                  = 'type';
+    const VALUE                 = 'value';
     const VIEWPORT              = 'viewport';
     const WIDTH                 = 'width';
 

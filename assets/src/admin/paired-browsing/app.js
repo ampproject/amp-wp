@@ -8,7 +8,7 @@ import { addQueryArgs, hasQueryArg, removeQueryArgs } from '@wordpress/url';
 import './app.css';
 
 const { app, history } = window;
-const { ampSlug, ampPairedBrowsingQueryVar, ampValidationErrorsQueryVar, documentTitlePrefix } = app;
+const { ampSlug, ampPairedBrowsingQueryVar, documentTitlePrefix } = app;
 
 class PairedBrowsingApp {
 	/**
@@ -181,7 +181,7 @@ class PairedBrowsingApp {
 	 * @return {string} Modified URL without any AMP related query variables.
 	 */
 	removeAmpQueryVars( url ) {
-		return removeQueryArgs( url, ampSlug, ampPairedBrowsingQueryVar, ampValidationErrorsQueryVar );
+		return removeQueryArgs( url, ampSlug, ampPairedBrowsingQueryVar );
 	}
 
 	/**

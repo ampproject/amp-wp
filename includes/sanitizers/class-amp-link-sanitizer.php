@@ -213,10 +213,10 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 		if ( $query_vars ) {
 			if ( Tag::FORM === $element->nodeName ) {
 				foreach ( $query_vars as $name => $value ) {
-					$input = $this->dom->createElement( 'input' );
-					$input->setAttribute( 'name', $name );
-					$input->setAttribute( 'value', $value );
-					$input->setAttribute( 'type', 'hidden' );
+					$input = $this->dom->createElement( Tag::INPUT );
+					$input->setAttribute( Attribute::NAME, $name );
+					$input->setAttribute( Attribute::VALUE, $value );
+					$input->setAttribute( Attribute::TYPE, 'hidden' );
 					$element->appendChild( $input );
 				}
 			} else {
