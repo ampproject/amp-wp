@@ -149,12 +149,18 @@ input[type="radio"]:focus {
  * Main app panel.
  */
 .amp-setup-panel-container {
-	width: 100%;
+	margin-left: -20px;
+	margin-right: -20px;
+
+	@media screen and (min-width: 783px) {
+		margin-left: 0;
+		margin-right: 0;
+		width: 100%;
+	}
 }
 
 .amp-setup-panel {
 	border-color: rgba(0, 0, 0, 0);
-	border-radius: 10px;
 	box-shadow: 0 25px 60px rgba(0, 0, 0, 0.1);
 	max-width: var(--setup-page-max-width);
 	min-height: 496px;
@@ -162,6 +168,7 @@ input[type="radio"]:focus {
 	width: 100%;
 
 	@media screen and (min-width: 783px) {
+		border-radius: 10px;
 		padding: 40px;
 	}
 }

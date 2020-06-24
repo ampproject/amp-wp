@@ -77,10 +77,15 @@
 
 .transitional-summary .transitional-summary__footer .components-toggle-control__label {
 	display: flex;
+	flex-wrap: wrap;
 }
 
 .transitional-summary__footer-illustration {
-	padding: 0 1.5rem;
+	padding-bottom: 1.5rem;
+
+	@media screen and (min-width: 783px) {
+		padding: 0 1.5rem;
+	}
 }
 
 .transitional-summary__footer .components-form-toggle {

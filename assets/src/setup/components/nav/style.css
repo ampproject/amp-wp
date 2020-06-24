@@ -16,7 +16,7 @@
 	align-items: center;
 	display: flex;
 	justify-content: space-between;
-	padding: 40px 15px;
+	padding: 15px;
 	width: 100%;
 
 	@media screen and (min-width: 783px) {

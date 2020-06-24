@@ -3,6 +3,7 @@
  */
 import { createContext, useEffect, useState, useRef, useCallback, useMemo, useContext } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { getQueryArg } from '@wordpress/url';
 
 /**
  * External dependencies
@@ -52,7 +53,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 		}
 
 		// On initial run, keep the option null until the user makes a selection.
-		if ( true !== options.wizard_completed ) {
+		if ( true !== options.wizard_completed || getQueryArg( global.location.href, 'setup-wizard-first-run' ) ) {
 			return;
 		}
 

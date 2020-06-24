@@ -29,13 +29,14 @@ import { MOST_RECOMMENDED, RECOMMENDED, getRecommendationLevels, getAllSelection
  * @param {string|Object} props.compatibility Compatibility content.
  * @param {string} props.id A string for the input's HTML ID.
  * @param {string|Object} props.illustration An illustration for the selection.
+ * @param {boolean} props.isCurrentSavedSelection Whether the mode is currently saved as the selected mode.
  * @param {Array} props.details Array of strings representing details about the mode and recommendation.
  * @param {Function} props.onChange Callback to select the mode.
  * @param {number} props.recommended Recommendation level. -1: not recommended. 0: good. 1: Most recommended.
  * @param {boolean} props.selected Whether the mode is selected.
  * @param {string} props.title The title for the selection.
  */
-export function Selection( { compatibility, id, illustration, details, onChange, recommended, selected, title } ) {
+export function Selection( { compatibility, id, illustration, isCurrentSavedSelection, details, onChange, recommended, selected, title } ) {
 	const recommendationLevelType = useMemo( () => {
 		switch ( recommended ) {
 			case MOST_RECOMMENDED:
@@ -67,6 +68,14 @@ export function Selection( { compatibility, id, illustration, details, onChange,
 					<h2>
 						{ title }
 					</h2>
+					{ isCurrentSavedSelection && (
+						<div className="template-mode-selection__current-selection">
+							<svg width="15" height="21" viewBox="0 0 15 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<path d="M9.60669 2.83203V7.83203C9.60669 8.95203 9.97669 9.99203 10.6067 10.832H4.60669C5.25669 9.97203 5.60669 8.93203 5.60669 7.83203V2.83203H9.60669ZM12.6067 0.832031H2.60669C2.05669 0.832031 1.60669 1.28203 1.60669 1.83203C1.60669 2.38203 2.05669 2.83203 2.60669 2.83203H3.60669V7.83203C3.60669 9.49203 2.26669 10.832 0.606689 10.832V12.832H6.57669V19.832L7.57669 20.832L8.57669 19.832V12.832H14.6067V10.832C12.9467 10.832 11.6067 9.49203 11.6067 7.83203V2.83203H12.6067C13.1567 2.83203 13.6067 2.38203 13.6067 1.83203C13.6067 1.28203 13.1567 0.832031 12.6067 0.832031Z" fill="#333D47" />
+							</svg>
+							{ __( 'Previously selected', 'amp' ) }
+						</div>
+					) }
 				</div>
 			</label>
 			<div
@@ -106,6 +115,7 @@ Selection.propTypes = {
 	details: PropTypes.node.isRequired,
 	id: PropTypes.string.isRequired,
 	illustration: PropTypes.node.isRequired,
+	isCurrentSavedSelection: PropTypes.bool.isRequired,
 	onChange: PropTypes.func.isRequired,
 	recommended: PropTypes.oneOf( [ RECOMMENDED, NOT_RECOMMENDED, MOST_RECOMMENDED ] ).isRequired,
 	selected: PropTypes.bool.isRequired,
@@ -119,10 +129,12 @@ Selection.propTypes = {
  * @param {string} props.currentMode The selected mode.
  * @param {boolean} props.developerToolsOption Whether the user has enabled developer tools.
  * @param {Array} props.pluginIssues The plugin issues found in the site scan.
+ * @param {string} props.savedCurrentMode The current selected mode saved in the database.
  * @param {Function} props.setCurrentMode The callback to update the selected mode.
  * @param {Array} props.themeIssues The theme issues found in the site scan.
+ * @param props.savedCurrentMode
  */
-export function ScreenUI( { currentMode, developerToolsOption, pluginIssues, setCurrentMode, themeIssues } ) {
+export function ScreenUI( { currentMode, developerToolsOption, pluginIssues, savedCurrentMode, setCurrentMode, themeIssues } ) {
 	const standardId = 'standard-mode';
 	const transitionalId = 'transitional-mode';
 	const readerId = 'reader-mode';
@@ -138,7 +150,10 @@ export function ScreenUI( { currentMode, developerToolsOption, pluginIssues, set
 		},
 	), [ themeIssues, pluginIssues, userIsTechnical ] );
 
-	const sectionText = useMemo( () => getAllSelectionText( recommendationLevels, userIsTechnical ? TECHNICAL : NON_TECHNICAL ), [ recommendationLevels, userIsTechnical ] );
+	const sectionText = useMemo(
+		() => getAllSelectionText( recommendationLevels, userIsTechnical ? TECHNICAL : NON_TECHNICAL ),
+		[ recommendationLevels, userIsTechnical ],
+	);
 
 	return (
 		<form>
@@ -147,6 +162,7 @@ export function ScreenUI( { currentMode, developerToolsOption, pluginIssues, set
 				details={ sectionText.standard.details }
 				id={ standardId }
 				illustration={ <Standard /> }
+				isCurrentSavedSelection={ savedCurrentMode === 'standard' }
 				onChange={ () => {
 					setCurrentMode( 'standard' );
 				} }
@@ -160,6 +176,7 @@ export function ScreenUI( { currentMode, developerToolsOption, pluginIssues, set
 				details={ sectionText.transitional.details }
 				id={ transitionalId }
 				illustration={ <Transitional /> }
+				isCurrentSavedSelection={ savedCurrentMode === 'transitional' }
 				onChange={ () => {
 					setCurrentMode( 'transitional' );
 				} }
@@ -173,6 +190,7 @@ export function ScreenUI( { currentMode, developerToolsOption, pluginIssues, set
 				details={ sectionText.reader.details }
 				id={ readerId }
 				illustration={ <Reader /> }
+				isCurrentSavedSelection={ savedCurrentMode === 'reader' }
 				onChange={ () => {
 					setCurrentMode( 'reader' );
 				} }
@@ -189,5 +207,6 @@ ScreenUI.propTypes = {
 	developerToolsOption: PropTypes.bool,
 	setCurrentMode: PropTypes.func.isRequired,
 	pluginIssues: PropTypes.arrayOf( PropTypes.string ),
+	savedCurrentMode: PropTypes.string,
 	themeIssues: PropTypes.arrayOf( PropTypes.string ),
 };
