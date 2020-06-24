@@ -13,7 +13,11 @@ exports[`ThemeCard matches snapshot 1`] = `
     >
       <img
         alt="Theme name"
+        decoding="async"
+        height="2165"
+        loading="lazy"
         src="http://screenshot.jpeg"
+        width="1000"
       />
     </div>
     <div
