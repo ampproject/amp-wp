@@ -1,7 +1,20 @@
 /**
  * Internal dependencies
  */
-import { getRecommendationLevels, getSelectionText, COMPATIBILITY, DETAILS, READER, STANDARD, TRANSITIONAL, MOST_RECOMMENDED, NOT_RECOMMENDED, RECOMMENDED, TECHNICAL, NON_TECHNICAL } from '../get-selection-details';
+import {
+	getRecommendationLevels,
+	getSelectionText,
+	COMPATIBILITY,
+	DETAILS,
+	READER,
+	STANDARD,
+	TRANSITIONAL,
+	MOST_RECOMMENDED,
+	NOT_RECOMMENDED,
+	RECOMMENDED,
+	TECHNICAL,
+	NON_TECHNICAL,
+} from '../get-selection-details';
 
 describe( 'getRecommendationLevels', () => {
 	it( 'throws no errors', () => {
