@@ -174,7 +174,7 @@ export function getSelectionText( ...args ) {
 			return 'Standard mode is a good choice if your site has an AMP-compatible theme and only uses AMP-compatible plugins. If you\'re not sure of the compatibility of your themes and plugins, Reader mode may be a better option.';
 
 		default: {
-			throw new Error( __( 'A selection text recommentation was not accounted for. ', 'amp' ) + JSON.stringify( args ) );
+			throw new Error( __( 'A selection text recommendation was not accounted for. ', 'amp' ) + JSON.stringify( args ) );
 		}
 	}
 }

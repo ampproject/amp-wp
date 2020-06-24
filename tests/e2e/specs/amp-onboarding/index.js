@@ -18,8 +18,7 @@ describe( 'AMP Setup Screen', () => {
 
 	const getTitleText = async () => {
 		await page.waitForSelector( 'h1' );
-		const titleText = await page.$eval( 'h1', ( el ) => el.innerText );
-		return titleText;
+		return page.$eval( 'h1', ( el ) => el.innerText );
 	};
 
 	it( 'should have stepper items', async () => {

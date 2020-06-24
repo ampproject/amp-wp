@@ -90,6 +90,6 @@ export function AMPNotice( { children, className, size, type } ) {
 AMPNotice.propTypes = {
 	children: PropTypes.node,
 	className: PropTypes.string,
-	size: PropTypes.oneOf( [ NOTICE_SIZE_LARGE, NOTICE_SIZE_SMALL ] ),
+	size: PropTypes.oneOf( [ NOTICE_SIZE_LARGE, NOTICE_SIZE_SMALL ] ).isRequired,
 	type: PropTypes.oneOf( [ NOTICE_TYPE_INFO, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_WARNING ] ).isRequired,
 };
