@@ -137,10 +137,10 @@ final class AMP_Setup_Wizard_Submenu_Page {
 			'AMP_OPTIONS_KEY'                    => AMP_Options_Manager::OPTION_NAME,
 			'APP_ROOT_ID'                        => self::APP_ROOT_ID,
 			'EXIT_LINK'                          => admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ),
-			// @todo Upcoming WP version will allow this to be retrieved via REST.
+			// @todo As of June 2020, an upcoming WP release will allow this to be retrieved via REST.
 			'CURRENT_THEME'                      => [
-				'name'        => $theme->name,
-				'description' => $theme->description,
+				'name'        => $theme->get( 'Name' ),
+				'description' => $theme->get( 'Description' ),
 				'screenshot'  => $theme->get_screenshot(),
 				'url'         => $theme->get( 'ThemeURI' ),
 			],
