@@ -33,8 +33,8 @@ function after_wp_install {
 	fi
 
 	if [[ ! -z $INSTALL_PWA_PLUGIN ]]; then
-		echo -n "Installing PWA 0.2-alpha2..."
-		wget -O "$WP_CORE_DIR/src/wp-content/plugins/pwa.zip" https://github.com/xwp/pwa-wp/releases/download/0.2-alpha2/pwa.zip
+		echo -n "Installing PWA plugin..."
+		wget -O "$WP_CORE_DIR/src/wp-content/plugins/pwa.zip" https://downloads.wordpress.org/plugin/pwa.zip
 		unzip -d "$WP_CORE_DIR/src/wp-content/plugins/pwa/" "$WP_CORE_DIR/src/wp-content/plugins/pwa.zip"
 		echo "done"
 	fi
