@@ -1,6 +1,6 @@
 <?php
 
-namespace AmpProject\AmpWP\Tests\Unit;
+namespace AmpProject\AmpWP\Tests\Unit\Infrastructure;
 
 use AmpProject\AmpWP\Exception\FailedToMakeInstance;
 use AmpProject\AmpWP\Infrastructure\Injector;
