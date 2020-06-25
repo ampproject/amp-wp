@@ -98,14 +98,16 @@ final class MobileRedirection implements Service, Registerable {
 		</p>
 		<script>
 			( function( $ ) {
+				const standardModeInput = $( '#theme_support_standard' );
 				const templateModeInputs = $( 'input[type=radio][name="amp-options[theme_support]"]' );
 				const mobileRedirectSetting = $( 'tr.amp-mobile-redirect' );
 
-				function toggleMobileRedirectSetting( e ) {
-					mobileRedirectSetting.toggleClass( 'hidden', 'standard' === e.target.value )
+				function toggleMobileRedirectSetting( ) {
+					mobileRedirectSetting.toggleClass( 'hidden', standardModeInput.prop( 'checked' ) )
 				}
 
 				templateModeInputs.on( 'change', toggleMobileRedirectSetting );
+				toggleMobileRedirectSetting();
 			} )( jQuery )
 		</script>
 		<?php
