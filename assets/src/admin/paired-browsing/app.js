@@ -92,7 +92,7 @@ class PairedBrowsingApp {
 	/**
 	 * Return promises to load iframes asynchronously.
 	 *
-	 * @return {[Promise<Function>, Promise<Function>]} Promises that determine if the iframes are loaded.
+	 * @return {Promise<void>[]} Promises that determine if the iframes are loaded.
 	 */
 	getIframeLoadedPromises() {
 		return [

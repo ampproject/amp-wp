@@ -16,9 +16,14 @@ body {
 	--light-gray: #e8e8e8;
 	--very-light-gray: #fafafc;
 	--white: #fff;
+	--font-noto: "Noto Sans", sans-serif;
 	--font-poppins: poppins, sans-serif;
 
 	padding-bottom: 4rem;
+}
+
+a {
+	color: var(--brand);
 }
 
 h1,

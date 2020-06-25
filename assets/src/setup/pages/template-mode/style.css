@@ -1,0 +1,106 @@
+.template-mode-selection {
+	margin-bottom: 3rem;
+	padding: 1.5rem;
+}
+
+.template-mode-selection label {
+	display: flex;
+	flex-wrap: wrap;
+	padding-bottom: 0.75rem;
+}
+
+.template-mode-selection label::after {
+	border-bottom: 1px solid #e2e4e7;
+	content: "";
+	margin: 1rem auto 0;
+	width: 100%;
+}
+
+.template-mode-selection__input-container {
+	padding: 1.5rem 1.5rem 1.5rem 0;
+}
+
+.template-mode-selection__illustration {
+	flex-shrink: 0;
+	width: 80px;
+}
+
+.template-mode-selection__details {
+	margin-bottom: 1rem;
+}
+
+.template-mode-selection .components-panel__row {
+	margin-left: -16px;
+}
+
+.template-mode-selection .components-panel__body-toggle.components-button {
+	font-family: var(--font-noto);
+	font-size: 13px;
+	font-weight: 400;
+	line-height: 1.4;
+	padding-left: 0;
+}
+
+.template-mode-selection__description {
+	align-items: flex-start;
+	display: flex;
+	flex-grow: 1;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	padding: 0 0 0 2rem;
+}
+
+.template-mode-selection__description h2 {
+	font-size: 1.5rem;
+	line-height: 1.5;
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+.template-mode-selection > .amp-notice {
+	padding-right: 0;
+}
+
+.template-mode-selection > .amp-notice .components-panel__arrow {
+	right: 0;
+}
+
+.template-mode-selection .components-panel__body-title:hover {
+	background: rgba(0, 0, 0, 0);
+}
+
+.template-mode-selection .components-panel__body-toggle:hover,
+.template-mode-selection .components-panel__body-toggle:active,
+.template-mode-selection .components-panel__body-toggle:focus {
+	color: inherit;
+}
+
+.template-mode-selection .components-panel__arrow {
+	height: 2rem;
+	width: 2rem;
+}
+
+.template-mode-selection .components-panel__body {
+	border-bottom-width: 0;
+	border-top-width: 0;
+}
+
+.template-mode-selection .components-panel__body-title button {
+	padding-left: 1.5rem;
+	padding-right: 3rem;
+	padding-top: 0.5rem;
+}
+
+.template-mode-selection .components-panel__body-title button .components-panel__arrow {
+	top: 1.125rem;
+	display: none; /* @todo Drawer will be expandable in 1.7 when site scan results are available. */
+}
+
+
+.template-mode-selection .components-panel__row {
+	flex-wrap: wrap;
+}
+
+.template-mode-selection .components-panel__row > * {
+	width: 100%;
+}

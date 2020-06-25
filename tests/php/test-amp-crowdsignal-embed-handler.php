@@ -5,12 +5,16 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\WithoutBlockPreRendering;
+
 /**
  * Class AMP_Crowdsignal_Embed_Handler_Test
  *
  * @covers AMP_Crowdsignal_Embed_Handler
  */
 class AMP_Crowdsignal_Embed_Handler_Test extends WP_UnitTestCase {
+
+	use WithoutBlockPreRendering;
 
 	/**
 	 * Get conversion data.

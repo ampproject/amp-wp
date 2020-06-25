@@ -9,6 +9,7 @@ namespace AmpProject\AmpWP\Infrastructure;
 
 use AmpProject\AmpWP\Exception\InvalidService;
 use AmpProject\AmpWP\Infrastructure\ServiceContainer\LazilyInstantiatedService;
+use AmpProject\AmpWP\PluginRegistry;
 
 /**
  * This abstract base plugin provides all the boilerplate code for working with
@@ -27,11 +28,15 @@ abstract class ServiceBasedPlugin implements Plugin {
 	const INJECTOR_ID = 'injector';
 
 	// WordPress action to trigger the service registration on.
-	const REGISTRATION_ACTION = 'plugins_loaded';
+	// Use false to register as soon as the code is loaded.
+	const REGISTRATION_ACTION = false;
 
 	// Prefixes to use.
 	const HOOK_PREFIX    = '';
 	const SERVICE_PREFIX = '';
+
+	// Pattern used for detecting capitals to turn PascalCase into snake_case.
+	const DETECT_CAPITALS_REGEX_PATTERN = '/[A-Z]([A-Z](?![a-z]))*/';
 
 	/** @var bool */
 	protected $enable_filters;
@@ -123,10 +128,14 @@ abstract class ServiceBasedPlugin implements Plugin {
 	 * @throws InvalidService If a service is not valid.
 	 */
 	public function register() {
-		\add_action(
-			static::REGISTRATION_ACTION,
-			[ $this, 'register_services' ]
-		);
+		if ( false !== static::REGISTRATION_ACTION ) {
+			\add_action(
+				static::REGISTRATION_ACTION,
+				[ $this, 'register_services' ]
+			);
+		} else {
+			$this->register_services();
+		}
 	}
 
 	/**
@@ -162,10 +171,12 @@ abstract class ServiceBasedPlugin implements Plugin {
 			 *                                classes need to implement the
 			 *                                Service interface.
 			 */
-			$services = \apply_filters(
+			$filtered_services = \apply_filters(
 				static::HOOK_PREFIX . static::SERVICES_FILTER,
 				$services
 			);
+
+			$services = $this->validate_services( $filtered_services, $services );
 		}
 
 		foreach ( $services as $id => $class ) {
@@ -194,6 +205,67 @@ abstract class ServiceBasedPlugin implements Plugin {
 
 			$this->register_service( $id, $class );
 		}
+	}
+
+	/**
+	 * Validates the services array to make sure it is in a usable shape.
+	 *
+	 * As the array of services could be filtered, we need to ensure it is
+	 * always in a state where it doesn't throw PHP warnings or errors.
+	 *
+	 * @param mixed    $services Services to validate.
+	 * @param string[] $fallback Fallback value to use if $services is not
+	 *                           salvageable.
+	 * @return string[] Validated array of service mappings.
+	 */
+	protected function validate_services( $services, $fallback ) {
+		// If we don't have an array, something went wrong with filtering.
+		// Just use the fallback value in this case.
+		if ( ! is_array( $services ) ) {
+			return $fallback;
+		}
+
+		// Make a copy so we can safely mutate while iterating.
+		$services_to_check = $services;
+
+		foreach ( $services_to_check as $identifier => $fqcn ) {
+			// Ensure we have valid identifiers we can refer to.
+			// If not, generate them from the FQCN.
+			if ( empty( $identifier ) || ! is_string( $identifier ) ) {
+				unset( $services[ $identifier ] );
+				$identifier              = $this->get_identifier_from_fqcn( $fqcn );
+				$services[ $identifier ] = $fqcn;
+			}
+
+			// Verify that the FQCN is valid and points to an existing class.
+			// If not, skip this service.
+			if ( empty( $fqcn ) || ! is_string( $fqcn ) || ! class_exists( $fqcn ) ) {
+				unset( $services[ $identifier ] );
+			}
+		}
+
+		return $services;
+	}
+
+	/**
+	 * Generate a valid identifier for a provided FQCN.
+	 *
+	 * @param string $fqcn FQCN to use as base to generate an identifer.
+	 * @return string Identifier to use for the provided FQCN.
+	 */
+	protected function get_identifier_from_fqcn( $fqcn ) {
+		// Retrieve the short name from the FQCN first.
+		$short_name = substr( $fqcn, strrpos( $fqcn, '\\' ) + 1 );
+
+		// Turn camelCase or PascalCase into snake_case.
+		$snake_case = strtolower(
+			trim(
+				preg_replace( self::DETECT_CAPITALS_REGEX_PATTERN, '_$0', $short_name ),
+				'_'
+			)
+		);
+
+		return $snake_case;
 	}
 
 	/**

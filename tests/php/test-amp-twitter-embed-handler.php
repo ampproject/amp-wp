@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\WithoutBlockPreRendering;
+
 /**
  * Class AMP_Twitter_Embed_Handler_Test
  *
@@ -12,11 +14,16 @@
  */
 class AMP_Twitter_Embed_Handler_Test extends WP_UnitTestCase {
 
+	use WithoutBlockPreRendering {
+		setUp as public prevent_block_pre_render;
+	}
+
 	/**
 	 * Set up each test.
 	 */
 	public function setUp() {
-		parent::setUp();
+		$this->prevent_block_pre_render();
+
 		add_filter( 'pre_http_request', [ $this, 'mock_http_request' ], 10, 3 );
 	}
 

@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\Tests\MarkupComparison;
+use AmpProject\AmpWP\Tests\WithoutBlockPreRendering;
 
 /**
  * Test AMP_Facebook_Embed_Handler_Test
@@ -14,11 +15,16 @@ use AmpProject\AmpWP\Tests\MarkupComparison;
  */
 class AMP_Facebook_Embed_Handler_Test extends WP_UnitTestCase {
 
+	use MarkupComparison;
+	use WithoutBlockPreRendering {
+		setUp as public prevent_block_pre_render;
+	}
+
 	/**
 	 * Set up.
 	 */
 	public function setUp() {
-		parent::setUp();
+		$this->prevent_block_pre_render();
 
 		// Mock the HTTP request.
 		add_filter( 'pre_http_request', [ $this, 'mock_http_request' ], 10, 3 );
@@ -62,8 +68,6 @@ class AMP_Facebook_Embed_Handler_Test extends WP_UnitTestCase {
 			'http_response' => null,
 		];
 	}
-
-	use MarkupComparison;
 
 	/**
 	 * Get scripts data.

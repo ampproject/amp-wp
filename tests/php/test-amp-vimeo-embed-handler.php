@@ -5,12 +5,16 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\WithoutBlockPreRendering;
+
 /**
  * Class AMP_Vimeo_Embed_Handler_Test
  *
  * @covers AMP_Vimeo_Embed_Handler
  */
 class AMP_Vimeo_Embed_Handler_Test extends WP_UnitTestCase {
+
+	use WithoutBlockPreRendering;
 
 	/**
 	 * Get conversion data.

@@ -1,6 +1,10 @@
 <?php
 
+use AmpProject\AmpWP\Tests\WithoutBlockPreRendering;
+
 class AMP_Pinterest_Embed_Handler_Test extends WP_UnitTestCase {
+
+	use WithoutBlockPreRendering;
 
 	public function get_conversion_data() {
 		return [
