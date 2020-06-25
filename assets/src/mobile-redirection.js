@@ -1,16 +1,21 @@
-( function( { ampSlug, disabledCookieName, userAgents } ) {
-	const regExp = userAgents
-		// Escape each user agent string before forming the regex expression.
-		.map( function( userAgent ) {
-			// See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Escaping.
-			return userAgent.replace( /[.*+\-?^${}()|[\]\\]/g, '\\$&' ); // $& means the whole matched string
-		} )
-		.join( '|' );
-	const re = new RegExp( regExp );
-	const isMobile = re.test( navigator.userAgent );
+( function( { ampSlug, disabledCookieName, mobileUserAgents, regexRegex } ) {
+	const regExpRegExp = new RegExp( regexRegex );
+
+	// A user agent may be expressed as a RegExp string serialization in the the form of `/pattern/[i]*`. If a user
+	// agent string does not match this pattern, then the string will be used as a simple string needle for the haystack.
+	const isMobile = mobileUserAgents.some( ( pattern ) => {
+		const matches = pattern.match( regExpRegExp ); // A regex for a regex. So meta.
+		if ( matches ) {
+			const re = new RegExp( matches[ 1 ], matches[ 2 ] );
+			if ( re.test( navigator.userAgent ) ) {
+				return true;
+			}
+		}
+		return navigator.userAgent.includes( pattern );
+	} );
 
 	if ( isMobile ) {
-		document.addEventListener( 'DOMContentLoaded', function() {
+		document.addEventListener( 'DOMContentLoaded', () => {
 			// Show the mobile version switcher link once the DOM has loaded.
 			const siteVersionSwitcher = document.getElementById( 'site-version-switcher' );
 			if ( siteVersionSwitcher ) {
@@ -21,9 +26,7 @@
 
 	const mobileRedirectionDisabled = document.cookie
 		.split( ';' )
-		.some( function( item ) {
-			return ( disabledCookieName + '=1' ) === item.trim();
-		} );
+		.some( ( item ) => disabledCookieName + '=1' === item.trim() );
 
 	// Short-circuit if mobile redirection is disabled.
 	if ( mobileRedirectionDisabled ) {

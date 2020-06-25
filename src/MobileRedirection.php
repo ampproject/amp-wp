@@ -20,6 +20,17 @@ use AmpProject\AmpWP\Infrastructure\Service;
 final class MobileRedirection implements Service, Registerable {
 
 	/**
+	 * Regular expression for regular expressions. So meta.
+	 *
+	 * This must work in both PHP and cross-browser JS, which is why the 's' flag is not used. Also, this will get
+	 * passed as the pattern argument to the RegExp constructor in JS, whereas in PHP it will be used as the pattern
+	 * surrounded by the '#' delimiter.
+	 *
+	 * @var string
+	 */
+	const REGEX_REGEX = '^\/((?:.|\n)+)\/([i]*)$';
+
+	/**
 	 * The name of the cookie that persists the user's preference for viewing the non-AMP version of a page when on mobile.
 	 *
 	 * @var string
@@ -271,24 +282,24 @@ final class MobileRedirection implements Service, Registerable {
 			return (bool) $pre_is_mobile;
 		}
 
-		$current_user_agent = wp_unslash( $_SERVER['HTTP_USER_AGENT'] );
-
-		if ( empty( $current_user_agent ) ) {
+		if ( empty( $_SERVER['HTTP_USER_AGENT'] ) ) {
 			return false;
 		}
 
-		$user_agents_regex = implode(
-			'|',
-			array_map(
-				static function ( $user_agent ) {
-					return preg_quote( $user_agent, '/' );
-				},
-				$this->get_user_agents()
-			)
-		);
-
-		if ( preg_match( "/$user_agents_regex/", $current_user_agent ) ) {
-			return true;
+		$current_user_agent = wp_unslash( $_SERVER['HTTP_USER_AGENT'] );
+		$regex_regex        = sprintf( '#%s#', self::REGEX_REGEX );
+		foreach ( $this->get_mobile_user_agents() as $user_agent_pattern ) {
+			if (
+				(
+					preg_match( $regex_regex, $user_agent_pattern ) // So meta!
+					&&
+					preg_match( $user_agent_pattern, $current_user_agent )
+				)
+				||
+				false !== strpos( $current_user_agent, $user_agent_pattern )
+			) {
+				return true;
+			}
 		}
 
 		return false;
@@ -311,11 +322,15 @@ final class MobileRedirection implements Service, Registerable {
 	}
 
 	/**
-	 * Get a list of user agents to use for comparison against the user agent from the current request.
+	 * Get a list of mobile user agents to use for comparison against the user agent from the current request.
 	 *
-	 * @return string[] An array of user agents.
+	 * Each entry may either be a simple string needle, or it be a regular expression serialized as a string in the form
+	 * of `/pattern/[i]*`. If a user agent string does not match this pattern, then the string will be used as a simple
+	 * string needle for the haystack.
+	 *
+	 * @return string[] An array of mobile user agent search strings (and regex patterns).
 	 */
-	public function get_user_agents() {
+	public function get_mobile_user_agents() {
 		// Default list compiled from the user agents listed in `wp_is_mobile()`.
 		$default_user_agents = [
 			'Mobile',
@@ -332,7 +347,7 @@ final class MobileRedirection implements Service, Registerable {
 		 *
 		 * @since 1.6
 		 *
-		 * @param string[] $user_agents List of user agents.
+		 * @param string[] $user_agents List of mobile user agent search strings (and regex patterns).
 		 */
 		return apply_filters( 'amp_mobile_user_agents', $default_user_agents );
 	}
@@ -399,14 +414,14 @@ final class MobileRedirection implements Service, Registerable {
 	public function add_mobile_redirect_script() {
 		$source = file_get_contents( __DIR__ . '/../assets/js/mobile-redirection.js' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 
-		// Inject global variables.
-		$globals = [
+		$exports = [
 			'ampSlug'            => amp_get_slug(),
 			'disabledCookieName' => self::DISABLED_COOKIE_NAME,
-			'userAgents'         => $this->get_user_agents(),
+			'mobileUserAgents'   => $this->get_mobile_user_agents(),
+			'regexRegex'         => self::REGEX_REGEX,
 		];
 
-		$source = preg_replace( '/\bAMP_MOBILE_REDIRECTION\b/', wp_json_encode( $globals ), $source );
+		$source = preg_replace( '/\bAMP_MOBILE_REDIRECTION\b/', wp_json_encode( $exports ), $source );
 
 		printf( '<script>%s</script>', $source ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
