@@ -1880,7 +1880,7 @@ class AMP_Validation_Manager {
 		$parent_menu_link = $dom->xpath->query( './a[ @href ]', $parent_menu_item )->item( 0 );
 		$admin_bar_icon   = $dom->xpath->query( './span[ @id = "amp-admin-bar-item-status-icon" ]', $parent_menu_link )->item( 0 );
 		$validate_link    = $dom->xpath->query( './/li[ @id = "wp-admin-bar-amp-validity" ]/a[ @href ]', $parent_menu_item )->item( 0 );
-		if ( ! $validate_link instanceof DOMElement || ! $admin_bar_icon instanceof DOMElement || ! $validate_link instanceof DOMElement ) {
+		if ( ! $parent_menu_link instanceof DOMElement || ! $admin_bar_icon instanceof DOMElement || ! $validate_link instanceof DOMElement ) {
 			return;
 		}
 
