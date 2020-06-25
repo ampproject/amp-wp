@@ -49,7 +49,7 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Get all raw embeds from the DOM.
 	 *
 	 * @param Document $dom Document.
-	 * @return DOMNodeList|null A list of DOMElement nodes, or null if not implemented.
+	 * @return DOMNodeList A list of DOMElement nodes.
 	 */
 	protected function get_raw_embed_nodes( Document $dom ) {
 		return $dom->getElementsByTagName( 'div' );
@@ -135,6 +135,7 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 			$script_query = $dom->xpath->query( '//script[ starts-with( @src, "https://connect.facebook.net" ) and contains( @src, "sdk.js" ) ]' );
 
 			foreach ( $script_query as $script ) {
+				/** @var DOMElement $parent_node */
 				$parent_node = $script->parentNode;
 				$parent_node->removeChild( $script );
 

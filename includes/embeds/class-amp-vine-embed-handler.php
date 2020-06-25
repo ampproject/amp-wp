@@ -107,7 +107,7 @@ class AMP_Vine_Embed_Handler extends AMP_Base_Embed_Handler implements Registera
 	 * Get all raw embeds from the DOM.
 	 *
 	 * @param Document $dom Document.
-	 * @return DOMNodeList|null A list of DOMElement nodes, or null if not implemented.
+	 * @return DOMNodeList A list of DOMElement nodes.
 	 */
 	protected function get_raw_embed_nodes( Document $dom ) {
 		return $dom->xpath->query( sprintf( '//%s', $this->amp_tag ) );
