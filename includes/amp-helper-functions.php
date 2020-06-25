@@ -340,8 +340,9 @@ function is_amp_available() {
 	$error_message = function () {
 		return sprintf(
 			/* translators: %1$s: is_amp_endpoint(), %2$s: the current action, %3$s: the wp action, %4$s: the WP_Query class, %5$s: the amp_skip_post() function */
-			__( '%1$s was called too early and so it will not work properly. WordPress is currently doing the "%2$s" action. Calling this function before the "%3$s" action means it will not have access to %4$s and the queried object to determine if it is an AMP response, thus neither the "%5$s" filter nor the AMP enabled toggle will be considered.', 'amp' ),
-			__FUNCTION__ . '()',
+			__( '%1$s (or %2$s) was called too early and so it will not work properly. WordPress is currently doing the "%3$s" action. Calling this function before the "%4$s" action means it will not have access to %5$s and the queried object to determine if it is an AMP response, thus neither the "%6$s" filter nor the AMP enabled toggle will be considered.', 'amp' ),
+			'is_amp_available()',
+			'is_amp_endpoint()',
 			current_action(),
 			'wp',
 			'WP_Query',
@@ -721,7 +722,9 @@ function post_supports_amp( $post ) {
 function is_amp_endpoint() {
 	global $wp_query;
 
-	$has_amp_query_var = (
+	$is_amp_url = (
+		amp_is_canonical()
+		||
 		isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		||
 		(
@@ -731,39 +734,20 @@ function is_amp_endpoint() {
 		)
 	);
 
-	// If WP_Query was not available yet, then we will just assume the query is supported since at this point we do
-	// know either that the site is in Standard mode or the URL was requested with the AMP query var. This can still
-	// produce an undesired result when a Standard mode site has a post that opts out of AMP, but this issue will
-	// have been flagged via _doing_it_wrong() above.
-	if ( ! did_action( 'wp' ) || ! $wp_query instanceof WP_Query ) {
-		_doing_it_wrong(
-			__FUNCTION__,
-			esc_html(
-				sprintf(
-				/* translators: %1$s: is_amp_endpoint(), %2$s: the current action, %3$s: the wp action, %4$s: the WP_Query class, %5$s: the amp_skip_post() function */
-					__( '%1$s was called too early and so it will not work properly. WordPress is currently doing the "%2$s" action. Calling this function before the "%3$s" action means it will not have access to %4$s and the queried object to determine if it is an AMP response, thus neither the "%5$s" filter nor the AMP enabled toggle will be considered.', 'amp' ),
-					__FUNCTION__ . '()',
-					current_action(),
-					'wp',
-					'WP_Query',
-					'amp_skip_post()'
-				)
-			),
-			'1.0.2'
-		);
-		return amp_is_canonical() || $has_amp_query_var;
-	}
-
 	// If AMP is not available, then it's definitely not an AMP endpoint.
 	if ( ! is_amp_available() ) {
+		// But, if WP_Query was not available yet, then we will just assume the query is supported since at this point we do
+		// know either that the site is in Standard mode or the URL was requested with the AMP query var. This can still
+		// produce an undesired result when a Standard mode site has a post that opts out of AMP, but this issue will
+		// have been flagged via _doing_it_wrong() in is_amp_available() above.
+		if ( ! did_action( 'wp' ) || ! $wp_query instanceof WP_Query ) {
+			return $is_amp_url;
+		}
+
 		return false;
 	}
 
-	if ( amp_is_canonical() ) {
-		return true;
-	}
-
-	return $has_amp_query_var;
+	return $is_amp_url;
 }
 
 /**

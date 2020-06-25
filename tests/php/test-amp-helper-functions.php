@@ -717,7 +717,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * Test is_amp_endpoint() function when there is no WP_Query.
 	 *
 	 * @covers ::is_amp_available()
-	 * @expectedIncorrectUsage is_amp_endpoint
+	 * @expectedIncorrectUsage is_amp_available
 	 */
 	public function test_is_amp_endpoint_when_no_wp_query() {
 		global $wp_query;
@@ -729,7 +729,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * Test is_amp_endpoint() function before the wp action happens.
 	 *
 	 * @covers ::is_amp_endpoint()
-	 * @expectedIncorrectUsage is_amp_endpoint
+	 * @expectedIncorrectUsage is_amp_available
 	 */
 	public function test_is_amp_endpoint_before_wp_action() {
 		add_theme_support( 'amp' );
