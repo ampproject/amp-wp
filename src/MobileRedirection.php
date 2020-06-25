@@ -191,6 +191,10 @@ final class MobileRedirection implements Service, Registerable {
 			// Add a link to the footer to allow for navigation to the AMP version.
 			add_action( 'wp_footer', [ $this, 'add_amp_mobile_version_switcher' ] );
 		} else {
+			// Enable AMP-to-AMP linking by default to avoid redirecting to AMP version when navigating.
+			// A low priority is used so that sites can continue overriding this if they have done so.
+			add_filter( 'amp_to_amp_linking_enabled', '__return_true', 0 );
+
 			add_filter( 'amp_to_amp_linking_element_excluded', [ $this, 'filter_amp_to_amp_linking_element_excluded' ], 100, 2 );
 			add_filter( 'amp_to_amp_linking_element_query_vars', [ $this, 'filter_amp_to_amp_linking_element_query_vars' ], 10, 2 );
 
