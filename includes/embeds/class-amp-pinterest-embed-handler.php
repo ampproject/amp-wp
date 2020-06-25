@@ -5,12 +5,13 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Embed\Registerable;
 use AmpProject\Dom\Document;
 
 /**
  * Class AMP_Pinterest_Embed_Handler
  */
-class AMP_Pinterest_Embed_Handler extends AMP_Base_Embed_Handler {
+class AMP_Pinterest_Embed_Handler extends AMP_Base_Embed_Handler implements Registerable {
 
 	const URL_PATTERN = '#https?://(www\.)?pinterest\.com/pin/.*#i';
 
