@@ -33,7 +33,7 @@ describe( 'AMP Setup Screen', () => {
 		let titleText;
 
 		titleText = await getTitleText();
-		expect( titleText ).toBe( 'Welcome' );
+		expect( titleText ).toBe( 'Welcome to the Official AMP Plugin for WordPress' );
 
 		await page.waitForSelector( `${ NEXT_BUTTON_SELECTOR }:not([disabled])` );
 		await page.click( NEXT_BUTTON_SELECTOR );
