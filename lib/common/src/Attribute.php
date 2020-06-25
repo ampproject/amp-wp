@@ -87,6 +87,7 @@ interface Attribute
     const REL_DNS_PREFETCH = 'dns-prefetch';
     const REL_ICON         = 'icon';
     const REL_NOAMPHTML    = 'noamphtml';
+    const REL_NOFOLLOW     = 'nofollow';
     const REL_PRECONNECT   = 'preconnect';
     const REL_PREFETCH     = 'prefetch';
     const REL_PRELOAD      = 'preload';

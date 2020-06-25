@@ -112,7 +112,8 @@
       "globals": {
         "AMP_MOBILE_REDIRECTION": false,
         "location": false,
-        "navigator": false
+        "navigator": false,
+        "sessionStorage": false
       }
     }
   ]
