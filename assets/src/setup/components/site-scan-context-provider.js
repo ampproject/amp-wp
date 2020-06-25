@@ -9,7 +9,7 @@ import { createContext, useEffect, useState } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { getQueryArg } from '@wordpress/url';
 
-export const SiteScan = createContext();
+export const Welcome = createContext();
 
 /**
  * Context provider for site scanning.
@@ -48,7 +48,7 @@ export function SiteScanContextProvider( { children } ) {
 	}, [ scanningSite ] );
 
 	return (
-		<SiteScan.Provider
+		<Welcome.Provider
 			value={
 				{
 					pluginIssues,
@@ -58,7 +58,7 @@ export function SiteScanContextProvider( { children } ) {
 			}
 		>
 			{ children }
-		</SiteScan.Provider>
+		</Welcome.Provider>
 	);
 }
 

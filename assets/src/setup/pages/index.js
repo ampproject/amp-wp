@@ -11,16 +11,17 @@ import { TemplateMode } from './template-mode';
 import { ChooseReaderTheme } from './choose-reader-theme';
 import { SiteConfigurationSummary } from './site-configuration-summary';
 import { Save } from './save';
-import { SiteScan } from './site-scan';
+import { Welcome } from './welcome';
 
 /**
  * Settings for the pages in the application.
  */
 export const PAGES = [
 	{
-		slug: 'site-scan',
-		title: __( 'Site scan', 'amp' ),
-		PageComponent: SiteScan,
+		slug: 'welcome',
+		title: __( 'Welcome', 'amp' ),
+		PageComponent: Welcome,
+		showTitle: false,
 	},
 	{
 		slug: 'technical-background',

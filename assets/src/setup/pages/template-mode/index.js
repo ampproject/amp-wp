@@ -8,7 +8,7 @@ import { useEffect, useContext } from '@wordpress/element';
  */
 import { Navigation } from '../../components/navigation-context-provider';
 import { Options } from '../../components/options-context-provider';
-import { SiteScan } from '../../components/site-scan-context-provider';
+import { Welcome } from '../../components/site-scan-context-provider';
 import { Loading } from '../../components/loading';
 import { User } from '../../components/user-context-provider';
 import { ScreenUI } from './screen-ui';
@@ -20,7 +20,7 @@ export function TemplateMode() {
 	const { canGoForward, setCanGoForward } = useContext( Navigation );
 	const { options, updateOptions } = useContext( Options );
 	const { developerToolsOption } = useContext( User );
-	const { pluginIssues, themeIssues, scanningSite } = useContext( SiteScan );
+	const { pluginIssues, themeIssues, scanningSite } = useContext( Welcome );
 
 	const { theme_support: themeSupport } = options || {};
 
