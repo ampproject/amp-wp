@@ -96,7 +96,6 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 			'layout'       => 'responsive',
 			'width'        => $this->args['width'],
 			'height'       => $this->args['height'],
-			'title'        => null,
 		];
 
 		if ( ! empty( $node->getAttribute( 'title' ) ) ) {
@@ -117,7 +116,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 			$attributes
 		);
 
-		$this->append_placeholder( $amp_node, $video_id, $attributes['title'] );
+		$this->append_placeholder( $amp_node, $video_id, isset( $attributes['title'] ) ? $attributes['title'] : null );
 
 		$this->unwrap_p_element( $node );
 
