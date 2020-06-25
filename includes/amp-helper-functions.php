@@ -321,7 +321,6 @@ function amp_add_frontend_actions() {
 /**
  * Determine whether AMP is available for the current URL.
  *
- * @todo This should go into the AmpProject\AmpWP namespace?
  * @since 1.6
  *
  * @return bool Whether there is an AMP version for the provided URL.
