@@ -364,7 +364,8 @@ function is_amp_available() {
 	}
 
 	// Always return false when requesting the service worker.
-	// Note this is no longer required because AMP_Theme_Support::prepare_response() will abort for non-HTML responses.
+	// Note this is no longer strictly required because AMP_Theme_Support::prepare_response() will abort for non-HTML responses.
+	// But it is still good to do so because it avoids needlessly output-buffering the response.
 	if ( class_exists( 'WP_Service_Workers' ) && $wp_query instanceof WP_Query && defined( 'WP_Service_Workers::QUERY_VAR' ) && $wp_query->get( WP_Service_Workers::QUERY_VAR ) ) {
 		return false;
 	}
