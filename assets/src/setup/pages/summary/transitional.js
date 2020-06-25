@@ -11,7 +11,6 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { Desktop } from '../../components/desktop';
 import { Transitional as TransitionalIllustration } from '../../components/svg/transitional';
 import { RedirectToggle } from './redirect-toggle';
 import { SummaryHeader } from './summary-header';

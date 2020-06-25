@@ -3,12 +3,11 @@
  */
 import { act } from 'react-dom/test-utils';
 import { create } from 'react-test-renderer';
-import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
  */
-import { render, useState } from '@wordpress/element';
+import { render } from '@wordpress/element';
 
 /**
  * Internal dependencies
