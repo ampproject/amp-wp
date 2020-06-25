@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Embed\Registerable;
 use AmpProject\Dom\Document;
 
 /**
@@ -12,7 +13,7 @@ use AmpProject\Dom\Document;
  *
  * Much of this class is borrowed from Jetpack embeds
  */
-class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
+class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler implements Registerable {
 
 	const URL_PATTERN = '#https?:\/\/(www\.)?instagr(\.am|am\.com)\/(p|tv)\/([A-Za-z0-9-_]+)#i';
 
@@ -36,6 +37,30 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @var string
 	 */
 	protected $amp_tag = 'amp-instagram';
+
+	/**
+	 * Register the embed.
+	 *
+	 * @return void
+	 */
+	public function register_embed() {
+		if ( version_compare( get_bloginfo( 'version' ), '5.1', '>=' ) ) {
+			return;
+		}
+
+		// The oEmbed provider for Instagram does not accommodate Instagram TV URLs on WP < 5.1. Modifying the provider format
+		// here will allow for the oEmbed HTML to be fetched, and can then sanitized later below.
+		wp_oembed_remove_provider( '#https?://(www\.)?instagr(\.am|am\.com)/p/.*#i' );
+		wp_oembed_add_provider( self::URL_PATTERN, 'https://api.instagram.com/oembed', true );
+	}
+
+	/**
+	 * Unregister the embed.
+	 *
+	 * @return void
+	 */
+	public function unregister_embed() {
+	}
 
 	/**
 	 * Get all raw embeds from the DOM.

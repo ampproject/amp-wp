@@ -55,19 +55,13 @@ class AMP_Crowdsignal_Embed_Handler_Test extends WP_UnitTestCase {
 				'<iframe src="https://rydk.survey.fm/test-survey?ft=1&amp;iframe=http://example.org/" layout="responsive" width="600" height="600" frameborder="0" scrolling="no" allowtransparency="true" sandbox="allow-scripts allow-same-origin"></iframe>' . PHP_EOL . PHP_EOL,
 				$survey_response,
 			],
-		];
 
-		/*
-		 * There is a bug with WordPress's oEmbed handling for Crowdsignal surveys.
-		 * See <https://core.trac.wordpress.org/ticket/46467>.
-		 */
-		if ( version_compare( get_bloginfo( 'version' ), '5.2.0', '>=' ) ) {
-			$data['survey.fm'] = [
+			'survey.fm'        => [
 				'https://rydk.survey.fm/test-survey',
 				'<iframe src="https://rydk.survey.fm/test-survey?ft=1&amp;iframe=http://example.org/" layout="responsive" width="600" height="600" frameborder="0" scrolling="no" allowtransparency="true" sandbox="allow-scripts allow-same-origin"></iframe>' . PHP_EOL . PHP_EOL,
 				$survey_response,
-			];
-		}
+			],
+		];
 
 		return $data;
 	}
@@ -106,12 +100,14 @@ class AMP_Crowdsignal_Embed_Handler_Test extends WP_UnitTestCase {
 		);
 
 		$embed = new AMP_Crowdsignal_Embed_Handler();
+		$embed->register_embed();
 
 		$filtered_content = apply_filters( 'the_content', $url );
 		$dom              = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
 		$embed->sanitize_raw_embeds( $dom );
 
-		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$content  = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$expected = $this->adapt_iframe_title( $expected );
 
 		$this->assertEquals( $expected, $content );
 	}

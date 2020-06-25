@@ -8,12 +8,44 @@
  * @since 1.2
  */
 
+use AmpProject\AmpWP\Embed\Registerable;
 use AmpProject\Dom\Document;
 
 /**
  * Class AMP_Crowdsignal_Embed_Handler
  */
-class AMP_Crowdsignal_Embed_Handler extends AMP_Base_Embed_Handler {
+class AMP_Crowdsignal_Embed_Handler extends AMP_Base_Embed_Handler implements Registerable {
+
+	/**
+	 * Register the embed.
+	 *
+	 * @return void
+	 */
+	public function register_embed() {
+		if ( version_compare( get_bloginfo( 'version' ), '5.1', '>=' ) ) {
+			return;
+		}
+
+		// The oEmbed providers for CrowdSignal embeds are outdated on WP < 5.1. Updating the providers here will
+		// allow for the oEmbed HTML to be fetched, and can then sanitized later below.
+		$formats = [
+			'#https?://(.+\.)?polldaddy\.com/.*#i',
+			'#https?://poll\.fm/.*#i',
+			'#https?://(.+\.)?survey\.fm/.*#i',
+		];
+
+		foreach ( $formats as $format ) {
+			wp_oembed_add_provider( $format, 'https://api.crowdsignal.com/oembed', true );
+		}
+	}
+
+	/**
+	 * Unregister the embed.
+	 *
+	 * @return void
+	 */
+	public function unregister_embed() {
+	}
 
 	/**
 	 * Get all raw embeds from the DOM.
