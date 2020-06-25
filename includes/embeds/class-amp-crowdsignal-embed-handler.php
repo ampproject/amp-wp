@@ -22,7 +22,7 @@ class AMP_Crowdsignal_Embed_Handler extends AMP_Base_Embed_Handler implements Re
 	 * @return void
 	 */
 	public function register_embed() {
-		if ( version_compare( get_bloginfo( 'version' ), '5.1', '>=' ) ) {
+		if ( version_compare( get_bloginfo( 'version' ), '5.2', '>=' ) ) {
 			return;
 		}
 
@@ -31,7 +31,7 @@ class AMP_Crowdsignal_Embed_Handler extends AMP_Base_Embed_Handler implements Re
 		$formats = [
 			'#https?://(.+\.)?polldaddy\.com/.*#i',
 			'#https?://poll\.fm/.*#i',
-			'#https?://(.+\.)?survey\.fm/.*#i',
+			'#https?://(.+\.)?survey\.fm/.*#i', // Not available on WP 5.2.
 		];
 
 		foreach ( $formats as $format ) {
