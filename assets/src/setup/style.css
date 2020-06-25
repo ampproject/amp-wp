@@ -103,6 +103,10 @@ input[type="radio"] {
 	width: 1.5rem;
 }
 
+input[type="radio"][disabled] {
+	border-color: var(--light-gray);
+}
+
 input[type="radio"]:checked {
 	border-color: var(--brand);
 }

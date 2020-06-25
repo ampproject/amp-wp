@@ -21,6 +21,14 @@
 	}
 }
 
+.choose-reader-theme__uninstallable {
+	padding-top: 6rem;
+}
+
+.choose-reader-theme__uninstallable label {
+	cursor: default;
+}
+
 .theme-card {
 	display: flex;
 	flex-direction: column;

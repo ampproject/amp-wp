@@ -28,8 +28,9 @@ import { Phone } from '../../components/phone';
  * @param {string} props.screenshotUrl URL for screenshot of theme.
  * @param {string} props.slug Theme slug.
  * @param {string} props.name Theme name.
+ * @param {boolean} props.uninstallable Whether the theme is not automatically installable in the current environment.
  */
-export function ThemeCard( { description, homepage, screenshotUrl, slug, name } ) {
+export function ThemeCard( { description, homepage, screenshotUrl, slug, name, uninstallable } ) {
 	const { options, updateOptions } = useContext( Options );
 	const { reader_theme: readerTheme } = options || {};
 
@@ -50,6 +51,7 @@ export function ThemeCard( { description, homepage, screenshotUrl, slug, name } 
 				</Phone>
 				<div className="theme-card__label-header">
 					<input
+						disabled={ Boolean( uninstallable ) }
 						type="radio"
 						id={ id }
 						checked={ readerTheme === slug }
@@ -82,4 +84,5 @@ ThemeCard.propTypes = {
 	screenshotUrl: PropTypes.string.isRequired,
 	slug: PropTypes.string.isRequired,
 	name: PropTypes.string.isRequired,
+	uninstallable: PropTypes.bool,
 };
