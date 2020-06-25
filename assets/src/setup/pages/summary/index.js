@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { useContext, useEffect } from '@wordpress/element';
+import { useContext, useEffect, useCallback } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -35,21 +35,29 @@ export function Summary() {
 		setCanGoForward( true );
 	}, [ setCanGoForward ] );
 
-	if ( undefined === themeSupport ) {
-		return null;
-	}
+	const Screen = useCallback( () => {
+		if ( undefined === themeSupport ) {
+			return null;
+		}
 
-	switch ( themeSupport ) {
-		case 'reader':
-			return <Reader currentTheme={ CURRENT_THEME } />;
+		switch ( themeSupport ) {
+			case 'reader':
+				return <Reader currentTheme={ CURRENT_THEME } />;
 
-		case 'standard':
-			return <Standard currentTheme={ CURRENT_THEME } />;
+			case 'standard':
+				return <Standard currentTheme={ CURRENT_THEME } />;
 
-		case 'transitional':
-			return <Transitional currentTheme={ CURRENT_THEME } />;
+			case 'transitional':
+				return <Transitional currentTheme={ CURRENT_THEME } />;
 
-		default:
-			throw new Error( __( 'A mode option was not accounted for on the summary screen.', 'amp' ) );
-	}
+			default:
+				throw new Error( __( 'A mode option was not accounted for on the summary screen.', 'amp' ) );
+		}
+	}, [ themeSupport ] );
+
+	return (
+		<div className="summary">
+			<Screen />
+		</div>
+	);
 }

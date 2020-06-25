@@ -22,24 +22,28 @@ body {
 	padding-bottom: 8rem;
 }
 
-a {
+.amp-setup a {
 	color: var(--brand);
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-.h1,
-.h2,
-.h3,
-.h4,
-.h5,
-.h6,
+#amp-setup h1,
+#amp-setup h2,
+#amp-setup h3,
+#amp-setup h4,
+#amp-setup h5,
+#amp-setup h6,
+#amp-setup .h1,
+#amp-setup .h2,
+#amp-setup .h3,
+#amp-setup .h4,
+#amp-setup .h5,
+#amp-setup .h6,
 .components-button {
 	font-family: var(--font-poppins);
+}
+
+.amp-setup p {
+	font-size: 16px;
 }
 
 .amp-setup-container,
@@ -286,7 +290,7 @@ input[type="radio"]:focus {
 }
 
 .amp-stepper__bullet--dot {
-	border-color: rgba(0, 0, 0, 0);
+	border-color: var(--brand);
 }
 
 .amp-stepper__bullet--dot span {

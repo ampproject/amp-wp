@@ -3,6 +3,10 @@
 	padding: 1.5rem;
 }
 
+.template-mode-selection p {
+	font-size: 13px;
+}
+
 .template-mode-selection label {
 	display: flex;
 	flex-wrap: wrap;

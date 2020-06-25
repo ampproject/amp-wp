@@ -1,0 +1,212 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RedirectToggle matches snapshot 1`] = `
+<div
+  className="selectable selectable--bottom"
+>
+  <div
+    className="redirect-toggle"
+  >
+    <div
+      className="components-base-control components-toggle-control"
+    >
+      <div
+        className="components-base-control__field"
+      >
+        <span
+          className="components-form-toggle"
+        >
+          <input
+            checked={false}
+            className="components-form-toggle__input"
+            id="inspector-toggle-control-0"
+            onChange={[Function]}
+            type="checkbox"
+          />
+          <span
+            className="components-form-toggle__track"
+          />
+          <span
+            className="components-form-toggle__thumb"
+          />
+          <svg
+            aria-hidden={true}
+            className="components-form-toggle__off"
+            focusable={false}
+            height="6"
+            role="img"
+            viewBox="0 0 6 6"
+            width="6"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 1.5c.8 0 1.5.7 1.5 1.5S3.8 4.5 3 4.5 1.5 3.8 1.5 3 2.2 1.5 3 1.5M3 0C1.3 0 0 1.3 0 3s1.3 3 3 3 3-1.3 3-3-1.3-3-3-3z"
+            />
+          </svg>
+        </span>
+        <label
+          className="components-toggle-control__label"
+          htmlFor="inspector-toggle-control-0"
+        >
+          <div
+            className="redirect-toggle__illustration"
+          >
+            <svg
+              fill="none"
+              height="50"
+              viewBox="0 0 69 50"
+              width="69"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M22.4305 1.63281H1.23047V38.3328H22.4305V1.63281Z"
+                fill="white"
+                stroke="#285BE7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeMiterlimit="10"
+                strokeWidth="2"
+              />
+              <path
+                d="M10.9307 7.53516H13.3307"
+                stroke="#285BE7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeMiterlimit="10"
+                strokeWidth="2"
+              />
+              <path
+                d="M16.1309 7.53516H18.9309"
+                stroke="#285BE7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeMiterlimit="10"
+                strokeWidth="2"
+              />
+              <path
+                d="M6.63027 9.33281C7.73027 9.33281 8.73027 8.43281 8.73027 7.23281C8.73027 6.13281 7.83027 5.13281 6.63027 5.13281C5.53027 5.13281 4.53027 6.03281 4.53027 7.23281C4.63027 8.43281 5.53027 9.33281 6.63027 9.33281Z"
+                fill="#285BE7"
+              />
+              <path
+                d="M18.9303 13.1328H4.53027V23.9328H18.9303V13.1328Z"
+                stroke="#285BE7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeMiterlimit="10"
+                strokeWidth="2"
+              />
+              <path
+                d="M11.1303 20.9328C13.5303 20.9328 15.4303 20.9328 15.4303 20.9328V16.1328L9.03027 20.9328H11.1303Z"
+                stroke="#285BE7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeMiterlimit="10"
+                strokeWidth="2"
+              />
+              <path
+                d="M11.3301 28.5352H19.7301"
+                stroke="#285BE7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeMiterlimit="10"
+                strokeWidth="2"
+              />
+              <path
+                d="M67.7371 1.63281H46.5371V38.3328H67.7371V1.63281Z"
+                fill="white"
+                stroke="#285BE7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeMiterlimit="10"
+                strokeWidth="2"
+              />
+              <path
+                d="M56.2373 7.53516H58.6373"
+                stroke="#285BE7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeMiterlimit="10"
+                strokeWidth="2"
+              />
+              <path
+                d="M61.4375 7.53516H64.2375"
+                stroke="#285BE7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeMiterlimit="10"
+                strokeWidth="2"
+              />
+              <path
+                d="M51.9369 9.33281C53.0369 9.33281 54.0369 8.43281 54.0369 7.23281C54.0369 6.13281 53.1369 5.13281 51.9369 5.13281C50.8369 5.13281 49.8369 6.03281 49.8369 7.23281C49.9369 8.43281 50.8369 9.33281 51.9369 9.33281Z"
+                fill="#285BE7"
+              />
+              <path
+                d="M64.2369 13.1328H49.8369V23.9328H64.2369V13.1328Z"
+                stroke="#285BE7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeMiterlimit="10"
+                strokeWidth="2"
+              />
+              <path
+                d="M56.4369 20.9328C58.8369 20.9328 60.7369 20.9328 60.7369 20.9328V16.1328L54.3369 20.9328H56.4369Z"
+                stroke="#285BE7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeMiterlimit="10"
+                strokeWidth="2"
+              />
+              <path
+                d="M56.6367 28.5352H65.0367"
+                stroke="#285BE7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeMiterlimit="10"
+                strokeWidth="2"
+              />
+              <path
+                d="M57.1367 49.3359C61.547 49.3359 65.1367 45.7462 65.1367 41.3359C65.1367 36.9257 61.547 33.3359 57.1367 33.3359C52.7265 33.3359 49.1367 36.9257 49.1367 41.3359C49.1367 45.7462 52.7265 49.3359 57.1367 49.3359Z"
+                fill="#3363E8"
+              />
+              <path
+                d="M58.1621 36.8174L57.7519 40.3046H59.2903C59.2903 40.3046 59.9057 40.202 59.2903 41.2277C56.5211 45.8431 56.5211 45.8431 56.5211 45.8431H56.0083L56.5211 42.3559H55.1878C55.1878 42.3559 54.1621 42.6636 54.8801 41.5354C57.7519 37.0225 57.8544 36.7148 57.8544 36.7148L58.1621 36.8174Z"
+                fill="white"
+              />
+              <circle
+                cx="11.8301"
+                cy="41.3359"
+                fill="white"
+                r="8"
+              />
+              <circle
+                cx="11.8301"
+                cy="41.3359"
+                fill="white"
+                r="8"
+              />
+              <path
+                d="M11.8301 33.3359C7.43008 33.3359 3.83008 36.9359 3.83008 41.3359C3.83008 45.7359 7.43008 49.3359 11.8301 49.3359C16.2301 49.3359 19.8301 45.7359 19.8301 41.3359C19.8301 36.9359 16.2301 33.3359 11.8301 33.3359ZM17.3501 38.1359H15.0301C14.7901 37.1759 14.3901 36.2159 13.9101 35.2559C15.3501 35.8159 16.6301 36.7759 17.3501 38.1359ZM11.8301 34.9359C12.4701 35.8959 13.0301 36.9359 13.3501 38.1359H10.3101C10.6301 37.0159 11.1901 35.8959 11.8301 34.9359ZM5.67008 42.9359C5.51008 42.4559 5.43008 41.8959 5.43008 41.3359C5.43008 40.7759 5.51008 40.2159 5.67008 39.7359H8.39008C8.31008 40.2959 8.31008 40.7759 8.31008 41.3359C8.31008 41.8959 8.39008 42.3759 8.39008 42.9359H5.67008ZM6.31008 44.5359H8.71008C8.95008 45.4959 9.35008 46.5359 9.83008 47.4159C8.31008 46.8559 7.03008 45.8959 6.31008 44.5359ZM8.63008 38.1359H6.23008C7.03008 36.7759 8.23008 35.8159 9.67008 35.2559C9.27008 36.2159 8.95008 37.1759 8.63008 38.1359ZM11.8301 47.7359C11.1901 46.7759 10.6301 45.7359 10.3101 44.5359H13.3501C13.0301 45.6559 12.4701 46.7759 11.8301 47.7359ZM13.6701 42.9359H9.99008C9.91008 42.3759 9.83008 41.8959 9.83008 41.3359C9.83008 40.7759 9.91008 40.2159 9.99008 39.7359H13.7501C13.8301 40.2159 13.9101 40.7759 13.9101 41.3359C13.9101 41.8959 13.7501 42.3759 13.6701 42.9359ZM13.9101 47.4159C14.3901 46.5359 14.7901 45.5759 15.0301 44.5359H17.3501C16.6301 45.8159 15.3501 46.8559 13.9101 47.4159ZM15.3501 42.9359C15.4301 42.3759 15.4301 41.8959 15.4301 41.3359C15.4301 40.7759 15.3501 40.2959 15.3501 39.7359H18.0701C18.2301 40.2159 18.3101 40.7759 18.3101 41.3359C18.3101 41.8959 18.2301 42.4559 18.0701 42.9359H15.3501Z"
+                fill="#285BE7"
+              />
+              <path
+                d="M43.2089 21.0977C43.5994 20.7072 43.5994 20.074 43.2089 19.6835L36.8449 13.3196C36.4544 12.929 35.8213 12.929 35.4307 13.3196C35.0402 13.7101 35.0402 14.3432 35.4307 14.7338L41.0876 20.3906L35.4307 26.0475C35.0402 26.438 35.0402 27.0712 35.4307 27.4617C35.8213 27.8522 36.4544 27.8522 36.8449 27.4617L43.2089 21.0977ZM22.2207 21.3906H42.5018V19.3906H22.2207V21.3906Z"
+                fill="#3363E8"
+              />
+            </svg>
+          </div>
+          <div
+            className="redirect-toggle__label-text"
+          >
+            <h3>
+              Redirect mobile visitors to AMP.
+            </h3>
+            <p>
+              AMP is not only for mobile.
+            </p>
+          </div>
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+`;
