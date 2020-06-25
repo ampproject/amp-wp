@@ -27,8 +27,20 @@
 	document.addEventListener( 'DOMContentLoaded', () => {
 		// Show the mobile version switcher link once the DOM has loaded.
 		const siteVersionSwitcher = document.getElementById( 'amp-mobile-version-switcher' );
-		if ( siteVersionSwitcher ) {
-			siteVersionSwitcher.hidden = false;
+		if ( ! siteVersionSwitcher ) {
+			return;
+		}
+
+		// Show the link to return to the mobile version of the site since it is hidden by default when client-side
+		// redirection is enabled, since JS is used to determine whether it is a mobile browser.
+		siteVersionSwitcher.hidden = false;
+
+		// Re-enable mobile redirection when navigating back to the mobile version of the site.
+		const link = siteVersionSwitcher.querySelector( 'a[href]' );
+		if ( link ) {
+			link.addEventListener( 'click', () => {
+				sessionStorage.removeItem( disabledStorageKey );
+			} );
 		}
 	} );
 

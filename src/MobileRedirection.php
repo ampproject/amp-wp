@@ -32,11 +32,11 @@ final class MobileRedirection implements Service, Registerable {
 	const REGEX_REGEX = '^\/((?:.|\n)+)\/([i]*)$';
 
 	/**
-	 * The name of the cookie that persists the user's preference for viewing the non-AMP version of a page when on mobile.
+	 * The name of the cookie or session storage key that persists the user's preference for viewing the non-AMP version of a page when on mobile.
 	 *
 	 * @var string
 	 */
-	const DISABLED_COOKIE_NAME = 'amp_mobile_redirect_disabled';
+	const DISABLED_STORAGE_KEY = 'amp_mobile_redirect_disabled';
 
 	/**
 	 * Query parameter to indicate that the page in question should not be served as AMP.
@@ -168,7 +168,7 @@ final class MobileRedirection implements Service, Registerable {
 			} elseif ( ! $this->is_redirection_disabled_via_cookie() ) {
 				if ( $this->is_redirection_disabled_via_query_param() ) {
 					// Persist disabling mobile redirection for the session if redirection is disabled for the current request.
-					$this->set_cookie_to_disable_redirection();
+					$this->set_mobile_redirection_disabled_cookie( true );
 				} else {
 					// Redirect to the AMP version since is_mobile_request and redirection not disabled by cookie or query param.
 					if ( wp_safe_redirect( $this->get_current_amp_url(), 302 ) ) {
@@ -180,6 +180,10 @@ final class MobileRedirection implements Service, Registerable {
 			// Add a link to the footer to allow for navigation to the AMP version.
 			add_action( 'wp_footer', [ $this, 'add_amp_mobile_version_switcher' ] );
 		} else {
+			if ( ! $js && $this->is_redirection_disabled_via_cookie() ) {
+				$this->set_mobile_redirection_disabled_cookie( false );
+			}
+
 			// Enable AMP-to-AMP linking by default to avoid redirecting to AMP version when navigating.
 			// A low priority is used so that sites can continue overriding this if they have done so.
 			add_filter( 'amp_to_amp_linking_enabled', '__return_true', 0 );
@@ -379,38 +383,46 @@ final class MobileRedirection implements Service, Registerable {
 	 * @return bool True if disabled, false otherwise.
 	 */
 	public function is_redirection_disabled_via_cookie() {
-		return isset( $_COOKIE[ self::DISABLED_COOKIE_NAME ] );
+		return isset( $_COOKIE[ self::DISABLED_STORAGE_KEY ] );
 	}
 
 	/**
-	 * Sets a cookie to disable mobile redirection for the current browser session.
+	 * Sets a cookie to disable/enable mobile redirection for the current browser session.
 	 *
+	 * @param bool $add Whether to add (true) or remove (false) the cookie.
 	 * @return void
 	 */
-	public function set_cookie_to_disable_redirection() {
-		$value    = '1';                                           // Cookie value.
-		$expires  = 0;                                             // Time till expiry. Setting it to `0` means the cookie will only last for the current browser session.
+	private function set_mobile_redirection_disabled_cookie( $add ) {
+		if ( $add ) {
+			$value   = '1';
+			$expires = 0; // Time till expiry. Setting it to `0` means the cookie will only last for the current browser session.
+		} else {
+			$value   = null;
+			$expires = time() - YEAR_IN_SECONDS;
+		}
+
 		$path     = wp_parse_url( home_url( '/' ), PHP_URL_PATH ); // Path.
 		$secure   = is_ssl();                                      // Whether cookie should be transmitted over a secure HTTPS connection.
-		$httponly = false;                                         // Whether cookie should be made accessible only through the HTTP protocol.
+		$httponly = true;                                          // Access via JS is unnecessary since cookie only get/set via PHP.
 		$samesite = 'strict';                                      // Prevents the cookie from being sent by the browser to the target site in all cross-site browsing context.
+		$domain   = COOKIE_DOMAIN;
 
 		// Pre PHP 7.3, the `samesite` cookie attribute had to be set via unconventional means. This was
 		// addressed in PHP 7.3 (see <https://github.com/php/php-src/commit/5cb825df7251aeb28b297f071c35b227a3949f01>),
 		// which now allows setting the cookie attribute via an options array.
 		if ( 70300 <= PHP_VERSION_ID ) {
 			setcookie(
-				self::DISABLED_COOKIE_NAME,
+				self::DISABLED_STORAGE_KEY,
 				$value,
-				compact( 'expires', 'path', 'secure', 'httponly', 'samesite' )
+				compact( 'expires', 'path', 'secure', 'httponly', 'samesite', 'domain' )
 			);
 		} else {
 			setcookie(
-				self::DISABLED_COOKIE_NAME,
+				self::DISABLED_STORAGE_KEY,
 				$value,
 				$expires,
 				$path . ';samesite=' . $samesite, // Includes the samesite option as a hack to be set in the cookie. See <https://stackoverflow.com/a/46971326>.
-				'', // Leave domain empty so the origin server is used.
+				$domain,
 				$secure,
 				$httponly
 			);
@@ -426,7 +438,7 @@ final class MobileRedirection implements Service, Registerable {
 		$exports = [
 			'ampUrl'             => $this->get_current_amp_url(),
 			'noampQueryVar'      => self::NO_AMP_QUERY_VAR,
-			'disabledStorageKey' => self::DISABLED_COOKIE_NAME,
+			'disabledStorageKey' => self::DISABLED_STORAGE_KEY,
 			'mobileUserAgents'   => $this->get_mobile_user_agents(),
 			'regexRegex'         => self::REGEX_REGEX,
 		];
@@ -455,12 +467,14 @@ final class MobileRedirection implements Service, Registerable {
 		/**
 		 * Filters whether the default mobile version switcher styles are printed.
 		 *
+		 * @since 1.6
+		 *
 		 * @param bool $used Whether the styles are printed.
 		 */
 		if ( ! apply_filters( 'amp_mobile_version_switcher_styles_used', true ) ) {
 			return;
 		}
-		$source = file_get_contents( __DIR__ . '/../assets/css/amp-mobile-version-switcher' . ( is_rtl() ? '-rtl.css' : '.css' ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		$source = file_get_contents( __DIR__ . '/../assets/css/amp-mobile-version-switcher' . ( is_rtl() ? '-rtl' : '' ) . '.css' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 		printf( '<style>%s</style>', $source ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
@@ -490,38 +504,7 @@ final class MobileRedirection implements Service, Registerable {
 		);
 		?>
 		<div id="amp-mobile-version-switcher" <?php printf( $hide_switcher ? 'hidden' : '' ); ?>>
-			<a
-				rel="<?php echo esc_attr( implode( ' ', $rel ) ); ?>"
-				href="<?php echo esc_url( $url ); ?>"
-				<?php
-				if ( ! $is_amp ) {
-					if ( $should_redirect_via_js ) {
-						$onclick = sprintf(
-							'sessionStorage.removeItem( %s );',
-							wp_json_encode( self::DISABLED_COOKIE_NAME )
-						);
-					} else {
-						$onclick = sprintf(
-							'document.cookie = %s + ( "https:" === location.protocol ? ";secure" : "" );',
-							wp_json_encode(
-								implode(
-									';',
-									[
-										self::DISABLED_COOKIE_NAME . '=', // Setting to empty value.
-										'path=' . wp_parse_url( home_url( '/' ), PHP_URL_PATH ),
-										'expires=Thu, 01 Jan 1970 00:00:01 GMT',
-										'samesite=strict',
-									]
-								)
-							)
-						);
-					}
-
-					// Add `onclick` attribute to enable mobile redirection when the user clicks to go to the mobile version.
-					printf( 'onclick="%s"', esc_attr( $onclick ) );
-				}
-				?>
-			>
+			<a rel="<?php echo esc_attr( implode( ' ', $rel ) ); ?>" href="<?php echo esc_url( $url ); ?>">
 				<?php echo esc_html( $text ); ?>
 			</a>
 		</div>
