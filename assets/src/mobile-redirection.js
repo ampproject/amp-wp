@@ -3,6 +3,7 @@
 		return;
 	}
 
+	// Yes, this is a regular expression to match regular expressions. So meta.
 	const regExpRegExp = new RegExp( regexRegex );
 
 	// A user agent may be expressed as a RegExp string serialization in the the form of `/pattern/[i]*`. If a user
