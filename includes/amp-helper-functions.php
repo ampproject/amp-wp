@@ -396,8 +396,8 @@ function is_amp_available() {
 		return false;
 	}
 
-	// @todo If redirected to this page because AMP is not available due to validation errors, we need to return false here!
-	if ( isset( $_GET['noamp'] ) && 'validation' === $_GET['noamp'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	// If redirected to this page because AMP is not available due to validation errors, prevent AMP from being available.
+	if ( ! amp_is_canonical() && isset( $_GET['noamp'] ) && 'validation' === $_GET['noamp'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		return false;
 	}
 
