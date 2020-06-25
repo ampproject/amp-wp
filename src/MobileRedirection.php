@@ -172,6 +172,10 @@ final class MobileRedirection implements Service, Registerable {
 			header( 'Vary: User-Agent', false );
 		}
 
+		// Print the mobile switcher styles.
+		add_action( 'wp_head', [ $this, 'add_mobile_version_switcher_styles' ] );
+		add_action( 'amp_post_template_head', [ $this, 'add_mobile_version_switcher_styles' ] );
+
 		if ( ! is_amp_endpoint() ) {
 			if ( $js ) {
 				// Add mobile redirection script.
@@ -450,6 +454,22 @@ final class MobileRedirection implements Service, Registerable {
 	}
 
 	/**
+	 * Print the styles for the mobile version switcher.
+	 */
+	public function add_mobile_version_switcher_styles() {
+		/**
+		 * Filters whether the default mobile version switcher styles are printed.
+		 *
+		 * @param bool $used Whether the styles are printed.
+		 */
+		if ( ! apply_filters( 'amp_mobile_version_switcher_styles_used', true ) ) {
+			return;
+		}
+		$source = file_get_contents( __DIR__ . '/../assets/css/amp-mobile-version-switcher' . ( is_rtl() ? '-rtl.css' : '.css' ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		printf( '<style>%s</style>', $source ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+
+	/**
 	 * Output the markup for the mobile version switcher.
 	 *
 	 * @param bool   $is_amp Modifies markup to be AMP compatible if true.
@@ -473,25 +493,9 @@ final class MobileRedirection implements Service, Registerable {
 			// device and thus whether the switcher should be displayed.
 			$should_redirect_via_js
 		);
-
-		// @todo Print the stylesheet in the head so it is easier to override?
 		?>
-		<style>
-			#version-switch-link {
-				display: block;
-				width: 100%;
-				padding: 15px 0;
-				font-size: 16px;
-				font-weight: 600;
-				color: #eaeaea;
-				text-align: center;
-				background-color: #444;
-				border: 0;
-			}
-		</style>
-		<div id="site-version-switcher" <?php printf( $hide_switcher ? 'hidden' : '' ); ?>>
+		<div id="amp-mobile-version-switcher" <?php printf( $hide_switcher ? 'hidden' : '' ); ?>>
 			<a
-				id="version-switch-link"
 				rel="<?php echo esc_attr( implode( ' ', $rel ) ); ?>"
 				href="<?php echo esc_url( $url ); ?>"
 				<?php
