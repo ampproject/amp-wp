@@ -1,12 +1,18 @@
 <?php
 
+use AmpProject\AmpWP\Tests\WithoutBlockPreRendering;
+
 class AMP_Tumblr_Embed_Handler_Test extends WP_UnitTestCase {
+
+	use WithoutBlockPreRendering {
+		setUp as prevent_block_pre_render;
+	}
 
 	/**
 	 * Set up.
 	 */
 	public function setUp() {
-		parent::setUp();
+		$this->prevent_block_pre_render();
 
 		// Mock the HTTP request.
 		add_filter( 'pre_http_request', [ $this, 'mock_http_request' ], 10, 3 );
