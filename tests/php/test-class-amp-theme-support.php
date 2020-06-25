@@ -2311,14 +2311,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 		$this->assertStringStartsWith( 'Redirecting', $sanitized_html );
 		$this->assertCount( 1, $redirects );
-		$this->assertEquals( add_query_arg( MobileRedirection::NO_AMP_QUERY_VAR, '1', home_url( '/' ) ), $redirects[0] );
+		$this->assertEquals( add_query_arg( MobileRedirection::NO_AMP_QUERY_VAR, 'validation', home_url( '/' ) ), $redirects[0] ); // @todo Query var name and value to be revisited!
 		$this->assertEquals( 1, AMP_Theme_Support_Sanitizer_Counter::$count );
 
 		AMP_Validation_Manager::reset_validation_results();
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 		$this->assertStringStartsWith( 'Redirecting', $sanitized_html );
 		$this->assertCount( 2, $redirects );
-		$this->assertEquals( add_query_arg( MobileRedirection::NO_AMP_QUERY_VAR, '1', home_url( '/' ) ), $redirects[0] );
+		$this->assertEquals( add_query_arg( MobileRedirection::NO_AMP_QUERY_VAR, 'validation', home_url( '/' ) ), $redirects[0] ); // @todo Query var name and value to be revisited!
 		$this->assertEquals( 2, AMP_Theme_Support_Sanitizer_Counter::$count, 'Expected sanitizer to be invoked again.' );
 
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );

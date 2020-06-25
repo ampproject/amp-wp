@@ -312,13 +312,20 @@ final class MobileRedirection implements Service, Registerable {
 	 */
 	public function should_redirect_via_js() {
 		/**
-		 * Filters whether mobile redirection should be done via JavaScript. If false, a server-side solution will be used instead.
+		 * Filters whether mobile redirection should be done via JavaScript.
+		 *
+		 * If false, a server-side solution will be used instead. It's important to verify that server-side redirection
+		 * does not conflict with a site's page caching logic.
+		 *
+		 * Beware that disabling this will result in a cookie being set when the user decides to leave the mobile version.
+		 * This may require updating the site's privacy policy or getting user consent for GDPR compliance. Nevertheless,
+		 * since the cookie is not used for tracking this may not be necessary.
 		 *
 		 * @since 1.6
 		 *
-		 * @param bool $should_redirect_via_js Whether JS redirection should be used.
+		 * @param bool $should_redirect_via_js Whether JS redirection should be used to take mobile visitors to the AMP version.
 		 */
-		return (bool) apply_filters( 'amp_redirect_via_js', true );
+		return (bool) apply_filters( 'amp_mobile_redirect_via_js', true );
 	}
 
 	/**
