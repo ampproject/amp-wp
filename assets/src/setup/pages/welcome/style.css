@@ -1,5 +1,6 @@
 .welcome {
-	padding-bottom: 60px;
+	padding-bottom: 45px;
+	padding-top: 30px;
 
 	@media screen and (min-width: 783px) {
 		padding-left: 90px;
