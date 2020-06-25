@@ -26,7 +26,7 @@ final class ServiceBasedPluginTest extends WP_UnitTestCase {
 
 		$container = $plugin->get_container();
 
-		$this->assertInstanceOf( ServiceContainer::class, $plugin->get_container() );
+		$this->assertInstanceOf( ServiceContainer::class, $container );
 	}
 
 	public function test_it_can_be_registered() {

@@ -12,7 +12,7 @@ use WP_UnitTestCase;
 final class AmpWpPluginTest extends WP_UnitTestCase {
 
 	public function test_it_has_filtering_disabled_by_default() {
-		$plugin  = new AmpWpPlugin();
+		$plugin = new AmpWpPlugin();
 
 		add_filter(
 			'amp_services',
