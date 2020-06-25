@@ -159,6 +159,7 @@ final class MobileRedirection implements Service, Registerable {
 		add_action( 'amp_post_template_head', [ $this, 'add_mobile_version_switcher_styles' ] );
 
 		if ( ! is_amp_endpoint() ) {
+			add_action( 'wp_head', [ $this, 'add_mobile_alternative_link' ] );
 			if ( $js ) {
 				// Add mobile redirection script.
 				add_action( 'wp_head', [ $this, 'add_mobile_redirect_script' ], ~PHP_INT_MAX );
@@ -431,6 +432,18 @@ final class MobileRedirection implements Service, Registerable {
 		$source = preg_replace( '/\bAMP_MOBILE_REDIRECTION\b/', wp_json_encode( $exports ), $source );
 
 		printf( '<script>%s</script>', $source ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+
+	/**
+	 * Add rel=alternate link for AMP version.
+	 *
+	 * @link https://developers.google.com/search/mobile-sites/mobile-seo/separate-urls#annotation-in-the-html
+	 */
+	public function add_mobile_alternative_link() {
+		printf(
+			'<link rel="alternate" type="text/html" media="only screen and (max-width: 640px)" href="%s">',
+			esc_url( $this->get_current_amp_url() )
+		);
 	}
 
 	/**
