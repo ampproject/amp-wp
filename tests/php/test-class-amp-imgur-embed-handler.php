@@ -57,9 +57,6 @@ class AMP_Imgur_Embed_Handler_Test extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_conversion_data() {
-		$width  = 500;
-		$height = 750;
-
 		return [
 			'no_embed'        => [
 				'<p>Hello world.</p>',
