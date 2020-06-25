@@ -48,24 +48,6 @@ final class MobileRedirection implements Service, Registerable {
 	const NO_AMP_QUERY_VAR = 'noamp';
 
 	/**
-	 * Indicates whether the the `amp_mobile_redirect_disabled` cookie has been set during the current request.
-	 *
-	 * When a cookie is set, it cannot be accessed via the `$_COOKIE` array until the next page load. This circumvent thia,
-	 * whenever the cookie is set during the current request, this variable becomes true and can be used as a fallback to
-	 * detect whether redirection has been disabled for the session.
-	 *
-	 * @var bool
-	 */
-	private $disabled_cookie_is_set;
-
-	/**
-	 * Constructor.
-	 */
-	public function __construct() {
-		$this->disabled_cookie_is_set = false;
-	}
-
-	/**
 	 * Register.
 	 */
 	public function register() {
@@ -394,7 +376,7 @@ final class MobileRedirection implements Service, Registerable {
 	 * @return bool True if disabled, false otherwise.
 	 */
 	public function is_redirection_disabled_via_cookie() {
-		return isset( $_COOKIE[ self::DISABLED_COOKIE_NAME ] ) || $this->disabled_cookie_is_set;
+		return isset( $_COOKIE[ self::DISABLED_COOKIE_NAME ] );
 	}
 
 	/**
@@ -430,8 +412,6 @@ final class MobileRedirection implements Service, Registerable {
 				$httponly
 			);
 		}
-
-		$this->disabled_cookie_is_set = true;
 	}
 
 	/**
@@ -518,7 +498,6 @@ final class MobileRedirection implements Service, Registerable {
 										'samesite=strict',
 									]
 								)
-
 							)
 						);
 					}
