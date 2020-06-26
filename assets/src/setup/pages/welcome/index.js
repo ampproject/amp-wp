@@ -84,7 +84,15 @@ export function Welcome() {
 						<h4>
 							{ __( 'AMP and WordPress', 'amp' ) }
 						</h4>
-						<p dangerouslySetInnerHTML={ { __html: __( 'AMP is a web framework designed to make it easier to build user-first sites--that is, sites that are beautiful, fast, engaging, secure, and accessible. <a href="http://amp.dev" target="_blank" rel="noreferrer">Learn more.</a> The Official AMP plugin for WordPress enables you to incorporate AMP into your site.', 'amp' ) } } />
+						<p>
+							{ __( 'AMP is a web framework designed to make it easier to build user-first sites--that is, sites that are beautiful, fast, engaging, secure, and accessible.', 'amp' ) }
+							{ ' ' }
+							<a href="http://amp.dev" target="_blank" rel="noreferrer">
+								{ __( 'Learn more.', 'amp' ) }
+							</a>
+							{ ' ' }
+							{ __( 'The Official AMP plugin for WordPress enables you to incorporate AMP into your site.', 'amp' ) }
+						</p>
 					</div>
 
 				</div>
@@ -115,7 +123,9 @@ export function Welcome() {
 						<h4>
 							{ __( 'Configure your site with AMP', 'amp' ) }
 						</h4>
-						<p dangerouslySetInnerHTML={ { __html: __( 'The AMP plugin for WordPress allows you to enable AMP content for your site. There are different ways this can be done, depending on the configuration of your site (e.g., which theme you are using) and your technical skills and level of interest in addressing AMP compatibility issues as your site evolves.', 'amp' ) } } />
+						<p>
+							{ __( 'The AMP plugin for WordPress allows you to enable AMP content for your site. There are different ways this can be done, depending on the configuration of your site (e.g., which theme you are using) and your technical skills and level of interest in addressing AMP compatibility issues as your site evolves.', 'amp' ) }
+						</p>
 					</div>
 
 				</div>
@@ -141,7 +151,9 @@ export function Welcome() {
 						<h4>
 							{ __( 'Onboarding flow', 'amp' ) }
 						</h4>
-						<p dangerouslySetInnerHTML={ { __html: __( 'Following the onboarding flow will guide you through the plugin configuration and getting started with AMP on your site.', 'amp' ) } } />
+						<p>
+							{ __( 'Following the onboarding flow will guide you through the plugin configuration and getting started with AMP on your site.', 'amp' ) }
+						</p>
 					</div>
 
 				</div>
