@@ -3,6 +3,10 @@
 	padding: 1.5rem;
 }
 
+.template-mode-selection p {
+	font-size: 13px;
+}
+
 .template-mode-selection label {
 	display: flex;
 	flex-wrap: wrap;
@@ -25,6 +29,25 @@
 	width: 80px;
 }
 
+.template-mode-selection__current-selection {
+	border: 2px solid var(--light-gray);
+	border-radius: 21.5px;
+	display: flex;
+	align-items: center;
+	font-size: 1rem;
+	font-weight: 600;
+	line-height: 1.5;
+	padding: 9px 18px;
+
+	@media screen and (min-width: 783px) {
+		margin-left: 1.5rem;
+	}
+}
+
+.template-mode-selection__current-selection svg {
+	margin-right: 10px;
+}
+
 .template-mode-selection__details {
 	margin-bottom: 1rem;
 }
@@ -42,19 +65,24 @@
 }
 
 .template-mode-selection__description {
-	align-items: flex-start;
+	align-items: center;
 	display: flex;
 	flex-grow: 1;
 	flex-wrap: wrap;
-	justify-content: space-between;
-	padding: 0 0 0 2rem;
+	justify-content: flex-start;
+	margin-bottom: 1.5rem;
+	padding: 0;
+
+	@media screen and (min-width: 783px) {
+		padding: 0 0 0 2rem;
+	}
 }
 
 .template-mode-selection__description h2 {
 	font-size: 1.5rem;
 	line-height: 1.5;
-	margin-top: 0;
-	margin-bottom: 0;
+	margin-top: .75rem;
+	margin-bottom: .75rem;
 }
 
 .template-mode-selection > .amp-notice {

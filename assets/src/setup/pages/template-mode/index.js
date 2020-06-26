@@ -8,7 +8,7 @@ import { useEffect, useContext } from '@wordpress/element';
  */
 import { Navigation } from '../../components/navigation-context-provider';
 import { Options } from '../../components/options-context-provider';
-import { Welcome } from '../../components/site-scan-context-provider';
+import { SiteScan } from '../../components/site-scan-context-provider';
 import { Loading } from '../../components/loading';
 import { User } from '../../components/user-context-provider';
 import { ScreenUI } from './screen-ui';
@@ -18,9 +18,9 @@ import { ScreenUI } from './screen-ui';
  */
 export function TemplateMode() {
 	const { canGoForward, setCanGoForward } = useContext( Navigation );
-	const { options, updateOptions } = useContext( Options );
+	const { options, savedThemeSupport, updateOptions } = useContext( Options );
 	const { developerToolsOption } = useContext( User );
-	const { pluginIssues, themeIssues, scanningSite } = useContext( Welcome );
+	const { pluginIssues, themeIssues, scanningSite } = useContext( SiteScan );
 
 	const { theme_support: themeSupport } = options || {};
 
@@ -33,7 +33,7 @@ export function TemplateMode() {
 		}
 	}, [ canGoForward, setCanGoForward, scanningSite, themeSupport ] );
 
-	if ( scanningSite || null === developerToolsOption ) {
+	if ( scanningSite ) {
 		return <Loading />;
 	}
 
@@ -43,6 +43,7 @@ export function TemplateMode() {
 			currentMode={ themeSupport }
 			developerToolsOption={ developerToolsOption }
 			pluginIssues={ pluginIssues }
+			savedCurrentMode={ savedThemeSupport }
 			setCurrentMode={ ( mode ) => {
 				updateOptions( { theme_support: mode } );
 			} }

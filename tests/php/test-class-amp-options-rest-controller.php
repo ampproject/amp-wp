@@ -77,6 +77,8 @@ class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
 			[
 				'theme_support',
 				'reader_theme',
+				'mobile_redirect',
+				'wizard_completed',
 			]
 		);
 	}

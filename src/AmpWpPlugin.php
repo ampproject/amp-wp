@@ -30,6 +30,9 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 * of code that can work independently.
 	 */
 
+	// Whether to enable filtering by default or not.
+	const ENABLE_FILTERS_DEFAULT = false;
+
 	/**
 	 * Prefix to use for all actions and filters.
 	 *

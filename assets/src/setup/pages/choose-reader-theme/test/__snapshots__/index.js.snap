@@ -11,10 +11,18 @@ exports[`ThemeCard matches snapshot 1`] = `
     <div
       className="phone"
     >
-      <img
-        alt="Theme name"
-        src="http://screenshot.jpeg"
-      />
+      <div
+        className="phone-inner"
+      >
+        <img
+          alt="Theme name"
+          decoding="async"
+          height="2165"
+          loading="lazy"
+          src="http://screenshot.jpeg"
+          width="1000"
+        />
+      </div>
     </div>
     <div
       className="theme-card__label-header"

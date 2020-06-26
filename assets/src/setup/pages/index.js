@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
 import { TechnicalBackground } from './technical-background';
 import { TemplateMode } from './template-mode';
 import { ChooseReaderTheme } from './choose-reader-theme';
-import { SiteConfigurationSummary } from './site-configuration-summary';
+import { Summary } from './summary';
 import { Save } from './save';
 import { Welcome } from './welcome';
 
@@ -39,9 +39,9 @@ export const PAGES = [
 		PageComponent: ChooseReaderTheme,
 	},
 	{
-		slug: 'site-configuration',
-		title: __( 'Site configuration', 'amp' ),
-		PageComponent: SiteConfigurationSummary,
+		slug: 'summary',
+		title: __( 'Summary', 'amp' ),
+		PageComponent: Summary,
 	},
 	{
 		slug: 'done',

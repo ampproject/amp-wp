@@ -4,7 +4,6 @@
  */
 import { act } from 'react-dom/test-utils';
 import { create } from 'react-test-renderer';
-import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
@@ -16,21 +15,9 @@ import { render } from '@wordpress/element';
  */
 import { Nav } from '..';
 import { NavigationContextProvider } from '../../navigation-context-provider';
-import { Options } from '../../options-context-provider';
-function OptionsContextProvider( { children } ) {
-	return (
-		<Options.Provider value={
-			{
-				options: {},
-			}
-		}>
-			{ children }
-		</Options.Provider>
-	);
-}
-OptionsContextProvider.propTypes = {
-	children: PropTypes.any,
-};
+import { OptionsContextProvider } from '../../options-context-provider';
+
+jest.mock( '../../../components/options-context-provider' );
 
 let container;
 
