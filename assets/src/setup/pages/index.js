@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
 import { TechnicalBackground } from './technical-background';
 import { TemplateMode } from './template-mode';
 import { ChooseReaderTheme } from './choose-reader-theme';
-import { SiteConfigurationSummary } from './site-configuration-summary';
+import { Summary } from './summary';
 import { Save } from './save';
 import { SiteScan } from './site-scan';
 
@@ -18,8 +18,8 @@ import { SiteScan } from './site-scan';
  */
 export const PAGES = [
 	{
-		slug: 'site-scan',
-		title: __( 'Site scan', 'amp' ),
+		slug: 'welcome',
+		title: __( 'Welcome', 'amp' ),
 		PageComponent: SiteScan,
 	},
 	{
@@ -38,9 +38,9 @@ export const PAGES = [
 		PageComponent: ChooseReaderTheme,
 	},
 	{
-		slug: 'site-configuration',
-		title: __( 'Site configuration', 'amp' ),
-		PageComponent: SiteConfigurationSummary,
+		slug: 'summary',
+		title: __( 'Summary', 'amp' ),
+		PageComponent: Summary,
 	},
 	{
 		slug: 'done',

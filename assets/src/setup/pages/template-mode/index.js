@@ -18,7 +18,7 @@ import { ScreenUI } from './screen-ui';
  */
 export function TemplateMode() {
 	const { canGoForward, setCanGoForward } = useContext( Navigation );
-	const { options, updateOptions } = useContext( Options );
+	const { options, savedThemeSupport, updateOptions } = useContext( Options );
 	const { developerToolsOption } = useContext( User );
 	const { pluginIssues, themeIssues, scanningSite } = useContext( SiteScan );
 
@@ -33,7 +33,7 @@ export function TemplateMode() {
 		}
 	}, [ canGoForward, setCanGoForward, scanningSite, themeSupport ] );
 
-	if ( scanningSite || null === developerToolsOption ) {
+	if ( scanningSite ) {
 		return <Loading />;
 	}
 
@@ -43,6 +43,7 @@ export function TemplateMode() {
 			currentMode={ themeSupport }
 			developerToolsOption={ developerToolsOption }
 			pluginIssues={ pluginIssues }
+			savedCurrentMode={ savedThemeSupport }
 			setCurrentMode={ ( mode ) => {
 				updateOptions( { theme_support: mode } );
 			} }

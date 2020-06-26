@@ -9,21 +9,24 @@ import PropTypes from 'prop-types';
 import './style.css';
 
 /**
- * Component resembling a phone with a screen.
+ * Component resembling a desktop computer with a screen.
  *
  * @param {Object} props Component props.
  * @param {any} props.children The elements to display in the screen.
  */
-export function Phone( { children } ) {
+export function Desktop( { children } ) {
 	return (
-		<div className="phone">
-			<div className="phone-inner">
-				{ children }
+		<div className="desktop">
+			<div className="desktop__toolbar">
+				<span />
+				<span />
+				<span />
 			</div>
+			{ children }
 		</div>
 	);
 }
 
-Phone.propTypes = {
+Desktop.propTypes = {
 	children: PropTypes.any,
 };

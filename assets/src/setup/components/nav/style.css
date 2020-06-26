@@ -1,0 +1,56 @@
+/**
+ * Nav component.
+ */
+.amp-setup-nav {
+	align-items: center;
+	background: linear-gradient(0deg, #fff 64.06%, rgba(255, 255, 255, 0.8) 99.99%, rgba(255, 255, 255, 0.8) 100%);
+	bottom: 0;
+	display: flex;
+	justify-content: flex-end;
+	left: 0;
+	position: fixed;
+	right: 0;
+}
+
+.amp-setup-nav__inner {
+	align-items: center;
+	display: flex;
+	justify-content: space-between;
+	padding: 15px;
+	width: 100%;
+
+	@media screen and (min-width: 783px) {
+		padding: 40px 30px;
+	}
+}
+
+.amp-setup-nav__prev-next {
+	display: flex;
+}
+
+.amp-setup-nav__prev-next > * {
+	align-items: center;
+	display: flex;
+	height: 36px;
+}
+
+.amp-setup-nav__prev-next svg {
+	display: none;
+	margin-left: 0.5rem;
+	height: 18px;
+	width: 18px;
+
+	@media screen and (min-width: 783px) {
+		display: block;
+	}
+}
+
+.amp-setup-nav__prev svg {
+	transform: rotate(180deg);
+	margin-left: 0;
+	margin-right: 0.5rem;
+}
+
+.amp-setup-nav__close svg {
+	margin-right: 0.5rem;
+}

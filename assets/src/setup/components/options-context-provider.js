@@ -3,12 +3,12 @@
  */
 import { createContext, useEffect, useState, useRef, useCallback } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { getQueryArg, addQueryArgs } from '@wordpress/url';
 
 /**
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -30,6 +30,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 	const [ savingOptions, setSavingOptions ] = useState( false );
 	const [ hasOptionsChanges, setHasOptionsChanges ] = useState( false );
 	const [ didSaveOptions, setDidSaveOptions ] = useState( false );
+	const [ savedThemeSupport, setSavedThemeSupport ] = useState( null );
 
 	const { setError } = useError();
 
@@ -45,7 +46,13 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 		setSavingOptions( true );
 
 		try {
-			await apiFetch( { method: 'post', url: addQueryArgs( optionsRestEndpoint, { 'amp-new-onboarding': '1' } ), data: options } );
+			await apiFetch(
+				{
+					method: 'post',
+					url: addQueryArgs( optionsRestEndpoint, { 'amp-new-onboarding': '1' } ),
+					data: { ...options, wizard_completed: true },
+				},
+			);
 
 			if ( true === hasUnmounted.current ) {
 				return;
@@ -55,8 +62,8 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 			return;
 		}
 
-		setSavingOptions( false );
 		setDidSaveOptions( true );
+		setSavingOptions( false );
 	}, [ options, optionsRestEndpoint, setError ] );
 
 	/**
@@ -91,7 +98,12 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 					return;
 				}
 
-				setOptions( fetchedOptions );
+				setSavedThemeSupport( fetchedOptions.theme_support );
+				setOptions(
+					true === fetchedOptions.wizard_completed && ! getQueryArg( global.location.href, 'setup-wizard-first-run' ) // Query arg available for testing.
+						? { ...fetchedOptions, theme_support: null } // Reset mode for the current session to force user to make a choice.
+						: {},
+				);
 			} catch ( e ) {
 				setError( e );
 				return;
@@ -112,7 +124,8 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 					fetchingOptions,
 					hasOptionsChanges,
 					didSaveOptions,
-					options,
+					options: options || {},
+					savedThemeSupport,
 					saveOptions,
 					savingOptions,
 					updateOptions,

@@ -33,7 +33,7 @@ describe( 'AMP Setup Screen', () => {
 		let titleText;
 
 		titleText = await getTitleText();
-		expect( titleText ).toBe( 'Site scan' );
+		expect( titleText ).toBe( 'Welcome' );
 
 		await page.waitForSelector( `${ NEXT_BUTTON_SELECTOR }:not([disabled])` );
 		await page.click( NEXT_BUTTON_SELECTOR );
