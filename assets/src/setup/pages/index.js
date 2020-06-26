@@ -27,6 +27,7 @@ export const PAGES = [
 		slug: 'technical-background',
 		title: __( 'Technical background', 'amp' ),
 		PageComponent: TechnicalBackground,
+		showTitle: false,
 	},
 	{
 		slug: 'template-modes',
