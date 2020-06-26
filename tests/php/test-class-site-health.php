@@ -259,19 +259,6 @@ class Test_Site_Health extends WP_UnitTestCase {
 			'recommended_https_status_result'          => [
 				[
 					'test'        => 'https_status',
-					'status'      => 'recommended',
-					'description' => '',
-				],
-			],
-
-			'no_https_recommended_https_status_result' => [
-				[
-					'test'        => 'https_status',
-					'status'      => 'recommended',
-					'description' => '',
-				],
-				[
-					'test'        => 'https_status',
 					'status'      => 'critical',
 					'description' => '<p>Additionally, AMP requires HTTPS for most components to work properly, including iframes and videos.</p>',
 				],
@@ -289,8 +276,12 @@ class Test_Site_Health extends WP_UnitTestCase {
 	 * @param array $test_data Data from Site Health test.
 	 * @param array $expected  Expected modified test result.
 	 */
-	public function test_modify_test_result( $test_data, $expected ) {
+	public function test_modify_test_result( $test_data, $expected = null ) {
 		$test_result = $this->instance->modify_test_result( $test_data );
+
+		if ( ! $expected ) {
+			$expected = $test_data;
+		}
 
 		$this->assertEquals( $expected, $test_result );
 	}
