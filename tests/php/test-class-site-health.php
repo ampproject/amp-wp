@@ -259,6 +259,11 @@ class Test_Site_Health extends WP_UnitTestCase {
 			'recommended_https_status_result' => [
 				[
 					'test'        => 'https_status',
+					'status'      => 'recommended',
+					'description' => '',
+				],
+				[
+					'test'        => 'https_status',
 					'status'      => 'critical',
 					'description' => '<p>Additionally, AMP requires HTTPS for most components to work properly, including iframes and videos.</p>',
 				],
