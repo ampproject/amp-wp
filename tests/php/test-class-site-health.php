@@ -246,17 +246,17 @@ class Test_Site_Health extends WP_UnitTestCase {
 	 */
 	public function get_test_result() {
 		return [
-			'empty_result'                             => [
+			'empty_result'                    => [
 				[],
 			],
-			'good_https_status_result'                 => [
+			'good_https_status_result'        => [
 				[
 					'test'        => 'https_status',
 					'status'      => 'good',
 					'description' => '',
 				],
 			],
-			'recommended_https_status_result'          => [
+			'recommended_https_status_result' => [
 				[
 					'test'        => 'https_status',
 					'status'      => 'critical',
