@@ -335,9 +335,12 @@ function is_amp_available() {
 		return false;
 	}
 
-	$warned        = false;
-	$error_message = function () {
-		return sprintf(
+	$warn = function () {
+		static $warned = false;
+		if ( $warned ) {
+			return;
+		}
+		$message = sprintf(
 			/* translators: %1$s: is_amp_endpoint(), %2$s: the current action, %3$s: the wp action, %4$s: the WP_Query class, %5$s: the amp_skip_post() function */
 			__( '%1$s (or %2$s) was called too early and so it will not work properly. WordPress is currently doing the "%3$s" action. Calling this function before the "%4$s" action means it will not have access to %5$s and the queried object to determine if it is an AMP response, thus neither the "%6$s" filter nor the AMP enabled toggle will be considered.', 'amp' ),
 			'is_amp_available()',
@@ -347,20 +350,20 @@ function is_amp_available() {
 			'WP_Query',
 			'amp_skip_post()'
 		);
+		_doing_it_wrong( 'is_amp_available', esc_html( $message ), '1.6.0' );
+		$warned = true;
 	};
 
 	// Make sure the parse_request action has triggered before trying to read from the REST_REQUEST constant, which is set during rest_api_loaded().
 	if ( ! did_action( 'parse_request' ) ) {
-		_doing_it_wrong( __FUNCTION__, esc_html( $error_message() ), '1.6.0' );
-		$warned = true;
+		$warn();
 	} elseif ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
 		return false;
 	}
 
 	// Make sure that the parse_query action has triggered, as this is required to initially populate the global WP_Query.
-	if ( ! $warned && ! ( $wp_query instanceof WP_Query || did_action( 'parse_query' ) ) ) {
-		_doing_it_wrong( __FUNCTION__, esc_html( $error_message() ), '0.4.2' );
-		$warned = true;
+	if ( ! ( $wp_query instanceof WP_Query || did_action( 'parse_query' ) ) ) {
+		$warn();
 	}
 
 	// Always return false when requesting the service worker.
@@ -393,10 +396,8 @@ function is_amp_available() {
 	}
 
 	if ( ! $wp_query instanceof WP_Query || ! did_action( 'wp' ) ) {
-		if ( ! $warned ) {
-			_doing_it_wrong( __FUNCTION__, esc_html( $error_message() ), '1.6.0' );
-		}
-		return false;
+		$warn();
+		return amp_is_canonical();
 	}
 
 	// If redirected to this page because AMP is not available due to validation errors, prevent AMP from being available.
