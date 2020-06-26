@@ -270,7 +270,7 @@ final class AMP_Reader_Themes {
 			case get_stylesheet() === $theme['slug']:
 				return self::STATUS_ACTIVE;
 
-			case wp_get_theme( $theme['slug'] )->exists():
+			case 'classic' === $theme['slug'] || wp_get_theme( $theme['slug'] )->exists():
 				return self::STATUS_INSTALLED;
 
 			case $this->can_install_theme( $theme ):

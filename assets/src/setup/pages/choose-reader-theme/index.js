@@ -84,7 +84,7 @@ export function ChooseReaderTheme() {
 				}
 			</p>
 			<form>
-				{ availableThemes && (
+				{ 0 < availableThemes.length && (
 					<ul className="choose-reader-theme__grid">
 						{ availableThemes.map( ( theme ) => (
 							<ThemeCard
@@ -96,7 +96,7 @@ export function ChooseReaderTheme() {
 					</ul>
 				) }
 
-				{ uninstallableThemes && (
+				{ 0 < uninstallableThemes.length && (
 					<div className="choose-reader-theme__uninstallable">
 						<h3>
 							{ __( 'Uninstallable themes', 'amp' ) }
