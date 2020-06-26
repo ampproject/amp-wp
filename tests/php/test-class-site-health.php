@@ -27,29 +27,6 @@ class Test_Site_Health extends WP_UnitTestCase {
 	public $instance;
 
 	/**
-	 * The original value of `$_SERVER['HTTPS']` before being modified by tests.
-	 *
-	 * @var string
-	 */
-	private static $original_server_https;
-
-	/**
-	 * Runs the routine before setting up all tests.
-	 */
-	public static function setUpBeforeClass() {
-		parent::setUpBeforeClass();
-		self::$original_server_https = $_SERVER['HTTPS'];
-	}
-
-	/**
-	 * Runs the routine after all tests have been run.
-	 */
-	public static function tearDownAfterClass() {
-		parent::tearDownAfterClass();
-		$_SERVER['HTTPS'] = self::$original_server_https;
-	}
-
-	/**
 	 * Sets up each test.
 	 *
 	 * @inheritDoc
@@ -270,19 +247,9 @@ class Test_Site_Health extends WP_UnitTestCase {
 	public function get_test_result() {
 		return [
 			'empty_result'                             => [
-				static function() {
-					return [];
-				},
 				[],
 			],
 			'good_https_status_result'                 => [
-				static function () {
-					return [
-						'test'        => 'https_status',
-						'status'      => 'good',
-						'description' => '',
-					];
-				},
 				[
 					'test'        => 'https_status',
 					'status'      => 'good',
@@ -290,14 +257,6 @@ class Test_Site_Health extends WP_UnitTestCase {
 				],
 			],
 			'recommended_https_status_result'          => [
-				static function () {
-					$_SERVER['HTTPS'] = 'on';
-					return [
-						'test'        => 'https_status',
-						'status'      => 'recommended',
-						'description' => '',
-					];
-				},
 				[
 					'test'        => 'https_status',
 					'status'      => 'recommended',
@@ -306,14 +265,11 @@ class Test_Site_Health extends WP_UnitTestCase {
 			],
 
 			'no_https_recommended_https_status_result' => [
-				static function () {
-					$_SERVER['HTTPS'] = 'off';
-					return [
-						'test'        => 'https_status',
-						'status'      => 'recommended',
-						'description' => '',
-					];
-				},
+				[
+					'test'        => 'https_status',
+					'status'      => 'recommended',
+					'description' => '',
+				],
 				[
 					'test'        => 'https_status',
 					'status'      => 'critical',
@@ -330,11 +286,11 @@ class Test_Site_Health extends WP_UnitTestCase {
 	 *
 	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::modify_test_result()
 	 *
-	 * @param callable $callback Function that returns the test data.
-	 * @param array    $expected Expected modified test data.
+	 * @param array $test_data Data from Site Health test.
+	 * @param array $expected  Expected modified test result.
 	 */
-	public function test_modify_test_result( $callback, $expected ) {
-		$test_result = $this->instance->modify_test_result( $callback() );
+	public function test_modify_test_result( $test_data, $expected ) {
+		$test_result = $this->instance->modify_test_result( $test_data );
 
 		$this->assertEquals( $expected, $test_result );
 	}

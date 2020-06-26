@@ -452,13 +452,12 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 	 * @return array Modified test result.
 	 */
 	public function modify_test_result( $test_result ) {
-		// Set the `https_status` test status to critical if `is_ssl()` returns false, along with adding to the
+		// Set the `https_status` test status to critical if its current status is recommended, along with adding to the
 		// description for why its required for AMP.
 		if (
 			isset( $test_result['test'], $test_result['status'], $test_result['description'] )
 			&& 'https_status' === $test_result['test']
 			&& 'recommended' === $test_result['status']
-			&& ! is_ssl()
 		) {
 			$test_result['status']       = 'critical';
 			$test_result['description'] .= '<p>' . __( 'Additionally, AMP requires HTTPS for most components to work properly, including iframes and videos.', 'amp' ) . '</p>';
