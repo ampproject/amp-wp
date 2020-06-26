@@ -66,10 +66,9 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param array  $matches URL pattern matches.
 	 * @param array  $attr    Shortcode attributes.
 	 * @param string $url     URL.
-	 * @param string $rawattr Unmodified shortcode attributes.
 	 * @return string Rendered oEmbed.
 	 */
-	public function oembed( $matches, $attr, $url, $rawattr ) {
+	public function oembed( $matches, $attr, $url ) {
 		$video_id = $this->get_video_id_from_url( $url );
 		return $this->render(
 			[

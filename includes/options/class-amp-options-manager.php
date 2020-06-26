@@ -245,7 +245,7 @@ class AMP_Options_Manager {
 
 		// Validate analytics.
 		if ( isset( $new_options[ Option::ANALYTICS ] ) && $new_options[ Option::ANALYTICS ] !== $options[ Option::ANALYTICS ] ) {
-			foreach ( $new_options[ Option::ANALYTICS ] as $id => $data ) {
+			foreach ( $new_options[ Option::ANALYTICS ] as $data ) {
 
 				// Check save/delete pre-conditions and proceed if correct.
 				if ( empty( $data['type'] ) || empty( $data['config'] ) ) {

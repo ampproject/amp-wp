@@ -50,7 +50,7 @@ function amp_post_template_add_canonical( $amp_template ) {
  */
 function amp_post_template_add_fonts( $amp_template ) {
 	$font_urls = $amp_template->get( 'font_urls', [] );
-	foreach ( $font_urls as $slug => $url ) {
+	foreach ( $font_urls as $url ) {
 		printf( '<link rel="stylesheet" href="%s">', esc_url( esc_url( $url ) ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 	}
 }
