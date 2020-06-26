@@ -445,11 +445,15 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 	}
 
 	/**
+	 * Modify test results.
+	 *
 	 * @param array $test_result Site Health test result.
 	 *
 	 * @return array Modified test result.
 	 */
 	public function modify_test_result( $test_result ) {
+		// Set the `https_status` test status to critical if `is_ssl()` returns false, along with adding to the
+		// description for why its required for AMP.
 		if (
 			isset( $test_result['test'], $test_result['status'], $test_result['description'] )
 			&& 'https_status' === $test_result['test']
