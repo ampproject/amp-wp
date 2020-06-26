@@ -117,7 +117,7 @@ final class AMP_Setup_Wizard_Submenu_Page {
 		// so we need to avoid specifying a version at all.
 		wp_enqueue_style( // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
 			$fonts_handle,
-			'https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&family=Poppins:wght@400;600&display=swap',
+			'https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&family=Poppins:wght@400;700&display=swap',
 			[],
 			null
 		);

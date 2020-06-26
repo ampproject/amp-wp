@@ -17,7 +17,9 @@ import './style.css';
 export function Phone( { children } ) {
 	return (
 		<div className="phone">
-			{ children }
+			<div className="phone-inner">
+				{ children }
+			</div>
 		</div>
 	);
 }

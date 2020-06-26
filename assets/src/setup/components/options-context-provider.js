@@ -62,8 +62,8 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 			return;
 		}
 
-		setSavingOptions( false );
 		setDidSaveOptions( true );
+		setSavingOptions( false );
 	}, [ options, optionsRestEndpoint, setError ] );
 
 	/**

@@ -106,8 +106,8 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 			return;
 		}
 
-		setSavingDeveloperToolsOption( false );
 		setDidSaveDeveloperToolsOption( true );
+		setSavingDeveloperToolsOption( false );
 	}, [ user, developerToolsOption, setError, setSavingDeveloperToolsOption, setDidSaveDeveloperToolsOption, userOptionDeveloperTools, userRestEndpoint ] );
 
 	useEffect( () => () => {
