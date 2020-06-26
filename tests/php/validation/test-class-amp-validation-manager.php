@@ -2104,7 +2104,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 
 		$expected_callback   = self::TESTED_CLASS . '::add_validation_error';
 		$filtered_sanitizers = AMP_Validation_Manager::filter_sanitizer_args( $sanitizers );
-		foreach ( $filtered_sanitizers as $sanitizer => $args ) {
+		foreach ( $filtered_sanitizers as $args ) {
 			$this->assertEquals( $expected_callback, $args['validation_error_callback'] );
 		}
 		remove_theme_support( AMP_Theme_Support::SLUG );

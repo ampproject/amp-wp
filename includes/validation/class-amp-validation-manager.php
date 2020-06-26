@@ -1943,7 +1943,7 @@ class AMP_Validation_Manager {
 	 * @return array $sanitizers The filtered AMP sanitizers.
 	 */
 	public static function filter_sanitizer_args( $sanitizers ) {
-		foreach ( $sanitizers as $sanitizer => &$args ) {
+		foreach ( $sanitizers as &$args ) {
 			$args['validation_error_callback'] = __CLASS__ . '::add_validation_error';
 		}
 

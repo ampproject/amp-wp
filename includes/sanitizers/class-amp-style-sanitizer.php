@@ -2888,7 +2888,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function get_validate_response_data() {
 		$stylesheets = [];
-		foreach ( $this->pending_stylesheets as $j => $pending_stylesheet ) {
+		foreach ( $this->pending_stylesheets as $pending_stylesheet ) {
 			$attributes = [];
 			foreach ( $pending_stylesheet['element']->attributes as $attribute ) {
 				$attributes[ $attribute->nodeName ] = $attribute->nodeValue;
