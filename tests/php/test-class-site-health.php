@@ -27,6 +27,29 @@ class Test_Site_Health extends WP_UnitTestCase {
 	public $instance;
 
 	/**
+	 * The original value of `$_SERVER['HTTPS']` before being modified by tests.
+	 *
+	 * @var string
+	 */
+	private static $original_server_https;
+
+	/**
+	 * Runs the routine before setting up all tests.
+	 */
+	public static function setUpBeforeClass() {
+		parent::setUpBeforeClass();
+		self::$original_server_https = $_SERVER['HTTPS'];
+	}
+
+	/**
+	 * Runs the routine after all tests have been run.
+	 */
+	public static function tearDownAfterClass() {
+		parent::tearDownAfterClass();
+		$_SERVER['HTTPS'] = self::$original_server_https;
+	}
+
+	/**
 	 * Sets up each test.
 	 *
 	 * @inheritDoc
@@ -54,13 +77,14 @@ class Test_Site_Health extends WP_UnitTestCase {
 	/**
 	 * Test init.
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::init()
+	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::register()
 	 */
-	public function test_init() {
+	public function test_register() {
 		$this->instance->register();
-		$this->assertEquals( 10, has_action( 'site_status_tests', [ $this->instance, 'add_tests' ] ) );
-		$this->assertEquals( 10, has_action( 'debug_information', [ $this->instance, 'add_debug_information' ] ) );
-		$this->assertEquals( 10, has_action( 'site_status_test_php_modules', [ $this->instance, 'add_extensions' ] ) );
+		$this->assertEquals( 10, has_filter( 'site_status_tests', [ $this->instance, 'add_tests' ] ) );
+		$this->assertEquals( 10, has_filter( 'debug_information', [ $this->instance, 'add_debug_information' ] ) );
+		$this->assertEquals( 10, has_filter( 'site_status_test_result', [ $this->instance, 'modify_test_result' ] ) );
+		$this->assertEquals( 10, has_filter( 'site_status_test_php_modules', [ $this->instance, 'add_extensions' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_print_styles-site-health.php', [ $this->instance, 'add_styles' ] ) );
 	}
 
@@ -236,6 +260,83 @@ class Test_Site_Health extends WP_UnitTestCase {
 			$this->assertArrayHasKey( $key, $debug_info['amp_wp']['fields'], "Expected key: $key" );
 			$this->assertFalse( $debug_info['amp_wp']['fields'][ $key ]['private'], "Expected private for key: $key" );
 		}
+	}
+
+	/**
+	 * Get test data for test_modify_test_result.
+	 *
+	 * @return array[] Test data.
+	 */
+	public function get_test_result() {
+		return [
+			'empty_result'                             => [
+				static function() {
+					return [];
+				},
+				[],
+			],
+			'good_https_status_result'                 => [
+				static function () {
+					return [
+						'test'        => 'https_status',
+						'status'      => 'good',
+						'description' => '',
+					];
+				},
+				[
+					'test'        => 'https_status',
+					'status'      => 'good',
+					'description' => '',
+				],
+			],
+			'recommended_https_status_result'          => [
+				static function () {
+					$_SERVER['HTTPS'] = 'on';
+					return [
+						'test'        => 'https_status',
+						'status'      => 'recommended',
+						'description' => '',
+					];
+				},
+				[
+					'test'        => 'https_status',
+					'status'      => 'recommended',
+					'description' => '',
+				],
+			],
+
+			'no_https_recommended_https_status_result' => [
+				static function () {
+					$_SERVER['HTTPS'] = 'off';
+					return [
+						'test'        => 'https_status',
+						'status'      => 'recommended',
+						'description' => '',
+					];
+				},
+				[
+					'test'        => 'https_status',
+					'status'      => 'critical',
+					'description' => '<p>Additionally, AMP requires HTTPS for most components to work properly, including iframes and videos.</p>',
+				],
+			],
+		];
+	}
+
+	/**
+	 * Test modify_test_result.
+	 *
+	 * @dataProvider get_test_result
+	 *
+	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::modify_test_result()
+	 *
+	 * @param callable $callback Function that returns the test data.
+	 * @param array    $expected Expected modified test data.
+	 */
+	public function test_modify_test_result( $callback, $expected ) {
+		$test_result = $this->instance->modify_test_result( $callback() );
+
+		$this->assertEquals( $expected, $test_result );
 	}
 
 	/**
