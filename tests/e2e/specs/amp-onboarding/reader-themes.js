@@ -18,19 +18,23 @@ describe( 'AMP wizard: reader themes', () => {
 
 		const itemCount = await page.$$eval( '.theme-card', ( els ) => els.length );
 
-		expect( itemCount ).toBe( 10 );
+		expect( itemCount ).toBe( 9 );
 	} );
 
 	it( 'should allow different themes to be selected', async () => {
 		await page.waitForSelector( '.theme-card' );
 
+		// Twenty twenty shouldn't show because it's the active theme.
+		const twentytwenty = await page.$( '[for="theme-card__twentytwenty"]' );
+		expect( twentytwenty ).toBeNull();
+
 		await page.$eval( '[for="theme-card__classic"]', ( el ) => el.click() );
 		let titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
 		expect( titleText ).toBe( 'AMP Classic' );
 
-		await page.$eval( '[for="theme-card__twentytwenty"]', ( el ) => el.click() );
+		await page.$eval( '[for="theme-card__twentynineteen"]', ( el ) => el.click() );
 		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
-		expect( titleText ).toBe( 'Twenty Twenty' );
+		expect( titleText ).toBe( 'Twenty Nineteen' );
 
 		await page.$eval( '[for="theme-card__twentysixteen"]', ( el ) => el.click() );
 		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
