@@ -42,6 +42,10 @@ export function ThemeCard( { description, homepage, screenshotUrl, slug, name } 
 					<img
 						src={ screenshotUrl }
 						alt={ name }
+						height="2165"
+						width="1000"
+						loading="lazy"
+						decoding="async"
 					/>
 				</Phone>
 				<div className="theme-card__label-header">

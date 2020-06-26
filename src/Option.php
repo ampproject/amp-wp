@@ -94,6 +94,13 @@ interface Option {
 	const READER_THEME = 'reader_theme';
 
 	/**
+	 * The key of the option storing whether the setup wizard has been completed.
+	 *
+	 * @var boolean
+	 */
+	const WIZARD_COMPLETED = 'wizard_completed';
+
+	/**
 	 * Suppressed plugins
 	 *
 	 * @var string

@@ -143,7 +143,7 @@ export function getSelectionText( ...args ) {
 
 		case match( COMPATIBILITY, TRANSITIONAL, RECOMMENDED, NON_TECHNICAL ):
 		case match( COMPATIBILITY, TRANSITIONAL, RECOMMENDED, TECHNICAL ):
-			return __( 'Traditional mode is a good choice if you are able to address any issues around AMP-compatibility that may arise as you work on your site.', 'amp' );
+			return __( 'Transitional mode is a good choice if you are able to address any issues around AMP-compatibility that may arise as you work on your site.', 'amp' );
 
 		case match( DETAILS, READER, NOT_RECOMMENDED, NON_TECHNICAL ):
 		case match( DETAILS, READER, NOT_RECOMMENDED, TECHNICAL ):

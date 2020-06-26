@@ -92,7 +92,7 @@ final class MobileRedirection implements Service, Registerable {
 		?>
 		<p>
 			<label for="mobile_redirect">
-				<input id="mobile_redirect" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[mobile_redirect]' ); ?>" <?php checked( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ); ?>>
+				<input id="mobile_redirect" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[mobile_redirect]' ); ?>" <?php checked( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ); ?> value="true">
 				<?php esc_html_e( 'Redirect mobile visitors to the AMP version of a page.', 'amp' ); ?>
 			</label>
 		</p>
@@ -122,11 +122,11 @@ final class MobileRedirection implements Service, Registerable {
 	 * @return array Sanitized options.
 	 */
 	public function sanitize_options( $options, $new_options ) {
-		if ( isset( $new_options[ Option::MOBILE_REDIRECT ] ) && 'on' === $new_options[ Option::MOBILE_REDIRECT ] ) {
-			$options[ Option::MOBILE_REDIRECT ] = true;
-		} else {
-			$options[ Option::MOBILE_REDIRECT ] = false;
-		}
+		$options[ Option::MOBILE_REDIRECT ] = (
+			isset( $new_options[ Option::MOBILE_REDIRECT ] )
+			&&
+			rest_sanitize_boolean( $new_options[ Option::MOBILE_REDIRECT ] )
+		);
 		return $options;
 	}
 

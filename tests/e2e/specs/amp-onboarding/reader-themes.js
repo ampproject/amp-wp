@@ -24,6 +24,7 @@ describe( 'AMP wizard: reader themes', () => {
 	it( 'should allow different themes to be selected', async () => {
 		await page.waitForSelector( '.theme-card' );
 
+		await page.$eval( '[for="theme-card__classic"]', ( el ) => el.click() );
 		let titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
 		expect( titleText ).toBe( 'AMP Classic' );
 
