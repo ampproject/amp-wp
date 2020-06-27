@@ -7,6 +7,7 @@
 
 use AmpProject\Amp;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\QueryVars;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\ConfigurationArgument;
 use AmpProject\AmpWP\Transformer;
@@ -2084,9 +2085,8 @@ class AMP_Theme_Support {
 		if ( ! $valid_amp_document && ! amp_is_canonical() ) {
 			$non_amp_url = amp_remove_endpoint( amp_get_current_url() );
 
-			// @todo Is this the best? Can noamp be a standard way to indicate AMP not available? Put it in AMP_HTTP?
-			// Note the value of validation here has the result of preventing AMP from even being considered available.
-			$non_amp_url = add_query_arg( 'noamp', 'validation', $non_amp_url );
+			// Redirect to include query var to preventing AMP from even being considered available.
+			$non_amp_url = add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_AVAILABLE, $non_amp_url );
 
 			wp_safe_redirect( $non_amp_url, 302 );
 			return esc_html__( 'Redirecting since AMP version not available.', 'amp' );

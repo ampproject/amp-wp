@@ -39,15 +39,6 @@ final class MobileRedirection implements Service, Registerable {
 	const DISABLED_STORAGE_KEY = 'amp_mobile_redirect_disabled';
 
 	/**
-	 * Query parameter to indicate that the page in question should not be served as AMP.
-	 *
-	 * @todo This needs to not be specific to mobile.
-	 *
-	 * @var string
-	 */
-	const NO_AMP_QUERY_VAR = 'noamp';
-
-	/**
 	 * Register.
 	 */
 	public function register() {
@@ -137,7 +128,7 @@ final class MobileRedirection implements Service, Registerable {
 	 */
 	private function get_current_amp_url() {
 		$url = add_query_arg( amp_get_slug(), '1', amp_get_current_url() );
-		$url = remove_query_arg( self::NO_AMP_QUERY_VAR, $url );
+		$url = remove_query_arg( QueryVars::NOAMP, $url );
 		return $url;
 	}
 
@@ -210,7 +201,7 @@ final class MobileRedirection implements Service, Registerable {
 			if ( ! empty( $query_string ) ) {
 				$query_vars = [];
 				parse_str( $query_string, $query_vars );
-				$excluded = array_key_exists( self::NO_AMP_QUERY_VAR, $query_vars );
+				$excluded = array_key_exists( QueryVars::NOAMP, $query_vars );
 			}
 		}
 		return $excluded;
@@ -225,7 +216,7 @@ final class MobileRedirection implements Service, Registerable {
 	 */
 	public function filter_amp_to_amp_linking_element_query_vars( $query_vars, $excluded ) {
 		if ( $excluded ) {
-			$query_vars[ self::NO_AMP_QUERY_VAR ] = '1';
+			$query_vars[ QueryVars::NOAMP ] = QueryVars::NOAMP_MOBILE;
 		}
 		return $query_vars;
 	}
@@ -234,7 +225,7 @@ final class MobileRedirection implements Service, Registerable {
 	 * Output the markup that allows the user to switch to the non-AMP version of the page.
 	 */
 	public function add_non_amp_mobile_version_switcher() {
-		$url = add_query_arg( self::NO_AMP_QUERY_VAR, '1', amp_remove_endpoint( amp_get_current_url() ) );
+		$url = add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_MOBILE, amp_remove_endpoint( amp_get_current_url() ) );
 		$this->add_mobile_version_switcher_markup( true, $url, __( 'Exit mobile version', 'amp' ) );
 	}
 
@@ -374,7 +365,7 @@ final class MobileRedirection implements Service, Registerable {
 	 * @return bool True if disabled, false otherwise.
 	 */
 	public function is_redirection_disabled_via_query_param() {
-		return isset( $_GET[ self::NO_AMP_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return isset( $_GET[ QueryVars::NOAMP ] ) && QueryVars::NOAMP_MOBILE === wp_unslash( $_GET[ QueryVars::NOAMP ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**
@@ -437,7 +428,8 @@ final class MobileRedirection implements Service, Registerable {
 
 		$exports = [
 			'ampUrl'             => $this->get_current_amp_url(),
-			'noampQueryVar'      => self::NO_AMP_QUERY_VAR,
+			'noampQueryVarName'  => QueryVars::NOAMP,
+			'noampQueryVarValue' => QueryVars::NOAMP_MOBILE,
 			'disabledStorageKey' => self::DISABLED_STORAGE_KEY,
 			'mobileUserAgents'   => $this->get_mobile_user_agents(),
 			'regexRegex'         => self::REGEX_REGEX,

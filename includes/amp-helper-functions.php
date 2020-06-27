@@ -8,6 +8,7 @@
 use AmpProject\AmpWP\AmpWpPluginFactory;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\QueryVars;
 
 /**
  * Handle activation of plugin.
@@ -395,13 +396,20 @@ function is_amp_available() {
 		return false;
 	}
 
+	$theme_supports_amp = current_theme_supports( AMP_Theme_Support::SLUG );
+
+	// If the query has not been initialized, we can only assume AMP is available if theme support is present and all templates are supported.
 	if ( ! $wp_query instanceof WP_Query || ! did_action( 'wp' ) ) {
 		$warn();
-		return amp_is_canonical();
+		return $theme_supports_amp && AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED );
 	}
 
-	// If redirected to this page because AMP is not available due to validation errors, prevent AMP from being available.
-	if ( ! amp_is_canonical() && isset( $_GET['noamp'] ) && 'validation' === $_GET['noamp'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	// If redirected to this page because AMP is not available due to validation errors, prevent AMP from being available (if not AMP-first).
+	if (
+		! amp_is_canonical()
+		&&
+		( isset( $_GET[ QueryVars::NOAMP ] ) && QueryVars::NOAMP_AVAILABLE === $_GET[ QueryVars::NOAMP ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	) {
 		return false;
 	}
 
@@ -416,7 +424,7 @@ function is_amp_available() {
 	}
 
 	$queried_object = get_queried_object();
-	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+	if ( $theme_supports_amp ) {
 		// Abort if in Transitional mode and AMP is not available for the URL.
 		$availability = AMP_Theme_Support::get_template_availability( $wp_query );
 
@@ -512,7 +520,7 @@ function amp_get_slug() {
 	 *
 	 * @param string $query_var The AMP query variable.
 	 */
-	$query_var = apply_filters( 'amp_query_var', 'amp' );
+	$query_var = apply_filters( 'amp_query_var', QueryVars::AMP );
 
 	define( 'AMP_QUERY_VAR', $query_var );
 
@@ -722,6 +730,10 @@ function post_supports_amp( $post ) {
 function is_amp_endpoint() {
 	global $wp_query;
 
+	if ( AMP_Validation_Manager::$is_validate_request ) {
+		return true;
+	}
+
 	$is_amp_url = (
 		amp_is_canonical()
 		||
@@ -741,7 +753,7 @@ function is_amp_endpoint() {
 		// produce an undesired result when a Standard mode site has a post that opts out of AMP, but this issue will
 		// have been flagged via _doing_it_wrong() in is_amp_available() above.
 		if ( ! did_action( 'wp' ) || ! $wp_query instanceof WP_Query ) {
-			return $is_amp_url;
+			return $is_amp_url && AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED );
 		}
 
 		return false;

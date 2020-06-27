@@ -1,4 +1,4 @@
-( function( { ampUrl, noampQueryVar, disabledStorageKey, mobileUserAgents, regexRegex } ) {
+( function( { ampUrl, noampQueryVarName, noampQueryVarValue, disabledStorageKey, mobileUserAgents, regexRegex } ) {
 	if ( typeof sessionStorage === 'undefined' ) {
 		return;
 	}
@@ -51,7 +51,7 @@
 
 	const url = new URL( location.href );
 
-	if ( url.searchParams.has( noampQueryVar ) ) {
+	if ( url.searchParams.has( noampQueryVarName ) && noampQueryVarValue === url.searchParams.get( noampQueryVarName ) ) {
 		// If the noamp query param is present, remember that redirection should be disabled.
 		sessionStorage.setItem( disabledStorageKey, '1' );
 	} else {

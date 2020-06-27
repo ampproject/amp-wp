@@ -7,6 +7,7 @@
 
 use AmpProject\AmpWP\MobileRedirection;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\QueryVars;
 use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 
@@ -267,7 +268,7 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer->sanitize();
 
 		$a_tag = $dom->getElementById( 'link' );
-		$this->assertEquals( $link . '?noamp=1', $a_tag->getAttribute( 'href' ) );
+		$this->assertEquals( add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_MOBILE, $link ), $a_tag->getAttribute( 'href' ) );
 	}
 
 	/**
@@ -296,7 +297,7 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer->sanitize();
 
 		$a_tag = $dom->getElementById( 'link' );
-		$this->assertEquals( $link . '?noamp=1', $a_tag->getAttribute( 'href' ) );
+		$this->assertEquals( add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_MOBILE, $link ), $a_tag->getAttribute( 'href' ) );
 	}
 
 	/**
