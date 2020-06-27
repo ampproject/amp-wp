@@ -697,6 +697,7 @@ function amp_add_amphtml_link() {
 	}
 
 	if ( $amp_url ) {
+		$amp_url = remove_query_arg( QueryVars::NOAMP, $amp_url );
 		printf( '<link rel="amphtml" href="%s">', esc_url( $amp_url ) );
 	}
 }
@@ -1741,6 +1742,8 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 	} else {
 		$href = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
 	}
+
+	$href = remove_query_arg( QueryVars::NOAMP, $href );
 
 	$parent = [
 		'id'    => 'amp',

@@ -2271,7 +2271,7 @@ class AMP_Theme_Support {
 			$url = wp_unslash( $_SERVER['REQUEST_URI'] );
 		}
 		$url = remove_query_arg(
-			[ amp_get_slug(), AMP_Validated_URL_Post_Type::VALIDATE_ACTION, AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ],
+			[ amp_get_slug(), QueryVars::NOAMP, AMP_Validated_URL_Post_Type::VALIDATE_ACTION, AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ],
 			$url
 		);
 		$url = add_query_arg( self::PAIRED_BROWSING_QUERY_VAR, '1', $url );

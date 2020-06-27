@@ -7,6 +7,7 @@
 
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\PluginRegistry;
+use AmpProject\AmpWP\QueryVars;
 use AmpProject\AmpWP\Services;
 use AmpProject\Attribute;
 use AmpProject\Tag;
@@ -365,10 +366,10 @@ class AMP_Validation_Manager {
 		}
 
 		$current_url = amp_get_current_url();
-		$non_amp_url = amp_remove_endpoint( $current_url ); // @todo Also include noamp?
+		$non_amp_url = amp_remove_endpoint( $current_url );
 
 		$amp_url = remove_query_arg(
-			wp_removable_query_args(),
+			array_merge( wp_removable_query_args(), [ QueryVars::NOAMP ] ),
 			$current_url
 		);
 		if ( ! amp_is_canonical() ) {
