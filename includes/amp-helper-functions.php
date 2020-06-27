@@ -1709,29 +1709,7 @@ function amp_wp_kses_mustache( $markup ) {
  * @param WP_Admin_Bar $wp_admin_bar Admin bar.
  */
 function amp_add_admin_bar_view_link( $wp_admin_bar ) {
-	if ( is_admin() || amp_is_canonical() ) {
-		return;
-	}
-
-	if ( current_theme_supports( 'amp' ) ) {
-		$available = AMP_Theme_Support::get_template_availability()['supported'];
-	} elseif ( is_singular() ) {
-		$post      = get_queried_object();
-		$available = ( $post instanceof WP_Post ) && post_supports_amp( $post );
-	} else {
-		$available = false;
-	}
-	if ( ! $available ) {
-		// @todo Add note that AMP is not available?
-		return;
-	}
-
-	// Show nothing if there are rejected validation errors for this URL.
-	if (
-		! is_amp_endpoint() &&
-		AMP_Theme_Support::READER_MODE_SLUG !== AMP_Theme_Support::get_support_mode() &&
-		count( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( amp_get_current_url(), [ 'ignore_accepted' => true ] ) ) > 0
-	) {
+	if ( is_admin() || amp_is_canonical() || ! is_amp_available() ) {
 		return;
 	}
 

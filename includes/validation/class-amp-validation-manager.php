@@ -359,8 +359,7 @@ class AMP_Validation_Manager {
 			return;
 		}
 
-		$availability = AMP_Theme_Support::get_template_availability();
-		if ( ! $availability['supported'] ) {
+		if ( ! is_amp_available() ) {
 			self::$amp_admin_bar_item_added = false;
 			return;
 		}
