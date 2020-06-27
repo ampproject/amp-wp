@@ -1,4 +1,4 @@
-( function( { ampUrl, noampQueryVarName, noampQueryVarValue, disabledStorageKey, mobileUserAgents, regexRegex } ) {
+( function( { ampUrl, isCustomizePreview, isAmpDevMode, noampQueryVarName, noampQueryVarValue, disabledStorageKey, mobileUserAgents, regexRegex } ) {
 	if ( typeof sessionStorage === 'undefined' ) {
 		return;
 	}
@@ -45,7 +45,7 @@
 	} );
 
 	// Short-circuit if mobile redirection is disabled.
-	if ( sessionStorage.getItem( disabledStorageKey ) ) {
+	if ( sessionStorage.getItem( disabledStorageKey ) || isCustomizePreview || isAmpDevMode ) {
 		return;
 	}
 

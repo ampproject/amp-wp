@@ -140,7 +140,7 @@ final class MobileRedirection implements Service, Registerable {
 	public function redirect() {
 		// If a site is AMP-first or AMP is not available for the request, then no redirection functionality will apply.
 		// Additionally, prevent adding redirection logic in the Customizer preview since that will currently complicate things.
-		if ( amp_is_canonical() || ! is_amp_available() || is_customize_preview() ) {
+		if ( amp_is_canonical() || ! is_amp_available() ) {
 			return;
 		}
 
@@ -297,9 +297,16 @@ final class MobileRedirection implements Service, Registerable {
 	/**
 	 * Determine if mobile redirection should be done via JavaScript.
 	 *
+	 * If auto-redirection is disabled due to being in the Customizer preview or in AMP Dev Mode (and thus possibly in
+	 * Paired Browsing), then client-side redirection is forced.
+	 *
 	 * @return bool True if mobile redirection should be done, false otherwise.
 	 */
 	public function is_using_client_side_redirection() {
+		if ( is_customize_preview() || amp_is_dev_mode() ) {
+			return true;
+		}
+
 		/**
 		 * Filters whether mobile redirection should be done client-side (via JavaScript).
 		 *
@@ -310,6 +317,9 @@ final class MobileRedirection implements Service, Registerable {
 		 * Beware that disabling this will result in a cookie being set when the user decides to leave the mobile version.
 		 * This may require updating the site's privacy policy or getting user consent for GDPR compliance. Nevertheless,
 		 * since the cookie is not used for tracking this may not be necessary.
+		 *
+		 * Please note that this does not apply when in the Customizer preview or when in AMP Dev Mode (and thus possible
+		 * Paired Browsing), since server-side redirects would not be able to be prevented as required.
 		 *
 		 * @since 1.6
 		 *
@@ -423,6 +433,8 @@ final class MobileRedirection implements Service, Registerable {
 			'disabledStorageKey' => self::DISABLED_STORAGE_KEY,
 			'mobileUserAgents'   => $this->get_mobile_user_agents(),
 			'regexRegex'         => self::REGEX_REGEX,
+			'isCustomizePreview' => is_customize_preview(),
+			'isAmpDevMode'       => amp_is_dev_mode(),
 		];
 
 		$source = preg_replace( '/\bAMP_MOBILE_REDIRECTION\b/', wp_json_encode( $exports ), $source );
@@ -484,12 +496,39 @@ final class MobileRedirection implements Service, Registerable {
 			// device and thus whether the switcher should be displayed.
 			$should_redirect_via_js
 		);
+
+		$container_id = 'amp-mobile-version-switcher';
 		?>
-		<div id="amp-mobile-version-switcher" <?php printf( $hide_switcher ? 'hidden' : '' ); ?>>
+		<div id="<?php echo esc_attr( $container_id ); ?>" <?php printf( $hide_switcher ? 'hidden' : '' ); ?>>
 			<a rel="<?php echo esc_attr( implode( ' ', $rel ) ); ?>" href="<?php echo esc_url( $url ); ?>">
 				<?php echo esc_html( $text ); ?>
 			</a>
 		</div>
+
+		<?php if ( amp_is_dev_mode() ) : ?>
+			<?php
+			$exports = [
+				'containerId'          => $container_id,
+				'isCustomizePreview'   => is_customize_preview(),
+				'notApplicableMessage' => __( 'This link is not applicable in this context. It remains here for preview purposes only.', 'amp' ),
+			];
+			?>
+			<script data-ampdevmode>
+			(function( { containerId, isCustomizePreview, notApplicableMessage } ) {
+				addEventListener( 'DOMContentLoaded', () => {
+					if ( isCustomizePreview || window.ampPairedBrowsingClient ) {
+						const link = document.querySelector( `#${containerId} a[href]` );
+						link.style.cursor = 'not-allowed';
+						link.addEventListener( 'click', ( event ) => {
+							event.preventDefault();
+							event.stopPropagation();
+							alert( notApplicableMessage );
+						} );
+					}
+				} );
+			})( <?php echo wp_json_encode( $exports ); ?> );
+			</script>
+		<?php endif; ?>
 		<?php
 	}
 }
