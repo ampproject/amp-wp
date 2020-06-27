@@ -138,7 +138,9 @@ final class MobileRedirection implements Service, Registerable {
 	 * Add redirection logic if available for request.
 	 */
 	public function redirect() {
-		if ( amp_is_canonical() || ! is_amp_available() ) {
+		// If a site is AMP-first or AMP is not available for the request, then no redirection functionality will apply.
+		// Additionally, prevent adding redirection logic in the Customizer preview since that will currently complicate things.
+		if ( amp_is_canonical() || ! is_amp_available() || is_customize_preview() ) {
 			return;
 		}
 
@@ -159,7 +161,7 @@ final class MobileRedirection implements Service, Registerable {
 
 		// Print the mobile switcher styles.
 		add_action( 'wp_head', [ $this, 'add_mobile_version_switcher_styles' ] );
-		add_action( 'amp_post_template_head', [ $this, 'add_mobile_version_switcher_styles' ] );
+		add_action( 'amp_post_template_head', [ $this, 'add_mobile_version_switcher_styles' ] ); // For legacy Reader mode theme.
 
 		if ( ! is_amp_endpoint() ) {
 			add_action( 'wp_head', [ $this, 'add_mobile_alternative_link' ] );
@@ -193,8 +195,8 @@ final class MobileRedirection implements Service, Registerable {
 			add_filter( 'amp_to_amp_linking_element_query_vars', [ $this, 'filter_amp_to_amp_linking_element_query_vars' ], 10, 2 );
 
 			// Add a link to the footer to allow for navigation to the non-AMP version.
-			add_action( 'amp_post_template_footer', [ $this, 'add_non_amp_mobile_version_switcher' ] ); // For Classic reader mode theme.
 			add_action( 'wp_footer', [ $this, 'add_non_amp_mobile_version_switcher' ] );
+			add_action( 'amp_post_template_footer', [ $this, 'add_non_amp_mobile_version_switcher' ] ); // For legacy Reader mode theme.
 		}
 	}
 
