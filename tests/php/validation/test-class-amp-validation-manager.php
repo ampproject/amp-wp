@@ -8,6 +8,7 @@
 // phpcs:disable Generic.Formatting.MultipleStatementAlignment.NotSameWarning
 
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\QueryVars;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\HandleValidation;
 use AmpProject\AmpWP\Tests\PrivateAccess;
@@ -330,7 +331,9 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$node = $admin_bar->get_node( 'amp' );
 		$this->assertInternalType( 'object', $node );
 		$this->assertStringContains( 'action=amp_validate', $node->href );
-		$this->assertNull( $admin_bar->get_node( 'amp-view' ) );
+		$view_item = $admin_bar->get_node( 'amp-view' );
+		$this->assertInternalType( 'object', $view_item );
+		$this->assertEqualSets( [ QueryVars::NOAMP ], array_keys( $this->get_url_query_vars( $view_item->href ) ) );
 		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-validity' ) );
 
 		// Admin bar item available in paired mode.
@@ -357,11 +360,30 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		add_theme_support( AMP_Theme_Support::SLUG, [ AMP_Theme_Support::PAIRED_FLAG => true ] );
 		$admin_bar = new WP_Admin_Bar();
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
-		$node = $admin_bar->get_node( 'amp' );
-		$this->assertInternalType( 'object', $node );
-		$this->assertStringEndsWith( '?amp', $node->href );
-		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-view' ) );
+		$root_node = $admin_bar->get_node( 'amp' );
+		$this->assertInternalType( 'object', $root_node );
+		$this->assertEqualSets( [ QueryVars::AMP ], array_keys( $this->get_url_query_vars( $root_node->href ) ) );
+
+		$view_item = $admin_bar->get_node( 'amp-view' );
+		$this->assertInternalType( 'object', $view_item );
+		$this->assertEqualSets( [ QueryVars::AMP ], array_keys( $this->get_url_query_vars( $view_item->href ) ) );
 		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-validity' ) );
+	}
+
+	/**
+	 * Get URL query vars.
+	 *
+	 * @param string $url URL.
+	 * @return array Query vars.
+	 */
+	private function get_url_query_vars( $url ) {
+		$query_string = wp_parse_url( $url, PHP_URL_QUERY );
+		if ( empty( $query_string ) ) {
+			return [];
+		}
+		$query_vars = [];
+		parse_str( $query_string, $query_vars );
+		return $query_vars;
 	}
 
 	/**

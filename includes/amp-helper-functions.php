@@ -406,7 +406,7 @@ function is_amp_available() {
 
 	// If redirected to this page because AMP is not available due to validation errors, prevent AMP from being available (if not AMP-first).
 	if (
-		! amp_is_canonical()
+		( ! amp_is_canonical() || AMP_Validation_Manager::has_cap() )
 		&&
 		( isset( $_GET[ QueryVars::NOAMP ] ) && QueryVars::NOAMP_AVAILABLE === $_GET[ QueryVars::NOAMP ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	) {

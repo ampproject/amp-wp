@@ -366,6 +366,9 @@ class AMP_Validation_Manager {
 
 		$current_url = amp_get_current_url();
 		$non_amp_url = amp_remove_endpoint( $current_url );
+		if ( amp_is_canonical() ) {
+			$non_amp_url = add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_AVAILABLE, $non_amp_url );
+		}
 
 		$amp_url = remove_query_arg(
 			array_merge( wp_removable_query_args(), [ QueryVars::NOAMP ] ),
@@ -423,21 +426,23 @@ class AMP_Validation_Manager {
 		$link_item = [
 			'parent' => 'amp',
 			'id'     => 'amp-view',
-			'title'  => esc_html( is_amp_endpoint() ? __( 'View non-AMP version', 'amp' ) : __( 'View AMP version', 'amp' ) ),
 			'href'   => esc_url( is_amp_endpoint() ? $non_amp_url : $amp_url ),
 		];
+		if ( amp_is_canonical() ) {
+			$link_item['title'] = esc_html__( 'View with AMP disabled', 'amp' );
+		} else {
+			$link_item['title'] = esc_html( is_amp_endpoint() ? __( 'View non-AMP version', 'amp' ) : __( 'View AMP version', 'amp' ) );
+		}
 
 		// Add top-level menu item. Note that this will correctly merge/amend any existing AMP nav menu item added in amp_add_admin_bar_view_link().
 		$wp_admin_bar->add_node( $parent );
 
-		if ( amp_is_canonical() ) {
+		if ( is_amp_endpoint() ) {
 			$wp_admin_bar->add_node( $validate_item );
-		} elseif ( ! is_amp_endpoint() ) {
 			$wp_admin_bar->add_node( $link_item );
-			$wp_admin_bar->add_node( $validate_item );
 		} else {
-			$wp_admin_bar->add_node( $validate_item );
 			$wp_admin_bar->add_node( $link_item );
+			$wp_admin_bar->add_node( $validate_item );
 		}
 
 		if ( AMP_Theme_Support::is_paired_available() && amp_is_dev_mode() ) { // @todo And user can manage_options.
