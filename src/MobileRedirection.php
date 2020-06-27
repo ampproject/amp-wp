@@ -8,7 +8,6 @@
 namespace AmpProject\AmpWP;
 
 use AMP_Options_Manager;
-use AMP_Theme_Support;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\Attribute;

@@ -2079,10 +2079,10 @@ class AMP_Theme_Support {
 
 		self::ensure_required_markup( $dom, array_keys( $amp_scripts ) );
 
-		$valid_amp_document = AMP_Validation_Manager::finalize_validation( $dom );
+		$can_serve = AMP_Validation_Manager::finalize_validation( $dom );
 
 		// Redirect to the non-AMP version if not on an AMP-first site.
-		if ( ! $valid_amp_document && ! amp_is_canonical() ) {
+		if ( ! $can_serve && ! amp_is_canonical() ) {
 			$non_amp_url = amp_remove_endpoint( amp_get_current_url() );
 
 			// Redirect to include query var to preventing AMP from even being considered available.
@@ -2347,6 +2347,7 @@ class AMP_Theme_Support {
 			[
 				'ampSlug'                   => amp_get_slug(),
 				'ampPairedBrowsingQueryVar' => self::PAIRED_BROWSING_QUERY_VAR,
+				'noampQueryVar'             => QueryVars::NOAMP,
 				'documentTitlePrefix'       => __( 'AMP Paired Browsing:', 'amp' ),
 			]
 		);
