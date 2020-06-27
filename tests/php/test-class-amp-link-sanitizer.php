@@ -250,15 +250,10 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 		/** @var MobileRedirection $mobile_redirection */
 		$mobile_redirection = Services::get( 'mobile_redirection' );
 
-		$enable_mobile_redirect = static function () {
-			return [ Option::MOBILE_REDIRECT => true ];
-		};
-		add_filter( 'pre_option_' . AMP_Options_Manager::OPTION_NAME, $enable_mobile_redirect );
+		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, true );
 
 		add_theme_support( 'amp', [ 'paired' => true ] );
 		$this->go_to( add_query_arg( amp_get_slug(), '', home_url( '/' ) ) );
-		$this->assertTrue( $mobile_redirection->is_enabled() );
-		$this->assertTrue( $mobile_redirection->is_available_for_request() );
 		$mobile_redirection->redirect();
 
 		$link = home_url( '/' );
@@ -278,16 +273,10 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 		/** @var MobileRedirection $mobile_redirection */
 		$mobile_redirection = Services::get( 'mobile_redirection' );
 
-		$enable_mobile_redirect = static function () {
-			return [ Option::MOBILE_REDIRECT => true ];
-		};
-
-		add_filter( 'pre_option_' . AMP_Options_Manager::OPTION_NAME, $enable_mobile_redirect );
+		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, true );
 
 		add_theme_support( 'amp', [ 'paired' => true ] );
 		$this->go_to( add_query_arg( amp_get_slug(), '', home_url( '/' ) ) );
-		$this->assertTrue( $mobile_redirection->is_enabled() );
-		$this->assertTrue( $mobile_redirection->is_available_for_request() );
 		$mobile_redirection->redirect();
 
 		$link = home_url( '/' );

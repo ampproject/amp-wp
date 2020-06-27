@@ -46,7 +46,9 @@ final class MobileRedirection implements Service, Registerable {
 		add_action( 'amp_options_menu_items', [ $this, 'add_settings_field' ], 10 );
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
 
-		add_action( 'wp', [ $this, 'redirect' ] );
+		if ( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ) {
+			add_action( 'wp', [ $this, 'redirect' ] );
+		}
 	}
 
 	/**
@@ -136,15 +138,23 @@ final class MobileRedirection implements Service, Registerable {
 	 * Add redirection logic if available for request.
 	 */
 	public function redirect() {
-		if ( ! $this->is_available_for_request() ) {
+		if ( amp_is_canonical() || ! is_amp_available() ) {
 			return;
 		}
 
 		$js = $this->is_using_client_side_redirection();
 
-		// If using server-side redirection, make sure that caches vary by user agent.
-		if ( ! $js && ! headers_sent() ) {
-			header( 'Vary: User-Agent', false );
+		if ( ! $js ) {
+			// If using server-side redirection, make sure that caches vary by user agent.
+			if ( ! headers_sent() ) {
+				header( 'Vary: User-Agent', false );
+			}
+
+			// Now abort if it's not an AMP page and the user agent is not mobile, since there won't be any redirection
+			// to the AMP version and we don't need to show a footer link to go to the AMP version.
+			if ( ! $this->is_mobile_request() && ! is_amp_endpoint() ) {
+				return;
+			}
 		}
 
 		// Print the mobile switcher styles.
@@ -235,28 +245,6 @@ final class MobileRedirection implements Service, Registerable {
 	public function add_amp_mobile_version_switcher() {
 		$url = $this->get_current_amp_url();
 		$this->add_mobile_version_switcher_markup( false, $url, __( 'Go to mobile version', 'amp' ) );
-	}
-
-	/**
-	 * Get whether mobile redirection is enabled or not.
-	 *
-	 * @return bool If JS redirection is disabled, only the status of the mobile redirection option is returned.
-	 *              Otherwise, returns true if mobile redirection option is enabled and current request is from a mobile device.
-	 */
-	public function is_enabled() {
-		if ( amp_is_canonical() || ! AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ) {
-			return false;
-		}
-		return $this->is_using_client_side_redirection() || $this->is_mobile_request();
-	}
-
-	/**
-	 * Determine if mobile redirection is available for the current request.
-	 *
-	 * @return bool True if available, false otherwise.
-	 */
-	public function is_available_for_request() {
-		return $this->is_enabled() && is_amp_available();
 	}
 
 	/**
