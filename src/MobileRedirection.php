@@ -480,6 +480,18 @@ final class MobileRedirection implements Service, Registerable {
 			$text = __( 'Go to mobile version', 'amp' );
 		}
 
+		/**
+		 * Filters the text to be used in the mobile switcher link.
+		 *
+		 * Use the `is_amp_endpoint()` function to determine whether you are filtering the
+		 * text for the link to go to the non-AMP version or the AMP version.
+		 *
+		 * @since 1.6
+		 *
+		 * @param string $text Link text to display.
+		 */
+		$text = apply_filters( 'amp_mobile_version_switcher_link_text', $text );
+
 		$hide_switcher = (
 			// The switcher must always be shown in the AMP version to allow accessing the non-AMP version.
 			! $is_amp

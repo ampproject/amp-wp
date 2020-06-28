@@ -499,10 +499,18 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		$this->assertStringContains( 'amp-mobile-version-switcher', $output );
 		$this->assertStringNotContains( '<script data-ampdevmode>', $output );
 
+		add_filter(
+			'amp_mobile_version_switcher_link_text',
+			function ( $link_text ) {
+				return $link_text . ' ' . ( is_amp_endpoint() ? '(non-AMP version)' : '(AMP version)' );
+			}
+		);
+
 		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 		ob_start();
 		$this->instance->add_mobile_version_switcher_link();
 		$output = ob_get_clean();
+		$this->assertStringContains( is_amp_endpoint() ? '(non-AMP version)' : '(AMP version)', $output );
 		$this->assertStringContains( '<script data-ampdevmode>', $output );
 		$this->assertStringContains( 'notApplicableMessage', $output );
 	}
