@@ -104,6 +104,17 @@
         "jest/prefer-expect-assertions": "off",
         "jest/prefer-inline-snapshots": "off"
       }
+    },
+    {
+      "files": [
+        "assets/src/mobile-redirection.js"
+      ],
+      "globals": {
+        "AMP_MOBILE_REDIRECTION": false,
+        "location": false,
+        "navigator": false,
+        "sessionStorage": false
+      }
     }
   ]
 }

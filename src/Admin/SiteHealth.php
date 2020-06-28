@@ -66,6 +66,7 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 	public function register() {
 		add_filter( 'site_status_tests', [ $this, 'add_tests' ] );
 		add_filter( 'debug_information', [ $this, 'add_debug_information' ] );
+		add_filter( 'site_status_test_result', [ $this, 'modify_test_result' ] );
 		add_filter( 'site_status_test_php_modules', [ $this, 'add_extensions' ] );
 		add_action( 'admin_print_styles-site-health.php', [ $this, 'add_styles' ] );
 	}
@@ -441,6 +442,28 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 				],
 			]
 		);
+	}
+
+	/**
+	 * Modify test results.
+	 *
+	 * @param array $test_result Site Health test result.
+	 *
+	 * @return array Modified test result.
+	 */
+	public function modify_test_result( $test_result ) {
+		// Set the `https_status` test status to critical if its current status is recommended, along with adding to the
+		// description for why its required for AMP.
+		if (
+			isset( $test_result['test'], $test_result['status'], $test_result['description'] )
+			&& 'https_status' === $test_result['test']
+			&& 'recommended' === $test_result['status']
+		) {
+			$test_result['status']       = 'critical';
+			$test_result['description'] .= '<p>' . __( 'Additionally, AMP requires HTTPS for most components to work properly, including iframes and videos.', 'amp' ) . '</p>';
+		}
+
+		return $test_result;
 	}
 
 	/**

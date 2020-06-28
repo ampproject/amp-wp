@@ -29,11 +29,9 @@ class AMP_Options_Manager {
 		Option::SUPPORTED_POST_TYPES    => [ 'post' ],
 		Option::ANALYTICS               => [],
 		Option::ALL_TEMPLATES_SUPPORTED => true,
-		Option::MOBILE_REDIRECT         => false,
 		Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
 		Option::VERSION                 => AMP__VERSION,
 		Option::READER_THEME            => AMP_Reader_Themes::DEFAULT_READER_THEME,
-		Option::SUPPRESSED_PLUGINS      => [],
 		Option::WIZARD_COMPLETED        => false,
 	];
 
@@ -98,6 +96,14 @@ class AMP_Options_Manager {
 		if ( current_theme_supports( 'amp' ) ) {
 			$defaults[ Option::THEME_SUPPORT ] = amp_is_canonical() ? AMP_Theme_Support::STANDARD_MODE_SLUG : AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
 		}
+
+		/**
+		 * Filters default options.
+		 *
+		 * @internal
+		 * @param array $defaults Default options.
+		 */
+		$defaults = apply_filters( 'amp_default_options', $defaults );
 
 		$options = array_merge( $defaults, $options );
 
@@ -231,13 +237,6 @@ class AMP_Options_Manager {
 			}
 		}
 
-		// Validate mobile redirect.
-		if ( isset( $new_options[ Option::MOBILE_REDIRECT ] ) && 'on' === $new_options[ Option::MOBILE_REDIRECT ] || true === $new_options[ Option::MOBILE_REDIRECT ] ) {
-			$options[ Option::MOBILE_REDIRECT ] = true;
-		} else {
-			$options[ Option::MOBILE_REDIRECT ] = false;
-		}
-
 		// Validate wizard completion.
 		if ( isset( $new_options[ Option::WIZARD_COMPLETED ] ) ) {
 			$options[ Option::WIZARD_COMPLETED ] = (bool) $new_options[ OPTION::WIZARD_COMPLETED ];
@@ -245,7 +244,7 @@ class AMP_Options_Manager {
 
 		// Validate analytics.
 		if ( isset( $new_options[ Option::ANALYTICS ] ) && $new_options[ Option::ANALYTICS ] !== $options[ Option::ANALYTICS ] ) {
-			foreach ( $new_options[ Option::ANALYTICS ] as $id => $data ) {
+			foreach ( $new_options[ Option::ANALYTICS ] as $data ) {
 
 				// Check save/delete pre-conditions and proceed if correct.
 				if ( empty( $data['type'] ) || empty( $data['config'] ) ) {
