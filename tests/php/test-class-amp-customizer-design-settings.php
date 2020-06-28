@@ -49,7 +49,6 @@ class Test_AMP_Customizer_Design_Settings extends WP_UnitTestCase {
 			'amp_customizer[header_color]',
 			'amp_customizer[header_background_color]',
 			'amp_customizer[color_scheme]',
-			'amp_customizer[display_exit_link]',
 		];
 
 		$this->assertEquals( $expected_setting_ids, $setting_ids );
@@ -72,7 +71,6 @@ class Test_AMP_Customizer_Design_Settings extends WP_UnitTestCase {
 			'amp_header_color',
 			'amp_header_background_color',
 			'amp_color_scheme',
-			'amp_display_exit_link',
 		];
 		$this->assertEquals( $expected_control_ids, $control_ids );
 

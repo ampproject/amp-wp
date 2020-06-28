@@ -279,21 +279,13 @@ class AMP_Post_Template {
 		$post_author             = get_userdata( $this->post->post_author );
 
 		$data = [
-			'post'                     => $this->post,
-			'post_id'                  => $this->ID,
-			'post_title'               => $post_title,
-			'post_publish_timestamp'   => $post_publish_timestamp,
-			'post_modified_timestamp'  => $post_modified_timestamp,
-			'post_author'              => $post_author,
-			'post_canonical_link_url'  => '',
-			'post_canonical_link_text' => '',
+			'post'                    => $this->post,
+			'post_id'                 => $this->ID,
+			'post_title'              => $post_title,
+			'post_publish_timestamp'  => $post_publish_timestamp,
+			'post_modified_timestamp' => $post_modified_timestamp,
+			'post_author'             => $post_author,
 		];
-
-		$customizer_settings = AMP_Customizer_Settings::get_settings();
-		if ( ! empty( $customizer_settings['display_exit_link'] ) ) {
-			$data['post_canonical_link_url']  = get_permalink( $this->ID );
-			$data['post_canonical_link_text'] = __( 'Exit Reader Mode', 'amp' );
-		}
 
 		$this->add_data( $data );
 
