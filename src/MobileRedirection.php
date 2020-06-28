@@ -180,7 +180,7 @@ final class MobileRedirection implements Service, Registerable {
 			}
 
 			// Add a link to the footer to allow for navigation to the AMP version.
-			add_action( 'wp_footer', [ $this, 'add_amp_mobile_version_switcher' ] );
+			add_action( 'wp_footer', [ $this, 'add_mobile_version_switcher_link' ] );
 		} else {
 			if ( ! $js && $this->is_redirection_disabled_via_cookie() ) {
 				$this->set_mobile_redirection_disabled_cookie( false );
@@ -194,8 +194,8 @@ final class MobileRedirection implements Service, Registerable {
 			add_filter( 'amp_to_amp_linking_element_query_vars', [ $this, 'filter_amp_to_amp_linking_element_query_vars' ], 10, 2 );
 
 			// Add a link to the footer to allow for navigation to the non-AMP version.
-			add_action( 'wp_footer', [ $this, 'add_non_amp_mobile_version_switcher' ] );
-			add_action( 'amp_post_template_footer', [ $this, 'add_non_amp_mobile_version_switcher' ] ); // For legacy Reader mode theme.
+			add_action( 'wp_footer', [ $this, 'add_mobile_version_switcher_link' ] );
+			add_action( 'amp_post_template_footer', [ $this, 'add_mobile_version_switcher_link' ] ); // For legacy Reader mode theme.
 		}
 	}
 
@@ -464,34 +464,19 @@ final class MobileRedirection implements Service, Registerable {
 	}
 
 	/**
-	 * Output the markup that allows the user to switch to the non-AMP version of the page.
+	 * Output the link for the mobile version switcher.
 	 */
-	public function add_non_amp_mobile_version_switcher() {
-		$this->add_mobile_version_switcher_markup( true );
-	}
-
-	/**
-	 * Output the markup that allows the user to switch to the AMP version of the page.
-	 */
-	public function add_amp_mobile_version_switcher() {
-		$this->add_mobile_version_switcher_markup( false );
-	}
-
-	/**
-	 * Output the markup for the mobile version switcher.
-	 *
-	 * @param bool $is_amp Modifies markup to be AMP compatible if true.
-	 */
-	private function add_mobile_version_switcher_markup( $is_amp ) {
+	public function add_mobile_version_switcher_link() {
 		$should_redirect_via_js = $this->is_using_client_side_redirection();
 
+		$is_amp = is_amp_endpoint();
 		if ( $is_amp ) {
 			$rel  = [ Attribute::REL_NOAMPHTML, Attribute::REL_NOFOLLOW ];
-			$url  = $this->get_current_amp_url();
+			$url  = add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_MOBILE, amp_remove_endpoint( amp_get_current_url() ) );
 			$text = __( 'Exit mobile version', 'amp' );
 		} else {
 			$rel  = [ Attribute::REL_AMPHTML ];
-			$url  = add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_MOBILE, amp_remove_endpoint( amp_get_current_url() ) );
+			$url  = $this->get_current_amp_url();
 			$text = __( 'Go to mobile version', 'amp' );
 		}
 
