@@ -11,7 +11,7 @@ import { TemplateMode } from './template-mode';
 import { ChooseReaderTheme } from './choose-reader-theme';
 import { Summary } from './summary';
 import { Save } from './save';
-import { SiteScan } from './site-scan';
+import { Welcome } from './welcome';
 
 /**
  * Settings for the pages in the application.
@@ -20,12 +20,14 @@ export const PAGES = [
 	{
 		slug: 'welcome',
 		title: __( 'Welcome', 'amp' ),
-		PageComponent: SiteScan,
+		PageComponent: Welcome,
+		showTitle: false,
 	},
 	{
 		slug: 'technical-background',
 		title: __( 'Technical background', 'amp' ),
 		PageComponent: TechnicalBackground,
+		showTitle: false,
 	},
 	{
 		slug: 'template-modes',

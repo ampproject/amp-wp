@@ -43,7 +43,7 @@ export function Nav( { exitLink } ) {
 					</Button>
 				</div>
 				<div className="amp-setup-nav__prev-next">
-					{ 2 > activePageIndex // The first screen doesn't need to be returned to.
+					{ 1 > activePageIndex
 						? (
 							<span className="amp-setup-nav__placeholder">
 								{ ' ' }

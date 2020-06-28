@@ -1,3 +1,17 @@
+.technical-background__header {
+	margin-bottom: 1.75rem;
+	padding-bottom: 1.75rem;
+	padding-top: 2.25rem;
+	text-align: center;
+	border-bottom: 2px solid #d3d9dd;
+}
+
+.technical-background__header p {
+	font-size: 15px;
+	margin: 0 auto;
+	max-width: 540px;
+}
+
 .technical-background-option-container {
 	margin-bottom: 2rem;
 	padding: 1.5rem 0;
@@ -24,6 +38,10 @@
 
 .technical-background-option__description {
 	padding: 0 2rem;
+}
+
+.technical-background-option__description p {
+	font-size: 13px;
 }
 
 .technical-background-option__description h2 {

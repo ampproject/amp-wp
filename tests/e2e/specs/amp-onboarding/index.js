@@ -33,12 +33,12 @@ describe( 'AMP Setup Screen', () => {
 		let titleText;
 
 		titleText = await getTitleText();
-		expect( titleText ).toBe( 'Welcome' );
+		expect( titleText ).toBe( 'Welcome to the Official AMP Plugin for WordPress' );
 
 		await page.waitForSelector( `${ NEXT_BUTTON_SELECTOR }:not([disabled])` );
 		await page.click( NEXT_BUTTON_SELECTOR );
 		titleText = await getTitleText();
-		expect( titleText ).toBe( 'Technical background' );
+		expect( titleText ).toBe( 'Are you technical?' );
 
 		await page.$eval( '#technical-background-disable', ( el ) => el.click() );
 
@@ -49,15 +49,11 @@ describe( 'AMP Setup Screen', () => {
 
 		await page.click( PREV_BUTTON_SELECTOR );
 		titleText = await getTitleText();
-		expect( titleText ).toBe( 'Technical background' );
+		expect( titleText ).toBe( 'Are you technical?' );
 	} );
 
 	it( 'hides prev button page one and two and disables next button on last page', async () => {
-		let prevButton = await page.$( PREV_BUTTON_SELECTOR );
-		expect( prevButton ).toBeNull();
-
-		await visitAdminPage( 'admin.php', 'page=amp-setup&amp-setup-screen=technical-background' );
-		prevButton = await page.$( PREV_BUTTON_SELECTOR );
+		const prevButton = await page.$( PREV_BUTTON_SELECTOR );
 		expect( prevButton ).toBeNull();
 
 		await visitAdminPage( 'admin.php', 'page=amp-setup&amp-setup-screen=done' );
