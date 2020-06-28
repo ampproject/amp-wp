@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "be1aab0c1b2b2e620c2db83d99cc3dcd",
+    "content-hash": "33d3a5cac78dd8988336e5878feb0874",
     "packages": [
         {
             "name": "ampproject/common",
@@ -12,7 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "lib/common",
-                "reference": "9ada7ae0569dc2d0544867c74d3a18e1408ec916"
+                "reference": "762d6a1043c22ba50aa761c859aab5e7897cbf54"
             },
             "require": {
                 "ext-dom": "*",
@@ -38,7 +38,7 @@
                 },
                 "downloads": {
                     "phpstan": {
-                        "url": "https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar",
+                        "url": "https://github.com/phpstan/phpstan/raw/master/phpstan.phar",
                         "path": "vendor/bin/phpstan",
                         "type": "phar"
                     }
@@ -82,8 +82,7 @@
             ],
             "description": "PHP library with common base functionality for AMP integrations.",
             "transport-options": {
-                "symlink": true,
-                "relative": true
+                "symlink": true
             }
         },
         {
@@ -92,7 +91,7 @@
             "dist": {
                 "type": "path",
                 "url": "lib/optimizer",
-                "reference": "f9c39e52ece00ea8fb3bd6a1d60d662847f2715e"
+                "reference": "7078af13ce8b25e00cc4405382b0d24b6a180ca2"
             },
             "require": {
                 "ampproject/common": "^1",
@@ -119,7 +118,7 @@
                 },
                 "downloads": {
                     "phpstan": {
-                        "url": "https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar",
+                        "url": "https://github.com/phpstan/phpstan/raw/master/phpstan.phar",
                         "path": "vendor/bin/phpstan",
                         "type": "phar"
                     }
@@ -156,7 +155,7 @@
                     "@analyze"
                 ],
                 "analyze": [
-                    "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan version; phpstan analyze --ansi; fi"
+                    "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan --version; phpstan analyze --ansi; fi"
                 ],
                 "unit": [
                     "if [ -z $TEST_SKIP_PHPUNIT ]; then phpunit --colors=always; fi"
@@ -170,8 +169,7 @@
             ],
             "description": "PHP library for optimizing AMP pages.",
             "transport-options": {
-                "symlink": true,
-                "relative": true
+                "symlink": true
             }
         },
         {
@@ -794,12 +792,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "499fb201e495ef0064da064f520c845d3638fe24"
+                "reference": "6d2e5ab854782830911ddd33b7d4649b9f18c10f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/499fb201e495ef0064da064f520c845d3638fe24",
-                "reference": "499fb201e495ef0064da064f520c845d3638fe24",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/6d2e5ab854782830911ddd33b7d4649b9f18c10f",
+                "reference": "6d2e5ab854782830911ddd33b7d4649b9f18c10f",
                 "shasum": ""
             },
             "conflict": {
@@ -843,8 +841,8 @@
                 "doctrine/orm": ">=2,<2.4.8|>=2.5,<2.5.1",
                 "dolibarr/dolibarr": "<11.0.4",
                 "dompdf/dompdf": ">=0.6,<0.6.2",
-                "drupal/core": ">=7,<7.70|>=8,<8.7.14|>=8.8,<8.8.6",
-                "drupal/drupal": ">=7,<7.70|>=8,<8.7.14|>=8.8,<8.8.6",
+                "drupal/core": ">=7,<7.72|>=8,<8.8.8|>=8.9,<8.9.1|>=9,<9.0.1",
+                "drupal/drupal": ">=7,<7.72|>=8,<8.8.8|>=8.9,<8.9.1|>=9,<9.0.1",
                 "endroid/qr-code-bundle": "<3.4.2",
                 "enshrined/svg-sanitize": "<0.13.1",
                 "erusev/parsedown": "<1.7.2",
@@ -1071,20 +1069,20 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2020-06-17T06:37:54+00:00"
+            "time": "2020-06-19T13:23:43+00:00"
         },
         {
             "name": "sirbrillig/phpcs-variable-analysis",
-            "version": "v2.8.1",
+            "version": "v2.8.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sirbrillig/phpcs-variable-analysis.git",
-                "reference": "5be26b4d719acaf7a433d1cad469159cbf034f2a"
+                "reference": "4a60e8bc9eebdb054a8a4ad41e4518d43d458c47"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sirbrillig/phpcs-variable-analysis/zipball/5be26b4d719acaf7a433d1cad469159cbf034f2a",
-                "reference": "5be26b4d719acaf7a433d1cad469159cbf034f2a",
+                "url": "https://api.github.com/repos/sirbrillig/phpcs-variable-analysis/zipball/4a60e8bc9eebdb054a8a4ad41e4518d43d458c47",
+                "reference": "4a60e8bc9eebdb054a8a4ad41e4518d43d458c47",
                 "shasum": ""
             },
             "require": {
@@ -1093,9 +1091,9 @@
             },
             "require-dev": {
                 "dealerdirect/phpcodesniffer-composer-installer": "^0.4.4 || ^0.5 || ^0.6",
-                "limedeck/phpunit-detailed-printer": "^3.1",
+                "limedeck/phpunit-detailed-printer": "^3.1 || ^4.0 || ^5.0",
                 "phpstan/phpstan": "^0.11.8",
-                "phpunit/phpunit": "^5.0 || ^6.5",
+                "phpunit/phpunit": "^5.0 || ^6.5 || ^7.0 || ^8.0",
                 "sirbrillig/phpcs-import-detection": "^1.1"
             },
             "type": "phpcodesniffer-standard",
@@ -1119,7 +1117,7 @@
                 }
             ],
             "description": "A PHPCS sniff to detect problems with variables.",
-            "time": "2020-02-11T22:18:48+00:00"
+            "time": "2020-05-25T17:00:12+00:00"
         },
         {
             "name": "squizlabs/php_codesniffer",

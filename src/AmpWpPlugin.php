@@ -59,6 +59,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			'site_health_integration'          => SiteHealth::class,
 			'plugin_registry'                  => PluginRegistry::class,
 			'plugin_suppression'               => PluginSuppression::class,
+			'mobile_redirection'               => MobileRedirection::class,
 		];
 	}
 
