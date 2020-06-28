@@ -62,6 +62,23 @@ final class MobileRedirection implements Service, Registerable {
 	}
 
 	/**
+	 * Sanitize options.
+	 *
+	 * @param array $options     Existing options with already-sanitized values for updating.
+	 * @param array $new_options Unsanitized options being submitted for updating.
+	 *
+	 * @return array Sanitized options.
+	 */
+	public function sanitize_options( $options, $new_options ) {
+		$options[ Option::MOBILE_REDIRECT ] = (
+			isset( $new_options[ Option::MOBILE_REDIRECT ] )
+			&&
+			rest_sanitize_boolean( $new_options[ Option::MOBILE_REDIRECT ] )
+		);
+		return $options;
+	}
+
+	/**
 	 * Add settings field.
 	 */
 	public function add_settings_field() {
@@ -106,28 +123,11 @@ final class MobileRedirection implements Service, Registerable {
 	}
 
 	/**
-	 * Sanitize options.
-	 *
-	 * @param array $options     Existing options with already-sanitized values for updating.
-	 * @param array $new_options Unsanitized options being submitted for updating.
-	 *
-	 * @return array Sanitized options.
-	 */
-	public function sanitize_options( $options, $new_options ) {
-		$options[ Option::MOBILE_REDIRECT ] = (
-			isset( $new_options[ Option::MOBILE_REDIRECT ] )
-			&&
-			rest_sanitize_boolean( $new_options[ Option::MOBILE_REDIRECT ] )
-		);
-		return $options;
-	}
-
-	/**
 	 * Get the AMP version of the current URL.
 	 *
 	 * @return string AMP URL.
 	 */
-	private function get_current_amp_url() {
+	public function get_current_amp_url() {
 		$url = add_query_arg( amp_get_slug(), '1', amp_get_current_url() );
 		$url = remove_query_arg( QueryVars::NOAMP, $url );
 		return $url;
@@ -230,22 +230,6 @@ final class MobileRedirection implements Service, Registerable {
 			$query_vars[ QueryVars::NOAMP ] = QueryVars::NOAMP_MOBILE;
 		}
 		return $query_vars;
-	}
-
-	/**
-	 * Output the markup that allows the user to switch to the non-AMP version of the page.
-	 */
-	public function add_non_amp_mobile_version_switcher() {
-		$url = add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_MOBILE, amp_remove_endpoint( amp_get_current_url() ) );
-		$this->add_mobile_version_switcher_markup( true, $url, __( 'Exit mobile version', 'amp' ) );
-	}
-
-	/**
-	 * Output the markup that allows the user to switch to the AMP version of the page.
-	 */
-	public function add_amp_mobile_version_switcher() {
-		$url = $this->get_current_amp_url();
-		$this->add_mobile_version_switcher_markup( false, $url, __( 'Go to mobile version', 'amp' ) );
 	}
 
 	/**
@@ -382,13 +366,21 @@ final class MobileRedirection implements Service, Registerable {
 	 * @param bool $add Whether to add (true) or remove (false) the cookie.
 	 * @return void
 	 */
-	private function set_mobile_redirection_disabled_cookie( $add ) {
+	public function set_mobile_redirection_disabled_cookie( $add ) {
 		if ( $add ) {
 			$value   = '1';
 			$expires = 0; // Time till expiry. Setting it to `0` means the cookie will only last for the current browser session.
+
+			$_COOKIE[ self::DISABLED_STORAGE_KEY ] = $value;
 		} else {
 			$value   = null;
 			$expires = time() - YEAR_IN_SECONDS;
+
+			unset( $_COOKIE[ self::DISABLED_STORAGE_KEY ] );
+		}
+
+		if ( headers_sent() ) {
+			return;
 		}
 
 		$path     = wp_parse_url( home_url( '/' ), PHP_URL_PATH ); // Path.
@@ -472,19 +464,35 @@ final class MobileRedirection implements Service, Registerable {
 	}
 
 	/**
+	 * Output the markup that allows the user to switch to the non-AMP version of the page.
+	 */
+	public function add_non_amp_mobile_version_switcher() {
+		$this->add_mobile_version_switcher_markup( true );
+	}
+
+	/**
+	 * Output the markup that allows the user to switch to the AMP version of the page.
+	 */
+	public function add_amp_mobile_version_switcher() {
+		$this->add_mobile_version_switcher_markup( false );
+	}
+
+	/**
 	 * Output the markup for the mobile version switcher.
 	 *
-	 * @param bool   $is_amp Modifies markup to be AMP compatible if true.
-	 * @param string $url    URL to canonical version of page.
-	 * @param string $text   Text for the anchor element.
+	 * @param bool $is_amp Modifies markup to be AMP compatible if true.
 	 */
-	public function add_mobile_version_switcher_markup( $is_amp, $url, $text ) {
+	private function add_mobile_version_switcher_markup( $is_amp ) {
 		$should_redirect_via_js = $this->is_using_client_side_redirection();
 
 		if ( $is_amp ) {
-			$rel = [ Attribute::REL_NOAMPHTML, Attribute::REL_NOFOLLOW ];
+			$rel  = [ Attribute::REL_NOAMPHTML, Attribute::REL_NOFOLLOW ];
+			$url  = $this->get_current_amp_url();
+			$text = __( 'Exit mobile version', 'amp' );
 		} else {
-			$rel = [ Attribute::REL_AMPHTML ];
+			$rel  = [ Attribute::REL_AMPHTML ];
+			$url  = add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_MOBILE, amp_remove_endpoint( amp_get_current_url() ) );
+			$text = __( 'Go to mobile version', 'amp' );
 		}
 
 		$hide_switcher = (
