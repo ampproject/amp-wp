@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Admin\DevToolsUserAccess;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\Services;
@@ -225,6 +226,22 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return void
 	 */
 	public static function register() {
+		/** @var DevToolsUserAccess $dev_tools_user_access */
+		$dev_tools_user_access = Services::get( 'dev_tools.user_access' );
+
+		// Show in the admin menu if dev tools are enabled for the user or if the user is on any dev tools screen.
+		$show_in_menu = (
+			// @todo Remove the current_theme_supports() flag.
+			( current_theme_supports( 'amp' ) && $dev_tools_user_access->is_user_enabled() )
+			||
+			( isset( $_GET['post_type'] ) && AMP_Validated_URL_Post_Type::POST_TYPE_SLUG === $_GET['post_type'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			||
+			( isset( $_GET['post'], $_GET['action'] ) && 'edit' === $_GET['action'] && AMP_Validated_URL_Post_Type::POST_TYPE_SLUG === get_post_type( (int) $_GET['post'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			||
+			( isset( $_GET['taxonomy'] ) && self::TAXONOMY_SLUG === $_GET['taxonomy'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			||
+			( isset( $_GET[ self::TAXONOMY_SLUG ] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		);
 
 		register_taxonomy(
 			self::TAXONOMY_SLUG,
@@ -255,12 +272,13 @@ class AMP_Validation_Error_Taxonomy {
 				'show_tagcloud'      => false,
 				'show_in_quick_edit' => false,
 				'hierarchical'       => false, // Or true? Code could be the parent term?
-				'show_in_menu'       => current_theme_supports( 'amp' ) && current_user_can( 'manage_options' ),
+				'show_in_menu'       => $show_in_menu,
 				'meta_box_cb'        => false,
 				'capabilities'       => [
-					// Note that delete_terms is needed so the checkbox (cb) table column will work.
-					'assign_terms' => 'do_not_allow',
-					'edit_terms'   => 'do_not_allow',
+					'manage_terms' => AMP_Validation_Manager::VALIDATE_CAPABILITY, // Needed to give access to the term list table.
+					'delete_terms' => AMP_Validation_Manager::VALIDATE_CAPABILITY, // Needed so the checkbox (cb) table column will work.
+					'assign_terms' => 'do_not_allow', // Block assign_terms since associating terms with posts is done programmatically.
+					'edit_terms'   => 'do_not_allow', // Terms are created (and updated) programmatically.
 				],
 			]
 		);

@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Admin\DevToolsUserAccess;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\Option;
@@ -110,7 +111,22 @@ class AMP_Validated_URL_Post_Type {
 	public static function register() {
 		add_action( 'amp_plugin_update', [ __CLASS__, 'handle_plugin_update' ] );
 
-		$post_type = register_post_type(
+		/** @var DevToolsUserAccess $dev_tools_user_access */
+		$dev_tools_user_access = Services::get( 'dev_tools.user_access' );
+
+		// Show in the admin menu if dev tools are enabled for the user or if the user is on any dev tools screen.
+		$show_in_menu = (
+			// @todo Remove the current_theme_supports() flag.
+			( current_theme_supports( 'amp' ) && $dev_tools_user_access->is_user_enabled() )
+			||
+			( isset( $_GET['post_type'] ) && self::POST_TYPE_SLUG === $_GET['post_type'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			||
+			( isset( $_GET['post'], $_GET['action'] ) && 'edit' === $_GET['action'] && self::POST_TYPE_SLUG === get_post_type( (int) $_GET['post'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			||
+			( isset( $_GET['taxonomy'] ) && AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG === $_GET['taxonomy'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		);
+
+		register_post_type(
 			self::POST_TYPE_SLUG,
 			[
 				'labels'       => [
@@ -125,7 +141,27 @@ class AMP_Validated_URL_Post_Type {
 				'supports'     => false,
 				'public'       => false,
 				'show_ui'      => true,
-				'show_in_menu' => current_theme_supports( 'amp' ) && current_user_can( 'manage_options' ) ? AMP_Options_Manager::OPTION_NAME : false,
+				'show_in_menu' => $show_in_menu ? AMP_Options_Manager::OPTION_NAME : false,
+				'map_meta_cap' => false,
+				'capabilities' => array_merge(
+					array_fill_keys(
+						[
+							'edit_post',
+							'read_post',
+							'delete_post',
+							'edit_posts',
+							'edit_others_posts',
+							'delete_posts',
+							'publish_posts',
+							'read_private_posts',
+						],
+						AMP_Validation_Manager::VALIDATE_CAPABILITY
+					),
+					[
+						// Hide the add new post link, as new posts are created programmatically.
+						'create_posts' => 'do_not_allow',
+					]
+				),
 				// @todo Show in rest.
 			]
 		);
@@ -139,9 +175,6 @@ class AMP_Validated_URL_Post_Type {
 		add_action( 'save_post_' . self::POST_TYPE_SLUG, $handle_delete );
 		add_action( 'trash_post', $handle_delete );
 		add_action( 'delete_post', $handle_delete );
-
-		// Hide the add new post link.
-		$post_type->cap->create_posts = 'do_not_allow';
 
 		if ( is_admin() ) {
 			self::add_admin_hooks();
@@ -182,7 +215,10 @@ class AMP_Validated_URL_Post_Type {
 	public static function add_admin_hooks() {
 		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_post_list_screen_scripts' ] );
 
-		if ( current_user_can( 'manage_options' ) ) {
+		/** @var DevToolsUserAccess $dev_tools_user_access */
+		$dev_tools_user_access = Services::get( 'dev_tools.user_access' );
+
+		if ( $dev_tools_user_access->is_user_enabled() ) {
 			add_filter( 'dashboard_glance_items', [ __CLASS__, 'filter_dashboard_glance_items' ] );
 			add_action( 'rightnow_end', [ __CLASS__, 'print_dashboard_glance_styles' ] );
 		}
@@ -1638,7 +1674,7 @@ class AMP_Validated_URL_Post_Type {
 					throw new Exception( 'illegal_url' );
 				}
 				// Don't let non-admins create new amp_validated_url posts.
-				if ( ! current_user_can( 'manage_options' ) ) {
+				if ( ! AMP_Validation_Manager::has_cap() ) {
 					throw new Exception( 'unauthorized' );
 				}
 			}

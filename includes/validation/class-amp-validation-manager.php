@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Admin\DevToolsUserAccess;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\QueryVars;
@@ -26,6 +27,17 @@ class AMP_Validation_Manager {
 	 * @var string
 	 */
 	const VALIDATE_QUERY_VAR = 'amp_validate';
+
+	/**
+	 * Meta capability for validation.
+	 *
+	 * Note that this is mapped to 'manage_options' by default via `AMP_Validation_Manager::map_meta_cap()`. Using a
+	 * meta capability allows a site to customize which users get access to perform validation.
+	 *
+	 * @see AMP_Validation_Manager::map_meta_cap()
+	 * @var string
+	 */
+	const VALIDATE_CAPABILITY = 'amp_validate';
 
 	/**
 	 * Action name for previewing the status change for invalid markup.
@@ -202,11 +214,23 @@ class AMP_Validation_Manager {
 	protected static $stylesheet_slug;
 
 	/**
+	 * Get dev tools user access service.
+	 *
+	 * @return DevToolsUserAccess
+	 */
+	private static function get_dev_tools_user_access() {
+		/** @var DevToolsUserAccess $service */
+		$service = Services::get( 'dev_tools.user_access' );
+		return $service;
+	}
+
+	/**
 	 * Initialize.
 	 *
 	 * @return void
 	 */
 	public static function init() {
+		add_filter( 'map_meta_cap', [ __CLASS__, 'map_meta_cap' ], 9, 2 );
 		AMP_Validated_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
 
@@ -354,12 +378,7 @@ class AMP_Validation_Manager {
 	 * @param WP_Admin_Bar $wp_admin_bar Admin bar.
 	 */
 	public static function add_admin_bar_menu_items( $wp_admin_bar ) {
-		if ( is_admin() || ! self::has_cap() ) {
-			self::$amp_admin_bar_item_added = false;
-			return;
-		}
-
-		if ( ! is_amp_available() ) {
+		if ( is_admin() || ! self::get_dev_tools_user_access()->is_user_enabled() || ! is_amp_available() ) {
 			self::$amp_admin_bar_item_added = false;
 			return;
 		}
@@ -378,15 +397,7 @@ class AMP_Validation_Manager {
 			$amp_url = add_query_arg( amp_get_slug(), '', $amp_url );
 		}
 
-		// @todo It makes more sense to use AMP_Validation_Manager::has_cap() here.
-		$amp_validated_url_post = AMP_Validated_URL_Post_Type::get_invalid_url_post( $amp_url );
-		$user_can_revalidate    = $amp_validated_url_post ? current_user_can( 'edit_post', $amp_validated_url_post->ID ) : current_user_can( 'manage_options' );
-		if ( ! $user_can_revalidate ) {
-			return;
-		}
-
-		// @todo The amp_validated_url post should probably only be accessible to users who can manage_options, or limit access to a post if the user has the cap to edit the queried object?
-		$validate_url = AMP_Validated_URL_Post_Type::get_recheck_url( $amp_validated_url_post ?: $amp_url );
+		$validate_url = AMP_Validated_URL_Post_Type::get_recheck_url( AMP_Validated_URL_Post_Type::get_invalid_url_post( $amp_url ) ?: $amp_url );
 
 		// Construct the parent admin bar item.
 		if ( is_amp_endpoint() ) {
@@ -445,7 +456,7 @@ class AMP_Validation_Manager {
 			$wp_admin_bar->add_node( $validate_item );
 		}
 
-		if ( AMP_Theme_Support::is_paired_available() && amp_is_dev_mode() ) { // @todo And user can manage_options.
+		if ( AMP_Theme_Support::is_paired_available() && amp_is_dev_mode() ) {
 			// Construct admin bar item to link to paired browsing experience.
 			$paired_browsing_item = [
 				'parent' => 'amp',
@@ -585,6 +596,11 @@ class AMP_Validation_Manager {
 	 */
 	public static function handle_save_post_prompting_validation( $post_id ) {
 		global $pagenow;
+
+		if ( ! self::get_dev_tools_user_access()->is_user_enabled() ) {
+			return;
+		}
+
 		$post = get_post( $post_id );
 
 		$is_classic_editor_post_save = (
@@ -693,7 +709,7 @@ class AMP_Validation_Manager {
 	 * @return array|null $validation_data Validation data if it's available, or null.
 	 */
 	public static function get_amp_validity_rest_field( $post_data, $field_name, $request ) {
-		if ( ! current_user_can( 'edit_post', $post_data['id'] ) || ! self::has_cap() || ! self::post_supports_validation( $post_data['id'] ) ) {
+		if ( ! current_user_can( 'edit_post', $post_data['id'] ) || ! self::get_dev_tools_user_access()->is_user_enabled() || ! self::post_supports_validation( $post_data['id'] ) ) {
 			return null;
 		}
 		$post = get_post( $post_data['id'] );
@@ -736,14 +752,39 @@ class AMP_Validation_Manager {
 	}
 
 	/**
-	 * Whether the user has the required capability.
+	 * Map the amp_validate meta capability to the primitive manage_options capability.
+	 *
+	 * Using a meta capability allows a site to customize which users get access to perform validation.
+	 *
+	 * @param string[] $caps Array of the user's capabilities.
+	 * @param string   $cap  Capability name.
+	 * @return string[] Filtered primitive capabilities.
+	 */
+	public static function map_meta_cap( $caps, $cap ) {
+		if ( self::VALIDATE_CAPABILITY === $cap ) {
+			// Note that $caps most likely only contains a single item anyway, but only swapping out the one meta
+			// capability with the primitive capability allows a site to add additional required capabilities.
+			$position = array_search( $cap, $caps, true );
+			if ( false !== $position ) {
+				$caps[ $position ] = 'manage_options';
+			}
+		}
+		return $caps;
+	}
+
+	/**
+	 * Whether the user has the required capability to validate.
 	 *
 	 * Checks for permissions before validating.
 	 *
+	 * @param int|WP_User|null $user User to check for the capability. If null, the current user is used.
 	 * @return boolean $has_cap Whether the current user has the capability.
 	 */
-	public static function has_cap() {
-		return current_user_can( 'edit_posts' ); // @todo This needs to change to manage_options.
+	public static function has_cap( $user = null ) {
+		if ( null === $user ) {
+			$user = wp_get_current_user();
+		}
+		return user_can( $user, self::VALIDATE_CAPABILITY );
 	}
 
 	/**
@@ -851,7 +892,7 @@ class AMP_Validation_Manager {
 	 * @return void
 	 */
 	public static function print_edit_form_validation_status( $post ) {
-		if ( ! self::post_supports_validation( $post ) || ! self::has_cap() ) {
+		if ( ! self::post_supports_validation( $post ) || ! self::get_dev_tools_user_access()->is_user_enabled() ) {
 			return;
 		}
 
@@ -889,7 +930,6 @@ class AMP_Validation_Manager {
 
 		echo '<div class="notice notice-warning">';
 		echo '<p>';
-		// @todo Check if the error actually occurs in the_content, and if not, consider omitting the warning if the user does not have privileges to manage_options.
 		esc_html_e( 'There is content which fails AMP validation.', 'amp' );
 		echo ' ';
 
@@ -1864,7 +1904,7 @@ class AMP_Validation_Manager {
 
 		// Otherwise, since it is in a paired mode, only allow showing the dirty AMP page if the user is authorized.
 		// If not, normally the result is redirection to the non-AMP version.
-		return self::has_cap() || current_user_can( 'manage_options' ) || is_customize_preview();
+		return self::has_cap() || is_customize_preview(); // @todo do self::get_dev_tools_user_access()->is_user_enabled() instead of has_cap?
 	}
 
 	/**
@@ -2406,7 +2446,7 @@ class AMP_Validation_Manager {
 		 * warnings appearing due to the amp-block-validation having been enqueued already.
 		 */
 		$should_enqueue_block_validation = (
-			self::has_cap()
+			self::get_dev_tools_user_access()->is_user_enabled()
 			&&
 			current_theme_supports( AMP_Theme_Support::SLUG )
 		);
