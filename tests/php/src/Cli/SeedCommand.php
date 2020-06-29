@@ -77,11 +77,13 @@ final class SeedCommand extends WP_CLI_Command {
 			WP_CLI::line( "Seeding feature '{$feature->get_feature_name()}' ..." );
 		}
 
-		WP_CLI::success( sprintf(
-			'Seeded %d of %d feature(s).',
-			count( $features ),
-			count( $features )
-		) );
+		WP_CLI::success(
+			sprintf(
+				'Seeded %d of %d feature(s).',
+				count( $features ),
+				count( $features )
+			)
+		);
 	}
 
 	/**
