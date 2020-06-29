@@ -21,11 +21,11 @@
 	}
 }
 
-.choose-reader-theme__uninstallable {
+.choose-reader-theme__unavailable {
 	padding-top: 6rem;
 }
 
-.choose-reader-theme__uninstallable label {
+.choose-reader-theme__unavailable label {
 	cursor: default;
 }
 

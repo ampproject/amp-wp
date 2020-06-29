@@ -46,18 +46,18 @@ export function ChooseReaderTheme() {
 	);
 
 	// Separate available themes (both installed and installable) from those that need to be installed manually.
-	const { availableThemes, uninstallableThemes } = useMemo(
+	const { availableThemes, unavailableThemes } = useMemo(
 		() => nonActiveThemes.reduce(
 			( collections, theme ) => {
 				if ( theme.availability === 'non-installable' ) {
-					collections.uninstallableThemes.push( theme );
+					collections.unavailableThemes.push( theme );
 				} else {
 					collections.availableThemes.push( theme );
 				}
 
 				return collections;
 			},
-			{ availableThemes: [], uninstallableThemes: [] },
+			{ availableThemes: [], unavailableThemes: [] },
 		),
 		[ nonActiveThemes ] );
 
@@ -96,20 +96,20 @@ export function ChooseReaderTheme() {
 					</ul>
 				) }
 
-				{ 0 < uninstallableThemes.length && (
-					<div className="choose-reader-theme__uninstallable">
+				{ 0 < unavailableThemes.length && (
+					<div className="choose-reader-theme__unavailable">
 						<h3>
-							{ __( 'Uninstallable themes', 'amp' ) }
+							{ __( 'Unavailable themes', 'amp' ) }
 						</h3>
 						<p>
 							{ __( 'The following themes are compatible but cannot be installed automatically. Please install them manually, or contact your host if you are not able to do so.', 'amp' ) }
 						</p>
 						<ul className="choose-reader-theme__grid">
-							{ uninstallableThemes.map( ( theme ) => (
+							{ unavailableThemes.map( ( theme ) => (
 								<ThemeCard
 									key={ `theme-card-${ theme.slug }` }
 									screenshotUrl={ theme.screenshot_url }
-									uninstallable={ true }
+									unavailable={ true }
 									{ ...theme }
 								/>
 							) ) }
