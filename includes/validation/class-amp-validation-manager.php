@@ -7,7 +7,10 @@
 
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\PluginRegistry;
+use AmpProject\AmpWP\QueryVars;
 use AmpProject\AmpWP\Services;
+use AmpProject\Attribute;
+use AmpProject\Tag;
 use AmpProject\Dom\Document;
 
 /**
@@ -23,13 +26,6 @@ class AMP_Validation_Manager {
 	 * @var string
 	 */
 	const VALIDATE_QUERY_VAR = 'amp_validate';
-
-	/**
-	 * Query var for containing the number of validation errors on the frontend after redirection when invalid.
-	 *
-	 * @var string
-	 */
-	const VALIDATION_ERRORS_QUERY_VAR = 'amp_validation_errors';
 
 	/**
 	 * Action name for previewing the status change for invalid markup.
@@ -236,15 +232,6 @@ class AMP_Validation_Manager {
 				}
 			);
 
-			// Prevent query vars from persisting after redirect.
-			add_filter(
-				'removable_query_args',
-				function( $query_vars ) {
-					$query_vars[] = AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR;
-					return $query_vars;
-				}
-			);
-
 			add_action( 'all_admin_notices', [ __CLASS__, 'print_plugin_notice' ] );
 
 			add_action( 'admin_bar_menu', [ __CLASS__, 'add_admin_bar_menu_items' ], 101 );
@@ -372,51 +359,28 @@ class AMP_Validation_Manager {
 			return;
 		}
 
-		$availability = AMP_Theme_Support::get_template_availability();
-		if ( ! $availability['supported'] ) {
+		if ( ! is_amp_available() ) {
 			self::$amp_admin_bar_item_added = false;
 			return;
 		}
 
-		$amp_validated_url_post = null;
-
 		$current_url = amp_get_current_url();
 		$non_amp_url = amp_remove_endpoint( $current_url );
+		if ( amp_is_canonical() ) {
+			$non_amp_url = add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_AVAILABLE, $non_amp_url );
+		}
 
 		$amp_url = remove_query_arg(
-			wp_removable_query_args(),
+			array_merge( wp_removable_query_args(), [ QueryVars::NOAMP ] ),
 			$current_url
 		);
 		if ( ! amp_is_canonical() ) {
 			$amp_url = add_query_arg( amp_get_slug(), '', $amp_url );
 		}
 
-		$error_count = -1;
-
-		/*
-		 * If not an AMP response, then obtain the count of validation errors from either the query param supplied after redirecting from AMP
-		 * to non-AMP due to validation errors (see AMP_Theme_Support::prepare_response()), or if there is an amp_validated_url post that already
-		 * is populated with the last-known validation errors. Otherwise, if it *is* an AMP response then the error count is obtained after
-		 * when the response is being prepared by AMP_Validation_Manager::finalize_validation().
-		 */
-		if ( ! is_amp_endpoint() ) {
-			if ( isset( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) && is_numeric( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				$error_count = (int) $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ]; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			}
-			if ( $error_count < 0 ) {
-				$amp_validated_url_post = AMP_Validated_URL_Post_Type::get_invalid_url_post( $amp_url );
-				if ( $amp_validated_url_post ) {
-					$error_count = 0;
-					foreach ( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $amp_validated_url_post ) as $error ) {
-						if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS === $error['term_status'] || AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS === $error['term_status'] ) {
-							$error_count++;
-						}
-					}
-				}
-			}
-		}
-
-		$user_can_revalidate = $amp_validated_url_post ? current_user_can( 'edit_post', $amp_validated_url_post->ID ) : current_user_can( 'manage_options' );
+		// @todo It makes more sense to use AMP_Validation_Manager::has_cap() here.
+		$amp_validated_url_post = AMP_Validated_URL_Post_Type::get_invalid_url_post( $amp_url );
+		$user_can_revalidate    = $amp_validated_url_post ? current_user_can( 'edit_post', $amp_validated_url_post->ID ) : current_user_can( 'manage_options' );
 		if ( ! $user_can_revalidate ) {
 			return;
 		}
@@ -427,9 +391,6 @@ class AMP_Validation_Manager {
 		// Construct the parent admin bar item.
 		if ( is_amp_endpoint() ) {
 			$icon = Icon::valid(); // This will get overridden in AMP_Validation_Manager::finalize_validation() if there are unaccepted errors.
-			$href = $validate_url;
-		} elseif ( $error_count > 0 ) {
-			$icon = Icon::invalid();
 			$href = $validate_url;
 		} else {
 			$icon = Icon::link();
@@ -457,58 +418,34 @@ class AMP_Validation_Manager {
 		$validate_item = [
 			'parent' => 'amp',
 			'id'     => 'amp-validity',
+			'title'  => esc_html__( 'Validate', 'amp' ),
 			'href'   => esc_url( $validate_url ),
 		];
-		if ( $error_count <= 0 ) {
-			$validate_item['title'] = esc_html__( 'Validate', 'amp' );
-		} else {
-			$validate_item['title'] = esc_html(
-				sprintf(
-					/* translators: %s is count of validation errors */
-					_n(
-						'Review %s validation issue',
-						'Review %s validation issues',
-						$error_count,
-						'amp'
-					),
-					number_format_i18n( $error_count )
-				)
-			);
-		}
 
 		// Construct admin bar item to link to AMP version or non-AMP version.
 		$link_item = [
 			'parent' => 'amp',
 			'id'     => 'amp-view',
-			'title'  => esc_html( is_amp_endpoint() ? __( 'View non-AMP version', 'amp' ) : __( 'View AMP version', 'amp' ) ),
 			'href'   => esc_url( is_amp_endpoint() ? $non_amp_url : $amp_url ),
 		];
-
-		// Add admin bar item to switch between AMP and non-AMP if parent node is also an AMP link.
-		$is_single_version_available = (
-			amp_is_canonical()
-			||
-			( ! is_amp_endpoint() && $error_count > 0 )
-		);
+		if ( amp_is_canonical() ) {
+			$link_item['title'] = esc_html__( 'View with AMP disabled', 'amp' );
+		} else {
+			$link_item['title'] = esc_html( is_amp_endpoint() ? __( 'View non-AMP version', 'amp' ) : __( 'View AMP version', 'amp' ) );
+		}
 
 		// Add top-level menu item. Note that this will correctly merge/amend any existing AMP nav menu item added in amp_add_admin_bar_view_link().
 		$wp_admin_bar->add_node( $parent );
 
-		/*
-		 * Add submenu items based on whether viewing AMP or not, and whether or not AMP is available.
-		 * When
-		 */
-		if ( $is_single_version_available ) {
+		if ( is_amp_endpoint() ) {
 			$wp_admin_bar->add_node( $validate_item );
-		} elseif ( ! is_amp_endpoint() ) {
 			$wp_admin_bar->add_node( $link_item );
-			$wp_admin_bar->add_node( $validate_item );
 		} else {
-			$wp_admin_bar->add_node( $validate_item );
 			$wp_admin_bar->add_node( $link_item );
+			$wp_admin_bar->add_node( $validate_item );
 		}
 
-		if ( AMP_Theme_Support::is_paired_available() && $error_count <= 0 && amp_is_dev_mode() ) {
+		if ( AMP_Theme_Support::is_paired_available() && amp_is_dev_mode() ) { // @todo And user can manage_options.
 			// Construct admin bar item to link to paired browsing experience.
 			$paired_browsing_item = [
 				'parent' => 'amp',
@@ -518,29 +455,6 @@ class AMP_Validation_Manager {
 			];
 
 			$wp_admin_bar->add_node( $paired_browsing_item );
-		}
-
-		// Scrub the query var from the URL.
-		if ( ! is_amp_endpoint() && isset( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			add_action(
-				'wp_before_admin_bar_render',
-				function() {
-					?>
-					<script>
-					(function( queryVar ) {
-						var urlParser = document.createElement( 'a' );
-						urlParser.href = location.href;
-						urlParser.search = urlParser.search.substr( 1 ).split( /&/ ).filter( function( part ) {
-							return 0 !== part.indexOf( queryVar + '=' );
-						} );
-						if ( urlParser.href !== location.href ) {
-							history.replaceState( {}, '', urlParser.href );
-						}
-					})( <?php echo wp_json_encode( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR ); ?> );
-					</script>
-					<?php
-				}
-			);
 		}
 
 		self::$amp_admin_bar_item_added = true;
@@ -558,9 +472,9 @@ class AMP_Validation_Manager {
 		$override_validation_error_statuses = (
 			isset( $_REQUEST['preview'] )
 			&&
-			isset( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			! empty( $_REQUEST[ AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			&&
-			is_array( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			is_array( $_REQUEST[ AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		);
 		if ( ! $override_validation_error_statuses ) {
 			return;
@@ -572,15 +486,18 @@ class AMP_Validation_Manager {
 				[ 'response' => 401 ]
 			);
 		}
-		$statuses = $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ]; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		/*
 		 * This can't just easily add an amp_validation_error_sanitized filter because the the filter_sanitizer_args() method
 		 * currently needs to obtain the list of overrides to create a parsed_cache_variant.
 		 */
-		foreach ( $statuses as $slug => $status ) {
+		foreach ( $_REQUEST[ AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY ] as $slug => $data ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			if ( ! isset( $data[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) ) {
+				continue;
+			}
+
 			$slug   = sanitize_key( $slug );
-			$status = (int) $status;
+			$status = (int) $data[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ];
 			self::$validation_error_status_overrides[ $slug ] = $status;
 			ksort( self::$validation_error_status_overrides );
 		}
@@ -826,7 +743,7 @@ class AMP_Validation_Manager {
 	 * @return boolean $has_cap Whether the current user has the capability.
 	 */
 	public static function has_cap() {
-		return current_user_can( 'edit_posts' );
+		return current_user_can( 'edit_posts' ); // @todo This needs to change to manage_options.
 	}
 
 	/**
@@ -1886,53 +1803,152 @@ class AMP_Validation_Manager {
 	 * @see AMP_Validation_Manager::add_admin_bar_menu_items()
 	 *
 	 * @param Document $dom Document.
+	 * @return bool Whether the document should be displayed to the user.
 	 */
 	public static function finalize_validation( Document $dom ) {
+		$total_count      = 0;
+		$kept_count       = 0;
+		$unreviewed_count = 0;
+		foreach ( self::$validation_results as $validation_result ) {
+			$sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $validation_result['error'] );
+			if ( ! ( (int) $sanitization['status'] & AMP_Validation_Error_Taxonomy::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) ) {
+				$kept_count++;
+			}
+			if ( ! ( (int) $sanitization['status'] & AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK ) ) {
+				$unreviewed_count++;
+			}
+			$total_count++;
+		}
+
 		/*
 		 * Override AMP status in admin bar set in \AMP_Validation_Manager::add_admin_bar_menu_items()
 		 * when there are validation errors which have not been explicitly accepted.
 		 */
-		if ( ! is_admin_bar_showing() || ! self::$amp_admin_bar_item_added ) {
+		if ( is_admin_bar_showing() && self::$amp_admin_bar_item_added ) {
+			self::update_admin_bar_item( $dom, $total_count, $kept_count, $unreviewed_count );
+		}
+
+		// If no invalid markup is kept, then the page should definitely be displayed to the user.
+		if ( 0 === $kept_count ) {
+			return true;
+		}
+
+		// When overrides are present, go ahead and display to the user.
+		if ( ! empty( self::$validation_error_status_overrides ) ) {
+			return true;
+		}
+
+		/*
+		 * In AMP-first, strip html@amp attribute to prevent GSC from complaining about a validation error
+		 * already surfaced inside of WordPress. This is intended to not serve dirty AMP, but rather a
+		 * non-AMP document (intentionally not valid AMP) that contains the AMP runtime and AMP components.
+		 *
+		 * Otherwise, if in Paired AMP then redirect to the non-AMP version if the current user isn't an user who
+		 * can manage validation error statuses (access developer tools) and change the AMP options for the template
+		 * mode. Such users should be able to see kept invalid markup on the AMP page even though it is invalid.
+		 */
+		if ( amp_is_canonical() ) {
+			$dom->documentElement->removeAttribute( Attribute::AMP );
+			$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI );
+			$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI_ALT );
+
+			/*
+			 * Make sure that document.write() is disabled to prevent dynamically-added content (such as added
+			 * via amp-live-list) from wiping out the page by introducing any scripts that call this function.
+			 */
+			$script = $dom->createElement( Tag::SCRIPT );
+			$script->appendChild( $dom->createTextNode( 'document.addEventListener( "DOMContentLoaded", function() { document.write = function( text ) { throw new Error( "[AMP-WP] Prevented document.write() call with: "  + text ); }; } );' ) );
+			$dom->head->appendChild( $script );
+			return true;
+		}
+
+		// Otherwise, since it is in a paired mode, only allow showing the dirty AMP page if the user is authorized.
+		// If not, normally the result is redirection to the non-AMP version.
+		return self::has_cap() || current_user_can( 'manage_options' ) || is_customize_preview();
+	}
+
+	/**
+	 * Override AMP status in admin bar set in \AMP_Validation_Manager::add_admin_bar_menu_items()
+	 * when there are validation errors which have not been explicitly accepted.
+	 *
+	 * @param Document $dom              Document.
+	 * @param int      $total_count      Total count of validation errors.
+	 * @param int      $kept_count       Count of validation errors with invalid markup kept.
+	 * @param int      $unreviewed_count Count of unreviewed validation errors.
+	 */
+	private static function update_admin_bar_item( Document $dom, $total_count, $kept_count, $unreviewed_count ) {
+		$parent_menu_item = $dom->getElementById( 'wp-admin-bar-amp' );
+		if ( ! $parent_menu_item instanceof DOMElement ) {
 			return;
 		}
 
-		$error_count = 0;
-		foreach ( self::$validation_results as $validation_result ) {
-			$validation_status = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $validation_result['error'] );
-
-			$is_unaccepted = 'with_preview' === $validation_status['forced'] ?
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $validation_status['status']
-				:
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $validation_status['term_status'];
-			if ( $is_unaccepted ) {
-				$error_count++;
-			}
-		}
-
-		if ( 0 === $error_count ) {
+		$parent_menu_link = $dom->xpath->query( './a[ @href ]', $parent_menu_item )->item( 0 );
+		$admin_bar_icon   = $dom->xpath->query( './span[ @id = "amp-admin-bar-item-status-icon" ]', $parent_menu_link )->item( 0 );
+		$validate_link    = $dom->xpath->query( './/li[ @id = "wp-admin-bar-amp-validity" ]/a[ @href ]', $parent_menu_item )->item( 0 );
+		if ( ! $parent_menu_link instanceof DOMElement || ! $admin_bar_icon instanceof DOMElement || ! $validate_link instanceof DOMElement ) {
 			return;
 		}
 
-		$validate_item = $dom->getElementById( 'wp-admin-bar-amp-validity' );
-		if ( $validate_item ) {
-			$link = $validate_item->getElementsByTagName( 'a' )->item( 0 );
-			if ( $link ) {
-				$link->firstChild->nodeValue = sprintf(
-					/* translators: %s is count of validation errors */
-					_n(
-						'Review %s validation issue',
-						'Review %s validation issues',
-						$error_count,
-						'amp'
-					),
-					number_format_i18n( $error_count )
-				);
-			}
-		}
-
-		$admin_bar_icon = $dom->getElementById( 'amp-admin-bar-item-status-icon' );
-		if ( $admin_bar_icon ) {
+		/*
+		 * When in Paired AMP, non-administrators accessing the AMP version will get redirected to the non-AMP version
+		 * if there are is kept invalid markup. In Paired AMP, the AMP plugin never intends to advertise the availability
+		 * of dirty AMP pages. However, in AMP-first (Standard mode), there is no non-AMP version to redirect to, so
+		 * kept invalid markup does not cause redirection but rather the `amp` attribute is removed from the AMP page
+		 * to serve an intentionally invalid AMP page with the AMP runtime loaded which is exempted from AMP validation
+		 * (and excluded from being indexed as an AMP page). So this is why the first conditional will only show the
+		 * error icon for kept markup when _not_ AMP-first. This will only be displayed to administrators who are directly
+		 * accessing the AMP version. Otherwise, if there is no kept invalid markup _or_ it is AMP-first, then the AMP
+		 * admin bar item will be updated to show if there are any unreviewed validation errors (regardless of whether
+		 * they are kept or removed).
+		 */
+		if ( $kept_count > 0 && ! amp_is_canonical() ) {
+			$admin_bar_icon->setAttribute( 'class', 'ab-icon amp-icon ' . Icon::INVALID );
+		} elseif ( $unreviewed_count > 0 ) {
 			$admin_bar_icon->setAttribute( 'class', 'ab-icon amp-icon ' . Icon::WARNING );
+		}
+
+		$text = sprintf(
+			/* translators: %s is total count of validation errors */
+			_n(
+				'Validate %s issue',
+				'Validate %s issues',
+				$total_count,
+				'amp'
+			),
+			number_format_i18n( $total_count )
+		);
+
+		$items = [];
+		if ( $unreviewed_count > 0 ) {
+			$items[] = sprintf(
+				/* translators: %s the total count of unreviewed validation errors */
+				_n(
+					'%s unreviewed',
+					'%s unreviewed',
+					$total_count,
+					'amp'
+				),
+				number_format_i18n( $unreviewed_count )
+			);
+		}
+		if ( $kept_count > 0 ) {
+			$items[] = sprintf(
+				/* translators: %s the total count of unreviewed validation errors */
+				_n(
+					'%s kept',
+					'%s kept',
+					$kept_count,
+					'amp'
+				),
+				number_format_i18n( $kept_count )
+			);
+		}
+		if ( $items ) {
+			$text .= sprintf( ' (%s)', implode( ', ', $items ) );
+		}
+
+		if ( $validate_link->firstChild instanceof DOMText ) {
+			$validate_link->firstChild->nodeValue = $text;
 		}
 	}
 
@@ -1943,7 +1959,7 @@ class AMP_Validation_Manager {
 	 * @return array $sanitizers The filtered AMP sanitizers.
 	 */
 	public static function filter_sanitizer_args( $sanitizers ) {
-		foreach ( $sanitizers as $sanitizer => &$args ) {
+		foreach ( $sanitizers as &$args ) {
 			$args['validation_error_callback'] = __CLASS__ . '::add_validation_error';
 		}
 

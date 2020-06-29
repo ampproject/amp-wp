@@ -7,7 +7,9 @@
  */
 
 use AmpProject\AmpWP\ConfigurationArgument;
+use AmpProject\AmpWP\MobileRedirection;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\QueryVars;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\PrivateAccess;
 use AmpProject\Dom\Document;
@@ -2308,16 +2310,16 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Theme_Support_Sanitizer_Counter::$count = 0;
 		AMP_Validation_Manager::reset_validation_results();
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
-		$this->assertStringStartsWith( 'Redirecting to non-AMP version', $sanitized_html );
+		$this->assertStringStartsWith( 'Redirecting', $sanitized_html );
 		$this->assertCount( 1, $redirects );
-		$this->assertEquals( home_url( '/' ), $redirects[0] );
+		$this->assertEquals( add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_AVAILABLE, home_url( '/' ) ), $redirects[0] );
 		$this->assertEquals( 1, AMP_Theme_Support_Sanitizer_Counter::$count );
 
 		AMP_Validation_Manager::reset_validation_results();
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
-		$this->assertStringStartsWith( 'Redirecting to non-AMP version', $sanitized_html );
+		$this->assertStringStartsWith( 'Redirecting', $sanitized_html );
 		$this->assertCount( 2, $redirects );
-		$this->assertEquals( home_url( '/' ), $redirects[0] );
+		$this->assertEquals( add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_AVAILABLE, home_url( '/' ) ), $redirects[0] );
 		$this->assertEquals( 2, AMP_Theme_Support_Sanitizer_Counter::$count, 'Expected sanitizer to be invoked again.' );
 
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
@@ -2325,16 +2327,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		AMP_Validation_Manager::reset_validation_results();
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
-		$this->assertStringStartsWith( 'Redirecting to non-AMP version', $sanitized_html );
-		$this->assertCount( 3, $redirects );
-		$this->assertEquals( home_url( '/?amp_validation_errors=1' ), $redirects[0] );
+		$this->assertStringStartsWith( '<!DOCTYPE html>', $sanitized_html, 'Expected page instead of redirect since admin logged-in.' );
+		$this->assertCount( 2, $redirects );
 		$this->assertEquals( 3, AMP_Theme_Support_Sanitizer_Counter::$count, 'Expected sanitizer be invoked after validation changed.' );
 
 		AMP_Validation_Manager::reset_validation_results();
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
-		$this->assertStringStartsWith( 'Redirecting to non-AMP version', $sanitized_html );
-		$this->assertCount( 4, $redirects );
-		$this->assertEquals( home_url( '/?amp_validation_errors=1' ), $redirects[0] );
+		$this->assertStringStartsWith( '<!DOCTYPE html>', $sanitized_html, 'Expected page instead of redirect since admin logged-in.' );
+		$this->assertCount( 2, $redirects );
 		$this->assertEquals( 4, AMP_Theme_Support_Sanitizer_Counter::$count, 'Expected sanitizer to be invoked again although validation results are cached.' );
 	}
 

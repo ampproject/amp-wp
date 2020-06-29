@@ -8,6 +8,7 @@
 use AmpProject\AmpWP\AmpWpPluginFactory;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\QueryVars;
 
 /**
  * Handle activation of plugin.
@@ -319,6 +320,144 @@ function amp_add_frontend_actions() {
 }
 
 /**
+ * Determine whether AMP is available for the current URL.
+ *
+ * @since 1.6
+ *
+ * @return bool Whether there is an AMP version for the provided URL.
+ * @global string $pagenow
+ * @global WP_Query $wp_query
+ */
+function is_amp_available() {
+	global $pagenow, $wp_query;
+
+	// Short-circuit for admin requests or requests to non-frontend pages.
+	if ( is_admin() || in_array( $pagenow, [ 'wp-login.php', 'wp-signup.php', 'wp-activate.php' ], true ) ) {
+		return false;
+	}
+
+	$warn = function () {
+		static $warned = false;
+		if ( $warned ) {
+			return;
+		}
+		$message = sprintf(
+			/* translators: %1$s: is_amp_endpoint(), %2$s: the current action, %3$s: the wp action, %4$s: the WP_Query class, %5$s: the amp_skip_post() function */
+			__( '%1$s (or %2$s) was called too early and so it will not work properly. WordPress is currently doing the "%3$s" action. Calling this function before the "%4$s" action means it will not have access to %5$s and the queried object to determine if it is an AMP response, thus neither the "%6$s" filter nor the AMP enabled toggle will be considered.', 'amp' ),
+			'is_amp_available()',
+			'is_amp_endpoint()',
+			current_action(),
+			'wp',
+			'WP_Query',
+			'amp_skip_post()'
+		);
+		_doing_it_wrong( 'is_amp_available', esc_html( $message ), '1.6.0' );
+		$warned = true;
+	};
+
+	// Make sure the parse_request action has triggered before trying to read from the REST_REQUEST constant, which is set during rest_api_loaded().
+	if ( ! did_action( 'parse_request' ) ) {
+		$warn();
+	} elseif ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+		return false;
+	}
+
+	// Make sure that the parse_query action has triggered, as this is required to initially populate the global WP_Query.
+	if ( ! ( $wp_query instanceof WP_Query || did_action( 'parse_query' ) ) ) {
+		$warn();
+	}
+
+	// Always return false when requesting the service worker.
+	// Note this is no longer strictly required because AMP_Theme_Support::prepare_response() will abort for non-HTML responses.
+	// But it is still good to do so because it avoids needlessly output-buffering the response.
+	if ( class_exists( 'WP_Service_Workers' ) && $wp_query instanceof WP_Query && defined( 'WP_Service_Workers::QUERY_VAR' ) && $wp_query->get( WP_Service_Workers::QUERY_VAR ) ) {
+		return false;
+	}
+
+	// Short-circuit queries that can never have AMP responses (e.g. post embeds and feeds).
+	// Note that these conditionals only require the parse_query action to have been run. They don't depend on the wp action having been fired.
+	if (
+		$wp_query instanceof WP_Query
+		&&
+		(
+			$wp_query->is_embed()
+			||
+			$wp_query->is_feed()
+			||
+			$wp_query->is_comment_feed()
+			||
+			$wp_query->is_trackback()
+			||
+			$wp_query->is_robots()
+			||
+			( method_exists( $wp_query, 'is_favicon' ) && $wp_query->is_favicon() )
+		)
+	) {
+		return false;
+	}
+
+	$theme_supports_amp = current_theme_supports( AMP_Theme_Support::SLUG );
+
+	// If the query has not been initialized, we can only assume AMP is available if theme support is present and all templates are supported.
+	if ( ! $wp_query instanceof WP_Query || ! did_action( 'wp' ) ) {
+		$warn();
+		return $theme_supports_amp && AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED );
+	}
+
+	// If redirected to this page because AMP is not available due to validation errors, prevent AMP from being available (if not AMP-first).
+	if (
+		( ! amp_is_canonical() || AMP_Validation_Manager::has_cap() )
+		&&
+		( isset( $_GET[ QueryVars::NOAMP ] ) && QueryVars::NOAMP_AVAILABLE === $_GET[ QueryVars::NOAMP ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	) {
+		return false;
+	}
+
+	/*
+	 * If this is a URL for validation, and validation is forced for all URLs, return true.
+	 * Normally, this would be false if the user has deselected a template,
+	 * like by unchecking 'Categories' in 'AMP Settings' > 'Supported Templates'.
+	 * But there's a flag for the WP-CLI command that sets this query var to validate all URLs.
+	 */
+	if ( AMP_Validation_Manager::is_theme_support_forced() ) {
+		return true;
+	}
+
+	$queried_object = get_queried_object();
+	if ( $theme_supports_amp ) {
+		// Abort if in Transitional mode and AMP is not available for the URL.
+		$availability = AMP_Theme_Support::get_template_availability( $wp_query );
+
+		if ( ! $availability['supported'] ) {
+			return false;
+		}
+
+		// If not in an AMP-first mode, check if there are any validation errors with kept invalid markup for this URL.
+		// And if so, and if the user cannot do validation (since they can always get fresh validation results), then
+		// AMP is not available.
+		if ( ! amp_is_canonical() && ! AMP_Validation_Manager::has_cap() ) {
+			$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors(
+				amp_get_current_url(),
+				[ 'ignore_accepted' => true ]
+			);
+			if ( count( $validation_errors ) > 0 ) {
+				return false;
+			}
+		}
+	} elseif ( ! (
+		$queried_object instanceof WP_Post &&
+		$wp_query instanceof WP_Query &&
+		( $wp_query->is_singular() || $wp_query->is_posts_page ) &&
+		post_supports_amp( $queried_object ) )
+	) {
+		// Abort if in Reader mode and the post doesn't support AMP.
+		return false;
+	}
+
+	return true;
+}
+
+/**
  * Bootstraps the AMP customizer.
  *
  * Uses the priority of 12 for the 'after_setup_theme' action.
@@ -381,7 +520,7 @@ function amp_get_slug() {
 	 *
 	 * @param string $query_var The AMP query variable.
 	 */
-	$query_var = apply_filters( 'amp_query_var', 'amp' );
+	$query_var = apply_filters( 'amp_query_var', QueryVars::AMP );
 
 	define( 'AMP_QUERY_VAR', $query_var );
 
@@ -534,11 +673,8 @@ function amp_remove_endpoint( $url ) {
  * If there are known validation errors for the current URL then do not output anything.
  *
  * @since 1.0
- * @global WP_Query $wp_query
  */
 function amp_add_amphtml_link() {
-	global $wp_query;
-
 	/**
 	 * Filters whether to show the amphtml link on the frontend.
 	 *
@@ -549,46 +685,19 @@ function amp_add_amphtml_link() {
 		return;
 	}
 
-	$current_url = amp_get_current_url();
-
-	$amp_url = null;
-	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-		if ( AMP_Theme_Support::is_paired_available() ) {
-			$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
-		}
-	} elseif ( $wp_query instanceof WP_Query && ( $wp_query->is_singular() || $wp_query->is_posts_page ) && post_supports_amp( get_post( get_queried_object_id() ) ) ) {
-		$amp_url = amp_get_permalink( get_queried_object_id() );
-	}
-
-	if ( ! $amp_url ) {
+	if ( ! is_amp_available() ) {
 		printf( '<!-- %s -->', esc_html__( 'There is no amphtml version available for this URL.', 'amp' ) );
 		return;
 	}
 
-	// Check to see if there are known unaccepted validation errors for this URL.
-	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-		$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $current_url, [ 'ignore_accepted' => true ] );
-		$error_count       = count( $validation_errors );
-		if ( $error_count > 0 ) {
-			echo "<!--\n";
-			echo esc_html(
-				sprintf(
-					/* translators: %s: error count */
-					_n(
-						'There is %s validation error that is blocking the amphtml version from being available.',
-						'There are %s validation errors that are blocking the amphtml version from being available.',
-						$error_count,
-						'amp'
-					),
-					number_format_i18n( $error_count )
-				)
-			);
-			echo "\n-->";
-			return;
-		}
+	if ( AMP_Theme_Support::is_paired_available() ) {
+		$amp_url = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
+	} else {
+		$amp_url = amp_get_permalink( get_queried_object_id() );
 	}
 
 	if ( $amp_url ) {
+		$amp_url = remove_query_arg( QueryVars::NOAMP, $amp_url );
 		printf( '<link rel="amphtml" href="%s">', esc_url( $amp_url ) );
 	}
 }
@@ -617,81 +726,18 @@ function post_supports_amp( $post ) {
  * var is present, or else in standard mode if just the template is available.
  *
  * @return bool Whether it is the AMP endpoint.
- * @global string $pagenow
  * @global WP_Query $wp_query
  */
 function is_amp_endpoint() {
-	global $pagenow, $wp_query;
+	global $wp_query;
 
-	// Short-circuit for admin requests or requests to non-frontend pages.
-	if ( is_admin() || in_array( $pagenow, [ 'wp-login.php', 'wp-signup.php', 'wp-activate.php' ], true ) ) {
-		return false;
-	}
-
-	$warned        = false;
-	$error_message = sprintf(
-		/* translators: %1$s: is_amp_endpoint(), %2$s: the current action, %3$s: the wp action, %4$s: the WP_Query class, %5$s: the amp_skip_post() function */
-		__( '%1$s was called too early and so it will not work properly. WordPress is currently doing the "%2$s" action. Calling this function before the "%3$s" action means it will not have access to %4$s and the queried object to determine if it is an AMP response, thus neither the "%5$s" filter nor the AMP enabled toggle will be considered.', 'amp' ),
-		__FUNCTION__ . '()',
-		current_action(),
-		'wp',
-		'WP_Query',
-		'amp_skip_post()'
-	);
-
-	// Make sure the parse_request action has triggered before trying to read from the REST_REQUEST constant, which is set during rest_api_loaded().
-	if ( ! did_action( 'parse_request' ) ) {
-		_doing_it_wrong( __FUNCTION__, esc_html( $error_message ), '1.6.0' );
-		$warned = true;
-	} elseif ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
-		return false;
-	}
-
-	// Make sure that the parse_query action has triggered, as this is required to initially populate the global WP_Query.
-	if ( ! $warned && ! ( $wp_query instanceof WP_Query || did_action( 'parse_query' ) ) ) {
-		_doing_it_wrong( __FUNCTION__, esc_html( $error_message ), '0.4.2' );
-		$warned = true;
-	}
-
-	// Always return false when requesting the service worker.
-	// Note this is no longer required because AMP_Theme_Support::prepare_response() will abort for non-HTML responses.
-	if ( class_exists( 'WP_Service_Workers' ) && $wp_query instanceof WP_Query && defined( 'WP_Service_Workers::QUERY_VAR' ) && $wp_query->get( WP_Service_Workers::QUERY_VAR ) ) {
-		return false;
-	}
-
-	// Short-circuit queries that can never have AMP responses (e.g. post embeds and feeds).
-	// Note that these conditionals only require the parse_query action to have been run. They don't depend on the wp action having been fired.
-	if (
-		$wp_query instanceof WP_Query
-		&&
-		(
-			$wp_query->is_embed()
-			||
-			$wp_query->is_feed()
-			||
-			$wp_query->is_comment_feed()
-			||
-			$wp_query->is_trackback()
-			||
-			$wp_query->is_robots()
-			||
-			( method_exists( $wp_query, 'is_favicon' ) && $wp_query->is_favicon() )
-		)
-	) {
-		return false;
-	}
-
-	/*
-	 * If this is a URL for validation, and validation is forced for all URLs, return true.
-	 * Normally, this would be false if the user has deselected a template,
-	 * like by unchecking 'Categories' in 'AMP Settings' > 'Supported Templates'.
-	 * But there's a flag for the WP-CLI command that sets this query var to validate all URLs.
-	 */
-	if ( AMP_Validation_Manager::is_theme_support_forced() ) {
+	if ( AMP_Validation_Manager::$is_validate_request ) {
 		return true;
 	}
 
-	$has_amp_query_var = (
+	$is_amp_url = (
+		amp_is_canonical()
+		||
 		isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		||
 		(
@@ -701,29 +747,20 @@ function is_amp_endpoint() {
 		)
 	);
 
-	// When there is no query var and AMP is not canonical (AMP-first), then this is definitely not an AMP endpoint.
-	if ( ! $has_amp_query_var && ! amp_is_canonical() ) {
+	// If AMP is not available, then it's definitely not an AMP endpoint.
+	if ( ! is_amp_available() ) {
+		// But, if WP_Query was not available yet, then we will just assume the query is supported since at this point we do
+		// know either that the site is in Standard mode or the URL was requested with the AMP query var. This can still
+		// produce an undesired result when a Standard mode site has a post that opts out of AMP, but this issue will
+		// have been flagged via _doing_it_wrong() in is_amp_available() above.
+		if ( ! did_action( 'wp' ) || ! $wp_query instanceof WP_Query ) {
+			return $is_amp_url && AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED );
+		}
+
 		return false;
 	}
 
-	if ( did_action( 'wp' ) && $wp_query instanceof WP_Query ) {
-		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-			$availability = AMP_Theme_Support::get_template_availability( $wp_query );
-			return $availability['supported'];
-		} else {
-			$queried_object = get_queried_object();
-			return $queried_object instanceof WP_Post && ( $wp_query->is_singular() || $wp_query->is_posts_page ) && post_supports_amp( $queried_object );
-		}
-	} else {
-		// If WP_Query was not available yet, then we will just assume the query is supported since at this point we do
-		// know either that the site is in Standard mode or the URL was requested with the AMP query var. This can still
-		// produce an undesired result when a Standard mode site has a post that opts out of AMP, but this issue will
-		// have been flagged via _doing_it_wrong() above.
-		if ( ! $warned ) {
-			_doing_it_wrong( __FUNCTION__, esc_html( $error_message ), '1.0.2' );
-		}
-		return amp_is_canonical() || $has_amp_query_var;
-	}
+	return $is_amp_url;
 }
 
 /**
@@ -1672,29 +1709,7 @@ function amp_wp_kses_mustache( $markup ) {
  * @param WP_Admin_Bar $wp_admin_bar Admin bar.
  */
 function amp_add_admin_bar_view_link( $wp_admin_bar ) {
-	if ( is_admin() || amp_is_canonical() ) {
-		return;
-	}
-
-	if ( current_theme_supports( 'amp' ) ) {
-		$available = AMP_Theme_Support::get_template_availability()['supported'];
-	} elseif ( is_singular() ) {
-		$post      = get_queried_object();
-		$available = ( $post instanceof WP_Post ) && post_supports_amp( $post );
-	} else {
-		$available = false;
-	}
-	if ( ! $available ) {
-		// @todo Add note that AMP is not available?
-		return;
-	}
-
-	// Show nothing if there are rejected validation errors for this URL.
-	if (
-		! is_amp_endpoint() &&
-		AMP_Theme_Support::READER_MODE_SLUG !== AMP_Theme_Support::get_support_mode() &&
-		count( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( amp_get_current_url(), [ 'ignore_accepted' => true ] ) ) > 0
-	) {
+	if ( is_admin() || amp_is_canonical() || ! is_amp_available() ) {
 		return;
 	}
 
@@ -1705,6 +1720,8 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 	} else {
 		$href = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
 	}
+
+	$href = remove_query_arg( QueryVars::NOAMP, $href );
 
 	$parent = [
 		'id'    => 'amp',
