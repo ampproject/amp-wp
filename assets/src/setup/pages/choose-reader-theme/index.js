@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useEffect, useContext } from '@wordpress/element';
+import { useEffect, useContext, useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -39,6 +39,28 @@ export function ChooseReaderTheme() {
 		}
 	}, [ canGoForward, setCanGoForward, readerTheme, themes, themeSupport ] );
 
+	// Filter out the active theme if it is a reader theme.
+	const nonActiveThemes = useMemo(
+		() => ( themes || [] ).filter( ( { availability } ) => 'active' !== availability ),
+		[ themes ],
+	);
+
+	// Separate available themes (both installed and installable) from those that need to be installed manually.
+	const { availableThemes, unavailableThemes } = useMemo(
+		() => nonActiveThemes.reduce(
+			( collections, theme ) => {
+				if ( theme.availability === 'non-installable' ) {
+					collections.unavailableThemes.push( theme );
+				} else {
+					collections.availableThemes.push( theme );
+				}
+
+				return collections;
+			},
+			{ availableThemes: [], unavailableThemes: [] },
+		),
+		[ nonActiveThemes ] );
+
 	if ( fetchingThemes ) {
 		return (
 			<Loading />
@@ -62,17 +84,38 @@ export function ChooseReaderTheme() {
 				}
 			</p>
 			<form>
-				<ul className="choose-reader-theme__grid">
-					{
-						themes && themes.map( ( theme ) => (
+				{ 0 < availableThemes.length && (
+					<ul className="choose-reader-theme__grid">
+						{ availableThemes.map( ( theme ) => (
 							<ThemeCard
 								key={ `theme-card-${ theme.slug }` }
 								screenshotUrl={ theme.screenshot_url }
 								{ ...theme }
-							/> ),
-						)
-					}
-				</ul>
+							/>
+						) ) }
+					</ul>
+				) }
+
+				{ 0 < unavailableThemes.length && (
+					<div className="choose-reader-theme__unavailable">
+						<h3>
+							{ __( 'Unavailable themes', 'amp' ) }
+						</h3>
+						<p>
+							{ __( 'The following themes are compatible but cannot be installed automatically. Please install them manually, or contact your host if you are not able to do so.', 'amp' ) }
+						</p>
+						<ul className="choose-reader-theme__grid">
+							{ unavailableThemes.map( ( theme ) => (
+								<ThemeCard
+									key={ `theme-card-${ theme.slug }` }
+									screenshotUrl={ theme.screenshot_url }
+									unavailable={ true }
+									{ ...theme }
+								/>
+							) ) }
+						</ul>
+					</div>
+				) }
 			</form>
 		</div>
 	);

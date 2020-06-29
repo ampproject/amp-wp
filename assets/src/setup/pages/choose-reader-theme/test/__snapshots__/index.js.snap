@@ -29,6 +29,7 @@ exports[`ThemeCard matches snapshot 1`] = `
     >
       <input
         checked={false}
+        disabled={false}
         id="theme-card__theme-slug"
         onChange={[Function]}
         type="radio"

@@ -53,11 +53,7 @@ describe( 'AMP Setup Screen', () => {
 	} );
 
 	it( 'hides prev button page one and two and disables next button on last page', async () => {
-		let prevButton = await page.$( PREV_BUTTON_SELECTOR );
-		expect( prevButton ).toBeNull();
-
-		await visitAdminPage( 'admin.php', 'page=amp-setup&amp-setup-screen=technical-background' );
-		prevButton = await page.$( PREV_BUTTON_SELECTOR );
+		const prevButton = await page.$( PREV_BUTTON_SELECTOR );
 		expect( prevButton ).toBeNull();
 
 		await visitAdminPage( 'admin.php', 'page=amp-setup&amp-setup-screen=done' );

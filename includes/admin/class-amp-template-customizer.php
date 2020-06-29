@@ -134,11 +134,16 @@ class AMP_Template_Customizer {
 	 */
 	public function add_customizer_scripts() {
 		if ( ! amp_is_canonical() ) {
+			$asset_file   = AMP__DIR__ . '/assets/js/amp-customize-controls.asset.php';
+			$asset        = require $asset_file;
+			$dependencies = $asset['dependencies'];
+			$version      = $asset['version'];
+
 			wp_enqueue_script(
 				'amp-customize-controls',
 				amp_get_asset_url( 'js/amp-customize-controls.js' ),
-				[ 'jquery', 'customize-controls' ],
-				AMP__VERSION,
+				array_merge( $dependencies, [ 'jquery', 'customize-controls' ] ),
+				$version,
 				true
 			);
 
@@ -185,38 +190,25 @@ class AMP_Template_Customizer {
 	 * Enqueues scripts used in both the AMP and non-AMP Customizer preview.
 	 *
 	 * @since 0.6
-	 * @global WP_Query $wp_query
 	 */
 	public function enqueue_preview_scripts() {
-		global $wp_query;
-
 		// Bail if user can't customize anyway.
 		if ( ! current_user_can( 'customize' ) ) {
 			return;
 		}
 
+		$asset_file   = AMP__DIR__ . '/assets/js/amp-customize-preview.asset.php';
+		$asset        = require $asset_file;
+		$dependencies = $asset['dependencies'];
+		$version      = $asset['version'];
+
 		wp_enqueue_script(
 			'amp-customize-preview',
 			amp_get_asset_url( 'js/amp-customize-preview.js' ),
-			[ 'jquery', 'customize-preview' ],
-			AMP__VERSION,
+			array_merge( $dependencies, [ 'jquery', 'customize-preview' ] ),
+			$version,
 			true
 		);
-
-		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-			$availability = AMP_Theme_Support::get_template_availability();
-			$available    = $availability['supported'];
-		} elseif ( is_singular() || $wp_query->is_posts_page ) {
-			/**
-			 * Queried object.
-			 *
-			 * @var WP_Post $queried_object
-			 */
-			$queried_object = get_queried_object();
-			$available      = post_supports_amp( $queried_object );
-		} else {
-			$available = false;
-		}
 
 		wp_add_inline_script(
 			'amp-customize-preview',
@@ -224,7 +216,7 @@ class AMP_Template_Customizer {
 				'ampCustomizePreview.boot( %s );',
 				wp_json_encode(
 					[
-						'available' => $available,
+						'available' => is_amp_available(),
 						'enabled'   => is_amp_endpoint(),
 					]
 				)

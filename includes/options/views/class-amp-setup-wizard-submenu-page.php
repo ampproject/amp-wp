@@ -61,6 +61,8 @@ final class AMP_Setup_Wizard_Submenu_Page {
 		add_filter( 'admin_footer_text', '__return_empty_string' );
 		remove_all_filters( 'update_footer' );
 
+		do_action( 'admin_head' );
+
 		// <head> tag was opened prior to this action and hasn't been closed.
 		?>
 		</head>

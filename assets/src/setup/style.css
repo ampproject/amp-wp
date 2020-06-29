@@ -77,6 +77,10 @@ body {
 	text-decoration: none;
 }
 
+.components-button:focus:not(:disabled) {
+	outline: 1px solid var(--brand);
+}
+
 .components-button.is-primary {
 	box-shadow: 0 25px 20px rgba(0, 0, 0, 0.1);
 }
@@ -88,6 +92,7 @@ body {
 .components-button.is-primary:focus:not(:disabled),
 .components-button.is-primary:active {
 	background: var(--brand);
+	color: var(--white);
 }
 
 .components-button.is-primary:disabled {
@@ -105,6 +110,10 @@ input[type="radio"] {
 	box-shadow: none;
 	height: 1.5rem;
 	width: 1.5rem;
+}
+
+input[type="radio"][disabled] {
+	border-color: var(--light-gray);
 }
 
 input[type="radio"]:checked {
