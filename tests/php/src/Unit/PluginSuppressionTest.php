@@ -16,6 +16,7 @@ use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AMP_Validated_URL_Post_Type;
 use AMP_Validation_Manager;
+use AmpProject\AmpWP\Tests\WithoutBlockPreRendering;
 use Exception;
 use WP_Block_Type_Registry;
 use WP_UnitTestCase;
@@ -26,6 +27,9 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 	use PrivateAccess;
 	use AssertContainsCompatibility;
 	use ThemesApiRequestMocking;
+	use WithoutBlockPreRendering {
+		setUp as public prevent_block_pre_render;
+	}
 
 	private $attempted_validate_request_urls = [];
 
@@ -33,13 +37,12 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 	 * Set up.
 	 */
 	public function setUp() {
-		parent::setUp();
+		$this->prevent_block_pre_render();
+
 		$this->reset_widgets();
 		add_filter(
 			'pre_http_request',
 			function( $r, $args, $url ) {
-				unset( $args );
-
 				if ( false === strpos( $url, 'amp_validate=' ) ) {
 					return $r;
 				}
@@ -184,7 +187,22 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 			defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX, // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
 			has_action( 'wp', [ $instance, 'suppress_plugins' ] )
 		);
-		$this->assertEquals( 10, has_action( 'amp_options_menu_items', [ $instance, 'add_settings_field' ] ) );
+		$this->assertEquals( 11, has_action( 'amp_options_menu_items', [ $instance, 'add_settings_field' ] ) );
+		$this->assertEquals( 10, has_filter( 'amp_default_options', [ $instance, 'filter_default_options' ] ) );
+	}
+
+	/** @covers PluginSuppression::filter_default_options() */
+	public function test_filter_default_options() {
+		$instance = $this->get_instance( true );
+		$this->assertEquals(
+			[
+				'foo'                      => 'bar',
+				Option::SUPPRESSED_PLUGINS => [],
+			],
+			$instance->filter_default_options( [ 'foo' => 'bar' ] )
+		);
+		$this->assertEquals( 11, has_action( 'amp_options_menu_items', [ $instance, 'add_settings_field' ] ) );
+		$this->assertEquals( 10, has_filter( 'amp_default_options', [ $instance, 'filter_default_options' ] ) );
 	}
 
 	/** @covers PluginSuppression::suppress_plugins() */

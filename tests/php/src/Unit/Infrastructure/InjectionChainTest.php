@@ -1,6 +1,6 @@
 <?php
 
-namespace AmpProject\AmpWP\Tests\Unit;
+namespace AmpProject\AmpWP\Tests\Unit\Infrastructure;
 
 use AmpProject\AmpWP\Infrastructure\Injector\InjectionChain;
 use PHPUnit\Framework\TestCase;

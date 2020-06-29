@@ -1,13 +1,18 @@
 /**
  * WordPress dependencies
  */
-import { createContext, useState } from '@wordpress/element';
+import { createContext, useState, useContext } from '@wordpress/element';
 import { getQueryArg } from '@wordpress/url';
 
 /**
  * External dependencies
  */
 import PropTypes from 'prop-types';
+
+/**
+ * Internal dependencies
+ */
+import { Options } from './options-context-provider';
 
 export const Navigation = createContext();
 
@@ -26,6 +31,9 @@ export function NavigationContextProvider( { children, pages } ) {
 		return -1 < index ? index : 0;
 	} );
 	const [ canGoForward, setCanGoForward ] = useState( false );
+	const { options } = useContext( Options );
+
+	const { theme_support: themeSupport } = options || {};
 
 	const currentPage = pages[ activePageIndex ];
 
@@ -41,7 +49,10 @@ export function NavigationContextProvider( { children, pages } ) {
 	 * Navigates to the next page. Pages are expected to set canGoForward to true when required actions have been taken.
 	 */
 	const moveForward = () => {
-		setActivePageIndex( activePageIndex + 1 );
+		// Skip the reader theme screen if the user has not selected that mode. Users can go back to it, however.
+		const forwardCount = pages[ activePageIndex + 1 ].slug === 'theme-selection' && 'reader' !== themeSupport ? 2 : 1;
+
+		setActivePageIndex( activePageIndex + forwardCount );
 		setCanGoForward( false ); // Each page is responsible for setting this to true.
 	};
 
@@ -69,6 +80,7 @@ NavigationContextProvider.propTypes = {
 	pages: PropTypes.arrayOf(
 		PropTypes.shape( {
 			PageComponent: PropTypes.func.isRequired,
+			showTitle: PropTypes.bool,
 			slug: PropTypes.string.isRequired,
 			title: PropTypes.string.isRequired,
 		} ),

@@ -5,6 +5,10 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\MobileRedirection;
+use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\QueryVars;
+use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 
 /**
@@ -21,8 +25,8 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function get_amp_to_amp_navigation_data() {
 		return [
-			[ true ],
-			[ false ],
+			'Paired AMP' => [ true ],
+			'AMP-First'  => [ false ],
 		];
 	}
 
@@ -75,13 +79,13 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 				'href'         => $post_link,
 				'expected_amp' => false,
 				'rel'          => 'help noamphtml',
-				'expected_rel' => 'help',
+				'expected_rel' => 'help noamphtml',
 			],
 			'multiple_rel'        => [
 				'href'         => $post_link,
 				'expected_amp' => false,
 				'rel'          => 'noamphtml nofollow help',
-				'expected_rel' => 'nofollow help',
+				'expected_rel' => 'noamphtml nofollow help',
 			],
 			'rel_trailing_space'  => [
 				'href'         => $post_link,
@@ -181,21 +185,22 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 		foreach ( $links as $id => $link_data ) {
 			$element = $dom->getElementById( $id );
 			$this->assertInstanceOf( 'DOMElement', $element, "ID: $id" );
+			$rel = (string) $element->getAttribute( 'rel' );
 			if ( empty( $link_data['expected_rel'] ) ) {
-				$this->assertFalse( $element->hasAttribute( 'rel' ) );
+				$this->assertNotRegExp( '/(^|\s)amphtml(\s|$)/', $rel, "ID: $id" );
 			} else {
-				$this->assertEquals( $link_data['expected_rel'], $element->getAttribute( 'rel' ) );
+				$this->assertEquals( $link_data['expected_rel'], $element->getAttribute( 'rel' ), "ID: $id" );
 			}
 
 			if ( $paired && $link_data['expected_amp'] ) {
-				$this->assertStringContains( '?' . amp_get_slug(), $element->getAttribute( 'href' ) );
+				$this->assertStringContains( '?' . amp_get_slug(), $element->getAttribute( 'href' ), "ID: $id" );
 			} elseif ( ! $paired || ! $link_data['expected_amp'] ) {
-				$this->assertStringNotContains( '?' . amp_get_slug(), $element->getAttribute( 'href' ) );
+				$this->assertStringNotContains( '?' . amp_get_slug(), $element->getAttribute( 'href' ), "ID: $id" );
 			}
 		}
 
 		// Confirm changes to form.
-		$this->assertEquals( 1, $dom->xpath->query( '//form[ @id = "internal-search" ]//input[ @name = "amp" ]' )->length );
+		$this->assertEquals( $paired ? 1 : 0, $dom->xpath->query( '//form[ @id = "internal-search" ]//input[ @name = "amp" ]' )->length );
 		$this->assertEquals( 0, $dom->xpath->query( '//form[ @id = "internal-post" ]//input[ @name = "amp" ]' )->length );
 		$this->assertEquals( 0, $dom->xpath->query( '//form[ @id = "external-search" ]//input[ @name = "amp" ]' )->length );
 	}
@@ -236,6 +241,52 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 		$meta_tag = $dom->xpath->query( "//meta[ @name = 'amp-to-amp-navigation' ]" )->item( 0 );
 		$this->assertInstanceOf( 'DOMElement', $meta_tag );
 		$this->assertEquals( $expected_meta, $meta_tag->getAttribute( 'content' ) );
+	}
+
+	/**
+	 * Test disabling mobile redirection if the URL is excluded.
+	 */
+	public function test_disable_mobile_redirect_for_excluded_url() {
+		/** @var MobileRedirection $mobile_redirection */
+		$mobile_redirection = Services::get( 'mobile_redirection' );
+
+		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, true );
+
+		add_theme_support( 'amp', [ 'paired' => true ] );
+		$this->go_to( add_query_arg( amp_get_slug(), '', home_url( '/' ) ) );
+		$mobile_redirection->redirect();
+
+		$link = home_url( '/' );
+		$dom  = AMP_DOM_Utils::get_dom_from_content( "<a id='link' href='{$link}'>Foo</a>" );
+
+		$sanitizer = new AMP_Link_Sanitizer( $dom, [ 'excluded_urls' => [ $link ] ] );
+		$sanitizer->sanitize();
+
+		$a_tag = $dom->getElementById( 'link' );
+		$this->assertEquals( add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_MOBILE, $link ), $a_tag->getAttribute( 'href' ) );
+	}
+
+	/**
+	 * Test disabling mobile redirection if the link has the `noamphtml` relationship.
+	 */
+	public function test_disable_mobile_redirect_for_url_with_noamphtml_rel() {
+		/** @var MobileRedirection $mobile_redirection */
+		$mobile_redirection = Services::get( 'mobile_redirection' );
+
+		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, true );
+
+		add_theme_support( 'amp', [ 'paired' => true ] );
+		$this->go_to( add_query_arg( amp_get_slug(), '', home_url( '/' ) ) );
+		$mobile_redirection->redirect();
+
+		$link = home_url( '/' );
+		$dom  = AMP_DOM_Utils::get_dom_from_content( "<a id='link' href='{$link}' rel='noamphtml'>Foo</a>" );
+
+		$sanitizer = new AMP_Link_Sanitizer( $dom );
+		$sanitizer->sanitize();
+
+		$a_tag = $dom->getElementById( 'link' );
+		$this->assertEquals( add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_MOBILE, $link ), $a_tag->getAttribute( 'href' ) );
 	}
 
 	/**

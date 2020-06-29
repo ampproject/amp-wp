@@ -30,16 +30,6 @@
 	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
 		<exclude-pattern>tests/*</exclude-pattern>
 		<exclude-pattern>src/*</exclude-pattern>
-		<exclude-pattern>includes/admin/class-amp-customizer.php</exclude-pattern>
-		<exclude-pattern>includes/embeds/class-amp-dailymotion-embed.php</exclude-pattern>
-		<exclude-pattern>includes/embeds/class-amp-facebook-embed.php</exclude-pattern>
-		<exclude-pattern>includes/embeds/class-amp-gallery-embed.php</exclude-pattern>
-		<exclude-pattern>includes/embeds/class-amp-instagram-embed.php</exclude-pattern>
-		<exclude-pattern>includes/embeds/class-amp-pinterest-embed.php</exclude-pattern>
-		<exclude-pattern>includes/embeds/class-amp-soundcloud-embed.php</exclude-pattern>
-		<exclude-pattern>includes/embeds/class-amp-twitter-embed.php</exclude-pattern>
-		<exclude-pattern>includes/embeds/class-amp-vimeo-embed.php</exclude-pattern>
-		<exclude-pattern>includes/embeds/class-amp-vine-embed.php</exclude-pattern>
 	</rule>
 
 	<rule ref="WordPress.WP.GlobalVariablesOverride.Prohibited">

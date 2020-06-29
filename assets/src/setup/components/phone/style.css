@@ -1,9 +1,17 @@
 .phone {
 	background: #f1f1f1;
 	border-radius: 10px;
+	display: flex;
+	flex-direction: column;
 	margin-bottom: 1rem;
+	max-height: 413px;
+	min-height: 200px;
 	padding: 12px;
 	position: relative;
+}
+
+.phone > * {
+	max-width: 100%;
 }
 
 .phone::before {
@@ -14,4 +22,8 @@
 	height: 5px;
 	margin: 9px auto;
 	width: 43px;
+}
+
+.phone-inner {
+	overflow: hidden;
 }

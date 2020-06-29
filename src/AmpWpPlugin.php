@@ -30,6 +30,9 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 * of code that can work independently.
 	 */
 
+	// Whether to enable filtering by default or not.
+	const ENABLE_FILTERS_DEFAULT = false;
+
 	/**
 	 * Prefix to use for all actions and filters.
 	 *
@@ -56,6 +59,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			'site_health_integration'          => SiteHealth::class,
 			'plugin_registry'                  => PluginRegistry::class,
 			'plugin_suppression'               => PluginSuppression::class,
+			'mobile_redirection'               => MobileRedirection::class,
 		];
 	}
 

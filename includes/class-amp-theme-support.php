@@ -7,6 +7,7 @@
 
 use AmpProject\Amp;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\QueryVars;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\ConfigurationArgument;
 use AmpProject\AmpWP\Transformer;
@@ -1982,9 +1983,6 @@ class AMP_Theme_Support {
 			$args
 		);
 
-		$current_url = amp_get_current_url();
-		$non_amp_url = amp_remove_endpoint( $current_url );
-
 		AMP_HTTP::send_server_timing( 'amp_output_buffer', -self::$init_start_time, 'AMP Output Buffer' );
 
 		$dom_parse_start = microtime( true );
@@ -2025,17 +2023,6 @@ class AMP_Theme_Support {
 			}
 			$data = array_merge( $data, AMP_Validation_Manager::get_validate_response_data( $sanitization_results ) );
 			return wp_json_encode( $data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
-		}
-
-		// Determine what the validation errors are.
-		$blocking_error_count = 0;
-		$validation_results   = [];
-		foreach ( AMP_Validation_Manager::$validation_results as $validation_result ) {
-			if ( ! $validation_result['sanitized'] ) {
-				$blocking_error_count++;
-			}
-			unset( $validation_result['error']['sources'] );
-			$validation_results[] = $validation_result;
 		}
 
 		$dom_serialize_start = microtime( true );
@@ -2092,42 +2079,18 @@ class AMP_Theme_Support {
 
 		self::ensure_required_markup( $dom, array_keys( $amp_scripts ) );
 
-		if ( $blocking_error_count > 0 && empty( AMP_Validation_Manager::$validation_error_status_overrides ) ) {
-			/*
-			 * In AMP-first, strip html@amp attribute to prevent GSC from complaining about a validation error
-			 * already surfaced inside of WordPress. This is intended to not serve dirty AMP, but rather a
-			 * non-AMP document (intentionally not valid AMP) that contains the AMP runtime and AMP components.
-			 */
-			if ( amp_is_canonical() ) {
-				$dom->documentElement->removeAttribute( Attribute::AMP );
-				$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI );
-				$dom->documentElement->removeAttribute( Attribute::AMP_EMOJI_ALT );
+		$can_serve = AMP_Validation_Manager::finalize_validation( $dom );
 
-				/*
-				 * Make sure that document.write() is disabled to prevent dynamically-added content (such as added
-				 * via amp-live-list) from wiping out the page by introducing any scripts that call this function.
-				 */
-				$script = $dom->createElement( Tag::SCRIPT );
-				$script->appendChild( $dom->createTextNode( 'document.addEventListener( "DOMContentLoaded", function() { document.write = function( text ) { throw new Error( "[AMP-WP] Prevented document.write() call with: "  + text ); }; } );' ) );
-				$dom->head->appendChild( $script );
-			} elseif ( ! self::is_customize_preview_iframe() ) {
-				$response = esc_html__( 'Redirecting to non-AMP version.', 'amp' );
+		// Redirect to the non-AMP version if not on an AMP-first site.
+		if ( ! $can_serve && ! amp_is_canonical() ) {
+			$non_amp_url = amp_remove_endpoint( amp_get_current_url() );
 
-				// Indicate the number of validation errors detected at runtime in a query var on the non-AMP page for display in the admin bar.
-				if ( AMP_Validation_Manager::has_cap() ) {
-					$non_amp_url = add_query_arg( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR, $blocking_error_count, $non_amp_url );
-				}
+			// Redirect to include query var to preventing AMP from even being considered available.
+			$non_amp_url = add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_AVAILABLE, $non_amp_url );
 
-				/*
-				 * Temporary redirect because AMP page may return with blocking validation errors when auto-accepting sanitization
-				 * is not enabled. A 302 will allow the errors to be fixed without needing to bust any redirect caches.
-				 */
-				wp_safe_redirect( $non_amp_url, 302 );
-				return $response;
-			}
+			wp_safe_redirect( $non_amp_url, 302 );
+			return esc_html__( 'Redirecting since AMP version not available.', 'amp' );
 		}
-
-		AMP_Validation_Manager::finalize_validation( $dom );
 
 		$response = $dom->saveHTML();
 
@@ -2308,7 +2271,7 @@ class AMP_Theme_Support {
 			$url = wp_unslash( $_SERVER['REQUEST_URI'] );
 		}
 		$url = remove_query_arg(
-			[ amp_get_slug(), AMP_Validated_URL_Post_Type::VALIDATE_ACTION, AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ],
+			[ amp_get_slug(), QueryVars::NOAMP, AMP_Validated_URL_Post_Type::VALIDATE_ACTION, AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ],
 			$url
 		);
 		$url = add_query_arg( self::PAIRED_BROWSING_QUERY_VAR, '1', $url );
@@ -2358,7 +2321,7 @@ class AMP_Theme_Support {
 
 		wp_enqueue_style(
 			'amp-paired-browsing-app',
-			amp_get_asset_url( '/css/amp-paired-browsing-app-compiled.css' ),
+			amp_get_asset_url( '/css/amp-paired-browsing-app.css' ),
 			[ 'dashicons' ],
 			AMP__VERSION
 		);
@@ -2382,10 +2345,10 @@ class AMP_Theme_Support {
 			'amp-paired-browsing-app',
 			'app',
 			[
-				'ampSlug'                     => amp_get_slug(),
-				'ampPairedBrowsingQueryVar'   => self::PAIRED_BROWSING_QUERY_VAR,
-				'ampValidationErrorsQueryVar' => AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR,
-				'documentTitlePrefix'         => __( 'AMP Paired Browsing:', 'amp' ),
+				'ampSlug'                   => amp_get_slug(),
+				'ampPairedBrowsingQueryVar' => self::PAIRED_BROWSING_QUERY_VAR,
+				'noampQueryVar'             => QueryVars::NOAMP,
+				'documentTitlePrefix'       => __( 'AMP Paired Browsing:', 'amp' ),
 			]
 		);
 

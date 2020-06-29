@@ -10,6 +10,7 @@ namespace AmpProject;
 interface Attribute
 {
 
+    const ACTION                = 'action';
     const ALT                   = 'alt';
     const AMP                   = 'amp';
     const AMP4ADS               = 'amp4ads';
@@ -64,7 +65,9 @@ interface Attribute
     const SRC                   = 'src';
     const TABINDEX              = 'tabindex';
     const TEMPLATE              = 'template';
+    const TITLE                 = 'title';
     const TYPE                  = 'type';
+    const VALUE                 = 'value';
     const VIEWPORT              = 'viewport';
     const WIDTH                 = 'width';
 
@@ -79,9 +82,12 @@ interface Attribute
     const TYPE_LD_JSON    = 'application/ld+json';
     const TYPE_TEXT_PLAIN = 'text/plain';
 
+    const REL_AMPHTML      = 'amphtml';
     const REL_CANONICAL    = 'canonical';
     const REL_DNS_PREFETCH = 'dns-prefetch';
     const REL_ICON         = 'icon';
+    const REL_NOAMPHTML    = 'noamphtml';
+    const REL_NOFOLLOW     = 'nofollow';
     const REL_PRECONNECT   = 'preconnect';
     const REL_PREFETCH     = 'prefetch';
     const REL_PRELOAD      = 'preload';

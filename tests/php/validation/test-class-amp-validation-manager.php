@@ -8,10 +8,12 @@
 // phpcs:disable Generic.Formatting.MultipleStatementAlignment.NotSameWarning
 
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\QueryVars;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\HandleValidation;
 use AmpProject\AmpWP\Tests\PrivateAccess;
 use AmpProject\AmpWP\Tests\AssertRestApiField;
+use AmpProject\AmpWP\Tests\WithoutBlockPreRendering;
 use AmpProject\Dom\Document;
 
 /**
@@ -26,6 +28,9 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	use HandleValidation;
 	use PrivateAccess;
 	use AssertRestApiField;
+	use WithoutBlockPreRendering {
+		setUp as public prevent_block_pre_render;
+	}
 
 	/**
 	 * The name of the tested class.
@@ -98,7 +103,8 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		unset( $GLOBALS['wp_scripts'], $GLOBALS['wp_styles'] );
-		parent::setUp();
+		$this->prevent_block_pre_render();
+
 		$dom_document = new Document( '1.0', 'utf-8' );
 		$this->node   = $dom_document->createElement( self::TAG_NAME );
 		$dom_document->appendChild( $this->node );
@@ -152,7 +158,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 
 		$this->assertEquals( 10, has_action( 'rest_api_init', self::TESTED_CLASS . '::add_rest_api_fields' ) );
 
-		$this->assertContains( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR, wp_removable_query_args() );
 		$this->assertEquals( 101, has_action( 'admin_bar_menu', [ self::TESTED_CLASS, 'add_admin_bar_menu_items' ] ) );
 
 		$this->assertFalse( has_action( 'wp', [ self::TESTED_CLASS, 'wrap_widget_callbacks' ] ) );
@@ -326,7 +331,9 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$node = $admin_bar->get_node( 'amp' );
 		$this->assertInternalType( 'object', $node );
 		$this->assertStringContains( 'action=amp_validate', $node->href );
-		$this->assertNull( $admin_bar->get_node( 'amp-view' ) );
+		$view_item = $admin_bar->get_node( 'amp-view' );
+		$this->assertInternalType( 'object', $view_item );
+		$this->assertEqualSets( [ QueryVars::NOAMP ], array_keys( $this->get_url_query_vars( $view_item->href ) ) );
 		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-validity' ) );
 
 		// Admin bar item available in paired mode.
@@ -353,22 +360,30 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		add_theme_support( AMP_Theme_Support::SLUG, [ AMP_Theme_Support::PAIRED_FLAG => true ] );
 		$admin_bar = new WP_Admin_Bar();
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
-		$node = $admin_bar->get_node( 'amp' );
-		$this->assertInternalType( 'object', $node );
-		$this->assertStringEndsWith( '?amp', $node->href );
-		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-view' ) );
-		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-validity' ) );
+		$root_node = $admin_bar->get_node( 'amp' );
+		$this->assertInternalType( 'object', $root_node );
+		$this->assertEqualSets( [ QueryVars::AMP ], array_keys( $this->get_url_query_vars( $root_node->href ) ) );
 
-		// Admin bar item available in paired mode with validation errors.
-		$_GET[ AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR ] = 3;
-		add_theme_support( AMP_Theme_Support::SLUG, [ AMP_Theme_Support::PAIRED_FLAG => true ] );
-		$admin_bar = new WP_Admin_Bar();
-		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
-		$node = $admin_bar->get_node( 'amp' );
-		$this->assertInternalType( 'object', $node );
-		$this->assertStringContains( 'action=amp_validate', $node->href );
-		$this->assertNull( $admin_bar->get_node( 'amp-view' ) );
+		$view_item = $admin_bar->get_node( 'amp-view' );
+		$this->assertInternalType( 'object', $view_item );
+		$this->assertEqualSets( [ QueryVars::AMP ], array_keys( $this->get_url_query_vars( $view_item->href ) ) );
 		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-validity' ) );
+	}
+
+	/**
+	 * Get URL query vars.
+	 *
+	 * @param string $url URL.
+	 * @return array Query vars.
+	 */
+	private function get_url_query_vars( $url ) {
+		$query_string = wp_parse_url( $url, PHP_URL_QUERY );
+		if ( empty( $query_string ) ) {
+			return [];
+		}
+		$query_vars = [];
+		parse_str( $query_string, $query_vars );
+		return $query_vars;
 	}
 
 	/**
@@ -382,9 +397,13 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$validation_error_term_2 = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( [ 'test' => 2 ] );
 		$_REQUEST['preview']  = '1';
 		$_REQUEST['_wpnonce'] = wp_create_nonce( AMP_Validation_Manager::MARKUP_STATUS_PREVIEW_ACTION );
-		$_REQUEST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] = [
-			$validation_error_term_1['slug'] => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
-			$validation_error_term_2['slug'] => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
+		$_REQUEST[ AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY ] = [
+			$validation_error_term_1['slug'] => [
+				AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+			],
+			$validation_error_term_2['slug'] => [
+				AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
+			],
 		];
 		AMP_Validation_Manager::override_validation_error_statuses();
 		$this->assertCount( 2, AMP_Validation_Manager::$validation_error_status_overrides );
@@ -400,8 +419,10 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$validation_error_term_1 = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( [ 'test' => 1 ] );
 		$_REQUEST['preview']  = '1';
 		$_REQUEST['_wpnonce'] = 'bad';
-		$_REQUEST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] = [
-			$validation_error_term_1['slug'] => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+		$_REQUEST[ AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY ] = [
+			$validation_error_term_1['slug'] => [
+				AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+			],
 		];
 		AMP_Validation_Manager::override_validation_error_statuses();
 	}
@@ -415,8 +436,10 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	public function test_override_validation_error_statuses_with_no_nonce() {
 		$validation_error_term_1 = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( [ 'test' => 1 ] );
 		$_REQUEST['preview']     = '1';
-		$_REQUEST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] = [
-			$validation_error_term_1['slug'] => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+		$_REQUEST[ AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY ] = [
+			$validation_error_term_1['slug'] => [
+				AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+			],
 		];
 		AMP_Validation_Manager::override_validation_error_statuses();
 	}
@@ -1182,6 +1205,19 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 * @param callable $assert   Function to assert the expected sources.
 	 */
 	public function test_locate_sources_e2e( $callback, $xpath, $assert ) {
+		// @todo Remove once https://github.com/WordPress/gutenberg/pull/23104 is in a release.
+		// Temporarily fixes an issue with PHP errors being thrown in Gutenberg v8.3.0 on PHP 7.4.
+		$theme_features = [
+			'editor-color-palette',
+			'editor-gradient-presets',
+			'editor-font-sizes',
+		];
+		foreach ( $theme_features as $theme_feature ) {
+			if ( ! current_theme_supports( $theme_feature ) ) {
+				add_theme_support( $theme_feature, [] );
+			}
+		}
+
 		add_theme_support( 'amp' );
 		AMP_Validation_Manager::add_validation_error_sourcing();
 		$callback();
@@ -2066,7 +2102,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		];
 
 		AMP_Validation_Manager::finalize_validation( $dom );
-		$this->assertEquals( 'Review 1 validation issue', trim( $validity_link_element->textContent ) );
+		$this->assertEquals( 'Validate 1 issue (1 unreviewed)', trim( $validity_link_element->textContent ) );
 		$this->assertStringContains( 'amp-icon amp-warning', $status_icon_element->getAttribute( 'class' ) );
 	}
 
@@ -2086,7 +2122,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 
 		$expected_callback   = self::TESTED_CLASS . '::add_validation_error';
 		$filtered_sanitizers = AMP_Validation_Manager::filter_sanitizer_args( $sanitizers );
-		foreach ( $filtered_sanitizers as $sanitizer => $args ) {
+		foreach ( $filtered_sanitizers as $args ) {
 			$this->assertEquals( $expected_callback, $args['validation_error_callback'] );
 		}
 		remove_theme_support( AMP_Theme_Support::SLUG );
@@ -2314,7 +2350,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertContains( $slug, wp_scripts()->queue );
 
 		$style = wp_styles()->registered[ $slug ];
-		$this->assertStringContains( 'css/amp-block-validation-compiled.css', $style->src );
+		$this->assertStringContains( 'css/amp-block-validation.css', $style->src );
 		$this->assertEquals( AMP__VERSION, $style->ver );
 		$this->assertContains( $slug, wp_styles()->queue );
 	}

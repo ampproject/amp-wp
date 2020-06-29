@@ -25,8 +25,9 @@ import { Phone } from '../../components/phone';
  * @param {Object} props Component props.
  * @param {string} props.description Theme description.
  * @param {string} props.homepage Link to view more information about the theme.
- * @param {string} props.name Theme name.
+ * @param {string} props.screenshotUrl URL for screenshot of theme.
  * @param {string} props.slug Theme slug.
+ * @param {string} props.name Theme name.
  */
 export function ThemeCard( { description, homepage, screenshotUrl, slug, name } ) {
 	const { options, updateOptions } = useContext( Options );
@@ -41,6 +42,10 @@ export function ThemeCard( { description, homepage, screenshotUrl, slug, name } 
 					<img
 						src={ screenshotUrl }
 						alt={ name }
+						height="2165"
+						width="1000"
+						loading="lazy"
+						decoding="async"
 					/>
 				</Phone>
 				<div className="theme-card__label-header">

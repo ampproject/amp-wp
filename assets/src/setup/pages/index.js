@@ -9,23 +9,25 @@ import { __ } from '@wordpress/i18n';
 import { TechnicalBackground } from './technical-background';
 import { TemplateMode } from './template-mode';
 import { ChooseReaderTheme } from './choose-reader-theme';
-import { SiteConfigurationSummary } from './site-configuration-summary';
+import { Summary } from './summary';
 import { Save } from './save';
-import { SiteScan } from './site-scan';
+import { Welcome } from './welcome';
 
 /**
  * Settings for the pages in the application.
  */
 export const PAGES = [
 	{
-		slug: 'site-scan',
-		title: __( 'Site scan', 'amp' ),
-		PageComponent: SiteScan,
+		slug: 'welcome',
+		title: __( 'Welcome', 'amp' ),
+		PageComponent: Welcome,
+		showTitle: false,
 	},
 	{
 		slug: 'technical-background',
 		title: __( 'Technical background', 'amp' ),
 		PageComponent: TechnicalBackground,
+		showTitle: false,
 	},
 	{
 		slug: 'template-modes',
@@ -33,14 +35,14 @@ export const PAGES = [
 		PageComponent: TemplateMode,
 	},
 	{
-		slug: 'reader-themes',
-		title: __( 'Reader themes', 'amp' ),
+		slug: 'theme-selection',
+		title: __( 'Theme selection', 'amp' ),
 		PageComponent: ChooseReaderTheme,
 	},
 	{
-		slug: 'site-configuration',
-		title: __( 'Site configuration', 'amp' ),
-		PageComponent: SiteConfigurationSummary,
+		slug: 'summary',
+		title: __( 'Summary', 'amp' ),
+		PageComponent: Summary,
 	},
 	{
 		slug: 'done',
@@ -48,3 +50,4 @@ export const PAGES = [
 		PageComponent: Save,
 	},
 ];
+

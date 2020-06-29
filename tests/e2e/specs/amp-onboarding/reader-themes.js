@@ -6,7 +6,11 @@ import { visitAdminPage } from '@wordpress/e2e-test-utils';
 
 describe( 'AMP wizard: reader themes', () => {
 	beforeEach( async () => {
-		await visitAdminPage( 'admin.php', 'page=amp-setup&amp-new-onboarding=1&amp-setup-screen=reader-themes' );
+		await visitAdminPage( 'admin.php', 'page=amp-setup&amp-new-onboarding=1&amp-setup-screen=template-modes' );
+		await page.waitForSelector( '#reader-mode' );
+		await page.$eval( '#reader-mode', ( el ) => el.click() );
+		await page.waitForSelector( '.amp-setup-nav__prev-next .is-primary' );
+		await page.$eval( '.amp-setup-nav__prev-next .is-primary', ( el ) => el.click() );
 	} );
 
 	it( 'should have themes', async () => {
@@ -20,6 +24,7 @@ describe( 'AMP wizard: reader themes', () => {
 	it( 'should allow different themes to be selected', async () => {
 		await page.waitForSelector( '.theme-card' );
 
+		await page.$eval( '[for="theme-card__classic"]', ( el ) => el.click() );
 		let titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
 		expect( titleText ).toBe( 'AMP Classic' );
 
