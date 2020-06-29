@@ -55,7 +55,7 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 	public function test_get_themes() {
 		$themes = $this->reader_themes->get_themes();
 
-		$this->assertEquals( 'classic', end( $themes )['slug'] );
+		$this->assertEquals( 'legacy', end( $themes )['slug'] );
 
 		$keys = [
 			'name',
@@ -80,7 +80,7 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 	 */
 	public function test_get_reader_theme_by_slug() {
 		$this->assertFalse( $this->reader_themes->get_reader_theme_by_slug( 'some-theme' ) );
-		$this->assertArrayHasKey( 'slug', $this->reader_themes->get_reader_theme_by_slug( 'classic' ) );
+		$this->assertArrayHasKey( 'slug', $this->reader_themes->get_reader_theme_by_slug( 'legacy' ) );
 	}
 
 	/**

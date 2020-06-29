@@ -87,7 +87,7 @@ interface Option {
 	/**
 	 * The slug of the theme selected to be used on AMP pages in reader mode.
 	 *
-	 * Default value: classic
+	 * Default value: legacy
 	 *
 	 * @var string
 	 */

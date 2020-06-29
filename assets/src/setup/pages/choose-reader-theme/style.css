@@ -21,6 +21,14 @@
 	}
 }
 
+.choose-reader-theme__unavailable {
+	padding-top: 6rem;
+}
+
+.choose-reader-theme__unavailable label {
+	cursor: default;
+}
+
 .theme-card {
 	display: flex;
 	flex-direction: column;
@@ -36,6 +44,10 @@
 .theme-card__label-header h2 {
 	margin-left: 5px;
 	margin-top: 0.75em;
+}
+
+.theme-card .phone-inner {
+	max-height: 307px; /* Make all images uniform height. */
 }
 
 .theme-card img {

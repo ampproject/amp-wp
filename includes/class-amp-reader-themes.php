@@ -38,7 +38,7 @@ final class AMP_Reader_Themes {
 	 *
 	 * @var string
 	 */
-	const DEFAULT_READER_THEME = 'classic';
+	const DEFAULT_READER_THEME = 'legacy';
 
 	/**
 	 * Status indicating a reader theme is active on the site.
@@ -270,7 +270,7 @@ final class AMP_Reader_Themes {
 			case get_stylesheet() === $theme['slug']:
 				return self::STATUS_ACTIVE;
 
-			case wp_get_theme( $theme['slug'] )->exists():
+			case 'legacy' === $theme['slug'] || wp_get_theme( $theme['slug'] )->exists():
 				return self::STATUS_INSTALLED;
 
 			case $this->can_install_theme( $theme ):
@@ -288,10 +288,10 @@ final class AMP_Reader_Themes {
 	 */
 	private function get_classic_mode() {
 		return [
-			'name'           => 'AMP Classic',
-			'slug'           => 'classic',
+			'name'           => 'AMP Legacy',
+			'slug'           => 'legacy',
 			'preview_url'    => 'https://amp-wp.org',
-			'screenshot_url' => amp_get_asset_url( 'images/reader-themes/classic.png' ),
+			'screenshot_url' => amp_get_asset_url( 'images/reader-themes/legacy.png' ),
 			'homepage'       => 'https://amp-wp.org',
 			'description'    => __(
 				// @todo Improved description text.
