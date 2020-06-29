@@ -143,18 +143,6 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 		}
 	}
 
-	private function import_widgets( $widgets ) {
-		foreach ( $widgets as $key => $value ) {
-			var_dump( "$key => $value" );
-		}
-	}
-
-	private function import_customizer_settings( $settings ) {
-		foreach ( $settings as $key => $value ) {
-			var_dump( "$key => $value" );
-		}
-	}
-
 	/**
 	 * Determines whether the requested importer is available.
 	 */

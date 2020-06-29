@@ -157,7 +157,7 @@ final class ImportWidgets implements Step {
 					$sidebars_widgets[ $use_sidebar_id ][] = $new_instance_id;
 					update_option( 'sidebars_widgets', $sidebars_widgets );
 
-					WP_CLI::warning(
+					WP_CLI::log(
 						WP_CLI::colorize(
 							"Widget %G'{$id_base}'%n imported into sidebar '%G{$use_sidebar_id}%n'."
 						)

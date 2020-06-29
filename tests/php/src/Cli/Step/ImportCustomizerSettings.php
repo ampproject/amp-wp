@@ -9,6 +9,7 @@ namespace AmpProject\AmpWP\Tests\Cli\Step;
 
 use AmpProject\AmpWP\Tests\Cli\ReferenceSiteImporter;
 use AmpProject\AmpWP\Tests\Cli\Step;
+use WP_CLI;
 
 final class ImportCustomizerSettings implements Step {
 
@@ -38,7 +39,7 @@ final class ImportCustomizerSettings implements Step {
 
 		// Update Astra Theme customizer settings.
 		if ( isset( $this->settings['astra-settings'] ) ) {
-			self::import_settings( $this->settings['astra-settings'] );
+			self::import_astra_settings( $this->settings['astra-settings'] );
 		}
 
 		// Add Custom CSS.
@@ -49,16 +50,12 @@ final class ImportCustomizerSettings implements Step {
 	}
 
 	/**
-	 * Import Astra Setting's
-	 *
-	 * Download & Import images from Astra Customizer Settings.
-	 *
-	 * @since 1.0.10
+	 * Import Astra theme settings.
 	 *
 	 * @param  array $settings Astra Customizer setting array.
 	 * @return void
 	 */
-	public static function import_settings( $settings = array() ) {
+	public static function import_astra_settings( $settings = array() ) {
 
 		array_walk_recursive(
 			$settings,
@@ -70,6 +67,8 @@ final class ImportCustomizerSettings implements Step {
 
 						if ( ! is_wp_error( $data ) ) {
 							$value = $data->url;
+						} else {
+							WP_CLI::warning( "Failed to sideload image '{$value}' - {$data->get_error_message()}" );
 						}
 					}
 				}
