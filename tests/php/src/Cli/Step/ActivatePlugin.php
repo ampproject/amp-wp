@@ -35,18 +35,12 @@ final class ActivatePlugin implements Step {
 	 *             Returns -1 for failure.
 	 */
 	public function process() {
-		// @TODO: Download plugin as needed.
 		WP_CLI::log(
 			WP_CLI::colorize(
-				"Activating plugin %G'{$this->plugin}'%n"
+				"Installing and activating plugin %G'{$this->plugin}'%n"
 			)
 		);
 
-		$active_plugins = (array) get_option( 'active_plugins' );
-
-		$active_plugins[] = $this->plugin;
-		$active_plugins = array_unique( $active_plugins );
-
-		update_option( 'active_plugins', $active_plugins );
+		WP_CLI::runcommand( "plugin install {$this->plugin} --activate" );
 	}
 }

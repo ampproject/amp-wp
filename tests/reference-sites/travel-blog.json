@@ -17,11 +17,11 @@
     },
     {
       "type": "activate_plugin",
-      "plugin": "ultimate-addons-for-gutenberg/ultimate-addons-for-gutenberg.php"
+      "plugin": "ultimate-addons-for-gutenberg"
     },
     {
       "type": "activate_plugin",
-      "plugin": "astra-widgets/astra-widgets.php"
+      "plugin": "astra-widgets"
     },
     {
       "type": "import_wxr_file",

@@ -35,13 +35,12 @@ final class ActivateTheme implements Step {
 	 *             Returns -1 for failure.
 	 */
 	public function process() {
-		// @TODO: Download theme as needed.
 		WP_CLI::log(
 			WP_CLI::colorize(
-				"Switching active theme to %G'{$this->theme}'%n"
+				"Installing and activating theme %G'{$this->theme}'%n"
 			)
 		);
 
-		switch_theme( $this->theme );
+		WP_CLI::runcommand( "theme install {$this->theme} --activate" );
 	}
 }
