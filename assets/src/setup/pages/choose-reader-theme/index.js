@@ -41,7 +41,7 @@ export function ChooseReaderTheme() {
 
 	// Filter out the active theme if it is a reader theme.
 	const nonActiveThemes = useMemo(
-		() => themes.filter( ( { availability } ) => 'active' !== availability ),
+		() => ( themes || [] ).filter( ( { availability } ) => 'active' !== availability ),
 		[ themes ],
 	);
 
