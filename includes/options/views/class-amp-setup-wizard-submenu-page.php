@@ -138,7 +138,13 @@ final class AMP_Setup_Wizard_Submenu_Page {
 		$setup_wizard_data = [
 			'AMP_OPTIONS_KEY'                    => AMP_Options_Manager::OPTION_NAME,
 			'APP_ROOT_ID'                        => self::APP_ROOT_ID,
-			'EXIT_LINK'                          => admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ),
+			'CUSTOMIZER_LINK'                    => add_query_arg(
+				[
+					'return' => rawurlencode( menu_page_url( AMP_Options_Manager::OPTION_NAME, false ) ),
+				],
+				admin_url( 'customize.php' )
+			),
+			'EXIT_LINK'                          => menu_page_url( AMP_Options_Manager::OPTION_NAME, false ),
 			// @todo As of June 2020, an upcoming WP release will allow this to be retrieved via REST.
 			'CURRENT_THEME'                      => [
 				'name'        => $theme->get( 'Name' ),
@@ -148,7 +154,7 @@ final class AMP_Setup_Wizard_Submenu_Page {
 			],
 			'OPTIONS_REST_ENDPOINT'              => rest_url( 'amp/v1/options' ),
 			'READER_THEMES_REST_ENDPOINT'        => rest_url( 'amp/v1/reader-themes' ),
-			'SITE_HOME'                          => home_url(),
+			'PREVIEW_PERMALINK'                  => amp_admin_get_preview_permalink(),
 			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
 			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
 			'USER_REST_ENDPOINT'                 => rest_url( 'wp/v2/users/me' ),

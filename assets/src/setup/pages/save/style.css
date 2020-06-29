@@ -1,7 +1,6 @@
 .done__preview-container {
 	border: 2px solid #e8e8e8;
 	border-radius: 8px;
-	box-shadow: inset 0 -10px 0 #eaeaea;
 	padding: 37px;
 	text-align: center;
 }
@@ -11,7 +10,26 @@
 	padding-bottom: 2rem;
 }
 
+.done__preview-container .phone::before {
+	height: 9px;
+	width: 80px;
+}
+
 .done__preview-iframe {
 	height: 610px;
+	width: 100%;
+}
+
+.done__preview-container .components-button {
+	margin-top: 0.5rem;
+	margin-bottom: 0.75rem;
+}
+
+.saving {
+	border-bottom: 2px solid #d3d9dd;
+	margin: 0 auto;
+	max-width: 800px;
+	padding: 3rem;
+	text-align: center;
 	width: 100%;
 }

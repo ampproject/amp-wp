@@ -23,7 +23,7 @@ import './style.css';
  * @param {string} props.exitLink Link to exit the application.
  */
 export function Nav( { exitLink } ) {
-	const { activePageIndex, canGoForward, moveBack, moveForward } = useContext( Navigation );
+	const { activePageIndex, canGoForward, isLastPage, moveBack, moveForward } = useContext( Navigation );
 
 	return (
 		<div className="amp-setup-nav">
@@ -64,11 +64,12 @@ export function Nav( { exitLink } ) {
 					}
 
 					<Button
-						disabled={ ! canGoForward }
+						disabled={ ! canGoForward && ! isLastPage }
+						href={ isLastPage ? exitLink : undefined }
 						isPrimary
 						onClick={ moveForward }
 					>
-						{ __( 'Next', 'amp' ) }
+						{ isLastPage ? __( 'Finish', 'amp' ) : __( 'Next', 'amp' ) }
 
 						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
 							<path d="M43.16 10.18c-0.881-0.881-2.322-0.881-3.203 0s-0.881 2.322 0 3.203l16.335 16.335h-54.051c-1.281 0-2.242 1.041-2.242 2.242 0 1.281 0.961 2.322 2.242 2.322h54.051l-16.415 16.335c-0.881 0.881-0.881 2.322 0 3.203s2.322 0.881 3.203 0l20.259-20.259c0.881-0.881 0.881-2.322 0-3.203l-20.179-20.179z" />

@@ -63,6 +63,7 @@ export function NavigationContextProvider( { children, pages } ) {
 					activePageIndex,
 					canGoForward,
 					currentPage,
+					isLastPage: activePageIndex === pages.length - 1,
 					moveBack,
 					moveForward,
 					pages,
