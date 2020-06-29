@@ -7,11 +7,11 @@
 
 namespace AmpProject\AmpWP\Tests\Cli;
 
-use AmpProject\AmpWP\Tests\Cli\Step;
 use Exception;
 use RuntimeException;
 use WP_CLI;
 use WP_CLI_Command;
+use WP_CLI\Utils;
 
 final class ReferenceSiteImportCommand extends WP_CLI_Command {
 
@@ -30,6 +30,12 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 	 * <file>
 	 * : Path to the reference site definition to import.
 	 *
+	 * [--empty-content]
+	 * : Empty the site content (posts, comments, and terms) before importing the reference content.
+	 *
+	 * [--empty-uploads]
+	 * : Empty the site uploads folder before importing the reference content.
+
 	 * ## EXAMPLES
 	 *
 	 *     # Import content from a reference site definition file
@@ -51,6 +57,9 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 		}
 
 		list( $site_definition_file ) = $args;
+		$empty_content = Utils\get_flag_value( $assoc_args, 'empty-content', false );
+		$empty_uploads = Utils\get_flag_value( $assoc_args, 'empty-uploads', false );
+
 		if ( ! path_is_absolute( $site_definition_file ) ) {
 			$site_definition_file = self::REFERENCE_SITES_ROOT . $site_definition_file;
 		}
@@ -66,6 +75,10 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 			$site_definition = $this->load_site_definition( $site_definition_file );
 		} catch ( Exception $exception ) {
 			WP_CLI::error( "The provided site definition file '{$site_definition_file}' could not be parsed: {$exception->getMessage()}" );
+		}
+
+		if ( $empty_content ) {
+			$this->empty_site( $empty_uploads );
 		}
 
 		WP_CLI::log(
@@ -172,5 +185,27 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 		require_once "{$wordpress_importer_path}/parsers/class-wxr-parser-xml.php";
 		require_once "{$wordpress_importer_path}/parsers/class-wxr-parser-regex.php";
 		require_once "{$wordpress_importer_path}/class-wp-import.php";
+	}
+
+	/**
+	 * Empty the site content.
+	 *
+	 * @param bool $empty_uploads Whether to empty the uploads folder as well.
+	 */
+	private function empty_site( $empty_uploads )
+	{
+		$command = 'site empty --yes';
+
+		if ( $empty_uploads ) {
+			$command .= ' --uploads';
+		}
+
+		WP_CLI::log(
+			WP_CLI::colorize(
+				$empty_uploads ? 'Emptying the site content and uploads...' : 'Emptying the site content...'
+			)
+		);
+
+		WP_CLI::runcommand( $command );
 	}
 }

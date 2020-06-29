@@ -167,6 +167,8 @@ final class ImportWidgets implements Step {
 			}
 		}
 
+		WP_CLI::success( 'Widgets imported successfully.' );
+
 		return $count;
 	}
 

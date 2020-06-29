@@ -37,7 +37,7 @@ final class ActivateTheme implements Step {
 	public function process() {
 		WP_CLI::log(
 			WP_CLI::colorize(
-				"Installing and activating theme %G'{$this->theme}'%n"
+				"Installing and activating theme %G'{$this->theme}'%n..."
 			)
 		);
 

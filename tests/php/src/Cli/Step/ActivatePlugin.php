@@ -37,7 +37,7 @@ final class ActivatePlugin implements Step {
 	public function process() {
 		WP_CLI::log(
 			WP_CLI::colorize(
-				"Installing and activating plugin %G'{$this->plugin}'%n"
+				"Installing and activating plugin %G'{$this->plugin}'%n..."
 			)
 		);
 

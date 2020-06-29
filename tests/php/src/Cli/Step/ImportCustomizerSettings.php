@@ -36,7 +36,6 @@ final class ImportCustomizerSettings implements Step {
 	 *             Returns -1 for failure.
 	 */
 	public function process() {
-
 		// Update Astra Theme customizer settings.
 		if ( isset( $this->settings['astra-settings'] ) ) {
 			self::import_astra_settings( $this->settings['astra-settings'] );
@@ -44,9 +43,14 @@ final class ImportCustomizerSettings implements Step {
 
 		// Add Custom CSS.
 		if ( isset( $this->settings['custom-css'] ) ) {
+			WP_CLI::log(
+				WP_CLI::colorize( "Updating Customizer %GCustom CSS%n..." )
+			);
+
 			wp_update_custom_css_post( $this->settings['custom-css'] );
 		}
 
+		WP_CLI::success( 'Customizer settings imported successfully.' );
 	}
 
 	/**
@@ -56,6 +60,9 @@ final class ImportCustomizerSettings implements Step {
 	 * @return void
 	 */
 	public static function import_astra_settings( $settings = array() ) {
+		WP_CLI::log(
+			WP_CLI::colorize( "Sideloading images in option %G'astra-settings'%n..." )
+		);
 
 		array_walk_recursive(
 			$settings,
@@ -75,7 +82,10 @@ final class ImportCustomizerSettings implements Step {
 			}
 		);
 
-		// Updated settings.
+		WP_CLI::log(
+			WP_CLI::colorize( "Updating option in %G'astra-settings'%n..." )
+		);
+
 		update_option( 'astra-settings', $settings );
 	}
 }

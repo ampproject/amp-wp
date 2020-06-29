@@ -319,7 +319,7 @@ final class ImportWxrFile implements Step {
 		$wpcli_import_counts['current_post'] ++;
 		WP_CLI::log(
 			WP_CLI::colorize(
-				"Processing post %Y#{$post['post_id']}%n (%G'{$post['post_title']}'%n) (%B{$post['post_type']}%n)"
+				"Processing post %Y#{$post['post_id']}%n (%G'{$post['post_title']}'%n) (%B{$post['post_type']}%n)..."
 			)
 		);
 		return $post;

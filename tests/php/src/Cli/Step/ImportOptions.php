@@ -39,7 +39,7 @@ final class ImportOptions implements Step {
 			if ( $value === null ) {
 				WP_CLI::log(
 					WP_CLI::colorize(
-						"Skipping empty option %G'{$key}'%n"
+						"Skipping empty option %G'{$key}'%n..."
 					)
 				);
 
@@ -48,7 +48,7 @@ final class ImportOptions implements Step {
 
 			WP_CLI::log(
 				WP_CLI::colorize(
-					"Updating option %G'{$key}'%n"
+					"Updating option %G'{$key}'%n..."
 				)
 			);
 

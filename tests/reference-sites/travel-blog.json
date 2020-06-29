@@ -24,6 +24,10 @@
       "plugin": "astra-widgets"
     },
     {
+      "type": "activate_plugin",
+      "plugin": "wpforms-lite"
+    },
+    {
       "type": "import_wxr_file",
       "filename": "travel-blog.xml"
     },
