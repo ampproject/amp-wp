@@ -146,6 +146,7 @@ final class AMP_Setup_Wizard_Submenu_Page {
 			],
 			'OPTIONS_REST_ENDPOINT'              => rest_url( 'amp/v1/options' ),
 			'READER_THEMES_REST_ENDPOINT'        => rest_url( 'amp/v1/reader-themes' ),
+			'SITE_HOME'                          => home_url(),
 			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
 			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
 			'USER_REST_ENDPOINT'                 => rest_url( 'wp/v2/users/me' ),
