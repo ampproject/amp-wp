@@ -46,6 +46,10 @@
 	margin-top: 0.75em;
 }
 
+.theme-card .phone-inner {
+	max-height: 307px; /* Make all images uniform height. */
+}
+
 .theme-card img {
 	height: auto;
 	width: 100%;

@@ -142,7 +142,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
 				Option::SUPPRESSED_PLUGINS      => [],
 				Option::VERSION                 => AMP__VERSION,
-				Option::READER_THEME            => 'classic',
+				Option::READER_THEME            => 'legacy',
 				Option::MOBILE_REDIRECT         => false,
 				Option::WIZARD_COMPLETED        => false,
 			],
