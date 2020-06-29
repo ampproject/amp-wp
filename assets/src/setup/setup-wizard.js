@@ -59,7 +59,7 @@ function PageComponentSideEffects( { children } ) {
  * @param {Array} props.exitLink Exit link.
  */
 export function SetupWizard( { exitLink } ) {
-	const { activePageIndex, currentPage: { title, PageComponent }, moveBack, moveForward, pages } = useContext( Navigation );
+	const { activePageIndex, currentPage: { title, PageComponent, showTitle }, moveBack, moveForward, pages } = useContext( Navigation );
 
 	const PageComponentWithSideEffects = useMemo( () => () => (
 		<PageComponentSideEffects>
@@ -83,9 +83,12 @@ export function SetupWizard( { exitLink } ) {
 				</div>
 				<div className="amp-setup-panel-container">
 					<Panel className="amp-setup-panel">
-						<h1>
-							{ title }
-						</h1>
+						{ false !== showTitle && (
+							<h1>
+								{ title }
+							</h1>
+
+						) }
 						<Page exitLink={ exitLink }>
 							<PageComponentWithSideEffects />
 						</Page>

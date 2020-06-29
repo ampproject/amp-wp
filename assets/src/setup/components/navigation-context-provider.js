@@ -80,6 +80,7 @@ NavigationContextProvider.propTypes = {
 	pages: PropTypes.arrayOf(
 		PropTypes.shape( {
 			PageComponent: PropTypes.func.isRequired,
+			showTitle: PropTypes.bool,
 			slug: PropTypes.string.isRequired,
 			title: PropTypes.string.isRequired,
 		} ),
