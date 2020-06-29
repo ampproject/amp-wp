@@ -28,9 +28,9 @@ describe( 'AMP wizard: reader themes', () => {
 		const twentytwenty = await page.$( '[for="theme-card__twentytwenty"]' );
 		expect( twentytwenty ).toBeNull();
 
-		await page.$eval( '[for="theme-card__classic"]', ( el ) => el.click() );
+		await page.$eval( '[for="theme-card__legacy"]', ( el ) => el.click() );
 		let titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
-		expect( titleText ).toBe( 'AMP Classic' );
+		expect( titleText ).toBe( 'AMP Legacy' );
 
 		await page.$eval( '[for="theme-card__twentynineteen"]', ( el ) => el.click() );
 		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
