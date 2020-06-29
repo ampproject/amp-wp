@@ -166,6 +166,20 @@ function amp_init() {
 			}
 		}
 	);
+
+	/**
+	 * Hide admin bar if the specified query arg isset.
+	 */
+	add_filter(
+		'show_admin_bar',
+		static function( $show_admin_bar ) {
+			if ( isset( $_GET['amp-no-admin-bar'] ) ) { // phpcs:disable WordPress.Security.NonceVerification.Recommended
+				return false;
+			}
+
+			return $show_admin_bar;
+		}
+	);
 }
 
 /**

@@ -342,3 +342,10 @@ input[type="radio"]:focus {
 		grid-template-columns: 3fr 1fr;
 	}
 }
+
+.grid-5-4 {
+
+	@media screen and (min-width: 783px) {
+		grid-template-columns: 5fr 4fr;
+	}
+}

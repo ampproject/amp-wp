@@ -2,7 +2,9 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useContext, useEffect } from '@wordpress/element';
+import { useContext, useEffect, useState, useRef } from '@wordpress/element';
+import { addQueryArgs } from '@wordpress/url';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * External dependencies
@@ -12,10 +14,12 @@ import { SITE_HOME } from 'amp-setup'; // From WP inline script.
 /**
  * Internal dependencies
  */
+import { Button } from '@wordpress/components';
 import { Options } from '../../components/options-context-provider';
 import { Loading } from '../../components/loading';
 import { User } from '../../components/user-context-provider';
 import { Phone } from '../../components/phone';
+import './style.css';
 
 /**
  * Provides the description for the done screen.
@@ -43,10 +47,54 @@ function getDescription( mode ) {
  * Final screen, where data is saved.
  */
 export function Save() {
+	const [ fetchingFirstPost, setFetchingFirstPost ] = useState( true );
+	const [ firstPostPermalink, setFirstPostPermalink ] = useState();
+	const [ firstPostPermalinkError, setFirstPostPermalinkError ] = useState( null );
+
 	const { didSaveOptions, options, saveOptions, savingOptions } = useContext( Options );
 	const { didSaveDeveloperToolsOption, saveDeveloperToolsOption, savingDeveloperToolsOption } = useContext( User );
 
 	const { theme_support: themeSupport } = options;
+
+	const hasUnmounted = useRef( false );
+
+	useEffect( () => () => {
+		hasUnmounted.current = true;
+	}, [] );
+
+	/**
+	 * If reader mode was selected, AMP won't be active on the site homepage, so we fetch the most recent post link.
+	 */
+	useEffect( () => {
+		if ( 'reader' !== themeSupport ) {
+			setFetchingFirstPost( false );
+			return;
+		}
+
+		( async () => {
+			try {
+				const posts = await apiFetch( { path: addQueryArgs( '/wp/v2/posts', { per_page: 1, _fields: 'link' } ) } );
+
+				if ( true === hasUnmounted.current ) {
+					return;
+				}
+
+				if ( ! posts.length ) {
+					setFirstPostPermalinkError( __( 'No post found', 'amp' ) );
+				} else {
+					setFirstPostPermalink( posts[ 0 ].link );
+				}
+			} catch ( e ) {
+				if ( true === hasUnmounted.current ) {
+					return;
+				}
+
+				setFirstPostPermalinkError( e );
+			}
+
+			setFetchingFirstPost( false );
+		} )();
+	}, [ themeSupport ] );
 
 	/**
 	 * Triggers saving of options on arrival of this screen.
@@ -74,7 +122,7 @@ export function Save() {
 		return <Loading />;
 	}
 
-	if ( ! didSaveOptions || ! didSaveDeveloperToolsOption ) {
+	if ( fetchingFirstPost || ! didSaveOptions || ! didSaveDeveloperToolsOption ) {
 		return null;
 	}
 
@@ -83,8 +131,13 @@ export function Save() {
 		heading = __( 'Your site is ready', 'amp' );
 	}
 
+	const urlArgs = {
+		amp: 1,
+		'amp-no-admin-bar': 1,
+	};
+
 	return (
-		<div className="done grid grid-2-1">
+		<div className="done grid grid-5-4">
 			<div>
 				<h1>
 					{ heading }
@@ -102,8 +155,25 @@ export function Save() {
 					{ __( 'Live view of your site', 'amp' ) }
 				</p>
 				<Phone>
-					<iframe src={ SITE_HOME } title={ __( 'Site preview', 'amp' ) } height="307" />
+					{ firstPostPermalinkError && (
+						<div>
+							{ __( 'There was an error renering the preview', 'amp' ) }
+						</div>
+					)
+					}
+					{ ! firstPostPermalinkError && (
+						<iframe
+							className="done__preview-iframe"
+							sandbox=""
+							src={ addQueryArgs( firstPostPermalink || SITE_HOME, urlArgs ) }
+							title={ __( 'Site preview', 'amp' ) }
+						/>
+					) }
 				</Phone>
+
+				<Button isPrimary href={ SITE_HOME } target="_blank" rel="noreferrer">
+					{ __( 'Visit your site', 'amp' ) }
+				</Button>
 			</div>
 		</div>
 	);

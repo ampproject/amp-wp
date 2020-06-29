@@ -1,0 +1,17 @@
+.done__preview-container {
+	border: 2px solid #e8e8e8;
+	border-radius: 8px;
+	box-shadow: inset 0 -10px 0 #eaeaea;
+	padding: 37px;
+	text-align: center;
+}
+
+.done__preview-container .phone {
+	max-height: 610px;
+	padding-bottom: 2rem;
+}
+
+.done__preview-iframe {
+	height: 610px;
+	width: 100%;
+}
