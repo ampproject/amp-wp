@@ -115,8 +115,8 @@ export function Save() {
 	}
 
 	return (
-		<div className="done grid grid-6-5">
-			<div>
+		<div className="done">
+			<div className="done__text">
 				<h1>
 					{ heading }
 				</h1>

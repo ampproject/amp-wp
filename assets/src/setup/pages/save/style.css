@@ -1,8 +1,29 @@
+.done {
+	display: flex;
+	flex-wrap: wrap;
+
+	@media screen and (min-width: 1100px) {
+		flex-wrap: nowrap;
+	}
+}
+
+.done__text {
+	width: 100%;
+	padding-bottom: 30px;
+
+	@media screen and (min-width: 1100px) {
+		padding-right: 30px;
+	}
+}
+
+
 .done__preview-container {
 	border: 2px solid #e8e8e8;
 	border-radius: 8px;
+	flex-shrink: 0;
 	padding: 37px;
 	text-align: center;
+	width: 400px;
 }
 
 .done__preview-container .phone {
