@@ -10,6 +10,12 @@ import { createContext } from '@wordpress/element';
 
 export const User = createContext();
 
+/**
+ * MOCK.
+ *
+ * @param {Object} props
+ * @param {any} props.children
+ */
 export function UserContextProvider( { children } ) {
 	return (
 		<User.Provider value={
