@@ -7,6 +7,8 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Option;
+
 /**
  * Crawls the site for validation errors or resets the stored validation errors.
  *
@@ -169,21 +171,27 @@ final class AMP_CLI_Validation_Command {
 			$this->force_crawl_urls = true;
 		}
 
-		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-			if ( $this->force_crawl_urls ) {
-				/*
-				 * There is no theme support added programmatically or via options.
-				 * So make sure that theme support is present so that AMP_Validation_Manager::validate_url()
-				 * will use a canonical URL as the basis for obtaining validation results.
-				 */
-				add_theme_support( AMP_Theme_Support::SLUG );
-			} else {
-				WP_CLI::error(
-					sprintf(
-						'Your templates are currently in Reader mode, which does not allow crawling the site. Please pass the --%s flag in order to force crawling for validation.',
-						self::FLAG_NAME_FORCE_VALIDATION
-					)
-				);
+		// Handle special case for Legacy Reader mode.
+		if (
+			AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
+			&&
+			AMP_Reader_Themes::DEFAULT_READER_THEME === AMP_Options_Manager::get_option( Option::READER_THEME )
+		) {
+			$allowed_templates = [
+				'is_singular',
+			];
+			if ( 'page' === get_option( 'show_on_front' ) ) {
+				$allowed_templates[] = 'is_home';
+				$allowed_templates[] = 'is_front_page';
+			}
+
+			$disallowed_templates = array_diff( $this->include_conditionals, $allowed_templates );
+			if ( ! empty( $disallowed_templates ) ) {
+				WP_CLI::error( sprintf( 'Templates not supported in legacy Reader mode with current configuration: %s', implode( ',', $disallowed_templates ) ) );
+			}
+
+			if ( empty( $this->include_conditionals ) ) {
+				$this->include_conditionals = $allowed_templates;
 			}
 		}
 
