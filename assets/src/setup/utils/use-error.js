@@ -16,7 +16,7 @@ export function useError() {
 				throw e;
 			} );
 		},
-		[ setError ],
+		[],
 	);
 
 	return { error, setError: memoizedSetError };

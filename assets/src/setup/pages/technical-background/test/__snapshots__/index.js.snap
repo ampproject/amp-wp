@@ -433,9 +433,11 @@ exports[`TechnicalBackground matches snapshot 1`] = `
         <div
           className="technical-background-option__description"
         >
-          <h2>
-            Developer or technically savvy
-          </h2>
+          <div>
+            <h2>
+              Developer or technically savvy
+            </h2>
+          </div>
           <p>
             I am a “Developer or technically savvy” user. I can do WordPress development such as making changes to themes and plugins. I have some familiarity with HTML, CSS, JavaScript, and PHP. I am technically savvy enough to build full WordPress sites out of plugins and themes and can address configuration issues and understand
           </p>
@@ -602,9 +604,11 @@ exports[`TechnicalBackground matches snapshot 1`] = `
         <div
           className="technical-background-option__description"
         >
-          <h2>
-            Non-technically savvy or wanting a simpler setup
-          </h2>
+          <div>
+            <h2>
+              Non-technically savvy or wanting a simpler setup
+            </h2>
+          </div>
           <p>
             I am not a developer and I am not responsible for configuring and fixing issues on my site. I am a site owner and/or content creator who wants to take advantage of AMP performance.
           </p>

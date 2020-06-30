@@ -3,7 +3,6 @@
  */
 import { createContext, useEffect, useState, useRef, useCallback } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { getQueryArg } from '@wordpress/url';
 
 /**
  * External dependencies
@@ -30,9 +29,10 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 	const [ savingOptions, setSavingOptions ] = useState( false );
 	const [ hasOptionsChanges, setHasOptionsChanges ] = useState( false );
 	const [ didSaveOptions, setDidSaveOptions ] = useState( false );
-	const [ savedThemeSupport, setSavedThemeSupport ] = useState( null );
 
 	const { setError } = useError();
+
+	const originalOptions = useRef();
 
 	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
 	const hasUnmounted = useRef( false );
@@ -69,16 +69,13 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 	/**
 	 * Updates options in state.
 	 *
-	 * @param {Object} Updated options values.
+	 * @param {Object} newOptions Updated options values.
 	 */
-	const updateOptions = useCallback( ( newOptions ) => {
-		if ( false === hasOptionsChanges ) {
-			setHasOptionsChanges( true );
-		}
-
+	const updateOptions = ( newOptions ) => {
+		setHasOptionsChanges( true );
 		setOptions( { ...options, ...newOptions } );
 		setDidSaveOptions( false );
-	}, [ hasOptionsChanges, options, setHasOptionsChanges, setOptions ] );
+	};
 
 	useEffect( () => {
 		if ( options || fetchingOptions ) {
@@ -98,12 +95,8 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 					return;
 				}
 
-				setSavedThemeSupport( fetchedOptions.theme_support );
-				setOptions(
-					true === fetchedOptions.wizard_completed && ! getQueryArg( global.location.href, 'setup-wizard-first-run' ) // Query arg available for testing.
-						? { ...fetchedOptions, theme_support: null } // Reset mode for the current session to force user to make a choice.
-						: {},
-				);
+				originalOptions.current = fetchedOptions;
+				setOptions( fetchedOptions );
 			} catch ( e ) {
 				setError( e );
 				return;
@@ -125,7 +118,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 					hasOptionsChanges,
 					didSaveOptions,
 					options: options || {},
-					savedThemeSupport,
+					originalOptions: originalOptions.current,
 					saveOptions,
 					savingOptions,
 					updateOptions,

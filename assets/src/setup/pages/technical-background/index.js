@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useContext, useEffect } from '@wordpress/element';
+import { useContext, useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -13,14 +13,18 @@ import { User1, User2 } from '../../components/svg/user-icons';
 import { Loading } from '../../components/loading';
 import { Selectable } from '../../components/selectable';
 import './style.css';
+import { AMPInfo } from '../../components/amp-info';
 
 /**
  * Screen for selecting the user's technical background.
  */
 export function TechnicalBackground() {
-	const { canGoForward, setCanGoForward } = useContext( Navigation );
+	// Initialize option as null to force user to make a selection.
+	const [ localDeveloperToolsOption, setLocalDeveloperToolsOption ] = useState( null );
+
+	const { setCanGoForward } = useContext( Navigation );
 	const {
-		developerToolsOption,
+		originalDeveloperToolsOption,
 		fetchingUser,
 		setDeveloperToolsOption,
 	} = useContext( User );
@@ -29,10 +33,21 @@ export function TechnicalBackground() {
 	 * Allow moving forward.
 	 */
 	useEffect( () => {
-		if ( canGoForward === false && 'boolean' === typeof developerToolsOption ) {
+		if ( 'boolean' === typeof localDeveloperToolsOption ) {
 			setCanGoForward( true );
 		}
-	}, [ canGoForward, developerToolsOption, setCanGoForward ] );
+	}, [ localDeveloperToolsOption, setCanGoForward ] );
+
+	/**
+	 * Persist selected option in global context.
+	 */
+	useEffect( () => {
+		if ( null === localDeveloperToolsOption ) {
+			return;
+		}
+
+		setDeveloperToolsOption( localDeveloperToolsOption );
+	}, [ localDeveloperToolsOption, setDeveloperToolsOption ] );
 
 	const disableInputID = 'technical-background-disable';
 	const enableInputID = 'technical-background-enable';
@@ -88,23 +103,30 @@ export function TechnicalBackground() {
 				</p>
 			</div>
 			<form>
-				<Selectable className={ `technical-background-option-container` } selected={ true === developerToolsOption }>
+				<Selectable className={ `technical-background-option-container` } selected={ true === localDeveloperToolsOption }>
 					<label htmlFor={ enableInputID } className="technical-background-option">
 						<div className="technical-background-option__input-container">
 							<input
 								type="radio"
 								id={ enableInputID }
-								checked={ true === developerToolsOption }
+								checked={ true === localDeveloperToolsOption }
 								onChange={ () => {
-									setDeveloperToolsOption( true );
+									setLocalDeveloperToolsOption( true );
 								} }
 							/>
 						</div>
 						<User1 />
 						<div className="technical-background-option__description">
-							<h2>
-								{ __( 'Developer or technically savvy', 'amp' ) }
-							</h2>
+							<div>
+								{ true === originalDeveloperToolsOption && (
+									<AMPInfo>
+										{ __( 'Previously selected', 'amp' ) }
+									</AMPInfo>
+								) }
+								<h2>
+									{ __( 'Developer or technically savvy', 'amp' ) }
+								</h2>
+							</div>
 							<p>
 								{ __( 'I am a “Developer or technically savvy” user. I can do WordPress development such as making changes to themes and plugins. I have some familiarity with HTML, CSS, JavaScript, and PHP. I am technically savvy enough to build full WordPress sites out of plugins and themes and can address configuration issues and understand', 'amp' ) }
 							</p>
@@ -112,23 +134,30 @@ export function TechnicalBackground() {
 					</label>
 				</Selectable>
 
-				<Selectable className={ `technical-background-option-container` } selected={ false === developerToolsOption }>
+				<Selectable className={ `technical-background-option-container` } selected={ false === localDeveloperToolsOption }>
 					<label htmlFor={ disableInputID } className="technical-background-option">
 						<div className="technical-background-option__input-container">
 							<input
 								type="radio"
 								id={ disableInputID }
-								checked={ false === developerToolsOption }
+								checked={ false === localDeveloperToolsOption }
 								onChange={ () => {
-									setDeveloperToolsOption( false );
+									setLocalDeveloperToolsOption( false );
 								} }
 							/>
 						</div>
 						<User2 />
 						<div className="technical-background-option__description">
-							<h2>
-								{ __( 'Non-technically savvy or wanting a simpler setup', 'amp' ) }
-							</h2>
+							<div>
+								{ false === originalDeveloperToolsOption && (
+									<AMPInfo>
+										{ __( 'Previously selected', 'amp' ) }
+									</AMPInfo>
+								) }
+								<h2>
+									{ __( 'Non-technically savvy or wanting a simpler setup', 'amp' ) }
+								</h2>
+							</div>
 							<p>
 								{ __( 'I am not a developer and I am not responsible for configuring and fixing issues on my site. I am a site owner and/or content creator who wants to take advantage of AMP performance.', 'amp' ) }
 							</p>
