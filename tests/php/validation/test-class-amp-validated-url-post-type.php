@@ -111,6 +111,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	 * @covers \AMP_Validated_URL_Post_Type::add_admin_menu_new_invalid_url_count()
 	 */
 	public function test_add_admin_menu_new_invalid_url_count() {
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
 		global $submenu;
 		AMP_Validation_Manager::init(); // Register the post type and taxonomy.
 

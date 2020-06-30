@@ -124,6 +124,9 @@ class AMP_Validated_URL_Post_Type {
 			||
 			( isset( $_GET['taxonomy'] ) && AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG === $_GET['taxonomy'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		);
+		if ( $show_in_menu && current_user_can( 'manage_options' ) ) {
+			$show_in_menu = AMP_Options_Manager::OPTION_NAME;
+		}
 
 		register_post_type(
 			self::POST_TYPE_SLUG,
@@ -140,7 +143,7 @@ class AMP_Validated_URL_Post_Type {
 				'supports'     => false,
 				'public'       => false,
 				'show_ui'      => true,
-				'show_in_menu' => $show_in_menu ? AMP_Options_Manager::OPTION_NAME : false,
+				'show_in_menu' => $show_in_menu,
 				'map_meta_cap' => false,
 				'capabilities' => array_merge(
 					array_fill_keys(
@@ -164,6 +167,23 @@ class AMP_Validated_URL_Post_Type {
 				// @todo Show in rest.
 			]
 		);
+
+		// Rename the top-level menu from "Validated URLs" to "AMP DevTools" when the user does not have access to the AMP settings screen.
+		if ( $show_in_menu && ! current_user_can( 'manage_options' ) ) {
+			add_action(
+				'admin_menu',
+				function () {
+					global $menu;
+					foreach ( $menu as &$menu_item ) {
+						if ( 'edit.php?post_type=' . self::POST_TYPE_SLUG === $menu_item[2] ) {
+							$menu_item[0] = esc_html__( 'AMP DevTools', 'amp' );
+							$menu_item[6] = AMP_Options_Menu::ICON_BASE64_SVG;
+							break;
+						}
+					}
+				}
+			);
+		}
 
 		// Ensure cached count of URLs with new validation errors is flushed whenever a URL is updated, trashed, or deleted.
 		$handle_delete = static function ( $post_id ) {
@@ -419,7 +439,11 @@ class AMP_Validated_URL_Post_Type {
 	 */
 	public static function add_admin_menu_new_invalid_url_count() {
 		global $submenu;
-		if ( ! isset( $submenu[ AMP_Options_Manager::OPTION_NAME ] ) ) {
+
+		$post_type_admin_url = 'edit.php?post_type=' . self::POST_TYPE_SLUG;
+		$submenu_key         = current_user_can( 'manage_options' ) ? AMP_Options_Manager::OPTION_NAME : $post_type_admin_url;
+
+		if ( ! isset( $submenu[ $submenu_key ] ) ) {
 			return;
 		}
 
@@ -438,8 +462,8 @@ class AMP_Validated_URL_Post_Type {
 			return;
 		}
 
-		foreach ( $submenu[ AMP_Options_Manager::OPTION_NAME ] as &$submenu_item ) {
-			if ( 'edit.php?post_type=' . self::POST_TYPE_SLUG === $submenu_item[2] ) {
+		foreach ( $submenu[ $submenu_key ] as &$submenu_item ) {
+			if ( $post_type_admin_url === $submenu_item[2] ) {
 				$submenu_item[0] .= ' <span class="awaiting-mod"><span class="new-validation-error-urls-count">' . esc_html( number_format_i18n( $new_validation_error_urls ) ) . '</span></span>';
 				break;
 			}

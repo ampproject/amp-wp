@@ -986,17 +986,21 @@ class AMP_Validation_Error_Taxonomy {
 		);
 
 		// Make sure parent menu item is expanded when visiting the taxonomy term page.
-		add_filter(
-			'parent_file',
-			static function( $parent_file ) {
-				if ( get_current_screen()->taxonomy === AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ) {
-					$parent_file = AMP_Options_Manager::OPTION_NAME;
-				}
-				return $parent_file;
-			},
-			10,
-			2
-		);
+		// This only applies if there is the top-level menu for the AMP settings admin screen. Otherwise, the parent file
+		// is automatically the amp_validated_url post type screen.
+		if ( current_user_can( 'manage_options' ) ) {
+			add_filter(
+				'parent_file',
+				static function ( $parent_file ) {
+					if ( get_current_screen()->taxonomy === AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ) {
+						$parent_file = AMP_Options_Manager::OPTION_NAME;
+					}
+					return $parent_file;
+				},
+				10,
+				2
+			);
+		}
 
 		// Replace the primary column to be error instead of the removed name column..
 		add_filter(
@@ -1682,15 +1686,27 @@ class AMP_Validation_Error_Taxonomy {
 			$menu_item_label .= ' <span class="awaiting-mod"><span class="pending-count">' . esc_html( number_format_i18n( $new_error_count ) ) . '</span></span>';
 		}
 
-		$taxonomy_caps = (object) get_taxonomy( self::TAXONOMY_SLUG )->cap; // Yes, cap is an object not an array.
-		add_submenu_page(
-			AMP_Options_Manager::OPTION_NAME,
-			$menu_item_label,
-			$menu_item_label,
-			$taxonomy_caps->manage_terms,
-			// The following esc_attr() is sadly needed due to <https://github.com/WordPress/wordpress-develop/blob/4.9.5/src/wp-admin/menu-header.php#L201>.
-			esc_attr( 'edit-tags.php?taxonomy=' . self::TAXONOMY_SLUG . '&post_type=' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG )
-		);
+		$post_menu_slug = 'edit.php?post_type=' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG;
+		$term_menu_slug = 'edit-tags.php?taxonomy=' . self::TAXONOMY_SLUG . '&post_type=' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG;
+
+		global $submenu;
+		if ( current_user_can( 'manage_options' ) ) {
+			$taxonomy_caps = (object) get_taxonomy( self::TAXONOMY_SLUG )->cap; // Yes, cap is an object not an array.
+			add_submenu_page(
+				AMP_Options_Manager::OPTION_NAME,
+				$menu_item_label,
+				$menu_item_label,
+				$taxonomy_caps->manage_terms,
+				// The following esc_attr() is sadly needed due to <https://github.com/WordPress/wordpress-develop/blob/4.9.5/src/wp-admin/menu-header.php#L201>.
+				esc_attr( $term_menu_slug )
+			);
+		} elseif ( isset( $submenu[ $post_menu_slug ] ) ) {
+			foreach ( $submenu[ $post_menu_slug ] as &$submenu_item ) {
+				if ( esc_attr( $term_menu_slug ) === $submenu_item[2] ) {
+					$submenu_item[0] = $menu_item_label;
+				}
+			}
+		}
 	}
 
 	/**
