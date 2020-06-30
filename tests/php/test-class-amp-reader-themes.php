@@ -173,4 +173,24 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 		$this->assertEquals( $expected, $this->reader_themes->get_theme_availability( $theme ) );
 		$this->assertEquals( $can_install, $this->reader_themes->can_install_theme( $theme ) );
 	}
+
+	/**
+	 * Tests for can_install_theme.
+	 *
+	 * @covers AMP_Reader_Themes::can_install_theme
+	 */
+	public function test_can_install_theme() {
+		$installable_theme = [
+			'name'         => 'Some Theme',
+			'requires'     => false,
+			'requires_php' => '5.2',
+			'slug'         => 'twentytwelve',
+		];
+
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'author' ] ) );
+		$this->assertFalse( $this->reader_themes->can_install_theme( $installable_theme ) );
+
+		wp_set_current_user( 1 );
+		$this->assertTrue( $this->reader_themes->can_install_theme( $installable_theme ) );
+	}
 }
