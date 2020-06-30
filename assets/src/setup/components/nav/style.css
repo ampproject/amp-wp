@@ -17,11 +17,12 @@
 	align-items: center;
 	display: flex;
 	justify-content: space-between;
+	max-width: 1320px;
 	padding: 15px;
 	width: 100%;
 
 	@media screen and (min-width: 783px) {
-		padding: 40px 30px;
+		padding: 40px 90px;
 	}
 }
 
