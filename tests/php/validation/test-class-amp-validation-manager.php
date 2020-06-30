@@ -204,18 +204,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test init when theme support is not present.
-	 *
-	 * @covers AMP_Validation_Manager::init()
-	 */
-	public function test_init_without_theme_support() {
-		remove_theme_support( AMP_Theme_Support::SLUG );
-		AMP_Validation_Manager::init();
-
-		$this->assertFalse( has_action( 'save_post', [ 'AMP_Validation_Manager', 'handle_save_post_prompting_validation' ] ) );
-	}
-
-	/**
 	 * Test \AMP_Validation_Manager::post_supports_validation.
 	 *
 	 * @covers \AMP_Validation_Manager::post_supports_validation()
@@ -224,7 +212,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 
 		// Ensure that posts can be validated even when theme support is absent.
 		remove_theme_support( AMP_Theme_Support::SLUG );
-		$this->assertFalse( AMP_Validation_Manager::post_supports_validation( $this->factory()->post->create() ) );
+		$this->assertTrue( AMP_Validation_Manager::post_supports_validation( $this->factory()->post->create() ) );
 
 		// Ensure normal case of validating published post when theme support present.
 		add_theme_support( AMP_Theme_Support::SLUG );
@@ -486,6 +474,8 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::validate_queued_posts_on_frontend()
 	 */
 	public function test_handle_save_post_prompting_validation_and_validate_queued_posts_on_frontend() {
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
+
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$_SERVER['REQUEST_METHOD'] = 'POST';
 		$GLOBALS['pagenow']        = 'post.php';
@@ -2353,25 +2343,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertStringContains( 'css/amp-block-validation.css', $style->src );
 		$this->assertEquals( AMP__VERSION, $style->ver );
 		$this->assertContains( $slug, wp_styles()->queue );
-	}
-
-	/**
-	 * Test enqueue_block_validation.
-	 *
-	 * @covers AMP_Validation_Manager::enqueue_block_validation()
-	 */
-	public function test_enqueue_block_validation_without_amp_support() {
-		if ( ! function_exists( 'register_block_type' ) ) {
-			$this->markTestSkipped( 'The block editor is not available.' );
-		}
-
-		remove_theme_support( AMP_Theme_Support::SLUG );
-		global $post;
-		$post = $this->factory()->post->create_and_get();
-		$slug = 'amp-block-validation';
-		$this->set_capability();
-		AMP_Validation_Manager::enqueue_block_validation();
-		$this->assertNotContains( $slug, wp_scripts()->queue );
 	}
 
 	/**

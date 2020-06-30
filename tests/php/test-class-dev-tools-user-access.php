@@ -60,15 +60,19 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 	 * @covers DevToolsUserAccess::rest_get_dev_tools_enabled
 	 */
 	public function test_rest_get_dev_tools_enabled() {
-		$user = self::factory()->user->create();
+		/** @var WP_User $user */
+		$user = self::factory()->user->create_and_get( [ 'role' => 'author' ] );
 
-		$this->assertNull( $this->dev_tools_user_access->rest_get_dev_tools_enabled( [ 'id' => $user ] ) );
+		$this->assertFalse( $this->dev_tools_user_access->rest_get_dev_tools_enabled( [ 'id' => $user->ID ] ) );
 
-		update_user_meta( $user, 'amp_dev_tools_enabled', 'false' );
-		$this->assertFalse( $this->dev_tools_user_access->rest_get_dev_tools_enabled( [ 'id' => $user ] ) );
+		$user->set_role( 'administrator' );
+		$this->assertTrue( $this->dev_tools_user_access->rest_get_dev_tools_enabled( [ 'id' => $user->ID ] ) );
 
-		update_user_meta( $user, 'amp_dev_tools_enabled', 'true' );
-		$this->assertTrue( $this->dev_tools_user_access->rest_get_dev_tools_enabled( [ 'id' => $user ] ) );
+		update_user_meta( $user->ID, 'amp_dev_tools_enabled', 'false' );
+		$this->assertFalse( $this->dev_tools_user_access->rest_get_dev_tools_enabled( [ 'id' => $user->ID ] ) );
+
+		update_user_meta( $user->ID, 'amp_dev_tools_enabled', 'true' );
+		$this->assertTrue( $this->dev_tools_user_access->rest_get_dev_tools_enabled( [ 'id' => $user->ID ] ) );
 	}
 
 	/**
@@ -77,21 +81,21 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 	 * @covers DevToolsUserAccess::rest_update_dev_tools_enabled
 	 */
 	public function test_rest_update_dev_tools_enabled() {
-		$author = self::factory()->user->create( [ 'role' => 'author' ] );
+		$author_user = self::factory()->user->create_and_get( [ 'role' => 'author' ] );
 
-		$author_user = get_user_by( 'ID', $author );
-		wp_set_current_user( $author );
+		wp_set_current_user( $author_user->ID );
 
 		$update = $this->dev_tools_user_access->rest_update_dev_tools_enabled( true, $author_user );
 		$this->assertInstanceOf( WP_Error::class, $update );
 
-		$administrator = self::factory()->user->create( [ 'role' => 'administrator' ] );
-		wp_set_current_user( $administrator );
+		$administrator_user = self::factory()->user->create_and_get( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $administrator_user->ID );
+		$this->assertInstanceOf( WP_Error::class, $this->dev_tools_user_access->rest_update_dev_tools_enabled( true, $author_user ) );
 
-		$this->assertInternalType( 'int', $this->dev_tools_user_access->rest_update_dev_tools_enabled( true, $author_user ) );
-		$this->assertEquals( 'true', get_user_meta( $author, 'amp_dev_tools_enabled', true ) );
+		$this->assertTrue( $this->dev_tools_user_access->rest_update_dev_tools_enabled( true, $administrator_user ) );
+		$this->assertEquals( 'true', get_user_meta( $administrator_user->ID, 'amp_dev_tools_enabled', true ) );
 
-		$this->assertTrue( $this->dev_tools_user_access->rest_update_dev_tools_enabled( false, $author_user ) );
-		$this->assertEquals( 'false', get_user_meta( $author, 'amp_dev_tools_enabled', true ) );
+		$this->assertTrue( $this->dev_tools_user_access->rest_update_dev_tools_enabled( false, $administrator_user ) );
+		$this->assertEquals( 'false', get_user_meta( $administrator_user->ID, 'amp_dev_tools_enabled', true ) );
 	}
 }
