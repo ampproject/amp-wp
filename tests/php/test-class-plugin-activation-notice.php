@@ -68,7 +68,7 @@ class Test_PluginActivationNotice extends WP_UnitTestCase {
 
 		delete_user_meta( get_current_user_id(), 'dismissed_wp_pointers' );
 
-		set_current_screen( null );
+		$GLOBALS['current_screen'] = null;
 	}
 
 	/**
@@ -87,6 +87,6 @@ class Test_PluginActivationNotice extends WP_UnitTestCase {
 
 		AMP_Options_Manager::update_option( Option::WIZARD_COMPLETED, $original_option );
 
-		set_current_screen( null );
+		$GLOBALS['current_screen'] = null;
 	}
 }
