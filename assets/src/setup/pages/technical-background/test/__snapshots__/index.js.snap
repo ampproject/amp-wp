@@ -15,7 +15,7 @@ exports[`TechnicalBackground matches snapshot 1`] = `
       xmlns="http://www.w3.org/2000/svg"
     >
       <g
-        clipPath="url(#clip0)"
+        clipPath="url(#clip-technical-background)"
       >
         <path
           d="M84.847 103.785H30.847C28.047 103.785 25.847 101.585 25.847 98.7852V45.7852C25.847 42.9852 28.047 40.7852 30.847 40.7852H89.847C92.647 40.7852 94.847 42.9852 94.847 45.7852V93.7852C94.847 99.2852 90.347 103.785 84.847 103.785Z"
@@ -182,7 +182,7 @@ exports[`TechnicalBackground matches snapshot 1`] = `
       </g>
       <defs>
         <clipPath
-          id="clip0"
+          id="clip-technical-background"
         >
           <rect
             fill="white"
@@ -226,7 +226,7 @@ exports[`TechnicalBackground matches snapshot 1`] = `
           xmlns="http://www.w3.org/2000/svg"
         >
           <g
-            clipPath="url(#clip0)"
+            clipPath="url(#clip-user-1)"
           >
             <path
               d="M1.9 41.7258C2.6732 41.7258 3.3 41.099 3.3 40.3258C3.3 39.5526 2.6732 38.9258 1.9 38.9258C1.1268 38.9258 0.5 39.5526 0.5 40.3258C0.5 41.099 1.1268 41.7258 1.9 41.7258Z"
@@ -419,7 +419,7 @@ exports[`TechnicalBackground matches snapshot 1`] = `
           </g>
           <defs>
             <clipPath
-              id="clip0"
+              id="clip-user-1"
             >
               <rect
                 fill="white"
@@ -467,7 +467,7 @@ exports[`TechnicalBackground matches snapshot 1`] = `
           xmlns="http://www.w3.org/2000/svg"
         >
           <g
-            clipPath="url(#clip0)"
+            clipPath="url(#clip-user-)"
           >
             <path
               d="M51.3999 22.6414C51.3999 22.6414 45.4999 14.9414 45.6999 13.4414C38.5999 15.8414 37.8999 18.2414 25.0999 18.4414V37.8414C25.0999 37.8414 31.6999 45.9414 36.5999 46.0414C42.4999 46.0414 42.4999 46.0414 42.4999 46.0414C42.4999 46.0414 51.3999 41.0414 51.3999 36.9414C51.3999 22.6414 51.3999 22.6414 51.3999 22.6414Z"
@@ -588,7 +588,7 @@ exports[`TechnicalBackground matches snapshot 1`] = `
           </g>
           <defs>
             <clipPath
-              id="clip0"
+              id="clip-user-2"
             >
               <rect
                 fill="white"

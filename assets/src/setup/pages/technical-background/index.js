@@ -45,7 +45,7 @@ export function TechnicalBackground() {
 		<div className="technical-background">
 			<div className="technical-background__header">
 				<svg width="130" height="136" viewBox="0 0 130 136" fill="none" xmlns="http://www.w3.org/2000/svg">
-					<g clipPath="url(#clip0)">
+					<g clipPath="url(#clip-technical-background)">
 						<path d="M84.847 103.785H30.847C28.047 103.785 25.847 101.585 25.847 98.7852V45.7852C25.847 42.9852 28.047 40.7852 30.847 40.7852H89.847C92.647 40.7852 94.847 42.9852 94.847 45.7852V93.7852C94.847 99.2852 90.347 103.785 84.847 103.785Z" stroke="#2459E7" strokeWidth="2" strokeMiterlimit="10" />
 						<path d="M73.847 89.1867H46.847C44.047 89.1867 41.847 86.9867 41.847 84.1867V60.3867C41.847 57.5867 44.047 55.3867 46.847 55.3867H73.847C76.647 55.3867 78.847 57.5867 78.847 60.3867V84.1867C78.847 86.9867 76.647 89.1867 73.847 89.1867Z" stroke="#2459E7" strokeWidth="2" strokeMiterlimit="10" />
 						<path d="M60.847 40.7852V19.7852" stroke="#2459E7" strokeWidth="2" strokeMiterlimit="10" />
@@ -75,7 +75,7 @@ export function TechnicalBackground() {
 						<path d="M25.547 86.5859H13.847L6.74701 93.6859V100.686" stroke="#2459E7" strokeWidth="2" strokeMiterlimit="10" />
 					</g>
 					<defs>
-						<clipPath id="clip0">
+						<clipPath id="clip-technical-background">
 							<rect width="129" height="135" fill="white" transform="translate(0.846985 0.785156)" />
 						</clipPath>
 					</defs>
