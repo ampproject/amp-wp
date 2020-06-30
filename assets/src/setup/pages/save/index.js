@@ -15,10 +15,11 @@ import { PREVIEW_PERMALINK, CUSTOMIZER_LINK } from 'amp-setup'; // From WP inlin
  */
 import { Button } from '@wordpress/components';
 import { Options } from '../../components/options-context-provider';
-import { Loading } from '../../components/loading';
 import { User } from '../../components/user-context-provider';
 import { Phone } from '../../components/phone';
 import './style.css';
+import { AMPInfo } from '../../components/amp-info';
+import { IconMobile } from '../../components/svg/icon-mobile';
 
 /**
  * Provides the description for the done screen.
@@ -42,6 +43,9 @@ function getDescription( mode ) {
 	}
 }
 
+/**
+ * UI for a saving state.
+ */
 function Saving() {
 	return (
 		<div className="saving">
@@ -75,15 +79,16 @@ function Saving() {
  * Final screen, where data is saved.
  */
 export function Save() {
-	const { didSaveOptions, options, saveOptions, savingOptions } = useContext( Options );
+	const {
+		didSaveOptions,
+		options: { theme_support: themeSupport, reader_theme: readerTheme },
+		saveOptions,
+		savingOptions,
+	} = useContext( Options );
 	const { didSaveDeveloperToolsOption, saveDeveloperToolsOption, savingDeveloperToolsOption } = useContext( User );
 
-	const { theme_support: themeSupport, reader_theme: readerTheme } = options;
-
 	/**
-	 * Triggers saving of options on arrival of this screen.
-	 *
-	 * @todo Possibly wait for a different user action to save.
+	 * Triggers saving of options on arrival to this screen.
 	 */
 	useEffect( () => {
 		if ( ! didSaveOptions && ! savingOptions ) {
@@ -93,8 +98,6 @@ export function Save() {
 
 	/**
 	 * Triggers saving of user options on arrival of this screen.
-	 *
-	 * @todo Possibly wait for a different user action to save.
 	 */
 	useEffect( () => {
 		if ( ! didSaveDeveloperToolsOption && ! savingDeveloperToolsOption ) {
@@ -112,7 +115,7 @@ export function Save() {
 	}
 
 	return (
-		<div className="done grid grid-5-4">
+		<div className="done grid grid-6-5">
 			<div>
 				<h1>
 					{ heading }
@@ -122,23 +125,19 @@ export function Save() {
 				</p>
 			</div>
 			<div className="done__preview-container">
-				<p className="reader-summary__caption">
-					<svg width="13" height="20" viewBox="0 0 13 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<path d="M1.66211 0.265625H11.2246C11.5684 0.265625 11.8496 0.390625 12.0684 0.640625C12.3184 0.859375 12.4434 1.14063 12.4434 1.48438V18.2656C12.4434 18.6094 12.3184 18.9062 12.0684 19.1562C11.8496 19.375 11.5684 19.4844 11.2246 19.4844H1.66211C1.31836 19.4844 1.02148 19.375 0.771484 19.1562C0.552734 18.9062 0.443359 18.6094 0.443359 18.2656V1.48438C0.443359 1.14063 0.552734 0.859375 0.771484 0.640625C1.02148 0.390625 1.31836 0.265625 1.66211 0.265625ZM10.0527 14.6562V2.65625H2.83398V14.6562H10.0527ZM4.05273 3.875H8.83398L4.05273 9.875V3.875Z" fill="black" fillOpacity="0.87" />
-					</svg>
-
+				<AMPInfo icon={ ( props ) => <IconMobile { ...props } /> }>
 					{ __( 'Live view of your site', 'amp' ) }
-				</p>
+				</AMPInfo>
 				<Phone>
 					<iframe
 						className="done__preview-iframe"
-						sandbox="allow-scripts"
-						src={ addQueryArgs( PREVIEW_PERMALINK, { 'amp-no-admin-bar': 1, ...( 'standard' === themeSupport ? {} : { amp: 1 } ) } ) }
+						src={ addQueryArgs( PREVIEW_PERMALINK, 'standard' === themeSupport ? {} : { amp: 1 } ) }
 						title={ __( 'Site preview', 'amp' ) }
+						name="amp-wizard-completion-preview"
 					/>
 				</Phone>
 
-				{ [ 'standard', 'transitional' ].includes( themeSupport ) && (
+				{ 'reader' !== themeSupport && (
 					<Button
 						isPrimary
 						href={
@@ -165,7 +164,7 @@ export function Save() {
 									addQueryArgs(
 										CUSTOMIZER_LINK,
 										'legacy' === readerTheme
-											? { 'autofocus[panel]': 'amp', url: PREVIEW_PERMALINK }
+											? { 'autofocus[panel]': 'amp_panel', url: PREVIEW_PERMALINK }
 											: { url: PREVIEW_PERMALINK },
 									)
 								}

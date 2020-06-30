@@ -20,6 +20,8 @@ import { AMPNotice, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_INFO, NOTICE_TYPE_WARNING, 
 import { Standard } from '../../components/svg/standard';
 import { Transitional } from '../../components/svg/transitional';
 import { Reader } from '../../components/svg/reader';
+import { AMPInfo } from '../../components/amp-info';
+import { IconPin } from '../../components/svg/icon-pin';
 import { MOST_RECOMMENDED, RECOMMENDED, getRecommendationLevels, getAllSelectionText, TECHNICAL, NON_TECHNICAL, STANDARD, TRANSITIONAL, READER, NOT_RECOMMENDED } from './get-selection-details';
 
 /**
@@ -69,12 +71,9 @@ export function Selection( { compatibility, id, illustration, isCurrentSavedSele
 						{ title }
 					</h2>
 					{ isCurrentSavedSelection && (
-						<div className="template-mode-selection__current-selection">
-							<svg width="15" height="21" viewBox="0 0 15 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-								<path d="M9.60669 2.83203V7.83203C9.60669 8.95203 9.97669 9.99203 10.6067 10.832H4.60669C5.25669 9.97203 5.60669 8.93203 5.60669 7.83203V2.83203H9.60669ZM12.6067 0.832031H2.60669C2.05669 0.832031 1.60669 1.28203 1.60669 1.83203C1.60669 2.38203 2.05669 2.83203 2.60669 2.83203H3.60669V7.83203C3.60669 9.49203 2.26669 10.832 0.606689 10.832V12.832H6.57669V19.832L7.57669 20.832L8.57669 19.832V12.832H14.6067V10.832C12.9467 10.832 11.6067 9.49203 11.6067 7.83203V2.83203H12.6067C13.1567 2.83203 13.6067 2.38203 13.6067 1.83203C13.6067 1.28203 13.1567 0.832031 12.6067 0.832031Z" fill="#333D47" />
-							</svg>
+						<AMPInfo icon={ ( props ) => <IconPin { ...props } /> }>
 							{ __( 'Previously selected', 'amp' ) }
-						</div>
+						</AMPInfo>
 					) }
 				</div>
 			</label>

@@ -107,7 +107,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, readerThemes
 			setFetchingThemes( true );
 
 			try {
-				const fetchedThemes = await apiFetch( { url: addQueryArgs( readerThemesEndpoint, { 'amp-new-onboarding': '1' } ) } );
+				const fetchedThemes = await apiFetch( { url: readerThemesEndpoint } );
 
 				if ( hasUnmounted.current === true ) {
 					return;

@@ -1,6 +1,8 @@
 .amp-notice {
 	border-radius: 12px;
 	display: flex;
+	font-size: 13px;
+	line-height: 1.85;
 }
 
 .amp-notice__body {
@@ -31,7 +33,7 @@
 }
 
 .amp-notice--large {
-	padding: 0.5rem 1rem 0.5rem 0.5rem;
+	padding: 0.5rem 1.125rem 0.5rem 0.5rem;
 }
 
 .amp-notice--large .amp-notice__icon {

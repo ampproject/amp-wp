@@ -6,7 +6,7 @@ import { visitAdminPage } from '@wordpress/e2e-test-utils';
 
 describe( 'AMP wizard: technical background', () => {
 	beforeEach( async () => {
-		await visitAdminPage( 'admin.php', 'page=amp-setup&amp-new-onboarding=1&amp-setup-screen=technical-background' );
+		await visitAdminPage( 'admin.php', 'page=amp-setup&amp-setup-screen=technical-background' );
 	} );
 
 	it( 'should show two options', async () => {

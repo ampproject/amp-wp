@@ -169,16 +169,29 @@ function amp_init() {
 	);
 
 	/**
-	 * Hide admin bar if the specified query arg isset.
+	 * Hide admin bar if the window is inside the setup wizard iframe.
 	 */
-	add_filter(
-		'show_admin_bar',
-		static function( $show_admin_bar ) {
-			if ( isset( $_GET['amp-no-admin-bar'] ) ) { // phpcs:disable WordPress.Security.NonceVerification.Recommended
-				return false;
+	add_action(
+		'wp_print_footer_scripts',
+		function() {
+			if ( ! amp_is_dev_mode() || ! is_admin_bar_showing() ) {
+				return;
 			}
+			?>
+			<script data-ampdevmode>
+				document.addEventListener( 'DOMContentLoaded', function() {
+					if ( ! ( 'name' in window ) || 'amp-wizard-completion-preview' !== window.name ) { // Detects whether the current window is in an iframe with the specified `name` attribute.
+						return;
+					}
 
-			return $show_admin_bar;
+					if ( document.body.classList.contains( 'admin-bar' ) ) {
+						document.body.classList.remove( 'admin-bar' );
+						document.documentElement.style.cssText += '; margin-top: 0 !important';
+						document.getElementById( 'wpadminbar' ).remove();
+					}
+				});
+			</script>
+			<?php
 		}
 	);
 }

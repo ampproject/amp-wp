@@ -7,7 +7,7 @@ import { visitAdminPage } from '@wordpress/e2e-test-utils';
 describe( 'AMP wizard: template-mode', () => {
 	beforeEach( async () => {
 		// Technical background must be selected.
-		await visitAdminPage( 'admin.php', 'page=amp-setup&amp-new-onboarding=1&amp-setup-screen=technical-background' );
+		await visitAdminPage( 'admin.php', 'page=amp-setup&amp-setup-screen=technical-background' );
 
 		await page.waitForSelector( 'input[type="radio"]' );
 		await page.$eval( 'input[type="radio"]', ( el ) => el.click() );

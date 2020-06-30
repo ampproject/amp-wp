@@ -6,7 +6,7 @@ import { visitAdminPage } from '@wordpress/e2e-test-utils';
 
 describe( 'AMP wizard: reader themes', () => {
 	beforeEach( async () => {
-		await visitAdminPage( 'admin.php', 'page=amp-setup&amp-new-onboarding=1&amp-setup-screen=template-modes' );
+		await visitAdminPage( 'admin.php', 'page=amp-setup&amp-setup-screen=template-modes' );
 		await page.waitForSelector( '#reader-mode' );
 		await page.$eval( '#reader-mode', ( el ) => el.click() );
 		await page.waitForSelector( '.amp-setup-nav__prev-next .is-primary' );

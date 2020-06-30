@@ -15,6 +15,8 @@ import PropTypes from 'prop-types';
  */
 import { Navigation } from '../navigation-context-provider';
 import './style.css';
+import { Options } from '../options-context-provider';
+import { User } from '../user-context-provider';
 
 /**
  * Navigation component.
@@ -24,6 +26,8 @@ import './style.css';
  */
 export function Nav( { exitLink } ) {
 	const { activePageIndex, canGoForward, isLastPage, moveBack, moveForward } = useContext( Navigation );
+	const { savingOptions } = useContext( Options );
+	const { savingDeveloperToolsOption } = useContext( User );
 
 	return (
 		<div className="amp-setup-nav">
@@ -64,7 +68,7 @@ export function Nav( { exitLink } ) {
 					}
 
 					<Button
-						disabled={ ! canGoForward && ! isLastPage }
+						disabled={ ! canGoForward && ! isLastPage && ! savingDeveloperToolsOption && ! savingOptions }
 						href={ isLastPage ? exitLink : undefined }
 						isPrimary
 						onClick={ moveForward }

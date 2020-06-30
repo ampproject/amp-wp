@@ -9,7 +9,7 @@ const PREV_BUTTON_SELECTOR = '.amp-setup-nav__prev-next button:not(.is-primary)'
 
 describe( 'AMP Setup Screen', () => {
 	beforeEach( async () => {
-		await visitAdminPage( 'admin.php', 'page=amp-setup&amp-new-onboarding=1' );
+		await visitAdminPage( 'admin.php', 'page=amp-setup' );
 		await page.waitForSelector( '.amp-setup-nav__prev-next' );
 	} );
 

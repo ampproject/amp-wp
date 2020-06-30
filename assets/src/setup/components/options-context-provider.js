@@ -3,7 +3,7 @@
  */
 import { createContext, useEffect, useState, useRef, useCallback } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { getQueryArg, addQueryArgs } from '@wordpress/url';
+import { getQueryArg } from '@wordpress/url';
 
 /**
  * External dependencies
@@ -49,7 +49,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 			await apiFetch(
 				{
 					method: 'post',
-					url: addQueryArgs( optionsRestEndpoint, { 'amp-new-onboarding': '1' } ),
+					url: optionsRestEndpoint,
 					data: { ...options, wizard_completed: true },
 				},
 			);
@@ -92,7 +92,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 			setFetchingOptions( true );
 
 			try {
-				const fetchedOptions = await apiFetch( { url: addQueryArgs( optionsRestEndpoint, { 'amp-new-onboarding': '1' } ) } );
+				const fetchedOptions = await apiFetch( { url: optionsRestEndpoint } );
 
 				if ( true === hasUnmounted.current ) {
 					return;

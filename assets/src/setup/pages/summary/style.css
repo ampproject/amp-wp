@@ -8,6 +8,8 @@
  */
 .reader-summary__screens .amp-description {
 	display: -webkit-box;
+	font-size: 13px;
+	line-height: 1.85;
 	-webkit-box-orient: vertical;
 	-webkit-line-clamp: 4;
 	overflow: hidden;
@@ -24,22 +26,6 @@
 
 .reader-summary__screens .selectable {
 	padding: 35px 30px;
-}
-
-.reader-summary__caption {
-	border: 2px solid #e8e8e8;
-	border-radius: 21.5px;
-	display: inline-block;
-	font-size: 13px;
-	font-weight: 600;
-	margin-top: 0.5rem;
-	margin-bottom: 2rem;
-	padding: 10px;
-}
-
-.reader-summary__caption svg {
-	float: left;
-	margin: 0 0.5rem;
 }
 
 /**
