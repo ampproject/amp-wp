@@ -158,7 +158,7 @@ export function Save() {
 										CUSTOMIZER_LINK,
 										'legacy' === readerTheme
 											? { 'autofocus[panel]': 'amp_panel', url: previewPermalink }
-											: { url: previewPermalink },
+											: { url: previewPermalink, amp: 1 },
 									)
 								}
 								target="_blank"
