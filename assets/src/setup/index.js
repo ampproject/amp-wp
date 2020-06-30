@@ -37,23 +37,24 @@ export function Providers( { children } ) {
 		<OptionsContextProvider
 			optionsRestEndpoint={ OPTIONS_REST_ENDPOINT }
 		>
-			<NavigationContextProvider pages={ PAGES }>
-				<ReaderThemesContextProvider
-					wpAjaxUrl={ wpAjaxUrl }
-					readerThemesEndpoint={ READER_THEMES_REST_ENDPOINT }
-					updatesNonce={ UPDATES_NONCE }
-				>
-					<UserContextProvider
-						userOptionDeveloperTools={ USER_FIELD_DEVELOPER_TOOLS_ENABLED }
-						userRestEndpoint={ USER_REST_ENDPOINT }
+			<UserContextProvider
+				userOptionDeveloperTools={ USER_FIELD_DEVELOPER_TOOLS_ENABLED }
+				userRestEndpoint={ USER_REST_ENDPOINT }
+			>
+				<NavigationContextProvider pages={ PAGES }>
+					<ReaderThemesContextProvider
+						wpAjaxUrl={ wpAjaxUrl }
+						readerThemesEndpoint={ READER_THEMES_REST_ENDPOINT }
+						updatesNonce={ UPDATES_NONCE }
 					>
+
 						<SiteScanContextProvider>
 							{ children }
 						</SiteScanContextProvider>
-					</UserContextProvider>
 
-				</ReaderThemesContextProvider>
-			</NavigationContextProvider>
+					</ReaderThemesContextProvider>
+				</NavigationContextProvider>
+			</UserContextProvider>
 		</OptionsContextProvider>
 	);
 }

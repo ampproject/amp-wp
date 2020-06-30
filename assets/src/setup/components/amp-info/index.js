@@ -14,7 +14,7 @@ import './style.css';
  * @param {Object} props Component props.
  * @param {?string} props.children Notice content, not including the icon.
  * @param {?string} props.className Optional extra class names.
- * @param {?Component} props.icon An SVG icon.
+ * @param {?Object} props.icon An SVG icon Component
  */
 export function AMPInfo( { children, className, icon: Icon } ) {
 	const classNames = [

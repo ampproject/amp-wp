@@ -1,69 +1,29 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AMPNotice matches snapshots 1`] = `
+exports[`AMPInfo matches snapshots 1`] = `
 <div
-  className="amp-notice amp-notice--success amp-notice--large"
->
-  <div
-    className="amp-notice__icon"
-  >
-    <svg
-      height="24"
-      viewBox="0 0 24 24"
-      width="24"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm4.393 7.5l-5.643 5.784-2.644-2.506-1.856 1.858 4.5 4.364 7.5-7.643-1.857-1.857z"
-        fill="#00A02F"
-      />
-    </svg>
-  </div>
-  <div
-    className="amp-notice__body"
-  >
-    Component children
-  </div>
-</div>
+  className="amp-info"
+/>
 `;
 
-exports[`AMPNotice matches snapshots 2`] = `
+exports[`AMPInfo matches snapshots 2`] = `
 <div
-  className="amp-notice amp-notice--warning amp-notice--small"
+  className="my-class amp-info"
 >
-  <div
-    className="amp-notice__icon"
+  <svg
+    className="amp-info__icon"
+    fill="none"
+    height="20"
+    viewBox="0 0 13 20"
+    width="13"
+    xmlns="http://www.w3.org/2000/svg"
   >
-    <svg
-      fill="none"
-      height="44"
-      viewBox="0 0 44 44"
-      width="44"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M8.18125 16.1001L16.4324 7.84902L28.1012 7.84902L36.3523 16.1001L36.3523 27.769L28.1012 36.0201L16.4324 36.0201L8.18125 27.769L8.18125 16.1001Z"
-        stroke="#EF0000"
-        strokeWidth="2"
-      />
-      <path
-        d="M24.2671 27.4609C24.2671 28.5654 23.3716 29.4609 22.2671 29.4609C21.1626 29.4609 20.2671 28.5654 20.2671 27.4609C20.2671 26.3564 21.1626 25.4609 22.2671 25.4609C23.3716 25.4609 24.2671 26.3564 24.2671 27.4609Z"
-        fill="#EF0000"
-      />
-      <line
-        stroke="#EF0000"
-        strokeWidth="2"
-        x1="22.2891"
-        x2="22.2891"
-        y1="14.0586"
-        y2="23.5659"
-      />
-    </svg>
-  </div>
-  <div
-    className="amp-notice__body"
-  >
-    Component children
-  </div>
+    <path
+      d="M1.66211 0.265625H11.2246C11.5684 0.265625 11.8496 0.390625 12.0684 0.640625C12.3184 0.859375 12.4434 1.14063 12.4434 1.48438V18.2656C12.4434 18.6094 12.3184 18.9062 12.0684 19.1562C11.8496 19.375 11.5684 19.4844 11.2246 19.4844H1.66211C1.31836 19.4844 1.02148 19.375 0.771484 19.1562C0.552734 18.9062 0.443359 18.6094 0.443359 18.2656V1.48438C0.443359 1.14063 0.552734 0.859375 0.771484 0.640625C1.02148 0.390625 1.31836 0.265625 1.66211 0.265625ZM10.0527 14.6562V2.65625H2.83398V14.6562H10.0527ZM4.05273 3.875H8.83398L4.05273 9.875V3.875Z"
+      fill="black"
+      fillOpacity="0.87"
+    />
+  </svg>
+  Component children
 </div>
 `;

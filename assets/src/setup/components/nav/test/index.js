@@ -16,8 +16,10 @@ import { render } from '@wordpress/element';
 import { Nav } from '..';
 import { NavigationContextProvider } from '../../navigation-context-provider';
 import { OptionsContextProvider } from '../../options-context-provider';
+import { UserContextProvider } from '../../user-context-provider';
 
-jest.mock( '../../../components/options-context-provider' );
+jest.mock( '../../options-context-provider' );
+jest.mock( '../../user-context-provider' );
 
 let container;
 
@@ -43,9 +45,11 @@ describe( 'Nav', () => {
 	it( 'matches snapshot', () => {
 		const wrapper = create(
 			<OptionsContextProvider>
-				<NavigationContextProvider pages={ testPages }>
-					<Nav exitLink="http://site.test" />
-				</NavigationContextProvider>
+				<UserContextProvider>
+					<NavigationContextProvider pages={ testPages }>
+						<Nav exitLink="http://site.test" />
+					</NavigationContextProvider>
+				</UserContextProvider>
 			</OptionsContextProvider>,
 		);
 		expect( wrapper.toJSON() ).toMatchSnapshot();
@@ -55,9 +59,11 @@ describe( 'Nav', () => {
 		act( () => {
 			render(
 				<OptionsContextProvider>
-					<NavigationContextProvider pages={ testPages }>
-						<Nav exitLink="http://site.test" />
-					</NavigationContextProvider>
+					<UserContextProvider>
+						<NavigationContextProvider pages={ testPages }>
+							<Nav exitLink="http://site.test" />
+						</NavigationContextProvider>
+					</UserContextProvider>
 				</OptionsContextProvider>,
 				container,
 			);
@@ -67,21 +73,5 @@ describe( 'Nav', () => {
 
 		expect( prevButton ).toBeNull();
 		expect( nextButton ).not.toBeNull();
-	} );
-
-	it( 'disables next button on last page', () => {
-		act( () => {
-			render(
-				<OptionsContextProvider>
-					<NavigationContextProvider pages={ [ testPages[ 0 ] ] }>
-						<Nav exitLink="http://site.test" />
-					</NavigationContextProvider>
-				</OptionsContextProvider>,
-				container );
-		} );
-
-		const { nextButton } = getNavButtons( container );
-
-		expect( nextButton.hasAttribute( 'disabled' ) ).toBe( true );
 	} );
 } );
