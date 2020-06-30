@@ -51,7 +51,7 @@ final class AmpSchemaOrgMetadata implements Transformer {
 	 * @param ErrorCollection $errors   Collection of errors that are collected during transformation.
 	 * @return void
 	 */
-	public function transform( Document $document, ErrorCollection $errors ) {
+	public function transform( Document $document, ErrorCollection $errors ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		// @todo How should we handle an existing schema.org script?
 		$schema_org_meta_script = $document->xpath->query( self::SCHEMA_ORG_XPATH )->item( 0 );
 
@@ -59,11 +59,16 @@ final class AmpSchemaOrgMetadata implements Transformer {
 			return;
 		}
 
+		$metadata = $this->configuration->get( AmpSchemaOrgMetadataConfiguration::METADATA );
+
+		if ( ! $metadata ) {
+			return;
+		}
+
 		$script = $document->createElement( Tag::SCRIPT );
 		$script->setAttribute( Attribute::TYPE, Attribute::TYPE_LD_JSON );
 
-		$metadata = $this->configuration->get( AmpSchemaOrgMetadataConfiguration::METADATA );
-		$json     = wp_json_encode( $metadata, JSON_UNESCAPED_UNICODE );
+		$json = wp_json_encode( $metadata, JSON_UNESCAPED_UNICODE );
 		$script->appendChild( $document->createTextNode( $json ) );
 
 		$document->head->appendChild( $script );

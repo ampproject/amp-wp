@@ -5,12 +5,16 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\WithoutBlockPreRendering;
+
 /**
  * Class AMP_Crowdsignal_Embed_Handler_Test
  *
  * @covers AMP_Crowdsignal_Embed_Handler
  */
 class AMP_Crowdsignal_Embed_Handler_Test extends WP_UnitTestCase {
+
+	use WithoutBlockPreRendering;
 
 	/**
 	 * Get conversion data.
@@ -115,8 +119,8 @@ class AMP_Crowdsignal_Embed_Handler_Test extends WP_UnitTestCase {
 	}
 
 	private function adapt_iframe_title( $html ) {
-		// Prior to 5.2, there was no 'title' attribute on an iframe.
-		if ( version_compare( get_bloginfo( 'version' ), '5.2', '<' ) ) {
+		// Prior to 5.1, there was no 'title' attribute on an iframe.
+		if ( version_compare( get_bloginfo( 'version' ), '5.1', '<' ) ) {
 			$html = preg_replace( '/(<iframe.*)(\stitle=".+?")/', '${1}', $html );
 		}
 

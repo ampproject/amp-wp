@@ -121,7 +121,7 @@ if [ "$SCRIPT_DEBUG" != $SCRIPT_DEBUG_CURRENT ]; then
 fi
 
 AMP_NEW_ONBOARDING_CURRENT=$(wp config get --type=constant --format=json AMP_NEW_ONBOARDING | tr -d '\r')
-if [ true != $AMP_NEW_ONBOARDING_CURRENT ]; then
+if [ true != "$AMP_NEW_ONBOARDING_CURRENT" ]; then
 	wp config set AMP_NEW_ONBOARDING true --raw --type=constant --quiet
 	AMP_NEW_ONBOARDING_RESULT=$(wp config get --type=constant --format=json AMP_NEW_ONBOARDING | tr -d '\r')
 	echo -e $(status_message "AMP_NEW_ONBOARDING: $AMP_NEW_ONBOARDING_RESULT...")

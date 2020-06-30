@@ -27,6 +27,9 @@ import { isAMPEnabled } from '../helpers';
  * this only displays a Notice with the error(s), not a toggle.
  * Error(s) are imported as errorMessages via wp_localize_script().
  *
+ * @param {Object} props Component props.
+ * @param {boolean} props.isEnabled Whether toggle is enabled.
+ * @param {Function} props.onChange Callback function for when the toggle is changed.
  * @return {Object} AMPToggle component.
  */
 function AMPToggle( { isEnabled, onChange } ) {

@@ -6,6 +6,10 @@
  */
 
 use AmpProject\AmpWP\Icon;
+use AmpProject\AmpWP\PluginRegistry;
+use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\QueryVars;
+use AmpProject\AmpWP\Services;
 
 /**
  * Class AMP_Validated_URL_Post_Type
@@ -669,7 +673,7 @@ class AMP_Validated_URL_Post_Type {
 		// Query args to be removed from validated URLs.
 		$removable_query_vars = array_merge(
 			wp_removable_query_args(),
-			[ 'preview_id', 'preview_nonce', 'preview' ]
+			[ 'preview_id', 'preview_nonce', 'preview', QueryVars::NOAMP ]
 		);
 
 		// Normalize query args, removing all that are not recognized or which are removable.
@@ -866,19 +870,80 @@ class AMP_Validated_URL_Post_Type {
 	}
 
 	/**
+	 * Get recent validation errors by source.
+	 *
+	 * @since 1.6
+	 * @todo This can be stored in object cache, invalidated whenever a validated URL post is inserted/updated/deleted.
+	 *
+	 * @param int $count Maximum count of validated URLs to gather validation errors from.
+	 * @return array Multidimensional array where root keys are source types, sub-keys are source names, and leaf arrays are the validation error terms, data, and the post IDs the error occurs on.
+	 */
+	public static function get_recent_validation_errors_by_source( $count = 100 ) {
+		$posts = get_posts(
+			[
+				'post_type'      => self::POST_TYPE_SLUG,
+				'posts_per_page' => $count,
+				'orderby'        => 'date',
+				'order'          => 'desc',
+			]
+		);
+
+		$errors_by_source = [];
+
+		foreach ( $posts as $post ) {
+			// Skip validated URLs which are stale since results will be misleading.
+			if ( self::get_post_staleness( $post ) ) {
+				continue;
+			}
+
+			$validation_errors = self::get_invalid_url_validation_errors( $post );
+			if ( empty( $validation_errors ) ) {
+				continue;
+			}
+
+			foreach ( $validation_errors as $validation_error ) {
+				if ( empty( $validation_error['data']['sources'] ) || ! $validation_error['term'] instanceof WP_Term ) {
+					continue;
+				}
+				foreach ( $validation_error['data']['sources'] as $source ) {
+					if ( ! isset( $source['type'], $source['name'] ) ) {
+						continue;
+					}
+					$data = json_decode( $validation_error['term']->description, true );
+					if ( ! is_array( $data ) ) {
+						continue;
+					}
+
+					if ( ! isset( $errors_by_source[ $source['type'] ][ $source['name'] ][ $validation_error['term']->slug ] ) ) {
+						$errors_by_source[ $source['type'] ][ $source['name'] ][ $validation_error['term']->slug ] = [
+							'term'     => $validation_error['term'],
+							'data'     => $data,
+							'post_ids' => [],
+						];
+					}
+					$errors_by_source[ $source['type'] ][ $source['name'] ][ $validation_error['term']->slug ]['post_ids'][] = $post->ID;
+				}
+			}
+		}
+
+		return $errors_by_source;
+	}
+
+	/**
 	 * Get the environment properties which will likely effect whether validation results are stale.
 	 *
 	 * @return array Environment.
 	 */
 	public static function get_validated_environment() {
-		// We want to sort the list of plugins to avoid fluctuations due to plugins fighting for first spot
-		// to constantly invalidate our cache.
-		$plugins = get_option( 'active_plugins', [] );
-		sort( $plugins );
+		/** @var PluginRegistry $plugin_registry */
+		$plugin_registry = Services::get( 'plugin_registry' );
 
 		return [
 			'theme'   => get_stylesheet(),
-			'plugins' => $plugins,
+			'plugins' => wp_list_pluck( $plugin_registry->get_plugins( true ), 'Version' ), // @todo What about multiple plugins being in the same directory?
+			'options' => [
+				Option::THEME_SUPPORT => AMP_Options_Manager::get_option( Option::THEME_SUPPORT ),
+			],
 		];
 	}
 
@@ -890,8 +955,8 @@ class AMP_Validated_URL_Post_Type {
 	 *     Staleness of the validation results. An empty array if the results are fresh.
 	 *
 	 *     @type string $theme   The theme that was active but is no longer. Absent if theme is the same.
-	 *     @type array  $plugins Plugins that used to be active but are no longer, or which are active now but weren't. Absent if the plugins were the same.
-	 *     @type array  $options Options that are now different. Absent if the options were the same.
+	 *     @type array  $plugins Plugins that used to be active but are no longer, or which are active now but weren't. Also includes plugins that have version updates. Absent if the plugins were the same.
+	 *     @type array  $options Options that used to be set. Absent if the options were the same.
 	 * }
 	 */
 	public static function get_post_staleness( $post ) {
@@ -904,19 +969,33 @@ class AMP_Validated_URL_Post_Type {
 		$new_validated_environment = self::get_validated_environment();
 
 		$staleness = [];
+
+		// Theme difference.
 		if ( isset( $old_validated_environment['theme'] ) && $new_validated_environment['theme'] !== $old_validated_environment['theme'] ) {
 			$staleness['theme'] = $old_validated_environment['theme'];
 		}
 
+		// Plugin difference.
 		if ( isset( $old_validated_environment['plugins'] ) ) {
-			$new_active_plugins = array_diff( $new_validated_environment['plugins'], $old_validated_environment['plugins'] );
+			$new_active_plugins = array_diff_assoc( $new_validated_environment['plugins'], $old_validated_environment['plugins'] );
 			if ( ! empty( $new_active_plugins ) ) {
-				$staleness['plugins']['new'] = array_values( $new_active_plugins );
+				$staleness['plugins']['new'] = array_keys( $new_active_plugins );
 			}
-			$old_active_plugins = array_diff( $old_validated_environment['plugins'], $new_validated_environment['plugins'] );
+			$old_active_plugins = array_diff_assoc( $old_validated_environment['plugins'], $new_validated_environment['plugins'] );
 			if ( ! empty( $old_active_plugins ) ) {
-				$staleness['plugins']['old'] = array_values( $old_active_plugins );
+				$staleness['plugins']['old'] = array_keys( $old_active_plugins );
 			}
+		}
+
+		// Options difference.
+		if ( isset( $old_validated_environment['options'] ) ) {
+			$old_options = $old_validated_environment['options'];
+		} else {
+			$old_options = [];
+		}
+		$option_differences = array_diff_assoc( $old_options, $new_validated_environment['options'] );
+		if ( ! empty( $option_differences ) ) {
+			$staleness['options'] = $option_differences;
 		}
 
 		return $staleness;
@@ -1134,6 +1213,8 @@ class AMP_Validated_URL_Post_Type {
 		}
 
 		$output = [];
+		/** @var PluginRegistry $plugin_registry */
+		$plugin_registry = Services::get( 'plugin_registry' );
 		foreach ( wp_array_slice_assoc( $sources, [ 'plugin', 'mu-plugin' ] ) as $type => $slugs ) {
 			$plugin_names = [];
 			$plugin_slugs = array_unique( $slugs );
@@ -1147,7 +1228,7 @@ class AMP_Validated_URL_Post_Type {
 					}
 
 					$plugin_name = $plugin_slug;
-					$plugin      = AMP_Validation_Error_Taxonomy::get_plugin_from_slug( $plugin_slug );
+					$plugin      = $plugin_registry->get_plugin_from_slug( $plugin_slug );
 					if ( $plugin ) {
 						$plugin_name = $plugin['data']['Name'];
 					}
@@ -1303,18 +1384,13 @@ class AMP_Validated_URL_Post_Type {
 				continue;
 			}
 
-			$validity = AMP_Validation_Manager::validate_url( $url );
+			$validity = AMP_Validation_Manager::validate_url_and_store( $url );
 			if ( is_wp_error( $validity ) ) {
 				$errors[] = AMP_Validation_Manager::get_validate_url_error_message( $validity->get_error_code(), $validity->get_error_message() );
 				continue;
 			}
 
-			$validation_errors = wp_list_pluck( $validity['results'], 'error' );
-			self::store_validation_errors(
-				$validation_errors,
-				$validity['url'],
-				wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets', 'php_fatal_error' ] )
-			);
+			$validation_errors      = wp_list_pluck( $validity['results'], 'error' );
 			$unaccepted_error_count = count(
 				array_filter(
 					$validation_errors,
@@ -1571,26 +1647,13 @@ class AMP_Validated_URL_Post_Type {
 				throw new Exception( 'missing_url' );
 			}
 
-			$validity = AMP_Validation_Manager::validate_url( $url );
+			$validity = AMP_Validation_Manager::validate_url_and_store( $url );
 			if ( is_wp_error( $validity ) ) {
 				throw new Exception( AMP_Validation_Manager::get_validate_url_error_message( $validity->get_error_code(), $validity->get_error_message() ) );
 			}
 
-			$errors = wp_list_pluck( $validity['results'], 'error' );
-			$stored = self::store_validation_errors(
-				$errors,
-				$validity['url'],
-				array_merge(
-					[
-						'invalid_url_post' => $post,
-					],
-					wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets', 'php_fatal_error' ] )
-				)
-			);
-			if ( is_wp_error( $stored ) ) {
-				throw new Exception( AMP_Validation_Manager::get_validate_url_error_message( $stored->get_error_code(), $stored->get_error_message() ) );
-			}
-			$redirect = get_edit_post_link( $stored, 'raw' );
+			$errors   = wp_list_pluck( $validity['results'], 'error' );
+			$redirect = get_edit_post_link( $validity['post_id'], 'raw' );
 
 			$error_count = count(
 				array_filter(
@@ -1644,23 +1707,13 @@ class AMP_Validated_URL_Post_Type {
 			return new WP_Error( 'missing_url' );
 		}
 
-		$validity = AMP_Validation_Manager::validate_url( $url );
+		$validity = AMP_Validation_Manager::validate_url_and_store( $url, $post );
 		if ( is_wp_error( $validity ) ) {
 			return $validity;
 		}
 
 		$validation_errors  = wp_list_pluck( $validity['results'], 'error' );
 		$validation_results = [];
-		self::store_validation_errors(
-			$validation_errors,
-			$validity['url'],
-			array_merge(
-				[
-					'invalid_url_post' => $post,
-				],
-				wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets', 'php_fatal_error' ] )
-			)
-		);
 		foreach ( $validation_errors  as $error ) {
 			$sanitized = AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error ); // @todo Consider re-using $validity['results'][x]['sanitized'], unless auto-sanitize is causing problem.
 
@@ -1929,7 +1982,7 @@ class AMP_Validated_URL_Post_Type {
 								esc_html_e( 'A different theme was active when these results were obtained.', 'amp' );
 								echo ' ';
 							} elseif ( ! empty( $staleness['plugins'] ) ) {
-								esc_html_e( 'Different plugins were active when these results were obtained.', 'amp' );
+								esc_html_e( 'Plugins have been updated since these results were obtained.', 'amp' );
 								echo ' ';
 							}
 							esc_html_e( 'Please recheck.', 'amp' );

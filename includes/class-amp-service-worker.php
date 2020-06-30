@@ -153,7 +153,7 @@ class AMP_Service_Worker {
 	 *
 	 * @link https://developers.google.com/web/tools/workbox/guides/common-recipes#google_fonts
 	 * @link https://github.com/ampproject/amp-by-example/blob/4593af61609898043302a101826ddafe7206bfd9/boilerplate-generator/templates/files/serviceworkerJs.js#L76-L103
-	 * @link https://github.com/xwp/pwa-wp/blob/master/integrations/class-wp-service-worker-fonts-integration.php
+	 * @link https://github.com/GoogleChromeLabs/pwa-wp/blob/d0eb52a2f348259123f39941093813f1351c0e21/integrations/class-wp-service-worker-fonts-integration.php
 	 *
 	 * @param WP_Service_Worker_Scripts $service_workers Service workers.
 	 */

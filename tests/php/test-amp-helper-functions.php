@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\QueryVars;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\HandleValidation;
 
@@ -25,6 +26,21 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	const MOCK_SITE_ICON = 'https://example.com/new-site-icon.jpg';
 
 	/**
+	 * Backup of $_SERVER.
+	 *
+	 * @var array
+	 */
+	private $server_var_backup;
+
+	/**
+	 * Set up.
+	 */
+	public function setUp() {
+		parent::setUp();
+		$this->server_var_backup = $_SERVER;
+	}
+
+	/**
 	 * After a test method runs, reset any state in WordPress the test method might have changed.
 	 */
 	public function tearDown() {
@@ -34,6 +50,13 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$wp_scripts     = null;
 		$show_admin_bar = null;
 		$pagenow        = 'index.php'; // Since clean_up_global_scope() doesn't.
+		$_SERVER        = $this->server_var_backup;
+
+		global $wp_rewrite;
+		delete_option( 'permalink_structure' );
+		$wp_rewrite->use_trailing_slashes = true;
+		$wp_rewrite->init();
+		$wp_rewrite->flush_rules();
 
 		if ( class_exists( 'WP_Block_Type_Registry' ) ) {
 			foreach ( WP_Block_Type_Registry::get_instance()->get_all_registered() as $block ) {
@@ -72,29 +95,135 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Get data for testing amp_get_current_url().
+	 *
+	 * @return array
+	 */
+	public function get_amp_get_current_url_test_data() {
+		$assertions = [
+			'path'                        => function () {
+				$_SERVER['REQUEST_URI'] = wp_slash( '/foo/' );
+				$this->assertEquals(
+					home_url( '/foo/' ),
+					amp_get_current_url()
+				);
+			},
+
+			'query'                       => function () {
+				$_SERVER['REQUEST_URI'] = wp_slash( '/bar/?baz=1' );
+				$this->assertEquals(
+					home_url( '/bar/?baz=1' ),
+					amp_get_current_url()
+				);
+			},
+
+			'idn_domain'                  => function () {
+				$this->set_home_url_with_filter( 'https://⚡️.example.com' );
+				$this->go_to( '/?s=lightning' );
+				$this->assertEquals( 'https://⚡️.example.com/?s=lightning', amp_get_current_url() );
+			},
+
+			'punycode_domain'             => function () {
+				$this->set_home_url_with_filter( 'https://xn--57h.example.com' );
+				$this->go_to( '/?s=thunder' );
+				$this->assertEquals( 'https://xn--57h.example.com/?s=thunder', amp_get_current_url() );
+			},
+
+			'ip_host'                     => function () {
+				$this->set_home_url_with_filter( 'http://127.0.0.1:1234' );
+				$this->go_to( '/' );
+				$this->assertEquals( 'http://127.0.0.1:1234/', amp_get_current_url() );
+			},
+
+			'permalink'                   => function () {
+				global $wp_rewrite;
+				update_option( 'permalink_structure', '/%year%/%monthnum%/%day%/%postname%/' );
+				$wp_rewrite->use_trailing_slashes = true;
+				$wp_rewrite->init();
+				$wp_rewrite->flush_rules();
+
+				$permalink = get_permalink( $this->factory()->post->create() );
+
+				$this->go_to( $permalink );
+				$this->assertEquals( $permalink, amp_get_current_url() );
+			},
+
+			'unset_request_uri'           => function () {
+				unset( $_SERVER['REQUEST_URI'] );
+				$this->assertEquals( home_url( '/' ), amp_get_current_url() );
+			},
+
+			'empty_request_uri'           => function () {
+				$_SERVER['REQUEST_URI'] = '';
+				$this->assertEquals( home_url( '/' ), amp_get_current_url() );
+			},
+
+			'no_slash_prefix_request_uri' => function () {
+				$_SERVER['REQUEST_URI'] = 'foo/';
+				$this->assertEquals( home_url( '/foo/' ), amp_get_current_url() );
+			},
+
+			'reconstructed_home_url'      => function () {
+				$_SERVER['HTTPS']       = 'on';
+				$_SERVER['REQUEST_URI'] = '/about/';
+				$_SERVER['HTTP_HOST']   = 'foo.example.org';
+				$this->set_home_url_with_filter( '/' );
+				$this->assertEquals(
+					'https://foo.example.org/about/',
+					amp_get_current_url()
+				);
+			},
+
+			'home_url_with_trimmings'     => function () {
+				$this->set_home_url_with_filter( 'https://user:pass@example.museum:8080' );
+				$_SERVER['REQUEST_URI'] = '/about/';
+				$this->assertEquals(
+					'https://user:pass@example.museum:8080/about/',
+					amp_get_current_url()
+				);
+			},
+
+			'complete_parse_fail'         => function () {
+				$_SERVER['HTTP_HOST'] = 'env.example.org';
+				unset( $_SERVER['REQUEST_URI'] );
+				$this->set_home_url_with_filter( ':' );
+				$this->assertEquals(
+					'http://env.example.org/',
+					amp_get_current_url()
+				);
+			},
+		];
+		return array_map(
+			function ( $assertion ) {
+				return [ $assertion ];
+			},
+			$assertions
+		);
+	}
+
+	/**
+	 * Set home_url with filter.
+	 *
+	 * @param string $home_url Home URL.
+	 */
+	private function set_home_url_with_filter( $home_url ) {
+		add_filter(
+			'home_url',
+			static function() use ( $home_url ) {
+				return $home_url;
+			}
+		);
+	}
+
+	/**
 	 * Test amp_get_current_url().
 	 *
+	 * @param callable $assert Assert.
+	 * @dataProvider get_amp_get_current_url_test_data
 	 * @covers ::amp_get_current_url()
 	 */
-	public function test_amp_get_current_url() {
-		$request_uris = [
-			'/foo',
-			'/bar?baz',
-			null,
-		];
-
-		foreach ( $request_uris as $request_uri ) {
-			if ( $request_uri ) {
-				$_SERVER['REQUEST_URI'] = wp_slash( $request_uri );
-			} else {
-				unset( $_SERVER['REQUEST_URI'] );
-			}
-			$this->assertEquals(
-				home_url( $request_uri ?: '/' ),
-				amp_get_current_url(),
-				sprintf( 'Unexpected for URI: %s', wp_json_encode( $request_uri, 64 /* JSON_UNESCAPED_SLASHES */ ) )
-			);
-		}
+	public function test_amp_get_current_url( $assert ) {
+		call_user_func( $assert );
 	}
 
 	/**
@@ -492,36 +621,44 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test is_amp_endpoint() function.
+	 * Test is_amp_available() and is_amp_endpoint() functions.
 	 *
+	 * @covers ::is_amp_available()
 	 * @covers ::is_amp_endpoint()
 	 */
 	public function test_is_amp_endpoint() {
 		$this->go_to( get_permalink( self::factory()->post->create() ) );
+		$this->assertTrue( is_amp_available() );
 		$this->assertFalse( is_amp_endpoint() );
 
 		// Legacy query var.
 		set_query_var( amp_get_slug(), '' );
+		$this->assertTrue( is_amp_available() );
 		$this->assertTrue( is_amp_endpoint() );
 		unset( $GLOBALS['wp_query']->query_vars[ amp_get_slug() ] );
+		$this->assertTrue( is_amp_available() );
 		$this->assertFalse( is_amp_endpoint() );
 
 		// Transitional theme support.
 		add_theme_support( AMP_Theme_Support::SLUG, [ 'template_dir' => './' ] );
 		$_GET['amp'] = '';
+		$this->assertTrue( is_amp_available() );
 		$this->assertTrue( is_amp_endpoint() );
 		unset( $_GET['amp'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$this->assertTrue( is_amp_available() );
 		$this->assertFalse( is_amp_endpoint() );
 		remove_theme_support( AMP_Theme_Support::SLUG );
 
 		// Standard theme support.
 		add_theme_support( AMP_Theme_Support::SLUG );
+		$this->assertTrue( is_amp_available() );
 		$this->assertTrue( is_amp_endpoint() );
 
 		// Special core pages.
 		$pages = [ 'wp-login.php', 'wp-signup.php', 'wp-activate.php' ];
 		foreach ( $pages as $page ) {
 			$GLOBALS['pagenow'] = $page;
+			$this->assertFalse( is_amp_available() );
 			$this->assertFalse( is_amp_endpoint() );
 		}
 		unset( $GLOBALS['pagenow'] );
@@ -535,20 +672,54 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 		// A post shouldn't be an AMP endpoint, as it was unchecked in the UI via the options above.
 		$this->go_to( self::factory()->post->create() );
+		$this->assertFalse( is_amp_available() );
 		$this->assertFalse( is_amp_endpoint() );
 
 		// The homepage shouldn't be an AMP endpoint, as it was also unchecked in the UI.
 		$this->go_to( home_url( '/' ) );
+		$this->assertFalse( is_amp_available() );
 		$this->assertFalse( is_amp_endpoint() );
 
 		// When the user passes a flag to the WP-CLI command, it forces AMP validation no matter whether the user disabled AMP on any template.
 		AMP_Validation_Manager::$is_validate_request = true;
+		$this->assertTrue( is_amp_available() );
+		$this->assertTrue( is_amp_endpoint() );
+	}
+
+	/**
+	 * Test is_amp_available() function when availability is blocked due to validation errors.
+	 *
+	 * @covers ::is_amp_available()
+	 * @covers ::is_amp_endpoint()
+	 */
+	public function test_is_amp_available_when_noamp_due_to_validation_errors() {
+		$post_id = self::factory()->post->create();
+		add_theme_support( 'amp', [ 'paired' => true ] );
+		$this->assertFalse( amp_is_canonical() );
+
+		$this->go_to( amp_get_permalink( $post_id ) );
+		$this->assertTrue( is_amp_available() );
+		$this->assertTrue( is_amp_endpoint() );
+
+		$this->go_to( get_permalink( $post_id ) );
+		$this->assertTrue( is_amp_available() );
+		$this->assertFalse( is_amp_endpoint() );
+
+		$this->go_to( add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_AVAILABLE, get_permalink( $post_id ) ) );
+		$this->assertFalse( is_amp_available() );
+		$this->assertFalse( is_amp_endpoint() );
+
+		// Now go AMP-first.
+		add_theme_support( 'amp', [ 'paired' => false ] );
+		$this->go_to( add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_AVAILABLE, get_permalink( $post_id ) ) );
+		$this->assertTrue( is_amp_available() );
 		$this->assertTrue( is_amp_endpoint() );
 	}
 
 	/**
 	 * Test is_amp_endpoint() function for post embeds and feeds.
 	 *
+	 * @covers ::is_amp_available()
 	 * @covers ::is_amp_endpoint()
 	 * global WP_Query $wp_the_query
 	 */
@@ -557,18 +728,22 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$post_id = self::factory()->post->create_and_get()->ID;
 
 		$this->go_to( home_url( "?p=$post_id" ) );
+		$this->assertTrue( is_amp_available() );
 		$this->assertTrue( is_amp_endpoint() );
 
 		$this->go_to( home_url( "?p=$post_id&embed=1" ) );
+		$this->assertFalse( is_amp_available() );
 		$this->assertFalse( is_amp_endpoint() );
 
 		$this->go_to( home_url( '?feed=rss' ) );
+		$this->assertFalse( is_amp_available() );
 		$this->assertFalse( is_amp_endpoint() );
 
 		if ( class_exists( 'WP_Service_Workers' ) && defined( 'WP_Service_Workers::QUERY_VAR' ) && function_exists( 'pwa_add_error_template_query_var' ) ) {
 			$this->go_to( home_url( "?p=$post_id" ) );
 			global $wp_query;
 			$wp_query->set( WP_Service_Workers::QUERY_VAR, WP_Service_Workers::SCOPE_FRONT );
+			$this->assertFalse( is_amp_available() );
 			$this->assertFalse( is_amp_endpoint() );
 		}
 	}
@@ -576,38 +751,89 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test is_amp_endpoint() function before the parse_query action happens.
 	 *
+	 * @covers ::is_amp_available()
 	 * @covers ::is_amp_endpoint()
-	 * @expectedIncorrectUsage is_amp_endpoint
+	 * @expectedIncorrectUsage is_amp_available
 	 */
-	public function test_is_amp_endpoint_before_parse_query_action() {
+	public function test_is_amp_available_before_parse_query_action() {
 		global $wp_actions;
 		unset( $wp_actions['parse_query'] );
 		$this->assertFalse( is_amp_endpoint() );
+		$this->assertFalse( is_amp_available() );
 	}
 
 	/**
 	 * Test is_amp_endpoint() function when there is no WP_Query.
 	 *
+	 * @covers ::is_amp_available()
 	 * @covers ::is_amp_endpoint()
-	 * @expectedIncorrectUsage is_amp_endpoint
+	 * @expectedIncorrectUsage is_amp_available
 	 */
 	public function test_is_amp_endpoint_when_no_wp_query() {
 		global $wp_query;
 		$wp_query = null;
+		$this->assertFalse( is_amp_available() );
 		$this->assertFalse( is_amp_endpoint() );
 	}
 
 	/**
-	 * Test is_amp_endpoint() function before the wp action happens.
+	 * Test is_amp_endpoint() function before the wp action happens in Standard mode.
 	 *
 	 * @covers ::is_amp_endpoint()
-	 * @expectedIncorrectUsage is_amp_endpoint
+	 * @covers ::is_amp_available()
+	 * @expectedIncorrectUsage is_amp_available
 	 */
-	public function test_is_amp_endpoint_before_wp_action() {
+	public function test_is_amp_endpoint_before_wp_action_for_standard_mode() {
 		add_theme_support( 'amp' );
 		global $wp_actions;
 		unset( $wp_actions['wp'] );
+		$this->assertTrue( AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) );
+		$this->assertTrue( amp_is_canonical() );
+		$this->assertTrue( is_amp_available(), 'Expected available even before wp action because AMP-First' );
 		$this->assertTrue( is_amp_endpoint() );
+
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
+		$this->assertFalse( is_amp_available() );
+		$this->assertFalse( is_amp_endpoint() );
+	}
+
+	/**
+	 * Test is_amp_endpoint() function before the wp action happens in Reader mode.
+	 *
+	 * @covers ::is_amp_endpoint()
+	 * @covers ::is_amp_available()
+	 * @expectedIncorrectUsage is_amp_available
+	 */
+	public function test_is_amp_endpoint_before_wp_action_for_reader_mode() {
+		remove_theme_support( 'amp' );
+		$this->go_to( home_url( '/' ) );
+		global $wp_actions;
+		unset( $wp_actions['wp'] );
+		$this->assertFalse( amp_is_canonical() );
+		$this->assertFalse( is_amp_available() );
+		$this->assertFalse( is_amp_endpoint() );
+	}
+
+	/**
+	 * Test is_amp_endpoint() function before the wp action happens in Transitional mode (with no AMP query var present).
+	 *
+	 * @covers ::is_amp_endpoint()
+	 * @covers ::is_amp_available()
+	 * @expectedIncorrectUsage is_amp_available
+	 */
+	public function test_is_amp_endpoint_before_wp_action_for_transitional_mode_with_query_var() {
+		add_theme_support( 'amp', [ 'paired' => true ] );
+		$this->go_to( add_query_arg( amp_get_slug(), '1', home_url( '/' ) ) );
+		global $wp_actions;
+		unset( $wp_actions['wp'] );
+		$this->assertTrue( AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) );
+		$this->assertFalse( amp_is_canonical() );
+		$this->assertTrue( is_amp_available() );
+		$this->assertTrue( is_amp_endpoint() );
+
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
+		$this->assertFalse( is_amp_available() );
+		$this->assertFalse( is_amp_endpoint() );
 	}
 
 	/**
@@ -841,16 +1067,16 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertEquals( $handlers, $this->last_filter_call['args'][0] );
 		$this->assertEquals( $post, $this->last_filter_call['args'][1] );
 
-		// Make sure the style and whitelist sanitizers are always at the end, even after filtering.
+		// Make sure the style and validating sanitizers are always at the end, even after filtering.
 		add_filter(
 			'amp_content_sanitizers',
 			static function( $classes ) {
-				$classes['Even_After_Whitelist_Sanitizer'] = [];
+				$classes['Even_After_Validating_Sanitizer'] = [];
 				return $classes;
 			}
 		);
 		$ordered_sanitizers = array_keys( amp_get_content_sanitizers() );
-		$this->assertEquals( 'Even_After_Whitelist_Sanitizer', $ordered_sanitizers[ count( $ordered_sanitizers ) - 4 ] );
+		$this->assertEquals( 'Even_After_Validating_Sanitizer', $ordered_sanitizers[ count( $ordered_sanitizers ) - 4 ] );
 		$this->assertEquals( 'AMP_Style_Sanitizer', $ordered_sanitizers[ count( $ordered_sanitizers ) - 3 ] );
 		$this->assertEquals( 'AMP_Meta_Sanitizer', $ordered_sanitizers[ count( $ordered_sanitizers ) - 2 ] );
 		$this->assertEquals( 'AMP_Tag_And_Attribute_Sanitizer', $ordered_sanitizers[ count( $ordered_sanitizers ) - 1 ] );

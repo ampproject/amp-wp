@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\Admin\SiteHealth;
+use AmpProject\AmpWP\AmpWpPluginFactory;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\PrivateAccess;
@@ -32,7 +33,12 @@ class Test_Site_Health extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
-		$this->instance = new SiteHealth();
+
+		$injector = AmpWpPluginFactory::create()
+			->get_container()
+			->get( 'injector' );
+
+		$this->instance = $injector->make( SiteHealth::class );
 	}
 
 	/**
@@ -48,13 +54,15 @@ class Test_Site_Health extends WP_UnitTestCase {
 	/**
 	 * Test init.
 	 *
-	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::init()
+	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::register()
 	 */
-	public function test_init() {
-		$this->instance->init();
-		$this->assertEquals( 10, has_action( 'site_status_tests', [ $this->instance, 'add_tests' ] ) );
-		$this->assertEquals( 10, has_action( 'debug_information', [ $this->instance, 'add_debug_information' ] ) );
-		$this->assertEquals( 10, has_action( 'site_status_test_php_modules', [ $this->instance, 'add_extensions' ] ) );
+	public function test_register() {
+		$this->instance->register();
+		$this->assertEquals( 10, has_filter( 'site_status_tests', [ $this->instance, 'add_tests' ] ) );
+		$this->assertEquals( 10, has_filter( 'debug_information', [ $this->instance, 'add_debug_information' ] ) );
+		$this->assertEquals( 10, has_filter( 'site_status_test_result', [ $this->instance, 'modify_test_result' ] ) );
+		$this->assertEquals( 10, has_filter( 'site_status_test_php_modules', [ $this->instance, 'add_extensions' ] ) );
+		$this->assertEquals( 10, has_action( 'admin_print_styles-site-health.php', [ $this->instance, 'add_styles' ] ) );
 	}
 
 	/**
@@ -229,6 +237,58 @@ class Test_Site_Health extends WP_UnitTestCase {
 			$this->assertArrayHasKey( $key, $debug_info['amp_wp']['fields'], "Expected key: $key" );
 			$this->assertFalse( $debug_info['amp_wp']['fields'][ $key ]['private'], "Expected private for key: $key" );
 		}
+	}
+
+	/**
+	 * Get test data for test_modify_test_result.
+	 *
+	 * @return array[] Test data.
+	 */
+	public function get_test_result() {
+		return [
+			'empty_result'                    => [
+				[],
+			],
+			'good_https_status_result'        => [
+				[
+					'test'        => 'https_status',
+					'status'      => 'good',
+					'description' => '',
+				],
+			],
+			'recommended_https_status_result' => [
+				[
+					'test'        => 'https_status',
+					'status'      => 'recommended',
+					'description' => '',
+				],
+				[
+					'test'        => 'https_status',
+					'status'      => 'critical',
+					'description' => '<p>Additionally, AMP requires HTTPS for most components to work properly, including iframes and videos.</p>',
+				],
+			],
+		];
+	}
+
+	/**
+	 * Test modify_test_result.
+	 *
+	 * @dataProvider get_test_result
+	 *
+	 * @covers \AmpProject\AmpWP\Admin\SiteHealth::modify_test_result()
+	 *
+	 * @param array $test_data Data from Site Health test.
+	 * @param array $expected  Expected modified test result.
+	 */
+	public function test_modify_test_result( $test_data, $expected = null ) {
+		$test_result = $this->instance->modify_test_result( $test_data );
+
+		if ( ! $expected ) {
+			$expected = $test_data;
+		}
+
+		$this->assertEquals( $expected, $test_result );
 	}
 
 	/**

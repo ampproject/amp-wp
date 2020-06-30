@@ -7,7 +7,9 @@
  */
 
 use AmpProject\AmpWP\ConfigurationArgument;
+use AmpProject\AmpWP\MobileRedirection;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\QueryVars;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\PrivateAccess;
 use AmpProject\Dom\Document;
@@ -1844,7 +1846,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_start_output_buffering() {
 		wp();
-		if ( ! function_exists( 'newrelic_disable_autorum ' ) ) {
+		if ( ! function_exists( 'newrelic_disable_autorum' ) ) {
 
 			/**
 			 * Define newrelic_disable_autorum to allow passing line.
@@ -2104,7 +2106,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		add_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
-		$wp_widget_factory = new WP_Widget_Factory();
+		$wp_widget_factory->widgets = [];
 		wp_widgets_init();
 
 		$this->assertTrue( is_amp_endpoint() );
@@ -2308,16 +2310,16 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Theme_Support_Sanitizer_Counter::$count = 0;
 		AMP_Validation_Manager::reset_validation_results();
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
-		$this->assertStringStartsWith( 'Redirecting to non-AMP version', $sanitized_html );
+		$this->assertStringStartsWith( 'Redirecting', $sanitized_html );
 		$this->assertCount( 1, $redirects );
-		$this->assertEquals( home_url( '/' ), $redirects[0] );
+		$this->assertEquals( add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_AVAILABLE, home_url( '/' ) ), $redirects[0] );
 		$this->assertEquals( 1, AMP_Theme_Support_Sanitizer_Counter::$count );
 
 		AMP_Validation_Manager::reset_validation_results();
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
-		$this->assertStringStartsWith( 'Redirecting to non-AMP version', $sanitized_html );
+		$this->assertStringStartsWith( 'Redirecting', $sanitized_html );
 		$this->assertCount( 2, $redirects );
-		$this->assertEquals( home_url( '/' ), $redirects[0] );
+		$this->assertEquals( add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_AVAILABLE, home_url( '/' ) ), $redirects[0] );
 		$this->assertEquals( 2, AMP_Theme_Support_Sanitizer_Counter::$count, 'Expected sanitizer to be invoked again.' );
 
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
@@ -2325,16 +2327,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		AMP_Validation_Manager::reset_validation_results();
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
-		$this->assertStringStartsWith( 'Redirecting to non-AMP version', $sanitized_html );
-		$this->assertCount( 3, $redirects );
-		$this->assertEquals( home_url( '/?amp_validation_errors=1' ), $redirects[0] );
+		$this->assertStringStartsWith( '<!DOCTYPE html>', $sanitized_html, 'Expected page instead of redirect since admin logged-in.' );
+		$this->assertCount( 2, $redirects );
 		$this->assertEquals( 3, AMP_Theme_Support_Sanitizer_Counter::$count, 'Expected sanitizer be invoked after validation changed.' );
 
 		AMP_Validation_Manager::reset_validation_results();
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
-		$this->assertStringStartsWith( 'Redirecting to non-AMP version', $sanitized_html );
-		$this->assertCount( 4, $redirects );
-		$this->assertEquals( home_url( '/?amp_validation_errors=1' ), $redirects[0] );
+		$this->assertStringStartsWith( '<!DOCTYPE html>', $sanitized_html, 'Expected page instead of redirect since admin logged-in.' );
+		$this->assertCount( 2, $redirects );
 		$this->assertEquals( 4, AMP_Theme_Support_Sanitizer_Counter::$count, 'Expected sanitizer to be invoked again although validation results are cached.' );
 	}
 
@@ -2434,11 +2434,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test AMP_Theme_Support::whitelist_layout_in_wp_kses_allowed_html().
+	 * Test AMP_Theme_Support::include_layout_in_wp_kses_allowed_html().
 	 *
-	 * @see AMP_Theme_Support::whitelist_layout_in_wp_kses_allowed_html()
+	 * @see AMP_Theme_Support::include_layout_in_wp_kses_allowed_html()
 	 */
-	public function test_whitelist_layout_in_wp_kses_allowed_html() {
+	public function test_include_layout_in_wp_kses_allowed_html() {
 		$attribute             = 'data-amp-layout';
 		$image_no_dimensions   = [
 			'img' => [
@@ -2453,16 +2453,16 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			]
 		);
 
-		$this->assertEquals( [], AMP_Theme_Support::whitelist_layout_in_wp_kses_allowed_html( [] ) );
-		$this->assertEquals( $image_no_dimensions, AMP_Theme_Support::whitelist_layout_in_wp_kses_allowed_html( $image_no_dimensions ) );
+		$this->assertEquals( [], AMP_Theme_Support::include_layout_in_wp_kses_allowed_html( [] ) );
+		$this->assertEquals( $image_no_dimensions, AMP_Theme_Support::include_layout_in_wp_kses_allowed_html( $image_no_dimensions ) );
 
-		$context = AMP_Theme_Support::whitelist_layout_in_wp_kses_allowed_html( $image_with_dimensions );
+		$context = AMP_Theme_Support::include_layout_in_wp_kses_allowed_html( $image_with_dimensions );
 		$this->assertTrue( $context['img'][ $attribute ] );
 
-		$context = AMP_Theme_Support::whitelist_layout_in_wp_kses_allowed_html( $image_with_dimensions );
+		$context = AMP_Theme_Support::include_layout_in_wp_kses_allowed_html( $image_with_dimensions );
 		$this->assertTrue( $context['img'][ $attribute ] );
 
-		add_filter( 'wp_kses_allowed_html', 'AMP_Theme_Support::whitelist_layout_in_wp_kses_allowed_html', 10, 2 );
+		add_filter( 'wp_kses_allowed_html', 'AMP_Theme_Support::include_layout_in_wp_kses_allowed_html', 10, 2 );
 		$image = '<img data-amp-layout="fill">';
 		$this->assertEquals( $image, wp_kses_post( $image ) );
 	}

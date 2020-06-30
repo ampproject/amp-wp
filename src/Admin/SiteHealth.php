@@ -11,6 +11,10 @@ use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AMP_Post_Type_Support;
 use AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching;
+use AmpProject\AmpWP\Infrastructure\Conditional;
+use AmpProject\AmpWP\Infrastructure\Delayed;
+use AmpProject\AmpWP\Infrastructure\Registerable;
+use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
 
 /**
@@ -20,18 +24,51 @@ use AmpProject\AmpWP\Option;
  *
  * @since 1.5.0
  */
-final class SiteHealth {
+final class SiteHealth implements Service, Registerable, Delayed, Conditional {
+
+	/**
+	 * Service that monitors and controls the CSS transient caching.
+	 *
+	 * @var MonitorCssTransientCaching
+	 */
+	private $css_transient_caching;
+
+	/**
+	 * Check whether the conditional object is currently needed.
+	 *
+	 * @return bool Whether the conditional object is needed.
+	 */
+	public static function is_needed() {
+		return is_admin() && ! wp_doing_ajax();
+	}
+
+	/**
+	 * Get the action to use for registering the service.
+	 *
+	 * @return string Registration action to use.
+	 */
+	public static function get_registration_action() {
+		return 'wp_loaded';
+	}
+
+	/**
+	 * SiteHealth constructor.
+	 *
+	 * @param MonitorCssTransientCaching $css_transient_caching CSS transient caching monitoring service.
+	 */
+	public function __construct( MonitorCssTransientCaching $css_transient_caching ) {
+		$this->css_transient_caching = $css_transient_caching;
+	}
 
 	/**
 	 * Adds the filters.
 	 */
-	public function init() {
+	public function register() {
 		add_filter( 'site_status_tests', [ $this, 'add_tests' ] );
 		add_filter( 'debug_information', [ $this, 'add_debug_information' ] );
+		add_filter( 'site_status_test_result', [ $this, 'modify_test_result' ] );
 		add_filter( 'site_status_test_php_modules', [ $this, 'add_extensions' ] );
-		add_action( 'admin_print_styles', [ $this, 'add_styles' ] );
-
-		( new ReenableCssTransientCachingAjaxAction() )->register();
+		add_action( 'admin_print_styles-site-health.php', [ $this, 'add_styles' ] );
 	}
 
 	/**
@@ -393,18 +430,40 @@ final class SiteHealth {
 						],
 						'amp_css_transient_caching_transient_count' => [
 							'label'   => esc_html__( 'Number of stylesheet transient cache entries', 'amp' ),
-							'value'   => MonitorCssTransientCaching::query_css_transient_count(),
+							'value'   => $this->css_transient_caching->query_css_transient_count(),
 							'private' => false,
 						],
 						'amp_css_transient_caching_time_series' => [
 							'label'   => esc_html__( 'Calculated time series for monitoring the stylesheet caching', 'amp' ),
-							'value'   => MonitorCssTransientCaching::get_time_series(),
+							'value'   => $this->css_transient_caching->get_time_series(),
 							'private' => false,
 						],
 					],
 				],
 			]
 		);
+	}
+
+	/**
+	 * Modify test results.
+	 *
+	 * @param array $test_result Site Health test result.
+	 *
+	 * @return array Modified test result.
+	 */
+	public function modify_test_result( $test_result ) {
+		// Set the `https_status` test status to critical if its current status is recommended, along with adding to the
+		// description for why its required for AMP.
+		if (
+			isset( $test_result['test'], $test_result['status'], $test_result['description'] )
+			&& 'https_status' === $test_result['test']
+			&& 'recommended' === $test_result['status']
+		) {
+			$test_result['status']       = 'critical';
+			$test_result['description'] .= '<p>' . __( 'Additionally, AMP requires HTTPS for most components to work properly, including iframes and videos.', 'amp' ) . '</p>';
+		}
+
+		return $test_result;
 	}
 
 	/**
@@ -492,7 +551,7 @@ final class SiteHealth {
 		/** This filter is documented in src/BackgroundTask/MonitorCssTransientCaching.php */
 		$threshold = (float) apply_filters(
 			'amp_css_transient_monitoring_threshold',
-			MonitorCssTransientCaching::DEFAULT_THRESHOLD
+			$this->css_transient_caching->get_default_threshold()
 		);
 
 		return "{$threshold} transients per day";
@@ -507,7 +566,7 @@ final class SiteHealth {
 		/** This filter is documented in src/BackgroundTask/MonitorCssTransientCaching.php */
 		$sampling_range = (float) apply_filters(
 			'amp_css_transient_monitoring_sampling_range',
-			MonitorCssTransientCaching::DEFAULT_SAMPLING_RANGE
+			$this->css_transient_caching->get_default_sampling_range()
 		);
 
 		return "{$sampling_range} days";

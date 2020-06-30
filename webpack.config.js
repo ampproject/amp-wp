@@ -3,7 +3,6 @@
  */
 const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
-const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const OptimizeCSSAssetsPlugin = require( 'optimize-css-assets-webpack-plugin' );
 const RtlCssPlugin = require( 'rtlcss-webpack-plugin' );
 const TerserPlugin = require( 'terser-webpack-plugin' );
@@ -14,14 +13,42 @@ const WebpackBar = require( 'webpackbar' );
  */
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
-const { defaultRequestToExternal, defaultRequestToHandle, camelCaseDash } = require( '@wordpress/dependency-extraction-webpack-plugin/util' );
+const { defaultRequestToExternal, defaultRequestToHandle, camelCaseDash } = require( '@wordpress/dependency-extraction-webpack-plugin/lib/util' );
 
 const sharedConfig = {
+	...defaultConfig,
 	output: {
 		path: path.resolve( process.cwd(), 'assets', 'js' ),
 		filename: '[name].js',
 		chunkFilename: '[name].js',
 	},
+	module: {
+		...defaultConfig.module,
+		rules: [
+			...defaultConfig.module.rules.map(
+				( rule ) => {
+					// @todo Can remove once the default config no longer excludes excludes CSS related to Gutenberg components.
+					if ( rule.test.source === '\\.css$' ) {
+						rule.exclude = /node_modules\/(?!@wordpress)/;
+					}
+					return rule;
+				},
+			),
+		],
+	},
+	plugins: [
+		...defaultConfig.plugins.map(
+			( plugin ) => {
+				if ( plugin.constructor.name === 'MiniCssExtractPlugin' ) {
+					plugin.options.filename = '../css/[name].css';
+				}
+				return plugin;
+			},
+		),
+		new RtlCssPlugin( {
+			filename: '../css/[name]-rtl.css',
+		} ),
+	],
 	optimization: {
 		minimizer: [
 			new TerserPlugin( {
@@ -41,7 +68,6 @@ const sharedConfig = {
 };
 
 const ampValidation = {
-	...defaultConfig,
 	...sharedConfig,
 	entry: {
 		'amp-validated-url-post-edit-screen': './assets/src/amp-validation/amp-validated-url-post-edit-screen.js',
@@ -50,7 +76,7 @@ const ampValidation = {
 		'amp-validation-single-error-url-details': './assets/src/amp-validation/amp-validation-single-error-url-details.js',
 	},
 	plugins: [
-		...defaultConfig.plugins,
+		...sharedConfig.plugins,
 		new WebpackBar( {
 			name: 'AMP Validation',
 			color: '#1c5fec',
@@ -59,7 +85,6 @@ const ampValidation = {
 };
 
 const blockEditor = {
-	...defaultConfig,
 	...sharedConfig,
 	externals: {
 		// Make localized data importable.
@@ -69,28 +94,8 @@ const blockEditor = {
 		'amp-block-editor': './assets/src/block-editor/index.js',
 		'amp-block-validation': './assets/src/block-validation/index.js',
 	},
-	module: {
-		...defaultConfig.module,
-		rules: [
-			...defaultConfig.module.rules,
-			{
-				test: /\.css$/,
-				use: [
-					MiniCssExtractPlugin.loader,
-					'css-loader',
-					'postcss-loader',
-				],
-			},
-		],
-	},
 	plugins: [
-		...defaultConfig.plugins,
-		new MiniCssExtractPlugin( {
-			filename: '../css/[name]-compiled.css',
-		} ),
-		new RtlCssPlugin( {
-			filename: '../css/[name]-compiled-rtl.css',
-		} ),
+		...sharedConfig.plugins,
 		new WebpackBar( {
 			name: 'Block Editor',
 			color: '#1773a8',
@@ -99,13 +104,12 @@ const blockEditor = {
 };
 
 const classicEditor = {
-	...defaultConfig,
 	...sharedConfig,
 	entry: {
 		'amp-post-meta-box': './assets/src/classic-editor/amp-post-meta-box.js',
 	},
 	plugins: [
-		...defaultConfig.plugins,
+		...sharedConfig.plugins,
 		new WebpackBar( {
 			name: 'Classic Editor',
 			color: '#dc3232',
@@ -114,35 +118,14 @@ const classicEditor = {
 };
 
 const admin = {
-	...defaultConfig,
 	...sharedConfig,
 	entry: {
 		'amp-validation-tooltips': './assets/src/admin/amp-validation-tooltips.js',
 		'amp-paired-browsing-app': './assets/src/admin/paired-browsing/app.js',
 		'amp-paired-browsing-client': './assets/src/admin/paired-browsing/client.js',
 	},
-	module: {
-		...defaultConfig.module,
-		rules: [
-			...defaultConfig.module.rules,
-			{
-				test: /\.css$/,
-				use: [
-					MiniCssExtractPlugin.loader,
-					'css-loader',
-					'postcss-loader',
-				],
-			},
-		],
-	},
 	plugins: [
-		...defaultConfig.plugins,
-		new MiniCssExtractPlugin( {
-			filename: '../css/[name]-compiled.css',
-		} ),
-		new RtlCssPlugin( {
-			filename: '../css/[name]-compiled-rtl.css',
-		} ),
+		...sharedConfig.plugins,
 		new WebpackBar( {
 			name: 'Admin',
 			color: '#67b255',
@@ -151,7 +134,6 @@ const admin = {
 };
 
 const customizer = {
-	...defaultConfig,
 	...sharedConfig,
 	entry: {
 		'amp-customize-controls': './assets/src/customizer/amp-customize-controls.js',
@@ -159,7 +141,7 @@ const customizer = {
 		'amp-customizer-design-preview': './assets/src/customizer/amp-customizer-design-preview.js',
 	},
 	plugins: [
-		...defaultConfig.plugins,
+		...sharedConfig.plugins,
 		new WebpackBar( {
 			name: 'Customizer',
 			color: '#f27136',
@@ -191,7 +173,6 @@ const gutenbergPackages = [ '@babel/polyfill', '@wordpress/dom-ready', '@wordpre
 ).filter( ( packageData ) => packageData );
 
 const wpPolyfills = {
-	...defaultConfig,
 	...sharedConfig,
 	externals: {},
 	entry: gutenbergPackages.reduce(
@@ -225,12 +206,14 @@ const wpPolyfills = {
 				return defaultRequestToExternal( request );
 			},
 		} ),
-		new CopyWebpackPlugin( [
-			{
-				from: 'node_modules/lodash/lodash.js',
-				to: './vendor/lodash.js',
-			},
-		] ),
+		new CopyWebpackPlugin( {
+			patterns: [
+				{
+					from: 'node_modules/lodash/lodash.js',
+					to: './vendor/lodash.js',
+				},
+			],
+		} ),
 		new WebpackBar( {
 			name: 'WordPress Polyfills',
 			color: '#21a0d0',
@@ -239,28 +222,63 @@ const wpPolyfills = {
 };
 
 const setup = {
-	...defaultConfig,
 	...sharedConfig,
 	entry: {
-		'amp-setup': './assets/src/setup',
+		'amp-setup': [
+			'./assets/src/setup',
+		],
 	},
 	externals: {
 		'amp-setup': 'ampSetup',
 	},
 	plugins: [
+		...sharedConfig.plugins.filter(
+			( plugin ) => plugin.constructor.name !== 'DependencyExtractionWebpackPlugin',
+		),
 		new DependencyExtractionWebpackPlugin( {
 			useDefaults: false,
-			// All dependencies will be bundled for the AMP setup screen for compatibility across WP versions.
-			requestToHandle: () => {
-				return undefined;
+			// Most dependencies will be bundled for the AMP setup screen for compatibility across WP versions.
+			requestToHandle: ( handle ) => {
+				switch ( handle ) {
+					case '@wordpress/api-fetch':
+					case '@wordpress/dom-ready':
+					case '@wordpress/html-entities':
+						return defaultRequestToHandle( handle );
+
+					default:
+						return undefined;
+				}
 			},
-			requestToExternal: () => {
-				return undefined;
+			requestToExternal: ( external ) => {
+				switch ( external ) {
+					case '@wordpress/api-fetch':
+					case '@wordpress/dom-ready':
+					case '@wordpress/html-entities':
+						return defaultRequestToExternal( external );
+
+					default:
+						return undefined;
+				}
 			},
 		} ),
 		new WebpackBar( {
 			name: 'Setup',
 			color: '#1773a8',
+		} ),
+	],
+};
+
+const mobileRedirection = {
+	...defaultConfig,
+	...sharedConfig,
+	entry: {
+		'mobile-redirection': './assets/src/mobile-redirection.js',
+	},
+	plugins: [
+		...defaultConfig.plugins,
+		new WebpackBar( {
+			name: 'Mobile Redirection',
+			color: '#f27136',
 		} ),
 	],
 };
@@ -273,4 +291,5 @@ module.exports = [
 	customizer,
 	wpPolyfills,
 	setup,
+	mobileRedirection,
 ];

@@ -42,6 +42,15 @@ interface Option {
 	const DISABLE_CSS_TRANSIENT_CACHING = 'amp_css_transient_monitor_disable_caching';
 
 	/**
+	 * Redirect mobile visitors to the AMP version of a page when the site is in Transitional or Reader mode.
+	 *
+	 * Default value: false
+	 *
+	 * @var string
+	 */
+	const MOBILE_REDIRECT = 'mobile_redirect';
+
+	/**
 	 * The list of post types that have support for AMP.
 	 *
 	 * The provided value should be an array of WordPress post-type slugs.
@@ -74,6 +83,57 @@ interface Option {
 	 * @var string
 	 */
 	const THEME_SUPPORT = 'theme_support';
+
+	/**
+	 * The slug of the theme selected to be used on AMP pages in reader mode.
+	 *
+	 * Default value: legacy
+	 *
+	 * @var string
+	 */
+	const READER_THEME = 'reader_theme';
+
+	/**
+	 * The key of the option storing whether the setup wizard has been completed.
+	 *
+	 * @var boolean
+	 */
+	const WIZARD_COMPLETED = 'wizard_completed';
+
+	/**
+	 * Suppressed plugins
+	 *
+	 * @var string
+	 */
+	const SUPPRESSED_PLUGINS = 'suppressed_plugins';
+
+	/**
+	 * Suppressed plugins, last version.
+	 *
+	 * @var string
+	 */
+	const SUPPRESSED_PLUGINS_LAST_VERSION = 'last_version';
+
+	/**
+	 * Suppressed plugins, timestamp.
+	 *
+	 * @var string
+	 */
+	const SUPPRESSED_PLUGINS_TIMESTAMP = 'timestamp';
+
+	/**
+	 * Suppressed plugins, username.
+	 *
+	 * @var string
+	 */
+	const SUPPRESSED_PLUGINS_USERNAME = 'username';
+
+	/**
+	 * Suppressed plugins, erroring URLs.
+	 *
+	 * @var string
+	 */
+	const SUPPRESSED_PLUGINS_ERRORING_URLS = 'erroring_urls';
 
 	/**
 	 * Version of the AMP plugin for which the options were last saved.

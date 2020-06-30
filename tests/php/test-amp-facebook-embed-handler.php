@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\Tests\MarkupComparison;
+use AmpProject\AmpWP\Tests\WithoutBlockPreRendering;
 
 /**
  * Test AMP_Facebook_Embed_Handler_Test
@@ -14,11 +15,16 @@ use AmpProject\AmpWP\Tests\MarkupComparison;
  */
 class AMP_Facebook_Embed_Handler_Test extends WP_UnitTestCase {
 
+	use MarkupComparison;
+	use WithoutBlockPreRendering {
+		setUp as public prevent_block_pre_render;
+	}
+
 	/**
 	 * Set up.
 	 */
 	public function setUp() {
-		parent::setUp();
+		$this->prevent_block_pre_render();
 
 		// Mock the HTTP request.
 		add_filter( 'pre_http_request', [ $this, 'mock_http_request' ], 10, 3 );
@@ -63,8 +69,6 @@ class AMP_Facebook_Embed_Handler_Test extends WP_UnitTestCase {
 		];
 	}
 
-	use MarkupComparison;
-
 	/**
 	 * Get scripts data.
 	 *
@@ -98,12 +102,12 @@ class AMP_Facebook_Embed_Handler_Test extends WP_UnitTestCase {
 		$dom              = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
 		$embed->sanitize_raw_embeds( $dom );
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$whitelist_sanitizer->sanitize();
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$validating_sanitizer->sanitize();
 
 		$scripts = array_merge(
 			$embed->get_scripts(),
-			$whitelist_sanitizer->get_scripts()
+			$validating_sanitizer->get_scripts()
 		);
 
 		$this->assertEquals( $expected, $scripts );

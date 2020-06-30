@@ -1,0 +1,59 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ThemeCard matches snapshot 1`] = `
+<li
+  className="theme-card selectable selectable--bottom"
+>
+  <label
+    className="theme-card__label"
+    htmlFor="theme-card__theme-slug"
+  >
+    <div
+      className="phone"
+    >
+      <div
+        className="phone-inner"
+      >
+        <img
+          alt="Theme name"
+          decoding="async"
+          height="2165"
+          loading="lazy"
+          src="http://screenshot.jpeg"
+          width="1000"
+        />
+      </div>
+    </div>
+    <div
+      className="theme-card__label-header"
+    >
+      <input
+        checked={false}
+        disabled={false}
+        id="theme-card__theme-slug"
+        onChange={[Function]}
+        type="radio"
+      />
+      <h2>
+        Theme name
+      </h2>
+    </div>
+    <p
+      className="theme-card__description"
+    >
+      Theme card
+    </p>
+  </label>
+  <p
+    className="theme-card__theme-link"
+  >
+    <a
+      href="http://mysite.com"
+      rel="noreferrer noopener"
+      target="_blank"
+    >
+      Learn more
+    </a>
+  </p>
+</li>
+`;

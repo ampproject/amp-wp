@@ -735,8 +735,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Style_Sanitizer( $dom, $args );
 		$sanitizer->sanitize();
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom, $args );
-		$whitelist_sanitizer->sanitize();
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom, $args );
+		$validating_sanitizer->sanitize();
 
 		$sanitized_html     = $dom->saveHTML( $dom->documentElement );
 		$actual_stylesheets = array_values( array_filter( $sanitizer->get_stylesheets() ) );
@@ -1897,7 +1897,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				[],
 			],
 
-			'blacklisted_and_whitelisted_keyframe_properties' => [
+			'denylisted_and_allowlisted_keyframe_properties' => [
 				'<style amp-keyframes>@keyframes anim1 { 50% { width: 50%; animation-timing-function: ease; opacity: 0.5; height:10%; offset-distance: 50%; visibility: visible; transform: rotate(0.5turn); -webkit-transform: rotate(0.5turn); color:red; } }</style>',
 				'<style amp-keyframes="">@keyframes anim1{50%{animation-timing-function:ease;opacity:.5;offset-distance:50%;visibility:visible;transform:rotate(.5 turn);-webkit-transform:rotate(.5 turn)}}</style>',
 				array_fill( 0, 3, AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_PROPERTY ),
@@ -2703,6 +2703,20 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			$this->markTestSkipped( 'Requires WordPress 5.0.' );
 		}
 		global $wp_theme_directories; // Note that get_theme_roots() does not work, for some reason.
+
+		// @todo Remove once https://github.com/WordPress/gutenberg/pull/23104 is in a release.
+		// Temporarily fixes an issue with PHP errors being thrown in Gutenberg v8.3.0 on PHP 7.4.
+		$theme_features = [
+			'editor-color-palette',
+			'editor-gradient-presets',
+			'editor-font-sizes',
+		];
+		foreach ( $theme_features as $theme_feature ) {
+			if ( ! current_theme_supports( $theme_feature ) ) {
+				add_theme_support( $theme_feature, [] );
+			}
+		}
+
 		$theme_exists = false;
 		foreach ( $wp_theme_directories as $theme_root ) {
 			$theme_exists = wp_get_theme( 'twentyten', $theme_root )->exists();
@@ -2735,8 +2749,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Style_Sanitizer( $amphtml_dom, $args );
 		$sanitizer->sanitize();
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $amphtml_dom, $args );
-		$whitelist_sanitizer->sanitize();
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $amphtml_dom, $args );
+		$validating_sanitizer->sanitize();
 
 		$assert( $original_dom, $html, $amphtml_dom, $amphtml_dom->saveHTML(), $sanitizer->get_stylesheets() );
 	}
@@ -3012,6 +3026,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			'viewport_merged_rules' => [
 				'<meta name="viewport" content="width=device-width,user-scalable=no"><style>@viewport{ initial-scale: 1; }</style><style>@-moz-viewport{ user-scalable: yes; }</style><style>@-o-viewport { minimum-scale: 0.5; }</style><style>@-baz-viewport { unrecognized: 1; }</style>',
 				'<meta name="viewport" content="width=device-width,user-scalable=yes,initial-scale=1,minimum-scale=.5,unrecognized=1">',
+			],
+			'nested_viewport_in_at_rule' => [
+				'<style>@media screen { @viewport{ width: device-width; } }</style>',
+				'<meta name="viewport" content="width=device-width">',
 			],
 		];
 	}

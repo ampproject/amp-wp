@@ -154,7 +154,7 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 				',
 			],
 
-			'iframe_with_blacklisted_attribute'         => [
+			'iframe_with_disallowed_attribute'         => [
 				'<iframe src="https://example.com/embed/132886713" width="500" height="281" scrolling="auto"></iframe>',
 				'
 					<amp-iframe src="https://example.com/embed/132886713" width="500" height="281" scrolling="auto" sandbox="allow-scripts allow-same-origin" layout="intrinsic" class="amp-wp-enforced-sizes">
@@ -476,6 +476,16 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 					</amp-iframe>',
 			],
 
+			'iframe_with_type_html_attr' => [
+				'<iframe type="text/html" src="https://example.com" width="320" height="640"></iframe>',
+				'
+					<amp-iframe src="https://example.com" width="320" height="640" sandbox="allow-scripts allow-same-origin" layout="intrinsic" class="amp-wp-enforced-sizes">
+						<noscript>
+							<iframe src="https://example.com" width="320" height="640"></iframe>
+						</noscript>
+					</amp-iframe>',
+			],
+
 			'iframe_with_marginheight_and_marginwidth_attrs' => [
 				'<iframe marginwidth="0" marginheight="0" src="https://example.com" width="320" height="640"></iframe>',
 				'
@@ -619,12 +629,12 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Iframe_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$whitelist_sanitizer->sanitize();
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$validating_sanitizer->sanitize();
 
 		$scripts = array_merge(
 			$sanitizer->get_scripts(),
-			$whitelist_sanitizer->get_scripts()
+			$validating_sanitizer->get_scripts()
 		);
 		$this->assertEquals( $expected, $scripts );
 	}
@@ -640,12 +650,12 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Iframe_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$whitelist_sanitizer->sanitize();
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$validating_sanitizer->sanitize();
 
 		$scripts = array_merge(
 			$sanitizer->get_scripts(),
-			$whitelist_sanitizer->get_scripts()
+			$validating_sanitizer->get_scripts()
 		);
 		$this->assertEquals( $expected, $scripts );
 	}

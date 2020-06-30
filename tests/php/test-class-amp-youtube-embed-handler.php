@@ -8,6 +8,7 @@
 
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\PrivateAccess;
+use AmpProject\AmpWP\Tests\WithoutBlockPreRendering;
 
 /**
  * Tests for AMP_YouTube_Embed_Handler.
@@ -18,6 +19,9 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 
 	use AssertContainsCompatibility;
 	use PrivateAccess;
+	use WithoutBlockPreRendering {
+		setUp as public prevent_block_pre_render;
+	}
 
 	protected $youtube_video_id = 'kfVsfOSbJY0';
 
@@ -40,7 +44,8 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 	 * Set up each test.
 	 */
 	public function setUp() {
-		parent::setUp();
+		$this->prevent_block_pre_render();
+
 		$this->handler = new AMP_YouTube_Embed_Handler();
 
 		add_filter( 'pre_http_request', [ $this, 'mock_http_request' ], 10, 3 );
@@ -183,7 +188,7 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 		$filtered_content = apply_filters( 'the_content', $source );
 
 		if (
-			version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.2', '<' )
+			version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.1', '<' )
 			&& null !== $fallback_for_expected
 		) {
 			$this->assertEquals( $fallback_for_expected, $filtered_content );
@@ -315,12 +320,12 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 		$this->handler->register_embed();
 		$source = apply_filters( 'the_content', $source );
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( AMP_DOM_Utils::get_dom_from_content( $source ) );
-		$whitelist_sanitizer->sanitize();
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( AMP_DOM_Utils::get_dom_from_content( $source ) );
+		$validating_sanitizer->sanitize();
 
 		$scripts = array_merge(
 			$this->handler->get_scripts(),
-			$whitelist_sanitizer->get_scripts()
+			$validating_sanitizer->get_scripts()
 		);
 
 		$this->assertEquals( $expected, $scripts );

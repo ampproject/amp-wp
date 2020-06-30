@@ -169,7 +169,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			// Add placeholder.
 			if ( $placeholder_node || true === $this->args['add_placeholder'] ) {
 				if ( ! $placeholder_node ) {
-					$placeholder_node = $this->build_placeholder( $normalized_attributes ); // @todo Can a better placeholder default be devised?
+					$placeholder_node = $this->build_placeholder(); // @todo Can a better placeholder default be devised?
 				}
 				$new_node->appendChild( $placeholder_node );
 			}
@@ -221,6 +221,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type int $frameborder <iframe> `frameborder` attribute - Filter to '0' or '1'; default to '0'
 	 *      @type bool $allowfullscreen <iframe> `allowfullscreen` attribute - Convert 'false' to empty string ''
 	 *      @type bool $allowtransparency <iframe> `allowtransparency` attribute - Convert 'false' to empty string ''
+	 *      @type string $type <iframe> `type` attribute - Pass along if value is not `text/html`
 	 * }
 	 * @return array Returns HTML attributes; normalizes src, dimensions, frameborder, sandbox, allowtransparency and allowfullscreen
 	 */
@@ -304,6 +305,16 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 					// No need to copy.
 					break;
 
+				case 'type':
+					/*
+					 * Omit the `type` attribute if its value is `text/html`. Popular embed providers such as Amazon
+					 * Kindle use this non-standard attribute, which is apparently a vestige from usage on <object>.
+					 */
+					if ( 'text/html' !== strtolower( $value ) ) {
+						$out[ $name ] = $value;
+					}
+					break;
+
 				default:
 					$out[ $name ] = $value;
 					break;
@@ -352,16 +363,10 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.2
 	 *
-	 * @param string[] $parent_attributes {
-	 *      Attributes.
-	 *
-	 *      @type string $placeholder AMP HTML <amp-iframe> `placeholder` attribute; default to 'amp-wp-iframe-placeholder'
-	 *      @type string $class AMP HTML <amp-iframe> `class` attribute; default to 'amp-wp-iframe-placeholder'
-	 * }
 	 * @return DOMElement|false
 	 */
-	private function build_placeholder( $parent_attributes ) {
-		$placeholder_node = AMP_DOM_Utils::create_node(
+	private function build_placeholder() {
+		return AMP_DOM_Utils::create_node(
 			$this->dom,
 			'span',
 			[
@@ -369,8 +374,6 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				'class'       => 'amp-wp-iframe-placeholder',
 			]
 		);
-
-		return $placeholder_node;
 	}
 
 	/**

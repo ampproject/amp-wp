@@ -10,6 +10,7 @@ namespace AmpProject;
 interface Tag
 {
 
+    const A        = 'a';
     const AREA     = 'area';
     const BASE     = 'base';
     const BASEFONT = 'basefont';
@@ -18,6 +19,7 @@ interface Tag
     const BR       = 'br';
     const COL      = 'col';
     const EMBED    = 'embed';
+    const FORM     = 'form';
     const FRAME    = 'frame';
     const HEAD     = 'head';
     const HR       = 'hr';
