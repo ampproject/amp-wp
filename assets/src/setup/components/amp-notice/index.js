@@ -26,9 +26,16 @@ function getNoticeIcon( type ) {
 	switch ( type ) {
 		case NOTICE_TYPE_SUCCESS:
 			Icon = () => (
-				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-					<path fill="#00A02F" d="M12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm4.393 7.5l-5.643 5.784-2.644-2.506-1.856 1.858 4.5 4.364 7.5-7.643-1.857-1.857z" />
+				<svg width="35" height="36" viewBox="0 0 35 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<rect x="1.90112" y="1.98828" width="32.0691" height="32.0691" rx="16.0345" stroke="#00A02F" strokeWidth="2" />
+					<mask id="mask-notice-success" mask-type="alpha" maskUnits="userSpaceOnUse" x="10" y="12" width="16" height="12">
+						<path d="M15.0921 21.461L11.3924 17.7613L10.1326 19.0122L15.0921 23.9718L25.7387 13.3252L24.4877 12.0742L15.0921 21.461Z" fill="white" />
+					</mask>
+					<g mask="url(#mask-notice-success)">
+						<rect x="7.28906" y="7.375" width="21.2932" height="21.2932" fill="#00A02F" />
+					</g>
 				</svg>
+
 			);
 			break;
 
