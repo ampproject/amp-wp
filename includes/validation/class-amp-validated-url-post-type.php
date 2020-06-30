@@ -436,14 +436,16 @@ class AMP_Validated_URL_Post_Type {
 
 	/**
 	 * Add count of how many validation error posts there are to the admin menu.
+	 *
+	 * @global array $submenu
 	 */
 	public static function add_admin_menu_new_invalid_url_count() {
 		global $submenu;
 
-		$post_type_admin_url = 'edit.php?post_type=' . self::POST_TYPE_SLUG;
-		$submenu_key         = current_user_can( 'manage_options' ) ? AMP_Options_Manager::OPTION_NAME : $post_type_admin_url;
+		$post_type_menu_slug = 'edit.php?post_type=' . self::POST_TYPE_SLUG;
+		$parent_menu_slug    = current_user_can( 'manage_options' ) ? AMP_Options_Manager::OPTION_NAME : $post_type_menu_slug;
 
-		if ( ! isset( $submenu[ $submenu_key ] ) ) {
+		if ( ! isset( $submenu[ $parent_menu_slug ] ) ) {
 			return;
 		}
 
@@ -462,8 +464,8 @@ class AMP_Validated_URL_Post_Type {
 			return;
 		}
 
-		foreach ( $submenu[ $submenu_key ] as &$submenu_item ) {
-			if ( $post_type_admin_url === $submenu_item[2] ) {
+		foreach ( $submenu[ $parent_menu_slug ] as &$submenu_item ) {
+			if ( $post_type_menu_slug === $submenu_item[2] ) {
 				$submenu_item[0] .= ' <span class="awaiting-mod"><span class="new-validation-error-urls-count">' . esc_html( number_format_i18n( $new_validation_error_urls ) ) . '</span></span>';
 				break;
 			}

@@ -62,6 +62,12 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		set_current_screen( 'index.php' );
 		AMP_Validated_URL_Post_Type::register();
 		$this->assertContains( AMP_Validated_URL_Post_Type::REMAINING_ERRORS, wp_removable_query_args() );
+
+		$post = $this->factory()->post->create( [ 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ] );
+		$this->assertTrue( user_can( wp_get_current_user()->ID, 'edit_post', $post ) );
+
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'subscriber' ] ) );
+		$this->assertFalse( current_user_can( 'edit_post', $post ) );
 	}
 
 	/**

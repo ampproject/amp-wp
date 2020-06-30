@@ -116,7 +116,7 @@ final class DevToolsUserAccess implements Service, Registerable {
 	 * @param WP_User $profile_user Current user being edited.
 	 */
 	public function print_personal_options( $profile_user ) {
-		if ( ! AMP_Validation_Manager::has_cap( $profile_user ) ) {
+		if ( ! current_user_can( 'edit_user', $profile_user->ID ) || ! AMP_Validation_Manager::has_cap( $profile_user ) ) {
 			return;
 		}
 		?>

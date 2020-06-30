@@ -7,8 +7,10 @@
 
 // phpcs:disable Generic.Formatting.MultipleStatementAlignment.NotSameWarning
 
+use AmpProject\AmpWP\Admin\DevToolsUserAccess;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVars;
+use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\HandleValidation;
 use AmpProject\AmpWP\Tests\PrivateAccess;
@@ -475,7 +477,12 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::validate_queued_posts_on_frontend()
 	 */
 	public function test_handle_save_post_prompting_validation_and_validate_queued_posts_on_frontend() {
-		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$admin_user_id = $this->factory()->user->create( [ 'role' => 'administrator' ] );
+		$editor_user_id = $this->factory()->user->create( [ 'role' => 'editor' ] );
+
+		wp_set_current_user( $admin_user_id );
+		/** @var DevToolsUserAccess $service */
+		$service = Services::get( 'dev_tools.user_access' );
 
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$_SERVER['REQUEST_METHOD'] = 'POST';
@@ -499,7 +506,23 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		AMP_Validation_Manager::handle_save_post_prompting_validation( $post->ID );
 		$this->assertFalse( has_action( 'shutdown', [ 'AMP_Validation_Manager', 'validate_queued_posts_on_frontend' ] ) );
 
+		// Test when user doesn't have the capability.
+		wp_set_current_user( $editor_user_id );
+		$post = self::factory()->post->create_and_get( [ 'post_type' => 'post' ] );
+		AMP_Validation_Manager::handle_save_post_prompting_validation( $post->ID );
+		$this->assertFalse( has_action( 'shutdown', [ 'AMP_Validation_Manager', 'validate_queued_posts_on_frontend' ] ) );
+
+		// Test when user has dev tools turned off.
+		wp_set_current_user( $admin_user_id );
+		$service->set_user_enabled( $admin_user_id, false );
+		$post = self::factory()->post->create_and_get( [ 'post_type' => 'post' ] );
+		$_POST['post_ID'] = $post->ID;
+		AMP_Validation_Manager::handle_save_post_prompting_validation( $post->ID );
+		$this->assertFalse( has_action( 'shutdown', [ 'AMP_Validation_Manager', 'validate_queued_posts_on_frontend' ] ) );
+
 		// Test success.
+		$service->set_user_enabled( $admin_user_id, true );
+		wp_set_current_user( $admin_user_id );
 		$post = self::factory()->post->create_and_get( [ 'post_type' => 'post' ] );
 		$_POST['post_ID'] = $post->ID;
 		AMP_Validation_Manager::handle_save_post_prompting_validation( $post->ID );
@@ -600,6 +623,19 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		);
 
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+
+		// Make user preference is honored.
+		/** @var DevToolsUserAccess $service */
+		$service = Services::get( 'dev_tools.user_access' );
+		$service->set_user_enabled( wp_get_current_user()->ID, false );
+		$this->assertNull(
+			AMP_Validation_Manager::get_amp_validity_rest_field(
+				compact( 'id' ),
+				'',
+				new WP_REST_Request( 'GET' )
+			)
+		);
+		$service->set_user_enabled( wp_get_current_user()->ID, true );
 
 		// GET request.
 		$field = AMP_Validation_Manager::get_amp_validity_rest_field(
@@ -850,6 +886,13 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->accept_sanitization_by_default( false );
 		$output = get_echo( [ 'AMP_Validation_Manager', 'print_edit_form_validation_status' ], [ $post ] );
 		$this->assertStringContains( $expected_notice_non_accepted_errors, $output );
+
+		// Ensure not displayed when dev tools is disabled.
+		/** @var DevToolsUserAccess $service */
+		$service = Services::get( 'dev_tools.user_access' );
+		$service->set_user_enabled( wp_get_current_user()->ID, false );
+		$output = get_echo( [ 'AMP_Validation_Manager', 'print_edit_form_validation_status' ], [ $post ] );
+		$this->assertStringNotContains( 'notice notice-warning', $output );
 	}
 
 	/**
@@ -2362,12 +2405,23 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			$this->markTestSkipped( 'The block editor is not available.' );
 		}
 
-		add_theme_support( AMP_Theme_Support::SLUG );
 		global $post;
 		$post = self::factory()->post->create_and_get();
 		$slug = 'amp-block-validation';
-		$this->set_capability();
 		AMP_Validation_Manager::enqueue_block_validation();
+		$this->assertFalse( wp_script_is( $slug, 'enqueued' ) );
+
+		// Ensure not displayed when dev tools is disabled.
+		/** @var DevToolsUserAccess $service */
+		$service = Services::get( 'dev_tools.user_access' );
+		$this->set_capability();
+		$service->set_user_enabled( wp_get_current_user()->ID, false );
+		AMP_Validation_Manager::enqueue_block_validation();
+		$this->assertFalse( wp_script_is( $slug, 'enqueued' ) );
+
+		$service->set_user_enabled( wp_get_current_user()->ID, true );
+		AMP_Validation_Manager::enqueue_block_validation();
+		$this->assertTrue( wp_script_is( $slug, 'enqueued' ) );
 
 		$script                = wp_scripts()->registered[ $slug ];
 		$expected_dependencies = [
