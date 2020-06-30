@@ -57,7 +57,7 @@ class Test_PluginActivationNotice extends WP_UnitTestCase {
 	 * @covers PluginActivationNotice::render_notice
 	 */
 	public function test_user_can_dismiss_notice() {
-		wp_set_current_user( 1 ); 
+		wp_set_current_user( 1 );
 		update_user_meta( get_current_user_id(), 'dismissed_wp_pointers', PluginActivationNotice::NOTICE_ID );
 
 		set_current_screen( 'plugins' );
