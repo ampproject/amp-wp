@@ -150,6 +150,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertTrue( post_type_exists( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) );
 		$this->assertTrue( taxonomy_exists( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ) );
 
+		$this->assertEquals( 100, has_filter( 'map_meta_cap', self::TESTED_CLASS . '::map_meta_cap' ) );
 		$this->assertEquals( 10, has_action( 'save_post', self::TESTED_CLASS . '::handle_save_post_prompting_validation' ) );
 		$this->assertEquals( 10, has_action( 'enqueue_block_editor_assets', self::TESTED_CLASS . '::enqueue_block_validation' ) );
 
@@ -649,22 +650,69 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test map_meta_cap.
+	 *
+	 * @covers AMP_Validation_Manager::map_meta_cap()
+	 */
+	public function test_map_meta_cap() {
+		$this->assertEquals(
+			AMP_Validation_Manager::map_meta_cap( [ AMP_Validation_Manager::VALIDATE_CAPABILITY ], AMP_Validation_Manager::VALIDATE_CAPABILITY ),
+			[ 'manage_options' ]
+		);
+
+		$this->assertEquals(
+			AMP_Validation_Manager::map_meta_cap( [ 'install_plugins', AMP_Validation_Manager::VALIDATE_CAPABILITY, 'update_core' ], AMP_Validation_Manager::VALIDATE_CAPABILITY ),
+			[ 'install_plugins', 'manage_options', 'update_core' ]
+		);
+	}
+
+	/**
 	 * Test has_cap.
 	 *
 	 * @covers AMP_Validation_Manager::has_cap()
 	 */
 	public function test_has_cap() {
-		wp_set_current_user(
-			self::factory()->user->create(
-				[
-					'role' => 'subscriber',
-				]
-			)
-		);
-		$this->assertFalse( AMP_Validation_Manager::has_cap() );
+		AMP_Validation_Manager::init();
 
-		$this->set_capability();
+		$subscriber    = self::factory()->user->create_and_get( [ 'role' => 'subscriber' ] );
+		$editor        = self::factory()->user->create_and_get( [ 'role' => 'editor' ] );
+		$administrator = self::factory()->user->create_and_get( [ 'role' => 'administrator' ] );
+
+		wp_set_current_user( $subscriber->ID );
+		$this->assertFalse( AMP_Validation_Manager::has_cap() );
+		$this->assertFalse( AMP_Validation_Manager::has_cap( $subscriber ) );
+		$this->assertFalse( AMP_Validation_Manager::has_cap( $subscriber->ID ) );
+		$this->assertTrue( AMP_Validation_Manager::has_cap( $administrator ) );
+		$this->assertTrue( AMP_Validation_Manager::has_cap( $administrator->ID ) );
+
+		wp_set_current_user( $administrator->ID );
 		$this->assertTrue( AMP_Validation_Manager::has_cap() );
+		$this->assertFalse( AMP_Validation_Manager::has_cap( $subscriber ) );
+		$this->assertFalse( AMP_Validation_Manager::has_cap( $subscriber->ID ) );
+		$this->assertTrue( AMP_Validation_Manager::has_cap( $administrator ) );
+		$this->assertTrue( AMP_Validation_Manager::has_cap( $administrator->ID ) );
+
+		$this->assertFalse( AMP_Validation_Manager::has_cap( $editor ) );
+		wp_set_current_user( $editor->ID );
+		$this->assertFalse( AMP_Validation_Manager::has_cap() );
+		add_filter(
+			'map_meta_cap',
+			function ( $caps, $cap, $user_id ) {
+				if ( AMP_Validation_Manager::VALIDATE_CAPABILITY === $cap && user_can( $user_id, 'edit_others_posts' ) ) {
+					$position = array_search( $cap, $caps, true );
+					if ( false !== $position ) {
+						$caps[ $position ] = 'edit_others_posts';
+					}
+				}
+				return $caps;
+			},
+			10,
+			3
+		);
+		$this->assertTrue( AMP_Validation_Manager::has_cap() );
+		$this->assertTrue( AMP_Validation_Manager::has_cap( $editor ) );
+		$this->assertTrue( AMP_Validation_Manager::has_cap( $administrator ) );
+		$this->assertFalse( AMP_Validation_Manager::has_cap( $subscriber ) );
 	}
 
 	/**

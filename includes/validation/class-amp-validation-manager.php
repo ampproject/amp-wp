@@ -230,7 +230,7 @@ class AMP_Validation_Manager {
 	 * @return void
 	 */
 	public static function init() {
-		add_filter( 'map_meta_cap', [ __CLASS__, 'map_meta_cap' ], 9, 2 );
+		add_filter( 'map_meta_cap', [ __CLASS__, 'map_meta_cap' ], 100, 2 );
 		AMP_Validated_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
 
