@@ -8,7 +8,7 @@ import { addQueryArgs } from '@wordpress/url';
 /**
  * External dependencies
  */
-import { PREVIEW_PERMALINK, CUSTOMIZER_LINK } from 'amp-setup'; // From WP inline script.
+import { CUSTOMIZER_LINK } from 'amp-setup'; // From WP inline script.
 
 /**
  * Internal dependencies
@@ -81,7 +81,7 @@ function Saving() {
 export function Save() {
 	const {
 		didSaveOptions,
-		options: { theme_support: themeSupport, reader_theme: readerTheme },
+		options: { theme_support: themeSupport, reader_theme: readerTheme, preview_permalink: previewPermalink },
 		saveOptions,
 		savingOptions,
 	} = useContext( Options );
@@ -131,7 +131,7 @@ export function Save() {
 				<Phone>
 					<iframe
 						className="done__preview-iframe"
-						src={ addQueryArgs( PREVIEW_PERMALINK, 'standard' === themeSupport ? {} : { amp: 1 } ) }
+						src={ previewPermalink }
 						title={ __( 'Site preview', 'amp' ) }
 						name="amp-wizard-completion-preview"
 					/>
@@ -140,14 +140,7 @@ export function Save() {
 				{ 'reader' !== themeSupport && (
 					<Button
 						isPrimary
-						href={
-							addQueryArgs(
-								PREVIEW_PERMALINK,
-								'transitional' === themeSupport
-									? { amp: 1 }
-									: {},
-							)
-						}
+						href={ previewPermalink	}
 						target="_blank"
 						rel="noreferrer"
 					>
@@ -164,8 +157,8 @@ export function Save() {
 									addQueryArgs(
 										CUSTOMIZER_LINK,
 										'legacy' === readerTheme
-											? { 'autofocus[panel]': 'amp_panel', url: PREVIEW_PERMALINK }
-											: { url: PREVIEW_PERMALINK },
+											? { 'autofocus[panel]': 'amp_panel', url: previewPermalink }
+											: { url: previewPermalink },
 									)
 								}
 								target="_blank"
@@ -174,7 +167,7 @@ export function Save() {
 								{ __( 'Visit in Customizer', 'amp' ) }
 							</Button>
 							<Button
-								href={ addQueryArgs( PREVIEW_PERMALINK, { amp: 1 } ) }
+								href={ previewPermalink }
 								target="_blank"
 								rel="noreferrer"
 							>

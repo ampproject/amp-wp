@@ -46,7 +46,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 		setSavingOptions( true );
 
 		try {
-			await apiFetch(
+			const savedOptions = await apiFetch(
 				{
 					method: 'post',
 					url: optionsRestEndpoint,
@@ -57,6 +57,8 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 			if ( true === hasUnmounted.current ) {
 				return;
 			}
+
+			setOptions( savedOptions );
 		} catch ( e ) {
 			setError( e );
 			return;
