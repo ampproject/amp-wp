@@ -89,11 +89,17 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 			setFetchingOptions( true );
 
 			try {
-				const fetchedOptions = await apiFetch( { url: optionsRestEndpoint } );
+				let fetchedOptions = await apiFetch( { url: optionsRestEndpoint } );
 
 				if ( true === hasUnmounted.current ) {
 					return;
 				}
+
+				fetchedOptions = {
+					...fetchedOptions,
+					// Initialize mobile_redirect to true if the wizard has not been completed before.
+					mobile_redirect: false === fetchedOptions.wizard_completed ? true : fetchedOptions.wizard_completed,
+				};
 
 				originalOptions.current = fetchedOptions;
 				setOptions( fetchedOptions );

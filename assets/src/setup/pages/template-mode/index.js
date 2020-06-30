@@ -63,7 +63,6 @@ export function TemplateMode() {
 			pluginIssues={ pluginIssues }
 			savedCurrentMode={ originalOptions.theme_support }
 			setCurrentMode={ ( mode ) => {
-				console.log( mode );
 				setLocalThemeSupport( mode );
 			} }
 			themeIssues={ themeIssues }
