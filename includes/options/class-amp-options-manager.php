@@ -601,8 +601,7 @@ class AMP_Options_Manager {
 		AMP_Post_Type_Support::add_post_type_support();
 
 		// Ensure theme support flags are set properly according to the new mode so that proper AMP URL can be generated.
-		$has_theme_support = ( AMP_Theme_Support::STANDARD_MODE_SLUG === $template_mode || AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === $template_mode );
-		if ( $has_theme_support ) {
+		if ( AMP_Theme_Support::STANDARD_MODE_SLUG === $template_mode || AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === $template_mode ) {
 			$theme_support = current_theme_supports( AMP_Theme_Support::SLUG );
 			if ( ! is_array( $theme_support ) ) {
 				$theme_support = [];
@@ -617,7 +616,7 @@ class AMP_Options_Manager {
 
 		$notice_type     = 'updated';
 		$review_messages = [];
-		if ( $url && $has_theme_support ) {
+		if ( $url ) {
 			$validation = AMP_Validation_Manager::validate_url_and_store( $url );
 
 			if ( is_wp_error( $validation ) ) {

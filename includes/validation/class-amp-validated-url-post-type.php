@@ -116,8 +116,7 @@ class AMP_Validated_URL_Post_Type {
 
 		// Show in the admin menu if dev tools are enabled for the user or if the user is on any dev tools screen.
 		$show_in_menu = (
-			// @todo Remove the current_theme_supports() flag.
-			( current_theme_supports( 'amp' ) && $dev_tools_user_access->is_user_enabled() )
+			$dev_tools_user_access->is_user_enabled()
 			||
 			( isset( $_GET['post_type'] ) && self::POST_TYPE_SLUG === $_GET['post_type'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			||

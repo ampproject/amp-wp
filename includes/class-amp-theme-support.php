@@ -6,10 +6,12 @@
  */
 
 use AmpProject\Amp;
+use AmpProject\AmpWP\Admin\DevToolsUserAccess;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVars;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\ConfigurationArgument;
+use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Transformer;
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
@@ -155,6 +157,17 @@ class AMP_Theme_Support {
 	 * @var null|string
 	 */
 	protected static $support_added_via_theme;
+
+	/**
+	 * Get dev tools user access service.
+	 *
+	 * @return DevToolsUserAccess
+	 */
+	private static function get_dev_tools_user_access() {
+		/** @var DevToolsUserAccess $service */
+		$service = Services::get( 'dev_tools.user_access' );
+		return $service;
+	}
 
 	/**
 	 * Initialize.
@@ -317,9 +330,6 @@ class AMP_Theme_Support {
 				]
 			);
 			self::$support_added_via_option = $is_paired ? self::TRANSITIONAL_MODE_SLUG : self::STANDARD_MODE_SLUG;
-		} elseif ( true === AMP_Validation_Manager::should_validate_response() ) { // @todo Eventually reader mode should allow for validate requests.
-			self::$support_added_via_option = self::STANDARD_MODE_SLUG;
-			add_theme_support( self::SLUG );
 		}
 	}
 
@@ -419,10 +429,8 @@ class AMP_Theme_Support {
 
 		self::add_hooks();
 		self::$sanitizer_classes = amp_get_content_sanitizers();
-		if ( ! $is_reader_mode ) {
-			self::$sanitizer_classes = AMP_Validation_Manager::filter_sanitizer_args( self::$sanitizer_classes );
-		}
-		self::$embed_handlers = self::register_content_embed_handlers();
+		self::$sanitizer_classes = AMP_Validation_Manager::filter_sanitizer_args( self::$sanitizer_classes );
+		self::$embed_handlers    = self::register_content_embed_handlers();
 		self::$sanitizer_classes['AMP_Embed_Sanitizer']['embed_handlers'] = self::$embed_handlers;
 
 		foreach ( self::$sanitizer_classes as $sanitizer_class => $args ) {
