@@ -12,6 +12,7 @@
 namespace AmpProject\AmpWP\Admin;
 
 use AMP_Options_Manager;
+use AMP_Setup_Wizard_Submenu;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -26,7 +27,7 @@ final class PluginActivationNotice implements Delayed, Service, Registerable {
 
 	/**
 	 * The ID of the plugin activation notice.
-	 * 
+	 *
 	 * @var string
 	 */
 	const NOTICE_ID = 'amp-plugin-notice-1';
@@ -76,7 +77,7 @@ final class PluginActivationNotice implements Delayed, Service, Registerable {
 			<div>
 				<h2><?php esc_html_e( 'Welcome to AMP for WordPress', 'amp' ); ?></h2>
 				<p><?php esc_html_e( 'Bring the speed and features of the open source AMP project to your site, complete with the tools to support content authoring and website development.', 'amp' ); ?></p>
-				<p><a href="https://amp-wp.org/getting-started/"><?php esc_html_e( 'Configure the plugin', 'amp' ); ?></a></p>
+				<p><a href="<?php menu_page_url( AMP_Setup_Wizard_Submenu::SCREEN_ID ); ?>"><?php esc_html_e( 'Configure the plugin', 'amp' ); ?></a></p>
 			</div>
 		</div>
 
