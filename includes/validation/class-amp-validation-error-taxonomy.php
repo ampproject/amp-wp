@@ -787,12 +787,6 @@ class AMP_Validation_Error_Taxonomy {
 		add_action( 'load-post.php', [ __CLASS__, 'add_order_clauses_from_description_json' ] );
 		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), [ __CLASS__, 'render_taxonomy_filters' ] );
 		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), [ __CLASS__, 'render_link_to_invalid_urls_screen' ] );
-		add_action(
-			'load-edit-tags.php',
-			static function() {
-				add_filter( 'user_has_cap', [ __CLASS__, 'filter_user_has_cap_for_hiding_term_list_table_checkbox' ], 10, 3 );
-			}
-		);
 		add_filter( 'terms_clauses', [ __CLASS__, 'filter_terms_clauses_for_description_search' ], 10, 3 );
 		add_action( 'admin_notices', [ __CLASS__, 'add_admin_notices' ] );
 		add_filter( self::TAXONOMY_SLUG . '_row_actions', [ __CLASS__, 'filter_tag_row_actions' ], PHP_INT_MAX, 2 );
@@ -1541,27 +1535,6 @@ class AMP_Validation_Error_Taxonomy {
 			wp_nonce_field( self::VALIDATION_ERROR_CLEAR_EMPTY_ACTION, self::VALIDATION_ERROR_CLEAR_EMPTY_ACTION . '_nonce', false );
 			submit_button( __( 'Clear Empty', 'amp' ), '', self::VALIDATION_ERROR_CLEAR_EMPTY_ACTION, false );
 		}
-	}
-
-	/**
-	 * Prevent user from being able to delete validation errors in order to disable the checkbox on the post list table.
-	 *
-	 * Yes, this is not ideal.
-	 *
-	 * @param array $allcaps All caps.
-	 * @param array $caps    Requested caps.
-	 * @param array $args    Cap args.
-	 * @return array All caps.
-	 */
-	public static function filter_user_has_cap_for_hiding_term_list_table_checkbox( $allcaps, $caps, $args ) {
-		if ( isset( $args[0] ) && 'delete_term' === $args[0] ) {
-			$term  = get_term( $args[2] );
-			$error = json_decode( $term->description, true );
-			if ( ! is_array( $error ) ) {
-				return $allcaps;
-			}
-		}
-		return $allcaps;
 	}
 
 	/**

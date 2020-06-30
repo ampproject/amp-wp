@@ -560,7 +560,6 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'load-post.php', [ self::TESTED_CLASS, 'add_error_type_clauses_filter' ] ) );
 		$this->assertEquals( 10, has_action( sprintf( 'after-%s-table', AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ), [ self::TESTED_CLASS, 'render_taxonomy_filters' ] ) );
 		$this->assertEquals( 10, has_action( sprintf( 'after-%s-table', AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ), [ self::TESTED_CLASS, 'render_link_to_invalid_urls_screen' ] ) );
-		$this->assertEquals( 10, has_filter( 'user_has_cap', [ self::TESTED_CLASS, 'filter_user_has_cap_for_hiding_term_list_table_checkbox' ] ) );
 		$this->assertEquals( 10, has_filter( 'terms_clauses', [ self::TESTED_CLASS, 'filter_terms_clauses_for_description_search' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', [ self::TESTED_CLASS, 'add_admin_notices' ] ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_row_actions', [ self::TESTED_CLASS, 'filter_tag_row_actions' ] ) );
@@ -888,32 +887,6 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		AMP_Validation_Error_Taxonomy::render_clear_empty_button();
 		$output = ob_get_clean();
 		$this->assertStringContains( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_CLEAR_EMPTY_ACTION, $output );
-	}
-
-	/**
-	 * Test filter_user_has_cap_for_hiding_term_list_table_checkbox.
-	 *
-	 * @covers \AMP_Validation_Error_Taxonomy::filter_user_has_cap_for_hiding_term_list_table_checkbox()
-	 */
-	public function test_filter_user_has_cap_for_hiding_term_list_table_checkbox() {
-		$initial_caps = [ 'manage_options' ];
-		$this->assertEquals( $initial_caps, AMP_Validation_Error_Taxonomy::filter_user_has_cap_for_hiding_term_list_table_checkbox( $initial_caps, [], [] ) );
-
-		$term_id_with_description = self::factory()->term->create(
-			[
-				'description' => wp_json_encode( [ 'foo' => 'bar' ] ),
-			]
-		);
-		$args                     = [ 'delete_term', null, $term_id_with_description ];
-		$this->assertEquals( $initial_caps, AMP_Validation_Error_Taxonomy::filter_user_has_cap_for_hiding_term_list_table_checkbox( $initial_caps, [], $args ) );
-
-		$term_id_no_description = self::factory()->term->create(
-			[
-				'description' => wp_json_encode( [ 'foo' => 'bar' ] ),
-			]
-		);
-		$args                   = [ 'delete_term', null, $term_id_no_description ];
-		$this->assertEquals( $initial_caps, AMP_Validation_Error_Taxonomy::filter_user_has_cap_for_hiding_term_list_table_checkbox( $initial_caps, [], $args ) );
 	}
 
 	/**
