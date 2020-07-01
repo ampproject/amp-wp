@@ -6,12 +6,10 @@
  */
 
 use AmpProject\Amp;
-use AmpProject\AmpWP\Admin\DevToolsUserAccess;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVars;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\ConfigurationArgument;
-use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Transformer;
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
@@ -157,17 +155,6 @@ class AMP_Theme_Support {
 	 * @var null|string
 	 */
 	protected static $support_added_via_theme;
-
-	/**
-	 * Get dev tools user access service.
-	 *
-	 * @return DevToolsUserAccess
-	 */
-	private static function get_dev_tools_user_access() {
-		/** @var DevToolsUserAccess $service */
-		$service = Services::get( 'dev_tools.user_access' );
-		return $service;
-	}
 
 	/**
 	 * Initialize.
