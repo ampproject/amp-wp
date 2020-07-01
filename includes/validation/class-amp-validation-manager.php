@@ -366,11 +366,15 @@ class AMP_Validation_Manager {
 			return;
 		}
 
+		$is_amp_endpoint = is_amp_endpoint();
+
 		$current_url = amp_get_current_url();
 		$non_amp_url = amp_remove_endpoint( $current_url );
-		if ( amp_is_canonical() ) {
-			$non_amp_url = add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_AVAILABLE, $non_amp_url );
-		}
+		$non_amp_url = add_query_arg(
+			QueryVars::NOAMP,
+			amp_is_canonical() ? QueryVars::NOAMP_AVAILABLE : QueryVars::NOAMP_MOBILE,
+			$non_amp_url
+		);
 
 		$amp_url = remove_query_arg(
 			array_merge( wp_removable_query_args(), [ QueryVars::NOAMP ] ),
@@ -383,7 +387,7 @@ class AMP_Validation_Manager {
 		$validate_url = AMP_Validated_URL_Post_Type::get_recheck_url( AMP_Validated_URL_Post_Type::get_invalid_url_post( $amp_url ) ?: $amp_url );
 
 		// Construct the parent admin bar item.
-		if ( is_amp_endpoint() ) {
+		if ( $is_amp_endpoint ) {
 			$icon = Icon::valid(); // This will get overridden in AMP_Validation_Manager::finalize_validation() if there are unaccepted errors.
 			$href = $validate_url;
 		} else {
@@ -420,18 +424,18 @@ class AMP_Validation_Manager {
 		$link_item = [
 			'parent' => 'amp',
 			'id'     => 'amp-view',
-			'href'   => esc_url( is_amp_endpoint() ? $non_amp_url : $amp_url ),
+			'href'   => esc_url( $is_amp_endpoint ? $non_amp_url : $amp_url ),
 		];
 		if ( amp_is_canonical() ) {
 			$link_item['title'] = esc_html__( 'View with AMP disabled', 'amp' );
 		} else {
-			$link_item['title'] = esc_html( is_amp_endpoint() ? __( 'View non-AMP version', 'amp' ) : __( 'View AMP version', 'amp' ) );
+			$link_item['title'] = esc_html( $is_amp_endpoint ? __( 'View non-AMP version', 'amp' ) : __( 'View AMP version', 'amp' ) );
 		}
 
 		// Add top-level menu item. Note that this will correctly merge/amend any existing AMP nav menu item added in amp_add_admin_bar_view_link().
 		$wp_admin_bar->add_node( $parent );
 
-		if ( is_amp_endpoint() ) {
+		if ( $is_amp_endpoint ) {
 			$wp_admin_bar->add_node( $validate_item );
 			$wp_admin_bar->add_node( $link_item );
 		} else {

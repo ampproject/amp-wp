@@ -44,7 +44,6 @@ final class MobileRedirection implements Service, Registerable {
 		add_filter( 'amp_default_options', [ $this, 'filter_default_options' ] );
 		add_action( 'amp_options_menu_items', [ $this, 'add_settings_field' ], 10 );
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
-		// @todo Add noamp=mobile to amp-view link in admin bar.
 
 		if ( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ) {
 			add_action( 'wp', [ $this, 'redirect' ] );
