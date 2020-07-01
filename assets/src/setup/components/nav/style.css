@@ -3,8 +3,9 @@
  */
 .amp-setup-nav {
 	align-items: center;
-	background: linear-gradient(0deg, #fff 64.06%, rgba(255, 255, 255, 0.8) 99.99%, rgba(255, 255, 255, 0.8) 100%);
+	background: var(--white);
 	bottom: 0;
+	box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.05);
 	display: flex;
 	justify-content: flex-end;
 	left: 0;
