@@ -20,7 +20,6 @@
 .done__preview-container {
 	border: 2px solid #e8e8e8;
 	border-radius: 8px;
-	flex-shrink: 0;
 	padding: 37px;
 	text-align: center;
 
@@ -28,6 +27,10 @@
 		margin-left: auto;
 		margin-right: auto;
 	}
+}
+
+.done__preview-container .amp-notice {
+	margin-bottom: 1.5rem;
 }
 
 .done__preview-container .phone {

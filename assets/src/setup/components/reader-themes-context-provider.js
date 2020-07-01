@@ -3,6 +3,7 @@
  */
 import { createContext, useEffect, useState, useRef, useContext, useMemo } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { __ } from '@wordpress/i18n';
 
 /**
  * External dependencies
@@ -30,6 +31,13 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, readerThemes
 	const [ themes, setThemes ] = useState( null );
 	const [ fetchingThemes, setFetchingThemes ] = useState( false );
 	const [ downloadingTheme, setDownloadingTheme ] = useState( false );
+	const [ downloadedTheme, setDownloadedTheme ] = useState( false );
+
+	/**
+	 * Handle downloaded theme errors separately from normal error handling because we don't want it to break the application
+	 * after settings have already been saved.
+	 */
+	const [ downloadingThemeError, setDownloadingThemeError ] = useState( null );
 
 	const { setError } = useError();
 
@@ -64,6 +72,10 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, readerThemes
 		 * Downloads a theme from WordPress.org using the traditional AJAX action.
 		 */
 		( async () => {
+			if ( downloadingTheme || downloadingThemeError ) {
+				return;
+			}
+
 			setDownloadingTheme( true );
 
 			try {
@@ -74,7 +86,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, readerThemes
 
 				// This is the only fetch request in the setup wizard that doesn't go to a REST endpoint.
 				// We need to use window.fetch to bypass the apiFetch middlewares that are useful for other requests.
-				await global.fetch( wpAjaxUrl, {
+				const response = await global.fetch( 'AWEFAWEF' + wpAjaxUrl, {
 					body,
 					method: 'POST',
 				} );
@@ -82,14 +94,23 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, readerThemes
 				if ( true === hasUnmounted.current ) {
 					return;
 				}
+
+				if ( ! response.ok ) {
+					throw new Error( __( 'Reader theme failed to download.', 'amp' ) );
+				}
+
+				setDownloadedTheme( selectedTheme.slug );
 			} catch ( e ) {
-				setError( e );
-				return;
+				if ( true === hasUnmounted.current ) {
+					return;
+				}
+
+				setDownloadingThemeError( e );
 			}
 
 			setDownloadingTheme( false );
 		} )();
-	}, [ wpAjaxUrl, downloadingTheme, savingOptions, selectedTheme, setError, themeSupport, updatesNonce ] );
+	}, [ wpAjaxUrl, downloadingTheme, downloadingThemeError, savingOptions, selectedTheme, themeSupport, updatesNonce ] );
 
 	/**
 	 * Fetches theme data when needed.
@@ -131,7 +152,9 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, readerThemes
 		<ReaderThemes.Provider
 			value={
 				{
+					downloadedTheme,
 					downloadingTheme,
+					downloadingThemeError,
 					fetchingThemes,
 					themes,
 				}

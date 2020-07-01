@@ -7,6 +7,7 @@
 
 .amp-notice__body {
 	flex-grow: 1;
+	text-align: left;
 }
 
 .amp-notice--success {

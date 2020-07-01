@@ -20,6 +20,8 @@ import { Phone } from '../../components/phone';
 import './style.css';
 import { AMPInfo } from '../../components/amp-info';
 import { IconMobile } from '../../components/svg/icon-mobile';
+import { ReaderThemes } from '../../components/reader-themes-context-provider';
+import { AMPNotice, NOTICE_SIZE_LARGE, NOTICE_TYPE_WARNING, NOTICE_TYPE_SUCCESS } from '../../components/amp-notice';
 
 /**
  * Provides the description for the done screen.
@@ -75,6 +77,68 @@ function Saving() {
 	);
 }
 
+function Preview() {
+	const {
+		options: { theme_support: themeSupport, reader_theme: readerTheme, preview_permalink: previewPermalink },
+	} = useContext( Options );
+
+	return (
+		<>
+			<AMPInfo icon={ ( props ) => <IconMobile { ...props } /> }>
+				{ __( 'Live view of your site', 'amp' ) }
+			</AMPInfo>
+			<Phone>
+				<iframe
+					className="done__preview-iframe"
+					src={ previewPermalink }
+					title={ __( 'Site preview', 'amp' ) }
+					name="amp-wizard-completion-preview"
+				/>
+			</Phone>
+
+			{ 'reader' !== themeSupport && (
+				<Button
+					isPrimary
+					href={ previewPermalink	}
+					target="_blank"
+					rel="noreferrer"
+				>
+					{ __( 'Visit your site', 'amp' ) }
+				</Button>
+			) }
+
+			{
+				'reader' === themeSupport && (
+					<>
+						<Button
+							isPrimary
+							href={
+								addQueryArgs(
+									CUSTOMIZER_LINK,
+									'legacy' === readerTheme
+										? { 'autofocus[panel]': 'amp_panel', url: previewPermalink }
+										: { url: previewPermalink, amp: 1 },
+								)
+							}
+							target="_blank"
+							rel="noreferrer"
+						>
+							{ __( 'Visit in Customizer', 'amp' ) }
+						</Button>
+						<Button
+							href={ previewPermalink }
+							target="_blank"
+							rel="noreferrer"
+						>
+							{ __( 'Browse AMP Version', 'amp' ) }
+						</Button>
+					</>
+				)
+			}
+		</>
+	);
+}
+
 /**
  * Final screen, where data is saved.
  */
@@ -97,11 +161,13 @@ export function Save() {
 
 	const {
 		didSaveOptions,
-		options: { theme_support: themeSupport, reader_theme: readerTheme, preview_permalink: previewPermalink },
+		options: { theme_support: themeSupport, reader_theme: readerTheme },
 		saveOptions,
 		savingOptions,
 	} = useContext( Options );
 	const { didSaveDeveloperToolsOption, saveDeveloperToolsOption, savingDeveloperToolsOption } = useContext( User );
+
+	const { downloadedTheme, downloadingTheme, downloadingThemeError } = useContext( ReaderThemes );
 
 	/**
 	 * Triggers saving of options on arrival to this screen.
@@ -121,7 +187,7 @@ export function Save() {
 		}
 	}, [ didSaveDeveloperToolsOption, savingDeveloperToolsOption, saveDeveloperToolsOption ] );
 
-	if ( shouldShowSaving || savingOptions || savingDeveloperToolsOption ) {
+	if ( shouldShowSaving || savingOptions || savingDeveloperToolsOption || downloadingTheme ) {
 		return <Saving />;
 	}
 
@@ -136,62 +202,24 @@ export function Save() {
 				<h1>
 					{ heading }
 				</h1>
+				{
+					downloadedTheme === readerTheme && (
+						<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_SUCCESS }>
+							{ __( 'Your reader theme was automatically installed', 'amp' ) }
+						</AMPNotice>
+					)
+				}
 				<p>
 					{ getDescription( themeSupport ) }
 				</p>
 			</div>
 			<div className="done__preview-container">
-				<AMPInfo icon={ ( props ) => <IconMobile { ...props } /> }>
-					{ __( 'Live view of your site', 'amp' ) }
-				</AMPInfo>
-				<Phone>
-					<iframe
-						className="done__preview-iframe"
-						src={ previewPermalink }
-						title={ __( 'Site preview', 'amp' ) }
-						name="amp-wizard-completion-preview"
-					/>
-				</Phone>
-
-				{ 'reader' !== themeSupport && (
-					<Button
-						isPrimary
-						href={ previewPermalink	}
-						target="_blank"
-						rel="noreferrer"
-					>
-						{ __( 'Visit your site', 'amp' ) }
-					</Button>
+				{ downloadingThemeError && (
+					<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_WARNING }>
+						{ __( 'There was an error downloading your reader theme. As a result, your site is currently using the legacy reader theme. Please install your chosen theme manually.', 'amp' ) }
+					</AMPNotice>
 				) }
-
-				{
-					'reader' === themeSupport && (
-						<>
-							<Button
-								isPrimary
-								href={
-									addQueryArgs(
-										CUSTOMIZER_LINK,
-										'legacy' === readerTheme
-											? { 'autofocus[panel]': 'amp_panel', url: previewPermalink }
-											: { url: previewPermalink, amp: 1 },
-									)
-								}
-								target="_blank"
-								rel="noreferrer"
-							>
-								{ __( 'Visit in Customizer', 'amp' ) }
-							</Button>
-							<Button
-								href={ previewPermalink }
-								target="_blank"
-								rel="noreferrer"
-							>
-								{ __( 'Browse AMP Version', 'amp' ) }
-							</Button>
-						</>
-					)
-				}
+				<Preview />
 			</div>
 		</div>
 	);
