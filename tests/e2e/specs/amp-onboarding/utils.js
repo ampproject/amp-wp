@@ -22,7 +22,7 @@ export async function moveToTechnicalScreen() {
 	await page.waitForSelector( 'input[type="radio"]' );
 }
 
-export async function moveToTemplateModeScreen( technical = true ) {
+export async function moveToTemplateModeScreen( { technical = true } ) {
 	await moveToTechnicalScreen();
 
 	const radioSelector = technical ? '#technical-background-enable' : '#technical-background-disable';

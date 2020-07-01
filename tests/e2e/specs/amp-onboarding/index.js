@@ -6,7 +6,7 @@ import { visitAdminPage } from '@wordpress/e2e-test-utils';
 /**
  * Internal dependencies
  */
-import { PREV_BUTTON_SELECTOR, clickNextButton } from './utils';
+import { PREV_BUTTON_SELECTOR, clickNextButton, clickPrevButton } from './utils';
 
 describe( 'AMP Setup Screen', () => {
 	beforeEach( async () => {
@@ -36,17 +36,17 @@ describe( 'AMP Setup Screen', () => {
 		titleText = await getTitleText();
 		expect( titleText ).toBe( 'Welcome to the Official AMP Plugin for WordPress' );
 
-		clickNextButton();
+		await clickNextButton();
 		titleText = await getTitleText();
 		expect( titleText ).toBe( 'Are you technical?' );
 
 		await page.$eval( '#technical-background-disable', ( el ) => el.click() );
 
-		clickNextButton();
+		await clickNextButton();
 		titleText = await getTitleText();
 		expect( titleText ).toBe( 'Template modes' );
 
-		await page.click( PREV_BUTTON_SELECTOR );
+		await clickPrevButton();
 		titleText = await getTitleText();
 		expect( titleText ).toBe( 'Are you technical?' );
 	} );

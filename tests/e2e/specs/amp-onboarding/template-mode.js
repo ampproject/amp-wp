@@ -6,7 +6,7 @@ import { moveToTemplateModeScreen } from './utils';
 
 describe( 'AMP wizard: template-mode', () => {
 	beforeEach( async () => {
-		await moveToTemplateModeScreen();
+		await moveToTemplateModeScreen( { technical: true } );
 	} );
 
 	it( 'should show two options, none selected', async () => {
@@ -39,7 +39,7 @@ describe( 'AMP wizard: template-mode', () => {
 
 describe( 'AMP wizard: template mode recommentations', () => {
 	it( 'makes correct recommendations when user is techncial', async () => {
-		await moveToTemplateModeScreen();
+		await moveToTemplateModeScreen( { technical: true } );
 
 		const infoNoticeCount = await page.$$eval( '.amp-notice--info', ( els ) => els.length );
 
@@ -47,7 +47,7 @@ describe( 'AMP wizard: template mode recommentations', () => {
 	} );
 
 	it( 'makes correct recommendations when user is not techncial', async () => {
-		await moveToTemplateModeScreen( false );
+		await moveToTemplateModeScreen( { technical: false } );
 
 		const infoNoticeCount = await page.$$eval( '.amp-notice--info', ( els ) => els.length );
 		expect( infoNoticeCount ).toBe( 2 );
