@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useContext, useEffect, useState } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
+import { Button } from '@wordpress/components';
 
 /**
  * External dependencies
@@ -13,7 +14,6 @@ import { CUSTOMIZER_LINK } from 'amp-setup'; // From WP inline script.
 /**
  * Internal dependencies
  */
-import { Button } from '@wordpress/components';
 import { Options } from '../../components/options-context-provider';
 import { User } from '../../components/user-context-provider';
 import { Phone } from '../../components/phone';
