@@ -11,9 +11,9 @@ import { __ } from '@wordpress/i18n';
 import { Options } from '../../components/options-context-provider';
 
 export function RedirectToggle() {
-	const { updates, updateOptions } = useContext( Options );
+	const { editedOptions, updateOptions } = useContext( Options );
 
-	const { mobile_redirect: mobileRedirect } = updates;
+	const { mobile_redirect: mobileRedirect } = editedOptions;
 	return (
 		<div className="selectable selectable--bottom">
 			<div className="redirect-toggle">
