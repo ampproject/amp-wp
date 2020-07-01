@@ -1287,7 +1287,7 @@ function amp_is_dev_mode() {
 			// For the few sites that forcibly show the admin bar even when the user is logged out, only enable dev
 			// mode if the user is actually logged in. This prevents the dev mode from being served to crawlers
 			// when they index the AMP version. The theme support check disables dev mode in Reader mode.
-			( is_admin_bar_showing() && is_user_logged_in() && current_theme_supports( 'amp' ) )
+			( is_admin_bar_showing() && is_user_logged_in() )
 			||
 			is_customize_preview()
 		)

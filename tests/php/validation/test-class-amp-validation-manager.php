@@ -7,8 +7,10 @@
 
 // phpcs:disable Generic.Formatting.MultipleStatementAlignment.NotSameWarning
 
+use AmpProject\AmpWP\Admin\DevToolsUserAccess;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVars;
+use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\HandleValidation;
 use AmpProject\AmpWP\Tests\PrivateAccess;
@@ -150,6 +152,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertTrue( post_type_exists( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) );
 		$this->assertTrue( taxonomy_exists( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ) );
 
+		$this->assertEquals( 100, has_filter( 'map_meta_cap', self::TESTED_CLASS . '::map_meta_cap' ) );
 		$this->assertEquals( 10, has_action( 'save_post', self::TESTED_CLASS . '::handle_save_post_prompting_validation' ) );
 		$this->assertEquals( 10, has_action( 'enqueue_block_editor_assets', self::TESTED_CLASS . '::enqueue_block_validation' ) );
 
@@ -204,18 +207,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test init when theme support is not present.
-	 *
-	 * @covers AMP_Validation_Manager::init()
-	 */
-	public function test_init_without_theme_support() {
-		remove_theme_support( AMP_Theme_Support::SLUG );
-		AMP_Validation_Manager::init();
-
-		$this->assertFalse( has_action( 'save_post', [ 'AMP_Validation_Manager', 'handle_save_post_prompting_validation' ] ) );
-	}
-
-	/**
 	 * Test \AMP_Validation_Manager::post_supports_validation.
 	 *
 	 * @covers \AMP_Validation_Manager::post_supports_validation()
@@ -224,21 +215,21 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 
 		// Ensure that posts can be validated even when theme support is absent.
 		remove_theme_support( AMP_Theme_Support::SLUG );
-		$this->assertFalse( AMP_Validation_Manager::post_supports_validation( $this->factory()->post->create() ) );
+		$this->assertTrue( AMP_Validation_Manager::post_supports_validation( self::factory()->post->create() ) );
 
 		// Ensure normal case of validating published post when theme support present.
 		add_theme_support( AMP_Theme_Support::SLUG );
-		$this->assertTrue( AMP_Validation_Manager::post_supports_validation( $this->factory()->post->create() ) );
+		$this->assertTrue( AMP_Validation_Manager::post_supports_validation( self::factory()->post->create() ) );
 
 		// Trashed posts are not validatable.
-		$this->assertFalse( AMP_Validation_Manager::post_supports_validation( $this->factory()->post->create( [ 'post_status' => 'trash' ] ) ) );
+		$this->assertFalse( AMP_Validation_Manager::post_supports_validation( self::factory()->post->create( [ 'post_status' => 'trash' ] ) ) );
 
 		// An invalid post is not previewable.
 		$this->assertFalse( AMP_Validation_Manager::post_supports_validation( 0 ) );
 
 		// Ensure non-viewable posts do not support validation.
 		register_post_type( 'not_viewable', [ 'publicly_queryable' => false ] );
-		$post = $this->factory()->post->create( [ 'post_type' => 'not_viewable' ] );
+		$post = self::factory()->post->create( [ 'post_type' => 'not_viewable' ] );
 		$this->assertFalse( AMP_Validation_Manager::post_supports_validation( $post ) );
 	}
 
@@ -486,6 +477,13 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::validate_queued_posts_on_frontend()
 	 */
 	public function test_handle_save_post_prompting_validation_and_validate_queued_posts_on_frontend() {
+		$admin_user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		$editor_user_id = self::factory()->user->create( [ 'role' => 'editor' ] );
+
+		wp_set_current_user( $admin_user_id );
+		/** @var DevToolsUserAccess $service */
+		$service = Services::get( 'dev_tools.user_access' );
+
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$_SERVER['REQUEST_METHOD'] = 'POST';
 		$GLOBALS['pagenow']        = 'post.php';
@@ -508,7 +506,23 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		AMP_Validation_Manager::handle_save_post_prompting_validation( $post->ID );
 		$this->assertFalse( has_action( 'shutdown', [ 'AMP_Validation_Manager', 'validate_queued_posts_on_frontend' ] ) );
 
+		// Test when user doesn't have the capability.
+		wp_set_current_user( $editor_user_id );
+		$post = self::factory()->post->create_and_get( [ 'post_type' => 'post' ] );
+		AMP_Validation_Manager::handle_save_post_prompting_validation( $post->ID );
+		$this->assertFalse( has_action( 'shutdown', [ 'AMP_Validation_Manager', 'validate_queued_posts_on_frontend' ] ) );
+
+		// Test when user has dev tools turned off.
+		wp_set_current_user( $admin_user_id );
+		$service->set_user_enabled( $admin_user_id, false );
+		$post = self::factory()->post->create_and_get( [ 'post_type' => 'post' ] );
+		$_POST['post_ID'] = $post->ID;
+		AMP_Validation_Manager::handle_save_post_prompting_validation( $post->ID );
+		$this->assertFalse( has_action( 'shutdown', [ 'AMP_Validation_Manager', 'validate_queued_posts_on_frontend' ] ) );
+
 		// Test success.
+		$service->set_user_enabled( $admin_user_id, true );
+		wp_set_current_user( $admin_user_id );
 		$post = self::factory()->post->create_and_get( [ 'post_type' => 'post' ] );
 		$_POST['post_ID'] = $post->ID;
 		AMP_Validation_Manager::handle_save_post_prompting_validation( $post->ID );
@@ -610,6 +624,19 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
+		// Make user preference is honored.
+		/** @var DevToolsUserAccess $service */
+		$service = Services::get( 'dev_tools.user_access' );
+		$service->set_user_enabled( wp_get_current_user()->ID, false );
+		$this->assertNull(
+			AMP_Validation_Manager::get_amp_validity_rest_field(
+				compact( 'id' ),
+				'',
+				new WP_REST_Request( 'GET' )
+			)
+		);
+		$service->set_user_enabled( wp_get_current_user()->ID, true );
+
 		// GET request.
 		$field = AMP_Validation_Manager::get_amp_validity_rest_field(
 			compact( 'id' ),
@@ -659,22 +686,69 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test map_meta_cap.
+	 *
+	 * @covers AMP_Validation_Manager::map_meta_cap()
+	 */
+	public function test_map_meta_cap() {
+		$this->assertEquals(
+			[ 'manage_options' ],
+			AMP_Validation_Manager::map_meta_cap( [ AMP_Validation_Manager::VALIDATE_CAPABILITY ], AMP_Validation_Manager::VALIDATE_CAPABILITY )
+		);
+
+		$this->assertEquals(
+			[ 'install_plugins', 'manage_options', 'update_core' ],
+			AMP_Validation_Manager::map_meta_cap( [ 'install_plugins', AMP_Validation_Manager::VALIDATE_CAPABILITY, 'update_core' ], AMP_Validation_Manager::VALIDATE_CAPABILITY )
+		);
+	}
+
+	/**
 	 * Test has_cap.
 	 *
 	 * @covers AMP_Validation_Manager::has_cap()
 	 */
 	public function test_has_cap() {
-		wp_set_current_user(
-			self::factory()->user->create(
-				[
-					'role' => 'subscriber',
-				]
-			)
-		);
-		$this->assertFalse( AMP_Validation_Manager::has_cap() );
+		AMP_Validation_Manager::init();
 
-		$this->set_capability();
+		$subscriber    = self::factory()->user->create_and_get( [ 'role' => 'subscriber' ] );
+		$editor        = self::factory()->user->create_and_get( [ 'role' => 'editor' ] );
+		$administrator = self::factory()->user->create_and_get( [ 'role' => 'administrator' ] );
+
+		wp_set_current_user( $subscriber->ID );
+		$this->assertFalse( AMP_Validation_Manager::has_cap() );
+		$this->assertFalse( AMP_Validation_Manager::has_cap( $subscriber ) );
+		$this->assertFalse( AMP_Validation_Manager::has_cap( $subscriber->ID ) );
+		$this->assertTrue( AMP_Validation_Manager::has_cap( $administrator ) );
+		$this->assertTrue( AMP_Validation_Manager::has_cap( $administrator->ID ) );
+
+		wp_set_current_user( $administrator->ID );
 		$this->assertTrue( AMP_Validation_Manager::has_cap() );
+		$this->assertFalse( AMP_Validation_Manager::has_cap( $subscriber ) );
+		$this->assertFalse( AMP_Validation_Manager::has_cap( $subscriber->ID ) );
+		$this->assertTrue( AMP_Validation_Manager::has_cap( $administrator ) );
+		$this->assertTrue( AMP_Validation_Manager::has_cap( $administrator->ID ) );
+
+		$this->assertFalse( AMP_Validation_Manager::has_cap( $editor ) );
+		wp_set_current_user( $editor->ID );
+		$this->assertFalse( AMP_Validation_Manager::has_cap() );
+		add_filter(
+			'map_meta_cap',
+			static function ( $caps, $cap, $user_id ) {
+				if ( AMP_Validation_Manager::VALIDATE_CAPABILITY === $cap && user_can( $user_id, 'edit_others_posts' ) ) {
+					$position = array_search( $cap, $caps, true );
+					if ( false !== $position ) {
+						$caps[ $position ] = 'edit_others_posts';
+					}
+				}
+				return $caps;
+			},
+			10,
+			3
+		);
+		$this->assertTrue( AMP_Validation_Manager::has_cap() );
+		$this->assertTrue( AMP_Validation_Manager::has_cap( $editor ) );
+		$this->assertTrue( AMP_Validation_Manager::has_cap( $administrator ) );
+		$this->assertFalse( AMP_Validation_Manager::has_cap( $subscriber ) );
 	}
 
 	/**
@@ -812,6 +886,13 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->accept_sanitization_by_default( false );
 		$output = get_echo( [ 'AMP_Validation_Manager', 'print_edit_form_validation_status' ], [ $post ] );
 		$this->assertStringContains( $expected_notice_non_accepted_errors, $output );
+
+		// Ensure not displayed when dev tools is disabled.
+		/** @var DevToolsUserAccess $service */
+		$service = Services::get( 'dev_tools.user_access' );
+		$service->set_user_enabled( wp_get_current_user()->ID, false );
+		$output = get_echo( [ 'AMP_Validation_Manager', 'print_edit_form_validation_status' ], [ $post ] );
+		$this->assertStringNotContains( 'notice notice-warning', $output );
 	}
 
 	/**
@@ -1371,7 +1452,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 */
 	public function test_wrap_widget_callbacks() {
 		global $wp_registered_widgets, $_wp_sidebars_widgets;
-		$this->go_to( amp_get_permalink( $this->factory()->post->create() ) );
+		$this->go_to( amp_get_permalink( self::factory()->post->create() ) );
 
 		$search_widget_id = 'search-2';
 		$this->assertArrayHasKey( $search_widget_id, $wp_registered_widgets );
@@ -1992,7 +2073,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::get_validate_response_data()
 	 */
 	public function test_get_validate_response_data() {
-		$post = $this->factory()->post->create_and_get();
+		$post = self::factory()->post->create_and_get();
 
 		$this->go_to( get_permalink( $post ) );
 		$source_html = '<style>amp-fit-text { color:red }</style><script>document.write("bad")</script><amp-fit-text width="300" height="200" layout="responsive">Lorem ipsum</amp-fit-text>';
@@ -2324,12 +2405,23 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			$this->markTestSkipped( 'The block editor is not available.' );
 		}
 
-		add_theme_support( AMP_Theme_Support::SLUG );
 		global $post;
 		$post = self::factory()->post->create_and_get();
 		$slug = 'amp-block-validation';
-		$this->set_capability();
 		AMP_Validation_Manager::enqueue_block_validation();
+		$this->assertFalse( wp_script_is( $slug, 'enqueued' ) );
+
+		// Ensure not displayed when dev tools is disabled.
+		/** @var DevToolsUserAccess $service */
+		$service = Services::get( 'dev_tools.user_access' );
+		$this->set_capability();
+		$service->set_user_enabled( wp_get_current_user()->ID, false );
+		AMP_Validation_Manager::enqueue_block_validation();
+		$this->assertFalse( wp_script_is( $slug, 'enqueued' ) );
+
+		$service->set_user_enabled( wp_get_current_user()->ID, true );
+		AMP_Validation_Manager::enqueue_block_validation();
+		$this->assertTrue( wp_script_is( $slug, 'enqueued' ) );
 
 		$script                = wp_scripts()->registered[ $slug ];
 		$expected_dependencies = [
@@ -2353,25 +2445,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertStringContains( 'css/amp-block-validation.css', $style->src );
 		$this->assertEquals( AMP__VERSION, $style->ver );
 		$this->assertContains( $slug, wp_styles()->queue );
-	}
-
-	/**
-	 * Test enqueue_block_validation.
-	 *
-	 * @covers AMP_Validation_Manager::enqueue_block_validation()
-	 */
-	public function test_enqueue_block_validation_without_amp_support() {
-		if ( ! function_exists( 'register_block_type' ) ) {
-			$this->markTestSkipped( 'The block editor is not available.' );
-		}
-
-		remove_theme_support( AMP_Theme_Support::SLUG );
-		global $post;
-		$post = $this->factory()->post->create_and_get();
-		$slug = 'amp-block-validation';
-		$this->set_capability();
-		AMP_Validation_Manager::enqueue_block_validation();
-		$this->assertNotContains( $slug, wp_scripts()->queue );
 	}
 
 	/**
