@@ -22,6 +22,7 @@ import { AMPInfo } from '../../components/amp-info';
 import { IconMobile } from '../../components/svg/icon-mobile';
 import { ReaderThemes } from '../../components/reader-themes-context-provider';
 import { AMPNotice, NOTICE_SIZE_LARGE, NOTICE_TYPE_WARNING, NOTICE_TYPE_SUCCESS } from '../../components/amp-notice';
+import { Navigation } from '../../components/navigation-context-provider';
 
 /**
  * Provides the description for the done screen.
@@ -79,7 +80,7 @@ function Saving() {
 
 function Preview() {
 	const {
-		options: { theme_support: themeSupport, reader_theme: readerTheme, preview_permalink: previewPermalink },
+		options: { theme_support: themeSupport, preview_permalink: previewPermalink },
 	} = useContext( Options );
 
 	return (
@@ -98,46 +99,6 @@ function Preview() {
 					name="amp-wizard-completion-preview"
 				/>
 			</Phone>
-
-			{ 'reader' !== themeSupport && (
-				<Button
-					isPrimary
-					href={ previewPermalink	}
-					target="_blank"
-					rel="noreferrer"
-				>
-					{ __( 'Visit your site', 'amp' ) }
-				</Button>
-			) }
-
-			{
-				'reader' === themeSupport && (
-					<>
-						<Button
-							isPrimary
-							href={
-								addQueryArgs(
-									CUSTOMIZER_LINK,
-									'legacy' === readerTheme
-										? { 'autofocus[panel]': 'amp_panel', url: previewPermalink }
-										: { url: previewPermalink, amp: 1 },
-								)
-							}
-							target="_blank"
-							rel="noreferrer"
-						>
-							{ __( 'Visit in Customizer', 'amp' ) }
-						</Button>
-						<Button
-							href={ previewPermalink }
-							target="_blank"
-							rel="noreferrer"
-						>
-							{ __( 'Browse AMP Version', 'amp' ) }
-						</Button>
-					</>
-				)
-			}
 		</>
 	);
 }
@@ -146,31 +107,27 @@ function Preview() {
  * Final screen, where data is saved.
  */
 export function Save() {
-	// We'll show the saving screen for at least a second even if data is saved.
-	const [ shouldShowSaving, setShouldShowSaving ] = useState( true );
-
-	/**
-	 * Set shouldShowSaving to false after a second.
-	 */
-	useEffect( () => {
-		const timeout = setTimeout( () => {
-			setShouldShowSaving( false );
-		}, 1000 );
-
-		return () => {
-			clearTimeout( timeout );
-		};
-	}, [] );
-
 	const {
 		didSaveOptions,
-		options: { theme_support: themeSupport, reader_theme: readerTheme },
+		options: { theme_support: themeSupport, reader_theme: readerTheme, preview_permalink: previewPermalink },
 		saveOptions,
 		savingOptions,
 	} = useContext( Options );
 	const { didSaveDeveloperToolsOption, saveDeveloperToolsOption, savingDeveloperToolsOption } = useContext( User );
-
+	const { canGoForward, setCanGoForward } = useContext( Navigation );
 	const { downloadedTheme, downloadingTheme, downloadingThemeError } = useContext( ReaderThemes );
+
+	/**
+	 * Allow the finish button to be enabled.
+	 */
+	useEffect(
+		() => {
+			if ( ! canGoForward ) {
+				setCanGoForward( true );
+			}
+		},
+		[ setCanGoForward, canGoForward ],
+	);
 
 	/**
 	 * Triggers saving of options on arrival to this screen.
@@ -190,7 +147,7 @@ export function Save() {
 		}
 	}, [ didSaveDeveloperToolsOption, savingDeveloperToolsOption, saveDeveloperToolsOption ] );
 
-	if ( shouldShowSaving || savingOptions || savingDeveloperToolsOption || downloadingTheme ) {
+	if ( savingOptions || savingDeveloperToolsOption || downloadingTheme ) {
 		return <Saving />;
 	}
 
@@ -215,6 +172,48 @@ export function Save() {
 				<p>
 					{ getDescription( themeSupport ) }
 				</p>
+				<div className="done__link-buttons">
+					{ 'reader' !== themeSupport && (
+						<Button
+							isPrimary
+							href={ previewPermalink	}
+							target="_blank"
+							rel="noreferrer"
+						>
+							{ __( 'Visit your site', 'amp' ) }
+						</Button>
+					) }
+
+					{
+						'reader' === themeSupport && (
+							<>
+								<Button
+									isPrimary
+									href={
+										addQueryArgs(
+											CUSTOMIZER_LINK,
+											'legacy' === readerTheme
+												? { 'autofocus[panel]': 'amp_panel', url: previewPermalink }
+												: { url: previewPermalink, amp: 1 },
+										)
+									}
+									target="_blank"
+									rel="noreferrer"
+								>
+									{ __( 'Visit in Customizer', 'amp' ) }
+								</Button>
+								<Button
+									isPrimary
+									href={ previewPermalink }
+									target="_blank"
+									rel="noreferrer"
+								>
+									{ __( 'Browse AMP Version', 'amp' ) }
+								</Button>
+							</>
+						)
+					}
+				</div>
 			</div>
 			<div className="done__preview-container">
 				{ 'reader' === themeSupport && downloadingThemeError && (

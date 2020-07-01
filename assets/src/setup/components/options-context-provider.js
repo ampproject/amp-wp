@@ -17,6 +17,15 @@ import { useError } from '../utils/use-error';
 export const Options = createContext();
 
 /**
+ * Returns a promise that resolves after one second.
+ */
+function waitASecond() {
+	return new Promise( ( resolve ) => {
+		setTimeout( resolve, 1000 );
+	} );
+}
+
+/**
  * Context provider for options retrieval and updating.
  *
  * @param {Object} props Component props.
@@ -46,12 +55,19 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 		setSavingOptions( true );
 
 		try {
-			const savedOptions = await apiFetch(
-				{
-					method: 'post',
-					url: optionsRestEndpoint,
-					data: { ...options, wizard_completed: true },
-				},
+			// Ensure this promise lasts at least a second so that the "Saving Options" load screen is
+			// visible long enough for the user to see it is happening.
+			const [ savedOptions ] = await Promise.all(
+				[
+					apiFetch(
+						{
+							method: 'post',
+							url: optionsRestEndpoint,
+							data: { ...options, wizard_completed: true },
+						},
+					),
+					waitASecond(),
+				],
 			);
 
 			if ( true === hasUnmounted.current ) {

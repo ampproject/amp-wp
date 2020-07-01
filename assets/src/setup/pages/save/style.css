@@ -16,6 +16,14 @@
 	}
 }
 
+.done__link-buttons a {
+	font-size: 14px;
+}
+
+.done__link-buttons a:not(:last-child) {
+	margin-right: 5px;
+}
+
 
 .done__preview-container {
 	border: 2px solid #e8e8e8;
