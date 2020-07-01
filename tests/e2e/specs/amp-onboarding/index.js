@@ -3,9 +3,10 @@
  * WordPress dependencies
  */
 import { visitAdminPage } from '@wordpress/e2e-test-utils';
-
-const NEXT_BUTTON_SELECTOR = '.amp-setup-nav__prev-next button.is-primary';
-const PREV_BUTTON_SELECTOR = '.amp-setup-nav__prev-next button:not(.is-primary)';
+/**
+ * Internal dependencies
+ */
+import { PREV_BUTTON_SELECTOR, clickNextButton } from './utils';
 
 describe( 'AMP Setup Screen', () => {
 	beforeEach( async () => {
@@ -35,15 +36,13 @@ describe( 'AMP Setup Screen', () => {
 		titleText = await getTitleText();
 		expect( titleText ).toBe( 'Welcome to the Official AMP Plugin for WordPress' );
 
-		await page.waitForSelector( `${ NEXT_BUTTON_SELECTOR }:not([disabled])` );
-		await page.click( NEXT_BUTTON_SELECTOR );
+		clickNextButton();
 		titleText = await getTitleText();
 		expect( titleText ).toBe( 'Are you technical?' );
 
 		await page.$eval( '#technical-background-disable', ( el ) => el.click() );
 
-		await page.waitForSelector( `${ NEXT_BUTTON_SELECTOR }:not([disabled])` );
-		await page.click( NEXT_BUTTON_SELECTOR );
+		clickNextButton();
 		titleText = await getTitleText();
 		expect( titleText ).toBe( 'Template modes' );
 

@@ -1,20 +1,22 @@
-
 /**
- * WordPress dependencies
+ * Internal dependencies
  */
-import { visitAdminPage } from '@wordpress/e2e-test-utils';
+import { moveToTechnicalScreen } from './utils';
 
 describe( 'AMP wizard: technical background', () => {
 	beforeEach( async () => {
-		await visitAdminPage( 'admin.php', 'page=amp-setup&amp-setup-screen=technical-background' );
+		await moveToTechnicalScreen();
 	} );
 
-	it( 'should show two options', async () => {
+	it( 'should show two options, none checked', async () => {
 		await page.waitForSelector( 'input[type="radio"]' );
 
 		const itemCount = await page.$$eval( 'input[type="radio"]', ( els ) => els.length );
 
 		expect( itemCount ).toBe( 2 );
+
+		const checkedRadio = await page.$( 'input[type="radio"][checked]' );
+		expect( checkedRadio ).toBeNull();
 	} );
 
 	it( 'should allow options to be selected', async () => {
