@@ -326,7 +326,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::finish_init()
 	 */
 	public function test_finish_init_when_accessing_singular_post_that_does_not_support_amp() {
-		$post          = $this->factory()->post->create();
+		$post          = self::factory()->post->create();
 		$requested_url = get_permalink( $post );
 		$this->assertEquals( AMP_Theme_Support::READER_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
 		$this->assertTrue( post_supports_amp( $post ) );
@@ -1940,7 +1940,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_prepare_response() {
 		add_theme_support( 'amp' );
-		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		add_filter(
 			'home_url',
@@ -2057,7 +2057,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
 	public function test_prepare_response_standard_mode_non_amp() {
-		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		add_filter( 'amp_dev_mode_enabled', '__return_false' );
 		wp();
 		$original_html = $this->get_original_html();

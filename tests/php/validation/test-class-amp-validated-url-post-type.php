@@ -43,7 +43,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	public function test_register() {
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$this->assertFalse( is_admin() );
-		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		AMP_Validated_URL_Post_Type::register();
 		$amp_post_type = get_post_type_object( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG );
@@ -63,10 +63,10 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		AMP_Validated_URL_Post_Type::register();
 		$this->assertContains( AMP_Validated_URL_Post_Type::REMAINING_ERRORS, wp_removable_query_args() );
 
-		$post = $this->factory()->post->create( [ 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ] );
+		$post = self::factory()->post->create( [ 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ] );
 		$this->assertTrue( user_can( wp_get_current_user()->ID, 'edit_post', $post ) );
 
-		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'subscriber' ] ) );
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'subscriber' ] ) );
 		$this->assertFalse( current_user_can( 'edit_post', $post ) );
 	}
 
@@ -76,7 +76,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	 * @covers \AMP_Validated_URL_Post_Type::add_admin_hooks()
 	 */
 	public function test_add_admin_hooks() {
-		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		AMP_Validated_URL_Post_Type::add_admin_hooks();
 
 		$this->assertEquals( 10, has_filter( 'dashboard_glance_items', [ self::TESTED_CLASS, 'filter_dashboard_glance_items' ] ) );
@@ -117,7 +117,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	 * @covers \AMP_Validated_URL_Post_Type::add_admin_menu_new_invalid_url_count()
 	 */
 	public function test_add_admin_menu_new_invalid_url_count() {
-		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		global $submenu;
 		AMP_Validation_Manager::init(); // Register the post type and taxonomy.
 
@@ -1791,7 +1791,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	 * Test that the code ensures other plugins won't mess up the validation URL action links in the post list table.
 	 */
 	public function test_post_row_actions_filter() {
-		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		AMP_Validated_URL_Post_Type::add_admin_hooks();
 
 		$post = self::factory()->post->create_and_get(

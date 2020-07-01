@@ -142,7 +142,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 				$wp_rewrite->init();
 				$wp_rewrite->flush_rules();
 
-				$permalink = get_permalink( $this->factory()->post->create() );
+				$permalink = get_permalink( self::factory()->post->create() );
 
 				$this->go_to( $permalink );
 				$this->assertEquals( $permalink, amp_get_current_url() );
@@ -423,7 +423,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 				];
 			},
 			'is_post'         => function() {
-				$post_id = $this->factory()->post->create();
+				$post_id = self::factory()->post->create();
 				return [
 					get_permalink( $post_id ),
 					amp_get_permalink( $post_id ),
@@ -521,7 +521,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 				];
 			},
 			'is_post'         => function() {
-				$post_id = $this->factory()->post->create();
+				$post_id = self::factory()->post->create();
 				return [
 					get_permalink( $post_id ),
 					amp_get_permalink( $post_id ),

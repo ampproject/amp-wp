@@ -215,21 +215,21 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 
 		// Ensure that posts can be validated even when theme support is absent.
 		remove_theme_support( AMP_Theme_Support::SLUG );
-		$this->assertTrue( AMP_Validation_Manager::post_supports_validation( $this->factory()->post->create() ) );
+		$this->assertTrue( AMP_Validation_Manager::post_supports_validation( self::factory()->post->create() ) );
 
 		// Ensure normal case of validating published post when theme support present.
 		add_theme_support( AMP_Theme_Support::SLUG );
-		$this->assertTrue( AMP_Validation_Manager::post_supports_validation( $this->factory()->post->create() ) );
+		$this->assertTrue( AMP_Validation_Manager::post_supports_validation( self::factory()->post->create() ) );
 
 		// Trashed posts are not validatable.
-		$this->assertFalse( AMP_Validation_Manager::post_supports_validation( $this->factory()->post->create( [ 'post_status' => 'trash' ] ) ) );
+		$this->assertFalse( AMP_Validation_Manager::post_supports_validation( self::factory()->post->create( [ 'post_status' => 'trash' ] ) ) );
 
 		// An invalid post is not previewable.
 		$this->assertFalse( AMP_Validation_Manager::post_supports_validation( 0 ) );
 
 		// Ensure non-viewable posts do not support validation.
 		register_post_type( 'not_viewable', [ 'publicly_queryable' => false ] );
-		$post = $this->factory()->post->create( [ 'post_type' => 'not_viewable' ] );
+		$post = self::factory()->post->create( [ 'post_type' => 'not_viewable' ] );
 		$this->assertFalse( AMP_Validation_Manager::post_supports_validation( $post ) );
 	}
 
@@ -477,8 +477,8 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::validate_queued_posts_on_frontend()
 	 */
 	public function test_handle_save_post_prompting_validation_and_validate_queued_posts_on_frontend() {
-		$admin_user_id = $this->factory()->user->create( [ 'role' => 'administrator' ] );
-		$editor_user_id = $this->factory()->user->create( [ 'role' => 'editor' ] );
+		$admin_user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		$editor_user_id = self::factory()->user->create( [ 'role' => 'editor' ] );
 
 		wp_set_current_user( $admin_user_id );
 		/** @var DevToolsUserAccess $service */
@@ -1452,7 +1452,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 */
 	public function test_wrap_widget_callbacks() {
 		global $wp_registered_widgets, $_wp_sidebars_widgets;
-		$this->go_to( amp_get_permalink( $this->factory()->post->create() ) );
+		$this->go_to( amp_get_permalink( self::factory()->post->create() ) );
 
 		$search_widget_id = 'search-2';
 		$this->assertArrayHasKey( $search_widget_id, $wp_registered_widgets );
@@ -2073,7 +2073,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::get_validate_response_data()
 	 */
 	public function test_get_validate_response_data() {
-		$post = $this->factory()->post->create_and_get();
+		$post = self::factory()->post->create_and_get();
 
 		$this->go_to( get_permalink( $post ) );
 		$source_html = '<style>amp-fit-text { color:red }</style><script>document.write("bad")</script><amp-fit-text width="300" height="200" layout="responsive">Lorem ipsum</amp-fit-text>';
