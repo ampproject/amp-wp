@@ -108,6 +108,7 @@
 	padding-left: 1.5rem;
 	padding-right: 3rem;
 	padding-top: 0.5rem;
+	pointer-events: none; /* In version 1.7, this will open a subpanel. */
 }
 
 .template-mode-selection .components-panel__body-title button .components-panel__arrow {
