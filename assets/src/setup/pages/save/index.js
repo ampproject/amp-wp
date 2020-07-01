@@ -85,7 +85,10 @@ function Preview() {
 	return (
 		<>
 			<AMPInfo icon={ ( props ) => <IconMobile { ...props } /> }>
-				{ __( 'Live view of your site', 'amp' ) }
+				{ 'standard' === themeSupport
+					? __( 'Live view of your site', 'amp' )
+					: __( 'Live view of a page on your site using AMP mode', 'amp' )
+				}
 			</AMPInfo>
 			<Phone>
 				<iframe
@@ -203,7 +206,7 @@ export function Save() {
 					{ heading }
 				</h1>
 				{
-					downloadedTheme === readerTheme && (
+					'reader' === themeSupport && downloadedTheme === readerTheme && (
 						<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_SUCCESS }>
 							{ __( 'Your reader theme was automatically installed', 'amp' ) }
 						</AMPNotice>
@@ -214,7 +217,7 @@ export function Save() {
 				</p>
 			</div>
 			<div className="done__preview-container">
-				{ downloadingThemeError && (
+				{ 'reader' === themeSupport && downloadingThemeError && (
 					<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_WARNING }>
 						{ __( 'There was an error downloading your reader theme. As a result, your site is currently using the legacy reader theme. Please install your chosen theme manually.', 'amp' ) }
 					</AMPNotice>
