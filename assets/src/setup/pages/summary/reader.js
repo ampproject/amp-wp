@@ -29,10 +29,10 @@ import { SummaryHeader } from './summary-header';
  * @param {Object} props.currentTheme Data for the theme currently active on the site.
  */
 export function Reader( { currentTheme } ) {
-	const { options } = useContext( Options );
+	const { editedOptions } = useContext( Options );
 	const { themes } = useContext( ReaderThemes );
 
-	const { reader_theme: readerTheme, mobile_redirect: mobileRedirect } = options;
+	const { reader_theme: readerTheme, mobile_redirect: mobileRedirect } = editedOptions;
 
 	const readerThemeData = themes ? themes.find( ( theme ) => theme.slug === readerTheme ) : {};
 

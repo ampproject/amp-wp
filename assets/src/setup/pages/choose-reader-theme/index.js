@@ -18,10 +18,10 @@ import { ThemeCard } from './theme-card';
  */
 export function ChooseReaderTheme() {
 	const { canGoForward, setCanGoForward } = useContext( Navigation );
-	const { options } = useContext( Options );
+	const { editedOptions } = useContext( Options );
 	const { fetchingThemes, themes } = useContext( ReaderThemes );
 
-	const { reader_theme: readerTheme, theme_support: themeSupport } = options || {};
+	const { reader_theme: readerTheme, theme_support: themeSupport } = editedOptions;
 
 	/**
 	 * Allow moving forward.

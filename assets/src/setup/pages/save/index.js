@@ -80,7 +80,8 @@ function Saving() {
 
 function Preview() {
 	const {
-		options: { theme_support: themeSupport, preview_permalink: previewPermalink },
+		editedOptions: { theme_support: themeSupport },
+		originalOptions: { preview_permalink: previewPermalink },
 	} = useContext( Options );
 
 	return (
@@ -109,7 +110,8 @@ function Preview() {
 export function Save() {
 	const {
 		didSaveOptions,
-		options: { theme_support: themeSupport, reader_theme: readerTheme, preview_permalink: previewPermalink },
+		updates: { theme_support: themeSupport, reader_theme: readerTheme },
+		originalOptions: { preview_permalink: previewPermalink },
 		saveOptions,
 		savingOptions,
 	} = useContext( Options );

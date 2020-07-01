@@ -24,9 +24,9 @@ import { Transitional } from './transitional';
  */
 export function Summary() {
 	const { setCanGoForward } = useContext( Navigation );
-	const { options } = useContext( Options );
+	const { editedOptions } = useContext( Options );
 
-	const { theme_support: themeSupport } = options || {};
+	const { theme_support: themeSupport } = editedOptions;
 
 	/**
 	 * Allow moving forward.

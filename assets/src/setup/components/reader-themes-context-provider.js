@@ -41,8 +41,8 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, readerThemes
 
 	const { setError } = useError();
 
-	const { options, savingOptions } = useContext( Options );
-	const { reader_theme: readerTheme, theme_support: themeSupport } = options || {};
+	const { updates, savingOptions } = useContext( Options );
+	const { reader_theme: readerTheme, theme_support: themeSupport } = updates;
 
 	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
 	const hasUnmounted = useRef( false );

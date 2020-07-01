@@ -31,9 +31,9 @@ export function NavigationContextProvider( { children, pages } ) {
 		return -1 < index ? index : 0;
 	} );
 	const [ canGoForward, setCanGoForward ] = useState( true ); // Allow immediately moving forward on first page. @todo This may need to change in 1.7.
-	const { options } = useContext( Options );
+	const { updates } = useContext( Options );
 
-	const { theme_support: themeSupport } = options || {};
+	const { theme_support: themeSupport } = updates;
 
 	const currentPage = pages[ activePageIndex ];
 

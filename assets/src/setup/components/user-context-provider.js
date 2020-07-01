@@ -3,7 +3,6 @@
  */
 import { createContext, useEffect, useState, useRef, useCallback, useMemo, useContext } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { getQueryArg } from '@wordpress/url';
 
 /**
  * External dependencies
@@ -27,39 +26,34 @@ export const User = createContext();
  * @param {string} props.userRestEndpoint REST endpoint to retrieve options.
  */
 export function UserContextProvider( { children, userOptionDeveloperTools, userRestEndpoint } ) {
-	const { options } = useContext( Options );
-	const [ user, setUser ] = useState( null );
+	const { originalOptions } = useContext( Options );
 	const [ fetchingUser, setFetchingUser ] = useState( false );
 	const [ developerToolsOption, setDeveloperToolsOption ] = useState( null );
+	const [ originalDeveloperToolsOption, setOriginalDeveloperToolsOption ] = useState( null );
 	const [ savingDeveloperToolsOption, setSavingDeveloperToolsOption ] = useState( false );
 	const [ didSaveDeveloperToolsOption, setDidSaveDeveloperToolsOption ] = useState( false );
-
 	const { setError } = useError();
-
-	const originalDeveloperToolsOption = useRef();
 
 	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
 	const hasUnmounted = useRef( false );
+	useEffect( () => () => {
+		hasUnmounted.current = true;
+	}, [] );
 
 	const hasDeveloperToolsOptionChange = useMemo(
-		() => user && developerToolsOption !== user[ userOptionDeveloperTools ],
-		[ user, developerToolsOption, userOptionDeveloperTools ],
+		() => null !== developerToolsOption && developerToolsOption !== originalDeveloperToolsOption,
+		[ developerToolsOption, originalDeveloperToolsOption ],
 	);
 
 	/**
 	 * Fetch user options on mount.
 	 */
 	useEffect( () => {
-		if ( ! options ) {
+		if ( ! originalOptions || false === originalOptions.wizard_completed ) {
 			return;
 		}
 
-		// On initial run, keep the option null until the user makes a selection.
-		if ( true !== options.wizard_completed || getQueryArg( global.location.href, 'setup-wizard-first-run' ) ) {
-			return;
-		}
-
-		if ( ! userRestEndpoint || user || fetchingUser ) {
+		if ( ! userRestEndpoint || fetchingUser || null !== originalDeveloperToolsOption ) {
 			return;
 		}
 
@@ -76,9 +70,8 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 					return;
 				}
 
-				originalDeveloperToolsOption.current = fetchedUser[ userOptionDeveloperTools ];
+				setOriginalDeveloperToolsOption( fetchedUser[ userOptionDeveloperTools ] );
 				setDeveloperToolsOption( fetchedUser[ userOptionDeveloperTools ] );
-				setUser( fetchedUser );
 			} catch ( e ) {
 				setError( e );
 				return;
@@ -86,24 +79,27 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 
 			setFetchingUser( false );
 		} )();
-	}, [ user, fetchingUser, options, setError, userOptionDeveloperTools, userRestEndpoint ] );
+	}, [ fetchingUser, originalDeveloperToolsOption, originalOptions, setError, userOptionDeveloperTools, userRestEndpoint ] );
 
 	/**
 	 * Sends the option back to the REST endpoint to be saved.
 	 */
 	const saveDeveloperToolsOption = useCallback( async () => {
-		if ( ! user ) {
+		if ( ! hasDeveloperToolsOptionChange ) {
 			return;
 		}
 
 		setSavingDeveloperToolsOption( true );
 
 		try {
-			await apiFetch( { method: 'post', url: userRestEndpoint, data: { [ userOptionDeveloperTools ]: developerToolsOption } } );
+			const fetchedUser = await apiFetch( { method: 'post', url: userRestEndpoint, data: { [ userOptionDeveloperTools ]: developerToolsOption } } );
 
 			if ( true === hasUnmounted.current ) {
 				return;
 			}
+
+			setOriginalDeveloperToolsOption( fetchedUser[ userOptionDeveloperTools ] );
+			setDeveloperToolsOption( fetchedUser[ userOptionDeveloperTools ] );
 		} catch ( e ) {
 			setError( e );
 			return;
@@ -111,11 +107,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 
 		setDidSaveDeveloperToolsOption( true );
 		setSavingDeveloperToolsOption( false );
-	}, [ user, developerToolsOption, setError, setSavingDeveloperToolsOption, setDidSaveDeveloperToolsOption, userOptionDeveloperTools, userRestEndpoint ] );
-
-	useEffect( () => () => {
-		hasUnmounted.current = true;
-	}, [] );
+	}, [ hasDeveloperToolsOptionChange, developerToolsOption, setError, userOptionDeveloperTools, userRestEndpoint ] );
 
 	return (
 		<User.Provider
@@ -125,7 +117,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 					fetchingUser,
 					didSaveDeveloperToolsOption,
 					hasDeveloperToolsOptionChange,
-					originalDeveloperToolsOption: originalDeveloperToolsOption.current,
+					originalDeveloperToolsOption,
 					saveDeveloperToolsOption,
 					savingDeveloperToolsOption,
 					setDeveloperToolsOption,

@@ -11,14 +11,14 @@ import { createContext, useState } from '@wordpress/element';
 export const Options = createContext();
 
 export function OptionsContextProvider( { children } ) {
-	const [ options, updateOptions ] = useState( {
+	const [ updates, updateOptions ] = useState( {
 		redirect_toggle: false,
 	} );
 
 	return (
 		<Options.Provider value={
 			{
-				options: options || {},
+				updates: updates || {},
 				updateOptions,
 			}
 		}>

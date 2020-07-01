@@ -31,8 +31,8 @@ import { Phone } from '../../components/phone';
  * @param {boolean} props.unavailable Whether the theme is not automatically installable in the current environment.
  */
 export function ThemeCard( { description, homepage, screenshotUrl, slug, name, unavailable } ) {
-	const { options, updateOptions } = useContext( Options );
-	const { reader_theme: readerTheme } = options || {};
+	const { editedOptions, updateOptions } = useContext( Options );
+	const { reader_theme: readerTheme } = editedOptions;
 
 	const id = `theme-card__${ slug }`;
 
