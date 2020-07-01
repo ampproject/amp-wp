@@ -2,7 +2,7 @@
 	display: flex;
 	flex-wrap: wrap;
 
-	@media screen and (min-width: 1100px) {
+	@media screen and (min-width: 1280px) {
 		flex-wrap: nowrap;
 	}
 }
@@ -11,7 +11,7 @@
 	width: 100%;
 	padding-bottom: 30px;
 
-	@media screen and (min-width: 1100px) {
+	@media screen and (min-width: 1280px) {
 		padding-right: 30px;
 	}
 }
@@ -23,7 +23,11 @@
 	flex-shrink: 0;
 	padding: 37px;
 	text-align: center;
-	width: 400px;
+
+	@media screen and (max-width: 1279px) {
+		margin-left: auto;
+		margin-right: auto;
+	}
 }
 
 .done__preview-container .phone {
@@ -38,7 +42,11 @@
 
 .done__preview-iframe {
 	height: 610px;
-	width: 100%;
+	width: 400px;
+
+	@media screen and (max-width: 600px) {
+		width: 300px;
+	}
 }
 
 .done__preview-container .components-button {
