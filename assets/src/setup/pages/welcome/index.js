@@ -2,29 +2,16 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useContext, useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { Navigation } from '../../components/navigation-context-provider';
 import './style.css';
 
 /**
  * Welcome screen.
  */
 export function Welcome() {
-	const { canGoForward, setCanGoForward } = useContext( Navigation );
-
-	/**
-	 * Allow moving forward.
-	 */
-	useEffect( () => {
-		if ( canGoForward === false ) {
-			setCanGoForward( true );
-		}
-	}, [ canGoForward, setCanGoForward ] );
-
 	return (
 		<div className="welcome">
 

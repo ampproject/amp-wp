@@ -30,7 +30,7 @@ export function NavigationContextProvider( { children, pages } ) {
 		const index = pages.findIndex( ( { slug } ) => slug === getQueryArg( global.location.href, 'amp-setup-screen' ) );
 		return -1 < index ? index : 0;
 	} );
-	const [ canGoForward, setCanGoForward ] = useState( false );
+	const [ canGoForward, setCanGoForward ] = useState( true ); // Allow immediately moving forward on first page. @todo This may need to change in 1.7.
 	const { options } = useContext( Options );
 
 	const { theme_support: themeSupport } = options || {};

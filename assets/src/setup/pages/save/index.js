@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useContext, useEffect, useState } from '@wordpress/element';
+import { useContext, useEffect } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
 import { Button } from '@wordpress/components';
 
