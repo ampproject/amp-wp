@@ -64,3 +64,10 @@ export async function moveToSummaryScreen( { technical = true, mode, readerTheme
 	await clickNextButton();
 	await page.waitForSelector( '.summary' );
 }
+
+export async function moveToDoneScreen( { technical = true, mode, readerTheme = 'legacy' } ) {
+	await moveToSummaryScreen( { technical, mode, readerTheme } );
+
+	await clickNextButton();
+	await page.waitForSelector( '.done' );
+}

@@ -1,15 +1,17 @@
+/* eslint-disable jest/no-export */
+/* eslint-disable jest/require-top-level-describe */
 
 /**
  * Internal dependencies
  */
 import { moveToReaderThemesScreen, selectReaderTheme } from './utils';
 
-describe( 'AMP wizard: reader themes', () => {
+export const readerThemes = () => {
 	beforeEach( async () => {
 		await moveToReaderThemesScreen( { technical: true } );
 	} );
 
-	it( 'should have themes, none selected', async () => {
+	test( 'should have themes, none selected', async () => {
 		await page.waitForSelector( '.theme-card' );
 
 		const itemCount = await page.$$eval( '.theme-card', ( els ) => els.length );
@@ -20,7 +22,7 @@ describe( 'AMP wizard: reader themes', () => {
 		expect( checkedRadio ).toBeNull();
 	} );
 
-	it( 'should allow different themes to be selected', async () => {
+	test( 'should allow different themes to be selected', async () => {
 		// Twenty twenty shouldn't show because it's the active theme.
 		const twentytwenty = await page.$( '[for="theme-card__twentytwenty"]' );
 		expect( twentytwenty ).toBeNull();
@@ -37,4 +39,7 @@ describe( 'AMP wizard: reader themes', () => {
 		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
 		expect( titleText ).toBe( 'Twenty Sixteen' );
 	} );
-} );
+};
+
+/* eslint-enable jest/require-top-level-describe */
+/* eslint-enable jest/no-export */

@@ -1,14 +1,17 @@
+/* eslint-disable jest/no-export */
+/* eslint-disable jest/require-top-level-describe */
+
 /**
  * Internal dependencies
  */
 import { moveToTechnicalScreen } from './utils';
 
-describe( 'AMP wizard: technical background', () => {
+export const technicalBackground = () => {
 	beforeEach( async () => {
 		await moveToTechnicalScreen();
 	} );
 
-	it( 'should show two options, none checked', async () => {
+	test( 'should show two options, none checked', async () => {
 		await page.waitForSelector( 'input[type="radio"]' );
 
 		const itemCount = await page.$$eval( 'input[type="radio"]', ( els ) => els.length );
@@ -19,7 +22,7 @@ describe( 'AMP wizard: technical background', () => {
 		expect( checkedRadio ).toBeNull();
 	} );
 
-	it( 'should allow options to be selected', async () => {
+	test( 'should allow options to be selected', async () => {
 		await page.waitForSelector( 'input[type="radio"]' );
 
 		let titleText;
@@ -32,4 +35,7 @@ describe( 'AMP wizard: technical background', () => {
 		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
 		expect( titleText ).toBe( 'Non-technically savvy or wanting a simpler setup' );
 	} );
-} );
+};
+
+/* eslint-enable jest/require-top-level-describe */
+/* eslint-enable jest/no-export */

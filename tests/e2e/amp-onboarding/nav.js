@@ -1,3 +1,5 @@
+/* eslint-disable jest/no-export */
+/* eslint-disable jest/require-top-level-describe */
 
 /**
  * WordPress dependencies
@@ -8,13 +10,13 @@ import { visitAdminPage } from '@wordpress/e2e-test-utils';
  */
 import { PREV_BUTTON_SELECTOR, clickNextButton, clickPrevButton } from './utils';
 
-describe( 'AMP Setup Screen', () => {
+export function nav() {
 	beforeEach( async () => {
 		await visitAdminPage( 'admin.php', 'page=amp-setup' );
 		await page.waitForSelector( '.amp-setup-nav__prev-next' );
 	} );
 
-	it( 'should contain app root', async () => {
+	test( 'should contain app root', async () => {
 		await expect( page ).toMatchElement( '#amp-setup' );
 	} );
 
@@ -23,14 +25,14 @@ describe( 'AMP Setup Screen', () => {
 		return page.$eval( 'h1', ( el ) => el.innerText );
 	};
 
-	it( 'should have stepper items', async () => {
+	test( 'should have stepper items', async () => {
 		await page.waitForSelector( '.amp-stepper__item' );
 		const itemCount = await page.$$eval( '.amp-stepper__item', ( els ) => els.length );
 
 		expect( itemCount ).toBe( 6 );
 	} );
 
-	it( 'should be navigable', async () => {
+	test( 'should be navigable', async () => {
 		let titleText;
 
 		titleText = await getTitleText();
@@ -51,8 +53,11 @@ describe( 'AMP Setup Screen', () => {
 		expect( titleText ).toBe( 'Are you technical?' );
 	} );
 
-	it( 'hides prev button page one and two and disables next button on last page', async () => {
+	test( 'hides prev button page one and two and disables next button on last page', async () => {
 		const prevButton = await page.$( PREV_BUTTON_SELECTOR );
 		expect( prevButton ).toBeNull();
 	} );
-} );
+}
+
+/* eslint-enable jest/require-top-level-describe */
+/* eslint-enable jest/no-export */
