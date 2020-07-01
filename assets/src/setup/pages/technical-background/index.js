@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useContext, useEffect } from '@wordpress/element';
+import { useContext, useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -13,14 +13,18 @@ import { User1, User2 } from '../../components/svg/user-icons';
 import { Loading } from '../../components/loading';
 import { Selectable } from '../../components/selectable';
 import './style.css';
+import { AMPInfo } from '../../components/amp-info';
 
 /**
  * Screen for selecting the user's technical background.
  */
 export function TechnicalBackground() {
-	const { canGoForward, setCanGoForward } = useContext( Navigation );
+	// Initialize option as null to force user to make a selection.
+	const [ localDeveloperToolsOption, setLocalDeveloperToolsOption ] = useState( null );
+
+	const { setCanGoForward } = useContext( Navigation );
 	const {
-		developerToolsOption,
+		originalDeveloperToolsOption,
 		fetchingUser,
 		setDeveloperToolsOption,
 	} = useContext( User );
@@ -29,10 +33,21 @@ export function TechnicalBackground() {
 	 * Allow moving forward.
 	 */
 	useEffect( () => {
-		if ( canGoForward === false && 'boolean' === typeof developerToolsOption ) {
+		if ( 'boolean' === typeof localDeveloperToolsOption ) {
 			setCanGoForward( true );
 		}
-	}, [ canGoForward, developerToolsOption, setCanGoForward ] );
+	}, [ localDeveloperToolsOption, setCanGoForward ] );
+
+	/**
+	 * Persist selected option in global context.
+	 */
+	useEffect( () => {
+		if ( null === localDeveloperToolsOption ) {
+			return;
+		}
+
+		setDeveloperToolsOption( localDeveloperToolsOption );
+	}, [ localDeveloperToolsOption, setDeveloperToolsOption ] );
 
 	const disableInputID = 'technical-background-disable';
 	const enableInputID = 'technical-background-enable';
@@ -45,7 +60,7 @@ export function TechnicalBackground() {
 		<div className="technical-background">
 			<div className="technical-background__header">
 				<svg width="130" height="136" viewBox="0 0 130 136" fill="none" xmlns="http://www.w3.org/2000/svg">
-					<g clipPath="url(#clip0)">
+					<g clipPath="url(#clip-technical-background)">
 						<path d="M84.847 103.785H30.847C28.047 103.785 25.847 101.585 25.847 98.7852V45.7852C25.847 42.9852 28.047 40.7852 30.847 40.7852H89.847C92.647 40.7852 94.847 42.9852 94.847 45.7852V93.7852C94.847 99.2852 90.347 103.785 84.847 103.785Z" stroke="#2459E7" strokeWidth="2" strokeMiterlimit="10" />
 						<path d="M73.847 89.1867H46.847C44.047 89.1867 41.847 86.9867 41.847 84.1867V60.3867C41.847 57.5867 44.047 55.3867 46.847 55.3867H73.847C76.647 55.3867 78.847 57.5867 78.847 60.3867V84.1867C78.847 86.9867 76.647 89.1867 73.847 89.1867Z" stroke="#2459E7" strokeWidth="2" strokeMiterlimit="10" />
 						<path d="M60.847 40.7852V19.7852" stroke="#2459E7" strokeWidth="2" strokeMiterlimit="10" />
@@ -75,7 +90,7 @@ export function TechnicalBackground() {
 						<path d="M25.547 86.5859H13.847L6.74701 93.6859V100.686" stroke="#2459E7" strokeWidth="2" strokeMiterlimit="10" />
 					</g>
 					<defs>
-						<clipPath id="clip0">
+						<clipPath id="clip-technical-background">
 							<rect width="129" height="135" fill="white" transform="translate(0.846985 0.785156)" />
 						</clipPath>
 					</defs>
@@ -88,23 +103,30 @@ export function TechnicalBackground() {
 				</p>
 			</div>
 			<form>
-				<Selectable className={ `technical-background-option-container` } selected={ true === developerToolsOption }>
+				<Selectable className={ `technical-background-option-container` } selected={ true === localDeveloperToolsOption }>
 					<label htmlFor={ enableInputID } className="technical-background-option">
 						<div className="technical-background-option__input-container">
 							<input
 								type="radio"
 								id={ enableInputID }
-								checked={ true === developerToolsOption }
+								checked={ true === localDeveloperToolsOption }
 								onChange={ () => {
-									setDeveloperToolsOption( true );
+									setLocalDeveloperToolsOption( true );
 								} }
 							/>
 						</div>
 						<User1 />
 						<div className="technical-background-option__description">
-							<h2>
-								{ __( 'Developer or technically savvy', 'amp' ) }
-							</h2>
+							<div>
+								{ true === originalDeveloperToolsOption && (
+									<AMPInfo>
+										{ __( 'Previously selected', 'amp' ) }
+									</AMPInfo>
+								) }
+								<h2>
+									{ __( 'Developer or technically savvy', 'amp' ) }
+								</h2>
+							</div>
 							<p>
 								{ __( 'I am a “Developer or technically savvy” user. I can do WordPress development such as making changes to themes and plugins. I have some familiarity with HTML, CSS, JavaScript, and PHP. I am technically savvy enough to build full WordPress sites out of plugins and themes and can address configuration issues and understand', 'amp' ) }
 							</p>
@@ -112,23 +134,30 @@ export function TechnicalBackground() {
 					</label>
 				</Selectable>
 
-				<Selectable className={ `technical-background-option-container` } selected={ false === developerToolsOption }>
+				<Selectable className={ `technical-background-option-container` } selected={ false === localDeveloperToolsOption }>
 					<label htmlFor={ disableInputID } className="technical-background-option">
 						<div className="technical-background-option__input-container">
 							<input
 								type="radio"
 								id={ disableInputID }
-								checked={ false === developerToolsOption }
+								checked={ false === localDeveloperToolsOption }
 								onChange={ () => {
-									setDeveloperToolsOption( false );
+									setLocalDeveloperToolsOption( false );
 								} }
 							/>
 						</div>
 						<User2 />
 						<div className="technical-background-option__description">
-							<h2>
-								{ __( 'Non-technically savvy or wanting a simpler setup', 'amp' ) }
-							</h2>
+							<div>
+								{ false === originalDeveloperToolsOption && (
+									<AMPInfo>
+										{ __( 'Previously selected', 'amp' ) }
+									</AMPInfo>
+								) }
+								<h2>
+									{ __( 'Non-technically savvy or wanting a simpler setup', 'amp' ) }
+								</h2>
+							</div>
 							<p>
 								{ __( 'I am not a developer and I am not responsible for configuring and fixing issues on my site. I am a site owner and/or content creator who wants to take advantage of AMP performance.', 'amp' ) }
 							</p>

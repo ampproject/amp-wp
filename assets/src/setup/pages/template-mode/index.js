@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { useEffect, useContext } from '@wordpress/element';
+import { useEffect, useContext, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -17,21 +17,39 @@ import { ScreenUI } from './screen-ui';
  * Screen for selecting the template mode.
  */
 export function TemplateMode() {
-	const { canGoForward, setCanGoForward } = useContext( Navigation );
-	const { options, savedThemeSupport, updateOptions } = useContext( Options );
+	// Initialize theme support setting as empty to force user to make a selection.
+	const [ localThemeSupport, setLocalThemeSupport ] = useState( null );
+
+	const { setCanGoForward } = useContext( Navigation );
+	const { options, originalOptions, updateOptions } = useContext( Options );
 	const { developerToolsOption } = useContext( User );
 	const { pluginIssues, themeIssues, scanningSite } = useContext( SiteScan );
 
-	const { theme_support: themeSupport } = options || {};
+	const { theme_support: themeSupport } = options;
+
+	/**
+	 * Persist the user selection in the global context.
+	 */
+	useEffect( () => {
+		if ( null === localThemeSupport ) {
+			return;
+		}
+
+		if ( localThemeSupport === themeSupport ) {
+			return;
+		}
+
+		updateOptions( { theme_support: localThemeSupport } );
+	}, [ localThemeSupport, themeSupport, updateOptions ] );
 
 	/**
 	 * Allow moving forward.
 	 */
 	useEffect( () => {
-		if ( false === canGoForward && false === scanningSite && themeSupport ) {
+		if ( false === scanningSite && localThemeSupport ) {
 			setCanGoForward( true );
 		}
-	}, [ canGoForward, setCanGoForward, scanningSite, themeSupport ] );
+	}, [ setCanGoForward, scanningSite, localThemeSupport ] );
 
 	if ( scanningSite ) {
 		return <Loading />;
@@ -40,12 +58,12 @@ export function TemplateMode() {
 	// The actual display component should avoid using global context directly. This will facilitate developing and testing the UI using different options.
 	return (
 		<ScreenUI
-			currentMode={ themeSupport }
+			currentMode={ localThemeSupport }
 			developerToolsOption={ developerToolsOption }
 			pluginIssues={ pluginIssues }
-			savedCurrentMode={ savedThemeSupport }
+			savedCurrentMode={ originalOptions.theme_support }
 			setCurrentMode={ ( mode ) => {
-				updateOptions( { theme_support: mode } );
+				setLocalThemeSupport( mode );
 			} }
 			themeIssues={ themeIssues }
 		/>

@@ -47,10 +47,19 @@
 	}
 }
 
+.amp-setup-nav__prev {
+	margin-right: 5px;
+}
+
 .amp-setup-nav__prev svg {
 	transform: rotate(180deg);
 	margin-left: 0;
 	margin-right: 0.5rem;
+}
+
+.amp-setup-nav__close {
+	align-items: center;
+	display: flex;
 }
 
 .amp-setup-nav__close svg {

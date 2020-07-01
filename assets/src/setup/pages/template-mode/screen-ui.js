@@ -21,7 +21,6 @@ import { Standard } from '../../components/svg/standard';
 import { Transitional } from '../../components/svg/transitional';
 import { Reader } from '../../components/svg/reader';
 import { AMPInfo } from '../../components/amp-info';
-import { IconPin } from '../../components/svg/icon-pin';
 import { MOST_RECOMMENDED, RECOMMENDED, getRecommendationLevels, getAllSelectionText, TECHNICAL, NON_TECHNICAL, STANDARD, TRANSITIONAL, READER, NOT_RECOMMENDED } from './get-selection-details';
 
 /**
@@ -71,7 +70,7 @@ export function Selection( { compatibility, id, illustration, isCurrentSavedSele
 						{ title }
 					</h2>
 					{ isCurrentSavedSelection && (
-						<AMPInfo icon={ ( props ) => <IconPin { ...props } /> }>
+						<AMPInfo>
 							{ __( 'Previously selected', 'amp' ) }
 						</AMPInfo>
 					) }

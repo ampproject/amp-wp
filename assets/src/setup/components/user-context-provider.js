@@ -36,6 +36,8 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 
 	const { setError } = useError();
 
+	const originalDeveloperToolsOption = useRef();
+
 	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
 	const hasUnmounted = useRef( false );
 
@@ -74,6 +76,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 					return;
 				}
 
+				originalDeveloperToolsOption.current = fetchedUser[ userOptionDeveloperTools ];
 				setDeveloperToolsOption( fetchedUser[ userOptionDeveloperTools ] );
 				setUser( fetchedUser );
 			} catch ( e ) {
@@ -122,6 +125,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 					fetchingUser,
 					didSaveDeveloperToolsOption,
 					hasDeveloperToolsOptionChange,
+					originalDeveloperToolsOption: originalDeveloperToolsOption.current,
 					saveDeveloperToolsOption,
 					savingDeveloperToolsOption,
 					setDeveloperToolsOption,

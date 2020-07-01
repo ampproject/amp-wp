@@ -1,12 +1,10 @@
 .amp-info {
-	border: 2px solid #e8e8e8;
-	border-radius: 21.5px;
 	display: inline-block;
 	font-size: 13px;
 	font-weight: 600;
 	margin-top: 0.5rem;
 	margin-bottom: 2rem;
-	padding: 10px;
+	margin-left: 1rem;
 }
 
 .amp-info__icon {

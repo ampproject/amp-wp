@@ -31,10 +31,7 @@
 }
 
 .template-mode-selection .amp-info {
-	font-size: 1rem;
-	font-weight: 600;
-	line-height: 1.5;
-	padding: 9px 18px;
+	margin-bottom: 0.5rem;
 
 	@media screen and (min-width: 783px) {
 		margin-left: 1.5rem;
@@ -77,10 +74,6 @@
 	line-height: 1.5;
 	margin-top: .75rem;
 	margin-bottom: .75rem;
-}
-
-.template-mode-selection__description .amp-info {
-	margin-bottom: 1rem;
 }
 
 .template-mode-selection > .amp-notice {

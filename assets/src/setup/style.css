@@ -265,7 +265,7 @@ input[type="radio"]:focus {
 	display: none;
 }
 
-.amp-stepper__item--active::before {
+.amp-stepper__item--done::before {
 	border-left-color: var(--brand);
 }
 

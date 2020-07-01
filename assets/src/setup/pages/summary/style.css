@@ -1,6 +1,6 @@
 .summary .selectable {
 	margin-bottom: 2.25rem;
-	padding: 40px 30px 45px;
+	padding: 40px 30px;
 }
 
 /**
@@ -54,6 +54,10 @@
 	line-height: 1.5;
 }
 
+.summary-header p:last-child {
+	margin-bottom: 0;
+}
+
 /**
  * Summary screenshot component.
  */
@@ -92,6 +96,10 @@
 	margin-top: 0;
 }
 
+.redirect-toggle__label-text p:last-child {
+	margin-bottom: 0;
+}
+
 .redirect-toggle .components-toggle-control .components-base-control__field .components-toggle-control__label {
 	display: flex;
 	flex-wrap: wrap;
@@ -107,4 +115,8 @@
 
 .redirect-toggle .components-form-toggle {
 	margin-bottom: 2.25rem;
+}
+
+.redirect-toggle .components-toggle-control .components-base-control__field {
+	margin-bottom: 0;
 }

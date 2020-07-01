@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useContext, useEffect } from '@wordpress/element';
+import { useContext, useEffect, useState } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
 
 /**
@@ -79,6 +79,22 @@ function Saving() {
  * Final screen, where data is saved.
  */
 export function Save() {
+	// We'll show the saving screen for at least a second even if data is saved.
+	const [ shouldShowSaving, setShouldShowSaving ] = useState( true );
+
+	/**
+	 * Set shouldShowSaving to false after a second.
+	 */
+	useEffect( () => {
+		const timeout = setTimeout( () => {
+			setShouldShowSaving( false );
+		}, 1000 );
+
+		return () => {
+			clearTimeout( timeout );
+		};
+	}, [] );
+
 	const {
 		didSaveOptions,
 		options: { theme_support: themeSupport, reader_theme: readerTheme, preview_permalink: previewPermalink },
@@ -105,7 +121,7 @@ export function Save() {
 		}
 	}, [ didSaveDeveloperToolsOption, savingDeveloperToolsOption, saveDeveloperToolsOption ] );
 
-	if ( savingOptions || savingDeveloperToolsOption ) {
+	if ( shouldShowSaving || savingOptions || savingDeveloperToolsOption ) {
 		return <Saving />;
 	}
 

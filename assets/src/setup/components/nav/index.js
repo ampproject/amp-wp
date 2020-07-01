@@ -69,7 +69,7 @@ export function Nav( { exitLink } ) {
 
 					<Button
 						disabled={ ! canGoForward && ! isLastPage && ! savingDeveloperToolsOption && ! savingOptions }
-						href={ isLastPage ? exitLink : undefined }
+						href={ isLastPage && ! savingDeveloperToolsOption && ! savingOptions ? exitLink : undefined }
 						isPrimary
 						onClick={ moveForward }
 					>
