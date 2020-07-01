@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Admin\DevToolsUserAccess;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\Option;
@@ -110,7 +111,24 @@ class AMP_Validated_URL_Post_Type {
 	public static function register() {
 		add_action( 'amp_plugin_update', [ __CLASS__, 'handle_plugin_update' ] );
 
-		$post_type = register_post_type(
+		/** @var DevToolsUserAccess $dev_tools_user_access */
+		$dev_tools_user_access = Services::get( 'dev_tools.user_access' );
+
+		// Show in the admin menu if dev tools are enabled for the user or if the user is on any dev tools screen.
+		$show_in_menu = (
+			$dev_tools_user_access->is_user_enabled()
+			||
+			( isset( $_GET['post_type'] ) && self::POST_TYPE_SLUG === $_GET['post_type'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			||
+			( isset( $_GET['post'], $_GET['action'] ) && 'edit' === $_GET['action'] && self::POST_TYPE_SLUG === get_post_type( (int) $_GET['post'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			||
+			( isset( $_GET['taxonomy'] ) && AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG === $_GET['taxonomy'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		);
+		if ( $show_in_menu && current_user_can( 'manage_options' ) ) {
+			$show_in_menu = AMP_Options_Manager::OPTION_NAME;
+		}
+
+		register_post_type(
 			self::POST_TYPE_SLUG,
 			[
 				'labels'       => [
@@ -125,10 +143,47 @@ class AMP_Validated_URL_Post_Type {
 				'supports'     => false,
 				'public'       => false,
 				'show_ui'      => true,
-				'show_in_menu' => current_theme_supports( 'amp' ) && current_user_can( 'manage_options' ) ? AMP_Options_Manager::OPTION_NAME : false,
+				'show_in_menu' => $show_in_menu,
+				'map_meta_cap' => false,
+				'capabilities' => array_merge(
+					array_fill_keys(
+						[
+							'edit_post',
+							'read_post',
+							'delete_post',
+							'edit_posts',
+							'edit_others_posts',
+							'delete_posts',
+							'publish_posts',
+							'read_private_posts',
+						],
+						AMP_Validation_Manager::VALIDATE_CAPABILITY
+					),
+					[
+						// Hide the add new post link, as new posts are created programmatically.
+						'create_posts' => 'do_not_allow',
+					]
+				),
 				// @todo Show in rest.
 			]
 		);
+
+		// Rename the top-level menu from "Validated URLs" to "AMP DevTools" when the user does not have access to the AMP settings screen.
+		if ( $show_in_menu && ! current_user_can( 'manage_options' ) ) {
+			add_action(
+				'admin_menu',
+				static function () {
+					global $menu;
+					foreach ( $menu as &$menu_item ) {
+						if ( 'edit.php?post_type=' . self::POST_TYPE_SLUG === $menu_item[2] ) {
+							$menu_item[0] = esc_html__( 'AMP DevTools', 'amp' );
+							$menu_item[6] = AMP_Options_Menu::ICON_BASE64_SVG;
+							break;
+						}
+					}
+				}
+			);
+		}
 
 		// Ensure cached count of URLs with new validation errors is flushed whenever a URL is updated, trashed, or deleted.
 		$handle_delete = static function ( $post_id ) {
@@ -139,9 +194,6 @@ class AMP_Validated_URL_Post_Type {
 		add_action( 'save_post_' . self::POST_TYPE_SLUG, $handle_delete );
 		add_action( 'trash_post', $handle_delete );
 		add_action( 'delete_post', $handle_delete );
-
-		// Hide the add new post link.
-		$post_type->cap->create_posts = 'do_not_allow';
 
 		if ( is_admin() ) {
 			self::add_admin_hooks();
@@ -182,7 +234,10 @@ class AMP_Validated_URL_Post_Type {
 	public static function add_admin_hooks() {
 		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_post_list_screen_scripts' ] );
 
-		if ( current_user_can( 'manage_options' ) ) {
+		/** @var DevToolsUserAccess $dev_tools_user_access */
+		$dev_tools_user_access = Services::get( 'dev_tools.user_access' );
+
+		if ( $dev_tools_user_access->is_user_enabled() ) {
 			add_filter( 'dashboard_glance_items', [ __CLASS__, 'filter_dashboard_glance_items' ] );
 			add_action( 'rightnow_end', [ __CLASS__, 'print_dashboard_glance_styles' ] );
 		}
@@ -381,10 +436,16 @@ class AMP_Validated_URL_Post_Type {
 
 	/**
 	 * Add count of how many validation error posts there are to the admin menu.
+	 *
+	 * @global array $submenu
 	 */
 	public static function add_admin_menu_new_invalid_url_count() {
 		global $submenu;
-		if ( ! isset( $submenu[ AMP_Options_Manager::OPTION_NAME ] ) ) {
+
+		$post_type_menu_slug = 'edit.php?post_type=' . self::POST_TYPE_SLUG;
+		$parent_menu_slug    = current_user_can( 'manage_options' ) ? AMP_Options_Manager::OPTION_NAME : $post_type_menu_slug;
+
+		if ( ! isset( $submenu[ $parent_menu_slug ] ) ) {
 			return;
 		}
 
@@ -403,8 +464,8 @@ class AMP_Validated_URL_Post_Type {
 			return;
 		}
 
-		foreach ( $submenu[ AMP_Options_Manager::OPTION_NAME ] as &$submenu_item ) {
-			if ( 'edit.php?post_type=' . self::POST_TYPE_SLUG === $submenu_item[2] ) {
+		foreach ( $submenu[ $parent_menu_slug ] as &$submenu_item ) {
+			if ( $post_type_menu_slug === $submenu_item[2] ) {
 				$submenu_item[0] .= ' <span class="awaiting-mod"><span class="new-validation-error-urls-count">' . esc_html( number_format_i18n( $new_validation_error_urls ) ) . '</span></span>';
 				break;
 			}
@@ -1638,7 +1699,7 @@ class AMP_Validated_URL_Post_Type {
 					throw new Exception( 'illegal_url' );
 				}
 				// Don't let non-admins create new amp_validated_url posts.
-				if ( ! current_user_can( 'manage_options' ) ) {
+				if ( ! AMP_Validation_Manager::has_cap() ) {
 					throw new Exception( 'unauthorized' );
 				}
 			}

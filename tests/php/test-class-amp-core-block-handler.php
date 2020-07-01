@@ -263,7 +263,7 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 	 */
 	public function test_process_archives_widgets() {
 		$instance_count = 2;
-		$this->factory()->post->create( [ 'post_date' => '2010-01-01 01:01:01' ] );
+		self::factory()->post->create( [ 'post_date' => '2010-01-01 01:01:01' ] );
 
 		ob_start();
 		the_widget(

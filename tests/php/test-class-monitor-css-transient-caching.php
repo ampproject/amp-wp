@@ -46,7 +46,7 @@ class Test_Monitor_CSS_Transient_Caching extends WP_UnitTestCase {
 	 * @covers MonitorCssTransientCaching::deactivate()
 	 */
 	public function test_event_gets_scheduled_and_unscheduled() {
-		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$this->assertFalse( wp_next_scheduled( MonitorCssTransientCaching::EVENT_NAME ) );
 
 		$monitor = new MonitorCssTransientCaching();

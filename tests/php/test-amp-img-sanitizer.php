@@ -561,9 +561,9 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 	 * @return int|WP_Error The new attachment ID, or WP_Error.
 	 */
 	public function get_new_attachment_id() {
-		return $this->factory()->attachment->create_object(
+		return self::factory()->attachment->create_object(
 			'example-image.jpeg',
-			$this->factory()->post->create(),
+			self::factory()->post->create(),
 			[
 				'post_mime_type' => 'image/jpeg',
 				'post_type'      => 'attachment',
