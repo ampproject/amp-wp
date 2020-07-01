@@ -733,7 +733,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertFalse( AMP_Validation_Manager::has_cap() );
 		add_filter(
 			'map_meta_cap',
-			function ( $caps, $cap, $user_id ) {
+			static function ( $caps, $cap, $user_id ) {
 				if ( AMP_Validation_Manager::VALIDATE_CAPABILITY === $cap && user_can( $user_id, 'edit_others_posts' ) ) {
 					$position = array_search( $cap, $caps, true );
 					if ( false !== $position ) {

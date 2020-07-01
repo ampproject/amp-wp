@@ -243,7 +243,7 @@ class AMP_Validation_Manager {
 		// Actions and filters involved in validation.
 		add_action(
 			'activate_plugin',
-			function() {
+			static function() {
 				if ( ! has_action( 'shutdown', [ __CLASS__, 'validate_after_plugin_activation' ] ) && self::get_dev_tools_user_access()->is_user_enabled() ) {
 					add_action( 'shutdown', [ __CLASS__, 'validate_after_plugin_activation' ] ); // Shutdown so all plugins will have been activated.
 				}

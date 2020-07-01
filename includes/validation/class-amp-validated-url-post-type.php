@@ -172,7 +172,7 @@ class AMP_Validated_URL_Post_Type {
 		if ( $show_in_menu && ! current_user_can( 'manage_options' ) ) {
 			add_action(
 				'admin_menu',
-				function () {
+				static function () {
 					global $menu;
 					foreach ( $menu as &$menu_item ) {
 						if ( 'edit.php?post_type=' . self::POST_TYPE_SLUG === $menu_item[2] ) {
