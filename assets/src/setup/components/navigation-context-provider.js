@@ -2,7 +2,6 @@
  * WordPress dependencies
  */
 import { createContext, useState, useContext } from '@wordpress/element';
-import { getQueryArg } from '@wordpress/url';
 
 /**
  * External dependencies
