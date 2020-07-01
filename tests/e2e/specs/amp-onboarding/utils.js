@@ -19,7 +19,7 @@ export async function clickPrevButton() {
 export async function moveToTechnicalScreen() {
 	await visitAdminPage( 'admin.php', 'page=amp-setup' );
 	await clickNextButton();
-	await page.waitForSelector( 'input[type="radio"]' );
+	await page.waitForSelector( '.technical-background' );
 }
 
 export async function moveToTemplateModeScreen( { technical = true } ) {
@@ -31,5 +31,16 @@ export async function moveToTemplateModeScreen( { technical = true } ) {
 	await page.$eval( radioSelector, ( el ) => el.click() );
 
 	await clickNextButton();
-	await page.waitForSelector( 'input[type="radio"]' );
+	await page.waitForSelector( '.template-mode-selection' );
+}
+
+export async function clickReaderMode() {
+	await page.$eval( '[for="reader-mode"]', ( el ) => el.click() );
+}
+
+export async function moveToReaderThemesScreen( { technical = true } ) {
+	await moveToTemplateModeScreen( { technical } );
+	await clickReaderMode();
+	await clickNextButton();
+	await page.waitForSelector( '.choose-reader-theme' );
 }

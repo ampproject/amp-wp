@@ -24,12 +24,7 @@ export const Navigation = createContext();
  * @param {Array} props.pages Pages in the app.
  */
 export function NavigationContextProvider( { children, pages } ) {
-	// Initialize page from URL `amp-setup-screen` parameter. If not set, current page is 0.
-	// This is primarily for testing.
-	const [ activePageIndex, setActivePageIndex ] = useState( () => {
-		const index = pages.findIndex( ( { slug } ) => slug === getQueryArg( global.location.href, 'amp-setup-screen' ) );
-		return -1 < index ? index : 0;
-	} );
+	const [ activePageIndex, setActivePageIndex ] = useState( 0 );
 	const [ canGoForward, setCanGoForward ] = useState( true ); // Allow immediately moving forward on first page. @todo This may need to change in 1.7.
 	const { updates } = useContext( Options );
 

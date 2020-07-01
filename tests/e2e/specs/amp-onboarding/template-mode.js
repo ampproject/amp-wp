@@ -2,7 +2,7 @@
 /**
  * Internal dependencies
  */
-import { moveToTemplateModeScreen } from './utils';
+import { moveToTemplateModeScreen, clickReaderMode } from './utils';
 
 describe( 'AMP wizard: template-mode', () => {
 	beforeEach( async () => {
@@ -31,7 +31,7 @@ describe( 'AMP wizard: template-mode', () => {
 		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
 		expect( titleText ).toBe( 'Transitional' );
 
-		await page.$eval( '[for="reader-mode"]', ( el ) => el.click() );
+		await clickReaderMode();
 		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
 		expect( titleText ).toBe( 'Reader' );
 	} );
