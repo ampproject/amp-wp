@@ -95,7 +95,7 @@ final class PluginActivationNotice implements Delayed, Service, Registerable {
 		<style type="text/css">
 			.amp-plugin-notice {
 				background: #E8F5F9;
-				box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.1), inset 4px 0px 0px #419ECD;
+				box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1), inset 4px 0 0 #419ECD;
 				display: flex;
 				padding: 21px 23px;
 			}
