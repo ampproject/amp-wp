@@ -692,13 +692,13 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 */
 	public function test_map_meta_cap() {
 		$this->assertEquals(
-			AMP_Validation_Manager::map_meta_cap( [ AMP_Validation_Manager::VALIDATE_CAPABILITY ], AMP_Validation_Manager::VALIDATE_CAPABILITY ),
-			[ 'manage_options' ]
+			[ 'manage_options' ],
+			AMP_Validation_Manager::map_meta_cap( [ AMP_Validation_Manager::VALIDATE_CAPABILITY ], AMP_Validation_Manager::VALIDATE_CAPABILITY )
 		);
 
 		$this->assertEquals(
-			AMP_Validation_Manager::map_meta_cap( [ 'install_plugins', AMP_Validation_Manager::VALIDATE_CAPABILITY, 'update_core' ], AMP_Validation_Manager::VALIDATE_CAPABILITY ),
-			[ 'install_plugins', 'manage_options', 'update_core' ]
+			[ 'install_plugins', 'manage_options', 'update_core' ],
+			AMP_Validation_Manager::map_meta_cap( [ 'install_plugins', AMP_Validation_Manager::VALIDATE_CAPABILITY, 'update_core' ], AMP_Validation_Manager::VALIDATE_CAPABILITY )
 		);
 	}
 
