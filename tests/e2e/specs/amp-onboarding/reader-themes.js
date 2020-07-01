@@ -2,7 +2,7 @@
 /**
  * Internal dependencies
  */
-import { moveToReaderThemesScreen } from './utils';
+import { moveToReaderThemesScreen, selectReaderTheme } from './utils';
 
 describe( 'AMP wizard: reader themes', () => {
 	beforeEach( async () => {
@@ -25,15 +25,15 @@ describe( 'AMP wizard: reader themes', () => {
 		const twentytwenty = await page.$( '[for="theme-card__twentytwenty"]' );
 		expect( twentytwenty ).toBeNull();
 
-		await page.$eval( '[for="theme-card__legacy"]', ( el ) => el.click() );
+		await selectReaderTheme( 'legacy' );
 		let titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
 		expect( titleText ).toBe( 'AMP Legacy' );
 
-		await page.$eval( '[for="theme-card__twentynineteen"]', ( el ) => el.click() );
+		await selectReaderTheme( 'twentynineteen' );
 		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
 		expect( titleText ).toBe( 'Twenty Nineteen' );
 
-		await page.$eval( '[for="theme-card__twentysixteen"]', ( el ) => el.click() );
+		await selectReaderTheme( 'twentysixteen' );
 		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
 		expect( titleText ).toBe( 'Twenty Sixteen' );
 	} );

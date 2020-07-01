@@ -22,7 +22,7 @@ export async function moveToTechnicalScreen() {
 	await page.waitForSelector( '.technical-background' );
 }
 
-export async function moveToTemplateModeScreen( { technical = true } ) {
+export async function moveToTemplateModeScreen( { technical } ) {
 	await moveToTechnicalScreen();
 
 	const radioSelector = technical ? '#technical-background-enable' : '#technical-background-disable';
@@ -34,13 +34,33 @@ export async function moveToTemplateModeScreen( { technical = true } ) {
 	await page.waitForSelector( '.template-mode-selection' );
 }
 
-export async function clickReaderMode() {
-	await page.$eval( '[for="reader-mode"]', ( el ) => el.click() );
+export async function clickMode( mode ) {
+	await page.$eval( `[for="${ mode }-mode"]`, ( el ) => el.click() );
 }
 
-export async function moveToReaderThemesScreen( { technical = true } ) {
+export async function moveToReaderThemesScreen( { technical } ) {
 	await moveToTemplateModeScreen( { technical } );
-	await clickReaderMode();
+	await clickMode( 'reader' );
 	await clickNextButton();
 	await page.waitForSelector( '.choose-reader-theme' );
+}
+
+export async function selectReaderTheme( theme = 'legacy' ) {
+	const selector = `[for="theme-card__${ theme }"]`;
+
+	await page.waitForSelector( selector );
+	await page.$eval( selector, ( el ) => el.click() );
+}
+
+export async function moveToSummaryScreen( { technical = true, mode, readerTheme = 'legacy' } ) {
+	await moveToTemplateModeScreen( { technical } );
+	await clickMode( mode );
+
+	if ( mode === 'reader' ) {
+		await clickNextButton();
+		await selectReaderTheme( readerTheme );
+	}
+
+	await clickNextButton();
+	await page.waitForSelector( '.summary' );
 }
