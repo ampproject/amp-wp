@@ -1891,7 +1891,7 @@ class AMP_Validation_Manager {
 
 		// Otherwise, since it is in a paired mode, only allow showing the dirty AMP page if the user is authorized.
 		// If not, normally the result is redirection to the non-AMP version.
-		return self::has_cap() || is_customize_preview(); // @todo do self::get_dev_tools_user_access()->is_user_enabled() instead of has_cap?
+		return self::has_cap() || is_customize_preview();
 	}
 
 	/**
