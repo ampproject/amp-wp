@@ -7,6 +7,7 @@
 
 namespace AmpProject\AmpWP\Tests\Cli\Step;
 
+use AmpProject\AmpWP\Tests\Cli\ReferenceSiteImporter;
 use AmpProject\AmpWP\Tests\Cli\Step;
 use WP_CLI;
 
@@ -81,7 +82,7 @@ final class ImportOptions implements Step {
 
 				// insert logo.
 				case 'custom_logo':
-					//$this->insert_logo( $value );
+					$this->insert_logo( $value );
 					break;
 
 				default:
@@ -107,5 +108,49 @@ final class ImportOptions implements Step {
 		}
 
 		update_option( $key, $page->ID );
+	}
+	/**
+	 * Insert Logo By URL
+	 *
+	 * @since 1.0.0
+	 * @param  string $image_url Logo URL.
+	 * @return void
+	 */
+	private function insert_logo( $image_url = '' ) {
+		$attachment_id = $this->download_image( $image_url );
+		var_dump( $attachment_id );
+		if ( $attachment_id ) {
+			set_theme_mod( 'custom_logo', $attachment_id );
+		}
+	}
+
+	/**
+	 * Download image by URL.
+	 *
+	 * @param  string $image_url Image URL to download.
+	 * @return int|false Attachment ID of the image, or false if failed.
+	 */
+	private function download_image( $image_url = '' ) {
+		$data = (object) ReferenceSiteImporter::sideload_image( $image_url );
+
+		if ( is_wp_error( $data ) ) {
+			WP_CLI::warning(
+				WP_CLI::colorize(
+					"Failed to download image %G'{$image_url}'%n."
+				)
+			);
+			return false;
+		}
+
+		if ( empty( $data->attachment_id ) ) {
+			WP_CLI::warning(
+				WP_CLI::colorize(
+					"Failed to retrieve attachment ID for downloaded image %G'{$image_url}'%n."
+				)
+			);
+			return false;
+		}
+
+		return $data->attachment_id;
 	}
 }

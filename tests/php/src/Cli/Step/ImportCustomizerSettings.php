@@ -67,16 +67,13 @@ final class ImportCustomizerSettings implements Step {
 		array_walk_recursive(
 			$settings,
 			static function ( &$value ) {
-				if ( ! is_array( $value ) ) {
+				if ( ! is_array( $value ) && ReferenceSiteImporter::is_image_url( $value ) ) {
+					$data = ReferenceSiteImporter::sideload_image( $value );
 
-					if ( ReferenceSiteImporter::is_image_url( $value ) ) {
-						$data = ReferenceSiteImporter::sideload_image( $value );
-
-						if ( ! is_wp_error( $data ) ) {
-							$value = $data->url;
-						} else {
-							WP_CLI::warning( "Failed to sideload image '{$value}' - {$data->get_error_message()}" );
-						}
+					if ( is_wp_error( $data ) ) {
+						WP_CLI::warning( "Failed to sideload image '{$value}' - {$data->get_error_message()}" );
+					} else {
+						$value = $data->url;
 					}
 				}
 			}

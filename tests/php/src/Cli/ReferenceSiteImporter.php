@@ -48,44 +48,65 @@ final class ReferenceSiteImporter extends WP_Import {
 	public static function sideload_image( $file ) {
 		$data = new stdClass();
 
+		if ( empty( $file ) ) {
+			WP_CLI::warning(
+				WP_CLI::colorize(
+					"Provided empty image filename to download, skipping."
+				)
+			);
+
+			return $data;
+		}
+
 		if ( ! function_exists( 'media_handle_sideload' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/media.php';
 			require_once ABSPATH . 'wp-admin/includes/file.php';
 			require_once ABSPATH . 'wp-admin/includes/image.php';
 		}
 
-		if ( ! empty( $file ) ) {
+		// Set variables for storage, fix file filename for query strings.
+		preg_match( '/[^\?]+\.(jpe?g|jpe|svg|gif|png)\b/i', $file, $matches );
+		$file_array         = array();
+		$file_array['name'] = basename( $matches[0] );
 
-			// Set variables for storage, fix file filename for query strings.
-			preg_match( '/[^\?]+\.(jpe?g|jpe|svg|gif|png)\b/i', $file, $matches );
-			$file_array         = array();
-			$file_array['name'] = basename( $matches[0] );
+		// Download file to temp location.
+		$file_array['tmp_name'] = download_url( $file );
 
-			// Download file to temp location.
-			$file_array['tmp_name'] = download_url( $file );
+		// If error storing temporarily, return the error.
+		if ( is_wp_error( $file_array['tmp_name'] ) ) {
+			WP_CLI::warning(
+				WP_CLI::colorize(
+					"Could not download image %G'{$file}'%n into a temporary file - {$id->get_error_message()}"
+				)
+			);
 
-			// If error storing temporarily, return the error.
-			if ( is_wp_error( $file_array['tmp_name'] ) ) {
-				return $file_array['tmp_name'];
-			}
-
-			// Do the validation and storage stuff.
-			$id = media_handle_sideload( $file_array, 0 );
-
-			// If error storing permanently, unlink.
-			if ( is_wp_error( $id ) ) {
-				unlink( $file_array['tmp_name'] );
-				return $id;
-			}
-
-			// Build the object to return.
-			$meta                = wp_get_attachment_metadata( $id );
-			$data->attachment_id = $id;
-			$data->url           = wp_get_attachment_url( $id );
-			$data->thumbnail_url = wp_get_attachment_thumb_url( $id );
-			$data->height        = isset( $meta['height'] ) ? $meta['height'] : '';
-			$data->width         = isset( $meta['width'] ) ? $meta['width'] : '';
+			return $file_array['tmp_name'];
 		}
+
+		// Do the validation and storage stuff.
+		$id = media_handle_sideload( $file_array, 0 );
+
+		// If error storing permanently, unlink.
+		if ( is_wp_error( $id ) ) {
+			unlink( $file_array['tmp_name'] );
+			WP_CLI::warning(
+				WP_CLI::colorize(
+					"Could not sideload image %G'{$file}'%n into the media library - {$id->get_error_message()}"
+				)
+			);
+
+			return $id;
+		}
+
+		wp_cache_flush();
+
+		// Build the object to return.
+		$meta                = wp_get_attachment_metadata( $id );
+		$data->attachment_id = $id;
+		$data->url           = wp_get_attachment_url( $id );
+		$data->thumbnail_url = wp_get_attachment_thumb_url( $id );
+		$data->height        = isset( $meta['height'] ) ? $meta['height'] : '';
+		$data->width         = isset( $meta['width'] ) ? $meta['width'] : '';
 
 		return $data;
 	}
@@ -99,13 +120,14 @@ final class ReferenceSiteImporter extends WP_Import {
 	 * @return bool Whether the string is an image url or not.
 	 */
 	public static function is_image_url( $string = '' ) {
-		if ( is_string( $string ) ) {
-
-			if ( preg_match( '/\.(jpg|jpeg|svg|png|gif)/i', $string ) ) {
-				return true;
-			}
+		if ( ! is_string( $string ) ) {
+			return false;
 		}
 
-		return false;
+		if ( ! preg_match( '/\.(jpg|jpeg|svg|png|gif)$/i', $string ) ) {
+			return false;
+		}
+
+		return true;
 	}
 }

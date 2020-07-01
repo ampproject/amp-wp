@@ -187,163 +187,51 @@ final class ImportWxrFile implements Step {
 	 * Add filters to shape WXR importer output.
 	 */
 	private function add_wxr_filters() {
-		add_filter(
-			'wp_import_posts',
-			[ $this, 'wp_import_posts' ],
-			10
-		);
-
-		add_filter(
-			'wp_import_post_comments',
-			[ $this, 'wp_import_post_comments' ],
-			10,
-			3
-		);
-
-		add_filter(
-			'wp_import_post_data_raw',
-			[ $this, 'wp_import_post_data_raw' ]
-		);
-
-		add_action(
-			'wp_import_insert_post',
-			[ $this, 'wp_import_insert_post' ],
-			10,
-			4
-		);
-
-		add_action(
-			'wp_import_insert_term',
-			[ $this, 'wp_import_insert_term' ],
-			10,
-			4
-		);
-
-		add_action(
-			'wp_import_set_post_terms',
-			[ $this, 'wp_import_set_post_terms' ],
-			10,
-			5
-		);
-
-		add_action(
-			'wp_import_insert_comment',
-			[ $this, 'wp_import_insert_comment' ],
-			10,
-			4
-		);
-
-		add_action(
-			'import_post_meta',
-			[ $this, 'import_post_meta' ],
-			10,
-			3
-		);
+		add_filter( 'wp_import_post_data_raw',       [ $this, 'log_post_processing' ]           );
+		add_action( 'wp_import_insert_post',         [ $this, 'log_imported_post' ],      10, 4 );
+		add_action( 'wp_import_insert_term',         [ $this, 'log_imported_term' ],      10, 4 );
+		add_action( 'wp_import_set_post_terms',      [ $this, 'log_associated_term' ],    10, 5 );
+		add_action( 'wp_import_insert_comment',      [ $this, 'log_imported_comment' ],   10, 4 );
+		add_action( 'import_post_meta',              [ $this, 'log_imported_post_meta' ], 10, 3 );
+		add_filter( 'wp_import_post_data_processed', [ $this, 'remove_guid' ],            10, 2 );
 	}
 
 	/**
 	 * Remove WXR importer output filters again.
 	 */
 	private function remove_wxr_filters() {
-		remove_filter(
-			'wp_import_posts',
-			[ $this, 'wp_import_posts' ],
-			10
-		);
-
-		remove_filter(
-			'wp_import_post_comments',
-			[ $this, 'wp_import_post_comments' ],
-			10,
-			3
-		);
-
-		remove_filter(
-			'wp_import_post_data_raw',
-			[ $this, 'wp_import_post_data_raw' ]
-		);
-
-		remove_action(
-			'wp_import_insert_post',
-			[ $this, 'wp_import_insert_post' ],
-			10,
-			4
-		);
-
-		remove_action(
-			'wp_import_insert_term',
-			[ $this, 'wp_import_insert_term' ],
-			10,
-			4
-		);
-
-		remove_action(
-			'wp_import_set_post_terms',
-			[ $this, 'wp_import_set_post_terms' ],
-			10,
-			5
-		);
-
-		remove_action(
-			'wp_import_insert_comment',
-			[ $this, 'wp_import_insert_comment' ],
-			10,
-			4
-		);
-
-		remove_action(
-			'import_post_meta',
-			[ $this, 'import_post_meta' ],
-			10,
-			3
-		);
+		remove_filter( 'wp_import_post_data_raw',       [ $this, 'log_post_processing' ]       );
+		remove_action( 'wp_import_insert_post',         [ $this, 'log_imported_post' ],      10);
+		remove_action( 'wp_import_insert_term',         [ $this, 'log_imported_term' ],      10);
+		remove_action( 'wp_import_set_post_terms',      [ $this, 'log_associated_term' ],    10);
+		remove_action( 'wp_import_insert_comment',      [ $this, 'log_imported_comment' ],   10);
+		remove_action( 'import_post_meta',              [ $this, 'log_imported_post_meta' ], 10);
+		remove_filter( 'wp_import_post_data_processed', [ $this, 'remove_guid' ],            10);
 	}
 
-	public function wp_import_posts( $posts ) {
-		global $wpcli_import_counts;
-		$wpcli_import_counts['current_post'] = 0;
-		$wpcli_import_counts['total_posts']  = count( $posts );
-		return $posts;
-	}
-
-	public function wp_import_post_comments( $comments, $post_id, $post ) {
-		global $wpcli_import_counts;
-		$wpcli_import_counts['current_comment'] = 0;
-		$wpcli_import_counts['total_comments']  = count( $comments );
-		return $comments;
-	}
-
-	public function wp_import_post_data_raw( $post ) {
-		global $wpcli_import_counts, $wpcli_import_current_file;
-
-		$wpcli_import_counts['current_post'] ++;
+	public function log_post_processing( $post ) {
 		WP_CLI::log(
 			WP_CLI::colorize(
 				"Processing post %Y#{$post['post_id']}%n (%G'{$post['post_title']}'%n) (%B{$post['post_type']}%n)..."
 			)
 		);
+
 		return $post;
 	}
 
-	public function wp_import_insert_post( $post_id, $original_post_id, $post, $postdata ) {
-		global $wpcli_import_counts;
+	public function log_imported_post( $post_id, $original_post_id, $post, $postdata ) {
 		if ( is_wp_error( $post_id ) ) {
 			WP_CLI::warning( '-- Error importing post: ' . $post_id->get_error_code() );
 		} else {
 			WP_CLI::log( "-- Imported post as post_id #{$post_id}" );
 		}
-
-		if ( 0 === ( $wpcli_import_counts['current_post'] % 500 ) ) {
-			WP_CLI\Utils\wp_clear_object_cache();
-			WP_CLI::log( '-- Cleared object cache.' );
-		}
 	}
 
-	public function wp_import_insert_term( $t, $import_term, $post_id, $post ) {
+	public function log_imported_term( $t, $import_term, $post_id, $post ) {
 		WP_CLI::log( "-- Created term \"{$import_term['name']}\"" );
 	}
 
-	public function wp_import_set_post_terms( $tt_ids, $term_ids, $taxonomy, $post_id, $post ) {
+	public function log_associated_term( $tt_ids, $term_ids, $taxonomy, $post_id, $post ) {
 		WP_CLI::log(
 			'-- Added terms (' . implode(
 				',',
@@ -352,9 +240,7 @@ final class ImportWxrFile implements Step {
 		);
 	}
 
-	public function wp_import_insert_comment( $comment_id, $comment, $comment_post_id, $post ) {
-		global $wpcli_import_counts;
-		$wpcli_import_counts['current_comment'] ++;
+	public function log_imported_comment( $comment_id, $comment, $comment_post_id, $post ) {
 		WP_CLI::log(
 			WP_CLI::colorize(
 				"-- Added comment %Y#{$comment_id}%n"
@@ -362,11 +248,24 @@ final class ImportWxrFile implements Step {
 		);
 	}
 
-	public function import_post_meta( $post_id, $key, $value ) {
+	public function log_imported_post_meta( $post_id, $key, $value ) {
 		WP_CLI::log(
 			WP_CLI::colorize(
 				"-- Added post_meta %G'{$key}'%n"
 			)
 		);
+	}
+
+	/**
+	 * Remove GUID from post data.
+	 *
+	 * @param  array $postdata Post data.
+	 * @param  array $data     Post data.
+	 * @return array Adapted post data.
+	 */
+	public function remove_guid( $postdata, $data ) {
+		$postdata['guid'] = '';
+
+		return $postdata;
 	}
 }
