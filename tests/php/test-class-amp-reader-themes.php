@@ -170,6 +170,7 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 	 * @param array  $theme       Theme.
 	 */
 	public function test_get_theme_availability( $expected, $can_install, $theme ) {
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$this->assertEquals( $expected, $this->reader_themes->get_theme_availability( $theme ) );
 		$this->assertEquals( $can_install, $this->reader_themes->can_install_theme( $theme ) );
 	}
