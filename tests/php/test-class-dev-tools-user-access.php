@@ -152,7 +152,6 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 	 * @covers DevToolsUserAccess::rest_get_dev_tools_enabled
 	 */
 	public function test_rest_get_dev_tools_enabled() {
-		/** @var WP_User $user */
 		$user = self::factory()->user->create_and_get( [ 'role' => 'author' ] );
 
 		$this->assertFalse( $this->dev_tools_user_access->rest_get_dev_tools_enabled( [ 'id' => $user->ID ] ) );
