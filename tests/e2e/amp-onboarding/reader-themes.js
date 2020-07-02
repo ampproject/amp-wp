@@ -15,7 +15,7 @@ export const readerThemes = () => {
 		const itemCount = await page.$$eval( '.theme-card', ( els ) => els.length );
 		expect( itemCount ).toBe( 9 );
 
-		expect( page ).not.toMatchElement( 'input[type="radio"][checked]' );
+		expect( page ).not.toMatchElement( 'input[type="radio"]:checked' );
 		testNextButton( { text: 'Next', disabled: true } );
 		testPreviousButton( { text: 'Previous' } );
 	} );

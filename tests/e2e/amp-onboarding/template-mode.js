@@ -4,7 +4,7 @@
 /**
  * Internal dependencies
  */
-import { moveToTemplateModeScreen, clickMode } from './utils';
+import { moveToTemplateModeScreen, clickMode, testNextButton, testPreviousButton } from './utils';
 
 export const templateMode = () => {
 	beforeEach( async () => {
@@ -14,10 +14,12 @@ export const templateMode = () => {
 	test( 'should show main page elements with nothing selected', async () => {
 		await page.waitForSelector( 'input[type="radio"]' );
 
-		const itemCount = await page.$$eval( 'input[type="radio"]', ( els ) => els.length );
-		expect( itemCount ).toBe( 3 );
+		await expect( 'input[type="radio"]' ).countToBe( 3 );
 
-		expect( page ).not.toMatchElement( 'input[type="radio"][checked]' );
+		expect( page ).not.toMatchElement( 'input[type="radio"]:checked' );
+
+		testNextButton( { text: 'Next', disabled: true } );
+		testPreviousButton( { text: 'Previous' } );
 	} );
 
 	test( 'should allow options to be selected', async () => {
@@ -29,26 +31,24 @@ export const templateMode = () => {
 
 		await clickMode( 'reader' );
 		expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Reader' } );
+
+		testNextButton( { text: 'Next' } );
 	} );
 };
 
 export const templateModeRecommendations = () => {
-	test( 'makes correct recommendations when user is techncial', async () => {
+	test( 'makes correct recommendations when user is technical', async () => {
 		await moveToTemplateModeScreen( { technical: true } );
 
-		const infoNoticeCount = await page.$$eval( '.amp-notice--info', ( els ) => els.length );
-
-		expect( infoNoticeCount ).toBe( 3 );
+		await expect( '.amp-notice--info' ).countToBe( 3 );
 	} );
 
 	test( 'makes correct recommendations when user is not techncial', async () => {
 		await moveToTemplateModeScreen( { technical: false } );
 
-		const infoNoticeCount = await page.$$eval( '.amp-notice--info', ( els ) => els.length );
-		expect( infoNoticeCount ).toBe( 2 );
+		await expect( '.amp-notice--info' ).countToBe( 2 );
 
-		const successNoticeCount = await page.$$eval( '.amp-notice--success', ( els ) => els.length );
-		expect( successNoticeCount ).toBe( 1 );
+		await expect( '.amp-notice--success' ).countToBe( 1 );
 	} );
 };
 

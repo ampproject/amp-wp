@@ -36,6 +36,7 @@ export async function moveToTemplateModeScreen( { technical } ) {
 
 export async function clickMode( mode ) {
 	await page.$eval( `[for="${ mode }-mode"]`, ( el ) => el.click() );
+	await page.waitForSelector( `#${ mode }-mode:checked` );
 }
 
 export async function moveToReaderThemesScreen( { technical } ) {
@@ -53,15 +54,16 @@ export async function selectReaderTheme( theme = 'legacy' ) {
 }
 
 export async function moveToSummaryScreen( { technical = true, mode, readerTheme = 'legacy' } ) {
-	await moveToTemplateModeScreen( { technical } );
-	await clickMode( mode );
-
 	if ( mode === 'reader' ) {
-		await clickNextButton();
+		await moveToReaderThemesScreen( [ technical ] );
 		await selectReaderTheme( readerTheme );
+	} else {
+		await moveToTemplateModeScreen( { technical } );
+		await clickMode( mode );
 	}
 
 	await clickNextButton();
+
 	await page.waitForSelector( '.summary' );
 }
 
@@ -69,7 +71,7 @@ export async function moveToDoneScreen( { technical = true, mode, readerTheme = 
 	await moveToSummaryScreen( { technical, mode, readerTheme } );
 
 	await clickNextButton();
-	await page.waitForSelector( '.done' );
+	await page.waitForSelector( '.done__preview-container' );
 }
 
 export function testCloseButton( { exists = true } ) {
@@ -84,7 +86,7 @@ export function testPreviousButton( { exists = true, disabled = false } ) {
 	if ( exists ) {
 		expect( page ).toMatchElement( `button${ disabled ? '[disabled]' : '' }`, { text: 'Previous' } );
 	} else {
-		expect( page ).not.toMatchElement( `button${ disabled ? '[disabled]' : '' }`, { text: 'Close' } );
+		expect( page ).not.toMatchElement( `button${ disabled ? '[disabled]' : '' }`, { text: 'Previous' } );
 	}
 }
 
@@ -94,9 +96,4 @@ export function testNextButton( { element = 'button', text, disabled = false } )
 
 export function testTitle( { text, element = 'h1' } ) {
 	expect( page ).toMatchElement( element, { text } );
-}
-
-export async function testElementCount( selector, expected ) {
-	const count = await page.$$eval( selector, ( els ) => els.length );
-	expect( count ).toBe( expected );
 }

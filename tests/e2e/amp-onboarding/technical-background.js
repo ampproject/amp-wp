@@ -4,7 +4,7 @@
 /**
  * Internal dependencies
  */
-import { moveToTechnicalScreen, testTitle, testNextButton, testPreviousButton, testElementCount } from './utils';
+import { moveToTechnicalScreen, testTitle, testNextButton, testPreviousButton } from './utils';
 
 export const technicalBackground = () => {
 	beforeEach( async () => {
@@ -16,16 +16,16 @@ export const technicalBackground = () => {
 
 		expect( page ).toMatchElement( 'p', { text: /^In order to/ } );
 
-		testNextButton( { text: 'Next' } );
+		testNextButton( { text: 'Next', disabled: true } );
 		testPreviousButton( { text: 'Previous' } );
 	} );
 
 	test( 'should show two options, none checked', async () => {
 		await page.waitForSelector( 'input[type="radio"]' );
 
-		await testElementCount( 'input[type="radio"]', 2 );
+		await expect( 'input[type="radio"]' ).countToBe( 2 );
 
-		expect( page ).not.toMatchElement( 'input[type="radio"][checked]' );
+		expect( page ).not.toMatchElement( 'input[type="radio"]:checked' );
 	} );
 
 	test( 'should allow options to be selected, then enable next button', async () => {

@@ -186,6 +186,9 @@ afterAll( () => {
 	removePageEvents();
 } );
 
+/**
+ * `expect` extension to count the number of elements with a given selector on the page.
+ */
 expect.extend( {
 	async countToBe( selector, expected ) {
 		const count = await page.$$eval( selector, ( els ) => els.length );
@@ -193,13 +196,13 @@ expect.extend( {
 		if ( count !== expected ) {
 			return {
 				pass: false,
-				message: `Expected ${ expected } elements for selector ${ selector }. Received ${ count }.`,
+				message: () => `Expected ${ expected } elements for selector ${ selector }. Received ${ count }.`,
 			};
 		}
 
 		return {
 			pass: true,
-			message: `Expected ${ expected } elements for selector ${ selector }.`,
+			message: () => `Expected ${ expected } elements for selector ${ selector }.`,
 		};
 	},
 } );

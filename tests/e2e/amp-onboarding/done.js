@@ -26,7 +26,7 @@ export const done = () => {
 	} );
 
 	test( 'renders reader mode done screen', async () => {
-		await moveToDoneScreen( { mode: 'reader' } );
+		await moveToDoneScreen( { mode: 'transitional' } );
 
 		testCloseButton( { exists: false } );
 

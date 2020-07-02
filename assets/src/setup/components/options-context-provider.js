@@ -104,7 +104,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 	};
 
 	useEffect( () => {
-		if ( Object.keys( updates ).length || fetchingOptions ) {
+		if ( Object.keys( originalOptions ).length || fetchingOptions ) {
 			return;
 		}
 
@@ -138,7 +138,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 
 			setFetchingOptions( false );
 		} )();
-	}, [ fetchingOptions, updates, optionsRestEndpoint, setError ] );
+	}, [ fetchingOptions, originalOptions, optionsRestEndpoint, setError ] );
 
 	// Allows an item in the updates object to be removed.
 	const unsetOption = useCallback( ( option ) => {
