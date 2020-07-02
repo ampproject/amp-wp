@@ -19,12 +19,6 @@ jest.mock( '../../../components/options-context-provider' );
 
 let container;
 
-function waitASecond() {
-	return new Promise( ( resolve ) => {
-		setTimeout( resolve, 25 );
-	} );
-}
-
 describe( 'RedirectToggle', () => {
 	beforeEach( () => {
 		container = document.createElement( 'div' );
