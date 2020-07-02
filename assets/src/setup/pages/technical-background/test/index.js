@@ -10,6 +10,8 @@ import { create } from 'react-test-renderer';
 import { TechnicalBackground } from '..';
 import { Providers } from '../../..';
 
+jest.mock( '../../../components/options-context-provider' );
+
 describe( 'TechnicalBackground', () => {
 	it( 'matches snapshot', () => {
 		const wrapper = create(

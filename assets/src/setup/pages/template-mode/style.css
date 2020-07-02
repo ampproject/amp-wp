@@ -5,6 +5,7 @@
 
 .template-mode-selection p {
 	font-size: 13px;
+	line-height: 1.85;
 }
 
 .template-mode-selection label {
@@ -29,23 +30,12 @@
 	width: 80px;
 }
 
-.template-mode-selection__current-selection {
-	border: 2px solid var(--light-gray);
-	border-radius: 21.5px;
-	display: flex;
-	align-items: center;
-	font-size: 1rem;
-	font-weight: 600;
-	line-height: 1.5;
-	padding: 9px 18px;
+.template-mode-selection .amp-info {
+	margin-bottom: 0.5rem;
 
 	@media screen and (min-width: 783px) {
 		margin-left: 1.5rem;
 	}
-}
-
-.template-mode-selection__current-selection svg {
-	margin-right: 10px;
 }
 
 .template-mode-selection__details {
@@ -60,7 +50,7 @@
 	font-family: var(--font-noto);
 	font-size: 13px;
 	font-weight: 400;
-	line-height: 1.4;
+	line-height: 1.85;
 	padding-left: 0;
 }
 
@@ -74,6 +64,7 @@
 	padding: 0;
 
 	@media screen and (min-width: 783px) {
+		margin-bottom: 0;
 		padding: 0 0 0 2rem;
 	}
 }
@@ -117,6 +108,7 @@
 	padding-left: 1.5rem;
 	padding-right: 3rem;
 	padding-top: 0.5rem;
+	cursor: default;
 }
 
 .template-mode-selection .components-panel__body-title button .components-panel__arrow {

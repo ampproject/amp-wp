@@ -2,14 +2,6 @@
 
 exports[`StepperBullet matches snaphnot when neither index nor active index are 0 and they are not the same 1`] = `
 <span
-  className="amp-stepper__bullet"
->
-  2
-</span>
-`;
-
-exports[`StepperBullet matches snapshot when index and active index are 0 1`] = `
-<span
   className="amp-stepper__bullet amp-stepper__bullet--check"
 >
   <svg
@@ -44,6 +36,14 @@ exports[`StepperBullet matches snapshot when index and active index are 0 1`] = 
       />
     </g>
   </svg>
+</span>
+`;
+
+exports[`StepperBullet matches snapshot when index and active index are 0 1`] = `
+<span
+  className="amp-stepper__bullet amp-stepper__bullet--dot"
+>
+  <span />
 </span>
 `;
 

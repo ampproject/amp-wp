@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { useEffect, useContext } from '@wordpress/element';
+import { useEffect, useContext, useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -17,21 +17,40 @@ import { ScreenUI } from './screen-ui';
  * Screen for selecting the template mode.
  */
 export function TemplateMode() {
-	const { canGoForward, setCanGoForward } = useContext( Navigation );
-	const { options, savedThemeSupport, updateOptions } = useContext( Options );
-	const { developerToolsOption } = useContext( User );
+	const { setCanGoForward } = useContext( Navigation );
+	const { editedOptions, originalOptions, updates, updateOptions } = useContext( Options );
+	const { developerToolsOption, originalDeveloperToolsOption } = useContext( User );
 	const { pluginIssues, themeIssues, scanningSite } = useContext( SiteScan );
 
-	const { theme_support: themeSupport } = options || {};
+	const technicalQuestionChanged = developerToolsOption !== originalDeveloperToolsOption;
+
+	/**
+	 * The prechecked option on the screen depends on how the user answered the technical question.
+	 */
+	const themeSupport = useMemo( () => {
+		// If the user has previously edited the option in this session, persist it.
+		if ( editedOptions.theme_support !== originalOptions.theme_support ) {
+			return editedOptions.theme_support;
+		}
+
+		// If the technical question was set to something different than it was previously, return the updated option
+		// or null/undefined if the user hasn't made a selection yet.
+		if ( technicalQuestionChanged ) {
+			return updates.theme_support;
+		}
+
+		// Otherwise return the option currently in state, whether it has been edited in this session or not.
+		return editedOptions.theme_support;
+	}, [ editedOptions.theme_support, originalOptions.theme_support, technicalQuestionChanged, updates.theme_support ] );
 
 	/**
 	 * Allow moving forward.
 	 */
 	useEffect( () => {
-		if ( false === canGoForward && false === scanningSite && themeSupport ) {
+		if ( false === scanningSite && undefined !== themeSupport ) {
 			setCanGoForward( true );
 		}
-	}, [ canGoForward, setCanGoForward, scanningSite, themeSupport ] );
+	}, [ setCanGoForward, scanningSite, themeSupport ] );
 
 	if ( scanningSite ) {
 		return <Loading />;
@@ -42,8 +61,10 @@ export function TemplateMode() {
 		<ScreenUI
 			currentMode={ themeSupport }
 			developerToolsOption={ developerToolsOption }
+			technicalQuestionChanged={ technicalQuestionChanged }
+			firstTimeInWizard={ false === originalOptions.wizard_completed }
 			pluginIssues={ pluginIssues }
-			savedCurrentMode={ savedThemeSupport }
+			savedCurrentMode={ originalOptions.theme_support }
 			setCurrentMode={ ( mode ) => {
 				updateOptions( { theme_support: mode } );
 			} }

@@ -2,7 +2,6 @@
  * WordPress dependencies
  */
 import { createContext, useState, useContext } from '@wordpress/element';
-import { getQueryArg } from '@wordpress/url';
 
 /**
  * External dependencies
@@ -24,18 +23,15 @@ export const Navigation = createContext();
  * @param {Array} props.pages Pages in the app.
  */
 export function NavigationContextProvider( { children, pages } ) {
-	// Initialize page from URL `amp-setup-screen` parameter. If not set, current page is 0.
-	// This is primarily for testing.
-	const [ activePageIndex, setActivePageIndex ] = useState( () => {
-		const index = pages.findIndex( ( { slug } ) => slug === getQueryArg( global.location.href, 'amp-setup-screen' ) );
-		return -1 < index ? index : 0;
-	} );
-	const [ canGoForward, setCanGoForward ] = useState( false );
-	const { options } = useContext( Options );
+	const [ activePageIndex, setActivePageIndex ] = useState( 0 );
+	const [ canGoForward, setCanGoForward ] = useState( true ); // Allow immediately moving forward on first page. @todo This may need to change in 1.7.
+	const { editedOptions } = useContext( Options );
 
-	const { theme_support: themeSupport } = options || {};
+	const { theme_support: themeSupport } = editedOptions;
 
 	const currentPage = pages[ activePageIndex ];
+
+	const isLastPage = activePageIndex === pages.length - 1;
 
 	/**
 	 * Navigates back to the previous page.
@@ -49,6 +45,10 @@ export function NavigationContextProvider( { children, pages } ) {
 	 * Navigates to the next page. Pages are expected to set canGoForward to true when required actions have been taken.
 	 */
 	const moveForward = () => {
+		if ( isLastPage ) {
+			return;
+		}
+
 		// Skip the reader theme screen if the user has not selected that mode. Users can go back to it, however.
 		const forwardCount = pages[ activePageIndex + 1 ].slug === 'theme-selection' && 'reader' !== themeSupport ? 2 : 1;
 
@@ -63,6 +63,7 @@ export function NavigationContextProvider( { children, pages } ) {
 					activePageIndex,
 					canGoForward,
 					currentPage,
+					isLastPage,
 					moveBack,
 					moveForward,
 					pages,

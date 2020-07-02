@@ -3,7 +3,6 @@
  */
 import { createContext, useEffect, useState, useRef, useCallback } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { getQueryArg, addQueryArgs } from '@wordpress/url';
 
 /**
  * External dependencies
@@ -18,6 +17,15 @@ import { useError } from '../utils/use-error';
 export const Options = createContext();
 
 /**
+ * Returns a promise that resolves after one second.
+ */
+function waitASecond() {
+	return new Promise( ( resolve ) => {
+		setTimeout( resolve, 1000 );
+	} );
+}
+
+/**
  * Context provider for options retrieval and updating.
  *
  * @param {Object} props Component props.
@@ -25,17 +33,19 @@ export const Options = createContext();
  * @param {string} props.optionsRestEndpoint REST endpoint to retrieve options.
  */
 export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
-	const [ options, setOptions ] = useState( null );
+	const [ updates, setUpdates ] = useState( {} );
 	const [ fetchingOptions, setFetchingOptions ] = useState( false );
 	const [ savingOptions, setSavingOptions ] = useState( false );
-	const [ hasOptionsChanges, setHasOptionsChanges ] = useState( false );
 	const [ didSaveOptions, setDidSaveOptions ] = useState( false );
-	const [ savedThemeSupport, setSavedThemeSupport ] = useState( null );
+	const [ originalOptions, setOriginalOptions ] = useState( null );
 
 	const { setError } = useError();
 
 	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
 	const hasUnmounted = useRef( false );
+	useEffect( () => () => {
+		hasUnmounted.current = true;
+	}, [] );
 
 	/**
 	 * Sends options to the REST endpoint to be saved.
@@ -46,17 +56,34 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 		setSavingOptions( true );
 
 		try {
-			await apiFetch(
-				{
-					method: 'post',
-					url: addQueryArgs( optionsRestEndpoint, { 'amp-new-onboarding': '1' } ),
-					data: { ...options, wizard_completed: true },
-				},
+			const updatesToSave = { ...updates };
+
+			// If the reader theme was set to null on initialization (i.e., this is the first time through the wizard
+			// and reader mode was selected), remove it from the updates.
+			if ( null === updatesToSave.reader_theme ) {
+				delete updatesToSave.reader_theme;
+			}
+
+			// Ensure this promise lasts at least a second so that the "Saving Options" load screen is
+			// visible long enough for the user to see it is happening.
+			const [ savedOptions ] = await Promise.all(
+				[
+					apiFetch(
+						{
+							method: 'post',
+							url: optionsRestEndpoint,
+							data: { ...updates, wizard_completed: true },
+						},
+					),
+					waitASecond(),
+				],
 			);
 
 			if ( true === hasUnmounted.current ) {
 				return;
 			}
+
+			setOriginalOptions( savedOptions );
 		} catch ( e ) {
 			setError( e );
 			return;
@@ -64,24 +91,20 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 
 		setDidSaveOptions( true );
 		setSavingOptions( false );
-	}, [ options, optionsRestEndpoint, setError ] );
+	}, [ optionsRestEndpoint, setError, updates ] );
 
 	/**
 	 * Updates options in state.
 	 *
-	 * @param {Object} Updated options values.
+	 * @param {Object} newOptions Updated options values.
 	 */
-	const updateOptions = useCallback( ( newOptions ) => {
-		if ( false === hasOptionsChanges ) {
-			setHasOptionsChanges( true );
-		}
-
-		setOptions( { ...options, ...newOptions } );
+	const updateOptions = ( newOptions ) => {
+		setUpdates( { ...updates, ...newOptions } );
 		setDidSaveOptions( false );
-	}, [ hasOptionsChanges, options, setHasOptionsChanges, setOptions ] );
+	};
 
 	useEffect( () => {
-		if ( options || fetchingOptions ) {
+		if ( Object.keys( updates ).length || fetchingOptions ) {
 			return;
 		}
 
@@ -92,18 +115,24 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 			setFetchingOptions( true );
 
 			try {
-				const fetchedOptions = await apiFetch( { url: addQueryArgs( optionsRestEndpoint, { 'amp-new-onboarding': '1' } ) } );
+				const fetchedOptions = await apiFetch( { url: optionsRestEndpoint } );
 
 				if ( true === hasUnmounted.current ) {
 					return;
 				}
 
-				setSavedThemeSupport( fetchedOptions.theme_support );
-				setOptions(
-					true === fetchedOptions.wizard_completed && ! getQueryArg( global.location.href, 'setup-wizard-first-run' ) // Query arg available for testing.
-						? { ...fetchedOptions, theme_support: null } // Reset mode for the current session to force user to make a choice.
-						: {},
-				);
+				setOriginalOptions( fetchedOptions );
+
+				const initialUpdates = {
+					wizard_completed: true,
+				};
+
+				if ( fetchedOptions.wizard_completed === false ) {
+					initialUpdates.mobile_redirect = true;
+					initialUpdates.reader_theme = null;
+				}
+
+				setUpdates( initialUpdates );
 			} catch ( e ) {
 				setError( e );
 				return;
@@ -111,23 +140,28 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 
 			setFetchingOptions( false );
 		} )();
-	}, [ fetchingOptions, options, optionsRestEndpoint, setError ] );
+	}, [ fetchingOptions, updates, optionsRestEndpoint, setError ] );
 
-	useEffect( () => () => {
-		hasUnmounted.current = true;
-	}, [] );
+	// Allows an item in the updates object to be removed.
+	const unsetOption = useCallback( ( option ) => {
+		const newOptions = { ...updates };
+		delete newOptions[ option ];
+		setUpdates( newOptions );
+	}, [ updates ] );
 
 	return (
 		<Options.Provider
 			value={
 				{
+					editedOptions: { ...originalOptions, ...updates },
 					fetchingOptions,
-					hasOptionsChanges,
+					hasOptionsChanges: Boolean( Object.keys( updates ).length ),
 					didSaveOptions,
-					options: options || {},
-					savedThemeSupport,
+					updates,
+					originalOptions,
 					saveOptions,
 					savingOptions,
+					unsetOption,
 					updateOptions,
 				}
 			}

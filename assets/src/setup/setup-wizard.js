@@ -16,26 +16,8 @@ import PropTypes from 'prop-types';
 import { Stepper } from './components/stepper';
 import { WordmarkLogo } from './components/svg/wordmark-logo';
 import { Nav } from './components/nav';
-import { Options } from './components/options-context-provider';
-import { Loading } from './components/loading';
 import { WizardUnsavedChangesWarning } from './components/unsaved-changes-warning';
 import { Navigation } from './components/navigation-context-provider';
-
-/**
- * State wrapper for the page component.
- *
- * @param {Object} props Component props.
- * @param {?any} props.children Component children.
- */
-function Page( { children } ) {
-	const { fetchingOptions } = useContext( Options );
-
-	if ( fetchingOptions ) {
-		return <Loading />;
-	}
-
-	return children;
-}
 
 /**
  * Side effect wrapper for page component.
@@ -89,9 +71,7 @@ export function SetupWizard( { exitLink } ) {
 							</h1>
 
 						) }
-						<Page exitLink={ exitLink }>
-							<PageComponentWithSideEffects />
-						</Page>
+						<PageComponentWithSideEffects />
 					</Panel>
 					<Nav
 						activePageIndex={ activePageIndex }

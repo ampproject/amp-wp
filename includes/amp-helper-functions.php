@@ -167,6 +167,37 @@ function amp_init() {
 			}
 		}
 	);
+
+	/*
+	 * Hide admin bar if the window is inside the setup wizard iframe.
+	 *
+	 * Detects whether the current window is in an iframe with the specified `name` attribute. The iframe is created
+	 * by Preview component located in <assets/src/setup/pages/save/index.js>.
+	 */
+	add_action(
+		'wp_print_footer_scripts',
+		function() {
+			if ( ! amp_is_dev_mode() || ! is_admin_bar_showing() ) {
+				return;
+			}
+			?>
+			<script data-ampdevmode>
+				document.addEventListener( 'DOMContentLoaded', function() {
+					if ( 'amp-wizard-completion-preview' !== window.name ) {
+						return;
+					}
+
+					const adminBar = document.getElementById( 'wpadminbar' );
+					if ( adminBar ) {
+						document.body.classList.remove( 'admin-bar' );
+						document.documentElement.style.cssText += '; margin-top: 0 !important';
+						adminBar.remove();
+					}
+				});
+			</script>
+			<?php
+		}
+	);
 }
 
 /**

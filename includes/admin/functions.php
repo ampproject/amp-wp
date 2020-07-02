@@ -201,15 +201,5 @@ function amp_should_use_new_onboarding() {
 		return false;
 	}
 
-	// @todo Remove this check when the onboarding feature is released.
-	if ( isset( $_GET['amp-new-onboarding'] ) && '1' === $_GET['amp-new-onboarding'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		return true;
-	}
-
-	// @todo Remove this check when the onboarding feature is released.
-	if ( defined( 'AMP_NEW_ONBOARDING' ) && AMP_NEW_ONBOARDING ) {
-		return true;
-	}
-
-	return false;
+	return true;
 }

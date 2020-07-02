@@ -265,7 +265,7 @@ input[type="radio"]:focus {
 	display: none;
 }
 
-.amp-stepper__item--active::before {
+.amp-stepper__item--done::before {
 	border-left-color: var(--brand);
 }
 
@@ -349,5 +349,12 @@ input[type="radio"]:focus {
 
 	@media screen and (min-width: 783px) {
 		grid-template-columns: 3fr 1fr;
+	}
+}
+
+.grid-5-4 {
+
+	@media screen and (min-width: 783px) {
+		grid-template-columns: 5fr 4fr;
 	}
 }

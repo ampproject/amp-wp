@@ -5,7 +5,7 @@
 export function User1() {
 	return (
 		<svg width="80" height="70" viewBox="0 0 80 70" fill="none" xmlns="http://www.w3.org/2000/svg">
-			<g clipPath="url(#clip0)">
+			<g clipPath="url(#clip-user-1)">
 				<path d="M1.9 41.7258C2.6732 41.7258 3.3 41.099 3.3 40.3258C3.3 39.5526 2.6732 38.9258 1.9 38.9258C1.1268 38.9258 0.5 39.5526 0.5 40.3258C0.5 41.099 1.1268 41.7258 1.9 41.7258Z" fill="#285BE7" />
 				<path d="M4.2999 32.3273C5.0731 32.3273 5.6999 31.7005 5.6999 30.9273C5.6999 30.1541 5.0731 29.5273 4.2999 29.5273C3.5267 29.5273 2.8999 30.1541 2.8999 30.9273C2.8999 31.7005 3.5267 32.3273 4.2999 32.3273Z" fill="#285BE7" />
 				<path d="M13.1 35.3273C13.8732 35.3273 14.5 34.7005 14.5 33.9273C14.5 33.1541 13.8732 32.5273 13.1 32.5273C12.3268 32.5273 11.7 33.1541 11.7 33.9273C11.7 34.7005 12.3268 35.3273 13.1 35.3273Z" fill="#285BE7" />
@@ -36,7 +36,7 @@ export function User1() {
 				<path d="M41.6999 22.7266H35.8999" stroke="#285BE7" strokeWidth="2" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
 			</g>
 			<defs>
-				<clipPath id="clip0">
+				<clipPath id="clip-user-1">
 					<rect width="79.5" height="69.7" fill="white" transform="translate(0.5 0.226562)" />
 				</clipPath>
 			</defs>
@@ -47,7 +47,7 @@ export function User1() {
 export function User2() {
 	return (
 		<svg width="76" height="71" viewBox="0 0 76 71" fill="none" xmlns="http://www.w3.org/2000/svg">
-			<g clipPath="url(#clip0)">
+			<g clipPath="url(#clip-user-)">
 				<path d="M51.3999 22.6414C51.3999 22.6414 45.4999 14.9414 45.6999 13.4414C38.5999 15.8414 37.8999 18.2414 25.0999 18.4414V37.8414C25.0999 37.8414 31.6999 45.9414 36.5999 46.0414C42.4999 46.0414 42.4999 46.0414 42.4999 46.0414C42.4999 46.0414 51.3999 41.0414 51.3999 36.9414C51.3999 22.6414 51.3999 22.6414 51.3999 22.6414Z" stroke="#285BE7" strokeWidth="2" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
 				<path d="M25.0998 22.1406C23.2998 22.2406 21.0998 22.8406 20.3998 24.6406C18.9998 28.3406 22.3998 31.2406 24.5998 33.4406" stroke="#285BE7" strokeWidth="2" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
 				<path d="M51.0999 22.1406C52.8999 22.2406 55.0999 22.8406 55.7999 24.6406C57.1999 28.3406 53.7999 31.2406 51.5999 33.4406" stroke="#285BE7" strokeWidth="2" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
@@ -69,7 +69,7 @@ export function User2() {
 				<path d="M2.6998 58.2414C3.473 58.2414 4.0998 57.6146 4.0998 56.8414C4.0998 56.0682 3.473 55.4414 2.6998 55.4414C1.92661 55.4414 1.2998 56.0682 1.2998 56.8414C1.2998 57.6146 1.92661 58.2414 2.6998 58.2414Z" fill="#285BE7" />
 			</g>
 			<defs>
-				<clipPath id="clip0">
+				<clipPath id="clip-user-2">
 					<rect width="75.7" height="69.4" fill="white" transform="translate(0.299805 0.839844)" />
 				</clipPath>
 			</defs>
