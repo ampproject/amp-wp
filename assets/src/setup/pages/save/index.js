@@ -120,7 +120,7 @@ function Preview() {
 export function Save() {
 	const {
 		didSaveOptions,
-		updates: { theme_support: themeSupport, reader_theme: readerTheme },
+		editedOptions: { theme_support: themeSupport, reader_theme: readerTheme },
 		originalOptions: { preview_permalink: previewPermalink },
 		saveOptions,
 		savingOptions,
