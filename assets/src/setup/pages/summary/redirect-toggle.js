@@ -14,6 +14,7 @@ export function RedirectToggle() {
 	const { editedOptions, updateOptions } = useContext( Options );
 
 	const { mobile_redirect: mobileRedirect } = editedOptions;
+
 	return (
 		<div className="selectable selectable--bottom">
 			<div className="redirect-toggle">

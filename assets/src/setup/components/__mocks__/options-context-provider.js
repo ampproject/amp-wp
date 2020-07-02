@@ -17,18 +17,22 @@ export const Options = createContext();
  * @param {any} props.children Component children.
  */
 export function OptionsContextProvider( { children } ) {
-	const [ updates, updateOptions ] = useState( {
-		redirect_toggle: false,
+	const [ updates, updateOptions ] = useState( {} );
+	const [ originalOptions, setOriginalOptions ] = useState( {
+		mobile_redirect: true,
+		theme_support: 'some-support',
 	} );
 
 	return (
 		<Options.Provider value={
 			{
-				originalOptions: {
-					theme_support: 'some-support',
-				},
-				updates: updates || {},
-				updateOptions,
+				editedOptions: { ...originalOptions, ...updates },
+				originalOptions,
+				setOriginalOptions,
+				updates,
+				updateOptions: ( ( newOptions ) => {
+					updateOptions( { ...updates, newOptions } );
+				} ),
 			}
 		}>
 			{ children }
