@@ -8,12 +8,12 @@ export const PREV_BUTTON_SELECTOR = '.amp-setup-nav__prev-next button:not(.is-pr
 
 export async function clickNextButton() {
 	await page.waitForSelector( `${ NEXT_BUTTON_SELECTOR }:not([disabled])` );
-	await page.click( NEXT_BUTTON_SELECTOR );
+	await expect( page ).toClick( 'button', { text: 'Next' } );
 }
 
 export async function clickPrevButton() {
 	await page.waitForSelector( `${ PREV_BUTTON_SELECTOR }:not([disabled])` );
-	await page.click( PREV_BUTTON_SELECTOR );
+	await expect( page ).toClick( 'button', { text: 'Previous' } );
 }
 
 export async function moveToTechnicalScreen() {
@@ -42,7 +42,7 @@ export async function moveToReaderThemesScreen( { technical } ) {
 	await moveToTemplateModeScreen( { technical } );
 	await clickMode( 'reader' );
 	await clickNextButton();
-	await page.waitForSelector( '.choose-reader-theme' );
+	await page.waitForSelector( '.theme-card' );
 }
 
 export async function selectReaderTheme( theme = 'legacy' ) {
@@ -70,4 +70,33 @@ export async function moveToDoneScreen( { technical = true, mode, readerTheme = 
 
 	await clickNextButton();
 	await page.waitForSelector( '.done' );
+}
+
+export function testCloseButton( { exists = true } ) {
+	if ( exists ) {
+		expect( page ).toMatchElement( 'a', { text: 'Close' } );
+	} else {
+		expect( page ).not.toMatchElement( 'a', { text: 'Close' } );
+	}
+}
+
+export function testPreviousButton( { exists = true, disabled = false } ) {
+	if ( exists ) {
+		expect( page ).toMatchElement( `button${ disabled ? '[disabled]' : '' }`, { text: 'Previous' } );
+	} else {
+		expect( page ).not.toMatchElement( `button${ disabled ? '[disabled]' : '' }`, { text: 'Close' } );
+	}
+}
+
+export function testNextButton( { element = 'button', text, disabled = false } ) {
+	expect( page ).toMatchElement( `${ element }${ disabled ? '[disabled]' : '' }`, { text } );
+}
+
+export function testTitle( { text, element = 'h1' } ) {
+	expect( page ).toMatchElement( element, { text } );
+}
+
+export async function testElementCount( selector, expected ) {
+	const count = await page.$$eval( selector, ( els ) => els.length );
+	expect( count ).toBe( expected );
 }

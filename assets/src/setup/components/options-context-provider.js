@@ -37,7 +37,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 	const [ fetchingOptions, setFetchingOptions ] = useState( false );
 	const [ savingOptions, setSavingOptions ] = useState( false );
 	const [ didSaveOptions, setDidSaveOptions ] = useState( false );
-	const [ originalOptions, setOriginalOptions ] = useState( null );
+	const [ originalOptions, setOriginalOptions ] = useState( {} );
 
 	const { setError } = useError();
 
@@ -123,9 +123,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 
 				setOriginalOptions( fetchedOptions );
 
-				const initialUpdates = {
-					wizard_completed: true,
-				};
+				const initialUpdates = {};
 
 				if ( fetchedOptions.wizard_completed === false ) {
 					initialUpdates.mobile_redirect = true;

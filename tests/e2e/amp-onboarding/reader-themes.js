@@ -4,40 +4,36 @@
 /**
  * Internal dependencies
  */
-import { moveToReaderThemesScreen, selectReaderTheme } from './utils';
+import { moveToReaderThemesScreen, selectReaderTheme, testNextButton, testPreviousButton } from './utils';
 
 export const readerThemes = () => {
 	beforeEach( async () => {
 		await moveToReaderThemesScreen( { technical: true } );
 	} );
 
-	test( 'should have themes, none selected', async () => {
-		await page.waitForSelector( '.theme-card' );
-
+	test( 'main components exist with no selection', async () => {
 		const itemCount = await page.$$eval( '.theme-card', ( els ) => els.length );
-
 		expect( itemCount ).toBe( 9 );
 
-		const checkedRadio = await page.$( 'input[type="radio"][checked]' );
-		expect( checkedRadio ).toBeNull();
+		expect( page ).not.toMatchElement( 'input[type="radio"][checked]' );
+		testNextButton( { text: 'Next', disabled: true } );
+		testPreviousButton( { text: 'Previous' } );
 	} );
 
 	test( 'should allow different themes to be selected', async () => {
 		// Twenty twenty shouldn't show because it's the active theme.
-		const twentytwenty = await page.$( '[for="theme-card__twentytwenty"]' );
-		expect( twentytwenty ).toBeNull();
+		expect( page ).not.toMatchElement( '[for="theme-card__twentytwenty"]' );
 
 		await selectReaderTheme( 'legacy' );
-		let titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
-		expect( titleText ).toBe( 'AMP Legacy' );
+		expect( page ).toMatchElement( '.selectable--selected h2', { text: 'AMP Legacy' } );
 
 		await selectReaderTheme( 'twentynineteen' );
-		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
-		expect( titleText ).toBe( 'Twenty Nineteen' );
+		expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Twenty Nineteen' } );
 
 		await selectReaderTheme( 'twentysixteen' );
-		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
-		expect( titleText ).toBe( 'Twenty Sixteen' );
+		expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Twenty Sixteen' } );
+
+		testNextButton( { text: 'Next' } );
 	} );
 };
 

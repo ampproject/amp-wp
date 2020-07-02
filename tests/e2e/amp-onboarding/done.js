@@ -4,11 +4,13 @@
 /**
  * Internal dependencies
  */
-import { moveToDoneScreen } from './utils';
+import { moveToDoneScreen, testCloseButton } from './utils';
 
 export const done = () => {
 	test( 'renders standard mode done screen', async () => {
 		await moveToDoneScreen( { mode: 'standard' } );
+
+		testCloseButton( { exists: false } );
 
 		expect( page ).toMatchElement( 'h1', { text: 'Your site is ready' } );
 		expect( page ).toMatchElement( '.phone iframe' );
@@ -17,12 +19,16 @@ export const done = () => {
 	test( 'renders transitional mode done screen', async () => {
 		await moveToDoneScreen( { mode: 'transitional' } );
 
+		testCloseButton( { exists: false } );
+
 		expect( page ).toMatchElement( 'h1', { text: 'Congratulations!' } );
 		expect( page ).toMatchElement( '.phone iframe' );
 	} );
 
 	test( 'renders reader mode done screen', async () => {
 		await moveToDoneScreen( { mode: 'reader' } );
+
+		testCloseButton( { exists: false } );
 
 		expect( page ).toMatchElement( 'h1', { text: 'Congratulations!' } );
 		expect( page ).toMatchElement( '.phone iframe' );

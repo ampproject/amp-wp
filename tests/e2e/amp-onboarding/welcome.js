@@ -5,6 +5,10 @@
  * WordPress dependencies
  */
 import { visitAdminPage } from '@wordpress/e2e-test-utils';
+/**
+ * Internal dependencies
+ */
+import { testPreviousButton, testNextButton } from './utils';
 
 export const welcome = () => {
 	beforeEach( async () => {
@@ -14,6 +18,9 @@ export const welcome = () => {
 
 	test( 'should contain content', async () => {
 		await expect( page ).toMatchElement( '.welcome' );
+
+		testPreviousButton( { exists: false } );
+		testNextButton( { text: 'Next' } );
 	} );
 };
 

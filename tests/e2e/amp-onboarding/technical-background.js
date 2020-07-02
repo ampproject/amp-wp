@@ -4,36 +4,40 @@
 /**
  * Internal dependencies
  */
-import { moveToTechnicalScreen } from './utils';
+import { moveToTechnicalScreen, testTitle, testNextButton, testPreviousButton, testElementCount } from './utils';
 
 export const technicalBackground = () => {
 	beforeEach( async () => {
 		await moveToTechnicalScreen();
 	} );
 
+	test( 'main components exist', async () => {
+		await testTitle( { text: 'Are you technical?' } );
+
+		expect( page ).toMatchElement( 'p', { text: /^In order to/ } );
+
+		testNextButton( { text: 'Next' } );
+		testPreviousButton( { text: 'Previous' } );
+	} );
+
 	test( 'should show two options, none checked', async () => {
 		await page.waitForSelector( 'input[type="radio"]' );
 
-		const itemCount = await page.$$eval( 'input[type="radio"]', ( els ) => els.length );
+		await testElementCount( 'input[type="radio"]', 2 );
 
-		expect( itemCount ).toBe( 2 );
-
-		const checkedRadio = await page.$( 'input[type="radio"][checked]' );
-		expect( checkedRadio ).toBeNull();
+		expect( page ).not.toMatchElement( 'input[type="radio"][checked]' );
 	} );
 
-	test( 'should allow options to be selected', async () => {
+	test( 'should allow options to be selected, then enable next button', async () => {
 		await page.waitForSelector( 'input[type="radio"]' );
 
-		let titleText;
+		await expect( page ).toClick( 'label', { text: /Developer or technically savvy/ } );
+		expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Developer or technically savvy' } );
 
-		await page.$eval( '[for="technical-background-enable"]', ( el ) => el.click() );
-		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
-		expect( titleText ).toBe( 'Developer or technically savvy' );
+		await expect( page ).toClick( 'label', { text: /Non-technically savvy/ } );
+		expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Non-technically savvy or wanting a simpler setup' } );
 
-		await page.$eval( '[for="technical-background-disable"]', ( el ) => el.click() );
-		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
-		expect( titleText ).toBe( 'Non-technically savvy or wanting a simpler setup' );
+		testNextButton( { text: 'Next', disabled: false } );
 	} );
 };
 

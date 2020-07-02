@@ -11,31 +11,24 @@ export const templateMode = () => {
 		await moveToTemplateModeScreen( { technical: true } );
 	} );
 
-	test( 'should show two options, none selected', async () => {
+	test( 'should show main page elements with nothing selected', async () => {
 		await page.waitForSelector( 'input[type="radio"]' );
 
 		const itemCount = await page.$$eval( 'input[type="radio"]', ( els ) => els.length );
-
 		expect( itemCount ).toBe( 3 );
 
-		const checkedRadio = await page.$( 'input[type="radio"][checked]' );
-		expect( checkedRadio ).toBeNull();
+		expect( page ).not.toMatchElement( 'input[type="radio"][checked]' );
 	} );
 
 	test( 'should allow options to be selected', async () => {
-		let titleText;
-
 		await clickMode( 'standard' );
-		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
-		expect( titleText ).toBe( 'Standard' );
+		expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Standard' } );
 
 		await clickMode( 'transitional' );
-		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
-		expect( titleText ).toBe( 'Transitional' );
+		expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Transitional' } );
 
 		await clickMode( 'reader' );
-		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
-		expect( titleText ).toBe( 'Reader' );
+		expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Reader' } );
 	} );
 };
 

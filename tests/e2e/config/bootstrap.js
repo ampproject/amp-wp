@@ -185,3 +185,21 @@ afterEach( async () => {
 afterAll( () => {
 	removePageEvents();
 } );
+
+expect.extend( {
+	async countToBe( selector, expected ) {
+		const count = await page.$$eval( selector, ( els ) => els.length );
+
+		if ( count !== expected ) {
+			return {
+				pass: false,
+				message: `Expected ${ expected } elements for selector ${ selector }. Received ${ count }.`,
+			};
+		}
+
+		return {
+			pass: true,
+			message: `Expected ${ expected } elements for selector ${ selector }.`,
+		};
+	},
+} );
