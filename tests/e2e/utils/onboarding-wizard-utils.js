@@ -19,7 +19,7 @@ export async function clickPrevButton() {
 export async function moveToTechnicalScreen() {
 	await visitAdminPage( 'admin.php', 'page=amp-setup' );
 	await clickNextButton();
-	await page.waitForSelector( '.technical-background' );
+	await page.waitForSelector( '.technical-background-option' );
 }
 
 export async function moveToTemplateModeScreen( { technical } ) {
@@ -96,4 +96,22 @@ export function testNextButton( { element = 'button', text, disabled = false } )
 
 export function testTitle( { text, element = 'h1' } ) {
 	expect( page ).toMatchElement( element, { text } );
+}
+
+/**
+ * Reset data modified by the setup wizard.
+ */
+export async function cleanUpWizard() {
+	await page.evaluate( async () => {
+		await Promise.all( [
+			wp.apiFetch( { path: '/wp/v2/users/me', method: 'POST', data: { amp_dev_tools_enabled: true } } ),
+			wp.apiFetch( { path: '/amp/v1/options', method: 'POST', data: {
+				mobile_redirect: false,
+				reader_theme: 'legacy',
+				theme_support: 'reader',
+				wizard_completed: false,
+			} } ),
+		],
+		);
+	} );
 }

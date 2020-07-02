@@ -1,17 +1,12 @@
-/* eslint-disable jest/no-export */
-/* eslint-disable jest/require-top-level-describe */
-
 /**
  * Internal dependencies
  */
-import { moveToTechnicalScreen, testTitle, testNextButton, testPreviousButton } from './utils';
+import { moveToTechnicalScreen, testTitle, testNextButton, testPreviousButton } from '../../utils/onboarding-wizard-utils';
 
-export const technicalBackground = () => {
-	beforeEach( async () => {
+describe( 'Technical background', () => {
+	it( 'main components exist', async () => {
 		await moveToTechnicalScreen();
-	} );
 
-	test( 'main components exist', async () => {
 		await testTitle( { text: 'Are you technical?' } );
 
 		expect( page ).toMatchElement( 'p', { text: /^In order to/ } );
@@ -20,7 +15,7 @@ export const technicalBackground = () => {
 		testPreviousButton( { text: 'Previous' } );
 	} );
 
-	test( 'should show two options, none checked', async () => {
+	it( 'should show two options, none checked', async () => {
 		await page.waitForSelector( 'input[type="radio"]' );
 
 		await expect( 'input[type="radio"]' ).countToBe( 2 );
@@ -28,7 +23,7 @@ export const technicalBackground = () => {
 		expect( page ).not.toMatchElement( 'input[type="radio"]:checked' );
 	} );
 
-	test( 'should allow options to be selected, then enable next button', async () => {
+	it( 'should allow options to be selected, then enable next button', async () => {
 		await page.waitForSelector( 'input[type="radio"]' );
 
 		await expect( page ).toClick( 'label', { text: /Developer or technically savvy/ } );
@@ -39,7 +34,4 @@ export const technicalBackground = () => {
 
 		testNextButton( { text: 'Next', disabled: false } );
 	} );
-};
-
-/* eslint-enable jest/require-top-level-describe */
-/* eslint-enable jest/no-export */
+} );

@@ -121,16 +121,12 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 					return;
 				}
 
-				setOriginalOptions( fetchedOptions );
-
-				const initialUpdates = {};
-
 				if ( fetchedOptions.wizard_completed === false ) {
-					initialUpdates.mobile_redirect = true;
-					initialUpdates.reader_theme = null;
+					fetchedOptions.mobile_redirect = true;
+					fetchedOptions.reader_theme = null;
 				}
 
-				setUpdates( initialUpdates );
+				setOriginalOptions( fetchedOptions );
 			} catch ( e ) {
 				setError( e );
 				return;

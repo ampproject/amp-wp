@@ -1,17 +1,14 @@
-/* eslint-disable jest/no-export */
-/* eslint-disable jest/require-top-level-describe */
-
 /**
  * Internal dependencies
  */
-import { moveToReaderThemesScreen, selectReaderTheme, testNextButton, testPreviousButton } from './utils';
+import { moveToReaderThemesScreen, selectReaderTheme, testNextButton, testPreviousButton } from '../../utils/onboarding-wizard-utils';
 
-export const readerThemes = () => {
+describe( 'Reader themes', () => {
 	beforeEach( async () => {
 		await moveToReaderThemesScreen( { technical: true } );
 	} );
 
-	test( 'main components exist with no selection', async () => {
+	it( 'main components exist with no selection', async () => {
 		const itemCount = await page.$$eval( '.theme-card', ( els ) => els.length );
 		expect( itemCount ).toBe( 9 );
 
@@ -20,7 +17,7 @@ export const readerThemes = () => {
 		testPreviousButton( { text: 'Previous' } );
 	} );
 
-	test( 'should allow different themes to be selected', async () => {
+	it( 'should allow different themes to be selected', async () => {
 		// Twenty twenty shouldn't show because it's the active theme.
 		expect( page ).not.toMatchElement( '[for="theme-card__twentytwenty"]' );
 
@@ -35,7 +32,4 @@ export const readerThemes = () => {
 
 		testNextButton( { text: 'Next' } );
 	} );
-};
-
-/* eslint-enable jest/require-top-level-describe */
-/* eslint-enable jest/no-export */
+} );

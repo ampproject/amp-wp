@@ -1,10 +1,7 @@
-/* eslint-disable jest/no-export */
-/* eslint-disable jest/require-top-level-describe */
-
 /**
  * Internal dependencies
  */
-import { moveToSummaryScreen, testNextButton, testPreviousButton } from './utils';
+import { moveToSummaryScreen, testNextButton, testPreviousButton } from '../../utils/onboarding-wizard-utils';
 
 const sharedTests = () => {
 	expect( page ).toMatchElement( '.desktop img' );
@@ -12,8 +9,8 @@ const sharedTests = () => {
 	testPreviousButton( { text: 'Previous' } );
 };
 
-export const summary = () => {
-	test( 'renders standard mode summary', async () => {
+describe( 'Summary', () => {
+	it( 'renders standard mode summary', async () => {
 		await moveToSummaryScreen( { mode: 'standard' } );
 
 		expect( page ).toMatchElement( 'h2', { text: 'Standard' } );
@@ -23,7 +20,7 @@ export const summary = () => {
 		sharedTests();
 	} );
 
-	test( 'renders transitional mode summary', async () => {
+	it( 'renders transitional mode summary', async () => {
 		await moveToSummaryScreen( { mode: 'transitional' } );
 
 		expect( page ).toMatchElement( 'h2', { text: 'Transitional' } );
@@ -33,7 +30,7 @@ export const summary = () => {
 		sharedTests();
 	} );
 
-	test( 'renders reader mode summary', async () => {
+	it( 'renders reader mode summary', async () => {
 		await moveToSummaryScreen( { mode: 'reader' } );
 
 		expect( page ).toMatchElement( 'h2', { text: 'Reader' } );
@@ -42,7 +39,4 @@ export const summary = () => {
 
 		sharedTests();
 	} );
-};
-
-/* eslint-enable jest/require-top-level-describe */
-/* eslint-enable jest/no-export */
+} );
