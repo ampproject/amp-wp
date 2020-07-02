@@ -1966,17 +1966,24 @@ class AMP_Theme_Support {
 			header( 'Content-Type: text/html; charset=utf-8' );
 		}
 
-		// @todo Both allow_dirty_styles and allow_dirty_scripts should eventually use AMP dev mode instead.
 		$args = array_merge(
 			[
 				'content_max_width'    => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
 				'use_document_element' => true,
-				'allow_dirty_styles'   => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcuts).
-				'allow_dirty_scripts'  => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
 				'user_can_validate'    => AMP_Validation_Manager::has_cap(),
 			],
 			$args
 		);
+
+		if ( is_customize_preview() ) {
+			// Scripts are always needed to inject changeset UUID.
+			$args['element_xpaths'][] = '//script';
+		}
+
+		if ( self::is_customize_preview_iframe() ) {
+			// Prevent the Customizer preview styles from being sanitized.
+			$args['element_xpaths'][] = '//link[ @id="customize-preview-css" ]';
+		}
 
 		AMP_HTTP::send_server_timing( 'amp_output_buffer', -self::$init_start_time, 'AMP Output Buffer' );
 

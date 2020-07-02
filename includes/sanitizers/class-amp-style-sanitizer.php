@@ -2759,9 +2759,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$stylesheet_groups[ $group ]['included_count'] = $this->finalize_stylesheet_group( $group, $stylesheet_groups[ $group ] );
 		}
 
-		// If we're not working with the document element (e.g. for legacy post templates) then there is nothing left to do.
+		// If we're not working with the document element (e.g. for Customizer rendered partials) then there is nothing left to do.
 		if ( empty( $this->args['use_document_element'] ) ) {
-			return; // @todo This would no longer be true with <https://github.com/ampproject/amp-wp/issues/2202>.
+			return;
 		}
 
 		// Add style[amp-custom] to document.
