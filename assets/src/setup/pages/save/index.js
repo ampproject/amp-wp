@@ -212,7 +212,7 @@ export function Save() {
 									target="_blank"
 									rel="noreferrer"
 								>
-									{ __( 'Visit', 'amp' ) }
+									{ __( 'Customize', 'amp' ) }
 								</Button>
 								<Button
 									isPrimary

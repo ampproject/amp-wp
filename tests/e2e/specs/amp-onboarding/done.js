@@ -40,6 +40,6 @@ describe( 'Done', () => {
 		await expect( page ).toMatchElement( '.phone iframe' );
 		await expect( page ).toMatchElement( 'p', { text: /reader mode/i } );
 		await expect( page ).toMatchElement( 'a', { text: 'Browse' } );
-		await expect( page ).toMatchElement( 'a', { text: 'Visit' } );
+		await expect( page ).toMatchElement( 'a', { text: 'Customize' } );
 	} );
 } );
