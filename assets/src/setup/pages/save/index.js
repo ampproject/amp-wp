@@ -90,12 +90,6 @@ function Preview() {
 
 	return (
 		<>
-			<AMPInfo icon={ ( props ) => <IconMobile { ...props } /> }>
-				{ 'standard' === themeSupport
-					? __( 'Live view of your site', 'amp' )
-					: __( 'Live view of a page on your site using AMP mode', 'amp' )
-				}
-			</AMPInfo>
 			<Phone>
 				<iframe
 					className="done__preview-iframe"
@@ -110,6 +104,12 @@ function Preview() {
 					} }
 				/>
 			</Phone>
+			<AMPInfo icon={ ( props ) => <IconMobile { ...props } /> }>
+				{ 'standard' === themeSupport
+					? __( 'Live view of your site', 'amp' )
+					: __( 'Live view of a page on your site using AMP mode', 'amp' )
+				}
+			</AMPInfo>
 		</>
 	);
 }
@@ -192,7 +192,7 @@ export function Save() {
 							target="_blank"
 							rel="noreferrer"
 						>
-							{ __( 'Visit your site', 'amp' ) }
+							{ __( 'Visit', 'amp' ) }
 						</Button>
 					) }
 
@@ -212,7 +212,7 @@ export function Save() {
 									target="_blank"
 									rel="noreferrer"
 								>
-									{ __( 'Visit in Customizer', 'amp' ) }
+									{ __( 'Visit', 'amp' ) }
 								</Button>
 								<Button
 									isPrimary
@@ -220,7 +220,7 @@ export function Save() {
 									target="_blank"
 									rel="noreferrer"
 								>
-									{ __( 'Browse AMP Version', 'amp' ) }
+									{ __( 'Browse', 'amp' ) }
 								</Button>
 							</>
 						)

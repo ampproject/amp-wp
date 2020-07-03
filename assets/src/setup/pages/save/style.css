@@ -16,19 +16,12 @@
 	}
 }
 
-.done__link-buttons a {
-	font-size: 14px;
-}
-
 .done__link-buttons a:not(:last-child) {
 	margin-right: 5px;
 }
 
 
 .done__preview-container {
-	border: 2px solid #e8e8e8;
-	border-radius: 8px;
-	padding: 37px;
 	text-align: center;
 
 	@media screen and (max-width: 1279px) {
