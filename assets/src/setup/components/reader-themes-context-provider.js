@@ -15,6 +15,7 @@ import PropTypes from 'prop-types';
  */
 import { useError } from '../utils/use-error';
 import { Options } from './options-context-provider';
+import { Navigation } from './navigation-context-provider';
 
 export const ReaderThemes = createContext();
 
@@ -22,35 +23,55 @@ export const ReaderThemes = createContext();
  * Context provider for options retrieval and updating.
  *
  * @param {Object} props Component props.
+ * @param {string} props.currentTheme The theme currently active on the site.
  * @param {string} props.wpAjaxUrl WP AJAX URL.
  * @param {?any} props.children Component children.
  * @param {string} props.readerThemesEndpoint REST endpoint to fetch reader themes.
  * @param {string} props.updatesNonce Nonce for the AJAX request to install a theme.
  */
-export function ReaderThemesContextProvider( { wpAjaxUrl, children, readerThemesEndpoint, updatesNonce } ) {
+export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme, readerThemesEndpoint, updatesNonce } ) {
+	const { setError } = useError();
+
 	const [ themes, setThemes ] = useState( null );
 	const [ fetchingThemes, setFetchingThemes ] = useState( false );
 	const [ downloadingTheme, setDownloadingTheme ] = useState( false );
 	const [ downloadedTheme, setDownloadedTheme ] = useState( false );
+
+	const { editedOptions, updateOptions, savingOptions } = useContext( Options );
+	const { reader_theme: readerTheme, theme_support: themeSupport } = editedOptions;
+
+	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
+	const hasUnmounted = useRef( false );
+	useEffect( () => () => {
+		hasUnmounted.current = true;
+	}, [] );
+
+	/**
+	 * The active reader theme.
+	 */
+	const selectedTheme = useMemo(
+		() => themes ? themes.find( ( { slug } ) => slug === readerTheme ) || { name: null } : { name: null },
+		[ readerTheme, themes ],
+	);
+
+	/**
+	 * When reader mode was selected selected and the user chooses the currently active theme as the reader theme,
+	 * we will override their choice with transitional.
+	 */
+	const [ readerModeWasOverridden, setReaderModeWasOverridden ] = useState( false );
+	const { currentPage: { slug: currentPageSlug } } = useContext( Navigation );
+	useEffect( () => {
+		if ( 'summary' === currentPageSlug && 'reader' === themeSupport && selectedTheme.name === currentTheme.name ) {
+			updateOptions( { theme_support: 'transitional' } );
+			setReaderModeWasOverridden( true );
+		}
+	}, [ selectedTheme.name, currentTheme.name, themeSupport, currentPageSlug, updateOptions ] );
 
 	/**
 	 * Handle downloaded theme errors separately from normal error handling because we don't want it to break the application
 	 * after settings have already been saved.
 	 */
 	const [ downloadingThemeError, setDownloadingThemeError ] = useState( null );
-
-	const { setError } = useError();
-
-	const { editedOptions, savingOptions } = useContext( Options );
-	const { reader_theme: readerTheme, theme_support: themeSupport } = editedOptions;
-
-	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
-	const hasUnmounted = useRef( false );
-
-	const selectedTheme = useMemo(
-		() => themes ? themes.find( ( { slug } ) => slug === readerTheme ) : null,
-		[ readerTheme, themes ],
-	);
 
 	/**
 	 * Downloads the selected reader theme, if necessary, when options are saved.
@@ -116,7 +137,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, readerThemes
 	 * Fetches theme data when needed.
 	 */
 	useEffect( () => {
-		if ( fetchingThemes || ! readerThemesEndpoint || themes || 'reader' !== themeSupport ) {
+		if ( fetchingThemes || ! readerThemesEndpoint || themes || 'standard' === themeSupport ) {
 			return;
 		}
 
@@ -144,18 +165,16 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, readerThemes
 		} )();
 	}, [ fetchingThemes, readerThemesEndpoint, setError, themes, themeSupport ] );
 
-	useEffect( () => () => {
-		hasUnmounted.current = true;
-	}, [] );
-
 	return (
 		<ReaderThemes.Provider
 			value={
 				{
+					currentTheme,
 					downloadedTheme,
 					downloadingTheme,
 					downloadingThemeError,
 					fetchingThemes,
+					readerModeWasOverridden,
 					themes,
 				}
 			}
@@ -166,8 +185,11 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, readerThemes
 }
 
 ReaderThemesContextProvider.propTypes = {
-	wpAjaxUrl: PropTypes.string.isRequired,
 	children: PropTypes.any,
+	currentTheme: PropTypes.shape( {
+		name: PropTypes.string.isRequired,
+	} ).isRequired,
 	readerThemesEndpoint: PropTypes.string.isRequired,
 	updatesNonce: PropTypes.string.isRequired,
+	wpAjaxUrl: PropTypes.string.isRequired,
 };

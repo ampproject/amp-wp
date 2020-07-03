@@ -74,19 +74,19 @@ export async function completeWizard( { technical = true, mode, readerTheme = 'l
 	await page.waitForSelector( '.done__preview-container' );
 }
 
-export function testCloseButton( { exists = true } ) {
+export async function testCloseButton( { exists = true } ) {
 	if ( exists ) {
-		expect( page ).toMatchElement( 'a', { text: 'Close' } );
+		await expect( page ).toMatchElement( 'a', { text: 'Close' } );
 	} else {
-		expect( page ).not.toMatchElement( 'a', { text: 'Close' } );
+		await expect( page ).not.toMatchElement( 'a', { text: 'Close' } );
 	}
 }
 
-export function testPreviousButton( { exists = true, disabled = false } ) {
+export async function testPreviousButton( { exists = true, disabled = false } ) {
 	if ( exists ) {
-		expect( page ).toMatchElement( `button${ disabled ? '[disabled]' : '' }`, { text: 'Previous' } );
+		await expect( page ).toMatchElement( `button${ disabled ? '[disabled]' : '' }`, { text: 'Previous' } );
 	} else {
-		expect( page ).not.toMatchElement( `button${ disabled ? '[disabled]' : '' }`, { text: 'Previous' } );
+		await expect( page ).not.toMatchElement( `button${ disabled ? '[disabled]' : '' }`, { text: 'Previous' } );
 	}
 }
 

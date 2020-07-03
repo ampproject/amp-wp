@@ -13,7 +13,7 @@ describe( 'Template mode', () => {
 
 		await expect( 'input[type="radio"]' ).countToBe( 3 );
 
-		expect( page ).not.toMatchElement( 'input[type="radio"]:checked' );
+		await expect( page ).not.toMatchElement( 'input[type="radio"]:checked' );
 
 		testNextButton( { text: 'Next', disabled: true } );
 		testPreviousButton( { text: 'Previous' } );
@@ -21,13 +21,13 @@ describe( 'Template mode', () => {
 
 	it( 'should allow options to be selected', async () => {
 		await clickMode( 'standard' );
-		expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Standard' } );
+		await expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Standard' } );
 
 		await clickMode( 'transitional' );
-		expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Transitional' } );
+		await expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Transitional' } );
 
 		await clickMode( 'reader' );
-		expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Reader' } );
+		await expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Reader' } );
 
 		testNextButton( { text: 'Next' } );
 	} );
@@ -43,8 +43,7 @@ describe( 'Template mode recommendations', () => {
 	it( 'makes correct recommendations when user is not techncial', async () => {
 		await moveToTemplateModeScreen( { technical: false } );
 
-		await expect( '.amp-notice--info' ).countToBe( 2 );
-
-		await expect( '.amp-notice--success' ).countToBe( 1 );
+		await expect( '.amp-notice--info' ).countToBe( 1 );
+		await expect( '.amp-notice--success' ).countToBe( 2 );
 	} );
 } );

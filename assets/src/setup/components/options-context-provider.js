@@ -48,6 +48,42 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 	}, [] );
 
 	/**
+	 * Fetches options.
+	 */
+	useEffect( () => {
+		if ( Object.keys( originalOptions ).length || fetchingOptions ) {
+			return;
+		}
+
+		/**
+		 * Fetches plugin options from the REST endpoint.
+		 */
+		( async () => {
+			setFetchingOptions( true );
+
+			try {
+				const fetchedOptions = await apiFetch( { url: optionsRestEndpoint } );
+
+				if ( true === hasUnmounted.current ) {
+					return;
+				}
+
+				if ( fetchedOptions.wizard_completed === false ) {
+					fetchedOptions.mobile_redirect = true;
+					fetchedOptions.reader_theme = null;
+				}
+
+				setOriginalOptions( fetchedOptions );
+			} catch ( e ) {
+				setError( e );
+				return;
+			}
+
+			setFetchingOptions( false );
+		} )();
+	}, [ fetchingOptions, originalOptions, optionsRestEndpoint, setError ] );
+
+	/**
 	 * Sends options to the REST endpoint to be saved.
 	 *
 	 * @param {Object} data Plugin options to update.
@@ -102,39 +138,6 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 		setUpdates( { ...updates, ...newOptions } );
 		setDidSaveOptions( false );
 	};
-
-	useEffect( () => {
-		if ( Object.keys( originalOptions ).length || fetchingOptions ) {
-			return;
-		}
-
-		/**
-		 * Fetches plugin options from the REST endpoint.
-		 */
-		( async () => {
-			setFetchingOptions( true );
-
-			try {
-				const fetchedOptions = await apiFetch( { url: optionsRestEndpoint } );
-
-				if ( true === hasUnmounted.current ) {
-					return;
-				}
-
-				if ( fetchedOptions.wizard_completed === false ) {
-					fetchedOptions.mobile_redirect = true;
-					fetchedOptions.reader_theme = null;
-				}
-
-				setOriginalOptions( fetchedOptions );
-			} catch ( e ) {
-				setError( e );
-				return;
-			}
-
-			setFetchingOptions( false );
-		} )();
-	}, [ fetchingOptions, originalOptions, optionsRestEndpoint, setError ] );
 
 	// Allows an item in the updates object to be removed.
 	const unsetOption = useCallback( ( option ) => {

@@ -13,9 +13,9 @@ describe( 'Summary', () => {
 	it( 'renders standard mode summary', async () => {
 		await moveToSummaryScreen( { mode: 'standard' } );
 
-		expect( page ).toMatchElement( 'h2', { text: 'Standard' } );
-		expect( page ).not.toMatchElement( '.phone img' );
-		expect( page ).not.toMatchElement( '.components-form-toggle' );
+		await expect( page ).toMatchElement( 'h2', { text: 'Standard' } );
+		await expect( page ).not.toMatchElement( '.phone img' );
+		await expect( page ).not.toMatchElement( '.components-form-toggle' );
 
 		sharedTests();
 	} );
@@ -23,9 +23,9 @@ describe( 'Summary', () => {
 	it( 'renders transitional mode summary', async () => {
 		await moveToSummaryScreen( { mode: 'transitional' } );
 
-		expect( page ).toMatchElement( 'h2', { text: 'Transitional' } );
-		expect( page ).not.toMatchElement( '.phone img' );
-		expect( page ).toMatchElement( '.components-form-toggle.is-checked' );
+		await expect( page ).toMatchElement( 'h2', { text: 'Transitional' } );
+		await expect( page ).not.toMatchElement( '.phone img' );
+		await expect( page ).toMatchElement( '.components-form-toggle.is-checked' );
 
 		sharedTests();
 	} );
@@ -33,9 +33,9 @@ describe( 'Summary', () => {
 	it( 'renders reader mode summary', async () => {
 		await moveToSummaryScreen( { mode: 'reader' } );
 
-		expect( page ).toMatchElement( 'h2', { text: 'Reader' } );
-		expect( page ).toMatchElement( '.phone img' );
-		expect( page ).toMatchElement( '.components-form-toggle.is-checked' );
+		await expect( page ).toMatchElement( 'h2', { text: 'Reader' } );
+		await expect( page ).toMatchElement( '.phone img' );
+		await expect( page ).toMatchElement( '.components-form-toggle.is-checked' );
 
 		sharedTests();
 	} );
