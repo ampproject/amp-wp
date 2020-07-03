@@ -2,6 +2,8 @@
  * Internal dependencies
  */
 import { moveToTemplateModeScreen, clickMode, testNextButton, testPreviousButton } from '../../utils/onboarding-wizard-utils';
+import { installTheme } from '../../utils/install-theme';
+import { activateTheme } from '../../utils/activate-theme';
 
 describe( 'Template mode', () => {
 	beforeEach( async () => {
@@ -34,16 +36,32 @@ describe( 'Template mode', () => {
 } );
 
 describe( 'Template mode recommendations', () => {
+	beforeEach( async () => {
+		await activateTheme( 'twentytwenty' );
+	} );
+
 	it( 'makes correct recommendations when user is technical', async () => {
 		await moveToTemplateModeScreen( { technical: true } );
 
 		await expect( '.amp-notice--info' ).countToBe( 3 );
 	} );
 
-	it( 'makes correct recommendations when user is not techncial', async () => {
+	it( 'makes correct recommendations when user is not technnical and the current theme is a reader theme', async () => {
 		await moveToTemplateModeScreen( { technical: false } );
 
 		await expect( '.amp-notice--info' ).countToBe( 1 );
 		await expect( '.amp-notice--success' ).countToBe( 2 );
+	} );
+
+	it( 'makes correct recommendations when user is not technical and the current theme is not a reader theme', async () => {
+		await installTheme( 'astra' );
+		await activateTheme( 'astra' );
+
+		await moveToTemplateModeScreen( { technical: false } );
+
+		await expect( '.amp-notice--info' ).countToBe( 2 );
+		await expect( '.amp-notice--success' ).countToBe( 1 );
+
+		await activateTheme( 'twentytwenty' );
 	} );
 } );
