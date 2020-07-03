@@ -1072,6 +1072,9 @@ class AMP_Theme_Support {
 		add_action( 'wp_enqueue_scripts', [ __CLASS__, 'enqueue_assets' ], 0 ); // Enqueue before theme's styles.
 		add_action( 'wp_enqueue_scripts', [ __CLASS__, 'dequeue_customize_preview_scripts' ], 1000 );
 		add_filter( 'customize_partial_render', [ __CLASS__, 'filter_customize_partial_render' ] );
+		if ( is_customize_preview() ) {
+			add_filter( 'style_loader_tag', [ __CLASS__, 'filter_customize_preview_style_loader_tag' ], 10, 2 );
+		}
 
 		add_action( 'wp_footer', 'amp_print_analytics' );
 
@@ -1561,6 +1564,28 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Add data-ampdevmode attribute to any enqueued style that depends on the `customizer-preview` handle.
+	 *
+	 * @since 1.6
+	 *
+	 * @param string $tag    The link tag for the enqueued style.
+	 * @param string $handle The style's registered handle.
+	 * @return string Tag.
+	 */
+	public static function filter_customize_preview_style_loader_tag( $tag, $handle ) {
+		$customize_preview = 'customize-preview';
+		if (
+				is_array( wp_styles()->registered[ $customize_preview ]->deps ) && in_array( $handle, wp_styles()->registered[ $customize_preview ]->deps, true )
+						? self::is_exclusively_dependent( wp_styles(), $handle, $customize_preview )
+						: self::has_dependency( wp_styles(), $handle, $customize_preview )
+		) {
+			$tag = preg_replace( '/(?<=<link)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
+		}
+
+		return $tag;
+	}
+
+	/**
 	 * Add data-ampdevmode attribute to any enqueued script that depends on the admin-bar.
 	 *
 	 * @since 1.3
@@ -1974,16 +1999,6 @@ class AMP_Theme_Support {
 			],
 			$args
 		);
-
-		if ( is_customize_preview() ) {
-			// Scripts are always needed to inject changeset UUID.
-			$args['element_xpaths'][] = '//script';
-		}
-
-		if ( self::is_customize_preview_iframe() ) {
-			// Prevent the Customizer preview styles from being sanitized.
-			$args['element_xpaths'][] = '//link[ @id="customize-preview-css" ]';
-		}
 
 		AMP_HTTP::send_server_timing( 'amp_output_buffer', -self::$init_start_time, 'AMP Output Buffer' );
 
