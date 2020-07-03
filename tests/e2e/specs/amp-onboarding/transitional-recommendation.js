@@ -33,7 +33,7 @@ describe( 'Current active theme is reader theme and user is nontechnical', () =>
 		await moveToSummaryScreen( { technical: false, readerTheme: 'twentytwenty', mode: 'reader' } );
 
 		await expect( page ).toMatchElement( 'h2', { text: 'Transitional' } );
-		await expect( page ).toMatchElement( '.amp-notice--info', { text: /switched from reader to transitional/i } );
+		await expect( page ).toMatchElement( '.amp-notice--info', { text: /switched to Transitional/i } );
 	} );
 } );
 

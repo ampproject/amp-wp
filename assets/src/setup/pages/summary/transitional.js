@@ -32,7 +32,7 @@ export function Transitional( { currentTheme } ) {
 		<>
 			{ readerModeWasOverridden && (
 				<AMPNotice type={ NOTICE_TYPE_INFO } size={ NOTICE_SIZE_LARGE }>
-					{ __( 'The reader theme you chose is the currently active theme on your site, which means reader mode provides no benefit. Your mode has been switched from reader to transitional.', 'amp' ) }
+					{ __( 'Because you selected a Reader theme that is the same as your site\'s active theme, your site has automatically been switched to Transitional template mode.', 'amp' ) }
 				</AMPNotice>
 			) }
 			<SummaryHeader
