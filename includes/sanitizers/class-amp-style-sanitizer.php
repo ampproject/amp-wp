@@ -844,12 +844,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	public function sanitize() {
 		$elements = [];
 
-		// @todo Instead of short-circuiting, this actually needs to turn off tree-shaking.
-		// Do nothing if inline styles are allowed. Note, a better alternative to this is AMP dev mode.
-		if ( ! empty( $this->args['allow_dirty_styles'] ) ) {
-			return;
-		}
-
 		$this->focus_class_name_selector_pattern = (
 			! empty( $this->args['focus_within_classes'] ) ?
 				self::get_class_name_selector_pattern( $this->args['focus_within_classes'] ) :

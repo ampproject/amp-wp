@@ -1920,8 +1920,6 @@ class AMP_Theme_Support {
 			$args = [
 				'content_max_width'    => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
 				'use_document_element' => false,
-				'allow_dirty_styles'   => true,
-				'allow_dirty_scripts'  => false,
 			];
 			AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args ); // @todo Include script assets in response?
 			$partial = AMP_DOM_Utils::get_content_from_dom( $dom );
