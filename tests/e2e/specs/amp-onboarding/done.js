@@ -2,7 +2,7 @@
 /**
  * Internal dependencies
  */
-import { moveToDoneScreen, testCloseButton, cleanUpWizard } from '../../utils/onboarding-wizard-utils';
+import { completeWizard, testCloseButton, cleanUpWizard } from '../../utils/onboarding-wizard-utils';
 
 describe( 'Done', () => {
 	afterEach( async () => {
@@ -10,7 +10,7 @@ describe( 'Done', () => {
 	} );
 
 	it( 'renders standard mode done screen', async () => {
-		await moveToDoneScreen( { mode: 'standard' } );
+		await completeWizard( { mode: 'standard' } );
 
 		testCloseButton( { exists: false } );
 
@@ -21,7 +21,7 @@ describe( 'Done', () => {
 	} );
 
 	it( 'renders transitional mode done screen', async () => {
-		await moveToDoneScreen( { mode: 'transitional' } );
+		await completeWizard( { mode: 'transitional' } );
 
 		testCloseButton( { exists: false } );
 
@@ -32,7 +32,7 @@ describe( 'Done', () => {
 	} );
 
 	it( 'renders reader mode done screen', async () => {
-		await moveToDoneScreen( { mode: 'reader' } );
+		await completeWizard( { mode: 'reader' } );
 
 		testCloseButton( { exists: false } );
 
