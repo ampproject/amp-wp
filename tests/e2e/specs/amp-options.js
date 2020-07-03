@@ -13,10 +13,6 @@ describe( 'AMP Settings Screen', () => {
 	it( 'should display a message about theme compatibility', async () => {
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
-		await page.click( '#theme_support_disabled' );
-		await page.click( '#submit' );
-		await page.waitForSelector( '.notice-success p' );
-
 		await expect( page ).toMatchElement( '.notice-success p', { text: 'Your active theme is known to work well in standard or transitional mode.' } );
 	} );
 } );
