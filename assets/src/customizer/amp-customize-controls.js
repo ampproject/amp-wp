@@ -25,13 +25,6 @@ window.ampCustomizeControls = ( function( api, $ ) {
 		const previewNotice = $( '#customize-info .preview-notice' );
 		previewNotice.text( component.data.l10n.ampVersionNotice );
 
-		// @todo Move into a stylesheet.
-		previewNotice.css( {
-			display: 'block',
-			lineHeight: 1.5,
-			marginRight: 28,
-		} );
-
 		$.ajaxPrefilter( component.injectAmpIntoAjaxRequests );
 
 		wp.customize.bind( 'ready', () => {
