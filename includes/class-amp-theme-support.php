@@ -1575,9 +1575,9 @@ class AMP_Theme_Support {
 	public static function filter_customize_preview_style_loader_tag( $tag, $handle ) {
 		$customize_preview = 'customize-preview';
 		if (
-				is_array( wp_styles()->registered[ $customize_preview ]->deps ) && in_array( $handle, wp_styles()->registered[ $customize_preview ]->deps, true )
-						? self::is_exclusively_dependent( wp_styles(), $handle, $customize_preview )
-						: self::has_dependency( wp_styles(), $handle, $customize_preview )
+			is_array( wp_styles()->registered[ $customize_preview ]->deps ) && in_array( $handle, wp_styles()->registered[ $customize_preview ]->deps, true )
+				? self::is_exclusively_dependent( wp_styles(), $handle, $customize_preview )
+				: self::has_dependency( wp_styles(), $handle, $customize_preview )
 		) {
 			$tag = preg_replace( '/(?<=<link)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
 		}
