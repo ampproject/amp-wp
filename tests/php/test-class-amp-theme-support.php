@@ -75,7 +75,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		parent::tearDown();
 		unset( $GLOBALS['show_admin_bar'] );
 		AMP_Validation_Manager::reset_validation_results();
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		$this->set_template_mode( AMP_Theme_Support::READER_MODE_SLUG );
 		remove_theme_support( 'custom-header' );
 		$_REQUEST                = []; // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
 		$_SERVER['QUERY_STRING'] = '';
@@ -99,7 +99,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$_REQUEST['__amp_source_origin'] = 'foo';
 		$_GET['__amp_source_origin']     = 'foo';
 
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Theme_Support::init();
 		$this->assertEquals( false, has_action( 'widgets_init', [ self::TESTED_CLASS, 'register_widgets' ] ) );
 		$this->assertEquals( PHP_INT_MAX, has_action( 'wp', [ self::TESTED_CLASS, 'finish_init' ] ) );
@@ -130,12 +130,12 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			}
 		);
 
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 
 		// The mode is Standard, and there is no /amp directory, so this should be false.
 		$this->assertFalse( AMP_Theme_Support::supports_reader_mode() );
 
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		$this->set_template_mode( AMP_Theme_Support::READER_MODE_SLUG );
 
 		// The mode is Reader, but there is no /amp directory in the theme.
 		$this->assertFalse( AMP_Theme_Support::supports_reader_mode() );
@@ -246,7 +246,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::ensure_proper_amp_location()
 	 */
 	public function test_ensure_proper_amp_location_canonical() {
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$e = null;
 
 		// Already canonical.
@@ -367,13 +367,13 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		// Establish initial state.
 		$post_id = self::factory()->post->create( [ 'post_title' => 'Test' ] );
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		$this->set_template_mode( AMP_Theme_Support::READER_MODE_SLUG );
 		query_posts( [ 'p' => $post_id ] ); // phpcs:ignore
 		$this->assertTrue( is_singular() );
 
 		// Transitional support is not available if theme support is not present or canonical.
 		$this->assertFalse( AMP_Theme_Support::is_paired_available() );
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->assertFalse( AMP_Theme_Support::is_paired_available() );
 
 		// Transitional mode is available once template_dir is supplied.
@@ -466,7 +466,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		wp_scripts();
 		wp();
 		add_filter( 'amp_validation_error_sanitized', '__return_true' );
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
 
@@ -550,7 +550,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		// Test successful match of singular template.
 		$this->assertTrue( is_singular() );
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$availability = AMP_Theme_Support::get_template_availability();
 		$this->assertEmpty( $availability['errors'] );
 		$this->assertTrue( $availability['supported'] );
@@ -659,7 +659,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_get_template_availability_with_ambiguity() {
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, true );
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$custom_post_type = 'book';
 		register_post_type(
 			$custom_post_type,
@@ -701,7 +701,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_get_template_availability_with_missing_parent() {
 		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, [ 'missing_parent' ] );
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 		add_filter(
 			'amp_supportable_templates',
 			static function ( $templates ) {
@@ -839,7 +839,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 				'templates_supported' => 'all',
 			]
 		);
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 
 		AMP_Theme_Support::init();
 		$supportable_templates = AMP_Theme_Support::get_supportable_templates();
@@ -936,7 +936,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertTrue( is_singular() );
 
 		// Test AMP-first.
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->assertTrue( amp_is_canonical() );
 		$output = get_echo( [ 'AMP_Theme_Support', 'amend_comment_form' ] );
 		$this->assertStringNotContains( '<input type="hidden" name="redirect_to"', $output );
@@ -1271,7 +1271,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @param callable $assert_callback Assert callback.
 	 */
 	public function test_filter_admin_bar_style_loader_tag( $setup_callback, $assert_callback ) {
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->go_to( '/' );
 		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 		add_filter( 'style_loader_tag', [ 'AMP_Theme_Support', 'filter_admin_bar_style_loader_tag' ], 10, 2 );
@@ -1383,7 +1383,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @param callable $assert_callback Assert callback.
 	 */
 	public function test_filter_admin_bar_script_loader_tag( $setup_callback, $assert_callback ) {
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->go_to( '/' );
 		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 		add_filter( 'script_loader_tag', [ 'AMP_Theme_Support', 'filter_admin_bar_script_loader_tag' ], 10, 2 );
@@ -1508,7 +1508,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_unneeded_scripts_get_removed() {
 		wp();
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
 
@@ -1580,7 +1580,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_duplicate_scripts_are_removed() {
 		wp();
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
 
@@ -1675,7 +1675,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			}
 		}
 
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
 
@@ -1695,7 +1695,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	public function test_finish_output_buffering() {
 		wp();
 		add_filter( 'amp_validation_error_sanitized', '__return_true' );
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
 
@@ -1746,7 +1746,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	public function test_filter_customize_partial_render() {
 		wp();
 		add_filter( 'amp_validation_error_sanitized', '__return_true' );
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
 
@@ -1767,7 +1767,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers ::amp_render_scripts()
 	 */
 	public function test_prepare_response() {
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		add_filter(
@@ -1925,7 +1925,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		wp_scripts();
 		wp_styles();
 
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
 		$wp_widget_factory->widgets = [];
@@ -2048,7 +2048,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	public function test_prepare_response_varying_html() {
 		wp();
 		add_filter( 'amp_validation_error_sanitized', '__return_true' );
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
 
@@ -2238,7 +2238,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$expected = $original_script_tag;
 		}
 
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->go_to( get_permalink( self::factory()->post->create() ) );
 		add_filter( 'amp_dev_mode_enabled', '__return_true' );
 		$src               = 'https://example.com/script.js';
