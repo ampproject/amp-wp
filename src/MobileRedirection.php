@@ -509,18 +509,17 @@ final class MobileRedirection implements Service, Registerable {
 			</a>
 		</div>
 
-		<?php if ( amp_is_dev_mode() ) : ?>
+		<?php if ( amp_is_dev_mode() && ! is_customize_preview() ) : ?>
 			<?php
 			$exports = [
 				'containerId'          => $container_id,
-				'isCustomizePreview'   => is_customize_preview(),
 				'notApplicableMessage' => __( 'This link is not applicable in this context. It remains here for preview purposes only.', 'amp' ),
 			];
 			?>
 			<script data-ampdevmode>
-			(function( { containerId, isCustomizePreview, notApplicableMessage } ) {
+			(function( { containerId, notApplicableMessage } ) {
 				addEventListener( 'DOMContentLoaded', () => {
-					if ( isCustomizePreview || [ 'paired-browsing-non-amp', 'paired-browsing-amp' ].includes( window.name ) ) {
+					if ( [ 'paired-browsing-non-amp', 'paired-browsing-amp' ].includes( window.name ) ) {
 						const link = document.querySelector( `#${containerId} a[href]` );
 						link.style.cursor = 'not-allowed';
 						link.addEventListener( 'click', ( event ) => {
