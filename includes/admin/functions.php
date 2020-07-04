@@ -16,30 +16,21 @@ define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
 
 /**
  * Sets up the AMP template editor for the Customizer.
- *
- * If this is not in Reader mode, exit.
- * There's no need for the 'AMP' Customizer panel,
- * And this does not need to toggle between the AMP and normal display.
  */
 function amp_init_customizer() {
-	if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
-		return;
-	}
 
-	$is_legacy = amp_is_legacy();
+	// Fire up the AMP Customizer.
+	add_action( 'customize_register', [ 'AMP_Template_Customizer', 'init' ], 500 );
 
-	if ( $is_legacy || isset( $_GET[ amp_get_slug() ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		// Fire up the AMP Customizer.
-		add_action( 'customize_register', [ 'AMP_Template_Customizer', 'init' ], 500 );
-	}
-
-	if ( $is_legacy ) {
+	if ( amp_is_legacy() ) {
 		// Add some basic design settings + controls to the Customizer.
 		add_action( 'amp_init', [ 'AMP_Customizer_Design_Settings', 'init' ] );
 	}
 
-	// Add a link to the AMP Customizer.
-	add_action( 'admin_menu', 'amp_add_customizer_link' );
+	// Add a link to the AMP Customizer in Reader mode.
+	if ( AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
+		add_action( 'admin_menu', 'amp_add_customizer_link' );
+	}
 }
 
 /**

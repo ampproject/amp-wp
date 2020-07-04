@@ -44,31 +44,59 @@ class AMP_Template_Customizer {
 	 *
 	 * @param WP_Customize_Manager $wp_customize Customizer instance.
 	 */
-	public static function init( $wp_customize ) {
+	public static function init( WP_Customize_Manager $wp_customize ) {
 		$self = new self();
 
 		$self->wp_customize = $wp_customize;
 
-		if ( amp_is_legacy() ) {
-			/**
-			 * Fires when the AMP Template Customizer initializes.
-			 *
-			 * In practice the `customize_register` hook should be used instead.
-			 *
-			 * @since 0.4
-			 * @param AMP_Template_Customizer $self Instance.
-			 */
-			do_action( 'amp_customizer_init', $self );
+		$is_reader_mode   = ( AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
+		$has_reader_theme = ( AMP_Reader_Themes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME ) );
 
-			$self->register_legacy_settings();
-			$self->register_legacy_ui();
+		$is_customizing_reader_theme = (
+			$is_reader_mode
+			&&
+			$has_reader_theme
+			&&
+			isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		);
 
-			add_action( 'customize_controls_print_footer_scripts', [ $self, 'print_legacy_controls_templates' ] );
-			add_action( 'customize_preview_init', [ $self, 'init_legacy_preview' ] );
+		if ( $is_reader_mode ) {
+			if ( $has_reader_theme ) {
+				add_action( 'customize_controls_enqueue_scripts', [ $self, 'add_customizer_scripts' ] );
+			} else {
+				/**
+				 * Fires when the AMP Template Customizer initializes.
+				 *
+				 * In practice the `customize_register` hook should be used instead.
+				 *
+				 * @param AMP_Template_Customizer $self Instance.
+				 *
+				 * @since 0.4
+				 */
+				do_action( 'amp_customizer_init', $self );
 
-			add_action( 'customize_controls_enqueue_scripts', [ $self, 'add_legacy_customizer_scripts' ] );
-		} else {
-			add_action( 'customize_controls_enqueue_scripts', [ $self, 'add_customizer_scripts' ] );
+				$self->register_legacy_settings();
+				$self->register_legacy_ui();
+
+				add_action( 'customize_controls_print_footer_scripts', [ $self, 'print_legacy_controls_templates' ] );
+				add_action( 'customize_preview_init', [ $self, 'init_legacy_preview' ] );
+
+				add_action( 'customize_controls_enqueue_scripts', [ $self, 'add_legacy_customizer_scripts' ] );
+			}
+		}
+
+		// Force changes to header video to cause refresh since logic in wp-customize-header.js does not construct AMP components.
+		if ( amp_is_canonical() || $is_customizing_reader_theme ) {
+			$setting_ids = [
+				'header_video',
+				'external_header_video',
+			];
+			foreach ( $setting_ids as $setting_id ) {
+				$setting = $wp_customize->get_setting( $setting_id );
+				if ( $setting ) {
+					$setting->transport = 'refresh';
+				}
+			}
 		}
 	}
 
@@ -76,7 +104,6 @@ class AMP_Template_Customizer {
 	 * Init Customizer preview for legacy.
 	 *
 	 * @since 0.4
-	 * @global WP_Customize_Manager $wp_customize
 	 */
 	public function init_legacy_preview() {
 		add_action( 'amp_post_template_head', 'wp_no_robots' );
