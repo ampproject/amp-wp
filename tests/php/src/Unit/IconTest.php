@@ -12,13 +12,19 @@ final class IconTest extends TestCase {
 
 	/** @return array */
 	public function get_icon_types() {
-		return [
-			'invalid' => [ 'invalid' ],
-			'link'    => [ 'link' ],
-			'valid'   => [ 'valid' ],
-			'warning' => [ 'warning' ],
-			'logo'    => [ 'logo' ],
+		$types = [
+			'invalid',
+			'link',
+			'valid',
+			'warning',
+			'logo',
 		];
+
+		$data = [];
+		foreach ( $types as $type ) {
+			$data[ $type ] = [ $type ];
+		}
+		return $data;
 	}
 
 	/**
