@@ -520,7 +520,7 @@ final class MobileRedirection implements Service, Registerable {
 			<script data-ampdevmode>
 			(function( { containerId, isCustomizePreview, notApplicableMessage } ) {
 				addEventListener( 'DOMContentLoaded', () => {
-					if ( isCustomizePreview || window.ampPairedBrowsingClient ) {
+					if ( isCustomizePreview || [ 'paired-browsing-non-amp', 'paired-browsing-amp' ].includes( window.name ) ) {
 						const link = document.querySelector( `#${containerId} a[href]` );
 						link.style.cursor = 'not-allowed';
 						link.addEventListener( 'click', ( event ) => {

@@ -45,7 +45,8 @@
 	} );
 
 	// Short-circuit if mobile redirection is disabled.
-	if ( sessionStorage.getItem( disabledStorageKey ) || isCustomizePreview || isAmpDevMode ) {
+	const isPairedBrowsing = isAmpDevMode && [ 'paired-browsing-non-amp', 'paired-browsing-amp' ].includes( window.name );
+	if ( sessionStorage.getItem( disabledStorageKey ) || isCustomizePreview || isPairedBrowsing ) {
 		return;
 	}
 
