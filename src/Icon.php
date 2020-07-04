@@ -128,10 +128,10 @@ final class Icon {
 	 * @return string Rendered HTML.
 	 */
 	public function to_html( $attributes = [] ) {
-		$icon_class = ' amp-icon ' . $this->icon;
+		$icon_class = 'amp-icon ' . $this->icon;
 
-		$attributes['class'] = isset( $attributes['class'] )
-			? $attributes['class'] . $icon_class
+		$attributes['class'] = ! empty( $attributes['class'] )
+			? $attributes['class'] . ' ' . $icon_class
 			: $icon_class;
 
 		$attributes_string = implode(
@@ -141,7 +141,7 @@ final class Icon {
 					return sprintf(
 						'%s="%s"',
 						htmlspecialchars( $key ),
-						htmlspecialchars( $value )
+						esc_attr( $value )
 					);
 				},
 				array_keys( $attributes ),
