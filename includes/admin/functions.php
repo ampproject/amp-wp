@@ -8,13 +8,6 @@
 use AmpProject\AmpWP\Option;
 
 /**
- * Obsolete constant for flagging when Customizer is opened for AMP.
- *
- * @deprecated
- */
-define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
-
-/**
  * Sets up the AMP template editor for the Customizer.
  */
 function amp_init_customizer() {
