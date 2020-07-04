@@ -1,5 +1,6 @@
 /* global amp_customizer_design, jQuery */
 
+// Note: This is only used in Legacy Reader mode.
 ( function( $ ) {
 	'use strict';
 

@@ -5,6 +5,9 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\QueryVars;
+
 /**
  * AMP class that implements a template style editor in the Customizer.
  *
@@ -46,48 +49,52 @@ class AMP_Template_Customizer {
 
 		$self->wp_customize = $wp_customize;
 
-		/**
-		 * Fires when the AMP Template Customizer initializes.
-		 *
-		 * In practice the `customize_register` hook should be used instead.
-		 *
-		 * @since 0.4
-		 * @param AMP_Template_Customizer $self Instance.
-		 */
-		do_action( 'amp_customizer_init', $self );
+		if ( amp_is_legacy() ) {
+			/**
+			 * Fires when the AMP Template Customizer initializes.
+			 *
+			 * In practice the `customize_register` hook should be used instead.
+			 *
+			 * @since 0.4
+			 * @param AMP_Template_Customizer $self Instance.
+			 */
+			do_action( 'amp_customizer_init', $self );
 
-		$self->register_settings();
-		$self->register_ui();
+			$self->register_legacy_settings();
+			$self->register_legacy_ui();
 
-		add_action( 'customize_controls_enqueue_scripts', [ $self, 'add_customizer_scripts' ] );
-		add_action( 'customize_controls_print_footer_scripts', [ $self, 'print_controls_templates' ] );
-		add_action( 'customize_preview_init', [ $self, 'init_preview' ] );
+			add_action( 'customize_controls_print_footer_scripts', [ $self, 'print_legacy_controls_templates' ] );
+			add_action( 'customize_preview_init', [ $self, 'init_legacy_preview' ] );
+
+			add_action( 'customize_controls_enqueue_scripts', [ $self, 'add_legacy_customizer_scripts' ] );
+		} else {
+			add_action( 'customize_controls_enqueue_scripts', [ $self, 'add_customizer_scripts' ] );
+		}
 	}
 
 	/**
-	 * Init Customizer preview.
+	 * Init Customizer preview for legacy.
 	 *
 	 * @since 0.4
 	 * @global WP_Customize_Manager $wp_customize
 	 */
-	public function init_preview() {
+	public function init_legacy_preview() {
 		add_action( 'amp_post_template_head', 'wp_no_robots' );
-		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_preview_scripts' ] );
-		add_action( 'amp_customizer_enqueue_preview_scripts', [ $this, 'enqueue_preview_scripts' ] );
+		add_action( 'amp_customizer_enqueue_preview_scripts', [ $this, 'enqueue_legacy_preview_scripts' ] );
 
 		// Output scripts and styles which will break AMP validation only when preview is opened with controls for manipulation.
 		if ( $this->wp_customize->get_messenger_channel() ) {
 			add_action( 'amp_post_template_head', [ $this->wp_customize, 'customize_preview_loading_style' ] );
-			add_action( 'amp_post_template_css', [ $this, 'add_customize_preview_styles' ] );
+			add_action( 'amp_post_template_css', [ $this, 'add_legacy_customize_preview_styles' ] );
 			add_action( 'amp_post_template_head', [ $this->wp_customize, 'remove_frameless_preview_messenger_channel' ] );
-			add_action( 'amp_post_template_footer', [ $this, 'add_preview_scripts' ] );
+			add_action( 'amp_post_template_footer', [ $this, 'add_legacy_preview_scripts' ] );
 		}
 	}
 
 	/**
 	 * Sets up the AMP Customizer preview.
 	 */
-	public function register_ui() {
+	public function register_legacy_ui() {
 		$this->wp_customize->add_panel(
 			self::PANEL_ID,
 			[
@@ -110,11 +117,11 @@ class AMP_Template_Customizer {
 	}
 
 	/**
-	 * Registers settings for customizing AMP templates.
+	 * Registers settings for customizing Legacy Reader AMP templates.
 	 *
 	 * @since 0.4
 	 */
-	public function register_settings() {
+	public function register_legacy_settings() {
 
 		/**
 		 * Fires when plugins should register settings for AMP.
@@ -128,52 +135,86 @@ class AMP_Template_Customizer {
 	}
 
 	/**
-	 * Load up AMP scripts needed for Customizer integrations.
+	 * Load up AMP scripts needed for Customizer integrations when a Reader theme has been selected.
 	 *
-	 * @since 0.6
+	 * @since 1.6
 	 */
 	public function add_customizer_scripts() {
-		if ( ! amp_is_canonical() ) {
-			$asset_file   = AMP__DIR__ . '/assets/js/amp-customize-controls.asset.php';
-			$asset        = require $asset_file;
-			$dependencies = $asset['dependencies'];
-			$version      = $asset['version'];
+		$asset_file   = AMP__DIR__ . '/assets/js/amp-customize-controls.asset.php';
+		$asset        = require $asset_file;
+		$dependencies = $asset['dependencies'];
+		$version      = $asset['version'];
 
-			wp_enqueue_script(
-				'amp-customize-controls',
-				amp_get_asset_url( 'js/amp-customize-controls.js' ),
-				array_merge( $dependencies, [ 'jquery', 'customize-controls' ] ),
-				$version,
-				true
-			);
+		wp_enqueue_script(
+			'amp-customize-controls',
+			amp_get_asset_url( 'js/amp-customize-controls.js' ),
+			array_merge( $dependencies, [ 'jquery', 'customize-controls' ] ),
+			$version,
+			true
+		);
 
-			wp_add_inline_script(
-				'amp-customize-controls',
-				sprintf(
-					'ampCustomizeControls.boot( %s );',
-					wp_json_encode(
-						[
-							'queryVar' => amp_get_slug(),
-							'panelId'  => self::PANEL_ID,
-							'ampUrl'   => amp_admin_get_preview_permalink(),
-							'l10n'     => [
-								'unavailableMessage'  => __( 'AMP is not available for the page currently being previewed.', 'amp' ),
-								'unavailableLinkText' => __( 'Navigate to an AMP compatible page', 'amp' ),
-							],
-						]
-					)
+		wp_add_inline_script(
+			'amp-customize-controls',
+			sprintf(
+				'ampCustomizeControls.boot( %s );',
+				wp_json_encode(
+					[
+						'queryVar' => amp_get_slug(),
+						'l10n'     => [
+							'ampVersionNotice' => __( 'You are customizing the AMP version of your site.', 'amp' ),
+						],
+					]
 				)
-			);
+			)
+		);
+	}
 
-			wp_enqueue_style(
-				'amp-customizer',
-				amp_get_asset_url( 'css/amp-customizer.css' ),
-				[],
-				AMP__VERSION
-			);
+	/**
+	 * Load up AMP scripts needed for Customizer integrations in Legacy Reader mode.
+	 *
+	 * @since 0.6 Originally called add_customizer_scripts.
+	 * @since 1.6
+	 */
+	public function add_legacy_customizer_scripts() {
+		$asset_file   = AMP__DIR__ . '/assets/js/amp-customize-controls-legacy.asset.php';
+		$asset        = require $asset_file;
+		$dependencies = $asset['dependencies'];
+		$version      = $asset['version'];
 
-			wp_styles()->add_data( 'amp-customizer', 'rtl', 'replace' );
-		}
+		wp_enqueue_script(
+			'amp-customize-controls', // Note: This is not 'amp-customize-controls-legacy' to not break existing scripts that have this dependency.
+			amp_get_asset_url( 'js/amp-customize-controls-legacy.js' ),
+			array_merge( $dependencies, [ 'jquery', 'customize-controls' ] ),
+			$version,
+			true
+		);
+
+		wp_add_inline_script(
+			'amp-customize-controls',
+			sprintf(
+				'ampCustomizeControls.boot( %s );',
+				wp_json_encode(
+					[
+						'queryVar' => amp_get_slug(),
+						'panelId'  => self::PANEL_ID,
+						'ampUrl'   => amp_admin_get_preview_permalink(),
+						'l10n'     => [
+							'unavailableMessage'  => __( 'AMP is not available for the page currently being previewed.', 'amp' ),
+							'unavailableLinkText' => __( 'Navigate to an AMP compatible page', 'amp' ),
+						],
+					]
+				)
+			)
+		);
+
+		wp_enqueue_style(
+			'amp-customizer',
+			amp_get_asset_url( 'css/amp-customizer-legacy.css' ),
+			[],
+			AMP__VERSION
+		);
+
+		wp_styles()->add_data( 'amp-customizer', 'rtl', 'replace' );
 
 		/**
 		 * Fires when plugins should register settings for AMP.
@@ -187,24 +228,24 @@ class AMP_Template_Customizer {
 	}
 
 	/**
-	 * Enqueues scripts used in both the AMP and non-AMP Customizer preview.
+	 * Enqueues scripts used in both the AMP and non-AMP Customizer preview (only applies to Legacy Reader mode).
 	 *
 	 * @since 0.6
 	 */
-	public function enqueue_preview_scripts() {
+	public function enqueue_legacy_preview_scripts() {
 		// Bail if user can't customize anyway.
 		if ( ! current_user_can( 'customize' ) ) {
 			return;
 		}
 
-		$asset_file   = AMP__DIR__ . '/assets/js/amp-customize-preview.asset.php';
+		$asset_file   = AMP__DIR__ . '/assets/js/amp-customize-preview-legacy.asset.php';
 		$asset        = require $asset_file;
 		$dependencies = $asset['dependencies'];
 		$version      = $asset['version'];
 
 		wp_enqueue_script(
 			'amp-customize-preview',
-			amp_get_asset_url( 'js/amp-customize-preview.js' ),
+			amp_get_asset_url( 'js/amp-customize-preview-legacy.js' ),
 			array_merge( $dependencies, [ 'jquery', 'customize-preview' ] ),
 			$version,
 			true
@@ -225,9 +266,9 @@ class AMP_Template_Customizer {
 	}
 
 	/**
-	 * Add AMP Customizer preview styles.
+	 * Add AMP Customizer preview styles for Legacy Reader mode.
 	 */
-	public function add_customize_preview_styles() {
+	public function add_legacy_customize_preview_styles() {
 		?>
 		/* Text meant only for screen readers; this is needed for wp.a11y.speak() */
 		.screen-reader-text {
@@ -250,13 +291,13 @@ class AMP_Template_Customizer {
 	}
 
 	/**
-	 * Enqueues scripts and does wp_print_footer_scripts() so we can output customizer scripts.
+	 * Enqueues Legacy Reader scripts and does wp_print_footer_scripts() so we can output customizer scripts.
 	 *
 	 * This breaks AMP validation in the customizer but is necessary for the live preview.
 	 *
 	 * @since 0.6
 	 */
-	public function add_preview_scripts() {
+	public function add_legacy_preview_scripts() {
 
 		// Bail if user can't customize anyway.
 		if ( ! current_user_can( 'customize' ) ) {
@@ -281,11 +322,11 @@ class AMP_Template_Customizer {
 	}
 
 	/**
-	 * Print templates needed for AMP in Customizer.
+	 * Print templates needed for AMP in Customizer (for Legacy Reader mode).
 	 *
 	 * @since 0.6
 	 */
-	public function print_controls_templates() {
+	public function print_legacy_controls_templates() {
 		?>
 		<script type="text/html" id="tmpl-customize-amp-enabled-toggle">
 			<div class="amp-toggle">

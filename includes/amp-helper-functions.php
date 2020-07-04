@@ -328,17 +328,7 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  * @return boolean Whether this is in AMP 'canonical' mode, that is whether it is AMP-first and there is not a separate (paired) AMP URL.
  */
 function amp_is_canonical() {
-	if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-		return false;
-	}
-
-	$args = AMP_Theme_Support::get_theme_support_args();
-	if ( isset( $args[ AMP_Theme_Support::PAIRED_FLAG ] ) ) {
-		return empty( $args[ AMP_Theme_Support::PAIRED_FLAG ] );
-	}
-
-	// If there is a template_dir, then transitional mode is implied.
-	return empty( $args['template_dir'] );
+	return AMP_Theme_Support::STANDARD_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
 }
 
 /**
@@ -427,12 +417,22 @@ function is_amp_available() {
 		return false;
 	}
 
-	$theme_supports_amp = current_theme_supports( AMP_Theme_Support::SLUG );
+	// Ensure that all templates can be accessed in AMP when a Reader theme is selected.
+	$has_reader_theme = (
+		AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
+		&&
+		AMP_Reader_Themes::DEFAULT_READER_THEME === AMP_Options_Manager::get_option( Option::READER_THEME )
+	);
+	if ( $has_reader_theme && is_customize_preview() ) {
+		return true;
+	}
+
+	$is_legacy = amp_is_legacy();
 
 	// If the query has not been initialized, we can only assume AMP is available if theme support is present and all templates are supported.
 	if ( ! $wp_query instanceof WP_Query || ! did_action( 'wp' ) ) {
 		$warn();
-		return $theme_supports_amp && AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED );
+		return ! $is_legacy && AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED );
 	}
 
 	// If redirected to this page because AMP is not available due to validation errors, prevent AMP from being available (if not AMP-first).
@@ -455,7 +455,7 @@ function is_amp_available() {
 	}
 
 	$queried_object = get_queried_object();
-	if ( $theme_supports_amp ) {
+	if ( ! $is_legacy ) {
 		// Abort if in Transitional mode and AMP is not available for the URL.
 		$availability = AMP_Theme_Support::get_template_availability( $wp_query );
 
@@ -481,7 +481,7 @@ function is_amp_available() {
 		( $wp_query->is_singular() || $wp_query->is_posts_page ) &&
 		post_supports_amp( $queried_object ) )
 	) {
-		// Abort if in Reader mode and the post doesn't support AMP.
+		// Abort if in legacy Reader mode and the post doesn't support AMP.
 		return false;
 	}
 
@@ -516,7 +516,7 @@ function _amp_bootstrap_customizer() {
 function amp_redirect_old_slug_to_new_url( $link ) {
 
 	if ( is_amp_endpoint() && ! amp_is_canonical() ) {
-		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+		if ( ! amp_is_legacy() ) {
 			$link = add_query_arg( amp_get_slug(), '', $link );
 		} else {
 			$link = trailingslashit( trailingslashit( $link ) . amp_get_slug() );
@@ -610,8 +610,8 @@ function amp_get_current_url() {
  */
 function amp_get_permalink( $post_id ) {
 
-	// When theme support is present, the plain query var should always be used.
-	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+	// When theme support is present (i.e. not using legacy Reader post templates), the plain query var should always be used.
+	if ( ! amp_is_legacy() ) {
 		$permalink = get_permalink( $post_id );
 		if ( ! amp_is_canonical() ) {
 			$permalink = add_query_arg( amp_get_slug(), '', $permalink );
@@ -712,7 +712,7 @@ function amp_add_amphtml_link() {
 	 * @todo This filter's name is incorrect. It's not about adding a canonical link but adding the amphtml link.
 	 * @since 0.2
 	 */
-	if ( false === apply_filters( 'amp_frontend_show_canonical', true ) ) {
+	if ( amp_is_canonical() || false === apply_filters( 'amp_frontend_show_canonical', true ) ) {
 		return;
 	}
 
@@ -837,18 +837,18 @@ function amp_get_boilerplate_stylesheets() {
  *
  * @since 6.0
  * @since 1.0 Add template mode.
+ * @since 1.6 Add reader theme.
  */
 function amp_add_generator_metadata() {
 	$content = sprintf( 'AMP Plugin v%s', AMP__VERSION );
 
-	if ( amp_is_canonical() ) {
-		$mode = 'standard';
-	} elseif ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-		$mode = 'transitional';
-	} else {
-		$mode = 'reader';
-	}
+	$mode     = AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
 	$content .= sprintf( '; mode=%s', $mode );
+
+	$reader_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
+	if ( AMP_Theme_Support::READER_MODE_SLUG === $mode && AMP_Reader_Themes::DEFAULT_READER_THEME !== $reader_theme ) {
+		$content .= sprintf( '; theme=%s', $reader_theme );
+	}
 
 	printf( '<meta name="generator" content="%s">', esc_attr( $content ) );
 }
@@ -1236,7 +1236,7 @@ function amp_print_analytics( $analytics ) {
  * @return array Embed handlers.
  */
 function amp_get_content_embed_handlers( $post = null ) {
-	if ( current_theme_supports( AMP_Theme_Support::SLUG ) && $post ) {
+	if ( ! amp_is_legacy() && $post ) {
 		_deprecated_argument(
 			__FUNCTION__,
 			'0.7',
@@ -1338,13 +1338,13 @@ function amp_is_dev_mode() {
 function amp_get_content_sanitizers( $post = null ) {
 	$theme_support_args = AMP_Theme_Support::get_theme_support_args();
 
-	if ( is_array( $theme_support_args ) && $post ) {
+	if ( $post && ! amp_is_legacy() ) {
 		_deprecated_argument(
 			__FUNCTION__,
 			'0.7',
 			sprintf(
 				/* translators: %s: $post */
-				esc_html__( 'The %s argument is deprecated when theme supports AMP.', 'amp' ),
+				esc_html__( 'The %s argument is deprecated.', 'amp' ),
 				'$post'
 			)
 		);
@@ -1365,7 +1365,7 @@ function amp_get_content_sanitizers( $post = null ) {
 	 */
 	$amp_to_amp_linking_enabled = (bool) apply_filters(
 		'amp_to_amp_linking_enabled',
-		AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Theme_Support::get_support_mode()
+		AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
 	);
 
 	$sanitizers = [
@@ -1415,7 +1415,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		$sanitizers['AMP_Nav_Menu_Dropdown_Sanitizer'] = $theme_support_args['nav_menu_dropdown'];
 	}
 
-	if ( $amp_to_amp_linking_enabled && AMP_Theme_Support::STANDARD_MODE_SLUG !== AMP_Theme_Support::get_support_mode() ) {
+	if ( $amp_to_amp_linking_enabled && AMP_Theme_Support::STANDARD_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
 
 		/**
 		 * Filters the list of URLs which are excluded from being included in AMP-to-AMP linking.
@@ -1744,7 +1744,9 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 		return;
 	}
 
-	if ( is_amp_endpoint() ) {
+	$is_amp_endpoint = is_amp_endpoint();
+
+	if ( $is_amp_endpoint ) {
 		$href = amp_remove_endpoint( amp_get_current_url() );
 	} elseif ( is_singular() ) {
 		$href = amp_get_permalink( get_queried_object_id() ); // For sake of Reader mode.
@@ -1764,12 +1766,20 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 					'class' => 'ab-icon',
 				]
 			),
-			esc_html( is_amp_endpoint() ? __( 'Non-AMP', 'amp' ) : __( 'AMP', 'amp' ) )
+			esc_html( $is_amp_endpoint ? __( 'Non-AMP', 'amp' ) : __( 'AMP', 'amp' ) )
 		),
 		'href'  => esc_url( $href ),
 	];
 
 	$wp_admin_bar->add_node( $parent );
+
+	// Make sure the Customizer opens with AMP enabled.
+	$customize_node = $wp_admin_bar->get_node( 'customize' );
+	if ( $customize_node && $is_amp_endpoint ) {
+		$args         = get_object_vars( $customize_node );
+		$args['href'] = add_query_arg( amp_get_slug(), '1', $args['href'] );
+		$wp_admin_bar->add_node( $args );
+	}
 }
 
 /**

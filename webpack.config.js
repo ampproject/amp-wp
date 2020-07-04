@@ -137,7 +137,8 @@ const customizer = {
 	...sharedConfig,
 	entry: {
 		'amp-customize-controls': './assets/src/customizer/amp-customize-controls.js',
-		'amp-customize-preview': './assets/src/customizer/amp-customize-preview.js',
+		'amp-customize-controls-legacy': './assets/src/customizer/amp-customize-controls-legacy.js',
+		'amp-customize-preview-legacy': './assets/src/customizer/amp-customize-preview-legacy.js',
 		'amp-customizer-design-preview': './assets/src/customizer/amp-customizer-design-preview.js',
 	},
 	plugins: [

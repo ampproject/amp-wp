@@ -241,7 +241,7 @@ class AMP_Service_Worker {
 	 * Add hooks to install the service worker from AMP page.
 	 */
 	public static function add_install_hooks() {
-		if ( current_theme_supports( 'amp' ) && is_amp_endpoint() ) {
+		if ( ! amp_is_legacy() && is_amp_endpoint() ) {
 			add_action( 'wp_footer', [ __CLASS__, 'install_service_worker' ] );
 
 			// Prevent validation error due to the script that installs the service worker on non-AMP pages.

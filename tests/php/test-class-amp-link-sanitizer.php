@@ -252,7 +252,7 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 
 		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, true );
 
-		add_theme_support( 'amp', [ 'paired' => true ] );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		$this->go_to( add_query_arg( amp_get_slug(), '', home_url( '/' ) ) );
 		$mobile_redirection->redirect();
 
@@ -275,7 +275,7 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 
 		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, true );
 
-		add_theme_support( 'amp', [ 'paired' => true ] );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		$this->go_to( add_query_arg( amp_get_slug(), '', home_url( '/' ) ) );
 		$mobile_redirection->redirect();
 
@@ -311,6 +311,7 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 	 * @param bool     $expected Whether to expect the sanitizer to be present.
 	 */
 	public function test_amp_to_amp_linking_enabled( $filter, $expected ) {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		add_filter( 'amp_to_amp_linking_enabled', $filter );
 		$sanitizers = amp_get_content_sanitizers();
 		if ( $expected ) {

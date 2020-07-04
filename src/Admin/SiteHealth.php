@@ -400,7 +400,12 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 					'fields'      => [
 						'amp_mode_enabled'        => [
 							'label'   => 'AMP mode enabled',
-							'value'   => AMP_Theme_Support::get_support_mode(),
+							'value'   => AMP_Options_Manager::get_option( Option::THEME_SUPPORT ),
+							'private' => false,
+						],
+						'amp_reader_theme'        => [
+							'label'   => 'AMP Reader theme',
+							'value'   => AMP_Options_Manager::get_option( Option::READER_THEME ),
 							'private' => false,
 						],
 						'amp_templates_enabled'   => [
@@ -488,7 +493,7 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 		);
 
 		// Add the supported templates, like 'is_author', if not in 'Reader' mode.
-		if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Theme_Support::get_support_mode() ) {
+		if ( ! amp_is_legacy() ) {
 			$supported_templates = array_merge(
 				$supported_templates,
 				array_keys(
@@ -519,7 +524,7 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 	 * @return string The value of the option to serve all templates.
 	 */
 	private function get_serve_all_templates() {
-		if ( AMP_Theme_Support::READER_MODE_SLUG === AMP_Theme_Support::get_support_mode() ) {
+		if ( amp_is_legacy() ) {
 			return esc_html__( 'This option does not apply to Reader mode.', 'amp' );
 		}
 

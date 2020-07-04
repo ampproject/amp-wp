@@ -62,6 +62,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			'plugin_registry'                  => PluginRegistry::class,
 			'plugin_suppression'               => PluginSuppression::class,
 			'mobile_redirection'               => MobileRedirection::class,
+			'reader_theme_loader'              => ReaderThemeLoader::class,
 		];
 	}
 

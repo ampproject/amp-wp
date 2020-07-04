@@ -137,6 +137,7 @@ final class AMP_Setup_Wizard_Submenu_Page {
 
 		$setup_wizard_data = [
 			'AMP_OPTIONS_KEY'                    => AMP_Options_Manager::OPTION_NAME,
+			'AMP_QUERY_VAR'                      => amp_get_slug(),
 			'APP_ROOT_ID'                        => self::APP_ROOT_ID,
 			'CUSTOMIZER_LINK'                    => add_query_arg(
 				[

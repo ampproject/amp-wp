@@ -76,7 +76,7 @@ class AMP_Post_Type_Support {
 	 * @since 0.6
 	 */
 	public static function add_post_type_support() {
-		if ( current_theme_supports( AMP_Theme_Support::SLUG ) && AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) ) {
+		if ( ! amp_is_legacy() && AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) ) {
 			$post_types = self::get_eligible_post_types();
 		} else {
 			$post_types = AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES, [] );
@@ -124,11 +124,12 @@ class AMP_Post_Type_Support {
 			}
 		} else {
 			/*
-			 * Disabled by default for custom page templates, page on front and page for posts, unless 'amp' theme
-			 * support is present (in which case AMP_Theme_Support::get_template_availability() determines availability).
+			 * Disabled by default for custom page templates, page on front and page for posts, unless not using a Reader theme.
+			 * If the active theme is not being used for AMP, then we can't make assumptions about these about whether the
+			 * default Reader theme template will work properly for the post.
 			 */
 			$enabled = (
-				current_theme_supports( AMP_Theme_Support::SLUG )
+				( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) )
 				||
 				(
 					! (bool) get_page_template_slug( $post )

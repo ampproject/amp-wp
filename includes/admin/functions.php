@@ -17,7 +17,7 @@ define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
 /**
  * Sets up the AMP template editor for the Customizer.
  *
- * If this is in AMP canonical mode, exit.
+ * If this is not in Reader mode, exit.
  * There's no need for the 'AMP' Customizer panel,
  * And this does not need to toggle between the AMP and normal display.
  */
@@ -26,14 +26,34 @@ function amp_init_customizer() {
 		return;
 	}
 
-	// Fire up the AMP Customizer.
-	add_action( 'customize_register', [ 'AMP_Template_Customizer', 'init' ], 500 );
+	$is_legacy = amp_is_legacy();
 
-	// Add some basic design settings + controls to the Customizer.
-	add_action( 'amp_init', [ 'AMP_Customizer_Design_Settings', 'init' ] );
+	if ( $is_legacy || isset( $_GET[ amp_get_slug() ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		// Fire up the AMP Customizer.
+		add_action( 'customize_register', [ 'AMP_Template_Customizer', 'init' ], 500 );
+	}
 
-	// Add a link to the Customizer.
+	if ( $is_legacy ) {
+		// Add some basic design settings + controls to the Customizer.
+		add_action( 'amp_init', [ 'AMP_Customizer_Design_Settings', 'init' ] );
+	}
+
+	// Add a link to the AMP Customizer.
 	add_action( 'admin_menu', 'amp_add_customizer_link' );
+}
+
+/**
+ * Determines whether the legacy AMP post templates are being used.
+ *
+ * @since 1.6
+ * @return bool
+ */
+function amp_is_legacy() {
+	return (
+		AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
+		&&
+		AMP_Reader_Themes::DEFAULT_READER_THEME === AMP_Options_Manager::get_option( Option::READER_THEME )
+	);
 }
 
 /**
@@ -61,7 +81,7 @@ function amp_admin_get_preview_permalink() {
 	}
 
 	// If theme support is present, then bail if the singular template is not supported.
-	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+	if ( ! amp_is_legacy() ) {
 		$supported_templates = AMP_Theme_Support::get_supportable_templates();
 		if ( empty( $supported_templates['is_singular']['supported'] ) ) {
 			return null;
@@ -94,18 +114,23 @@ function amp_admin_get_preview_permalink() {
  * Registers a submenu page to access the AMP template editor panel in the Customizer.
  */
 function amp_add_customizer_link() {
+	$is_legacy = amp_is_legacy();
+
 	/** This filter is documented in includes/settings/class-amp-customizer-design-settings.php */
-	if ( ! apply_filters( 'amp_customizer_is_enabled', true ) || current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+	if ( $is_legacy && ! apply_filters( 'amp_customizer_is_enabled', true ) ) {
 		return;
 	}
 
-	$menu_slug = add_query_arg(
-		[
-			'autofocus[panel]' => AMP_Template_Customizer::PANEL_ID,
-			'return'           => rawurlencode( admin_url() ),
-		],
-		'customize.php'
-	);
+	$args = [
+		'url' => amp_admin_get_preview_permalink(),
+	];
+	if ( $is_legacy ) {
+		$args['autofocus[panel]'] = AMP_Template_Customizer::PANEL_ID;
+	} else {
+		$args[ amp_get_slug() ] = '1';
+	}
+
+	$menu_slug = add_query_arg( urlencode_deep( $args ), 'customize.php' );
 
 	// Add the theme page.
 	add_theme_page(

@@ -93,8 +93,15 @@ class AMP_Options_Manager {
 
 		$defaults = self::$defaults;
 
-		if ( current_theme_supports( 'amp' ) ) {
-			$defaults[ Option::THEME_SUPPORT ] = amp_is_canonical() ? AMP_Theme_Support::STANDARD_MODE_SLUG : AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
+		$theme_support = get_theme_support( 'amp' );
+		if ( $theme_support ) {
+			if ( isset( $theme_support[0]['paired'] ) && false === $theme_support[0]['paired'] ) {
+				$defaults[ Option::THEME_SUPPORT ] = AMP_Theme_Support::STANDARD_MODE_SLUG;
+			} elseif ( ! empty( $theme_support[0]['paired'] ) || ! empty( $theme_support[0]['template_dir'] ) ) {
+				$defaults[ Option::THEME_SUPPORT ] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
+			} else {
+				$defaults[ Option::THEME_SUPPORT ] = AMP_Theme_Support::STANDARD_MODE_SLUG;
+			}
 		}
 
 		/**
@@ -224,7 +231,7 @@ class AMP_Options_Manager {
 		$theme_support_args = AMP_Theme_Support::get_theme_support_args();
 
 		$is_template_support_required = ( isset( $theme_support_args['templates_supported'] ) && 'all' === $theme_support_args['templates_supported'] );
-		if ( ! $is_template_support_required && ! isset( $theme_support_args['available_callback'] ) ) {
+		if ( ! $is_template_support_required ) {
 			$options[ Option::ALL_TEMPLATES_SUPPORTED ] = ! empty( $new_options[ Option::ALL_TEMPLATES_SUPPORTED ] );
 
 			// Validate supported templates.
@@ -599,18 +606,6 @@ class AMP_Options_Manager {
 			remove_post_type_support( $post_type, AMP_Post_Type_Support::SLUG );
 		}
 		AMP_Post_Type_Support::add_post_type_support();
-
-		// Ensure theme support flags are set properly according to the new mode so that proper AMP URL can be generated.
-		if ( AMP_Theme_Support::STANDARD_MODE_SLUG === $template_mode || AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === $template_mode ) {
-			$theme_support = current_theme_supports( AMP_Theme_Support::SLUG );
-			if ( ! is_array( $theme_support ) ) {
-				$theme_support = [];
-			}
-			$theme_support['paired'] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === $template_mode;
-			add_theme_support( AMP_Theme_Support::SLUG, $theme_support );
-		} else {
-			remove_theme_support( AMP_Theme_Support::SLUG ); // So that the amp_get_permalink() will work for reader mode URL.
-		}
 
 		$url = amp_admin_get_preview_permalink();
 
