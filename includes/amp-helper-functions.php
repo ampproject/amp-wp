@@ -1460,11 +1460,19 @@ function amp_get_content_sanitizers( $post = null ) {
 		 * @param string[] $element_xpaths XPath element queries. Context is the root element.
 		 */
 		$dev_mode_xpaths = (array) apply_filters( 'amp_dev_mode_element_xpaths', [] );
+
 		if ( is_admin_bar_showing() ) {
 			$dev_mode_xpaths[] = '//*[ @id = "wpadminbar" ]';
 			$dev_mode_xpaths[] = '//*[ @id = "wpadminbar" ]//*';
 			$dev_mode_xpaths[] = '//style[ @id = "admin-bar-inline-css" ]';
 		}
+
+		if ( is_customize_preview() ) {
+			// Scripts are always needed to inject changeset UUID.
+			$dev_mode_xpaths[] = '//script[ @src ]';
+			$dev_mode_xpaths[] = '//script[ not( @type ) or @type = "text/javascript" ]';
+		}
+
 		$sanitizers = array_merge(
 			[
 				'AMP_Dev_Mode_Sanitizer' => [
