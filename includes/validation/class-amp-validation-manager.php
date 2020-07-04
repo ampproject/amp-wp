@@ -421,6 +421,7 @@ class AMP_Validation_Manager {
 		];
 
 		// Construct admin bar item to link to AMP version or non-AMP version.
+		$wp_admin_bar->remove_node( 'amp-view' ); // Remove so we can re-add in the right position.
 		$link_item = [
 			'parent' => 'amp',
 			'id'     => 'amp-view',
@@ -1970,12 +1971,13 @@ class AMP_Validation_Manager {
 				number_format_i18n( $kept_count )
 			);
 		}
+
+		// Update the text of the link if there are validation errors.
 		if ( $items ) {
 			$text .= sprintf( ' (%s)', implode( ', ', $items ) );
-		}
-
-		if ( $validate_link->firstChild instanceof DOMText ) {
-			$validate_link->firstChild->nodeValue = $text;
+			if ( $validate_link->firstChild instanceof DOMText ) {
+				$validate_link->firstChild->nodeValue = $text;
+			}
 		}
 	}
 
