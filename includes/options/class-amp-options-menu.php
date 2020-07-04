@@ -185,7 +185,7 @@ class AMP_Options_Menu {
 					</label>
 				</dt>
 				<dd>
-					<?php echo wp_kses_post( $standard_description ); ?>
+					<p><?php echo wp_kses_post( $standard_description ); ?></p>
 				</dd>
 				<dt>
 					<input type="radio" id="theme_support_transitional" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="<?php echo esc_attr( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ); ?>" <?php checked( $theme_support, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ); ?>>
@@ -194,7 +194,7 @@ class AMP_Options_Menu {
 					</label>
 				</dt>
 				<dd>
-					<?php echo wp_kses_post( $transitional_description ); ?>
+					<p><?php echo wp_kses_post( $transitional_description ); ?></p>
 				</dd>
 				<dt>
 					<input type="radio" id="theme_support_disabled" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="<?php echo esc_attr( AMP_Theme_Support::READER_MODE_SLUG ); ?>" <?php checked( $theme_support, AMP_Theme_Support::READER_MODE_SLUG ); ?>>
@@ -203,7 +203,14 @@ class AMP_Options_Menu {
 					</label>
 				</dt>
 				<dd>
-					<?php echo wp_kses_post( $reader_description ); ?>
+					<p><?php echo wp_kses_post( $reader_description ); ?></p>
+
+					<p>
+						<?php
+						/* translators: %s is the reader theme */
+						echo esc_html( sprintf( __( 'The "%s" theme is currently selected in the wizard. The ability to change it from the admin screen will come soon.', 'amp' ), AMP_Options_Manager::get_option( Option::READER_THEME ) ) );
+						?>
+					</p>
 				</dd>
 			</dl>
 
@@ -309,6 +316,9 @@ class AMP_Options_Menu {
 					const allTemplatesSupportedInput = $( '#all_templates_supported' );
 
 					function isThemeSupportDisabled() {
+						if ( <?php echo wp_json_encode( AMP_Reader_Themes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME ) ); ?> ) {
+							return false;
+						}
 						return Boolean( themeSupportDisabledInput.length && themeSupportDisabledInput.prop( 'checked' ) );
 					}
 
