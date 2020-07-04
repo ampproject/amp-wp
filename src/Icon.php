@@ -35,6 +35,11 @@ final class Icon {
 	const WARNING = 'amp-warning';
 
 	/**
+	 * Indicates being on an AMP page.
+	 */
+	const LOGO = 'amp-logo';
+
+	/**
 	 * Icon class name.
 	 *
 	 * @var string
@@ -84,6 +89,15 @@ final class Icon {
 	 */
 	public static function warning() {
 		return new self( self::WARNING );
+	}
+
+	/**
+	 * Logo icon
+	 *
+	 * @return Icon
+	 */
+	public static function logo() {
+		return new self( self::LOGO );
 	}
 
 	/**
