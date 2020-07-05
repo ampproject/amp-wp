@@ -21,7 +21,7 @@ export function TemplateMode() {
 	const { editedOptions, originalOptions, updates, updateOptions } = useContext( Options );
 	const { developerToolsOption, originalDeveloperToolsOption } = useContext( User );
 	const { pluginIssues, themeIssues, scanningSite } = useContext( SiteScan );
-	const { currentTheme, themes } = useContext( ReaderThemes );
+	const { currentTheme } = useContext( ReaderThemes );
 
 	const technicalQuestionChanged = developerToolsOption !== originalDeveloperToolsOption;
 
@@ -44,10 +44,6 @@ export function TemplateMode() {
 		return editedOptions.theme_support;
 	}, [ editedOptions.theme_support, originalOptions.theme_support, technicalQuestionChanged, updates.theme_support ] );
 
-	const currentThemeIsReaderTheme = useMemo( () => {
-		return Boolean( themes.find( ( { name } ) => name === currentTheme.name ) );
-	}, [ currentTheme, themes ] );
-
 	/**
 	 * Allow moving forward.
 	 */
@@ -65,7 +61,7 @@ export function TemplateMode() {
 	return (
 		<ScreenUI
 			currentMode={ themeSupport }
-			currentThemeIsReaderTheme={ currentThemeIsReaderTheme }
+			currentThemeIsReaderTheme={ currentTheme.is_reader_theme }
 			developerToolsOption={ developerToolsOption }
 			firstTimeInWizard={ false === originalOptions.wizard_completed }
 			pluginIssues={ pluginIssues }

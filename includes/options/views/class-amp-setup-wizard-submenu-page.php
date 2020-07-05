@@ -133,7 +133,8 @@ final class AMP_Setup_Wizard_Submenu_Page {
 
 		wp_styles()->add_data( self::ASSET_HANDLE, 'rtl', 'replace' );
 
-		$theme = wp_get_theme();
+		$theme           = wp_get_theme();
+		$is_reader_theme = in_array( get_stylesheet(), wp_list_pluck( ( new AMP_Reader_Themes() )->get_themes(), 'slug' ), true );
 
 		$setup_wizard_data = [
 			'AMP_OPTIONS_KEY'                    => AMP_Options_Manager::OPTION_NAME,
@@ -147,10 +148,11 @@ final class AMP_Setup_Wizard_Submenu_Page {
 			'EXIT_LINK'                          => menu_page_url( AMP_Options_Manager::OPTION_NAME, false ),
 			// @todo As of June 2020, an upcoming WP release will allow this to be retrieved via REST.
 			'CURRENT_THEME'                      => [
-				'name'        => $theme->get( 'Name' ),
-				'description' => $theme->get( 'Description' ),
-				'screenshot'  => $theme->get_screenshot(),
-				'url'         => $theme->get( 'ThemeURI' ),
+				'name'            => $theme->get( 'Name' ),
+				'description'     => $theme->get( 'Description' ),
+				'is_reader_theme' => $is_reader_theme,
+				'screenshot'      => $theme->get_screenshot(),
+				'url'             => $theme->get( 'ThemeURI' ),
 			],
 			'OPTIONS_REST_ENDPOINT'              => rest_url( 'amp/v1/options' ),
 			'READER_THEMES_REST_ENDPOINT'        => rest_url( 'amp/v1/reader-themes' ),

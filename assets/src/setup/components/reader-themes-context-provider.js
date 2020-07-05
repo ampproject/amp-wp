@@ -137,7 +137,11 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	 * Fetches theme data when needed.
 	 */
 	useEffect( () => {
-		if ( fetchingThemes || ! readerThemesEndpoint || themes || 'standard' === themeSupport ) {
+		if ( fetchingThemes || ! readerThemesEndpoint || themes ) {
+			return;
+		}
+
+		if ( 'reader' !== themeSupport ) {
 			return;
 		}
 
