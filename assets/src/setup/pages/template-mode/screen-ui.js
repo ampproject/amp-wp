@@ -135,7 +135,7 @@ Selection.propTypes = {
  * @param {boolean} props.technicalQuestionChanged Whether the user changed their technical question from the previous option.
  * @param {Array} props.pluginIssues The plugin issues found in the site scan.
  * @param {string} props.savedCurrentMode The current selected mode saved in the database.
- * @param {Function} props.setCurrentMode The callback to upda te the selected mode.
+ * @param {Function} props.setCurrentMode The callback to update the selected mode.
  * @param {Array} props.themeIssues The theme issues found in the site scan.
  */
 export function ScreenUI( { currentMode, currentThemeIsReaderTheme, developerToolsOption, firstTimeInWizard, technicalQuestionChanged, pluginIssues, savedCurrentMode, setCurrentMode, themeIssues } ) {

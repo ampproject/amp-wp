@@ -8,7 +8,16 @@ import '@wordpress/components/build-style/style.css';
 /**
  * External dependencies
  */
-import { APP_ROOT_ID, CURRENT_THEME, EXIT_LINK, OPTIONS_REST_ENDPOINT, READER_THEMES_REST_ENDPOINT, UPDATES_NONCE, USER_FIELD_DEVELOPER_TOOLS_ENABLED, USER_REST_ENDPOINT } from 'amp-setup'; // From WP inline script.
+import {
+	APP_ROOT_ID,
+	CURRENT_THEME,
+	EXIT_LINK,
+	OPTIONS_REST_ENDPOINT,
+	READER_THEMES_REST_ENDPOINT,
+	UPDATES_NONCE,
+	USER_FIELD_DEVELOPER_TOOLS_ENABLED,
+	USER_REST_ENDPOINT,
+} from 'amp-setup'; // From WP inline script.
 import PropTypes from 'prop-types';
 
 /**
