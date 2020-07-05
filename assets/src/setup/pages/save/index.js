@@ -83,7 +83,7 @@ function Preview() {
 
 	const {
 		editedOptions: { theme_support: themeSupport },
-		originalOptions: { preview_permalink: previewPermalink },
+		originalOptions: { preview_permalink: previewPermalink, reader_theme: readerTheme },
 	} = useContext( Options );
 
 	const opacity = iframeLoaded ? '1' : '0';
@@ -104,12 +104,37 @@ function Preview() {
 					} }
 				/>
 			</Phone>
-			<AMPInfo icon={ ( props ) => <IconMobile { ...props } /> }>
-				{ 'standard' === themeSupport
-					? __( 'Live view of your site', 'amp' )
-					: __( 'Live view of a page on your site using AMP mode', 'amp' )
+			<div className="done__link-buttons">
+
+				{
+					'reader' === themeSupport && (
+						<Button
+							isPrimary
+							href={
+								addQueryArgs(
+									CUSTOMIZER_LINK,
+									'legacy' === readerTheme
+										? { 'autofocus[panel]': 'amp_panel', url: previewPermalink }
+										: { url: previewPermalink, amp: 1 },
+								)
+							}
+							target="_blank"
+							rel="noreferrer"
+						>
+							{ __( 'Customize AMP', 'amp' ) }
+						</Button>
+					)
 				}
-			</AMPInfo>
+				<Button
+					isPrimary
+					href={ previewPermalink }
+					target="_blank"
+					rel="noreferrer"
+				>
+					{ __( 'Browse AMP', 'amp' ) }
+				</Button>
+
+			</div>
 		</>
 	);
 }
@@ -121,7 +146,6 @@ export function Save() {
 	const {
 		didSaveOptions,
 		editedOptions: { theme_support: themeSupport, reader_theme: readerTheme },
-		originalOptions: { preview_permalink: previewPermalink },
 		saveOptions,
 		savingOptions,
 	} = useContext( Options );
@@ -184,48 +208,6 @@ export function Save() {
 				<p>
 					{ getDescription( themeSupport ) }
 				</p>
-				<div className="done__link-buttons">
-					{ 'reader' !== themeSupport && (
-						<Button
-							isPrimary
-							href={ previewPermalink	}
-							target="_blank"
-							rel="noreferrer"
-						>
-							{ __( 'Visit', 'amp' ) }
-						</Button>
-					) }
-
-					{
-						'reader' === themeSupport && (
-							<>
-								<Button
-									isPrimary
-									href={
-										addQueryArgs(
-											CUSTOMIZER_LINK,
-											'legacy' === readerTheme
-												? { 'autofocus[panel]': 'amp_panel', url: previewPermalink }
-												: { url: previewPermalink, amp: 1 },
-										)
-									}
-									target="_blank"
-									rel="noreferrer"
-								>
-									{ __( 'Customize', 'amp' ) }
-								</Button>
-								<Button
-									isPrimary
-									href={ previewPermalink }
-									target="_blank"
-									rel="noreferrer"
-								>
-									{ __( 'Browse', 'amp' ) }
-								</Button>
-							</>
-						)
-					}
-				</div>
 			</div>
 			<div className="done__preview-container">
 				{ 'reader' === themeSupport && downloadingThemeError && (
@@ -234,6 +216,7 @@ export function Save() {
 					</AMPNotice>
 				) }
 				<Preview />
+
 			</div>
 		</div>
 	);

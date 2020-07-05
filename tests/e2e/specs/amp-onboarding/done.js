@@ -17,7 +17,7 @@ describe( 'Done', () => {
 		await expect( page ).toMatchElement( 'h1', { text: 'Your site is ready' } );
 		await expect( page ).toMatchElement( 'p', { text: /standard mode/i } );
 		await expect( page ).toMatchElement( '.phone iframe' );
-		await expect( page ).toMatchElement( 'a', { text: 'Visit' } );
+		await expect( page ).toMatchElement( 'a', { text: 'Browse AMP' } );
 	} );
 
 	it( 'renders transitional mode done screen', async () => {
@@ -28,7 +28,7 @@ describe( 'Done', () => {
 		await expect( page ).toMatchElement( 'h1', { text: 'Congratulations!' } );
 		await expect( page ).toMatchElement( 'p', { text: /transitional mode/i } );
 		await expect( page ).toMatchElement( '.phone iframe' );
-		await expect( page ).toMatchElement( 'a', { text: 'Visit' } );
+		await expect( page ).toMatchElement( 'a', { text: 'Browse AMP' } );
 	} );
 
 	it( 'renders reader mode done screen', async () => {
@@ -39,7 +39,7 @@ describe( 'Done', () => {
 		await expect( page ).toMatchElement( 'h1', { text: 'Congratulations!' } );
 		await expect( page ).toMatchElement( '.phone iframe' );
 		await expect( page ).toMatchElement( 'p', { text: /reader mode/i } );
-		await expect( page ).toMatchElement( 'a', { text: 'Browse' } );
-		await expect( page ).toMatchElement( 'a', { text: 'Customize' } );
+		await expect( page ).toMatchElement( 'a', { text: 'Browse AMP' } );
+		await expect( page ).toMatchElement( 'a', { text: 'Customize AMP' } );
 	} );
 } );
