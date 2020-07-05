@@ -61,7 +61,7 @@ export function TemplateMode() {
 	return (
 		<ScreenUI
 			currentMode={ themeSupport }
-			currentThemeIsReaderTheme={ currentTheme.is_reader_theme }
+			currentThemeIsAmongReaderThemes={ currentTheme.is_reader_theme }
 			developerToolsOption={ developerToolsOption }
 			firstTimeInWizard={ false === originalOptions.wizard_completed }
 			pluginIssues={ pluginIssues }
