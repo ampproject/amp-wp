@@ -140,7 +140,7 @@ final class Icon {
 				static function ( $key, $value ) {
 					return sprintf(
 						'%s="%s"',
-						htmlspecialchars( $key ),
+						esc_attr( sanitize_key( $key ) ),
 						esc_attr( $value )
 					);
 				},
