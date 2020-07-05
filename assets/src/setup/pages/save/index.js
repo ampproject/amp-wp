@@ -18,8 +18,6 @@ import { Options } from '../../components/options-context-provider';
 import { User } from '../../components/user-context-provider';
 import { Phone } from '../../components/phone';
 import './style.css';
-import { AMPInfo } from '../../components/amp-info';
-import { IconMobile } from '../../components/svg/icon-mobile';
 import { ReaderThemes } from '../../components/reader-themes-context-provider';
 import { AMPNotice, NOTICE_SIZE_LARGE, NOTICE_TYPE_WARNING, NOTICE_TYPE_SUCCESS } from '../../components/amp-notice';
 import { Navigation } from '../../components/navigation-context-provider';
