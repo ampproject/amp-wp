@@ -11,6 +11,7 @@ use AMP_Options_Manager;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\Attribute;
+use AMP_Theme_Support;
 
 /**
  * Service for redirecting mobile users to the AMP version of a page.
@@ -509,17 +510,19 @@ final class MobileRedirection implements Service, Registerable {
 			</a>
 		</div>
 
-		<?php if ( amp_is_dev_mode() && ! is_customize_preview() ) : ?>
+		<?php if ( amp_is_dev_mode() && ( ! is_customize_preview() || AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) ) : ?>
 			<?php
+			// Note that the switcher link is disabled in Reader mode because there is a separate toggle to switch versions.
 			$exports = [
 				'containerId'          => $container_id,
+				'isCustomizePreview'   => is_customize_preview(),
 				'notApplicableMessage' => __( 'This link is not applicable in this context. It remains here for preview purposes only.', 'amp' ),
 			];
 			?>
 			<script data-ampdevmode>
-			(function( { containerId, notApplicableMessage } ) {
+			(function( { containerId, isCustomizePreview, notApplicableMessage } ) {
 				addEventListener( 'DOMContentLoaded', () => {
-					if ( [ 'paired-browsing-non-amp', 'paired-browsing-amp' ].includes( window.name ) ) {
+					if ( isCustomizePreview || [ 'paired-browsing-non-amp', 'paired-browsing-amp' ].includes( window.name ) ) {
 						const link = document.querySelector( `#${containerId} a[href]` );
 						link.style.cursor = 'not-allowed';
 						link.addEventListener( 'click', ( event ) => {
