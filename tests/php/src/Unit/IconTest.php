@@ -53,14 +53,12 @@ final class IconTest extends TestCase {
 
 		$html = $icon->to_html(
 			[
-				'id'      => 'amp-admin-bar-item',
-				'class'   => 'ab-icon',
-				'data-ok' => '" onclick="alert(\"evil\")">end',
+				'id'    => 'amp-admin-bar-item',
+				'class' => '" onclick="alert(\"evil\")">end',
 			]
 		);
-		$this->assertStringContains( "class=\"ab-icon amp-icon amp-{$type}\"", $html );
+		$this->assertStringContains( "class=\"&quot; onclick=&quot;alert(\&quot;evil\&quot;)&quot;&gt;end amp-icon amp-{$type}\"", $html );
 		$this->assertStringContains( 'id="amp-admin-bar-item"', $html );
 		$this->assertStringEndsWith( '</span>', $html );
-		$this->assertRegExp( '/data-ok="&quot; onclick=.+[^"]+?end"/', $html );
 	}
 }
