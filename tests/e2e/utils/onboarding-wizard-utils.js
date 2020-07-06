@@ -78,14 +78,14 @@ export async function completeWizard( { technical = true, mode, readerTheme = 'l
 	await moveToSummaryScreen( { technical, mode, readerTheme, mobileRedirect } );
 
 	if ( 'standard' !== mode ) {
-		await page.waitForSelector( '.redirect-toggle input' );
+		await page.waitForSelector( '.amp-setting-toggle input' );
 
-		const selector = '.redirect-toggle input:checked';
+		const selector = '.amp-setting-toggle input:checked';
 		const checkedMobileRedirect = await page.$( selector );
 
 		if ( checkedMobileRedirect && false === mobileRedirect ) {
 			await expect( page ).toClick( selector );
-			await page.waitForSelector( '.redirect-toggle input:not(:checked)' );
+			await page.waitForSelector( '.amp-setting-toggle input:not(:checked)' );
 		} else if ( ! checkedMobileRedirect && true === mobileRedirect ) {
 			await expect( page ).toClick( selector );
 			await page.waitForSelector( selector );

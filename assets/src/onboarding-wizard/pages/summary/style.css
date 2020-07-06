@@ -88,39 +88,3 @@
 	height: auto;
 	width: 100%;
 }
-
-
-/**
- * Redirect toggle component.
- */
-.redirect-toggle__label-text h3 {
-	font-weight: 700;
-	font-size: 1.25rem;
-	margin-bottom: 1rem;
-	margin-top: 0;
-}
-
-.redirect-toggle__label-text p:last-child {
-	margin-bottom: 0;
-}
-
-.redirect-toggle .components-toggle-control .components-base-control__field .components-toggle-control__label {
-	display: flex;
-	flex-wrap: wrap;
-}
-
-.redirect-toggle__illustration {
-	padding-bottom: 1.5rem;
-
-	@media screen and (min-width: 783px) {
-		padding: 0 1.5rem;
-	}
-}
-
-.redirect-toggle .components-form-toggle {
-	margin-bottom: 2.25rem;
-}
-
-.redirect-toggle .components-toggle-control .components-base-control__field {
-	margin-bottom: 0;
-}

@@ -25,6 +25,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import '../css/variables.css';
+import '../css/core-components.css';
 import '../css/elements.css';
 import './style.css';
 import { OptionsContextProvider } from '../components/options-context-provider';

@@ -2,18 +2,13 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { OPTIONS_REST_ENDPOINT } from 'amp-settings';
 
 /**
  * WordPress dependencies
  */
 import domReady from '@wordpress/dom-ready';
 import { render } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
-
-/**
- * External dependencies
- */
-import { OPTIONS_REST_ENDPOINT } from 'amp-settings';
 
 /**
  * Internal dependencies
@@ -21,6 +16,8 @@ import { OPTIONS_REST_ENDPOINT } from 'amp-settings';
 import { OptionsContextProvider } from '../components/options-context-provider';
 import '../css/variables.css';
 import '../css/elements.css';
+import '../css/core-components.css';
+import './welcome.css';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
 import { MobileRedirection } from './mobile-redirection';

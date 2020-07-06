@@ -38,17 +38,6 @@
 	height: 36px;
 }
 
-.onboarding-wizard-nav__prev-next svg {
-	display: none;
-	margin-left: 0.5rem;
-	height: 18px;
-	width: 18px;
-
-	@media screen and (min-width: 783px) {
-		display: block;
-	}
-}
-
 .onboarding-wizard-nav__prev {
 	margin-right: 5px;
 }
