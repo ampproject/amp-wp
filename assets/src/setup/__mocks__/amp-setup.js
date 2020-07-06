@@ -1,9 +1,10 @@
 module.exports = {
 	APP_ROOT_ID: 'amp-setup',
+	CLOSE_LINK: 'http://site.test/wp-admin/?page=amp-options',
 	CURRENT_THEME: {
 		name: 'Twenty Twenty',
 	},
-	EXIT_LINK: 'http://site.test/wp-admin/?page=amp-options',
+	FINISH_LINK: 'http://site.test/wp-admin/?page=amp-options',
 	OPTIONS_REST_ENDPOINT: 'http://site.test/wp-json/amp/v1/options',
 	READER_THEMES_REST_ENDPOINT: 'http://site.test/wp-json/amp/v1/reader-themes',
 	UPDATES_NONCE: '',
