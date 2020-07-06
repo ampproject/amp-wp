@@ -359,6 +359,18 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertInternalType( 'object', $view_item );
 		$this->assertEqualSets( [ QueryVars::AMP ], array_keys( $this->get_url_query_vars( $view_item->href ) ) );
 		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-validity' ) );
+
+		// Lastly, confirm that the settings item is added if the user is an admin.
+		wp_set_current_user( 0 );
+		$admin_bar = new WP_Admin_Bar();
+		$this->assertFalse( current_user_can( 'manage_options' ) );
+		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
+		$this->assertNull( $admin_bar->get_node( 'amp-settings' ) );
+		$admin_bar = new WP_Admin_Bar();
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->assertTrue( current_user_can( 'manage_options' ) );
+		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
+		$this->assertObjectHasAttribute( 'href', $admin_bar->get_node( 'amp-settings' ) );
 	}
 
 	/**
