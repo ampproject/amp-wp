@@ -17,7 +17,7 @@ export async function clickPrevButton() {
 }
 
 export async function moveToTechnicalScreen() {
-	await visitAdminPage( 'admin.php', 'page=amp-settings' );
+	await visitAdminPage( 'admin.php', 'page=amp-onboarding-wizard' );
 	await clickNextButton();
 	await page.waitForSelector( '.technical-background-option' );
 }

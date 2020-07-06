@@ -15,7 +15,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import './style.css';
-import { Selectable } from '../../components/selectable';
+import { Selectable } from '../../../components/selectable';
 import { AMPNotice, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_INFO, NOTICE_TYPE_WARNING, NOTICE_SIZE_LARGE } from '../../components/amp-notice';
 import { Standard } from '../../components/svg/standard';
 import { Transitional } from '../../components/svg/transitional';
@@ -27,32 +27,16 @@ import { MOST_RECOMMENDED, RECOMMENDED, getRecommendationLevels, getAllSelection
  * An individual mode selection component.
  *
  * @param {Object} props Component props.
- * @param {string|Object} props.compatibility Compatibility content.
+ * @param {string|Object} props.children Section content.
  * @param {string} props.id A string for the input's HTML ID.
- * @param {boolean} props.firstTimeInWizard Whether the wizard is running for the first time.
  * @param {string|Object} props.illustration An illustration for the selection.
- * @param {boolean} props.isCurrentSavedSelection Whether the mode is currently saved as the selected mode.
  * @param {Array} props.details Array of strings representing details about the mode and recommendation.
  * @param {Function} props.onChange Callback to select the mode.
- * @param {number} props.recommended Recommendation level. -1: not recommended. 0: good. 1: Most recommended.
+ * @param {boolean} props.previouslySelected Whether the option was selected previously.
  * @param {boolean} props.selected Whether the mode is selected.
- * @param {boolean} props.technicalQuestionChanged Whether the user changed their technical question from the previous option.
  * @param {string} props.title The title for the selection.
  */
-export function Selection( { compatibility, firstTimeInWizard, id, illustration, isCurrentSavedSelection, details, onChange, recommended, selected, technicalQuestionChanged, title } ) {
-	const recommendationLevelType = useMemo( () => {
-		switch ( recommended ) {
-			case MOST_RECOMMENDED:
-				return NOTICE_TYPE_SUCCESS;
-
-			case RECOMMENDED:
-				return NOTICE_TYPE_INFO;
-
-			default:
-				return NOTICE_TYPE_WARNING;
-		}
-	}, [ recommended ] );
-
+export function Selection( { children, id, illustration, details, onChange, previouslySelected, selected, title } ) {
 	return (
 		<Selectable className="template-mode-selection" selected={ selected }>
 			<label htmlFor={ id }>
@@ -71,7 +55,7 @@ export function Selection( { compatibility, firstTimeInWizard, id, illustration,
 					<h2>
 						{ title }
 					</h2>
-					{ isCurrentSavedSelection && technicalQuestionChanged && ! firstTimeInWizard && (
+					{ previouslySelected && (
 						<AMPInfo>
 							{ __( 'Previously selected', 'amp' ) }
 						</AMPInfo>
@@ -90,37 +74,20 @@ export function Selection( { compatibility, firstTimeInWizard, id, illustration,
 					</a>
 				</p>
 			</div>
-			<AMPNotice size={ NOTICE_SIZE_LARGE } type={ recommendationLevelType }>
-				<PanelBody title={ compatibility } initialOpen={ false } opened={ false }>
-					<PanelRow>
-						<h3>
-							{ __( 'Compatibility', 'amp' ) }
-						</h3>
-						<p>
-							{ 'Lorem ipsum dolar sit amet. ' }
-							{ /* @todo Temporary URL. */ }
-							<a href="http://amp-wp.org" target="_blank" rel="noreferrer">
-								{ __( 'Learn more.', 'amp' ) }
-							</a>
-						</p>
-					</PanelRow>
-				</PanelBody>
-			</AMPNotice>
+
+			{ children && children }
 		</Selectable>
 	);
 }
 
 Selection.propTypes = {
-	compatibility: PropTypes.node.isRequired,
+	children: PropTypes.any,
 	details: PropTypes.node.isRequired,
-	firstTimeInWizard: PropTypes.bool,
 	id: PropTypes.string.isRequired,
 	illustration: PropTypes.node.isRequired,
-	isCurrentSavedSelection: PropTypes.bool.isRequired,
 	onChange: PropTypes.func.isRequired,
-	recommended: PropTypes.oneOf( [ RECOMMENDED, NOT_RECOMMENDED, MOST_RECOMMENDED ] ).isRequired,
+	previouslySelected: PropTypes.bool.isRequired,
 	selected: PropTypes.bool.isRequired,
-	technicalQuestionChanged: PropTypes.bool,
 	title: PropTypes.string.isRequired,
 };
 
@@ -160,55 +127,109 @@ export function ScreenUI( { currentMode, currentThemeIsAmongReaderThemes, develo
 		[ recommendationLevels, userIsTechnical ],
 	);
 
+	const getRecommendationLevelType = ( recommended ) => {
+		switch ( recommended ) {
+			case MOST_RECOMMENDED:
+				return NOTICE_TYPE_SUCCESS;
+
+			case RECOMMENDED:
+				return NOTICE_TYPE_INFO;
+
+			default:
+				return NOTICE_TYPE_WARNING;
+		}
+	};
+
 	return (
 		<form>
 			<Selection
-				compatibility={ sectionText.standard.compatibility }
 				details={ sectionText.standard.details }
 				id={ standardId }
 				illustration={ <Standard /> }
-				isCurrentSavedSelection={ savedCurrentMode === 'standard' }
 				onChange={ () => {
 					setCurrentMode( 'standard' );
 				} }
-				recommended={ recommendationLevels[ STANDARD ] }
+				previouslySelected={ savedCurrentMode === 'standard' && technicalQuestionChanged && ! firstTimeInWizard }
 				selected={ currentMode === 'standard' }
 				title={ __( 'Standard', 'amp' ) }
-				technicalQuestionChanged={ technicalQuestionChanged }
-				firstTimeInWizard={ firstTimeInWizard }
-			/>
+			>
+				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ getRecommendationLevelType( recommendationLevels[ STANDARD ] ) }>
+					<PanelBody title={ sectionText.standard.compatibility } initialOpen={ false } opened={ false }>
+						<PanelRow>
+							<h3>
+								{ __( 'Compatibility', 'amp' ) }
+							</h3>
+							<p>
+								{ 'Lorem ipsum dolar sit amet. ' }
+								{ /* @todo Temporary URL. */ }
+								<a href="http://amp-wp.org" target="_blank" rel="noreferrer">
+									{ __( 'Learn more.', 'amp' ) }
+								</a>
+							</p>
+						</PanelRow>
+					</PanelBody>
+				</AMPNotice>
+			</Selection>
 
 			<Selection
-				compatibility={ sectionText.transitional.compatibility }
 				details={ sectionText.transitional.details }
 				id={ transitionalId }
 				illustration={ <Transitional /> }
-				isCurrentSavedSelection={ savedCurrentMode === 'transitional' }
 				onChange={ () => {
 					setCurrentMode( 'transitional' );
 				} }
-				recommended={ recommendationLevels[ TRANSITIONAL ] }
+				previouslySelected={ savedCurrentMode === 'transitional' && technicalQuestionChanged && ! firstTimeInWizard }
 				selected={ currentMode === 'transitional' }
 				title={ __( 'Transitional', 'amp' ) }
-				technicalQuestionChanged={ technicalQuestionChanged }
-				firstTimeInWizard={ firstTimeInWizard }
-			/>
+			>
+				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ getRecommendationLevelType( recommendationLevels[ TRANSITIONAL ] ) }>
+					<PanelBody title={ sectionText.transitional.compatibility } initialOpen={ false } opened={ false }>
+						<PanelRow>
+							<h3>
+								{ __( 'Compatibility', 'amp' ) }
+							</h3>
+							<p>
+								{ 'Lorem ipsum dolar sit amet. ' }
+								{ /* @todo Temporary URL. */ }
+								<a href="http://amp-wp.org" target="_blank" rel="noreferrer">
+									{ __( 'Learn more.', 'amp' ) }
+								</a>
+							</p>
+						</PanelRow>
+					</PanelBody>
+				</AMPNotice>
+			</Selection>
 
 			<Selection
 				compatibility={ sectionText.reader.compatibility }
 				details={ sectionText.reader.details }
 				id={ readerId }
 				illustration={ <Reader /> }
-				isCurrentSavedSelection={ savedCurrentMode === 'reader' }
 				onChange={ () => {
 					setCurrentMode( 'reader' );
 				} }
+				previouslySelected={ savedCurrentMode === 'reader' && technicalQuestionChanged && ! firstTimeInWizard }
 				recommended={ recommendationLevels[ READER ] }
 				selected={ currentMode === 'reader' }
 				title={ __( 'Reader', 'amp' ) }
-				technicalQuestionChanged={ technicalQuestionChanged }
-				firstTimeInWizard={ firstTimeInWizard }
-			/>
+			>
+				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ getRecommendationLevelType( recommendationLevels[ READER ] ) }>
+					<PanelBody title={ sectionText.reader.compatibility } initialOpen={ false } opened={ false }>
+						<PanelRow>
+							<h3>
+								{ __( 'Compatibility', 'amp' ) }
+							</h3>
+							<p>
+								{ 'Lorem ipsum dolar sit amet. ' }
+								{ /* @todo Temporary URL. */ }
+								<a href="http://amp-wp.org" target="_blank" rel="noreferrer">
+									{ __( 'Learn more.', 'amp' ) }
+								</a>
+							</p>
+						</PanelRow>
+					</PanelBody>
+				</AMPNotice>
+			</Selection>
 		</form>
 	);
 }

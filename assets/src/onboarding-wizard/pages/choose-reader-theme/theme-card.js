@@ -15,7 +15,7 @@ import PropTypes from 'prop-types';
  */
 import './style.css';
 import { __ } from '@wordpress/i18n';
-import { Selectable } from '../../components/selectable';
+import { Selectable } from '../../../components/selectable';
 import { Phone } from '../../components/phone';
 import { Options } from '../../../components/options-context-provider';
 

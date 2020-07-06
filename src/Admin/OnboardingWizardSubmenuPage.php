@@ -102,7 +102,7 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 			<div>
 			<div>
 			<div>
-			<div id="<?php echo esc_attr( static::APP_ROOT_ID ); ?>"></div>
+			<div class="amp" id="<?php echo esc_attr( static::APP_ROOT_ID ); ?>"></div>
 		<?php
 
 		require_once ABSPATH . 'wp-admin/admin-footer.php';

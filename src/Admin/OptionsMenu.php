@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP\Admin;
 use AMP_Analytics_Options_Submenu;
 use AMP_Core_Theme_Sanitizer;
 use AMP_Options_Manager;
+use AMP_Reader_Themes;
 use AMP_Theme_Support;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -164,7 +165,7 @@ class OptionsMenu implements Service, Registerable {
 			AMP_Options_Manager::check_supported_post_type_update_errors();
 		}
 		?>
-		<div class="wrap">
+		<div class="wrap amp">
 			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 			<?php settings_errors(); ?>
 			<?php if ( AMP_Theme_Support::READER_MODE_SLUG === AMP_Theme_Support::get_support_mode() ) : ?>
@@ -188,9 +189,7 @@ class OptionsMenu implements Service, Registerable {
 					<?php echo wp_kses_post( $ecosystem_description ); ?>
 				</p>
 			<?php endif; ?>
-			<div id="amp-settings-welcome"></div>
-			<div id="amp-settings-template-mode"></div>
-			<div id="amp-settings-template-support"></div>
+			<div id="amp-settings-root"></div>
 		</div>
 		<?php
 	}
@@ -201,7 +200,7 @@ class OptionsMenu implements Service, Registerable {
 	 * @return string
 	 */
 	public function screen_handle() {
-		return sprintf( 'amp_page_%s', AMP_Options_Manager::OPTION_NAME );
+		return sprintf( 'toplevel_page_%s', AMP_Options_Manager::OPTION_NAME );
 	}
 
 	/**

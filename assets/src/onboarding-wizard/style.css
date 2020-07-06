@@ -4,58 +4,6 @@ body {
 }
 
 /**
- * CSS variables for the AMP setup wizard.
- */
-#amp-onboarding-wizard { /* React app root element. */
-	--stepper-max-width: 280px;
-	--setup-page-max-width: 1000px;
-	--black: #212121;
-	--brand: #2459e7;
-	--light-blue: #ceeeff;
-	--gray: #6c7781;
-	--light-gray: #e8e8e8;
-	--very-light-gray: #fafafc;
-	--white: #fff;
-	--font-noto: "Noto Sans", sans-serif;
-	--font-poppins: poppins, sans-serif;
-
-	padding-bottom: 8rem;
-}
-
-.amp-settings a {
-	color: var(--brand);
-}
-
-#amp-onboarding-wizard h1,
-#amp-onboarding-wizard h2,
-#amp-onboarding-wizard h3,
-#amp-onboarding-wizard h4,
-#amp-onboarding-wizard h5,
-#amp-onboarding-wizard h6,
-#amp-onboarding-wizard .h1,
-#amp-onboarding-wizard .h2,
-#amp-onboarding-wizard .h3,
-#amp-onboarding-wizard .h4,
-#amp-onboarding-wizard .h5,
-#amp-onboarding-wizard .h6,
-.components-button {
-	font-family: var(--font-poppins);
-}
-
-.amp-settings p {
-	font-size: 16px;
-}
-
-.amp-settings-container,
-.amp-settings-container::before,
-.amp-settings-container::after,
-.amp-settings-container *,
-.amp-settings-container *::before,
-.amp-settings-container *::after {
-	box-sizing: border-box;
-}
-
-/**
  * Buttons.
  */
 .components-button {

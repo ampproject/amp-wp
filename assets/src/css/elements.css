@@ -1,0 +1,32 @@
+.amp a {
+	color: var(--brand);
+}
+
+.amp h1,
+.amp h2,
+.amp h3,
+.amp h4,
+.amp h5,
+.amp h6,
+.amp .h1,
+.amp .h2,
+.amp .h3,
+.amp .h4,
+.amp .h5,
+.amp .h6,
+.components-button {
+	font-family: var(--font-poppins);
+}
+
+.amp p {
+	font-size: 16px;
+}
+
+.amp,
+.amp::before,
+.amp::after,
+.amp *,
+.amp *::before,
+.amp *::after {
+	box-sizing: border-box;
+}
