@@ -1413,8 +1413,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Fetch external stylesheet.
 	 *
-	 * @todo Use Cache-Control max-age for transient.
-	 *
 	 * @param string $url External stylesheet URL.
 	 * @return string|WP_Error Stylesheet contents or WP_Error.
 	 */
