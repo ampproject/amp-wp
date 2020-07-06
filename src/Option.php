@@ -98,7 +98,7 @@ interface Option {
 	 *
 	 * @var boolean
 	 */
-	const WIZARD_COMPLETED = 'wizard_completed';
+	const PLUGIN_CONFIGURED = 'plugin_configured';
 
 	/**
 	 * Suppressed plugins

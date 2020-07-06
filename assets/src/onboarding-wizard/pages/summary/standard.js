@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
  */
 import { __ } from '@wordpress/i18n';
 
-import { Standard as StandardIllustration } from '../../components/svg/standard';
+import { Standard as StandardIllustration } from '../../../components/svg/standard';
 import { SummaryHeader } from './summary-header';
 import { DesktopScreenshot } from './desktop-screenshot';
 

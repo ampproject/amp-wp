@@ -57,7 +57,7 @@ final class PluginActivationNotice implements Delayed, Service, Registerable {
 			return;
 		}
 
-		if ( AMP_Options_Manager::get_option( Option::WIZARD_COMPLETED ) ) {
+		if ( AMP_Options_Manager::get_option( Option::PLUGIN_CONFIGURED ) ) {
 			return;
 		}
 

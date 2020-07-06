@@ -75,9 +75,9 @@ class Test_PluginActivationNotice extends WP_UnitTestCase {
 	 * @covers PluginActivationNotice::render_notice
 	 */
 	public function test_notice_doesnt_show_if_wizard_completed() {
-		$original_option = AMP_Options_Manager::get_option( Option::WIZARD_COMPLETED );
+		$original_option = AMP_Options_Manager::get_option( Option::PLUGIN_CONFIGURED );
 
-		AMP_Options_Manager::update_option( Option::WIZARD_COMPLETED, true );
+		AMP_Options_Manager::update_option( Option::PLUGIN_CONFIGURED, true );
 
 		set_current_screen( 'plugins' );
 		$this->assertEmpty( get_echo( [ $this->plugin_activation_notice, 'render_notice' ] ) );
@@ -85,7 +85,7 @@ class Test_PluginActivationNotice extends WP_UnitTestCase {
 		set_current_screen( 'toplevel_page_' . AMP_Options_Manager::OPTION_NAME );
 		$this->assertEmpty( get_echo( [ $this->plugin_activation_notice, 'render_notice' ] ) );
 
-		AMP_Options_Manager::update_option( Option::WIZARD_COMPLETED, $original_option );
+		AMP_Options_Manager::update_option( Option::PLUGIN_CONFIGURED, $original_option );
 
 		$GLOBALS['current_screen'] = null;
 	}

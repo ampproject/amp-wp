@@ -68,7 +68,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 					return;
 				}
 
-				if ( fetchedOptions.wizard_completed === false ) {
+				if ( fetchedOptions.plugin_configured === false ) {
 					fetchedOptions.mobile_redirect = true;
 					fetchedOptions.reader_theme = null;
 				}
@@ -102,12 +102,12 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 
 			// If this is the first time running the wizard and mobile_redirect is not in updates, set mobile_redirect to true.
 			// We do this here instead of in the fetch effect to prevent the exit confirmation before the user has interacted.
-			if ( ! originalOptions.wizard_completed && ! ( 'mobile_redirect' in updatesToSave ) ) {
+			if ( ! originalOptions.plugin_configured && ! ( 'mobile_redirect' in updatesToSave ) ) {
 				updatesToSave.mobile_redirect = true;
 			}
 
-			if ( ! originalOptions.wizard_completed ) {
-				updatesToSave.wizard_completed = true;
+			if ( ! originalOptions.plugin_configured ) {
+				updatesToSave.plugin_configured = true;
 			}
 
 			// Ensure this promise lasts at least a second so that the "Saving Options" load screen is
@@ -137,7 +137,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 
 		setDidSaveOptions( true );
 		setSavingOptions( false );
-	}, [ optionsRestEndpoint, setError, originalOptions.wizard_completed, updates ] );
+	}, [ optionsRestEndpoint, setError, originalOptions.plugin_configured, updates ] );
 
 	/**
 	 * Updates options in state.

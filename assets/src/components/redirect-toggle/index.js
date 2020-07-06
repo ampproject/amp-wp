@@ -8,7 +8,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { Options } from '../../../components/options-context-provider';
+import { Options } from '../options-context-provider';
 
 export function RedirectToggle() {
 	const { editedOptions, updateOptions } = useContext( Options );

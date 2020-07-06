@@ -162,7 +162,7 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 						'readonly' => true,
 						'format'   => 'url',
 					],
-					Option::WIZARD_COMPLETED => [
+					Option::PLUGIN_CONFIGURED => [
 						'type'    => 'boolean',
 						'default' => false,
 					],

@@ -11,7 +11,7 @@ import { useInstanceId } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import { Check } from '../svg/check';
+import { Check } from '../../../components/svg/check';
 
 /**
  * List bullet for a stepper item.

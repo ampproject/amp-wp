@@ -52,7 +52,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 			return;
 		}
 
-		if ( ! originalOptions.wizard_completed ) {
+		if ( ! originalOptions.plugin_configured ) {
 			setOriginalDeveloperToolsOption( null );
 			setDeveloperToolsOption( null );
 			return;
@@ -84,7 +84,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 
 			setFetchingUser( false );
 		} )();
-	}, [ fetchingOptions, fetchingUser, originalDeveloperToolsOption, originalOptions.wizard_completed, setError, userOptionDeveloperTools, userRestEndpoint ] );
+	}, [ fetchingOptions, fetchingUser, originalDeveloperToolsOption, originalOptions.plugin_configured, setError, userOptionDeveloperTools, userRestEndpoint ] );
 
 	/**
 	 * Sends the option back to the REST endpoint to be saved.

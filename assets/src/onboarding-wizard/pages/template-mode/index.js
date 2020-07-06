@@ -12,6 +12,7 @@ import { Loading } from '../../components/loading';
 import { User } from '../../components/user-context-provider';
 import { Options } from '../../../components/options-context-provider';
 import { ScreenUI } from './screen-ui';
+import '../../../css/template-mode-selection.css';
 
 /**
  * Screen for selecting the template mode.
@@ -63,7 +64,7 @@ export function TemplateMode() {
 			currentMode={ themeSupport }
 			currentThemeIsAmongReaderThemes={ currentTheme.is_reader_theme }
 			developerToolsOption={ developerToolsOption }
-			firstTimeInWizard={ false === originalOptions.wizard_completed }
+			firstTimeInWizard={ false === originalOptions.plugin_configured }
 			pluginIssues={ pluginIssues }
 			savedCurrentMode={ originalOptions.theme_support }
 			setCurrentMode={ ( mode ) => {

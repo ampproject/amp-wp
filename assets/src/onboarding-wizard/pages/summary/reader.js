@@ -14,12 +14,12 @@ import { useContext } from '@wordpress/element';
 import { Desktop } from '../../components/desktop';
 import { Phone } from '../../components/phone';
 import { ReaderThemes } from '../../components/reader-themes-context-provider';
-import { Reader as ReaderIllustration } from '../../components/svg/reader';
-import { AMPInfo } from '../../components/amp-info';
-import { IconDesktop } from '../../components/svg/icon-desktop';
-import { IconMobile } from '../../components/svg/icon-mobile';
+import { Reader as ReaderIllustration } from '../../../components/svg/reader';
+import { AMPInfo } from '../../../components/amp-info';
+import { IconDesktop } from '../../../components/svg/icon-desktop';
+import { IconMobile } from '../../../components/svg/icon-mobile';
 import { Options } from '../../../components/options-context-provider';
-import { RedirectToggle } from './redirect-toggle';
+import { RedirectToggle } from '../../../components/redirect-toggle';
 import { SummaryHeader } from './summary-header';
 
 /**

@@ -12,10 +12,10 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { useContext } from '@wordpress/element';
-import { Transitional as TransitionalIllustration } from '../../components/svg/transitional';
+import { Transitional as TransitionalIllustration } from '../../../components/svg/transitional';
 import { ReaderThemes } from '../../components/reader-themes-context-provider';
 import { AMPNotice, NOTICE_TYPE_INFO, NOTICE_SIZE_LARGE } from '../../components/amp-notice';
-import { RedirectToggle } from './redirect-toggle';
+import { RedirectToggle } from '../../../components/redirect-toggle';
 import { SummaryHeader } from './summary-header';
 import { DesktopScreenshot } from './desktop-screenshot';
 

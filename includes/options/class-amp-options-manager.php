@@ -32,7 +32,7 @@ class AMP_Options_Manager {
 		Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
 		Option::VERSION                 => AMP__VERSION,
 		Option::READER_THEME            => AMP_Reader_Themes::DEFAULT_READER_THEME,
-		Option::WIZARD_COMPLETED        => false,
+		Option::PLUGIN_CONFIGURED        => false,
 	];
 
 	/**
@@ -237,8 +237,8 @@ class AMP_Options_Manager {
 		}
 
 		// Validate wizard completion.
-		if ( isset( $new_options[ Option::WIZARD_COMPLETED ] ) ) {
-			$options[ Option::WIZARD_COMPLETED ] = (bool) $new_options[ OPTION::WIZARD_COMPLETED ];
+		if ( isset( $new_options[ Option::PLUGIN_CONFIGURED ] ) ) {
+			$options[ Option::PLUGIN_CONFIGURED ] = (bool) $new_options[ OPTION::PLUGIN_CONFIGURED ];
 		}
 
 		// Validate analytics.

@@ -13,8 +13,8 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
+import { WordmarkLogo } from '../components/svg/wordmark-logo';
 import { Stepper } from './components/stepper';
-import { WordmarkLogo } from './components/svg/wordmark-logo';
 import { Nav } from './components/nav';
 import { WizardUnsavedChangesWarning } from './components/unsaved-changes-warning';
 import { Navigation } from './components/navigation-context-provider';

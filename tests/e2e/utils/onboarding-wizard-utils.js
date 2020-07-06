@@ -131,7 +131,7 @@ export async function cleanUpWizard() {
 				mobile_redirect: false,
 				reader_theme: 'legacy',
 				theme_support: 'reader',
-				wizard_completed: false,
+				plugin_configured: false,
 			} } ),
 		],
 		);
