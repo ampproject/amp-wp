@@ -2213,7 +2213,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			],
 		];
 		AMP_Validation_Manager::finalize_validation( $dom );
-		$this->assertEquals( '(1 reviewed issue)', $get_small_text_content( $validity_link_element ) );
+		$this->assertEquals( '(1 issue: reviewed)', $get_small_text_content( $validity_link_element ) );
 		$this->assertStringContains( 'amp-icon amp-valid', $status_icon_element->getAttribute( 'class' ) );
 		$status_icon_element->setAttribute( 'class', $valid_class_name );
 
@@ -2317,7 +2317,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			],
 		];
 		AMP_Validation_Manager::finalize_validation( $dom );
-		$this->assertEquals( '(2 reviewed issues)', $get_small_text_content( $validity_link_element ) );
+		$this->assertEquals( '(2 issues: all reviewed)', $get_small_text_content( $validity_link_element ) );
 		$this->assertStringContains( 'amp-icon amp-valid', $status_icon_element->getAttribute( 'class' ) );
 		$status_icon_element->setAttribute( 'class', $valid_class_name );
 	}

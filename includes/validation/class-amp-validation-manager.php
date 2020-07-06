@@ -1937,17 +1937,6 @@ class AMP_Validation_Manager {
 
 		// Update the text of the link if there are validation errors.
 		if ( $unreviewed_count > 0 || $kept_count > 0 ) {
-			$text = sprintf(
-				/* translators: %s is total count of validation errors */
-				_n(
-					'%s issue:',
-					'%s issues:',
-					$total_count,
-					'amp'
-				),
-				number_format_i18n( $total_count )
-			);
-
 			$items = [];
 			if ( $unreviewed_count > 0 ) {
 				if ( $unreviewed_count === $total_count ) {
@@ -1993,20 +1982,27 @@ class AMP_Validation_Manager {
 					);
 				}
 			}
-
-			$text .= ' ' . implode( ', ', $items );
 		} else {
-			$text = sprintf(
-				/* translators: %s the total count of reviewed validation errors */
-				_n(
-					'%s reviewed issue',
-					'%s reviewed issues',
-					$total_count,
-					'amp'
-				),
-				number_format_i18n( $total_count )
+			/* translators: text is describing validation issue(s) */
+			$items[] = _n(
+				'reviewed',
+				'all reviewed',
+				$total_count,
+				'amp'
 			);
 		}
+
+		$text = sprintf(
+			/* translators: %s is total count of validation errors */
+			_n(
+				'%s issue:',
+				'%s issues:',
+				$total_count,
+				'amp'
+			),
+			number_format_i18n( $total_count )
+		);
+		$text .= ' ' . implode( ', ', $items );
 
 		$validate_link->appendChild( $dom->createTextNode( ' ' ) );
 		$small = $dom->createElement( 'small' );
