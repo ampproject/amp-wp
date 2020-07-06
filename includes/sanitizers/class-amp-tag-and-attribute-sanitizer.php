@@ -889,14 +889,21 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function get_missing_mandatory_attributes( $attr_spec, DOMElement $node ) {
 		$missing_attributes = [];
+
 		foreach ( $attr_spec as $attr_name => $attr_spec_rule_value ) {
+			if ( empty( $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY ] ) ) {
+				continue;
+			}
+
 			if ( '\u' === substr( $attr_name, 0, 2 ) ) {
 				$attr_name = html_entity_decode( '&#x' . substr( $attr_name, 2 ) . ';' ); // Probably ⚡.
 			}
+
 			if ( ! $node->hasAttribute( $attr_name ) && AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_mandatory( $node, $attr_name, $attr_spec_rule_value ) ) {
 				$missing_attributes[] = $attr_name;
 			}
 		}
+
 		return $missing_attributes;
 	}
 
