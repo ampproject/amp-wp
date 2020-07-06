@@ -440,33 +440,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test for render_welcome_notice()
-	 *
-	 * @covers AMP_Options_Manager::render_welcome_notice()
-	 */
-	public function test_render_welcome_notice() {
-		// If this is not the main 'AMP Settings' page, this should not render the notice.
-		wp_set_current_user( self::factory()->user->create() );
-		set_current_screen( 'edit.php' );
-		$output = get_echo( [ 'AMP_Options_Manager', 'render_welcome_notice' ] );
-		$this->assertEmpty( $output );
-
-		// This is the correct page, but the notice was dismissed, so it should not display.
-		$GLOBALS['current_screen']->id = 'toplevel_page_' . AMP_Options_Manager::OPTION_NAME;
-		$id                            = 'amp-welcome-notice-1';
-		update_user_meta( get_current_user_id(), 'dismissed_wp_pointers', $id );
-		$output = get_echo( [ 'AMP_Options_Manager', 'render_welcome_notice' ] );
-		$this->assertEmpty( $output );
-
-		// This is the correct page, and the notice has not been dismissed, so it should display.
-		delete_user_meta( get_current_user_id(), 'dismissed_wp_pointers' );
-		$output = get_echo( [ 'AMP_Options_Manager', 'render_welcome_notice' ] );
-		$this->assertStringContains( 'Welcome to AMP for WordPress', $output );
-		$this->assertStringContains( 'Bring the speed and features of the open source AMP project to your site, complete with the tools to support content authoring and website development.', $output );
-		$this->assertStringContains( $id, $output );
-	}
-
-	/**
 	 * Test handle_updated_theme_support_option for reader mode.
 	 *
 	 * @covers AMP_Options_Manager::handle_updated_theme_support_option()
