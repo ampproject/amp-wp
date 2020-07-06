@@ -511,7 +511,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 	 */
 	private function update_suppressed_plugins_option( $plugins ) {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
+			wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		}
 		if ( ! isset( $GLOBALS['wp_registered_settings'][ AMP_Options_Manager::OPTION_NAME ] ) ) {
 			AMP_Options_Manager::register_settings(); // Adds validate_options as filter.

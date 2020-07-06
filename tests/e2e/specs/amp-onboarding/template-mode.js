@@ -1,44 +1,85 @@
-
+/**
+ * Internal dependencies
+ */
 /**
  * WordPress dependencies
  */
-import { visitAdminPage } from '@wordpress/e2e-test-utils';
+import { moveToTemplateModeScreen, clickMode, testNextButton, testPreviousButton, cleanUpWizard } from '../../utils/onboarding-wizard-utils';
+import { installTheme } from '../../utils/install-theme';
+import { activateTheme } from '../../utils/activate-theme';
+import { deleteTheme } from '../../utils/delete-theme';
 
-describe( 'AMP wizard: template-mode', () => {
+describe( 'Template mode', () => {
 	beforeEach( async () => {
-		// Technical background must be selected.
-		await visitAdminPage( 'admin.php', 'page=amp-setup&amp-new-onboarding=1&amp-setup-screen=technical-background' );
-
-		await page.waitForSelector( 'input[type="radio"]' );
-		await page.$eval( 'input[type="radio"]', ( el ) => el.click() );
-
-		await page.waitForSelector( '.amp-setup-nav__prev-next .components-button.is-primary' );
-		await page.$eval( '.amp-setup-nav__prev-next .components-button.is-primary', ( el ) => el.click() );
+		await moveToTemplateModeScreen( { technical: true } );
 	} );
 
-	it( 'should show two options', async () => {
+	it( 'should show main page elements with nothing selected', async () => {
 		await page.waitForSelector( 'input[type="radio"]' );
 
-		const itemCount = await page.$$eval( 'input[type="radio"]', ( els ) => els.length );
+		await expect( 'input[type="radio"]' ).countToBe( 3 );
 
-		expect( itemCount ).toBe( 3 );
+		await expect( page ).not.toMatchElement( 'input[type="radio"]:checked' );
+
+		testNextButton( { text: 'Next', disabled: true } );
+		testPreviousButton( { text: 'Previous' } );
 	} );
 
 	it( 'should allow options to be selected', async () => {
-		await page.waitForSelector( 'input[type="radio"]' );
+		await clickMode( 'standard' );
+		await expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Standard' } );
 
-		let titleText;
+		await clickMode( 'transitional' );
+		await expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Transitional' } );
 
-		await page.$eval( '[for="standard-mode"]', ( el ) => el.click() );
-		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
-		expect( titleText ).toBe( 'Standard' );
+		await clickMode( 'reader' );
+		await expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Reader' } );
 
-		await page.$eval( '[for="transitional-mode"]', ( el ) => el.click() );
-		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
-		expect( titleText ).toBe( 'Transitional' );
+		testNextButton( { text: 'Next' } );
+	} );
+} );
 
-		await page.$eval( '[for="reader-mode"]', ( el ) => el.click() );
-		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
-		expect( titleText ).toBe( 'Reader' );
+describe( 'Template mode recommendations with reader theme active', () => {
+	beforeEach( async () => {
+		await activateTheme( 'twentytwenty' );
+	} );
+
+	it( 'makes correct recommendations when user is not technical and the current theme is a reader theme', async () => {
+		await moveToTemplateModeScreen( { technical: false } );
+
+		await expect( '.amp-notice--info' ).countToBe( 1 );
+		await expect( '.amp-notice--success' ).countToBe( 2 );
+	} );
+
+	it( 'makes correct recommendations when user is technical and the current theme is a reader theme', async () => {
+		await moveToTemplateModeScreen( { technical: true } );
+
+		await expect( '.amp-notice--info' ).countToBe( 1 );
+		await expect( '.amp-notice--success' ).countToBe( 2 );
+	} );
+} );
+
+describe( 'Template mode recommendations with non-reader-theme active', () => {
+	beforeAll( async () => {
+		await cleanUpWizard();
+		await installTheme( 'astra' );
+		await activateTheme( 'astra' );
+	} );
+
+	afterAll( async () => {
+		await deleteTheme( 'astra', 'twentytwenty' );
+	} );
+
+	it( 'makes correct recommendations when user is not technical and the current theme is not a reader theme', async () => {
+		await moveToTemplateModeScreen( { technical: false } );
+
+		await expect( '.amp-notice--info' ).countToBe( 2 );
+		await expect( '.amp-notice--success' ).countToBe( 1 );
+	} );
+
+	it( 'makes correct recommendations when user is technical and the current theme is not a reader theme', async () => {
+		await moveToTemplateModeScreen( { technical: true } );
+
+		await expect( '.amp-notice--info' ).countToBe( 3 );
 	} );
 } );

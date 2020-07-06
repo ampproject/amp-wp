@@ -167,6 +167,37 @@ function amp_init() {
 			}
 		}
 	);
+
+	/*
+	 * Hide admin bar if the window is inside the setup wizard iframe.
+	 *
+	 * Detects whether the current window is in an iframe with the specified `name` attribute. The iframe is created
+	 * by Preview component located in <assets/src/setup/pages/save/index.js>.
+	 */
+	add_action(
+		'wp_print_footer_scripts',
+		function() {
+			if ( ! amp_is_dev_mode() || ! is_admin_bar_showing() ) {
+				return;
+			}
+			?>
+			<script data-ampdevmode>
+				document.addEventListener( 'DOMContentLoaded', function() {
+					if ( 'amp-wizard-completion-preview' !== window.name ) {
+						return;
+					}
+
+					const adminBar = document.getElementById( 'wpadminbar' );
+					if ( adminBar ) {
+						document.body.classList.remove( 'admin-bar' );
+						document.documentElement.style.cssText += '; margin-top: 0 !important';
+						adminBar.remove();
+					}
+				});
+			</script>
+			<?php
+		}
+	);
 }
 
 /**
@@ -1287,7 +1318,7 @@ function amp_is_dev_mode() {
 			// For the few sites that forcibly show the admin bar even when the user is logged out, only enable dev
 			// mode if the user is actually logged in. This prevents the dev mode from being served to crawlers
 			// when they index the AMP version. The theme support check disables dev mode in Reader mode.
-			( is_admin_bar_showing() && is_user_logged_in() && current_theme_supports( 'amp' ) )
+			( is_admin_bar_showing() && is_user_logged_in() )
 			||
 			is_customize_preview()
 		)
@@ -1429,11 +1460,19 @@ function amp_get_content_sanitizers( $post = null ) {
 		 * @param string[] $element_xpaths XPath element queries. Context is the root element.
 		 */
 		$dev_mode_xpaths = (array) apply_filters( 'amp_dev_mode_element_xpaths', [] );
+
 		if ( is_admin_bar_showing() ) {
 			$dev_mode_xpaths[] = '//*[ @id = "wpadminbar" ]';
 			$dev_mode_xpaths[] = '//*[ @id = "wpadminbar" ]//*';
 			$dev_mode_xpaths[] = '//style[ @id = "admin-bar-inline-css" ]';
 		}
+
+		if ( is_customize_preview() ) {
+			// Scripts are always needed to inject changeset UUID.
+			$dev_mode_xpaths[] = '//script[ @src ]';
+			$dev_mode_xpaths[] = '//script[ not( @type ) or @type = "text/javascript" ]';
+		}
+
 		$sanitizers = array_merge(
 			[
 				'AMP_Dev_Mode_Sanitizer' => [

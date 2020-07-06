@@ -317,9 +317,6 @@ class AMP_Theme_Support {
 				]
 			);
 			self::$support_added_via_option = $is_paired ? self::TRANSITIONAL_MODE_SLUG : self::STANDARD_MODE_SLUG;
-		} elseif ( true === AMP_Validation_Manager::should_validate_response() ) { // @todo Eventually reader mode should allow for validate requests.
-			self::$support_added_via_option = self::STANDARD_MODE_SLUG;
-			add_theme_support( self::SLUG );
 		}
 	}
 
@@ -419,10 +416,8 @@ class AMP_Theme_Support {
 
 		self::add_hooks();
 		self::$sanitizer_classes = amp_get_content_sanitizers();
-		if ( ! $is_reader_mode ) {
-			self::$sanitizer_classes = AMP_Validation_Manager::filter_sanitizer_args( self::$sanitizer_classes );
-		}
-		self::$embed_handlers = self::register_content_embed_handlers();
+		self::$sanitizer_classes = AMP_Validation_Manager::filter_sanitizer_args( self::$sanitizer_classes );
+		self::$embed_handlers    = self::register_content_embed_handlers();
 		self::$sanitizer_classes['AMP_Embed_Sanitizer']['embed_handlers'] = self::$embed_handlers;
 
 		foreach ( self::$sanitizer_classes as $sanitizer_class => $args ) {
@@ -1077,6 +1072,9 @@ class AMP_Theme_Support {
 		add_action( 'wp_enqueue_scripts', [ __CLASS__, 'enqueue_assets' ], 0 ); // Enqueue before theme's styles.
 		add_action( 'wp_enqueue_scripts', [ __CLASS__, 'dequeue_customize_preview_scripts' ], 1000 );
 		add_filter( 'customize_partial_render', [ __CLASS__, 'filter_customize_partial_render' ] );
+		if ( is_customize_preview() ) {
+			add_filter( 'style_loader_tag', [ __CLASS__, 'filter_customize_preview_style_loader_tag' ], 10, 2 );
+		}
 
 		add_action( 'wp_footer', 'amp_print_analytics' );
 
@@ -1566,6 +1564,28 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Add data-ampdevmode attribute to any enqueued style that depends on the `customizer-preview` handle.
+	 *
+	 * @since 1.6
+	 *
+	 * @param string $tag    The link tag for the enqueued style.
+	 * @param string $handle The style's registered handle.
+	 * @return string Tag.
+	 */
+	public static function filter_customize_preview_style_loader_tag( $tag, $handle ) {
+		$customize_preview = 'customize-preview';
+		if (
+			is_array( wp_styles()->registered[ $customize_preview ]->deps ) && in_array( $handle, wp_styles()->registered[ $customize_preview ]->deps, true )
+				? self::is_exclusively_dependent( wp_styles(), $handle, $customize_preview )
+				: self::has_dependency( wp_styles(), $handle, $customize_preview )
+		) {
+			$tag = preg_replace( '/(?<=<link)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
+		}
+
+		return $tag;
+	}
+
+	/**
 	 * Add data-ampdevmode attribute to any enqueued script that depends on the admin-bar.
 	 *
 	 * @since 1.3
@@ -1900,8 +1920,6 @@ class AMP_Theme_Support {
 			$args = [
 				'content_max_width'    => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
 				'use_document_element' => false,
-				'allow_dirty_styles'   => true,
-				'allow_dirty_scripts'  => false,
 			];
 			AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args ); // @todo Include script assets in response?
 			$partial = AMP_DOM_Utils::get_content_from_dom( $dom );
@@ -1971,13 +1989,10 @@ class AMP_Theme_Support {
 			header( 'Content-Type: text/html; charset=utf-8' );
 		}
 
-		// @todo Both allow_dirty_styles and allow_dirty_scripts should eventually use AMP dev mode instead.
 		$args = array_merge(
 			[
 				'content_max_width'    => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
 				'use_document_element' => true,
-				'allow_dirty_styles'   => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcuts).
-				'allow_dirty_scripts'  => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
 				'user_can_validate'    => AMP_Validation_Manager::has_cap(),
 			],
 			$args

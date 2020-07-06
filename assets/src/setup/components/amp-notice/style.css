@@ -1,10 +1,13 @@
 .amp-notice {
 	border-radius: 12px;
 	display: flex;
+	font-size: 13px;
+	line-height: 1.85;
 }
 
 .amp-notice__body {
 	flex-grow: 1;
+	text-align: left;
 }
 
 .amp-notice--success {
@@ -31,25 +34,18 @@
 }
 
 .amp-notice--large {
-	padding: 0.5rem 1rem 0.5rem 0.5rem;
+	padding: 0.5rem 1.125rem 0.5rem 0.5rem;
 }
 
 .amp-notice--large .amp-notice__icon {
 	margin-top: 0.5rem;
+	margin-left: 0.5rem;
 }
 
 .amp-notice--large svg {
 	flex-grow: 0;
 	margin-right: 1rem;
-	height: 42px;
-	width: 42px;
+	height: 30px;
+	width: 30px;
 }
 
-.amp-notice--large.amp-notice--success .amp-notice__icon {
-	padding: 7px;
-}
-
-.amp-notice--large.amp-notice--success svg {
-	height: 35px;
-	width: 35px;
-}

@@ -8,7 +8,17 @@ import '@wordpress/components/build-style/style.css';
 /**
  * External dependencies
  */
-import { APP_ROOT_ID, EXIT_LINK, OPTIONS_REST_ENDPOINT, READER_THEMES_REST_ENDPOINT, UPDATES_NONCE, USER_FIELD_DEVELOPER_TOOLS_ENABLED, USER_REST_ENDPOINT } from 'amp-setup'; // From WP inline script.
+import {
+	APP_ROOT_ID,
+	CLOSE_LINK,
+	CURRENT_THEME,
+	FINISH_LINK,
+	OPTIONS_REST_ENDPOINT,
+	READER_THEMES_REST_ENDPOINT,
+	UPDATES_NONCE,
+	USER_FIELD_DEVELOPER_TOOLS_ENABLED,
+	USER_REST_ENDPOINT,
+} from 'amp-setup'; // From WP inline script.
 import PropTypes from 'prop-types';
 
 /**
@@ -37,23 +47,25 @@ export function Providers( { children } ) {
 		<OptionsContextProvider
 			optionsRestEndpoint={ OPTIONS_REST_ENDPOINT }
 		>
-			<NavigationContextProvider pages={ PAGES }>
-				<ReaderThemesContextProvider
-					wpAjaxUrl={ wpAjaxUrl }
-					readerThemesEndpoint={ READER_THEMES_REST_ENDPOINT }
-					updatesNonce={ UPDATES_NONCE }
-				>
-					<UserContextProvider
-						userOptionDeveloperTools={ USER_FIELD_DEVELOPER_TOOLS_ENABLED }
-						userRestEndpoint={ USER_REST_ENDPOINT }
+			<UserContextProvider
+				userOptionDeveloperTools={ USER_FIELD_DEVELOPER_TOOLS_ENABLED }
+				userRestEndpoint={ USER_REST_ENDPOINT }
+			>
+				<NavigationContextProvider pages={ PAGES }>
+					<ReaderThemesContextProvider
+						currentTheme={ CURRENT_THEME }
+						wpAjaxUrl={ wpAjaxUrl }
+						readerThemesEndpoint={ READER_THEMES_REST_ENDPOINT }
+						updatesNonce={ UPDATES_NONCE }
 					>
+
 						<SiteScanContextProvider>
 							{ children }
 						</SiteScanContextProvider>
-					</UserContextProvider>
 
-				</ReaderThemesContextProvider>
-			</NavigationContextProvider>
+					</ReaderThemesContextProvider>
+				</NavigationContextProvider>
+			</UserContextProvider>
 		</OptionsContextProvider>
 	);
 }
@@ -87,7 +99,7 @@ class ErrorBoundary extends Component {
 
 		if ( error ) {
 			return (
-				<ErrorScreen error={ error } exitLink={ EXIT_LINK } />
+				<ErrorScreen error={ error } finishLink={ FINISH_LINK } />
 			);
 		}
 
@@ -102,7 +114,7 @@ domReady( () => {
 		render(
 			<ErrorBoundary>
 				<Providers>
-					<SetupWizard exitLink={ EXIT_LINK } />
+					<SetupWizard closeLink={ CLOSE_LINK } finishLink={ FINISH_LINK } />
 				</Providers>
 			</ErrorBoundary>,
 			root,

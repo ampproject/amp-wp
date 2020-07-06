@@ -3,24 +3,28 @@
  */
 .amp-setup-nav {
 	align-items: center;
-	background: linear-gradient(0deg, #fff 64.06%, rgba(255, 255, 255, 0.8) 99.99%, rgba(255, 255, 255, 0.8) 100%);
+	background: var(--white);
 	bottom: 0;
+	box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.05);
 	display: flex;
 	justify-content: flex-end;
 	left: 0;
 	position: fixed;
 	right: 0;
+	z-index: 2;
 }
 
 .amp-setup-nav__inner {
 	align-items: center;
 	display: flex;
 	justify-content: space-between;
+	margin: 0 auto;
+	max-width: 1320px;
 	padding: 15px;
 	width: 100%;
 
 	@media screen and (min-width: 783px) {
-		padding: 40px 30px;
+		padding: 40px 90px;
 	}
 }
 
@@ -45,10 +49,19 @@
 	}
 }
 
+.amp-setup-nav__prev {
+	margin-right: 5px;
+}
+
 .amp-setup-nav__prev svg {
 	transform: rotate(180deg);
 	margin-left: 0;
 	margin-right: 0.5rem;
+}
+
+.amp-setup-nav__close {
+	align-items: center;
+	display: flex;
 }
 
 .amp-setup-nav__close svg {

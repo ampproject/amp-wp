@@ -48,6 +48,7 @@ export const PAGES = [
 		slug: 'done',
 		title: __( 'Done', 'amp' ),
 		PageComponent: Save,
+		showTitle: false,
 	},
 ];
 

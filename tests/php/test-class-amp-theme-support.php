@@ -228,15 +228,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertNull( AMP_Theme_Support::get_support_mode_added_via_theme() );
 		$this->assertSame( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG, AMP_Theme_Support::get_support_mode_added_via_option() );
 		$this->assertTrue( current_theme_supports( AMP_Theme_Support::SLUG ) );
-
-		// Test that forced validation works.
-		remove_theme_support( AMP_Theme_Support::SLUG );
-		delete_option( AMP_Options_Manager::OPTION_NAME );
-		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = AMP_Validation_Manager::get_amp_validate_nonce();
-		AMP_Theme_Support::read_theme_support();
-		$this->assertSame( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Theme_Support::get_support_mode_added_via_option() );
-		$this->assertNull( AMP_Theme_Support::get_support_mode_added_via_theme() );
-		$this->assertTrue( get_theme_support( AMP_Theme_Support::SLUG ) );
 	}
 
 	/**
@@ -335,7 +326,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::finish_init()
 	 */
 	public function test_finish_init_when_accessing_singular_post_that_does_not_support_amp() {
-		$post          = $this->factory()->post->create();
+		$post          = self::factory()->post->create();
 		$requested_url = get_permalink( $post );
 		$this->assertEquals( AMP_Theme_Support::READER_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
 		$this->assertTrue( post_supports_amp( $post ) );
@@ -1949,6 +1940,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_prepare_response() {
 		add_theme_support( 'amp' );
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		add_filter(
 			'home_url',
@@ -2065,6 +2057,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
 	public function test_prepare_response_standard_mode_non_amp() {
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		add_filter( 'amp_dev_mode_enabled', '__return_false' );
 		wp();
 		$original_html = $this->get_original_html();
 		add_filter( 'amp_validation_error_sanitized', '__return_false' ); // For testing purpose only. This should not normally be done.

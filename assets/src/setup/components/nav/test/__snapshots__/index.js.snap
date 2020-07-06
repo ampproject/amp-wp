@@ -12,7 +12,7 @@ exports[`Nav matches snapshot 1`] = `
     >
       <a
         className="components-button is-link"
-        href="http://site.test"
+        href="http://site.test/wp-admin"
       >
         <svg
           fill="none"
@@ -61,7 +61,7 @@ exports[`Nav matches snapshot 1`] = `
       </span>
       <button
         className="components-button is-primary"
-        disabled={true}
+        disabled={false}
         onClick={[Function]}
         type="button"
       >

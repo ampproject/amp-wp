@@ -1,33 +1,37 @@
-
 /**
- * WordPress dependencies
+ * Internal dependencies
  */
-import { visitAdminPage } from '@wordpress/e2e-test-utils';
+import { moveToTechnicalScreen, testTitle, testNextButton, testPreviousButton } from '../../utils/onboarding-wizard-utils';
 
-describe( 'AMP wizard: technical background', () => {
-	beforeEach( async () => {
-		await visitAdminPage( 'admin.php', 'page=amp-setup&amp-new-onboarding=1&amp-setup-screen=technical-background' );
+describe( 'Technical background', () => {
+	it( 'main components exist', async () => {
+		await moveToTechnicalScreen();
+
+		await testTitle( { text: 'Are you technical?' } );
+
+		await expect( page ).toMatchElement( 'p', { text: /^In order to/ } );
+
+		testNextButton( { text: 'Next', disabled: true } );
+		testPreviousButton( { text: 'Previous' } );
 	} );
 
-	it( 'should show two options', async () => {
+	it( 'should show two options, none checked', async () => {
 		await page.waitForSelector( 'input[type="radio"]' );
 
-		const itemCount = await page.$$eval( 'input[type="radio"]', ( els ) => els.length );
+		await expect( 'input[type="radio"]' ).countToBe( 2 );
 
-		expect( itemCount ).toBe( 2 );
+		await expect( page ).not.toMatchElement( 'input[type="radio"]:checked' );
 	} );
 
-	it( 'should allow options to be selected', async () => {
+	it( 'should allow options to be selected, then enable next button', async () => {
 		await page.waitForSelector( 'input[type="radio"]' );
 
-		let titleText;
+		await expect( page ).toClick( 'label', { text: /Developer or technically savvy/ } );
+		await expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Developer or technically savvy' } );
 
-		await page.$eval( '[for="technical-background-enable"]', ( el ) => el.click() );
-		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
-		expect( titleText ).toBe( 'Developer or technically savvy' );
+		await expect( page ).toClick( 'label', { text: /Non-technically savvy/ } );
+		await expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Non-technically savvy or wanting a simpler setup' } );
 
-		await page.$eval( '[for="technical-background-disable"]', ( el ) => el.click() );
-		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
-		expect( titleText ).toBe( 'Non-technically savvy or wanting a simpler setup' );
+		testNextButton( { text: 'Next', disabled: false } );
 	} );
 } );

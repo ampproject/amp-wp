@@ -21,7 +21,7 @@ import { Check } from '../svg/check';
  * @param {number} props.index The index of the item being rendered.
  */
 export function StepperBullet( { activePageIndex, index } ) {
-	const isCheckMark = index === 0;
+	const isCheckMark = activePageIndex > index;
 	const isCurrent = ( ! isCheckMark ) && activePageIndex === index;
 
 	if ( isCheckMark ) {
@@ -67,7 +67,7 @@ export function Stepper( { activePageIndex, pages } ) {
 			<ul>
 				{ pages.map( ( { title }, index ) => (
 					<li
-						className={ `amp-stepper__item ${ index === activePageIndex ? 'amp-stepper__item--active' : '' }` }
+						className={ `amp-stepper__item ${ index === activePageIndex ? 'amp-stepper__item--active' : '' } ${ activePageIndex > index ? 'amp-stepper__item--done' : '' }` }
 						key={ `${ instanceId }-${ index }` }
 					>
 						<StepperBullet activePageIndex={ activePageIndex } index={ index } />
