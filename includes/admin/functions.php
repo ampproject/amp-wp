@@ -117,30 +117,6 @@ function amp_add_customizer_link() {
 }
 
 /**
- * Registers AMP settings.
- */
-function amp_add_options_menu() {
-	if ( ! is_admin() ) {
-		return;
-	}
-
-	/**
-	 * Filter whether to enable the AMP settings.
-	 *
-	 * @since 0.5
-	 * @param bool $enable Whether to enable the AMP settings. Default true.
-	 */
-	$short_circuit = apply_filters( 'amp_options_menu_is_enabled', true );
-
-	if ( true !== $short_circuit ) {
-		return;
-	}
-
-	$amp_options = new AMP_Options_Menu();
-	$amp_options->init();
-}
-
-/**
  * Add custom analytics.
  *
  * This is currently only used for legacy AMP post templates.

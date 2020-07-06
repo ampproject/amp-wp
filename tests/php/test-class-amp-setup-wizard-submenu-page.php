@@ -1,29 +1,30 @@
 <?php
 /**
- * Tests for AMP_Setup_Wizard_Submenu_Page class.
+ * Tests for OnboardingWizardSubmenuPage class.
  *
  * @package AMP
  */
 
+use AmpProject\AmpWP\Admin\OnboardingWizardSubmenuPage;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 
 /**
- * Tests for AMP_Setup_Wizard_Submenu_Page class.
+ * Tests for OnboardingWizardSubmenuPage class.
  *
  * @group setup
  *
  * @since 1.6.0
  *
- * @covers AMP_Setup_Wizard_Submenu
+ * @covers OnboardingWizardSubmenu
  */
-class Test_AMP_Setup_Wizard_Submenu_Page extends WP_UnitTestCase {
+class Test_OnboardingWizardSubmenuPage extends WP_UnitTestCase {
 
 	use AssertContainsCompatibility;
 
 	/**
 	 * Test instance.
 	 *
-	 * @var AMP_Setup_Wizard_Submenu_Page
+	 * @var OnboardingWizardSubmenuPage
 	 */
 	private $page;
 
@@ -35,13 +36,13 @@ class Test_AMP_Setup_Wizard_Submenu_Page extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
-		$this->page = new AMP_Setup_Wizard_Submenu_Page();
+		$this->page = new OnboardingWizardSubmenuPage();
 	}
 
 	/**
-	 * Tests AMP_Setup_Wizard_Submenu_Page::init
+	 * Tests OnboardingWizardSubmenuPage::init
 	 *
-	 * @covers AMP_Setup_Wizard_Submenu_Page::init
+	 * @covers OnboardingWizardSubmenuPage::init
 	 */
 	public function test_init() {
 		$this->page->init();
@@ -51,34 +52,34 @@ class Test_AMP_Setup_Wizard_Submenu_Page extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests AMP_Setup_Wizard_Submenu_Page::render
+	 * Tests OnboardingWizardSubmenuPage::render
 	 *
-	 * @covers AMP_Setup_Wizard_Submenu_Page::render
+	 * @covers OnboardingWizardSubmenuPage::render
 	 */
 	public function test_render() {
 		ob_start();
 
 		$this->page->render();
 
-		$this->assertStringContains( '<div id="amp-setup"></div>', ob_get_clean() );
+		$this->assertStringContains( '<div id="amp-settings"></div>', ob_get_clean() );
 	}
 
 	/**
-	 * Tests AMP_Setup_Wizard_Submenu_Page::screen_handle
+	 * Tests OnboardingWizardSubmenuPage::screen_handle
 	 *
-	 * @covers AMP_Setup_Wizard_Submenu_Page::screen_handle
+	 * @covers OnboardingWizardSubmenuPage::screen_handle
 	 */
 	public function test_screen_handle() {
 		$this->assertEquals( $this->page->screen_handle(), 'amp_page_amp-setup' );
 	}
 
 	/**
-	 * Tests AMP_Setup_Wizard_Submenu_Page::enqueue_assets
+	 * Tests OnboardingWizardSubmenuPage::enqueue_assets
 	 *
-	 * @covers AMP_Setup_Wizard_Submenu_Page::enqueue_assets
+	 * @covers OnboardingWizardSubmenuPage::enqueue_assets
 	 */
 	public function test_enqueue_assets() {
-		$handle = 'amp-setup';
+		$handle = 'amp-settings';
 
 		$this->page->enqueue_assets( $this->page->screen_handle() );
 		$this->assertTrue( wp_script_is( $handle ) );

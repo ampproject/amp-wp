@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\Admin\DevToolsUserAccess;
+use AmpProject\AmpWP\Admin\OptionsMenu;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\Option;
@@ -177,7 +178,7 @@ class AMP_Validated_URL_Post_Type {
 					foreach ( $menu as &$menu_item ) {
 						if ( 'edit.php?post_type=' . self::POST_TYPE_SLUG === $menu_item[2] ) {
 							$menu_item[0] = esc_html__( 'AMP DevTools', 'amp' );
-							$menu_item[6] = AMP_Options_Menu::ICON_BASE64_SVG;
+							$menu_item[6] = OptionsMenu::ICON_BASE64_SVG;
 							break;
 						}
 					}

@@ -8,6 +8,10 @@
 namespace AmpProject\AmpWP;
 
 use AmpProject\AmpWP\Admin\DevToolsUserAccess;
+use AmpProject\AmpWP\Admin\GoogleFonts;
+use AmpProject\AmpWP\Admin\OnboardingWizardSubmenu;
+use AmpProject\AmpWP\Admin\OnboardingWizardSubmenuPage;
+use AmpProject\AmpWP\Admin\OptionsMenu;
 use AmpProject\AmpWP\Admin\PluginActivationNotice;
 use AmpProject\AmpWP\Admin\ReenableCssTransientCachingAjaxAction;
 use AmpProject\AmpWP\Admin\SiteHealth;
@@ -62,6 +66,10 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			'plugin_registry'                  => PluginRegistry::class,
 			'plugin_suppression'               => PluginSuppression::class,
 			'mobile_redirection'               => MobileRedirection::class,
+			'admin.google_fonts'               => GoogleFonts::class,
+			'admin.options_menu'               => OptionsMenu::class,
+			'admin.onboarding_menu'            => OnboardingWizardSubmenu::class,
+			'admin.onboarding_wizard'          => OnboardingWizardSubmenuPage::class,
 		];
 	}
 

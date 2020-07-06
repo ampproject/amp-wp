@@ -224,12 +224,61 @@ const wpPolyfills = {
 const setup = {
 	...sharedConfig,
 	entry: {
-		'amp-setup': [
-			'./assets/src/setup',
+		'amp-onboarding-wizard': [
+			'./assets/src/onboarding-wizard',
 		],
 	},
 	externals: {
-		'amp-setup': 'ampSetup',
+		'amp-onboarding-wizard': 'ampOnboardingWizard',
+	},
+	plugins: [
+		...sharedConfig.plugins.filter(
+			( plugin ) => plugin.constructor.name !== 'DependencyExtractionWebpackPlugin',
+		),
+		new DependencyExtractionWebpackPlugin( {
+			useDefaults: false,
+			// Most dependencies will be bundled for the AMP setup screen for compatibility across WP versions.
+			requestToHandle: ( handle ) => {
+				switch ( handle ) {
+					case '@wordpress/api-fetch':
+					case '@wordpress/dom-ready':
+					case '@wordpress/html-entities':
+					case '@wordpress/url':
+						return defaultRequestToHandle( handle );
+
+					default:
+						return undefined;
+				}
+			},
+			requestToExternal: ( external ) => {
+				switch ( external ) {
+					case '@wordpress/api-fetch':
+					case '@wordpress/dom-ready':
+					case '@wordpress/html-entities':
+					case '@wordpress/url':
+						return defaultRequestToExternal( external );
+
+					default:
+						return undefined;
+				}
+			},
+		} ),
+		new WebpackBar( {
+			name: 'Onboarding wizard',
+			color: '#1773a8',
+		} ),
+	],
+};
+
+const settingsPage = {
+	...sharedConfig,
+	entry: {
+		'amp-settings': [
+			'./assets/src/settings-page',
+		],
+	},
+	externals: {
+		'amp-settings': 'ampSettings',
 	},
 	plugins: [
 		...sharedConfig.plugins.filter(
@@ -262,8 +311,8 @@ const setup = {
 			},
 		} ),
 		new WebpackBar( {
-			name: 'Setup',
-			color: '#1773a8',
+			name: 'Settings page',
+			color: '#67b255',
 		} ),
 	],
 };
@@ -291,5 +340,6 @@ module.exports = [
 	customizer,
 	wpPolyfills,
 	setup,
+	settingsPage,
 	mobileRedirection,
 ];

@@ -1,25 +1,27 @@
 <?php
 /**
- * Tests for AMP_Setup_Wizard_Submenu class.
+ * Tests for OnboardingWizardSubmenu class.
  *
  * @package AMP
  */
 
+use AmpProject\AmpWP\Admin\OnboardingWizardSubmenu;
+
 /**
- * Tests for AMP_Setup_Wizard_Submenu  class.
+ * Tests for OnboardingWizardSubmenu  class.
  *
  * @group setup
  *
  * @since 1.6.0
  *
- * @covers AMP_Setup_Wizard_Submenu
+ * @covers OnboardingWizardSubmenu
  */
-class Test_AMP_Setup_Wizard_Submenu  extends WP_UnitTestCase {
+class Test_OnboardingWizardSubmenu  extends WP_UnitTestCase {
 
 	/**
 	 * Test instance.
 	 *
-	 * @var AMP_Setup_Wizard_Submenu
+	 * @var OnboardingWizardSubmenu
 	 */
 	private $wizard;
 
@@ -31,21 +33,21 @@ class Test_AMP_Setup_Wizard_Submenu  extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
-		$this->wizard = new AMP_Setup_Wizard_Submenu( 'amp-options' );
+		$this->wizard = new OnboardingWizardSubmenu();
 	}
 
 	/**
-	 * Tests AMP_Setup_Wizard_Submenu::init
+	 * Tests OnboardingWizardSubmenu::register
 	 *
-	 * @covers AMP_Setup_Wizard_Submenu::init
+	 * @covers OnboardingWizardSubmenu::register
 	 */
 	public function test_init() {
 		global $submenu;
 
-		wp_set_current_user( 1 );
+		wp_set_current_user( 1 ); 
 
-		$this->wizard->init();
+		$this->wizard->register();
 
-		$this->assertEquals( end( $submenu['amp-options'] )[2], 'amp-setup' );
+		$this->assertEquals( end( $submenu['amp-options'] )[2], 'amp-onboarding-wizard' );
 	}
 }

@@ -101,7 +101,6 @@ function amp_init() {
 	add_action( 'admin_init', 'AMP_Options_Manager::init' );
 	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
 	add_action( 'rest_api_init', 'AMP_Options_Manager::register_settings' );
-	add_action( 'wp_loaded', 'amp_add_options_menu' );
 	add_action( 'wp_loaded', 'amp_bootstrap_admin' );
 
 	add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );

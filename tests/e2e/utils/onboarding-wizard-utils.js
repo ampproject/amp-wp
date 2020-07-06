@@ -3,8 +3,8 @@
  */
 import { visitAdminPage } from '@wordpress/e2e-test-utils/build/visit-admin-page';
 
-export const NEXT_BUTTON_SELECTOR = '.amp-setup-nav__prev-next button.is-primary';
-export const PREV_BUTTON_SELECTOR = '.amp-setup-nav__prev-next button:not(.is-primary)';
+export const NEXT_BUTTON_SELECTOR = '.amp-settings-nav__prev-next button.is-primary';
+export const PREV_BUTTON_SELECTOR = '.amp-settings-nav__prev-next button:not(.is-primary)';
 
 export async function clickNextButton() {
 	await page.waitForSelector( `${ NEXT_BUTTON_SELECTOR }:not([disabled])` );
@@ -17,7 +17,7 @@ export async function clickPrevButton() {
 }
 
 export async function moveToTechnicalScreen() {
-	await visitAdminPage( 'admin.php', 'page=amp-setup' );
+	await visitAdminPage( 'admin.php', 'page=amp-settings' );
 	await clickNextButton();
 	await page.waitForSelector( '.technical-background-option' );
 }

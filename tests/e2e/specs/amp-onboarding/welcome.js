@@ -10,8 +10,8 @@ import { testPreviousButton, testNextButton } from '../../utils/onboarding-wizar
 
 describe( 'welcome', () => {
 	beforeEach( async () => {
-		await visitAdminPage( 'admin.php', 'page=amp-setup' );
-		await page.waitForSelector( '.amp-setup-nav__prev-next' );
+		await visitAdminPage( 'admin.php', 'page=amp-settings' );
+		await page.waitForSelector( '.amp-settings-nav__prev-next' );
 	} );
 
 	it( 'should contain content', async () => {
