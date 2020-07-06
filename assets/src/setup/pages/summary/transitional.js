@@ -11,7 +11,10 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
+import { useContext } from '@wordpress/element';
 import { Transitional as TransitionalIllustration } from '../../components/svg/transitional';
+import { ReaderThemes } from '../../components/reader-themes-context-provider';
+import { AMPNotice, NOTICE_TYPE_INFO, NOTICE_SIZE_LARGE } from '../../components/amp-notice';
 import { RedirectToggle } from './redirect-toggle';
 import { SummaryHeader } from './summary-header';
 import { DesktopScreenshot } from './desktop-screenshot';
@@ -23,8 +26,15 @@ import { DesktopScreenshot } from './desktop-screenshot';
  * @param {Object} props.currentTheme Data for the theme currently active on the site.
  */
 export function Transitional( { currentTheme } ) {
+	const { readerModeWasOverridden } = useContext( ReaderThemes );
+
 	return (
 		<>
+			{ readerModeWasOverridden && (
+				<AMPNotice type={ NOTICE_TYPE_INFO } size={ NOTICE_SIZE_LARGE }>
+					{ __( 'Because you selected a Reader theme that is the same as your site\'s active theme, your site has automatically been switched to Transitional template mode.', 'amp' ) }
+				</AMPNotice>
+			) }
 			<SummaryHeader
 				illustration={ <TransitionalIllustration /> }
 				title={ __( 'Transitional', 'amp' ) }

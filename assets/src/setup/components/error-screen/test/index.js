@@ -12,7 +12,7 @@ import { ErrorScreen } from '..';
 describe( 'ErrorScreen', () => {
 	it( 'matches snapshot', () => {
 		const wrapper = create(
-			<ErrorScreen exitLink={ 'http://my-exit-link.com' } error={ { message: 'The application failed' } } />,
+			<ErrorScreen finishLink={ 'http://my-exit-link.com' } error={ { message: 'The application failed' } } />,
 		);
 		expect( wrapper.toJSON() ).toMatchSnapshot();
 	} );

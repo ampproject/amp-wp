@@ -3,6 +3,10 @@
 	padding: 40px 30px;
 }
 
+.summary .amp-notice {
+	margin-bottom: 1.5rem;
+}
+
 /**
  * Reader-specific styles.
  */
