@@ -416,7 +416,7 @@ class AMP_Validation_Manager {
 		$validate_item = [
 			'parent' => 'amp',
 			'id'     => 'amp-validity',
-			'title'  => esc_html__( 'Validate', 'amp' ),
+			'title'  => esc_html__( 'Validate URL', 'amp' ),
 			'href'   => esc_url( $validate_url ),
 		];
 
@@ -1935,17 +1935,6 @@ class AMP_Validation_Manager {
 			$admin_bar_icon->setAttribute( 'class', 'ab-icon amp-icon ' . Icon::WARNING );
 		}
 
-		$text = sprintf(
-			/* translators: %s is total count of validation errors */
-			_n(
-				'Validate %s issue',
-				'Validate %s issues',
-				$total_count,
-				'amp'
-			),
-			number_format_i18n( $total_count )
-		);
-
 		$items = [];
 		if ( $unreviewed_count > 0 ) {
 			$items[] = sprintf(
@@ -1974,10 +1963,17 @@ class AMP_Validation_Manager {
 
 		// Update the text of the link if there are validation errors.
 		if ( $items ) {
-			$text .= sprintf( ' (%s)', implode( ', ', $items ) );
-			if ( $validate_link->firstChild instanceof DOMText ) {
-				$validate_link->firstChild->nodeValue = $text;
-			}
+			$text = sprintf(
+				/* translators: %s is total count of validation errors */
+				_n(
+					'(%s issue)',
+					'(%s issues)',
+					$total_count,
+					'amp'
+				),
+				number_format_i18n( $total_count )
+			);
+			$validate_link->appendChild( $dom->createTextNode( ' ' . $text ) );
 		}
 	}
 
