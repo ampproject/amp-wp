@@ -102,8 +102,8 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 
 			// If this is the first time running the wizard and mobile_redirect is not in updates, set mobile_redirect to true.
 			// We do this here instead of in the fetch effect to prevent the exit confirmation before the user has interacted.
-			if ( ! originalOptions.plugin_configured && ! ( 'mobile_redirect' in updatesToSave ) ) {
-				updatesToSave.mobile_redirect = true;
+			if ( ! originalOptions.wizard_completed && ! ( 'mobile_redirect' in updatesToSave ) ) {
+				updatesToSave.mobile_redirect = originalOptions.mobile_redirect;
 			}
 
 			if ( ! originalOptions.plugin_configured ) {
@@ -137,7 +137,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 
 		setDidSaveOptions( true );
 		setSavingOptions( false );
-	}, [ optionsRestEndpoint, setError, originalOptions.plugin_configured, updates ] );
+	}, [ optionsRestEndpoint, setError, originalOptions, updates ] );
 
 	/**
 	 * Updates options in state.
