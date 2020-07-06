@@ -72,6 +72,10 @@ final class AMP_Setup_Wizard_Submenu_Page {
 			<div>
 			<div>
 			<div id="<?php echo esc_attr( static::APP_ROOT_ID ); ?>"></div>
+
+			<style>
+			#wpfooter { display:none; }
+			</style>
 		<?php
 
 		require_once ABSPATH . 'wp-admin/admin-footer.php';
