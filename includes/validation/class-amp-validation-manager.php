@@ -1852,7 +1852,7 @@ class AMP_Validation_Manager {
 		 * Override AMP status in admin bar set in \AMP_Validation_Manager::add_admin_bar_menu_items()
 		 * when there are validation errors which have not been explicitly accepted.
 		 */
-		if ( is_admin_bar_showing() && self::$amp_admin_bar_item_added ) {
+		if ( is_admin_bar_showing() && self::$amp_admin_bar_item_added && $total_count > 0 ) {
 			self::update_admin_bar_item( $dom, $total_count, $kept_count, $unreviewed_count );
 		}
 
@@ -1900,7 +1900,7 @@ class AMP_Validation_Manager {
 	 * when there are validation errors which have not been explicitly accepted.
 	 *
 	 * @param Document $dom              Document.
-	 * @param int      $total_count      Total count of validation errors.
+	 * @param int      $total_count      Total count of validation errors (more than 0).
 	 * @param int      $kept_count       Count of validation errors with invalid markup kept.
 	 * @param int      $unreviewed_count Count of unreviewed validation errors.
 	 */
@@ -1935,46 +1935,84 @@ class AMP_Validation_Manager {
 			$admin_bar_icon->setAttribute( 'class', 'ab-icon amp-icon ' . Icon::WARNING );
 		}
 
-		$items = [];
-		if ( $unreviewed_count > 0 ) {
-			$items[] = sprintf(
-				/* translators: %s the total count of unreviewed validation errors */
-				_n(
-					'%s unreviewed',
-					'%s unreviewed',
-					$total_count,
-					'amp'
-				),
-				number_format_i18n( $unreviewed_count )
-			);
-		}
-		if ( $kept_count > 0 ) {
-			$items[] = sprintf(
-				/* translators: %s the total count of unreviewed validation errors */
-				_n(
-					'%s kept',
-					'%s kept',
-					$kept_count,
-					'amp'
-				),
-				number_format_i18n( $kept_count )
-			);
-		}
-
 		// Update the text of the link if there are validation errors.
-		if ( $items ) {
+		if ( $unreviewed_count > 0 && $kept_count > 0 ) {
 			$text = sprintf(
 				/* translators: %s is total count of validation errors */
 				_n(
-					'(%s issue)',
-					'(%s issues)',
+					'%s issue:',
+					'%s issues:',
 					$total_count,
 					'amp'
 				),
 				number_format_i18n( $total_count )
 			);
-			$validate_link->appendChild( $dom->createTextNode( ' ' . $text ) );
+
+			$text .= ' ' . implode(
+				', ',
+				[
+					sprintf(
+						/* translators: %s the total count of validation errors with kept markup */
+						_n(
+							'%s with kept invalid markup',
+							'%s with kept invalid markup',
+							$kept_count,
+							'amp'
+						),
+						number_format_i18n( $kept_count )
+					),
+					sprintf(
+						/* translators: %s the total count of unreviewed validation errors */
+						_n(
+							'%s unreviewed',
+							'%s unreviewed',
+							$unreviewed_count,
+							'amp'
+						),
+						number_format_i18n( $unreviewed_count )
+					),
+				]
+			);
+		} elseif ( $unreviewed_count > 0 ) {
+			$text = sprintf(
+				/* translators: %s the total count of unreviewed validation errors */
+				_n(
+					'%s unreviewed issue',
+					'%s unreviewed issues',
+					$unreviewed_count,
+					'amp'
+				),
+				number_format_i18n( $unreviewed_count )
+			);
+		} elseif ( 0 === $unreviewed_count && $kept_count > 0 ) {
+			$text = sprintf(
+				/* translators: %s the total count of unreviewed validation errors */
+				_n(
+					'%s issue with kept invalid markup',
+					'%s issues with kept invalid markup',
+					$kept_count,
+					'amp'
+				),
+				number_format_i18n( $kept_count )
+			);
+		} else {
+			$text = sprintf(
+				/* translators: %s the total count of reviewed validation errors */
+				_n(
+					'%s reviewed issue',
+					'%s reviewed issues',
+					$total_count,
+					'amp'
+				),
+				number_format_i18n( $total_count )
+			);
 		}
+
+		$validate_link->appendChild( $dom->createTextNode( ' ' ) );
+		$small = $dom->createElement( 'small' );
+		$small->setAttribute( 'style', 'font-size: smaller' );
+		$small->appendChild( $dom->createTextNode( sprintf( '(%s)', $text ) ) );
+		$validate_link->appendChild( $small );
 	}
 
 	/**
