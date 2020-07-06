@@ -1,9 +1,9 @@
-
 /**
  * External dependencies
  */
 import { act } from 'react-dom/test-utils';
 import { create } from 'react-test-renderer';
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
@@ -29,7 +29,24 @@ const getNavButtons = ( containerElement ) => ( {
 } );
 
 const MyPageComponent = () => <div />;
-const testPages = [ { PageComponent: MyPageComponent, slug: 'slug', title: 'Page 0' }, { PageComponent: MyPageComponent, slug: 'slug-2', title: 'Page 1' } ];
+const testPages = [
+	{ PageComponent: MyPageComponent, slug: 'slug', title: 'Page 0' },
+	{ PageComponent: MyPageComponent, slug: 'slug-2', title: 'Page 1' },
+];
+
+const Providers = ( { children, pages } ) => (
+	<OptionsContextProvider>
+		<UserContextProvider>
+			<NavigationContextProvider pages={ pages }>
+				{ children }
+			</NavigationContextProvider>
+		</UserContextProvider>
+	</OptionsContextProvider>
+);
+Providers.propTypes = {
+	children: PropTypes.any,
+	pages: PropTypes.array,
+};
 
 describe( 'Nav', () => {
 	beforeEach( () => {
@@ -44,13 +61,9 @@ describe( 'Nav', () => {
 
 	it( 'matches snapshot', () => {
 		const wrapper = create(
-			<OptionsContextProvider>
-				<UserContextProvider>
-					<NavigationContextProvider pages={ testPages }>
-						<Nav exitLink="http://site.test" />
-					</NavigationContextProvider>
-				</UserContextProvider>
-			</OptionsContextProvider>,
+			<Providers pages={ testPages }>
+				<Nav closeLink="http://site.test/wp-admin" finishLink="http://site.test" />
+			</Providers>,
 		);
 		expect( wrapper.toJSON() ).toMatchSnapshot();
 	} );
@@ -58,13 +71,9 @@ describe( 'Nav', () => {
 	it( 'hides previous button on first page', () => {
 		act( () => {
 			render(
-				<OptionsContextProvider>
-					<UserContextProvider>
-						<NavigationContextProvider pages={ testPages }>
-							<Nav exitLink="http://site.test" />
-						</NavigationContextProvider>
-					</UserContextProvider>
-				</OptionsContextProvider>,
+				<Providers pages={ testPages }>
+					<Nav closeLink="http://site.test/wp-admin" finishLink="http://site.test" />
+				</Providers>,
 				container,
 			);
 		} );
@@ -73,5 +82,49 @@ describe( 'Nav', () => {
 
 		expect( prevButton ).toBeNull();
 		expect( nextButton ).not.toBeNull();
+	} );
+
+	it( 'changes next button to "Finish" on last page', () => {
+		act( () => {
+			render(
+				<Providers pages={ testPages }>
+					<Nav closeLink="http://site.test/wp-admin" finishLink="http://site.test" />
+				</Providers>,
+				container,
+			);
+		} );
+
+		const { nextButton } = getNavButtons( container );
+
+		expect( nextButton.textContent ).toBe( 'Next' );
+
+		act( () => {
+			nextButton.dispatchEvent( new global.MouseEvent( 'click', { bubbles: true } ) );
+		} );
+
+		expect( nextButton.textContent ).toBe( 'Finish' );
+	} );
+
+	it( 'close button hides on last page', () => {
+		act( () => {
+			render(
+				<Providers pages={ testPages }>
+					<Nav closeLink="http://site.test/wp-admin" finishLink="http://site.test" />
+				</Providers>,
+				container,
+			);
+		} );
+
+		const { nextButton } = getNavButtons( container );
+		let closeButton = container.querySelector( '.amp-setup-nav__close a' );
+
+		expect( closeButton ).not.toBeNull();
+
+		act( () => {
+			nextButton.dispatchEvent( new global.MouseEvent( 'click', { bubbles: true } ) );
+		} );
+
+		closeButton = container.querySelector( '.amp-setup-nav__close a' );
+		expect( closeButton ).toBeNull();
 	} );
 } );

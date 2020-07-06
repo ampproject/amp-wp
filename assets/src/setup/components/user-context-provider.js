@@ -26,7 +26,7 @@ export const User = createContext();
  * @param {string} props.userRestEndpoint REST endpoint to retrieve options.
  */
 export function UserContextProvider( { children, userOptionDeveloperTools, userRestEndpoint } ) {
-	const { originalOptions } = useContext( Options );
+	const { originalOptions, fetchingOptions } = useContext( Options );
 	const [ fetchingUser, setFetchingUser ] = useState( false );
 	const [ developerToolsOption, setDeveloperToolsOption ] = useState( null );
 	const [ originalDeveloperToolsOption, setOriginalDeveloperToolsOption ] = useState( null );
@@ -44,12 +44,17 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 		() => null !== developerToolsOption && developerToolsOption !== originalDeveloperToolsOption,
 		[ developerToolsOption, originalDeveloperToolsOption ],
 	);
-
 	/**
 	 * Fetch user options on mount.
 	 */
 	useEffect( () => {
-		if ( ! originalOptions || false === originalOptions.wizard_completed ) {
+		if ( fetchingOptions ) {
+			return;
+		}
+
+		if ( ! originalOptions.wizard_completed ) {
+			setOriginalDeveloperToolsOption( null );
+			setDeveloperToolsOption( null );
 			return;
 		}
 
@@ -79,7 +84,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 
 			setFetchingUser( false );
 		} )();
-	}, [ fetchingUser, originalDeveloperToolsOption, originalOptions, setError, userOptionDeveloperTools, userRestEndpoint ] );
+	}, [ fetchingOptions, fetchingUser, originalDeveloperToolsOption, originalOptions.wizard_completed, setError, userOptionDeveloperTools, userRestEndpoint ] );
 
 	/**
 	 * Sends the option back to the REST endpoint to be saved.

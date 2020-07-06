@@ -2,13 +2,13 @@
  * WordPress dependencies
  */
 import { useEffect, useContext, useMemo } from '@wordpress/element';
-
 /**
  * Internal dependencies
  */
 import { Navigation } from '../../components/navigation-context-provider';
 import { Options } from '../../components/options-context-provider';
 import { SiteScan } from '../../components/site-scan-context-provider';
+import { ReaderThemes } from '../../components/reader-themes-context-provider';
 import { Loading } from '../../components/loading';
 import { User } from '../../components/user-context-provider';
 import { ScreenUI } from './screen-ui';
@@ -21,6 +21,7 @@ export function TemplateMode() {
 	const { editedOptions, originalOptions, updates, updateOptions } = useContext( Options );
 	const { developerToolsOption, originalDeveloperToolsOption } = useContext( User );
 	const { pluginIssues, themeIssues, scanningSite } = useContext( SiteScan );
+	const { currentTheme } = useContext( ReaderThemes );
 
 	const technicalQuestionChanged = developerToolsOption !== originalDeveloperToolsOption;
 
@@ -60,14 +61,15 @@ export function TemplateMode() {
 	return (
 		<ScreenUI
 			currentMode={ themeSupport }
+			currentThemeIsAmongReaderThemes={ currentTheme.is_reader_theme }
 			developerToolsOption={ developerToolsOption }
-			technicalQuestionChanged={ technicalQuestionChanged }
 			firstTimeInWizard={ false === originalOptions.wizard_completed }
 			pluginIssues={ pluginIssues }
 			savedCurrentMode={ originalOptions.theme_support }
 			setCurrentMode={ ( mode ) => {
 				updateOptions( { theme_support: mode } );
 			} }
+			technicalQuestionChanged={ technicalQuestionChanged }
 			themeIssues={ themeIssues }
 		/>
 	);
