@@ -1931,7 +1931,7 @@ class AMP_Validation_Manager {
 		 */
 		if ( $kept_count > 0 && ! amp_is_canonical() ) {
 			$admin_bar_icon->setAttribute( 'class', 'ab-icon amp-icon ' . Icon::INVALID );
-		} elseif ( $unreviewed_count > 0 ) {
+		} elseif ( $unreviewed_count > 0 || $kept_count > 0 ) {
 			$admin_bar_icon->setAttribute( 'class', 'ab-icon amp-icon ' . Icon::WARNING );
 		}
 
