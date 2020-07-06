@@ -2172,7 +2172,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertEquals( $valid_class_name, $status_icon_element->getAttribute( 'class' ) );
 		$validity_link_element = $dom->getElementById( 'wp-admin-bar-amp-validity' );
 		$this->assertInstanceOf( 'DOMElement', $validity_link_element );
-		$this->assertEquals( 'Validate URL', $validity_link_element->textContent );
+		$this->assertEquals( 'Validate URL', trim( $validity_link_element->textContent ) );
 
 		$error1 = [ 'code' => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR ];
 		$error2 = [ 'code' => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ];
@@ -2200,7 +2200,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		];
 		wp_update_term( $term1_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, [ 'term_group' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS ] );
 		AMP_Validation_Manager::finalize_validation( $dom );
-		$this->assertEquals( '(1 unreviewed issue)', $get_small_text_content( $validity_link_element ) );
+		$this->assertEquals( '(1 issue: unreviewed)', $get_small_text_content( $validity_link_element ) );
 		$this->assertStringContains( 'amp-icon amp-warning', $status_icon_element->getAttribute( 'class' ) );
 		$status_icon_element->setAttribute( 'class', $valid_class_name );
 
@@ -2228,7 +2228,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			],
 		];
 		AMP_Validation_Manager::finalize_validation( $dom );
-		$this->assertEquals( '(1 issue: 1 with kept invalid markup, 1 unreviewed)', $get_small_text_content( $validity_link_element ) );
+		$this->assertEquals( '(1 issue: unreviewed, kept)', $get_small_text_content( $validity_link_element ) );
 		$this->assertStringContains( 'amp-icon amp-warning', $status_icon_element->getAttribute( 'class' ) );
 		$status_icon_element->setAttribute( 'class', $valid_class_name );
 
@@ -2243,7 +2243,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			],
 		];
 		AMP_Validation_Manager::finalize_validation( $dom );
-		$this->assertEquals( '(1 issue with kept invalid markup)', $get_small_text_content( $validity_link_element ) );
+		$this->assertEquals( '(1 issue: kept)', $get_small_text_content( $validity_link_element ) );
 		$this->assertStringContains( 'amp-icon amp-warning', $status_icon_element->getAttribute( 'class' ) );
 		$status_icon_element->setAttribute( 'class', $valid_class_name );
 
@@ -2259,7 +2259,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			],
 		];
 		AMP_Validation_Manager::finalize_validation( $dom );
-		$this->assertEquals( '(1 issue: 1 with kept invalid markup, 1 unreviewed)', $get_small_text_content( $validity_link_element ) );
+		$this->assertEquals( '(1 issue: unreviewed, kept)', $get_small_text_content( $validity_link_element ) );
 		$this->assertStringContains( 'amp-icon amp-invalid', $status_icon_element->getAttribute( 'class' ) );
 		$status_icon_element->setAttribute( 'class', $valid_class_name );
 
@@ -2275,7 +2275,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			],
 		];
 		AMP_Validation_Manager::finalize_validation( $dom );
-		$this->assertEquals( '(1 issue with kept invalid markup)', $get_small_text_content( $validity_link_element ) );
+		$this->assertEquals( '(1 issue: kept)', $get_small_text_content( $validity_link_element ) );
 		$this->assertStringContains( 'amp-icon amp-invalid', $status_icon_element->getAttribute( 'class' ) );
 		$status_icon_element->setAttribute( 'class', $valid_class_name );
 
@@ -2296,7 +2296,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			],
 		];
 		AMP_Validation_Manager::finalize_validation( $dom );
-		$this->assertEquals( '(1 unreviewed issue)', $get_small_text_content( $validity_link_element ) );
+		$this->assertEquals( '(2 issues: 1 unreviewed)', $get_small_text_content( $validity_link_element ) );
 		$this->assertStringContains( 'amp-icon amp-warning', $status_icon_element->getAttribute( 'class' ) );
 		$status_icon_element->setAttribute( 'class', $valid_class_name );
 

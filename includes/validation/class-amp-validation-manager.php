@@ -1936,7 +1936,7 @@ class AMP_Validation_Manager {
 		}
 
 		// Update the text of the link if there are validation errors.
-		if ( $unreviewed_count > 0 && $kept_count > 0 ) {
+		if ( $unreviewed_count > 0 || $kept_count > 0 ) {
 			$text = sprintf(
 				/* translators: %s is total count of validation errors */
 				_n(
@@ -1948,20 +1948,18 @@ class AMP_Validation_Manager {
 				number_format_i18n( $total_count )
 			);
 
-			$text .= ' ' . implode(
-				', ',
-				[
-					sprintf(
-						/* translators: %s the total count of validation errors with kept markup */
-						_n(
-							'%s with kept invalid markup',
-							'%s with kept invalid markup',
-							$kept_count,
-							'amp'
-						),
-						number_format_i18n( $kept_count )
-					),
-					sprintf(
+			$items = [];
+			if ( $unreviewed_count > 0 ) {
+				if ( $unreviewed_count === $total_count ) {
+					/* translators: text is describing validation issue(s) */
+					$items[] = _n(
+						'unreviewed',
+						'all unreviewed',
+						$unreviewed_count,
+						'amp'
+					);
+				} else {
+					$items[] = sprintf(
 						/* translators: %s the total count of unreviewed validation errors */
 						_n(
 							'%s unreviewed',
@@ -1970,31 +1968,33 @@ class AMP_Validation_Manager {
 							'amp'
 						),
 						number_format_i18n( $unreviewed_count )
-					),
-				]
-			);
-		} elseif ( $unreviewed_count > 0 ) {
-			$text = sprintf(
-				/* translators: %s the total count of unreviewed validation errors */
-				_n(
-					'%s unreviewed issue',
-					'%s unreviewed issues',
-					$unreviewed_count,
-					'amp'
-				),
-				number_format_i18n( $unreviewed_count )
-			);
-		} elseif ( 0 === $unreviewed_count && $kept_count > 0 ) {
-			$text = sprintf(
-				/* translators: %s the total count of unreviewed validation errors */
-				_n(
-					'%s issue with kept invalid markup',
-					'%s issues with kept invalid markup',
-					$kept_count,
-					'amp'
-				),
-				number_format_i18n( $kept_count )
-			);
+					);
+				}
+			}
+			if ( $kept_count > 0 ) {
+				if ( $kept_count === $total_count ) {
+					/* translators: text is describing validation issue(s) */
+					$items[] = _n(
+						'kept',
+						'all kept',
+						$kept_count,
+						'amp'
+					);
+				} else {
+					$items[] = sprintf(
+						/* translators: %s the total count of unreviewed validation errors */
+						_n(
+							'%s kept',
+							'%s kept',
+							$kept_count,
+							'amp'
+						),
+						number_format_i18n( $kept_count )
+					);
+				}
+			}
+
+			$text .= ' ' . implode( ', ', $items );
 		} else {
 			$text = sprintf(
 				/* translators: %s the total count of reviewed validation errors */
