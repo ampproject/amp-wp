@@ -62,7 +62,7 @@ describe( 'Nav', () => {
 	it( 'matches snapshot', () => {
 		const wrapper = create(
 			<Providers pages={ testPages }>
-				<Nav finishLink="http://site.test" />
+				<Nav closeLink="http://site.test/wp-admin" finishLink="http://site.test" />
 			</Providers>,
 		);
 		expect( wrapper.toJSON() ).toMatchSnapshot();
@@ -72,7 +72,7 @@ describe( 'Nav', () => {
 		act( () => {
 			render(
 				<Providers pages={ testPages }>
-					<Nav finishLink="http://site.test" />
+					<Nav closeLink="http://site.test/wp-admin" finishLink="http://site.test" />
 				</Providers>,
 				container,
 			);
@@ -88,7 +88,7 @@ describe( 'Nav', () => {
 		act( () => {
 			render(
 				<Providers pages={ testPages }>
-					<Nav finishLink="http://site.test" />
+					<Nav closeLink="http://site.test/wp-admin" finishLink="http://site.test" />
 				</Providers>,
 				container,
 			);
@@ -109,7 +109,7 @@ describe( 'Nav', () => {
 		act( () => {
 			render(
 				<Providers pages={ testPages }>
-					<Nav finishLink="http://site.test" />
+					<Nav closeLink="http://site.test/wp-admin" finishLink="http://site.test" />
 				</Providers>,
 				container,
 			);
