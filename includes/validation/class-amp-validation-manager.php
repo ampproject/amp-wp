@@ -1935,54 +1935,53 @@ class AMP_Validation_Manager {
 			$admin_bar_icon->setAttribute( 'class', 'ab-icon amp-icon ' . Icon::WARNING );
 		}
 
-		// Update the text of the link if there are validation errors.
-		if ( $unreviewed_count > 0 || $kept_count > 0 ) {
-			$items = [];
-			if ( $unreviewed_count > 0 ) {
-				if ( $unreviewed_count === $total_count ) {
-					/* translators: text is describing validation issue(s) */
-					$items[] = _n(
-						'unreviewed',
-						'all unreviewed',
+		// Update the text of the link to reflect the status of the validation error(s).
+		$items = [];
+		if ( $unreviewed_count > 0 ) {
+			if ( $unreviewed_count === $total_count ) {
+				/* translators: text is describing validation issue(s) */
+				$items[] = _n(
+					'unreviewed',
+					'all unreviewed',
+					$unreviewed_count,
+					'amp'
+				);
+			} else {
+				$items[] = sprintf(
+					/* translators: %s the total count of unreviewed validation errors */
+					_n(
+						'%s unreviewed',
+						'%s unreviewed',
 						$unreviewed_count,
 						'amp'
-					);
-				} else {
-					$items[] = sprintf(
-						/* translators: %s the total count of unreviewed validation errors */
-						_n(
-							'%s unreviewed',
-							'%s unreviewed',
-							$unreviewed_count,
-							'amp'
-						),
-						number_format_i18n( $unreviewed_count )
-					);
-				}
+					),
+					number_format_i18n( $unreviewed_count )
+				);
 			}
-			if ( $kept_count > 0 ) {
-				if ( $kept_count === $total_count ) {
-					/* translators: text is describing validation issue(s) */
-					$items[] = _n(
-						'kept',
-						'all kept',
+		}
+		if ( $kept_count > 0 ) {
+			if ( $kept_count === $total_count ) {
+				/* translators: text is describing validation issue(s) */
+				$items[] = _n(
+					'kept',
+					'all kept',
+					$kept_count,
+					'amp'
+				);
+			} else {
+				$items[] = sprintf(
+					/* translators: %s the total count of unreviewed validation errors */
+					_n(
+						'%s kept',
+						'%s kept',
 						$kept_count,
 						'amp'
-					);
-				} else {
-					$items[] = sprintf(
-						/* translators: %s the total count of unreviewed validation errors */
-						_n(
-							'%s kept',
-							'%s kept',
-							$kept_count,
-							'amp'
-						),
-						number_format_i18n( $kept_count )
-					);
-				}
+					),
+					number_format_i18n( $kept_count )
+				);
 			}
-		} else {
+		}
+		if ( empty( $items ) ) {
 			/* translators: text is describing validation issue(s) */
 			$items[] = _n(
 				'reviewed',
