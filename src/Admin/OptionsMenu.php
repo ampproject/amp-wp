@@ -188,7 +188,7 @@ class OptionsMenu implements Service, Registerable {
 					<?php echo wp_kses_post( $ecosystem_description ); ?>
 				</p>
 			<?php endif; ?>
-			<div id="amp-settings-intro"></div>
+			<div id="amp-settings-welcome"></div>
 			<div id="amp-settings-template-mode"></div>
 			<div id="amp-settings-template-support"></div>
 		</div>
@@ -231,7 +231,7 @@ class OptionsMenu implements Service, Registerable {
 
 		wp_enqueue_style(
 			self::ASSET_HANDLE,
-			amp_get_asset_url( 'css/amp-onboarding-wizard.css' ),
+			amp_get_asset_url( 'css/amp-settings.css' ),
 			[ $this->google_fonts->get_handle() ],
 			AMP__VERSION
 		);
@@ -241,7 +241,7 @@ class OptionsMenu implements Service, Registerable {
 		$theme           = wp_get_theme();
 		$is_reader_theme = in_array( get_stylesheet(), wp_list_pluck( ( new AMP_Reader_Themes() )->get_themes(), 'slug' ), true );
 
-		$setup_wizard_data = [
+		$js_data = [
 			'CURRENT_THEME'                      => [
 				'name'            => $theme->get( 'Name' ),
 				'description'     => $theme->get( 'Description' ),
@@ -259,8 +259,8 @@ class OptionsMenu implements Service, Registerable {
 		wp_add_inline_script(
 			self::ASSET_HANDLE,
 			sprintf(
-				'var ampOnboardingWizard = %s;',
-				wp_json_encode( $setup_wizard_data )
+				'var ampSettings = %s;',
+				wp_json_encode( $js_data )
 			),
 			'before'
 		);

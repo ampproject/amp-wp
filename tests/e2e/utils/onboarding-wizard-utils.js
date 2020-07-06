@@ -3,8 +3,8 @@
  */
 import { visitAdminPage } from '@wordpress/e2e-test-utils/build/visit-admin-page';
 
-export const NEXT_BUTTON_SELECTOR = '.amp-settings-nav__prev-next button.is-primary';
-export const PREV_BUTTON_SELECTOR = '.amp-settings-nav__prev-next button:not(.is-primary)';
+export const NEXT_BUTTON_SELECTOR = '.onboarding-wizard-nav__prev-next button.is-primary';
+export const PREV_BUTTON_SELECTOR = '.onboarding-wizard-nav__prev-next button:not(.is-primary)';
 
 export async function clickNextButton() {
 	await page.waitForSelector( `${ NEXT_BUTTON_SELECTOR }:not([disabled])` );

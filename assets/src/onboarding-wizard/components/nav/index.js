@@ -30,9 +30,9 @@ export function Nav( { exitLink } ) {
 	const { savingDeveloperToolsOption } = useContext( User );
 
 	return (
-		<div className="amp-settings-nav">
-			<div className="amp-settings-nav__inner">
-				<div className="amp-settings-nav__close">
+		<div className="onboarding-wizard-nav">
+			<div className="onboarding-wizard-nav__inner">
+				<div className="onboarding-wizard-nav__close">
 					{ ! isLastPage && (
 						<Button isLink href={ exitLink }>
 							<svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -48,16 +48,16 @@ export function Nav( { exitLink } ) {
 						</Button>
 					) }
 				</div>
-				<div className="amp-settings-nav__prev-next">
+				<div className="onboarding-wizard-nav__prev-next">
 					{ 1 > activePageIndex
 						? (
-							<span className="amp-settings-nav__placeholder">
+							<span className="onboarding-wizard-nav__placeholder">
 								{ ' ' }
 							</span>
 						)
 						: (
 							<Button
-								className="amp-settings-nav__prev"
+								className="onboarding-wizard-nav__prev"
 								onClick={ moveBack }
 							>
 								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">

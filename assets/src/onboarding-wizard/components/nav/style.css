@@ -1,7 +1,7 @@
 /**
  * Nav component.
  */
-.amp-settings-nav {
+.onboarding-wizard-nav {
 	align-items: center;
 	background: var(--white);
 	bottom: 0;
@@ -14,7 +14,7 @@
 	z-index: 2;
 }
 
-.amp-settings-nav__inner {
+.onboarding-wizard-nav__inner {
 	align-items: center;
 	display: flex;
 	justify-content: space-between;
@@ -28,17 +28,17 @@
 	}
 }
 
-.amp-settings-nav__prev-next {
+.onboarding-wizard-nav__prev-next {
 	display: flex;
 }
 
-.amp-settings-nav__prev-next > * {
+.onboarding-wizard-nav__prev-next > * {
 	align-items: center;
 	display: flex;
 	height: 36px;
 }
 
-.amp-settings-nav__prev-next svg {
+.onboarding-wizard-nav__prev-next svg {
 	display: none;
 	margin-left: 0.5rem;
 	height: 18px;
@@ -49,21 +49,21 @@
 	}
 }
 
-.amp-settings-nav__prev {
+.onboarding-wizard-nav__prev {
 	margin-right: 5px;
 }
 
-.amp-settings-nav__prev svg {
+.onboarding-wizard-nav__prev svg {
 	transform: rotate(180deg);
 	margin-left: 0;
 	margin-right: 0.5rem;
 }
 
-.amp-settings-nav__close {
+.onboarding-wizard-nav__close {
 	align-items: center;
 	display: flex;
 }
 
-.amp-settings-nav__close svg {
+.onboarding-wizard-nav__close svg {
 	margin-right: 0.5rem;
 }

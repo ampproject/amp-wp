@@ -13,9 +13,9 @@ import { render } from '@wordpress/element';
  * Internal dependencies
  */
 import { RedirectToggle } from '../redirect-toggle';
-import { OptionsContextProvider } from '../../../components/options-context-provider';
+import { OptionsContextProvider } from '../../../../components/options-context-provider';
 
-jest.mock( '../../../components/options-context-provider' );
+jest.mock( '../../../../components/options-context-provider' );
 
 let container;
 

@@ -2,13 +2,13 @@
 
 exports[`Nav matches snapshot 1`] = `
 <div
-  className="amp-settings-nav"
+  className="onboarding-wizard-nav"
 >
   <div
-    className="amp-settings-nav__inner"
+    className="onboarding-wizard-nav__inner"
   >
     <div
-      className="amp-settings-nav__close"
+      className="onboarding-wizard-nav__close"
     >
       <a
         className="components-button is-link"
@@ -52,10 +52,10 @@ exports[`Nav matches snapshot 1`] = `
       </a>
     </div>
     <div
-      className="amp-settings-nav__prev-next"
+      className="onboarding-wizard-nav__prev-next"
     >
       <span
-        className="amp-settings-nav__placeholder"
+        className="onboarding-wizard-nav__placeholder"
       >
          
       </span>
