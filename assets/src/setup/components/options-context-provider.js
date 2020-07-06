@@ -100,6 +100,16 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 				delete updatesToSave.reader_theme;
 			}
 
+			// If this is the first time running the wizard and mobile_redirect is not in updates, set mobile_redirect to true.
+			// We do this here instead of in the fetch effect to prevent the exit confirmation before the user has interacted.
+			if ( ! originalOptions.wizard_completed && ! ( 'mobile_redirect' in updatesToSave ) ) {
+				updatesToSave.mobile_redirect = true;
+			}
+
+			if ( ! originalOptions.wizard_completed ) {
+				updatesToSave.wizard_completed = true;
+			}
+
 			// Ensure this promise lasts at least a second so that the "Saving Options" load screen is
 			// visible long enough for the user to see it is happening.
 			const [ savedOptions ] = await Promise.all(
@@ -108,7 +118,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 						{
 							method: 'post',
 							url: optionsRestEndpoint,
-							data: { ...updates, wizard_completed: true },
+							data: updatesToSave,
 						},
 					),
 					waitASecond(),
@@ -127,7 +137,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 
 		setDidSaveOptions( true );
 		setSavingOptions( false );
-	}, [ optionsRestEndpoint, setError, updates ] );
+	}, [ optionsRestEndpoint, setError, originalOptions.wizard_completed, updates ] );
 
 	/**
 	 * Updates options in state.

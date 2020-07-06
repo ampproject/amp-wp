@@ -67,8 +67,23 @@ export async function moveToSummaryScreen( { technical = true, mode, readerTheme
 	await page.waitForSelector( '.summary' );
 }
 
-export async function completeWizard( { technical = true, mode, readerTheme = 'legacy' } ) {
-	await moveToSummaryScreen( { technical, mode, readerTheme } );
+export async function completeWizard( { technical = true, mode, readerTheme = 'legacy', mobileRedirect = true } ) {
+	await moveToSummaryScreen( { technical, mode, readerTheme, mobileRedirect } );
+
+	if ( 'standard' !== mode ) {
+		await page.waitForSelector( '.redirect-toggle input' );
+
+		const selector = '.redirect-toggle input:checked';
+		const checkedMobileRedirect = await page.$( selector );
+
+		if ( checkedMobileRedirect && false === mobileRedirect ) {
+			await expect( page ).toClick( selector );
+			await page.waitForSelector( '.redirect-toggle input:not(:checked)' );
+		} else if ( ! checkedMobileRedirect && true === mobileRedirect ) {
+			await expect( page ).toClick( selector );
+			await page.waitForSelector( selector );
+		}
+	}
 
 	await clickNextButton();
 	await page.waitForSelector( '.done__preview-container' );
