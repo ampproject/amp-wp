@@ -137,7 +137,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 
 		setDidSaveOptions( true );
 		setSavingOptions( false );
-	}, [ optionsRestEndpoint, setError, originalOptions.wizard_completed, updates ] );
+	}, [ optionsRestEndpoint, setError, originalOptions, updates ] );
 
 	/**
 	 * Updates options in state.
