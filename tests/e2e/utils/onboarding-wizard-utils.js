@@ -1,10 +1,17 @@
 /**
  * WordPress dependencies
  */
-import { visitAdminPage } from '@wordpress/e2e-test-utils/build/visit-admin-page';
+import { visitAdminPage, isCurrentURL } from '@wordpress/e2e-test-utils';
 
 export const NEXT_BUTTON_SELECTOR = '.onboarding-wizard-nav__prev-next button.is-primary';
 export const PREV_BUTTON_SELECTOR = '.onboarding-wizard-nav__prev-next button:not(.is-primary)';
+
+export async function goToOnboardingWizard() {
+	if ( ! isCurrentURL( 'admin.php', 'page=amp-setup' ) ) {
+		await visitAdminPage( 'admin.php', 'page=amp-setup' );
+	}
+	await page.waitForSelector( '#amp-setup' );
+}
 
 export async function clickNextButton() {
 	await page.waitForSelector( `${ NEXT_BUTTON_SELECTOR }:not([disabled])` );
@@ -17,7 +24,7 @@ export async function clickPrevButton() {
 }
 
 export async function moveToTechnicalScreen() {
-	await visitAdminPage( 'admin.php', 'page=amp-onboarding-wizard' );
+	await goToOnboardingWizard();
 	await clickNextButton();
 	await page.waitForSelector( '.technical-background-option' );
 }
@@ -67,8 +74,23 @@ export async function moveToSummaryScreen( { technical = true, mode, readerTheme
 	await page.waitForSelector( '.summary' );
 }
 
-export async function completeWizard( { technical = true, mode, readerTheme = 'legacy' } ) {
-	await moveToSummaryScreen( { technical, mode, readerTheme } );
+export async function completeWizard( { technical = true, mode, readerTheme = 'legacy', mobileRedirect = true } ) {
+	await moveToSummaryScreen( { technical, mode, readerTheme, mobileRedirect } );
+
+	if ( 'standard' !== mode ) {
+		await page.waitForSelector( '.redirect-toggle input' );
+
+		const selector = '.redirect-toggle input:checked';
+		const checkedMobileRedirect = await page.$( selector );
+
+		if ( checkedMobileRedirect && false === mobileRedirect ) {
+			await expect( page ).toClick( selector );
+			await page.waitForSelector( '.redirect-toggle input:not(:checked)' );
+		} else if ( ! checkedMobileRedirect && true === mobileRedirect ) {
+			await expect( page ).toClick( selector );
+			await page.waitForSelector( selector );
+		}
+	}
 
 	await clickNextButton();
 	await page.waitForSelector( '.done__preview-container' );

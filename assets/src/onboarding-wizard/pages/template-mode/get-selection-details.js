@@ -40,9 +40,9 @@ export function getRecommendationLevels( { currentThemeIsAmongReaderThemes, user
 	if ( ! hasScanResults ) {
 		if ( userIsTechnical ) {
 			return {
-				[ READER ]: RECOMMENDED,
+				[ READER ]: currentThemeIsAmongReaderThemes ? MOST_RECOMMENDED : RECOMMENDED,
 				[ STANDARD ]: RECOMMENDED,
-				[ TRANSITIONAL ]: RECOMMENDED,
+				[ TRANSITIONAL ]: currentThemeIsAmongReaderThemes ? MOST_RECOMMENDED : RECOMMENDED,
 			};
 		}
 		return {

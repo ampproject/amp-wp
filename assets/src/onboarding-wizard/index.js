@@ -10,8 +10,9 @@ import '@wordpress/components/build-style/style.css';
  */
 import {
 	APP_ROOT_ID,
+	CLOSE_LINK,
 	CURRENT_THEME,
-	EXIT_LINK,
+	FINISH_LINK,
 	OPTIONS_REST_ENDPOINT,
 	READER_THEMES_REST_ENDPOINT,
 	UPDATES_NONCE,
@@ -100,7 +101,7 @@ class ErrorBoundary extends Component {
 
 		if ( error ) {
 			return (
-				<ErrorScreen error={ error } exitLink={ EXIT_LINK } />
+				<ErrorScreen error={ error } finishLink={ FINISH_LINK } />
 			);
 		}
 
@@ -115,7 +116,7 @@ domReady( () => {
 		render(
 			<ErrorBoundary>
 				<Providers>
-					<SetupWizard exitLink={ EXIT_LINK } />
+					<SetupWizard closeLink={ CLOSE_LINK } finishLink={ FINISH_LINK } />
 				</Providers>
 			</ErrorBoundary>,
 			root,

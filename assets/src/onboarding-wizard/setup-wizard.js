@@ -38,9 +38,10 @@ function PageComponentSideEffects( { children } ) {
  * Setup wizard root component.
  *
  * @param {Object} props Component props.
- * @param {Array} props.exitLink Exit link.
+ * @param {string} props.closeLink Link to return to previous user location.
+ * @param {string} props.finishLink Exit link.
  */
-export function SetupWizard( { exitLink } ) {
+export function SetupWizard( { closeLink, finishLink } ) {
 	const { activePageIndex, currentPage: { title, PageComponent, showTitle }, moveBack, moveForward, pages } = useContext( Navigation );
 
 	const PageComponentWithSideEffects = useMemo( () => () => (
@@ -75,7 +76,8 @@ export function SetupWizard( { exitLink } ) {
 					</Panel>
 					<Nav
 						activePageIndex={ activePageIndex }
-						exitLink={ exitLink }
+						closeLink={ closeLink }
+						finishLink={ finishLink }
 						moveBack={ moveBack }
 						moveForward={ moveForward }
 						pages={ pages }
@@ -88,5 +90,6 @@ export function SetupWizard( { exitLink } ) {
 }
 
 SetupWizard.propTypes = {
-	exitLink: PropTypes.string.isRequired,
+	closeLink: PropTypes.string.isRequired,
+	finishLink: PropTypes.string.isRequired,
 };

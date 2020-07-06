@@ -102,7 +102,11 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 			<div>
 			<div>
 			<div>
-			<div class="amp" id="<?php echo esc_attr( static::APP_ROOT_ID ); ?>"></div>
+			<div id="<?php echo esc_attr( static::APP_ROOT_ID ); ?>"></div>
+
+			<style>
+			#wpfooter { display:none; }
+			</style>
 		<?php
 
 		require_once ABSPATH . 'wp-admin/admin-footer.php';
@@ -156,15 +160,17 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 		$theme           = wp_get_theme();
 		$is_reader_theme = in_array( get_stylesheet(), wp_list_pluck( ( new AMP_Reader_Themes() )->get_themes(), 'slug' ), true );
 
+		$exit_link = menu_page_url( AMP_Options_Manager::OPTION_NAME, false );
+
 		$setup_wizard_data = [
 			'APP_ROOT_ID'                        => self::APP_ROOT_ID,
 			'CUSTOMIZER_LINK'                    => add_query_arg(
 				[
-					'return' => rawurlencode( menu_page_url( AMP_Options_Manager::OPTION_NAME, false ) ),
+					'return' => rawurlencode( $exit_link ),
 				],
 				admin_url( 'customize.php' )
 			),
-			'EXIT_LINK'                          => menu_page_url( AMP_Options_Manager::OPTION_NAME, false ),
+			'CLOSE_LINK'                         => wp_get_referer() ?: $exit_link,
 			// @todo As of June 2020, an upcoming WP release will allow this to be retrieved via REST.
 			'CURRENT_THEME'                      => [
 				'name'            => $theme->get( 'Name' ),
@@ -173,6 +179,7 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 				'screenshot'      => $theme->get_screenshot(),
 				'url'             => $theme->get( 'ThemeURI' ),
 			],
+			'FINISH_LINK'                        => $exit_link,
 			'OPTIONS_REST_ENDPOINT'              => rest_url( 'amp/v1/options' ),
 			'READER_THEMES_REST_ENDPOINT'        => rest_url( 'amp/v1/reader-themes' ),
 			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
