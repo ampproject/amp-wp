@@ -832,7 +832,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		$missing_attributes = [];
 
 		foreach ( $attr_spec as $attr_name => $attr_spec_rule_value ) {
-			if ( ! isset( $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY ] ) || ! $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY ] ) {
+			if ( empty( $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY ] ) ) {
 				continue;
 			}
 
