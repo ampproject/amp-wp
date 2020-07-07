@@ -42,7 +42,6 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 	public function test_register() {
 		$this->instance->register();
 		$this->assertEquals( 10, has_filter( 'amp_default_options', [ $this->instance, 'filter_default_options' ] ) );
-		$this->assertEquals( 10, has_action( 'amp_options_menu_items', [ $this->instance, 'add_settings_field' ] ) );
 		$this->assertEquals( 10, has_filter( 'amp_options_updating', [ $this->instance, 'sanitize_options' ] ) );
 	}
 
@@ -102,31 +101,6 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 				[ Option::MOBILE_REDIRECT => 'false' ]
 			)
 		);
-	}
-
-	/** @covers MobileRedirection::add_settings_field() */
-	public function test_add_settings_field() {
-		global $wp_settings_fields;
-
-		$this->instance->add_settings_field();
-		$this->assertTrue( isset( $wp_settings_fields[ AMP_Options_Manager::OPTION_NAME ]['general'][ Option::MOBILE_REDIRECT ] ) );
-	}
-
-	/** @covers MobileRedirection::render_setting_field() */
-	public function test_render_setting_field() {
-		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, true );
-		ob_start();
-		$this->instance->render_setting_field();
-		$html = ob_get_clean();
-		$this->assertStringContains( 'type="checkbox"', $html );
-		$this->assertStringContains( 'checked=', $html );
-
-		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, false );
-		ob_start();
-		$this->instance->render_setting_field();
-		$html = ob_get_clean();
-		$this->assertStringContains( 'type="checkbox"', $html );
-		$this->assertStringNotContains( 'checked=', $html );
 	}
 
 	/** @covers MobileRedirection::get_current_amp_url() */

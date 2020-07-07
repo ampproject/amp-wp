@@ -46,7 +46,7 @@ final class GoogleFonts implements Delayed, Service, Registerable {
 	public function register() {
 		// PHPCS ignore reason: WP will strip multiple `family` args from the Google fonts URL while adding the version string,
 		// so we need to avoid specifying a version at all.
-		wp_enqueue_style( // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		wp_register_style( // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
 			$this->get_handle(),
 			'https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&family=Poppins:wght@400;700&display=swap',
 			[],

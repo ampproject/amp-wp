@@ -5,7 +5,11 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Admin\GoogleFonts;
 use AmpProject\AmpWP\Admin\OnboardingWizardSubmenuPage;
+use AmpProject\AmpWP\Infrastructure\Delayed;
+use AmpProject\AmpWP\Infrastructure\Registerable;
+use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 
 /**
@@ -17,7 +21,7 @@ use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
  *
  * @covers OnboardingWizardSubmenu
  */
-class Test_OnboardingWizardSubmenuPage extends WP_UnitTestCase {
+class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 
 	use AssertContainsCompatibility;
 
@@ -36,18 +40,26 @@ class Test_OnboardingWizardSubmenuPage extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
-		$this->page = new OnboardingWizardSubmenuPage();
+		$this->page = new OnboardingWizardSubmenuPage( new GoogleFonts() );
+	}
+
+	/** @covers OnboardingWizardSubmenu::__construct() */
+	public function test__construct() {
+		$this->assertInstanceOf( OnboardingWizardSubmenuPage::class, $this->page );
+		$this->assertInstanceOf( Delayed::class, $this->page );
+		$this->assertInstanceOf( Service::class, $this->page );
+		$this->assertInstanceOf( Registerable::class, $this->page );
 	}
 
 	/**
-	 * Tests OnboardingWizardSubmenuPage::init
+	 * Tests OnboardingWizardSubmenuPage::register
 	 *
-	 * @covers OnboardingWizardSubmenuPage::init
+	 * @covers OnboardingWizardSubmenuPage::register
 	 */
-	public function test_init() {
-		$this->page->init();
+	public function test_register() {
+		$this->page->register();
 
-		$this->assertEquals( 10, has_action( 'admin_head-amp_page_amp-setup', [ $this->page, 'override_template' ] ) );
+		$this->assertEquals( 10, has_action( 'admin_head-amp_page_amp-onboarding-wizard', [ $this->page, 'override_template' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ $this->page, 'enqueue_assets' ] ) );
 	}
 
@@ -61,7 +73,7 @@ class Test_OnboardingWizardSubmenuPage extends WP_UnitTestCase {
 
 		$this->page->render();
 
-		$this->assertStringContains( '<div id="amp-settings"></div>', ob_get_clean() );
+		$this->assertStringContains( '<div class="amp" id="amp-onboarding-wizard"></div>', ob_get_clean() );
 	}
 
 	/**
@@ -70,7 +82,7 @@ class Test_OnboardingWizardSubmenuPage extends WP_UnitTestCase {
 	 * @covers OnboardingWizardSubmenuPage::screen_handle
 	 */
 	public function test_screen_handle() {
-		$this->assertEquals( $this->page->screen_handle(), 'amp_page_amp-setup' );
+		$this->assertEquals( $this->page->screen_handle(), 'amp_page_amp-onboarding-wizard' );
 	}
 
 	/**
@@ -79,9 +91,10 @@ class Test_OnboardingWizardSubmenuPage extends WP_UnitTestCase {
 	 * @covers OnboardingWizardSubmenuPage::enqueue_assets
 	 */
 	public function test_enqueue_assets() {
-		$handle = 'amp-settings';
+		$handle = 'amp-onboarding-wizard';
 
 		$this->page->enqueue_assets( $this->page->screen_handle() );
 		$this->assertTrue( wp_script_is( $handle ) );
+		$this->assertTrue( wp_style_is( $handle ) );
 	}
 }

@@ -7,7 +7,6 @@
 
 use AmpProject\AmpWP\Admin\GoogleFonts;
 use AmpProject\AmpWP\Admin\OptionsMenu;
-use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 
 /**
@@ -15,7 +14,7 @@ use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
  * 
  * @group options-menu
  */
-class Test_OptionsMenu extends WP_UnitTestCase {
+class OptionsMenuTest extends WP_UnitTestCase {
 
 	use AssertContainsCompatibility;
 
