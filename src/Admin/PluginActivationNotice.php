@@ -19,7 +19,7 @@ use AmpProject\AmpWP\Option;
 
 /**
  * Class PluginActivationNotice
- * 
+ *
  * @group plugin-activation-notice
  *
  * @since 1.6.0
