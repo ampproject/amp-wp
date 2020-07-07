@@ -266,7 +266,7 @@ class OptionsMenu implements Service, Registerable {
 	/**
 	 * Returns a notice indicating the current reader theme supports standard mode, if applicable.
 	 *
-	 * @return string The notice text or an empty string if nonapplicable.
+	 * @return array Associative array of support types to notice text.
 	 */
 	public function get_theme_support_notices() {
 		$builtin_support = in_array( get_template(), AMP_Core_Theme_Sanitizer::get_supported_themes(), true );

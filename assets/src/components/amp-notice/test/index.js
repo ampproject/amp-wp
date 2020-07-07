@@ -48,6 +48,17 @@ describe( 'AMPNotice', () => {
 	it( 'has correct classes', () => {
 		act( () => {
 			render(
+				<AMPNotice>
+					{ 'children' }
+				</AMPNotice>,
+				container,
+			);
+		} );
+
+		expect( container.querySelector( 'div' ).getAttribute( 'class' ) ).toBe( 'amp-notice amp-notice--info amp-notice--large' );
+
+		act( () => {
+			render(
 				<AMPNotice type={ NOTICE_TYPE_SUCCESS } size={ NOTICE_SIZE_LARGE } className="my-cool-class">
 					{ 'children' }
 				</AMPNotice>,
