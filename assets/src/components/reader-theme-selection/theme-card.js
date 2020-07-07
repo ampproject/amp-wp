@@ -24,7 +24,6 @@ import { AMPNotice, NOTICE_TYPE_WARNING, NOTICE_SIZE_SMALL } from '../amp-notice
  *
  * @param {Object} props Component props.
  * @param {string} props.description Theme description.
- * @param {boolean} props.disableCurrentlyActiveTheme Whether the currently active theme should be unselectable.
  * @param {string} props.currentlyActiveThemeNotice The notice to show if the theme is unselectable.
  * @param {string} props.homepage Link to view more information about the theme.
  * @param {string} props.screenshotUrl URL for screenshot of theme.
@@ -32,7 +31,7 @@ import { AMPNotice, NOTICE_TYPE_WARNING, NOTICE_SIZE_SMALL } from '../amp-notice
  * @param {string} props.name Theme name.
  * @param {boolean} props.disabled Whether the theme is not automatically installable in the current environment.
  */
-export function ThemeCard( { currentlyActiveThemeNotice, description, disableCurrentlyActiveTheme, homepage, screenshotUrl, slug, name, disabled } ) {
+export function ThemeCard( { currentlyActiveThemeNotice, description, homepage, screenshotUrl, slug, name, disabled } ) {
 	const { editedOptions, updateOptions } = useContext( Options );
 	const { reader_theme: readerTheme } = editedOptions;
 
@@ -90,7 +89,6 @@ export function ThemeCard( { currentlyActiveThemeNotice, description, disableCur
 ThemeCard.propTypes = {
 	currentlyActiveThemeNotice: PropTypes.string,
 	description: PropTypes.string.isRequired,
-	disableCurrentlyActiveTheme: PropTypes.bool,
 	homepage: PropTypes.string.isRequired,
 	screenshotUrl: PropTypes.string.isRequired,
 	slug: PropTypes.string.isRequired,

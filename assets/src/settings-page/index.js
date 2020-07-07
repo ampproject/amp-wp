@@ -7,7 +7,6 @@ import {
 	OPTIONS_REST_ENDPOINT,
 	READER_THEMES_REST_ENDPOINT,
 	THEME_SUPPORT_ARGS,
-	THEME_SUPPORT_NOTICES,
 	UPDATES_NONCE,
 } from 'amp-settings';
 
@@ -82,7 +81,7 @@ function Root() {
 					</AMPNotice>
 				)
 			}
-			<TemplateModes themeSupportNotices={ THEME_SUPPORT_NOTICES } />
+			<TemplateModes />
 			<ReaderThemes />
 			<SupportedTemplates themeSupportArgs={ themeSupportArgs } />
 			<MobileRedirection />

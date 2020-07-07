@@ -224,6 +224,7 @@ class OptionsMenu implements Service, Registerable {
 		$is_reader_theme = in_array( get_stylesheet(), wp_list_pluck( ( new AMP_Reader_Themes() )->get_themes(), 'slug' ), true );
 
 		$js_data = [
+			'BUILT_IN_SUPPORT'                   => in_array( get_template(), AMP_Core_Theme_Sanitizer::get_supported_themes(), true ),
 			'CURRENT_THEME'                      => [
 				'name'            => $theme->get( 'Name' ),
 				'description'     => $theme->get( 'Description' ),
@@ -234,7 +235,8 @@ class OptionsMenu implements Service, Registerable {
 			'OPTIONS_REST_ENDPOINT'              => rest_url( 'amp/v1/options' ),
 			'READER_THEMES_REST_ENDPOINT'        => rest_url( 'amp/v1/reader-themes' ),
 			'THEME_SUPPORT_ARGS'                 => AMP_Theme_Support::get_theme_support_args(),
-			'THEME_SUPPORT_NOTICES'              => $this->get_theme_support_notices(),
+			'THEME_PROVIDED_SUPPORT_MODE'        => AMP_Theme_Support::get_support_mode_added_via_theme(),
+			'THEME_SUPPORTS_READER_MODE'         => AMP_Theme_Support::supports_reader_mode(),
 			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
 			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
 			'USER_REST_ENDPOINT'                 => rest_url( 'wp/v2/users/me' ),
@@ -261,43 +263,6 @@ class OptionsMenu implements Service, Registerable {
 				'after'
 			);
 		}
-	}
-
-	/**
-	 * Returns a notice indicating the current reader theme supports standard mode, if applicable.
-	 *
-	 * @return array Associative array of support types to notice text.
-	 */
-	public function get_theme_support_notices() {
-		$builtin_support = in_array( get_template(), AMP_Core_Theme_Sanitizer::get_supported_themes(), true );
-
-		if ( AMP_Theme_Support::READER_MODE_SLUG === AMP_Theme_Support::get_support_mode() ) {
-			if ( AMP_Theme_Support::STANDARD_MODE_SLUG === AMP_Theme_Support::get_support_mode_added_via_theme() ) {
-				return [
-					'reader'       => '',
-					'standard'     => __( 'Your active theme is known to work well in standard mode.', 'amp' ),
-					'transitional' => '',
-				];
-			} elseif ( $builtin_support || AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Theme_Support::get_support_mode_added_via_theme() ) {
-				return [
-					'reader'       => '',
-					'standard'     => __( 'Your active theme is known to work well in standard mode.', 'amp' ),
-					'transitional' => __( 'Your active theme is known to work well in transitional mode.', 'amp' ),
-				];
-			}
-		} elseif ( AMP_Theme_Support::supports_reader_mode() ) {
-			return [
-				'reader'       => __( 'Your theme indicates it works best in reader mode.', 'amp' ),
-				'standard'     => '',
-				'transitional' => '',
-			];
-		}
-
-		return [
-			'reader'       => '',
-			'standard'     => '',
-			'transitional' => '',
-		];
 	}
 
 	/**

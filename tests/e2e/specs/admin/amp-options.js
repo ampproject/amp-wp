@@ -81,7 +81,11 @@ describe( 'AMP settings screen newly activated', () => {
 		await expect( page ).toMatchElement( '.hidden .supported-templates ' );
 
 		await selectReaderTheme( 'twentytwenty' );
-		await expect( page ).toMatchElement( '#theme-card__twentytwenty:checked' );
+		await expect( page ).not.toMatchElement( '#theme-card__twentytwenty:checked' ); // Active theme is not selectable.
+
+		await selectReaderTheme( 'twentynineteen' );
+		await expect( page ).toMatchElement( '#theme-card__twentynineteen:checked' );
+
 		await expect( page ).not.toMatchElement( '.hidden .supported-templates ' );
 
 		await expect( page ).toMatchElement( '#supported_templates_fieldset.hidden' );
@@ -105,8 +109,15 @@ describe( 'Active theme as reader mode', () => {
 
 describe( 'Mode info notices', () => {
 	it( 'shows expected notices', async () => {
-		await expect( page ).toMatchElement( 'amp-notice__body p', { text: /in standard mode/ } );
-		await expect( page ).toMatchElement( 'amp-notice__body p', { text: /in transitional mode/ } );
+		await activateTheme( 'twentytwenty' );
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+
+		await expect( page ).toMatchElement( '.amp-notice--info p', { text: /in transitional mode/ } );
+
+		await clickMode( 'reader' );
+
+		await expect( page ).not.toMatchElement( '.amp-notice--info p', { text: /in transitional mode/ } );
+		await expect( page ).toMatchElement( '.amp-notice--warning p', { text: /in transitional mode/ } );
 	} );
 } );
 
