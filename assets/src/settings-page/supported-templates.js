@@ -42,7 +42,7 @@ export function SupportedTemplates( { themeSupportArgs } ) {
 	}, [] );
 
 	return (
-		<section className={ 'legacy' === readerTheme || ! themeSupport ? 'hidden' : '' }>
+		<section className={ ( 'reader' === themeSupport && 'legacy' === readerTheme ) || ! themeSupport ? 'hidden' : '' }>
 			<h2>
 				{ __( 'Supported Templates', 'amp' ) }
 			</h2>

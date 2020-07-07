@@ -1,8 +1,8 @@
 .template-mode-selection {
-	margin-bottom: 3rem;
+	margin-bottom: 2.5rem;
 }
 
-.template-mode-selection p {
+.amp .template-mode-selection p {
 	font-size: 13px;
 	line-height: 1.85;
 }
@@ -64,14 +64,14 @@
 
 	@media screen and (min-width: 783px) {
 		margin-bottom: 0;
-		padding: 0 0 0 2rem;
+		padding: 0 0 0 1rem;
 	}
 }
 
 .template-mode-selection__description h2 {
 	font-size: 1.5rem;
 	line-height: 1.5;
-	margin-top: .75rem;
+	margin-top: 0;
 	margin-bottom: .75rem;
 }
 

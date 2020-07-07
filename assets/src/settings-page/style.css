@@ -22,7 +22,21 @@
 
 /* Welcome section. */
 .settings-welcome {
-	margin-bottom: 2.25rem;
+	margin-bottom: 2.5rem;
+}
+
+.settings-welcome p {
+	font-size: 13px;
+}
+
+.settings-welcome h2 {
+	align-items: center;
+	display: flex;
+	margin-top: 0;
+}
+
+.settings-welcome h2 svg {
+	margin-left: 0.5rem;
 }
 
 .settings-welcome .selectable {
@@ -98,3 +112,8 @@
 	margin-bottom: 2.25rem;
 }
 
+
+.amp-settings .template-mode-selection > p {
+	font-size: 16px;
+	margin-bottom: 1rem;
+}

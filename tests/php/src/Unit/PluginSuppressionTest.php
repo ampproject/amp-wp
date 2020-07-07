@@ -427,7 +427,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		$this->assertEqualSets( $bad_plugin_file_slugs, $this->call_private_method( $instance, 'get_suppressible_plugins' ) );
 		$wp_settings_fields = [];
 		$instance->add_settings_field();
-		$this->assertTrue( isset( $wp_settings_fields[ AMP_Options_Manager::OPTION_NAME ]['general'][ Option::SUPPRESSED_PLUGINS ] ) );
+		$this->assertTrue( isset( $wp_settings_fields[ AMP_Options_Manager::OPTION_NAME ]['validation'][ Option::SUPPRESSED_PLUGINS ] ) );
 	}
 
 	/**
