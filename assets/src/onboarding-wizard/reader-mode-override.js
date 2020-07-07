@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { createContext, useState, useEffect, useContext } from '@wordpress/element';
+
 /**
  * Internal dependencies
  */

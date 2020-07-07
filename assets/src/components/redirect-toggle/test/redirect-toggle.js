@@ -49,7 +49,22 @@ describe( 'RedirectToggle', () => {
 			);
 		} );
 
-		const toggle = container.querySelector( '.components-form-toggle' );
-		expect( [ ...toggle.classList ] ).toContain( 'is-checked' );
+		expect( container.querySelector( '.is-checked' ) ).not.toBeNull();
+
+		act(
+			() => {
+				container.querySelector( 'input' ).dispatchEvent( new global.MouseEvent( 'click' ) );
+			},
+		);
+
+		expect( container.querySelector( 'input:checked' ) ).toBeNull();
+
+		act(
+			() => {
+				container.querySelector( 'input' ).dispatchEvent( new global.MouseEvent( 'click' ) );
+			},
+		);
+
+		expect( container.querySelector( '.is-checked' ) ).not.toBeNull();
 	} );
 } );

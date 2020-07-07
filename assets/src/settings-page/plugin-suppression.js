@@ -21,6 +21,9 @@ export function PluginSuppression() {
 
 	const pluginSuppressionContainer = useRef();
 
+	/**
+	 * Pull the PHP-generated plugin suppression section into the JS-generated area.
+	 */
 	useEffect( () => {
 		const settingsSections = [ ...document.querySelectorAll( '#amp-settings-sections > table' ) ];
 		const supportedTemplatesTable = settingsSections.find( ( section ) => section.querySelector( '.amp-suppressed-plugins' ) );

@@ -30,10 +30,15 @@ export function SupportedTemplates( { themeSupportArgs } ) {
 
 	const supportedTemplatesContainer = useRef();
 
+	/**
+	 * Pull the PHP-generated form inputs into this React-generated section.
+	 */
 	useEffect( () => {
 		const settingsSections = [ ...document.querySelectorAll( '#amp-settings-sections > table' ) ];
 		const supportedTemplatesTable = settingsSections.find( ( section ) => section.querySelector( '.amp-template-support-field' ) );
-		supportedTemplatesContainer.current.appendChild( supportedTemplatesTable );
+		if ( supportedTemplatesTable ) {
+			supportedTemplatesContainer.current.appendChild( supportedTemplatesTable );
+		}
 	}, [] );
 
 	return (

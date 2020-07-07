@@ -66,13 +66,7 @@ Providers.propTypes = {
 };
 
 /**
- * Settings page application root. Because there is PHP-generated markup, including a form, in the middle of components that share
- * React state, several root divs have been created on the backend, and in this component we load various pieces of the application
- * into those root components, all sharing state.
- *
- * @todo Once the template support form is fully moved from PHP into React, all of this can be rendered into a single root div.
- *
- * Note: This component cannot use any state or context. They would cause the portals to be re-created every time state change.
+ * Settings page application root.
  */
 function Root() {
 	const themeSupportArgs = Array.isArray( THEME_SUPPORT_ARGS ) ? {} : THEME_SUPPORT_ARGS;

@@ -10,6 +10,9 @@ import { __ } from '@wordpress/i18n';
 import { Options } from '../components/options-context-provider';
 import { ReaderThemeSelection } from '../components/reader-theme-selection';
 
+/**
+ * The reader themes section of the settings page.
+ */
 export function ReaderThemes() {
 	const { editedOptions } = useContext( Options );
 

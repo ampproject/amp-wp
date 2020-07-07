@@ -10,6 +10,9 @@ import { __ } from '@wordpress/i18n';
  */
 import { Options } from '../components/options-context-provider';
 
+/**
+ * The bottom section of the settings page.
+ */
 export function SettingsFooter() {
 	const { didSaveOptions, editedOptions, saveOptions, savingOptions } = useContext( Options );
 

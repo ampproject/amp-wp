@@ -62,7 +62,6 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		$this->assertEquals(
 			[
 				'foo'                   => 'bar',
-				Option::MOBILE_REDIRECT => false,
 			],
 			$this->instance->sanitize_options(
 				[ 'foo' => 'bar' ],
