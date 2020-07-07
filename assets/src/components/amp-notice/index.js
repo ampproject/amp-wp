@@ -73,7 +73,7 @@ function getNoticeIcon( type ) {
  * @param {string} props.size The notice size.
  * @param {string} props.type The notice type.
  */
-export function AMPNotice( { children, className, size, type } ) {
+export function AMPNotice( { children, className, size = NOTICE_SIZE_LARGE, type = NOTICE_TYPE_INFO } ) {
 	const noticeIcon = getNoticeIcon( type );
 
 	const classNames = [
@@ -98,6 +98,6 @@ export function AMPNotice( { children, className, size, type } ) {
 AMPNotice.propTypes = {
 	children: PropTypes.node,
 	className: PropTypes.string,
-	size: PropTypes.oneOf( [ NOTICE_SIZE_LARGE, NOTICE_SIZE_SMALL ] ).isRequired,
-	type: PropTypes.oneOf( [ NOTICE_TYPE_INFO, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_WARNING ] ).isRequired,
+	size: PropTypes.oneOf( [ NOTICE_SIZE_LARGE, NOTICE_SIZE_SMALL ] ),
+	type: PropTypes.oneOf( [ NOTICE_TYPE_INFO, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_WARNING ] ),
 };

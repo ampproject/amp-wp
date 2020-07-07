@@ -170,12 +170,6 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 						'type'    => 'boolean',
 						'default' => true,
 					],
-					Option::SUPPORTED_TEMPLATES     =>
-					[
-						'type'    => 'array',
-						'items'   => [ 'type' => 'string' ],
-						'default' => [ 'is_singular' ],
-					],
 				],
 			];
 		}

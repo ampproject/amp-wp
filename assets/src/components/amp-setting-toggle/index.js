@@ -27,7 +27,6 @@ export function AMPSettingToggle( { checked, onChange, text, title } ) {
 		<div className="amp-setting-toggle">
 			<ToggleControl
 				checked={ checked }
-				disabled={ true }
 				label={ (
 					<div className="amp-setting-toggle__label-text">
 						<h3>

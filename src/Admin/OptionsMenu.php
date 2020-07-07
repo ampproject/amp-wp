@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP\Admin;
 use AMP_Analytics_Options_Submenu;
 use AMP_Core_Theme_Sanitizer;
 use AMP_Options_Manager;
+use AMP_Post_Type_Support;
 use AMP_Reader_Themes;
 use AMP_Theme_Support;
 use AmpProject\AmpWP\Infrastructure\Registerable;
@@ -132,6 +133,24 @@ class OptionsMenu implements Service, Registerable {
 			AMP_Options_Manager::OPTION_NAME
 		);
 
+		add_settings_section(
+			'general',
+			false,
+			'__return_false',
+			AMP_Options_Manager::OPTION_NAME
+		);
+
+		add_settings_field(
+			Option::SUPPORTED_TEMPLATES,
+			__( 'Supported Templates', 'amp' ),
+			[ $this, 'render_supported_templates' ],
+			AMP_Options_Manager::OPTION_NAME,
+			'general',
+			[
+				'class' => 'amp-template-support-field',
+			]
+		);
+
 		/**
 		 * This fires when settings fields for the AMP Options menu need to be registered.
 		 *
@@ -152,6 +171,129 @@ class OptionsMenu implements Service, Registerable {
 	}
 
 	/**
+	 * Provides the settings screen handle.
+	 *
+	 * @return string
+	 */
+	public function screen_handle() {
+		return sprintf( 'toplevel_page_%s', AMP_Options_Manager::OPTION_NAME );
+	}
+
+	/**
+	 * Enqueues settings page assets.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param string $hook_suffix The current admin page.
+	 */
+	public function enqueue_assets( $hook_suffix ) {
+		if ( $this->screen_handle() !== $hook_suffix ) {
+			return;
+		}
+
+		$asset_file   = AMP__DIR__ . '/assets/js/' . self::ASSET_HANDLE . '.asset.php';
+		$asset        = require $asset_file;
+		$dependencies = $asset['dependencies'];
+		$version      = $asset['version'];
+
+		wp_enqueue_script(
+			self::ASSET_HANDLE,
+			amp_get_asset_url( 'js/' . self::ASSET_HANDLE . '.js' ),
+			$dependencies,
+			$version,
+			true
+		);
+
+		wp_enqueue_style(
+			self::ASSET_HANDLE,
+			amp_get_asset_url( 'css/amp-settings.css' ),
+			[ $this->google_fonts->get_handle(), 'wp-components' ],
+			AMP__VERSION
+		);
+
+		wp_styles()->add_data( self::ASSET_HANDLE, 'rtl', 'replace' );
+
+		$theme           = wp_get_theme();
+		$is_reader_theme = in_array( get_stylesheet(), wp_list_pluck( ( new AMP_Reader_Themes() )->get_themes(), 'slug' ), true );
+
+		$js_data = [
+			'CURRENT_THEME'                      => [
+				'name'            => $theme->get( 'Name' ),
+				'description'     => $theme->get( 'Description' ),
+				'is_reader_theme' => $is_reader_theme,
+				'screenshot'      => $theme->get_screenshot(),
+				'url'             => $theme->get( 'ThemeURI' ),
+			],
+			'OPTIONS_REST_ENDPOINT'              => rest_url( 'amp/v1/options' ),
+			'READER_THEMES_REST_ENDPOINT'        => rest_url( 'amp/v1/reader-themes' ),
+			'THEME_SUPPORT_ARGS'                 => AMP_Theme_Support::get_theme_support_args(),
+			'THEME_SUPPORT_NOTICES'              => $this->get_theme_support_notices(),
+			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
+			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
+			'USER_REST_ENDPOINT'                 => rest_url( 'wp/v2/users/me' ),
+		];
+
+		wp_add_inline_script(
+			self::ASSET_HANDLE,
+			sprintf(
+				'var ampSettings = %s;',
+				wp_json_encode( $js_data )
+			),
+			'before'
+		);
+
+		if ( function_exists( 'wp_set_script_translations' ) ) {
+			wp_set_script_translations( self::ASSET_HANDLE, 'amp' );
+		} elseif ( function_exists( 'wp_get_jed_locale_data' ) || function_exists( 'gutenberg_get_jed_locale_data' ) ) {
+			$locale_data  = function_exists( 'wp_get_jed_locale_data' ) ? wp_get_jed_locale_data( 'amp' ) : gutenberg_get_jed_locale_data( 'amp' );
+			$translations = wp_json_encode( $locale_data );
+
+			wp_add_inline_script(
+				self::ASSET_HANDLE,
+				'wp.i18n.setLocaleData( ' . $translations . ', "amp" );',
+				'after'
+			);
+		}
+	}
+
+	/**
+	 * Returns a notice indicating the current reader theme supports standard mode, if applicable.
+	 *
+	 * @return string The notice text or an empty string if nonapplicable.
+	 */
+	public function get_theme_support_notices() {
+		$builtin_support = in_array( get_template(), AMP_Core_Theme_Sanitizer::get_supported_themes(), true );
+
+		if ( AMP_Theme_Support::READER_MODE_SLUG === AMP_Theme_Support::get_support_mode() ) {
+			if ( AMP_Theme_Support::STANDARD_MODE_SLUG === AMP_Theme_Support::get_support_mode_added_via_theme() ) {
+				return [
+					'reader'       => '',
+					'standard'     => __( 'Your active theme is known to work well in standard mode.', 'amp' ),
+					'transitional' => '',
+				];
+			} elseif ( $builtin_support || AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Theme_Support::get_support_mode_added_via_theme() ) {
+				return [
+					'reader'       => '',
+					'standard'     => __( 'Your active theme is known to work well in standard mode.', 'amp' ),
+					'transitional' => __( 'Your active theme is known to work well in transitional mode.', 'amp' ),
+				];
+			}
+		} elseif ( AMP_Theme_Support::supports_reader_mode() ) {
+			return [
+				'reader'       => __( 'Your theme indicates it works best in reader mode.', 'amp' ),
+				'standard'     => '',
+				'transitional' => '',
+			];
+		}
+
+		return [
+			'reader'       => '',
+			'standard'     => '',
+			'transitional' => '',
+		];
+	}
+
+	/**
 	 * Display Settings.
 	 *
 	 * @since 0.6
@@ -159,7 +301,6 @@ class OptionsMenu implements Service, Registerable {
 	public function render_screen() {
 		/* translators: %s: URL to the ecosystem page. */
 		$ecosystem_description = sprintf( __( 'For a list of themes and plugins that are known to be AMP compatible, please see the <a href="%s">ecosystem page</a>.', 'amp' ), esc_url( 'https://amp-wp.org/ecosystem/' ) );
-		$reader_mode_support   = __( 'Your theme indicates it works best in <strong>Reader mode.</strong>', 'amp' );
 		$builtin_support       = in_array( get_template(), AMP_Core_Theme_Sanitizer::get_supported_themes(), true );
 		$plugin_configured     = AMP_Options_Manager::get_option( Option::PLUGIN_CONFIGURED );
 
@@ -170,28 +311,13 @@ class OptionsMenu implements Service, Registerable {
 		<div class="wrap">
 			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 			<?php settings_errors(); ?>
-			<?php if ( AMP_Theme_Support::READER_MODE_SLUG === AMP_Theme_Support::get_support_mode() ) : ?>
-				<?php if ( AMP_Theme_Support::STANDARD_MODE_SLUG === AMP_Theme_Support::get_support_mode_added_via_theme() ) : ?>
-					<div class="notice notice-success notice-alt inline">
-						<p><?php esc_html_e( 'Your active theme is known to work well in standard mode.', 'amp' ); ?></p>
-					</div>
-				<?php elseif ( $builtin_support || AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Theme_Support::get_support_mode_added_via_theme() ) : ?>
-					<div class="notice notice-success notice-alt inline">
-						<p><?php esc_html_e( 'Your active theme is known to work well in standard or transitional mode.', 'amp' ); ?></p>
-					</div>
-				<?php endif; ?>
-			<?php elseif ( AMP_Theme_Support::supports_reader_mode() ) : ?>
-				<div class="notice notice-success notice-alt inline">
-					<p><?php echo wp_kses( $reader_mode_support, [ 'strong' => [] ] ); ?></p>
-				</div>
-			<?php endif; ?>
 
 			<?php if ( ! AMP_Theme_Support::get_support_mode_added_via_theme() && ! AMP_Theme_Support::supports_reader_mode() && ! $builtin_support ) : ?>
 				<p>
 					<?php echo wp_kses_post( $ecosystem_description ); ?>
 				</p>
 			<?php endif; ?>
-			<div class="amp">
+			<div class="amp amp-settings">
 				<div class="settings-welcome">
 					<div class="selectable selectable--left">
 						<div class="settings-welcome__illustration">
@@ -254,92 +380,147 @@ class OptionsMenu implements Service, Registerable {
 					</div>
 				</div>
 				<div id="amp-settings-root"></div>
+				<div id="amp-template-modes"></div>
+				<div class="supported-templates">
+					<h2>
+						<?php esc_html_e( 'Supported Templates', 'amp' ); ?>
+					</h2>
+					<div class="selectable selectable--left">
+						<div id="amp-supported-templates"></div>
+
+						<form id="amp-settings" action="options.php" method="post">
+							<?php
+								settings_fields( AMP_Options_Manager::OPTION_NAME );
+								do_settings_sections( AMP_Options_Manager::OPTION_NAME );
+							?>
+						</form>
+					</div>
+				</div>
+				<div id="amp-mobile-redirect"></div>
+				<div id="amp-settings-footer"></div>
 			</div>
 		</div>
 		<?php
 	}
 
 	/**
-	 * Provides the settings screen handle.
+	 * Supported templates section renderer.
 	 *
-	 * @return string
+	 * @since 1.0
 	 */
-	public function screen_handle() {
-		return sprintf( 'toplevel_page_%s', AMP_Options_Manager::OPTION_NAME );
+	public function render_supported_templates() {
+		$theme_support_args = AMP_Theme_Support::get_theme_support_args();
+
+		?>
+
+		<fieldset id="supported_post_types_fieldset" class="hidden">
+			<?php
+			$element_name         = AMP_Options_Manager::OPTION_NAME . '[supported_post_types][]';
+			$supported_post_types = AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES );
+			?>
+			<h4 class="title"><?php esc_html_e( 'Content Types', 'amp' ); ?></h4>
+			<p>
+				<?php esc_html_e( 'The following content types will be available as AMP:', 'amp' ); ?>
+			</p>
+			<ul>
+			<?php foreach ( array_map( 'get_post_type_object', AMP_Post_Type_Support::get_eligible_post_types() ) as $post_type ) : ?>
+				<?php
+				$checked = (
+					post_type_supports( $post_type->name, AMP_Post_Type_Support::SLUG )
+					||
+					in_array( $post_type->name, $supported_post_types, true )
+				);
+				?>
+				<li>
+					<?php $element_id = AMP_Options_Manager::OPTION_NAME . "-supported_post_types-{$post_type->name}"; ?>
+					<input
+						type="checkbox"
+						id="<?php echo esc_attr( $element_id ); ?>"
+						name="<?php echo esc_attr( $element_name ); ?>"
+						value="<?php echo esc_attr( $post_type->name ); ?>"
+						<?php checked( $checked ); ?>
+						>
+					<label for="<?php echo esc_attr( $element_id ); ?>">
+						<?php echo esc_html( $post_type->label ); ?>
+					</label>
+				</li>
+			<?php endforeach; ?>
+			</ul>
+		</fieldset>
+
+		<?php if ( ! isset( $theme_support_args['available_callback'] ) ) : ?>
+			<fieldset id="supported_templates_fieldset" class="hidden">
+				<style>
+					#supported_templates_fieldset ul ul {
+						margin-left: 40px;
+					}
+				</style>
+				<h4 class="title"><?php esc_html_e( 'Templates', 'amp' ); ?></h4>
+				<?php
+				$this->list_template_conditional_options( AMP_Theme_Support::get_supportable_templates() );
+				?>
+			</fieldset>
+		<?php endif; ?>
+		<?php
 	}
 
 	/**
-	 * Enqueues settings page assets.
+	 * List template conditional options.
 	 *
-	 * @since 1.6.0
-	 *
-	 * @param string $hook_suffix The current admin page.
+	 * @param array       $options Options.
+	 * @param string|null $parent  ID of the parent option.
 	 */
-	public function enqueue_assets( $hook_suffix ) {
-		if ( $this->screen_handle() !== $hook_suffix ) {
-			return;
-		}
+	private function list_template_conditional_options( $options, $parent = null ) {
+		$element_name = AMP_Options_Manager::OPTION_NAME . '[supported_templates][]';
+		?>
+		<ul>
+			<?php foreach ( $options as $id => $option ) : ?>
+				<?php
+				$element_id = AMP_Options_Manager::OPTION_NAME . '-supported-templates-' . $id;
+				if ( $parent ? empty( $option['parent'] ) || $parent !== $option['parent'] : ! empty( $option['parent'] ) ) {
+					continue;
+				}
 
-		$asset_file   = AMP__DIR__ . '/assets/js/' . self::ASSET_HANDLE . '.asset.php';
-		$asset        = require $asset_file;
-		$dependencies = $asset['dependencies'];
-		$version      = $asset['version'];
+				// Skip showing an option if it doesn't have a label.
+				if ( empty( $option['label'] ) ) {
+					continue;
+				}
 
-		wp_enqueue_script(
-			self::ASSET_HANDLE,
-			amp_get_asset_url( 'js/' . self::ASSET_HANDLE . '.js' ),
-			$dependencies,
-			$version,
-			true
-		);
+				?>
+				<li>
+					<?php if ( empty( $option['immutable'] ) ) : ?>
+						<input
+							type="checkbox"
+							id="<?php echo esc_attr( $element_id ); ?>"
+							name="<?php echo esc_attr( $element_name ); ?>"
+							value="<?php echo esc_attr( $id ); ?>"
+							<?php checked( ! empty( $option['user_supported'] ) ); ?>
+						>
+					<?php else : // Persist user selection even when checkbox disabled, when selection forced by theme/filter. ?>
+						<input
+							type="checkbox"
+							id="<?php echo esc_attr( $element_id ); ?>"
+							<?php checked( ! empty( $option['supported'] ) ); ?>
+							<?php disabled( true ); ?>
+						>
+						<?php if ( ! empty( $option['user_supported'] ) ) : ?>
+							<input type="hidden" name="<?php echo esc_attr( $element_name ); ?>" value="<?php echo esc_attr( $id ); ?>">
+						<?php endif; ?>
+					<?php endif; ?>
+					<label for="<?php echo esc_attr( $element_id ); ?>">
+						<?php echo esc_html( $option['label'] ); ?>
+					</label>
 
-		wp_enqueue_style(
-			self::ASSET_HANDLE,
-			amp_get_asset_url( 'css/amp-settings.css' ),
-			[ $this->google_fonts->get_handle(), 'wp-components' ],
-			AMP__VERSION
-		);
+					<?php if ( ! empty( $option['description'] ) ) : ?>
+						<span class="description">
+							&mdash; <?php echo wp_kses_post( $option['description'] ); ?>
+						</span>
+					<?php endif; ?>
 
-		wp_styles()->add_data( self::ASSET_HANDLE, 'rtl', 'replace' );
-
-		$theme           = wp_get_theme();
-		$is_reader_theme = in_array( get_stylesheet(), wp_list_pluck( ( new AMP_Reader_Themes() )->get_themes(), 'slug' ), true );
-
-		$js_data = [
-			'CURRENT_THEME'                      => [
-				'name'            => $theme->get( 'Name' ),
-				'description'     => $theme->get( 'Description' ),
-				'is_reader_theme' => $is_reader_theme,
-				'screenshot'      => $theme->get_screenshot(),
-				'url'             => $theme->get( 'ThemeURI' ),
-			],
-			'OPTIONS_REST_ENDPOINT'              => rest_url( 'amp/v1/options' ),
-			'READER_THEMES_REST_ENDPOINT'        => rest_url( 'amp/v1/reader-themes' ),
-			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
-			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
-			'USER_REST_ENDPOINT'                 => rest_url( 'wp/v2/users/me' ),
-		];
-
-		wp_add_inline_script(
-			self::ASSET_HANDLE,
-			sprintf(
-				'var ampSettings = %s;',
-				wp_json_encode( $js_data )
-			),
-			'before'
-		);
-
-		if ( function_exists( 'wp_set_script_translations' ) ) {
-			wp_set_script_translations( self::ASSET_HANDLE, 'amp' );
-		} elseif ( function_exists( 'wp_get_jed_locale_data' ) || function_exists( 'gutenberg_get_jed_locale_data' ) ) {
-			$locale_data  = function_exists( 'wp_get_jed_locale_data' ) ? wp_get_jed_locale_data( 'amp' ) : gutenberg_get_jed_locale_data( 'amp' );
-			$translations = wp_json_encode( $locale_data );
-
-			wp_add_inline_script(
-				self::ASSET_HANDLE,
-				'wp.i18n.setLocaleData( ' . $translations . ', "amp" );',
-				'after'
-			);
-		}
+					<?php $this->list_template_conditional_options( $options, $id ); ?>
+				</li>
+			<?php endforeach; ?>
+		</ul>
+		<?php
 	}
 }

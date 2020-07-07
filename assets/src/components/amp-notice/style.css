@@ -5,9 +5,19 @@
 	line-height: 1.85;
 }
 
+.amp-notice p {
+	font-size: 13px;
+}
+
 .amp-notice__body {
 	flex-grow: 1;
 	text-align: left;
+}
+
+.amp-notice__body .components-panel__body-toggle,
+.amp-notice__body .components-panel__body-toggle:focus:not(:disabled) {
+	color: var(--black);
+	outline: none;
 }
 
 .amp-notice--success {

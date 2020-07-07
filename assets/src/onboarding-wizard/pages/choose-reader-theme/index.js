@@ -7,10 +7,10 @@ import { useEffect, useContext, useMemo } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { Loading } from '../../components/loading';
 import { Navigation } from '../../components/navigation-context-provider';
 import { ReaderThemes } from '../../components/reader-themes-context-provider';
 import { Options } from '../../../components/options-context-provider';
+import { Loading } from '../../../components/loading';
 import { ThemeCard } from './theme-card';
 
 /**
@@ -41,7 +41,7 @@ export function ChooseReaderTheme() {
 
 	// Separate available themes (both installed and installable) from those that need to be installed manually.
 	const { availableThemes, unavailableThemes } = useMemo(
-		() => themes.reduce(
+		() => ( themes || [] ).reduce(
 			( collections, theme ) => {
 				if ( theme.availability === 'non-installable' ) {
 					collections.unavailableThemes.push( theme );

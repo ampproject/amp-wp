@@ -1,22 +1,44 @@
+/**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { useContext } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { SupportedTemplatesToggle } from '../components/supported-templates-toggle';
+import { Options } from '../components/options-context-provider';
+import { SupportedTemplatesVisibility } from './supported-templates-visibility';
 
-export function SupportedTemplates() {
+/**
+ * Supported templates section of the settings page.
+ *
+ * @param {Object} props Component props.
+ * @param {Object} props.themeSupportArgs Theme support settings passed from the backend.
+ */
+export function SupportedTemplates( { themeSupportArgs } ) {
+	const { fetchingOptions } = useContext( Options );
+
 	return (
 		<div className="supported-templates">
 
-			<h2>
-				{ __( 'Supported Templates', 'amp' ) }
-			</h2>
-			<SupportedTemplatesToggle />
+			{ false === fetchingOptions && (
+				<>
+					<SupportedTemplatesToggle themeSupportArgs={ themeSupportArgs } />
+					<SupportedTemplatesVisibility />
+				</>
+			) }
 		</div>
 	);
 }
+
+SupportedTemplates.propTypes = {
+	themeSupportArgs: PropTypes.shape( {
+		templates_supported: PropTypes.any,
+	} ).isRequired,
+};

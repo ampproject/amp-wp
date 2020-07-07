@@ -33,6 +33,7 @@ class AMP_Options_Manager {
 		Option::VERSION                 => AMP__VERSION,
 		Option::READER_THEME            => AMP_Reader_Themes::DEFAULT_READER_THEME,
 		Option::PLUGIN_CONFIGURED       => false,
+		Option::MOBILE_REDIRECT         => false,
 	];
 
 	/**
@@ -241,6 +242,11 @@ class AMP_Options_Manager {
 			$options[ Option::PLUGIN_CONFIGURED ] = (bool) $new_options[ OPTION::PLUGIN_CONFIGURED ];
 		}
 
+		// Validate mobile redirection.
+		if ( isset( $new_options[ Option::MOBILE_REDIRECT ] ) ) {
+			$options[ Option::MOBILE_REDIRECT ] = (bool) $new_options[ OPTION::MOBILE_REDIRECT ];
+		}
+
 		// Validate analytics.
 		if ( isset( $new_options[ Option::ANALYTICS ] ) && $new_options[ Option::ANALYTICS ] !== $options[ Option::ANALYTICS ] ) {
 			foreach ( $new_options[ Option::ANALYTICS ] as $data ) {
@@ -392,7 +398,9 @@ class AMP_Options_Manager {
 			$options
 		);
 
-		return update_option( self::OPTION_NAME, $amp_options, false );
+		$update = update_option( self::OPTION_NAME, $amp_options, false );
+
+		return $update;
 	}
 
 	/**

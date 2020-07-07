@@ -14,7 +14,7 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import { AMPNotice, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_INFO, NOTICE_TYPE_WARNING, NOTICE_SIZE_LARGE } from '../../components/amp-notice';
+import { AMPNotice, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_INFO, NOTICE_TYPE_WARNING, NOTICE_SIZE_LARGE } from '../../../components/amp-notice';
 import { TemplateModeOption } from '../../../components/template-mode-option';
 import { MOST_RECOMMENDED, RECOMMENDED, getRecommendationLevels, getAllSelectionText, TECHNICAL, NON_TECHNICAL, STANDARD, TRANSITIONAL, READER } from './get-selection-details';
 
@@ -88,7 +88,7 @@ export function ScreenUI( { currentThemeIsAmongReaderThemes, developerToolsOptio
 
 			<TemplateModeOption
 				details={ sectionText.transitional.details }
-				mode="transitonal"
+				mode="transitional"
 				previouslySelected={ savedCurrentMode === 'transitional' && technicalQuestionChanged && ! firstTimeInWizard }
 			>
 				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ getRecommendationLevelType( recommendationLevels[ TRANSITIONAL ] ) }>
