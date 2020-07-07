@@ -4070,6 +4070,7 @@ class AMP_Allowed_Tags_Generated {
 							'allow_relative' => true,
 							'protocol' => array(
 								'https',
+								'amp-state',
 							),
 						),
 					),
