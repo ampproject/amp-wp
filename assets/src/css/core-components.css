@@ -42,7 +42,7 @@
 .amp .components-button.is-primary:disabled {
 	color: var(--white);
 	background: #d3d9dd;
-	border-color: var(--brand);
+	border-color: #d3d9dd;
 }
 
 .amp .components-button svg {
