@@ -71,6 +71,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 				if ( fetchedOptions.plugin_configured === false ) {
 					fetchedOptions.mobile_redirect = true;
 					fetchedOptions.reader_theme = null;
+					fetchedOptions.theme_support = null;
 				}
 
 				setOriginalOptions( fetchedOptions );

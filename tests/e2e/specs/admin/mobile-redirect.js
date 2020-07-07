@@ -8,9 +8,11 @@ const { visitAdminPage } = require( '@wordpress/e2e-test-utils/build/visit-admin
  */
 const { completeWizard, cleanUpWizard } = require( '../../utils/onboarding-wizard-utils' );
 
+const toggleSelector = '.amp-setting-toggle input[type="checkbox"]';
+
 describe( 'Mobile redirect settings', () => {
 	afterEach( async () => {
-		await visitAdminPage( 'admin.php', 'page=amp-setup' );
+		await visitAdminPage( 'admin.php', 'page=amp-onboarding-wizard' );
 		await cleanUpWizard();
 	} );
 
@@ -18,15 +20,15 @@ describe( 'Mobile redirect settings', () => {
 		await completeWizard( { mode: 'reader' } );
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
-		await page.waitForSelector( '#mobile_redirect' );
-		await expect( page ).toMatchElement( '#mobile_redirect:checked' );
+		await page.waitForSelector( toggleSelector );
+		await expect( page ).toMatchElement( `${ toggleSelector }:checked` );
 	} );
 
 	it( 'persists the mobile redirect setting off', async () => {
 		await completeWizard( { mode: 'reader', mobileRedirect: false } );
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
-		await page.waitForSelector( '#mobile_redirect' );
-		await expect( page ).not.toMatchElement( '#mobile_redirect:checked' );
+		await page.waitForSelector( toggleSelector );
+		await expect( page ).not.toMatchElement( `${ toggleSelector }:checked` );
 	} );
 } );

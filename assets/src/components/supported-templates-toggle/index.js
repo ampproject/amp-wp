@@ -21,7 +21,7 @@ export function SupportedTemplatesToggle( { themeSupportArgs } ) {
 
 	const { all_templates_supported: allTemplatesSupported, theme_support: themeSupport } = editedOptions;
 
-	return 'templates_supported' in themeSupportArgs && 'all' === themeSupportArgs.templates_supported
+	return themeSupportArgs && 'templates_supported' in themeSupportArgs && 'all' === themeSupportArgs.templates_supported
 		? (
 			<AMPNotice>
 				<p>
@@ -42,7 +42,10 @@ export function SupportedTemplatesToggle( { themeSupportArgs } ) {
 }
 
 SupportedTemplatesToggle.propTypes = {
-	themeSupportArgs: PropTypes.shape( {
-		templates_supported: PropTypes.any,
-	} ).isRequired,
+	themeSupportArgs: PropTypes.oneOfType( [
+		PropTypes.bool,
+		PropTypes.shape( {
+			templates_supported: PropTypes.any,
+		} ),
+	] ).isRequired,
 };

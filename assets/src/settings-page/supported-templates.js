@@ -38,7 +38,10 @@ export function SupportedTemplates( { themeSupportArgs } ) {
 }
 
 SupportedTemplates.propTypes = {
-	themeSupportArgs: PropTypes.shape( {
-		templates_supported: PropTypes.any,
-	} ).isRequired,
+	themeSupportArgs: PropTypes.oneOfType( [
+		PropTypes.bool,
+		PropTypes.shape( {
+			templates_supported: PropTypes.any,
+		} ),
+	] ).isRequired,
 };

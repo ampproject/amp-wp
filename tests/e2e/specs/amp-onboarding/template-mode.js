@@ -76,10 +76,4 @@ describe( 'Template mode recommendations with non-reader-theme active', () => {
 		await expect( '.amp-notice--info' ).countToBe( 2 );
 		await expect( '.amp-notice--success' ).countToBe( 1 );
 	} );
-
-	it( 'makes correct recommendations when user is technical and the current theme is not a reader theme', async () => {
-		await moveToTemplateModeScreen( { technical: true } );
-
-		await expect( '.amp-notice--info' ).countToBe( 3 );
-	} );
 } );

@@ -20,9 +20,9 @@ describe( 'Onboarding wizard exit links', () => {
 		await page.waitForSelector( '.wp-admin' );
 
 		await page.evaluate( () => {
-			document.querySelector( 'a[href="admin.php?page=amp-setup"]' ).click();
+			document.querySelector( 'a[href="admin.php?page=amp-onboarding-wizard"]' ).click();
 		} );
-		await page.waitForSelector( '#amp-setup' );
+		await page.waitForSelector( '#amp-onboarding-wizard' );
 		await expect( page ).toClick( 'a', { text: 'Close' } );
 		await page.waitForSelector( '.wp-admin' );
 		await expect( page ).toMatchElement( 'h1', { text: 'Dashboard' } );

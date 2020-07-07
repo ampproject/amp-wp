@@ -97,7 +97,7 @@ function Root() {
 		<>
 			{ fetchingOptions && <Loading /> }
 			{
-				'available_callback' in themeSupportArgs && (
+				themeSupportArgs && 'available_callback' in themeSupportArgs && (
 					<AMPNotice type={ NOTICE_TYPE_WARNING } size={ NOTICE_SIZE_LARGE }>
 						<p>
 							{ __( 'Your theme is using the deprecated available_callback argument for AMP theme support.', 'amp' ) }

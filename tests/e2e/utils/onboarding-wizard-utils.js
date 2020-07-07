@@ -7,10 +7,10 @@ export const NEXT_BUTTON_SELECTOR = '.onboarding-wizard-nav__prev-next button.is
 export const PREV_BUTTON_SELECTOR = '.onboarding-wizard-nav__prev-next button:not(.is-primary)';
 
 export async function goToOnboardingWizard() {
-	if ( ! isCurrentURL( 'admin.php', 'page=amp-setup' ) ) {
-		await visitAdminPage( 'admin.php', 'page=amp-setup' );
+	if ( ! isCurrentURL( 'admin.php', 'page=amp-onboarding-wizard' ) ) {
+		await visitAdminPage( 'admin.php', 'page=amp-onboarding-wizard' );
 	}
-	await page.waitForSelector( '#amp-setup' );
+	await page.waitForSelector( '#amp-onboarding-wizard' );
 }
 
 export async function clickNextButton() {
@@ -42,8 +42,8 @@ export async function moveToTemplateModeScreen( { technical } ) {
 }
 
 export async function clickMode( mode ) {
-	await page.$eval( `[for="${ mode }-mode"]`, ( el ) => el.click() );
-	await page.waitForSelector( `#${ mode }-mode:checked` );
+	await page.$eval( `[for="template-mode-${ mode }"]`, ( el ) => el.click() );
+	await page.waitForSelector( `#template-mode-${ mode }:checked` );
 }
 
 export async function moveToReaderThemesScreen( { technical } ) {
