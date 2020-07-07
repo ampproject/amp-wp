@@ -329,10 +329,7 @@ class AMP_Theme_Support {
 
 		self::ensure_proper_amp_location();
 
-		$theme_support = self::get_theme_support_args();
-		if ( ! empty( $theme_support['template_dir'] ) ) {
-			self::add_amp_template_filters();
-		} elseif ( amp_is_legacy() ) {
+		if ( amp_is_legacy() ) {
 			// Make sure there is no confusion when serving the legacy Reader template that the normal theme hooks should not be used.
 			remove_theme_support( self::SLUG );
 
@@ -343,6 +340,15 @@ class AMP_Theme_Support {
 				},
 				PHP_INT_MAX
 			);
+		} else {
+			$theme_support = self::get_theme_support_args();
+			if ( false === $theme_support ) {
+				// Make sure that 'amp' theme support is present for plugins can use `current_theme_supports('amp')` as
+				// a signal for whether to use standard template hooks instead of legacy Reader AMP post template hooks.
+				add_theme_support( self::SLUG );
+			} elseif ( ! empty( $theme_support['template_dir'] ) ) {
+				self::add_amp_template_filters();
+			}
 		}
 
 		self::add_hooks();

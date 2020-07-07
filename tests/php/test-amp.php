@@ -13,6 +13,14 @@ use AmpProject\AmpWP\Option;
 class Test_AMP extends WP_UnitTestCase {
 
 	/**
+	 * Set up.
+	 */
+	public function setUp() {
+		parent::setUp();
+		remove_theme_support( 'amp' );
+	}
+
+	/**
 	 * Tear down and clean up.
 	 */
 	public function tearDown() {

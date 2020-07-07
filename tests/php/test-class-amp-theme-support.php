@@ -154,13 +154,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_finish_init() {
 		$post_id = self::factory()->post->create( [ 'post_title' => 'Test' ] );
-		add_theme_support(
-			AMP_Theme_Support::SLUG,
-			[
-				AMP_Theme_Support::PAIRED_FLAG => true,
-				'template_dir'                 => 'amp',
-			]
-		);
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 
 		// Test transitional mode singular, where not on endpoint that it causes amphtml link to be added.
 		remove_action( 'wp_head', 'amp_add_amphtml_link' );
@@ -178,11 +172,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		// Test canonical, so amphtml link is not added and init finalizes.
 		remove_action( 'wp_head', 'amp_add_amphtml_link' );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
 			[
-				AMP_Theme_Support::PAIRED_FLAG => false,
-				'template_dir'                 => 'amp',
+				'template_dir' => 'my-amp',
 			]
 		);
 		$this->go_to( get_permalink( $post_id ) );
@@ -191,6 +185,40 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertFalse( has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 		$this->assertEquals( 10, has_filter( 'index_template_hierarchy', [ 'AMP_Theme_Support', 'filter_amp_template_hierarchy' ] ), 'Expected add_amp_template_filters to have been called since template_dir is not empty' );
 		$this->assertEquals( 20, has_action( 'wp_head', 'amp_add_generator_metadata' ), 'Expected add_hooks to have been called' );
+		$this->assertTrue( current_theme_supports( 'amp' ) );
+
+		// Test Transitional without existing theme support args.
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+		remove_theme_support( 'amp' );
+		$this->go_to( amp_get_permalink( $post_id ) );
+		$this->assertTrue( is_amp_endpoint() );
+		AMP_Theme_Support::finish_init();
+		$this->assertTrue( current_theme_supports( 'amp' ) );
+
+		// Test Transitional with existing theme support args.
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+		add_theme_support( 'amp', [ 'foo' => 'bar' ] );
+		$this->go_to( amp_get_permalink( $post_id ) );
+		$this->assertTrue( is_amp_endpoint() );
+		AMP_Theme_Support::finish_init();
+		$this->assertTrue( current_theme_supports( 'amp' ) );
+		$this->assertEquals( [ [ 'foo' => 'bar' ] ], get_theme_support( 'amp' ) );
+
+		// Test legacy Reader mode.
+		add_theme_support( 'amp' );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::READER_THEME, AMP_Reader_Themes::DEFAULT_READER_THEME );
+		$this->go_to( amp_get_permalink( $post_id ) );
+		AMP_Theme_Support::finish_init();
+		$this->assertFalse( current_theme_supports( 'amp' ) );
+
+		// Test Reader mode with Reader theme.
+		remove_theme_support( 'amp' );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentyseventeen' );
+		$this->go_to( amp_get_permalink( $post_id ) );
+		AMP_Theme_Support::finish_init();
+		$this->assertTrue( current_theme_supports( 'amp' ) );
 	}
 
 	/**
