@@ -7,6 +7,8 @@ import { visitAdminPage } from '@wordpress/e2e-test-utils';
  * Internal dependencies
  */
 import { completeWizard, cleanUpWizard, clickMode, selectReaderTheme } from '../../utils/onboarding-wizard-utils';
+import { installTheme } from '../../utils/install-theme';
+import { activateTheme } from '../../utils/activate-theme';
 
 async function testStandardAndTransitionalSupportedTemplateToggle() {
 	await expect( page ).toMatchElement( '.supported-templates' );
@@ -83,6 +85,28 @@ describe( 'AMP settings screen newly activated', () => {
 		await expect( page ).not.toMatchElement( '.hidden .supported-templates ' );
 
 		await expect( page ).toMatchElement( '#supported_templates_fieldset.hidden' );
+	} );
+} );
+
+describe( 'Active theme as reader mode', () => {
+	it( 'disables reader theme if is currently active on site', async () => {
+		await installTheme( 'twentynineteen' );
+		await activateTheme( 'twentynineteen' );
+
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+
+		await clickMode( 'reader' );
+
+		await expect( page ).toMatchElement( '.amp-notice__body', { text: /^This is the active/ } );
+
+		await activateTheme( 'twentytwenty' );
+	} );
+} );
+
+describe( 'Mode info notices', () => {
+	it( 'shows expected notices', async () => {
+		await expect( page ).toMatchElement( 'amp-notice__body p', { text: /in standard mode/ } );
+		await expect( page ).toMatchElement( 'amp-notice__body p', { text: /in transitional mode/ } );
 	} );
 } );
 
