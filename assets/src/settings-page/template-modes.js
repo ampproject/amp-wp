@@ -23,7 +23,7 @@ import { AMPNotice, NOTICE_SIZE_LARGE, NOTICE_TYPE_INFO } from '../components/am
  */
 export function TemplateModes( { themeSupportNotices } ) {
 	return (
-		<div className="template-mode-selection">
+		<section className="template-mode-selection">
 			<h2>
 				{ __( 'Template mode', 'amp' ) }
 			</h2>
@@ -66,7 +66,7 @@ export function TemplateModes( { themeSupportNotices } ) {
 					</AMPNotice>
 				) }
 			</TemplateModeOption>
-		</div>
+		</section>
 	);
 }
 TemplateModes.propTypes = {

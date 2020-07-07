@@ -22,17 +22,11 @@ export function SupportedTemplatesVisibility() {
 	const supportedPostTypesFieldset = useRef( document.getElementById( 'supported_post_types_fieldset' ) );
 	const supportedTemplatesFieldset = useRef( document.getElementById( 'supported_templates_fieldset' ) );
 	const supportedTemplateInputs = useRef( [ ...document.querySelectorAll( '#supported_templates_fieldset input[type=checkbox]' ) ] );
-	const supportedTemplatesContainer = useRef( document.querySelector( '.supported-templates' ) );
 
 	/**
 	 * Show/hide settings features depending on options on the page.
 	 */
 	useEffect( () => {
-		supportedTemplatesContainer.current.classList.toggle(
-			'hidden',
-			! themeSupport,
-		);
-
 		supportedPostTypesTitle.current.classList.toggle(
 			'hidden',
 			'reader' === themeSupport,

@@ -20,11 +20,11 @@ export function ReaderThemes() {
 	}
 
 	return (
-		<div className="reader-themes">
+		<section className="reader-themes">
 			<h2>
 				{ __( 'Choose Reader Theme', 'amp' ) }
 			</h2>
 			<ReaderThemeSelection />
-		</div>
+		</section>
 	);
 }

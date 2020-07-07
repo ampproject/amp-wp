@@ -24,11 +24,11 @@ export function MobileRedirection() {
 	}
 
 	return (
-		<div className="mobile-redirection">
+		<section className="mobile-redirection">
 			<h2>
 				{ __( 'Mobile Redirection', 'amp' ) }
 			</h2>
 			<RedirectToggle direction="left" />
-		</div>
+		</section>
 	);
 }

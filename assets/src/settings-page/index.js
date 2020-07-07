@@ -15,7 +15,7 @@ import {
  * WordPress dependencies
  */
 import domReady from '@wordpress/dom-ready';
-import { render, createPortal } from '@wordpress/element';
+import { render } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -37,6 +37,7 @@ import '../css/core-components.css';
 import './style.css';
 import { ReaderThemes } from './reader-themes';
 import { SettingsFooter } from './settings-footer';
+import { PluginSuppression } from './plugin-suppression';
 
 const { ajaxurl: wpAjaxUrl } = global;
 
@@ -76,31 +77,6 @@ Providers.propTypes = {
 function Root() {
 	const themeSupportArgs = Array.isArray( THEME_SUPPORT_ARGS ) ? {} : THEME_SUPPORT_ARGS;
 
-	const TemplateModesPortal = () => createPortal(
-		(
-			<>
-				<TemplateModes themeSupportNotices={ THEME_SUPPORT_NOTICES } />
-				<ReaderThemes />
-			</>
-		),
-		document.getElementById( 'amp-template-modes' ),
-	);
-
-	const SupportedTemplatesPortal = () => createPortal(
-		<SupportedTemplates themeSupportArgs={ themeSupportArgs } />,
-		document.getElementById( 'amp-supported-templates' ),
-	);
-
-	const MobileRedirectionPortal = () => createPortal(
-		<MobileRedirection />,
-		document.getElementById( 'amp-mobile-redirect' ),
-	);
-
-	const SettingsFooterPortal = () => createPortal(
-		<SettingsFooter />,
-		document.getElementById( 'amp-settings-footer' ),
-	);
-
 	return (
 		<>
 			{
@@ -112,10 +88,12 @@ function Root() {
 					</AMPNotice>
 				)
 			}
-			<TemplateModesPortal />
-			<SupportedTemplatesPortal />
-			<MobileRedirectionPortal />
-			<SettingsFooterPortal />
+			<TemplateModes themeSupportNotices={ THEME_SUPPORT_NOTICES } />
+			<ReaderThemes />
+			<SupportedTemplates themeSupportArgs={ themeSupportArgs } />
+			<MobileRedirection />
+			<PluginSuppression />
+			<SettingsFooter />
 		</>
 	);
 }

@@ -167,8 +167,7 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 						'default' => false,
 					],
 					Option::ALL_TEMPLATES_SUPPORTED => [
-						'type'    => 'boolean',
-						'default' => true,
+						'type' => 'boolean',
 					],
 				],
 			];

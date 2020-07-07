@@ -204,7 +204,7 @@ final class PluginSuppression implements Service, Registerable {
 				__( 'Plugin Suppression', 'amp' ),
 				[ $this, 'render_suppressed_plugins' ],
 				AMP_Options_Manager::OPTION_NAME,
-				'general',
+				'validation',
 				[
 					'class' => 'amp-suppressed-plugins',
 				]

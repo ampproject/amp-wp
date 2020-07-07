@@ -225,7 +225,9 @@ class AMP_Options_Manager {
 
 		$is_template_support_required = ( isset( $theme_support_args['templates_supported'] ) && 'all' === $theme_support_args['templates_supported'] );
 		if ( ! $is_template_support_required && ! isset( $theme_support_args['available_callback'] ) ) {
-			$options[ Option::ALL_TEMPLATES_SUPPORTED ] = ! empty( $new_options[ Option::ALL_TEMPLATES_SUPPORTED ] );
+			if ( isset( $new_options[ Option::ALL_TEMPLATES_SUPPORTED ] ) ) {
+				$options[ Option::ALL_TEMPLATES_SUPPORTED ] = ! empty( $new_options[ Option::ALL_TEMPLATES_SUPPORTED ] );
+			}
 
 			// Validate supported templates.
 			$options[ Option::SUPPORTED_TEMPLATES ] = [];
@@ -240,11 +242,6 @@ class AMP_Options_Manager {
 		// Validate wizard completion.
 		if ( isset( $new_options[ Option::PLUGIN_CONFIGURED ] ) ) {
 			$options[ Option::PLUGIN_CONFIGURED ] = (bool) $new_options[ OPTION::PLUGIN_CONFIGURED ];
-		}
-
-		// Validate mobile redirection.
-		if ( isset( $new_options[ Option::MOBILE_REDIRECT ] ) ) {
-			$options[ Option::MOBILE_REDIRECT ] = (bool) $new_options[ OPTION::MOBILE_REDIRECT ];
 		}
 
 		// Validate analytics.

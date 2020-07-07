@@ -7,6 +7,20 @@
 	max-width: 550px;
 }
 
+/* Core form style overrides. */
+.amp-settings .form-table td {
+	padding: 0;
+}
+
+.amp-settings .form-table {
+	margin-top: 0;
+}
+
+.amp-settings .form-table > tbody > tr > th {
+	display: none;
+}
+
+/* Welcome section. */
 .settings-welcome {
 	margin-bottom: 2.25rem;
 }
@@ -32,51 +46,13 @@
 
 .settings-welcome__button {
 
-
 	@media (min-width: 783px) {
 		padding-left: 1rem;
 		padding-right: 1.5rem;
 	}
 }
 
-.supported-templates {
-	margin-bottom: 3rem;
-}
-
-.amp-supported-templates {
-	margin-bottom: 3rem;
-}
-
-.supported-templates > .amp-notice {
-	margin-bottom: 1rem;
-}
-
-.supported-templates .form-table td {
-	padding: 0;
-}
-
-.supported-templates .form-table {
-	margin-top: 0;
-}
-
-.amp-template-support-field > th {
-	display: none;
-}
-
-.amp .amp-template-support-field > td {
-	padding-top: 1rem;
-
-	@media (min-width: 783px) {
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		grid-gap: 1rem;
-	}
-}
-
-.mobile-redirection {
-	margin-bottom: 2.25rem;
-}
-
+/* Reader themes section. */
 .amp-settings .choose-reader-theme__grid {
 
 	@media (min-width: 1300px) {
@@ -97,3 +73,28 @@
 	padding: 2.5rem;
 	margin-bottom: 2.5rem;
 }
+
+/* Supported templates section. */
+.supported-templates {
+	margin-bottom: 3rem;
+}
+
+.supported-templates .amp-notice {
+	margin-bottom: 1rem;
+}
+
+.amp .amp-template-support-field > td {
+	padding-top: 1rem;
+
+	@media (min-width: 783px) {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		grid-gap: 1rem;
+	}
+}
+
+.mobile-redirection,
+.plugin-suppression {
+	margin-bottom: 2.25rem;
+}
+

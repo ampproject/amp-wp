@@ -70,11 +70,13 @@ final class MobileRedirection implements Service, Registerable {
 	 * @return array Sanitized options.
 	 */
 	public function sanitize_options( $options, $new_options ) {
-		$options[ Option::MOBILE_REDIRECT ] = (
-			isset( $new_options[ Option::MOBILE_REDIRECT ] )
-			&&
-			rest_sanitize_boolean( $new_options[ Option::MOBILE_REDIRECT ] )
-		);
+		if ( isset( $new_options[ Option::MOBILE_REDIRECT ] ) ) {
+			$options[ Option::MOBILE_REDIRECT ] = (
+				isset( $new_options[ Option::MOBILE_REDIRECT ] )
+				&&
+				rest_sanitize_boolean( $new_options[ Option::MOBILE_REDIRECT ] )
+			);
+		}
 		return $options;
 	}
 
