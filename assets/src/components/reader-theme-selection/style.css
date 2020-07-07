@@ -1,4 +1,4 @@
-.choose-reader-theme > form {
+.choose-reader-theme > div {
 	margin-left: -8px;
 	margin-right: -8px;
 }
@@ -41,7 +41,7 @@
 	display: flex;
 }
 
-.theme-card__label-header h2 {
+.theme-card__label-header h3 {
 	margin-left: 5px;
 	margin-top: 0.75em;
 }
@@ -55,7 +55,7 @@
 	width: 100%;
 }
 
-.theme-card__description {
+p.theme-card__description {
 	font-size: 13px;
 	line-height: 1.666;
 	display: -webkit-box;

@@ -4,6 +4,7 @@
  */
 import { useContext } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
+import { __ } from '@wordpress/i18n';
 
 /**
  * External dependencies
@@ -13,11 +14,9 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import './style.css';
-import { __ } from '@wordpress/i18n';
-import { Selectable } from '../../../components/selectable';
-import { Phone } from '../../components/phone';
-import { Options } from '../../../components/options-context-provider';
+import { Options } from '../options-context-provider';
+import { Selectable } from '../selectable';
+import { Phone } from '../phone';
 
 /**
  * A selectable card showing a theme in a list of themes.
@@ -59,9 +58,9 @@ export function ThemeCard( { description, homepage, screenshotUrl, slug, name, u
 							updateOptions( { reader_theme: slug } );
 						} }
 					/>
-					<h2>
+					<h3>
 						{ decodeEntities( name ) }
-					</h2>
+					</h3>
 				</div>
 
 				<p className="theme-card__description">

@@ -1,4 +1,4 @@
-.amp.amp-settings .selectable {
+.amp.amp-settings .selectable--left {
 	margin-left: 10px;
 	width: calc(100% - 10px); /* Offset box shadow. */
 }
@@ -43,12 +43,20 @@
 	margin-bottom: 3rem;
 }
 
+.amp-supported-templates {
+	margin-bottom: 3rem;
+}
+
 .supported-templates > .amp-notice {
 	margin-bottom: 1rem;
 }
 
 .supported-templates .form-table td {
 	padding: 0;
+}
+
+.supported-templates .form-table {
+	margin-top: 0;
 }
 
 .amp-template-support-field > th {
@@ -67,4 +75,25 @@
 
 .mobile-redirection {
 	margin-bottom: 2.25rem;
+}
+
+.amp-settings .choose-reader-theme__grid {
+
+	@media (min-width: 1300px) {
+		grid-template-columns: repeat(4, 1fr);
+	}
+
+	@media (min-width: 1600px) {
+		grid-template-columns: repeat(5, 1fr);
+	}
+
+	@media (min-width: 1900px) {
+		grid-template-columns: repeat(6, 1fr);
+	}
+}
+
+.amp-settings .reader-themes {
+	background-color: var(--white);
+	padding: 2.5rem;
+	margin-bottom: 2.5rem;
 }

@@ -29,7 +29,7 @@ export function SupportedTemplatesToggle( { themeSupportArgs } ) {
 				</p>
 			</AMPNotice>
 		)
-		: 'reader' !== themeSupport && (
+		: [ 'standard', 'transitional' ].includes( themeSupport ) && (
 			<AMPSettingToggle
 				checked={ true === allTemplatesSupported }
 				text={ __( 'This will allow all of the URLs on your site to be served as AMP by default.', 'amp' ) }

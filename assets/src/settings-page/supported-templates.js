@@ -24,16 +24,15 @@ import { SupportedTemplatesVisibility } from './supported-templates-visibility';
 export function SupportedTemplates( { themeSupportArgs } ) {
 	const { fetchingOptions } = useContext( Options );
 
-	return (
-		<div className="supported-templates">
+	if ( fetchingOptions ) {
+		return null;
+	}
 
-			{ false === fetchingOptions && (
-				<>
-					<SupportedTemplatesToggle themeSupportArgs={ themeSupportArgs } />
-					<SupportedTemplatesVisibility />
-				</>
-			) }
-		</div>
+	return (
+		<>
+			<SupportedTemplatesToggle themeSupportArgs={ themeSupportArgs } />
+			<SupportedTemplatesVisibility />
+		</>
 	);
 }
 

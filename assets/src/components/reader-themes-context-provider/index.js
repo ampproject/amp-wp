@@ -14,8 +14,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import { useError } from '../../utils/use-error';
-import { Options } from '../../components/options-context-provider';
-import { Navigation } from './navigation-context-provider';
+import { Options } from '../options-context-provider';
 
 export const ReaderThemes = createContext();
 
@@ -37,7 +36,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	const [ downloadingTheme, setDownloadingTheme ] = useState( false );
 	const [ downloadedTheme, setDownloadedTheme ] = useState( false );
 
-	const { editedOptions, updateOptions, savingOptions } = useContext( Options );
+	const { editedOptions, savingOptions } = useContext( Options );
 	const { reader_theme: readerTheme, theme_support: themeSupport } = editedOptions;
 
 	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
@@ -53,19 +52,6 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 		() => themes ? themes.find( ( { slug } ) => slug === readerTheme ) || { name: null } : { name: null },
 		[ readerTheme, themes ],
 	);
-
-	/**
-	 * When reader mode was selected selected and the user chooses the currently active theme as the reader theme,
-	 * we will override their choice with transitional.
-	 */
-	const [ readerModeWasOverridden, setReaderModeWasOverridden ] = useState( false );
-	const { currentPage: { slug: currentPageSlug } } = useContext( Navigation );
-	useEffect( () => {
-		if ( 'summary' === currentPageSlug && 'reader' === themeSupport && selectedTheme.name === currentTheme.name ) {
-			updateOptions( { theme_support: 'transitional' } );
-			setReaderModeWasOverridden( true );
-		}
-	}, [ selectedTheme.name, currentTheme.name, themeSupport, currentPageSlug, updateOptions ] );
 
 	/**
 	 * Handle downloaded theme errors separately from normal error handling because we don't want it to break the application
@@ -178,8 +164,8 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 					downloadingTheme,
 					downloadingThemeError,
 					fetchingThemes,
-					readerModeWasOverridden,
 					themes,
+					selectedTheme,
 				}
 			}
 		>

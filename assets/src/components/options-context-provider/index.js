@@ -145,10 +145,10 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 	 *
 	 * @param {Object} newOptions Updated options values.
 	 */
-	const updateOptions = ( newOptions ) => {
+	const updateOptions = useCallback( ( newOptions ) => {
 		setUpdates( { ...updates, ...newOptions } );
 		setDidSaveOptions( false );
-	};
+	}, [ updates ] );
 
 	// Allows an item in the updates object to be removed.
 	const unsetOption = useCallback( ( option ) => {

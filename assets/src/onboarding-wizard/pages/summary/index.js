@@ -9,8 +9,8 @@ import { __ } from '@wordpress/i18n';
  */
 import './style.css';
 import { Navigation } from '../../components/navigation-context-provider';
-import { ReaderThemes } from '../../components/reader-themes-context-provider';
 import { Options } from '../../../components/options-context-provider';
+import { ReaderThemes } from '../../../components/reader-themes-context-provider';
 import { Reader } from './reader';
 import { Standard } from './standard';
 import { Transitional } from './transitional';

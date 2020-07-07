@@ -1,7 +1,7 @@
 /**
  * CSS variables for the AMP admin pages.
  */
-:root { /* React app root element. */
+.amp { /* React app root element. */
 	--stepper-max-width: 280px;
 	--setup-page-max-width: 1000px;
 	--black: #212121;

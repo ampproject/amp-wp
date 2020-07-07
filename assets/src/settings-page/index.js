@@ -2,22 +2,28 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { OPTIONS_REST_ENDPOINT, THEME_SUPPORT_ARGS, THEME_SUPPORT_NOTICES } from 'amp-settings';
+import {
+	CURRENT_THEME,
+	OPTIONS_REST_ENDPOINT,
+	READER_THEMES_REST_ENDPOINT,
+	THEME_SUPPORT_ARGS,
+	THEME_SUPPORT_NOTICES,
+	UPDATES_NONCE,
+} from 'amp-settings';
 
 /**
  * WordPress dependencies
  */
 import domReady from '@wordpress/dom-ready';
-import { render, createPortal, useContext, useEffect } from '@wordpress/element';
+import { render, createPortal } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Button } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
-import { OptionsContextProvider, Options } from '../components/options-context-provider';
+import { OptionsContextProvider } from '../components/options-context-provider';
 import { AMPNotice, NOTICE_TYPE_WARNING, NOTICE_SIZE_LARGE } from '../components/amp-notice';
-import { Loading } from '../components/loading';
+import { ReaderThemesContextProvider } from '../components/reader-themes-context-provider';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
 import { MobileRedirection } from './mobile-redirection';
@@ -29,6 +35,10 @@ import '../css/variables.css';
 import '../css/elements.css';
 import '../css/core-components.css';
 import './style.css';
+import { ReaderThemes } from './reader-themes';
+import { SettingsFooter } from './settings-footer';
+
+const { ajaxurl: wpAjaxUrl } = global;
 
 /**
  * Context providers for the settings page.
@@ -39,7 +49,14 @@ import './style.css';
 function Providers( { children } ) {
 	return (
 		<OptionsContextProvider optionsRestEndpoint={ OPTIONS_REST_ENDPOINT }>
-			{ children }
+			<ReaderThemesContextProvider
+				currentTheme={ CURRENT_THEME }
+				readerThemesEndpoint={ READER_THEMES_REST_ENDPOINT }
+				updatesNonce={ UPDATES_NONCE }
+				wpAjaxUrl={ wpAjaxUrl }
+			>
+				{ children }
+			</ReaderThemesContextProvider>
 		</OptionsContextProvider>
 	);
 }
@@ -53,14 +70,19 @@ Providers.propTypes = {
  * into those root components, all sharing state.
  *
  * @todo Once the template support form is fully moved from PHP into React, all of this can be rendered into a single root div.
+ *
+ * Note: This component cannot use any state or context. They would cause the portals to be re-created every time state change.
  */
 function Root() {
-	const { didSaveOptions, fetchingOptions, saveOptions, savingOptions } = useContext( Options );
-
 	const themeSupportArgs = Array.isArray( THEME_SUPPORT_ARGS ) ? {} : THEME_SUPPORT_ARGS;
 
 	const TemplateModesPortal = () => createPortal(
-		<TemplateModes themeSupportNotices={ THEME_SUPPORT_NOTICES } />,
+		(
+			<>
+				<TemplateModes themeSupportNotices={ THEME_SUPPORT_NOTICES } />
+				<ReaderThemes />
+			</>
+		),
 		document.getElementById( 'amp-template-modes' ),
 	);
 
@@ -75,27 +97,12 @@ function Root() {
 	);
 
 	const SettingsFooterPortal = () => createPortal(
-		<Button isPrimary onClick={ saveOptions } disabled={ savingOptions || didSaveOptions }>
-			{ __( 'Save changes', 'amp' ) }
-			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-				<path d="M43.16 10.18c-0.881-0.881-2.322-0.881-3.203 0s-0.881 2.322 0 3.203l16.335 16.335h-54.051c-1.281 0-2.242 1.041-2.242 2.242 0 1.281 0.961 2.322 2.242 2.322h54.051l-16.415 16.335c-0.881 0.881-0.881 2.322 0 3.203s2.322 0.881 3.203 0l20.259-20.259c0.881-0.881 0.881-2.322 0-3.203l-20.179-20.179z" />
-			</svg>
-		</Button>,
+		<SettingsFooter />,
 		document.getElementById( 'amp-settings-footer' ),
 	);
 
-	/**
-	 * Submits the PHP-generated form on the page after options have saved via REST.
-	 */
-	useEffect( () => {
-		if ( true === didSaveOptions ) {
-			document.querySelector( 'form#amp-settings' ).submit();
-		}
-	}, [ didSaveOptions ] );
-
 	return (
 		<>
-			{ fetchingOptions && <Loading /> }
 			{
 				themeSupportArgs && 'available_callback' in themeSupportArgs && (
 					<AMPNotice type={ NOTICE_TYPE_WARNING } size={ NOTICE_SIZE_LARGE }>

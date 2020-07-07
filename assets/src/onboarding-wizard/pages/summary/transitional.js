@@ -13,9 +13,9 @@ import { __ } from '@wordpress/i18n';
  */
 import { useContext } from '@wordpress/element';
 import { Transitional as TransitionalIllustration } from '../../../components/svg/transitional';
-import { ReaderThemes } from '../../components/reader-themes-context-provider';
 import { AMPNotice, NOTICE_TYPE_INFO, NOTICE_SIZE_LARGE } from '../../../components/amp-notice';
 import { RedirectToggle } from '../../../components/redirect-toggle';
+import { ReaderModeOverride } from '../../reader-mode-override';
 import { SummaryHeader } from './summary-header';
 import { DesktopScreenshot } from './desktop-screenshot';
 
@@ -26,7 +26,7 @@ import { DesktopScreenshot } from './desktop-screenshot';
  * @param {Object} props.currentTheme Data for the theme currently active on the site.
  */
 export function Transitional( { currentTheme } ) {
-	const { readerModeWasOverridden } = useContext( ReaderThemes );
+	const readerModeWasOverridden = useContext( ReaderModeOverride );
 
 	return (
 		<>

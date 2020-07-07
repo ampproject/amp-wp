@@ -15,9 +15,9 @@ import { CUSTOMIZER_LINK } from 'amp-onboarding-wizard'; // From WP inline scrip
  * Internal dependencies
  */
 import { User } from '../../components/user-context-provider';
-import { Phone } from '../../components/phone';
+import { Phone } from '../../../components/phone';
 import './style.css';
-import { ReaderThemes } from '../../components/reader-themes-context-provider';
+import { ReaderThemes } from '../../../components/reader-themes-context-provider';
 import { AMPNotice, NOTICE_SIZE_LARGE, NOTICE_TYPE_WARNING, NOTICE_TYPE_SUCCESS } from '../../../components/amp-notice';
 import { Navigation } from '../../components/navigation-context-provider';
 import { Options } from '../../../components/options-context-provider';

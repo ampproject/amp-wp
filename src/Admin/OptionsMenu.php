@@ -381,7 +381,7 @@ class OptionsMenu implements Service, Registerable {
 				</div>
 				<div id="amp-settings-root"></div>
 				<div id="amp-template-modes"></div>
-				<div class="supported-templates">
+				<div class="supported-templates hidden">
 					<h2>
 						<?php esc_html_e( 'Supported Templates', 'amp' ); ?>
 					</h2>

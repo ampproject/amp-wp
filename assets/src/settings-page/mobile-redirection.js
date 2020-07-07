@@ -19,7 +19,7 @@ export function MobileRedirection() {
 
 	const { theme_support: themeSupport } = editedOptions || {};
 
-	if ( 'standard' === themeSupport ) {
+	if ( ! [ 'reader', 'transitional' ].includes( themeSupport ) ) {
 		return null;
 	}
 

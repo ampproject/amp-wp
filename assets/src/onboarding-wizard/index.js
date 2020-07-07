@@ -29,13 +29,14 @@ import '../css/core-components.css';
 import '../css/elements.css';
 import './style.css';
 import { OptionsContextProvider } from '../components/options-context-provider';
+import { ReaderThemesContextProvider } from '../components/reader-themes-context-provider';
 import { PAGES } from './pages';
 import { SetupWizard } from './setup-wizard';
 import { NavigationContextProvider } from './components/navigation-context-provider';
-import { ReaderThemesContextProvider } from './components/reader-themes-context-provider';
 import { UserContextProvider } from './components/user-context-provider';
 import { ErrorScreen } from './components/error-screen';
 import { SiteScanContextProvider } from './components/site-scan-context-provider';
+import { ReaderModeOverrideContextProvider } from './reader-mode-override';
 
 const { ajaxurl: wpAjaxUrl } = global;
 
@@ -61,11 +62,11 @@ export function Providers( { children } ) {
 						readerThemesEndpoint={ READER_THEMES_REST_ENDPOINT }
 						updatesNonce={ UPDATES_NONCE }
 					>
-
-						<SiteScanContextProvider>
-							{ children }
-						</SiteScanContextProvider>
-
+						<ReaderModeOverrideContextProvider>
+							<SiteScanContextProvider>
+								{ children }
+							</SiteScanContextProvider>
+						</ReaderModeOverrideContextProvider>
 					</ReaderThemesContextProvider>
 				</NavigationContextProvider>
 			</UserContextProvider>

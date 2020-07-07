@@ -12,14 +12,14 @@ import { useContext } from '@wordpress/element';
  * Internal dependencies
  */
 import { Desktop } from '../../components/desktop';
-import { Phone } from '../../components/phone';
-import { ReaderThemes } from '../../components/reader-themes-context-provider';
+import { Phone } from '../../../components/phone';
 import { Reader as ReaderIllustration } from '../../../components/svg/reader';
 import { AMPInfo } from '../../../components/amp-info';
 import { IconDesktop } from '../../../components/svg/icon-desktop';
 import { IconMobile } from '../../../components/svg/icon-mobile';
 import { Options } from '../../../components/options-context-provider';
 import { RedirectToggle } from '../../../components/redirect-toggle';
+import { ReaderThemes } from '../../../components/reader-themes-context-provider';
 import { SummaryHeader } from './summary-header';
 
 /**
