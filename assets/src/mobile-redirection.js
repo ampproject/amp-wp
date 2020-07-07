@@ -44,8 +44,12 @@
 		}
 	} );
 
-	// Short-circuit if mobile redirection is disabled.
-	if ( sessionStorage.getItem( disabledStorageKey ) || isCustomizePreview || isAmpDevMode ) {
+	// Short-circuit if mobile redirection is disabled. Redirection is disabled if the user opted-out by clicking the
+	// link to exit the mobile version, if they are in paired browsing (since non-AMP and AMP are forced in the respective
+	// iframes), and when in the customizer (since the Customizer is opened with a given URL and that should be the URL
+	// which is then used for Customization).
+	const isPairedBrowsing = isAmpDevMode && [ 'paired-browsing-non-amp', 'paired-browsing-amp' ].includes( window.name );
+	if ( sessionStorage.getItem( disabledStorageKey ) || isCustomizePreview || isPairedBrowsing ) {
 		return;
 	}
 

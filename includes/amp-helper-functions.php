@@ -1751,7 +1751,9 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 		return;
 	}
 
-	if ( is_amp_endpoint() ) {
+	$is_amp_endpoint = is_amp_endpoint();
+
+	if ( $is_amp_endpoint ) {
 		$href = amp_remove_endpoint( amp_get_current_url() );
 	} elseif ( is_singular() ) {
 		$href = amp_get_permalink( get_queried_object_id() ); // For sake of Reader mode.
@@ -1761,22 +1763,42 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 
 	$href = remove_query_arg( QueryVars::NOAMP, $href );
 
-	$parent = [
-		'id'    => 'amp',
-		'title' => sprintf(
-			'%s %s',
-			Icon::link()->to_html(
-				[
-					'id'    => 'amp-admin-bar-item-status-icon',
-					'class' => 'ab-icon',
-				]
-			),
-			esc_html( is_amp_endpoint() ? __( 'Non-AMP', 'amp' ) : __( 'AMP', 'amp' ) )
-		),
-		'href'  => esc_url( $href ),
-	];
+	if ( $is_amp_endpoint ) {
+		$icon = Icon::logo()->to_html(
+			[
+				'id'    => 'amp-admin-bar-item-status-icon',
+				'class' => 'ab-icon',
+			]
+		);
+	} else {
+		$icon = Icon::link()->to_html(
+			[
+				'id'    => 'amp-admin-bar-item-status-icon',
+				'class' => 'ab-icon',
+			]
+		);
+	}
 
-	$wp_admin_bar->add_node( $parent );
+	$wp_admin_bar->add_node(
+		[
+			'id'    => 'amp',
+			'title' => sprintf(
+				'%s %s',
+				$icon,
+				esc_html__( 'AMP', 'amp' )
+			),
+			'href'  => esc_url( $href ),
+		]
+	);
+
+	$wp_admin_bar->add_node(
+		[
+			'parent' => 'amp',
+			'id'     => 'amp-view',
+			'title'  => esc_html( $is_amp_endpoint ? __( 'View non-AMP version', 'amp' ) : __( 'View AMP version', 'amp' ) ),
+			'href'   => esc_url( $href ),
+		]
+	);
 }
 
 /**
