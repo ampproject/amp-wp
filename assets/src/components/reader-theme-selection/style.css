@@ -41,6 +41,10 @@
 	display: flex;
 }
 
+.theme-card__label-header > * {
+	flex-shrink: 0;
+}
+
 .theme-card__label-header h3 {
 	margin-left: 5px;
 	margin-top: 0.75em;

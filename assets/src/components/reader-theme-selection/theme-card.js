@@ -17,19 +17,22 @@ import PropTypes from 'prop-types';
 import { Options } from '../options-context-provider';
 import { Selectable } from '../selectable';
 import { Phone } from '../phone';
+import { AMPNotice, NOTICE_TYPE_WARNING, NOTICE_SIZE_SMALL } from '../amp-notice';
 
 /**
  * A selectable card showing a theme in a list of themes.
  *
  * @param {Object} props Component props.
  * @param {string} props.description Theme description.
+ * @param {boolean} props.disableCurrentlyActiveTheme Whether the currently active theme should be unselectable.
+ * @param {string} props.currentlyActiveThemeNotice The notice to show if the theme is unselectable.
  * @param {string} props.homepage Link to view more information about the theme.
  * @param {string} props.screenshotUrl URL for screenshot of theme.
  * @param {string} props.slug Theme slug.
  * @param {string} props.name Theme name.
- * @param {boolean} props.unavailable Whether the theme is not automatically installable in the current environment.
+ * @param {boolean} props.disabled Whether the theme is not automatically installable in the current environment.
  */
-export function ThemeCard( { description, homepage, screenshotUrl, slug, name, unavailable } ) {
+export function ThemeCard( { currentlyActiveThemeNotice, description, disableCurrentlyActiveTheme, homepage, screenshotUrl, slug, name, disabled } ) {
 	const { editedOptions, updateOptions } = useContext( Options );
 	const { reader_theme: readerTheme } = editedOptions;
 
@@ -50,7 +53,7 @@ export function ThemeCard( { description, homepage, screenshotUrl, slug, name, u
 				</Phone>
 				<div className="theme-card__label-header">
 					<input
-						disabled={ Boolean( unavailable ) }
+						disabled={ Boolean( disabled ) }
 						type="radio"
 						id={ id }
 						checked={ readerTheme === slug }
@@ -61,7 +64,14 @@ export function ThemeCard( { description, homepage, screenshotUrl, slug, name, u
 					<h3>
 						{ decodeEntities( name ) }
 					</h3>
+
 				</div>
+
+				{ disabled && currentlyActiveThemeNotice && (
+					<AMPNotice type={ NOTICE_TYPE_WARNING } size={ NOTICE_SIZE_SMALL }>
+						{ currentlyActiveThemeNotice }
+					</AMPNotice>
+				) }
 
 				<p className="theme-card__description">
 					{ decodeEntities( description ) }
@@ -78,10 +88,12 @@ export function ThemeCard( { description, homepage, screenshotUrl, slug, name, u
 }
 
 ThemeCard.propTypes = {
+	currentlyActiveThemeNotice: PropTypes.string,
 	description: PropTypes.string.isRequired,
+	disableCurrentlyActiveTheme: PropTypes.bool,
 	homepage: PropTypes.string.isRequired,
 	screenshotUrl: PropTypes.string.isRequired,
 	slug: PropTypes.string.isRequired,
 	name: PropTypes.string.isRequired,
-	unavailable: PropTypes.bool,
+	disabled: PropTypes.bool,
 };

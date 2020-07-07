@@ -45,7 +45,8 @@ final class OnboardingWizardSubmenu implements Delayed, Service, Registerable {
 			__( 'Onboarding Wizard', 'amp' ),
 			'manage_options',
 			self::SCREEN_ID,
-			'__return_empty_string'
+			'__return_empty_string',
+			99
 		);
 	}
 }

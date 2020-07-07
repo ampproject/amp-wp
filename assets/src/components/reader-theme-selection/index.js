@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { useMemo, useContext } from '@wordpress/element';
@@ -12,8 +17,15 @@ import { Loading } from '../loading';
 import { ThemeCard } from './theme-card';
 import './style.css';
 
-export function ReaderThemeSelection() {
-	const { fetchingThemes, themes } = useContext( ReaderThemes );
+/**
+ * Component for selecting a reader theme.
+ *
+ * @param {Object} props Component props.
+ * @param {boolean} props.disableCurrentlyActiveTheme Whether the currently active theme should be unselectable.
+ * @param {string} props.currentlyActiveThemeNotice The notice to show if the theme is unselectable.
+ */
+export function ReaderThemeSelection( { disableCurrentlyActiveTheme = false, currentlyActiveThemeNotice } ) {
+	const { currentTheme, fetchingThemes, themes } = useContext( ReaderThemes );
 
 	// Separate available themes (both installed and installable) from those that need to be installed manually.
 	const { availableThemes, unavailableThemes } = useMemo(
@@ -49,6 +61,8 @@ export function ReaderThemeSelection() {
 					<ul className="choose-reader-theme__grid">
 						{ availableThemes.map( ( theme ) => (
 							<ThemeCard
+								currentlyActiveThemeNotice={ currentlyActiveThemeNotice }
+								disabled={ disableCurrentlyActiveTheme && currentTheme.name === theme.name }
 								key={ `theme-card-${ theme.slug }` }
 								screenshotUrl={ theme.screenshot_url }
 								{ ...theme }
@@ -70,7 +84,7 @@ export function ReaderThemeSelection() {
 								<ThemeCard
 									key={ `theme-card-${ theme.slug }` }
 									screenshotUrl={ theme.screenshot_url }
-									unavailable={ true }
+									disabled={ true }
 									{ ...theme }
 								/>
 							) ) }
@@ -81,3 +95,8 @@ export function ReaderThemeSelection() {
 		</div>
 	);
 }
+
+ReaderThemeSelection.propTypes = {
+	currentlyActiveThemeNotice: PropTypes.string,
+	disableCurrentlyActiveTheme: PropTypes.bool,
+};
