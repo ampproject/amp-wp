@@ -90,9 +90,16 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
+			$img_elements = $node->getElementsByTagName( 'amp-img' );
+
+			// Skip if no images found.
+			if ( 0 === $img_elements->length ) {
+				continue;
+			}
+
 			// If lightbox is set, we should add lightbox feature to the gallery images.
 			if ( $is_amp_lightbox ) {
-				$this->add_lightbox_attributes_to_image_nodes( $node );
+				$this->add_lightbox_attributes_to_image_nodes( $img_elements );
 			}
 
 			// If amp-carousel is not set, nothing else to do here.
@@ -100,23 +107,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$images = new ElementList();
-
-			// If it's not AMP lightbox, look for <amg-img> elements.
-			if ( ! $is_amp_lightbox ) {
-				$img_elements = $node->getElementsByTagName( 'amp-img' );
-
-				// Skip if no images found.
-				if ( 0 === $img_elements->length ) {
-					continue;
-				}
-
-				foreach ( $img_elements as $element ) {
-					$images = $images->add( $element, $this->get_caption_element( $element ) );
-				}
-			}
-
-			$amp_carousel = new Carousel( $this->dom, $images );
+			$amp_carousel = $this->get_amp_carousel( $img_elements );
 			$gallery_node->parentNode->replaceChild( $amp_carousel->get_dom_element(), $gallery_node );
 		}
 		$this->did_convert_elements = true;
@@ -125,19 +116,28 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Set lightbox related attributes to <amp-img> within gallery.
 	 *
-	 * @param DOMElement $element The UL element.
+	 * @param DOMNodeList $img_elements List of image elements.
 	 */
-	protected function add_lightbox_attributes_to_image_nodes( $element ) {
-		$images     = $element->getElementsByTagName( 'amp-img' );
-		$num_images = $images->length;
-		if ( 0 === $num_images ) {
-			return;
+	protected function add_lightbox_attributes_to_image_nodes( DOMNodeList $img_elements ) {
+		foreach ( $img_elements as $img_element ) {
+			$img_element->setAttribute( 'lightbox', '' );
+		}
+	}
+
+	/**
+	 * Create an AMP carousel component from the list of images specified.
+	 *
+	 * @param DOMNodeList $img_elements
+	 * @return Carousel
+	 */
+	protected function get_amp_carousel( DOMNodeList $img_elements ) {
+		$images = new ElementList();
+
+		foreach ( $img_elements as $element ) {
+			$images = $images->add( $element, $this->get_caption_element( $element ) );
 		}
 
-		for ( $j = $num_images - 1; $j >= 0; $j-- ) {
-			$image_node = $images->item( $j );
-			$image_node->setAttribute( 'lightbox', '' );
-		}
+		return new Carousel( $this->dom, $images );
 	}
 
 	/**
