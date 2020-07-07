@@ -17,7 +17,7 @@ use AmpProject\AmpWP\Option;
  *
  * @covers PluginActivationNotice
  */
-class Test_PluginActivationNotice extends WP_UnitTestCase {
+class PluginActivationNoticeTest extends WP_UnitTestCase {
 
 	/**
 	 * Test instance.

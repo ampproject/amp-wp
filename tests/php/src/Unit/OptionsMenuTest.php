@@ -11,7 +11,7 @@ use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 
 /**
  * Tests for OptionsMenu.
- * 
+ *
  * @group options-menu
  */
 class OptionsMenuTest extends WP_UnitTestCase {
@@ -60,7 +60,7 @@ class OptionsMenuTest extends WP_UnitTestCase {
 	 *
 	 * @covers OptionsMenu::add_menu_items()
 	 */
-	public function test_add_menu_items() { 
+	public function test_add_menu_items() {
 		global $_parent_pages, $submenu, $wp_settings_sections, $wp_settings_fields;
 
 		wp_set_current_user(
