@@ -114,10 +114,24 @@ class AMP_Options_Manager {
 
 		$options = array_merge( $defaults, $options );
 
-		// Migrate theme support slugs.
-		if ( 'native' === $options[ Option::THEME_SUPPORT ] ) {
+		// Ensure current template mode.
+		if ( AMP_Theme_Support::READER_MODE_SLUG === $options[ Option::THEME_SUPPORT ] && get_template() === $options[ Option::READER_THEME ] ) {
+			/*
+			 * When Reader mode is selected and a Reader theme has been chosen, if the active theme switches to be the
+			 * same as the Reader theme, then transparently switch the mode from Reader to Transitional while the
+			 * active theme and the Reader theme are the same. Remember that Reader mode means having two separate
+			 * templates for AMP and non-AMP, whereas Transitional mode means using the same templates. Otherwise, there
+			 * is no difference whatsoever between Reader and Transitional modes, as they are both Paired AMP modes.
+			 * By dynamically changing the mode from Reader to Transitional in the options getter here, if the active
+			 * theme is switched again to be different than what was selected as the Reader theme, then the site will
+			 * go back to being in Reader mode as opposed to Transitional.
+			 */
+			$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
+		} elseif ( 'native' === $options[ Option::THEME_SUPPORT ] ) {
+			// The slug 'native' is the old term for 'standard'.
 			$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::STANDARD_MODE_SLUG;
 		} elseif ( 'paired' === $options[ Option::THEME_SUPPORT ] ) {
+			// The slug 'paired' is the old term for 'transitional.
 			$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
 		} elseif ( 'disabled' === $options[ Option::THEME_SUPPORT ] ) {
 			/*

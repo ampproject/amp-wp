@@ -197,7 +197,7 @@ class AMP_Options_Menu {
 					<p><?php echo wp_kses_post( $transitional_description ); ?></p>
 				</dd>
 				<dt>
-					<input type="radio" id="theme_support_disabled" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="<?php echo esc_attr( AMP_Theme_Support::READER_MODE_SLUG ); ?>" <?php checked( $theme_support, AMP_Theme_Support::READER_MODE_SLUG ); ?>>
+					<input type="radio" id="theme_support_disabled" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="<?php echo esc_attr( AMP_Theme_Support::READER_MODE_SLUG ); ?>" <?php checked( $theme_support, AMP_Theme_Support::READER_MODE_SLUG ); ?> <?php disabled( AMP_Options_Manager::get_option( Option::READER_THEME ), get_template() ); ?>>
 					<label for="theme_support_disabled">
 						<strong><?php esc_html_e( 'Reader', 'amp' ); ?></strong>
 					</label>
@@ -211,6 +211,10 @@ class AMP_Options_Menu {
 						echo esc_html( sprintf( __( 'The "%s" theme is currently selected in the wizard. The ability to change it from the admin screen will come soon.', 'amp' ), AMP_Options_Manager::get_option( Option::READER_THEME ) ) );
 						?>
 					</p>
+
+					<?php if ( AMP_Options_Manager::get_option( Option::READER_THEME ) === get_template() ) : ?>
+						<p><?php esc_html_e( 'The currently-selected Reader theme is the same as the active theme. This means that Reader mode is disabled since it is no different from Transitional mode at this point.', 'amp' ); ?></p>
+					<?php endif; ?>
 				</dd>
 			</dl>
 
