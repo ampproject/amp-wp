@@ -167,6 +167,37 @@ function amp_init() {
 			}
 		}
 	);
+
+	/*
+	 * Hide admin bar if the window is inside the setup wizard iframe.
+	 *
+	 * Detects whether the current window is in an iframe with the specified `name` attribute. The iframe is created
+	 * by Preview component located in <assets/src/setup/pages/save/index.js>.
+	 */
+	add_action(
+		'wp_print_footer_scripts',
+		function() {
+			if ( ! amp_is_dev_mode() || ! is_admin_bar_showing() ) {
+				return;
+			}
+			?>
+			<script data-ampdevmode>
+				document.addEventListener( 'DOMContentLoaded', function() {
+					if ( 'amp-wizard-completion-preview' !== window.name ) {
+						return;
+					}
+
+					const adminBar = document.getElementById( 'wpadminbar' );
+					if ( adminBar ) {
+						document.body.classList.remove( 'admin-bar' );
+						document.documentElement.style.cssText += '; margin-top: 0 !important';
+						adminBar.remove();
+					}
+				});
+			</script>
+			<?php
+		}
+	);
 }
 
 /**
@@ -1429,11 +1460,19 @@ function amp_get_content_sanitizers( $post = null ) {
 		 * @param string[] $element_xpaths XPath element queries. Context is the root element.
 		 */
 		$dev_mode_xpaths = (array) apply_filters( 'amp_dev_mode_element_xpaths', [] );
+
 		if ( is_admin_bar_showing() ) {
 			$dev_mode_xpaths[] = '//*[ @id = "wpadminbar" ]';
 			$dev_mode_xpaths[] = '//*[ @id = "wpadminbar" ]//*';
 			$dev_mode_xpaths[] = '//style[ @id = "admin-bar-inline-css" ]';
 		}
+
+		if ( is_customize_preview() ) {
+			// Scripts are always needed to inject changeset UUID.
+			$dev_mode_xpaths[] = '//script[ @src ]';
+			$dev_mode_xpaths[] = '//script[ not( @type ) or @type = "text/javascript" ]';
+		}
+
 		$sanitizers = array_merge(
 			[
 				'AMP_Dev_Mode_Sanitizer' => [
@@ -1713,7 +1752,9 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 		return;
 	}
 
-	if ( is_amp_endpoint() ) {
+	$is_amp_endpoint = is_amp_endpoint();
+
+	if ( $is_amp_endpoint ) {
 		$href = amp_remove_endpoint( amp_get_current_url() );
 	} elseif ( is_singular() ) {
 		$href = amp_get_permalink( get_queried_object_id() ); // For sake of Reader mode.
@@ -1723,22 +1764,42 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 
 	$href = remove_query_arg( QueryVars::NOAMP, $href );
 
-	$parent = [
-		'id'    => 'amp',
-		'title' => sprintf(
-			'%s %s',
-			Icon::link()->to_html(
-				[
-					'id'    => 'amp-admin-bar-item-status-icon',
-					'class' => 'ab-icon',
-				]
-			),
-			esc_html( is_amp_endpoint() ? __( 'Non-AMP', 'amp' ) : __( 'AMP', 'amp' ) )
-		),
-		'href'  => esc_url( $href ),
-	];
+	if ( $is_amp_endpoint ) {
+		$icon = Icon::logo()->to_html(
+			[
+				'id'    => 'amp-admin-bar-item-status-icon',
+				'class' => 'ab-icon',
+			]
+		);
+	} else {
+		$icon = Icon::link()->to_html(
+			[
+				'id'    => 'amp-admin-bar-item-status-icon',
+				'class' => 'ab-icon',
+			]
+		);
+	}
 
-	$wp_admin_bar->add_node( $parent );
+	$wp_admin_bar->add_node(
+		[
+			'id'    => 'amp',
+			'title' => sprintf(
+				'%s %s',
+				$icon,
+				esc_html__( 'AMP', 'amp' )
+			),
+			'href'  => esc_url( $href ),
+		]
+	);
+
+	$wp_admin_bar->add_node(
+		[
+			'parent' => 'amp',
+			'id'     => 'amp-view',
+			'title'  => esc_html( $is_amp_endpoint ? __( 'View non-AMP version', 'amp' ) : __( 'View AMP version', 'amp' ) ),
+			'href'   => esc_url( $href ),
+		]
+	);
 }
 
 /**

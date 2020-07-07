@@ -16,26 +16,8 @@ import PropTypes from 'prop-types';
 import { Stepper } from './components/stepper';
 import { WordmarkLogo } from './components/svg/wordmark-logo';
 import { Nav } from './components/nav';
-import { Options } from './components/options-context-provider';
-import { Loading } from './components/loading';
 import { WizardUnsavedChangesWarning } from './components/unsaved-changes-warning';
 import { Navigation } from './components/navigation-context-provider';
-
-/**
- * State wrapper for the page component.
- *
- * @param {Object} props Component props.
- * @param {?any} props.children Component children.
- */
-function Page( { children } ) {
-	const { fetchingOptions } = useContext( Options );
-
-	if ( fetchingOptions ) {
-		return <Loading />;
-	}
-
-	return children;
-}
 
 /**
  * Side effect wrapper for page component.
@@ -56,9 +38,10 @@ function PageComponentSideEffects( { children } ) {
  * Setup wizard root component.
  *
  * @param {Object} props Component props.
- * @param {Array} props.exitLink Exit link.
+ * @param {string} props.closeLink Link to return to previous user location.
+ * @param {string} props.finishLink Exit link.
  */
-export function SetupWizard( { exitLink } ) {
+export function SetupWizard( { closeLink, finishLink } ) {
 	const { activePageIndex, currentPage: { title, PageComponent, showTitle }, moveBack, moveForward, pages } = useContext( Navigation );
 
 	const PageComponentWithSideEffects = useMemo( () => () => (
@@ -89,13 +72,12 @@ export function SetupWizard( { exitLink } ) {
 							</h1>
 
 						) }
-						<Page exitLink={ exitLink }>
-							<PageComponentWithSideEffects />
-						</Page>
+						<PageComponentWithSideEffects />
 					</Panel>
 					<Nav
 						activePageIndex={ activePageIndex }
-						exitLink={ exitLink }
+						closeLink={ closeLink }
+						finishLink={ finishLink }
 						moveBack={ moveBack }
 						moveForward={ moveForward }
 						pages={ pages }
@@ -108,5 +90,6 @@ export function SetupWizard( { exitLink } ) {
 }
 
 SetupWizard.propTypes = {
-	exitLink: PropTypes.string.isRequired,
+	closeLink: PropTypes.string.isRequired,
+	finishLink: PropTypes.string.isRequired,
 };

@@ -117,7 +117,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type string[] $dynamic_element_selectors  Selectors for elements (or their ancestors) which contain dynamic content; selectors containing these will not be filtered.
 	 *      @type bool     $use_document_element       Whether the root of the document should be used rather than the body.
 	 *      @type bool     $require_https_src          Require HTTPS URLs.
-	 *      @type bool     $allow_dirty_styles         Allow dirty styles. This short-circuits the sanitize logic; it is used primarily in Customizer preview.
 	 *      @type callable $validation_error_callback  Function to call when a validation error is encountered.
 	 *      @type bool     $should_locate_sources      Whether to locate the sources when reporting validation errors.
 	 *      @type string   $parsed_cache_variant       Additional value by which to vary parsed cache.
@@ -844,12 +843,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	public function sanitize() {
 		$elements = [];
 
-		// @todo Instead of short-circuiting, this actually needs to turn off tree-shaking.
-		// Do nothing if inline styles are allowed. Note, a better alternative to this is AMP dev mode.
-		if ( ! empty( $this->args['allow_dirty_styles'] ) ) {
-			return;
-		}
-
 		$this->focus_class_name_selector_pattern = (
 			! empty( $this->args['focus_within_classes'] ) ?
 				self::get_class_name_selector_pattern( $this->args['focus_within_classes'] ) :
@@ -1419,8 +1412,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
 	 * Fetch external stylesheet.
-	 *
-	 * @todo Use Cache-Control max-age for transient.
 	 *
 	 * @param string $url External stylesheet URL.
 	 * @return string|WP_Error Stylesheet contents or WP_Error.
@@ -2759,9 +2750,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$stylesheet_groups[ $group ]['included_count'] = $this->finalize_stylesheet_group( $group, $stylesheet_groups[ $group ] );
 		}
 
-		// If we're not working with the document element (e.g. for legacy post templates) then there is nothing left to do.
+		// If we're not working with the document element (e.g. for Customizer rendered partials) then there is nothing left to do.
 		if ( empty( $this->args['use_document_element'] ) ) {
-			return; // @todo This would no longer be true with <https://github.com/ampproject/amp-wp/issues/2202>.
+			return;
 		}
 
 		// Add style[amp-custom] to document.

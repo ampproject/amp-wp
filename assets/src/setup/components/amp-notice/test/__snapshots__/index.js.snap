@@ -8,15 +8,46 @@ exports[`AMPNotice matches snapshots 1`] = `
     className="amp-notice__icon"
   >
     <svg
-      height="24"
-      viewBox="0 0 24 24"
-      width="24"
+      fill="none"
+      height="36"
+      viewBox="0 0 35 36"
+      width="35"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path
-        d="M12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm4.393 7.5l-5.643 5.784-2.644-2.506-1.856 1.858 4.5 4.364 7.5-7.643-1.857-1.857z"
-        fill="#00A02F"
+      <rect
+        height="32.0691"
+        rx="16.0345"
+        stroke="#00A02F"
+        strokeWidth="2"
+        width="32.0691"
+        x="1.90112"
+        y="1.98828"
       />
+      <mask
+        height="12"
+        id="mask-notice-success"
+        mask-type="alpha"
+        maskUnits="userSpaceOnUse"
+        width="16"
+        x="10"
+        y="12"
+      >
+        <path
+          d="M15.0921 21.461L11.3924 17.7613L10.1326 19.0122L15.0921 23.9718L25.7387 13.3252L24.4877 12.0742L15.0921 21.461Z"
+          fill="white"
+        />
+      </mask>
+      <g
+        mask="url(#mask-notice-success)"
+      >
+        <rect
+          fill="#00A02F"
+          height="21.2932"
+          width="21.2932"
+          x="7.28906"
+          y="7.375"
+        />
+      </g>
     </svg>
   </div>
   <div

@@ -231,6 +231,10 @@ final class AMP_Reader_Themes {
 			[ 'twentyten' ]
 		);
 
+		if ( ! current_user_can( 'install_themes' ) ) {
+			return false;
+		}
+
 		if ( ! in_array( $theme['slug'], $default_reader_theme_slugs, true ) ) {
 			return false;
 		}

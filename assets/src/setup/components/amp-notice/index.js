@@ -26,9 +26,16 @@ function getNoticeIcon( type ) {
 	switch ( type ) {
 		case NOTICE_TYPE_SUCCESS:
 			Icon = () => (
-				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-					<path fill="#00A02F" d="M12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm4.393 7.5l-5.643 5.784-2.644-2.506-1.856 1.858 4.5 4.364 7.5-7.643-1.857-1.857z" />
+				<svg width="35" height="36" viewBox="0 0 35 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<rect x="1.90112" y="1.98828" width="32.0691" height="32.0691" rx="16.0345" stroke="#00A02F" strokeWidth="2" />
+					<mask id="mask-notice-success" mask-type="alpha" maskUnits="userSpaceOnUse" x="10" y="12" width="16" height="12">
+						<path d="M15.0921 21.461L11.3924 17.7613L10.1326 19.0122L15.0921 23.9718L25.7387 13.3252L24.4877 12.0742L15.0921 21.461Z" fill="white" />
+					</mask>
+					<g mask="url(#mask-notice-success)">
+						<rect x="7.28906" y="7.375" width="21.2932" height="21.2932" fill="#00A02F" />
+					</g>
 				</svg>
+
 			);
 			break;
 
@@ -45,11 +52,12 @@ function getNoticeIcon( type ) {
 
 		default:
 			Icon = () => (
-				<svg width="31" height="33" viewBox="0 0 31 33" fill="none" xmlns="http://www.w3.org/2000/svg">
-					<rect x="1.2666" y="1.28516" width="27.7439" height="30" rx="13.8719" stroke="#285BE7" strokeWidth="2" />
-					<path d="M13.2796 10.4062C13.2796 9.30176 14.1119 8.40625 15.1386 8.40625C16.1652 8.40625 16.9976 9.30176 16.9976 10.4062C16.9976 11.5107 16.1652 12.4062 15.1386 12.4062C14.1119 12.4062 13.2796 11.5107 13.2796 10.4062Z" fill="#285BE7" />
-					<line x1="15.0474" y1="23.8086" x2="15.0474" y2="14.3013" stroke="#285BE7" strokeWidth="2" />
+				<svg width="35" height="35" viewBox="0 0 35 35" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<rect x="1.66626" y="1.76172" width="31.4597" height="31.4597" rx="15.7299" stroke="#285BE7" strokeWidth="2" />
+					<path d="M15.3048 11.3424C15.3048 10.1875 16.2412 9.25113 17.3961 9.25113C18.5509 9.25113 19.4873 10.1875 19.4873 11.3424C19.4873 12.4972 18.5509 13.4336 17.3961 13.4336C16.2412 13.4336 15.3048 12.4972 15.3048 11.3424Z" fill="#285BE7" />
+					<line x1="17.4184" y1="25.3594" x2="17.4184" y2="15.4184" stroke="#285BE7" strokeWidth="2" />
 				</svg>
+
 			);
 	}
 

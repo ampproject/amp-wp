@@ -5,16 +5,12 @@ import { useContext, useEffect, useCallback } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
- * External dependencies
- */
-import { CURRENT_THEME } from 'amp-setup'; // From WP inline script.
-
-/**
  * Internal dependencies
  */
 import './style.css';
 import { Navigation } from '../../components/navigation-context-provider';
 import { Options } from '../../components/options-context-provider';
+import { ReaderThemes } from '../../components/reader-themes-context-provider';
 import { Reader } from './reader';
 import { Standard } from './standard';
 import { Transitional } from './transitional';
@@ -24,9 +20,10 @@ import { Transitional } from './transitional';
  */
 export function Summary() {
 	const { setCanGoForward } = useContext( Navigation );
-	const { options } = useContext( Options );
+	const { editedOptions } = useContext( Options );
+	const { currentTheme } = useContext( ReaderThemes );
 
-	const { theme_support: themeSupport } = options || {};
+	const { theme_support: themeSupport } = editedOptions;
 
 	/**
 	 * Allow moving forward.
@@ -42,18 +39,18 @@ export function Summary() {
 
 		switch ( themeSupport ) {
 			case 'reader':
-				return <Reader currentTheme={ CURRENT_THEME } />;
+				return <Reader currentTheme={ currentTheme } />;
 
 			case 'standard':
-				return <Standard currentTheme={ CURRENT_THEME } />;
+				return <Standard currentTheme={ currentTheme } />;
 
 			case 'transitional':
-				return <Transitional currentTheme={ CURRENT_THEME } />;
+				return <Transitional currentTheme={ currentTheme } />;
 
 			default:
 				throw new Error( __( 'A mode option was not accounted for on the summary screen.', 'amp' ) );
 		}
-	}, [ themeSupport ] );
+	}, [ currentTheme, themeSupport ] );
 
 	return (
 		<div className="summary">

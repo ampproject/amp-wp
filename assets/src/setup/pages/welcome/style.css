@@ -2,7 +2,7 @@
 	padding-bottom: 45px;
 	padding-top: 30px;
 
-	@media screen and (min-width: 783px) {
+	@media screen and (min-width: 1000px) {
 		padding-left: 90px;
 		padding-right: 90px;
 	}

@@ -20,6 +20,7 @@ import { AMPNotice, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_INFO, NOTICE_TYPE_WARNING, 
 import { Standard } from '../../components/svg/standard';
 import { Transitional } from '../../components/svg/transitional';
 import { Reader } from '../../components/svg/reader';
+import { AMPInfo } from '../../components/amp-info';
 import { MOST_RECOMMENDED, RECOMMENDED, getRecommendationLevels, getAllSelectionText, TECHNICAL, NON_TECHNICAL, STANDARD, TRANSITIONAL, READER, NOT_RECOMMENDED } from './get-selection-details';
 
 /**
@@ -28,15 +29,17 @@ import { MOST_RECOMMENDED, RECOMMENDED, getRecommendationLevels, getAllSelection
  * @param {Object} props Component props.
  * @param {string|Object} props.compatibility Compatibility content.
  * @param {string} props.id A string for the input's HTML ID.
+ * @param {boolean} props.firstTimeInWizard Whether the wizard is running for the first time.
  * @param {string|Object} props.illustration An illustration for the selection.
  * @param {boolean} props.isCurrentSavedSelection Whether the mode is currently saved as the selected mode.
  * @param {Array} props.details Array of strings representing details about the mode and recommendation.
  * @param {Function} props.onChange Callback to select the mode.
  * @param {number} props.recommended Recommendation level. -1: not recommended. 0: good. 1: Most recommended.
  * @param {boolean} props.selected Whether the mode is selected.
+ * @param {boolean} props.technicalQuestionChanged Whether the user changed their technical question from the previous option.
  * @param {string} props.title The title for the selection.
  */
-export function Selection( { compatibility, id, illustration, isCurrentSavedSelection, details, onChange, recommended, selected, title } ) {
+export function Selection( { compatibility, firstTimeInWizard, id, illustration, isCurrentSavedSelection, details, onChange, recommended, selected, technicalQuestionChanged, title } ) {
 	const recommendationLevelType = useMemo( () => {
 		switch ( recommended ) {
 			case MOST_RECOMMENDED:
@@ -68,13 +71,10 @@ export function Selection( { compatibility, id, illustration, isCurrentSavedSele
 					<h2>
 						{ title }
 					</h2>
-					{ isCurrentSavedSelection && (
-						<div className="template-mode-selection__current-selection">
-							<svg width="15" height="21" viewBox="0 0 15 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-								<path d="M9.60669 2.83203V7.83203C9.60669 8.95203 9.97669 9.99203 10.6067 10.832H4.60669C5.25669 9.97203 5.60669 8.93203 5.60669 7.83203V2.83203H9.60669ZM12.6067 0.832031H2.60669C2.05669 0.832031 1.60669 1.28203 1.60669 1.83203C1.60669 2.38203 2.05669 2.83203 2.60669 2.83203H3.60669V7.83203C3.60669 9.49203 2.26669 10.832 0.606689 10.832V12.832H6.57669V19.832L7.57669 20.832L8.57669 19.832V12.832H14.6067V10.832C12.9467 10.832 11.6067 9.49203 11.6067 7.83203V2.83203H12.6067C13.1567 2.83203 13.6067 2.38203 13.6067 1.83203C13.6067 1.28203 13.1567 0.832031 12.6067 0.832031Z" fill="#333D47" />
-							</svg>
+					{ isCurrentSavedSelection && technicalQuestionChanged && ! firstTimeInWizard && (
+						<AMPInfo>
 							{ __( 'Previously selected', 'amp' ) }
-						</div>
+						</AMPInfo>
 					) }
 				</div>
 			</label>
@@ -113,12 +113,14 @@ export function Selection( { compatibility, id, illustration, isCurrentSavedSele
 Selection.propTypes = {
 	compatibility: PropTypes.node.isRequired,
 	details: PropTypes.node.isRequired,
+	firstTimeInWizard: PropTypes.bool,
 	id: PropTypes.string.isRequired,
 	illustration: PropTypes.node.isRequired,
 	isCurrentSavedSelection: PropTypes.bool.isRequired,
 	onChange: PropTypes.func.isRequired,
 	recommended: PropTypes.oneOf( [ RECOMMENDED, NOT_RECOMMENDED, MOST_RECOMMENDED ] ).isRequired,
 	selected: PropTypes.bool.isRequired,
+	technicalQuestionChanged: PropTypes.bool,
 	title: PropTypes.string.isRequired,
 };
 
@@ -127,13 +129,16 @@ Selection.propTypes = {
  *
  * @param {Object} props Component props.
  * @param {string} props.currentMode The selected mode.
+ * @param {boolean} props.currentThemeIsAmongReaderThemes Whether the currently active theme is in the list of reader themes.
  * @param {boolean} props.developerToolsOption Whether the user has enabled developer tools.
+ * @param {boolean} props.firstTimeInWizard Whether the wizard is running for the first time.
+ * @param {boolean} props.technicalQuestionChanged Whether the user changed their technical question from the previous option.
  * @param {Array} props.pluginIssues The plugin issues found in the site scan.
  * @param {string} props.savedCurrentMode The current selected mode saved in the database.
  * @param {Function} props.setCurrentMode The callback to update the selected mode.
  * @param {Array} props.themeIssues The theme issues found in the site scan.
  */
-export function ScreenUI( { currentMode, developerToolsOption, pluginIssues, savedCurrentMode, setCurrentMode, themeIssues } ) {
+export function ScreenUI( { currentMode, currentThemeIsAmongReaderThemes, developerToolsOption, firstTimeInWizard, technicalQuestionChanged, pluginIssues, savedCurrentMode, setCurrentMode, themeIssues } ) {
 	const standardId = 'standard-mode';
 	const transitionalId = 'transitional-mode';
 	const readerId = 'reader-mode';
@@ -142,12 +147,13 @@ export function ScreenUI( { currentMode, developerToolsOption, pluginIssues, sav
 
 	const recommendationLevels = useMemo( () => getRecommendationLevels(
 		{
+			currentThemeIsAmongReaderThemes,
 			userIsTechnical,
 			hasScanResults: null !== pluginIssues && null !== themeIssues,
 			hasPluginIssues: pluginIssues && 0 < pluginIssues.length,
 			hasThemeIssues: themeIssues && 0 < themeIssues.length,
 		},
-	), [ themeIssues, pluginIssues, userIsTechnical ] );
+	), [ currentThemeIsAmongReaderThemes, themeIssues, pluginIssues, userIsTechnical ] );
 
 	const sectionText = useMemo(
 		() => getAllSelectionText( recommendationLevels, userIsTechnical ? TECHNICAL : NON_TECHNICAL ),
@@ -168,6 +174,8 @@ export function ScreenUI( { currentMode, developerToolsOption, pluginIssues, sav
 				recommended={ recommendationLevels[ STANDARD ] }
 				selected={ currentMode === 'standard' }
 				title={ __( 'Standard', 'amp' ) }
+				technicalQuestionChanged={ technicalQuestionChanged }
+				firstTimeInWizard={ firstTimeInWizard }
 			/>
 
 			<Selection
@@ -182,6 +190,8 @@ export function ScreenUI( { currentMode, developerToolsOption, pluginIssues, sav
 				recommended={ recommendationLevels[ TRANSITIONAL ] }
 				selected={ currentMode === 'transitional' }
 				title={ __( 'Transitional', 'amp' ) }
+				technicalQuestionChanged={ technicalQuestionChanged }
+				firstTimeInWizard={ firstTimeInWizard }
 			/>
 
 			<Selection
@@ -196,6 +206,8 @@ export function ScreenUI( { currentMode, developerToolsOption, pluginIssues, sav
 				recommended={ recommendationLevels[ READER ] }
 				selected={ currentMode === 'reader' }
 				title={ __( 'Reader', 'amp' ) }
+				technicalQuestionChanged={ technicalQuestionChanged }
+				firstTimeInWizard={ firstTimeInWizard }
 			/>
 		</form>
 	);
@@ -203,7 +215,10 @@ export function ScreenUI( { currentMode, developerToolsOption, pluginIssues, sav
 
 ScreenUI.propTypes = {
 	currentMode: PropTypes.string,
+	currentThemeIsAmongReaderThemes: PropTypes.bool.isRequired,
 	developerToolsOption: PropTypes.bool,
+	firstTimeInWizard: PropTypes.bool,
+	technicalQuestionChanged: PropTypes.bool,
 	setCurrentMode: PropTypes.func.isRequired,
 	pluginIssues: PropTypes.arrayOf( PropTypes.string ),
 	savedCurrentMode: PropTypes.string,

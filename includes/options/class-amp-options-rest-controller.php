@@ -16,6 +16,13 @@ use AmpProject\AmpWP\Option;
 final class AMP_Options_REST_Controller extends WP_REST_Controller {
 
 	/**
+	 * Key for a preview permalink added to the endpoint data.
+	 *
+	 * @var string
+	 */
+	const PREVIEW_PERMALINK = 'preview_permalink';
+
+	/**
 	 * Reader themes provider class.
 	 *
 	 * @var AMP_Reader_Themes
@@ -94,6 +101,11 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 		$properties = $this->get_item_schema()['properties'];
 
 		$options = wp_array_slice_assoc( $options, array_keys( $properties ) );
+
+		// Add the preview permalink. The permalink can't be handled via AMP_Options_Manager::get_options because
+		// amp_admin_get_preview_permalink calls AMP_Options_Manager::get_options, leading to infinite recursion.
+		$options[ self::PREVIEW_PERMALINK ] = amp_admin_get_preview_permalink();
+
 		return rest_ensure_response( $options );
 	}
 
@@ -144,6 +156,11 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 					Option::MOBILE_REDIRECT  => [
 						'type'    => 'boolean',
 						'default' => false,
+					],
+					self::PREVIEW_PERMALINK  => [
+						'type'     => 'string',
+						'readonly' => true,
+						'format'   => 'url',
 					],
 					Option::WIZARD_COMPLETED => [
 						'type'    => 'boolean',

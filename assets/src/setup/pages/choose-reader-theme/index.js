@@ -18,10 +18,10 @@ import { ThemeCard } from './theme-card';
  */
 export function ChooseReaderTheme() {
 	const { canGoForward, setCanGoForward } = useContext( Navigation );
-	const { options } = useContext( Options );
+	const { editedOptions } = useContext( Options );
 	const { fetchingThemes, themes } = useContext( ReaderThemes );
 
-	const { reader_theme: readerTheme, theme_support: themeSupport } = options || {};
+	const { reader_theme: readerTheme, theme_support: themeSupport } = editedOptions;
 
 	/**
 	 * Allow moving forward.
@@ -39,15 +39,9 @@ export function ChooseReaderTheme() {
 		}
 	}, [ canGoForward, setCanGoForward, readerTheme, themes, themeSupport ] );
 
-	// Filter out the active theme if it is a reader theme.
-	const nonActiveThemes = useMemo(
-		() => ( themes || [] ).filter( ( { availability } ) => 'active' !== availability ),
-		[ themes ],
-	);
-
 	// Separate available themes (both installed and installable) from those that need to be installed manually.
 	const { availableThemes, unavailableThemes } = useMemo(
-		() => nonActiveThemes.reduce(
+		() => themes.reduce(
 			( collections, theme ) => {
 				if ( theme.availability === 'non-installable' ) {
 					collections.unavailableThemes.push( theme );
@@ -59,7 +53,7 @@ export function ChooseReaderTheme() {
 			},
 			{ availableThemes: [], unavailableThemes: [] },
 		),
-		[ nonActiveThemes ] );
+		[ themes ] );
 
 	if ( fetchingThemes ) {
 		return (
