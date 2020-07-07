@@ -358,6 +358,18 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertInternalType( 'object', $view_item );
 		$this->assertEqualSets( [ QueryVars::AMP ], array_keys( $this->get_url_query_vars( $view_item->href ) ) );
 		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-validity' ) );
+
+		// Lastly, confirm that the settings item is added if the user is an admin.
+		wp_set_current_user( 0 );
+		$admin_bar = new WP_Admin_Bar();
+		$this->assertFalse( current_user_can( 'manage_options' ) );
+		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
+		$this->assertNull( $admin_bar->get_node( 'amp-settings' ) );
+		$admin_bar = new WP_Admin_Bar();
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->assertTrue( current_user_can( 'manage_options' ) );
+		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
+		$this->assertObjectHasAttribute( 'href', $admin_bar->get_node( 'amp-settings' ) );
 	}
 
 	/**
@@ -2165,23 +2177,158 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertInstanceOf( 'DOMElement', $dom->getElementById( 'wp-admin-bar-amp' ) );
 		$status_icon_element = $dom->getElementById( 'amp-admin-bar-item-status-icon' );
 		$this->assertInstanceOf( 'DOMElement', $status_icon_element );
-		$this->assertStringContains( 'amp-icon amp-valid', $status_icon_element->getAttribute( 'class' ) );
+		$valid_class_name = 'ab-icon amp-icon amp-valid';
+		$this->assertEquals( $valid_class_name, $status_icon_element->getAttribute( 'class' ) );
 		$validity_link_element = $dom->getElementById( 'wp-admin-bar-amp-validity' );
 		$this->assertInstanceOf( 'DOMElement', $validity_link_element );
-		$this->assertEquals( 'Validate', trim( $validity_link_element->textContent ) );
+		$this->assertEquals( 'Validate URL', trim( $validity_link_element->textContent ) );
 
+		$error1 = [ 'code' => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR ];
+		$error2 = [ 'code' => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ];
+
+		$term1_data = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( $error1 );
+		$term2_data = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( $error2 );
+
+		$term1_id = wp_insert_term( $term1_data['slug'], AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, $term1_data )['term_id'];
+		$term2_id = wp_insert_term( $term1_data['slug'], AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, $term2_data )['term_id'];
+
+		$get_small_text_content = function ( $validity_link_element ) {
+			$small = $validity_link_element->getElementsByTagName( 'small' )->item( 0 );
+			$this->assertInstanceOf( DOMElement::class, $small );
+			$text = $small->textContent;
+			$small->parentNode->removeChild( $small );
+			return $text;
+		};
+
+		// Test 1 unreviewed removed term.
 		AMP_Validation_Manager::$validation_results = [
 			[
-				'error'       => [ 'code' => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR ],
-				'sanitized'   => false,
-				'slug'        => '98765b4',
-				'term_status' => 0,
+				'error'     => $error1,
+				'sanitized' => true,
 			],
 		];
-
+		wp_update_term( $term1_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, [ 'term_group' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS ] );
 		AMP_Validation_Manager::finalize_validation( $dom );
-		$this->assertEquals( 'Validate 1 issue (1 unreviewed)', trim( $validity_link_element->textContent ) );
+		$this->assertEquals( '(1 issue: unreviewed)', $get_small_text_content( $validity_link_element ) );
 		$this->assertStringContains( 'amp-icon amp-warning', $status_icon_element->getAttribute( 'class' ) );
+		$status_icon_element->setAttribute( 'class', $valid_class_name );
+
+		// Test 1 reviewed removed term.
+		wp_update_term( $term1_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, [ 'term_group' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS ] );
+		AMP_Validation_Manager::$validation_results = [
+			[
+				'error'     => $error1,
+				'sanitized' => true,
+			],
+		];
+		AMP_Validation_Manager::finalize_validation( $dom );
+		$this->assertEquals( '(1 issue: reviewed)', $get_small_text_content( $validity_link_element ) );
+		$this->assertStringContains( 'amp-icon amp-valid', $status_icon_element->getAttribute( 'class' ) );
+		$status_icon_element->setAttribute( 'class', $valid_class_name );
+
+		// Test 1 unreviewed kept term in Standard Mode.
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->assertTrue( amp_is_canonical() );
+		wp_update_term( $term1_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, [ 'term_group' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS ] );
+		AMP_Validation_Manager::$validation_results = [
+			[
+				'error'     => $error1,
+				'sanitized' => false,
+			],
+		];
+		AMP_Validation_Manager::finalize_validation( $dom );
+		$this->assertEquals( '(1 issue: unreviewed, kept)', $get_small_text_content( $validity_link_element ) );
+		$this->assertStringContains( 'amp-icon amp-warning', $status_icon_element->getAttribute( 'class' ) );
+		$status_icon_element->setAttribute( 'class', $valid_class_name );
+
+		// Test 1 reviewed kept term in Standard Mode.
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->assertTrue( amp_is_canonical() );
+		wp_update_term( $term1_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, [ 'term_group' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS ] );
+		AMP_Validation_Manager::$validation_results = [
+			[
+				'error'     => $error1,
+				'sanitized' => false,
+			],
+		];
+		AMP_Validation_Manager::finalize_validation( $dom );
+		$this->assertEquals( '(1 issue: kept)', $get_small_text_content( $validity_link_element ) );
+		$this->assertStringContains( 'amp-icon amp-warning', $status_icon_element->getAttribute( 'class' ) );
+		$status_icon_element->setAttribute( 'class', $valid_class_name );
+
+		// Test 1 unreviewed kept term in Transitional Mode.
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+		add_theme_support( 'amp', [ 'paired' => true ] );
+		$this->assertTrue( ! amp_is_canonical() );
+		wp_update_term( $term1_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, [ 'term_group' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS ] );
+		AMP_Validation_Manager::$validation_results = [
+			[
+				'error'     => $error1,
+				'sanitized' => false,
+			],
+		];
+		AMP_Validation_Manager::finalize_validation( $dom );
+		$this->assertEquals( '(1 issue: unreviewed, kept)', $get_small_text_content( $validity_link_element ) );
+		$this->assertStringContains( 'amp-icon amp-invalid', $status_icon_element->getAttribute( 'class' ) );
+		$status_icon_element->setAttribute( 'class', $valid_class_name );
+
+		// Test 1 reviewed kept term in Transitional Mode.
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+		add_theme_support( 'amp', [ 'paired' => true ] );
+		$this->assertTrue( ! amp_is_canonical() );
+		wp_update_term( $term1_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, [ 'term_group' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS ] );
+		AMP_Validation_Manager::$validation_results = [
+			[
+				'error'     => $error1,
+				'sanitized' => false,
+			],
+		];
+		AMP_Validation_Manager::finalize_validation( $dom );
+		$this->assertEquals( '(1 issue: kept)', $get_small_text_content( $validity_link_element ) );
+		$this->assertStringContains( 'amp-icon amp-invalid', $status_icon_element->getAttribute( 'class' ) );
+		$status_icon_element->setAttribute( 'class', $valid_class_name );
+
+		// Test 2 issues: one reviewed removed and one unreviewed removed.
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		add_theme_support( 'amp', [ 'paired' => false ] );
+		$this->assertTrue( amp_is_canonical() );
+		wp_update_term( $term1_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, [ 'term_group' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS ] );
+		wp_update_term( $term2_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, [ 'term_group' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS ] );
+		AMP_Validation_Manager::$validation_results = [
+			[
+				'error'     => $error1,
+				'sanitized' => true,
+			],
+			[
+				'error'     => $error2,
+				'sanitized' => true,
+			],
+		];
+		AMP_Validation_Manager::finalize_validation( $dom );
+		$this->assertEquals( '(2 issues: 1 unreviewed)', $get_small_text_content( $validity_link_element ) );
+		$this->assertStringContains( 'amp-icon amp-warning', $status_icon_element->getAttribute( 'class' ) );
+		$status_icon_element->setAttribute( 'class', $valid_class_name );
+
+		// Test 2 issues: two reviewed removed.
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		add_theme_support( 'amp', [ 'paired' => false ] );
+		$this->assertTrue( amp_is_canonical() );
+		wp_update_term( $term1_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, [ 'term_group' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS ] );
+		wp_update_term( $term2_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, [ 'term_group' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS ] );
+		AMP_Validation_Manager::$validation_results = [
+			[
+				'error'     => $error1,
+				'sanitized' => true,
+			],
+			[
+				'error'     => $error2,
+				'sanitized' => true,
+			],
+		];
+		AMP_Validation_Manager::finalize_validation( $dom );
+		$this->assertEquals( '(2 issues: all reviewed)', $get_small_text_content( $validity_link_element ) );
+		$this->assertStringContains( 'amp-icon amp-valid', $status_icon_element->getAttribute( 'class' ) );
+		$status_icon_element->setAttribute( 'class', $valid_class_name );
 	}
 
 	/**

@@ -129,6 +129,7 @@ Selection.propTypes = {
  *
  * @param {Object} props Component props.
  * @param {string} props.currentMode The selected mode.
+ * @param {boolean} props.currentThemeIsAmongReaderThemes Whether the currently active theme is in the list of reader themes.
  * @param {boolean} props.developerToolsOption Whether the user has enabled developer tools.
  * @param {boolean} props.firstTimeInWizard Whether the wizard is running for the first time.
  * @param {boolean} props.technicalQuestionChanged Whether the user changed their technical question from the previous option.
@@ -137,7 +138,7 @@ Selection.propTypes = {
  * @param {Function} props.setCurrentMode The callback to update the selected mode.
  * @param {Array} props.themeIssues The theme issues found in the site scan.
  */
-export function ScreenUI( { currentMode, developerToolsOption, firstTimeInWizard, technicalQuestionChanged, pluginIssues, savedCurrentMode, setCurrentMode, themeIssues } ) {
+export function ScreenUI( { currentMode, currentThemeIsAmongReaderThemes, developerToolsOption, firstTimeInWizard, technicalQuestionChanged, pluginIssues, savedCurrentMode, setCurrentMode, themeIssues } ) {
 	const standardId = 'standard-mode';
 	const transitionalId = 'transitional-mode';
 	const readerId = 'reader-mode';
@@ -146,12 +147,13 @@ export function ScreenUI( { currentMode, developerToolsOption, firstTimeInWizard
 
 	const recommendationLevels = useMemo( () => getRecommendationLevels(
 		{
+			currentThemeIsAmongReaderThemes,
 			userIsTechnical,
 			hasScanResults: null !== pluginIssues && null !== themeIssues,
 			hasPluginIssues: pluginIssues && 0 < pluginIssues.length,
 			hasThemeIssues: themeIssues && 0 < themeIssues.length,
 		},
-	), [ themeIssues, pluginIssues, userIsTechnical ] );
+	), [ currentThemeIsAmongReaderThemes, themeIssues, pluginIssues, userIsTechnical ] );
 
 	const sectionText = useMemo(
 		() => getAllSelectionText( recommendationLevels, userIsTechnical ? TECHNICAL : NON_TECHNICAL ),
@@ -213,6 +215,7 @@ export function ScreenUI( { currentMode, developerToolsOption, firstTimeInWizard
 
 ScreenUI.propTypes = {
 	currentMode: PropTypes.string,
+	currentThemeIsAmongReaderThemes: PropTypes.bool.isRequired,
 	developerToolsOption: PropTypes.bool,
 	firstTimeInWizard: PropTypes.bool,
 	technicalQuestionChanged: PropTypes.bool,

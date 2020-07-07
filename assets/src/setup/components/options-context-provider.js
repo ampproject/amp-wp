@@ -37,7 +37,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 	const [ fetchingOptions, setFetchingOptions ] = useState( false );
 	const [ savingOptions, setSavingOptions ] = useState( false );
 	const [ didSaveOptions, setDidSaveOptions ] = useState( false );
-	const [ originalOptions, setOriginalOptions ] = useState( null );
+	const [ originalOptions, setOriginalOptions ] = useState( {} );
 
 	const { setError } = useError();
 
@@ -46,6 +46,42 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 	useEffect( () => () => {
 		hasUnmounted.current = true;
 	}, [] );
+
+	/**
+	 * Fetches options.
+	 */
+	useEffect( () => {
+		if ( Object.keys( originalOptions ).length || fetchingOptions ) {
+			return;
+		}
+
+		/**
+		 * Fetches plugin options from the REST endpoint.
+		 */
+		( async () => {
+			setFetchingOptions( true );
+
+			try {
+				const fetchedOptions = await apiFetch( { url: optionsRestEndpoint } );
+
+				if ( true === hasUnmounted.current ) {
+					return;
+				}
+
+				if ( fetchedOptions.wizard_completed === false ) {
+					fetchedOptions.mobile_redirect = true;
+					fetchedOptions.reader_theme = null;
+				}
+
+				setOriginalOptions( fetchedOptions );
+			} catch ( e ) {
+				setError( e );
+				return;
+			}
+
+			setFetchingOptions( false );
+		} )();
+	}, [ fetchingOptions, originalOptions, optionsRestEndpoint, setError ] );
 
 	/**
 	 * Sends options to the REST endpoint to be saved.
@@ -64,6 +100,16 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 				delete updatesToSave.reader_theme;
 			}
 
+			// If this is the first time running the wizard and mobile_redirect is not in updates, set mobile_redirect to true.
+			// We do this here instead of in the fetch effect to prevent the exit confirmation before the user has interacted.
+			if ( ! originalOptions.wizard_completed && ! ( 'mobile_redirect' in updatesToSave ) ) {
+				updatesToSave.mobile_redirect = originalOptions.mobile_redirect;
+			}
+
+			if ( ! originalOptions.wizard_completed ) {
+				updatesToSave.wizard_completed = true;
+			}
+
 			// Ensure this promise lasts at least a second so that the "Saving Options" load screen is
 			// visible long enough for the user to see it is happening.
 			const [ savedOptions ] = await Promise.all(
@@ -72,7 +118,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 						{
 							method: 'post',
 							url: optionsRestEndpoint,
-							data: { ...updates, wizard_completed: true },
+							data: updatesToSave,
 						},
 					),
 					waitASecond(),
@@ -91,7 +137,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 
 		setDidSaveOptions( true );
 		setSavingOptions( false );
-	}, [ optionsRestEndpoint, setError, updates ] );
+	}, [ optionsRestEndpoint, setError, originalOptions, updates ] );
 
 	/**
 	 * Updates options in state.
@@ -102,45 +148,6 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 		setUpdates( { ...updates, ...newOptions } );
 		setDidSaveOptions( false );
 	};
-
-	useEffect( () => {
-		if ( Object.keys( updates ).length || fetchingOptions ) {
-			return;
-		}
-
-		/**
-		 * Fetches plugin options from the REST endpoint.
-		 */
-		( async () => {
-			setFetchingOptions( true );
-
-			try {
-				const fetchedOptions = await apiFetch( { url: optionsRestEndpoint } );
-
-				if ( true === hasUnmounted.current ) {
-					return;
-				}
-
-				setOriginalOptions( fetchedOptions );
-
-				const initialUpdates = {
-					wizard_completed: true,
-				};
-
-				if ( fetchedOptions.wizard_completed === false ) {
-					initialUpdates.mobile_redirect = true;
-					initialUpdates.reader_theme = null;
-				}
-
-				setUpdates( initialUpdates );
-			} catch ( e ) {
-				setError( e );
-				return;
-			}
-
-			setFetchingOptions( false );
-		} )();
-	}, [ fetchingOptions, updates, optionsRestEndpoint, setError ] );
 
 	// Allows an item in the updates object to be removed.
 	const unsetOption = useCallback( ( option ) => {

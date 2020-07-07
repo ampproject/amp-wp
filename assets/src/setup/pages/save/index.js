@@ -18,8 +18,6 @@ import { Options } from '../../components/options-context-provider';
 import { User } from '../../components/user-context-provider';
 import { Phone } from '../../components/phone';
 import './style.css';
-import { AMPInfo } from '../../components/amp-info';
-import { IconMobile } from '../../components/svg/icon-mobile';
 import { ReaderThemes } from '../../components/reader-themes-context-provider';
 import { AMPNotice, NOTICE_SIZE_LARGE, NOTICE_TYPE_WARNING, NOTICE_TYPE_SUCCESS } from '../../components/amp-notice';
 import { Navigation } from '../../components/navigation-context-provider';
@@ -83,19 +81,13 @@ function Preview() {
 
 	const {
 		editedOptions: { theme_support: themeSupport },
-		originalOptions: { preview_permalink: previewPermalink },
+		originalOptions: { preview_permalink: previewPermalink, reader_theme: readerTheme },
 	} = useContext( Options );
 
 	const opacity = iframeLoaded ? '1' : '0';
 
 	return (
 		<>
-			<AMPInfo icon={ ( props ) => <IconMobile { ...props } /> }>
-				{ 'standard' === themeSupport
-					? __( 'Live view of your site', 'amp' )
-					: __( 'Live view of a page on your site using AMP mode', 'amp' )
-				}
-			</AMPInfo>
 			<Phone>
 				<iframe
 					className="done__preview-iframe"
@@ -110,6 +102,37 @@ function Preview() {
 					} }
 				/>
 			</Phone>
+			<div className="done__link-buttons">
+
+				{
+					'reader' === themeSupport && (
+						<Button
+							isPrimary
+							href={
+								addQueryArgs(
+									CUSTOMIZER_LINK,
+									'legacy' === readerTheme
+										? { 'autofocus[panel]': 'amp_panel', url: previewPermalink }
+										: { url: previewPermalink, [ AMP_QUERY_VAR ]: '1' },
+								)
+							}
+							target="_blank"
+							rel="noreferrer"
+						>
+							{ __( 'Customize AMP', 'amp' ) }
+						</Button>
+					)
+				}
+				<Button
+					isPrimary
+					href={ previewPermalink }
+					target="_blank"
+					rel="noreferrer"
+				>
+					{ __( 'Browse AMP', 'amp' ) }
+				</Button>
+
+			</div>
 		</>
 	);
 }
@@ -121,7 +144,6 @@ export function Save() {
 	const {
 		didSaveOptions,
 		editedOptions: { theme_support: themeSupport, reader_theme: readerTheme },
-		originalOptions: { preview_permalink: previewPermalink },
 		saveOptions,
 		savingOptions,
 	} = useContext( Options );
@@ -184,48 +206,6 @@ export function Save() {
 				<p>
 					{ getDescription( themeSupport ) }
 				</p>
-				<div className="done__link-buttons">
-					{ 'reader' !== themeSupport && (
-						<Button
-							isPrimary
-							href={ previewPermalink	}
-							target="_blank"
-							rel="noreferrer"
-						>
-							{ __( 'Visit your site', 'amp' ) }
-						</Button>
-					) }
-
-					{
-						'reader' === themeSupport && (
-							<>
-								<Button
-									isPrimary
-									href={
-										addQueryArgs(
-											CUSTOMIZER_LINK,
-											'legacy' === readerTheme
-												? { 'autofocus[panel]': 'amp_panel', url: previewPermalink }
-												: { url: previewPermalink, [ AMP_QUERY_VAR ]: '1' },
-										)
-									}
-									target="_blank"
-									rel="noreferrer"
-								>
-									{ __( 'Visit in Customizer', 'amp' ) }
-								</Button>
-								<Button
-									isPrimary
-									href={ previewPermalink }
-									target="_blank"
-									rel="noreferrer"
-								>
-									{ __( 'Browse AMP Version', 'amp' ) }
-								</Button>
-							</>
-						)
-					}
-				</div>
 			</div>
 			<div className="done__preview-container">
 				{ 'reader' === themeSupport && downloadingThemeError && (
@@ -234,6 +214,7 @@ export function Save() {
 					</AMPNotice>
 				) }
 				<Preview />
+
 			</div>
 		</div>
 	);

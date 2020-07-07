@@ -1764,22 +1764,28 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 
 	$href = remove_query_arg( QueryVars::NOAMP, $href );
 
-	$parent = [
-		'id'    => 'amp',
-		'title' => sprintf(
-			'%s %s',
-			Icon::link()->to_html(
-				[
-					'id'    => 'amp-admin-bar-item-status-icon',
-					'class' => 'ab-icon',
-				]
-			),
-			esc_html( $is_amp_endpoint ? __( 'Non-AMP', 'amp' ) : __( 'AMP', 'amp' ) )
-		),
-		'href'  => esc_url( $href ),
+	$icon = $is_amp_endpoint ? Icon::logo() : Icon::link();
+	$attr = [
+		'id'    => 'amp-admin-bar-item-status-icon',
+		'class' => 'ab-icon',
 	];
 
-	$wp_admin_bar->add_node( $parent );
+	$wp_admin_bar->add_node(
+		[
+			'id'    => 'amp',
+			'title' => $icon->to_html( $attr ) . ' ' . esc_html__( 'AMP', 'amp' ),
+			'href'  => esc_url( $href ),
+		]
+	);
+
+	$wp_admin_bar->add_node(
+		[
+			'parent' => 'amp',
+			'id'     => 'amp-view',
+			'title'  => esc_html( $is_amp_endpoint ? __( 'View non-AMP version', 'amp' ) : __( 'View AMP version', 'amp' ) ),
+			'href'   => esc_url( $href ),
+		]
+	);
 
 	// Make sure the Customizer opens with AMP enabled.
 	$customize_node = $wp_admin_bar->get_node( 'customize' );
