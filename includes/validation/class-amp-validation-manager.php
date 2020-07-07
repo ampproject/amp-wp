@@ -456,6 +456,18 @@ class AMP_Validation_Manager {
 			$wp_admin_bar->add_node( $paired_browsing_item );
 		}
 
+		// Add settings link to admin bar.
+		if ( current_user_can( 'manage_options' ) ) {
+			$wp_admin_bar->add_node(
+				[
+					'parent' => 'amp',
+					'id'     => 'amp-settings',
+					'title'  => esc_html__( 'Settings', 'amp' ),
+					'href'   => esc_url( admin_url( add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, 'admin.php' ) ) ),
+				]
+			);
+		}
+
 		self::$amp_admin_bar_item_added = true;
 	}
 
