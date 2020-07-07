@@ -229,7 +229,9 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			return '';
 		}
 
-		$images = new ElementList();
+		$images          = new ElementList();
+		$caption_counter = 0;
+
 		foreach ( $args['images'] as $props ) {
 			$image_atts = [
 				'src'    => $props['url'],
@@ -264,7 +266,18 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			}
 
 			$caption = isset( $props['id'] ) ? wp_get_attachment_caption( $props['id'] ) : '';
-			$images  = $images->add( $image, $caption );
+
+			$caption_id   = 'amp-wp-caption-' . $caption_counter++;
+			$caption_html = sprintf( '<span id="%s">%s</span>', $caption_id, $caption );
+
+			// Create a temporary DOM document to load the HTML string.
+			$tmp_dom = AMP_DOM_Utils::get_dom_from_content( $caption_html );
+
+			// Import the loaded HTML element into the DOM we're working with.
+			$caption_node = $dom->importNode( $tmp_dom->getElementById( $caption_id ), true );
+			$dom->appendChild( $caption_node );
+
+			$images  = $images->add( $image, $dom->getElementById( $caption_id ) );
 		}
 
 		$amp_carousel  = new Carousel( $dom, $images );

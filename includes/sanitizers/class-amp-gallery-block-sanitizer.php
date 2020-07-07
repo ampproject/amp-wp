@@ -69,12 +69,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 				]
 			)
 		);
-		$query       = $this->dom->xpath->query( $expr );
-
-		$nodes = [];
-		foreach ( $query as $node ) {
-			$nodes[] = $node;
-		}
+		$nodes       = $this->dom->xpath->query( $expr );
 
 		foreach ( $nodes as $node ) {
 			// In WordPress 5.3, the Gallery block's <ul> is wrapped in a <figure class="wp-block-gallery">, so look for that node also.
@@ -107,23 +102,18 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 
 			$images = new ElementList();
 
-			// If it's not AMP lightbox, look for links first.
+			// If it's not AMP lightbox, look for <amg-img> elements.
 			if ( ! $is_amp_lightbox ) {
-				foreach ( $node->getElementsByTagName( 'a' ) as $element ) {
-					$images = $images->add( $element, $this->possibly_get_caption_text( $element ) );
-				}
-			}
+				$img_elements = $node->getElementsByTagName( 'amp-img' );
 
-			// If not linking to anything then look for <amp-img>.
-			if ( 0 === count( $images ) ) {
-				foreach ( $node->getElementsByTagName( 'amp-img' ) as $element ) {
-					$images = $images->add( $element, $this->possibly_get_caption_text( $element ) );
+				// Skip if no images found.
+				if ( 0 === $img_elements->length ) {
+					continue;
 				}
-			}
 
-			// Skip if no images found.
-			if ( 0 === count( $images ) ) {
-				continue;
+				foreach ( $img_elements as $element ) {
+					$images = $images->add( $element, $this->get_caption_element( $element ) );
+				}
 			}
 
 			$amp_carousel = new Carousel( $this->dom, $images );
@@ -154,19 +144,35 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 	 * Gets the caption of an image, if it exists.
 	 *
 	 * @param DOMElement $element The element for which to search for a caption.
-	 * @return string The caption for the image, or ''.
+	 * @return DOMElement A <span> wrapping the content of the image <figcaption>, or null if the caption could not be found.
 	 */
-	public function possibly_get_caption_text( $element ) {
+	public function get_caption_element($element ) {
 		$caption_tag = 'figcaption';
+		$figcaption_element = null;
+
 		if ( isset( $element->nextSibling->nodeName ) && $caption_tag === $element->nextSibling->nodeName ) {
-			return $element->nextSibling->textContent;
+			$figcaption_element = $element->nextSibling;
 		}
 
 		// If 'Link To' is selected, the image will be wrapped in an <a>, so search for the sibling of the <a>.
-		if ( isset( $element->parentNode->nextSibling->nodeName ) && $caption_tag === $element->parentNode->nextSibling->nodeName ) {
-			return $element->parentNode->nextSibling->textContent;
+		if (
+			! $figcaption_element
+			&& isset( $element->parentNode->nextSibling->nodeName )
+			&& $caption_tag === $element->parentNode->nextSibling->nodeName
+		) {
+			$figcaption_element = $element->parentNode->nextSibling;
 		}
 
-		return '';
+		if ( ! $figcaption_element ) {
+			return null;
+		}
+
+		$caption_element = AMP_DOM_Utils::create_node( $this->dom, 'span', [] );
+
+		foreach ( iterator_to_array( $figcaption_element->childNodes ) as $childNode ) {
+			$caption_element->appendChild( $childNode );
+		}
+
+		return $caption_element;
 	}
 }

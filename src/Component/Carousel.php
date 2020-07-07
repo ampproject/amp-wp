@@ -81,7 +81,7 @@ final class Carousel {
 
 		foreach ( $this->slides as $slide ) {
 			$slide_node      = $slide instanceof CaptionedSlide ? $slide->get_slide_node() : $slide;
-			$caption         = $slide instanceof HasCaption ? $slide->get_caption() : null;
+			$caption_node    = $slide instanceof HasCaption ? $slide->get_caption_node() : null;
 			$slide_container = AMP_DOM_Utils::create_node(
 				$this->dom,
 				'span', // This cannot be a <div> because if the gallery is inside of a <p>, then the DOM will break.
@@ -100,19 +100,13 @@ final class Carousel {
 
 			$slide_container->appendChild( $slide_node );
 
-			// If there's a caption, wrap it and append it to the slide.
-			if ( $caption ) {
-				$caption_wrapper = AMP_DOM_Utils::create_node(
-					$this->dom,
-					'span', // This cannot be a <div> because if the gallery is inside of a <p>, then the DOM will break.
-					[ 'class' => 'amp-wp-gallery-caption' ]
-				);
-				$caption_span    = AMP_DOM_Utils::create_node( $this->dom, 'span', [] );
-				$text_node       = $this->dom->createTextNode( $caption );
+			// If there's a caption, append it to the slide.
+			if ( $caption_node ) {
+				if ( $caption_node instanceof DOMElement && 'span' === $caption_node->nodeName ) {
+					$caption_node->setAttribute( 'class', 'amp-wp-gallery-caption' );
+				}
 
-				$caption_span->appendChild( $text_node );
-				$caption_wrapper->appendChild( $caption_span );
-				$slide_container->appendChild( $caption_wrapper );
+				$slide_container->appendChild( $caption_node );
 			}
 
 			$amp_carousel->appendChild( $slide_container );

@@ -92,13 +92,13 @@ class Test_DOM_Element_List extends \WP_UnitTestCase {
 	/**
 	 * Test get_caption.
 	 *
-	 * @covers \AmpProject\AmpWP\Component\CaptionedSlide::get_caption()
+	 * @covers \AmpProject\AmpWP\Component\CaptionedSlide::get_caption_node()
 	 */
 	public function test_get_caption() {
 		$image_node      = AMP_DOM_Utils::create_node( new Document(), 'amp-img', [] );
-		$caption         = 'This is a caption';
+		$caption         = new DOMText( 'This is a caption' );
 		$captioned_image = new CaptionedSlide( $image_node, $caption );
-		$this->assertEquals( $caption, $captioned_image->get_caption() );
+		$this->assertEquals( $caption, $captioned_image->get_caption_node() );
 	}
 
 	/**

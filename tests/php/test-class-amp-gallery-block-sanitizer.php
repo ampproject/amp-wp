@@ -205,7 +205,7 @@ class AMP_Gallery_Block_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Test possibly_get_caption_text.
 	 *
-	 * @covers \AMP_Gallery_Block_Sanitizer::possibly_get_caption_text()
+	 * @covers \AMP_Gallery_Block_Sanitizer::get_caption_element()
 	 *
 	 * @dataProvider get_caption_text_data
 	 * @param string      $source The markup source to test.
@@ -220,6 +220,6 @@ class AMP_Gallery_Block_Sanitizer_Test extends WP_UnitTestCase {
 			[ 'content_max_width' => 600 ]
 		);
 
-		$this->assertEquals( $expected, $sanitizer->possibly_get_caption_text( $element ) );
+		$this->assertEquals( $expected, $sanitizer->get_caption_element( $element ) );
 	}
 }
