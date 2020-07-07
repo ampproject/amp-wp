@@ -462,7 +462,7 @@ class AMP_Validation_Manager {
 				[
 					'parent' => 'amp',
 					'id'     => 'amp-settings',
-					'title'  => __( 'Settings', 'amp' ),
+					'title'  => esc_html__( 'Settings', 'amp' ),
 					'href'   => esc_url( admin_url( add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, 'admin.php' ) ) ),
 				]
 			);
