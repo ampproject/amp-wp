@@ -1795,9 +1795,13 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 
 	// Make sure the Customizer opens with AMP enabled.
 	$customize_node = $wp_admin_bar->get_node( 'customize' );
-	if ( $customize_node && $is_amp_endpoint ) {
-		$args         = get_object_vars( $customize_node );
-		$args['href'] = add_query_arg( amp_get_slug(), '1', $args['href'] );
+	if ( $customize_node && $is_amp_endpoint && AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
+		$args = get_object_vars( $customize_node );
+		if ( amp_is_legacy() ) {
+			$args['href'] = add_query_arg( 'autofocus[panel]', AMP_Template_Customizer::PANEL_ID, $args['href'] );
+		} else {
+			$args['href'] = add_query_arg( amp_get_slug(), '1', $args['href'] );
+		}
 		$wp_admin_bar->add_node( $args );
 	}
 }
