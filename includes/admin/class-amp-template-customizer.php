@@ -43,6 +43,7 @@ class AMP_Template_Customizer {
 	 * @access public
 	 *
 	 * @param WP_Customize_Manager $wp_customize Customizer instance.
+	 * @return AMP_Template_Customizer Instance.
 	 */
 	public static function init( WP_Customize_Manager $wp_customize ) {
 		$self = new self();
@@ -98,6 +99,8 @@ class AMP_Template_Customizer {
 				}
 			}
 		}
+
+		return $self;
 	}
 
 	/**
@@ -299,6 +302,9 @@ class AMP_Template_Customizer {
 				)
 			)
 		);
+
+		wp_enqueue_script( 'customize-selective-refresh' );
+		wp_enqueue_script( 'amp-customize-preview' );
 	}
 
 	/**
@@ -339,9 +345,6 @@ class AMP_Template_Customizer {
 		if ( ! current_user_can( 'customize' ) ) {
 			return;
 		}
-
-		wp_enqueue_script( 'customize-selective-refresh' );
-		wp_enqueue_script( 'amp-customize-preview' );
 
 		/**
 		 * Fires when plugins should enqueue their own scripts for the AMP Customizer preview.
