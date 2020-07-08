@@ -126,7 +126,7 @@ class AMP_Post_Type_Support {
 			/*
 			 * Disabled by default for custom page templates, page on front and page for posts, unless not using a Reader theme.
 			 * If the active theme is not being used for AMP, then we can't make assumptions about these about whether the
-			 * default Reader theme template will work properly for the post.
+			 * template in the Reader theme template (or legacy post template) will work properly for the post/page.
 			 */
 			$enabled = (
 				( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) )
