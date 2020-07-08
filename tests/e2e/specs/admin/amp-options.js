@@ -141,7 +141,6 @@ describe( 'Mode info notices', () => {
 
 		await clickMode( 'reader' );
 
-		await expect( page ).not.toMatchElement( '.amp-notice--info p', { text: /in transitional mode/ } );
 		await expect( page ).toMatchElement( '.amp-notice--warning p', { text: /in transitional mode/ } );
 	} );
 } );

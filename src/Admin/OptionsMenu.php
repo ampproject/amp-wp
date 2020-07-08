@@ -354,7 +354,7 @@ class OptionsMenu implements Service, Registerable {
 						</div>
 					</div>
 					<div id="amp-settings-root"></div>
-					<div id="amp-settings-sections" class="hidden">
+					<div id="amp-settings-sections" style="display: none !important;">
 						<?php do_settings_sections( AMP_Options_Manager::OPTION_NAME ); ?>
 					</div>
 				</div>
