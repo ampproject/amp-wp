@@ -52,7 +52,7 @@ exports[`RedirectToggle matches snapshot 1`] = `
             className="amp-setting-toggle__label-text"
           >
             <h3>
-              Redirect mobile visitors to AMP.
+              Redirect mobile visitors to the AMP version of your site.
             </h3>
           </div>
         </label>

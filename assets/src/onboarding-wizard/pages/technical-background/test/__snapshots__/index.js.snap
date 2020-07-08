@@ -194,10 +194,10 @@ exports[`TechnicalBackground matches snapshot 1`] = `
       </defs>
     </svg>
     <h1>
-      Are you technical?
+      Are you a technical user?
     </h1>
     <p>
-      In order to recommend the best AMP experience for your site, please indicate what level of technical experience you have.
+      In order to recommend the best AMP experience for your site, please indicate which of these options best describes you.
     </p>
   </div>
   <form>
@@ -435,11 +435,11 @@ exports[`TechnicalBackground matches snapshot 1`] = `
         >
           <div>
             <h2>
-              Developer or technically savvy
+              Technically savvy or power user
             </h2>
           </div>
           <p>
-            I am a “Developer or technically savvy” user. I can do WordPress development such as making changes to themes and plugins. I have some familiarity with HTML, CSS, JavaScript, and PHP. I am technically savvy enough to build full WordPress sites out of plugins and themes and can address configuration issues and understand
+            I can do WordPress development such as making changes to themes and plugins. I have some familiarity with HTML, CSS, JavaScript, and PHP. I am technically savvy enough to build full WordPress sites out of plugins and themes and can address configuration and validation issues.
           </p>
         </div>
       </label>
@@ -610,7 +610,7 @@ exports[`TechnicalBackground matches snapshot 1`] = `
             </h2>
           </div>
           <p>
-            I am not a developer and I am not responsible for configuring and fixing issues on my site. I am a site owner and/or content creator who wants to take advantage of AMP performance.
+            I am not a developer, I am not responsible for configuring and fixing issues on my site or I just want to take advantage of AMP performance without having to address issues
           </p>
         </div>
       </label>

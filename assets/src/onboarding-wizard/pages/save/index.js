@@ -210,7 +210,7 @@ export function Save() {
 			<div className="done__preview-container">
 				{ 'reader' === themeSupport && downloadingThemeError && (
 					<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_WARNING }>
-						{ __( 'There was an error downloading your reader theme. As a result, your site is currently using the legacy reader theme. Please install your chosen theme by manually.', 'amp' ) }
+						{ __( 'There was an error downloading your reader theme. As a result, your site is currently using the legacy reader theme. Please install your chosen theme manually.', 'amp' ) }
 					</AMPNotice>
 				) }
 				<Preview />
