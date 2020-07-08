@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useEffect, useContext, useMemo } from '@wordpress/element';
 
 /**
@@ -12,6 +12,11 @@ import { Navigation } from '../../components/navigation-context-provider';
 import { Options } from '../../components/options-context-provider';
 import { ReaderThemes } from '../../components/reader-themes-context-provider';
 import { ThemeCard } from './theme-card';
+
+/**
+ * External Dependencies.
+ */
+import { AMP_QUERY_VAR, DEFAULT_AMP_QUERY_VAR, LEGACY_THEME_SLUG, AMP_QUERY_VAR_CUSTOMIZED_LATE } from 'amp-setup'; // From WP inline script.
 
 /**
  * Screen for choosing the Reader theme.
@@ -43,7 +48,7 @@ export function ChooseReaderTheme() {
 	const { availableThemes, unavailableThemes } = useMemo(
 		() => themes.reduce(
 			( collections, theme ) => {
-				if ( theme.availability === 'non-installable' ) {
+				if ( ( AMP_QUERY_VAR_CUSTOMIZED_LATE && theme.slug !== LEGACY_THEME_SLUG ) || theme.availability === 'non-installable' ) {
 					collections.unavailableThemes.push( theme );
 				} else {
 					collections.availableThemes.push( theme );
@@ -96,7 +101,10 @@ export function ChooseReaderTheme() {
 							{ __( 'Unavailable themes', 'amp' ) }
 						</h3>
 						<p>
-							{ __( 'The following themes are compatible but cannot be installed automatically. Please install them manually, or contact your host if you are not able to do so.', 'amp' ) }
+							{ AMP_QUERY_VAR_CUSTOMIZED_LATE
+								? sprintf( __( 'The following themes are not available because your site (probably the active theme) has customized the AMP query var too late (it is set to “%1$s” as opposed to the default of “%2$s”). Please make sure that any customizations done by defining the AMP_QUERY_VAR constant or adding an amp_query_var filter are done before the `plugins_loaded` action with priority 8.', 'amp' ), AMP_QUERY_VAR, DEFAULT_AMP_QUERY_VAR )
+								: __( 'The following themes are compatible but cannot be installed automatically. Please install them manually, or contact your host if you are not able to do so.', 'amp' )
+							}
 						</p>
 						<ul className="choose-reader-theme__grid">
 							{ unavailableThemes.map( ( theme ) => (

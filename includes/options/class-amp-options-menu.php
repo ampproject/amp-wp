@@ -5,7 +5,10 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\QueryVars;
+use AmpProject\AmpWP\Services;
 
 /**
  * AMP_Options_Menu class.
@@ -134,6 +137,9 @@ class AMP_Options_Menu {
 	public function render_theme_support() {
 		$theme_support = AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
 
+		/** @var AmpSlugCustomizationWatcher $amp_slug_customization_watcher */
+		$amp_slug_customization_watcher = Services::get( 'amp_slug_customization_watcher' );
+
 		/* translators: %s: URL to the documentation. */
 		$standard_description = sprintf( __( 'The active theme integrates AMP as the framework for your site by using its templates and styles to render webpages. This means your site is <b>AMP-first</b> and your canonical URLs are AMP! Depending on your theme/plugins, a varying level of <a href="%s">development work</a> may be required.', 'amp' ), esc_url( 'https://amp-wp.org/documentation/developing-wordpress-amp-sites/' ) );
 		/* translators: %s: URL to the documentation. */
@@ -205,15 +211,51 @@ class AMP_Options_Menu {
 				<dd>
 					<p><?php echo wp_kses_post( $reader_description ); ?></p>
 
-					<p>
-						<?php
-						/* translators: %s is the reader theme */
-						echo esc_html( sprintf( __( 'The "%s" theme is currently selected in the wizard. The ability to change it from the admin screen will come soon.', 'amp' ), AMP_Options_Manager::get_option( Option::READER_THEME ) ) );
-						?>
-					</p>
+					<div class="notice notice-info notice-alt inline">
+						<p>
+							<?php
+							/* translators: %s is the reader theme */
+							echo esc_html( sprintf( __( 'The "%s" theme is currently selected in the wizard. The ability to change it from the admin screen will come soon.', 'amp' ), AMP_Options_Manager::get_option( Option::READER_THEME ) ) );
+							?>
+						</p>
+					</div>
 
 					<?php if ( AMP_Options_Manager::get_option( Option::READER_THEME ) === get_template() ) : ?>
-						<p><?php esc_html_e( 'The currently-selected Reader theme is the same as the active theme. This means that Reader mode is disabled since it is no different from Transitional mode at this point.', 'amp' ); ?></p>
+						<div class="notice notice-info notice-alt inline">
+							<p><?php esc_html_e( 'The currently-selected Reader theme is the same as the active theme. This means that Reader mode is disabled since it is no different from Transitional mode at this point.', 'amp' ); ?></p>
+						</div>
+					<?php endif; ?>
+
+					<?php if ( $amp_slug_customization_watcher->did_customize_late() ) : ?>
+						<div class="notice notice-warning notice-alt inline">
+							<p>
+								<?php
+								echo wp_kses_post(
+									sprintf(
+									/* translators: 1: customized AMP query var, 2: default AMP query var */
+										esc_html__( 'Warning: You customized your AMP query var too late. This means that Reader themes will not be available to you. You customized it to be %1$s instead of the default %2$s.', 'amp' ),
+										sprintf( '&#8220;<code>%s</code>&#8221;', esc_html( $amp_slug_customization_watcher->get_customized_slug() ) ),
+										sprintf( '&#8220;<code>%s</code>&#8221;', QueryVars::AMP )
+									)
+								);
+								?>
+							</p>
+						</div>
+					<?php elseif ( $amp_slug_customization_watcher->did_customize_early() ) : ?>
+						<div class="notice notice-info notice-alt inline">
+							<p>
+								<?php
+								echo wp_kses_post(
+									sprintf(
+									/* translators: 1: customized AMP query var, 2: default AMP query var */
+										esc_html__( 'You customized your query var to be %1$s instead of the default %2$s.', 'amp' ),
+										sprintf( '&#8220;<code>%s</code>&#8221;', esc_html( $amp_slug_customization_watcher->get_customized_slug() ) ),
+										sprintf( '&#8220;<code>%s</code>&#8221;', QueryVars::AMP )
+									)
+								);
+								?>
+							</p>
+						</div>
 					<?php endif; ?>
 				</dd>
 			</dl>

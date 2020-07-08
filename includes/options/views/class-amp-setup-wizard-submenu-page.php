@@ -7,6 +7,10 @@
  */
 
 use AmpProject\AmpWP\Admin\DevToolsUserAccess;
+use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
+use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\QueryVars;
+use AmpProject\AmpWP\Services;
 
 /**
  * AMP setup wizard submenu page class.
@@ -104,6 +108,9 @@ final class AMP_Setup_Wizard_Submenu_Page {
 			return;
 		}
 
+		/** @var AmpSlugCustomizationWatcher $amp_slug_customization_watcher */
+		$amp_slug_customization_watcher = Services::get( 'amp_slug_customization_watcher' );
+
 		$asset_file   = AMP__DIR__ . '/assets/js/' . self::ASSET_HANDLE . '.asset.php';
 		$asset        = require $asset_file;
 		$dependencies = $asset['dependencies'];
@@ -145,6 +152,9 @@ final class AMP_Setup_Wizard_Submenu_Page {
 		$setup_wizard_data = [
 			'AMP_OPTIONS_KEY'                    => AMP_Options_Manager::OPTION_NAME,
 			'AMP_QUERY_VAR'                      => amp_get_slug(),
+			'DEFAULT_AMP_QUERY_VAR'              => QueryVars::AMP,
+			'AMP_QUERY_VAR_CUSTOMIZED_LATE'      => $amp_slug_customization_watcher->did_customize_late(),
+			'LEGACY_THEME_SLUG'                  => AMP_Reader_Themes::DEFAULT_READER_THEME,
 			'APP_ROOT_ID'                        => self::APP_ROOT_ID,
 			'CUSTOMIZER_LINK'                    => add_query_arg(
 				[

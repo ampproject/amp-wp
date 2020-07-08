@@ -63,6 +63,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			'plugin_suppression'               => PluginSuppression::class,
 			'mobile_redirection'               => MobileRedirection::class,
 			'reader_theme_loader'              => ReaderThemeLoader::class,
+			'amp_slug_customization_watcher'   => AmpSlugCustomizationWatcher::class,
 		];
 	}
 
