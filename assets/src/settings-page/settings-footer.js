@@ -24,18 +24,16 @@ export function SettingsFooter() {
 	 * Submits the PHP-generated form on the page after options have saved via REST.
 	 */
 	useEffect( () => {
-		if ( true === didSaveOptions ) {
+		if ( true === didSaveOptions && ! downloadingTheme ) {
 			document.querySelector( 'form#amp-settings' ).submit();
 		}
-	}, [ didSaveOptions ] );
+	}, [ didSaveOptions, downloadingTheme ] );
 
 	const disabled = ! themeSupport ||
 		savingOptions ||
 		didSaveOptions ||
 		downloadingTheme ||
 		( 'reader' === themeSupport && ! readerTheme );
-
-	console.log( readerTheme );
 
 	return (
 		<section className="settings-footer">

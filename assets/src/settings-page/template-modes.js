@@ -21,7 +21,12 @@ import '../css/template-mode-selection.css';
 import { AMPNotice, NOTICE_SIZE_LARGE, NOTICE_TYPE_INFO, NOTICE_TYPE_WARNING } from '../components/amp-notice';
 import { Options } from '../components/options-context-provider';
 
-function getStandardNotice( themeSupport ) {
+/**
+ * Provides the notice to show in the reader theme support mode selection.
+ *
+ * @param {string} themeSupport The current theme support mode.
+ */
+function getReaderNotice( themeSupport ) {
 	switch ( true ) {
 		case 'reader' === themeSupport && 'standard' === THEME_PROVIDED_SUPPORT_MODE:
 			return (
@@ -60,7 +65,6 @@ function getStandardNotice( themeSupport ) {
  */
 export function TemplateModes() {
 	const { editedOptions } = useContext( Options );
-
 	const { plugin_configured: pluginConfigured, theme_support: themeSupport } = editedOptions;
 
 	return (
@@ -99,7 +103,7 @@ export function TemplateModes() {
 				details={ __( 'Formerly called classic mode, this mode generates paired AMP content using simplified templates which may not match the look and feel of your site. Only posts/pages can be served as AMP in Reader mode. No reidrection is performed for mobile visitors; AMP pages are served by AMP consumption platforms.', 'amp' ) }
 				mode="reader"
 			>
-				{ getStandardNotice( themeSupport ) }
+				{ getReaderNotice( themeSupport ) }
 			</TemplateModeOption>
 		</section>
 	);

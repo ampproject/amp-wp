@@ -118,7 +118,7 @@ export function TemplateModeOption( { children, details, mode, previouslySelecte
 				</p>
 			</div>
 
-			{ children && children }
+			{ children }
 		</Selectable>
 	);
 }

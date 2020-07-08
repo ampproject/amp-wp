@@ -1,8 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
-import { PanelBody, PanelRow } from '@wordpress/components';
+import { PanelBody } from '@wordpress/components';
 import { useMemo } from '@wordpress/element';
 
 /**
@@ -70,18 +69,7 @@ export function ScreenUI( { currentThemeIsAmongReaderThemes, developerToolsOptio
 			>
 				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ getRecommendationLevelType( recommendationLevels[ STANDARD ] ) }>
 					<PanelBody title={ sectionText.standard.compatibility } initialOpen={ false } opened={ false }>
-						<PanelRow>
-							<h3>
-								{ __( 'Compatibility', 'amp' ) }
-							</h3>
-							<p>
-								{ 'Lorem ipsum dolar sit amet. ' }
-								{ /* @todo Temporary URL. */ }
-								<a href="http://amp-wp.org" target="_blank" rel="noreferrer">
-									{ __( 'Learn more.', 'amp' ) }
-								</a>
-							</p>
-						</PanelRow>
+						{ /* @todo Theme/plugin compatibility info. */ }
 					</PanelBody>
 				</AMPNotice>
 			</TemplateModeOption>
@@ -93,18 +81,7 @@ export function ScreenUI( { currentThemeIsAmongReaderThemes, developerToolsOptio
 			>
 				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ getRecommendationLevelType( recommendationLevels[ TRANSITIONAL ] ) }>
 					<PanelBody title={ sectionText.transitional.compatibility } initialOpen={ false } opened={ false }>
-						<PanelRow>
-							<h3>
-								{ __( 'Compatibility', 'amp' ) }
-							</h3>
-							<p>
-								{ 'Lorem ipsum dolar sit amet. ' }
-								{ /* @todo Temporary URL. */ }
-								<a href="http://amp-wp.org" target="_blank" rel="noreferrer">
-									{ __( 'Learn more.', 'amp' ) }
-								</a>
-							</p>
-						</PanelRow>
+						{ /* @todo Theme/plugin compatibility info. */ }
 					</PanelBody>
 				</AMPNotice>
 			</TemplateModeOption>
@@ -116,18 +93,7 @@ export function ScreenUI( { currentThemeIsAmongReaderThemes, developerToolsOptio
 			>
 				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ getRecommendationLevelType( recommendationLevels[ READER ] ) }>
 					<PanelBody title={ sectionText.reader.compatibility } initialOpen={ false } opened={ false }>
-						<PanelRow>
-							<h3>
-								{ __( 'Compatibility', 'amp' ) }
-							</h3>
-							<p>
-								{ 'Lorem ipsum dolar sit amet. ' }
-								{ /* @todo Temporary URL. */ }
-								<a href="http://amp-wp.org" target="_blank" rel="noreferrer">
-									{ __( 'Learn more.', 'amp' ) }
-								</a>
-							</p>
-						</PanelRow>
+						{ /* @todo Theme/plugin compatibility info. */ }
 					</PanelBody>
 				</AMPNotice>
 			</TemplateModeOption>

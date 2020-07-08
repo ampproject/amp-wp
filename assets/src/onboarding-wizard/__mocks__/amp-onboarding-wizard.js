@@ -1,5 +1,5 @@
 module.exports = {
-	APP_ROOT_ID: 'amp-settings',
+	APP_ROOT_ID: 'amp-onboarding-wizard',
 	CLOSE_LINK: 'http://site.test/wp-admin/?page=amp-options',
 	CURRENT_THEME: {
 		name: 'Twenty Twenty',
