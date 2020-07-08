@@ -37,10 +37,15 @@ export function ChooseReaderTheme() {
 			return;
 		}
 
-		if ( themes && readerTheme && canGoForward === false ) {
-			if ( themes.map( ( { slug } ) => slug ).includes( readerTheme ) ) {
-				setCanGoForward( true );
-			}
+		if (
+			themes &&
+			readerTheme &&
+			canGoForward === false &&
+			! AMP_QUERY_VAR_CUSTOMIZED_LATE
+				? themes.map( ( { slug } ) => slug ).includes( readerTheme )
+				: readerTheme === LEGACY_THEME_SLUG
+		) {
+			setCanGoForward( true );
 		}
 	}, [ canGoForward, setCanGoForward, readerTheme, themes, themeSupport ] );
 
