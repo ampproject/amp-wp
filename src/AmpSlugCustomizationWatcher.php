@@ -18,13 +18,6 @@ use AmpProject\AmpWP\Infrastructure\Service;
 final class AmpSlugCustomizationWatcher implements Service, Registerable {
 
 	/**
-	 * The slug (query var) that was customized.
-	 *
-	 * @var string|null
-	 */
-	protected $customized_slug = null;
-
-	/**
 	 * Whether the slug was customized early (at plugins_loaded action, priority 8).
 	 *
 	 * @var bool
@@ -66,26 +59,6 @@ final class AmpSlugCustomizationWatcher implements Service, Registerable {
 	}
 
 	/**
-	 * Whether the slug was customized.
-	 *
-	 * @return bool
-	 */
-	public function did_customize_slug() {
-		return null !== $this->customized_slug;
-	}
-
-	/**
-	 * Get the customized slug.
-	 *
-	 * Returns null if it was not customized.
-	 *
-	 * @return string|null
-	 */
-	public function get_customized_slug() {
-		return $this->customized_slug;
-	}
-
-	/**
 	 * Peek at the customized slug.
 	 *
 	 * This does not call amp_get_slug(true) because if it did then it would end up defining AMP_QUERY_VAR and destroy
@@ -93,7 +66,7 @@ final class AmpSlugCustomizationWatcher implements Service, Registerable {
 	 *
 	 * @return string Query var.
 	 */
-	public function peek_customized_slug() {
+	protected function peek_customized_slug() {
 		return amp_get_slug( false );
 	}
 
@@ -108,7 +81,6 @@ final class AmpSlugCustomizationWatcher implements Service, Registerable {
 	public function determine_early_customization() {
 		$slug = $this->peek_customized_slug();
 		if ( QueryVars::AMP !== $slug ) {
-			$this->customized_slug     = $slug;
 			$this->is_customized_early = true;
 		} else {
 			add_action( 'after_setup_theme', [ $this, 'determine_late_customization' ], 4 );
@@ -132,7 +104,6 @@ final class AmpSlugCustomizationWatcher implements Service, Registerable {
 	public function determine_late_customization() {
 		$slug = $this->peek_customized_slug();
 		if ( QueryVars::AMP !== $slug ) {
-			$this->customized_slug    = $slug;
 			$this->is_customized_late = true;
 		}
 	}
