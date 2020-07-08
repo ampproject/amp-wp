@@ -76,10 +76,10 @@ final class AmpSlugCustomizationWatcherTest extends WP_UnitTestCase {
 	 * @param string $value Query var.
 	 */
 	private function add_query_var_filter( $value ) {
-		remove_alL_filters( 'amp_query_var' );
+		remove_all_filters( 'amp_query_var' );
 		add_filter(
 			'amp_query_var',
-			function () use ( $value ) {
+			static function () use ( $value ) {
 				return $value;
 			}
 		);
