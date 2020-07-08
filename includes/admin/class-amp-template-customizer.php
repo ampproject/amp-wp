@@ -6,7 +6,6 @@
  */
 
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\QueryVars;
 
 /**
  * AMP class that implements a template style editor in the Customizer.
