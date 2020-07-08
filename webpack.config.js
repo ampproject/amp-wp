@@ -270,13 +270,12 @@ const setup = {
 };
 
 const mobileRedirection = {
-	...defaultConfig,
 	...sharedConfig,
 	entry: {
 		'mobile-redirection': './assets/src/mobile-redirection.js',
 	},
 	plugins: [
-		...defaultConfig.plugins,
+		...sharedConfig.plugins,
 		new WebpackBar( {
 			name: 'Mobile Redirection',
 			color: '#f27136',
