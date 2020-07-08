@@ -852,7 +852,7 @@ function amp_add_generator_metadata() {
 	$content .= sprintf( '; mode=%s', $mode );
 
 	$reader_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
-	if ( AMP_Theme_Support::READER_MODE_SLUG === $mode && AMP_Reader_Themes::DEFAULT_READER_THEME !== $reader_theme ) {
+	if ( AMP_Theme_Support::READER_MODE_SLUG === $mode ) {
 		$content .= sprintf( '; theme=%s', $reader_theme );
 	}
 
