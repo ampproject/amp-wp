@@ -235,7 +235,7 @@ class OptionsMenu implements Service, Registerable {
 			'OPTIONS_REST_ENDPOINT'              => rest_url( 'amp/v1/options' ),
 			'READER_THEMES_REST_ENDPOINT'        => rest_url( 'amp/v1/reader-themes' ),
 			'THEME_SUPPORT_ARGS'                 => AMP_Theme_Support::get_theme_support_args(),
-			'THEME_PROVIDED_SUPPORT_MODE'        => '', // @todo  Should be reader, standard, or transitional.
+			'THEME_PROVIDED_SUPPORT_MODE'        => current_theme_supports( 'amp' ),
 			'THEME_SUPPORTS_READER_MODE'         => AMP_Theme_Support::supports_reader_mode(),
 			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
 			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
