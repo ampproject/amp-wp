@@ -4,7 +4,7 @@
 /**
  * WordPress dependencies
  */
-import { moveToTemplateModeScreen, clickMode, testNextButton, testPreviousButton, cleanUpWizard } from '../../utils/onboarding-wizard-utils';
+import { moveToTemplateModeScreen, clickMode, testNextButton, testPreviousButton, cleanUpSettings } from '../../utils/onboarding-wizard-utils';
 import { installTheme } from '../../utils/install-theme';
 import { activateTheme } from '../../utils/activate-theme';
 import { deleteTheme } from '../../utils/delete-theme';
@@ -61,7 +61,7 @@ describe( 'Template mode recommendations with reader theme active', () => {
 
 describe( 'Template mode recommendations with non-reader-theme active', () => {
 	beforeAll( async () => {
-		await cleanUpWizard();
+		await cleanUpSettings();
 		await installTheme( 'astra' );
 		await activateTheme( 'astra' );
 	} );

@@ -5,7 +5,7 @@ const { visitAdminPage } = require( '@wordpress/e2e-test-utils/build/visit-admin
 /**
  * Internal dependencies
  */
-const { goToOnboardingWizard, completeWizard, cleanUpWizard } = require( '../../utils/onboarding-wizard-utils' );
+const { goToOnboardingWizard, completeWizard, cleanUpSettings } = require( '../../utils/onboarding-wizard-utils' );
 
 describe( 'Onboarding wizard exit links', () => {
 	it( 'if no previous page, returns to settings when clicking close', async () => {
@@ -35,6 +35,6 @@ describe( 'Onboarding wizard exit links', () => {
 		await expect( page ).toMatchElement( 'h1', { text: 'AMP Settings' } );
 
 		await goToOnboardingWizard();
-		await cleanUpWizard();
+		await cleanUpSettings();
 	} );
 } );

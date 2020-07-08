@@ -6,9 +6,11 @@ import { visitAdminPage } from '@wordpress/e2e-test-utils';
 /**
  * Internal dependencies
  */
-import { completeWizard, cleanUpWizard, clickMode, selectReaderTheme } from '../../utils/onboarding-wizard-utils';
+import { completeWizard, cleanUpSettings, clickMode, selectReaderTheme } from '../../utils/onboarding-wizard-utils';
 import { installTheme } from '../../utils/install-theme';
 import { activateTheme } from '../../utils/activate-theme';
+import { themeInstalled } from '../../utils/theme-installed';
+import { deleteTheme } from '../../utils/delete-theme';
 
 async function testStandardAndTransitionalSupportedTemplateToggle() {
 	await expect( page ).toMatchElement( '.supported-templates' );
@@ -92,7 +94,30 @@ describe( 'AMP settings screen newly activated', () => {
 	} );
 } );
 
-describe( 'Active theme as reader mode', () => {
+describe( 'Settings screen submit button', () => {
+	it( 'has the correct disabled state', async () => {
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+
+		await expect( page ).toMatchElement( '.settings-footer button:disabled' );
+
+		await clickMode( 'standard' );
+		await expect( page ).toMatchElement( '.settings-footer button:not(:disabled)' );
+
+		await clickMode( 'reader' );
+		await expect( page ).toMatchElement( '.settings-footer button:disabled' );
+
+		await clickMode( 'transitional' );
+		await expect( page ).toMatchElement( '.settings-footer button:not(:disabled)' );
+
+		await clickMode( 'reader' );
+		await expect( page ).toMatchElement( '.settings-footer button:disabled' );
+
+		await selectReaderTheme( 'twentynineteen' );
+		await expect( page ).toMatchElement( '.settings-footer button:not(:disabled)' );
+	} );
+} );
+
+describe( 'Settings screen when reader theme is active theme', () => {
 	it( 'disables reader theme if is currently active on site', async () => {
 		await installTheme( 'twentynineteen' );
 		await activateTheme( 'twentynineteen' );
@@ -121,6 +146,31 @@ describe( 'Mode info notices', () => {
 	} );
 } );
 
+describe( 'AMP settings reader theme install', () => {
+	beforeAll( async () => {
+		if ( themeInstalled( 'twentysixteen' ) ) {
+			await deleteTheme( 'twentysixteen' );
+		}
+	} );
+
+	afterAll( async () => {
+		await cleanUpSettings();
+	} );
+
+	it( 'can install a theme', async () => {
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+		await clickMode( 'reader' );
+		await selectReaderTheme( 'twentysixteen' );
+
+		await expect( page ).toClick( '.settings-footer button' );
+		await page.waitForSelector( '.settings-footer button:disabled' );
+		await page.waitForSelector( '.settings-footer button:not(:disabled)' );
+
+		const success = await themeInstalled( 'twentysixteen' );
+		expect( success ).toBe( true );
+	} );
+} );
+
 describe( 'AMP Settings Screen after wizard', () => {
 	beforeAll( async () => {
 		await completeWizard( { technical: true, mode: 'standard' } );
@@ -128,7 +178,7 @@ describe( 'AMP Settings Screen after wizard', () => {
 	} );
 
 	afterAll( async () => {
-		await cleanUpWizard();
+		await cleanUpSettings();
 	} );
 
 	it( 'has main page components', async () => {
@@ -143,3 +193,4 @@ describe( 'AMP Settings Screen after wizard', () => {
 		} );
 	} );
 } );
+

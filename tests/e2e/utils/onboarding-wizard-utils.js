@@ -123,7 +123,7 @@ export function testTitle( { text, element = 'h1' } ) {
 /**
  * Reset data modified by the setup wizard.
  */
-export async function cleanUpWizard() {
+export async function cleanUpSettings() {
 	await page.evaluate( async () => {
 		await Promise.all( [
 			wp.apiFetch( { path: '/wp/v2/users/me', method: 'POST', data: { amp_dev_tools_enabled: true } } ),

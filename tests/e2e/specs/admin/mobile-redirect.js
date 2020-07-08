@@ -6,14 +6,14 @@ const { visitAdminPage } = require( '@wordpress/e2e-test-utils/build/visit-admin
 /**
  * Internal dependencies
  */
-const { completeWizard, cleanUpWizard } = require( '../../utils/onboarding-wizard-utils' );
+const { completeWizard, cleanUpSettings } = require( '../../utils/onboarding-wizard-utils' );
 
 const toggleSelector = '.amp-setting-toggle input[type="checkbox"]';
 
 describe( 'Mobile redirect settings', () => {
 	afterEach( async () => {
 		await visitAdminPage( 'admin.php', 'page=amp-onboarding-wizard' );
-		await cleanUpWizard();
+		await cleanUpSettings();
 	} );
 
 	it( 'persists the mobile redirect setting on', async () => {

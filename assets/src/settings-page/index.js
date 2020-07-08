@@ -20,20 +20,16 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
+import '../css/variables.css';
+import '../css/elements.css';
+import '../css/core-components.css';
+import './style.css';
 import { OptionsContextProvider } from '../components/options-context-provider';
 import { AMPNotice, NOTICE_TYPE_WARNING, NOTICE_SIZE_LARGE } from '../components/amp-notice';
 import { ReaderThemesContextProvider } from '../components/reader-themes-context-provider';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
 import { MobileRedirection } from './mobile-redirection';
-
-/**
- * Styles.
- */
-import '../css/variables.css';
-import '../css/elements.css';
-import '../css/core-components.css';
-import './style.css';
 import { ReaderThemes } from './reader-themes';
 import { SettingsFooter } from './settings-footer';
 import { PluginSuppression } from './plugin-suppression';
