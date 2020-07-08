@@ -114,9 +114,10 @@ class AMP_Content_Sanitizer {
 			$sanitizer->init( $sanitizers );
 		}
 
+		$index = 0;
 		// Sanitize.
 		foreach ( $sanitizers as $sanitizer_class => $sanitizer ) {
-			$sanitize_class_start = microtime( true );
+			do_action( 'amp_server_timing_start', 'amp_sanitize_' . $index, $sanitizer_class, [], true );
 
 			$sanitizer->sanitize();
 
@@ -127,7 +128,7 @@ class AMP_Content_Sanitizer {
 				$stylesheets = array_merge( $stylesheets, $sanitizer->get_stylesheets() );
 			}
 
-			AMP_HTTP::send_server_timing( 'amp_sanitize', -$sanitize_class_start, $sanitizer_class );
+			do_action( 'amp_server_timing_stop', 'amp_sanitize_' . $index++ );
 		}
 
 		return compact( 'scripts', 'styles', 'stylesheets', 'sanitizers' );

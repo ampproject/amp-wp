@@ -13,6 +13,8 @@ use AmpProject\AmpWP\Admin\ReenableCssTransientCachingAjaxAction;
 use AmpProject\AmpWP\Admin\SiteHealth;
 use AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching;
 use AmpProject\AmpWP\Infrastructure\ServiceBasedPlugin;
+use AmpProject\AmpWP\Instrumentation\ServerTiming;
+use AmpProject\AmpWP\Instrumentation\StopWatch;
 
 /**
  * The AmpWpPlugin class is the composition root of the plugin.
@@ -62,6 +64,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			'plugin_registry'                  => PluginRegistry::class,
 			'plugin_suppression'               => PluginSuppression::class,
 			'mobile_redirection'               => MobileRedirection::class,
+			'server_timing'                    => ServerTiming::class,
 		];
 	}
 
@@ -113,6 +116,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	protected function get_shared_instances() {
 		return [
 			PluginRegistry::class,
+			StopWatch::class,
 		];
 	}
 

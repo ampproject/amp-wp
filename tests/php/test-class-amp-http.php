@@ -108,6 +108,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 	 * @covers \AMP_HTTP::send_server_timing()
 	 */
 	public function test_send_server_timing_positive_duration() {
+		$this->setExpectedDeprecated( 'AMP_HTTP::send_server_timing' );
 		AMP_HTTP::send_server_timing( 'name', 123, 'Description' );
 		$this->assertCount( 1, AMP_HTTP::$headers_sent );
 		$this->assertEquals( 'Server-Timing', AMP_HTTP::$headers_sent[0]['name'] );
@@ -125,6 +126,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 	 * @covers \AMP_HTTP::send_server_timing()
 	 */
 	public function test_send_server_timing_negative_duration() {
+		$this->setExpectedDeprecated( 'AMP_HTTP::send_server_timing' );
 		AMP_HTTP::send_server_timing( 'name', -microtime( true ) );
 		$this->assertCount( 1, AMP_HTTP::$headers_sent );
 		$this->assertEquals( 'Server-Timing', AMP_HTTP::$headers_sent[0]['name'] );

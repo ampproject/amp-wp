@@ -38,4 +38,17 @@ class EventWithDuration extends Event {
 	public function get_duration() {
 		return $this->duration;
 	}
+
+	/**
+	 * Get the server timing header string.
+	 *
+	 * @return string Server timing header string representing this event.
+	 */
+	public function get_header_string() {
+		return sprintf(
+			'%s;dur="%.1f"',
+			parent::get_header_string(),
+			$this->get_duration()
+		);
+	}
 }

@@ -122,14 +122,6 @@ class AMP_Theme_Support {
 	];
 
 	/**
-	 * Start time when init was called.
-	 *
-	 * @since 1.0
-	 * @var float
-	 */
-	public static $init_start_time;
-
-	/**
 	 * Whether output buffering has started.
 	 *
 	 * @since 0.7
@@ -164,7 +156,7 @@ class AMP_Theme_Support {
 	public static function init() {
 		self::read_theme_support();
 
-		self::$init_start_time = microtime( true );
+		do_action( 'amp_server_timing_start', 'init', 'AMP Output Buffer' );
 
 		if ( self::READER_MODE_SLUG !== self::get_support_mode() ) {
 			// Ensure extra theme support for core themes is in place.
@@ -1901,7 +1893,9 @@ class AMP_Theme_Support {
 	 */
 	public static function finish_output_buffering( $response ) {
 		self::$is_output_buffering = false;
-		return self::prepare_response( $response );
+		$response = self::prepare_response( $response );
+		do_action( 'amp_server_timing_send' );
+		return $response;
 	}
 
 	/**
@@ -1998,9 +1992,9 @@ class AMP_Theme_Support {
 			$args
 		);
 
-		AMP_HTTP::send_server_timing( 'amp_output_buffer', -self::$init_start_time, 'AMP Output Buffer' );
+		do_action( 'amp_server_timing_stop', 'init' );
 
-		$dom_parse_start = microtime( true );
+		do_action( 'amp_server_timing_start', 'amp_dom_parse', 'AMP DOM Parse', [], true );
 
 		$dom = Document::fromHtml( $response );
 
@@ -2008,7 +2002,7 @@ class AMP_Theme_Support {
 			AMP_Validation_Manager::remove_illegal_source_stack_comments( $dom );
 		}
 
-		AMP_HTTP::send_server_timing( 'amp_dom_parse', -$dom_parse_start, 'AMP DOM Parse' );
+		do_action( 'amp_server_timing_stop', 'amp_dom_parse' );
 
 		// Make sure scripts from the body get moved to the head.
 		foreach ( $dom->xpath->query( '//body//script[ @custom-element or @custom-template or @src = "https://cdn.ampproject.org/v0.js" ]' ) as $script ) {
@@ -2040,7 +2034,7 @@ class AMP_Theme_Support {
 			return wp_json_encode( $data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
 		}
 
-		$dom_serialize_start = microtime( true );
+		do_action( 'amp_server_timing_start', 'amp_dom_serialize', 'AMP DOM Serialize', [], true );
 
 		// Gather all component scripts that are used in the document and then render any not already printed.
 		$amp_scripts = $sanitization_results['scripts'];
@@ -2075,6 +2069,8 @@ class AMP_Theme_Support {
 		$enable_optimizer = apply_filters( 'amp_enable_optimizer', $enable_optimizer );
 
 		if ( $enable_optimizer ) {
+			do_action( 'amp_server_timing_start', 'amp_optimizer', 'AMP Optimizer' );
+
 			$errors = new Optimizer\ErrorCollection();
 			self::get_optimizer( $args )->optimizeDom( $dom, $errors );
 
@@ -2090,6 +2086,8 @@ class AMP_Theme_Support {
 				);
 				// @todo Include errors elsewhere than HTML comment?
 			}
+
+			do_action( 'amp_server_timing_stop', 'amp_optimizer' );
 		}
 
 		self::ensure_required_markup( $dom, array_keys( $amp_scripts ) );
@@ -2109,7 +2107,7 @@ class AMP_Theme_Support {
 
 		$response = $dom->saveHTML();
 
-		AMP_HTTP::send_server_timing( 'amp_dom_serialize', -$dom_serialize_start, 'AMP DOM Serialize' );
+		do_action( 'amp_server_timing_stop', 'amp_dom_serialize' );
 
 		return $response;
 	}

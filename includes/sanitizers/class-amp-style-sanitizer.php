@@ -930,8 +930,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 			$shake_css_duration += $pending_stylesheet['shake_time'];
 		}
-		AMP_HTTP::send_server_timing( 'amp_parse_css', $parse_css_duration, 'AMP Parse CSS' );
-		AMP_HTTP::send_server_timing( 'amp_shake_css', $shake_css_duration, 'AMP Tree-Shake CSS' );
+		// TODO: This cannot use actions when we extract the sanitizers into an
+		// external library.
+		do_action( 'amp_server_timing_log', 'amp_parse_css', 'AMP Parse CSS', [ 'dur' => $parse_css_duration * 1000 ], true );
+		do_action( 'amp_server_timing_log', 'amp_shake_css', 'AMP Tree-Shake CSS', [ 'dur' => $shake_css_duration * 1000 ], true );
 	}
 
 	/**
