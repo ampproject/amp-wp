@@ -181,7 +181,7 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'amp_post_template_footer', [ $instance, 'add_legacy_preview_scripts' ] ) );
 	}
 
-	/** @convers AMP_Template_Customizer::add_customizer_scripts() */
+	/** @covers AMP_Template_Customizer::add_customizer_scripts() */
 	public function test_add_customizer_scripts() {
 		$instance = AMP_Template_Customizer::init( $this->get_customize_manager() );
 		$instance->add_customizer_scripts();
@@ -193,7 +193,7 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		$this->assertEquals( 0, did_action( 'amp_customizer_enqueue_scripts' ) );
 	}
 
-	/** @convers AMP_Template_Customizer::add_legacy_customizer_scripts() */
+	/** @covers AMP_Template_Customizer::add_legacy_customizer_scripts() */
 	public function test_add_legacy_customizer_scripts() {
 		$instance = AMP_Template_Customizer::init( $this->get_customize_manager() );
 		$instance->add_legacy_customizer_scripts();
@@ -205,7 +205,7 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		$this->assertEquals( 1, did_action( 'amp_customizer_enqueue_scripts' ) );
 	}
 
-	/** @convers AMP_Template_Customizer::enqueue_legacy_preview_scripts() */
+	/** @covers AMP_Template_Customizer::enqueue_legacy_preview_scripts() */
 	public function test_enqueue_legacy_preview_scripts() {
 		$post = self::factory()->post->create( [ 'post_type' => 'post' ] );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
@@ -218,28 +218,28 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		$this->assertTrue( wp_script_is( 'amp-customize-preview', 'enqueued' ) );
 		$this->assertStringContains( 'amp-customize-preview-legacy.js', wp_scripts()->registered['amp-customize-preview']->src );
 
-		$this->assertTrue( wp_script_is( 'customize-selective-refresh', 'enqueued' ) );
 		$this->assertTrue( wp_script_is( 'amp-customize-preview', 'enqueued' ) );
 	}
 
-	/** @convers AMP_Template_Customizer::add_legacy_customize_preview_styles() */
+	/** @covers AMP_Template_Customizer::add_legacy_customize_preview_styles() */
 	public function test_add_legacy_customize_preview_styles() {
 		$instance = AMP_Template_Customizer::init( $this->get_customize_manager() );
 		$output   = get_echo( [ $instance, 'add_legacy_customize_preview_styles' ] );
 		$this->assertStringContains( '.screen-reader-text', $output );
 	}
 
-	/** @convers AMP_Template_Customizer::add_legacy_preview_scripts() */
+	/** @covers AMP_Template_Customizer::add_legacy_preview_scripts() */
 	public function test_add_legacy_preview_scripts() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		$this->assertTrue( amp_is_legacy() );
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$instance = AMP_Template_Customizer::init( $this->get_customize_manager() );
 		get_echo( [ $instance, 'add_legacy_preview_scripts' ] );
+		$this->assertTrue( wp_script_is( 'customize-selective-refresh', 'enqueued' ) );
 		$this->assertEquals( 1, did_action( 'amp_customizer_enqueue_preview_scripts' ) );
 	}
 
-	/** @convers AMP_Template_Customizer::print_legacy_controls_templates() */
+	/** @covers AMP_Template_Customizer::print_legacy_controls_templates() */
 	public function test_print_legacy_controls_templates() {
 		$instance = AMP_Template_Customizer::init( $this->get_customize_manager() );
 		$output   = get_echo( [ $instance, 'print_legacy_controls_templates' ] );
