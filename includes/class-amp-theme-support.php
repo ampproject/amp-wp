@@ -2004,6 +2004,8 @@ class AMP_Theme_Support {
 
 		do_action( 'amp_server_timing_stop', 'amp_dom_parse' );
 
+		do_action( 'amp_server_timing_start', 'amp_sanitizer', 'AMP Sanitizer' );
+
 		// Make sure scripts from the body get moved to the head.
 		foreach ( $dom->xpath->query( '//body//script[ @custom-element or @custom-template or @src = "https://cdn.ampproject.org/v0.js" ]' ) as $script ) {
 			$dom->head->appendChild( $script->parentNode->removeChild( $script ) );
@@ -2017,6 +2019,8 @@ class AMP_Theme_Support {
 		}
 
 		$sanitization_results = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
+
+		do_action( 'amp_server_timing_stop', 'amp_sanitizer' );
 
 		// Respond early with results if performing a validate request.
 		if ( AMP_Validation_Manager::$is_validate_request ) {
