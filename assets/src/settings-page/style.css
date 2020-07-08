@@ -1,3 +1,7 @@
+.amp.amp-settings .selectable {
+	padding: 1.25rem 2.5rem;
+}
+
 .amp.amp-settings .selectable--left {
 	margin-left: 10px;
 	width: calc(100% - 10px); /* Offset box shadow. */
@@ -97,6 +101,10 @@
 	margin-bottom: 1rem;
 }
 
+.supported-templates .amp-setting-toggle p {
+	font-size: 13px;
+}
+
 .amp .amp-template-support-field > td {
 	padding-top: 1rem;
 
@@ -116,4 +124,8 @@
 .amp.amp-settings .template-mode-selection > p {
 	font-size: 16px;
 	margin-bottom: 1rem;
+}
+
+.amp .form-table .amp-suppressed-plugins p {
+	font-size: 13px;
 }
