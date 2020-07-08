@@ -272,9 +272,7 @@ class OptionsMenu implements Service, Registerable {
 	 */
 	public function render_screen() {
 		/* translators: %s: URL to the ecosystem page. */
-		$ecosystem_description = sprintf( __( 'For a list of themes and plugins that are known to be AMP compatible, please see the <a href="%s">ecosystem page</a>.', 'amp' ), esc_url( 'https://amp-wp.org/ecosystem/' ) );
-		$builtin_support       = in_array( get_template(), AMP_Core_Theme_Sanitizer::get_supported_themes(), true );
-		$plugin_configured     = AMP_Options_Manager::get_option( Option::PLUGIN_CONFIGURED );
+		$plugin_configured = AMP_Options_Manager::get_option( Option::PLUGIN_CONFIGURED );
 
 		if ( ! empty( $_GET['settings-updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			AMP_Options_Manager::check_supported_post_type_update_errors();
@@ -286,11 +284,6 @@ class OptionsMenu implements Service, Registerable {
 				<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 				<?php settings_errors(); ?>
 
-				<?php if ( ! AMP_Theme_Support::get_support_mode_added_via_theme() && ! AMP_Theme_Support::supports_reader_mode() && ! $builtin_support ) : ?>
-					<p>
-						<?php echo wp_kses_post( $ecosystem_description ); ?>
-					</p>
-				<?php endif; ?>
 				<div class="amp amp-settings">
 					<div class="settings-welcome">
 						<div class="selectable selectable--left">
