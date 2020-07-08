@@ -98,7 +98,11 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 *                      to argument values.
 	 */
 	protected function get_arguments() {
-		return [];
+		return [
+			ServerTiming::class => [
+				'verbose' => filter_input( INPUT_GET, QueryVar::VERBOSE_SERVER_TIMING, FILTER_VALIDATE_BOOLEAN ),
+			],
+		];
 	}
 
 	/**
