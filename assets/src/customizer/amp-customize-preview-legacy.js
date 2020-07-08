@@ -1,3 +1,4 @@
+// Note: This is only used in Legacy Reader mode.
 window.ampCustomizePreview = ( function( api ) {
 	'use strict';
 

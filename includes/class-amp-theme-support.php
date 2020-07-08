@@ -138,38 +138,15 @@ class AMP_Theme_Support {
 	protected static $is_output_buffering = false;
 
 	/**
-	 * Theme support mode that was added via option.
-	 *
-	 * This should be either null (reader), 'standard', or 'transitional'.
-	 *
-	 * @since 1.0
-	 * @var null|string
-	 */
-	protected static $support_added_via_option;
-
-	/**
-	 * Theme support mode which was added via the theme.
-	 *
-	 * This should be either null (reader), 'standard', or 'transitional'.
-	 *
-	 * @var null|string
-	 */
-	protected static $support_added_via_theme;
-
-	/**
 	 * Initialize.
 	 *
 	 * @since 0.7
 	 */
 	public static function init() {
-		self::read_theme_support();
-
 		self::$init_start_time = microtime( true );
 
-		if ( self::READER_MODE_SLUG !== self::get_support_mode() ) {
-			// Ensure extra theme support for core themes is in place.
-			AMP_Core_Theme_Sanitizer::extend_theme_support();
-		}
+		// Ensure extra theme support for core themes is in place.
+		AMP_Core_Theme_Sanitizer::extend_theme_support();
 
 		/*
 		 * Note that wp action is use instead of template_redirect because some themes/plugins output
@@ -186,13 +163,13 @@ class AMP_Theme_Support {
 	 * @see AMP_Theme_Support::read_theme_support()
 	 * @see AMP_Theme_Support::get_support_mode()
 	 * @codeCoverageIgnore
-	 * @deprecated Use AMP_Theme_Support::get_support_mode_added_via_option().
+	 * @deprecated Support is always determined by the option.
 	 *
 	 * @return bool Support added via option.
 	 */
 	public static function is_support_added_via_option() {
-		_deprecated_function( __METHOD__, '1.2', 'AMP_Theme_Support::get_support_mode_added_via_option' );
-		return null !== self::$support_added_via_option;
+		_deprecated_function( __METHOD__, '1.6' );
+		return true;
 	}
 
 	/**
@@ -204,23 +181,37 @@ class AMP_Theme_Support {
 	 * @see AMP_Theme_Support::STANDARD_MODE_SLUG
 	 *
 	 * @since 1.2
+	 * @deprecated
+	 * @codeCoverageIgnore
 	 */
 	public static function get_support_mode_added_via_option() {
-		return self::$support_added_via_option;
+		_deprecated_function( __METHOD__, '1.6', 'AMP_Options_Manager::get_option' );
+		$value = AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
+		if ( self::READER_MODE_SLUG === $value ) {
+			$value = null;
+		}
+		return $value;
 	}
 
 	/**
-	 * Get the theme support mode added via admin option.
+	 * Get the theme support mode added via theme.
 	 *
-	 * @return null|string Support added via option, with null meaning Reader, and otherwise being 'standard' or 'transitional'.
+	 * @return null|string Support added via theme, with null meaning Reader, and otherwise being 'standard' or 'transitional'.
 	 * @see AMP_Theme_Support::read_theme_support()
 	 * @see AMP_Theme_Support::TRANSITIONAL_MODE_SLUG
 	 * @see AMP_Theme_Support::STANDARD_MODE_SLUG
 	 *
 	 * @since 1.2
+	 * @deprecated
+	 * @codeCoverageIgnore
 	 */
 	public static function get_support_mode_added_via_theme() {
-		return self::$support_added_via_theme;
+		_deprecated_function( __METHOD__, '1.6', 'current_theme_supports' );
+		$theme_support_args = self::get_theme_support_args();
+		if ( ! $theme_support_args ) {
+			return null;
+		}
+		return empty( $theme_support_args[ self::PAIRED_FLAG ] ) ? self::STANDARD_MODE_SLUG : self::TRANSITIONAL_MODE_SLUG;
 	}
 
 	/**
@@ -232,92 +223,30 @@ class AMP_Theme_Support {
 	 * @see AMP_Theme_Support::STANDARD_MODE_SLUG
 	 *
 	 * @since 1.2
+	 * @deprecated
+	 * @codeCoverageIgnore
 	 */
 	public static function get_support_mode() {
-		$theme_support = self::get_support_mode_added_via_option();
-		if ( ! $theme_support ) {
-			$theme_support = self::get_support_mode_added_via_theme();
-		}
-		if ( ! $theme_support ) {
-			$theme_support = self::READER_MODE_SLUG;
-		}
-		return $theme_support;
+		_deprecated_function( __METHOD__, '1.6', 'AMP_Options_Manager::get_option' );
+		return AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
 	}
 
 	/**
 	 * Check theme support args or add theme support if option is set in the admin.
 	 *
-	 * The DB option is only considered if the theme does not already explicitly support AMP.
+	 * In older versions of the plugin, the DB option was only considered if the theme does not already explicitly support AMP.
+	 * This is no longer the case. The DB option is the only value that is considered.
 	 *
-	 * @see AMP_Theme_Support::get_support_mode_added_via_theme()
-	 * @see AMP_Theme_Support::get_support_mode_added_via_option()
+	 * @todo Should we store the original theme support args so we can tell the user that the active theme says it can be used in Standard/Transitional modes?
+	 * @todo What is even the purpose of doing any of this? Calling current_theme_supports('amp') is irrelevant if is_amp_endpoint().
+	 * Maybe not because really we should be scanning the site to actually see if there are validation errors, and tha that this
+	 *
 	 * @see AMP_Post_Type_Support::add_post_type_support() For where post type support is added, since it is irrespective of theme support.
+	 * @deprecated
+	 * @codeCoverageIgnore
 	 */
 	public static function read_theme_support() {
-		self::$support_added_via_theme  = null;
-		self::$support_added_via_option = null;
-
-		$theme_support_option = AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
-		if ( current_theme_supports( self::SLUG ) ) {
-			$args = self::get_theme_support_args();
-
-			// Validate theme support usage.
-			$keys = [ 'template_dir', 'comments_live_list', self::PAIRED_FLAG, 'templates_supported', 'available_callback', 'service_worker', 'nav_menu_toggle', 'nav_menu_dropdown' ];
-
-			if ( count( array_diff( array_keys( $args ), $keys ) ) !== 0 ) {
-				_doing_it_wrong(
-					'add_theme_support',
-					esc_html(
-						sprintf(  // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-							/* translators: 1: comma-separated list of expected keys, 2: comma-separated list of actual keys */
-							__( 'Expected AMP theme support to keys (%1$s) but saw (%2$s)', 'amp' ),
-							implode( ', ', $keys ),
-							implode( ', ', array_keys( $args ) )
-						)
-					),
-					'1.0'
-				);
-			}
-
-			if ( isset( $args['available_callback'] ) ) {
-				_doing_it_wrong(
-					'add_theme_support',
-					sprintf(
-						/* translators: 1: available_callback. 2: supported_templates */
-						esc_html__( 'The %1$s is deprecated when adding amp theme support in favor of declaratively setting the %2$s.', 'amp' ),
-						'available_callback',
-						Option::SUPPORTED_TEMPLATES // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					),
-					'1.0'
-				);
-			}
-
-			// See amp_is_canonical().
-			$is_paired = isset( $args[ self::PAIRED_FLAG ] ) ? $args[ self::PAIRED_FLAG ] : ! empty( $args['template_dir'] );
-
-			self::$support_added_via_theme  = $is_paired ? self::TRANSITIONAL_MODE_SLUG : self::STANDARD_MODE_SLUG;
-			self::$support_added_via_option = $theme_support_option;
-
-			// Make sure the user option can override what the theme has specified.
-			if ( $is_paired && self::STANDARD_MODE_SLUG === $theme_support_option ) {
-				$args[ self::PAIRED_FLAG ] = false;
-				add_theme_support( self::SLUG, $args );
-			} elseif ( ! $is_paired && self::TRANSITIONAL_MODE_SLUG === $theme_support_option ) {
-				$args[ self::PAIRED_FLAG ] = true;
-				add_theme_support( self::SLUG, $args );
-			} elseif ( self::READER_MODE_SLUG === $theme_support_option ) {
-				remove_theme_support( self::SLUG );
-			}
-		} elseif ( self::READER_MODE_SLUG !== $theme_support_option ) {
-			$is_paired = ( self::TRANSITIONAL_MODE_SLUG === $theme_support_option );
-			add_theme_support(
-				self::SLUG,
-				[
-					self::PAIRED_FLAG => $is_paired,
-				]
-			);
-			self::$support_added_via_option = $is_paired ? self::TRANSITIONAL_MODE_SLUG : self::STANDARD_MODE_SLUG;
-		}
+		_deprecated_function( __METHOD__, '1.6' );
 	}
 
 	/**
@@ -355,7 +284,7 @@ class AMP_Theme_Support {
 	 */
 	public static function supports_reader_mode() {
 		return (
-			! self::get_support_mode_added_via_theme()
+			! current_theme_supports( self::SLUG )
 			&&
 			(
 				is_dir( trailingslashit( get_template_directory() ) . self::READER_MODE_TEMPLATE_DIRECTORY )
@@ -377,8 +306,7 @@ class AMP_Theme_Support {
 			add_filter( 'template_include', [ __CLASS__, 'serve_paired_browsing_experience' ] );
 		}
 
-		$is_reader_mode = self::READER_MODE_SLUG === self::get_support_mode();
-		$has_query_var  = (
+		$has_query_var = (
 			isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			||
 			false !== get_query_var( amp_get_slug(), false )
@@ -401,10 +329,10 @@ class AMP_Theme_Support {
 
 		self::ensure_proper_amp_location();
 
-		$theme_support = self::get_theme_support_args();
-		if ( ! empty( $theme_support['template_dir'] ) ) {
-			self::add_amp_template_filters();
-		} elseif ( $is_reader_mode ) {
+		if ( amp_is_legacy() ) {
+			// Make sure there is no confusion when serving the legacy Reader template that the normal theme hooks should not be used.
+			remove_theme_support( self::SLUG );
+
 			add_filter(
 				'template_include',
 				static function() {
@@ -412,6 +340,15 @@ class AMP_Theme_Support {
 				},
 				PHP_INT_MAX
 			);
+		} else {
+			$theme_support = self::get_theme_support_args();
+			if ( false === $theme_support ) {
+				// Make sure that 'amp' theme support is present for plugins can use `current_theme_supports('amp')` as
+				// a signal for whether to use standard template hooks instead of legacy Reader AMP post template hooks.
+				add_theme_support( self::SLUG );
+			} elseif ( ! empty( $theme_support['template_dir'] ) ) {
+				self::add_amp_template_filters();
+			}
 		}
 
 		self::add_hooks();
@@ -450,7 +387,7 @@ class AMP_Theme_Support {
 			if ( $has_query_var || $has_url_param ) {
 				return self::redirect_non_amp_url( current_user_can( 'manage_options' ) ? 302 : 301 );
 			}
-		} elseif ( self::READER_MODE_SLUG === self::get_support_mode() && is_singular() ) {
+		} elseif ( amp_is_legacy() && is_singular() ) {
 			// Prevent infinite URL space under /amp/ endpoint.
 			global $wp;
 			$path_args = [];
@@ -524,7 +461,7 @@ class AMP_Theme_Support {
 	 * @return bool Whether available.
 	 */
 	public static function is_paired_available() {
-		if ( ! current_theme_supports( self::SLUG ) ) {
+		if ( amp_is_legacy() ) {
 			return false;
 		}
 
@@ -603,6 +540,13 @@ class AMP_Theme_Support {
 			'template'  => null,
 		];
 
+		if ( amp_is_legacy() ) {
+			return array_merge(
+				$default_response,
+				[ 'errors' => [ 'legacy_reader_mode' ] ]
+			);
+		}
+
 		if ( ! ( $query instanceof WP_Query ) ) {
 			_doing_it_wrong( __METHOD__, esc_html__( 'No WP_Query available.', 'amp' ), '1.0' );
 			return array_merge(
@@ -612,44 +556,6 @@ class AMP_Theme_Support {
 		}
 
 		$theme_support_args = self::get_theme_support_args();
-		if ( false === $theme_support_args ) {
-			return array_merge(
-				$default_response,
-				[ 'errors' => [ 'no_theme_support' ] ]
-			);
-		}
-
-		// Support available_callback from 0.7, though it is deprecated.
-		if ( isset( $theme_support_args['available_callback'] ) && is_callable( $theme_support_args['available_callback'] ) ) {
-			/**
-			 * Queried object.
-			 *
-			 * @var WP_Post $queried_object
-			 */
-			$queried_object = $query->get_queried_object();
-			if ( ( is_singular() || $query->is_posts_page ) && ! post_supports_amp( $queried_object ) ) {
-				return array_merge(
-					$default_response,
-					[
-						'errors'    => [ 'no-post-support' ],
-						'supported' => false,
-						'immutable' => true,
-					]
-				);
-			}
-
-			$response = array_merge(
-				$default_response,
-				[
-					'supported' => call_user_func( $theme_support_args['available_callback'] ),
-					'immutable' => true,
-				]
-			);
-			if ( ! $response['supported'] ) {
-				$response['errors'][] = 'available_callback';
-			}
-			return $response;
-		}
 
 		$all_templates_supported_by_theme_support = false;
 		if ( isset( $theme_support_args['templates_supported'] ) ) {

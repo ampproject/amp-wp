@@ -6,6 +6,7 @@
  * @since 1.1
  */
 
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 
 /**
@@ -191,7 +192,7 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 	public function test_add_install_hooks() {
 		remove_all_actions( 'amp_post_template_footer' );
 		remove_all_actions( 'wp_footer' );
-		remove_theme_support( 'amp' );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 
 		$post_id = self::factory()->post->create();
 		$this->go_to( get_permalink( $post_id ) );
@@ -200,7 +201,7 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 		$this->assertSame( 10, has_action( 'amp_post_template_footer', [ 'AMP_Service_Worker', 'install_service_worker' ] ) );
 		$this->assertFalse( has_action( 'wp_footer', [ 'AMP_Service_Worker', 'install_service_worker' ] ) );
 
-		add_theme_support( 'amp' );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->assertTrue( is_amp_endpoint() );
 		AMP_Service_Worker::add_install_hooks();
 		$this->assertSame( 10, has_action( 'wp_footer', [ 'AMP_Service_Worker', 'install_service_worker' ] ) );
