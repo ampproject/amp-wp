@@ -51,8 +51,6 @@ final class ReaderThemeLoader implements Service, Registerable, Conditional {
 			AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
 			&&
 			AMP_Reader_Themes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME )
-			&&
-			isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		);
 	}
 
@@ -85,6 +83,11 @@ final class ReaderThemeLoader implements Service, Registerable, Conditional {
 	 * @see WP_Customize_Manager::start_previewing_theme() which provides for much of the inspiration here.
 	 */
 	public function override_theme() {
+		// Short-circuit if the request does not include the AMP query var.
+		if ( ! isset( $_GET[ amp_get_slug() ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return;
+		}
+
 		$theme = $this->get_reader_theme();
 		if ( ! $theme instanceof WP_Theme ) {
 			return;

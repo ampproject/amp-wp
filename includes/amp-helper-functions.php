@@ -538,10 +538,6 @@ function amp_redirect_old_slug_to_new_url( $link ) {
  * @return string Slug used for query var, endpoint, and post type support.
  */
 function amp_get_slug() {
-	if ( defined( 'AMP_QUERY_VAR' ) ) {
-		return AMP_QUERY_VAR;
-	}
-
 	/**
 	 * Filter the AMP query variable.
 	 *
@@ -551,11 +547,7 @@ function amp_get_slug() {
 	 *
 	 * @param string $query_var The AMP query variable.
 	 */
-	$query_var = apply_filters( 'amp_query_var', QueryVars::AMP );
-
-	define( 'AMP_QUERY_VAR', $query_var );
-
-	return $query_var;
+	return apply_filters( 'amp_query_var', defined( 'AMP_QUERY_VAR' ) ? AMP_QUERY_VAR : QueryVars::AMP );
 }
 
 /**
