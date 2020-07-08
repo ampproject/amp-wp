@@ -47,7 +47,7 @@ final class ServerTiming implements Service, Registerable {
 	 * @param bool      $verbose   Optional. Whether to track all events, or
 	 *                             only the non-verbose ones.
 	 */
-	public function __construct( StopWatch $stopwatch, $verbose = true ) {
+	public function __construct( StopWatch $stopwatch, $verbose = false ) {
 		$this->stopwatch = $stopwatch;
 		$this->verbose   = $verbose;
 	}
