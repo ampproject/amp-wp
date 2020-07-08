@@ -61,7 +61,7 @@ function getStandardNotice( themeSupport ) {
 export function TemplateModes() {
 	const { editedOptions } = useContext( Options );
 
-	const { theme_support: themeSupport } = editedOptions;
+	const { plugin_configured: pluginConfigured, theme_support: themeSupport } = editedOptions;
 
 	return (
 		<section className="template-mode-selection">
@@ -75,7 +75,7 @@ export function TemplateModes() {
 				details={ __( 'In Standard Mode your site uses a single theme and there is a single version of your content. In this mode, AMP is the framework of your site and there is reduced development and maintenance costs by having a single site to maintain.', 'amp' ) }
 				mode="standard"
 			>
-				{ ! themeSupport && 'standard' === THEME_PROVIDED_SUPPORT_MODE && (
+				{ ! pluginConfigured && 'standard' === THEME_PROVIDED_SUPPORT_MODE && (
 					<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_INFO }>
 						<p>
 							{ __( 'Your active theme is known to work well in standard mode.', 'amp' ) }
@@ -87,7 +87,7 @@ export function TemplateModes() {
 				details={ __( 'The active theme\'s templates are used to generate non-AMP and AMP versions of your content, allowing for each canonical URL to have a corresponding (paired) AMP URL. This mode is useful to progressively transition towards a fully AMP-first site. Depending on your themes/plugins, a varying level of development work may be required.', 'amp' ) }
 				mode="transitional"
 			>
-				{ ! themeSupport && ( BUILT_IN_SUPPORT || 'transitional' === THEME_PROVIDED_SUPPORT_MODE ) && (
+				{ ! pluginConfigured && ( BUILT_IN_SUPPORT || 'transitional' === THEME_PROVIDED_SUPPORT_MODE ) && (
 					<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_INFO }>
 						<p>
 							{ __( 'Your active theme is known to work well in transitional mode.', 'amp' ) }
