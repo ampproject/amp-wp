@@ -9,7 +9,7 @@ use AmpProject\AmpWP\Admin\DevToolsUserAccess;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\QueryVars;
+use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Services;
 
 /**
@@ -734,7 +734,7 @@ class AMP_Validated_URL_Post_Type {
 		// Query args to be removed from validated URLs.
 		$removable_query_vars = array_merge(
 			wp_removable_query_args(),
-			[ 'preview_id', 'preview_nonce', 'preview', QueryVars::NOAMP ]
+			[ 'preview_id', 'preview_nonce', 'preview', QueryVar::NOAMP ]
 		);
 
 		// Normalize query args, removing all that are not recognized or which are removable.

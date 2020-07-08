@@ -6,7 +6,7 @@
  */
 
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\QueryVars;
+use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\HandleValidation;
 
@@ -705,13 +705,13 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertTrue( is_amp_available() );
 		$this->assertFalse( is_amp_endpoint() );
 
-		$this->go_to( add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_AVAILABLE, get_permalink( $post_id ) ) );
+		$this->go_to( add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_AVAILABLE, get_permalink( $post_id ) ) );
 		$this->assertFalse( is_amp_available() );
 		$this->assertFalse( is_amp_endpoint() );
 
 		// Now go AMP-first.
 		add_theme_support( 'amp', [ 'paired' => false ] );
-		$this->go_to( add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_AVAILABLE, get_permalink( $post_id ) ) );
+		$this->go_to( add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_AVAILABLE, get_permalink( $post_id ) ) );
 		$this->assertTrue( is_amp_available() );
 		$this->assertTrue( is_amp_endpoint() );
 	}

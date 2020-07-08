@@ -7,7 +7,7 @@
 
 use AmpProject\Amp;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\QueryVars;
+use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\ConfigurationArgument;
 use AmpProject\AmpWP\Transformer;
@@ -2099,7 +2099,7 @@ class AMP_Theme_Support {
 			$non_amp_url = amp_remove_endpoint( amp_get_current_url() );
 
 			// Redirect to include query var to preventing AMP from even being considered available.
-			$non_amp_url = add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_AVAILABLE, $non_amp_url );
+			$non_amp_url = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_AVAILABLE, $non_amp_url );
 
 			wp_safe_redirect( $non_amp_url, 302 );
 			return esc_html__( 'Redirecting since AMP version not available.', 'amp' );
@@ -2284,7 +2284,7 @@ class AMP_Theme_Support {
 			$url = wp_unslash( $_SERVER['REQUEST_URI'] );
 		}
 		$url = remove_query_arg(
-			[ amp_get_slug(), QueryVars::NOAMP, AMP_Validated_URL_Post_Type::VALIDATE_ACTION, AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ],
+			[ amp_get_slug(), QueryVar::NOAMP, AMP_Validated_URL_Post_Type::VALIDATE_ACTION, AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ],
 			$url
 		);
 		$url = add_query_arg( self::PAIRED_BROWSING_QUERY_VAR, '1', $url );
@@ -2358,10 +2358,10 @@ class AMP_Theme_Support {
 			'amp-paired-browsing-app',
 			'app',
 			[
-				'ampSlug'                   => amp_get_slug(),
-				'ampPairedBrowsingQueryVar' => self::PAIRED_BROWSING_QUERY_VAR,
-				'noampQueryVar'             => QueryVars::NOAMP,
-				'documentTitlePrefix'       => __( 'AMP Paired Browsing:', 'amp' ),
+					'ampSlug'                   => amp_get_slug(),
+					'ampPairedBrowsingQueryVar' => self::PAIRED_BROWSING_QUERY_VAR,
+					'noampQueryVar'             => QueryVar::NOAMP,
+					'documentTitlePrefix'       => __( 'AMP Paired Browsing:', 'amp' ),
 			]
 		);
 

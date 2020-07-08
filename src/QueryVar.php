@@ -1,6 +1,6 @@
 <?php
 /**
- * Interface QueryVars.
+ * Interface QueryVar.
  *
  * @package AmpProject\AmpWP
  */
@@ -12,7 +12,7 @@ namespace AmpProject\AmpWP;
  *
  * @package AmpProject\AmpWP
  */
-interface QueryVars {
+interface QueryVar {
 
 	/**
 	 * Query var used to signal the request for an AMP page.
@@ -61,4 +61,11 @@ interface QueryVars {
 	 * @var string
 	 */
 	const NOAMP_AVAILABLE = 'available';
+
+	/**
+	 * Value for the query var that allows switching to verbose server-timing output.
+	 *
+	 * @var string
+	 */
+	const VERBOSE_SERVER_TIMING = 'amp_verbose_server_timing';
 }

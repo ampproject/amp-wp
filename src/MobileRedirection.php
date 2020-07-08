@@ -130,7 +130,7 @@ final class MobileRedirection implements Service, Registerable {
 	 */
 	public function get_current_amp_url() {
 		$url = add_query_arg( amp_get_slug(), '1', amp_get_current_url() );
-		$url = remove_query_arg( QueryVars::NOAMP, $url );
+		$url = remove_query_arg( QueryVar::NOAMP, $url );
 		return $url;
 	}
 
@@ -213,7 +213,7 @@ final class MobileRedirection implements Service, Registerable {
 			if ( ! empty( $query_string ) ) {
 				$query_vars = [];
 				parse_str( $query_string, $query_vars );
-				$excluded = array_key_exists( QueryVars::NOAMP, $query_vars );
+				$excluded = array_key_exists( QueryVar::NOAMP, $query_vars );
 			}
 		}
 		return $excluded;
@@ -228,7 +228,7 @@ final class MobileRedirection implements Service, Registerable {
 	 */
 	public function filter_amp_to_amp_linking_element_query_vars( $query_vars, $excluded ) {
 		if ( $excluded ) {
-			$query_vars[ QueryVars::NOAMP ] = QueryVars::NOAMP_MOBILE;
+			$query_vars[ QueryVar::NOAMP ] = QueryVar::NOAMP_MOBILE;
 		}
 		return $query_vars;
 	}
@@ -349,7 +349,7 @@ final class MobileRedirection implements Service, Registerable {
 	 * @return bool True if disabled, false otherwise.
 	 */
 	public function is_redirection_disabled_via_query_param() {
-		return isset( $_GET[ QueryVars::NOAMP ] ) && QueryVars::NOAMP_MOBILE === wp_unslash( $_GET[ QueryVars::NOAMP ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return isset( $_GET[ QueryVar::NOAMP ] ) && QueryVar::NOAMP_MOBILE === wp_unslash( $_GET[ QueryVar::NOAMP ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**
@@ -420,8 +420,8 @@ final class MobileRedirection implements Service, Registerable {
 
 		$exports = [
 			'ampUrl'             => $this->get_current_amp_url(),
-			'noampQueryVarName'  => QueryVars::NOAMP,
-			'noampQueryVarValue' => QueryVars::NOAMP_MOBILE,
+			'noampQueryVarName'  => QueryVar::NOAMP,
+			'noampQueryVarValue' => QueryVar::NOAMP_MOBILE,
 			'disabledStorageKey' => self::DISABLED_STORAGE_KEY,
 			'mobileUserAgents'   => $this->get_mobile_user_agents(),
 			'regexRegex'         => self::REGEX_REGEX,
@@ -473,7 +473,7 @@ final class MobileRedirection implements Service, Registerable {
 		$is_amp = is_amp_endpoint();
 		if ( $is_amp ) {
 			$rel  = [ Attribute::REL_NOAMPHTML, Attribute::REL_NOFOLLOW ];
-			$url  = add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_MOBILE, amp_remove_endpoint( amp_get_current_url() ) );
+			$url  = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, amp_remove_endpoint( amp_get_current_url() ) );
 			$text = __( 'Exit mobile version', 'amp' );
 		} else {
 			$rel  = [ Attribute::REL_AMPHTML ];

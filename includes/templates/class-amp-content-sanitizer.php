@@ -114,10 +114,20 @@ class AMP_Content_Sanitizer {
 			$sanitizer->init( $sanitizers );
 		}
 
-		$index = 0;
 		// Sanitize.
+		$index = 0;
+		$sanitizers_to_surface = [
+			AMP_Style_Sanitizer::class,
+			AMP_Tag_And_Attribute_Sanitizer::class,
+		];
 		foreach ( $sanitizers as $sanitizer_class => $sanitizer ) {
-			do_action( 'amp_server_timing_start', 'amp_sanitize_' . $index, $sanitizer_class, [], true );
+			do_action(
+				'amp_server_timing_start',
+				'amp_sanitize_' . $index,
+				str_replace( '_', ' ', $sanitizer_class ),
+				[],
+				! in_array( $sanitizer_class, $sanitizers_to_surface, true )
+			);
 
 			$sanitizer->sanitize();
 

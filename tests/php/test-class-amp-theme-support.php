@@ -9,7 +9,7 @@
 use AmpProject\AmpWP\ConfigurationArgument;
 use AmpProject\AmpWP\MobileRedirection;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\QueryVars;
+use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\PrivateAccess;
 use AmpProject\Dom\Document;
@@ -2306,14 +2306,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 		$this->assertStringStartsWith( 'Redirecting', $sanitized_html );
 		$this->assertCount( 1, $redirects );
-		$this->assertEquals( add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_AVAILABLE, home_url( '/' ) ), $redirects[0] );
+		$this->assertEquals( add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_AVAILABLE, home_url( '/' ) ), $redirects[0] );
 		$this->assertEquals( 1, AMP_Theme_Support_Sanitizer_Counter::$count );
 
 		AMP_Validation_Manager::reset_validation_results();
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 		$this->assertStringStartsWith( 'Redirecting', $sanitized_html );
 		$this->assertCount( 2, $redirects );
-		$this->assertEquals( add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_AVAILABLE, home_url( '/' ) ), $redirects[0] );
+		$this->assertEquals( add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_AVAILABLE, home_url( '/' ) ), $redirects[0] );
 		$this->assertEquals( 2, AMP_Theme_Support_Sanitizer_Counter::$count, 'Expected sanitizer to be invoked again.' );
 
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );

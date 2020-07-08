@@ -8,7 +8,7 @@
 use AmpProject\AmpWP\Admin\DevToolsUserAccess;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\PluginRegistry;
-use AmpProject\AmpWP\QueryVars;
+use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Services;
 use AmpProject\Attribute;
 use AmpProject\Tag;
@@ -371,13 +371,13 @@ class AMP_Validation_Manager {
 		$current_url = amp_get_current_url();
 		$non_amp_url = amp_remove_endpoint( $current_url );
 		$non_amp_url = add_query_arg(
-			QueryVars::NOAMP,
-			amp_is_canonical() ? QueryVars::NOAMP_AVAILABLE : QueryVars::NOAMP_MOBILE,
+			QueryVar::NOAMP,
+			amp_is_canonical() ? QueryVar::NOAMP_AVAILABLE : QueryVar::NOAMP_MOBILE,
 			$non_amp_url
 		);
 
 		$amp_url = remove_query_arg(
-			array_merge( wp_removable_query_args(), [ QueryVars::NOAMP ] ),
+			array_merge( wp_removable_query_args(), [ QueryVar::NOAMP ] ),
 			$current_url
 		);
 		if ( ! amp_is_canonical() ) {
