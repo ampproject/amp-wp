@@ -435,7 +435,7 @@ function is_amp_available() {
 	$has_reader_theme = (
 		AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
 		&&
-		AMP_Reader_Themes::DEFAULT_READER_THEME === AMP_Options_Manager::get_option( Option::READER_THEME )
+		AMP_Reader_Themes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME )
 	);
 	if ( $has_reader_theme && is_customize_preview() ) {
 		return true;
