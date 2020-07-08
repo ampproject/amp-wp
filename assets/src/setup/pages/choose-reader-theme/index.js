@@ -1,8 +1,13 @@
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useEffect, useContext, useMemo } from '@wordpress/element';
+
+/**
+ * External dependencies
+ */
+import { AMP_QUERY_VAR, DEFAULT_AMP_QUERY_VAR, LEGACY_THEME_SLUG, AMP_QUERY_VAR_CUSTOMIZED_LATE } from 'amp-setup'; // From WP inline script.
 
 /**
  * Internal dependencies
@@ -32,10 +37,15 @@ export function ChooseReaderTheme() {
 			return;
 		}
 
-		if ( themes && readerTheme && canGoForward === false ) {
-			if ( themes.map( ( { slug } ) => slug ).includes( readerTheme ) ) {
-				setCanGoForward( true );
-			}
+		if (
+			themes &&
+			readerTheme &&
+			canGoForward === false &&
+			! AMP_QUERY_VAR_CUSTOMIZED_LATE
+				? themes.map( ( { slug } ) => slug ).includes( readerTheme )
+				: readerTheme === LEGACY_THEME_SLUG
+		) {
+			setCanGoForward( true );
 		}
 	}, [ canGoForward, setCanGoForward, readerTheme, themes, themeSupport ] );
 
@@ -43,7 +53,7 @@ export function ChooseReaderTheme() {
 	const { availableThemes, unavailableThemes } = useMemo(
 		() => themes.reduce(
 			( collections, theme ) => {
-				if ( theme.availability === 'non-installable' ) {
+				if ( ( AMP_QUERY_VAR_CUSTOMIZED_LATE && theme.slug !== LEGACY_THEME_SLUG ) || theme.availability === 'non-installable' ) {
 					collections.unavailableThemes.push( theme );
 				} else {
 					collections.availableThemes.push( theme );
@@ -96,7 +106,23 @@ export function ChooseReaderTheme() {
 							{ __( 'Unavailable themes', 'amp' ) }
 						</h3>
 						<p>
-							{ __( 'The following themes are compatible but cannot be installed automatically. Please install them manually, or contact your host if you are not able to do so.', 'amp' ) }
+							{ AMP_QUERY_VAR_CUSTOMIZED_LATE
+								/* dangerouslySetInnerHTML reason: Injection of code tags. */
+								? <span
+									dangerouslySetInnerHTML={ {
+										__html: sprintf(
+											/* translators: 1: customized AMP query var, 2: default query var, 3: the AMP_QUERY_VAR constant name, 4: the amp_query_var filter, 5: the plugins_loaded action */
+											__( 'The following themes are not available because your site (probably the active theme) has customized the AMP query var too late (it is set to %1$s as opposed to the default of %2$s). Please make sure that any customizations done by defining the %3$s constant or adding an %4$s filter are done before the %5$s action with priority 8.', 'amp' ),
+											`<code>${ AMP_QUERY_VAR }</code>`,
+											`<code>${ DEFAULT_AMP_QUERY_VAR }</code>`,
+											'<code>AMP_QUERY_VAR</code>',
+											'<code>amp_query_var</code>',
+											'<code>plugins_loaded</code>',
+										),
+									} }
+								/>
+								: __( 'The following themes are compatible but cannot be installed automatically. Please install them manually, or contact your host if you are not able to do so.', 'amp' )
+							}
 						</p>
 						<ul className="choose-reader-theme__grid">
 							{ unavailableThemes.map( ( theme ) => (

@@ -192,13 +192,13 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$checkbox_enabled  = '<input id="amp-status-enabled" type="radio" name="amp_status" value="enabled"  checked=\'checked\'>';
 
 		// This is not in AMP 'canonical mode' but rather reader or transitional mode.
-		remove_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		$output = get_echo( [ $this->instance, 'render_status' ], [ $post ] );
 		$this->assertStringContains( $amp_status_markup, $output );
 		$this->assertStringContains( $checkbox_enabled, $output );
 
 		// This is in AMP-first mode with a template that can be rendered.
-		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$output = get_echo( [ $this->instance, 'render_status' ], [ $post ] );
 		$this->assertStringContains( $amp_status_markup, $output );
 		$this->assertStringContains( $checkbox_enabled, $output );
@@ -250,7 +250,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		);
 
 		// In AMP-first, there also shouldn't be errors.
-		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->assertEquals(
 			$expected_status_and_errors,
 			$this->instance->get_status_and_errors( $post )
@@ -407,7 +407,6 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	 */
 	public function test_add_rest_api_fields( $theme_feature, $support_args ) {
 		add_theme_support( $theme_feature, $support_args );
-		AMP_Theme_Support::read_theme_support();
 		$this->instance->add_rest_api_fields();
 		$this->assertRestApiFieldPresent(
 			AMP_Post_Type_Support::get_post_types_for_rest_api(),

@@ -208,7 +208,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 	/** @covers PluginSuppression::suppress_plugins() */
 	public function test_suppress_plugins_not_amp_endpoint() {
 		$url = home_url( '/' );
-		remove_theme_support( 'amp' );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		$this->init_plugins();
 		$bad_plugin_file_slugs = $this->get_bad_plugin_file_slugs();
 		$this->populate_validation_errors( $url, $bad_plugin_file_slugs );
@@ -224,7 +224,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 	/** @covers PluginSuppression::suppress_plugins() */
 	public function test_suppress_plugins_none_suppressible() {
 		$url = home_url( '/' );
-		add_theme_support( 'amp' );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->init_plugins();
 		update_option( 'active_plugins', [] );
 		$bad_plugin_file_slugs = $this->get_bad_plugin_file_slugs();
@@ -241,7 +241,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 	/** @covers PluginSuppression::suppress_plugins() */
 	public function test_suppress_plugins_when_no_plugins_suppressed() {
 		$url = home_url( '/' );
-		add_theme_support( 'amp' );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->init_plugins();
 		$bad_plugin_file_slugs = $this->get_bad_plugin_file_slugs();
 		$this->populate_validation_errors( $url, $bad_plugin_file_slugs );
@@ -265,7 +265,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 	 */
 	public function test_suppress_plugins_when_conditions_satisfied_for_all() {
 		$url = home_url( '/' );
-		add_theme_support( 'amp' );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->init_plugins();
 
 		$bad_plugin_file_slugs = $this->get_bad_plugin_file_slugs();
@@ -293,7 +293,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 	 */
 	public function test_suppress_plugins_when_conditions_satisfied_for_some() {
 		$url = home_url( '/' );
-		add_theme_support( 'amp' );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->init_plugins();
 
 		$bad_plugin_file_slugs = $this->get_bad_plugin_file_slugs();
@@ -332,7 +332,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		$this->init_plugins();
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		AMP_Options_Manager::register_settings(); // Adds validate_options as filter.
-		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Validation_Manager::init();
 
 		$bad_plugin_file_slugs = $this->get_bad_plugin_file_slugs();

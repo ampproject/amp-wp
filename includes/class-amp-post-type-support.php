@@ -76,7 +76,7 @@ class AMP_Post_Type_Support {
 	 * @since 0.6
 	 */
 	public static function add_post_type_support() {
-		if ( current_theme_supports( AMP_Theme_Support::SLUG ) && AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) ) {
+		if ( ! amp_is_legacy() && AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) ) {
 			$post_types = self::get_eligible_post_types();
 		} else {
 			$post_types = AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES, [] );
@@ -124,11 +124,16 @@ class AMP_Post_Type_Support {
 			}
 		} else {
 			/*
-			 * Disabled by default for custom page templates, page on front and page for posts, unless 'amp' theme
-			 * support is present (in which case AMP_Theme_Support::get_template_availability() determines availability).
+			 * Disabled by default for custom page templates, page on front and page for posts, unless not using legacy
+			 * Reader mode. In legacy Reader mode, there is no UI to enable AMP for various templates whereas in the new
+			 * Reader mode there is the ability to enable AMP for the various templates, including the front page or
+			 * else to enable AMP for all templates. Therefore, we do not need to disable AMP by default for the new
+			 * Reader mode. Otherwise, in legacy Reader mode we disable AMP by default for special template pages
+			 * because we can't make assumptions about whether the legacy template will be suitable for rendering the
+			 * content.
 			 */
 			$enabled = (
-				current_theme_supports( AMP_Theme_Support::SLUG )
+				! amp_is_legacy()
 				||
 				(
 					! (bool) get_page_template_slug( $post )
