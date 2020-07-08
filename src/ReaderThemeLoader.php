@@ -31,17 +31,6 @@ final class ReaderThemeLoader implements Service, Registerable, Conditional {
 	private $theme;
 
 	/**
-	 * Register the service with the system.
-	 *
-	 * @return void
-	 */
-	public function register() {
-		// The following needs to run at plugins_loaded because that is when _wp_customize_include runs. Otherwise, the
-		// most logical action would be setup_theme.
-		add_action( 'plugins_loaded', [ $this, 'override_theme' ], 9 );
-	}
-
-	/**
 	 * Is Reader mode with a Reader theme selected.
 	 *
 	 * @return bool Whether new Reader mode.
@@ -52,6 +41,17 @@ final class ReaderThemeLoader implements Service, Registerable, Conditional {
 			&&
 			AMP_Reader_Themes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME )
 		);
+	}
+
+	/**
+	 * Register the service with the system.
+	 *
+	 * @return void
+	 */
+	public function register() {
+		// The following needs to run at plugins_loaded because that is when _wp_customize_include runs. Otherwise, the
+		// most logical action would be setup_theme.
+		add_action( 'plugins_loaded', [ $this, 'override_theme' ], 9 );
 	}
 
 	/**
