@@ -332,6 +332,20 @@ function amp_is_canonical() {
 }
 
 /**
+ * Determines whether the legacy AMP post templates are being used.
+ *
+ * @since 1.6
+ * @return bool
+ */
+function amp_is_legacy() {
+	return (
+		AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
+		&&
+		AMP_Reader_Themes::DEFAULT_READER_THEME === AMP_Options_Manager::get_option( Option::READER_THEME )
+	);
+}
+
+/**
  * Add frontend actions.
  *
  * @since 0.2

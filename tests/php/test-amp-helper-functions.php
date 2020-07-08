@@ -93,6 +93,36 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function test_amp_get_slug() {
 		$this->assertSame( 'amp', amp_get_slug() );
+
+		add_filter(
+			'amp_query_var',
+			static function () {
+				return 'lite';
+			}
+		);
+
+		$this->assertSame( 'lite', amp_get_slug() );
+	}
+
+	/** @ocvers ::amp_is_canonical() */
+	public function test_amp_is_canonical() {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->assertTrue( amp_is_canonical() );
+
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+		$this->assertFalse( amp_is_canonical() );
+	}
+
+	/** @ocvers ::amp_is_legacy() */
+	public function test_amp_is_legacy() {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->assertFalse( amp_is_legacy() );
+
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		$this->assertTrue( amp_is_legacy() );
+
+		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentynineteen' );
+		$this->assertFalse( amp_is_legacy() );
 	}
 
 	/**
