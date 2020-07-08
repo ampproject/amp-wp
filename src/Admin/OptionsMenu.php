@@ -339,7 +339,7 @@ class OptionsMenu implements Service, Registerable {
 									<?php esc_html_e( 'The AMP configuration wizard can help you choose the best settings for your theme, plugins, and technical capabilities.', 'amp' ); ?>
 								</p>
 
-								<a class="components-button is-primary settings-welcome__button" href="<?php menu_page_url( OnboardingWizardSubmenu::SCREEN_ID ); ?>" target="_blank">
+								<a class="components-button is-primary settings-welcome__button" href="<?php menu_page_url( OnboardingWizardSubmenu::SCREEN_ID ); ?>">
 									<?php if ( $plugin_configured ) : ?>
 										<?php esc_html_e( 'Reopen Wizard', 'amp' ); ?>
 
