@@ -1480,9 +1480,9 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		AMP_Validated_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
 
-		$number_of_new_errors = 20;
-		$number_of_rejected   = 15;
-		$number_of_accepted   = 5;
+		$number_of_new_errors     = 20;
+		$number_of_total_rejected = 24;
+		$number_of_total_accepted = 16;
 
 		for ( $i = 0; $i < 40; $i++ ) {
 			$invalid_url_post      = self::factory()->post->create( [ 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ] );
@@ -1538,11 +1538,11 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 			$output
 		);
 		$this->assertStringContains(
-			sprintf( 'With kept markup <span class="count">(%d)</span>', $number_of_rejected ),
+			sprintf( 'With kept markup <span class="count">(%d)</span>', $number_of_total_rejected ),
 			$output
 		);
 		$this->assertStringContains(
-			sprintf( 'With removed markup <span class="count">(%d)</span>', $number_of_accepted ),
+			sprintf( 'With removed markup <span class="count">(%d)</span>', $number_of_total_accepted ),
 			$output
 		);
 	}
