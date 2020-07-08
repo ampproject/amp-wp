@@ -1310,10 +1310,9 @@ class AMP_Validation_Error_Taxonomy {
 		$screen_base = get_current_screen()->base;
 
 		if ( 'edit-tags' === $screen_base ) {
-			$total_term_count        = self::get_validation_error_count();
-			$ack_rejected_term_count = self::get_validation_error_count( [ 'group' => [ self::VALIDATION_ERROR_ACK_REJECTED_STATUS ] ] );
-			$ack_accepted_term_count = self::get_validation_error_count( [ 'group' => [ self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS ] ] );
-			$new_term_count          = $total_term_count - $ack_rejected_term_count - $ack_accepted_term_count;
+			$rejected_term_count = self::get_validation_error_count( [ 'group' => [ self::VALIDATION_ERROR_NEW_REJECTED_STATUS, self::VALIDATION_ERROR_ACK_REJECTED_STATUS ] ] );
+			$accepted_term_count = self::get_validation_error_count( [ 'group' => [ self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS, self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS ] ] );
+			$unreviewed_count    = self::get_validation_error_count( [ 'group' => [ self::VALIDATION_ERROR_NEW_REJECTED_STATUS, self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS ] ] );
 
 		} elseif ( 'edit' === $screen_base ) {
 			$args = [
@@ -1327,7 +1326,7 @@ class AMP_Validation_Error_Taxonomy {
 				$args[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] = $error_type;
 			}
 
-			$with_new_query = new WP_Query(
+			$with_new_query   = new WP_Query(
 				array_merge(
 					$args,
 					[
@@ -1338,23 +1337,33 @@ class AMP_Validation_Error_Taxonomy {
 					]
 				)
 			);
-			$new_term_count = $with_new_query->found_posts;
+			$unreviewed_count = $with_new_query->found_posts;
 
-			$with_rejected_query     = new WP_Query(
+			$with_rejected_query = new WP_Query(
 				array_merge(
 					$args,
-					[ self::VALIDATION_ERROR_STATUS_QUERY_VAR => self::VALIDATION_ERROR_ACK_REJECTED_STATUS ]
+					[
+						self::VALIDATION_ERROR_STATUS_QUERY_VAR => [
+							self::VALIDATION_ERROR_NEW_REJECTED_STATUS,
+							self::VALIDATION_ERROR_ACK_REJECTED_STATUS,
+						],
+					]
 				)
 			);
-			$ack_rejected_term_count = $with_rejected_query->found_posts;
+			$rejected_term_count = $with_rejected_query->found_posts;
 
-			$with_accepted_query     = new WP_Query(
+			$with_accepted_query = new WP_Query(
 				array_merge(
 					$args,
-					[ self::VALIDATION_ERROR_STATUS_QUERY_VAR => self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS ]
+					[
+						self::VALIDATION_ERROR_STATUS_QUERY_VAR => [
+							self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+							self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+						],
+					]
 				)
 			);
-			$ack_accepted_term_count = $with_accepted_query->found_posts;
+			$accepted_term_count = $with_accepted_query->found_posts;
 		} else {
 			return;
 		}
@@ -1375,94 +1384,53 @@ class AMP_Validation_Error_Taxonomy {
 		<select name="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>" id="<?php echo esc_attr( self::VALIDATION_ERROR_STATUS_QUERY_VAR ); ?>">
 			<option value="<?php echo esc_attr( self::NO_FILTER_VALUE ); ?>"><?php esc_html_e( 'All statuses', 'amp' ); ?></option>
 			<?php
-			if ( 'edit' === $screen_base ) {
-				$new_term_text = sprintf(
-					/* translators: %s: the new term count. */
-					_nx(
-						'With unreviewed error <span class="count">(%s)</span>',
-						'With unreviewed errors <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
-						$new_term_count,
-						'terms',
-						'amp'
-					),
-					number_format_i18n( $new_term_count )
-				);
-			} else {
-				$new_term_text = sprintf(
-					/* translators: %s: the new term count. */
-					_nx(
-						'Unreviewed error <span class="count">(%s)</span>',
-						'Unreviewed errors <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
-						$new_term_count,
-						'terms',
-						'amp'
-					),
-					number_format_i18n( $new_term_count )
-				);
-			}
-			$value = self::VALIDATION_ERROR_NEW_REJECTED_STATUS . ',' . self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS;
-			?>
-			<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $error_status_filter_value, $value ); ?>><?php echo wp_kses_post( $new_term_text ); ?></option>
-			<?php
-			if ( 'edit' === $screen_base ) {
-				$removed_term_text = sprintf(
-					/* translators: %s: the accepted term count. */
-					_nx(
-						'With removed markup <span class="count">(%s)</span>',
-						'With removed markup <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
-						$ack_accepted_term_count,
-						'terms',
-						'amp'
-					),
-					number_format_i18n( $ack_accepted_term_count )
-				);
-			} else {
-				$removed_term_text = sprintf(
-					/* translators: %s: the accepted term count. */
-					_nx(
-						'Removed markup <span class="count">(%s)</span>',
-						'Removed markup <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
-						$ack_accepted_term_count,
-						'terms',
-						'amp'
-					),
-					number_format_i18n( $ack_accepted_term_count )
+			$options_config = [
+				[
+					'text'        => 'edit' === $screen_base ? _x( 'With unreviewed errors', 'terms', 'amp' ) : _x( 'Unreviewed errors', 'terms', 'amp' ),
+					'value'       => self::VALIDATION_ERROR_NEW_REJECTED_STATUS . ',' . self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+					'error_count' => $unreviewed_count,
+				],
+				[
+					'text'        => 'edit' === $screen_base ? _x( 'With removed markup', 'terms', 'amp' ) : _x( 'Removed markup', 'terms', 'amp' ),
+					'value'       => self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS . ',' . self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+					'error_count' => $accepted_term_count,
+				],
+				[
+					'text'        => 'edit' === $screen_base ? _x( 'With kept markup', 'terms', 'amp' ) : _x( 'Kept markup', 'terms', 'amp' ),
+					'value'       => self::VALIDATION_ERROR_NEW_REJECTED_STATUS . ',' . self::VALIDATION_ERROR_ACK_REJECTED_STATUS,
+					'error_count' => $rejected_term_count,
+				],
+			];
+
+			foreach ( $options_config as $option_config ) {
+				self::output_error_status_filter_option_markup(
+					$option_config['text'],
+					$option_config['value'],
+					$option_config['error_count'],
+					$error_status_filter_value
 				);
 			}
-			$value = self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS;
 			?>
-			<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $error_status_filter_value, $value ); ?>><?php echo wp_kses_post( $removed_term_text ); ?></option>
-			<?php
-			if ( 'edit' === $screen_base ) {
-				$kept_term_text = sprintf(
-					/* translators: %s: the rejected term count. */
-					_nx(
-						'With kept markup <span class="count">(%s)</span>',
-						'With kept markup <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
-						$ack_rejected_term_count,
-						'terms',
-						'amp'
-					),
-					number_format_i18n( $ack_rejected_term_count )
-				);
-			} else {
-				$kept_term_text = sprintf(
-					/* translators: %s: the rejected term count. */
-					_nx(
-						'Kept markup <span class="count">(%s)</span>',
-						'Kept markup <span class="count">(%s)</span>', // @todo Should this really have variations for singular/plural? Should count be part of translated string?
-						$ack_rejected_term_count,
-						'terms',
-						'amp'
-					),
-					number_format_i18n( $ack_rejected_term_count )
-				);
-			}
-			$value = self::VALIDATION_ERROR_ACK_REJECTED_STATUS;
-			?>
-			<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $error_status_filter_value, $value ); ?>><?php echo wp_kses_post( $kept_term_text ); ?></option>
 		</select>
 		<?php
+	}
+
+	/**
+	 * Output the option markup for a error status filter.
+	 *
+	 * @param string $option_text    Option text.
+	 * @param string $option_value   Option value.
+	 * @param int    $error_count    Error count for error status.
+	 * @param string $selected_value Currently selected value.
+	 */
+	private static function output_error_status_filter_option_markup( $option_text, $option_value, $error_count, $selected_value ) {
+		printf(
+			'<option value="%s" %s>%s <span class="count">(%s)</span></option>',
+			esc_attr( $option_value ),
+			selected( $selected_value, $option_value, false ),
+			esc_html( $option_text ),
+			esc_html( number_format_i18n( $error_count ) )
+		);
 	}
 
 	/**
