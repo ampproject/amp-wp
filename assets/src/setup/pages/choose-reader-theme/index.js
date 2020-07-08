@@ -5,6 +5,11 @@ import { __, sprintf } from '@wordpress/i18n';
 import { useEffect, useContext, useMemo } from '@wordpress/element';
 
 /**
+ * External dependencies
+ */
+import { AMP_QUERY_VAR, DEFAULT_AMP_QUERY_VAR, LEGACY_THEME_SLUG, AMP_QUERY_VAR_CUSTOMIZED_LATE } from 'amp-setup'; // From WP inline script.
+
+/**
  * Internal dependencies
  */
 import { Loading } from '../../components/loading';
@@ -12,11 +17,6 @@ import { Navigation } from '../../components/navigation-context-provider';
 import { Options } from '../../components/options-context-provider';
 import { ReaderThemes } from '../../components/reader-themes-context-provider';
 import { ThemeCard } from './theme-card';
-
-/**
- * External Dependencies.
- */
-import { AMP_QUERY_VAR, DEFAULT_AMP_QUERY_VAR, LEGACY_THEME_SLUG, AMP_QUERY_VAR_CUSTOMIZED_LATE } from 'amp-setup'; // From WP inline script.
 
 /**
  * Screen for choosing the Reader theme.
