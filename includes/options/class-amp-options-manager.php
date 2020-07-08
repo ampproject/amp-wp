@@ -115,7 +115,13 @@ class AMP_Options_Manager {
 		$options = array_merge( $defaults, $options );
 
 		// Ensure current template mode.
-		if ( AMP_Theme_Support::READER_MODE_SLUG === $options[ Option::THEME_SUPPORT ] && get_template() === $options[ Option::READER_THEME ] ) {
+		if (
+			AMP_Theme_Support::READER_MODE_SLUG === $options[ Option::THEME_SUPPORT ]
+			&&
+			get_template() === $options[ Option::READER_THEME ]
+			&&
+			! isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		) {
 			/*
 			 * When Reader mode is selected and a Reader theme has been chosen, if the active theme switches to be the
 			 * same as the Reader theme, then transparently switch the mode from Reader to Transitional while the
