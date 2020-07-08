@@ -59,18 +59,6 @@ final class AmpSlugCustomizationWatcher implements Service, Registerable {
 	}
 
 	/**
-	 * Peek at the customized slug.
-	 *
-	 * This does not call amp_get_slug(true) because if it did then it would end up defining AMP_QUERY_VAR and destroy
-	 * the ability for us to determine when exactly a theme or plugin is customizing it.
-	 *
-	 * @return string Query var.
-	 */
-	protected function peek_customized_slug() {
-		return amp_get_slug( false );
-	}
-
-	/**
 	 * Determine if the slug was customized early.
 	 *
 	 * Early customization happens by plugins_loaded action at priority 8; this is required in order for the slug to be
@@ -79,8 +67,7 @@ final class AmpSlugCustomizationWatcher implements Service, Registerable {
 	 * determined, so for Reader themes to apply the logic in `ReaderThemeLoader` must run beforehand.
 	 */
 	public function determine_early_customization() {
-		$slug = $this->peek_customized_slug();
-		if ( QueryVars::AMP !== $slug ) {
+		if ( QueryVars::AMP !== amp_get_slug() ) {
 			$this->is_customized_early = true;
 		} else {
 			add_action( 'after_setup_theme', [ $this, 'determine_late_customization' ], 4 );
@@ -102,8 +89,7 @@ final class AmpSlugCustomizationWatcher implements Service, Registerable {
 	 * @see amp_after_setup_theme()
 	 */
 	public function determine_late_customization() {
-		$slug = $this->peek_customized_slug();
-		if ( QueryVars::AMP !== $slug ) {
+		if ( QueryVars::AMP !== amp_get_slug() ) {
 			$this->is_customized_late = true;
 		}
 	}

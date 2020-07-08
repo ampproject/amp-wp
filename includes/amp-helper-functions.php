@@ -535,14 +535,9 @@ function amp_redirect_old_slug_to_new_url( $link ) {
  *
  * @since 0.7
  *
- * @param bool $define_constant Whether store the query var in the AMP_QUERY_VAR constant.
  * @return string Slug used for query var, endpoint, and post type support.
  */
-function amp_get_slug( $define_constant = true ) {
-	if ( defined( 'AMP_QUERY_VAR' ) ) {
-		return AMP_QUERY_VAR;
-	}
-
+function amp_get_slug() {
 	/**
 	 * Filter the AMP query variable.
 	 *
@@ -552,13 +547,7 @@ function amp_get_slug( $define_constant = true ) {
 	 *
 	 * @param string $query_var The AMP query variable.
 	 */
-	$query_var = apply_filters( 'amp_query_var', QueryVars::AMP );
-
-	if ( $define_constant ) {
-		define( 'AMP_QUERY_VAR', $query_var );
-	}
-
-	return $query_var;
+	return apply_filters( 'amp_query_var', defined( 'AMP_QUERY_VAR' ) ? AMP_QUERY_VAR : QueryVars::AMP );
 }
 
 /**
