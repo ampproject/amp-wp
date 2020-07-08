@@ -104,7 +104,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertSame( 'lite', amp_get_slug() );
 	}
 
-	/** @ocvers ::amp_is_canonical() */
+	/** @covers ::amp_is_canonical() */
 	public function test_amp_is_canonical() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->assertTrue( amp_is_canonical() );
