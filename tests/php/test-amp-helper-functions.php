@@ -947,20 +947,30 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 		$output = $get_generator_tag();
 		$this->assertStringContains( 'mode=reader', $output );
+		$this->assertStringContains( 'theme=legacy', $output );
+		$this->assertStringContains( 'v' . AMP__VERSION, $output );
+
+		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentynineteen' );
+		$output = $get_generator_tag();
+		$this->assertStringContains( 'mode=reader', $output );
+		$this->assertStringContains( 'theme=twentynineteen', $output );
 		$this->assertStringContains( 'v' . AMP__VERSION, $output );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		$output = $get_generator_tag();
 		$this->assertStringContains( 'mode=transitional', $output );
+		$this->assertStringNotContains( 'theme=', $output );
 		$this->assertStringContains( 'v' . AMP__VERSION, $output );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$output = $get_generator_tag();
 		$this->assertStringContains( 'mode=standard', $output );
+		$this->assertStringNotContains( 'theme=', $output );
 		$this->assertStringContains( 'v' . AMP__VERSION, $output );
 
 		$output = $get_generator_tag();
 		$this->assertStringContains( 'mode=standard', $output );
+		$this->assertStringNotContains( 'theme=', $output );
 	}
 
 	/**
@@ -1524,6 +1534,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function test_amp_add_admin_bar_item() {
 		require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		$post_id = self::factory()->post->create();
 		$this->go_to( get_permalink( $post_id ) );
@@ -1539,9 +1550,13 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		$admin_bar = new WP_Admin_Bar();
 		amp_add_admin_bar_view_link( $admin_bar );
+		wp_admin_bar_customize_menu( $admin_bar );
 		$item = $admin_bar->get_node( 'amp' );
 		$this->assertInternalType( 'object', $item );
 		$this->assertEquals( esc_url( amp_get_permalink( $post_id ) ), $item->href );
+		$item = $admin_bar->get_node( 'customize' );
+		$this->assertStringNotContains( amp_get_slug() . '=', $item->href );
+		$this->assertStringNotContains( 'autofocus', $item->href );
 
 		// Confirm that link is added to non-AMP version.
 		set_query_var( amp_get_slug(), '' );
@@ -1561,13 +1576,33 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertNull( $admin_bar->get_node( 'amp' ) );
 		remove_filter( 'amp_skip_post', '__return_true' );
 
-		// Confirm Reader mode works.
+		$this->go_to( amp_get_permalink( $post_id ) );
+
+		// Confirm legacy Reader mode works.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		$this->assertTrue( amp_is_legacy() );
 		$admin_bar = new WP_Admin_Bar();
+		wp_admin_bar_customize_menu( $admin_bar );
 		amp_add_admin_bar_view_link( $admin_bar );
 		$item = $admin_bar->get_node( 'amp' );
 		$this->assertInternalType( 'object', $item );
-		$this->assertEquals( esc_url( amp_get_permalink( $post_id ) ), $item->href );
+		$this->assertEquals( esc_url( get_permalink( $post_id ) ), $item->href );
+		$item = $admin_bar->get_node( 'customize' );
+		$this->assertInternalType( 'object', $item );
+		$this->assertStringNotContains( amp_get_slug() . '=', $item->href );
+		$this->assertStringContains( 'autofocus', $item->href );
+
+		// Confirm Customize link with a Reader theme points to the right place.
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentynineteen' );
+		$this->assertFalse( amp_is_legacy() );
+		$admin_bar = new WP_Admin_Bar();
+		wp_admin_bar_customize_menu( $admin_bar );
+		amp_add_admin_bar_view_link( $admin_bar );
+		$item = $admin_bar->get_node( 'customize' );
+		$this->assertInternalType( 'object', $item );
+		$this->assertStringContains( amp_get_slug() . '=', $item->href );
+		$this->assertStringNotContains( 'autofocus', $item->href );
 	}
 
 	/**
