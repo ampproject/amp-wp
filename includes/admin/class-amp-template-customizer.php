@@ -110,6 +110,7 @@ class AMP_Template_Customizer {
 	 */
 	public function init_legacy_preview() {
 		add_action( 'amp_post_template_head', 'wp_no_robots' );
+		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_legacy_preview_scripts' ] );
 		add_action( 'amp_customizer_enqueue_preview_scripts', [ $this, 'enqueue_legacy_preview_scripts' ] );
 
 		// Output scripts and styles which will break AMP validation only when preview is opened with controls for manipulation.
@@ -302,9 +303,6 @@ class AMP_Template_Customizer {
 				)
 			)
 		);
-
-		wp_enqueue_script( 'customize-selective-refresh' );
-		wp_enqueue_script( 'amp-customize-preview' );
 	}
 
 	/**
@@ -345,6 +343,8 @@ class AMP_Template_Customizer {
 		if ( ! current_user_can( 'customize' ) ) {
 			return;
 		}
+
+		wp_enqueue_script( 'customize-selective-refresh' );
 
 		/**
 		 * Fires when plugins should enqueue their own scripts for the AMP Customizer preview.

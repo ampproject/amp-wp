@@ -125,7 +125,7 @@ class AMP_Post_Type_Support {
 		} else {
 			/*
 			 * Disabled by default for custom page templates, page on front and page for posts, unless not using legacy
-			 * Reader mode. In regacy Reader mode, there is no UI to enable AMP for various templates whereas in the new
+			 * Reader mode. In legacy Reader mode, there is no UI to enable AMP for various templates whereas in the new
 			 * Reader mode there is the ability to enable AMP for the various templates, including the front page or
 			 * else to enable AMP for all templates. Therefore, we do not need to disable AMP by default for the new
 			 * Reader mode. Otherwise, in legacy Reader mode we disable AMP by default for special template pages
