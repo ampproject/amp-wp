@@ -232,7 +232,7 @@ class AMP_Options_Menu {
 								<?php
 								echo wp_kses_post(
 									sprintf(
-									/* translators: 1: customized AMP query var, 2: default AMP query var */
+										/* translators: 1: customized AMP query var, 2: default AMP query var */
 										esc_html__( 'Warning: You customized your AMP query var too late. This means that Reader themes will not be available to you. You customized it to be %1$s instead of the default %2$s.', 'amp' ),
 										sprintf( '&#8220;<code>%s</code>&#8221;', esc_html( amp_get_slug() ) ),
 										sprintf( '&#8220;<code>%s</code>&#8221;', QueryVars::AMP )
@@ -247,7 +247,7 @@ class AMP_Options_Menu {
 								<?php
 								echo wp_kses_post(
 									sprintf(
-									/* translators: 1: customized AMP query var, 2: default AMP query var */
+										/* translators: 1: customized AMP query var, 2: default AMP query var */
 										esc_html__( 'You customized your query var to be %1$s instead of the default %2$s.', 'amp' ),
 										sprintf( '&#8220;<code>%s</code>&#8221;', esc_html( amp_get_slug() ) ),
 										sprintf( '&#8220;<code>%s</code>&#8221;', QueryVars::AMP )
