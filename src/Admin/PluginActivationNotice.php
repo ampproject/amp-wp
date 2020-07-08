@@ -77,7 +77,7 @@ final class PluginActivationNotice implements Delayed, Service, Registerable {
 			</div>
 			<div>
 				<h2><?php esc_html_e( 'Welcome to AMP for WordPress', 'amp' ); ?></h2>
-				<p><?php esc_html_e( 'Bring the speed and features of the open source AMP project to your site, complete with the tools to support content authoring and website development.', 'amp' ); ?></p>
+				<p><?php esc_html_e( 'Bring the speed and features of the open-source AMP project to your site, complete with the tools to support content authoring and website development.', 'amp' ); ?></p>
 				<p><a href="<?php menu_page_url( OnboardingWizardSubmenu::SCREEN_ID ); ?>"><?php esc_html_e( 'Configure the plugin', 'amp' ); ?></a></p>
 			</div>
 		</div>

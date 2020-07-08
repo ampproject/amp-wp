@@ -52,8 +52,7 @@ export function ReaderThemeSelection( { disableCurrentlyActiveTheme = false, cur
 		<div className="reader-theme-selection">
 			<p>
 				{
-					// @todo Probably improve this text.
-					__( 'Select the theme template for mobile visitors', 'amp' )
+					__( 'Select the theme template for mobile and AMP visitors', 'amp' )
 				}
 			</p>
 			<div>

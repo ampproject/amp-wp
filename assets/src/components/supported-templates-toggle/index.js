@@ -33,7 +33,7 @@ export function SupportedTemplatesToggle( { themeSupportArgs } ) {
 			<AMPSettingToggle
 				checked={ true === allTemplatesSupported }
 				text={ __( 'This will allow all of the URLs on your site to be served as AMP by default.', 'amp' ) }
-				title={ __( 'Serve all templates as AMP regardless of what is being queried.', 'amp' ) }
+				title={ __( 'Serve all templates as AMP.', 'amp' ) }
 				onChange={ () => {
 					updateOptions( { all_templates_supported: ! allTemplatesSupported } );
 				} }

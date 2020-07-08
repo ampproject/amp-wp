@@ -44,7 +44,7 @@ export function Reader( { currentTheme } ) {
 			<SummaryHeader
 				illustration={ <ReaderIllustration /> }
 				title={ __( 'Reader', 'amp' ) }
-				text={ __( 'In Reader mode your site will have a non-AMP and an AMP version, and each version will use its own theme. If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content.', 'amp' ) }
+				text={ __( 'In Reader mode <b>your site will have a non-AMP and an AMP version</b>, and <b>each version will use its own theme</b>. If automatic mobile redirection is enabled, the AMP version of the content will be served on mobile devices. If AMP-to-AMP linking is enabled, once users are on an AMP page, they will continue navigating your AMP content.', 'amp' ) }
 			/>
 
 			<RedirectToggle />

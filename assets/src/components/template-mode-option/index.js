@@ -102,7 +102,7 @@ export function TemplateModeOption( { children, details, mode, previouslySelecte
 					</h2>
 					{ previouslySelected && (
 						<AMPInfo>
-							{ __( 'Previously selected', 'amp' ) }
+							{ __( 'Currently active on your site', 'amp' ) }
 						</AMPInfo>
 					) }
 				</div>
