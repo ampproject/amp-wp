@@ -9,7 +9,7 @@ import { Button } from '@wordpress/components';
 /**
  * External dependencies
  */
-import { CUSTOMIZER_LINK, AMP_QUERY_VAR } from 'amp-onboarding-wizard'; // From WP inline script.
+import { CUSTOMIZER_LINK, AMP_QUERY_VAR } from 'amp-settings'; // From WP inline script.
 
 /**
  * Internal dependencies

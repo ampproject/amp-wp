@@ -230,7 +230,7 @@ const setup = {
 		],
 	},
 	externals: {
-		'amp-onboarding-wizard': 'ampOnboardingWizard',
+		'amp-settings': 'ampSettings',
 	},
 	plugins: [
 		...sharedConfig.plugins.filter(

@@ -18,7 +18,7 @@ import {
 	UPDATES_NONCE,
 	USER_FIELD_DEVELOPER_TOOLS_ENABLED,
 	USER_REST_ENDPOINT,
-} from 'amp-onboarding-wizard'; // From WP inline script.
+} from 'amp-settings'; // From WP inline script.
 import PropTypes from 'prop-types';
 
 /**

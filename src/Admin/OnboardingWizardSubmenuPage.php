@@ -198,7 +198,7 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 		wp_add_inline_script(
 			self::ASSET_HANDLE,
 			sprintf(
-				'var ampOnboardingWizard = %s;',
+				'var ampSettings = %s;',
 				wp_json_encode( $setup_wizard_data )
 			),
 			'before'
