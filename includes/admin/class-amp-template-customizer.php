@@ -62,9 +62,9 @@ class AMP_Template_Customizer {
 		);
 
 		if ( $is_reader_mode ) {
-			if ( $has_reader_theme ) {
+			if ( $is_customizing_reader_theme ) {
 				add_action( 'customize_controls_enqueue_scripts', [ $self, 'add_customizer_scripts' ] );
-			} else {
+			} elseif ( ! $has_reader_theme ) {
 				/**
 				 * Fires when the AMP Template Customizer initializes.
 				 *
