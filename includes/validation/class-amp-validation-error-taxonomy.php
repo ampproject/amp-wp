@@ -1326,7 +1326,7 @@ class AMP_Validation_Error_Taxonomy {
 				$args[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ] = $error_type;
 			}
 
-			$with_new_query = new WP_Query(
+			$with_new_query   = new WP_Query(
 				array_merge(
 					$args,
 					[
@@ -1339,27 +1339,27 @@ class AMP_Validation_Error_Taxonomy {
 			);
 			$unreviewed_count = $with_new_query->found_posts;
 
-			$with_rejected_query     = new WP_Query(
+			$with_rejected_query = new WP_Query(
 				array_merge(
 					$args,
 					[
 						self::VALIDATION_ERROR_STATUS_QUERY_VAR => [
 							self::VALIDATION_ERROR_NEW_REJECTED_STATUS,
 							self::VALIDATION_ERROR_ACK_REJECTED_STATUS,
-						]
+						],
 					]
 				)
 			);
 			$rejected_term_count = $with_rejected_query->found_posts;
 
-			$with_accepted_query     = new WP_Query(
+			$with_accepted_query = new WP_Query(
 				array_merge(
 					$args,
 					[
 						self::VALIDATION_ERROR_STATUS_QUERY_VAR => [
 							self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
 							self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
-						]
+						],
 					]
 				)
 			);
@@ -1425,11 +1425,11 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	private static function output_error_status_filter_option_markup( $option_text, $option_value, $error_count, $selected_value ) {
 		printf(
-				'<option value="%s" %s>%s <span class="count">(%s)</span></option>',
-				esc_attr( $option_value ),
-				selected( $selected_value, $option_value, false ),
-				esc_html( $option_text ),
-				number_format_i18n( $error_count )
+			'<option value="%s" %s>%s <span class="count">(%s)</span></option>',
+			esc_attr( $option_value ),
+			selected( $selected_value, $option_value, false ),
+			esc_html( $option_text ),
+			esc_html( number_format_i18n( $error_count ) )
 		);
 	}
 
