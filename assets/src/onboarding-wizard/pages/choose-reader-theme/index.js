@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { LEGACY_THEME_SLUG, AMP_QUERY_VAR_CUSTOMIZED_LATE } from 'amp-settings'; // From WP inline script.
+
+/**
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
@@ -32,10 +37,15 @@ export function ChooseReaderTheme() {
 			return;
 		}
 
-		if ( themes && readerTheme && canGoForward === false ) {
-			if ( themes.map( ( { slug } ) => slug ).includes( readerTheme ) ) {
-				setCanGoForward( true );
-			}
+		if (
+			themes &&
+			readerTheme &&
+			canGoForward === false &&
+			! AMP_QUERY_VAR_CUSTOMIZED_LATE
+				? themes.map( ( { slug } ) => slug ).includes( readerTheme )
+				: readerTheme === LEGACY_THEME_SLUG
+		) {
+			setCanGoForward( true );
 		}
 	}, [ canGoForward, setCanGoForward, readerTheme, themes, themeSupport ] );
 

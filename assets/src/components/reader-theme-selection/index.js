@@ -8,7 +8,7 @@ import { AMP_QUERY_VAR, DEFAULT_AMP_QUERY_VAR, LEGACY_THEME_SLUG, AMP_QUERY_VAR_
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useEffect, useContext, useMemo } from '@wordpress/element';
+import { useContext, useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -16,8 +16,6 @@ import { useEffect, useContext, useMemo } from '@wordpress/element';
 import { ReaderThemes } from '../reader-themes-context-provider';
 import { Loading } from '../loading';
 import './style.css';
-import { Options } from '../options-context-provider';
-import { Navigation } from '../../onboarding-wizard/components/navigation-context-provider';
 import { ThemeCard } from './theme-card';
 
 /**
@@ -29,31 +27,6 @@ import { ThemeCard } from './theme-card';
  */
 export function ReaderThemeSelection( { disableCurrentlyActiveTheme = false, currentlyActiveThemeNotice } ) {
 	const { currentTheme, fetchingThemes, themes } = useContext( ReaderThemes );
-	const { canGoForward, setCanGoForward } = useContext( Navigation );
-	const { editedOptions } = useContext( Options );
-
-	const { reader_theme: readerTheme, theme_support: themeSupport } = editedOptions;
-
-	/**
-	 * Allow moving forward.
-	 */
-	useEffect( () => {
-		if ( 'reader' !== themeSupport ) {
-			setCanGoForward( true );
-			return;
-		}
-
-		if (
-			themes &&
-			readerTheme &&
-			canGoForward === false &&
-			! AMP_QUERY_VAR_CUSTOMIZED_LATE
-				? themes.map( ( { slug } ) => slug ).includes( readerTheme )
-				: readerTheme === LEGACY_THEME_SLUG
-		) {
-			setCanGoForward( true );
-		}
-	}, [ canGoForward, setCanGoForward, readerTheme, themes, themeSupport ] );
 
 	// Separate available themes (both installed and installable) from those that need to be installed manually.
 	const { availableThemes, unavailableThemes } = useMemo(
