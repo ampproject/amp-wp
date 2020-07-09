@@ -367,8 +367,6 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	 * Supported templates section renderer.
 	 */
 	public function render_supported_templates() {
-		$theme_support_args = AMP_Theme_Support::get_theme_support_args();
-
 		?>
 
 		<fieldset id="supported_post_types_fieldset" class="hidden">
