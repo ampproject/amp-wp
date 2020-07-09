@@ -80,17 +80,12 @@ describe( 'AMP settings screen newly activated', () => {
 		await expect( page ).not.toMatchElement( '#theme-card__legacy:checked' );
 		await selectReaderTheme();
 		await expect( page ).toMatchElement( '#theme-card__legacy:checked' );
-		await expect( page ).toMatchElement( '.hidden .supported-templates ' );
 
 		await selectReaderTheme( 'twentytwenty' );
 		await expect( page ).not.toMatchElement( '#theme-card__twentytwenty:checked' ); // Active theme is not selectable.
 
 		await selectReaderTheme( 'twentynineteen' );
 		await expect( page ).toMatchElement( '#theme-card__twentynineteen:checked' );
-
-		await expect( page ).not.toMatchElement( '.hidden .supported-templates ' );
-
-		await expect( page ).toMatchElement( '#supported_templates_fieldset.hidden' );
 	} );
 } );
 
@@ -147,6 +142,29 @@ describe( 'Mode info notices', () => {
 
 	it.todo( 'shows expected notices for theme with paired flag false' );
 	it.todo( 'shows expected notices for theme that only supports reader mode' );
+} );
+
+describe( 'Show all templates toggle', () => {
+	it.each( [ 'reader', 'standard', 'transitional' ] )( 'shows expected supported template state for %s mode', async ( mode ) => {
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+
+		await expect( page ).toMatchElement( '.hidden .supported-templates' );
+
+		await clickMode( mode );
+
+		if ( 'reader' === mode ) {
+			await expect( page ).toMatchElement( '.hidden .supported-templates' );
+			await selectReaderTheme( 'twentysixteen' );
+		}
+
+		await expect( page ).not.toMatchElement( '.hidden .supported-templates' );
+		await expect( page ).not.toMatchElement( '.amp-setting-toggle--disabled' );
+
+		if ( 'reader' === mode ) {
+			await selectReaderTheme( 'legacy' );
+			await expect( page ).toMatchElement( '.amp-setting-toggle--disabled' );
+		}
+	} );
 } );
 
 describe( 'AMP settings reader theme install', () => {

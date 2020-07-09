@@ -33,15 +33,17 @@ export function SupportedTemplates() {
 		}
 	}, [] );
 
+	const isLegacy = 'reader' === themeSupport && 'legacy' === readerTheme;
+
 	return (
-		<section className={ ( 'reader' === themeSupport && 'legacy' === readerTheme ) || ! themeSupport ? 'hidden' : '' }>
+		<section className={ ! themeSupport || ( 'reader' === themeSupport && ! readerTheme ) ? 'hidden' : '' }>
 			<h2>
 				{ __( 'Supported Templates', 'amp' ) }
 			</h2>
 			<Selectable className="supported-templates">
 				<SupportedTemplatesToggle />
 				<SupportedTemplatesVisibility />
-				<div ref={ supportedTemplatesContainer } />
+				{ ! isLegacy && <div ref={ supportedTemplatesContainer } /> }
 			</Selectable>
 		</section>
 	);

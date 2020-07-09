@@ -42,3 +42,8 @@
 .amp-setting-toggle .components-form-toggle__input:focus + .components-form-toggle__track {
 	box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--brand);
 }
+
+.amp-setting-toggle--disabled .components-form-toggle {
+	pointer-events: none;
+	opacity: 0.5;
+}

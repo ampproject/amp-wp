@@ -5,7 +5,7 @@ exports[`RedirectToggle matches snapshot 1`] = `
   className="selectable selectable--bottom"
 >
   <div
-    className="amp-setting-toggle"
+    className="amp-setting-toggle "
   >
     <div
       className="components-base-control components-toggle-control"

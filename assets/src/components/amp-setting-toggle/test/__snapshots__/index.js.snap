@@ -2,7 +2,7 @@
 
 exports[`AMPSettingToggle matches snapshots 1`] = `
 <div
-  className="amp-setting-toggle"
+  className="amp-setting-toggle "
 >
   <div
     className="components-base-control components-toggle-control"
@@ -63,7 +63,7 @@ exports[`AMPSettingToggle matches snapshots 1`] = `
 
 exports[`AMPSettingToggle matches snapshots 2`] = `
 <div
-  className="amp-setting-toggle"
+  className="amp-setting-toggle "
 >
   <div
     className="components-base-control components-toggle-control"

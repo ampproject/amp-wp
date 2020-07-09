@@ -18,15 +18,16 @@ import './style.css';
  *
  * @param {Object} props Component props.
  * @param {boolean} props.checked Whether the toggle is on.
+ * @param {boolean} props.disabled Whether the toggle is disabled.
  * @param {Function} props.onChange Change handler.
  * @param {?string} props.text Toggle text.
  * @param {string} props.title Toggle title.
  */
-export function AMPSettingToggle( { checked, onChange, text, title } ) {
+export function AMPSettingToggle( { checked, disabled = false, onChange, text, title } ) {
 	return (
-		<div className="amp-setting-toggle">
+		<div className={ `amp-setting-toggle ${ disabled ? 'amp-setting-toggle--disabled' : '' }` }>
 			<ToggleControl
-				checked={ checked }
+				checked={ ! disabled && checked }
 				label={ (
 					<div className="amp-setting-toggle__label-text">
 						<h3>
@@ -45,6 +46,7 @@ export function AMPSettingToggle( { checked, onChange, text, title } ) {
 }
 AMPSettingToggle.propTypes = {
 	checked: PropTypes.bool.isRequired,
+	disabled: PropTypes.bool,
 	onChange: PropTypes.func.isRequired,
 	text: PropTypes.string,
 	title: PropTypes.string.isRequired,
