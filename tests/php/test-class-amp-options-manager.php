@@ -343,9 +343,9 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				],
 				AMP_Theme_Support::STANDARD_MODE_SLUG,
 			],
-			'standard_no_args'                     => [
+			'transitional_no_args'                 => [
 				[],
-				AMP_Theme_Support::STANDARD_MODE_SLUG,
+				AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
 			],
 			'standard_via_native'                  => [
 				null,

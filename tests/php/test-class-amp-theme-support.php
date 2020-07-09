@@ -105,6 +105,58 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( PHP_INT_MAX, has_action( 'wp', [ self::TESTED_CLASS, 'finish_init' ] ) );
 	}
 
+	/** @covers AMP_Theme_Support::get_theme_support_args() */
+	public function test_get_theme_support_args() {
+		remove_theme_support( 'amp' );
+		$this->assertFalse( AMP_Theme_Support::get_theme_support_args() );
+
+		// When paired not supplied, default to paired.
+		add_theme_support( 'amp' );
+		$args = AMP_Theme_Support::get_theme_support_args();
+		$this->assertEquals(
+			[ 'paired' => true ],
+			$args
+		);
+
+		// Handle explicit requirement for Standard mode.
+		add_theme_support( 'amp', [ 'paired' => false ] );
+		$args = AMP_Theme_Support::get_theme_support_args();
+		$this->assertEquals(
+			[
+				'paired' => false,
+			],
+			$args
+		);
+
+		// Redundant paired.
+		add_theme_support(
+			'amp',
+			[
+				'paired' => true,
+				'foo'    => 'bar',
+			]
+		);
+		$args = AMP_Theme_Support::get_theme_support_args();
+		$this->assertEquals(
+			[
+				'paired' => true,
+				'foo'    => 'bar',
+			],
+			$args
+		);
+
+		// Merged paired.
+		add_theme_support( 'amp', [ 'foo' => 'bar' ] );
+		$args = AMP_Theme_Support::get_theme_support_args();
+		$this->assertEquals(
+			[
+				'paired' => true,
+				'foo'    => 'bar',
+			],
+			$args
+		);
+	}
+
 	/**
 	 * Test supports_reader_mode.
 	 *

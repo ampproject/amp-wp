@@ -93,14 +93,12 @@ class AMP_Options_Manager {
 
 		$defaults = self::$defaults;
 
-		$theme_support = get_theme_support( 'amp' );
+		$theme_support = AMP_Theme_Support::get_theme_support_args();
 		if ( $theme_support ) {
-			if ( isset( $theme_support[0]['paired'] ) && false === $theme_support[0]['paired'] ) {
+			if ( empty( $theme_support[ AMP_Theme_Support::PAIRED_FLAG ] ) ) {
 				$defaults[ Option::THEME_SUPPORT ] = AMP_Theme_Support::STANDARD_MODE_SLUG;
-			} elseif ( ! empty( $theme_support[0]['paired'] ) || ! empty( $theme_support[0]['template_dir'] ) ) {
-				$defaults[ Option::THEME_SUPPORT ] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
 			} else {
-				$defaults[ Option::THEME_SUPPORT ] = AMP_Theme_Support::STANDARD_MODE_SLUG;
+				$defaults[ Option::THEME_SUPPORT ] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
 			}
 		}
 

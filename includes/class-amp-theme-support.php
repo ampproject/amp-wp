@@ -237,10 +237,6 @@ class AMP_Theme_Support {
 	 * In older versions of the plugin, the DB option was only considered if the theme does not already explicitly support AMP.
 	 * This is no longer the case. The DB option is the only value that is considered.
 	 *
-	 * @todo Should we store the original theme support args so we can tell the user that the active theme says it can be used in Standard/Transitional modes?
-	 * @todo What is even the purpose of doing any of this? Calling current_theme_supports('amp') is irrelevant if is_amp_endpoint().
-	 * Maybe not because really we should be scanning the site to actually see if there are validation errors, and tha that this
-	 *
 	 * @see AMP_Post_Type_Support::add_post_type_support() For where post type support is added, since it is irrespective of theme support.
 	 * @deprecated
 	 * @codeCoverageIgnore
@@ -263,15 +259,18 @@ class AMP_Theme_Support {
 			return false;
 		}
 		$support = get_theme_support( self::SLUG );
-		if ( true === $support ) {
-			return [
-				self::PAIRED_FLAG => false,
-			];
+		if ( isset( $support[0] ) && is_array( $support[0] ) ) {
+			$args = $support[0];
+		} else {
+			$args = [];
 		}
-		if ( ! isset( $support[0] ) || ! is_array( $support[0] ) ) {
-			return [];
+		if ( ! isset( $args[ self::PAIRED_FLAG ] ) ) {
+			// Formerly when paired was not supplied it defaulted to be false. However, the reality is that
+			// the vast majority of themes should be built to work in AMP and non-AMP because AMP can be
+			// disabled for any URL just by disabling AMP for the post.
+			$args[ self::PAIRED_FLAG ] = true;
 		}
-		return $support[0];
+		return $args;
 	}
 
 	/**
