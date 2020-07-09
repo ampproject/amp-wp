@@ -117,6 +117,7 @@ class AMP_Options_Manager {
 
 		// Ensure current template mode.
 		if (
+			isset( $options[ Option::THEME_SUPPORT ] ) &&
 			AMP_Theme_Support::READER_MODE_SLUG === $options[ Option::THEME_SUPPORT ]
 			&&
 			get_template() === $options[ Option::READER_THEME ]
@@ -134,13 +135,13 @@ class AMP_Options_Manager {
 			 * go back to being in Reader mode as opposed to Transitional.
 			 */
 			$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
-		} elseif ( 'native' === $options[ Option::THEME_SUPPORT ] ) {
+		} elseif ( isset( $options[ Option::THEME_SUPPORT ] ) && 'native' === $options[ Option::THEME_SUPPORT ] ) {
 			// The slug 'native' is the old term for 'standard'.
 			$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::STANDARD_MODE_SLUG;
-		} elseif ( 'paired' === $options[ Option::THEME_SUPPORT ] ) {
+		} elseif ( isset( $options[ Option::THEME_SUPPORT ] ) && 'paired' === $options[ Option::THEME_SUPPORT ] ) {
 			// The slug 'paired' is the old term for 'transitional.
 			$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
-		} elseif ( 'disabled' === $options[ Option::THEME_SUPPORT ] ) {
+		} elseif ( isset( $options[ Option::THEME_SUPPORT ] ) && 'disabled' === $options[ Option::THEME_SUPPORT ] ) {
 			/*
 			 * Prior to 1.2, the theme support slug for Reader mode was 'disabled'. This would be saved in options for
 			 * themes that had 'amp' theme support defined. Also prior to 1.2, the user could not switch between modes
