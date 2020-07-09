@@ -39,7 +39,7 @@ function getReaderNotice( themeSupport ) {
 			);
 
 		// Theme has built-in support or has declared theme support with the paired flag set to true.
-		case 'reader' === themeSupport && ( IS_CORE_THEME || ( 'object' === typeof THEME_SUPPORT_ARGS && true === THEME_SUPPORT_ARGS.paired ) ):
+		case 'reader' === themeSupport && ( IS_CORE_THEME || ( 'object' === typeof THEME_SUPPORT_ARGS && false !== THEME_SUPPORT_ARGS.paired ) ):
 			return (
 				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_WARNING }>
 					<p>
@@ -68,7 +68,7 @@ function getReaderNotice( themeSupport ) {
  */
 export function TemplateModes() {
 	const { editedOptions } = useContext( Options );
-	const { plugin_configured: pluginConfigured, theme_support: themeSupport } = editedOptions;
+	const { theme_support: themeSupport } = editedOptions;
 
 	return (
 		<section className="template-mode-selection">
@@ -84,7 +84,7 @@ export function TemplateModes() {
 			>
 				{
 					// Plugin is not configured; active theme has built-in support or has declared theme support without the paired flag.
-					! pluginConfigured && ( IS_CORE_THEME || 'object' === typeof THEME_SUPPORT_ARGS ) && (
+					( IS_CORE_THEME || 'object' === typeof THEME_SUPPORT_ARGS ) && (
 						<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_INFO }>
 							<p>
 								{ __( 'Your active theme is known to work well in standard mode.', 'amp' ) }
@@ -99,7 +99,7 @@ export function TemplateModes() {
 			>
 				{
 					// Plugin is not configured; active theme has built-in support or has declared theme support with the paired flag.
-					! pluginConfigured && ( IS_CORE_THEME || ( 'object' === typeof THEME_SUPPORT_ARGS && true === THEME_SUPPORT_ARGS.paired ) ) && (
+					( IS_CORE_THEME || ( 'object' === typeof THEME_SUPPORT_ARGS && true === THEME_SUPPORT_ARGS.paired ) ) && (
 						<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_INFO }>
 							<p>
 								{ __( 'Your active theme is known to work well in transitional mode.', 'amp' ) }
