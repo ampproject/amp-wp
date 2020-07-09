@@ -33,8 +33,11 @@ export function SupportedTemplates() {
 		}
 	}, [] );
 
+	const isReader = 'reader' === themeSupport;
+	const isLegacy = isReader && 'legacy' === readerTheme;
+
 	return (
-		<section className={ ! themeSupport || ( 'reader' === themeSupport && ! readerTheme ) ? 'hidden' : '' }>
+		<section className={ ! themeSupport || ( isReader && ! readerTheme ) || isLegacy ? 'hidden' : '' }>
 			<h2>
 				{ __( 'Supported Templates', 'amp' ) }
 			</h2>
