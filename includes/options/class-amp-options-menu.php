@@ -5,7 +5,10 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\QueryVars;
+use AmpProject\AmpWP\Services;
 
 /**
  * AMP_Options_Menu class.
@@ -132,7 +135,10 @@ class AMP_Options_Menu {
 	 * @since 1.0
 	 */
 	public function render_theme_support() {
-		$theme_support = AMP_Theme_Support::get_support_mode();
+		$theme_support = AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
+
+		/** @var AmpSlugCustomizationWatcher $amp_slug_customization_watcher */
+		$amp_slug_customization_watcher = Services::get( 'amp_slug_customization_watcher' );
 
 		/* translators: %s: URL to the documentation. */
 		$standard_description = sprintf( __( 'The active theme integrates AMP as the framework for your site by using its templates and styles to render webpages. This means your site is <b>AMP-first</b> and your canonical URLs are AMP! Depending on your theme/plugins, a varying level of <a href="%s">development work</a> may be required.', 'amp' ), esc_url( 'https://amp-wp.org/documentation/developing-wordpress-amp-sites/' ) );
@@ -144,15 +150,23 @@ class AMP_Options_Menu {
 
 		$builtin_support     = in_array( get_template(), AMP_Core_Theme_Sanitizer::get_supported_themes(), true );
 		$reader_mode_support = __( 'Your theme indicates it works best in <strong>Reader mode.</strong>', 'amp' );
+
+		$theme_support_args          = AMP_Theme_Support::get_theme_support_args();
+		$theme_supports_standard     = false;
+		$theme_supports_transitional = false;
+		if ( $theme_support_args ) {
+			$theme_supports_standard     = empty( $theme_support_args[ AMP_Theme_Support::PAIRED_FLAG ] );
+			$theme_supports_transitional = ! empty( $theme_support_args[ AMP_Theme_Support::PAIRED_FLAG ] );
+		}
 		?>
 
 		<fieldset>
-			<?php if ( AMP_Theme_Support::READER_MODE_SLUG === AMP_Theme_Support::get_support_mode() ) : ?>
-				<?php if ( AMP_Theme_Support::STANDARD_MODE_SLUG === AMP_Theme_Support::get_support_mode_added_via_theme() ) : ?>
+			<?php if ( AMP_Theme_Support::READER_MODE_SLUG === $theme_support ) : ?>
+				<?php if ( $theme_supports_standard ) : ?>
 					<div class="notice notice-success notice-alt inline">
 						<p><?php esc_html_e( 'Your active theme is known to work well in standard mode.', 'amp' ); ?></p>
 					</div>
-				<?php elseif ( $builtin_support || AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Theme_Support::get_support_mode_added_via_theme() ) : ?>
+				<?php elseif ( $builtin_support || $theme_supports_transitional ) : ?>
 					<div class="notice notice-success notice-alt inline">
 						<p><?php esc_html_e( 'Your active theme is known to work well in standard or transitional mode.', 'amp' ); ?></p>
 					</div>
@@ -163,7 +177,7 @@ class AMP_Options_Menu {
 				</div>
 			<?php endif; ?>
 
-			<?php if ( ! AMP_Theme_Support::get_support_mode_added_via_theme() && ! AMP_Theme_Support::supports_reader_mode() && ! $builtin_support ) : ?>
+			<?php if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) && ! AMP_Theme_Support::supports_reader_mode() && ! $builtin_support ) : ?>
 				<p>
 					<?php echo wp_kses_post( $ecosystem_description ); ?>
 				</p>
@@ -177,7 +191,7 @@ class AMP_Options_Menu {
 					</label>
 				</dt>
 				<dd>
-					<?php echo wp_kses_post( $standard_description ); ?>
+					<p><?php echo wp_kses_post( $standard_description ); ?></p>
 				</dd>
 				<dt>
 					<input type="radio" id="theme_support_transitional" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="<?php echo esc_attr( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ); ?>" <?php checked( $theme_support, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ); ?>>
@@ -186,20 +200,67 @@ class AMP_Options_Menu {
 					</label>
 				</dt>
 				<dd>
-					<?php echo wp_kses_post( $transitional_description ); ?>
+					<p><?php echo wp_kses_post( $transitional_description ); ?></p>
 				</dd>
 				<dt>
-					<input type="radio" id="theme_support_disabled" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="<?php echo esc_attr( AMP_Theme_Support::READER_MODE_SLUG ); ?>" <?php checked( $theme_support, AMP_Theme_Support::READER_MODE_SLUG ); ?>>
+					<input type="radio" id="theme_support_disabled" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="<?php echo esc_attr( AMP_Theme_Support::READER_MODE_SLUG ); ?>" <?php checked( $theme_support, AMP_Theme_Support::READER_MODE_SLUG ); ?> <?php disabled( AMP_Options_Manager::get_option( Option::READER_THEME ), get_template() ); ?>>
 					<label for="theme_support_disabled">
 						<strong><?php esc_html_e( 'Reader', 'amp' ); ?></strong>
 					</label>
 				</dt>
 				<dd>
-					<?php echo wp_kses_post( $reader_description ); ?>
+					<p><?php echo wp_kses_post( $reader_description ); ?></p>
+
+					<div class="notice notice-info notice-alt inline">
+						<p>
+							<?php
+							/* translators: %s is the reader theme */
+							echo esc_html( sprintf( __( 'The "%s" theme is currently selected in the wizard. The ability to change it from the admin screen will come soon.', 'amp' ), AMP_Options_Manager::get_option( Option::READER_THEME ) ) );
+							?>
+						</p>
+					</div>
+
+					<?php if ( AMP_Options_Manager::get_option( Option::READER_THEME ) === get_template() ) : ?>
+						<div class="notice notice-info notice-alt inline">
+							<p><?php esc_html_e( 'The currently-selected Reader theme is the same as the active theme. This means that Reader mode is disabled since it is no different from Transitional mode at this point.', 'amp' ); ?></p>
+						</div>
+					<?php endif; ?>
+
+					<?php if ( $amp_slug_customization_watcher->did_customize_late() ) : ?>
+						<div class="notice notice-warning notice-alt inline">
+							<p>
+								<?php
+								echo wp_kses_post(
+									sprintf(
+										/* translators: 1: customized AMP query var, 2: default AMP query var */
+										esc_html__( 'Warning: You customized your AMP query var too late. This means that Reader themes will not be available to you. You customized it to be %1$s instead of the default %2$s.', 'amp' ),
+										sprintf( '&#8220;<code>%s</code>&#8221;', esc_html( amp_get_slug() ) ),
+										sprintf( '&#8220;<code>%s</code>&#8221;', QueryVars::AMP )
+									)
+								);
+								?>
+							</p>
+						</div>
+					<?php elseif ( $amp_slug_customization_watcher->did_customize_early() ) : ?>
+						<div class="notice notice-info notice-alt inline">
+							<p>
+								<?php
+								echo wp_kses_post(
+									sprintf(
+										/* translators: 1: customized AMP query var, 2: default AMP query var */
+										esc_html__( 'You customized your query var to be %1$s instead of the default %2$s.', 'amp' ),
+										sprintf( '&#8220;<code>%s</code>&#8221;', esc_html( amp_get_slug() ) ),
+										sprintf( '&#8220;<code>%s</code>&#8221;', QueryVars::AMP )
+									)
+								);
+								?>
+							</p>
+						</div>
+					<?php endif; ?>
 				</dd>
 			</dl>
 
-			<?php if ( AMP_Theme_Support::get_support_mode_added_via_theme() ) : ?>
+			<?php if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) : ?>
 				<p>
 					<?php echo wp_kses_post( $ecosystem_description ); ?>
 				</p>
@@ -217,39 +278,25 @@ class AMP_Options_Menu {
 		$theme_support_args = AMP_Theme_Support::get_theme_support_args();
 		?>
 
-		<?php if ( ! isset( $theme_support_args['available_callback'] ) ) : ?>
-			<fieldset id="all_templates_supported_fieldset">
-				<?php if ( isset( $theme_support_args['templates_supported'] ) && 'all' === $theme_support_args['templates_supported'] ) : ?>
-					<div class="notice notice-info notice-alt inline">
-						<p>
-							<?php esc_html_e( 'The current theme requires all templates to support AMP.', 'amp' ); ?>
-						</p>
-					</div>
-				<?php else : ?>
+		<fieldset id="all_templates_supported_fieldset">
+			<?php if ( isset( $theme_support_args['templates_supported'] ) && 'all' === $theme_support_args['templates_supported'] ) : ?>
+				<div class="notice notice-info notice-alt inline">
 					<p>
-						<label for="all_templates_supported">
-							<input id="all_templates_supported" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[all_templates_supported]' ); ?>" <?php checked( AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) ); ?>>
-							<?php esc_html_e( 'Serve all templates as AMP regardless of what is being queried.', 'amp' ); ?>
-						</label>
+						<?php esc_html_e( 'The current theme requires all templates to support AMP.', 'amp' ); ?>
 					</p>
-					<p class="description">
-						<?php esc_html_e( 'This will allow all of the URLs on your site to be served as AMP by default.', 'amp' ); ?>
-					</p>
-				<?php endif; ?>
-			</fieldset>
-		<?php else : ?>
-			<div class="notice notice-warning notice-alt inline">
+				</div>
+			<?php else : ?>
 				<p>
-					<?php
-					printf(
-						/* translators: %s: available_callback */
-						esc_html__( 'Your theme is using the deprecated %s argument for AMP theme support.', 'amp' ),
-						'available_callback'
-					);
-					?>
+					<label for="all_templates_supported">
+						<input id="all_templates_supported" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[all_templates_supported]' ); ?>" <?php checked( AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) ); ?>>
+						<?php esc_html_e( 'Serve all templates as AMP regardless of what is being queried.', 'amp' ); ?>
+					</label>
 				</p>
-			</div>
-		<?php endif; ?>
+				<p class="description">
+					<?php esc_html_e( 'This will allow all of the URLs on your site to be served as AMP by default.', 'amp' ); ?>
+				</p>
+			<?php endif; ?>
+		</fieldset>
 
 		<fieldset id="supported_post_types_fieldset">
 			<?php
@@ -315,6 +362,9 @@ class AMP_Options_Menu {
 					const allTemplatesSupportedInput = $( '#all_templates_supported' );
 
 					function isThemeSupportDisabled() {
+						if ( <?php echo wp_json_encode( AMP_Reader_Themes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME ) ); ?> ) {
+							return false;
+						}
 						return Boolean( themeSupportDisabledInput.length && themeSupportDisabledInput.prop( 'checked' ) );
 					}
 

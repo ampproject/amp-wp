@@ -7,6 +7,7 @@
 
 use AmpProject\AmpWP\Admin\DevToolsUserAccess;
 use AmpProject\AmpWP\Icon;
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Services;
@@ -444,7 +445,13 @@ class AMP_Validation_Manager {
 			$wp_admin_bar->add_node( $validate_item );
 		}
 
-		if ( AMP_Theme_Support::is_paired_available() && amp_is_dev_mode() ) {
+		if (
+			AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
+			&&
+			AMP_Theme_Support::is_paired_available()
+			&&
+			amp_is_dev_mode()
+		) {
 			// Construct admin bar item to link to paired browsing experience.
 			$paired_browsing_item = [
 				'parent' => 'amp',
