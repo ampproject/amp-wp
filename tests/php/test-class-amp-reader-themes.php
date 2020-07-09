@@ -6,7 +6,7 @@
  * @since 1.6
  */
 
-use AmpProject\AmpWP\Tests\ThemesApiRequestMocking;
+use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
 
 /**
  * Tests for reader themes.

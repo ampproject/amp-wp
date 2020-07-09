@@ -7,7 +7,7 @@
  */
 
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 
 /**
  * Tests for AMP_HTTP.

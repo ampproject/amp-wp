@@ -6,8 +6,8 @@
  * @since 0.7
  */
 
-use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
-use AmpProject\AmpWP\Tests\WithoutBlockPreRendering;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
 
 /**
  * Tests for AMP_Playlist_Embed_Handler.

@@ -5,7 +5,7 @@
  * @package AmpProject\AmpWP
  */
 
-namespace AmpProject\AmpWP\Tests;
+namespace AmpProject\AmpWP\Tests\Helpers;
 
 /**
  * Helper trait for to mock HTTP requests to the WordPress.org themes API.

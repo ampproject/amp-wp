@@ -1,6 +1,6 @@
 <?php
 
-namespace AmpProject\AmpWP\Tests;
+namespace AmpProject\AmpWP\Tests\Helpers;
 
 use AMP_Base_Sanitizer;
 

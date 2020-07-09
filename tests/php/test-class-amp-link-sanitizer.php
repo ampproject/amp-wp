@@ -9,7 +9,7 @@ use AmpProject\AmpWP\MobileRedirection;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Services;
-use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 
 /**
  * Class AMP_Link_Sanitizer_Test

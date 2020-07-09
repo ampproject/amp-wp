@@ -7,7 +7,7 @@ use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\MobileRedirection;
-use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AMP_Options_Manager;
 use AMP_Theme_Support;
 use WP_UnitTestCase;

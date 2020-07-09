@@ -11,11 +11,11 @@ use AmpProject\AmpWP\Admin\DevToolsUserAccess;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Services;
-use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
-use AmpProject\AmpWP\Tests\HandleValidation;
-use AmpProject\AmpWP\Tests\PrivateAccess;
-use AmpProject\AmpWP\Tests\AssertRestApiField;
-use AmpProject\AmpWP\Tests\WithoutBlockPreRendering;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use AmpProject\AmpWP\Tests\Helpers\AssertRestApiField;
+use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
 use AmpProject\Dom\Document;
 
 /**

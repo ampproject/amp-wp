@@ -5,7 +5,7 @@
  * @package AmpProject\AmpWP
  */
 
-namespace AmpProject\AmpWP\Tests;
+namespace AmpProject\AmpWP\Tests\Helpers;
 
 /**
  * Helper trait for comparing strings of HTML markup.

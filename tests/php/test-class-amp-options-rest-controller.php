@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Tests\ThemesApiRequestMocking;
+use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
 
 /**
  * Tests for AMP_Options_REST_Controller.

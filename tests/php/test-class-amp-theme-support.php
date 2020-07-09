@@ -10,8 +10,8 @@ use AmpProject\AmpWP\ConfigurationArgument;
 use AmpProject\AmpWP\MobileRedirection;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
-use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
-use AmpProject\AmpWP\Tests\PrivateAccess;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\Dom\Document;
 use org\bovigo\vfs;
 

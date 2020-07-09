@@ -4,7 +4,7 @@ namespace AmpProject\AmpWP\Tests\Unit;
 
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\PluginRegistry;
-use AmpProject\AmpWP\Tests\MockPluginEnvironment;
+use AmpProject\AmpWP\Tests\Helpers\MockPluginEnvironment;
 use PHPUnit\Framework\TestCase;
 
 final class PluginRegistryTest extends TestCase {

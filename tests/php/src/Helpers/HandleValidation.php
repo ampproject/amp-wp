@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-namespace AmpProject\AmpWP\Tests;
+namespace AmpProject\AmpWP\Tests\Helpers;
 
 /**
  * Helper trait for validation

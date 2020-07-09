@@ -5,7 +5,7 @@
  * @package AMP.
  */
 
-use AmpProject\AmpWP\Tests\WithoutBlockPreRendering;
+use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
 
 /**
  * Class Test_AMP_TikTok_Embed_Handler

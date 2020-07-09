@@ -3,7 +3,7 @@
 namespace AmpProject\AmpWP\Tests\Unit;
 
 use AmpProject\AmpWP\Icon;
-use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use PHPUnit\Framework\TestCase;
 
 final class IconTest extends TestCase {
