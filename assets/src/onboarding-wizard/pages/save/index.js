@@ -18,7 +18,7 @@ import { User } from '../../components/user-context-provider';
 import { Phone } from '../../../components/phone';
 import './style.css';
 import { ReaderThemes } from '../../../components/reader-themes-context-provider';
-import { AMPNotice, NOTICE_SIZE_LARGE, NOTICE_TYPE_WARNING, NOTICE_TYPE_SUCCESS } from '../../../components/amp-notice';
+import { AMPNotice, NOTICE_SIZE_LARGE, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_INFO } from '../../../components/amp-notice';
 import { Navigation } from '../../components/navigation-context-provider';
 import { Options } from '../../../components/options-context-provider';
 
@@ -209,7 +209,7 @@ export function Save() {
 			</div>
 			<div className="done__preview-container">
 				{ 'reader' === themeSupport && downloadingThemeError && (
-					<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_WARNING }>
+					<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_INFO }>
 						{ __( 'There was an error downloading your reader theme. As a result, your site is currently using the legacy reader theme. Please install your chosen theme manually.', 'amp' ) }
 					</AMPNotice>
 				) }

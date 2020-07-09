@@ -23,7 +23,9 @@ export function SupportedTemplatesToggle() {
 		<>
 			{ isLegacy && (
 				<AMPNotice>
-					{ __( 'This setting is not available when the legacy Reader theme is selected.', 'amp' ) }
+					<p>
+						{ __( 'This setting is not available when the legacy Reader theme is selected.', 'amp' ) }
+					</p>
 				</AMPNotice>
 			) }
 			<AMPSettingToggle

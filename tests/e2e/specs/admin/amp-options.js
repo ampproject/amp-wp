@@ -81,8 +81,7 @@ describe( 'AMP settings screen newly activated', () => {
 		await selectReaderTheme();
 		await expect( page ).toMatchElement( '#theme-card__legacy:checked' );
 
-		await selectReaderTheme( 'twentytwenty' );
-		await expect( page ).not.toMatchElement( '#theme-card__twentytwenty:checked' ); // Active theme is not selectable.
+		await expect( page ).not.toMatchElement( '#theme-card__twentytwenty:checked' ); // Active theme is hidden.
 
 		await selectReaderTheme( 'twentynineteen' );
 		await expect( page ).toMatchElement( '#theme-card__twentynineteen:checked' );
@@ -121,7 +120,7 @@ describe( 'Settings screen when reader theme is active theme', () => {
 
 		await clickMode( 'reader' );
 
-		await expect( page ).toMatchElement( '.amp-notice__body', { text: /^This is the active/ } );
+		await expect( page ).toMatchElement( '.amp-notice__body', { text: /^Your active theme/ } );
 
 		await activateTheme( 'twentytwenty' );
 	} );
@@ -137,7 +136,7 @@ describe( 'Mode info notices', () => {
 
 		await clickMode( 'reader' );
 
-		await expect( page ).toMatchElement( '#template-mode-reader-container .amp-notice--warning' );
+		await expect( page ).toMatchElement( '#template-mode-reader-container .amp-notice--info' );
 	} );
 
 	it.todo( 'shows expected notices for theme with paired flag false' );

@@ -18,7 +18,7 @@ import { useContext } from '@wordpress/element';
  */
 import { TemplateModeOption } from '../components/template-mode-option';
 import '../css/template-mode-selection.css';
-import { AMPNotice, NOTICE_SIZE_LARGE, NOTICE_TYPE_INFO, NOTICE_TYPE_WARNING } from '../components/amp-notice';
+import { AMPNotice, NOTICE_SIZE_LARGE, NOTICE_TYPE_INFO } from '../components/amp-notice';
 import { Options } from '../components/options-context-provider';
 
 /**
@@ -31,7 +31,7 @@ function getReaderNotice( themeSupport ) {
 		// Theme has built-in support or has declared theme support with the paired flag set to false.
 		case 'reader' === themeSupport && ( 'object' === typeof THEME_SUPPORT_ARGS && false === THEME_SUPPORT_ARGS.paired ):
 			return (
-				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_WARNING }>
+				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_INFO }>
 					<p>
 						{ __( 'Your active theme is known to work well in standard mode.', 'amp' ) }
 					</p>
@@ -41,7 +41,7 @@ function getReaderNotice( themeSupport ) {
 		// Theme has built-in support or has declared theme support with the paired flag set to true.
 		case 'reader' === themeSupport && ( IS_CORE_THEME || ( 'object' === typeof THEME_SUPPORT_ARGS && false !== THEME_SUPPORT_ARGS.paired ) ):
 			return (
-				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_WARNING }>
+				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_INFO }>
 					<p>
 						{ __( 'Your active theme is known to work well in standard and transitional mode.', 'amp' ) }
 					</p>

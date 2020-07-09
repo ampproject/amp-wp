@@ -27,7 +27,7 @@ export function ReaderThemes() {
 			<h2>
 				{ __( 'Choose Reader Theme', 'amp' ) }
 			</h2>
-			<ReaderThemeSelection disableCurrentlyActiveTheme={ true } />
+			<ReaderThemeSelection hideCurrentlyActiveTheme={ true } />
 		</section>
 	);
 }
