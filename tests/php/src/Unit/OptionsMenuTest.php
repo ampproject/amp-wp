@@ -54,7 +54,7 @@ class OptionsMenuTest extends WP_UnitTestCase {
 		$this->assertEquals( 9, has_action( 'admin_menu', [ $this->instance, 'add_menu_items' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_post_amp_analytics_options', 'AMP_Options_Manager::handle_analytics_submit' ) );
 
-		$this->assertEquals( has_filter( 10, "plugin_action_links_amp/amp.php", [ $this, 'add_plugin_action_links' ] ) );
+		$this->assertEquals( has_filter( 10, 'plugin_action_links_amp/amp.php', [ $this, 'add_plugin_action_links' ] ) );
 
 		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] ) );
 	}

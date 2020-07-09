@@ -14,9 +14,6 @@ import { SupportedTemplatesVisibility } from './supported-templates-visibility';
 
 /**
  * Supported templates section of the settings page.
- *
- * @param {Object} props Component props.
- * @param {Object} props.themeSupportArgs Theme support settings passed from the backend.
  */
 export function SupportedTemplates() {
 	const { editedOptions } = useContext( Options );
