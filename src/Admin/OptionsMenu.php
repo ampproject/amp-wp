@@ -224,7 +224,6 @@ class OptionsMenu implements Service, Registerable {
 		$is_reader_theme = in_array( get_stylesheet(), wp_list_pluck( ( new AMP_Reader_Themes() )->get_themes(), 'slug' ), true );
 
 		$js_data = [
-			'BUILT_IN_SUPPORT'                   => in_array( get_template(), AMP_Core_Theme_Sanitizer::get_supported_themes(), true ),
 			'CURRENT_THEME'                      => [
 				'name'            => $theme->get( 'Name' ),
 				'description'     => $theme->get( 'Description' ),
@@ -234,8 +233,12 @@ class OptionsMenu implements Service, Registerable {
 			],
 			'OPTIONS_REST_ENDPOINT'              => rest_url( 'amp/v1/options' ),
 			'READER_THEMES_REST_ENDPOINT'        => rest_url( 'amp/v1/reader-themes' ),
+			'THEME_IS_SUPPORTED'                 => in_array(
+				get_template(),
+				array_diff( AMP_Core_Theme_Sanitizer::get_supported_themes(), [ 'twentyten' ] ),
+				true
+			),
 			'THEME_SUPPORT_ARGS'                 => AMP_Theme_Support::get_theme_support_args(),
-			'THEME_PROVIDED_SUPPORT_MODE'        => current_theme_supports( 'amp' ),
 			'THEME_SUPPORTS_READER_MODE'         => AMP_Theme_Support::supports_reader_mode(),
 			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
 			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
