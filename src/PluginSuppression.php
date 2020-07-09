@@ -53,7 +53,7 @@ final class PluginSuppression implements Service, Registerable {
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
 		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
 
-		// When a Reader theme is selected and and an AMP request is being made, start suppressing as early as possible
+		// When a Reader theme is selected and an AMP request is being made, start suppressing as early as possible.
 		// This can be done because we know it is an AMP page due to the query parameter, but it also _has_ to be done
 		// specifically for the case of accessing the AMP Customizer (in which customize.php is requested with the query
 		// parameter) in order to prevent the registration of Customizer controls from suppressed plugins. Suppression
