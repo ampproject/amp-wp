@@ -510,7 +510,6 @@ class AMP_Theme_Support {
 	 *     Template availability.
 	 *
 	 *     @type bool        $supported Whether the template is supported in AMP.
-	 *     @type bool|null   $immutable Whether the supported status is known to be unchangeable.
 	 *     @type string|null $template  The ID of the matched template (conditional), such as 'is_singular', or null if nothing was matched.
 	 *     @type string[]    $errors    List of the errors or reasons for why the template is not available.
 	 * }
@@ -535,7 +534,7 @@ class AMP_Theme_Support {
 		$default_response = [
 			'errors'    => [],
 			'supported' => false,
-			'immutable' => null,
+			'immutable' => false, // Obsolete.
 			'template'  => null,
 		];
 
@@ -592,7 +591,6 @@ class AMP_Theme_Support {
 				$matching_templates[ $id ] = [
 					'template'  => $id,
 					'supported' => ! empty( $supportable_template['supported'] ),
-					'immutable' => ! empty( $supportable_template['immutable'] ),
 				];
 			}
 		}
@@ -878,15 +876,12 @@ class AMP_Theme_Support {
 		/**
 		 * Filters list of supportable templates.
 		 *
-		 * A theme or plugin can force a given template to be supported or not by preemptively
-		 * setting the 'supported' flag for a given template. Otherwise, if the flag is undefined
-		 * then the user will be able to toggle it themselves in the admin. Each array item should
-		 * have a key that corresponds to a template conditional function. If the key is such a
-		 * function, then the key is used to evaluate whether the given template entry is a match.
-		 * Otherwise, a supportable template item can include a callback value which is used instead.
-		 * Each item needs a 'label' value. Additionally, if the supportable template is a subset of
-		 * another condition (e.g. is_singular > is_single) then this relationship needs to be
-		 * indicated via the 'parent' value.
+		 * Each array item should have a key that corresponds to a template conditional function.
+		 * If the key is such a function, then the key is used to evaluate whether the given template
+		 * entry is a match. Otherwise, a supportable template item can include a callback value which
+		 * is used instead. Each item needs a 'label' value. Additionally, if the supportable template
+		 * is a subset of another condition (e.g. is_singular > is_single) then this relationship needs
+		 * to be indicated via the 'parent' value.
 		 *
 		 * @since 1.0
 		 *
@@ -894,34 +889,13 @@ class AMP_Theme_Support {
 		 */
 		$templates = apply_filters( 'amp_supportable_templates', $templates );
 
-		$theme_support_args        = self::get_theme_support_args();
-		$theme_supported_templates = [];
-		if ( isset( $theme_support_args['templates_supported'] ) ) {
-			$theme_supported_templates = $theme_support_args['templates_supported'];
-		}
-
 		$supported_templates = AMP_Options_Manager::get_option( Option::SUPPORTED_TEMPLATES );
+		$are_all_supported   = AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED );
+
 		foreach ( $templates as $id => &$template ) {
-
-			// Capture user-elected support from options. This allows us to preserve the original user selection through programmatic overrides.
-			$template['user_supported'] = in_array( $id, $supported_templates, true );
-
-			// Consider supported templates from theme support args.
-			if ( ! isset( $template['supported'] ) ) {
-				if ( 'all' === $theme_supported_templates ) {
-					$template['supported'] = true;
-				} elseif ( is_array( $theme_supported_templates ) && isset( $theme_supported_templates[ $id ] ) ) {
-					$template['supported'] = $theme_supported_templates[ $id ];
-				}
-			}
-
-			// Make supported state immutable if it was programmatically set.
-			$template['immutable'] = isset( $template['supported'] );
-
-			// Set supported state from user preference.
-			if ( ! $template['immutable'] ) {
-				$template['supported'] = AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) || $template['user_supported'];
-			}
+			$template['supported']      = $are_all_supported || in_array( $id, $supported_templates, true );
+			$template['user_supported'] = $template['supported']; // Obsolete.
+			$template['immutable']      = false; // Obsolete.
 		}
 
 		return $templates;

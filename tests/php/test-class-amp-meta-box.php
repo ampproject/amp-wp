@@ -285,16 +285,6 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	 * @see AMP_Post_Meta_Box::get_error_messages()
 	 */
 	public function test_get_error_messages() {
-		$this->assertEquals(
-			[ 'Your site does not allow AMP to be disabled.' ],
-			$this->instance->get_error_messages( AMP_Post_Meta_Box::ENABLED_STATUS, [ 'status_immutable' ] )
-		);
-
-		$this->assertEquals(
-			[ 'Your site does not allow AMP to be enabled.' ],
-			$this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, [ 'status_immutable' ] )
-		);
-
 		$messages = $this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, [ 'template_unsupported' ] );
 		$this->assertStringContains( 'There are no', $messages[0] );
 		$this->assertStringContains( 'page=amp-options', $messages[0] );

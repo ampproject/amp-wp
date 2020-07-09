@@ -322,9 +322,6 @@ class AMP_Post_Meta_Box {
 			$availability = AMP_Theme_Support::get_template_availability( $post );
 			$status       = $availability['supported'] ? self::ENABLED_STATUS : self::DISABLED_STATUS;
 			$errors       = array_diff( $availability['errors'], [ 'post-status-disabled' ] ); // Subtract the status which the metabox will allow to be toggled.
-			if ( true === $availability['immutable'] ) {
-				$errors[] = 'status_immutable';
-			}
 		} else {
 			$errors = AMP_Post_Type_Support::get_support_errors( $post );
 			$status = empty( $errors ) ? self::ENABLED_STATUS : self::DISABLED_STATUS;
@@ -344,13 +341,6 @@ class AMP_Post_Meta_Box {
 	 */
 	public function get_error_messages( $status, $errors ) {
 		$error_messages = [];
-		if ( in_array( 'status_immutable', $errors, true ) ) {
-			if ( self::ENABLED_STATUS === $status ) {
-				$error_messages[] = __( 'Your site does not allow AMP to be disabled.', 'amp' );
-			} else {
-				$error_messages[] = __( 'Your site does not allow AMP to be enabled.', 'amp' );
-			}
-		}
 		if ( in_array( 'template_unsupported', $errors, true ) || in_array( 'no_matching_template', $errors, true ) ) {
 			$error_messages[] = sprintf(
 				/* translators: %s is a link to the AMP settings screen */
@@ -371,7 +361,7 @@ class AMP_Post_Meta_Box {
 		if ( in_array( 'skip-post', $errors, true ) ) {
 			$error_messages[] = __( 'A plugin or theme has disabled AMP support.', 'amp' );
 		}
-		if ( count( array_diff( $errors, [ 'status_immutable', 'page-on-front', 'page-for-posts', 'password-protected', 'post-type-support', 'skip-post', 'template_unsupported', 'no_matching_template' ] ) ) > 0 ) {
+		if ( count( array_diff( $errors, [ 'page-on-front', 'page-for-posts', 'password-protected', 'post-type-support', 'skip-post', 'template_unsupported', 'no_matching_template' ] ) ) > 0 ) {
 			$error_messages[] = __( 'Unavailable for an unknown reason.', 'amp' );
 		}
 

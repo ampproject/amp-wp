@@ -417,25 +417,13 @@ class AMP_Options_Menu {
 
 				?>
 				<li>
-					<?php if ( empty( $option['immutable'] ) ) : ?>
-						<input
-							type="checkbox"
-							id="<?php echo esc_attr( $element_id ); ?>"
-							name="<?php echo esc_attr( $element_name ); ?>"
-							value="<?php echo esc_attr( $id ); ?>"
-							<?php checked( ! empty( $option['user_supported'] ) ); ?>
-						>
-					<?php else : // Persist user selection even when checkbox disabled, when selection forced by theme/filter. ?>
-						<input
-							type="checkbox"
-							id="<?php echo esc_attr( $element_id ); ?>"
-							<?php checked( ! empty( $option['supported'] ) ); ?>
-							<?php disabled( true ); ?>
-						>
-						<?php if ( ! empty( $option['user_supported'] ) ) : ?>
-							<input type="hidden" name="<?php echo esc_attr( $element_name ); ?>" value="<?php echo esc_attr( $id ); ?>">
-						<?php endif; ?>
-					<?php endif; ?>
+					<input
+						type="checkbox"
+						id="<?php echo esc_attr( $element_id ); ?>"
+						name="<?php echo esc_attr( $element_name ); ?>"
+						value="<?php echo esc_attr( $id ); ?>"
+						<?php checked( ! empty( $option['user_supported'] ) ); ?>
+					>
 					<label for="<?php echo esc_attr( $element_id ); ?>">
 						<?php echo esc_html( $option['label'] ); ?>
 					</label>
