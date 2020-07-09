@@ -67,13 +67,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		 * @since 0.5
 		 * @param bool $enable Whether to enable the AMP settings. Default true.
 		 */
-		$short_circuit = apply_filters( 'amp_options_menu_is_enabled', true );
-
-		if ( true !== $short_circuit ) {
-			return false;
-		}
-
-		return true;
+		return (bool) apply_filters( 'amp_options_menu_is_enabled', true );
 	}
 
 	/**
@@ -112,7 +106,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 				'settings' => sprintf(
 					'<a href="%1$s">%2$s</a>',
 					esc_url( add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, admin_url( 'admin.php' ) ) ),
-					__( 'Settings', 'amp' )
+					esc_html__( 'Settings', 'amp' )
 				),
 			],
 			$links
@@ -128,7 +122,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		 * page when the current user can manage_options.
 		 */
 		add_menu_page(
-			__( 'AMP Options', 'amp' ),
+			__( 'AMP Settings', 'amp' ),
 			__( 'AMP', 'amp' ),
 			'manage_options',
 			AMP_Options_Manager::OPTION_NAME,
@@ -139,7 +133,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		add_submenu_page(
 			AMP_Options_Manager::OPTION_NAME,
 			__( 'AMP Settings', 'amp' ),
-			__( 'General', 'amp' ),
+			__( 'Settings', 'amp' ),
 			'manage_options',
 			AMP_Options_Manager::OPTION_NAME
 		);
@@ -246,7 +240,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			'READER_THEMES_REST_ENDPOINT'        => rest_url( 'amp/v1/reader-themes' ),
 			'IS_CORE_THEME'                      => in_array(
 				get_stylesheet(),
-				array_diff( AMP_Core_Theme_Sanitizer::get_supported_themes(), [ 'twentyten' ] ),
+				AMP_Core_Theme_Sanitizer::get_supported_themes(),
 				true
 			),
 			'THEME_SUPPORT_ARGS'                 => AMP_Theme_Support::get_theme_support_args(),
@@ -411,20 +405,6 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			<?php endforeach; ?>
 			</ul>
 		</fieldset>
-
-		<?php if ( ! isset( $theme_support_args['available_callback'] ) ) : ?>
-			<fieldset id="supported_templates_fieldset" class="hidden">
-				<style>
-					#supported_templates_fieldset ul ul {
-						margin-left: 40px;
-					}
-				</style>
-				<h4 class="title"><?php esc_html_e( 'Templates', 'amp' ); ?></h4>
-				<?php
-				$this->list_template_conditional_options( AMP_Theme_Support::get_supportable_templates() );
-				?>
-			</fieldset>
-		<?php endif; ?>
 		<?php
 	}
 
