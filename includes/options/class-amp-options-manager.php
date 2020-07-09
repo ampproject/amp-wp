@@ -111,7 +111,7 @@ class AMP_Options_Manager {
 		 * @internal
 		 * @param array $defaults Default options.
 		 */
-		$defaults = apply_filters( 'amp_default_options', $defaults );
+		$defaults = (array) apply_filters( 'amp_default_options', $defaults );
 
 		$options = array_merge( $defaults, $options );
 
