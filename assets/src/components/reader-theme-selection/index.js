@@ -23,9 +23,8 @@ import { ThemeCard } from './theme-card';
  *
  * @param {Object} props Component props.
  * @param {boolean} props.disableCurrentlyActiveTheme Whether the currently active theme should be unselectable.
- * @param {string} props.currentlyActiveThemeNotice The notice to show if the theme is unselectable.
  */
-export function ReaderThemeSelection( { disableCurrentlyActiveTheme = false, currentlyActiveThemeNotice } ) {
+export function ReaderThemeSelection( { disableCurrentlyActiveTheme = false } ) {
 	const { currentTheme, fetchingThemes, themes } = useContext( ReaderThemes );
 
 	// Separate available themes (both installed and installable) from those that need to be installed manually.
@@ -60,15 +59,20 @@ export function ReaderThemeSelection( { disableCurrentlyActiveTheme = false, cur
 			<div>
 				{ 0 < availableThemes.length && (
 					<ul className="choose-reader-theme__grid">
-						{ availableThemes.map( ( theme ) => (
-							<ThemeCard
-								currentlyActiveThemeNotice={ currentlyActiveThemeNotice }
-								disabled={ disableCurrentlyActiveTheme && currentTheme.name === theme.name }
-								key={ `theme-card-${ theme.slug }` }
-								screenshotUrl={ theme.screenshot_url }
-								{ ...theme }
-							/>
-						) ) }
+						{ availableThemes.map( ( theme ) => {
+							const disabled = disableCurrentlyActiveTheme && currentTheme.name === theme.name;
+							const currentlyActiveThemeNotice = disabled ? __( 'This is the active theme on your site. We recommend transitional mode.', 'amp' ) : null;
+
+							return (
+								<ThemeCard
+									currentlyActiveThemeNotice={ currentlyActiveThemeNotice }
+									disabled={ disabled }
+									key={ `theme-card-${ theme.slug }` }
+									screenshotUrl={ theme.screenshot_url }
+									{ ...theme }
+								/>
+							);
+						} ) }
 					</ul>
 				) }
 
@@ -114,6 +118,5 @@ export function ReaderThemeSelection( { disableCurrentlyActiveTheme = false, cur
 }
 
 ReaderThemeSelection.propTypes = {
-	currentlyActiveThemeNotice: PropTypes.string,
 	disableCurrentlyActiveTheme: PropTypes.bool,
 };
