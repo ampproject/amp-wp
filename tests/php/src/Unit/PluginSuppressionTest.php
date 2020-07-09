@@ -13,6 +13,7 @@ use AmpProject\AmpWP\Tests\MockPluginEnvironment;
 use AmpProject\AmpWP\Tests\PrivateAccess;
 use AmpProject\AmpWP\Tests\ThemesApiRequestMocking;
 use AMP_Options_Manager;
+use AMP_Reader_Themes;
 use AMP_Theme_Support;
 use AMP_Validated_URL_Post_Type;
 use AMP_Validation_Manager;
@@ -179,16 +180,56 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 	}
 
 	/** @covers PluginSuppression::register() */
-	public function test_register() {
+	public function test_register_standard_mode() {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$instance = $this->get_instance();
+		$this->assertFalse( $instance->is_reader_theme_request() );
 
 		$instance->register();
 		$this->assertEquals(
 			defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX, // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
-			has_action( 'wp', [ $instance, 'suppress_plugins' ] )
+			has_action( 'wp', [ $instance, 'maybe_suppress_plugins' ] )
 		);
 		$this->assertEquals( 11, has_action( 'amp_options_menu_items', [ $instance, 'add_settings_field' ] ) );
 		$this->assertEquals( 10, has_filter( 'amp_default_options', [ $instance, 'filter_default_options' ] ) );
+	}
+
+	/** @covers PluginSuppression::register() */
+	public function test_register_reader_theme_mode() {
+		$instance = $this->get_instance();
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentynineteen' );
+		$_GET[ amp_get_slug() ] = 1;
+		$this->assertTrue( $instance->is_reader_theme_request() );
+
+		$instance->register();
+		$this->assertEquals(
+			defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX, // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
+			has_action( 'plugins_loaded', [ $instance, 'suppress_plugins' ] )
+		);
+		$this->assertEquals( 11, has_action( 'amp_options_menu_items', [ $instance, 'add_settings_field' ] ) );
+		$this->assertEquals( 10, has_filter( 'amp_default_options', [ $instance, 'filter_default_options' ] ) );
+	}
+
+	/** @covers PluginSuppression::is_reader_theme_request() */
+	public function test_is_reader_theme_request() {
+		$instance = $this->get_instance();
+
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->assertFalse( $instance->is_reader_theme_request() );
+
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::READER_THEME, AMP_Reader_Themes::DEFAULT_READER_THEME );
+		$this->assertFalse( $instance->is_reader_theme_request() );
+		$_GET[ amp_get_slug() ] = 1;
+		$this->assertFalse( $instance->is_reader_theme_request() );
+
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentynineteen' );
+		unset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$this->assertFalse( $instance->is_reader_theme_request() );
+		$_GET[ amp_get_slug() ] = 1;
+		$this->assertTrue( $instance->is_reader_theme_request() );
 	}
 
 	/** @covers PluginSuppression::filter_default_options() */
@@ -205,20 +246,38 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'amp_default_options', [ $instance, 'filter_default_options' ] ) );
 	}
 
-	/** @covers PluginSuppression::suppress_plugins() */
-	public function test_suppress_plugins_not_amp_endpoint() {
+	/** @covers PluginSuppression::maybe_suppress_plugins() */
+	public function test_maybe_suppress_plugins_not_amp_endpoint() {
 		$url = home_url( '/' );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		$this->init_plugins();
 		$bad_plugin_file_slugs = $this->get_bad_plugin_file_slugs();
 		$this->populate_validation_errors( $url, $bad_plugin_file_slugs );
+		$this->update_suppressed_plugins_option( array_fill_keys( $bad_plugin_file_slugs, true ) );
 		$instance = $this->get_instance( true );
 		$this->go_to( $url );
 
 		$this->assertNotEmpty( $this->call_private_method( $instance, 'get_suppressible_plugins' ) );
 		$this->assertFalse( is_amp_endpoint() );
-		$this->assertFalse( $instance->suppress_plugins(), 'Expected no suppression since not an AMP endpoint.' );
+		$this->assertFalse( $instance->maybe_suppress_plugins(), 'Expected no suppression since not an AMP endpoint.' );
 		$this->assert_plugin_suppressed_state( false, $bad_plugin_file_slugs );
+	}
+
+	/** @covers PluginSuppression::maybe_suppress_plugins() */
+	public function test_maybe_suppress_plugins_yes_amp_endpoint() {
+		$url = home_url( '/' );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->init_plugins();
+		$bad_plugin_file_slugs = $this->get_bad_plugin_file_slugs();
+		$this->populate_validation_errors( $url, $bad_plugin_file_slugs );
+		$this->update_suppressed_plugins_option( array_fill_keys( $bad_plugin_file_slugs, true ) );
+		$instance = $this->get_instance( true );
+		$this->go_to( $url );
+
+		$this->assertNotEmpty( $this->call_private_method( $instance, 'get_suppressible_plugins' ) );
+		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( $instance->maybe_suppress_plugins(), 'Expected suppression since an AMP endpoint and there are suppressible plugins.' );
+		$this->assert_plugin_suppressed_state( true, $bad_plugin_file_slugs );
 	}
 
 	/** @covers PluginSuppression::suppress_plugins() */

@@ -8,6 +8,8 @@
 namespace AmpProject\AmpWP;
 
 use AMP_Options_Manager;
+use AMP_Reader_Themes;
+use AMP_Theme_Support;
 use AMP_Validation_Error_Taxonomy;
 use AMP_Validation_Manager;
 use AMP_Validated_URL_Post_Type;
@@ -44,15 +46,42 @@ final class PluginSuppression implements Service, Registerable {
 
 	/**
 	 * Register the service with the system.
-	 *
-	 * @return void
 	 */
 	public function register() {
-		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
-		add_action( 'wp', [ $this, 'suppress_plugins' ], $priority );
 		add_filter( 'amp_default_options', [ $this, 'filter_default_options' ] );
 		add_action( 'amp_options_menu_items', [ $this, 'add_settings_field' ], 11 );
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
+		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
+
+		// When a Reader theme is selected and and an AMP request is being made, start suppressing as early as possible
+		// This can be done because we know it is an AMP page due to the query parameter, but it also _has_ to be done
+		// specifically for the case of accessing the AMP Customizer (in which customize.php is requested with the query
+		// parameter) in order to prevent the registration of Customizer controls from suppressed plugins. Suppression
+		// could be done early for Transitional mode as well since a query parameter is also used for frontend requests
+		// but there is no similar need to suppress the registration of Customizer controls in Transitional mode since
+		// there is no separate Customizer for AMP in Transitional mode (or legacy Reader mode).
+		if ( $this->is_reader_theme_request() ) {
+			add_action( 'plugins_loaded', [ $this, 'suppress_plugins' ], $priority );
+		} else {
+			// In Standard mode we _have_ to wait for the wp action because with the absence of a query parameter
+			// we have to rely on is_amp_endpoint() and the WP_Query to determine whether a plugin should be suppressed.
+			add_action( 'wp', [ $this, 'maybe_suppress_plugins' ], $priority );
+		}
+	}
+
+	/**
+	 * Is reader theme request.
+	 *
+	 * @return bool
+	 */
+	public function is_reader_theme_request() {
+		return (
+			AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
+			&&
+			AMP_Reader_Themes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME )
+			&&
+			isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		);
 	}
 
 	/**
@@ -67,15 +96,23 @@ final class PluginSuppression implements Service, Registerable {
 	}
 
 	/**
+	 * Suppress plugins if on an AMP endpoint.
+	 *
+	 * @return bool Whether plugins are being suppressed.
+	 */
+	public function maybe_suppress_plugins() {
+		if ( is_amp_endpoint() ) {
+			return $this->suppress_plugins();
+		}
+		return false;
+	}
+
+	/**
 	 * Suppress plugins.
 	 *
 	 * @return bool Whether plugins are being suppressed.
 	 */
 	public function suppress_plugins() {
-		if ( ! is_amp_endpoint() ) {
-			return false;
-		}
-
 		$suppressed = AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS );
 		if ( empty( $suppressed ) ) {
 			return false;
