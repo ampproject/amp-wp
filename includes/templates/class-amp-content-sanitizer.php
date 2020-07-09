@@ -115,7 +115,7 @@ class AMP_Content_Sanitizer {
 		}
 
 		// Sanitize.
-		$index = 0;
+		$index                 = 0;
 		$sanitizers_to_surface = [
 			AMP_Style_Sanitizer::class,
 			AMP_Tag_And_Attribute_Sanitizer::class,
@@ -138,7 +138,8 @@ class AMP_Content_Sanitizer {
 				$stylesheets = array_merge( $stylesheets, $sanitizer->get_stylesheets() );
 			}
 
-			do_action( 'amp_server_timing_stop', 'amp_sanitize_' . $index++ );
+			do_action( 'amp_server_timing_stop', 'amp_sanitize_' . $index );
+			++$index;
 		}
 
 		return compact( 'scripts', 'styles', 'stylesheets', 'sanitizers' );

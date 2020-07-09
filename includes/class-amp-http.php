@@ -110,7 +110,7 @@ class AMP_HTTP {
 	 * @return bool Return value of send_header call. If WP_DEBUG is not enabled or admin user (who can manage_options) is not logged-in, this will always return false.
 	 */
 	public static function send_server_timing( $name, $duration = null, $description = null ) {
-		_deprecated_function( 'AMP_HTTP::send_server_timing', '1.6', 'Use the AmpProject\AmpWp\Instrumentation\ServerTiming service or its associated actions instead.');
+		_deprecated_function( 'AMP_HTTP::send_server_timing', '1.6', 'Use the AmpProject\AmpWp\Instrumentation\ServerTiming service or its associated actions instead.' );
 
 		if ( ! self::$server_timing ) {
 			return false;

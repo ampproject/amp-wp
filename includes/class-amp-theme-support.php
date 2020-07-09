@@ -1799,7 +1799,7 @@ class AMP_Theme_Support {
 	 */
 	public static function finish_output_buffering( $response ) {
 		self::$is_output_buffering = false;
-		$response = self::prepare_response( $response );
+		$response                  = self::prepare_response( $response );
 		do_action( 'amp_server_timing_send' );
 		return $response;
 	}
@@ -2268,10 +2268,10 @@ class AMP_Theme_Support {
 			'amp-paired-browsing-app',
 			'app',
 			[
-					'ampSlug'                   => amp_get_slug(),
-					'ampPairedBrowsingQueryVar' => self::PAIRED_BROWSING_QUERY_VAR,
-					'noampQueryVar'             => QueryVar::NOAMP,
-					'documentTitlePrefix'       => __( 'AMP Paired Browsing:', 'amp' ),
+				'ampSlug'                   => amp_get_slug(),
+				'ampPairedBrowsingQueryVar' => self::PAIRED_BROWSING_QUERY_VAR,
+				'noampQueryVar'             => QueryVar::NOAMP,
+				'documentTitlePrefix'       => __( 'AMP Paired Browsing:', 'amp' ),
 			]
 		);
 
