@@ -28,7 +28,7 @@ import { Options } from '../components/options-context-provider';
  */
 function getReaderNotice( themeSupport ) {
 	switch ( true ) {
-		// Theme has built-in support or has declared theme support with the paired flag false.
+		// Theme has built-in support or has declared theme support with the paired flag set to false.
 		case 'reader' === themeSupport && ( IS_CORE_THEME || ( 'object' === typeof THEME_SUPPORT_ARGS && false === THEME_SUPPORT_ARGS.paired ) ):
 			return (
 				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_WARNING }>
@@ -38,7 +38,7 @@ function getReaderNotice( themeSupport ) {
 				</AMPNotice>
 			);
 
-		// Theme has built-in support or has declared theme support with the paired flag true.
+		// Theme has built-in support or has declared theme support with the paired flag set to true.
 		case 'reader' === themeSupport && ( IS_CORE_THEME || ( 'object' === typeof THEME_SUPPORT_ARGS && true === THEME_SUPPORT_ARGS.paired ) ):
 			return (
 				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_WARNING }>
@@ -53,7 +53,7 @@ function getReaderNotice( themeSupport ) {
 			return (
 				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_INFO }>
 					<p>
-						{ __( 'Your theme indicates it works best in reader mode.', 'amp' ) }
+						{ __( 'Your theme indicates it has special support for the legacy templates in Reader mode.', 'amp' ) }
 					</p>
 				</AMPNotice>
 			);
