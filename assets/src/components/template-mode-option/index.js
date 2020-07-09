@@ -70,7 +70,7 @@ function getTitle( mode ) {
  *
  * @param {Object} props Component props.
  * @param {string|Object} props.children Section content.
- * @param {any} props.details Mode details.
+ * @param {string} props.details Mode details.
  * @param {string} props.mode The template mode.
  * @param {boolean} props.previouslySelected Optional. Whether the option was selected previously.
  */
@@ -125,7 +125,7 @@ export function TemplateModeOption( { children, details, mode, previouslySelecte
 
 TemplateModeOption.propTypes = {
 	children: PropTypes.any,
-	details: PropTypes.node.isRequired,
+	details: PropTypes.string.isRequired,
 	mode: PropTypes.string.isRequired,
 	previouslySelected: PropTypes.bool,
 };
