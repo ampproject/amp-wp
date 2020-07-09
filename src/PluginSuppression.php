@@ -8,11 +8,11 @@
 namespace AmpProject\AmpWP;
 
 use AMP_Options_Manager;
-use AMP_Reader_Themes;
 use AMP_Theme_Support;
 use AMP_Validation_Error_Taxonomy;
 use AMP_Validation_Manager;
 use AMP_Validated_URL_Post_Type;
+use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use WP_Block_Type_Registry;
@@ -78,7 +78,7 @@ final class PluginSuppression implements Service, Registerable {
 		return (
 			AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
 			&&
-			AMP_Reader_Themes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME )
+			ReaderThemes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME )
 			&&
 			isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		);
