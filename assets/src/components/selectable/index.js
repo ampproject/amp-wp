@@ -18,7 +18,7 @@ import './style.css';
  * @param {string} props.HTMLElement The HTML element to serve as the selectable wrapper.
  * @param {boolean} props.selected Whether the element is selected.
  */
-export function Selectable( { children, className, direction = 'left', HTMLElement, selected = false, ...props } ) {
+export function Selectable( { children, className = '', direction = 'left', HTMLElement = 'div', selected = false, ...props } ) {
 	const classNames = [ className, 'selectable', ( selected ? 'selectable--selected' : '' ), `selectable--${ direction }` ]
 		.filter( ( name ) => name )
 		.join( ' ' );
@@ -39,11 +39,4 @@ Selectable.propTypes = {
 	direction: PropTypes.oneOf( [ 'top', 'right', 'bottom', 'left' ] ),
 	HTMLElement: PropTypes.node,
 	selected: PropTypes.bool,
-};
-
-Selectable.defaultProps = {
-	children: [],
-	className: '',
-	direction: 'left',
-	HTMLElement: 'div',
 };
