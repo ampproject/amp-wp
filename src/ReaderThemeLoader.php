@@ -14,7 +14,7 @@ use AMP_Options_Manager;
 use AMP_Theme_Support;
 use WP_Theme;
 use WP_Customize_Manager;
-use AMP_Reader_Themes;
+use ReaderThemes;
 
 /**
  * Switches to the designated Reader theme when template mode enabled and when requesting an AMP page.
@@ -39,7 +39,7 @@ final class ReaderThemeLoader implements Service, Registerable, Conditional {
 		return (
 			AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
 			&&
-			AMP_Reader_Themes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME )
+			ReaderThemes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME )
 		);
 	}
 

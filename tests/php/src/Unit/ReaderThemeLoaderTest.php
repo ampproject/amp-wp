@@ -3,8 +3,8 @@
 namespace AmpProject\AmpWP\Tests\Unit;
 
 use AMP_Options_Manager;
-use AMP_Reader_Themes;
 use AMP_Theme_Support;
+use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -49,7 +49,7 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 		$this->assertFalse( ReaderThemeLoader::is_needed() );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
-		AMP_Options_Manager::update_option( Option::READER_THEME, AMP_Reader_Themes::DEFAULT_READER_THEME );
+		AMP_Options_Manager::update_option( Option::READER_THEME, ReaderThemes::DEFAULT_READER_THEME );
 		$this->assertFalse( ReaderThemeLoader::is_needed() );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );

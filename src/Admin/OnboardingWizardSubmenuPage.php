@@ -9,7 +9,6 @@
 namespace AmpProject\AmpWP\Admin;
 
 use AMP_Options_Manager;
-use AMP_Reader_Themes;
 use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
@@ -49,12 +48,21 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 	private $google_fonts;
 
 	/**
+	 * ReaderThemes instance.
+	 *
+	 * @var ReaderThemes
+	 */
+	private $reader_themes;
+
+	/**
 	 * OnboardingWizardSubmenuPage constructor.
 	 *
-	 * @param GoogleFonts $google_fonts An instance of the GoogleFonts service.
+	 * @param GoogleFonts  $google_fonts An instance of the GoogleFonts service.
+	 * @param ReaderThemes $reader_themes An instance of the ReaderThemes class.
 	 */
-	public function __construct( GoogleFonts $google_fonts ) {
-		$this->google_fonts = $google_fonts;
+	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes ) {
+		$this->google_fonts  = $google_fonts;
+		$this->reader_themes = $reader_themes;
 	}
 
 	/**
@@ -164,7 +172,7 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 		wp_styles()->add_data( self::ASSET_HANDLE, 'rtl', 'replace' );
 
 		$theme           = wp_get_theme();
-		$is_reader_theme = in_array( get_stylesheet(), wp_list_pluck( ( new AMP_Reader_Themes() )->get_themes(), 'slug' ), true );
+		$is_reader_theme = in_array( get_stylesheet(), wp_list_pluck( $this->reader_themes->get_themes(), 'slug' ), true );
 
 		$exit_link = menu_page_url( AMP_Options_Manager::OPTION_NAME, false );
 
@@ -173,7 +181,7 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 			'AMP_QUERY_VAR'                      => amp_get_slug(),
 			'DEFAULT_AMP_QUERY_VAR'              => QueryVars::AMP,
 			'AMP_QUERY_VAR_CUSTOMIZED_LATE'      => $amp_slug_customization_watcher->did_customize_late(),
-			'LEGACY_THEME_SLUG'                  => AMP_Reader_Themes::DEFAULT_READER_THEME,
+			'LEGACY_THEME_SLUG'                  => ReaderThemes::DEFAULT_READER_THEME,
 			'APP_ROOT_ID'                        => self::APP_ROOT_ID,
 			'CUSTOMIZER_LINK'                    => add_query_arg(
 				[

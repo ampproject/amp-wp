@@ -2,7 +2,7 @@
  * External dependencies
  */
 import {
-	THEME_IS_SUPPORTED,
+	IS_CORE_THEME,
 	THEME_SUPPORT_ARGS,
 	THEME_SUPPORTS_READER_MODE,
 } from 'amp-settings';
@@ -29,7 +29,7 @@ import { Options } from '../components/options-context-provider';
 function getReaderNotice( themeSupport ) {
 	switch ( true ) {
 		// Theme has built-in support or has declared theme support with the paired flag false.
-		case 'reader' === themeSupport && ( THEME_IS_SUPPORTED || ( 'object' === typeof THEME_SUPPORT_ARGS && false === THEME_SUPPORT_ARGS.paired ) ):
+		case 'reader' === themeSupport && ( IS_CORE_THEME || ( 'object' === typeof THEME_SUPPORT_ARGS && false === THEME_SUPPORT_ARGS.paired ) ):
 			return (
 				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_WARNING }>
 					<p>
@@ -39,7 +39,7 @@ function getReaderNotice( themeSupport ) {
 			);
 
 		// Theme has built-in support or has declared theme support with the paired flag true.
-		case 'reader' === themeSupport && ( THEME_IS_SUPPORTED || ( 'object' === typeof THEME_SUPPORT_ARGS && true === THEME_SUPPORT_ARGS.paired ) ):
+		case 'reader' === themeSupport && ( IS_CORE_THEME || ( 'object' === typeof THEME_SUPPORT_ARGS && true === THEME_SUPPORT_ARGS.paired ) ):
 			return (
 				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_WARNING }>
 					<p>
@@ -84,7 +84,7 @@ export function TemplateModes() {
 			>
 				{
 					// Plugin is not configured; active theme has built-in support or has declared theme support without the paired flag.
-					! pluginConfigured && ( THEME_IS_SUPPORTED || 'object' === typeof THEME_SUPPORT_ARGS ) && (
+					! pluginConfigured && ( IS_CORE_THEME || 'object' === typeof THEME_SUPPORT_ARGS ) && (
 						<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_INFO }>
 							<p>
 								{ __( 'Your active theme is known to work well in standard mode.', 'amp' ) }
@@ -99,7 +99,7 @@ export function TemplateModes() {
 			>
 				{
 					// Plugin is not configured; active theme has built-in support or has declared theme support with the paired flag.
-					! pluginConfigured && ( THEME_IS_SUPPORTED || ( 'object' === typeof THEME_SUPPORT_ARGS && true === THEME_SUPPORT_ARGS.paired ) ) && (
+					! pluginConfigured && ( IS_CORE_THEME || ( 'object' === typeof THEME_SUPPORT_ARGS && true === THEME_SUPPORT_ARGS.paired ) ) && (
 						<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_INFO }>
 							<p>
 								{ __( 'Your active theme is known to work well in transitional mode.', 'amp' ) }

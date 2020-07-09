@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
 
 /**
@@ -31,7 +32,7 @@ class AMP_Options_Manager {
 		Option::ALL_TEMPLATES_SUPPORTED => true,
 		Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
 		Option::VERSION                 => AMP__VERSION,
-		Option::READER_THEME            => AMP_Reader_Themes::DEFAULT_READER_THEME,
+		Option::READER_THEME            => ReaderThemes::DEFAULT_READER_THEME,
 		Option::PLUGIN_CONFIGURED       => false,
 		Option::MOBILE_REDIRECT         => false,
 	];

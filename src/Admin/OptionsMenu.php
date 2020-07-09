@@ -2,7 +2,7 @@
 /**
  * Class OptionsMenu
  *
- * @package AMP
+ * @package Ampproject\Ampwp
  */
 
 namespace AmpProject\AmpWP\Admin;
@@ -11,8 +11,8 @@ use AMP_Analytics_Options_Submenu;
 use AMP_Core_Theme_Sanitizer;
 use AMP_Options_Manager;
 use AMP_Post_Type_Support;
-use AMP_Reader_Themes;
 use AMP_Theme_Support;
+use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
@@ -20,7 +20,7 @@ use AmpProject\AmpWP\Option;
 /**
  * OptionsMenu class.
  */
-class OptionsMenu implements Service, Registerable {
+class OptionsMenu implements Conditional, Service, Registerable {
 	/**
 	 * Handle for JS file.
 	 *
@@ -45,20 +45,20 @@ class OptionsMenu implements Service, Registerable {
 	private $google_fonts;
 
 	/**
-	 * OptionsMenu constructor.
+	 * ReaderThemes instance.
 	 *
-	 * @param GoogleFonts $google_fonts An instance of the GoogleFonts service.
+	 * @var ReaderThemes
 	 */
-	public function __construct( GoogleFonts $google_fonts ) {
-		$this->google_fonts = $google_fonts;
-	}
+	private $reader_themes;
 
 	/**
-	 * Registers AMP settings.
+	 * Check whether the conditional object is currently needed.
+	 *
+	 * @return bool Whether the conditional object is needed.
 	 */
-	public function register() {
+	public static function is_needed() {
 		if ( ! is_admin() ) {
-			return;
+			return false;
 		}
 
 		/**
@@ -70,16 +70,27 @@ class OptionsMenu implements Service, Registerable {
 		$short_circuit = apply_filters( 'amp_options_menu_is_enabled', true );
 
 		if ( true !== $short_circuit ) {
-			return;
+			return false;
 		}
 
-		$this->add_hooks();
+		return true;
+	}
+
+	/**
+	 * OptionsMenu constructor.
+	 *
+	 * @param GoogleFonts  $google_fonts An instance of the GoogleFonts service.
+	 * @param ReaderThemes $reader_themes An instance of the ReaderThemes class.
+	 */
+	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes ) {
+		$this->google_fonts  = $google_fonts;
+		$this->reader_themes = $reader_themes;
 	}
 
 	/**
 	 * Adds hooks.
 	 */
-	public function add_hooks() {
+	public function register() {
 		add_action( 'admin_post_amp_analytics_options', 'AMP_Options_Manager::handle_analytics_submit' );
 		add_action( 'admin_menu', [ $this, 'add_menu_items' ], 9 );
 
@@ -221,7 +232,7 @@ class OptionsMenu implements Service, Registerable {
 		wp_styles()->add_data( self::ASSET_HANDLE, 'rtl', 'replace' );
 
 		$theme           = wp_get_theme();
-		$is_reader_theme = in_array( get_stylesheet(), wp_list_pluck( ( new AMP_Reader_Themes() )->get_themes(), 'slug' ), true );
+		$is_reader_theme = in_array( get_stylesheet(), wp_list_pluck( $this->reader_themes->get_themes(), 'slug' ), true );
 
 		$js_data = [
 			'CURRENT_THEME'                      => [
@@ -233,8 +244,8 @@ class OptionsMenu implements Service, Registerable {
 			],
 			'OPTIONS_REST_ENDPOINT'              => rest_url( 'amp/v1/options' ),
 			'READER_THEMES_REST_ENDPOINT'        => rest_url( 'amp/v1/reader-themes' ),
-			'THEME_IS_SUPPORTED'                 => in_array(
-				get_template(),
+			'IS_CORE_THEME'                      => in_array(
+				get_stylesheet(),
 				array_diff( AMP_Core_Theme_Sanitizer::get_supported_themes(), [ 'twentyten' ] ),
 				true
 			),
@@ -270,8 +281,6 @@ class OptionsMenu implements Service, Registerable {
 
 	/**
 	 * Display Settings.
-	 *
-	 * @since 0.6
 	 */
 	public function render_screen() {
 		/* translators: %s: URL to the ecosystem page. */
@@ -362,8 +371,6 @@ class OptionsMenu implements Service, Registerable {
 
 	/**
 	 * Supported templates section renderer.
-	 *
-	 * @since 1.0
 	 */
 	public function render_supported_templates() {
 		$theme_support_args = AMP_Theme_Support::get_theme_support_args();
@@ -425,7 +432,7 @@ class OptionsMenu implements Service, Registerable {
 	 * List template conditional options.
 	 *
 	 * @param array       $options Options.
-	 * @param string|null $parent  ID of the parent option.
+	 * @param string|null $parent  Optional. ID of the parent option.
 	 */
 	private function list_template_conditional_options( $options, $parent = null ) {
 		$element_name = AMP_Options_Manager::OPTION_NAME . '[supported_templates][]';

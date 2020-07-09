@@ -6,6 +6,8 @@
  * @since 1.6.0
  */
 
+use AmpProject\AmpWP\Admin\ReaderThemes;
+
 /**
  * AMP reader theme REST controller.
  *
@@ -16,16 +18,16 @@ final class AMP_Reader_Theme_REST_Controller extends WP_REST_Controller {
 	/**
 	 * Reader themes provider class.
 	 *
-	 * @var AMP_Reader_Themes
+	 * @var ReaderThemes
 	 */
 	private $reader_themes;
 
 	/**
 	 * Constructor.
 	 *
-	 * @param AMP_Reader_Themes $reader_themes AMP_Reader_Themes instance to provide theme data.
+	 * @param ReaderThemes $reader_themes ReaderThemes instance to provide theme data.
 	 */
-	public function __construct( $reader_themes ) {
+	public function __construct( ReaderThemes $reader_themes ) {
 		$this->reader_themes = $reader_themes;
 		$this->namespace     = 'amp/v1';
 		$this->rest_base     = 'reader-themes';
