@@ -76,7 +76,7 @@ export function TemplateModes() {
 				{ __( 'Template mode', 'amp' ) }
 			</h2>
 			<p dangerouslySetInnerHTML={ {
-				__html: __( 'For a list of themes and plugins that are known to be AMP compatible, please see the <a href="https://amp-wp.org/ecosystem/">ecosystem page</a>.', 'amp' ),
+				__html: __( 'For a list of themes and plugins that are known to be AMP compatible, please see the <a href="https://amp-wp.org/ecosystem/" target="_blank">ecosystem page</a>.', 'amp' ),
 			} } />
 			<TemplateModeOption
 				details={ __( 'In Standard Mode your site uses a single theme and there is a single version of your content. In this mode, AMP is the framework of your site and there is reduced development and maintenance costs by having a single site to maintain.', 'amp' ) }
