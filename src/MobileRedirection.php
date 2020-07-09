@@ -71,11 +71,7 @@ final class MobileRedirection implements Service, Registerable {
 	 */
 	public function sanitize_options( $options, $new_options ) {
 		if ( isset( $new_options[ Option::MOBILE_REDIRECT ] ) ) {
-			$options[ Option::MOBILE_REDIRECT ] = (
-				isset( $new_options[ Option::MOBILE_REDIRECT ] )
-				&&
-				rest_sanitize_boolean( $new_options[ Option::MOBILE_REDIRECT ] )
-			);
+			$options[ Option::MOBILE_REDIRECT ] = rest_sanitize_boolean( $new_options[ Option::MOBILE_REDIRECT ] );
 		}
 		return $options;
 	}
