@@ -90,24 +90,30 @@ class Event {
 		foreach ( $this->properties as $property => $value ) {
 			if ( is_float( $value ) ) {
 				$property_strings[] = sprintf(
-					';%s=%.1f',
+					';%s="%.1f"',
 					addslashes( $property ),
 					$value
 				);
 			} else {
 				$property_strings[] = sprintf(
-					';%s=%s',
+					';%s="%s"',
 					addslashes( $property ),
 					addslashes( $value )
 				);
 			}
 		}
 
-		return sprintf(
-			'%s;desc="%s"%s',
-			addslashes( $this->get_name() ),
-			addslashes( $this->get_description() ),
-			implode( $property_strings )
-		);
+		$event_string = addslashes( $this->get_name() );
+
+		$description = $this->get_description();
+		if ( ! empty( $description ) ) {
+			$event_string = sprintf(
+				'%s;desc="%s"',
+				$event_string,
+				addslashes( $description )
+			);
+		}
+
+		return $event_string . implode( $property_strings );
 	}
 }
