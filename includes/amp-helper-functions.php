@@ -105,8 +105,6 @@ function amp_init() {
 	add_action( 'wp_loaded', 'amp_bootstrap_admin' );
 
 	add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
-	AMP_Post_Type_Support::add_post_type_support();
-	add_action( 'init', [ 'AMP_Post_Type_Support', 'add_post_type_support' ], 1000 ); // After post types have been defined.
 	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
 	add_action( 'admin_bar_menu', 'amp_add_admin_bar_view_link', 100 );
 

@@ -477,20 +477,9 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 	 * @return string The supported template(s), in a comma-separated string.
 	 */
 	private function get_supported_templates() {
-		$possible_post_types = AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES );
 
 		// Get the supported content types, like 'post'.
-		$supported_templates = array_filter(
-			AMP_Post_Type_Support::get_eligible_post_types(),
-			static function( $template ) use ( $possible_post_types ) {
-				$post_type = get_post_type_object( $template );
-				return (
-					post_type_supports( $post_type->name, AMP_Post_Type_Support::SLUG )
-					||
-					in_array( $post_type->name, $possible_post_types, true )
-				);
-			}
-		);
+		$supported_templates = AMP_Post_Type_Support::get_supported_post_types();
 
 		// Add the supported templates, like 'is_author', if not in 'Reader' mode.
 		if ( ! amp_is_legacy() ) {

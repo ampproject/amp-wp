@@ -22,6 +22,7 @@ export function SupportedTemplatesVisibility() {
 	const supportedPostTypesFieldset = useRef( document.getElementById( 'supported_post_types_fieldset' ) );
 	const supportedTemplatesFieldset = useRef( document.getElementById( 'supported_templates_fieldset' ) );
 	const supportedTemplateInputs = useRef( [ ...document.querySelectorAll( '#supported_templates_fieldset input[type=checkbox]' ) ] );
+	const supportedPostTypeInputs = useRef( [ ...document.querySelectorAll( '#supported_post_types_fieldset input[type=checkbox]' ) ] );
 
 	/**
 	 * Show/hide settings features depending on options on the page.
@@ -52,14 +53,15 @@ export function SupportedTemplatesVisibility() {
 	 */
 	useEffect( () => {
 		const listenerCallback = ( event ) => {
-			if ( ! supportedTemplateInputs.current.includes( event.target ) ) {
-				return;
+			if ( supportedTemplateInputs.current.includes( event.target ) ) {
+				const checked = event.target.checked;
+				[ ...event.target.parentElement.querySelectorAll( 'input[type=checkbox]' ) ].forEach( ( inputElement ) => {
+					inputElement.checked = checked;
+				} );
+			} else if ( supportedPostTypeInputs.current.includes( event.target ) ) {
+				const hiddenInput = event.target.closest( 'li' ).querySelector( 'input[type=hidden][name]' );
+				hiddenInput.value = event.target.checked ? 'true' : 'false';
 			}
-
-			const checked = event.target.checked;
-			[ ...event.target.parentElement.querySelectorAll( 'input[type=checkbox]' ) ].forEach( ( inputElement ) => {
-				inputElement.checked = checked;
-			} );
 		};
 
 		global.addEventListener( 'click', listenerCallback );

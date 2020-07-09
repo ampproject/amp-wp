@@ -280,9 +280,6 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		/* translators: %s: URL to the ecosystem page. */
 		$plugin_configured = AMP_Options_Manager::get_option( Option::PLUGIN_CONFIGURED );
 
-		if ( ! empty( $_GET['settings-updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			AMP_Options_Manager::check_supported_post_type_update_errors();
-		}
 		?>
 		<div class="wrap">
 			<form id="amp-settings" action="options.php" method="post">
@@ -371,7 +368,6 @@ class OptionsMenu implements Conditional, Service, Registerable {
 
 		<fieldset id="supported_post_types_fieldset" class="hidden">
 			<?php
-			$element_name         = AMP_Options_Manager::OPTION_NAME . '[supported_post_types][]';
 			$supported_post_types = AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES );
 			?>
 			<h4 class="title"><?php esc_html_e( 'Content Types', 'amp' ); ?></h4>
@@ -380,23 +376,18 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			</p>
 			<ul>
 			<?php foreach ( array_map( 'get_post_type_object', AMP_Post_Type_Support::get_eligible_post_types() ) as $post_type ) : ?>
-				<?php
-				$checked = (
-					post_type_supports( $post_type->name, AMP_Post_Type_Support::SLUG )
-					||
-					in_array( $post_type->name, $supported_post_types, true )
-				);
-				?>
 				<li>
-					<?php $element_id = AMP_Options_Manager::OPTION_NAME . "-supported_post_types-{$post_type->name}"; ?>
+					<?php
+					$element_name = sprintf( '%s[supported_post_types][%s]', AMP_Options_Manager::OPTION_NAME, $post_type->name );
+					$supported    = ! empty( $supported_post_types[ $post_type->name ] );
+					?>
 					<input
 						type="checkbox"
-						id="<?php echo esc_attr( $element_id ); ?>"
-						name="<?php echo esc_attr( $element_name ); ?>"
-						value="<?php echo esc_attr( $post_type->name ); ?>"
-						<?php checked( $checked ); ?>
+						id="<?php echo esc_attr( $element_name ); ?>"
+						<?php checked( $supported ); ?>
 						>
-					<label for="<?php echo esc_attr( $element_id ); ?>">
+					<input type="hidden" name="<?php echo esc_attr( $element_name ); ?>" value="<?php echo esc_attr( wp_json_encode( $supported ) ); ?>">
+					<label for="<?php echo esc_attr( $element_name ); ?>">
 						<?php echo esc_html( $post_type->label ); ?>
 					</label>
 				</li>

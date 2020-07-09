@@ -68,20 +68,30 @@ class AMP_Post_Type_Support {
 	}
 
 	/**
+	 * Get supported post types.
+	 *
+	 * @return string[] List of post types that support AMP.
+	 */
+	public static function get_supported_post_types() {
+		if ( ! amp_is_legacy() && AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) ) {
+			return self::get_eligible_post_types();
+		}
+		return array_keys( array_filter( AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES, [] ) ) );
+	}
+
+	/**
 	 * Declare support for post types.
 	 *
 	 * This function should only be invoked through the 'after_setup_theme' action to
 	 * allow plugins/theme to overwrite the post types support.
 	 *
+	 * @codeCoverageIgnore
 	 * @since 0.6
+	 * @deprecated The 'amp' post type support is no longer used at runtime to determine whether AMP is supported.
 	 */
 	public static function add_post_type_support() {
-		if ( ! amp_is_legacy() && AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) ) {
-			$post_types = self::get_eligible_post_types();
-		} else {
-			$post_types = AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES, [] );
-		}
-		foreach ( $post_types as $post_type ) {
+		_deprecated_function( __METHOD__, '1.6' );
+		foreach ( self::get_supported_post_types() as $post_type ) {
 			add_post_type_support( $post_type, self::SLUG );
 		}
 	}
@@ -100,7 +110,7 @@ class AMP_Post_Type_Support {
 		}
 		$errors = [];
 
-		if ( ! post_type_supports( $post->post_type, self::SLUG ) ) {
+		if ( ! in_array( $post->post_type, self::get_supported_post_types(), true ) ) {
 			$errors[] = 'post-type-support';
 		}
 

@@ -27,7 +27,7 @@ class AMP_Options_Manager {
 	 */
 	protected static $defaults = [
 		Option::THEME_SUPPORT           => AMP_Theme_Support::READER_MODE_SLUG,
-		Option::SUPPORTED_POST_TYPES    => [ 'post' ],
+		Option::SUPPORTED_POST_TYPES    => [ 'post' => true ],
 		Option::ANALYTICS               => [],
 		Option::ALL_TEMPLATES_SUPPORTED => true,
 		Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
@@ -153,6 +153,16 @@ class AMP_Options_Manager {
 			$options[ Option::THEME_SUPPORT ] = $defaults[ Option::THEME_SUPPORT ];
 		}
 
+		// Migrate supported post types.
+		if ( isset( $options[ Option::SUPPORTED_POST_TYPES ][0] ) ) {
+			$options[ Option::SUPPORTED_POST_TYPES ] = array_fill_keys( $options[ Option::SUPPORTED_POST_TYPES ], true );
+		}
+		foreach ( get_post_types_by_support( 'amp' ) as $post_type ) {
+			if ( ! isset( $options[ Option::SUPPORTED_POST_TYPES ][ $post_type ] ) ) {
+				$options[ Option::SUPPORTED_POST_TYPES ][ $post_type ] = true;
+			}
+		}
+
 		unset(
 			/**
 			 * Remove 'auto_accept_sanitization' option.
@@ -237,13 +247,8 @@ class AMP_Options_Manager {
 		// Validate post type support.
 		if ( isset( $new_options[ Option::SUPPORTED_POST_TYPES ] ) ) {
 			$options[ Option::SUPPORTED_POST_TYPES ] = [];
-
-			foreach ( $new_options[ Option::SUPPORTED_POST_TYPES ] as $post_type ) {
-				if ( ! post_type_exists( $post_type ) ) {
-					self::add_settings_error( self::OPTION_NAME, 'unknown_post_type', __( 'Unrecognized post type.', 'amp' ) );
-				} else {
-					$options[ Option::SUPPORTED_POST_TYPES ][] = $post_type;
-				}
+			foreach ( $new_options[ Option::SUPPORTED_POST_TYPES ] as $post_type => $enabled ) {
+				$options[ Option::SUPPORTED_POST_TYPES ][ $post_type ] = rest_sanitize_boolean( $enabled );
 			}
 		}
 
@@ -343,55 +348,6 @@ class AMP_Options_Manager {
 		$options[ Option::VERSION ] = AMP__VERSION;
 
 		return $options;
-	}
-
-	/**
-	 * Check for errors with updating the supported post types.
-	 *
-	 * @since 0.6
-	 * @see add_settings_error()
-	 */
-	public static function check_supported_post_type_update_errors() {
-		// If all templates are supported then skip check since all post types are also supported. This option only applies with standard/transitional theme support.
-		if ( self::get_option( Option::ALL_TEMPLATES_SUPPORTED, false ) && AMP_Theme_Support::READER_MODE_SLUG !== self::get_option( Option::THEME_SUPPORT ) ) {
-			return;
-		}
-
-		$supported_types = self::get_option( Option::SUPPORTED_POST_TYPES, [] );
-		foreach ( AMP_Post_Type_Support::get_eligible_post_types() as $name ) {
-			$post_type = get_post_type_object( $name );
-			if ( empty( $post_type ) ) {
-				continue;
-			}
-
-			$post_type_supported = post_type_supports( $post_type->name, AMP_Post_Type_Support::SLUG );
-			$is_support_elected  = in_array( $post_type->name, $supported_types, true );
-
-			$error = null;
-			$code  = null;
-			if ( $is_support_elected && ! $post_type_supported ) {
-				/* translators: %s: Post type name. */
-				$error = __( '"%s" could not be activated because support is removed by a plugin or theme', 'amp' );
-				$code  = sprintf( '%s_activation_error', $post_type->name );
-			} elseif ( ! $is_support_elected && $post_type_supported ) {
-				/* translators: %s: Post type name. */
-				$error = __( '"%s" could not be deactivated because support is added by a plugin or theme', 'amp' );
-				$code  = sprintf( '%s_deactivation_error', $post_type->name );
-			}
-
-			if ( isset( $error, $code ) ) {
-				self::add_settings_error(
-					self::OPTION_NAME,
-					$code,
-					esc_html(
-						sprintf(
-							$error,
-							isset( $post_type->label ) ? $post_type->label : $post_type->name
-						)
-					)
-				);
-			}
-		}
 	}
 
 	/**
@@ -550,12 +506,6 @@ class AMP_Options_Manager {
 	 */
 	public static function handle_updated_theme_support_option() {
 		$template_mode = self::get_option( Option::THEME_SUPPORT );
-
-		// Make sure post type support has been added for sake of amp_admin_get_preview_permalink().
-		foreach ( AMP_Post_Type_Support::get_eligible_post_types() as $post_type ) {
-			remove_post_type_support( $post_type, AMP_Post_Type_Support::SLUG );
-		}
-		AMP_Post_Type_Support::add_post_type_support();
 
 		$url = amp_admin_get_preview_permalink();
 

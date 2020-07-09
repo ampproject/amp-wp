@@ -402,74 +402,30 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test check_supported_post_type_update_errors.
+	 * Test for render_welcome_notice()
 	 *
-	 * @covers AMP_Options_Manager::check_supported_post_type_update_errors()
+	 * @covers AMP_Options_Manager::render_welcome_notice()
 	 */
-	public function test_check_supported_post_type_update_errors() {
-		global $wp_settings_errors;
-		$wp_settings_errors = []; // clear any errors before starting.
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
-		register_post_type(
-			'foo',
-			[
-				'public' => true,
-				'label'  => 'Foo',
-			]
-		);
-		AMP_Post_Type_Support::add_post_type_support();
+	public function test_render_welcome_notice() {
+		// If this is not the main 'AMP Settings' page, this should not render the notice.
+		wp_set_current_user( self::factory()->user->create() );
+		set_current_screen( 'edit.php' );
+		$output = get_echo( [ 'AMP_Options_Manager', 'render_welcome_notice' ] );
+		$this->assertEmpty( $output );
 
-		// Test when Option::ALL_TEMPLATES_SUPPORTED is selected.
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
-		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, true );
-		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, [ 'post' ] );
-		AMP_Options_Manager::check_supported_post_type_update_errors();
-		$this->assertEmpty( get_settings_errors() );
+		// This is the correct page, but the notice was dismissed, so it should not display.
+		$GLOBALS['current_screen']->id = 'toplevel_page_' . AMP_Options_Manager::OPTION_NAME;
+		$id                            = 'amp-welcome-notice-1';
+		update_user_meta( get_current_user_id(), 'dismissed_wp_pointers', $id );
+		$output = get_echo( [ 'AMP_Options_Manager', 'render_welcome_notice' ] );
+		$this->assertEmpty( $output );
 
-		// Test when Option::ALL_TEMPLATES_SUPPORTED is not selected.
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
-		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
-		foreach ( get_post_types() as $post_type ) {
-			if ( 'foo' !== $post_type ) {
-				remove_post_type_support( $post_type, AMP_Post_Type_Support::SLUG );
-			}
-		}
-		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, [ 'foo' ] );
-		AMP_Options_Manager::check_supported_post_type_update_errors();
-		$this->assertEmpty( get_settings_errors() );
-
-		// Test when Option::ALL_TEMPLATES_SUPPORTED is not selected, and theme support is also disabled.
-		add_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
-		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
-		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, [ 'post' ] );
-		AMP_Options_Manager::check_supported_post_type_update_errors();
-		$settings_errors    = get_settings_errors();
-		$wp_settings_errors = [];
-		$this->assertCount( 1, $settings_errors );
-		$this->assertEquals( 'foo_deactivation_error', $settings_errors[0]['code'] );
-
-		// Activation error.
-		remove_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
-		remove_post_type_support( 'foo', AMP_Post_Type_Support::SLUG );
-		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, [ 'foo' ] );
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
-		AMP_Options_Manager::check_supported_post_type_update_errors();
-		$settings_errors = get_settings_errors();
-		$this->assertCount( 1, $settings_errors );
-		$error = current( $settings_errors );
-		$this->assertEquals( 'foo_activation_error', $error['code'] );
-		$wp_settings_errors = [];
-
-		// Deactivation error.
-		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, [] );
-		add_post_type_support( 'foo', AMP_Post_Type_Support::SLUG );
-		AMP_Options_Manager::check_supported_post_type_update_errors();
-		$errors = get_settings_errors();
-		$this->assertCount( 1, $errors );
-		$error = current( $errors );
-		$this->assertEquals( 'foo_deactivation_error', $error['code'] );
-		$wp_settings_errors = [];
+		// This is the correct page, and the notice has not been dismissed, so it should display.
+		delete_user_meta( get_current_user_id(), 'dismissed_wp_pointers' );
+		$output = get_echo( [ 'AMP_Options_Manager', 'render_welcome_notice' ] );
+		$this->assertStringContains( 'Welcome to AMP for WordPress', $output );
+		$this->assertStringContains( 'Bring the speed and features of the open source AMP project to your site, complete with the tools to support content authoring and website development.', $output );
+		$this->assertStringContains( $id, $output );
 	}
 
 	/**
