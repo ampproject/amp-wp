@@ -29,7 +29,7 @@ import { Options } from '../components/options-context-provider';
 function getReaderNotice( themeSupport ) {
 	switch ( true ) {
 		// Theme has built-in support or has declared theme support with the paired flag set to false.
-		case 'reader' === themeSupport && ( IS_CORE_THEME || ( 'object' === typeof THEME_SUPPORT_ARGS && false === THEME_SUPPORT_ARGS.paired ) ):
+		case 'reader' === themeSupport && ( 'object' === typeof THEME_SUPPORT_ARGS && false === THEME_SUPPORT_ARGS.paired ):
 			return (
 				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_WARNING }>
 					<p>

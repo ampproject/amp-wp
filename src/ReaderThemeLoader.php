@@ -12,9 +12,9 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AMP_Options_Manager;
 use AMP_Theme_Support;
+use AmpProject\AmpWP\Admin\ReaderThemes;
 use WP_Theme;
 use WP_Customize_Manager;
-use ReaderThemes;
 
 /**
  * Switches to the designated Reader theme when template mode enabled and when requesting an AMP page.

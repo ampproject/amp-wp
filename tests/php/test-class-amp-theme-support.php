@@ -2346,6 +2346,23 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			AMP_Theme_Support::amend_header_image_with_video_header( $mock_image )
 		);
 	}
+
+	/**
+	 * Tests for the get_theme_support_args method.
+	 *
+	 * @covers AMP_Theme_Support::get_theme_support_args
+	 */
+	public function test_get_theme_support_args() {
+		remove_theme_support( 'amp' );
+
+		$this->assertFalse( AMP_Theme_Support::get_theme_support_args() );
+
+		add_theme_support( 'amp' );
+		$this->assertEquals( [ 'paired' => false ], AMP_Theme_Support::get_theme_support_args() );
+
+		add_theme_support( 'amp', [ 'paired' => true ] );
+		$this->assertEquals( [ 'paired' => true ], AMP_Theme_Support::get_theme_support_args() );
+	}
 }
 
 // phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound
