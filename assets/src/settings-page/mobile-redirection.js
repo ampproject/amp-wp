@@ -19,7 +19,8 @@ export function MobileRedirection() {
 
 	const { theme_support: themeSupport } = editedOptions || {};
 
-	if ( ! [ 'reader', 'transitional' ].includes( themeSupport ) ) {
+	// Don't show if the mode is standard or the themeSupport is not yet set.
+	if ( ! themeSupport || 'standard' === themeSupport ) {
 		return null;
 	}
 
