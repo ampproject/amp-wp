@@ -6,7 +6,7 @@
  *
  * @since 1.6.0
  *
- * @package AMP
+ * @package AmpProject\AmpWP
  */
 
 namespace AmpProject\AmpWP\Admin;
@@ -16,7 +16,7 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 
 /**
- * Class GoogleFonts
+ * Enqueue Google Fonts stylesheet.
  *
  * @since 1.6.0
  */

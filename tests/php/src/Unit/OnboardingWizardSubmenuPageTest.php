@@ -2,7 +2,7 @@
 /**
  * Tests for OnboardingWizardSubmenuPage class.
  *
- * @package AMP
+ * @package AmpProject\AmpWP\Tests
  */
 
 use AmpProject\AmpWP\Admin\GoogleFonts;
