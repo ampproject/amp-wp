@@ -81,7 +81,7 @@ export function TemplateModeOption( { children, details, mode, previouslySelecte
 	const id = `template-mode-${ mode }`;
 
 	return (
-		<Selectable className="template-mode-selection" selected={ mode === themeSupport }>
+		<Selectable id={ `${ id }-container` } className="template-mode-selection" selected={ mode === themeSupport }>
 			<label htmlFor={ id }>
 				<div className="template-mode-selection__input-container">
 					<input

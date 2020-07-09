@@ -137,11 +137,12 @@ describe( 'Mode info notices', () => {
 		await activateTheme( 'twentytwenty' );
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
-		await expect( page ).toMatchElement( '.amp-notice--info p', { text: /in transitional mode/ } );
+		await expect( page ).toMatchElement( '#template-mode-standard-container .amp-notice--info' );
+		await expect( page ).toMatchElement( '#template-mode-transitional-container .amp-notice--info' );
 
 		await clickMode( 'reader' );
 
-		await expect( page ).toMatchElement( '.amp-notice--warning p', { text: /in standard mode/ } );
+		await expect( page ).toMatchElement( '#template-mode-reader-container .amp-notice--warning' );
 	} );
 
 	it.todo( 'shows expected notices for theme with paired flag false' );

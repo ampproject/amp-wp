@@ -318,7 +318,7 @@ class AMP_Options_Manager {
 		}
 
 		if ( isset( $new_options[ Option::READER_THEME ] ) ) {
-			$reader_theme_slugs = wp_list_pluck( ( new AMP_Reader_Themes() )->get_themes(), 'slug' );
+			$reader_theme_slugs = wp_list_pluck( ( new ReaderThemes() )->get_themes(), 'slug' );
 			if ( in_array( $new_options[ Option::READER_THEME ], $reader_theme_slugs, true ) ) {
 				$options[ Option::READER_THEME ] = $new_options[ Option::READER_THEME ];
 			}
