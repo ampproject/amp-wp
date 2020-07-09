@@ -11,9 +11,9 @@ import { createContext, useState, useEffect, useContext } from '@wordpress/eleme
 /**
  * Internal dependencies
  */
-import { Options } from '../components/options-context-provider';
-import { ReaderThemes } from '../components/reader-themes-context-provider';
-import { Navigation } from './components/navigation-context-provider';
+import { Options } from '../../components/options-context-provider';
+import { ReaderThemes } from '../../components/reader-themes-context-provider';
+import { Navigation } from './navigation-context-provider';
 
 export const ReaderModeOverride = createContext();
 

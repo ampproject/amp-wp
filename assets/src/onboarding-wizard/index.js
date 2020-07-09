@@ -36,7 +36,7 @@ import { NavigationContextProvider } from './components/navigation-context-provi
 import { UserContextProvider } from './components/user-context-provider';
 import { ErrorScreen } from './components/error-screen';
 import { SiteScanContextProvider } from './components/site-scan-context-provider';
-import { ReaderModeOverrideContextProvider } from './reader-mode-override';
+import { ReaderModeOverrideContextProvider } from './components/reader-mode-override';
 
 const { ajaxurl: wpAjaxUrl } = global;
 
