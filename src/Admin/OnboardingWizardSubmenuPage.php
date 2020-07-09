@@ -57,7 +57,7 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 	/**
 	 * OnboardingWizardSubmenuPage constructor.
 	 *
-	 * @param GoogleFonts  $google_fonts An instance of the GoogleFonts service.
+	 * @param GoogleFonts  $google_fonts  An instance of the GoogleFonts service.
 	 * @param ReaderThemes $reader_themes An instance of the ReaderThemes class.
 	 */
 	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes ) {
