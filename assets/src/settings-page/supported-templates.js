@@ -23,7 +23,7 @@ import { SupportedTemplatesVisibility } from './supported-templates-visibility';
  * @param {Object} props Component props.
  * @param {Object} props.themeSupportArgs Theme support settings passed from the backend.
  */
-export function SupportedTemplates( { themeSupportArgs } ) {
+export function SupportedTemplates() {
 	const { editedOptions } = useContext( Options );
 
 	const { reader_theme: readerTheme, theme_support: themeSupport } = editedOptions;
@@ -47,19 +47,10 @@ export function SupportedTemplates( { themeSupportArgs } ) {
 				{ __( 'Supported Templates', 'amp' ) }
 			</h2>
 			<Selectable className="supported-templates">
-				<SupportedTemplatesToggle themeSupportArgs={ themeSupportArgs } />
+				<SupportedTemplatesToggle />
 				<SupportedTemplatesVisibility />
 				<div ref={ supportedTemplatesContainer } />
 			</Selectable>
 		</section>
 	);
 }
-
-SupportedTemplates.propTypes = {
-	themeSupportArgs: PropTypes.oneOfType( [
-		PropTypes.bool,
-		PropTypes.shape( {
-			templates_supported: PropTypes.any,
-		} ),
-	] ).isRequired,
-};
