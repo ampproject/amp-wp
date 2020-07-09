@@ -68,10 +68,6 @@ export function ReaderThemeSelection( { hideCurrentlyActiveTheme = false } ) {
 		return <Loading />;
 	}
 
-	if ( activeTheme && hideCurrentlyActiveTheme ) {
-
-	}
-
 	return (
 		<div className="reader-theme-selection">
 			<p>
@@ -84,7 +80,7 @@ export function ReaderThemeSelection( { hideCurrentlyActiveTheme = false } ) {
 				<AMPNotice>
 					{
 						sprintf(
-							// Translators: placeholder is the name of a WordPress theme.
+							/* translators: placeholder is the name of a WordPress theme. */
 							__( 'Your active theme "%s" is not available as a reader theme. If you wish to use it, Transitional mode may be the best option for you', 'amp' ),
 							activeTheme.name,
 						)
