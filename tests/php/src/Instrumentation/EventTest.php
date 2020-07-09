@@ -38,7 +38,7 @@ final class EventTest extends TestCase {
 	 *
 	 * @param string     $name        Event name.
 	 * @param string     $description Event description.
-	 * @param array|null $properties  Optional.Associative array of properties
+	 * @param array|null $properties  Optional. Associative array of properties
 	 *                                or null to not use additional properties.
 	 * @param string     $expected    Expected header string.
 	 */

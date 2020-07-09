@@ -22,6 +22,19 @@ class EventWithDuration extends Event {
 	protected $duration = 0.0;
 
 	/**
+	 * Event constructor.
+	 *
+	 * @param string        $name        Event name.
+	 * @param string|null   $description Optional. Event description.
+	 * @param string[]|null $properties  Optional. Additional properties for the event.
+	 * @param float         $duration    Optional. Event duration.
+	 */
+	public function __construct( $name, $description = null, $properties = [], $duration = 0.0 ) {
+		parent::__construct( $name, $description, $properties );
+		$this->duration = $duration;
+	}
+
+	/**
 	 * Set the event duration.
 	 *
 	 * @param float $duration Event duration.
