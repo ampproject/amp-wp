@@ -7,6 +7,7 @@
 
 use AmpProject\AmpWP\Admin\GoogleFonts;
 use AmpProject\AmpWP\Admin\OptionsMenu;
+use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 
 /**
@@ -32,7 +33,7 @@ class OptionsMenuTest extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
-		$this->instance = new OptionsMenu( new GoogleFonts() );
+		$this->instance = new OptionsMenu( new GoogleFonts(), new ReaderThemes() );
 	}
 
 	/**
@@ -54,9 +55,9 @@ class OptionsMenuTest extends WP_UnitTestCase {
 		$this->assertEquals( 9, has_action( 'admin_menu', [ $this->instance, 'add_menu_items' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_post_amp_analytics_options', 'AMP_Options_Manager::handle_analytics_submit' ) );
 
-		$this->assertEquals( has_filter( 10, 'plugin_action_links_amp/amp.php', [ $this, 'add_plugin_action_links' ] ) );
+		$this->assertEquals( 10, has_filter( 'plugin_action_links_amp/amp.php', [ $this->instance, 'add_plugin_action_links' ] ) );
 
-		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] ) );
+		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ $this->instance, 'enqueue_assets' ] ) );
 	}
 
 	/**
