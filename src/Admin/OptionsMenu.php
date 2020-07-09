@@ -122,8 +122,8 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		 * page when the current user can manage_options.
 		 */
 		add_menu_page(
-			__( 'AMP Settings', 'amp' ),
-			__( 'AMP', 'amp' ),
+			esc_html__( 'AMP Settings', 'amp' ),
+			esc_html__( 'AMP', 'amp' ),
 			'manage_options',
 			AMP_Options_Manager::OPTION_NAME,
 			[ $this, 'render_screen' ],
@@ -132,8 +132,8 @@ class OptionsMenu implements Conditional, Service, Registerable {
 
 		add_submenu_page(
 			AMP_Options_Manager::OPTION_NAME,
-			__( 'AMP Settings', 'amp' ),
-			__( 'Settings', 'amp' ),
+			esc_html__( 'AMP Settings', 'amp' ),
+			esc_html__( 'Settings', 'amp' ),
 			'manage_options',
 			AMP_Options_Manager::OPTION_NAME
 		);
@@ -154,7 +154,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 
 		add_settings_field(
 			Option::SUPPORTED_TEMPLATES,
-			__( 'Supported Templates', 'amp' ),
+			esc_html__( 'Supported Templates', 'amp' ),
 			[ $this, 'render_supported_templates' ],
 			AMP_Options_Manager::OPTION_NAME,
 			'general',
