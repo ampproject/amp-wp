@@ -422,9 +422,7 @@ class AMP_Options_Manager {
 			$options
 		);
 
-		$update = update_option( self::OPTION_NAME, $amp_options, false );
-
-		return $update;
+		return update_option( self::OPTION_NAME, $amp_options, false );
 	}
 
 	/**
