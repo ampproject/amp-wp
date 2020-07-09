@@ -2,7 +2,7 @@
 /**
  * Tests for OnboardingWizardSubmenuPage class.
  *
- * @package AMP
+ * @package AmpProject\AmpWP\Tests
  */
 
 use AmpProject\AmpWP\Admin\GoogleFonts;
@@ -15,7 +15,7 @@ use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 /**
  * Tests for OnboardingWizardSubmenuPage class.
  *
- * @group setup
+ * @group onboarding
  *
  * @since 1.6.0
  *

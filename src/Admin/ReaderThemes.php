@@ -6,12 +6,17 @@
  * @since 1.6.0
  */
 
+namespace AmpProject\AmpWP\Admin;
+
+use AMP_Core_Theme_Sanitizer;
+use WP_Upgrader;
+
 /**
- * Class AMP_Reader_Themes.
+ * Handles reader themes.
  *
  * @since 1.6.0
  */
-final class AMP_Reader_Themes {
+final class ReaderThemes {
 	/**
 	 * Formatted theme data.
 	 *

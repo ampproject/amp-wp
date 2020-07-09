@@ -1,11 +1,12 @@
 <?php
 /**
- * Tests for AMP Reader Themes.
+ * Tests for ReaderThemes.
  *
  * @package AMP
  * @since 1.6
  */
 
+use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Tests\ThemesApiRequestMocking;
 
 /**
@@ -13,16 +14,16 @@ use AmpProject\AmpWP\Tests\ThemesApiRequestMocking;
  *
  * @group reader-themes
  *
- * @covers AMP_Reader_Themes
+ * @covers ReaderThemes
  */
-class Test_AMP_Reader_Themes extends WP_UnitTestCase {
+class ReaderThemesTest extends WP_UnitTestCase {
 
 	use ThemesApiRequestMocking;
 
 	/**
 	 * Test instance.
 	 *
-	 * @var AMP_Reader_Themes
+	 * @var ReaderThemes
 	 */
 	private $reader_themes;
 
@@ -41,7 +42,7 @@ class Test_AMP_Reader_Themes extends WP_UnitTestCase {
 		$this->add_reader_themes_request_filter();
 
 		switch_theme( 'twentytwenty' );
-		$this->reader_themes = new AMP_Reader_Themes();
+		$this->reader_themes = new ReaderThemes();
 	}
 
 	/**

@@ -18,7 +18,7 @@ import {
 	UPDATES_NONCE,
 	USER_FIELD_DEVELOPER_TOOLS_ENABLED,
 	USER_REST_ENDPOINT,
-} from 'amp-onboarding-wizard'; // From WP inline script.
+} from 'amp-settings'; // From WP inline script.
 import PropTypes from 'prop-types';
 
 /**
@@ -36,7 +36,7 @@ import { NavigationContextProvider } from './components/navigation-context-provi
 import { UserContextProvider } from './components/user-context-provider';
 import { ErrorScreen } from './components/error-screen';
 import { SiteScanContextProvider } from './components/site-scan-context-provider';
-import { ReaderModeOverrideContextProvider } from './reader-mode-override';
+import { ReaderModeOverrideContextProvider } from './components/reader-mode-override';
 
 const { ajaxurl: wpAjaxUrl } = global;
 

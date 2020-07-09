@@ -15,7 +15,7 @@ import { useContext } from '@wordpress/element';
 import { Transitional as TransitionalIllustration } from '../../../components/svg/transitional';
 import { AMPNotice, NOTICE_TYPE_INFO, NOTICE_SIZE_LARGE } from '../../../components/amp-notice';
 import { RedirectToggle } from '../../../components/redirect-toggle';
-import { ReaderModeOverride } from '../../reader-mode-override';
+import { ReaderModeOverride } from '../../components/reader-mode-override';
 import { SummaryHeader } from './summary-header';
 import { DesktopScreenshot } from './desktop-screenshot';
 

@@ -62,7 +62,7 @@ export async function selectReaderTheme( theme = 'legacy' ) {
 
 export async function moveToSummaryScreen( { technical = true, mode, readerTheme = 'legacy' } ) {
 	if ( mode === 'reader' ) {
-		await moveToReaderThemesScreen( [ technical ] );
+		await moveToReaderThemesScreen( { technical } );
 		await selectReaderTheme( readerTheme );
 	} else {
 		await moveToTemplateModeScreen( { technical } );
@@ -121,9 +121,10 @@ export function testTitle( { text, element = 'h1' } ) {
 }
 
 /**
- * Reset data modified by the setup wizard.
+ * Reset plugin configuration.
  */
 export async function cleanUpSettings() {
+	await visitAdminPage( 'admin.php', 'page=amp-options' );
 	await page.evaluate( async () => {
 		await Promise.all( [
 			wp.apiFetch( { path: '/wp/v2/users/me', method: 'POST', data: { amp_dev_tools_enabled: true } } ),

@@ -70,6 +70,8 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			'admin.options_menu'               => OptionsMenu::class,
 			'admin.onboarding_menu'            => OnboardingWizardSubmenu::class,
 			'admin.onboarding_wizard'          => OnboardingWizardSubmenuPage::class,
+			'reader_theme_loader'              => ReaderThemeLoader::class,
+			'amp_slug_customization_watcher'   => AmpSlugCustomizationWatcher::class,
 		];
 	}
 

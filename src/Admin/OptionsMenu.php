@@ -2,7 +2,7 @@
 /**
  * Class OptionsMenu
  *
- * @package AMP
+ * @package Ampproject\Ampwp
  */
 
 namespace AmpProject\AmpWP\Admin;
@@ -11,8 +11,8 @@ use AMP_Analytics_Options_Submenu;
 use AMP_Core_Theme_Sanitizer;
 use AMP_Options_Manager;
 use AMP_Post_Type_Support;
-use AMP_Reader_Themes;
 use AMP_Theme_Support;
+use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
@@ -20,7 +20,7 @@ use AmpProject\AmpWP\Option;
 /**
  * OptionsMenu class.
  */
-class OptionsMenu implements Service, Registerable {
+class OptionsMenu implements Conditional, Service, Registerable {
 	/**
 	 * Handle for JS file.
 	 *
@@ -45,20 +45,20 @@ class OptionsMenu implements Service, Registerable {
 	private $google_fonts;
 
 	/**
-	 * OptionsMenu constructor.
+	 * ReaderThemes instance.
 	 *
-	 * @param GoogleFonts $google_fonts An instance of the GoogleFonts service.
+	 * @var ReaderThemes
 	 */
-	public function __construct( GoogleFonts $google_fonts ) {
-		$this->google_fonts = $google_fonts;
-	}
+	private $reader_themes;
 
 	/**
-	 * Registers AMP settings.
+	 * Check whether the conditional object is currently needed.
+	 *
+	 * @return bool Whether the conditional object is needed.
 	 */
-	public function register() {
+	public static function is_needed() {
 		if ( ! is_admin() ) {
-			return;
+			return false;
 		}
 
 		/**
@@ -70,16 +70,27 @@ class OptionsMenu implements Service, Registerable {
 		$short_circuit = apply_filters( 'amp_options_menu_is_enabled', true );
 
 		if ( true !== $short_circuit ) {
-			return;
+			return false;
 		}
 
-		$this->add_hooks();
+		return true;
+	}
+
+	/**
+	 * OptionsMenu constructor.
+	 *
+	 * @param GoogleFonts  $google_fonts An instance of the GoogleFonts service.
+	 * @param ReaderThemes $reader_themes An instance of the ReaderThemes class.
+	 */
+	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes ) {
+		$this->google_fonts  = $google_fonts;
+		$this->reader_themes = $reader_themes;
 	}
 
 	/**
 	 * Adds hooks.
 	 */
-	public function add_hooks() {
+	public function register() {
 		add_action( 'admin_post_amp_analytics_options', 'AMP_Options_Manager::handle_analytics_submit' );
 		add_action( 'admin_menu', [ $this, 'add_menu_items' ], 9 );
 
@@ -221,10 +232,9 @@ class OptionsMenu implements Service, Registerable {
 		wp_styles()->add_data( self::ASSET_HANDLE, 'rtl', 'replace' );
 
 		$theme           = wp_get_theme();
-		$is_reader_theme = in_array( get_stylesheet(), wp_list_pluck( ( new AMP_Reader_Themes() )->get_themes(), 'slug' ), true );
+		$is_reader_theme = in_array( get_stylesheet(), wp_list_pluck( $this->reader_themes->get_themes(), 'slug' ), true );
 
 		$js_data = [
-			'BUILT_IN_SUPPORT'                   => in_array( get_template(), AMP_Core_Theme_Sanitizer::get_supported_themes(), true ),
 			'CURRENT_THEME'                      => [
 				'name'            => $theme->get( 'Name' ),
 				'description'     => $theme->get( 'Description' ),
@@ -234,8 +244,12 @@ class OptionsMenu implements Service, Registerable {
 			],
 			'OPTIONS_REST_ENDPOINT'              => rest_url( 'amp/v1/options' ),
 			'READER_THEMES_REST_ENDPOINT'        => rest_url( 'amp/v1/reader-themes' ),
+			'IS_CORE_THEME'                      => in_array(
+				get_stylesheet(),
+				array_diff( AMP_Core_Theme_Sanitizer::get_supported_themes(), [ 'twentyten' ] ),
+				true
+			),
 			'THEME_SUPPORT_ARGS'                 => AMP_Theme_Support::get_theme_support_args(),
-			'THEME_PROVIDED_SUPPORT_MODE'        => AMP_Theme_Support::get_support_mode_added_via_theme(),
 			'THEME_SUPPORTS_READER_MODE'         => AMP_Theme_Support::supports_reader_mode(),
 			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
 			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
@@ -267,14 +281,10 @@ class OptionsMenu implements Service, Registerable {
 
 	/**
 	 * Display Settings.
-	 *
-	 * @since 0.6
 	 */
 	public function render_screen() {
 		/* translators: %s: URL to the ecosystem page. */
-		$ecosystem_description = sprintf( __( 'For a list of themes and plugins that are known to be AMP compatible, please see the <a href="%s">ecosystem page</a>.', 'amp' ), esc_url( 'https://amp-wp.org/ecosystem/' ) );
-		$builtin_support       = in_array( get_template(), AMP_Core_Theme_Sanitizer::get_supported_themes(), true );
-		$plugin_configured     = AMP_Options_Manager::get_option( Option::PLUGIN_CONFIGURED );
+		$plugin_configured = AMP_Options_Manager::get_option( Option::PLUGIN_CONFIGURED );
 
 		if ( ! empty( $_GET['settings-updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			AMP_Options_Manager::check_supported_post_type_update_errors();
@@ -286,11 +296,6 @@ class OptionsMenu implements Service, Registerable {
 				<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 				<?php settings_errors(); ?>
 
-				<?php if ( ! AMP_Theme_Support::get_support_mode_added_via_theme() && ! AMP_Theme_Support::supports_reader_mode() && ! $builtin_support ) : ?>
-					<p>
-						<?php echo wp_kses_post( $ecosystem_description ); ?>
-					</p>
-				<?php endif; ?>
 				<div class="amp amp-settings">
 					<div class="settings-welcome">
 						<div class="selectable selectable--left">
@@ -339,7 +344,7 @@ class OptionsMenu implements Service, Registerable {
 									<?php esc_html_e( 'The AMP configuration wizard can help you choose the optimal settings to your theme, plugins, and technical capabilities.', 'amp' ); ?>
 								</p>
 
-								<a class="components-button is-primary settings-welcome__button" href="<?php menu_page_url( OnboardingWizardSubmenu::SCREEN_ID ); ?>" target="_blank">
+								<a class="components-button is-primary settings-welcome__button" href="<?php menu_page_url( OnboardingWizardSubmenu::SCREEN_ID ); ?>">
 									<?php if ( $plugin_configured ) : ?>
 										<?php esc_html_e( 'Reopen Wizard', 'amp' ); ?>
 
@@ -366,8 +371,6 @@ class OptionsMenu implements Service, Registerable {
 
 	/**
 	 * Supported templates section renderer.
-	 *
-	 * @since 1.0
 	 */
 	public function render_supported_templates() {
 		$theme_support_args = AMP_Theme_Support::get_theme_support_args();
@@ -429,7 +432,7 @@ class OptionsMenu implements Service, Registerable {
 	 * List template conditional options.
 	 *
 	 * @param array       $options Options.
-	 * @param string|null $parent  ID of the parent option.
+	 * @param string|null $parent  Optional. ID of the parent option.
 	 */
 	private function list_template_conditional_options( $options, $parent = null ) {
 		$element_name = AMP_Options_Manager::OPTION_NAME . '[supported_templates][]';

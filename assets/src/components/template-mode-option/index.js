@@ -70,9 +70,9 @@ function getTitle( mode ) {
  *
  * @param {Object} props Component props.
  * @param {string|Object} props.children Section content.
- * @param {Array} props.details Array of strings representing details about the mode and recommendation.
- * @param {boolean} props.previouslySelected Whether the option was selected previously.
+ * @param {any} props.details Mode details.
  * @param {string} props.mode The template mode.
+ * @param {boolean} props.previouslySelected Optional. Whether the option was selected previously.
  */
 export function TemplateModeOption( { children, details, mode, previouslySelected = false } ) {
 	const { editedOptions, updateOptions } = useContext( Options );
@@ -81,7 +81,7 @@ export function TemplateModeOption( { children, details, mode, previouslySelecte
 	const id = `template-mode-${ mode }`;
 
 	return (
-		<Selectable className="template-mode-selection" selected={ mode === themeSupport }>
+		<Selectable id={ `${ id }-container` } className="template-mode-selection" selected={ mode === themeSupport }>
 			<label htmlFor={ id }>
 				<div className="template-mode-selection__input-container">
 					<input
@@ -125,7 +125,7 @@ export function TemplateModeOption( { children, details, mode, previouslySelecte
 
 TemplateModeOption.propTypes = {
 	children: PropTypes.any,
-	details: PropTypes.node,
+	details: PropTypes.node.isRequired,
 	mode: PropTypes.string.isRequired,
 	previouslySelected: PropTypes.bool,
 };

@@ -2,7 +2,7 @@
 /**
  * Tests for OnboardingWizardSubmenu class.
  *
- * @package AMP
+ * @package AmpProject\AmpWP\Tests
  */
 
 use AmpProject\AmpWP\Admin\OnboardingWizardSubmenu;
@@ -13,7 +13,7 @@ use AmpProject\AmpWP\Infrastructure\Service;
 /**
  * Tests for OnboardingWizardSubmenu  class.
  *
- * @group setup
+ * @group onboarding
  *
  * @since 1.6.0
  *

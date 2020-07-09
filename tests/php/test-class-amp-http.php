@@ -6,6 +6,7 @@
  * @since 1.0
  */
 
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 
 /**
@@ -395,7 +396,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 	 */
 	public function test_intercept_post_request_redirect() {
 
-		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$url = home_url( '', 'https' ) . ':443/?test=true#test';
 
 		add_filter( 'wp_doing_ajax', '__return_true' );
@@ -547,7 +548,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 			}
 		);
 
-		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$post    = self::factory()->post->create_and_get();
 		$comment = self::factory()->comment->create_and_get(
 			[

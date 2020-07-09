@@ -2,7 +2,7 @@
 /**
  * Tests for GoogleFonts class.
  *
- * @package AMP
+ * @package AmpProject\AmpWP\Tests
  */
 
 use AmpProject\AmpWP\Admin\GoogleFonts;
@@ -12,8 +12,6 @@ use AmpProject\AmpWP\Infrastructure\Service;
 
 /**
  * Tests for GoogleFonts class.
- *
- * @group google-fonts
  *
  * @since 1.6.0
  *
@@ -50,8 +48,8 @@ class GoogleFontsTest extends WP_UnitTestCase {
 	/**
 	 * Tests OnboardingWizardSubmenu::register
 	 *
-	 * @covers OnboardingWizardSubmenu::get_handle
-	 * @covers OnboardingWizardSubmenu::register
+	 * @covers GoogleFonts::get_handle
+	 * @covers GoogleFonts::register
 	 */
 	public function test_register() {
 		$this->instance->register();

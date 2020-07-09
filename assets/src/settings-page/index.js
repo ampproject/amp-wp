@@ -79,7 +79,7 @@ function Root() {
 			}
 			<TemplateModes />
 			<ReaderThemes />
-			<SupportedTemplates themeSupportArgs={ themeSupportArgs } />
+			<SupportedTemplates />
 			<MobileRedirection />
 			<PluginSuppression />
 			<SettingsFooter />

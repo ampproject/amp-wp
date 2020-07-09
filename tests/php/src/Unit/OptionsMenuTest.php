@@ -2,7 +2,7 @@
 /**
  * Tests for OptionsMenu.
  *
- * @package AMP
+ * @package AmpProject\AmpWP\Tests
  */
 
 use AmpProject\AmpWP\Admin\GoogleFonts;
@@ -49,10 +49,14 @@ class OptionsMenuTest extends WP_UnitTestCase {
 	 *
 	 * @see OptionsMenu::add_hooks()
 	 */
-	public function test_add_hooks() {
-		$this->instance->add_hooks();
+	public function test_register() {
+		$this->instance->register();
 		$this->assertEquals( 9, has_action( 'admin_menu', [ $this->instance, 'add_menu_items' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_post_amp_analytics_options', 'AMP_Options_Manager::handle_analytics_submit' ) );
+
+		$this->assertEquals( has_filter( 10, "plugin_action_links_amp/amp.php", [ $this, 'add_plugin_action_links' ] ) );
+
+		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] ) );
 	}
 
 	/**

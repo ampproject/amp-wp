@@ -1,12 +1,12 @@
 /**
  * CSS variables for the AMP admin pages.
+ * @todo Make the naming of these variables more semantic.
  */
-.amp { /* React app root element. */
+.amp { /* Root element for plugin markup. */
 	--stepper-max-width: 280px;
 	--setup-page-max-width: 1000px;
 	--black: #212121;
 	--brand: #2459e7;
-	--light-blue: #ceeeff;
 	--gray: #6c7781;
 	--light-gray: #e8e8e8;
 	--very-light-gray: #fafafc;

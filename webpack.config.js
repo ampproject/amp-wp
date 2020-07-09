@@ -137,8 +137,9 @@ const customizer = {
 	...sharedConfig,
 	entry: {
 		'amp-customize-controls': './assets/src/customizer/amp-customize-controls.js',
-		'amp-customize-preview': './assets/src/customizer/amp-customize-preview.js',
-		'amp-customizer-design-preview': './assets/src/customizer/amp-customizer-design-preview.js',
+		'amp-customize-controls-legacy': './assets/src/customizer/amp-customize-controls-legacy.js',
+		'amp-customize-preview-legacy': './assets/src/customizer/amp-customize-preview-legacy.js',
+		'amp-customizer-design-preview-legacy': './assets/src/customizer/amp-customizer-design-preview-legacy.js',
 	},
 	plugins: [
 		...sharedConfig.plugins,
@@ -229,7 +230,7 @@ const setup = {
 		],
 	},
 	externals: {
-		'amp-onboarding-wizard': 'ampOnboardingWizard',
+		'amp-settings': 'ampSettings',
 	},
 	plugins: [
 		...sharedConfig.plugins.filter(
@@ -318,13 +319,12 @@ const settingsPage = {
 };
 
 const mobileRedirection = {
-	...defaultConfig,
 	...sharedConfig,
 	entry: {
 		'mobile-redirection': './assets/src/mobile-redirection.js',
 	},
 	plugins: [
-		...defaultConfig.plugins,
+		...sharedConfig.plugins,
 		new WebpackBar( {
 			name: 'Mobile Redirection',
 			color: '#f27136',

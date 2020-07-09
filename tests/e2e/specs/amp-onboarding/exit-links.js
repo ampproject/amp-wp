@@ -34,7 +34,6 @@ describe( 'Onboarding wizard exit links', () => {
 		await page.waitForSelector( '.wp-admin' );
 		await expect( page ).toMatchElement( 'h1', { text: 'AMP Settings' } );
 
-		await goToOnboardingWizard();
 		await cleanUpSettings();
 	} );
 } );

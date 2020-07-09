@@ -2,7 +2,7 @@
 /**
  * OnboardingWizardSubmenu class.
  *
- * @package AMP
+ * @package AmpProject\AmpWP
  * @since 1.6.0
  */
 

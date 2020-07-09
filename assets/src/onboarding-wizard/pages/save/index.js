@@ -9,7 +9,7 @@ import { Button } from '@wordpress/components';
 /**
  * External dependencies
  */
-import { CUSTOMIZER_LINK } from 'amp-onboarding-wizard'; // From WP inline script.
+import { CUSTOMIZER_LINK, AMP_QUERY_VAR } from 'amp-settings'; // From WP inline script.
 
 /**
  * Internal dependencies
@@ -113,7 +113,7 @@ function Preview() {
 									CUSTOMIZER_LINK,
 									'legacy' === readerTheme
 										? { 'autofocus[panel]': 'amp_panel', url: previewPermalink }
-										: { url: previewPermalink, amp: 1 },
+										: { url: previewPermalink, [ AMP_QUERY_VAR ]: '1' },
 								)
 							}
 							target="_blank"

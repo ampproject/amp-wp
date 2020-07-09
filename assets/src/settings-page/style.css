@@ -92,6 +92,10 @@
 	margin-bottom: 2.5rem;
 }
 
+.amp-settings .theme-card .phone-inner {
+	max-height: 237px;
+}
+
 /* Supported templates section. */
 .supported-templates {
 	margin-bottom: 3rem;
