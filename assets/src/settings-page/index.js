@@ -6,7 +6,6 @@ import {
 	CURRENT_THEME,
 	OPTIONS_REST_ENDPOINT,
 	READER_THEMES_REST_ENDPOINT,
-	THEME_SUPPORT_ARGS,
 	UPDATES_NONCE,
 } from 'amp-settings';
 
@@ -15,7 +14,6 @@ import {
  */
 import domReady from '@wordpress/dom-ready';
 import { render } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -25,7 +23,6 @@ import '../css/elements.css';
 import '../css/core-components.css';
 import './style.css';
 import { OptionsContextProvider } from '../components/options-context-provider';
-import { AMPNotice, NOTICE_TYPE_WARNING, NOTICE_SIZE_LARGE } from '../components/amp-notice';
 import { ReaderThemesContextProvider } from '../components/reader-themes-context-provider';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
@@ -64,19 +61,8 @@ Providers.propTypes = {
  * Settings page application root.
  */
 function Root() {
-	const themeSupportArgs = Array.isArray( THEME_SUPPORT_ARGS ) ? {} : THEME_SUPPORT_ARGS;
-
 	return (
 		<>
-			{
-				themeSupportArgs && 'available_callback' in themeSupportArgs && (
-					<AMPNotice type={ NOTICE_TYPE_WARNING } size={ NOTICE_SIZE_LARGE }>
-						<p>
-							{ __( 'Your theme is using the deprecated available_callback argument for AMP theme support.', 'amp' ) }
-						</p>
-					</AMPNotice>
-				)
-			}
 			<TemplateModes />
 			<ReaderThemes />
 			<SupportedTemplates />
