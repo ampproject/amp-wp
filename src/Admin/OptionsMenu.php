@@ -403,6 +403,18 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			<?php endforeach; ?>
 			</ul>
 		</fieldset>
+
+		<fieldset id="supported_templates_fieldset" class="hidden">
+			<style>
+				#supported_templates_fieldset ul ul {
+					margin-left: 40px;
+				}
+			</style>
+			<h4 class="title"><?php esc_html_e( 'Templates', 'amp' ); ?></h4>
+			<?php
+			$this->list_template_conditional_options( AMP_Theme_Support::get_supportable_templates() );
+			?>
+		</fieldset>
 		<?php
 	}
 
