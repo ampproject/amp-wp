@@ -71,8 +71,8 @@ function getTitle( mode ) {
  * @param {Object} props Component props.
  * @param {string|Object} props.children Section content.
  * @param {Array} props.details Array of strings representing details about the mode and recommendation.
- * @param {boolean} props.previouslySelected Whether the option was selected previously.
  * @param {string} props.mode The template mode.
+ * @param {boolean} props.previouslySelected Optional. Whether the option was selected previously.
  */
 export function TemplateModeOption( { children, details, mode, previouslySelected = false } ) {
 	const { editedOptions, updateOptions } = useContext( Options );
