@@ -1,6 +1,6 @@
 <?php
 
-namespace AmpProject\AmpWP\Tests\Integration;
+namespace AmpProject\AmpWP\Tests;
 
 use AmpProject\AmpWP\AmpWpPlugin;
 use AmpProject\AmpWP\Infrastructure\Injector;

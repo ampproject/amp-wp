@@ -1,6 +1,6 @@
 <?php
 
-namespace AmpProject\AmpWP\Tests\Unit;
+namespace AmpProject\AmpWP\Tests;
 
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;

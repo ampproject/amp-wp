@@ -1,6 +1,6 @@
 <?php
 
-namespace AmpProject\AmpWP\Tests\Unit;
+namespace AmpProject\AmpWP\Tests;
 
 use AMP_Options_Manager;
 use AMP_Reader_Themes;

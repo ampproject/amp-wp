@@ -1,6 +1,6 @@
 <?php
 
-namespace AmpProject\AmpWP\Tests\Unit\Infrastructure;
+namespace AmpProject\AmpWP\Tests\Infrastructure;
 
 use AmpProject\AmpWP\Exception\InvalidService;
 use AmpProject\AmpWP\Infrastructure\Service;
