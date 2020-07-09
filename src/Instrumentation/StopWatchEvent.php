@@ -48,6 +48,10 @@ final class StopWatchEvent {
 	 * @return float Duration in milliseconds.
 	 */
 	public function get_duration() {
+		if ( null === $this->end ) {
+			return 0.0;
+		}
+
 		return $this->end - $this->start;
 	}
 
