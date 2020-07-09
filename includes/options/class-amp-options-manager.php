@@ -34,7 +34,6 @@ class AMP_Options_Manager {
 		Option::VERSION                 => AMP__VERSION,
 		Option::READER_THEME            => ReaderThemes::DEFAULT_READER_THEME,
 		Option::PLUGIN_CONFIGURED       => false,
-		Option::MOBILE_REDIRECT         => false,
 	];
 
 	/**
