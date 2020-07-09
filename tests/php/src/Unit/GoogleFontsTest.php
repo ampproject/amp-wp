@@ -51,8 +51,8 @@ class GoogleFontsTest extends WP_UnitTestCase {
 	 * @covers GoogleFonts::get_handle
 	 * @covers GoogleFonts::register
 	 */
-	public function test_register() {
-		$this->instance->register();
+	public function test_register_style() {
+		$this->instance->register_style( wp_styles() );
 
 		$this->assertTrue( wp_style_is( 'amp-admin-google-fonts', 'registered' ) );
 	}
