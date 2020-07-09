@@ -48,10 +48,10 @@ class ReaderThemesTest extends WP_UnitTestCase {
 	/**
 	 * Test for get_themes.
 	 *
-	 * @covers AMP_Reader_Themes::get_themes
-	 * @covers AMP_Reader_Themes::get_default_reader_themes
-	 * @covers AMP_Reader_Themes::get_classic_mode
-	 * @covers AMP_Reader_Themes::get_default_raw_reader_themes
+	 * @covers ReaderThemes::get_themes
+	 * @covers ReaderThemes::get_default_reader_themes
+	 * @covers ReaderThemes::get_classic_mode
+	 * @covers ReaderThemes::get_default_raw_reader_themes
 	 */
 	public function test_get_themes() {
 		$themes = $this->reader_themes->get_themes();
@@ -77,7 +77,7 @@ class ReaderThemesTest extends WP_UnitTestCase {
 	/**
 	 * Test for get_reader_theme_by_slug.
 	 *
-	 * @covers AMP_Reader_Themes::get_reader_theme_by_slug
+	 * @covers ReaderThemes::get_reader_theme_by_slug
 	 */
 	public function test_get_reader_theme_by_slug() {
 		$this->assertFalse( $this->reader_themes->get_reader_theme_by_slug( 'some-theme' ) );
@@ -96,7 +96,7 @@ class ReaderThemesTest extends WP_UnitTestCase {
 
 		return [
 			'twentysixteen_from_wp_future'           => [
-				$is_installed( 'twentysixteen' ) ? AMP_Reader_Themes::STATUS_INSTALLED : AMP_Reader_Themes::STATUS_NON_INSTALLABLE,
+				$is_installed( 'twentysixteen' ) ? ReaderThemes::STATUS_INSTALLED : ReaderThemes::STATUS_NON_INSTALLABLE,
 				false,
 				[
 					'name'         => 'Some Theme',
@@ -106,7 +106,7 @@ class ReaderThemesTest extends WP_UnitTestCase {
 				],
 			],
 			'twentysixteen_from_php_future'          => [
-				$is_installed( 'twentysixteen' ) ? AMP_Reader_Themes::STATUS_INSTALLED : AMP_Reader_Themes::STATUS_NON_INSTALLABLE,
+				$is_installed( 'twentysixteen' ) ? ReaderThemes::STATUS_INSTALLED : ReaderThemes::STATUS_NON_INSTALLABLE,
 				false,
 				[
 					'name'         => 'Some Theme',
@@ -116,7 +116,7 @@ class ReaderThemesTest extends WP_UnitTestCase {
 				],
 			],
 			'non_reader_theme'                       => [
-				AMP_Reader_Themes::STATUS_NON_INSTALLABLE,
+				ReaderThemes::STATUS_NON_INSTALLABLE,
 				false,
 				[
 					'name'         => 'Some Theme',
@@ -126,7 +126,7 @@ class ReaderThemesTest extends WP_UnitTestCase {
 				],
 			],
 			'twentytwelve_not_requiring_wp_version'  => [
-				$is_installed( 'twentytwelve' ) ? AMP_Reader_Themes::STATUS_INSTALLED : AMP_Reader_Themes::STATUS_INSTALLABLE,
+				$is_installed( 'twentytwelve' ) ? ReaderThemes::STATUS_INSTALLED : ReaderThemes::STATUS_INSTALLABLE,
 				true,
 				[
 					'name'         => 'Some Theme',
@@ -136,7 +136,7 @@ class ReaderThemesTest extends WP_UnitTestCase {
 				],
 			],
 			'twentytwelve_not_requiring_php_version' => [
-				$is_installed( 'twentysixteen' ) ? AMP_Reader_Themes::STATUS_INSTALLED : AMP_Reader_Themes::STATUS_INSTALLABLE,
+				$is_installed( 'twentysixteen' ) ? ReaderThemes::STATUS_INSTALLED : ReaderThemes::STATUS_INSTALLABLE,
 				true,
 				[
 					'name'         => 'Some Theme',
@@ -146,7 +146,7 @@ class ReaderThemesTest extends WP_UnitTestCase {
 				],
 			],
 			'twentytwenty_active'                    => [
-				AMP_Reader_Themes::STATUS_ACTIVE,
+				ReaderThemes::STATUS_ACTIVE,
 				true,
 				[
 					'name'         => 'WordPress Default',
@@ -161,8 +161,8 @@ class ReaderThemesTest extends WP_UnitTestCase {
 	/**
 	 * Test for get_theme_availability.
 	 *
-	 * @covers AMP_Reader_Themes::get_theme_availability
-	 * @covers AMP_Reader_Themes::can_install_theme
+	 * @covers ReaderThemes::get_theme_availability
+	 * @covers ReaderThemes::can_install_theme
 	 *
 	 * @dataProvider get_availability_test_themes
 	 *
@@ -179,7 +179,7 @@ class ReaderThemesTest extends WP_UnitTestCase {
 	/**
 	 * Tests for can_install_theme.
 	 *
-	 * @covers AMP_Reader_Themes::can_install_theme
+	 * @covers ReaderThemes::can_install_theme
 	 */
 	public function test_can_install_theme() {
 		$installable_theme = [
