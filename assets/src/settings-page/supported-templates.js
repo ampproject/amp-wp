@@ -33,8 +33,6 @@ export function SupportedTemplates() {
 		}
 	}, [] );
 
-	const isLegacy = 'reader' === themeSupport && 'legacy' === readerTheme;
-
 	return (
 		<section className={ ! themeSupport || ( 'reader' === themeSupport && ! readerTheme ) ? 'hidden' : '' }>
 			<h2>
@@ -43,7 +41,7 @@ export function SupportedTemplates() {
 			<Selectable className="supported-templates">
 				<SupportedTemplatesToggle />
 				<SupportedTemplatesVisibility />
-				{ ! isLegacy && <div ref={ supportedTemplatesContainer } /> }
+				<div ref={ supportedTemplatesContainer } />
 			</Selectable>
 		</section>
 	);

@@ -16,7 +16,7 @@ import { Options } from '../components/options-context-provider';
 export function SupportedTemplatesVisibility() {
 	const { editedOptions } = useContext( Options );
 
-	const { all_templates_supported: allTemplatesSupported, theme_support: themeSupport } = editedOptions || {};
+	const { all_templates_supported: allTemplatesSupported, reader_theme: readerTheme, theme_support: themeSupport } = editedOptions || {};
 
 	const supportedPostTypesTitle = useRef( document.querySelector( '#all_templates_supported_fieldset, #supported_post_types_fieldset > .title' ) );
 	const supportedPostTypesFieldset = useRef( document.getElementById( 'supported_post_types_fieldset' ) );
@@ -32,16 +32,22 @@ export function SupportedTemplatesVisibility() {
 			'reader' === themeSupport,
 		);
 
+		let supportedPostTypesHidden = allTemplatesSupported;
+		if ( 'reader' === themeSupport && 'legacy' === readerTheme ) {
+			supportedPostTypesHidden = false;
+
+			console.log( themeSupport, readerTheme );
+		}
 		supportedPostTypesFieldset.current.classList.toggle(
 			'hidden',
-			allTemplatesSupported && 'reader' !== themeSupport,
+			supportedPostTypesHidden,
 		);
 
 		supportedTemplatesFieldset.current.classList.toggle(
 			'hidden',
-			allTemplatesSupported || 'reader' === themeSupport,
+			allTemplatesSupported || ( 'reader' === themeSupport && 'legacy' === readerTheme ),
 		);
-	}, [ allTemplatesSupported, themeSupport ] );
+	}, [ allTemplatesSupported, readerTheme, themeSupport ] );
 
 	/**
 	 * Check or uncheck all of a checkbox's child checkboxes when it is checked or unchecked.
