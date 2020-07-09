@@ -275,7 +275,7 @@ final class PluginSuppression implements Service, Registerable {
 				}
 
 				#suppressed-plugins-table .column-status {
-					width: 120px;
+					width: 150px;
 				}
 
 				#suppressed-plugins-table .column-status > select {
