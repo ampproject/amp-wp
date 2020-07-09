@@ -39,6 +39,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		$this->prevent_block_pre_render();
+		$this->add_reader_themes_request_filter();
 
 		$this->reset_widgets();
 		add_filter(
@@ -381,7 +382,6 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 	 * @covers AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source()
 	 */
 	public function test_sanitize_options() {
-		$this->add_reader_themes_request_filter();
 		$instance = $this->get_instance();
 		$instance->register();
 
