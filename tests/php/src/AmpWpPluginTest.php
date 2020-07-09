@@ -4,7 +4,6 @@ namespace AmpProject\AmpWP\Tests;
 
 use AmpProject\AmpWP\AmpWpPlugin;
 use AmpProject\AmpWP\Infrastructure\Injector;
-use AmpProject\AmpWP\Infrastructure\ServiceContainer\SimpleServiceContainer;
 use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\Tests\Fixture\DummyService;
 use WP_UnitTestCase;

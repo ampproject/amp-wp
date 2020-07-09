@@ -12,16 +12,18 @@ use AmpProject\AmpWP\Exception\InvalidStopwatchEvent;
 /**
  * Record the timing of multiple events.
  *
+ * @internal
+ *
  * @package AmpProject\AmpWP
  */
-final class StopWatch {
+class StopWatch {
 
 	/**
 	 * Collection of named events that the stopwatch is tracking.
 	 *
 	 * @var StopWatchEvent[]
 	 */
-	private $events = [];
+	protected $events = [];
 
 	/**
 	 * Start a named event.

@@ -10,6 +10,8 @@ namespace AmpProject\AmpWP\Instrumentation;
 /**
  * Record the timing of a single event.
  *
+ * @internal
+ *
  * @package AmpProject\AmpWP
  */
 final class StopWatchEvent {
