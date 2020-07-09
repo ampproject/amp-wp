@@ -35,8 +35,6 @@ export function SupportedTemplatesVisibility() {
 		let supportedPostTypesHidden = allTemplatesSupported;
 		if ( 'reader' === themeSupport && 'legacy' === readerTheme ) {
 			supportedPostTypesHidden = false;
-
-			console.log( themeSupport, readerTheme );
 		}
 		supportedPostTypesFieldset.current.classList.toggle(
 			'hidden',

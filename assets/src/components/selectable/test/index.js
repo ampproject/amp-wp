@@ -39,7 +39,7 @@ describe( 'Selectable', () => {
 		expect( wrapper.toJSON() ).toMatchSnapshot();
 
 		wrapper = create(
-			<Selectable selected={ true } ElementName="section" className="my-cool-class" direction="top">
+			<Selectable selected={ true } elementName="section" className="my-cool-class" direction="top">
 				<div>
 					{ 'Component children' }
 				</div>
@@ -51,7 +51,7 @@ describe( 'Selectable', () => {
 	it( 'has correct classes', () => {
 		act( () => {
 			render(
-				<Selectable selected={ true } ElementName="section" className="my-cool-class" direction="top">
+				<Selectable selected={ true } elementName="section" className="my-cool-class" direction="top">
 					<div>
 						{ 'children' }
 					</div>
@@ -64,7 +64,7 @@ describe( 'Selectable', () => {
 
 		act( () => {
 			render(
-				<Selectable selected={ false } ElementName="section">
+				<Selectable selected={ false } elementName="section">
 					<div>
 						{ 'children' }
 					</div>

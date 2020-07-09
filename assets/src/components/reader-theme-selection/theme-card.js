@@ -38,7 +38,7 @@ export function ThemeCard( { currentlyActiveThemeNotice, description, homepage, 
 	const id = `theme-card__${ slug }`;
 
 	return (
-		<Selectable className={ `theme-card` } direction="bottom" ElementName="li" selected={ readerTheme === slug }>
+		<Selectable className={ `theme-card` } direction="bottom" elementName="li" selected={ readerTheme === slug }>
 			<label htmlFor={ id } className="theme-card__label">
 				<Phone>
 					<img

@@ -22,6 +22,7 @@ export function SettingsFooter() {
 
 	/**
 	 * Submits the PHP-generated form on the page after options have saved via REST.
+	 *
 	 * @todo Eliminate this once the Plugin Suppression logic is moved to use the REST API.
 	 */
 	useEffect( () => {
