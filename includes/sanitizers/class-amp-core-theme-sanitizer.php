@@ -82,7 +82,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			case 'twentytwenty':
 				$config = [
 					'prevent_sanitize_in_customizer_preview' => [
-						'//style[ @id = "custom-background-css" ]',
 						'//style[ @id = "twentytwenty-style-inline-css" ]',
 					],
 					'dequeue_scripts'                  => [
@@ -118,9 +117,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			// Twenty Nineteen.
 			case 'twentynineteen':
 				return [
-					'prevent_sanitize_in_customizer_preview' => [
-						'//style[ @id = "custom-theme-colors" ]',
-					],
 					'dequeue_scripts'                    => [
 						'twentynineteen-skip-link-focus-fix', // This is part of AMP. See <https://github.com/ampproject/amphtml/issues/18671>.
 						'twentynineteen-priority-menu',
@@ -139,7 +135,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			case 'twentyseventeen':
 				return [
 					'prevent_sanitize_in_customizer_preview' => [
-						'//style[ @id = "custom-theme-colors" ]',
 						'//link[ @id = "twentyseventeen-colors-dark-css" ]',
 					],
 					// @todo Try to implement belowEntryMetaClass().
@@ -216,9 +211,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			// Twenty Fourteen.
 			case 'twentyfourteen':
 				return [
-					'prevent_sanitize_in_customizer_preview' => [
-						'//style[ @id = "custom-background-css" ]',
-					],
 					// @todo Figure out an AMP solution for onResizeARIA().
 					'dequeue_scripts'                    => [
 						'twentyfourteen-script',
@@ -247,9 +239,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			// Twenty Twelve.
 			case 'twentytwelve':
 				return [
-					'prevent_sanitize_in_customizer_preview' => [
-						'//style[ @id = "custom-background-css" ]',
-					],
 					'dequeue_scripts'     => [
 						'twentytwelve-navigation',
 					],
@@ -261,18 +250,13 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				return [
 					'prevent_sanitize_in_customizer_preview' => [
 						'//style[ @id = "twentyeleven-header-css" ]',
-						'//style[ @id = "custom-background-css" ]',
 						'//link[ @id = "dark-css" ]',
 					],
 				];
 
 			// Twenty Ten.
 			case 'twentyten':
-				return [
-					'prevent_sanitize_in_customizer_preview' => [
-						'//style[ @id = "custom-background-css" ]',
-					],
-				];
+				return [];
 
 			default:
 				return null;
