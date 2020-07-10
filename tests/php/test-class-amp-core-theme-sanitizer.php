@@ -45,7 +45,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	 * Test xpath_from_css_selector().
 	 *
 	 * @dataProvider get_xpath_from_css_selector_data
-	 * @covers AMP_Core_Theme_Sanitizer::xpath_from_css_selector()
+	 * @covers AMP_Core_Theme_Sanitizer::xpath_from_css_selector
 	 *
 	 * @param string $css_selector CSS Selector.
 	 * @param string $expected     Expected XPath expression.
@@ -99,7 +99,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	 * Test get_closest_submenu().
 	 *
 	 * @dataProvider get_get_closest_submenu_data
-	 * @covers AMP_Core_Theme_Sanitizer::get_closest_submenu()
+	 * @covers AMP_Core_Theme_Sanitizer::get_closest_submenu
 	 *
 	 * @param Document   $dom      Document.
 	 * @param DOMElement $element  Element.
@@ -169,7 +169,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Test add_has_header_video_body_class().
 	 *
-	 * @covers AMP_Core_Theme_Sanitizer::add_has_header_video_body_class()
+	 * @covers AMP_Core_Theme_Sanitizer::add_has_header_video_body_class
 	 */
 	public function test_add_has_header_video_body_class() {
 		$args = [ 'foo' ];
@@ -228,7 +228,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	 * Test guess_modal_role().
 	 *
 	 * @dataProvider get_modals
-	 * @covers       AMP_Core_Theme_Sanitizer::guess_modal_role()
+	 * @covers       AMP_Core_Theme_Sanitizer::guess_modal_role
 	 *
 	 * @param DOMElement $dom_element Document.
 	 * @param string     $expected    Expected.
@@ -244,7 +244,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Tests add_img_display_block_fix.
 	 *
-	 * @covers AMP_Core_Theme_Sanitizer::add_img_display_block_fix()
+	 * @covers AMP_Core_Theme_Sanitizer::add_img_display_block_fix
 	 */
 	public function test_add_img_display_block_fix() {
 		AMP_Core_Theme_Sanitizer::add_img_display_block_fix();
@@ -257,7 +257,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Tests add_twentytwenty_custom_logo_fix.
 	 *
-	 * @covers AMP_Core_Theme_Sanitizer::add_twentytwenty_custom_logo_fix()
+	 * @covers AMP_Core_Theme_Sanitizer::add_twentytwenty_custom_logo_fix
 	 */
 	public function test_add_twentytwenty_custom_logo_fix() {
 		add_filter(
@@ -273,5 +273,34 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		$needle = '.site-logo amp-img { width: 3.000000rem; } @media (min-width: 700px) { .site-logo amp-img { width: 4.500000rem; } }';
 
 		$this->assertStringContains( $needle, $logo );
+	}
+
+	/**
+	 * Tests prevent_sanitize_in_customizer_preview.
+	 *
+	 * @covers AMP_Core_Theme_Sanitizer::prevent_sanitize_in_customizer_preview
+	 */
+	public function test_prevent_sanitize_in_customizer_preview() {
+		global $wp_customize;
+
+		require ABSPATH . 'wp-includes/class-wp-customize-manager.php';
+		$wp_customize = new \WP_Customize_Manager();
+
+		$xpath_selectors = [ '//p[ @id = "foo" ]' ];
+
+		$html = '<p id="foo"></p> <p id="bar"></p>';
+		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
+
+		$instance = new AMP_Core_Theme_Sanitizer( $dom );
+
+		$wp_customize->start_previewing_theme();
+		$instance->prevent_sanitize_in_customizer_preview( $xpath_selectors );
+		$wp_customize->stop_previewing_theme();
+
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+
+		$expected = $html = '<p id="foo" data-ampdevmode=""></p> <p id="bar"></p>';
+
+		$this->assertEquals( $expected, $content );
 	}
 }
