@@ -289,7 +289,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		$xpath_selectors = [ '//p[ @id = "foo" ]' ];
 
 		$html = '<p id="foo"></p> <p id="bar"></p>';
-		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
+		$dom  = AMP_DOM_Utils::get_dom_from_content( $html );
 
 		$instance = new AMP_Core_Theme_Sanitizer( $dom );
 
