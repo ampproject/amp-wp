@@ -143,7 +143,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				Option::SUPPORTED_POST_TYPES    => [ 'post' => true ],
 				Option::ANALYTICS               => [],
 				Option::ALL_TEMPLATES_SUPPORTED => true,
-				Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
+				Option::SUPPORTED_TEMPLATES     => [ 'is_singular' => true ],
 				Option::SUPPRESSED_PLUGINS      => [],
 				Option::VERSION                 => AMP__VERSION,
 				Option::MOBILE_REDIRECT         => false,
@@ -171,6 +171,26 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				'attachment' => false,
 			],
 			AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES )
+		);
+
+		// Test supported_templates validation.
+		AMP_Options_Manager::update_option(
+			Option::SUPPORTED_TEMPLATES,
+			[
+				'is_singular' => 'false',
+				'is_search'   => 'true',
+				'is_date'     => false,
+				'is_category' => true,
+			]
+		);
+		$this->assertSame(
+			[
+				'is_singular' => false,
+				'is_search'   => true,
+				'is_date'     => false,
+				'is_category' => true,
+			],
+			AMP_Options_Manager::get_option( Option::SUPPORTED_TEMPLATES )
 		);
 
 		// Test analytics validation with missing fields.
@@ -308,17 +328,76 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 			],
 			AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES )
 		);
+	}
 
-		// Make sure that the old simple list _and_ the post type support get migrated.
+	/**
+	 * Test get_options when all_templates_supported theme support is used.
+	 *
+	 * @covers AMP_Options_Manager::get_options()
+	 */
+	public function test_get_options_migration_all_templates_supported() {
 		delete_option( AMP_Options_Manager::OPTION_NAME );
-		add_post_type_support( 'page', 'amp' );
-		update_option( AMP_Options_Manager::OPTION_NAME, [ Option::SUPPORTED_POST_TYPES => [ 'attachment' ] ] );
+		add_theme_support( 'amp', [ 'templates_supported' => 'all' ] );
+		$this->assertTrue( AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) );
+
+		delete_option( AMP_Options_Manager::OPTION_NAME );
+		add_theme_support(
+			'amp',
+			[
+				'templates_supported' => [
+					'is_search'  => true,
+					'is_archive' => false,
+				],
+			]
+		);
+		$this->assertFalse( AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) );
 		$this->assertEquals(
 			[
-				'page'       => true,
-				'attachment' => true,
+				'is_singular' => true,
+				'is_search'   => true,
+				'is_archive'  => false,
 			],
-			AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES )
+			AMP_Options_Manager::get_option( Option::SUPPORTED_TEMPLATES )
+		);
+	}
+
+	/**
+	 * Test get_options when supported_templates option is list of templates and when theme support is used.
+	 *
+	 * @covers AMP_Options_Manager::get_options()
+	 */
+	public function test_get_options_migration_supported_templates() {
+		// Make sure that the old simple list of post types gets migrated to an associative array.
+		update_option( AMP_Options_Manager::OPTION_NAME, [ Option::SUPPORTED_TEMPLATES => [ 'is_singular', 'is_search' ] ] );
+		$this->assertEquals(
+			[
+				'is_singular' => true,
+				'is_search'   => true,
+			],
+			AMP_Options_Manager::get_option( Option::SUPPORTED_TEMPLATES )
+		);
+
+		// Make sure the theme support get migrated.
+		delete_option( AMP_Options_Manager::OPTION_NAME );
+		add_theme_support(
+			'amp',
+			[
+				'templates_supported' => [
+					'is_archive'  => true,
+					'is_search'   => false,
+					'is_404'      => false,
+					'is_singular' => true,
+				],
+			]
+		);
+		$this->assertEquals(
+			[
+				'is_archive'  => true,
+				'is_search'   => false,
+				'is_404'      => false,
+				'is_singular' => true,
+			],
+			AMP_Options_Manager::get_option( Option::SUPPORTED_TEMPLATES )
 		);
 	}
 
@@ -415,20 +494,20 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 					Option::THEME_SUPPORT => 'paired',
 				],
 			],
-			'standard_upon_upgrade'                => [
+			'reader_mode_persists_non_paired'      => [
 				[
 					'paired' => false,
 				],
-				AMP_Theme_Support::STANDARD_MODE_SLUG,
+				AMP_Theme_Support::READER_MODE_SLUG,
 				[
 					Option::THEME_SUPPORT => 'disabled',
 				],
 			],
-			'transitional_upon_upgrade'            => [
+			'reader_mode_persists_paired'          => [
 				[
 					'paired' => true,
 				],
-				AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
+				AMP_Theme_Support::READER_MODE_SLUG,
 				[
 					Option::THEME_SUPPORT => 'disabled',
 				],

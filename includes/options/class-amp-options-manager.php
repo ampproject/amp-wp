@@ -30,7 +30,7 @@ class AMP_Options_Manager {
 		Option::SUPPORTED_POST_TYPES    => [ 'post' => true ],
 		Option::ANALYTICS               => [],
 		Option::ALL_TEMPLATES_SUPPORTED => true,
-		Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
+		Option::SUPPORTED_TEMPLATES     => [ 'is_singular' => true ],
 		Option::VERSION                 => AMP__VERSION,
 		Option::READER_THEME            => ReaderThemes::DEFAULT_READER_THEME,
 		Option::PLUGIN_CONFIGURED       => false,
@@ -93,13 +93,34 @@ class AMP_Options_Manager {
 
 		$defaults = self::$defaults;
 
+		// Migrate legacy method of specifying the mode.
 		$theme_support = AMP_Theme_Support::get_theme_support_args();
-		if ( $theme_support ) {
+		if ( $theme_support && ! isset( $options[ Option::THEME_SUPPORT ] ) ) {
 			if ( empty( $theme_support[ AMP_Theme_Support::PAIRED_FLAG ] ) ) {
 				$defaults[ Option::THEME_SUPPORT ] = AMP_Theme_Support::STANDARD_MODE_SLUG;
 			} else {
 				$defaults[ Option::THEME_SUPPORT ] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
 			}
+		}
+
+		// Migrate legacy amp post type support to be reflected in the default supported_post_types value.
+		if ( ! isset( $options[ Option::SUPPORTED_POST_TYPES ] ) ) {
+			foreach ( get_post_types_by_support( 'amp' ) as $post_type ) {
+				$defaults[ Option::SUPPORTED_POST_TYPES ][ $post_type ] = true;
+			}
+		}
+
+		// Migrate legacy method of specifying all_templates_supported.
+		if ( ! isset( $options[ Option::ALL_TEMPLATES_SUPPORTED ] ) && isset( $theme_support['templates_supported'] ) ) {
+			$defaults[ Option::ALL_TEMPLATES_SUPPORTED ] = ( 'all' === $theme_support['templates_supported'] );
+		}
+
+		// Migrate legacy amp theme support to be reflected in the default supported_templates value.
+		if ( ! isset( $options[ Option::SUPPORTED_TEMPLATES ] ) && isset( $theme_support['templates_supported'] ) && is_array( $theme_support['templates_supported'] ) ) {
+			$defaults[ Option::SUPPORTED_TEMPLATES ] = array_merge(
+				$defaults[ Option::SUPPORTED_TEMPLATES ],
+				$theme_support['templates_supported']
+			);
 		}
 
 		/**
@@ -157,10 +178,10 @@ class AMP_Options_Manager {
 		if ( isset( $options[ Option::SUPPORTED_POST_TYPES ][0] ) ) {
 			$options[ Option::SUPPORTED_POST_TYPES ] = array_fill_keys( $options[ Option::SUPPORTED_POST_TYPES ], true );
 		}
-		foreach ( get_post_types_by_support( 'amp' ) as $post_type ) {
-			if ( ! isset( $options[ Option::SUPPORTED_POST_TYPES ][ $post_type ] ) ) {
-				$options[ Option::SUPPORTED_POST_TYPES ][ $post_type ] = true;
-			}
+
+		// Migrate supported templates.
+		if ( isset( $options[ Option::SUPPORTED_TEMPLATES ][0] ) ) {
+			$options[ Option::SUPPORTED_TEMPLATES ] = array_fill_keys( $options[ Option::SUPPORTED_TEMPLATES ], true );
 		}
 
 		unset(
@@ -245,28 +266,29 @@ class AMP_Options_Manager {
 		}
 
 		// Validate post type support.
-		if ( isset( $new_options[ Option::SUPPORTED_POST_TYPES ] ) ) {
+		if ( isset( $new_options[ Option::SUPPORTED_POST_TYPES ] ) && is_array( $new_options[ Option::SUPPORTED_POST_TYPES ] ) ) {
 			$options[ Option::SUPPORTED_POST_TYPES ] = [];
 			foreach ( $new_options[ Option::SUPPORTED_POST_TYPES ] as $post_type => $enabled ) {
-				$options[ Option::SUPPORTED_POST_TYPES ][ $post_type ] = rest_sanitize_boolean( $enabled );
+				if ( post_type_exists( $post_type ) ) {
+					$options[ Option::SUPPORTED_POST_TYPES ][ $post_type ] = rest_sanitize_boolean( $enabled );
+				}
 			}
 		}
 
-		$theme_support_args = AMP_Theme_Support::get_theme_support_args();
+		// Update all_templates_supported.
+		if ( isset( $new_options[ Option::ALL_TEMPLATES_SUPPORTED ] ) ) {
+			$options[ Option::ALL_TEMPLATES_SUPPORTED ] = rest_sanitize_boolean( $new_options[ Option::ALL_TEMPLATES_SUPPORTED ] );
+		}
 
-		$is_template_support_required = ( isset( $theme_support_args['templates_supported'] ) && 'all' === $theme_support_args['templates_supported'] );
-		if ( ! $is_template_support_required ) {
-			if ( isset( $new_options[ Option::ALL_TEMPLATES_SUPPORTED ] ) ) {
-				$options[ Option::ALL_TEMPLATES_SUPPORTED ] = ! empty( $new_options[ Option::ALL_TEMPLATES_SUPPORTED ] );
-			}
-
-			// Validate supported templates.
+		// Validate supported templates.
+		if ( isset( $new_options[ Option::SUPPORTED_TEMPLATES ] ) && is_array( $new_options[ Option::SUPPORTED_TEMPLATES ] ) ) {
+			$supportable_templates                  = AMP_Theme_Support::get_supportable_templates();
 			$options[ Option::SUPPORTED_TEMPLATES ] = [];
-			if ( isset( $new_options[ Option::SUPPORTED_TEMPLATES ] ) ) {
-				$options[ Option::SUPPORTED_TEMPLATES ] = array_intersect(
-					$new_options[ Option::SUPPORTED_TEMPLATES ],
-					array_keys( AMP_Theme_Support::get_supportable_templates() )
-				);
+			foreach ( $new_options[ Option::SUPPORTED_TEMPLATES ] as $template_id => $supported ) {
+				$template_id = rawurldecode( $template_id );
+				if ( array_key_exists( $template_id, $supportable_templates ) ) {
+					$options[ Option::SUPPORTED_TEMPLATES ][ $template_id ] = rest_sanitize_boolean( $supported );
+				}
 			}
 		}
 

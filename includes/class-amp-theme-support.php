@@ -554,14 +554,15 @@ class AMP_Theme_Support {
 		}
 
 		$theme_support_args = self::get_theme_support_args();
-
-		$all_templates_supported_by_theme_support = false;
 		if ( isset( $theme_support_args['templates_supported'] ) ) {
-			$all_templates_supported_by_theme_support = 'all' === $theme_support_args['templates_supported'];
+			_doing_it_wrong(
+				'add_theme_support',
+				esc_html__( 'The AMP plugin no longer considers the `templates_supported` argument when adding amp theme support. This is controlled exclusively via the UI.', 'amp' ),
+				'1.6'
+			);
 		}
-		$all_templates_supported = (
-			$all_templates_supported_by_theme_support || AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED )
-		);
+
+		$all_templates_supported = AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED );
 
 		// Make sure global $wp_query is set in case of conditionals that unfortunately look at global scope.
 		$prev_query = $wp_query;
@@ -892,10 +893,34 @@ class AMP_Theme_Support {
 		$supported_templates = AMP_Options_Manager::get_option( Option::SUPPORTED_TEMPLATES );
 		$are_all_supported   = AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED );
 
+		$did_filter_supply_supported = false;
+		$did_filter_supply_immutable = false;
 		foreach ( $templates as $id => &$template ) {
-			$template['supported']      = $are_all_supported || in_array( $id, $supported_templates, true );
+			if ( isset( $template['supported'] ) ) {
+				$did_filter_supply_supported = true;
+			}
+			if ( isset( $template['immutable'] ) ) {
+				$did_filter_supply_immutable = true;
+			}
+
+			$template['supported']      = $are_all_supported || ! empty( $supported_templates[ $id ] );
 			$template['user_supported'] = $template['supported']; // Obsolete.
 			$template['immutable']      = false; // Obsolete.
+		}
+
+		if ( $did_filter_supply_supported ) {
+			_doing_it_wrong(
+				'add_filter',
+				esc_html__( 'The AMP plugin no longer allows `amp_supportable_templates` filters to specify a template as being `supported`. This is now managed only in AMP Settings.', 'amp' ),
+				'1.6'
+			);
+		}
+		if ( $did_filter_supply_immutable ) {
+			_doing_it_wrong(
+				'add_filter',
+				esc_html__( 'The AMP plugin no longer allows `amp_supportable_templates` filters to specify a template\'s support as being `immutable`. This is now managed only in AMP Settings.', 'amp' ),
+				'1.6'
+			);
 		}
 
 		return $templates;
