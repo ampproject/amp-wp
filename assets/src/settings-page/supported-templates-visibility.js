@@ -19,8 +19,8 @@ export function SupportedTemplatesVisibility() {
 	const { all_templates_supported: allTemplatesSupported, reader_theme: readerTheme, theme_support: themeSupport } = editedOptions || {};
 
 	const supportedPostTypesTitle = useRef( document.querySelector( '#all_templates_supported_fieldset, #supported_post_types_fieldset > .title' ) );
-	const supportedPostTypesFieldset = document.getElementById( 'supported_post_types_fieldset' )
-	const supportedTemplatesFieldset = document.getElementById( 'supported_templates_fieldset' )
+	const supportedPostTypesFieldset = document.getElementById( 'supported_post_types_fieldset' );
+	const supportedTemplatesFieldset = document.getElementById( 'supported_templates_fieldset' );
 	const supportedPostTypesFieldsetRef = useRef( supportedPostTypesFieldset );
 	const supportedTemplatesFieldsetRef = useRef( supportedTemplatesFieldset );
 	const supportedTemplateInputs = useRef( [ ...supportedTemplatesFieldset.querySelectorAll( 'input[type=checkbox]' ) ] );
