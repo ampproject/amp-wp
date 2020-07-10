@@ -7,6 +7,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
 
 /**
@@ -175,7 +176,7 @@ final class AMP_CLI_Validation_Command {
 		if (
 			AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
 			&&
-			AMP_Reader_Themes::DEFAULT_READER_THEME === AMP_Options_Manager::get_option( Option::READER_THEME )
+			ReaderThemes::DEFAULT_READER_THEME === AMP_Options_Manager::get_option( Option::READER_THEME )
 		) {
 			$allowed_templates = [
 				'is_singular',

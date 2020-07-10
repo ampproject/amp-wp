@@ -1,0 +1,135 @@
+.amp.amp-settings .selectable {
+	padding: 1.25rem 2.5rem;
+}
+
+.amp.amp-settings .selectable--left {
+	margin-left: 10px;
+	width: calc(100% - 10px); /* Offset box shadow. */
+}
+
+.amp-settings .amp-notice {
+	max-width: 550px;
+}
+
+/* Core form style overrides. */
+.amp-settings .form-table td {
+	padding: 0;
+}
+
+.amp-settings .form-table {
+	margin-top: 0;
+}
+
+.amp-settings .form-table > tbody > tr > th {
+	display: none;
+}
+
+/* Welcome section. */
+.settings-welcome {
+	margin-bottom: 2.5rem;
+}
+
+.settings-welcome p {
+	font-size: 13px;
+}
+
+.settings-welcome h2 {
+	align-items: center;
+	display: flex;
+	margin-top: 0;
+}
+
+.settings-welcome h2 svg {
+	margin-left: 0.5rem;
+}
+
+.settings-welcome .selectable {
+	align-items: center;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+
+	@media (min-width: 783px) {
+		flex-direction: row;
+	}
+}
+
+.settings-welcome__illustration {
+	margin-bottom: 2rem;
+
+	@media (min-width: 783px) {
+		margin-right: 2rem;
+	}
+}
+
+.settings-welcome__button {
+
+	@media (min-width: 783px) {
+		padding-left: 1rem;
+		padding-right: 1.5rem;
+	}
+}
+
+/* Reader themes section. */
+.amp-settings .choose-reader-theme__grid {
+
+	@media (min-width: 1300px) {
+		grid-template-columns: repeat(4, 1fr);
+	}
+
+	@media (min-width: 1600px) {
+		grid-template-columns: repeat(5, 1fr);
+	}
+
+	@media (min-width: 1900px) {
+		grid-template-columns: repeat(6, 1fr);
+	}
+}
+
+.amp-settings .reader-themes {
+	background-color: var(--white);
+	padding: 2.5rem;
+	margin-bottom: 2.5rem;
+}
+
+.amp-settings .theme-card .phone-inner {
+	max-height: 237px;
+}
+
+/* Supported templates section. */
+.supported-templates {
+	margin-bottom: 3rem;
+}
+
+.supported-templates .amp-notice {
+	margin-bottom: 1rem;
+}
+
+.supported-templates .amp-setting-toggle p {
+	font-size: 13px;
+}
+
+.amp .amp-template-support-field > td {
+	padding-top: 1rem;
+
+	@media (min-width: 783px) {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		grid-gap: 1rem;
+	}
+}
+
+.mobile-redirection,
+.plugin-suppression {
+	margin-bottom: 2.25rem;
+}
+
+
+.amp.amp-settings .template-mode-selection > p {
+	font-size: 16px;
+	margin-bottom: 1rem;
+}
+
+.amp .form-table .amp-suppressed-plugins p {
+	font-size: 13px;
+}

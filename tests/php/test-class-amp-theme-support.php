@@ -6,6 +6,7 @@
  * @since 0.7
  */
 
+use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\ConfigurationArgument;
 use AmpProject\AmpWP\MobileRedirection;
 use AmpProject\AmpWP\Option;
@@ -259,7 +260,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		// Test legacy Reader mode.
 		add_theme_support( 'amp' );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
-		AMP_Options_Manager::update_option( Option::READER_THEME, AMP_Reader_Themes::DEFAULT_READER_THEME );
+		AMP_Options_Manager::update_option( Option::READER_THEME, ReaderThemes::DEFAULT_READER_THEME );
 		$this->go_to( amp_get_permalink( $post_id ) );
 		AMP_Theme_Support::finish_init();
 		$this->assertFalse( current_theme_supports( 'amp' ) );

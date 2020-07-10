@@ -6,6 +6,7 @@
  * @since 1.6.0
  */
 
+use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
 
 /**
@@ -25,7 +26,7 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 	/**
 	 * Reader themes provider class.
 	 *
-	 * @var AMP_Reader_Themes
+	 * @var ReaderThemes
 	 */
 	private $reader_themes;
 
@@ -39,9 +40,9 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 	/**
 	 * Constructor.
 	 *
-	 * @param AMP_Reader_Themes $reader_themes Reader themes helper class instance.
+	 * @param ReaderThemes $reader_themes Reader themes helper class instance.
 	 */
-	public function __construct( $reader_themes ) {
+	public function __construct( ReaderThemes $reader_themes ) {
 		$this->namespace     = 'amp/v1';
 		$this->rest_base     = 'options';
 		$this->reader_themes = $reader_themes;
@@ -136,7 +137,7 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 				'type'       => 'object',
 				'properties' => [
 					// Note: The sanitize_callback from AMP_Options_Manager::register_settings() is applying to this option.
-					Option::THEME_SUPPORT    => [
+					Option::THEME_SUPPORT           => [
 						'type' => 'string',
 						'enum' => [
 							AMP_Theme_Support::READER_MODE_SLUG,
@@ -144,7 +145,7 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 							AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
 						],
 					],
-					Option::READER_THEME     => [
+					Option::READER_THEME            => [
 						'type'        => 'string',
 						'arg_options' => [
 							'validate_callback' => function ( $value ) {
@@ -153,18 +154,21 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 							},
 						],
 					],
-					Option::MOBILE_REDIRECT  => [
+					Option::MOBILE_REDIRECT         => [
 						'type'    => 'boolean',
 						'default' => false,
 					],
-					self::PREVIEW_PERMALINK  => [
+					self::PREVIEW_PERMALINK         => [
 						'type'     => 'string',
 						'readonly' => true,
 						'format'   => 'url',
 					],
-					Option::WIZARD_COMPLETED => [
+					Option::PLUGIN_CONFIGURED       => [
 						'type'    => 'boolean',
 						'default' => false,
+					],
+					Option::ALL_TEMPLATES_SUPPORTED => [
+						'type' => 'boolean',
 					],
 				],
 			];

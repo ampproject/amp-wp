@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\AmpWpPluginFactory;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
@@ -101,7 +102,6 @@ function amp_init() {
 	add_action( 'admin_init', 'AMP_Options_Manager::init' );
 	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
 	add_action( 'rest_api_init', 'AMP_Options_Manager::register_settings' );
-	add_action( 'wp_loaded', 'amp_add_options_menu' );
 	add_action( 'wp_loaded', 'amp_bootstrap_admin' );
 
 	add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
@@ -157,7 +157,7 @@ function amp_init() {
 		'rest_api_init',
 		static function() {
 			if ( amp_should_use_new_onboarding() ) {
-				$reader_themes = new AMP_Reader_Themes();
+				$reader_themes = new ReaderThemes();
 
 				$reader_theme_controller = new AMP_Reader_Theme_REST_Controller( $reader_themes );
 				$reader_theme_controller->register_routes();
@@ -341,7 +341,7 @@ function amp_is_legacy() {
 	return (
 		AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
 		&&
-		AMP_Reader_Themes::DEFAULT_READER_THEME === AMP_Options_Manager::get_option( Option::READER_THEME )
+		ReaderThemes::DEFAULT_READER_THEME === AMP_Options_Manager::get_option( Option::READER_THEME )
 	);
 }
 
@@ -435,7 +435,7 @@ function is_amp_available() {
 	$has_reader_theme = (
 		AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
 		&&
-		AMP_Reader_Themes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME )
+		ReaderThemes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME )
 	);
 	if ( $has_reader_theme && is_customize_preview() ) {
 		return true;
