@@ -288,18 +288,17 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 
 		$xpath_selectors = [ '//p[ @id = "foo" ]' ];
 
-		$html = '<p id="foo"></p> <p id="bar"></p>';
-		$dom  = AMP_DOM_Utils::get_dom_from_content( $html );
+		$html     = '<p id="foo"></p> <p id="bar"></p>';
+		$expected = '<p id="foo" data-ampdevmode=""></p> <p id="bar"></p>';
 
-		$instance = new AMP_Core_Theme_Sanitizer( $dom );
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $html );
+		$sanitizer = new AMP_Core_Theme_Sanitizer( $dom );
 
 		$wp_customize->start_previewing_theme();
-		$instance->prevent_sanitize_in_customizer_preview( $xpath_selectors );
+		$sanitizer->prevent_sanitize_in_customizer_preview( $xpath_selectors );
 		$wp_customize->stop_previewing_theme();
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
-
-		$expected = $html = '<p id="foo" data-ampdevmode=""></p> <p id="bar"></p>';
 
 		$this->assertEquals( $expected, $content );
 	}
