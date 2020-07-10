@@ -58,7 +58,7 @@ class AMP_Post_Type_Support {
 	 */
 	public static function get_post_types_for_rest_api() {
 		return array_intersect(
-			get_post_types_by_support( 'amp' ),
+			self::get_supported_post_types(),
 			get_post_types(
 				[
 					'show_in_rest' => true,

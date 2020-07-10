@@ -489,11 +489,7 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 					array_filter(
 						AMP_Theme_Support::get_supportable_templates(),
 						static function( $option ) {
-							return (
-								( empty( $option['immutable'] ) && ! empty( $option['user_supported'] ) )
-								||
-								! empty( $option['supported'] )
-							);
+							return ! empty( $option['supported'] );
 						}
 					)
 				)

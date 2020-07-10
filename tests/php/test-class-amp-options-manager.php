@@ -136,7 +136,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertEquals(
 			[
 				Option::THEME_SUPPORT           => AMP_Theme_Support::READER_MODE_SLUG,
-				Option::SUPPORTED_POST_TYPES    => [ 'post' ],
+				Option::SUPPORTED_POST_TYPES    => [ 'post' => true ],
 				Option::ANALYTICS               => [],
 				Option::ALL_TEMPLATES_SUPPORTED => true,
 				Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
@@ -144,7 +144,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				Option::VERSION                 => AMP__VERSION,
 				Option::MOBILE_REDIRECT         => false,
 				Option::READER_THEME            => 'legacy',
-				Option::MOBILE_REDIRECT         => false,
 				Option::PLUGIN_CONFIGURED       => false,
 			],
 			AMP_Options_Manager::get_options()
@@ -153,12 +152,19 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertSame( 'default', AMP_Options_Manager::get_option( 'foo', 'default' ) );
 
 		// Test supported_post_types validation.
-		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, [ 'post', 'page', 'attachment' ] );
+		AMP_Options_Manager::update_option(
+			Option::SUPPORTED_POST_TYPES,
+			[
+				'post'       => true,
+				'page'       => 'false',
+				'attachment' => false,
+			]
+		);
 		$this->assertSame(
 			[
-				'post',
-				'page',
-				'attachment',
+				'post'       => true,
+				'page'       => false,
+				'attachment' => false,
 			],
 			AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES )
 		);
