@@ -23,14 +23,16 @@ const sharedConfig = {
 		chunkFilename: '[name].js',
 	},
 	plugins: [
-		...defaultConfig.plugins.map(
-			( plugin ) => {
-				if ( plugin.constructor.name === 'MiniCssExtractPlugin' ) {
-					plugin.options.filename = '../css/[name].css';
-				}
-				return plugin;
-			},
-		),
+		...defaultConfig.plugins
+			.map(
+				( plugin ) => {
+					if ( plugin.constructor.name === 'MiniCssExtractPlugin' ) {
+						plugin.options.filename = '../css/[name].css';
+					}
+					return plugin;
+				},
+			)
+			.filter( ( plugin ) => plugin.constructor.name !== 'CleanWebpackPlugin' ),
 		new RtlCssPlugin( {
 			filename: '../css/[name]-rtl.css',
 		} ),
