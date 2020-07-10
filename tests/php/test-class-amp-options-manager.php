@@ -42,6 +42,10 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		parent::tearDown();
 		$GLOBALS['_wp_using_ext_object_cache'] = $this->was_wp_using_ext_object_cache;
 		unregister_post_type( 'foo' );
+
+		foreach ( get_post_types() as $post_type ) {
+			remove_post_type_support( $post_type, 'amp' );
+		}
 	}
 
 	/**
@@ -272,6 +276,50 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$entries = AMP_Options_Manager::get_option( Option::ANALYTICS );
 		$this->assertCount( 1, $entries );
 		$this->assertArrayNotHasKey( $id, $entries );
+	}
+
+	/**
+	 * Test get_options when supported_post_types option is list of post types and when post type support is added for default values.
+	 *
+	 * @covers AMP_Options_Manager::get_options()
+	 */
+	public function test_get_options_migration_supported_post_types() {
+		foreach ( get_post_types() as $post_type ) {
+			remove_post_type_support( $post_type, 'amp' );
+		}
+
+		// Make sure that the old simple list of post types gets migrated to an associative array.
+		update_option( AMP_Options_Manager::OPTION_NAME, [ Option::SUPPORTED_POST_TYPES => [ 'page', 'attachment' ] ] );
+		$this->assertEquals(
+			[
+				'page'       => true,
+				'attachment' => true,
+			],
+			AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES )
+		);
+
+		// Make sure the post type support get migrated.
+		delete_option( AMP_Options_Manager::OPTION_NAME );
+		add_post_type_support( 'page', 'amp' );
+		$this->assertEquals(
+			[
+				'post' => true, // Enabled by default.
+				'page' => true,
+			],
+			AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES )
+		);
+
+		// Make sure that the old simple list _and_ the post type support get migrated.
+		delete_option( AMP_Options_Manager::OPTION_NAME );
+		add_post_type_support( 'page', 'amp' );
+		update_option( AMP_Options_Manager::OPTION_NAME, [ Option::SUPPORTED_POST_TYPES => [ 'attachment' ] ] );
+		$this->assertEquals(
+			[
+				'page'       => true,
+				'attachment' => true,
+			],
+			AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES )
+		);
 	}
 
 	/**
