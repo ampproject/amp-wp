@@ -105,7 +105,7 @@ class AMP_Options_Manager {
 
 		// Migrate legacy amp post type support to be reflected in the default supported_post_types value.
 		if ( ! isset( $options[ Option::SUPPORTED_POST_TYPES ] ) ) {
-			foreach ( get_post_types_by_support( 'amp' ) as $post_type ) {
+			foreach ( (array) get_post_types_by_support( 'amp' ) as $post_type ) {
 				$defaults[ Option::SUPPORTED_POST_TYPES ][ $post_type ] = true;
 			}
 		}
@@ -123,19 +123,20 @@ class AMP_Options_Manager {
 			);
 		}
 
-		/**
-		 * Filters default options.
-		 *
-		 * @internal
-		 * @param array $defaults Default options.
-		 */
-		$defaults = (array) apply_filters( 'amp_default_options', $defaults );
-
-		$options = array_merge( $defaults, $options );
+		$options = array_merge(
+			$defaults,
+			/**
+			 * Filters default options.
+			 *
+			 * @internal
+			 * @param array $defaults Default options.
+			 */
+			(array) apply_filters( 'amp_default_options', $defaults ),
+			$options
+		);
 
 		// Ensure current template mode.
 		if (
-			isset( $options[ Option::THEME_SUPPORT ] ) &&
 			AMP_Theme_Support::READER_MODE_SLUG === $options[ Option::THEME_SUPPORT ]
 			&&
 			get_template() === $options[ Option::READER_THEME ]
@@ -153,13 +154,13 @@ class AMP_Options_Manager {
 			 * go back to being in Reader mode as opposed to Transitional.
 			 */
 			$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
-		} elseif ( isset( $options[ Option::THEME_SUPPORT ] ) && 'native' === $options[ Option::THEME_SUPPORT ] ) {
+		} elseif ( 'native' === $options[ Option::THEME_SUPPORT ] ) {
 			// The slug 'native' is the old term for 'standard'.
 			$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::STANDARD_MODE_SLUG;
-		} elseif ( isset( $options[ Option::THEME_SUPPORT ] ) && 'paired' === $options[ Option::THEME_SUPPORT ] ) {
+		} elseif ( 'paired' === $options[ Option::THEME_SUPPORT ] ) {
 			// The slug 'paired' is the old term for 'transitional.
 			$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
-		} elseif ( isset( $options[ Option::THEME_SUPPORT ] ) && 'disabled' === $options[ Option::THEME_SUPPORT ] ) {
+		} elseif ( 'disabled' === $options[ Option::THEME_SUPPORT ] ) {
 			/*
 			 * Prior to 1.2, the theme support slug for Reader mode was 'disabled'. This would be saved in options for
 			 * themes that had 'amp' theme support defined. Also prior to 1.2, the user could not switch between modes
