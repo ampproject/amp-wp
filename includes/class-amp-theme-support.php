@@ -553,15 +553,6 @@ class AMP_Theme_Support {
 			);
 		}
 
-		$theme_support_args = self::get_theme_support_args();
-		if ( isset( $theme_support_args['templates_supported'] ) ) {
-			_doing_it_wrong(
-				'add_theme_support',
-				esc_html__( 'The AMP plugin no longer considers the `templates_supported` argument when adding amp theme support. This is controlled exclusively via the UI.', 'amp' ),
-				'1.6'
-			);
-		}
-
 		$all_templates_supported = AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED );
 
 		// Make sure global $wp_query is set in case of conditionals that unfortunately look at global scope.
