@@ -1,0 +1,90 @@
+.summary .selectable {
+	margin-bottom: 2.25rem;
+	padding: 40px 30px;
+}
+
+.summary .amp-notice {
+	margin-bottom: 1.5rem;
+}
+
+/**
+ * Reader-specific styles.
+ */
+.reader-summary__screens .amp-description {
+	display: -webkit-box;
+	font-size: 13px;
+	line-height: 1.85;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 4;
+	overflow: hidden;
+}
+
+.reader-summary__description {
+	margin-bottom: 1.5rem;
+}
+
+.reader-summary__screens img {
+	width: 100%;
+	height: auto;
+}
+
+.reader-summary__screens .selectable {
+	padding: 35px 30px;
+}
+
+/**
+ * Summary header component.
+ */
+.summary-header__header {
+	align-items: center;
+	border-bottom: 1px solid var(--light-gray);
+	display: flex;
+	font-family: var(--font-poppins);
+	margin-bottom: 1.5rem;
+	padding-bottom: 0.5rem;
+}
+
+.summary-header__header h2 {
+	font-size: 24px;
+	font-weight: 700;
+}
+
+.summary-header__illustration {
+	margin-right: 1.5rem;
+}
+
+.summary-header p {
+	font-size: 1rem;
+	line-height: 1.5;
+}
+
+.summary-header p:last-child {
+	margin-bottom: 0;
+}
+
+/**
+ * Summary screenshot component.
+ */
+.summary-screenshot {
+	align-items: start;
+	padding-bottom: 3rem;
+	position: relative;
+}
+
+.summary-screenshot h3 {
+	font-size: 1.5rem;
+}
+
+.summary-screenshot p {
+	font-size: 1rem;
+	line-height: 1.5;
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 6;
+	overflow: hidden;
+}
+
+.summary-screenshot img {
+	height: auto;
+	width: 100%;
+}

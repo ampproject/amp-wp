@@ -2,11 +2,11 @@
 /**
  * Internal dependencies
  */
-import { completeWizard, testCloseButton, cleanUpWizard } from '../../utils/onboarding-wizard-utils';
+import { completeWizard, testCloseButton, cleanUpSettings } from '../../utils/onboarding-wizard-utils';
 
 describe( 'Done', () => {
 	afterEach( async () => {
-		await cleanUpWizard();
+		await cleanUpSettings();
 	} );
 
 	it( 'renders standard mode done screen', async () => {

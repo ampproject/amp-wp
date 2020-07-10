@@ -3,14 +3,14 @@
  */
 import { visitAdminPage, isCurrentURL } from '@wordpress/e2e-test-utils';
 
-export const NEXT_BUTTON_SELECTOR = '.amp-setup-nav__prev-next button.is-primary';
-export const PREV_BUTTON_SELECTOR = '.amp-setup-nav__prev-next button:not(.is-primary)';
+export const NEXT_BUTTON_SELECTOR = '.onboarding-wizard-nav__prev-next button.is-primary';
+export const PREV_BUTTON_SELECTOR = '.onboarding-wizard-nav__prev-next button:not(.is-primary)';
 
 export async function goToOnboardingWizard() {
-	if ( ! isCurrentURL( 'admin.php', 'page=amp-setup' ) ) {
-		await visitAdminPage( 'admin.php', 'page=amp-setup' );
+	if ( ! isCurrentURL( 'admin.php', 'page=amp-onboarding-wizard' ) ) {
+		await visitAdminPage( 'admin.php', 'page=amp-onboarding-wizard' );
 	}
-	await page.waitForSelector( '#amp-setup' );
+	await page.waitForSelector( '#amp-onboarding-wizard' );
 }
 
 export async function clickNextButton() {
@@ -42,8 +42,8 @@ export async function moveToTemplateModeScreen( { technical } ) {
 }
 
 export async function clickMode( mode ) {
-	await page.$eval( `[for="${ mode }-mode"]`, ( el ) => el.click() );
-	await page.waitForSelector( `#${ mode }-mode:checked` );
+	await page.$eval( `[for="template-mode-${ mode }"]`, ( el ) => el.click() );
+	await page.waitForSelector( `#template-mode-${ mode }:checked` );
 }
 
 export async function moveToReaderThemesScreen( { technical } ) {
@@ -62,7 +62,7 @@ export async function selectReaderTheme( theme = 'legacy' ) {
 
 export async function moveToSummaryScreen( { technical = true, mode, readerTheme = 'legacy' } ) {
 	if ( mode === 'reader' ) {
-		await moveToReaderThemesScreen( [ technical ] );
+		await moveToReaderThemesScreen( { technical } );
 		await selectReaderTheme( readerTheme );
 	} else {
 		await moveToTemplateModeScreen( { technical } );
@@ -78,14 +78,14 @@ export async function completeWizard( { technical = true, mode, readerTheme = 'l
 	await moveToSummaryScreen( { technical, mode, readerTheme, mobileRedirect } );
 
 	if ( 'standard' !== mode ) {
-		await page.waitForSelector( '.redirect-toggle input' );
+		await page.waitForSelector( '.amp-setting-toggle input' );
 
-		const selector = '.redirect-toggle input:checked';
+		const selector = '.amp-setting-toggle input:checked';
 		const checkedMobileRedirect = await page.$( selector );
 
 		if ( checkedMobileRedirect && false === mobileRedirect ) {
 			await expect( page ).toClick( selector );
-			await page.waitForSelector( '.redirect-toggle input:not(:checked)' );
+			await page.waitForSelector( '.amp-setting-toggle input:not(:checked)' );
 		} else if ( ! checkedMobileRedirect && true === mobileRedirect ) {
 			await expect( page ).toClick( selector );
 			await page.waitForSelector( selector );
@@ -121,9 +121,10 @@ export function testTitle( { text, element = 'h1' } ) {
 }
 
 /**
- * Reset data modified by the setup wizard.
+ * Reset plugin configuration.
  */
-export async function cleanUpWizard() {
+export async function cleanUpSettings() {
+	await visitAdminPage( 'admin.php', 'page=amp-options' );
 	await page.evaluate( async () => {
 		await Promise.all( [
 			wp.apiFetch( { path: '/wp/v2/users/me', method: 'POST', data: { amp_dev_tools_enabled: true } } ),
@@ -131,7 +132,7 @@ export async function cleanUpWizard() {
 				mobile_redirect: false,
 				reader_theme: 'legacy',
 				theme_support: 'reader',
-				wizard_completed: false,
+				plugin_configured: false,
 			} } ),
 		],
 		);

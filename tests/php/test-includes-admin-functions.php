@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
 
 /**
@@ -30,7 +31,7 @@ class Test_AMP_Admin_Includes_Functions extends WP_UnitTestCase {
 	/** @covers ::amp_init_customizer() */
 	public function test_amp_init_customizer_legacy_reader() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
-		AMP_Options_Manager::update_option( Option::READER_THEME, AMP_Reader_Themes::DEFAULT_READER_THEME );
+		AMP_Options_Manager::update_option( Option::READER_THEME, ReaderThemes::DEFAULT_READER_THEME );
 		amp_init_customizer();
 		$this->assertTrue( amp_is_legacy() );
 		$this->assertEquals( 500, has_action( 'customize_register', [ 'AMP_Template_Customizer', 'init' ] ) );

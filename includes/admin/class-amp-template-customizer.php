@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
 
 /**
@@ -50,7 +51,7 @@ class AMP_Template_Customizer {
 		$self->wp_customize = $wp_customize;
 
 		$is_reader_mode   = ( AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
-		$has_reader_theme = ( AMP_Reader_Themes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME ) );
+		$has_reader_theme = ( ReaderThemes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME ) );
 
 		$is_customizing_reader_theme = (
 			$is_reader_mode

@@ -19,13 +19,13 @@ describe( 'Reader themes', () => {
 
 	it( 'should allow different themes to be selected', async () => {
 		await selectReaderTheme( 'legacy' );
-		await expect( page ).toMatchElement( '.selectable--selected h2', { text: 'AMP Legacy' } );
+		await expect( page ).toMatchElement( '.selectable--selected h3', { text: 'AMP Legacy' } );
 
 		await selectReaderTheme( 'twentynineteen' );
-		await expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Twenty Nineteen' } );
+		await expect( page ).toMatchElement( '.selectable--selected h3', { text: 'Twenty Nineteen' } );
 
 		await selectReaderTheme( 'twentysixteen' );
-		await expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Twenty Sixteen' } );
+		await expect( page ).toMatchElement( '.selectable--selected h3', { text: 'Twenty Sixteen' } );
 
 		testNextButton( { text: 'Next' } );
 	} );
