@@ -63,7 +63,6 @@ function amp_admin_get_preview_permalink() {
 			'no_found_rows'    => true,
 			'suppress_filters' => false,
 			'post_status'      => 'publish',
-			'post_password'    => '', // @todo Not needed anymore because password-protected posts are now supported.
 			'post_type'        => $supported_post_types, // @todo This is not needed if ( ! amp_is_legacy() && AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) ).
 			'posts_per_page'   => 1,
 			'fields'           => 'ids',

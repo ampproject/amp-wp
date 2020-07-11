@@ -348,9 +348,6 @@ class AMP_Post_Meta_Box {
 				esc_url( admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ) )
 			);
 		}
-		if ( in_array( 'password-protected', $errors, true ) ) {
-			$error_messages[] = __( 'AMP cannot be enabled on password protected posts.', 'amp' );
-		}
 		if ( in_array( 'post-type-support', $errors, true ) ) {
 			$error_messages[] = sprintf(
 				/* translators: %s is a link to the AMP settings screen */
@@ -361,7 +358,7 @@ class AMP_Post_Meta_Box {
 		if ( in_array( 'skip-post', $errors, true ) ) {
 			$error_messages[] = __( 'A plugin or theme has disabled AMP support.', 'amp' );
 		}
-		if ( count( array_diff( $errors, [ 'page-on-front', 'page-for-posts', 'password-protected', 'post-type-support', 'skip-post', 'template_unsupported', 'no_matching_template' ] ) ) > 0 ) {
+		if ( count( array_diff( $errors, [ 'page-on-front', 'page-for-posts', 'post-type-support', 'skip-post', 'template_unsupported', 'no_matching_template' ] ) ) > 0 ) {
 			$error_messages[] = __( 'Unavailable for an unknown reason.', 'amp' );
 		}
 

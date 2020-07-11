@@ -298,11 +298,6 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$this->assertStringContains( 'There are no', $messages[0] );
 		$this->assertStringContains( 'page=amp-options', $messages[0] );
 
-		$this->assertEquals(
-			[ 'AMP cannot be enabled on password protected posts.' ],
-			$this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, [ 'password-protected' ] )
-		);
-
 		$messages = $this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, [ 'post-type-support' ] );
 		$this->assertStringContains( 'AMP cannot be enabled because this', $messages[0] );
 		$this->assertStringContains( 'page=amp-options', $messages[0] );
