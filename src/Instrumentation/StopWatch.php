@@ -16,14 +16,14 @@ use AmpProject\AmpWP\Exception\InvalidStopwatchEvent;
  *
  * @package AmpProject\AmpWP
  */
-class StopWatch {
+final class StopWatch {
 
 	/**
 	 * Collection of named events that the stopwatch is tracking.
 	 *
 	 * @var StopWatchEvent[]
 	 */
-	protected $events = [];
+	private $events = [];
 
 	/**
 	 * Start a named event.

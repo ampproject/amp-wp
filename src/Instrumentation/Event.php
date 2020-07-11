@@ -19,21 +19,21 @@ class Event {
 	 *
 	 * @var string
 	 */
-	private $name;
+	protected $name;
 
 	/**
 	 * Event description.
 	 *
 	 * @var string|null
 	 */
-	private $description;
+	protected $description;
 
 	/**
 	 * Additional properties of the event.
 	 *
 	 * @var string[]
 	 */
-	private $properties;
+	protected $properties;
 
 	/**
 	 * Event constructor.
