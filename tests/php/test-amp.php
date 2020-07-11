@@ -69,11 +69,6 @@ class Test_AMP extends WP_UnitTestCase {
 				true,
 				AMP_Theme_Support::STANDARD_MODE_SLUG,
 			],
-			'no_paired_arg'               => [
-				[],
-				false,
-				AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
-			],
 			'paired_without_template_dir' => [
 				[
 					AMP_Theme_Support::PAIRED_FLAG => true,
