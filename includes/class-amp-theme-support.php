@@ -269,9 +269,10 @@ class AMP_Theme_Support {
 			];
 		}
 		if ( ! isset( $support[0] ) || ! is_array( $support[0] ) ) {
-			return [];
+			return [ 'paired' => false ];
 		}
-		return $support[0];
+
+		return wp_parse_args( $support[0], [ 'paired' => false ] );
 	}
 
 	/**

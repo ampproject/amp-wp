@@ -11,9 +11,9 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AMP_Options_Manager;
 use AMP_Theme_Support;
+use AmpProject\AmpWP\Admin\ReaderThemes;
 use WP_Theme;
 use WP_Customize_Manager;
-use AMP_Reader_Themes;
 
 /**
  * Switches to the designated Reader theme when template mode enabled and when requesting an AMP page.
@@ -67,7 +67,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 
 		// If the Legacy Reader mode is active, then a Reader theme is not going to be served.
 		$reader_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
-		if ( AMP_Reader_Themes::DEFAULT_READER_THEME === $reader_theme ) {
+		if ( ReaderThemes::DEFAULT_READER_THEME === AMP_Options_Manager::get_option( Option::READER_THEME ) ) {
 			return false;
 		}
 
