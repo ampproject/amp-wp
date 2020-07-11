@@ -303,7 +303,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 *
 	 * @covers AMP_Options_Manager::get_options()
 	 */
-	public function test_get_options_migration_supported_post_types() {
+	public function test_get_options_migration_supported_post_types_defaults() {
 		foreach ( get_post_types() as $post_type ) {
 			remove_post_type_support( $post_type, 'amp' );
 		}
@@ -335,7 +335,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 *
 	 * @covers AMP_Options_Manager::get_options()
 	 */
-	public function test_get_options_migration_all_templates_supported() {
+	public function test_get_options_migration_all_templates_supported_defaults() {
 		delete_option( AMP_Options_Manager::OPTION_NAME );
 		add_theme_support( 'amp', [ 'templates_supported' => 'all' ] );
 		$this->assertTrue( AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) );
@@ -359,6 +359,71 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 			],
 			AMP_Options_Manager::get_option( Option::SUPPORTED_TEMPLATES )
 		);
+	}
+
+	/**
+	 * Test that get_options() will migrate options properly when there is theme support and post type support flags.
+	 *
+	 * @covers AMP_Options_Manager::get_options()
+	 */
+	public function test_get_options_migration_from_old_version_selective_templates_forced() {
+		$options = [
+			'theme_support'           => 'transitional',
+			'supported_post_types'    => [
+				'post',
+			],
+			'analytics'               => [],
+			'all_templates_supported' => false,
+			'supported_templates'     => [
+				'is_singular',
+				'is_404',
+				'is_category',
+			],
+			'version'                 => '1.5.5',
+		];
+		update_option( AMP_Options_Manager::OPTION_NAME, $options );
+
+		$this->assertEquals( $options, get_option( AMP_Options_Manager::OPTION_NAME ) );
+
+		add_post_type_support( 'page', 'amp' );
+		add_theme_support(
+			'amp',
+			[
+				'templates_supported' => [
+					'is_singular' => true,
+					'is_404'      => false,
+					'is_date'     => true,
+				],
+			]
+		);
+		$migrated_options = AMP_Options_Manager::get_options();
+
+		$this->assertFalse( $migrated_options[ Option::ALL_TEMPLATES_SUPPORTED ] );
+		$this->assertEquals(
+			[
+				'is_singular' => true,
+				'is_404'      => false,
+				'is_date'     => true,
+				'is_category' => true,
+			],
+			$migrated_options[ Option::SUPPORTED_TEMPLATES ]
+		);
+		$this->assertEquals(
+			[
+				'post' => true,
+				'page' => true,
+			],
+			$migrated_options[ Option::SUPPORTED_POST_TYPES ]
+		);
+
+		// Now verify that the templates_supported=>all theme support flag is also migrated.
+		update_option( AMP_Options_Manager::OPTION_NAME, $options );
+		add_theme_support(
+			'amp',
+			[ 'templates_supported' => 'all' ]
+		);
+		$migrated_options = AMP_Options_Manager::get_options();
+		$this->assertTrue( $migrated_options[ Option::ALL_TEMPLATES_SUPPORTED ] );
 	}
 
 	/**

@@ -175,14 +175,36 @@ class AMP_Options_Manager {
 			$options[ Option::THEME_SUPPORT ] = $defaults[ Option::THEME_SUPPORT ];
 		}
 
-		// Migrate supported post types.
+		// Make sure supported posts types are stored as associative array mapping post type to boolean, rather than just a list of post type strings.
 		if ( isset( $options[ Option::SUPPORTED_POST_TYPES ][0] ) ) {
 			$options[ Option::SUPPORTED_POST_TYPES ] = array_fill_keys( $options[ Option::SUPPORTED_POST_TYPES ], true );
 		}
 
-		// Migrate supported templates.
+		// Make sure supported templates are stored as associative array mapping template to boolean, rather than just a list of template ID strings.
 		if ( isset( $options[ Option::SUPPORTED_TEMPLATES ][0] ) ) {
 			$options[ Option::SUPPORTED_TEMPLATES ] = array_fill_keys( $options[ Option::SUPPORTED_TEMPLATES ], true );
+		}
+
+		// Migrate options from 1.5 to 1.6.
+		if ( isset( $options['version'] ) && version_compare( $options['version'], '1.6', '<' ) ) {
+
+			// Make sure programmatic post type support is persisted in the DB.
+			foreach ( (array) get_post_types_by_support( 'amp' ) as $post_type ) {
+				$options[ Option::SUPPORTED_POST_TYPES ][ $post_type ] = true;
+			}
+
+			// It also used to be that the themes_supported flag overrode the options, so make sure the option gets updated to reflect the theme support.
+			if ( isset( $theme_support['templates_supported'] ) ) {
+				if ( 'all' === $theme_support['templates_supported'] ) {
+					$options[ Option::ALL_TEMPLATES_SUPPORTED ] = true;
+				} elseif ( is_array( $theme_support['templates_supported'] ) ) {
+					$options[ Option::ALL_TEMPLATES_SUPPORTED ] = false;
+					$options[ Option::SUPPORTED_TEMPLATES ]     = array_merge(
+						$options[ Option::SUPPORTED_TEMPLATES ],
+						array_map( 'rest_sanitize_boolean', $theme_support['templates_supported'] )
+					);
+				}
+			}
 		}
 
 		unset(
