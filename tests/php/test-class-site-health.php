@@ -365,7 +365,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, $supported_templates );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, $theme_support );
-		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, array_fill_keys( $supported_content_types, true ) );
+		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, $supported_content_types );
 
 		$this->assertEquals( $expected, $this->call_private_method( $this->instance, 'get_supported_templates' ) );
 	}

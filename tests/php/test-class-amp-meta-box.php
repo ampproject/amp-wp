@@ -205,13 +205,12 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$this->assertStringContains( $checkbox_enabled, $output );
 
 		// Post type no longer supports AMP, so no status input.
-		$supported_post_types         = AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES );
-		$supported_post_types['post'] = false;
+		$supported_post_types = array_diff( AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES ), [ 'post' ] );
 		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, $supported_post_types );
 		$output = get_echo( [ $this->instance, 'render_status' ], [ $post ] );
 		$this->assertStringContains( 'This post type is not', $output );
 		$this->assertStringNotContains( $checkbox_enabled, $output );
-		$supported_post_types['post'] = true;
+		$supported_post_types[] = 'post';
 		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, $supported_post_types );
 
 		// No template is available to render the post.
@@ -262,8 +261,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		);
 
 		// If post type doesn't support AMP, this method should return AMP as being disabled.
-		$supported_post_types         = AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES );
-		$supported_post_types['post'] = false;
+		$supported_post_types = array_diff( AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES ), [ 'post' ] );
 		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, $supported_post_types );
 		remove_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
 		$this->assertEquals(
@@ -273,7 +271,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 			],
 			$this->instance->get_status_and_errors( $post )
 		);
-		$supported_post_types['post'] = true;
+		$supported_post_types[] = 'post';
 		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, $supported_post_types );
 
 		// There's no template to render this post, so this method should also return AMP as disabled.
@@ -425,8 +423,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 
 		// AMP status should be disabled if AMP is not supported for the `post` post type.
-		$supported_post_types         = AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES );
-		$supported_post_types['post'] = false;
+		$supported_post_types = array_diff( AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES ), [ 'post' ] );
 		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, $supported_post_types );
 		$id = self::factory()->post->create();
 		$this->assertFalse(
@@ -434,7 +431,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		);
 
 		// AMP status should be enabled if AMP is supported for the `post` post type.
-		$supported_post_types['post'] = true;
+		$supported_post_types[] = 'post';
 		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, $supported_post_types );
 		$id = self::factory()->post->create();
 		$this->assertTrue(

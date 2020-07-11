@@ -154,16 +154,15 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		// Make sure that no upgrade happened when the user is not logged-in.
 		do_action( 'after_setup_theme' );
 		$this->assertEquals( 0, did_action( 'amp_plugin_update' ) );
-		$this->assertEquals(
-			array_fill_keys( [ 'post', 'page' ], true ),
+		$this->assertEqualSets(
+			[ 'post', 'page' ],
 			AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES )
 		);
-		$this->assertEquals(
+		$this->assertEqualSets(
 			[
-				'is_singular' => true,
-				'is_404'      => false,
-				'is_category' => true,
-				'is_date'     => true,
+				'is_singular',
+				'is_category',
+				'is_date',
 			],
 			AMP_Options_Manager::get_option( Option::SUPPORTED_TEMPLATES )
 		);

@@ -368,6 +368,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		<fieldset id="supported_post_types_fieldset" class="hidden">
 			<?php
 			$supported_post_types = AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES );
+			$element_name         = sprintf( '%s[supported_post_types][]', AMP_Options_Manager::OPTION_NAME );
 			?>
 			<h4 class="title"><?php esc_html_e( 'Content Types', 'amp' ); ?></h4>
 			<p>
@@ -377,16 +378,17 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			<?php foreach ( array_map( 'get_post_type_object', AMP_Post_Type_Support::get_eligible_post_types() ) as $post_type ) : ?>
 				<li>
 					<?php
-					$element_name = sprintf( '%s[supported_post_types][%s]', AMP_Options_Manager::OPTION_NAME, $post_type->name );
-					$supported    = ! empty( $supported_post_types[ $post_type->name ] );
+					$element_id = sprintf( '%s[supported_post_types][%s]', AMP_Options_Manager::OPTION_NAME, $post_type->name );
+					$supported  = in_array( $post_type->name, $supported_post_types, true );
 					?>
 					<input
 						type="checkbox"
-						id="<?php echo esc_attr( $element_name ); ?>"
+						id="<?php echo esc_attr( $element_id ); ?>"
+						name="<?php echo esc_attr( $element_name ); ?>"
+						value="<?php echo esc_attr( $post_type->name ); ?>"
 						<?php checked( $supported ); ?>
 						>
-					<input type="hidden" name="<?php echo esc_attr( $element_name ); ?>" value="<?php echo esc_attr( wp_json_encode( $supported ) ); ?>">
-					<label for="<?php echo esc_attr( $element_name ); ?>">
+					<label for="<?php echo esc_attr( $element_id ); ?>">
 						<?php echo esc_html( $post_type->label ); ?>
 					</label>
 				</li>
@@ -416,7 +418,9 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	 */
 	private function list_template_conditional_options( $options, $parent = null ) {
 		$supported_templates = AMP_Options_Manager::get_option( Option::SUPPORTED_TEMPLATES );
+		$element_name        = sprintf( '%s[supported_templates][]', AMP_Options_Manager::OPTION_NAME );
 		?>
+		<input type="hidden" name="<?php echo esc_attr( $element_name ); ?>" value=""><!-- Included to make sure that the supported_templates get updated if no checkboxes are checked. -->
 		<ul>
 			<?php foreach ( $options as $id => $option ) : ?>
 				<?php
@@ -429,17 +433,15 @@ class OptionsMenu implements Conditional, Service, Registerable {
 				if ( empty( $option['label'] ) ) {
 					continue;
 				}
-
-				$element_name = sprintf( '%s[supported_templates][%s]', AMP_Options_Manager::OPTION_NAME, rawurlencode( $id ) );
-				$supported    = ! empty( $supported_templates[ $id ] )
 				?>
 				<li>
 					<input
 						type="checkbox"
 						id="<?php echo esc_attr( $element_id ); ?>"
-						<?php checked( $supported ); ?>
+						name="<?php echo esc_attr( $element_name ); ?>"
+						value="<?php echo esc_attr( $id ); ?>"
+						<?php checked( in_array( $id, $supported_templates, true ) ); ?>
 					>
-					<input type="hidden" name="<?php echo esc_attr( $element_name ); ?>" value="<?php echo esc_attr( wp_json_encode( ! empty( $supported_templates[ $id ] ) ) ); ?>">
 					<label for="<?php echo esc_attr( $element_id ); ?>">
 						<?php echo esc_html( $option['label'] ); ?>
 					</label>

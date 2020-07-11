@@ -76,7 +76,7 @@ class AMP_Post_Type_Support {
 		if ( ! amp_is_legacy() && AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) ) {
 			return self::get_eligible_post_types();
 		}
-		return array_keys( array_filter( AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES, [] ) ) );
+		return AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES, [] );
 	}
 
 	/**

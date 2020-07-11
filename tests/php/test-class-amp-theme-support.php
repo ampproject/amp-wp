@@ -701,9 +701,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertTrue( $availability['supported'] );
 		$this->assertEquals( 'is_special', $availability['template'] );
 
-		$supported_post_types = array_merge(
+		$supported_post_types = array_diff(
 			AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES ),
-			[ 'page' => false ]
+			[ 'page' ]
 		);
 		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, $supported_post_types );
 		$availability = AMP_Theme_Support::get_template_availability( self::factory()->post->create_and_get( [ 'post_type' => 'page' ] ) );
@@ -712,7 +712,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( 'is_page', $availability['template'] );
 		AMP_Options_Manager::update_option(
 			Option::SUPPORTED_POST_TYPES,
-			array_merge( $supported_post_types, [ 'page' => true ] )
+			array_merge( $supported_post_types, [ 'page' ] )
 		);
 		$availability = AMP_Theme_Support::get_template_availability( self::factory()->post->create_and_get( [ 'post_type' => 'page' ] ) );
 		$this->assertTrue( $availability['supported'] );

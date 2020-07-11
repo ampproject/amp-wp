@@ -140,10 +140,10 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertEquals(
 			[
 				Option::THEME_SUPPORT           => AMP_Theme_Support::READER_MODE_SLUG,
-				Option::SUPPORTED_POST_TYPES    => [ 'post' => true ],
+				Option::SUPPORTED_POST_TYPES    => [ 'post' ],
 				Option::ANALYTICS               => [],
 				Option::ALL_TEMPLATES_SUPPORTED => true,
-				Option::SUPPORTED_TEMPLATES     => [ 'is_singular' => true ],
+				Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
 				Option::SUPPRESSED_PLUGINS      => [],
 				Option::VERSION                 => AMP__VERSION,
 				Option::MOBILE_REDIRECT         => false,
@@ -158,18 +158,10 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		// Test supported_post_types validation.
 		AMP_Options_Manager::update_option(
 			Option::SUPPORTED_POST_TYPES,
-			[
-				'post'       => true,
-				'page'       => 'false',
-				'attachment' => false,
-			]
+			[ 'post' ]
 		);
 		$this->assertSame(
-			[
-				'post'       => true,
-				'page'       => false,
-				'attachment' => false,
-			],
+			[ 'post' ],
 			AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES )
 		);
 
@@ -177,18 +169,14 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option(
 			Option::SUPPORTED_TEMPLATES,
 			[
-				'is_singular' => 'false',
-				'is_search'   => 'true',
-				'is_date'     => false,
-				'is_category' => true,
+				'is_search',
+				'is_category',
 			]
 		);
 		$this->assertSame(
 			[
-				'is_singular' => false,
-				'is_search'   => true,
-				'is_date'     => false,
-				'is_category' => true,
+				'is_search',
+				'is_category',
 			],
 			AMP_Options_Manager::get_option( Option::SUPPORTED_TEMPLATES )
 		);
@@ -308,23 +296,13 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 			remove_post_type_support( $post_type, 'amp' );
 		}
 
-		// Make sure that the old simple list of post types gets migrated to an associative array.
-		update_option( AMP_Options_Manager::OPTION_NAME, [ Option::SUPPORTED_POST_TYPES => [ 'page', 'attachment' ] ] );
-		$this->assertEquals(
-			[
-				'page'       => true,
-				'attachment' => true,
-			],
-			AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES )
-		);
-
 		// Make sure the post type support get migrated.
 		delete_option( AMP_Options_Manager::OPTION_NAME );
 		add_post_type_support( 'page', 'amp' );
 		$this->assertEquals(
 			[
-				'post' => true, // Enabled by default.
-				'page' => true,
+				'post', // Enabled by default.
+				'page',
 			],
 			AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES )
 		);
@@ -353,9 +331,8 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertFalse( AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) );
 		$this->assertEquals(
 			[
-				'is_singular' => true,
-				'is_search'   => true,
-				'is_archive'  => false,
+				'is_singular',
+				'is_search',
 			],
 			AMP_Options_Manager::get_option( Option::SUPPORTED_TEMPLATES )
 		);
@@ -399,19 +376,18 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$migrated_options = AMP_Options_Manager::get_options();
 
 		$this->assertFalse( $migrated_options[ Option::ALL_TEMPLATES_SUPPORTED ] );
-		$this->assertEquals(
+		$this->assertEqualSets(
 			[
-				'is_singular' => true,
-				'is_404'      => false,
-				'is_date'     => true,
-				'is_category' => true,
+				'is_singular',
+				'is_date',
+				'is_category',
 			],
-			$migrated_options[ Option::SUPPORTED_TEMPLATES ]
+			array_unique( $migrated_options[ Option::SUPPORTED_TEMPLATES ] )
 		);
 		$this->assertEquals(
 			[
-				'post' => true,
-				'page' => true,
+				'post',
+				'page',
 			],
 			$migrated_options[ Option::SUPPORTED_POST_TYPES ]
 		);
@@ -436,8 +412,8 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		update_option( AMP_Options_Manager::OPTION_NAME, [ Option::SUPPORTED_TEMPLATES => [ 'is_singular', 'is_search' ] ] );
 		$this->assertEquals(
 			[
-				'is_singular' => true,
-				'is_search'   => true,
+				'is_singular',
+				'is_search',
 			],
 			AMP_Options_Manager::get_option( Option::SUPPORTED_TEMPLATES )
 		);
@@ -455,14 +431,12 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				],
 			]
 		);
-		$this->assertEquals(
+		$this->assertEqualSets(
 			[
-				'is_archive'  => true,
-				'is_search'   => false,
-				'is_404'      => false,
-				'is_singular' => true,
+				'is_archive',
+				'is_singular',
 			],
-			AMP_Options_Manager::get_option( Option::SUPPORTED_TEMPLATES )
+			array_unique( AMP_Options_Manager::get_option( Option::SUPPORTED_TEMPLATES ) )
 		);
 	}
 

@@ -77,7 +77,7 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 		$this->assertEquals( [ 'post-type-support' ], AMP_Post_Type_Support::get_support_errors( $book_id ) );
 		$supported_post_types = array_merge(
 			AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES ),
-			[ 'book' => true ]
+			[ 'book' ]
 		);
 		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, $supported_post_types );
 		$this->assertEmpty( AMP_Post_Type_Support::get_support_errors( $book_id ) );

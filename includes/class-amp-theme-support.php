@@ -894,7 +894,7 @@ class AMP_Theme_Support {
 				$did_filter_supply_immutable = true;
 			}
 
-			$template['supported']      = $are_all_supported || ! empty( $supported_templates[ $id ] );
+			$template['supported']      = $are_all_supported || in_array( $id, $supported_templates, true );
 			$template['user_supported'] = $template['supported']; // Obsolete.
 			$template['immutable']      = false; // Obsolete.
 		}
