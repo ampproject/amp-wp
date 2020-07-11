@@ -43,7 +43,6 @@ final class MobileRedirection implements Service, Registerable {
 	 */
 	public function register() {
 		add_filter( 'amp_default_options', [ $this, 'filter_default_options' ] );
-		add_action( 'amp_options_menu_items', [ $this, 'add_settings_field' ], 10 );
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
 
 		if ( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ) {
@@ -71,56 +70,10 @@ final class MobileRedirection implements Service, Registerable {
 	 * @return array Sanitized options.
 	 */
 	public function sanitize_options( $options, $new_options ) {
-		$options[ Option::MOBILE_REDIRECT ] = (
-			isset( $new_options[ Option::MOBILE_REDIRECT ] )
-			&&
-			rest_sanitize_boolean( $new_options[ Option::MOBILE_REDIRECT ] )
-		);
+		if ( isset( $new_options[ Option::MOBILE_REDIRECT ] ) ) {
+			$options[ Option::MOBILE_REDIRECT ] = rest_sanitize_boolean( $new_options[ Option::MOBILE_REDIRECT ] );
+		}
 		return $options;
-	}
-
-	/**
-	 * Add settings field.
-	 */
-	public function add_settings_field() {
-		add_settings_field(
-			Option::MOBILE_REDIRECT,
-			__( 'Mobile Redirection', 'amp' ),
-			[ $this, 'render_setting_field' ],
-			AMP_Options_Manager::OPTION_NAME,
-			'general',
-			[
-				'class' => 'amp-mobile-redirect',
-			]
-		);
-	}
-
-	/**
-	 * Render mobile redirect setting.
-	 */
-	public function render_setting_field() {
-		?>
-		<p>
-			<label for="mobile_redirect">
-				<input id="mobile_redirect" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[mobile_redirect]' ); ?>" <?php checked( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ); ?> value="true">
-				<?php esc_html_e( 'Redirect mobile visitors to the AMP version of a page.', 'amp' ); ?>
-			</label>
-		</p>
-		<script>
-			( function( $ ) {
-				const standardModeInput = $( '#theme_support_standard' );
-				const templateModeInputs = $( 'input[type=radio][name="amp-options[theme_support]"]' );
-				const mobileRedirectSetting = $( 'tr.amp-mobile-redirect' );
-
-				function toggleMobileRedirectSetting( ) {
-					mobileRedirectSetting.toggleClass( 'hidden', standardModeInput.prop( 'checked' ) )
-				}
-
-				templateModeInputs.on( 'change', toggleMobileRedirectSetting );
-				toggleMobileRedirectSetting();
-			} )( jQuery )
-		</script>
-		<?php
 	}
 
 	/**

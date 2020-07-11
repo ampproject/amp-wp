@@ -58,7 +58,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 */
 	public function test_init() {
 		AMP_Options_Manager::init();
-		$this->assertEquals( 10, has_action( 'admin_notices', [ AMP_Options_Manager::class, 'render_welcome_notice' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', [ AMP_Options_Manager::class, 'render_php_css_parser_conflict_notice' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', [ AMP_Options_Manager::class, 'insecure_connection_notice' ] ) );
 	}
@@ -145,7 +144,8 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				Option::VERSION                 => AMP__VERSION,
 				Option::MOBILE_REDIRECT         => false,
 				Option::READER_THEME            => 'legacy',
-				Option::WIZARD_COMPLETED        => false,
+				Option::MOBILE_REDIRECT         => false,
+				Option::PLUGIN_CONFIGURED       => false,
 			],
 			AMP_Options_Manager::get_options()
 		);
@@ -470,33 +470,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$error = current( $errors );
 		$this->assertEquals( 'foo_deactivation_error', $error['code'] );
 		$wp_settings_errors = [];
-	}
-
-	/**
-	 * Test for render_welcome_notice()
-	 *
-	 * @covers AMP_Options_Manager::render_welcome_notice()
-	 */
-	public function test_render_welcome_notice() {
-		// If this is not the main 'AMP Settings' page, this should not render the notice.
-		wp_set_current_user( self::factory()->user->create() );
-		set_current_screen( 'edit.php' );
-		$output = get_echo( [ 'AMP_Options_Manager', 'render_welcome_notice' ] );
-		$this->assertEmpty( $output );
-
-		// This is the correct page, but the notice was dismissed, so it should not display.
-		$GLOBALS['current_screen']->id = 'toplevel_page_' . AMP_Options_Manager::OPTION_NAME;
-		$id                            = 'amp-welcome-notice-1';
-		update_user_meta( get_current_user_id(), 'dismissed_wp_pointers', $id );
-		$output = get_echo( [ 'AMP_Options_Manager', 'render_welcome_notice' ] );
-		$this->assertEmpty( $output );
-
-		// This is the correct page, and the notice has not been dismissed, so it should display.
-		delete_user_meta( get_current_user_id(), 'dismissed_wp_pointers' );
-		$output = get_echo( [ 'AMP_Options_Manager', 'render_welcome_notice' ] );
-		$this->assertStringContains( 'Welcome to AMP for WordPress', $output );
-		$this->assertStringContains( 'Bring the speed and features of the open source AMP project to your site, complete with the tools to support content authoring and website development.', $output );
-		$this->assertStringContains( $id, $output );
 	}
 
 	/**

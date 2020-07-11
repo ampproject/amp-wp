@@ -13,10 +13,10 @@ use AmpProject\AmpWP\Tests\Helpers\MockPluginEnvironment;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
 use AMP_Options_Manager;
-use AMP_Reader_Themes;
 use AMP_Theme_Support;
 use AMP_Validated_URL_Post_Type;
 use AMP_Validation_Manager;
+use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
 use Exception;
 use WP_Block_Type_Registry;
@@ -220,7 +220,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		$this->assertFalse( $instance->is_reader_theme_request() );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
-		AMP_Options_Manager::update_option( Option::READER_THEME, AMP_Reader_Themes::DEFAULT_READER_THEME );
+		AMP_Options_Manager::update_option( Option::READER_THEME, ReaderThemes::DEFAULT_READER_THEME );
 		$this->assertFalse( $instance->is_reader_theme_request() );
 		$_GET[ amp_get_slug() ] = 1;
 		$this->assertFalse( $instance->is_reader_theme_request() );
@@ -486,7 +486,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		$this->assertEqualSets( $bad_plugin_file_slugs, $this->call_private_method( $instance, 'get_suppressible_plugins' ) );
 		$wp_settings_fields = [];
 		$instance->add_settings_field();
-		$this->assertTrue( isset( $wp_settings_fields[ AMP_Options_Manager::OPTION_NAME ]['general'][ Option::SUPPRESSED_PLUGINS ] ) );
+		$this->assertTrue( isset( $wp_settings_fields[ AMP_Options_Manager::OPTION_NAME ]['validation'][ Option::SUPPRESSED_PLUGINS ] ) );
 	}
 
 	/**

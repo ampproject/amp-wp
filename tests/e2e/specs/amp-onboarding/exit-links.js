@@ -5,7 +5,7 @@ const { visitAdminPage } = require( '@wordpress/e2e-test-utils/build/visit-admin
 /**
  * Internal dependencies
  */
-const { goToOnboardingWizard, completeWizard, cleanUpWizard } = require( '../../utils/onboarding-wizard-utils' );
+const { goToOnboardingWizard, completeWizard, cleanUpSettings } = require( '../../utils/onboarding-wizard-utils' );
 
 describe( 'Onboarding wizard exit links', () => {
 	it( 'if no previous page, returns to settings when clicking close', async () => {
@@ -20,9 +20,9 @@ describe( 'Onboarding wizard exit links', () => {
 		await page.waitForSelector( '.wp-admin' );
 
 		await page.evaluate( () => {
-			document.querySelector( 'a[href="admin.php?page=amp-setup"]' ).click();
+			document.querySelector( 'a[href="admin.php?page=amp-onboarding-wizard"]' ).click();
 		} );
-		await page.waitForSelector( '#amp-setup' );
+		await page.waitForSelector( '#amp-onboarding-wizard' );
 		await expect( page ).toClick( 'a', { text: 'Close' } );
 		await page.waitForSelector( '.wp-admin' );
 		await expect( page ).toMatchElement( 'h1', { text: 'Dashboard' } );
@@ -34,7 +34,6 @@ describe( 'Onboarding wizard exit links', () => {
 		await page.waitForSelector( '.wp-admin' );
 		await expect( page ).toMatchElement( 'h1', { text: 'AMP Settings' } );
 
-		await goToOnboardingWizard();
-		await cleanUpWizard();
+		await cleanUpSettings();
 	} );
 } );

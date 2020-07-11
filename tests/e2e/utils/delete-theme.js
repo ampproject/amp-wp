@@ -8,6 +8,7 @@ import { switchUserToAdmin, switchUserToTest, visitAdminPage } from '@wordpress/
  */
 import { installTheme } from './install-theme';
 import { activateTheme } from './activate-theme';
+import { themeInstalled } from './theme-installed';
 
 /**
  * Deletes a theme from the site, activating another theme if necessary.
@@ -24,6 +25,11 @@ export async function deleteTheme( slug, newThemeSlug, newThemeSearchTerm ) {
 		await activateTheme( newThemeSlug );
 	} else {
 		await visitAdminPage( 'themes.php' );
+	}
+
+	if ( ! await themeInstalled( slug ) ) {
+		await switchUserToTest();
+		return;
 	}
 
 	await page.click( `[data-slug="${ slug }"]` );

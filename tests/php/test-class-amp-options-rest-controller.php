@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
 
 /**
@@ -38,7 +39,7 @@ class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
 		$this->add_reader_themes_request_filter();
 
 		do_action( 'rest_api_init' );
-		$this->controller = new AMP_Options_REST_Controller( new AMP_Reader_Themes() );
+		$this->controller = new AMP_Options_REST_Controller( new ReaderThemes() );
 	}
 
 	/**
@@ -78,7 +79,8 @@ class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
 				'theme_support',
 				'reader_theme',
 				'mobile_redirect',
-				'wizard_completed',
+				'plugin_configured',
+				'all_templates_supported',
 				'preview_permalink',
 			]
 		);

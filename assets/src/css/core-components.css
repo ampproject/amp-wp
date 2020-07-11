@@ -1,0 +1,57 @@
+/**
+ * Buttons.
+ */
+.amp .components-button {
+	align-items: center;
+	border-radius: 3px;
+	color: var(--brand);
+	font-size: 1rem;
+	font-weight: 600;
+}
+
+.amp .components-button.is-link,
+.amp .components-button.is-link:hover,
+.amp .components-button.is-link:hover:not(:disabled),
+.amp .components-button:focus,
+.amp .components-button:focus:not(:disabled),
+.amp .components-button:hover {
+	box-shadow: none;
+	color: var(--brand);
+	text-decoration: none;
+}
+
+.amp .components-button:focus:not(:disabled) {
+	outline: 1px solid var(--brand);
+}
+
+.amp .components-button.is-primary {
+	box-shadow: 0 25px 20px rgba(0, 0, 0, 0.1);
+}
+
+.amp .components-button.is-primary,
+.amp .components-button.is-primary:hover,
+.amp .components-button.is-primary:hover:not(:disabled),
+.amp .components-button.is-primary:focus,
+.amp .components-button.is-primary:focus:not(:disabled),
+.amp .components-button.is-primary:active,
+.amp .components-button.is-primary:not(:disabled):not([aria-disabled="true"]):hover {
+	background: var(--brand);
+	color: var(--white);
+}
+
+.amp .components-button.is-primary:disabled {
+	color: var(--white);
+	background: #d3d9dd;
+	border-color: #d3d9dd;
+}
+
+.amp .components-button svg {
+	display: none;
+	margin-left: 0.5rem;
+	height: 18px;
+	width: 18px;
+
+	@media screen and (min-width: 783px) {
+		display: block;
+	}
+}

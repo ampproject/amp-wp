@@ -6,6 +6,7 @@
  * @since 0.7
  */
 
+use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\ConfigurationArgument;
 use AmpProject\AmpWP\MobileRedirection;
 use AmpProject\AmpWP\Option;
@@ -207,7 +208,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		// Test legacy Reader mode.
 		add_theme_support( 'amp' );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
-		AMP_Options_Manager::update_option( Option::READER_THEME, AMP_Reader_Themes::DEFAULT_READER_THEME );
+		AMP_Options_Manager::update_option( Option::READER_THEME, ReaderThemes::DEFAULT_READER_THEME );
 		$this->go_to( amp_get_permalink( $post_id ) );
 		AMP_Theme_Support::finish_init();
 		$this->assertFalse( current_theme_supports( 'amp' ) );
@@ -2344,6 +2345,23 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$mock_image . '<amp-youtube media="(min-width: 900px)" width="0" height="0" layout="responsive" autoplay loop id="wp-custom-header-video" data-videoid="a8NScvBhVnc" data-param-rel="0" data-param-showinfo="0" data-param-controls="0" data-param-iv_load_policy="3" data-param-modestbranding="1" data-param-playsinline="1" data-param-disablekb="1" data-param-fs="0"></amp-youtube><style>#wp-custom-header-video .amp-video-eq { display:none; }</style>',
 			AMP_Theme_Support::amend_header_image_with_video_header( $mock_image )
 		);
+	}
+
+	/**
+	 * Tests for the get_theme_support_args method.
+	 *
+	 * @covers AMP_Theme_Support::get_theme_support_args
+	 */
+	public function test_get_theme_support_args() {
+		remove_theme_support( 'amp' );
+
+		$this->assertFalse( AMP_Theme_Support::get_theme_support_args() );
+
+		add_theme_support( 'amp' );
+		$this->assertEquals( [ 'paired' => false ], AMP_Theme_Support::get_theme_support_args() );
+
+		add_theme_support( 'amp', [ 'paired' => true ] );
+		$this->assertEquals( [ 'paired' => true ], AMP_Theme_Support::get_theme_support_args() );
 	}
 }
 
