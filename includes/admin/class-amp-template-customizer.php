@@ -6,6 +6,8 @@
  */
 
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\ReaderThemeLoader;
+use AmpProject\AmpWP\Services;
 
 /**
  * AMP class that implements a template style editor in the Customizer.
@@ -29,10 +31,28 @@ class AMP_Template_Customizer {
 	 * Customizer instance.
 	 *
 	 * @since 0.4
-	 * @access protected
 	 * @var WP_Customize_Manager $wp_customize
 	 */
 	protected $wp_customize;
+
+	/**
+	 * Reader theme loader.
+	 *
+	 * @since 1.6
+	 * @var ReaderThemeLoader
+	 */
+	protected $reader_theme_loader;
+
+	/**
+	 * AMP_Template_Customizer constructor.
+	 *
+	 * @param WP_Customize_Manager $wp_customize        Customize manager.
+	 * @param ReaderThemeLoader    $reader_theme_loader Reader theme loader instance.
+	 */
+	protected function __construct( WP_Customize_Manager $wp_customize, ReaderThemeLoader $reader_theme_loader ) {
+		$this->wp_customize        = $wp_customize;
+		$this->reader_theme_loader = $reader_theme_loader;
+	}
 
 	/**
 	 * Initialize the template Customizer feature class.
@@ -45,23 +65,16 @@ class AMP_Template_Customizer {
 	 * @return AMP_Template_Customizer Instance.
 	 */
 	public static function init( WP_Customize_Manager $wp_customize ) {
-		$self = new self();
+		/** @var ReaderThemeLoader $reader_theme_loader */
+		$reader_theme_loader = Services::get( 'reader_theme_loader' );
 
-		$self->wp_customize = $wp_customize;
+		$self = new self( $wp_customize, $reader_theme_loader );
 
 		$is_reader_mode   = ( AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
 		$has_reader_theme = ( AMP_Reader_Themes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME ) );
 
-		$is_customizing_reader_theme = (
-			$is_reader_mode
-			&&
-			$has_reader_theme
-			&&
-			isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		);
-
 		if ( $is_reader_mode ) {
-			if ( $is_customizing_reader_theme ) {
+			if ( $reader_theme_loader->is_theme_overridden() ) {
 				add_action( 'customize_controls_enqueue_scripts', [ $self, 'add_customizer_scripts' ] );
 			} elseif ( ! $has_reader_theme ) {
 				/**
@@ -85,21 +98,76 @@ class AMP_Template_Customizer {
 			}
 		}
 
-		// Force changes to header video to cause refresh since logic in wp-customize-header.js does not construct AMP components.
-		if ( amp_is_canonical() || $is_customizing_reader_theme ) {
-			$setting_ids = [
-				'header_video',
-				'external_header_video',
-			];
-			foreach ( $setting_ids as $setting_id ) {
-				$setting = $wp_customize->get_setting( $setting_id );
-				if ( $setting ) {
-					$setting->transport = 'refresh';
-				}
-			}
+		$self->set_refresh_setting_transport();
+		$self->deactivate_cover_template_section();
+		return $self;
+	}
+
+	/**
+	 * Force changes to header video to cause refresh since logic in wp-customize-header.js does not construct AMP components.
+	 *
+	 * This applies whenever AMP is being served in the Customizer preview, that is, in Standard mode or Reader mode with a Reader theme.
+	 */
+	protected function set_refresh_setting_transport() {
+		if ( ! amp_is_canonical() && ! $this->reader_theme_loader->is_theme_overridden() ) {
+			return;
 		}
 
-		return $self;
+		$setting_ids = [
+			'header_video',
+			'external_header_video',
+		];
+		foreach ( $setting_ids as $setting_id ) {
+			$setting = $this->wp_customize->get_setting( $setting_id );
+			if ( $setting ) {
+				$setting->transport = 'refresh';
+			}
+		}
+	}
+
+	/**
+	 * Deactivate the Cover Template section if needed.
+	 *
+	 * Prevent showing the "Cover Template" section if the active (non-Reader) theme does not have the same template
+	 * as Twenty Twenty, as otherwise the user would be shown a section that would never reflect any preview change.
+	 */
+	protected function deactivate_cover_template_section() {
+		if ( ! $this->reader_theme_loader->is_theme_overridden() ) {
+			return;
+		}
+
+		$active_theme = $this->reader_theme_loader->get_active_theme();
+		$reader_theme = $this->reader_theme_loader->get_reader_theme();
+		if ( ! $active_theme instanceof WP_Theme || ! $reader_theme instanceof WP_Theme ) {
+			return;
+		}
+
+		// This only applies to Twenty Twenty.
+		if ( $reader_theme->get_template() !== 'twentytwenty' ) {
+			return;
+		}
+
+		// Prevent deactivating the cover template if the active theme and reader theme both have a cover template.
+		$cover_template_name = 'templates/template-cover.php';
+		if (
+			array_key_exists( $cover_template_name, $active_theme->get_page_templates() )
+			&&
+			array_key_exists( $cover_template_name, $reader_theme->get_page_templates() )
+		) {
+			return;
+		}
+
+		add_filter(
+			'customize_section_active',
+			function ( $active, WP_Customize_Section $section ) {
+				if ( 'cover_template_options' === $section->id ) {
+					$active = false;
+				}
+				return $active;
+			},
+			10,
+			2
+		);
 	}
 
 	/**
