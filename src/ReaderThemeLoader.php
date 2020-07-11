@@ -18,7 +18,7 @@ use WP_Customize_Manager;
 /**
  * Switches to the designated Reader theme when template mode enabled and when requesting an AMP page.
  *
- * This class does not implement Conditional because other services need to be able to always be able to access this
+ * This class does not implement Conditional because other services need to always be able to access this
  * service in order to determine whether or a Reader theme is loaded, and if so, what the previously-active theme was.
  *
  * @package AmpProject\AmpWP
