@@ -43,16 +43,36 @@ final class ReaderThemeLoader implements Service, Registerable {
 	private $active_theme;
 
 	/**
+	 * Whether the active theme was overridden with the Reader theme.
+	 *
+	 * @var bool
+	 */
+	private $theme_overridden = false;
+
+	/**
 	 * Is Reader mode with a Reader theme selected.
 	 *
 	 * @return bool Whether new Reader mode.
 	 */
 	public function is_enabled() {
-		return (
-			AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
-			&&
-			AMP_Reader_Themes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME )
-		);
+		if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
+			return false;
+		}
+
+		$reader_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
+		if ( AMP_Reader_Themes::DEFAULT_READER_THEME === $reader_theme ) {
+			return false;
+		}
+
+		// If the theme was overridden then we know it is enabled. We can't check get_template() at this point because
+		// it will be identical to $reader_theme.
+		if ( $this->theme_overridden ) {
+			return true;
+		}
+
+		// Lastly, if the active theme is not the same as the reader theme, then we can switch to the reader theme.
+		// Otherwise, the site should instead be in Transitional mode.
+		return get_template() !== $reader_theme;
 	}
 
 	/**
@@ -124,8 +144,9 @@ final class ReaderThemeLoader implements Service, Registerable {
 			return;
 		}
 
-		$this->active_theme = wp_get_theme();
-		$this->reader_theme = $theme;
+		$this->active_theme     = wp_get_theme();
+		$this->reader_theme     = $theme;
+		$this->theme_overridden = true;
 
 		$get_template   = function () {
 			return $this->reader_theme->get_template();

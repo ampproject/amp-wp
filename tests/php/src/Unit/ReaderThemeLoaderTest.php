@@ -45,6 +45,7 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 
 	/** @covers ReaderThemeLoader::is_enabled() */
 	public function test_is_enabled() {
+		switch_theme( 'twentytwenty' );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		$this->assertFalse( $this->instance->is_enabled() );
 
@@ -54,6 +55,12 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentynineteen' );
+		$this->assertTrue( $this->instance->is_enabled() );
+		$this->assertNotEquals( get_template(), 'twentynineteen' );
+
+		$_GET[ amp_get_slug() ] = true;
+		$this->instance->override_theme();
+		$this->assertEquals( get_template(), 'twentynineteen' );
 		$this->assertTrue( $this->instance->is_enabled() );
 	}
 
