@@ -81,6 +81,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			// Twenty Twenty.
 			case 'twentytwenty':
 				$config = [
+					'prevent_sanitize_in_customizer_preview' => [
+						'//style[ @id = "twentytwenty-style-inline-css" ]',
+					],
 					'dequeue_scripts'                  => [
 						'twentytwenty-js',
 					],
@@ -131,6 +134,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			// Twenty Seventeen.
 			case 'twentyseventeen':
 				return [
+					'prevent_sanitize_in_customizer_preview' => [
+						'//link[ @id = "twentyseventeen-colors-dark-css" ]',
+					],
 					// @todo Try to implement belowEntryMetaClass().
 					'dequeue_scripts'                     => [
 						'twentyseventeen-html5', // Only relevant for IE<9.
@@ -241,7 +247,14 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 			// Twenty Eleven.
 			case 'twentyeleven':
-				// Twenty Ten.
+				return [
+					'prevent_sanitize_in_customizer_preview' => [
+						'//style[ @id = "twentyeleven-header-css" ]',
+						'//link[ @id = "dark-css" ]',
+					],
+				];
+
+			// Twenty Ten.
 			case 'twentyten':
 				return [];
 
@@ -553,6 +566,28 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		foreach ( $theme_features as $theme_feature => $feature_args ) {
 			if ( method_exists( $this, $theme_feature ) ) {
 				$this->$theme_feature( $feature_args );
+			}
+		}
+	}
+
+	/**
+	 * Adds the data-ampdevmode attribute to the set of specified elements to prevent further sanitization. This is
+	 * necessary as certain features in the Customizer require these elements to be present in their unaltered state.
+	 *
+	 * @param array $xpaths List of XPaths.
+	 */
+	public function prevent_sanitize_in_customizer_preview( $xpaths = [] ) {
+		if ( ! is_customize_preview() ) {
+			return;
+		}
+
+		// We can't use the `amp_dev_mode_element_xpaths` filter here as AMP_Dev_Mode_Sanitizer has already been
+		// executed.
+		foreach ( $xpaths as $xpath ) {
+			foreach ( $this->dom->xpath->query( $xpath ) as $node ) {
+				if ( $node instanceof DOMElement ) {
+					$node->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
+				}
 			}
 		}
 	}
