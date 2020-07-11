@@ -209,7 +209,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$supported_post_types['post'] = false;
 		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, $supported_post_types );
 		$output = get_echo( [ $this->instance, 'render_status' ], [ $post ] );
-		$this->assertStringContains( 'post type does not support it', $output );
+		$this->assertStringContains( 'This post type is not', $output );
 		$this->assertStringNotContains( $checkbox_enabled, $output );
 		$supported_post_types['post'] = true;
 		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, $supported_post_types );
@@ -218,7 +218,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		add_filter( 'amp_supportable_templates', '__return_empty_array' );
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		$output = get_echo( [ $this->instance, 'render_status' ], [ $post ] );
-		$this->assertStringContains( 'no supported templates to display this in AMP.', wp_strip_all_tags( $output ) );
+		$this->assertStringContains( 'There are no supported templates.', wp_strip_all_tags( $output ) );
 		$this->assertStringNotContains( $checkbox_enabled, $output );
 
 		// User doesn't have the capability to display the metabox.
@@ -299,7 +299,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$this->assertStringContains( 'page=amp-options', $messages[0] );
 
 		$messages = $this->instance->get_error_messages( [ 'post-type-support' ] );
-		$this->assertStringContains( 'AMP cannot be enabled because this', $messages[0] );
+		$this->assertStringContains( 'This post type is not', $messages[0] );
 		$this->assertStringContains( 'page=amp-options', $messages[0] );
 
 		$this->assertEquals(

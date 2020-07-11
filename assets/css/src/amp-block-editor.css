@@ -33,3 +33,16 @@
 .wp-core-ui .edit-post-header .editor-post-preview {
 	height: 34px;
 }
+
+.amp-unavailable-notice {
+	width: 100%;
+}
+
+.amp-unavailable-notice details > summary {
+	font-weight: bold;
+	user-select: none;
+}
+
+.amp-unavailable-notice details[open] > summary {
+	margin-bottom: 1em;
+}

@@ -212,6 +212,13 @@ class AMP_Post_Meta_Box {
 			return;
 		}
 
+		$status_and_errors = self::get_status_and_errors( $post );
+
+		// Skip proceeding if there are errors blocking AMP and the user can't do anything about it.
+		if ( ! empty( $status_and_errors['errors'] ) && ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
 		wp_enqueue_style(
 			self::BLOCK_ASSET_HANDLE,
 			amp_get_asset_url( 'css/' . self::BLOCK_ASSET_HANDLE . '.css' ),
@@ -234,17 +241,9 @@ class AMP_Post_Meta_Box {
 			true
 		);
 
-		$status_and_errors = self::get_status_and_errors( get_post() );
-		$error_messages    = $this->get_error_messages( $status_and_errors['errors'] );
-
-		// @todo Don't show the toggle if DevTools is disabled?
-		// @todo Only show the error messages if the user has DevTools enabled and user can manage_options?
-
-		// @todo There's two questions: (1) When to show toggle? (2) If shown, when to show errors?
-
 		$data = [
 			'ampSlug'         => amp_get_slug(),
-			'errorMessages'   => $error_messages,
+			'errorMessages'   => $this->get_error_messages( $status_and_errors['errors'] ),
 			'hasThemeSupport' => ! amp_is_legacy(),
 			'isStandardMode'  => amp_is_canonical(),
 		];
@@ -289,8 +288,13 @@ class AMP_Post_Meta_Box {
 		}
 
 		$status_and_errors = self::get_status_and_errors( $post );
-		$status            = $status_and_errors['status'];
+		$status            = $status_and_errors['status']; // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable -- Used in amp-enabled-classic-editor-toggle.php.
 		$errors            = $status_and_errors['errors'];
+
+		// Skip showing any error message if the user doesn't have the ability to do anything about it.
+		if ( ! empty( $errors ) && ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
 
 		// phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis
 		$error_messages = $this->get_error_messages( $errors );
@@ -346,19 +350,21 @@ class AMP_Post_Meta_Box {
 	 * @return array $error_messages The error messages, as an array of strings.
 	 */
 	public function get_error_messages( $errors ) {
+		$settings_screen_url = admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME );
+
 		$error_messages = [];
 		if ( in_array( 'template_unsupported', $errors, true ) || in_array( 'no_matching_template', $errors, true ) ) {
 			$error_messages[] = sprintf(
 				/* translators: %s is a link to the AMP settings screen */
-				__( 'There are no <a href="%s">supported templates</a> to display this in AMP.', 'amp' ),
-				esc_url( admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ) )
+				__( 'There are no <a href="%s" target="_blank">supported templates</a>.', 'amp' ),
+				esc_url( $settings_screen_url )
 			);
 		}
 		if ( in_array( 'post-type-support', $errors, true ) ) {
 			$error_messages[] = sprintf(
 				/* translators: %s is a link to the AMP settings screen */
-				__( 'AMP cannot be enabled because this <a href="%s">post type does not support it</a>.', 'amp' ),
-				esc_url( admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ) )
+				__( 'This post type is not <a href="%s" target="_blank">enabled</a>.', 'amp' ),
+				esc_url( $settings_screen_url )
 			);
 		}
 		if ( in_array( 'skip-post', $errors, true ) ) {
