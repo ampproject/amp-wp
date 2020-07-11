@@ -415,6 +415,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	 * @param string|null $parent  Optional. ID of the parent option.
 	 */
 	private function list_template_conditional_options( $options, $parent = null ) {
+		$supported_templates = AMP_Options_Manager::get_option( Option::SUPPORTED_TEMPLATES );
 		?>
 		<ul>
 			<?php foreach ( $options as $id => $option ) : ?>
@@ -430,14 +431,15 @@ class OptionsMenu implements Conditional, Service, Registerable {
 				}
 
 				$element_name = sprintf( '%s[supported_templates][%s]', AMP_Options_Manager::OPTION_NAME, rawurlencode( $id ) );
+				$supported    = ! empty( $supported_templates[ $id ] )
 				?>
 				<li>
 					<input
 						type="checkbox"
 						id="<?php echo esc_attr( $element_id ); ?>"
-						<?php checked( $option['supported'] ); ?>
+						<?php checked( $supported ); ?>
 					>
-					<input type="hidden" name="<?php echo esc_attr( $element_name ); ?>" value="<?php echo esc_attr( wp_json_encode( $option['supported'] ) ); ?>">
+					<input type="hidden" name="<?php echo esc_attr( $element_name ); ?>" value="<?php echo esc_attr( wp_json_encode( ! empty( $supported_templates[ $id ] ) ) ); ?>">
 					<label for="<?php echo esc_attr( $element_id ); ?>">
 						<?php echo esc_html( $option['label'] ); ?>
 					</label>
