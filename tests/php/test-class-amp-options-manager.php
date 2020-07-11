@@ -408,17 +408,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 * @covers AMP_Options_Manager::get_options()
 	 */
 	public function test_get_options_migration_supported_templates() {
-		// Make sure that the old simple list of post types gets migrated to an associative array.
-		update_option( AMP_Options_Manager::OPTION_NAME, [ Option::SUPPORTED_TEMPLATES => [ 'is_singular', 'is_search' ] ] );
-		$this->assertEquals(
-			[
-				'is_singular',
-				'is_search',
-			],
-			AMP_Options_Manager::get_option( Option::SUPPORTED_TEMPLATES )
-		);
-
-		// Make sure the theme support get migrated.
+		// Make sure the theme support get migrated to DB option.
 		delete_option( AMP_Options_Manager::OPTION_NAME );
 		add_theme_support(
 			'amp',
