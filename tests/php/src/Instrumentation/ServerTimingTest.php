@@ -34,6 +34,10 @@ final class ServerTimingTest extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'amp_server_timing_send' ), [ $this->server_timing, 'send' ] );
 	}
 
+	/**
+	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::start()
+	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::stop()
+	 */
 	public function test_it_can_record_events_with_duration_directly() {
 		$this->server_timing->start( 'event-1', 'Event N°1' );
 		usleep( 100 * 1000 ); // 100ms.
@@ -48,6 +52,11 @@ final class ServerTimingTest extends WP_UnitTestCase {
 		$this->assertGreaterThan( 0.1, $event->get_duration() );
 	}
 
+	/**
+	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::register()
+	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::start()
+	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::stop()
+	 */
 	public function test_it_can_record_events_with_duration_via_actions() {
 		do_action( 'amp_server_timing_start', 'event-2', 'Event N°2' );
 		usleep( 100 * 1000 ); // 100ms.
@@ -62,6 +71,9 @@ final class ServerTimingTest extends WP_UnitTestCase {
 		$this->assertGreaterThan( 0.1, $event->get_duration() );
 	}
 
+	/**
+	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::log()
+	 */
 	public function test_it_can_record_events_without_duration_directly() {
 		$this->server_timing->log( 'event-3', 'Event N°3' );
 
@@ -74,6 +86,10 @@ final class ServerTimingTest extends WP_UnitTestCase {
 		$this->assertEquals( 'Event N°3', $event->get_description() );
 	}
 
+	/**
+	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::register()
+	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::log()
+	 */
 	public function test_it_can_record_events_without_duration_via_actions() {
 		do_action( 'amp_server_timing_log', 'event-4', 'Event N°4' );
 
@@ -86,6 +102,11 @@ final class ServerTimingTest extends WP_UnitTestCase {
 		$this->assertEquals( 'Event N°4', $event->get_description() );
 	}
 
+	/**
+	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::start()
+	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::stop()
+	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::log()
+	 */
 	public function test_it_can_forward_additional_properties_directly() {
 		$this->server_timing->start(
 			'event-5',
@@ -125,6 +146,12 @@ final class ServerTimingTest extends WP_UnitTestCase {
 		);
 	}
 
+	/**
+	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::register()
+	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::start()
+	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::stop()
+	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::log()
+	 */
 	public function test_it_can_forward_additional_properties_via_actions() {
 		do_action(
 			'amp_server_timing_start',
@@ -166,6 +193,12 @@ final class ServerTimingTest extends WP_UnitTestCase {
 		);
 	}
 
+	/**
+	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::register()
+	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::start()
+	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::stop()
+	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::get_header_string()
+	 */
 	public function test_it_can_return_a_header_string() {
 		do_action(
 			'amp_server_timing_start',
@@ -185,6 +218,12 @@ final class ServerTimingTest extends WP_UnitTestCase {
 		$this->assertEquals( 'event-9;desc="Event N°9";prop-9="val-9";prop-10="val-10";dur="3.1"', $this->server_timing->get_header_string() );
 	}
 
+	/**
+	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::start()
+	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::stop()
+	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::get_header_string()
+	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::send()
+	 */
 	public function test_it_can_send_headers_directly() {
 		$this->server_timing->start( 'event-10', 'Event N°10' );
 		$this->server_timing->stop( 'event-10' );
@@ -206,6 +245,13 @@ final class ServerTimingTest extends WP_UnitTestCase {
 		);
 	}
 
+	/**
+	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::register()
+	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::start()
+	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::stop()
+	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::get_header_string()
+	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::send()
+	 */
 	public function test_it_can_send_headers_via_action() {
 		do_action( 'amp_server_timing_start', 'event-11', 'Event N°11' );
 		do_action( 'amp_server_timing_stop', 'event-11' );
