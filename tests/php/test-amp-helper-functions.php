@@ -130,7 +130,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 		add_action(
 			'after_setup_theme',
-			function () {
+			static function () {
 				add_post_type_support( 'page', 'amp' );
 				add_theme_support(
 					'amp',

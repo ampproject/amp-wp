@@ -146,7 +146,7 @@ function amp_init() {
 		// This waits to happen until after_setup_theme to ensure that amp theme support and amp post type support have all been added.
 		add_action(
 			'after_setup_theme',
-			function () use ( $old_version ) {
+			static function () use ( $old_version ) {
 				/**
 				 * Triggers when after amp_init when the plugin version has updated.
 				 *
