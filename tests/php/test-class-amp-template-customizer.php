@@ -111,7 +111,6 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 	 * @covers AMP_Template_Customizer::deactivate_cover_template_section()
 	 */
 	public function test_init_legacy_reader() {
-		switch_theme( 'twentytwenty' );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		$this->assertFalse( amp_is_canonical() );
 		$this->assertTrue( amp_is_legacy() );
@@ -149,6 +148,10 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 	 * @covers AMP_Template_Customizer::deactivate_cover_template_section()
 	 */
 	public function test_init_reader_theme() {
+		if ( ! wp_get_theme( 'twentynineteen' )->exists() || ! wp_get_theme( 'twentytwenty' )->exists() ) {
+			$this->markTestSkipped();
+		}
+
 		switch_theme( 'twentynineteen' );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentytwenty' );
