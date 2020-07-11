@@ -43,18 +43,27 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 		delete_site_transient( 'theme_roots' );
 	}
 
-	/** @covers ReaderThemeLoader::is_needed() */
-	public function test_is_needed() {
+	/** @covers ReaderThemeLoader::is_enabled() */
+	public function test_is_enabled() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
-		$this->assertFalse( ReaderThemeLoader::is_needed() );
+		$this->assertFalse( $this->instance->is_enabled() );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::READER_THEME, AMP_Reader_Themes::DEFAULT_READER_THEME );
-		$this->assertFalse( ReaderThemeLoader::is_needed() );
+		$this->assertFalse( $this->instance->is_enabled() );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentynineteen' );
-		$this->assertTrue( ReaderThemeLoader::is_needed() );
+		$this->assertTrue( $this->instance->is_enabled() );
+	}
+
+	/** @covers ReaderThemeLoader::is_amp_request() */
+	public function test_is_amp_request() {
+		$_GET[ amp_get_slug() ] = '1';
+		$this->assertTrue( $this->instance->is_amp_request() );
+
+		unset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$this->assertFalse( $this->instance->is_amp_request() );
 	}
 
 	/** @covers ReaderThemeLoader::__construct() */
@@ -62,7 +71,6 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 		$this->assertInstanceOf( ReaderThemeLoader::class, $this->instance );
 		$this->assertInstanceOf( Service::class, $this->instance );
 		$this->assertInstanceOf( Registerable::class, $this->instance );
-		$this->assertInstanceOf( Conditional::class, $this->instance );
 	}
 
 	/** @covers ReaderThemeLoader::register() */
@@ -88,7 +96,10 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 		$this->assertEquals( $reader_theme_slug, $theme->get_template() );
 	}
 
-	/** @covers ReaderThemeLoader::override_theme() */
+	/**
+	 * @covers ReaderThemeLoader::override_theme()
+	 * @covers ReaderThemeLoader::get_active_theme()
+	 */
 	public function test_override_theme() {
 		$active_theme_slug = 'twentytwenty';
 		$reader_theme_slug = 'twentynineteen';
@@ -104,6 +115,7 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 		unset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$this->instance->override_theme();
 		$this->assertFalse( has_filter( 'stylesheet' ) );
+		$this->assertNull( $this->instance->get_active_theme() );
 
 		// Query var but bad reader theme.
 		AMP_Options_Manager::update_option( Option::READER_THEME, 'gone' );
@@ -111,6 +123,7 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 		$this->instance->override_theme();
 		$this->assertFalse( has_filter( 'stylesheet' ) );
 		$this->assertFalse( has_filter( 'sidebars_widgets' ) );
+		$this->assertNull( $this->instance->get_active_theme() );
 
 		// Query var and good theme.
 		$this->assertEquals( $active_theme_slug, get_template() );
@@ -122,6 +135,9 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( Option::READER_THEME, $reader_theme_slug );
 		$_GET[ amp_get_slug() ] = 1;
 		$this->instance->override_theme();
+		$active_theme = $this->instance->get_active_theme();
+		$this->assertInstanceOf( WP_Theme::class, $active_theme );
+		$this->assertEquals( $active_theme_slug, $active_theme->get_template() );
 		$this->assertTrue( has_filter( 'stylesheet' ) );
 		$this->assertTrue( has_filter( 'template' ) );
 		$this->assertEquals( $reader_theme_slug, get_template() );

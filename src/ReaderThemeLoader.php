@@ -19,28 +19,49 @@ use AMP_Reader_Themes;
 /**
  * Switches to the designated Reader theme when template mode enabled and when requesting an AMP page.
  *
+ * This class does not implement Conditional because other services need to be able to always be able to access this
+ * service in order to determine whether or a Reader theme is loaded, and if so, what the previously-active theme was.
+ *
  * @package AmpProject\AmpWP
  */
-final class ReaderThemeLoader implements Service, Registerable, Conditional {
+final class ReaderThemeLoader implements Service, Registerable {
 
 	/**
 	 * Reader theme.
 	 *
 	 * @var WP_Theme
 	 */
-	private $theme;
+	private $reader_theme;
+
+	/**
+	 * Active theme.
+	 *
+	 * Theme which was active before switching to the Reader theme.
+	 *
+	 * @var WP_Theme
+	 */
+	private $active_theme;
 
 	/**
 	 * Is Reader mode with a Reader theme selected.
 	 *
 	 * @return bool Whether new Reader mode.
 	 */
-	public static function is_needed() {
+	public function is_enabled() {
 		return (
 			AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
 			&&
 			AMP_Reader_Themes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME )
 		);
+	}
+
+	/**
+	 * Is an AMP request.
+	 *
+	 * @return bool Whether AMP request.
+	 */
+	public function is_amp_request() {
+		return isset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**
@@ -76,6 +97,17 @@ final class ReaderThemeLoader implements Service, Registerable, Conditional {
 	}
 
 	/**
+	 * Get active theme.
+	 *
+	 * The theme that was active before switching to the Reader theme.
+	 *
+	 * @return WP_Theme|null
+	 */
+	public function get_active_theme() {
+		return $this->active_theme;
+	}
+
+	/**
 	 * Switch theme if in Reader mode, a Reader theme was selected, and the AMP query var is present.
 	 *
 	 * Note that AMP_Theme_Support will redirect to the non-AMP version if AMP is not available for the query.
@@ -83,8 +115,7 @@ final class ReaderThemeLoader implements Service, Registerable, Conditional {
 	 * @see WP_Customize_Manager::start_previewing_theme() which provides for much of the inspiration here.
 	 */
 	public function override_theme() {
-		// Short-circuit if the request does not include the AMP query var.
-		if ( ! isset( $_GET[ amp_get_slug() ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! $this->is_enabled() || ! $this->is_amp_request() ) {
 			return;
 		}
 
@@ -93,13 +124,14 @@ final class ReaderThemeLoader implements Service, Registerable, Conditional {
 			return;
 		}
 
-		$this->theme = $theme;
+		$this->active_theme = wp_get_theme();
+		$this->reader_theme = $theme;
 
 		$get_template   = function () {
-			return $this->theme->get_template();
+			return $this->reader_theme->get_template();
 		};
 		$get_stylesheet = function () {
-			return $this->theme->get_stylesheet();
+			return $this->reader_theme->get_stylesheet();
 		};
 
 		add_filter( 'stylesheet', $get_stylesheet );
@@ -107,7 +139,7 @@ final class ReaderThemeLoader implements Service, Registerable, Conditional {
 		add_filter(
 			'pre_option_current_theme',
 			function () {
-				return $this->theme->display( 'Name' );
+				return $this->reader_theme->display( 'Name' );
 			}
 		);
 
@@ -119,13 +151,13 @@ final class ReaderThemeLoader implements Service, Registerable, Conditional {
 		add_filter(
 			'pre_option_stylesheet_root',
 			function () {
-				return get_raw_theme_root( $this->theme->get_stylesheet(), true );
+				return get_raw_theme_root( $this->reader_theme->get_stylesheet(), true );
 			}
 		);
 		add_filter(
 			'pre_option_template_root',
 			function () {
-				return get_raw_theme_root( $this->theme->get_template(), true );
+				return get_raw_theme_root( $this->reader_theme->get_template(), true );
 			}
 		);
 
