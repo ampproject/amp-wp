@@ -141,14 +141,22 @@ function amp_init() {
 	 */
 	$options     = get_option( AMP_Options_Manager::OPTION_NAME, [] );
 	$old_version = isset( $options[ Option::VERSION ] ) ? $options[ Option::VERSION ] : '0.0';
+
 	if ( AMP__VERSION !== $old_version && is_admin() && current_user_can( 'manage_options' ) ) {
-		/**
-		 * Triggers when after amp_init when the plugin version has updated.
-		 *
-		 * @param string $old_version Old version.
-		 */
-		do_action( 'amp_plugin_update', $old_version );
-		AMP_Options_Manager::update_option( Option::VERSION, AMP__VERSION );
+		// This waits to happen until after_setup_theme to ensure that amp theme support and amp post type support have all been added.
+		add_action(
+			'after_setup_theme',
+			function () use ( $old_version ) {
+				/**
+				 * Triggers when after amp_init when the plugin version has updated.
+				 *
+				 * @param string $old_version Old version.
+				 */
+				do_action( 'amp_plugin_update', $old_version );
+				AMP_Options_Manager::update_option( Option::VERSION, AMP__VERSION );
+			},
+			PHP_INT_MAX
+		);
 	}
 
 	add_action(
