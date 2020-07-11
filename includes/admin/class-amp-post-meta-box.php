@@ -235,7 +235,12 @@ class AMP_Post_Meta_Box {
 		);
 
 		$status_and_errors = self::get_status_and_errors( get_post() );
-		$error_messages    = $this->get_error_messages( $status_and_errors['status'], $status_and_errors['errors'] );
+		$error_messages    = $this->get_error_messages( $status_and_errors['errors'] );
+
+		// @todo Don't show the toggle if DevTools is disabled?
+		// @todo Only show the error messages if the user has DevTools enabled and user can manage_options?
+
+		// @todo There's two questions: (1) When to show toggle? (2) If shown, when to show errors?
 
 		$data = [
 			'ampSlug'         => amp_get_slug(),
@@ -288,7 +293,7 @@ class AMP_Post_Meta_Box {
 		$errors            = $status_and_errors['errors'];
 
 		// phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis
-		$error_messages = $this->get_error_messages( $status, $errors );
+		$error_messages = $this->get_error_messages( $errors );
 
 		$labels = [
 			'enabled'  => __( 'Enabled', 'amp' ),
@@ -335,11 +340,12 @@ class AMP_Post_Meta_Box {
 	 * Gets the AMP enabled error message(s).
 	 *
 	 * @since 1.0
-	 * @param string $status The AMP enabled status.
-	 * @param array  $errors The AMP enabled errors.
+	 * @see AMP_Post_Type_Support::get_support_errors()
+	 *
+	 * @param string[] $errors The AMP enabled errors.
 	 * @return array $error_messages The error messages, as an array of strings.
 	 */
-	public function get_error_messages( $status, $errors ) {
+	public function get_error_messages( $errors ) {
 		$error_messages = [];
 		if ( in_array( 'template_unsupported', $errors, true ) || in_array( 'no_matching_template', $errors, true ) ) {
 			$error_messages[] = sprintf(

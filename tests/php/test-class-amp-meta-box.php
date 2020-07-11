@@ -294,11 +294,11 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	 * @see AMP_Post_Meta_Box::get_error_messages()
 	 */
 	public function test_get_error_messages() {
-		$messages = $this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, [ 'template_unsupported' ] );
+		$messages = $this->instance->get_error_messages( [ 'template_unsupported' ] );
 		$this->assertStringContains( 'There are no', $messages[0] );
 		$this->assertStringContains( 'page=amp-options', $messages[0] );
 
-		$messages = $this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, [ 'post-type-support' ] );
+		$messages = $this->instance->get_error_messages( [ 'post-type-support' ] );
 		$this->assertStringContains( 'AMP cannot be enabled because this', $messages[0] );
 		$this->assertStringContains( 'page=amp-options', $messages[0] );
 
@@ -307,12 +307,12 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 				'A plugin or theme has disabled AMP support.',
 				'Unavailable for an unknown reason.',
 			],
-			$this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, [ 'skip-post', 'unknown-error' ] )
+			$this->instance->get_error_messages( [ 'skip-post', 'unknown-error' ] )
 		);
 
 		$this->assertEquals(
 			[ 'Unavailable for an unknown reason.' ],
-			$this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, [ 'unknown-error' ] )
+			$this->instance->get_error_messages( [ 'unknown-error' ] )
 		);
 	}
 
