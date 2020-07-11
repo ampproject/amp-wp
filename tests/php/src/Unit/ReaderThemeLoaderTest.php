@@ -106,6 +106,7 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 	/**
 	 * @covers ReaderThemeLoader::override_theme()
 	 * @covers ReaderThemeLoader::get_active_theme()
+	 * @covers ReaderThemeLoader::is_theme_overridden()
 	 */
 	public function test_override_theme() {
 		$active_theme_slug = 'twentytwenty';
@@ -123,6 +124,7 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 		$this->instance->override_theme();
 		$this->assertFalse( has_filter( 'stylesheet' ) );
 		$this->assertNull( $this->instance->get_active_theme() );
+		$this->assertFalse( $this->instance->is_theme_overridden() );
 
 		// Query var but bad reader theme.
 		AMP_Options_Manager::update_option( Option::READER_THEME, 'gone' );
@@ -131,6 +133,7 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 		$this->assertFalse( has_filter( 'stylesheet' ) );
 		$this->assertFalse( has_filter( 'sidebars_widgets' ) );
 		$this->assertNull( $this->instance->get_active_theme() );
+		$this->assertFalse( $this->instance->is_theme_overridden() );
 
 		// Query var and good theme.
 		$this->assertEquals( $active_theme_slug, get_template() );
@@ -142,6 +145,7 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( Option::READER_THEME, $reader_theme_slug );
 		$_GET[ amp_get_slug() ] = 1;
 		$this->instance->override_theme();
+		$this->assertTrue( $this->instance->is_theme_overridden() );
 		$active_theme = $this->instance->get_active_theme();
 		$this->assertInstanceOf( WP_Theme::class, $active_theme );
 		$this->assertEquals( $active_theme_slug, $active_theme->get_template() );

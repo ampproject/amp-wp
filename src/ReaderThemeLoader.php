@@ -7,7 +7,6 @@
 
 namespace AmpProject\AmpWP;
 
-use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AMP_Options_Manager;
@@ -55,24 +54,35 @@ final class ReaderThemeLoader implements Service, Registerable {
 	 * @return bool Whether new Reader mode.
 	 */
 	public function is_enabled() {
+		// If the theme was overridden then we know it is enabled. We can't check get_template() at this point because
+		// it will be identical to $reader_theme.
+		if ( $this->is_theme_overridden() ) {
+			return true;
+		}
+
+		// If Reader mode is not enabled, then a Reader theme is definitely not going to be served.
 		if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
 			return false;
 		}
 
+		// If the Legacy Reader mode is active, then a Reader theme is not going to be served.
 		$reader_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
 		if ( AMP_Reader_Themes::DEFAULT_READER_THEME === $reader_theme ) {
 			return false;
 		}
 
-		// If the theme was overridden then we know it is enabled. We can't check get_template() at this point because
-		// it will be identical to $reader_theme.
-		if ( $this->theme_overridden ) {
-			return true;
-		}
-
 		// Lastly, if the active theme is not the same as the reader theme, then we can switch to the reader theme.
 		// Otherwise, the site should instead be in Transitional mode.
 		return get_template() !== $reader_theme;
+	}
+
+	/**
+	 * Whether the active theme was overridden with the reader theme.
+	 *
+	 * @return bool Whether theme overridden.
+	 */
+	public function is_theme_overridden() {
+		return $this->theme_overridden;
 	}
 
 	/**
