@@ -5,6 +5,8 @@
  * @package AmpProject\AmpWP\Tests
  */
 
+namespace AmpProject\AmpWP\Tests\Admin;
+
 use AmpProject\AmpWP\Admin\GoogleFonts;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;

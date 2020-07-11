@@ -5,8 +5,12 @@
  * @package AMP
  */
 
+namespace AmpProject\AmpWP\Tests\Admin;
+
 use AmpProject\AmpWP\Admin\PluginActivationNotice;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\AMP_Options_Manager;
+use AmpProject\AmpWP\Tests\WP_UnitTestCase;
 
 /**
  * Tests for PluginActivationNotice class.

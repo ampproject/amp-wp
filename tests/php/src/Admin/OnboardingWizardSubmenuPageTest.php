@@ -5,6 +5,8 @@
  * @package AmpProject\AmpWP\Tests
  */
 
+namespace AmpProject\AmpWP\Tests\Admin;
+
 use AmpProject\AmpWP\Admin\GoogleFonts;
 use AmpProject\AmpWP\Admin\OnboardingWizardSubmenuPage;
 use AmpProject\AmpWP\Admin\ReaderThemes;
@@ -12,6 +14,7 @@ use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\WP_UnitTestCase;
 
 /**
  * Tests for OnboardingWizardSubmenuPage class.

@@ -5,10 +5,13 @@
  * @package AmpProject\AmpWP\Tests
  */
 
+namespace AmpProject\AmpWP\Tests\Admin;
+
 use AmpProject\AmpWP\Admin\OnboardingWizardSubmenu;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\Tests\WP_UnitTestCase;
 
 /**
  * Tests for OnboardingWizardSubmenu  class.
