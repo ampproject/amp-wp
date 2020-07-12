@@ -1002,7 +1002,7 @@ class AMP_Validated_URL_Post_Type {
 
 		return [
 			'theme'   => get_stylesheet(),
-			'plugins' => wp_list_pluck( $plugin_registry->get_plugins( true ), 'Version' ), // @todo What about multiple plugins being in the same directory?
+			'plugins' => wp_list_pluck( $plugin_registry->get_plugins( true, false ), 'Version' ), // @todo What about multiple plugins being in the same directory?
 			'options' => [
 				Option::THEME_SUPPORT => AMP_Options_Manager::get_option( Option::THEME_SUPPORT ),
 			],
