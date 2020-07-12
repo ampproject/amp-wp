@@ -1483,6 +1483,13 @@ function amp_get_content_sanitizers( $post = null ) {
 			// Scripts are always needed to inject changeset UUID.
 			$dev_mode_xpaths[] = '//script[ @src ]';
 			$dev_mode_xpaths[] = '//script[ not( @type ) or @type = "text/javascript" ]';
+
+			// Style needed for Additional CSS to work as intended.
+			$dev_mode_xpaths[] = '//style[ @id = "wp-custom-css" ]';
+
+			// Styles needed for Colors customization.
+			$dev_mode_xpaths[] = '//style[ @id = "custom-background-css" ]';
+			$dev_mode_xpaths[] = '//style[ @id = "custom-theme-colors" ]';
 		}
 
 		$sanitizers = array_merge(
