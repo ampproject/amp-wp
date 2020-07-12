@@ -14,31 +14,50 @@ import { createContext, useState, useEffect, useContext } from '@wordpress/eleme
 import { Options } from '../../components/options-context-provider';
 import { ReaderThemes } from '../../components/reader-themes-context-provider';
 import { Navigation } from './navigation-context-provider';
+import { User } from './user-context-provider';
 
 export const ReaderModeOverride = createContext();
 
 /**
- * When reader mode was selected selected and the user chooses the currently active theme as the reader theme,
- * we will override their choice with transitional.
+ * Responds to user selections with overrides to the template mode setting.
  *
  * @param {Object} props Component props.
  * @param {any} props.children Children to consume the context.
  */
-export function ReaderModeOverrideContextProvider( { children } ) {
+export function TemplateModeOverrideContextProvider( { children } ) {
 	const { editedOptions, updateOptions } = useContext( Options );
 	const { currentPage: { slug: currentPageSlug } } = useContext( Navigation );
 	const { selectedTheme, currentTheme } = useContext( ReaderThemes );
+	const { developerToolsOption, fetchingUser, originalDeveloperToolsOption } = useContext( User );
+	const [ respondedToDeveloperToolsOptionChange, setRespondedToDeveloperToolsOptionChange ] = useState( false );
 
 	const { theme_support: themeSupport } = editedOptions || {};
 
 	const [ readerModeWasOverridden, setReaderModeWasOverridden ] = useState( false );
 
+	/**
+	 * Override with transitional if the user has selected reader mode and their currently active theme as reader theme.
+	 */
 	useEffect( () => {
 		if ( 'summary' === currentPageSlug && 'reader' === themeSupport && selectedTheme.name === currentTheme.name ) {
 			updateOptions( { theme_support: 'transitional' } );
 			setReaderModeWasOverridden( true );
 		}
 	}, [ selectedTheme.name, currentTheme.name, themeSupport, currentPageSlug, updateOptions ] );
+
+	/**
+	 * Unset theme support in current session if the user changes their answer on the technical screen.
+	 */
+	useEffect( () => {
+		if ( fetchingUser ) {
+			return;
+		}
+
+		if ( developerToolsOption !== originalDeveloperToolsOption && ! respondedToDeveloperToolsOptionChange ) {
+			setRespondedToDeveloperToolsOptionChange( true );
+			updateOptions( { theme_support: undefined } );
+		}
+	}, [ developerToolsOption, fetchingUser, originalDeveloperToolsOption, respondedToDeveloperToolsOptionChange, updateOptions ] );
 
 	return (
 		<ReaderModeOverride.Provider value={ readerModeWasOverridden }>
@@ -47,6 +66,6 @@ export function ReaderModeOverrideContextProvider( { children } ) {
 	);
 }
 
-ReaderModeOverrideContextProvider.propTypes = {
+TemplateModeOverrideContextProvider.propTypes = {
 	children: PropTypes.any,
 };

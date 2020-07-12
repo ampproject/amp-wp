@@ -36,7 +36,7 @@ import { NavigationContextProvider } from './components/navigation-context-provi
 import { UserContextProvider } from './components/user-context-provider';
 import { ErrorScreen } from './components/error-screen';
 import { SiteScanContextProvider } from './components/site-scan-context-provider';
-import { ReaderModeOverrideContextProvider } from './components/reader-mode-override-context-provider';
+import { TemplateModeOverrideContextProvider } from './components/template-mode-override-context-provider';
 
 const { ajaxurl: wpAjaxUrl } = global;
 
@@ -62,11 +62,11 @@ export function Providers( { children } ) {
 						readerThemesEndpoint={ READER_THEMES_REST_ENDPOINT }
 						updatesNonce={ UPDATES_NONCE }
 					>
-						<ReaderModeOverrideContextProvider>
+						<TemplateModeOverrideContextProvider>
 							<SiteScanContextProvider>
 								{ children }
 							</SiteScanContextProvider>
-						</ReaderModeOverrideContextProvider>
+						</TemplateModeOverrideContextProvider>
 					</ReaderThemesContextProvider>
 				</NavigationContextProvider>
 			</UserContextProvider>
