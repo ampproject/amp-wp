@@ -25,13 +25,14 @@ export const ReaderModeOverride = createContext();
  * @param {any} props.children Children to consume the context.
  */
 export function TemplateModeOverrideContextProvider( { children } ) {
-	const { editedOptions, updateOptions } = useContext( Options );
+	const { editedOptions, originalOptions, updateOptions } = useContext( Options );
 	const { currentPage: { slug: currentPageSlug } } = useContext( Navigation );
 	const { selectedTheme, currentTheme } = useContext( ReaderThemes );
 	const { developerToolsOption, fetchingUser, originalDeveloperToolsOption } = useContext( User );
 	const [ respondedToDeveloperToolsOptionChange, setRespondedToDeveloperToolsOptionChange ] = useState( false );
 
 	const { theme_support: themeSupport } = editedOptions || {};
+	const { theme_support: originalThemeSupport } = originalOptions || {};
 
 	const [ readerModeWasOverridden, setReaderModeWasOverridden ] = useState( false );
 
@@ -53,11 +54,29 @@ export function TemplateModeOverrideContextProvider( { children } ) {
 			return;
 		}
 
-		if ( developerToolsOption !== originalDeveloperToolsOption && ! respondedToDeveloperToolsOptionChange ) {
+		if ( respondedToDeveloperToolsOptionChange ) {
+			return;
+		}
+
+		// If user has already made a change, don't do anythhing.
+		if ( originalThemeSupport !== themeSupport ) {
+			setRespondedToDeveloperToolsOptionChange( true );
+			return;
+		}
+
+		if ( developerToolsOption !== originalDeveloperToolsOption ) {
 			setRespondedToDeveloperToolsOptionChange( true );
 			updateOptions( { theme_support: undefined } );
 		}
-	}, [ developerToolsOption, fetchingUser, originalDeveloperToolsOption, respondedToDeveloperToolsOptionChange, updateOptions ] );
+	}, [
+		developerToolsOption,
+		fetchingUser,
+		originalDeveloperToolsOption,
+		originalThemeSupport,
+		respondedToDeveloperToolsOptionChange,
+		themeSupport,
+		updateOptions,
+	] );
 
 	return (
 		<ReaderModeOverride.Provider value={ readerModeWasOverridden }>
