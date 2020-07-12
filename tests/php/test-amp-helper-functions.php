@@ -982,6 +982,14 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @global WP_Scripts $wp_scripts
 	 */
 	public function test_script_registering() {
+		// Remove ID attributes which were added in WP 5.5.
+		add_filter(
+			'script_loader_tag',
+			static function ( $script ) {
+				return preg_replace( "/ id='amp-[^']+?'/", '', $script );
+			}
+		);
+
 		global $wp_scripts;
 		$wp_scripts = null;
 		$this->assertEquals( 10, has_action( 'wp_default_scripts', 'amp_register_default_scripts' ) );
