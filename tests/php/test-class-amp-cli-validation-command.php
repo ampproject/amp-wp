@@ -126,7 +126,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		$this->validation->force_crawl_urls = false;
 
 		// In AMP-first, the IDs should include all of the newly-created posts.
-		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->assertEquals( $ids, $this->call_private_method( $this->validation, 'get_posts_that_support_amp', [ $ids ] ) );
 
 		// In Transitional Mode, the IDs should also include all of the newly-created posts.

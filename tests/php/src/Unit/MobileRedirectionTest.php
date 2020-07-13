@@ -9,6 +9,7 @@ use AmpProject\AmpWP\QueryVars;
 use AmpProject\AmpWP\MobileRedirection;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AMP_Options_Manager;
+use AMP_Theme_Support;
 use WP_UnitTestCase;
 use WP_Customize_Manager;
 
@@ -42,7 +43,6 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 	public function test_register() {
 		$this->instance->register();
 		$this->assertEquals( 10, has_filter( 'amp_default_options', [ $this->instance, 'filter_default_options' ] ) );
-		$this->assertEquals( 10, has_action( 'amp_options_menu_items', [ $this->instance, 'add_settings_field' ] ) );
 		$this->assertEquals( 10, has_filter( 'amp_options_updating', [ $this->instance, 'sanitize_options' ] ) );
 	}
 
@@ -62,8 +62,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 	public function test_sanitize_options() {
 		$this->assertEquals(
 			[
-				'foo'                   => 'bar',
-				Option::MOBILE_REDIRECT => false,
+				'foo' => 'bar',
 			],
 			$this->instance->sanitize_options(
 				[ 'foo' => 'bar' ],
@@ -104,31 +103,6 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		);
 	}
 
-	/** @covers MobileRedirection::add_settings_field() */
-	public function test_add_settings_field() {
-		global $wp_settings_fields;
-
-		$this->instance->add_settings_field();
-		$this->assertTrue( isset( $wp_settings_fields[ AMP_Options_Manager::OPTION_NAME ]['general'][ Option::MOBILE_REDIRECT ] ) );
-	}
-
-	/** @covers MobileRedirection::render_setting_field() */
-	public function test_render_setting_field() {
-		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, true );
-		ob_start();
-		$this->instance->render_setting_field();
-		$html = ob_get_clean();
-		$this->assertStringContains( 'type="checkbox"', $html );
-		$this->assertStringContains( 'checked=', $html );
-
-		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, false );
-		ob_start();
-		$this->instance->render_setting_field();
-		$html = ob_get_clean();
-		$this->assertStringContains( 'type="checkbox"', $html );
-		$this->assertStringNotContains( 'checked=', $html );
-	}
-
 	/** @covers MobileRedirection::get_current_amp_url() */
 	public function test_get_current_amp_url() {
 		$this->go_to( add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_MOBILE, '/foo/' ) );
@@ -140,7 +114,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 
 	/** @covers MobileRedirection::redirect() */
 	public function test_redirect_on_canonical_and_available() {
-		add_theme_support( 'amp', [ 'paired' => false ] );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->go_to( '/' );
 		$this->assertTrue( amp_is_canonical() );
 		$this->assertTrue( is_amp_available() );
@@ -150,7 +124,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 
 	/** @covers MobileRedirection::redirect() */
 	public function test_redirect_on_canonical_and_not_available() {
-		add_theme_support( 'amp', [ 'paired' => false ] );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, [ 'is_author' ] );
 		$this->go_to( '/' );
@@ -162,7 +136,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 
 	/** @covers MobileRedirection::redirect() */
 	public function test_redirect_on_transitional_and_not_available() {
-		add_theme_support( 'amp', [ 'paired' => true ] );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, [ 'is_author' ] );
 		$this->go_to( add_query_arg( QueryVars::AMP, '1', '/' ) );
@@ -174,7 +148,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 
 	/** @covers MobileRedirection::redirect() */
 	public function test_redirect_on_transitional_and_available_and_client_side_on_amp_endpoint() {
-		add_theme_support( 'amp', [ 'paired' => true ] );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 
 		$this->go_to( '/' );
 		set_query_var( QueryVars::AMP, '1' );
@@ -195,7 +169,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 
 	/** @covers MobileRedirection::redirect() */
 	public function test_redirect_when_server_side_and_not_applicable() {
-		add_theme_support( 'amp', [ 'paired' => true ] );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		add_filter( 'amp_mobile_client_side_redirection', '__return_false' );
 		add_filter( 'amp_pre_is_mobile', '__return_false' );
 
@@ -209,7 +183,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 
 	/** @covers MobileRedirection::redirect() */
 	public function test_redirect_not_amp_endpoint_with_client_side_redirection() {
-		add_theme_support( 'amp', [ 'paired' => true ] );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 
 		$this->go_to( '/' );
 		$this->assertFalse( is_amp_endpoint() );
@@ -222,7 +196,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 
 	/** @covers MobileRedirection::redirect() */
 	public function test_redirect_not_amp_endpoint_with_server_side_redirection_on_mobile() {
-		add_theme_support( 'amp', [ 'paired' => true ] );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		add_filter( 'amp_mobile_client_side_redirection', '__return_false' );
 		add_filter( 'amp_pre_is_mobile', '__return_true' );
 
@@ -247,7 +221,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 
 	/** @covers MobileRedirection::redirect() */
 	public function test_redirect_not_amp_endpoint_with_server_side_redirection_on_mobile_when_cookie_set() {
-		add_theme_support( 'amp', [ 'paired' => true ] );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		add_filter( 'amp_mobile_client_side_redirection', '__return_false' );
 		add_filter( 'amp_pre_is_mobile', '__return_true' );
 
@@ -262,7 +236,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 
 	/** @covers MobileRedirection::redirect() */
 	public function test_redirect_not_amp_endpoint_with_server_side_redirection_on_mobile_when_noamp_query_var_present() {
-		add_theme_support( 'amp', [ 'paired' => true ] );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		add_filter( 'amp_mobile_client_side_redirection', '__return_false' );
 		add_filter( 'amp_pre_is_mobile', '__return_true' );
 
@@ -280,7 +254,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 
 	/** @covers MobileRedirection::redirect() */
 	public function test_redirect_on_transitional_and_available_and_server_side_on_amp_endpoint_with_cookie_set() {
-		add_theme_support( 'amp', [ 'paired' => true ] );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		add_filter( 'amp_mobile_client_side_redirection', '__return_false' );
 		add_filter( 'amp_pre_is_mobile', '__return_true' );
 
@@ -486,7 +460,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 	 * @param string $link_rel Expected link relations.
 	 */
 	public function test_add_mobile_version_switcher( $is_amp, $link_rel ) {
-		add_theme_support( 'amp', [ 'paired' => true ] );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		$this->go_to( '/' );
 		if ( $is_amp ) {
 			set_query_var( QueryVars::AMP, '1' );

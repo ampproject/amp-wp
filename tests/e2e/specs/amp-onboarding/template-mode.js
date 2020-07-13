@@ -4,7 +4,7 @@
 /**
  * WordPress dependencies
  */
-import { moveToTemplateModeScreen, clickMode, testNextButton, testPreviousButton, cleanUpWizard } from '../../utils/onboarding-wizard-utils';
+import { moveToTemplateModeScreen, clickMode, testNextButton, testPreviousButton, cleanUpSettings } from '../../utils/onboarding-wizard-utils';
 import { installTheme } from '../../utils/install-theme';
 import { activateTheme } from '../../utils/activate-theme';
 import { deleteTheme } from '../../utils/delete-theme';
@@ -44,24 +44,20 @@ describe( 'Template mode recommendations with reader theme active', () => {
 		await activateTheme( 'twentytwenty' );
 	} );
 
-	it( 'makes correct recommendations when user is not technical and the current theme is a reader theme', async () => {
-		await moveToTemplateModeScreen( { technical: false } );
+	it.each(
+		[ 'technical', 'nontechnical' ],
+	)( 'makes correct recommendations when user is not %s and the current theme is a reader theme', async ( technical ) => {
+		await moveToTemplateModeScreen( { technical: technical === 'technical' } );
 
-		await expect( '.amp-notice--info' ).countToBe( 1 );
-		await expect( '.amp-notice--success' ).countToBe( 2 );
-	} );
-
-	it( 'makes correct recommendations when user is technical and the current theme is a reader theme', async () => {
-		await moveToTemplateModeScreen( { technical: true } );
-
-		await expect( '.amp-notice--info' ).countToBe( 1 );
-		await expect( '.amp-notice--success' ).countToBe( 2 );
+		await expect( page ).toMatchElement( '#template-mode-standard-container .amp-notice--info' );
+		await expect( page ).toMatchElement( '#template-mode-transitional-container .amp-notice--success' );
+		await expect( page ).toMatchElement( '#template-mode-reader-container .amp-notice--success' );
 	} );
 } );
 
 describe( 'Template mode recommendations with non-reader-theme active', () => {
 	beforeAll( async () => {
-		await cleanUpWizard();
+		await cleanUpSettings();
 		await installTheme( 'astra' );
 		await activateTheme( 'astra' );
 	} );
@@ -73,13 +69,8 @@ describe( 'Template mode recommendations with non-reader-theme active', () => {
 	it( 'makes correct recommendations when user is not technical and the current theme is not a reader theme', async () => {
 		await moveToTemplateModeScreen( { technical: false } );
 
-		await expect( '.amp-notice--info' ).countToBe( 2 );
-		await expect( '.amp-notice--success' ).countToBe( 1 );
-	} );
-
-	it( 'makes correct recommendations when user is technical and the current theme is not a reader theme', async () => {
-		await moveToTemplateModeScreen( { technical: true } );
-
-		await expect( '.amp-notice--info' ).countToBe( 3 );
+		await expect( page ).toMatchElement( '#template-mode-standard-container .amp-notice--info' );
+		await expect( page ).toMatchElement( '#template-mode-transitional-container .amp-notice--info' );
+		await expect( page ).toMatchElement( '#template-mode-reader-container .amp-notice--success' );
 	} );
 } );

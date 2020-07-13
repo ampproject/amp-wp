@@ -223,14 +223,14 @@ class AMP_Customizer_Design_Settings {
 	public static function enqueue_customizer_preview_scripts() {
 		global $wp_customize;
 
-		$asset_file   = AMP__DIR__ . '/assets/js/amp-customizer-design-preview.asset.php';
+		$asset_file   = AMP__DIR__ . '/assets/js/amp-customizer-design-preview-legacy.asset.php';
 		$asset        = require $asset_file;
 		$dependencies = $asset['dependencies'];
 		$version      = $asset['version'];
 
 		wp_enqueue_script(
 			'amp-customizer-design-preview',
-			amp_get_asset_url( 'js/amp-customizer-design-preview.js' ),
+			amp_get_asset_url( 'js/amp-customizer-design-preview-legacy.js' ),
 			array_merge( $dependencies, [ 'amp-customize-preview' ] ),
 			$version,
 			true

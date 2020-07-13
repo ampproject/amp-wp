@@ -30,8 +30,9 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 		$this->was_wp_using_ext_object_cache = $GLOBALS['_wp_using_ext_object_cache'];
-		remove_theme_support( AMP_Theme_Support::SLUG );
 		delete_option( AMP_Options_Manager::OPTION_NAME ); // Make sure default reader mode option does not override theme support being added.
+		remove_theme_support( 'amp' );
+		$GLOBALS['wp_settings_errors'] = [];
 	}
 
 	/**
@@ -57,7 +58,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 */
 	public function test_init() {
 		AMP_Options_Manager::init();
-		$this->assertEquals( 10, has_action( 'admin_notices', [ AMP_Options_Manager::class, 'render_welcome_notice' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', [ AMP_Options_Manager::class, 'render_php_css_parser_conflict_notice' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', [ AMP_Options_Manager::class, 'insecure_connection_notice' ] ) );
 	}
@@ -145,7 +145,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				Option::MOBILE_REDIRECT         => false,
 				Option::READER_THEME            => 'legacy',
 				Option::MOBILE_REDIRECT         => false,
-				Option::WIZARD_COMPLETED        => false,
+				Option::PLUGIN_CONFIGURED       => false,
 			],
 			AMP_Options_Manager::get_options()
 		);
@@ -269,6 +269,39 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_options when active theme is switched to be the same as the Reader theme.
+	 *
+	 * @covers AMP_Options_Manager::get_options()
+	 * @covers AMP_Options_Manager::get_option()
+	 * @covers AMP_Options_Manager::update_option()
+	 */
+	public function test_get_options_when_reader_theme_same_as_active_theme() {
+		if ( ! wp_get_theme( 'twentytwenty' ) ) {
+			$this->markTestSkipped();
+		}
+		if ( ! wp_get_theme( 'twentynineteen' ) ) {
+			$this->markTestSkipped();
+		}
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		switch_theme( 'twentytwenty' );
+		AMP_Options_Manager::update_options(
+			[
+				Option::THEME_SUPPORT => AMP_Theme_Support::READER_MODE_SLUG,
+				Option::READER_THEME  => 'twentynineteen',
+			]
+		);
+		$this->assertEquals( AMP_Theme_Support::READER_MODE_SLUG, AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
+		$this->assertEquals( 'twentynineteen', AMP_Options_Manager::get_option( Option::READER_THEME ) );
+
+		switch_theme( 'twentynineteen' );
+		$this->assertEquals( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG, AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
+
+		switch_theme( 'twentytwenty' );
+		$this->assertEquals( AMP_Theme_Support::READER_MODE_SLUG, AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
+		$this->assertEquals( 'twentynineteen', AMP_Options_Manager::get_option( Option::READER_THEME ) );
+	}
+
+	/**
 	 * Tests the update_options method.
 	 *
 	 * @covers AMP_Options_Manager::update_options
@@ -376,7 +409,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	public function test_check_supported_post_type_update_errors() {
 		global $wp_settings_errors;
 		$wp_settings_errors = []; // clear any errors before starting.
-		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		register_post_type(
 			'foo',
 			[
@@ -437,33 +470,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$error = current( $errors );
 		$this->assertEquals( 'foo_deactivation_error', $error['code'] );
 		$wp_settings_errors = [];
-	}
-
-	/**
-	 * Test for render_welcome_notice()
-	 *
-	 * @covers AMP_Options_Manager::render_welcome_notice()
-	 */
-	public function test_render_welcome_notice() {
-		// If this is not the main 'AMP Settings' page, this should not render the notice.
-		wp_set_current_user( self::factory()->user->create() );
-		set_current_screen( 'edit.php' );
-		$output = get_echo( [ 'AMP_Options_Manager', 'render_welcome_notice' ] );
-		$this->assertEmpty( $output );
-
-		// This is the correct page, but the notice was dismissed, so it should not display.
-		$GLOBALS['current_screen']->id = 'toplevel_page_' . AMP_Options_Manager::OPTION_NAME;
-		$id                            = 'amp-welcome-notice-1';
-		update_user_meta( get_current_user_id(), 'dismissed_wp_pointers', $id );
-		$output = get_echo( [ 'AMP_Options_Manager', 'render_welcome_notice' ] );
-		$this->assertEmpty( $output );
-
-		// This is the correct page, and the notice has not been dismissed, so it should display.
-		delete_user_meta( get_current_user_id(), 'dismissed_wp_pointers' );
-		$output = get_echo( [ 'AMP_Options_Manager', 'render_welcome_notice' ] );
-		$this->assertStringContains( 'Welcome to AMP for WordPress', $output );
-		$this->assertStringContains( 'Bring the speed and features of the open source AMP project to your site, complete with the tools to support content authoring and website development.', $output );
-		$this->assertStringContains( $id, $output );
 	}
 
 	/**

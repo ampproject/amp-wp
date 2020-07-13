@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\Admin\DevToolsUserAccess;
+use AmpProject\AmpWP\Admin\OptionsMenu;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\Option;
@@ -177,7 +178,7 @@ class AMP_Validated_URL_Post_Type {
 					foreach ( $menu as &$menu_item ) {
 						if ( 'edit.php?post_type=' . self::POST_TYPE_SLUG === $menu_item[2] ) {
 							$menu_item[0] = esc_html__( 'AMP DevTools', 'amp' );
-							$menu_item[6] = AMP_Options_Menu::ICON_BASE64_SVG;
+							$menu_item[6] = OptionsMenu::ICON_BASE64_SVG;
 							break;
 						}
 					}
@@ -999,9 +1000,20 @@ class AMP_Validated_URL_Post_Type {
 		/** @var PluginRegistry $plugin_registry */
 		$plugin_registry = Services::get( 'plugin_registry' );
 
+		$theme     = [];
+		$theme_obj = wp_get_theme();
+		if ( ! $theme_obj->errors() ) {
+			$theme[ $theme_obj->get_stylesheet() ] = $theme_obj->get( 'Version' );
+
+			$parent_theme_obj = $theme_obj->parent();
+			if ( $parent_theme_obj ) {
+				$theme[ $parent_theme_obj->get_stylesheet() ] = $parent_theme_obj->get( 'Version' );
+			}
+		}
+
 		return [
-			'theme'   => get_stylesheet(),
-			'plugins' => wp_list_pluck( $plugin_registry->get_plugins( true ), 'Version' ), // @todo What about multiple plugins being in the same directory?
+			'theme'   => $theme,
+			'plugins' => wp_list_pluck( $plugin_registry->get_plugins( true, false ), 'Version' ), // @todo What about multiple plugins being in the same directory?
 			'options' => [
 				Option::THEME_SUPPORT => AMP_Options_Manager::get_option( Option::THEME_SUPPORT ),
 			],
@@ -1033,7 +1045,20 @@ class AMP_Validated_URL_Post_Type {
 
 		// Theme difference.
 		if ( isset( $old_validated_environment['theme'] ) && $new_validated_environment['theme'] !== $old_validated_environment['theme'] ) {
-			$staleness['theme'] = $old_validated_environment['theme'];
+			if ( is_string( $old_validated_environment['theme'] ) ) {
+				$old_validated_environment['theme'] = [
+					$old_validated_environment['theme'] => null,
+				];
+			}
+
+			$new_active_theme = array_diff_assoc( $new_validated_environment['theme'], $old_validated_environment['theme'] );
+			if ( ! empty( $new_active_theme ) ) {
+				$staleness['theme']['new'] = array_keys( $new_active_theme );
+			}
+			$old_active_theme = array_diff_assoc( $old_validated_environment['theme'], $new_validated_environment['theme'] );
+			if ( ! empty( $old_active_theme ) ) {
+				$staleness['theme']['old'] = array_keys( $old_active_theme );
+			}
 		}
 
 		// Plugin difference.
@@ -2037,10 +2062,10 @@ class AMP_Validated_URL_Post_Type {
 							echo '</b>';
 							echo '<br>';
 							if ( ! empty( $staleness['theme'] ) && ! empty( $staleness['plugins'] ) ) {
-								esc_html_e( 'Different theme and plugins were active when these results were obtained.', 'amp' );
+								esc_html_e( 'The theme and plugins have changed since these results were obtained.', 'amp' );
 								echo ' ';
 							} elseif ( ! empty( $staleness['theme'] ) ) {
-								esc_html_e( 'A different theme was active when these results were obtained.', 'amp' );
+								esc_html_e( 'The theme has changed since these results were obtained.', 'amp' );
 								echo ' ';
 							} elseif ( ! empty( $staleness['plugins'] ) ) {
 								esc_html_e( 'Plugins have been updated since these results were obtained.', 'amp' );
@@ -2113,7 +2138,13 @@ class AMP_Validated_URL_Post_Type {
 						}
 						printf( '<a href="%s">%s</a>', esc_url( self::get_url_from_post( $post ) ), esc_html( $view_label ) );
 
-						if ( $is_amp_enabled && AMP_Theme_Support::is_paired_available() ) {
+						if (
+							$is_amp_enabled
+							&&
+							AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
+							&&
+							AMP_Theme_Support::is_paired_available()
+						) {
 							printf(
 								' | <a href="%s">%s</a>',
 								esc_url( AMP_Theme_Support::get_paired_browsing_url( self::get_url_from_post( $post ) ) ),

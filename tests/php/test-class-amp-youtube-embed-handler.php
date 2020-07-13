@@ -183,6 +183,10 @@ class Test_AMP_YouTube_Embed_Handler extends WP_UnitTestCase {
 	 */
 	public function test__conversion( $source, $expected, $fallback_for_expected = null ) {
 		$this->handler->register_embed();
+
+		// Make actual output consistent between WP 5.4 and 5.5.
+		add_filter( 'wp_lazy_loading_enabled', '__return_false' );
+
 		$filtered_content = apply_filters( 'the_content', $source );
 
 		if (

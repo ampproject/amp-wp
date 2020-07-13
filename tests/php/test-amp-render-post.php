@@ -1,5 +1,6 @@
 <?php
 
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 
 class AMP_Render_Post_Test extends WP_UnitTestCase {
@@ -73,7 +74,7 @@ class AMP_Render_Post_Test extends WP_UnitTestCase {
 		$this->assertTrue( $this->was_amp_endpoint, 'is_amp_endpoint was not forced to true during amp_render_post' );
 		$this->assertFalse( $after_is_amp_endpoint, 'is_amp_endpoint was not reset after amp_render_post' );
 
-		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->go_to( get_permalink( $post_id ) );
 		$this->assertTrue( is_amp_endpoint() );
 

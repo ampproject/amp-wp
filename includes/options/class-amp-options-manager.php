@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
 
 /**
@@ -31,15 +32,14 @@ class AMP_Options_Manager {
 		Option::ALL_TEMPLATES_SUPPORTED => true,
 		Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
 		Option::VERSION                 => AMP__VERSION,
-		Option::READER_THEME            => AMP_Reader_Themes::DEFAULT_READER_THEME,
-		Option::WIZARD_COMPLETED        => false,
+		Option::READER_THEME            => ReaderThemes::DEFAULT_READER_THEME,
+		Option::PLUGIN_CONFIGURED       => false,
 	];
 
 	/**
 	 * Sets up hooks.
 	 */
 	public static function init() {
-		add_action( 'admin_notices', [ __CLASS__, 'render_welcome_notice' ] );
 		add_action( 'admin_notices', [ __CLASS__, 'render_php_css_parser_conflict_notice' ] );
 		add_action( 'admin_notices', [ __CLASS__, 'insecure_connection_notice' ] );
 	}
@@ -93,8 +93,15 @@ class AMP_Options_Manager {
 
 		$defaults = self::$defaults;
 
-		if ( current_theme_supports( 'amp' ) ) {
-			$defaults[ Option::THEME_SUPPORT ] = amp_is_canonical() ? AMP_Theme_Support::STANDARD_MODE_SLUG : AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
+		$theme_support = get_theme_support( 'amp' );
+		if ( $theme_support ) {
+			if ( isset( $theme_support[0]['paired'] ) && false === $theme_support[0]['paired'] ) {
+				$defaults[ Option::THEME_SUPPORT ] = AMP_Theme_Support::STANDARD_MODE_SLUG;
+			} elseif ( ! empty( $theme_support[0]['paired'] ) || ! empty( $theme_support[0]['template_dir'] ) ) {
+				$defaults[ Option::THEME_SUPPORT ] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
+			} else {
+				$defaults[ Option::THEME_SUPPORT ] = AMP_Theme_Support::STANDARD_MODE_SLUG;
+			}
 		}
 
 		/**
@@ -103,16 +110,38 @@ class AMP_Options_Manager {
 		 * @internal
 		 * @param array $defaults Default options.
 		 */
-		$defaults = apply_filters( 'amp_default_options', $defaults );
+		$defaults = (array) apply_filters( 'amp_default_options', $defaults );
 
 		$options = array_merge( $defaults, $options );
 
-		// Migrate theme support slugs.
-		if ( 'native' === $options[ Option::THEME_SUPPORT ] ) {
-			$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::STANDARD_MODE_SLUG;
-		} elseif ( 'paired' === $options[ Option::THEME_SUPPORT ] ) {
+		// Ensure current template mode.
+		if (
+			isset( $options[ Option::THEME_SUPPORT ] ) &&
+			AMP_Theme_Support::READER_MODE_SLUG === $options[ Option::THEME_SUPPORT ]
+			&&
+			get_template() === $options[ Option::READER_THEME ]
+			&&
+			! isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		) {
+			/*
+			 * When Reader mode is selected and a Reader theme has been chosen, if the active theme switches to be the
+			 * same as the Reader theme, then transparently switch the mode from Reader to Transitional while the
+			 * active theme and the Reader theme are the same. Remember that Reader mode means having two separate
+			 * templates for AMP and non-AMP, whereas Transitional mode means using the same templates. Otherwise, there
+			 * is no difference whatsoever between Reader and Transitional modes, as they are both Paired AMP modes.
+			 * By dynamically changing the mode from Reader to Transitional in the options getter here, if the active
+			 * theme is switched again to be different than what was selected as the Reader theme, then the site will
+			 * go back to being in Reader mode as opposed to Transitional.
+			 * @todo It would be preferable to rather invoke methods of ReaderThemeLoader here, but that risks an infinite loop and is a circular dependency.
+			 */
 			$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
-		} elseif ( 'disabled' === $options[ Option::THEME_SUPPORT ] ) {
+		} elseif ( isset( $options[ Option::THEME_SUPPORT ] ) && 'native' === $options[ Option::THEME_SUPPORT ] ) {
+			// The slug 'native' is the old term for 'standard'.
+			$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::STANDARD_MODE_SLUG;
+		} elseif ( isset( $options[ Option::THEME_SUPPORT ] ) && 'paired' === $options[ Option::THEME_SUPPORT ] ) {
+			// The slug 'paired' is the old term for 'transitional.
+			$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
+		} elseif ( isset( $options[ Option::THEME_SUPPORT ] ) && 'disabled' === $options[ Option::THEME_SUPPORT ] ) {
 			/*
 			 * Prior to 1.2, the theme support slug for Reader mode was 'disabled'. This would be saved in options for
 			 * themes that had 'amp' theme support defined. Also prior to 1.2, the user could not switch between modes
@@ -224,8 +253,10 @@ class AMP_Options_Manager {
 		$theme_support_args = AMP_Theme_Support::get_theme_support_args();
 
 		$is_template_support_required = ( isset( $theme_support_args['templates_supported'] ) && 'all' === $theme_support_args['templates_supported'] );
-		if ( ! $is_template_support_required && ! isset( $theme_support_args['available_callback'] ) ) {
-			$options[ Option::ALL_TEMPLATES_SUPPORTED ] = ! empty( $new_options[ Option::ALL_TEMPLATES_SUPPORTED ] );
+		if ( ! $is_template_support_required ) {
+			if ( isset( $new_options[ Option::ALL_TEMPLATES_SUPPORTED ] ) ) {
+				$options[ Option::ALL_TEMPLATES_SUPPORTED ] = ! empty( $new_options[ Option::ALL_TEMPLATES_SUPPORTED ] );
+			}
 
 			// Validate supported templates.
 			$options[ Option::SUPPORTED_TEMPLATES ] = [];
@@ -238,8 +269,8 @@ class AMP_Options_Manager {
 		}
 
 		// Validate wizard completion.
-		if ( isset( $new_options[ Option::WIZARD_COMPLETED ] ) ) {
-			$options[ Option::WIZARD_COMPLETED ] = (bool) $new_options[ OPTION::WIZARD_COMPLETED ];
+		if ( isset( $new_options[ Option::PLUGIN_CONFIGURED ] ) ) {
+			$options[ Option::PLUGIN_CONFIGURED ] = (bool) $new_options[ OPTION::PLUGIN_CONFIGURED ];
 		}
 
 		// Validate analytics.
@@ -288,7 +319,7 @@ class AMP_Options_Manager {
 		}
 
 		if ( isset( $new_options[ Option::READER_THEME ] ) ) {
-			$reader_theme_slugs = wp_list_pluck( ( new AMP_Reader_Themes() )->get_themes(), 'slug' );
+			$reader_theme_slugs = wp_list_pluck( ( new ReaderThemes() )->get_themes(), 'slug' );
 			if ( in_array( $new_options[ Option::READER_THEME ], $reader_theme_slugs, true ) ) {
 				$options[ Option::READER_THEME ] = $new_options[ Option::READER_THEME ];
 			}
@@ -442,77 +473,6 @@ class AMP_Options_Manager {
 	}
 
 	/**
-	 * Renders the welcome notice on the 'AMP Settings' page.
-	 *
-	 * Uses the user meta values for the dismissed WP pointers.
-	 * So once the user dismisses this notice, it will never appear again.
-	 */
-	public static function render_welcome_notice() {
-		if ( 'toplevel_page_' . self::OPTION_NAME !== get_current_screen()->id ) {
-			return;
-		}
-
-		$notice_id = 'amp-welcome-notice-1';
-		$dismissed = get_user_meta( get_current_user_id(), 'dismissed_wp_pointers', true );
-		if ( in_array( $notice_id, explode( ',', (string) $dismissed ), true ) ) {
-			return;
-		}
-
-		?>
-		<div class="amp-welcome-notice notice notice-info is-dismissible" id="<?php echo esc_attr( $notice_id ); ?>">
-			<div class="notice-dismiss"></div>
-			<div class="amp-welcome-icon-holder">
-				<img width="200" height="200" class="amp-welcome-icon" src="<?php echo esc_url( amp_get_asset_url( 'images/amp-welcome-icon.svg' ) ); ?>" alt="<?php esc_attr_e( 'Illustration of WordPress running AMP plugin.', 'amp' ); ?>" />
-			</div>
-			<h2><?php esc_html_e( 'Welcome to AMP for WordPress', 'amp' ); ?></h2>
-			<h3><?php esc_html_e( 'Bring the speed and features of the open source AMP project to your site, complete with the tools to support content authoring and website development.', 'amp' ); ?></h3>
-			<h3><?php esc_html_e( 'From granular controls that help you create AMP content, to Core Gutenberg support, to a sanitizer that only shows visitors error-free pages, to a full error workflow for developers, this release enables rich, performant experiences for your WordPress site.', 'amp' ); ?></h3>
-			<a href="https://amp-wp.org/getting-started/" target="_blank" class="button button-primary"><?php esc_html_e( 'Learn More', 'amp' ); ?></a>
-		</div>
-
-		<script>
-		jQuery( function( $ ) {
-			// On dismissing the notice, make a POST request to store this notice with the dismissed WP pointers so it doesn't display again.
-			$( <?php echo wp_json_encode( "#$notice_id" ); ?> ).on( 'click', '.notice-dismiss', function() {
-				$.post( ajaxurl, {
-					pointer: <?php echo wp_json_encode( $notice_id ); ?>,
-					action: 'dismiss-wp-pointer'
-				} );
-			} );
-		} );
-		</script>
-		<style type="text/css">
-			.amp-welcome-notice {
-				padding: 38px;
-				min-height: 200px;
-			}
-			.amp-welcome-notice + .notice {
-				clear: both;
-			}
-			.amp-welcome-icon-holder {
-				width: 200px;
-				height: 200px;
-				float: left;
-				margin: 0 38px 38px 0;
-			}
-			.amp-welcome-icon {
-				width: 100%;
-				height: 100%;
-				display: block;
-			}
-			.amp-welcome-notice h1 {
-				font-weight: bold;
-			}
-			.amp-welcome-notice h3 {
-				font-size: 16px;
-				font-weight: 500;
-			}
-
-		</style>
-		<?php
-	}
-
-	/**
 	 * Render PHP-CSS-Parser conflict notice.
 	 *
 	 * @return void
@@ -599,18 +559,6 @@ class AMP_Options_Manager {
 			remove_post_type_support( $post_type, AMP_Post_Type_Support::SLUG );
 		}
 		AMP_Post_Type_Support::add_post_type_support();
-
-		// Ensure theme support flags are set properly according to the new mode so that proper AMP URL can be generated.
-		if ( AMP_Theme_Support::STANDARD_MODE_SLUG === $template_mode || AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === $template_mode ) {
-			$theme_support = current_theme_supports( AMP_Theme_Support::SLUG );
-			if ( ! is_array( $theme_support ) ) {
-				$theme_support = [];
-			}
-			$theme_support['paired'] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === $template_mode;
-			add_theme_support( AMP_Theme_Support::SLUG, $theme_support );
-		} else {
-			remove_theme_support( AMP_Theme_Support::SLUG ); // So that the amp_get_permalink() will work for reader mode URL.
-		}
 
 		$url = amp_admin_get_preview_permalink();
 

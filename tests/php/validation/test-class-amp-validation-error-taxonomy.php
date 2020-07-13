@@ -5,6 +5,7 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\HandleValidation;
 
@@ -30,8 +31,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	 */
 	public function tearDown() {
 		$_REQUEST = [];
-		remove_theme_support( AMP_Theme_Support::SLUG );
-		AMP_Theme_Support::read_theme_support();
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		remove_filter( 'amp_validation_error_sanitized', '__return_true' );
 		remove_all_filters( 'amp_validation_error_sanitized' );
 		remove_all_filters( 'terms_clauses' );
@@ -46,7 +46,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	 */
 	public function test_register() {
 		global $wp_taxonomies;
-		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		AMP_Validation_Error_Taxonomy::register();
@@ -231,6 +231,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::get_validation_error_sanitization()
 	 */
 	public function test_is_validation_error_sanitized_and_get_validation_error_sanitization() {
+		delete_option( AMP_Options_Manager::OPTION_NAME );
 
 		// New accepted.
 		$this->accept_sanitization_by_default( true );
@@ -545,7 +546,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::add_admin_hooks()
 	 */
 	public function test_add_admin_hooks() {
-		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		AMP_Validation_Error_Taxonomy::register();
 
@@ -1228,7 +1229,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		// Test the 'status' block in the switch for the error taxonomy page.
 		$GLOBALS['pagenow'] = 'edit-tags.php';
 		$filtered_content   = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'status', $term_id );
-		$this->assertStringContains( '<span class="status-text"><span class=" amp-icon amp-invalid"></span> Kept</span>', $filtered_content );
+		$this->assertStringContains( '<span class="status-text"><span class="amp-icon amp-invalid"></span> Kept</span>', $filtered_content );
 
 		// Test the 'status' block switch for the single error page.
 		$GLOBALS['pagenow'] = 'post.php';
