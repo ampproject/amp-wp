@@ -9,6 +9,7 @@ window.ampCustomizeControls = ( function( api, $ ) {
 			l10n: {
 				ampVersionNotice: '',
 				optionSettingNotice: '',
+				navMenusPanelNotice: '',
 			},
 			optionSettings: [],
 		},
@@ -28,6 +29,7 @@ window.ampCustomizeControls = ( function( api, $ ) {
 		$.ajaxPrefilter( component.injectAmpIntoAjaxRequests );
 		api.bind( 'ready', component.forceAmpPreviewUrl );
 		api.bind( 'ready', component.addOptionSettingNotices );
+		api.bind( 'ready', component.addNavMenuPanelNotice );
 	};
 
 	/**
@@ -80,7 +82,7 @@ window.ampCustomizeControls = ( function( api, $ ) {
 		for ( const settingId of component.data.optionSettings ) {
 			api( settingId, ( setting ) => {
 				const notification = new api.Notification(
-					'option_setting',
+					'amp_option_setting',
 					{
 						type: 'info',
 						message: component.data.l10n.optionSettingNotice,
@@ -89,6 +91,28 @@ window.ampCustomizeControls = ( function( api, $ ) {
 				setting.notifications.add( notification.code, notification );
 			} );
 		}
+	};
+
+	/**
+	 * Add notice to the nav menus panel.
+	 */
+	component.addNavMenuPanelNotice = function addNavMenuPanelNotice() {
+		api.panel( 'nav_menus', ( panel ) => {
+			// Fix bug in WP where the Nav Menus panel lacks a notifications container.
+			if ( ! panel.notifications.container.length ) {
+				panel.notifications.container = $( '<div class="customize-control-notifications-container"></div>' );
+				panel.container.find( '.panel-meta:first' ).append( panel.notifications.container );
+			}
+
+			const notification = new api.Notification(
+				'amp_version',
+				{
+					type: 'info',
+					message: component.data.l10n.navMenusPanelNotice,
+				},
+			);
+			panel.notifications.add( notification.code, notification );
+		} );
 	};
 
 	return component;

@@ -294,6 +294,7 @@ class AMP_Template_Customizer {
 						'l10n'           => [
 							'ampVersionNotice'    => __( 'You are customizing the AMP version of your site.', 'amp' ),
 							'optionSettingNotice' => __( 'This also applies to the non-AMP version of your site.', 'amp' ),
+							'navMenusPanelNotice' => __( 'The menus here are shared with the non-AMP version of your site. Assign existing menus to menu locations in the Reader theme or create new AMP-specific menus.', 'amp' ),
 						],
 					]
 				)
