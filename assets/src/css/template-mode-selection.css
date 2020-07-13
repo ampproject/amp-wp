@@ -53,6 +53,10 @@
 	padding-left: 0;
 }
 
+.template-mode-selection .components-panel__body-title:hover {
+	background: rgba(0, 0, 0, 0) !important;
+}
+
 .template-mode-selection__description {
 	align-items: center;
 	display: flex;

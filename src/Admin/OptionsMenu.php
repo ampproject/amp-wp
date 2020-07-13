@@ -219,7 +219,10 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		wp_enqueue_style(
 			self::ASSET_HANDLE,
 			amp_get_asset_url( 'css/amp-settings.css' ),
-			[ $this->google_fonts->get_handle(), 'wp-components' ],
+			[
+				$this->google_fonts->get_handle(),
+				'wp-components',
+			],
 			AMP__VERSION
 		);
 

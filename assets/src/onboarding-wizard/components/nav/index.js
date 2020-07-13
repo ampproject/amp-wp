@@ -73,6 +73,7 @@ export function Nav( { closeLink, finishLink } ) {
 					<Button
 						disabled={ ! canGoForward || savingOptions || savingDeveloperToolsOption }
 						href={ isLastPage && ! savingDeveloperToolsOption && ! savingOptions ? finishLink : undefined }
+						id="next-button"
 						isPrimary
 						onClick={ moveForward }
 					>
