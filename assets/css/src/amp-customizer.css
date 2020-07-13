@@ -1,5 +1,5 @@
-#customize-info .preview-notice {
+#customize-controls .customize-info .preview-notice {
 	display: block;
-	line-height: 1.5;
+	line-height: 1.4em;
 	margin-right: 28px;
 }
