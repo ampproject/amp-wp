@@ -8,7 +8,9 @@ window.ampCustomizeControls = ( function( api, $ ) {
 			queryVar: '',
 			l10n: {
 				ampVersionNotice: '',
+				optionSettingNotice: '',
 			},
+			optionSettings: [],
 		},
 	};
 
@@ -25,6 +27,7 @@ window.ampCustomizeControls = ( function( api, $ ) {
 
 		$.ajaxPrefilter( component.injectAmpIntoAjaxRequests );
 		wp.customize.bind( 'ready', component.forceAmpPreviewUrl );
+		wp.customize.bind( 'ready', component.addOptionSettingNotices );
 	};
 
 	/**
@@ -68,6 +71,24 @@ window.ampCustomizeControls = ( function( api, $ ) {
 				return val;
 			};
 		}( api.previewer.previewUrl.validate ) );
+	};
+
+	/**
+	 * Add notice to all settings for options.
+	 */
+	component.addOptionSettingNotices = function addOptionSettingNotices() {
+		for ( const settingId of component.data.optionSettings ) {
+			wp.customize( settingId, ( setting ) => {
+				const notification = new wp.customize.Notification(
+					'option_setting',
+					{
+						type: 'info',
+						message: component.data.l10n.optionSettingNotice,
+					},
+				);
+				setting.notifications.add( notification.code, notification );
+			} );
+		}
 	};
 
 	return component;

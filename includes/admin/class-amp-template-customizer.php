@@ -252,15 +252,25 @@ class AMP_Template_Customizer {
 			true
 		);
 
+		$option_settings = [];
+		foreach ( $this->wp_customize->settings() as $setting ) {
+			/** @var WP_Customize_Setting $setting */
+			if ( 'option' === $setting->type ) {
+				$option_settings[] = $setting->id;
+			}
+		}
+
 		wp_add_inline_script(
 			'amp-customize-controls',
 			sprintf(
 				'ampCustomizeControls.boot( %s );',
 				wp_json_encode(
 					[
-						'queryVar' => amp_get_slug(),
-						'l10n'     => [
-							'ampVersionNotice' => __( 'You are customizing the AMP version of your site.', 'amp' ),
+						'queryVar'       => amp_get_slug(),
+						'optionSettings' => $option_settings,
+						'l10n'           => [
+							'ampVersionNotice'    => __( 'You are customizing the AMP version of your site.', 'amp' ),
+							'optionSettingNotice' => __( 'This also applies to the non-AMP version of your site.', 'amp' ),
 						],
 					]
 				)
