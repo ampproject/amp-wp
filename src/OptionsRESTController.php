@@ -6,15 +6,26 @@
  * @since 1.6.0
  */
 
+namespace AmpProject\AmpWP;
+
+use AMP_Options_Manager;
+use AMP_Theme_Support;
 use AmpProject\AmpWP\Admin\ReaderThemes;
-use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Infrastructure\Delayed;
+use AmpProject\AmpWP\Infrastructure\Registerable;
+use AmpProject\AmpWP\Infrastructure\Service;
+use WP_Error;
+use WP_REST_Controller;
+use WP_REST_Request;
+use WP_REST_Response;
+use WP_REST_Server;
 
 /**
- * AMP_Options_REST_Controller class.
+ * OptionsRESTController class.
  *
  * @since 1.6.0
  */
-final class AMP_Options_REST_Controller extends WP_REST_Controller {
+final class OptionsRESTController extends WP_REST_Controller implements Delayed, Service, Registerable {
 
 	/**
 	 * Key for a preview permalink added to the endpoint data.
@@ -31,6 +42,13 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 	private $reader_themes;
 
 	/**
+	 * PluginSuppression instance.
+	 *
+	 * @var PluginSuppression
+	 */
+	private $plugin_suppression;
+
+	/**
 	 * Cached results of get_item_schema.
 	 *
 	 * @var array
@@ -38,20 +56,31 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 	protected $schema;
 
 	/**
+	 * Get the action to use for registering the service.
+	 *
+	 * @return string Registration action to use.
+	 */
+	public static function get_registration_action() {
+		return 'rest_api_init';
+	}
+
+	/**
 	 * Constructor.
 	 *
-	 * @param ReaderThemes $reader_themes Reader themes helper class instance.
+	 * @param ReaderThemes      $reader_themes Reader themes helper class instance.
+	 * @param PluginSuppression $plugin_suppression An instance of the PluginSuppression class.
 	 */
-	public function __construct( ReaderThemes $reader_themes ) {
-		$this->namespace     = 'amp/v1';
-		$this->rest_base     = 'options';
-		$this->reader_themes = $reader_themes;
+	public function __construct( ReaderThemes $reader_themes, PluginSuppression $plugin_suppression ) {
+		$this->namespace          = 'amp/v1';
+		$this->rest_base          = 'options';
+		$this->reader_themes      = $reader_themes;
+		$this->plugin_suppression = $plugin_suppression;
 	}
 
 	/**
 	 * Registers all routes for the controller.
 	 */
-	public function register_routes() {
+	public function register() {
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,

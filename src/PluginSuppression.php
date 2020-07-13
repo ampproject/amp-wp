@@ -339,10 +339,7 @@ final class PluginSuppression implements Service, Registerable {
 
 			<?php
 			$suppressed_plugins = AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS );
-			$plugins            = array_intersect_key( // Note that wp_array_slice_assoc() doesn't preserve sort order.
-				$this->plugin_registry->get_plugins( true ),
-				array_fill_keys( $this->get_suppressible_plugins(), true )
-			);
+			$plugins            = $this->get_suppressible_plugins_with_details();
 
 			$errors_by_sources = AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source();
 			$select_options    = [
@@ -590,6 +587,18 @@ final class PluginSuppression implements Service, Registerable {
 				array_merge( $erroring_plugin_slugs, $suppressed_plugin_slugs ),
 				$active_plugin_slugs
 			)
+		);
+	}
+
+	/**
+	 * Provides a keyed array of suppressible plugins with keys being slugs and values being plugin info.
+	 *
+	 * @return array
+	 */
+	public function get_suppressible_plugins_with_details() {
+		return array_intersect_key( // Note that wp_array_slice_assoc() doesn't preserve sort order.
+			$this->plugin_registry->get_plugins( true ),
+			array_fill_keys( $this->get_suppressible_plugins(), true )
 		);
 	}
 

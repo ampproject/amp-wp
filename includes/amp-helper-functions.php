@@ -9,6 +9,7 @@ use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\AmpWpPluginFactory;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\OptionsRESTController;
 use AmpProject\AmpWP\QueryVars;
 
 /**
@@ -161,9 +162,6 @@ function amp_init() {
 
 				$reader_theme_controller = new AMP_Reader_Theme_REST_Controller( $reader_themes );
 				$reader_theme_controller->register_routes();
-
-				$options_controller = new AMP_Options_REST_Controller( $reader_themes );
-				$options_controller->register_routes();
 			}
 		}
 	);
