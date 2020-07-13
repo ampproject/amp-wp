@@ -16,7 +16,7 @@ import { ReaderThemes } from '../../components/reader-themes-context-provider';
 import { Navigation } from './navigation-context-provider';
 import { User } from './user-context-provider';
 
-export const ReaderModeOverride = createContext();
+export const TemplateModeOverride = createContext();
 
 /**
  * Responds to user selections with overrides to the template mode setting.
@@ -79,9 +79,9 @@ export function TemplateModeOverrideContextProvider( { children } ) {
 	] );
 
 	return (
-		<ReaderModeOverride.Provider value={ readerModeWasOverridden }>
+		<TemplateModeOverride.Provider value={ readerModeWasOverridden }>
 			{ children }
-		</ReaderModeOverride.Provider>
+		</TemplateModeOverride.Provider>
 	);
 }
 
