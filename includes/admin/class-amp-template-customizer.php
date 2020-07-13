@@ -248,7 +248,7 @@ class AMP_Template_Customizer {
 		return wp_kses_post(
 			sprintf(
 				/* translators: 1: URL to AMP project, 2: URL to admin settings screen */
-				__( '<a href="%1$s" target="_blank">AMP</a> is a project that emphasizes user experience. While AMP also applies to desktop pages, your site is <a href="%2$s" target="_blank">currently configured</a> in Reader mode to serve AMP pages to mobile visitors. These settings customize the experience for these users.', 'amp' ),
+				__( 'While <a href="%1$s" target="_blank">AMP</a> works well on both desktop and mobile pages, your site is <a href="%2$s" target="_blank">currently configured</a> in Reader mode to serve AMP pages to mobile visitors. These settings customize the experience for these users.', 'amp' ),
 				'https://amp.dev',
 				admin_url( 'admin.php?page=amp-options' )
 			)
@@ -311,7 +311,7 @@ class AMP_Template_Customizer {
 						'l10n'           => [
 							/* translators: placeholder is URL to non-AMP Customizer. */
 							'ampVersionNotice'     => wp_kses_post( sprintf( __( 'You are customizing the AMP version of your site. <a href="%s">Customize non-AMP version</a>.', 'amp' ), esc_url( admin_url( 'customize.php' ) ) ) ),
-							'optionSettingNotice'  => __( 'This also applies to the non-AMP version of your site.', 'amp' ),
+							'optionSettingNotice'  => __( 'Also applies to non-AMP version of your site.', 'amp' ),
 							'navMenusPanelNotice'  => __( 'The menus here are shared with the non-AMP version of your site. Assign existing menus to menu locations in the Reader theme or create new AMP-specific menus.', 'amp' ),
 							'rootPanelDescription' => $this->get_amp_panel_description(),
 						],
