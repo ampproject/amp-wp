@@ -39,7 +39,7 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	 */
 	component.updatePreviewNotice = function updatePreviewNotice() {
 		const previewNotice = $( '#customize-info .preview-notice' );
-		previewNotice.text( component.data.l10n.ampVersionNotice );
+		previewNotice.html( component.data.l10n.ampVersionNotice ); // Contents have been sanitiuzed with wp_kses_post().
 	};
 
 	/**
