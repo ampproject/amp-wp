@@ -22,29 +22,17 @@ const sharedConfig = {
 		filename: '[name].js',
 		chunkFilename: '[name].js',
 	},
-	module: {
-		...defaultConfig.module,
-		rules: [
-			...defaultConfig.module.rules.map(
-				( rule ) => {
-					// @todo Can remove once the default config no longer excludes excludes CSS related to Gutenberg components.
-					if ( rule.test.source === '\\.css$' ) {
-						rule.exclude = /node_modules\/(?!@wordpress)/;
-					}
-					return rule;
-				},
-			),
-		],
-	},
 	plugins: [
-		...defaultConfig.plugins.map(
-			( plugin ) => {
-				if ( plugin.constructor.name === 'MiniCssExtractPlugin' ) {
-					plugin.options.filename = '../css/[name].css';
-				}
-				return plugin;
-			},
-		),
+		...defaultConfig.plugins
+			.map(
+				( plugin ) => {
+					if ( plugin.constructor.name === 'MiniCssExtractPlugin' ) {
+						plugin.options.filename = '../css/[name].css';
+					}
+					return plugin;
+				},
+			)
+			.filter( ( plugin ) => plugin.constructor.name !== 'CleanWebpackPlugin' ),
 		new RtlCssPlugin( {
 			filename: '../css/[name]-rtl.css',
 		} ),
