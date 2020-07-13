@@ -21,31 +21,18 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	component.boot = function boot( data ) {
 		component.data = data;
 
-		// Set up Reader theme customizer.
-		const previewNotice = $( '#customize-info .preview-notice' );
-		previewNotice.text( component.data.l10n.ampVersionNotice );
+		component.updatePreviewNotice();
 
 		$.ajaxPrefilter( component.injectAmpIntoAjaxRequests );
+		wp.customize.bind( 'ready', component.forceAmpPreviewUrl );
+	};
 
-		wp.customize.bind( 'ready', () => {
-			/*
-			 * Persist the presence or lack of the amp=1 param when navigating in the preview,
-			 * even if current page is not yet supported.
-			 */
-			api.previewer.previewUrl.validate = ( function( prevValidate ) {
-				return function( value ) {
-					let val = prevValidate.call( this, value );
-					if ( val ) {
-						const url = new URL( val );
-						if ( ! url.searchParams.has( component.data.queryVar ) ) {
-							url.searchParams.append( component.data.queryVar, '1' );
-							val = url.href;
-						}
-					}
-					return val;
-				};
-			}( api.previewer.previewUrl.validate ) );
-		} );
+	/**
+	 * Update preview notice.
+	 */
+	component.updatePreviewNotice = function updatePreviewNotice() {
+		const previewNotice = $( '#customize-info .preview-notice' );
+		previewNotice.text( component.data.l10n.ampVersionNotice );
 	};
 
 	/**
@@ -60,8 +47,27 @@ window.ampCustomizeControls = ( function( api, $ ) {
 		const url = new URL( options.url, window.location.href );
 		if ( ! url.searchParams.has( component.data.queryVar ) ) {
 			url.searchParams.append( component.data.queryVar, '1' );
+			options.url = url.href;
 		}
-		options.url = url.href;
+	};
+
+	/**
+	 * Persist the presence the amp=1 param when navigating in the preview, even if current page is not yet supported.
+	 */
+	component.forceAmpPreviewUrl = function forceAmpPreviewUrl() {
+		api.previewer.previewUrl.validate = ( function( prevValidate ) {
+			return function( value ) {
+				let val = prevValidate.call( this, value );
+				if ( val ) {
+					const url = new URL( val );
+					if ( ! url.searchParams.has( component.data.queryVar ) ) {
+						url.searchParams.append( component.data.queryVar, '1' );
+						val = url.href;
+					}
+				}
+				return val;
+			};
+		}( api.previewer.previewUrl.validate ) );
 	};
 
 	return component;
