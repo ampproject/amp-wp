@@ -222,8 +222,7 @@ class AMP_Template_Customizer {
 			[
 				'type'        => 'amp',
 				'title'       => __( 'AMP', 'amp' ),
-				/* translators: placeholder is URL to AMP project. */
-				'description' => sprintf( __( '<a href="%s" target="_blank">The AMP Project</a> is a Google-led initiative that dramatically improves loading speeds on phones and tablets. You can use the Customizer to preview changes to your AMP template before publishing them.', 'amp' ), 'https://ampproject.org' ),
+				'description' => $this->get_amp_panel_description(),
 			]
 		);
 
@@ -236,6 +235,18 @@ class AMP_Template_Customizer {
 		 * @param WP_Customize_Manager $manager Manager.
 		 */
 		do_action( 'amp_customizer_register_ui', $this->wp_customize );
+	}
+
+	/**
+	 * Get AMP panel description.
+	 *
+	 * This is also added to the root panel description in the AMP Customizer when a Reader theme is being customized.
+	 *
+	 * @return string Description, with markup.
+	 */
+	protected function get_amp_panel_description() {
+		/* translators: placeholder is URL to AMP project. */
+		return wp_kses_post( sprintf( __( '<a href="%s" target="_blank">The AMP Project</a> is a Google-led initiative that dramatically improves loading speeds on phones and tablets. You can use the Customizer to preview changes to your AMP template before publishing them.', 'amp' ), 'https://ampproject.org' ) );
 	}
 
 	/**
@@ -292,9 +303,10 @@ class AMP_Template_Customizer {
 						'queryVar'       => amp_get_slug(),
 						'optionSettings' => $option_settings,
 						'l10n'           => [
-							'ampVersionNotice'    => __( 'You are customizing the AMP version of your site.', 'amp' ),
-							'optionSettingNotice' => __( 'This also applies to the non-AMP version of your site.', 'amp' ),
-							'navMenusPanelNotice' => __( 'The menus here are shared with the non-AMP version of your site. Assign existing menus to menu locations in the Reader theme or create new AMP-specific menus.', 'amp' ),
+							'ampVersionNotice'     => __( 'You are customizing the AMP version of your site.', 'amp' ),
+							'optionSettingNotice'  => __( 'This also applies to the non-AMP version of your site.', 'amp' ),
+							'navMenusPanelNotice'  => __( 'The menus here are shared with the non-AMP version of your site. Assign existing menus to menu locations in the Reader theme or create new AMP-specific menus.', 'amp' ),
+							'rootPanelDescription' => $this->get_amp_panel_description(),
 						],
 					]
 				)

@@ -10,6 +10,7 @@ window.ampCustomizeControls = ( function( api, $ ) {
 				ampVersionNotice: '',
 				optionSettingNotice: '',
 				navMenusPanelNotice: '',
+				rootPanelDescription: '',
 			},
 			optionSettings: [],
 		},
@@ -25,6 +26,7 @@ window.ampCustomizeControls = ( function( api, $ ) {
 		component.data = data;
 
 		component.updatePreviewNotice();
+		component.extendRootDescription();
 
 		$.ajaxPrefilter( component.injectAmpIntoAjaxRequests );
 		api.bind( 'ready', component.forceAmpPreviewUrl );
@@ -38,6 +40,24 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	component.updatePreviewNotice = function updatePreviewNotice() {
 		const previewNotice = $( '#customize-info .preview-notice' );
 		previewNotice.text( component.data.l10n.ampVersionNotice );
+	};
+
+	/**
+	 * Add AMP-specific info to the root panel description.
+	 */
+	component.extendRootDescription = function extendRootDescription() {
+		const panelDescription = $( '#customize-info .customize-panel-description' );
+
+		// Ensure the original description is in a paragraph (where normally it is not).
+		if ( panelDescription.find( 'p' ).length === 0 ) {
+			const originalParagraph = $( '<p></p>' );
+			originalParagraph.html( panelDescription.html() );
+			panelDescription.html( '' );
+			panelDescription.append( originalParagraph );
+		}
+
+		const ampDescription = $( '<p>' + component.data.l10n.rootPanelDescription + '</p>' ); // Contents have been sanitized with wp_kses_post().
+		panelDescription.append( ampDescription );
 	};
 
 	/**
