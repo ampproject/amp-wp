@@ -100,7 +100,7 @@ class AMP_Template_Customizer {
 		}
 
 		$self->set_refresh_setting_transport();
-		$self->deactivate_cover_template_section();
+		$self->remove_cover_template_section();
 		$self->remove_homepage_settings_section();
 		return $self;
 	}
@@ -128,12 +128,12 @@ class AMP_Template_Customizer {
 	}
 
 	/**
-	 * Deactivate the Cover Template section if needed.
+	 * Remove the Cover Template section if needed.
 	 *
 	 * Prevent showing the "Cover Template" section if the active (non-Reader) theme does not have the same template
 	 * as Twenty Twenty, as otherwise the user would be shown a section that would never reflect any preview change.
 	 */
-	protected function deactivate_cover_template_section() {
+	protected function remove_cover_template_section() {
 		if ( ! $this->reader_theme_loader->is_theme_overridden() ) {
 			return;
 		}
@@ -159,21 +159,11 @@ class AMP_Template_Customizer {
 			return;
 		}
 
-		add_filter(
-			'customize_section_active',
-			function ( $active, WP_Customize_Section $section ) {
-				if ( 'cover_template_options' === $section->id ) {
-					$active = false;
-				}
-				return $active;
-			},
-			10,
-			2
-		);
+		$this->wp_customize->remove_section( 'cover_template_options' );
 	}
 
 	/**
-	 * Remove the Homepage Settings section in the AMP Customizer for a Reader theme.
+	 * Remove the Homepage Settings section in the AMP Customizer for a Reader theme if needed.
 	 *
 	 * The Homepage Settings section exclusively contains controls for options which apply to both AMP and non-AMP.
 	 * If this is the case and there are no other controls added to it, then remove the section. Otherwise, the controls
