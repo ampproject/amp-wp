@@ -60,7 +60,7 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 	public function test_register() {
 		$this->page->register();
 
-		$this->assertEquals( 10, has_action( 'admin_head-amp_page_amp-onboarding-wizard', [ $this->page, 'override_template' ] ) );
+		$this->assertEquals( 10, has_action( 'admin_head-admin_page_amp-onboarding-wizard', [ $this->page, 'override_template' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ $this->page, 'enqueue_assets' ] ) );
 	}
 
@@ -83,7 +83,7 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 	 * @covers OnboardingWizardSubmenuPage::screen_handle
 	 */
 	public function test_screen_handle() {
-		$this->assertEquals( $this->page->screen_handle(), 'amp_page_amp-onboarding-wizard' );
+		$this->assertEquals( $this->page->screen_handle(), 'admin_page_amp-onboarding-wizard' );
 	}
 
 	/**

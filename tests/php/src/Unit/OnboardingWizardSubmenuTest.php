@@ -53,12 +53,12 @@ class OnboardingWizardSubmenuTest  extends WP_UnitTestCase {
 	 * @covers OnboardingWizardSubmenu::register
 	 */
 	public function test_register() {
-		global $submenu;
+		global $submenu; 
 
 		wp_set_current_user( 1 );
 
 		$this->instance->register();
 
-		$this->assertEquals( end( $submenu['amp-options'] )[2], 'amp-onboarding-wizard' );
+		$this->assertEquals( end( $submenu[''] )[2], 'amp-onboarding-wizard' );
 	}
 }

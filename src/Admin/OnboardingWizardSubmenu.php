@@ -8,7 +8,7 @@
 
 namespace AmpProject\AmpWP\Admin;
 
-use AMP_Options_Manager;
+use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -18,13 +18,22 @@ use AmpProject\AmpWP\Infrastructure\Service;
  *
  * @since 1.6.0
  */
-final class OnboardingWizardSubmenu implements Delayed, Service, Registerable {
+final class OnboardingWizardSubmenu implements Conditional, Delayed, Service, Registerable {
 	/**
 	 * Setup screen ID.
 	 *
 	 * @var string
 	 */
 	const SCREEN_ID = 'amp-onboarding-wizard';
+
+	/**
+	 * Check whether the conditional object is currently needed.
+	 *
+	 * @return bool Whether the conditional object is needed.
+	 */
+	public static function is_needed() {
+		return amp_should_use_new_onboarding();
+	}
 
 	/**
 	 * Get the action to use for registering the service.
@@ -40,7 +49,7 @@ final class OnboardingWizardSubmenu implements Delayed, Service, Registerable {
 	 */
 	public function register() {
 		add_submenu_page(
-			AMP_Options_Manager::OPTION_NAME,
+			'',
 			__( 'Onboarding Wizard', 'amp' ),
 			__( 'Onboarding Wizard', 'amp' ),
 			'manage_options',

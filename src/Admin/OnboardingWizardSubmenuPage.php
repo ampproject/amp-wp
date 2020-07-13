@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP\Admin;
 
 use AMP_Options_Manager;
 use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
+use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -21,7 +22,7 @@ use AmpProject\AmpWP\Services;
  *
  * @since 1.6.0
  */
-final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Service {
+final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registerable, Service {
 	/**
 	 * Handle for JS file.
 	 *
@@ -63,6 +64,15 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes ) {
 		$this->google_fonts  = $google_fonts;
 		$this->reader_themes = $reader_themes;
+	}
+
+	/**
+	 * Check whether the conditional object is currently needed.
+	 *
+	 * @return bool Whether the conditional object is needed.
+	 */
+	public static function is_needed() {
+		return amp_should_use_new_onboarding();
 	}
 
 	/**
@@ -131,7 +141,7 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 	 * @return string
 	 */
 	public function screen_handle() {
-		return sprintf( 'amp_page_%s', OnboardingWizardSubmenu::SCREEN_ID );
+		return sprintf( 'admin_page_%s', OnboardingWizardSubmenu::SCREEN_ID );
 	}
 
 	/**
