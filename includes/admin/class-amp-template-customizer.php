@@ -101,6 +101,7 @@ class AMP_Template_Customizer {
 
 		$self->set_refresh_setting_transport();
 		$self->deactivate_cover_template_section();
+		$self->remove_homepage_settings_section();
 		return $self;
 	}
 
@@ -169,6 +170,38 @@ class AMP_Template_Customizer {
 			10,
 			2
 		);
+	}
+
+	/**
+	 * Remove the Homepage Settings section in the AMP Customizer for a Reader theme.
+	 *
+	 * The Homepage Settings section exclusively contains controls for options which apply to both AMP and non-AMP.
+	 * If this is the case and there are no other controls added to it, then remove the section. Otherwise, the controls
+	 * will all get the same notice added to them.
+	 */
+	protected function remove_homepage_settings_section() {
+		if ( ! $this->reader_theme_loader->is_theme_overridden() ) {
+			return;
+		}
+
+		$section_id  = 'static_front_page';
+		$control_ids = [];
+		foreach ( $this->wp_customize->controls() as $control ) {
+			/** @var WP_Customize_Control $control */
+			if ( $section_id === $control->section ) {
+				$control_ids[] = $control->id;
+			}
+		}
+
+		$static_front_page_control_ids = [
+			'show_on_front',
+			'page_on_front',
+			'page_for_posts',
+		];
+
+		if ( count( array_diff( $control_ids, $static_front_page_control_ids ) ) === 0 ) {
+			$this->wp_customize->remove_section( $section_id );
+		}
 	}
 
 	/**
