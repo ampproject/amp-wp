@@ -26,8 +26,8 @@ window.ampCustomizeControls = ( function( api, $ ) {
 		component.updatePreviewNotice();
 
 		$.ajaxPrefilter( component.injectAmpIntoAjaxRequests );
-		wp.customize.bind( 'ready', component.forceAmpPreviewUrl );
-		wp.customize.bind( 'ready', component.addOptionSettingNotices );
+		api.bind( 'ready', component.forceAmpPreviewUrl );
+		api.bind( 'ready', component.addOptionSettingNotices );
 	};
 
 	/**
@@ -78,8 +78,8 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	 */
 	component.addOptionSettingNotices = function addOptionSettingNotices() {
 		for ( const settingId of component.data.optionSettings ) {
-			wp.customize( settingId, ( setting ) => {
-				const notification = new wp.customize.Notification(
+			api( settingId, ( setting ) => {
+				const notification = new api.Notification(
 					'option_setting',
 					{
 						type: 'info',
