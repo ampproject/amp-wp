@@ -49,6 +49,17 @@ final class ReaderThemeLoader implements Service, Registerable {
 	private $theme_overridden = false;
 
 	/**
+	 * Register the service with the system.
+	 *
+	 * @return void
+	 */
+	public function register() {
+		// The following needs to run at plugins_loaded because that is when _wp_customize_include runs. Otherwise, the
+		// most logical action would be setup_theme.
+		add_action( 'plugins_loaded', [ $this, 'override_theme' ], 9 );
+	}
+
+	/**
 	 * Is Reader mode with a Reader theme selected.
 	 *
 	 * @return bool Whether new Reader mode.
@@ -92,17 +103,6 @@ final class ReaderThemeLoader implements Service, Registerable {
 	 */
 	public function is_amp_request() {
 		return isset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-	}
-
-	/**
-	 * Register the service with the system.
-	 *
-	 * @return void
-	 */
-	public function register() {
-		// The following needs to run at plugins_loaded because that is when _wp_customize_include runs. Otherwise, the
-		// most logical action would be setup_theme.
-		add_action( 'plugins_loaded', [ $this, 'override_theme' ], 9 );
 	}
 
 	/**
