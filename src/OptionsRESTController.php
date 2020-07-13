@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP;
 
 use AMP_Options_Manager;
 use AMP_Theme_Support;
+use AMP_Validated_URL_Post_Type;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
@@ -33,6 +34,20 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 	 * @var string
 	 */
 	const PREVIEW_PERMALINK = 'preview_permalink';
+
+	/**
+	 * Key for suppressible plugins data added to the endpoint.
+	 *
+	 * @var string
+	 */
+	const SUPPRESSIBLE_PLUGINS = 'suppressible_plugins';
+
+	/**
+	 * Key for the errors by source data included in the endpoint.
+	 *
+	 * @var string
+	 */
+	const ERRORS_BY_SOURCE = 'errors_by_source';
 
 	/**
 	 * Reader themes provider class.
@@ -136,6 +151,9 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 		// amp_admin_get_preview_permalink calls AMP_Options_Manager::get_options, leading to infinite recursion.
 		$options[ self::PREVIEW_PERMALINK ] = amp_admin_get_preview_permalink();
 
+		$options[ self::SUPPRESSIBLE_PLUGINS ] = $this->plugin_suppression->get_suppressible_plugins_with_details();
+		$options[ self::ERRORS_BY_SOURCE ]     = AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source();
+
 		return rest_ensure_response( $options );
 	}
 
@@ -198,6 +216,17 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 					],
 					Option::ALL_TEMPLATES_SUPPORTED => [
 						'type' => 'boolean',
+					],
+					self::SUPPRESSIBLE_PLUGINS      => [
+						'type'     => 'object',
+						'readonly' => true,
+					],
+					Option::SUPPRESSED_PLUGINS      => [
+						'type' => 'array',
+					],
+					self::ERRORS_BY_SOURCE          => [
+						'type'     => 'object',
+						'readonly' => true,
 					],
 				],
 			];

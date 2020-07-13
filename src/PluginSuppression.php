@@ -342,6 +342,7 @@ final class PluginSuppression implements Service, Registerable {
 			$plugins            = $this->get_suppressible_plugins_with_details();
 
 			$errors_by_sources = AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source();
+
 			$select_options    = [
 				'0' => __( 'Active', 'amp' ),
 				'1' => __( 'Suppressed', 'amp' ),
