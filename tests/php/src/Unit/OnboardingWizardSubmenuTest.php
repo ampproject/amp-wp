@@ -53,7 +53,7 @@ class OnboardingWizardSubmenuTest  extends WP_UnitTestCase {
 	 * @covers OnboardingWizardSubmenu::register
 	 */
 	public function test_register() {
-		global $submenu; 
+		global $submenu;
 
 		wp_set_current_user( 1 );
 
