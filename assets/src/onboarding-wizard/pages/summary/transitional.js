@@ -15,7 +15,7 @@ import { useContext } from '@wordpress/element';
 import { Transitional as TransitionalIllustration } from '../../../components/svg/transitional';
 import { AMPNotice, NOTICE_TYPE_INFO, NOTICE_SIZE_LARGE } from '../../../components/amp-notice';
 import { RedirectToggle } from '../../../components/redirect-toggle';
-import { ReaderModeOverride } from '../../components/reader-mode-override-context-provider';
+import { TemplateModeOverride } from '../../components/template-mode-override-context-provider';
 import { SummaryHeader } from './summary-header';
 import { DesktopScreenshot } from './desktop-screenshot';
 
@@ -26,7 +26,7 @@ import { DesktopScreenshot } from './desktop-screenshot';
  * @param {Object} props.currentTheme Data for the theme currently active on the site.
  */
 export function Transitional( { currentTheme } ) {
-	const readerModeWasOverridden = useContext( ReaderModeOverride );
+	const { readerModeWasOverridden } = useContext( TemplateModeOverride );
 
 	return (
 		<>
