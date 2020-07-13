@@ -29,6 +29,7 @@ import { SupportedTemplates } from './supported-templates';
 import { MobileRedirection } from './mobile-redirection';
 import { ReaderThemes } from './reader-themes';
 import { SettingsFooter } from './settings-footer';
+import { OldPluginSuppression } from './old-plugin-suppression';
 import { PluginSuppression } from './plugin-suppression';
 
 const { ajaxurl: wpAjaxUrl } = global;
@@ -68,6 +69,7 @@ function Root() {
 			<SupportedTemplates />
 			<MobileRedirection />
 			<PluginSuppression />
+			<OldPluginSuppression />
 			<SettingsFooter />
 		</>
 	);
