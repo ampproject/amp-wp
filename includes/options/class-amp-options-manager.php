@@ -132,6 +132,7 @@ class AMP_Options_Manager {
 			 * By dynamically changing the mode from Reader to Transitional in the options getter here, if the active
 			 * theme is switched again to be different than what was selected as the Reader theme, then the site will
 			 * go back to being in Reader mode as opposed to Transitional.
+			 * @todo It would be preferable to rather invoke methods of ReaderThemeLoader here, but that risks an infinite loop and is a circular dependency.
 			 */
 			$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
 		} elseif ( isset( $options[ Option::THEME_SUPPORT ] ) && 'native' === $options[ Option::THEME_SUPPORT ] ) {
