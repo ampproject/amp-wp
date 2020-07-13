@@ -103,6 +103,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/** @covers ::amp_init() */
 	public function test_amp_init_migration() {
 		global $wp_actions;
+		remove_all_actions( 'init' );
 		remove_all_actions( 'after_setup_theme' );
 		$wp_actions = [];
 
@@ -123,15 +124,9 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		update_option( AMP_Options_Manager::OPTION_NAME, $options );
 		$this->assertEquals( $options, get_option( AMP_Options_Manager::OPTION_NAME ) );
 
-		$this->assertEquals( 0, did_action( 'amp_init' ) );
-		amp_init();
-		$this->assertEquals( 1, did_action( 'amp_init' ) );
-		$this->assertEquals( 10, has_filter( 'allowed_redirect_hosts', [ 'AMP_HTTP', 'filter_allowed_redirect_hosts' ] ) );
-
 		add_action(
 			'after_setup_theme',
 			static function () {
-				add_post_type_support( 'page', 'amp' );
 				add_theme_support(
 					'amp',
 					[
@@ -145,6 +140,13 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		);
 
 		add_action(
+			'init',
+			function () {
+				add_post_type_support( 'page', 'amp' );
+			}
+		);
+
+		add_action(
 			'amp_plugin_update',
 			function ( $old_version ) use ( $options ) {
 				$this->assertEquals( $options['version'], $old_version );
@@ -152,7 +154,12 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		);
 
 		// Make sure that no upgrade happened when the user is not logged-in.
+		$this->assertEquals( 0, did_action( 'amp_init' ) );
+		add_action( 'after_setup_theme', 'amp_after_setup_theme', 5 );
 		do_action( 'after_setup_theme' );
+		do_action( 'init' );
+		$this->assertEquals( 1, did_action( 'amp_init' ) );
+		$this->assertEquals( 10, has_filter( 'allowed_redirect_hosts', [ 'AMP_HTTP', 'filter_allowed_redirect_hosts' ] ) );
 		$this->assertEquals( 0, did_action( 'amp_plugin_update' ) );
 		$this->assertEqualSets(
 			[ 'post', 'page' ],
@@ -172,8 +179,9 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		set_current_screen( 'index.php' );
 		$this->assertTrue( is_admin() );
-		amp_init();
+		add_action( 'after_setup_theme', 'amp_after_setup_theme', 5 );
 		do_action( 'after_setup_theme' );
+		do_action( 'init' );
 		$this->assertEquals( 2, did_action( 'amp_init' ) );
 		$this->assertEquals( 1, did_action( 'amp_plugin_update' ) );
 		$this->assertNotEquals( $options, get_option( AMP_Options_Manager::OPTION_NAME ), 'Expected DB to now be updated.' );
