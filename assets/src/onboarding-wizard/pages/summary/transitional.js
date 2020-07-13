@@ -26,7 +26,7 @@ import { DesktopScreenshot } from './desktop-screenshot';
  * @param {Object} props.currentTheme Data for the theme currently active on the site.
  */
 export function Transitional( { currentTheme } ) {
-	const readerModeWasOverridden = useContext( TemplateModeOverride );
+	const { readerModeWasOverridden } = useContext( TemplateModeOverride );
 
 	return (
 		<>

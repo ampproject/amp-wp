@@ -30,11 +30,33 @@ export function TemplateModeOverrideContextProvider( { children } ) {
 	const { selectedTheme, currentTheme } = useContext( ReaderThemes );
 	const { developerToolsOption, fetchingUser, originalDeveloperToolsOption } = useContext( User );
 	const [ respondedToDeveloperToolsOptionChange, setRespondedToDeveloperToolsOptionChange ] = useState( false );
+	const [ mostRecentlySelectedThemeSupport, setMostRecentlySelectedThemeSupport ] = useState( null );
+	const [ technicalQuestionChangedAtLeastOnce, setTechnicalQuestionChangedAtLeastOnce ] = useState( false );
 
 	const { theme_support: themeSupport } = editedOptions || {};
 	const { theme_support: originalThemeSupport } = originalOptions || {};
 
 	const [ readerModeWasOverridden, setReaderModeWasOverridden ] = useState( false );
+
+	const technicalQuestionChanged = ! fetchingUser && developerToolsOption !== originalDeveloperToolsOption;
+
+	/**
+	 * Persist the "previously selected" note if the technical question is changed, even if it is subsequently restored.
+	 */
+	useEffect( () => {
+		if ( technicalQuestionChanged ) {
+			setTechnicalQuestionChangedAtLeastOnce( true );
+		}
+	}, [ technicalQuestionChanged ] );
+
+	/**
+	 * When a user makes a theme support selection, save it so it can be restored if needed.
+	 */
+	useEffect( () => {
+		if ( themeSupport ) {
+			setMostRecentlySelectedThemeSupport( themeSupport );
+		}
+	}, [ themeSupport ] );
 
 	/**
 	 * Override with transitional if the user has selected reader mode and their currently active theme is the same as the selected reader theme.
@@ -50,27 +72,32 @@ export function TemplateModeOverrideContextProvider( { children } ) {
 	 * Unset theme support in current session if the user changes their answer on the technical screen.
 	 */
 	useEffect( () => {
-		if ( fetchingUser ) {
-			return;
-		}
-
-		if ( respondedToDeveloperToolsOptionChange ) {
+		if ( fetchingUser || 'technical-background' !== currentPageSlug ) {
 			return;
 		}
 
 		// If user has already made a change, don't do anything.
-		if ( originalThemeSupport !== themeSupport ) {
+		if ( ! respondedToDeveloperToolsOptionChange && originalThemeSupport !== themeSupport ) {
 			setRespondedToDeveloperToolsOptionChange( true );
 			return;
 		}
 
-		if ( developerToolsOption !== originalDeveloperToolsOption ) {
+		if ( ! respondedToDeveloperToolsOptionChange && developerToolsOption !== originalDeveloperToolsOption ) {
 			setRespondedToDeveloperToolsOptionChange( true );
 			updateOptions( { theme_support: undefined } );
 		}
+
+		if ( respondedToDeveloperToolsOptionChange && developerToolsOption === originalDeveloperToolsOption ) {
+			const themeSupportToSelect = mostRecentlySelectedThemeSupport || originalThemeSupport;
+			if ( themeSupport !== themeSupportToSelect ) {
+				updateOptions( { theme_support: themeSupportToSelect } );
+			}
+		}
 	}, [
+		currentPageSlug,
 		developerToolsOption,
 		fetchingUser,
+		mostRecentlySelectedThemeSupport,
 		originalDeveloperToolsOption,
 		originalThemeSupport,
 		respondedToDeveloperToolsOptionChange,
@@ -79,7 +106,7 @@ export function TemplateModeOverrideContextProvider( { children } ) {
 	] );
 
 	return (
-		<TemplateModeOverride.Provider value={ readerModeWasOverridden }>
+		<TemplateModeOverride.Provider value={ { readerModeWasOverridden, technicalQuestionChangedAtLeastOnce } }>
 			{ children }
 		</TemplateModeOverride.Provider>
 	);

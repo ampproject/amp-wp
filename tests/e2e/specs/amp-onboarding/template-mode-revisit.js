@@ -45,4 +45,22 @@ describe( 'Template mode revisit', () => {
 
 		await expect( page ).toMatchElement( '#template-mode-transitional-container input[type="radio"]:checked' );
 	} );
+
+	it( 'persists selection when user selects a mode, changes their devtools setting, returns to mode select screen, then changes their devtools setting back', async () => {
+		await moveToTemplateModeScreen( { technical: true } );
+		await clickMode( 'transitional' );
+
+		await clickPrevButton();
+
+		await expect( page ).toClick( '#technical-background-disable' );
+		await clickNextButton();
+
+		await clickPrevButton();
+		await expect( page ).toClick( '#technical-background-enable' );
+		await clickNextButton();
+
+		await expect( page ).toMatchElement( '.amp-info' ); // 'Previously selected' element.
+		await expect( page ).toMatchElement( '.template-mode-selection input[type="radio"]:checked' );
+		await expect( page ).toMatchElement( '#next-button:not(:disabled)' );
+	} );
 } );

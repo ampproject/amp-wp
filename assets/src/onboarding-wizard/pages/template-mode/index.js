@@ -11,6 +11,7 @@ import { ReaderThemes } from '../../../components/reader-themes-context-provider
 import { User } from '../../components/user-context-provider';
 import { Options } from '../../../components/options-context-provider';
 import { Loading } from '../../../components/loading';
+import { TemplateModeOverride } from '../../components/template-mode-override-context-provider';
 import { ScreenUI } from './screen-ui';
 import '../../../css/template-mode-selection.css';
 
@@ -20,11 +21,11 @@ import '../../../css/template-mode-selection.css';
 export function TemplateMode() {
 	const { setCanGoForward } = useContext( Navigation );
 	const { editedOptions, originalOptions, updateOptions } = useContext( Options );
-	const { developerToolsOption, originalDeveloperToolsOption } = useContext( User );
+	const { developerToolsOption } = useContext( User );
 	const { pluginIssues, themeIssues, scanningSite } = useContext( SiteScan );
 	const { currentTheme } = useContext( ReaderThemes );
+	const { technicalQuestionChangedAtLeastOnce } = useContext( TemplateModeOverride );
 
-	const technicalQuestionChanged = developerToolsOption !== originalDeveloperToolsOption;
 	const { theme_support: themeSupport } = editedOptions;
 
 	/**
@@ -52,7 +53,7 @@ export function TemplateMode() {
 			setCurrentMode={ ( mode ) => {
 				updateOptions( { theme_support: mode } );
 			} }
-			technicalQuestionChanged={ technicalQuestionChanged }
+			technicalQuestionChanged={ technicalQuestionChangedAtLeastOnce }
 			themeIssues={ themeIssues }
 		/>
 	);

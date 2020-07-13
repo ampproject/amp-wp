@@ -3,7 +3,6 @@
  */
 import { render, Component } from '@wordpress/element';
 import domReady from '@wordpress/dom-ready';
-import '@wordpress/components/build-style/style.css';
 
 /**
  * External dependencies
