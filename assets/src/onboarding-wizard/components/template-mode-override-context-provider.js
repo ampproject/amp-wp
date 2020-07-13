@@ -37,7 +37,7 @@ export function TemplateModeOverrideContextProvider( { children } ) {
 	const [ readerModeWasOverridden, setReaderModeWasOverridden ] = useState( false );
 
 	/**
-	 * Override with transitional if the user has selected reader mode and their currently active theme as reader theme.
+	 * Override with transitional if the user has selected reader mode and their currently active theme is the same as the selected reader theme.
 	 */
 	useEffect( () => {
 		if ( 'summary' === currentPageSlug && 'reader' === themeSupport && selectedTheme.name === currentTheme.name ) {
@@ -58,7 +58,7 @@ export function TemplateModeOverrideContextProvider( { children } ) {
 			return;
 		}
 
-		// If user has already made a change, don't do anythhing.
+		// If user has already made a change, don't do anything.
 		if ( originalThemeSupport !== themeSupport ) {
 			setRespondedToDeveloperToolsOptionChange( true );
 			return;
