@@ -245,8 +245,14 @@ class AMP_Template_Customizer {
 	 * @return string Description, with markup.
 	 */
 	protected function get_amp_panel_description() {
-		/* translators: placeholder is URL to AMP project. */
-		return wp_kses_post( sprintf( __( '<a href="%s" target="_blank">The AMP Project</a> is a Google-led initiative that dramatically improves loading speeds on phones and tablets. You can use the Customizer to preview changes to your AMP template before publishing them.', 'amp' ), 'https://ampproject.org' ) );
+		return wp_kses_post(
+			sprintf(
+				/* translators: 1: URL to AMP project, 2: URL to admin settings screen */
+				__( '<a href="%1$s" target="_blank">AMP</a> is a project that emphasizes user experience. While AMP also applies to desktop pages, your site is <a href="%2$s" target="_blank">currently configured</a> in Reader mode to serve AMP pages to mobile visitors. These settings customize the experience for these users.', 'amp' ),
+				'https://amp.dev',
+				admin_url( 'admin.php?page=amp-options' )
+			)
+		);
 	}
 
 	/**
