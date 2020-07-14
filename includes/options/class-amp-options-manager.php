@@ -99,12 +99,26 @@ class AMP_Options_Manager {
 		}
 
 		// Migrate legacy method of specifying the mode.
-		$theme_support = AMP_Theme_Support::get_theme_support_args();
-		if ( $theme_support && ! isset( $options[ Option::THEME_SUPPORT ] ) ) {
-			if ( empty( $theme_support[ AMP_Theme_Support::PAIRED_FLAG ] ) ) {
-				$defaults[ Option::THEME_SUPPORT ] = AMP_Theme_Support::STANDARD_MODE_SLUG;
-			} else {
-				$defaults[ Option::THEME_SUPPORT ] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
+		if ( ! isset( $options[ Option::THEME_SUPPORT ] ) ) {
+			$theme_support = AMP_Theme_Support::get_theme_support_args();
+			$template      = get_template();
+			$stylesheet    = get_stylesheet();
+			if (
+				$theme_support
+				&&
+				(
+					// If theme support was probably explicitly added by the theme (since not core).
+					! in_array( $template, AMP_Core_Theme_Sanitizer::get_supported_themes(), true )
+					||
+					// If it is a core theme no child theme is being used (which likely won't be AMP-compatible by default).
+					$template === $stylesheet
+				)
+			) {
+				if ( empty( $theme_support[ AMP_Theme_Support::PAIRED_FLAG ] ) ) {
+					$defaults[ Option::THEME_SUPPORT ] = AMP_Theme_Support::STANDARD_MODE_SLUG;
+				} else {
+					$defaults[ Option::THEME_SUPPORT ] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
+				}
 			}
 		}
 

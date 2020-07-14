@@ -24,6 +24,8 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 */
 	private $was_wp_using_ext_object_cache;
 
+	private $original_theme_directories;
+
 	/**
 	 * Set up.
 	 */
@@ -33,6 +35,11 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		delete_option( AMP_Options_Manager::OPTION_NAME ); // Make sure default reader mode option does not override theme support being added.
 		remove_theme_support( 'amp' );
 		$GLOBALS['wp_settings_errors'] = [];
+
+		global $wp_theme_directories;
+		$this->original_theme_directories = $wp_theme_directories;
+		register_theme_directory( ABSPATH . 'wp-content/themes' );
+		delete_site_transient( 'theme_roots' );
 	}
 
 	/**
@@ -46,6 +53,10 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		foreach ( get_post_types() as $post_type ) {
 			remove_post_type_support( $post_type, 'amp' );
 		}
+
+		global $wp_theme_directories;
+		$wp_theme_directories = $this->original_theme_directories;
+		delete_site_transient( 'theme_roots' );
 	}
 
 	/**
@@ -320,6 +331,51 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 			]
 		);
 		$this->assertTrue( AMP_Options_Manager::get_option( Option::PLUGIN_CONFIGURED ) );
+	}
+
+	/** @return array */
+	public function get_data_for_testing_get_options_default_template_mode() {
+		return [
+			'core_theme'    => [
+				'twentytwenty',
+				AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
+				null,
+			],
+			'child_of_core' => [
+				'child-of-core',
+				AMP_Theme_Support::READER_MODE_SLUG,
+				null,
+			],
+			'custom_theme'  => [
+				'twentytwenty',
+				AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
+				[],
+			],
+		];
+	}
+
+	/**
+	 * Test the expected default mode when various themes are active.
+	 *
+	 * @dataProvider get_data_for_testing_get_options_default_template_mode
+	 *
+	 * @covers AMP_Options_Manager::get_options()
+	 * @param string     $theme               Theme.
+	 * @param string     $expected_mode       Expected mode.
+	 * @param null|array $added_theme_support Added theme support (or not if null).
+	 */
+	public function test_get_options_default_template_mode( $theme, $expected_mode, $added_theme_support ) {
+		$theme_dir = basename( dirname( AMP__DIR__ ) ) . '/' . basename( AMP__DIR__ ) . '/tests/php/data/themes';
+		register_theme_directory( $theme_dir );
+
+		delete_option( AMP_Options_Manager::OPTION_NAME );
+		remove_theme_support( 'amp' );
+		switch_theme( $theme );
+		if ( is_array( $added_theme_support ) ) {
+			add_theme_support( 'amp', $added_theme_support );
+		}
+		AMP_Core_Theme_Sanitizer::extend_theme_support();
+		$this->assertEquals( $expected_mode, AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
 	}
 
 	/**
