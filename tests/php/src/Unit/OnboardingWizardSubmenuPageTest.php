@@ -62,6 +62,22 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 
 		$this->assertEquals( 10, has_action( 'admin_head-admin_page_amp-onboarding-wizard', [ $this->page, 'override_template' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ $this->page, 'enqueue_assets' ] ) );
+		$this->assertEquals( 10, add_filter( 'admin_title', [ $this->page, 'override_title' ] ) );
+	}
+
+	/**
+	 * Tests OnboardingWizardSubmenuPage::override_title
+	 *
+	 * @covers OnboardingWizardSubmenuPage::override_title
+	 */
+	public function test_override_title() {
+		set_current_screen( 'index.php' );
+
+		$this->assertEquals( 'Index - WordPress', $this->page->override_title( 'Index - WordPress' ) );
+
+		set_current_screen( $this->page->screen_handle() );
+
+		$this->assertEquals( 'Index - WordPress', $this->page->override_title( ' - WordPress' ) );
 	}
 
 	/**

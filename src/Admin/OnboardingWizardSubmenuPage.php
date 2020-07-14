@@ -92,6 +92,21 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 	public function register() {
 		add_action( 'admin_head-' . $this->screen_handle(), [ $this, 'override_template' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+		add_filter( 'admin_title', [ $this, 'override_title' ] );
+	}
+
+	/**
+	 * Overrides the admin title on the wizard screen. Without this filter, the title portion would be empty.
+	 *
+	 * @param string $admin_title The unfiltered admin title.
+	 * @return string If on the wizard screen, the admin title with the page title prepended.
+	 */
+	public function override_title( $admin_title ) {
+		if ( $this->screen_handle() !== get_current_screen()->id ) {
+			return $admin_title;
+		}
+
+		return esc_html__( 'AMP Onboarding Wizard', 'amp' ) . $admin_title;
 	}
 
 	/**
