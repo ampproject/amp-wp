@@ -351,6 +351,10 @@ export function PluginSuppression() {
 		suppressible_plugins: suppressiblePlugins,
 	} = editedOptions;
 
+	if ( ! suppressiblePlugins || 0 === Object.keys( suppressiblePlugins ).length ) {
+		return null;
+	}
+
 	return (
 		<section>
 			<h2>

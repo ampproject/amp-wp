@@ -13,6 +13,8 @@
 	--white: #fff;
 	--font-noto: "Noto Sans", sans-serif;
 	--font-poppins: poppins, sans-serif;
+	--color-valid: #46b450;
+	--color-invalid: #dc3232;
 
 	padding-bottom: 8rem;
 }

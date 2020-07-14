@@ -193,11 +193,11 @@
 }
 
 li.error-removed {
-	color: <?php echo esc_html(icon::valid() ->get_color());
+	color: var(--color-valid);
 }
 
 li.error-kept {
-	color: <?php echo esc_html(icon::invalid() ->get_color());
+	color: var(--color-invalid);
 }
 
 @media screen and (max-width: 782px) {
