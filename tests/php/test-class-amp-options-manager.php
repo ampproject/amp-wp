@@ -317,7 +317,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 			[
 				Option::VERSION           => AMP__VERSION,
 				Option::PLUGIN_CONFIGURED => true,
-			],
+			]
 		);
 		$this->assertTrue( AMP_Options_Manager::get_option( Option::PLUGIN_CONFIGURED ) );
 	}
