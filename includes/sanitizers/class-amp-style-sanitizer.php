@@ -930,9 +930,37 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 			$shake_css_duration += $pending_stylesheet['shake_time'];
 		}
-		// TODO: This cannot use actions when we extract the sanitizers into an
-		// external library.
+
+		// TODO: These cannot use actions when we extract the sanitizers into an external library.
+
+		/**
+		 * Logs the server-timing measurement for the CSS parsing.
+		 *
+		 * @since 1.6.0
+		 * @internal
+		 *
+		 * @param string   $event_name        Name of the event to log.
+		 * @param string   $event_description Description of the event to log.
+		 * @param string[] $properties        Optional. Additional properties to add
+		 *                                    to the logged record.
+		 * @param bool     $verbose_only      Optional. Whether to only show the
+		 *                                    event in verbose mode.
+		 */
 		do_action( 'amp_server_timing_log', 'amp_parse_css', 'AMP Parse CSS', [ 'dur' => $parse_css_duration * 1000 ], true );
+
+		/**
+		 * Logs the server-timing measurement for the CSS tree-shaking.
+		 *
+		 * @since 1.6.0
+		 * @internal
+		 *
+		 * @param string   $event_name        Name of the event to log.
+		 * @param string   $event_description Description of the event to log.
+		 * @param string[] $properties        Optional. Additional properties to add
+		 *                                    to the logged record.
+		 * @param bool     $verbose_only      Optional. Whether to only show the
+		 *                                    event in verbose mode.
+		 */
 		do_action( 'amp_server_timing_log', 'amp_shake_css', 'AMP Tree-Shake CSS', [ 'dur' => $shake_css_duration * 1000 ], true );
 	}
 

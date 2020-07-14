@@ -135,6 +135,21 @@ class AMP_Theme_Support {
 	 * @since 0.7
 	 */
 	public static function init() {
+		/**
+		 * Starts the server-timing measurement for the entire output buffer capture.
+		 *
+		 * @since 1.6.0
+		 * @internal
+		 *
+		 * @param string      $event_name        Name of the event to record.
+		 * @param string|null $event_description Optional. Description of the event
+		 *                                       to record. Defaults to null.
+		 * @param string[]    $properties        Optional. Additional properties to add
+		 *                                       to the logged record.
+		 * @param bool        $verbose_only      Optional. Whether to only show the
+		 *                                       event in verbose mode. Defaults to
+		 *                                       false.
+		 */
 		do_action( 'amp_server_timing_start', 'init', 'AMP Output Buffer' );
 
 		// Ensure extra theme support for core themes is in place.
@@ -1887,8 +1902,31 @@ class AMP_Theme_Support {
 			$args
 		);
 
+		/**
+		 * Stops the server-timing measurement for the entire output buffer capture.
+		 *
+		 * @since 1.6.0
+		 * @internal
+		 *
+		 * @param string $event_name Name of the event to stop.
+		 */
 		do_action( 'amp_server_timing_stop', 'init' );
 
+		/**
+		 * Starts the server-timing measurement for the dom parsing subsystem.
+		 *
+		 * @since 1.6.0
+		 * @internal
+		 *
+		 * @param string      $event_name        Name of the event to record.
+		 * @param string|null $event_description Optional. Description of the event
+		 *                                       to record. Defaults to null.
+		 * @param string[]    $properties        Optional. Additional properties to add
+		 *                                       to the logged record.
+		 * @param bool        $verbose_only      Optional. Whether to only show the
+		 *                                       event in verbose mode. Defaults to
+		 *                                       false.
+		 */
 		do_action( 'amp_server_timing_start', 'amp_dom_parse', 'AMP DOM Parse', [], true );
 
 		$dom = Document::fromHtml( $response );
@@ -1897,8 +1935,31 @@ class AMP_Theme_Support {
 			AMP_Validation_Manager::remove_illegal_source_stack_comments( $dom );
 		}
 
+		/**
+		 * Stops the server-timing measurement for the dom parsing subsystem.
+		 *
+		 * @since 1.6.0
+		 * @internal
+		 *
+		 * @param string $event_name Name of the event to stop.
+		 */
 		do_action( 'amp_server_timing_stop', 'amp_dom_parse' );
 
+		/**
+		 * Starts the server-timing measurement for the AMP Sanitizer subsystem.
+		 *
+		 * @since 1.6.0
+		 * @internal
+		 *
+		 * @param string      $event_name        Name of the event to record.
+		 * @param string|null $event_description Optional. Description of the event
+		 *                                       to record. Defaults to null.
+		 * @param string[]    $properties        Optional. Additional properties to add
+		 *                                       to the logged record.
+		 * @param bool        $verbose_only      Optional. Whether to only show the
+		 *                                       event in verbose mode. Defaults to
+		 *                                       false.
+		 */
 		do_action( 'amp_server_timing_start', 'amp_sanitizer', 'AMP Sanitizer' );
 
 		// Make sure scripts from the body get moved to the head.
@@ -1915,6 +1976,14 @@ class AMP_Theme_Support {
 
 		$sanitization_results = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
 
+		/**
+		 * Stops the server-timing measurement for the AMP Sanitizer subsystem.
+		 *
+		 * @since 1.6.0
+		 * @internal
+		 *
+		 * @param string $event_name Name of the event to stop.
+		 */
 		do_action( 'amp_server_timing_stop', 'amp_sanitizer' );
 
 		// Respond early with results if performing a validate request.
@@ -1933,6 +2002,21 @@ class AMP_Theme_Support {
 			return wp_json_encode( $data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
 		}
 
+		/**
+		 * Starts the server-timing measurement for the AMP DOM serialization.
+		 *
+		 * @since 1.6.0
+		 * @internal
+		 *
+		 * @param string      $event_name        Name of the event to record.
+		 * @param string|null $event_description Optional. Description of the event
+		 *                                       to record. Defaults to null.
+		 * @param string[]    $properties        Optional. Additional properties to add
+		 *                                       to the logged record.
+		 * @param bool        $verbose_only      Optional. Whether to only show the
+		 *                                       event in verbose mode. Defaults to
+		 *                                       false.
+		 */
 		do_action( 'amp_server_timing_start', 'amp_dom_serialize', 'AMP DOM Serialize', [], true );
 
 		// Gather all component scripts that are used in the document and then render any not already printed.
@@ -1968,6 +2052,21 @@ class AMP_Theme_Support {
 		$enable_optimizer = apply_filters( 'amp_enable_optimizer', $enable_optimizer );
 
 		if ( $enable_optimizer ) {
+			/**
+			 * Starts the server-timing measurement for the AMP Optimizer subsystem.
+			 *
+			 * @since 1.6.0
+			 * @internal
+			 *
+			 * @param string      $event_name        Name of the event to record.
+			 * @param string|null $event_description Optional. Description of the event
+			 *                                       to record. Defaults to null.
+			 * @param string[]    $properties        Optional. Additional properties to add
+			 *                                       to the logged record.
+			 * @param bool        $verbose_only      Optional. Whether to only show the
+			 *                                       event in verbose mode. Defaults to
+			 *                                       false.
+			 */
 			do_action( 'amp_server_timing_start', 'amp_optimizer', 'AMP Optimizer' );
 
 			$errors = new Optimizer\ErrorCollection();
@@ -1986,6 +2085,14 @@ class AMP_Theme_Support {
 				// @todo Include errors elsewhere than HTML comment?
 			}
 
+			/**
+			 * Stops the server-timing measurement for the AMP Optimizer subsystem.
+			 *
+			 * @since 1.6.0
+			 * @internal
+			 *
+			 * @param string $event_name Name of the event to stop.
+			 */
 			do_action( 'amp_server_timing_stop', 'amp_optimizer' );
 		}
 
@@ -2006,6 +2113,14 @@ class AMP_Theme_Support {
 
 		$response = $dom->saveHTML();
 
+		/**
+		 * Stops the server-timing measurement for the AMP DOM serialization.
+		 *
+		 * @since 1.6.0
+		 * @internal
+		 *
+		 * @param string $event_name Name of the event to stop.
+		 */
 		do_action( 'amp_server_timing_stop', 'amp_dom_serialize' );
 
 		return $response;

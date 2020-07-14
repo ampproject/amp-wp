@@ -121,6 +121,21 @@ class AMP_Content_Sanitizer {
 			AMP_Tag_And_Attribute_Sanitizer::class,
 		];
 		foreach ( $sanitizers as $sanitizer_class => $sanitizer ) {
+			/**
+			 * Starts the server-timing measurement for an individual sanitizer.
+			 *
+			 * @since 1.6.0
+			 * @internal
+			 *
+			 * @param string      $event_name        Name of the event to record.
+			 * @param string|null $event_description Optional. Description of the event
+			 *                                       to record. Defaults to null.
+			 * @param string[]    $properties        Optional. Additional properties to add
+			 *                                       to the logged record.
+			 * @param bool        $verbose_only      Optional. Whether to only show the
+			 *                                       event in verbose mode. Defaults to
+			 *                                       false.
+			 */
 			do_action(
 				'amp_server_timing_start',
 				'amp_sanitize_' . $index,
@@ -138,6 +153,14 @@ class AMP_Content_Sanitizer {
 				$stylesheets = array_merge( $stylesheets, $sanitizer->get_stylesheets() );
 			}
 
+			/**
+			 * Stops the server-timing measurement for an individual sanitizer.
+			 *
+			 * @since 1.6.0
+			 * @internal
+			 *
+			 * @param string $event_name Name of the event to stop.
+			 */
 			do_action( 'amp_server_timing_stop', 'amp_sanitize_' . $index );
 			++$index;
 		}
