@@ -51,16 +51,24 @@ function AMPToggle( { isEnabled, onChange } ) {
 				Boolean( errorMessages.length ) &&
 					(
 						<Notice
-							status="warning"
+							status="info"
 							isDismissible={ false }
+							className="amp-unavailable-notice"
 						>
-							{
-								errorMessages.map( ( message, index ) => (
-									<RawHTML key={ index }>
-										{ message }
-									</RawHTML>
-								) )
-							}
+							<details>
+								<summary>
+									{ __( 'AMP Unavailable', 'amp' ) }
+								</summary>
+								{
+									errorMessages.map( ( message, index ) => (
+										<p key={ index }>
+											<RawHTML>
+												{ message }
+											</RawHTML>
+										</p>
+									) )
+								}
+							</details>
 						</Notice>
 					)
 			}

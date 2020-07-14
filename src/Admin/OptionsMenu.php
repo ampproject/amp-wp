@@ -284,9 +284,6 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		/* translators: %s: URL to the ecosystem page. */
 		$plugin_configured = AMP_Options_Manager::get_option( Option::PLUGIN_CONFIGURED );
 
-		if ( ! empty( $_GET['settings-updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			AMP_Options_Manager::check_supported_post_type_update_errors();
-		}
 		?>
 		<div class="wrap">
 			<form id="amp-settings" action="options.php" method="post">
@@ -372,11 +369,10 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	 */
 	public function render_supported_templates() {
 		?>
-
 		<fieldset id="supported_post_types_fieldset" class="hidden">
 			<?php
-			$element_name         = AMP_Options_Manager::OPTION_NAME . '[supported_post_types][]';
 			$supported_post_types = AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES );
+			$element_name         = sprintf( '%s[supported_post_types][]', AMP_Options_Manager::OPTION_NAME );
 			?>
 			<h4 class="title"><?php esc_html_e( 'Content Types', 'amp' ); ?></h4>
 			<p>
@@ -384,21 +380,17 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			</p>
 			<ul>
 			<?php foreach ( array_map( 'get_post_type_object', AMP_Post_Type_Support::get_eligible_post_types() ) as $post_type ) : ?>
-				<?php
-				$checked = (
-					post_type_supports( $post_type->name, AMP_Post_Type_Support::SLUG )
-					||
-					in_array( $post_type->name, $supported_post_types, true )
-				);
-				?>
 				<li>
-					<?php $element_id = AMP_Options_Manager::OPTION_NAME . "-supported_post_types-{$post_type->name}"; ?>
+					<?php
+					$element_id = sprintf( '%s[supported_post_types][%s]', AMP_Options_Manager::OPTION_NAME, $post_type->name );
+					$supported  = in_array( $post_type->name, $supported_post_types, true );
+					?>
 					<input
 						type="checkbox"
 						id="<?php echo esc_attr( $element_id ); ?>"
 						name="<?php echo esc_attr( $element_name ); ?>"
 						value="<?php echo esc_attr( $post_type->name ); ?>"
-						<?php checked( $checked ); ?>
+						<?php checked( $supported ); ?>
 						>
 					<label for="<?php echo esc_attr( $element_id ); ?>">
 						<?php echo esc_html( $post_type->label ); ?>
@@ -429,8 +421,10 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	 * @param string|null $parent  Optional. ID of the parent option.
 	 */
 	private function list_template_conditional_options( $options, $parent = null ) {
-		$element_name = AMP_Options_Manager::OPTION_NAME . '[supported_templates][]';
+		$supported_templates = AMP_Options_Manager::get_option( Option::SUPPORTED_TEMPLATES );
+		$element_name        = sprintf( '%s[supported_templates][]', AMP_Options_Manager::OPTION_NAME );
 		?>
+		<input type="hidden" name="<?php echo esc_attr( $element_name ); ?>" value=""><!-- Included to make sure that the supported_templates get updated if no checkboxes are checked. -->
 		<ul>
 			<?php foreach ( $options as $id => $option ) : ?>
 				<?php
@@ -443,28 +437,15 @@ class OptionsMenu implements Conditional, Service, Registerable {
 				if ( empty( $option['label'] ) ) {
 					continue;
 				}
-
 				?>
 				<li>
-					<?php if ( empty( $option['immutable'] ) ) : ?>
-						<input
-							type="checkbox"
-							id="<?php echo esc_attr( $element_id ); ?>"
-							name="<?php echo esc_attr( $element_name ); ?>"
-							value="<?php echo esc_attr( $id ); ?>"
-							<?php checked( ! empty( $option['user_supported'] ) ); ?>
-						>
-					<?php else : // Persist user selection even when checkbox disabled, when selection forced by theme/filter. ?>
-						<input
-							type="checkbox"
-							id="<?php echo esc_attr( $element_id ); ?>"
-							<?php checked( ! empty( $option['supported'] ) ); ?>
-							<?php disabled( true ); ?>
-						>
-						<?php if ( ! empty( $option['user_supported'] ) ) : ?>
-							<input type="hidden" name="<?php echo esc_attr( $element_name ); ?>" value="<?php echo esc_attr( $id ); ?>">
-						<?php endif; ?>
-					<?php endif; ?>
+					<input
+						type="checkbox"
+						id="<?php echo esc_attr( $element_id ); ?>"
+						name="<?php echo esc_attr( $element_name ); ?>"
+						value="<?php echo esc_attr( $id ); ?>"
+						<?php checked( in_array( $id, $supported_templates, true ) ); ?>
+					>
 					<label for="<?php echo esc_attr( $element_id ); ?>">
 						<?php echo esc_html( $option['label'] ); ?>
 					</label>
