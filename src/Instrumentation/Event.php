@@ -1,6 +1,6 @@
 <?php
 /**
- * Class EventWithDuration.
+ * Class Event.
  *
  * @package AmpProject\AmpWP
  */
