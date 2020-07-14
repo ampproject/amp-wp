@@ -11,10 +11,12 @@ namespace AmpProject\AmpWP;
 use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AMP_Validated_URL_Post_Type;
+use AMP_Validation_Error_Taxonomy;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use stdClass;
 use WP_Error;
 use WP_REST_Controller;
 use WP_REST_Request;
@@ -43,11 +45,9 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 	const SUPPRESSIBLE_PLUGINS = 'suppressible_plugins';
 
 	/**
-	 * Key for the errors by source data included in the endpoint.
-	 *
-	 * @var string
+	 * Key for the date format used in date-rendering functions.
 	 */
-	const ERRORS_BY_SOURCE = 'errors_by_source';
+	const DATE_FORMAT = 'date_format';
 
 	/**
 	 * Reader themes provider class.
@@ -152,7 +152,7 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 		$options[ self::PREVIEW_PERMALINK ] = amp_admin_get_preview_permalink();
 
 		$options[ self::SUPPRESSIBLE_PLUGINS ] = $this->plugin_suppression->get_suppressible_plugins_with_details();
-		$options[ self::ERRORS_BY_SOURCE ]     = AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source();
+		$options[ self::DATE_FORMAT ]          = get_option( 'date_format' );
 
 		return rest_ensure_response( $options );
 	}
@@ -222,10 +222,10 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 						'readonly' => true,
 					],
 					Option::SUPPRESSED_PLUGINS      => [
-						'type' => 'array',
+						'type' => 'object',
 					],
-					self::ERRORS_BY_SOURCE          => [
-						'type'     => 'object',
+					self::DATE_FORMAT               => [
+						'type'     => 'string',
 						'readonly' => true,
 					],
 				],

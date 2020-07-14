@@ -343,7 +343,7 @@ final class PluginSuppression implements Service, Registerable {
 
 			$errors_by_sources = AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source();
 
-			$select_options    = [
+			$select_options = [
 				'0' => __( 'Active', 'amp' ),
 				'1' => __( 'Suppressed', 'amp' ),
 			];
@@ -484,6 +484,45 @@ final class PluginSuppression implements Service, Registerable {
 	}
 
 	/**
+	 * Provides validation errors for a plugin specified by slug.
+	 *
+	 * @param string $plugin_slug Plugin slug.
+	 * @return array Validation errors.
+	 */
+	public function get_sorted_plugin_validation_errors( $plugin_slug ) {
+		$errors_by_source = AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source();
+
+		if ( ! isset( $errors_by_source['plugin'][ $plugin_slug ] ) ) {
+			return [];
+		}
+
+		$validation_errors = $errors_by_source['plugin'][ $plugin_slug ];
+
+		usort(
+			$validation_errors,
+			static function ( $a, $b ) {
+				/** @var WP_Term */
+				$a_term = $a['term'];
+
+				/** @var WP_Term */
+				$b_term = $b['term'];
+
+				$a_reviewed = ( (int) $a_term->term_group & AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
+				$b_reviewed = ( (int) $b_term->term_group & AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
+				if ( $a_reviewed !== $b_reviewed ) {
+					return (int) $a_reviewed - (int) $b_reviewed;
+				}
+
+				$a_removed = ( (int) $a_term->term_group & AMP_Validation_Error_Taxonomy::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
+				$b_removed = ( (int) $b_term->term_group & AMP_Validation_Error_Taxonomy::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
+				return (int) $a_removed - (int) $b_removed;
+			}
+		);
+
+		return $validation_errors;
+	}
+
+	/**
 	 * Render validation errors into <details> element.
 	 *
 	 * @param array $validation_errors Validation errors.
@@ -597,10 +636,43 @@ final class PluginSuppression implements Service, Registerable {
 	 * @return array
 	 */
 	public function get_suppressible_plugins_with_details() {
-		return array_intersect_key( // Note that wp_array_slice_assoc() doesn't preserve sort order.
+		$plugins = array_intersect_key( // Note that wp_array_slice_assoc() doesn't preserve sort order.
 			$this->plugin_registry->get_plugins( true ),
 			array_fill_keys( $this->get_suppressible_plugins(), true )
 		);
+
+		foreach ( $plugins as $key => $plugin ) {
+			$validation_errors = $this->get_sorted_plugin_validation_errors( $key );
+
+			foreach ( $validation_errors as &$validation_error ) {
+				$term = $validation_error['term'];
+
+				$validation_error['edit_url'] = admin_url(
+					add_query_arg(
+						[
+							AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG => $term->name,
+							'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+						],
+						'edit.php'
+					)
+				);
+
+				$validation_error['title'] = AMP_Validation_Error_Taxonomy::get_error_title_from_code( $validation_error['data'] );
+
+				$validation_error['is_removed']  = ( (int) $term->term_group & AMP_Validation_Error_Taxonomy::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
+				$validation_error['is_reviewed'] = ( (int) $term->term_group & AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
+				$validation_error['tooltip']     = sprintf(
+					/* translators: %1 is whether validation error is 'removed' or 'kept', %2 is whether validation error is 'reviewed' or 'unreviewed' */
+					__( 'Invalid markup causing the validation error is %1$s and %2$s. See all validated URL(s) with this validation error.', 'amp' ),
+					$validation_error['is_removed'] ? __( 'removed', 'amp' ) : __( 'kept', 'amp' ),
+					$validation_error['is_reviewed'] ? __( 'reviewed', 'amp' ) : __( 'unreviewed', 'amp' )
+				);
+			}
+
+			$plugins[ $key ]['validation_errors'] = $validation_errors;
+		}
+
+		return $plugins;
 	}
 
 	/**
