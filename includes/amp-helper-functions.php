@@ -142,10 +142,12 @@ function amp_init() {
 	$options = get_option( AMP_Options_Manager::OPTION_NAME, [] );
 
 	// Initialize the plugin_configured option, setting it to true if options already exist.
-	if ( empty( $options ) ) {
-		AMP_Options_Manager::update_option( Option::PLUGIN_CONFIGURED, false );
-	} elseif ( ! isset( $options[ Option::PLUGIN_CONFIGURED ] ) ) {
-		AMP_Options_Manager::update_option( Option::PLUGIN_CONFIGURED, true );
+	if ( is_admin() && current_user_can( 'manage_options' )  ) {
+		if ( empty( $options ) ) {
+			AMP_Options_Manager::update_option( Option::PLUGIN_CONFIGURED, false );
+		} elseif ( ! isset( $options[ Option::PLUGIN_CONFIGURED ] ) ) {
+			AMP_Options_Manager::update_option( Option::PLUGIN_CONFIGURED, true );
+		}
 	}
 
 	$old_version = isset( $options[ Option::VERSION ] ) ? $options[ Option::VERSION ] : '0.0';
