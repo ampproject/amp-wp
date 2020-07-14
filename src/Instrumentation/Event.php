@@ -73,6 +73,8 @@ class Event {
 	 * Add additional properties to the event.
 	 *
 	 * @param string[] $properties Properties to add.
+	 * @throws InvalidEventProperties When the type of $properties or its
+	 *                                elements is off.
 	 */
 	public function add_properties( $properties ) {
 		if ( ! is_array( $properties ) ) {
