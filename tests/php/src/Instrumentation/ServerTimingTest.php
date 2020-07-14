@@ -343,4 +343,58 @@ final class ServerTimingTest extends WP_UnitTestCase {
 			)
 		);
 	}
+
+	public function test_it_restricts_output_in_non_verbose_mode() {
+		$server_timing = $this->injector->make( ServerTiming::class );
+
+		$server_timing->start( 'main-event', 'Main Event', [], false );
+		$server_timing->stop( 'main-event' );
+		$server_timing->start( 'verbose-event', 'Verbose Event', [], true );
+		$server_timing->stop( 'verbose-event' );
+
+		$events     = $this->get_private_property( $server_timing, 'events' );
+		$main_event = $events['main-event'];
+		$main_event->set_duration( 1.2 );
+		$this->assertNotContains( 'verbose-event', $events );
+
+		$server_timing->send();
+
+		$this->assertContains(
+			[
+				'name'        => 'Server-Timing',
+				'value'       => 'main-event;desc="Main Event";dur="1.2"',
+				'replace'     => true,
+				'status_code' => null,
+			],
+			AMP_HTTP::$headers_sent
+		);
+	}
+
+	public function test_it_doesnt_restrict_output_in_verbose_mode() {
+		$server_timing = $this->injector->make( ServerTiming::class );
+		$this->set_private_property( $server_timing, 'verbose', true );
+
+		$server_timing->start( 'main-event', 'Main Event', [], false );
+		$server_timing->stop( 'main-event' );
+		$server_timing->start( 'verbose-event', 'Verbose Event', [], true );
+		$server_timing->stop( 'verbose-event' );
+
+		$events     = $this->get_private_property( $server_timing, 'events' );
+		$main_event = $events['main-event'];
+		$main_event->set_duration( 1.2 );
+		$verbose_event = $events['verbose-event'];
+		$verbose_event->set_duration( 3.4 );
+
+		$server_timing->send();
+
+		$this->assertContains(
+			[
+				'name'        => 'Server-Timing',
+				'value'       => 'main-event;desc="Main Event";dur="1.2", verbose-event;desc="Verbose Event";dur="3.4"',
+				'replace'     => true,
+				'status_code' => null,
+			],
+			AMP_HTTP::$headers_sent
+		);
+	}
 }
