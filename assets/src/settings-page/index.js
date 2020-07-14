@@ -26,7 +26,6 @@ import { OptionsContextProvider } from '../components/options-context-provider';
 import { ReaderThemesContextProvider } from '../components/reader-themes-context-provider';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
-import { SupportedTemplates as OldSupportedTemplates } from './old-supported-templates';
 import { MobileRedirection } from './mobile-redirection';
 import { ReaderThemes } from './reader-themes';
 import { SettingsFooter } from './settings-footer';
@@ -67,7 +66,6 @@ function Root() {
 			<TemplateModes />
 			<ReaderThemes />
 			<SupportedTemplates />
-			<OldSupportedTemplates />
 			<MobileRedirection />
 			<PluginSuppression />
 			<SettingsFooter />

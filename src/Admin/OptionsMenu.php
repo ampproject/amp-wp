@@ -10,13 +10,11 @@ namespace AmpProject\AmpWP\Admin;
 use AMP_Analytics_Options_Submenu;
 use AMP_Core_Theme_Sanitizer;
 use AMP_Options_Manager;
-use AMP_Post_Type_Support;
 use AMP_Theme_Support;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\PluginSuppression;
 
 /**
  * OptionsMenu class.
@@ -137,31 +135,6 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			esc_html__( 'Settings', 'amp' ),
 			'manage_options',
 			AMP_Options_Manager::OPTION_NAME
-		);
-
-		add_settings_section(
-			'general',
-			false,
-			'__return_false',
-			AMP_Options_Manager::OPTION_NAME
-		);
-
-		add_settings_section(
-			'validation',
-			false,
-			'__return_false',
-			AMP_Options_Manager::OPTION_NAME
-		);
-
-		add_settings_field(
-			Option::SUPPORTED_TEMPLATES,
-			esc_html__( 'Supported Templates', 'amp' ),
-			[ $this, 'render_supported_templates' ],
-			AMP_Options_Manager::OPTION_NAME,
-			'general',
-			[
-				'class' => 'amp-template-support-field',
-			]
 		);
 
 		/**
@@ -355,111 +328,9 @@ class OptionsMenu implements Conditional, Service, Registerable {
 						</div>
 					</div>
 					<div id="amp-settings-root"></div>
-					<div id="amp-settings-sections" style="display: none !important;">
-						<?php do_settings_sections( AMP_Options_Manager::OPTION_NAME ); ?>
-					</div>
 				</div>
 			</form>
 		</div>
-		<?php
-	}
-
-	/**
-	 * Supported templates section renderer.
-	 */
-	public function render_supported_templates() {
-		?>
-		<fieldset id="supported_post_types_fieldset" class="hidden">
-			<?php
-			$supported_post_types = AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES );
-			$element_name         = sprintf( '%s[supported_post_types][]', AMP_Options_Manager::OPTION_NAME );
-			?>
-			<h4 class="title"><?php esc_html_e( 'Content Types', 'amp' ); ?></h4>
-			<p>
-				<?php esc_html_e( 'The following content types will be available as AMP:', 'amp' ); ?>
-			</p>
-			<ul>
-			<?php foreach ( array_map( 'get_post_type_object', AMP_Post_Type_Support::get_eligible_post_types() ) as $post_type ) : ?>
-				<li>
-					<?php
-					$element_id = sprintf( '%s[supported_post_types][%s]', AMP_Options_Manager::OPTION_NAME, $post_type->name );
-					$supported  = in_array( $post_type->name, $supported_post_types, true );
-					?>
-					<input
-						type="checkbox"
-						id="<?php echo esc_attr( $element_id ); ?>"
-						name="<?php echo esc_attr( $element_name ); ?>"
-						value="<?php echo esc_attr( $post_type->name ); ?>"
-						<?php checked( $supported ); ?>
-						>
-					<label for="<?php echo esc_attr( $element_id ); ?>">
-						<?php echo esc_html( $post_type->label ); ?>
-					</label>
-				</li>
-			<?php endforeach; ?>
-			</ul>
-		</fieldset>
-
-		<fieldset id="supported_templates_fieldset" class="hidden">
-			<style>
-				#supported_templates_fieldset ul ul {
-					margin-left: 40px;
-				}
-			</style>
-			<h4 class="title"><?php esc_html_e( 'Templates', 'amp' ); ?></h4>
-			<?php
-			$this->list_template_conditional_options( AMP_Theme_Support::get_supportable_templates() );
-			?>
-		</fieldset>
-		<?php
-	}
-
-	/**
-	 * List template conditional options.
-	 *
-	 * @param array       $options Options.
-	 * @param string|null $parent  Optional. ID of the parent option.
-	 */
-	private function list_template_conditional_options( $options, $parent = null ) {
-		$supported_templates = AMP_Options_Manager::get_option( Option::SUPPORTED_TEMPLATES );
-		$element_name        = sprintf( '%s[supported_templates][]', AMP_Options_Manager::OPTION_NAME );
-		?>
-		<input type="hidden" name="<?php echo esc_attr( $element_name ); ?>" value=""><!-- Included to make sure that the supported_templates get updated if no checkboxes are checked. -->
-		<ul>
-			<?php foreach ( $options as $id => $option ) : ?>
-				<?php
-				$element_id = AMP_Options_Manager::OPTION_NAME . '-supported-templates-' . $id;
-				if ( $parent ? empty( $option['parent'] ) || $parent !== $option['parent'] : ! empty( $option['parent'] ) ) {
-					continue;
-				}
-
-				// Skip showing an option if it doesn't have a label.
-				if ( empty( $option['label'] ) ) {
-					continue;
-				}
-				?>
-				<li>
-					<input
-						type="checkbox"
-						id="<?php echo esc_attr( $element_id ); ?>"
-						name="<?php echo esc_attr( $element_name ); ?>"
-						value="<?php echo esc_attr( $id ); ?>"
-						<?php checked( in_array( $id, $supported_templates, true ) ); ?>
-					>
-					<label for="<?php echo esc_attr( $element_id ); ?>">
-						<?php echo esc_html( $option['label'] ); ?>
-					</label>
-
-					<?php if ( ! empty( $option['description'] ) ) : ?>
-						<span class="description">
-							&mdash; <?php echo wp_kses_post( $option['description'] ); ?>
-						</span>
-					<?php endif; ?>
-
-					<?php $this->list_template_conditional_options( $options, $id ); ?>
-				</li>
-			<?php endforeach; ?>
-		</ul>
 		<?php
 	}
 }

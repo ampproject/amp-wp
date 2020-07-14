@@ -215,3 +215,8 @@ li.error-kept {
 		display: table-cell;
 	}
 }
+
+/* Supported templates. */
+#supported_templates_fieldset ul ul {
+	margin-left: 40px;
+}

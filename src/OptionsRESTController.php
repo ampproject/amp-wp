@@ -52,7 +52,14 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 	 *
 	 * @var string
 	 */
-	const ELIGIBLE_POST_TYPES = 'eligible_post_types';
+	const SUPPORTABLE_POST_TYPES = 'supportable_post_types';
+
+	/**
+	 * Key for supportable templates data.
+	 *
+	 * @var string
+	 */
+	const SUPPORTABLE_TEMPLATES = 'supportable_templates';
 
 	/**
 	 * Reader themes provider class.
@@ -156,9 +163,9 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 		// amp_admin_get_preview_permalink calls AMP_Options_Manager::get_options, leading to infinite recursion.
 		$options[ self::PREVIEW_PERMALINK ] = amp_admin_get_preview_permalink();
 
-		$options[ self::SUPPRESSIBLE_PLUGINS ] = $this->plugin_suppression->get_suppressible_plugins_with_details();
-		$options[ self::DATE_FORMAT ]          = get_option( 'date_format' );
-		$options[ self::ELIGIBLE_POST_TYPES ]  = array_map(
+		$options[ self::SUPPRESSIBLE_PLUGINS ]   = $this->plugin_suppression->get_suppressible_plugins_with_details();
+		$options[ self::DATE_FORMAT ]            = get_option( 'date_format' );
+		$options[ self::SUPPORTABLE_POST_TYPES ] = array_map(
 			function( $slug ) {
 				$post_type                 = (array) get_post_type_object( $slug );
 				$post_type['supports_amp'] = post_type_supports( $post_type['name'], AMP_Post_Type_Support::SLUG );
@@ -167,7 +174,38 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 			AMP_Post_Type_Support::get_eligible_post_types()
 		);
 
+		$options[ self::SUPPORTABLE_TEMPLATES ] = $this->get_nested_supportable_templates( AMP_Theme_Support::get_supportable_templates() );
+
 		return rest_ensure_response( $options );
+	}
+
+	/**
+	 * Provides a hierarchical array of supportable templates.
+	 *
+	 * @param array       $options Template options.
+	 * @param string|null $parent The parent to provide templates for.
+	 * @return array
+	 */
+	private function get_nested_supportable_templates( $options, $parent = null ) {
+		$result = [];
+
+		foreach ( $options as $id => $option ) {
+			if ( $parent ? empty( $option['parent'] ) || $parent !== $option['parent'] : ! empty( $option['parent'] ) ) {
+				continue;
+			}
+
+			// Skip showing an option if it doesn't have a label.
+			if ( empty( $option['label'] ) ) {
+				continue;
+			}
+
+			$option['id']       = $id;
+			$option['children'] = $this->get_nested_supportable_templates( $options, $id );
+
+			$result[] = $option;
+		}
+
+		return $result;
 	}
 
 	/**
@@ -253,7 +291,10 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 							'type' => 'string',
 						],
 					],
-					self::ELIGIBLE_POST_TYPES       => [
+					self::SUPPORTABLE_POST_TYPES    => [
+						'type' => 'array',
+					],
+					self::SUPPORTABLE_TEMPLATES     => [
 						'type' => 'array',
 					],
 				],

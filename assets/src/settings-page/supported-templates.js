@@ -24,9 +24,9 @@ function PostTypeCheckbox( { postTypeObject, supportedPostTypes } ) {
 	const [ checked, setChecked ] = useState( postTypeObject.supports_amp || supportedPostTypes.includes( postTypeObject.name ) );
 
 	const newSupportedPostTypes = useMemo( () => {
-		let newValue = supportedPostTypes.filter( ( postType ) => postType !== postTypeObject.name );
+		const newValue = supportedPostTypes.filter( ( postType ) => postType !== postTypeObject.name );
 		if ( ! checked ) {
-			newValue = newValue.concat( postTypeObject.name );
+			newValue.push( postTypeObject.name );
 		}
 
 		return newValue;
@@ -39,7 +39,7 @@ function PostTypeCheckbox( { postTypeObject, supportedPostTypes } ) {
 	}, [ newSupportedPostTypes, supportedPostTypes.length, updateOptions ] );
 
 	return (
-		<li key={ `eligible-post-type-${ postTypeObject.name }` }>
+		<li key={ `supportable-post-type-${ postTypeObject.name }` }>
 			<CheckboxControl
 				checked={ checked }
 				label={ postTypeObject.label }
@@ -64,9 +64,9 @@ PostTypeCheckbox.propTypes = {
 function SupportedPostTypesFieldset() {
 	const { editedOptions, fetchingOptions } = useContext( Options );
 
-	const { eligible_post_types: eligiblePostTypes, supported_post_types: supportedPostTypes } = editedOptions || {};
+	const { supportable_post_types: supportablePostTypes, supported_post_types: supportedPostTypes } = editedOptions || {};
 
-	if ( fetchingOptions || ! eligiblePostTypes ) {
+	if ( fetchingOptions || ! supportablePostTypes ) {
 		return null;
 	}
 
@@ -79,10 +79,10 @@ function SupportedPostTypesFieldset() {
 				{ __( 'The following content types will be available as AMP:', 'amp' ) }
 			</p>
 			<ul>
-				{ eligiblePostTypes.map( ( postTypeObject ) => {
+				{ supportablePostTypes.map( ( postTypeObject ) => {
 					return (
 						<PostTypeCheckbox
-							key={ `eligible-post-type-${ postTypeObject.name }` }
+							key={ `supportable-post-type-${ postTypeObject.name }` }
 							postTypeObject={ postTypeObject }
 							supportedPostTypes={ supportedPostTypes }
 						/>
@@ -94,67 +94,67 @@ function SupportedPostTypesFieldset() {
 	);
 }
 
-export function SupportedTemplatesFieldSet() {
+export function SupportedTemplatesCheckboxes( { supportableTemplates } ) {
+	const { editedOptions, updateOptions } = useContext( Options );
+
+	const { supported_templates: supportedTemplates } = editedOptions || {};
+
+	if ( ! supportableTemplates.length ) {
+		return null;
+	}
+
 	return (
-		<fieldset id="supported_templates_fieldset" className="hidden">
+		<ul>
+			{ supportableTemplates.map( ( supportableTemplate ) => (
+				<li key={ supportableTemplate.id }>
+					<CheckboxControl
+						checked={ supportedTemplates.includes( supportableTemplate.id ) }
+						help={ supportableTemplates.description }
+						label={ supportableTemplate.label }
+						onChange={ ( checked ) => {
+							let newSupported = [ ...supportedTemplates ];
+
+							const templatesToSwitch = [ supportableTemplate.id, ...( supportableTemplate.children.map( ( { id } ) => id ) ) ];
+
+							if ( checked ) {
+								templatesToSwitch.forEach( ( template ) => {
+									if ( ! newSupported.includes( template ) ) {
+										newSupported.push( template );
+									}
+								} );
+							} else {
+								newSupported = newSupported.filter( ( template ) => ! templatesToSwitch.includes( template ) );
+							}
+
+							updateOptions( { supported_templates: newSupported } );
+						} }
+					/>
+					<SupportedTemplatesCheckboxes supportableTemplates={ supportableTemplate.children } />
+				</li>
+			) ) }
+		</ul>
+	);
+}
+SupportedTemplatesCheckboxes.propTypes = {
+	supportableTemplates: PropTypes.array.isRequired,
+};
+
+export function SupportedTemplatesFieldset() {
+	const { editedOptions, fetchingOptions } = useContext( Options );
+
+	const { supportable_templates: supportableTemplates } = editedOptions || {};
+
+	if ( fetchingOptions || ! supportableTemplates ) {
+		return null;
+	}
+
+	return (
+		<fieldset id="supported_templates_fieldset">
 			<h4 className="title">
 				{ __( 'Templates', 'amp' ) }
 			</h4>
-			{ `<style>
-			#supported_templates_fieldset ul ul {
-				margin-left: 40px;
-			}
-		</style>
-		<h4 class="title"><?php esc_html_e( 'Templates', 'amp' ); ?></h4>
-		<ul>
-			<?php foreach ( $options as $id => $option ) : ?>
-				<?php
-				$element_id = AMP_Options_Manager::OPTION_NAME . '-supported-templates-' . $id;
-				if ( $parent ? empty( $option['parent'] ) || $parent !== $option['parent'] : ! empty( $option['parent'] ) ) {
-					continue;
-				}
 
-				// Skip showing an option if it doesn't have a label.
-				if ( empty( $option['label'] ) ) {
-					continue;
-				}
-
-				?>
-				<li>
-					<?php if ( empty( $option['immutable'] ) ) : ?>
-						<input
-							type="checkbox"
-							id="<?php echo esc_attr( $element_id ); ?>"
-							name="<?php echo esc_attr( $element_name ); ?>"
-							value="<?php echo esc_attr( $id ); ?>"
-							<?php checked( ! empty( $option['user_supported'] ) ); ?>
-						>
-					<?php else : // Persist user selection even when checkbox disabled, when selection forced by theme/filter. ?>
-						<input
-							type="checkbox"
-							id="<?php echo esc_attr( $element_id ); ?>"
-							<?php checked( ! empty( $option['supported'] ) ); ?>
-							<?php disabled( true ); ?>
-						>
-						<?php if ( ! empty( $option['user_supported'] ) ) : ?>
-							<input type="hidden" name="<?php echo esc_attr( $element_name ); ?>" value="<?php echo esc_attr( $id ); ?>">
-						<?php endif; ?>
-					<?php endif; ?>
-					<label for="<?php echo esc_attr( $element_id ); ?>">
-						<?php echo esc_html( $option['label'] ); ?>
-					</label>
-
-					<?php if ( ! empty( $option['description'] ) ) : ?>
-						<span class="description">
-							&mdash; <?php echo wp_kses_post( $option['description'] ); ?>
-						</span>
-					<?php endif; ?>
-
-					<?php $this->list_template_conditional_options( $options, $id ); ?>
-				</li>
-			<?php endforeach; ?>
-		</ul>` }
-
+			<SupportedTemplatesCheckboxes supportableTemplates={ supportableTemplates } />
 		</fieldset>
 	);
 }
@@ -168,7 +168,7 @@ export function SupportedTemplates() {
 			<Selectable className="supported-templates">
 				<SupportedTemplatesToggle />
 				<SupportedPostTypesFieldset />
-				<SupportedTemplatesFieldSet />
+				<SupportedTemplatesFieldset />
 
 			</Selectable>
 		</section>
