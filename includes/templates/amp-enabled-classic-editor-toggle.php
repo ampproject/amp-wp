@@ -39,8 +39,15 @@ if ( ! ( $this instanceof AMP_Post_Meta_Box ) ) {
 				<?php wp_nonce_field( AMP_Post_Meta_Box::NONCE_ACTION, AMP_Post_Meta_Box::NONCE_NAME ); ?>
 			</fieldset>
 		<?php else : ?>
-			<div class="inline notice notice-warning notice-alt">
-				<p><?php echo implode( ' ', $error_messages ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p>
+			<div class="inline notice notice-info notice-alt">
+				<p>
+					<strong><?php esc_html_e( 'AMP Unavailable', 'amp' ); ?></strong>
+				</p>
+				<?php foreach ( $error_messages as $error_message ) : ?>
+					<p>
+						<?php echo $error_message; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					</p>
+				<?php endforeach; ?>
 			</div>
 		<?php endif; ?>
 		<div class="amp-status-actions">
