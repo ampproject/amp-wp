@@ -30,6 +30,8 @@ class ReaderThemesTest extends WP_UnitTestCase {
 	 */
 	private $reader_themes;
 
+	private $original_theme_directories;
+
 	/**
 	 * Setup.
 	 *
@@ -46,6 +48,18 @@ class ReaderThemesTest extends WP_UnitTestCase {
 
 		switch_theme( 'twentytwenty' );
 		$this->reader_themes = new ReaderThemes();
+
+		global $wp_theme_directories;
+		$this->original_theme_directories = $wp_theme_directories;
+		register_theme_directory( ABSPATH . 'wp-content/themes' );
+		delete_site_transient( 'theme_roots' );
+	}
+
+	public function tearDown() {
+		parent::tearDown();
+		global $wp_theme_directories;
+		$wp_theme_directories = $this->original_theme_directories;
+		delete_site_transient( 'theme_roots' );
 	}
 
 	/**
@@ -93,13 +107,11 @@ class ReaderThemesTest extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_availability_test_themes() {
-		$is_installed = static function ( $theme ) {
-			return wp_get_theme( $theme )->exists();
-		};
-
 		return [
 			'twentysixteen_from_wp_future'           => [
-				$is_installed( 'twentysixteen' ) ? ReaderThemes::STATUS_INSTALLED : ReaderThemes::STATUS_NON_INSTALLABLE,
+				static function () {
+					return wp_get_theme( 'twentysixteen' )->exists() ? ReaderThemes::STATUS_INSTALLED : ReaderThemes::STATUS_NON_INSTALLABLE;
+				},
 				false,
 				[
 					'name'         => 'Some Theme',
@@ -109,7 +121,9 @@ class ReaderThemesTest extends WP_UnitTestCase {
 				],
 			],
 			'twentysixteen_from_php_future'          => [
-				$is_installed( 'twentysixteen' ) ? ReaderThemes::STATUS_INSTALLED : ReaderThemes::STATUS_NON_INSTALLABLE,
+				static function () {
+					return wp_get_theme( 'twentysixteen' )->exists() ? ReaderThemes::STATUS_INSTALLED : ReaderThemes::STATUS_NON_INSTALLABLE;
+				},
 				false,
 				[
 					'name'         => 'Some Theme',
@@ -119,7 +133,9 @@ class ReaderThemesTest extends WP_UnitTestCase {
 				],
 			],
 			'non_reader_theme'                       => [
-				ReaderThemes::STATUS_NON_INSTALLABLE,
+				static function () {
+					return ReaderThemes::STATUS_NON_INSTALLABLE;
+				},
 				false,
 				[
 					'name'         => 'Some Theme',
@@ -129,7 +145,9 @@ class ReaderThemesTest extends WP_UnitTestCase {
 				],
 			],
 			'twentytwelve_not_requiring_wp_version'  => [
-				$is_installed( 'twentytwelve' ) ? ReaderThemes::STATUS_INSTALLED : ReaderThemes::STATUS_INSTALLABLE,
+				static function () {
+					return wp_get_theme( 'twentytwelve' )->exists() ? ReaderThemes::STATUS_INSTALLED : ReaderThemes::STATUS_NON_INSTALLABLE;
+				},
 				true,
 				[
 					'name'         => 'Some Theme',
@@ -139,7 +157,9 @@ class ReaderThemesTest extends WP_UnitTestCase {
 				],
 			],
 			'twentytwelve_not_requiring_php_version' => [
-				$is_installed( 'twentysixteen' ) ? ReaderThemes::STATUS_INSTALLED : ReaderThemes::STATUS_INSTALLABLE,
+				static function () {
+					return wp_get_theme( 'twentysixteen' )->exists() ? ReaderThemes::STATUS_INSTALLED : ReaderThemes::STATUS_NON_INSTALLABLE;
+				},
 				true,
 				[
 					'name'         => 'Some Theme',
@@ -149,7 +169,9 @@ class ReaderThemesTest extends WP_UnitTestCase {
 				],
 			],
 			'twentytwenty_active'                    => [
-				ReaderThemes::STATUS_ACTIVE,
+				static function () {
+					return ReaderThemes::STATUS_ACTIVE;
+				},
 				true,
 				[
 					'name'         => 'WordPress Default',
@@ -169,12 +191,13 @@ class ReaderThemesTest extends WP_UnitTestCase {
 	 *
 	 * @dataProvider get_availability_test_themes
 	 *
-	 * @param string $expected    Expected.
-	 * @param bool   $can_install Can install.
-	 * @param array  $theme       Theme.
+	 * @param Closure $get_expected Expected.
+	 * @param bool    $can_install  Can install.
+	 * @param array   $theme        Theme.
 	 */
-	public function test_get_theme_availability( $expected, $can_install, $theme ) {
+	public function test_get_theme_availability( $get_expected, $can_install, $theme ) {
 		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$expected = $get_expected();
 		$this->assertEquals( $expected, $this->reader_themes->get_theme_availability( $theme ) );
 		$this->assertEquals( $can_install, $this->reader_themes->can_install_theme( $theme ) );
 	}

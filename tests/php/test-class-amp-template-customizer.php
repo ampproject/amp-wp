@@ -6,6 +6,8 @@
  */
 
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\ReaderThemeLoader;
+use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 
 /**
@@ -17,14 +19,28 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 
 	use AssertContainsCompatibility;
 
+	private $original_theme_directories;
+
 	public static function setUpBeforeClass() {
 		require_once ABSPATH . WPINC . '/class-wp-customize-manager.php';
 		return parent::setUpBeforeClass();
 	}
 
+	public function setUp() {
+		parent::setUp();
+
+		global $wp_theme_directories;
+		$this->original_theme_directories = $wp_theme_directories;
+		register_theme_directory( ABSPATH . 'wp-content/themes' );
+		delete_site_transient( 'theme_roots' );
+	}
+
 	public function tearDown() {
 		parent::tearDown();
 		unset( $GLOBALS['wp_customize'], $GLOBALS['wp_scripts'], $GLOBALS['wp_styles'] );
+		global $wp_theme_directories;
+		$wp_theme_directories = $this->original_theme_directories;
+		delete_site_transient( 'theme_roots' );
 	}
 
 	/**
@@ -91,6 +107,9 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 	 * @covers AMP_Template_Customizer::init()
 	 * @covers AMP_Template_Customizer::register_legacy_ui()
 	 * @covers AMP_Template_Customizer::register_legacy_settings()
+	 * @covers AMP_Template_Customizer::set_refresh_setting_transport()
+	 * @covers AMP_Template_Customizer::remove_cover_template_section()
+	 * @covers AMP_Template_Customizer::remove_homepage_settings_section()
 	 */
 	public function test_init_legacy_reader() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
@@ -100,6 +119,7 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		add_theme_support( 'header-video', [ 'video' => [] ] );
 		$wp_customize = $this->get_customize_manager();
 		$wp_customize->register_controls();
+		$wp_customize->add_section( 'cover_template_options', [] );
 		$header_video_setting          = $wp_customize->get_setting( 'header_video' );
 		$external_header_video_setting = $wp_customize->get_setting( 'external_header_video' );
 		foreach ( [ $header_video_setting, $external_header_video_setting ] as $setting ) {
@@ -120,13 +140,32 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		foreach ( [ $header_video_setting, $external_header_video_setting ] as $setting ) {
 			$this->assertEquals( 'postMessage', $setting->transport );
 		}
+		$this->assertInstanceOf( WP_Customize_Section::class, $wp_customize->get_section( 'cover_template_options' ) );
+		$this->assertInstanceOf( WP_Customize_Section::class, $wp_customize->get_section( 'static_front_page' ) );
 	}
 
-	/** @covers AMP_Template_Customizer::init() */
+	/**
+	 * @covers AMP_Template_Customizer::init()
+	 * @covers AMP_Template_Customizer::set_refresh_setting_transport()
+	 * @covers AMP_Template_Customizer::remove_cover_template_section()
+	 * @covers AMP_Template_Customizer::remove_homepage_settings_section()
+	 */
 	public function test_init_reader_theme() {
-		switch_theme( 'twentytwenty' );
+		if ( ! wp_get_theme( 'twentynineteen' )->exists() || ! wp_get_theme( 'twentytwenty' )->exists() ) {
+			$this->markTestSkipped();
+		}
+
+		switch_theme( 'twentynineteen' );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
-		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentynineteen' );
+		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentytwenty' );
+
+		/** @var ReaderThemeLoader $reader_theme_loader */
+		$reader_theme_loader = Services::get( 'reader_theme_loader' );
+
+		$_GET[ amp_get_slug() ] = '1';
+		$reader_theme_loader->override_theme();
+		$this->assertTrue( $reader_theme_loader->is_theme_overridden() );
+
 		$this->assertFalse( amp_is_canonical() );
 		$this->assertFalse( amp_is_legacy() );
 		$_GET[ amp_get_slug() ] = '1';
@@ -134,6 +173,7 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		add_theme_support( 'header-video', [ 'video' => [] ] );
 		$wp_customize = $this->get_customize_manager();
 		$wp_customize->register_controls();
+		$wp_customize->add_section( 'cover_template_options', [] );
 		$header_video_setting          = $wp_customize->get_setting( 'header_video' );
 		$external_header_video_setting = $wp_customize->get_setting( 'external_header_video' );
 		foreach ( [ $header_video_setting, $external_header_video_setting ] as $setting ) {
@@ -153,6 +193,9 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		foreach ( [ $header_video_setting, $external_header_video_setting ] as $setting ) {
 			$this->assertEquals( 'refresh', $setting->transport );
 		}
+
+		$this->assertNull( $wp_customize->get_section( 'cover_template_options' ) );
+		$this->assertNull( $wp_customize->get_section( 'static_front_page' ) );
 	}
 
 	/** @covers AMP_Template_Customizer::init_legacy_preview() */

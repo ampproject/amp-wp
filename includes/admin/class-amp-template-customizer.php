@@ -7,6 +7,8 @@
 
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\ReaderThemeLoader;
+use AmpProject\AmpWP\Services;
 
 /**
  * AMP class that implements a template style editor in the Customizer.
@@ -30,10 +32,28 @@ class AMP_Template_Customizer {
 	 * Customizer instance.
 	 *
 	 * @since 0.4
-	 * @access protected
 	 * @var WP_Customize_Manager $wp_customize
 	 */
 	protected $wp_customize;
+
+	/**
+	 * Reader theme loader.
+	 *
+	 * @since 1.6
+	 * @var ReaderThemeLoader
+	 */
+	protected $reader_theme_loader;
+
+	/**
+	 * AMP_Template_Customizer constructor.
+	 *
+	 * @param WP_Customize_Manager $wp_customize        Customize manager.
+	 * @param ReaderThemeLoader    $reader_theme_loader Reader theme loader instance.
+	 */
+	protected function __construct( WP_Customize_Manager $wp_customize, ReaderThemeLoader $reader_theme_loader ) {
+		$this->wp_customize        = $wp_customize;
+		$this->reader_theme_loader = $reader_theme_loader;
+	}
 
 	/**
 	 * Initialize the template Customizer feature class.
@@ -46,23 +66,16 @@ class AMP_Template_Customizer {
 	 * @return AMP_Template_Customizer Instance.
 	 */
 	public static function init( WP_Customize_Manager $wp_customize ) {
-		$self = new self();
+		/** @var ReaderThemeLoader $reader_theme_loader */
+		$reader_theme_loader = Services::get( 'reader_theme_loader' );
 
-		$self->wp_customize = $wp_customize;
+		$self = new self( $wp_customize, $reader_theme_loader );
 
 		$is_reader_mode   = ( AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
 		$has_reader_theme = ( ReaderThemes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME ) );
 
-		$is_customizing_reader_theme = (
-			$is_reader_mode
-			&&
-			$has_reader_theme
-			&&
-			isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		);
-
 		if ( $is_reader_mode ) {
-			if ( $is_customizing_reader_theme ) {
+			if ( $reader_theme_loader->is_theme_overridden() ) {
 				add_action( 'customize_controls_enqueue_scripts', [ $self, 'add_customizer_scripts' ] );
 			} elseif ( ! $has_reader_theme ) {
 				/**
@@ -86,21 +99,99 @@ class AMP_Template_Customizer {
 			}
 		}
 
-		// Force changes to header video to cause refresh since logic in wp-customize-header.js does not construct AMP components.
-		if ( amp_is_canonical() || $is_customizing_reader_theme ) {
-			$setting_ids = [
-				'header_video',
-				'external_header_video',
-			];
-			foreach ( $setting_ids as $setting_id ) {
-				$setting = $wp_customize->get_setting( $setting_id );
-				if ( $setting ) {
-					$setting->transport = 'refresh';
-				}
+		$self->set_refresh_setting_transport();
+		$self->remove_cover_template_section();
+		$self->remove_homepage_settings_section();
+		return $self;
+	}
+
+	/**
+	 * Force changes to header video to cause refresh since logic in wp-customize-header.js does not construct AMP components.
+	 *
+	 * This applies whenever AMP is being served in the Customizer preview, that is, in Standard mode or Reader mode with a Reader theme.
+	 */
+	protected function set_refresh_setting_transport() {
+		if ( ! amp_is_canonical() && ! $this->reader_theme_loader->is_theme_overridden() ) {
+			return;
+		}
+
+		$setting_ids = [
+			'header_video',
+			'external_header_video',
+		];
+		foreach ( $setting_ids as $setting_id ) {
+			$setting = $this->wp_customize->get_setting( $setting_id );
+			if ( $setting ) {
+				$setting->transport = 'refresh';
+			}
+		}
+	}
+
+	/**
+	 * Remove the Cover Template section if needed.
+	 *
+	 * Prevent showing the "Cover Template" section if the active (non-Reader) theme does not have the same template
+	 * as Twenty Twenty, as otherwise the user would be shown a section that would never reflect any preview change.
+	 */
+	protected function remove_cover_template_section() {
+		if ( ! $this->reader_theme_loader->is_theme_overridden() ) {
+			return;
+		}
+
+		$active_theme = $this->reader_theme_loader->get_active_theme();
+		$reader_theme = $this->reader_theme_loader->get_reader_theme();
+		if ( ! $active_theme instanceof WP_Theme || ! $reader_theme instanceof WP_Theme ) {
+			return;
+		}
+
+		// This only applies to Twenty Twenty.
+		if ( $reader_theme->get_template() !== 'twentytwenty' ) {
+			return;
+		}
+
+		// Prevent deactivating the cover template if the active theme and reader theme both have a cover template.
+		$cover_template_name = 'templates/template-cover.php';
+		if (
+			array_key_exists( $cover_template_name, $active_theme->get_page_templates() )
+			&&
+			array_key_exists( $cover_template_name, $reader_theme->get_page_templates() )
+		) {
+			return;
+		}
+
+		$this->wp_customize->remove_section( 'cover_template_options' );
+	}
+
+	/**
+	 * Remove the Homepage Settings section in the AMP Customizer for a Reader theme if needed.
+	 *
+	 * The Homepage Settings section exclusively contains controls for options which apply to both AMP and non-AMP.
+	 * If this is the case and there are no other controls added to it, then remove the section. Otherwise, the controls
+	 * will all get the same notice added to them.
+	 */
+	protected function remove_homepage_settings_section() {
+		if ( ! $this->reader_theme_loader->is_theme_overridden() ) {
+			return;
+		}
+
+		$section_id  = 'static_front_page';
+		$control_ids = [];
+		foreach ( $this->wp_customize->controls() as $control ) {
+			/** @var WP_Customize_Control $control */
+			if ( $section_id === $control->section ) {
+				$control_ids[] = $control->id;
 			}
 		}
 
-		return $self;
+		$static_front_page_control_ids = [
+			'show_on_front',
+			'page_on_front',
+			'page_for_posts',
+		];
+
+		if ( count( array_diff( $control_ids, $static_front_page_control_ids ) ) === 0 ) {
+			$this->wp_customize->remove_section( $section_id );
+		}
 	}
 
 	/**
@@ -131,8 +222,7 @@ class AMP_Template_Customizer {
 			[
 				'type'        => 'amp',
 				'title'       => __( 'AMP', 'amp' ),
-				/* translators: placeholder is URL to AMP project. */
-				'description' => sprintf( __( '<a href="%s" target="_blank">The AMP Project</a> is a Google-led initiative that dramatically improves loading speeds on phones and tablets. You can use the Customizer to preview changes to your AMP template before publishing them.', 'amp' ), 'https://ampproject.org' ),
+				'description' => $this->get_amp_panel_description(),
 			]
 		);
 
@@ -145,6 +235,24 @@ class AMP_Template_Customizer {
 		 * @param WP_Customize_Manager $manager Manager.
 		 */
 		do_action( 'amp_customizer_register_ui', $this->wp_customize );
+	}
+
+	/**
+	 * Get AMP panel description.
+	 *
+	 * This is also added to the root panel description in the AMP Customizer when a Reader theme is being customized.
+	 *
+	 * @return string Description, with markup.
+	 */
+	protected function get_amp_panel_description() {
+		return wp_kses_post(
+			sprintf(
+				/* translators: 1: URL to AMP project, 2: URL to admin settings screen */
+				__( 'While <a href="%1$s" target="_blank">AMP</a> works well on both desktop and mobile pages, your site is <a href="%2$s" target="_blank">currently configured</a> in Reader mode to serve AMP pages to mobile visitors. These settings customize the experience for these users.', 'amp' ),
+				'https://amp.dev',
+				admin_url( 'admin.php?page=amp-options' )
+			)
+		);
 	}
 
 	/**
@@ -184,15 +292,28 @@ class AMP_Template_Customizer {
 			true
 		);
 
+		$option_settings = [];
+		foreach ( $this->wp_customize->settings() as $setting ) {
+			/** @var WP_Customize_Setting $setting */
+			if ( 'option' === $setting->type ) {
+				$option_settings[] = $setting->id;
+			}
+		}
+
 		wp_add_inline_script(
 			'amp-customize-controls',
 			sprintf(
 				'ampCustomizeControls.boot( %s );',
 				wp_json_encode(
 					[
-						'queryVar' => amp_get_slug(),
-						'l10n'     => [
-							'ampVersionNotice' => __( 'You are customizing the AMP version of your site.', 'amp' ),
+						'queryVar'       => amp_get_slug(),
+						'optionSettings' => $option_settings,
+						'l10n'           => [
+							/* translators: placeholder is URL to non-AMP Customizer. */
+							'ampVersionNotice'     => wp_kses_post( sprintf( __( 'You are customizing the AMP version of your site. <a href="%s">Customize non-AMP version</a>.', 'amp' ), esc_url( admin_url( 'customize.php' ) ) ) ),
+							'optionSettingNotice'  => __( 'Also applies to non-AMP version of your site.', 'amp' ),
+							'navMenusPanelNotice'  => __( 'The menus here are shared with the non-AMP version of your site. Assign existing menus to menu locations in the Reader theme or create new AMP-specific menus.', 'amp' ),
+							'rootPanelDescription' => $this->get_amp_panel_description(),
 						],
 					]
 				)

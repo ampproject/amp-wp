@@ -12,7 +12,6 @@ import { User } from '../../components/user-context-provider';
 import { User1, User2 } from '../../../components/svg/user-icons';
 import { Selectable } from '../../../components/selectable';
 import './style.css';
-import { Options } from '../../../components/options-context-provider';
 import { Loading } from '../../../components/loading';
 
 /**
@@ -23,21 +22,12 @@ export function TechnicalBackground() {
 	const {
 		developerToolsOption,
 		fetchingUser,
-		originalDeveloperToolsOption,
 		setDeveloperToolsOption,
 	} = useContext( User );
-	const { originalOptions, unsetOption, updateOptions } = useContext( Options );
 
 	const onChange = useCallback( ( newValue ) => {
 		setDeveloperToolsOption( newValue );
-
-		// Clear the theme support selection if the developer tools option has changed.
-		if ( newValue !== originalDeveloperToolsOption ) {
-			unsetOption( 'theme_support' );
-		} else {
-			updateOptions( { theme_support: originalOptions.theme_support } );
-		}
-	}, [ setDeveloperToolsOption, updateOptions, originalOptions.theme_support, originalDeveloperToolsOption, unsetOption ] );
+	}, [ setDeveloperToolsOption ] );
 
 	/**
 	 * Allow moving forward.

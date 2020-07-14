@@ -25,13 +25,26 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 
 	const TESTED_CLASS = 'AMP_Validated_URL_Post_Type';
 
-	/**
-	 * After a test method runs, reset any state in WordPress the test method might have changed.
-	 */
+	private $original_theme_directories;
+
+	public function setUp() {
+		parent::setUp();
+
+		global $wp_theme_directories;
+		$this->original_theme_directories = $wp_theme_directories;
+		register_theme_directory( ABSPATH . 'wp-content/themes' );
+		delete_site_transient( 'theme_roots' );
+	}
+
 	public function tearDown() {
-		global $current_screen;
 		parent::tearDown();
+
+		global $current_screen;
 		$current_screen = null;
+
+		global $wp_theme_directories;
+		$wp_theme_directories = $this->original_theme_directories;
+		delete_site_transient( 'theme_roots' );
 	}
 
 	/**
@@ -514,7 +527,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$old_env = AMP_Validated_URL_Post_Type::get_validated_environment();
 		$this->assertArrayHasKey( 'theme', $old_env );
 		$this->assertArrayHasKey( 'plugins', $old_env );
-		$this->assertEquals( 'twentysixteen', $old_env['theme'] );
+		$this->assertEquals( [ 'twentysixteen' => wp_get_theme( 'twentysixteen' )->get( 'Version' ) ], $old_env['theme'] );
 		$this->assertEquals( [ Option::THEME_SUPPORT => AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ], $old_env['options'] );
 
 		switch_theme( 'twentyseventeen' );
@@ -522,7 +535,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$new_env = AMP_Validated_URL_Post_Type::get_validated_environment();
 		$this->assertNotEquals( $old_env, $new_env );
-		$this->assertEquals( 'twentyseventeen', $new_env['theme'] );
+		$this->assertEquals( [ 'twentyseventeen' => wp_get_theme( 'twentyseventeen' )->get( 'Version' ) ], $new_env['theme'] );
 		$this->assertEquals( [ Option::THEME_SUPPORT => AMP_Theme_Support::STANDARD_MODE_SLUG ], $new_env['options'] );
 	}
 
@@ -572,7 +585,13 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		switch_theme( 'twentyseventeen' );
 		$next_staleness = AMP_Validated_URL_Post_Type::get_post_staleness( $invalid_url_post_id );
 		$this->assertArrayHasKey( 'theme', $next_staleness );
-		$this->assertEquals( 'twentysixteen', $next_staleness['theme'] );
+		$this->assertEquals(
+			[
+				'old' => [ 'twentysixteen' ],
+				'new' => [ 'twentyseventeen' ],
+			],
+			$next_staleness['theme']
+		);
 		$this->assertSame( $next_staleness['plugins'], $staleness['plugins'] );
 		$this->assertArrayNotHasKey( 'options', $staleness );
 

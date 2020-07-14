@@ -47,9 +47,10 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	public function tearDown() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Validation_Manager::$is_validate_request = false;
-		global $wp_scripts, $pagenow, $show_admin_bar;
+		global $wp_scripts, $pagenow, $show_admin_bar, $current_screen;
 		$wp_scripts     = null;
 		$show_admin_bar = null;
+		$current_screen = null;
 		$pagenow        = 'index.php'; // Since clean_up_global_scope() doesn't.
 		$_SERVER        = $this->server_var_backup;
 
@@ -84,6 +85,108 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	public function return_example_url( $url, $post_id ) {
 		$current_filter = current_filter();
 		return 'http://overridden.example.com/?' . build_query( compact( 'url', 'post_id', 'current_filter' ) );
+	}
+
+	/** @covers ::amp_bootstrap_plugin() */
+	public function test_amp_bootstrap_plugin() {
+		amp_bootstrap_plugin();
+
+		$this->assertEquals( ~PHP_INT_MAX, has_action( 'plugins_loaded', [ 'AMP_Validation_Manager', 'init_validate_request' ] ) );
+		$this->assertEquals( 10, has_action( 'wp_default_scripts', 'amp_register_default_scripts' ) );
+		$this->assertEquals( 10, has_action( 'wp_default_styles', 'amp_register_default_styles' ) );
+		$this->assertEquals( PHP_INT_MAX, has_filter( 'script_loader_tag', 'amp_filter_script_loader_tag' ) );
+		$this->assertEquals( 10, has_filter( 'style_loader_tag', 'amp_filter_font_style_loader_tag_with_crossorigin_anonymous' ) );
+		$this->assertEquals( 5, has_action( 'after_setup_theme', 'amp_after_setup_theme' ) );
+		$this->assertEquals( 9, has_action( 'plugins_loaded', '_amp_bootstrap_customizer' ) );
+	}
+
+	/** @covers ::amp_init() */
+	public function test_amp_init_migration() {
+		global $wp_actions;
+		remove_all_actions( 'init' );
+		remove_all_actions( 'after_setup_theme' );
+		$wp_actions = [];
+
+		$options = [
+			'theme_support'           => 'transitional',
+			'supported_post_types'    => [
+				'post',
+			],
+			'analytics'               => [],
+			'all_templates_supported' => false,
+			'supported_templates'     => [
+				'is_singular',
+				'is_404',
+				'is_category',
+			],
+			'version'                 => '1.5.5',
+		];
+		update_option( AMP_Options_Manager::OPTION_NAME, $options );
+		$this->assertEquals( $options, get_option( AMP_Options_Manager::OPTION_NAME ) );
+
+		add_action(
+			'after_setup_theme',
+			static function () {
+				add_theme_support(
+					'amp',
+					[
+						'templates_supported' => [
+							'is_404'  => false,
+							'is_date' => true,
+						],
+					]
+				);
+			}
+		);
+
+		add_action(
+			'init',
+			function () {
+				add_post_type_support( 'page', 'amp' );
+			}
+		);
+
+		add_action(
+			'amp_plugin_update',
+			function ( $old_version ) use ( $options ) {
+				$this->assertEquals( $options['version'], $old_version );
+			}
+		);
+
+		// Make sure that no upgrade happened when the user is not logged-in.
+		$this->assertEquals( 0, did_action( 'amp_init' ) );
+		add_action( 'after_setup_theme', 'amp_after_setup_theme', 5 );
+		do_action( 'after_setup_theme' );
+		do_action( 'init' );
+		$this->assertEquals( 1, did_action( 'amp_init' ) );
+		$this->assertEquals( 10, has_filter( 'allowed_redirect_hosts', [ 'AMP_HTTP', 'filter_allowed_redirect_hosts' ] ) );
+		$this->assertEquals( 0, did_action( 'amp_plugin_update' ) );
+		$this->assertEqualSets(
+			[ 'post', 'page' ],
+			AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES )
+		);
+		$this->assertEqualSets(
+			[
+				'is_singular',
+				'is_category',
+				'is_date',
+			],
+			AMP_Options_Manager::get_option( Option::SUPPORTED_TEMPLATES )
+		);
+		$this->assertEquals( $options, get_option( AMP_Options_Manager::OPTION_NAME ), 'Expected DB to not be updated yet.' );
+
+		// Now try again with conditions for upgrade being satisfied.
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		set_current_screen( 'index.php' );
+		$this->assertTrue( is_admin() );
+		add_action( 'after_setup_theme', 'amp_after_setup_theme', 5 );
+		do_action( 'after_setup_theme' );
+		do_action( 'init' );
+		$this->assertEquals( 2, did_action( 'amp_init' ) );
+		$this->assertEquals( 1, did_action( 'amp_plugin_update' ) );
+		$this->assertNotEquals( $options, get_option( AMP_Options_Manager::OPTION_NAME ), 'Expected DB to now be updated.' );
+		$saved_option = get_option( AMP_Options_Manager::OPTION_NAME );
+		$this->assertEquals( AMP__VERSION, $saved_option['version'] );
 	}
 
 	/**
@@ -982,6 +1085,14 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @global WP_Scripts $wp_scripts
 	 */
 	public function test_script_registering() {
+		// Remove ID attributes which were added in WP 5.5.
+		add_filter(
+			'script_loader_tag',
+			static function ( $script ) {
+				return preg_replace( "/ id='amp-[^']+?'/", '', $script );
+			}
+		);
+
 		global $wp_scripts;
 		$wp_scripts = null;
 		$this->assertEquals( 10, has_action( 'wp_default_scripts', 'amp_register_default_scripts' ) );

@@ -3,7 +3,7 @@
  */
 import { visitAdminPage, isCurrentURL } from '@wordpress/e2e-test-utils';
 
-export const NEXT_BUTTON_SELECTOR = '.onboarding-wizard-nav__prev-next button.is-primary';
+export const NEXT_BUTTON_SELECTOR = '#next-button';
 export const PREV_BUTTON_SELECTOR = '.onboarding-wizard-nav__prev-next button:not(.is-primary)';
 
 export async function goToOnboardingWizard() {

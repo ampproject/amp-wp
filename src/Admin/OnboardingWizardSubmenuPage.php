@@ -165,7 +165,10 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 		wp_enqueue_style(
 			self::ASSET_HANDLE,
 			amp_get_asset_url( 'css/amp-onboarding-wizard.css' ),
-			[ $this->google_fonts->get_handle() ],
+			[
+				'wp-components',
+				$this->google_fonts->get_handle(),
+			],
 			AMP__VERSION
 		);
 
