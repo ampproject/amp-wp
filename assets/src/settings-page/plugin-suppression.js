@@ -24,7 +24,7 @@ import { Selectable } from '../components/selectable';
 /**
  * Renders the formatted date for when a plugin was suppressed.
  *
- * @param {Object} props
+ * @param {Object} props Component props.
  * @param {Object} props.suppressedPlugin
  */
 function SuppressedPluginTime( { suppressedPlugin } ) {
@@ -98,23 +98,22 @@ function SuppressedPluginUsername( { suppressedPlugin } ) {
 		} )();
 	}, [ suppressedPlugin.username, suppressingUser ] );
 
-	if ( ! suppressedPlugin.username ) {
+	if ( fetchingSuppressingUser ) {
 		return null;
 	}
 
-	if ( fetchingSuppressingUser || ! suppressedPlugin.username ) {
-		return null;
-	}
+	if ( userFetchError || ! suppressingUser || ! ( 'name' in suppressingUser ) ) {
+		if ( ! ( 'username' in suppressedPlugin ) ) {
+			return null;
+		}
 
-	if ( ! userFetchError ) {
 		return (
 			<span>
 
 				{
 					// Translators: placeholder is a username
-					sprintf( __( 'Done by %s.', 'amp' ), suppressedPlugin.username )
+					sprintf( __( 'Done by %s. ', 'amp' ), suppressedPlugin.username )
 				}
-				{ ' ' }
 			</span>
 		);
 	}
@@ -123,10 +122,10 @@ function SuppressedPluginUsername( { suppressedPlugin } ) {
 		<span>
 			{
 			// Translators: placeholder is a username
-				sprintf( __( 'Done by %s.', 'amp' ), suppressingUser.name )
+				sprintf( __( 'Done by %s. ', 'amp' ), suppressingUser.name )
 			}
-			{ ' ' }
-		</span> );
+		</span>
+	);
 }
 SuppressedPluginUsername.propTypes = {
 	suppressedPlugin: PropTypes.shape( {
@@ -143,26 +142,27 @@ SuppressedPluginUsername.propTypes = {
  * @param {Object} props.suppressedPlugin
  */
 function SuppressedPluginVersion( { pluginDetails, suppressedPlugin } ) {
-	if ( suppressedPlugin.last_version !== pluginDetails.Version ) {
-		if ( pluginDetails.Version ) {
-			return (
-				<span>
-					{
-						sprintf(
-							// Translators: both placeholders are plugin version numbers.
-							__( 'Now updated to version %1$s since suppressed at %2$s.', 'amp' ),
-							pluginDetails.Version,
-							suppressedPlugin.last_version,
-						)
-
-					}
-				</span>
-			);
-		}
-		return __( 'Plugin updated since last suppressed', 'amp' );
+	if ( suppressedPlugin.last_version === pluginDetails.Version ) {
+		return null;
 	}
 
-	return null;
+	if ( pluginDetails.Version ) {
+		return (
+			<span>
+				{
+					sprintf(
+						// Translators: both placeholders are plugin version numbers.
+						__( 'Now updated to version %1$s since suppressed at %2$s.', 'amp' ),
+						pluginDetails.Version,
+						suppressedPlugin.last_version,
+					)
+
+				}
+			</span>
+		);
+	}
+
+	return __( 'Plugin updated since last suppressed', 'amp' );
 }
 SuppressedPluginVersion.propTypes = {
 	pluginDetails: PropTypes.shape( {
@@ -280,7 +280,7 @@ function PluginRow( { pluginKey, pluginDetails } ) {
 
 					{ [
 						pluginDetails.Author && (
-							<p className="plugin-author-uri" key="plugin-details-author">
+							<p className="plugin-author-uri" key={ `${ pluginKey }-details-author` }>
 								<small>
 									{ pluginDetails.AuthorURI ? (
 										<a href={ pluginDetails.AuthorURI } target="_blank" rel="noreferrer">
@@ -295,7 +295,7 @@ function PluginRow( { pluginKey, pluginDetails } ) {
 						),
 						pluginDetails.Description && (
 							<div
-								key="plugin-details-description"
+								key={ `${ pluginKey }-details-description` }
 								className="plugin-description"
 								dangerouslySetInnerHTML={ { __html: autop( pluginDetails.Description ) } }
 							/>

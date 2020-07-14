@@ -78,7 +78,10 @@ class OptionsRESTControllerTest extends WP_UnitTestCase {
 				'mobile_redirect',
 				'plugin_configured',
 				'all_templates_supported',
+				'suppressed_plugins',
 				'preview_permalink',
+				'suppressible_plugins',
+				'date_format',
 			]
 		);
 	}
