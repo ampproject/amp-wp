@@ -41,7 +41,7 @@ const { ajaxurl: wpAjaxUrl } = global;
  */
 function Providers( { children } ) {
 	return (
-		<OptionsContextProvider optionsRestEndpoint={ OPTIONS_REST_ENDPOINT }>
+		<OptionsContextProvider optionsRestEndpoint={ OPTIONS_REST_ENDPOINT } populateDefaultValues={ true }>
 			<ReaderThemesContextProvider
 				currentTheme={ CURRENT_THEME }
 				readerThemesEndpoint={ READER_THEMES_REST_ENDPOINT }

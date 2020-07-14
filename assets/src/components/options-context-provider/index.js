@@ -31,8 +31,9 @@ function waitASecond() {
  * @param {Object} props Component props.
  * @param {?any} props.children Component children.
  * @param {string} props.optionsRestEndpoint REST endpoint to retrieve options.
+ * @param {boolean} props.populateDefaultValues Whether default values should be populated.
  */
-export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
+export function OptionsContextProvider( { children, optionsRestEndpoint, populateDefaultValues } ) {
 	const [ updates, setUpdates ] = useState( {} );
 	const [ fetchingOptions, setFetchingOptions ] = useState( false );
 	const [ savingOptions, setSavingOptions ] = useState( false );
@@ -68,7 +69,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 					return;
 				}
 
-				if ( fetchedOptions.plugin_configured === false ) {
+				if ( ! populateDefaultValues && fetchedOptions.plugin_configured === false ) {
 					fetchedOptions.mobile_redirect = true;
 					fetchedOptions.reader_theme = null;
 					fetchedOptions.theme_support = null;
@@ -82,7 +83,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 
 			setFetchingOptions( false );
 		} )();
-	}, [ fetchingOptions, originalOptions, optionsRestEndpoint, setError ] );
+	}, [ fetchingOptions, originalOptions, optionsRestEndpoint, populateDefaultValues, setError ] );
 
 	/**
 	 * Sends options to the REST endpoint to be saved.
@@ -182,4 +183,5 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 OptionsContextProvider.propTypes = {
 	children: PropTypes.any,
 	optionsRestEndpoint: PropTypes.string.isRequired,
+	populateDefaultValues: PropTypes.bool.isRequired,
 };
