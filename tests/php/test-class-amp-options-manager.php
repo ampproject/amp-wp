@@ -155,9 +155,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertSame( false, AMP_Options_Manager::get_option( 'foo' ) );
 		$this->assertSame( 'default', AMP_Options_Manager::get_option( 'foo', 'default' ) );
 
-		// Before any options are saved, plugin_configured should be false.
-		$this->assertFalse( AMP_Options_Manager::get_option( Option::PLUGIN_CONFIGURED ) );
-
 		// Test supported_post_types validation.
 		AMP_Options_Manager::update_option(
 			Option::SUPPORTED_POST_TYPES,
@@ -183,9 +180,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 			],
 			AMP_Options_Manager::get_option( Option::SUPPORTED_TEMPLATES )
 		);
-
-		// Plugin_configured has not been explicitly set, but now that options are not empty it should be true.
-		$this->assertTrue( AMP_Options_Manager::get_option( Option::PLUGIN_CONFIGURED ) );
 
 		// Test analytics validation with missing fields.
 		AMP_Options_Manager::update_option(
