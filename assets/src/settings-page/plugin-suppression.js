@@ -123,8 +123,9 @@ function SuppressedPluginUsername( { suppressedPlugin } ) {
 		<span>
 			{
 			// Translators: placeholder is a username
-				sprintf( __( 'Done by %s', 'amp' ), suppressingUser.name )
+				sprintf( __( 'Done by %s.', 'amp' ), suppressingUser.name )
 			}
+			{ ' ' }
 		</span> );
 }
 SuppressedPluginUsername.propTypes = {
@@ -244,6 +245,9 @@ function PluginRow( { pluginKey, pluginDetails } ) {
 		</strong>
 	);
 
+	// Translators: placeholder is an author name.
+	const author = sprintf( __( 'By %s. ' ), pluginDetails.Author );
+
 	return (
 		<tr>
 			<th className="column-status" scope="row">
@@ -280,10 +284,10 @@ function PluginRow( { pluginKey, pluginDetails } ) {
 								<small>
 									{ pluginDetails.AuthorURI ? (
 										<a href={ pluginDetails.AuthorURI } target="_blank" rel="noreferrer">
-											{ pluginDetails.Author }
+											{ author }
 										</a>
 									)
-										: pluginDetails.Author
+										: author
 									}
 
 								</small>
@@ -344,7 +348,6 @@ export function PluginSuppression() {
 	}
 
 	const {
-		suppressed_plugins: suppressedPlugins,
 		suppressible_plugins: suppressiblePlugins,
 	} = editedOptions;
 
@@ -377,7 +380,6 @@ export function PluginSuppression() {
 								key={ `plugin-row-${ pluginKey }` }
 								pluginDetails={ suppressiblePlugins[ pluginKey ] }
 								pluginKey={ pluginKey }
-								suppressedPlugins={ suppressedPlugins }
 							/>
 						) ) }
 					</tbody>
