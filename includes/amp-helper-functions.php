@@ -9,7 +9,6 @@ use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\AmpWpPluginFactory;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\OptionsRESTController;
 use AmpProject\AmpWP\QueryVars;
 
 /**
