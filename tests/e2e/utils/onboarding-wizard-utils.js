@@ -3,7 +3,7 @@
  */
 import { visitAdminPage, isCurrentURL } from '@wordpress/e2e-test-utils';
 
-export const NEXT_BUTTON_SELECTOR = '.onboarding-wizard-nav__prev-next button.is-primary';
+export const NEXT_BUTTON_SELECTOR = '#next-button';
 export const PREV_BUTTON_SELECTOR = '.onboarding-wizard-nav__prev-next button:not(.is-primary)';
 
 export async function goToOnboardingWizard() {
@@ -125,6 +125,7 @@ export function testTitle( { text, element = 'h1' } ) {
  */
 export async function cleanUpSettings() {
 	await visitAdminPage( 'admin.php', 'page=amp-options' );
+	await page.waitForSelector( '.settings-footer' );
 	await page.evaluate( async () => {
 		await Promise.all( [
 			wp.apiFetch( { path: '/wp/v2/users/me', method: 'POST', data: { amp_dev_tools_enabled: true } } ),

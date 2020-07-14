@@ -105,8 +105,6 @@ function amp_init() {
 	add_action( 'wp_loaded', 'amp_bootstrap_admin' );
 
 	add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
-	AMP_Post_Type_Support::add_post_type_support();
-	add_action( 'init', [ 'AMP_Post_Type_Support', 'add_post_type_support' ], 1000 ); // After post types have been defined.
 	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
 	add_action( 'admin_bar_menu', 'amp_add_admin_bar_view_link', 100 );
 
@@ -143,14 +141,22 @@ function amp_init() {
 	 */
 	$options     = get_option( AMP_Options_Manager::OPTION_NAME, [] );
 	$old_version = isset( $options[ Option::VERSION ] ) ? $options[ Option::VERSION ] : '0.0';
+
 	if ( AMP__VERSION !== $old_version && is_admin() && current_user_can( 'manage_options' ) ) {
-		/**
-		 * Triggers when after amp_init when the plugin version has updated.
-		 *
-		 * @param string $old_version Old version.
-		 */
-		do_action( 'amp_plugin_update', $old_version );
-		AMP_Options_Manager::update_option( Option::VERSION, AMP__VERSION );
+		// This waits to happen until the very end of init to ensure that amp theme support and amp post type support have all been added.
+		add_action(
+			'init',
+			static function () use ( $old_version ) {
+				/**
+				 * Triggers when after amp_init when the plugin version has updated.
+				 *
+				 * @param string $old_version Old version.
+				 */
+				do_action( 'amp_plugin_update', $old_version );
+				AMP_Options_Manager::update_option( Option::VERSION, AMP__VERSION );
+			},
+			PHP_INT_MAX
+		);
 	}
 
 	add_action(

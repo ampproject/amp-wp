@@ -30,6 +30,7 @@ class PluginActivationNoticeTest extends WP_UnitTestCase {
 		parent::setUp();
 
 		$this->plugin_activation_notice = new PluginActivationNotice();
+		delete_option( 'amp-options' );
 	}
 
 	/**
