@@ -2,13 +2,14 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+
 /**
  * WordPress dependencies
  */
 import { Children } from '@wordpress/element';
 
 /**
- * Renders a details element conditionally. If no children exist, the summary is rendered.
+ * Renders a details element conditionally. If no children are preset, the summary is rendered with no details element.
  *
  * @param {Object} props Component props.
  * @param {any} props.children Component children.

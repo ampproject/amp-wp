@@ -237,7 +237,7 @@ final class PluginSuppression implements Service, Registerable {
 	 * @param string $plugin_slug Plugin slug.
 	 * @return array Validation errors.
 	 */
-	public function get_sorted_plugin_validation_errors( $plugin_slug ) {
+	private function get_sorted_plugin_validation_errors( $plugin_slug ) {
 		$errors_by_source = AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source();
 
 		if ( ! isset( $errors_by_source['plugin'][ $plugin_slug ] ) ) {
