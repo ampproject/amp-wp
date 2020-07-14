@@ -7,6 +7,8 @@
 
 namespace AmpProject\AmpWP\Instrumentation;
 
+use AmpProject\AmpWP\Exception\InvalidEventProperties;
+
 /**
  * A server-timing event.
  *
@@ -73,10 +75,21 @@ class Event {
 	 * @param string[] $properties Properties to add.
 	 */
 	public function add_properties( $properties ) {
-		$this->properties = array_merge(
-			(array) $properties,
-			$this->properties
-		);
+		if ( ! is_array( $properties ) ) {
+			throw InvalidEventProperties::from_invalid_type( $properties );
+		}
+
+		foreach ( $properties as $key => $value ) {
+			if ( ! is_string( $key ) ) {
+				throw InvalidEventProperties::from_invalid_element_value_type( $key );
+			}
+
+			if ( ! is_scalar( $value ) ) {
+				throw InvalidEventProperties::from_invalid_element_value_type( $value );
+			}
+
+			$this->properties[ $key ] = $value;
+		}
 	}
 
 	/**
