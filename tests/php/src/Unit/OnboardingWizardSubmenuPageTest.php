@@ -77,7 +77,7 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 
 		set_current_screen( $this->page->screen_handle() );
 
-		$this->assertEquals( 'Index - WordPress', $this->page->override_title( ' - WordPress' ) );
+		$this->assertEquals( 'AMP Onboarding Wizard - WordPress', $this->page->override_title( ' - WordPress' ) );
 	}
 
 	/**
