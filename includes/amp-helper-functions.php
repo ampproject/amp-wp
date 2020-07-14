@@ -141,6 +141,7 @@ function amp_init() {
 	 */
 	$options     = get_option( AMP_Options_Manager::OPTION_NAME, [] );
 	$old_version = isset( $options[ Option::VERSION ] ) ? $options[ Option::VERSION ] : '0.0';
+
 	if ( AMP__VERSION !== $old_version && is_admin() && current_user_can( 'manage_options' ) ) {
 		// This waits to happen until the very end of init to ensure that amp theme support and amp post type support have all been added.
 		add_action(
@@ -152,9 +153,7 @@ function amp_init() {
 				 * @param string $old_version Old version.
 				 */
 				do_action( 'amp_plugin_update', $old_version );
-
 				AMP_Options_Manager::update_option( Option::VERSION, AMP__VERSION );
-
 			},
 			PHP_INT_MAX
 		);

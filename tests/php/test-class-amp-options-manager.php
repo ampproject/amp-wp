@@ -287,6 +287,42 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_options for toggling the default value of plugin_configured.
+	 *
+	 * @covers AMP_Options_Manager::get_option()
+	 * @covers AMP_Options_Manager::get_options()
+	 */
+	public function test_get_options_changing_plugin_configured_default() {
+		// Ensure plugin_configured is false when existing option is absent.
+		delete_option( AMP_Options_Manager::OPTION_NAME );
+		$this->assertFalse( AMP_Options_Manager::get_option( Option::PLUGIN_CONFIGURED ) );
+
+		// Ensure plugin_configured is true when existing option is absent from an old version.
+		update_option( AMP_Options_Manager::OPTION_NAME, [ Option::VERSION => '1.5.2' ] );
+		$this->assertTrue( AMP_Options_Manager::get_option( Option::PLUGIN_CONFIGURED ) );
+
+		// Ensure plugin_configured is true when explicitly set as such in the DB.
+		update_option(
+			AMP_Options_Manager::OPTION_NAME,
+			[
+				Option::VERSION           => AMP__VERSION,
+				Option::PLUGIN_CONFIGURED => false,
+			]
+		);
+		$this->assertFalse( AMP_Options_Manager::get_option( Option::PLUGIN_CONFIGURED ) );
+
+		// Ensure plugin_configured is false when explicitly set as such in the DB.
+		update_option(
+			AMP_Options_Manager::OPTION_NAME,
+			[
+				Option::VERSION           => AMP__VERSION,
+				Option::PLUGIN_CONFIGURED => true,
+			],
+		);
+		$this->assertTrue( AMP_Options_Manager::get_option( Option::PLUGIN_CONFIGURED ) );
+	}
+
+	/**
 	 * Test get_options when supported_post_types option is list of post types and when post type support is added for default values.
 	 *
 	 * @covers AMP_Options_Manager::get_options()
