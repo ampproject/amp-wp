@@ -11,7 +11,7 @@ use AmpProject\AmpWP\Admin\GoogleFonts;
 use AmpProject\AmpWP\Admin\OptionsMenu;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
-use AmpProject\AmpWP\Tests\WP_UnitTestCase;
+use WP_UnitTestCase;
 
 /**
  * Tests for OptionsMenu.

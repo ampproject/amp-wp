@@ -10,7 +10,7 @@ namespace AmpProject\AmpWP\Tests\Admin;
 
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
-use AmpProject\AmpWP\Tests\WP_UnitTestCase;
+use WP_UnitTestCase;
 
 /**
  * Tests for reader themes.
