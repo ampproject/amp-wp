@@ -28,10 +28,10 @@ final class ServerTimingTest extends WP_UnitTestCase {
 	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::register()
 	 */
 	public function test_it_can_be_hooked_into() {
-		$this->assertEquals( 10, has_action( 'amp_server_timing_start' ), [ $this->server_timing, 'start' ] );
-		$this->assertEquals( 10, has_action( 'amp_server_timing_stop' ), [ $this->server_timing, 'stop' ] );
-		$this->assertEquals( 10, has_action( 'amp_server_timing_log' ), [ $this->server_timing, 'log' ] );
-		$this->assertEquals( 10, has_action( 'amp_server_timing_send' ), [ $this->server_timing, 'send' ] );
+		$this->assertEquals( 10, has_action( 'amp_server_timing_start', [ $this->server_timing, 'start' ] ) );
+		$this->assertEquals( 10, has_action( 'amp_server_timing_stop', [ $this->server_timing, 'stop' ] ) );
+		$this->assertEquals( 10, has_action( 'amp_server_timing_log', [ $this->server_timing, 'log' ] ) );
+		$this->assertEquals( 10, has_action( 'amp_server_timing_send', [ $this->server_timing, 'send' ] ) );
 	}
 
 	/**
