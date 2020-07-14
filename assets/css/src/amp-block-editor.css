@@ -36,11 +36,13 @@
 
 .amp-unavailable-notice {
 	width: 100%;
+	margin: 5px 0 2px;
 }
 
 .amp-unavailable-notice details > summary {
 	font-weight: bold;
 	user-select: none;
+	cursor: pointer;
 }
 
 .amp-unavailable-notice details[open] > summary {
