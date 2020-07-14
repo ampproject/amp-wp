@@ -208,7 +208,7 @@ function ValidationErrorDetails( { errors } ) {
 					return (
 						<li key={ error.term.term_id } className={ className }>
 							<WrapperElement>
-								<a href={ error.edit_url } target="_blank" rel="noreferrer">
+								<a href={ error.edit_url } target="_blank" rel="noreferrer" title={ error.tooltip }>
 									<span dangerouslySetInnerHTML={ { __html: error.title } } />
 								</a>
 							</WrapperElement>
