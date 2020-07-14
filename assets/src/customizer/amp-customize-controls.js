@@ -13,6 +13,7 @@ window.ampCustomizeControls = ( function( api, $ ) {
 				rootPanelDescription: '',
 			},
 			optionSettings: [],
+			activeThemeSettingImports: {},
 		},
 	};
 
@@ -32,6 +33,7 @@ window.ampCustomizeControls = ( function( api, $ ) {
 		api.bind( 'ready', component.forceAmpPreviewUrl );
 		api.bind( 'ready', component.addOptionSettingNotices );
 		api.bind( 'ready', component.addNavMenuPanelNotice );
+		api.bind( 'ready', component.addActiveThemeSettingsImporting );
 	};
 
 	/**
@@ -58,6 +60,25 @@ window.ampCustomizeControls = ( function( api, $ ) {
 
 		const ampDescription = $( '<p>' + component.data.l10n.rootPanelDescription + '</p>' ); // Contents have been sanitized with wp_kses_post().
 		panelDescription.append( ampDescription );
+	};
+
+	/**
+	 * Add ability to import settings from the active theme.
+	 */
+	component.addActiveThemeSettingsImporting = function addActiveThemeSettingsImporting() {
+		const importButton = $( '<button type="button" class="button button-secondary">Import Active Theme Settings</button>' );
+		importButton.on( 'click', () => {
+			for ( const [ settingId, settingValue ] of Object.entries( component.data.activeThemeSettingImports ) ) {
+				const setting = api( settingId );
+				if ( setting ) {
+					// @todo This is not enough to update the Background Image control.
+					setting.set( settingValue );
+				}
+			}
+		} );
+
+		// @todo Put this in a better spot.
+		$( '#customize-info .preview-notice' ).append( importButton );
 	};
 
 	/**

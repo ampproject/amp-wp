@@ -106,7 +106,7 @@ class AMP_Template_Customizer {
 	}
 
 	/**
-	 * Force changes to header video to cause refresh since logic in wp-customize-header.js does not construct AMP components.
+	 * Force select settings to have a refresh transport.
 	 *
 	 * This applies whenever AMP is being served in the Customizer preview, that is, in Standard mode or Reader mode with a Reader theme.
 	 */
@@ -116,8 +116,12 @@ class AMP_Template_Customizer {
 		}
 
 		$setting_ids = [
+			// Force changes to header video to cause refresh since logic in wp-customize-header.js does not construct AMP components.
 			'header_video',
 			'external_header_video',
+
+			// Because injecting the amp-img via JS may not result in the right dimensions.
+			'custom_logo',
 		];
 		foreach ( $setting_ids as $setting_id ) {
 			$setting = $this->wp_customize->get_setting( $setting_id );
@@ -306,9 +310,10 @@ class AMP_Template_Customizer {
 				'ampCustomizeControls.boot( %s );',
 				wp_json_encode(
 					[
-						'queryVar'       => amp_get_slug(),
-						'optionSettings' => $option_settings,
-						'l10n'           => [
+						'queryVar'                  => amp_get_slug(),
+						'optionSettings'            => $option_settings,
+						'activeThemeSettingImports' => $this->get_active_theme_import_settings(),
+						'l10n'                      => [
 							/* translators: placeholder is URL to non-AMP Customizer. */
 							'ampVersionNotice'     => wp_kses_post( sprintf( __( 'You are customizing the AMP version of your site. <a href="%s">Customize non-AMP version</a>.', 'amp' ), esc_url( admin_url( 'customize.php' ) ) ) ),
 							'optionSettingNotice'  => __( 'Also applies to non-AMP version of your site.', 'amp' ),
@@ -328,6 +333,61 @@ class AMP_Template_Customizer {
 		);
 
 		wp_styles()->add_data( 'amp-customizer', 'rtl', 'replace' );
+	}
+
+	/**
+	 * Get settings to import from the active theme.
+	 *
+	 * @return array Import settings.
+	 */
+	protected function get_active_theme_import_settings() {
+		$active_theme    = $this->reader_theme_loader->get_active_theme();
+		$import_settings = [];
+		if ( ! $active_theme instanceof WP_Theme ) {
+			return null;
+		}
+
+		$import_theme_mods = get_option( 'theme_mods_' . $active_theme->get_stylesheet(), [] );
+		unset(
+			$import_theme_mods['sidebars_widgets'],
+			$import_theme_mods['custom_css_post_id']
+		);
+
+		if ( ! empty( $import_theme_mods['nav_menu_locations'] ) ) {
+			$import_theme_mods['nav_menu_locations'] = wp_map_nav_menu_locations(
+				get_theme_mod( 'nav_menu_locations', [] ),
+				$import_theme_mods['nav_menu_locations']
+			);
+		}
+
+		foreach ( $this->wp_customize->settings() as $setting ) {
+			/** @var WP_Customize_Setting $setting */
+			if ( 'theme_mod' !== $setting->type ) {
+				continue;
+			}
+
+			$id_data = $setting->id_data();
+			if ( ! array_key_exists( $id_data['base'], $import_theme_mods ) ) {
+				continue;
+			}
+			$value   = $import_theme_mods[ $id_data['base'] ];
+			$subkeys = $id_data['keys'];
+			while ( ! empty( $subkeys ) ) {
+				$subkey = array_shift( $subkeys );
+				if ( ! is_array( $value ) || ! array_key_exists( $subkey, $value ) ) {
+					// Move on to the next setting.
+					continue 2;
+				}
+				$value = $value[ $subkey ];
+			}
+
+			/** This filter is documented in wp-includes/class-wp-customize-manager.php */
+			$value = apply_filters( "customize_sanitize_js_{$setting->id}", $value, $setting );
+
+			$import_settings[ $setting->id ] = $value;
+		}
+
+		return $import_theme_mods;
 	}
 
 	/**
