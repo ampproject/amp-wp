@@ -81,7 +81,7 @@ class Event {
 
 		foreach ( $properties as $key => $value ) {
 			if ( ! is_string( $key ) ) {
-				throw InvalidEventProperties::from_invalid_element_value_type( $key );
+				throw InvalidEventProperties::from_invalid_element_key_type( $key );
 			}
 
 			if ( ! is_scalar( $value ) ) {
