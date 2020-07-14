@@ -89,6 +89,9 @@ class AMP_Options_Manager {
 		$options = get_option( self::OPTION_NAME, [] );
 		if ( empty( $options ) ) {
 			$options = []; // Ensure empty string becomes array.
+		} else {
+			// If settings exist, the plugin has been configured.
+			$options[ Option::PLUGIN_CONFIGURED ] = true;
 		}
 
 		$defaults = self::$defaults;
