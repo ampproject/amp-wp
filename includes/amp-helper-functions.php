@@ -139,19 +139,8 @@ function amp_init() {
 	 * version was new option added, and in that case default would never be used for a site
 	 * upgrading from a version prior to 1.0. So this is why get_option() is currently used.
 	 */
-	$options = get_option( AMP_Options_Manager::OPTION_NAME, [] );
-
-	// Initialize the plugin_configured option, setting it to true if options already exist.
-	if ( is_admin() && current_user_can( 'manage_options' )  ) {
-		if ( empty( $options ) ) {
-			AMP_Options_Manager::update_option( Option::PLUGIN_CONFIGURED, false );
-		} elseif ( ! isset( $options[ Option::PLUGIN_CONFIGURED ] ) ) {
-			AMP_Options_Manager::update_option( Option::PLUGIN_CONFIGURED, true );
-		}
-	}
-
+	$options     = get_option( AMP_Options_Manager::OPTION_NAME, [] );
 	$old_version = isset( $options[ Option::VERSION ] ) ? $options[ Option::VERSION ] : '0.0';
-
 	if ( AMP__VERSION !== $old_version && is_admin() && current_user_can( 'manage_options' ) ) {
 		// This waits to happen until the very end of init to ensure that amp theme support and amp post type support have all been added.
 		add_action(

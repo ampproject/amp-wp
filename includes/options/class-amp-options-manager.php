@@ -93,6 +93,11 @@ class AMP_Options_Manager {
 
 		$defaults = self::$defaults;
 
+		// Make sure the plugin is marked as being already configured if there saved options.
+		if ( ! empty( $options ) ) {
+			$defaults[ Option::PLUGIN_CONFIGURED ] = true;
+		}
+
 		// Migrate legacy method of specifying the mode.
 		$theme_support = AMP_Theme_Support::get_theme_support_args();
 		if ( $theme_support && ! isset( $options[ Option::THEME_SUPPORT ] ) ) {
