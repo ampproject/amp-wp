@@ -16,16 +16,15 @@ describe( 'Onboarding wizard exit links', () => {
 	} );
 
 	it( 'returns to previous page when clicking close', async () => {
-		await visitAdminPage( 'index.php' );
+		await visitAdminPage( 'plugins.php' );
 		await page.waitForSelector( '.wp-admin' );
 
-		await page.evaluate( () => {
-			document.querySelector( 'a[href="admin.php?page=amp-onboarding-wizard"]' ).click();
-		} );
+		await page.waitForSelector( 'a[href*="admin.php?page=amp-onboarding-wizard"]' );
+		await expect( page ).toClick( 'a[href*="admin.php?page=amp-onboarding-wizard"]' );
 		await page.waitForSelector( '#amp-onboarding-wizard' );
 		await expect( page ).toClick( 'a', { text: 'Close' } );
 		await page.waitForSelector( '.wp-admin' );
-		await expect( page ).toMatchElement( 'h1', { text: 'Dashboard' } );
+		await expect( page ).toMatchElement( 'h1', { text: 'Plugins' } );
 	} );
 
 	it( 'goes to settings when clicking finish', async () => {

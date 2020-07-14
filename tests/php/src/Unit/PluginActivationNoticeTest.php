@@ -30,6 +30,7 @@ class PluginActivationNoticeTest extends WP_UnitTestCase {
 		parent::setUp();
 
 		$this->plugin_activation_notice = new PluginActivationNotice();
+		delete_option( 'amp-options' );
 	}
 
 	/**
@@ -50,7 +51,7 @@ class PluginActivationNoticeTest extends WP_UnitTestCase {
 		$this->assertContains( 'class="amp-plugin-notice', get_echo( [ $this->plugin_activation_notice, 'render_notice' ] ) );
 
 		set_current_screen( 'toplevel_page_' . AMP_Options_Manager::OPTION_NAME );
-		$this->assertContains( 'class="amp-plugin-notice', get_echo( [ $this->plugin_activation_notice, 'render_notice' ] ) );
+		$this->assertNotContains( 'class="amp-plugin-notice', get_echo( [ $this->plugin_activation_notice, 'render_notice' ] ) );
 	}
 
 	/**

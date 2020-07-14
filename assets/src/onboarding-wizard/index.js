@@ -49,6 +49,7 @@ export function Providers( { children } ) {
 	return (
 		<OptionsContextProvider
 			optionsRestEndpoint={ OPTIONS_REST_ENDPOINT }
+			populateDefaultValues={ false }
 		>
 			<UserContextProvider
 				userOptionDeveloperTools={ USER_FIELD_DEVELOPER_TOOLS_ENABLED }
