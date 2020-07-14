@@ -50,8 +50,8 @@ final class OnboardingWizardSubmenu implements Conditional, Delayed, Service, Re
 	public function register() {
 		add_submenu_page(
 			'',
-			__( 'Onboarding Wizard', 'amp' ),
-			__( 'Onboarding Wizard', 'amp' ),
+			__( 'AMP Onboarding Wizard', 'amp' ),
+			__( 'AMP Onboarding Wizard', 'amp' ),
 			'manage_options',
 			self::SCREEN_ID,
 			'__return_empty_string',
