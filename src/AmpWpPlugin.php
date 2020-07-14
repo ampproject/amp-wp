@@ -19,6 +19,7 @@ use AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching;
 use AmpProject\AmpWP\Infrastructure\ServiceBasedPlugin;
 use AmpProject\AmpWP\Instrumentation\ServerTiming;
 use AmpProject\AmpWP\Instrumentation\StopWatch;
+use function is_user_logged_in;
 
 /**
  * The AmpWpPlugin class is the composition root of the plugin.
@@ -110,7 +111,16 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	protected function get_arguments() {
 		return [
 			ServerTiming::class => [
-				'verbose' => filter_input( INPUT_GET, QueryVar::VERBOSE_SERVER_TIMING, FILTER_VALIDATE_BOOLEAN ),
+				// Wrapped in a closure so it is lazily evaluated. Otherwise,
+				// is_user_logged_in() breaks because it's used too early.
+				'verbose' => static function () {
+					return is_user_logged_in()
+						&& isset( $_GET[ QueryVar::VERBOSE_SERVER_TIMING ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+						&& filter_var(
+							$_GET[ QueryVar::VERBOSE_SERVER_TIMING ], // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+							FILTER_VALIDATE_BOOLEAN
+						);
+				},
 			],
 		];
 	}

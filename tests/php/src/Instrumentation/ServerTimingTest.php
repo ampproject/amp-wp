@@ -3,35 +3,46 @@
 namespace AmpProject\AmpWP\Tests\Instrumentation;
 
 use AMP_HTTP;
+use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Instrumentation\Event;
 use AmpProject\AmpWP\Instrumentation\EventWithDuration;
 use AmpProject\AmpWP\Instrumentation\ServerTiming;
-use AmpProject\AmpWP\Instrumentation\StopWatch;
+use AmpProject\AmpWP\QueryVar;
+use AmpProject\AmpWP\Services;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use WP_UnitTestCase;
 
 final class ServerTimingTest extends WP_UnitTestCase {
 
+	use AssertContainsCompatibility;
 	use PrivateAccess;
 
 	/**
-	 * @var ServerTiming
+	 * Injector instance to use.
+	 *
+	 * @var Injector
 	 */
-	private $server_timing;
+	private $injector;
 
+	/**
+	 * Set up the tests.
+	 */
 	public function setUp() {
-		$this->server_timing = new ServerTiming( new StopWatch() );
-		$this->server_timing->register();
+		$this->injector = Services::get( 'injector' );
+		parent::setUp();
 	}
 
 	/**
 	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::register()
 	 */
 	public function test_it_can_be_hooked_into() {
-		$this->assertEquals( 10, has_action( 'amp_server_timing_start', [ $this->server_timing, 'start' ] ) );
-		$this->assertEquals( 10, has_action( 'amp_server_timing_stop', [ $this->server_timing, 'stop' ] ) );
-		$this->assertEquals( 10, has_action( 'amp_server_timing_log', [ $this->server_timing, 'log' ] ) );
-		$this->assertEquals( 10, has_action( 'amp_server_timing_send', [ $this->server_timing, 'send' ] ) );
+		$server_timing = $this->injector->make( ServerTiming::class );
+		$server_timing->register();
+		$this->assertEquals( 10, has_action( 'amp_server_timing_start', [ $server_timing, 'start' ] ) );
+		$this->assertEquals( 10, has_action( 'amp_server_timing_stop', [ $server_timing, 'stop' ] ) );
+		$this->assertEquals( 10, has_action( 'amp_server_timing_log', [ $server_timing, 'log' ] ) );
+		$this->assertEquals( 10, has_action( 'amp_server_timing_send', [ $server_timing, 'send' ] ) );
 	}
 
 	/**
@@ -39,11 +50,12 @@ final class ServerTimingTest extends WP_UnitTestCase {
 	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::stop()
 	 */
 	public function test_it_can_record_events_with_duration_directly() {
-		$this->server_timing->start( 'event-1', 'Event N°1' );
+		$server_timing = $this->injector->make( ServerTiming::class );
+		$server_timing->start( 'event-1', 'Event N°1' );
 		usleep( 100 * 1000 ); // 100ms.
-		$this->server_timing->stop( 'event-1' );
+		$server_timing->stop( 'event-1' );
 
-		$events = $this->get_private_property( $this->server_timing, 'events' );
+		$events = $this->get_private_property( $server_timing, 'events' );
 		$event  = $events['event-1'];
 
 		$this->assertInstanceof( EventWithDuration::class, $event );
@@ -58,11 +70,13 @@ final class ServerTimingTest extends WP_UnitTestCase {
 	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::stop()
 	 */
 	public function test_it_can_record_events_with_duration_via_actions() {
+		$server_timing = $this->injector->make( ServerTiming::class );
+		$server_timing->register();
 		do_action( 'amp_server_timing_start', 'event-2', 'Event N°2' );
 		usleep( 100 * 1000 ); // 100ms.
 		do_action( 'amp_server_timing_stop', 'event-2' );
 
-		$events = $this->get_private_property( $this->server_timing, 'events' );
+		$events = $this->get_private_property( $server_timing, 'events' );
 		$event  = $events['event-2'];
 
 		$this->assertInstanceof( EventWithDuration::class, $event );
@@ -75,9 +89,10 @@ final class ServerTimingTest extends WP_UnitTestCase {
 	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::log()
 	 */
 	public function test_it_can_record_events_without_duration_directly() {
-		$this->server_timing->log( 'event-3', 'Event N°3' );
+		$server_timing = $this->injector->make( ServerTiming::class );
+		$server_timing->log( 'event-3', 'Event N°3' );
 
-		$events = $this->get_private_property( $this->server_timing, 'events' );
+		$events = $this->get_private_property( $server_timing, 'events' );
 		$event  = $events['event-3'];
 
 		$this->assertInstanceof( Event::class, $event );
@@ -91,9 +106,11 @@ final class ServerTimingTest extends WP_UnitTestCase {
 	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::log()
 	 */
 	public function test_it_can_record_events_without_duration_via_actions() {
+		$server_timing = $this->injector->make( ServerTiming::class );
+		$server_timing->register();
 		do_action( 'amp_server_timing_log', 'event-4', 'Event N°4' );
 
-		$events = $this->get_private_property( $this->server_timing, 'events' );
+		$events = $this->get_private_property( $server_timing, 'events' );
 		$event  = $events['event-4'];
 
 		$this->assertInstanceof( Event::class, $event );
@@ -108,7 +125,8 @@ final class ServerTimingTest extends WP_UnitTestCase {
 	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::log()
 	 */
 	public function test_it_can_forward_additional_properties_directly() {
-		$this->server_timing->start(
+		$server_timing = $this->injector->make( ServerTiming::class );
+		$server_timing->start(
 			'event-5',
 			'Event N°5',
 			[
@@ -116,8 +134,8 @@ final class ServerTimingTest extends WP_UnitTestCase {
 				'prop-2' => 'val-2',
 			]
 		);
-		$this->server_timing->stop( 'event-5' );
-		$this->server_timing->log(
+		$server_timing->stop( 'event-5' );
+		$server_timing->log(
 			'event-6',
 			'Event N°6',
 			[
@@ -126,7 +144,7 @@ final class ServerTimingTest extends WP_UnitTestCase {
 			]
 		);
 
-		$events  = $this->get_private_property( $this->server_timing, 'events' );
+		$events  = $this->get_private_property( $server_timing, 'events' );
 		$event_5 = $events['event-5'];
 		$event_6 = $events['event-6'];
 
@@ -153,6 +171,8 @@ final class ServerTimingTest extends WP_UnitTestCase {
 	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::log()
 	 */
 	public function test_it_can_forward_additional_properties_via_actions() {
+		$server_timing = $this->injector->make( ServerTiming::class );
+		$server_timing->register();
 		do_action(
 			'amp_server_timing_start',
 			'event-7',
@@ -173,7 +193,7 @@ final class ServerTimingTest extends WP_UnitTestCase {
 			]
 		);
 
-		$events  = $this->get_private_property( $this->server_timing, 'events' );
+		$events  = $this->get_private_property( $server_timing, 'events' );
 		$event_7 = $events['event-7'];
 		$event_8 = $events['event-8'];
 
@@ -200,6 +220,8 @@ final class ServerTimingTest extends WP_UnitTestCase {
 	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::get_header_string()
 	 */
 	public function test_it_can_return_a_header_string() {
+		$server_timing = $this->injector->make( ServerTiming::class );
+		$server_timing->register();
 		do_action(
 			'amp_server_timing_start',
 			'event-9',
@@ -211,11 +233,11 @@ final class ServerTimingTest extends WP_UnitTestCase {
 		);
 		do_action( 'amp_server_timing_stop', 'event-9' );
 
-		$events = $this->get_private_property( $this->server_timing, 'events' );
+		$events = $this->get_private_property( $server_timing, 'events' );
 		$event  = $events['event-9'];
 		$event->set_duration( 3.14 );
 
-		$this->assertEquals( 'event-9;desc="Event N°9";prop-9="val-9";prop-10="val-10";dur="3.1"', $this->server_timing->get_header_string() );
+		$this->assertStringContains( 'event-9;desc="Event N°9";prop-9="val-9";prop-10="val-10";dur="3.1"', $server_timing->get_header_string() );
 	}
 
 	/**
@@ -225,14 +247,16 @@ final class ServerTimingTest extends WP_UnitTestCase {
 	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::send()
 	 */
 	public function test_it_can_send_headers_directly() {
-		$this->server_timing->start( 'event-10', 'Event N°10' );
-		$this->server_timing->stop( 'event-10' );
+		$server_timing = $this->injector->make( ServerTiming::class );
 
-		$events = $this->get_private_property( $this->server_timing, 'events' );
+		$server_timing->start( 'event-10', 'Event N°10' );
+		$server_timing->stop( 'event-10' );
+
+		$events = $this->get_private_property( $server_timing, 'events' );
 		$event  = $events['event-10'];
 		$event->set_duration( 12345.67890 );
 
-		$this->server_timing->send();
+		$server_timing->send();
 
 		$this->assertContains(
 			[
@@ -253,10 +277,13 @@ final class ServerTimingTest extends WP_UnitTestCase {
 	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::send()
 	 */
 	public function test_it_can_send_headers_via_action() {
+		$server_timing = $this->injector->make( ServerTiming::class );
+		$server_timing->register();
+
 		do_action( 'amp_server_timing_start', 'event-11', 'Event N°11' );
 		do_action( 'amp_server_timing_stop', 'event-11' );
 
-		$events = $this->get_private_property( $this->server_timing, 'events' );
+		$events = $this->get_private_property( $server_timing, 'events' );
 		$event  = $events['event-11'];
 		$event->set_duration( 3.14 );
 
@@ -270,6 +297,50 @@ final class ServerTimingTest extends WP_UnitTestCase {
 				'status_code' => null,
 			],
 			AMP_HTTP::$headers_sent
+		);
+	}
+
+	public function test_it_sends_restricted_output_by_default() {
+		$server_timing = $this->injector->make( ServerTiming::class );
+		$this->assertFalse(
+			$this->get_private_property(
+				$server_timing,
+				'verbose'
+			)
+		);
+	}
+
+	public function test_it_sends_restricted_output_with_query_var_but_not_logged_in() {
+		$_GET[ QueryVar::VERBOSE_SERVER_TIMING ] = '1';
+		$server_timing                           = $this->injector->make( ServerTiming::class );
+		$this->assertFalse(
+			$this->get_private_property(
+				$server_timing,
+				'verbose'
+			)
+		);
+	}
+
+	public function test_it_sends_restricted_output_when_logged_in_but_no_query_var() {
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$server_timing = $this->injector->make( ServerTiming::class );
+		$this->assertFalse(
+			$this->get_private_property(
+				$server_timing,
+				'verbose'
+			)
+		);
+	}
+
+	public function test_it_sends_verbose_output_with_query_var_and_logged_in() {
+		$_GET[ QueryVar::VERBOSE_SERVER_TIMING ] = '1';
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$server_timing = $this->injector->make( ServerTiming::class );
+		$this->assertTrue(
+			$this->get_private_property(
+				$server_timing,
+				'verbose'
+			)
 		);
 	}
 }

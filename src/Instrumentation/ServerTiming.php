@@ -8,6 +8,7 @@
 namespace AmpProject\AmpWP\Instrumentation;
 
 use AMP_HTTP;
+use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 
@@ -16,7 +17,7 @@ use AmpProject\AmpWP\Infrastructure\Service;
  *
  * @package AmpProject\AmpWP
  */
-final class ServerTiming implements Service, Registerable {
+final class ServerTiming implements Service, Registerable, Delayed {
 
 	/**
 	 * Stop watch to use to recording the duration of events.
@@ -38,6 +39,16 @@ final class ServerTiming implements Service, Registerable {
 	 * @var Event[]
 	 */
 	private $events = [];
+
+	/**
+	 * Get the action to use for registering the service.
+	 *
+	 * @return string Registration action to use.
+	 */
+	public static function get_registration_action() {
+		// Delayed because we need to access is_user_logged_in().
+		return 'init';
+	}
 
 	/**
 	 * ServerTiming constructor.

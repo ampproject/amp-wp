@@ -170,4 +170,19 @@ final class SimpleInjectorTest extends TestCase {
 		$this->assertEquals( 42, $object->get_argument_a() );
 		$this->assertEquals( 'Mr Alderson', $object->get_argument_b() );
 	}
+
+	public function test_callable_arguments_are_lazily_resolved() {
+		$injector = new SimpleInjector();
+		$injector->bind_argument(
+			Fixture\DummyClassWithNamedArguments::class,
+			'argument_a',
+			static function ( $class, $parameter, $arguments ) {
+				return $arguments['number']; }
+		);
+
+		$object = $injector->make( Fixture\DummyClassWithNamedArguments::class, [ 'number' => 123 ] );
+
+		$this->assertInstanceOf( Fixture\DummyClassWithNamedArguments::class, $object );
+		$this->assertEquals( 123, $object->get_argument_a() );
+	}
 }
