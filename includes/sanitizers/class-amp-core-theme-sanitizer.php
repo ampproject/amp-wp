@@ -297,12 +297,12 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.1
 	 */
 	public static function extend_theme_support() {
-		$args = self::get_theme_support_args( get_template() );
-
-		if ( empty( $args ) ) {
+		$template = get_template();
+		if ( ! in_array( $template, self::get_supported_themes(), true ) ) {
 			return;
 		}
 
+		$args    = self::get_theme_support_args( $template );
 		$support = AMP_Theme_Support::get_theme_support_args();
 		if ( ! is_array( $support ) ) {
 			$support = [];

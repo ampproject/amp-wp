@@ -17,6 +17,24 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	use AssertContainsCompatibility;
 	use PrivateAccess;
 
+	private $original_theme_directories;
+
+	public function setUp() {
+		parent::setUp();
+
+		global $wp_theme_directories;
+		$this->original_theme_directories = $wp_theme_directories;
+		register_theme_directory( ABSPATH . 'wp-content/themes' );
+		delete_site_transient( 'theme_roots' );
+	}
+
+	public function tearDown() {
+		parent::tearDown();
+		global $wp_theme_directories;
+		$wp_theme_directories = $this->original_theme_directories;
+		delete_site_transient( 'theme_roots' );
+	}
+
 	/**
 	 * Data for testing the conversion of a CSS selector to a XPath.
 	 *
@@ -131,6 +149,54 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		];
 
 		$this->assertEquals( $supported_themes, AMP_Core_Theme_Sanitizer::get_supported_themes() );
+	}
+
+	/**
+	 * Test extend_theme_support().
+	 *
+	 * @covers AMP_Core_Theme_Sanitizer::extend_theme_support()
+	 */
+	public function test_extend_theme_support() {
+		$theme_dir = basename( dirname( AMP__DIR__ ) ) . '/' . basename( AMP__DIR__ ) . '/tests/php/data/themes';
+		register_theme_directory( $theme_dir );
+
+		// Make sure that theme support is added even when no special keys are needed.
+		remove_theme_support( 'amp' );
+		switch_theme( 'twentytwenty' );
+		AMP_Core_Theme_Sanitizer::extend_theme_support();
+		$this->assertTrue( current_theme_supports( 'amp' ) );
+		$this->assertEquals(
+			[ 'paired' => true ],
+			AMP_Theme_Support::get_theme_support_args()
+		);
+
+		// Make sure the expected theme support is added for a core theme.
+		remove_theme_support( 'amp' );
+		switch_theme( 'twentysixteen' );
+		AMP_Core_Theme_Sanitizer::extend_theme_support();
+		$this->assertTrue( current_theme_supports( 'amp' ) );
+		$this->assertEqualSets(
+			[ 'paired', 'nav_menu_toggle', 'nav_menu_dropdown' ],
+			array_keys( AMP_Theme_Support::get_theme_support_args() )
+		);
+
+		// Ensure custom themes do not get extended with theme support.
+		remove_theme_support( 'amp' );
+		$this->assertTrue( wp_get_theme( 'custom' )->exists() );
+		switch_theme( 'custom' );
+		AMP_Core_Theme_Sanitizer::extend_theme_support();
+		$this->assertFalse( current_theme_supports( 'amp' ) );
+		$this->assertFalse( AMP_Theme_Support::get_theme_support_args() );
+
+		// Ensure that child theme inherits extended core theme support.
+		$this->assertTrue( wp_get_theme( 'child-of-core' )->exists() );
+		switch_theme( 'child-of-core' );
+		AMP_Core_Theme_Sanitizer::extend_theme_support();
+		$this->assertTrue( current_theme_supports( 'amp' ) );
+		$this->assertEquals(
+			[ 'paired' => true ],
+			AMP_Theme_Support::get_theme_support_args()
+		);
 	}
 
 	/**
