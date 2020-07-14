@@ -58,35 +58,6 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test add_post_type_support.
-	 *
-	 * @covers AMP_Post_Type_Support::add_post_type_support()
-	 */
-	public function test_add_post_type_support() {
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
-		register_post_type(
-			'book',
-			[
-				'label'  => 'Book',
-				'public' => true,
-			]
-		);
-		register_post_type(
-			'poem',
-			[
-				'label'  => 'Poem',
-				'public' => true,
-			]
-		);
-		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, [ 'post', 'poem' ] );
-
-		AMP_Post_Type_Support::add_post_type_support();
-		$this->assertTrue( post_type_supports( 'post', AMP_Post_Type_Support::SLUG ) );
-		$this->assertTrue( post_type_supports( 'poem', AMP_Post_Type_Support::SLUG ) );
-		$this->assertFalse( post_type_supports( 'book', AMP_Post_Type_Support::SLUG ) );
-	}
-
-	/**
 	 * Return an error code if a given post does not have AMP support.
 	 *
 	 * @covers AMP_Post_Type_Support::get_support_errors()
@@ -104,7 +75,11 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 		// Post type support.
 		$book_id = self::factory()->post->create( [ 'post_type' => 'book' ] );
 		$this->assertEquals( [ 'post-type-support' ], AMP_Post_Type_Support::get_support_errors( $book_id ) );
-		add_post_type_support( 'book', AMP_Post_Type_Support::SLUG );
+		$supported_post_types = array_merge(
+			AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES ),
+			[ 'book' ]
+		);
+		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, $supported_post_types );
 		$this->assertEmpty( AMP_Post_Type_Support::get_support_errors( $book_id ) );
 
 		// Skip-post.

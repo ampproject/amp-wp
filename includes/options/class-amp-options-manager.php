@@ -93,30 +93,62 @@ class AMP_Options_Manager {
 
 		$defaults = self::$defaults;
 
-		$theme_support = get_theme_support( 'amp' );
-		if ( $theme_support ) {
-			if ( isset( $theme_support[0]['paired'] ) && false === $theme_support[0]['paired'] ) {
+		// Migrate legacy method of specifying the mode.
+		$theme_support = AMP_Theme_Support::get_theme_support_args();
+		if ( $theme_support && ! isset( $options[ Option::THEME_SUPPORT ] ) ) {
+			if ( empty( $theme_support[ AMP_Theme_Support::PAIRED_FLAG ] ) ) {
 				$defaults[ Option::THEME_SUPPORT ] = AMP_Theme_Support::STANDARD_MODE_SLUG;
-			} elseif ( ! empty( $theme_support[0]['paired'] ) || ! empty( $theme_support[0]['template_dir'] ) ) {
-				$defaults[ Option::THEME_SUPPORT ] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
 			} else {
-				$defaults[ Option::THEME_SUPPORT ] = AMP_Theme_Support::STANDARD_MODE_SLUG;
+				$defaults[ Option::THEME_SUPPORT ] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
 			}
 		}
 
-		/**
-		 * Filters default options.
-		 *
-		 * @internal
-		 * @param array $defaults Default options.
-		 */
-		$defaults = (array) apply_filters( 'amp_default_options', $defaults );
+		// Migrate legacy amp post type support to be reflected in the default supported_post_types value.
+		if ( ! isset( $options[ Option::SUPPORTED_POST_TYPES ] ) ) {
+			$defaults[ Option::SUPPORTED_POST_TYPES ] = array_merge(
+				$defaults[ Option::SUPPORTED_POST_TYPES ],
+				(array) get_post_types_by_support( 'amp' )
+			);
+		}
 
-		$options = array_merge( $defaults, $options );
+		// Migrate legacy method of specifying all_templates_supported.
+		if ( ! isset( $options[ Option::ALL_TEMPLATES_SUPPORTED ] ) && isset( $theme_support['templates_supported'] ) ) {
+			$defaults[ Option::ALL_TEMPLATES_SUPPORTED ] = ( 'all' === $theme_support['templates_supported'] );
+		}
+
+		// Migrate legacy amp theme support to be reflected in the default supported_templates value.
+		if ( ! isset( $options[ Option::SUPPORTED_TEMPLATES ] ) && isset( $theme_support['templates_supported'] ) && is_array( $theme_support['templates_supported'] ) ) {
+			$defaults[ Option::SUPPORTED_TEMPLATES ] = array_merge(
+				$defaults[ Option::SUPPORTED_TEMPLATES ],
+				array_keys( array_filter( $theme_support['templates_supported'] ) )
+			);
+			$defaults[ Option::SUPPORTED_TEMPLATES ] = array_diff(
+				$defaults[ Option::SUPPORTED_TEMPLATES ],
+				array_keys(
+					array_filter(
+						$theme_support['templates_supported'],
+						static function ( $supported ) {
+							return ! $supported;
+						}
+					)
+				)
+			);
+		}
+
+		$options = array_merge(
+			$defaults,
+			/**
+			 * Filters default options.
+			 *
+			 * @internal
+			 * @param array $defaults Default options.
+			 */
+			(array) apply_filters( 'amp_default_options', $defaults ),
+			$options
+		);
 
 		// Ensure current template mode.
 		if (
-			isset( $options[ Option::THEME_SUPPORT ] ) &&
 			AMP_Theme_Support::READER_MODE_SLUG === $options[ Option::THEME_SUPPORT ]
 			&&
 			get_template() === $options[ Option::READER_THEME ]
@@ -135,13 +167,13 @@ class AMP_Options_Manager {
 			 * @todo It would be preferable to rather invoke methods of ReaderThemeLoader here, but that risks an infinite loop and is a circular dependency.
 			 */
 			$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
-		} elseif ( isset( $options[ Option::THEME_SUPPORT ] ) && 'native' === $options[ Option::THEME_SUPPORT ] ) {
+		} elseif ( 'native' === $options[ Option::THEME_SUPPORT ] ) {
 			// The slug 'native' is the old term for 'standard'.
 			$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::STANDARD_MODE_SLUG;
-		} elseif ( isset( $options[ Option::THEME_SUPPORT ] ) && 'paired' === $options[ Option::THEME_SUPPORT ] ) {
+		} elseif ( 'paired' === $options[ Option::THEME_SUPPORT ] ) {
 			// The slug 'paired' is the old term for 'transitional.
 			$options[ Option::THEME_SUPPORT ] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
-		} elseif ( isset( $options[ Option::THEME_SUPPORT ] ) && 'disabled' === $options[ Option::THEME_SUPPORT ] ) {
+		} elseif ( 'disabled' === $options[ Option::THEME_SUPPORT ] ) {
 			/*
 			 * Prior to 1.2, the theme support slug for Reader mode was 'disabled'. This would be saved in options for
 			 * themes that had 'amp' theme support defined. Also prior to 1.2, the user could not switch between modes
@@ -154,6 +186,42 @@ class AMP_Options_Manager {
 			 * default 'reader' mode.
 			 */
 			$options[ Option::THEME_SUPPORT ] = $defaults[ Option::THEME_SUPPORT ];
+		}
+
+		// Migrate options from 1.5 to 1.6.
+		if ( isset( $options['version'] ) && version_compare( $options['version'], '1.6', '<' ) ) {
+
+			// Make sure programmatic post type support is persisted in the DB.
+			$options[ Option::SUPPORTED_POST_TYPES ] = array_merge(
+				$options[ Option::SUPPORTED_POST_TYPES ],
+				(array) get_post_types_by_support( 'amp' )
+			);
+
+			// It also used to be that the themes_supported flag overrode the options, so make sure the option gets updated to reflect the theme support.
+			if ( isset( $theme_support['templates_supported'] ) ) {
+				if ( 'all' === $theme_support['templates_supported'] ) {
+					$options[ Option::ALL_TEMPLATES_SUPPORTED ] = true;
+				} elseif ( is_array( $theme_support['templates_supported'] ) ) {
+					$options[ Option::ALL_TEMPLATES_SUPPORTED ] = false;
+
+					$options[ Option::SUPPORTED_TEMPLATES ] = array_merge(
+						$options[ Option::SUPPORTED_TEMPLATES ],
+						array_keys( array_filter( $theme_support['templates_supported'] ) )
+					);
+
+					$options[ Option::SUPPORTED_TEMPLATES ] = array_diff(
+						$options[ Option::SUPPORTED_TEMPLATES ],
+						array_keys(
+							array_filter(
+								$theme_support['templates_supported'],
+								static function ( $supported ) {
+									return ! $supported;
+								}
+							)
+						)
+					);
+				}
+			}
 		}
 
 		unset(
@@ -238,34 +306,31 @@ class AMP_Options_Manager {
 		}
 
 		// Validate post type support.
-		if ( isset( $new_options[ Option::SUPPORTED_POST_TYPES ] ) ) {
+		if ( isset( $new_options[ Option::SUPPORTED_POST_TYPES ] ) && is_array( $new_options[ Option::SUPPORTED_POST_TYPES ] ) ) {
 			$options[ Option::SUPPORTED_POST_TYPES ] = [];
-
 			foreach ( $new_options[ Option::SUPPORTED_POST_TYPES ] as $post_type ) {
-				if ( ! post_type_exists( $post_type ) ) {
-					self::add_settings_error( self::OPTION_NAME, 'unknown_post_type', __( 'Unrecognized post type.', 'amp' ) );
-				} else {
+				if ( post_type_exists( $post_type ) ) {
 					$options[ Option::SUPPORTED_POST_TYPES ][] = $post_type;
 				}
 			}
+			$options[ Option::SUPPORTED_POST_TYPES ] = array_unique( $options[ Option::SUPPORTED_POST_TYPES ] );
 		}
 
-		$theme_support_args = AMP_Theme_Support::get_theme_support_args();
+		// Update all_templates_supported.
+		if ( isset( $new_options[ Option::ALL_TEMPLATES_SUPPORTED ] ) ) {
+			$options[ Option::ALL_TEMPLATES_SUPPORTED ] = rest_sanitize_boolean( $new_options[ Option::ALL_TEMPLATES_SUPPORTED ] );
+		}
 
-		$is_template_support_required = ( isset( $theme_support_args['templates_supported'] ) && 'all' === $theme_support_args['templates_supported'] );
-		if ( ! $is_template_support_required ) {
-			if ( isset( $new_options[ Option::ALL_TEMPLATES_SUPPORTED ] ) ) {
-				$options[ Option::ALL_TEMPLATES_SUPPORTED ] = ! empty( $new_options[ Option::ALL_TEMPLATES_SUPPORTED ] );
-			}
-
-			// Validate supported templates.
+		// Validate supported templates.
+		if ( isset( $new_options[ Option::SUPPORTED_TEMPLATES ] ) && is_array( $new_options[ Option::SUPPORTED_TEMPLATES ] ) ) {
+			$supportable_templates                  = AMP_Theme_Support::get_supportable_templates();
 			$options[ Option::SUPPORTED_TEMPLATES ] = [];
-			if ( isset( $new_options[ Option::SUPPORTED_TEMPLATES ] ) ) {
-				$options[ Option::SUPPORTED_TEMPLATES ] = array_intersect(
-					$new_options[ Option::SUPPORTED_TEMPLATES ],
-					array_keys( AMP_Theme_Support::get_supportable_templates() )
-				);
+			foreach ( $new_options[ Option::SUPPORTED_TEMPLATES ] as $template_id ) {
+				if ( array_key_exists( $template_id, $supportable_templates ) ) {
+					$options[ Option::SUPPORTED_TEMPLATES ][] = $template_id;
+				}
 			}
+			$options[ Option::SUPPORTED_TEMPLATES ] = array_unique( $options[ Option::SUPPORTED_TEMPLATES ] );
 		}
 
 		// Validate wizard completion.
@@ -346,55 +411,6 @@ class AMP_Options_Manager {
 		$options[ Option::VERSION ] = AMP__VERSION;
 
 		return $options;
-	}
-
-	/**
-	 * Check for errors with updating the supported post types.
-	 *
-	 * @since 0.6
-	 * @see add_settings_error()
-	 */
-	public static function check_supported_post_type_update_errors() {
-		// If all templates are supported then skip check since all post types are also supported. This option only applies with standard/transitional theme support.
-		if ( self::get_option( Option::ALL_TEMPLATES_SUPPORTED, false ) && AMP_Theme_Support::READER_MODE_SLUG !== self::get_option( Option::THEME_SUPPORT ) ) {
-			return;
-		}
-
-		$supported_types = self::get_option( Option::SUPPORTED_POST_TYPES, [] );
-		foreach ( AMP_Post_Type_Support::get_eligible_post_types() as $name ) {
-			$post_type = get_post_type_object( $name );
-			if ( empty( $post_type ) ) {
-				continue;
-			}
-
-			$post_type_supported = post_type_supports( $post_type->name, AMP_Post_Type_Support::SLUG );
-			$is_support_elected  = in_array( $post_type->name, $supported_types, true );
-
-			$error = null;
-			$code  = null;
-			if ( $is_support_elected && ! $post_type_supported ) {
-				/* translators: %s: Post type name. */
-				$error = __( '"%s" could not be activated because support is removed by a plugin or theme', 'amp' );
-				$code  = sprintf( '%s_activation_error', $post_type->name );
-			} elseif ( ! $is_support_elected && $post_type_supported ) {
-				/* translators: %s: Post type name. */
-				$error = __( '"%s" could not be deactivated because support is added by a plugin or theme', 'amp' );
-				$code  = sprintf( '%s_deactivation_error', $post_type->name );
-			}
-
-			if ( isset( $error, $code ) ) {
-				self::add_settings_error(
-					self::OPTION_NAME,
-					$code,
-					esc_html(
-						sprintf(
-							$error,
-							isset( $post_type->label ) ? $post_type->label : $post_type->name
-						)
-					)
-				);
-			}
-		}
 	}
 
 	/**
@@ -553,12 +569,6 @@ class AMP_Options_Manager {
 	 */
 	public static function handle_updated_theme_support_option() {
 		$template_mode = self::get_option( Option::THEME_SUPPORT );
-
-		// Make sure post type support has been added for sake of amp_admin_get_preview_permalink().
-		foreach ( AMP_Post_Type_Support::get_eligible_post_types() as $post_type ) {
-			remove_post_type_support( $post_type, AMP_Post_Type_Support::SLUG );
-		}
-		AMP_Post_Type_Support::add_post_type_support();
 
 		$url = amp_admin_get_preview_permalink();
 
