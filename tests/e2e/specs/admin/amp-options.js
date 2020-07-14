@@ -126,7 +126,6 @@ describe( 'AMP Settings Screen after wizard', () => {
 	} );
 
 	it( 'has main page components', async () => {
-		await expect( page ).not.toMatchElement( '.amp-plugin-notice' );
 		await expect( page ).toMatchElement( 'h1', { text: 'AMP Settings' } );
 		await expect( page ).toMatchElement( 'h2', { text: 'AMP Settings Configured' } );
 		await expect( page ).toMatchElement( 'a', { text: 'Reopen Wizard' } );

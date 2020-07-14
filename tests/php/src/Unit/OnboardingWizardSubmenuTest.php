@@ -59,6 +59,6 @@ class OnboardingWizardSubmenuTest  extends WP_UnitTestCase {
 
 		$this->instance->register();
 
-		$this->assertEquals( end( $submenu['amp-options'] )[2], 'amp-onboarding-wizard' );
+		$this->assertEquals( end( $submenu[''] )[2], 'amp-onboarding-wizard' );
 	}
 }
