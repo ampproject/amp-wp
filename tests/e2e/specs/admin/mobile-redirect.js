@@ -17,7 +17,7 @@ describe( 'Mobile redirect settings', () => {
 	} );
 
 	it( 'persists the mobile redirect setting on', async () => {
-		await completeWizard( { mode: 'reader' } );
+		await completeWizard( { mode: 'reader', mobileRedirect: true } );
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
 		await page.waitForSelector( toggleSelector );
