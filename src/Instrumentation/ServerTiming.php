@@ -70,7 +70,7 @@ final class ServerTiming implements Service, Registerable {
 	 * @param string      $event_name        Name of the event to record.
 	 * @param string|null $event_description Optional. Description of the event
 	 *                                       to record. Defaults to null.
-	 * @param string[]    $properties        Optional.Additional properties to add
+	 * @param string[]    $properties        Optional. Additional properties to add
 	 *                                       to the logged record.
 	 * @param bool        $verbose_only      Optional. Whether to only show the
 	 *                                       event in verbose mode. Defaults to
@@ -112,7 +112,7 @@ final class ServerTiming implements Service, Registerable {
 	 *
 	 * @param string   $event_name        Name of the event to log.
 	 * @param string   $event_description Description of the event to log.
-	 * @param string[] $properties        Optional.Additional properties to add
+	 * @param string[] $properties        Optional. Additional properties to add
 	 *                                    to the logged record.
 	 * @param bool     $verbose_only      Optional. Whether to only show the
 	 *                                    event in verbose mode.

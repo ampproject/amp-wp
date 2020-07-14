@@ -26,7 +26,7 @@ final class StopWatchEvent {
 	/**
 	 * End time in milliseconds.
 	 *
-	 * @var float
+	 * @var float|null
 	 */
 	private $end;
 
