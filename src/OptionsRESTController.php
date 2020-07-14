@@ -9,14 +9,12 @@
 namespace AmpProject\AmpWP;
 
 use AMP_Options_Manager;
+use AMP_Post_Type_Support;
 use AMP_Theme_Support;
-use AMP_Validated_URL_Post_Type;
-use AMP_Validation_Error_Taxonomy;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use stdClass;
 use WP_Error;
 use WP_REST_Controller;
 use WP_REST_Request;
@@ -48,6 +46,13 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 	 * Key for the date format used in date-rendering functions.
 	 */
 	const DATE_FORMAT = 'date_format';
+
+	/**
+	 * Key for post type data.
+	 *
+	 * @var string
+	 */
+	const ELIGIBLE_POST_TYPES = 'eligible_post_types';
 
 	/**
 	 * Reader themes provider class.
@@ -153,6 +158,14 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 
 		$options[ self::SUPPRESSIBLE_PLUGINS ] = $this->plugin_suppression->get_suppressible_plugins_with_details();
 		$options[ self::DATE_FORMAT ]          = get_option( 'date_format' );
+		$options[ self::ELIGIBLE_POST_TYPES ]  = array_map(
+			function( $slug ) {
+				$post_type                 = (array) get_post_type_object( $slug );
+				$post_type['supports_amp'] = post_type_supports( $post_type['name'], AMP_Post_Type_Support::SLUG );
+				return $post_type;
+			},
+			AMP_Post_Type_Support::get_eligible_post_types()
+		);
 
 		return rest_ensure_response( $options );
 	}
@@ -227,6 +240,21 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 					self::DATE_FORMAT               => [
 						'type'     => 'string',
 						'readonly' => true,
+					],
+					Option::SUPPORTED_TEMPLATES     => [
+						'type'  => 'array',
+						'items' => [
+							'type' => 'string',
+						],
+					],
+					Option::SUPPORTED_POST_TYPES    => [
+						'type'  => 'array',
+						'items' => [
+							'type' => 'string',
+						],
+					],
+					self::ELIGIBLE_POST_TYPES       => [
+						'type' => 'array',
 					],
 				],
 			];
