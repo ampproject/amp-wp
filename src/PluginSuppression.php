@@ -284,8 +284,8 @@ final class PluginSuppression implements Service, Registerable {
 
 				$validation_error['title'] = AMP_Validation_Error_Taxonomy::get_error_title_from_code( $validation_error['data'] );
 
-				$validation_error['is_removed']  = ( (int) $term->term_group & AMP_Validation_Error_Taxonomy::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
-				$validation_error['is_reviewed'] = ( (int) $term->term_group & AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
+				$validation_error['is_removed']  = (bool) ( (int) $term->term_group & AMP_Validation_Error_Taxonomy::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
+				$validation_error['is_reviewed'] = (bool) ( (int) $term->term_group & AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
 				$validation_error['tooltip']     = sprintf(
 					/* translators: %1 is whether validation error is 'removed' or 'kept', %2 is whether validation error is 'reviewed' or 'unreviewed' */
 					__( 'Invalid markup causing the validation error is %1$s and %2$s. See all validated URL(s) with this validation error.', 'amp' ),
@@ -337,6 +337,52 @@ final class PluginSuppression implements Service, Registerable {
 		}
 
 		return $plugins;
+	}
+
+	/**
+	 * Prepare suppressed plugins for response.
+	 *
+	 * Augment the suppressed plugins data with additional information.
+	 *
+	 * @param array $suppressed_plugins Suppressed plugins.
+	 * @return array Prepared suppressed plugins.
+	 */
+	public function prepare_suppressed_plugins_for_response( $suppressed_plugins ) {
+		return array_map(
+			function ( $suppressed_plugin ) {
+				if ( ! is_array( $suppressed_plugin ) ) {
+					return $suppressed_plugin;
+				}
+
+				if ( isset( $suppressed_plugin['username'] ) ) {
+					$username = $suppressed_plugin['username'];
+					unset( $suppressed_plugin['username'] );
+					$suppressed_plugin['user'] = $this->prepare_user_for_response( $username );
+				}
+
+				return $suppressed_plugin;
+			},
+			$suppressed_plugins
+		);
+	}
+
+	/**
+	 * Prepare user for response.
+	 *
+	 * @param string $username Username.
+	 * @return array User data.
+	 */
+	private function prepare_user_for_response( $username ) {
+		$response = [
+			'slug' => $username,
+		];
+
+		$user = get_user_by( 'slug', $username );
+		if ( $user ) {
+			$response['name'] = $user->display_name;
+		}
+
+		return $response;
 	}
 
 	/**

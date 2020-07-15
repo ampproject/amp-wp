@@ -6,13 +6,11 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { useContext, useEffect, useState, useRef, Fragment } from '@wordpress/element';
+import { useContext, Fragment } from '@wordpress/element';
 import { __, sprintf, _n } from '@wordpress/i18n';
 import { autop } from '@wordpress/autop';
 import { format, dateI18n } from '@wordpress/date';
-import apiFetch from '@wordpress/api-fetch';
 import { SelectControl } from '@wordpress/components';
-import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -40,10 +38,9 @@ function SuppressedPluginTime( { suppressedPlugin } ) {
 	return (
 		<time dateTime={ format( 'c', suppressedPlugin.timestamp ) }>
 			{
-				// Translators: placeholder is a formatted date.
+				/* translators: placeholder is a formatted date. */
 				sprintf( __( 'Since %s.', 'amp' ), dateI18n( dateFormat, suppressedPlugin.timestamp * 1000 ) )
 			}
-			{ ' ' }
 		</time>
 	);
 }
@@ -56,75 +53,15 @@ SuppressedPluginTime.propTypes = {
 /**
  * Renders the username of the WP user who suppressed a plugin.
  *
- * @todo Maybe pass this from the backend to avoid the extra apiFetch.
- * @todo The PHP version says "you" if the suppressing user is the current user.
- *
  * @param {Object} props Component props.
  * @param {Object} props.suppressedPlugin
  */
 function SuppressedPluginUsername( { suppressedPlugin } ) {
-	const [ fetchingSuppressingUser, setFetchingSuppressingUser ] = useState( true );
-	const [ suppressingUser, setSuppressingUser ] = useState( null );
-	const [ userFetchError, setUserFetchError ] = useState( null );
-
-	const mounted = useRef( true );
-	useEffect( () => () => {
-		mounted.current = false;
-	} );
-
-	/**
-	 * Fetch the user by username.
-	 */
-	useEffect( () => {
-		if ( suppressingUser || ! suppressedPlugin.username ) {
-			return;
-		}
-
-		( async () => {
-			try {
-				const fetchedSuppressingUser = await apiFetch( { path: addQueryArgs( '/wp/v2/users', { slug: suppressedPlugin.username } ) } );
-
-				if ( ! mounted.current || ! Array.isArray( fetchedSuppressingUser ) || ! fetchedSuppressingUser.length ) {
-					return;
-				}
-
-				setSuppressingUser( fetchedSuppressingUser[ 0 ] );
-			} catch ( e ) {
-				if ( ! mounted.current ) {
-					return;
-				}
-				setUserFetchError( e );
-			}
-
-			setFetchingSuppressingUser( false );
-		} )();
-	}, [ suppressedPlugin.username, suppressingUser ] );
-
-	if ( fetchingSuppressingUser ) {
-		return null;
-	}
-
-	if ( userFetchError || ! suppressingUser || ! ( 'name' in suppressingUser ) ) {
-		if ( ! ( 'username' in suppressedPlugin ) ) {
-			return null;
-		}
-
-		return (
-			<span>
-
-				{
-					// Translators: placeholder is a username
-					sprintf( __( 'Done by %s. ', 'amp' ), suppressedPlugin.username )
-				}
-			</span>
-		);
-	}
-
 	return (
 		<span>
 			{
-			// Translators: placeholder is a username
-				sprintf( __( 'Done by %s. ', 'amp' ), suppressingUser.name )
+				/* translators: placeholder is the name of the user who suppressed the plugin */
+				sprintf( __( 'Done by %s.', 'amp' ), suppressedPlugin.user.name || suppressedPlugin.user.slug )
 			}
 		</span>
 	);
@@ -132,7 +69,10 @@ function SuppressedPluginUsername( { suppressedPlugin } ) {
 SuppressedPluginUsername.propTypes = {
 	suppressedPlugin: PropTypes.shape( {
 		timestamp: PropTypes.number,
-		username: PropTypes.string,
+		user: PropTypes.shape( {
+			slug: PropTypes.string,
+			name: PropTypes.string,
+		} ),
 	} ),
 };
 
@@ -153,18 +93,17 @@ function SuppressedPluginVersion( { pluginDetails, suppressedPlugin } ) {
 			<span>
 				{
 					sprintf(
-						// Translators: both placeholders are plugin version numbers.
+						/* translators: both placeholders are plugin version numbers. */
 						__( 'Now updated to version %1$s since suppressed at %2$s.', 'amp' ),
 						pluginDetails.Version,
 						suppressedPlugin.last_version,
 					)
-
 				}
 			</span>
 		);
 	}
 
-	return __( 'Plugin updated since last suppressed', 'amp' );
+	return __( 'Plugin updated since last suppressed.', 'amp' );
 }
 SuppressedPluginVersion.propTypes = {
 	pluginDetails: PropTypes.shape( {
@@ -205,7 +144,7 @@ function ValidationErrorDetails( { errors } ) {
 						`error-${ error.is_reviewed ? 'reviewed' : 'unreviewed' }`,
 					].join( ' ' );
 
-					const WrapperElement = 'is_reviewed' ? 'strong' : Fragment;
+					const WrapperElement = ! error.is_reviewed ? 'strong' : Fragment;
 
 					return (
 						<li key={ error.term.term_id } className={ className }>
@@ -222,7 +161,14 @@ function ValidationErrorDetails( { errors } ) {
 	);
 }
 ValidationErrorDetails.propTypes = {
-	errors: PropTypes.array,
+	errors: PropTypes.arrayOf( PropTypes.shape( {
+		is_removed: PropTypes.bool,
+		is_reviewed: PropTypes.bool,
+		edit_url: PropTypes.string,
+		term: PropTypes.object,
+		title: PropTypes.string,
+		tooltip: PropTypes.string,
+	} ) ),
 };
 
 /**
@@ -239,16 +185,13 @@ function PluginRow( { pluginKey, pluginDetails } ) {
 	const { suppressed_plugins: originalSuppressedPlugins } = originalOptions;
 
 	const isOriginallySuppressed = pluginKey in originalSuppressedPlugins;
-	const isSuppressed = pluginKey in editedSuppressedPlugins;
+	const isSuppressed = pluginKey in editedSuppressedPlugins && editedSuppressedPlugins[ pluginKey ] !== false;
 
 	const PluginName = () => (
 		<strong>
 			{ pluginDetails.Name }
 		</strong>
 	);
-
-	// Translators: placeholder is an author name.
-	const author = sprintf( __( 'By %s. ' ), pluginDetails.Author );
 
 	return (
 		<tr>
@@ -262,7 +205,7 @@ function PluginRow( { pluginKey, pluginDetails } ) {
 
 						updateOptions( { suppressed_plugins: newSuppressedPlugins } );
 					} }
-					value={ isSuppressed ? true : false }
+					value={ isSuppressed }
 					label={ __( 'Plugin status:', 'amp' ) }
 					options={ [
 						{ value: false, label: __( 'Active', 'amp' ) },
@@ -286,10 +229,15 @@ function PluginRow( { pluginKey, pluginDetails } ) {
 								<small>
 									{ pluginDetails.AuthorURI ? (
 										<a href={ pluginDetails.AuthorURI } target="_blank" rel="noreferrer">
-											{ author }
-										</a>
-									)
-										: author
+											{
+												/* translators: placeholder is an author name. */
+												sprintf( __( 'By %s' ), pluginDetails.Author )
+											}
+										</a> )
+										: (
+											/* translators: placeholder is an author name. */
+											sprintf( __( 'By %s' ), pluginDetails.Author )
+										)
 									}
 
 								</small>
@@ -312,7 +260,9 @@ function PluginRow( { pluginKey, pluginDetails } ) {
 					isOriginallySuppressed ? (
 						<p>
 							<SuppressedPluginTime suppressedPlugin={ originalSuppressedPlugins[ pluginKey ] } />
+							{ ' ' }
 							<SuppressedPluginUsername suppressedPlugin={ originalSuppressedPlugins[ pluginKey ] } />
+							{ ' ' }
 							<SuppressedPluginVersion
 								pluginDetails={ pluginDetails }
 								suppressedPlugin={ originalSuppressedPlugins[ pluginKey ] }
@@ -336,7 +286,6 @@ PluginRow.propTypes = {
 		validation_errors: PropTypes.array,
 	} ).isRequired,
 	pluginKey: PropTypes.string.isRequired,
-
 };
 
 /**

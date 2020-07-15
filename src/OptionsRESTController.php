@@ -170,6 +170,8 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 
 		$options[ self::SUPPORTABLE_TEMPLATES ] = $this->get_nested_supportable_templates( AMP_Theme_Support::get_supportable_templates() );
 
+		$options[ Option::SUPPRESSED_PLUGINS ] = $this->plugin_suppression->prepare_suppressed_plugins_for_response( $options[ Option::SUPPRESSED_PLUGINS ] );
+
 		return rest_ensure_response( $options );
 	}
 
