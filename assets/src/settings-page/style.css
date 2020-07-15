@@ -101,6 +101,14 @@
 	margin-bottom: 3rem;
 }
 
+.supported-templates h4 {
+	font-size: 1rem;
+}
+
+.supported-templates p {
+	font-size: 13px;
+}
+
 .supported-templates .amp-notice {
 	margin-bottom: 1rem;
 }
@@ -251,13 +259,13 @@ li.error-kept {
 	}
 }
 
-.amp-save-success-notice {
+.amp .amp-save-success-notice.amp-notice {
 	position: fixed;
 	bottom: 3rem;
 	right: -1rem;
 	padding-right: 3rem;
 	width: 100%;
-	max-width: 200px;
+	max-width: 300px;
 	animation: slideIn, fadeOut;
 	animation-delay: 0s, 8s;
 	animation-duration: 0.5s, 0.5s;

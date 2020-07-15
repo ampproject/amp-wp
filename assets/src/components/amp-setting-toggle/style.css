@@ -8,10 +8,6 @@
 	margin-top: 0;
 }
 
-.amp-setting-toggle__label-text p:last-child {
-	margin-bottom: 0;
-}
-
 .amp-setting-toggle .components-toggle-control .components-base-control__field .components-toggle-control__label {
 	display: flex;
 	flex-wrap: wrap;
@@ -43,7 +39,11 @@
 	box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--brand);
 }
 
-.amp-setting-toggle--disabled .components-form-toggle {
+.amp-setting-toggle--disabled .components-form-toggle__input {
 	pointer-events: none;
 	opacity: 0.5;
+}
+
+.amp-setting-toggle--disabled .components-toggle-control__label {
+	pointer-events: none;
 }
