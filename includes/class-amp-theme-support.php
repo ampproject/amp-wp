@@ -1804,6 +1804,15 @@ class AMP_Theme_Support {
 	public static function finish_output_buffering( $response ) {
 		self::$is_output_buffering = false;
 		$response                  = self::prepare_response( $response );
+
+		/**
+		 * Fires when server timings should be sent.
+		 *
+		 * This is immediately before the processed output buffer is sent to the client.
+		 *
+		 * @since 1.6.0
+		 * @internal
+		 */
 		do_action( 'amp_server_timing_send' );
 		return $response;
 	}
