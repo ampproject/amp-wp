@@ -25,6 +25,7 @@ import './style.css';
 import { OptionsContextProvider } from '../components/options-context-provider';
 import { ReaderThemesContextProvider } from '../components/reader-themes-context-provider';
 import { SiteSettingsProvider } from '../components/site-settings-provider';
+import { UnsavedChangesWarning } from '../components/unsaved-changes-warning';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
 import { MobileRedirection } from './mobile-redirection';
@@ -72,6 +73,7 @@ function Root() {
 			<MobileRedirection />
 			<PluginSuppression />
 			<SettingsFooter />
+			<UnsavedChangesWarning excludeUserContext={ true } />
 		</>
 	);
 }

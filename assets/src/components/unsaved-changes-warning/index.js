@@ -1,7 +1,12 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
-import { useEffect, useContext } from '@wordpress/element';
+import { useEffect, useContext, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -13,11 +18,15 @@ import { Options } from '../options-context-provider';
 /**
  * If there are unsaved changes in the wizard, warns the user before exiting the page.
  *
+ * @param {Object} props Component props.
+ * @param {boolean} props.excludeUserContext Whether to exclude listening to user context.
  * @return {null} Renders nothing.
  */
-export function UnsavedChangesWarning() {
+export function UnsavedChangesWarning( { excludeUserContext = false } ) {
 	const { hasOptionsChanges, didSaveOptions } = useContext( Options );
-	const { hasDeveloperToolsOptionChange, didSaveDeveloperToolsOption } = useContext( User );
+	const [ userState, setUserState ] = useState( { hasDeveloperToolsOptionChange: false, didSaveDeveloperToolsOption: true } );
+
+	const { hasDeveloperToolsOptionChange, didSaveDeveloperToolsOption } = userState;
 
 	useEffect( () => {
 		if ( ( hasOptionsChanges && ! didSaveOptions ) || ( hasDeveloperToolsOptionChange && ! didSaveDeveloperToolsOption ) ) {
@@ -36,6 +45,25 @@ export function UnsavedChangesWarning() {
 
 		return () => undefined;
 	}, [ hasOptionsChanges, didSaveOptions, hasDeveloperToolsOptionChange, didSaveDeveloperToolsOption ] );
+
+	return excludeUserContext ? null : <WithUserContext setUserState={ setUserState } />;
+}
+UnsavedChangesWarning.propTypes = {
+	excludeUserContext: PropTypes.bool,
+};
+
+/**
+ * Sends user context back up to the parent component.
+ *
+ * @param {Object} props
+ * @param {Function} props.setUserState Sets updated user state.
+ */
+function WithUserContext( { setUserState } ) {
+	const { hasDeveloperToolsOptionChange, didSaveDeveloperToolsOption } = useContext( User );
+
+	useEffect( () => {
+		setUserState( { hasDeveloperToolsOptionChange, didSaveDeveloperToolsOption } );
+	}, [ hasDeveloperToolsOptionChange, didSaveDeveloperToolsOption, setUserState ] );
 
 	return null;
 }
