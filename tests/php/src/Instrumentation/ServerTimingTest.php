@@ -390,7 +390,7 @@ final class ServerTimingTest extends WP_UnitTestCase {
 		$this->assertContains(
 			[
 				'name'        => 'Server-Timing',
-				'value'       => 'main-event;desc="Main Event";dur="1.2", verbose-event;desc="Verbose Event";dur="3.4"',
+				'value'       => 'main-event;desc="Main Event";dur="1.2",verbose-event;desc="Verbose Event";dur="3.4"',
 				'replace'     => true,
 				'status_code' => null,
 			],
