@@ -193,9 +193,6 @@ function PluginRow( { pluginKey, pluginDetails } ) {
 		</strong>
 	);
 
-	/* translators: placeholder is an author name. */
-	const author = sprintf( __( 'By %s. ' ), pluginDetails.Author );
-
 	return (
 		<tr>
 			<th className="column-status" scope="row">
@@ -232,10 +229,15 @@ function PluginRow( { pluginKey, pluginDetails } ) {
 								<small>
 									{ pluginDetails.AuthorURI ? (
 										<a href={ pluginDetails.AuthorURI } target="_blank" rel="noreferrer">
-											{ author }
-										</a>
-									)
-										: author
+											{
+												/* translators: placeholder is an author name. */
+												sprintf( __( 'By %s' ), pluginDetails.Author )
+											}
+										</a> )
+										: (
+											/* translators: placeholder is an author name. */
+											sprintf( __( 'By %s' ), pluginDetails.Author )
+										)
 									}
 
 								</small>
