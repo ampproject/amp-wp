@@ -14,6 +14,7 @@ import PropTypes from 'prop-types';
  */
 import { useError } from '../../utils/use-error';
 import { Options } from '../../components/options-context-provider';
+import { ErrorContext } from '../../components/error-boundary';
 
 export const User = createContext();
 
@@ -33,6 +34,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 	const [ savingDeveloperToolsOption, setSavingDeveloperToolsOption ] = useState( false );
 	const [ didSaveDeveloperToolsOption, setDidSaveDeveloperToolsOption ] = useState( false );
 	const { setError } = useError();
+	const error = useContext( ErrorContext );
 
 	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
 	const hasUnmounted = useRef( false );
@@ -48,7 +50,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 	 * Fetch user options on mount.
 	 */
 	useEffect( () => {
-		if ( fetchingOptions ) {
+		if ( error || fetchingOptions ) {
 			return;
 		}
 
@@ -84,13 +86,13 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 
 			setFetchingUser( false );
 		} )();
-	}, [ fetchingOptions, fetchingUser, originalDeveloperToolsOption, originalOptions.plugin_configured, setError, userOptionDeveloperTools, userRestEndpoint ] );
+	}, [ error, fetchingOptions, fetchingUser, originalDeveloperToolsOption, originalOptions.plugin_configured, setError, userOptionDeveloperTools, userRestEndpoint ] );
 
 	/**
 	 * Sends the option back to the REST endpoint to be saved.
 	 */
 	const saveDeveloperToolsOption = useCallback( async () => {
-		if ( ! hasDeveloperToolsOptionChange ) {
+		if ( error || ! hasDeveloperToolsOptionChange ) {
 			return;
 		}
 
@@ -112,7 +114,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 
 		setDidSaveDeveloperToolsOption( true );
 		setSavingDeveloperToolsOption( false );
-	}, [ hasDeveloperToolsOptionChange, developerToolsOption, setError, userOptionDeveloperTools, userRestEndpoint ] );
+	}, [ error, hasDeveloperToolsOptionChange, developerToolsOption, setError, userOptionDeveloperTools, userRestEndpoint ] );
 
 	return (
 		<User.Provider

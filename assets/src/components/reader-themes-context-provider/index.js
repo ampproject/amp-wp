@@ -15,6 +15,7 @@ import PropTypes from 'prop-types';
  */
 import { useError } from '../../utils/use-error';
 import { Options } from '../options-context-provider';
+import { ErrorContext } from '../error-boundary';
 
 export const ReaderThemes = createContext();
 
@@ -30,6 +31,7 @@ export const ReaderThemes = createContext();
  */
 export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme, readerThemesEndpoint, updatesNonce } ) {
 	const { setError } = useError();
+	const error = useContext( ErrorContext );
 
 	const [ themes, setThemes ] = useState( null );
 	const [ fetchingThemes, setFetchingThemes ] = useState( false );
@@ -79,7 +81,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 		 * Downloads a theme from WordPress.org using the traditional AJAX action.
 		 */
 		( async () => {
-			if ( downloadingTheme || downloadingThemeError ) {
+			if ( error || downloadingTheme || downloadingThemeError ) {
 				return;
 			}
 
@@ -117,13 +119,13 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 
 			setDownloadingTheme( false );
 		} )();
-	}, [ wpAjaxUrl, downloadingTheme, downloadingThemeError, savingOptions, selectedTheme, themeSupport, updatesNonce ] );
+	}, [ error, wpAjaxUrl, downloadingTheme, downloadingThemeError, savingOptions, selectedTheme, themeSupport, updatesNonce ] );
 
 	/**
 	 * Fetches theme data when needed.
 	 */
 	useEffect( () => {
-		if ( fetchingThemes || ! readerThemesEndpoint || themes ) {
+		if ( error || fetchingThemes || ! readerThemesEndpoint || themes ) {
 			return;
 		}
 
@@ -153,7 +155,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 
 			setFetchingThemes( false );
 		} )();
-	}, [ fetchingThemes, readerThemesEndpoint, setError, themes, themeSupport ] );
+	}, [ error, fetchingThemes, readerThemesEndpoint, setError, themes, themeSupport ] );
 
 	return (
 		<ReaderThemes.Provider

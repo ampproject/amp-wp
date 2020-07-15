@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { createContext, useEffect, useState, useRef, useCallback } from '@wordpress/element';
+import { createContext, useEffect, useState, useRef, useCallback, useContext } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -13,6 +13,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import { useError } from '../../utils/use-error';
+import { ErrorContext } from '../error-boundary';
 
 export const Options = createContext();
 
@@ -40,6 +41,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint, populat
 	const [ didSaveOptions, setDidSaveOptions ] = useState( false );
 	const [ originalOptions, setOriginalOptions ] = useState( {} );
 
+	const error = useContext( ErrorContext );
 	const { setError } = useError();
 
 	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
@@ -52,7 +54,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint, populat
 	 * Fetches options.
 	 */
 	useEffect( () => {
-		if ( Object.keys( originalOptions ).length || fetchingOptions ) {
+		if ( error || Object.keys( originalOptions ).length || fetchingOptions ) {
 			return;
 		}
 
@@ -83,7 +85,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint, populat
 
 			setFetchingOptions( false );
 		} )();
-	}, [ fetchingOptions, originalOptions, optionsRestEndpoint, populateDefaultValues, setError ] );
+	}, [ error, fetchingOptions, originalOptions, optionsRestEndpoint, populateDefaultValues, setError ] );
 
 	/**
 	 * Sends options to the REST endpoint to be saved.
@@ -91,6 +93,10 @@ export function OptionsContextProvider( { children, optionsRestEndpoint, populat
 	 * @param {Object} data Plugin options to update.
 	 */
 	const saveOptions = useCallback( async () => {
+		if ( error ) {
+			return;
+		}
+
 		setSavingOptions( true );
 
 		try {
@@ -139,7 +145,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint, populat
 
 		setDidSaveOptions( true );
 		setSavingOptions( false );
-	}, [ optionsRestEndpoint, setError, originalOptions, updates ] );
+	}, [ error, optionsRestEndpoint, setError, originalOptions, updates ] );
 
 	/**
 	 * Updates options in state.

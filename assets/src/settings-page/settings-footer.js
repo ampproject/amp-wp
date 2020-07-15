@@ -11,11 +11,13 @@ import { __ } from '@wordpress/i18n';
 import { Options } from '../components/options-context-provider';
 import { ReaderThemes } from '../components/reader-themes-context-provider';
 import { AMPNotice, NOTICE_TYPE_SUCCESS } from '../components/amp-notice';
+import { ErrorContext } from '../components/error-boundary';
 
 /**
  * The bottom section of the settings page.
  */
 export function SettingsFooter() {
+	const error = useContext( ErrorContext );
 	const { didSaveOptions, editedOptions, saveOptions, savingOptions } = useContext( Options );
 	const { downloadingTheme } = useContext( ReaderThemes );
 	const [ saved, setSaved ] = useState( false );
@@ -42,6 +44,7 @@ export function SettingsFooter() {
 	}, [ didSaveOptions, downloadingTheme ] );
 
 	const disabled = ! themeSupport ||
+		error ||
 		savingOptions ||
 		didSaveOptions ||
 		downloadingTheme ||

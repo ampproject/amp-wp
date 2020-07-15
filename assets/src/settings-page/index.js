@@ -13,7 +13,8 @@ import {
  * WordPress dependencies
  */
 import domReady from '@wordpress/dom-ready';
-import { render } from '@wordpress/element';
+import { render, useContext, useState, useEffect, useRef } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -26,7 +27,8 @@ import { OptionsContextProvider } from '../components/options-context-provider';
 import { ReaderThemesContextProvider } from '../components/reader-themes-context-provider';
 import { SiteSettingsProvider } from '../components/site-settings-provider';
 import { UnsavedChangesWarning } from '../components/unsaved-changes-warning';
-import { ErrorBoundary } from '../components/error-boundary';
+import { ErrorBoundary, ErrorContext } from '../components/error-boundary';
+import { AMPNotice, NOTICE_TYPE_WARNING } from '../components/amp-notice';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
 import { MobileRedirection } from './mobile-redirection';
@@ -62,10 +64,53 @@ Providers.propTypes = {
 	children: PropTypes.any,
 };
 
+function ErrorNotice( { errorMessage } ) {
+	return (
+		<div className="amp-error-notice">
+			<AMPNotice type={ NOTICE_TYPE_WARNING }>
+				<p>
+					<strong>
+						{ __( 'Error: ', 'amp' ) }
+					</strong>
+					{ errorMessage }
+				</p>
+			</AMPNotice>
+		</div>
+	);
+}
+ErrorNotice.propTypes = {
+	errorMessage: PropTypes.string,
+};
+
 /**
  * Settings page application root.
  */
 function Root() {
+	const error = useContext( ErrorContext );
+	const [ delayedError, setDelayedError ] = useState( error && error.message ? error.message : null );
+	const errorRef = useRef( error );
+
+	useEffect( () => {
+		errorRef.current = error;
+	}, [ error ] );
+
+	useEffect( () => {
+		const interval = setInterval( () => {
+			if ( delayedError && ! errorRef.current ) {
+				setDelayedError( null );
+				return;
+			}
+
+			if ( errorRef.current && delayedError !== errorRef.current.message ) {
+				setDelayedError( errorRef.current.message );
+			}
+		}, 1500 );
+
+		return () => {
+			clearInterval( interval );
+		};
+	}, [ delayedError ] );
+
 	return (
 		<>
 			<TemplateModes />
@@ -75,6 +120,7 @@ function Root() {
 			<PluginSuppression />
 			<SettingsFooter />
 			<UnsavedChangesWarning excludeUserContext={ true } />
+			{ delayedError && <ErrorNotice errorMessage={ delayedError } /> }
 		</>
 	);
 }
