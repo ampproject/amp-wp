@@ -44,6 +44,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 		() => null !== developerToolsOption && developerToolsOption !== originalDeveloperToolsOption,
 		[ developerToolsOption, originalDeveloperToolsOption ],
 	);
+
 	/**
 	 * Fetch user options on mount.
 	 */

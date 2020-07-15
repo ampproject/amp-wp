@@ -198,6 +198,7 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 			$option['id']       = $id;
 			$option['children'] = $this->get_nested_supportable_templates( $supportable_templates, $id );
 
+			// Omit obsolete properties.
 			unset(
 				$option['supported'],
 				$option['user_supported'],
@@ -290,10 +291,12 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 						],
 					],
 					self::SUPPORTABLE_POST_TYPES    => [
-						'type' => 'array',
+						'type'     => 'array',
+						'readonly' => true,
 					],
 					self::SUPPORTABLE_TEMPLATES     => [
-						'type' => 'array',
+						'type'     => 'array',
+						'readonly' => true,
 					],
 				],
 			];
