@@ -163,7 +163,11 @@ function ValidationErrorDetails( { errors } ) {
 	);
 }
 ValidationErrorDetails.propTypes = {
-	errors: PropTypes.array,
+	errors: PropTypes.arrayOf( PropTypes.shape( {
+		is_removed: PropTypes.bool,
+		is_reviewed: PropTypes.bool,
+		edit_url: PropTypes.string,
+	} ) ),
 };
 
 /**
