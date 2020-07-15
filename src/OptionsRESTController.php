@@ -6,15 +6,26 @@
  * @since 1.6.0
  */
 
+namespace AmpProject\AmpWP;
+
+use AMP_Options_Manager;
+use AMP_Theme_Support;
 use AmpProject\AmpWP\Admin\ReaderThemes;
-use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Infrastructure\Delayed;
+use AmpProject\AmpWP\Infrastructure\Registerable;
+use AmpProject\AmpWP\Infrastructure\Service;
+use WP_Error;
+use WP_REST_Controller;
+use WP_REST_Request;
+use WP_REST_Response;
+use WP_REST_Server;
 
 /**
- * AMP_Options_REST_Controller class.
+ * OptionsRESTController class.
  *
  * @since 1.6.0
  */
-final class AMP_Options_REST_Controller extends WP_REST_Controller {
+final class OptionsRESTController extends WP_REST_Controller implements Delayed, Service, Registerable {
 
 	/**
 	 * Key for a preview permalink added to the endpoint data.
@@ -24,11 +35,25 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 	const PREVIEW_PERMALINK = 'preview_permalink';
 
 	/**
+	 * Key for suppressible plugins data added to the endpoint.
+	 *
+	 * @var string
+	 */
+	const SUPPRESSIBLE_PLUGINS = 'suppressible_plugins';
+
+	/**
 	 * Reader themes provider class.
 	 *
 	 * @var ReaderThemes
 	 */
 	private $reader_themes;
+
+	/**
+	 * PluginSuppression instance.
+	 *
+	 * @var PluginSuppression
+	 */
+	private $plugin_suppression;
 
 	/**
 	 * Cached results of get_item_schema.
@@ -38,20 +63,31 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 	protected $schema;
 
 	/**
+	 * Get the action to use for registering the service.
+	 *
+	 * @return string Registration action to use.
+	 */
+	public static function get_registration_action() {
+		return 'rest_api_init';
+	}
+
+	/**
 	 * Constructor.
 	 *
-	 * @param ReaderThemes $reader_themes Reader themes helper class instance.
+	 * @param ReaderThemes      $reader_themes Reader themes helper class instance.
+	 * @param PluginSuppression $plugin_suppression An instance of the PluginSuppression class.
 	 */
-	public function __construct( ReaderThemes $reader_themes ) {
-		$this->namespace     = 'amp/v1';
-		$this->rest_base     = 'options';
-		$this->reader_themes = $reader_themes;
+	public function __construct( ReaderThemes $reader_themes, PluginSuppression $plugin_suppression ) {
+		$this->namespace          = 'amp/v1';
+		$this->rest_base          = 'options';
+		$this->reader_themes      = $reader_themes;
+		$this->plugin_suppression = $plugin_suppression;
 	}
 
 	/**
 	 * Registers all routes for the controller.
 	 */
-	public function register_routes() {
+	public function register() {
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
@@ -106,6 +142,10 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 		// Add the preview permalink. The permalink can't be handled via AMP_Options_Manager::get_options because
 		// amp_admin_get_preview_permalink calls AMP_Options_Manager::get_options, leading to infinite recursion.
 		$options[ self::PREVIEW_PERMALINK ] = amp_admin_get_preview_permalink();
+
+		$options[ self::SUPPRESSIBLE_PLUGINS ] = $this->plugin_suppression->get_suppressible_plugins_with_details();
+
+		$options[ Option::SUPPRESSED_PLUGINS ] = $this->plugin_suppression->prepare_suppressed_plugins_for_response( $options[ Option::SUPPRESSED_PLUGINS ] );
 
 		return rest_ensure_response( $options );
 	}
@@ -169,6 +209,13 @@ final class AMP_Options_REST_Controller extends WP_REST_Controller {
 					],
 					Option::ALL_TEMPLATES_SUPPORTED => [
 						'type' => 'boolean',
+					],
+					self::SUPPRESSIBLE_PLUGINS      => [
+						'type'     => 'object',
+						'readonly' => true,
+					],
+					Option::SUPPRESSED_PLUGINS      => [
+						'type' => 'object',
 					],
 				],
 			];
