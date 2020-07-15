@@ -99,7 +99,6 @@ function SuppressedPluginVersion( { pluginDetails, suppressedPlugin } ) {
 						pluginDetails.Version,
 						suppressedPlugin.last_version,
 					)
-
 				}
 			</span>
 		);
@@ -146,7 +145,7 @@ function ValidationErrorDetails( { errors } ) {
 						`error-${ error.is_reviewed ? 'reviewed' : 'unreviewed' }`,
 					].join( ' ' );
 
-					const WrapperElement = 'is_reviewed' ? 'strong' : Fragment;
+					const WrapperElement = ! error.is_reviewed ? 'strong' : Fragment;
 
 					return (
 						<li key={ error.term.term_id } className={ className }>
@@ -167,6 +166,9 @@ ValidationErrorDetails.propTypes = {
 		is_removed: PropTypes.bool,
 		is_reviewed: PropTypes.bool,
 		edit_url: PropTypes.string,
+		term: PropTypes.object,
+		title: PropTypes.string,
+		tooltip: PropTypes.string,
 	} ) ),
 };
 
