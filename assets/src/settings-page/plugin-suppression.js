@@ -286,7 +286,6 @@ PluginRow.propTypes = {
 		validation_errors: PropTypes.array,
 	} ).isRequired,
 	pluginKey: PropTypes.string.isRequired,
-
 };
 
 /**
