@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import { useError } from '../../utils/use-error';
+import { useAsyncError } from '../../utils/use-async-error';
 import { ErrorContext } from '../error-boundary';
 
 export const Options = createContext();
@@ -42,7 +42,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint, populat
 	const [ originalOptions, setOriginalOptions ] = useState( {} );
 
 	const error = useContext( ErrorContext );
-	const { setError } = useError();
+	const { setError } = useAsyncError();
 
 	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
 	const hasUnmounted = useRef( false );

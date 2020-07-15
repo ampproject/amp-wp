@@ -46,7 +46,7 @@ export class ErrorBoundary extends Component {
 
 	componentDidUpdate() {
 		if ( this.state.error ) {
-			global.setTimeout( this.clearError, 10000 );
+			global.setTimeout( this.clearError, 20000 );
 		}
 	}
 

@@ -11,7 +11,7 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import { useError } from '../../utils/use-error';
+import { useAsyncError } from '../../utils/use-async-error';
 import { ErrorContext } from '../error-boundary';
 
 export const SiteSettings = createContext();
@@ -26,7 +26,7 @@ export function SiteSettingsProvider( { children } ) {
 	const [ settings, setSettings ] = useState( {} );
 	const [ fetchingSiteSettings, setFetchingSiteSettings ] = useState( false );
 
-	const { setError } = useError();
+	const { setError } = useAsyncError();
 	const error = useContext( ErrorContext );
 
 	useEffect( () => {

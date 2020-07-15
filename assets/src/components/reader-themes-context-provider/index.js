@@ -13,7 +13,7 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import { useError } from '../../utils/use-error';
+import { useAsyncError } from '../../utils/use-async-error';
 import { Options } from '../options-context-provider';
 import { ErrorContext } from '../error-boundary';
 
@@ -30,7 +30,7 @@ export const ReaderThemes = createContext();
  * @param {string} props.updatesNonce Nonce for the AJAX request to install a theme.
  */
 export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme, readerThemesEndpoint, updatesNonce } ) {
-	const { setError } = useError();
+	const { setError } = useAsyncError();
 	const error = useContext( ErrorContext );
 
 	const [ themes, setThemes ] = useState( null );
