@@ -62,14 +62,14 @@ PostTypeCheckbox.propTypes = {
  * Container for the supported post type checkbox fieldset.
  */
 function SupportedPostTypesFieldset() {
-	const { editedOptions, fetchingOptions } = useContext( Options );
+	const { editedOptions } = useContext( Options );
 
 	const {
 		theme_support: themeSupport,
 		supportable_post_types: supportablePostTypes,
 	} = editedOptions || {};
 
-	if ( fetchingOptions || ! supportablePostTypes ) {
+	if ( ! supportablePostTypes ) {
 		return null;
 	}
 

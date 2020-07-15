@@ -292,11 +292,7 @@ PluginRow.propTypes = {
  * Component rendering the plugin suppression table.
  */
 export function PluginSuppression() {
-	const { editedOptions, fetchingOptions } = useContext( Options );
-
-	if ( fetchingOptions ) {
-		return null;
-	}
+	const { editedOptions } = useContext( Options );
 
 	const {
 		suppressible_plugins: suppressiblePlugins,

@@ -7,6 +7,11 @@
 	color: var(--brand);
 	font-size: 1rem;
 	font-weight: 600;
+	padding: 0.5rem 1rem;
+}
+
+.amp .components-button svg {
+	fill: currentColor;
 }
 
 .amp .components-button.is-link,
@@ -37,6 +42,7 @@
 .amp .components-button.is-primary:not(:disabled):not([aria-disabled="true"]):hover {
 	background: var(--brand);
 	color: var(--white);
+	text-shadow: none;
 }
 
 .amp .components-button.is-primary:disabled {
@@ -60,4 +66,28 @@
 	@media screen and (min-width: 783px) {
 		display: block;
 	}
+}
+
+/* For WP 5.0. Some of these styles are redundant in later WP versions. */
+.amp input[type="checkbox"]:checked::before {
+	display: none;
+}
+
+.amp .components-visually-hidden {
+	display: none;
+}
+
+.amp .components-checkbox-control__input-container {
+	width: 16px;
+	height: 16px;
+	margin-right: 12px;
+	position: relative;
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.amp svg.components-checkbox-control__checked {
+	fill: rgb(255, 255, 255);
+	position: absolute;
+	top: -2px;
 }

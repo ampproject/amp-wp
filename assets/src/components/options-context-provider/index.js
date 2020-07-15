@@ -35,7 +35,7 @@ function waitASecond() {
  */
 export function OptionsContextProvider( { children, optionsRestEndpoint, populateDefaultValues } ) {
 	const [ updates, setUpdates ] = useState( {} );
-	const [ fetchingOptions, setFetchingOptions ] = useState( false );
+	const [ fetchingOptions, setFetchingOptions ] = useState( null );
 	const [ savingOptions, setSavingOptions ] = useState( false );
 	const [ didSaveOptions, setDidSaveOptions ] = useState( false );
 	const [ originalOptions, setOriginalOptions ] = useState( {} );

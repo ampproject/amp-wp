@@ -116,7 +116,7 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 				[
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => [ $this, 'update_items' ],
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					'args'                => [],
 					'permission_callback' => [ $this, 'get_items_permissions_check' ],
 				],
 				'schema' => $this->get_public_item_schema(),

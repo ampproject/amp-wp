@@ -13,7 +13,7 @@ import {
  * WordPress dependencies
  */
 import domReady from '@wordpress/dom-ready';
-import { render } from '@wordpress/element';
+import { render, useContext } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -22,7 +22,7 @@ import '../css/variables.css';
 import '../css/elements.css';
 import '../css/core-components.css';
 import './style.css';
-import { OptionsContextProvider } from '../components/options-context-provider';
+import { OptionsContextProvider, Options } from '../components/options-context-provider';
 import { ReaderThemesContextProvider } from '../components/reader-themes-context-provider';
 import { SiteSettingsProvider } from '../components/site-settings-provider';
 import { TemplateModes } from './template-modes';
@@ -64,6 +64,12 @@ Providers.propTypes = {
  * Settings page application root.
  */
 function Root() {
+	const { fetchingOptions } = useContext( Options );
+
+	if ( false !== fetchingOptions ) {
+		return null;
+	}
+
 	return (
 		<>
 			<TemplateModes />
