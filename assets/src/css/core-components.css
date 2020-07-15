@@ -41,8 +41,8 @@
 
 .amp .components-button.is-primary:disabled {
 	color: rgba(255, 255, 255, .8);
-	background: var(--color-gray-medium);
-	border-color: var(--color-gray-medium);
+	background: rgba(0, 0, 0, 0.3);
+	border-color: rgba(0, 0, 0, 0.3);
 }
 
 .amp .components-button.is-primary:disabled.is-busy {

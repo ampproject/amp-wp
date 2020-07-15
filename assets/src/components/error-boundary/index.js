@@ -59,7 +59,7 @@ export class ErrorBoundary extends Component {
 	}
 
 	clearError() {
-		if ( this.mounted ) {
+		if ( ! this.props.fullScreen && this.mounted ) {
 			this.setState( { error: null } );
 		}
 	}
