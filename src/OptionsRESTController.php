@@ -137,16 +137,21 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function get_items( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		$options    = AMP_Options_Manager::get_options();
-		$properties = $this->get_item_schema()['properties'];
-
-		$options = wp_array_slice_assoc( $options, array_keys( $properties ) );
+		$options = AMP_Options_Manager::get_options();
+		$options = wp_array_slice_assoc( $options, array_keys( $this->get_internal_item_schema_properties() ) );
 
 		// Add the preview permalink. The permalink can't be handled via AMP_Options_Manager::get_options because
 		// amp_admin_get_preview_permalink calls AMP_Options_Manager::get_options, leading to infinite recursion.
 		$options[ self::PREVIEW_PERMALINK ] = amp_admin_get_preview_permalink();
 
-		$options[ self::SUPPRESSIBLE_PLUGINS ] = $this->plugin_suppression->get_suppressible_plugins_with_details();
+		/**
+		 * Filters the items returned by a request to the AMP options endpoint.
+		 *
+		 * @param array           $options Options.
+		 * @param WP_REST_Request $request Request.
+		 * @internal
+		 */
+		$options = apply_filters( 'amp_rest_options_request_items', $options, $request );
 
 		return rest_ensure_response( $options );
 	}
@@ -160,9 +165,64 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 	public function update_items( $request ) {
 		$params = $request->get_params();
 
+		// @todo The update_options method needs to be refactored to embrace a REST API-driven service-based architecture.
 		AMP_Options_Manager::update_options( wp_array_slice_assoc( $params, array_keys( $this->get_item_schema()['properties'] ) ) );
 
+//		AMP_Options_Manager::update_options( wp_array_slice_assoc( $params, array_keys( $this->get_internal_item_schema_properties() ) ) );
+//
+//		/**
+//		 * Fires for services go inject their own logic to update their respective options.
+//		 *
+//		 * @internal
+//		 * @param WP_REST_Request $request
+//		 */
+//		do_action( 'amp_rest_update_options', $request );
+
 		return rest_ensure_response( $this->get_items( $request ) );
+	}
+
+	/**
+	 * Get internal item schema properties (without filtering for services to add their own).
+	 *
+	 * @return array Schema.
+	 */
+	private function get_internal_item_schema_properties() {
+		return [
+			// Note: The sanitize_callback from AMP_Options_Manager::register_settings() is applying to this option.
+			Option::THEME_SUPPORT           => [
+				'type' => 'string',
+				'enum' => [
+					AMP_Theme_Support::READER_MODE_SLUG,
+					AMP_Theme_Support::STANDARD_MODE_SLUG,
+					AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
+				],
+			],
+			Option::READER_THEME            => [ // @todo Move this to the ReaderThemeLoader service.
+				'type'        => 'string',
+				'arg_options' => [
+					'validate_callback' => function ( $value ) {
+						// Note: The validate_callback is used instead of enum in order to prevent leaking the list of themes.
+						return in_array( $value, wp_list_pluck( $this->reader_themes->get_themes(), 'slug' ), true );
+					},
+				],
+			],
+			Option::MOBILE_REDIRECT         => [ // @todo Move this to MobileRedirection service.
+				'type'    => 'boolean',
+				'default' => false,
+			],
+			self::PREVIEW_PERMALINK         => [
+				'type'     => 'string',
+				'readonly' => true,
+				'format'   => 'url',
+			],
+			Option::PLUGIN_CONFIGURED       => [
+				'type'    => 'boolean',
+				'default' => false,
+			],
+			Option::ALL_TEMPLATES_SUPPORTED => [
+				'type' => 'boolean',
+			],
+		];
 	}
 
 	/**
@@ -171,54 +231,20 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 	 * @return array Item schema data.
 	 */
 	public function get_item_schema() {
+		/**
+		 * Filters the properties schema for services to inject.
+		 *
+		 * @internal
+		 * @param array $properties Properties.
+		 */
+		$properties = apply_filters( 'amp_options_endpoint_properties_schema', $this->get_internal_item_schema_properties() );
+
 		if ( ! $this->schema ) {
 			$this->schema = [
 				'$schema'    => 'http://json-schema.org/draft-04/schema#',
 				'title'      => 'amp-wp-options',
 				'type'       => 'object',
-				'properties' => [
-					// Note: The sanitize_callback from AMP_Options_Manager::register_settings() is applying to this option.
-					Option::THEME_SUPPORT           => [
-						'type' => 'string',
-						'enum' => [
-							AMP_Theme_Support::READER_MODE_SLUG,
-							AMP_Theme_Support::STANDARD_MODE_SLUG,
-							AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
-						],
-					],
-					Option::READER_THEME            => [
-						'type'        => 'string',
-						'arg_options' => [
-							'validate_callback' => function ( $value ) {
-								// Note: The validate_callback is used instead of enum in order to prevent leaking the list of themes.
-								return in_array( $value, wp_list_pluck( $this->reader_themes->get_themes(), 'slug' ), true );
-							},
-						],
-					],
-					Option::MOBILE_REDIRECT         => [
-						'type'    => 'boolean',
-						'default' => false,
-					],
-					self::PREVIEW_PERMALINK         => [
-						'type'     => 'string',
-						'readonly' => true,
-						'format'   => 'url',
-					],
-					Option::PLUGIN_CONFIGURED       => [
-						'type'    => 'boolean',
-						'default' => false,
-					],
-					Option::ALL_TEMPLATES_SUPPORTED => [
-						'type' => 'boolean',
-					],
-					self::SUPPRESSIBLE_PLUGINS      => [
-						'type'     => 'object',
-						'readonly' => true,
-					],
-					Option::SUPPRESSED_PLUGINS      => [
-						'type' => 'object',
-					],
-				],
+				'properties' => $properties,
 			];
 		}
 

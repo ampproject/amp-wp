@@ -49,6 +49,8 @@ final class PluginSuppression implements Service, Registerable {
 	 */
 	public function register() {
 		add_filter( 'amp_default_options', [ $this, 'filter_default_options' ] );
+		add_filter( 'amp_options_endpoint_properties_schema', [ $this, 'filter_options_endpoint_properties_schema' ] );
+		add_filter( 'amp_rest_options_request_items', [ $this, 'filter_rest_options_request_items' ], 10, 2 );
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
 		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
 
@@ -92,6 +94,38 @@ final class PluginSuppression implements Service, Registerable {
 	public function filter_default_options( $defaults ) {
 		$defaults[ Option::SUPPRESSED_PLUGINS ] = [];
 		return $defaults;
+	}
+
+	/**
+	 * Properties.
+	 *
+	 * @param array $properties Properties.
+	 * @return array Filtered properties.
+	 */
+	public function filter_options_endpoint_properties_schema( $properties ) {
+		return array_merge(
+			$properties,
+			[
+				Option::SUPPRESSIBLE_PLUGINS => [
+					'type'     => 'object',
+					'readonly' => true,
+				],
+				Option::SUPPRESSED_PLUGINS   => [
+					'type' => 'object',
+				],
+			]
+		);
+	}
+
+	/**
+	 * Filter the items returned by the options REST request to add our own values.
+	 *
+	 * @param array $options Options.
+	 * @return array Filtered options.
+	 */
+	public function filter_rest_options_request_items( $options ) {
+		$options[ Option::SUPPRESSIBLE_PLUGINS ] = $this->get_suppressible_plugins_with_details();
+		return $options;
 	}
 
 	/**

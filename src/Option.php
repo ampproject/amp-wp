@@ -108,6 +108,13 @@ interface Option {
 	const SUPPRESSED_PLUGINS = 'suppressed_plugins';
 
 	/**
+	 * Suppressible plugins
+	 *
+	 * @var string
+	 */
+	const SUPPRESSIBLE_PLUGINS = 'suppressible_plugins';
+
+	/**
 	 * Suppressed plugins, last version.
 	 *
 	 * @var string
