@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useContext } from '@wordpress/element';
 import { CheckboxControl } from '@wordpress/components';
 
@@ -197,6 +197,17 @@ export function SupportedTemplatesFieldset() {
 			<h4 className="title">
 				{ __( 'Templates', 'amp' ) }
 			</h4>
+
+			{ /* dangerouslySetInnerHTML reason: Link embedded in translation string. */ }
+			<p
+				dangerouslySetInnerHTML={ {
+					__html: sprintf(
+						/* translators: placeholder is link to WordPress handbook page about the template hierarchy. */
+						__( 'You may enable AMP for a subset of the WordPress <a href="%s" target="_blank" rel="noreferrer">Template Hierarchy</a>:', 'amp' ),
+						'https://developer.wordpress.org/themes/basics/template-hierarchy/',
+					),
+				} }
+			/>
 
 			<SupportedTemplatesCheckboxes supportableTemplates={ supportableTemplates } />
 		</fieldset>
