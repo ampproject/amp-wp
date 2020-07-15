@@ -34,9 +34,11 @@ export function ErrorScreen( { error, finishLink } ) {
 						dangerouslySetInnerHTML={ { __html: error.message || __( 'There was an error loading the setup wizard.', 'amp' ) } }
 					/>
 					{ ' ' }
-					<a href={ finishLink }>
-						{ __( 'Return to AMP settings.', 'amp' ) }
-					</a>
+					{ finishLink && (
+						<a href={ finishLink }>
+							{ __( 'Return to AMP settings.', 'amp' ) }
+						</a>
+					) }
 				</p>
 			</Panel>
 		</div>

@@ -26,6 +26,7 @@ import { OptionsContextProvider } from '../components/options-context-provider';
 import { ReaderThemesContextProvider } from '../components/reader-themes-context-provider';
 import { SiteSettingsProvider } from '../components/site-settings-provider';
 import { UnsavedChangesWarning } from '../components/unsaved-changes-warning';
+import { ErrorBoundary } from '../components/error-boundary';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
 import { MobileRedirection } from './mobile-redirection';
@@ -83,9 +84,11 @@ domReady( () => {
 
 	if ( root ) {
 		render( (
-			<Providers>
-				<Root optionsRestEndpoint={ OPTIONS_REST_ENDPOINT } />
-			</Providers>
+			<ErrorBoundary>
+				<Providers>
+					<Root optionsRestEndpoint={ OPTIONS_REST_ENDPOINT } />
+				</Providers>
+			</ErrorBoundary>
 		), root );
 	}
 } );

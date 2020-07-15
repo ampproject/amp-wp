@@ -15,8 +15,8 @@ import PropTypes from 'prop-types';
  */
 import { Navigation } from '../navigation-context-provider';
 import './style.css';
-import { User } from '../user-context-provider';
 import { Options } from '../../../components/options-context-provider';
+import { User } from '../user-context-provider';
 
 /**
  * Navigation component.
