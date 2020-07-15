@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useContext, useState, useEffect, useMemo } from '@wordpress/element';
+import { useContext } from '@wordpress/element';
 import { CheckboxControl } from '@wordpress/components';
 
 /**
@@ -17,35 +17,33 @@ import { SupportedTemplatesToggle } from '../components/supported-templates-togg
 import { Selectable } from '../components/selectable';
 import { Options } from '../components/options-context-provider';
 
-function PostTypeCheckbox( { postTypeObject, supportedPostTypes } ) {
-	const { updateOptions } = useContext( Options );
+/**
+ * A checkbox for a supportable post type.
+ *
+ * @param {Object} props Component props.
+ * @param {Object} props.postTypeObject A post type object.
+ */
+function PostTypeCheckbox( { postTypeObject } ) {
+	const { editedOptions, updateOptions } = useContext( Options );
 
-	// Initialize state with supports_amp if true.
-	const [ checked, setChecked ] = useState( postTypeObject.supports_amp || supportedPostTypes.includes( postTypeObject.name ) );
-
-	const newSupportedPostTypes = useMemo( () => {
-		const newValue = supportedPostTypes.filter( ( postType ) => postType !== postTypeObject.name );
-		if ( ! checked ) {
-			newValue.push( postTypeObject.name );
-		}
-
-		return newValue;
-	}, [ checked, postTypeObject.name, supportedPostTypes ] );
-
-	useEffect( () => {
-		if ( supportedPostTypes.length !== newSupportedPostTypes.length ) {
-			updateOptions( { supported_post_types: newSupportedPostTypes } );
-		}
-	}, [ newSupportedPostTypes, supportedPostTypes.length, updateOptions ] );
+	const {
+		supported_post_types: supportedPostTypes,
+	} = editedOptions || {};
 
 	return (
 		<li key={ `supportable-post-type-${ postTypeObject.name }` }>
 			<CheckboxControl
-				checked={ checked }
+				checked={ supportedPostTypes.includes( postTypeObject.name ) }
 				label={ postTypeObject.label }
 				onChange={
-					() => {
-						setChecked( ! checked );
+					( newChecked ) => {
+						const newSupportedPostTypes = supportedPostTypes.filter( ( postType ) => postType !== postTypeObject.name );
+
+						if ( newChecked ) {
+							newSupportedPostTypes.push( postTypeObject.name );
+						}
+
+						updateOptions( { supported_post_types: newSupportedPostTypes } );
 					}
 				}
 			/>
@@ -58,13 +56,18 @@ PostTypeCheckbox.propTypes = {
 		name: PropTypes.string,
 		supports_amp: PropTypes.bool,
 	} ).isRequired,
-	supportedPostTypes: PropTypes.array.isRequired,
 };
 
+/**
+ * Container for the supported post type checkbox fieldset.
+ */
 function SupportedPostTypesFieldset() {
 	const { editedOptions, fetchingOptions } = useContext( Options );
 
-	const { supportable_post_types: supportablePostTypes, supported_post_types: supportedPostTypes } = editedOptions || {};
+	const {
+		theme_support: themeSupport,
+		supportable_post_types: supportablePostTypes,
+	} = editedOptions || {};
 
 	if ( fetchingOptions || ! supportablePostTypes ) {
 		return null;
@@ -72,9 +75,11 @@ function SupportedPostTypesFieldset() {
 
 	return (
 		<fieldset id="supported_post_types_fieldset">
-			<h4 className="title">
-				{ __( 'Content Types', 'amp' ) }
-			</h4>
+			{ 'reader' !== themeSupport && (
+				<h4 className="title">
+					{ __( 'Content Types', 'amp' ) }
+				</h4>
+			) }
 			<p>
 				{ __( 'The following content types will be available as AMP:', 'amp' ) }
 			</p>
@@ -84,7 +89,6 @@ function SupportedPostTypesFieldset() {
 						<PostTypeCheckbox
 							key={ `supportable-post-type-${ postTypeObject.name }` }
 							postTypeObject={ postTypeObject }
-							supportedPostTypes={ supportedPostTypes }
 						/>
 					);
 				} ) }
@@ -94,6 +98,12 @@ function SupportedPostTypesFieldset() {
 	);
 }
 
+/**
+ * List of checkboxes corresponding to supportable templates.
+ *
+ * @param {Object} props Component props.
+ * @param {Array} props.supportableTemplates Array of supportableTemplate objects.
+ */
 export function SupportedTemplatesCheckboxes( { supportableTemplates } ) {
 	const { editedOptions, updateOptions } = useContext( Options );
 
@@ -114,7 +124,11 @@ export function SupportedTemplatesCheckboxes( { supportableTemplates } ) {
 						onChange={ ( checked ) => {
 							let newSupported = [ ...supportedTemplates ];
 
-							const templatesToSwitch = [ supportableTemplate.id, ...( supportableTemplate.children.map( ( { id } ) => id ) ) ];
+							// Toggle child checkboxes along with their parent.
+							const templatesToSwitch = [
+								supportableTemplate.id,
+								...( supportableTemplate.children.map( ( { id } ) => id ) ),
+							];
 
 							if ( checked ) {
 								templatesToSwitch.forEach( ( template ) => {
@@ -139,12 +153,15 @@ SupportedTemplatesCheckboxes.propTypes = {
 	supportableTemplates: PropTypes.array.isRequired,
 };
 
+/**
+ * Container for the supported templates fieldset.
+ */
 export function SupportedTemplatesFieldset() {
 	const { editedOptions, fetchingOptions } = useContext( Options );
 
-	const { supportable_templates: supportableTemplates } = editedOptions || {};
+	const { theme_support: themeSupport, supportable_templates: supportableTemplates } = editedOptions || {};
 
-	if ( fetchingOptions || ! supportableTemplates ) {
+	if ( 'reader' === themeSupport || fetchingOptions || ! supportableTemplates ) {
 		return null;
 	}
 
@@ -159,7 +176,18 @@ export function SupportedTemplatesFieldset() {
 	);
 }
 
+/**
+ * Component rendering the supported templates section of the settings page, including the "Serve all templates as AMP" toggle.
+ */
 export function SupportedTemplates() {
+	const { editedOptions, fetchingOptions } = useContext( Options );
+
+	const { all_templates_supported: allTemplatesSupported } = editedOptions || {};
+
+	if ( fetchingOptions ) {
+		return null;
+	}
+
 	return (
 		<section>
 			<h2>
@@ -167,8 +195,12 @@ export function SupportedTemplates() {
 			</h2>
 			<Selectable className="supported-templates">
 				<SupportedTemplatesToggle />
-				<SupportedPostTypesFieldset />
-				<SupportedTemplatesFieldset />
+				{ ! allTemplatesSupported && (
+					<div className="supported-templates__fields">
+						<SupportedPostTypesFieldset />
+						<SupportedTemplatesFieldset />
+					</div>
+				) }
 
 			</Selectable>
 		</section>

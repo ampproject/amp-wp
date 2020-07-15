@@ -220,3 +220,46 @@ li.error-kept {
 #supported_templates_fieldset ul ul {
 	margin-left: 40px;
 }
+
+.supported-templates__fields {
+	display: grid;
+
+	@media (min-width: 783px) {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@keyframes slideIn {
+
+	from {
+		transform: translate3d(300px, 0, 0);
+	}
+
+	to {
+		transform: translate3d(0, 0, 0);
+	}
+}
+
+@keyframes fadeOut {
+
+	from {
+		opacity: 1;
+	}
+
+	to {
+		opacity: 0;
+	}
+}
+
+.amp-save-success-notice {
+	position: fixed;
+	bottom: 3rem;
+	right: -1rem;
+	padding-right: 3rem;
+	width: 100%;
+	max-width: 200px;
+	animation: slideIn, fadeOut;
+	animation-delay: 0s, 8s;
+	animation-duration: 0.5s, 0.5s;
+	animation-fill-mode: both;
+}

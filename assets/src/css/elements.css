@@ -66,3 +66,7 @@
 	border-color: var(--brand);
 	box-shadow: 0 0 0 1px var(--brand);
 }
+
+.amp .components-checkbox-control__input[type="checkbox"]:checked {
+	background: var(--brand);
+}
