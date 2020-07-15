@@ -41,7 +41,6 @@ function SuppressedPluginTime( { suppressedPlugin } ) {
 				/* translators: placeholder is a formatted date. */
 				sprintf( __( 'Since %s.', 'amp' ), dateI18n( dateFormat, suppressedPlugin.timestamp * 1000 ) )
 			}
-			{ ' ' }
 		</time>
 	);
 }
@@ -61,8 +60,8 @@ function SuppressedPluginUsername( { suppressedPlugin } ) {
 	return (
 		<span>
 			{
-				/* translators: placeholder is a user name */
-				sprintf( __( 'Done by %s. ', 'amp' ), suppressedPlugin.user.name || suppressedPlugin.user.slug )
+				/* translators: placeholder is the name of the user who suppressed the plugin */
+				sprintf( __( 'Done by %s.', 'amp' ), suppressedPlugin.user.name || suppressedPlugin.user.slug )
 			}
 		</span>
 	);
@@ -104,7 +103,7 @@ function SuppressedPluginVersion( { pluginDetails, suppressedPlugin } ) {
 		);
 	}
 
-	return __( 'Plugin updated since last suppressed', 'amp' );
+	return __( 'Plugin updated since last suppressed.', 'amp' );
 }
 SuppressedPluginVersion.propTypes = {
 	pluginDetails: PropTypes.shape( {
@@ -259,7 +258,9 @@ function PluginRow( { pluginKey, pluginDetails } ) {
 					isOriginallySuppressed ? (
 						<p>
 							<SuppressedPluginTime suppressedPlugin={ originalSuppressedPlugins[ pluginKey ] } />
+							{ ' ' }
 							<SuppressedPluginUsername suppressedPlugin={ originalSuppressedPlugins[ pluginKey ] } />
+							{ ' ' }
 							<SuppressedPluginVersion
 								pluginDetails={ pluginDetails }
 								suppressedPlugin={ originalSuppressedPlugins[ pluginKey ] }
