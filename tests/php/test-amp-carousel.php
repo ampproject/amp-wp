@@ -8,7 +8,7 @@
 use AmpProject\AmpWP\Component\Carousel;
 use AmpProject\Dom\Document;
 use AmpProject\AmpWP\Dom\ElementList;
-use AmpProject\AmpWP\Tests\PrivateAccess;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 
 /**
  * Tests for Carousel class.

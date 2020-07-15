@@ -6,7 +6,7 @@
  */
 
 use AmpProject\Dom\Document;
-use AmpProject\AmpWP\Tests\StubSanitizer;
+use AmpProject\AmpWP\Tests\Helpers\StubSanitizer;
 
 /**
  * Test AMP_Base_Sanitizer_Test

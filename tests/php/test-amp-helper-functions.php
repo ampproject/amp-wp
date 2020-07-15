@@ -6,9 +6,9 @@
  */
 
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\QueryVars;
-use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
-use AmpProject\AmpWP\Tests\HandleValidation;
+use AmpProject\AmpWP\QueryVar;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
 
 /**
  * Class Test_AMP_Helper_Functions
@@ -851,13 +851,13 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertTrue( is_amp_available() );
 		$this->assertFalse( is_amp_endpoint() );
 
-		$this->go_to( add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_AVAILABLE, get_permalink( $post_id ) ) );
+		$this->go_to( add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_AVAILABLE, get_permalink( $post_id ) ) );
 		$this->assertFalse( is_amp_available() );
 		$this->assertFalse( is_amp_endpoint() );
 
 		// Now go AMP-first.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
-		$this->go_to( add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_AVAILABLE, get_permalink( $post_id ) ) );
+		$this->go_to( add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_AVAILABLE, get_permalink( $post_id ) ) );
 		$this->assertTrue( is_amp_available() );
 		$this->assertTrue( is_amp_endpoint() );
 	}
