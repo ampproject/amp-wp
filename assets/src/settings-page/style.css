@@ -50,6 +50,7 @@
 .settings-welcome h2 {
 	align-items: center;
 	display: flex;
+	font-size: 1rem;
 	margin-bottom: 0;
 	margin-top: 0;
 }
