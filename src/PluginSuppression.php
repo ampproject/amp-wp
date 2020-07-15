@@ -340,6 +340,52 @@ final class PluginSuppression implements Service, Registerable {
 	}
 
 	/**
+	 * Prepare suppressed plugins for response.
+	 *
+	 * Augment the suppressed plugins data with additional information.
+	 *
+	 * @param array $suppressed_plugins Suppressed plugins.
+	 * @return array Prepared suppressed plugins.
+	 */
+	public function prepare_suppressed_plugins_for_response( $suppressed_plugins ) {
+		return array_map(
+			function ( $suppressed_plugin ) {
+				if ( ! is_array( $suppressed_plugin ) ) {
+					return $suppressed_plugin;
+				}
+
+				if ( isset( $suppressed_plugin['username'] ) ) {
+					$username = $suppressed_plugin['username'];
+					unset( $suppressed_plugin['username'] );
+					$suppressed_plugin['user'] = $this->prepare_user_for_response( $username );
+				}
+
+				return $suppressed_plugin;
+			},
+			$suppressed_plugins
+		);
+	}
+
+	/**
+	 * Prepare user for response.
+	 *
+	 * @param string $username Username.
+	 * @return array User data.
+	 */
+	private function prepare_user_for_response( $username ) {
+		$response = [
+			'slug' => $username,
+		];
+
+		$user = get_user_by( 'slug', $username );
+		if ( $user ) {
+			$response['name'] = $user->display_name;
+		}
+
+		return $response;
+	}
+
+	/**
 	 * Suppress plugin hooks.
 	 *
 	 * @param string[] $suppressed_plugins Suppressed plugins.

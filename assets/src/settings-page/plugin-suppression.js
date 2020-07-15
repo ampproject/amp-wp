@@ -6,13 +6,11 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { useContext, useEffect, useState, useRef, Fragment } from '@wordpress/element';
+import { useContext, Fragment } from '@wordpress/element';
 import { __, sprintf, _n } from '@wordpress/i18n';
 import { autop } from '@wordpress/autop';
 import { format, dateI18n } from '@wordpress/date';
-import apiFetch from '@wordpress/api-fetch';
 import { SelectControl } from '@wordpress/components';
-import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -56,75 +54,15 @@ SuppressedPluginTime.propTypes = {
 /**
  * Renders the username of the WP user who suppressed a plugin.
  *
- * @todo Maybe pass this from the backend to avoid the extra apiFetch.
- * @todo The PHP version says "you" if the suppressing user is the current user.
- *
  * @param {Object} props Component props.
  * @param {Object} props.suppressedPlugin
  */
 function SuppressedPluginUsername( { suppressedPlugin } ) {
-	const [ fetchingSuppressingUser, setFetchingSuppressingUser ] = useState( true );
-	const [ suppressingUser, setSuppressingUser ] = useState( null );
-	const [ userFetchError, setUserFetchError ] = useState( null );
-
-	const mounted = useRef( true );
-	useEffect( () => () => {
-		mounted.current = false;
-	} );
-
-	/**
-	 * Fetch the user by username.
-	 */
-	useEffect( () => {
-		if ( suppressingUser || ! suppressedPlugin.username ) {
-			return;
-		}
-
-		( async () => {
-			try {
-				const fetchedSuppressingUser = await apiFetch( { path: addQueryArgs( '/wp/v2/users', { slug: suppressedPlugin.username } ) } );
-
-				if ( ! mounted.current || ! Array.isArray( fetchedSuppressingUser ) || ! fetchedSuppressingUser.length ) {
-					return;
-				}
-
-				setSuppressingUser( fetchedSuppressingUser[ 0 ] );
-			} catch ( e ) {
-				if ( ! mounted.current ) {
-					return;
-				}
-				setUserFetchError( e );
-			}
-
-			setFetchingSuppressingUser( false );
-		} )();
-	}, [ suppressedPlugin.username, suppressingUser ] );
-
-	if ( fetchingSuppressingUser ) {
-		return null;
-	}
-
-	if ( userFetchError || ! suppressingUser || ! ( 'name' in suppressingUser ) ) {
-		if ( ! ( 'username' in suppressedPlugin ) ) {
-			return null;
-		}
-
-		return (
-			<span>
-
-				{
-					// Translators: placeholder is a username
-					sprintf( __( 'Done by %s. ', 'amp' ), suppressedPlugin.username )
-				}
-			</span>
-		);
-	}
-
 	return (
 		<span>
 			{
-			// Translators: placeholder is a username
-				sprintf( __( 'Done by %s. ', 'amp' ), suppressingUser.name )
+				/* translators: placeholder is a user name */
+				sprintf( __( 'Done by %s. ', 'amp' ), suppressedPlugin.user.name || suppressedPlugin.user.slug )
 			}
 		</span>
 	);
@@ -132,7 +70,10 @@ function SuppressedPluginUsername( { suppressedPlugin } ) {
 SuppressedPluginUsername.propTypes = {
 	suppressedPlugin: PropTypes.shape( {
 		timestamp: PropTypes.number,
-		username: PropTypes.string,
+		user: PropTypes.shape( {
+			slug: PropTypes.string,
+			name: PropTypes.string,
+		} ),
 	} ),
 };
 

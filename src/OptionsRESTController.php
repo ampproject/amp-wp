@@ -148,6 +148,8 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 
 		$options[ self::SUPPRESSIBLE_PLUGINS ] = $this->plugin_suppression->get_suppressible_plugins_with_details();
 
+		$options[ Option::SUPPRESSED_PLUGINS ] = $this->plugin_suppression->prepare_suppressed_plugins_for_response( $options[ Option::SUPPRESSED_PLUGINS ] );
+
 		return rest_ensure_response( $options );
 	}
 
