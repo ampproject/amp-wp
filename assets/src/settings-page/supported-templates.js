@@ -66,6 +66,7 @@ function SupportedPostTypesFieldset() {
 
 	const {
 		theme_support: themeSupport,
+		reader_theme: readerTheme,
 		supportable_post_types: supportablePostTypes,
 	} = editedOptions || {};
 
@@ -73,9 +74,11 @@ function SupportedPostTypesFieldset() {
 		return null;
 	}
 
+	const isLegacy = 'reader' === themeSupport && 'legacy' === readerTheme;
+
 	return (
 		<fieldset id="supported_post_types_fieldset">
-			{ 'reader' !== themeSupport && (
+			{ ! isLegacy && (
 				<h4 className="title">
 					{ __( 'Content Types', 'amp' ) }
 				</h4>
@@ -94,7 +97,6 @@ function SupportedPostTypesFieldset() {
 				} ) }
 			</ul>
 		</fieldset>
-
 	);
 }
 

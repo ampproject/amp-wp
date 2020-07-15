@@ -61,7 +61,6 @@ export function SettingsFooter() {
 						{ __( 'Settings saved', 'amp' ) }
 					</p>
 				</AMPNotice>
-
 			) }
 		</section>
 	);
