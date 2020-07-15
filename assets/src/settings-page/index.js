@@ -70,8 +70,9 @@ function ErrorNotice( { errorMessage } ) {
 			<AMPNotice type={ NOTICE_TYPE_WARNING }>
 				<p>
 					<strong>
-						{ __( 'Error: ', 'amp' ) }
+						{ __( 'Error:', 'amp' ) }
 					</strong>
+					{ ' ' }
 					{ errorMessage }
 				</p>
 			</AMPNotice>

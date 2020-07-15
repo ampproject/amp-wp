@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
  */
 import { createContext, useState, useEffect, useContext } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+
 /**
  * Internal dependencies
  */
