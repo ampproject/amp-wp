@@ -25,6 +25,7 @@ import './style.css';
 import { OptionsContextProvider, Options } from '../components/options-context-provider';
 import { ReaderThemesContextProvider } from '../components/reader-themes-context-provider';
 import { SiteSettingsProvider } from '../components/site-settings-provider';
+import { Loading } from '../components/loading';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
 import { MobileRedirection } from './mobile-redirection';
@@ -67,7 +68,7 @@ function Root() {
 	const { fetchingOptions } = useContext( Options );
 
 	if ( false !== fetchingOptions ) {
-		return null;
+		return <Loading />;
 	}
 
 	return (

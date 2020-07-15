@@ -19,8 +19,10 @@
 	width: calc(100% - 10px); /* Offset box shadow. */
 }
 
-.amp-settings .amp-notice {
-	max-width: 550px;
+.amp-settings .amp-notice--large {
+	max-width: 450px;
+	padding-bottom: 0;
+	padding-top: 0;
 }
 
 /* Core form style overrides. */
@@ -150,7 +152,7 @@
 }
 
 .template-modes .template-mode-selection {
-	margin-bottom: 1rem;
+	margin-bottom: 0.5rem;
 }
 
 .amp.amp-settings .template-mode-selection > p {
@@ -158,6 +160,7 @@
 	margin-bottom: 1rem;
 }
 
+.template-modes > p,
 .amp .form-table .amp-suppressed-plugins p {
 	font-size: 13px;
 }
