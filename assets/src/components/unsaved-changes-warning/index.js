@@ -2,20 +2,20 @@
  * WordPress dependencies
  */
 import { useEffect, useContext } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import { __ } from '@wordpress/i18n';
-import { User } from '../user-context-provider';
-import { Options } from '../../../components/options-context-provider';
+import { User } from '../../onboarding-wizard/components/user-context-provider';
+import { Options } from '../options-context-provider';
 
 /**
  * If there are unsaved changes in the wizard, warns the user before exiting the page.
  *
  * @return {null} Renders nothing.
  */
-export function WizardUnsavedChangesWarning() {
+export function UnsavedChangesWarning() {
 	const { hasOptionsChanges, didSaveOptions } = useContext( Options );
 	const { hasDeveloperToolsOptionChange, didSaveDeveloperToolsOption } = useContext( User );
 
