@@ -43,11 +43,6 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 	const SUPPRESSIBLE_PLUGINS = 'suppressible_plugins';
 
 	/**
-	 * Key for the date format used in date-rendering functions.
-	 */
-	const DATE_FORMAT = 'date_format';
-
-	/**
 	 * Key for post type data.
 	 *
 	 * @var string
@@ -164,7 +159,6 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 		$options[ self::PREVIEW_PERMALINK ] = amp_admin_get_preview_permalink();
 
 		$options[ self::SUPPRESSIBLE_PLUGINS ]   = $this->plugin_suppression->get_suppressible_plugins_with_details();
-		$options[ self::DATE_FORMAT ]            = get_option( 'date_format' );
 		$options[ self::SUPPORTABLE_POST_TYPES ] = array_map(
 			function( $slug ) {
 				$post_type                 = (array) get_post_type_object( $slug );
@@ -274,10 +268,6 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 					],
 					Option::SUPPRESSED_PLUGINS      => [
 						'type' => 'object',
-					],
-					self::DATE_FORMAT               => [
-						'type'     => 'string',
-						'readonly' => true,
 					],
 					Option::SUPPORTED_TEMPLATES     => [
 						'type'  => 'array',

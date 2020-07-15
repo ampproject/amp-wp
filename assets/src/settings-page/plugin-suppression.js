@@ -20,6 +20,7 @@ import { addQueryArgs } from '@wordpress/url';
 import { Options } from '../components/options-context-provider';
 import { ConditionalDetails } from '../components/conditional-details';
 import { Selectable } from '../components/selectable';
+import { SiteSettings } from '../components/site-settings-provider';
 
 /**
  * Renders the formatted date for when a plugin was suppressed.
@@ -28,8 +29,9 @@ import { Selectable } from '../components/selectable';
  * @param {Object} props.suppressedPlugin
  */
 function SuppressedPluginTime( { suppressedPlugin } ) {
-	const { editedOptions } = useContext( Options );
-	const { date_format: dateFormat } = editedOptions;
+	const { settings } = useContext( SiteSettings );
+
+	const { date_format: dateFormat } = settings;
 
 	if ( ! suppressedPlugin || ! suppressedPlugin.timestamp || ! dateFormat ) {
 		return null;
