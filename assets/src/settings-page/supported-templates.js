@@ -133,7 +133,7 @@ export function SupportedTemplatesCheckboxes( { supportableTemplates } ) {
 				<li key={ supportableTemplate.id }>
 					<CheckboxControl
 						checked={ supportedTemplates.includes( supportableTemplate.id ) }
-						help={ supportableTemplates.description }
+						help={ supportableTemplate.description }
 						label={ supportableTemplate.label }
 						onChange={ ( checked ) => {
 							let newSupported = [ ...supportedTemplates ];
@@ -161,7 +161,12 @@ export function SupportedTemplatesCheckboxes( { supportableTemplates } ) {
 	);
 }
 SupportedTemplatesCheckboxes.propTypes = {
-	supportableTemplates: PropTypes.array.isRequired,
+	supportableTemplates: PropTypes.arrayOf( PropTypes.shape( {
+		id: PropTypes.string,
+		description: PropTypes.string,
+		label: PropTypes.string,
+		children: PropTypes.array,
+	} ) ),
 };
 
 /**
