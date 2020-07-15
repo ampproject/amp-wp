@@ -66,7 +66,7 @@ class OptionsMenuTest extends WP_UnitTestCase {
 	 * @covers OptionsMenu::add_menu_items()
 	 */
 	public function test_add_menu_items() {
-		global $_parent_pages, $submenu, $wp_settings_fields;
+		global $_parent_pages, $submenu;
 
 		wp_set_current_user(
 			self::factory()->user->create(
@@ -86,11 +86,6 @@ class OptionsMenuTest extends WP_UnitTestCase {
 		$this->assertCount( 3, $submenu['amp-options'] );
 		$this->assertEquals( 'edit-tags.php?taxonomy=amp_validation_error&amp;post_type=amp_validated_url', $submenu['amp-options'][0][2] );
 		$this->assertEquals( 'amp-options', $submenu['amp-options'][1][2] );
-
-		// Test add_setting_field().
-		$this->assertArrayHasKey( 'amp-options', $wp_settings_fields );
-		$this->assertArrayHasKey( 'general', $wp_settings_fields['amp-options'] );
-		$this->assertArrayNotHasKey( 'stories_settings', $wp_settings_fields['amp-options']['general'] );
 	}
 
 	/**
