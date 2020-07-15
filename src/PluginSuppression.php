@@ -284,8 +284,8 @@ final class PluginSuppression implements Service, Registerable {
 
 				$validation_error['title'] = AMP_Validation_Error_Taxonomy::get_error_title_from_code( $validation_error['data'] );
 
-				$validation_error['is_removed']  = ( (int) $term->term_group & AMP_Validation_Error_Taxonomy::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
-				$validation_error['is_reviewed'] = ( (int) $term->term_group & AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
+				$validation_error['is_removed']  = (bool) ( (int) $term->term_group & AMP_Validation_Error_Taxonomy::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
+				$validation_error['is_reviewed'] = (bool) ( (int) $term->term_group & AMP_Validation_Error_Taxonomy::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
 				$validation_error['tooltip']     = sprintf(
 					/* translators: %1 is whether validation error is 'removed' or 'kept', %2 is whether validation error is 'reviewed' or 'unreviewed' */
 					__( 'Invalid markup causing the validation error is %1$s and %2$s. See all validated URL(s) with this validation error.', 'amp' ),
