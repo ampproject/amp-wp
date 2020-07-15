@@ -66,17 +66,17 @@ export class ErrorBoundary extends Component {
 
 	render() {
 		const { error } = this.state;
-		const { fullScreen } = this.props;
+		const { children, exitLink, fullScreen } = this.props;
 
 		if ( error && fullScreen ) {
 			return (
-				<ErrorScreen error={ error } finishLink={ this.props.exitLink } />
+				<ErrorScreen error={ error } finishLink={ exitLink } />
 			);
 		}
 
 		return (
 			<ErrorContext.Provider value={ error }>
-				{ this.props.children }
+				{ children }
 			</ErrorContext.Provider>
 		);
 	}

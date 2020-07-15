@@ -83,7 +83,7 @@ domReady( () => {
 
 	if ( root ) {
 		render(
-			<ErrorBoundary exitLink={ FINISH_LINK }>
+			<ErrorBoundary exitLink={ FINISH_LINK } fullScreen={ true }>
 				<Providers>
 					<SetupWizard closeLink={ CLOSE_LINK } finishLink={ FINISH_LINK } />
 				</Providers>
