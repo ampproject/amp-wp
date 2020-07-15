@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Tests\MarkupComparison;
+use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 

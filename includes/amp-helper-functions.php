@@ -9,7 +9,7 @@ use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\AmpWpPluginFactory;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\QueryVars;
+use AmpProject\AmpWP\QueryVar;
 
 /**
  * Handle activation of plugin.
@@ -456,7 +456,7 @@ function is_amp_available() {
 	if (
 		( ! amp_is_canonical() || AMP_Validation_Manager::has_cap() )
 		&&
-		( isset( $_GET[ QueryVars::NOAMP ] ) && QueryVars::NOAMP_AVAILABLE === $_GET[ QueryVars::NOAMP ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		( isset( $_GET[ QueryVar::NOAMP ] ) && QueryVar::NOAMP_AVAILABLE === $_GET[ QueryVar::NOAMP ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	) {
 		return false;
 	}
@@ -564,7 +564,7 @@ function amp_get_slug() {
 	 *
 	 * @param string $query_var The AMP query variable.
 	 */
-	return apply_filters( 'amp_query_var', defined( 'AMP_QUERY_VAR' ) ? AMP_QUERY_VAR : QueryVars::AMP );
+	return apply_filters( 'amp_query_var', defined( 'AMP_QUERY_VAR' ) ? AMP_QUERY_VAR : QueryVar::AMP );
 }
 
 /**
@@ -737,7 +737,7 @@ function amp_add_amphtml_link() {
 	}
 
 	if ( $amp_url ) {
-		$amp_url = remove_query_arg( QueryVars::NOAMP, $amp_url );
+		$amp_url = remove_query_arg( QueryVar::NOAMP, $amp_url );
 		printf( '<link rel="amphtml" href="%s">', esc_url( $amp_url ) );
 	}
 }
@@ -1778,7 +1778,7 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 		$href = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
 	}
 
-	$href = remove_query_arg( QueryVars::NOAMP, $href );
+	$href = remove_query_arg( QueryVar::NOAMP, $href );
 
 	$icon = $is_amp_endpoint ? Icon::logo() : Icon::link();
 	$attr = [

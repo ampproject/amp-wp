@@ -377,7 +377,14 @@ final class SimpleInjector implements Injector {
 		// Check if we have mapped this argument for the specific class.
 		if ( \array_key_exists( $class, $this->argument_mappings )
 			&& \array_key_exists( $name, $this->argument_mappings[ $class ] ) ) {
-			return $this->argument_mappings[ $class ][ $name ];
+			$value = $this->argument_mappings[ $class ][ $name ];
+
+			// Closures are immediately resolved, to provide lazy resolution.
+			if ( is_callable( $value ) ) {
+				$value = $value( $class, $parameter, $arguments );
+			}
+
+			return $value;
 		}
 
 		// No argument found for the class, check if we have a global value.
