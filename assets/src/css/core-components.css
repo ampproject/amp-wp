@@ -40,9 +40,9 @@
 }
 
 .amp .components-button.is-primary:disabled {
-	color: var(--white);
-	background: #d3d9dd;
-	border-color: #d3d9dd;
+	color: rgba(255, 255, 255, .8);
+	background: var(--color-gray-medium);
+	border-color: var(--color-gray-medium);
 }
 
 .amp .components-button.is-primary:disabled.is-busy {
