@@ -239,7 +239,7 @@ function PluginRow( { pluginKey, pluginDetails } ) {
 	const { suppressed_plugins: originalSuppressedPlugins } = originalOptions;
 
 	const isOriginallySuppressed = pluginKey in originalSuppressedPlugins;
-	const isSuppressed = pluginKey in editedSuppressedPlugins;
+	const isSuppressed = pluginKey in editedSuppressedPlugins && editedSuppressedPlugins[ pluginKey ] !== false;
 
 	const PluginName = () => (
 		<strong>
@@ -262,7 +262,7 @@ function PluginRow( { pluginKey, pluginDetails } ) {
 
 						updateOptions( { suppressed_plugins: newSuppressedPlugins } );
 					} }
-					value={ isSuppressed ? true : false }
+					value={ isSuppressed }
 					label={ __( 'Plugin status:', 'amp' ) }
 					options={ [
 						{ value: false, label: __( 'Active', 'amp' ) },
