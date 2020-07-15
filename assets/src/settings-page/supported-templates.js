@@ -99,6 +99,20 @@ function SupportedPostTypesFieldset() {
 }
 
 /**
+ * Get a list of the template IDs for the supported template and its descendants.
+ *
+ * @param {object} supportableTemplate Supportable templates.
+ * @return {array} Descendant template IDs, including the ID of the passed template.
+ */
+function getInclusiveDescendantTemplatesIds( supportableTemplate ) {
+	const templateIds = [ supportableTemplate.id ];
+	for ( const childSupportableTemplate of supportableTemplate.children ) {
+		templateIds.push( ...getInclusiveDescendantTemplatesIds( childSupportableTemplate ) );
+	}
+	return templateIds;
+}
+
+/**
  * List of checkboxes corresponding to supportable templates.
  *
  * @param {Object} props Component props.
@@ -125,10 +139,7 @@ export function SupportedTemplatesCheckboxes( { supportableTemplates } ) {
 							let newSupported = [ ...supportedTemplates ];
 
 							// Toggle child checkboxes along with their parent.
-							const templatesToSwitch = [
-								supportableTemplate.id,
-								...( supportableTemplate.children.map( ( { id } ) => id ) ),
-							];
+							const templatesToSwitch = getInclusiveDescendantTemplatesIds( supportableTemplate );
 
 							if ( checked ) {
 								templatesToSwitch.forEach( ( template ) => {
