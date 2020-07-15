@@ -125,6 +125,7 @@ export function testTitle( { text, element = 'h1' } ) {
  */
 export async function cleanUpSettings() {
 	await visitAdminPage( 'admin.php', 'page=amp-options' );
+	await page.waitForSelector( '.settings-footer' );
 	await page.evaluate( async () => {
 		await Promise.all( [
 			wp.apiFetch( { path: '/wp/v2/users/me', method: 'POST', data: { amp_dev_tools_enabled: true } } ),

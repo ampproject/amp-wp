@@ -24,6 +24,7 @@ import '../css/core-components.css';
 import './style.css';
 import { OptionsContextProvider } from '../components/options-context-provider';
 import { ReaderThemesContextProvider } from '../components/reader-themes-context-provider';
+import { SiteSettingsProvider } from '../components/site-settings-provider';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
 import { MobileRedirection } from './mobile-redirection';
@@ -41,16 +42,18 @@ const { ajaxurl: wpAjaxUrl } = global;
  */
 function Providers( { children } ) {
 	return (
-		<OptionsContextProvider optionsRestEndpoint={ OPTIONS_REST_ENDPOINT }>
-			<ReaderThemesContextProvider
-				currentTheme={ CURRENT_THEME }
-				readerThemesEndpoint={ READER_THEMES_REST_ENDPOINT }
-				updatesNonce={ UPDATES_NONCE }
-				wpAjaxUrl={ wpAjaxUrl }
-			>
-				{ children }
-			</ReaderThemesContextProvider>
-		</OptionsContextProvider>
+		<SiteSettingsProvider>
+			<OptionsContextProvider optionsRestEndpoint={ OPTIONS_REST_ENDPOINT } populateDefaultValues={ true }>
+				<ReaderThemesContextProvider
+					currentTheme={ CURRENT_THEME }
+					readerThemesEndpoint={ READER_THEMES_REST_ENDPOINT }
+					updatesNonce={ UPDATES_NONCE }
+					wpAjaxUrl={ wpAjaxUrl }
+				>
+					{ children }
+				</ReaderThemesContextProvider>
+			</OptionsContextProvider>
+		</SiteSettingsProvider>
 	);
 }
 Providers.propTypes = {

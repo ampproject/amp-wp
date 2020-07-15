@@ -1,28 +1,38 @@
 <?php
 /**
- * Tests for AMP_Options_REST_Controller.
+ * Tests for OptionsRESTController.
  *
  * @package AMP
  */
 
+namespace AmpProject\AmpWP\Tests\Unit;
+
+use AMP_Options_Manager;
 use AmpProject\AmpWP\Admin\ReaderThemes;
+use AmpProject\AmpWP\OptionsRESTController;
+use AmpProject\AmpWP\PluginRegistry;
+use AmpProject\AmpWP\PluginSuppression;
 use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
+use WP_REST_Request;
+use WP_UnitTestCase;
+
+
 
 /**
- * Tests for AMP_Options_REST_Controller.
+ * Tests for OptionsRESTController.
  *
  * @group amp-options
  *
- * @covers AMP_Options_REST_Controller
+ * @covers OptionsRESTController
  */
-class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
+class OptionsRESTControllerTest extends WP_UnitTestCase {
 
 	use ThemesApiRequestMocking;
 
 	/**
 	 * Test instance.
 	 *
-	 * @var AMP_Options_REST_Controller
+	 * @var OptionsRESTController
 	 */
 	private $controller;
 
@@ -38,26 +48,13 @@ class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
 
 		$this->add_reader_themes_request_filter();
 
-		do_action( 'rest_api_init' );
-		$this->controller = new AMP_Options_REST_Controller( new ReaderThemes() );
+		$this->controller = new OptionsRESTController( new ReaderThemes(), new PluginSuppression( new PluginRegistry() ) );
 	}
 
 	/**
-	 * Tests AMP_Options_REST_Controller::register_routes.
+	 * Tests OptionsRESTController::get_items_permissions_check.
 	 *
-	 * @covers AMP_Options_REST_Controller::register_routes
-	 */
-	public function test_register_routes() {
-		$this->controller->register_routes();
-
-		$this->assertContains( 'amp/v1', rest_get_server()->get_namespaces() );
-		$this->assertContains( '/amp/v1/options', array_keys( rest_get_server()->get_routes( 'amp/v1' ) ) );
-	}
-
-	/**
-	 * Tests AMP_Options_REST_Controller::get_items_permissions_check.
-	 *
-	 * @covers AMP_Options_REST_Controller::get_items_permissions_check
+	 * @covers OptionsRESTController::get_items_permissions_check
 	 */
 	public function test_get_items_permissions_check() {
 		$this->assertWPError( $this->controller->get_items_permissions_check( new WP_REST_Request( 'GET', '/amp/v1/options' ) ) );
@@ -68,9 +65,9 @@ class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests AMP_Options_REST_Controller::get_items.
+	 * Tests OptionsRESTController::get_items.
 	 *
-	 * @covers AMP_Options_REST_Controller::get_items.
+	 * @covers OptionsRESTController::get_items.
 	 */
 	public function test_get_items() {
 		$this->assertEquals(
@@ -81,15 +78,17 @@ class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
 				'mobile_redirect',
 				'plugin_configured',
 				'all_templates_supported',
+				'suppressed_plugins',
 				'preview_permalink',
+				'suppressible_plugins',
 			]
 		);
 	}
 
 	/**
-	 * Tests AMP_Options_REST_Controller::update_items.
+	 * Tests OptionsRESTController::update_items.
 	 *
-	 * @covers AMP_Options_REST_Controller::update_items.
+	 * @covers OptionsRESTController::update_items.
 	 */
 	public function test_update_items() {
 		wp_set_current_user( 1 );
@@ -130,9 +129,9 @@ class Test_AMP_Options_REST_Controller extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests AMP_Options_REST_Controller::get_item_schema.
+	 * Tests OptionsRESTController::get_item_schema.
 	 *
-	 * @covers AMP_Options_REST_Controller::get_item_schema.
+	 * @covers OptionsRESTController::get_item_schema.
 	 */
 	public function test_get_item_schema() {
 		$schema = $this->controller->get_item_schema();
