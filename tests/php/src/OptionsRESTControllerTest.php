@@ -16,8 +16,6 @@ use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
 use WP_REST_Request;
 use WP_UnitTestCase;
 
-
-
 /**
  * Tests for OptionsRESTController.
  *
