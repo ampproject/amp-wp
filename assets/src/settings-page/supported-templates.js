@@ -218,13 +218,9 @@ export function SupportedTemplatesFieldset() {
  * Component rendering the supported templates section of the settings page, including the "Serve all templates as AMP" toggle.
  */
 export function SupportedTemplates() {
-	const { editedOptions, fetchingOptions } = useContext( Options );
+	const { editedOptions } = useContext( Options );
 
 	const { all_templates_supported: allTemplatesSupported, theme_support: themeSupport, reader_theme: readerTheme } = editedOptions || {};
-
-	if ( fetchingOptions ) {
-		return null;
-	}
 
 	const isLegacy = 'reader' === themeSupport && 'legacy' === readerTheme;
 

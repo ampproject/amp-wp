@@ -13,7 +13,7 @@ import {
  * WordPress dependencies
  */
 import domReady from '@wordpress/dom-ready';
-import { render, useContext, useState, useEffect, useRef } from '@wordpress/element';
+import { render, useContext } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -87,29 +87,6 @@ ErrorNotice.propTypes = {
  */
 function Root() {
 	const error = useContext( ErrorContext );
-	const [ delayedError, setDelayedError ] = useState( error && error.message ? error.message : null );
-	const errorRef = useRef( error );
-
-	useEffect( () => {
-		errorRef.current = error;
-	}, [ error ] );
-
-	useEffect( () => {
-		const interval = setInterval( () => {
-			if ( delayedError && ! errorRef.current ) {
-				setDelayedError( null );
-				return;
-			}
-
-			if ( errorRef.current && delayedError !== errorRef.current.message ) {
-				setDelayedError( errorRef.current.message );
-			}
-		}, 1500 );
-
-		return () => {
-			clearInterval( interval );
-		};
-	}, [ delayedError ] );
 
 	return (
 		<>
@@ -120,7 +97,7 @@ function Root() {
 			<PluginSuppression />
 			<SettingsFooter />
 			<UnsavedChangesWarning excludeUserContext={ true } />
-			{ delayedError && <ErrorNotice errorMessage={ delayedError } /> }
+			{ error && <ErrorNotice errorMessage={ error.message } /> }
 		</>
 	);
 }
