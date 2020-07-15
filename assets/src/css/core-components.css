@@ -45,6 +45,12 @@
 	border-color: #d3d9dd;
 }
 
+.amp .components-button.is-primary:disabled.is-busy {
+	background-size: 100% 100%;
+	background-image: linear-gradient(-45deg, var(--brand) 28%, rgba(36, 89, 231, .8) 28%, rgb(36, 89, 231, .8) 72%, var(--brand) 72%);
+	border-color: #d3d9dd;
+}
+
 .amp .components-button svg {
 	display: none;
 	margin-left: 0.5rem;

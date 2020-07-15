@@ -260,14 +260,15 @@ li.error-kept {
 }
 
 .amp .amp-save-success-notice.amp-notice {
-	position: fixed;
-	bottom: 3rem;
-	right: -1rem;
-	padding-right: 3rem;
-	width: 100%;
-	max-width: 300px;
 	animation: slideIn, fadeOut;
 	animation-delay: 0s, 8s;
 	animation-duration: 0.5s, 0.5s;
 	animation-fill-mode: both;
+	bottom: 3rem;
+	box-shadow: 0 30px 20px rgba(0, 0, 0, 0.1);
+	max-width: 250px;
+	padding-right: 3rem;
+	position: fixed;
+	right: -1rem;
+	width: 100%;
 }
