@@ -101,8 +101,8 @@ function SupportedPostTypesFieldset() {
 /**
  * Get a list of the template IDs for the supported template and its descendants.
  *
- * @param {object} supportableTemplate Supportable templates.
- * @return {array} Descendant template IDs, including the ID of the passed template.
+ * @param {Object} supportableTemplate Supportable templates.
+ * @return {Array} Descendant template IDs, including the ID of the passed template.
  */
 function getInclusiveDescendantTemplatesIds( supportableTemplate ) {
 	const templateIds = [ supportableTemplate.id ];
