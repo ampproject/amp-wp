@@ -38,7 +38,7 @@ function SuppressedPluginTime( { suppressedPlugin } ) {
 	return (
 		<time dateTime={ format( 'c', suppressedPlugin.timestamp ) }>
 			{
-				// Translators: placeholder is a formatted date.
+				/* translators: placeholder is a formatted date. */
 				sprintf( __( 'Since %s.', 'amp' ), dateI18n( dateFormat, suppressedPlugin.timestamp * 1000 ) )
 			}
 			{ ' ' }
@@ -94,7 +94,7 @@ function SuppressedPluginVersion( { pluginDetails, suppressedPlugin } ) {
 			<span>
 				{
 					sprintf(
-						// Translators: both placeholders are plugin version numbers.
+						/* translators: both placeholders are plugin version numbers. */
 						__( 'Now updated to version %1$s since suppressed at %2$s.', 'amp' ),
 						pluginDetails.Version,
 						suppressedPlugin.last_version,
@@ -192,7 +192,7 @@ function PluginRow( { pluginKey, pluginDetails } ) {
 		</strong>
 	);
 
-	// Translators: placeholder is an author name.
+	/* translators: placeholder is an author name. */
 	const author = sprintf( __( 'By %s. ' ), pluginDetails.Author );
 
 	return (
