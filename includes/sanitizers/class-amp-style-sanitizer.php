@@ -946,7 +946,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		 * @param bool     $verbose_only      Optional. Whether to only show the
 		 *                                    event in verbose mode.
 		 */
-		do_action( 'amp_server_timing_log', 'amp_parse_css', 'AMP Parse CSS', [ 'dur' => $parse_css_duration * 1000 ], true );
+		do_action( 'amp_server_timing_log', 'amp_parse_css', '', [ 'dur' => $parse_css_duration * 1000 ], true );
 
 		/**
 		 * Logs the server-timing measurement for the CSS tree-shaking.
@@ -961,7 +961,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		 * @param bool     $verbose_only      Optional. Whether to only show the
 		 *                                    event in verbose mode.
 		 */
-		do_action( 'amp_server_timing_log', 'amp_shake_css', 'AMP Tree-Shake CSS', [ 'dur' => $shake_css_duration * 1000 ], true );
+		do_action( 'amp_server_timing_log', 'amp_shake_css', '', [ 'dur' => $shake_css_duration * 1000 ], true );
 	}
 
 	/**

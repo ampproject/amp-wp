@@ -138,8 +138,8 @@ class AMP_Content_Sanitizer {
 			 */
 			do_action(
 				'amp_server_timing_start',
-				'amp_sanitize_' . $index,
-				str_replace( '_', ' ', $sanitizer_class ),
+				strtolower( $sanitizer_class ),
+				'',
 				[],
 				! in_array( $sanitizer_class, $sanitizers_to_surface, true )
 			);
@@ -161,7 +161,10 @@ class AMP_Content_Sanitizer {
 			 *
 			 * @param string $event_name Name of the event to stop.
 			 */
-			do_action( 'amp_server_timing_stop', 'amp_sanitize_' . $index );
+			do_action(
+				'amp_server_timing_stop',
+				strtolower( $sanitizer_class )
+			);
 			++$index;
 		}
 

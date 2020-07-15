@@ -150,7 +150,7 @@ class AMP_Theme_Support {
 		 *                                       event in verbose mode. Defaults to
 		 *                                       false.
 		 */
-		do_action( 'amp_server_timing_start', 'init', 'AMP Output Buffer' );
+		do_action( 'amp_server_timing_start', 'amp_output_buffer' );
 
 		// Ensure extra theme support for core themes is in place.
 		AMP_Core_Theme_Sanitizer::extend_theme_support();
@@ -1910,7 +1910,7 @@ class AMP_Theme_Support {
 		 *
 		 * @param string $event_name Name of the event to stop.
 		 */
-		do_action( 'amp_server_timing_stop', 'init' );
+		do_action( 'amp_server_timing_stop', 'amp_output_buffer' );
 
 		/**
 		 * Starts the server-timing measurement for the dom parsing subsystem.
@@ -1927,7 +1927,7 @@ class AMP_Theme_Support {
 		 *                                       event in verbose mode. Defaults to
 		 *                                       false.
 		 */
-		do_action( 'amp_server_timing_start', 'amp_dom_parse', 'AMP DOM Parse', [], true );
+		do_action( 'amp_server_timing_start', 'amp_dom_parse', '', [], true );
 
 		$dom = Document::fromHtml( $response );
 
@@ -1960,7 +1960,7 @@ class AMP_Theme_Support {
 		 *                                       event in verbose mode. Defaults to
 		 *                                       false.
 		 */
-		do_action( 'amp_server_timing_start', 'amp_sanitizer', 'AMP Sanitizer' );
+		do_action( 'amp_server_timing_start', 'amp_sanitizer' );
 
 		// Make sure scripts from the body get moved to the head.
 		foreach ( $dom->xpath->query( '//body//script[ @custom-element or @custom-template or @src = "https://cdn.ampproject.org/v0.js" ]' ) as $script ) {
@@ -2017,7 +2017,7 @@ class AMP_Theme_Support {
 		 *                                       event in verbose mode. Defaults to
 		 *                                       false.
 		 */
-		do_action( 'amp_server_timing_start', 'amp_dom_serialize', 'AMP DOM Serialize', [], true );
+		do_action( 'amp_server_timing_start', 'amp_dom_serialize', '', [], true );
 
 		// Gather all component scripts that are used in the document and then render any not already printed.
 		$amp_scripts = $sanitization_results['scripts'];
@@ -2067,7 +2067,7 @@ class AMP_Theme_Support {
 			 *                                       event in verbose mode. Defaults to
 			 *                                       false.
 			 */
-			do_action( 'amp_server_timing_start', 'amp_optimizer', 'AMP Optimizer' );
+			do_action( 'amp_server_timing_start', 'amp_optimizer' );
 
 			$errors = new Optimizer\ErrorCollection();
 			self::get_optimizer( $args )->optimizeDom( $dom, $errors );
