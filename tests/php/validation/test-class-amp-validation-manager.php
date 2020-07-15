@@ -9,13 +9,13 @@
 
 use AmpProject\AmpWP\Admin\DevToolsUserAccess;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\QueryVars;
+use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Services;
-use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
-use AmpProject\AmpWP\Tests\HandleValidation;
-use AmpProject\AmpWP\Tests\PrivateAccess;
-use AmpProject\AmpWP\Tests\AssertRestApiField;
-use AmpProject\AmpWP\Tests\WithoutBlockPreRendering;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use AmpProject\AmpWP\Tests\Helpers\AssertRestApiField;
+use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
 use AmpProject\Dom\Document;
 
 /**
@@ -323,7 +323,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertStringContains( 'action=amp_validate', $node->href );
 		$view_item = $admin_bar->get_node( 'amp-view' );
 		$this->assertInternalType( 'object', $view_item );
-		$this->assertEqualSets( [ QueryVars::NOAMP ], array_keys( $this->get_url_query_vars( $view_item->href ) ) );
+		$this->assertEqualSets( [ QueryVar::NOAMP ], array_keys( $this->get_url_query_vars( $view_item->href ) ) );
 		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-validity' ) );
 
 		// Admin bar item available in paired mode.
@@ -352,11 +352,11 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$root_node = $admin_bar->get_node( 'amp' );
 		$this->assertInternalType( 'object', $root_node );
-		$this->assertEqualSets( [ QueryVars::AMP ], array_keys( $this->get_url_query_vars( $root_node->href ) ) );
+		$this->assertEqualSets( [ QueryVar::AMP ], array_keys( $this->get_url_query_vars( $root_node->href ) ) );
 
 		$view_item = $admin_bar->get_node( 'amp-view' );
 		$this->assertInternalType( 'object', $view_item );
-		$this->assertEqualSets( [ QueryVars::AMP ], array_keys( $this->get_url_query_vars( $view_item->href ) ) );
+		$this->assertEqualSets( [ QueryVar::AMP ], array_keys( $this->get_url_query_vars( $view_item->href ) ) );
 		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-validity' ) );
 
 		// Lastly, confirm that the settings item is added if the user is an admin.

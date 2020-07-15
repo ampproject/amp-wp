@@ -14,7 +14,7 @@ use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\QueryVars;
+use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Services;
 
 /**
@@ -207,7 +207,7 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 		$setup_wizard_data = [
 			'AMP_OPTIONS_KEY'                    => AMP_Options_Manager::OPTION_NAME,
 			'AMP_QUERY_VAR'                      => amp_get_slug(),
-			'DEFAULT_AMP_QUERY_VAR'              => QueryVars::AMP,
+			'DEFAULT_AMP_QUERY_VAR'              => QueryVar::AMP,
 			'AMP_QUERY_VAR_CUSTOMIZED_LATE'      => $amp_slug_customization_watcher->did_customize_late(),
 			'LEGACY_THEME_SLUG'                  => ReaderThemes::DEFAULT_READER_THEME,
 			'APP_ROOT_ID'                        => self::APP_ROOT_ID,

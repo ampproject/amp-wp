@@ -67,7 +67,7 @@ final class AmpSlugCustomizationWatcher implements Service, Registerable {
 	 * determined, so for Reader themes to apply the logic in `ReaderThemeLoader` must run beforehand.
 	 */
 	public function determine_early_customization() {
-		if ( QueryVars::AMP !== amp_get_slug() ) {
+		if ( QueryVar::AMP !== amp_get_slug() ) {
 			$this->is_customized_early = true;
 		} else {
 			add_action( 'after_setup_theme', [ $this, 'determine_late_customization' ], 4 );
@@ -89,7 +89,7 @@ final class AmpSlugCustomizationWatcher implements Service, Registerable {
 	 * @see amp_after_setup_theme()
 	 */
 	public function determine_late_customization() {
-		if ( QueryVars::AMP !== amp_get_slug() ) {
+		if ( QueryVar::AMP !== amp_get_slug() ) {
 			$this->is_customized_late = true;
 		}
 	}

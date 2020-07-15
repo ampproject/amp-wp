@@ -5,8 +5,8 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Tests\MarkupComparison;
-use AmpProject\AmpWP\Tests\WithoutBlockPreRendering;
+use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
+use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
 
 /**
  * Test AMP_Facebook_Embed_Handler_Test
