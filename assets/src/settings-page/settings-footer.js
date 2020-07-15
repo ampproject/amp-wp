@@ -18,7 +18,7 @@ import { ErrorContext } from '../components/error-boundary';
  */
 export function SettingsFooter() {
 	const error = useContext( ErrorContext );
-	const { didSaveOptions, editedOptions, saveOptions, savingOptions } = useContext( Options );
+	const { didSaveOptions, editedOptions, hasOptionsChanges, saveOptions, savingOptions } = useContext( Options );
 	const { downloadingTheme } = useContext( ReaderThemes );
 	const [ saved, setSaved ] = useState( false );
 
@@ -44,6 +44,7 @@ export function SettingsFooter() {
 	}, [ didSaveOptions, downloadingTheme ] );
 
 	const disabled = ! themeSupport ||
+		! hasOptionsChanges ||
 		error ||
 		savingOptions ||
 		didSaveOptions ||
