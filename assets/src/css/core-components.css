@@ -48,13 +48,13 @@
 .amp .components-button.is-primary:disabled {
 	color: var(--white);
 	background: #d3d9dd;
-	border-color: #d3d9dd;
+	border-color: var(--color-gray-medium);
 }
 
 .amp .components-button.is-primary:disabled.is-busy {
 	background-size: 100% 100%;
 	background-image: linear-gradient(-45deg, var(--brand) 28%, rgba(36, 89, 231, .8) 28%, rgb(36, 89, 231, .8) 72%, var(--brand) 72%);
-	border-color: #d3d9dd;
+	border-color: var(--color-gray-medium);
 }
 
 .amp .components-button svg {
@@ -66,6 +66,60 @@
 	@media screen and (min-width: 783px) {
 		display: block;
 	}
+}
+
+.amp .components-toggle-control .components-base-control__field .components-toggle-control__label {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+
+.amp .components-toggle-control .components-base-control__field {
+	align-items: baseline;
+	margin-bottom: 0;
+}
+
+.amp .components-form-toggle .components-form-toggle__track {
+	border: 2px solid var(--color-gray-medium);
+}
+
+.amp .components-form-toggle .components-form-toggle__thumb {
+	background-color: var(--color-gray-medium);
+	border-width: 0;
+	top: 4px;
+	left: 4px;
+	width: 10px;
+	height: 10px;
+}
+
+.amp .components-form-toggle.is-checked .components-form-toggle__thumb {
+	background-color: var(--white);
+}
+
+.amp .components-form-toggle.is-checked .components-form-toggle__track {
+	background-color: var(--brand);
+	border-width: 0;
+}
+
+.amp .components-form-toggle__input:focus + .components-form-toggle__track {
+	box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--brand);
+}
+
+.amp .components-checkbox-control__input[type="checkbox"]:checked {
+	background: var(--brand);
+	border-color: var(--brand);
+}
+
+.amp .components-checkbox-control__input[type="checkbox"] {
+	border: 2px solid var(--color-gray-medium);
+	height: 18px;
+	width: 18px;
+}
+
+.amp svg.components-checkbox-control__checked {
+	width: 18px;
+	height: 22px;
+	left: 0;
 }
 
 /* For WP 5.0. Some of these styles are redundant in later WP versions. */
