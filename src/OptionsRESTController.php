@@ -178,15 +178,15 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 	/**
 	 * Provides a hierarchical array of supportable templates.
 	 *
-	 * @param array       $options Template options.
-	 * @param string|null $parent The parent to provide templates for.
-	 * @return array
+	 * @param array[]     $supportable_templates Template options.
+	 * @param string|null $parent_template_id    The parent to provide templates for.
+	 * @return array[] Supportable templates with nesting.
 	 */
-	private function get_nested_supportable_templates( $options, $parent = null ) {
-		$result = [];
+	private function get_nested_supportable_templates( $supportable_templates, $parent_template_id = null ) {
+		$nested_supportable_templates = [];
 
-		foreach ( $options as $id => $option ) {
-			if ( $parent ? empty( $option['parent'] ) || $parent !== $option['parent'] : ! empty( $option['parent'] ) ) {
+		foreach ( $supportable_templates as $id => $option ) {
+			if ( $parent_template_id ? empty( $option['parent'] ) || $parent_template_id !== $option['parent'] : ! empty( $option['parent'] ) ) {
 				continue;
 			}
 
@@ -196,12 +196,19 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 			}
 
 			$option['id']       = $id;
-			$option['children'] = $this->get_nested_supportable_templates( $options, $id );
+			$option['children'] = $this->get_nested_supportable_templates( $supportable_templates, $id );
 
-			$result[] = $option;
+			// Omit obsolete properties.
+			unset(
+				$option['supported'],
+				$option['user_supported'],
+				$option['immutable']
+			);
+
+			$nested_supportable_templates[] = $option;
 		}
 
-		return $result;
+		return $nested_supportable_templates;
 	}
 
 	/**
@@ -284,10 +291,12 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 						],
 					],
 					self::SUPPORTABLE_POST_TYPES    => [
-						'type' => 'array',
+						'type'     => 'array',
+						'readonly' => true,
 					],
 					self::SUPPORTABLE_TEMPLATES     => [
-						'type' => 'array',
+						'type'     => 'array',
+						'readonly' => true,
 					],
 				],
 			];
