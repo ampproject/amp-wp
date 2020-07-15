@@ -71,7 +71,7 @@ export function TemplateModes() {
 	const { theme_support: themeSupport } = editedOptions;
 
 	return (
-		<section className="template-mode-selection">
+		<section className="template-modes">
 			<h2>
 				{ __( 'Template mode', 'amp' ) }
 			</h2>
