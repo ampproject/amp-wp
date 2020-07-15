@@ -159,9 +159,9 @@ SupportedTemplatesCheckboxes.propTypes = {
 export function SupportedTemplatesFieldset() {
 	const { editedOptions, fetchingOptions } = useContext( Options );
 
-	const { theme_support: themeSupport, supportable_templates: supportableTemplates } = editedOptions || {};
+	const { theme_support: themeSupport, supportable_templates: supportableTemplates, reader_theme: readerTheme } = editedOptions || {};
 
-	if ( 'reader' === themeSupport || fetchingOptions || ! supportableTemplates ) {
+	if ( ( 'reader' === themeSupport && 'legacy' === readerTheme ) || fetchingOptions || ! supportableTemplates ) {
 		return null;
 	}
 
@@ -182,11 +182,13 @@ export function SupportedTemplatesFieldset() {
 export function SupportedTemplates() {
 	const { editedOptions, fetchingOptions } = useContext( Options );
 
-	const { all_templates_supported: allTemplatesSupported } = editedOptions || {};
+	const { all_templates_supported: allTemplatesSupported, theme_support: themeSupport, reader_theme: readerTheme } = editedOptions || {};
 
 	if ( fetchingOptions ) {
 		return null;
 	}
+
+	const isLegacy = 'reader' === themeSupport && 'legacy' === readerTheme;
 
 	return (
 		<section>
@@ -195,7 +197,7 @@ export function SupportedTemplates() {
 			</h2>
 			<Selectable className="supported-templates">
 				<SupportedTemplatesToggle />
-				{ ! allTemplatesSupported && (
+				{ ( ! allTemplatesSupported || isLegacy ) && (
 					<div className="supported-templates__fields">
 						<SupportedPostTypesFieldset />
 						<SupportedTemplatesFieldset />
