@@ -1,3 +1,8 @@
+#amp-settings {
+	max-width: 1060px;
+	margin: 0 auto;
+}
+
 #amp-settings > h1 {
 	font-family: var(--font-poppins);
 	font-size: 1.682rem;
