@@ -264,12 +264,12 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 					Option::ALL_TEMPLATES_SUPPORTED => [
 						'type' => 'boolean',
 					],
+					Option::SUPPRESSED_PLUGINS      => [
+						'type' => 'object',
+					],
 					self::SUPPRESSIBLE_PLUGINS      => [
 						'type'     => 'object',
 						'readonly' => true,
-					],
-					Option::SUPPRESSED_PLUGINS      => [
-						'type' => 'object',
 					],
 					Option::SUPPORTED_TEMPLATES     => [
 						'type'  => 'array',
