@@ -138,6 +138,15 @@ export function SupportedTemplatesCheckboxes( { supportableTemplates } ) {
 						help={ supportableTemplate.description }
 						label={ supportableTemplate.label }
 						onChange={ ( checked ) => {
+							if (
+								! checked &&
+								'is_singular' === supportableTemplate.id &&
+								// eslint-disable-next-line no-alert
+								! window.confirm( __( 'Are you sure you want to disable the singular template? This template is needed to serve individual posts and pages as AMP.' ) )
+							) {
+								return;
+							}
+
 							let newSupported = [ ...supportedTemplates ];
 
 							// Toggle child checkboxes along with their parent.
