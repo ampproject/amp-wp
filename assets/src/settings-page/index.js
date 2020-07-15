@@ -27,8 +27,8 @@ import { OptionsContextProvider } from '../components/options-context-provider';
 import { ReaderThemesContextProvider } from '../components/reader-themes-context-provider';
 import { SiteSettingsProvider } from '../components/site-settings-provider';
 import { UnsavedChangesWarning } from '../components/unsaved-changes-warning';
-import { ErrorBoundary, ErrorContext } from '../components/error-boundary';
 import { AMPNotice, NOTICE_TYPE_WARNING } from '../components/amp-notice';
+import { ErrorContextProvider, ErrorContext } from '../components/error-context-provider';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
 import { MobileRedirection } from './mobile-redirection';
@@ -86,8 +86,7 @@ ErrorNotice.propTypes = {
  * Settings page application root.
  */
 function Root() {
-	const error = useContext( ErrorContext );
-
+	const { error } = useContext( ErrorContext );
 	return (
 		<>
 			<TemplateModes />
@@ -107,11 +106,11 @@ domReady( () => {
 
 	if ( root ) {
 		render( (
-			<ErrorBoundary>
+			<ErrorContextProvider>
 				<Providers>
 					<Root optionsRestEndpoint={ OPTIONS_REST_ENDPOINT } />
 				</Providers>
-			</ErrorBoundary>
+			</ErrorContextProvider>
 		), root );
 	}
 } );

@@ -13,7 +13,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import { useAsyncError } from '../../utils/use-async-error';
-import { ErrorContext } from '../error-boundary';
+import { ErrorContext } from '../error-context-provider';
 
 export const Options = createContext();
 
@@ -33,16 +33,17 @@ function waitASecond() {
  * @param {?any} props.children Component children.
  * @param {string} props.optionsRestEndpoint REST endpoint to retrieve options.
  * @param {boolean} props.populateDefaultValues Whether default values should be populated.
+ * @param {boolean} props.hasErrorBoundary Whether the component is wrapped in an error boundary.
  */
-export function OptionsContextProvider( { children, optionsRestEndpoint, populateDefaultValues } ) {
+export function OptionsContextProvider( { children, optionsRestEndpoint, populateDefaultValues, hasErrorBoundary = false } ) {
 	const [ updates, setUpdates ] = useState( {} );
 	const [ fetchingOptions, setFetchingOptions ] = useState( false );
 	const [ savingOptions, setSavingOptions ] = useState( false );
 	const [ didSaveOptions, setDidSaveOptions ] = useState( false );
 	const [ originalOptions, setOriginalOptions ] = useState( {} );
 
-	const error = useContext( ErrorContext );
-	const { setError } = useAsyncError();
+	const { error, setError } = useContext( ErrorContext );
+	const { setAsyncError } = useAsyncError();
 
 	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
 	const hasUnmounted = useRef( false );
@@ -79,13 +80,21 @@ export function OptionsContextProvider( { children, optionsRestEndpoint, populat
 
 				setOriginalOptions( fetchedOptions );
 			} catch ( e ) {
+				if ( true === hasUnmounted.current ) {
+					return;
+				}
+
 				setError( e );
+
+				if ( hasErrorBoundary ) {
+					setAsyncError( e );
+				}
 				return;
 			}
 
 			setFetchingOptions( false );
 		} )();
-	}, [ error, fetchingOptions, originalOptions, optionsRestEndpoint, populateDefaultValues, setError ] );
+	}, [ error, fetchingOptions, hasErrorBoundary, originalOptions, optionsRestEndpoint, populateDefaultValues, setAsyncError, setError ] );
 
 	/**
 	 * Sends options to the REST endpoint to be saved.
@@ -93,10 +102,6 @@ export function OptionsContextProvider( { children, optionsRestEndpoint, populat
 	 * @param {Object} data Plugin options to update.
 	 */
 	const saveOptions = useCallback( async () => {
-		if ( error ) {
-			return;
-		}
-
 		setSavingOptions( true );
 
 		try {
@@ -138,14 +143,24 @@ export function OptionsContextProvider( { children, optionsRestEndpoint, populat
 			}
 
 			setOriginalOptions( savedOptions );
+			setError( null );
 		} catch ( e ) {
+			if ( true === hasUnmounted.current ) {
+				return;
+			}
+
+			setSavingOptions( false );
 			setError( e );
+
+			if ( hasErrorBoundary ) {
+				setAsyncError( e );
+			}
 			return;
 		}
 
 		setDidSaveOptions( true );
 		setSavingOptions( false );
-	}, [ error, optionsRestEndpoint, setError, originalOptions, updates ] );
+	}, [ hasErrorBoundary, optionsRestEndpoint, setAsyncError, originalOptions, setError, updates ] );
 
 	/**
 	 * Updates options in state.
@@ -188,6 +203,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint, populat
 
 OptionsContextProvider.propTypes = {
 	children: PropTypes.any,
+	hasErrorBoundary: PropTypes.bool,
 	optionsRestEndpoint: PropTypes.string.isRequired,
 	populateDefaultValues: PropTypes.bool.isRequired,
 };

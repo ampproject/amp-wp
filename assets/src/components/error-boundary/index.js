@@ -6,14 +6,12 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { Component, createContext } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { ErrorScreen } from '../error-screen';
-
-export const ErrorContext = createContext();
 
 /**
  * Catches errors in the application and displays a fallback screen.
@@ -32,8 +30,6 @@ export class ErrorBoundary extends Component {
 
 		this.timeout = null;
 		this.state = { error: null };
-
-		this.clearError = this.clearError.bind( this );
 	}
 
 	componentDidMount() {
@@ -44,24 +40,8 @@ export class ErrorBoundary extends Component {
 		this.mounted = false;
 	}
 
-	componentDidUpdate() {
-		if ( this.state.error ) {
-			global.setTimeout( this.clearError, 20000 );
-		}
-	}
-
 	componentDidCatch( error ) {
 		this.setState( { error } );
-	}
-
-	shouldComponentUpdate( nextProps, nextState ) {
-		return this.state.error !== nextState.error;
-	}
-
-	clearError() {
-		if ( ! this.props.fullScreen && this.mounted ) {
-			this.setState( { error: null } );
-		}
 	}
 
 	render() {
@@ -74,10 +54,7 @@ export class ErrorBoundary extends Component {
 			);
 		}
 
-		return (
-			<ErrorContext.Provider value={ error }>
-				{ children }
-			</ErrorContext.Provider>
-		);
+		return children;
 	}
 }
+

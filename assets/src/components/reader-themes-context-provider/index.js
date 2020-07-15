@@ -15,7 +15,7 @@ import PropTypes from 'prop-types';
  */
 import { useAsyncError } from '../../utils/use-async-error';
 import { Options } from '../options-context-provider';
-import { ErrorContext } from '../error-boundary';
+import { ErrorContext } from '../error-context-provider';
 
 export const ReaderThemes = createContext();
 
@@ -28,10 +28,11 @@ export const ReaderThemes = createContext();
  * @param {?any} props.children Component children.
  * @param {string} props.readerThemesEndpoint REST endpoint to fetch reader themes.
  * @param {string} props.updatesNonce Nonce for the AJAX request to install a theme.
+ * @param {boolean} props.hasErrorBoundary Whether the component is wrapped in an error boundary.
  */
-export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme, readerThemesEndpoint, updatesNonce } ) {
-	const { setError } = useAsyncError();
-	const error = useContext( ErrorContext );
+export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme, readerThemesEndpoint, updatesNonce, hasErrorBoundary = false } ) {
+	const { setAsyncError } = useAsyncError();
+	const { error, setError } = useContext( ErrorContext );
 
 	const [ themes, setThemes ] = useState( null );
 	const [ fetchingThemes, setFetchingThemes ] = useState( false );
@@ -81,7 +82,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 		 * Downloads a theme from WordPress.org using the traditional AJAX action.
 		 */
 		( async () => {
-			if ( error || downloadingTheme || downloadingThemeError ) {
+			if ( downloadingTheme || downloadingThemeError ) {
 				return;
 			}
 
@@ -119,7 +120,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 
 			setDownloadingTheme( false );
 		} )();
-	}, [ error, wpAjaxUrl, downloadingTheme, downloadingThemeError, savingOptions, selectedTheme, themeSupport, updatesNonce ] );
+	}, [ wpAjaxUrl, downloadingTheme, downloadingThemeError, savingOptions, selectedTheme, themeSupport, updatesNonce ] );
 
 	/**
 	 * Fetches theme data when needed.
@@ -150,12 +151,16 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 				setThemes( fetchedThemes );
 			} catch ( e ) {
 				setError( e );
+
+				if ( hasErrorBoundary ) {
+					setAsyncError( e );
+				}
 				return;
 			}
 
 			setFetchingThemes( false );
 		} )();
-	}, [ error, fetchingThemes, readerThemesEndpoint, setError, themes, themeSupport ] );
+	}, [ error, hasErrorBoundary, fetchingThemes, readerThemesEndpoint, setAsyncError, setError, themes, themeSupport ] );
 
 	return (
 		<ReaderThemes.Provider
@@ -181,6 +186,7 @@ ReaderThemesContextProvider.propTypes = {
 	currentTheme: PropTypes.shape( {
 		name: PropTypes.string.isRequired,
 	} ).isRequired,
+	hasErrorBoundary: PropTypes.bool,
 	readerThemesEndpoint: PropTypes.string.isRequired,
 	updatesNonce: PropTypes.string.isRequired,
 	wpAjaxUrl: PropTypes.string.isRequired,

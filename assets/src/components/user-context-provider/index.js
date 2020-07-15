@@ -32,7 +32,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 	const [ originalDeveloperToolsOption, setOriginalDeveloperToolsOption ] = useState( null );
 	const [ savingDeveloperToolsOption, setSavingDeveloperToolsOption ] = useState( false );
 	const [ didSaveDeveloperToolsOption, setDidSaveDeveloperToolsOption ] = useState( false );
-	const { setError } = useAsyncError();
+	const { setAsyncError } = useAsyncError();
 
 	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
 	const hasUnmounted = useRef( false );
@@ -79,13 +79,13 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 				setOriginalDeveloperToolsOption( fetchedUser[ userOptionDeveloperTools ] );
 				setDeveloperToolsOption( fetchedUser[ userOptionDeveloperTools ] );
 			} catch ( e ) {
-				setError( e );
+				setAsyncError( e );
 				return;
 			}
 
 			setFetchingUser( false );
 		} )();
-	}, [ fetchingOptions, fetchingUser, originalDeveloperToolsOption, originalOptions.plugin_configured, setError, userOptionDeveloperTools, userRestEndpoint ] );
+	}, [ fetchingOptions, fetchingUser, originalDeveloperToolsOption, originalOptions.plugin_configured, setAsyncError, userOptionDeveloperTools, userRestEndpoint ] );
 
 	/**
 	 * Sends the option back to the REST endpoint to be saved.
@@ -107,13 +107,13 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 			setOriginalDeveloperToolsOption( fetchedUser[ userOptionDeveloperTools ] );
 			setDeveloperToolsOption( fetchedUser[ userOptionDeveloperTools ] );
 		} catch ( e ) {
-			setError( e );
+			setAsyncError( e );
 			return;
 		}
 
 		setDidSaveDeveloperToolsOption( true );
 		setSavingDeveloperToolsOption( false );
-	}, [ hasDeveloperToolsOptionChange, developerToolsOption, setError, userOptionDeveloperTools, userRestEndpoint ] );
+	}, [ hasDeveloperToolsOptionChange, developerToolsOption, setAsyncError, userOptionDeveloperTools, userRestEndpoint ] );
 
 	return (
 		<User.Provider
