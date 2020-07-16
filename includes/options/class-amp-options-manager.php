@@ -206,13 +206,7 @@ class AMP_Options_Manager {
 		// Migrate options from 1.5 to 1.6.
 		if ( isset( $options['version'] ) && version_compare( $options['version'], '1.6', '<' ) ) {
 
-			// Make sure programmatic post type support is persisted in the DB.
-			$options[ Option::SUPPORTED_POST_TYPES ] = array_merge(
-				$options[ Option::SUPPORTED_POST_TYPES ],
-				(array) get_post_types_by_support( 'amp' )
-			);
-
-			// It also used to be that the themes_supported flag overrode the options, so make sure the option gets updated to reflect the theme support.
+			// It used to be that the themes_supported flag overrode the options, so make sure the option gets updated to reflect the theme support.
 			if ( isset( $theme_support['templates_supported'] ) ) {
 				if ( 'all' === $theme_support['templates_supported'] ) {
 					$options[ Option::ALL_TEMPLATES_SUPPORTED ] = true;
@@ -236,6 +230,20 @@ class AMP_Options_Manager {
 						)
 					);
 				}
+			}
+
+			// Make sure programmatic post type support is persisted in the DB, as from now on the DB option is the source of truth.
+			$options[ Option::SUPPORTED_POST_TYPES ] = array_merge(
+				$options[ Option::SUPPORTED_POST_TYPES ],
+				(array) get_post_types_by_support( AMP_Post_Type_Support::SLUG )
+			);
+
+			// Make sure that all post types get enabled if all templates were supported since they are now independently controlled.
+			if ( ! empty( $options[ Option::ALL_TEMPLATES_SUPPORTED ] ) ) {
+				$options[ Option::SUPPORTED_POST_TYPES ] = array_merge(
+					$options[ Option::SUPPORTED_POST_TYPES ],
+					AMP_Post_Type_Support::get_eligible_post_types()
+				);
 			}
 		}
 

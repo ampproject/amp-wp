@@ -492,6 +492,14 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		);
 		$migrated_options = AMP_Options_Manager::get_options();
 		$this->assertTrue( $migrated_options[ Option::ALL_TEMPLATES_SUPPORTED ] );
+		$this->assertEqualSets(
+			[
+				'post',
+				'page',
+				'attachment',
+			],
+			array_unique( $migrated_options[ Option::SUPPORTED_POST_TYPES ] )
+		);
 	}
 
 	/**
