@@ -306,6 +306,60 @@ const settingsPage = {
 	],
 };
 
+const settingsPage49 = {
+	...sharedConfig,
+	entry: {
+		'wp-api-fetch': [
+			'./assets/src/polyfills/api-fetch.js',
+		],
+		'wp-components': [
+			'@wordpress/components/build-style/style.css',
+		],
+		'amp-settings-4-9': [
+			'./assets/src/settings-page',
+		],
+	},
+	externals: {
+		'amp-settings': 'ampSettings',
+	},
+	resolve: {
+		alias: {
+			'@wordpress/api-fetch__non-shim': require.resolve( '@wordpress/api-fetch' ),
+		},
+	},
+	plugins: [
+		...sharedConfig.plugins.filter(
+			( plugin ) => plugin.constructor.name !== 'DependencyExtractionWebpackPlugin',
+		),
+		new DependencyExtractionWebpackPlugin( {
+			useDefaults: false,
+			// Most dependencies will be bundled for the AMP setup screen for compatibility across WP versions.
+			requestToHandle: ( handle ) => {
+				switch ( handle ) {
+					case '@wordpress/api-fetch':
+						return defaultRequestToHandle( handle );
+
+					default:
+						return undefined;
+				}
+			},
+			requestToExternal: ( external ) => {
+				switch ( external ) {
+					case '@wordpress/api-fetch':
+						return defaultRequestToExternal( external );
+
+					default:
+						return undefined;
+				}
+			},
+		} ),
+		new WebpackBar( {
+			name: '4.9 Settings page',
+			color: '#67b255',
+		} ),
+	],
+};
+
 const mobileRedirection = {
 	...sharedConfig,
 	entry: {
@@ -329,5 +383,6 @@ module.exports = [
 	wpPolyfills,
 	setup,
 	settingsPage,
+	settingsPage49,
 	mobileRedirection,
 ];

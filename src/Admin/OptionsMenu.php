@@ -165,6 +165,60 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		return sprintf( 'toplevel_page_%s', AMP_Options_Manager::OPTION_NAME );
 	}
 
+	private function register_shimmed_assets() {
+		if ( ! wp_script_is( 'wp-api-fetch', 'registered' ) ) {
+			$asset_handle = 'wp-api-fetch';
+			$asset_file   = AMP__DIR__ . '/assets/js/' . $asset_handle . '.asset.php';
+			$asset        = require $asset_file;
+			$version      = $asset['version'];
+
+			wp_register_script(
+				$asset_handle,
+				amp_get_asset_url( 'js/' . $asset_handle . '.js' ),
+				[],
+				$version,
+				true
+			);
+
+			wp_add_inline_script(
+				$asset_handle,
+				sprintf(
+					'wp.apiFetch.use( wp.apiFetch.createRootURLMiddleware( "%s" ) );',
+					esc_url_raw( get_rest_url() )
+				),
+				'after'
+			);
+			wp_add_inline_script(
+				$asset_handle,
+				implode(
+					"\n",
+					array(
+						sprintf(
+							'wp.apiFetch.nonceMiddleware = wp.apiFetch.createNonceMiddleware( "%s" );',
+							( wp_installing() && ! is_multisite() ) ? '' : wp_create_nonce( 'wp_rest' )
+						),
+						'wp.apiFetch.use( wp.apiFetch.nonceMiddleware );',
+						'wp.apiFetch.use( wp.apiFetch.mediaUploadMiddleware );',
+						sprintf(
+							'wp.apiFetch.nonceEndpoint = "%s";',
+							admin_url( 'admin-ajax.php?action=rest-nonce' )
+						),
+					)
+				),
+				'after'
+			);
+		}
+
+		if ( ! wp_style_is( 'wp-components', 'registered' ) ) {
+			wp_register_style(
+				'wp-components',
+				amp_get_asset_url( 'css/wp-components.css' ),
+				[],
+				AMP__VERSION
+			);
+		}
+	}
+
 	/**
 	 * Enqueues settings page assets.
 	 *
@@ -177,21 +231,27 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			return;
 		}
 
-		$asset_file   = AMP__DIR__ . '/assets/js/' . self::ASSET_HANDLE . '.asset.php';
+		if ( ! amp_should_use_new_onboarding() ) {
+			$this->register_shimmed_assets();
+		}
+
+		$asset_handle = amp_should_use_new_onboarding() ? self::ASSET_HANDLE : self::ASSET_HANDLE . '-4-9';
+
+		$asset_file   = AMP__DIR__ . '/assets/js/' . $asset_handle . '.asset.php';
 		$asset        = require $asset_file;
 		$dependencies = $asset['dependencies'];
 		$version      = $asset['version'];
 
 		wp_enqueue_script(
-			self::ASSET_HANDLE,
-			amp_get_asset_url( 'js/' . self::ASSET_HANDLE . '.js' ),
+			$asset_handle,
+			amp_get_asset_url( 'js/' . $asset_handle . '.js' ),
 			$dependencies,
 			$version,
 			true
 		);
 
 		wp_enqueue_style(
-			self::ASSET_HANDLE,
+			$asset_handle,
 			amp_get_asset_url( 'css/amp-settings.css' ),
 			[
 				$this->google_fonts->get_handle(),
@@ -200,7 +260,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			AMP__VERSION
 		);
 
-		wp_styles()->add_data( self::ASSET_HANDLE, 'rtl', 'replace' );
+		wp_styles()->add_data( $asset_handle, 'rtl', 'replace' );
 
 		$theme           = wp_get_theme();
 		$is_reader_theme = in_array( get_stylesheet(), wp_list_pluck( $this->reader_themes->get_themes(), 'slug' ), true );
@@ -228,7 +288,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		];
 
 		wp_add_inline_script(
-			self::ASSET_HANDLE,
+			$asset_handle,
 			sprintf(
 				'var ampSettings = %s;',
 				wp_json_encode( $js_data )
@@ -237,13 +297,13 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		);
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {
-			wp_set_script_translations( self::ASSET_HANDLE, 'amp' );
+			wp_set_script_translations( $asset_handle, 'amp' );
 		} elseif ( function_exists( 'wp_get_jed_locale_data' ) || function_exists( 'gutenberg_get_jed_locale_data' ) ) {
 			$locale_data  = function_exists( 'wp_get_jed_locale_data' ) ? wp_get_jed_locale_data( 'amp' ) : gutenberg_get_jed_locale_data( 'amp' );
 			$translations = wp_json_encode( $locale_data );
 
 			wp_add_inline_script(
-				self::ASSET_HANDLE,
+				$asset_handle,
 				'wp.i18n.setLocaleData( ' . $translations . ', "amp" );',
 				'after'
 			);
