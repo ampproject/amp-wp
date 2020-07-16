@@ -49,7 +49,7 @@ class AMP_Post_Type_Support {
 		);
 
 		/**
-		 * Filters the list of post types eligible for AMP.
+		 * Filters the list of post types which may be supported for AMP.
 		 *
 		 * By default the list includes those which are public.
 		 *
@@ -57,7 +57,7 @@ class AMP_Post_Type_Support {
 		 *
 		 * @param string[] $post_types Post types.
 		 */
-		return apply_filters( 'amp_eligible_post_types', $post_types );
+		return apply_filters( 'amp_supportable_post_types', $post_types );
 	}
 
 	/**
