@@ -262,12 +262,23 @@ const setup = {
 const settingsPage = {
 	...sharedConfig,
 	entry: {
+		'wp-api-fetch': [
+			'./assets/src/polyfills/api-fetch.js',
+		],
+		'wp-components': [
+			'@wordpress/components/build-style/style.css',
+		],
 		'amp-settings': [
 			'./assets/src/settings-page',
 		],
 	},
 	externals: {
 		'amp-settings': 'ampSettings',
+	},
+	resolve: {
+		alias: {
+			'@wordpress/api-fetch__non-shim': require.resolve( '@wordpress/api-fetch' ),
+		},
 	},
 	plugins: [
 		...sharedConfig.plugins.filter(
@@ -279,8 +290,6 @@ const settingsPage = {
 			requestToHandle: ( handle ) => {
 				switch ( handle ) {
 					case '@wordpress/api-fetch':
-					case '@wordpress/dom-ready':
-					case '@wordpress/html-entities':
 						return defaultRequestToHandle( handle );
 
 					default:
@@ -290,8 +299,6 @@ const settingsPage = {
 			requestToExternal: ( external ) => {
 				switch ( external ) {
 					case '@wordpress/api-fetch':
-					case '@wordpress/dom-ready':
-					case '@wordpress/html-entities':
 						return defaultRequestToExternal( external );
 
 					default:

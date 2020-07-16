@@ -162,12 +162,10 @@ function amp_init() {
 	add_action(
 		'rest_api_init',
 		static function() {
-			if ( amp_should_use_new_onboarding() ) {
-				$reader_themes = new ReaderThemes();
+			$reader_themes = new ReaderThemes();
 
-				$reader_theme_controller = new AMP_Reader_Theme_REST_Controller( $reader_themes );
-				$reader_theme_controller->register_routes();
-			}
+			$reader_theme_controller = new AMP_Reader_Theme_REST_Controller( $reader_themes );
+			$reader_theme_controller->register_routes();
 		}
 	);
 
