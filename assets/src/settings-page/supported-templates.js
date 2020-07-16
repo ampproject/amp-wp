@@ -115,15 +115,25 @@ function getInclusiveDescendantTemplatesIds( supportableTemplate ) {
 export function SupportedTemplatesCheckboxes( { supportableTemplates } ) {
 	const { editedOptions, updateOptions } = useContext( Options );
 
-	const { supported_templates: supportedTemplates } = editedOptions || {};
+	const { supported_templates: supportedTemplates, supported_post_types: supportedPostTypes } = editedOptions || {};
 
 	if ( ! supportableTemplates.length ) {
 		return null;
 	}
 
+	const hasPageOnFront = supportedTemplates.includes( 'is_front_page' );
+	const isPageSupported = supportedPostTypes.includes( 'page' );
+	const relevantSupportableTemplates = ! hasPageOnFront ? supportableTemplates : supportableTemplates.filter( ( supportableTemplate ) => {
+		return (
+			! hasPageOnFront ||
+			isPageSupported ||
+			! [ 'is_home', 'is_front_page' ].includes( supportableTemplate.id )
+		);
+	} );
+
 	return (
 		<ul>
-			{ supportableTemplates.map( ( supportableTemplate ) => (
+			{ relevantSupportableTemplates.map( ( supportableTemplate ) => (
 				<li key={ supportableTemplate.id }>
 					<CheckboxControl
 						checked={ supportedTemplates.includes( supportableTemplate.id ) }
