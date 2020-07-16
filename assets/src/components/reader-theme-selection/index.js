@@ -81,7 +81,7 @@ export function ReaderThemeSelection( { hideCurrentlyActiveTheme = false } ) {
 					<p>
 						{
 							sprintf(
-							/* translators: placeholder is the name of a WordPress theme. */
+								/* translators: placeholder is the name of a WordPress theme. */
 								__( 'Your active theme “%s” is not available as a reader theme. If you wish to use it, Transitional mode may be the best option for you.', 'amp' ),
 								activeTheme.name,
 							)
