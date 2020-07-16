@@ -61,11 +61,9 @@ function AMPToggle( { isEnabled, onChange } ) {
 								</summary>
 								{
 									errorMessages.map( ( message, index ) => (
-										<p key={ index }>
-											<RawHTML>
-												{ message }
-											</RawHTML>
-										</p>
+										<RawHTML key={ index }>
+											{ message }
+										</RawHTML>
 									) )
 								}
 							</details>
