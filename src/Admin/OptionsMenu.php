@@ -165,6 +165,9 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		return sprintf( 'toplevel_page_%s', AMP_Options_Manager::OPTION_NAME );
 	}
 
+	/**
+	 * Provides core assets in environments where they're not enqueued by default (i.e., WP <5.0).
+	 */
 	private function register_shimmed_assets() {
 		if ( ! wp_script_is( 'wp-api-fetch', 'registered' ) ) {
 			$asset_handle = 'wp-api-fetch';
