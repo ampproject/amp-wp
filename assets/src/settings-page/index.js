@@ -31,6 +31,7 @@ import { Loading } from '../components/loading';
 import { UnsavedChangesWarning } from '../components/unsaved-changes-warning';
 import { AMPNotice, NOTICE_TYPE_WARNING } from '../components/amp-notice';
 import { ErrorContextProvider, ErrorContext } from '../components/error-context-provider';
+import { Welcome } from './welcome';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
 import { MobileRedirection } from './mobile-redirection';
@@ -104,6 +105,7 @@ function Root() {
 
 	return (
 		<>
+			<Welcome />
 			<TemplateModes />
 			<ReaderThemes />
 			<Panel className="advanced-settings-container">

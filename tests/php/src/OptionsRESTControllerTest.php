@@ -84,6 +84,8 @@ class OptionsRESTControllerTest extends WP_UnitTestCase {
 				'suppressible_plugins',
 				'supportable_post_types',
 				'supportable_templates',
+				'onboarding_wizard_link',
+				'customizer_link',
 			]
 		);
 

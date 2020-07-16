@@ -85,6 +85,12 @@ function amp_admin_get_preview_permalink() {
  * @return string
  */
 function amp_get_customizer_url() {
+	$mode = AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
+
+	if ( 'reader' === $mode ) {
+		return '';
+	}
+
 	$is_legacy = amp_is_legacy();
 
 	/** This filter is documented in includes/settings/class-amp-customizer-design-settings.php */

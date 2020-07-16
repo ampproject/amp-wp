@@ -11,6 +11,7 @@ namespace AmpProject\AmpWP;
 use AMP_Options_Manager;
 use AMP_Post_Type_Support;
 use AMP_Theme_Support;
+use AmpProject\AmpWP\Admin\OnboardingWizardSubmenu;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
@@ -55,6 +56,20 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 	 * @var string
 	 */
 	const SUPPORTABLE_TEMPLATES = 'supportable_templates';
+
+	/**
+	 * Key for the read-only property providing a link to the onboarding wizard if available.
+	 *
+	 * @var string
+	 */
+	const ONBOARDING_WIZARD_LINK = 'onboarding_wizard_link';
+
+	/**
+	 * Key for the read-only customizer link property.
+	 *
+	 * @var string
+	 */
+	const CUSTOMIZER_LINK = 'customizer_link';
 
 	/**
 	 * Reader themes provider class.
@@ -171,6 +186,12 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 		$options[ self::SUPPORTABLE_TEMPLATES ] = $this->get_nested_supportable_templates( AMP_Theme_Support::get_supportable_templates() );
 
 		$options[ Option::SUPPRESSED_PLUGINS ] = $this->plugin_suppression->prepare_suppressed_plugins_for_response( $options[ Option::SUPPRESSED_PLUGINS ] );
+
+		$options[ self::ONBOARDING_WIZARD_LINK ] = amp_should_use_new_onboarding()
+			? get_admin_url( null, add_query_arg( [ 'page' => OnboardingWizardSubmenu::SCREEN_ID ], 'admin.php' ) )
+			: null;
+
+		$options[ self::CUSTOMIZER_LINK ] = amp_get_customizer_url();
 
 		return rest_ensure_response( $options );
 	}
@@ -301,6 +322,14 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 					],
 					self::SUPPORTABLE_TEMPLATES     => [
 						'type'     => 'array',
+						'readonly' => true,
+					],
+					self::ONBOARDING_WIZARD_LINK    => [
+						'type'     => 'url',
+						'readonly' => true,
+					],
+					self::CUSTOMIZER_LINK           => [
+						'type'     => 'url',
 						'readonly' => true,
 					],
 				],
