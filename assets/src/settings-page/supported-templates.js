@@ -184,11 +184,11 @@ SupportedTemplatesCheckboxes.propTypes = {
  * Container for the supported templates fieldset.
  */
 export function SupportedTemplatesFieldset() {
-	const { editedOptions, fetchingOptions } = useContext( Options );
+	const { editedOptions } = useContext( Options );
 
 	const { theme_support: themeSupport, supportable_templates: supportableTemplates, reader_theme: readerTheme } = editedOptions || {};
 
-	if ( ( 'reader' === themeSupport && 'legacy' === readerTheme ) || fetchingOptions || ! supportableTemplates ) {
+	if ( ( 'reader' === themeSupport && 'legacy' === readerTheme ) || ! supportableTemplates ) {
 		return null;
 	}
 
