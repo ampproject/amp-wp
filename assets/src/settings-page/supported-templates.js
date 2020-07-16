@@ -18,6 +18,21 @@ import { Selectable } from '../components/selectable';
 import { Options } from '../components/options-context-provider';
 
 /**
+ * Determine whether the supportable templates include the static front page.
+ *
+ * @param {Array} supportableTemplates Supportable templates.
+ * @return {boolean} Has front page template.
+ */
+function hasFrontPageTemplate( supportableTemplates ) {
+	return Boolean( supportableTemplates.find( ( supportableTemplate ) => {
+		if ( supportableTemplate.children && hasFrontPageTemplate( supportableTemplate.children ) ) {
+			return true;
+		}
+		return supportableTemplate.id === 'is_front_page';
+	} ) );
+}
+
+/**
  * A checkbox for a supportable post type.
  *
  * @param {Object} props Component props.
@@ -28,7 +43,14 @@ function PostTypeCheckbox( { postTypeObject } ) {
 
 	const {
 		supported_post_types: supportedPostTypes,
+		supportable_templates: supportableTemplates,
+		supported_templates: supportedTemplates,
+		all_templates_supported: allTemplatesSupported,
 	} = editedOptions || {};
+
+	const hasPageOnFront = hasFrontPageTemplate( supportableTemplates );
+	const isBlogTemplateSupported = supportedTemplates.includes( 'is_home' );
+	const isFrontPageTemplateSupported = supportedTemplates.includes( 'is_front_page' );
 
 	return (
 		<li key={ `supportable-post-type-${ postTypeObject.name }` }>
@@ -37,6 +59,21 @@ function PostTypeCheckbox( { postTypeObject } ) {
 				label={ postTypeObject.label }
 				onChange={
 					( newChecked ) => {
+						if ( ! newChecked && hasPageOnFront && ! allTemplatesSupported && 'page' === postTypeObject.name ) {
+							let warning = '';
+							if ( isBlogTemplateSupported && isFrontPageTemplateSupported ) {
+								warning = __( 'Note that disabling Pages will prevent you from serving your homepage and posts page (blog index) as AMP.', 'amp' );
+							} else if ( isBlogTemplateSupported ) {
+								warning = __( 'Note that disabling pages will prevent you from serving your posts page (blog index) as AMP.', 'amp' );
+							} else if ( isFrontPageTemplateSupported ) {
+								warning = __( 'Note that disabling pages will prevent you from serving your homepage as AMP.', 'amp' );
+							}
+							// eslint-disable-next-line no-alert
+							if ( warning && ! window.confirm( warning ) ) {
+								return;
+							}
+						}
+
 						const newSupportedPostTypes = supportedPostTypes.filter( ( postType ) => postType !== postTypeObject.name );
 
 						if ( newChecked ) {
@@ -121,9 +158,7 @@ export function SupportedTemplatesCheckboxes( { supportableTemplates } ) {
 		return null;
 	}
 
-	const hasPageOnFront = Boolean( supportableTemplates.find( ( supportableTemplate ) => {
-		return supportableTemplate.id === 'is_front_page';
-	} ) );
+	const hasPageOnFront = hasFrontPageTemplate( supportableTemplates );
 	const isPageSupported = supportedPostTypes.includes( 'page' );
 	const relevantSupportableTemplates = ! hasPageOnFront ? supportableTemplates : supportableTemplates.filter( ( supportableTemplate ) => {
 		return (
