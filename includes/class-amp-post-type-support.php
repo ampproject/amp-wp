@@ -84,11 +84,10 @@ class AMP_Post_Type_Support {
 	 * @return string[] List of post types that support AMP.
 	 */
 	public static function get_supported_post_types() {
-		$eligible_post_types = self::get_eligible_post_types();
-		if ( ! amp_is_legacy() && AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) ) {
-			return $eligible_post_types;
-		}
-		return array_intersect( AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES, [] ), $eligible_post_types );
+		return array_intersect(
+			AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES, [] ),
+			self::get_eligible_post_types()
+		);
 	}
 
 	/**
