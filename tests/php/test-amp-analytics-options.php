@@ -1,7 +1,7 @@
 <?php
 
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\Dom\Document;
 
 class AMP_Analytics_Options_Test extends WP_UnitTestCase {

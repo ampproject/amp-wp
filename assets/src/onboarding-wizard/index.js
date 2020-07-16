@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { render, Component } from '@wordpress/element';
+import { render } from '@wordpress/element';
 import domReady from '@wordpress/dom-ready';
 
 /**
@@ -29,11 +29,12 @@ import '../css/elements.css';
 import './style.css';
 import { OptionsContextProvider } from '../components/options-context-provider';
 import { ReaderThemesContextProvider } from '../components/reader-themes-context-provider';
+import { ErrorBoundary } from '../components/error-boundary';
+import { ErrorContextProvider } from '../components/error-context-provider';
 import { PAGES } from './pages';
 import { SetupWizard } from './setup-wizard';
 import { NavigationContextProvider } from './components/navigation-context-provider';
 import { UserContextProvider } from './components/user-context-provider';
-import { ErrorScreen } from './components/error-screen';
 import { SiteScanContextProvider } from './components/site-scan-context-provider';
 import { TemplateModeOverrideContextProvider } from './components/template-mode-override-context-provider';
 
@@ -47,30 +48,37 @@ const { ajaxurl: wpAjaxUrl } = global;
  */
 export function Providers( { children } ) {
 	return (
-		<OptionsContextProvider
-			optionsRestEndpoint={ OPTIONS_REST_ENDPOINT }
-			populateDefaultValues={ false }
-		>
-			<UserContextProvider
-				userOptionDeveloperTools={ USER_FIELD_DEVELOPER_TOOLS_ENABLED }
-				userRestEndpoint={ USER_REST_ENDPOINT }
-			>
-				<NavigationContextProvider pages={ PAGES }>
-					<ReaderThemesContextProvider
-						currentTheme={ CURRENT_THEME }
-						wpAjaxUrl={ wpAjaxUrl }
-						readerThemesEndpoint={ READER_THEMES_REST_ENDPOINT }
-						updatesNonce={ UPDATES_NONCE }
+		<ErrorBoundary exitLink={ FINISH_LINK } fullScreen={ true }>
+			<ErrorContextProvider>
+				<OptionsContextProvider
+					delaySave={ true }
+					hasErrorBoundary={ true }
+					optionsRestEndpoint={ OPTIONS_REST_ENDPOINT }
+					populateDefaultValues={ false }
+				>
+					<UserContextProvider
+						userOptionDeveloperTools={ USER_FIELD_DEVELOPER_TOOLS_ENABLED }
+						userRestEndpoint={ USER_REST_ENDPOINT }
 					>
-						<TemplateModeOverrideContextProvider>
-							<SiteScanContextProvider>
-								{ children }
-							</SiteScanContextProvider>
-						</TemplateModeOverrideContextProvider>
-					</ReaderThemesContextProvider>
-				</NavigationContextProvider>
-			</UserContextProvider>
-		</OptionsContextProvider>
+						<NavigationContextProvider pages={ PAGES }>
+							<ReaderThemesContextProvider
+								currentTheme={ CURRENT_THEME }
+								hasErrorBoundary={ true }
+								wpAjaxUrl={ wpAjaxUrl }
+								readerThemesEndpoint={ READER_THEMES_REST_ENDPOINT }
+								updatesNonce={ UPDATES_NONCE }
+							>
+								<TemplateModeOverrideContextProvider>
+									<SiteScanContextProvider>
+										{ children }
+									</SiteScanContextProvider>
+								</TemplateModeOverrideContextProvider>
+							</ReaderThemesContextProvider>
+						</NavigationContextProvider>
+					</UserContextProvider>
+				</OptionsContextProvider>
+			</ErrorContextProvider>
+		</ErrorBoundary>
 	);
 }
 
@@ -78,49 +86,15 @@ Providers.propTypes = {
 	children: PropTypes.any,
 };
 
-/**
- * Catches errors in the application and displays a fallback screen.
- *
- * @see https://reactjs.org/docs/error-boundaries.html
- */
-class ErrorBoundary extends Component {
-	static propTypes = {
-		children: PropTypes.any,
-	}
-
-	constructor( props ) {
-		super( props );
-
-		this.state = { error: null };
-	}
-
-	componentDidCatch( error ) {
-		this.setState( { error } );
-	}
-
-	render() {
-		const { error } = this.state;
-
-		if ( error ) {
-			return (
-				<ErrorScreen error={ error } finishLink={ FINISH_LINK } />
-			);
-		}
-
-		return this.props.children;
-	}
-}
-
 domReady( () => {
 	const root = document.getElementById( APP_ROOT_ID );
 
 	if ( root ) {
 		render(
-			<ErrorBoundary>
-				<Providers>
-					<SetupWizard closeLink={ CLOSE_LINK } finishLink={ FINISH_LINK } />
-				</Providers>
-			</ErrorBoundary>,
+
+			<Providers>
+				<SetupWizard closeLink={ CLOSE_LINK } finishLink={ FINISH_LINK } />
+			</Providers>,
 			root,
 		);
 	}

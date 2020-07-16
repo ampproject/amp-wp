@@ -14,6 +14,7 @@ import {
  */
 import domReady from '@wordpress/dom-ready';
 import { render, useContext } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -26,6 +27,9 @@ import { OptionsContextProvider, Options } from '../components/options-context-p
 import { ReaderThemesContextProvider } from '../components/reader-themes-context-provider';
 import { SiteSettingsProvider } from '../components/site-settings-provider';
 import { Loading } from '../components/loading';
+import { UnsavedChangesWarning } from '../components/unsaved-changes-warning';
+import { AMPNotice, NOTICE_TYPE_WARNING } from '../components/amp-notice';
+import { ErrorContextProvider, ErrorContext } from '../components/error-context-provider';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
 import { MobileRedirection } from './mobile-redirection';
@@ -62,10 +66,36 @@ Providers.propTypes = {
 };
 
 /**
+ * Renders an error notice.
+ *
+ * @param {Object} props Component props.
+ * @param {string} props.errorMessage Error message text.
+ */
+function ErrorNotice( { errorMessage } ) {
+	return (
+		<div className="amp-error-notice">
+			<AMPNotice type={ NOTICE_TYPE_WARNING }>
+				<p>
+					<strong>
+						{ __( 'Error:', 'amp' ) }
+					</strong>
+					{ ' ' }
+					{ errorMessage }
+				</p>
+			</AMPNotice>
+		</div>
+	);
+}
+ErrorNotice.propTypes = {
+	errorMessage: PropTypes.string,
+};
+
+/**
  * Settings page application root.
  */
 function Root() {
 	const { fetchingOptions } = useContext( Options );
+	const { error } = useContext( ErrorContext );
 
 	if ( false !== fetchingOptions ) {
 		return <Loading />;
@@ -79,6 +109,8 @@ function Root() {
 			<MobileRedirection />
 			<PluginSuppression />
 			<SettingsFooter />
+			<UnsavedChangesWarning excludeUserContext={ true } />
+			{ error && <ErrorNotice errorMessage={ error.message || __( 'An error occurred. You might be offline or logged out.', 'amp' ) } /> }
 		</>
 	);
 }
@@ -88,9 +120,11 @@ domReady( () => {
 
 	if ( root ) {
 		render( (
-			<Providers>
-				<Root optionsRestEndpoint={ OPTIONS_REST_ENDPOINT } />
-			</Providers>
+			<ErrorContextProvider>
+				<Providers>
+					<Root optionsRestEndpoint={ OPTIONS_REST_ENDPOINT } />
+				</Providers>
+			</ErrorContextProvider>
 		), root );
 	}
 } );

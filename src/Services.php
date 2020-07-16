@@ -1,6 +1,6 @@
 <?php
 /**
- * Class PluginRegistry.
+ * Class Services.
  *
  * @package AmpProject\AmpWP
  */

@@ -1,6 +1,6 @@
 <?php
 
-use AmpProject\AmpWP\Tests\WithoutBlockPreRendering;
+use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
 
 class AMP_Instagram_Embed_Handler_Test extends WP_UnitTestCase {
 

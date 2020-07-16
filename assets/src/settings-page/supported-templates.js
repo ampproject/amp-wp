@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useContext } from '@wordpress/element';
 import { CheckboxControl } from '@wordpress/components';
 
@@ -66,6 +66,7 @@ function SupportedPostTypesFieldset() {
 
 	const {
 		theme_support: themeSupport,
+		reader_theme: readerTheme,
 		supportable_post_types: supportablePostTypes,
 	} = editedOptions || {};
 
@@ -73,9 +74,11 @@ function SupportedPostTypesFieldset() {
 		return null;
 	}
 
+	const isLegacy = 'reader' === themeSupport && 'legacy' === readerTheme;
+
 	return (
 		<fieldset id="supported_post_types_fieldset">
-			{ 'reader' !== themeSupport && (
+			{ ! isLegacy && (
 				<h4 className="title">
 					{ __( 'Content Types', 'amp' ) }
 				</h4>
@@ -94,8 +97,21 @@ function SupportedPostTypesFieldset() {
 				} ) }
 			</ul>
 		</fieldset>
-
 	);
+}
+
+/**
+ * Get a list of the template IDs for the supported template and its descendants.
+ *
+ * @param {Object} supportableTemplate Supportable templates.
+ * @return {Array} Descendant template IDs, including the ID of the passed template.
+ */
+function getInclusiveDescendantTemplatesIds( supportableTemplate ) {
+	const templateIds = [ supportableTemplate.id ];
+	for ( const childSupportableTemplate of supportableTemplate.children ) {
+		templateIds.push( ...getInclusiveDescendantTemplatesIds( childSupportableTemplate ) );
+	}
+	return templateIds;
 }
 
 /**
@@ -119,16 +135,22 @@ export function SupportedTemplatesCheckboxes( { supportableTemplates } ) {
 				<li key={ supportableTemplate.id }>
 					<CheckboxControl
 						checked={ supportedTemplates.includes( supportableTemplate.id ) }
-						help={ supportableTemplates.description }
+						help={ supportableTemplate.description }
 						label={ supportableTemplate.label }
 						onChange={ ( checked ) => {
+							if (
+								! checked &&
+								'is_singular' === supportableTemplate.id &&
+								// eslint-disable-next-line no-alert
+								! window.confirm( __( 'Are you sure you want to disable the singular template? This template is needed to serve individual posts and pages as AMP.' ) )
+							) {
+								return;
+							}
+
 							let newSupported = [ ...supportedTemplates ];
 
 							// Toggle child checkboxes along with their parent.
-							const templatesToSwitch = [
-								supportableTemplate.id,
-								...( supportableTemplate.children.map( ( { id } ) => id ) ),
-							];
+							const templatesToSwitch = getInclusiveDescendantTemplatesIds( supportableTemplate );
 
 							if ( checked ) {
 								templatesToSwitch.forEach( ( template ) => {
@@ -150,7 +172,12 @@ export function SupportedTemplatesCheckboxes( { supportableTemplates } ) {
 	);
 }
 SupportedTemplatesCheckboxes.propTypes = {
-	supportableTemplates: PropTypes.array.isRequired,
+	supportableTemplates: PropTypes.arrayOf( PropTypes.shape( {
+		id: PropTypes.string,
+		description: PropTypes.string,
+		label: PropTypes.string,
+		children: PropTypes.array,
+	} ) ),
 };
 
 /**
@@ -171,6 +198,17 @@ export function SupportedTemplatesFieldset() {
 				{ __( 'Templates', 'amp' ) }
 			</h4>
 
+			{ /* dangerouslySetInnerHTML reason: Link embedded in translation string. */ }
+			<p
+				dangerouslySetInnerHTML={ {
+					__html: sprintf(
+						/* translators: placeholder is link to WordPress handbook page about the template hierarchy. */
+						__( 'You may enable AMP for a subset of the WordPress <a href="%s" target="_blank" rel="noreferrer">Template Hierarchy</a>:', 'amp' ),
+						'https://developer.wordpress.org/themes/basics/template-hierarchy/',
+					),
+				} }
+			/>
+
 			<SupportedTemplatesCheckboxes supportableTemplates={ supportableTemplates } />
 		</fieldset>
 	);
@@ -180,13 +218,9 @@ export function SupportedTemplatesFieldset() {
  * Component rendering the supported templates section of the settings page, including the "Serve all templates as AMP" toggle.
  */
 export function SupportedTemplates() {
-	const { editedOptions, fetchingOptions } = useContext( Options );
+	const { editedOptions } = useContext( Options );
 
 	const { all_templates_supported: allTemplatesSupported, theme_support: themeSupport, reader_theme: readerTheme } = editedOptions || {};
-
-	if ( fetchingOptions ) {
-		return null;
-	}
 
 	const isLegacy = 'reader' === themeSupport && 'legacy' === readerTheme;
 

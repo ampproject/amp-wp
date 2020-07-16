@@ -6,8 +6,13 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { createContext, useState, useEffect } from '@wordpress/element';
+import { createContext, useState, useEffect, useContext } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+
+/**
+ * Internal dependencies
+ */
+import { ErrorContext } from '../error-context-provider';
 
 export const SiteSettings = createContext();
 
@@ -20,10 +25,11 @@ export const SiteSettings = createContext();
 export function SiteSettingsProvider( { children } ) {
 	const [ settings, setSettings ] = useState( {} );
 	const [ fetchingSiteSettings, setFetchingSiteSettings ] = useState( false );
-	const [ fetchSiteSettingsError, setFetchingSiteSettingsError ] = useState( null );
+
+	const { error, setError } = useContext( ErrorContext );
 
 	useEffect( () => {
-		if ( Object.keys( settings ).length || fetchSiteSettingsError || fetchingSiteSettings ) {
+		if ( error || Object.keys( settings ).length || fetchingSiteSettings ) {
 			return () => undefined;
 		}
 
@@ -43,7 +49,8 @@ export function SiteSettingsProvider( { children } ) {
 					return;
 				}
 
-				setFetchingSiteSettingsError( e );
+				setError( e );
+				return;
 			}
 
 			setFetchingSiteSettings( false );
@@ -52,10 +59,10 @@ export function SiteSettingsProvider( { children } ) {
 		return () => {
 			unmounted = true;
 		};
-	}, [ settings, fetchSiteSettingsError, fetchingSiteSettings ] );
+	}, [ error, settings, fetchingSiteSettings, setError ] );
 
 	return (
-		<SiteSettings.Provider value={ { settings, fetchingSiteSettings, fetchSiteSettingsError } }>
+		<SiteSettings.Provider value={ { settings, fetchingSiteSettings } }>
 			{ children }
 		</SiteSettings.Provider>
 	);

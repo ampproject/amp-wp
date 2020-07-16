@@ -283,11 +283,16 @@ li.error-kept {
 	}
 }
 
+
 .amp .amp-save-success-notice.amp-notice {
 	animation: slideIn, fadeOut;
 	animation-delay: 0s, 8s;
 	animation-duration: 0.5s, 0.5s;
 	animation-fill-mode: both;
+}
+
+.amp .amp-save-success-notice.amp-notice,
+.amp-error-notice .amp-notice {
 	bottom: 3rem;
 	box-shadow: 0 30px 20px rgba(0, 0, 0, 0.1);
 	max-width: 250px;
@@ -295,4 +300,13 @@ li.error-kept {
 	position: fixed;
 	right: -1rem;
 	width: 100%;
+	z-index: 99;
+}
+
+.amp-error-notice .amp-notice {
+	animation: slideIn;
+	animation-delay: 0s;
+	animation-duration: 0.5s;
+	animation-fill-mode: both;
+	max-width: 400px;
 }

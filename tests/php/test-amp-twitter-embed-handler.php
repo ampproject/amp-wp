@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Tests\WithoutBlockPreRendering;
+use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
 
 /**
  * Class AMP_Twitter_Embed_Handler_Test

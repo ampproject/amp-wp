@@ -16,7 +16,7 @@ import { AMPNotice, NOTICE_TYPE_SUCCESS } from '../components/amp-notice';
  * The bottom section of the settings page.
  */
 export function SettingsFooter() {
-	const { didSaveOptions, editedOptions, saveOptions, savingOptions } = useContext( Options );
+	const { didSaveOptions, editedOptions, hasOptionsChanges, saveOptions, savingOptions } = useContext( Options );
 	const { downloadingTheme } = useContext( ReaderThemes );
 	const [ saved, setSaved ] = useState( false );
 
@@ -42,6 +42,7 @@ export function SettingsFooter() {
 	}, [ didSaveOptions, downloadingTheme ] );
 
 	const disabled = ! themeSupport ||
+		! hasOptionsChanges ||
 		savingOptions ||
 		didSaveOptions ||
 		downloadingTheme ||
@@ -61,7 +62,6 @@ export function SettingsFooter() {
 						{ __( 'Settings saved', 'amp' ) }
 					</p>
 				</AMPNotice>
-
 			) }
 		</section>
 	);
