@@ -235,8 +235,6 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			return;
 		}
 
-		$asset_handle = self::ASSET_HANDLE;
-
 		$asset_file   = AMP__DIR__ . '/assets/js/' . self::ASSET_HANDLE . '.asset.php';
 		$asset        = require $asset_file;
 		$dependencies = $asset['dependencies'];
