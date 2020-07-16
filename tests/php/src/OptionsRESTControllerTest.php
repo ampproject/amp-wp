@@ -57,7 +57,7 @@ class OptionsRESTControllerTest extends WP_UnitTestCase {
 	public function test_get_items_permissions_check() {
 		$this->assertWPError( $this->controller->get_items_permissions_check( new WP_REST_Request( 'GET', '/amp/v1/options' ) ) );
 
-		wp_set_current_user( 1 );
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		$this->assertTrue( $this->controller->get_items_permissions_check( new WP_REST_Request( 'GET', '/amp/v1/options' ) ) );
 	}
@@ -105,7 +105,7 @@ class OptionsRESTControllerTest extends WP_UnitTestCase {
 	 * @covers OptionsRESTController::update_items.
 	 */
 	public function test_update_items() {
-		wp_set_current_user( 1 );
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		$request      = new WP_REST_Request( 'POST', '/amp/v1/options' );
 		$valid_params = [
