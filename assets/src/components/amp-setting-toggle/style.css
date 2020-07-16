@@ -1,6 +1,10 @@
 /**
  * AMP setting toggle component.
  */
+.amp-setting-toggle p {
+	font-size: 13px;
+}
+
 .amp-setting-toggle__label-text h3 {
 	font-weight: 700;
 	font-size: 1.25rem;

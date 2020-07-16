@@ -23,6 +23,7 @@ import '../css/variables.css';
 import '../css/elements.css';
 import '../css/core-components.css';
 import './style.css';
+import { Panel, PanelBody } from '@wordpress/components';
 import { OptionsContextProvider, Options } from '../components/options-context-provider';
 import { ReaderThemesContextProvider } from '../components/reader-themes-context-provider';
 import { SiteSettingsProvider } from '../components/site-settings-provider';
@@ -105,9 +106,15 @@ function Root() {
 		<>
 			<TemplateModes />
 			<ReaderThemes />
-			<SupportedTemplates />
-			<MobileRedirection />
-			<PluginSuppression />
+			<Panel className="advanced-settings-container">
+				<PanelBody title={ __( 'Advanced', 'amp' ) } initialOpen={ false }>
+					<div className="advanced-settings">
+						<SupportedTemplates />
+						<MobileRedirection />
+						<PluginSuppression />
+					</div>
+				</PanelBody>
+			</Panel>
 			<SettingsFooter />
 			<UnsavedChangesWarning excludeUserContext={ true } />
 			{ error && <ErrorNotice errorMessage={ error.message || __( 'An error occurred. You might be offline or logged out.', 'amp' ) } /> }

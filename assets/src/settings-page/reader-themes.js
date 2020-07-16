@@ -7,6 +7,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
+import { Panel, PanelBody } from '@wordpress/components';
 import { Options } from '../components/options-context-provider';
 import { ReaderThemeSelection } from '../components/reader-theme-selection';
 
@@ -23,11 +24,10 @@ export function ReaderThemes() {
 	}
 
 	return (
-		<section className="reader-themes">
-			<h2>
-				{ __( 'Choose Reader Theme', 'amp' ) }
-			</h2>
-			<ReaderThemeSelection hideCurrentlyActiveTheme={ true } />
-		</section>
+		<Panel className="reader-themes">
+			<PanelBody title={ __( 'Choose Reader Theme', 'amp' ) } initialOpen={ false }>
+				<ReaderThemeSelection hideCurrentlyActiveTheme={ true } />
+			</PanelBody>
+		</Panel>
 	);
 }

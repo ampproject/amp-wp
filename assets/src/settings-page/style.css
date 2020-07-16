@@ -10,34 +10,6 @@
 	margin-bottom: 0.55rem;
 }
 
-.amp.amp-settings .selectable {
-	padding: 1.25rem 2.5rem;
-}
-
-.amp.amp-settings .selectable--left {
-	margin-left: 10px;
-	width: calc(100% - 10px); /* Offset box shadow. */
-}
-
-.amp-settings .amp-notice--large {
-	max-width: 450px;
-	padding-bottom: 0;
-	padding-top: 0;
-}
-
-/* Core form style overrides. */
-.amp-settings .form-table td {
-	padding: 0;
-}
-
-.amp-settings .form-table {
-	margin-top: 0;
-}
-
-.amp-settings .form-table > tbody > tr > th {
-	display: none;
-}
-
 /* Welcome section. */
 .settings-welcome {
 	margin-bottom: 2.5rem;
@@ -86,30 +58,8 @@
 	}
 }
 
-/* Reader themes section. */
-.amp-settings .choose-reader-theme__grid {
-
-	@media (min-width: 1300px) {
-		grid-template-columns: repeat(4, 1fr);
-	}
-
-	@media (min-width: 1600px) {
-		grid-template-columns: repeat(5, 1fr);
-	}
-
-	@media (min-width: 1900px) {
-		grid-template-columns: repeat(6, 1fr);
-	}
-}
-
-.amp-settings .reader-themes {
-	background-color: var(--white);
-	padding: 2.5rem;
-	margin-bottom: 2.5rem;
-}
-
 .amp-settings .theme-card .phone-inner {
-	max-height: 237px;
+	max-height: 365px;
 }
 
 /* Supported templates section. */
@@ -125,24 +75,6 @@
 	font-size: 13px;
 }
 
-.supported-templates .amp-notice {
-	margin-bottom: 1rem;
-}
-
-.supported-templates .amp-setting-toggle p {
-	font-size: 13px;
-}
-
-.amp .amp-template-support-field > td {
-	padding-top: 1rem;
-
-	@media (min-width: 783px) {
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		grid-gap: 1rem;
-	}
-}
-
 .mobile-redirection,
 .plugin-suppression {
 	margin-bottom: 2.25rem;
@@ -152,11 +84,11 @@
 	margin-bottom: 2.5rem;
 }
 
-.template-modes .template-mode-selection {
+.template-modes .template-mode-option {
 	margin-bottom: 0.5rem;
 }
 
-.amp.amp-settings .template-mode-selection > p {
+.amp.amp-settings .template-mode-option > p {
 	font-size: 16px;
 	margin-bottom: 1rem;
 }
@@ -255,6 +187,7 @@ li.error-kept {
 
 .supported-templates__fields {
 	display: grid;
+	gap: 1.5rem;
 
 	@media (min-width: 783px) {
 		grid-template-columns: repeat(2, 1fr);
@@ -295,7 +228,7 @@ li.error-kept {
 .amp-error-notice .amp-notice {
 	bottom: 3rem;
 	box-shadow: 0 30px 20px rgba(0, 0, 0, 0.1);
-	max-width: 250px;
+	max-width: 300px;
 	padding-right: 3rem;
 	position: fixed;
 	right: -1rem;
@@ -309,4 +242,15 @@ li.error-kept {
 	animation-duration: 0.5s;
 	animation-fill-mode: both;
 	max-width: 400px;
+}
+
+/* Panel bodies. */
+.reader-theme-selection,
+.advanced-settings {
+	padding: 0 1rem;
+}
+
+.settings-footer {
+	padding-bottom: 2.5rem;
+	padding-top: 2.5rem;
 }

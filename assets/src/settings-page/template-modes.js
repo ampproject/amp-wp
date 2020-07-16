@@ -17,7 +17,6 @@ import { useContext } from '@wordpress/element';
  * Internal dependencies
  */
 import { TemplateModeOption } from '../components/template-mode-option';
-import '../css/template-mode-selection.css';
 import { AMPNotice, NOTICE_SIZE_LARGE, NOTICE_TYPE_INFO } from '../components/amp-notice';
 import { Options } from '../components/options-context-provider';
 

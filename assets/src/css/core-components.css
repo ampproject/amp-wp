@@ -1,7 +1,7 @@
 /**
  * Buttons.
  */
-.amp .components-button {
+.amp .components-button:not(.components-panel__body-toggle) {
 	align-items: center;
 	border-radius: 3px;
 	color: var(--brand);
@@ -10,16 +10,38 @@
 	padding: 0.5rem 1rem;
 }
 
-.amp .components-button svg {
+.amp .components-button:not(.components-panel__body-toggle) svg {
 	fill: currentColor;
+	display: none;
+	margin-left: 0.5rem;
+	height: 18px;
+	width: 18px;
+
+	@media screen and (min-width: 783px) {
+		display: block;
+	}
+}
+
+.amp .components-panel__body-title button {
+	font-size: 16px;
+	font-weight: 600;
+}
+
+.amp .components-panel__body-title:hover {
+	background: var(--white);
+}
+
+.amp .components-button.components-panel__body-toggle svg {
+	height: 30px;
+	width: 30px;
 }
 
 .amp .components-button.is-link,
 .amp .components-button.is-link:hover,
 .amp .components-button.is-link:hover:not(:disabled),
-.amp .components-button:focus,
-.amp .components-button:focus:not(:disabled),
-.amp .components-button:hover {
+.amp .components-button:not(.components-panel__body-toggle):focus,
+.amp .components-button:not(.components-panel__body-toggle):focus:not(:disabled),
+.amp .components-button:not(.components-panel__body-toggle):hover {
 	box-shadow: none;
 	color: var(--brand);
 	text-decoration: none;
@@ -55,17 +77,6 @@
 	background-size: 100% 100%;
 	background-image: linear-gradient(-45deg, var(--brand) 28%, rgba(36, 89, 231, .8) 28%, rgb(36, 89, 231, .8) 72%, var(--brand) 72%);
 	border-color: var(--color-gray-medium);
-}
-
-.amp .components-button svg {
-	display: none;
-	margin-left: 0.5rem;
-	height: 18px;
-	width: 18px;
-
-	@media screen and (min-width: 783px) {
-		display: block;
-	}
 }
 
 .amp .components-toggle-control .components-base-control__field .components-toggle-control__label {

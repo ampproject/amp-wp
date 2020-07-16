@@ -13,7 +13,6 @@ import { Options } from '../../../components/options-context-provider';
 import { Loading } from '../../../components/loading';
 import { TemplateModeOverride } from '../../components/template-mode-override-context-provider';
 import { ScreenUI } from './screen-ui';
-import '../../../css/template-mode-selection.css';
 
 /**
  * Screen for selecting the template mode.
