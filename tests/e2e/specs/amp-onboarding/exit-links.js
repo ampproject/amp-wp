@@ -5,7 +5,7 @@ const { visitAdminPage } = require( '@wordpress/e2e-test-utils/build/visit-admin
 /**
  * Internal dependencies
  */
-const { goToOnboardingWizard, completeWizard, cleanUpSettings, moveToDoneScreen } = require( '../../utils/onboarding-wizard-utils' );
+const { goToOnboardingWizard, cleanUpSettings, moveToDoneScreen } = require( '../../utils/onboarding-wizard-utils' );
 
 describe( 'Onboarding wizard exit links', () => {
 	it( 'if no previous page, returns to settings when clicking close', async () => {
