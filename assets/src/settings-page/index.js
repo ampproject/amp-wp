@@ -35,7 +35,6 @@ import { Welcome } from './welcome';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
 import { MobileRedirection } from './mobile-redirection';
-import { ReaderThemes } from './reader-themes';
 import { SettingsFooter } from './settings-footer';
 import { PluginSuppression } from './plugin-suppression';
 
@@ -107,7 +106,6 @@ function Root() {
 		<>
 			<Welcome />
 			<TemplateModes />
-			<ReaderThemes />
 			<Panel className="advanced-settings-container">
 				<PanelBody title={ __( 'Advanced', 'amp' ) } initialOpen={ false }>
 					<div className="advanced-settings">

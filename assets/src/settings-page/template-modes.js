@@ -19,6 +19,7 @@ import { useContext } from '@wordpress/element';
 import { TemplateModeOption } from '../components/template-mode-option';
 import { AMPNotice, NOTICE_SIZE_LARGE, NOTICE_TYPE_INFO } from '../components/amp-notice';
 import { Options } from '../components/options-context-provider';
+import { ReaderThemes } from './reader-themes';
 
 /**
  * Provides the notice to show in the reader theme support mode selection.
@@ -112,6 +113,7 @@ export function TemplateModes() {
 				mode="reader"
 			>
 				{ getReaderNotice( themeSupport ) }
+				{ 'reader' === themeSupport && <ReaderThemes /> }
 			</TemplateModeOption>
 		</section>
 	);

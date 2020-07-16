@@ -45,7 +45,7 @@
 	margin-left: -16px;
 }
 
-.template-mode-option .components-panel__body-toggle.components-button {
+.template-mode-option .amp-notice .components-panel__body-toggle.components-button {
 	font-family: var(--font-noto);
 	font-size: 13px;
 	font-weight: 400;
@@ -53,9 +53,15 @@
 	padding-left: 0;
 }
 
-.template-mode-option .components-panel__body-title:hover {
+.template-mode-option .amp-notice .components-panel__body-title:hover {
 	background: rgba(0, 0, 0, 0) !important;
 }
+
+.template-mode-option .amp-notice .components-panel__body-title button .components-panel__arrow {
+	top: 1.125rem;
+	display: none; /* @todo Drawer will be expandable in 1.7 when site scan results are available. */
+}
+
 
 .template-mode-selection__description {
 	align-items: center;
@@ -106,15 +112,8 @@
 .template-mode-option .components-panel__body-title button {
 	padding-left: 1.5rem;
 	padding-right: 3rem;
-	padding-top: 0.5rem;
 	cursor: default;
 }
-
-.template-mode-option .components-panel__body-title button .components-panel__arrow {
-	top: 1.125rem;
-	display: none; /* @todo Drawer will be expandable in 1.7 when site scan results are available. */
-}
-
 
 .template-mode-option .components-panel__row {
 	flex-wrap: wrap;
@@ -122,4 +121,17 @@
 
 .template-mode-option .components-panel__row > * {
 	width: 100%;
+}
+
+.template-mode-option .reader-themes {
+	margin-top: 1.5rem;
+}
+
+.template-mode-option .reader-themes__current-theme {
+	font-weight: 400;
+}
+
+.template-mode-option .reader-themes__current-theme::before {
+	content: "-";
+	margin: 0 0.5rem;
 }
