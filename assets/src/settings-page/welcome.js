@@ -8,6 +8,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { Options } from '../components/options-context-provider';
+import { AMPNotice, NOTICE_SIZE_LARGE } from '../components/amp-notice';
 
 /**
  * Welcome component on the settings screen.
@@ -20,6 +21,14 @@ export function Welcome() {
 		onboarding_wizard_link: onboardingWizardLink,
 		plugin_configured: pluginConfigured,
 	} = editedOptions;
+
+	if ( ! onboardingWizardLink ) {
+		return (
+			<AMPNotice size={ NOTICE_SIZE_LARGE }>
+				{ __( 'You are using an old version of WordPress. Please upgrade to access all of the features of the AMP plugin.', 'amp' ) }
+			</AMPNotice>
+		);
+	}
 
 	return (
 		<div className="settings-welcome">
@@ -76,14 +85,10 @@ export function Welcome() {
 						{ __( 'The AMP configuration wizard can help you choose the best settings for your theme, plugins, and technical capabilities.', 'amp' ) }
 					</p>
 
-					{
-						onboardingWizardLink && (
-							<a className="components-button is-primary settings-welcome__button" href={ onboardingWizardLink } >
-								{ pluginConfigured ? __( 'Reopen Wizard', 'amp' ) : __( 'Open Wizard', 'amp' ) }
-							</a>
-						)
+					<a className="components-button is-primary settings-welcome__button" href={ onboardingWizardLink } >
+						{ pluginConfigured ? __( 'Reopen Wizard', 'amp' ) : __( 'Open Wizard', 'amp' ) }
+					</a>
 
-					}
 					{
 						customizerLink && (
 							<a className="components-button is-link" href={ customizerLink } rel="noreferrer">
