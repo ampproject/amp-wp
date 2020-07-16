@@ -167,7 +167,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	}
 
 	/**
-	 * Provides core assets in environments where they're not enqueued by default (i.e., WP <5.0).
+	 * Registers shimmed assets not guaranteed to be available in core.
 	 */
 	public function register_shimmed_assets() {
 		if ( ! wp_script_is( 'wp-api-fetch', 'registered' ) ) {
