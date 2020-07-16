@@ -39,7 +39,7 @@ class AMP_Post_Type_Support {
 	 * @return string[] Post types eligible for AMP.
 	 */
 	public static function get_eligible_post_types() {
-		return array_values(
+		$post_types = array_values(
 			get_post_types(
 				[
 					'public' => true,
@@ -47,6 +47,17 @@ class AMP_Post_Type_Support {
 				'names'
 			)
 		);
+
+		/**
+		 * Filters the list of post types eligible for AMP.
+		 *
+		 * By default the list includes those which are public.
+		 *
+		 * @since 1.6
+		 *
+		 * @param string[] $post_types Post types.
+		 */
+		return apply_filters( 'amp_eligible_post_types', $post_types );
 	}
 
 	/**
@@ -73,10 +84,11 @@ class AMP_Post_Type_Support {
 	 * @return string[] List of post types that support AMP.
 	 */
 	public static function get_supported_post_types() {
+		$eligible_post_types = self::get_eligible_post_types();
 		if ( ! amp_is_legacy() && AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) ) {
-			return self::get_eligible_post_types();
+			return $eligible_post_types;
 		}
-		return AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES, [] );
+		return array_intersect( AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES, [] ), $eligible_post_types );
 	}
 
 	/**
