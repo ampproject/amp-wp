@@ -89,7 +89,7 @@ function amp_get_customizer_url() {
 
 	/** This filter is documented in includes/settings/class-amp-customizer-design-settings.php */
 	if ( $is_legacy && ! apply_filters( 'amp_customizer_is_enabled', true ) ) {
-		return;
+		return '';
 	}
 
 	$args = [
@@ -108,14 +108,18 @@ function amp_get_customizer_url() {
  * Registers a submenu page to access the AMP template editor panel in the Customizer.
  */
 function amp_add_customizer_link() {
-	$menu_slug = amp_get_customizer_url();
+	$customizer_url = amp_get_customizer_url();
+
+	if ( ! $customizer_url ) {
+		return;
+	}
 
 	// Add the theme page.
 	add_theme_page(
 		__( 'AMP', 'amp' ),
 		__( 'AMP', 'amp' ),
 		'edit_theme_options',
-		$menu_slug
+		$customizer_url
 	);
 }
 
