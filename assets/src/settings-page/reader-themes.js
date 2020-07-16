@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { useContext } from '@wordpress/element';
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -17,7 +17,7 @@ import { ReaderThemes as ReaderThemesContext } from '../components/reader-themes
  */
 export function ReaderThemes() {
 	const { editedOptions } = useContext( Options );
-	const { currentTheme } = useContext( ReaderThemesContext );
+	const { selectedTheme } = useContext( ReaderThemesContext );
 
 	const { theme_support: themeSupport } = editedOptions;
 
@@ -29,22 +29,15 @@ export function ReaderThemes() {
 		<Panel className="reader-themes">
 			<PanelBody
 				title={
-					(
+					selectedTheme ? (
 						<>
-							{ __( 'Choose Reader Theme', 'amp' ) }
-							{ currentTheme && (
-								<span className="reader-themes__current-theme">
-									{
-										sprintf(
-										// Translators: Placeholder is a reader theme name.
-											__( 'Current theme: %s', 'amp' ),
-											currentTheme.name,
-										)
-									}
-								</span>
-							) }
+							{ __( 'Chosen Reader Theme:', 'amp' ) }
+							<span className="reader-themes__current-theme">
+								{ selectedTheme.name }
+							</span>
 						</>
-					) }
+					) : __( 'Choose Reader Theme', 'amp' )
+				}
 				initialOpen={ false }>
 				<ReaderThemeSelection hideCurrentlyActiveTheme={ true } />
 			</PanelBody>
