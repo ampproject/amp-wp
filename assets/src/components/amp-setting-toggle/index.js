@@ -22,17 +22,20 @@ import './style.css';
  * @param {Function} props.onChange Change handler.
  * @param {?string} props.text Toggle text.
  * @param {string} props.title Toggle title.
+ * @param {number} props.headingLevel Heading level for title.
  */
-export function AMPSettingToggle( { checked, disabled = false, onChange, text, title } ) {
+export function AMPSettingToggle( { checked, disabled = false, onChange, text, title, headingLevel } ) {
+	const Heading = headingLevel ? `h${ headingLevel }` : 'h3';
+
 	return (
 		<div className={ `amp-setting-toggle ${ disabled ? 'amp-setting-toggle--disabled' : '' }` }>
 			<ToggleControl
 				checked={ ! disabled && checked }
 				label={ (
 					<div className="amp-setting-toggle__label-text">
-						<h3>
+						<Heading>
 							{ title }
-						</h3>
+						</Heading>
 						{ text && (
 							<p>
 								{ text }
@@ -49,5 +52,6 @@ AMPSettingToggle.propTypes = {
 	disabled: PropTypes.bool,
 	onChange: PropTypes.func.isRequired,
 	text: PropTypes.string,
+	headingLevel: PropTypes.number,
 	title: PropTypes.string.isRequired,
 };
