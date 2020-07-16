@@ -17,7 +17,7 @@ import { ReaderThemes as ReaderThemesContext } from '../components/reader-themes
  */
 export function ReaderThemes() {
 	const { editedOptions } = useContext( Options );
-	const { currentTheme } = useContext( ReaderThemesContext );
+	const { selectedTheme } = useContext( ReaderThemesContext );
 
 	const { theme_support: themeSupport } = editedOptions;
 
@@ -29,11 +29,11 @@ export function ReaderThemes() {
 		<Panel className="reader-themes">
 			<PanelBody
 				title={
-					currentTheme ? (
+					selectedTheme ? (
 						<>
 							{ __( 'Chosen Reader Theme:', 'amp' ) }
 							<span className="reader-themes__current-theme">
-								{ currentTheme.name }
+								{ selectedTheme.name }
 							</span>
 						</>
 					) : __( 'Choose Reader Theme', 'amp' )
