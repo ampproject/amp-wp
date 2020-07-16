@@ -34,8 +34,9 @@ function waitASecond() {
  * @param {string} props.optionsRestEndpoint REST endpoint to retrieve options.
  * @param {boolean} props.populateDefaultValues Whether default values should be populated.
  * @param {boolean} props.hasErrorBoundary Whether the component is wrapped in an error boundary.
+ * @param {boolean} props.delaySave Whether to delay updating state when saving data.
  */
-export function OptionsContextProvider( { children, optionsRestEndpoint, populateDefaultValues, hasErrorBoundary = false } ) {
+export function OptionsContextProvider( { children, optionsRestEndpoint, populateDefaultValues, hasErrorBoundary = false, delaySave = false } ) {
 	const [ updates, setUpdates ] = useState( {} );
 	const [ fetchingOptions, setFetchingOptions ] = useState( false );
 	const [ savingOptions, setSavingOptions ] = useState( false );
@@ -134,7 +135,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint, populat
 							data: updatesToSave,
 						},
 					),
-					waitASecond(),
+					delaySave ? waitASecond() : () => undefined,
 				],
 			);
 
@@ -155,12 +156,13 @@ export function OptionsContextProvider( { children, optionsRestEndpoint, populat
 			if ( hasErrorBoundary ) {
 				setAsyncError( e );
 			}
+
 			return;
 		}
 
 		setDidSaveOptions( true );
 		setSavingOptions( false );
-	}, [ hasErrorBoundary, optionsRestEndpoint, setAsyncError, originalOptions, setError, updates ] );
+	}, [ delaySave, hasErrorBoundary, optionsRestEndpoint, setAsyncError, originalOptions, setError, updates ] );
 
 	/**
 	 * Updates options in state.
@@ -203,6 +205,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint, populat
 
 OptionsContextProvider.propTypes = {
 	children: PropTypes.any,
+	delaySave: PropTypes.bool,
 	hasErrorBoundary: PropTypes.bool,
 	optionsRestEndpoint: PropTypes.string.isRequired,
 	populateDefaultValues: PropTypes.bool.isRequired,

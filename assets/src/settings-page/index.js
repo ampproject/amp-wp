@@ -64,6 +64,12 @@ Providers.propTypes = {
 	children: PropTypes.any,
 };
 
+/**
+ * Renders an error notice.
+ *
+ * @param {Object} props Component props.
+ * @param {string} props.errorMessage Error message text.
+ */
 function ErrorNotice( { errorMessage } ) {
 	return (
 		<div className="amp-error-notice">
@@ -88,6 +94,7 @@ ErrorNotice.propTypes = {
  */
 function Root() {
 	const { error } = useContext( ErrorContext );
+
 	return (
 		<>
 			<TemplateModes />
@@ -97,7 +104,7 @@ function Root() {
 			<PluginSuppression />
 			<SettingsFooter />
 			<UnsavedChangesWarning excludeUserContext={ true } />
-			{ error && <ErrorNotice errorMessage={ error.message } /> }
+			{ error && <ErrorNotice errorMessage={ error.message || __( 'An error occurred. You might be offline or logged out.', 'amp' ) } /> }
 		</>
 	);
 }

@@ -51,6 +51,7 @@ export function Providers( { children } ) {
 		<ErrorBoundary exitLink={ FINISH_LINK } fullScreen={ true }>
 			<ErrorContextProvider>
 				<OptionsContextProvider
+					delaySave={ true }
 					hasErrorBoundary={ true }
 					optionsRestEndpoint={ OPTIONS_REST_ENDPOINT }
 					populateDefaultValues={ false }
