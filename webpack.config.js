@@ -262,60 +262,13 @@ const setup = {
 const settingsPage = {
 	...sharedConfig,
 	entry: {
-		'amp-settings': [
-			'./assets/src/settings-page',
-		],
-	},
-	externals: {
-		'amp-settings': 'ampSettings',
-	},
-	plugins: [
-		...sharedConfig.plugins.filter(
-			( plugin ) => plugin.constructor.name !== 'DependencyExtractionWebpackPlugin',
-		),
-		new DependencyExtractionWebpackPlugin( {
-			useDefaults: false,
-			// Most dependencies will be bundled for the AMP setup screen for compatibility across WP versions.
-			requestToHandle: ( handle ) => {
-				switch ( handle ) {
-					case '@wordpress/api-fetch':
-					case '@wordpress/dom-ready':
-					case '@wordpress/html-entities':
-						return defaultRequestToHandle( handle );
-
-					default:
-						return undefined;
-				}
-			},
-			requestToExternal: ( external ) => {
-				switch ( external ) {
-					case '@wordpress/api-fetch':
-					case '@wordpress/dom-ready':
-					case '@wordpress/html-entities':
-						return defaultRequestToExternal( external );
-
-					default:
-						return undefined;
-				}
-			},
-		} ),
-		new WebpackBar( {
-			name: 'Settings page',
-			color: '#67b255',
-		} ),
-	],
-};
-
-const settingsPage49 = {
-	...sharedConfig,
-	entry: {
 		'wp-api-fetch': [
 			'./assets/src/polyfills/api-fetch.js',
 		],
 		'wp-components': [
 			'@wordpress/components/build-style/style.css',
 		],
-		'amp-settings-4-9': [
+		'amp-settings': [
 			'./assets/src/settings-page',
 		],
 	},
@@ -354,7 +307,7 @@ const settingsPage49 = {
 			},
 		} ),
 		new WebpackBar( {
-			name: '4.9 Settings page',
+			name: 'Settings page',
 			color: '#67b255',
 		} ),
 	],
@@ -383,6 +336,5 @@ module.exports = [
 	wpPolyfills,
 	setup,
 	settingsPage,
-	settingsPage49,
 	mobileRedirection,
 ];
