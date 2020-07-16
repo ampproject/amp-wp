@@ -64,27 +64,19 @@ PostTypeCheckbox.propTypes = {
 function SupportedPostTypesFieldset() {
 	const { editedOptions } = useContext( Options );
 
-	const {
-		theme_support: themeSupport,
-		reader_theme: readerTheme,
-		supportable_post_types: supportablePostTypes,
-	} = editedOptions || {};
+	const { supportable_post_types: supportablePostTypes } = editedOptions || {};
 
 	if ( ! supportablePostTypes ) {
 		return null;
 	}
 
-	const isLegacy = 'reader' === themeSupport && 'legacy' === readerTheme;
-
 	return (
 		<fieldset id="supported_post_types_fieldset">
-			{ ! isLegacy && (
-				<h4 className="title">
-					{ __( 'Content Types', 'amp' ) }
-				</h4>
-			) }
+			<h4 className="title">
+				{ __( 'Content Types', 'amp' ) }
+			</h4>
 			<p>
-				{ __( 'The following content types will be available as AMP:', 'amp' ) }
+				{ __( 'Content types enabled for AMP:', 'amp' ) }
 			</p>
 			<ul>
 				{ supportablePostTypes.map( ( postTypeObject ) => {
@@ -186,7 +178,12 @@ SupportedTemplatesCheckboxes.propTypes = {
 export function SupportedTemplatesFieldset() {
 	const { editedOptions } = useContext( Options );
 
-	const { theme_support: themeSupport, supportable_templates: supportableTemplates, reader_theme: readerTheme } = editedOptions || {};
+	const {
+		all_templates_supported: allTemplatesSupported,
+		theme_support: themeSupport,
+		supportable_templates: supportableTemplates,
+		reader_theme: readerTheme,
+	} = editedOptions || {};
 
 	if ( ( 'reader' === themeSupport && 'legacy' === readerTheme ) || ! supportableTemplates ) {
 		return null;
@@ -198,18 +195,31 @@ export function SupportedTemplatesFieldset() {
 				{ __( 'Templates', 'amp' ) }
 			</h4>
 
-			{ /* dangerouslySetInnerHTML reason: Link embedded in translation string. */ }
-			<p
-				dangerouslySetInnerHTML={ {
-					__html: sprintf(
-						/* translators: placeholder is link to WordPress handbook page about the template hierarchy. */
-						__( 'You may enable AMP for a subset of the WordPress <a href="%s" target="_blank" rel="noreferrer">Template Hierarchy</a>:', 'amp' ),
-						'https://developer.wordpress.org/themes/basics/template-hierarchy/',
-					),
-				} }
-			/>
+			<SupportedTemplatesToggle />
 
-			<SupportedTemplatesCheckboxes supportableTemplates={ supportableTemplates } />
+			{ ! allTemplatesSupported ? (
+				<>
+					{ /* dangerouslySetInnerHTML reason: Link embedded in translation string. */ }
+					<p
+						dangerouslySetInnerHTML={ {
+							__html: sprintf(
+								/* translators: placeholder is link to WordPress handbook page about the template hierarchy. */
+								__( 'Limit AMP on a subset of the WordPress <a href="%s" target="_blank" rel="noreferrer">Template Hierarchy</a>:', 'amp' ),
+								'https://developer.wordpress.org/themes/basics/template-hierarchy/',
+							),
+						} }
+					/>
+
+					{ supportableTemplates
+						? <SupportedTemplatesCheckboxes supportableTemplates={ supportableTemplates } />
+						: (
+							<p>
+								{ __( 'Your site does not provide any templates to support.', 'amp' ) }
+							</p>
+						)
+					}
+				</>
+			) : null }
 		</fieldset>
 	);
 }
@@ -218,26 +228,16 @@ export function SupportedTemplatesFieldset() {
  * Component rendering the supported templates section of the settings page, including the "Serve all templates as AMP" toggle.
  */
 export function SupportedTemplates() {
-	const { editedOptions } = useContext( Options );
-
-	const { all_templates_supported: allTemplatesSupported, theme_support: themeSupport, reader_theme: readerTheme } = editedOptions || {};
-
-	const isLegacy = 'reader' === themeSupport && 'legacy' === readerTheme;
-
 	return (
 		<section>
 			<h2>
 				{ __( 'Supported Templates', 'amp' ) }
 			</h2>
 			<Selectable className="supported-templates">
-				<SupportedTemplatesToggle />
-				{ ( ! allTemplatesSupported || isLegacy ) && (
-					<div className="supported-templates__fields">
-						<SupportedPostTypesFieldset />
-						<SupportedTemplatesFieldset />
-					</div>
-				) }
-
+				<div className="supported-templates__fields">
+					<SupportedPostTypesFieldset />
+					<SupportedTemplatesFieldset />
+				</div>
 			</Selectable>
 		</section>
 	);
