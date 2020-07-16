@@ -121,7 +121,9 @@ export function SupportedTemplatesCheckboxes( { supportableTemplates } ) {
 		return null;
 	}
 
-	const hasPageOnFront = supportedTemplates.includes( 'is_front_page' );
+	const hasPageOnFront = Boolean( supportableTemplates.find( ( supportableTemplate ) => {
+		return supportableTemplate.id === 'is_front_page';
+	} ) );
 	const isPageSupported = supportedPostTypes.includes( 'page' );
 	const relevantSupportableTemplates = ! hasPageOnFront ? supportableTemplates : supportableTemplates.filter( ( supportableTemplate ) => {
 		return (
