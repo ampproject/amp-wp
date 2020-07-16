@@ -11,7 +11,7 @@ import { createContext, useState } from '@wordpress/element';
 export const ErrorContext = createContext();
 
 /**
- * Erro \r context provider.
+ * Error context provider.
  *
  * @param {Object} props Component props.
  * @param {any} props.children Component children.

@@ -160,7 +160,7 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 
 		$options[ self::SUPPRESSIBLE_PLUGINS ]   = $this->plugin_suppression->get_suppressible_plugins_with_details();
 		$options[ self::SUPPORTABLE_POST_TYPES ] = array_map(
-			function( $slug ) {
+			static function( $slug ) {
 				$post_type                 = (array) get_post_type_object( $slug );
 				$post_type['supports_amp'] = post_type_supports( $post_type['name'], AMP_Post_Type_Support::SLUG );
 				return $post_type;
@@ -185,27 +185,32 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 	private function get_nested_supportable_templates( $supportable_templates, $parent_template_id = null ) {
 		$nested_supportable_templates = [];
 
-		foreach ( $supportable_templates as $id => $option ) {
-			if ( $parent_template_id ? empty( $option['parent'] ) || $parent_template_id !== $option['parent'] : ! empty( $option['parent'] ) ) {
+		foreach ( $supportable_templates as $id => $supportable_template ) {
+			if (
+				$parent_template_id ?
+					empty( $supportable_template['parent'] ) || $parent_template_id !== $supportable_template['parent']
+					:
+					! empty( $supportable_template['parent'] )
+			) {
 				continue;
 			}
 
 			// Skip showing an option if it doesn't have a label.
-			if ( empty( $option['label'] ) ) {
+			if ( empty( $supportable_template['label'] ) ) {
 				continue;
 			}
 
-			$option['id']       = $id;
-			$option['children'] = $this->get_nested_supportable_templates( $supportable_templates, $id );
+			$supportable_template['id']       = $id;
+			$supportable_template['children'] = $this->get_nested_supportable_templates( $supportable_templates, $id );
 
 			// Omit obsolete properties.
 			unset(
-				$option['supported'],
-				$option['user_supported'],
-				$option['immutable']
+				$supportable_template['supported'],
+				$supportable_template['user_supported'],
+				$supportable_template['immutable']
 			);
 
-			$nested_supportable_templates[] = $option;
+			$nested_supportable_templates[] = $supportable_template;
 		}
 
 		return $nested_supportable_templates;
