@@ -780,8 +780,7 @@ class AMP_Theme_Support {
 	public static function get_supportable_templates() {
 		$templates = [
 			'is_singular' => [
-				'label'       => __( 'Singular', 'amp' ),
-				'description' => __( 'Required for the above content types.', 'amp' ),
+				'label' => __( 'Singular', 'amp' ),
 			],
 		];
 		if ( 'page' === get_option( 'show_on_front' ) ) {

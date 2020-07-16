@@ -15,10 +15,6 @@ async function testStandardAndTransitionalSupportedTemplateToggle() {
 	await expect( page ).toClick( '.supported-templates .amp-setting-toggle input:checked' );
 	await expect( page ).toMatchElement( '.supported-templates .amp-setting-toggle input:not(:checked)' );
 	await expect( page ).not.toMatchElement( '#supported_templates_fieldset.hidden' );
-	await expect( page ).toMatchElement( '#amp-options-supported-templates-is_author:not(:checked)' );
-	await expect( page ).toClick( '#amp-options-supported-templates-is_archive:not(:checked)' );
-	await expect( page ).toMatchElement( '#amp-options-supported-templates-is_archive:checked' );
-	await expect( page ).toMatchElement( '#amp-options-supported-templates-is_author:checked' );
 }
 
 async function testMobileRedirectToggle() {

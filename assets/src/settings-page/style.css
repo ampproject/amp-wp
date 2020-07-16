@@ -101,6 +101,14 @@
 	margin-bottom: 3rem;
 }
 
+.supported-templates h4 {
+	font-size: 1rem;
+}
+
+.supported-templates p {
+	font-size: 13px;
+}
+
 .supported-templates .amp-notice {
 	margin-bottom: 1rem;
 }
@@ -214,4 +222,67 @@ li.error-kept {
 	#suppressed-plugins-table td {
 		display: table-cell;
 	}
+}
+
+/* Supported templates. */
+#supported_templates_fieldset ul ul {
+	margin-left: 40px;
+}
+
+.supported-templates__fields {
+	display: grid;
+
+	@media (min-width: 783px) {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@keyframes slideIn {
+
+	from {
+		transform: translate3d(300px, 0, 0);
+	}
+
+	to {
+		transform: translate3d(0, 0, 0);
+	}
+}
+
+@keyframes fadeOut {
+
+	from {
+		opacity: 1;
+	}
+
+	to {
+		opacity: 0;
+	}
+}
+
+
+.amp .amp-save-success-notice.amp-notice {
+	animation: slideIn, fadeOut;
+	animation-delay: 0s, 8s;
+	animation-duration: 0.5s, 0.5s;
+	animation-fill-mode: both;
+}
+
+.amp .amp-save-success-notice.amp-notice,
+.amp-error-notice .amp-notice {
+	bottom: 3rem;
+	box-shadow: 0 30px 20px rgba(0, 0, 0, 0.1);
+	max-width: 250px;
+	padding-right: 3rem;
+	position: fixed;
+	right: -1rem;
+	width: 100%;
+	z-index: 99;
+}
+
+.amp-error-notice .amp-notice {
+	animation: slideIn;
+	animation-delay: 0s;
+	animation-duration: 0.5s;
+	animation-fill-mode: both;
+	max-width: 400px;
 }

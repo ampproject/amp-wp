@@ -66,3 +66,19 @@
 	border-color: var(--brand);
 	box-shadow: 0 0 0 1px var(--brand);
 }
+
+.amp .components-checkbox-control__input[type="checkbox"]:checked {
+	background: var(--brand);
+	border-color: var(--brand);
+}
+
+.amp .components-checkbox-control__input[type="checkbox"] {
+	height: 18px;
+	width: 18px;
+}
+
+.amp svg.components-checkbox-control__checked {
+	width: 18px;
+	height: 22px;
+	left: 0;
+}

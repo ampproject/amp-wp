@@ -9,6 +9,7 @@
 namespace AmpProject\AmpWP;
 
 use AMP_Options_Manager;
+use AMP_Post_Type_Support;
 use AMP_Theme_Support;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Infrastructure\Delayed;
@@ -40,6 +41,20 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 	 * @var string
 	 */
 	const SUPPRESSIBLE_PLUGINS = 'suppressible_plugins';
+
+	/**
+	 * Key for post type data.
+	 *
+	 * @var string
+	 */
+	const SUPPORTABLE_POST_TYPES = 'supportable_post_types';
+
+	/**
+	 * Key for supportable templates data.
+	 *
+	 * @var string
+	 */
+	const SUPPORTABLE_TEMPLATES = 'supportable_templates';
 
 	/**
 	 * Reader themes provider class.
@@ -143,11 +158,62 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 		// amp_admin_get_preview_permalink calls AMP_Options_Manager::get_options, leading to infinite recursion.
 		$options[ self::PREVIEW_PERMALINK ] = amp_admin_get_preview_permalink();
 
-		$options[ self::SUPPRESSIBLE_PLUGINS ] = $this->plugin_suppression->get_suppressible_plugins_with_details();
+		$options[ self::SUPPRESSIBLE_PLUGINS ]   = $this->plugin_suppression->get_suppressible_plugins_with_details();
+		$options[ self::SUPPORTABLE_POST_TYPES ] = array_map(
+			static function( $slug ) {
+				$post_type                 = (array) get_post_type_object( $slug );
+				$post_type['supports_amp'] = post_type_supports( $post_type['name'], AMP_Post_Type_Support::SLUG );
+				return $post_type;
+			},
+			AMP_Post_Type_Support::get_eligible_post_types()
+		);
+
+		$options[ self::SUPPORTABLE_TEMPLATES ] = $this->get_nested_supportable_templates( AMP_Theme_Support::get_supportable_templates() );
 
 		$options[ Option::SUPPRESSED_PLUGINS ] = $this->plugin_suppression->prepare_suppressed_plugins_for_response( $options[ Option::SUPPRESSED_PLUGINS ] );
 
 		return rest_ensure_response( $options );
+	}
+
+	/**
+	 * Provides a hierarchical array of supportable templates.
+	 *
+	 * @param array[]     $supportable_templates Template options.
+	 * @param string|null $parent_template_id    The parent to provide templates for.
+	 * @return array[] Supportable templates with nesting.
+	 */
+	private function get_nested_supportable_templates( $supportable_templates, $parent_template_id = null ) {
+		$nested_supportable_templates = [];
+
+		foreach ( $supportable_templates as $id => $supportable_template ) {
+			if (
+				$parent_template_id ?
+					empty( $supportable_template['parent'] ) || $parent_template_id !== $supportable_template['parent']
+					:
+					! empty( $supportable_template['parent'] )
+			) {
+				continue;
+			}
+
+			// Skip showing an option if it doesn't have a label.
+			if ( empty( $supportable_template['label'] ) ) {
+				continue;
+			}
+
+			$supportable_template['id']       = $id;
+			$supportable_template['children'] = $this->get_nested_supportable_templates( $supportable_templates, $id );
+
+			// Omit obsolete properties.
+			unset(
+				$supportable_template['supported'],
+				$supportable_template['user_supported'],
+				$supportable_template['immutable']
+			);
+
+			$nested_supportable_templates[] = $supportable_template;
+		}
+
+		return $nested_supportable_templates;
 	}
 
 	/**
@@ -210,12 +276,32 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 					Option::ALL_TEMPLATES_SUPPORTED => [
 						'type' => 'boolean',
 					],
+					Option::SUPPRESSED_PLUGINS      => [
+						'type' => 'object',
+					],
 					self::SUPPRESSIBLE_PLUGINS      => [
 						'type'     => 'object',
 						'readonly' => true,
 					],
-					Option::SUPPRESSED_PLUGINS      => [
-						'type' => 'object',
+					Option::SUPPORTED_TEMPLATES     => [
+						'type'  => 'array',
+						'items' => [
+							'type' => 'string',
+						],
+					],
+					Option::SUPPORTED_POST_TYPES    => [
+						'type'  => 'array',
+						'items' => [
+							'type' => 'string',
+						],
+					],
+					self::SUPPORTABLE_POST_TYPES    => [
+						'type'     => 'array',
+						'readonly' => true,
+					],
+					self::SUPPORTABLE_TEMPLATES     => [
+						'type'     => 'array',
+						'readonly' => true,
 					],
 				],
 			];

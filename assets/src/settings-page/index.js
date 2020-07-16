@@ -13,7 +13,8 @@ import {
  * WordPress dependencies
  */
 import domReady from '@wordpress/dom-ready';
-import { render } from '@wordpress/element';
+import { render, useContext } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -25,6 +26,9 @@ import './style.css';
 import { OptionsContextProvider } from '../components/options-context-provider';
 import { ReaderThemesContextProvider } from '../components/reader-themes-context-provider';
 import { SiteSettingsProvider } from '../components/site-settings-provider';
+import { UnsavedChangesWarning } from '../components/unsaved-changes-warning';
+import { AMPNotice, NOTICE_TYPE_WARNING } from '../components/amp-notice';
+import { ErrorContextProvider, ErrorContext } from '../components/error-context-provider';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
 import { MobileRedirection } from './mobile-redirection';
@@ -61,9 +65,36 @@ Providers.propTypes = {
 };
 
 /**
+ * Renders an error notice.
+ *
+ * @param {Object} props Component props.
+ * @param {string} props.errorMessage Error message text.
+ */
+function ErrorNotice( { errorMessage } ) {
+	return (
+		<div className="amp-error-notice">
+			<AMPNotice type={ NOTICE_TYPE_WARNING }>
+				<p>
+					<strong>
+						{ __( 'Error:', 'amp' ) }
+					</strong>
+					{ ' ' }
+					{ errorMessage }
+				</p>
+			</AMPNotice>
+		</div>
+	);
+}
+ErrorNotice.propTypes = {
+	errorMessage: PropTypes.string,
+};
+
+/**
  * Settings page application root.
  */
 function Root() {
+	const { error } = useContext( ErrorContext );
+
 	return (
 		<>
 			<TemplateModes />
@@ -72,6 +103,8 @@ function Root() {
 			<MobileRedirection />
 			<PluginSuppression />
 			<SettingsFooter />
+			<UnsavedChangesWarning excludeUserContext={ true } />
+			{ error && <ErrorNotice errorMessage={ error.message || __( 'An error occurred. You might be offline or logged out.', 'amp' ) } /> }
 		</>
 	);
 }
@@ -81,9 +114,11 @@ domReady( () => {
 
 	if ( root ) {
 		render( (
-			<Providers>
-				<Root optionsRestEndpoint={ OPTIONS_REST_ENDPOINT } />
-			</Providers>
+			<ErrorContextProvider>
+				<Providers>
+					<Root optionsRestEndpoint={ OPTIONS_REST_ENDPOINT } />
+				</Providers>
+			</ErrorContextProvider>
 		), root );
 	}
 } );

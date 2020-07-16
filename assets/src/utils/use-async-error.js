@@ -7,17 +7,17 @@ import { useState, useCallback } from '@wordpress/element';
  * The error boundary component doesn't automatically catch errors in async functions.
  * This allows errors to be explicitly thrown.
  */
-export function useError() {
-	const [ error, setError ] = useState();
+export function useAsyncError() {
+	const [ error, setAsyncError ] = useState();
 
 	const memoizedSetError = useCallback(
 		( e ) => {
-			setError( () => {
+			setAsyncError( () => {
 				throw e;
 			} );
 		},
 		[],
 	);
 
-	return { error, setError: memoizedSetError };
+	return { error, setAsyncError: memoizedSetError };
 }
