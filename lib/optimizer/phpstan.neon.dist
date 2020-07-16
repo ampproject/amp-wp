@@ -6,3 +6,6 @@ parameters:
 	inferPrivatePropertyTypeFromConstructor: true
 	paths:
 		- src/
+	ignoreErrors:
+	# See https://github.com/phpstan/phpstan/issues/3611
+	- '#^Class .*? has an unused method .*?\(\)\.$#'
