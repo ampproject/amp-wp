@@ -196,7 +196,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 				$asset_handle,
 				implode(
 					"\n",
-					array(
+					[
 						sprintf(
 							'wp.apiFetch.nonceMiddleware = wp.apiFetch.createNonceMiddleware( "%s" );',
 							( wp_installing() && ! is_multisite() ) ? '' : wp_create_nonce( 'wp_rest' )
@@ -207,7 +207,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 							'wp.apiFetch.nonceEndpoint = "%s";',
 							admin_url( 'admin-ajax.php?action=rest-nonce' )
 						),
-					)
+					]
 				),
 				'after'
 			);
