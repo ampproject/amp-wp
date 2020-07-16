@@ -8,5 +8,3 @@ parameters:
 		- src/
 	ignoreErrors:
 		- '#^PHPDoc tag @throws with type AmpProject\\Exception\\FailedRemoteRequest is not subtype of Throwable$#'
-		# See https://github.com/phpstan/phpstan/issues/3611
-		- '#^Class .*? has an unused method .*?\(\)\.$#'
