@@ -23,16 +23,18 @@ import '../css/variables.css';
 import '../css/elements.css';
 import '../css/core-components.css';
 import './style.css';
-import { OptionsContextProvider } from '../components/options-context-provider';
+import { Panel, PanelBody } from '@wordpress/components';
+import { OptionsContextProvider, Options } from '../components/options-context-provider';
 import { ReaderThemesContextProvider } from '../components/reader-themes-context-provider';
 import { SiteSettingsProvider } from '../components/site-settings-provider';
+import { Loading } from '../components/loading';
 import { UnsavedChangesWarning } from '../components/unsaved-changes-warning';
 import { AMPNotice, NOTICE_TYPE_WARNING } from '../components/amp-notice';
 import { ErrorContextProvider, ErrorContext } from '../components/error-context-provider';
+import { Welcome } from './welcome';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
 import { MobileRedirection } from './mobile-redirection';
-import { ReaderThemes } from './reader-themes';
 import { SettingsFooter } from './settings-footer';
 import { PluginSuppression } from './plugin-suppression';
 
@@ -93,15 +95,26 @@ ErrorNotice.propTypes = {
  * Settings page application root.
  */
 function Root() {
+	const { fetchingOptions } = useContext( Options );
 	const { error } = useContext( ErrorContext );
+
+	if ( false !== fetchingOptions ) {
+		return <Loading />;
+	}
 
 	return (
 		<>
+			<Welcome />
 			<TemplateModes />
-			<ReaderThemes />
-			<SupportedTemplates />
-			<MobileRedirection />
-			<PluginSuppression />
+			<Panel className="advanced-settings-container">
+				<PanelBody title={ __( 'Advanced', 'amp' ) } initialOpen={ false }>
+					<div className="advanced-settings">
+						<SupportedTemplates />
+						<MobileRedirection />
+						<PluginSuppression />
+					</div>
+				</PanelBody>
+			</Panel>
 			<SettingsFooter />
 			<UnsavedChangesWarning excludeUserContext={ true } />
 			{ error && <ErrorNotice errorMessage={ error.message || __( 'An error occurred. You might be offline or logged out.', 'amp' ) } /> }

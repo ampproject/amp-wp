@@ -17,9 +17,9 @@ import { useContext } from '@wordpress/element';
  * Internal dependencies
  */
 import { TemplateModeOption } from '../components/template-mode-option';
-import '../css/template-mode-selection.css';
 import { AMPNotice, NOTICE_SIZE_LARGE, NOTICE_TYPE_INFO } from '../components/amp-notice';
 import { Options } from '../components/options-context-provider';
+import { ReaderThemes } from './reader-themes';
 
 /**
  * Provides the notice to show in the reader theme support mode selection.
@@ -71,7 +71,7 @@ export function TemplateModes() {
 	const { theme_support: themeSupport } = editedOptions;
 
 	return (
-		<section className="template-mode-selection">
+		<section className="template-modes">
 			<h2>
 				{ __( 'Template mode', 'amp' ) }
 			</h2>
@@ -113,6 +113,7 @@ export function TemplateModes() {
 				mode="reader"
 			>
 				{ getReaderNotice( themeSupport ) }
+				{ 'reader' === themeSupport && <ReaderThemes /> }
 			</TemplateModeOption>
 		</section>
 	);

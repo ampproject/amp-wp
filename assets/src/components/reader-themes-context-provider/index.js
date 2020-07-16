@@ -150,6 +150,10 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 				// Screenshots are required.
 				setThemes( fetchedThemes );
 			} catch ( e ) {
+				if ( hasUnmounted.current === true ) {
+					return;
+				}
+
 				setError( e );
 
 				if ( hasErrorBoundary ) {

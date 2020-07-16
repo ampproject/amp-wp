@@ -80,14 +80,17 @@ function amp_admin_get_preview_permalink() {
 }
 
 /**
- * Registers a submenu page to access the AMP template editor panel in the Customizer.
+ * Provides a URL to the customizer.
+ *
+ * @return string
  */
-function amp_add_customizer_link() {
+function amp_get_customizer_url() {
 	$is_legacy = amp_is_legacy();
+	$mode      = AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
 
 	/** This filter is documented in includes/settings/class-amp-customizer-design-settings.php */
-	if ( $is_legacy && ! apply_filters( 'amp_customizer_is_enabled', true ) ) {
-		return;
+	if ( 'reader' !== $mode || ( $is_legacy && ! apply_filters( 'amp_customizer_is_enabled', true ) ) ) {
+		return '';
 	}
 
 	$args = [
@@ -99,14 +102,25 @@ function amp_add_customizer_link() {
 		$args[ amp_get_slug() ] = '1';
 	}
 
-	$menu_slug = add_query_arg( urlencode_deep( $args ), 'customize.php' );
+	return add_query_arg( urlencode_deep( $args ), 'customize.php' );
+}
+
+/**
+ * Registers a submenu page to access the AMP template editor panel in the Customizer.
+ */
+function amp_add_customizer_link() {
+	$customizer_url = amp_get_customizer_url();
+
+	if ( ! $customizer_url ) {
+		return;
+	}
 
 	// Add the theme page.
 	add_theme_page(
 		__( 'AMP', 'amp' ),
 		__( 'AMP', 'amp' ),
 		'edit_theme_options',
-		$menu_slug
+		$customizer_url
 	);
 }
 
