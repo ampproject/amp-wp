@@ -48,8 +48,9 @@ const { ajaxurl: wpAjaxUrl } = global;
  */
 export function Providers( { children } ) {
 	return (
-		<ErrorBoundary exitLink={ FINISH_LINK } fullScreen={ true }>
-			<ErrorContextProvider>
+		<ErrorContextProvider>
+			<ErrorBoundary exitLink={ FINISH_LINK } fullScreen={ true }>
+
 				<OptionsContextProvider
 					delaySave={ true }
 					hasErrorBoundary={ true }
@@ -77,8 +78,8 @@ export function Providers( { children } ) {
 						</NavigationContextProvider>
 					</UserContextProvider>
 				</OptionsContextProvider>
-			</ErrorContextProvider>
-		</ErrorBoundary>
+			</ErrorBoundary>
+		</ErrorContextProvider>
 	);
 }
 

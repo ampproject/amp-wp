@@ -10,19 +10,6 @@ import { completeWizard, cleanUpSettings, clickMode, selectReaderTheme } from '.
 import { installTheme } from '../../utils/install-theme';
 import { activateTheme } from '../../utils/activate-theme';
 
-async function testStandardAndTransitionalSupportedTemplateToggle() {
-	await expect( page ).toMatchElement( '.supported-templates' );
-	await expect( page ).toClick( '.supported-templates .amp-setting-toggle input:checked' );
-	await expect( page ).toMatchElement( '.supported-templates .amp-setting-toggle input:not(:checked)' );
-	await expect( page ).not.toMatchElement( '#supported_templates_fieldset.hidden' );
-}
-
-async function testMobileRedirectToggle() {
-	await expect( page ).toMatchElement( '.mobile-redirection' );
-	await expect( page ).toClick( '.mobile-redirection .amp-setting-toggle input:not(:checked)' );
-	await expect( page ).toMatchElement( '.mobile-redirection .amp-setting-toggle input:checked' );
-}
-
 describe( 'AMP settings screen newly activated', () => {
 	beforeEach( async () => {
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
@@ -36,7 +23,7 @@ describe( 'AMP settings screen newly activated', () => {
 		await expect( page ).toMatchElement( 'h1', { text: 'AMP Settings' } );
 		await expect( page ).toMatchElement( 'h2', { text: 'Configure AMP' } );
 		await expect( page ).toMatchElement( 'a', { text: 'Open Wizard' } );
-		await expect( page ).toMatchElement( '.template-mode-selection input:checked' );
+		await expect( page ).toMatchElement( '.template-mode-option input:checked' );
 		await expect( page ).toPassAxeTests( {
 			exclude: [
 				'#wpadminbar',
@@ -48,8 +35,6 @@ describe( 'AMP settings screen newly activated', () => {
 		await clickMode( 'standard' );
 		await expect( page ).toMatchElement( '#template-mode-standard:checked' );
 
-		await testStandardAndTransitionalSupportedTemplateToggle();
-
 		await expect( page ).not.toMatchElement( '.mobile-redirection' );
 		await expect( page ).not.toMatchElement( '.reader-themes' );
 	} );
@@ -58,8 +43,6 @@ describe( 'AMP settings screen newly activated', () => {
 		await clickMode( 'transitional' );
 		await expect( page ).toMatchElement( '#template-mode-transitional:checked' );
 
-		await testStandardAndTransitionalSupportedTemplateToggle();
-		await testMobileRedirectToggle();
 		await expect( page ).not.toMatchElement( '.reader-themes' );
 	} );
 
@@ -67,9 +50,7 @@ describe( 'AMP settings screen newly activated', () => {
 		await clickMode( 'reader' );
 		await expect( page ).toMatchElement( '#template-mode-reader:checked' );
 
-		await testMobileRedirectToggle();
-
-		await expect( page ).toMatchElement( '.reader-themes' );
+		await expect( page ).toClick( '.reader-themes' );
 		await expect( page ).toMatchElement( '#theme-card__legacy:checked' );
 
 		await expect( page ).not.toMatchElement( '#theme-card__twentytwenty:checked' ); // Active theme is hidden.
@@ -112,12 +93,12 @@ describe( 'Mode info notices', () => {
 } );
 
 describe( 'AMP Settings Screen after wizard', () => {
-	beforeAll( async () => {
+	beforeEach( async () => {
 		await completeWizard( { technical: true, mode: 'standard' } );
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 	} );
 
-	afterAll( async () => {
+	afterEach( async () => {
 		await cleanUpSettings();
 	} );
 

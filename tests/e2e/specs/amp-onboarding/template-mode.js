@@ -56,13 +56,13 @@ describe( 'Template mode recommendations with reader theme active', () => {
 } );
 
 describe( 'Template mode recommendations with non-reader-theme active', () => {
-	beforeAll( async () => {
+	beforeEach( async () => {
 		await cleanUpSettings();
 		await installTheme( 'astra' );
 		await activateTheme( 'astra' );
 	} );
 
-	afterAll( async () => {
+	afterEach( async () => {
 		await deleteTheme( 'astra', 'twentytwenty' );
 	} );
 
