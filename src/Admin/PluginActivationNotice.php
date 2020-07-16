@@ -79,6 +79,8 @@ final class PluginActivationNotice implements Delayed, Service, Registerable {
 
 				<?php if ( amp_should_use_new_onboarding() ) : ?>
 					<p><a href="<?php menu_page_url( OnboardingWizardSubmenu::SCREEN_ID ); ?>"><?php esc_html_e( 'Configure the plugin', 'amp' ); ?></a></p>
+				<?php else : ?>
+					<p><a href="<?php menu_page_url( AMP_Options_Manager::OPTION_NAME ); ?>"><?php esc_html_e( 'Configure the plugin', 'amp' ); ?></a></p>
 				<?php endif; ?>
 			</div>
 		</div>
