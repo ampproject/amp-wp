@@ -112,7 +112,7 @@
 .template-mode-option .components-panel__body-title button {
 	padding-left: 1.5rem;
 	padding-right: 3rem;
-	cursor: default;
+	cursor: pointer;
 }
 
 .template-mode-option .components-panel__row {
@@ -129,9 +129,5 @@
 
 .template-mode-option .reader-themes__current-theme {
 	font-weight: 400;
-}
-
-.template-mode-option .reader-themes__current-theme::before {
-	content: "-";
-	margin: 0 0.5rem;
+	margin-left: 0.5rem;
 }
