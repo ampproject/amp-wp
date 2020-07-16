@@ -85,16 +85,11 @@ function amp_admin_get_preview_permalink() {
  * @return string
  */
 function amp_get_customizer_url() {
-	$mode = AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
-
-	if ( 'reader' === $mode ) {
-		return '';
-	}
-
 	$is_legacy = amp_is_legacy();
+	$mode      = AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
 
 	/** This filter is documented in includes/settings/class-amp-customizer-design-settings.php */
-	if ( $is_legacy && ! apply_filters( 'amp_customizer_is_enabled', true ) ) {
+	if ( 'reader' !== $mode || ( $is_legacy && ! apply_filters( 'amp_customizer_is_enabled', true ) ) ) {
 		return '';
 	}
 
