@@ -62,7 +62,7 @@ function PostTypeCheckbox( { postTypeObject } ) {
 						if ( ! newChecked && hasPageOnFront && ! allTemplatesSupported && 'page' === postTypeObject.name ) {
 							let warning = '';
 							if ( isBlogTemplateSupported && isFrontPageTemplateSupported ) {
-								warning = __( 'Note that disabling Pages will prevent you from serving your homepage and posts page (blog index) as AMP.', 'amp' );
+								warning = __( 'Note that disabling pages will prevent you from serving your homepage and posts page (blog index) as AMP.', 'amp' );
 							} else if ( isBlogTemplateSupported ) {
 								warning = __( 'Note that disabling pages will prevent you from serving your posts page (blog index) as AMP.', 'amp' );
 							} else if ( isFrontPageTemplateSupported ) {
