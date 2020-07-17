@@ -27,7 +27,7 @@ class AMP_Options_Manager {
 	 */
 	protected static $defaults = [
 		Option::THEME_SUPPORT           => AMP_Theme_Support::READER_MODE_SLUG,
-		Option::SUPPORTED_POST_TYPES    => [ 'post' ],
+		Option::SUPPORTED_POST_TYPES    => [ 'post', 'page' ],
 		Option::ANALYTICS               => [],
 		Option::ALL_TEMPLATES_SUPPORTED => true,
 		Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],

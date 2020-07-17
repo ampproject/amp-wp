@@ -53,6 +53,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		foreach ( get_post_types() as $post_type ) {
 			remove_post_type_support( $post_type, 'amp' );
 		}
+		unregister_post_type( 'book' );
 
 		global $wp_theme_directories;
 		$wp_theme_directories = $this->original_theme_directories;
@@ -151,7 +152,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertEquals(
 			[
 				Option::THEME_SUPPORT           => AMP_Theme_Support::READER_MODE_SLUG,
-				Option::SUPPORTED_POST_TYPES    => [ 'post' ],
+				Option::SUPPORTED_POST_TYPES    => [ 'post', 'page' ],
 				Option::ANALYTICS               => [],
 				Option::ALL_TEMPLATES_SUPPORTED => true,
 				Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
@@ -388,13 +389,21 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 			remove_post_type_support( $post_type, 'amp' );
 		}
 
+		register_post_type(
+			'book',
+			[
+				'public'   => true,
+				'supports' => [ 'amp' ],
+			]
+		);
+
 		// Make sure the post type support get migrated.
 		delete_option( AMP_Options_Manager::OPTION_NAME );
-		add_post_type_support( 'page', 'amp' );
 		$this->assertEquals(
 			[
 				'post', // Enabled by default.
-				'page',
+				'page', // Enabled by default.
+				'book',
 			],
 			AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES )
 		);
