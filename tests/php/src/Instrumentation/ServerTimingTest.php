@@ -331,7 +331,7 @@ final class ServerTimingTest extends WP_UnitTestCase {
 			)
 		);
 	}
-	
+
 	public function test_it_sends_restricted_output_with_query_var_and_logged_in() {
 		$_GET[ QueryVar::VERBOSE_SERVER_TIMING ] = '1';
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'subscriber' ] ) );
