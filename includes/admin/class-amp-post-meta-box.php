@@ -144,7 +144,7 @@ class AMP_Post_Meta_Box {
 			isset( $screen->base ) &&
 			'post' === $screen->base &&
 			( ! isset( $screen->is_block_editor ) || ! $screen->is_block_editor ) &&
-			is_post_type_viewable( $post->post_type )
+			in_array( $post->post_type, AMP_Post_Type_Support::get_eligible_post_types(), true )
 		);
 
 		if ( ! $validate ) {
@@ -208,7 +208,7 @@ class AMP_Post_Meta_Box {
 	 */
 	public function enqueue_block_assets() {
 		$post = get_post();
-		if ( ! is_post_type_viewable( $post->post_type ) ) {
+		if ( ! in_array( $post->post_type, AMP_Post_Type_Support::get_eligible_post_types(), true ) ) {
 			return;
 		}
 
@@ -278,7 +278,7 @@ class AMP_Post_Meta_Box {
 		$verify = (
 			isset( $post->ID )
 			&&
-			is_post_type_viewable( $post->post_type )
+			in_array( $post->post_type, AMP_Post_Type_Support::get_eligible_post_types(), true )
 			&&
 			current_user_can( 'edit_post', $post->ID )
 		);
