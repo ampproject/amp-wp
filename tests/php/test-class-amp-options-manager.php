@@ -49,11 +49,11 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		parent::tearDown();
 		$GLOBALS['_wp_using_ext_object_cache'] = $this->was_wp_using_ext_object_cache;
 		unregister_post_type( 'foo' );
+		unregister_post_type( 'book' );
 
 		foreach ( get_post_types() as $post_type ) {
 			remove_post_type_support( $post_type, 'amp' );
 		}
-		unregister_post_type( 'book' );
 
 		global $wp_theme_directories;
 		$wp_theme_directories = $this->original_theme_directories;
