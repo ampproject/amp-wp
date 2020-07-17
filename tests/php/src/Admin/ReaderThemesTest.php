@@ -69,7 +69,6 @@ class ReaderThemesTest extends WP_UnitTestCase {
 	 * @covers ReaderThemes::get_themes
 	 * @covers ReaderThemes::get_default_reader_themes
 	 * @covers ReaderThemes::get_classic_mode
-	 * @covers ReaderThemes::get_default_raw_reader_themes
 	 */
 	public function test_get_themes() {
 		$themes = $this->reader_themes->get_themes();
