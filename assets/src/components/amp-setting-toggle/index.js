@@ -56,8 +56,5 @@ AMPSettingToggle.propTypes = {
 	disabled: PropTypes.bool,
 	onChange: PropTypes.func.isRequired,
 	text: PropTypes.string,
-	title: PropTypes.oneOfType( [
-		PropTypes.string,
-		PropTypes.node,
-	] ).isRequired,
+	title: PropTypes.node,
 };
