@@ -55,6 +55,24 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 			],
 			AMP_Post_Type_Support::get_eligible_post_types()
 		);
+
+		add_filter(
+			'amp_supportable_post_types',
+			static function ( $post_types ) {
+				$post_types[] = 'secret';
+				return array_diff( $post_types, [ 'attachment' ] );
+			}
+		);
+
+		$this->assertEqualSets(
+			[
+				'post',
+				'page',
+				'secret',
+				'book',
+			],
+			AMP_Post_Type_Support::get_eligible_post_types()
+		);
 	}
 
 	/**

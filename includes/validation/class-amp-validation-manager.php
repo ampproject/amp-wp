@@ -272,7 +272,7 @@ class AMP_Validation_Manager {
 
 		return (
 			// Skip if the post type is not viewable on the frontend, since we need a permalink to validate.
-			is_post_type_viewable( $post->post_type )
+			in_array( $post->post_type, AMP_Post_Type_Support::get_eligible_post_types(), true )
 			&&
 			! wp_is_post_autosave( $post )
 			&&

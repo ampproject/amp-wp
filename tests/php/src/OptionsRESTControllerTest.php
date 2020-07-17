@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-namespace AmpProject\AmpWP\Tests\Unit;
+namespace AmpProject\AmpWP\Tests;
 
 use AMP_Options_Manager;
 use AmpProject\AmpWP\Admin\ReaderThemes;
@@ -70,7 +70,6 @@ class OptionsRESTControllerTest extends WP_UnitTestCase {
 	public function test_get_items() {
 		$data = $this->controller->get_items( new WP_REST_Request( 'GET', '/amp/v1/options' ) )->get_data();
 		$this->assertEquals(
-			array_keys( $data ),
 			[
 				'theme_support',
 				'reader_theme',
@@ -86,17 +85,18 @@ class OptionsRESTControllerTest extends WP_UnitTestCase {
 				'supportable_templates',
 				'onboarding_wizard_link',
 				'customizer_link',
-			]
+			],
+			array_keys( $data )
 		);
 
-		$this->assertEquals( $data['suppressible_plugins'], [] );
-		$this->assertEquals( $data['preview_permalink'], null );
-		$this->assertEquals( $data['suppressed_plugins'], [] );
-		$this->assertEquals( $data['suppressible_plugins'], [] );
-		$this->assertContains( 'post', wp_list_pluck( $data['supportable_post_types'], 'name' ) );
-		$this->assertEquals( $data['supported_post_types'], [ 'post' ] );
+		$this->assertEquals( [], $data['suppressible_plugins'] );
+		$this->assertEquals( null, $data['preview_permalink'] );
+		$this->assertEquals( [], $data['suppressed_plugins'] );
+		$this->assertEquals( [], $data['suppressible_plugins'] );
+		$this->assertArraySubset( [ 'post', 'page', 'attachment' ], wp_list_pluck( $data['supportable_post_types'], 'name' ) );
+		$this->assertEquals( [ 'post', 'page' ], $data['supported_post_types'] );
 		$this->assertContains( 'is_singular', wp_list_pluck( $data['supportable_templates'], 'id' ) );
-		$this->assertEquals( $data['supported_templates'], [ 'is_singular' ] );
+		$this->assertEquals( [ 'is_singular' ], $data['supported_templates'] );
 	}
 
 	/**

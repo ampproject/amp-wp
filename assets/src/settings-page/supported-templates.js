@@ -18,6 +18,21 @@ import { Selectable } from '../components/selectable';
 import { Options } from '../components/options-context-provider';
 
 /**
+ * Determine whether the supportable templates include the static front page.
+ *
+ * @param {Array} supportableTemplates Supportable templates.
+ * @return {boolean} Has front page template.
+ */
+function hasFrontPageTemplate( supportableTemplates ) {
+	return Boolean( supportableTemplates.find( ( supportableTemplate ) => {
+		if ( supportableTemplate.children && hasFrontPageTemplate( supportableTemplate.children ) ) {
+			return true;
+		}
+		return supportableTemplate.id === 'is_front_page';
+	} ) );
+}
+
+/**
  * A checkbox for a supportable post type.
  *
  * @param {Object} props Component props.
@@ -28,7 +43,14 @@ function PostTypeCheckbox( { postTypeObject } ) {
 
 	const {
 		supported_post_types: supportedPostTypes,
+		supportable_templates: supportableTemplates,
+		supported_templates: supportedTemplates,
+		all_templates_supported: allTemplatesSupported,
 	} = editedOptions || {};
+
+	const hasPageOnFront = hasFrontPageTemplate( supportableTemplates );
+	const isBlogTemplateSupported = supportedTemplates.includes( 'is_home' );
+	const isFrontPageTemplateSupported = supportedTemplates.includes( 'is_front_page' );
 
 	return (
 		<li key={ `supportable-post-type-${ postTypeObject.name }` }>
@@ -37,6 +59,21 @@ function PostTypeCheckbox( { postTypeObject } ) {
 				label={ postTypeObject.label }
 				onChange={
 					( newChecked ) => {
+						if ( ! newChecked && hasPageOnFront && ! allTemplatesSupported && 'page' === postTypeObject.name ) {
+							let warning = '';
+							if ( isBlogTemplateSupported && isFrontPageTemplateSupported ) {
+								warning = __( 'Note that disabling pages will prevent you from serving your homepage and posts page (blog index) as AMP.', 'amp' );
+							} else if ( isBlogTemplateSupported ) {
+								warning = __( 'Note that disabling pages will prevent you from serving your posts page (blog index) as AMP.', 'amp' );
+							} else if ( isFrontPageTemplateSupported ) {
+								warning = __( 'Note that disabling pages will prevent you from serving your homepage as AMP.', 'amp' );
+							}
+							// eslint-disable-next-line no-alert
+							if ( warning && ! window.confirm( warning ) ) {
+								return;
+							}
+						}
+
 						const newSupportedPostTypes = supportedPostTypes.filter( ( postType ) => postType !== postTypeObject.name );
 
 						if ( newChecked ) {
@@ -64,27 +101,19 @@ PostTypeCheckbox.propTypes = {
 function SupportedPostTypesFieldset() {
 	const { editedOptions } = useContext( Options );
 
-	const {
-		theme_support: themeSupport,
-		reader_theme: readerTheme,
-		supportable_post_types: supportablePostTypes,
-	} = editedOptions || {};
+	const { supportable_post_types: supportablePostTypes } = editedOptions || {};
 
 	if ( ! supportablePostTypes ) {
 		return null;
 	}
 
-	const isLegacy = 'reader' === themeSupport && 'legacy' === readerTheme;
-
 	return (
 		<fieldset id="supported_post_types_fieldset">
-			{ ! isLegacy && (
-				<h4 className="title">
-					{ __( 'Content Types', 'amp' ) }
-				</h4>
-			) }
+			<h4 className="title">
+				{ __( 'Content Types', 'amp' ) }
+			</h4>
 			<p>
-				{ __( 'The following content types will be available as AMP:', 'amp' ) }
+				{ __( 'Content types enabled for AMP:', 'amp' ) }
 			</p>
 			<ul>
 				{ supportablePostTypes.map( ( postTypeObject ) => {
@@ -123,15 +152,25 @@ function getInclusiveDescendantTemplatesIds( supportableTemplate ) {
 export function SupportedTemplatesCheckboxes( { supportableTemplates } ) {
 	const { editedOptions, updateOptions } = useContext( Options );
 
-	const { supported_templates: supportedTemplates } = editedOptions || {};
+	const { supported_templates: supportedTemplates, supported_post_types: supportedPostTypes } = editedOptions || {};
 
 	if ( ! supportableTemplates.length ) {
 		return null;
 	}
 
+	const hasPageOnFront = hasFrontPageTemplate( supportableTemplates );
+	const isPageSupported = supportedPostTypes.includes( 'page' );
+	const relevantSupportableTemplates = ! hasPageOnFront ? supportableTemplates : supportableTemplates.filter( ( supportableTemplate ) => {
+		return (
+			! hasPageOnFront ||
+			isPageSupported ||
+			! [ 'is_home', 'is_front_page' ].includes( supportableTemplate.id )
+		);
+	} );
+
 	return (
 		<ul>
-			{ supportableTemplates.map( ( supportableTemplate ) => (
+			{ relevantSupportableTemplates.map( ( supportableTemplate ) => (
 				<li key={ supportableTemplate.id }>
 					<CheckboxControl
 						checked={ supportedTemplates.includes( supportableTemplate.id ) }
@@ -186,7 +225,12 @@ SupportedTemplatesCheckboxes.propTypes = {
 export function SupportedTemplatesFieldset() {
 	const { editedOptions } = useContext( Options );
 
-	const { theme_support: themeSupport, supportable_templates: supportableTemplates, reader_theme: readerTheme } = editedOptions || {};
+	const {
+		all_templates_supported: allTemplatesSupported,
+		theme_support: themeSupport,
+		supportable_templates: supportableTemplates,
+		reader_theme: readerTheme,
+	} = editedOptions || {};
 
 	if ( ( 'reader' === themeSupport && 'legacy' === readerTheme ) || ! supportableTemplates ) {
 		return null;
@@ -198,18 +242,31 @@ export function SupportedTemplatesFieldset() {
 				{ __( 'Templates', 'amp' ) }
 			</h4>
 
-			{ /* dangerouslySetInnerHTML reason: Link embedded in translation string. */ }
-			<p
-				dangerouslySetInnerHTML={ {
-					__html: sprintf(
-						/* translators: placeholder is link to WordPress handbook page about the template hierarchy. */
-						__( 'You may enable AMP for a subset of the WordPress <a href="%s" target="_blank" rel="noreferrer">Template Hierarchy</a>:', 'amp' ),
-						'https://developer.wordpress.org/themes/basics/template-hierarchy/',
-					),
-				} }
-			/>
+			<SupportedTemplatesToggle />
 
-			<SupportedTemplatesCheckboxes supportableTemplates={ supportableTemplates } />
+			{ ! allTemplatesSupported ? (
+				<>
+					{ /* dangerouslySetInnerHTML reason: Link embedded in translation string. */ }
+					<p
+						dangerouslySetInnerHTML={ {
+							__html: sprintf(
+								/* translators: placeholder is link to WordPress handbook page about the template hierarchy. */
+								__( 'Limit AMP on a subset of the WordPress <a href="%s" target="_blank" rel="noreferrer">Template Hierarchy</a>:', 'amp' ),
+								'https://developer.wordpress.org/themes/basics/template-hierarchy/',
+							),
+						} }
+					/>
+
+					{ supportableTemplates
+						? <SupportedTemplatesCheckboxes supportableTemplates={ supportableTemplates } />
+						: (
+							<p>
+								{ __( 'Your site does not provide any templates to support.', 'amp' ) }
+							</p>
+						)
+					}
+				</>
+			) : null }
 		</fieldset>
 	);
 }
@@ -218,26 +275,16 @@ export function SupportedTemplatesFieldset() {
  * Component rendering the supported templates section of the settings page, including the "Serve all templates as AMP" toggle.
  */
 export function SupportedTemplates() {
-	const { editedOptions } = useContext( Options );
-
-	const { all_templates_supported: allTemplatesSupported, theme_support: themeSupport, reader_theme: readerTheme } = editedOptions || {};
-
-	const isLegacy = 'reader' === themeSupport && 'legacy' === readerTheme;
-
 	return (
 		<section>
 			<h2>
 				{ __( 'Supported Templates', 'amp' ) }
 			</h2>
 			<Selectable className="supported-templates">
-				<SupportedTemplatesToggle />
-				{ ( ! allTemplatesSupported || isLegacy ) && (
-					<div className="supported-templates__fields">
-						<SupportedPostTypesFieldset />
-						<SupportedTemplatesFieldset />
-					</div>
-				) }
-
+				<div className="supported-templates__fields">
+					<SupportedPostTypesFieldset />
+					<SupportedTemplatesFieldset />
+				</div>
 			</Selectable>
 		</section>
 	);

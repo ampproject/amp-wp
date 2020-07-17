@@ -89,6 +89,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_HTTP::$headers_sent = [];
 		remove_all_filters( 'theme_root' );
 		remove_all_filters( 'template' );
+		unregister_post_type( 'book' );
+		unregister_post_type( 'announcement' );
 	}
 
 	/**
