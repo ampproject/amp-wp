@@ -58,6 +58,6 @@ AMPSettingToggle.propTypes = {
 	text: PropTypes.string,
 	title: PropTypes.oneOfType( [
 		PropTypes.string,
-		PropTypes.elementType,
+		PropTypes.node,
 	] ).isRequired,
 };
