@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { ToggleControl } from '@wordpress/components';
+import { isValidElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -20,22 +21,25 @@ import './style.css';
  * @param {boolean} props.checked Whether the toggle is on.
  * @param {boolean} props.disabled Whether the toggle is disabled.
  * @param {Function} props.onChange Change handler.
- * @param {?string} props.text Toggle text.
- * @param {string} props.title Toggle title.
- * @param {number} props.headingLevel Heading level for title.
+ * @param {string} props.text Toggle text.
+ * @param {Object|string} props.title Toggle title.
  */
-export function AMPSettingToggle( { checked, disabled = false, onChange, text, title, headingLevel } ) {
-	const Heading = headingLevel ? `h${ headingLevel }` : 'h3';
-
+export function AMPSettingToggle( { checked, disabled = false, onChange, text, title } ) {
 	return (
 		<div className={ `amp-setting-toggle ${ disabled ? 'amp-setting-toggle--disabled' : '' }` }>
 			<ToggleControl
 				checked={ ! disabled && checked }
 				label={ (
 					<div className="amp-setting-toggle__label-text">
-						<Heading>
-							{ title }
-						</Heading>
+						{
+							isValidElement( title )
+								? title
+								: (
+									<h3>
+										{ title }
+									</h3>
+								)
+						}
 						{ text && (
 							<p>
 								{ text }
@@ -52,6 +56,8 @@ AMPSettingToggle.propTypes = {
 	disabled: PropTypes.bool,
 	onChange: PropTypes.func.isRequired,
 	text: PropTypes.string,
-	headingLevel: PropTypes.number,
-	title: PropTypes.string.isRequired,
+	title: PropTypes.oneOfType( [
+		PropTypes.string,
+		PropTypes.elementType,
+	] ).isRequired,
 };

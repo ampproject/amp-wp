@@ -7,6 +7,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
+import './style.css';
 import { Options } from '../options-context-provider';
 import { AMPSettingToggle } from '../amp-setting-toggle';
 
@@ -25,8 +26,11 @@ export function SupportedTemplatesToggle() {
 	return (
 		<AMPSettingToggle
 			checked={ true === allTemplatesSupported }
-			title={ __( 'Serve all templates as AMP', 'amp' ) }
-			headingLevel={ 5 }
+			title={ (
+				<p>
+					{ __( 'Serve all templates as AMP', 'amp' ) }
+				</p>
+			) }
 			onChange={ () => {
 				updateOptions( { all_templates_supported: ! allTemplatesSupported } );
 			} }
