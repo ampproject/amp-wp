@@ -57,7 +57,7 @@ class AMP_Post_Type_Support {
 		 *
 		 * @param string[] $post_types Post types.
 		 */
-		return apply_filters( 'amp_supportable_post_types', $post_types );
+		return array_values( (array) apply_filters( 'amp_supportable_post_types', $post_types ) );
 	}
 
 	/**
