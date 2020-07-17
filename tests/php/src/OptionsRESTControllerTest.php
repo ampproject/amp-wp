@@ -94,7 +94,7 @@ class OptionsRESTControllerTest extends WP_UnitTestCase {
 		$this->assertEquals( $data['suppressed_plugins'], [] );
 		$this->assertEquals( $data['suppressible_plugins'], [] );
 		$this->assertEquals( [ 'post', 'page', 'attachment' ], wp_list_pluck( $data['supportable_post_types'], 'name' ) );
-		$this->assertEquals( $data['supported_post_types'], [ 'post', 'page' ] );
+		$this->assertEquals( [ 'post', 'page' ], $data['supported_post_types'] );
 		$this->assertContains( 'is_singular', wp_list_pluck( $data['supportable_templates'], 'id' ) );
 		$this->assertEquals( $data['supported_templates'], [ 'is_singular' ] );
 	}
