@@ -45,12 +45,14 @@
 }
 
 .amp-notice--large {
-	padding: 0.5rem 1.125rem 0.5rem 0.5rem;
+	padding: 1rem 1.5rem;
+	display: inline-flex;
+	align-items: center;
 }
 
-.amp-notice--large .amp-notice__icon {
-	margin-top: 0.5rem;
-	margin-left: 0.5rem;
+.amp-notice--large p {
+	margin-top: 0;
+	margin-bottom: 0;
 }
 
 .amp-notice--large svg {

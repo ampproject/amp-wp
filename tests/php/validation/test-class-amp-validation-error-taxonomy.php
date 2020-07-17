@@ -6,8 +6,8 @@
  */
 
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
-use AmpProject\AmpWP\Tests\HandleValidation;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
 
 /**
  * Tests for AMP_Validation_Error_Taxonomy class.

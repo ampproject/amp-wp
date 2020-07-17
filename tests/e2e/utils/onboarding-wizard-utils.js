@@ -1,48 +1,45 @@
 /**
  * WordPress dependencies
  */
-import { visitAdminPage, isCurrentURL } from '@wordpress/e2e-test-utils';
+import { visitAdminPage } from '@wordpress/e2e-test-utils';
 
-export const NEXT_BUTTON_SELECTOR = '.onboarding-wizard-nav__prev-next button.is-primary';
+export const NEXT_BUTTON_SELECTOR = '#next-button';
 export const PREV_BUTTON_SELECTOR = '.onboarding-wizard-nav__prev-next button:not(.is-primary)';
 
 export async function goToOnboardingWizard() {
-	if ( ! isCurrentURL( 'admin.php', 'page=amp-onboarding-wizard' ) ) {
-		await visitAdminPage( 'admin.php', 'page=amp-onboarding-wizard' );
-	}
-	await page.waitForSelector( '#amp-onboarding-wizard' );
+	await visitAdminPage( 'index.php' );
+	await expect( page ).not.toMatchElement( '#amp-onboarding-wizard' );
+	await visitAdminPage( 'admin.php', 'page=amp-onboarding-wizard' );
+	await expect( page ).toMatchElement( '#amp-onboarding-wizard' );
 }
 
 export async function clickNextButton() {
-	await page.waitForSelector( `${ NEXT_BUTTON_SELECTOR }:not([disabled])` );
-	await expect( page ).toClick( 'button', { text: 'Next' } );
+	await expect( page ).toClick( `${ NEXT_BUTTON_SELECTOR }:not([disabled])` );
 }
 
 export async function clickPrevButton() {
-	await page.waitForSelector( `${ PREV_BUTTON_SELECTOR }:not([disabled])` );
-	await expect( page ).toClick( 'button', { text: 'Previous' } );
+	await expect( page ).toClick( `${ PREV_BUTTON_SELECTOR }:not([disabled])` );
 }
 
 export async function moveToTechnicalScreen() {
 	await goToOnboardingWizard();
 	await clickNextButton();
-	await page.waitForSelector( '.technical-background-option' );
+	await expect( page ).toMatchElement( '.technical-background-option' );
 }
 
 export async function moveToTemplateModeScreen( { technical } ) {
 	await moveToTechnicalScreen();
 
 	const radioSelector = technical ? '#technical-background-enable' : '#technical-background-disable';
-
-	await page.waitForSelector( radioSelector );
-	await page.$eval( radioSelector, ( el ) => el.click() );
+	await expect( page ).toClick( radioSelector );
 
 	await clickNextButton();
-	await page.waitForSelector( '.template-mode-selection' );
+	await expect( page ).toMatchElement( '.template-mode-option' );
 }
 
 export async function clickMode( mode ) {
-	await page.$eval( `[for="template-mode-${ mode }"]`, ( el ) => el.click() );
+	await page.waitForSelector( `[for="template-mode-${ mode }"]` );
+	await page.click( `[for="template-mode-${ mode }"]` );
 	await page.waitForSelector( `#template-mode-${ mode }:checked` );
 }
 
@@ -74,7 +71,7 @@ export async function moveToSummaryScreen( { technical = true, mode, readerTheme
 	await page.waitForSelector( '.summary' );
 }
 
-export async function completeWizard( { technical = true, mode, readerTheme = 'legacy', mobileRedirect = true } ) {
+export async function moveToDoneScreen( { technical = true, mode, readerTheme = 'legacy', mobileRedirect = true } ) {
 	await moveToSummaryScreen( { technical, mode, readerTheme, mobileRedirect } );
 
 	if ( 'standard' !== mode ) {
@@ -94,6 +91,12 @@ export async function completeWizard( { technical = true, mode, readerTheme = 'l
 
 	await clickNextButton();
 	await page.waitForSelector( '.done__preview-container' );
+}
+
+export async function completeWizard( { technical = true, mode, readerTheme = 'legacy', mobileRedirect = true } ) {
+	await moveToDoneScreen( { technical, mode, readerTheme, mobileRedirect } );
+	await page.click( '#next-button' );
+	await page.waitForSelector( '#amp-settings' );
 }
 
 export async function testCloseButton( { exists = true } ) {
@@ -125,6 +128,7 @@ export function testTitle( { text, element = 'h1' } ) {
  */
 export async function cleanUpSettings() {
 	await visitAdminPage( 'admin.php', 'page=amp-options' );
+	await page.waitForSelector( '.settings-footer' );
 	await page.evaluate( async () => {
 		await Promise.all( [
 			wp.apiFetch( { path: '/wp/v2/users/me', method: 'POST', data: { amp_dev_tools_enabled: true } } ),

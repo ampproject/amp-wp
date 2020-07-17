@@ -7,7 +7,7 @@
 
 use AmpProject\Amp;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\QueryVars;
+use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\ConfigurationArgument;
 use AmpProject\AmpWP\Transformer;
@@ -122,14 +122,6 @@ class AMP_Theme_Support {
 	];
 
 	/**
-	 * Start time when init was called.
-	 *
-	 * @since 1.0
-	 * @var float
-	 */
-	public static $init_start_time;
-
-	/**
 	 * Whether output buffering has started.
 	 *
 	 * @since 0.7
@@ -143,7 +135,22 @@ class AMP_Theme_Support {
 	 * @since 0.7
 	 */
 	public static function init() {
-		self::$init_start_time = microtime( true );
+		/**
+		 * Starts the server-timing measurement for the entire output buffer capture.
+		 *
+		 * @since 1.6.0
+		 * @internal
+		 *
+		 * @param string      $event_name        Name of the event to record.
+		 * @param string|null $event_description Optional. Description of the event
+		 *                                       to record. Defaults to null.
+		 * @param string[]    $properties        Optional. Additional properties to add
+		 *                                       to the logged record.
+		 * @param bool        $verbose_only      Optional. Whether to only show the
+		 *                                       event in verbose mode. Defaults to
+		 *                                       false.
+		 */
+		do_action( 'amp_server_timing_start', 'amp_output_buffer' );
 
 		// Ensure extra theme support for core themes is in place.
 		AMP_Core_Theme_Sanitizer::extend_theme_support();
@@ -237,10 +244,6 @@ class AMP_Theme_Support {
 	 * In older versions of the plugin, the DB option was only considered if the theme does not already explicitly support AMP.
 	 * This is no longer the case. The DB option is the only value that is considered.
 	 *
-	 * @todo Should we store the original theme support args so we can tell the user that the active theme says it can be used in Standard/Transitional modes?
-	 * @todo What is even the purpose of doing any of this? Calling current_theme_supports('amp') is irrelevant if is_amp_endpoint().
-	 * Maybe not because really we should be scanning the site to actually see if there are validation errors, and tha that this
-	 *
 	 * @see AMP_Post_Type_Support::add_post_type_support() For where post type support is added, since it is irrespective of theme support.
 	 * @deprecated
 	 * @codeCoverageIgnore
@@ -263,16 +266,18 @@ class AMP_Theme_Support {
 			return false;
 		}
 		$support = get_theme_support( self::SLUG );
-		if ( true === $support ) {
-			return [
-				self::PAIRED_FLAG => false,
-			];
+		if ( isset( $support[0] ) && is_array( $support[0] ) ) {
+			$args = $support[0];
+		} else {
+			$args = [];
 		}
-		if ( ! isset( $support[0] ) || ! is_array( $support[0] ) ) {
-			return [ 'paired' => false ];
+		if ( ! isset( $args[ self::PAIRED_FLAG ] ) ) {
+			// Formerly when paired was not supplied it defaulted to be false. However, the reality is that
+			// the vast majority of themes should be built to work in AMP and non-AMP because AMP can be
+			// disabled for any URL just by disabling AMP for the post.
+			$args[ self::PAIRED_FLAG ] = true;
 		}
-
-		return wp_parse_args( $support[0], [ 'paired' => false ] );
+		return $args;
 	}
 
 	/**
@@ -512,7 +517,6 @@ class AMP_Theme_Support {
 	 *     Template availability.
 	 *
 	 *     @type bool        $supported Whether the template is supported in AMP.
-	 *     @type bool|null   $immutable Whether the supported status is known to be unchangeable.
 	 *     @type string|null $template  The ID of the matched template (conditional), such as 'is_singular', or null if nothing was matched.
 	 *     @type string[]    $errors    List of the errors or reasons for why the template is not available.
 	 * }
@@ -537,7 +541,7 @@ class AMP_Theme_Support {
 		$default_response = [
 			'errors'    => [],
 			'supported' => false,
-			'immutable' => null,
+			'immutable' => false, // Obsolete.
 			'template'  => null,
 		];
 
@@ -556,15 +560,7 @@ class AMP_Theme_Support {
 			);
 		}
 
-		$theme_support_args = self::get_theme_support_args();
-
-		$all_templates_supported_by_theme_support = false;
-		if ( isset( $theme_support_args['templates_supported'] ) ) {
-			$all_templates_supported_by_theme_support = 'all' === $theme_support_args['templates_supported'];
-		}
-		$all_templates_supported = (
-			$all_templates_supported_by_theme_support || AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED )
-		);
+		$all_templates_supported = AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED );
 
 		// Make sure global $wp_query is set in case of conditionals that unfortunately look at global scope.
 		$prev_query = $wp_query;
@@ -594,7 +590,6 @@ class AMP_Theme_Support {
 				$matching_templates[ $id ] = [
 					'template'  => $id,
 					'supported' => ! empty( $supportable_template['supported'] ),
-					'immutable' => ! empty( $supportable_template['immutable'] ),
 				];
 			}
 		}
@@ -785,8 +780,7 @@ class AMP_Theme_Support {
 	public static function get_supportable_templates() {
 		$templates = [
 			'is_singular' => [
-				'label'       => __( 'Singular', 'amp' ),
-				'description' => __( 'Required for the above content types.', 'amp' ),
+				'label' => __( 'Singular', 'amp' ),
 			],
 		];
 		if ( 'page' === get_option( 'show_on_front' ) ) {
@@ -880,15 +874,12 @@ class AMP_Theme_Support {
 		/**
 		 * Filters list of supportable templates.
 		 *
-		 * A theme or plugin can force a given template to be supported or not by preemptively
-		 * setting the 'supported' flag for a given template. Otherwise, if the flag is undefined
-		 * then the user will be able to toggle it themselves in the admin. Each array item should
-		 * have a key that corresponds to a template conditional function. If the key is such a
-		 * function, then the key is used to evaluate whether the given template entry is a match.
-		 * Otherwise, a supportable template item can include a callback value which is used instead.
-		 * Each item needs a 'label' value. Additionally, if the supportable template is a subset of
-		 * another condition (e.g. is_singular > is_single) then this relationship needs to be
-		 * indicated via the 'parent' value.
+		 * Each array item should have a key that corresponds to a template conditional function.
+		 * If the key is such a function, then the key is used to evaluate whether the given template
+		 * entry is a match. Otherwise, a supportable template item can include a callback value which
+		 * is used instead. Each item needs a 'label' value. Additionally, if the supportable template
+		 * is a subset of another condition (e.g. is_singular > is_single) then this relationship needs
+		 * to be indicated via the 'parent' value.
 		 *
 		 * @since 1.0
 		 *
@@ -896,34 +887,37 @@ class AMP_Theme_Support {
 		 */
 		$templates = apply_filters( 'amp_supportable_templates', $templates );
 
-		$theme_support_args        = self::get_theme_support_args();
-		$theme_supported_templates = [];
-		if ( isset( $theme_support_args['templates_supported'] ) ) {
-			$theme_supported_templates = $theme_support_args['templates_supported'];
+		$supported_templates = AMP_Options_Manager::get_option( Option::SUPPORTED_TEMPLATES );
+		$are_all_supported   = AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED );
+
+		$did_filter_supply_supported = false;
+		$did_filter_supply_immutable = false;
+		foreach ( $templates as $id => &$template ) {
+			if ( isset( $template['supported'] ) ) {
+				$did_filter_supply_supported = true;
+			}
+			if ( isset( $template['immutable'] ) ) {
+				$did_filter_supply_immutable = true;
+			}
+
+			$template['supported']      = $are_all_supported || in_array( $id, $supported_templates, true );
+			$template['user_supported'] = $template['supported']; // Obsolete.
+			$template['immutable']      = false; // Obsolete.
 		}
 
-		$supported_templates = AMP_Options_Manager::get_option( Option::SUPPORTED_TEMPLATES );
-		foreach ( $templates as $id => &$template ) {
-
-			// Capture user-elected support from options. This allows us to preserve the original user selection through programmatic overrides.
-			$template['user_supported'] = in_array( $id, $supported_templates, true );
-
-			// Consider supported templates from theme support args.
-			if ( ! isset( $template['supported'] ) ) {
-				if ( 'all' === $theme_supported_templates ) {
-					$template['supported'] = true;
-				} elseif ( is_array( $theme_supported_templates ) && isset( $theme_supported_templates[ $id ] ) ) {
-					$template['supported'] = $theme_supported_templates[ $id ];
-				}
-			}
-
-			// Make supported state immutable if it was programmatically set.
-			$template['immutable'] = isset( $template['supported'] );
-
-			// Set supported state from user preference.
-			if ( ! $template['immutable'] ) {
-				$template['supported'] = AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) || $template['user_supported'];
-			}
+		if ( $did_filter_supply_supported ) {
+			_doing_it_wrong(
+				'add_filter',
+				esc_html__( 'The AMP plugin no longer allows `amp_supportable_templates` filters to specify a template as being `supported`. This is now managed only in AMP Settings.', 'amp' ),
+				'1.6'
+			);
+		}
+		if ( $did_filter_supply_immutable ) {
+			_doing_it_wrong(
+				'add_filter',
+				esc_html__( 'The AMP plugin no longer allows `amp_supportable_templates` filters to specify a template\'s support as being `immutable`. This is now managed only in AMP Settings.', 'amp' ),
+				'1.6'
+			);
 		}
 
 		return $templates;
@@ -1808,7 +1802,18 @@ class AMP_Theme_Support {
 	 */
 	public static function finish_output_buffering( $response ) {
 		self::$is_output_buffering = false;
-		return self::prepare_response( $response );
+		$response                  = self::prepare_response( $response );
+
+		/**
+		 * Fires when server timings should be sent.
+		 *
+		 * This is immediately before the processed output buffer is sent to the client.
+		 *
+		 * @since 1.6.0
+		 * @internal
+		 */
+		do_action( 'amp_server_timing_send' );
+		return $response;
 	}
 
 	/**
@@ -1905,9 +1910,32 @@ class AMP_Theme_Support {
 			$args
 		);
 
-		AMP_HTTP::send_server_timing( 'amp_output_buffer', -self::$init_start_time, 'AMP Output Buffer' );
+		/**
+		 * Stops the server-timing measurement for the entire output buffer capture.
+		 *
+		 * @since 1.6.0
+		 * @internal
+		 *
+		 * @param string $event_name Name of the event to stop.
+		 */
+		do_action( 'amp_server_timing_stop', 'amp_output_buffer' );
 
-		$dom_parse_start = microtime( true );
+		/**
+		 * Starts the server-timing measurement for the dom parsing subsystem.
+		 *
+		 * @since 1.6.0
+		 * @internal
+		 *
+		 * @param string      $event_name        Name of the event to record.
+		 * @param string|null $event_description Optional. Description of the event
+		 *                                       to record. Defaults to null.
+		 * @param string[]    $properties        Optional. Additional properties to add
+		 *                                       to the logged record.
+		 * @param bool        $verbose_only      Optional. Whether to only show the
+		 *                                       event in verbose mode. Defaults to
+		 *                                       false.
+		 */
+		do_action( 'amp_server_timing_start', 'amp_dom_parse', '', [], true );
 
 		$dom = Document::fromHtml( $response );
 
@@ -1915,7 +1943,32 @@ class AMP_Theme_Support {
 			AMP_Validation_Manager::remove_illegal_source_stack_comments( $dom );
 		}
 
-		AMP_HTTP::send_server_timing( 'amp_dom_parse', -$dom_parse_start, 'AMP DOM Parse' );
+		/**
+		 * Stops the server-timing measurement for the dom parsing subsystem.
+		 *
+		 * @since 1.6.0
+		 * @internal
+		 *
+		 * @param string $event_name Name of the event to stop.
+		 */
+		do_action( 'amp_server_timing_stop', 'amp_dom_parse' );
+
+		/**
+		 * Starts the server-timing measurement for the AMP Sanitizer subsystem.
+		 *
+		 * @since 1.6.0
+		 * @internal
+		 *
+		 * @param string      $event_name        Name of the event to record.
+		 * @param string|null $event_description Optional. Description of the event
+		 *                                       to record. Defaults to null.
+		 * @param string[]    $properties        Optional. Additional properties to add
+		 *                                       to the logged record.
+		 * @param bool        $verbose_only      Optional. Whether to only show the
+		 *                                       event in verbose mode. Defaults to
+		 *                                       false.
+		 */
+		do_action( 'amp_server_timing_start', 'amp_sanitizer' );
 
 		// Make sure scripts from the body get moved to the head.
 		foreach ( $dom->xpath->query( '//body//script[ @custom-element or @custom-template or @src = "https://cdn.ampproject.org/v0.js" ]' ) as $script ) {
@@ -1930,6 +1983,16 @@ class AMP_Theme_Support {
 		}
 
 		$sanitization_results = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
+
+		/**
+		 * Stops the server-timing measurement for the AMP Sanitizer subsystem.
+		 *
+		 * @since 1.6.0
+		 * @internal
+		 *
+		 * @param string $event_name Name of the event to stop.
+		 */
+		do_action( 'amp_server_timing_stop', 'amp_sanitizer' );
 
 		// Respond early with results if performing a validate request.
 		if ( AMP_Validation_Manager::$is_validate_request ) {
@@ -1947,7 +2010,22 @@ class AMP_Theme_Support {
 			return wp_json_encode( $data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
 		}
 
-		$dom_serialize_start = microtime( true );
+		/**
+		 * Starts the server-timing measurement for the AMP DOM serialization.
+		 *
+		 * @since 1.6.0
+		 * @internal
+		 *
+		 * @param string      $event_name        Name of the event to record.
+		 * @param string|null $event_description Optional. Description of the event
+		 *                                       to record. Defaults to null.
+		 * @param string[]    $properties        Optional. Additional properties to add
+		 *                                       to the logged record.
+		 * @param bool        $verbose_only      Optional. Whether to only show the
+		 *                                       event in verbose mode. Defaults to
+		 *                                       false.
+		 */
+		do_action( 'amp_server_timing_start', 'amp_dom_serialize', '', [], true );
 
 		// Gather all component scripts that are used in the document and then render any not already printed.
 		$amp_scripts = $sanitization_results['scripts'];
@@ -1982,6 +2060,23 @@ class AMP_Theme_Support {
 		$enable_optimizer = apply_filters( 'amp_enable_optimizer', $enable_optimizer );
 
 		if ( $enable_optimizer ) {
+			/**
+			 * Starts the server-timing measurement for the AMP Optimizer subsystem.
+			 *
+			 * @since 1.6.0
+			 * @internal
+			 *
+			 * @param string      $event_name        Name of the event to record.
+			 * @param string|null $event_description Optional. Description of the event
+			 *                                       to record. Defaults to null.
+			 * @param string[]    $properties        Optional. Additional properties to add
+			 *                                       to the logged record.
+			 * @param bool        $verbose_only      Optional. Whether to only show the
+			 *                                       event in verbose mode. Defaults to
+			 *                                       false.
+			 */
+			do_action( 'amp_server_timing_start', 'amp_optimizer' );
+
 			$errors = new Optimizer\ErrorCollection();
 			self::get_optimizer( $args )->optimizeDom( $dom, $errors );
 
@@ -1997,6 +2092,16 @@ class AMP_Theme_Support {
 				);
 				// @todo Include errors elsewhere than HTML comment?
 			}
+
+			/**
+			 * Stops the server-timing measurement for the AMP Optimizer subsystem.
+			 *
+			 * @since 1.6.0
+			 * @internal
+			 *
+			 * @param string $event_name Name of the event to stop.
+			 */
+			do_action( 'amp_server_timing_stop', 'amp_optimizer' );
 		}
 
 		self::ensure_required_markup( $dom, array_keys( $amp_scripts ) );
@@ -2008,7 +2113,7 @@ class AMP_Theme_Support {
 			$non_amp_url = amp_remove_endpoint( amp_get_current_url() );
 
 			// Redirect to include query var to preventing AMP from even being considered available.
-			$non_amp_url = add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_AVAILABLE, $non_amp_url );
+			$non_amp_url = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_AVAILABLE, $non_amp_url );
 
 			wp_safe_redirect( $non_amp_url, 302 );
 			return esc_html__( 'Redirecting since AMP version not available.', 'amp' );
@@ -2016,7 +2121,15 @@ class AMP_Theme_Support {
 
 		$response = $dom->saveHTML();
 
-		AMP_HTTP::send_server_timing( 'amp_dom_serialize', -$dom_serialize_start, 'AMP DOM Serialize' );
+		/**
+		 * Stops the server-timing measurement for the AMP DOM serialization.
+		 *
+		 * @since 1.6.0
+		 * @internal
+		 *
+		 * @param string $event_name Name of the event to stop.
+		 */
+		do_action( 'amp_server_timing_stop', 'amp_dom_serialize' );
 
 		return $response;
 	}
@@ -2193,7 +2306,7 @@ class AMP_Theme_Support {
 			$url = wp_unslash( $_SERVER['REQUEST_URI'] );
 		}
 		$url = remove_query_arg(
-			[ amp_get_slug(), QueryVars::NOAMP, AMP_Validated_URL_Post_Type::VALIDATE_ACTION, AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ],
+			[ amp_get_slug(), QueryVar::NOAMP, AMP_Validated_URL_Post_Type::VALIDATE_ACTION, AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ],
 			$url
 		);
 		$url = add_query_arg( self::PAIRED_BROWSING_QUERY_VAR, '1', $url );
@@ -2269,7 +2382,7 @@ class AMP_Theme_Support {
 			[
 				'ampSlug'                   => amp_get_slug(),
 				'ampPairedBrowsingQueryVar' => self::PAIRED_BROWSING_QUERY_VAR,
-				'noampQueryVar'             => QueryVars::NOAMP,
+				'noampQueryVar'             => QueryVar::NOAMP,
 				'documentTitlePrefix'       => __( 'AMP Paired Browsing:', 'amp' ),
 			]
 		);

@@ -19,6 +19,8 @@ import { Transitional } from '../svg/transitional';
 import { Reader } from '../svg/reader';
 import { Options } from '../options-context-provider';
 
+import './style.css';
+
 /**
  * Mode-specific illustration.
  *
@@ -81,7 +83,7 @@ export function TemplateModeOption( { children, details, mode, previouslySelecte
 	const id = `template-mode-${ mode }`;
 
 	return (
-		<Selectable id={ `${ id }-container` } className="template-mode-selection" selected={ mode === themeSupport }>
+		<Selectable id={ `${ id }-container` } className="template-mode-option" selected={ mode === themeSupport }>
 			<label htmlFor={ id }>
 				<div className="template-mode-selection__input-container">
 					<input

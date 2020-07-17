@@ -8,7 +8,7 @@
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\ReaderThemeLoader;
 use AmpProject\AmpWP\Services;
-use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 
 /**
  * Class Test_AMP_Template_Customizer
@@ -108,7 +108,8 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 	 * @covers AMP_Template_Customizer::register_legacy_ui()
 	 * @covers AMP_Template_Customizer::register_legacy_settings()
 	 * @covers AMP_Template_Customizer::set_refresh_setting_transport()
-	 * @covers AMP_Template_Customizer::deactivate_cover_template_section()
+	 * @covers AMP_Template_Customizer::remove_cover_template_section()
+	 * @covers AMP_Template_Customizer::remove_homepage_settings_section()
 	 */
 	public function test_init_legacy_reader() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
@@ -139,13 +140,15 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		foreach ( [ $header_video_setting, $external_header_video_setting ] as $setting ) {
 			$this->assertEquals( 'postMessage', $setting->transport );
 		}
-		$this->assertTrue( $wp_customize->get_section( 'cover_template_options' )->active() );
+		$this->assertInstanceOf( WP_Customize_Section::class, $wp_customize->get_section( 'cover_template_options' ) );
+		$this->assertInstanceOf( WP_Customize_Section::class, $wp_customize->get_section( 'static_front_page' ) );
 	}
 
 	/**
 	 * @covers AMP_Template_Customizer::init()
 	 * @covers AMP_Template_Customizer::set_refresh_setting_transport()
-	 * @covers AMP_Template_Customizer::deactivate_cover_template_section()
+	 * @covers AMP_Template_Customizer::remove_cover_template_section()
+	 * @covers AMP_Template_Customizer::remove_homepage_settings_section()
 	 */
 	public function test_init_reader_theme() {
 		if ( ! wp_get_theme( 'twentynineteen' )->exists() || ! wp_get_theme( 'twentytwenty' )->exists() ) {
@@ -191,8 +194,8 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 			$this->assertEquals( 'refresh', $setting->transport );
 		}
 
-		$this->assertFalse( $wp_customize->get_section( 'cover_template_options' )->active() );
-		$this->assertTrue( $wp_customize->get_section( 'title_tagline' )->active() );
+		$this->assertNull( $wp_customize->get_section( 'cover_template_options' ) );
+		$this->assertNull( $wp_customize->get_section( 'static_front_page' ) );
 	}
 
 	/** @covers AMP_Template_Customizer::init_legacy_preview() */

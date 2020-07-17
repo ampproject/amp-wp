@@ -22,29 +22,17 @@ const sharedConfig = {
 		filename: '[name].js',
 		chunkFilename: '[name].js',
 	},
-	module: {
-		...defaultConfig.module,
-		rules: [
-			...defaultConfig.module.rules.map(
-				( rule ) => {
-					// @todo Can remove once the default config no longer excludes excludes CSS related to Gutenberg components.
-					if ( rule.test.source === '\\.css$' ) {
-						rule.exclude = /node_modules\/(?!@wordpress)/;
-					}
-					return rule;
-				},
-			),
-		],
-	},
 	plugins: [
-		...defaultConfig.plugins.map(
-			( plugin ) => {
-				if ( plugin.constructor.name === 'MiniCssExtractPlugin' ) {
-					plugin.options.filename = '../css/[name].css';
-				}
-				return plugin;
-			},
-		),
+		...defaultConfig.plugins
+			.map(
+				( plugin ) => {
+					if ( plugin.constructor.name === 'MiniCssExtractPlugin' ) {
+						plugin.options.filename = '../css/[name].css';
+					}
+					return plugin;
+				},
+			)
+			.filter( ( plugin ) => plugin.constructor.name !== 'CleanWebpackPlugin' ),
 		new RtlCssPlugin( {
 			filename: '../css/[name]-rtl.css',
 		} ),
@@ -274,12 +262,23 @@ const setup = {
 const settingsPage = {
 	...sharedConfig,
 	entry: {
+		'wp-api-fetch': [
+			'./assets/src/polyfills/api-fetch.js',
+		],
+		'wp-components': [
+			'@wordpress/components/build-style/style.css',
+		],
 		'amp-settings': [
 			'./assets/src/settings-page',
 		],
 	},
 	externals: {
 		'amp-settings': 'ampSettings',
+	},
+	resolve: {
+		alias: {
+			'@wordpress/api-fetch__non-shim': require.resolve( '@wordpress/api-fetch' ),
+		},
 	},
 	plugins: [
 		...sharedConfig.plugins.filter(
@@ -291,8 +290,6 @@ const settingsPage = {
 			requestToHandle: ( handle ) => {
 				switch ( handle ) {
 					case '@wordpress/api-fetch':
-					case '@wordpress/dom-ready':
-					case '@wordpress/html-entities':
 						return defaultRequestToHandle( handle );
 
 					default:
@@ -302,8 +299,6 @@ const settingsPage = {
 			requestToExternal: ( external ) => {
 				switch ( external ) {
 					case '@wordpress/api-fetch':
-					case '@wordpress/dom-ready':
-					case '@wordpress/html-entities':
 						return defaultRequestToExternal( external );
 
 					default:

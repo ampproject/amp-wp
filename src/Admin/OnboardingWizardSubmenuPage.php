@@ -10,10 +10,11 @@ namespace AmpProject\AmpWP\Admin;
 
 use AMP_Options_Manager;
 use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
+use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\QueryVars;
+use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Services;
 
 /**
@@ -21,7 +22,7 @@ use AmpProject\AmpWP\Services;
  *
  * @since 1.6.0
  */
-final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Service {
+final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registerable, Service {
 	/**
 	 * Handle for JS file.
 	 *
@@ -66,6 +67,15 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 	}
 
 	/**
+	 * Check whether the conditional object is currently needed.
+	 *
+	 * @return bool Whether the conditional object is needed.
+	 */
+	public static function is_needed() {
+		return amp_should_use_new_onboarding();
+	}
+
+	/**
 	 * Get the action to use for registering the service.
 	 *
 	 * @return string Registration action to use.
@@ -82,6 +92,21 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 	public function register() {
 		add_action( 'admin_head-' . $this->screen_handle(), [ $this, 'override_template' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+		add_filter( 'admin_title', [ $this, 'override_title' ] );
+	}
+
+	/**
+	 * Overrides the admin title on the wizard screen. Without this filter, the title portion would be empty.
+	 *
+	 * @param string $admin_title The unfiltered admin title.
+	 * @return string If on the wizard screen, the admin title with the page title prepended.
+	 */
+	public function override_title( $admin_title ) {
+		if ( $this->screen_handle() !== get_current_screen()->id ) {
+			return $admin_title;
+		}
+
+		return esc_html__( 'AMP Onboarding Wizard', 'amp' ) . $admin_title;
 	}
 
 	/**
@@ -131,7 +156,7 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 	 * @return string
 	 */
 	public function screen_handle() {
-		return sprintf( 'amp_page_%s', OnboardingWizardSubmenu::SCREEN_ID );
+		return sprintf( 'admin_page_%s', OnboardingWizardSubmenu::SCREEN_ID );
 	}
 
 	/**
@@ -165,7 +190,10 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 		wp_enqueue_style(
 			self::ASSET_HANDLE,
 			amp_get_asset_url( 'css/amp-onboarding-wizard.css' ),
-			[ $this->google_fonts->get_handle() ],
+			[
+				'wp-components',
+				$this->google_fonts->get_handle(),
+			],
 			AMP__VERSION
 		);
 
@@ -179,7 +207,7 @@ final class OnboardingWizardSubmenuPage implements Delayed, Registerable, Servic
 		$setup_wizard_data = [
 			'AMP_OPTIONS_KEY'                    => AMP_Options_Manager::OPTION_NAME,
 			'AMP_QUERY_VAR'                      => amp_get_slug(),
-			'DEFAULT_AMP_QUERY_VAR'              => QueryVars::AMP,
+			'DEFAULT_AMP_QUERY_VAR'              => QueryVar::AMP,
 			'AMP_QUERY_VAR_CUSTOMIZED_LATE'      => $amp_slug_customization_watcher->did_customize_late(),
 			'LEGACY_THEME_SLUG'                  => ReaderThemes::DEFAULT_READER_THEME,
 			'APP_ROOT_ID'                        => self::APP_ROOT_ID,

@@ -8,8 +8,8 @@
 use AmpProject\AmpWP\Admin\SiteHealth;
 use AmpProject\AmpWP\AmpWpPluginFactory;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
-use AmpProject\AmpWP\Tests\PrivateAccess;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 
 /**
  * Test Site_Health.
@@ -41,6 +41,9 @@ class Test_Site_Health extends WP_UnitTestCase {
 		$this->instance = $injector->make( SiteHealth::class );
 
 		remove_theme_support( 'amp' );
+		foreach ( get_post_types_by_support( 'amp' ) as $post_type ) {
+			remove_post_type_support( $post_type, 'amp' );
+		}
 		delete_option( AMP_Options_Manager::OPTION_NAME );
 	}
 
@@ -305,10 +308,10 @@ class Test_Site_Health extends WP_UnitTestCase {
 				[],
 				[],
 				'standard',
-				'post',
+				'No template supported',
 			],
 			'only_singular'               => [
-				[],
+				[ 'post' ],
 				[ 'is_singular' ],
 				'transitional',
 				'post, is_singular',
@@ -362,14 +365,7 @@ class Test_Site_Health extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, $supported_templates );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, $theme_support );
-
-		foreach ( get_post_types() as $post_type ) {
-			remove_post_type_support( $post_type, AMP_Theme_Support::SLUG );
-		}
-
-		foreach ( $supported_content_types as $post_type ) {
-			add_post_type_support( $post_type, AMP_Theme_Support::SLUG );
-		}
+		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, $supported_content_types );
 
 		$this->assertEquals( $expected, $this->call_private_method( $this->instance, 'get_supported_templates' ) );
 	}

@@ -62,6 +62,7 @@ exports[`Nav matches snapshot 1`] = `
       <button
         className="components-button is-primary"
         disabled={false}
+        id="next-button"
         onClick={[Function]}
         type="button"
       >

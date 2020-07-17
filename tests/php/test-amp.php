@@ -42,8 +42,8 @@ class Test_AMP extends WP_UnitTestCase {
 			],
 			'no_args'                     => [
 				[],
-				true,
-				AMP_Theme_Support::STANDARD_MODE_SLUG,
+				false,
+				AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
 			],
 			'paired_implied'              => [
 				[
@@ -91,13 +91,12 @@ class Test_AMP extends WP_UnitTestCase {
 	 * @param string $expected_mode      Expected mode.
 	 */
 	public function test_amp_is_canonical( $theme_support_args, $is_canonical, $expected_mode ) {
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		delete_option( AMP_Options_Manager::OPTION_NAME );
 		if ( isset( $theme_support_args ) ) {
 			if ( is_array( $theme_support_args ) ) {
 				add_theme_support( AMP_Theme_Support::SLUG, $theme_support_args );
 			} else {
-				AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+				add_theme_support( AMP_Theme_Support::SLUG );
 			}
 		}
 		$this->assertSame( $expected_mode, AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );

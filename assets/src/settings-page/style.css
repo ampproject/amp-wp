@@ -1,27 +1,13 @@
-.amp.amp-settings .selectable {
-	padding: 1.25rem 2.5rem;
+#amp-settings {
+	max-width: 1060px;
+	margin: 0 auto;
 }
 
-.amp.amp-settings .selectable--left {
-	margin-left: 10px;
-	width: calc(100% - 10px); /* Offset box shadow. */
-}
-
-.amp-settings .amp-notice {
-	max-width: 550px;
-}
-
-/* Core form style overrides. */
-.amp-settings .form-table td {
-	padding: 0;
-}
-
-.amp-settings .form-table {
-	margin-top: 0;
-}
-
-.amp-settings .form-table > tbody > tr > th {
-	display: none;
+#amp-settings > h1 {
+	font-family: var(--font-poppins);
+	font-size: 1.682rem;
+	font-weight: 600;
+	margin-bottom: 0.55rem;
 }
 
 /* Welcome section. */
@@ -36,6 +22,8 @@
 .settings-welcome h2 {
 	align-items: center;
 	display: flex;
+	font-size: 1rem;
+	margin-bottom: 0;
 	margin-top: 0;
 }
 
@@ -70,30 +58,8 @@
 	}
 }
 
-/* Reader themes section. */
-.amp-settings .choose-reader-theme__grid {
-
-	@media (min-width: 1300px) {
-		grid-template-columns: repeat(4, 1fr);
-	}
-
-	@media (min-width: 1600px) {
-		grid-template-columns: repeat(5, 1fr);
-	}
-
-	@media (min-width: 1900px) {
-		grid-template-columns: repeat(6, 1fr);
-	}
-}
-
-.amp-settings .reader-themes {
-	background-color: var(--white);
-	padding: 2.5rem;
-	margin-bottom: 2.5rem;
-}
-
 .amp-settings .theme-card .phone-inner {
-	max-height: 237px;
+	max-height: 365px;
 }
 
 /* Supported templates section. */
@@ -101,22 +67,12 @@
 	margin-bottom: 3rem;
 }
 
-.supported-templates .amp-notice {
-	margin-bottom: 1rem;
+.supported-templates h4 {
+	font-size: 1rem;
 }
 
-.supported-templates .amp-setting-toggle p {
+.supported-templates p {
 	font-size: 13px;
-}
-
-.amp .amp-template-support-field > td {
-	padding-top: 1rem;
-
-	@media (min-width: 783px) {
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		grid-gap: 1rem;
-	}
 }
 
 .mobile-redirection,
@@ -124,12 +80,177 @@
 	margin-bottom: 2.25rem;
 }
 
+.template-modes {
+	margin-bottom: 2.5rem;
+}
 
-.amp.amp-settings .template-mode-selection > p {
+.template-modes .template-mode-option {
+	margin-bottom: 0.5rem;
+}
+
+.amp.amp-settings .template-mode-option > p {
 	font-size: 16px;
 	margin-bottom: 1rem;
 }
 
+.template-modes > p,
 .amp .form-table .amp-suppressed-plugins p {
 	font-size: 13px;
+}
+
+
+/* Plugin suppression */
+.plugin-suppression > p {
+	font-size: 13px;
+}
+
+
+#suppressed-plugins-table {
+	margin-top: 20px;
+}
+
+#suppressed-plugins-table th {
+	font-weight: 400;
+}
+
+#suppressed-plugins-table th,
+#suppressed-plugins-table td {
+	padding: 8px 10px;
+}
+
+#suppressed-plugins-table .column-status {
+	width: 150px;
+}
+
+#suppressed-plugins-table .column-status > select {
+	width: 100%;
+}
+
+#suppressed-plugins-table .column-plugin {
+	width: 45%;
+}
+
+#suppressed-plugins-table .column-plugin .plugin-author-uri {
+	margin-top: 0;
+}
+
+#suppressed-plugins-table .column-details {
+	width: 50%;
+}
+
+#suppressed-plugins-table tbody th,
+#suppressed-plugins-table tbody td {
+	vertical-align: top;
+}
+
+#suppressed-plugins-table details > ul {
+	margin-left: 30px;
+	margin-top: 0.5em;
+	margin-bottom: 1em;
+	list-style-type: disc;
+}
+
+#suppressed-plugins-table summary {
+	user-select: none;
+	cursor: pointer;
+	line-height: 30px; /* To match .wp-core-ui select */
+}
+
+li.error-removed {
+	color: var(--color-valid);
+}
+
+li.error-kept {
+	color: var(--color-invalid);
+}
+
+@media screen and (max-width: 782px) {
+
+	#suppressed-plugins-table summary {
+		line-height: 40px; /* To match .wp-core-ui select */
+	}
+
+	#suppressed-plugins-table {
+		display: table;
+	}
+
+	#suppressed-plugins-table th,
+	#suppressed-plugins-table td {
+		display: table-cell;
+	}
+}
+
+/* Supported templates. */
+#supported_templates_fieldset ul ul {
+	margin-left: 40px;
+}
+
+.supported-templates__fields {
+	display: grid;
+	gap: 1.5rem;
+
+	@media (min-width: 783px) {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@keyframes slideIn {
+
+	from {
+		transform: translate3d(300px, 0, 0);
+	}
+
+	to {
+		transform: translate3d(0, 0, 0);
+	}
+}
+
+@keyframes fadeOut {
+
+	from {
+		opacity: 1;
+	}
+
+	to {
+		opacity: 0;
+	}
+}
+
+
+.amp .amp-save-success-notice.amp-notice {
+	animation: slideIn, fadeOut;
+	animation-delay: 0s, 8s;
+	animation-duration: 0.5s, 0.5s;
+	animation-fill-mode: both;
+}
+
+.amp .amp-save-success-notice.amp-notice,
+.amp-error-notice .amp-notice {
+	bottom: 3rem;
+	box-shadow: 0 30px 20px rgba(0, 0, 0, 0.1);
+	max-width: 300px;
+	padding-right: 3rem;
+	position: fixed;
+	right: -1rem;
+	width: 100%;
+	z-index: 99;
+}
+
+.amp-error-notice .amp-notice {
+	animation: slideIn;
+	animation-delay: 0s;
+	animation-duration: 0.5s;
+	animation-fill-mode: both;
+	max-width: 400px;
+}
+
+/* Panel bodies. */
+.reader-theme-selection,
+.advanced-settings {
+	padding: 0 1rem;
+}
+
+.settings-footer {
+	padding-bottom: 2.5rem;
+	padding-top: 2.5rem;
 }

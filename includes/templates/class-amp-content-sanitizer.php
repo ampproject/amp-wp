@@ -115,8 +115,33 @@ class AMP_Content_Sanitizer {
 		}
 
 		// Sanitize.
+		$sanitizers_to_surface = [
+			AMP_Style_Sanitizer::class,
+			AMP_Tag_And_Attribute_Sanitizer::class,
+		];
 		foreach ( $sanitizers as $sanitizer_class => $sanitizer ) {
-			$sanitize_class_start = microtime( true );
+			/**
+			 * Starts the server-timing measurement for an individual sanitizer.
+			 *
+			 * @since 1.6.0
+			 * @internal
+			 *
+			 * @param string      $event_name        Name of the event to record.
+			 * @param string|null $event_description Optional. Description of the event
+			 *                                       to record. Defaults to null.
+			 * @param string[]    $properties        Optional. Additional properties to add
+			 *                                       to the logged record.
+			 * @param bool        $verbose_only      Optional. Whether to only show the
+			 *                                       event in verbose mode. Defaults to
+			 *                                       false.
+			 */
+			do_action(
+				'amp_server_timing_start',
+				strtolower( $sanitizer_class ),
+				'',
+				[],
+				! in_array( $sanitizer_class, $sanitizers_to_surface, true )
+			);
 
 			$sanitizer->sanitize();
 
@@ -127,10 +152,20 @@ class AMP_Content_Sanitizer {
 				$stylesheets = array_merge( $stylesheets, $sanitizer->get_stylesheets() );
 			}
 
-			AMP_HTTP::send_server_timing( 'amp_sanitize', -$sanitize_class_start, $sanitizer_class );
+			/**
+			 * Stops the server-timing measurement for an individual sanitizer.
+			 *
+			 * @since 1.6.0
+			 * @internal
+			 *
+			 * @param string $event_name Name of the event to stop.
+			 */
+			do_action(
+				'amp_server_timing_stop',
+				strtolower( $sanitizer_class )
+			);
 		}
 
 		return compact( 'scripts', 'styles', 'stylesheets', 'sanitizers' );
 	}
 }
-

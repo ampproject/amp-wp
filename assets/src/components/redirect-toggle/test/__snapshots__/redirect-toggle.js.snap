@@ -29,20 +29,6 @@ exports[`RedirectToggle matches snapshot 1`] = `
           <span
             className="components-form-toggle__thumb"
           />
-          <svg
-            aria-hidden={true}
-            className="components-form-toggle__on"
-            focusable={false}
-            height="6"
-            role="img"
-            viewBox="0 0 2 6"
-            width="2"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M0 0h2v6H0z"
-            />
-          </svg>
         </span>
         <label
           className="components-toggle-control__label"
@@ -52,7 +38,7 @@ exports[`RedirectToggle matches snapshot 1`] = `
             className="amp-setting-toggle__label-text"
           >
             <h3>
-              Redirect mobile visitors to AMP.
+              Redirect mobile visitors to AMP
             </h3>
           </div>
         </label>

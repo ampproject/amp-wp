@@ -1,8 +1,9 @@
 /**
  * CSS variables for the AMP admin pages.
+ *
  * @todo Make the naming of these variables more semantic.
  */
-.amp { /* Root element for plugin markup. */
+:root {
 	--stepper-max-width: 280px;
 	--setup-page-max-width: 1000px;
 	--black: #212121;
@@ -13,6 +14,7 @@
 	--white: #fff;
 	--font-noto: "Noto Sans", sans-serif;
 	--font-poppins: poppins, sans-serif;
-
-	padding-bottom: 8rem;
+	--color-valid: #46b450;
+	--color-invalid: #dc3232;
+	--color-gray-medium: rgba(0, 0, 0, 0.54);
 }

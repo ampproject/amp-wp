@@ -14,9 +14,9 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import { WordmarkLogo } from '../components/svg/wordmark-logo';
+import { UnsavedChangesWarning } from '../components/unsaved-changes-warning';
 import { Stepper } from './components/stepper';
 import { Nav } from './components/nav';
-import { WizardUnsavedChangesWarning } from './components/unsaved-changes-warning';
 import { Navigation } from './components/navigation-context-provider';
 
 /**
@@ -84,7 +84,7 @@ export function SetupWizard( { closeLink, finishLink } ) {
 					/>
 				</div>
 			</div>
-			<WizardUnsavedChangesWarning />
+			<UnsavedChangesWarning />
 		</div>
 	);
 }

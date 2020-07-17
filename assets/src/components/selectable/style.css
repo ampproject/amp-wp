@@ -6,7 +6,7 @@
 	border: 2px solid var(--light-gray);
 	border-radius: 8px;
 	box-shadow: -10px 0 0 var(--light-gray);
-	padding: 2.5rem;
+	padding: 1.25rem 2.5rem;
 }
 
 .selectable--bottom {

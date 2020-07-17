@@ -13,8 +13,9 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import { useError } from '../../utils/use-error';
+import { useAsyncError } from '../../utils/use-async-error';
 import { Options } from '../options-context-provider';
+import { ErrorContext } from '../error-context-provider';
 
 export const ReaderThemes = createContext();
 
@@ -27,9 +28,11 @@ export const ReaderThemes = createContext();
  * @param {?any} props.children Component children.
  * @param {string} props.readerThemesEndpoint REST endpoint to fetch reader themes.
  * @param {string} props.updatesNonce Nonce for the AJAX request to install a theme.
+ * @param {boolean} props.hasErrorBoundary Whether the component is wrapped in an error boundary.
  */
-export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme, readerThemesEndpoint, updatesNonce } ) {
-	const { setError } = useError();
+export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme, readerThemesEndpoint, updatesNonce, hasErrorBoundary = false } ) {
+	const { setAsyncError } = useAsyncError();
+	const { error, setError } = useContext( ErrorContext );
 
 	const [ themes, setThemes ] = useState( null );
 	const [ fetchingThemes, setFetchingThemes ] = useState( false );
@@ -123,7 +126,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	 * Fetches theme data when needed.
 	 */
 	useEffect( () => {
-		if ( fetchingThemes || ! readerThemesEndpoint || themes ) {
+		if ( error || fetchingThemes || ! readerThemesEndpoint || themes ) {
 			return;
 		}
 
@@ -147,13 +150,21 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 				// Screenshots are required.
 				setThemes( fetchedThemes );
 			} catch ( e ) {
+				if ( hasUnmounted.current === true ) {
+					return;
+				}
+
 				setError( e );
+
+				if ( hasErrorBoundary ) {
+					setAsyncError( e );
+				}
 				return;
 			}
 
 			setFetchingThemes( false );
 		} )();
-	}, [ fetchingThemes, readerThemesEndpoint, setError, themes, themeSupport ] );
+	}, [ error, hasErrorBoundary, fetchingThemes, readerThemesEndpoint, setAsyncError, setError, themes, themeSupport ] );
 
 	return (
 		<ReaderThemes.Provider
@@ -179,6 +190,7 @@ ReaderThemesContextProvider.propTypes = {
 	currentTheme: PropTypes.shape( {
 		name: PropTypes.string.isRequired,
 	} ).isRequired,
+	hasErrorBoundary: PropTypes.bool,
 	readerThemesEndpoint: PropTypes.string.isRequired,
 	updatesNonce: PropTypes.string.isRequired,
 	wpAjaxUrl: PropTypes.string.isRequired,

@@ -17,9 +17,10 @@ describe( 'Mobile redirect settings', () => {
 	} );
 
 	it( 'persists the mobile redirect setting on', async () => {
-		await completeWizard( { mode: 'reader' } );
+		await completeWizard( { mode: 'reader', mobileRedirect: true } );
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
+		await expect( page ).toClick( '.advanced-settings-container' );
 		await page.waitForSelector( toggleSelector );
 		await expect( page ).toMatchElement( `${ toggleSelector }:checked` );
 	} );
@@ -29,6 +30,7 @@ describe( 'Mobile redirect settings', () => {
 		await completeWizard( { mode: 'reader', mobileRedirect: false } );
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
+		await expect( page ).toClick( '.advanced-settings-container' );
 		await page.waitForSelector( toggleSelector );
 		await expect( page ).not.toMatchElement( `${ toggleSelector }:checked` );
 	} );

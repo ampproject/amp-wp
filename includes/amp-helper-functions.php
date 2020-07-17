@@ -9,7 +9,7 @@ use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\AmpWpPluginFactory;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\QueryVars;
+use AmpProject\AmpWP\QueryVar;
 
 /**
  * Handle activation of plugin.
@@ -105,8 +105,6 @@ function amp_init() {
 	add_action( 'wp_loaded', 'amp_bootstrap_admin' );
 
 	add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
-	AMP_Post_Type_Support::add_post_type_support();
-	add_action( 'init', [ 'AMP_Post_Type_Support', 'add_post_type_support' ], 1000 ); // After post types have been defined.
 	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
 	add_action( 'admin_bar_menu', 'amp_add_admin_bar_view_link', 100 );
 
@@ -143,28 +141,31 @@ function amp_init() {
 	 */
 	$options     = get_option( AMP_Options_Manager::OPTION_NAME, [] );
 	$old_version = isset( $options[ Option::VERSION ] ) ? $options[ Option::VERSION ] : '0.0';
+
 	if ( AMP__VERSION !== $old_version && is_admin() && current_user_can( 'manage_options' ) ) {
-		/**
-		 * Triggers when after amp_init when the plugin version has updated.
-		 *
-		 * @param string $old_version Old version.
-		 */
-		do_action( 'amp_plugin_update', $old_version );
-		AMP_Options_Manager::update_option( Option::VERSION, AMP__VERSION );
+		// This waits to happen until the very end of init to ensure that amp theme support and amp post type support have all been added.
+		add_action(
+			'init',
+			static function () use ( $old_version ) {
+				/**
+				 * Triggers when after amp_init when the plugin version has updated.
+				 *
+				 * @param string $old_version Old version.
+				 */
+				do_action( 'amp_plugin_update', $old_version );
+				AMP_Options_Manager::update_option( Option::VERSION, AMP__VERSION );
+			},
+			PHP_INT_MAX
+		);
 	}
 
 	add_action(
 		'rest_api_init',
 		static function() {
-			if ( amp_should_use_new_onboarding() ) {
-				$reader_themes = new ReaderThemes();
+			$reader_themes = new ReaderThemes();
 
-				$reader_theme_controller = new AMP_Reader_Theme_REST_Controller( $reader_themes );
-				$reader_theme_controller->register_routes();
-
-				$options_controller = new AMP_Options_REST_Controller( $reader_themes );
-				$options_controller->register_routes();
-			}
+			$reader_theme_controller = new AMP_Reader_Theme_REST_Controller( $reader_themes );
+			$reader_theme_controller->register_routes();
 		}
 	);
 
@@ -453,7 +454,7 @@ function is_amp_available() {
 	if (
 		( ! amp_is_canonical() || AMP_Validation_Manager::has_cap() )
 		&&
-		( isset( $_GET[ QueryVars::NOAMP ] ) && QueryVars::NOAMP_AVAILABLE === $_GET[ QueryVars::NOAMP ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		( isset( $_GET[ QueryVar::NOAMP ] ) && QueryVar::NOAMP_AVAILABLE === $_GET[ QueryVar::NOAMP ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	) {
 		return false;
 	}
@@ -561,7 +562,7 @@ function amp_get_slug() {
 	 *
 	 * @param string $query_var The AMP query variable.
 	 */
-	return apply_filters( 'amp_query_var', defined( 'AMP_QUERY_VAR' ) ? AMP_QUERY_VAR : QueryVars::AMP );
+	return apply_filters( 'amp_query_var', defined( 'AMP_QUERY_VAR' ) ? AMP_QUERY_VAR : QueryVar::AMP );
 }
 
 /**
@@ -734,7 +735,7 @@ function amp_add_amphtml_link() {
 	}
 
 	if ( $amp_url ) {
-		$amp_url = remove_query_arg( QueryVars::NOAMP, $amp_url );
+		$amp_url = remove_query_arg( QueryVar::NOAMP, $amp_url );
 		printf( '<link rel="amphtml" href="%s">', esc_url( $amp_url ) );
 	}
 }
@@ -1775,7 +1776,7 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 		$href = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
 	}
 
-	$href = remove_query_arg( QueryVars::NOAMP, $href );
+	$href = remove_query_arg( QueryVar::NOAMP, $href );
 
 	$icon = $is_amp_endpoint ? Icon::logo() : Icon::link();
 	$attr = [
