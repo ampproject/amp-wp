@@ -336,7 +336,7 @@ class AMP_Options_Manager {
 					$options[ Option::SUPPORTED_POST_TYPES ][] = $post_type;
 				}
 			}
-			$options[ Option::SUPPORTED_POST_TYPES ] = array_unique( $options[ Option::SUPPORTED_POST_TYPES ] );
+			$options[ Option::SUPPORTED_POST_TYPES ] = array_values( array_unique( $options[ Option::SUPPORTED_POST_TYPES ] ) );
 		}
 
 		// Update all_templates_supported.
@@ -353,7 +353,7 @@ class AMP_Options_Manager {
 					$options[ Option::SUPPORTED_TEMPLATES ][] = $template_id;
 				}
 			}
-			$options[ Option::SUPPORTED_TEMPLATES ] = array_unique( $options[ Option::SUPPORTED_TEMPLATES ] );
+			$options[ Option::SUPPORTED_TEMPLATES ] = array_values( array_unique( $options[ Option::SUPPORTED_TEMPLATES ] ) );
 		}
 
 		// Validate wizard completion.
