@@ -842,6 +842,7 @@ function amp_get_boilerplate_stylesheets() {
 /**
  * Add generator metadata.
  *
+ * @since 0.6
  * @since 1.0 Add template mode.
  * @since 2.0 Add reader theme.
  */
