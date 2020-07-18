@@ -14,7 +14,6 @@ use AMP_Theme_Support;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\Option;
 
 /**
  * OptionsMenu class.
@@ -23,7 +22,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	/**
 	 * Handle for JS file.
 	 *
-	 * @since 1.6.0
+	 * @since 2.0
 	 *
 	 * @var string
 	 */
@@ -226,7 +225,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	/**
 	 * Enqueues settings page assets.
 	 *
-	 * @since 1.6.0
+	 * @since 2.0
 	 *
 	 * @param string $hook_suffix The current admin page.
 	 */

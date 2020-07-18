@@ -3,7 +3,7 @@
  * Tests for ReaderThemes.
  *
  * @package AMP
- * @since 1.6
+ * @since 2.0
  */
 
 namespace AmpProject\AmpWP\Tests\Admin;

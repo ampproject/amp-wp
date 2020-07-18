@@ -4,7 +4,7 @@
  *
  * Registers Google fonts for admin screens.
  *
- * @since 1.6.0
+ * @since 2.0
  *
  * @package AmpProject\AmpWP
  */
@@ -20,7 +20,7 @@ use WP_Styles;
 /**
  * Enqueue Google Fonts stylesheet.
  *
- * @since 1.6.0
+ * @since 2.0
  */
 final class GoogleFonts implements Conditional, Delayed, Service, Registerable {
 

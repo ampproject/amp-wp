@@ -4,7 +4,7 @@
  *
  * Adds an admin notice to the plugins screen after the plugin is activated.
  *
- * @since 1.6.0
+ * @since 2.0
  *
  * @package AMP
  */
@@ -20,7 +20,7 @@ use AmpProject\AmpWP\Option;
 /**
  * Class PluginActivationNotice
  *
- * @since 1.6.0
+ * @since 2.0
  */
 final class PluginActivationNotice implements Delayed, Service, Registerable {
 

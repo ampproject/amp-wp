@@ -138,7 +138,7 @@ class AMP_Theme_Support {
 		/**
 		 * Starts the server-timing measurement for the entire output buffer capture.
 		 *
-		 * @since 1.6.0
+		 * @since 2.0
 		 * @internal
 		 *
 		 * @param string      $event_name        Name of the event to record.
@@ -175,7 +175,7 @@ class AMP_Theme_Support {
 	 * @return bool Support added via option.
 	 */
 	public static function is_support_added_via_option() {
-		_deprecated_function( __METHOD__, '1.6' );
+		_deprecated_function( __METHOD__, '2.0.0' );
 		return true;
 	}
 
@@ -192,7 +192,7 @@ class AMP_Theme_Support {
 	 * @codeCoverageIgnore
 	 */
 	public static function get_support_mode_added_via_option() {
-		_deprecated_function( __METHOD__, '1.6', 'AMP_Options_Manager::get_option' );
+		_deprecated_function( __METHOD__, '2.0.0', 'AMP_Options_Manager::get_option' );
 		$value = AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
 		if ( self::READER_MODE_SLUG === $value ) {
 			$value = null;
@@ -213,7 +213,7 @@ class AMP_Theme_Support {
 	 * @codeCoverageIgnore
 	 */
 	public static function get_support_mode_added_via_theme() {
-		_deprecated_function( __METHOD__, '1.6', 'current_theme_supports' );
+		_deprecated_function( __METHOD__, '2.0.0', 'current_theme_supports' );
 		$theme_support_args = self::get_theme_support_args();
 		if ( ! $theme_support_args ) {
 			return null;
@@ -234,7 +234,7 @@ class AMP_Theme_Support {
 	 * @codeCoverageIgnore
 	 */
 	public static function get_support_mode() {
-		_deprecated_function( __METHOD__, '1.6', 'AMP_Options_Manager::get_option' );
+		_deprecated_function( __METHOD__, '2.0.0', 'AMP_Options_Manager::get_option' );
 		return AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
 	}
 
@@ -249,7 +249,7 @@ class AMP_Theme_Support {
 	 * @codeCoverageIgnore
 	 */
 	public static function read_theme_support() {
-		_deprecated_function( __METHOD__, '1.6' );
+		_deprecated_function( __METHOD__, '2.0.0' );
 	}
 
 	/**
@@ -374,7 +374,7 @@ class AMP_Theme_Support {
 	 * Ensure that the current AMP location is correct.
 	 *
 	 * @since 1.0
-	 * @since 1.6 Removed $exit param.
+	 * @since 2.0 Removed $exit param.
 	 *
 	 * @return bool Whether redirection should have been done.
 	 */
@@ -436,7 +436,7 @@ class AMP_Theme_Support {
 	 * @since 0.7
 	 * @since 1.0 Added $exit param.
 	 * @since 1.0 Renamed from redirect_canonical_amp().
-	 * @since 1.6 Removed $exit param.
+	 * @since 2.0 Removed $exit param.
 	 *
 	 * @param int $status Status code (301 or 302).
 	 * @return bool Whether redirection should have be done.
@@ -909,14 +909,14 @@ class AMP_Theme_Support {
 			_doing_it_wrong(
 				'add_filter',
 				esc_html__( 'The AMP plugin no longer allows `amp_supportable_templates` filters to specify a template as being `supported`. This is now managed only in AMP Settings.', 'amp' ),
-				'1.6'
+				'2.0.0'
 			);
 		}
 		if ( $did_filter_supply_immutable ) {
 			_doing_it_wrong(
 				'add_filter',
 				esc_html__( 'The AMP plugin no longer allows `amp_supportable_templates` filters to specify a template\'s support as being `immutable`. This is now managed only in AMP Settings.', 'amp' ),
-				'1.6'
+				'2.0.0'
 			);
 		}
 
@@ -1012,12 +1012,12 @@ class AMP_Theme_Support {
 	/**
 	 * Register/override widgets.
 	 *
-	 * @deprecated As of 1.6 the AMP_Core_Block_Handler will sanitize the core widgets instead.
+	 * @deprecated As of 2.0 the AMP_Core_Block_Handler will sanitize the core widgets instead.
 	 * @global WP_Widget_Factory
 	 * @return void
 	 */
 	public static function register_widgets() {
-		_deprecated_function( __METHOD__, '1.6' );
+		_deprecated_function( __METHOD__, '2.0.0' );
 		global $wp_widget_factory;
 		foreach ( $wp_widget_factory->widgets as $registered_widget ) {
 			$registered_widget_class_name = get_class( $registered_widget );
@@ -1467,7 +1467,7 @@ class AMP_Theme_Support {
 	/**
 	 * Add data-ampdevmode attribute to any enqueued style that depends on the `customizer-preview` handle.
 	 *
-	 * @since 1.6
+	 * @since 2.0
 	 *
 	 * @param string $tag    The link tag for the enqueued style.
 	 * @param string $handle The style's registered handle.
@@ -1809,7 +1809,7 @@ class AMP_Theme_Support {
 		 *
 		 * This is immediately before the processed output buffer is sent to the client.
 		 *
-		 * @since 1.6.0
+		 * @since 2.0
 		 * @internal
 		 */
 		do_action( 'amp_server_timing_send' );
@@ -1913,7 +1913,7 @@ class AMP_Theme_Support {
 		/**
 		 * Stops the server-timing measurement for the entire output buffer capture.
 		 *
-		 * @since 1.6.0
+		 * @since 2.0
 		 * @internal
 		 *
 		 * @param string $event_name Name of the event to stop.
@@ -1923,7 +1923,7 @@ class AMP_Theme_Support {
 		/**
 		 * Starts the server-timing measurement for the dom parsing subsystem.
 		 *
-		 * @since 1.6.0
+		 * @since 2.0
 		 * @internal
 		 *
 		 * @param string      $event_name        Name of the event to record.
@@ -1946,7 +1946,7 @@ class AMP_Theme_Support {
 		/**
 		 * Stops the server-timing measurement for the dom parsing subsystem.
 		 *
-		 * @since 1.6.0
+		 * @since 2.0
 		 * @internal
 		 *
 		 * @param string $event_name Name of the event to stop.
@@ -1956,7 +1956,7 @@ class AMP_Theme_Support {
 		/**
 		 * Starts the server-timing measurement for the AMP Sanitizer subsystem.
 		 *
-		 * @since 1.6.0
+		 * @since 2.0
 		 * @internal
 		 *
 		 * @param string      $event_name        Name of the event to record.
@@ -1987,7 +1987,7 @@ class AMP_Theme_Support {
 		/**
 		 * Stops the server-timing measurement for the AMP Sanitizer subsystem.
 		 *
-		 * @since 1.6.0
+		 * @since 2.0
 		 * @internal
 		 *
 		 * @param string $event_name Name of the event to stop.
@@ -2013,7 +2013,7 @@ class AMP_Theme_Support {
 		/**
 		 * Starts the server-timing measurement for the AMP DOM serialization.
 		 *
-		 * @since 1.6.0
+		 * @since 2.0
 		 * @internal
 		 *
 		 * @param string      $event_name        Name of the event to record.
@@ -2063,7 +2063,7 @@ class AMP_Theme_Support {
 			/**
 			 * Starts the server-timing measurement for the AMP Optimizer subsystem.
 			 *
-			 * @since 1.6.0
+			 * @since 2.0
 			 * @internal
 			 *
 			 * @param string      $event_name        Name of the event to record.
@@ -2096,7 +2096,7 @@ class AMP_Theme_Support {
 			/**
 			 * Stops the server-timing measurement for the AMP Optimizer subsystem.
 			 *
-			 * @since 1.6.0
+			 * @since 2.0
 			 * @internal
 			 *
 			 * @param string $event_name Name of the event to stop.
@@ -2124,7 +2124,7 @@ class AMP_Theme_Support {
 		/**
 		 * Stops the server-timing measurement for the AMP DOM serialization.
 		 *
-		 * @since 1.6.0
+		 * @since 2.0
 		 * @internal
 		 *
 		 * @param string $event_name Name of the event to stop.

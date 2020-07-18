@@ -3,7 +3,7 @@
  * OnboardingWizardSubmenuPage class.
  *
  * @package AmpProject\AmpWP
- * @since 1.6.0
+ * @since 2.0
  */
 
 namespace AmpProject\AmpWP\Admin;
@@ -20,13 +20,13 @@ use AmpProject\AmpWP\Services;
 /**
  * AMP setup wizard submenu page class.
  *
- * @since 1.6.0
+ * @since 2.0
  */
 final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registerable, Service {
 	/**
 	 * Handle for JS file.
 	 *
-	 * @since 1.6.0
+	 * @since 2.0
 	 *
 	 * @var string
 	 */
@@ -35,7 +35,7 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 	/**
 	 * HTML ID for the app root element.
 	 *
-	 * @since 1.6.0
+	 * @since 2.0
 	 *
 	 * @var string
 	 */
@@ -87,7 +87,7 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 	/**
 	 * Sets up hooks.
 	 *
-	 * @since 1.6.0
+	 * @since 2.0
 	 */
 	public function register() {
 		add_action( 'admin_head-' . $this->screen_handle(), [ $this, 'override_template' ] );
@@ -112,7 +112,7 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 	/**
 	 * Renders the setup wizard screen output and exits.
 	 *
-	 * @since 1.6.0
+	 * @since 2.0
 	 */
 	public function override_template() {
 		$this->render();
@@ -151,7 +151,7 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 	/**
 	 * Provides the setup screen handle.
 	 *
-	 * @since 1.6.0
+	 * @since 2.0
 	 *
 	 * @return string
 	 */
@@ -162,7 +162,7 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 	/**
 	 * Enqueues setup assets.
 	 *
-	 * @since 1.6.0
+	 * @since 2.0
 	 *
 	 * @param string $hook_suffix The current admin page.
 	 */

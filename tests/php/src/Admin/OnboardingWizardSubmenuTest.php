@@ -18,7 +18,7 @@ use WP_UnitTestCase;
  *
  * @group onboarding
  *
- * @since 1.6.0
+ * @since 2.0
  *
  * @covers OnboardingWizardSubmenu
  */

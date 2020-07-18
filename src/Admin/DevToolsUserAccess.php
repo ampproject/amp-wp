@@ -2,7 +2,7 @@
 /**
  * Class DevToolsUserAccess.
  *
- * @since 1.6.0
+ * @since 2.0
  *
  * @package AMP
  */
@@ -18,7 +18,7 @@ use WP_User;
 /**
  * Class DevToolsUserAccess
  *
- * @since 1.6.0
+ * @since 2.0
  */
 final class DevToolsUserAccess implements Service, Registerable {
 

@@ -23,7 +23,7 @@ export function SiteScanContextProvider( { children } ) {
 	const [ scanningSite, setScanningSite ] = useState( true );
 
 	/**
-	 * @todo Note: The following effects will be updated for version 1.7 when site scan is implemented in the wizard. For now,
+	 * @todo Note: The following effects will be updated for version 2.1 when site scan is implemented in the wizard. For now,
 	 * we will keep themeIssues and pluginIssues set to null, emulating an unsuccessful site scan. The wizard will then make
 	 * a mode recommendation based only on how the user has answered the technical question.
 	 */

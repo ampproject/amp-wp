@@ -335,7 +335,7 @@ function amp_is_canonical() {
 /**
  * Determines whether the legacy AMP post templates are being used.
  *
- * @since 1.6
+ * @since 2.0
  * @return bool
  */
 function amp_is_legacy() {
@@ -358,7 +358,7 @@ function amp_add_frontend_actions() {
 /**
  * Determine whether AMP is available for the current URL.
  *
- * @since 1.6
+ * @since 2.0
  *
  * @return bool Whether there is an AMP version for the provided URL.
  * @global string $pagenow
@@ -387,7 +387,7 @@ function is_amp_available() {
 			'WP_Query',
 			'amp_skip_post()'
 		);
-		_doing_it_wrong( 'is_amp_available', esc_html( $message ), '1.6.0' );
+		_doing_it_wrong( 'is_amp_available', esc_html( $message ), '2.0.0' );
 		$warned = true;
 	};
 
@@ -842,9 +842,9 @@ function amp_get_boilerplate_stylesheets() {
 /**
  * Add generator metadata.
  *
- * @since 6.0
+ * @since 0.6
  * @since 1.0 Add template mode.
- * @since 1.6 Add reader theme.
+ * @since 2.0 Add reader theme.
  */
 function amp_add_generator_metadata() {
 	$content = sprintf( 'AMP Plugin v%s', AMP__VERSION );
@@ -961,7 +961,7 @@ function amp_register_default_scripts( $wp_scripts ) {
 /**
  * Register default styles.
  *
- * @since 1.6
+ * @since 2.0
  *
  * @param WP_Styles $styles Styles.
  */

@@ -936,7 +936,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		/**
 		 * Logs the server-timing measurement for the CSS parsing.
 		 *
-		 * @since 1.6.0
+		 * @since 2.0
 		 * @internal
 		 *
 		 * @param string   $event_name        Name of the event to log.
@@ -951,7 +951,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		/**
 		 * Logs the server-timing measurement for the CSS tree-shaking.
 		 *
-		 * @since 1.6.0
+		 * @since 2.0
 		 * @internal
 		 *
 		 * @param string   $event_name        Name of the event to log.
