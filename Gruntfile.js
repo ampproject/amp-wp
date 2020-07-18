@@ -41,8 +41,10 @@ module.exports = function( grunt ) {
 		'vendor/*/*/tests',
 		'vendor/ampproject/common/phpstan.neon.dist',
 		'vendor/ampproject/optimizer/bin',
+		'vendor/ampproject/optimizer/conceptual-diagram.svg',
 		'vendor/ampproject/optimizer/phpstan.neon.dist',
 		'vendor/bin',
+		'vendor/php-parallel-lint',
 	];
 
 	grunt.initConfig( {
