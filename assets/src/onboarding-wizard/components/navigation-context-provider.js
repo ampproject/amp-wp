@@ -23,7 +23,7 @@ export const Navigation = createContext();
  */
 export function NavigationContextProvider( { children, pages } ) {
 	const [ activePageIndex, setActivePageIndex ] = useState( 0 );
-	const [ canGoForward, setCanGoForward ] = useState( true ); // Allow immediately moving forward on first page. @todo This may need to change in 1.7.
+	const [ canGoForward, setCanGoForward ] = useState( true ); // Allow immediately moving forward on first page. @todo This may need to change in 2.1.
 	const { editedOptions } = useContext( Options );
 
 	const { theme_support: themeSupport } = editedOptions;
