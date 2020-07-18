@@ -39,7 +39,7 @@ class AMP_Template_Customizer {
 	/**
 	 * Reader theme loader.
 	 *
-	 * @since 1.6
+	 * @since 2.0
 	 * @var ReaderThemeLoader
 	 */
 	protected $reader_theme_loader;
@@ -276,7 +276,7 @@ class AMP_Template_Customizer {
 	/**
 	 * Load up AMP scripts needed for Customizer integrations when a Reader theme has been selected.
 	 *
-	 * @since 1.6
+	 * @since 2.0
 	 */
 	public function add_customizer_scripts() {
 		$asset_file   = AMP__DIR__ . '/assets/js/amp-customize-controls.asset.php';
@@ -334,7 +334,7 @@ class AMP_Template_Customizer {
 	 * Load up AMP scripts needed for Customizer integrations in Legacy Reader mode.
 	 *
 	 * @since 0.6 Originally called add_customizer_scripts.
-	 * @since 1.6
+	 * @since 2.0
 	 */
 	public function add_legacy_customizer_scripts() {
 		$asset_file   = AMP__DIR__ . '/assets/js/amp-customize-controls-legacy.asset.php';

@@ -80,7 +80,7 @@ class AMP_Post_Meta_Box {
 	/**
 	 * The name for the REST API field containing whether AMP is enabled for a post.
 	 *
-	 * @since 1.6
+	 * @since 2.0
 	 * @var string
 	 */
 	const REST_ATTRIBUTE_NAME = 'amp_enabled';
@@ -432,7 +432,7 @@ class AMP_Post_Meta_Box {
 	/**
 	 * Add a REST API field to display whether AMP is enabled on supported post types.
 	 *
-	 * @since 1.6
+	 * @since 2.0
 	 *
 	 * @return void
 	 */
@@ -454,7 +454,7 @@ class AMP_Post_Meta_Box {
 	/**
 	 * Get the value of whether AMP is enabled for a REST API request.
 	 *
-	 * @since 1.6
+	 * @since 2.0
 	 *
 	 * @param array $post_data Post data.
 	 * @return bool Whether AMP is enabled on post.
@@ -477,7 +477,7 @@ class AMP_Post_Meta_Box {
 	/**
 	 * Update whether AMP is enabled for a REST API request.
 	 *
-	 * @since 1.6
+	 * @since 2.0
 	 *
 	 * @param bool    $is_enabled Whether AMP is enabled.
 	 * @param WP_Post $post       Post being updated.

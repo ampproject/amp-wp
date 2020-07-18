@@ -3,7 +3,7 @@
  * Tests for the reader theme REST controller.
  *
  * @package AMP
- * @since 1.6
+ * @since 2.0
  */
 
 use AmpProject\AmpWP\Admin\ReaderThemes;

@@ -3,7 +3,7 @@
  * Fetches and formats data for AMP reader themes.
  *
  * @package AMP
- * @since 1.6.0
+ * @since 2.0
  */
 
 namespace AmpProject\AmpWP\Admin;
@@ -14,7 +14,7 @@ use WP_Upgrader;
 /**
  * Handles reader themes.
  *
- * @since 1.6.0
+ * @since 2.0
  */
 final class ReaderThemes {
 	/**

@@ -203,8 +203,8 @@ class AMP_Options_Manager {
 			$options[ Option::THEME_SUPPORT ] = $defaults[ Option::THEME_SUPPORT ];
 		}
 
-		// Migrate options from 1.5 to 1.6.
-		if ( isset( $options['version'] ) && version_compare( $options['version'], '1.6', '<' ) ) {
+		// Migrate options from 1.5 to 2.0.
+		if ( isset( $options['version'] ) && version_compare( $options['version'], '2.0', '<' ) ) {
 
 			// It used to be that the themes_supported flag overrode the options, so make sure the option gets updated to reflect the theme support.
 			if ( isset( $theme_support['templates_supported'] ) ) {

@@ -3,7 +3,7 @@
  * Rest endpoint for fetching and updating plugin options from admin screens.
  *
  * @package AMP
- * @since 1.6.0
+ * @since 2.0
  */
 
 namespace AmpProject\AmpWP;
@@ -25,7 +25,7 @@ use WP_REST_Server;
 /**
  * OptionsRESTController class.
  *
- * @since 1.6.0
+ * @since 2.0
  */
 final class OptionsRESTController extends WP_REST_Controller implements Delayed, Service, Registerable {
 

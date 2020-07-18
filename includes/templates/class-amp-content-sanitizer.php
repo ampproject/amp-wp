@@ -123,7 +123,7 @@ class AMP_Content_Sanitizer {
 			/**
 			 * Starts the server-timing measurement for an individual sanitizer.
 			 *
-			 * @since 1.6.0
+			 * @since 2.0
 			 * @internal
 			 *
 			 * @param string      $event_name        Name of the event to record.
@@ -155,7 +155,7 @@ class AMP_Content_Sanitizer {
 			/**
 			 * Stops the server-timing measurement for an individual sanitizer.
 			 *
-			 * @since 1.6.0
+			 * @since 2.0
 			 * @internal
 			 *
 			 * @param string $event_name Name of the event to stop.

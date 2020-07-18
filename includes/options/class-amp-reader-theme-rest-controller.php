@@ -3,7 +3,7 @@
  * Reader theme controller.
  *
  * @package AMP
- * @since 1.6.0
+ * @since 2.0
  */
 
 use AmpProject\AmpWP\Admin\ReaderThemes;
@@ -11,7 +11,7 @@ use AmpProject\AmpWP\Admin\ReaderThemes;
 /**
  * AMP reader theme REST controller.
  *
- * @since 1.6.0
+ * @since 2.0
  */
 final class AMP_Reader_Theme_REST_Controller extends WP_REST_Controller {
 
@@ -36,7 +36,7 @@ final class AMP_Reader_Theme_REST_Controller extends WP_REST_Controller {
 	/**
 	 * Registers routes for the controller.
 	 *
-	 * @since 1.6.0
+	 * @since 2.0
 	 */
 	public function register_routes() {
 		register_rest_route(

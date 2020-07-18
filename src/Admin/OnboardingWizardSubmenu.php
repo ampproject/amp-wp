@@ -3,7 +3,7 @@
  * OnboardingWizardSubmenu class.
  *
  * @package AmpProject\AmpWP
- * @since 1.6.0
+ * @since 2.0
  */
 
 namespace AmpProject\AmpWP\Admin;
@@ -16,7 +16,7 @@ use AmpProject\AmpWP\Infrastructure\Service;
 /**
  * AMP onboarding wizard submenu class.
  *
- * @since 1.6.0
+ * @since 2.0
  */
 final class OnboardingWizardSubmenu implements Conditional, Delayed, Service, Registerable {
 	/**
