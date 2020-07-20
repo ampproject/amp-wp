@@ -13,7 +13,7 @@ import { render } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { TemplateModeOption, getId } from '..';
+import { TemplateModeOption } from '..';
 import { READER, STANDARD, TRANSITIONAL } from '../../../common/constants';
 import { OptionsContextProvider } from '../../options-context-provider';
 
