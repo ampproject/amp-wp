@@ -37,7 +37,7 @@
  */
 .summary-header__header {
 	align-items: center;
-	border-bottom: 1px solid var(--light-gray);
+	border-bottom: 1px solid var(--amp-settings-color-border);
 	display: flex;
 	font-family: var(--font-poppins);
 	margin-bottom: 1.5rem;

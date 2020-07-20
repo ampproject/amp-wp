@@ -12,6 +12,7 @@ import { useContext } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import { PanelBody } from '@wordpress/components';
 import { Selectable } from '../selectable';
 import { AMPInfo } from '../amp-info';
 import { Standard } from '../svg/standard';
@@ -20,6 +21,7 @@ import { Reader } from '../svg/reader';
 import { Options } from '../options-context-provider';
 
 import './style.css';
+import { READER, STANDARD, TRANSITIONAL } from '../../common/constants';
 
 /**
  * Mode-specific illustration.
@@ -29,13 +31,13 @@ import './style.css';
  */
 function Illustration( { mode } ) {
 	switch ( mode ) {
-		case 'standard':
+		case STANDARD:
 			return <Standard />;
 
-		case 'transitional':
+		case TRANSITIONAL:
 			return <Transitional />;
 
-		case 'reader':
+		case READER:
 			return <Reader />;
 
 		default:
@@ -53,18 +55,27 @@ Illustration.propTypes = {
  */
 function getTitle( mode ) {
 	switch ( mode ) {
-		case 'standard':
+		case STANDARD:
 			return __( 'Standard', 'amp' );
 
-		case 'transitional':
+		case TRANSITIONAL:
 			return __( 'Transitional', 'amp' );
 
-		case 'reader':
+		case READER:
 			return __( 'Reader', 'amp' );
 
 		default:
 			return null;
 	}
+}
+
+/**
+ * Returns the ID for an input corresponding to a mode option.
+ *
+ * @param {string} mode A template mode.
+ */
+export function getId( mode ) {
+	return `template-mode-${ mode }`;
 }
 
 /**
@@ -80,11 +91,11 @@ export function TemplateModeOption( { children, details, mode, previouslySelecte
 	const { editedOptions, updateOptions } = useContext( Options );
 	const { theme_support: themeSupport } = editedOptions;
 
-	const id = `template-mode-${ mode }`;
+	const id = getId( mode );
 
 	return (
 		<Selectable id={ `${ id }-container` } className="template-mode-option" selected={ mode === themeSupport }>
-			<label htmlFor={ id }>
+			<label className="template-mode-option__label" htmlFor={ id }>
 				<div className="template-mode-selection__input-container">
 					<input
 						type="radio"
@@ -109,25 +120,29 @@ export function TemplateModeOption( { children, details, mode, previouslySelecte
 					) }
 				</div>
 			</label>
-			<div className="template-mode-selection__details">
-				<p>
-					<span dangerouslySetInnerHTML={ { __html: details } } />
-					{ ' ' }
-					{ /* @todo Temporary URL. */ }
-					<a href="http://amp-wp.org" target="_blank" rel="noreferrer">
-						{ __( 'Learn more.', 'amp' ) }
-					</a>
-				</p>
-			</div>
+			<PanelBody title={ ' ' } className="template-mode-option__panel-body" initialOpen={ mode && themeSupport && mode === themeSupport }>
+				<div className="template-mode-selection__details">
+					{ details && (
+						<p>
+							<span dangerouslySetInnerHTML={ { __html: details } } />
+							{ ' ' }
+							{ /* @todo Temporary URL. */ }
+							<a href="http://amp-wp.org" target="_blank" rel="noreferrer">
+								{ __( 'Learn more.', 'amp' ) }
+							</a>
+						</p>
+					) }
+					{ children }
+				</div>
+			</PanelBody>
 
-			{ children }
 		</Selectable>
 	);
 }
 
 TemplateModeOption.propTypes = {
 	children: PropTypes.any,
-	details: PropTypes.string.isRequired,
-	mode: PropTypes.string.isRequired,
+	details: PropTypes.string,
+	mode: PropTypes.oneOf( [ READER, STANDARD, TRANSITIONAL ] ).isRequired,
 	previouslySelected: PropTypes.bool,
 };

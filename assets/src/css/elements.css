@@ -47,7 +47,7 @@
 }
 
 .amp input[type="radio"][disabled] {
-	border-color: var(--light-gray);
+	border-color: var(--amp-settings-color-border);
 }
 
 .amp input[type="radio"]:checked {

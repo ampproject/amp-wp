@@ -28,7 +28,7 @@
 }
 
 .amp .components-panel__body-title:hover {
-	background: var(--white);
+	background: var(--amp-settings-color-background);
 }
 
 .amp .components-button.components-panel__body-toggle svg {
@@ -63,7 +63,7 @@
 .amp .components-button.is-primary:active,
 .amp .components-button.is-primary:not(:disabled):not([aria-disabled="true"]):hover {
 	background: var(--brand);
-	color: var(--white);
+	color: var(--amp-settings-color-background);
 	text-shadow: none;
 }
 
@@ -104,7 +104,7 @@
 }
 
 .amp .components-form-toggle.is-checked .components-form-toggle__thumb {
-	background-color: var(--white);
+	background-color: var(--amp-settings-color-background);
 }
 
 .amp .components-form-toggle.is-checked .components-form-toggle__track {

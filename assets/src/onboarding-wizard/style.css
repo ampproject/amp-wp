@@ -67,7 +67,7 @@ body {
 }
 
 .amp-settings-plugin-name::after {
-	border-bottom: 1px solid var(--light-gray);
+	border-bottom: 1px solid var(--amp-settings-color-border);
 	display: block;
 	content: "";
 	margin: 15px auto 0;
@@ -111,7 +111,7 @@ body {
 
 .amp-stepper__item::before {
 	bottom: -50%;
-	border-left: 2px solid var(--light-gray);
+	border-left: 2px solid var(--amp-settings-color-border);
 	content: "";
 	left: 32px;
 	position: absolute;
@@ -142,8 +142,8 @@ body {
 
 .amp-stepper__bullet {
 	align-items: center;
-	background-color: var(--white);
-	border: 2px solid var(--light-gray);
+	background-color: var(--amp-settings-color-background);
+	border: 2px solid var(--amp-settings-color-border);
 	border-radius: 12px;
 	color: var(--gray);
 	content: attr(data-index);
