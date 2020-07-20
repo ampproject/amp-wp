@@ -115,6 +115,7 @@ final class Carousel {
 				$caption_block_class     = 'wp-block-image';
 				$has_caption_class       = AMP_DOM_Utils::has_class( $caption_node, $caption_shortcode_class ) || AMP_DOM_Utils::has_class( $caption_node, $caption_block_class );
 
+				/** @var DOMElement $caption_node */
 				if ( ! $has_caption_class || ! $caption_node->hasAttribute( Attribute::CLASS_ ) ) {
 					$caption_node->setAttribute( Attribute::CLASS_, 'amp-wp-gallery-caption' );
 				}
