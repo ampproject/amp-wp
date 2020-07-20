@@ -1301,7 +1301,7 @@ function amp_end_app_shell_content() {
 		ob_end_clean();
 	}
 
-	echo '</div><!-- #amp-app-shell-content -->';
+	printf( '</div><!-- #%s -->', esc_attr( AMP_Theme_Support::APP_SHELL_CONTENT_ELEMENT_ID ) );
 }
 
 /**
