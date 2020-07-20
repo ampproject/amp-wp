@@ -8,6 +8,7 @@
 namespace AmpProject\AmpWP\Dom;
 
 use AmpProject\AmpWP\Component\CaptionedSlide;
+use DOMNode;
 use IteratorAggregate;
 use Countable;
 use DOMElement;
@@ -31,11 +32,11 @@ final class ElementList implements IteratorAggregate, Countable {
 	/**
 	 * Adds an element to the list, possibly with a caption.
 	 *
-	 * @param DOMElement $element The element to add, possibly an image.
-	 * @param DOMElement $caption The caption element for the element.
+	 * @param DOMElement   $element The element to add, possibly an image.
+	 * @param DOMNode|null $caption The caption for the element.
 	 * @return ElementList A clone of this list, with the new element added.
 	 */
-	public function add( DOMElement $element, $caption = null ) {
+	public function add( DOMElement $element, DOMNode $caption = null ) {
 		$cloned_list             = clone $this;
 		$cloned_list->elements[] = $caption === null ? $element : new CaptionedSlide( $element, $caption );
 		return $cloned_list;

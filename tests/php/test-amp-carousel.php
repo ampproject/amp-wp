@@ -25,27 +25,35 @@ class Test_Carousel extends \WP_UnitTestCase {
 	 * @return array[] An associative array, including the slides and captions, the DOM, and the expected markup.
 	 */
 	public function get_carousel_data() {
-		$dom     = new Document();
-		$src     = 'https://example.com/img.png';
-		$width   = '1200';
-		$height  = '800';
-		$image   = AMP_DOM_Utils::create_node(
+		$dom    = new Document();
+		$src    = 'https://example.com/img.png';
+		$width  = '1200';
+		$height = '800';
+		$image  = AMP_DOM_Utils::create_node(
 			$dom,
 			'amp-img',
 			compact( 'src', 'width', 'height' )
 		);
-		$caption = 'Example caption';
+
+		$caption_element = AMP_DOM_Utils::create_node( $dom, 'a', [ 'href' => 'example.org' ] );
+		$caption_element->appendChild( new DOMText( 'Example caption' ) );
 
 		return [
-			'image_without_caption' => [
-				( new ElementList() )->add( $image, '' ),
+			'image_without_caption'   => [
+				( new ElementList() )->add( $image, null ),
 				$dom,
-				'<amp-carousel width="' . $width . '" height="' . $height . '" type="slides" layout="responsive"><span class="slide"><amp-img src="' . $src . '" width="' . $width . '" height="' . $height . '" layout="fill" object-fit="cover"></amp-img></span></amp-carousel>',
+				'<amp-carousel width="' . $width . '" height="' . $height . '" type="slides" layout="responsive"><figure class="slide"><amp-img src="' . $src . '" width="' . $width . '" height="' . $height . '" layout="fill" object-fit="cover"></amp-img></figure></amp-carousel>',
 			],
-			'image_with_caption'    => [
-				( new ElementList() )->add( $image, $caption ),
+			'image_with_text_caption' => [
+				( new ElementList() )->add( $image, new DOMText( 'Example caption' ) ),
 				$dom,
-				'<amp-carousel width="' . $width . '" height="' . $height . '" type="slides" layout="responsive"><span class="slide"><amp-img src="' . $src . '" width="' . $width . '" height="' . $height . '" layout="fill" object-fit="cover"></amp-img><span class="amp-wp-gallery-caption"><span>' . $caption . '</span></span></span></amp-carousel>',
+				'<amp-carousel width="' . $width . '" height="' . $height . '" type="slides" layout="responsive"><figure class="slide"><amp-img src="' . $src . '" width="' . $width . '" height="' . $height . '" layout="fill" object-fit="cover"></amp-img><figcaption class="amp-wp-gallery-caption">Example caption</figcaption></figure></amp-carousel>',
+			],
+
+			'image_with_html_caption' => [
+				( new ElementList() )->add( $image, $caption_element ),
+				$dom,
+				'<amp-carousel width="' . $width . '" height="' . $height . '" type="slides" layout="responsive"><figure class="slide"><amp-img src="' . $src . '" width="' . $width . '" height="' . $height . '" layout="fill" object-fit="cover"></amp-img><figcaption class="amp-wp-gallery-caption"><a href="example.org">Example caption</a></figcaption></figure></amp-carousel>',
 			],
 		];
 	}
@@ -129,15 +137,15 @@ class Test_Carousel extends \WP_UnitTestCase {
 				[ $wide_image_width, $wide_image_height ],
 			],
 			'image_with_0_height_should_not_affect_ratio' => [
-				( new ElementList() )->add( $image_with_0_height )->add( $wide_image, '' ),
+				( new ElementList() )->add( $image_with_0_height )->add( $wide_image, null ),
 				[ $wide_image_width, $wide_image_height ],
 			],
 			'two_images'                                  => [
-				( new ElementList() )->add( $narrow_image )->add( $wide_image, '' ),
+				( new ElementList() )->add( $narrow_image )->add( $wide_image, null ),
 				[ $wide_image_width, $wide_image_height ],
 			],
 			'two_images_order_changed'                    => [
-				( new ElementList() )->add( $wide_image )->add( $narrow_image, '' ),
+				( new ElementList() )->add( $wide_image )->add( $narrow_image, null ),
 				[ $wide_image_width, $wide_image_height ],
 			],
 		];

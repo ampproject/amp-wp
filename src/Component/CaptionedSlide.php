@@ -37,7 +37,7 @@ final class CaptionedSlide implements HasCaption {
 	 * @param DOMNode $slide_node   The slide node, possibly an image.
 	 * @param DOMNode $caption_node The caption node.
 	 */
-	public function __construct( DOMNode $slide_node, $caption_node ) {
+	public function __construct( DOMNode $slide_node, DOMNode $caption_node ) {
 		$this->slide_node   = $slide_node;
 		$this->caption_node = $caption_node;
 	}

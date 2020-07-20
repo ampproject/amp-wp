@@ -58,7 +58,7 @@ class Test_DOM_Element_List extends \WP_UnitTestCase {
 	public function test_dom_element_list_add( $images, $expected_count ) {
 		$dom_element_list = new ElementList();
 		foreach ( $images as $image ) {
-			$dom_element_list = $dom_element_list->add( $image, '' );
+			$dom_element_list = $dom_element_list->add( $image, null );
 		}
 
 		$this->assertEquals( $expected_count, $dom_element_list->count() );
@@ -77,7 +77,7 @@ class Test_DOM_Element_List extends \WP_UnitTestCase {
 	public function test_dom_element_list_get_iterator( $images, $expected_count ) {
 		$dom_element_list = new ElementList();
 		foreach ( $images as $image ) {
-			$dom_element_list = $dom_element_list->add( $image, '' );
+			$dom_element_list = $dom_element_list->add( $image, null );
 		}
 
 		$iteration_count = 0;
@@ -108,7 +108,7 @@ class Test_DOM_Element_List extends \WP_UnitTestCase {
 	 */
 	public function test_get_slide_node() {
 		$image_node = AMP_DOM_Utils::create_node( new Document(), 'amp-img', [] );
-		$amp_image  = new CaptionedSlide( $image_node, '' );
+		$amp_image  = new CaptionedSlide( $image_node, new DOMNode() );
 		$this->assertEquals( $image_node, $amp_image->get_slide_node() );
 	}
 }

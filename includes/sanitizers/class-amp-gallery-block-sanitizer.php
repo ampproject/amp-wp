@@ -5,8 +5,7 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Dom\ElementList;
-use AmpProject\AmpWP\Component\Carousel;
+use AmpProject\AmpWP\Embed\HandlesGalleryEmbed;
 
 /**
  * Class AMP_Gallery_Block_Sanitizer
@@ -14,6 +13,8 @@ use AmpProject\AmpWP\Component\Carousel;
  * Modifies gallery block to match the block's AMP-specific configuration.
  */
 class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
+
+	use HandlesGalleryEmbed;
 
 	/**
 	 * Tag.
@@ -77,102 +78,48 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 			$attributes   = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $gallery_node );
 
 			$is_amp_lightbox = isset( $attributes['data-amp-lightbox'] ) && rest_sanitize_boolean( $attributes['data-amp-lightbox'] );
-			if ( $node->hasAttribute( 'data-amp-carousel' ) || $node->parentNode->hasAttribute( 'data-amp-carousel' ) ) {
-				$is_amp_carousel = rest_sanitize_boolean( $node->getAttribute( 'data-amp-carousel' ) ) || rest_sanitize_boolean( $node->parentNode->getAttribute( 'data-amp-carousel' ) );
+
+			if ( $gallery_node->hasAttribute( 'data-amp-carousel' ) ) {
+				$is_amp_carousel = rest_sanitize_boolean( $gallery_node->getAttribute( 'data-amp-carousel' ) );
 			} else {
 				// The carousel_required argument is set to true when the theme does not support AMP. However, it is no
 				// no longer strictly required. Rather, carousels are just enabled by default.
 				$is_amp_carousel = ! empty( $this->args['carousel_required'] );
 			}
 
-			// We are only looking for <ul> elements which have amp-carousel / amp-lightbox true.
-			if ( ! $is_amp_carousel && ! $is_amp_lightbox ) {
-				continue;
-			}
-
 			$img_elements = $node->getElementsByTagName( 'amp-img' );
 
-			// Skip if no images found.
-			if ( 0 === $img_elements->length ) {
-				continue;
-			}
-
-			// If lightbox is set, we should add lightbox feature to the gallery images.
-			if ( $is_amp_lightbox ) {
-				$this->add_lightbox_attributes_to_image_nodes( $img_elements );
-			}
-
-			// If amp-carousel is not set, nothing else to do here.
-			if ( ! $is_amp_carousel ) {
-				continue;
-			}
-
-			$amp_carousel = $this->get_amp_carousel( $img_elements );
-			$gallery_node->parentNode->replaceChild( $amp_carousel->get_dom_element(), $gallery_node );
-		}
-		$this->did_convert_elements = true;
-	}
-
-	/**
-	 * Set lightbox related attributes to <amp-img> within gallery.
-	 *
-	 * @param DOMNodeList $img_elements List of image elements.
-	 */
-	protected function add_lightbox_attributes_to_image_nodes( DOMNodeList $img_elements ) {
-		foreach ( $img_elements as $img_element ) {
-			$img_element->setAttribute( 'lightbox', '' );
+			$this->process_gallery_embed( $is_amp_carousel, $is_amp_lightbox, $gallery_node, $img_elements );
 		}
 	}
 
 	/**
-	 * Create an AMP carousel component from the list of images specified.
+	 * Get the caption element for the specified image element.
 	 *
-	 * @param DOMNodeList $img_elements
-	 * @return Carousel
+	 * @param DOMElement $img_element Image element.
+	 * @return DOMElement|null The caption element, or `null` if the image has none.
 	 */
-	protected function get_amp_carousel( DOMNodeList $img_elements ) {
-		$images = new ElementList();
-
-		foreach ( $img_elements as $element ) {
-			$images = $images->add( $element, $this->get_caption_element( $element ) );
-		}
-
-		return new Carousel( $this->dom, $images );
-	}
-
-	/**
-	 * Gets the caption of an image, if it exists.
-	 *
-	 * @param DOMElement $element The element for which to search for a caption.
-	 * @return DOMElement A <span> wrapping the content of the image <figcaption>, or null if the caption could not be found.
-	 */
-	public function get_caption_element($element ) {
-		$caption_tag = 'figcaption';
+	protected function get_caption_element( DOMElement $img_element ) {
+		$caption_tag        = 'figcaption';
 		$figcaption_element = null;
 
-		if ( isset( $element->nextSibling->nodeName ) && $caption_tag === $element->nextSibling->nodeName ) {
-			$figcaption_element = $element->nextSibling;
+		if ( isset( $img_element->nextSibling->nodeName ) && $caption_tag === $img_element->nextSibling->nodeName ) {
+			$figcaption_element = $img_element->nextSibling;
 		}
 
 		// If 'Link To' is selected, the image will be wrapped in an <a>, so search for the sibling of the <a>.
 		if (
 			! $figcaption_element
-			&& isset( $element->parentNode->nextSibling->nodeName )
-			&& $caption_tag === $element->parentNode->nextSibling->nodeName
+			&& isset( $img_element->parentNode->nextSibling->nodeName )
+			&& $caption_tag === $img_element->parentNode->nextSibling->nodeName
 		) {
-			$figcaption_element = $element->parentNode->nextSibling;
+			$figcaption_element = $img_element->parentNode->nextSibling;
 		}
 
-		if ( ! $figcaption_element ) {
+		if ( $figcaption_element instanceof DOMElement && 0 === $figcaption_element->childNodes->length ) {
 			return null;
 		}
 
-		$caption_element = AMP_DOM_Utils::create_node( $this->dom, 'span', [] );
-
-		foreach ( iterator_to_array( $figcaption_element->childNodes ) as $childNode ) {
-			$caption_element->appendChild( $childNode );
-		}
-
-		return $caption_element;
+		return $figcaption_element;
 	}
 }

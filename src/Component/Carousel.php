@@ -7,6 +7,7 @@
 
 namespace AmpProject\AmpWP\Component;
 
+use AmpProject\Attribute;
 use AmpProject\Dom\Document;
 use AmpProject\AmpWP\Dom\ElementList;
 use DOMElement;
@@ -84,7 +85,7 @@ final class Carousel {
 			$caption_node    = $slide instanceof HasCaption ? $slide->get_caption_node() : null;
 			$slide_container = AMP_DOM_Utils::create_node(
 				$this->dom,
-				'span', // This cannot be a <div> because if the gallery is inside of a <p>, then the DOM will break.
+				'figure', // This cannot be a <div> because if the gallery is inside of a <p>, then the DOM will break.
 				[ 'class' => 'slide' ]
 			);
 
@@ -101,9 +102,20 @@ final class Carousel {
 			$slide_container->appendChild( $slide_node );
 
 			// If there's a caption, append it to the slide.
-			if ( $caption_node ) {
-				if ( $caption_node instanceof DOMElement && 'span' === $caption_node->nodeName ) {
-					$caption_node->setAttribute( 'class', 'amp-wp-gallery-caption' );
+			if ( $caption_node instanceof DOMElement ) {
+				// If the caption is not a <figcaption>, wrap it in one.
+				if ( 'figcaption' !== $caption_node->nodeName ) {
+					$caption_content = $caption_node;
+					$caption_node    = AMP_DOM_Utils::create_node( $this->dom, 'figcaption', [] );
+					$caption_node->appendChild( $caption_content );
+				}
+
+				$caption_shortcode_class = 'wp-caption-text';
+				$caption_block_class     = 'wp-block-image';
+				$has_caption_class       = AMP_DOM_Utils::has_class( $caption_node, $caption_shortcode_class ) || AMP_DOM_Utils::has_class( $caption_node, $caption_block_class );
+
+				if ( ! $has_caption_class || ! $caption_node->hasAttribute( Attribute::CLASS_ ) ) {
+					$caption_node->setAttribute( Attribute::CLASS_, 'amp-wp-gallery-caption' );
 				}
 
 				$slide_container->appendChild( $caption_node );
