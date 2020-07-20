@@ -259,6 +259,25 @@ jobs:
       - name: Check out source files
         uses: actions/checkout@v2
 
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: |
+          echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Configure Composer cache
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps['composer-cache'].outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        # Scripts are not ignored as they are needed to apply patches for the
+        # `sabberworm/php-css-parser` dependency.
+        run: |
+          composer install
+
       - name: Download dev build
         uses: actions/download-artifact@v2
         with:
@@ -340,10 +359,6 @@ jobs:
           wp eval \
           'AMP_Options_Manager::update_option( AmpProject\AmpWP\Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );' \
           --allow-root
-
-      - name: Dump Composer auto-loader
-        run: |
-          composer dump-autoload
 
       - name: Import "Travel Blog" reference site
         run: |
