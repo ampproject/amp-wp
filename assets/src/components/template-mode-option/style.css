@@ -130,6 +130,10 @@
 	margin-top: 0;
 }
 
+.template-mode-selection__label-extra {
+	margin-left: 1.5rem;
+}
+
 .template-mode-option > .amp-notice .components-panel__arrow {
 	right: 0;
 }

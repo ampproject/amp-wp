@@ -50,6 +50,23 @@ describe( 'TemplateModeOption', () => {
 			</OptionsContextProvider>,
 		);
 		expect( wrapper.toJSON() ).toMatchSnapshot();
+
+		wrapper = create(
+			<OptionsContextProvider>
+				<TemplateModeOption
+					details="Component details"
+					mode={ READER }
+					previouslySelected={ true }
+					initialOpen={ true }
+					labelExtra={ (
+						<div>
+							{ 'Extra label content' }
+						</div>
+					) }
+				/>
+			</OptionsContextProvider>,
+		);
+		expect( wrapper.toJSON() ).toMatchSnapshot();
 	} );
 
 	it( 'is open by default if is current mode', () => {
@@ -74,6 +91,30 @@ describe( 'TemplateModeOption', () => {
 
 		expect( container.querySelector( '#reader-mode-children' ) ).not.toBeNull();
 		expect( container.querySelector( '#standard-mode-children' ) ).toBeNull();
+	} );
+
+	it( 'is open by default if initialOpen is true', () => {
+		// Reader is the default in mock options context provider.
+		act( () => {
+			render(
+				<OptionsContextProvider>
+					<TemplateModeOption mode={ TRANSITIONAL }>
+						<div id="reader-mode-children">
+							{ 'children' }
+						</div>
+					</TemplateModeOption>
+					<TemplateModeOption mode={ STANDARD } initialOpen={ true }>
+						<div id="standard-mode-children">
+							{ 'children' }
+						</div>
+					</TemplateModeOption>
+				</OptionsContextProvider>,
+				container,
+			);
+		} );
+
+		expect( container.querySelector( '#transitional-mode-children' ) ).toBeNull();
+		expect( container.querySelector( '#standard-mode-children' ) ).not.toBeNull();
 	} );
 
 	it( 'can be toggled', () => {

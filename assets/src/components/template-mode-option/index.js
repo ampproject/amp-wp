@@ -86,8 +86,10 @@ export function getId( mode ) {
  * @param {string} props.details Mode details.
  * @param {string} props.mode The template mode.
  * @param {boolean} props.previouslySelected Optional. Whether the option was selected previously.
+ * @param {Object} props.labelExtra Optional. Extra content to display on the right side of the option label.
+ * @param props.initialOpen
  */
-export function TemplateModeOption( { children, details, mode, previouslySelected = false } ) {
+export function TemplateModeOption( { children, details, initialOpen, labelExtra = null, mode, previouslySelected = false } ) {
 	const { editedOptions, updateOptions } = useContext( Options );
 	const { theme_support: themeSupport } = editedOptions;
 
@@ -118,9 +120,18 @@ export function TemplateModeOption( { children, details, mode, previouslySelecte
 							{ __( 'Previously selected', 'amp' ) }
 						</AMPInfo>
 					) }
+					{ labelExtra && (
+						<div className="template-mode-selection__label-extra">
+							{ labelExtra }
+						</div>
+					) }
 				</div>
 			</label>
-			<PanelBody title={ ' ' } className="template-mode-option__panel-body" initialOpen={ mode && themeSupport && mode === themeSupport }>
+			<PanelBody
+				title={ ' ' }
+				className="template-mode-option__panel-body"
+				initialOpen={ 'boolean' === typeof initialOpen ? initialOpen : mode && themeSupport && mode === themeSupport }
+			>
 				<div className="template-mode-selection__details">
 					{ details && (
 						<p>
@@ -143,6 +154,8 @@ export function TemplateModeOption( { children, details, mode, previouslySelecte
 TemplateModeOption.propTypes = {
 	children: PropTypes.any,
 	details: PropTypes.string,
+	initialOpen: PropTypes.bool,
+	labelExtra: PropTypes.node,
 	mode: PropTypes.oneOf( [ READER, STANDARD, TRANSITIONAL ] ).isRequired,
 	previouslySelected: PropTypes.bool,
 };
