@@ -208,8 +208,8 @@ class AMP_Theme_Support {
 			add_action( 'parse_query', [ __CLASS__, 'init_app_shell' ], 9 );
 
 			/*
-			 * Note that wp action is use instead of template_redirect because some themes/plugins output
-			 * the response at this action and then short-circuit with exit. So this is why the the preceding
+			 * Note that wp action is used instead of template_redirect because some themes/plugins output
+			 * the response at this action and then short-circuit with exit. So this is why the preceding
 			 * action to template_redirect--the wp action--is used instead.
 			 */
 			if ( ! is_admin() ) {
@@ -496,7 +496,7 @@ class AMP_Theme_Support {
 						return;
 					}
 					wp_die(
-						esc_html__( 'Outer app shell can only be requested of the non-AMP version (thus requires paired mode).', 'amp' ),
+						esc_html__( 'Outer app shell can only be requested of the non-AMP version (thus requires Transitional mode).', 'amp' ),
 						esc_html__( 'AMP Outer App Shell Problem', 'amp' ),
 						[ 'response' => 400 ]
 					);
