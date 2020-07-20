@@ -60,6 +60,10 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 		$empty_content = Utils\get_flag_value( $assoc_args, 'empty-content', false );
 		$empty_uploads = Utils\get_flag_value( $assoc_args, 'empty-uploads', false );
 
+		if ( substr_compare( $site_definition_file, '.json', -5 ) !== 0 ) {
+			$site_definition_file .= '.json';
+		}
+
 		if ( ! path_is_absolute( $site_definition_file ) ) {
 			$site_definition_file = self::REFERENCE_SITES_ROOT . $site_definition_file;
 		}
