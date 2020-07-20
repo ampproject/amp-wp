@@ -342,6 +342,13 @@ jobs:
           --force \
           --allow-root
 
+      - name: Install and activate the WebP Converter for Media plugin
+        run: |
+          wp plugin install webp-converter-for-media \
+          --activate \
+          --force \
+          --allow-root
+
       - name: Install and activate the WordPress Importer plugin
         run: |
           wp plugin install wordpress-importer \
