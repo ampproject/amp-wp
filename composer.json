@@ -71,8 +71,7 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "AmpProject\\AmpWP\\Tests\\": "tests/php/src/",
-      "AmpProject\\AmpWP\\Seed\\": "tests/seeds/"
+      "AmpProject\\AmpWP\\Tests\\": "tests/php/src/"
     },
     "classmap": [
       "tests/php/validation/"
