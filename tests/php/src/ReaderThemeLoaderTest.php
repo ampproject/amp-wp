@@ -90,6 +90,29 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 	public function test_register() {
 		$this->instance->register();
 		$this->assertEquals( 9, has_action( 'plugins_loaded', [ $this->instance, 'override_theme' ] ) );
+		$this->assertEquals( 10, has_filter( 'wp_prepare_themes_for_js', [ $this->instance, 'filter_wp_prepare_themes_to_indicate_reader_theme' ] ) );
+	}
+
+	/** @covers ReaderThemeLoader::filter_wp_prepare_themes_to_indicate_reader_theme() */
+	public function test_filter_wp_prepare_themes_to_indicate_reader_theme() {
+		$active_theme_slug = 'twentytwenty';
+		$reader_theme_slug = 'twentyseventeen';
+		if ( ! wp_get_theme( $active_theme_slug )->exists() || ! wp_get_theme( $reader_theme_slug )->exists() ) {
+			$this->markTestSkipped();
+		}
+		switch_theme( $active_theme_slug );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::READER_THEME, $reader_theme_slug );
+
+		$themes = $this->instance->filter_wp_prepare_themes_to_indicate_reader_theme( wp_prepare_themes_for_js() );
+		$this->assertEquals( $active_theme_slug, $themes[0]['id'] );
+		$this->assertStringNotContains( 'AMP', $themes[0]['description'] );
+		$this->assertArrayHasKey( 'delete', $themes[0]['actions'] );
+
+		$this->assertEquals( $reader_theme_slug, $themes[1]['id'] );
+		$this->assertArrayNotHasKey( 'delete', $themes[1]['actions'] );
+		$this->assertStringContains( 'AMP', $themes[1]['description'] );
+
 	}
 
 	/** @covers ReaderThemeLoader::get_reader_theme() */

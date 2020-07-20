@@ -103,6 +103,58 @@ final class ReaderThemeLoader implements Service, Registerable {
 		// The following needs to run at plugins_loaded because that is when _wp_customize_include runs. Otherwise, the
 		// most logical action would be setup_theme.
 		add_action( 'plugins_loaded', [ $this, 'override_theme' ], 9 );
+
+		add_filter( 'wp_prepare_themes_for_js', [ $this, 'filter_wp_prepare_themes_to_indicate_reader_theme' ] );
+	}
+
+	/**
+	 * Filter themes for JS to remove action to delete the selected Reader theme and show a notice.
+	 *
+	 * @param array $prepared_themes Array of theme data.
+	 * @return array Themes.
+	 */
+	public function filter_wp_prepare_themes_to_indicate_reader_theme( $prepared_themes ) {
+		if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
+			return $prepared_themes;
+		}
+
+		$reader_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
+		if ( isset( $prepared_themes[ $reader_theme ] ) ) {
+
+			// Make sure the AMP Reader theme appears right after the active theme in the list.
+			$stylesheet = get_stylesheet();
+			if ( isset( $prepared_themes[ $stylesheet ] ) ) {
+				$prepared_themes = array_merge(
+					[
+						$stylesheet   => $prepared_themes[ $stylesheet ],
+						$reader_theme => $prepared_themes[ $reader_theme ],
+					],
+					$prepared_themes
+				);
+			}
+
+			// Prevent Reader theme from being deleted.
+			unset( $prepared_themes[ $reader_theme ]['actions']['delete'] );
+
+			// Add AMP Reader theme notice.
+			$notice = sprintf(
+				'<span class="reader-theme-notice notice notice-info notice-alt inline" style="display:block; margin-bottom: 1em;"><span style="display: block; margin: 0.5em 0; padding:2px;">%s</span></span>',
+				sprintf(
+					wp_kses(
+						/* translators: placeholder is link to AMP settings screen */
+						__( 'This has been <a href="%s">selected</a> as the AMP Reader theme.', 'amp' ),
+						[
+							'a' => [ 'href' => true ],
+						]
+					),
+					esc_url( add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, admin_url( 'admin.php' ) ) )
+				)
+			);
+
+			$prepared_themes[ $reader_theme ]['description'] = $notice . $prepared_themes[ $reader_theme ]['description'];
+		}
+
+		return $prepared_themes;
 	}
 
 	/**
