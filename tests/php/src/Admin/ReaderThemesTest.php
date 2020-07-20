@@ -3,7 +3,7 @@
  * Tests for ReaderThemes.
  *
  * @package AMP
- * @since 1.6
+ * @since 2.0
  */
 
 namespace AmpProject\AmpWP\Tests\Admin;
@@ -11,6 +11,7 @@ namespace AmpProject\AmpWP\Tests\Admin;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
 use WP_UnitTestCase;
+use Closure;
 
 /**
  * Tests for reader themes.
@@ -68,7 +69,6 @@ class ReaderThemesTest extends WP_UnitTestCase {
 	 * @covers ReaderThemes::get_themes
 	 * @covers ReaderThemes::get_default_reader_themes
 	 * @covers ReaderThemes::get_classic_mode
-	 * @covers ReaderThemes::get_default_raw_reader_themes
 	 */
 	public function test_get_themes() {
 		$themes = $this->reader_themes->get_themes();
@@ -108,40 +108,40 @@ class ReaderThemesTest extends WP_UnitTestCase {
 	 */
 	public function get_availability_test_themes() {
 		return [
-			'twentysixteen_from_wp_future'           => [
-				static function () {
-					return wp_get_theme( 'twentysixteen' )->exists() ? ReaderThemes::STATUS_INSTALLED : ReaderThemes::STATUS_NON_INSTALLABLE;
-				},
-				false,
-				[
-					'name'         => 'Some Theme',
-					'requires'     => '99.9',
-					'requires_php' => '5.2',
-					'slug'         => 'twentysixteen',
-				],
-			],
-			'twentysixteen_from_php_future'          => [
-				static function () {
-					return wp_get_theme( 'twentysixteen' )->exists() ? ReaderThemes::STATUS_INSTALLED : ReaderThemes::STATUS_NON_INSTALLABLE;
-				},
-				false,
-				[
-					'name'         => 'Some Theme',
-					'requires'     => '4.9',
-					'requires_php' => '99.9',
-					'slug'         => 'twentysixteen',
-				],
-			],
-			'non_reader_theme'                       => [
+			'from_wp_future'                         => [
 				static function () {
 					return ReaderThemes::STATUS_NON_INSTALLABLE;
 				},
 				false,
 				[
 					'name'         => 'Some Theme',
+					'requires'     => '99.9',
+					'requires_php' => '5.2',
+					'slug'         => 'from_wp_future',
+				],
+			],
+			'from_php_future'                        => [
+				static function () {
+					return ReaderThemes::STATUS_NON_INSTALLABLE;
+				},
+				false,
+				[
+					'name'         => 'Some Theme',
+					'requires'     => '4.9',
+					'requires_php' => '99.9',
+					'slug'         => 'from_php_future',
+				],
+			],
+			'non_reader_theme'                       => [
+				static function () {
+					return wp_get_theme( 'neve' )->exists() ? ReaderThemes::STATUS_INSTALLED : ReaderThemes::STATUS_INSTALLABLE;
+				},
+				true,
+				[
+					'name'         => 'Neve',
 					'requires'     => false,
 					'requires_php' => '5.2',
-					'slug'         => 'some-nondefault-theme',
+					'slug'         => 'neve',
 				],
 			],
 			'twentytwelve_not_requiring_wp_version'  => [
@@ -208,17 +208,33 @@ class ReaderThemesTest extends WP_UnitTestCase {
 	 * @covers ReaderThemes::can_install_theme
 	 */
 	public function test_can_install_theme() {
-		$installable_theme = [
-			'name'         => 'Some Theme',
+		$core_theme = [
+			'name'         => 'Twenty Twelve',
 			'requires'     => false,
 			'requires_php' => '5.2',
 			'slug'         => 'twentytwelve',
 		];
 
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'author' ] ) );
-		$this->assertFalse( $this->reader_themes->can_install_theme( $installable_theme ) );
+		$neve_theme = [
+			'name'         => 'Neve',
+			'requires'     => false,
+			'requires_php' => '5.2',
+			'slug'         => 'neve',
+		];
 
-		wp_set_current_user( 1 );
-		$this->assertTrue( $this->reader_themes->can_install_theme( $installable_theme ) );
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'author' ] ) );
+		$this->assertFalse( $this->reader_themes->can_install_theme( $core_theme ) );
+		$this->assertFalse( $this->reader_themes->can_install_theme( $neve_theme ) );
+
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->assertTrue( $this->reader_themes->can_install_theme( $core_theme ) );
+		$this->assertTrue( $this->reader_themes->can_install_theme( $neve_theme ) );
+
+		$core_theme['requires'] = '999.9';
+		$this->assertFalse( $this->reader_themes->can_install_theme( $core_theme ) );
+
+		$core_theme['requires']     = false;
+		$core_theme['requires_php'] = '999.9';
+		$this->assertFalse( $this->reader_themes->can_install_theme( $core_theme ) );
 	}
 }

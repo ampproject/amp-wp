@@ -16,7 +16,7 @@ use WP_UnitTestCase;
 /**
  * Tests for GoogleFonts class.
  *
- * @since 1.6.0
+ * @since 2.0
  *
  * @covers GoogleFonts
  */

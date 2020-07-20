@@ -17,7 +17,7 @@ use WP_UnitTestCase;
  *
  * @group plugin-activation-notice
  *
- * @since 1.6.0
+ * @since 2.0
  *
  * @covers PluginActivationNotice
  */

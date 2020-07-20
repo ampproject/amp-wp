@@ -3,7 +3,7 @@
  * Fetches and formats data for AMP reader themes.
  *
  * @package AMP
- * @since 1.6.0
+ * @since 2.0
  */
 
 namespace AmpProject\AmpWP\Admin;
@@ -14,7 +14,7 @@ use WP_Upgrader;
 /**
  * Handles reader themes.
  *
- * @since 1.6.0
+ * @since 2.0
  */
 final class ReaderThemes {
 	/**
@@ -228,19 +228,7 @@ final class ReaderThemes {
 	 * @return bool True if themes can be installed.
 	 */
 	public function can_install_theme( $theme ) {
-		// @todo Add support for installing non-default reader themes. Until that is done, themes that are provided via
-		// the amp_reader_themes filter will show on the reader themes screen but will need to be manually installed on
-		// the site.
-		$default_reader_theme_slugs = array_diff(
-			AMP_Core_Theme_Sanitizer::get_supported_themes(),
-			[ 'twentyten' ]
-		);
-
 		if ( ! current_user_can( 'install_themes' ) ) {
-			return false;
-		}
-
-		if ( ! in_array( $theme['slug'], $default_reader_theme_slugs, true ) ) {
 			return false;
 		}
 

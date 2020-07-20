@@ -12,7 +12,7 @@ use AmpProject\AmpWP\Admin\DevToolsUserAccess;
  *
  * @group dev-tools-user-access
  *
- * @since 1.6.0
+ * @since 2.0
  *
  * @covers DevToolsUserAccess
  */

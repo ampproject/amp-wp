@@ -198,7 +198,7 @@ final class MobileRedirection implements Service, Registerable {
 		 * Filters whether the current request is from a mobile device. This is provided as a means to short-circuit
 		 * the normal determination of a mobile request below.
 		 *
-		 * @since 1.6
+		 * @since 2.0
 		 *
 		 * @param null $is_mobile Whether the current request is from a mobile device.
 		 */
@@ -258,7 +258,7 @@ final class MobileRedirection implements Service, Registerable {
 		 * Please note that this does not apply when in the Customizer preview or when in AMP Dev Mode (and thus possible
 		 * Paired Browsing), since server-side redirects would not be able to be prevented as required.
 		 *
-		 * @since 1.6
+		 * @since 2.0
 		 *
 		 * @param bool $should_redirect_via_js Whether JS redirection should be used to take mobile visitors to the AMP version.
 		 */
@@ -289,7 +289,7 @@ final class MobileRedirection implements Service, Registerable {
 		/**
 		 * Filters the list of user agents used to determine if the user agent from the current request is a mobile one.
 		 *
-		 * @since 1.6
+		 * @since 2.0
 		 *
 		 * @param string[] $user_agents List of mobile user agent search strings (and regex patterns).
 		 */
@@ -406,7 +406,7 @@ final class MobileRedirection implements Service, Registerable {
 		/**
 		 * Filters whether the default mobile version switcher styles are printed.
 		 *
-		 * @since 1.6
+		 * @since 2.0
 		 *
 		 * @param bool $used Whether the styles are printed.
 		 */
@@ -440,7 +440,7 @@ final class MobileRedirection implements Service, Registerable {
 		 * Use the `is_amp_endpoint()` function to determine whether you are filtering the
 		 * text for the link to go to the non-AMP version or the AMP version.
 		 *
-		 * @since 1.6
+		 * @since 2.0
 		 *
 		 * @param string $text Link text to display.
 		 */

@@ -53,7 +53,7 @@ class AMP_Post_Type_Support {
 		 *
 		 * By default the list includes those which are public.
 		 *
-		 * @since 1.6
+		 * @since 2.0
 		 *
 		 * @param string[] $post_types Post types.
 		 */
@@ -63,7 +63,7 @@ class AMP_Post_Type_Support {
 	/**
 	 * Get post types that can be shown in the REST API and supports AMP.
 	 *
-	 * @since 1.6
+	 * @since 2.0
 	 *
 	 * @return string[] Post types.
 	 */
@@ -101,7 +101,7 @@ class AMP_Post_Type_Support {
 	 * @deprecated The 'amp' post type support is no longer used at runtime to determine whether AMP is supported.
 	 */
 	public static function add_post_type_support() {
-		_deprecated_function( __METHOD__, '1.6' );
+		_deprecated_function( __METHOD__, '2.0.0' );
 		foreach ( self::get_supported_post_types() as $post_type ) {
 			add_post_type_support( $post_type, self::SLUG );
 		}

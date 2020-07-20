@@ -19,7 +19,7 @@ interface QueryVar {
 	 *
 	 * Historically this value may be filtered via `amp_query_var` or overridden via the `AMP_QUERY_VAR` constant. The
 	 * value then was also used as an endpoint (`/amp/`) in addition to being used as a URL query var (`?amp`).
-	 * Nevertheless, in 1.6 this will no longer be supported in the theme itself when a Reader theme is selected.
+	 * Nevertheless, in 2.0 this will no longer be supported in the theme itself when a Reader theme is selected.
 	 * Additionally, the logic for determining whether a request is for an AMP endpoint or not may also be arbitrarily
 	 * overridden as of amp-wp#2204.
 	 *
