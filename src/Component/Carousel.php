@@ -12,6 +12,7 @@ use AmpProject\Dom\Document;
 use AmpProject\AmpWP\Dom\ElementList;
 use DOMElement;
 use AMP_DOM_Utils;
+use DOMNode;
 
 /**
  * Class Carousel
@@ -102,7 +103,7 @@ final class Carousel {
 			$slide_container->appendChild( $slide_node );
 
 			// If there's a caption, append it to the slide.
-			if ( $caption_node instanceof DOMElement ) {
+			if ( $caption_node instanceof DOMNode ) {
 				// If the caption is not a <figcaption>, wrap it in one.
 				if ( 'figcaption' !== $caption_node->nodeName ) {
 					$caption_content = $caption_node;

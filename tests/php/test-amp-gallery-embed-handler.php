@@ -83,10 +83,10 @@ class AMP_Gallery_Embed_Handler_Test extends WP_UnitTestCase {
 						<dd class="wp-caption-text gallery-caption" id="gallery-4-{{id1}}"> ' . self::CAPTION_TEXT . ' </dd>
 					</dl>
 					<dl class="gallery-item">
-						<dt class="gallery-icon landscape"><a href="{{file_url2}}"><img width="150" height="150" src="{{file2}}-150x150.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" ' . $loading_attribute . '></a></dt>
+						<dt class="gallery-icon landscape"><a href="{{file_url2}}"><img width="150" height="150" src="{{file2}}-150x150.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text"' . ( $loading_attribute ? ( ' ' . $loading_attribute ) : '' ) . '></a></dt>
 					</dl>
 					<dl class="gallery-item">
-						<dt class="gallery-icon landscape"><a href="{{file_url3}}"><img width="100" height="100" src="{{file3}}.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" ' . $loading_attribute . '></a></dt>
+						<dt class="gallery-icon landscape"><a href="{{file_url3}}"><img width="100" height="100" src="{{file3}}.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text"' . ( $loading_attribute ? ( ' ' . $loading_attribute ) : '' ) . '></a></dt>
 					</dl>
 					<br style="clear: both">
 				</div>',
