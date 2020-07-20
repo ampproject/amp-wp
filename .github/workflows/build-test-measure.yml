@@ -254,19 +254,18 @@ jobs:
   lighthouse:
     name: Audit and track performance via Lighthouse CI
     runs-on: ubuntu-latest
-    needs: release-zip
+    needs: dev-zip
 
     steps:
       # Although we have a readily built ZIP of the plugin, we need the lighthouse configuration from source.
       - name: Check out source files
         uses: actions/checkout@v2
 
-      - name: Download release ZIPs
+      - name: Download dev build
         uses: actions/download-artifact@v2
         with:
-          # Downloaded file name will actually be amp.zip again.
-          name: amp-${{ needs.release-zip.outputs.branch-name }}-${{ needs.release-zip.outputs.git-sha-8 }}
-          path: builds
+          name: amp-${{ needs.dev-zip.outputs.branch-name }}-${{ needs.dev-zip.outputs.git-sha-8 }}-dev
+          path: builds/dev
 
       - name: Install MySQL client
         run: |
@@ -313,7 +312,7 @@ jobs:
 
       - name: Install and activate the AMP plugin
         run: |
-          wp plugin install builds/prod/amp.zip \
+          wp plugin install builds/dev/amp.zip \
           --activate \
           --force \
           --allow-root
@@ -343,6 +342,10 @@ jobs:
           wp eval \
           'AMP_Options_Manager::update_option( AmpProject\AmpWP\Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );' \
           --allow-root
+
+      - name: Import "Travel Blog" reference site
+        run: |
+          wp amp reference-site import travel-blog --allow-root
 
       - name: Install Lighthouse CI
         run: |
