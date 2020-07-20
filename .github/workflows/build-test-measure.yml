@@ -341,6 +341,10 @@ jobs:
           'AMP_Options_Manager::update_option( AmpProject\AmpWP\Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );' \
           --allow-root
 
+      - name: Dump Composer auto-loader
+        run: |
+          composer dump-autoload
+
       - name: Import "Travel Blog" reference site
         run: |
           wp amp reference-site import travel-blog --allow-root
