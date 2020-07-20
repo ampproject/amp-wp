@@ -26,10 +26,10 @@ trait HandlesGalleryEmbed {
 	/**
 	 * Transforms the raw embed gallery embed to become AMP compatible.
 	 *
-	 * @param bool        $is_carousel Whether the embed should be transformed into an <amp-carousel>
-	 * @param bool        $is_lightbox Whether the gallery images should be shown in a lightbox.
+	 * @param bool        $is_carousel     Whether the embed should be transformed into an <amp-carousel>.
+	 * @param bool        $is_lightbox     Whether the gallery images should be shown in a lightbox.
 	 * @param DOMElement  $gallery_element Gallery element.
-	 * @param DOMNodeList $img_elements
+	 * @param DOMNodeList $img_elements    List of image elements in gallery.
 	 */
 	protected function process_gallery_embed( $is_carousel, $is_lightbox, DOMElement $gallery_element, DOMNodeList $img_elements ) {
 		// Bail if the embed does not support carousel or lightbox.
@@ -71,10 +71,10 @@ trait HandlesGalleryEmbed {
 		$images = new ElementList();
 
 		foreach ( $img_elements as $img_element ) {
-			$element           = $img_element;
-			$parentElementName = $img_element->parentNode->nodeName;
+			$element             = $img_element;
+			$parent_element_name = $img_element->parentNode->nodeName;
 
-			if ( 'a' === $parentElementName && ! $is_amp_lightbox ) {
+			if ( 'a' === $parent_element_name && ! $is_amp_lightbox ) {
 				$element = $img_element->parentNode;
 			}
 

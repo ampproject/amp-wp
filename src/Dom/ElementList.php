@@ -38,7 +38,7 @@ final class ElementList implements IteratorAggregate, Countable {
 	 */
 	public function add( DOMElement $element, DOMNode $caption = null ) {
 		$cloned_list             = clone $this;
-		$cloned_list->elements[] = $caption === null ? $element : new CaptionedSlide( $element, $caption );
+		$cloned_list->elements[] = null === $caption ? $element : new CaptionedSlide( $element, $caption );
 		return $cloned_list;
 	}
 
