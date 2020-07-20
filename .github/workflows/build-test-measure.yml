@@ -255,7 +255,8 @@ jobs:
     needs: dev-zip
 
     steps:
-      # Although we have a readily built ZIP of the plugin, we need the lighthouse configuration from source.
+      # Although we have a readily built ZIP of the plugin, we also need the dev
+      # dependencies that contain the reference site setup code.
       - name: Check out source files
         uses: actions/checkout@v2
 
@@ -278,11 +279,11 @@ jobs:
         run: |
           composer install
 
-      - name: Download dev build
+      - name: Download prod build
         uses: actions/download-artifact@v2
         with:
-          name: amp-${{ needs.dev-zip.outputs.branch-name }}-${{ needs.dev-zip.outputs.git-sha-8 }}-dev
-          path: builds/dev
+          name: amp-${{ needs.prod-zip.outputs.branch-name }}-${{ needs.prod-zip.outputs.git-sha-8 }}-prod
+          path: builds/prod
 
       - name: Install MySQL client
         run: |
@@ -329,7 +330,7 @@ jobs:
 
       - name: Install and activate the AMP plugin
         run: |
-          wp plugin install builds/dev/amp.zip \
+          wp plugin install builds/prod/amp.zip \
           --activate \
           --force \
           --allow-root
@@ -362,7 +363,7 @@ jobs:
 
       - name: Import "Travel Blog" reference site
         run: |
-          wp amp reference-site import travel-blog --allow-root
+          wp --require=tests/php/register-wp-cli-commands.php amp reference-site import travel-blog --allow-root
 
       - name: Install Lighthouse CI
         run: |
