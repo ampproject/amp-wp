@@ -342,6 +342,13 @@ jobs:
           --force \
           --allow-root
 
+      - name: Install and activate the WordPress Importer plugin
+        run: |
+          wp plugin install wordpress-importer \
+          --activate \
+          --force \
+          --allow-root
+
       - name: Install the URL Toggles plugin as a must-use plugin
         run: |
           mkdir -p www/wp-content/mu-plugins
