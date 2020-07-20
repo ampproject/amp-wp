@@ -22,29 +22,17 @@ const sharedConfig = {
 		filename: '[name].js',
 		chunkFilename: '[name].js',
 	},
-	module: {
-		...defaultConfig.module,
-		rules: [
-			...defaultConfig.module.rules.map(
-				( rule ) => {
-					// @todo Can remove once the default config no longer excludes excludes CSS related to Gutenberg components.
-					if ( rule.test.source === '\\.css$' ) {
-						rule.exclude = /node_modules\/(?!@wordpress)/;
-					}
-					return rule;
-				},
-			),
-		],
-	},
 	plugins: [
-		...defaultConfig.plugins.map(
-			( plugin ) => {
-				if ( plugin.constructor.name === 'MiniCssExtractPlugin' ) {
-					plugin.options.filename = '../css/[name].css';
-				}
-				return plugin;
-			},
-		),
+		...defaultConfig.plugins
+			.map(
+				( plugin ) => {
+					if ( plugin.constructor.name === 'MiniCssExtractPlugin' ) {
+						plugin.options.filename = '../css/[name].css';
+					}
+					return plugin;
+				},
+			)
+			.filter( ( plugin ) => plugin.constructor.name !== 'CleanWebpackPlugin' ),
 		new RtlCssPlugin( {
 			filename: '../css/[name]-rtl.css',
 		} ),
@@ -137,8 +125,9 @@ const customizer = {
 	...sharedConfig,
 	entry: {
 		'amp-customize-controls': './assets/src/customizer/amp-customize-controls.js',
-		'amp-customize-preview': './assets/src/customizer/amp-customize-preview.js',
-		'amp-customizer-design-preview': './assets/src/customizer/amp-customizer-design-preview.js',
+		'amp-customize-controls-legacy': './assets/src/customizer/amp-customize-controls-legacy.js',
+		'amp-customize-preview-legacy': './assets/src/customizer/amp-customize-preview-legacy.js',
+		'amp-customizer-design-preview-legacy': './assets/src/customizer/amp-customizer-design-preview-legacy.js',
 	},
 	plugins: [
 		...sharedConfig.plugins,
@@ -224,12 +213,12 @@ const wpPolyfills = {
 const setup = {
 	...sharedConfig,
 	entry: {
-		'amp-setup': [
-			'./assets/src/setup',
+		'amp-onboarding-wizard': [
+			'./assets/src/onboarding-wizard',
 		],
 	},
 	externals: {
-		'amp-setup': 'ampSetup',
+		'amp-settings': 'ampSettings',
 	},
 	plugins: [
 		...sharedConfig.plugins.filter(
@@ -243,6 +232,7 @@ const setup = {
 					case '@wordpress/api-fetch':
 					case '@wordpress/dom-ready':
 					case '@wordpress/html-entities':
+					case '@wordpress/url':
 						return defaultRequestToHandle( handle );
 
 					default:
@@ -254,6 +244,7 @@ const setup = {
 					case '@wordpress/api-fetch':
 					case '@wordpress/dom-ready':
 					case '@wordpress/html-entities':
+					case '@wordpress/url':
 						return defaultRequestToExternal( external );
 
 					default:
@@ -262,20 +253,73 @@ const setup = {
 			},
 		} ),
 		new WebpackBar( {
-			name: 'Setup',
+			name: 'Onboarding wizard',
 			color: '#1773a8',
 		} ),
 	],
 };
 
+const settingsPage = {
+	...sharedConfig,
+	entry: {
+		'wp-api-fetch': [
+			'./assets/src/polyfills/api-fetch.js',
+		],
+		'wp-components': [
+			'@wordpress/components/build-style/style.css',
+		],
+		'amp-settings': [
+			'./assets/src/settings-page',
+		],
+	},
+	externals: {
+		'amp-settings': 'ampSettings',
+	},
+	resolve: {
+		alias: {
+			'@wordpress/api-fetch__non-shim': require.resolve( '@wordpress/api-fetch' ),
+		},
+	},
+	plugins: [
+		...sharedConfig.plugins.filter(
+			( plugin ) => plugin.constructor.name !== 'DependencyExtractionWebpackPlugin',
+		),
+		new DependencyExtractionWebpackPlugin( {
+			useDefaults: false,
+			// Most dependencies will be bundled for the AMP setup screen for compatibility across WP versions.
+			requestToHandle: ( handle ) => {
+				switch ( handle ) {
+					case '@wordpress/api-fetch':
+						return defaultRequestToHandle( handle );
+
+					default:
+						return undefined;
+				}
+			},
+			requestToExternal: ( external ) => {
+				switch ( external ) {
+					case '@wordpress/api-fetch':
+						return defaultRequestToExternal( external );
+
+					default:
+						return undefined;
+				}
+			},
+		} ),
+		new WebpackBar( {
+			name: 'Settings page',
+			color: '#67b255',
+		} ),
+	],
+};
+
 const mobileRedirection = {
-	...defaultConfig,
 	...sharedConfig,
 	entry: {
 		'mobile-redirection': './assets/src/mobile-redirection.js',
 	},
 	plugins: [
-		...defaultConfig.plugins,
+		...sharedConfig.plugins,
 		new WebpackBar( {
 			name: 'Mobile Redirection',
 			color: '#f27136',
@@ -291,5 +335,6 @@ module.exports = [
 	customizer,
 	wpPolyfills,
 	setup,
+	settingsPage,
 	mobileRedirection,
 ];

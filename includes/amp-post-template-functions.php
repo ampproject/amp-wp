@@ -19,6 +19,13 @@ function amp_post_template_init_hooks() {
 	add_action( 'amp_post_template_css', 'amp_post_template_add_styles', 99 );
 	add_action( 'amp_post_template_data', 'amp_post_template_add_analytics_script' );
 	add_action( 'amp_post_template_footer', 'amp_post_template_add_analytics_data' );
+
+	add_action( 'admin_bar_init', [ 'AMP_Theme_Support', 'init_admin_bar' ] );
+	add_action( 'amp_post_template_footer', 'wp_admin_bar_render' );
+
+	// Printing scripts here is done primarily for the benefit of the admin bar. Note that wp_enqueue_scripts() is not called.
+	add_action( 'amp_post_template_head', 'wp_print_head_scripts' );
+	add_action( 'amp_post_template_footer', 'wp_print_footer_scripts' );
 }
 
 /**
@@ -65,6 +72,8 @@ function amp_post_template_add_block_styles() {
 	if ( function_exists( 'wp_common_block_scripts_and_styles' ) ) {
 		wp_common_block_scripts_and_styles();
 	}
+
+	// Note that this will also print the admin-bar styles since WP_Admin_Bar::initialize() has been called.
 	wp_styles()->do_items();
 }
 

@@ -400,7 +400,12 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 					'fields'      => [
 						'amp_mode_enabled'        => [
 							'label'   => 'AMP mode enabled',
-							'value'   => AMP_Theme_Support::get_support_mode(),
+							'value'   => AMP_Options_Manager::get_option( Option::THEME_SUPPORT ),
+							'private' => false,
+						],
+						'amp_reader_theme'        => [
+							'label'   => 'AMP Reader theme',
+							'value'   => AMP_Options_Manager::get_option( Option::READER_THEME ),
 							'private' => false,
 						],
 						'amp_templates_enabled'   => [
@@ -472,34 +477,19 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 	 * @return string The supported template(s), in a comma-separated string.
 	 */
 	private function get_supported_templates() {
-		$possible_post_types = AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES );
 
 		// Get the supported content types, like 'post'.
-		$supported_templates = array_filter(
-			AMP_Post_Type_Support::get_eligible_post_types(),
-			static function( $template ) use ( $possible_post_types ) {
-				$post_type = get_post_type_object( $template );
-				return (
-					post_type_supports( $post_type->name, AMP_Post_Type_Support::SLUG )
-					||
-					in_array( $post_type->name, $possible_post_types, true )
-				);
-			}
-		);
+		$supported_templates = AMP_Post_Type_Support::get_supported_post_types();
 
 		// Add the supported templates, like 'is_author', if not in 'Reader' mode.
-		if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Theme_Support::get_support_mode() ) {
+		if ( ! amp_is_legacy() ) {
 			$supported_templates = array_merge(
 				$supported_templates,
 				array_keys(
 					array_filter(
 						AMP_Theme_Support::get_supportable_templates(),
 						static function( $option ) {
-							return (
-								( empty( $option['immutable'] ) && ! empty( $option['user_supported'] ) )
-								||
-								! empty( $option['supported'] )
-							);
+							return ! empty( $option['supported'] );
 						}
 					)
 				)
@@ -519,7 +509,7 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 	 * @return string The value of the option to serve all templates.
 	 */
 	private function get_serve_all_templates() {
-		if ( AMP_Theme_Support::READER_MODE_SLUG === AMP_Theme_Support::get_support_mode() ) {
+		if ( amp_is_legacy() ) {
 			return esc_html__( 'This option does not apply to Reader mode.', 'amp' );
 		}
 

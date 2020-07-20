@@ -5,7 +5,8 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Tests\MarkupComparison;
+use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\Dom\Document;
 
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
@@ -25,7 +26,7 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
-		add_theme_support( 'amp' );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->go_to( '/current-page/' );
 	}
 
@@ -33,7 +34,7 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 	 * Tear down.
 	 */
 	public function tearDown() {
-		remove_theme_support( 'amp' );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		parent::tearDown();
 	}
 

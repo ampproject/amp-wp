@@ -87,7 +87,7 @@ interface Option {
 	/**
 	 * The slug of the theme selected to be used on AMP pages in reader mode.
 	 *
-	 * Default value: classic
+	 * Default value: legacy
 	 *
 	 * @var string
 	 */
@@ -98,7 +98,7 @@ interface Option {
 	 *
 	 * @var boolean
 	 */
-	const WIZARD_COMPLETED = 'wizard_completed';
+	const PLUGIN_CONFIGURED = 'plugin_configured';
 
 	/**
 	 * Suppressed plugins

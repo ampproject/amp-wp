@@ -5,7 +5,7 @@
  * @package AmpProject\AmpWP
  */
 
-use AmpProject\AmpWP\Tests\MarkupComparison;
+use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 
 /**
  * Tests the accessibility sanitizer class.

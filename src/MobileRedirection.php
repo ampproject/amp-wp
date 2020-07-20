@@ -11,6 +11,7 @@ use AMP_Options_Manager;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\Attribute;
+use AMP_Theme_Support;
 
 /**
  * Service for redirecting mobile users to the AMP version of a page.
@@ -42,7 +43,6 @@ final class MobileRedirection implements Service, Registerable {
 	 */
 	public function register() {
 		add_filter( 'amp_default_options', [ $this, 'filter_default_options' ] );
-		add_action( 'amp_options_menu_items', [ $this, 'add_settings_field' ], 10 );
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
 
 		if ( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ) {
@@ -70,56 +70,10 @@ final class MobileRedirection implements Service, Registerable {
 	 * @return array Sanitized options.
 	 */
 	public function sanitize_options( $options, $new_options ) {
-		$options[ Option::MOBILE_REDIRECT ] = (
-			isset( $new_options[ Option::MOBILE_REDIRECT ] )
-			&&
-			rest_sanitize_boolean( $new_options[ Option::MOBILE_REDIRECT ] )
-		);
+		if ( isset( $new_options[ Option::MOBILE_REDIRECT ] ) ) {
+			$options[ Option::MOBILE_REDIRECT ] = rest_sanitize_boolean( $new_options[ Option::MOBILE_REDIRECT ] );
+		}
 		return $options;
-	}
-
-	/**
-	 * Add settings field.
-	 */
-	public function add_settings_field() {
-		add_settings_field(
-			Option::MOBILE_REDIRECT,
-			__( 'Mobile Redirection', 'amp' ),
-			[ $this, 'render_setting_field' ],
-			AMP_Options_Manager::OPTION_NAME,
-			'general',
-			[
-				'class' => 'amp-mobile-redirect',
-			]
-		);
-	}
-
-	/**
-	 * Render mobile redirect setting.
-	 */
-	public function render_setting_field() {
-		?>
-		<p>
-			<label for="mobile_redirect">
-				<input id="mobile_redirect" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[mobile_redirect]' ); ?>" <?php checked( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ); ?> value="true">
-				<?php esc_html_e( 'Redirect mobile visitors to the AMP version of a page.', 'amp' ); ?>
-			</label>
-		</p>
-		<script>
-			( function( $ ) {
-				const standardModeInput = $( '#theme_support_standard' );
-				const templateModeInputs = $( 'input[type=radio][name="amp-options[theme_support]"]' );
-				const mobileRedirectSetting = $( 'tr.amp-mobile-redirect' );
-
-				function toggleMobileRedirectSetting( ) {
-					mobileRedirectSetting.toggleClass( 'hidden', standardModeInput.prop( 'checked' ) )
-				}
-
-				templateModeInputs.on( 'change', toggleMobileRedirectSetting );
-				toggleMobileRedirectSetting();
-			} )( jQuery )
-		</script>
-		<?php
 	}
 
 	/**
@@ -129,7 +83,7 @@ final class MobileRedirection implements Service, Registerable {
 	 */
 	public function get_current_amp_url() {
 		$url = add_query_arg( amp_get_slug(), '1', amp_get_current_url() );
-		$url = remove_query_arg( QueryVars::NOAMP, $url );
+		$url = remove_query_arg( QueryVar::NOAMP, $url );
 		return $url;
 	}
 
@@ -212,7 +166,7 @@ final class MobileRedirection implements Service, Registerable {
 			if ( ! empty( $query_string ) ) {
 				$query_vars = [];
 				parse_str( $query_string, $query_vars );
-				$excluded = array_key_exists( QueryVars::NOAMP, $query_vars );
+				$excluded = array_key_exists( QueryVar::NOAMP, $query_vars );
 			}
 		}
 		return $excluded;
@@ -227,7 +181,7 @@ final class MobileRedirection implements Service, Registerable {
 	 */
 	public function filter_amp_to_amp_linking_element_query_vars( $query_vars, $excluded ) {
 		if ( $excluded ) {
-			$query_vars[ QueryVars::NOAMP ] = QueryVars::NOAMP_MOBILE;
+			$query_vars[ QueryVar::NOAMP ] = QueryVar::NOAMP_MOBILE;
 		}
 		return $query_vars;
 	}
@@ -244,7 +198,7 @@ final class MobileRedirection implements Service, Registerable {
 		 * Filters whether the current request is from a mobile device. This is provided as a means to short-circuit
 		 * the normal determination of a mobile request below.
 		 *
-		 * @since 1.6
+		 * @since 2.0
 		 *
 		 * @param null $is_mobile Whether the current request is from a mobile device.
 		 */
@@ -304,7 +258,7 @@ final class MobileRedirection implements Service, Registerable {
 		 * Please note that this does not apply when in the Customizer preview or when in AMP Dev Mode (and thus possible
 		 * Paired Browsing), since server-side redirects would not be able to be prevented as required.
 		 *
-		 * @since 1.6
+		 * @since 2.0
 		 *
 		 * @param bool $should_redirect_via_js Whether JS redirection should be used to take mobile visitors to the AMP version.
 		 */
@@ -335,7 +289,7 @@ final class MobileRedirection implements Service, Registerable {
 		/**
 		 * Filters the list of user agents used to determine if the user agent from the current request is a mobile one.
 		 *
-		 * @since 1.6
+		 * @since 2.0
 		 *
 		 * @param string[] $user_agents List of mobile user agent search strings (and regex patterns).
 		 */
@@ -348,7 +302,7 @@ final class MobileRedirection implements Service, Registerable {
 	 * @return bool True if disabled, false otherwise.
 	 */
 	public function is_redirection_disabled_via_query_param() {
-		return isset( $_GET[ QueryVars::NOAMP ] ) && QueryVars::NOAMP_MOBILE === wp_unslash( $_GET[ QueryVars::NOAMP ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return isset( $_GET[ QueryVar::NOAMP ] ) && QueryVar::NOAMP_MOBILE === wp_unslash( $_GET[ QueryVar::NOAMP ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**
@@ -419,8 +373,8 @@ final class MobileRedirection implements Service, Registerable {
 
 		$exports = [
 			'ampUrl'             => $this->get_current_amp_url(),
-			'noampQueryVarName'  => QueryVars::NOAMP,
-			'noampQueryVarValue' => QueryVars::NOAMP_MOBILE,
+			'noampQueryVarName'  => QueryVar::NOAMP,
+			'noampQueryVarValue' => QueryVar::NOAMP_MOBILE,
 			'disabledStorageKey' => self::DISABLED_STORAGE_KEY,
 			'mobileUserAgents'   => $this->get_mobile_user_agents(),
 			'regexRegex'         => self::REGEX_REGEX,
@@ -452,7 +406,7 @@ final class MobileRedirection implements Service, Registerable {
 		/**
 		 * Filters whether the default mobile version switcher styles are printed.
 		 *
-		 * @since 1.6
+		 * @since 2.0
 		 *
 		 * @param bool $used Whether the styles are printed.
 		 */
@@ -472,7 +426,7 @@ final class MobileRedirection implements Service, Registerable {
 		$is_amp = is_amp_endpoint();
 		if ( $is_amp ) {
 			$rel  = [ Attribute::REL_NOAMPHTML, Attribute::REL_NOFOLLOW ];
-			$url  = add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_MOBILE, amp_remove_endpoint( amp_get_current_url() ) );
+			$url  = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, amp_remove_endpoint( amp_get_current_url() ) );
 			$text = __( 'Exit mobile version', 'amp' );
 		} else {
 			$rel  = [ Attribute::REL_AMPHTML ];
@@ -486,7 +440,7 @@ final class MobileRedirection implements Service, Registerable {
 		 * Use the `is_amp_endpoint()` function to determine whether you are filtering the
 		 * text for the link to go to the non-AMP version or the AMP version.
 		 *
-		 * @since 1.6
+		 * @since 2.0
 		 *
 		 * @param string $text Link text to display.
 		 */
@@ -509,8 +463,9 @@ final class MobileRedirection implements Service, Registerable {
 			</a>
 		</div>
 
-		<?php if ( amp_is_dev_mode() ) : ?>
+		<?php if ( amp_is_dev_mode() && ( ! is_customize_preview() || AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) ) : ?>
 			<?php
+			// Note that the switcher link is disabled in Reader mode because there is a separate toggle to switch versions.
 			$exports = [
 				'containerId'          => $container_id,
 				'isCustomizePreview'   => is_customize_preview(),
@@ -520,7 +475,7 @@ final class MobileRedirection implements Service, Registerable {
 			<script data-ampdevmode>
 			(function( { containerId, isCustomizePreview, notApplicableMessage } ) {
 				addEventListener( 'DOMContentLoaded', () => {
-					if ( isCustomizePreview || window.ampPairedBrowsingClient ) {
+					if ( isCustomizePreview || [ 'paired-browsing-non-amp', 'paired-browsing-amp' ].includes( window.name ) ) {
 						const link = document.querySelector( `#${containerId} a[href]` );
 						link.style.cursor = 'not-allowed';
 						link.addEventListener( 'click', ( event ) => {

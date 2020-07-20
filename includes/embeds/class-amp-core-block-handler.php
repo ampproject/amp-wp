@@ -224,7 +224,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Process "Categories" widgets.
 	 *
-	 * @since 1.6
+	 * @since 2.0
 	 *
 	 * @param Document $dom Document.
 	 */
@@ -256,7 +256,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Process "Archives" widgets.
 	 *
-	 * @since 1.6
+	 * @since 2.0
 	 *
 	 * @param Document $dom  Select node retrieved from the widget.
 	 * @param array    $args Args passed to sanitizer.
@@ -300,7 +300,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 * Core strips out the dimensions to prevent the element being made too wide for the sidebar. This is not a concern
 	 * in AMP because of responsive sizing. So this logic is here to undo what core is doing.
 	 *
-	 * @since 1.6
+	 * @since 2.0
 	 * @see WP_Widget_Text::inject_video_max_width_style()
 	 * @see AMP_Core_Block_Handler::process_text_widgets()
 	 *
@@ -325,7 +325,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Process "Text" widgets.
 	 *
-	 * @since 1.6
+	 * @since 2.0
 	 * @see AMP_Core_Block_Handler::preserve_widget_text_element_dimensions()
 	 *
 	 * @param Document $dom Select node retrieved from the widget.

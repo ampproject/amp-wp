@@ -7,12 +7,13 @@
 
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\RemoteRequest\CachedResponse;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
-use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
-use AmpProject\AmpWP\Tests\MarkupComparison;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\Dom\Document;
-use AmpProject\AmpWP\Tests\PrivateAccess;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\Exception\FailedToGetFromRemoteUrl;
 
 /**
@@ -24,6 +25,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	use MarkupComparison;
 	use PrivateAccess;
 
+	private $original_theme_directories;
+
 	/**
 	 * Set up.
 	 */
@@ -33,6 +36,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$wp_styles  = null;
 		$wp_scripts = null;
 		delete_option( AMP_Options_Manager::OPTION_NAME ); // Make sure default reader mode option does not override theme support being added.
+
+		global $wp_theme_directories;
+		$this->original_theme_directories = $wp_theme_directories;
+		register_theme_directory( ABSPATH . 'wp-content/themes' );
+		delete_site_transient( 'theme_roots' );
 	}
 
 	/**
@@ -43,6 +51,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		global $wp_styles, $wp_scripts;
 		$wp_styles  = null;
 		$wp_scripts = null;
+
+		global $wp_theme_directories;
+		$wp_theme_directories = $this->original_theme_directories;
+		delete_site_transient( 'theme_roots' );
 	}
 
 	/**
@@ -2521,7 +2533,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function test_unicode_stylesheet() {
 		wp();
-		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
 
@@ -2632,7 +2644,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		return [
 			'admin_bar_included' => [
 				function () use ( $render_template ) {
-					$this->go_to( amp_get_permalink( $this->factory()->post->create() ) );
+					$this->go_to( amp_get_permalink( self::factory()->post->create() ) );
 					show_admin_bar( true );
 					_wp_admin_bar_init();
 					switch_theme( 'twentyten' );
@@ -2728,7 +2740,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			$this->markTestSkipped( 'Requires Twenty Ten to be installed.' );
 		}
 
-		add_theme_support( 'amp' );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->go_to( home_url() );
 		$html = $html_generator();
 

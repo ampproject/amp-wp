@@ -1,44 +1,76 @@
-
+/**
+ * Internal dependencies
+ */
 /**
  * WordPress dependencies
  */
-import { visitAdminPage } from '@wordpress/e2e-test-utils';
+import { moveToTemplateModeScreen, clickMode, testNextButton, testPreviousButton, cleanUpSettings } from '../../utils/onboarding-wizard-utils';
+import { installTheme } from '../../utils/install-theme';
+import { activateTheme } from '../../utils/activate-theme';
+import { deleteTheme } from '../../utils/delete-theme';
 
-describe( 'AMP wizard: template-mode', () => {
+describe( 'Template mode', () => {
 	beforeEach( async () => {
-		// Technical background must be selected.
-		await visitAdminPage( 'admin.php', 'page=amp-setup&amp-new-onboarding=1&amp-setup-screen=technical-background' );
-
-		await page.waitForSelector( 'input[type="radio"]' );
-		await page.$eval( 'input[type="radio"]', ( el ) => el.click() );
-
-		await page.waitForSelector( '.amp-setup-nav__prev-next .components-button.is-primary' );
-		await page.$eval( '.amp-setup-nav__prev-next .components-button.is-primary', ( el ) => el.click() );
+		await moveToTemplateModeScreen( { technical: true } );
 	} );
 
-	it( 'should show two options', async () => {
+	it( 'should show main page elements with nothing selected', async () => {
 		await page.waitForSelector( 'input[type="radio"]' );
 
-		const itemCount = await page.$$eval( 'input[type="radio"]', ( els ) => els.length );
+		await expect( 'input[type="radio"]' ).countToBe( 3 );
 
-		expect( itemCount ).toBe( 3 );
+		await expect( page ).not.toMatchElement( 'input[type="radio"]:checked' );
+
+		testNextButton( { text: 'Next', disabled: true } );
+		testPreviousButton( { text: 'Previous' } );
 	} );
 
 	it( 'should allow options to be selected', async () => {
-		await page.waitForSelector( 'input[type="radio"]' );
+		await clickMode( 'standard' );
+		await expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Standard' } );
 
-		let titleText;
+		await clickMode( 'transitional' );
+		await expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Transitional' } );
 
-		await page.$eval( '[for="standard-mode"]', ( el ) => el.click() );
-		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
-		expect( titleText ).toBe( 'Standard' );
+		await clickMode( 'reader' );
+		await expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Reader' } );
 
-		await page.$eval( '[for="transitional-mode"]', ( el ) => el.click() );
-		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
-		expect( titleText ).toBe( 'Transitional' );
+		testNextButton( { text: 'Next' } );
+	} );
+} );
 
-		await page.$eval( '[for="reader-mode"]', ( el ) => el.click() );
-		titleText = await page.$eval( '.selectable--selected h2', ( el ) => el.innerText );
-		expect( titleText ).toBe( 'Reader' );
+describe( 'Template mode recommendations with reader theme active', () => {
+	beforeEach( async () => {
+		await activateTheme( 'twentytwenty' );
+	} );
+
+	it.each(
+		[ 'technical', 'nontechnical' ],
+	)( 'makes correct recommendations when user is not %s and the current theme is a reader theme', async ( technical ) => {
+		await moveToTemplateModeScreen( { technical: technical === 'technical' } );
+
+		await expect( page ).toMatchElement( '#template-mode-standard-container .amp-notice--info' );
+		await expect( page ).toMatchElement( '#template-mode-transitional-container .amp-notice--success' );
+		await expect( page ).toMatchElement( '#template-mode-reader-container .amp-notice--success' );
+	} );
+} );
+
+describe( 'Template mode recommendations with non-reader-theme active', () => {
+	beforeEach( async () => {
+		await cleanUpSettings();
+		await installTheme( 'astra' );
+		await activateTheme( 'astra' );
+	} );
+
+	afterEach( async () => {
+		await deleteTheme( 'astra', 'twentytwenty' );
+	} );
+
+	it( 'makes correct recommendations when user is not technical and the current theme is not a reader theme', async () => {
+		await moveToTemplateModeScreen( { technical: false } );
+
+		await expect( page ).toMatchElement( '#template-mode-standard-container .amp-notice--info' );
+		await expect( page ).toMatchElement( '#template-mode-transitional-container .amp-notice--info' );
+		await expect( page ).toMatchElement( '#template-mode-reader-container .amp-notice--success' );
 	} );
 } );

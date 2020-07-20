@@ -1,6 +1,6 @@
 <?php
 
-use AmpProject\AmpWP\Tests\StubSanitizer;
+use AmpProject\AmpWP\Tests\Helpers\StubSanitizer;
 
 /**
  * Tests for AMP_Content_Sanitizer class.

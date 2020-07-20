@@ -1,7 +1,7 @@
 <?php
 
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\Dom\Document;
 
 class AMP_Analytics_Options_Test extends WP_UnitTestCase {
@@ -207,7 +207,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'type', $analytics[ $key ] );
 		$this->assertEquals( 'googleanalytics', $analytics[ $key ]['type'] );
 
-		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		add_filter(
 			'amp_analytics_entries',
 			static function( $analytics ) use ( $key ) {

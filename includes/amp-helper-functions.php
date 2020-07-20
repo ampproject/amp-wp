@@ -5,10 +5,11 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\AmpWpPluginFactory;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\QueryVars;
+use AmpProject\AmpWP\QueryVar;
 
 /**
  * Handle activation of plugin.
@@ -101,12 +102,9 @@ function amp_init() {
 	add_action( 'admin_init', 'AMP_Options_Manager::init' );
 	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
 	add_action( 'rest_api_init', 'AMP_Options_Manager::register_settings' );
-	add_action( 'wp_loaded', 'amp_add_options_menu' );
 	add_action( 'wp_loaded', 'amp_bootstrap_admin' );
 
 	add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
-	AMP_Post_Type_Support::add_post_type_support();
-	add_action( 'init', [ 'AMP_Post_Type_Support', 'add_post_type_support' ], 1000 ); // After post types have been defined.
 	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
 	add_action( 'admin_bar_menu', 'amp_add_admin_bar_view_link', 100 );
 
@@ -143,28 +141,62 @@ function amp_init() {
 	 */
 	$options     = get_option( AMP_Options_Manager::OPTION_NAME, [] );
 	$old_version = isset( $options[ Option::VERSION ] ) ? $options[ Option::VERSION ] : '0.0';
+
 	if ( AMP__VERSION !== $old_version && is_admin() && current_user_can( 'manage_options' ) ) {
-		/**
-		 * Triggers when after amp_init when the plugin version has updated.
-		 *
-		 * @param string $old_version Old version.
-		 */
-		do_action( 'amp_plugin_update', $old_version );
-		AMP_Options_Manager::update_option( Option::VERSION, AMP__VERSION );
+		// This waits to happen until the very end of init to ensure that amp theme support and amp post type support have all been added.
+		add_action(
+			'init',
+			static function () use ( $old_version ) {
+				/**
+				 * Triggers when after amp_init when the plugin version has updated.
+				 *
+				 * @param string $old_version Old version.
+				 */
+				do_action( 'amp_plugin_update', $old_version );
+				AMP_Options_Manager::update_option( Option::VERSION, AMP__VERSION );
+			},
+			PHP_INT_MAX
+		);
 	}
 
 	add_action(
 		'rest_api_init',
 		static function() {
-			if ( amp_should_use_new_onboarding() ) {
-				$reader_themes = new AMP_Reader_Themes();
+			$reader_themes = new ReaderThemes();
 
-				$reader_theme_controller = new AMP_Reader_Theme_REST_Controller( $reader_themes );
-				$reader_theme_controller->register_routes();
+			$reader_theme_controller = new AMP_Reader_Theme_REST_Controller( $reader_themes );
+			$reader_theme_controller->register_routes();
+		}
+	);
 
-				$options_controller = new AMP_Options_REST_Controller( $reader_themes );
-				$options_controller->register_routes();
+	/*
+	 * Hide admin bar if the window is inside the setup wizard iframe.
+	 *
+	 * Detects whether the current window is in an iframe with the specified `name` attribute. The iframe is created
+	 * by Preview component located in <assets/src/setup/pages/save/index.js>.
+	 */
+	add_action(
+		'wp_print_footer_scripts',
+		function() {
+			if ( ! amp_is_dev_mode() || ! is_admin_bar_showing() ) {
+				return;
 			}
+			?>
+			<script data-ampdevmode>
+				document.addEventListener( 'DOMContentLoaded', function() {
+					if ( 'amp-wizard-completion-preview' !== window.name ) {
+						return;
+					}
+
+					const adminBar = document.getElementById( 'wpadminbar' );
+					if ( adminBar ) {
+						document.body.classList.remove( 'admin-bar' );
+						document.documentElement.style.cssText += '; margin-top: 0 !important';
+						adminBar.remove();
+					}
+				});
+			</script>
+			<?php
 		}
 	);
 }
@@ -297,17 +329,21 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  * @return boolean Whether this is in AMP 'canonical' mode, that is whether it is AMP-first and there is not a separate (paired) AMP URL.
  */
 function amp_is_canonical() {
-	if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-		return false;
-	}
+	return AMP_Theme_Support::STANDARD_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
+}
 
-	$args = AMP_Theme_Support::get_theme_support_args();
-	if ( isset( $args[ AMP_Theme_Support::PAIRED_FLAG ] ) ) {
-		return empty( $args[ AMP_Theme_Support::PAIRED_FLAG ] );
-	}
-
-	// If there is a template_dir, then transitional mode is implied.
-	return empty( $args['template_dir'] );
+/**
+ * Determines whether the legacy AMP post templates are being used.
+ *
+ * @since 2.0
+ * @return bool
+ */
+function amp_is_legacy() {
+	return (
+		AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
+		&&
+		ReaderThemes::DEFAULT_READER_THEME === AMP_Options_Manager::get_option( Option::READER_THEME )
+	);
 }
 
 /**
@@ -322,7 +358,7 @@ function amp_add_frontend_actions() {
 /**
  * Determine whether AMP is available for the current URL.
  *
- * @since 1.6
+ * @since 2.0
  *
  * @return bool Whether there is an AMP version for the provided URL.
  * @global string $pagenow
@@ -351,7 +387,7 @@ function is_amp_available() {
 			'WP_Query',
 			'amp_skip_post()'
 		);
-		_doing_it_wrong( 'is_amp_available', esc_html( $message ), '1.6.0' );
+		_doing_it_wrong( 'is_amp_available', esc_html( $message ), '2.0.0' );
 		$warned = true;
 	};
 
@@ -396,19 +432,29 @@ function is_amp_available() {
 		return false;
 	}
 
-	$theme_supports_amp = current_theme_supports( AMP_Theme_Support::SLUG );
+	// Ensure that all templates can be accessed in AMP when a Reader theme is selected.
+	$has_reader_theme = (
+		AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
+		&&
+		ReaderThemes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME )
+	);
+	if ( $has_reader_theme && is_customize_preview() ) {
+		return true;
+	}
+
+	$is_legacy = amp_is_legacy();
 
 	// If the query has not been initialized, we can only assume AMP is available if theme support is present and all templates are supported.
 	if ( ! $wp_query instanceof WP_Query || ! did_action( 'wp' ) ) {
 		$warn();
-		return $theme_supports_amp && AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED );
+		return ! $is_legacy && AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED );
 	}
 
 	// If redirected to this page because AMP is not available due to validation errors, prevent AMP from being available (if not AMP-first).
 	if (
 		( ! amp_is_canonical() || AMP_Validation_Manager::has_cap() )
 		&&
-		( isset( $_GET[ QueryVars::NOAMP ] ) && QueryVars::NOAMP_AVAILABLE === $_GET[ QueryVars::NOAMP ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		( isset( $_GET[ QueryVar::NOAMP ] ) && QueryVar::NOAMP_AVAILABLE === $_GET[ QueryVar::NOAMP ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	) {
 		return false;
 	}
@@ -424,7 +470,7 @@ function is_amp_available() {
 	}
 
 	$queried_object = get_queried_object();
-	if ( $theme_supports_amp ) {
+	if ( ! $is_legacy ) {
 		// Abort if in Transitional mode and AMP is not available for the URL.
 		$availability = AMP_Theme_Support::get_template_availability( $wp_query );
 
@@ -450,7 +496,7 @@ function is_amp_available() {
 		( $wp_query->is_singular() || $wp_query->is_posts_page ) &&
 		post_supports_amp( $queried_object ) )
 	) {
-		// Abort if in Reader mode and the post doesn't support AMP.
+		// Abort if in legacy Reader mode and the post doesn't support AMP.
 		return false;
 	}
 
@@ -485,7 +531,7 @@ function _amp_bootstrap_customizer() {
 function amp_redirect_old_slug_to_new_url( $link ) {
 
 	if ( is_amp_endpoint() && ! amp_is_canonical() ) {
-		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+		if ( ! amp_is_legacy() ) {
 			$link = add_query_arg( amp_get_slug(), '', $link );
 		} else {
 			$link = trailingslashit( trailingslashit( $link ) . amp_get_slug() );
@@ -507,10 +553,6 @@ function amp_redirect_old_slug_to_new_url( $link ) {
  * @return string Slug used for query var, endpoint, and post type support.
  */
 function amp_get_slug() {
-	if ( defined( 'AMP_QUERY_VAR' ) ) {
-		return AMP_QUERY_VAR;
-	}
-
 	/**
 	 * Filter the AMP query variable.
 	 *
@@ -520,11 +562,7 @@ function amp_get_slug() {
 	 *
 	 * @param string $query_var The AMP query variable.
 	 */
-	$query_var = apply_filters( 'amp_query_var', QueryVars::AMP );
-
-	define( 'AMP_QUERY_VAR', $query_var );
-
-	return $query_var;
+	return apply_filters( 'amp_query_var', defined( 'AMP_QUERY_VAR' ) ? AMP_QUERY_VAR : QueryVar::AMP );
 }
 
 /**
@@ -579,8 +617,8 @@ function amp_get_current_url() {
  */
 function amp_get_permalink( $post_id ) {
 
-	// When theme support is present, the plain query var should always be used.
-	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+	// When theme support is present (i.e. not using legacy Reader post templates), the plain query var should always be used.
+	if ( ! amp_is_legacy() ) {
 		$permalink = get_permalink( $post_id );
 		if ( ! amp_is_canonical() ) {
 			$permalink = add_query_arg( amp_get_slug(), '', $permalink );
@@ -681,7 +719,7 @@ function amp_add_amphtml_link() {
 	 * @todo This filter's name is incorrect. It's not about adding a canonical link but adding the amphtml link.
 	 * @since 0.2
 	 */
-	if ( false === apply_filters( 'amp_frontend_show_canonical', true ) ) {
+	if ( amp_is_canonical() || false === apply_filters( 'amp_frontend_show_canonical', true ) ) {
 		return;
 	}
 
@@ -697,7 +735,7 @@ function amp_add_amphtml_link() {
 	}
 
 	if ( $amp_url ) {
-		$amp_url = remove_query_arg( QueryVars::NOAMP, $amp_url );
+		$amp_url = remove_query_arg( QueryVar::NOAMP, $amp_url );
 		printf( '<link rel="amphtml" href="%s">', esc_url( $amp_url ) );
 	}
 }
@@ -804,20 +842,20 @@ function amp_get_boilerplate_stylesheets() {
 /**
  * Add generator metadata.
  *
- * @since 6.0
+ * @since 0.6
  * @since 1.0 Add template mode.
+ * @since 2.0 Add reader theme.
  */
 function amp_add_generator_metadata() {
 	$content = sprintf( 'AMP Plugin v%s', AMP__VERSION );
 
-	if ( amp_is_canonical() ) {
-		$mode = 'standard';
-	} elseif ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-		$mode = 'transitional';
-	} else {
-		$mode = 'reader';
-	}
+	$mode     = AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
 	$content .= sprintf( '; mode=%s', $mode );
+
+	$reader_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
+	if ( AMP_Theme_Support::READER_MODE_SLUG === $mode ) {
+		$content .= sprintf( '; theme=%s', $reader_theme );
+	}
 
 	printf( '<meta name="generator" content="%s">', esc_attr( $content ) );
 }
@@ -923,7 +961,7 @@ function amp_register_default_scripts( $wp_scripts ) {
 /**
  * Register default styles.
  *
- * @since 1.6
+ * @since 2.0
  *
  * @param WP_Styles $styles Styles.
  */
@@ -1205,7 +1243,7 @@ function amp_print_analytics( $analytics ) {
  * @return array Embed handlers.
  */
 function amp_get_content_embed_handlers( $post = null ) {
-	if ( current_theme_supports( AMP_Theme_Support::SLUG ) && $post ) {
+	if ( ! amp_is_legacy() && $post ) {
 		_deprecated_argument(
 			__FUNCTION__,
 			'0.7',
@@ -1287,7 +1325,7 @@ function amp_is_dev_mode() {
 			// For the few sites that forcibly show the admin bar even when the user is logged out, only enable dev
 			// mode if the user is actually logged in. This prevents the dev mode from being served to crawlers
 			// when they index the AMP version. The theme support check disables dev mode in Reader mode.
-			( is_admin_bar_showing() && is_user_logged_in() && current_theme_supports( 'amp' ) )
+			( is_admin_bar_showing() && is_user_logged_in() )
 			||
 			is_customize_preview()
 		)
@@ -1307,13 +1345,13 @@ function amp_is_dev_mode() {
 function amp_get_content_sanitizers( $post = null ) {
 	$theme_support_args = AMP_Theme_Support::get_theme_support_args();
 
-	if ( is_array( $theme_support_args ) && $post ) {
+	if ( $post && ! amp_is_legacy() ) {
 		_deprecated_argument(
 			__FUNCTION__,
 			'0.7',
 			sprintf(
 				/* translators: %s: $post */
-				esc_html__( 'The %s argument is deprecated when theme supports AMP.', 'amp' ),
+				esc_html__( 'The %s argument is deprecated.', 'amp' ),
 				'$post'
 			)
 		);
@@ -1334,7 +1372,7 @@ function amp_get_content_sanitizers( $post = null ) {
 	 */
 	$amp_to_amp_linking_enabled = (bool) apply_filters(
 		'amp_to_amp_linking_enabled',
-		AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Theme_Support::get_support_mode()
+		AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
 	);
 
 	$sanitizers = [
@@ -1384,7 +1422,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		$sanitizers['AMP_Nav_Menu_Dropdown_Sanitizer'] = $theme_support_args['nav_menu_dropdown'];
 	}
 
-	if ( $amp_to_amp_linking_enabled && AMP_Theme_Support::STANDARD_MODE_SLUG !== AMP_Theme_Support::get_support_mode() ) {
+	if ( $amp_to_amp_linking_enabled && AMP_Theme_Support::STANDARD_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
 
 		/**
 		 * Filters the list of URLs which are excluded from being included in AMP-to-AMP linking.
@@ -1429,11 +1467,26 @@ function amp_get_content_sanitizers( $post = null ) {
 		 * @param string[] $element_xpaths XPath element queries. Context is the root element.
 		 */
 		$dev_mode_xpaths = (array) apply_filters( 'amp_dev_mode_element_xpaths', [] );
+
 		if ( is_admin_bar_showing() ) {
 			$dev_mode_xpaths[] = '//*[ @id = "wpadminbar" ]';
 			$dev_mode_xpaths[] = '//*[ @id = "wpadminbar" ]//*';
 			$dev_mode_xpaths[] = '//style[ @id = "admin-bar-inline-css" ]';
 		}
+
+		if ( is_customize_preview() ) {
+			// Scripts are always needed to inject changeset UUID.
+			$dev_mode_xpaths[] = '//script[ @src ]';
+			$dev_mode_xpaths[] = '//script[ not( @type ) or @type = "text/javascript" ]';
+
+			// Style needed for Additional CSS to work as intended.
+			$dev_mode_xpaths[] = '//style[ @id = "wp-custom-css" ]';
+
+			// Styles needed for Colors customization.
+			$dev_mode_xpaths[] = '//style[ @id = "custom-background-css" ]';
+			$dev_mode_xpaths[] = '//style[ @id = "custom-theme-colors" ]';
+		}
+
 		$sanitizers = array_merge(
 			[
 				'AMP_Dev_Mode_Sanitizer' => [
@@ -1713,7 +1766,9 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 		return;
 	}
 
-	if ( is_amp_endpoint() ) {
+	$is_amp_endpoint = is_amp_endpoint();
+
+	if ( $is_amp_endpoint ) {
 		$href = amp_remove_endpoint( amp_get_current_url() );
 	} elseif ( is_singular() ) {
 		$href = amp_get_permalink( get_queried_object_id() ); // For sake of Reader mode.
@@ -1721,24 +1776,42 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 		$href = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
 	}
 
-	$href = remove_query_arg( QueryVars::NOAMP, $href );
+	$href = remove_query_arg( QueryVar::NOAMP, $href );
 
-	$parent = [
-		'id'    => 'amp',
-		'title' => sprintf(
-			'%s %s',
-			Icon::link()->to_html(
-				[
-					'id'    => 'amp-admin-bar-item-status-icon',
-					'class' => 'ab-icon',
-				]
-			),
-			esc_html( is_amp_endpoint() ? __( 'Non-AMP', 'amp' ) : __( 'AMP', 'amp' ) )
-		),
-		'href'  => esc_url( $href ),
+	$icon = $is_amp_endpoint ? Icon::logo() : Icon::link();
+	$attr = [
+		'id'    => 'amp-admin-bar-item-status-icon',
+		'class' => 'ab-icon',
 	];
 
-	$wp_admin_bar->add_node( $parent );
+	$wp_admin_bar->add_node(
+		[
+			'id'    => 'amp',
+			'title' => $icon->to_html( $attr ) . ' ' . esc_html__( 'AMP', 'amp' ),
+			'href'  => esc_url( $href ),
+		]
+	);
+
+	$wp_admin_bar->add_node(
+		[
+			'parent' => 'amp',
+			'id'     => 'amp-view',
+			'title'  => esc_html( $is_amp_endpoint ? __( 'View non-AMP version', 'amp' ) : __( 'View AMP version', 'amp' ) ),
+			'href'   => esc_url( $href ),
+		]
+	);
+
+	// Make sure the Customizer opens with AMP enabled.
+	$customize_node = $wp_admin_bar->get_node( 'customize' );
+	if ( $customize_node && $is_amp_endpoint && AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
+		$args = get_object_vars( $customize_node );
+		if ( amp_is_legacy() ) {
+			$args['href'] = add_query_arg( 'autofocus[panel]', AMP_Template_Customizer::PANEL_ID, $args['href'] );
+		} else {
+			$args['href'] = add_query_arg( amp_get_slug(), '1', $args['href'] );
+		}
+		$wp_admin_bar->add_node( $args );
+	}
 }
 
 /**

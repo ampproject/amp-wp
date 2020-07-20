@@ -80,7 +80,7 @@ class AMP_Post_Meta_Box {
 	/**
 	 * The name for the REST API field containing whether AMP is enabled for a post.
 	 *
-	 * @since 1.6
+	 * @since 2.0
 	 * @var string
 	 */
 	const REST_ATTRIBUTE_NAME = 'amp_enabled';
@@ -144,7 +144,7 @@ class AMP_Post_Meta_Box {
 			isset( $screen->base ) &&
 			'post' === $screen->base &&
 			( ! isset( $screen->is_block_editor ) || ! $screen->is_block_editor ) &&
-			is_post_type_viewable( $post->post_type )
+			in_array( $post->post_type, AMP_Post_Type_Support::get_eligible_post_types(), true )
 		);
 
 		if ( ! $validate ) {
@@ -174,7 +174,7 @@ class AMP_Post_Meta_Box {
 			false
 		);
 
-		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+		if ( ! amp_is_legacy() ) {
 			$availability   = AMP_Theme_Support::get_template_availability( $post );
 			$support_errors = $availability['errors'];
 		} else {
@@ -208,7 +208,14 @@ class AMP_Post_Meta_Box {
 	 */
 	public function enqueue_block_assets() {
 		$post = get_post();
-		if ( ! is_post_type_viewable( $post->post_type ) ) {
+		if ( ! in_array( $post->post_type, AMP_Post_Type_Support::get_eligible_post_types(), true ) ) {
+			return;
+		}
+
+		$status_and_errors = self::get_status_and_errors( $post );
+
+		// Skip proceeding if there are errors blocking AMP and the user can't do anything about it.
+		if ( ! empty( $status_and_errors['errors'] ) && ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
 
@@ -234,13 +241,10 @@ class AMP_Post_Meta_Box {
 			true
 		);
 
-		$status_and_errors = self::get_status_and_errors( get_post() );
-		$error_messages    = $this->get_error_messages( $status_and_errors['status'], $status_and_errors['errors'] );
-
 		$data = [
 			'ampSlug'         => amp_get_slug(),
-			'errorMessages'   => $error_messages,
-			'hasThemeSupport' => current_theme_supports( AMP_Theme_Support::SLUG ),
+			'errorMessages'   => $this->get_error_messages( $status_and_errors['errors'] ),
+			'hasThemeSupport' => ! amp_is_legacy(),
 			'isStandardMode'  => amp_is_canonical(),
 		];
 
@@ -274,7 +278,7 @@ class AMP_Post_Meta_Box {
 		$verify = (
 			isset( $post->ID )
 			&&
-			is_post_type_viewable( $post->post_type )
+			in_array( $post->post_type, AMP_Post_Type_Support::get_eligible_post_types(), true )
 			&&
 			current_user_can( 'edit_post', $post->ID )
 		);
@@ -284,11 +288,16 @@ class AMP_Post_Meta_Box {
 		}
 
 		$status_and_errors = self::get_status_and_errors( $post );
-		$status            = $status_and_errors['status'];
+		$status            = $status_and_errors['status']; // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable -- Used in amp-enabled-classic-editor-toggle.php.
 		$errors            = $status_and_errors['errors'];
 
+		// Skip showing any error message if the user doesn't have the ability to do anything about it.
+		if ( ! empty( $errors ) && ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
 		// phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis
-		$error_messages = $this->get_error_messages( $status, $errors );
+		$error_messages = $this->get_error_messages( $errors );
 
 		$labels = [
 			'enabled'  => __( 'Enabled', 'amp' ),
@@ -318,13 +327,10 @@ class AMP_Post_Meta_Box {
 		 * Checking for template availability will include a check for get_support_errors. Otherwise, if theme support is not present
 		 * then we just check get_support_errors.
 		 */
-		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+		if ( ! amp_is_legacy() ) {
 			$availability = AMP_Theme_Support::get_template_availability( $post );
 			$status       = $availability['supported'] ? self::ENABLED_STATUS : self::DISABLED_STATUS;
 			$errors       = array_diff( $availability['errors'], [ 'post-status-disabled' ] ); // Subtract the status which the metabox will allow to be toggled.
-			if ( true === $availability['immutable'] ) {
-				$errors[] = 'status_immutable';
-			}
 		} else {
 			$errors = AMP_Post_Type_Support::get_support_errors( $post );
 			$status = empty( $errors ) ? self::ENABLED_STATUS : self::DISABLED_STATUS;
@@ -338,40 +344,33 @@ class AMP_Post_Meta_Box {
 	 * Gets the AMP enabled error message(s).
 	 *
 	 * @since 1.0
-	 * @param string $status The AMP enabled status.
-	 * @param array  $errors The AMP enabled errors.
+	 * @see AMP_Post_Type_Support::get_support_errors()
+	 *
+	 * @param string[] $errors The AMP enabled errors.
 	 * @return array $error_messages The error messages, as an array of strings.
 	 */
-	public function get_error_messages( $status, $errors ) {
+	public function get_error_messages( $errors ) {
+		$settings_screen_url = admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME );
+
 		$error_messages = [];
-		if ( in_array( 'status_immutable', $errors, true ) ) {
-			if ( self::ENABLED_STATUS === $status ) {
-				$error_messages[] = __( 'Your site does not allow AMP to be disabled.', 'amp' );
-			} else {
-				$error_messages[] = __( 'Your site does not allow AMP to be enabled.', 'amp' );
-			}
-		}
 		if ( in_array( 'template_unsupported', $errors, true ) || in_array( 'no_matching_template', $errors, true ) ) {
 			$error_messages[] = sprintf(
 				/* translators: %s is a link to the AMP settings screen */
-				__( 'There are no <a href="%s">supported templates</a> to display this in AMP.', 'amp' ),
-				esc_url( admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ) )
+				__( 'There are no <a href="%s" target="_blank">supported templates</a>.', 'amp' ),
+				esc_url( $settings_screen_url )
 			);
-		}
-		if ( in_array( 'password-protected', $errors, true ) ) {
-			$error_messages[] = __( 'AMP cannot be enabled on password protected posts.', 'amp' );
 		}
 		if ( in_array( 'post-type-support', $errors, true ) ) {
 			$error_messages[] = sprintf(
 				/* translators: %s is a link to the AMP settings screen */
-				__( 'AMP cannot be enabled because this <a href="%s">post type does not support it</a>.', 'amp' ),
-				esc_url( admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ) )
+				__( 'This post type is not <a href="%s" target="_blank">enabled</a>.', 'amp' ),
+				esc_url( $settings_screen_url )
 			);
 		}
 		if ( in_array( 'skip-post', $errors, true ) ) {
 			$error_messages[] = __( 'A plugin or theme has disabled AMP support.', 'amp' );
 		}
-		if ( count( array_diff( $errors, [ 'status_immutable', 'page-on-front', 'page-for-posts', 'password-protected', 'post-type-support', 'skip-post', 'template_unsupported', 'no_matching_template' ] ) ) > 0 ) {
+		if ( count( array_diff( $errors, [ 'post-type-support', 'skip-post', 'template_unsupported', 'no_matching_template' ] ) ) > 0 ) {
 			$error_messages[] = __( 'Unavailable for an unknown reason.', 'amp' );
 		}
 
@@ -433,7 +432,7 @@ class AMP_Post_Meta_Box {
 	/**
 	 * Add a REST API field to display whether AMP is enabled on supported post types.
 	 *
-	 * @since 1.6
+	 * @since 2.0
 	 *
 	 * @return void
 	 */
@@ -455,7 +454,7 @@ class AMP_Post_Meta_Box {
 	/**
 	 * Get the value of whether AMP is enabled for a REST API request.
 	 *
-	 * @since 1.6
+	 * @since 2.0
 	 *
 	 * @param array $post_data Post data.
 	 * @return bool Whether AMP is enabled on post.
@@ -478,7 +477,7 @@ class AMP_Post_Meta_Box {
 	/**
 	 * Update whether AMP is enabled for a REST API request.
 	 *
-	 * @since 1.6
+	 * @since 2.0
 	 *
 	 * @param bool    $is_enabled Whether AMP is enabled.
 	 * @param WP_Post $post       Post being updated.
