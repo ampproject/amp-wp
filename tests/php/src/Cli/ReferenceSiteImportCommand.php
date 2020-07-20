@@ -182,7 +182,7 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 			}
 		}
 
-		$wordpress_importer_path = ABSPATH . 'wp-content/plugins/wordpress-importer';
+		$wordpress_importer_path = WP_CONTENT_DIR . '/plugins/wordpress-importer';
 
 		require_once "{$wordpress_importer_path}/compat.php";
 		require_once "{$wordpress_importer_path}/parsers/class-wxr-parser.php";
