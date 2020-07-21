@@ -136,6 +136,12 @@ final class ReaderThemeLoader implements Service, Registerable {
 			// Prevent Reader theme from being deleted.
 			unset( $prepared_themes[ $reader_theme ]['actions']['delete'] );
 
+			// Make sure the Customize link goes to AMP.
+			$prepared_themes[ $reader_theme ]['actions']['customize'] = amp_get_customizer_url();
+
+			// Force the theme to be styled as Active.
+			$prepared_themes[ $reader_theme ]['active'] = true;
+
 			// Add AMP Reader theme notice.
 			$notice = sprintf(
 				'<span class="reader-theme-notice notice notice-info notice-alt inline" style="display:block; margin-bottom: 1em;"><span style="display: block; margin: 0.5em 0; padding:2px;">%s</span></span>',
