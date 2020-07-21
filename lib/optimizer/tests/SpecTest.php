@@ -4,10 +4,12 @@ namespace AmpProject\Optimizer;
 
 use AmpProject\Dom\Document;
 use AmpProject\Optimizer\Configuration\AmpRuntimeCssConfiguration;
+use AmpProject\Optimizer\Configuration\RewriteAmpUrlsConfiguration;
 use AmpProject\Optimizer\Tests\MarkupComparison;
 use AmpProject\Optimizer\Tests\TestMarkup;
 use AmpProject\Optimizer\Transformer\AmpRuntimeCss;
 use AmpProject\Optimizer\Transformer\ReorderHead;
+use AmpProject\Optimizer\Transformer\RewriteAmpUrls;
 use AmpProject\Optimizer\Transformer\ServerSideRendering;
 use AmpProject\RemoteRequest\StubbedRemoteGetRequest;
 use DirectoryIterator;
@@ -24,7 +26,7 @@ final class SpecTest extends TestCase
 {
     use MarkupComparison;
 
-    const TRANSFORMER_SPEC_PATH = __DIR__ . '/spec/transformers/valid';
+    const TRANSFORMER_SPEC_PATH = __DIR__ . '/spec/transformers';
 
     const TESTS_TO_SKIP = [
         'ReorderHead - reorders_head_a4a'                => 'see https://github.com/ampproject/amp-toolbox/issues/583',
@@ -54,12 +56,13 @@ final class SpecTest extends TestCase
     {
         $scenarios = [];
         $suites    = [
-            'ReorderHead'         => [ReorderHead::class, self::TRANSFORMER_SPEC_PATH . '/ReorderHeadTransformer'],
-            'ServerSideRendering' => [ServerSideRendering::class, self::TRANSFORMER_SPEC_PATH . '/ServerSideRendering'],
+            'ReorderHead'         => [ReorderHead::class, self::TRANSFORMER_SPEC_PATH . '/valid/ReorderHeadTransformer'],
+            'ServerSideRendering' => [ServerSideRendering::class, self::TRANSFORMER_SPEC_PATH . '/valid/ServerSideRendering'],
             'AmpRuntimeCss'       => [
                 AmpRuntimeCss::class,
-                self::TRANSFORMER_SPEC_PATH . '/AmpBoilerplateTransformer',
+                self::TRANSFORMER_SPEC_PATH . '/valid/AmpBoilerplateTransformer',
             ],
+            'RewriteAmpUrls'      => [RewriteAmpUrls::class, self::TRANSFORMER_SPEC_PATH . '/experimental/RewriteAmpUrls']
         ];
 
         foreach ($suites as $key => list($transformerClass, $specFileFolder)) {
@@ -139,17 +142,29 @@ final class SpecTest extends TestCase
                     break;
                 case 'ampRuntimeVersion':
                     $mappedConfiguration[AmpRuntimeCss::class][AmpRuntimeCssConfiguration::VERSION] = $value;
+                    $mappedConfiguration[RewriteAmpUrls::class][RewriteAmpUrlsConfiguration::AMP_RUNTIME_VERSION] = $value;
+                    break;
+                case 'experimentalEsm':
+                    $mappedConfiguration[RewriteAmpUrls::class][RewriteAmpUrlsConfiguration::EXPERIMENTAL_ESM] = $value;
+                    break;
+                case 'ampUrlPrefix':
+                    $mappedConfiguration[RewriteAmpUrls::class][RewriteAmpUrlsConfiguration::AMP_URL_PREFIX] = $value;
+                    break;
+                case 'geoApiUrl':
+                    $mappedConfiguration[RewriteAmpUrls::class][RewriteAmpUrlsConfiguration::GEO_API_URL] = $value;
+                    break;
+                case 'lts':
+                    $mappedConfiguration[RewriteAmpUrls::class][RewriteAmpUrlsConfiguration::LTS] = $value;
+                    break;
+                case 'rtv':
+                    $mappedConfiguration[RewriteAmpUrls::class][RewriteAmpUrlsConfiguration::RTV] = $value;
                     break;
 
                 // @TODO: Known configuration arguments used in spec tests that are not implemented yet.
-                case 'ampUrlPrefix':
                 case 'ampUrl':
                 case 'canonical':
                 case 'experimentBindAttribute':
-                case 'geoApiUrl':
-                case 'lts':
                 case 'preloadHeroImage':
-                case 'rtv':
                 default:
                     $this->fail("Configuration argument not yet implemented: {$key}.");
             }

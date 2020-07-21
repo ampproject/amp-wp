@@ -155,7 +155,7 @@ final class AmpRuntimeCss implements Transformer
     {
         // Use version passed in via params if available, otherwise fetch the current prod version.
         if (! empty($version)) {
-            $v0CssUrl = $this->appendRuntimeVersion(Amp::CACHE_HOST, $version) . '/' . self::V0_CSS;
+            $v0CssUrl = RuntimeVersion::appendRuntimeVersion(Amp::CACHE_HOST, $version) . '/' . self::V0_CSS;
         } else {
             $v0CssUrl = self::V0_CSS_URL;
             $options  = [RuntimeVersion::OPTION_CANARY => $this->configuration->get(AmpRuntimeCssConfiguration::CANARY)];
@@ -193,17 +193,5 @@ final class AmpRuntimeCss implements Transformer
         $cssStyleNode->setAttribute(Attribute::HREF, self::V0_CSS_URL);
 
         $ampRuntimeStyle->parentNode->insertBefore($cssStyleNode, $ampRuntimeStyle);
-    }
-
-    /**
-     * Append the runtime version to the host URL.
-     *
-     * @param string $host    Host domain to use.
-     * @param string $version Version to use.
-     * @return string Runtime version URL.
-     */
-    private function appendRuntimeVersion($host, $version)
-    {
-        return "{$host}/rtv/{$version}";
     }
 }
