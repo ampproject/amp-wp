@@ -93,9 +93,10 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 		};
 		add_filter( 'gallery_style', $filter_gallery_style );
 
-		remove_filter( 'post_gallery', [ $this, 'generate_gallery_markup' ] );
+		// Proceed to get the original shortcode markup and prevent infinite recursion by removing this filter callback and then restoring it.
+		remove_filter( 'post_gallery', [ $this, __FUNCTION__ ] );
 		$gallery_html = gallery_shortcode( $attrs );
-		add_filter( 'post_gallery', [ $this, 'generate_gallery_markup' ], 10, 2 );
+		add_filter( 'post_gallery', [ $this, __FUNCTION__ ], 10, 2 );
 
 		remove_filter( 'gallery_style', $filter_gallery_style );
 
