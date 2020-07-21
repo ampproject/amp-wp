@@ -101,4 +101,17 @@ final class RuntimeVersion
     {
         return str_pad($version, 15, 0);
     }
+
+
+    /**
+     * Append the runtime version to the host URL.
+     *
+     * @param string $host    Host domain to use.
+     * @param string $version Version to use.
+     * @return string Runtime version URL.
+     */
+    public static function appendRuntimeVersion($host, $version)
+    {
+        return "{$host}/rtv/{$version}";
+    }
 }

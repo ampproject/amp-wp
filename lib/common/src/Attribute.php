@@ -35,6 +35,7 @@ interface Attribute
     const CONTENT               = 'content';
     const CUSTOM_ELEMENT        = 'custom-element';
     const CUSTOM_TEMPLATE       = 'custom-template';
+    const CROSSORIGIN           = 'crossorigin';
     const DECODING              = 'decoding';
     const DISABLE_INLINE_WIDTH  = 'disable-inline-width';
     const HEIGHT                = 'height';
@@ -54,6 +55,7 @@ interface Attribute
     const MEDIA                 = 'media';
     const NAME                  = 'name';
     const NOLOADING             = 'noloading';
+    const NOMODULE              = 'nomodule';
     const OBJECT_FIT            = 'object-fit';
     const ON                    = 'on';
     const PROFILE               = 'profile';
@@ -81,6 +83,7 @@ interface Attribute
     const TYPE_JSON       = 'application/json';
     const TYPE_LD_JSON    = 'application/ld+json';
     const TYPE_TEXT_PLAIN = 'text/plain';
+    const TYPE_MODULE     = 'module';
 
     const REL_AMPHTML      = 'amphtml';
     const REL_CANONICAL    = 'canonical';
@@ -93,4 +96,6 @@ interface Attribute
     const REL_PRELOAD      = 'preload';
     const REL_PRERENDER    = 'prerender';
     const REL_STYLESHEET   = 'stylesheet';
+
+    const CROSSORIGIN_ANONYMOUS = 'anonymous';
 }
