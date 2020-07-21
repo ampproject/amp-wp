@@ -29,7 +29,7 @@ import { ReaderThemesContextProvider } from '../components/reader-themes-context
 import { SiteSettingsProvider } from '../components/site-settings-provider';
 import { Loading } from '../components/loading';
 import { UnsavedChangesWarning } from '../components/unsaved-changes-warning';
-import { AMPNotice, NOTICE_TYPE_WARNING } from '../components/amp-notice';
+import { AMPNotice, NOTICE_TYPE_ERROR } from '../components/amp-notice';
 import { ErrorContextProvider, ErrorContext } from '../components/error-context-provider';
 import { Welcome } from './welcome';
 import { TemplateModes } from './template-modes';
@@ -75,7 +75,7 @@ Providers.propTypes = {
 function ErrorNotice( { errorMessage } ) {
 	return (
 		<div className="amp-error-notice">
-			<AMPNotice type={ NOTICE_TYPE_WARNING }>
+			<AMPNotice type={ NOTICE_TYPE_ERROR }>
 				<p>
 					<strong>
 						{ __( 'Error:', 'amp' ) }

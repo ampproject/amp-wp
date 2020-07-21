@@ -28,7 +28,19 @@
 	background-color: #effbff;
 }
 
+.amp-notice--info svg {
+	color: #285be7;
+}
+
 .amp-notice--warning {
+	background-color: #fff9c8;
+}
+
+.amp-notice--warning svg {
+	color: #ff9f00;
+}
+
+.amp-notice--error {
 	background-color: #ffefef;
 }
 

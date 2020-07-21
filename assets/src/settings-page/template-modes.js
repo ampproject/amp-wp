@@ -17,7 +17,7 @@ import { useContext, useMemo } from '@wordpress/element';
  * Internal dependencies
  */
 import { TemplateModeOption } from '../components/template-mode-option';
-import { AMPNotice, NOTICE_SIZE_LARGE, NOTICE_TYPE_INFO, NOTICE_SIZE_SMALL } from '../components/amp-notice';
+import { AMPNotice, NOTICE_SIZE_LARGE, NOTICE_TYPE_INFO, NOTICE_SIZE_SMALL, NOTICE_TYPE_WARNING } from '../components/amp-notice';
 import { Options } from '../components/options-context-provider';
 import { READER, STANDARD, TRANSITIONAL } from '../common/constants';
 import { ReaderThemes } from './reader-themes';
@@ -38,7 +38,7 @@ function RecommendedNotice() {
  */
 function NotRecommendedNotice() {
 	return (
-		<AMPNotice size={ NOTICE_SIZE_SMALL }>
+		<AMPNotice size={ NOTICE_SIZE_SMALL } type={ NOTICE_TYPE_WARNING }>
 			{ __( 'Not recommended', 'amp' ) }
 		</AMPNotice>
 	);
@@ -56,7 +56,7 @@ function getReaderNotice( selected ) {
 			return {
 				readerNoticeSmall: selected ? <NotRecommendedNotice /> : null,
 				readerNoticeLarge: (
-					<AMPNotice size={ NOTICE_SIZE_SMALL }>
+					<AMPNotice size={ NOTICE_SIZE_SMALL } type={ NOTICE_TYPE_WARNING }>
 						{ __( 'Your active theme is known to work well in standard mode.', 'amp' ) }
 					</AMPNotice>
 				),
@@ -67,7 +67,7 @@ function getReaderNotice( selected ) {
 			return {
 				readerNoticeSmall: selected ? <NotRecommendedNotice /> : null,
 				readerNoticeLarge: (
-					<AMPNotice size={ NOTICE_SIZE_SMALL }>
+					<AMPNotice size={ NOTICE_SIZE_SMALL } type={ NOTICE_TYPE_WARNING }>
 						{ __( 'Your active theme is known to work well in standard and transitional mode.', 'amp' ) }
 					</AMPNotice>
 				) };
