@@ -1,5 +1,5 @@
 .amp a {
-	color: var(--brand);
+	color: var(--amp-settings-color-brand);
 }
 
 .amp h1,
@@ -51,11 +51,11 @@
 }
 
 .amp input[type="radio"]:checked {
-	border-color: var(--brand);
+	border-color: var(--amp-settings-color-brand);
 }
 
 .amp input[type="radio"]:checked::before {
-	background-color: var(--brand);
+	background-color: var(--amp-settings-color-brand);
 	height: 12px;
 	margin: 0.25rem;
 	width: 12px;
@@ -63,6 +63,6 @@
 
 .amp input[type="checkbox"]:focus,
 .amp input[type="radio"]:focus {
-	border-color: var(--brand);
-	box-shadow: 0 0 0 1px var(--brand);
+	border-color: var(--amp-settings-color-brand);
+	box-shadow: 0 0 0 1px var(--amp-settings-color-brand);
 }

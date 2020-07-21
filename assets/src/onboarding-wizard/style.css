@@ -128,7 +128,7 @@ body {
 }
 
 .amp-stepper__item--done::before {
-	border-left-color: var(--brand);
+	border-left-color: var(--amp-settings-color-brand);
 }
 
 .amp-stepper__item-title {
@@ -156,16 +156,16 @@ body {
 }
 
 .amp-stepper__bullet--check {
-	background-color: var(--brand);
-	border-color: var(--brand);
+	background-color: var(--amp-settings-color-brand);
+	border-color: var(--amp-settings-color-brand);
 }
 
 .amp-stepper__bullet--dot {
-	border-color: var(--brand);
+	border-color: var(--amp-settings-color-brand);
 }
 
 .amp-stepper__bullet--dot span {
-	background-color: var(--brand);
+	background-color: var(--amp-settings-color-brand);
 	border-radius: 5px;
 	height: 10px;
 	width: 10px;

@@ -18,6 +18,7 @@ import { Loading } from '../loading';
 import './style.css';
 import { AMPNotice } from '../amp-notice';
 import { ThemeCard } from '../theme-card';
+import { Carousel } from './carousel';
 
 /**
  * Component for selecting a reader theme.
@@ -25,8 +26,8 @@ import { ThemeCard } from '../theme-card';
  * @param {Object} props Component props.
  * @param {boolean} props.hideCurrentlyActiveTheme Whether the currently active theme should be unselectable.
  */
-export function ReaderThemeSelection( { hideCurrentlyActiveTheme = false } ) {
-	const { currentTheme, fetchingThemes, themes: unprocessedThemes } = useContext( ReaderThemes );
+export function ReaderThemeCarousel( { hideCurrentlyActiveTheme = false } ) {
+	const { currentTheme, fetchingThemes, selectedTheme, themes: unprocessedThemes } = useContext( ReaderThemes );
 
 	const { activeTheme, themes } = useMemo( () => {
 		let active, processedThemes;
@@ -91,19 +92,12 @@ export function ReaderThemeSelection( { hideCurrentlyActiveTheme = false } ) {
 			) }
 			<div>
 				{ 0 < availableThemes.length && (
-					<ul className="choose-reader-theme__grid">
-						{ availableThemes.map( ( theme ) => {
-							const disabled = hideCurrentlyActiveTheme && currentTheme.name === theme.name;
-
-							return ! disabled && (
-								<ThemeCard
-									key={ `theme-card-${ theme.slug }` }
-									screenshotUrl={ theme.screenshot_url }
-									{ ...theme }
-								/>
-							);
-						} ) }
-					</ul>
+					<Carousel
+						availableThemes={ availableThemes }
+						currentTheme={ currentTheme }
+						hideCurrentlyActiveTheme={ hideCurrentlyActiveTheme }
+						selectedTheme={ selectedTheme }
+					/>
 				) }
 
 				{ 0 < unavailableThemes.length && (
@@ -147,6 +141,6 @@ export function ReaderThemeSelection( { hideCurrentlyActiveTheme = false } ) {
 	);
 }
 
-ReaderThemeSelection.propTypes = {
+ReaderThemeCarousel.propTypes = {
 	hideCurrentlyActiveTheme: PropTypes.bool,
 };

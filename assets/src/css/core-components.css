@@ -4,7 +4,7 @@
 .amp .components-button:not(.components-panel__body-toggle) {
 	align-items: center;
 	border-radius: 3px;
-	color: var(--brand);
+	color: var(--amp-settings-color-brand);
 	font-size: 1rem;
 	font-weight: 600;
 	padding: 0.5rem 1rem;
@@ -43,12 +43,12 @@
 .amp .components-button:not(.components-panel__body-toggle):focus:not(:disabled),
 .amp .components-button:not(.components-panel__body-toggle):hover {
 	box-shadow: none;
-	color: var(--brand);
+	color: var(--amp-settings-color-brand);
 	text-decoration: none;
 }
 
 .amp .components-button:focus:not(:disabled) {
-	outline: 1px solid var(--brand);
+	outline: 1px solid var(--amp-settings-color-brand);
 }
 
 .amp .components-button.is-primary {
@@ -62,7 +62,7 @@
 .amp .components-button.is-primary:focus:not(:disabled),
 .amp .components-button.is-primary:active,
 .amp .components-button.is-primary:not(:disabled):not([aria-disabled="true"]):hover {
-	background: var(--brand);
+	background: var(--amp-settings-color-brand);
 	color: var(--amp-settings-color-background);
 	text-shadow: none;
 }
@@ -75,7 +75,7 @@
 
 .amp .components-button.is-primary:disabled.is-busy {
 	background-size: 100% 100%;
-	background-image: linear-gradient(-45deg, var(--brand) 28%, rgba(36, 89, 231, .8) 28%, rgb(36, 89, 231, .8) 72%, var(--brand) 72%);
+	background-image: linear-gradient(-45deg, var(--amp-settings-color-brand) 28%, rgba(36, 89, 231, .8) 28%, rgb(36, 89, 231, .8) 72%, var(--amp-settings-color-brand) 72%);
 	border-color: var(--color-gray-medium);
 }
 
@@ -108,17 +108,17 @@
 }
 
 .amp .components-form-toggle.is-checked .components-form-toggle__track {
-	background-color: var(--brand);
+	background-color: var(--amp-settings-color-brand);
 	border-width: 0;
 }
 
 .amp .components-form-toggle__input:focus + .components-form-toggle__track {
-	box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--brand);
+	box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--amp-settings-color-brand);
 }
 
 .amp .components-checkbox-control__input[type="checkbox"]:checked {
-	background: var(--brand);
-	border-color: var(--brand);
+	background: var(--amp-settings-color-brand);
+	border-color: var(--amp-settings-color-brand);
 }
 
 .amp .components-checkbox-control__input[type="checkbox"] {

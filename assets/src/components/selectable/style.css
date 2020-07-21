@@ -15,12 +15,12 @@
 }
 
 .selectable--selected {
-	border-color: var(--brand);
-	box-shadow: -10px 0 0 var(--brand);
+	border-color: var(--amp-settings-color-brand);
+	box-shadow: -10px 0 0 var(--amp-settings-color-brand);
 }
 
 .selectable--bottom.selectable--selected {
-	box-shadow: 0 10px 0 var(--brand);
+	box-shadow: 0 10px 0 var(--amp-settings-color-brand);
 }
 
 /** Other directions not yet required. */
