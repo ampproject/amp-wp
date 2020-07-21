@@ -168,13 +168,18 @@ final class ReaderThemeLoader implements Service, Registerable {
 	 * This is admittedly hacky, but WordPress doesn't provide a much better option.
 	 */
 	public function inject_theme_single_template_modifications() {
+		if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
+			return;
+		}
+
+		$reader_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
 		?>
 		<script>
-			(function( themeSingle ) {
-				if ( ! themeSingle ) {
+			(function( themeSingleTmpl ) {
+				if ( ! themeSingleTmpl ) {
 					return;
 				}
-				let text = themeSingle.text;
+				let text = themeSingleTmpl.text;
 
 				text = text.replace(
 					/(?=<p class="theme-description">)/,
@@ -205,9 +210,35 @@ final class ReaderThemeLoader implements Service, Registerable {
 					}
 				);
 
-				// Inject the notice.
-				themeSingle.text = text;
+				themeSingleTmpl.text = text;
 			})( document.getElementById( 'tmpl-theme-single' ) );
+
+			(function ( themeTmpl, ssrThemeNamePrefixElement ) {
+				// First update the card that was rendered server-side in wp-admin/themes.php.
+				if ( ssrThemeNamePrefixElement ) {
+					ssrThemeNamePrefixElement.textContent = <?php echo wp_json_encode( _x( 'Reader:', 'prefix for theme card in list', 'amp' ) ); ?>;
+				}
+
+				// Then update the Mustache template so that future renders will also have the proper prefix.
+				if ( themeTmpl ) {
+					themeTmpl.text = themeTmpl.text.replace(
+						/(<div class="theme-id-container">)(\s*<# if)/,
+						function ( match, startDiv ) {
+							return `
+							${startDiv}
+							<# if ( data.ampActiveReaderTheme ) { #>
+								<h2 class="theme-name" id="{{ data.id }}-name">
+									<span><?php echo esc_html( _x( 'Reader:', 'prefix for theme card in list', 'amp' ) ); ?></span> {{{ data.name }}}
+								</h2>
+							<# } else if
+						`;
+						}
+					);
+				}
+			}) (
+				document.getElementById( 'tmpl-theme' ),
+				document.querySelector( <?php echo wp_json_encode( sprintf( '#%s-name > span', $reader_theme ) ); ?> )
+			);
 		</script>
 		<?php
 
