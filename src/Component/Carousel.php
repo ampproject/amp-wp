@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP\Component;
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
 use AmpProject\AmpWP\Dom\ElementList;
+use AmpProject\Tag;
 use DOMElement;
 use AMP_DOM_Utils;
 use DOMNode;
@@ -86,7 +87,7 @@ final class Carousel {
 			$caption_node    = $slide instanceof HasCaption ? $slide->get_caption_node() : null;
 			$slide_container = AMP_DOM_Utils::create_node(
 				$this->dom,
-				'figure', // This cannot be a <div> because if the gallery is inside of a <p>, then the DOM will break.
+				Tag::FIGURE, // This cannot be a <div> because if the gallery is inside of a <p>, then the DOM will break.
 				[ 'class' => 'slide' ]
 			);
 
@@ -105,9 +106,9 @@ final class Carousel {
 			// If there's a caption, append it to the slide.
 			if ( $caption_node instanceof DOMNode ) {
 				// If the caption is not a <figcaption>, wrap it in one.
-				if ( 'figcaption' !== $caption_node->nodeName ) {
+				if ( Tag::FIGCAPTION !== $caption_node->nodeName ) {
 					$caption_content = $caption_node;
-					$caption_node    = AMP_DOM_Utils::create_node( $this->dom, 'figcaption', [] );
+					$caption_node    = AMP_DOM_Utils::create_node( $this->dom, Tag::FIGCAPTION, [] );
 					$caption_node->appendChild( $caption_content );
 				}
 

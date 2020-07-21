@@ -11,11 +11,12 @@ use AmpProject\AmpWP\Component\Carousel;
 use AmpProject\AmpWP\Dom\ElementList;
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
+use AmpProject\Tag;
 use DOMElement;
 use DOMNodeList;
 
 /**
- * Trait HandlesGalleryEmbed
+ * Trait HandlesGalleryEmbed.
  *
  * Contains logic related to both gallery embed shortcodes and blocks.
  *
@@ -24,7 +25,7 @@ use DOMNodeList;
 trait HandlesGalleryEmbed {
 
 	/**
-	 * Transforms the raw embed gallery embed to become AMP compatible.
+	 * Transforms the raw gallery embed to become AMP compatible.
 	 *
 	 * @param bool        $is_carousel     Whether the embed should be transformed into an <amp-carousel>.
 	 * @param bool        $is_lightbox     Whether the gallery images should be shown in a lightbox.
@@ -74,7 +75,7 @@ trait HandlesGalleryEmbed {
 			$element             = $img_element;
 			$parent_element_name = $img_element->parentNode->nodeName;
 
-			if ( 'a' === $parent_element_name && ! $is_amp_lightbox ) {
+			if ( Tag::A === $parent_element_name && ! $is_amp_lightbox ) {
 				$element = $img_element->parentNode;
 			}
 
