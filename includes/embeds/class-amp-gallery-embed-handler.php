@@ -33,7 +33,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Markup for the gallery.
 	 */
 	public function generate_gallery_markup( $html, $attrs ) {
-		// Use <amp-carousel> for the gallery if requested via amp-carousel shortcode attribute, or use by default if in Reader mode.
+		// Use <amp-carousel> for the gallery if requested via amp-carousel shortcode attribute, or use by default if in legacy Reader mode.
 		// In AMP_Gallery_Block_Sanitizer, this is referred to as carousel_required.
 		$is_carousel = isset( $attrs['amp-carousel'] )
 			? rest_sanitize_boolean( $attrs['amp-carousel'] )
@@ -73,26 +73,26 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		// Use `data` attributes to indicate which options are configured for the embed. These indications are later
 		// processed during sanitization of the embed in `::sanitize_raw_embeds`.
-		add_filter(
-			'gallery_style',
-			static function ( $style ) use ( $is_carousel, $is_lightbox ) {
-				$data_attrs = [];
+		$filter_gallery_style = static function ( $style ) use ( $is_carousel, $is_lightbox ) {
+			$data_attrs = [];
 
-				if ( $is_lightbox ) {
-					$data_attrs[] = 'data-amp-lightbox';
-				}
-
-				if ( $is_carousel ) {
-					$data_attrs[] = 'data-amp-carousel';
-				}
-
-				return str_replace( "class='", implode( ' ', $data_attrs ) . " class='", $style );
+			if ( $is_lightbox ) {
+				$data_attrs[] = 'data-amp-lightbox';
 			}
-		);
+
+			if ( $is_carousel ) {
+				$data_attrs[] = 'data-amp-carousel';
+			}
+
+			return str_replace( "class='", implode( ' ', $data_attrs ) . " class='", $style );
+		};
+		add_filter( 'gallery_style', $filter_gallery_style );
 
 		remove_filter( 'post_gallery', [ $this, 'generate_gallery_markup' ] );
 		$gallery_html = gallery_shortcode( $attrs );
 		add_filter( 'post_gallery', [ $this, 'generate_gallery_markup' ], 10, 2 );
+
+		remove_filter( 'gallery_style', $filter_gallery_style );
 
 		return $gallery_html;
 	}

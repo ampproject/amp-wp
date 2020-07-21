@@ -18,7 +18,7 @@ use DOMNodeList;
 /**
  * Trait HandlesGalleryEmbed.
  *
- * Contains logic related to both gallery embed shortcodes and blocks.
+ * Contains logic related to both gallery shortcodes and blocks.
  *
  * @since 2.0
  */
