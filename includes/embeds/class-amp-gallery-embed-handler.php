@@ -33,6 +33,23 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Markup for the gallery.
 	 */
 	public function generate_gallery_markup( $html, $attrs ) {
+		static $recursing = false;
+		if ( ! $recursing ) {
+			$recursing = true;
+			$html      = $this->filter_post_gallery_markup( $html, $attrs );
+			$recursing = false;
+		}
+		return $html;
+	}
+
+	/**
+	 * Filter the output of gallery_shortcode().
+	 *
+	 * @param string $html  Markup to filter.
+	 * @param array  $attrs Shortcode attributes.
+	 * @return string Markup for the gallery.
+	 */
+	protected function filter_post_gallery_markup( $html, $attrs ) {
 		// Use <amp-carousel> for the gallery if requested via amp-carousel shortcode attribute, or use by default if in legacy Reader mode.
 		// In AMP_Gallery_Block_Sanitizer, this is referred to as carousel_required.
 		$is_carousel = isset( $attrs['amp-carousel'] )
@@ -91,13 +108,9 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 				1
 			);
 		};
+
 		add_filter( 'gallery_style', $filter_gallery_style );
-
-		// Proceed to get the original shortcode markup and prevent infinite recursion by removing this filter callback and then restoring it.
-		remove_filter( 'post_gallery', [ $this, __FUNCTION__ ] );
 		$gallery_html = gallery_shortcode( $attrs );
-		add_filter( 'post_gallery', [ $this, __FUNCTION__ ], 10, 2 );
-
 		remove_filter( 'gallery_style', $filter_gallery_style );
 
 		return $gallery_html;
