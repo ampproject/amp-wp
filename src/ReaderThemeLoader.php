@@ -105,6 +105,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 		add_action( 'plugins_loaded', [ $this, 'override_theme' ], 9 );
 
 		add_filter( 'wp_prepare_themes_for_js', [ $this, 'filter_wp_prepare_themes_to_indicate_reader_theme' ] );
+		add_action( 'admin_print_footer_scripts-themes.php', [ $this, 'inject_theme_single_template_modifications' ] );
 	}
 
 	/**
@@ -142,25 +143,74 @@ final class ReaderThemeLoader implements Service, Registerable {
 			// Force the theme to be styled as Active.
 			$prepared_themes[ $reader_theme ]['active'] = true;
 
-			// Add AMP Reader theme notice.
-			$notice = sprintf(
-				'<span class="reader-theme-notice notice notice-info notice-alt inline" style="display:block; margin-bottom: 1em;"><span style="display: block; margin: 0.5em 0; padding:2px;">%s</span></span>',
-				sprintf(
-					wp_kses(
-						/* translators: placeholder is link to AMP settings screen */
-						__( 'This has been <a href="%s">selected</a> as the AMP Reader theme.', 'amp' ),
-						[
-							'a' => [ 'href' => true ],
-						]
-					),
-					esc_url( add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, admin_url( 'admin.php' ) ) )
-				)
-			);
+			// Make sure the hacked Backbone template will use the AMP action links.
+			$prepared_themes[ $reader_theme ]['ampActiveReaderTheme'] = true;
 
-			$prepared_themes[ $reader_theme ]['description'] = $notice . $prepared_themes[ $reader_theme ]['description'];
+			// Add AMP Reader theme notice.
+			$prepared_themes[ $reader_theme ]['ampReaderThemeNotice'] = sprintf(
+				wp_kses(
+					/* translators: placeholder is link to AMP settings screen */
+					__( 'This has been <a href="%s">selected</a> as the AMP Reader theme.', 'amp' ),
+					[
+						'a' => [ 'href' => true ],
+					]
+				),
+				esc_url( add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, admin_url( 'admin.php' ) ) )
+			);
 		}
 
 		return $prepared_themes;
+	}
+
+	/**
+	 * Inject new logic into the Backbone templates for rendering a theme lightbox.
+	 *
+	 * This is admittedly hacky, but WordPress doesn't provide a much better option.
+	 */
+	public function inject_theme_single_template_modifications() {
+		?>
+		<script>
+			(function( themeSingle ) {
+				if ( ! themeSingle ) {
+					return;
+				}
+				let text = themeSingle.text;
+
+				text = text.replace(
+					/(?=<p class="theme-description">)/,
+					`
+					<# if ( data.ampReaderThemeNotice ) { #>
+						<div class="notice notice-info notice-alt inline">
+							<p>{{{ data.ampReaderThemeNotice }}}</p>
+						</div>
+					<# } #>
+					`
+				);
+
+				// Inject our action links.
+				text = text.replace(
+					/(<div class="active-theme">)((?:.|\s)+?)(<\/div>)/,
+					( match, startDiv, actionLinks, endDiv ) => {
+						return `
+							${startDiv}
+							<# if ( data.ampActiveReaderTheme ) { #>
+								<a href="{{{ data.actions.customize }}}" class="button button-primary customize load-customize hide-if-no-customize">
+									<?php esc_html_e( 'Customize AMP', 'amp' ); ?>
+								</a>
+							<# } else { #>
+								${actionLinks}
+							<# } #>
+							${endDiv}
+						`;
+					}
+				);
+
+				// Inject the notice.
+				themeSingle.text = text;
+			})( document.getElementById( 'tmpl-theme-single' ) );
+		</script>
+		<?php
+
 	}
 
 	/**
