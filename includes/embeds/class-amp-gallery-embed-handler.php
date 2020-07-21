@@ -84,7 +84,12 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 				$data_attrs[] = 'data-amp-carousel';
 			}
 
-			return str_replace( "class='", implode( ' ', $data_attrs ) . " class='", $style );
+			return preg_replace(
+				'/(?=\sclass=[\'"])/',
+				implode( ' ', $data_attrs ) . ' ',
+				$style,
+				1
+			);
 		};
 		add_filter( 'gallery_style', $filter_gallery_style );
 
