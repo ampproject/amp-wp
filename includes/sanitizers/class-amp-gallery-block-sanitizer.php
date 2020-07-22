@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\Embed\HandlesGalleryEmbed;
+use AmpProject\Tag;
 
 /**
  * Class AMP_Gallery_Block_Sanitizer
@@ -73,6 +74,8 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 		$nodes       = $this->dom->xpath->query( $expr );
 
 		foreach ( $nodes as $node ) {
+			/** @var DOMElement $node */
+
 			// In WordPress 5.3, the Gallery block's <ul> is wrapped in a <figure class="wp-block-gallery">, so look for that node also.
 			$gallery_node = isset( $node->parentNode ) && AMP_DOM_Utils::has_class( $node->parentNode, self::$class ) ? $node->parentNode : $node;
 			$attributes   = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $gallery_node );
@@ -100,10 +103,9 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return DOMElement|null The caption element, or `null` if the image has none.
 	 */
 	protected function get_caption_element( DOMElement $img_element ) {
-		$caption_tag        = 'figcaption';
 		$figcaption_element = null;
 
-		if ( isset( $img_element->nextSibling->nodeName ) && $caption_tag === $img_element->nextSibling->nodeName ) {
+		if ( isset( $img_element->nextSibling->nodeName ) && Tag::FIGCAPTION === $img_element->nextSibling->nodeName ) {
 			$figcaption_element = $img_element->nextSibling;
 		}
 
@@ -111,7 +113,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 		if (
 			! $figcaption_element
 			&& isset( $img_element->parentNode->nextSibling->nodeName )
-			&& $caption_tag === $img_element->parentNode->nextSibling->nodeName
+			&& Tag::FIGCAPTION === $img_element->parentNode->nextSibling->nodeName
 		) {
 			$figcaption_element = $img_element->parentNode->nextSibling;
 		}

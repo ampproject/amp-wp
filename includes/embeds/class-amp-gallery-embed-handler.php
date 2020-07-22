@@ -7,6 +7,7 @@
 
 use AmpProject\AmpWP\Embed\HandlesGalleryEmbed;
 use AmpProject\Dom\Document;
+use AmpProject\Tag;
 
 /**
  * Class AMP_Gallery_Embed_Handler
@@ -168,10 +169,10 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			$caption_element = $caption_element->nextSibling;
 		}
 
-		if ( $caption_element instanceof DOMElement && 'figcaption' !== $caption_element->nodeName ) {
+		if ( $caption_element instanceof DOMElement && Tag::FIGCAPTION !== $caption_element->nodeName ) {
 			// Transform the caption element into a `figcaption`. This not only allows the `amp-lightbox` to correctly
 			// detect and display the caption, but it is also semantically correct as the parent element will be a `figure`.
-			$figcaption_element = AMP_DOM_Utils::create_node( Document::fromNode( $caption_element ), 'figcaption', [] );
+			$figcaption_element = AMP_DOM_Utils::create_node( Document::fromNode( $caption_element ), Tag::FIGCAPTION, [] );
 
 			while ( $caption_element->hasChildNodes() ) {
 				$child = $caption_element->childNodes->item( 0 );
