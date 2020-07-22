@@ -82,8 +82,8 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 
 			$is_amp_lightbox = isset( $attributes['data-amp-lightbox'] ) && rest_sanitize_boolean( $attributes['data-amp-lightbox'] );
 
-			if ( $gallery_node->hasAttribute( 'data-amp-carousel' ) ) {
-				$is_amp_carousel = rest_sanitize_boolean( $gallery_node->getAttribute( 'data-amp-carousel' ) );
+			if ( isset( $attributes['data-amp-carousel'] ) ) {
+				$is_amp_carousel = rest_sanitize_boolean( $attributes['data-amp-carousel'] );
 			} else {
 				// The carousel_required argument is set to true when the theme does not support AMP. However, it is no
 				// no longer strictly required. Rather, carousels are just enabled by default.
