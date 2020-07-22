@@ -82,7 +82,7 @@ final class Carousel {
 		);
 
 		foreach ( $this->slides as $slide ) {
-			$slide_node      = $slide instanceof CaptionedSlide ? $slide->get_slide_node() : $slide;
+			$slide_node      = $slide instanceof CaptionedSlide ? $slide->get_slide_element() : $slide;
 			$caption_element = $slide instanceof HasCaption ? $slide->get_caption_element() : null;
 			$slide_container = AMP_DOM_Utils::create_node(
 				$this->dom,
@@ -152,7 +152,7 @@ final class Carousel {
 		$carousel_height  = 0;
 
 		foreach ( $this->slides as $slide ) {
-			$slide_node = $slide instanceof CaptionedSlide ? $slide->get_slide_node() : $slide;
+			$slide_node = $slide instanceof CaptionedSlide ? $slide->get_slide_element() : $slide;
 			// Account for an <amp-img> that's wrapped in an <a>.
 			if ( ! $this->is_image_element( $slide_node ) && $slide_node->firstChild instanceof DOMElement && $this->is_image_element( $slide_node->firstChild ) ) {
 				$slide_node = $slide_node->firstChild;

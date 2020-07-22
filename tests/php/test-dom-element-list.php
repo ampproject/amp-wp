@@ -106,13 +106,13 @@ class Test_DOM_Element_List extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_slide_node.
+	 * Test get_slide_element.
 	 *
-	 * @covers \AmpProject\AmpWP\Component\CaptionedSlide::get_slide_node()
+	 * @covers \AmpProject\AmpWP\Component\CaptionedSlide::get_slide_element()
 	 */
-	public function test_get_slide_node() {
+	public function test_get_slide_element() {
 		$image_node = AMP_DOM_Utils::create_node( new Document(), 'amp-img', [] );
 		$amp_image  = new CaptionedSlide( $image_node, new DOMElement( 'foo' ) );
-		$this->assertEquals( $image_node, $amp_image->get_slide_node() );
+		$this->assertEquals( $image_node, $amp_image->get_slide_element() );
 	}
 }
