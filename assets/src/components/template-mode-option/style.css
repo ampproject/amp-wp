@@ -1,6 +1,14 @@
 .template-mode-option {
-	--panel-button-width: 112px;
+	--panel-button-width: 56px;
 	--label-height: 92px;
+}
+
+@media (min-width: 783px) {
+
+	.template-mode-option {
+		--panel-button-width: 112px;
+		--label-height: 92px;
+	}
 }
 
 .template-mode-option {
@@ -13,14 +21,27 @@
 	align-items: center;
 	background-color: var(--amp-settings-color-background);
 	display: flex;
-	flex-wrap: wrap;
 	height: var(--label-height);
 	left: 0;
-	padding: 1.125rem 0 1.125rem 3rem;
+	padding: 0.75rem 0 0.75rem 1rem;
 	position: absolute;
 	right: var(--panel-button-width);
 	top: 0;
 	z-index: 1;
+
+	@media (min-width: 783px) {
+		flex-wrap: wrap;
+		padding: 1.125rem 0 1.125rem 3rem;
+	}
+}
+
+.template-mode-selection__illustration svg {
+	height: auto;
+	width: 45px;
+
+	@media (min-width: 783px) {
+		width: 66px;
+	}
 }
 
 .amp .template-mode-option .components-panel__body-title {
@@ -70,12 +91,20 @@
 }
 
 .template-mode-selection__input-container {
-	margin-right: 1.5rem;
+	margin-right: 0.75rem;
+
+	@media screen and (min-width: 783px) {
+		margin-right: 1.5rem;
+	}
 }
 
 .template-mode-selection__illustration {
 	flex-shrink: 0;
-	width: 80px;
+	width: 60px;
+
+	@media screen and (min-width: 783px) {
+		width: 80px;
+	}
 }
 
 .template-mode-option .amp-info {
@@ -118,7 +147,6 @@
 	flex-grow: 1;
 	flex-wrap: wrap;
 	justify-content: flex-start;
-	margin-bottom: 1.5rem;
 	padding: 0;
 
 	@media screen and (min-width: 783px) {
@@ -128,14 +156,31 @@
 }
 
 .template-mode-selection__description h2 {
-	font-size: 1.5rem;
+	font-size: 1rem;
 	line-height: 1.5;
 	margin-bottom: 0;
 	margin-top: 0;
+
+	@media screen and (min-width: 783px) {
+		font-size: 1.5rem;
+	}
 }
 
 .template-mode-selection__label-extra {
-	margin-left: 1.5rem;
+	margin-top: 0.5rem;
+
+	@media screen and (min-width: 783px) {
+		margin-left: 1.5rem;
+		margin-top: 0;
+	}
+}
+
+.template-mode-selection__label-extra .amp-notice--small {
+	font-size: 13px;
+
+	@media screen and (min-width: 783px) {
+		font-size: 14px;
+	}
 }
 
 .template-mode-option > .amp-notice .components-panel__arrow {
