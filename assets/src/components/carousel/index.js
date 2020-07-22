@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { debounce } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -16,7 +17,7 @@ import { DotNav } from './dot-nav';
 
 const DEFAULT_GUTTER_WIDTH = 60;
 const DEFAULT_ITEM_WIDTH = 268;
-const MOBILE_BREAKPOINT = 783;
+const DEFAULT_MOBILE_BREAKPOINT = 783;
 
 /**
  * Renders a scrollable carousel with a button navigation.
@@ -27,37 +28,57 @@ const MOBILE_BREAKPOINT = 783;
  * @param {number} props.itemWidth The width of each item.
  * @param {number} props.mobileBreakpoint Breakpoint below which to render the mobile version.
  * @param {string} props.namespace CSS namespace.
+ * @param {number} props.selectedItemIndex Index of an item to force into focus.
  */
 export function Carousel( {
 	gutterWidth = DEFAULT_GUTTER_WIDTH,
 	items,
 	itemWidth = DEFAULT_ITEM_WIDTH,
-	mobileBreakpoint = MOBILE_BREAKPOINT,
+	mobileBreakpoint = DEFAULT_MOBILE_BREAKPOINT,
 	namespace = 'amp-carousel',
+	selectedItemIndex = 0,
 } ) {
 	const width = useWindowWidth();
-	const [ activeItemIndex, setActiveItemIndex ] = useState( 0 );
+	const [ currentItemIndex, setCurrentItemIndex ] = useState( selectedItemIndex );
+	const [ prevButtonDisabled, setPrevButtonDisabled ] = useState( true );
+	const [ nextButtonDisabled, setNextButtonDisabled ] = useState( true );
 
 	const carouselList = useRef();
-	const carouselItems = useRef();
+	const mounted = useRef( false );
+
+	/**
+	 * Set up ref to track whether the component is mounted, as there is a debounced callback in an effect below.
+	 */
+	useEffect( () => {
+		mounted.current = true;
+		return () => {
+			mounted.current = false;
+		};
+	}, [] );
 
 	/**
 	 * Scrolls to the carousel item at the given index.
 	 */
 	const scrollToItem = useCallback( ( newIndex ) => {
+		if ( ! ( newIndex in carouselList.current.children ) ) {
+			return;
+		}
+
 		carouselList.current.scrollTo( {
 			top: 0,
-			left: carouselItems.current[ newIndex ].offsetLeft - ( width > mobileBreakpoint ? itemWidth : 0 ),
+			left: carouselList.current.children[ newIndex + ( width > mobileBreakpoint ? 0 : 1 ) ].offsetLeft,
 			behavior: 'smooth',
 		} );
-	}, [ itemWidth, mobileBreakpoint, width ] );
+
+		carouselList.current.children[ newIndex ].focus( { preventScroll: true } );
+	}, [ mobileBreakpoint, width ] );
 
 	/**
-	 * On component mount, find all the theme cards.
+	 * When an item is selected, center it.
 	 */
 	useEffect( () => {
-		carouselItems.current = [ ...carouselList.current.querySelectorAll( `.${ namespace }__item` ) ];
-	}, [ namespace ] );
+		scrollToItem( selectedItemIndex );
+	}, [ scrollToItem, selectedItemIndex ] );
 
 	/**
 	 * Respond to user scrolls by setting the new index.
@@ -69,34 +90,57 @@ export function Carousel( {
 
 		const currentContainer = carouselList.current;
 
-		const scrollCallback = () => {
-			const newIndex = Math.floor( currentContainer.scrollLeft / itemWidth );
-			if ( newIndex < items.length ) {
-				setActiveItemIndex( newIndex );
+		const scrollCallback = debounce( () => {
+			if ( ! mounted.current ) {
+				return;
 			}
-		};
+
+			const realItemWidth = currentContainer.scrollWidth / currentContainer.children.length;
+			const newIndex = Math.floor( currentContainer.scrollLeft / realItemWidth ) - ( width > mobileBreakpoint ? 0 : 1 );
+
+			if ( newIndex < items.length ) {
+				setCurrentItemIndex( newIndex );
+			}
+
+			setPrevButtonDisabled( newIndex < 1 );
+			setNextButtonDisabled( newIndex > items.length - 2 );
+		}, 50 );
 		currentContainer.addEventListener( 'scroll', scrollCallback );
 
 		return () => {
 			currentContainer.removeEventListener( 'scroll', scrollCallback );
 		};
-	}, [ items.length, itemWidth, scrollToItem ] );
+	}, [ items.length, itemWidth, mobileBreakpoint, scrollToItem, width ] );
 
 	return (
 		<div className={ namespace }>
 			<div className={ `${ namespace }__container` }>
 				<ul className={ `${ namespace }__carousel` } ref={ carouselList }>
-					{ width > mobileBreakpoint && <li className={ `${ namespace }__item` } /> }
+					<li className={ `${ namespace }__item` } />
 					{ items.map( ( { name, Item } ) => (
-						<li className={ `${ namespace }__item` } key={ `${ namespace }-item-${ name }` }>
+						<li className={ `${ namespace }__item` } key={ `${ namespace }-item-${ name }` } tabIndex={ -1 }>
 							<Item />
 						</li>
 					) ) }
-					{ width > mobileBreakpoint && <li className={ `${ namespace }__item` } /> }
+					<li className={ `${ namespace }__item` } />
 				</ul>
 			</div>
-			<DotNav { ...{ activeItemIndex, items, namespace, scrollToItem } } />
-			<Style gutterWidth={ gutterWidth } itemWidth={ itemWidth } namespace={ namespace } />
+			<DotNav
+				currentItemIndex={ currentItemIndex }
+				items={ items }
+				mobileBreakpoint={ mobileBreakpoint }
+				namespace={ namespace }
+				scrollToItem={ scrollToItem }
+				width={ width }
+				prevButtonDisabled={ prevButtonDisabled }
+				nextButtonDisabled={ nextButtonDisabled }
+				selectedItemIndex={ selectedItemIndex }
+			/>
+			<Style
+				gutterWidth={ gutterWidth }
+				itemWidth={ itemWidth }
+				namespace={ namespace }
+			/>
 		</div>
 	);
 }
@@ -106,6 +150,7 @@ Carousel.propTypes = {
 	itemWidth: PropTypes.number,
 	mobileBreakpoint: PropTypes.number,
 	namespace: PropTypes.string,
+	selectedItemIndex: PropTypes.number,
 };
 
 /**
@@ -126,6 +171,7 @@ function Style( { gutterWidth, itemWidth, namespace } ) {
 	display: flex;
 	overflow-x: scroll;
 	-ms-overflow-style: none;
+	padding: 1rem 0;
 	scrollbar-width: none;
 	scroll-snap-type: x mandatory;
 }
@@ -141,14 +187,20 @@ function Style( { gutterWidth, itemWidth, namespace } ) {
 
 .${ namespace }__item {
 	flex-shrink: 0;
-	scroll-snap-align: start;
+	scroll-snap-align: center;
 	width: ${ itemWidth }px;
+}
+
+.${ namespace }__item:focus,
+.${ namespace }__item:focus > * {
+	outline: 1px dotted #c4c4c4;
+	outline-offset: -2px;
 }
 
 .${ namespace }__nav {
 	display: flex;
 	justify-content: center;
-	padding: 3rem 1.5rem;
+	padding: 1.5rem;
 }
 
 .${ namespace }__nav .components-button.is-primary svg {
@@ -168,7 +220,6 @@ function Style( { gutterWidth, itemWidth, namespace } ) {
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: center;
-	padding: 0 10px;
 }
 
 .${ namespace }__nav .${ namespace }__nav-dot-button {
@@ -177,6 +228,14 @@ function Style( { gutterWidth, itemWidth, namespace } ) {
 	justify-content: center;
 	padding: 0;
 	width: 20px;
+}
+
+.${ namespace }__prev {
+	margin-right: 10px;
+}
+
+.${ namespace }__next {
+	margin-left: 10px;
 }
 
 .${ namespace }__nav-dot-button .${ namespace }__nav-dot {

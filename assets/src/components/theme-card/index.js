@@ -39,7 +39,13 @@ export function ThemeCard( { description, ElementName = 'li', homepage, screensh
 	const id = `theme-card__${ slug }`;
 
 	return (
-		<Selectable className={ `theme-card` } direction="bottom" ElementName={ ElementName } selected={ readerTheme === slug } style={ style }>
+		<Selectable
+			className={ `theme-card ${ disabled ? 'theme-card--disabled' : '' }` }
+			direction="bottom"
+			ElementName={ ElementName }
+			selected={ readerTheme === slug }
+			style={ style }
+		>
 			<label htmlFor={ id } className="theme-card__label">
 				<Phone>
 					<img

@@ -1,37 +1,3 @@
-.reader-theme-carousel {
-	overflow: hidden;
-	margin: 0 auto;
-}
-
-.reader-theme-carousel__carousel::-webkit-scrollbar,
-.reader-theme-carousel__dots::-webkit-scrollbar {
-	display: none;
-}
-
-.reader-theme-carousel__carousel {
-	grid-gap: 60px;
-	display: grid;
-	grid-auto-flow: column;
-	overflow-x: scroll;
-	-ms-overflow-style: none;
-	scrollbar-width: none;
-	scroll-snap-type: x mandatory;
-}
-
-.reader-theme-carousel__carousel li:first-child,
-.reader-theme-carousel__carousel li:last-child {
-	display: none;
-}
-
-.reader-theme-carousel .theme-card {
-	scroll-snap-align: start;
-}
-
-.reader-theme-carousel .theme-card {
-	width: 280px;
-}
-
-
 .choose-reader-theme__unavailable .choose-reader-theme__grid {
 	display: grid;
 	gap: 1rem;

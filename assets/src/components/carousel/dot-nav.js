@@ -16,25 +16,33 @@ import { __ } from '@wordpress/i18n';
  * @param {boolean} props.isCurrent Whether the dot is currently selected.
  * @param {string} props.label Button label.
  * @param {Function} props.onClick Click callback.
+ * @param {boolean} props.isSelected Whether the current item is selected.
  */
-function Dot( { isCurrent, label, onClick } ) {
+function Dot( { isCurrent, isSelected, label, onClick } ) {
 	return (
 		<Button
 			className={
 				`amp-carousel__nav-dot-button ${
-					isCurrent ? 'amp-carousel__nav-dot-button--current' : '' }`
+					isCurrent ? 'amp-carousel__nav-dot-button--current' : '' } ${
+					isSelected ? 'amp-carousel__nav-dot-button--active' : '' }`
 			}
 			onClick={ onClick }
 		>
 			<span className="components-visually-hidden">
 				{ label }
 			</span>
+			{ isCurrent && (
+				<span className="components-visually-hidden">
+					{ __( '(Current slide)', 'amp' ) }
+				</span>
+			) }
 			<span className="amp-carousel__nav-dot" />
 		</Button>
 	);
 }
 Dot.propTypes = {
 	isCurrent: PropTypes.bool.isRequired,
+	isSelected: PropTypes.bool.isRequired,
 	label: PropTypes.string.isRequired,
 	onClick: PropTypes.func.isRequired,
 };
@@ -43,20 +51,26 @@ Dot.propTypes = {
  * Dot navigation component.
  *
  * @param {Object} props Component props.
- * @param {number} props.activeItemIndex The index of the item currently prominent in the view.
+ * @param {number} props.currentItemIndex The index of the item currently prominent in the view.
  * @param {Array} props.items Items in the carousel.
+ * @param {number} props.mobileBreakpoint The breakpoint below which to show a mobile view.
  * @param {Function} props.scrollToItem Callback to scroll to a given item.
  * @param {string} props.namespace CSS namespace.
+ * @param {number} props.width Current window width.
+ * @param {boolean} props.prevButtonDisabled Whether the previous button should be disabled.
+ * @param {boolean} props.nextButtonDisabled Whether the next button should be disabled.
+ * @param {number} props.selectedItemIndex Index of an item to highlight.
  */
-export function DotNav( { activeItemIndex, items, namespace, scrollToItem } ) {
+export function DotNav( { prevButtonDisabled, nextButtonDisabled, currentItemIndex, items, mobileBreakpoint, namespace, scrollToItem, selectedItemIndex, width } ) {
 	return (
 		<div className={ `${ namespace }__nav` }>
 			<Button
 				isPrimary
-				disabled={ 0 === activeItemIndex }
+				disabled={ prevButtonDisabled }
 				onClick={ () => {
-					scrollToItem( activeItemIndex - 1 );
+					scrollToItem( currentItemIndex - 1 );
 				} }
+				className={ `${ namespace }__prev` }
 			>
 				<span className="components-visually-hidden">
 					{ __( 'Previous', 'amp' ) }
@@ -67,25 +81,29 @@ export function DotNav( { activeItemIndex, items, namespace, scrollToItem } ) {
 				</svg>
 
 			</Button>
-			<div className={ `${ namespace }__dots` }>
-				{ items.map( ( { label, name }, itemIndex ) => (
-					<Dot
-						id={ `${ namespace }__${ name }` }
-						key={ `${ namespace }__${ name }` }
-						isCurrent={ activeItemIndex === itemIndex }
-						label={ label }
-						onClick={ () => {
-							scrollToItem( itemIndex );
-						} }
-					/>
-				) ) }
-			</div>
+			{ width > mobileBreakpoint && (
+				<div className={ `${ namespace }__dots` }>
+					{ items.map( ( { label, name }, itemIndex ) => (
+						<Dot
+							id={ `${ namespace }__${ name }` }
+							key={ `${ namespace }__${ name }` }
+							isCurrent={ currentItemIndex === itemIndex }
+							isSelected={ itemIndex === selectedItemIndex }
+							label={ label }
+							onClick={ () => {
+								scrollToItem( itemIndex );
+							} }
+						/>
+					) ) }
+				</div>
+			) }
 			<Button
-				disabled={ activeItemIndex === items.length - 1 }
+				disabled={ nextButtonDisabled }
 				isPrimary
 				onClick={ () => {
-					scrollToItem( activeItemIndex + 1 );
+					scrollToItem( currentItemIndex + 1 );
 				} }
+				className={ `${ namespace }__next` }
 			>
 				<span className="components-visually-hidden">
 					{ __( 'Next', 'amp' ) }
@@ -100,8 +118,13 @@ export function DotNav( { activeItemIndex, items, namespace, scrollToItem } ) {
 	);
 }
 DotNav.propTypes = {
-	activeItemIndex: PropTypes.number.isRequired,
+	currentItemIndex: PropTypes.number.isRequired,
 	items: PropTypes.array.isRequired,
+	mobileBreakpoint: PropTypes.number.isRequired,
 	namespace: PropTypes.string.isRequired,
+	nextButtonDisabled: PropTypes.bool.isRequired,
+	prevButtonDisabled: PropTypes.bool.isRequired,
 	scrollToItem: PropTypes.func.isRequired,
+	selectedItemIndex: PropTypes.number,
+	width: PropTypes.number.isRequired,
 };
