@@ -80,6 +80,9 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 			$gallery_node = isset( $node->parentNode ) && AMP_DOM_Utils::has_class( $node->parentNode, self::$class ) ? $node->parentNode : $node;
 			$attributes   = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $gallery_node );
 
+			$gallery_node->removeAttribute( 'data-amp-carousel' );
+			$gallery_node->removeAttribute( 'data-amp-lightbox' );
+
 			$is_amp_lightbox = isset( $attributes['data-amp-lightbox'] ) && rest_sanitize_boolean( $attributes['data-amp-lightbox'] );
 
 			if ( isset( $attributes['data-amp-carousel'] ) ) {
@@ -92,7 +95,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 
 			$img_elements = $node->getElementsByTagName( 'amp-img' );
 
-			$this->process_gallery_embed( $is_amp_carousel, $is_amp_lightbox, $gallery_node, $img_elements );
+			$this->process_gallery_embed( $is_amp_carousel, $is_amp_lightbox, $node, $img_elements );
 		}
 	}
 

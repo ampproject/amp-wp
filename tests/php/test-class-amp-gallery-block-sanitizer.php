@@ -145,6 +145,11 @@ class AMP_Gallery_Block_Sanitizer_Test extends WP_UnitTestCase {
 				'<ul class="wp-block-gallery" data-amp-lightbox="true" data-amp-carousel="true"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></figure></li></ul>',
 				'<amp-carousel width="600" height="400" type="slides" layout="responsive" lightbox=""><figure class="slide"><amp-img src="http://example.com/img.png" width="600" height="400" layout="fill" object-fit="cover"></amp-img></figure></amp-carousel>',
 			],
+
+			'data_amp_lightbox_carousel_and_link_with_gallery_caption' => [
+				'<figure class="wp-block-gallery" data-amp-lightbox="true" data-amp-carousel="true"><ul class="blocks-gallery-grid"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></figure></li></ul><figcaption>Caption for gallery</figcaption></figure>',
+				'<figure class="wp-block-gallery"><amp-carousel width="600" height="400" type="slides" layout="responsive" lightbox=""><figure class="slide"><amp-img src="http://example.com/img.png" width="600" height="400" layout="fill" object-fit="cover"></amp-img></figure></amp-carousel><figcaption>Caption for gallery</figcaption></figure>',
+			],
 		];
 	}
 
