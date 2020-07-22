@@ -174,10 +174,8 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			// detect and display the caption, but it is also semantically correct as the parent element will be a `figure`.
 			$figcaption_element = AMP_DOM_Utils::create_node( Document::fromNode( $caption_element ), Tag::FIGCAPTION, [] );
 
-			while ( $caption_element->hasChildNodes() ) {
-				$child = $caption_element->childNodes->item( 0 );
-				$child = $caption_element->ownerDocument->importNode( $child, true );
-				$figcaption_element->appendChild( $child );
+			while ( $caption_element->firstChild ) {
+				$figcaption_element->appendChild( $caption_element->firstChild );
 			}
 
 			$caption_element = $figcaption_element;
