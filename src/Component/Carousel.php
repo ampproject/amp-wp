@@ -13,7 +13,6 @@ use AmpProject\AmpWP\Dom\ElementList;
 use AmpProject\Tag;
 use DOMElement;
 use AMP_DOM_Utils;
-use DOMNode;
 
 /**
  * Class Carousel
@@ -84,7 +83,7 @@ final class Carousel {
 
 		foreach ( $this->slides as $slide ) {
 			$slide_node      = $slide instanceof CaptionedSlide ? $slide->get_slide_node() : $slide;
-			$caption_node    = $slide instanceof HasCaption ? $slide->get_caption_node() : null;
+			$caption_element = $slide instanceof HasCaption ? $slide->get_caption_element() : null;
 			$slide_container = AMP_DOM_Utils::create_node(
 				$this->dom,
 				Tag::FIGURE, // This cannot be a <div> because if the gallery is inside of a <p>, then the DOM will break.
@@ -104,24 +103,24 @@ final class Carousel {
 			$slide_container->appendChild( $slide_node );
 
 			// If there's a caption, append it to the slide.
-			if ( $caption_node instanceof DOMNode ) {
+			if ( null !== $caption_element ) {
 				// If the caption is not a <figcaption>, wrap it in one.
-				if ( Tag::FIGCAPTION !== $caption_node->nodeName ) {
-					$caption_content = $caption_node;
-					$caption_node    = AMP_DOM_Utils::create_node( $this->dom, Tag::FIGCAPTION, [] );
-					$caption_node->appendChild( $caption_content );
+				if ( Tag::FIGCAPTION !== $caption_element->nodeName ) {
+					$caption_content = $caption_element;
+					$caption_element = AMP_DOM_Utils::create_node( $this->dom, Tag::FIGCAPTION, [] );
+					$caption_element->appendChild( $caption_content );
 				}
 
 				$caption_shortcode_class = 'wp-caption-text';
 				$caption_block_class     = 'wp-block-image';
-				$has_caption_class       = AMP_DOM_Utils::has_class( $caption_node, $caption_shortcode_class ) || AMP_DOM_Utils::has_class( $caption_node, $caption_block_class );
+				$has_caption_class       = AMP_DOM_Utils::has_class( $caption_element, $caption_shortcode_class ) || AMP_DOM_Utils::has_class( $caption_element, $caption_block_class );
 
-				/** @var DOMElement $caption_node */
-				if ( ! $has_caption_class || ! $caption_node->hasAttribute( Attribute::CLASS_ ) ) {
-					$caption_node->setAttribute( Attribute::CLASS_, 'amp-wp-gallery-caption' );
+				/** @var DOMElement $caption_element */
+				if ( ! $has_caption_class || ! $caption_element->hasAttribute( Attribute::CLASS_ ) ) {
+					$caption_element->setAttribute( Attribute::CLASS_, 'amp-wp-gallery-caption' );
 				}
 
-				$slide_container->appendChild( $caption_node );
+				$slide_container->appendChild( $caption_element );
 			}
 
 			$amp_carousel->appendChild( $slide_container );

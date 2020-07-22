@@ -22,5 +22,5 @@ interface HasCaption {
 	 *
 	 * @return DOMNode
 	 */
-	public function get_caption_node();
+	public function get_caption_element();
 }

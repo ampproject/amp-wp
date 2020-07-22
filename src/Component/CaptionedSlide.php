@@ -7,6 +7,7 @@
 
 namespace AmpProject\AmpWP\Component;
 
+use DOMElement;
 use DOMNode;
 
 /**
@@ -27,28 +28,28 @@ final class CaptionedSlide implements HasCaption {
 	/**
 	 * The caption node.
 	 *
-	 * @var DOMNode
+	 * @var DOMElement
 	 */
-	private $caption_node;
+	private $caption_element;
 
 	/**
 	 * Constructs the class.
 	 *
-	 * @param DOMNode $slide_node   The slide node, possibly an image.
-	 * @param DOMNode $caption_node The caption node.
+	 * @param DOMNode    $slide_node      The slide node, possibly an image.
+	 * @param DOMElement $caption_element The caption element.
 	 */
-	public function __construct( DOMNode $slide_node, DOMNode $caption_node ) {
-		$this->slide_node   = $slide_node;
-		$this->caption_node = $caption_node;
+	public function __construct( DOMNode $slide_node, DOMElement $caption_element ) {
+		$this->slide_node      = $slide_node;
+		$this->caption_element = $caption_element;
 	}
 
 	/**
-	 * Gets the caption node.
+	 * Gets the caption element.
 	 *
-	 * @return DOMNode
+	 * @return DOMElement
 	 */
-	public function get_caption_node() {
-		return $this->caption_node;
+	public function get_caption_element() {
+		return $this->caption_element;
 	}
 
 	/**

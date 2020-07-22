@@ -15,7 +15,7 @@ use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
  *
  * @covers \AmpProject\AmpWP\Component\Carousel
  */
-class Test_Carousel extends \WP_UnitTestCase {
+class Test_Carousel extends WP_UnitTestCase {
 
 	use PrivateAccess;
 
@@ -44,12 +44,6 @@ class Test_Carousel extends \WP_UnitTestCase {
 				$dom,
 				'<amp-carousel width="' . $width . '" height="' . $height . '" type="slides" layout="responsive"><figure class="slide"><amp-img src="' . $src . '" width="' . $width . '" height="' . $height . '" layout="fill" object-fit="cover"></amp-img></figure></amp-carousel>',
 			],
-			'image_with_text_caption' => [
-				( new ElementList() )->add( $image, new DOMText( 'Example caption' ) ),
-				$dom,
-				'<amp-carousel width="' . $width . '" height="' . $height . '" type="slides" layout="responsive"><figure class="slide"><amp-img src="' . $src . '" width="' . $width . '" height="' . $height . '" layout="fill" object-fit="cover"></amp-img><figcaption class="amp-wp-gallery-caption">Example caption</figcaption></figure></amp-carousel>',
-			],
-
 			'image_with_html_caption' => [
 				( new ElementList() )->add( $image, $caption_element ),
 				$dom,
