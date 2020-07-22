@@ -244,6 +244,14 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				],
 			],
 
+			'nested_css_var_in_function'         => [
+				'<style>.opacity3 { color: rgba(0, 0, 255, var(--opacity)); }</style><p class="opacity3"></p>',
+				'<p class="opacity3"></p>',
+				[
+					'.opacity3{color:rgba(0,0,255,var(--opacity))}',
+				],
+			],
+
 			'multi_selector_in_not_pseudo_class'         => [
 				'<style>.widget:not(.widget_text,.jetpack_widget_social_icons[title="a,b"]) ul { color:red; }</style><div class="widget"><ul></ul></div>',
 				'<div class="widget"><ul></ul></div>',
