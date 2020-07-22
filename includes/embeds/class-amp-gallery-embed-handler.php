@@ -103,8 +103,8 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			}
 
 			return preg_replace(
-				'/(?=\sclass=[\'"])/',
-				implode( ' ', $data_attrs ) . ' ',
+				'/(?<=<div\b)/',
+				' ' . implode( ' ', $data_attrs ) . ' ',
 				$style,
 				1
 			);
