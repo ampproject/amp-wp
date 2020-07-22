@@ -31,6 +31,7 @@ import { Loading } from '../components/loading';
 import { UnsavedChangesWarning } from '../components/unsaved-changes-warning';
 import { AMPNotice, NOTICE_TYPE_ERROR } from '../components/amp-notice';
 import { ErrorContextProvider, ErrorContext } from '../components/error-context-provider';
+import { WindowContextProvider } from '../components/window-context-provider';
 import { Welcome } from './welcome';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
@@ -56,7 +57,9 @@ function Providers( { children } ) {
 					updatesNonce={ UPDATES_NONCE }
 					wpAjaxUrl={ wpAjaxUrl }
 				>
-					{ children }
+					<WindowContextProvider window={ global || window }>
+						{ children }
+					</WindowContextProvider>
 				</ReaderThemesContextProvider>
 			</OptionsContextProvider>
 		</SiteSettingsProvider>

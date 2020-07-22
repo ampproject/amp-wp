@@ -30,15 +30,16 @@ import './style.css';
  * @param {string} props.name Theme name.
  * @param {boolean} props.disabled Whether the theme is not automatically installable in the current environment.
  * @param {Object} props.style Style object to pass to the Selectable component.
+ * @param {string} props.ElementName Name for the wrapper element.
  */
-export function ThemeCard( { description, homepage, screenshotUrl, slug, name, disabled, style } ) {
+export function ThemeCard( { description, ElementName = 'li', homepage, screenshotUrl, slug, name, disabled, style } ) {
 	const { editedOptions, updateOptions } = useContext( Options );
 	const { reader_theme: readerTheme } = editedOptions;
 
 	const id = `theme-card__${ slug }`;
 
 	return (
-		<Selectable className={ `theme-card` } direction="bottom" ElementName="li" selected={ readerTheme === slug } style={ style }>
+		<Selectable className={ `theme-card` } direction="bottom" ElementName={ ElementName } selected={ readerTheme === slug } style={ style }>
 			<label htmlFor={ id } className="theme-card__label">
 				<Phone>
 					<img
@@ -82,6 +83,7 @@ export function ThemeCard( { description, homepage, screenshotUrl, slug, name, d
 
 ThemeCard.propTypes = {
 	description: PropTypes.string.isRequired,
+	ElementName: PropTypes.string,
 	homepage: PropTypes.string.isRequired,
 	screenshotUrl: PropTypes.string.isRequired,
 	slug: PropTypes.string.isRequired,

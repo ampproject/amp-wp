@@ -18,7 +18,7 @@ import { Loading } from '../loading';
 import './style.css';
 import { AMPNotice } from '../amp-notice';
 import { ThemeCard } from '../theme-card';
-import { Carousel } from './carousel';
+import { ReaderThemeCarousel as CarouselWrapper } from './reader-theme-carousel';
 
 /**
  * Component for selecting a reader theme.
@@ -92,7 +92,7 @@ export function ReaderThemeCarousel( { hideCurrentlyActiveTheme = false } ) {
 			) }
 			<div>
 				{ 0 < availableThemes.length && (
-					<Carousel
+					<CarouselWrapper
 						availableThemes={ availableThemes }
 						currentTheme={ currentTheme }
 						hideCurrentlyActiveTheme={ hideCurrentlyActiveTheme }

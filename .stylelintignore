@@ -5,3 +5,4 @@
 /vendor
 /lib/optimizer
 /lib/common
+*.js
