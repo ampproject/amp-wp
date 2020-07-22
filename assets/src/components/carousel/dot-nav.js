@@ -14,9 +14,9 @@ import { __ } from '@wordpress/i18n';
  *
  * @param {Object} props Component props.
  * @param {boolean} props.isCurrent Whether the dot is currently selected.
+ * @param {boolean} props.isSelected Whether the current item is selected.
  * @param {string} props.label Button label.
  * @param {Function} props.onClick Click callback.
- * @param {boolean} props.isSelected Whether the current item is selected.
  */
 function Dot( { isCurrent, isSelected, label, onClick } ) {
 	return (
@@ -34,6 +34,11 @@ function Dot( { isCurrent, isSelected, label, onClick } ) {
 			{ isCurrent && (
 				<span className="components-visually-hidden">
 					{ __( '(Current slide)', 'amp' ) }
+				</span>
+			) }
+			{ isSelected && (
+				<span className="components-visually-hidden">
+					{ __( '(Selected item)', 'amp' ) }
 				</span>
 			) }
 			<span className="amp-carousel__nav-dot" />
@@ -54,14 +59,24 @@ Dot.propTypes = {
  * @param {number} props.currentItemIndex The index of the item currently prominent in the view.
  * @param {Array} props.items Items in the carousel.
  * @param {number} props.mobileBreakpoint The breakpoint below which to show a mobile view.
- * @param {Function} props.scrollToItem Callback to scroll to a given item.
  * @param {string} props.namespace CSS namespace.
- * @param {number} props.width Current window width.
- * @param {boolean} props.prevButtonDisabled Whether the previous button should be disabled.
  * @param {boolean} props.nextButtonDisabled Whether the next button should be disabled.
+ * @param {boolean} props.prevButtonDisabled Whether the previous button should be disabled.
+ * @param {Function} props.scrollToItem Callback to scroll to a given item.
  * @param {number} props.selectedItemIndex Index of an item to highlight.
+ * @param {number} props.width Current window width.
  */
-export function DotNav( { prevButtonDisabled, nextButtonDisabled, currentItemIndex, items, mobileBreakpoint, namespace, scrollToItem, selectedItemIndex, width } ) {
+export function DotNav( {
+	currentItemIndex,
+	items,
+	mobileBreakpoint,
+	namespace,
+	nextButtonDisabled,
+	prevButtonDisabled,
+	scrollToItem,
+	selectedItemIndex,
+	width,
+} ) {
 	return (
 		<div className={ `${ namespace }__nav` }>
 			<Button

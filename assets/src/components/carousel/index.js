@@ -130,11 +130,11 @@ export function Carousel( {
 				items={ items }
 				mobileBreakpoint={ mobileBreakpoint }
 				namespace={ namespace }
-				scrollToItem={ scrollToItem }
-				width={ width }
-				prevButtonDisabled={ prevButtonDisabled }
 				nextButtonDisabled={ nextButtonDisabled }
+				prevButtonDisabled={ prevButtonDisabled }
+				scrollToItem={ scrollToItem }
 				selectedItemIndex={ selectedItemIndex }
+				width={ width }
 			/>
 			<Style
 				gutterWidth={ gutterWidth }
