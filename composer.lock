@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cffc38bfac6ea02a4579ea9a358a8023",
+    "content-hash": "5563f44cda3f8ccd2b50fba64b8eef62",
     "packages": [
         {
             "name": "ampproject/common",
@@ -12,7 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "lib/common",
-                "reference": "4ab7dd96419d90b7333163d844bebafd8e1e72ad"
+                "reference": "ce447047ea69ea2d06e54ac7607a749511cec51c"
             },
             "require": {
                 "ext-dom": "*",
@@ -38,7 +38,7 @@
                 },
                 "downloads": {
                     "phpstan": {
-                        "url": "https://github.com/phpstan/phpstan/raw/master/phpstan.phar",
+                        "url": "https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar",
                         "path": "vendor/bin/phpstan",
                         "type": "phar"
                     }
@@ -82,8 +82,7 @@
             ],
             "description": "PHP library with common base functionality for AMP integrations.",
             "transport-options": {
-                "symlink": true,
-                "relative": true
+                "symlink": true
             }
         },
         {
@@ -92,7 +91,7 @@
             "dist": {
                 "type": "path",
                 "url": "lib/optimizer",
-                "reference": "1cf044ad9af973a2be714326699c35d3dca3d11b"
+                "reference": "f370dec309fc20ff93aaa67a495007e982105065"
             },
             "require": {
                 "ampproject/common": "^1",
@@ -119,7 +118,7 @@
                 },
                 "downloads": {
                     "phpstan": {
-                        "url": "https://github.com/phpstan/phpstan/raw/master/phpstan.phar",
+                        "url": "https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar",
                         "path": "vendor/bin/phpstan",
                         "type": "phar"
                     }
@@ -170,8 +169,7 @@
             ],
             "description": "PHP library for optimizing AMP pages.",
             "transport-options": {
-                "symlink": true,
-                "relative": true
+                "symlink": true
             }
         },
         {
@@ -332,12 +330,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sabberworm/PHP-CSS-Parser.git",
-                "reference": "bc6ec74"
+                "reference": "bfdd976"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sabberworm/PHP-CSS-Parser/zipball/bc6ec74",
-                "reference": "bc6ec74",
+                "url": "https://api.github.com/repos/sabberworm/PHP-CSS-Parser/zipball/bfdd976",
+                "reference": "bfdd976",
                 "shasum": ""
             },
             "require": {
@@ -348,6 +346,12 @@
                 "phpunit/phpunit": "~4.8"
             },
             "type": "library",
+            "extra": {
+                "patches_applied": {
+                    "Validate name-start code points for identifier <https://github.com/sabberworm/PHP-CSS-Parser/pull/185>": "patches/php-css-parser-pull-185.patch",
+                    "Fix parsing CSS selectors which contain commas <https://github.com/westonruter/PHP-CSS-Parser/pull/1>": "patches/php-css-parser-commit-10a2501.patch"
+                }
+            },
             "autoload": {
                 "psr-0": {
                     "Sabberworm\\CSS\\": "lib/"
@@ -368,7 +372,7 @@
                 "parser",
                 "stylesheet"
             ],
-            "time": "2020-03-18T15:29:59+00:00"
+            "time": "2020-07-21T18:39:46+00:00"
         },
         {
             "name": "willwashburn/stream",
@@ -788,12 +792,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "881b9e4a8de3186c93904230bdf6344b685fe6a5"
+                "reference": "9f386dba391018e90a5f1e51abeffc6bf27583db"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/881b9e4a8de3186c93904230bdf6344b685fe6a5",
-                "reference": "881b9e4a8de3186c93904230bdf6344b685fe6a5",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/9f386dba391018e90a5f1e51abeffc6bf27583db",
+                "reference": "9f386dba391018e90a5f1e51abeffc6bf27583db",
                 "shasum": ""
             },
             "conflict": {
@@ -930,8 +934,8 @@
                 "silverstripe/cms": "<4.3.6|>=4.4,<4.4.4",
                 "silverstripe/comments": ">=1.3,<1.9.99|>=2,<2.9.99|>=3,<3.1.1",
                 "silverstripe/forum": "<=0.6.1|>=0.7,<=0.7.3",
-                "silverstripe/framework": "<4.4.5|>=4.5,<4.5.2",
-                "silverstripe/graphql": ">=2,<2.0.5|>=3,<3.1.2",
+                "silverstripe/framework": "<4.4.7|>=4.5,<4.5.4",
+                "silverstripe/graphql": ">=2,<2.0.5|>=3,<3.1.2|>=3.2,<3.2.4",
                 "silverstripe/registry": ">=2.1,<2.1.2|>=2.2,<2.2.1",
                 "silverstripe/restfulserver": ">=1,<1.0.9|>=2,<2.0.4",
                 "silverstripe/subsites": ">=2,<2.1.1",
@@ -1067,7 +1071,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2020-07-11T19:04:25+00:00"
+            "time": "2020-07-16T05:17:29+00:00"
         },
         {
             "name": "sirbrillig/phpcs-variable-analysis",
