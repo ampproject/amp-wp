@@ -6,6 +6,7 @@ use AmpProject\Amp;
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
 use AmpProject\Optimizer\Configuration\RewriteAmpUrlsConfiguration;
+use AmpProject\Optimizer\Error\CannotAdaptDocumentForSelfHosting;
 use AmpProject\Optimizer\ErrorCollection;
 use AmpProject\Optimizer\Exception\InvalidConfiguration;
 use AmpProject\Optimizer\Transformer;
@@ -95,7 +96,7 @@ final class RewriteAmpUrls implements Transformer
             );
         }
 
-        $this->adaptForSelfHosting($document, $host);
+        $this->adaptForSelfHosting($document, $host, $errors);
     }
 
     /**
@@ -239,9 +240,16 @@ final class RewriteAmpUrls implements Transformer
         return $preloadNode;
     }
 
-    private function adaptForSelfHosting(Document $document, $host)
+    /**
+     * Add meta tags as needed to adapt for self-hosting the AMP runtime.
+     *
+     * @param Document        $document Document to add the meta tags to.
+     * @param string          $host     Host URL to use.
+     * @param ErrorCollection $errors   Error collection to add potential errors to.
+     */
+    private function adaptForSelfHosting(Document $document, $host, $errors)
     {
-        // runtime-host and amp-geo-api meta tags should appear before the first script
+        // runtime-host and amp-geo-api meta tags should appear before the first script.
         if (
             ! $this->usesAmpCacheUrl($host) && ! $this->configuration->get(
                 RewriteAmpUrlsConfiguration::LTS
@@ -252,7 +260,7 @@ final class RewriteAmpUrls implements Transformer
                 $origin   = "{$urlParts['scheme']}://{$urlParts['host']}";
                 $this->addMeta($document, 'runtime-host', $origin);
             } catch (Exception $exception) {
-                // TODO: Log issue.
+                $errors->add(CannotAdaptDocumentForSelfHosting::fromException($exception));
             }
         }
         if (
