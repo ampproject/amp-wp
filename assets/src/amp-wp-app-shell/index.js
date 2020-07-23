@@ -125,8 +125,7 @@ function isHeaderVisible() {
  */
 function fetchShadowDocResponse( url ) {
 	const ampUrl = new URL( url );
-	const pathSuffix = '_' + ampAppShell.componentQueryVar + '_inner';
-	ampUrl.pathname = ampUrl.pathname + pathSuffix;
+	ampUrl.searchParams.set( ampAppShell.componentQueryVar, 'inner' );
 
 	return fetch( ampUrl.toString(), {
 		method: 'GET',
