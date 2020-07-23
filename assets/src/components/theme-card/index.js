@@ -56,6 +56,11 @@ export function ThemeCard( { description, ElementName = 'li', homepage, screensh
 						loading="lazy"
 						decoding="async"
 					/>
+					{ disabled && (
+						<div className="theme-card__disabled-overlay">
+							{ __( 'Unavailable', 'amp' ) }
+						</div>
+					) }
 				</Phone>
 				<div className="theme-card__label-header">
 					<input

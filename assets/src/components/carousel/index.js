@@ -52,7 +52,7 @@ export function Carousel( {
 	const setCurrentItem = useCallback( ( newCurrentItem, scrollToItem = true ) => {
 		originalSetCurrentItem( newCurrentItem );
 
-		if ( scrollToItem ) {
+		if ( newCurrentItem && scrollToItem ) {
 			const left = newCurrentItem.offsetLeft - (
 				width > mobileBreakpoint
 					? ( newCurrentItem.offsetWidth + gutterWidth ) // Center the item on desktop. If this isn't exact, the scroll snap CSS properties will fix it.
