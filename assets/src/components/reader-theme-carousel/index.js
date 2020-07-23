@@ -86,6 +86,8 @@ export function ReaderThemeCarousel( { hideCurrentlyActiveTheme = false } ) {
 							ElementName="div"
 							screenshotUrl={ theme.screenshot_url }
 							{ ...theme }
+							aria-label={ theme.name }
+							id={ `theme-card-${ theme.slug }` }
 						/>
 					),
 				} ) ),
@@ -121,7 +123,7 @@ export function ReaderThemeCarousel( { hideCurrentlyActiveTheme = false } ) {
 				{ 0 < shownThemes.length && (
 					<Carousel
 						items={ carouselItems }
-						selectedItemIndex={ shownThemes.findIndex( ( { name } ) => name === selectedTheme.name ) }
+						highlightedItemIndex={ shownThemes.findIndex( ( { name } ) => name === selectedTheme.name ) }
 					/>
 				) }
 

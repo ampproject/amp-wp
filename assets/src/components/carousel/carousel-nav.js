@@ -56,34 +56,28 @@ Dot.propTypes = {
  * Dot navigation component.
  *
  * @param {Object} props Component props.
- * @param {number} props.currentItemIndex The index of the item currently prominent in the view.
+ * @param {number} props.currentItem The current item.
  * @param {Array} props.items Items in the carousel.
- * @param {number} props.mobileBreakpoint The breakpoint below which to show a mobile view.
  * @param {string} props.namespace CSS namespace.
- * @param {boolean} props.nextButtonDisabled Whether the next button should be disabled.
- * @param {boolean} props.prevButtonDisabled Whether the previous button should be disabled.
- * @param {Function} props.scrollToItem Callback to scroll to a given item.
- * @param {number} props.selectedItemIndex Index of an item to highlight.
- * @param {number} props.width Current window width.
+ * @param {Function} props.setCurrentItem Sets an item as the current item.
+ * @param {number} props.highlightedItemIndex Index of an item to highlight.
+ * @param {boolean} props.showDots Whether to show the dot navigation.
  */
-export function DotNav( {
-	currentItemIndex,
+export function CarouselNav( {
+	currentItem,
 	items,
-	mobileBreakpoint,
 	namespace,
-	nextButtonDisabled,
-	prevButtonDisabled,
-	scrollToItem,
-	selectedItemIndex,
-	width,
+	setCurrentItem,
+	highlightedItemIndex,
+	showDots,
 } ) {
 	return (
 		<div className={ `${ namespace }__nav` }>
 			<Button
 				isPrimary
-				disabled={ prevButtonDisabled }
+				disabled={ null === currentItem.previousElementSibling }
 				onClick={ () => {
-					scrollToItem( currentItemIndex - 1 );
+					setCurrentItem( currentItem.previousElementSibling );
 				} }
 				className={ `${ namespace }__prev` }
 			>
@@ -96,27 +90,26 @@ export function DotNav( {
 				</svg>
 
 			</Button>
-			{ width > mobileBreakpoint && (
+			{ showDots && (
 				<div className={ `${ namespace }__dots` }>
-					{ items.map( ( { label, name }, itemIndex ) => (
+					{ [ ...items ].map( ( item, itemIndex ) => (
 						<Dot
-							id={ `${ namespace }__${ name }` }
-							key={ `${ namespace }__${ name }` }
-							isCurrent={ currentItemIndex === itemIndex }
-							isSelected={ itemIndex === selectedItemIndex }
-							label={ label }
+							key={ `${ namespace }__${ item.id }-dot` }
+							isCurrent={ item === currentItem }
+							isSelected={ itemIndex === highlightedItemIndex }
+							label={ item.getAttribute( 'data-label' ) }
 							onClick={ () => {
-								scrollToItem( itemIndex );
+								setCurrentItem( item );
 							} }
 						/>
 					) ) }
 				</div>
 			) }
 			<Button
-				disabled={ nextButtonDisabled }
 				isPrimary
+				disabled={ null === currentItem.nextElementSibling }
 				onClick={ () => {
-					scrollToItem( currentItemIndex + 1 );
+					setCurrentItem( currentItem.nextElementSibling );
 				} }
 				className={ `${ namespace }__next` }
 			>
@@ -132,14 +125,11 @@ export function DotNav( {
 		</div>
 	);
 }
-DotNav.propTypes = {
-	currentItemIndex: PropTypes.number.isRequired,
-	items: PropTypes.array.isRequired,
-	mobileBreakpoint: PropTypes.number.isRequired,
+CarouselNav.propTypes = {
+	currentItem: PropTypes.object.isRequired,
+	items: PropTypes.object.isRequired,
 	namespace: PropTypes.string.isRequired,
-	nextButtonDisabled: PropTypes.bool.isRequired,
-	prevButtonDisabled: PropTypes.bool.isRequired,
-	scrollToItem: PropTypes.func.isRequired,
-	selectedItemIndex: PropTypes.number,
-	width: PropTypes.number.isRequired,
+	highlightedItemIndex: PropTypes.number.isRequired,
+	setCurrentItem: PropTypes.func.isRequired,
+	showDots: PropTypes.bool.isRequired,
 };

@@ -2,18 +2,17 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { debounce } from 'lodash';
 
 /**
  * WordPress dependencies
  */
-import { useRef, useEffect, useState, useCallback } from '@wordpress/element';
+import { useRef, useEffect, useState, useCallback, useLayoutEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { useWindowWidth } from '../../utils/use-window-width';
-import { DotNav } from './dot-nav';
+import { CarouselNav } from './carousel-nav';
 
 const DEFAULT_GUTTER_WIDTH = 60;
 const DEFAULT_ITEM_WIDTH = 268;
@@ -28,7 +27,7 @@ const DEFAULT_MOBILE_BREAKPOINT = 783;
  * @param {number} props.itemWidth The width of each item.
  * @param {number} props.mobileBreakpoint Breakpoint below which to render the mobile version.
  * @param {string} props.namespace CSS namespace.
- * @param {number} props.selectedItemIndex Index of an item to force into focus.
+ * @param {number} props.highlightedItemIndex Index of an item to force into focus.
  */
 export function Carousel( {
 	gutterWidth = DEFAULT_GUTTER_WIDTH,
@@ -36,106 +35,88 @@ export function Carousel( {
 	itemWidth = DEFAULT_ITEM_WIDTH,
 	mobileBreakpoint = DEFAULT_MOBILE_BREAKPOINT,
 	namespace = 'amp-carousel',
-	selectedItemIndex = 0,
+	highlightedItemIndex = 0,
 } ) {
 	const width = useWindowWidth();
-	const [ currentItemIndex, setCurrentItemIndex ] = useState( selectedItemIndex );
-	const [ prevButtonDisabled, setPrevButtonDisabled ] = useState( true );
-	const [ nextButtonDisabled, setNextButtonDisabled ] = useState( true );
+	const [ currentItem, originalSetCurrentItem ] = useState( null );
 
-	const carouselList = useRef();
-	const mounted = useRef( false );
+	const carouselContainerRef = useRef();
+	const carouselListRef = useRef();
+
+	const setCurrentItem = useCallback( ( newCurrentItem, scrollToItem = true ) => {
+		originalSetCurrentItem( newCurrentItem );
+
+		if ( scrollToItem ) {
+			const left = newCurrentItem.offsetLeft - (
+				width > mobileBreakpoint
+					? ( newCurrentItem.offsetWidth + gutterWidth ) // Center the item on desktop. If this isn't exact, the scroll snap CSS properties will fix it.
+					: 0
+			);
+			carouselListRef.current.scrollTo( { top: 0, left, behavior: 'smooth' } );
+		}
+	}, [ gutterWidth, mobileBreakpoint, width ] );
 
 	/**
-	 * Set up ref to track whether the component is mounted, as there is a debounced callback in an effect below.
+	 * Center the highlighted item. On initial load, this will center the previously selected theme. Subsequently,
+	 * it will center a theme when the user clicks its label (e.g., if they click a theme that's off to the side).
 	 */
 	useEffect( () => {
-		mounted.current = true;
-		return () => {
-			mounted.current = false;
-		};
-	}, [] );
+		const item = carouselListRef.current.children.item( highlightedItemIndex );
+
+		setCurrentItem( item );
+	}, [ highlightedItemIndex, setCurrentItem ] );
 
 	/**
-	 * Scrolls to the carousel item at the given index.
+	 * Set up an intersection observer to set an item as active as it crosses the center of the view.
 	 */
-	const scrollToItem = useCallback( ( newIndex ) => {
-		if ( ! ( newIndex in carouselList.current.children ) ) {
-			return;
-		}
+	useLayoutEffect( () => {
+		const observerCallback = ( [ { isIntersecting, target } ] ) => {
+			if ( isIntersecting ) {
+				setCurrentItem( target, false );
+			}
+		};
 
-		carouselList.current.scrollTo( {
-			top: 0,
-			left: carouselList.current.children[ newIndex + ( width > mobileBreakpoint ? 0 : 1 ) ].offsetLeft,
-			behavior: 'smooth',
+		const observer = new global.IntersectionObserver( observerCallback, {
+			root: carouselContainerRef.current,
+			rootMargin: '0px -50%',
 		} );
 
-		carouselList.current.children[ newIndex ].focus( { preventScroll: true } );
-	}, [ mobileBreakpoint, width ] );
-
-	/**
-	 * When an item is selected, center it.
-	 */
-	useEffect( () => {
-		scrollToItem( selectedItemIndex );
-	}, [ scrollToItem, selectedItemIndex ] );
-
-	/**
-	 * Respond to user scrolls by setting the new index.
-	 */
-	useEffect( () => {
-		if ( ! carouselList.current ) {
-			return () => null;
-		}
-
-		const currentContainer = carouselList.current;
-
-		const scrollCallback = debounce( () => {
-			if ( ! mounted.current ) {
-				return;
-			}
-
-			const realItemWidth = currentContainer.scrollWidth / currentContainer.children.length;
-			const newIndex = Math.floor( currentContainer.scrollLeft / realItemWidth ) - ( width > mobileBreakpoint ? 0 : 1 );
-
-			if ( newIndex < items.length ) {
-				setCurrentItemIndex( newIndex );
-			}
-
-			setPrevButtonDisabled( newIndex < 1 );
-			setNextButtonDisabled( newIndex > items.length - 2 );
-		}, 50 );
-		currentContainer.addEventListener( 'scroll', scrollCallback );
+		[ ...carouselListRef.current.children ].forEach( ( element ) => {
+			observer.observe( element );
+		} );
 
 		return () => {
-			currentContainer.removeEventListener( 'scroll', scrollCallback );
+			observer.disconnect();
 		};
-	}, [ items.length, itemWidth, mobileBreakpoint, scrollToItem, width ] );
+	}, [ currentItem, setCurrentItem ] );
 
 	return (
 		<div className={ namespace }>
-			<div className={ `${ namespace }__container` }>
-				<ul className={ `${ namespace }__carousel` } ref={ carouselList }>
-					<li className={ `${ namespace }__item` } />
-					{ items.map( ( { name, Item } ) => (
-						<li className={ `${ namespace }__item` } key={ `${ namespace }-item-${ name }` } tabIndex={ -1 }>
+			<div className={ `${ namespace }__container` } ref={ carouselContainerRef }>
+				<ul className={ `${ namespace }__carousel` } ref={ carouselListRef }>
+					{ items.map( ( { label, name, Item } ) => (
+						<li
+							className={ `${ namespace }__item` }
+							data-label={ label }
+							id={ `${ namespace }-item-${ name }` }
+							key={ `${ namespace }-item-${ name }` }
+							tabIndex={ -1 }
+						>
 							<Item />
 						</li>
 					) ) }
-					<li className={ `${ namespace }__item` } />
 				</ul>
 			</div>
-			<DotNav
-				currentItemIndex={ currentItemIndex }
-				items={ items }
-				mobileBreakpoint={ mobileBreakpoint }
-				namespace={ namespace }
-				nextButtonDisabled={ nextButtonDisabled }
-				prevButtonDisabled={ prevButtonDisabled }
-				scrollToItem={ scrollToItem }
-				selectedItemIndex={ selectedItemIndex }
-				width={ width }
-			/>
+			{ currentItem && (
+				<CarouselNav
+					currentItem={ currentItem }
+					items={ carouselListRef?.current?.children }
+					namespace={ namespace }
+					setCurrentItem={ setCurrentItem }
+					highlightedItemIndex={ highlightedItemIndex }
+					showDots={ mobileBreakpoint < width }
+				/>
+			) }
 			<Style
 				gutterWidth={ gutterWidth }
 				itemWidth={ itemWidth }
@@ -150,7 +131,7 @@ Carousel.propTypes = {
 	itemWidth: PropTypes.number,
 	mobileBreakpoint: PropTypes.number,
 	namespace: PropTypes.string,
-	selectedItemIndex: PropTypes.number,
+	highlightedItemIndex: PropTypes.number,
 };
 
 /**
@@ -168,7 +149,9 @@ function Style( { gutterWidth, itemWidth, namespace } ) {
 				`
 
 .${ namespace }__carousel {
-	display: flex;
+	display: grid;
+	gap: ${ gutterWidth }px;
+	grid-auto-flow: column;
 	overflow-x: scroll;
 	-ms-overflow-style: none;
 	padding: 1rem 0;
@@ -180,9 +163,11 @@ function Style( { gutterWidth, itemWidth, namespace } ) {
 	display: none;
 }
 
-.${ namespace }__carousel > li {
-	margin-left: ${ gutterWidth / 2 }px;
-	margin-right: ${ gutterWidth / 2 }px;
+.${ namespace }__carousel::before,
+.${ namespace }__carousel::after {
+	content: '';
+	display: block;
+	width: ${ itemWidth }px;
 }
 
 .${ namespace }__item {
@@ -193,7 +178,7 @@ function Style( { gutterWidth, itemWidth, namespace } ) {
 
 .${ namespace }__item:focus,
 .${ namespace }__item:focus > * {
-	outline: 1px dotted #c4c4c4;
+	outline: 1px dotted var(--amp-settings-color-brand);
 	outline-offset: -2px;
 }
 
