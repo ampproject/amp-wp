@@ -87,8 +87,8 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			];
 			foreach ( $prop_attribute_mapping as $prop => $attr ) {
 				if ( isset( $block['attrs'][ $prop ] ) ) {
-					$property_value       = rest_sanitize_boolean( $block['attrs'][ $prop ] );
-					$injected_attributes .= sprintf( ' %s="%s"', $attr, esc_attr( wp_json_encode( $property_value ) ) );
+					$property_value       = $block['attrs'][ $prop ];
+					$injected_attributes .= sprintf( ' %s="%s"', $attr, esc_attr( $property_value ) );
 				}
 			}
 			if ( $injected_attributes ) {
