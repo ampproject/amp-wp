@@ -122,15 +122,19 @@ final class RewriteAmpUrls implements Transformer
                     $preloadNodes[] = $this->createPreload($document, $node->getAttribute(Attribute::SRC), Tag::SCRIPT);
                 }
             } elseif ($node->tagName === Tag::LINK) {
-                if ($node->getAttribute(Attribute::REL) === Attribute::REL_STYLESHEET
-                    && $this->usesAmpCacheUrl($node->getAttribute(Attribute::HREF))) {
+                if (
+                    $node->getAttribute(Attribute::REL) === Attribute::REL_STYLESHEET
+                    && $this->usesAmpCacheUrl($node->getAttribute(Attribute::HREF))
+                ) {
                     $node->setAttribute(
                         Attribute::HREF,
                         $this->replaceUrl($node->getAttribute(Attribute::HREF), $host)
                     );
                     $preloadNodes[] = $this->createPreload($document, $node->getAttribute(Attribute::HREF), Tag::STYLE);
-                } elseif ($node->getAttribute(Attribute::REL) === Attribute::REL_PRELOAD
-                          && $this->usesAmpCacheUrl($node->getAttribute(Attribute::HREF))) {
+                } elseif (
+                    $node->getAttribute(Attribute::REL) === Attribute::REL_PRELOAD
+                    && $this->usesAmpCacheUrl($node->getAttribute(Attribute::HREF))
+                ) {
                     if ($usesEsm && $this->shouldPreload($node->getAttribute(Attribute::HREF))) {
                         // Only preload .mjs runtime in ESM mode.
                         $node->parentNode->removeChild($node);
@@ -232,9 +236,11 @@ final class RewriteAmpUrls implements Transformer
     private function adaptForSelfHosting(Document $document, $host)
     {
         // runtime-host and amp-geo-api meta tags should appear before the first script
-        if (! $this->usesAmpCacheUrl($host) && ! $this->configuration->get(
+        if (
+            ! $this->usesAmpCacheUrl($host) && ! $this->configuration->get(
                 Configuration\RewriteAmpUrlsConfiguration::LTS
-            )) {
+            )
+        ) {
             try {
                 $urlParts = parse_url($host);
                 $origin   = "{$urlParts['scheme']}://{$urlParts['host']}";
@@ -243,13 +249,15 @@ final class RewriteAmpUrls implements Transformer
                 // TODO: Log issue.
             }
         }
-        if (! empty(
-            $this->configuration->get(
-                Configuration\RewriteAmpUrlsConfiguration::GEO_API_URL
-            )
+        if (
+            ! empty(
+                $this->configuration->get(
+                    Configuration\RewriteAmpUrlsConfiguration::GEO_API_URL
+                )
             ) && ! $this->configuration->get(
                 Configuration\RewriteAmpUrlsConfiguration::LTS
-            )) {
+            )
+        ) {
             $this->addMeta(
                 $document,
                 'amp-geo-api',
