@@ -945,6 +945,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'cancel_comment_reply_link', [ self::TESTED_CLASS, 'filter_cancel_comment_reply_link' ] ) );
 		$this->assertEquals( 100, has_action( 'comment_form', [ self::TESTED_CLASS, 'amend_comment_form' ] ) );
 		$this->assertEquals( 10, has_filter( 'get_comments_link', [ self::TESTED_CLASS, 'amend_comments_link' ] ) );
+		$this->assertEquals( 10, has_filter( 'respond_link', [ self::TESTED_CLASS, 'amend_comments_link' ] ) );
 		$this->assertFalse( has_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'get_header_image_tag', [ self::TESTED_CLASS, 'amend_header_image_with_video_header' ] ) );
 	}

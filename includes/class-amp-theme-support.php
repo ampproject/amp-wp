@@ -993,6 +993,7 @@ class AMP_Theme_Support {
 		add_action( 'comment_form', [ __CLASS__, 'amend_comment_form' ], 100 );
 		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' );
 		add_filter( 'get_comments_link', [ __CLASS__, 'amend_comments_link' ] );
+		add_filter( 'respond_link', [ __CLASS__, 'amend_comments_link' ] );
 		add_filter( 'wp_kses_allowed_html', [ __CLASS__, 'include_layout_in_wp_kses_allowed_html' ], 10 );
 		add_filter( 'get_header_image_tag', [ __CLASS__, 'amend_header_image_with_video_header' ], PHP_INT_MAX );
 		add_action(
@@ -1116,9 +1117,12 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Amend the comments link to go to non-AMP page when in legacy Reader mode.
+	 * Amend the comments/redpond links to go to non-AMP page when in legacy Reader mode.
 	 *
-	 * @param string $comments_link Post comments permalink with '#comments' appended.
+	 * @see get_comments_link()
+	 * @see comments_popup_link()
+	 *
+	 * @param string $comments_link Post comments permalink with '#comments' or '#respond' appended.
 	 * @return string The link to the comments.
 	 */
 	public static function amend_comments_link( $comments_link ) {
