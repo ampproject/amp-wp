@@ -34,9 +34,9 @@ final class InvalidConfigurationKey extends OutOfBoundsException implements AmpO
      */
     public static function fromTransformerKey($transformer, $key)
     {
-        $transformerParts = explode('\\', $transformer);
-        $transformer      = array_pop($transformerParts);
-        $message          = "The provided configuration key '{$key}' is not valid for the transformer '{$transformer}'.";
+        $parts       = explode('\\', $transformer);
+        $transformer = array_pop($parts);
+        $message     = "The provided configuration key '{$key}' is not valid for the transformer '{$transformer}'.";
 
         return new self($message);
     }

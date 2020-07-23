@@ -51,7 +51,10 @@ final class FilesystemRemoteGetRequest implements RemoteGetRequest
         }
 
         if (! file_exists($this->argumentMap[$url]) || ! is_readable($this->argumentMap[$url])) {
-            throw new LogicException("Trying to get a remote request from the filesystem for a file that is not accessible: {$url} => {$this->argumentMap[$url]}.");
+            throw new LogicException(
+                'Trying to get a remote request from the filesystem for a file that is not accessible: '
+                . "{$url} => {$this->argumentMap[$url]}."
+            );
         }
 
         try {
