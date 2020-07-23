@@ -5,9 +5,6 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\QueryVar;
-
 /**
  * Class AMP_Post_Template
  *
