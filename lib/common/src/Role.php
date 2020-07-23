@@ -83,7 +83,8 @@ interface Role
     const COMBOBOX = 'combobox';
 
     /**
-     * A supporting section of the document, designed to be complementary to the main content at a similar level in the DOM hierarchy, but remains meaningful when separated from the main content.
+     * A supporting section of the document, designed to be complementary to the main content at a similar level in the
+     * DOM hierarchy, but remains meaningful when separated from the main content.
      *
      * @var string
      */
@@ -111,7 +112,8 @@ interface Role
     const DESCRIPTION = 'description';
 
     /**
-     * A dialog is a small application window that sits above the application and is designed to interrupt the current processing of an application in order to prompt the user to enter information or require a response.
+     * A dialog is a small application window that sits above the application and is designed to interrupt the current
+     * processing of an application in order to prompt the user to enter information or require a response.
      *
      * @var string
      */
@@ -132,7 +134,8 @@ interface Role
     const DOCUMENT = 'document';
 
     /**
-     * A scrollable list of articles where scrolling may cause articles to be added to or removed from either end of the list.
+     * A scrollable list of articles where scrolling may cause articles to be added to or removed from either end of the
+     * list.
      *
      * @var string
      */
@@ -160,14 +163,17 @@ interface Role
     const GRID = 'grid';
 
     /**
-     * A gridcell is a table cell in a grid. Gridcells may be active, editable, and selectable. Cells may have relationships such as controls to address the application of functional relationships.
+     * A gridcell is a table cell in a grid. Gridcells may be active, editable, and selectable. Cells may have
+     * relationships such as controls to address the application of functional relationships.
      *
      * @var string
      */
     const GRIDCELL = 'gridcell';
 
     /**
-     * A group is a section of user interface objects which would not be included in a page summary or table of contents by an assistive technology. See region for sections of user interface objects that should be included in a page summary or table of contents.
+     * A group is a section of user interface objects which would not be included in a page summary or table of contents
+     * by an assistive technology. See region for sections of user interface objects that should be included in a page
+     * summary or table of contents.
      *
      * @var string
      */
@@ -188,7 +194,8 @@ interface Role
     const IMG = 'img';
 
     /**
-     * Interactive reference to a resource (note, that in XHTML 2.0 any element can have an href attribute and thus be a link)
+     * Interactive reference to a resource (note, that in XHTML 2.0 any element can have an href attribute and thus be a
+     * link)
      *
      * @var string
      */
@@ -204,7 +211,8 @@ interface Role
     const LIST_ = 'list';
 
     /**
-     * A list box is a widget that allows the user to select one or more items from a list. Items within the list are static and may contain images. List boxes contain children whose role is option.
+     * A list box is a widget that allows the user to select one or more items from a list. Items within the list are
+     * static and may contain images. List boxes contain children whose role is option.
      *
      * @var string
      */
@@ -218,7 +226,10 @@ interface Role
     const LISTITEM = 'listitem';
 
     /**
-     * A region where new information is added and old information may disappear such as chat logs, messaging, game log or an error log. In contrast to other regions, in this role there is a relationship between the arrival of new items in the log and the reading order. The log contains a meaningful sequence and new information is added only to the end of the log, not at arbitrary points.
+     * A region where new information is added and old information may disappear such as chat logs, messaging, game log
+     * or an error log. In contrast to other regions, in this role there is a relationship between the arrival of new
+     * items in the log and the reading order. The log contains a meaningful sequence and new information is added only
+     * to the end of the log, not at arbitrary points.
      *
      * @var string
      */
@@ -253,7 +264,8 @@ interface Role
     const MENU = 'menu';
 
     /**
-     * A menubar is a container of menu items. Each menu item may activate a new sub-menu. Navigation behavior should be similar to the typical menu bar graphical user interface.
+     * A menubar is a container of menu items. Each menu item may activate a new sub-menu. Navigation behavior should be
+     * similar to the typical menu bar graphical user interface.
      *
      * @var string
      */
@@ -323,7 +335,8 @@ interface Role
     const PROGRESSBAR = 'progressbar';
 
     /**
-     * A radio is an option in single-select list. Only one radio control in a radiogroup can be selected at the same time.
+     * A radio is an option in single-select list. Only one radio control in a radiogroup can be selected at the same
+     * time.
      *
      * @var string
      */
@@ -393,7 +406,8 @@ interface Role
     const SEPARATOR = 'separator';
 
     /**
-     * A user input where the user selects an input in a given range. This form of range expects an analog keyboard interface.
+     * A user input where the user selects an input in a given range. This form of range expects an analog keyboard
+     * interface.
      *
      * @var string
      */
@@ -465,7 +479,8 @@ interface Role
     const TEXTBOX = 'textbox';
 
     /**
-     * A numerical counter which indicates an amount of elapsed time from a start point, or the time remaining until an end point.
+     * A numerical counter which indicates an amount of elapsed time from a start point, or the time remaining until an
+     * end point.
      *
      * @var string
      */
@@ -479,7 +494,8 @@ interface Role
     const TOOLBAR = 'toolbar';
 
     /**
-     * A popup that displays a description for an element when a user passes over or rests on that element. Supplement to the normal tooltip processing of the user agent.
+     * A popup that displays a description for an element when a user passes over or rests on that element. Supplement
+     * to the normal tooltip processing of the user agent.
      *
      * @var string
      */

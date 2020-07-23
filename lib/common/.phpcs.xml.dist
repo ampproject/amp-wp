@@ -2,7 +2,10 @@
 <ruleset name="Coding Standard for the AMP Common PHP Library">
 
 	<!-- Use PSR-12 as baseline standard -->
-	<rule ref="PSR12" />
+	<rule ref="PSR12">
+		<!-- We cannot use constant visibility because of PHP 5.6 compat -->
+		<exclude name="PSR12.Properties.ConstantVisibility.NotFound" />
+	</rule>
 
 	<!-- Exclude resources folder -->
 	<exclude-pattern>resources/*</exclude-pattern>
@@ -25,4 +28,8 @@
 
 	<!-- Check up to 20 files simultaneously. -->
 	<arg name="parallel" value="20"/>
+
+	<rule ref="Generic.Files.LineLength.TooLong">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
 </ruleset>
