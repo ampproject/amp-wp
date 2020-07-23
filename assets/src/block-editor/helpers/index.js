@@ -82,6 +82,13 @@ const ampLayoutOptions = [
 	},
 ];
 
+const mappedAttributes = {
+	ampCarousel: 'data-amp-carousel',
+	ampLightbox: 'data-amp-lightbox',
+	ampNoLoading: 'data-amp-noloading',
+	ampLayout: 'data-amp-layout',
+};
+
 /**
  * Add AMP attributes to every core block.
  *
@@ -172,12 +179,6 @@ export const addAMPAttributes = ( settings, name ) => {
  * @return {Object} Modified block settings.
  */
 export const removeDeprecatedAmpProps = ( settings ) => {
-	const mappedAttributes = {
-		ampCarousel: 'data-amp-carousel',
-		ampLightbox: 'data-amp-lightbox',
-		ampNoLoading: 'data-amp-noloading',
-		ampLayout: 'data-amp-layout',
-	};
 	const maybeBlockHasDeprecatedProp = Object.keys( mappedAttributes )
 		.some( ( attribute ) => Object.keys( settings.attributes ).includes( attribute ) );
 
@@ -193,11 +194,11 @@ export const removeDeprecatedAmpProps = ( settings ) => {
 				const { attributes: blockAttributes } = blockData;
 
 				// Collect all deprecated props that would be set on the saved HTML block in the post.
-				Object.keys( mappedAttributes ).forEach( ( attribute ) => {
-					if ( attribute in blockAttributes && blockAttributes[ attribute ] ) {
-						deprecatedProps[ mappedAttributes[ attribute ] ] = blockAttributes[ attribute ];
+				for ( const [ blockAttributeName, htmlAttributeName ] of Object.entries( mappedAttributes ) ) {
+					if ( blockAttributeName in blockAttributes && blockAttributes[ blockAttributeName ] ) {
+						deprecatedProps[ htmlAttributeName ] = blockAttributes[ blockAttributeName ];
 					}
-				} );
+				}
 
 				// If there are not any deprecated props, return the unmodified element.
 				if ( 0 === Object.keys( deprecatedProps ).length ) {
