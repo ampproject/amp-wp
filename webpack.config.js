@@ -113,6 +113,21 @@ const ampValidation = {
 	],
 };
 
+const ampWpAppShell = {
+	...defaultConfig,
+	...sharedConfig,
+	entry: {
+		'amp-wp-app-shell': './assets/src/amp-wp-app-shell/index.js',
+	},
+	plugins: [
+		...defaultConfig.plugins,
+		new WebpackBar( {
+			name: 'AMP WP App Shell',
+			color: '#7F3f9c',
+		} ),
+	],
+};
+
 const blockEditor = {
 	...defaultConfig,
 	...sharedConfig,
@@ -273,6 +288,7 @@ const wpPolyfills = {
 module.exports = [
 	ampStories,
 	ampValidation,
+	ampWpAppShell,
 	blockEditor,
 	classicEditor,
 	admin,
