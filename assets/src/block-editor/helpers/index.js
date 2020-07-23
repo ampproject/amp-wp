@@ -165,6 +165,57 @@ export const addAMPAttributes = ( settings, name ) => {
 };
 
 /**
+ * Remove AMP deprecated props from any blocks which may contain them.
+ *
+ * @param {Object} settings Block settings.
+ *
+ * @return {Object} Modified block settings.
+ */
+export const removeDeprecatedAmpProps = ( settings ) => {
+	const mappedAttributes = {
+		ampCarousel: 'data-amp-carousel',
+		ampLightbox: 'data-amp-lightbox',
+		ampNoLoading: 'data-amp-noloading',
+		ampNoLayout: 'data-amp-layout',
+	};
+	const deprecatedProps = {};
+	const maybeBlockHasDeprecatedProp = Object.keys( mappedAttributes )
+		.some( ( attribute ) => Object.keys( settings.attributes ).includes( attribute ) );
+
+	if ( maybeBlockHasDeprecatedProp ) {
+		// At minimum, the `attributes`, and `save` props are required.
+		const deprecatedConfig = {
+			attributes: settings.attributes,
+			save( blockData ) {
+				// Render the block.
+				let element = settings.save( blockData );
+				const { attributes: blockAttributes } = blockData;
+
+				// Collect all deprecated props that would be set on the saved HTML block in the post.
+				Object.keys( mappedAttributes ).forEach( ( attribute ) => {
+					const deprecatedPropSet = Object.keys( blockAttributes ).includes( attribute ) && blockAttributes[ attribute ];
+
+					if ( deprecatedPropSet ) {
+						deprecatedProps[ mappedAttributes[ attribute ] ] = blockAttributes[ attribute ];
+					}
+				} );
+
+				// Re-render the block with deprecated props.
+				const props = { ...element.props, ...deprecatedProps };
+				element = cloneElement( element, props );
+
+				// Gutenberg will now compare the difference and update the block accordingly without the deprecated props.
+				return element;
+			},
+		};
+
+		settings.deprecated.unshift( deprecatedConfig );
+	}
+
+	return settings;
+};
+
+/**
  * Filters blocks' save function.
  *
  * @param {Object} element        Element to be saved.
