@@ -209,7 +209,7 @@ final class ReaderThemes {
 				return array_merge(
 					array_fill_keys( $keys, '' ), // Provide empty defaults to make sure all keys are present.
 					wp_array_slice_assoc( (array) $theme, $keys ),
-					[ 'screenshot_url' => amp_get_asset_url( "images/reader-themes/{$theme->slug}.png" ) ]
+					[ 'screenshot_url' => amp_get_asset_url( "images/reader-themes/{$theme->slug}.jpg" ) ]
 				);
 			},
 			$reader_themes
@@ -288,7 +288,7 @@ final class ReaderThemes {
 			'name'           => 'AMP Legacy',
 			'slug'           => 'legacy',
 			'preview_url'    => 'https://amp-wp.org',
-			'screenshot_url' => amp_get_asset_url( 'images/reader-themes/legacy.png' ),
+			'screenshot_url' => amp_get_asset_url( 'images/reader-themes/legacy.jpg' ),
 			'homepage'       => 'https://amp-wp.org',
 			'description'    => __(
 				// @todo Improved description text.
