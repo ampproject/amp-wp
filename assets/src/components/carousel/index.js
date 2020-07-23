@@ -39,10 +39,16 @@ export function Carousel( {
 } ) {
 	const width = useWindowWidth();
 	const [ currentItem, originalSetCurrentItem ] = useState( null );
-
 	const carouselContainerRef = useRef();
 	const carouselListRef = useRef();
 
+	/**
+	 * Sets the the currentItem state and optionally scrolls to it.
+	 *
+	 * This wrapper function is required because the intersection observer needs to set currentItem, but it does
+	 * so only when the new currentItem is already centered in the view. Calling scrollTo in that situation would
+	 * cause jerky scroll effects.
+	 */
 	const setCurrentItem = useCallback( ( newCurrentItem, scrollToItem = true ) => {
 		originalSetCurrentItem( newCurrentItem );
 
@@ -78,7 +84,7 @@ export function Carousel( {
 
 		const observer = new global.IntersectionObserver( observerCallback, {
 			root: carouselContainerRef.current,
-			rootMargin: '0px -50%',
+			rootMargin: '0px -50%', // Run the callback as an item crosses the center.
 		} );
 
 		[ ...carouselListRef.current.children ].forEach( ( element ) => {
