@@ -176,7 +176,7 @@ export const removeDeprecatedAmpProps = ( settings ) => {
 		ampCarousel: 'data-amp-carousel',
 		ampLightbox: 'data-amp-lightbox',
 		ampNoLoading: 'data-amp-noloading',
-		ampNoLayout: 'data-amp-layout',
+		ampLayout: 'data-amp-layout',
 	};
 	const deprecatedProps = {};
 	const maybeBlockHasDeprecatedProp = Object.keys( mappedAttributes )
