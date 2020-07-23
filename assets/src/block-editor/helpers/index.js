@@ -494,7 +494,7 @@ const AmpNoloadingToggle = ( props ) => {
 
 AmpNoloadingToggle.propTypes = {
 	attributes: PropTypes.shape( {
-		ampNoLoading: PropTypes.string,
+		ampNoLoading: PropTypes.bool,
 	} ),
 	setAttributes: PropTypes.func.isRequired,
 };
