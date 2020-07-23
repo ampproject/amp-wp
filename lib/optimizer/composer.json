@@ -61,8 +61,8 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "scripts": {
-    "cbf": "phpcbf --standard=PSR12 -n src tests",
-    "cs": "if [ -z $TEST_SKIP_PHPCS ]; then phpcs --standard=PSR12 -s -n src tests; fi",
+    "cbf": "phpcbf",
+    "cs": "if [ -z $TEST_SKIP_PHPCS ]; then phpcs; fi",
     "lint": "if [ -z $TEST_SKIP_LINTING ]; then parallel-lint -j 10 --colors --exclude vendor .; fi",
     "post-update-cmd": [
       "@update-test-specs",
