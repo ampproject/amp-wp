@@ -312,17 +312,6 @@ class AMP_Post_Template {
 			return;
 		}
 
-		if (
-			is_amp_endpoint()
-			&& amp_is_legacy()
-			&& true === AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT )
-		) {
-			// Modify comments link to go to non-AMP version page when in legacy Reader mode.
-			add_filter( 'get_comments_link', static function ( $comments_link ) {
-				return add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $comments_link );
-			} );
-		}
-
 		$comments_link_url  = get_comments_link( $this->post );
 		$comments_link_text = $comments_open
 			? __( 'Leave a Comment', 'amp' )
