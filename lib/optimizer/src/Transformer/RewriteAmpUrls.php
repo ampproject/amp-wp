@@ -19,36 +19,37 @@ use Exception;
 /**
  * RewriteAmpUrls - rewrites AMP runtime URLs.
  *
- * This transformer supports two parameters:
+ * This transformer supports five parameters:
  *
  * * `ampRuntimeVersion`: specifies a
  *   [specific version](https://github.com/ampproject/amp-toolbox/tree/main/runtime-version)
- *   version</a> of the AMP runtime. For example: `ampRuntimeVersion:
- *   "001515617716922"` will result in AMP runtime URLs being re-written
- *   from `https://cdn.ampproject.org/v0.js` to
- *   `https://cdn.ampproject.org/rtv/001515617716922/v0.js`.
+ *   version of the AMP runtime. For example: `ampRuntimeVersion: "001515617716922"` will result in AMP runtime URLs
+ *   being re-written from `https://cdn.ampproject.org/v0.js` to `https://cdn.ampproject.org/rtv/001515617716922/v0.js`.
  *
- * * `ampUrlPrefix`: specifies an URL prefix for AMP runtime
- *   URLs. For example: `ampUrlPrefix: "/amp"` will result in AMP runtime
- *   URLs being re-written from `https://cdn.ampproject.org/v0.js` to
- *   `/amp/v0.js`. This option is experimental and not recommended.
+ * * `ampUrlPrefix`: specifies an URL prefix for AMP runtime URLs. For example: `ampUrlPrefix: "/amp"` will result in
+ *   AMP runtime URLs being re-written from `https://cdn.ampproject.org/v0.js` to `/amp/v0.js`. This option is
+ *   experimental and not recommended.
  *
- * * `geoApiUrl`: specifies amp-geo API URL to use as a fallback when
- *   amp-geo-0.1.js is served unpatched, i.e. when
- *   {{AMP_ISO_COUNTRY_HOTPATCH}} is not replaced dynamically.
+ * * `geoApiUrl`: specifies amp-geo API URL to use as a fallback when `amp-geo-0.1.js` is served unpatched, i.e. when
+ *   `{{AMP_ISO_COUNTRY_HOTPATCH}}` is not replaced dynamically.
  *
- * * `lts`: Use long-term stable URLs. This option is not compatible with
- *   `ampRuntimeVersion` or `ampUrlPrefix`; an error will be thrown if
- *   these options are included together. Similarly, the `geoApiUrl`
- *   option is ineffective with the lts flag, but will simply be ignored
- *   rather than throwing an error.
+ * * `lts`: Use long-term stable URLs. This option is not compatible with `rtv`, `ampRuntimeVersion` or `ampUrlPrefix`;
+ *   an error will be thrown if these options are included together. Similarly, the `geoApiUrl` option is ineffective
+ *   with the `lts` flag, but will simply be ignored rather than throwing an error.
  *
- * All parameters are optional. If no option is provided, runtime URLs won't be
- * re-written. You can combine `ampRuntimeVersion` and  `ampUrlPrefix` to
- * rewrite AMP runtime URLs to versioned URLs on a different origin.
+ * * `rtv`: Append the runtime version to the rewritten URLs. This option is not compatible with `lts`.
  *
- * This transformer also adds a preload header for the AMP runtime (v0.js) to trigger HTTP/2
- * push for CDNs (see https://www.w3.org/TR/preload/#server-push-(http/2)).
+ * All parameters are optional. If no option is provided, runtime URLs won't be re-written. You can combine
+ * `ampRuntimeVersion` and  `ampUrlPrefix` to rewrite AMP runtime URLs to versioned URLs on a different origin.
+ *
+ * This transformer also adds a preload header for the AMP runtime (v0.js) to trigger HTTP/2 push for CDNs (see
+ * https://www.w3.org/TR/preload/#server-push-(http/2)).
+ *
+ * This is ported from the NodeJS optimizer while verifying against the Go version.
+ *
+ * NodeJS:
+ * @version 7fbf187b3c7f07100e8911a52582b640b23490e5
+ * @link https://github.com/ampproject/amp-toolbox/blob/7fbf187b3c7f07100e8911a52582b640b23490e5/packages/optimizer/lib/transformers/RewriteAmpUrls.js
  *
  * @package AmpProject\Optimizer\Transformer
  */
@@ -290,10 +291,8 @@ final class RewriteAmpUrls implements Transformer
      */
     private function calculateHost()
     {
-        $ampUrlPrefix      = $this->configuration->get(RewriteAmpUrlsConfiguration::AMP_URL_PREFIX);
-        $ampRuntimeVersion = $this->configuration->get(RewriteAmpUrlsConfiguration::AMP_RUNTIME_VERSION);
-        $lts               = $this->configuration->get(RewriteAmpUrlsConfiguration::LTS);
-        $rtv               = $this->configuration->get(RewriteAmpUrlsConfiguration::RTV);
+        $lts = $this->configuration->get(RewriteAmpUrlsConfiguration::LTS);
+        $rtv = $this->configuration->get(RewriteAmpUrlsConfiguration::RTV);
 
         if ($lts && $rtv) {
             throw InvalidConfiguration::forMutuallyExclusiveFlags(
@@ -301,6 +300,9 @@ final class RewriteAmpUrls implements Transformer
                 RewriteAmpUrlsConfiguration::RTV
             );
         }
+
+        $ampUrlPrefix      = $this->configuration->get(RewriteAmpUrlsConfiguration::AMP_URL_PREFIX);
+        $ampRuntimeVersion = $this->configuration->get(RewriteAmpUrlsConfiguration::AMP_RUNTIME_VERSION);
 
         $ampUrlPrefix = rtrim($ampUrlPrefix, '/');
 
