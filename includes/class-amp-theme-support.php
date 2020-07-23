@@ -992,15 +992,7 @@ class AMP_Theme_Support {
 		add_filter( 'cancel_comment_reply_link', [ __CLASS__, 'filter_cancel_comment_reply_link' ], 10, 3 );
 		add_action( 'comment_form', [ __CLASS__, 'amend_comment_form' ], 100 );
 		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' );
-		if ( amp_is_legacy() && true === AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ) {
-			// Modify comments link to go to non-AMP page when in legacy Reader mode.
-			add_filter(
-				'get_comments_link',
-				static function ( $comments_link ) {
-					return add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $comments_link );
-				}
-			);
-		}
+		add_filter( 'get_comments_link', [ __CLASS__, 'amend_comments_link' ] );
 		add_filter( 'wp_kses_allowed_html', [ __CLASS__, 'include_layout_in_wp_kses_allowed_html' ], 10 );
 		add_filter( 'get_header_image_tag', [ __CLASS__, 'amend_header_image_with_video_header' ], PHP_INT_MAX );
 		add_action(
@@ -1121,6 +1113,20 @@ class AMP_Theme_Support {
 			<input type="hidden" name="redirect_to" value="<?php echo esc_url( amp_get_permalink( get_the_ID() ) ); ?>">
 		<?php endif; ?>
 		<?php
+	}
+
+	/**
+	 * Amend the comments link to go to non-AMP page when in legacy Reader mode.
+	 *
+	 * @param string $comments_link Post comments permalink with '#comments' appended.
+	 * @return string The link to the comments.
+	 */
+	public static function amend_comments_link( $comments_link ) {
+		if ( amp_is_legacy() && true === AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ) {
+			$comments_link = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $comments_link );
+		}
+
+		return $comments_link;
 	}
 
 	/**
