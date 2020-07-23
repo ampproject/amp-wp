@@ -1,5 +1,5 @@
 /* global ampAppShell, AMP */
-/* eslint-disable no-console */
+/* eslint-env browser */
 /**
  * WordPress dependencies
  */
@@ -118,7 +118,7 @@ function handleSubmit( event ) {
 function isHeaderVisible() {
 	const element = document.querySelector( '.site-branding' );
 	if ( ! element ) {
-		return;
+		return false;
 	}
 	const clientRect = element.getBoundingClientRect();
 	return clientRect.height + clientRect.top >= 0;
@@ -153,7 +153,7 @@ function fetchShadowDocResponse( url ) {
 		credentials: 'include',
 		redirect: 'follow',
 		cache: 'default',
-		referrer: 'client'
+		referrer: 'client',
 	} );
 }
 
@@ -162,8 +162,9 @@ function fetchShadowDocResponse( url ) {
  *
  * @todo When should scroll to the top? Only if the first element of the content is not visible?
  * @param {string|URL} url - URL.
- * @param {boolean} scrollIntoView - Scroll into view.
- * @param {boolean} pushState - Whether to push state.
+ * @param {Object} Args - Additional arguments.
+ * @param {boolean} Args.scrollIntoView - Scroll into view.
+ * @param {boolean} Args.pushState - Whether to push state.
  */
 function loadUrl( url, { scrollIntoView = false, pushState = true } = {} ) {
 	const previousUrl = location.href;
@@ -171,8 +172,8 @@ function loadUrl( url, { scrollIntoView = false, pushState = true } = {} ) {
 		cancelable: true,
 		detail: {
 			previousUrl,
-			url: String( url )
-		}
+			url: String( url ),
+		},
 	} );
 	if ( ! window.dispatchEvent( navigateEvent ) ) {
 		return; // Allow scripts on page to cancel navigation via preventDefault() on wp-amp-app-shell-navigate event.
@@ -181,7 +182,7 @@ function loadUrl( url, { scrollIntoView = false, pushState = true } = {} ) {
 	updateNavMenuClasses( url );
 
 	fetchShadowDocResponse( url )
-		.then( response => {
+		.then( ( response ) => {
 			if ( currentShadowDoc ) {
 				currentShadowDoc.close();
 			}
@@ -227,7 +228,7 @@ function loadUrl( url, { scrollIntoView = false, pushState = true } = {} ) {
 					history.pushState(
 						{},
 						currentShadowDoc.title,
-						currentUrl.toString()
+						currentUrl.toString(),
 					);
 				}
 
@@ -238,8 +239,8 @@ function loadUrl( url, { scrollIntoView = false, pushState = true } = {} ) {
 						previousUrl,
 						oldContainer,
 						newContainer,
-						shadowDoc: currentShadowDoc
-					}
+						shadowDoc: currentShadowDoc,
+					},
 				} );
 				window.dispatchEvent( readyEvent );
 
@@ -267,7 +268,7 @@ function loadUrl( url, { scrollIntoView = false, pushState = true } = {} ) {
 					siteContent.scrollIntoView( {
 						block: 'start',
 						inline: 'start',
-						behavior: 'smooth'
+						behavior: 'smooth',
 					} );
 				}
 			} );
@@ -276,13 +277,15 @@ function loadUrl( url, { scrollIntoView = false, pushState = true } = {} ) {
 			const decoder = new TextDecoder();
 
 			function readChunk() {
-				return reader.read().then( chunk => {
+				// @todo Get rid of the eslint disable rule
+				/* eslint-disable consistent-return */
+				return reader.read().then( ( chunk ) => {
 					const input = chunk.value || new Uint8Array();
 					const text = decoder.decode(
 						input,
 						{
-							stream: ! chunk.done
-						}
+							stream: ! chunk.done,
+						},
 					);
 					if ( text ) {
 						currentShadowDoc.writer.write( text );
@@ -293,6 +296,7 @@ function loadUrl( url, { scrollIntoView = false, pushState = true } = {} ) {
 						return readChunk();
 					}
 				} );
+				/* eslint-enable consistent-return */
 			}
 
 			return readChunk();
@@ -301,18 +305,20 @@ function loadUrl( url, { scrollIntoView = false, pushState = true } = {} ) {
 			if ( 'amp_unavailable' === error ) {
 				window.location.assign( url );
 			} else {
-				console.error( error );
+				console.error( error ); // eslint-disable-line no-console
 			}
 		} );
 }
 
+// @todo Refactor the function so that it doesn't exceed the complexity limit
+/* eslint-disable complexity */
 /**
  * Update class names in nav menus based on what URL is being navigated to.
  *
  * Note that this will only be able to account for:
- *  - current-menu-item (current_{object}_item)
- *  - current-menu-parent (current_{object}_parent)
- *  - current-menu-ancestor (current_{object}_ancestor)
+ * - current-menu-item (current_{object}_item)
+ * - current-menu-parent (current_{object}_parent)
+ * - current-menu-ancestor (current_{object}_ancestor)
  *
  * @param {string|URL} url URL.
  */
@@ -353,19 +359,19 @@ function updateNavMenuClasses( url ) {
 			if ( 0 === depth ) {
 				item.classList.add( 'current-menu-item' );
 				if ( menuItemObjectName ) {
-					link.parentElement.classList.add( `current_${menuItemObjectName}_item` );
+					link.parentElement.classList.add( `current_${ menuItemObjectName }_item` );
 				}
 			} else if ( 1 === depth ) {
 				item.classList.add( 'current-menu-parent' );
 				item.classList.add( 'current-menu-ancestor' );
 				if ( menuItemObjectName ) {
-					link.parentElement.classList.add( `current_${menuItemObjectName}_parent` );
-					link.parentElement.classList.add( `current_${menuItemObjectName}_ancestor` );
+					link.parentElement.classList.add( `current_${ menuItemObjectName }_parent` );
+					link.parentElement.classList.add( `current_${ menuItemObjectName }_ancestor` );
 				}
 			} else {
 				item.classList.add( 'current-menu-ancestor' );
 				if ( menuItemObjectName ) {
-					link.parentElement.classList.add( `current_${menuItemObjectName}_ancestor` );
+					link.parentElement.classList.add( `current_${ menuItemObjectName }_ancestor` );
 				}
 			}
 			depth++;
@@ -404,15 +410,16 @@ function updateNavMenuClasses( url ) {
 		}
 	}
 }
+/* eslint-enable complexity */
 
 // Initialize when Shadow DOM API loaded and DOM Ready.
-const ampReadyPromise = new Promise( resolve => {
+const ampReadyPromise = new Promise( ( resolve ) => {
 	if ( ! window.AMP ) {
 		window.AMP = [];
 	}
 	window.AMP.push( resolve );
 } );
-const shadowDomPolyfillReadyPromise = new Promise( resolve => {
+const shadowDomPolyfillReadyPromise = new Promise( ( resolve ) => {
 	if ( Element.prototype.attachShadow ) {
 		// Native available.
 		resolve();
