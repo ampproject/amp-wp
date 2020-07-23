@@ -5,8 +5,9 @@ namespace AmpProject\Optimizer\Transformer;
 use AmpProject\Amp;
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
-use AmpProject\Optimizer\Configuration;
+use AmpProject\Optimizer\Configuration\RewriteAmpUrlsConfiguration;
 use AmpProject\Optimizer\ErrorCollection;
+use AmpProject\Optimizer\Exception\InvalidConfiguration;
 use AmpProject\Optimizer\Transformer;
 use AmpProject\Optimizer\TransformerConfiguration;
 use AmpProject\RuntimeVersion;
@@ -104,7 +105,7 @@ final class RewriteAmpUrls implements Transformer
      */
     private function collectPreloadNodes(Document $document, $host)
     {
-        $usesEsm      = $this->configuration->get(Configuration\RewriteAmpUrlsConfiguration::EXPERIMENTAL_ESM);
+        $usesEsm      = $this->configuration->get(RewriteAmpUrlsConfiguration::EXPERIMENTAL_ESM);
         $preloadNodes = [];
 
         $node = $document->head->firstChild;
@@ -242,7 +243,7 @@ final class RewriteAmpUrls implements Transformer
         // runtime-host and amp-geo-api meta tags should appear before the first script
         if (
             ! $this->usesAmpCacheUrl($host) && ! $this->configuration->get(
-                Configuration\RewriteAmpUrlsConfiguration::LTS
+                RewriteAmpUrlsConfiguration::LTS
             )
         ) {
             try {
@@ -256,16 +257,16 @@ final class RewriteAmpUrls implements Transformer
         if (
             ! empty(
                 $this->configuration->get(
-                    Configuration\RewriteAmpUrlsConfiguration::GEO_API_URL
+                    RewriteAmpUrlsConfiguration::GEO_API_URL
                 )
             ) && ! $this->configuration->get(
-                Configuration\RewriteAmpUrlsConfiguration::LTS
+                RewriteAmpUrlsConfiguration::LTS
             )
         ) {
             $this->addMeta(
                 $document,
                 'amp-geo-api',
-                $this->configuration->get(Configuration\RewriteAmpUrlsConfiguration::GEO_API_URL)
+                $this->configuration->get(RewriteAmpUrlsConfiguration::GEO_API_URL)
             );
         }
     }
@@ -289,13 +290,16 @@ final class RewriteAmpUrls implements Transformer
      */
     private function calculateHost()
     {
-        $ampUrlPrefix      = $this->configuration->get(Configuration\RewriteAmpUrlsConfiguration::AMP_URL_PREFIX);
-        $ampRuntimeVersion = $this->configuration->get(Configuration\RewriteAmpUrlsConfiguration::AMP_RUNTIME_VERSION);
-        $lts               = $this->configuration->get(Configuration\RewriteAmpUrlsConfiguration::LTS);
-        $rtv               = $this->configuration->get(Configuration\RewriteAmpUrlsConfiguration::RTV);
+        $ampUrlPrefix      = $this->configuration->get(RewriteAmpUrlsConfiguration::AMP_URL_PREFIX);
+        $ampRuntimeVersion = $this->configuration->get(RewriteAmpUrlsConfiguration::AMP_RUNTIME_VERSION);
+        $lts               = $this->configuration->get(RewriteAmpUrlsConfiguration::LTS);
+        $rtv               = $this->configuration->get(RewriteAmpUrlsConfiguration::RTV);
 
         if ($lts && $rtv) {
-            // TODO: Throw logic exception.
+            throw InvalidConfiguration::forMutuallyExclusiveFlags(
+                RewriteAmpUrlsConfiguration::LTS,
+                RewriteAmpUrlsConfiguration::RTV
+            );
         }
 
         $ampUrlPrefix = rtrim($ampUrlPrefix, '/');
