@@ -209,6 +209,9 @@ export const removeDeprecatedAmpProps = ( settings ) => {
 			},
 		};
 
+		if ( ! settings.deprecated ) {
+			settings.deprecated = [];
+		}
 		settings.deprecated.unshift( deprecatedConfig );
 	}
 
