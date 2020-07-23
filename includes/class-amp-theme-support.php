@@ -994,9 +994,12 @@ class AMP_Theme_Support {
 		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' );
 		if ( amp_is_legacy() && true === AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ) {
 			// Modify comments link to go to non-AMP page when in legacy Reader mode.
-			add_filter( 'get_comments_link', static function ( $comments_link ) {
-				return add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $comments_link );
-			} );
+			add_filter(
+				'get_comments_link',
+				static function ( $comments_link ) {
+					return add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $comments_link );
+				}
+			);
 		}
 		add_filter( 'wp_kses_allowed_html', [ __CLASS__, 'include_layout_in_wp_kses_allowed_html' ], 10 );
 		add_filter( 'get_header_image_tag', [ __CLASS__, 'amend_header_image_with_video_header' ], PHP_INT_MAX );
