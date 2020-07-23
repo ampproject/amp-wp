@@ -114,34 +114,38 @@ final class RewriteAmpUrls implements Transformer
                 continue;
             }
 
-            if ($node->tagName === Tag::SCRIPT && $this->usesAmpCacheUrl($node->getAttribute(Attribute::SRC))) {
-                $node->setAttribute(Attribute::SRC, $this->replaceUrl($node->getAttribute(Attribute::SRC), $host));
+            $src = $node->getAttribute(Attribute::SRC);
+
+            if ($node->tagName === Tag::SCRIPT && $this->usesAmpCacheUrl($src)) {
+                $node->setAttribute(Attribute::SRC, $this->replaceUrl($src, $host));
                 if ($usesEsm) {
                     $preloadNodes[] = $this->addEsm($document, $node);
                 } else {
-                    $preloadNodes[] = $this->createPreload($document, $node->getAttribute(Attribute::SRC), Tag::SCRIPT);
+                    $preloadNodes[] = $this->createPreload($document, $src, Tag::SCRIPT);
                 }
             } elseif ($node->tagName === Tag::LINK) {
+                $href = $node->getAttribute(Attribute::HREF);
+
                 if (
                     $node->getAttribute(Attribute::REL) === Attribute::REL_STYLESHEET
-                    && $this->usesAmpCacheUrl($node->getAttribute(Attribute::HREF))
+                    && $this->usesAmpCacheUrl($href)
                 ) {
                     $node->setAttribute(
                         Attribute::HREF,
-                        $this->replaceUrl($node->getAttribute(Attribute::HREF), $host)
+                        $this->replaceUrl($href, $host)
                     );
-                    $preloadNodes[] = $this->createPreload($document, $node->getAttribute(Attribute::HREF), Tag::STYLE);
+                    $preloadNodes[] = $this->createPreload($document, $href, Tag::STYLE);
                 } elseif (
                     $node->getAttribute(Attribute::REL) === Attribute::REL_PRELOAD
-                    && $this->usesAmpCacheUrl($node->getAttribute(Attribute::HREF))
+                    && $this->usesAmpCacheUrl($href)
                 ) {
-                    if ($usesEsm && $this->shouldPreload($node->getAttribute(Attribute::HREF))) {
+                    if ($usesEsm && $this->shouldPreload($href)) {
                         // Only preload .mjs runtime in ESM mode.
                         $node->parentNode->removeChild($node);
                     } else {
                         $node->setAttribute(
                             Attribute::HREF,
-                            $this->replaceUrl($node->getAttribute(Attribute::HREF), $host)
+                            $this->replaceUrl($href, $host)
                         );
                     }
                 }
