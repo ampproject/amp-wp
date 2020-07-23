@@ -51,7 +51,6 @@ module.exports = function( grunt ) {
 					'assets/js/*.js',
 					'!assets/js/amp-service-worker-runtime-precaching.js',
 					'!assets/js/amp-service-worker-offline-commenting.js',
-					'!assets/js/amp-wp-app-shell.js',
 					'assets/js/*.asset.php',
 				],
 			},

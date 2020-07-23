@@ -468,12 +468,17 @@ function amp_register_default_scripts( $wp_scripts ) {
 	);
 
 	// App shell library.
-	$handle = 'amp-wp-app-shell';
+	$handle         = 'amp-wp-app-shell';
+	$asset_file     = AMP__DIR__ . '/assets/js/' . $handle . '.asset.php';
+	$asset          = require $asset_file;
+	$dependencies   = $asset['dependencies'];
+	$dependencies[] = 'amp-shadow';
+	$version        = $asset['version'];
 	$wp_scripts->add(
 		$handle,
-		amp_get_asset_url( 'js/amp-wp-app-shell.js' ),
-		[ 'amp-shadow' ],
-		AMP__VERSION . ( WP_DEBUG ? '-' . md5( file_get_contents( AMP__DIR__ . '/assets/js/amp-wp-app-shell.js' ) ) : '' ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.WP.AlternativeFunctions.file_system_read_file_get_contents
+		amp_get_asset_url( 'js/' . $handle . '.js' ),
+		$dependencies,
+		$version
 	);
 	$wp_scripts->add_data(
 		$handle,
