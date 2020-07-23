@@ -122,9 +122,10 @@ exports[`TemplateModeOption matches snapshot 1`] = `
             aria-hidden={true}
             className="components-panel__arrow"
             focusable={false}
+            height={24}
             role="img"
-            size={24}
             viewBox="0 0 24 24"
+            width={24}
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
@@ -360,9 +361,10 @@ exports[`TemplateModeOption matches snapshot 2`] = `
             aria-hidden={true}
             className="components-panel__arrow"
             focusable={false}
+            height={24}
             role="img"
-            size={24}
             viewBox="0 0 24 24"
+            width={24}
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
@@ -626,9 +628,10 @@ exports[`TemplateModeOption matches snapshot 3`] = `
             aria-hidden={true}
             className="components-panel__arrow"
             focusable={false}
+            height={24}
             role="img"
-            size={24}
             viewBox="0 0 24 24"
+            width={24}
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
