@@ -30,10 +30,10 @@ final class FallbackRemoteGetRequest implements RemoteGetRequest
     /**
      * Instantiate a FallbackRemoteGetRequest object.
      *
-     * @param RemoteGetRequest[] ...$pipeline Variadic array of RemoteGetRequest instances to use as consecutive
-     *                                        fallbacks.
+     * @param RemoteGetRequest ...$pipeline Variadic array of RemoteGetRequest instances to use as consecutive
+     *                                      fallbacks.
      */
-    public function __construct(...$pipeline)
+    public function __construct(RemoteGetRequest ...$pipeline)
     {
         array_walk($pipeline, [$this, 'addRemoteGetRequestInstance']);
     }
