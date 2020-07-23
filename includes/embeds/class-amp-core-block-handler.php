@@ -87,7 +87,11 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			];
 			foreach ( $prop_attribute_mapping as $prop => $attr ) {
 				if ( isset( $block['attrs'][ $prop ] ) ) {
-					$property_value       = $block['attrs'][ $prop ];
+					$property_value = $block['attrs'][ $prop ];
+					if ( is_bool( $property_value ) ) {
+						$property_value = wp_json_encode( $property_value );
+					}
+
 					$injected_attributes .= sprintf( ' %s="%s"', $attr, esc_attr( $property_value ) );
 				}
 			}
