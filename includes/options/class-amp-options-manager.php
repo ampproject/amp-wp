@@ -166,7 +166,7 @@ class AMP_Options_Manager {
 		if (
 			AMP_Theme_Support::READER_MODE_SLUG === $options[ Option::THEME_SUPPORT ]
 			&&
-			get_template() === $options[ Option::READER_THEME ]
+			get_stylesheet() === $options[ Option::READER_THEME ]
 			&&
 			! isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		) {

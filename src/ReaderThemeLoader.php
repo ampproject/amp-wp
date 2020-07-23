@@ -72,8 +72,9 @@ final class ReaderThemeLoader implements Service, Registerable {
 		}
 
 		// Lastly, if the active theme is not the same as the reader theme, then we can switch to the reader theme.
-		// Otherwise, the site should instead be in Transitional mode.
-		return get_template() !== $reader_theme;
+		// Otherwise, the site should instead be in Transitional mode. Note that get_stylesheet() is used as opposed
+		// to get_template() because the active theme should be allowed to be a child theme of a Reader theme.
+		return get_stylesheet() !== $reader_theme;
 	}
 
 	/**
