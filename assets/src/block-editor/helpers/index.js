@@ -26,7 +26,6 @@ const ampLayoutOptions = [
 		notAvailable: [
 			'core-embed/vimeo',
 			'core-embed/dailymotion',
-			'core-embed/hulu',
 			'core-embed/reddit',
 			'core-embed/soundcloud',
 		],
@@ -77,7 +76,6 @@ const ampLayoutOptions = [
 			'core-embed/instagram',
 			'core-embed/vimeo',
 			'core-embed/dailymotion',
-			'core-embed/hulu',
 			'core-embed/reddit',
 			'core-embed/soundcloud',
 		],
