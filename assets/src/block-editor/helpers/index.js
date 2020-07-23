@@ -178,7 +178,7 @@ export const removeDeprecatedAmpProps = ( settings ) => {
 		ampNoLoading: 'data-amp-noloading',
 		ampLayout: 'data-amp-layout',
 	};
-	const deprecatedProps = {};
+	let deprecatedProps = {};
 	const maybeBlockHasDeprecatedProp = Object.keys( mappedAttributes )
 		.some( ( attribute ) => Object.keys( settings.attributes ).includes( attribute ) );
 
@@ -200,9 +200,16 @@ export const removeDeprecatedAmpProps = ( settings ) => {
 					}
 				} );
 
+				// If there are not any deprecated props, return the unmodified element.
+				if ( 0 === Object.keys( deprecatedProps ).length ) {
+					return element;
+				}
+
 				// Re-render the block with deprecated props.
 				const props = { ...element.props, ...deprecatedProps };
 				element = cloneElement( element, props );
+
+				deprecatedProps = {};
 
 				// Gutenberg will now compare the difference and update the block accordingly without the deprecated props.
 				return element;
