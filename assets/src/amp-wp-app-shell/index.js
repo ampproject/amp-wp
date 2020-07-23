@@ -1,5 +1,12 @@
 /* global ampAppShell, AMP */
 /* eslint-disable no-console */
+/**
+ * WordPress dependencies
+ */
+import { createHooks } from '@wordpress/hooks';
+
+ampAppShell.hooks = ampAppShell.hooks || createHooks();
+
 let currentShadowDoc;
 
 /**
@@ -124,8 +131,21 @@ function isHeaderVisible() {
  * @return {Promise<Response>} Response promise.
  */
 function fetchShadowDocResponse( url ) {
-	const ampUrl = new URL( url );
-	ampUrl.searchParams.set( ampAppShell.componentQueryVar, 'inner' );
+	const { componentQueryVar } = ampAppShell;
+	const componentUrl = new URL( url );
+	componentUrl.searchParams.set( componentQueryVar, 'inner' );
+
+	/**
+	 * Filters the inner component URL.
+	 *
+	 * This filter is useful in case a format of the inner component URL has to
+	 * be changed.
+	 *
+	 * @param {string} componentUrl      Inner component URL.
+	 * @param {string} url               Document base URL.
+	 * @param {string} componentQueryVar Component query parameter name.
+	 */
+	const ampUrl = ampAppShell.hooks.applyFilters( 'amp.appShell.innerComponentUrl', componentUrl, url, componentQueryVar );
 
 	return fetch( ampUrl.toString(), {
 		method: 'GET',
