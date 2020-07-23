@@ -192,7 +192,7 @@ final class RewriteAmpUrls implements Transformer
 
         if ($this->shouldPreload($scriptUrl)) {
             $preloadNode = $document->createElement(Tag::LINK);
-            $preloadNode->setAttribute('as', Tag::SCRIPT);
+            $preloadNode->setAttribute(Attribute::AS_, Tag::SCRIPT);
             $preloadNode->setAttribute(Attribute::CROSSORIGIN, Attribute::CROSSORIGIN_ANONYMOUS);
             $preloadNode->setAttribute(Attribute::HREF, $esmScriptUrl);
             $preloadNode->setAttribute(Attribute::REL, Attribute::REL_PRELOAD);
@@ -232,7 +232,7 @@ final class RewriteAmpUrls implements Transformer
 
         $preloadNode->setAttribute(Attribute::REL, Attribute::REL_PRELOAD);
         $preloadNode->setAttribute(Attribute::HREF, $href);
-        $preloadNode->setAttribute('as', $type);
+        $preloadNode->setAttribute(Attribute::AS_, $type);
 
         return $preloadNode;
     }

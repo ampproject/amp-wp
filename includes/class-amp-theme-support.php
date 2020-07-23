@@ -1652,7 +1652,7 @@ class AMP_Theme_Support {
 			Tag::LINK,
 			[
 				Attribute::REL  => Attribute::REL_PRELOAD,
-				'as'            => Tag::SCRIPT,
+				Attribute::AS_  => Tag::SCRIPT,
 				Attribute::HREF => $runtime_src,
 			]
 		);
@@ -1671,7 +1671,7 @@ class AMP_Theme_Support {
 				Tag::LINK,
 				[
 					Attribute::REL  => Attribute::REL_PRELOAD,
-					'as'            => Tag::SCRIPT,
+					Attribute::AS_  => Tag::SCRIPT,
 					Attribute::HREF => $amp_scripts[ $script_handle ]->getAttribute( Attribute::SRC ),
 				]
 			);
