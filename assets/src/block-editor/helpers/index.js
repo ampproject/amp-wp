@@ -194,9 +194,7 @@ export const removeDeprecatedAmpProps = ( settings ) => {
 
 				// Collect all deprecated props that would be set on the saved HTML block in the post.
 				Object.keys( mappedAttributes ).forEach( ( attribute ) => {
-					const deprecatedPropSet = Object.keys( blockAttributes ).includes( attribute ) && blockAttributes[ attribute ];
-
-					if ( deprecatedPropSet ) {
+					if ( attribute in blockAttributes && blockAttributes[ attribute ] ) {
 						deprecatedProps[ mappedAttributes[ attribute ] ] = blockAttributes[ attribute ];
 					}
 				} );
