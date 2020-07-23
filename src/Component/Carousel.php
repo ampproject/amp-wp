@@ -111,12 +111,10 @@ final class Carousel {
 					$caption_element->appendChild( $caption_content );
 				}
 
-				$caption_shortcode_class = 'wp-caption-text';
-				$caption_block_class     = 'wp-block-image';
-				$has_caption_class       = AMP_DOM_Utils::has_class( $caption_element, $caption_shortcode_class ) || AMP_DOM_Utils::has_class( $caption_element, $caption_block_class );
+				$has_caption_class = AMP_DOM_Utils::has_class( $caption_element, 'amp-wp-gallery-caption' );
 
 				/** @var DOMElement $caption_element */
-				if ( ! $has_caption_class || ! $caption_element->hasAttribute( Attribute::CLASS_ ) ) {
+				if ( ! $has_caption_class ) {
 					$caption_element->setAttribute( Attribute::CLASS_, 'amp-wp-gallery-caption' );
 				}
 
