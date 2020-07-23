@@ -15,17 +15,24 @@ import { __ } from '@wordpress/i18n';
  * @param {Object} props Component props.
  * @param {boolean} props.isCurrent Whether the dot is currently selected.
  * @param {boolean} props.isSelected Whether the current item is selected.
+ * @param {string} props.id An HTML ID.
  * @param {string} props.label Button label.
+ * @param {string} props.namespace CSS namespace.
  * @param {Function} props.onClick Click callback.
  */
-function Dot( { isCurrent, isSelected, label, onClick } ) {
+function Dot( { id, isCurrent, isSelected, label, namespace, onClick } ) {
 	return (
 		<Button
 			className={
-				`amp-carousel__nav-dot-button ${
-					isCurrent ? 'amp-carousel__nav-dot-button--current' : '' } ${
-					isSelected ? 'amp-carousel__nav-dot-button--active' : '' }`
+				[
+					`${ namespace }__nav-dot-button`,
+					isCurrent ? `${ namespace }__nav-dot-button--current` : '',
+					isSelected ? `${ namespace }__nav-dot-button--active` : '',
+				]
+					.filter( ( item ) => item )
+					.join( ' ' )
 			}
+			id={ id }
 			onClick={ onClick }
 		>
 			<span className="components-visually-hidden">
@@ -41,14 +48,16 @@ function Dot( { isCurrent, isSelected, label, onClick } ) {
 					{ __( '(Selected item)', 'amp' ) }
 				</span>
 			) }
-			<span className="amp-carousel__nav-dot" />
+			<span className={ `${ namespace }__nav-dot` } />
 		</Button>
 	);
 }
 Dot.propTypes = {
+	id: PropTypes.string.isRequired,
 	isCurrent: PropTypes.bool.isRequired,
 	isSelected: PropTypes.bool.isRequired,
 	label: PropTypes.string.isRequired,
+	namespace: PropTypes.string.isRequired,
 	onClick: PropTypes.func.isRequired,
 };
 
@@ -57,7 +66,7 @@ Dot.propTypes = {
  *
  * @param {Object} props Component props.
  * @param {number} props.currentItem The current item.
- * @param {Array} props.items Items in the carousel.
+ * @param {HTMLCollection} props.items Items in the carousel.
  * @param {string} props.namespace CSS namespace.
  * @param {Function} props.setCurrentItem Sets an item as the current item.
  * @param {number} props.highlightedItemIndex Index of an item to highlight.
@@ -74,6 +83,7 @@ export function CarouselNav( {
 	return (
 		<div className={ `${ namespace }__nav` }>
 			<Button
+				id={ `${ namespace }__prev-button` }
 				isPrimary
 				disabled={ null === currentItem.previousElementSibling }
 				onClick={ () => {
@@ -94,10 +104,12 @@ export function CarouselNav( {
 				<div className={ `${ namespace }__dots` }>
 					{ [ ...items ].map( ( item, itemIndex ) => (
 						<Dot
+							id={ `${ namespace }__${ item.id }-dot` }
 							key={ `${ namespace }__${ item.id }-dot` }
 							isCurrent={ item === currentItem }
 							isSelected={ itemIndex === highlightedItemIndex }
 							label={ item.getAttribute( 'data-label' ) }
+							namespace={ namespace }
 							onClick={ () => {
 								setCurrentItem( item );
 							} }
@@ -106,6 +118,7 @@ export function CarouselNav( {
 				</div>
 			) }
 			<Button
+				id={ `${ namespace }__next-button` }
 				isPrimary
 				disabled={ null === currentItem.nextElementSibling }
 				onClick={ () => {

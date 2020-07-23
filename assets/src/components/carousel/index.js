@@ -23,7 +23,7 @@ const DEFAULT_MOBILE_BREAKPOINT = 783;
  *
  * @param {Object} props Component props.
  * @param {number} props.gutterWidth Amount of space between items in pixels.
- * @param {Array} props.items Items in the carousel.
+ * @param {HTMLCollection} props.items Items in the carousel.
  * @param {number} props.itemWidth The width of each item.
  * @param {number} props.mobileBreakpoint Breakpoint below which to render the mobile version.
  * @param {string} props.namespace CSS namespace.
