@@ -86,8 +86,6 @@ export function ReaderThemeCarousel( { hideCurrentlyActiveTheme = false } ) {
 							ElementName="div"
 							screenshotUrl={ theme.screenshot_url }
 							{ ...theme }
-							aria-label={ theme.name }
-							id={ `theme-card-${ theme.slug }` }
 						/>
 					),
 				} ) ),
