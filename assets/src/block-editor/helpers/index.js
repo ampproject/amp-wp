@@ -366,6 +366,8 @@ export const filterBlocksEdit = ( BlockEdit ) => {
  * Set width and height in case of image block.
  *
  * @param {Object} props Props.
+ * @param {Function} props.setAttributes Callback to set attributes.
+ * @param {Object} props.attributes Attributes.
  * @param {string} layout Layout.
  */
 export const setImageBlockLayoutAttributes = ( props, layout ) => {
@@ -496,6 +498,9 @@ AmpNoloadingToggle.propTypes = {
  * @todo Consider wrapping the render function to delete the original font size in text settings when ampFitText.
  *
  * @param {Object} props Props.
+ * @param {Function} props.setAttributes Callback to set attributes.
+ * @param {Object} props.attributes Attributes.
+ * @param {boolean} props.isSelected Is selected.
  *
  * @return {ReactElement} Inspector Controls.
  */
