@@ -70,7 +70,7 @@ if ($res !== true) {
 for ($index = 0; $index < $zip->numFiles; $index++) {
     $archivedPath = $zip->statIndex($index)['name'];
 
-    if (substr($archivedPath, -5) !== '.html') {
+    if (substr($archivedPath, -5) !== '.html' && substr($archivedPath, -11) !== 'config.json' ) {
         continue;
     }
 

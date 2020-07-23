@@ -25,7 +25,7 @@ final class RewriteAmpUrlsConfiguration extends BaseTransformerConfiguration
      *
      * @var string
      */
-    const EXPERIMENTAL_ESM = 'experimentalEsm';
+    const EXPERIMENT_ESM = 'experimentEsm';
 
     /**
      * Get the associative array of allowed keys and their respective default
@@ -45,7 +45,7 @@ final class RewriteAmpUrlsConfiguration extends BaseTransformerConfiguration
             self::LTS                 => false,
             self::RTV                 => false,
             self::GEO_API_URL         => '',
-            self::EXPERIMENTAL_ESM    => false,
+            self::EXPERIMENT_ESM      => false,
         ];
     }
 
@@ -117,11 +117,11 @@ final class RewriteAmpUrlsConfiguration extends BaseTransformerConfiguration
                 $value = trim($value);
                 break;
 
-            case self::EXPERIMENTAL_ESM:
+            case self::EXPERIMENT_ESM:
                 if (! is_bool($value)) {
                     throw InvalidConfigurationValue::forInvalidSubValueType(
                         self::class,
-                        self::EXPERIMENTAL_ESM,
+                        self::EXPERIMENT_ESM,
                         'boolean',
                         gettype($value)
                     );

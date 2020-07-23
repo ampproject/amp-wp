@@ -107,7 +107,7 @@ final class RewriteAmpUrls implements Transformer
      */
     private function collectPreloadNodes(Document $document, $host)
     {
-        $usesEsm      = $this->configuration->get(RewriteAmpUrlsConfiguration::EXPERIMENTAL_ESM);
+        $usesEsm      = $this->configuration->get(RewriteAmpUrlsConfiguration::EXPERIMENT_ESM);
         $preloadNodes = [];
 
         $node = $document->head->firstChild;

@@ -56,16 +56,22 @@ final class SpecTest extends TestCase
     {
         $scenarios = [];
         $suites    = [
-            'ReorderHead'         => [ReorderHead::class, self::TRANSFORMER_SPEC_PATH . '/valid/ReorderHeadTransformer'],
+            'ReorderHead'         => [ReorderHead::class,         self::TRANSFORMER_SPEC_PATH . '/valid/ReorderHeadTransformer'],
             'ServerSideRendering' => [ServerSideRendering::class, self::TRANSFORMER_SPEC_PATH . '/valid/ServerSideRendering'],
-            'AmpRuntimeCss'       => [
-                AmpRuntimeCss::class,
-                self::TRANSFORMER_SPEC_PATH . '/valid/AmpBoilerplateTransformer',
-            ],
-            'RewriteAmpUrls'      => [RewriteAmpUrls::class, self::TRANSFORMER_SPEC_PATH . '/experimental/RewriteAmpUrls']
+            'AmpRuntimeCss'       => [AmpRuntimeCss::class,       self::TRANSFORMER_SPEC_PATH . '/valid/AmpBoilerplateTransformer'],
+            'RewriteAmpUrls'      => [RewriteAmpUrls::class,      self::TRANSFORMER_SPEC_PATH . '/experimental/RewriteAmpUrls']
         ];
 
         foreach ($suites as $key => list($transformerClass, $specFileFolder)) {
+            $suiteConfig = [];
+            if (file_exists("{$specFileFolder}/config.json")) {
+                $suiteConfigJson = file_get_contents("{$specFileFolder}/config.json");
+                $suiteConfig = (array)json_decode($suiteConfigJson, true);
+                if (empty($suiteConfig) || json_last_error() !== JSON_ERROR_NONE) {
+                    $suiteConfig = [];
+                }
+            }
+
             foreach (new DirectoryIterator($specFileFolder) as $subFolder) {
                 if ($subFolder->isFile() || $subFolder->isDot()) {
                     continue;
@@ -77,6 +83,7 @@ final class SpecTest extends TestCase
                     $scenarios[$scenario] = [
                         $scenario,
                         self::CLASS_SKIP_TEST,
+                        [],
                         $scenario,
                         self::TESTS_TO_SKIP[$scenario],
                     ];
@@ -87,6 +94,7 @@ final class SpecTest extends TestCase
                 $scenarios[$scenario] = [
                     $scenario,
                     $transformerClass,
+                    $suiteConfig,
                     file_get_contents("{$subFolder->getPathname()}/input.html"),
                     file_get_contents("{$subFolder->getPathname()}/expected_output.html"),
                 ];
@@ -103,22 +111,27 @@ final class SpecTest extends TestCase
      *
      * @param string $scenario         Test scenario.
      * @param string $transformerClass Class of the transformer to test.
+     * @param array  $suiteConfig      Suite-wide config file to use.
      * @param string $source           Source file to transform.
      * @param string $expected         Expected transformed result.
      */
-    public function testTransformerSpecFiles($scenario, $transformerClass, $source, $expected)
+    public function testTransformerSpecFiles($scenario, $transformerClass, $suiteConfig, $source, $expected)
     {
         if ($transformerClass === self::CLASS_SKIP_TEST) {
             // $source contains the scenario name, $expected the reason.
             $this->markTestSkipped("Skipping {$source}, {$expected}");
         }
 
-        $configuration = $this->mapConfigurationData($this->extractConfigurationData($source));
+        $configuration = $this->mapConfigurationData(
+            array_merge(
+                $suiteConfig,
+                $this->extractConfigurationData($source)
+            )
+        );
 
-        $document = Document::fromHtmlFragment($source);
-
-        $transformer   = $this->getTransformer($scenario, $transformerClass, $configuration);
-        $errors        = new ErrorCollection();
+        $document    = Document::fromHtmlFragment($source);
+        $transformer = $this->getTransformer($scenario, $transformerClass, $configuration);
+        $errors      = new ErrorCollection();
 
         $transformer->transform($document, $errors);
 
@@ -144,8 +157,8 @@ final class SpecTest extends TestCase
                     $mappedConfiguration[AmpRuntimeCss::class][AmpRuntimeCssConfiguration::VERSION] = $value;
                     $mappedConfiguration[RewriteAmpUrls::class][RewriteAmpUrlsConfiguration::AMP_RUNTIME_VERSION] = $value;
                     break;
-                case 'experimentalEsm':
-                    $mappedConfiguration[RewriteAmpUrls::class][RewriteAmpUrlsConfiguration::EXPERIMENTAL_ESM] = $value;
+                case 'experimentEsm':
+                    $mappedConfiguration[RewriteAmpUrls::class][RewriteAmpUrlsConfiguration::EXPERIMENT_ESM] = $value;
                     break;
                 case 'ampUrlPrefix':
                     $mappedConfiguration[RewriteAmpUrls::class][RewriteAmpUrlsConfiguration::AMP_URL_PREFIX] = $value;
@@ -182,7 +195,7 @@ final class SpecTest extends TestCase
      * @param string $source Input source file to parse for a configuration snippet.
      * @return array Associative array of configuration data found in the input HTML file.
      */
-    public function extractConfigurationData(&$source)
+    private function extractConfigurationData(&$source)
     {
         $matches = [];
         if (!preg_match(self::LEADING_HTML_COMMENT_REGEX_PATTERN, $source, $matches)) {
