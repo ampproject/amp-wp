@@ -98,6 +98,9 @@ final class ObsoleteBlockAttributeRemoverTest extends WP_UnitTestCase {
 	 * @param int    $expected_prop_count
 	 */
 	public function test_filter_rest_prepare_post_raw( $block_content, $expected_prop_count ) {
+		if ( ! function_exists( 'parse_blocks' ) ) {
+			$this->markTestSkipped();
+		}
 		$block_content = str_replace( "\t", '', trim( $block_content ) );
 
 		$parsed_blocks = parse_blocks( $block_content );
