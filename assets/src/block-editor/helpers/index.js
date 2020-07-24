@@ -103,9 +103,11 @@ export const addAMPAttributes = ( settings, name ) => {
 		if ( ! settings.attributes ) {
 			settings.attributes = {};
 		}
+		// The following attributes have to default to `false` so that the gallery block can be updated successfully if
+		// it has deprecated props.
 		settings.attributes.ampCarousel = {
 			type: 'boolean',
-			default: ! select( 'amp/block-editor' ).hasThemeSupport(), // @todo We could just default this to false now even in Reader mode since block styles are loaded.
+			default: false,
 		};
 		settings.attributes.ampLightbox = {
 			type: 'boolean',
@@ -175,10 +177,11 @@ export const addAMPAttributes = ( settings, name ) => {
  * Remove AMP deprecated props from any blocks which may contain them.
  *
  * @param {Object} settings Block settings.
+ * @param {string} name     Block name.
  *
  * @return {Object} Modified block settings.
  */
-export const removeDeprecatedAmpProps = ( settings ) => {
+export const removeDeprecatedAmpProps = ( settings, name ) => {
 	const maybeBlockHasDeprecatedProp = Object.keys( mappedAttributes )
 		.some( ( attribute ) => Object.keys( settings.attributes ).includes( attribute ) );
 
@@ -203,6 +206,11 @@ export const removeDeprecatedAmpProps = ( settings ) => {
 				// If there are not any deprecated props, return the unmodified element.
 				if ( 0 === Object.keys( deprecatedProps ).length ) {
 					return element;
+				}
+
+				// Once we know the block will be updated successfully, we can now modify the block's attributes.
+				if ( 'core/gallery' === name ) {
+					settings.attributes.ampCarousel.default = ! select( 'amp/block-editor' ).hasThemeSupport(); // @todo We could just default this to false now even in Reader mode since block styles are loaded.
 				}
 
 				// Re-render the block with deprecated props.
