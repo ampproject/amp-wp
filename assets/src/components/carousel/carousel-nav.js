@@ -14,20 +14,20 @@ import { __ } from '@wordpress/i18n';
  *
  * @param {Object} props Component props.
  * @param {boolean} props.isCurrent Whether the dot is currently selected.
- * @param {boolean} props.isSelected Whether the current item is selected.
+ * @param {boolean} props.isHighlighted Whether the current item is highlighted.
  * @param {string} props.id An HTML ID.
  * @param {string} props.label Button label.
  * @param {string} props.namespace CSS namespace.
  * @param {Function} props.onClick Click callback.
  */
-function Dot( { id, isCurrent, isSelected, label, namespace, onClick } ) {
+function Dot( { id, isCurrent, isHighlighted, label, namespace, onClick } ) {
 	return (
 		<Button
 			className={
 				[
 					`${ namespace }__nav-dot-button`,
 					isCurrent ? `${ namespace }__nav-dot-button--current` : '',
-					isSelected ? `${ namespace }__nav-dot-button--active` : '',
+					isHighlighted ? `${ namespace }__nav-dot-button--active` : '',
 				]
 					.filter( ( item ) => item )
 					.join( ' ' )
@@ -44,7 +44,7 @@ function Dot( { id, isCurrent, isSelected, label, namespace, onClick } ) {
 					{ __( '(Current slide)', 'amp' ) }
 				</span>
 			) }
-			{ isSelected && (
+			{ isHighlighted && (
 				<span className="components-visually-hidden">
 					{ __( '(Selected item)', 'amp' ) }
 				</span>
@@ -56,7 +56,7 @@ function Dot( { id, isCurrent, isSelected, label, namespace, onClick } ) {
 Dot.propTypes = {
 	id: PropTypes.string.isRequired,
 	isCurrent: PropTypes.bool.isRequired,
-	isSelected: PropTypes.bool.isRequired,
+	isHighlighted: PropTypes.bool.isRequired,
 	label: PropTypes.string.isRequired,
 	namespace: PropTypes.string.isRequired,
 	onClick: PropTypes.func.isRequired,
@@ -109,7 +109,7 @@ export function CarouselNav( {
 							id={ `${ namespace }__${ item.id }-dot` }
 							key={ `${ namespace }__${ item.id }-dot` }
 							isCurrent={ item === currentItem }
-							isSelected={ itemIndex === highlightedItemIndex }
+							isHighlighted={ itemIndex === highlightedItemIndex }
 							label={ item.getAttribute( 'data-label' ) }
 							namespace={ namespace }
 							onClick={ () => {

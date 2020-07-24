@@ -27,7 +27,7 @@ const DEFAULT_MOBILE_BREAKPOINT = 783;
  * @param {number} props.itemWidth The width of each item.
  * @param {number} props.mobileBreakpoint Breakpoint below which to render the mobile version.
  * @param {string} props.namespace CSS namespace.
- * @param {number} props.highlightedItemIndex Index of an item to force into focus.
+ * @param {number} props.highlightedItemIndex Index of an item receiving special visual treatment.
  */
 export function Carousel( {
 	gutterWidth = DEFAULT_GUTTER_WIDTH,
@@ -37,7 +37,7 @@ export function Carousel( {
 	namespace = 'amp-carousel',
 	highlightedItemIndex = 0,
 } ) {
-	const width = useWindowWidth();
+	const windowWidth = useWindowWidth();
 	const [ currentItem, originalSetCurrentItem ] = useState( null );
 	const carouselContainerRef = useRef();
 	const carouselListRef = useRef();
@@ -45,22 +45,22 @@ export function Carousel( {
 	/**
 	 * Sets the the currentItem state and optionally scrolls to it.
 	 *
-	 * This wrapper function is required because the intersection observer needs to set currentItem, but it does
-	 * so only when the new currentItem is already centered in the view. Calling scrollTo in that situation would
-	 * cause jerky scroll effects.
+	 * This state-setting wrapper is required, as opposed to scrolling to items in an effect hook when they're set as current,
+	 * because intersection observer needs to set currentItem, but it does so only when the new currentItem is already centered
+	 * in the view. Calling scrollTo in that situation would cause jerky scroll effects.
 	 */
 	const setCurrentItem = useCallback( ( newCurrentItem, scrollToItem = true ) => {
 		originalSetCurrentItem( newCurrentItem );
 
 		if ( newCurrentItem && scrollToItem ) {
 			const left = newCurrentItem.offsetLeft - (
-				width > mobileBreakpoint
-					? ( newCurrentItem.offsetWidth + gutterWidth ) // Center the item on desktop. If this isn't exact, the scroll snap CSS properties will fix it.
+				windowWidth > mobileBreakpoint
+					? ( newCurrentItem.offsetWidth + gutterWidth ) // Center the item on desktop. If this isn't exact, the scroll snap CSS rules will fix it.
 					: 0
 			);
 			carouselListRef.current.scrollTo( { top: 0, left, behavior: 'smooth' } );
 		}
-	}, [ gutterWidth, mobileBreakpoint, width ] );
+	}, [ gutterWidth, mobileBreakpoint, windowWidth ] );
 
 	/**
 	 * Center the highlighted item. On initial load, this will center the previously selected theme. Subsequently,
@@ -73,7 +73,7 @@ export function Carousel( {
 	}, [ highlightedItemIndex, setCurrentItem ] );
 
 	/**
-	 * Set up an intersection observer to set an item as active as it crosses the center of the view.
+	 * Set up an intersection observer to set an item as the currentItem as it crosses the center of the view.
 	 */
 	useLayoutEffect( () => {
 		const observerCallback = ( [ { isIntersecting, target } ] ) => {
@@ -120,7 +120,7 @@ export function Carousel( {
 					namespace={ namespace }
 					setCurrentItem={ setCurrentItem }
 					highlightedItemIndex={ highlightedItemIndex }
-					showDots={ mobileBreakpoint < width }
+					showDots={ mobileBreakpoint < windowWidth }
 				/>
 			) }
 			<Style
@@ -142,6 +142,8 @@ Carousel.propTypes = {
 
 /**
  * Styles for the carousel component, rendered as a string in JSX to facilitate dynamic rules.
+ *
+ * @todo Installing a styled components library would provide better tooling for this.
  *
  * @param {Object} props Component props.
  * @param {number} props.gutterWidth The amount of space betwen items.
