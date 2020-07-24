@@ -15,21 +15,22 @@ use WP_REST_Response;
 /**
  * Removes obsolete data-amp-* attributes from block markup in post content.
  *
- * These HTML attributes serve as processing instructions to control how the sanitizers handle converting the HTML to AMP.
+ * These HTML attributes serve as processing instructions to control how the sanitizers handle converting HTML to AMP.
  * For each HTML attribute there is also a block attribute, so if there is a data-amp-carousel HTML attribute then there
  * is also an ampCarousel block attribute. The block attributes were originally mirrored onto the HTML attributes because
  * the 'render_block' filter was not available in Gutenberg (or WordPress Core) when this was first implemented; now that
- * this filter is available, there is no need to duplicate the mirror the attributes, and so they are injected into the
+ * this filter is available, there is no need to duplicate/mirror the attributes, and so they are injected into the
  * root HTML element via `AMP_Core_Block_Handler::filter_rendered_block()`. In hindsight, instead of having the data
  * mirrored between block attributes and HTML attributes, the block attributes should have perhaps used an 'attribute'
  * as the block attribute 'source'. Then again, that may have complicated things yet further to migrate away from using
  * these data attributes. A key reason for why these HTML data-* attributes are bad is that they cause block validation
  * errors. If someone creates a Gallery block and enables a carousel, then if they go and deactivate the AMP plugin,
  * this block will then show as having a block validation error. If, however, we restrict the block attributes to only
- * be in the block comment, then no block validation errors occurs. Also, since the 'render_block' filter is now
- * available, the reason for storing these attributes as data-amp-* HTML attributes in post_content is now obsolete.
+ * be in the block comment, then no block validation errors occur. Also, since the 'render_block' filter is now
+ * available, the reason for storing these block attributes as data-amp-* HTML attributes in post_content is now obsolete.
  *
  * @see AMP_Core_Block_Handler::filter_rendered_block()
+ * @see AMP_Gallery_Block_Sanitizer
  * @link https://github.com/ampproject/amp-wp/pull/4775
  *
  * @package AmpProject\AmpWP
