@@ -50,7 +50,6 @@ describe( 'AMP settings screen newly activated', () => {
 		await clickMode( 'reader' );
 		await expect( page ).toMatchElement( '#template-mode-reader:checked' );
 
-		await expect( page ).toClick( '.reader-themes' );
 		await expect( page ).toMatchElement( '#theme-card__legacy:checked' );
 
 		await expect( page ).not.toMatchElement( '#theme-card__twentytwenty:checked' ); // Active theme is hidden.

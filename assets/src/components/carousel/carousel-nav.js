@@ -34,6 +34,7 @@ function Dot( { id, isCurrent, isSelected, label, namespace, onClick } ) {
 			}
 			id={ id }
 			onClick={ onClick }
+			aria-label={ label }
 		>
 			<span className="components-visually-hidden">
 				{ label }
@@ -90,6 +91,7 @@ export function CarouselNav( {
 					setCurrentItem( currentItem.previousElementSibling );
 				} }
 				className={ `${ namespace }__prev` }
+				aria-label={ __( 'Previous', 'amp' ) }
 			>
 				<span className="components-visually-hidden">
 					{ __( 'Previous', 'amp' ) }
@@ -125,6 +127,7 @@ export function CarouselNav( {
 					setCurrentItem( currentItem.nextElementSibling );
 				} }
 				className={ `${ namespace }__next` }
+				aria-label={ __( 'Next', 'amp' ) }
 			>
 				<span className="components-visually-hidden">
 					{ __( 'Next', 'amp' ) }

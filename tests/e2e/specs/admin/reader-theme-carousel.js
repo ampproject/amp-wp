@@ -8,8 +8,11 @@ describe( 'AMP settings screen reader themes carousel', () => {
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 	} );
 
-	it( 'should allow selection of carousel items', async () => {
+	it( 'allows selection of carousel items', async () => {
+		await expect( page ).toClick( '#template-mode-reader' );
+
 		await expect( page ).toMatchElement( '.amp-carousel__carousel' );
+		await expect( page ).toMatchElement( '#theme-card__twentynineteen' );
 		await expect( page ).toClick( '#theme-card__twentynineteen' );
 		await expect( page ).toMatchElement( '#theme-card__twentynineteen:checked' );
 	} );

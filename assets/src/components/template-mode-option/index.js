@@ -128,7 +128,11 @@ export function TemplateModeOption( { children, details, initialOpen, labelExtra
 				</div>
 			</label>
 			<PanelBody
-				title={ ' ' }
+				title={ (
+					<span className="components-visually-hidden">
+						{ getTitle( mode ) }
+					</span>
+				) }
 				className="template-mode-option__panel-body"
 				initialOpen={ 'boolean' === typeof initialOpen ? initialOpen : mode && themeSupport && mode === themeSupport }
 			>
