@@ -50,7 +50,8 @@
 	}
 }
 
-.settings-welcome__button {
+.amp .settings-welcome__button.is-primary {
+	box-shadow: none;
 
 	@media (min-width: 783px) {
 		padding-left: 1rem;

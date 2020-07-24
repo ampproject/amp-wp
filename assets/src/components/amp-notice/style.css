@@ -24,6 +24,12 @@
 	background-color: #ecfef1;
 }
 
+.amp-notice__icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
 .amp-notice--info {
 	background-color: #effbff;
 }
@@ -45,7 +51,7 @@
 }
 
 .amp-notice--large {
-	padding: 1rem 1.5rem;
+	padding: 0.5rem 1rem;
 	display: inline-flex;
 	align-items: center;
 }

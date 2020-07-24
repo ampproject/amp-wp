@@ -21,6 +21,7 @@ import { ReaderThemes } from '../../../components/reader-themes-context-provider
 import { AMPNotice, NOTICE_SIZE_LARGE, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_INFO } from '../../../components/amp-notice';
 import { Navigation } from '../../components/navigation-context-provider';
 import { Options } from '../../../components/options-context-provider';
+import { Done } from '../../../components/svg/done';
 
 /**
  * Provides the description for the done screen.
@@ -193,6 +194,7 @@ export function Save() {
 	return (
 		<div className="done">
 			<div className="done__text">
+				<Done />
 				<h1>
 					{ heading }
 				</h1>
