@@ -6,7 +6,7 @@ import { visitAdminPage } from '@wordpress/e2e-test-utils';
 /**
  * Internal dependencies
  */
-import { completeWizard, cleanUpSettings, clickMode, selectReaderTheme } from '../../utils/onboarding-wizard-utils';
+import { completeWizard, cleanUpSettings, clickMode } from '../../utils/onboarding-wizard-utils';
 import { installTheme } from '../../utils/install-theme';
 import { activateTheme } from '../../utils/activate-theme';
 
