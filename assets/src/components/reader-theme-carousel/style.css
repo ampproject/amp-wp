@@ -1,3 +1,9 @@
+.reader-theme-selection {
+	margin-top: 1.5rem;
+	padding-top: 1.5rem;
+	border-top: 1px solid var(--amp-settings-color-border);
+}
+
 .choose-reader-theme__unavailable .choose-reader-theme__grid {
 	display: grid;
 	gap: 1rem;
