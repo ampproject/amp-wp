@@ -45,18 +45,6 @@ describe( 'AMP settings screen newly activated', () => {
 
 		await expect( page ).not.toMatchElement( '.reader-themes' );
 	} );
-
-	it( 'shows expected elements for reader mode', async () => {
-		await clickMode( 'reader' );
-		await expect( page ).toMatchElement( '#template-mode-reader:checked' );
-
-		await expect( page ).toMatchElement( '#theme-card__legacy:checked' );
-
-		await expect( page ).not.toMatchElement( '#theme-card__twentytwenty:checked' ); // Active theme is hidden.
-
-		await selectReaderTheme( 'twentynineteen' );
-		await expect( page ).toMatchElement( '#theme-card__twentynineteen:checked' );
-	} );
 } );
 
 describe( 'Settings screen when reader theme is active theme', () => {
@@ -84,7 +72,7 @@ describe( 'Mode info notices', () => {
 
 		await clickMode( 'reader' );
 
-		await expect( page ).toMatchElement( '#template-mode-reader-container .amp-notice--info' );
+		await expect( page ).toMatchElement( '#template-mode-reader-container .amp-notice--warning' );
 	} );
 
 	it.todo( 'shows expected notices for theme with paired flag false' );
