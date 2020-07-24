@@ -43,17 +43,10 @@ final class ObsoleteBlockAttributeRemover implements Service, Registerable, Dela
 	 */
 	const OBSOLETE_ATTRIBUTES = [
 		'data-amp-carousel',
+		'data-amp-layout',
 		'data-amp-lightbox',
 		'data-amp-noloading',
-		'data-amp-layout',
 	];
-
-	/**
-	 * Pattern matching the obsolete attribute key/value pair in an HTML start tag.
-	 *
-	 * @var string
-	 */
-	protected $obsolete_attribute_pattern;
 
 	/**
 	 * Get registration action.
@@ -70,10 +63,22 @@ final class ObsoleteBlockAttributeRemover implements Service, Registerable, Dela
 	 * @return void
 	 */
 	public function register() {
-		$this->obsolete_attribute_pattern = sprintf( '/\s(%s)="[^"]*+"/', implode( '|', self::OBSOLETE_ATTRIBUTES ) );
 		foreach ( get_post_types_by_support( 'editor' ) as $post_type ) {
 			add_filter( "rest_prepare_{$post_type}", [ $this, 'filter_rest_prepare_post' ] );
 		}
+	}
+
+	/**
+	 * Get obsolete attribute regular expression to match the obsolete attribute key/value pair in an HTML start tag..
+	 *
+	 * @return string Regular expression pattern.
+	 */
+	protected function get_obsolete_attribute_pattern() {
+		static $pattern = null;
+		if ( ! $pattern ) {
+			$pattern = sprintf( '/\s(%s)="[^"]*+"/', implode( '|', self::OBSOLETE_ATTRIBUTES ) );
+		}
+		return $pattern;
 	}
 
 	/**
@@ -87,7 +92,7 @@ final class ObsoleteBlockAttributeRemover implements Service, Registerable, Dela
 			$response->data['content']['raw'] = preg_replace_callback(
 				'#(?P<before_html_attrs><!--\s*wp:\w+.*?-->\s*<\w+\S*?)(?P<html_attrs>\s+[^>]*+)\s*>#s',
 				function ( $matches ) {
-					return $matches['before_html_attrs'] . preg_replace( $this->obsolete_attribute_pattern, '', $matches['html_attrs'] ) . '>';
+					return $matches['before_html_attrs'] . preg_replace( $this->get_obsolete_attribute_pattern(), '', $matches['html_attrs'] ) . '>';
 				},
 				$response->data['content']['raw']
 			);
