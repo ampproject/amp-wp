@@ -77,6 +77,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			'amp_slug_customization_watcher'   => AmpSlugCustomizationWatcher::class,
 			'rest.options_controller'          => OptionsRESTController::class,
 			'server_timing'                    => ServerTiming::class,
+			'obsolete_block_attribute_remover' => ObsoleteBlockAttributeRemover::class,
 		];
 	}
 

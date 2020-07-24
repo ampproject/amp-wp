@@ -13,7 +13,7 @@ import domReady from '@wordpress/dom-ready';
 import { withFeaturedImageNotice } from '../common/components';
 import { getMinimumFeaturedImageDimensions } from '../common/helpers';
 import { withMediaLibraryNotice, AMPPreview } from './components';
-import { addAMPAttributes, addAMPExtraProps, filterBlocksEdit, filterBlocksSave, renderPreviewButton } from './helpers';
+import { addAMPAttributes, filterBlocksEdit, filterBlocksSave, renderPreviewButton } from './helpers';
 import './store';
 
 const {
@@ -31,7 +31,6 @@ plugins.keys().forEach( ( modulePath ) => {
 addFilter( 'blocks.registerBlockType', 'ampEditorBlocks/addAttributes', addAMPAttributes );
 addFilter( 'blocks.getSaveElement', 'ampEditorBlocks/filterSave', filterBlocksSave );
 addFilter( 'editor.BlockEdit', 'ampEditorBlocks/filterEdit', filterBlocksEdit, 20 );
-addFilter( 'blocks.getSaveContent.extraProps', 'ampEditorBlocks/addExtraAttributes', addAMPExtraProps );
 addFilter( 'editor.PostFeaturedImage', 'ampEditorBlocks/withFeaturedImageNotice', withFeaturedImageNotice );
 addFilter( 'editor.MediaUpload', 'ampEditorBlocks/withMediaLibraryNotice', ( InitialMediaUpload ) => withMediaLibraryNotice( InitialMediaUpload, getMinimumFeaturedImageDimensions() ) );
 
