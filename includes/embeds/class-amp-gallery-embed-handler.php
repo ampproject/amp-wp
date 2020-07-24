@@ -95,11 +95,11 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			$data_attrs = [];
 
 			if ( $is_lightbox ) {
-				$data_attrs[] = 'data-amp-lightbox';
+				$data_attrs[] = 'data-amp-lightbox="true"';
 			}
 
 			if ( $is_carousel ) {
-				$data_attrs[] = 'data-amp-carousel';
+				$data_attrs[] = 'data-amp-carousel="true"';
 			}
 
 			return preg_replace(
