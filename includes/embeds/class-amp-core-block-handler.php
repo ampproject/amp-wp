@@ -76,14 +76,17 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Filtered block content.
 	 */
 	public function filter_rendered_block( $block_content, $block ) {
+		if ( ! isset( $block['blockName'] ) ) {
+			return $block_content;
+		}
 
-		if ( isset( $block['attrs'] ) ) {
+		if ( isset( $block['attrs'] ) && 'core/shortcode' !== $block['blockName'] ) {
 			$injected_attributes    = '';
 			$prop_attribute_mapping = [
-				'ampLayout'    => 'data-amp-layout',
-				'ampNoLoading' => 'data-amp-noloading',
-				'ampLightbox'  => 'data-amp-lightbox',
 				'ampCarousel'  => 'data-amp-carousel',
+				'ampLayout'    => 'data-amp-layout',
+				'ampLightbox'  => 'data-amp-lightbox',
+				'ampNoLoading' => 'data-amp-noloading',
 			];
 			foreach ( $prop_attribute_mapping as $prop => $attr ) {
 				if ( isset( $block['attrs'][ $prop ] ) ) {
@@ -100,9 +103,6 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			}
 		}
 
-		if ( ! isset( $block['blockName'] ) ) {
-			return $block_content;
-		}
 		if ( isset( $this->block_ampify_methods[ $block['blockName'] ] ) ) {
 			$method_name   = $this->block_ampify_methods[ $block['blockName'] ];
 			$block_content = $this->{$method_name}( $block_content, $block );
