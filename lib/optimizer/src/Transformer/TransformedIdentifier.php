@@ -14,7 +14,6 @@ use AmpProject\Optimizer\TransformerConfiguration;
  * This is ported from the NodeJS optimizer while verifying against the Go version.
  *
  * NodeJS:
- *
  * @version 2ca65a94b77130c91ac11fcc32c94b93cbd2b7a0
  * @link    https://github.com/ampproject/amp-toolbox/blob/2ca65a94b77130c91ac11fcc32c94b93cbd2b7a0/packages/optimizer/lib/transformers/AddTransformedFlag.js
  *

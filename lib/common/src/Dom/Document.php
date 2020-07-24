@@ -77,7 +77,8 @@ final class Document extends DOMDocument
      *
      * @var string
      */
-    const AMP_BIND_ATTR_PATTERN = '#^\s+(?P<name>\[?[a-zA-Z0-9_\-]+\]?)(?P<value>=(?>"[^"]*+"|\'[^\']*+\'|[^\'"\s]+))?#';
+    const AMP_BIND_ATTR_PATTERN = '#^\s+(?P<name>\[?[a-zA-Z0-9_\-]+\]?)'
+                                  . '(?P<value>=(?>"[^"]*+"|\'[^\']*+\'|[^\'"\s]+))?#';
 
     /**
      * Match all start tags that contain a binding attribute.
@@ -89,7 +90,8 @@ final class Document extends DOMDocument
                                         . '(?P<attrs>\s'                            // Attributes.
                                         . '(?>[^>"\'\[\]]+|"[^"]*+"|\'[^\']*+\')*+' // Non-binding attributes tokens.
                                         . '\[[a-zA-Z0-9_\-]+\]'                     // One binding attribute key.
-                                        . '(?>[^>"\']+|"[^"]*+"|\'[^\']*+\')*+'     // Any attribute tokens, including binding ones.
+                                        . '(?>[^>"\']+|"[^"]*+"|\'[^\']*+\')*+'     // Any attribute tokens, including
+                                                                                    // binding ones.
                                         . ')>#s';
 
     /*
@@ -103,11 +105,13 @@ final class Document extends DOMDocument
     const HTML_STRUCTURE_BODY_START_TAG  = '/^[^<]*(?><!--.*-->\s*)*(?><body(?>\s+[^>]*)?>)/is';
     const HTML_STRUCTURE_BODY_END_TAG    = '/(?><\/body(?>\s+[^>]*)?>.*)$/is';
     const HTML_STRUCTURE_HEAD_TAG        = '/^(?>[^<]*(?><head(?>\s+[^>]*)?>).*?<\/head(?>\s+[^>]*)?>)/is';
-    const HTML_DOCTYPE_HTML_4_SUFFIX     = ' PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"';
+    const HTML_DOCTYPE_HTML_4_SUFFIX     = ' PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" '
+                                           . '"http://www.w3.org/TR/REC-html40/loose.dtd"';
 
     // Regex patterns used for securing and restoring the doctype node.
     const HTML_SECURE_DOCTYPE_IF_NOT_FIRST_PATTERN = '/(^[^<]*(?>\s*<!--[^>]*>\s*)+<)(!)(doctype)(\s+[^>]+?)(>)/i';
-    const HTML_RESTORE_DOCTYPE_PATTERN             = '/(^[^<]*(?>\s*<!--[^>]*>\s*)+<)(!--amp-)(doctype)(\s+[^>]+?)(-->)/i';
+    const HTML_RESTORE_DOCTYPE_PATTERN             = '/(^[^<]*(?>\s*<!--[^>]*>\s*)+<)'
+                                                     . '(!--amp-)(doctype)(\s+[^>]+?)(-->)/i';
 
     // Regex pattern used for removing Internet Explorer conditional comments.
     const HTML_IE_CONDITIONAL_COMMENTS_PATTERN = '/<!--(?>\[if\s|<!\[endif)(?>[^>]+(?<!--)>)*(?>[^>]+(?<=--)>)/i';
@@ -120,11 +124,14 @@ final class Document extends DOMDocument
     const XPATH_URL_ENCODED_ATTRIBUTES_QUERY = './/*/@src|.//*/@href|.//*/@action';
 
     /**
-     * Xpath query to fetch the elements containing Mustache templates (both <template type=amp-mustache> and <script type=text/plain template=amp-mustache>).
+     * Xpath query to fetch the elements containing Mustache templates (both <template type=amp-mustache> and
+     * <script type=text/plain template=amp-mustache>).
      *
      * @var string
      */
-    const XPATH_MUSTACHE_TEMPLATE_ELEMENTS_QUERY = './/self::template[ @type = "amp-mustache" ]|//self::script[ @type = "text/plain" and @template = "amp-mustache" ]';
+    const XPATH_MUSTACHE_TEMPLATE_ELEMENTS_QUERY = './/self::template[ @type = "amp-mustache" ]'
+                                                   . '|//self::script[ @type = "text/plain" '
+                                                   . 'and @template = "amp-mustache" ]';
 
     /**
      * Error message to use when the __get() is triggered for an unknown property.
@@ -134,9 +141,14 @@ final class Document extends DOMDocument
     const PROPERTY_GETTER_ERROR_MESSAGE = 'Undefined property: AmpProject\\Dom\\Document::';
 
     // Regex patterns and values used for adding and removing http-equiv charsets for compatibility.
-    const HTML_GET_HEAD_OPENING_TAG_PATTERN     = '/(?><!--.*?-->\s*)*<head(?>\s+[^>]*)?>/is'; // This pattern contains a comment to make sure we don't match a <head> tag within a comment.
-    const HTML_GET_HEAD_OPENING_TAG_REPLACEMENT = '$0<meta http-equiv="content-type" content="text/html; charset=utf-8">';
-    const HTML_GET_HTTP_EQUIV_TAG_PATTERN       = '#<meta http-equiv=([\'"])content-type\1 content=([\'"])text/html; charset=utf-8\2>#i';
+    // The opening tag pattern contains a comment to make sure we don't match a <head> tag within a comment.
+    const HTML_GET_HEAD_OPENING_TAG_PATTERN     = '/(?><!--.*?-->\s*)*<head(?>\s+[^>]*)?>/is';
+    const HTML_GET_HEAD_OPENING_TAG_REPLACEMENT = '$0<meta http-equiv="content-type" '
+                                                  . 'content="text/html; '
+                                                  . 'charset=utf-8">';
+    const HTML_GET_HTTP_EQUIV_TAG_PATTERN       = '#<meta http-equiv=([\'"])content-type\1 '
+                                                  . 'content=([\'"])text/html; '
+                                                  . 'charset=utf-8\2>#i';
     const HTML_HTTP_EQUIV_VALUE                 = 'content-type';
     const HTML_HTTP_EQUIV_CONTENT_VALUE         = 'text/html; charset=utf-8';
 
@@ -151,13 +163,19 @@ final class Document extends DOMDocument
      *
      * @var string
      */
-    const AMP_EMOJI_ATTRIBUTE_PATTERN = '/(<html [^>]*?)(' . Attribute::AMP_EMOJI_ALT . '|' . Attribute::AMP_EMOJI . ')([^\s^>]*)/iu';
+    const AMP_EMOJI_ATTRIBUTE_PATTERN = '/(<html [^>]*?)('
+                                        . Attribute::AMP_EMOJI_ALT
+                                        . '|'
+                                        . Attribute::AMP_EMOJI
+                                        . ')([^\s^>]*)/iu';
 
     // Attribute to use as a placeholder to move the emoji AMP symbol (⚡) over to DOM.
     const EMOJI_AMP_ATTRIBUTE_PLACEHOLDER = 'emoji-amp';
 
     // Patterns used for fixing the mangled encoding of src attributes with SVG data.
-    const I_AMPHTML_SIZER_REGEX_PATTERN = '/(?<before_src><i-amphtml-sizer\s+[^>]*>\s*<img\s+[^>]*?\s+src=([\'"]))(?<src>.*?)(?<after_src>\2><\/i-amphtml-sizer>)/i';
+    const I_AMPHTML_SIZER_REGEX_PATTERN = '/(?<before_src><i-amphtml-sizer\s+[^>]*>\s*<img\s+[^>]*?\s+src=([\'"]))'
+                                          . '(?<src>.*?)'
+                                          . '(?<after_src>\2><\/i-amphtml-sizer>)/i';
     const SRC_SVG_REGEX_PATTERN         = '/^\s*(?<type>[^<]+)(?<value><svg[^>]+>)\s*$/i';
 
     /**
@@ -402,7 +420,12 @@ final class Document extends DOMDocument
 
         // Force-add http-equiv charset to make DOMDocument behave as it should.
         // See: http://php.net/manual/en/domdocument.loadhtml.php#78243.
-        $source = preg_replace(self::HTML_GET_HEAD_OPENING_TAG_PATTERN, self::HTML_GET_HEAD_OPENING_TAG_REPLACEMENT, $source, 1);
+        $source = preg_replace(
+            self::HTML_GET_HEAD_OPENING_TAG_PATTERN,
+            self::HTML_GET_HEAD_OPENING_TAG_REPLACEMENT,
+            $source,
+            1
+        );
 
         $libxml_previous_state = libxml_use_internal_errors(true);
 
@@ -543,11 +566,13 @@ final class Document extends DOMDocument
         $node->parentNode->insertBefore($commentStart, $node);
         $node->parentNode->insertBefore($commentEnd, $node->nextSibling);
 
-        $html = preg_replace(
-            '/^.*?' . preg_quote("<!--{$startBoundary}-->", '/') . '(.*)' . preg_quote("<!--{$endBoundary}-->", '/') . '.*?\s*$/s',
-            '$1',
-            parent::saveHTML()
-        );
+        $pattern = '/^.*?'
+                   . preg_quote("<!--{$startBoundary}-->", '/')
+                   . '(.*)'
+                   . preg_quote("<!--{$endBoundary}-->", '/')
+                   . '.*?\s*$/s';
+
+        $html = preg_replace($pattern, '$1', parent::saveHTML());
 
         $node->parentNode->removeChild($commentStart);
         $node->parentNode->removeChild($commentEnd);
@@ -899,7 +924,8 @@ final class Document extends DOMDocument
     }
 
     /**
-     * Secures instances of script[template="amp-mustache"] by renaming element to tmp-script, as a workaround to a libxml parsing issue.
+     * Secures instances of script[template="amp-mustache"] by renaming element to tmp-script, as a workaround to a
+     * libxml parsing issue.
      *
      * This script can have closing tags of its children table and td stripped.
      * So this changes its name from script to tmp-script to avoid this.
@@ -961,7 +987,7 @@ final class Document extends DOMDocument
          */
         $replaceCallback = static function ($tagMatches) {
 
-            // Strip the self-closing slash as long as it is not an attribute value, like for the href attribute (<a href=/>).
+            // Strip the self-closing slash as long as it is not an attribute value, like for the href attribute.
             $oldAttrs = rtrim(preg_replace('#(?<!=)/$#', '', $tagMatches['attrs']));
 
             $newAttrs = '';
@@ -1261,7 +1287,7 @@ final class Document extends DOMDocument
             $placeholders = [];
             $salt         = $this->rand();
 
-            // Note: The order of these tokens is important, as it determines the order of the order of the replacements.
+            // Note: The order of these tokens is important, as it determines the order of the replacements.
             $tokens = [
                 '{{{',
                 '}}}',
@@ -1299,7 +1325,12 @@ final class Document extends DOMDocument
 
         $this->usedAmpEmoji = $matches[2];
 
-        return preg_replace(self::AMP_EMOJI_ATTRIBUTE_PATTERN, '\1' . self::EMOJI_AMP_ATTRIBUTE_PLACEHOLDER . '="\3"', $source, 1);
+        return preg_replace(
+            self::AMP_EMOJI_ATTRIBUTE_PATTERN,
+            '\1' . self::EMOJI_AMP_ATTRIBUTE_PLACEHOLDER . '="\3"',
+            $source,
+            1
+        );
     }
 
     /**
@@ -1314,7 +1345,12 @@ final class Document extends DOMDocument
             return $html;
         }
 
-        return preg_replace('/(<html [^>]*?)' . preg_quote(self::EMOJI_AMP_ATTRIBUTE_PLACEHOLDER, '/') . '="([^"]*)"/i', '\1' . $this->usedAmpEmoji . '\2', $html, 1);
+        return preg_replace(
+            '/(<html [^>]*?)' . preg_quote(self::EMOJI_AMP_ATTRIBUTE_PLACEHOLDER, '/') . '="([^"]*)"/i',
+            '\1' . $this->usedAmpEmoji . '\2',
+            $html,
+            1
+        );
     }
 
     /**
@@ -1349,7 +1385,13 @@ final class Document extends DOMDocument
      */
     private function secureDoctypeNode($html)
     {
-        return preg_replace(self::HTML_SECURE_DOCTYPE_IF_NOT_FIRST_PATTERN, '\1!--amp-\3\4-->', $html, 1, $this->securedDoctype);
+        return preg_replace(
+            self::HTML_SECURE_DOCTYPE_IF_NOT_FIRST_PATTERN,
+            '\1!--amp-\3\4-->',
+            $html,
+            1,
+            $this->securedDoctype
+        );
     }
 
     /**
@@ -1563,13 +1605,14 @@ final class Document extends DOMDocument
                 }
                 return $this->body;
             case 'ampElements':
-                $this->ampElements = $this->xpath->query(".//*[ starts-with( name(), 'amp-' ) ]", $this->body) ?: new DOMNodeList();
+                $this->ampElements = $this->xpath->query(".//*[ starts-with( name(), 'amp-' ) ]", $this->body)
+                    ?: new DOMNodeList();
 
                 return $this->ampElements;
         }
 
         // Mimic regular PHP behavior for missing notices.
-        trigger_error(self::PROPERTY_GETTER_ERROR_MESSAGE . $name, E_USER_NOTICE); // phpcs:ignore WordPress.PHP.DevelopmentFunctions,WordPress.Security.EscapeOutput
+        trigger_error(self::PROPERTY_GETTER_ERROR_MESSAGE . $name, E_USER_NOTICE); // phpcs:ignore WordPress.PHP.DevelopmentFunctions,WordPress.Security.EscapeOutput,Generic.Files.LineLength.TooLong
         return null;
     }
 
