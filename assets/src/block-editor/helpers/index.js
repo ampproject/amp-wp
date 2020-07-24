@@ -82,13 +82,6 @@ const ampLayoutOptions = [
 	},
 ];
 
-const mappedAttributes = {
-	ampCarousel: 'data-amp-carousel',
-	ampLightbox: 'data-amp-lightbox',
-	ampNoLoading: 'data-amp-noloading',
-	ampLayout: 'data-amp-layout',
-};
-
 /**
  * Add AMP attributes to every core block.
  *
@@ -168,64 +161,6 @@ export const addAMPAttributes = ( settings, name ) => {
 			type: 'boolean',
 		};
 	}
-	return settings;
-};
-
-/**
- * Remove AMP deprecated props from any blocks which may contain them.
- *
- * @param {Object} settings Block settings.
- * @param {string} name     Block name.
- *
- * @return {Object} Modified block settings.
- */
-export const removeDeprecatedAmpProps = ( settings, name ) => {
-	const maybeBlockHasDeprecatedProp = Object.keys( mappedAttributes )
-		.some( ( attribute ) => Object.keys( settings.attributes ).includes( attribute ) );
-
-	if ( maybeBlockHasDeprecatedProp ) {
-		// At minimum, the `attributes`, and `save` props are required.
-		const deprecatedConfig = {
-			attributes: settings.attributes,
-			save( blockData ) {
-				const deprecatedProps = {};
-
-				// Render the block.
-				let element = settings.save( blockData );
-				const { attributes: blockAttributes } = blockData;
-
-				// Collect all deprecated props that would be set on the saved HTML block in the post.
-				for ( const [ blockAttributeName, htmlAttributeName ] of Object.entries( mappedAttributes ) ) {
-					if ( blockAttributeName in blockAttributes && blockAttributes[ blockAttributeName ] ) {
-						deprecatedProps[ htmlAttributeName ] = blockAttributes[ blockAttributeName ];
-					}
-				}
-
-				// If there are not any deprecated props, return the unmodified element.
-				if ( 0 === Object.keys( deprecatedProps ).length ) {
-					return element;
-				}
-
-				// Once we know the block will be updated successfully, we can now modify the block's attributes.
-				if ( 'core/gallery' === name ) {
-					settings.attributes.ampCarousel.default = ! select( 'amp/block-editor' ).hasThemeSupport(); // @todo We could just default this to false now even in Reader mode since block styles are loaded.
-				}
-
-				// Re-render the block with deprecated props.
-				const props = { ...element.props, ...deprecatedProps };
-				element = cloneElement( element, props );
-
-				// Gutenberg will now compare the difference and update the block accordingly without the deprecated props.
-				return element;
-			},
-		};
-
-		if ( ! settings.deprecated ) {
-			settings.deprecated = [];
-		}
-		settings.deprecated.unshift( deprecatedConfig );
-	}
-
 	return settings;
 };
 
