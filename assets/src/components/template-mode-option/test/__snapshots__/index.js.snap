@@ -133,7 +133,11 @@ exports[`TemplateModeOption matches snapshot 1`] = `
             />
           </svg>
         </span>
-         
+        <span
+          className="components-visually-hidden"
+        >
+          Standard
+        </span>
       </button>
     </h2>
   </div>
@@ -372,7 +376,11 @@ exports[`TemplateModeOption matches snapshot 2`] = `
             />
           </svg>
         </span>
-         
+        <span
+          className="components-visually-hidden"
+        >
+          Reader
+        </span>
       </button>
     </h2>
     <div
@@ -639,7 +647,11 @@ exports[`TemplateModeOption matches snapshot 3`] = `
             />
           </svg>
         </span>
-         
+        <span
+          className="components-visually-hidden"
+        >
+          Reader
+        </span>
       </button>
     </h2>
     <div
