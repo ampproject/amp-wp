@@ -135,12 +135,9 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		/** @var DOMElement $node */
 		foreach ( $nodes as $node ) {
-			$is_carousel  = $node->hasAttribute( 'data-amp-carousel' );
-			$is_lightbox  = $node->hasAttribute( 'data-amp-lightbox' );
+			$is_carousel  = $node->hasAttribute( 'data-amp-carousel' ) && rest_sanitize_boolean( $node->getAttribute( 'data-amp-carousel' ) );
+			$is_lightbox  = $node->hasAttribute( 'data-amp-lightbox' ) && rest_sanitize_boolean( $node->getAttribute( 'data-amp-lightbox' ) );
 			$img_elements = $node->getElementsByTagName( 'img' );
-
-			$node->removeAttribute( 'data-amp-carousel' );
-			$node->removeAttribute( 'data-amp-lightbox' );
 
 			$this->process_gallery_embed( $is_carousel, $is_lightbox, $node, $img_elements );
 		}

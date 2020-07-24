@@ -112,7 +112,7 @@ class AMP_Gallery_Embed_Handler_Test extends WP_UnitTestCase {
 			'shortcode_with_lightbox'                 => [
 				'[gallery amp-lightbox=true amp-carousel=false ids={{id1}},{{id2}},{{id3}}]',
 				'<style type="text/css"> #gallery-10 { margin: auto; } #gallery-10 .gallery-item { float: left; margin-top: 10px; text-align: center; width: 33%; } #gallery-10 img { border: 2px solid #cfcfcf; } #gallery-10 .gallery-caption { margin-left: 0; } /* see gallery_shortcode() in wp-includes/media.php */ </style>
-				<div id="gallery-10" class="gallery galleryid-0 gallery-columns-3 gallery-size-thumbnail">
+				<div data-amp-lightbox="true" id="gallery-10" class="gallery galleryid-0 gallery-columns-3 gallery-size-thumbnail">
 					<dl class="gallery-item"><dt class="gallery-icon landscape">
 						<img width="50" height="50" src="{{file1}}.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" ' . $loading_attribute . ' aria-describedby="gallery-10-{{id1}}" lightbox="">
 					</dt><dd class="wp-caption-text gallery-caption" id="gallery-10-{{id1}}"> ' . self::CAPTION_TEXT . ' </dd></dl>
@@ -128,7 +128,7 @@ class AMP_Gallery_Embed_Handler_Test extends WP_UnitTestCase {
 			'shortcode_with_lightbox_linking_to_file' => [
 				'[gallery amp-lightbox=true amp-carousel=false link="file" ids={{id1}},{{id2}},{{id3}}]',
 				'<style type="text/css"> #gallery-12 { margin: auto; } #gallery-12 .gallery-item { float: left; margin-top: 10px; text-align: center; width: 33%; } #gallery-12 img { border: 2px solid #cfcfcf; } #gallery-12 .gallery-caption { margin-left: 0; } /* see gallery_shortcode() in wp-includes/media.php */ </style>
-				<div id="gallery-12" class="gallery galleryid-0 gallery-columns-3 gallery-size-thumbnail">
+				<div data-amp-lightbox="true" id="gallery-12" class="gallery galleryid-0 gallery-columns-3 gallery-size-thumbnail">
 					<dl class="gallery-item"><dt class="gallery-icon landscape">
 						<img width="50" height="50" src="{{file1}}.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" ' . $loading_attribute . ' aria-describedby="gallery-12-{{id1}}" lightbox="">
 					</dt><dd class="wp-caption-text gallery-caption" id="gallery-12-{{id1}}"> ' . self::CAPTION_TEXT . ' </dd></dl>
