@@ -103,11 +103,9 @@ export const addAMPAttributes = ( settings, name ) => {
 		if ( ! settings.attributes ) {
 			settings.attributes = {};
 		}
-		// The following attributes have to default to `false` so that the gallery block can be updated successfully if
-		// it has deprecated props.
 		settings.attributes.ampCarousel = {
 			type: 'boolean',
-			default: false,
+			default: ! select( 'amp/block-editor' ).hasThemeSupport(), // @todo We could just default this to false now even in Reader mode since block styles are loaded.
 		};
 		settings.attributes.ampLightbox = {
 			type: 'boolean',

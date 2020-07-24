@@ -29,7 +29,7 @@ plugins.keys().forEach( ( modulePath ) => {
 } );
 
 addFilter( 'blocks.registerBlockType', 'ampEditorBlocks/addAttributes', addAMPAttributes );
-addFilter( 'blocks.registerBlockType', 'ampEditorBlocks/deprecateProps', removeDeprecatedAmpProps );
+//addFilter( 'blocks.registerBlockType', 'ampEditorBlocks/deprecateProps', removeDeprecatedAmpProps );
 addFilter( 'blocks.getSaveElement', 'ampEditorBlocks/filterSave', filterBlocksSave );
 addFilter( 'editor.BlockEdit', 'ampEditorBlocks/filterEdit', filterBlocksEdit, 20 );
 addFilter( 'editor.PostFeaturedImage', 'ampEditorBlocks/withFeaturedImageNotice', withFeaturedImageNotice );
