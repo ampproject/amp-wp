@@ -91,9 +91,9 @@ final class ObsoleteBlockAttributeRemover implements Service, Registerable, Dela
 	public function filter_rest_prepare_post( WP_REST_Response $response ) {
 		if ( isset( $response->data['content']['raw'] ) ) {
 			$response->data['content']['raw'] = preg_replace_callback(
-				'#(?P<before_html_attrs><!--\s*wp:\w+.*?-->\s*<\w+\S*?)(?P<html_attrs>\s+[^>]*+)\s*>#s',
+				'#(?P<block_comment><!--\s*+wp:\w+.*?-->\s*+)(?P<start_tag><[a-z][a-z0-9_:-]*+\s[^>]*+>)#s',
 				function ( $matches ) {
-					return $matches['before_html_attrs'] . preg_replace( $this->get_obsolete_attribute_pattern(), '', $matches['html_attrs'] ) . '>';
+					return $matches['block_comment'] . preg_replace( $this->get_obsolete_attribute_pattern(), '', $matches['start_tag'] );
 				},
 				$response->data['content']['raw']
 			);
