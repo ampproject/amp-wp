@@ -90,6 +90,11 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 				$is_amp_carousel = ! empty( $this->args['carousel_required'] );
 			}
 
+			// Ensure data-amp-carousel=true attribute is present for proper styling of block.
+			if ( $is_amp_carousel ) {
+				$gallery_node->setAttribute( 'data-amp-carousel', 'true' );
+			}
+
 			$img_elements = $node->getElementsByTagName( 'amp-img' );
 
 			$this->process_gallery_embed( $is_amp_carousel, $is_amp_lightbox, $node, $img_elements );
