@@ -1842,7 +1842,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'<link rel="preconnect" href="https://cdn.ampproject.org">',
 			'<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">',
 			'<link rel="dns-prefetch" href="//cdn.ampproject.org">',
-			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0.js">',
 			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js">',
 			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-experiment-0.1.js">',
 			'<script type="text/javascript" src="https://cdn.ampproject.org/v0.js" async></script>',

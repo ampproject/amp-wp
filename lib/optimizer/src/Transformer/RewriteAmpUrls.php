@@ -103,11 +103,12 @@ final class RewriteAmpUrls implements Transformer
      * Collect all the preload nodes to be added to the <head>.
      *
      * @param Document $document Document to collect preload nodes for.
+     * @param string   $host     Host URL to use.
      * @return DOMNode[] Preload nodes.
      */
     private function collectPreloadNodes(Document $document, $host)
     {
-        $usesEsm      = $this->configuration->get(RewriteAmpUrlsConfiguration::EXPERIMENT_ESM);
+        $usesEsm      = true;//$this->configuration->get(RewriteAmpUrlsConfiguration::EXPERIMENT_ESM);
         $preloadNodes = [];
 
         $node = $document->head->firstChild;

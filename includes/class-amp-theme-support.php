@@ -1526,6 +1526,7 @@ class AMP_Theme_Support {
 		$links         = [
 			Attribute::REL_PRECONNECT => [
 				// Include preconnect link for AMP CDN for browsers that don't support preload.
+				// @TODO: Move into RewriteAmpUrls transformer, as that will support self-hosting as well.
 				AMP_DOM_Utils::create_node(
 					$dom,
 					Tag::LINK,
@@ -1635,32 +1636,15 @@ class AMP_Theme_Support {
 			}
 		}
 
-		/* phpcs:ignore Squiz.PHP.CommentedOutCode.Found
-		 *
-		 * "2. Next, preload the AMP runtime v0.js <script> tag with <link as=script href=https://cdn.ampproject.org/v0.js rel=preload>.
-		 * The AMP runtime should start downloading as soon as possible because the AMP boilerplate hides the document via body { visibility:hidden }
-		 * until the AMP runtime has loaded. Preloading the AMP runtime tells the browser to download the script with a higher priority."
-		 * {@link https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/optimize_amp/ Optimize the AMP Runtime loading}
+		/*
+		 * "3. If your page includes render-delaying extensions (e.g., amp-experiment, amp-dynamic-css-classes, amp-story),
+		 * preload those extensions as they're required by the AMP runtime for rendering the page."
+		 * @TODO: Move into RewriteAmpUrls transformer, as that will support self-hosting as well.
 		 */
 		$prioritized_preloads = [];
 		if ( ! isset( $links[ Attribute::REL_PRELOAD ] ) ) {
 			$links[ Attribute::REL_PRELOAD ] = [];
 		}
-
-		$prioritized_preloads[] = AMP_DOM_Utils::create_node(
-			$dom,
-			Tag::LINK,
-			[
-				Attribute::REL  => Attribute::REL_PRELOAD,
-				Attribute::AS_  => Tag::SCRIPT,
-				Attribute::HREF => $runtime_src,
-			]
-		);
-
-		/*
-		 * "3. If your page includes render-delaying extensions (e.g., amp-experiment, amp-dynamic-css-classes, amp-story),
-		 * preload those extensions as they're required by the AMP runtime for rendering the page."
-		 */
 		$amp_script_handles = array_keys( $amp_scripts );
 		foreach ( array_intersect( Amp::RENDER_DELAYING_EXTENSIONS, $amp_script_handles ) as $script_handle ) {
 			if ( ! in_array( $script_handle, Amp::RENDER_DELAYING_EXTENSIONS, true ) ) {
@@ -2045,6 +2029,8 @@ class AMP_Theme_Support {
 			}
 		}
 
+		self::ensure_required_markup( $dom, array_keys( $amp_scripts ) );
+
 		$enable_optimizer = array_key_exists( ConfigurationArgument::ENABLE_OPTIMIZER, $args )
 			? $args[ ConfigurationArgument::ENABLE_OPTIMIZER ]
 			: true;
@@ -2103,8 +2089,6 @@ class AMP_Theme_Support {
 			 */
 			do_action( 'amp_server_timing_stop', 'amp_optimizer' );
 		}
-
-		self::ensure_required_markup( $dom, array_keys( $amp_scripts ) );
 
 		$can_serve = AMP_Validation_Manager::finalize_validation( $dom );
 
