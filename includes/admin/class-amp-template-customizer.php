@@ -116,6 +116,7 @@ class AMP_Template_Customizer {
 		}
 
 		$setting_ids = [
+			'custom_logo',
 			'header_video',
 			'external_header_video',
 		];
