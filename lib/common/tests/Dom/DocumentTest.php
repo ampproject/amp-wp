@@ -7,6 +7,8 @@ use AmpProject\Dom\Document;
 use AmpProject\Tests\AssertContainsCompatibility;
 use DOMNode;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
+use ReflectionException;
 
 /**
  * Tests for AmpProject\Dom\Document.
@@ -426,6 +428,22 @@ class DocumentTest extends TestCase
     }
 
     /**
+     * Test getting random number.
+     *
+     * @covers Document::rand()
+     */
+    public function testRand()
+    {
+        $doc   = new Document();
+        $rands = [];
+        $n     = 100;
+        for ($i = 0; $i < $n; $i++) {
+            $rands[] = $this->callPrivateMethod($doc, 'rand');
+        }
+        $this->assertCount($n, array_unique($rands), 'Expected no duplicate random numbers.');
+    }
+
+    /**
      * Get Table Row Iterations.
      *
      * @return array An array of arrays holding an integer representation of iterations.
@@ -805,5 +823,22 @@ class DocumentTest extends TestCase
         $dom->body->appendChild($element);
 
         $this->assertEquals('some-prefix-3', $dom->getElementId($element, 'some-prefix'));
+    }
+
+    /**
+     * Call a private method as if it was public.
+     *
+     * @param object|string $object     Object instance or class string to call the method of.
+     * @param string        $methodName Name of the method to call.
+     * @param array         $args       Optional. Array of arguments to pass to the method.
+     * @return mixed Return value of the method call.
+     * @throws ReflectionException If the object could not be reflected upon.
+     */
+    private function callPrivateMethod($object, $methodName, $args = [])
+    {
+        $method = (new ReflectionClass($object))->getMethod($methodName);
+        $method->setAccessible(true);
+
+        return $method->invokeArgs($object, $args);
     }
 }

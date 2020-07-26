@@ -1375,7 +1375,7 @@ final class Document extends DOMDocument
      * @param int $max Upper limit for the generated number
      * @return int A random number between min and max
      */
-    private function rand($min = 0, $max = 0)
+    private function rand($min = 0, $max = PHP_INT_MAX)
     {
         if (function_exists('mt_rand')) {
             return mt_rand($min, $max);
