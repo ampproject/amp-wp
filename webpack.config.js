@@ -128,6 +128,7 @@ const customizer = {
 		'amp-customize-controls-legacy': './assets/src/customizer/amp-customize-controls-legacy.js',
 		'amp-customize-preview-legacy': './assets/src/customizer/amp-customize-preview-legacy.js',
 		'amp-customizer-design-preview-legacy': './assets/src/customizer/amp-customizer-design-preview-legacy.js',
+		'amp-customize-preview-selective-refresh': './assets/src/customizer/amp-customize-preview-selective-refresh.js',
 	},
 	plugins: [
 		...sharedConfig.plugins,

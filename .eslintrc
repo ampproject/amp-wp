@@ -115,6 +115,15 @@
         "navigator": false,
         "sessionStorage": false
       }
+    },
+    {
+      "files": [
+        "assets/src/customizer/amp-customize-preview-selective-refresh.js"
+      ],
+      "globals": {
+        "Element": false,
+        "jQuery": false
+      }
     }
   ]
 }

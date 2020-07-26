@@ -99,6 +99,10 @@ class AMP_Template_Customizer {
 			}
 		}
 
+		if ( ! amp_is_legacy() ) {
+			add_action( 'customize_preview_init', [ $self, 'init_preview' ] );
+		}
+
 		$self->set_refresh_setting_transport();
 		$self->remove_cover_template_section();
 		$self->remove_homepage_settings_section();
@@ -195,6 +199,15 @@ class AMP_Template_Customizer {
 	}
 
 	/**
+	 * Init Customizer preview scripts.
+	 *
+	 * @since 2.0
+	 */
+	public function init_preview() {
+		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_preview_selective_refresh_scripts' ] );
+	}
+
+	/**
 	 * Init Customizer preview for legacy.
 	 *
 	 * @since 0.4
@@ -202,6 +215,7 @@ class AMP_Template_Customizer {
 	public function init_legacy_preview() {
 		add_action( 'amp_post_template_head', 'wp_no_robots' );
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_legacy_preview_scripts' ] );
+		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_preview_selective_refresh_scripts' ] );
 		add_action( 'amp_customizer_enqueue_preview_scripts', [ $this, 'enqueue_legacy_preview_scripts' ] );
 
 		// Output scripts and styles which will break AMP validation only when preview is opened with controls for manipulation.
@@ -386,6 +400,31 @@ class AMP_Template_Customizer {
 		 * @param WP_Customize_Manager $manager Manager.
 		 */
 		do_action( 'amp_customizer_enqueue_scripts', $this->wp_customize );
+	}
+
+	/**
+	 * Enqueues scripts used in AMP Customizer preview for extending selective refresh.
+	 *
+	 * @since 2.0
+	 */
+	public function enqueue_preview_selective_refresh_scripts() {
+		// Bail if user can't customize anyway.
+		if ( ! current_user_can( 'customize' ) ) {
+			return;
+		}
+
+		$asset_file   = AMP__DIR__ . '/assets/js/amp-customize-preview-selective-refresh.asset.php';
+		$asset        = require $asset_file;
+		$dependencies = $asset['dependencies'];
+		$version      = $asset['version'];
+
+		wp_enqueue_script(
+			'amp-customize-preview-selective-refresh',
+			amp_get_asset_url( 'js/amp-customize-preview-selective-refresh.js' ),
+			array_merge( $dependencies, [ 'jquery', 'customize-preview', 'customize-selective-refresh' ] ),
+			$version,
+			true
+		);
 	}
 
 	/**
