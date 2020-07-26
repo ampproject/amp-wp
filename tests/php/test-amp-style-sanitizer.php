@@ -687,10 +687,12 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'
 				<html>
 					<head>
+						<noscript>
+							<style>h2.one { color: green }</style>
+						</noscript>
 					</head>
 					<body>
 						<style>
-							h2.one { color: green }
 							h2.two { color: red }
 						</style>
 						<template type="amp-mustache">
@@ -703,7 +705,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				</html>
 				',
 				[
-					'h2.one{color:green}h2.two{color:red}',
+					'h2.one{color:green}',
+					'h2.two{color:red}',
 				],
 				[],
 			],
