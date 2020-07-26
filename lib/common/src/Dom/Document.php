@@ -448,6 +448,7 @@ final class Document extends DOMDocument
         if ($success) {
             $this->normalizeHtmlAttributes();
             $this->restoreMustacheScriptTemplates();
+            $this->maybeRestoreNoscriptElements();
 
             // Remove http-equiv charset again.
             $meta = $this->head->firstChild;
@@ -515,7 +516,6 @@ final class Document extends DOMDocument
 
         $html = $this->restoreDoctypeNode($html);
         $html = $this->restoreMustacheTemplateTokens($html);
-        $html = $this->maybeRestoreNoscriptElements($html);
         $html = $this->restoreSelfClosingTags($html);
         $html = $this->restoreAmpEmojiAttribute($html);
         $html = $this->fixSvgSourceAttributeEncoding($html);
@@ -879,10 +879,11 @@ final class Document extends DOMDocument
                     return preg_replace_callback(
                         '#<noscript[^>]*>.*?</noscript>#si',
                         function ($noscriptMatches) {
-                            $placeholder = sprintf('<!--noscript:%s-->', (string)$this->rand());
+                            $id   = 'noscript-' . (string)$this->rand();
+                            $meta = sprintf('<meta id="%s">', $id);
 
-                            $this->noscriptPlaceholderComments[$placeholder] = $noscriptMatches[0];
-                            return $placeholder;
+                            $this->noscriptPlaceholderComments[$id] = $noscriptMatches[0];
+                            return $meta;
                         },
                         $headMatches[0]
                     );
@@ -895,7 +896,7 @@ final class Document extends DOMDocument
     }
 
     /**
-     * Maybe replace noscript elements with placeholders.
+     * Maybe restore noscript elements with placeholders.
      *
      * This is done because libxml<2.8 might parse them incorrectly.
      * When appearing in the head element, a noscript can cause the head to close prematurely
@@ -905,22 +906,34 @@ final class Document extends DOMDocument
      * and it is important for the AMP_Script_Sanitizer to be able to access the noscript elements
      * in the body otherwise.
      *
-     * @param string $html HTML string to adapt.
-     * @return string Adapted HTML string.
      * @see maybeReplaceNoscriptElements() Reciprocal function.
      *
      */
-    private function maybeRestoreNoscriptElements($html)
+    private function maybeRestoreNoscriptElements()
     {
-        if (empty($this->noscriptPlaceholderComments)) {
-            return $html;
-        }
+        foreach ($this->noscriptPlaceholderComments as $id => $noscriptHtmlFragment) {
+            $placeholderElement = $this->getElementById($id);
+            if (!$placeholderElement || !$placeholderElement->parentNode) {
+                continue;
+            }
+            $noscriptFragmentDocument = self::fromHtmlFragment($noscriptHtmlFragment);
+            if (!$noscriptFragmentDocument) {
+                continue;
+            }
+            $exportBody = $noscriptFragmentDocument->getElementsByTagName(Tag::BODY)->item(0);
+            if (!$exportBody) {
+                continue;
+            }
 
-        return str_replace(
-            array_keys($this->noscriptPlaceholderComments),
-            $this->noscriptPlaceholderComments,
-            $html
-        );
+            $importFragment = $this->createDocumentFragment();
+            while ($exportBody->firstChild) {
+                $importNode = $exportBody->removeChild($exportBody->firstChild);
+                $importNode = $this->importNode($importNode, true);
+                $importFragment->appendChild($importNode);
+            }
+
+            $placeholderElement->parentNode->replaceChild($importFragment, $placeholderElement);
+        }
     }
 
     /**
