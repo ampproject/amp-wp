@@ -208,9 +208,12 @@ final class Document extends DOMDocument
     private $originalEncoding;
 
     /**
-     * Store the placeholder comments that were generated to replace <noscript> elements.
+     * Store the <noscript> markup that was extracted to preserve it during parsing.
+     *
+     * The array keys are the element IDs for placeholder <meta> tags.
      *
      * @see maybeReplaceNoscriptElements()
+     * @see maybeRestoreNoscriptElements()
      *
      * @var string[]
      */
@@ -868,7 +871,6 @@ final class Document extends DOMDocument
      * @param string $html HTML string to adapt.
      * @return string Adapted HTML string.
      * @see maybeRestoreNoscriptElements() Reciprocal function.
-     *
      */
     private function maybeReplaceNoscriptElements($html)
     {
@@ -879,11 +881,9 @@ final class Document extends DOMDocument
                     return preg_replace_callback(
                         '#<noscript[^>]*>.*?</noscript>#si',
                         function ($noscriptMatches) {
-                            $id   = 'noscript-' . (string)$this->rand();
-                            $meta = sprintf('<meta id="%s">', $id);
-
+                            $id = 'noscript-' . (string)$this->rand();
                             $this->noscriptPlaceholderComments[$id] = $noscriptMatches[0];
-                            return $meta;
+                            return sprintf('<meta class="noscript-placeholder" id="%s">', $id);
                         },
                         $headMatches[0]
                     );
@@ -907,7 +907,6 @@ final class Document extends DOMDocument
      * in the body otherwise.
      *
      * @see maybeReplaceNoscriptElements() Reciprocal function.
-     *
      */
     private function maybeRestoreNoscriptElements()
     {

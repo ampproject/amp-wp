@@ -428,6 +428,42 @@ class DocumentTest extends TestCase
     }
 
     /**
+     * Test handling noscript elements in the head.
+     *
+     * @covers Document::maybeReplaceNoscriptElements()
+     * @covers Document::maybeRestoreNoscriptElements()
+     */
+    public function testHeadNoscriptElementHandling()
+    {
+        $original = '
+            <html>
+                <head>
+                    <noscript>
+                        <style>/*1*/</style>
+                    </noscript>
+                    <title>Hello</title>
+                    <noscript>
+                        <style>/*2*/</style>
+                    </noscript>
+                </head>
+                <body>
+                    <noscript>
+                        <style>/*3*/</style>
+                    </noscript>
+                </body>
+            </html>
+        ';
+
+        $dom = Document::fromHtml($original);
+        $noscripts = $dom->getElementsByTagName('noscript');
+
+        $this->assertEquals(3, $noscripts->length);
+        $this->assertEquals('head', $noscripts->item(0)->parentNode->nodeName);
+        $this->assertEquals('head', $noscripts->item(1)->parentNode->nodeName);
+        $this->assertEquals('body', $noscripts->item(2)->parentNode->nodeName);
+    }
+
+    /**
      * Test getting random number.
      *
      * @covers Document::rand()
