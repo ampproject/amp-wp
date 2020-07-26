@@ -797,9 +797,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					$mobile_width  = $mobile_height * ( $width / $height );
 
 					$html .= sprintf(
-						'<style data-src="%s" %s>.site-logo amp-img { width: %frem; } @media (min-width: 700px) { .site-logo amp-img { width: %frem; } }</style>',
+						'<style data-src="%s">.site-logo amp-img { width: %frem; } @media (min-width: 700px) { .site-logo amp-img { width: %frem; } }</style>',
 						esc_attr( $method ),
-						is_customize_preview() ? 'data-ampdevmode' : '',
 						$mobile_width,
 						$desktop_width
 					);
