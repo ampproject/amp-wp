@@ -337,6 +337,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $remote_request;
 
 	/**
+	 * Cached call to is_customize_preview()
+	 *
+	 * @see is_customize_preview()
+	 * @var bool
+	 */
+	private $is_customize_preview;
+
+	/**
 	 * Get error codes that can be raised during parsing of CSS.
 	 *
 	 * This is used to determine which validation errors should be taken into account
@@ -841,6 +849,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.4
 	 */
 	public function sanitize() {
+		$this->is_customize_preview = is_customize_preview();
+
 		$elements = [];
 
 		$this->focus_class_name_selector_pattern = (
@@ -3199,7 +3209,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$used_selector_count = 0;
 				$selectors           = [];
 				foreach ( $selectors_parsed as $selector => $parsed_selector ) {
-					$should_include = is_customize_preview() || (
+					$should_include = $this->is_customize_preview || (
 						// If all class names are used in the doc.
 						(
 							empty( $parsed_selector[ self::SELECTOR_EXTRACTED_CLASSES ] )
@@ -3369,7 +3379,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Report validation error if size is now too big.
-			if ( ! is_customize_preview() && $current_concatenated_size + $this->pending_stylesheets[ $i ]['final_size'] > $max_bytes ) {
+			if ( ! $this->is_customize_preview && $current_concatenated_size + $this->pending_stylesheets[ $i ]['final_size'] > $max_bytes ) {
 				$validation_error = [
 					'code'      => self::STYLESHEET_TOO_LONG,
 					'type'      => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
