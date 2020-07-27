@@ -171,13 +171,6 @@ function Style( { gutterWidth, itemWidth, namespace } ) {
 	display: none;
 }
 
-.${ namespace }__carousel::before,
-.${ namespace }__carousel::after {
-	content: '';
-	display: block;
-	width: ${ itemWidth }px;
-}
-
 .${ namespace }__item {
 	flex-shrink: 0;
 	scroll-snap-align: center;
