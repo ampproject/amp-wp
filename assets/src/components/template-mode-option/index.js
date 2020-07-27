@@ -96,6 +96,7 @@ export function TemplateModeOption( { children, details, initialOpen, labelExtra
 
 	return (
 		<AMPDrawer
+			className="template-mode-option"
 			heading={ (
 				<label className="template-mode-option__label" htmlFor={ id }>
 					<div className="template-mode-selection__input-container">

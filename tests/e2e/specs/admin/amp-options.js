@@ -55,6 +55,7 @@ describe( 'Settings screen when reader theme is active theme', () => {
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
 		await clickMode( 'reader' );
+		await expect( page ).toClick( '#template-mode-reader-container .components-panel__body-toggle' );
 
 		await expect( page ).toMatchElement( '.amp-notice__body', { text: /^Your active theme/ } );
 
