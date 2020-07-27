@@ -41,7 +41,7 @@ function Dot( { id, isCurrent, isHighlighted, label, namespace, onClick } ) {
 			</span>
 			{ isCurrent && (
 				<span className="components-visually-hidden">
-					{ __( '(Current slide)', 'amp' ) }
+					{ __( '(Current item)', 'amp' ) }
 				</span>
 			) }
 			{ isHighlighted && (
