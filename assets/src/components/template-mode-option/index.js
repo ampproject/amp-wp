@@ -20,7 +20,7 @@ import { Options } from '../options-context-provider';
 
 import './style.css';
 import { READER, STANDARD, TRANSITIONAL } from '../../common/constants';
-import { AMPDrawer } from '../amp-drawer';
+import { AMPDrawer, HANDLE_TYPE_RIGHT } from '../amp-drawer';
 
 /**
  * Mode-specific illustration.
@@ -97,6 +97,7 @@ export function TemplateModeOption( { children, details, initialOpen, labelExtra
 	return (
 		<AMPDrawer
 			className="template-mode-option"
+			handleType={ HANDLE_TYPE_RIGHT }
 			heading={ (
 				<label className="template-mode-option__label" htmlFor={ id }>
 					<div className="template-mode-selection__input-container">

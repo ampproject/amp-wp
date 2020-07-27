@@ -2,7 +2,7 @@
 
 exports[`TemplateModeOption matches snapshot 1`] = `
 <div
-  className="amp-drawer template-mode-option selectable selectable--left"
+  className="amp-drawer amp-drawer--handle-type-right template-mode-option selectable selectable--left"
   id="template-mode-standard-container"
 >
   <div
@@ -150,7 +150,7 @@ exports[`TemplateModeOption matches snapshot 1`] = `
 
 exports[`TemplateModeOption matches snapshot 2`] = `
 <div
-  className="amp-drawer template-mode-option amp-drawer--opened selectable selectable--selected selectable--left"
+  className="amp-drawer amp-drawer--handle-type-right template-mode-option amp-drawer--opened selectable selectable--selected selectable--left"
   id="template-mode-reader-container"
 >
   <div
@@ -422,7 +422,7 @@ exports[`TemplateModeOption matches snapshot 2`] = `
 
 exports[`TemplateModeOption matches snapshot 3`] = `
 <div
-  className="amp-drawer template-mode-option amp-drawer--opened selectable selectable--selected selectable--left"
+  className="amp-drawer amp-drawer--handle-type-right template-mode-option amp-drawer--opened selectable selectable--selected selectable--left"
   id="template-mode-reader-container"
 >
   <div

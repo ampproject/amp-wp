@@ -277,6 +277,7 @@ export function SupportedTemplatesFieldset() {
 export function SupportedTemplates() {
 	return (
 		<AMPDrawer
+
 			heading={ (
 				<h3>
 					{ __( 'Supported Templates', 'amp' ) }

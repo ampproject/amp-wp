@@ -15,6 +15,9 @@ import { useEffect, useState } from '@wordpress/element';
 import { Selectable } from '../selectable';
 import './style.css';
 
+export const HANDLE_TYPE_FULL_WIDTH = 'full-width';
+export const HANDLE_TYPE_RIGHT = 'right';
+
 /**
  * Wrapper for the core PanelBody component with styles applied.
  *
@@ -26,8 +29,9 @@ import './style.css';
  * @param {boolean} props.initialOpen Whether the drawer should be initially open.
  * @param {boolean} props.selected Whether to apply the selectable components selected CSS class.
  * @param {string} props.hiddenTitle A title to go with the button that expands the drawer.
+ * @param {string} props.handleType Display style for the drawer handle. Either 'full-width' or 'right'.
  */
-export function AMPDrawer( { children = null, className, heading, id, initialOpen = false, selected = false, hiddenTitle } ) {
+export function AMPDrawer( { children = null, className, heading, handleType = HANDLE_TYPE_FULL_WIDTH, id, initialOpen = false, selected = false, hiddenTitle } ) {
 	const [ opened, setOpened ] = useState( initialOpen );
 
 	/**
@@ -60,6 +64,7 @@ export function AMPDrawer( { children = null, className, heading, id, initialOpe
 			className={
 				[
 					'amp-drawer',
+					`amp-drawer--handle-type-${ handleType }`,
 					className ? className : '',
 					opened ? 'amp-drawer--opened' : '',
 				]
@@ -68,14 +73,20 @@ export function AMPDrawer( { children = null, className, heading, id, initialOpe
 			}
 			selected={ selected }
 		>
-			<div className="amp-drawer__heading">
-				{ heading }
-			</div>
+			{ handleType === HANDLE_TYPE_RIGHT && (
+				<div className="amp-drawer__heading">
+					{ heading }
+				</div>
+			) }
 			<PanelBody
-				title={ (
+				title={ handleType === HANDLE_TYPE_RIGHT ? (
 					<span className="components-visually-hidden">
 						{ hiddenTitle }
 					</span>
+				) : (
+					<div className="amp-drawer__heading">
+						{ heading }
+					</div>
 				) }
 				className="amp-drawer__panel-body"
 				initialOpen={ initialOpen }
@@ -91,6 +102,7 @@ export function AMPDrawer( { children = null, className, heading, id, initialOpe
 AMPDrawer.propTypes = {
 	children: PropTypes.any,
 	className: PropTypes.string,
+	handleType: PropTypes.oneOf( [ HANDLE_TYPE_FULL_WIDTH, HANDLE_TYPE_RIGHT ] ),
 	heading: PropTypes.node.isRequired,
 	hiddenTitle: PropTypes.node.isRequired,
 	id: PropTypes.string.isRequired,
