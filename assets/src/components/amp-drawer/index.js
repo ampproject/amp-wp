@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { PanelBody } from '@wordpress/components';
-import { useEffect, useState, useLayoutEffect } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -21,7 +21,7 @@ export function AMPDrawer( { children = null, className, heading, id, initialOpe
 	/**
 	 * Watch for changes to the panel body attributes and set opened state accordingly.
 	 */
-	useLayoutEffect( () => {
+	useEffect( () => {
 		const mutationCallback = ( [ mutation ] ) => {
 			if ( mutation.target.classList.contains( 'is-opened' ) && ! opened ) {
 				setOpened( true );
