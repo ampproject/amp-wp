@@ -115,6 +115,14 @@
         "navigator": false,
         "sessionStorage": false
       }
+    },
+    {
+      "files": [
+        "assets/src/customizer/amp-customize-controls.js"
+      ],
+      "globals": {
+        "HTMLAnchorElement": false
+      }
     }
   ]
 }
