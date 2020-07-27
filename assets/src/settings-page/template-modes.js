@@ -155,7 +155,7 @@ export function TemplateModes() {
 			</TemplateModeOption>
 			{ READER === themeSupport && (
 				<AMPDrawer
-					className="selectable--selected"
+					selected={ true }
 					heading={ (
 						<div className="reader-themes-drawer__heading">
 							<h3>
