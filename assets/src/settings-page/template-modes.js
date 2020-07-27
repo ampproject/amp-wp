@@ -106,7 +106,7 @@ export function TemplateModes() {
 	return (
 		<section className="template-modes">
 			<h2>
-				{ __( 'Template mode', 'amp' ) }
+				{ __( 'Template Mode', 'amp' ) }
 			</h2>
 			<p dangerouslySetInnerHTML={ {
 				__html: __( 'For a list of themes and plugins that are known to be AMP compatible, please see the <a href="https://amp-wp.org/ecosystem/" target="_blank">ecosystem page</a>.', 'amp' ),

@@ -112,9 +112,9 @@ export function TemplateModeOption( { children, details, initialOpen, labelExtra
 						{ <Illustration mode={ mode } /> }
 					</div>
 					<div className="template-mode-selection__description">
-						<h2>
+						<h3>
 							{ getTitle( mode ) }
-						</h2>
+						</h3>
 						{ previouslySelected && (
 							<AMPInfo>
 								{ __( 'Previously selected', 'amp' ) }
