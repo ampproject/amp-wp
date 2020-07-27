@@ -48,9 +48,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function tearDown() {
 		parent::tearDown();
-		global $wp_styles, $wp_scripts;
-		$wp_styles  = null;
-		$wp_scripts = null;
+		global $wp_styles, $wp_scripts, $wp_customize;
+		$wp_styles    = null;
+		$wp_scripts   = null;
+		$wp_customize = null;
 
 		global $wp_theme_directories;
 		$wp_theme_directories = $this->original_theme_directories;
@@ -779,6 +780,71 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		if ( $actual_stylesheets ) {
 			$this->assertStringContains( "\n\n/*# sourceURL=amp-custom.css */", $sanitized_html );
 		}
+	}
+
+	/**
+	 * Test that tree shaking and CSS limits are disabled when in the Customizer Preview.
+	 */
+	public function test_tree_shaking_disabled_in_customizer_preview() {
+		$active_theme = 'twentynineteen';
+		$reader_theme = 'twentytwenty';
+		if ( ! wp_get_theme( $active_theme )->exists() || ! wp_get_theme( $reader_theme )->exists() ) {
+			$this->markTestSkipped();
+		}
+		switch_theme( $active_theme );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::READER_THEME, $reader_theme );
+
+		require_once ABSPATH . WPINC . '/class-wp-customize-manager.php';
+		global $wp_customize;
+		$wp_customize = new WP_Customize_Manager();
+		$wp_customize->start_previewing_theme();
+		$this->assertTrue( is_customize_preview() );
+
+		$dom = Document::fromHtml(
+			sprintf(
+				'
+				<html>
+					<head>
+						<style>
+						.selective-refresh-container {
+							outline: solid 1px red;
+						}
+						</style>
+						<style>
+						.my-partial {
+							outline: solid 1px blue;
+							content: "%s";
+						}
+						</style>
+					</head>
+					<body>
+						<div class="selective-refresh-container">
+							<!-- Selective refresh may render my-partial here. -->
+						</div>
+					</body>
+				</html>
+				',
+				str_repeat( 'a', 75001 )
+			)
+		);
+
+		$args = [
+			'use_document_element' => true,
+		];
+
+		$sanitizer = new AMP_Style_Sanitizer( $dom, $args );
+		$sanitizer->sanitize();
+
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom, $args );
+		$validating_sanitizer->sanitize();
+
+		$actual_stylesheets = array_values( array_filter( $sanitizer->get_stylesheets() ) );
+
+		$this->assertCount( 2, $actual_stylesheets );
+		$this->assertStringStartsWith( '.selective-refresh-container{', $actual_stylesheets[0] );
+		$this->assertStringStartsWith( '.my-partial{', $actual_stylesheets[1] );
+		$this->assertGreaterThan( 75000, strlen( implode( '', $actual_stylesheets ) ) );
 	}
 
 	/**
