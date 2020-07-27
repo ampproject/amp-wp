@@ -176,7 +176,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 					downloadingThemeError,
 					fetchingThemes,
 					themes,
-					selectedTheme,
+					selectedTheme: selectedTheme || {},
 				}
 			}
 		>

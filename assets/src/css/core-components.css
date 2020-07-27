@@ -47,7 +47,7 @@
 	text-decoration: none;
 }
 
-.amp .components-button:focus:not(:disabled) {
+.amp.amp .components-button:focus:not(:disabled) {
 	outline: 1px solid var(--amp-settings-color-brand);
 }
 

@@ -253,3 +253,29 @@ li.error-kept {
 	padding-bottom: 2.5rem;
 	padding-top: 2.5rem;
 }
+
+
+#template-mode-reader-container {
+	margin-bottom: 0;
+}
+
+#template-mode-reader-container.selectable.selectable--selected {
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+#reader-themes-drawer {
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
+	border-top-width: 0;
+}
+
+#reader-themes-drawer .amp-drawer__heading {
+	align-items: center;
+	display: flex;
+	padding-left: 1.5rem;
+
+	@media (min-width: 783px) {
+		padding-left: 3rem;
+	}
+}

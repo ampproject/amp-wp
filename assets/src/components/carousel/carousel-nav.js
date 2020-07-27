@@ -72,11 +72,15 @@ Dot.propTypes = {
  * @param {Function} props.setCurrentItem Sets an item as the current item.
  * @param {number} props.highlightedItemIndex Index of an item to highlight.
  * @param {boolean} props.showDots Whether to show the dot navigation.
+ * @param {boolean} props.prevButtonDisabled Whether the prev button is disabled.
+ * @param {boolean} props.nextButtonDisabled Whether the next button is disabled.
  */
 export function CarouselNav( {
 	currentItem,
 	items,
 	namespace,
+	nextButtonDisabled,
+	prevButtonDisabled,
 	setCurrentItem,
 	highlightedItemIndex,
 	showDots,
@@ -86,7 +90,7 @@ export function CarouselNav( {
 			<Button
 				id={ `${ namespace }__prev-button` }
 				isPrimary
-				disabled={ null === currentItem.previousElementSibling }
+				disabled={ prevButtonDisabled }
 				onClick={ () => {
 					setCurrentItem( currentItem.previousElementSibling );
 				} }
@@ -122,7 +126,7 @@ export function CarouselNav( {
 			<Button
 				id={ `${ namespace }__next-button` }
 				isPrimary
-				disabled={ null === currentItem.nextElementSibling }
+				disabled={ nextButtonDisabled }
 				onClick={ () => {
 					setCurrentItem( currentItem.nextElementSibling );
 				} }
@@ -146,6 +150,8 @@ CarouselNav.propTypes = {
 	items: PropTypes.object.isRequired,
 	namespace: PropTypes.string.isRequired,
 	highlightedItemIndex: PropTypes.number.isRequired,
+	nextButtonDisabled: PropTypes.bool.isRequired,
+	prevButtonDisabled: PropTypes.bool.isRequired,
 	setCurrentItem: PropTypes.func.isRequired,
 	showDots: PropTypes.bool.isRequired,
 };

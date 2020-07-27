@@ -53,14 +53,10 @@ export function Carousel( {
 		originalSetCurrentItem( newCurrentItem );
 
 		if ( newCurrentItem && scrollToItem ) {
-			const left = newCurrentItem.offsetLeft - (
-				windowWidth > mobileBreakpoint
-					? ( newCurrentItem.offsetWidth + gutterWidth ) // Center the item on desktop. If this isn't exact, the scroll snap CSS rules will fix it.
-					: 0
-			);
+			const left = newCurrentItem.offsetLeft;
 			carouselListRef.current.scrollTo( { top: 0, left, behavior: 'smooth' } );
 		}
-	}, [ gutterWidth, mobileBreakpoint, windowWidth ] );
+	}, [] );
 
 	/**
 	 * Center the highlighted item. On initial load, this will center the previously selected theme. Subsequently,
@@ -96,6 +92,11 @@ export function Carousel( {
 		};
 	}, [ currentItem, setCurrentItem ] );
 
+	const isMobile = mobileBreakpoint > windowWidth;
+	const currentItemIndex = [ ...( carouselListRef.current?.children || [] ) ].indexOf( currentItem );
+	const nextButtonDisabled = currentItemIndex >= items.length - ( isMobile ? 1 : 2 );
+	const prevButtonDisabled = currentItemIndex <= ( isMobile ? 0 : 1 );
+
 	return (
 		<div className={ namespace }>
 			<div className={ `${ namespace }__container` } ref={ carouselContainerRef }>
@@ -116,8 +117,11 @@ export function Carousel( {
 			{ currentItem && (
 				<CarouselNav
 					currentItem={ currentItem }
+					currentItemIndex={ currentItemIndex }
 					items={ carouselListRef?.current?.children }
 					namespace={ namespace }
+					nextButtonDisabled={ nextButtonDisabled }
+					prevButtonDisabled={ prevButtonDisabled }
 					setCurrentItem={ setCurrentItem }
 					highlightedItemIndex={ highlightedItemIndex }
 					showDots={ mobileBreakpoint < windowWidth }

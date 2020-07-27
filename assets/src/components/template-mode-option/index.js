@@ -12,8 +12,6 @@ import { useContext } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { PanelBody } from '@wordpress/components';
-import { Selectable } from '../selectable';
 import { AMPInfo } from '../amp-info';
 import { Standard } from '../svg/standard';
 import { Transitional } from '../svg/transitional';
@@ -22,6 +20,7 @@ import { Options } from '../options-context-provider';
 
 import './style.css';
 import { READER, STANDARD, TRANSITIONAL } from '../../common/constants';
+import { AMPDrawer } from '../amp-drawer';
 
 /**
  * Mode-specific illustration.
@@ -96,62 +95,58 @@ export function TemplateModeOption( { children, details, initialOpen, labelExtra
 	const id = getId( mode );
 
 	return (
-		<Selectable id={ `${ id }-container` } className="template-mode-option" selected={ mode === themeSupport }>
-			<label className="template-mode-option__label" htmlFor={ id }>
-				<div className="template-mode-selection__input-container">
-					<input
-						type="radio"
-						id={ id }
-						checked={ mode === themeSupport }
-						onChange={ () => {
-							updateOptions( { theme_support: mode } );
-						} }
-					/>
-				</div>
-				<div className="template-mode-selection__illustration">
-					{ <Illustration mode={ mode } /> }
-				</div>
-				<div className="template-mode-selection__description">
-					<h2>
-						{ getTitle( mode ) }
-					</h2>
-					{ previouslySelected && (
-						<AMPInfo>
-							{ __( 'Previously selected', 'amp' ) }
-						</AMPInfo>
-					) }
-					{ labelExtra && (
-						<div className="template-mode-selection__label-extra">
-							{ labelExtra }
-						</div>
-					) }
-				</div>
-			</label>
-			<PanelBody
-				title={ (
-					<span className="components-visually-hidden">
-						{ getTitle( mode ) }
-					</span>
+		<AMPDrawer
+			heading={ (
+				<label className="template-mode-option__label" htmlFor={ id }>
+					<div className="template-mode-selection__input-container">
+						<input
+							type="radio"
+							id={ id }
+							checked={ mode === themeSupport }
+							onChange={ () => {
+								updateOptions( { theme_support: mode } );
+							} }
+						/>
+					</div>
+					<div className="template-mode-selection__illustration">
+						{ <Illustration mode={ mode } /> }
+					</div>
+					<div className="template-mode-selection__description">
+						<h2>
+							{ getTitle( mode ) }
+						</h2>
+						{ previouslySelected && (
+							<AMPInfo>
+								{ __( 'Previously selected', 'amp' ) }
+							</AMPInfo>
+						) }
+						{ labelExtra && (
+							<div className="template-mode-selection__label-extra">
+								{ labelExtra }
+							</div>
+						) }
+					</div>
+				</label>
+			) }
+			hiddenTitle={ getTitle( mode ) }
+			id={ `${ id }-container` }
+			initialOpen={ 'boolean' === typeof initialOpen ? initialOpen : mode && themeSupport && mode === themeSupport }
+			selected={ mode === themeSupport }
+		>
+			<div className="template-mode-selection__details">
+				{ details && (
+					<p>
+						<span dangerouslySetInnerHTML={ { __html: details } } />
+						{ ' ' }
+						{ /* @todo Temporary URL. */ }
+						<a href="http://amp-wp.org" target="_blank" rel="noreferrer">
+							{ __( 'Learn more.', 'amp' ) }
+						</a>
+					</p>
 				) }
-				className="template-mode-option__panel-body"
-				initialOpen={ 'boolean' === typeof initialOpen ? initialOpen : mode && themeSupport && mode === themeSupport }
-			>
-				<div className="template-mode-selection__details">
-					{ details && (
-						<p>
-							<span dangerouslySetInnerHTML={ { __html: details } } />
-							{ ' ' }
-							{ /* @todo Temporary URL. */ }
-							<a href="http://amp-wp.org" target="_blank" rel="noreferrer">
-								{ __( 'Learn more.', 'amp' ) }
-							</a>
-						</p>
-					) }
-					{ children }
-				</div>
-			</PanelBody>
-
-		</Selectable>
+				{ children }
+			</div>
+		</AMPDrawer>
 	);
 }
 
