@@ -1,6 +1,7 @@
 <?php
 
-use Amp\AmpWP\Dom\Document;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\Dom\Document;
 
 /**
  * Class AMP_DOM_Utils_Test
@@ -12,6 +13,8 @@ use Amp\AmpWP\Dom\Document;
  * @method void assertFalse( bool $expectsFalse, string $errorMessage=null )
  */
 class AMP_DOM_Utils_Test extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/**
 	 * Test UTF-8 content.
@@ -163,7 +166,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	/**
 	 * Test handling of empty elements.
 	 *
-	 * @covers \Amp\AmpWP\Dom\Document::from_html()
+	 * @covers \AmpProject\Dom\Document::fromHtml()
 	 * @covers \AMP_DOM_Utils::get_content_from_dom_node()
 	 */
 	public function test_html5_empty_elements() {
@@ -191,7 +194,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	/**
 	 * Test parsing DOM with Mustache or Mustache-like templates.
 	 *
-	 * @covers \Amp\AmpWP\Dom\Document::from_html()
+	 * @covers \AmpProject\Dom\Document::fromHtml()
 	 * @covers \AMP_DOM_Utils::get_content_from_dom_node()
 	 */
 	public function test_mustache_replacements() {
@@ -255,16 +258,16 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 
 		$serialized_html = $dom->saveHTML( $dom->documentElement );
 
-		$this->assertContains( '<a href="{{href}}" title="Hello {{name}}">', $serialized_html );
-		$this->assertContains( '<img src="{{src}}">', $serialized_html );
-		$this->assertContains( '<blockquote cite="{{cite}}">', $serialized_html );
-		$this->assertContains( '"block_attrs":{"layout":"column-1"}}', $serialized_html );
+		$this->assertStringContains( '<a href="{{href}}" title="Hello {{name}}">', $serialized_html );
+		$this->assertStringContains( '<img src="{{src}}">', $serialized_html );
+		$this->assertStringContains( '<blockquote cite="{{cite}}">', $serialized_html );
+		$this->assertStringContains( '"block_attrs":{"layout":"column-1"}}', $serialized_html );
 	}
 
 	/**
 	 * Test encoding.
 	 *
-	 * @covers \Amp\AmpWP\Dom\Document::from_html()
+	 * @covers \AmpProject\Dom\Document::fromHtml()
 	 */
 	public function test_get_dom_encoding() {
 		$html  = '<!DOCTYPE html><html><head><title>مرحبا بالعالم! Check out ‘this’ and “that” and—other things.</title><meta charset="utf-8"></head><body>';
@@ -273,7 +276,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$html .= '<p>&#x645;&#x631;&#x62D;&#x628;&#x627; &#x628;&#x627;&#x644;&#x639;&#x627;&#x644;&#x645;! Check out &lsquo;this&rsquo; and &ldquo;that&rdquo; and&mdash;other things.</p>';
 		$html .= '</body></html>';
 
-		$document = Document::from_html( $html );
+		$document = Document::fromHtml( $html );
 
 		$this->assertEquals( 'utf-8', $document->encoding );
 		$paragraphs = $document->getElementsByTagName( 'p' );
@@ -294,7 +297,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$body = " start <ul><li>First</li><li>Second</li></ul><style>pre::before { content:'⚡️'; }</style><script type=\"application/json\">\"⚡️\"</script><pre>\t* one\n\t* two\n\t* three</pre> end ";
 		$html = "<html><head><meta charset=\"utf-8\"></head><body data-foo=\"&gt;\">$body</body></html>";
 
-		$dom = Document::from_html( "<!DOCTYPE html>$html" );
+		$dom = Document::fromHtml( "<!DOCTYPE html>$html" );
 
 		$output = $dom->saveHTML( $dom->documentElement );
 		$this->assertEquals( $html, $output );
@@ -346,29 +349,58 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	}
 
 	public function get_get_element_id_data() {
-		$dom = new Document();
+		$element_factory = static function ( $dom, $id = null ) {
+			$element = $dom->createElement( 'div' );
 
-		$same_element = AMP_DOM_Utils::create_node( $dom, 'div', [] );
+			if ( $id ) {
+				$element->setAttribute( 'id', $id );
+			}
+
+			$dom->body->appendChild( $element );
+
+			return $element;
+		};
 
 		return [
-			// Element with existing ID
-			[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'id' => 'my-id' ] ), 'some-prefix', 'my-id' ],
-			// Element without ID
-			[ AMP_DOM_Utils::create_node( $dom, 'div', [] ), 'some-prefix', 'some-prefix' ],
-			// Another element without ID with same prefix
-			[ AMP_DOM_Utils::create_node( $dom, 'div', [] ), 'some-prefix', 'some-prefix-2' ],
-			// Another element without ID with different prefix
-			[ AMP_DOM_Utils::create_node( $dom, 'div', [] ), 'other-prefix', 'other-prefix' ],
-			// Another element without ID with different prefix again
-			[ AMP_DOM_Utils::create_node( $dom, 'div', [] ), 'other-prefix', 'other-prefix-2' ],
-			// Another element without ID with first prefix again
-			[ AMP_DOM_Utils::create_node( $dom, 'div', [] ), 'some-prefix', 'some-prefix-3' ],
-			// Element with existing prefix again
-			[ AMP_DOM_Utils::create_node( $dom, 'div', [ 'id' => 'another-id' ] ), 'some-prefix', 'another-id' ],
-			// Same element first time
-			[ $same_element, 'some-prefix', 'some-prefix-4' ],
-			// Same element second time
-			[ $same_element, 'some-prefix', 'some-prefix-4' ],
+			'single check with existing ID'         => [
+				[
+					[ $element_factory, 'my-id', 'some-prefix', 'my-id' ],
+				],
+			],
+
+			'single check without existing ID'      => [
+				[
+					[ $element_factory, null, 'some-prefix', 'some-prefix-0' ],
+				],
+			],
+
+			'consecutive checks count upwards'      => [
+				[
+					[ $element_factory, null, 'some-prefix', 'some-prefix-0' ],
+					[ $element_factory, null, 'some-prefix', 'some-prefix-1' ],
+				],
+			],
+
+			'consecutive checks for same element return same ID' => [
+				[
+					[ $element_factory, null, 'some-prefix', 'some-prefix-0' ],
+					[ null, null, 'some-prefix', 'some-prefix-0' ],
+				],
+			],
+
+			'mixing prefixes keeps counts separate' => [
+				[
+					[ $element_factory, 'my-id', 'some-prefix', 'my-id' ],
+					[ $element_factory, null, 'some-prefix', 'some-prefix-0' ],
+					[ $element_factory, null, 'some-prefix', 'some-prefix-1' ],
+					[ $element_factory, null, 'other-prefix', 'other-prefix-0' ],
+					[ $element_factory, null, 'other-prefix', 'other-prefix-1' ],
+					[ $element_factory, null, 'some-prefix', 'some-prefix-2' ],
+					[ $element_factory, 'another-id', 'some-prefix', 'another-id' ],
+					[ $element_factory, null, 'some-prefix', 'some-prefix-3' ],
+					[ null, null, 'some-prefix', 'some-prefix-3' ],
+				],
+			],
 		];
 	}
 
@@ -378,13 +410,21 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	 * @dataProvider get_get_element_id_data
 	 * @covers \AMP_DOM_Utils::get_element_id()
 	 *
-	 * @param DOMElement $element  Element.
-	 * @param string     $prefix   Prefix.
-	 * @param string     $expected Expected element ID.
+	 * @expectedDeprecated AMP_DOM_Utils::get_element_id
+	 *
+	 * @param array $checks Checks to perform. Each check is an array containing an element, a prefix and an expected ID.
 	 */
-	public function test_get_element_id( DOMElement $element, $prefix, $expected ) {
-		$actual = AMP_DOM_Utils::get_element_id( $element, $prefix );
-		$this->assertEquals( $expected, $actual );
+	public function test_get_element_id( $checks ) {
+		$dom = new Document();
+		foreach ( $checks as list( $element_factory, $id, $prefix, $expected ) ) {
+			// If no element factory was passed, just reuse the previous element.
+			if ( $element_factory ) {
+				$element = $element_factory( $dom, $id );
+			}
+
+			$actual = AMP_DOM_Utils::get_element_id( $element, $prefix );
+			$this->assertEquals( $expected, $actual );
+		}
 	}
 
 	public function get_add_amp_action_data() {
@@ -429,7 +469,6 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		AMP_DOM_Utils::add_amp_action( $element, $event, $action );
 		$this->assertEquals( $expected, $element->getAttribute( 'on' ) );
 	}
-
 
 	public function get_merge_amp_actions_data() {
 		return [

@@ -104,10 +104,6 @@ function amp_get_test_data_entries() {
 			'content' => 'http://www.funnyordie.com/videos/2977012a20/i-still-haven-t-found-the-droids-i-m-looking-for',
 		],
 		[
-			'heading' => 'Hulu Embed',
-			'content' => 'https://www.hulu.com/watch/807443',
-		],
-		[
 			'heading' => 'Instagram Embed',
 			'content' => 'https://www.instagram.com/p/bNd86MSFv6/',
 		],

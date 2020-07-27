@@ -95,9 +95,9 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return void
 	 */
 	public function unregister_embed() {
-		if ( $this->removed_shortcode_callback ) {
+		if ( isset( $this->removed_shortcode_callback ) ) {
 			add_shortcode( self::SHORTCODE, $this->removed_shortcode_callback );
-			$this->removed_shortcode_callback = null;
+			unset( $this->removed_shortcode_callback );
 		}
 		add_action( 'wp_playlist_scripts', 'wp_playlist_scripts' );
 	}
@@ -330,5 +330,4 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		return '';
 	}
-
 }

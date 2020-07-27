@@ -5,7 +5,8 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Dom\Document;
+use AmpProject\DevMode;
+use AmpProject\Dom\Document;
 
 /**
  * Class AMP_Base_Sanitizer
@@ -33,7 +34,7 @@ abstract class AMP_Base_Sanitizer {
 	/**
 	 * DOM.
 	 *
-	 * @var Document An Amp\Document representation of an HTML document.
+	 * @var Document An AmpProject\Document representation of an HTML document.
 	 *
 	 * @since 0.2
 	 */
@@ -54,8 +55,6 @@ abstract class AMP_Base_Sanitizer {
 	 *      @type array $amp_globally_allowed_attributes
 	 *      @type array $amp_layout_allowed_attributes
 	 *      @type array $amp_bind_placeholder_prefix
-	 *      @type bool $allow_dirty_styles
-	 *      @type bool $allow_dirty_scripts
 	 *      @type bool $should_locate_sources
 	 *      @type callable $validation_error_callback
 	 * }
@@ -174,6 +173,7 @@ abstract class AMP_Base_Sanitizer {
 	 * Return array of values that would be valid as an HTML `style` attribute.
 	 *
 	 * @since 0.4
+	 * @codeCoverageIgnore
 	 * @deprecated As of 1.0, use get_stylesheets().
 	 *
 	 * @return array[][] Mapping of CSS selectors to arrays of properties.
@@ -203,6 +203,7 @@ abstract class AMP_Base_Sanitizer {
 	/**
 	 * Get HTML body as DOMElement from Dom\Document received by the constructor.
 	 *
+	 * @codeCoverageIgnore
 	 * @deprecated Use $this->dom->body instead.
 	 * @return DOMElement The body element.
 	 */
@@ -410,12 +411,13 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @since 1.3
 	 *
+	 * @deprecated Use AmpProject\DevMode::isActiveForDocument( $document ) instead.
+	 *
 	 * @return bool Whether the document is in dev mode.
 	 */
 	protected function is_document_in_dev_mode() {
-		return $this->dom->documentElement->hasAttribute(
-			AMP_Rule_Spec::DEV_MODE_ATTRIBUTE
-		);
+		_deprecated_function( 'AMP_Base_Sanitizer::is_document_in_dev_mode', '1.5', 'AmpProject\DevMode::isActiveForDocument' );
+		return DevMode::isActiveForDocument( $this->dom );
 	}
 
 	/**
@@ -423,25 +425,27 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @since 1.3
 	 *
+	 * @deprecated Use AmpProject\DevMode::hasExemptionForNode( $node ) instead.
+	 *
 	 * @param DOMNode $node Node to check.
 	 * @return bool Whether the node should be exempt during dev mode.
 	 */
 	protected function has_dev_mode_exemption( DOMNode $node ) {
-		if ( ! $node instanceof DOMElement ) {
-			return false;
-		}
-
-		return $node->hasAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE );
+		_deprecated_function( 'AMP_Base_Sanitizer::has_dev_mode_exemption', '1.5', 'AmpProject\DevMode::hasExemptionForNode' );
+		return DevMode::hasExemptionForNode( $node );
 	}
 
 	/**
 	 * Check whether a certain node should be exempt from validation.
 	 *
+	 * @deprecated Use AmpProject\DevMode::isExemptFromValidation( $node ) instead.
+	 *
 	 * @param DOMNode $node Node to check.
 	 * @return bool Whether the node should be exempt from validation.
 	 */
 	protected function is_exempt_from_validation( DOMNode $node ) {
-		return $this->is_document_in_dev_mode() && $this->has_dev_mode_exemption( $node );
+		_deprecated_function( 'AMP_Base_Sanitizer::is_exempt_from_validation', '1.5', 'AmpProject\DevMode::isExemptFromValidation' );
+		return DevMode::isExemptFromValidation( $node );
 	}
 
 	/**
@@ -457,7 +461,7 @@ abstract class AMP_Base_Sanitizer {
 	 * @return bool Whether the node should have been removed, that is, that the node was sanitized for validity.
 	 */
 	public function remove_invalid_child( $node, $validation_error = [] ) {
-		if ( $this->is_exempt_from_validation( $node ) ) {
+		if ( DevMode::isExemptFromValidation( $node ) ) {
 			return false;
 		}
 
@@ -468,6 +472,11 @@ abstract class AMP_Base_Sanitizer {
 
 		$should_remove = $this->should_sanitize_validation_error( $validation_error, compact( 'node' ) );
 		if ( $should_remove ) {
+			if ( null === $node->parentNode ) {
+				// Node no longer exists.
+				return $should_remove;
+			}
+
 			$node->parentNode->removeChild( $node );
 		} else {
 			$this->nodes_to_keep[ $node->nodeName ][] = $node;
@@ -490,7 +499,7 @@ abstract class AMP_Base_Sanitizer {
 	 * @return bool Whether the node should have been removed, that is, that the node was sanitized for validity.
 	 */
 	public function remove_invalid_attribute( $element, $attribute, $validation_error = [], $attr_spec = [] ) {
-		if ( $this->is_exempt_from_validation( $element ) ) {
+		if ( DevMode::isExemptFromValidation( $element ) ) {
 			return false;
 		}
 
@@ -612,6 +621,10 @@ abstract class AMP_Base_Sanitizer {
 			$error['text'] = trim( $node->data, '?' );
 		}
 
+		if ( ! isset( $error['node_type'] ) ) {
+			$error['node_type'] = $node->nodeType;
+		}
+
 		return $error;
 	}
 
@@ -651,7 +664,7 @@ abstract class AMP_Base_Sanitizer {
 
 		// Editor blocks add 'figure' as the parent node for images. If this node has data-amp-layout then we should add this as the layout attribute.
 		$parent_node = $node->parentNode;
-		if ( 'figure' === $parent_node->tagName ) {
+		if ( $parent_node instanceof DOMELement && 'figure' === $parent_node->tagName ) {
 			$parent_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $parent_node );
 			if ( isset( $parent_attributes['data-amp-layout'] ) ) {
 				$attributes['layout'] = $parent_attributes['data-amp-layout'];
@@ -692,7 +705,7 @@ abstract class AMP_Base_Sanitizer {
 	public function filter_attachment_layout_attributes( $node, $new_attributes, $layout ) {
 
 		// The width has to be unset / auto in case of fixed-height.
-		if ( 'fixed-height' === $layout ) {
+		if ( 'fixed-height' === $layout && $node->parentNode instanceof DOMElement ) {
 			if ( ! isset( $new_attributes['height'] ) ) {
 				$new_attributes['height'] = self::FALLBACK_HEIGHT;
 			}
@@ -700,13 +713,13 @@ abstract class AMP_Base_Sanitizer {
 			$node->parentNode->setAttribute( 'style', 'height: ' . $new_attributes['height'] . 'px; width: auto;' );
 
 			// The parent element should have width/height set and position set in case of 'fill'.
-		} elseif ( 'fill' === $layout ) {
+		} elseif ( 'fill' === $layout && $node->parentNode instanceof DOMElement ) {
 			if ( ! isset( $new_attributes['height'] ) ) {
 				$new_attributes['height'] = self::FALLBACK_HEIGHT;
 			}
 			$node->parentNode->setAttribute( 'style', 'position:relative; width: 100%; height: ' . $new_attributes['height'] . 'px;' );
 			unset( $new_attributes['width'], $new_attributes['height'] );
-		} elseif ( 'responsive' === $layout ) {
+		} elseif ( 'responsive' === $layout && $node->parentNode instanceof DOMElement ) {
 			$node->parentNode->setAttribute( 'style', 'position:relative; width: 100%; height: auto' );
 		} elseif ( 'fixed' === $layout ) {
 			if ( ! isset( $new_attributes['height'] ) ) {
@@ -764,5 +777,17 @@ abstract class AMP_Base_Sanitizer {
 			},
 			''
 		);
+	}
+
+	/**
+	 * Get data that is returned in validate responses.
+	 *
+	 * The array returned is merged with the overall validate response data.
+	 *
+	 * @see \AMP_Validation_Manager::get_validate_response_data()
+	 * @return array Validate response data.
+	 */
+	public function get_validate_response_data() {
+		return [];
 	}
 }

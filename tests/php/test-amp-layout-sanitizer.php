@@ -5,12 +5,16 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
+
 /**
  * Test AMP_Layout_Sanitizer_Test
  *
  * @covers AMP_Layout_Sanitizer_Test
  */
 class AMP_Layout_Sanitizer_Test extends WP_UnitTestCase {
+
+	use MarkupComparison;
 
 	/**
 	 * Get body data.
@@ -19,6 +23,11 @@ class AMP_Layout_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function get_body_data() {
 		return [
+			'non_amp_component'                           => [
+				'<svg height="10%" width="10%"></svg>',
+				'<svg height="10%" width="10%"></svg>',
+			],
+
 			'no_width_or_height'                          => [
 				'<amp-img src="foo.jpg" data-amp-layout="fill"></amp-img>',
 				'<amp-img src="foo.jpg" layout="fill"></amp-img>',
@@ -92,23 +101,5 @@ class AMP_Layout_Sanitizer_Test extends WP_UnitTestCase {
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 
 		$this->assertEqualMarkup( $expected, $content );
-	}
-
-	/**
-	 * Assert markup is equal.
-	 *
-	 * @param string $expected Expected markup.
-	 * @param string $actual   Actual markup.
-	 */
-	public function assertEqualMarkup( $expected, $actual ) {
-		$actual   = preg_replace( '/\s+/', ' ', $actual );
-		$expected = preg_replace( '/\s+/', ' ', $expected );
-		$actual   = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $actual ) );
-		$expected = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $expected ) );
-
-		$this->assertEquals(
-			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $expected, -1, PREG_SPLIT_DELIM_CAPTURE ) ),
-			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $actual, -1, PREG_SPLIT_DELIM_CAPTURE ) )
-		);
 	}
 }

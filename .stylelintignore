@@ -3,3 +3,5 @@
 /build
 /tests
 /vendor
+/lib/optimizer
+/lib/common

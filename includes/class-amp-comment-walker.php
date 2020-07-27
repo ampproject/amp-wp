@@ -2,6 +2,7 @@
 /**
  * Class AMP_Comment_Walker
  *
+ * @codeCoverageIgnore
  * @deprecated 1.1.0 This functionality was moved to AMP_Comments_Sanitizer
  * @package AMP
  */
@@ -80,10 +81,11 @@ class AMP_Comment_Walker extends Walker_Comment {
 	 * @param int          $max_depth The maximum hierarchical depth.
 	 * @param int          $page_num The specific page number, beginning with 1.
 	 * @param int          $per_page Per page counter.
+	 * @param mixed        ...$args  Optional additional arguments.
 	 *
 	 * @return string XHTML of the specified page of elements.
 	 */
-	public function paged_walk( $elements, $max_depth, $page_num, $per_page ) {
+	public function paged_walk( $elements, $max_depth, $page_num, $per_page, ...$args ) {
 		if ( empty( $elements ) || $max_depth < -1 ) {
 			return '';
 		}

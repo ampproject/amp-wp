@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AmpProject\DevMode;
+
 /**
  * Class AMP_Audio_Sanitizer
  *
@@ -61,7 +63,7 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 			$node = $nodes->item( $i );
 
 			// Skip element if already inside of an AMP element as a noscript fallback, or it has a dev mode exemption.
-			if ( $this->is_inside_amp_noscript( $node ) || $this->has_dev_mode_exemption( $node ) ) {
+			if ( $this->is_inside_amp_noscript( $node ) || DevMode::hasExemptionForNode( $node ) ) {
 				continue;
 			}
 

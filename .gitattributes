@@ -1,0 +1,4 @@
+lib/optimizer/resources/local_fallback/*                 linguist-generated=true
+lib/optimizer/tests/spec/*                               linguist-generated=true
+*.snap                                                   linguist-generated=true
+includes/sanitizers/class-amp-allowed-tags-generated.php linguist-generated=true
