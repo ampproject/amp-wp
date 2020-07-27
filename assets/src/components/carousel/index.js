@@ -187,7 +187,7 @@ function Style( { gutterWidth, itemWidth, namespace } ) {
 	-ms-overflow-style: none;
 	padding: 1rem 0;
 	scrollbar-width: none;
-	 /* scroll-snap-type: x mandatory; */
+	scroll-snap-type: x mandatory;
 }
 
 .${ namespace }__carousel::-webkit-scrollbar {
