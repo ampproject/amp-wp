@@ -146,7 +146,7 @@ export function TemplateModes() {
 				}
 			</TemplateModeOption>
 			<TemplateModeOption
-				details={ __( 'Formerly called classic mode, this mode generates paired AMP content using simplified templates which may not match the look and feel of your site. Only posts/pages can be served as AMP in Reader mode. No reidrection is performed for mobile visitors; AMP pages are served by AMP consumption platforms.', 'amp' ) }
+				details={ __( 'Formerly called classic mode, this mode generates paired AMP content using simplified templates which may not match the look and feel of your site. Only posts/pages can be served as AMP in Reader mode. No redirection is performed for mobile visitors; AMP pages are served by AMP consumption platforms.', 'amp' ) }
 				initialOpen={ false }
 				mode={ READER }
 				labelExtra={ readerNoticeSmall }
