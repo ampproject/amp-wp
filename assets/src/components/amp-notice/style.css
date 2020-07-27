@@ -36,7 +36,7 @@
 	background-color: #fff9c8;
 }
 
-.amp-notice--warning svg {
+.amp-notice--warning .amp-notice__icon svg {
 	color: #ff9f00;
 	transform: rotate(180deg);
 }

@@ -118,13 +118,6 @@ export function ReaderThemeCarousel( { hideCurrentlyActiveTheme = false } ) {
 				</AMPNotice>
 			) }
 			<div>
-				{ 0 < shownThemes.length && (
-					<Carousel
-						items={ carouselItems }
-						highlightedItemIndex={ shownThemes.findIndex( ( { name } ) => name === selectedTheme.name ) }
-					/>
-				) }
-
 				{
 					hasUnavailableThemes && (
 						<AMPNotice type={ NOTICE_TYPE_WARNING }>
@@ -157,6 +150,13 @@ export function ReaderThemeCarousel( { hideCurrentlyActiveTheme = false } ) {
 						</AMPNotice>
 					)
 				}
+
+				{ 0 < shownThemes.length && (
+					<Carousel
+						items={ carouselItems }
+						highlightedItemIndex={ shownThemes.findIndex( ( { name } ) => name === selectedTheme.name ) }
+					/>
+				) }
 			</div>
 		</div>
 	);
