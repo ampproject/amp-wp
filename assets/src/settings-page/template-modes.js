@@ -20,7 +20,7 @@ import { TemplateModeOption } from '../components/template-mode-option';
 import { AMPNotice, NOTICE_SIZE_LARGE, NOTICE_TYPE_INFO, NOTICE_SIZE_SMALL, NOTICE_TYPE_WARNING } from '../components/amp-notice';
 import { Options } from '../components/options-context-provider';
 import { READER, STANDARD, TRANSITIONAL } from '../common/constants';
-import { AMPDrawer, HANDLE_TYPE_RIGHT } from '../components/amp-drawer';
+import { AMPDrawer } from '../components/amp-drawer';
 import { ReaderThemes } from '../components/reader-themes-context-provider';
 import { ReaderThemeCarousel } from '../components/reader-theme-carousel';
 
