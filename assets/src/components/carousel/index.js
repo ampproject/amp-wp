@@ -56,7 +56,13 @@ export function Carousel( {
 		originalsetCenteredItem( newCurrentItem );
 
 		if ( newCurrentItem && scrollToItem ) {
-			const left = newCurrentItem.offsetLeft - ( isMobile ? 0 : newCurrentItem.clientWidth );
+			let left;
+			if ( isMobile ) {
+				left = newCurrentItem.offsetLeft;
+			} else {
+				left = newCurrentItem.previousElementSibling ? newCurrentItem.previousElementSibling.offsetLeft : newCurrentItem.offsetLeft;
+			}
+
 			carouselListRef.current.scrollTo( { top: 0, left, behavior: initialized ? 'smooth' : 'auto' } );
 
 			if ( ! initialized ) {
@@ -70,7 +76,13 @@ export function Carousel( {
 	 * it will center a theme when the user clicks its label (e.g., if they click a theme that's off to the side).
 	 */
 	useEffect( () => {
-		const item = carouselListRef.current.children.item( highlightedItemIndex > -1 ? highlightedItemIndex : 0 );
+		let index = highlightedItemIndex > -1 ? highlightedItemIndex : 0;
+
+		if ( ! isMobile && index < items.length - 1 ) {
+			index += 1;
+		}
+
+		const item = carouselListRef.current.children.item( index );
 
 		setCenteredItem( item );
 	}, [ highlightedItemIndex, isMobile, items.length, setCenteredItem ] );
@@ -167,6 +179,7 @@ function Style( { gutterWidth, itemWidth, namespace } ) {
 				`
 
 .${ namespace }__carousel {
+	position: relative;
 	display: grid;
 	gap: ${ gutterWidth }px;
 	grid-auto-flow: column;
@@ -174,7 +187,7 @@ function Style( { gutterWidth, itemWidth, namespace } ) {
 	-ms-overflow-style: none;
 	padding: 1rem 0;
 	scrollbar-width: none;
-	scroll-snap-type: x mandatory;
+	 /* scroll-snap-type: x mandatory; */
 }
 
 .${ namespace }__carousel::-webkit-scrollbar {
