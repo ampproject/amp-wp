@@ -262,6 +262,8 @@ li.error-kept {
 #template-mode-reader-container.selectable.selectable--selected {
 	border-bottom-left-radius: 0;
 	border-bottom-right-radius: 0;
+	border-bottom-style: dotted;
+	border-bottom-width: 1px;
 }
 
 #reader-themes-drawer {
