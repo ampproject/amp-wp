@@ -162,7 +162,7 @@ Carousel.propTypes = {
  * @todo Installing a styled components library would provide better tooling for this.
  *
  * @param {Object} props Component props.
- * @param {number} props.gutterWidth The amount of space betwen items.
+ * @param {number} props.gutterWidth The amount of space between items.
  * @param {number} props.itemWidth The width of items.
  * @param {string} props.namespace CSS property namespace.
  */
