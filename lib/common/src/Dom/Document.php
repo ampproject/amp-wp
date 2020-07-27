@@ -1370,23 +1370,14 @@ final class Document extends DOMDocument
      *
      * ⚠️ This is not cryptographically secure!
      *
-     * @param int $min Lower limit for the generated number. Defaults to 0.
-     * @param int $max Upper limit for the generated number. Defaults to max random number.
-     * @return int A random number between min and max
+     * @return int A random number.
      */
-    private function rand($min = 0, $max = null)
+    private function rand()
     {
         if (function_exists('mt_rand')) {
-            if ($max === null) {
-                $max = mt_getrandmax();
-            }
-            return mt_rand($min, $max);
+            return mt_rand();
         }
-
-        if ($max === null) {
-            $max = getrandmax();
-        }
-        return rand($min, $max);
+        return rand();
     }
 
     /**
