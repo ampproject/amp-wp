@@ -38,6 +38,7 @@
 
 .amp-notice--warning svg {
 	color: #ff9f00;
+	transform: rotate(180deg);
 }
 
 .amp-notice--error {
