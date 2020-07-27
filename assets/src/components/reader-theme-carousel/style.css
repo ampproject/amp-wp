@@ -2,13 +2,17 @@
 	padding: 1.5rem;
 
 	@media (min-width: 783px) {
-		padding: 3rem;
+		padding: 1.5rem 3rem;
 	}
+}
+
+.reader-theme-selection p {
+	margin-top: 0;
+	font-size: 14px;
 }
 
 .choose-reader-theme__unavailable .choose-reader-theme__grid {
 	display: grid;
 	gap: 1rem;
 	grid-template-columns: repeat(4, 1fr);
-
 }

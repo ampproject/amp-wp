@@ -117,11 +117,28 @@ describe( 'TemplateModeOption', () => {
 		expect( container.querySelector( '#standard-mode-children' ) ).not.toBeNull();
 	} );
 
-	it( 'can be toggled', () => {
+	it( 'can be open', () => {
 		act( () => {
 			render(
 				<OptionsContextProvider>
-					<TemplateModeOption mode={ TRANSITIONAL }>
+					<TemplateModeOption mode={ TRANSITIONAL } initialOpen={ true }>
+						<div id="transitional-mode-children">
+							{ 'children' }
+						</div>
+					</TemplateModeOption>
+				</OptionsContextProvider>,
+				container,
+			);
+		} );
+
+		expect( container.querySelector( '#transitional-mode-children' ) ).not.toBeNull();
+	} );
+
+	it( 'can be closed', () => {
+		act( () => {
+			render(
+				<OptionsContextProvider>
+					<TemplateModeOption mode={ TRANSITIONAL } initialOpen={ false }>
 						<div id="transitional-mode-children">
 							{ 'children' }
 						</div>
@@ -132,11 +149,5 @@ describe( 'TemplateModeOption', () => {
 		} );
 
 		expect( container.querySelector( '#transitional-mode-children' ) ).toBeNull();
-
-		act( () => {
-			document.querySelector( `#template-mode-transitional-container .components-panel__body-toggle` ).dispatchEvent( new global.MouseEvent( 'click', { bubbles: true } ) );
-		} );
-
-		expect( container.querySelector( '#transitional-mode-children' ) ).not.toBeNull();
 	} );
 } );

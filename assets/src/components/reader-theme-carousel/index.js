@@ -98,9 +98,6 @@ export function ReaderThemeCarousel( { hideCurrentlyActiveTheme = false } ) {
 
 	return (
 		<div className="reader-theme-selection">
-			<h3>
-				{ __( 'Choose Reader Theme', 'amp' ) }
-			</h3>
 			<p>
 				{
 					// @todo Probably improve this text.

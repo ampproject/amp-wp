@@ -56,14 +56,14 @@ export function Carousel( {
 		originalsetCenteredItem( newCurrentItem );
 
 		if ( newCurrentItem && scrollToItem ) {
-			const left = newCurrentItem.offsetLeft;
+			const left = newCurrentItem.offsetLeft - ( isMobile ? 0 : newCurrentItem.clientWidth );
 			carouselListRef.current.scrollTo( { top: 0, left, behavior: initialized ? 'smooth' : 'auto' } );
 
 			if ( ! initialized ) {
 				setInitialized( true );
 			}
 		}
-	}, [ initialized ] );
+	}, [ initialized, isMobile ] );
 
 	/**
 	 * Center the highlighted item. On initial load, this will center the previously selected theme. Subsequently,
@@ -75,7 +75,7 @@ export function Carousel( {
 		if ( isMobile ) {
 			item = carouselListRef.current.children.item( highlightedItemIndex );
 		} else {
-			item = carouselListRef.current.children.item( 0 === highlightedItemIndex ? 0 : highlightedItemIndex - 1 );
+			item = carouselListRef.current.children.item( highlightedItemIndex );
 		}
 
 		setCenteredItem( item );

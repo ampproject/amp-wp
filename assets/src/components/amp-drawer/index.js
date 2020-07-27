@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { PanelBody } from '@wordpress/components';
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useState, useLayoutEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -15,28 +15,32 @@ import { useEffect, useState } from '@wordpress/element';
 import { Selectable } from '../selectable';
 import './style.css';
 
-export function AMPDrawer( { children = null, className, heading, id, initialOpen, selected = false, hiddenTitle } ) {
+export function AMPDrawer( { children = null, className, heading, id, initialOpen = false, selected = false, hiddenTitle } ) {
 	const [ opened, setOpened ] = useState( initialOpen );
 
 	/**
 	 * Watch for changes to the panel body attributes and set opened state accordingly.
 	 */
-	useEffect( () => {
+	useLayoutEffect( () => {
 		const mutationCallback = ( [ mutation ] ) => {
-			if ( mutation.target.classList.contains( 'is-opened' ) ) {
+			if ( mutation.target.classList.contains( 'is-opened' ) && ! opened ) {
 				setOpened( true );
-			} else {
+			} else if ( opened ) {
 				setOpened( false );
 			}
 		};
 
 		const observer = new global.MutationObserver( mutationCallback );
-		observer.observe( document.getElementById( id ).querySelector( '.components-panel__body' ), { attributes: true } );
+
+		const panel = document.getElementById( id )?.querySelector( '.components-panel__body' );
+		if ( panel ) {
+			observer.observe( panel, { attributes: true } );
+		}
 
 		return () => {
 			observer.disconnect();
 		};
-	}, [ id ] );
+	}, [ id, opened ] );
 
 	return (
 		<Selectable

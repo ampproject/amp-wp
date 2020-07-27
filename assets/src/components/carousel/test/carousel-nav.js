@@ -51,6 +51,8 @@ describe( 'CarouselNav', () => {
 					centeredItem={ centeredItem }
 					items={ items }
 					namespace={ namespace }
+					nextButtonDisabled={ false }
+					prevButtonDisabled={ false }
 					setCenteredItem={ ( newItem ) => {
 						centeredItem = newItem;
 					} }

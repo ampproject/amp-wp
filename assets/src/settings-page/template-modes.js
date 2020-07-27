@@ -162,7 +162,7 @@ export function TemplateModes() {
 								{ sprintf(
 								// Translators: placeholder is a theme name.
 									__( 'Reader theme: %s', 'amp' ),
-									selectedTheme.name,
+									selectedTheme.name || '',
 								) }
 							</h3>
 						</div>
