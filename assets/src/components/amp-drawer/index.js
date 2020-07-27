@@ -18,6 +18,9 @@ import './style.css';
 export function AMPDrawer( { children = null, className, heading, id, initialOpen, selected = false, hiddenTitle } ) {
 	const [ opened, setOpened ] = useState( initialOpen );
 
+	/**
+	 * Watch for changes to the panel body attributes and set opened state accordingly.
+	 */
 	useEffect( () => {
 		const mutationCallback = ( [ mutation ] ) => {
 			if ( mutation.target.classList.contains( 'is-opened' ) ) {
@@ -29,6 +32,10 @@ export function AMPDrawer( { children = null, className, heading, id, initialOpe
 
 		const observer = new global.MutationObserver( mutationCallback );
 		observer.observe( document.getElementById( id ).querySelector( '.components-panel__body' ), { attributes: true } );
+
+		return () => {
+			observer.disconnect();
+		};
 	}, [ id ] );
 
 	return (

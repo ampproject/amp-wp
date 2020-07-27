@@ -65,6 +65,11 @@
 /* Supported templates section. */
 .supported-templates {
 	margin-bottom: 3rem;
+	padding: 0 1.5rem;
+
+	@media (min-width: 783px) {
+		padding: 0 3rem;
+	}
 }
 
 .supported-templates h4 {
@@ -77,7 +82,7 @@
 
 .mobile-redirection,
 .plugin-suppression {
-	margin-bottom: 2.25rem;
+	margin-bottom: 1rem;
 }
 
 .template-modes {
@@ -244,11 +249,6 @@ li.error-kept {
 	max-width: 400px;
 }
 
-/* Panel bodies. */
-.advanced-settings {
-	padding: 0 1rem;
-}
-
 .settings-footer {
 	padding-bottom: 2.5rem;
 	padding-top: 2.5rem;
@@ -278,4 +278,16 @@ li.error-kept {
 	@media (min-width: 783px) {
 		padding-left: 3rem;
 	}
+}
+
+#plugin-suppression-drawer .amp-drawer__panel-body-inner {
+	padding: 0 1.5rem 3rem;
+
+	@media (min-width: 783px) {
+		padding: 0 3rem 3rem;
+	}
+}
+
+#plugin-suppression-drawer .amp-drawer__panel-body-inner p {
+	font-size: 15px;
 }

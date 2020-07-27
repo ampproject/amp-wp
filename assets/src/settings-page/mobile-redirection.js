@@ -2,7 +2,6 @@
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { useContext } from '@wordpress/element';
 
 /**
@@ -26,9 +25,6 @@ export function MobileRedirection() {
 
 	return (
 		<section className="mobile-redirection">
-			<h2>
-				{ __( 'Mobile Redirection', 'amp' ) }
-			</h2>
 			<RedirectToggle direction="left" />
 		</section>
 	);
