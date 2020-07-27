@@ -70,13 +70,7 @@ export function Carousel( {
 	 * it will center a theme when the user clicks its label (e.g., if they click a theme that's off to the side).
 	 */
 	useEffect( () => {
-		let item;
-
-		if ( isMobile ) {
-			item = carouselListRef.current.children.item( highlightedItemIndex );
-		} else {
-			item = carouselListRef.current.children.item( highlightedItemIndex );
-		}
+		const item = carouselListRef.current.children.item( highlightedItemIndex > -1 ? highlightedItemIndex : 0 );
 
 		setCenteredItem( item );
 	}, [ highlightedItemIndex, isMobile, items.length, setCenteredItem ] );
