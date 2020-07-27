@@ -38,43 +38,56 @@ export function Carousel( {
 	highlightedItemIndex = 0,
 } ) {
 	const windowWidth = useWindowWidth();
-	const [ currentItem, originalSetCurrentItem ] = useState( null );
+	const [ centeredItem, originalsetCenteredItem ] = useState( null );
+	const [ initialized, setInitialized ] = useState( false );
 	const carouselContainerRef = useRef();
 	const carouselListRef = useRef();
 
+	const isMobile = mobileBreakpoint > windowWidth;
+
 	/**
-	 * Sets the the currentItem state and optionally scrolls to it.
+	 * Sets the the centeredItem state and optionally scrolls to it.
 	 *
 	 * This state-setting wrapper is required, as opposed to scrolling to items in an effect hook when they're set as current,
-	 * because intersection observer needs to set currentItem, but it does so only when the new currentItem is already centered
+	 * because intersection observer needs to set centeredItem, but it does so only when the new centeredItem is already centered
 	 * in the view. Calling scrollTo in that situation would cause jerky scroll effects.
 	 */
-	const setCurrentItem = useCallback( ( newCurrentItem, scrollToItem = true ) => {
-		originalSetCurrentItem( newCurrentItem );
+	const setCenteredItem = useCallback( ( newCurrentItem, scrollToItem = true ) => {
+		originalsetCenteredItem( newCurrentItem );
 
 		if ( newCurrentItem && scrollToItem ) {
 			const left = newCurrentItem.offsetLeft;
-			carouselListRef.current.scrollTo( { top: 0, left, behavior: 'smooth' } );
+			carouselListRef.current.scrollTo( { top: 0, left, behavior: initialized ? 'smooth' : 'auto' } );
+
+			if ( ! initialized ) {
+				setInitialized( true );
+			}
 		}
-	}, [] );
+	}, [ initialized ] );
 
 	/**
 	 * Center the highlighted item. On initial load, this will center the previously selected theme. Subsequently,
 	 * it will center a theme when the user clicks its label (e.g., if they click a theme that's off to the side).
 	 */
 	useEffect( () => {
-		const item = carouselListRef.current.children.item( highlightedItemIndex );
+		let item;
 
-		setCurrentItem( item );
-	}, [ highlightedItemIndex, setCurrentItem ] );
+		if ( isMobile ) {
+			item = carouselListRef.current.children.item( highlightedItemIndex );
+		} else {
+			item = carouselListRef.current.children.item( 0 === highlightedItemIndex ? 0 : highlightedItemIndex - 1 );
+		}
+
+		setCenteredItem( item );
+	}, [ highlightedItemIndex, isMobile, items.length, setCenteredItem ] );
 
 	/**
-	 * Set up an intersection observer to set an item as the currentItem as it crosses the center of the view.
+	 * Set up an intersection observer to set an item as the centeredItem as it crosses the center of the view.
 	 */
 	useLayoutEffect( () => {
 		const observerCallback = ( [ { isIntersecting, target } ] ) => {
 			if ( isIntersecting ) {
-				setCurrentItem( target, false );
+				setCenteredItem( target, false );
 			}
 		};
 
@@ -90,12 +103,11 @@ export function Carousel( {
 		return () => {
 			observer.disconnect();
 		};
-	}, [ currentItem, setCurrentItem ] );
+	}, [ centeredItem, setCenteredItem ] );
 
-	const isMobile = mobileBreakpoint > windowWidth;
-	const currentItemIndex = [ ...( carouselListRef.current?.children || [] ) ].indexOf( currentItem );
-	const nextButtonDisabled = currentItemIndex >= items.length - ( isMobile ? 1 : 2 );
-	const prevButtonDisabled = currentItemIndex <= ( isMobile ? 0 : 1 );
+	const centeredItemIndex = [ ...( carouselListRef.current?.children || [] ) ].indexOf( centeredItem );
+	const nextButtonDisabled = centeredItemIndex >= items.length - ( isMobile ? 1 : 2 );
+	const prevButtonDisabled = centeredItemIndex <= ( isMobile ? 0 : 1 );
 
 	return (
 		<div className={ namespace }>
@@ -114,15 +126,15 @@ export function Carousel( {
 					) ) }
 				</ul>
 			</div>
-			{ currentItem && (
+			{ centeredItem && (
 				<CarouselNav
-					currentItem={ currentItem }
-					currentItemIndex={ currentItemIndex }
+					centeredItem={ centeredItem }
+					centeredItemIndex={ centeredItemIndex }
 					items={ carouselListRef?.current?.children }
 					namespace={ namespace }
 					nextButtonDisabled={ nextButtonDisabled }
 					prevButtonDisabled={ prevButtonDisabled }
-					setCurrentItem={ setCurrentItem }
+					setCenteredItem={ setCenteredItem }
 					highlightedItemIndex={ highlightedItemIndex }
 					showDots={ mobileBreakpoint < windowWidth }
 				/>

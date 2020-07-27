@@ -66,22 +66,22 @@ Dot.propTypes = {
  * Dot navigation component.
  *
  * @param {Object} props Component props.
- * @param {number} props.currentItem The current item.
+ * @param {number} props.centeredItem The current item.
  * @param {HTMLCollection} props.items Items in the carousel.
  * @param {string} props.namespace CSS namespace.
- * @param {Function} props.setCurrentItem Sets an item as the current item.
+ * @param {Function} props.setCenteredItem Sets an item as the current item.
  * @param {number} props.highlightedItemIndex Index of an item to highlight.
  * @param {boolean} props.showDots Whether to show the dot navigation.
  * @param {boolean} props.prevButtonDisabled Whether the prev button is disabled.
  * @param {boolean} props.nextButtonDisabled Whether the next button is disabled.
  */
 export function CarouselNav( {
-	currentItem,
+	centeredItem,
 	items,
 	namespace,
 	nextButtonDisabled,
 	prevButtonDisabled,
-	setCurrentItem,
+	setCenteredItem,
 	highlightedItemIndex,
 	showDots,
 } ) {
@@ -92,7 +92,7 @@ export function CarouselNav( {
 				isPrimary
 				disabled={ prevButtonDisabled }
 				onClick={ () => {
-					setCurrentItem( currentItem.previousElementSibling );
+					setCenteredItem( centeredItem.previousElementSibling );
 				} }
 				className={ `${ namespace }__prev` }
 				aria-label={ __( 'Previous', 'amp' ) }
@@ -112,12 +112,12 @@ export function CarouselNav( {
 						<Dot
 							id={ `${ namespace }__${ item.id }-dot` }
 							key={ `${ namespace }__${ item.id }-dot` }
-							isCurrent={ item === currentItem }
+							isCurrent={ item === centeredItem }
 							isHighlighted={ itemIndex === highlightedItemIndex }
 							label={ item.getAttribute( 'data-label' ) }
 							namespace={ namespace }
 							onClick={ () => {
-								setCurrentItem( item );
+								setCenteredItem( item );
 							} }
 						/>
 					) ) }
@@ -128,7 +128,7 @@ export function CarouselNav( {
 				isPrimary
 				disabled={ nextButtonDisabled }
 				onClick={ () => {
-					setCurrentItem( currentItem.nextElementSibling );
+					setCenteredItem( centeredItem.nextElementSibling );
 				} }
 				className={ `${ namespace }__next` }
 				aria-label={ __( 'Next', 'amp' ) }
@@ -146,12 +146,12 @@ export function CarouselNav( {
 	);
 }
 CarouselNav.propTypes = {
-	currentItem: PropTypes.object.isRequired,
+	centeredItem: PropTypes.object.isRequired,
 	items: PropTypes.object.isRequired,
 	namespace: PropTypes.string.isRequired,
 	highlightedItemIndex: PropTypes.number.isRequired,
 	nextButtonDisabled: PropTypes.bool.isRequired,
 	prevButtonDisabled: PropTypes.bool.isRequired,
-	setCurrentItem: PropTypes.func.isRequired,
+	setCenteredItem: PropTypes.func.isRequired,
 	showDots: PropTypes.bool.isRequired,
 };
