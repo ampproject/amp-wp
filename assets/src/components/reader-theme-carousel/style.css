@@ -6,6 +6,10 @@
 	}
 }
 
+.reader-theme-selection .amp-notice--info {
+	margin-bottom: 0.75rem;
+}
+
 .reader-theme-selection p {
 	margin-top: 0;
 	font-size: 14px;

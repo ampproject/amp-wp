@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 import { AMP_QUERY_VAR, DEFAULT_AMP_QUERY_VAR, LEGACY_THEME_SLUG, AMP_QUERY_VAR_CUSTOMIZED_LATE } from 'amp-settings'; // From WP inline script.
 
 /**
@@ -23,38 +22,15 @@ import { Carousel } from '../carousel';
 
 /**
  * Component for selecting a reader theme.
- *
- * @param {Object} props Component props.
- * @param {boolean} props.hideCurrentlyActiveTheme Whether the currently active theme should be unselectable.
  */
-export function ReaderThemeCarousel( { hideCurrentlyActiveTheme = false } ) {
-	const { currentTheme, fetchingThemes, selectedTheme, themes: unprocessedThemes } = useContext( ReaderThemes );
+export function ReaderThemeCarousel() {
+	const { currentTheme, fetchingThemes, selectedTheme, themes } = useContext( ReaderThemes );
 
 	const [ includeUnavailableThemes, setIncludeUnavailableThemes ] = useState( false );
-
-	const { activeTheme, themes } = useMemo( () => {
-		let active, processedThemes;
-
-		if ( hideCurrentlyActiveTheme ) {
-			processedThemes = ( unprocessedThemes || [] ).filter( ( theme ) => {
-				if ( 'active' === theme.availability ) {
-					active = theme;
-					return false;
-				}
-				return true;
-			} );
-		} else {
-			active = null;
-			processedThemes = unprocessedThemes;
-		}
-
-		return { activeTheme: active, themes: processedThemes };
-	}, [ hideCurrentlyActiveTheme, unprocessedThemes ] );
 
 	// Separate available themes (both installed and installable) from those that need to be installed manually.
 	const { hasUnavailableThemes, shownThemes } = useMemo(
 		() => ( themes || [] )
-			.filter( ( theme ) => ! ( hideCurrentlyActiveTheme && currentTheme.name === theme.name ) )
 			.reduce(
 				( collection, theme ) => {
 					if ( ( AMP_QUERY_VAR_CUSTOMIZED_LATE && theme.slug !== LEGACY_THEME_SLUG ) || theme.availability === 'non-installable' ) {
@@ -70,7 +46,7 @@ export function ReaderThemeCarousel( { hideCurrentlyActiveTheme = false } ) {
 				},
 				{ shownThemes: [], hasUnavailableThemes: false },
 			),
-		[ currentTheme.name, hideCurrentlyActiveTheme, includeUnavailableThemes, themes ],
+		[ includeUnavailableThemes, themes ],
 	);
 
 	// Memoize carousel items to avoid flickering images on every render.
@@ -104,14 +80,14 @@ export function ReaderThemeCarousel( { hideCurrentlyActiveTheme = false } ) {
 					__( 'Select the theme template for mobile visitors', 'amp' )
 				}
 			</p>
-			{ activeTheme && hideCurrentlyActiveTheme && (
+			{ currentTheme && currentTheme.is_reader_theme && (
 				<AMPNotice>
 					<p>
 						{
 							sprintf(
 								/* translators: placeholder is the name of a WordPress theme. */
 								__( 'Your active theme “%s” is not available as a reader theme. If you wish to use it, Transitional mode may be the best option for you.', 'amp' ),
-								activeTheme.name,
+								currentTheme.name,
 							)
 						}
 					</p>
@@ -161,7 +137,3 @@ export function ReaderThemeCarousel( { hideCurrentlyActiveTheme = false } ) {
 		</div>
 	);
 }
-
-ReaderThemeCarousel.propTypes = {
-	hideCurrentlyActiveTheme: PropTypes.bool,
-};

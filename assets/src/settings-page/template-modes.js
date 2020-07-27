@@ -21,8 +21,8 @@ import { AMPNotice, NOTICE_SIZE_LARGE, NOTICE_TYPE_INFO, NOTICE_SIZE_SMALL, NOTI
 import { Options } from '../components/options-context-provider';
 import { READER, STANDARD, TRANSITIONAL } from '../common/constants';
 import { AMPDrawer } from '../components/amp-drawer';
-import { ReaderThemes as ReaderThemesContext } from '../components/reader-themes-context-provider';
-import { ReaderThemes } from './reader-themes';
+import { ReaderThemes } from '../components/reader-themes-context-provider';
+import { ReaderThemeCarousel } from '../components/reader-theme-carousel';
 
 /**
  * Small notice indicating a mode is recommended.
@@ -94,7 +94,7 @@ function getReaderNotice( selected ) {
  */
 export function TemplateModes() {
 	const { editedOptions } = useContext( Options );
-	const { selectedTheme } = useContext( ReaderThemesContext );
+	const { selectedTheme } = useContext( ReaderThemes );
 
 	const { theme_support: themeSupport } = editedOptions;
 
@@ -171,7 +171,7 @@ export function TemplateModes() {
 					id="reader-themes-drawer"
 					initialOpen={ false }
 				>
-					<ReaderThemes />
+					<ReaderThemeCarousel />
 				</AMPDrawer>
 			) }
 		</section>

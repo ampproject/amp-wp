@@ -51,6 +51,7 @@ function Providers( { children } ) {
 			<OptionsContextProvider optionsRestEndpoint={ OPTIONS_REST_ENDPOINT } populateDefaultValues={ true }>
 				<ReaderThemesContextProvider
 					currentTheme={ CURRENT_THEME }
+					hideCurrentlyActiveTheme={ true }
 					readerThemesEndpoint={ READER_THEMES_REST_ENDPOINT }
 					updatesNonce={ UPDATES_NONCE }
 					wpAjaxUrl={ wpAjaxUrl }

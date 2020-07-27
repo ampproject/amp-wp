@@ -6,6 +6,10 @@
 	position: relative;
 }
 
+.theme-card p {
+	font-size: 14px;
+}
+
 .theme-card--disabled {
 	position: relative;
 }
