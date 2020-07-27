@@ -155,7 +155,6 @@ export function TemplateModes() {
 			</TemplateModeOption>
 			{ READER === themeSupport && (
 				<AMPDrawer
-					handleType={ HANDLE_TYPE_RIGHT }
 					selected={ true }
 					heading={ (
 						<div className="reader-themes-drawer__heading">
