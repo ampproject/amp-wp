@@ -256,10 +256,6 @@ function Style( { gutterWidth, itemWidth, namespace } ) {
 	border-color: var(--amp-settings-color-brand);
 }
 
-.${ namespace }__nav-dot-button--current .${ namespace }__nav-dot {
-	transform: scale3d(1.3, 1.3, 1.3);
-}
-
 ` }
 		</style>
 	);

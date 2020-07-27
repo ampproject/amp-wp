@@ -13,20 +13,18 @@ import { __ } from '@wordpress/i18n';
  * Navigation dot.
  *
  * @param {Object} props Component props.
- * @param {boolean} props.isCurrent Whether the dot is currently selected.
  * @param {boolean} props.isHighlighted Whether the current item is highlighted.
  * @param {string} props.id An HTML ID.
  * @param {string} props.label Button label.
  * @param {string} props.namespace CSS namespace.
  * @param {Function} props.onClick Click callback.
  */
-function Dot( { id, isCurrent, isHighlighted, label, namespace, onClick } ) {
+function Dot( { id, isHighlighted, label, namespace, onClick } ) {
 	return (
 		<Button
 			className={
 				[
 					`${ namespace }__nav-dot-button`,
-					isCurrent ? `${ namespace }__nav-dot-button--current` : '',
 					isHighlighted ? `${ namespace }__nav-dot-button--active` : '',
 				]
 					.filter( ( item ) => item )
@@ -39,11 +37,6 @@ function Dot( { id, isCurrent, isHighlighted, label, namespace, onClick } ) {
 			<span className="components-visually-hidden">
 				{ label }
 			</span>
-			{ isCurrent && (
-				<span className="components-visually-hidden">
-					{ __( '(Current item)', 'amp' ) }
-				</span>
-			) }
 			{ isHighlighted && (
 				<span className="components-visually-hidden">
 					{ __( '(Selected item)', 'amp' ) }
@@ -55,7 +48,6 @@ function Dot( { id, isCurrent, isHighlighted, label, namespace, onClick } ) {
 }
 Dot.propTypes = {
 	id: PropTypes.string.isRequired,
-	isCurrent: PropTypes.bool.isRequired,
 	isHighlighted: PropTypes.bool.isRequired,
 	label: PropTypes.string.isRequired,
 	namespace: PropTypes.string.isRequired,
@@ -112,7 +104,6 @@ export function CarouselNav( {
 						<Dot
 							id={ `${ namespace }__${ item.id }-dot` }
 							key={ `${ namespace }__${ item.id }-dot` }
-							isCurrent={ item === centeredItem }
 							isHighlighted={ itemIndex === highlightedItemIndex }
 							label={ item.getAttribute( 'data-label' ) }
 							namespace={ namespace }
