@@ -1,4 +1,4 @@
-name: Build, test & measure
+name: Integrate
 
 on:
   push:
@@ -18,8 +18,8 @@ jobs:
     if: github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
     runs-on: ubuntu-latest
     outputs:
-      branch-name: ${{ steps.retrieve-branch-name.outputs.branch_name }}
-      git-sha-8: ${{ steps.retrieve-git-sha-8.outputs.sha8 }}
+      branch-name: ${{ steps['retrieve-branch-name'].outputs.branch_name }}
+      git-sha-8: ${{ steps['retrieve-git-sha-8'].outputs.sha8 }}
 
     steps:
       - name: Check out source files
@@ -33,7 +33,7 @@ jobs:
       - name: Configure Composer cache
         uses: actions/cache@v1
         with:
-          path: ${{ steps.composer-cache.outputs.dir }}
+          path: ${{ steps['composer-cache'].outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-
@@ -41,7 +41,10 @@ jobs:
       - name: Install Composer dependencies
         # Scripts are not ignored as they are needed to apply patches for the
         # `sabberworm/php-css-parser` dependency.
-        run: composer install --prefer-dist --optimize-autoloader
+        run: |
+          composer install \
+          --prefer-dist \
+          --optimize-autoloader
 
       - name: Get npm cache directory
         id: npm-cache
@@ -51,14 +54,16 @@ jobs:
       - name: Configure npm cache
         uses: actions/cache@v1
         with:
-          path: ${{ steps.npm-cache.outputs.dir }}
+          path: ${{ steps['npm-cache'].outputs.dir }}
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
 
       - name: Install Node dependencies
         # Prevent malicious scripts from being run with `--ignore-scripts`
-        run: npm install --ignore-scripts
+        run: |
+          npm install \
+          --ignore-scripts
 
       - name: Create destination directories
         run: mkdir -p builds/dev
@@ -74,10 +79,14 @@ jobs:
 
       - name: Retrieve git SHA-8 string
         id: retrieve-git-sha-8
-        run: echo "::set-output name=sha8::$(echo ${GITHUB_SHA} | cut -c1-8)"
+        run: |
+          echo "::set-output name=sha8::$(echo ${GITHUB_SHA} \
+          | cut -c1-8)"
 
       - name: Upload build as artifact
         uses: actions/upload-artifact@v2
+        env:
+          SHA8: ${GITHUB_SHA::8}
         with:
           name: amp-${{ steps.retrieve-branch-name.outputs.branch_name }}-${{ steps.retrieve-git-sha-8.outputs.sha8 }}-dev
           path: builds/dev
@@ -237,3 +246,152 @@ jobs:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
           edit-mode: replace
           body: ${{ steps.get-comment-body.outputs.body }}
+
+#-----------------------------------------------------------------------------------------------------------------------
+
+  lighthouse:
+    name: Audit and track performance via Lighthouse CI
+    runs-on: ubuntu-latest
+    needs: prod-zip
+
+    steps:
+      # Although we have a readily built ZIP of the plugin, we also need the dev
+      # dependencies that contain the reference site setup code.
+      - name: Check out source files
+        uses: actions/checkout@v2
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: |
+          echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Configure Composer cache
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps['composer-cache'].outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        # Scripts are not ignored as they are needed to apply patches for the
+        # `sabberworm/php-css-parser` dependency.
+        run: |
+          composer install
+
+      - name: Download prod build
+        uses: actions/download-artifact@v2
+        with:
+          name: amp-${{ needs.prod-zip.outputs.branch-name }}-${{ needs.prod-zip.outputs.git-sha-8 }}-prod
+          path: builds/prod
+
+      - name: Install MySQL client
+        run: |
+          sudo apt-get install -y mysql-client
+
+      - name: Install WP-CLI
+        run: |
+          curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          sudo mv wp-cli.phar /usr/local/bin/wp
+          sudo chmod +x /usr/local/bin/wp
+
+      - name: Install WordPress Core
+        env:
+          PORT: ${{ job.services.mysql.ports[3306] }}
+        run: |
+          mkdir -p www
+          echo "path: www/" > wp-cli.local.yml
+          wp core download \
+          --force \
+          --allow-root
+          wp config create \
+          --dbname=lighthouse_test \
+          --dbuser=root \
+          --dbpass=root \
+          --dbhost="127.0.0.1:$PORT" \
+          --force \
+          --skip-check \
+          --allow-root
+
+      - name: Start MySQL server
+        run: |
+          sudo service mysql start
+
+      - name: Initialize WordPress database
+        run: |
+          wp db create --allow-root
+          wp core install --title="AMP Dev" \
+          --admin_user=admin \
+          --admin_password=password \
+          --admin_email=test@test.com \
+          --skip-email \
+          --url=http://localhost:8080 \
+          --allow-root
+
+      - name: Install and activate the AMP plugin
+        run: |
+          wp plugin install builds/prod/amp.zip \
+          --activate \
+          --force \
+          --allow-root
+
+      - name: Install and activate the PWA plugin
+        run: |
+          wp plugin install pwa \
+          --activate \
+          --force \
+          --allow-root
+
+      - name: Install and activate the WordPress Importer plugin
+        run: |
+          wp plugin install wordpress-importer \
+          --activate \
+          --force \
+          --allow-root
+
+      - name: Install the URL Toggles plugin as a must-use plugin
+        run: |
+          mkdir -p www/wp-content/mu-plugins
+          cp tests/e2e/plugins/url-toggles.php www/wp-content/mu-plugins
+
+      - name: Install the Meta Description plugin as a must-use plugin
+        run: |
+          cp tests/e2e/plugins/add-meta-description.php www/wp-content/mu-plugins
+
+      - name: Create basic robots.txt file
+        run: |
+          echo "User-agent: *\nDisallow: /wp-admin/\nAllow: /wp-admin/admin-ajax.php\n" > www/robots.txt
+
+      - name: Switch site into Transitional mode
+        run: |
+          wp eval \
+          'AMP_Options_Manager::update_option( AmpProject\AmpWP\Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );' \
+          --allow-root
+
+      - name: Import "Travel Blog" reference site
+        run: |
+          wp --require=tests/php/register-wp-cli-commands.php amp reference-site import travel-blog --allow-root
+
+      - name: Install Lighthouse CI
+        run: |
+          sudo npm install -g @lhci/cli
+
+      - name: Run Lighthouse CI health check
+        run: |
+          lhci healthcheck
+
+      - name: Run Lighthouse CI audit
+        run: |
+          lhci collect
+
+      - name: Assert Lighthouse CI measurements against requirements
+        run: |
+          echo -n 'Skipping assertions for now'
+          # lhci assert
+
+      - name: Upload Lighthouse CI measurements to Lighthouse CI server
+        run: |
+          lhci upload \
+          --target=lhci \
+          --serverBaseUrl=${{ secrets.LHCI_SERVER_BASE_URL }} \
+          --token=${{ secrets.LHCI_BUILD_TOKEN }}

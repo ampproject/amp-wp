@@ -177,11 +177,12 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 
 		if ( ! class_exists( 'WP_Importer' ) ) {
 			$class_wp_importer = ABSPATH . 'wp-admin/includes/class-wp-importer.php';
-			if ( file_exists( $class_wp_importer ) )
+			if ( file_exists( $class_wp_importer ) ) {
 				require $class_wp_importer;
+			}
 		}
 
-		$wordpress_importer_path = dirname( AMP__DIR__ ) . '/wordpress-importer';
+		$wordpress_importer_path = WP_CONTENT_DIR . '/plugins/wordpress-importer';
 
 		require_once "{$wordpress_importer_path}/compat.php";
 		require_once "{$wordpress_importer_path}/parsers/class-wxr-parser.php";
