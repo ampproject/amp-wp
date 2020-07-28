@@ -70,9 +70,13 @@ export function Carousel( {
 	 * Set up an intersection observer to set an item as the currentPage as it crosses the center of the view.
 	 */
 	useLayoutEffect( () => {
+		let mounted = true;
 		const currentCarouselList = carouselListRef.current;
 
 		const scrollCallback = debounce( () => {
+			if ( ! mounted ) {
+				return;
+			}
 			for ( const child of [ ...currentCarouselList.children ] ) {
 				if ( child.offsetLeft >= currentCarouselList.scrollLeft ) {
 					if ( child !== currentPage ) {
@@ -81,10 +85,11 @@ export function Carousel( {
 					return;
 				}
 			}
-		}, 100 );
+		}, 300 );
 		currentCarouselList.addEventListener( 'scroll', scrollCallback );
 
 		return () => {
+			mounted = false;
 			currentCarouselList.removeEventListener( 'scroll', scrollCallback );
 		};
 	}, [ currentPage, setCurrentPage ] );
