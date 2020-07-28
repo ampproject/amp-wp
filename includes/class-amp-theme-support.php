@@ -173,10 +173,10 @@ class AMP_Theme_Support {
 		add_action( 'parse_query', [ __CLASS__, 'init_app_shell' ], 9 );
 
 		/*
-			* Note that wp action is used instead of template_redirect because some themes/plugins output
-			* the response at this action and then short-circuit with exit. So this is why the preceding
-			* action to template_redirect--the wp action--is used instead.
-			*/
+		* Note that wp action is used instead of template_redirect because some themes/plugins output
+		* the response at this action and then short-circuit with exit. So this is why the preceding
+		* action to template_redirect--the wp action--is used instead.
+		*/
 		if ( ! is_admin() ) {
 			add_action( 'wp', [ __CLASS__, 'finish_init' ], PHP_INT_MAX );
 		}
