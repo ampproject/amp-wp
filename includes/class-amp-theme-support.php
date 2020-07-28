@@ -1969,7 +1969,7 @@ class AMP_Theme_Support {
 	 * @param DOMElement $content_element Content element.
 	 */
 	protected static function prepare_inner_app_shell_document( DOMElement $content_element ) {
-		$dom = Document::from_node( $content_element );
+		$dom = Document::fromNode( $content_element );
 
 		// Preserve the admin bar.
 		$admin_bar = $dom->getElementById( 'wpadminbar' );
