@@ -1524,14 +1524,15 @@ final class Document extends DOMDocument
      * @param string $prefix Prefix.
      * @return string ID.
      */
-    private function getUniqueId( $prefix = '' ) {
+    private function getUniqueId($prefix = '')
+    {
         if (array_key_exists($prefix, $this->indexCounter)) {
             ++$this->indexCounter[$prefix];
         } else {
             $this->indexCounter[$prefix] = 0;
         }
         $uniqueId = (string)$this->indexCounter[$prefix];
-        if ( $prefix ) {
+        if ($prefix) {
             $uniqueId = "{$prefix}-{$uniqueId}";
         }
         return $uniqueId;
