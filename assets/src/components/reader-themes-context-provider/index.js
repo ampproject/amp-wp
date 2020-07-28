@@ -182,7 +182,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 		}
 
 		return { filteredThemes: newFilteredThemes };
-	}, [ , hideCurrentlyActiveTheme, themes ] );
+	}, [ hideCurrentlyActiveTheme, themes ] );
 
 	return (
 		<ReaderThemes.Provider
