@@ -41,20 +41,20 @@ describe( 'CarouselNav', () => {
 	} );
 
 	it( 'has main elements and responds to clicks', () => {
-		let centeredItem = itemsContainer.querySelector( 'li:nth-of-type(3)' );
+		let currentPage = itemsContainer.querySelector( 'li:nth-of-type(3)' );
 		const namespace = 'my-carousel';
 		const items = itemsContainer.querySelectorAll( 'li' );
 
 		act( () => {
 			render(
 				<CarouselNav
-					centeredItem={ centeredItem }
+					currentPage={ currentPage }
 					items={ items }
 					namespace={ namespace }
 					nextButtonDisabled={ false }
 					prevButtonDisabled={ false }
-					setCenteredItem={ ( newItem ) => {
-						centeredItem = newItem;
+					setCurrentPage={ ( newItem ) => {
+						currentPage = newItem;
 					} }
 					highlightedItemIndex={ 5 }
 					showDots={ true }
@@ -70,7 +70,7 @@ describe( 'CarouselNav', () => {
 			container.querySelector( `#${ namespace }__${ items[ 0 ].id }-dot` ).click();
 		} );
 
-		expect( centeredItem.id ).toBe( 'item-0' );
+		expect( currentPage.id ).toBe( 'item-0' );
 		expect(	container.querySelector( `#${ namespace }__${ items[ 5 ].id }-dot` ).classList.contains( `${ namespace }__nav-dot-button--active` ) ).toBe( true );
 	} );
 } );

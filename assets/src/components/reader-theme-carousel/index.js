@@ -18,12 +18,14 @@ import { Loading } from '../loading';
 import './style.css';
 import { AMPNotice, NOTICE_TYPE_WARNING } from '../amp-notice';
 import { ThemeCard } from '../theme-card';
-import { Carousel } from '../carousel';
+import { Carousel, DEFAULT_MOBILE_BREAKPOINT } from '../carousel';
+import { useWindowWidth } from '../../utils/use-window-width';
 
 /**
  * Component for selecting a reader theme.
  */
 export function ReaderThemeCarousel() {
+	const windowWidth = useWindowWidth();
 	const { currentTheme, fetchingThemes, selectedTheme, themes } = useContext( ReaderThemes );
 
 	const [ includeUnavailableThemes, setIncludeUnavailableThemes ] = useState( false );
@@ -49,23 +51,84 @@ export function ReaderThemeCarousel() {
 		[ includeUnavailableThemes, themes ],
 	);
 
+	const isMobile = windowWidth < DEFAULT_MOBILE_BREAKPOINT;
+
 	// Memoize carousel items to avoid flickering images on every render.
 	const carouselItems = useMemo(
-		() => shownThemes
-			.map( ( theme ) => (
+		() => {
+			if ( isMobile ) {
+				return shownThemes
+					.map( ( theme ) => {
+						return {
+							label: theme.name,
+							name: theme.slug,
+							Item: () => (
+								<ThemeCard
+									disabled={ 'non-installable' === theme.availability }
+									ElementName="div"
+									screenshotUrl={ theme.screenshot_url }
+									{ ...theme }
+								/>
+							),
+						};
+					} );
+			}
+
+			const pages = [];
+			const newShownthemes = [ ...shownThemes ];
+
+			while ( newShownthemes.length ) {
+				pages.push( newShownthemes.splice( 0, 3 ) );
+			}
+
+			return pages.map( ( page, index ) => (
 				{
-					label: theme.name,
-					name: theme.slug,
-					Item: () => (
-						<ThemeCard
-							disabled={ 'non-installable' === theme.availability }
-							ElementName="div"
-							screenshotUrl={ theme.screenshot_url }
-							{ ...theme }
-						/>
+					label: sprintf(
+						// Translators: Placeholder is a page number.
+						__( 'Page %s' ),
+						index,
 					),
-				} ) ),
-		[ shownThemes ],
+					name: `carousel-page-${ index }`,
+					Item: () => (
+						<div className="amp-carousel__page">
+							{ page
+								.map( ( theme ) => {
+									return (
+										<ThemeCard
+											key={ `theme-card-${ theme.slug }` }
+											disabled={ 'non-installable' === theme.availability }
+											ElementName="div"
+											screenshotUrl={ theme.screenshot_url }
+											{ ...theme }
+										/>
+
+									);
+								} ) }
+						</div>
+					),
+				}
+			) );
+		},
+		[ isMobile, shownThemes ],
+	);
+
+	const highlightedItemIndex = useMemo(
+		() => {
+			for ( let i = 0; i < shownThemes.length; i += 1 ) {
+				const theme = shownThemes[ i ];
+				if ( theme.slug === selectedTheme.slug ) {
+					if ( isMobile ) {
+						return i;
+					}
+
+					// Desktop carousel shows groups of three. Highlighted index is the group containing the selected theme.
+					return ( i % 3 ) + 1;
+				}
+			}
+
+			return 0;
+		},
+		[ isMobile, selectedTheme.slug, shownThemes ],
 	);
 
 	if ( fetchingThemes ) {
@@ -130,7 +193,7 @@ export function ReaderThemeCarousel() {
 				{ 0 < shownThemes.length && (
 					<Carousel
 						items={ carouselItems }
-						highlightedItemIndex={ shownThemes.findIndex( ( { name } ) => name === selectedTheme.name ) }
+						highlightedItemIndex={ highlightedItemIndex }
 					/>
 				) }
 			</div>

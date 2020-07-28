@@ -14,9 +14,9 @@ import { useRef, useEffect, useState, useCallback, useLayoutEffect } from '@word
 import { useWindowWidth } from '../../utils/use-window-width';
 import { CarouselNav } from './carousel-nav';
 
-const DEFAULT_GUTTER_WIDTH = 60;
-const DEFAULT_ITEM_WIDTH = 268;
-const DEFAULT_MOBILE_BREAKPOINT = 783;
+export const DEFAULT_GUTTER_WIDTH = 60;
+export const DEFAULT_ITEM_WIDTH = 268;
+export const DEFAULT_MOBILE_BREAKPOINT = 783;
 
 /**
  * Renders a scrollable carousel with a button navigation.
@@ -24,7 +24,6 @@ const DEFAULT_MOBILE_BREAKPOINT = 783;
  * @param {Object} props Component props.
  * @param {number} props.gutterWidth Amount of space between items in pixels.
  * @param {HTMLCollection} props.items Items in the carousel.
- * @param {number} props.itemWidth The width of each item.
  * @param {number} props.mobileBreakpoint Breakpoint below which to render the mobile version.
  * @param {string} props.namespace CSS namespace.
  * @param {number} props.highlightedItemIndex Index of an item receiving special visual treatment.
@@ -32,88 +31,73 @@ const DEFAULT_MOBILE_BREAKPOINT = 783;
 export function Carousel( {
 	gutterWidth = DEFAULT_GUTTER_WIDTH,
 	items,
-	itemWidth = DEFAULT_ITEM_WIDTH,
 	mobileBreakpoint = DEFAULT_MOBILE_BREAKPOINT,
 	namespace = 'amp-carousel',
 	highlightedItemIndex = 0,
 } ) {
 	const windowWidth = useWindowWidth();
-	const [ centeredItem, originalsetCenteredItem ] = useState( null );
-	const [ initialized, setInitialized ] = useState( false );
+	const [ currentPage, originalSetCenteredPage ] = useState( null );
+	const [ pageWidth, setPageWidth ] = useState( 0 );
 	const carouselContainerRef = useRef();
 	const carouselListRef = useRef();
 
-	const isMobile = mobileBreakpoint > windowWidth;
-
 	/**
-	 * Sets the the centeredItem state and optionally scrolls to it.
+	 * Sets the the currentPage state and optionally scrolls to it.
 	 *
 	 * This state-setting wrapper is required, as opposed to scrolling to items in an effect hook when they're set as current,
-	 * because intersection observer needs to set centeredItem, but it does so only when the new centeredItem is already centered
+	 * because intersection observer needs to set currentPage, but it does so only when the new currentPage is already centered
 	 * in the view. Calling scrollTo in that situation would cause jerky scroll effects.
 	 */
-	const setCenteredItem = useCallback( ( newCurrentItem, scrollToItem = true ) => {
-		originalsetCenteredItem( newCurrentItem );
+	const setCurrentPage = useCallback( ( newCurrentPage, scrollToItem = true, smooth = true ) => {
+		originalSetCenteredPage( newCurrentPage );
 
-		if ( newCurrentItem && scrollToItem ) {
-			let left;
-			if ( isMobile ) {
-				left = newCurrentItem.offsetLeft;
-			} else {
-				left = newCurrentItem.previousElementSibling ? newCurrentItem.previousElementSibling.offsetLeft : newCurrentItem.offsetLeft;
-			}
-
-			carouselListRef.current.scrollTo( { top: 0, left, behavior: initialized ? 'smooth' : 'auto' } );
-
-			if ( ! initialized ) {
-				setInitialized( true );
-			}
+		if ( newCurrentPage && scrollToItem ) {
+			carouselListRef.current.scrollTo( { top: 0, left: newCurrentPage.offsetLeft, behavior: smooth ? 'smooth' : 'auto' } );
 		}
-	}, [ initialized, isMobile ] );
+	}, [] );
 
 	/**
-	 * Center the highlighted item. On initial load, this will center the previously selected theme. Subsequently,
-	 * it will center a theme when the user clicks its label (e.g., if they click a theme that's off to the side).
+	 * Scroll to the highlighted item when it changes.
 	 */
 	useEffect( () => {
-		let index = highlightedItemIndex > -1 ? highlightedItemIndex : 0;
+		const newCurrentPage = carouselListRef.current.children.item( highlightedItemIndex );
 
-		if ( ! isMobile && index < items.length - 1 ) {
-			index += 1;
-		}
-
-		const item = carouselListRef.current.children.item( index );
-
-		setCenteredItem( item );
-	}, [ highlightedItemIndex, isMobile, items.length, setCenteredItem ] );
+		setCurrentPage( newCurrentPage, true, false );
+	}, [ highlightedItemIndex, pageWidth, setCurrentPage ] );
 
 	/**
-	 * Set up an intersection observer to set an item as the centeredItem as it crosses the center of the view.
+	 * Set up an intersection observer to set an item as the currentPage as it crosses the center of the view.
 	 */
 	useLayoutEffect( () => {
-		const observerCallback = ( [ { isIntersecting, target } ] ) => {
-			if ( isIntersecting ) {
-				setCenteredItem( target, false );
+		const currentCarouselList = carouselListRef.current;
+
+		const scrollCallback = () => {
+			for ( const child of [ ...currentCarouselList.children ] ) {
+				if ( child.offsetLeft >= currentCarouselList.scrollLeft ) {
+					if ( child !== currentPage ) {
+						setCurrentPage( child, false );
+					}
+					return;
+				}
 			}
 		};
-
-		const observer = new global.IntersectionObserver( observerCallback, {
-			root: carouselContainerRef.current,
-			rootMargin: '0px -50%', // Run the callback as an item crosses the center.
-		} );
-
-		[ ...carouselListRef.current.children ].forEach( ( element ) => {
-			observer.observe( element );
-		} );
+		currentCarouselList.addEventListener( 'scroll', scrollCallback );
 
 		return () => {
-			observer.disconnect();
+			currentCarouselList.removeEventListener( 'scroll', scrollCallback );
 		};
-	}, [ centeredItem, setCenteredItem ] );
+	}, [ currentPage, setCurrentPage ] );
 
-	const centeredItemIndex = [ ...( carouselListRef.current?.children || [] ) ].indexOf( centeredItem );
-	const nextButtonDisabled = centeredItemIndex >= items.length - ( isMobile ? 1 : 2 );
-	const prevButtonDisabled = centeredItemIndex <= ( isMobile ? 0 : 1 );
+	/**
+	 * Update page width.
+	 */
+	useEffect( () => {
+		setPageWidth( carouselListRef?.current?.clientWidth || 0 );
+	}, [ items.length, windowWidth ] );
+
+	const centeredItemIndex = [ ...( carouselListRef.current?.children || [] ) ].indexOf( currentPage );
+	const nextButtonDisabled = centeredItemIndex >= items.length - 1;
+	const prevButtonDisabled = centeredItemIndex <= 0;
 
 	return (
 		<div className={ namespace }>
@@ -132,22 +116,22 @@ export function Carousel( {
 					) ) }
 				</ul>
 			</div>
-			{ centeredItem && (
+			{ currentPage && (
 				<CarouselNav
-					centeredItem={ centeredItem }
+					currentPage={ currentPage }
 					centeredItemIndex={ centeredItemIndex }
 					items={ carouselListRef?.current?.children }
 					namespace={ namespace }
 					nextButtonDisabled={ nextButtonDisabled }
 					prevButtonDisabled={ prevButtonDisabled }
-					setCenteredItem={ setCenteredItem }
+					setCurrentPage={ setCurrentPage }
 					highlightedItemIndex={ highlightedItemIndex }
 					showDots={ mobileBreakpoint < windowWidth }
 				/>
 			) }
 			<Style
 				gutterWidth={ gutterWidth }
-				itemWidth={ itemWidth }
+				itemWidth={ pageWidth }
 				namespace={ namespace }
 			/>
 		</div>
@@ -156,7 +140,6 @@ export function Carousel( {
 Carousel.propTypes = {
 	gutterWidth: PropTypes.number,
 	items: PropTypes.array.isRequired,
-	itemWidth: PropTypes.number,
 	mobileBreakpoint: PropTypes.number,
 	namespace: PropTypes.string,
 	highlightedItemIndex: PropTypes.number,

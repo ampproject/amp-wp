@@ -20,3 +20,14 @@
 	gap: 1rem;
 	grid-template-columns: repeat(4, 1fr);
 }
+
+.amp-carousel__page {
+	display: grid;
+	gap: 60px;
+	grid-template-columns: repeat(3, 1fr);
+}
+
+.reader-theme-selection .theme-card {
+	margin: 0 auto;
+	max-width: 300px;
+}
