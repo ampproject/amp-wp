@@ -250,6 +250,7 @@ function Style( { gutterWidth, itemWidth, namespace } ) {
 	align-items: center;
 	display: flex;
 	font-size: 14px;
+	font-variant-numeric: tabular-nums;
 	padding: 0 0.5rem;
 }
 
