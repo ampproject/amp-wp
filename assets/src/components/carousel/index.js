@@ -16,7 +16,6 @@ import { useWindowWidth } from '../../utils/use-window-width';
 import { CarouselNav } from './carousel-nav';
 
 export const DEFAULT_GUTTER_WIDTH = 60;
-export const DEFAULT_ITEM_WIDTH = 268;
 export const DEFAULT_MOBILE_BREAKPOINT = 783;
 
 /**
