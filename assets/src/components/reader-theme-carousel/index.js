@@ -26,6 +26,16 @@ import { useWindowWidth } from '../../utils/use-window-width';
  */
 export function ReaderThemeCarousel() {
 	const windowWidth = useWindowWidth();
+
+	/**
+	 * @typedef Theme
+	 * @type {Object}
+	 * @property {string} availability - Availability.
+	 * @property {string} screenshot_url - Screenshot URL.
+	 * @property {boolean} is_reader_theme - Is Reader theme.
+	 */
+
+	/** @type {Theme[]} themes */
 	const { currentTheme, fetchingThemes, selectedTheme, themes } = useContext( ReaderThemes );
 
 	const [ includeUnavailableThemes, setIncludeUnavailableThemes ] = useState( false );
