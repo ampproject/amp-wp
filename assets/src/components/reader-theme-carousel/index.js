@@ -122,7 +122,7 @@ export function ReaderThemeCarousel() {
 					}
 
 					// Desktop carousel shows groups of three. Highlighted index is the group containing the selected theme.
-					return ( i % 3 ) + 1;
+					return Math.floor( i / 3 );
 				}
 			}
 
