@@ -86,7 +86,7 @@ export function Carousel( {
 				}
 			}
 		}, 300 );
-		currentCarouselList.addEventListener( 'scroll', scrollCallback );
+		currentCarouselList.addEventListener( 'scroll', scrollCallback, { passive: true } );
 
 		return () => {
 			mounted = false;

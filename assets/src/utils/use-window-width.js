@@ -14,7 +14,7 @@ export function useWindowWidth() {
 			setWidth( window.innerWidth );
 		};
 
-		window.addEventListener( 'resize', resizeCallback );
+		window.addEventListener( 'resize', resizeCallback, { passive: true } );
 
 		return () => {
 			window.removeEventListener( 'resize', resizeCallback );
