@@ -172,10 +172,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 
 		if ( hideCurrentlyActiveTheme ) {
 			newFilteredThemes = ( themes || [] ).filter( ( theme ) => {
-				if ( 'active' === theme.availability ) {
-					return false;
-				}
-				return true;
+				return 'active' !== theme.availability;
 			} );
 		} else {
 			newFilteredThemes = themes;
