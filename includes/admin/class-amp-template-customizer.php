@@ -106,7 +106,7 @@ class AMP_Template_Customizer {
 	}
 
 	/**
-	 * Force changes to header video to cause refresh since since there are various JS dependencies that prevent selective refresh from working properly.
+	 * Force changes to header video to cause refresh since there are various JS dependencies that prevent selective refresh from working properly.
 	 *
 	 * In the AMP Customizer preview, selective refresh partial for `custom_header` will render <amp-video> or <amp-youtube> elements.
 	 * Nevertheless, custom-header.js in core is not expecting AMP components. Therefore the `wp-custom-header-video-loaded` event never
