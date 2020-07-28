@@ -444,7 +444,7 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 							'private' => false,
 						],
 						'amp_libxml_version'      => [
-							'label'   => 'LIBXML Version',
+							'label'   => 'libxml Version',
 							'value'   => LIBXML_DOTTED_VERSION,
 							'private' => false,
 						],
