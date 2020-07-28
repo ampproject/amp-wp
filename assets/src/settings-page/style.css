@@ -16,7 +16,7 @@
 }
 
 .settings-welcome p {
-	font-size: 13px;
+	font-size: 14px;
 }
 
 .settings-welcome h2 {
@@ -77,7 +77,7 @@
 }
 
 .supported-templates p {
-	font-size: 13px;
+	font-size: 14px;
 }
 
 .mobile-redirection,
@@ -100,13 +100,13 @@
 
 .template-modes > p,
 .amp .form-table .amp-suppressed-plugins p {
-	font-size: 13px;
+	font-size: 14px;
 }
 
 
 /* Plugin suppression */
 .plugin-suppression > p {
-	font-size: 13px;
+	font-size: 14px;
 }
 
 
