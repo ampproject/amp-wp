@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import classnames from 'classnames';
 
 /**
  * WordPress dependencies
@@ -62,14 +63,12 @@ export function AMPDrawer( { children = null, className, heading, handleType = H
 		<Selectable
 			id={ id }
 			className={
-				[
+				classnames(
 					'amp-drawer',
 					`amp-drawer--handle-type-${ handleType }`,
-					className ? className : '',
+					className,
 					opened ? 'amp-drawer--opened' : '',
-				]
-					.filter( ( item ) => item )
-					.join( ' ' )
+				)
 			}
 			selected={ selected }
 		>

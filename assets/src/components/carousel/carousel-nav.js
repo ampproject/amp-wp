@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import classnames from 'classnames';
 
 /**
  * WordPress dependencies
@@ -23,12 +24,10 @@ function Dot( { id, isHighlighted, label, namespace, onClick } ) {
 	return (
 		<Button
 			className={
-				[
+				classnames(
 					`${ namespace }__nav-dot-button`,
-					isHighlighted ? `${ namespace }__nav-dot-button--active` : '',
-				]
-					.filter( ( item ) => item )
-					.join( ' ' )
+					{ [ `${ namespace }__nav-dot-button--active` ]: isHighlighted },
+				)
 			}
 			id={ id }
 			onClick={ onClick }

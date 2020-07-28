@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -77,15 +78,14 @@ function getNoticeIcon( type ) {
 export function AMPNotice( { children, className, size = NOTICE_SIZE_LARGE, type = NOTICE_TYPE_INFO } ) {
 	const noticeIcon = getNoticeIcon( type );
 
-	const classNames = [
-		className ? className : '',
-		'amp-notice',
-		`amp-notice--${ type }`,
-		`amp-notice--${ size }`,
-	].filter( ( item ) => item );
-
 	return (
-		<div className={ classNames.join( ' ' ) }>
+		<div className={
+			classnames( className ? className : '',
+				'amp-notice',
+				`amp-notice--${ type }`,
+				`amp-notice--${ size }`,
+			) }
+		>
 			<div className="amp-notice__icon">
 				{ noticeIcon }
 			</div>

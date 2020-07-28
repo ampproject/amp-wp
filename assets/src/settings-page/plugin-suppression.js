@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import classnames from 'classnames';
 
 /**
  * WordPress dependencies
@@ -139,15 +140,15 @@ function ValidationErrorDetails( { errors } ) {
 			</summary>
 			<ul>
 				{ errors.map( ( error ) => {
-					const className = [
-						`error-${ error.is_removed ? 'removed' : 'kept' }`,
-						`error-${ error.is_reviewed ? 'reviewed' : 'unreviewed' }`,
-					].join( ' ' );
-
 					const WrapperElement = ! error.is_reviewed ? 'strong' : Fragment;
 
 					return (
-						<li key={ error.term.term_id } className={ className }>
+						<li
+							key={ error.term.term_id }
+							className={ classnames(
+								`error-${ error.is_removed ? 'removed' : 'kept' }`,
+								`error-${ error.is_reviewed ? 'reviewed' : 'unreviewed' }`,
+							) }>
 							<WrapperElement>
 								<a href={ error.edit_url } target="_blank" rel="noreferrer" title={ error.tooltip }>
 									<span dangerouslySetInnerHTML={ { __html: error.title } } />
