@@ -186,7 +186,7 @@ export function ReaderThemeCarousel() {
 											),
 										} }
 									/>
-									: __( 'Some supported themes cannot be installed automatically on this site. To use, please install them manually or contact your hosting provider', 'amp' )
+									: __( 'Some supported themes cannot be installed automatically on this site. To use, please install them manually or contact your hosting provider.', 'amp' )
 								}
 							</p>
 							<CheckboxControl
