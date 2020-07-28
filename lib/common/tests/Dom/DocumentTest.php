@@ -470,13 +470,15 @@ class DocumentTest extends TestCase
      */
     public function testRand()
     {
-        $doc   = new Document();
-        $rands = [];
-        $n     = 100;
+        $doc    = new Document();
+        $method = (new ReflectionClass($doc))->getMethod('rand');
+        $method->setAccessible(true);
+        $rands  = [];
+        $n      = 100;
         for ($i = 0; $i < $n; $i++) {
-            $rands[] = $this->callPrivateMethod($doc, 'rand');
+            $rands[] = $method->invokeArgs($doc, []);
         }
-        $this->assertCount($n, array_unique($rands), 'Expected no duplicate random numbers.');
+        $this->assertGreaterThan(1, count(array_unique($rands)), "Expected rand() to return at least more than 1 random number after $n invocations.");
     }
 
     /**
@@ -859,22 +861,5 @@ class DocumentTest extends TestCase
         $dom->body->appendChild($element);
 
         $this->assertEquals('some-prefix-3', $dom->getElementId($element, 'some-prefix'));
-    }
-
-    /**
-     * Call a private method as if it was public.
-     *
-     * @param object|string $object     Object instance or class string to call the method of.
-     * @param string        $methodName Name of the method to call.
-     * @param array         $args       Optional. Array of arguments to pass to the method.
-     * @return mixed Return value of the method call.
-     * @throws ReflectionException If the object could not be reflected upon.
-     */
-    private function callPrivateMethod($object, $methodName, $args = [])
-    {
-        $method = (new ReflectionClass($object))->getMethod($methodName);
-        $method->setAccessible(true);
-
-        return $method->invokeArgs($object, $args);
     }
 }
