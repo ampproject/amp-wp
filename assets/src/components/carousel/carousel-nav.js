@@ -58,7 +58,7 @@ Dot.propTypes = {
  * Dot navigation component.
  *
  * @param {Object} props Component props.
- * @param {number} props.currentPage The current item.
+ * @param {Element} props.currentPage The current item.
  * @param {HTMLCollection} props.items Items in the carousel.
  * @param {string} props.namespace CSS namespace.
  * @param {Function} props.setCurrentPage Sets an item as the current item.
