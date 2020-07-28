@@ -28,7 +28,6 @@ use Exception;
  * This is ported from the NodeJS optimizer while verifying against the Go version.
  *
  * NodeJS:
- *
  * @version c92d6023ea4c9edadff593742a992da2b400a75d
  * @link    https://github.com/ampproject/amp-toolbox/blob/c92d6023ea4c9edadff593742a992da2b400a75d/packages/optimizer/lib/transformers/ServerSideRendering.js
  *
@@ -217,7 +216,12 @@ final class ServerSideRendering implements Transformer
         // Emit the amp-runtime marker to indicate that we're applying server side rendering in the document.
         $ampRuntimeMarker = $document->createElement(Tag::STYLE);
         $ampRuntimeMarker->setAttribute(Attribute::AMP_RUNTIME, '');
-        $document->head->insertBefore($ampRuntimeMarker, $document->head->hasChildNodes() ? $document->head->firstChild : null);
+        $document->head->insertBefore(
+            $ampRuntimeMarker,
+            $document->head->hasChildNodes()
+                ? $document->head->firstChild
+                : null
+        );
 
         foreach ($document->xpath->query('.//script[ @custom-element ]', $document->head) as $customElementScript) {
             /** @var DOMElement $customElementScript */
@@ -251,7 +255,12 @@ final class ServerSideRendering implements Transformer
             $noscriptTagInHead->parentNode->removeChild($noscriptTagInHead);
         }
 
-        foreach ($document->xpath->query('.//style[ @amp-boilerplate or @amp4ads-boilerplate or @amp4email-boilerplate ]', $document->head) as $boilerplateStyleTag) {
+        $boilerplateStyleTags = $document->xpath->query(
+            './/style[ @amp-boilerplate or @amp4ads-boilerplate or @amp4email-boilerplate ]',
+            $document->head
+        );
+
+        foreach ($boilerplateStyleTags as $boilerplateStyleTag) {
             /** @var DOMElement $boilerplateStyleTag */
             $boilerplateStyleTag->parentNode->removeChild($boilerplateStyleTag);
         }
@@ -306,7 +315,13 @@ final class ServerSideRendering implements Transformer
         // Calculate effective width, height and layout.
         $width  = $this->calculateWidth($ampLayout, $inputWidth, $element->tagName);
         $height = $this->calculateHeight($ampLayout, $inputHeight, $element->tagName);
-        $layout = $this->calculateLayout($ampLayout, $width, $height, $element->getAttribute(Attribute::SIZES), $element->getAttribute(Attribute::HEIGHTS));
+        $layout = $this->calculateLayout(
+            $ampLayout,
+            $width,
+            $height,
+            $element->getAttribute(Attribute::SIZES),
+            $element->getAttribute(Attribute::HEIGHTS)
+        );
 
         if (! $this->isSupportedLayout($layout)) {
             $errors->add(Error\CannotPerformServerSideRendering::fromUnsupportedLayout($element, $layout));
@@ -383,7 +398,13 @@ final class ServerSideRendering implements Transformer
      */
     private function calculateHeight($inputLayout, CssLength $inputHeight, $tagName)
     {
-        if ((empty($inputLayout) || $inputLayout === Layout::FIXED || $inputLayout === Layout::FIXED_HEIGHT) && ! $inputHeight->isDefined()) {
+        if (
+            (
+                empty($inputLayout)
+                || $inputLayout === Layout::FIXED
+                || $inputLayout === Layout::FIXED_HEIGHT
+            ) && ! $inputHeight->isDefined()
+        ) {
             // These values come from AMP's runtime and can be found in
             // https://github.com/ampproject/amphtml/blob/292dc66b8c0bb078bbe3a1bca960e8f494f7fc8f/src/layout.js#L70-L86
             switch ($tagName) {
@@ -479,7 +500,8 @@ final class ServerSideRendering implements Transformer
                 $element->setAttribute(Attribute::HIDDEN, Attribute::HIDDEN);
                 break;
             case Layout::FIXED:
-                $styles = "width:{$width->getNumeral()}{$width->getUnit()};height:{$height->getNumeral()}{$height->getUnit()};";
+                $styles = "width:{$width->getNumeral()}{$width->getUnit()};"
+                          . "height:{$height->getNumeral()}{$height->getUnit()};";
                 break;
             case Layout::FIXED_HEIGHT:
                 $styles = "height:{$height->getNumeral()}{$height->getUnit()};";
@@ -607,8 +629,12 @@ final class ServerSideRendering implements Transformer
      * @param string    $style    Style to use for the sizer. Defaults to padding-top in percentage.
      * @return DOMElement
      */
-    private function createResponsiveSizer(Document $document, CssLength $width, CssLength $height, $style = 'padding-top:%1.4F%%;')
-    {
+    private function createResponsiveSizer(
+        Document $document,
+        CssLength $width,
+        CssLength $height,
+        $style = 'padding-top:%1.4F%%;'
+    ) {
         $padding = $height->getNumeral() / $width->getNumeral() * 100;
         $sizer   = $document->createElement(Amp::SIZER_ELEMENT);
         $style   = empty($style) ? 'display:block' : "display:block;{$style}";
@@ -643,7 +669,8 @@ final class ServerSideRendering implements Transformer
             Attribute::SRC,
             sprintf(
                 'data:image/svg+xml;base64,%s',
-                base64_encode("<svg height='{$height->getNumeral()}' width='{$width->getNumeral()}' xmlns='http://www.w3.org/2000/svg' version='1.1'/>")
+                base64_encode("<svg height='{$height->getNumeral()}' width='{$width->getNumeral()}' "
+                              . "xmlns='http://www.w3.org/2000/svg' version='1.1'/>")
             )
         );
 
@@ -861,7 +888,7 @@ final class ServerSideRendering implements Transformer
             return;
         }
 
-        // Inject new styles before any source map annotation comment if it exists, like: /*# sourceURL=amp-custom.css */
+        // Inject new styles before any potential source map annotation comment like: /*# sourceURL=amp-custom.css */.
         // If not present, then just put it at the end of the stylesheet. This isn't strictly required, but putting the
         // source map comments at the end is the convention.
         $this->ampCustomStyleElement->textContent = preg_replace(
@@ -947,8 +974,13 @@ final class ServerSideRendering implements Transformer
      * @param string[]   $mediaQueryStyle CSS rule template for a media query style.
      * @return CssRule[] Array of CSS rules to use.
      */
-    private function extractAttributeCss(Document $document, DOMElement $element, DOMAttr $attribute, $mainStyle, $mediaQueryStyle)
-    {
+    private function extractAttributeCss(
+        Document $document,
+        DOMElement $element,
+        DOMAttr $attribute,
+        $mainStyle,
+        $mediaQueryStyle
+    ) {
         if (empty($attribute->nodeValue)) {
             return [];
         }

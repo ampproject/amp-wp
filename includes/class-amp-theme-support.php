@@ -992,6 +992,8 @@ class AMP_Theme_Support {
 		add_filter( 'cancel_comment_reply_link', [ __CLASS__, 'filter_cancel_comment_reply_link' ], 10, 3 );
 		add_action( 'comment_form', [ __CLASS__, 'amend_comment_form' ], 100 );
 		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' );
+		add_filter( 'get_comments_link', [ __CLASS__, 'amend_comments_link' ] );
+		add_filter( 'respond_link', [ __CLASS__, 'amend_comments_link' ] );
 		add_filter( 'wp_kses_allowed_html', [ __CLASS__, 'include_layout_in_wp_kses_allowed_html' ], 10 );
 		add_filter( 'get_header_image_tag', [ __CLASS__, 'amend_header_image_with_video_header' ], PHP_INT_MAX );
 		add_action(
@@ -1112,6 +1114,23 @@ class AMP_Theme_Support {
 			<input type="hidden" name="redirect_to" value="<?php echo esc_url( amp_get_permalink( get_the_ID() ) ); ?>">
 		<?php endif; ?>
 		<?php
+	}
+
+	/**
+	 * Amend the comments/redpond links to go to non-AMP page when in legacy Reader mode.
+	 *
+	 * @see get_comments_link()
+	 * @see comments_popup_link()
+	 *
+	 * @param string $comments_link Post comments permalink with '#comments' or '#respond' appended.
+	 * @return string The link to the comments.
+	 */
+	public static function amend_comments_link( $comments_link ) {
+		if ( amp_is_legacy() && true === AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ) {
+			$comments_link = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $comments_link );
+		}
+
+		return $comments_link;
 	}
 
 	/**
@@ -1831,9 +1850,23 @@ class AMP_Theme_Support {
 			$dom  = AMP_DOM_Utils::get_dom_from_content( $partial );
 			$args = [
 				'content_max_width'    => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
-				'use_document_element' => false,
+				'use_document_element' => true,
 			];
 			AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args ); // @todo Include script assets in response?
+
+			// Move any amp-custom to include in the partial response.
+			$amp_custom_style = $dom->xpath->query( '//style[ @amp-custom ]' )->item( 0 );
+			if ( $amp_custom_style instanceof DOMElement ) {
+				$amp_custom_style->removeAttribute( Attribute::AMP_CUSTOM );
+				$amp_custom_style->setAttribute( 'amp-custom-partial', '' );
+				$amp_custom_style->textContent = str_replace(
+					'/*# sourceURL=amp-custom.css */',
+					'/*# sourceURL=amp-custom-partial.css */',
+					$amp_custom_style->textContent
+				);
+				$dom->body->appendChild( $amp_custom_style ); // @todo This could cause layout problems. It may be preferable to move to the head.
+			}
+
 			$partial = AMP_DOM_Utils::get_content_from_dom( $dom );
 		}
 		return $partial;

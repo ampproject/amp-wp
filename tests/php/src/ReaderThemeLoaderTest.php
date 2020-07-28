@@ -90,6 +90,41 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 	public function test_register() {
 		$this->instance->register();
 		$this->assertEquals( 9, has_action( 'plugins_loaded', [ $this->instance, 'override_theme' ] ) );
+		$this->assertEquals( 10, has_filter( 'wp_prepare_themes_for_js', [ $this->instance, 'filter_wp_prepare_themes_to_indicate_reader_theme' ] ) );
+		$this->assertEquals( 10, has_action( 'admin_print_footer_scripts-themes.php', [ $this->instance, 'inject_theme_single_template_modifications' ] ) );
+	}
+
+	/** @covers ReaderThemeLoader::filter_wp_prepare_themes_to_indicate_reader_theme() */
+	public function test_filter_wp_prepare_themes_to_indicate_reader_theme() {
+		$active_theme_slug = 'twentytwenty';
+		$reader_theme_slug = 'twentyseventeen';
+		if ( ! wp_get_theme( $active_theme_slug )->exists() || ! wp_get_theme( $reader_theme_slug )->exists() ) {
+			$this->markTestSkipped();
+		}
+		switch_theme( $active_theme_slug );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::READER_THEME, $reader_theme_slug );
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+
+		$themes = $this->instance->filter_wp_prepare_themes_to_indicate_reader_theme( wp_prepare_themes_for_js() );
+		$this->assertEquals( $active_theme_slug, $themes[0]['id'] );
+		$this->assertStringNotContains( 'AMP', $themes[0]['description'] );
+		$this->assertArrayHasKey( 'delete', $themes[0]['actions'] );
+		$this->assertStringNotContains( amp_get_slug() . '=', $themes[0]['actions']['customize'] );
+		$this->assertArrayNotHasKey( 'ampActiveReaderTheme', $themes[0] );
+		$this->assertArrayNotHasKey( 'ampReaderThemeNotice', $themes[0] );
+
+		$this->assertEquals( $reader_theme_slug, $themes[1]['id'] );
+		$this->assertArrayNotHasKey( 'delete', $themes[1]['actions'] );
+		$this->assertStringContains( amp_get_slug() . '=', $themes[1]['actions']['customize'] );
+		$this->assertArrayHasKey( 'ampActiveReaderTheme', $themes[1] );
+		$this->assertArrayHasKey( 'ampReaderThemeNotice', $themes[1] );
+	}
+
+	/** @covers ReaderThemeLoader::inject_theme_single_template_modifications() */
+	public function test_inject_theme_single_template_modifications() {
+		$output = get_echo( [ $this->instance, 'inject_theme_single_template_modifications' ] );
+		$this->assertStringContains( '<script>', $output );
 	}
 
 	/** @covers ReaderThemeLoader::get_reader_theme() */

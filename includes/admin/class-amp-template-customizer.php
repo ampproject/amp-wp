@@ -106,7 +106,15 @@ class AMP_Template_Customizer {
 	}
 
 	/**
-	 * Force changes to header video to cause refresh since logic in wp-customize-header.js does not construct AMP components.
+	 * Force changes to header video to cause refresh since there are various JS dependencies that prevent selective refresh from working properly.
+	 *
+	 * In the AMP Customizer preview, selective refresh partial for `custom_header` will render <amp-video> or <amp-youtube> elements.
+	 * Nevertheless, custom-header.js in core is not expecting AMP components. Therefore the `wp-custom-header-video-loaded` event never
+	 * fires. This prevents themes from toggling the `has-header-video` class on the body.
+	 *
+	 * Additionally, the Twenty Seventeen core theme (the only which supports header videos) has two separate scripts
+	 * `twentyseventeen-global` and `twentyseventeen-skip-link-focus-fix` which are depended on for displaying the
+	 * video, for example toggling the 'has-header-video' class when the video is added or removed.
 	 *
 	 * This applies whenever AMP is being served in the Customizer preview, that is, in Standard mode or Reader mode with a Reader theme.
 	 */

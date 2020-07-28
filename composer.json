@@ -17,7 +17,7 @@
     "ampproject/optimizer": "^1",
     "cweagans/composer-patches": "1.6.7",
     "fasterimage/fasterimage": "1.5.0",
-    "sabberworm/php-css-parser": "dev-master#bc6ec74"
+    "sabberworm/php-css-parser": "dev-master#bfdd976"
   },
   "require-dev": {
     "civicrm/composer-downloads-plugin": "^2.1",

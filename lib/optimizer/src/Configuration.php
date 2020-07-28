@@ -124,12 +124,21 @@ final class Configuration
         switch ($key) {
             case self::KEY_TRANSFORMERS:
                 if (! is_array($value)) {
-                    throw InvalidConfigurationValue::forInvalidValueType(self::KEY_TRANSFORMERS, 'array', gettype($value));
+                    throw InvalidConfigurationValue::forInvalidValueType(
+                        self::KEY_TRANSFORMERS,
+                        'array',
+                        gettype($value)
+                    );
                 }
 
                 foreach ($value as $index => $entry) {
                     if (! is_string($entry)) {
-                        throw InvalidConfigurationValue::forInvalidSubValueType(self::KEY_TRANSFORMERS, $index, 'string', gettype($entry));
+                        throw InvalidConfigurationValue::forInvalidSubValueType(
+                            self::KEY_TRANSFORMERS,
+                            $index,
+                            'string',
+                            gettype($entry)
+                        );
                     }
                 }
         }

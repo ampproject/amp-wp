@@ -14,7 +14,10 @@
   "require-dev": {
     "ext-zip": "*",
     "civicrm/composer-downloads-plugin": "^2.1",
+    "dealerdirect/phpcodesniffer-composer-installer": "0.7.0",
+    "phpcompatibility/phpcompatibility-wp": "2.1.0",
     "roave/security-advisories": "dev-master",
+    "sirbrillig/phpcs-variable-analysis": "2.8.3",
     "squizlabs/php_codesniffer": "^3"
   },
   "suggest": {
@@ -58,8 +61,8 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "scripts": {
-    "cbf": "phpcbf --standard=PSR12 -n src tests",
-    "cs": "if [ -z $TEST_SKIP_PHPCS ]; then phpcs --standard=PSR12 -s -n src tests; fi",
+    "cbf": "phpcbf",
+    "cs": "if [ -z $TEST_SKIP_PHPCS ]; then phpcs; fi",
     "lint": "if [ -z $TEST_SKIP_LINTING ]; then parallel-lint -j 10 --colors --exclude vendor .; fi",
     "post-update-cmd": [
       "@update-test-specs",

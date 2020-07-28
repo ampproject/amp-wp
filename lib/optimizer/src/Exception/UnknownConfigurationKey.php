@@ -34,9 +34,10 @@ final class UnknownConfigurationKey extends InvalidArgumentException implements 
      */
     public static function fromTransformerKey($transformer, $key)
     {
-        $transformerParts = explode('\\', $transformer);
-        $transformer      = array_pop($transformerParts);
-        $message          = "The configuration of the transformer '{$transformer}' does not contain the requested key '{$key}'.";
+        $parts       = explode('\\', $transformer);
+        $transformer = array_pop($parts);
+        $message     = "The configuration of the transformer '{$transformer}' does not contain '
+                       . 'the requested key '{$key}'.";
 
         return new self($message);
     }

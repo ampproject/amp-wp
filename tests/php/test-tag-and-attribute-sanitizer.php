@@ -523,6 +523,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 							</amp-story-page>
 							<amp-story-page id="my-second-page">
 								<amp-analytics config="https://example.com/analytics.account.config.json"></amp-analytics>
+								<amp-story-grid-layer template="fill">
+									<amp-story-360 layout="responsive" width="100" height="100" heading-start="-45" pitch-start="-20" heading-end="95" pitch-end="-10" zoom-end="4" duration="30s">
+										<amp-img src="img/panorama1.jpg" layout="fixed" width="200" height="100" crossorigin="anonymous" referrerpolicy="origin"></amp-img>
+									</amp-story-360>
+								</amp-story-grid-layer>
 								<amp-story-grid-layer template="thirds">
 									<amp-img grid-area="bottom-third" src="https://example.ampproject.org/helloworld/bg2.gif" width="900" height="1600">
 									</amp-img>
@@ -559,7 +564,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					return [
 						$html,
 						preg_replace( '#<\w+[^>]*>bad</\w+>#', '', $html ),
-						[ 'amp-story', 'amp-analytics', 'amp-twitter', 'amp-youtube', 'amp-video' ],
+						[ 'amp-story', 'amp-analytics', 'amp-story-360', 'amp-twitter', 'amp-youtube', 'amp-video' ],
 						[
 							[
 								'code'      => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_DESCENDANT_TAG,
@@ -570,6 +575,36 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					];
 				}
 			),
+
+			'amp_story_player'                             => [
+				'
+				<amp-story-player width="360" height="600">
+					<a href="https://www.example.com" class="story">
+						<span class="title">A local’s guide to what to eat and do in New York City</span>
+					</a>
+					<a href="https://www.example.com2" class="story">
+						<span class="title">A local’s guide to what to eat and do in Mexico City</span>
+					</a>
+				</amp-story-player>
+				',
+				null,
+				[ 'amp-story-player' ],
+			],
+
+			'amp_story_360'                                => [
+				'
+				<amp-story-player width="360" height="600">
+					<a href="https://www.example.com" class="story">
+						<span class="title">A local’s guide to what to eat and do in New York City</span>
+					</a>
+					<a href="https://www.example.com2" class="story">
+						<span class="title">A local’s guide to what to eat and do in Mexico City</span>
+					</a>
+				</amp-story-player>
+				',
+				null,
+				[ 'amp-story-player' ],
+			],
 
 			'reference-points-bad'                         => [
 				'<div lightbox-thumbnail-id update items pagination separator option selected disabled>BAD REFERENCE POINTS</div>',
@@ -2212,7 +2247,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			'amp-autocomplete'                             => [
 				'
 					<form method="post" action-xhr="/form/echo-json/post" target="_blank" on="submit-success:AMP.setState({result: event.response})">
-						<amp-autocomplete id="autocomplete" filter="substring" min-characters="0" inline="@">
+						<amp-autocomplete id="autocomplete" filter="substring" min-characters="0" inline="@" max-items="10">
 							<input type="text" id="input">
 							<script type="application/json" id="script">
 							{ "items" : ["apple", "banana", "orange"] }

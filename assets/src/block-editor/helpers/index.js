@@ -8,7 +8,7 @@ import { ReactElement } from 'react';
  * WordPress dependencies
  */
 import { __, _x } from '@wordpress/i18n';
-import { cloneElement, RawHTML, render } from '@wordpress/element';
+import { cloneElement, render } from '@wordpress/element';
 import { TextControl, SelectControl, ToggleControl, Notice, PanelBody, FontSizePicker } from '@wordpress/components';
 import { InspectorControls } from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
@@ -26,7 +26,6 @@ const ampLayoutOptions = [
 		notAvailable: [
 			'core-embed/vimeo',
 			'core-embed/dailymotion',
-			'core-embed/hulu',
 			'core-embed/reddit',
 			'core-embed/soundcloud',
 		],
@@ -77,7 +76,6 @@ const ampLayoutOptions = [
 			'core-embed/instagram',
 			'core-embed/vimeo',
 			'core-embed/dailymotion',
-			'core-embed/hulu',
 			'core-embed/reddit',
 			'core-embed/soundcloud',
 		],
@@ -94,15 +92,17 @@ const ampLayoutOptions = [
  */
 export const addAMPAttributes = ( settings, name ) => {
 	// AMP Carousel settings.
-	if ( 'core/shortcode' === name || 'core/gallery' === name ) {
+	if ( 'core/gallery' === name ) {
 		if ( ! settings.attributes ) {
 			settings.attributes = {};
 		}
 		settings.attributes.ampCarousel = {
 			type: 'boolean',
+			default: ! select( 'amp/block-editor' ).hasThemeSupport(), // @todo We could just default this to false now even in Reader mode since block styles are loaded.
 		};
 		settings.attributes.ampLightbox = {
 			type: 'boolean',
+			default: false,
 		};
 	}
 
@@ -113,6 +113,7 @@ export const addAMPAttributes = ( settings, name ) => {
 		}
 		settings.attributes.ampLightbox = {
 			type: 'boolean',
+			default: false,
 		};
 	}
 
@@ -124,6 +125,7 @@ export const addAMPAttributes = ( settings, name ) => {
 			settings.attributes = {};
 		}
 		settings.attributes.ampFitText = {
+			type: 'boolean',
 			default: false,
 		};
 		settings.attributes.minFont = {
@@ -173,58 +175,12 @@ export const addAMPAttributes = ( settings, name ) => {
  * @return {Object} Output element.
  */
 export const filterBlocksSave = ( element, blockType, attributes ) => { // eslint-disable-line complexity
-	let text = attributes.text || '',
-		content = '';
-
 	const fitTextProps = {
 		layout: 'fixed-height',
 	};
 
-	if ( 'core/shortcode' === blockType.name && isGalleryShortcode( attributes ) ) {
-		if ( ! attributes.ampLightbox ) {
-			if ( hasGalleryShortcodeLightboxAttribute( attributes.text || '' ) ) {
-				text = removeAmpLightboxFromShortcodeAtts( attributes.text );
-			}
-		}
-		if ( attributes.ampCarousel ) {
-			// If the text contains amp-carousel or amp-lightbox, lets remove it.
-			if ( hasGalleryShortcodeCarouselAttribute( text ) ) {
-				text = removeAmpCarouselFromShortcodeAtts( text );
-			}
-
-			// If lightbox is not set, we can return here.
-			if ( ! attributes.ampLightbox ) {
-				if ( attributes.text !== text ) {
-					return (
-						<RawHTML>
-							{ text }
-						</RawHTML>
-					);
-				}
-
-				// Else lets return original.
-				return element;
-			}
-		} else if ( ! hasGalleryShortcodeCarouselAttribute( attributes.text || '' ) ) {
-			// Add amp-carousel=false attribute to the shortcode.
-			text = attributes.text.replace( '[gallery', '[gallery amp-carousel=false' );
-		} else {
-			text = attributes.text;
-		}
-
-		if ( attributes.ampLightbox && ! hasGalleryShortcodeLightboxAttribute( text ) ) {
-			text = text.replace( '[gallery', '[gallery amp-lightbox=true' );
-		}
-
-		if ( attributes.text !== text ) {
-			return (
-				<RawHTML>
-					{ text }
-				</RawHTML>
-			);
-		}
-	} else if ( 'core/paragraph' === blockType.name && ! attributes.ampFitText ) {
-		content = getAmpFitTextContent( attributes.content );
+	if ( 'core/paragraph' === blockType.name && ! attributes.ampFitText ) {
+		const content = getAmpFitTextContent( attributes.content );
 		if ( content !== attributes.content ) {
 			return cloneElement(
 				element,
@@ -303,48 +259,6 @@ export const getLayoutOptions = ( block ) => {
 };
 
 /**
- * Add extra data-amp-layout attribute to save to DB.
- *
- * @param {Object} props          Properties.
- * @param {Object} blockType      Block type.
- * @param {Object} blockType.name Block type name.
- * @param {Object} attributes     Attributes.
- *
- * @return {Object} Props.
- */
-export const addAMPExtraProps = ( props, blockType, attributes ) => {
-	const ampAttributes = {};
-
-	// Shortcode props are handled differently.
-	if ( 'core/shortcode' === blockType.name ) {
-		return props;
-	}
-
-	// AMP blocks handle layout and other props on their own.
-	if ( 'amp/' === blockType.name.substr( 0, 4 ) ) {
-		return props;
-	}
-
-	if ( attributes.ampLayout ) {
-		ampAttributes[ 'data-amp-layout' ] = attributes.ampLayout;
-	}
-	if ( attributes.ampNoLoading ) {
-		ampAttributes[ 'data-amp-noloading' ] = attributes.ampNoLoading;
-	}
-	if ( attributes.ampLightbox ) {
-		ampAttributes[ 'data-amp-lightbox' ] = attributes.ampLightbox;
-	}
-	if ( attributes.ampCarousel ) {
-		ampAttributes[ 'data-amp-carousel' ] = attributes.ampCarousel;
-	}
-
-	return {
-		...ampAttributes,
-		...props,
-	};
-};
-
-/**
  * Filters blocks edit function of all blocks.
  *
  * @param {Function} BlockEdit function.
@@ -353,26 +267,11 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
  */
 export const filterBlocksEdit = ( BlockEdit ) => {
 	const EnhancedBlockEdit = function( props ) {
-		const { attributes: { text, ampLayout }, setAttributes, name } = props;
+		const { attributes: { ampLayout }, name } = props;
 
 		let inspectorControls;
 
-		if ( 'core/shortcode' === name ) {
-			// Lets remove amp-carousel from edit view.
-			if ( hasGalleryShortcodeCarouselAttribute( text || '' ) ) {
-				setAttributes( { text: removeAmpCarouselFromShortcodeAtts( text ) } );
-			}
-			// Lets remove amp-lightbox from edit view.
-			if ( hasGalleryShortcodeLightboxAttribute( text || '' ) ) {
-				setAttributes( { text: removeAmpLightboxFromShortcodeAtts( text ) } );
-			}
-
-			inspectorControls = setUpShortcodeInspectorControls( props );
-			if ( '' === inspectorControls ) {
-				// Return original.
-				return <BlockEdit { ...props } />;
-			}
-		} else if ( 'core/gallery' === name ) {
+		if ( 'core/gallery' === name ) {
 			inspectorControls = setUpGalleryInspectorControls( props );
 		} else if ( 'core/image' === name ) {
 			inspectorControls = setUpImageInspectorControls( props );
@@ -413,6 +312,8 @@ export const filterBlocksEdit = ( BlockEdit ) => {
  * Set width and height in case of image block.
  *
  * @param {Object} props Props.
+ * @param {Function} props.setAttributes Callback to set attributes.
+ * @param {Object} props.attributes Attributes.
  * @param {string} layout Layout.
  */
 export const setImageBlockLayoutAttributes = ( props, layout ) => {
@@ -532,7 +433,7 @@ const AmpNoloadingToggle = ( props ) => {
 
 AmpNoloadingToggle.propTypes = {
 	attributes: PropTypes.shape( {
-		ampNoLoading: PropTypes.string,
+		ampNoLoading: PropTypes.bool,
 	} ),
 	setAttributes: PropTypes.func.isRequired,
 };
@@ -543,6 +444,9 @@ AmpNoloadingToggle.propTypes = {
  * @todo Consider wrapping the render function to delete the original font size in text settings when ampFitText.
  *
  * @param {Object} props Props.
+ * @param {Function} props.setAttributes Callback to set attributes.
+ * @param {Object} props.attributes Attributes.
+ * @param {boolean} props.isSelected Is selected.
  *
  * @return {ReactElement} Inspector Controls.
  */
@@ -666,44 +570,12 @@ const setUpTextBlocksInspectorControls = ( props ) => {
 setUpTextBlocksInspectorControls.propTypes = {
 	isSelected: PropTypes.bool,
 	attributes: PropTypes.shape( {
-		ampFitText: PropTypes.string,
+		ampFitText: PropTypes.bool,
 		minFont: PropTypes.number,
 		maxFont: PropTypes.number,
 		height: PropTypes.number,
 	} ),
 	setAttributes: PropTypes.func.isRequired,
-};
-
-/**
- * Set up inspector controls for shortcode block.
- * Adds ampCarousel attribute in case of gallery shortcode.
- *
- * @param {Object} props Props.
- *
- * @return {ReactElement} Inspector controls.
- */
-const setUpShortcodeInspectorControls = ( props ) => {
-	const { isSelected } = props;
-
-	if ( ! isGalleryShortcode( props.attributes ) || ! isSelected ) {
-		return null;
-	}
-
-	const hasThemeSupport = select( 'amp/block-editor' ).hasThemeSupport();
-
-	return (
-		<InspectorControls>
-			<PanelBody title={ __( 'AMP Settings', 'amp' ) }>
-				{ hasThemeSupport && <AmpCarouselToggle { ...props } /> }
-				<AmpLightboxToggle { ...props } />
-			</PanelBody>
-		</InspectorControls>
-	);
-};
-
-setUpShortcodeInspectorControls.propTypes = {
-	isSelected: PropTypes.bool,
-	attributes: PropTypes.object,
 };
 
 /**
@@ -739,7 +611,7 @@ const AmpLightboxToggle = ( props ) => {
 
 AmpLightboxToggle.propTypes = {
 	attributes: PropTypes.shape( {
-		ampLightbox: PropTypes.string,
+		ampLightbox: PropTypes.bool,
 		ampLayout: PropTypes.string,
 		linkTo: PropTypes.string,
 	} ),
@@ -770,7 +642,7 @@ const AmpCarouselToggle = ( props ) => {
 
 AmpCarouselToggle.propTypes = {
 	attributes: PropTypes.shape( {
-		ampCarousel: PropTypes.string,
+		ampCarousel: PropTypes.bool,
 	} ),
 	setAttributes: PropTypes.func.isRequired,
 };
@@ -821,12 +693,10 @@ const setUpGalleryInspectorControls = ( props ) => {
 		return null;
 	}
 
-	const hasThemeSupport = select( 'amp/block-editor' ).hasThemeSupport();
-
 	return (
 		<InspectorControls>
 			<PanelBody title={ __( 'AMP Settings', 'amp' ) }>
-				{ hasThemeSupport && <AmpCarouselToggle { ...props } /> }
+				<AmpCarouselToggle { ...props } />
 				<AmpLightboxToggle { ...props } />
 			</PanelBody>
 		</InspectorControls>
@@ -835,61 +705,6 @@ const setUpGalleryInspectorControls = ( props ) => {
 
 setUpGalleryInspectorControls.propTypes = {
 	isSelected: PropTypes.bool,
-};
-
-/**
- * Removes amp-carousel=false from shortcode attributes.
- *
- * @param {string} shortcode Shortcode text.
- *
- * @return {string} Modified shortcode.
- */
-export const removeAmpCarouselFromShortcodeAtts = ( shortcode ) => {
-	return shortcode.replace( ' amp-carousel=false', '' );
-};
-
-/**
- * Removes amp-lightbox=true from shortcode attributes.
- *
- * @param {string} shortcode Shortcode text.
- *
- * @return {string} Modified shortcode.
- */
-export const removeAmpLightboxFromShortcodeAtts = ( shortcode ) => {
-	return shortcode.replace( ' amp-lightbox=true', '' );
-};
-
-/**
- * Determines whether a shortcode includes the amp-carousel attribute.
- *
- * @param {string} text Shortcode.
- *
- * @return {boolean} Whether the shortcode includes the attribute.
- */
-export const hasGalleryShortcodeCarouselAttribute = ( text ) => {
-	return -1 !== text.indexOf( 'amp-carousel=false' );
-};
-
-/**
- * Determines whether a shortcode includes the amp-lightbox attribute.
- *
- * @param {string} text Shortcode.
- *
- * @return {boolean} Whether the shortcode includes the attribute.
- */
-export const hasGalleryShortcodeLightboxAttribute = ( text ) => {
-	return -1 !== text.indexOf( 'amp-lightbox=true' );
-};
-
-/**
- * Determines whether the current shortcode is a gallery shortcode.
- *
- * @param {Object} attributes Shortcode attributes.
- *
- * @return {boolean} Whether it is a gallery shortcode.
- */
-export const isGalleryShortcode = ( attributes ) => {
-	return attributes.text && -1 !== attributes.text.indexOf( 'gallery' );
 };
 
 /**

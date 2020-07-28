@@ -7,7 +7,7 @@ $targetFolder    = realpath(dirname(__DIR__) . '/tests') . '/spec';
 $tmpFilePath     = tempnam(sys_get_temp_dir(), 'amp-optimizer-');
 $tmpFile         = null;
 $zip             = null;
-$version_string  = ltrim( $version, 'v' );
+$version_string  = ltrim($version, 'v');
 $targetSubFolder = "amp-toolbox-{$version_string}/packages/optimizer/spec/";
 
 function cleanUp()

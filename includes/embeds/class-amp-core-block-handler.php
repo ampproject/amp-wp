@@ -79,6 +79,30 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		if ( ! isset( $block['blockName'] ) ) {
 			return $block_content;
 		}
+
+		if ( isset( $block['attrs'] ) && 'core/shortcode' !== $block['blockName'] ) {
+			$injected_attributes    = '';
+			$prop_attribute_mapping = [
+				'ampCarousel'  => 'data-amp-carousel',
+				'ampLayout'    => 'data-amp-layout',
+				'ampLightbox'  => 'data-amp-lightbox',
+				'ampNoLoading' => 'data-amp-noloading',
+			];
+			foreach ( $prop_attribute_mapping as $prop => $attr ) {
+				if ( isset( $block['attrs'][ $prop ] ) ) {
+					$property_value = $block['attrs'][ $prop ];
+					if ( is_bool( $property_value ) ) {
+						$property_value = $property_value ? 'true' : 'false';
+					}
+
+					$injected_attributes .= sprintf( ' %s="%s"', $attr, esc_attr( $property_value ) );
+				}
+			}
+			if ( $injected_attributes ) {
+				$block_content = preg_replace( '/(<\w+)/', '$1' . $injected_attributes, $block_content, 1 );
+			}
+		}
+
 		if ( isset( $this->block_ampify_methods[ $block['blockName'] ] ) ) {
 			$method_name   = $this->block_ampify_methods[ $block['blockName'] ];
 			$block_content = $this->{$method_name}( $block_content, $block );
