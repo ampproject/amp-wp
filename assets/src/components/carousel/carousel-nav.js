@@ -98,7 +98,7 @@ export function CarouselNav( {
 				</svg>
 
 			</Button>
-			{ showDots && (
+			{ showDots ? (
 				<div className={ `${ namespace }__dots` }>
 					{ [ ...items ].map( ( item, itemIndex ) => (
 						<Dot
@@ -112,6 +112,15 @@ export function CarouselNav( {
 							} }
 						/>
 					) ) }
+				</div>
+			) : (
+				<div className={ `${ namespace }__item-counter` }>
+					<span>
+						{ centeredItemIndex + 1 }
+					</span>
+					<span>
+						{ items.length }
+					</span>
 				</div>
 			) }
 			<Button

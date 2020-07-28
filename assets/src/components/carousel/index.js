@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { debounce } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -71,7 +72,7 @@ export function Carousel( {
 	useLayoutEffect( () => {
 		const currentCarouselList = carouselListRef.current;
 
-		const scrollCallback = () => {
+		const scrollCallback = debounce( () => {
 			for ( const child of [ ...currentCarouselList.children ] ) {
 				if ( child.offsetLeft >= currentCarouselList.scrollLeft ) {
 					if ( child !== currentPage ) {
@@ -80,7 +81,7 @@ export function Carousel( {
 					return;
 				}
 			}
-		};
+		}, 100 );
 		currentCarouselList.addEventListener( 'scroll', scrollCallback );
 
 		return () => {
@@ -239,6 +240,24 @@ function Style( { gutterWidth, itemWidth, namespace } ) {
 	padding: 0;
 	transition: .2s all;
 	width: 10px;
+}
+
+.${ namespace }__item-counter {
+	align-items: center;
+	display: flex;
+	font-size: 14px;
+	padding: 0 0.5rem;
+}
+
+.${ namespace }__item-counter span:first-of-type {
+	display: flex;
+	font-size: 20px;
+}
+
+.${ namespace }__item-counter span:first-of-type:after {
+	border-left: 2px solid rgba(0, 0, 0, .6);
+	content: '';
+	margin: -0.5rem 0.5rem;
 }
 
 .${ namespace }__nav-dot-button--active .${ namespace }__nav-dot {
