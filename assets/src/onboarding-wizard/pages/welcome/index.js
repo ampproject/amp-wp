@@ -72,11 +72,7 @@ export function Welcome() {
 							{ __( 'AMP and WordPress', 'amp' ) }
 						</h4>
 						<p>
-							{ __( 'AMP is a web framework designed to make it easier to build user-first sites--that is, sites that are beautiful, fast, engaging, secure, and accessible.', 'amp' ) }
-							{ ' ' }
-							<a href="http://amp.dev" target="_blank" rel="noreferrer">
-								{ __( 'Learn more.', 'amp' ) }
-							</a>
+							{ __( 'AMP is a web framework designed to make it easier to build user-first sites, which are beautiful, fast, engaging, secure, and accessible.', 'amp' ) }
 							{ ' ' }
 							{ __( 'The Official AMP plugin for WordPress enables you to incorporate AMP into your site.', 'amp' ) }
 						</p>
@@ -111,7 +107,7 @@ export function Welcome() {
 							{ __( 'Configure your site with AMP', 'amp' ) }
 						</h4>
 						<p>
-							{ __( 'The AMP plugin for WordPress allows you to enable AMP content for your site. There are different ways this can be done, depending on the configuration of your site (e.g., which theme you are using) and your technical skills and level of interest in addressing AMP compatibility issues as your site evolves.', 'amp' ) }
+							{ __( 'There are different ways in which you can incorporate AMP content into your site, depending on the configuration of your site (e.g., which theme you are using), your technical skills and the level of resources you may have for addressing AMP compatibility issues as your site evolves.', 'amp' ) }
 						</p>
 					</div>
 
@@ -139,7 +135,7 @@ export function Welcome() {
 							{ __( 'Onboarding flow', 'amp' ) }
 						</h4>
 						<p>
-							{ __( 'Following the onboarding flow will guide you through the plugin configuration and getting started with AMP on your site.', 'amp' ) }
+							{ __( 'This onboarding flow will guide you through the plugin configuration and getting started with AMP on your site.', 'amp' ) }
 						</p>
 					</div>
 

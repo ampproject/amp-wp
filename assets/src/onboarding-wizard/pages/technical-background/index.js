@@ -88,7 +88,7 @@ export function TechnicalBackground() {
 					{ __( 'Are you technical?', 'amp' ) }
 				</h1>
 				<p>
-					{ __( 'In order to recommend the best AMP experience for your site, please indicate what level of technical experience you have.', 'amp' ) }
+					{ __( 'In order to recommend the best plugin configuration options for your site, please indicate what is your level of technical expertise.', 'amp' ) }
 				</p>
 			</div>
 			<form>
@@ -112,7 +112,7 @@ export function TechnicalBackground() {
 								</h2>
 							</div>
 							<p>
-								{ __( 'I am a “Developer or technically savvy” user. I can do WordPress development such as making changes to themes and plugins. I have some familiarity with HTML, CSS, JavaScript, and PHP. I am technically savvy enough to build full WordPress sites out of plugins and themes and can address configuration issues and understand', 'amp' ) }
+								{ __( 'I am a “Developer or technically savvy” user. I am familiar with HTML, CSS, JavaScript, and PHP. I am able to do WordPress development, including making changes to themes and plugins, as well as assembling full WordPress sites out of plugins and themes components. I can undertstand and address AMP validation issues.', 'amp' ) }
 							</p>
 						</div>
 					</label>
@@ -138,7 +138,7 @@ export function TechnicalBackground() {
 								</h2>
 							</div>
 							<p>
-								{ __( 'I am not a developer and I am not responsible for configuring and fixing issues on my site. I am a site owner and/or content creator who wants to take advantage of AMP performance.', 'amp' ) }
+								{ __( 'I am not a developer and I am not responsible for configuring and fixing issues on my site. I am a site owner and/or content creator who wants to take advantage of AMP to build user-first sites.', 'amp' ) }
 							</p>
 						</div>
 					</label>
