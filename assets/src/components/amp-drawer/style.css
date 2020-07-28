@@ -38,6 +38,10 @@
 	margin: 0 0 0 auto;
 }
 
+.amp .amp-drawer .components-panel__body-title {
+	border-radius: 5px;
+}
+
 .amp .amp-drawer .is-opened .components-panel__body-title {
 	border-radius: 5px 5px 0 0;
 }
