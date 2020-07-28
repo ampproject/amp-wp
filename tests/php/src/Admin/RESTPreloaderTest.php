@@ -38,6 +38,10 @@ class RESTPreloaderTest extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
+		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
+			$this->markTestSkipped( 'Requires WordPress 5.0.' );
+		}
+
 		$this->instance = new RESTPreloader();
 	}
 

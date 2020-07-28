@@ -33,7 +33,7 @@ final class RESTPreloader implements Conditional, Delayed, Registerable, Service
 	 * @return bool Whether the conditional object is needed.
 	 */
 	public static function is_needed() {
-		return is_admin() && has_filter( 'amp_preload_rest_paths' );
+		return function_exists( 'rest_preload_api_request' ) && is_admin() && has_filter( 'amp_preload_rest_paths' );
 	}
 
 	/**
