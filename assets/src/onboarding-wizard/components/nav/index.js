@@ -3,12 +3,14 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
+import { addQueryArgs } from '@wordpress/url';
 import { useContext } from '@wordpress/element';
 
 /**
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { CUSTOMIZER_LINK, AMP_QUERY_VAR } from 'amp-settings'; // From WP inline script.
 
 /**
  * Internal dependencies
@@ -27,8 +29,31 @@ import { User } from '../user-context-provider';
  */
 export function Nav( { closeLink, finishLink } ) {
 	const { activePageIndex, canGoForward, isLastPage, moveBack, moveForward } = useContext( Navigation );
-	const { savingOptions } = useContext( Options );
+	const {
+		savingOptions,
+		editedOptions: { theme_support: themeSupport },
+		originalOptions: { preview_permalink: previewPermalink, reader_theme: readerTheme },
+	} = useContext( Options );
 	const { savingDeveloperToolsOption } = useContext( User );
+
+	let nextText;
+	let nextLink;
+
+	if ( isLastPage && 'reader' === themeSupport ) {
+		nextText = __( 'Customize AMP', 'amp' );
+		nextLink = ! savingDeveloperToolsOption && ! savingOptions ? addQueryArgs(
+			CUSTOMIZER_LINK,
+			'legacy' === readerTheme
+				? { 'autofocus[panel]': 'amp_panel', url: previewPermalink }
+				: { url: previewPermalink, [ AMP_QUERY_VAR ]: '1' },
+		) : undefined;
+	} else if ( isLastPage ) {
+		nextText = __( 'Finish', 'amp' );
+		nextLink = ! savingDeveloperToolsOption && ! savingOptions ? finishLink : undefined;
+	} else {
+		nextText = __( 'Next', 'amp' );
+		nextLink = undefined;
+	}
 
 	return (
 		<div className="onboarding-wizard-nav">
@@ -72,12 +97,12 @@ export function Nav( { closeLink, finishLink } ) {
 
 					<Button
 						disabled={ ! canGoForward || savingOptions || savingDeveloperToolsOption }
-						href={ isLastPage && ! savingDeveloperToolsOption && ! savingOptions ? finishLink : undefined }
+						href={ nextLink }
 						id="next-button"
 						isPrimary
 						onClick={ moveForward }
 					>
-						{ isLastPage ? __( 'Finish', 'amp' ) : __( 'Next', 'amp' ) }
+						{ nextText }
 
 						{ ! isLastPage && (
 							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">

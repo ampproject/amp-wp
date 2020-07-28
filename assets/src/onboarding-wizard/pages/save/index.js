@@ -3,13 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useContext, useEffect, useState } from '@wordpress/element';
-import { addQueryArgs } from '@wordpress/url';
 import { Button } from '@wordpress/components';
-
-/**
- * External dependencies
- */
-import { CUSTOMIZER_LINK, AMP_QUERY_VAR } from 'amp-settings'; // From WP inline script.
 
 /**
  * Internal dependencies
@@ -81,8 +75,7 @@ function Preview() {
 	const [ iframeLoaded, setIframeLoaded ] = useState( false );
 
 	const {
-		editedOptions: { theme_support: themeSupport },
-		originalOptions: { preview_permalink: previewPermalink, reader_theme: readerTheme },
+		originalOptions: { preview_permalink: previewPermalink },
 	} = useContext( Options );
 
 	const opacity = iframeLoaded ? '1' : '0';
@@ -105,25 +98,6 @@ function Preview() {
 			</Phone>
 			<div className="done__link-buttons">
 
-				{
-					'reader' === themeSupport && (
-						<Button
-							isPrimary
-							href={
-								addQueryArgs(
-									CUSTOMIZER_LINK,
-									'legacy' === readerTheme
-										? { 'autofocus[panel]': 'amp_panel', url: previewPermalink }
-										: { url: previewPermalink, [ AMP_QUERY_VAR ]: '1' },
-								)
-							}
-							target="_blank"
-							rel="noreferrer"
-						>
-							{ __( 'Customize AMP', 'amp' ) }
-						</Button>
-					)
-				}
 				<Button
 					isPrimary
 					href={ previewPermalink }
