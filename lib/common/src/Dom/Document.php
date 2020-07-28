@@ -1365,21 +1365,6 @@ final class Document extends DOMDocument
     }
 
     /**
-     * Produce a random number to use in hashes.
-     *
-     * ⚠️ This is not cryptographically secure!
-     *
-     * @return int A random number.
-     */
-    private function rand()
-    {
-        if (function_exists('mt_rand')) {
-            return mt_rand();
-        }
-        return rand();
-    }
-
-    /**
      * Secure the original doctype node.
      *
      * We need to keep elements around that were prepended to the doctype, like comment node used for source-tracking.

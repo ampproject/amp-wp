@@ -464,24 +464,6 @@ class DocumentTest extends TestCase
     }
 
     /**
-     * Test getting random number.
-     *
-     * @covers Document::rand()
-     */
-    public function testRand()
-    {
-        $doc    = new Document();
-        $method = (new ReflectionClass($doc))->getMethod('rand');
-        $method->setAccessible(true);
-        $rands  = [];
-        $n      = 100;
-        for ($i = 0; $i < $n; $i++) {
-            $rands[] = $method->invokeArgs($doc, []);
-        }
-        $this->assertGreaterThan(1, count(array_unique($rands)), "Expected rand() to return at least more than 1 random number after $n invocations.");
-    }
-
-    /**
      * Get Table Row Iterations.
      *
      * @return array An array of arrays holding an integer representation of iterations.
