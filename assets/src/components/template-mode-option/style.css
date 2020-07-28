@@ -10,7 +10,7 @@
 	align-items: center;
 	background-color: var(--amp-settings-color-background);
 	display: flex;
-	padding: 0.75rem 0;
+	padding: 0;
 	width: 100%;
 
 	@media (min-width: 783px) {
@@ -94,7 +94,7 @@
 	}
 }
 
-.template-mode-selection__description h2 {
+.template-mode-selection__description h3 {
 	font-size: 1rem;
 	line-height: 1.5;
 	margin-bottom: 0;
@@ -106,9 +106,7 @@
 }
 
 .template-mode-selection__label-extra {
-	margin-left: .5rem;
-	margin-bottom: 1rem;
-	margin-top: -0.5rem;
+	margin: 0;
 
 	@media screen and (min-width: 783px) {
 		margin-left: auto;

@@ -22,7 +22,8 @@
 	display: flex;
 	height: var(--heading-height);
 	left: 0;
-	padding-left: 1.5rem;
+	padding-left: 0.5rem;
+	padding-right: 0.5rem;
 	overflow: hidden;
 	position: absolute;
 	top: 0;
@@ -31,6 +32,17 @@
 	@media (min-width: 783px) {
 		padding-left: 3rem;
 	}
+}
+
+.amp-drawer--handle-type-full-width .amp-drawer__heading {
+
+	@media (min-width: 783px) {
+		padding-right: 3rem;
+	}
+}
+
+.amp-drawer__heading h3 {
+	margin-bottom: 0;
 }
 
 .amp .amp-drawer .components-panel__body-title {
