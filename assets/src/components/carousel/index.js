@@ -39,7 +39,6 @@ export function Carousel( {
 	const windowWidth = useWindowWidth();
 	const [ currentPage, originalSetCenteredPage ] = useState( null );
 	const [ pageWidth, setPageWidth ] = useState( 0 );
-	const carouselContainerRef = useRef();
 	const carouselListRef = useRef();
 
 	/**
@@ -53,7 +52,11 @@ export function Carousel( {
 		originalSetCenteredPage( newCurrentPage );
 
 		if ( newCurrentPage && scrollToItem ) {
-			carouselListRef.current.scrollTo( { top: 0, left: newCurrentPage.offsetLeft, behavior: smooth ? 'smooth' : 'auto' } );
+			carouselListRef.current.scrollTo( {
+				top: 0,
+				left: newCurrentPage.offsetLeft,
+				behavior: smooth ? 'smooth' : 'auto',
+			} );
 		}
 	}, [] );
 
@@ -107,7 +110,7 @@ export function Carousel( {
 
 	return (
 		<div className={ namespace }>
-			<div className={ `${ namespace }__container` } ref={ carouselContainerRef }>
+			<div className={ `${ namespace }__container` }>
 				<ul className={ `${ namespace }__carousel` } ref={ carouselListRef }>
 					{ items.map( ( { label, name, Item } ) => (
 						<li
