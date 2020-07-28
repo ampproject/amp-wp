@@ -560,7 +560,7 @@ final class Document extends DOMDocument
      */
     private function extractNodeViaFragmentBoundaries(DOMNode $node)
     {
-        $boundary      = 'fragment_boundary:' . $this->rand();
+        $boundary      = $this->getUniqueId('fragment_boundary');
         $startBoundary = $boundary . ':start';
         $endBoundary   = $boundary . ':end';
         $commentStart  = $this->createComment($startBoundary);
@@ -881,7 +881,7 @@ final class Document extends DOMDocument
                     return preg_replace_callback(
                         '#<noscript[^>]*>.*?</noscript>#si',
                         function ($noscriptMatches) {
-                            $id = 'noscript-' . (string)$this->rand();
+                            $id = $this->getUniqueId('noscript');
                             $this->noscriptPlaceholderComments[$id] = $noscriptMatches[0];
                             return sprintf('<meta class="noscript-placeholder" id="%s">', $id);
                         },
@@ -1535,6 +1535,25 @@ final class Document extends DOMDocument
     }
 
     /**
+     * Get auto-incremented ID unique to this class's instantiation.
+     *
+     * @param string $prefix Prefix.
+     * @return string ID.
+     */
+    private function getUniqueId( $prefix = '' ) {
+        if (array_key_exists($prefix, $this->indexCounter)) {
+            ++$this->indexCounter[$prefix];
+        } else {
+            $this->indexCounter[$prefix] = 0;
+        }
+        $uniqueId = (string)$this->indexCounter[$prefix];
+        if ( $prefix ) {
+            $uniqueId = "{$prefix}-{$uniqueId}";
+        }
+        return $uniqueId;
+    }
+
+    /**
      * Get the ID for an element.
      *
      * If the element does not have an ID, create one first.
@@ -1549,17 +1568,9 @@ final class Document extends DOMDocument
             return $element->getAttribute('id');
         }
 
-        if (array_key_exists($prefix, $this->indexCounter)) {
-            ++$this->indexCounter[$prefix];
-        } else {
-            $this->indexCounter[$prefix] = 0;
-        }
-
-        $id = "{$prefix}-{$this->indexCounter[ $prefix ]}";
-
+        $id = $this->getUniqueId($prefix);
         while ($this->getElementById($id) instanceof DOMElement) {
-            ++$this->indexCounter[$prefix];
-            $id = "{$prefix}-{$this->indexCounter[ $prefix ]}";
+            $id = $this->getUniqueId($prefix);
         }
 
         $element->setAttribute('id', $id);
