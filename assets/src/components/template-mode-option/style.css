@@ -64,7 +64,7 @@
 
 .template-mode-option .amp-notice .components-panel__body-toggle.components-button {
 	font-family: var(--font-noto);
-	font-size: 13px;
+	font-size: 14px;
 	font-weight: 400;
 	line-height: 1.85;
 	padding-left: 0;
@@ -116,7 +116,7 @@
 }
 
 .template-mode-selection__label-extra .amp-notice--small {
-	font-size: 13px;
+	font-size: 14px;
 
 	@media screen and (min-width: 783px) {
 		font-size: 14px;
