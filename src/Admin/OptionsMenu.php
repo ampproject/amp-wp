@@ -91,6 +91,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 
 		add_action( 'admin_enqueue_scripts', [ $this, 'register_shimmed_assets' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+		add_filter( 'amp_preload_rest_paths', [ $this, 'filter_preload_rest_paths' ], 10, 2 );
 	}
 
 	/**
@@ -263,25 +264,23 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		$is_reader_theme = in_array( get_stylesheet(), wp_list_pluck( $this->reader_themes->get_themes(), 'slug' ), true );
 
 		$js_data = [
-			'CURRENT_THEME'                      => [
+			'CURRENT_THEME'              => [
 				'name'            => $theme->get( 'Name' ),
 				'description'     => $theme->get( 'Description' ),
 				'is_reader_theme' => $is_reader_theme,
 				'screenshot'      => $theme->get_screenshot(),
 				'url'             => $theme->get( 'ThemeURI' ),
 			],
-			'OPTIONS_REST_ENDPOINT'              => rest_url( 'amp/v1/options' ),
-			'READER_THEMES_REST_ENDPOINT'        => rest_url( 'amp/v1/reader-themes' ),
-			'IS_CORE_THEME'                      => in_array(
+			'OPTIONS_REST_PATH'          => '/amp/v1/options',
+			'READER_THEMES_REST_PATH'    => '/amp/v1/reader-themes',
+			'IS_CORE_THEME'              => in_array(
 				get_stylesheet(),
 				AMP_Core_Theme_Sanitizer::get_supported_themes(),
 				true
 			),
-			'THEME_SUPPORT_ARGS'                 => AMP_Theme_Support::get_theme_support_args(),
-			'THEME_SUPPORTS_READER_MODE'         => AMP_Theme_Support::supports_reader_mode(),
-			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
-			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
-			'USER_REST_ENDPOINT'                 => rest_url( 'wp/v2/users/me' ),
+			'THEME_SUPPORT_ARGS'         => AMP_Theme_Support::get_theme_support_args(),
+			'THEME_SUPPORTS_READER_MODE' => AMP_Theme_Support::supports_reader_mode(),
+			'UPDATES_NONCE'              => wp_create_nonce( 'updates' ),
 		];
 
 		wp_add_inline_script(
@@ -324,5 +323,27 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			</form>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Adds REST paths to preload.
+	 *
+	 * @param array  $paths Array of paths that will be preloaded on the backend.
+	 * @param string $screen The current screen ID.
+	 * @return array Filtered paths.
+	 */
+	public function filter_preload_rest_paths( $paths, $screen ) {
+		if ( $this->screen_handle() !== $screen ) {
+			return $paths;
+		}
+
+		return array_merge(
+			$paths,
+			[
+				'/amp/v1/options',
+				'/amp/v1/reader-themes',
+				'/wp/v2/settings',
+			]
+		);
 	}
 }

@@ -93,6 +93,7 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 		add_action( 'admin_head-' . $this->screen_handle(), [ $this, 'override_template' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 		add_filter( 'admin_title', [ $this, 'override_title' ] );
+		add_filter( 'amp_preload_rest_paths', [ $this, 'filter_preload_rest_paths' ], 10, 2 );
 	}
 
 	/**
@@ -227,11 +228,11 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 				'url'             => $theme->get( 'ThemeURI' ),
 			],
 			'FINISH_LINK'                        => $exit_link,
-			'OPTIONS_REST_ENDPOINT'              => rest_url( 'amp/v1/options' ),
-			'READER_THEMES_REST_ENDPOINT'        => rest_url( 'amp/v1/reader-themes' ),
+			'OPTIONS_REST_PATH'                  => '/amp/v1/options',
+			'READER_THEMES_REST_PATH'            => '/amp/v1/reader-themes',
 			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
 			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
-			'USER_REST_ENDPOINT'                 => rest_url( 'wp/v2/users/me' ),
+			'USER_REST_PATH'                     => '/wp/v2/users/me',
 		];
 
 		wp_add_inline_script(
@@ -255,5 +256,28 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 				'after'
 			);
 		}
+	}
+
+	/**
+	 * Adds REST paths to preload.
+	 *
+	 * @param array  $paths Array of paths that will be preloaded on the backend.
+	 * @param string $screen The current screen ID.
+	 * @return array Filtered paths.
+	 */
+	public function filter_preload_rest_paths( $paths, $screen ) {
+		if ( $this->screen_handle() !== $screen ) {
+			return $paths;
+		}
+
+		return array_merge(
+			$paths,
+			[
+				'/amp/v1/options',
+				'/amp/v1/reader-themes',
+				'/wp/v2/settings',
+				'/wp/v2/users/me',
+			]
+		);
 	}
 }
