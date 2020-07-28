@@ -46,7 +46,7 @@ export function Carousel( {
 	 * Sets the the currentPage state and optionally scrolls to it.
 	 *
 	 * This state-setting wrapper is required, as opposed to scrolling to items in an effect hook when they're set as current,
-	 * because intersection observer needs to set currentPage, but it does so only when the new currentPage is already centered
+	 * because scroll listener below needs to set currentPage, but it does so only when the new currentPage is already centered
 	 * in the view. Calling scrollTo in that situation would cause jerky scroll effects.
 	 */
 	const setCurrentPage = useCallback( ( newCurrentPage, scrollToItem = true, smooth = true ) => {
@@ -67,7 +67,7 @@ export function Carousel( {
 	}, [ highlightedItemIndex, pageWidth, setCurrentPage ] );
 
 	/**
-	 * Set up an intersection observer to set an item as the currentPage as it crosses the center of the view.
+	 * Set up a scroll listener to set an item as the currentPage as it crosses the center of the view.
 	 */
 	useLayoutEffect( () => {
 		let mounted = true;
