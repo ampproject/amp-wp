@@ -186,8 +186,7 @@ function Style( { gutterWidth, itemWidth, namespace } ) {
 
 .${ namespace }__item:focus,
 .${ namespace }__item:focus > * {
-	outline: 1px dotted var(--amp-settings-color-brand);
-	outline-offset: -2px;
+	outline: none;
 }
 
 .${ namespace }__nav {
