@@ -7,6 +7,8 @@
 
 namespace AmpProject\AmpWP\Component;
 
+use DOMElement;
+
 /**
  * Interface HasCaption
  *
@@ -16,9 +18,9 @@ namespace AmpProject\AmpWP\Component;
 interface HasCaption {
 
 	/**
-	 * Gets the caption.
+	 * Gets the caption node.
 	 *
-	 * @return string The caption text.
+	 * @return DOMElement
 	 */
-	public function get_caption();
+	public function get_caption_element();
 }

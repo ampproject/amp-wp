@@ -349,7 +349,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	public function test_prevent_sanitize_in_customizer_preview() {
 		global $wp_customize;
 
-		require ABSPATH . 'wp-includes/class-wp-customize-manager.php';
+		require_once ABSPATH . 'wp-includes/class-wp-customize-manager.php';
 		$wp_customize = new \WP_Customize_Manager();
 
 		$xpath_selectors = [ '//p[ @id = "foo" ]' ];

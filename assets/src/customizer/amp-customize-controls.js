@@ -4,6 +4,7 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	'use strict';
 
 	const component = {
+		nonAmpCustomizerLink: null,
 		data: {
 			queryVar: '',
 			l10n: {
@@ -29,6 +30,7 @@ window.ampCustomizeControls = ( function( api, $ ) {
 		component.extendRootDescription();
 
 		$.ajaxPrefilter( component.injectAmpIntoAjaxRequests );
+		api.bind( 'ready', component.updateNonAmpCustomizeLink );
 		api.bind( 'ready', component.forceAmpPreviewUrl );
 		api.bind( 'ready', component.addOptionSettingNotices );
 		api.bind( 'ready', component.addNavMenuPanelNotice );
@@ -40,6 +42,28 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	component.updatePreviewNotice = function updatePreviewNotice() {
 		const previewNotice = $( '#customize-info .preview-notice' );
 		previewNotice.html( component.data.l10n.ampVersionNotice ); // Contents have been sanitized with wp_kses_post().
+		component.nonAmpCustomizerLink = previewNotice.find( 'a[href]' )[ 0 ];
+	};
+
+	/**
+	 * Make sure the non-AMP Customizer link keeps referencing to the currently-previewed URL.
+	 */
+	component.updateNonAmpCustomizeLink = function updateNonAmpCustomizeLink() {
+		if ( ! ( component.nonAmpCustomizerLink instanceof HTMLAnchorElement ) ) {
+			return;
+		}
+
+		const update = () => {
+			const previewUrl = new URL( api.previewer.previewUrl() );
+			previewUrl.searchParams.delete( component.data.queryVar );
+
+			const customizeUrl = new URL( component.nonAmpCustomizerLink.href );
+			customizeUrl.searchParams.set( 'url', previewUrl );
+			component.nonAmpCustomizerLink.href = customizeUrl.href;
+		};
+
+		update();
+		api.previewer.previewUrl.bind( update );
 	};
 
 	/**

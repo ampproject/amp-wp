@@ -1820,9 +1820,13 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
 
-		$partial = '<img src="test.png"><script data-head>document.write(\'Illegal\');</script>';
+		$partial = '<img src="test.png" style="border:solid 1px red;"><script data-head>document.write(\'Illegal\');</script><style>img { background:blue }</style>';
 		$output  = AMP_Theme_Support::filter_customize_partial_render( $partial );
 		$this->assertStringContains( '<amp-img src="test.png"', $output );
+		$this->assertStringContains( '<style amp-custom-partial="">', $output );
+		$this->assertStringContains( 'amp-img{background:blue}', $output );
+		$this->assertStringContains( ':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-b123f72{border:solid 1px red}', $output );
+		$this->assertStringEndsWith( '/*# sourceURL=amp-custom-partial.css */</style>', $output );
 		$this->assertStringNotContains( '<script', $output );
 		$this->assertStringNotContains( '<html', $output );
 	}

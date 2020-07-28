@@ -10,34 +10,36 @@ namespace AmpProject;
 interface Tag
 {
 
-    const A        = 'a';
-    const AREA     = 'area';
-    const BASE     = 'base';
-    const BASEFONT = 'basefont';
-    const BGSOUND  = 'bgsound';
-    const BODY     = 'body';
-    const BR       = 'br';
-    const COL      = 'col';
-    const EMBED    = 'embed';
-    const FORM     = 'form';
-    const FRAME    = 'frame';
-    const HEAD     = 'head';
-    const HR       = 'hr';
-    const HTML     = 'html';
-    const IMG      = 'img';
-    const INPUT    = 'input';
-    const KEYGEN   = 'keygen';
-    const LINK     = 'link';
-    const META     = 'meta';
-    const NOSCRIPT = 'noscript';
-    const PARAM    = 'param';
-    const SCRIPT   = 'script';
-    const SOURCE   = 'source';
-    const STYLE    = 'style';
-    const TEMPLATE = 'template';
-    const TITLE    = 'title';
-    const TRACK    = 'track';
-    const WBR      = 'wbr';
+    const A          = 'a';
+    const AREA       = 'area';
+    const BASE       = 'base';
+    const BASEFONT   = 'basefont';
+    const BGSOUND    = 'bgsound';
+    const BODY       = 'body';
+    const BR         = 'br';
+    const COL        = 'col';
+    const EMBED      = 'embed';
+    const FIGCAPTION = 'figcaption';
+    const FIGURE     = 'figure';
+    const FORM       = 'form';
+    const FRAME      = 'frame';
+    const HEAD       = 'head';
+    const HR         = 'hr';
+    const HTML       = 'html';
+    const IMG        = 'img';
+    const INPUT      = 'input';
+    const KEYGEN     = 'keygen';
+    const LINK       = 'link';
+    const META       = 'meta';
+    const NOSCRIPT   = 'noscript';
+    const PARAM      = 'param';
+    const SCRIPT     = 'script';
+    const SOURCE     = 'source';
+    const STYLE      = 'style';
+    const TEMPLATE   = 'template';
+    const TITLE      = 'title';
+    const TRACK      = 'track';
+    const WBR        = 'wbr';
 
     /**
      * HTML elements that are self-closing.
