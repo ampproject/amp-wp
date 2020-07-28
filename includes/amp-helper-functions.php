@@ -97,7 +97,7 @@ function amp_init() {
 	$amp_service_worker->init();
 
 	add_filter( 'allowed_redirect_hosts', [ 'AMP_HTTP', 'filter_allowed_redirect_hosts' ] );
-	add_filter( 'wp_redirect', array( 'AMP_HTTP', 'add_purged_query_vars' ) );
+	add_filter( 'wp_redirect', [ 'AMP_HTTP', 'add_purged_query_vars' ] );
 	AMP_HTTP::purge_amp_query_vars();
 	AMP_HTTP::send_cors_headers();
 	AMP_HTTP::handle_xhr_request();
@@ -1779,7 +1779,6 @@ function amp_wp_kses_mustache( $markup ) {
 	return wp_kses( $markup, array_fill_keys( $amp_mustache_allowed_html_tags, [] ) );
 }
 
-
 /**
  * Mark the beginning of the content that will be displayed inside the app shell.
  *
@@ -1815,6 +1814,7 @@ function amp_start_app_shell_content() {
 		ob_start();
 	}
 }
+
 /**
  * Mark the end of the content that will be displayed inside the app shell.
  *
