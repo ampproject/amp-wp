@@ -1297,7 +1297,6 @@ final class Document extends DOMDocument
 
         if (null === $placeholders) {
             $placeholders = [];
-            $salt         = $this->rand();
 
             // Note: The order of these tokens is important, as it determines the order of the replacements.
             $tokens = [
@@ -1311,7 +1310,7 @@ final class Document extends DOMDocument
             ];
 
             foreach ($tokens as $token) {
-                $placeholders[$token] = '_amp_mustache_' . md5($salt . $token);
+                $placeholders[$token] = '_amp_mustache_' . md5(uniqid($token));
             }
         }
 
