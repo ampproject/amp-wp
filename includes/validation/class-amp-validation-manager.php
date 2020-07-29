@@ -950,7 +950,7 @@ class AMP_Validation_Manager {
 			 * In that case, this will block serving AMP.
 			 * This could also apply if this is in 'Standard' mode and the user has rejected a validation error.
 			 */
-			esc_html_e( 'For AMP to served you will have to remove the invalid markup, or allow the plugin to remove it.', 'amp' );
+			esc_html_e( 'In order for AMP to be served you will have to remove the invalid markup, or allow the plugin to remove it.', 'amp' );
 		}
 
 		echo sprintf(
