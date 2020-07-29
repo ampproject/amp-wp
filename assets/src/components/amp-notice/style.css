@@ -29,7 +29,7 @@
 }
 
 .amp-notice--info svg {
-	color: #285be7;
+	color: var(--amp-settings-color-brand);
 }
 
 .amp-notice--warning {
