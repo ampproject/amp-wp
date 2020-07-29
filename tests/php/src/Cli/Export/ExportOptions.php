@@ -18,6 +18,7 @@ final class ExportOptions implements ExportStep {
 	 */
 	const EXCLUDED_OPTIONS = [
 		'/^(_site)?_transient_.*$/',
+		'/^admin_email_lifespan$/',
 		'/^amp-options$/',
 		'/^amp_css_transient_monitor_time_series$/',
 		'/^_bp_.*$/',

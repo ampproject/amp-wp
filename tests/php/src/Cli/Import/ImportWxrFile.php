@@ -39,10 +39,9 @@ final class ImportWxrFile implements ImportStep {
 	 *             Returns -1 for failure.
 	 */
 	public function process() {
-
-		$importer = new ReferenceSiteImporter();
-		//$importer->processed_posts = $this->processed_posts;
+		$importer    = new ReferenceSiteImporter();
 		$import_data = $importer->parse( $this->wxr_file );
+
 		if ( is_wp_error( $import_data ) ) {
 			throw new RuntimeException( $import_data );
 		}
@@ -126,7 +125,7 @@ final class ImportWxrFile implements ImportStep {
 		$this->add_wxr_filters();
 		ob_start();
 		$importer->import( $this->wxr_file );
-		$output = ob_get_clean();
+		ob_clean();
 		$this->remove_wxr_filters();
 
 		return count( $importer->processed_posts );

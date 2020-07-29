@@ -11,6 +11,7 @@ use AmpProject\AmpWP\Tests\Cli\Export\ExportActivePlugins;
 use AmpProject\AmpWP\Tests\Cli\Export\ExportActiveThemes;
 use AmpProject\AmpWP\Tests\Cli\Export\ExportOptions;
 use AmpProject\AmpWP\Tests\Cli\Export\ExportResult;
+use AmpProject\AmpWP\Tests\Cli\Export\ExportWxrFile;
 use Exception;
 use WP_CLI;
 use WP_CLI_Command;
@@ -27,6 +28,7 @@ final class ReferenceSiteExportCommand extends WP_CLI_Command {
 		ExportActiveThemes::class,
 		ExportActivePlugins::class,
 		ExportOptions::class,
+		ExportWxrFile::class,
 	];
 
 	/**
@@ -80,7 +82,7 @@ final class ReferenceSiteExportCommand extends WP_CLI_Command {
 	 * @param string $site_definition_file Site definition file to export into.
 	 */
 	private function export_site( $site_definition_file ) {
-		$export_result = new ExportResult();
+		$export_result = new ExportResult( $site_definition_file );
 
 		foreach ( self::EXPORT_STEPS as $export_step_class ) {
 			/** @var ExportStep $export_step */

@@ -20,6 +20,30 @@ final class ExportResult {
 	private $data = [];
 
 	/**
+	 * Target path of the site definition file.
+	 *
+	 * @var string
+	 */
+	private $target_path;
+
+	/**
+	 * Instantiate a ExportResult object.
+	 *
+	 * @param string $target_path Target path of the site definition file.
+	 */
+	public function __construct( $target_path ) {
+		$this->target_path = $target_path;
+	}
+
+	/**
+	 * Get the target path of the site definition file.
+	 *
+	 * @return string Target path of the site definition file.
+	 */
+	public function get_target_path(  ) {
+		return $this->target_path;
+	}
+	/**
 	 * Add a step to the export result.
 	 *
 	 * @param string $type    Type of the step to add.
@@ -31,7 +55,7 @@ final class ExportResult {
 		foreach ( $content as $key => $value ) {
 			$step->$key = $value;
 		}
-		$this->data['steps'][] = $step;
+		$this->data['import-steps'][] = $step;
 	}
 
 	/**
@@ -40,12 +64,25 @@ final class ExportResult {
 	 * @return string JSON representation of the export result.
 	 */
 	public function to_json() {
-		$json = json_encode( $this->data );
+		$json = json_encode(
+			array_merge( $this->get_defaults(), $this->data ),
+			JSON_PRETTY_PRINT
+		);
 
 		if ( JSON_ERROR_NONE !== json_last_error() ) {
 			WP_CLI::error( 'Failed to convert export result into JSON: ' . json_last_error_msg() );
 		}
 
 		return false === $json ? '{}' : $json;
+	}
+
+	private function get_defaults() {
+		return [
+			'name'         => get_option( 'blogname', 'Unnamed WordPress Site' ),
+			'version'      => '1.0',
+			'description'  => get_option( 'blogdescription', 'Just another WordPress site' ),
+			'attributions' => [],
+			'import-steps' => [],
+		];
 	}
 }
