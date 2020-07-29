@@ -23,8 +23,7 @@ describe( 'Mobile redirect settings', () => {
 		await expect( page ).toMatchElement( `${ toggleSelector }:checked` );
 	} );
 
-	// eslint-disable-next-line jest/no-disabled-tests
-	it.skip( 'persists the mobile redirect setting off', async () => {
+	it( 'persists the mobile redirect setting off', async () => {
 		await completeWizard( { mode: 'reader', mobileRedirect: false } );
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
