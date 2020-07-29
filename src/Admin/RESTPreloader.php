@@ -14,7 +14,7 @@ use AmpProject\AmpWP\Infrastructure\Service;
 use WP_Screen;
 
 /**
- * Preloads REST responses for client-side applications to prevent having to call fetch on pageload.
+ * Preloads REST responses for client-side applications to prevent having to call fetch on page load.
  *
  * @package AmpProject\AmpWP
  */
