@@ -2087,7 +2087,7 @@ class AMP_Validated_URL_Post_Type {
 							</strong>
 							<?php
 							esc_html_e(
-								'Review each instance of invalid markup and determine whether the action of removing (or keeping) is approved. You can change the status and click preview to see what impact the invalid markup has on the page. Invalid markup that is not approved is markup which you may not have seen yet or which you want to fix directly in underlying code.',
+								'For each detected invalid markup, determine whether it can be safely removed or it needs to be kept. You can change the Markup Status (Removed or Kept) and click the Preview Changes button to see its impact on the page. Once the proper action has been taken (Remove or Keep), you can toggle the checkbox the instance as Reviewed.',
 								'amp'
 							);
 							echo '<br><br>';
@@ -2108,9 +2108,9 @@ class AMP_Validated_URL_Post_Type {
 							?>
 						</strong>
 						<?php if ( $is_amp_enabled && count( array_filter( $counts ) ) > 0 ) : ?>
-							<?php esc_html_e( 'AMP is enabled because no invalid markup is kept.', 'amp' ); ?>
+							<?php esc_html_e( 'AMP is enabled because no invalid markup has been kept.', 'amp' ); ?>
 						<?php elseif ( ! $is_amp_enabled ) : ?>
-							<?php esc_html_e( 'AMP is disabled because there is invalid markup kept. To unblock AMP from being served, either mark the invalid markup as removed or fix the code that adds the invalid markup.', 'amp' ); ?>
+							<?php esc_html_e( 'AMP is disabled because some invalid markup has been kept. To enable AMP to be served, either mark the invalid markup as Removed or provide an AMP compatible fix that eliminates the invalid markup.', 'amp' ); ?>
 						<?php endif; ?>
 					</div>
 
