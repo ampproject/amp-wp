@@ -48,6 +48,7 @@ class RESTPreloaderTest extends WP_UnitTestCase {
 	public function test_adding_preloaded_data() {
 		global $wp_scripts;
 
+		set_current_screen( 'index.php' );
 		$this->instance->add_preloaded_path( '/wp/v2/posts' );
 		do_action( 'admin_enqueue_scripts' );
 
