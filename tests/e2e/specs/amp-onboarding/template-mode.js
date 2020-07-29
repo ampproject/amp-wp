@@ -10,7 +10,6 @@ import {
 	testNextButton,
 	testPreviousButton,
 	cleanUpSettings,
-	moveToReaderThemesScreen,
 } from '../../utils/onboarding-wizard-utils';
 import { installTheme } from '../../utils/install-theme';
 import { activateTheme } from '../../utils/activate-theme';
