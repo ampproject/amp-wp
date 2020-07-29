@@ -29,8 +29,9 @@ export const ReaderThemes = createContext();
  * @param {string} props.readerThemesEndpoint REST endpoint to fetch reader themes.
  * @param {string} props.updatesNonce Nonce for the AJAX request to install a theme.
  * @param {boolean} props.hasErrorBoundary Whether the component is wrapped in an error boundary.
+ * @param {boolean} props.hideCurrentlyActiveTheme Whether the currently active theme should be hidden in the UI.
  */
-export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme, readerThemesEndpoint, updatesNonce, hasErrorBoundary = false } ) {
+export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme, hideCurrentlyActiveTheme = false, readerThemesEndpoint, updatesNonce, hasErrorBoundary = false } ) {
 	const { setAsyncError } = useAsyncError();
 	const { error, setError } = useContext( ErrorContext );
 
@@ -166,6 +167,20 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 		} )();
 	}, [ error, hasErrorBoundary, fetchingThemes, readerThemesEndpoint, setAsyncError, setError, themes, themeSupport ] );
 
+	const { filteredThemes } = useMemo( () => {
+		let newFilteredThemes;
+
+		if ( hideCurrentlyActiveTheme ) {
+			newFilteredThemes = ( themes || [] ).filter( ( theme ) => {
+				return 'active' !== theme.availability;
+			} );
+		} else {
+			newFilteredThemes = themes;
+		}
+
+		return { filteredThemes: newFilteredThemes };
+	}, [ hideCurrentlyActiveTheme, themes ] );
+
 	return (
 		<ReaderThemes.Provider
 			value={
@@ -175,8 +190,8 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 					downloadingTheme,
 					downloadingThemeError,
 					fetchingThemes,
-					themes,
-					selectedTheme,
+					themes: filteredThemes,
+					selectedTheme: selectedTheme || {},
 				}
 			}
 		>
@@ -191,6 +206,7 @@ ReaderThemesContextProvider.propTypes = {
 		name: PropTypes.string.isRequired,
 	} ).isRequired,
 	hasErrorBoundary: PropTypes.bool,
+	hideCurrentlyActiveTheme: PropTypes.bool,
 	readerThemesEndpoint: PropTypes.string.isRequired,
 	updatesNonce: PropTypes.string.isRequired,
 	wpAjaxUrl: PropTypes.string.isRequired,

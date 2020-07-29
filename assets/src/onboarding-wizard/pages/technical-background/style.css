@@ -18,6 +18,7 @@
 }
 
 .technical-background-option {
+	align-items: flex-start;
 	display: flex;
 	flex-wrap: wrap;
 
@@ -32,8 +33,9 @@
 
 .technical-background-option svg {
 	flex-shrink: 0;
+	height: auto;
 	margin-bottom: 1.5rem;
-	width: 80px;
+	width: 66px;
 }
 
 .technical-background-option__description {
@@ -41,7 +43,7 @@
 }
 
 .technical-background-option__description p {
-	font-size: 13px;
+	font-size: 14px;
 }
 
 .technical-background-option__description h2 {

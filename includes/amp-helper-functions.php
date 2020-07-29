@@ -176,25 +176,32 @@ function amp_init() {
 	 * by Preview component located in <assets/src/setup/pages/save/index.js>.
 	 */
 	add_action(
-		'wp_print_footer_scripts',
+		'wp_print_scripts',
 		function() {
 			if ( ! amp_is_dev_mode() || ! is_admin_bar_showing() ) {
 				return;
 			}
 			?>
 			<script data-ampdevmode>
-				document.addEventListener( 'DOMContentLoaded', function() {
+				( () => {
 					if ( 'amp-wizard-completion-preview' !== window.name ) {
 						return;
 					}
 
-					const adminBar = document.getElementById( 'wpadminbar' );
-					if ( adminBar ) {
-						document.body.classList.remove( 'admin-bar' );
-						document.documentElement.style.cssText += '; margin-top: 0 !important';
-						adminBar.remove();
-					}
-				});
+					/** @type {HTMLStyleElement} */
+					const style = document.createElement( 'style' );
+					style.setAttribute( 'type', 'text/css' );
+					style.appendChild( document.createTextNode( 'html { margin-top: 0 !important; } #wpadminbar { display: none !important; }' ) );
+					document.head.appendChild( style );
+
+					document.addEventListener( 'DOMContentLoaded', function() {
+						const adminBar = document.getElementById( 'wpadminbar' );
+						if ( adminBar ) {
+							document.body.classList.remove( 'admin-bar' );
+							adminBar.remove();
+						}
+					});
+				} )();
 			</script>
 			<?php
 		}
@@ -1659,7 +1666,10 @@ function amp_get_schemaorg_metadata() {
 
 	$publisher_logo = amp_get_publisher_logo();
 	if ( $publisher_logo ) {
-		$metadata['publisher']['logo'] = $publisher_logo;
+		$metadata['publisher']['logo'] = [
+			'@type' => 'ImageObject',
+			'url'   => $publisher_logo,
+		];
 	}
 
 	$queried_object = get_queried_object();
