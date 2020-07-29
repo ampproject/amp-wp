@@ -1,16 +1,16 @@
 <?php
 /**
- * Step interface.
+ * ImportStep interface.
  *
  * @package AmpProject\AmpWP
  */
 
 namespace AmpProject\AmpWP\Tests\Cli;
 
-interface Step {
+interface ImportStep {
 
 	/**
-	 * Process the step.
+	 * Process the import step.
 	 *
 	 * @return int Number of items that were successfully processed.
 	 *             Returns -1 for failure.

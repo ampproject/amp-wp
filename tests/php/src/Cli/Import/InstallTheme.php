@@ -1,28 +1,28 @@
 <?php
 /**
- * Reference site import WXR file step.
+ * Reference site install theme (without activating) step.
  *
  * @package AmpProject\AmpWP
  */
 
-namespace AmpProject\AmpWP\Tests\Cli\Step;
+namespace AmpProject\AmpWP\Tests\Cli\Import;
 
-use AmpProject\AmpWP\Tests\Cli\Step;
+use AmpProject\AmpWP\Tests\Cli\ImportStep;
 use WP_CLI;
 
-final class ActivateTheme implements Step {
+final class InstallTheme implements ImportStep {
 
 	/**
-	 * Theme slug to activate.
+	 * Theme slug to install.
 	 *
 	 * @var string
 	 */
 	private $theme;
 
 	/**
-	 * ActivateTheme constructor.
+	 * InstallTheme constructor.
 	 *
-	 * @param string $theme Theme slug to activate.
+	 * @param string $theme Theme slug to install.
 	 */
 	public function __construct( $theme ) {
 		$this->theme = $theme;
@@ -37,10 +37,12 @@ final class ActivateTheme implements Step {
 	public function process() {
 		WP_CLI::log(
 			WP_CLI::colorize(
-				"Installing and activating theme %G'{$this->theme}'%n..."
+				"Installing theme %G'{$this->theme}'%n..."
 			)
 		);
 
-		WP_CLI::runcommand( "theme install {$this->theme} --activate" );
+		WP_CLI::runcommand( "theme install {$this->theme}" );
+
+		return 1;
 	}
 }

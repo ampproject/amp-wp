@@ -5,13 +5,13 @@
  * @package AmpProject\AmpWP
  */
 
-namespace AmpProject\AmpWP\Tests\Cli\Step;
+namespace AmpProject\AmpWP\Tests\Cli\Import;
 
 use AmpProject\AmpWP\Tests\Cli\ReferenceSiteImporter;
-use AmpProject\AmpWP\Tests\Cli\Step;
+use AmpProject\AmpWP\Tests\Cli\ImportStep;
 use WP_CLI;
 
-final class ImportOptions implements Step {
+final class ImportOptions implements ImportStep {
 
 	/**
 	 * Associative array of options to process.
@@ -118,7 +118,6 @@ final class ImportOptions implements Step {
 	 */
 	private function insert_logo( $image_url = '' ) {
 		$attachment_id = $this->download_image( $image_url );
-		var_dump( $attachment_id );
 		if ( $attachment_id ) {
 			set_theme_mod( 'custom_logo', $attachment_id );
 		}

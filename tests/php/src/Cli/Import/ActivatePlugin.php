@@ -1,16 +1,16 @@
 <?php
 /**
- * Reference site import WXR file step.
+ * Reference site activate plugins step.
  *
  * @package AmpProject\AmpWP
  */
 
-namespace AmpProject\AmpWP\Tests\Cli\Step;
+namespace AmpProject\AmpWP\Tests\Cli\Import;
 
-use AmpProject\AmpWP\Tests\Cli\Step;
+use AmpProject\AmpWP\Tests\Cli\ImportStep;
 use WP_CLI;
 
-final class ActivatePlugin implements Step {
+final class ActivatePlugin implements ImportStep {
 
 	/**
 	 * Plugin slug to activate.
@@ -42,5 +42,7 @@ final class ActivatePlugin implements Step {
 		);
 
 		WP_CLI::runcommand( "plugin install {$this->plugin} --activate" );
+
+		return 1;
 	}
 }

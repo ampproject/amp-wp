@@ -5,16 +5,16 @@
  * @package AmpProject\AmpWP
  */
 
-namespace AmpProject\AmpWP\Tests\Cli\Step;
+namespace AmpProject\AmpWP\Tests\Cli\Import;
 
 use AmpProject\AmpWP\Tests\Cli\ReferenceSiteImporter;
-use AmpProject\AmpWP\Tests\Cli\Step;
+use AmpProject\AmpWP\Tests\Cli\ImportStep;
 use RuntimeException;
 use stdClass;
 use WP_CLI;
 use WP_User;
 
-final class ImportWxrFile implements Step {
+final class ImportWxrFile implements ImportStep {
 
 	/**
 	 * File path to the WXR file to import.
@@ -129,7 +129,7 @@ final class ImportWxrFile implements Step {
 		$output = ob_get_clean();
 		$this->remove_wxr_filters();
 
-		return $importer->processed_posts;
+		return count( $importer->processed_posts );
 	}
 
 	/**

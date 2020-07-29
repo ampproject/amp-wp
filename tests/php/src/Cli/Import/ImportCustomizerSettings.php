@@ -5,13 +5,13 @@
  * @package AmpProject\AmpWP
  */
 
-namespace AmpProject\AmpWP\Tests\Cli\Step;
+namespace AmpProject\AmpWP\Tests\Cli\Import;
 
 use AmpProject\AmpWP\Tests\Cli\ReferenceSiteImporter;
-use AmpProject\AmpWP\Tests\Cli\Step;
+use AmpProject\AmpWP\Tests\Cli\ImportStep;
 use WP_CLI;
 
-final class ImportCustomizerSettings implements Step {
+final class ImportCustomizerSettings implements ImportStep {
 
 	/**
 	 * Associative array of Customizer settings.
@@ -59,7 +59,7 @@ final class ImportCustomizerSettings implements Step {
 	 * @param  array $settings Astra Customizer setting array.
 	 * @return void
 	 */
-	public static function import_astra_settings( $settings = array() ) {
+	public static function import_astra_settings( $settings = [] ) {
 		WP_CLI::log(
 			WP_CLI::colorize( "Sideloading images in option %G'astra-settings'%n..." )
 		);

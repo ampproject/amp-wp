@@ -16,4 +16,11 @@ use WP_CLI\Dispatcher\CommandNamespace;
  */
 final class ReferenceSiteCommandNamespace extends CommandNamespace {
 
+	/**
+	 * Root folder to use for the reference site definition files.
+	 *
+	 * @var string
+	 */
+	const REFERENCE_SITES_ROOT = AMP__DIR__ . '/tests/reference-sites/';
+
 }

@@ -5,12 +5,12 @@
  * @package AmpProject\AmpWP
  */
 
-namespace AmpProject\AmpWP\Tests\Cli\Step;
+namespace AmpProject\AmpWP\Tests\Cli\Import;
 
-use AmpProject\AmpWP\Tests\Cli\Step;
+use AmpProject\AmpWP\Tests\Cli\ImportStep;
 use WP_CLI;
 
-final class ImportWidgets implements Step {
+final class ImportWidgets implements ImportStep {
 
 	/**
 	 * Associative array of widgets settings to import.

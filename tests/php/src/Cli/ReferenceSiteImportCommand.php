@@ -15,10 +15,6 @@ use WP_CLI\Utils;
 
 final class ReferenceSiteImportCommand extends WP_CLI_Command {
 
-	const REFERENCE_SITES_ROOT = AMP__DIR__ . '/tests/reference-sites/';
-
-	public $processed_posts = [];
-
 	/**
 	 * Imports content from a reference site definition.
 	 *
@@ -51,7 +47,7 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 	 */
 	public function __invoke( $args, $assoc_args ) {
 		try {
-			$this->assert_importer_plugin_is_available();
+			( new WpImporterCompat() )->prepare_import();
 		} catch ( Exception $exception ) {
 			WP_CLI::error( 'Unable to import reference site: ' . $exception->getMessage() );
 		}
@@ -60,12 +56,12 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 		$empty_content = Utils\get_flag_value( $assoc_args, 'empty-content', false );
 		$empty_uploads = Utils\get_flag_value( $assoc_args, 'empty-uploads', false );
 
-		if ( substr_compare( $site_definition_file, '.json', -5 ) !== 0 ) {
+		if ( 0 !== substr_compare( $site_definition_file, '.json', -5 ) ) {
 			$site_definition_file .= '.json';
 		}
 
 		if ( ! path_is_absolute( $site_definition_file ) ) {
-			$site_definition_file = self::REFERENCE_SITES_ROOT . $site_definition_file;
+			$site_definition_file = ReferenceSiteCommandNamespace::REFERENCE_SITES_ROOT . $site_definition_file;
 		}
 
 		if ( ! file_exists( $site_definition_file )
@@ -134,61 +130,30 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 		foreach ( $site_definition->get_steps() as $step ) {
 			switch ( $step['type'] ) {
 				case 'activate_theme':
-					( new Step\ActivateTheme( $step['theme'] ) )->process();
+					( new Import\ActivateTheme( $step['theme'] ) )->process();
 					break;
 				case 'activate_plugin':
-					( new Step\ActivatePlugin( $step['plugin'] ) )->process();
+					( new Import\ActivatePlugin( $step['plugin'] ) )->process();
 					break;
 				case 'import_wxr_file':
 					$wxr_path = $step['filename'];
 
 					if ( ! path_is_absolute( $wxr_path ) ) {
-						$wxr_path = self::REFERENCE_SITES_ROOT . $wxr_path;
+						$wxr_path = ReferenceSiteCommandNamespace::REFERENCE_SITES_ROOT . $wxr_path;
 					}
-					( new Step\ImportWxrFile( $wxr_path ) )->process();
+					( new Import\ImportWxrFile( $wxr_path ) )->process();
 					break;
 				case 'import_options':
-					( new Step\ImportOptions( $step['options'] ) )->process();
+					( new Import\ImportOptions( $step['options'] ) )->process();
 					break;
 				case 'import_widgets':
-					( new Step\ImportWidgets( $step['widgets'] ) )->process();
+					( new Import\ImportWidgets( $step['widgets'] ) )->process();
 					break;
 				case 'import_customizer_settings':
-					( new Step\ImportCustomizerSettings( $step['settings'] ) )->process();
+					( new Import\ImportCustomizerSettings( $step['settings'] ) )->process();
 					break;
 			}
 		}
-	}
-
-	/**
-	 * Determines whether the requested importer is available.
-	 */
-	private function assert_importer_plugin_is_available() {
-		if ( class_exists( 'WP_Import' ) ) {
-			return true;
-		}
-
-		require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		$plugins            = get_plugins();
-		$wordpress_importer = 'wordpress-importer/wordpress-importer.php';
-		if ( ! array_key_exists( $wordpress_importer, $plugins ) ) {
-			throw new RuntimeException( "WordPress Importer needs to be installed. Try 'wp plugin install wordpress-importer'." );
-		}
-
-		if ( ! class_exists( 'WP_Importer' ) ) {
-			$class_wp_importer = ABSPATH . 'wp-admin/includes/class-wp-importer.php';
-			if ( file_exists( $class_wp_importer ) )
-				require $class_wp_importer;
-		}
-
-		$wordpress_importer_path = dirname( AMP__DIR__ ) . '/wordpress-importer';
-
-		require_once "{$wordpress_importer_path}/compat.php";
-		require_once "{$wordpress_importer_path}/parsers/class-wxr-parser.php";
-		require_once "{$wordpress_importer_path}/parsers/class-wxr-parser-simplexml.php";
-		require_once "{$wordpress_importer_path}/parsers/class-wxr-parser-xml.php";
-		require_once "{$wordpress_importer_path}/parsers/class-wxr-parser-regex.php";
-		require_once "{$wordpress_importer_path}/class-wp-import.php";
 	}
 
 	/**
