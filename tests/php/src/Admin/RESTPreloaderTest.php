@@ -1,17 +1,13 @@
 <?php
 /**
- * Tests for GoogleFonts class.
+ * Tests for RESTPreloader class.
  *
  * @package AmpProject\AmpWP\Tests
  */
 
 namespace AmpProject\AmpWP\Tests\Admin;
 
-use AmpProject\AmpWP\Admin\GoogleFonts;
 use AmpProject\AmpWP\Admin\RESTPreloader;
-use AmpProject\AmpWP\Infrastructure\Delayed;
-use AmpProject\AmpWP\Infrastructure\Registerable;
-use AmpProject\AmpWP\Infrastructure\Service;
 use WP_UnitTestCase;
 
 /**

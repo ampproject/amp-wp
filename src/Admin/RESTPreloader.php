@@ -10,7 +10,7 @@ namespace AmpProject\AmpWP\Admin;
 use AmpProject\AmpWP\Infrastructure\Service;
 
 /**
- * Preloads REST responses for client-side applications to prevent having to call fetch on pageload.
+ * Preloads REST responses for client-side applications to prevent having to call fetch on page load.
  *
  * @package AmpProject\AmpWP
  */
