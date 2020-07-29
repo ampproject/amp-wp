@@ -84,7 +84,7 @@ export async function moveToDoneScreen( { technical = true, mode, readerTheme = 
 		await page.waitForSelector( '.amp-setting-toggle input' );
 
 		const selector = '.amp-setting-toggle input:checked';
-		const checkedMobileRedirect = await page.$( selector );
+		const checkedMobileRedirect = await page.waitForSelector( selector );
 
 		if ( checkedMobileRedirect && false === mobileRedirect ) {
 			await expect( page ).toClick( selector );

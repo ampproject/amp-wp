@@ -19,6 +19,7 @@ import { Navigation } from '../navigation-context-provider';
 import './style.css';
 import { Options } from '../../../components/options-context-provider';
 import { User } from '../user-context-provider';
+import { READER } from '../../../common/constants';
 
 /**
  * Navigation component.
@@ -59,7 +60,7 @@ export function Nav( { closeLink, finishLink } ) {
 		<div className="onboarding-wizard-nav">
 			<div className="onboarding-wizard-nav__inner">
 				<div className="onboarding-wizard-nav__close">
-					{ ! isLastPage && (
+					{ ( ! isLastPage || READER === themeSupport ) && (
 						<Button isLink href={ closeLink }>
 							<svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
 								<mask id="close-icon" mask-type="alpha" maskUnits="userSpaceOnUse" x="3" y="3" width="19" height="19">
