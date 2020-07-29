@@ -46,7 +46,7 @@ class RESTPreloaderTest extends WP_UnitTestCase {
 	 * @covers RESTPreloader::preload_data
 	 */
 	public function test_adding_preloaded_data() {
-		global $wp_scripts, $wp_screen;
+		global $wp_scripts;
 
 		set_current_screen( 'index.php' );
 		$this->instance->add_preloaded_path( '/wp/v2/posts' );
@@ -59,6 +59,6 @@ class RESTPreloaderTest extends WP_UnitTestCase {
 			$result
 		);
 
-		$wp_screen = null;
+		set_current_screen( 'front' );
 	}
 }
