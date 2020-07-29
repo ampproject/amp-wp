@@ -7,6 +7,10 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { createContext, useState } from '@wordpress/element';
+/**
+ * Internal dependencies
+ */
+import { READER } from '../../../common/constants';
 
 export const Options = createContext();
 
@@ -20,7 +24,7 @@ export function OptionsContextProvider( { children } ) {
 	const [ updates, updateOptions ] = useState( {} );
 	const [ originalOptions, setOriginalOptions ] = useState( {
 		mobile_redirect: true,
-		theme_support: 'some-support',
+		theme_support: READER,
 	} );
 
 	return (

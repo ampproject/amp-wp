@@ -6,15 +6,14 @@
  */
 import { __ } from '@wordpress/i18n';
 import isShallowEqual from '@wordpress/is-shallow-equal';
+/**
+ * Internal dependencies
+ */
+import { READER, STANDARD, TRANSITIONAL } from '../../../common/constants';
 
 // Sections.
 export const COMPATIBILITY = 'compatibility';
 export const DETAILS = 'details';
-
-// Modes.
-export const READER = 'reader';
-export const STANDARD = 'standard';
-export const TRANSITIONAL = 'transitional';
 
 // Recommendation levels.
 export const MOST_RECOMMENDED = 'mostRecommended';
