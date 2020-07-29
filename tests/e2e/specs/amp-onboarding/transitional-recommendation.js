@@ -32,6 +32,9 @@ describe( 'Current active theme is reader theme and user is nontechnical', () =>
 	it( 'switches to transitional mode and shows a notice if the user chooses the active theme', async () => {
 		await moveToSummaryScreen( { technical: false, readerTheme: 'twentytwenty', mode: 'reader' } );
 
+		const stepperItemCount = await page.$$eval( '.amp-stepper__item', ( els ) => els.length );
+		expect( stepperItemCount ).toBe( 5 );
+
 		await expect( page ).toMatchElement( 'h2', { text: 'Transitional' } );
 		await expect( page ).toMatchElement( '.amp-notice--info', { text: /switched to Transitional/i } );
 	} );
