@@ -29,7 +29,7 @@ final class ExportResult {
 		$step = new stdClass();
 		$step->type = $type;
 		foreach ( $content as $key => $value ) {
-			$step->key = $value;
+			$step->$key = $value;
 		}
 		$this->data['steps'][] = $step;
 	}
