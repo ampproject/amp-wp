@@ -102,12 +102,16 @@ class AMP_HTTP {
 	 *
 	 * @since 1.0
 	 *
+	 * @deprecated Use the `ServerTiming` service or its associated actions instead.
+	 *
 	 * @param string $name        Name.
 	 * @param float  $duration    Duration. If negative, will be added to microtime( true ). Optional.
 	 * @param string $description Description. Optional.
 	 * @return bool Return value of send_header call. If WP_DEBUG is not enabled or admin user (who can manage_options) is not logged-in, this will always return false.
 	 */
 	public static function send_server_timing( $name, $duration = null, $description = null ) {
+		_deprecated_function( __METHOD__, '2.0.0', 'Use the AmpProject\AmpWp\Instrumentation\ServerTiming service or its associated actions instead.' );
+
 		if ( ! self::$server_timing ) {
 			return false;
 		}

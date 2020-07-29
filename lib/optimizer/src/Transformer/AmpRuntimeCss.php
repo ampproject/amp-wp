@@ -24,7 +24,6 @@ use Exception;
  * This is ported from the NodeJS optimizer while verifying against the Go version.
  *
  * NodeJS:
- *
  * @version 6f465eb24b05acf74d39541151c17b8d8d97450d
  * @link    https://github.com/ampproject/amp-toolbox/blob/6f465eb24b05acf74d39541151c17b8d8d97450d/packages/optimizer/lib/transformers/AmpBoilerplateTransformer.js
  *
@@ -158,7 +157,9 @@ final class AmpRuntimeCss implements Transformer
             $v0CssUrl = $this->appendRuntimeVersion(Amp::CACHE_HOST, $version) . '/' . self::V0_CSS;
         } else {
             $v0CssUrl = self::V0_CSS_URL;
-            $options  = [RuntimeVersion::OPTION_CANARY => $this->configuration->get(AmpRuntimeCssConfiguration::CANARY)];
+            $options  = [
+                RuntimeVersion::OPTION_CANARY => $this->configuration->get(AmpRuntimeCssConfiguration::CANARY)
+            ];
             $version  = (new RuntimeVersion($this->remoteRequest))->currentVersion($options);
         }
 

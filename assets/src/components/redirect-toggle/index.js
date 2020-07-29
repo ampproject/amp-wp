@@ -24,7 +24,7 @@ export function RedirectToggle( { direction = 'bottom' } ) {
 		<div className={ `selectable selectable--${ direction }` }>
 			<AMPSettingToggle
 				checked={ true === mobileRedirect }
-				title={ __( 'Redirect mobile visitors to AMP.', 'amp' ) }
+				title={ __( 'Redirect mobile visitors to AMP', 'amp' ) }
 				onChange={ () => {
 					updateOptions( { mobile_redirect: ! mobileRedirect } );
 				} }

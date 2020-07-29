@@ -4,7 +4,7 @@
  *
  * Adds an admin notice to the plugins screen after the plugin is activated.
  *
- * @since 1.6.0
+ * @since 2.0
  *
  * @package AMP
  */
@@ -20,7 +20,7 @@ use AmpProject\AmpWP\Option;
 /**
  * Class PluginActivationNotice
  *
- * @since 1.6.0
+ * @since 2.0
  */
 final class PluginActivationNotice implements Delayed, Service, Registerable {
 
@@ -51,7 +51,7 @@ final class PluginActivationNotice implements Delayed, Service, Registerable {
 	 * Renders a notice on the plugins screen after the plugin is activated. Persists until it is closed or setup has been completed.
 	 */
 	public function render_notice() {
-		if ( 'plugins' !== get_current_screen()->id && 'toplevel_page_' . AMP_Options_Manager::OPTION_NAME !== get_current_screen()->id ) {
+		if ( 'plugins' !== get_current_screen()->id ) {
 			return;
 		}
 
@@ -76,7 +76,12 @@ final class PluginActivationNotice implements Delayed, Service, Registerable {
 			<div>
 				<h2><?php esc_html_e( 'Welcome to AMP for WordPress', 'amp' ); ?></h2>
 				<p><?php esc_html_e( 'Bring the speed and features of the open source AMP project to your site, complete with the tools to support content authoring and website development.', 'amp' ); ?></p>
-				<p><a href="<?php menu_page_url( OnboardingWizardSubmenu::SCREEN_ID ); ?>"><?php esc_html_e( 'Configure the plugin', 'amp' ); ?></a></p>
+
+				<?php if ( amp_should_use_new_onboarding() ) : ?>
+					<p><a href="<?php menu_page_url( OnboardingWizardSubmenu::SCREEN_ID ); ?>"><?php esc_html_e( 'Configure the plugin', 'amp' ); ?></a></p>
+				<?php else : ?>
+					<p><a href="<?php menu_page_url( AMP_Options_Manager::OPTION_NAME ); ?>"><?php esc_html_e( 'Configure the plugin', 'amp' ); ?></a></p>
+				<?php endif; ?>
 			</div>
 		</div>
 

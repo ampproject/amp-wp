@@ -6,9 +6,9 @@
  */
 
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\QueryVars;
-use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
-use AmpProject\AmpWP\Tests\HandleValidation;
+use AmpProject\AmpWP\QueryVar;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
 
 /**
  * Class Test_AMP_Helper_Functions
@@ -851,13 +851,13 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertTrue( is_amp_available() );
 		$this->assertFalse( is_amp_endpoint() );
 
-		$this->go_to( add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_AVAILABLE, get_permalink( $post_id ) ) );
+		$this->go_to( add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_AVAILABLE, get_permalink( $post_id ) ) );
 		$this->assertFalse( is_amp_available() );
 		$this->assertFalse( is_amp_endpoint() );
 
 		// Now go AMP-first.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
-		$this->go_to( add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_AVAILABLE, get_permalink( $post_id ) ) );
+		$this->go_to( add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_AVAILABLE, get_permalink( $post_id ) ) );
 		$this->assertTrue( is_amp_available() );
 		$this->assertTrue( is_amp_endpoint() );
 	}
@@ -1504,7 +1504,10 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$expected_publisher = [
 			'@type' => $publisher_type,
 			'name'  => 'Foo',
-			'logo'  => amp_get_asset_url( 'images/amp-page-fallback-wordpress-publisher-logo.png' ),
+			'logo'  => [
+				'@type' => 'ImageObject',
+				'url'   => amp_get_asset_url( 'images/amp-page-fallback-wordpress-publisher-logo.png' ),
+			],
 		];
 
 		$user_id = self::factory()->user->create(
@@ -1538,14 +1541,13 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertArrayNotHasKey( '@type', $metadata );
 		$this->assertArrayHasKey( 'publisher', $metadata );
 		$this->assertEquals( $expected_publisher, $metadata['publisher'] );
-		$this->assertEquals( $metadata['publisher']['logo'], amp_get_publisher_logo() );
 
 		// Set site icon which now should get used instead of default for publisher logo.
 		update_option( 'site_icon', $site_icon_attachment_id );
 		$metadata = amp_get_schemaorg_metadata();
 		$this->assertEquals(
 			wp_get_attachment_image_url( $site_icon_attachment_id, 'full', false ),
-			$metadata['publisher']['logo']
+			$metadata['publisher']['logo']['url']
 		);
 		$this->assertEquals( wp_get_attachment_image_url( $site_icon_attachment_id, 'full', false ), amp_get_publisher_logo() );
 
@@ -1554,15 +1556,15 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$metadata = amp_get_schemaorg_metadata();
 		$this->assertEquals(
 			wp_get_attachment_image_url( $custom_logo_attachment_id, 'full', false ),
-			$metadata['publisher']['logo']
+			$metadata['publisher']['logo']['url']
 		);
 		$this->assertEquals( wp_get_attachment_image_url( $custom_logo_attachment_id, 'full', false ), amp_get_publisher_logo() );
 
 		// Test amp_site_icon_url filter overrides previous.
 		add_filter( 'amp_site_icon_url', [ __CLASS__, 'mock_site_icon' ] );
 		$metadata = amp_get_schemaorg_metadata();
-		$this->assertEquals( self::MOCK_SITE_ICON, $metadata['publisher']['logo'] );
-		$this->assertEquals( $metadata['publisher']['logo'], amp_get_publisher_logo() );
+		$this->assertEquals( self::MOCK_SITE_ICON, $metadata['publisher']['logo']['url'] );
+		$this->assertEquals( $metadata['publisher']['logo']['url'], amp_get_publisher_logo() );
 
 		// Clear out all customized icons.
 		remove_filter( 'amp_site_icon_url', [ __CLASS__, 'mock_site_icon' ] );
@@ -1580,7 +1582,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertEquals( get_the_title( $page_id ), $metadata['headline'] );
 		$this->assertArrayHasKey( 'datePublished', $metadata );
 		$this->assertArrayHasKey( 'dateModified', $metadata );
-		$this->assertEquals( $metadata['publisher']['logo'], amp_get_publisher_logo() );
+		$this->assertEquals( $metadata['publisher']['logo']['url'], amp_get_publisher_logo() );
 
 		// Test post.
 		$this->go_to( get_permalink( $post_id ) );
@@ -1599,7 +1601,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			],
 			$metadata['author']
 		);
-		$this->assertEquals( $metadata['publisher']['logo'], amp_get_publisher_logo() );
+		$this->assertEquals( $metadata['publisher']['logo']['url'], amp_get_publisher_logo() );
 
 		// Test author archive.
 		$this->go_to( get_author_posts_url( $user_id ) );
@@ -1634,7 +1636,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'did_amp_post_template_metadata', $metadata );
 		$this->assertArrayHasKey( 'did_amp_schemaorg_metadata', $metadata );
 		$this->assertEquals( 'George', $metadata['author']['name'] );
-		$this->assertEquals( $metadata['publisher']['logo'], amp_get_publisher_logo() );
+		$this->assertEquals( $metadata['publisher']['logo']['url'], amp_get_publisher_logo() );
 	}
 
 	/**

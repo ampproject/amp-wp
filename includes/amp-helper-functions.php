@@ -9,7 +9,7 @@ use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\AmpWpPluginFactory;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\QueryVars;
+use AmpProject\AmpWP\QueryVar;
 
 /**
  * Handle activation of plugin.
@@ -162,15 +162,10 @@ function amp_init() {
 	add_action(
 		'rest_api_init',
 		static function() {
-			if ( amp_should_use_new_onboarding() ) {
-				$reader_themes = new ReaderThemes();
+			$reader_themes = new ReaderThemes();
 
-				$reader_theme_controller = new AMP_Reader_Theme_REST_Controller( $reader_themes );
-				$reader_theme_controller->register_routes();
-
-				$options_controller = new AMP_Options_REST_Controller( $reader_themes );
-				$options_controller->register_routes();
-			}
+			$reader_theme_controller = new AMP_Reader_Theme_REST_Controller( $reader_themes );
+			$reader_theme_controller->register_routes();
 		}
 	);
 
@@ -181,25 +176,32 @@ function amp_init() {
 	 * by Preview component located in <assets/src/setup/pages/save/index.js>.
 	 */
 	add_action(
-		'wp_print_footer_scripts',
+		'wp_print_scripts',
 		function() {
 			if ( ! amp_is_dev_mode() || ! is_admin_bar_showing() ) {
 				return;
 			}
 			?>
 			<script data-ampdevmode>
-				document.addEventListener( 'DOMContentLoaded', function() {
+				( () => {
 					if ( 'amp-wizard-completion-preview' !== window.name ) {
 						return;
 					}
 
-					const adminBar = document.getElementById( 'wpadminbar' );
-					if ( adminBar ) {
-						document.body.classList.remove( 'admin-bar' );
-						document.documentElement.style.cssText += '; margin-top: 0 !important';
-						adminBar.remove();
-					}
-				});
+					/** @type {HTMLStyleElement} */
+					const style = document.createElement( 'style' );
+					style.setAttribute( 'type', 'text/css' );
+					style.appendChild( document.createTextNode( 'html { margin-top: 0 !important; } #wpadminbar { display: none !important; }' ) );
+					document.head.appendChild( style );
+
+					document.addEventListener( 'DOMContentLoaded', function() {
+						const adminBar = document.getElementById( 'wpadminbar' );
+						if ( adminBar ) {
+							document.body.classList.remove( 'admin-bar' );
+							adminBar.remove();
+						}
+					});
+				} )();
 			</script>
 			<?php
 		}
@@ -340,7 +342,7 @@ function amp_is_canonical() {
 /**
  * Determines whether the legacy AMP post templates are being used.
  *
- * @since 1.6
+ * @since 2.0
  * @return bool
  */
 function amp_is_legacy() {
@@ -363,7 +365,7 @@ function amp_add_frontend_actions() {
 /**
  * Determine whether AMP is available for the current URL.
  *
- * @since 1.6
+ * @since 2.0
  *
  * @return bool Whether there is an AMP version for the provided URL.
  * @global string $pagenow
@@ -392,7 +394,7 @@ function is_amp_available() {
 			'WP_Query',
 			'amp_skip_post()'
 		);
-		_doing_it_wrong( 'is_amp_available', esc_html( $message ), '1.6.0' );
+		_doing_it_wrong( 'is_amp_available', esc_html( $message ), '2.0.0' );
 		$warned = true;
 	};
 
@@ -459,7 +461,7 @@ function is_amp_available() {
 	if (
 		( ! amp_is_canonical() || AMP_Validation_Manager::has_cap() )
 		&&
-		( isset( $_GET[ QueryVars::NOAMP ] ) && QueryVars::NOAMP_AVAILABLE === $_GET[ QueryVars::NOAMP ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		( isset( $_GET[ QueryVar::NOAMP ] ) && QueryVar::NOAMP_AVAILABLE === $_GET[ QueryVar::NOAMP ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	) {
 		return false;
 	}
@@ -567,7 +569,7 @@ function amp_get_slug() {
 	 *
 	 * @param string $query_var The AMP query variable.
 	 */
-	return apply_filters( 'amp_query_var', defined( 'AMP_QUERY_VAR' ) ? AMP_QUERY_VAR : QueryVars::AMP );
+	return apply_filters( 'amp_query_var', defined( 'AMP_QUERY_VAR' ) ? AMP_QUERY_VAR : QueryVar::AMP );
 }
 
 /**
@@ -740,7 +742,7 @@ function amp_add_amphtml_link() {
 	}
 
 	if ( $amp_url ) {
-		$amp_url = remove_query_arg( QueryVars::NOAMP, $amp_url );
+		$amp_url = remove_query_arg( QueryVar::NOAMP, $amp_url );
 		printf( '<link rel="amphtml" href="%s">', esc_url( $amp_url ) );
 	}
 }
@@ -847,9 +849,9 @@ function amp_get_boilerplate_stylesheets() {
 /**
  * Add generator metadata.
  *
- * @since 6.0
+ * @since 0.6
  * @since 1.0 Add template mode.
- * @since 1.6 Add reader theme.
+ * @since 2.0 Add reader theme.
  */
 function amp_add_generator_metadata() {
 	$content = sprintf( 'AMP Plugin v%s', AMP__VERSION );
@@ -966,7 +968,7 @@ function amp_register_default_scripts( $wp_scripts ) {
 /**
  * Register default styles.
  *
- * @since 1.6
+ * @since 2.0
  *
  * @param WP_Styles $styles Styles.
  */
@@ -1283,7 +1285,6 @@ function amp_get_content_embed_handlers( $post = null ) {
 			'AMP_Instagram_Embed_Handler'    => [],
 			'AMP_Issuu_Embed_Handler'        => [],
 			'AMP_Meetup_Embed_Handler'       => [],
-			'AMP_Vine_Embed_Handler'         => [],
 			'AMP_Facebook_Embed_Handler'     => [],
 			'AMP_Pinterest_Embed_Handler'    => [],
 			'AMP_Playlist_Embed_Handler'     => [],
@@ -1292,7 +1293,6 @@ function amp_get_content_embed_handlers( $post = null ) {
 			'AMP_Tumblr_Embed_Handler'       => [],
 			'AMP_Gallery_Embed_Handler'      => [],
 			'AMP_Gfycat_Embed_Handler'       => [],
-			'AMP_Hulu_Embed_Handler'         => [],
 			'AMP_Imgur_Embed_Handler'        => [],
 			'AMP_Scribd_Embed_Handler'       => [],
 			'AMP_WordPress_TV_Embed_Handler' => [],
@@ -1666,7 +1666,10 @@ function amp_get_schemaorg_metadata() {
 
 	$publisher_logo = amp_get_publisher_logo();
 	if ( $publisher_logo ) {
-		$metadata['publisher']['logo'] = $publisher_logo;
+		$metadata['publisher']['logo'] = [
+			'@type' => 'ImageObject',
+			'url'   => $publisher_logo,
+		];
 	}
 
 	$queried_object = get_queried_object();
@@ -1781,7 +1784,7 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 		$href = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
 	}
 
-	$href = remove_query_arg( QueryVars::NOAMP, $href );
+	$href = remove_query_arg( QueryVar::NOAMP, $href );
 
 	$icon = $is_amp_endpoint ? Icon::logo() : Icon::link();
 	$attr = [

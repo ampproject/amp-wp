@@ -7,7 +7,7 @@
 
 use AmpProject\Amp;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\QueryVars;
+use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\ConfigurationArgument;
 use AmpProject\AmpWP\Transformer;
@@ -122,14 +122,6 @@ class AMP_Theme_Support {
 	];
 
 	/**
-	 * Start time when init was called.
-	 *
-	 * @since 1.0
-	 * @var float
-	 */
-	public static $init_start_time;
-
-	/**
 	 * Whether output buffering has started.
 	 *
 	 * @since 0.7
@@ -143,7 +135,22 @@ class AMP_Theme_Support {
 	 * @since 0.7
 	 */
 	public static function init() {
-		self::$init_start_time = microtime( true );
+		/**
+		 * Starts the server-timing measurement for the entire output buffer capture.
+		 *
+		 * @since 2.0
+		 * @internal
+		 *
+		 * @param string      $event_name        Name of the event to record.
+		 * @param string|null $event_description Optional. Description of the event
+		 *                                       to record. Defaults to null.
+		 * @param string[]    $properties        Optional. Additional properties to add
+		 *                                       to the logged record.
+		 * @param bool        $verbose_only      Optional. Whether to only show the
+		 *                                       event in verbose mode. Defaults to
+		 *                                       false.
+		 */
+		do_action( 'amp_server_timing_start', 'amp_output_buffer' );
 
 		// Ensure extra theme support for core themes is in place.
 		AMP_Core_Theme_Sanitizer::extend_theme_support();
@@ -168,7 +175,7 @@ class AMP_Theme_Support {
 	 * @return bool Support added via option.
 	 */
 	public static function is_support_added_via_option() {
-		_deprecated_function( __METHOD__, '1.6' );
+		_deprecated_function( __METHOD__, '2.0.0' );
 		return true;
 	}
 
@@ -185,7 +192,7 @@ class AMP_Theme_Support {
 	 * @codeCoverageIgnore
 	 */
 	public static function get_support_mode_added_via_option() {
-		_deprecated_function( __METHOD__, '1.6', 'AMP_Options_Manager::get_option' );
+		_deprecated_function( __METHOD__, '2.0.0', 'AMP_Options_Manager::get_option' );
 		$value = AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
 		if ( self::READER_MODE_SLUG === $value ) {
 			$value = null;
@@ -206,7 +213,7 @@ class AMP_Theme_Support {
 	 * @codeCoverageIgnore
 	 */
 	public static function get_support_mode_added_via_theme() {
-		_deprecated_function( __METHOD__, '1.6', 'current_theme_supports' );
+		_deprecated_function( __METHOD__, '2.0.0', 'current_theme_supports' );
 		$theme_support_args = self::get_theme_support_args();
 		if ( ! $theme_support_args ) {
 			return null;
@@ -227,7 +234,7 @@ class AMP_Theme_Support {
 	 * @codeCoverageIgnore
 	 */
 	public static function get_support_mode() {
-		_deprecated_function( __METHOD__, '1.6', 'AMP_Options_Manager::get_option' );
+		_deprecated_function( __METHOD__, '2.0.0', 'AMP_Options_Manager::get_option' );
 		return AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
 	}
 
@@ -242,7 +249,7 @@ class AMP_Theme_Support {
 	 * @codeCoverageIgnore
 	 */
 	public static function read_theme_support() {
-		_deprecated_function( __METHOD__, '1.6' );
+		_deprecated_function( __METHOD__, '2.0.0' );
 	}
 
 	/**
@@ -367,7 +374,7 @@ class AMP_Theme_Support {
 	 * Ensure that the current AMP location is correct.
 	 *
 	 * @since 1.0
-	 * @since 1.6 Removed $exit param.
+	 * @since 2.0 Removed $exit param.
 	 *
 	 * @return bool Whether redirection should have been done.
 	 */
@@ -429,7 +436,7 @@ class AMP_Theme_Support {
 	 * @since 0.7
 	 * @since 1.0 Added $exit param.
 	 * @since 1.0 Renamed from redirect_canonical_amp().
-	 * @since 1.6 Removed $exit param.
+	 * @since 2.0 Removed $exit param.
 	 *
 	 * @param int $status Status code (301 or 302).
 	 * @return bool Whether redirection should have be done.
@@ -773,8 +780,7 @@ class AMP_Theme_Support {
 	public static function get_supportable_templates() {
 		$templates = [
 			'is_singular' => [
-				'label'       => __( 'Singular', 'amp' ),
-				'description' => __( 'Required for the above content types.', 'amp' ),
+				'label' => __( 'Singular', 'amp' ),
 			],
 		];
 		if ( 'page' === get_option( 'show_on_front' ) ) {
@@ -903,14 +909,14 @@ class AMP_Theme_Support {
 			_doing_it_wrong(
 				'add_filter',
 				esc_html__( 'The AMP plugin no longer allows `amp_supportable_templates` filters to specify a template as being `supported`. This is now managed only in AMP Settings.', 'amp' ),
-				'1.6'
+				'2.0.0'
 			);
 		}
 		if ( $did_filter_supply_immutable ) {
 			_doing_it_wrong(
 				'add_filter',
 				esc_html__( 'The AMP plugin no longer allows `amp_supportable_templates` filters to specify a template\'s support as being `immutable`. This is now managed only in AMP Settings.', 'amp' ),
-				'1.6'
+				'2.0.0'
 			);
 		}
 
@@ -986,6 +992,8 @@ class AMP_Theme_Support {
 		add_filter( 'cancel_comment_reply_link', [ __CLASS__, 'filter_cancel_comment_reply_link' ], 10, 3 );
 		add_action( 'comment_form', [ __CLASS__, 'amend_comment_form' ], 100 );
 		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' );
+		add_filter( 'get_comments_link', [ __CLASS__, 'amend_comments_link' ] );
+		add_filter( 'respond_link', [ __CLASS__, 'amend_comments_link' ] );
 		add_filter( 'wp_kses_allowed_html', [ __CLASS__, 'include_layout_in_wp_kses_allowed_html' ], 10 );
 		add_filter( 'get_header_image_tag', [ __CLASS__, 'amend_header_image_with_video_header' ], PHP_INT_MAX );
 		add_action(
@@ -1006,12 +1014,12 @@ class AMP_Theme_Support {
 	/**
 	 * Register/override widgets.
 	 *
-	 * @deprecated As of 1.6 the AMP_Core_Block_Handler will sanitize the core widgets instead.
+	 * @deprecated As of 2.0 the AMP_Core_Block_Handler will sanitize the core widgets instead.
 	 * @global WP_Widget_Factory
 	 * @return void
 	 */
 	public static function register_widgets() {
-		_deprecated_function( __METHOD__, '1.6' );
+		_deprecated_function( __METHOD__, '2.0.0' );
 		global $wp_widget_factory;
 		foreach ( $wp_widget_factory->widgets as $registered_widget ) {
 			$registered_widget_class_name = get_class( $registered_widget );
@@ -1106,6 +1114,23 @@ class AMP_Theme_Support {
 			<input type="hidden" name="redirect_to" value="<?php echo esc_url( amp_get_permalink( get_the_ID() ) ); ?>">
 		<?php endif; ?>
 		<?php
+	}
+
+	/**
+	 * Amend the comments/redpond links to go to non-AMP page when in legacy Reader mode.
+	 *
+	 * @see get_comments_link()
+	 * @see comments_popup_link()
+	 *
+	 * @param string $comments_link Post comments permalink with '#comments' or '#respond' appended.
+	 * @return string The link to the comments.
+	 */
+	public static function amend_comments_link( $comments_link ) {
+		if ( amp_is_legacy() && true === AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ) {
+			$comments_link = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $comments_link );
+		}
+
+		return $comments_link;
 	}
 
 	/**
@@ -1461,7 +1486,7 @@ class AMP_Theme_Support {
 	/**
 	 * Add data-ampdevmode attribute to any enqueued style that depends on the `customizer-preview` handle.
 	 *
-	 * @since 1.6
+	 * @since 2.0
 	 *
 	 * @param string $tag    The link tag for the enqueued style.
 	 * @param string $handle The style's registered handle.
@@ -1796,7 +1821,18 @@ class AMP_Theme_Support {
 	 */
 	public static function finish_output_buffering( $response ) {
 		self::$is_output_buffering = false;
-		return self::prepare_response( $response );
+		$response                  = self::prepare_response( $response );
+
+		/**
+		 * Fires when server timings should be sent.
+		 *
+		 * This is immediately before the processed output buffer is sent to the client.
+		 *
+		 * @since 2.0
+		 * @internal
+		 */
+		do_action( 'amp_server_timing_send' );
+		return $response;
 	}
 
 	/**
@@ -1814,9 +1850,23 @@ class AMP_Theme_Support {
 			$dom  = AMP_DOM_Utils::get_dom_from_content( $partial );
 			$args = [
 				'content_max_width'    => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
-				'use_document_element' => false,
+				'use_document_element' => true,
 			];
 			AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args ); // @todo Include script assets in response?
+
+			// Move any amp-custom to include in the partial response.
+			$amp_custom_style = $dom->xpath->query( '//style[ @amp-custom ]' )->item( 0 );
+			if ( $amp_custom_style instanceof DOMElement ) {
+				$amp_custom_style->removeAttribute( Attribute::AMP_CUSTOM );
+				$amp_custom_style->setAttribute( 'amp-custom-partial', '' );
+				$amp_custom_style->textContent = str_replace(
+					'/*# sourceURL=amp-custom.css */',
+					'/*# sourceURL=amp-custom-partial.css */',
+					$amp_custom_style->textContent
+				);
+				$dom->body->appendChild( $amp_custom_style ); // @todo This could cause layout problems. It may be preferable to move to the head.
+			}
+
 			$partial = AMP_DOM_Utils::get_content_from_dom( $dom );
 		}
 		return $partial;
@@ -1893,9 +1943,32 @@ class AMP_Theme_Support {
 			$args
 		);
 
-		AMP_HTTP::send_server_timing( 'amp_output_buffer', -self::$init_start_time, 'AMP Output Buffer' );
+		/**
+		 * Stops the server-timing measurement for the entire output buffer capture.
+		 *
+		 * @since 2.0
+		 * @internal
+		 *
+		 * @param string $event_name Name of the event to stop.
+		 */
+		do_action( 'amp_server_timing_stop', 'amp_output_buffer' );
 
-		$dom_parse_start = microtime( true );
+		/**
+		 * Starts the server-timing measurement for the dom parsing subsystem.
+		 *
+		 * @since 2.0
+		 * @internal
+		 *
+		 * @param string      $event_name        Name of the event to record.
+		 * @param string|null $event_description Optional. Description of the event
+		 *                                       to record. Defaults to null.
+		 * @param string[]    $properties        Optional. Additional properties to add
+		 *                                       to the logged record.
+		 * @param bool        $verbose_only      Optional. Whether to only show the
+		 *                                       event in verbose mode. Defaults to
+		 *                                       false.
+		 */
+		do_action( 'amp_server_timing_start', 'amp_dom_parse', '', [], true );
 
 		$dom = Document::fromHtml( $response );
 
@@ -1903,7 +1976,32 @@ class AMP_Theme_Support {
 			AMP_Validation_Manager::remove_illegal_source_stack_comments( $dom );
 		}
 
-		AMP_HTTP::send_server_timing( 'amp_dom_parse', -$dom_parse_start, 'AMP DOM Parse' );
+		/**
+		 * Stops the server-timing measurement for the dom parsing subsystem.
+		 *
+		 * @since 2.0
+		 * @internal
+		 *
+		 * @param string $event_name Name of the event to stop.
+		 */
+		do_action( 'amp_server_timing_stop', 'amp_dom_parse' );
+
+		/**
+		 * Starts the server-timing measurement for the AMP Sanitizer subsystem.
+		 *
+		 * @since 2.0
+		 * @internal
+		 *
+		 * @param string      $event_name        Name of the event to record.
+		 * @param string|null $event_description Optional. Description of the event
+		 *                                       to record. Defaults to null.
+		 * @param string[]    $properties        Optional. Additional properties to add
+		 *                                       to the logged record.
+		 * @param bool        $verbose_only      Optional. Whether to only show the
+		 *                                       event in verbose mode. Defaults to
+		 *                                       false.
+		 */
+		do_action( 'amp_server_timing_start', 'amp_sanitizer' );
 
 		// Make sure scripts from the body get moved to the head.
 		foreach ( $dom->xpath->query( '//body//script[ @custom-element or @custom-template or @src = "https://cdn.ampproject.org/v0.js" ]' ) as $script ) {
@@ -1918,6 +2016,16 @@ class AMP_Theme_Support {
 		}
 
 		$sanitization_results = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
+
+		/**
+		 * Stops the server-timing measurement for the AMP Sanitizer subsystem.
+		 *
+		 * @since 2.0
+		 * @internal
+		 *
+		 * @param string $event_name Name of the event to stop.
+		 */
+		do_action( 'amp_server_timing_stop', 'amp_sanitizer' );
 
 		// Respond early with results if performing a validate request.
 		if ( AMP_Validation_Manager::$is_validate_request ) {
@@ -1935,7 +2043,22 @@ class AMP_Theme_Support {
 			return wp_json_encode( $data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
 		}
 
-		$dom_serialize_start = microtime( true );
+		/**
+		 * Starts the server-timing measurement for the AMP DOM serialization.
+		 *
+		 * @since 2.0
+		 * @internal
+		 *
+		 * @param string      $event_name        Name of the event to record.
+		 * @param string|null $event_description Optional. Description of the event
+		 *                                       to record. Defaults to null.
+		 * @param string[]    $properties        Optional. Additional properties to add
+		 *                                       to the logged record.
+		 * @param bool        $verbose_only      Optional. Whether to only show the
+		 *                                       event in verbose mode. Defaults to
+		 *                                       false.
+		 */
+		do_action( 'amp_server_timing_start', 'amp_dom_serialize', '', [], true );
 
 		// Gather all component scripts that are used in the document and then render any not already printed.
 		$amp_scripts = $sanitization_results['scripts'];
@@ -1970,6 +2093,23 @@ class AMP_Theme_Support {
 		$enable_optimizer = apply_filters( 'amp_enable_optimizer', $enable_optimizer );
 
 		if ( $enable_optimizer ) {
+			/**
+			 * Starts the server-timing measurement for the AMP Optimizer subsystem.
+			 *
+			 * @since 2.0
+			 * @internal
+			 *
+			 * @param string      $event_name        Name of the event to record.
+			 * @param string|null $event_description Optional. Description of the event
+			 *                                       to record. Defaults to null.
+			 * @param string[]    $properties        Optional. Additional properties to add
+			 *                                       to the logged record.
+			 * @param bool        $verbose_only      Optional. Whether to only show the
+			 *                                       event in verbose mode. Defaults to
+			 *                                       false.
+			 */
+			do_action( 'amp_server_timing_start', 'amp_optimizer' );
+
 			$errors = new Optimizer\ErrorCollection();
 			self::get_optimizer( $args )->optimizeDom( $dom, $errors );
 
@@ -1985,6 +2125,16 @@ class AMP_Theme_Support {
 				);
 				// @todo Include errors elsewhere than HTML comment?
 			}
+
+			/**
+			 * Stops the server-timing measurement for the AMP Optimizer subsystem.
+			 *
+			 * @since 2.0
+			 * @internal
+			 *
+			 * @param string $event_name Name of the event to stop.
+			 */
+			do_action( 'amp_server_timing_stop', 'amp_optimizer' );
 		}
 
 		self::ensure_required_markup( $dom, array_keys( $amp_scripts ) );
@@ -1996,7 +2146,7 @@ class AMP_Theme_Support {
 			$non_amp_url = amp_remove_endpoint( amp_get_current_url() );
 
 			// Redirect to include query var to preventing AMP from even being considered available.
-			$non_amp_url = add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_AVAILABLE, $non_amp_url );
+			$non_amp_url = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_AVAILABLE, $non_amp_url );
 
 			wp_safe_redirect( $non_amp_url, 302 );
 			return esc_html__( 'Redirecting since AMP version not available.', 'amp' );
@@ -2004,7 +2154,15 @@ class AMP_Theme_Support {
 
 		$response = $dom->saveHTML();
 
-		AMP_HTTP::send_server_timing( 'amp_dom_serialize', -$dom_serialize_start, 'AMP DOM Serialize' );
+		/**
+		 * Stops the server-timing measurement for the AMP DOM serialization.
+		 *
+		 * @since 2.0
+		 * @internal
+		 *
+		 * @param string $event_name Name of the event to stop.
+		 */
+		do_action( 'amp_server_timing_stop', 'amp_dom_serialize' );
 
 		return $response;
 	}
@@ -2181,7 +2339,7 @@ class AMP_Theme_Support {
 			$url = wp_unslash( $_SERVER['REQUEST_URI'] );
 		}
 		$url = remove_query_arg(
-			[ amp_get_slug(), QueryVars::NOAMP, AMP_Validated_URL_Post_Type::VALIDATE_ACTION, AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ],
+			[ amp_get_slug(), QueryVar::NOAMP, AMP_Validated_URL_Post_Type::VALIDATE_ACTION, AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ],
 			$url
 		);
 		$url = add_query_arg( self::PAIRED_BROWSING_QUERY_VAR, '1', $url );
@@ -2257,7 +2415,7 @@ class AMP_Theme_Support {
 			[
 				'ampSlug'                   => amp_get_slug(),
 				'ampPairedBrowsingQueryVar' => self::PAIRED_BROWSING_QUERY_VAR,
-				'noampQueryVar'             => QueryVars::NOAMP,
+				'noampQueryVar'             => QueryVar::NOAMP,
 				'documentTitlePrefix'       => __( 'AMP Paired Browsing:', 'amp' ),
 			]
 		);

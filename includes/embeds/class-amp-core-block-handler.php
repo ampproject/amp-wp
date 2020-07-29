@@ -79,6 +79,30 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		if ( ! isset( $block['blockName'] ) ) {
 			return $block_content;
 		}
+
+		if ( isset( $block['attrs'] ) && 'core/shortcode' !== $block['blockName'] ) {
+			$injected_attributes    = '';
+			$prop_attribute_mapping = [
+				'ampCarousel'  => 'data-amp-carousel',
+				'ampLayout'    => 'data-amp-layout',
+				'ampLightbox'  => 'data-amp-lightbox',
+				'ampNoLoading' => 'data-amp-noloading',
+			];
+			foreach ( $prop_attribute_mapping as $prop => $attr ) {
+				if ( isset( $block['attrs'][ $prop ] ) ) {
+					$property_value = $block['attrs'][ $prop ];
+					if ( is_bool( $property_value ) ) {
+						$property_value = $property_value ? 'true' : 'false';
+					}
+
+					$injected_attributes .= sprintf( ' %s="%s"', $attr, esc_attr( $property_value ) );
+				}
+			}
+			if ( $injected_attributes ) {
+				$block_content = preg_replace( '/(<\w+)/', '$1' . $injected_attributes, $block_content, 1 );
+			}
+		}
+
 		if ( isset( $this->block_ampify_methods[ $block['blockName'] ] ) ) {
 			$method_name   = $this->block_ampify_methods[ $block['blockName'] ];
 			$block_content = $this->{$method_name}( $block_content, $block );
@@ -224,7 +248,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Process "Categories" widgets.
 	 *
-	 * @since 1.6
+	 * @since 2.0
 	 *
 	 * @param Document $dom Document.
 	 */
@@ -256,7 +280,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Process "Archives" widgets.
 	 *
-	 * @since 1.6
+	 * @since 2.0
 	 *
 	 * @param Document $dom  Select node retrieved from the widget.
 	 * @param array    $args Args passed to sanitizer.
@@ -300,7 +324,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 * Core strips out the dimensions to prevent the element being made too wide for the sidebar. This is not a concern
 	 * in AMP because of responsive sizing. So this logic is here to undo what core is doing.
 	 *
-	 * @since 1.6
+	 * @since 2.0
 	 * @see WP_Widget_Text::inject_video_max_width_style()
 	 * @see AMP_Core_Block_Handler::process_text_widgets()
 	 *
@@ -325,7 +349,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Process "Text" widgets.
 	 *
-	 * @since 1.6
+	 * @since 2.0
 	 * @see AMP_Core_Block_Handler::preserve_widget_text_element_dimensions()
 	 *
 	 * @param Document $dom Select node retrieved from the widget.
@@ -350,7 +374,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			 * MediaElement.js is not used in AMP this stylesheet is not included. In any case, videos in AMP are
 			 * responsive so this is built-in. Note also the style rule for .wp-video in amp-default.css.
 			 */
-			foreach ( $dom->xpath->query( './/div[ @class = "wp-video" and @style ]' ) as $element ) {
+			foreach ( $dom->xpath->query( './/div[ @class = "wp-video" and @style ]', $text_widget ) as $element ) {
 				$element->removeAttribute( 'style' );
 			}
 		}

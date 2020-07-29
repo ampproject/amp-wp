@@ -13,7 +13,7 @@
  */
 class AMP_Allowed_Tags_Generated {
 
-	private static $spec_file_revision = 1052;
+	private static $spec_file_revision = 1060;
 	private static $minimum_validator_revision_required = 474;
 
 	private static $descendant_tag_lists = array(
@@ -247,6 +247,7 @@ class AMP_Allowed_Tags_Generated {
 			'amp-live-list',
 			'amp-pixel',
 			'amp-state',
+			'amp-story-360',
 			'amp-timeago',
 			'amp-twitter',
 			'amp-video',
@@ -621,7 +622,7 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#links',
 				),
 			),
 		),
@@ -777,7 +778,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-accordion',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-accordion',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-accordion/',
 				),
 			),
 		),
@@ -797,7 +798,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-action-macro',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-action-macro',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-action-macro/',
 				),
 			),
 		),
@@ -846,7 +847,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-ad',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-ad',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-ad/',
 				),
 			),
 			array(
@@ -952,7 +953,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-ad',
 					),
 					'spec_name' => 'amp-ad with data-multi-size attribute',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-ad',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-ad/',
 				),
 			),
 			array(
@@ -1007,7 +1008,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-ad',
 					),
 					'spec_name' => 'amp-ad with data-enable-refresh attribute',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-ad',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-ad/',
 				),
 			),
 		),
@@ -1123,7 +1124,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-analytics',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-analytics',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-analytics/',
 				),
 			),
 		),
@@ -1170,7 +1171,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-anim',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-anim',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-anim/',
 				),
 			),
 		),
@@ -1241,7 +1242,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-apester-media',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-apester-media',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-apester-media/',
 				),
 			),
 		),
@@ -1269,7 +1270,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-app-banner',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-app-banner',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-app-banner/',
 					'unique' => true,
 				),
 			),
@@ -1343,7 +1344,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-audio',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-audio',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-audio/',
 				),
 			),
 			array(
@@ -1403,7 +1404,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-audio',
 					),
 					'spec_name' => 'amp-story >> amp-audio',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-audio',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-audio/',
 				),
 			),
 		),
@@ -1427,7 +1428,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-auto-ads',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-auto-ads',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-auto-ads/',
 				),
 			),
 		),
@@ -1456,6 +1457,7 @@ class AMP_Allowed_Tags_Generated {
 					'inline' => array(),
 					'items' => array(),
 					'max-entries' => array(),
+					'max-items' => array(),
 					'media' => array(),
 					'min-characters' => array(),
 					'noloading' => array(
@@ -1486,7 +1488,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-autocomplete',
 					),
 					'spec_name' => 'amp-autocomplete',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-autocomplete',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-autocomplete/',
 				),
 			),
 		),
@@ -1567,7 +1569,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-base-carousel',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-base-carousel',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-base-carousel/',
 				),
 			),
 			array(
@@ -1661,7 +1663,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-base-carousel',
 					),
 					'spec_name' => 'AMP-BASE-CAROUSEL [lightbox]',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-base-carousel',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-base-carousel/',
 				),
 			),
 		),
@@ -1723,7 +1725,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-bind',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-bind',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-bind/',
 				),
 			),
 		),
@@ -1772,7 +1774,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-bodymovin-animation',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-bodymovin-animation',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-bodymovin-animation/',
 				),
 			),
 		),
@@ -1831,7 +1833,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-brid-player',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-brid-player',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-brid-player/',
 				),
 			),
 		),
@@ -1879,7 +1881,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-brightcove',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-brightcove',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-brightcove/',
 				),
 			),
 		),
@@ -1956,7 +1958,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-call-tracking',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-call-tracking',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-call-tracking/',
 				),
 			),
 		),
@@ -2018,7 +2020,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-carousel',
 					),
 					'spec_name' => 'AMP-CAROUSEL',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-carousel',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-carousel/',
 				),
 			),
 			array(
@@ -2092,7 +2094,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-lightbox-gallery',
 					),
 					'spec_name' => 'AMP-CAROUSEL lightbox',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-carousel',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-carousel/',
 				),
 			),
 		),
@@ -2123,7 +2125,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-connatix-player',
 					),
-					'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-connatix-player',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-connatix-player/',
 				),
 			),
 		),
@@ -2244,7 +2246,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-dailymotion',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-dailymotion',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-dailymotion/',
 				),
 			),
 		),
@@ -2867,7 +2869,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-ad',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-ad',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-ad/',
 				),
 			),
 			array(
@@ -2925,7 +2927,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-ad',
 					),
 					'spec_name' => 'amp-embed with data-multi-size attribute',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-ad',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-ad/',
 				),
 			),
 		),
@@ -2957,7 +2959,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-embedly-card',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-embedly-card',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-embedly-card/',
 				),
 			),
 		),
@@ -2988,7 +2990,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-experiment',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-experiment',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-experiment/',
 					'unique' => true,
 				),
 			),
@@ -3271,7 +3273,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-gfycat',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-gfycat',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-gfycat/',
 				),
 			),
 		),
@@ -3297,7 +3299,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-gist',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-gist',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-gist/',
 				),
 			),
 		),
@@ -3338,7 +3340,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-google-document-embed',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-google-document-embed',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-google-document-embed/',
 				),
 			),
 		),
@@ -3368,7 +3370,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-hulu',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-hulu',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-hulu/',
 				),
 			),
 		),
@@ -3511,7 +3513,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-ima-video',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-ima-video',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-ima-video/',
 				),
 			),
 		),
@@ -3574,7 +3576,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-image-slider',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-image-slider',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-image-slider/',
 				),
 			),
 		),
@@ -3583,6 +3585,7 @@ class AMP_Allowed_Tags_Generated {
 				'attr_spec_list' => array(
 					'alt' => array(),
 					'attribution' => array(),
+					'crossorigin' => array(),
 					'data-amp-bind-alt' => array(),
 					'data-amp-bind-attribution' => array(),
 					'data-amp-bind-src' => array(),
@@ -3600,6 +3603,7 @@ class AMP_Allowed_Tags_Generated {
 					'object-fit' => array(),
 					'object-position' => array(),
 					'placeholder' => array(),
+					'referrerpolicy' => array(),
 					'src' => array(
 						'alternative_names' => array(
 							'srcset',
@@ -3627,7 +3631,7 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-img',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-img/',
 				),
 			),
 		),
@@ -3680,7 +3684,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-inline-gallery',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-inline-gallery',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-inline-gallery/',
 				),
 			),
 		),
@@ -3711,7 +3715,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-inline-gallery',
 					),
 					'spec_name' => 'amp-inline-gallery-pagination',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-inline-gallery',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-inline-gallery/',
 				),
 			),
 			array(
@@ -3737,7 +3741,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-inline-gallery',
 					),
 					'spec_name' => 'amp-inline-gallery-pagination [inset]',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-inline-gallery',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-inline-gallery/',
 				),
 			),
 		),
@@ -3781,7 +3785,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-inline-gallery',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-inline-gallery',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-inline-gallery/',
 				),
 			),
 		),
@@ -3923,7 +3927,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-jwplayer',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-jwplayer',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-jwplayer/',
 				),
 			),
 		),
@@ -3980,7 +3984,7 @@ class AMP_Allowed_Tags_Generated {
 							5,
 						),
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-layout',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-layout/',
 				),
 			),
 		),
@@ -4272,7 +4276,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-mega-menu',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-mega-menu',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-mega-menu/',
 				),
 			),
 		),
@@ -4412,7 +4416,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-minute-media-player',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-minute-media-player',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-minute-media-player/',
 				),
 			),
 		),
@@ -4474,7 +4478,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-sidebar',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-nested-menu',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-nested-menu/',
 				),
 			),
 		),
@@ -4507,7 +4511,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-next-page',
 					),
 					'spec_name' => 'amp-next-page with inline config',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-next-page',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-next-page/',
 					'unique' => true,
 				),
 			),
@@ -4550,7 +4554,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-next-page',
 					),
 					'spec_name' => 'amp-next-page with src attribute',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-next-page',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-next-page/',
 					'unique' => true,
 				),
 			),
@@ -4594,7 +4598,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-next-page',
 					),
 					'spec_name' => 'amp-next-page [type=adsense]',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-next-page',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-next-page/',
 					'unique' => true,
 				),
 			),
@@ -4834,7 +4838,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-pinterest',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-pinterest',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-pinterest/',
 				),
 			),
 		),
@@ -4874,7 +4878,7 @@ class AMP_Allowed_Tags_Generated {
 							1,
 						),
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-pixel',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-pixel/',
 				),
 			),
 		),
@@ -5001,7 +5005,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-powr-player',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-powr-player',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-powr-player/',
 				),
 			),
 		),
@@ -5166,7 +5170,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-riddle-quiz',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-riddle-quiz',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-riddle-quiz/',
 				),
 			),
 		),
@@ -5312,7 +5316,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-sidebar',
 					),
 					'spec_name' => 'amp-sidebar',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-sidebar',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-sidebar/',
 				),
 			),
 			array(
@@ -5328,7 +5332,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-sidebar',
 					),
 					'spec_name' => 'amp-story >> amp-sidebar',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-sidebar',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-sidebar/',
 				),
 			),
 		),
@@ -5593,7 +5597,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-bind',
 					),
 					'spec_name' => 'amp-state',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-bind',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-bind/',
 				),
 			),
 		),
@@ -5723,6 +5727,56 @@ class AMP_Allowed_Tags_Generated {
 				),
 			),
 		),
+		'amp-story-360' => array(
+			array(
+				'attr_spec_list' => array(
+					'duration' => array(
+						'value_regex' => '([0-9\\.]+)\\s*(s|ms)',
+					),
+					'heading-end' => array(
+						'value_regex' => '-?\\d+\\.?\\d*',
+					),
+					'heading-start' => array(
+						'value_regex' => '-?\\d+\\.?\\d*',
+					),
+					'pitch-end' => array(
+						'value_regex' => '-?\\d+\\.?\\d*',
+					),
+					'pitch-start' => array(
+						'value_regex' => '-?\\d+\\.?\\d*',
+					),
+					'zoom-end' => array(
+						'value_regex' => '\\d+\\.?\\d*',
+					),
+					'zoom-start' => array(
+						'value_regex' => '\\d+\\.?\\d*',
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							6,
+							2,
+							3,
+							7,
+							1,
+							4,
+						),
+					),
+					'child_tags' => array(
+						'child_tag_name_oneof' => array(
+							'amp-img',
+						),
+						'mandatory_num_child_tags' => 1,
+					),
+					'mandatory_ancestor' => 'amp-story',
+					'requires_extension' => array(
+						'amp-story-360',
+					),
+					'spec_url' => 'https://amp.dev/documentation/components/amp-story-360',
+				),
+			),
+		),
 		'amp-story-animation' => array(
 			array(
 				'attr_spec_list' => array(
@@ -5767,7 +5821,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-story-auto-ads',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-story-auto-ads',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-story-auto-ads/',
 					'unique' => true,
 				),
 			),
@@ -5969,6 +6023,30 @@ class AMP_Allowed_Tags_Generated {
 				),
 			),
 		),
+		'amp-story-player' => array(
+			array(
+				'attr_spec_list' => array(),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							6,
+							2,
+							3,
+							7,
+							4,
+						),
+					),
+					'child_tags' => array(
+						'child_tag_name_oneof' => array(
+							'a',
+						),
+					),
+					'requires_extension' => array(
+						'amp-story-player',
+					),
+				),
+			),
+		),
 		'amp-timeago' => array(
 			array(
 				'attr_spec_list' => array(
@@ -6000,7 +6078,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-timeago',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-timeago',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-timeago/',
 				),
 			),
 		),
@@ -6036,7 +6114,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-truncate-text',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-truncate-text',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-truncate-text/',
 				),
 			),
 		),
@@ -6256,7 +6334,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-video',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-video',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-video/',
 				),
 			),
 			array(
@@ -6368,7 +6446,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-video',
 					),
 					'spec_name' => 'amp-story >> amp-story-page-attachment >> amp-video',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-video',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-video/',
 				),
 			),
 			array(
@@ -6479,7 +6557,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-video',
 					),
 					'spec_name' => 'amp-story >> amp-video',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-video',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-video/',
 				),
 			),
 		),
@@ -6557,7 +6635,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-video-iframe',
 					),
 					'spec_name' => 'AMP-VIDEO-IFRAME[poster]',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-video-iframe',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-video-iframe/',
 				),
 			),
 			array(
@@ -6636,7 +6714,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-video-iframe',
 					),
 					'spec_name' => 'AMP-VIDEO-IFRAME with [placeholder]',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-video-iframe',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-video-iframe/',
 				),
 			),
 		),
@@ -6825,7 +6903,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-web-push',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-web-push',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-web-push/',
 				),
 			),
 		),
@@ -6856,7 +6934,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-web-push',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-web-push',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-web-push/',
 				),
 			),
 		),
@@ -6925,7 +7003,7 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-yotpo',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-yotpo',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-yotpo/',
 				),
 			),
 		),
@@ -7018,7 +7096,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'noscript',
 					'mandatory_ancestor_suggested_alternative' => 'amp-audio',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-audio',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-audio/',
 				),
 			),
 		),
@@ -7094,7 +7172,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory' => true,
 					'mandatory_parent' => 'html',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup',
 					'unique' => true,
 				),
 			),
@@ -7295,7 +7373,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -7383,7 +7461,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -7419,7 +7497,7 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(),
 				'tag_spec' => array(
-					'spec_url' => 'https://amp.dev/documentation/components/amp-form',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-form/',
 				),
 			),
 		),
@@ -7506,7 +7584,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -7539,7 +7617,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -7692,7 +7770,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_parent' => 'amp-image-slider',
 					'spec_name' => 'AMP-IMAGE-SLIDER > DIV [first]',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-image-slider',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-image-slider/',
 				),
 			),
 			array(
@@ -7704,7 +7782,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_parent' => 'amp-image-slider',
 					'spec_name' => 'AMP-IMAGE-SLIDER > DIV [second]',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-image-slider',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-image-slider/',
 				),
 			),
 			array(
@@ -7833,7 +7911,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -7923,7 +8001,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -8011,7 +8089,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -8092,7 +8170,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -8176,7 +8254,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -8257,7 +8335,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -8273,7 +8351,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -8357,7 +8435,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -8483,7 +8561,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -8697,7 +8775,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -8782,7 +8860,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -8882,7 +8960,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -8990,7 +9068,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory' => true,
 					'mandatory_parent' => 'html',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup',
 					'unique' => true,
 				),
 			),
@@ -9023,7 +9101,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -9046,7 +9124,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory' => true,
 					'mandatory_parent' => '!doctype',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup',
 					'unique' => true,
 				),
 			),
@@ -9104,7 +9182,7 @@ class AMP_Allowed_Tags_Generated {
 						'src',
 						'srcdoc',
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-iframe',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-iframe/',
 				),
 			),
 		),
@@ -9210,7 +9288,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -9262,7 +9340,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'noscript',
 					'mandatory_ancestor_suggested_alternative' => 'amp-img',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-img',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-img/',
 				),
 			),
 		),
@@ -9331,7 +9409,7 @@ class AMP_Allowed_Tags_Generated {
 					'width' => array(),
 				),
 				'tag_spec' => array(
-					'spec_url' => 'https://amp.dev/documentation/components/amp-form',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-form/',
 				),
 			),
 			array(
@@ -9404,7 +9482,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'form [method=post]',
 					'spec_name' => 'INPUT [type=file]',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-form',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-form/',
 				),
 			),
 			array(
@@ -9472,7 +9550,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'form [method=post]',
 					'spec_name' => 'INPUT [type=password]',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-form',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-form/',
 				),
 			),
 			array(
@@ -9570,7 +9648,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-inputmask',
 					),
 					'spec_name' => 'input [mask] (custom mask)',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-inputmask',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-inputmask/',
 				),
 			),
 			array(
@@ -9648,7 +9726,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-inputmask',
 					),
 					'spec_name' => 'input [mask=payment-card]',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-inputmask',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-inputmask/',
 				),
 			),
 			array(
@@ -9726,7 +9804,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-inputmask',
 					),
 					'spec_name' => 'input [mask=date-dd-mm-yyyy]',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-inputmask',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-inputmask/',
 				),
 			),
 			array(
@@ -9804,7 +9882,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-inputmask',
 					),
 					'spec_name' => 'input [mask=date-mm-dd-yyyy]',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-inputmask',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-inputmask/',
 				),
 			),
 			array(
@@ -9882,7 +9960,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-inputmask',
 					),
 					'spec_name' => 'input [mask=date-mm-yy]',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-inputmask',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-inputmask/',
 				),
 			),
 			array(
@@ -9960,7 +10038,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-inputmask',
 					),
 					'spec_name' => 'input [mask=date-yyyy-mm-dd]',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-inputmask',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-inputmask/',
 				),
 			),
 		),
@@ -9994,7 +10072,7 @@ class AMP_Allowed_Tags_Generated {
 					'for' => array(),
 				),
 				'tag_spec' => array(
-					'spec_url' => 'https://amp.dev/documentation/components/amp-form',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-form/',
 				),
 			),
 		),
@@ -10096,7 +10174,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -10198,7 +10276,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -10228,7 +10306,7 @@ class AMP_Allowed_Tags_Generated {
 						'template',
 					),
 					'spec_name' => 'link rel=',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags',
 				),
 			),
 			array(
@@ -10267,7 +10345,7 @@ class AMP_Allowed_Tags_Generated {
 					'mandatory' => true,
 					'mandatory_parent' => 'head',
 					'spec_name' => 'link rel=canonical',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup',
 					'unique' => true,
 				),
 			),
@@ -10305,7 +10383,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_parent' => 'head',
 					'spec_name' => 'link rel=manifest',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags',
 				),
 			),
 			array(
@@ -10337,7 +10415,7 @@ class AMP_Allowed_Tags_Generated {
 						'template',
 					),
 					'spec_name' => 'link rel=preload',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags',
 				),
 			),
 			array(
@@ -10367,7 +10445,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_parent' => 'head',
 					'spec_name' => 'link rel=stylesheet for fonts',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#custom-fonts',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#custom-fonts',
 				),
 			),
 			array(
@@ -10397,7 +10475,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'spec_name' => 'link itemprop=sameAs',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags',
 				),
 			),
 			array(
@@ -10423,7 +10501,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'spec_name' => 'link itemprop=',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags',
 				),
 			),
 			array(
@@ -10449,7 +10527,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'spec_name' => 'link property=',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags',
 				),
 			),
 		),
@@ -10553,7 +10631,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -10639,7 +10717,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -10658,7 +10736,7 @@ class AMP_Allowed_Tags_Generated {
 					'mandatory' => true,
 					'mandatory_parent' => 'head',
 					'spec_name' => 'meta charset=utf-8',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup',
 					'unique' => true,
 				),
 			),
@@ -10692,7 +10770,7 @@ class AMP_Allowed_Tags_Generated {
 					'mandatory' => true,
 					'mandatory_parent' => 'head',
 					'spec_name' => 'meta name=viewport',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup',
 					'unique' => true,
 				),
 			),
@@ -10720,7 +10798,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'head',
 					'spec_name' => 'meta http-equiv=X-UA-Compatible',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags',
 				),
 			),
 			array(
@@ -10740,7 +10818,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_parent' => 'head',
 					'spec_name' => 'meta name=apple-itunes-app',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags',
 				),
 			),
 			array(
@@ -10782,7 +10860,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_parent' => 'head',
 					'spec_name' => 'meta name=amp-3p-iframe-src',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-ad',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-ad/',
 				),
 			),
 			array(
@@ -10960,7 +11038,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'head',
 					'spec_name' => 'meta http-equiv=Content-Type',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags',
 				),
 			),
 			array(
@@ -10979,7 +11057,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'head',
 					'spec_name' => 'meta http-equiv=content-language',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags',
 				),
 			),
 			array(
@@ -10998,7 +11076,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'head',
 					'spec_name' => 'meta http-equiv=pics-label',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags',
 				),
 			),
 			array(
@@ -11017,7 +11095,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'head',
 					'spec_name' => 'meta http-equiv=imagetoolbar',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags',
 				),
 			),
 			array(
@@ -11039,7 +11117,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'head',
 					'spec_name' => 'meta http-equiv=Content-Style-Type',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags',
 				),
 			),
 			array(
@@ -11061,7 +11139,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'head',
 					'spec_name' => 'meta http-equiv=Content-Script-Type',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags',
 				),
 			),
 			array(
@@ -11080,7 +11158,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'head',
 					'spec_name' => 'meta http-equiv=origin-trial',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags',
 				),
 			),
 			array(
@@ -11099,7 +11177,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'head',
 					'spec_name' => 'meta http-equiv=resource-type',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags',
 				),
 			),
 			array(
@@ -11122,7 +11200,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'head',
 					'spec_name' => 'meta http-equiv=x-dns-prefetch-control',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags',
 				),
 			),
 			array(
@@ -11174,7 +11252,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -11244,7 +11322,7 @@ class AMP_Allowed_Tags_Generated {
 					'mandatory' => true,
 					'mandatory_parent' => 'head',
 					'spec_name' => 'noscript enclosure for boilerplate',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites',
 					'unique' => true,
 				),
 			),
@@ -11292,7 +11370,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_parent' => 'select',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-form',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-form/',
 				),
 			),
 		),
@@ -11309,7 +11387,7 @@ class AMP_Allowed_Tags_Generated {
 					'value' => array(),
 				),
 				'tag_spec' => array(
-					'spec_url' => 'https://amp.dev/documentation/components/amp-form',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-form/',
 				),
 			),
 		),
@@ -11413,7 +11491,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -11520,7 +11598,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -11529,7 +11607,7 @@ class AMP_Allowed_Tags_Generated {
 				'attr_spec_list' => array(),
 				'tag_spec' => array(
 					'mandatory_parent' => 'noscript',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-img',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-img/',
 				),
 			),
 		),
@@ -11612,7 +11690,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -11695,7 +11773,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -11831,7 +11909,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -11925,7 +12003,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -12005,7 +12083,7 @@ class AMP_Allowed_Tags_Generated {
 					'mandatory_alternatives' => 'amphtml engine v0.js script',
 					'mandatory_parent' => 'head',
 					'spec_name' => 'amphtml engine v0.js script',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup',
 					'unique' => true,
 				),
 			),
@@ -12048,7 +12126,7 @@ class AMP_Allowed_Tags_Generated {
 					'mandatory_alternatives' => 'amphtml engine v0.js script',
 					'mandatory_parent' => 'head',
 					'spec_name' => 'amphtml engine v0.js lts script',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup',
 					'unique' => true,
 				),
 			),
@@ -12560,7 +12638,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-analytics',
 					),
 					'spec_name' => 'amp-analytics extension .json script',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-analytics',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-analytics/',
 				),
 			),
 			array(
@@ -12944,7 +13022,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-bind',
 					),
 					'spec_name' => 'amp-bind extension .json script',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-bind',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-bind/',
 				),
 			),
 			array(
@@ -13476,12 +13554,12 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'max_bytes' => 15000,
-					'max_bytes_spec_url' => 'https://amp.dev/documentation/components/amp-experiment#configuration',
+					'max_bytes_spec_url' => 'https://amp.dev/documentation/components/amp-experiment/#configuration',
 				),
 				'tag_spec' => array(
 					'mandatory_parent' => 'amp-experiment',
 					'spec_name' => 'amp-experiment extension .json script',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-experiment',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-experiment/',
 				),
 			),
 			array(
@@ -13809,7 +13887,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-geo',
 					),
 					'spec_name' => 'amp-geo extension .json script',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-geo',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-geo/',
 				),
 			),
 			array(
@@ -14772,7 +14850,7 @@ class AMP_Allowed_Tags_Generated {
 						'amp-next-page',
 					),
 					'spec_name' => 'AMP-NEXT-PAGE > SCRIPT[type=application/json]',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-next-page',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-next-page/',
 				),
 			),
 			array(
@@ -15254,14 +15332,14 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'max_bytes' => 10000,
-					'max_bytes_spec_url' => 'https://amp.dev/documentation/components/amp-script#faq',
+					'max_bytes_spec_url' => 'https://amp.dev/documentation/components/amp-script/#faq',
 				),
 				'tag_spec' => array(
 					'requires_extension' => array(
 						'amp-script',
 					),
 					'spec_name' => 'amp-script extension local script',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-script',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-script/',
 				),
 			),
 			array(
@@ -15527,6 +15605,36 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
+						'name' => 'amp-story-360',
+						'requires_usage' => true,
+						'version' => array(
+							'0.1',
+						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
 						'name' => 'amp-story-auto-ads',
 						'requires_usage' => true,
 						'version' => array(
@@ -15560,7 +15668,37 @@ class AMP_Allowed_Tags_Generated {
 						'amp-story-auto-ads',
 					),
 					'spec_name' => 'amp-story-auto-ads config script',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-story-auto-ads',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-story-auto-ads/',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
+						'name' => 'amp-story-player',
+						'requires_usage' => true,
+						'version' => array(
+							'0.1',
+						),
+					),
 				),
 			),
 			array(
@@ -15661,12 +15799,12 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'max_bytes' => 15000,
-					'max_bytes_spec_url' => 'https://amp.dev/documentation/components/amp-experiment#configuration',
+					'max_bytes_spec_url' => 'https://amp.dev/documentation/components/amp-experiment/#configuration',
 				),
 				'tag_spec' => array(
 					'mandatory_parent' => 'amp-experiment',
 					'spec_name' => 'amp-experiment story extension .json script',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-experiment',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-experiment/',
 				),
 			),
 			array(
@@ -16265,7 +16403,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
-					'spec_url' => 'https://amp.dev/documentation/components/amp-yotpo',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-yotpo/',
 				),
 			),
 			array(
@@ -16389,7 +16527,7 @@ class AMP_Allowed_Tags_Generated {
 					'size' => array(),
 				),
 				'tag_spec' => array(
-					'spec_url' => 'https://amp.dev/documentation/components/amp-form',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-form/',
 				),
 			),
 		),
@@ -16483,7 +16621,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -16508,7 +16646,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_parent' => 'picture',
 					'spec_name' => 'picture > source',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-img',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-img/',
 				),
 			),
 			array(
@@ -16530,7 +16668,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_parent' => 'amp-video',
 					'spec_name' => 'amp-video > source',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-video',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-video/',
 				),
 			),
 			array(
@@ -16552,7 +16690,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_parent' => 'amp-audio',
 					'spec_name' => 'amp-audio > source',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-audio',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-audio/',
 				),
 			),
 			array(
@@ -16575,7 +16713,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_parent' => 'audio',
 					'spec_name' => 'audio > source',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-audio',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-audio/',
 				),
 			),
 			array(
@@ -16598,7 +16736,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_parent' => 'video',
 					'spec_name' => 'video > source',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-video',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-video/',
 				),
 			),
 			array(
@@ -16674,7 +16812,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'lineargradient',
 					'spec_name' => 'lineargradient > stop',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 			array(
@@ -16687,7 +16825,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'radialgradient',
 					'spec_name' => 'radialgradient > stop',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -16743,12 +16881,12 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'doc_css_bytes' => true,
 					'max_bytes' => 75000,
-					'max_bytes_spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size',
+					'max_bytes_spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size',
 				),
 				'tag_spec' => array(
 					'mandatory_parent' => 'head',
 					'spec_name' => 'style amp-custom',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets',
 					'unique' => true,
 				),
 			),
@@ -16771,7 +16909,7 @@ class AMP_Allowed_Tags_Generated {
 					'mandatory' => true,
 					'mandatory_parent' => 'head',
 					'spec_name' => 'head > style[amp-boilerplate]',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites',
 					'unique' => true,
 				),
 			),
@@ -16795,7 +16933,7 @@ class AMP_Allowed_Tags_Generated {
 					'mandatory_ancestor' => 'head',
 					'mandatory_parent' => 'noscript',
 					'spec_name' => 'noscript > style[amp-boilerplate]',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites',
 					'unique' => true,
 				),
 			),
@@ -16827,7 +16965,7 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'doc_css_bytes' => false,
 					'max_bytes' => 500000,
-					'max_bytes_spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#keyframes-stylesheet',
+					'max_bytes_spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#keyframes-stylesheet',
 				),
 				'tag_spec' => array(
 					'mandatory_parent' => 'body',
@@ -16946,7 +17084,7 @@ class AMP_Allowed_Tags_Generated {
 					'zoomandpan' => array(),
 				),
 				'tag_spec' => array(
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -17025,7 +17163,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -17106,7 +17244,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -17340,7 +17478,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -17395,7 +17533,7 @@ class AMP_Allowed_Tags_Generated {
 					'wrap' => array(),
 				),
 				'tag_spec' => array(
-					'spec_url' => 'https://amp.dev/documentation/components/amp-form',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-form/',
 				),
 			),
 		),
@@ -17496,7 +17634,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -17563,7 +17701,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
 					'spec_name' => 'svg title',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -17925,7 +18063,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_parent' => 'amp-ima-video',
 					'spec_name' => 'amp-ima-video > track[kind=subtitles]',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-ima-video',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-ima-video/',
 				),
 			),
 		),
@@ -18023,7 +18161,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -18110,7 +18248,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -18231,7 +18369,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -18267,7 +18405,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'noscript',
 					'mandatory_ancestor_suggested_alternative' => 'amp-video',
-					'spec_url' => 'https://amp.dev/documentation/components/amp-video',
+					'spec_url' => 'https://amp.dev/documentation/components/amp-video/',
 				),
 			),
 		),
@@ -18287,7 +18425,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -18307,7 +18445,7 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'svg',
-					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg',
+					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg',
 				),
 			),
 		),
@@ -18512,6 +18650,11 @@ class AMP_Allowed_Tags_Generated {
 				'amp-subscriptions',
 			),
 		),
+		'subscriptions-google-rtc' => array(
+			'requires_extension' => array(
+				'amp-subscriptions-google',
+			),
+		),
 		'subscriptions-lang' => array(
 			'requires_extension' => array(
 				'amp-subscriptions',
@@ -18611,7 +18754,7 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'spec_name' => 'AMP-LIVE-LIST [items]',
-				'spec_url' => 'https://amp.dev/documentation/components/amp-live-list#items',
+				'spec_url' => 'https://amp.dev/documentation/components/amp-live-list/#items',
 			),
 		),
 		'AMP-LIVE-LIST [items] item' => array(
@@ -18628,7 +18771,7 @@ class AMP_Allowed_Tags_Generated {
 			),
 			'tag_spec' => array(
 				'spec_name' => 'AMP-LIVE-LIST [items] item',
-				'spec_url' => 'https://amp.dev/documentation/components/amp-live-list#items',
+				'spec_url' => 'https://amp.dev/documentation/components/amp-live-list/#items',
 			),
 		),
 		'AMP-LIVE-LIST [pagination]' => array(
@@ -18639,7 +18782,7 @@ class AMP_Allowed_Tags_Generated {
 			),
 			'tag_spec' => array(
 				'spec_name' => 'AMP-LIVE-LIST [pagination]',
-				'spec_url' => 'https://amp.dev/documentation/components/amp-live-list#pagination',
+				'spec_url' => 'https://amp.dev/documentation/components/amp-live-list/#pagination',
 			),
 		),
 		'AMP-LIVE-LIST [update]' => array(
@@ -18650,7 +18793,7 @@ class AMP_Allowed_Tags_Generated {
 			),
 			'tag_spec' => array(
 				'spec_name' => 'AMP-LIVE-LIST [update]',
-				'spec_url' => 'https://amp.dev/documentation/components/amp-live-list#update',
+				'spec_url' => 'https://amp.dev/documentation/components/amp-live-list/#update',
 			),
 		),
 		'AMP-MEGA-MENU > AMP-LIST' => array(
@@ -18858,7 +19001,7 @@ class AMP_Allowed_Tags_Generated {
 			),
 			'tag_spec' => array(
 				'spec_name' => 'AMP-SELECTOR option',
-				'spec_url' => 'https://amp.dev/documentation/components/amp-selector',
+				'spec_url' => 'https://amp.dev/documentation/components/amp-selector/',
 			),
 		),
 		'AMP-STORY-CTA-LAYER animate-in' => array(
@@ -18910,7 +19053,7 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'spec_name' => 'AMP-STORY-CTA-LAYER animate-in',
-				'spec_url' => 'https://amp.dev/documentation/components/amp-story',
+				'spec_url' => 'https://amp.dev/documentation/components/amp-story/',
 			),
 		),
 		'AMP-STORY-GRID-LAYER animate-in' => array(
@@ -18981,7 +19124,7 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'spec_name' => 'AMP-STORY-GRID-LAYER animate-in',
-				'spec_url' => 'https://amp.dev/documentation/components/amp-story',
+				'spec_url' => 'https://amp.dev/documentation/components/amp-story/',
 			),
 		),
 		'AMP-STORY-GRID-LAYER default' => array(
@@ -19107,7 +19250,7 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'spec_name' => 'AMP-STORY-GRID-LAYER default',
-				'spec_url' => 'https://amp.dev/documentation/components/amp-story',
+				'spec_url' => 'https://amp.dev/documentation/components/amp-story/',
 			),
 		),
 		'AMP-VIDEO-IFRAME > [placeholder]' => array(
@@ -19118,7 +19261,7 @@ class AMP_Allowed_Tags_Generated {
 			),
 			'tag_spec' => array(
 				'spec_name' => 'AMP-VIDEO-IFRAME > [placeholder]',
-				'spec_url' => 'https://amp.dev/documentation/components/amp-video-iframe',
+				'spec_url' => 'https://amp.dev/documentation/components/amp-video-iframe/',
 			),
 		),
 	);

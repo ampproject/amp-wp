@@ -17,6 +17,9 @@ use AmpProject\AmpWP\Admin\ReenableCssTransientCachingAjaxAction;
 use AmpProject\AmpWP\Admin\SiteHealth;
 use AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching;
 use AmpProject\AmpWP\Infrastructure\ServiceBasedPlugin;
+use AmpProject\AmpWP\Instrumentation\ServerTiming;
+use AmpProject\AmpWP\Instrumentation\StopWatch;
+use function is_user_logged_in;
 
 /**
  * The AmpWpPlugin class is the composition root of the plugin.
@@ -72,6 +75,9 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			'admin.onboarding_wizard'          => OnboardingWizardSubmenuPage::class,
 			'reader_theme_loader'              => ReaderThemeLoader::class,
 			'amp_slug_customization_watcher'   => AmpSlugCustomizationWatcher::class,
+			'rest.options_controller'          => OptionsRESTController::class,
+			'server_timing'                    => ServerTiming::class,
+			'obsolete_block_attribute_remover' => ObsoleteBlockAttributeRemover::class,
 		];
 	}
 
@@ -105,7 +111,21 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 *                      to argument values.
 	 */
 	protected function get_arguments() {
-		return [];
+		return [
+			ServerTiming::class => [
+				// Wrapped in a closure so it is lazily evaluated. Otherwise,
+				// is_user_logged_in() breaks because it's used too early.
+				'verbose' => static function () {
+					return is_user_logged_in()
+						&& current_user_can( 'manage_options' )
+						&& isset( $_GET[ QueryVar::VERBOSE_SERVER_TIMING ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+						&& filter_var(
+							$_GET[ QueryVar::VERBOSE_SERVER_TIMING ], // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+							FILTER_VALIDATE_BOOLEAN
+						);
+				},
+			],
+		];
 	}
 
 	/**
@@ -123,6 +143,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	protected function get_shared_instances() {
 		return [
 			PluginRegistry::class,
+			StopWatch::class,
 		];
 	}
 

@@ -80,7 +80,7 @@ class AMP_Post_Meta_Box {
 	/**
 	 * The name for the REST API field containing whether AMP is enabled for a post.
 	 *
-	 * @since 1.6
+	 * @since 2.0
 	 * @var string
 	 */
 	const REST_ATTRIBUTE_NAME = 'amp_enabled';
@@ -144,7 +144,7 @@ class AMP_Post_Meta_Box {
 			isset( $screen->base ) &&
 			'post' === $screen->base &&
 			( ! isset( $screen->is_block_editor ) || ! $screen->is_block_editor ) &&
-			is_post_type_viewable( $post->post_type )
+			in_array( $post->post_type, AMP_Post_Type_Support::get_eligible_post_types(), true )
 		);
 
 		if ( ! $validate ) {
@@ -208,7 +208,7 @@ class AMP_Post_Meta_Box {
 	 */
 	public function enqueue_block_assets() {
 		$post = get_post();
-		if ( ! is_post_type_viewable( $post->post_type ) ) {
+		if ( ! in_array( $post->post_type, AMP_Post_Type_Support::get_eligible_post_types(), true ) ) {
 			return;
 		}
 
@@ -278,7 +278,7 @@ class AMP_Post_Meta_Box {
 		$verify = (
 			isset( $post->ID )
 			&&
-			is_post_type_viewable( $post->post_type )
+			in_array( $post->post_type, AMP_Post_Type_Support::get_eligible_post_types(), true )
 			&&
 			current_user_can( 'edit_post', $post->ID )
 		);
@@ -432,7 +432,7 @@ class AMP_Post_Meta_Box {
 	/**
 	 * Add a REST API field to display whether AMP is enabled on supported post types.
 	 *
-	 * @since 1.6
+	 * @since 2.0
 	 *
 	 * @return void
 	 */
@@ -454,7 +454,7 @@ class AMP_Post_Meta_Box {
 	/**
 	 * Get the value of whether AMP is enabled for a REST API request.
 	 *
-	 * @since 1.6
+	 * @since 2.0
 	 *
 	 * @param array $post_data Post data.
 	 * @return bool Whether AMP is enabled on post.
@@ -477,7 +477,7 @@ class AMP_Post_Meta_Box {
 	/**
 	 * Update whether AMP is enabled for a REST API request.
 	 *
-	 * @since 1.6
+	 * @since 2.0
 	 *
 	 * @param bool    $is_enabled Whether AMP is enabled.
 	 * @param WP_Post $post       Post being updated.

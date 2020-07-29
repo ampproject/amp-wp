@@ -1,8 +1,3 @@
-.choose-reader-theme > div {
-	margin-left: -8px;
-	margin-right: -8px;
-}
-
 .choose-reader-theme > p {
 	font-size: 1rem;
 	margin-bottom: 1.5rem;
@@ -27,48 +22,4 @@
 
 .choose-reader-theme__unavailable label {
 	cursor: default;
-}
-
-.theme-card {
-	display: flex;
-	flex-direction: column;
-	padding: 35px 31px;
-	position: relative;
-}
-
-.theme-card__label-header {
-	align-items: center;
-	display: flex;
-}
-
-.theme-card__label-header > input {
-	flex-shrink: 0;
-}
-
-.theme-card__label-header h3 {
-	line-height: 1.3;
-	margin-left: 5px;
-	margin-top: 0.75em;
-}
-
-.theme-card .phone-inner {
-	max-height: 307px; /* Make all images uniform height. */
-}
-
-.theme-card img {
-	height: auto;
-	width: 100%;
-}
-
-p.theme-card__description {
-	font-size: 13px;
-	line-height: 1.666;
-	display: -webkit-box;
-	-webkit-box-orient: vertical;
-	-webkit-line-clamp: 3;
-	overflow: hidden;
-}
-
-.theme-card__theme-link {
-	margin-top: auto;
 }

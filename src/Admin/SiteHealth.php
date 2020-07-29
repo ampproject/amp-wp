@@ -443,6 +443,11 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 							'value'   => $this->css_transient_caching->get_time_series(),
 							'private' => false,
 						],
+						'amp_libxml_version'      => [
+							'label'   => 'libxml Version',
+							'value'   => LIBXML_DOTTED_VERSION,
+							'private' => false,
+						],
 					],
 				],
 			]

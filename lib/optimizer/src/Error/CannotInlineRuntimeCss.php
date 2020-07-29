@@ -11,7 +11,8 @@ final class CannotInlineRuntimeCss implements Error
     use ErrorProperties;
 
     const EXCEPTION_STRING                 = 'Cannot inline the amp-runtime CSS in %3$s into %2$s: %1$s.';
-    const MISSING_AMP_RUNTIME_STYLE_STRING = 'Cannot inline the amp-runtime CSS in %s: the <style amp-runtime> element is missing.';
+    const MISSING_AMP_RUNTIME_STYLE_STRING = 'Cannot inline the amp-runtime CSS in %s: '
+                                             . 'the <style amp-runtime> element is missing.';
 
     /**
      * Instantiate a CannotInlineRuntimeCss object for an exception that was thrown.

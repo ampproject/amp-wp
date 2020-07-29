@@ -38,7 +38,8 @@ final class InvalidConfigurationValue extends InvalidArgumentException implement
      */
     public static function forInvalidSubValueType($key, $index, $expected, $actual)
     {
-        $message = "The configuration value '{$index}' for the key '{$key}' expected a value of type '{$expected}', got '{$actual}' instead.";
+        $message = "The configuration value '{$index}' for the key '{$key}' expected a value of type '{$expected}', "
+                   . "got '{$actual}' instead.";
 
         return new self($message);
     }

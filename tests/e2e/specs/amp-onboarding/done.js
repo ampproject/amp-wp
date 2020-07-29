@@ -2,7 +2,7 @@
 /**
  * Internal dependencies
  */
-import { completeWizard, testCloseButton, cleanUpSettings } from '../../utils/onboarding-wizard-utils';
+import { testCloseButton, cleanUpSettings, moveToDoneScreen } from '../../utils/onboarding-wizard-utils';
 
 describe( 'Done', () => {
 	afterEach( async () => {
@@ -10,7 +10,7 @@ describe( 'Done', () => {
 	} );
 
 	it( 'renders standard mode done screen', async () => {
-		await completeWizard( { mode: 'standard' } );
+		await moveToDoneScreen( { mode: 'standard' } );
 
 		testCloseButton( { exists: false } );
 
@@ -21,7 +21,7 @@ describe( 'Done', () => {
 	} );
 
 	it( 'renders transitional mode done screen', async () => {
-		await completeWizard( { mode: 'transitional' } );
+		await moveToDoneScreen( { mode: 'transitional' } );
 
 		testCloseButton( { exists: false } );
 
@@ -32,9 +32,9 @@ describe( 'Done', () => {
 	} );
 
 	it( 'renders reader mode done screen', async () => {
-		await completeWizard( { mode: 'reader' } );
+		await moveToDoneScreen( { mode: 'reader' } );
 
-		testCloseButton( { exists: false } );
+		testCloseButton( { exists: true } );
 
 		await expect( page ).toMatchElement( 'h1', { text: 'Congratulations!' } );
 		await expect( page ).toMatchElement( '.phone iframe' );

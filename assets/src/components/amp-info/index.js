@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -17,13 +18,8 @@ import './style.css';
  * @param {?Object} props.icon An SVG icon Component
  */
 export function AMPInfo( { children, className, icon: Icon } ) {
-	const classNames = [
-		className ? className : '',
-		'amp-info',
-	].filter( ( item ) => item );
-
 	return (
-		<div className={ classNames.join( ' ' ) }>
+		<div className={ classnames( 'amp-info', className ) }>
 			{ Icon && <Icon className="amp-info__icon" /> }
 			{ children }
 		</div>

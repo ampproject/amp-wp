@@ -8,7 +8,7 @@ exports[`AMPInfo matches snapshots 1`] = `
 
 exports[`AMPInfo matches snapshots 2`] = `
 <div
-  className="my-class amp-info"
+  className="amp-info my-class"
 >
   <svg
     className="amp-info__icon"

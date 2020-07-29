@@ -6,7 +6,7 @@
  */
 
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 
 /**
  * Tests for AMP_Options_Manager.
@@ -24,6 +24,8 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 */
 	private $was_wp_using_ext_object_cache;
 
+	private $original_theme_directories;
+
 	/**
 	 * Set up.
 	 */
@@ -33,6 +35,11 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		delete_option( AMP_Options_Manager::OPTION_NAME ); // Make sure default reader mode option does not override theme support being added.
 		remove_theme_support( 'amp' );
 		$GLOBALS['wp_settings_errors'] = [];
+
+		global $wp_theme_directories;
+		$this->original_theme_directories = $wp_theme_directories;
+		register_theme_directory( ABSPATH . 'wp-content/themes' );
+		delete_site_transient( 'theme_roots' );
 	}
 
 	/**
@@ -42,10 +49,15 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		parent::tearDown();
 		$GLOBALS['_wp_using_ext_object_cache'] = $this->was_wp_using_ext_object_cache;
 		unregister_post_type( 'foo' );
+		unregister_post_type( 'book' );
 
 		foreach ( get_post_types() as $post_type ) {
 			remove_post_type_support( $post_type, 'amp' );
 		}
+
+		global $wp_theme_directories;
+		$wp_theme_directories = $this->original_theme_directories;
+		delete_site_transient( 'theme_roots' );
 	}
 
 	/**
@@ -140,7 +152,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertEquals(
 			[
 				Option::THEME_SUPPORT           => AMP_Theme_Support::READER_MODE_SLUG,
-				Option::SUPPORTED_POST_TYPES    => [ 'post' ],
+				Option::SUPPORTED_POST_TYPES    => [ 'post', 'page' ],
 				Option::ANALYTICS               => [],
 				Option::ALL_TEMPLATES_SUPPORTED => true,
 				Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
@@ -287,6 +299,87 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_options for toggling the default value of plugin_configured.
+	 *
+	 * @covers AMP_Options_Manager::get_option()
+	 * @covers AMP_Options_Manager::get_options()
+	 */
+	public function test_get_options_changing_plugin_configured_default() {
+		// Ensure plugin_configured is false when existing option is absent.
+		delete_option( AMP_Options_Manager::OPTION_NAME );
+		$this->assertFalse( AMP_Options_Manager::get_option( Option::PLUGIN_CONFIGURED ) );
+
+		// Ensure plugin_configured is true when existing option is absent from an old version.
+		update_option( AMP_Options_Manager::OPTION_NAME, [ Option::VERSION => '1.5.2' ] );
+		$this->assertTrue( AMP_Options_Manager::get_option( Option::PLUGIN_CONFIGURED ) );
+
+		// Ensure plugin_configured is true when explicitly set as such in the DB.
+		update_option(
+			AMP_Options_Manager::OPTION_NAME,
+			[
+				Option::VERSION           => AMP__VERSION,
+				Option::PLUGIN_CONFIGURED => false,
+			]
+		);
+		$this->assertFalse( AMP_Options_Manager::get_option( Option::PLUGIN_CONFIGURED ) );
+
+		// Ensure plugin_configured is false when explicitly set as such in the DB.
+		update_option(
+			AMP_Options_Manager::OPTION_NAME,
+			[
+				Option::VERSION           => AMP__VERSION,
+				Option::PLUGIN_CONFIGURED => true,
+			]
+		);
+		$this->assertTrue( AMP_Options_Manager::get_option( Option::PLUGIN_CONFIGURED ) );
+	}
+
+	/** @return array */
+	public function get_data_for_testing_get_options_default_template_mode() {
+		return [
+			'core_theme'    => [
+				'twentytwenty',
+				AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
+				null,
+			],
+			'child_of_core' => [
+				'child-of-core',
+				AMP_Theme_Support::READER_MODE_SLUG,
+				null,
+			],
+			'custom_theme'  => [
+				'twentytwenty',
+				AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
+				[],
+			],
+		];
+	}
+
+	/**
+	 * Test the expected default mode when various themes are active.
+	 *
+	 * @dataProvider get_data_for_testing_get_options_default_template_mode
+	 *
+	 * @covers AMP_Options_Manager::get_options()
+	 * @param string     $theme               Theme.
+	 * @param string     $expected_mode       Expected mode.
+	 * @param null|array $added_theme_support Added theme support (or not if null).
+	 */
+	public function test_get_options_default_template_mode( $theme, $expected_mode, $added_theme_support ) {
+		$theme_dir = basename( dirname( AMP__DIR__ ) ) . '/' . basename( AMP__DIR__ ) . '/tests/php/data/themes';
+		register_theme_directory( $theme_dir );
+
+		delete_option( AMP_Options_Manager::OPTION_NAME );
+		remove_theme_support( 'amp' );
+		switch_theme( $theme );
+		if ( is_array( $added_theme_support ) ) {
+			add_theme_support( 'amp', $added_theme_support );
+		}
+		AMP_Core_Theme_Sanitizer::extend_theme_support();
+		$this->assertEquals( $expected_mode, AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
+	}
+
+	/**
 	 * Test get_options when supported_post_types option is list of post types and when post type support is added for default values.
 	 *
 	 * @covers AMP_Options_Manager::get_options()
@@ -296,13 +389,21 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 			remove_post_type_support( $post_type, 'amp' );
 		}
 
+		register_post_type(
+			'book',
+			[
+				'public'   => true,
+				'supports' => [ 'amp' ],
+			]
+		);
+
 		// Make sure the post type support get migrated.
 		delete_option( AMP_Options_Manager::OPTION_NAME );
-		add_post_type_support( 'page', 'amp' );
 		$this->assertEquals(
 			[
 				'post', // Enabled by default.
-				'page',
+				'page', // Enabled by default.
+				'book',
 			],
 			AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES )
 		);
@@ -400,6 +501,14 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		);
 		$migrated_options = AMP_Options_Manager::get_options();
 		$this->assertTrue( $migrated_options[ Option::ALL_TEMPLATES_SUPPORTED ] );
+		$this->assertEqualSets(
+			[
+				'post',
+				'page',
+				'attachment',
+			],
+			array_unique( $migrated_options[ Option::SUPPORTED_POST_TYPES ] )
+		);
 	}
 
 	/**
@@ -561,155 +670,5 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 			add_theme_support( 'amp', $args );
 		}
 		$this->assertEquals( $expected_mode, AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
-	}
-
-	/**
-	 * Test handle_updated_theme_support_option for reader mode.
-	 *
-	 * @covers AMP_Options_Manager::handle_updated_theme_support_option()
-	 * @covers ::amp_admin_get_preview_permalink()
-	 */
-	public function test_handle_updated_theme_support_option_disabled() {
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
-		AMP_Validation_Manager::init();
-
-		$page_id = self::factory()->post->create( [ 'post_type' => 'page' ] );
-		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, [ 'page' ] );
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
-		AMP_Options_Manager::handle_updated_theme_support_option();
-		$amp_settings_errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
-		$new_error           = end( $amp_settings_errors );
-		$this->assertStringStartsWith( 'Reader mode activated!', $new_error['message'] );
-		$this->assertStringContains( esc_url( amp_get_permalink( $page_id ) ), $new_error['message'], 'Expect amp_admin_get_preview_permalink() to return a page since it is the only post type supported.' );
-		$this->assertCount( 0, get_posts( [ 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ] ) );
-	}
-
-	/**
-	 * Test handle_updated_theme_support_option for standard when there is one auto-accepted issue.
-	 *
-	 * @covers AMP_Options_Manager::handle_updated_theme_support_option()
-	 * @covers ::amp_admin_get_preview_permalink()
-	 */
-	public function test_handle_updated_theme_support_option_standard_success_but_error() {
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
-
-		$post_id = self::factory()->post->create( [ 'post_type' => 'post' ] );
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
-		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, [ 'post' ] );
-
-		$filter = static function() {
-			$validation = [
-				'results' => [
-					[
-						'error'     => [ 'code' => 'example' ],
-						'sanitized' => false,
-					],
-				],
-			];
-			return [
-				'body' => wp_json_encode( $validation ),
-			];
-		};
-		add_filter( 'pre_http_request', $filter, 10, 3 );
-		AMP_Options_Manager::handle_updated_theme_support_option();
-		remove_filter( 'pre_http_request', $filter );
-		$amp_settings_errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
-		$new_error           = end( $amp_settings_errors );
-		$this->assertStringStartsWith( 'Standard mode activated!', $new_error['message'] );
-		$this->assertStringContains( esc_url( amp_get_permalink( $post_id ) ), $new_error['message'], 'Expect amp_admin_get_preview_permalink() to return a post since it is the only post type supported.' );
-		$invalid_url_posts = get_posts(
-			[
-				'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-				'fields'    => 'ids',
-			]
-		);
-		$this->assertEquals( 'updated', $new_error['type'] );
-		$this->assertCount( 1, $invalid_url_posts );
-		$this->assertStringContains( 'review 1 issue', $new_error['message'] );
-		$this->assertStringContains( esc_url( get_edit_post_link( $invalid_url_posts[0], 'raw' ) ), $new_error['message'], 'Expect edit post link for the invalid URL post to be present.' );
-	}
-
-	/**
-	 * Test handle_updated_theme_support_option for standard when there is one auto-accepted issue.
-	 *
-	 * @covers AMP_Options_Manager::handle_updated_theme_support_option()
-	 * @covers ::amp_admin_get_preview_permalink()
-	 */
-	public function test_handle_updated_theme_support_option_standard_validate_error() {
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
-		self::factory()->post->create( [ 'post_type' => 'post' ] );
-
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
-		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, [ 'post' ] );
-
-		$filter = static function() {
-			return [
-				'body' => '<html amp><head></head><body></body>',
-			];
-		};
-		add_filter( 'pre_http_request', $filter, 10, 3 );
-		AMP_Options_Manager::handle_updated_theme_support_option();
-		remove_filter( 'pre_http_request', $filter );
-
-		$amp_settings_errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
-		$new_error           = end( $amp_settings_errors );
-		$this->assertStringStartsWith( 'Standard mode activated!', $new_error['message'] );
-		$invalid_url_posts = get_posts(
-			[
-				'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-				'fields'    => 'ids',
-			]
-		);
-		$this->assertCount( 0, $invalid_url_posts );
-		$this->assertEquals( 'error', $new_error['type'] );
-	}
-
-	/**
-	 * Test handle_updated_theme_support_option for transitional mode.
-	 *
-	 * @covers AMP_Options_Manager::handle_updated_theme_support_option()
-	 * @covers ::amp_admin_get_preview_permalink()
-	 */
-	public function test_handle_updated_theme_support_option_paired() {
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
-
-		$post_id = self::factory()->post->create( [ 'post_type' => 'post' ] );
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
-		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, [ 'post' ] );
-
-		$filter = static function() {
-			$validation = [
-				'results' => [
-					[
-						'error'     => [ 'code' => 'foo' ],
-						'sanitized' => false,
-					],
-					[
-						'error'     => [ 'code' => 'bar' ],
-						'sanitized' => false,
-					],
-				],
-			];
-			return [
-				'body' => wp_json_encode( $validation ),
-			];
-		};
-		add_filter( 'pre_http_request', $filter, 10, 3 );
-		AMP_Options_Manager::handle_updated_theme_support_option();
-		remove_filter( 'pre_http_request', $filter );
-		$amp_settings_errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
-		$new_error           = end( $amp_settings_errors );
-		$this->assertStringStartsWith( 'Transitional mode activated!', $new_error['message'] );
-		$this->assertStringContains( esc_url( amp_get_permalink( $post_id ) ), $new_error['message'], 'Expect amp_admin_get_preview_permalink() to return a post since it is the only post type supported.' );
-		$invalid_url_posts = get_posts(
-			[
-				'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-				'fields'    => 'ids',
-			]
-		);
-		$this->assertEquals( 'updated', $new_error['type'] );
-		$this->assertCount( 1, $invalid_url_posts );
-		$this->assertStringContains( 'review 2 issues', $new_error['message'] );
-		$this->assertStringContains( esc_url( get_edit_post_link( $invalid_url_posts[0], 'raw' ) ), $new_error['message'], 'Expect edit post link for the invalid URL post to be present.' );
 	}
 }

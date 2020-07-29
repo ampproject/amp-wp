@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { ToggleControl } from '@wordpress/components';
+import { isValidElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -20,8 +21,8 @@ import './style.css';
  * @param {boolean} props.checked Whether the toggle is on.
  * @param {boolean} props.disabled Whether the toggle is disabled.
  * @param {Function} props.onChange Change handler.
- * @param {?string} props.text Toggle text.
- * @param {string} props.title Toggle title.
+ * @param {string} props.text Toggle text.
+ * @param {Object|string} props.title Toggle title.
  */
 export function AMPSettingToggle( { checked, disabled = false, onChange, text, title } ) {
 	return (
@@ -30,9 +31,15 @@ export function AMPSettingToggle( { checked, disabled = false, onChange, text, t
 				checked={ ! disabled && checked }
 				label={ (
 					<div className="amp-setting-toggle__label-text">
-						<h3>
-							{ title }
-						</h3>
+						{
+							isValidElement( title )
+								? title
+								: (
+									<h3>
+										{ title }
+									</h3>
+								)
+						}
 						{ text && (
 							<p>
 								{ text }
@@ -49,5 +56,5 @@ AMPSettingToggle.propTypes = {
 	disabled: PropTypes.bool,
 	onChange: PropTypes.func.isRequired,
 	text: PropTypes.string,
-	title: PropTypes.string.isRequired,
+	title: PropTypes.node.isRequired,
 };

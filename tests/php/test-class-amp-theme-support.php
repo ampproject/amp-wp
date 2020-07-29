@@ -10,9 +10,9 @@ use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\ConfigurationArgument;
 use AmpProject\AmpWP\MobileRedirection;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\QueryVars;
-use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
-use AmpProject\AmpWP\Tests\PrivateAccess;
+use AmpProject\AmpWP\QueryVar;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\Dom\Document;
 use org\bovigo\vfs;
 
@@ -89,6 +89,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_HTTP::$headers_sent = [];
 		remove_all_filters( 'theme_root' );
 		remove_all_filters( 'template' );
+		unregister_post_type( 'book' );
+		unregister_post_type( 'announcement' );
 	}
 
 	/**
@@ -942,6 +944,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'comment_reply_link', [ self::TESTED_CLASS, 'filter_comment_reply_link' ] ) );
 		$this->assertEquals( 10, has_filter( 'cancel_comment_reply_link', [ self::TESTED_CLASS, 'filter_cancel_comment_reply_link' ] ) );
 		$this->assertEquals( 100, has_action( 'comment_form', [ self::TESTED_CLASS, 'amend_comment_form' ] ) );
+		$this->assertEquals( 10, has_filter( 'get_comments_link', [ self::TESTED_CLASS, 'amend_comments_link' ] ) );
+		$this->assertEquals( 10, has_filter( 'respond_link', [ self::TESTED_CLASS, 'amend_comments_link' ] ) );
 		$this->assertFalse( has_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'get_header_image_tag', [ self::TESTED_CLASS, 'amend_header_image_with_video_header' ] ) );
 	}
@@ -990,6 +994,34 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertFalse( amp_is_canonical() );
 		$output = get_echo( [ 'AMP_Theme_Support', 'amend_comment_form' ] );
 		$this->assertStringContains( '<input type="hidden" name="redirect_to"', $output );
+	}
+
+	/**
+	 * Test amend_comments_link().
+	 *
+	 * @covers AMP_Theme_Support::amend_comments_link
+	 */
+	public function test_amend_comments_link() {
+		$post_id       = self::factory()->post->create();
+		$comments_link = get_comments_link( $post_id );
+
+		// Test Transitional mode.
+		$this->set_template_mode( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+		$this->assertStringEndsNotWith( 'noamp=mobile#respond', AMP_Theme_Support::amend_comments_link( $comments_link ) );
+
+		// Test legacy reader mode without mobile redirection.
+		delete_option( AMP_Options_Manager::OPTION_NAME );
+		$this->set_template_mode( AMP_Theme_Support::READER_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::READER_THEME, ReaderThemes::DEFAULT_READER_THEME );
+		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, false );
+		$this->assertStringEndsNotWith( 'noamp=mobile#respond', AMP_Theme_Support::amend_comments_link( $comments_link ) );
+
+		// Test legacy Reader mode with mobile redirection.
+		delete_option( AMP_Options_Manager::OPTION_NAME );
+		$this->set_template_mode( AMP_Theme_Support::READER_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::READER_THEME, ReaderThemes::DEFAULT_READER_THEME );
+		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, true );
+		$this->assertStringEndsWith( 'noamp=mobile#respond', AMP_Theme_Support::amend_comments_link( $comments_link ) );
 	}
 
 	/**
@@ -1788,9 +1820,13 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
 
-		$partial = '<img src="test.png"><script data-head>document.write(\'Illegal\');</script>';
+		$partial = '<img src="test.png" style="border:solid 1px red;"><script data-head>document.write(\'Illegal\');</script><style>img { background:blue }</style>';
 		$output  = AMP_Theme_Support::filter_customize_partial_render( $partial );
 		$this->assertStringContains( '<amp-img src="test.png"', $output );
+		$this->assertStringContains( '<style amp-custom-partial="">', $output );
+		$this->assertStringContains( 'amp-img{background:blue}', $output );
+		$this->assertStringContains( ':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-b123f72{border:solid 1px red}', $output );
+		$this->assertStringEndsWith( '/*# sourceURL=amp-custom-partial.css */</style>', $output );
 		$this->assertStringNotContains( '<script', $output );
 		$this->assertStringNotContains( '<html', $output );
 	}
@@ -2179,14 +2215,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 		$this->assertStringStartsWith( 'Redirecting', $sanitized_html );
 		$this->assertCount( 1, $redirects );
-		$this->assertEquals( add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_AVAILABLE, home_url( '/' ) ), $redirects[0] );
+		$this->assertEquals( add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_AVAILABLE, home_url( '/' ) ), $redirects[0] );
 		$this->assertEquals( 1, AMP_Theme_Support_Sanitizer_Counter::$count );
 
 		AMP_Validation_Manager::reset_validation_results();
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 		$this->assertStringStartsWith( 'Redirecting', $sanitized_html );
 		$this->assertCount( 2, $redirects );
-		$this->assertEquals( add_query_arg( QueryVars::NOAMP, QueryVars::NOAMP_AVAILABLE, home_url( '/' ) ), $redirects[0] );
+		$this->assertEquals( add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_AVAILABLE, home_url( '/' ) ), $redirects[0] );
 		$this->assertEquals( 2, AMP_Theme_Support_Sanitizer_Counter::$count, 'Expected sanitizer to be invoked again.' );
 
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );

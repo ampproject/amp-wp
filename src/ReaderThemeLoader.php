@@ -49,17 +49,6 @@ final class ReaderThemeLoader implements Service, Registerable {
 	private $theme_overridden = false;
 
 	/**
-	 * Register the service with the system.
-	 *
-	 * @return void
-	 */
-	public function register() {
-		// The following needs to run at plugins_loaded because that is when _wp_customize_include runs. Otherwise, the
-		// most logical action would be setup_theme.
-		add_action( 'plugins_loaded', [ $this, 'override_theme' ], 9 );
-	}
-
-	/**
 	 * Is Reader mode with a Reader theme selected.
 	 *
 	 * @return bool Whether new Reader mode.
@@ -83,8 +72,9 @@ final class ReaderThemeLoader implements Service, Registerable {
 		}
 
 		// Lastly, if the active theme is not the same as the reader theme, then we can switch to the reader theme.
-		// Otherwise, the site should instead be in Transitional mode.
-		return get_template() !== $reader_theme;
+		// Otherwise, the site should instead be in Transitional mode. Note that get_stylesheet() is used as opposed
+		// to get_template() because the active theme should be allowed to be a child theme of a Reader theme.
+		return get_stylesheet() !== $reader_theme;
 	}
 
 	/**
@@ -103,6 +93,156 @@ final class ReaderThemeLoader implements Service, Registerable {
 	 */
 	public function is_amp_request() {
 		return isset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	}
+
+	/**
+	 * Register the service with the system.
+	 *
+	 * @return void
+	 */
+	public function register() {
+		// The following needs to run at plugins_loaded because that is when _wp_customize_include runs. Otherwise, the
+		// most logical action would be setup_theme.
+		add_action( 'plugins_loaded', [ $this, 'override_theme' ], 9 );
+
+		add_filter( 'wp_prepare_themes_for_js', [ $this, 'filter_wp_prepare_themes_to_indicate_reader_theme' ] );
+		add_action( 'admin_print_footer_scripts-themes.php', [ $this, 'inject_theme_single_template_modifications' ] );
+	}
+
+	/**
+	 * Filter themes for JS to remove action to delete the selected Reader theme and show a notice.
+	 *
+	 * @param array $prepared_themes Array of theme data.
+	 * @return array Themes.
+	 */
+	public function filter_wp_prepare_themes_to_indicate_reader_theme( $prepared_themes ) {
+		if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
+			return $prepared_themes;
+		}
+
+		$reader_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
+		if ( isset( $prepared_themes[ $reader_theme ] ) ) {
+
+			// Make sure the AMP Reader theme appears right after the active theme in the list.
+			$stylesheet = get_stylesheet();
+			if ( isset( $prepared_themes[ $stylesheet ] ) ) {
+				$prepared_themes = array_merge(
+					[
+						$stylesheet   => $prepared_themes[ $stylesheet ],
+						$reader_theme => $prepared_themes[ $reader_theme ],
+					],
+					$prepared_themes
+				);
+			}
+
+			// Prevent Reader theme from being deleted.
+			unset( $prepared_themes[ $reader_theme ]['actions']['delete'] );
+
+			// Make sure the Customize link goes to AMP.
+			$prepared_themes[ $reader_theme ]['actions']['customize'] = amp_get_customizer_url();
+
+			// Force the theme to be styled as Active.
+			$prepared_themes[ $reader_theme ]['active'] = true;
+
+			// Make sure the hacked Backbone template will use the AMP action links.
+			$prepared_themes[ $reader_theme ]['ampActiveReaderTheme'] = true;
+
+			// Add AMP Reader theme notice.
+			$prepared_themes[ $reader_theme ]['ampReaderThemeNotice'] = sprintf(
+				wp_kses(
+					/* translators: placeholder is link to AMP settings screen */
+					__( 'This has been <a href="%s">selected</a> as the AMP Reader theme.', 'amp' ),
+					[
+						'a' => [ 'href' => true ],
+					]
+				),
+				esc_url( add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, admin_url( 'admin.php' ) ) )
+			);
+		}
+
+		return $prepared_themes;
+	}
+
+	/**
+	 * Inject new logic into the Backbone templates for rendering a theme lightbox.
+	 *
+	 * This is admittedly hacky, but WordPress doesn't provide a much better option.
+	 */
+	public function inject_theme_single_template_modifications() {
+		if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
+			return;
+		}
+
+		$reader_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
+		?>
+		<script>
+			(function( themeSingleTmpl ) {
+				if ( ! themeSingleTmpl ) {
+					return;
+				}
+				let text = themeSingleTmpl.text;
+
+				text = text.replace(
+					/(?=<p class="theme-description">)/,
+					`
+					<# if ( data.ampReaderThemeNotice ) { #>
+						<div class="notice notice-info notice-alt inline">
+							<p>{{{ data.ampReaderThemeNotice }}}</p>
+						</div>
+					<# } #>
+					`
+				);
+
+				// Inject our action links.
+				text = text.replace(
+					/(<div class="active-theme">)((?:.|\s)+?)(<\/div>)/,
+					( match, startDiv, actionLinks, endDiv ) => {
+						return `
+							${startDiv}
+							<# if ( data.ampActiveReaderTheme ) { #>
+								<a href="{{{ data.actions.customize }}}" class="button button-primary customize load-customize hide-if-no-customize">
+									<?php esc_html_e( 'Customize AMP', 'amp' ); ?>
+								</a>
+							<# } else { #>
+								${actionLinks}
+							<# } #>
+							${endDiv}
+						`;
+					}
+				);
+
+				themeSingleTmpl.text = text;
+			})( document.getElementById( 'tmpl-theme-single' ) );
+
+			(function ( themeTmpl, ssrThemeNamePrefixElement ) {
+				// First update the card that was rendered server-side in wp-admin/themes.php.
+				if ( ssrThemeNamePrefixElement ) {
+					ssrThemeNamePrefixElement.textContent = <?php echo wp_json_encode( _x( 'Reader:', 'prefix for theme card in list', 'amp' ) ); ?>;
+				}
+
+				// Then update the Mustache template so that future renders will also have the proper prefix.
+				if ( themeTmpl ) {
+					themeTmpl.text = themeTmpl.text.replace(
+						/(<div class="theme-id-container">)(\s*<# if)/,
+						function ( match, startDiv ) {
+							return `
+							${startDiv}
+							<# if ( data.ampActiveReaderTheme ) { #>
+								<h2 class="theme-name" id="{{ data.id }}-name">
+									<span><?php echo esc_html( _x( 'Reader:', 'prefix for theme card in list', 'amp' ) ); ?></span> {{{ data.name }}}
+								</h2>
+							<# } else if
+						`;
+						}
+					);
+				}
+			}) (
+				document.getElementById( 'tmpl-theme' ),
+				document.querySelector( <?php echo wp_json_encode( sprintf( '#%s-name > span', $reader_theme ) ); ?> )
+			);
+		</script>
+		<?php
+
 	}
 
 	/**

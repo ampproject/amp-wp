@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { createContext, useEffect, useState, useRef, useCallback } from '@wordpress/element';
+import { createContext, useEffect, useState, useRef, useCallback, useContext } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -12,7 +12,8 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import { useError } from '../../utils/use-error';
+import { useAsyncError } from '../../utils/use-async-error';
+import { ErrorContext } from '../error-context-provider';
 
 export const Options = createContext();
 
@@ -31,15 +32,19 @@ function waitASecond() {
  * @param {Object} props Component props.
  * @param {?any} props.children Component children.
  * @param {string} props.optionsRestEndpoint REST endpoint to retrieve options.
+ * @param {boolean} props.populateDefaultValues Whether default values should be populated.
+ * @param {boolean} props.hasErrorBoundary Whether the component is wrapped in an error boundary.
+ * @param {boolean} props.delaySave Whether to delay updating state when saving data.
  */
-export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
+export function OptionsContextProvider( { children, optionsRestEndpoint, populateDefaultValues, hasErrorBoundary = false, delaySave = false } ) {
 	const [ updates, setUpdates ] = useState( {} );
-	const [ fetchingOptions, setFetchingOptions ] = useState( false );
+	const [ fetchingOptions, setFetchingOptions ] = useState( null );
 	const [ savingOptions, setSavingOptions ] = useState( false );
 	const [ didSaveOptions, setDidSaveOptions ] = useState( false );
 	const [ originalOptions, setOriginalOptions ] = useState( {} );
 
-	const { setError } = useError();
+	const { error, setError } = useContext( ErrorContext );
+	const { setAsyncError } = useAsyncError();
 
 	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
 	const hasUnmounted = useRef( false );
@@ -51,7 +56,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 	 * Fetches options.
 	 */
 	useEffect( () => {
-		if ( Object.keys( originalOptions ).length || fetchingOptions ) {
+		if ( error || Object.keys( originalOptions ).length || fetchingOptions ) {
 			return;
 		}
 
@@ -68,7 +73,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 					return;
 				}
 
-				if ( fetchedOptions.plugin_configured === false ) {
+				if ( ! populateDefaultValues && fetchedOptions.plugin_configured === false ) {
 					fetchedOptions.mobile_redirect = true;
 					fetchedOptions.reader_theme = null;
 					fetchedOptions.theme_support = null;
@@ -76,13 +81,21 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 
 				setOriginalOptions( fetchedOptions );
 			} catch ( e ) {
+				if ( true === hasUnmounted.current ) {
+					return;
+				}
+
 				setError( e );
+
+				if ( hasErrorBoundary ) {
+					setAsyncError( e );
+				}
 				return;
 			}
 
 			setFetchingOptions( false );
 		} )();
-	}, [ fetchingOptions, originalOptions, optionsRestEndpoint, setError ] );
+	}, [ error, fetchingOptions, hasErrorBoundary, originalOptions, optionsRestEndpoint, populateDefaultValues, setAsyncError, setError ] );
 
 	/**
 	 * Sends options to the REST endpoint to be saved.
@@ -122,7 +135,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 							data: updatesToSave,
 						},
 					),
-					waitASecond(),
+					delaySave ? waitASecond() : () => undefined,
 				],
 			);
 
@@ -131,14 +144,25 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 			}
 
 			setOriginalOptions( savedOptions );
+			setError( null );
 		} catch ( e ) {
+			if ( true === hasUnmounted.current ) {
+				return;
+			}
+
+			setSavingOptions( false );
 			setError( e );
+
+			if ( hasErrorBoundary ) {
+				setAsyncError( e );
+			}
+
 			return;
 		}
 
 		setDidSaveOptions( true );
 		setSavingOptions( false );
-	}, [ optionsRestEndpoint, setError, originalOptions, updates ] );
+	}, [ delaySave, hasErrorBoundary, optionsRestEndpoint, setAsyncError, originalOptions, setError, updates ] );
 
 	/**
 	 * Updates options in state.
@@ -181,5 +205,8 @@ export function OptionsContextProvider( { children, optionsRestEndpoint } ) {
 
 OptionsContextProvider.propTypes = {
 	children: PropTypes.any,
+	delaySave: PropTypes.bool,
+	hasErrorBoundary: PropTypes.bool,
 	optionsRestEndpoint: PropTypes.string.isRequired,
+	populateDefaultValues: PropTypes.bool.isRequired,
 };

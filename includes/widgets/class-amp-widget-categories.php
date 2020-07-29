@@ -7,12 +7,12 @@
  * @codeCoverageIgnore
  */
 
-_deprecated_file( __FILE__, '1.6' );
+_deprecated_file( __FILE__, '2.0.0' );
 
 /**
  * Class AMP_Widget_Categories
  *
- * @deprecated As of 1.6 the AMP_Core_Block_Handler will sanitize the core widgets instead.
+ * @deprecated As of 2.0 the AMP_Core_Block_Handler will sanitize the core widgets instead.
  * @since 0.7.0
  * @package AMP
  */

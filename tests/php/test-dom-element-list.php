@@ -58,7 +58,7 @@ class Test_DOM_Element_List extends \WP_UnitTestCase {
 	public function test_dom_element_list_add( $images, $expected_count ) {
 		$dom_element_list = new ElementList();
 		foreach ( $images as $image ) {
-			$dom_element_list = $dom_element_list->add( $image, '' );
+			$dom_element_list = $dom_element_list->add( $image, null );
 		}
 
 		$this->assertEquals( $expected_count, $dom_element_list->count() );
@@ -77,7 +77,7 @@ class Test_DOM_Element_List extends \WP_UnitTestCase {
 	public function test_dom_element_list_get_iterator( $images, $expected_count ) {
 		$dom_element_list = new ElementList();
 		foreach ( $images as $image ) {
-			$dom_element_list = $dom_element_list->add( $image, '' );
+			$dom_element_list = $dom_element_list->add( $image );
 		}
 
 		$iteration_count = 0;
@@ -92,23 +92,27 @@ class Test_DOM_Element_List extends \WP_UnitTestCase {
 	/**
 	 * Test get_caption.
 	 *
-	 * @covers \AmpProject\AmpWP\Component\CaptionedSlide::get_caption()
+	 * @covers \AmpProject\AmpWP\Component\CaptionedSlide::get_caption_element()
 	 */
 	public function test_get_caption() {
-		$image_node      = AMP_DOM_Utils::create_node( new Document(), 'amp-img', [] );
-		$caption         = 'This is a caption';
-		$captioned_image = new CaptionedSlide( $image_node, $caption );
-		$this->assertEquals( $caption, $captioned_image->get_caption() );
+		$dom = new Document();
+
+		$image_node      = AMP_DOM_Utils::create_node( $dom, 'amp-img', [] );
+		$caption_element = AMP_DOM_Utils::create_node( $dom, 'span', [] );
+		$caption_element->appendChild( new DOMText( 'This is a caption' ) );
+
+		$captioned_image = new CaptionedSlide( $image_node, $caption_element );
+		$this->assertEquals( $caption_element, $captioned_image->get_caption_element() );
 	}
 
 	/**
-	 * Test get_slide_node.
+	 * Test get_slide_element.
 	 *
-	 * @covers \AmpProject\AmpWP\Component\CaptionedSlide::get_slide_node()
+	 * @covers \AmpProject\AmpWP\Component\CaptionedSlide::get_slide_element()
 	 */
-	public function test_get_slide_node() {
+	public function test_get_slide_element() {
 		$image_node = AMP_DOM_Utils::create_node( new Document(), 'amp-img', [] );
-		$amp_image  = new CaptionedSlide( $image_node, '' );
-		$this->assertEquals( $image_node, $amp_image->get_slide_node() );
+		$amp_image  = new CaptionedSlide( $image_node, new DOMElement( 'foo' ) );
+		$this->assertEquals( $image_node, $amp_image->get_slide_element() );
 	}
 }

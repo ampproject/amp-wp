@@ -39,7 +39,7 @@ class AMP_Template_Customizer {
 	/**
 	 * Reader theme loader.
 	 *
-	 * @since 1.6
+	 * @since 2.0
 	 * @var ReaderThemeLoader
 	 */
 	protected $reader_theme_loader;
@@ -106,7 +106,15 @@ class AMP_Template_Customizer {
 	}
 
 	/**
-	 * Force select settings to have a refresh transport.
+	 * Force changes to header video to cause refresh since there are various JS dependencies that prevent selective refresh from working properly.
+	 *
+	 * In the AMP Customizer preview, selective refresh partial for `custom_header` will render <amp-video> or <amp-youtube> elements.
+	 * Nevertheless, custom-header.js in core is not expecting AMP components. Therefore the `wp-custom-header-video-loaded` event never
+	 * fires. This prevents themes from toggling the `has-header-video` class on the body.
+	 *
+	 * Additionally, the Twenty Seventeen core theme (the only which supports header videos) has two separate scripts
+	 * `twentyseventeen-global` and `twentyseventeen-skip-link-focus-fix` which are depended on for displaying the
+	 * video, for example toggling the 'has-header-video' class when the video is added or removed.
 	 *
 	 * This applies whenever AMP is being served in the Customizer preview, that is, in Standard mode or Reader mode with a Reader theme.
 	 */
@@ -116,12 +124,8 @@ class AMP_Template_Customizer {
 		}
 
 		$setting_ids = [
-			// Force changes to header video to cause refresh since logic in wp-customize-header.js does not construct AMP components.
 			'header_video',
 			'external_header_video',
-
-			// Because injecting the amp-img via JS may not result in the right dimensions.
-			'custom_logo',
 		];
 		foreach ( $setting_ids as $setting_id ) {
 			$setting = $this->wp_customize->get_setting( $setting_id );
@@ -280,7 +284,7 @@ class AMP_Template_Customizer {
 	/**
 	 * Load up AMP scripts needed for Customizer integrations when a Reader theme has been selected.
 	 *
-	 * @since 1.6
+	 * @since 2.0
 	 */
 	public function add_customizer_scripts() {
 		$asset_file   = AMP__DIR__ . '/assets/js/amp-customize-controls.asset.php';
@@ -394,7 +398,7 @@ class AMP_Template_Customizer {
 	 * Load up AMP scripts needed for Customizer integrations in Legacy Reader mode.
 	 *
 	 * @since 0.6 Originally called add_customizer_scripts.
-	 * @since 1.6
+	 * @since 2.0
 	 */
 	public function add_legacy_customizer_scripts() {
 		$asset_file   = AMP__DIR__ . '/assets/js/amp-customize-controls-legacy.asset.php';
