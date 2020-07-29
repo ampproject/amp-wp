@@ -2,14 +2,8 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useContext, useEffect, useState } from '@wordpress/element';
-import { addQueryArgs } from '@wordpress/url';
+import { useContext, useEffect } from '@wordpress/element';
 import { Button } from '@wordpress/components';
-
-/**
- * External dependencies
- */
-import { CUSTOMIZER_LINK, AMP_QUERY_VAR } from 'amp-settings'; // From WP inline script.
 
 /**
  * Internal dependencies
@@ -21,6 +15,7 @@ import { ReaderThemes } from '../../../components/reader-themes-context-provider
 import { AMPNotice, NOTICE_SIZE_LARGE, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_INFO } from '../../../components/amp-notice';
 import { Navigation } from '../../components/navigation-context-provider';
 import { Options } from '../../../components/options-context-provider';
+import { Done } from '../../../components/svg/done';
 
 /**
  * Provides the description for the done screen.
@@ -77,14 +72,9 @@ function Saving() {
 }
 
 function Preview() {
-	const [ iframeLoaded, setIframeLoaded ] = useState( false );
-
 	const {
-		editedOptions: { theme_support: themeSupport },
-		originalOptions: { preview_permalink: previewPermalink, reader_theme: readerTheme },
+		originalOptions: { preview_permalink: previewPermalink },
 	} = useContext( Options );
-
-	const opacity = iframeLoaded ? '1' : '0';
 
 	return (
 		<>
@@ -94,35 +84,10 @@ function Preview() {
 					src={ previewPermalink }
 					title={ __( 'Site preview', 'amp' ) }
 					name="amp-wizard-completion-preview"
-					style={ {
-						opacity,
-					} }
-					onLoad={ () => {
-						setIframeLoaded( true );
-					} }
 				/>
 			</Phone>
 			<div className="done__link-buttons">
 
-				{
-					'reader' === themeSupport && (
-						<Button
-							isPrimary
-							href={
-								addQueryArgs(
-									CUSTOMIZER_LINK,
-									'legacy' === readerTheme
-										? { 'autofocus[panel]': 'amp_panel', url: previewPermalink }
-										: { url: previewPermalink, [ AMP_QUERY_VAR ]: '1' },
-								)
-							}
-							target="_blank"
-							rel="noreferrer"
-						>
-							{ __( 'Customize AMP', 'amp' ) }
-						</Button>
-					)
-				}
 				<Button
 					isPrimary
 					href={ previewPermalink }
@@ -193,6 +158,7 @@ export function Save() {
 	return (
 		<div className="done">
 			<div className="done__text">
+				<Done />
 				<h1>
 					{ heading }
 				</h1>

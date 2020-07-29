@@ -19,12 +19,13 @@ export const Options = createContext();
  *
  * @param {Object} props
  * @param {any} props.children Component children.
+ * @param {string} props.themeSupport Default theme support mode in the mock provider.
  */
-export function OptionsContextProvider( { children } ) {
+export function OptionsContextProvider( { children, themeSupport = READER } ) {
 	const [ updates, updateOptions ] = useState( {} );
 	const [ originalOptions, setOriginalOptions ] = useState( {
 		mobile_redirect: true,
-		theme_support: READER,
+		theme_support: themeSupport,
 	} );
 
 	return (
@@ -45,4 +46,5 @@ export function OptionsContextProvider( { children } ) {
 }
 OptionsContextProvider.propTypes = {
 	children: PropTypes.any,
+	themeSupport: PropTypes.string,
 };
