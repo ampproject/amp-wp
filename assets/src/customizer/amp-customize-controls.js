@@ -15,6 +15,10 @@ window.ampCustomizeControls = ( function( api, $ ) {
 			},
 			optionSettings: [],
 			activeThemeSettingImports: {},
+			mimeTypeIcons: {
+				image: '',
+				document: '',
+			},
 		},
 	};
 
@@ -87,19 +91,129 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	};
 
 	/**
+	 * i18n friendly version of basename()
+	 *
+	 * This is a port of wp_basename() in PHP.
+	 *
+	 * @param {string} path Path.
+	 * @return {string} Basename.
+	 */
+	function wpBasename( path ) {
+		return decodeURIComponent(
+			encodeURIComponent( path )
+				.replace( /%(2F|5C)/g, '/' )
+				.replace( /^.*\//, '' ),
+		);
+	}
+
+	/**
+	 * Ensure UploadControl is updated when underlying setting is programmatically updated (not using media library).
+	 *
+	 * The newer MediaControl does update programmatically when the setting changes, so the control for the newer
+	 * Custom Logo will update their UI to show the image. Older controls like the Background Image will not however.
+	 *
+	 * @param {wp.customize.UploadControl} control
+	 */
+	function populateUploadControl( control ) {
+		const value = control.setting();
+		if ( ! value || ( control.params.attachment && control.params.attachment.url === value ) ) {
+			return;
+		}
+		const url = new URL( value );
+
+		// The following replicates PHP logic in WP_Customize_Media_Control::to_json().
+		const type = [ 'jpg', 'png', 'gif', 'bmp' ].includes( url.pathname.substr( -3 ) ) ? 'image' : 'document';
+		const attachment = {
+			id: 1,
+			url: url.href,
+			type,
+			icon: component.data.mimeTypeIcons[ type ],
+			title: wpBasename( url.pathname ),
+		};
+		if ( 'image' === type ) {
+			attachment.sizes = {
+				full: {
+					url: url.href,
+				},
+			};
+		}
+
+		// Make sure that the media frame is populated with the attachment.
+		if ( ! control.frame ) {
+			control.initFrame();
+		}
+		if ( ! control.frame.state() ) {
+			control.frame.setState( 'library' );
+		}
+		control.frame.state().get( 'selection' ).set( [ attachment ] );
+
+		// Call the select method so that the attachment param is updated.
+		if ( control.extended( api.BackgroundControl ) ) {
+			// Explicitly do not call BackgroundControl#select() because it sends an unnecessary custom-background-add ajax request.
+			api.UploadControl.prototype.select.call( control );
+		} else {
+			control.select();
+		}
+
+		// Finally, render the control.
+		control.renderContent();
+	}
+
+	/**
+	 * Ensure HeaderControl is updated when underlying setting is programmatically updated (not using media library).
+	 *
+	 * The newer MediaControl does update programmatically when the setting changes, so the control for the newer
+	 * Custom Logo will update their UI to show the image. Older controls like the Header Image will not however.
+	 *
+	 * @param {wp.customize.HeaderControl} control
+	 */
+	function populateHeaderControl( control ) {
+		const headerImagedData = api( 'header_image_data' ).get();
+		if ( headerImagedData ) {
+			control.setImageFromURL(
+				headerImagedData.url,
+				headerImagedData.attachment_id,
+				headerImagedData.width,
+				headerImagedData.height,
+			);
+		}
+	}
+
+	/**
+	 * Import settings.
+	 */
+	function importSettings() {
+		for ( const [ settingId, settingValue ] of Object.entries( component.data.activeThemeSettingImports ) ) {
+			const setting = api( settingId );
+			if ( setting ) {
+				setting.set( settingValue );
+			}
+		}
+
+		// Work around the UploadControl not supporting programmatic setting updates.
+		api.control.each( ( control ) => {
+			const controlImportedSetting = Object.values( control.settings ).find( ( setting ) => {
+				return setting.id in component.data.activeThemeSettingImports;
+			} );
+			if ( ! controlImportedSetting ) {
+				return;
+			}
+
+			if ( control.extended( api.UploadControl ) ) {
+				populateUploadControl( control );
+			} else if ( control.extended( api.HeaderControl ) ) {
+				populateHeaderControl( control );
+			}
+		} );
+	}
+
+	/**
 	 * Add ability to import settings from the active theme.
 	 */
 	component.addActiveThemeSettingsImporting = function addActiveThemeSettingsImporting() {
 		const importButton = $( '<button type="button" class="button button-secondary">Import Active Theme Settings</button>' );
-		importButton.on( 'click', () => {
-			for ( const [ settingId, settingValue ] of Object.entries( component.data.activeThemeSettingImports ) ) {
-				const setting = api( settingId );
-				if ( setting ) {
-					// @todo This is not enough to update the Background Image control.
-					setting.set( settingValue );
-				}
-			}
-		} );
+
+		importButton.on( 'click', importSettings );
 
 		// @todo Put this in a better spot.
 		$( '#customize-info .preview-notice' ).append( importButton );

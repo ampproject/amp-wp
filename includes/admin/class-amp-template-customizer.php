@@ -317,6 +317,10 @@ class AMP_Template_Customizer {
 						'queryVar'                  => amp_get_slug(),
 						'optionSettings'            => $option_settings,
 						'activeThemeSettingImports' => $this->get_active_theme_import_settings(),
+						'mimeTypeIcons'             => [
+							'image'    => wp_mime_type_icon( 'image' ),
+							'document' => wp_mime_type_icon( 'document' ),
+						],
 						'l10n'                      => [
 							/* translators: placeholder is URL to non-AMP Customizer. */
 							'ampVersionNotice'     => wp_kses_post( sprintf( __( 'You are customizing the AMP version of your site. <a href="%s">Customize non-AMP version</a>.', 'amp' ), esc_url( admin_url( 'customize.php' ) ) ) ),
