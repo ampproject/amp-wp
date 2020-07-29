@@ -76,7 +76,7 @@ export function TemplateModes() {
 				{ __( 'Template mode', 'amp' ) }
 			</h2>
 			<TemplateModeOption
-				details={ __( 'In Standard Mode your site uses a single theme and there is a single version of your content. You can opt out from AMP selectively for parts of your site. Every canonical URL will be either AMP or non-AMP.', 'amp' ) }
+				details={ __( 'In Standard mode your site uses a single theme and there is a single version of your content. You can opt out from AMP selectively for parts of your site. Every canonical URL will be either AMP or non-AMP.', 'amp' ) }
 				mode="standard"
 			>
 				{
