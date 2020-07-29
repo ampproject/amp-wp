@@ -46,7 +46,7 @@ class RESTPreloaderTest extends WP_UnitTestCase {
 	 * @covers RESTPreloader::preload_data
 	 */
 	public function test_adding_preloaded_data() {
-		global $wp_scripts;
+		global $wp_scripts, $wp_screen;
 
 		set_current_screen( 'index.php' );
 		$this->instance->add_preloaded_path( '/wp/v2/posts' );
@@ -58,5 +58,7 @@ class RESTPreloaderTest extends WP_UnitTestCase {
 			'wp.apiFetch.use( wp.apiFetch.createPreloadingMiddleware( {"\/wp\/v2\/posts":{"body":[],"headers":{"X-WP-Total":0,"X-WP-TotalPages":0}}} ) );',
 			$result
 		);
+
+		$wp_screen = null;
 	}
 }
