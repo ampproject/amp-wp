@@ -163,7 +163,7 @@ final class Document extends DOMDocument
      *
      * @var string
      */
-    const AMP_EMOJI_ATTRIBUTE_PATTERN = '/(<html [^>]*?)('
+    const AMP_EMOJI_ATTRIBUTE_PATTERN = '/(<html\s[^>]*?)('
                                         . Attribute::AMP_EMOJI_ALT
                                         . '|'
                                         . Attribute::AMP_EMOJI
@@ -1346,7 +1346,7 @@ final class Document extends DOMDocument
         }
 
         return preg_replace(
-            '/(<html [^>]*?)' . preg_quote(self::EMOJI_AMP_ATTRIBUTE_PLACEHOLDER, '/') . '="([^"]*)"/i',
+            '/(<html\s[^>]*?)' . preg_quote(self::EMOJI_AMP_ATTRIBUTE_PLACEHOLDER, '/') . '="([^"]*)"/i',
             '\1' . $this->usedAmpEmoji . '\2',
             $html,
             1

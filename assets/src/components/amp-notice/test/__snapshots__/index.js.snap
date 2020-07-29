@@ -60,7 +60,7 @@ exports[`AMPNotice matches snapshots 1`] = `
 
 exports[`AMPNotice matches snapshots 2`] = `
 <div
-  className="amp-notice amp-notice--warning amp-notice--small"
+  className="amp-notice amp-notice--error amp-notice--small"
 >
   <div
     className="amp-notice__icon"

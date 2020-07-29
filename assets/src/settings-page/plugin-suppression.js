@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import classnames from 'classnames';
 
 /**
  * WordPress dependencies
@@ -17,8 +18,8 @@ import { SelectControl } from '@wordpress/components';
  */
 import { Options } from '../components/options-context-provider';
 import { ConditionalDetails } from '../components/conditional-details';
-import { Selectable } from '../components/selectable';
 import { SiteSettings } from '../components/site-settings-provider';
+import { AMPDrawer } from '../components/amp-drawer';
 
 /**
  * Renders the formatted date for when a plugin was suppressed.
@@ -139,15 +140,15 @@ function ValidationErrorDetails( { errors } ) {
 			</summary>
 			<ul>
 				{ errors.map( ( error ) => {
-					const className = [
-						`error-${ error.is_removed ? 'removed' : 'kept' }`,
-						`error-${ error.is_reviewed ? 'reviewed' : 'unreviewed' }`,
-					].join( ' ' );
-
 					const WrapperElement = ! error.is_reviewed ? 'strong' : Fragment;
 
 					return (
-						<li key={ error.term.term_id } className={ className }>
+						<li
+							key={ error.term.term_id }
+							className={ classnames(
+								`error-${ error.is_removed ? 'removed' : 'kept' }`,
+								`error-${ error.is_reviewed ? 'reviewed' : 'unreviewed' }`,
+							) }>
 							<WrapperElement>
 								<a href={ error.edit_url } target="_blank" rel="noreferrer" title={ error.tooltip }>
 									<span dangerouslySetInnerHTML={ { __html: error.title } } />
@@ -303,40 +304,43 @@ export function PluginSuppression() {
 	}
 
 	return (
-		<section>
-			<h2>
-				{ __( 'Plugin Suppression', 'amp' ) }
-			</h2>
-			<Selectable className="plugin-suppression">
-				<p>
-					{ __( 'When a plugin adds markup which is invalid on AMP pages, you have two options: you can review the validation error, determine that the invalid markup is not needed, and let the AMP plugin remove it. Alternatively, you can suppress the offending plugin from running on AMP pages. Below is the list of active plugins which have caused validation issues.', 'amp' ) }
-				</p>
-				<table id="suppressed-plugins-table" className="wp-list-table widefat fixed striped">
-					<thead>
-						<tr>
-							<th className="column-status" scope="col">
-								{ __( 'Status', 'amp' ) }
-							</th>
-							<th className="column-plugin" scope="col">
-								{ __( 'Plugin', 'amp' ) }
-							</th>
-							<th className="column-details" scope="col">
-								{ __( 'Details', 'amp' ) }
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						{ Object.keys( suppressiblePlugins || {} ).map( ( pluginKey ) => (
-							<PluginRow
-								key={ `plugin-row-${ pluginKey }` }
-								pluginDetails={ suppressiblePlugins[ pluginKey ] }
-								pluginKey={ pluginKey }
-							/>
-						) ) }
-					</tbody>
-				</table>
-
-			</Selectable>
-		</section>
+		<AMPDrawer
+			heading={ (
+				<h3>
+					{ __( 'Plugin Suppression', 'amp' ) }
+				</h3>
+			) }
+			hiddenTitle={ __( 'Plugin suppression', 'amp' ) }
+			id="plugin-suppression-drawer"
+			initialOpen={ false }
+		>
+			<p>
+				{ __( 'When a plugin adds markup which is invalid on AMP pages, you have two options: you can review the validation error, determine that the invalid markup is not needed, and let the AMP plugin remove it. Alternatively, you can suppress the offending plugin from running on AMP pages. Below is the list of active plugins which have caused validation issues.', 'amp' ) }
+			</p>
+			<table id="suppressed-plugins-table" className="wp-list-table widefat fixed striped">
+				<thead>
+					<tr>
+						<th className="column-status" scope="col">
+							{ __( 'Status', 'amp' ) }
+						</th>
+						<th className="column-plugin" scope="col">
+							{ __( 'Plugin', 'amp' ) }
+						</th>
+						<th className="column-details" scope="col">
+							{ __( 'Details', 'amp' ) }
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					{ Object.keys( suppressiblePlugins || {} ).map( ( pluginKey ) => (
+						<PluginRow
+							key={ `plugin-row-${ pluginKey }` }
+							pluginDetails={ suppressiblePlugins[ pluginKey ] }
+							pluginKey={ pluginKey }
+						/>
+					) ) }
+				</tbody>
+			</table>
+		</AMPDrawer>
 	);
 }

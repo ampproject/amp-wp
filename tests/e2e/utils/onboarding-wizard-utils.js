@@ -38,9 +38,15 @@ export async function moveToTemplateModeScreen( { technical } ) {
 }
 
 export async function clickMode( mode ) {
-	await page.waitForSelector( `[for="template-mode-${ mode }"]` );
-	await page.click( `[for="template-mode-${ mode }"]` );
-	await page.waitForSelector( `#template-mode-${ mode }:checked` );
+	await page.evaluate( ( templateMode ) => {
+		const el = document.querySelector( `#template-mode-${ templateMode }` );
+		if ( el ) {
+			el.scrollIntoView();
+		}
+	}, mode );
+	await expect( page ).toMatchElement( `#template-mode-${ mode }` );
+	await expect( page ).toClick( `#template-mode-${ mode }` );
+	await expect( page ).toMatchElement( `#template-mode-${ mode }:checked` );
 }
 
 export async function moveToReaderThemesScreen( { technical } ) {
@@ -95,8 +101,9 @@ export async function moveToDoneScreen( { technical = true, mode, readerTheme = 
 
 export async function completeWizard( { technical = true, mode, readerTheme = 'legacy', mobileRedirect = true } ) {
 	await moveToDoneScreen( { technical, mode, readerTheme, mobileRedirect } );
-	await page.click( '#next-button' );
+	await expect( page ).toClick( '#next-button' );
 	await page.waitForSelector( '#amp-settings' );
+	await expect( page ).toMatchElement( '#amp-settings' );
 }
 
 export async function testCloseButton( { exists = true } ) {
