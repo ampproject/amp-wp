@@ -16,7 +16,7 @@ describe( 'Onboarding wizard exit links', () => {
 	} );
 
 	it( 'returns to previous page when clicking close', async () => {
-		await visitAdminPage( 'plugins.php' );
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
 		await page.waitForSelector( '.wp-admin' );
 
 		await page.waitForSelector( 'a[href*="admin.php?page=amp-onboarding-wizard"]' );
@@ -24,7 +24,7 @@ describe( 'Onboarding wizard exit links', () => {
 		await page.waitForSelector( '#amp-onboarding-wizard' );
 		await expect( page ).toClick( 'a', { text: 'Close' } );
 		await page.waitForSelector( '.wp-admin' );
-		await expect( page ).toMatchElement( 'h1', { text: 'Plugins' } );
+		await expect( page ).toMatchElement( 'h1', { text: 'AMP Settings' } );
 	} );
 
 	it( 'goes to settings when clicking finish', async () => {
