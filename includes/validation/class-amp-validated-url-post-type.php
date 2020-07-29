@@ -2344,9 +2344,9 @@ class AMP_Validated_URL_Post_Type {
 			<div class="notice notice-alt notice-error inline">
 				<p>
 					<?php if ( 0 === $excluded_stylesheets ) : ?>
-						<?php esc_html_e( 'You have exceeded the CSS budget. Because of this, the page will not be served as a valid AMP page.', 'amp' ); ?>
+						<?php esc_html_e( 'You have exceeded the CSS budget. The page will not be served as a valid AMP page.', 'amp' ); ?>
 					<?php else : ?>
-						<?php esc_html_e( 'You have exceeded the CSS budget. Because of this, stylesheets deemed of lesser priority have been excluded from the page.', 'amp' ); ?>
+						<?php esc_html_e( 'You have exceeded the CSS budget. Stylesheets deemed of lesser priority have been excluded from the page.', 'amp' ); ?>
 					<?php endif; ?>
 					<?php esc_html_e( 'Please review the flagged stylesheets below and determine if the current theme or a particular plugin is including excessive CSS.', 'amp' ); ?>
 				</p>
@@ -2354,7 +2354,7 @@ class AMP_Validated_URL_Post_Type {
 		<?php elseif ( $percentage_budget_used >= AMP_Style_Sanitizer::CSS_BUDGET_WARNING_PERCENTAGE ) : ?>
 			<div class="notice notice-alt notice-warning inline">
 				<p>
-					<?php esc_html_e( 'You are nearing the limit of the CSS budget. Once reaching this limit, stylesheets deemed of lesser priority will be excluded from the page. Please review the stylesheets below and determine if the current theme or a particular plugin is including excessive CSS.', 'amp' ); ?>
+					<?php esc_html_e( 'You are nearing the limit of the CSS budget. Once this limit is reached, stylesheets deemed of lesser priority will be excluded from the page. Please review the stylesheets below and determine if the current theme or a particular plugin is including excessive CSS.', 'amp' ); ?>
 				</p>
 			</div>
 		<?php endif; ?>
@@ -2559,7 +2559,7 @@ class AMP_Validated_URL_Post_Type {
 													esc_attr(
 														'style_attribute' === $stylesheet['origin']
 															?
-															__( 'Selector generated to increase specificity so the cascade is preserved for properties moved from style attribute to CSS rule in style[amp-custom].', 'amp' )
+															__( 'Selector generated to increase specificity so the cascade is preserved for properties moved from style attribute to CSS rules in style[amp-custom].', 'amp' )
 															:
 															__( 'Selector generated to increase specificity for important properties so that the CSS cascade is preserved. AMP does not allow important properties.', 'amp' )
 													)
