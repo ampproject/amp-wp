@@ -361,14 +361,15 @@ class AMP_Template_Customizer {
 			$import_theme_mods['custom_css_post_id']
 		);
 
-		if ( ! empty( $import_theme_mods['nav_menu_locations'] ) ) {
+		if ( isset( $import_theme_mods['nav_menu_locations'] ) ) {
 			$nav_menu_locations = wp_map_nav_menu_locations(
 				get_theme_mod( 'nav_menu_locations', [] ),
 				$import_theme_mods['nav_menu_locations']
 			);
 			foreach ( $nav_menu_locations as $nav_menu_location => $menu_id ) {
-				$import_theme_mods[ "nav_menu_locations[$nav_menu_location]" ] = $menu_id;
+				$import_settings[ "nav_menu_locations[$nav_menu_location]" ] = $menu_id;
 			}
+			unset( $import_theme_mods['nav_menu_locations'] );
 		}
 
 		foreach ( $this->wp_customize->settings() as $setting ) {
@@ -398,7 +399,7 @@ class AMP_Template_Customizer {
 			$import_settings[ $setting->id ] = $value;
 		}
 
-		return $import_theme_mods;
+		return $import_settings;
 	}
 
 	/**
