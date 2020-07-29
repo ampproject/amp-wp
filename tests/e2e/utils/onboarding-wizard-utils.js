@@ -96,12 +96,17 @@ export async function moveToDoneScreen( { technical = true, mode, readerTheme = 
 	}
 
 	await clickNextButton();
+	await page.waitFor( 1000 );
 	await page.waitForSelector( '.done__preview-container' );
 }
 
 export async function completeWizard( { technical = true, mode, readerTheme = 'legacy', mobileRedirect = true } ) {
 	await moveToDoneScreen( { technical, mode, readerTheme, mobileRedirect } );
-	await expect( page ).toClick( '#next-button' );
+	if ( 'reader' === mode ) {
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+	} else {
+		await expect( page ).toClick( '#next-button' );
+	}
 	await page.waitForSelector( '#amp-settings' );
 	await expect( page ).toMatchElement( '#amp-settings' );
 }
