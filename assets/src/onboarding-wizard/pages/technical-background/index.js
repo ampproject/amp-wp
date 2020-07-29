@@ -88,7 +88,7 @@ export function TechnicalBackground() {
 					{ __( 'Are you technical?', 'amp' ) }
 				</h1>
 				<p>
-					{ __( 'In order to recommend the best plugin configuration options for your site, please indicate what is your level of technical expertise.', 'amp' ) }
+					{ __( 'In order to recommend the best plugin configuration options for your site, please indicate your level of technical expertise.', 'amp' ) }
 				</p>
 			</div>
 			<form>
