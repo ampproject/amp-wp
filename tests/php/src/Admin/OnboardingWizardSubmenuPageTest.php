@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP\Tests\Admin;
 use AmpProject\AmpWP\Admin\GoogleFonts;
 use AmpProject\AmpWP\Admin\OnboardingWizardSubmenuPage;
 use AmpProject\AmpWP\Admin\ReaderThemes;
+use AmpProject\AmpWP\Admin\RESTPreloader;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -44,7 +45,7 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
-		$this->page = new OnboardingWizardSubmenuPage( new GoogleFonts(), new ReaderThemes() );
+		$this->page = new OnboardingWizardSubmenuPage( new GoogleFonts(), new ReaderThemes(), new RESTPreloader() );
 	}
 
 	/** @covers OnboardingWizardSubmenu::__construct() */
