@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useContext, useEffect, useState } from '@wordpress/element';
+import { useContext, useEffect } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 
 /**
@@ -72,13 +72,9 @@ function Saving() {
 }
 
 function Preview() {
-	const [ iframeLoaded, setIframeLoaded ] = useState( false );
-
 	const {
 		originalOptions: { preview_permalink: previewPermalink },
 	} = useContext( Options );
-
-	const opacity = iframeLoaded ? '1' : '0';
 
 	return (
 		<>
@@ -88,12 +84,6 @@ function Preview() {
 					src={ previewPermalink }
 					title={ __( 'Site preview', 'amp' ) }
 					name="amp-wizard-completion-preview"
-					style={ {
-						opacity,
-					} }
-					onLoad={ () => {
-						setIframeLoaded( true );
-					} }
 				/>
 			</Phone>
 			<div className="done__link-buttons">
