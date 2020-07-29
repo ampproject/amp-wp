@@ -3,12 +3,14 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
+import { addQueryArgs } from '@wordpress/url';
 import { useContext } from '@wordpress/element';
 
 /**
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { CUSTOMIZER_LINK, AMP_QUERY_VAR } from 'amp-settings'; // From WP inline script.
 
 /**
  * Internal dependencies
@@ -17,6 +19,7 @@ import { Navigation } from '../navigation-context-provider';
 import './style.css';
 import { Options } from '../../../components/options-context-provider';
 import { User } from '../user-context-provider';
+import { READER } from '../../../common/constants';
 
 /**
  * Navigation component.
@@ -27,14 +30,37 @@ import { User } from '../user-context-provider';
  */
 export function Nav( { closeLink, finishLink } ) {
 	const { activePageIndex, canGoForward, isLastPage, moveBack, moveForward } = useContext( Navigation );
-	const { savingOptions } = useContext( Options );
+	const {
+		savingOptions,
+		editedOptions: { theme_support: themeSupport },
+		originalOptions: { preview_permalink: previewPermalink, reader_theme: readerTheme },
+	} = useContext( Options );
 	const { savingDeveloperToolsOption } = useContext( User );
+
+	let nextText;
+	let nextLink;
+
+	if ( isLastPage && READER === themeSupport ) {
+		nextText = __( 'Customize AMP', 'amp' );
+		nextLink = ! savingDeveloperToolsOption && ! savingOptions ? addQueryArgs(
+			CUSTOMIZER_LINK,
+			'legacy' === readerTheme
+				? { 'autofocus[panel]': 'amp_panel', url: previewPermalink }
+				: { url: previewPermalink, [ AMP_QUERY_VAR ]: '1' },
+		) : undefined;
+	} else if ( isLastPage ) {
+		nextText = __( 'Finish', 'amp' );
+		nextLink = ! savingDeveloperToolsOption && ! savingOptions ? finishLink : undefined;
+	} else {
+		nextText = __( 'Next', 'amp' );
+		nextLink = undefined;
+	}
 
 	return (
 		<div className="onboarding-wizard-nav">
 			<div className="onboarding-wizard-nav__inner">
 				<div className="onboarding-wizard-nav__close">
-					{ ! isLastPage && (
+					{ ( ! isLastPage || READER === themeSupport ) && (
 						<Button isLink href={ closeLink }>
 							<svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
 								<mask id="close-icon" mask-type="alpha" maskUnits="userSpaceOnUse" x="3" y="3" width="19" height="19">
@@ -72,12 +98,12 @@ export function Nav( { closeLink, finishLink } ) {
 
 					<Button
 						disabled={ ! canGoForward || savingOptions || savingDeveloperToolsOption }
-						href={ isLastPage && ! savingDeveloperToolsOption && ! savingOptions ? finishLink : undefined }
+						href={ nextLink }
 						id="next-button"
 						isPrimary
 						onClick={ moveForward }
 					>
-						{ isLastPage ? __( 'Finish', 'amp' ) : __( 'Next', 'amp' ) }
+						{ nextText }
 
 						{ ! isLastPage && (
 							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">

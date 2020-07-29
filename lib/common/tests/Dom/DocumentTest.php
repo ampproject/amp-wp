@@ -7,6 +7,8 @@ use AmpProject\Dom\Document;
 use AmpProject\Tests\AssertContainsCompatibility;
 use DOMNode;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
+use ReflectionException;
 
 /**
  * Tests for AmpProject\Dom\Document.
@@ -423,6 +425,42 @@ class DocumentTest extends TestCase
             $converted = Document::fromHtml($html)->saveHTML();
             $this->assertStringNotContains(Document::AMP_BIND_DATA_ATTR_PREFIX, $converted, "Source: {$html}");
         }
+    }
+
+    /**
+     * Test handling noscript elements in the head.
+     *
+     * @covers Document::maybeReplaceNoscriptElements()
+     * @covers Document::maybeRestoreNoscriptElements()
+     */
+    public function testHeadNoscriptElementHandling()
+    {
+        $original = '
+            <html>
+                <head>
+                    <noscript>
+                        <style>/*1*/</style>
+                    </noscript>
+                    <title>Hello</title>
+                    <noscript>
+                        <style>/*2*/</style>
+                    </noscript>
+                </head>
+                <body>
+                    <noscript>
+                        <style>/*3*/</style>
+                    </noscript>
+                </body>
+            </html>
+        ';
+
+        $dom = Document::fromHtml($original);
+        $noscripts = $dom->getElementsByTagName('noscript');
+
+        $this->assertEquals(3, $noscripts->length);
+        $this->assertEquals('head', $noscripts->item(0)->parentNode->nodeName);
+        $this->assertEquals('head', $noscripts->item(1)->parentNode->nodeName);
+        $this->assertEquals('body', $noscripts->item(2)->parentNode->nodeName);
     }
 
     /**
