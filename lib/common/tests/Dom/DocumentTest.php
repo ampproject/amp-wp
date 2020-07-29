@@ -40,7 +40,7 @@ class DocumentTest extends TestCase
             ],
             'emoji_amp_attribute'                      => [
                 'utf-8',
-                '<!DOCTYPE html><html ' . Attribute::AMP_EMOJI . '>' . $head . '<body></body></html>',
+                '<!DOCTYPE html><html' . PHP_EOL . Attribute::AMP_EMOJI . '>' . $head . '<body></body></html>',
                 '<!DOCTYPE html><html ' . Attribute::AMP_EMOJI . '>' . $head . '<body></body></html>',
             ],
             // The next one is different, see https://github.com/ampproject/amphtml/issues/25990.
