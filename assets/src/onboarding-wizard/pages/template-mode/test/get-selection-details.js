@@ -6,15 +6,13 @@ import {
 	getSelectionText,
 	COMPATIBILITY,
 	DETAILS,
-	READER,
-	STANDARD,
-	TRANSITIONAL,
 	MOST_RECOMMENDED,
 	NOT_RECOMMENDED,
 	RECOMMENDED,
 	TECHNICAL,
 	NON_TECHNICAL,
 } from '../get-selection-details';
+import { READER, STANDARD, TRANSITIONAL } from '../../../../common/constants';
 
 describe( 'getRecommendationLevels', () => {
 	it( 'throws no errors', () => {

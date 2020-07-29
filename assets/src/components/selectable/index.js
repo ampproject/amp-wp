@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -19,13 +20,11 @@ import './style.css';
  * @param {boolean} props.selected Whether the element is selected.
  */
 export function Selectable( { children, className = '', direction = 'left', ElementName = 'div', selected = false, ...props } ) {
-	const classNames = [ className, 'selectable', ( selected ? 'selectable--selected' : '' ), `selectable--${ direction }` ]
-		.filter( ( name ) => name )
-		.join( ' ' );
-
 	return (
 		<ElementName
-			className={ classNames }
+			className={ classnames(
+				className, 'selectable', { 'selectable--selected': selected }, `selectable--${ direction }`,
+			) }
 			{ ...props }
 		>
 			{ children }
