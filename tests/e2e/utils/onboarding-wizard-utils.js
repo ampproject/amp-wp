@@ -41,11 +41,11 @@ export async function clickMode( mode ) {
 	await page.evaluate( ( templateMode ) => {
 		const el = document.querySelector( `#template-mode-${ templateMode }` );
 		if ( el ) {
-			el.scrollIntoView();
+			el.scrollIntoView( { block: 'center', inline: 'center' } );
 		}
 	}, mode );
 	await expect( page ).toMatchElement( `#template-mode-${ mode }` );
-	await expect( page ).toClick( `#template-mode-${ mode }` );
+	await page.click( `#template-mode-${ mode }` );
 	await expect( page ).toMatchElement( `#template-mode-${ mode }:checked` );
 }
 
