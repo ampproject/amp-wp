@@ -24,7 +24,7 @@ export const HANDLE_TYPE_RIGHT = 'right';
  *
  * @param {Object} props Component props.
  * @param {any} props.children PanelBody content.
- * @param {string} props.className Extra CSS classes for the wrapper compnent.
+ * @param {string} props.className Extra CSS classes for the wrapper component.
  * @param {any} props.heading Content for the drawer heading.
  * @param {string} props.id A unique ID for the component.
  * @param {boolean} props.initialOpen Whether the drawer should be initially open.

@@ -36,7 +36,7 @@ export function Carousel( {
 	highlightedItemIndex = 0,
 } ) {
 	const windowWidth = useWindowWidth();
-	const [ currentPage, originalSetCenteredPage ] = useState( null );
+	const [ currentPage, originalSetCurrentPage ] = useState( null );
 	const [ pageWidth, setPageWidth ] = useState( 0 );
 	const carouselListRef = useRef();
 
@@ -48,7 +48,7 @@ export function Carousel( {
 	 * in the view. Calling scrollTo in that situation would cause jerky scroll effects.
 	 */
 	const setCurrentPage = useCallback( ( newCurrentPage, scrollToItem = true, smooth = true ) => {
-		originalSetCenteredPage( newCurrentPage );
+		originalSetCurrentPage( newCurrentPage );
 
 		if ( newCurrentPage && scrollToItem ) {
 			carouselListRef.current.scrollTo( {
@@ -262,7 +262,7 @@ function Style( { gutterWidth, itemWidth, namespace } ) {
 }
 
 .${ namespace }__item-counter span:first-of-type:after {
-	border-left: 2px solid rgba(0, 0, 0, .6);
+	border-left: 2px solid var(--color-gray-medium);
 	content: '';
 	margin: -0.5rem 0.5rem;
 }

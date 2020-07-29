@@ -22,7 +22,9 @@ import './style.css';
 export function Selectable( { children, className = '', direction = 'left', ElementName = 'div', selected = false, ...props } ) {
 	return (
 		<ElementName
-			className={ classnames( className, 'selectable', ( selected ? 'selectable--selected' : '' ), `selectable--${ direction }` ) }
+			className={ classnames(
+				className, 'selectable', { 'selectable--selected': selected }, `selectable--${ direction }`,
+			) }
 			{ ...props }
 		>
 			{ children }

@@ -80,7 +80,8 @@ export function AMPNotice( { children, className, size = NOTICE_SIZE_LARGE, type
 
 	return (
 		<div className={
-			classnames( className ? className : '',
+			classnames(
+				className,
 				'amp-notice',
 				`amp-notice--${ type }`,
 				`amp-notice--${ size }`,

@@ -132,7 +132,7 @@ export function TemplateModeOption( { children, details, initialOpen, labelExtra
 			) }
 			hiddenTitle={ getTitle( mode ) }
 			id={ `${ id }-container` }
-			initialOpen={ 'boolean' === typeof initialOpen ? initialOpen : mode && themeSupport && mode === themeSupport }
+			initialOpen={ initialOpen || ( mode && themeSupport ) && mode === themeSupport }
 			selected={ mode === themeSupport }
 		>
 			<div className="template-mode-selection__details">

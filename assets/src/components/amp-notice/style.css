@@ -37,7 +37,7 @@
 }
 
 .amp-notice--warning .amp-notice__icon svg {
-	color: #ff9f00;
+	color: var(--amp-settings-color-warning);
 	transform: rotate(180deg);
 }
 

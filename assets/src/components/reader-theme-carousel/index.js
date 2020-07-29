@@ -85,17 +85,17 @@ export function ReaderThemeCarousel() {
 			}
 
 			const pages = [];
-			const newShownthemes = [ ...shownThemes ];
+			const newShownThemes = [ ...shownThemes ];
 
-			while ( newShownthemes.length ) {
-				pages.push( newShownthemes.splice( 0, 3 ) );
+			while ( newShownThemes.length ) {
+				pages.push( newShownThemes.splice( 0, 3 ) );
 			}
 
 			return pages.map( ( page, index ) => (
 				{
 					label: sprintf(
 						// Translators: Placeholder is a page number.
-						__( 'Page %s' ),
+						__( 'Page %d' ),
 						index,
 					),
 					name: `carousel-page-${ index }`,
