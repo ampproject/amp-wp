@@ -29,7 +29,7 @@
     "@wordpress/escape-html": "1.8.0",
     "@wordpress/html-entities": "2.7.0",
     "@wordpress/i18n": "3.13.0",
-    "@wordpress/url": "2.16.0",
+    "@wordpress/url": "2.17.0",
     "classnames": "2.2.6",
     "prop-types": "15.7.2"
   },
