@@ -143,7 +143,7 @@ export function TemplateModes() {
 				}
 			</TemplateModeOption>
 			<TemplateModeOption
-				details={ __( 'In Reader mode, there are two versions of your site, and two different themes are used are used for the AMP and non-AMP versions. You have the option of using an available fully AMP-compatible theme, or you can use the AMP Legacy theme (formerly known as Classic theme).', 'amp' ) }
+				details={ __( 'In Reader mode, there are two versions of your site, and two different themes are used are used for the AMP and non-AMP versions. Your currently active theme will be used to serve non-AMP pages, and for AMP pages you can choose any theme from a curated list of fully AMP-compatible themes.', 'amp' ) }
 				initialOpen={ false }
 				mode={ READER }
 				labelExtra={ readerNoticeSmall }
