@@ -8,6 +8,7 @@
 namespace AmpProject\AmpWP\Tests\Cli;
 
 use AmpProject\AmpWP\Tests\Cli\Export\ExportActivePlugins;
+use AmpProject\AmpWP\Tests\Cli\Export\ExportActiveThemes;
 use AmpProject\AmpWP\Tests\Cli\Export\ExportResult;
 use Exception;
 use WP_CLI;
@@ -22,6 +23,7 @@ final class ReferenceSiteExportCommand extends WP_CLI_Command {
 	 * @var string
 	 */
 	const EXPORT_STEPS = [
+		ExportActiveThemes::class,
 		ExportActivePlugins::class,
 	];
 

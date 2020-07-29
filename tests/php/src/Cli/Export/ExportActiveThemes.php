@@ -19,34 +19,16 @@ final class ExportActiveThemes implements ExportStep {
 	 * @return ExportResult Adapted export result.
 	 */
 	public function process( ExportResult $export_result ) {
-		$active_themes = $this->get_active_theme();
+		$active_theme = wp_get_theme();
+		$child_theme = $active_theme->get_stylesheet();
+		$parent_theme = $active_theme->get_template();
 
-		foreach ( $active_themes as $plugin ) {
-			$export_result->add_step( 'activate_theme', compact( 'theme' ) );
+		if ( $parent_theme !== $child_theme ) {
+			$export_result->add_step( 'install_theme', [ 'theme' => $parent_theme ] );
 		}
 
+		$export_result->add_step( 'activate_theme', [ 'theme' => $child_theme ] );
+
 		return $export_result;
-	}
-
-	/**
-	 * Get the list of currently active themes.
-	 *
-	 * @return string[] Array of currently active themes.
-	 */
-	private function get_active_themes() {
-		return array_map( static function ( $plugin ) {
-			$filename = basename( $plugin );
-			return preg_replace( '/\.php$/', '', $filename );
-		}, get_option( 'active_themes', [] ) );
-	}
-
-	/**
-	 * Skip the themes that are marked as excluded.
-	 *
-	 * @param string $active_plugin Active plugin to check.
-	 * @return bool Whether to skip the active plugin.
-	 */
-	private function skip_excluded_themes( $active_plugin ) {
-		return ! in_array( $active_plugin, self::EXCLUDED_PLUGINS, true );
 	}
 }
