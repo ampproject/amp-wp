@@ -18,6 +18,10 @@
 	font-family: var(--font-poppins);
 }
 
+.amp h1 {
+	font-size: 2.125rem;
+}
+
 .amp h2 {
 	font-size: 1.5rem;
 }

@@ -208,9 +208,12 @@ final class Document extends DOMDocument
     private $originalEncoding;
 
     /**
-     * Store the placeholder comments that were generated to replace <noscript> elements.
+     * Store the <noscript> markup that was extracted to preserve it during parsing.
+     *
+     * The array keys are the element IDs for placeholder <meta> tags.
      *
      * @see maybeReplaceNoscriptElements()
+     * @see maybeRestoreNoscriptElements()
      *
      * @var string[]
      */
@@ -448,6 +451,7 @@ final class Document extends DOMDocument
         if ($success) {
             $this->normalizeHtmlAttributes();
             $this->restoreMustacheScriptTemplates();
+            $this->maybeRestoreNoscriptElements();
 
             // Remove http-equiv charset again.
             $meta = $this->head->firstChild;
@@ -515,7 +519,6 @@ final class Document extends DOMDocument
 
         $html = $this->restoreDoctypeNode($html);
         $html = $this->restoreMustacheTemplateTokens($html);
-        $html = $this->maybeRestoreNoscriptElements($html);
         $html = $this->restoreSelfClosingTags($html);
         $html = $this->restoreAmpEmojiAttribute($html);
         $html = $this->fixSvgSourceAttributeEncoding($html);
@@ -557,7 +560,7 @@ final class Document extends DOMDocument
      */
     private function extractNodeViaFragmentBoundaries(DOMNode $node)
     {
-        $boundary      = 'fragment_boundary:' . $this->rand();
+        $boundary      = $this->getUniqueId('fragment_boundary');
         $startBoundary = $boundary . ':start';
         $endBoundary   = $boundary . ':end';
         $commentStart  = $this->createComment($startBoundary);
@@ -868,7 +871,6 @@ final class Document extends DOMDocument
      * @param string $html HTML string to adapt.
      * @return string Adapted HTML string.
      * @see maybeRestoreNoscriptElements() Reciprocal function.
-     *
      */
     private function maybeReplaceNoscriptElements($html)
     {
@@ -879,10 +881,9 @@ final class Document extends DOMDocument
                     return preg_replace_callback(
                         '#<noscript[^>]*>.*?</noscript>#si',
                         function ($noscriptMatches) {
-                            $placeholder = sprintf('<!--noscript:%s-->', (string)$this->rand());
-
-                            $this->noscriptPlaceholderComments[$placeholder] = $noscriptMatches[0];
-                            return $placeholder;
+                            $id = $this->getUniqueId('noscript');
+                            $this->noscriptPlaceholderComments[$id] = $noscriptMatches[0];
+                            return sprintf('<meta class="noscript-placeholder" id="%s">', $id);
                         },
                         $headMatches[0]
                     );
@@ -895,7 +896,7 @@ final class Document extends DOMDocument
     }
 
     /**
-     * Maybe replace noscript elements with placeholders.
+     * Maybe restore noscript elements with placeholders.
      *
      * This is done because libxml<2.8 might parse them incorrectly.
      * When appearing in the head element, a noscript can cause the head to close prematurely
@@ -905,22 +906,33 @@ final class Document extends DOMDocument
      * and it is important for the AMP_Script_Sanitizer to be able to access the noscript elements
      * in the body otherwise.
      *
-     * @param string $html HTML string to adapt.
-     * @return string Adapted HTML string.
      * @see maybeReplaceNoscriptElements() Reciprocal function.
-     *
      */
-    private function maybeRestoreNoscriptElements($html)
+    private function maybeRestoreNoscriptElements()
     {
-        if (empty($this->noscriptPlaceholderComments)) {
-            return $html;
-        }
+        foreach ($this->noscriptPlaceholderComments as $id => $noscriptHtmlFragment) {
+            $placeholderElement = $this->getElementById($id);
+            if (!$placeholderElement || !$placeholderElement->parentNode) {
+                continue;
+            }
+            $noscriptFragmentDocument = self::fromHtmlFragment($noscriptHtmlFragment);
+            if (!$noscriptFragmentDocument) {
+                continue;
+            }
+            $exportBody = $noscriptFragmentDocument->getElementsByTagName(Tag::BODY)->item(0);
+            if (!$exportBody) {
+                continue;
+            }
 
-        return str_replace(
-            array_keys($this->noscriptPlaceholderComments),
-            $this->noscriptPlaceholderComments,
-            $html
-        );
+            $importFragment = $this->createDocumentFragment();
+            while ($exportBody->firstChild) {
+                $importNode = $exportBody->removeChild($exportBody->firstChild);
+                $importNode = $this->importNode($importNode, true);
+                $importFragment->appendChild($importNode);
+            }
+
+            $placeholderElement->parentNode->replaceChild($importFragment, $placeholderElement);
+        }
     }
 
     /**
@@ -1285,7 +1297,6 @@ final class Document extends DOMDocument
 
         if (null === $placeholders) {
             $placeholders = [];
-            $salt         = $this->rand();
 
             // Note: The order of these tokens is important, as it determines the order of the replacements.
             $tokens = [
@@ -1299,7 +1310,7 @@ final class Document extends DOMDocument
             ];
 
             foreach ($tokens as $token) {
-                $placeholders[$token] = '_amp_mustache_' . md5($salt . $token);
+                $placeholders[$token] = '_amp_mustache_' . md5(uniqid($token));
             }
         }
 
@@ -1351,24 +1362,6 @@ final class Document extends DOMDocument
             $html,
             1
         );
-    }
-
-    /**
-     * Produce a random number to use in hashes.
-     *
-     * ⚠️ This is not cryptographically secure!
-     *
-     * @param int $min Lower limit for the generated number
-     * @param int $max Upper limit for the generated number
-     * @return int A random number between min and max
-     */
-    private function rand($min = 0, $max = 0)
-    {
-        if (function_exists('mt_rand')) {
-            return mt_rand($min, $max);
-        }
-
-        return rand($min, $max);
     }
 
     /**
@@ -1526,6 +1519,26 @@ final class Document extends DOMDocument
     }
 
     /**
+     * Get auto-incremented ID unique to this class's instantiation.
+     *
+     * @param string $prefix Prefix.
+     * @return string ID.
+     */
+    private function getUniqueId($prefix = '')
+    {
+        if (array_key_exists($prefix, $this->indexCounter)) {
+            ++$this->indexCounter[$prefix];
+        } else {
+            $this->indexCounter[$prefix] = 0;
+        }
+        $uniqueId = (string)$this->indexCounter[$prefix];
+        if ($prefix) {
+            $uniqueId = "{$prefix}-{$uniqueId}";
+        }
+        return $uniqueId;
+    }
+
+    /**
      * Get the ID for an element.
      *
      * If the element does not have an ID, create one first.
@@ -1540,17 +1553,9 @@ final class Document extends DOMDocument
             return $element->getAttribute('id');
         }
 
-        if (array_key_exists($prefix, $this->indexCounter)) {
-            ++$this->indexCounter[$prefix];
-        } else {
-            $this->indexCounter[$prefix] = 0;
-        }
-
-        $id = "{$prefix}-{$this->indexCounter[ $prefix ]}";
-
+        $id = $this->getUniqueId($prefix);
         while ($this->getElementById($id) instanceof DOMElement) {
-            ++$this->indexCounter[$prefix];
-            $id = "{$prefix}-{$this->indexCounter[ $prefix ]}";
+            $id = $this->getUniqueId($prefix);
         }
 
         $element->setAttribute('id', $id);

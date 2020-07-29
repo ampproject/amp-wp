@@ -53,6 +53,11 @@
 	margin-right: 1.5rem;
 }
 
+.summary-header__illustration svg {
+	height: auto;
+	width: 60px;
+}
+
 .summary-header p {
 	font-size: 1rem;
 	line-height: 1.5;
