@@ -34,7 +34,7 @@ describe( 'Done', () => {
 	it( 'renders reader mode done screen', async () => {
 		await moveToDoneScreen( { mode: 'reader' } );
 
-		testCloseButton( { exists: false } );
+		testCloseButton( { exists: true } );
 
 		await expect( page ).toMatchElement( 'h1', { text: 'Congratulations!' } );
 		await expect( page ).toMatchElement( '.phone iframe' );
