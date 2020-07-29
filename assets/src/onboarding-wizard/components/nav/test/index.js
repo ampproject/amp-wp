@@ -84,7 +84,7 @@ describe( 'Nav', () => {
 		expect( nextButton ).not.toBeNull();
 	} );
 
-	it( 'changes next button to "Finish" on last page', () => {
+	it( 'changes next button to "Customize AMP" on last page', () => {
 		act( () => {
 			render(
 				<Providers pages={ testPages }>
@@ -102,7 +102,7 @@ describe( 'Nav', () => {
 			nextButton.dispatchEvent( new global.MouseEvent( 'click', { bubbles: true } ) );
 		} );
 
-		expect( nextButton.textContent ).toBe( 'Finish' );
+		expect( nextButton.textContent ).toBe( 'Customize AMP' );
 	} );
 
 	it( 'close button hides on last page', () => {
