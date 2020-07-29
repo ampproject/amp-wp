@@ -45,46 +45,21 @@ class RESTPreloaderTest extends WP_UnitTestCase {
 		$this->instance = new RESTPreloader();
 	}
 
-	/** @covers RESTPreloader::is_needed */
-	public function test_is_needed() {
-		global $current_screen;
-
-		$this->assertFalse( RESTPreloader::is_needed() );
-
-		set_current_screen( 'index.php' );
-		$this->assertFalse( RESTPreloader::is_needed() );
-
-		add_filter(
-			'amp_preload_rest_paths',
-			function( $paths ) {
-				return $paths;
-			}
-		);
-		$this->assertTrue( RESTPreloader::is_needed() );
-
-		$current_screen = null;
-		$this->assertFalse( RESTPreloader::is_needed() );
-	}
-
 	/**
-	 * @covers RESTPreloader::is_needed
+	 * @covers RESTPreloader::add_preloaded_path
 	 * @covers RESTPreloader::preload_data
 	 */
-	public function test_register() {
+	public function test_adding_preloaded_data() {
 		global $wp_scripts;
 
-		add_filter(
-			'amp_preload_rest_paths',
-			function() {
-				return [ '/wp/v2/posts' ];
-			}
-		);
+		$this->instance->add_preloaded_path( '/wp/v2/posts' );
+		do_action( 'admin_enqueue_scripts' );
 
-		$this->instance->register();
+		$result = end( $wp_scripts->registered['wp-api-fetch']->extra['after'] );
 
 		$this->assertEquals(
 			'wp.apiFetch.use( wp.apiFetch.createPreloadingMiddleware( {"\/wp\/v2\/posts":{"body":[],"headers":{"X-WP-Total":0,"X-WP-TotalPages":0}}} ) );',
-			end( $wp_scripts->registered['wp-api-fetch']->extra['after'] )
+			$result
 		);
 	}
 }

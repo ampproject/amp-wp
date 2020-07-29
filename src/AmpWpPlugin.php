@@ -79,7 +79,6 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			'rest.options_controller'          => OptionsRESTController::class,
 			'server_timing'                    => ServerTiming::class,
 			'obsolete_block_attribute_remover' => ObsoleteBlockAttributeRemover::class,
-			'admin.rest_preloader'             => RESTPreloader::class,
 		];
 	}
 

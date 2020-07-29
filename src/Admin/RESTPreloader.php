@@ -7,18 +7,14 @@
 
 namespace AmpProject\AmpWP\Admin;
 
-use AmpProject\AmpWP\Infrastructure\Conditional;
-use AmpProject\AmpWP\Infrastructure\Delayed;
-use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use WP_Screen;
 
 /**
  * Preloads REST responses for client-side applications to prevent having to call fetch on pageload.
  *
  * @package AmpProject\AmpWP
  */
-final class RESTPreloader implements Conditional, Delayed, Registerable, Service {
+final class RESTPreloader implements Service {
 
 	/**
 	 * Paths to preload.
@@ -28,46 +24,25 @@ final class RESTPreloader implements Conditional, Delayed, Registerable, Service
 	private $paths = [];
 
 	/**
-	 * Check whether the conditional object is currently needed.
+	 * Adds a REST path to be preloaded.
 	 *
-	 * @return bool Whether the conditional object is needed.
+	 * @param string $path A REST path to cache for apiFetch middleware.
 	 */
-	public static function is_needed() {
-		return function_exists( 'rest_preload_api_request' ) && is_admin() && has_filter( 'amp_preload_rest_paths' );
-	}
+	public function add_preloaded_path( $path ) {
+		// Delay adding the preload_data action hook until after a path is added.
+		if ( empty( $this->paths ) ) {
+			add_action( 'admin_enqueue_scripts', [ $this, 'preload_data' ], 99 );
+		}
 
-	/**
-	 * Get the action to use for registering the service.
-	 *
-	 * @return string Registration action to use.
-	 */
-	public static function get_registration_action() {
-		return 'admin_enqueue_scripts';
-	}
-
-	/**
-	 * Adds hooks.
-	 */
-	public function register() {
-		$screen = get_current_screen();
-
-		/**
-		 * Filters REST API paths to preload for the current page.
-		 *
-		 * @param array $paths Paths to preload.
-		 * @param string|null $screen_id Current screen ID or null if no current screen is set.
-		 */
-		$this->paths = apply_filters( 'amp_preload_rest_paths', $this->paths, is_a( $screen, WP_Screen::class ) ? $screen->id : null );
-
-		if ( ! empty( $this->paths ) ) {
-			$this->preload_data();
+		if ( ! in_array( $path, $this->paths, true ) ) {
+			$this->paths[] = $path;
 		}
 	}
 
 	/**
 	 * Preloads data using apiFetch preloading middleware.
 	 */
-	private function preload_data() {
+	public function preload_data() {
 		$preload_data = array_reduce( $this->paths, 'rest_preload_api_request', [] );
 
 		wp_add_inline_script(

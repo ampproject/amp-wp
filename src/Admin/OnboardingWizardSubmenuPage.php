@@ -56,14 +56,23 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 	private $reader_themes;
 
 	/**
+	 * RESTPreloader instance.
+	 *
+	 * @var RESTPreloader
+	 */
+	private $rest_preloader;
+
+	/**
 	 * OnboardingWizardSubmenuPage constructor.
 	 *
-	 * @param GoogleFonts  $google_fonts  An instance of the GoogleFonts service.
-	 * @param ReaderThemes $reader_themes An instance of the ReaderThemes class.
+	 * @param GoogleFonts   $google_fonts  An instance of the GoogleFonts service.
+	 * @param ReaderThemes  $reader_themes An instance of the ReaderThemes class.
+	 * @param RESTPreloader $rest_preloader An instance of the RESTPreloader class.
 	 */
-	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes ) {
-		$this->google_fonts  = $google_fonts;
-		$this->reader_themes = $reader_themes;
+	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes, RESTPreloader $rest_preloader ) {
+		$this->google_fonts   = $google_fonts;
+		$this->reader_themes  = $reader_themes;
+		$this->rest_preloader = $rest_preloader;
 	}
 
 	/**
@@ -93,7 +102,6 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 		add_action( 'admin_head-' . $this->screen_handle(), [ $this, 'override_template' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 		add_filter( 'admin_title', [ $this, 'override_title' ] );
-		add_filter( 'amp_preload_rest_paths', [ $this, 'filter_preload_rest_paths' ], 10, 2 );
 	}
 
 	/**
@@ -256,28 +264,23 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 				'after'
 			);
 		}
+
+		$this->add_preload_rest_paths();
 	}
 
 	/**
 	 * Adds REST paths to preload.
-	 *
-	 * @param array  $paths Array of paths that will be preloaded on the backend.
-	 * @param string $screen The current screen ID.
-	 * @return array Filtered paths.
 	 */
-	public function filter_preload_rest_paths( $paths, $screen ) {
-		if ( $this->screen_handle() !== $screen ) {
-			return $paths;
-		}
+	public function add_preload_rest_paths() {
+		$paths = [
+			'/amp/v1/options',
+			'/amp/v1/reader-themes',
+			'/wp/v2/settings',
+			'/wp/v2/users/me',
+		];
 
-		return array_merge(
-			$paths,
-			[
-				'/amp/v1/options',
-				'/amp/v1/reader-themes',
-				'/wp/v2/settings',
-				'/wp/v2/users/me',
-			]
-		);
+		foreach ( $paths as $path ) {
+			$this->rest_preloader->add_preloaded_path( $path );
+		}
 	}
 }
