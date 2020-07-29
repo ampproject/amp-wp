@@ -109,15 +109,11 @@ export function TemplateModes() {
 				{ __( 'Template Mode', 'amp' ) }
 			</h2>
 			<TemplateModeOption
-<<<<<<< HEAD
+
 				details={ __( 'In Standard Mode your site uses a single theme and there is a single version of your content. You can opt out from AMP selectively for parts of your site. Every canonical URL will be either AMP or non-AMP.', 'amp' ) }
-				mode="standard"
-=======
-				details={ __( 'In Standard Mode your site uses a single theme and there is a single version of your content. In this mode, AMP is the framework of your site and there is reduced development and maintenance costs by having a single site to maintain.', 'amp' ) }
 				initialOpen={ false }
 				mode={ STANDARD }
 				labelExtra={ ( IS_CORE_THEME || 'object' === typeof THEME_SUPPORT_ARGS ) ? <RecommendedNotice /> : null }
->>>>>>> develop
 			>
 				{
 					// Plugin is not configured; active theme has built-in support or has declared theme support without the paired flag.
@@ -131,15 +127,10 @@ export function TemplateModes() {
 				}
 			</TemplateModeOption>
 			<TemplateModeOption
-<<<<<<< HEAD
 				details={ __( 'In transitional mode the active theme\'s templates are used to generate both the AMP and non-AMP versions of your content, allowing for each canonical URL to have a corresponding (paired) AMP URL. This mode is useful to progressively transition towards a fully AMP-compatible site. Depending on your themes/plugins, a varying level of development work may be required.', 'amp' ) }
-				mode="transitional"
-=======
-				details={ __( 'The active theme\'s templates are used to generate non-AMP and AMP versions of your content, allowing for each canonical URL to have a corresponding (paired) AMP URL. This mode is useful to progressively transition towards a fully AMP-first site. Depending on your themes/plugins, a varying level of development work may be required.', 'amp' ) }
 				initialOpen={ false }
 				mode={ TRANSITIONAL }
 				labelExtra={ ( IS_CORE_THEME || 'object' === typeof THEME_SUPPORT_ARGS ) ? <RecommendedNotice /> : null }
->>>>>>> develop
 			>
 				{
 					// Plugin is not configured; active theme has built-in support or has declared theme support with the paired flag.
@@ -153,15 +144,10 @@ export function TemplateModes() {
 				}
 			</TemplateModeOption>
 			<TemplateModeOption
-<<<<<<< HEAD
 				details={ __( 'In Reader mode, there are two versions of your site, and two different themes are used are used for the AMP and non-AMP versions. You have the option of using an available fully AMP-compatible theme, or you can use the AMP Legacy theme (formerly known as Classic theme).', 'amp' ) }
-				mode="reader"
-=======
-				details={ __( 'Formerly called classic mode, this mode generates paired AMP content using simplified templates which may not match the look and feel of your site. Only posts/pages can be served as AMP in Reader mode. No redirection is performed for mobile visitors; AMP pages are served by AMP consumption platforms.', 'amp' ) }
 				initialOpen={ false }
 				mode={ READER }
 				labelExtra={ readerNoticeSmall }
->>>>>>> develop
 			>
 				{ readerNoticeLarge }
 			</TemplateModeOption>
