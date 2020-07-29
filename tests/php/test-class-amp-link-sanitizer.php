@@ -5,10 +5,18 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\MobileRedirection;
+use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\QueryVar;
+use AmpProject\AmpWP\Services;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+
 /**
  * Class AMP_Link_Sanitizer_Test
  */
 class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/**
 	 * Data for test_amp_to_amp_navigation.
@@ -17,8 +25,8 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function get_amp_to_amp_navigation_data() {
 		return [
-			[ true ],
-			[ false ],
+			'Paired AMP' => [ true ],
+			'AMP-First'  => [ false ],
 		];
 	}
 
@@ -38,63 +46,112 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 		$wp_rewrite->init();
 		$wp_rewrite->flush_rules();
 
-		$post_to_link_to = self::factory()->post->create(
-			[
-				'post_name'   => 'link-target-post',
-				'post_status' => 'publish',
-				'post_type'   => 'post',
-			]
+		$post_link         = get_permalink(
+			self::factory()->post->create(
+				[
+					'post_name'   => 'link-target-post',
+					'post_status' => 'publish',
+					'post_type'   => 'post',
+				]
+			)
 		);
+		$excluded_amp_link = get_permalink( self::factory()->post->create() );
+		$excluded_urls     = [ $excluded_amp_link ];
 
 		$links = [
-			'home-link'         => [
+			'home-link'           => [
 				'href'         => home_url( '/' ),
 				'expected_amp' => true,
 				'expected_rel' => 'amphtml',
 			],
-			'internal-link'     => [
-				'href'         => get_permalink( $post_to_link_to ),
+			'internal-link'       => [
+				'href'         => $post_link,
 				'expected_amp' => true,
 				'expected_rel' => 'amphtml',
 			],
-			'ugc-link'          => [
+			'non_amp_to_amp_rel'  => [
+				'href'         => $post_link,
+				'expected_amp' => false,
+				'rel'          => 'noamphtml',
+				'expected_rel' => null,
+			],
+			'two_rel'             => [
+				'href'         => $post_link,
+				'expected_amp' => false,
+				'rel'          => 'help noamphtml',
+				'expected_rel' => 'help noamphtml',
+			],
+			'multiple_rel'        => [
+				'href'         => $post_link,
+				'expected_amp' => false,
+				'rel'          => 'noamphtml nofollow help',
+				'expected_rel' => 'noamphtml nofollow help',
+			],
+			'rel_trailing_space'  => [
+				'href'         => $post_link,
+				'expected_amp' => false,
+				'rel'          => 'noamphtml ',
+				'expected_rel' => null,
+			],
+			'excluded_amp_link'   => [
+				'href'         => $excluded_amp_link,
+				'expected_amp' => false,
+				'expected_rel' => null,
+			],
+			'fragment_identifier' => [
+				'href'         => $excluded_amp_link . '#heading',
+				'expected_amp' => false,
+				'expected_rel' => null,
+			],
+			'ugc-link'            => [
 				'rel'          => 'ugc',
 				'href'         => home_url( '/some/user/generated/data/' ),
 				'expected_amp' => true,
 				'expected_rel' => 'ugc amphtml',
 			],
-			'page-anchor'       => [
+			'page-anchor'         => [
 				'href'         => '#top',
 				'expected_amp' => false,
 				'expected_rel' => null,
 			],
-			'other-page-anchor' => [
-				'href'         => get_permalink( $post_to_link_to ) . '#top',
+			'other-page-anchor'   => [
+				'href'         => $post_link . '#top',
 				'expected_amp' => true,
 				'expected_rel' => 'amphtml',
 			],
-			'external-link'     => [
+			'external-link'       => [
 				'href'         => 'https://external.example.com/',
 				'expected_amp' => false,
 				'expected_rel' => null,
 			],
-			'php-file-link'     => [
+			'non_amp_rel_removed' => [
+				'href'         => 'https://external.example.com/',
+				'expected_amp' => false,
+				'rel'          => 'noamphtml',
+				'expected_rel' => null,
+			],
+			'php-file-link'       => [
 				'href'         => site_url( '/wp-login.php' ),
 				'expected_amp' => false,
 				'expected_rel' => null,
 			],
-			'feed-link'         => [
+			'feed-link'           => [
 				'href'         => get_feed_link(),
 				'expected_amp' => false,
 				'expected_rel' => null,
 			],
-			'admin-link'        => [
+			'admin-link'          => [
 				'href'         => admin_url( 'options-general.php?page=some-plugin' ),
 				'expected_amp' => false,
 				'expected_rel' => null,
 			],
-			'image-link'        => [
+			'image-link'          => [
 				'href'         => content_url( '/some-image.jpg' ),
+				'expected_amp' => false,
+				'expected_rel' => null,
+			],
+			'mailto-link'         => [
+				'href'         => 'mailto:nobody@example.com',
 				'expected_amp' => false,
 				'expected_rel' => null,
 			],
@@ -116,7 +173,7 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
 
-		$sanitizer = new AMP_Link_Sanitizer( $dom, compact( 'paired' ) );
+		$sanitizer = new AMP_Link_Sanitizer( $dom, compact( 'paired', 'excluded_urls' ) );
 		$sanitizer->sanitize();
 
 		// Confirm admin bar is unchanged.
@@ -128,21 +185,22 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 		foreach ( $links as $id => $link_data ) {
 			$element = $dom->getElementById( $id );
 			$this->assertInstanceOf( 'DOMElement', $element, "ID: $id" );
+			$rel = (string) $element->getAttribute( 'rel' );
 			if ( empty( $link_data['expected_rel'] ) ) {
-				$this->assertFalse( $element->hasAttribute( 'rel' ) );
+				$this->assertNotRegExp( '/(^|\s)amphtml(\s|$)/', $rel, "ID: $id" );
 			} else {
-				$this->assertEquals( $link_data['expected_rel'], $element->getAttribute( 'rel' ) );
+				$this->assertEquals( $link_data['expected_rel'], $element->getAttribute( 'rel' ), "ID: $id" );
 			}
 
 			if ( $paired && $link_data['expected_amp'] ) {
-				$this->assertContains( '?' . amp_get_slug(), $element->getAttribute( 'href' ) );
+				$this->assertStringContains( '?' . amp_get_slug(), $element->getAttribute( 'href' ), "ID: $id" );
 			} elseif ( ! $paired || ! $link_data['expected_amp'] ) {
-				$this->assertNotContains( '?' . amp_get_slug(), $element->getAttribute( 'href' ) );
+				$this->assertStringNotContains( '?' . amp_get_slug(), $element->getAttribute( 'href' ), "ID: $id" );
 			}
 		}
 
 		// Confirm changes to form.
-		$this->assertEquals( 1, $dom->xpath->query( '//form[ @id = "internal-search" ]//input[ @name = "amp" ]' )->length );
+		$this->assertEquals( $paired ? 1 : 0, $dom->xpath->query( '//form[ @id = "internal-search" ]//input[ @name = "amp" ]' )->length );
 		$this->assertEquals( 0, $dom->xpath->query( '//form[ @id = "internal-post" ]//input[ @name = "amp" ]' )->length );
 		$this->assertEquals( 0, $dom->xpath->query( '//form[ @id = "external-search" ]//input[ @name = "amp" ]' )->length );
 	}
@@ -186,6 +244,52 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test disabling mobile redirection if the URL is excluded.
+	 */
+	public function test_disable_mobile_redirect_for_excluded_url() {
+		/** @var MobileRedirection $mobile_redirection */
+		$mobile_redirection = Services::get( 'mobile_redirection' );
+
+		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, true );
+
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+		$this->go_to( add_query_arg( amp_get_slug(), '', home_url( '/' ) ) );
+		$mobile_redirection->redirect();
+
+		$link = home_url( '/' );
+		$dom  = AMP_DOM_Utils::get_dom_from_content( "<a id='link' href='{$link}'>Foo</a>" );
+
+		$sanitizer = new AMP_Link_Sanitizer( $dom, [ 'excluded_urls' => [ $link ] ] );
+		$sanitizer->sanitize();
+
+		$a_tag = $dom->getElementById( 'link' );
+		$this->assertEquals( add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $link ), $a_tag->getAttribute( 'href' ) );
+	}
+
+	/**
+	 * Test disabling mobile redirection if the link has the `noamphtml` relationship.
+	 */
+	public function test_disable_mobile_redirect_for_url_with_noamphtml_rel() {
+		/** @var MobileRedirection $mobile_redirection */
+		$mobile_redirection = Services::get( 'mobile_redirection' );
+
+		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, true );
+
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+		$this->go_to( add_query_arg( amp_get_slug(), '', home_url( '/' ) ) );
+		$mobile_redirection->redirect();
+
+		$link = home_url( '/' );
+		$dom  = AMP_DOM_Utils::get_dom_from_content( "<a id='link' href='{$link}' rel='noamphtml'>Foo</a>" );
+
+		$sanitizer = new AMP_Link_Sanitizer( $dom );
+		$sanitizer->sanitize();
+
+		$a_tag = $dom->getElementById( 'link' );
+		$this->assertEquals( add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $link ), $a_tag->getAttribute( 'href' ) );
+	}
+
+	/**
 	 * Get data for test_amp_to_amp_linking_enabled.
 	 *
 	 * @return array
@@ -207,6 +311,7 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 	 * @param bool     $expected Whether to expect the sanitizer to be present.
 	 */
 	public function test_amp_to_amp_linking_enabled( $filter, $expected ) {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		add_filter( 'amp_to_amp_linking_enabled', $filter );
 		$sanitizers = amp_get_content_sanitizers();
 		if ( $expected ) {

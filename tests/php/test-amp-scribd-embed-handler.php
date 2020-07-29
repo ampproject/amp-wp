@@ -5,12 +5,18 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
+
 /**
  * Class AMP_Scribd_Embed_Handler_Test
  *
  * @covers AMP_Scribd_Embed_Handler
  */
 class AMP_Scribd_Embed_Handler_Test extends WP_UnitTestCase {
+
+	use WithoutBlockPreRendering {
+		setUp as public prevent_block_pre_render;
+	}
 
 	/**
 	 * Scribd document URL.
@@ -20,31 +26,10 @@ class AMP_Scribd_Embed_Handler_Test extends WP_UnitTestCase {
 	protected $scribd_doc_url = 'https://www.scribd.com/doc/110799637/Synthesis-of-Knowledge-Effects-of-Fire-and-Thinning-Treatments-on-Understory-Vegetation-in-Dry-U-S-Forests';
 
 	/**
-	 * Hypothetical Scribd document URL that would return an oEmbed response with a 'sandbox'
-	 * attribute already set on the iframe.
-	 *
-	 * @var string
-	 */
-	protected $scribd_doc_with_sandbox_attr_url = 'https://www.scribd.com/doc/NaN/Hypothetical-Book';
-
-	/**
 	 * Set up.
-	 *
-	 * @global WP_Post $post
 	 */
 	public function setUp() {
-		global $post;
-		parent::setUp();
-
-		/*
-		 * As #34115 in 4.9 a post is not needed for context to run oEmbeds. Prior to 4.9, the WP_Embed::shortcode()
-		 * method would short-circuit when this is the case:
-		 * https://github.com/WordPress/wordpress-develop/blob/4.8.4/src/wp-includes/class-wp-embed.php#L192-L193
-		 * So on WP<4.9 we set a post global to ensure oEmbeds get processed.
-		 */
-		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '4.9', '<' ) ) {
-			$post = self::factory()->post->create_and_get();
-		}
+		$this->prevent_block_pre_render();
 
 		add_filter( 'pre_http_request', [ $this, 'mock_http_request' ], 10, 3 );
 	}
@@ -66,15 +51,15 @@ class AMP_Scribd_Embed_Handler_Test extends WP_UnitTestCase {
 	 * @return array Response data.
 	 */
 	public function mock_http_request( $preempt, $r, $url ) {
+		if ( in_array( 'external-http', $_SERVER['argv'], true ) ) {
+			return $preempt;
+		}
+
 		if ( false === strpos( $url, 'scribd.com' ) ) {
 			return $preempt;
 		}
 
-		$body = '{"type":"rich","version":"1.0","provider_name":"Scribd","provider_url":"https://www.scribd.com/","cache_age":604800,"title":"Synthesis of Knowledge: Effects of Fire and Thinning Treatments on Understory Vegetation in Dry U.S. Forests","author_name":"Joint Fire Science Program","author_url":"https://www.scribd.com/user/151878975/Joint-Fire-Science-Program","thumbnail_url":"https://imgv2-1-f.scribdassets.com/img/document/110799637/111x142/9fc8621525/1570598026?v=1","thumbnail_width":164,"thumbnail_height":212,"html":"\u003ciframe class=\"scribd_iframe_embed\" src=\"https://www.scribd.com/embeds/110799637/content\" data-aspect-ratio=\"1.2941176470588236\" scrolling=\"no\" id=\"110799637\" width=\"100%\" height=\"500\" frameborder=\"0\"\u003e\u003c/iframe\u003e\u003cscript type=\"text/javascript\"\u003e\n          (function() { var scribd = document.createElement(\"script\"); scribd.type = \"text/javascript\"; scribd.async = true; scribd.src = \"https://www.scribd.com/javascripts/embed_code/inject.js\"; var s = document.getElementsByTagName(\"script\")[0]; s.parentNode.insertBefore(scribd, s); })()\n        \u003c/script\u003e"}';
-
-		if ( false !== strpos( $url, 'Hypothetical-Book' ) ) {
-			$body = '{"type":"rich","version":"1.0","provider_name":"Scribd","provider_url":"https://www.scribd.com/","cache_age":604800,"title":"Hypothetical Book","author_name":"John Doe","author_url":"https://www.scribd.com/user/NaN/Hypothetical-Book","thumbnail_url":"https://imgv2-1-f.scribdassets.com/img/document/NaN/111x142/123/123?v=1","thumbnail_width":164,"thumbnail_height":212,"html":"\u003ciframe class=\"scribd_iframe_embed\" sandbox=\"allow-forms allow-scripts\" src=\"https://www.scribd.com/embeds/NaN/content\" data-aspect-ratio=\"1.2941176470588236\" scrolling=\"no\" id=\"NaN\" width=\"100%\" height=\"500\" frameborder=\"0\"\u003e\u003c/iframe\u003e\u003cscript type=\"text/javascript\"\u003e\n          (function() { var scribd = document.createElement(\"script\"); scribd.type = \"text/javascript\"; scribd.async = true; scribd.src = \"https://www.scribd.com/javascripts/embed_code/inject.js\"; var s = document.getElementsByTagName(\"script\")[0]; s.parentNode.insertBefore(scribd, s); })()\n        \u003c/script\u003e"}';
-		}
+		$body = '{"type":"rich","version":"1.0","provider_name":"Scribd","provider_url":"https://www.scribd.com/","cache_age":604800,"title":"Synthesis of Knowledge: Effects of Fire and Thinning Treatments on Understory Vegetation in Dry U.S. Forests","author_name":"Joint Fire Science Program","author_url":"https://www.scribd.com/user/151878975/Joint-Fire-Science-Program","thumbnail_url":"https://imgv2-1-f.scribdassets.com/img/document/110799637/111x142/9fc8621525/1570598026?v=1","thumbnail_width":164,"thumbnail_height":212,"html":"\u003ciframe class=\"scribd_iframe_embed\" src=\"https://www.scribd.com/embeds/110799637/content\" data-aspect-ratio=\"1.2941176470588236\" scrolling=\"no\" id=\"110799637\" width=\"500\" height=\"750\" frameborder=\"0\"\u003e\u003c/iframe\u003e\u003cscript type=\"text/javascript\"\u003e\n          (function() { var scribd = document.createElement(\"script\"); scribd.type = \"text/javascript\"; scribd.async = true; scribd.src = \"https://www.scribd.com/javascripts/embed_code/inject.js\"; var s = document.getElementsByTagName(\"script\")[0]; s.parentNode.insertBefore(scribd, s); })()\n        \u003c/script\u003e"}';
 
 		return [
 			'body'     => $body,
@@ -92,31 +77,22 @@ class AMP_Scribd_Embed_Handler_Test extends WP_UnitTestCase {
 	 */
 	public function get_conversion_data() {
 		$data = [
-			'no_embed'                         => [
+			'no_embed'       => [
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>' . PHP_EOL,
 			],
-			'document_embed'                   => [
-				$this->scribd_doc_url . PHP_EOL,
-				'<p><iframe title="Synthesis of Knowledge: Effects of Fire and Thinning Treatments on Understory Vegetation in Dry U.S. Forests" class="scribd_iframe_embed" src="https://www.scribd.com/embeds/110799637/content" data-aspect-ratio="1.2941176470588236" scrolling="no" id="110799637" width="100%" height="500" frameborder="0" sandbox="allow-popups allow-scripts"></iframe></p>' . PHP_EOL,
-			],
 
-			'document_embed_with_sandbox_attr' => [
-				$this->scribd_doc_with_sandbox_attr_url . PHP_EOL,
-				'<p><iframe title="Hypothetical Book" class="scribd_iframe_embed" sandbox="allow-popups allow-scripts allow-forms allow-scripts" src="https://www.scribd.com/embeds/NaN/content" data-aspect-ratio="1.2941176470588236" scrolling="no" id="NaN" width="100%" height="500" frameborder="0"></iframe></p>' . PHP_EOL,
+			'document_embed' => [
+				$this->scribd_doc_url . PHP_EOL,
+				'<p><iframe title="Synthesis of Knowledge: Effects of Fire and Thinning Treatments on Understory Vegetation in Dry U.S. Forests" class="scribd_iframe_embed" src="https://www.scribd.com/embeds/110799637/content" data-aspect-ratio="1.2941176470588236" scrolling="no" id="110799637" width="500" height="750" frameborder="0" sandbox="allow-popups allow-scripts"></iframe></p>' . PHP_EOL,
 			],
 		];
 
-		// Prior to 5.2, there was no 'title' attribute on an iframe.
-		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.2', '<' ) ) {
+		// Prior to 5.1, there was no 'title' attribute on an iframe.
+		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.1', '<' ) ) {
 			$data['document_embed'] = [
 				$this->scribd_doc_url . PHP_EOL,
-				'<p><iframe class="scribd_iframe_embed" src="https://www.scribd.com/embeds/110799637/content" data-aspect-ratio="1.2941176470588236" scrolling="no" id="110799637" width="100%" height="500" frameborder="0" sandbox="allow-popups allow-scripts"></iframe></p>' . PHP_EOL,
-			];
-
-			$data['document_embed_with_sandbox_attr'] = [
-				$this->scribd_doc_with_sandbox_attr_url . PHP_EOL,
-				'<p><iframe class="scribd_iframe_embed" sandbox="allow-popups allow-scripts allow-forms allow-scripts" src="https://www.scribd.com/embeds/NaN/content" data-aspect-ratio="1.2941176470588236" scrolling="no" id="NaN" width="100%" height="500" frameborder="0"></iframe></p>' . PHP_EOL,
+				'<p><iframe class="scribd_iframe_embed" src="https://www.scribd.com/embeds/110799637/content" data-aspect-ratio="1.2941176470588236" scrolling="no" id="110799637" width="500" height="750" frameborder="0" sandbox="allow-popups allow-scripts"></iframe></p>' . PHP_EOL,
 			];
 		}
 
@@ -127,8 +103,7 @@ class AMP_Scribd_Embed_Handler_Test extends WP_UnitTestCase {
 	 * Test conversion.
 	 *
 	 * @covers AMP_Scribd_Embed_Handler::filter_embed_oembed_html()
-	 * @covers AMP_Scribd_Embed_Handler::remove_script()
-	 * @covers AMP_Scribd_Embed_Handler::inject_sandbox_permissions()
+	 * @covers AMP_Scribd_Embed_Handler::sanitize_iframe()
 	 * @dataProvider get_conversion_data
 	 *
 	 * @param $source
@@ -174,15 +149,14 @@ class AMP_Scribd_Embed_Handler_Test extends WP_UnitTestCase {
 		$embed->register_embed();
 		$source = apply_filters( 'the_content', $source );
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( AMP_DOM_Utils::get_dom_from_content( $source ) );
-		$whitelist_sanitizer->sanitize();
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( AMP_DOM_Utils::get_dom_from_content( $source ) );
+		$validating_sanitizer->sanitize();
 
 		$scripts = array_merge(
 			$embed->get_scripts(),
-			$whitelist_sanitizer->get_scripts()
+			$validating_sanitizer->get_scripts()
 		);
 
 		$this->assertEquals( $expected, $scripts );
 	}
-
 }

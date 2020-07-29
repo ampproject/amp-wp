@@ -1,6 +1,12 @@
 <?php
 
+use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+
 class AMP_Render_Post_Test extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
+
 	/**
 	 * @expectedDeprecated amp_render_post
 	 */
@@ -26,7 +32,7 @@ class AMP_Render_Post_Test extends WP_UnitTestCase {
 
 		$output = get_echo( 'amp_render_post', [ $post_id ] );
 
-		$this->assertContains( '<html amp', $output, 'Response does not include html tag with amp attribute.' );
+		$this->assertStringContains( '<html amp', $output, 'Response does not include html tag with amp attribute.' );
 		$this->assertEquals( 1, did_action( 'pre_amp_render_post', 'pre_amp_render_post action fire either did not fire or fired too many times.' ) );
 	}
 
@@ -52,9 +58,7 @@ class AMP_Render_Post_Test extends WP_UnitTestCase {
 			]
 		);
 
-		// Set global for WP<5.2 where get_the_content() doesn't take the $post parameter.
-		$GLOBALS['post'] = get_post( $post_id );
-		setup_postdata( $post_id );
+		$this->go_to( get_permalink( $post_id ) );
 
 		$before_is_amp_endpoint = is_amp_endpoint();
 
@@ -62,7 +66,7 @@ class AMP_Render_Post_Test extends WP_UnitTestCase {
 		$this->was_amp_endpoint = false;
 
 		$output = get_echo( 'amp_render_post', [ $post_id ] );
-		$this->assertContains( '<html amp', $output );
+		$this->assertStringContains( '<html amp', $output );
 
 		$after_is_amp_endpoint = is_amp_endpoint();
 
@@ -70,7 +74,7 @@ class AMP_Render_Post_Test extends WP_UnitTestCase {
 		$this->assertTrue( $this->was_amp_endpoint, 'is_amp_endpoint was not forced to true during amp_render_post' );
 		$this->assertFalse( $after_is_amp_endpoint, 'is_amp_endpoint was not reset after amp_render_post' );
 
-		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->go_to( get_permalink( $post_id ) );
 		$this->assertTrue( is_amp_endpoint() );
 

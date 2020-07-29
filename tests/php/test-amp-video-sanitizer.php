@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
+
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 
 /**
@@ -13,6 +15,8 @@
  * @covers AMP_Video_Sanitizer
  */
 class AMP_Video_Converter_Test extends WP_UnitTestCase {
+
+	use MarkupComparison;
 
 	/**
 	 * Tear down.
@@ -102,12 +106,12 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 				'<amp-video width="300" height="300" src="https://example.com/video.mp4" layout="responsive"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4" autoplay="false"></video></noscript></amp-video>',
 			],
 
-			'video_with_whitelisted_attributes__enabled' => [
+			'video_with_allowlisted_attributes__enabled' => [
 				'<video width="300" height="300" src="https://example.com/video.mp4" controls loop="true" muted="muted"></video>',
 				'<amp-video width="300" height="300" src="https://example.com/video.mp4" controls="" loop="" muted="" layout="responsive"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4" controls loop="true" muted="muted"></video></noscript></amp-video>',
 			],
 
-			'video_with_whitelisted_attributes__disabled' => [
+			'video_with_allowlisted_attributes__disabled' => [
 				'<video width="300" height="300" src="https://example.com/video.mp4" controls="false" loop="false" muted="false"></video>',
 				'<amp-video width="300" height="300" src="https://example.com/video.mp4" layout="responsive"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4" controls="false" loop="false" muted="false"></video></noscript></amp-video>',
 			],
@@ -288,8 +292,8 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Script_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$whitelist_sanitizer->sanitize();
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$validating_sanitizer->sanitize();
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 
@@ -312,8 +316,8 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 		);
 		$sanitizer->sanitize();
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$whitelist_sanitizer->sanitize();
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$validating_sanitizer->sanitize();
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEqualMarkup( $expected, $content );
@@ -330,12 +334,12 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Video_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$whitelist_sanitizer->sanitize();
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$validating_sanitizer->sanitize();
 
 		$scripts = array_merge(
 			$sanitizer->get_scripts(),
-			$whitelist_sanitizer->get_scripts()
+			$validating_sanitizer->get_scripts()
 		);
 		$this->assertEquals( $expected, $scripts );
 	}
@@ -351,29 +355,13 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Video_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$whitelist_sanitizer->sanitize();
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$validating_sanitizer->sanitize();
 
 		$scripts = array_merge(
 			$sanitizer->get_scripts(),
-			$whitelist_sanitizer->get_scripts()
+			$validating_sanitizer->get_scripts()
 		);
 		$this->assertEquals( $expected, $scripts );
-	}
-
-	/**
-	 * Assert markup is equal.
-	 *
-	 * @param string $expected Expected markup.
-	 * @param string $actual   Actual markup.
-	 */
-	public function assertEqualMarkup( $expected, $actual ) {
-		$actual   = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $actual ) );
-		$expected = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $expected ) );
-
-		$this->assertEquals(
-			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $expected, -1, PREG_SPLIT_DELIM_CAPTURE ) ),
-			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $actual, -1, PREG_SPLIT_DELIM_CAPTURE ) )
-		);
 	}
 }

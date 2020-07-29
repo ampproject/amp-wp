@@ -28,9 +28,10 @@ domReady( () => {
 	handleFiltering();
 	handleSearching();
 	setValidationErrorRowsSeenClass();
-	handleStatusChange();
+	handleRowEvents();
 	handleBulkActions();
 	watchForUnsavedChanges();
+	setupStylesheetsMetabox();
 } );
 
 let beforeUnloadPromptAdded = false;
@@ -55,12 +56,14 @@ const addBeforeUnloadPrompt = () => {
 /**
  * Watch for unsaved changes.
  *
- * Add an beforeunload warning when attempting to leave the page when there are unsaved changes,
- * unless the user is pressing the trash link or update button.
+ * Add an beforeunload warning when there are unsaved changes for the markup or review status.
  */
 const watchForUnsavedChanges = () => {
 	const onChange = ( event ) => {
-		if ( event.target.matches( 'select' ) && event.target.getAttribute( 'id' ) !== 'amp_validation_error_type' ) {
+		if (
+			event.target.matches( '.amp-validation-error-status' ) ||
+			event.target.matches( '.amp-validation-error-status-review' )
+		) {
 			document.getElementById( 'post' ).removeEventListener( 'change', onChange );
 			addBeforeUnloadPrompt();
 		}
@@ -275,38 +278,40 @@ const handleSearching = () => {
 };
 
 /**
- * Update icon for select element.
+ * Update border color for select element.
  *
  * @param {HTMLSelectElement} select Select element.
  */
-const updateSelectIcon = ( select ) => {
+const updateSelectBorderColor = ( select ) => {
 	const newOption = select.options[ select.selectedIndex ];
 	if ( newOption ) {
-		const iconSrc = newOption.getAttribute( 'data-status-icon' );
-		select.parentNode.querySelector( 'img' ).setAttribute( 'src', iconSrc );
+		select.style.borderColor = newOption.getAttribute( 'data-color' );
 	}
 };
 
 /**
- * Handles a change in the error status, like from 'Removed' to 'Kept'.
- *
- * Gets the data-status-icon value from the newly-selected <option>.
- * And sets this as the src of the status icon <img>.
+ * Handles events that may occur for a row.
  */
-const handleStatusChange = () => {
-	const onChange = ( { event } ) => {
-		if ( event.target.matches( 'select' ) ) {
-			updateSelectIcon( event.target );
-		}
-	};
-
+const handleRowEvents = () => {
 	document.querySelectorAll( 'tr[id^="tag-"]' ).forEach( ( row ) => {
-		const select = row.querySelector( '.amp-validation-error-status' );
+		const statusSelect = row.querySelector( '.amp-validation-error-status' );
+		const reviewCheckbox = row.querySelector( '.amp-validation-error-status-review' );
 
-		if ( select ) {
-			select.addEventListener( 'change', ( event ) => {
-				onChange( { event, row, select } );
+		if ( statusSelect ) {
+			/*
+			 * Handle a change in the error status, like from 'Removed' to 'Kept'. It gets the data-color value
+			 * from the newly-selected <option> and sets this as the border color of the <select>.
+			 */
+			statusSelect.addEventListener( 'change', ( event ) => {
+				if ( event.target.matches( 'select' ) ) {
+					updateSelectBorderColor( event.target );
+				}
 			} );
+		}
+
+		if ( reviewCheckbox ) {
+			// Toggle the 'new' state for the row depending on the state of approval for the validation error.
+			reviewCheckbox.addEventListener( 'change', () => row.classList.toggle( 'new' ) );
 		}
 	} );
 };
@@ -318,9 +323,9 @@ const handleStatusChange = () => {
  * Also, on unchecking the last checked box, this hides these buttons.
  */
 const handleBulkActions = () => {
-	const acceptButton = document.querySelector( 'button.action.accept' );
-	const rejectButton = document.querySelector( 'button.action.reject' );
-	const acceptAndRejectContainer = document.getElementById( 'accept-reject-buttons' );
+	const removeButton = document.querySelector( 'button.action.remove' );
+	const keepButton = document.querySelector( 'button.action.keep' );
+	const removeAndKeepContainer = document.getElementById( 'remove-keep-buttons' );
 
 	const onChange = ( event ) => {
 		let areThereCheckedBoxes;
@@ -331,7 +336,7 @@ const handleBulkActions = () => {
 
 		if ( event.target.checked ) {
 			// This checkbox was checked, so ensure the buttons display.
-			acceptAndRejectContainer.classList.remove( 'hidden' );
+			removeAndKeepContainer.classList.remove( 'hidden' );
 		} else {
 			/*
 			 * This checkbox was unchecked.
@@ -345,7 +350,7 @@ const handleBulkActions = () => {
 				}
 			} );
 			if ( ! areThereCheckedBoxes ) {
-				acceptAndRejectContainer.classList.add( 'hidden' );
+				removeAndKeepContainer.classList.add( 'hidden' );
 			}
 		}
 	};
@@ -355,24 +360,48 @@ const handleBulkActions = () => {
 	} );
 
 	// Handle click on bulk "Remove" button.
-	acceptButton.addEventListener( 'click', () => {
+	removeButton.addEventListener( 'click', () => {
 		Array.prototype.forEach.call( document.querySelectorAll( 'select.amp-validation-error-status' ), ( select ) => {
 			if ( select.closest( 'tr' ).querySelector( '.check-column input[type=checkbox]' ).checked ) {
 				select.value = '3'; // See AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS.
-				updateSelectIcon( select );
+				updateSelectBorderColor( select );
 				addBeforeUnloadPrompt();
 			}
 		} );
 	} );
 
 	// Handle click on bulk "Keep" button.
-	rejectButton.addEventListener( 'click', () => {
+	keepButton.addEventListener( 'click', () => {
 		Array.prototype.forEach.call( document.querySelectorAll( 'select.amp-validation-error-status' ), ( select ) => {
 			if ( select.closest( 'tr' ).querySelector( '.check-column input[type=checkbox]' ).checked ) {
 				select.value = '2'; // See AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS.
-				updateSelectIcon( select );
+				updateSelectBorderColor( select );
 				addBeforeUnloadPrompt();
 			}
 		} );
 	} );
+};
+
+/**
+ * Set up stylesheet metabox.
+ */
+const setupStylesheetsMetabox = () => {
+	const metabox = document.getElementById( 'amp_stylesheets' );
+
+	for ( const toggleStylesheetDetailsButton of metabox.querySelectorAll( '.toggle-stylesheet-details' ) ) {
+		const row = toggleStylesheetDetailsButton.closest( 'tr' );
+		toggleStylesheetDetailsButton.addEventListener( 'click', () => {
+			row.classList.toggle( 'expanded' );
+		} );
+	}
+
+	for ( const stylesheetDetailsElements of metabox.querySelectorAll( '.stylesheet-details' ) ) {
+		const shakenStylesheetContainer = stylesheetDetailsElements.querySelector( '.shaken-stylesheet' );
+		const showRemovedStylesCheckbox = stylesheetDetailsElements.querySelector( '.show-removed-styles' );
+		if ( showRemovedStylesCheckbox ) {
+			showRemovedStylesCheckbox.addEventListener( 'click', () => {
+				shakenStylesheetContainer.classList.toggle( 'removed-styles-shown', showRemovedStylesCheckbox.checked );
+			} );
+		}
+	}
 };

@@ -41,6 +41,9 @@ class AMP_Dev_Mode_Sanitizer_Test extends WP_UnitTestCase {
 			]
 		);
 		$sanitizer->sanitize();
+
+		// Assert dev mode is set correctly on elements.
+		$this->assertFalse( $dom->hasInitialAmpDevMode() );
 		$this->assertTrue( $dom->documentElement->hasAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE ) );
 		$this->assertTrue( $dom->getElementById( 'greet' )->hasAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE ) );
 		$this->assertTrue( $dom->getElementById( 'wpadminbar' )->hasAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE ) );

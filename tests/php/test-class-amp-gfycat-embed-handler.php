@@ -5,42 +5,41 @@
  * @package AMP.
  */
 
+use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
+
 /**
- * Class AMP_Gfycat_Embed_Test
+ * Class AMP_Gfycat_Embed_Handler_Test
+ *
+ * @covers AMP_Gfycat_Embed_Handler
  */
-class AMP_Gfycat_Embed_Test extends WP_UnitTestCase {
+class AMP_Gfycat_Embed_Handler_Test extends WP_UnitTestCase {
+
+	use WithoutBlockPreRendering {
+		setUp as public prevent_block_pre_render;
+	}
 
 	/**
 	 * Set up.
-	 *
-	 * @global WP_Post $post
 	 */
 	public function setUp() {
-		global $post;
-		parent::setUp();
+		$this->prevent_block_pre_render();
 
 		// Mock the HTTP request.
 		add_filter(
 			'pre_oembed_result',
 			static function( $pre, $url ) {
+				if ( in_array( 'external-http', $_SERVER['argv'], true ) ) {
+					return $pre;
+				}
+
 				if ( false === strpos( $url, 'tautwhoppingcougar' ) ) {
 					return $pre;
 				}
-				return '<iframe src=\'https://gfycat.com/ifr/tautwhoppingcougar\' frameborder=\'0\' scrolling=\'no\' width=\'500\' height=\'281.25\'  allowfullscreen></iframe>';
+				return '<iframe src=\'https://gfycat.com/ifr/tautwhoppingcougar\' frameborder=\'0\' scrolling=\'no\' width=\'100\' height=\'100\'  allowfullscreen></iframe>';
 			},
 			10,
 			2
 		);
-
-		/*
-		 * As #34115 in 4.9 a post is not needed for context to run oEmbeds. Prior ot 4.9, the WP_Embed::shortcode()
-		 * method would short-circuit when this is the case:
-		 * https://github.com/WordPress/wordpress-develop/blob/4.8.4/src/wp-includes/class-wp-embed.php#L192-L193
-		 * So on WP<4.9 we set a post global to ensure oEmbeds get processed.
-		 */
-		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '4.9', '<' ) ) {
-			$post = self::factory()->post->create_and_get();
-		}
 	}
 
 	/**
@@ -57,17 +56,17 @@ class AMP_Gfycat_Embed_Test extends WP_UnitTestCase {
 
 			'url_simple'      => [
 				'https://gfycat.com/tautwhoppingcougar' . PHP_EOL,
-				'<p><amp-gfycat width="500" height="281" data-gfyid="tautwhoppingcougar"></amp-gfycat></p>' . PHP_EOL,
+				'<p><amp-gfycat width="100" height="100" data-gfyid="tautwhoppingcougar"></amp-gfycat></p>' . PHP_EOL,
 			],
 
 			'url_with_detail' => [
 				'https://gfycat.com/gifs/detail/tautwhoppingcougar' . PHP_EOL,
-				'<p><amp-gfycat width="500" height="281" data-gfyid="tautwhoppingcougar"></amp-gfycat></p>' . PHP_EOL,
+				'<p><amp-gfycat width="100" height="100" data-gfyid="tautwhoppingcougar"></amp-gfycat></p>' . PHP_EOL,
 			],
 
 			'url_with_params' => [
 				'https://gfycat.com/gifs/detail/tautwhoppingcougar?foo=bar' . PHP_EOL,
-				'<p><amp-gfycat width="500" height="281" data-gfyid="tautwhoppingcougar"></amp-gfycat></p>' . PHP_EOL,
+				'<p><amp-gfycat width="100" height="100" data-gfyid="tautwhoppingcougar"></amp-gfycat></p>' . PHP_EOL,
 			],
 
 		];
@@ -118,12 +117,12 @@ class AMP_Gfycat_Embed_Test extends WP_UnitTestCase {
 		$embed->register_embed();
 		$source = apply_filters( 'the_content', $source );
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( AMP_DOM_Utils::get_dom_from_content( $source ) );
-		$whitelist_sanitizer->sanitize();
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( AMP_DOM_Utils::get_dom_from_content( $source ) );
+		$validating_sanitizer->sanitize();
 
 		$scripts = array_merge(
 			$embed->get_scripts(),
-			$whitelist_sanitizer->get_scripts()
+			$validating_sanitizer->get_scripts()
 		);
 
 		$this->assertEquals( $expected, $scripts );

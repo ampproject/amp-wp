@@ -5,6 +5,548 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Admin\ReaderThemes;
+use AmpProject\AmpWP\AmpWpPluginFactory;
+use AmpProject\AmpWP\Icon;
+use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\QueryVar;
+
+/**
+ * Handle activation of plugin.
+ *
+ * @since 0.2
+ *
+ * @param bool $network_wide Whether the activation was done network-wide.
+ */
+function amp_activate( $network_wide = false ) {
+	AmpWpPluginFactory::create()->activate( $network_wide );
+	amp_after_setup_theme();
+	if ( ! did_action( 'amp_init' ) ) {
+		amp_init();
+	}
+	flush_rewrite_rules();
+}
+
+/**
+ * Handle deactivation of plugin.
+ *
+ * @since 0.2
+ *
+ * @param bool $network_wide Whether the activation was done network-wide.
+ */
+function amp_deactivate( $network_wide = false ) {
+	AmpWpPluginFactory::create()->deactivate( $network_wide );
+	// We need to manually remove the amp endpoint.
+	global $wp_rewrite;
+	foreach ( $wp_rewrite->endpoints as $index => $endpoint ) {
+		if ( amp_get_slug() === $endpoint[1] ) {
+			unset( $wp_rewrite->endpoints[ $index ] );
+			break;
+		}
+	}
+
+	flush_rewrite_rules( false );
+}
+
+/**
+ * Bootstrap plugin.
+ *
+ * @since 1.5
+ */
+function amp_bootstrap_plugin() {
+	AmpWpPluginFactory::create()->register();
+
+	// The plugins_loaded action is the earliest we can run this since that is when pluggable.php has been required and wp_hash() is available.
+	add_action( 'plugins_loaded', [ 'AMP_Validation_Manager', 'init_validate_request' ], ~PHP_INT_MAX );
+
+	/*
+	 * Register AMP scripts regardless of whether AMP is enabled or it is the AMP endpoint
+	 * for the sake of being able to use AMP components on non-AMP documents ("dirty AMP").
+	 */
+	add_action( 'wp_default_scripts', 'amp_register_default_scripts' );
+
+	add_action( 'wp_default_styles', 'amp_register_default_styles' );
+
+	// Ensure async and custom-element/custom-template attributes are present on script tags.
+	add_filter( 'script_loader_tag', 'amp_filter_script_loader_tag', PHP_INT_MAX, 2 );
+
+	// Ensure crossorigin=anonymous is added to font links.
+	add_filter( 'style_loader_tag', 'amp_filter_font_style_loader_tag_with_crossorigin_anonymous', 10, 4 );
+
+	add_action( 'after_setup_theme', 'amp_after_setup_theme', 5 );
+
+	add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 ); // Should be hooked before priority 10 on 'plugins_loaded' to properly unhook core panels.
+}
+
+/**
+ * Init AMP.
+ *
+ * @since 0.1
+ */
+function amp_init() {
+
+	/**
+	 * Triggers on init when AMP plugin is active.
+	 *
+	 * @since 0.3
+	 */
+	do_action( 'amp_init' );
+
+	global $amp_service_worker;
+	$amp_service_worker = new AMP_Service_Worker();
+	$amp_service_worker->init();
+
+	add_filter( 'allowed_redirect_hosts', [ 'AMP_HTTP', 'filter_allowed_redirect_hosts' ] );
+	add_filter( 'wp_redirect', [ 'AMP_HTTP', 'add_purged_query_vars' ] );
+	AMP_HTTP::purge_amp_query_vars();
+	AMP_HTTP::send_cors_headers();
+	AMP_HTTP::handle_xhr_request();
+	AMP_Theme_Support::init();
+	AMP_Validation_Manager::init();
+	AMP_Service_Worker::init();
+	add_action( 'admin_init', 'AMP_Options_Manager::init' );
+	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
+	add_action( 'rest_api_init', 'AMP_Options_Manager::register_settings' );
+	add_action( 'wp_loaded', 'amp_bootstrap_admin' );
+
+	add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
+	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
+	add_action( 'admin_bar_menu', 'amp_add_admin_bar_view_link', 100 );
+
+	add_action(
+		'admin_bar_init',
+		function () {
+			$handle = 'amp-icons';
+			if ( ! is_admin() && wp_style_is( $handle, 'registered' ) ) {
+				wp_styles()->registered[ $handle ]->deps[] = 'admin-bar'; // Ensure included in dev mode.
+				wp_enqueue_style( $handle );
+			}
+		}
+	);
+
+	add_action( 'wp_loaded', 'amp_editor_core_blocks' );
+	add_filter( 'request', 'amp_force_query_var_value' );
+
+	// Redirect the old url of amp page to the updated url.
+	add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
+
+	if ( defined( 'WP_CLI' ) && WP_CLI ) {
+		if ( class_exists( 'WP_CLI\Dispatcher\CommandNamespace' ) ) {
+			WP_CLI::add_command( 'amp', 'AMP_CLI_Namespace' );
+		}
+
+		WP_CLI::add_command( 'amp validation', 'AMP_CLI_Validation_Command' );
+	}
+
+	/*
+	 * Broadcast plugin updates.
+	 * Note that AMP_Options_Manager::get_option( Option::VERSION, '0.0' ) cannot be used because
+	 * version was new option added, and in that case default would never be used for a site
+	 * upgrading from a version prior to 1.0. So this is why get_option() is currently used.
+	 */
+	$options     = get_option( AMP_Options_Manager::OPTION_NAME, [] );
+	$old_version = isset( $options[ Option::VERSION ] ) ? $options[ Option::VERSION ] : '0.0';
+
+	if ( AMP__VERSION !== $old_version && is_admin() && current_user_can( 'manage_options' ) ) {
+		// This waits to happen until the very end of init to ensure that amp theme support and amp post type support have all been added.
+		add_action(
+			'init',
+			static function () use ( $old_version ) {
+				/**
+				 * Triggers when after amp_init when the plugin version has updated.
+				 *
+				 * @param string $old_version Old version.
+				 */
+				do_action( 'amp_plugin_update', $old_version );
+				AMP_Options_Manager::update_option( Option::VERSION, AMP__VERSION );
+			},
+			PHP_INT_MAX
+		);
+	}
+
+	add_action(
+		'rest_api_init',
+		static function() {
+			$reader_themes = new ReaderThemes();
+
+			$reader_theme_controller = new AMP_Reader_Theme_REST_Controller( $reader_themes );
+			$reader_theme_controller->register_routes();
+		}
+	);
+
+	/*
+	 * Hide admin bar if the window is inside the setup wizard iframe.
+	 *
+	 * Detects whether the current window is in an iframe with the specified `name` attribute. The iframe is created
+	 * by Preview component located in <assets/src/setup/pages/save/index.js>.
+	 */
+	add_action(
+		'wp_print_footer_scripts',
+		function() {
+			if ( ! amp_is_dev_mode() || ! is_admin_bar_showing() ) {
+				return;
+			}
+			?>
+			<script data-ampdevmode>
+				document.addEventListener( 'DOMContentLoaded', function() {
+					if ( 'amp-wizard-completion-preview' !== window.name ) {
+						return;
+					}
+
+					const adminBar = document.getElementById( 'wpadminbar' );
+					if ( adminBar ) {
+						document.body.classList.remove( 'admin-bar' );
+						document.documentElement.style.cssText += '; margin-top: 0 !important';
+						adminBar.remove();
+					}
+				});
+			</script>
+			<?php
+		}
+	);
+}
+
+/**
+ * Set up AMP.
+ *
+ * This function must be invoked through the 'after_setup_theme' action to allow
+ * the AMP setting to declare the post types support earlier than plugins/theme.
+ *
+ * @since 0.6
+ */
+function amp_after_setup_theme() {
+	amp_get_slug(); // Ensure AMP_QUERY_VAR is set.
+
+	/**
+	 * Filters whether AMP is enabled on the current site.
+	 *
+	 * Useful if the plugin is network activated and you want to turn it off on select sites.
+	 *
+	 * @since 0.2
+	 */
+	if ( false === apply_filters( 'amp_is_enabled', true ) ) {
+		return;
+	}
+
+	add_action( 'init', 'amp_init', 0 ); // Must be 0 because widgets_init happens at init priority 1.
+}
+
+/**
+ * Make sure the `amp` query var has an explicit value.
+ *
+ * This avoids issues when filtering the deprecated `query_string` hook.
+ *
+ * @since 0.3.3
+ *
+ * @param array $query_vars Query vars.
+ * @return array Query vars.
+ */
+function amp_force_query_var_value( $query_vars ) {
+	if ( isset( $query_vars[ amp_get_slug() ] ) && '' === $query_vars[ amp_get_slug() ] ) {
+		$query_vars[ amp_get_slug() ] = 1;
+	}
+	return $query_vars;
+}
+
+/**
+ * Fix up WP_Query for front page when amp query var is present.
+ *
+ * Normally the front page would not get served if a query var is present other than preview, page, paged, and cpage.
+ *
+ * @since 0.6
+ * @see WP_Query::parse_query()
+ * @link https://github.com/WordPress/wordpress-develop/blob/0baa8ae85c670d338e78e408f8d6e301c6410c86/src/wp-includes/class-wp-query.php#L951-L971
+ *
+ * @param WP_Query $query Query.
+ */
+function amp_correct_query_when_is_front_page( WP_Query $query ) {
+	$is_front_page_query = (
+		$query->is_main_query()
+		&&
+		$query->is_home()
+		&&
+		// Is AMP endpoint.
+		false !== $query->get( amp_get_slug(), false )
+		&&
+		// Is query not yet fixed uo up to be front page.
+		! $query->is_front_page()
+		&&
+		// Is showing pages on front.
+		'page' === get_option( 'show_on_front' )
+		&&
+		// Has page on front set.
+		get_option( 'page_on_front' )
+		&&
+		// See line in WP_Query::parse_query() at <https://github.com/WordPress/wordpress-develop/blob/0baa8ae/src/wp-includes/class-wp-query.php#L961>.
+		0 === count( array_diff( array_keys( wp_parse_args( $query->query ) ), [ amp_get_slug(), 'preview', 'page', 'paged', 'cpage' ] ) )
+	);
+	if ( $is_front_page_query ) {
+		$query->is_home     = false;
+		$query->is_page     = true;
+		$query->is_singular = true;
+		$query->set( 'page_id', get_option( 'page_on_front' ) );
+	}
+}
+
+/**
+ * Whether this is in 'canonical mode'.
+ *
+ * Themes can register support for this with `add_theme_support( AMP_Theme_Support::SLUG )`:
+ *
+ *      add_theme_support( AMP_Theme_Support::SLUG );
+ *
+ * This will serve templates in AMP-first, allowing you to use AMP components in your theme templates.
+ * If you want to make available in transitional mode, where templates are served in AMP or non-AMP documents, do:
+ *
+ *      add_theme_support( AMP_Theme_Support::SLUG, array(
+ *          'paired' => true,
+ *      ) );
+ *
+ * Transitional mode is also implied if you define a template_dir:
+ *
+ *      add_theme_support( AMP_Theme_Support::SLUG, array(
+ *          'template_dir' => 'amp',
+ *      ) );
+ *
+ * If you want to have AMP-specific templates in addition to serving AMP-first, do:
+ *
+ *      add_theme_support( AMP_Theme_Support::SLUG, array(
+ *          'paired'       => false,
+ *          'template_dir' => 'amp',
+ *      ) );
+ *
+ * If you want to force AMP to always be served on a given template, you can use the templates_supported arg,
+ * for example to always serve the Category template in AMP:
+ *
+ *      add_theme_support( AMP_Theme_Support::SLUG, array(
+ *          'templates_supported' => array(
+ *              'is_category' => true,
+ *          ),
+ *      ) );
+ *
+ * Or if you want to force AMP to be used on all templates:
+ *
+ *      add_theme_support( AMP_Theme_Support::SLUG, array(
+ *          'templates_supported' => 'all',
+ *      ) );
+ *
+ * @see AMP_Theme_Support::read_theme_support()
+ * @return boolean Whether this is in AMP 'canonical' mode, that is whether it is AMP-first and there is not a separate (paired) AMP URL.
+ */
+function amp_is_canonical() {
+	return AMP_Theme_Support::STANDARD_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
+}
+
+/**
+ * Determines whether the legacy AMP post templates are being used.
+ *
+ * @since 2.0
+ * @return bool
+ */
+function amp_is_legacy() {
+	return (
+		AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
+		&&
+		ReaderThemes::DEFAULT_READER_THEME === AMP_Options_Manager::get_option( Option::READER_THEME )
+	);
+}
+
+/**
+ * Add frontend actions.
+ *
+ * @since 0.2
+ */
+function amp_add_frontend_actions() {
+	add_action( 'wp_head', 'amp_add_amphtml_link' );
+}
+
+/**
+ * Determine whether AMP is available for the current URL.
+ *
+ * @since 2.0
+ *
+ * @return bool Whether there is an AMP version for the provided URL.
+ * @global string $pagenow
+ * @global WP_Query $wp_query
+ */
+function is_amp_available() {
+	global $pagenow, $wp_query;
+
+	// Short-circuit for admin requests or requests to non-frontend pages.
+	if ( is_admin() || in_array( $pagenow, [ 'wp-login.php', 'wp-signup.php', 'wp-activate.php' ], true ) ) {
+		return false;
+	}
+
+	$warn = function () {
+		static $warned = false;
+		if ( $warned ) {
+			return;
+		}
+		$message = sprintf(
+			/* translators: %1$s: is_amp_endpoint(), %2$s: the current action, %3$s: the wp action, %4$s: the WP_Query class, %5$s: the amp_skip_post() function */
+			__( '%1$s (or %2$s) was called too early and so it will not work properly. WordPress is currently doing the "%3$s" action. Calling this function before the "%4$s" action means it will not have access to %5$s and the queried object to determine if it is an AMP response, thus neither the "%6$s" filter nor the AMP enabled toggle will be considered.', 'amp' ),
+			'is_amp_available()',
+			'is_amp_endpoint()',
+			current_action(),
+			'wp',
+			'WP_Query',
+			'amp_skip_post()'
+		);
+		_doing_it_wrong( 'is_amp_available', esc_html( $message ), '2.0.0' );
+		$warned = true;
+	};
+
+	// Make sure the parse_request action has triggered before trying to read from the REST_REQUEST constant, which is set during rest_api_loaded().
+	if ( ! did_action( 'parse_request' ) ) {
+		$warn();
+	} elseif ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+		return false;
+	}
+
+	// Make sure that the parse_query action has triggered, as this is required to initially populate the global WP_Query.
+	if ( ! ( $wp_query instanceof WP_Query || did_action( 'parse_query' ) ) ) {
+		$warn();
+	}
+
+	// Always return false when requesting the service worker.
+	// Note this is no longer strictly required because AMP_Theme_Support::prepare_response() will abort for non-HTML responses.
+	// But it is still good to do so because it avoids needlessly output-buffering the response.
+	if ( class_exists( 'WP_Service_Workers' ) && $wp_query instanceof WP_Query && defined( 'WP_Service_Workers::QUERY_VAR' ) && $wp_query->get( WP_Service_Workers::QUERY_VAR ) ) {
+		return false;
+	}
+
+	// Short-circuit queries that can never have AMP responses (e.g. post embeds and feeds).
+	// Note that these conditionals only require the parse_query action to have been run. They don't depend on the wp action having been fired.
+	if (
+		$wp_query instanceof WP_Query
+		&&
+		(
+			$wp_query->is_embed()
+			||
+			$wp_query->is_feed()
+			||
+			$wp_query->is_comment_feed()
+			||
+			$wp_query->is_trackback()
+			||
+			$wp_query->is_robots()
+			||
+			( method_exists( $wp_query, 'is_favicon' ) && $wp_query->is_favicon() )
+		)
+	) {
+		return false;
+	}
+
+	// Ensure that all templates can be accessed in AMP when a Reader theme is selected.
+	$has_reader_theme = (
+		AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
+		&&
+		ReaderThemes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME )
+	);
+	if ( $has_reader_theme && is_customize_preview() ) {
+		return true;
+	}
+
+	$is_legacy = amp_is_legacy();
+
+	// If the query has not been initialized, we can only assume AMP is available if theme support is present and all templates are supported.
+	if ( ! $wp_query instanceof WP_Query || ! did_action( 'wp' ) ) {
+		$warn();
+		return ! $is_legacy && AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED );
+	}
+
+	// If redirected to this page because AMP is not available due to validation errors, prevent AMP from being available (if not AMP-first).
+	if (
+		( ! amp_is_canonical() || AMP_Validation_Manager::has_cap() )
+		&&
+		( isset( $_GET[ QueryVar::NOAMP ] ) && QueryVar::NOAMP_AVAILABLE === $_GET[ QueryVar::NOAMP ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	) {
+		return false;
+	}
+
+	/*
+	 * If this is a URL for validation, and validation is forced for all URLs, return true.
+	 * Normally, this would be false if the user has deselected a template,
+	 * like by unchecking 'Categories' in 'AMP Settings' > 'Supported Templates'.
+	 * But there's a flag for the WP-CLI command that sets this query var to validate all URLs.
+	 */
+	if ( AMP_Validation_Manager::is_theme_support_forced() ) {
+		return true;
+	}
+
+	$queried_object = get_queried_object();
+	if ( ! $is_legacy ) {
+		// Abort if in Transitional mode and AMP is not available for the URL.
+		$availability = AMP_Theme_Support::get_template_availability( $wp_query );
+
+		if ( ! $availability['supported'] ) {
+			return false;
+		}
+
+		// If not in an AMP-first mode, check if there are any validation errors with kept invalid markup for this URL.
+		// And if so, and if the user cannot do validation (since they can always get fresh validation results), then
+		// AMP is not available.
+		if ( ! amp_is_canonical() && ! AMP_Validation_Manager::has_cap() ) {
+			$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors(
+				amp_get_current_url(),
+				[ 'ignore_accepted' => true ]
+			);
+			if ( count( $validation_errors ) > 0 ) {
+				return false;
+			}
+		}
+	} elseif ( ! (
+		$queried_object instanceof WP_Post &&
+		$wp_query instanceof WP_Query &&
+		( $wp_query->is_singular() || $wp_query->is_posts_page ) &&
+		post_supports_amp( $queried_object ) )
+	) {
+		// Abort if in legacy Reader mode and the post doesn't support AMP.
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * Bootstraps the AMP customizer.
+ *
+ * Uses the priority of 12 for the 'after_setup_theme' action.
+ * Many themes run `add_theme_support()` on the 'after_setup_theme' hook, at the default priority of 10.
+ * And that function's documentation suggests adding it to that action.
+ * So this enables themes to `add_theme_support( AMP_Theme_Support::SLUG )`.
+ * And `amp_init_customizer()` will be able to recognize theme support by calling `amp_is_canonical()`.
+ *
+ * @since 0.4
+ */
+function _amp_bootstrap_customizer() {
+	add_action( 'after_setup_theme', 'amp_init_customizer', 12 );
+}
+
+/**
+ * Redirects the old AMP URL to the new AMP URL.
+ *
+ * If post slug is updated the amp page with old post slug will be redirected to the updated url.
+ * Also includes all original query vars.
+ *
+ * @since 0.5
+ *
+ * @param string $link New URL of the post.
+ * @return string URL to be redirected.
+ */
+function amp_redirect_old_slug_to_new_url( $link ) {
+
+	if ( is_amp_endpoint() && ! amp_is_canonical() ) {
+		if ( ! amp_is_legacy() ) {
+			$link = add_query_arg( amp_get_slug(), '', $link );
+		} else {
+			$link = trailingslashit( trailingslashit( $link ) . amp_get_slug() );
+		}
+	}
+
+	return $link;
+}
+
 /**
  * Get the slug used in AMP for the query var, endpoint, and post type support.
  *
@@ -17,10 +559,6 @@
  * @return string Slug used for query var, endpoint, and post type support.
  */
 function amp_get_slug() {
-	if ( defined( 'AMP_QUERY_VAR' ) ) {
-		return AMP_QUERY_VAR;
-	}
-
 	/**
 	 * Filter the AMP query variable.
 	 *
@@ -30,11 +568,7 @@ function amp_get_slug() {
 	 *
 	 * @param string $query_var The AMP query variable.
 	 */
-	$query_var = apply_filters( 'amp_query_var', 'amp' );
-
-	define( 'AMP_QUERY_VAR', $query_var );
-
-	return $query_var;
+	return apply_filters( 'amp_query_var', defined( 'AMP_QUERY_VAR' ) ? AMP_QUERY_VAR : QueryVar::AMP );
 }
 
 /**
@@ -48,13 +582,35 @@ function amp_get_slug() {
  * @return string Current URL.
  */
 function amp_get_current_url() {
-	$url = preg_replace( '#(^https?://[^/]+)/.*#', '$1', home_url( '/' ) );
-	if ( isset( $_SERVER['REQUEST_URI'] ) ) {
-		$url = esc_url_raw( $url . wp_unslash( $_SERVER['REQUEST_URI'] ) );
-	} else {
-		$url .= '/';
+	$parsed_url = wp_parse_url( home_url() );
+	if ( ! is_array( $parsed_url ) ) {
+		$parsed_url = [];
 	}
-	return $url;
+	if ( empty( $parsed_url['scheme'] ) ) {
+		$parsed_url['scheme'] = is_ssl() ? 'https' : 'http';
+	}
+	if ( ! isset( $parsed_url['host'] ) ) {
+		$parsed_url['host'] = wp_unslash( $_SERVER['HTTP_HOST'] );
+	}
+
+	$current_url = $parsed_url['scheme'] . '://';
+	if ( isset( $parsed_url['user'] ) ) {
+		$current_url .= $parsed_url['user'];
+		if ( isset( $parsed_url['pass'] ) ) {
+			$current_url .= ':' . $parsed_url['pass'];
+		}
+		$current_url .= '@';
+	}
+	$current_url .= $parsed_url['host'];
+	if ( isset( $parsed_url['port'] ) ) {
+		$current_url .= ':' . $parsed_url['port'];
+	}
+	$current_url .= '/';
+
+	if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+		$current_url .= ltrim( wp_unslash( $_SERVER['REQUEST_URI'] ), '/' );
+	}
+	return esc_url_raw( $current_url );
 }
 
 /**
@@ -67,10 +623,10 @@ function amp_get_current_url() {
  */
 function amp_get_permalink( $post_id ) {
 
-	// When theme support is present, the plain query var should always be used.
-	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+	// When theme support is present (i.e. not using legacy Reader post templates), the plain query var should always be used.
+	if ( ! amp_is_legacy() ) {
 		$permalink = get_permalink( $post_id );
-		if ( ! amp_is_canonical() && AMP_Story_Post_Type::POST_TYPE_SLUG !== get_post_type( $post_id ) ) {
+		if ( ! amp_is_canonical() ) {
 			$permalink = add_query_arg( amp_get_slug(), '', $permalink );
 		}
 		return $permalink;
@@ -163,59 +719,29 @@ function amp_remove_endpoint( $url ) {
  * @since 1.0
  */
 function amp_add_amphtml_link() {
-
 	/**
 	 * Filters whether to show the amphtml link on the frontend.
 	 *
 	 * @todo This filter's name is incorrect. It's not about adding a canonical link but adding the amphtml link.
 	 * @since 0.2
 	 */
-	if ( false === apply_filters( 'amp_frontend_show_canonical', true ) ) {
+	if ( amp_is_canonical() || false === apply_filters( 'amp_frontend_show_canonical', true ) ) {
 		return;
 	}
 
-	$current_url = amp_get_current_url();
-
-	$amp_url = null;
-	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-		if ( AMP_Theme_Support::is_paired_available() ) {
-			$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
-		}
-	} elseif ( is_singular() ) {
-		$amp_url = amp_get_permalink( get_queried_object_id() );
-	} else {
-		$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
-	}
-
-	if ( ! $amp_url ) {
+	if ( ! is_amp_available() ) {
 		printf( '<!-- %s -->', esc_html__( 'There is no amphtml version available for this URL.', 'amp' ) );
 		return;
 	}
 
-	// Check to see if there are known unaccepted validation errors for this URL.
-	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-		$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $current_url, [ 'ignore_accepted' => true ] );
-		$error_count       = count( $validation_errors );
-		if ( $error_count > 0 ) {
-			echo "<!--\n";
-			echo esc_html(
-				sprintf(
-					/* translators: %s: error count */
-					_n(
-						'There is %s validation error that is blocking the amphtml version from being available.',
-						'There are %s validation errors that are blocking the amphtml version from being available.',
-						$error_count,
-						'amp'
-					),
-					number_format_i18n( $error_count )
-				)
-			);
-			echo "\n-->";
-			return;
-		}
+	if ( AMP_Theme_Support::is_paired_available() ) {
+		$amp_url = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
+	} else {
+		$amp_url = amp_get_permalink( get_queried_object_id() );
 	}
 
 	if ( $amp_url ) {
+		$amp_url = remove_query_arg( QueryVar::NOAMP, $amp_url );
 		printf( '<link rel="amphtml" href="%s">', esc_url( $amp_url ) );
 	}
 }
@@ -244,66 +770,19 @@ function post_supports_amp( $post ) {
  * var is present, or else in standard mode if just the template is available.
  *
  * @return bool Whether it is the AMP endpoint.
- * @global string $pagenow
  * @global WP_Query $wp_query
  */
 function is_amp_endpoint() {
-	global $pagenow, $wp_query;
+	global $wp_query;
 
-	if ( is_admin() || is_embed() || is_feed() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || in_array( $pagenow, [ 'wp-login.php', 'wp-signup.php', 'wp-activate.php' ], true ) ) {
-		return false;
-	}
-
-	// Always return false when requesting service worker.
-	if ( class_exists( 'WP_Service_Workers' ) && ! empty( $wp_query ) && defined( 'WP_Service_Workers::QUERY_VAR' ) && $wp_query->get( WP_Service_Workers::QUERY_VAR ) ) {
-		return false;
-	}
-
-	$did_parse_query = did_action( 'parse_query' );
-
-	if ( ! $did_parse_query ) {
-		_doing_it_wrong(
-			__FUNCTION__,
-			sprintf(
-				/* translators: 1: is_amp_endpoint(), 2: parse_query */
-				esc_html__( '%1$s was called before the %2$s hook was called.', 'amp' ),
-				'is_amp_endpoint()',
-				'parse_query'
-			),
-			'0.4.2'
-		);
-	}
-
-	if ( empty( $wp_query ) || ! ( $wp_query instanceof WP_Query ) ) {
-		_doing_it_wrong(
-			__FUNCTION__,
-			sprintf(
-				/* translators: 1: is_amp_endpoint(), 2: WP_Query */
-				esc_html__( '%1$s was called before the %2$s was instantiated.', 'amp' ),
-				'is_amp_endpoint()',
-				'WP_Query'
-			),
-			'1.1'
-		);
-	}
-
-	// AMP Stories are always an AMP endpoint.
-	if ( $wp_query instanceof WP_Query && $wp_query->is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
+	if ( AMP_Validation_Manager::$is_validate_request ) {
 		return true;
 	}
 
-	/*
-	 * If this is a URL for validation, and validation is forced for all URLs, return true.
-	 * Normally, this would be false if the user has deselected a template,
-	 * like by unchecking 'Categories' in 'AMP Settings' > 'Supported Templates'.
-	 * But there's a flag for the WP-CLI command that sets this query var to validate all URLs.
-	 */
-	if ( AMP_Validation_Manager::is_theme_support_forced() ) {
-		return true;
-	}
-
-	$support_args      = AMP_Theme_Support::get_theme_support_args();
-	$has_amp_query_var = (
+	$support_args = AMP_Theme_Support::get_theme_support_args();
+	$is_amp_url   = (
+		amp_is_canonical()
+		||
 		isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		||
 		(
@@ -319,34 +798,20 @@ function is_amp_endpoint() {
 		)
 	);
 
-	if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-		return $has_amp_query_var;
-	}
+	// If AMP is not available, then it's definitely not an AMP endpoint.
+	if ( ! is_amp_available() ) {
+		// But, if WP_Query was not available yet, then we will just assume the query is supported since at this point we do
+		// know either that the site is in Standard mode or the URL was requested with the AMP query var. This can still
+		// produce an undesired result when a Standard mode site has a post that opts out of AMP, but this issue will
+		// have been flagged via _doing_it_wrong() in is_amp_available() above.
+		if ( ! did_action( 'wp' ) || ! $wp_query instanceof WP_Query ) {
+			return $is_amp_url && AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED );
+		}
 
-	// When there is no query var and AMP is not canonical (AMP-first), then this is definitely not an AMP endpoint.
-	if ( ! $has_amp_query_var && ! amp_is_canonical() ) {
 		return false;
 	}
 
-	if ( ! did_action( 'wp' ) ) {
-		_doing_it_wrong(
-			__FUNCTION__,
-			sprintf(
-				/* translators: 1: is_amp_endpoint(). 2: wp. 3: amp_skip_post */
-				esc_html__( '%1$s was called before the %2$s action which means it will not have access to the queried object to determine if it is an AMP response, thus neither the %3$s filter nor the AMP enabled publish metabox toggle will be considered.', 'amp' ),
-				'is_amp_endpoint()',
-				'wp',
-				'amp_skip_post'
-			),
-			'1.0.2'
-		);
-		$supported = true;
-	} else {
-		$availability = AMP_Theme_Support::get_template_availability();
-		$supported    = $availability['supported'];
-	}
-
-	return amp_is_canonical() ? $supported : ( $has_amp_query_var && $supported );
+	return $is_amp_url;
 }
 
 /**
@@ -390,24 +855,20 @@ function amp_get_boilerplate_stylesheets() {
 /**
  * Add generator metadata.
  *
- * @since 6.0
+ * @since 0.6
  * @since 1.0 Add template mode.
+ * @since 2.0 Add reader theme.
  */
 function amp_add_generator_metadata() {
 	$content = sprintf( 'AMP Plugin v%s', AMP__VERSION );
 
-	if ( ! AMP_Options_Manager::is_website_experience_enabled() ) {
-		$mode = 'none';
-	} elseif ( amp_is_canonical() ) {
-		$mode = 'standard';
-	} elseif ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-		$mode = 'transitional';
-	} else {
-		$mode = 'reader';
-	}
+	$mode     = AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
 	$content .= sprintf( '; mode=%s', $mode );
 
-	$content .= sprintf( '; experiences=%s', implode( ',', AMP_Options_Manager::get_option( 'experiences' ) ) );
+	$reader_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
+	if ( AMP_Theme_Support::READER_MODE_SLUG === $mode ) {
+		$content .= sprintf( '; theme=%s', $reader_theme );
+	}
 
 	printf( '<meta name="generator" content="%s">', esc_attr( $content ) );
 }
@@ -422,7 +883,7 @@ function amp_register_default_scripts( $wp_scripts ) {
 	 * Polyfill dependencies that are registered in Gutenberg and WordPress 5.0.
 	 * Note that Gutenberg will override these at wp_enqueue_scripts if it is active.
 	 */
-	$handles = [ 'wp-i18n', 'wp-dom-ready', 'wp-polyfill', 'wp-server-side-render', 'wp-url' ];
+	$handles = [ 'wp-i18n', 'wp-dom-ready', 'wp-polyfill', 'wp-url' ];
 	foreach ( $handles as $handle ) {
 		if ( ! isset( $wp_scripts->registered[ $handle ] ) ) {
 			$asset_file   = AMP__DIR__ . '/assets/js/' . $handle . '.asset.php';
@@ -436,6 +897,20 @@ function amp_register_default_scripts( $wp_scripts ) {
 				$dependencies,
 				$version
 			);
+		}
+	}
+
+	$vendor_scripts = [
+		'lodash' => [
+			'dependencies' => [],
+			'version'      => '4.17.15',
+		],
+	];
+	foreach ( $vendor_scripts as $handle => $handle_data ) {
+		if ( ! isset( $wp_scripts->registered[ $handle ] ) ) {
+			$path = amp_get_asset_url( sprintf( 'js/vendor/%s.js', $handle ) );
+
+			$wp_scripts->add( $handle, $path, $handle_data['dependencies'], $handle_data['version'], 1 );
 		}
 	}
 
@@ -504,6 +979,31 @@ function amp_register_default_scripts( $wp_scripts ) {
 			null
 		);
 	}
+
+	if ( $wp_scripts->query( 'amp-experiment', 'registered' ) ) {
+		/*
+		 * Version 1.0 of amp-experiment is still experimental and requires the user to enable it.
+		 * @todo Revisit once amp-experiment is no longer experimental.
+		 */
+		$wp_scripts->registered['amp-experiment']->src = 'https://cdn.ampproject.org/v0/amp-experiment-0.1.js';
+	}
+}
+
+/**
+ * Register default styles.
+ *
+ * @since 2.0
+ *
+ * @param WP_Styles $styles Styles.
+ */
+function amp_register_default_styles( WP_Styles $styles ) {
+	$styles->add(
+		'amp-icons',
+		amp_get_asset_url( 'css/amp-icons.css' ),
+		[ 'dashicons' ],
+		AMP__VERSION
+	);
+	$styles->add_data( 'amp-icons', 'rtl', 'replace' );
 }
 
 /**
@@ -665,7 +1165,7 @@ function amp_filter_font_style_loader_tag_with_crossorigin_anonymous( $tag, $han
  * @return array Analytics.
  */
 function amp_get_analytics( $analytics = [] ) {
-	$analytics_entries = AMP_Options_Manager::get_option( 'analytics', [] );
+	$analytics_entries = AMP_Options_Manager::get_option( Option::ANALYTICS, [] );
 
 	/**
 	 * Add amp-analytics tags.
@@ -714,7 +1214,7 @@ function amp_print_analytics( $analytics ) {
 	 * This is useful for printing additional `amp-analytics` tags to the page without having to refactor any existing
 	 * markup generation logic to use the data structure mutated by the `amp_analytics_entries` filter. For such cases,
 	 * this action should be used for printing `amp-analytics` tags as opposed to using the `wp_footer` and
-	 * `amp_post_template_footer` actions; this will ensure analytics will also be included on AMP Stories.
+	 * `amp_post_template_footer` actions.
 	 *
 	 * @since 1.3
 	 * @param array $analytics_entries Analytics entries, already potentially modified by the amp_analytics_entries filter.
@@ -773,7 +1273,7 @@ function amp_print_analytics( $analytics ) {
  * @return array Embed handlers.
  */
 function amp_get_content_embed_handlers( $post = null ) {
-	if ( current_theme_supports( AMP_Theme_Support::SLUG ) && $post ) {
+	if ( ! amp_is_legacy() && $post ) {
 		_deprecated_argument(
 			__FUNCTION__,
 			'0.7',
@@ -808,15 +1308,14 @@ function amp_get_content_embed_handlers( $post = null ) {
 			'AMP_Instagram_Embed_Handler'    => [],
 			'AMP_Issuu_Embed_Handler'        => [],
 			'AMP_Meetup_Embed_Handler'       => [],
-			'AMP_Vine_Embed_Handler'         => [],
 			'AMP_Facebook_Embed_Handler'     => [],
 			'AMP_Pinterest_Embed_Handler'    => [],
 			'AMP_Playlist_Embed_Handler'     => [],
 			'AMP_Reddit_Embed_Handler'       => [],
+			'AMP_TikTok_Embed_Handler'       => [],
 			'AMP_Tumblr_Embed_Handler'       => [],
 			'AMP_Gallery_Embed_Handler'      => [],
 			'AMP_Gfycat_Embed_Handler'       => [],
-			'AMP_Hulu_Embed_Handler'         => [],
 			'AMP_Imgur_Embed_Handler'        => [],
 			'AMP_Scribd_Embed_Handler'       => [],
 			'AMP_WordPress_TV_Embed_Handler' => [],
@@ -854,7 +1353,7 @@ function amp_is_dev_mode() {
 			// For the few sites that forcibly show the admin bar even when the user is logged out, only enable dev
 			// mode if the user is actually logged in. This prevents the dev mode from being served to crawlers
 			// when they index the AMP version. The theme support check disables dev mode in Reader mode.
-			( is_admin_bar_showing() && is_user_logged_in() && current_theme_supports( 'amp' ) )
+			( is_admin_bar_showing() && is_user_logged_in() )
 			||
 			is_customize_preview()
 		)
@@ -874,13 +1373,13 @@ function amp_is_dev_mode() {
 function amp_get_content_sanitizers( $post = null ) {
 	$theme_support_args = AMP_Theme_Support::get_theme_support_args();
 
-	if ( is_array( $theme_support_args ) && $post ) {
+	if ( $post && ! amp_is_legacy() ) {
 		_deprecated_argument(
 			__FUNCTION__,
 			'0.7',
 			sprintf(
 				/* translators: %s: $post */
-				esc_html__( 'The %s argument is deprecated when theme supports AMP.', 'amp' ),
+				esc_html__( 'The %s argument is deprecated.', 'amp' ),
 				'$post'
 			)
 		);
@@ -893,21 +1392,21 @@ function amp_get_content_sanitizers( $post = null ) {
 		$current_origin .= ':' . $parsed_home_url['port'];
 	}
 
-	$amp_to_amp_linking_enabled = false;
-	if ( AMP_Options_Manager::is_website_experience_enabled() ) {
-		/**
-		 * Filters whether AMP-to-AMP linking should be enabled.
-		 *
-		 * @since 1.4.0
-		 * @param bool $amp_to_amp_linking_enabled Whether AMP-to-AMP linking should be enabled.
-		 */
-		$amp_to_amp_linking_enabled = (bool) apply_filters(
-			'amp_to_amp_linking_enabled',
-			AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Theme_Support::get_support_mode()
-		);
-	}
+	/**
+	 * Filters whether AMP-to-AMP linking should be enabled.
+	 *
+	 * @since 1.4.0
+	 * @param bool $amp_to_amp_linking_enabled Whether AMP-to-AMP linking should be enabled.
+	 */
+	$amp_to_amp_linking_enabled = (bool) apply_filters(
+		'amp_to_amp_linking_enabled',
+		AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
+	);
 
 	$sanitizers = [
+		'AMP_Embed_Sanitizer'             => [
+			'amp_to_amp_linking_enabled' => $amp_to_amp_linking_enabled,
+		],
 		'AMP_Core_Theme_Sanitizer'        => [
 			'template'       => get_template(),
 			'stylesheet'     => get_stylesheet(),
@@ -926,22 +1425,21 @@ function amp_get_content_sanitizers( $post = null ) {
 		'AMP_O2_Player_Sanitizer'         => [],
 		'AMP_Audio_Sanitizer'             => [],
 		'AMP_Playbuzz_Sanitizer'          => [],
-		'AMP_Embed_Sanitizer'             => [],
 		'AMP_Iframe_Sanitizer'            => [
-			'add_placeholder' => true,
-			'current_origin'  => $current_origin,
+			'add_placeholder'    => true,
+			'current_origin'     => $current_origin,
+			'align_wide_support' => current_theme_supports( 'align-wide' ),
 		],
 		'AMP_Gallery_Block_Sanitizer'     => [ // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
 			'carousel_required' => ! is_array( $theme_support_args ), // For back-compat.
 		],
 		'AMP_Block_Sanitizer'             => [], // Note: Block sanitizer must come after embed / media sanitizers since its logic is using the already sanitized content.
 		'AMP_Script_Sanitizer'            => [],
-		'AMP_Style_Sanitizer'             => [
-			'include_manifest_comment' => ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ? 'always' : 'when_excessive',
-		],
+		'AMP_Style_Sanitizer'             => [],
 		'AMP_Meta_Sanitizer'              => [],
 		'AMP_Layout_Sanitizer'            => [],
-		'AMP_Tag_And_Attribute_Sanitizer' => [], // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
+		'AMP_Accessibility_Sanitizer'     => [],
+		'AMP_Tag_And_Attribute_Sanitizer' => [], // Note: This validating sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
 	];
 
 	if ( ! empty( $theme_support_args['nav_menu_toggle'] ) ) {
@@ -952,10 +1450,26 @@ function amp_get_content_sanitizers( $post = null ) {
 		$sanitizers['AMP_Nav_Menu_Dropdown_Sanitizer'] = $theme_support_args['nav_menu_dropdown'];
 	}
 
-	if ( $amp_to_amp_linking_enabled ) {
-		$sanitizers['AMP_Link_Sanitizer'] = [
-			'paired' => ! amp_is_canonical(),
-		];
+	if ( $amp_to_amp_linking_enabled && AMP_Theme_Support::STANDARD_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
+
+		/**
+		 * Filters the list of URLs which are excluded from being included in AMP-to-AMP linking.
+		 *
+		 * This only applies when the amp_to_amp_linking_enabled filter returns true,
+		 * which it does by default in Transitional mode. This filter can be used to opt-in
+		 * when in Reader mode. This does not apply in Standard mode.
+		 * Only frontend URLs on the frontend need be excluded, as all other URLs are never made into AMP links.
+		 *
+		 * @since 1.5.0
+		 *
+		 * @param string[] $excluded_urls The URLs to exclude from having AMP-to-AMP links.
+		 */
+		$excluded_urls = apply_filters( 'amp_to_amp_excluded_urls', [] );
+
+		$sanitizers['AMP_Link_Sanitizer'] = array_merge(
+			[ 'paired' => ! amp_is_canonical() ],
+			compact( 'excluded_urls' )
+		);
 	}
 
 	/**
@@ -978,14 +1492,29 @@ function amp_get_content_sanitizers( $post = null ) {
 		 * elements prior to running any of the sanitizers.
 		 *
 		 * @since 1.3
-		 * @param string[] XPath element queries. Context is the root element.
+		 * @param string[] $element_xpaths XPath element queries. Context is the root element.
 		 */
 		$dev_mode_xpaths = (array) apply_filters( 'amp_dev_mode_element_xpaths', [] );
+
 		if ( is_admin_bar_showing() ) {
 			$dev_mode_xpaths[] = '//*[ @id = "wpadminbar" ]';
 			$dev_mode_xpaths[] = '//*[ @id = "wpadminbar" ]//*';
 			$dev_mode_xpaths[] = '//style[ @id = "admin-bar-inline-css" ]';
 		}
+
+		if ( is_customize_preview() ) {
+			// Scripts are always needed to inject changeset UUID.
+			$dev_mode_xpaths[] = '//script[ @src ]';
+			$dev_mode_xpaths[] = '//script[ not( @type ) or @type = "text/javascript" ]';
+
+			// Style needed for Additional CSS to work as intended.
+			$dev_mode_xpaths[] = '//style[ @id = "wp-custom-css" ]';
+
+			// Styles needed for Colors customization.
+			$dev_mode_xpaths[] = '//style[ @id = "custom-background-css" ]';
+			$dev_mode_xpaths[] = '//style[ @id = "custom-theme-colors" ]';
+		}
+
 		$sanitizers = array_merge(
 			[
 				'AMP_Dev_Mode_Sanitizer' => [
@@ -996,7 +1525,18 @@ function amp_get_content_sanitizers( $post = null ) {
 		);
 	}
 
-	// Force style sanitizer and whitelist sanitizer to be at end.
+	/**
+	 * Filters whether parsed CSS is allowed to be cached in transients.
+	 *
+	 * When this is filtered to be false, parsed CSS will not be stored in transients. This is important when there is
+	 * highly-variable CSS content in order to prevent filling up the wp_options table with an endless number of entries.
+	 *
+	 * @since 1.5.0
+	 * @param bool $transient_caching_allowed Transient caching allowed.
+	 */
+	$sanitizers['AMP_Style_Sanitizer']['allow_transient_caching'] = apply_filters( 'amp_parsed_css_transient_caching_allowed', true );
+
+	// Force style sanitizer, meta sanitizer, and validating sanitizer to be at end.
 	foreach ( [ 'AMP_Style_Sanitizer', 'AMP_Meta_Sanitizer', 'AMP_Tag_And_Attribute_Sanitizer' ] as $class_name ) {
 		if ( isset( $sanitizers[ $class_name ] ) ) {
 			$sanitizer = $sanitizers[ $class_name ];
@@ -1069,50 +1609,39 @@ function amp_get_post_image_metadata( $post = null ) {
 /**
  * Get the publisher logo.
  *
- * "The following guidelines apply to logos used for general AMP pages, not AMP stories. There
- * are different logo requirements for AMP stories."
+ * The following guidelines apply to logos used for general AMP pages.
  *
  * "The logo should be a rectangle, not a square. The logo should fit in a 60x600px rectangle.,
  * and either be exactly 60px high (preferred), or exactly 600px wide. For example, 450x45px
  * would not be acceptable, even though it fits in the 600x60px rectangle."
  *
- * For AMP Stories: "The logo shape should be a square, not a rectangle. … The logo should be at least 96x96 pixels."
- *
  * @since 1.2.1
  * @link https://developers.google.com/search/docs/data-types/article#logo-guidelines
- * @link https://amp.dev/documentation/components/amp-story/#publisher-logo-src-guidelines
  *
  * @return string Publisher logo image URL. WordPress logo if no site icon or custom logo defined, and no logo provided via 'amp_site_icon_url' filter.
  */
 function amp_get_publisher_logo() {
 	$logo_image_url = null;
 
-	$is_amp_story = is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG );
-	if ( $is_amp_story ) {
-		// This should be square, at least 96px in width/height. The 512 is used because the site icon would have this size generated.
-		$logo_width  = 512;
-		$logo_height = 512;
-	} else {
-		/*
-		 * This should be 60x600px rectangle. It *can* be larger than this, contrary to the current documentation.
-		 * Only minimum size and ratio matters. So height should be at least 60px and width a minimum of 200px.
-		 * An aspect ratio between 200/60 (10/3) and 600:60 (10/1) should be used. A square image still be used,
-		 * but it is not preferred; a landscape logo should be provided if possible.
-		 */
-		$logo_width  = 600;
-		$logo_height = 60;
-	}
+	/*
+	 * This should be 60x600px rectangle. It *can* be larger than this, contrary to the current documentation.
+	 * Only minimum size and ratio matters. So height should be at least 60px and width a minimum of 200px.
+	 * An aspect ratio between 200/60 (10/3) and 600:60 (10/1) should be used. A square image still be used,
+	 * but it is not preferred; a landscape logo should be provided if possible.
+	 */
+	$logo_width  = 600;
+	$logo_height = 60;
 
-	// Use the Custom Logo if set, but only for Stories if it is square.
+	// Use the Custom Logo if set.
 	$custom_logo_id = get_theme_mod( 'custom_logo' );
 	if ( has_custom_logo() && $custom_logo_id ) {
 		$custom_logo_img = wp_get_attachment_image_src( $custom_logo_id, [ $logo_width, $logo_height ], false );
-		if ( $custom_logo_img && ( ! $is_amp_story || $custom_logo_img[2] === $custom_logo_img[1] ) ) {
+		if ( ! empty( $custom_logo_img[0] ) ) {
 			$logo_image_url = $custom_logo_img[0];
 		}
 	}
 
-	// Try Site Icon, though it is not ideal for non-Story because it should be square.
+	// Try Site Icon if a custom logo is not set.
 	$site_icon_id = get_option( 'site_icon' );
 	if ( empty( $logo_image_url ) && $site_icon_id ) {
 		$site_icon_src = wp_get_attachment_image_src( $site_icon_id, [ $logo_width, $logo_height ], false );
@@ -1135,11 +1664,7 @@ function amp_get_publisher_logo() {
 
 	// Fallback to serving the WordPress logo.
 	if ( empty( $logo_image_url ) ) {
-		if ( $is_amp_story ) {
-			$logo_image_url = amp_get_asset_url( 'images/stories-editor/amp-story-fallback-wordpress-publisher-logo.png' );
-		} else {
-			$logo_image_url = amp_get_asset_url( 'images/amp-page-fallback-wordpress-publisher-logo.png' );
-		}
+		$logo_image_url = amp_get_asset_url( 'images/amp-page-fallback-wordpress-publisher-logo.png' );
 	}
 
 	return $logo_image_url;
@@ -1167,20 +1692,20 @@ function amp_get_schemaorg_metadata() {
 		$metadata['publisher']['logo'] = $publisher_logo;
 	}
 
-	$post = get_queried_object();
-	if ( $post instanceof WP_Post ) {
+	$queried_object = get_queried_object();
+	if ( $queried_object instanceof WP_Post ) {
 		$metadata = array_merge(
 			$metadata,
 			[
 				'@type'            => is_page() ? 'WebPage' : 'BlogPosting',
 				'mainEntityOfPage' => get_permalink(),
 				'headline'         => get_the_title(),
-				'datePublished'    => mysql2date( 'c', $post->post_date_gmt, false ),
-				'dateModified'     => mysql2date( 'c', $post->post_modified_gmt, false ),
+				'datePublished'    => mysql2date( 'c', $queried_object->post_date_gmt, false ),
+				'dateModified'     => mysql2date( 'c', $queried_object->post_modified_gmt, false ),
 			]
 		);
 
-		$post_author = get_userdata( $post->post_author );
+		$post_author = get_userdata( $queried_object->post_author );
 		if ( $post_author ) {
 			$metadata['author'] = [
 				'@type' => 'Person',
@@ -1188,7 +1713,7 @@ function amp_get_schemaorg_metadata() {
 			];
 		}
 
-		$image_metadata = amp_get_post_image_metadata( $post );
+		$image_metadata = amp_get_post_image_metadata( $queried_object );
 		if ( $image_metadata ) {
 			$metadata['image'] = $image_metadata['url'];
 		}
@@ -1201,10 +1726,12 @@ function amp_get_schemaorg_metadata() {
 		 *
 		 * @since 0.3
 		 *
-		 * @param array   $metadata Metadata.
-		 * @param WP_Post $post     Post.
+		 * @param array   $metadata       Metadata.
+		 * @param WP_Post $queried_object Post.
 		 */
-		$metadata = apply_filters( 'amp_post_template_metadata', $metadata, $post );
+		$metadata = apply_filters( 'amp_post_template_metadata', $metadata, $queried_object );
+	} elseif ( is_archive() ) {
+		$metadata['@type'] = 'CollectionPage';
 	}
 
 	/**
@@ -1252,7 +1779,6 @@ function amp_wp_kses_mustache( $markup ) {
 	return wp_kses( $markup, array_fill_keys( $amp_mustache_allowed_html_tags, [] ) );
 }
 
-
 /**
  * Mark the beginning of the content that will be displayed inside the app shell.
  *
@@ -1288,6 +1814,7 @@ function amp_start_app_shell_content() {
 		ob_start();
 	}
 }
+
 /**
  * Mark the end of the content that will be displayed inside the app shell.
  *
@@ -1320,33 +1847,13 @@ function amp_end_app_shell_content() {
  * @param WP_Admin_Bar $wp_admin_bar Admin bar.
  */
 function amp_add_admin_bar_view_link( $wp_admin_bar ) {
-	if ( is_admin() || amp_is_canonical() ) {
+	if ( is_admin() || amp_is_canonical() || ! is_amp_available() ) {
 		return;
 	}
 
-	if ( current_theme_supports( 'amp' ) ) {
-		$available = AMP_Theme_Support::get_template_availability()['supported'];
-	} elseif ( is_singular() ) {
-		$post      = get_queried_object();
-		$available = ( $post instanceof WP_Post ) && post_supports_amp( $post );
-	} else {
-		$available = false;
-	}
-	if ( ! $available ) {
-		// @todo Add note that AMP is not available?
-		return;
-	}
+	$is_amp_endpoint = is_amp_endpoint();
 
-	// Show nothing if there are rejected validation errors for this URL.
-	if (
-		! is_amp_endpoint() &&
-		AMP_Theme_Support::READER_MODE_SLUG !== AMP_Theme_Support::get_support_mode() &&
-		count( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( amp_get_current_url(), [ 'ignore_accepted' => true ] ) ) > 0
-	) {
-		return;
-	}
-
-	if ( is_amp_endpoint() ) {
+	if ( $is_amp_endpoint ) {
 		$href = amp_remove_endpoint( amp_get_current_url() );
 	} elseif ( is_singular() ) {
 		$href = amp_get_permalink( get_queried_object_id() ); // For sake of Reader mode.
@@ -1354,50 +1861,42 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 		$href = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
 	}
 
-	$icon = '&#x1F517;'; // LINK SYMBOL.
+	$href = remove_query_arg( QueryVar::NOAMP, $href );
 
-	$parent = [
-		'id'    => 'amp',
-		'title' => sprintf(
-			'<span id="amp-admin-bar-item-status-icon">%s</span> %s',
-			$icon,
-			esc_html( is_amp_endpoint() ? __( 'Non-AMP', 'amp' ) : __( 'AMP', 'amp' ) )
-		),
-		'href'  => esc_url( $href ),
+	$icon = $is_amp_endpoint ? Icon::logo() : Icon::link();
+	$attr = [
+		'id'    => 'amp-admin-bar-item-status-icon',
+		'class' => 'ab-icon',
 	];
 
-	$wp_admin_bar->add_node( $parent );
-}
-
-/**
- * Prints AMP Stories auto ads.
- *
- * @since 1.2
- */
-function amp_print_story_auto_ads() {
-	/**
-	 * Filters the configuration data for <amp-story-auto-ads>.
-	 *
-	 * This allows Dynamically inserting ads into a story.
-	 *
-	 * @param array   $data Story ads configuration data.
-	 * @param WP_Post $post The current story's post object.
-	 */
-	$data = apply_filters( 'amp_story_auto_ads_configuration', [], get_post() );
-
-	if ( empty( $data ) ) {
-		return;
-	}
-
-	$script_element = AMP_HTML_Utils::build_tag(
-		'script',
+	$wp_admin_bar->add_node(
 		[
-			'type' => 'application/json',
-		],
-		wp_json_encode( $data )
+			'id'    => 'amp',
+			'title' => $icon->to_html( $attr ) . ' ' . esc_html__( 'AMP', 'amp' ),
+			'href'  => esc_url( $href ),
+		]
 	);
 
-	echo AMP_HTML_Utils::build_tag( 'amp-story-auto-ads', [], $script_element ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	$wp_admin_bar->add_node(
+		[
+			'parent' => 'amp',
+			'id'     => 'amp-view',
+			'title'  => esc_html( $is_amp_endpoint ? __( 'View non-AMP version', 'amp' ) : __( 'View AMP version', 'amp' ) ),
+			'href'   => esc_url( $href ),
+		]
+	);
+
+	// Make sure the Customizer opens with AMP enabled.
+	$customize_node = $wp_admin_bar->get_node( 'customize' );
+	if ( $customize_node && $is_amp_endpoint && AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
+		$args = get_object_vars( $customize_node );
+		if ( amp_is_legacy() ) {
+			$args['href'] = add_query_arg( 'autofocus[panel]', AMP_Template_Customizer::PANEL_ID, $args['href'] );
+		} else {
+			$args['href'] = add_query_arg( amp_get_slug(), '1', $args['href'] );
+		}
+		$wp_admin_bar->add_node( $args );
+	}
 }
 
 /**
@@ -1427,121 +1926,4 @@ function amp_generate_script_hash( $script ) {
 		base64_encode( $sha384 ) // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 	);
 	return 'sha384-' . $hash;
-}
-
-/*
- * The function below is copied from the ramsey/array_column package.
- *
- * Changes were made to code style to pass PHPCS requirements, but logic is unchanged.
- *
- * This can be removed once the required PHP version moves to PHP 5.5+.
- *
- * @link https://github.com/ramsey/array_column
- *
- * @copyright Copyright (c) Ben Ramsey (http://benramsey.com)
- * @license   http://opensource.org/licenses/MIT MIT
- */
-if ( ! function_exists( 'array_column' ) ) {
-	/**
-	 * Returns the values from a single column of the input array, identified by
-	 * the $columnKey.
-	 *
-	 * Optionally, you may provide an $indexKey to index the values in the returned
-	 * array by the values from the $indexKey column in the input array.
-	 *
-	 * @param array $input      A multi-dimensional array (record set) from which to pull
-	 *                          a column of values.
-	 * @param mixed $column_key The column of values to return. This value may be the
-	 *                          integer key of the column you wish to retrieve, or it
-	 *                          may be the string key name for an associative array.
-	 * @param mixed $index_key  (Optional.) The column to use as the index/keys for
-	 *                          the returned array. This value may be the integer key
-	 *                          of the column, or it may be the string key name.
-	 * @return array|bool
-	 */
-	function array_column( $input = null, $column_key = null, $index_key = null ) {
-		// Using func_get_args() in order to check for proper number of
-		// parameters and trigger errors exactly as the built-in array_column()
-		// does in PHP 5.5.
-		$argc   = func_num_args();
-		$params = func_get_args();
-
-		if ( $argc < 2 ) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error,WordPress.Security.EscapeOutput.OutputNotEscaped
-			trigger_error( "array_column() expects at least 2 parameters, {$argc} given", E_USER_WARNING );
-			return null;
-		}
-
-		if ( ! is_array( $params[0] ) ) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error,WordPress.Security.EscapeOutput.OutputNotEscaped
-			trigger_error( 'array_column() expects parameter 1 to be array, ' . gettype( $params[0] ) . ' given', E_USER_WARNING );
-			return null;
-		}
-
-		if ( ! is_int( $params[1] )
-			&& ! is_float( $params[1] )
-			&& ! is_string( $params[1] )
-			&& null !== $params[1]
-			&& ! ( is_object( $params[1] ) && method_exists( $params[1], '__toString' ) )
-		) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-			trigger_error( 'array_column(): The column key should be either a string or an integer', E_USER_WARNING );
-			return false;
-		}
-
-		if ( isset( $params[2] )
-			&& ! is_int( $params[2] )
-			&& ! is_float( $params[2] )
-			&& ! is_string( $params[2] )
-			&& ! ( is_object( $params[2] ) && method_exists( $params[2], '__toString' ) )
-		) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-			trigger_error( 'array_column(): The index key should be either a string or an integer', E_USER_WARNING );
-			return false;
-		}
-
-		$params_input      = $params[0];
-		$params_column_key = ( null !== $params[1] ) ? (string) $params[1] : null;
-
-		$params_index_key = null;
-		if ( isset( $params[2] ) ) {
-			if ( is_float( $params[2] ) || is_int( $params[2] ) ) {
-				$params_index_key = (int) $params[2];
-			} else {
-				$params_index_key = (string) $params[2];
-			}
-		}
-
-		$result_array = [];
-
-		foreach ( $params_input as $row ) {
-			$key       = null;
-			$value     = null;
-			$key_set   = false;
-			$value_set = false;
-
-			if ( null !== $params_index_key && array_key_exists( $params_index_key, $row ) ) {
-				$key_set = true;
-				$key     = (string) $row[ $params_index_key ];
-			}
-
-			if ( null === $params_column_key ) {
-				$value_set = true;
-				$value     = $row;
-			} elseif ( is_array( $row ) && array_key_exists( $params_column_key, $row ) ) {
-				$value_set = true;
-				$value     = $row[ $params_column_key ];
-			}
-
-			if ( $value_set ) {
-				if ( $key_set ) {
-					$result_array[ $key ] = $value;
-				} else {
-					$result_array[] = $value;
-				}
-			}
-		}
-
-		return $result_array;
-	}
 }

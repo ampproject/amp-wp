@@ -18,7 +18,7 @@ const { wp } = window;
 /**
  * Gets a wrapped version of MediaUpload, to enforce that it has the correct file type.
  *
- * Only intended for the MediaUpload in the Core Video block and the AMP Story 'Background Media' control.
+ * Only intended for the MediaUpload in the Core Video block.
  * Though this will also apply to any other MediaUpload with allowedTypes of [ 'video' ].
  * Partly copied from customize-controls.js.
  *
@@ -40,8 +40,8 @@ export default ( InitialMediaUpload ) => {
 		constructor( ...args ) {
 			super( ...args );
 
-			// This class should only be present in the MediaUpload for the AMP Story 'Background Media' or when only 'video' types are allowed, like in the Core Video block.
-			if ( 'story-background-media' === this.props.id || isEqual( [ 'video/mp4' ], this.props.allowedTypes ) ) {
+			// This class should only be present when only 'video' types are allowed, like in the Core Video block.
+			if ( isEqual( [ 'video/mp4' ], this.props.allowedTypes ) ) {
 				this.initFileTypeMedia();
 			}
 		}

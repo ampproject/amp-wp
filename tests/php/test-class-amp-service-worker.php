@@ -6,12 +6,17 @@
  * @since 1.1
  */
 
+use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+
 /**
  * Tests for AMP_Service_Worker.
  *
  * @covers AMP_Service_Worker
  */
 class Test_AMP_Service_Worker extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/**
 	 * Set up.
@@ -187,7 +192,7 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 	public function test_add_install_hooks() {
 		remove_all_actions( 'amp_post_template_footer' );
 		remove_all_actions( 'wp_footer' );
-		remove_theme_support( 'amp' );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 
 		$post_id = self::factory()->post->create();
 		$this->go_to( get_permalink( $post_id ) );
@@ -196,7 +201,7 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 		$this->assertSame( 10, has_action( 'amp_post_template_footer', [ 'AMP_Service_Worker', 'install_service_worker' ] ) );
 		$this->assertFalse( has_action( 'wp_footer', [ 'AMP_Service_Worker', 'install_service_worker' ] ) );
 
-		add_theme_support( 'amp' );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->assertTrue( is_amp_endpoint() );
 		AMP_Service_Worker::add_install_hooks();
 		$this->assertSame( 10, has_action( 'wp_footer', [ 'AMP_Service_Worker', 'install_service_worker' ] ) );
@@ -211,7 +216,7 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 	public function test_install_service_worker() {
 		$output = get_echo( [ 'AMP_Service_Worker', 'install_service_worker' ] );
 
-		$this->assertContains( '<amp-install-serviceworker', $output );
+		$this->assertStringContains( '<amp-install-serviceworker', $output );
 	}
 
 	/**
@@ -243,10 +248,9 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 		$this->assertInstanceOf( 'Exception', $exception );
 		$this->assertEquals( 'exited', $exception->getMessage() );
 		$output = ob_get_clean();
-		$this->assertContains( '<script>navigator.serviceWorker.register', $output );
+		$this->assertStringContains( '<script>navigator.serviceWorker.register', $output );
 
 		// Go back home to clean up 🤷!
 		$this->go_to( home_url() );
 	}
-
 }

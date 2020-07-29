@@ -41,7 +41,7 @@ class AMP_Editor_Blocks {
 	 */
 	public function init() {
 		if ( function_exists( 'register_block_type' ) ) {
-			add_filter( 'wp_kses_allowed_html', [ $this, 'whitelist_block_atts_in_wp_kses_allowed_html' ], 10, 2 );
+			add_filter( 'wp_kses_allowed_html', [ $this, 'include_block_atts_in_wp_kses_allowed_html' ], 10, 2 );
 
 			/*
 			 * Dirty AMP is required when a site is in AMP-first mode but not all templates are being served
@@ -62,7 +62,7 @@ class AMP_Editor_Blocks {
 	}
 
 	/**
-	 * Whitelist elements and attributes used for AMP.
+	 * Allowlist elements and attributes used for AMP.
 	 *
 	 * This prevents AMP markup from being deleted in
 	 *
@@ -70,7 +70,7 @@ class AMP_Editor_Blocks {
 	 * @param string $context Context.
 	 * @return mixed Modified array.
 	 */
-	public function whitelist_block_atts_in_wp_kses_allowed_html( $tags, $context ) {
+	public function include_block_atts_in_wp_kses_allowed_html( $tags, $context ) {
 		if ( 'post' !== $context ) {
 			return $tags;
 		}

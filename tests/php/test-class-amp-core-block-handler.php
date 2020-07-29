@@ -6,6 +6,9 @@
  * @since 1.0
  */
 
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
+
 /**
  * Tests for AMP_Core_Block_Handler.
  *
@@ -13,6 +16,11 @@
  * @covers AMP_Core_Block_Handler
  */
 class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
+	use WithoutBlockPreRendering {
+		setUp as public prevent_block_pre_render;
+	}
 
 	/**
 	 * Set up.
@@ -24,7 +32,7 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
 			$this->markTestSkipped( 'Missing required render_block filter.' );
 		}
-		parent::setUp();
+		$this->prevent_block_pre_render();
 	}
 
 	/**
@@ -71,26 +79,26 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 
 		$handler->register_embed();
 		$rendered = do_blocks( $categories_block );
-		$this->assertContains( '<select', $rendered );
-		$this->assertNotContains( 'onchange', $rendered );
-		$this->assertContains( 'on="change', $rendered );
+		$this->assertStringContains( '<select', $rendered );
+		$this->assertStringNotContains( 'onchange', $rendered );
+		$this->assertStringContains( 'on="change', $rendered );
 		if ( WP_Block_Type_Registry::get_instance()->is_registered( 'core/archives' ) ) {
 			$rendered = do_blocks( $archives_block );
-			$this->assertContains( '<select', $rendered );
-			$this->assertNotContains( 'onchange', $rendered );
-			$this->assertContains( 'on="change', $rendered );
+			$this->assertStringContains( '<select', $rendered );
+			$this->assertStringNotContains( 'onchange', $rendered );
+			$this->assertStringContains( 'on="change', $rendered );
 		}
 
 		$handler->unregister_embed();
 		$rendered = do_blocks( $categories_block );
-		$this->assertContains( '<select', $rendered );
-		$this->assertContains( 'onchange', $rendered );
-		$this->assertNotContains( 'on="change', $rendered );
+		$this->assertStringContains( '<select', $rendered );
+		$this->assertStringContains( 'onchange', $rendered );
+		$this->assertStringNotContains( 'on="change', $rendered );
 		if ( WP_Block_Type_Registry::get_instance()->is_registered( 'core/archives' ) ) {
 			$rendered = do_blocks( $archives_block );
-			$this->assertContains( '<select', $rendered );
-			$this->assertContains( 'onchange', $rendered );
-			$this->assertNotContains( 'on="change', $rendered );
+			$this->assertStringContains( '<select', $rendered );
+			$this->assertStringContains( 'onchange', $rendered );
+			$this->assertStringNotContains( 'on="change', $rendered );
 		}
 	}
 
@@ -140,7 +148,7 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 
 		$content = apply_filters( 'the_content', get_post( $post_id )->post_content );
 
-		$this->assertContains( '<video width="560" height="320" ', $content );
+		$this->assertStringContains( '<video width="560" height="320" ', $content );
 	}
 
 	/**
@@ -169,8 +177,254 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 
 		$content = apply_filters( 'the_content', get_post( $post_id )->post_content );
 
-		$this->assertContains( '<video layout="fill" object-fit="cover"', $content );
-		$this->assertNotContains( 'width=', $content );
-		$this->assertNotContains( 'height=', $content );
+		$this->assertStringContains( '<video layout="fill" object-fit="cover"', $content );
+		$this->assertStringNotContains( 'width=', $content );
+		$this->assertStringNotContains( 'height=', $content );
+	}
+
+	/**
+	 * Test process_categories_widgets.
+	 *
+	 * @covers AMP_Core_Block_Handler::process_categories_widgets()
+	 * @see WP_Widget_Categories
+	 */
+	public function test_process_categories_widgets() {
+		$instance_count = 2;
+
+		ob_start();
+		the_widget(
+			'WP_Widget_Categories',
+			[ 'dropdown' => '1' ],
+			[]
+		);
+		the_widget(
+			'WP_Widget_Categories',
+			[ 'dropdown' => '1' ],
+			[
+				'before_widget' => '<section>',
+				'after_widget'  => '</section>',
+			]
+		);
+		$html = ob_get_clean();
+
+		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
+
+		/**
+		 * Elements.
+		 *
+		 * @var DOMElement $select
+		 * @var DOMElement $form
+		 */
+		$selects = $dom->getElementsByTagName( 'select' );
+		$forms   = $dom->getElementsByTagName( 'form' );
+
+		$this->assertEquals( $instance_count, $dom->body->getElementsByTagName( 'script' )->length );
+		$this->assertEquals( $instance_count, $selects->length );
+		$this->assertEquals( $instance_count, $forms->length );
+
+		$embed = new AMP_Core_Block_Handler();
+		$embed->register_embed();
+		$embed->sanitize_raw_embeds( $dom );
+
+		$sanitizer = new AMP_Form_Sanitizer( $dom );
+		$sanitizer->sanitize();
+
+		$error_count = 0;
+		$sanitizer   = new AMP_Tag_And_Attribute_Sanitizer(
+			$dom,
+			[
+				'validation_error_callback' => static function () use ( &$error_count ) {
+					$error_count++;
+					return true;
+				},
+			]
+		);
+		$sanitizer->sanitize();
+		$this->assertEquals( 0, $error_count );
+
+		$this->assertEquals( 0, $dom->body->getElementsByTagName( 'script' )->length );
+		$this->assertEquals( $instance_count, $selects->length );
+		foreach ( $selects as $select ) {
+			$this->assertTrue( $select->hasAttribute( 'on' ) );
+		}
+		$ids = [];
+		foreach ( $forms as $form ) {
+			$this->assertTrue( $form->hasAttribute( 'id' ) );
+			$ids[] = $form->getAttribute( 'id' );
+		}
+		$this->assertCount( $instance_count, array_unique( $ids ) );
+	}
+
+	/**
+	 * Test process_archives_widgets.
+	 *
+	 * @covers AMP_Core_Block_Handler::process_archives_widgets()
+	 * @see WP_Widget_Archives
+	 */
+	public function test_process_archives_widgets() {
+		$instance_count = 2;
+		self::factory()->post->create( [ 'post_date' => '2010-01-01 01:01:01' ] );
+
+		ob_start();
+		the_widget(
+			'WP_Widget_Archives',
+			[ 'dropdown' => '1' ],
+			[]
+		);
+		the_widget(
+			'WP_Widget_Archives',
+			[ 'dropdown' => '1' ],
+			[
+				'before_widget' => '<section>',
+				'after_widget'  => '</section>',
+			]
+		);
+		$html = ob_get_clean();
+
+		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
+
+		/**
+		 * Elements.
+		 *
+		 * @var DOMElement $select
+		 */
+		$selects = $dom->getElementsByTagName( 'select' );
+
+		$this->assertEquals( $instance_count, $selects->length );
+
+		$embed = new AMP_Core_Block_Handler();
+		$embed->register_embed();
+		$embed->sanitize_raw_embeds( $dom, [ 'amp_to_amp_linking_enabled' => true ] );
+
+		$error_count = 0;
+		$sanitizer   = new AMP_Tag_And_Attribute_Sanitizer(
+			$dom,
+			[
+				'validation_error_callback' => static function () use ( &$error_count ) {
+					$error_count++;
+					return true;
+				},
+			]
+		);
+		$sanitizer->sanitize();
+		$this->assertEquals( 0, $error_count );
+
+		$this->assertEquals( 0, $dom->body->getElementsByTagName( 'script' )->length );
+		$this->assertEquals( $instance_count, $selects->length );
+		foreach ( $selects as $select ) {
+			$this->assertTrue( $select->hasAttribute( 'on' ) );
+			$this->assertEquals( 'change:AMP.navigateTo(url=event.value)', $select->getAttribute( 'on' ) );
+
+			$options = $dom->xpath->query( '//option[ @value != "" ]', $select );
+
+			$this->assertGreaterThan( 0, $options->length );
+			foreach ( $options as $option ) {
+				/**
+				 * Option element.
+				 *
+				 * @var DOMElement $option
+				 */
+				$query = wp_parse_url( $option->getAttribute( 'value' ), PHP_URL_QUERY );
+				$this->assertNotEmpty( $query );
+				$query_vars = [];
+				wp_parse_str( $query, $query_vars );
+				$this->assertArrayHasKey( amp_get_slug(), $query_vars );
+			}
+		}
+	}
+
+	/**
+	 * Test process_text_widgets.
+	 *
+	 * @covers AMP_Core_Block_Handler::process_text_widgets()
+	 * @see WP_Widget_Archives
+	 */
+	public function test_process_text_widgets() {
+		$instance_count = 2;
+
+		$embed = new AMP_Core_Block_Handler();
+		$embed->register_embed();
+
+		$video_attachment_id = $this->get_video_attachment_id();
+		$video_metadata      = wp_get_attachment_metadata( $video_attachment_id );
+
+		$text  = sprintf(
+			'[video width="%d" height="%d" mp4="%s"][/video]',
+			$video_metadata['width'],
+			$video_metadata['height'],
+			esc_url( wp_get_attachment_url( $video_attachment_id ) )
+		);
+		$text .= "\n\n";
+		$text .= '<iframe src="https://example.com" width="265" height="150"></iframe>';
+
+		$instance = [
+			'text'   => $text,
+			'filter' => true,
+			'visual' => true,
+		];
+
+		ob_start();
+		the_widget(
+			'WP_Widget_Text',
+			$instance,
+			[]
+		);
+		the_widget(
+			'WP_Widget_Text',
+			$instance,
+			[
+				'before_widget' => '<section>',
+				'after_widget'  => '</section>',
+			]
+		);
+		$html = ob_get_clean();
+
+		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
+
+		/**
+		 * Elements.
+		 *
+		 * @var DOMElement $element
+		 */
+		$text_widgets = $dom->xpath->query( '//div[ @class = "textwidget" ]' );
+
+		$this->assertEquals( $instance_count, $text_widgets->length );
+
+		$embed->sanitize_raw_embeds( $dom );
+
+		$sanitizer = new AMP_Video_Sanitizer( $dom );
+		$sanitizer->sanitize();
+
+		$sanitizer = new AMP_Iframe_Sanitizer( $dom );
+		$sanitizer->sanitize();
+
+		$error_count = 0;
+		$sanitizer   = new AMP_Tag_And_Attribute_Sanitizer(
+			$dom,
+			[
+				'validation_error_callback' => static function () use ( &$error_count ) {
+					$error_count++;
+					return true;
+				},
+			]
+		);
+		$sanitizer->sanitize();
+		$this->assertEquals( 0, $error_count );
+
+		foreach ( $text_widgets as $text_widget ) {
+			$video_div = $dom->xpath->query( './/div[ @class = "wp-video" ]', $text_widget )->item( 0 );
+			$this->assertInstanceOf( 'DOMElement', $video_div );
+			$this->assertFalse( $video_div->hasAttribute( 'style' ) );
+
+			$amp_video = $video_div->getElementsByTagName( 'amp-video' )->item( 0 );
+			$this->assertInstanceOf( 'DOMElement', $amp_video );
+			$this->assertEquals( $video_metadata['width'], $amp_video->getAttribute( 'width' ) );
+			$this->assertEquals( $video_metadata['height'], $amp_video->getAttribute( 'height' ) );
+
+			$amp_iframe = $text_widget->getElementsByTagName( 'amp-iframe' )->item( 0 );
+			$this->assertInstanceOf( 'DOMElement', $amp_iframe );
+			$this->assertEquals( '265', $amp_iframe->getAttribute( 'width' ) );
+			$this->assertEquals( '150', $amp_iframe->getAttribute( 'height' ) );
+		}
 	}
 }
