@@ -25,7 +25,7 @@ export const TemplateModeOverride = createContext();
  * @param {any} props.children Children to consume the context.
  */
 export function TemplateModeOverrideContextProvider( { children } ) {
-	const { editedOptions, originalOptions, updateOptions } = useContext( Options );
+	const { editedOptions, originalOptions, updateOptions, readerModeWasOverridden, setReaderModeWasOverridden } = useContext( Options );
 	const { currentPage: { slug: currentPageSlug } } = useContext( Navigation );
 	const { selectedTheme, currentTheme } = useContext( ReaderThemes );
 	const { developerToolsOption, fetchingUser, originalDeveloperToolsOption } = useContext( User );
@@ -35,8 +35,6 @@ export function TemplateModeOverrideContextProvider( { children } ) {
 
 	const { theme_support: themeSupport } = editedOptions || {};
 	const { theme_support: originalThemeSupport } = originalOptions || {};
-
-	const [ readerModeWasOverridden, setReaderModeWasOverridden ] = useState( false );
 
 	const technicalQuestionChanged = ! fetchingUser && developerToolsOption !== originalDeveloperToolsOption;
 
@@ -66,7 +64,7 @@ export function TemplateModeOverrideContextProvider( { children } ) {
 			updateOptions( { theme_support: 'transitional' } );
 			setReaderModeWasOverridden( true );
 		}
-	}, [ selectedTheme.name, currentTheme.name, themeSupport, currentPageSlug, updateOptions ] );
+	}, [ selectedTheme.name, currentTheme.name, themeSupport, currentPageSlug, updateOptions, setReaderModeWasOverridden ] );
 
 	/**
 	 * Unset theme support in current session if the user changes their answer on the technical screen.

@@ -46,6 +46,8 @@ export function OptionsContextProvider( { children, optionsRestEndpoint, populat
 	const { error, setError } = useContext( ErrorContext );
 	const { setAsyncError } = useAsyncError();
 
+	const [ readerModeWasOverridden, setReaderModeWasOverridden ] = useState( false );
+
 	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
 	const hasUnmounted = useRef( false );
 	useEffect( () => () => {
@@ -195,6 +197,8 @@ export function OptionsContextProvider( { children, optionsRestEndpoint, populat
 					savingOptions,
 					unsetOption,
 					updateOptions,
+					readerModeWasOverridden,
+					setReaderModeWasOverridden,
 				}
 			}
 		>
