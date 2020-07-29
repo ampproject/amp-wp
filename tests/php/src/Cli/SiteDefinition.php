@@ -41,8 +41,8 @@ final class SiteDefinition {
 	 *
 	 * @return mixed[] Associative array of steps to perform.
 	 */
-	public function get_steps() {
-		return $this->site_definition['steps'];
+	public function get_import_steps() {
+		return $this->site_definition['import-steps'];
 	}
 
 	/**

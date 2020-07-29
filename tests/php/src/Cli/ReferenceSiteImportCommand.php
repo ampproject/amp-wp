@@ -127,16 +127,16 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 	 *                                        import.
 	 */
 	private function import_site( SiteDefinition $site_definition ) {
-		foreach ( $site_definition->get_steps() as $step ) {
-			switch ( $step['type'] ) {
+		foreach ( $site_definition->get_import_steps() as $import_step ) {
+			switch ( $import_step['type'] ) {
 				case 'activate_theme':
-					( new Import\ActivateTheme( $step['theme'] ) )->process();
+					( new Import\ActivateTheme( $import_step['theme'] ) )->process();
 					break;
 				case 'activate_plugin':
-					( new Import\ActivatePlugin( $step['plugin'] ) )->process();
+					( new Import\ActivatePlugin( $import_step['plugin'] ) )->process();
 					break;
 				case 'import_wxr_file':
-					$wxr_path = $step['filename'];
+					$wxr_path = $import_step['filename'];
 
 					if ( ! path_is_absolute( $wxr_path ) ) {
 						$wxr_path = ReferenceSiteCommandNamespace::REFERENCE_SITES_ROOT . $wxr_path;
@@ -144,13 +144,13 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 					( new Import\ImportWxrFile( $wxr_path ) )->process();
 					break;
 				case 'import_options':
-					( new Import\ImportOptions( $step['options'] ) )->process();
+					( new Import\ImportOptions( $import_step['options'] ) )->process();
 					break;
 				case 'import_widgets':
-					( new Import\ImportWidgets( $step['widgets'] ) )->process();
+					( new Import\ImportWidgets( $import_step['widgets'] ) )->process();
 					break;
 				case 'import_customizer_settings':
-					( new Import\ImportCustomizerSettings( $step['settings'] ) )->process();
+					( new Import\ImportCustomizerSettings( $import_step['settings'] ) )->process();
 					break;
 			}
 		}

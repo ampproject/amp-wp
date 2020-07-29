@@ -5,7 +5,7 @@
   "attributions": [
     "Site content created with Starter Templates by Brainstorm Force.\nSee https://wordpress.org/plugins/astra-sites/"
   ],
-  "steps": [
+  "import-steps": [
     {
       "type": "activate_theme",
       "theme": "astra"
