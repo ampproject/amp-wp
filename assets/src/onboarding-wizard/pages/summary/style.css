@@ -12,7 +12,7 @@
  */
 .reader-summary__screens .amp-description {
 	display: -webkit-box;
-	font-size: 13px;
+	font-size: 14px;
 	line-height: 1.85;
 	-webkit-box-orient: vertical;
 	-webkit-line-clamp: 4;
@@ -37,7 +37,7 @@
  */
 .summary-header__header {
 	align-items: center;
-	border-bottom: 1px solid var(--light-gray);
+	border-bottom: 1px solid var(--amp-settings-color-border);
 	display: flex;
 	font-family: var(--font-poppins);
 	margin-bottom: 1.5rem;

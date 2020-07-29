@@ -12,7 +12,7 @@ import { render } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { AMPNotice, NOTICE_TYPE_SUCCESS, NOTICE_SIZE_LARGE, NOTICE_TYPE_WARNING, NOTICE_SIZE_SMALL, NOTICE_TYPE_INFO } from '..';
+import { AMPNotice, NOTICE_TYPE_SUCCESS, NOTICE_SIZE_LARGE, NOTICE_TYPE_ERROR, NOTICE_SIZE_SMALL, NOTICE_TYPE_INFO } from '..';
 
 let container;
 
@@ -37,7 +37,7 @@ describe( 'AMPNotice', () => {
 
 		wrapper = create(
 			<AMPNotice
-				type={ NOTICE_TYPE_WARNING }
+				type={ NOTICE_TYPE_ERROR }
 				size={ NOTICE_SIZE_SMALL }>
 				{ 'Component children' }
 			</AMPNotice>,

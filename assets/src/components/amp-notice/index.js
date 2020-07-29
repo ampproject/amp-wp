@@ -2,12 +2,14 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
  */
 import './style.css';
 
+export const NOTICE_TYPE_ERROR = 'error';
 export const NOTICE_TYPE_WARNING = 'warning';
 export const NOTICE_TYPE_INFO = 'info';
 export const NOTICE_TYPE_SUCCESS = 'success';
@@ -39,7 +41,7 @@ function getNoticeIcon( type ) {
 			);
 			break;
 
-		case NOTICE_TYPE_WARNING:
+		case NOTICE_TYPE_ERROR:
 			Icon = () => (
 				<svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
 					<path d="M8.18125 16.1001L16.4324 7.84902L28.1012 7.84902L36.3523 16.1001L36.3523 27.769L28.1012 36.0201L16.4324 36.0201L8.18125 27.769L8.18125 16.1001Z" stroke="#EF0000" strokeWidth="2" />
@@ -53,9 +55,9 @@ function getNoticeIcon( type ) {
 		default:
 			Icon = () => (
 				<svg width="35" height="35" viewBox="0 0 35 35" fill="none" xmlns="http://www.w3.org/2000/svg">
-					<rect x="1.66626" y="1.76172" width="31.4597" height="31.4597" rx="15.7299" stroke="#285BE7" strokeWidth="2" />
-					<path d="M15.3048 11.3424C15.3048 10.1875 16.2412 9.25113 17.3961 9.25113C18.5509 9.25113 19.4873 10.1875 19.4873 11.3424C19.4873 12.4972 18.5509 13.4336 17.3961 13.4336C16.2412 13.4336 15.3048 12.4972 15.3048 11.3424Z" fill="#285BE7" />
-					<line x1="17.4184" y1="25.3594" x2="17.4184" y2="15.4184" stroke="#285BE7" strokeWidth="2" />
+					<rect x="1.66626" y="1.76172" width="31.4597" height="31.4597" rx="15.7299" stroke="currentColor" strokeWidth="2" />
+					<path d="M15.3048 11.3424C15.3048 10.1875 16.2412 9.25113 17.3961 9.25113C18.5509 9.25113 19.4873 10.1875 19.4873 11.3424C19.4873 12.4972 18.5509 13.4336 17.3961 13.4336C16.2412 13.4336 15.3048 12.4972 15.3048 11.3424Z" fill="currentColor" />
+					<line x1="17.4184" y1="25.3594" x2="17.4184" y2="15.4184" stroke="currentColor" strokeWidth="2" />
 				</svg>
 
 			);
@@ -76,15 +78,15 @@ function getNoticeIcon( type ) {
 export function AMPNotice( { children, className, size = NOTICE_SIZE_LARGE, type = NOTICE_TYPE_INFO } ) {
 	const noticeIcon = getNoticeIcon( type );
 
-	const classNames = [
-		className ? className : '',
-		'amp-notice',
-		`amp-notice--${ type }`,
-		`amp-notice--${ size }`,
-	].filter( ( item ) => item );
-
 	return (
-		<div className={ classNames.join( ' ' ) }>
+		<div className={
+			classnames(
+				className,
+				'amp-notice',
+				`amp-notice--${ type }`,
+				`amp-notice--${ size }`,
+			) }
+		>
 			<div className="amp-notice__icon">
 				{ noticeIcon }
 			</div>
@@ -99,5 +101,5 @@ AMPNotice.propTypes = {
 	children: PropTypes.node,
 	className: PropTypes.string,
 	size: PropTypes.oneOf( [ NOTICE_SIZE_LARGE, NOTICE_SIZE_SMALL ] ),
-	type: PropTypes.oneOf( [ NOTICE_TYPE_INFO, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_WARNING ] ),
+	type: PropTypes.oneOf( [ NOTICE_TYPE_INFO, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_ERROR, NOTICE_TYPE_WARNING ] ),
 };

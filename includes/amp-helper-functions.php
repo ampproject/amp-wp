@@ -1659,7 +1659,10 @@ function amp_get_schemaorg_metadata() {
 
 	$publisher_logo = amp_get_publisher_logo();
 	if ( $publisher_logo ) {
-		$metadata['publisher']['logo'] = $publisher_logo;
+		$metadata['publisher']['logo'] = [
+			'@type' => 'ImageObject',
+			'url'   => $publisher_logo,
+		];
 	}
 
 	$queried_object = get_queried_object();

@@ -2,25 +2,25 @@
  * Selectable elements.
  */
 .selectable {
-	background-color: var(--white);
-	border: 2px solid var(--light-gray);
+	background-color: var(--amp-settings-color-background);
+	border: 2px solid var(--amp-settings-color-border);
 	border-radius: 8px;
-	box-shadow: -10px 0 0 var(--light-gray);
+	box-shadow: -10px 0 0 var(--amp-settings-color-border);
 	padding: 1.25rem 2.5rem;
 }
 
 .selectable--bottom {
-	border: 2px solid var(--light-gray);
-	box-shadow: 0 10px 0 var(--light-gray);
+	border: 2px solid var(--amp-settings-color-border);
+	box-shadow: 0 10px 0 var(--amp-settings-color-border);
 }
 
 .selectable--selected {
-	border-color: var(--brand);
-	box-shadow: -10px 0 0 var(--brand);
+	border-color: var(--amp-settings-color-brand);
+	box-shadow: -10px 0 0 var(--amp-settings-color-brand);
 }
 
 .selectable--bottom.selectable--selected {
-	box-shadow: 0 10px 0 var(--brand);
+	box-shadow: 0 10px 0 var(--amp-settings-color-brand);
 }
 
 /** Other directions not yet required. */

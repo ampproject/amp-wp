@@ -16,7 +16,7 @@
 }
 
 .settings-welcome p {
-	font-size: 13px;
+	font-size: 14px;
 }
 
 .settings-welcome h2 {
@@ -59,12 +59,17 @@
 }
 
 .amp-settings .theme-card .phone-inner {
-	max-height: 365px;
+	max-height: 298px;
 }
 
 /* Supported templates section. */
 .supported-templates {
 	margin-bottom: 3rem;
+	padding: 0 1.5rem;
+
+	@media (min-width: 783px) {
+		padding: 0 3rem;
+	}
 }
 
 .supported-templates h4 {
@@ -72,12 +77,12 @@
 }
 
 .supported-templates p {
-	font-size: 13px;
+	font-size: 14px;
 }
 
 .mobile-redirection,
 .plugin-suppression {
-	margin-bottom: 2.25rem;
+	margin-bottom: 1rem;
 }
 
 .template-modes {
@@ -95,13 +100,13 @@
 
 .template-modes > p,
 .amp .form-table .amp-suppressed-plugins p {
-	font-size: 13px;
+	font-size: 14px;
 }
 
 
 /* Plugin suppression */
 .plugin-suppression > p {
-	font-size: 13px;
+	font-size: 14px;
 }
 
 
@@ -244,13 +249,47 @@ li.error-kept {
 	max-width: 400px;
 }
 
-/* Panel bodies. */
-.reader-theme-selection,
-.advanced-settings {
-	padding: 0 1rem;
-}
-
 .settings-footer {
 	padding-bottom: 2.5rem;
 	padding-top: 2.5rem;
+}
+
+
+#template-mode-reader-container {
+	margin-bottom: 0;
+}
+
+#template-mode-reader-container.selectable.selectable--selected {
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+	border-bottom-style: dotted;
+	border-bottom-width: 1px;
+}
+
+#reader-themes-drawer {
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
+	border-top-width: 0;
+}
+
+#reader-themes-drawer .amp-drawer__heading {
+	align-items: center;
+	display: flex;
+	padding-left: 1.5rem;
+
+	@media (min-width: 783px) {
+		padding-left: 3rem;
+	}
+}
+
+#plugin-suppression-drawer .amp-drawer__panel-body-inner {
+	padding: 0 1.5rem 3rem;
+
+	@media (min-width: 783px) {
+		padding: 0 3rem 3rem;
+	}
+}
+
+#plugin-suppression-drawer .amp-drawer__panel-body-inner p {
+	font-size: 14px;
 }

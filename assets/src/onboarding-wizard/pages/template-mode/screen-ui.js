@@ -1,7 +1,6 @@
 /**
  * WordPress dependencies
  */
-import { PanelBody } from '@wordpress/components';
 import { useMemo } from '@wordpress/element';
 
 /**
@@ -13,9 +12,10 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import { AMPNotice, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_INFO, NOTICE_TYPE_WARNING, NOTICE_SIZE_LARGE } from '../../../components/amp-notice';
+import { AMPNotice, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_INFO, NOTICE_TYPE_ERROR, NOTICE_SIZE_LARGE } from '../../../components/amp-notice';
 import { TemplateModeOption } from '../../../components/template-mode-option';
-import { MOST_RECOMMENDED, RECOMMENDED, getRecommendationLevels, getAllSelectionText, TECHNICAL, NON_TECHNICAL, STANDARD, TRANSITIONAL, READER } from './get-selection-details';
+import { READER, STANDARD, TRANSITIONAL } from '../../../common/constants';
+import { MOST_RECOMMENDED, RECOMMENDED, getRecommendationLevels, getAllSelectionText, TECHNICAL, NON_TECHNICAL } from './get-selection-details';
 
 /**
  * The interface for the mode selection screen. Avoids using context for easier testing.
@@ -56,7 +56,7 @@ export function ScreenUI( { currentThemeIsAmongReaderThemes, developerToolsOptio
 				return NOTICE_TYPE_INFO;
 
 			default:
-				return NOTICE_TYPE_WARNING;
+				return NOTICE_TYPE_ERROR;
 		}
 	};
 
@@ -64,37 +64,34 @@ export function ScreenUI( { currentThemeIsAmongReaderThemes, developerToolsOptio
 		<form>
 			<TemplateModeOption
 				details={ sectionText.standard.details }
+				initialOpen={ true }
 				mode="standard"
 				previouslySelected={ savedCurrentMode === 'standard' && technicalQuestionChanged && ! firstTimeInWizard }
 			>
 				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ getRecommendationLevelType( recommendationLevels[ STANDARD ] ) }>
-					<PanelBody title={ sectionText.standard.compatibility } initialOpen={ false } opened={ false }>
-						{ /* @todo Theme/plugin compatibility info. */ }
-					</PanelBody>
+					{ sectionText.standard.compatibility }
 				</AMPNotice>
 			</TemplateModeOption>
 
 			<TemplateModeOption
 				details={ sectionText.transitional.details }
+				initialOpen={ true }
 				mode="transitional"
 				previouslySelected={ savedCurrentMode === 'transitional' && technicalQuestionChanged && ! firstTimeInWizard }
 			>
 				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ getRecommendationLevelType( recommendationLevels[ TRANSITIONAL ] ) }>
-					<PanelBody title={ sectionText.transitional.compatibility } initialOpen={ false } opened={ false }>
-						{ /* @todo Theme/plugin compatibility info. */ }
-					</PanelBody>
+					{ sectionText.transitional.compatibility }
 				</AMPNotice>
 			</TemplateModeOption>
 
 			<TemplateModeOption
 				details={ sectionText.reader.details }
+				initialOpen={ true }
 				mode="reader"
 				previouslySelected={ savedCurrentMode === 'reader' && technicalQuestionChanged && ! firstTimeInWizard }
 			>
 				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ getRecommendationLevelType( recommendationLevels[ READER ] ) }>
-					<PanelBody title={ sectionText.reader.compatibility } initialOpen={ false } opened={ false }>
-						{ /* @todo Theme/plugin compatibility info. */ }
-					</PanelBody>
+					{ sectionText.reader.compatibility }
 				</AMPNotice>
 			</TemplateModeOption>
 		</form>
