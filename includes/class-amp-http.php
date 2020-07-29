@@ -476,7 +476,7 @@ class AMP_HTTP {
 		}
 
 		/**
-		 * Filters the message when comment submitted success message when
+		 * Filters the message when comment submitted successfully.
 		 *
 		 * @since 0.7
 		 */
