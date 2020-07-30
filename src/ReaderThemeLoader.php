@@ -203,6 +203,9 @@ final class ReaderThemeLoader implements Service, Registerable {
 								<a href="{{{ data.actions.customize }}}" class="button button-primary customize load-customize hide-if-no-customize">
 									<?php esc_html_e( 'Customize AMP', 'amp' ); ?>
 								</a>
+								<a href="<?php echo esc_url( add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, admin_url( 'admin.php' ) ) ); ?>" class="button button-secondary">
+									<?php esc_html_e( 'AMP Settings', 'amp' ); ?>
+								</a>
 							<# } else { #>
 								${actionLinks}
 							<# } #>
