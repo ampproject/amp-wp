@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { createContext, useState, useContext, useMemo } from '@wordpress/element';
+import { createContext, useState, useContext, useEffect, useMemo } from '@wordpress/element';
 
 /**
  * External dependencies
@@ -11,6 +11,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import { Options } from '../../components/options-context-provider';
+import { READER } from '../pages/template-mode/get-selection-details';
 
 export const Navigation = createContext();
 
@@ -29,20 +30,25 @@ export function NavigationContextProvider( { children, pages } ) {
 	const { theme_support: themeSupport } = editedOptions;
 
 	const adaptedPages = useMemo( () => {
-		if ( 'reader' === themeSupport ) {
+		if ( READER === themeSupport ) {
 			return pages;
 		}
 
-		if ( readerModeWasOverridden ) {
-			setActivePageIndex( ( index ) => index - 1 );
-		}
-
 		return pages.filter( ( page ) => 'theme-selection' !== page.slug );
-	}, [ pages, themeSupport, readerModeWasOverridden ] );
+	}, [ pages, themeSupport ] );
 
 	const currentPage = adaptedPages[ activePageIndex ];
 
 	const isLastPage = activePageIndex === adaptedPages.length - 1;
+
+	useEffect( () => {
+		if ( readerModeWasOverridden && 'done' === currentPage.slug ) {
+			// If reader mode is overridden, the Theme Selection page will be removed, and means `activePageIndex` will
+			// point to the Done page instead of Summary. To overcome this we decrement `activePageIndex` by 1 so that
+			// it points to the Summary page.
+			setActivePageIndex( activePageIndex - 1 );
+		}
+	}, [ currentPage.slug, activePageIndex, adaptedPages, readerModeWasOverridden ] );
 
 	/**
 	 * Navigates back to the previous page.
