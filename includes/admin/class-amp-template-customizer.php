@@ -77,6 +77,7 @@ class AMP_Template_Customizer {
 		if ( $is_reader_mode ) {
 			if ( $reader_theme_loader->is_theme_overridden() ) {
 				add_action( 'customize_controls_enqueue_scripts', [ $self, 'add_customizer_scripts' ] );
+				add_action( 'customize_controls_print_footer_scripts', [ $self, 'render_setting_import_section_template' ] );
 			} elseif ( ! $has_reader_theme ) {
 				/**
 				 * Fires when the AMP Template Customizer initializes.
@@ -400,6 +401,30 @@ class AMP_Template_Customizer {
 		}
 
 		return $import_settings;
+	}
+
+	/**
+	 * Render template for the setting import "section".
+	 *
+	 * This section only has a menu item and it is not intended to expand.
+	 */
+	public function render_setting_import_section_template() {
+		?>
+		<script type="text/html" id="tmpl-customize-section-amp_active_theme_settings_import">
+			<li id="accordion-section-{{ data.id }}" class="accordion-section control-section control-section-{{ data.type }}">
+				<h3 class="accordion-section-title">
+					<button type="button" class="button button-secondary" aria-label="<?php esc_attr_e( 'Import settings', 'amp' ); ?>">
+						<?php echo esc_html( _ex( 'Import', 'theme', 'amp' ) ); ?>
+					</button>
+					<details>
+						<summary>{{ data.title }}</summary>
+						<dl></dl>
+					</details>
+				</h3>
+				<ul class="accordion-section-content"></ul>
+			</li>
+		</script>
+		<?php
 	}
 
 	/**

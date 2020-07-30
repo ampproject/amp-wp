@@ -4,7 +4,21 @@
 	margin-right: 28px;
 }
 
-#amp-active-theme-settings-importing {
+#customize-theme-controls .control-section-amp_active_theme_settings_import > .accordion-section-title {
+	cursor: default;
+}
+
+#customize-theme-controls .control-section-amp_active_theme_settings_import > .accordion-section-title:after {
+	content: "";
+}
+
+#customize-theme-controls .control-section-amp_active_theme_settings_import > .accordion-section-title > button {
+	float: right;
+	font-weight: normal;
+}
+
+#customize-controls .control-section-amp_active_theme_settings_import > .accordion-section-title,
+#customize-controls .control-section-amp_active_theme_settings_import > .accordion-section-title:hover {
 	cursor: default;
 	background: #fff;
 	color: #555d66;
@@ -12,6 +26,24 @@
 	border-bottom: 1px solid #ddd;
 	border-left: none;
 	border-right: none;
-	margin: 15px 0;
 	padding: 12px;
+	font-weight: normal;
+	margin: 0 0 15px 0;
+}
+
+#customize-controls .control-section-amp_active_theme_settings_import > .accordion-section-title details {
+	margin: 5px 0;
+}
+
+#customize-controls .control-section-amp_active_theme_settings_import > .accordion-section-title summary {
+	display: inline-block;
+	max-width: 75%;
+}
+
+#customize-controls .control-section-amp_active_theme_settings_import > .accordion-section-title dt {
+	font-weight: bold;
+}
+
+#customize-controls .control-section-amp_active_theme_settings_import > .accordion-section-title dd {
+	margin-left: 20px;
 }

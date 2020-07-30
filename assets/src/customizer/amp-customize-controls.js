@@ -1,6 +1,14 @@
 /* global jQuery */
 
-import { __, _n, sprintf } from '@wordpress/i18n';
+/**
+ * External dependencies
+ */
+import { isEqual } from 'lodash';
+
+/**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
 
 window.ampCustomizeControls = ( function( api, $ ) {
 	'use strict';
@@ -208,13 +216,120 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	}
 
 	/**
+	 * Import settings for a control.
+	 *
+	 * @param {wp.customize.Control} control Control.
+	 */
+	function importControlSettings( control ) {
+		for ( const setting of Object.values( control.settings ) ) {
+			if ( setting.id in component.data.activeThemeSettingImports ) {
+				setting.set( component.data.activeThemeSettingImports[ setting.id ] );
+			}
+		}
+		if ( control.extended( api.UploadControl ) ) {
+			populateUploadControl( control );
+		} else if ( control.extended( api.HeaderControl ) ) {
+			populateHeaderControl( control );
+		}
+	}
+
+	api.sectionConstructor.amp_active_theme_settings_import = api.Section.extend( {
+		isContextuallyActive() {
+			return true;
+		},
+		expand() {},
+		attachEvents() {},
+		ready() {
+			const importSection = this;
+			api.Section.prototype.ready.call( importSection );
+
+			const importBtn = importSection.headContainer.find( 'button' );
+			importBtn.on( 'click', () => {
+				let remainingCheckboxes = 0;
+
+				importSection.headContainer.find( 'input[type=checkbox]' ).each( function() {
+					const checkbox = $( this );
+					if ( ! checkbox.prop( 'checked' ) ) {
+						remainingCheckboxes++;
+						return;
+					}
+
+					const control = api.control( checkbox.val() );
+					importControlSettings( control );
+					checkbox.closest( 'dd' ).remove();
+				} );
+
+				// Remove any childless dt's.
+				importSection.headContainer.find( 'dt' ).each( function() {
+					const dt = $( this );
+					if ( ! dt.next( 'dd' ).length ) {
+						dt.remove();
+					}
+				} );
+
+				if ( 0 === remainingCheckboxes ) {
+					importSection.active( false );
+				}
+			} );
+
+			const dl = importSection.headContainer.find( 'dl' );
+
+			const otherSections = [];
+			api.section.each( ( otherSection ) => {
+				if ( otherSection.id !== importSection.id ) {
+					otherSections.push( otherSection );
+				}
+			} );
+			otherSections.sort( ( a, b ) => {
+				return a.priority() - b.priority();
+			} );
+
+			for ( const otherSection of otherSections ) {
+				const sectionControls = [];
+				for ( const control of otherSection.controls() ) {
+					if ( importSection.params.controls.has( control ) ) {
+						sectionControls.push( control );
+					}
+				}
+				if ( ! sectionControls.length ) {
+					continue;
+				}
+
+				let title;
+				switch ( otherSection.id ) {
+					case 'menu_locations':
+						title = __( 'Menu Locations', 'amp' );
+						break;
+					default:
+						title = otherSection.params.title;
+				}
+
+				const dt = $( '<dt></dt>' );
+				dt.text( title );
+				dl.append( dt );
+
+				for ( const control of sectionControls ) {
+					const dd = $( '<dd></dd>' );
+					const label = $( '<label></label>' );
+					const checkbox = $( '<input type=checkbox checked>' );
+					checkbox.val( control.id );
+					label.append( checkbox );
+					label.append( document.createTextNode( ' ' + control.params.label ) );
+					dd.append( label );
+					dl.append( dd );
+				}
+			}
+		},
+	} );
+
+	/**
 	 * Add ability to import settings from the active theme.
 	 */
 	component.addActiveThemeSettingsImporting = function addActiveThemeSettingsImporting() {
 		const differingSettings = new Set();
 		for ( const [ settingId, settingValue ] of Object.entries( component.data.activeThemeSettingImports ) ) {
 			const setting = api( settingId );
-			if ( setting && ! _.isEqual( setting(), settingValue ) ) {
+			if ( setting && ! isEqual( setting(), settingValue ) ) {
 				differingSettings.add( settingId );
 			}
 		}
@@ -233,28 +348,21 @@ window.ampCustomizeControls = ( function( api, $ ) {
 			}
 		} );
 
-		const container = $( '<div id="amp-active-theme-settings-importing"></div>' );
-		const importButton = $( '<button type="button" class="button button-secondary"></button>' );
-		importButton.text(
-			__( 'Import Active Theme\'s Settings', 'amp' ) + sprintf( ' (%d)', controlsWithSettings.size ),
-		);
-		importButton.on( 'click', importSettings );
-		container.append( importButton );
-
-		const ol = $( '<ol>' );
-		const sortedControls = Array.from( controlsWithSettings );
-		sortedControls.sort( ( a, b ) => {
-			return a.priority() - b.priority();
-		} );
-
-		for ( const sortedControl of sortedControls ) {
-			const li = $( '<li></li>' );
-			li.text( sortedControl.params.label );
-			ol.append( li );
+		// In the very rare chance that there are settings without controls, abort.
+		if ( controlsWithSettings.size === 0 ) {
+			return;
 		}
-		container.append( ol );
 
-		$( '#customize-info' ).after( container );
+		const section = new api.sectionConstructor.amp_active_theme_settings_import(
+			'amp_settings_import',
+			{
+				title: __( 'Active Theme\'s Settings', 'amp' ),
+				priority: -1,
+				controls: controlsWithSettings,
+			},
+		);
+
+		api.section.add( section );
 	};
 
 	/**
