@@ -511,7 +511,12 @@ class AMP_Template_Customizer {
 					</button>
 					<details>
 						<summary>{{ data.title }}</summary>
-						<dl></dl>
+						<div>
+							<p>
+								<?php esc_html_e( 'You can import some settings from the primary Active theme into the corresponding Reader theme settings.', 'amp' ); ?>
+							</p>
+							<dl></dl>
+						</div>
 					</details>
 				</h3>
 				<ul class="accordion-section-content"></ul>
