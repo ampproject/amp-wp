@@ -1,5 +1,5 @@
 /**
- * AMP logo with wordmark SVG.
+ * AMP logo.
  */
 export function Logo() {
 	return (
