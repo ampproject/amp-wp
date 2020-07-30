@@ -1,6 +1,6 @@
 <?php
 /**
- * Class ReaderThemeLoader.
+ * Class RESTPreloader.
  *
  * @package AmpProject\AmpWP
  */

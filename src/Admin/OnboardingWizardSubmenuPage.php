@@ -271,7 +271,7 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 	/**
 	 * Adds REST paths to preload.
 	 */
-	public function add_preload_rest_paths() {
+	protected function add_preload_rest_paths() {
 		$paths = [
 			'/amp/v1/options',
 			'/amp/v1/reader-themes',
