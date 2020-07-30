@@ -16,6 +16,17 @@
 	}
 }
 
+.done__text h1 {
+	text-align: center;
+}
+
+.done__text .svg-done {
+	display: block;
+	width: 150px;
+	height: auto;
+	margin: 0 auto;
+}
+
 .done__link-buttons a:not(:last-child) {
 	margin-right: 15px;
 }

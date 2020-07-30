@@ -38,12 +38,19 @@
 }
 
 .template-mode-selection__illustration {
+	align-items: center;
+	display: flex;
 	flex-shrink: 0;
 	width: 60px;
 
 	@media screen and (min-width: 783px) {
 		width: 80px;
 	}
+}
+
+.template-mode-selection__illustration svg {
+	width: 60px;
+	height: auto;
 }
 
 .template-mode-option .amp-info {

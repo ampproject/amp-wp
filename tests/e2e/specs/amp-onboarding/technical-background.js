@@ -24,9 +24,9 @@ describe( 'Technical background', () => {
 	} );
 
 	it( 'should allow options to be selected, then enable next button', async () => {
-		await page.waitForSelector( 'input[type="radio"]' );
+		await page.waitForSelector( '#technical-background-enable' );
 
-		await expect( page ).toClick( 'label', { text: /Developer or technically savvy/ } );
+		await expect( page ).toClick( '#technical-background-enable' );
 		await expect( page ).toMatchElement( '.selectable--selected h2', { text: 'Developer or technically savvy' } );
 
 		await expect( page ).toClick( 'label', { text: /Non-technically savvy/ } );

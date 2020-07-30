@@ -83,12 +83,16 @@ export async function moveToDoneScreen( { technical = true, mode, readerTheme = 
 	if ( 'standard' !== mode ) {
 		await page.waitForSelector( '.amp-setting-toggle input' );
 
-		const selector = '.amp-setting-toggle input:checked';
-		const checkedMobileRedirect = await page.$( selector );
+		const selector = '.amp-setting-toggle .components-form-toggle.is-checked';
+		const checkedMobileRedirect = await page.waitForSelector( selector );
 
 		if ( checkedMobileRedirect && false === mobileRedirect ) {
-			await expect( page ).toClick( selector );
-			await page.waitForSelector( '.amp-setting-toggle input:not(:checked)' );
+			const labelSelector = `${ selector } + label`;
+			await page.evaluate( ( selectorLabel ) => {
+				document.querySelector( selectorLabel ).scrollIntoView();
+			}, labelSelector );
+			await expect( page ).toClick( labelSelector );
+			await page.waitForSelector( '.amp-setting-toggle .components-form-toggle:not(.is-checked)' );
 		} else if ( ! checkedMobileRedirect && true === mobileRedirect ) {
 			await expect( page ).toClick( selector );
 			await page.waitForSelector( selector );
@@ -96,12 +100,17 @@ export async function moveToDoneScreen( { technical = true, mode, readerTheme = 
 	}
 
 	await clickNextButton();
+	await page.waitFor( 1000 );
 	await page.waitForSelector( '.done__preview-container' );
 }
 
 export async function completeWizard( { technical = true, mode, readerTheme = 'legacy', mobileRedirect = true } ) {
 	await moveToDoneScreen( { technical, mode, readerTheme, mobileRedirect } );
-	await expect( page ).toClick( '#next-button' );
+	if ( 'reader' === mode ) {
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+	} else {
+		await expect( page ).toClick( '#next-button' );
+	}
 	await page.waitForSelector( '#amp-settings' );
 	await expect( page ).toMatchElement( '#amp-settings' );
 }
