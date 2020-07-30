@@ -9,12 +9,13 @@ namespace AmpProject\AmpWP\Tests\Cli;
 
 use stdClass;
 use WP_CLI;
+use WP_Error;
 use WP_Import;
 
 final class ReferenceSiteImporter extends WP_Import {
 
 	/**
-	 * Performs post-import cleanup of files and the cache
+	 * Performs post-import cleanup of files and the cache.
 	 */
 	public function import_end() {
 		wp_import_cleanup( $this->id );
@@ -66,17 +67,17 @@ final class ReferenceSiteImporter extends WP_Import {
 
 		// Set variables for storage, fix file filename for query strings.
 		preg_match( '/[^\?]+\.(jpe?g|jpe|svg|gif|png)\b/i', $file, $matches );
-		$file_array         = array();
+		$file_array         = [];
 		$file_array['name'] = basename( $matches[0] );
 
 		// Download file to temp location.
-		$file_array['tmp_name'] = download_url( $file );
+		$file_array['tmp_name'] = file_get_contents( $file );
 
 		// If error storing temporarily, return the error.
 		if ( is_wp_error( $file_array['tmp_name'] ) ) {
 			WP_CLI::warning(
 				WP_CLI::colorize(
-					"Could not download image %G'{$file}'%n into a temporary file - {$id->get_error_message()}"
+					"Could not download image %G'{$file}'%n into a temporary file - {$file_array['tmp_name']->get_error_message()}"
 				)
 			);
 
@@ -129,5 +130,104 @@ final class ReferenceSiteImporter extends WP_Import {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Attempt to download a remote file attachment
+	 *
+	 * @param string $url URL of item to fetch
+	 * @param array $post Attachment details
+	 * @return array|WP_Error Local file location details on success, WP_Error otherwise
+	 */
+	public function fetch_remote_file( $url, $post ) {
+		if ( ! $this->is_google_storage_url( $url ) ) {
+			return parent::fetch_remote_file( $url, $post );
+		}
+
+		// Extract the file name from the URL.
+		$file_name = basename( parse_url( $url, PHP_URL_PATH ) );
+
+		if ( ! $file_name ) {
+			$file_name = md5( $url );
+		}
+
+		$tmp_file_name = wp_tempnam( $file_name );
+		if ( ! $tmp_file_name ) {
+			return new WP_Error( 'import_no_file', __( 'Could not create temporary file.', 'wordpress-importer' ) );
+		}
+
+		$context_options = [
+			"ssl" => [
+				"verify_peer"      => false,
+				"verify_peer_name" => false,
+			],
+		];
+
+		file_put_contents(
+			$tmp_file_name,
+			file_get_contents(
+				$url,
+				false,
+				stream_context_create( $context_options )
+			)
+		);
+
+		// Handle the upload like _wp_handle_upload() does.
+		$wp_filetype     = wp_check_filetype_and_ext( $tmp_file_name, $file_name );
+		$ext             = empty( $wp_filetype['ext'] ) ? '' : $wp_filetype['ext'];
+		$type            = empty( $wp_filetype['type'] ) ? '' : $wp_filetype['type'];
+		$proper_filename = empty( $wp_filetype['proper_filename'] ) ? '' : $wp_filetype['proper_filename'];
+
+		// Check to see if wp_check_filetype_and_ext() determined the filename was incorrect.
+		if ( $proper_filename ) {
+			$file_name = $proper_filename;
+		}
+
+		if ( ( ! $type || ! $ext ) && ! current_user_can( 'unfiltered_upload' ) ) {
+			return new WP_Error( 'import_file_error', __( 'Sorry, this file type is not permitted for security reasons.', 'wordpress-importer' ) );
+		}
+
+		$uploads = wp_upload_dir( $post['upload_date'] );
+		if ( ! ( $uploads && false === $uploads['error'] ) ) {
+			return new WP_Error( 'upload_dir_error', $uploads['error'] );
+		}
+
+		// Move the file to the uploads dir.
+		$file_name     = wp_unique_filename( $uploads['path'], $file_name );
+		$new_file      = $uploads['path'] . "/$file_name";
+		$move_new_file = copy( $tmp_file_name, $new_file );
+
+		if ( ! $move_new_file ) {
+			@unlink( $tmp_file_name );
+			return new WP_Error( 'import_file_error', __( 'The uploaded file could not be moved', 'wordpress-importer' ) );
+		}
+
+		// Set correct file permissions.
+		$stat  = stat( dirname( $new_file ) );
+		$perms = $stat['mode'] & 0000666;
+		chmod( $new_file, $perms );
+
+		$upload = [
+			'file'  => $new_file,
+			'url'   => "{$uploads['url']}/{$file_name}",
+			'type'  => $wp_filetype['type'],
+			'error' => false,
+		];
+
+		// Keep track of the old and new urls so we can substitute them later.
+		$this->url_remap[$url] = $upload['url'];
+		$this->url_remap[$post['guid']] = $upload['url'];
+
+		return $upload;
+	}
+
+	/**
+	 * Check whether the provided URL is pointing to Google Storage.
+	 *
+	 * @param string $url URL to check.
+	 * @return bool Whether this is a Google Storage URL.
+	 */
+	private function is_google_storage_url( $url ) {
+		return 1 === preg_match( '#^gs://#', $url );
 	}
 }

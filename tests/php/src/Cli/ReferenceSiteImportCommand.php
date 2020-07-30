@@ -8,6 +8,7 @@
 namespace AmpProject\AmpWP\Tests\Cli;
 
 use Exception;
+use Google\Cloud\Storage\StorageClient;
 use RuntimeException;
 use WP_CLI;
 use WP_CLI_Command;
@@ -51,6 +52,9 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 		} catch ( Exception $exception ) {
 			WP_CLI::error( 'Unable to import reference site: ' . $exception->getMessage() );
 		}
+
+		$storage = new StorageClient();
+		$storage->registerStreamWrapper();
 
 		list( $site_definition_file ) = $args;
 		$empty_content = Utils\get_flag_value( $assoc_args, 'empty-content', false );
