@@ -328,7 +328,7 @@ window.ampCustomizeControls = ( function( api, $ ) {
 		const section = new api.sectionConstructor.amp_active_theme_settings_import(
 			'amp_settings_import',
 			{
-				title: __( 'Active Theme\'s Settings', 'amp' ),
+				title: __( 'Primary Theme Settings', 'amp' ),
 				priority: -1,
 				controls: controlsWithSettings,
 			},
