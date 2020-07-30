@@ -139,7 +139,7 @@ export function getSelectionText( ...args ) {
 
 		case match( COMPATIBILITY, TRANSITIONAL, MOST_RECOMMENDED, NON_TECHNICAL ):
 		case match( COMPATIBILITY, TRANSITIONAL, MOST_RECOMMENDED, TECHNICAL ):
-			return __( 'Transitional mode is recommended because it makes it easy to keep your content as valid AMP even if non-AMP-compatible plugins are installed later', 'amp' );
+			return __( 'Transitional mode is recommended because it makes it easy to keep your content as valid AMP even if non-AMP-compatible plugins are installed later.', 'amp' );
 
 		case match( COMPATIBILITY, TRANSITIONAL, RECOMMENDED, NON_TECHNICAL ):
 		case match( COMPATIBILITY, TRANSITIONAL, RECOMMENDED, TECHNICAL ):
