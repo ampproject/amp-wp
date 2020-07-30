@@ -18,6 +18,13 @@ use WP_Export_WXR_Formatter;
 final class ExportWxrFile implements ExportStep {
 
 	/**
+	 * Name of the reference site.
+	 *
+	 * @var string
+	 */
+	private $site_name;
+
+	/**
 	 * Process the export step.
 	 *
 	 * @param ExportResult $export_result Export result to adapt.
@@ -25,11 +32,21 @@ final class ExportWxrFile implements ExportStep {
 	 * @return ExportResult Adapted export result.
 	 */
 	public function process( ExportResult $export_result ) {
-		$wxr_file = preg_replace( '/\.json$/', '.xml', $export_result->get_target_path() );
+		$this->site_name = preg_replace(
+			'/\.json$/',
+			'',
+			basename( $export_result->get_target_path() )
+		);
+
+		$wxr_file = preg_replace(
+			'/\.json$/',
+			'.xml',
+			$export_result->get_target_path()
+		);
+
 		$this->generate_wxr_file( $wxr_file );
 
 		$filename = basename( $wxr_file );
-
 		$export_result->add_step( 'import_wxr_file', compact( 'filename' ) );
 
 		return $export_result;
@@ -50,9 +67,27 @@ final class ExportWxrFile implements ExportStep {
 			$formatter    = new WP_Export_WXR_Formatter( $export_query );
 			$writer       = new WP_Export_File_Writer( $formatter, $target_path );
 
-			return $writer->export();
+			add_filter( 'wp_get_attachment_url', [ $this, 'upload_media_file' ], 10, 2 );
+			$writer->export();
+			remove_filter( 'wp_get_attachment_url', [ $this, 'upload_media_file' ] );
 		} catch ( Exception $exception ) {
 			WP_CLI::error( $exception->getMessage() );
 		}
+	}
+
+	/**
+	 * Upload media files when retrieving attachment URLs.
+	 *
+	 * @param string $url           URL for the given attachment.
+	 * @param int    $attachment_id Attachment post ID.
+	 * @return string URL pointing to Google Storage.
+	 */
+	public function upload_media_file( $url, $attachment_id ) {
+		if ( 0 === strncmp( $url, 'gs://', 5 ) ) {
+			return $url;
+		}
+
+		$uploader = new MediaFileUploader();
+		return $uploader->upload( $this->site_name, $url );
 	}
 }
