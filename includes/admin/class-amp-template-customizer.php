@@ -357,11 +357,14 @@ class AMP_Template_Customizer {
 		}
 
 		$import_theme_mods = get_option( 'theme_mods_' . $active_theme->get_stylesheet(), [] );
+
+		// Remove theme mods which will not be imported directly.
 		unset(
 			$import_theme_mods['sidebars_widgets'],
 			$import_theme_mods['custom_css_post_id']
 		);
 
+		// Map nav menus for importing.
 		if ( isset( $import_theme_mods['nav_menu_locations'] ) ) {
 			$nav_menu_locations = wp_map_nav_menu_locations(
 				get_theme_mod( 'nav_menu_locations', [] ),
@@ -398,6 +401,21 @@ class AMP_Template_Customizer {
 			$value = apply_filters( "customize_sanitize_js_{$setting->id}", $value, $setting );
 
 			$import_settings[ $setting->id ] = $value;
+		}
+
+		// Import Custom CSS.
+		$custom_css_setting = $this->wp_customize->get_setting( sprintf( 'custom_css[%s]', get_stylesheet() ) );
+		$custom_css_post    = wp_get_custom_css_post( $active_theme->get_stylesheet() );
+		if ( $custom_css_setting instanceof WP_Customize_Custom_CSS_Setting && $custom_css_post instanceof WP_Post ) {
+			$value = $custom_css_post->post_content;
+
+			/** This filter is documented in wp-includes/class-wp-customize-setting.php */
+			$value = apply_filters( 'customize_value_custom_css', $value, $custom_css_setting );
+
+			/** This filter is documented in wp-includes/class-wp-customize-manager.php */
+			$value = apply_filters( "customize_sanitize_js_{$custom_css_setting->id}", $value, $custom_css_setting );
+
+			$import_settings[ $custom_css_setting->id ] = $value;
 		}
 
 		return $import_settings;
