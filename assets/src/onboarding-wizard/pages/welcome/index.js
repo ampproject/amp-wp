@@ -107,7 +107,7 @@ export function Welcome() {
 							{ __( 'Configure your site with AMP', 'amp' ) }
 						</h4>
 						<p>
-							{ __( 'There are different ways in which you can incorporate AMP content into your site, depending on the configuration of your site (e.g., which theme you are using), your technical skills and the level of resources you may have for addressing AMP compatibility issues as your site evolves.', 'amp' ) }
+							{ __( 'There are different ways in which you can incorporate AMP content into your site, depending on the configuration of your site (e.g. which theme you are using), your technical skills and the level of resources you may have for addressing AMP compatibility issues as your site evolves.', 'amp' ) }
 						</p>
 					</div>
 
