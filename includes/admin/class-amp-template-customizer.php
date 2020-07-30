@@ -83,6 +83,10 @@ class AMP_Template_Customizer {
 		$has_reader_theme = ( ReaderThemes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME ) );
 
 		if ( $is_reader_mode ) {
+			if ( $has_reader_theme ) {
+				add_action( 'customize_save_after', [ $self, 'store_modified_theme_mod_setting_timestamps' ] );
+			}
+
 			if ( $reader_theme_loader->is_theme_overridden() ) {
 				add_action( 'customize_controls_enqueue_scripts', [ $self, 'add_customizer_scripts' ] );
 				add_action( 'customize_controls_print_footer_scripts', [ $self, 'render_setting_import_section_template' ] );
@@ -353,6 +357,35 @@ class AMP_Template_Customizer {
 	}
 
 	/**
+	 * Store the timestamps for modified theme settings.
+	 *
+	 * This is used to determine which settings from the Active theme should be presented for importing into the Reader
+	 * theme. If a setting has been modified more recently in the Reader theme, then it doesn't make much sense to offer
+	 * for the user to re-import a customization they already made.
+	 */
+	public function store_modified_theme_mod_setting_timestamps() {
+		$modified_setting_ids = [];
+		foreach ( array_keys( $this->wp_customize->unsanitized_post_values() ) as $setting_id ) {
+			$setting = $this->wp_customize->get_setting( $setting_id );
+			if ( $setting instanceof WP_Customize_Custom_CSS_Setting ) {
+				$modified_setting_ids[] = $setting->id_data()['base']; // Remove theme slug from ID.
+			} elseif ( $setting instanceof WP_Customize_Setting ) {
+				$modified_setting_ids[] = $setting->id;
+			}
+		}
+
+		if ( empty( $modified_setting_ids ) ) {
+			return;
+		}
+
+		$theme_mod_timestamps = get_theme_mod( self::THEME_MOD_TIMESTAMPS_KEY, [] );
+		foreach ( $modified_setting_ids as $modified_setting_id ) {
+			$theme_mod_timestamps[ $modified_setting_id ] = time();
+		}
+		set_theme_mod( self::THEME_MOD_TIMESTAMPS_KEY, $theme_mod_timestamps );
+	}
+
+	/**
 	 * Get settings to import from the active theme.
 	 *
 	 * @return array Import settings.
@@ -364,43 +397,65 @@ class AMP_Template_Customizer {
 			return null;
 		}
 
-		$import_theme_mods = get_option( 'theme_mods_' . $active_theme->get_stylesheet(), [] );
+		$active_theme_mods = get_option( 'theme_mods_' . $active_theme->get_stylesheet(), [] );
+
+		$active_setting_timestamps = isset( $active_theme_mods[ self::THEME_MOD_TIMESTAMPS_KEY ] ) ? $active_theme_mods[ self::THEME_MOD_TIMESTAMPS_KEY ] : [];
+		$reader_setting_timestamps = get_theme_mod( self::THEME_MOD_TIMESTAMPS_KEY, [] );
 
 		// Remove theme mods which will not be imported directly.
 		unset(
-			$import_theme_mods['sidebars_widgets'],
-			$import_theme_mods['custom_css_post_id']
+			$active_theme_mods['sidebars_widgets'],
+			$active_theme_mods['custom_css_post_id'],
+			$active_theme_mods[ self::THEME_MOD_TIMESTAMPS_KEY ]
 		);
 
 		// Map nav menus for importing.
-		if ( isset( $import_theme_mods['nav_menu_locations'] ) ) {
+		if ( isset( $active_theme_mods['nav_menu_locations'] ) ) {
 			$nav_menu_locations = wp_map_nav_menu_locations(
 				get_theme_mod( 'nav_menu_locations', [] ),
-				$import_theme_mods['nav_menu_locations']
+				$active_theme_mods['nav_menu_locations']
 			);
 			foreach ( $nav_menu_locations as $nav_menu_location => $menu_id ) {
 				$setting = $this->wp_customize->get_setting( "nav_menu_locations[$nav_menu_location]" );
-				if ( $setting instanceof WP_Customize_Setting ) {
+				if (
+					$setting instanceof WP_Customize_Setting
+					&&
+					// Skip presenting settings which have been more recently updated in the Reader theme.
+					(
+						! isset( $active_setting_timestamps[ $setting->id ], $reader_setting_timestamps[ $setting->id ] )
+						||
+						$active_setting_timestamps[ $setting->id ] > $reader_setting_timestamps[ $setting->id ]
+					)
+				) {
 					/** This filter is documented in wp-includes/class-wp-customize-manager.php */
 					$value = apply_filters( "customize_sanitize_js_{$setting->id}", $menu_id, $setting );
 
 					$import_settings[ $setting->id ] = $value;
 				}
 			}
-			unset( $import_theme_mods['nav_menu_locations'] );
+			unset( $active_theme_mods['nav_menu_locations'] );
 		}
 
 		foreach ( $this->wp_customize->settings() as $setting ) {
 			/** @var WP_Customize_Setting $setting */
-			if ( 'theme_mod' !== $setting->type ) {
+			if (
+				'theme_mod' !== $setting->type
+				||
+				// Skip presenting settings which have been more recently updated in the Reader theme.
+				(
+					isset( $active_setting_timestamps[ $setting->id ], $reader_setting_timestamps[ $setting->id ] )
+					&&
+					$reader_setting_timestamps[ $setting->id ] > $active_setting_timestamps[ $setting->id ]
+				)
+			) {
 				continue;
 			}
 
 			$id_data = $setting->id_data();
-			if ( ! array_key_exists( $id_data['base'], $import_theme_mods ) ) {
+			if ( ! array_key_exists( $id_data['base'], $active_theme_mods ) ) {
 				continue;
 			}
-			$value   = $import_theme_mods[ $id_data['base'] ];
+			$value   = $active_theme_mods[ $id_data['base'] ];
 			$subkeys = $id_data['keys'];
 			while ( ! empty( $subkeys ) ) {
 				$subkey = array_shift( $subkeys );
@@ -417,19 +472,25 @@ class AMP_Template_Customizer {
 			$import_settings[ $setting->id ] = $value;
 		}
 
-		// Import Custom CSS.
-		$custom_css_setting = $this->wp_customize->get_setting( sprintf( 'custom_css[%s]', get_stylesheet() ) );
-		$custom_css_post    = wp_get_custom_css_post( $active_theme->get_stylesheet() );
-		if ( $custom_css_setting instanceof WP_Customize_Custom_CSS_Setting && $custom_css_post instanceof WP_Post ) {
-			$value = $custom_css_post->post_content;
+		// Import Custom CSS if it has not been more recently updated in the Reader theme.
+		if (
+			! isset( $active_setting_timestamps['custom_css'], $reader_setting_timestamps['custom_css'] )
+			||
+			$active_setting_timestamps['custom_css'] > $reader_setting_timestamps['custom_css']
+		) {
+			$custom_css_setting = $this->wp_customize->get_setting( sprintf( 'custom_css[%s]', get_stylesheet() ) );
+			$custom_css_post    = wp_get_custom_css_post( $active_theme->get_stylesheet() );
+			if ( $custom_css_setting instanceof WP_Customize_Custom_CSS_Setting && $custom_css_post instanceof WP_Post ) {
+				$value = $custom_css_post->post_content;
 
-			/** This filter is documented in wp-includes/class-wp-customize-setting.php */
-			$value = apply_filters( 'customize_value_custom_css', $value, $custom_css_setting );
+				/** This filter is documented in wp-includes/class-wp-customize-setting.php */
+				$value = apply_filters( 'customize_value_custom_css', $value, $custom_css_setting );
 
-			/** This filter is documented in wp-includes/class-wp-customize-manager.php */
-			$value = apply_filters( "customize_sanitize_js_{$custom_css_setting->id}", $value, $custom_css_setting );
+				/** This filter is documented in wp-includes/class-wp-customize-manager.php */
+				$value = apply_filters( "customize_sanitize_js_{$custom_css_setting->id}", $value, $custom_css_setting );
 
-			$import_settings[ $custom_css_setting->id ] = $value;
+				$import_settings[ $custom_css_setting->id ] = $value;
+			}
 		}
 
 		return $import_settings;
