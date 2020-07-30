@@ -4,8 +4,6 @@
  * @todo Make the naming of these variables more semantic.
  */
 :root {
-	--stepper-max-width: 280px;
-	--setup-page-max-width: 1000px;
 	--black: #212121;
 	--amp-settings-color-brand: #2459e7;
 	--gray: #6c7781;
