@@ -11,7 +11,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import { Options } from '../../components/options-context-provider';
-import { READER } from '../pages/template-mode/get-selection-details';
+import { READER } from '../../common/constants';
 
 export const Navigation = createContext();
 
