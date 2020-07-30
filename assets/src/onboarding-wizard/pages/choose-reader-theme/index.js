@@ -6,7 +6,6 @@ import { LEGACY_THEME_SLUG, AMP_QUERY_VAR_CUSTOMIZED_LATE } from 'amp-settings';
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { useEffect, useContext } from '@wordpress/element';
 
 /**
@@ -32,11 +31,6 @@ export function ChooseReaderTheme() {
 	 * Allow moving forward.
 	 */
 	useEffect( () => {
-		if ( 'reader' !== themeSupport ) {
-			setCanGoForward( true );
-			return;
-		}
-
 		if (
 			themes &&
 			readerTheme &&
@@ -52,14 +46,6 @@ export function ChooseReaderTheme() {
 	if ( fetchingThemes ) {
 		return (
 			<Loading />
-		);
-	}
-
-	if ( 'reader' !== themeSupport ) {
-		return (
-			<p>
-				{ __( 'This screen is only relevant to sites that use Reader mode. Go back if you would like to select Reader mode, or move forward to complete the setup wizard.', 'amp' ) }
-			</p>
 		);
 	}
 

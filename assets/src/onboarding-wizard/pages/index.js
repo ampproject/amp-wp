@@ -25,18 +25,18 @@ export const PAGES = [
 	},
 	{
 		slug: 'technical-background',
-		title: __( 'Technical background', 'amp' ),
+		title: __( 'Technical Background', 'amp' ),
 		PageComponent: TechnicalBackground,
 		showTitle: false,
 	},
 	{
 		slug: 'template-modes',
-		title: __( 'Template modes', 'amp' ),
+		title: __( 'Template Modes', 'amp' ),
 		PageComponent: TemplateMode,
 	},
 	{
 		slug: 'theme-selection',
-		title: __( 'Theme selection', 'amp' ),
+		title: __( 'Theme Selection', 'amp' ),
 		PageComponent: ChooseReaderTheme,
 	},
 	{
