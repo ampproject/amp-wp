@@ -303,28 +303,25 @@ final class PluginSuppression implements Service, Registerable {
 	}
 
 	/**
-	 * Get suppressible plugin slugs.
+	 * Provides a keyed array of active plugins with keys being slugs and values being plugin info plus validation error details.
 	 *
-	 * @return string[] Plugin slugs which are suppressible.
-	 */
-	private function get_suppressible_plugins() {
-		return array_keys( $this->plugin_registry->get_plugins( true ) );
-	}
-
-	/**
-	 * Provides a keyed array of suppressible plugins with keys being slugs and values being plugin info plus validation error details.
+	 * Plugins are sorted by validation error count, in descending order.
 	 *
-	 * @return array
+	 * @return array Plugins.
 	 */
 	public function get_suppressible_plugins_with_details() {
-		$plugins = array_intersect_key( // Note that wp_array_slice_assoc() doesn't preserve sort order.
-			$this->plugin_registry->get_plugins( true ),
-			array_fill_keys( $this->get_suppressible_plugins(), true )
-		);
-
-		foreach ( array_keys( $plugins ) as $key ) {
-			$plugins[ $key ]['validation_errors'] = $this->get_sorted_plugin_validation_errors( $key );
+		$plugins = [];
+		foreach ( $this->plugin_registry->get_plugins( true ) as $slug => $plugin ) {
+			$plugin['validation_errors'] = $this->get_sorted_plugin_validation_errors( $slug );
+			$plugins[ $slug ]            = $plugin;
 		}
+
+		uasort(
+			$plugins,
+			static function ( $a, $b ) {
+				return count( $b['validation_errors'] ) - count( $a['validation_errors'] );
+			}
+		);
 
 		return $plugins;
 	}
