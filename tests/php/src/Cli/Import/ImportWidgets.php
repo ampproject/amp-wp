@@ -120,9 +120,9 @@ final class ImportWidgets implements ImportStep {
 				}
 
 				if ( ! $fail ) {
-					$single_widget_instances   = get_option( 'widget_' . $id_base );
+					$single_widget_instances   = get_option( 'widget_' . $id_base, [] );
 					$single_widget_instances   = ! empty( $single_widget_instances )
-						? $single_widget_instances
+						? (array) $single_widget_instances
 						: [ '_multiwidget' => 1 ];
 					$single_widget_instances[] = $widget;
 

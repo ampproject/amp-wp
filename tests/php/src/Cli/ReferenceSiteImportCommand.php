@@ -31,10 +31,13 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 	 * : Empty the site content (posts, comments, and terms) before importing the reference content.
 	 *
 	 * [--empty-uploads]
-	 * : Empty the site uploads folder before importing the reference content.
+	 * : Empty the site uploads folder before importing the reference content. This can only be used in conjunction with --empty-content.
 	 *
 	 * [--empty-extensions]
 	 * : Empty the extensions folder (plugins & themes except for the AMP & WordPress Importer plugin) before importing the reference content.
+	 *
+	 * [--empty-options]
+	 * : Empty the site options before importing the reference content and only leave default WordPress options in place.
 	 *
 	 * ## EXAMPLES
 	 *
@@ -63,6 +66,7 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 		$empty_content    = Utils\get_flag_value( $assoc_args, 'empty-content', false );
 		$empty_uploads    = Utils\get_flag_value( $assoc_args, 'empty-uploads', false );
 		$empty_extensions = Utils\get_flag_value( $assoc_args, 'empty-extensions', false );
+		$empty_options    = Utils\get_flag_value( $assoc_args, 'empty-options', false );
 
 		if ( 0 !== substr_compare( $site_definition_file, '.json', -5 ) ) {
 			$site_definition_file .= '.json';
@@ -91,6 +95,10 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 
 		if ( $empty_extensions ) {
 			$this->empty_extensions();
+		}
+
+		if ( $empty_options ) {
+			$this->empty_options();
 		}
 
 		WP_CLI::log(
@@ -212,5 +220,22 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 		} );
 
 		WP_CLI::runcommand( 'plugin delete ' . implode( ' ', $plugins ) );
+	}
+
+
+	/**
+	 * Empty the site's options.
+	 *
+	 * This removes all options and then populates the database with the default
+	 * options for an empty WordPress site.
+	 */
+	private function empty_options() {
+		global $wpdb;
+
+		WP_CLI::log( 'Emptying the site options...' );
+
+		$wpdb->query( sprintf( 'TRUNCATE `%s`;', $wpdb->options ) );
+
+		\populate_options();
 	}
 }
