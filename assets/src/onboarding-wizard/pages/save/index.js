@@ -26,13 +26,13 @@ import { Done } from '../../../components/svg/done';
 function getDescription( mode ) {
 	switch ( mode ) {
 		case 'reader':
-			return __( 'Your site is using Reader mode. AMP pages on your site will be served using the reader theme you have selected (shown to the right), while your site’s primary theme will still be used where pages are not served using AMP.', 'amp' );
+			return __( 'Your site is using Reader mode. The AMP version of pages on your site will be served using the Reader theme you have selected (shown to the right), while pages for the non-AMP version of your site will be served using your primary theme.', 'amp' );
 
 		case 'standard':
-			return __( 'Your site is using Standard mode, which means it is AMP-first, and all canonical URLs are AMP by default. You can still opt specific content types and templates out of AMP upon returning to the AMP settings screen. Depending on your theme and plugins, development work may be required to maintain your site’s AMP compatibility.', 'amp' );
+			return __( 'Your site is using Standard mode (AMP-first). All canonical URLs are AMP by default. You can still opt out of AMP for specific content types and templates from the AMP settings screen. Depending on the theme and plugins you are using, development work may be required to maintain your site’s AMP compatibility.', 'amp' );
 
 		case 'transitional':
-			return __( 'Your site is using Transitional mode, which means your current theme will be used to generate both AMP and non-AMP versions of all URLs on your site. With further development work to address AMP-compatibility issues in your themes and plugins, your site can be made fully AMP-first.', 'amp' );
+			return __( 'Your site is using Transitional mode. Pages for both the AMP and non-AMP versions of your site will be served using your currently active theme. With further development work to address AMP-compatibility issues in your themes and plugins, your site can be made fully AMP-first.', 'amp' );
 
 		default:
 			return '';
@@ -165,7 +165,7 @@ export function Save() {
 				{
 					'reader' === themeSupport && downloadedTheme === readerTheme && (
 						<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_SUCCESS }>
-							{ __( 'Your reader theme was automatically installed', 'amp' ) }
+							{ __( 'Your Reader theme was automatically installed', 'amp' ) }
 						</AMPNotice>
 					)
 				}
@@ -176,7 +176,7 @@ export function Save() {
 			<div className="done__preview-container">
 				{ 'reader' === themeSupport && downloadingThemeError && (
 					<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_INFO }>
-						{ __( 'There was an error downloading your reader theme. As a result, your site is currently using the legacy reader theme. Please install your chosen theme manually.', 'amp' ) }
+						{ __( 'There was an error downloading your Reader theme. As a result, your site is currently using the legacy reader theme. Please install your chosen theme manually.', 'amp' ) }
 					</AMPNotice>
 				) }
 				<Preview />
