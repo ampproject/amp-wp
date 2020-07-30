@@ -50,7 +50,7 @@
     "@wordpress/jest-puppeteer-axe": "1.8.0",
     "@wordpress/plugins": "2.20.3",
     "@wordpress/scripts": "12.1.1",
-    "autoprefixer": "9.8.5",
+    "autoprefixer": "9.8.6",
     "babel-eslint": "10.1.0",
     "babel-jest": "26.2.1",
     "babel-loader": "8.1.0",
