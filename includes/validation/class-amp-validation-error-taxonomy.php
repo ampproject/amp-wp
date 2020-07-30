@@ -2104,7 +2104,7 @@ class AMP_Validation_Error_Taxonomy {
 					<?php endif; ?>
 				</p>
 				<p>
-					<?php echo wp_kses_post( __( 'If all invalid markup is <strong>removed</strong> the page will be served as AMP. However, the impact the removal has on the page must be assessed and determined if the result is acceptable. If any invalid markup is <strong>kept</strong> then the page will not be served as AMP.', 'amp' ) ); ?>
+					<?php echo wp_kses_post( __( 'If all invalid markup is &#8220;removed&#8221; the page will be served as AMP. However, the impact that the removal has on the page must be assessed to determine if the result is acceptable. If any invalid markup is &#8220;kept&#8221; then the page will not be served as AMP.', 'amp' ) ); ?>
 				</p>
 			</dd>
 
