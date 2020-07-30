@@ -12,11 +12,11 @@ import {
 	CLOSE_LINK,
 	CURRENT_THEME,
 	FINISH_LINK,
-	OPTIONS_REST_ENDPOINT,
-	READER_THEMES_REST_ENDPOINT,
+	OPTIONS_REST_PATH,
+	READER_THEMES_REST_PATH,
 	UPDATES_NONCE,
 	USER_FIELD_DEVELOPER_TOOLS_ENABLED,
-	USER_REST_ENDPOINT,
+	USER_REST_PATH,
 } from 'amp-settings'; // From WP inline script.
 import PropTypes from 'prop-types';
 
@@ -54,19 +54,19 @@ export function Providers( { children } ) {
 				<OptionsContextProvider
 					delaySave={ true }
 					hasErrorBoundary={ true }
-					optionsRestEndpoint={ OPTIONS_REST_ENDPOINT }
+					optionsRestPath={ OPTIONS_REST_PATH }
 					populateDefaultValues={ false }
 				>
 					<UserContextProvider
 						userOptionDeveloperTools={ USER_FIELD_DEVELOPER_TOOLS_ENABLED }
-						userRestEndpoint={ USER_REST_ENDPOINT }
+						userRestPath={ USER_REST_PATH }
 					>
 						<NavigationContextProvider pages={ PAGES }>
 							<ReaderThemesContextProvider
 								currentTheme={ CURRENT_THEME }
 								hasErrorBoundary={ true }
 								wpAjaxUrl={ wpAjaxUrl }
-								readerThemesEndpoint={ READER_THEMES_REST_ENDPOINT }
+								readerThemesRestPath={ READER_THEMES_REST_PATH }
 								updatesNonce={ UPDATES_NONCE }
 							>
 								<TemplateModeOverrideContextProvider>

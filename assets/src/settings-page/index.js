@@ -4,8 +4,8 @@
 import PropTypes from 'prop-types';
 import {
 	CURRENT_THEME,
-	OPTIONS_REST_ENDPOINT,
-	READER_THEMES_REST_ENDPOINT,
+	OPTIONS_REST_PATH,
+	READER_THEMES_REST_PATH,
 	UPDATES_NONCE,
 } from 'amp-settings';
 
@@ -48,11 +48,11 @@ const { ajaxurl: wpAjaxUrl } = global;
 function Providers( { children } ) {
 	return (
 		<SiteSettingsProvider>
-			<OptionsContextProvider optionsRestEndpoint={ OPTIONS_REST_ENDPOINT } populateDefaultValues={ true }>
+			<OptionsContextProvider optionsRestPath={ OPTIONS_REST_PATH } populateDefaultValues={ true }>
 				<ReaderThemesContextProvider
 					currentTheme={ CURRENT_THEME }
+					readerThemesRestPath={ READER_THEMES_REST_PATH }
 					hideCurrentlyActiveTheme={ true }
-					readerThemesEndpoint={ READER_THEMES_REST_ENDPOINT }
 					updatesNonce={ UPDATES_NONCE }
 					wpAjaxUrl={ wpAjaxUrl }
 				>
@@ -126,7 +126,7 @@ domReady( () => {
 		render( (
 			<ErrorContextProvider>
 				<Providers>
-					<Root optionsRestEndpoint={ OPTIONS_REST_ENDPOINT } />
+					<Root optionsRestPath={ OPTIONS_REST_PATH } />
 				</Providers>
 			</ErrorContextProvider>
 		), root );
