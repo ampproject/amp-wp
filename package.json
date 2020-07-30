@@ -52,7 +52,7 @@
     "@wordpress/scripts": "12.1.1",
     "autoprefixer": "9.8.5",
     "babel-eslint": "10.1.0",
-    "babel-jest": "26.1.0",
+    "babel-jest": "26.2.1",
     "babel-loader": "8.1.0",
     "babel-plugin-inline-react-svg": "1.1.1",
     "babel-plugin-transform-react-remove-prop-types": "0.4.24",
