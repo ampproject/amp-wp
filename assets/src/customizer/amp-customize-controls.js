@@ -188,34 +188,6 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	}
 
 	/**
-	 * Import settings.
-	 */
-	function importSettings() {
-		for ( const [ settingId, settingValue ] of Object.entries( component.data.activeThemeSettingImports ) ) {
-			const setting = api( settingId );
-			if ( setting ) {
-				setting.set( settingValue );
-			}
-		}
-
-		// Work around the UploadControl not supporting programmatic setting updates.
-		api.control.each( ( control ) => {
-			const controlImportedSetting = Object.values( control.settings ).find( ( setting ) => {
-				return setting.id in component.data.activeThemeSettingImports;
-			} );
-			if ( ! controlImportedSetting ) {
-				return;
-			}
-
-			if ( control.extended( api.UploadControl ) ) {
-				populateUploadControl( control );
-			} else if ( control.extended( api.HeaderControl ) ) {
-				populateHeaderControl( control );
-			}
-		} );
-	}
-
-	/**
 	 * Import settings for a control.
 	 *
 	 * @param {wp.customize.Control} control Control.
