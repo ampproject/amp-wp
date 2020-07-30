@@ -14,7 +14,6 @@ use AmpProject\AmpWP\Admin\OnboardingWizardSubmenuPage;
 use AmpProject\AmpWP\Admin\OptionsMenu;
 use AmpProject\AmpWP\Admin\PluginActivationNotice;
 use AmpProject\AmpWP\Admin\ReenableCssTransientCachingAjaxAction;
-use AmpProject\AmpWP\Admin\RESTPreloader;
 use AmpProject\AmpWP\Admin\SiteHealth;
 use AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching;
 use AmpProject\AmpWP\Infrastructure\ServiceBasedPlugin;
