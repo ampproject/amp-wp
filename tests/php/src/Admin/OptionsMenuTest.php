@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP\Tests\Admin;
 use AmpProject\AmpWP\Admin\GoogleFonts;
 use AmpProject\AmpWP\Admin\OptionsMenu;
 use AmpProject\AmpWP\Admin\ReaderThemes;
+use AmpProject\AmpWP\Admin\RESTPreloader;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use WP_UnitTestCase;
 
@@ -36,7 +37,7 @@ class OptionsMenuTest extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
-		$this->instance = new OptionsMenu( new GoogleFonts(), new ReaderThemes() );
+		$this->instance = new OptionsMenu( new GoogleFonts(), new ReaderThemes(), new RESTPreloader() );
 	}
 
 	/**

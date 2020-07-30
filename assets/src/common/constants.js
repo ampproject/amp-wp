@@ -3,3 +3,7 @@ export const MIN_FONT_SIZE = 6;
 export const MAX_FONT_SIZE = 72;
 export const MINIMUM_FEATURED_IMAGE_WIDTH = 1200;
 export const FILE_TYPE_ERROR_VIEW = 'select-file-type-error';
+
+export const READER = 'reader';
+export const STANDARD = 'standard';
+export const TRANSITIONAL = 'transitional';

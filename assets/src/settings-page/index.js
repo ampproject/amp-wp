@@ -4,8 +4,8 @@
 import PropTypes from 'prop-types';
 import {
 	CURRENT_THEME,
-	OPTIONS_REST_ENDPOINT,
-	READER_THEMES_REST_ENDPOINT,
+	OPTIONS_REST_PATH,
+	READER_THEMES_REST_PATH,
 	UPDATES_NONCE,
 } from 'amp-settings';
 
@@ -23,13 +23,12 @@ import '../css/variables.css';
 import '../css/elements.css';
 import '../css/core-components.css';
 import './style.css';
-import { Panel, PanelBody } from '@wordpress/components';
 import { OptionsContextProvider, Options } from '../components/options-context-provider';
 import { ReaderThemesContextProvider } from '../components/reader-themes-context-provider';
 import { SiteSettingsProvider } from '../components/site-settings-provider';
 import { Loading } from '../components/loading';
 import { UnsavedChangesWarning } from '../components/unsaved-changes-warning';
-import { AMPNotice, NOTICE_TYPE_WARNING } from '../components/amp-notice';
+import { AMPNotice, NOTICE_TYPE_ERROR } from '../components/amp-notice';
 import { ErrorContextProvider, ErrorContext } from '../components/error-context-provider';
 import { Welcome } from './welcome';
 import { TemplateModes } from './template-modes';
@@ -49,10 +48,11 @@ const { ajaxurl: wpAjaxUrl } = global;
 function Providers( { children } ) {
 	return (
 		<SiteSettingsProvider>
-			<OptionsContextProvider optionsRestEndpoint={ OPTIONS_REST_ENDPOINT } populateDefaultValues={ true }>
+			<OptionsContextProvider optionsRestPath={ OPTIONS_REST_PATH } populateDefaultValues={ true }>
 				<ReaderThemesContextProvider
 					currentTheme={ CURRENT_THEME }
-					readerThemesEndpoint={ READER_THEMES_REST_ENDPOINT }
+					readerThemesRestPath={ READER_THEMES_REST_PATH }
+					hideCurrentlyActiveTheme={ true }
 					updatesNonce={ UPDATES_NONCE }
 					wpAjaxUrl={ wpAjaxUrl }
 				>
@@ -75,7 +75,7 @@ Providers.propTypes = {
 function ErrorNotice( { errorMessage } ) {
 	return (
 		<div className="amp-error-notice">
-			<AMPNotice type={ NOTICE_TYPE_WARNING }>
+			<AMPNotice type={ NOTICE_TYPE_ERROR }>
 				<p>
 					<strong>
 						{ __( 'Error:', 'amp' ) }
@@ -106,15 +106,12 @@ function Root() {
 		<>
 			<Welcome />
 			<TemplateModes />
-			<Panel className="advanced-settings-container">
-				<PanelBody title={ __( 'Advanced', 'amp' ) } initialOpen={ false }>
-					<div className="advanced-settings">
-						<SupportedTemplates />
-						<MobileRedirection />
-						<PluginSuppression />
-					</div>
-				</PanelBody>
-			</Panel>
+			<h2>
+				{ __( 'Advanced Settings', 'amp' ) }
+			</h2>
+			<MobileRedirection />
+			<SupportedTemplates />
+			<PluginSuppression />
 			<SettingsFooter />
 			<UnsavedChangesWarning excludeUserContext={ true } />
 			{ error && <ErrorNotice errorMessage={ error.message || __( 'An error occurred. You might be offline or logged out.', 'amp' ) } /> }
@@ -129,7 +126,7 @@ domReady( () => {
 		render( (
 			<ErrorContextProvider>
 				<Providers>
-					<Root optionsRestEndpoint={ OPTIONS_REST_ENDPOINT } />
+					<Root optionsRestPath={ OPTIONS_REST_PATH } />
 				</Providers>
 			</ErrorContextProvider>
 		), root );

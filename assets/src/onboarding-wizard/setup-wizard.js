@@ -13,7 +13,7 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import { WordmarkLogo } from '../components/svg/wordmark-logo';
+import { Logo } from '../components/svg/logo';
 import { UnsavedChangesWarning } from '../components/unsaved-changes-warning';
 import { Stepper } from './components/stepper';
 import { Nav } from './components/nav';
@@ -52,20 +52,25 @@ export function SetupWizard( { closeLink, finishLink } ) {
 	), [ PageComponent ] );
 
 	return (
-		<div className="amp-settings-container">
-			<div className="amp-settings">
+		<div className="amp-onboarding-wizard-container">
+			<div className="amp-onboarding-wizard">
 				<div className="amp-stepper-container">
-					<WordmarkLogo />
-					<div className="amp-settings-plugin-name">
-						{ __( 'Official AMP Plugin for WordPress', 'amp' ) }
+					<div className="amp-onboarding-wizard__logo-container">
+						<Logo />
+						<h1>
+							{ __( 'AMP', 'amp' ) }
+						</h1>
+					</div>
+					<div className="amp-onboarding-wizard-plugin-name">
+						{ __( 'Official WordPress Plugin', 'amp' ) }
 					</div>
 					<Stepper
 						activePageIndex={ activePageIndex }
 						pages={ pages }
 					/>
 				</div>
-				<div className="amp-settings-panel-container">
-					<Panel className="amp-settings-panel">
+				<div className="amp-onboarding-wizard-panel-container">
+					<Panel className="amp-onboarding-wizard-panel">
 						{ false !== showTitle && (
 							<h1>
 								{ title }

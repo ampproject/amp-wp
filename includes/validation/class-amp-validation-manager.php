@@ -942,7 +942,7 @@ class AMP_Validation_Manager {
 
 		// Auto-acceptance is enabled by default but can be overridden by the the `amp_validation_error_default_sanitized` filter.
 		if ( ! $has_rejected_error ) {
-			esc_html_e( 'Nevertheless, the invalid markup has been automatically removed.', 'amp' );
+			esc_html_e( 'The invalid markup has been automatically removed.', 'amp' );
 		} else {
 			/*
 			 * Even if invalid markup is removed by default, if there are non-accepted errors in non-Standard mode, it will redirect to a non-AMP page.
@@ -950,7 +950,7 @@ class AMP_Validation_Manager {
 			 * In that case, this will block serving AMP.
 			 * This could also apply if this is in 'Standard' mode and the user has rejected a validation error.
 			 */
-			esc_html_e( 'You will have to remove the invalid markup (or allow the plugin to remove it) to serve AMP.', 'amp' );
+			esc_html_e( 'In order for AMP to be served you will have to remove the invalid markup or allow the plugin to remove it.', 'amp' );
 		}
 
 		echo sprintf(

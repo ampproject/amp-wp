@@ -50,6 +50,13 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	private $reader_themes;
 
 	/**
+	 * RESTPreloader instance.
+	 *
+	 * @var RESTPreloader
+	 */
+	private $rest_preloader;
+
+	/**
 	 * Check whether the conditional object is currently needed.
 	 *
 	 * @return bool Whether the conditional object is needed.
@@ -71,12 +78,14 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	/**
 	 * OptionsMenu constructor.
 	 *
-	 * @param GoogleFonts  $google_fonts An instance of the GoogleFonts service.
-	 * @param ReaderThemes $reader_themes An instance of the ReaderThemes class.
+	 * @param GoogleFonts   $google_fonts An instance of the GoogleFonts service.
+	 * @param ReaderThemes  $reader_themes An instance of the ReaderThemes class.
+	 * @param RESTPreloader $rest_preloader An instance of the RESTPreloader class.
 	 */
-	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes ) {
-		$this->google_fonts  = $google_fonts;
-		$this->reader_themes = $reader_themes;
+	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes, RESTPreloader $rest_preloader ) {
+		$this->google_fonts   = $google_fonts;
+		$this->reader_themes  = $reader_themes;
+		$this->rest_preloader = $rest_preloader;
 	}
 
 	/**
@@ -263,25 +272,23 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		$is_reader_theme = in_array( get_stylesheet(), wp_list_pluck( $this->reader_themes->get_themes(), 'slug' ), true );
 
 		$js_data = [
-			'CURRENT_THEME'                      => [
+			'CURRENT_THEME'              => [
 				'name'            => $theme->get( 'Name' ),
 				'description'     => $theme->get( 'Description' ),
 				'is_reader_theme' => $is_reader_theme,
 				'screenshot'      => $theme->get_screenshot(),
 				'url'             => $theme->get( 'ThemeURI' ),
 			],
-			'OPTIONS_REST_ENDPOINT'              => rest_url( 'amp/v1/options' ),
-			'READER_THEMES_REST_ENDPOINT'        => rest_url( 'amp/v1/reader-themes' ),
-			'IS_CORE_THEME'                      => in_array(
+			'OPTIONS_REST_PATH'          => '/amp/v1/options',
+			'READER_THEMES_REST_PATH'    => '/amp/v1/reader-themes',
+			'IS_CORE_THEME'              => in_array(
 				get_stylesheet(),
 				AMP_Core_Theme_Sanitizer::get_supported_themes(),
 				true
 			),
-			'THEME_SUPPORT_ARGS'                 => AMP_Theme_Support::get_theme_support_args(),
-			'THEME_SUPPORTS_READER_MODE'         => AMP_Theme_Support::supports_reader_mode(),
-			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
-			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
-			'USER_REST_ENDPOINT'                 => rest_url( 'wp/v2/users/me' ),
+			'THEME_SUPPORT_ARGS'         => AMP_Theme_Support::get_theme_support_args(),
+			'THEME_SUPPORTS_READER_MODE' => AMP_Theme_Support::supports_reader_mode(),
+			'UPDATES_NONCE'              => wp_create_nonce( 'updates' ),
 		];
 
 		wp_add_inline_script(
@@ -305,6 +312,8 @@ class OptionsMenu implements Conditional, Service, Registerable {
 				'after'
 			);
 		}
+
+		$this->add_preload_rest_paths();
 	}
 
 	/**
@@ -324,5 +333,20 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			</form>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Adds REST paths to preload.
+	 */
+	protected function add_preload_rest_paths() {
+		$paths = [
+			'/amp/v1/options',
+			'/amp/v1/reader-themes',
+			'/wp/v2/settings',
+		];
+
+		foreach ( $paths as $path ) {
+			$this->rest_preloader->add_preloaded_path( $path );
+		}
 	}
 }

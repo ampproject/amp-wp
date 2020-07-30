@@ -2087,7 +2087,7 @@ class AMP_Validated_URL_Post_Type {
 							</strong>
 							<?php
 							esc_html_e(
-								'Review each instance of invalid markup and determine whether the action of removing (or keeping) is approved. You can change the status and click preview to see what impact the invalid markup has on the page. Invalid markup that is not approved is markup which you may not have seen yet or which you want to fix directly in underlying code.',
+								'For each instance of invalid markup, determine whether it can be safely removed or it needs to be kept. You can change the Markup Status (Removed or Kept) and click the Preview Changes button to see its impact on the page. Once the proper action has been taken (Remove or Keep), you can toggle the checkbox the instance as Reviewed.',
 								'amp'
 							);
 							echo '<br><br>';
@@ -2108,9 +2108,9 @@ class AMP_Validated_URL_Post_Type {
 							?>
 						</strong>
 						<?php if ( $is_amp_enabled && count( array_filter( $counts ) ) > 0 ) : ?>
-							<?php esc_html_e( 'AMP is enabled because no invalid markup is kept.', 'amp' ); ?>
+							<?php esc_html_e( 'AMP is enabled because no invalid markup is being kept.', 'amp' ); ?>
 						<?php elseif ( ! $is_amp_enabled ) : ?>
-							<?php esc_html_e( 'AMP is disabled because there is invalid markup kept. To unblock AMP from being served, either mark the invalid markup as removed or fix the code that adds the invalid markup.', 'amp' ); ?>
+							<?php esc_html_e( 'AMP is disabled because some invalid markup has been kept. To enable AMP to be served, either mark the invalid markup as &#8220;removed&#8221; or provide an AMP-compatible fix that eliminates the invalid markup from being generated in the first place.', 'amp' ); ?>
 						<?php endif; ?>
 					</div>
 
@@ -2344,9 +2344,9 @@ class AMP_Validated_URL_Post_Type {
 			<div class="notice notice-alt notice-error inline">
 				<p>
 					<?php if ( 0 === $excluded_stylesheets ) : ?>
-						<?php esc_html_e( 'You have exceeded the CSS budget. Because of this, the page will not be served as a valid AMP page.', 'amp' ); ?>
+						<?php esc_html_e( 'You have exceeded the CSS budget. The page will not be served as a valid AMP page.', 'amp' ); ?>
 					<?php else : ?>
-						<?php esc_html_e( 'You have exceeded the CSS budget. Because of this, stylesheets deemed of lesser priority have been excluded from the page.', 'amp' ); ?>
+						<?php esc_html_e( 'You have exceeded the CSS budget. Stylesheets deemed of lesser priority have been excluded from the page.', 'amp' ); ?>
 					<?php endif; ?>
 					<?php esc_html_e( 'Please review the flagged stylesheets below and determine if the current theme or a particular plugin is including excessive CSS.', 'amp' ); ?>
 				</p>
@@ -2354,7 +2354,7 @@ class AMP_Validated_URL_Post_Type {
 		<?php elseif ( $percentage_budget_used >= AMP_Style_Sanitizer::CSS_BUDGET_WARNING_PERCENTAGE ) : ?>
 			<div class="notice notice-alt notice-warning inline">
 				<p>
-					<?php esc_html_e( 'You are nearing the limit of the CSS budget. Once reaching this limit, stylesheets deemed of lesser priority will be excluded from the page. Please review the stylesheets below and determine if the current theme or a particular plugin is including excessive CSS.', 'amp' ); ?>
+					<?php esc_html_e( 'You are nearing the limit of the CSS budget. Once this limit is reached, stylesheets deemed of lesser priority will be excluded from the page. Please review the stylesheets below and determine if the current theme or a particular plugin is including excessive CSS.', 'amp' ); ?>
 				</p>
 			</div>
 		<?php endif; ?>
@@ -2559,7 +2559,7 @@ class AMP_Validated_URL_Post_Type {
 													esc_attr(
 														'style_attribute' === $stylesheet['origin']
 															?
-															__( 'Selector generated to increase specificity so the cascade is preserved for properties moved from style attribute to CSS rule in style[amp-custom].', 'amp' )
+															__( 'Selector generated to increase specificity so the cascade is preserved for properties moved from style attribute to CSS rules in style[amp-custom].', 'amp' )
 															:
 															__( 'Selector generated to increase specificity for important properties so that the CSS cascade is preserved. AMP does not allow important properties.', 'amp' )
 													)

@@ -41,7 +41,7 @@ export const PAGES = [
 	},
 	{
 		slug: 'summary',
-		title: __( 'Summary', 'amp' ),
+		title: __( 'Review', 'amp' ),
 		PageComponent: Summary,
 	},
 	{

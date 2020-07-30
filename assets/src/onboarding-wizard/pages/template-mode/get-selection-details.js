@@ -6,15 +6,14 @@
  */
 import { __ } from '@wordpress/i18n';
 import isShallowEqual from '@wordpress/is-shallow-equal';
+/**
+ * Internal dependencies
+ */
+import { READER, STANDARD, TRANSITIONAL } from '../../../common/constants';
 
 // Sections.
 export const COMPATIBILITY = 'compatibility';
 export const DETAILS = 'details';
-
-// Modes.
-export const READER = 'reader';
-export const STANDARD = 'standard';
-export const TRANSITIONAL = 'transitional';
 
 // Recommendation levels.
 export const MOST_RECOMMENDED = 'mostRecommended';
@@ -118,11 +117,11 @@ export function getSelectionText( ...args ) {
 	switch ( true ) {
 		case match( COMPATIBILITY, READER, MOST_RECOMMENDED, NON_TECHNICAL ):
 		case match( COMPATIBILITY, READER, MOST_RECOMMENDED, TECHNICAL ):
-			return __( 'Reader mode is the best choice for users who don\'t have a technical background or would like a simpler setup.', 'amp' );
+			return __( 'Reader mode is the best choice if you don\'t have a technical background or would like a simpler setup.', 'amp' );
 
 		case match( COMPATIBILITY, READER, RECOMMENDED, NON_TECHNICAL ):
 		case match( COMPATIBILITY, READER, RECOMMENDED, TECHNICAL ):
-			return __( 'Reader mode makes it easy to bring AMP content to your site, but the AMP version of your site will have a different theme.', 'amp' );
+			return __( 'Reader mode makes it easy to bring AMP content to your site, but your site will use two different themes.', 'amp' );
 
 		case match( COMPATIBILITY, READER, NOT_RECOMMENDED, NON_TECHNICAL ):
 		case match( COMPATIBILITY, READER, NOT_RECOMMENDED, TECHNICAL ):
@@ -140,11 +139,11 @@ export function getSelectionText( ...args ) {
 
 		case match( COMPATIBILITY, TRANSITIONAL, MOST_RECOMMENDED, NON_TECHNICAL ):
 		case match( COMPATIBILITY, TRANSITIONAL, MOST_RECOMMENDED, TECHNICAL ):
-			return __( 'Transitional mode is recommended because it will make it easy to keep AMP content even if you install non-AMP-compatible plugins later', 'amp' );
+			return __( 'Transitional mode is recommended because it makes it easy to keep your content as valid AMP even if non-AMP-compatible plugins are installed later.', 'amp' );
 
 		case match( COMPATIBILITY, TRANSITIONAL, RECOMMENDED, NON_TECHNICAL ):
 		case match( COMPATIBILITY, TRANSITIONAL, RECOMMENDED, TECHNICAL ):
-			return __( 'Transitional mode is a good choice if you are able to address any issues around AMP-compatibility that may arise as you work on your site.', 'amp' );
+			return __( 'Transitional mode is a good choice if you are willing and able to address any issues around AMP-compatibility that may arise as your site evolves.', 'amp' );
 
 		case match( DETAILS, READER, NOT_RECOMMENDED, NON_TECHNICAL ):
 		case match( DETAILS, READER, NOT_RECOMMENDED, TECHNICAL ):
@@ -168,12 +167,12 @@ export function getSelectionText( ...args ) {
 		case match( DETAILS, STANDARD, MOST_RECOMMENDED, TECHNICAL ):
 		case match( DETAILS, STANDARD, NOT_RECOMMENDED, NON_TECHNICAL ):
 		case match( DETAILS, STANDARD, NOT_RECOMMENDED, TECHNICAL ):
-			return __( 'In Standard mode <b>your site will be completely AMP</b> (except in cases where you opt-out of AMP for specific content types), and <b>it will use a single theme</b>. ', 'amp' );
+			return __( 'In Standard mode <b>your site will be completely AMP</b> (except in cases where you opt-out of AMP for specific parts of your site), and <b>it will use a single theme</b>. ', 'amp' );
 
 		// Cases potentially never used.
 		case match( COMPATIBILITY, STANDARD, RECOMMENDED, NON_TECHNICAL ):
 		case match( COMPATIBILITY, STANDARD, RECOMMENDED, TECHNICAL ):
-			return 'Standard mode is a good choice if your site has an AMP-compatible theme and only uses AMP-compatible plugins. If you\'re not sure of the compatibility of your themes and plugins, Reader mode may be a better option.';
+			return 'Standard mode is a good choice if your site uses an AMP-compatible theme and only uses AMP-compatible plugins. If you\'re not sure of the compatibility of your themes and plugins, Reader mode may be a better option.';
 
 		default: {
 			throw new Error( __( 'A selection text recommendation was not accounted for. ', 'amp' ) + JSON.stringify( args ) );

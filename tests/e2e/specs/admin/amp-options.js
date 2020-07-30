@@ -6,7 +6,7 @@ import { visitAdminPage } from '@wordpress/e2e-test-utils';
 /**
  * Internal dependencies
  */
-import { completeWizard, cleanUpSettings, clickMode, selectReaderTheme } from '../../utils/onboarding-wizard-utils';
+import { completeWizard, cleanUpSettings, clickMode } from '../../utils/onboarding-wizard-utils';
 import { installTheme } from '../../utils/install-theme';
 import { activateTheme } from '../../utils/activate-theme';
 
@@ -45,19 +45,6 @@ describe( 'AMP settings screen newly activated', () => {
 
 		await expect( page ).not.toMatchElement( '.reader-themes' );
 	} );
-
-	it( 'shows expected elements for reader mode', async () => {
-		await clickMode( 'reader' );
-		await expect( page ).toMatchElement( '#template-mode-reader:checked' );
-
-		await expect( page ).toClick( '.reader-themes' );
-		await expect( page ).toMatchElement( '#theme-card__legacy:checked' );
-
-		await expect( page ).not.toMatchElement( '#theme-card__twentytwenty:checked' ); // Active theme is hidden.
-
-		await selectReaderTheme( 'twentynineteen' );
-		await expect( page ).toMatchElement( '#theme-card__twentynineteen:checked' );
-	} );
 } );
 
 describe( 'Settings screen when reader theme is active theme', () => {
@@ -68,6 +55,7 @@ describe( 'Settings screen when reader theme is active theme', () => {
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
 		await clickMode( 'reader' );
+		await expect( page ).toClick( '#template-mode-reader-container .components-panel__body-toggle' );
 
 		await expect( page ).toMatchElement( '.amp-notice__body', { text: /^Your active theme/ } );
 
@@ -85,7 +73,7 @@ describe( 'Mode info notices', () => {
 
 		await clickMode( 'reader' );
 
-		await expect( page ).toMatchElement( '#template-mode-reader-container .amp-notice--info' );
+		await expect( page ).toMatchElement( '#template-mode-reader-container .amp-notice--warning' );
 	} );
 
 	it.todo( 'shows expected notices for theme with paired flag false' );
