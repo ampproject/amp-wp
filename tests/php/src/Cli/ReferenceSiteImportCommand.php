@@ -89,12 +89,12 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 			WP_CLI::error( "The provided site definition file '{$site_definition_file}' could not be parsed: {$exception->getMessage()}" );
 		}
 
-		if ( $empty_content ) {
-			$this->empty_site( $empty_uploads );
-		}
-
 		if ( $empty_extensions ) {
 			$this->empty_extensions();
+		}
+
+		if ( $empty_content ) {
+			$this->empty_site( $empty_uploads );
 		}
 
 		if ( $empty_options ) {
@@ -234,8 +234,31 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 
 		WP_CLI::log( 'Emptying the site options...' );
 
+		if ( ! function_exists( '__get_option' ) ) {
+			/** WordPress Administration API */
+			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		}
+
+		if ( ! function_exists( 'populate_options' ) ) {
+			/** WordPress Schema API */
+			require_once ABSPATH . 'wp-admin/includes/schema.php';
+		}
+
+		$siteurl = get_option( 'siteurl' );
+		$home    = get_option( 'home' );
+
 		$wpdb->query( sprintf( 'TRUNCATE `%s`;', $wpdb->options ) );
 
-		\populate_options();
+		populate_options( [
+			'siteurl'             => $siteurl,
+			'home'                => $home,
+			'permalink_structure' => '%postname%',
+		] );
+
+		populate_roles();
+
+		activate_plugin( 'amp/amp.php' );
+
+		wp_cache_flush();
 	}
 }

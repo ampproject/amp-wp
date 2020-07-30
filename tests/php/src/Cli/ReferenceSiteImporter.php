@@ -67,22 +67,26 @@ final class ReferenceSiteImporter extends WP_Import {
 
 		// Set variables for storage, fix file filename for query strings.
 		preg_match( '/[^\?]+\.(jpe?g|jpe|svg|gif|png)\b/i', $file, $matches );
-		$file_array         = [];
-		$file_array['name'] = basename( $matches[0] );
+		$url_filename           = basename( parse_url( $file, PHP_URL_PATH ) );
+		$file_array             = [];
+		$file_array['name']     = basename( $matches[0] );
+		$file_array['tmp_name'] = wp_tempnam( $url_filename );
 
 		// Download file to temp location.
-		$file_array['tmp_name'] = file_get_contents( $file );
-
-		// If error storing temporarily, return the error.
-		if ( is_wp_error( $file_array['tmp_name'] ) ) {
-			WP_CLI::warning(
-				WP_CLI::colorize(
-					"Could not download image %G'{$file}'%n into a temporary file - {$file_array['tmp_name']->get_error_message()}"
-				)
-			);
-
-			return $file_array['tmp_name'];
-		}
+		$context_options = [
+			"ssl" => [
+				"verify_peer"      => false,
+				"verify_peer_name" => false,
+			],
+		];
+		file_put_contents(
+			$file_array['tmp_name'],
+			file_get_contents(
+				$file,
+				false,
+				stream_context_create( $context_options )
+			)
+		);
 
 		// Do the validation and storage stuff.
 		$id = media_handle_sideload( $file_array, 0 );
