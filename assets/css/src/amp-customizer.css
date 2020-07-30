@@ -8,7 +8,7 @@
 	cursor: default;
 }
 
-#customize-theme-controls .control-section-amp_active_theme_settings_import > .accordion-section-title:after {
+#customize-theme-controls .control-section-amp_active_theme_settings_import > .accordion-section-title::after {
 	content: "";
 }
 
