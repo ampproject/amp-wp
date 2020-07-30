@@ -1,5 +1,7 @@
 /* global jQuery */
 
+import { __, _n, sprintf } from '@wordpress/i18n';
+
 window.ampCustomizeControls = ( function( api, $ ) {
 	'use strict';
 
@@ -211,12 +213,50 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	 * Add ability to import settings from the active theme.
 	 */
 	component.addActiveThemeSettingsImporting = function addActiveThemeSettingsImporting() {
-		const importButton = $( '<button type="button" class="button button-secondary">Import Active Theme Settings</button>' );
+		const differingSettings = new Set();
+		for ( const [ settingId, settingValue ] of Object.entries( component.data.activeThemeSettingImports ) ) {
+			const setting = api( settingId );
+			if ( setting && ! _.isEqual( setting(), settingValue ) ) {
+				differingSettings.add( settingId );
+			}
+		}
 
+		// Abort adding any UI if there are no settings to import.
+		if ( differingSettings.size === 0 ) {
+			return;
+		}
+
+		const controlsWithSettings = new Set();
+		api.control.each( ( control ) => {
+			for ( const setting of Object.values( control.settings ) ) {
+				if ( differingSettings.has( setting.id ) ) {
+					controlsWithSettings.add( control );
+				}
+			}
+		} );
+
+		const container = $( '<div id="amp-active-theme-settings-importing"></div>' );
+		const importButton = $( '<button type="button" class="button button-secondary"></button>' );
+		importButton.text(
+			__( 'Import Active Theme\'s Settings', 'amp' ) + sprintf( ' (%d)', controlsWithSettings.size ),
+		);
 		importButton.on( 'click', importSettings );
+		container.append( importButton );
 
-		// @todo Put this in a better spot.
-		$( '#customize-info .preview-notice' ).append( importButton );
+		const ol = $( '<ol>' );
+		const sortedControls = Array.from( controlsWithSettings );
+		sortedControls.sort( ( a, b ) => {
+			return a.priority() - b.priority();
+		} );
+
+		for ( const sortedControl of sortedControls ) {
+			const li = $( '<li></li>' );
+			li.text( sortedControl.params.label );
+			ol.append( li );
+		}
+		container.append( ol );
+
+		$( '#customize-info' ).after( container );
 	};
 
 	/**

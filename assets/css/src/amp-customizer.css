@@ -3,3 +3,15 @@
 	line-height: 1.4;
 	margin-right: 28px;
 }
+
+#amp-active-theme-settings-importing {
+	cursor: default;
+	background: #fff;
+	color: #555d66;
+	border-top: 1px solid #ddd;
+	border-bottom: 1px solid #ddd;
+	border-left: none;
+	border-right: none;
+	margin: 15px 0;
+	padding: 12px;
+}

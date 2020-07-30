@@ -287,18 +287,20 @@ class AMP_Template_Customizer {
 	 * @since 2.0
 	 */
 	public function add_customizer_scripts() {
+		$handle       = 'amp-customize-controls';
 		$asset_file   = AMP__DIR__ . '/assets/js/amp-customize-controls.asset.php';
 		$asset        = require $asset_file;
 		$dependencies = $asset['dependencies'];
 		$version      = $asset['version'];
 
 		wp_enqueue_script(
-			'amp-customize-controls',
+			$handle,
 			amp_get_asset_url( 'js/amp-customize-controls.js' ),
 			array_merge( $dependencies, [ 'jquery', 'customize-controls' ] ),
 			$version,
 			true
 		);
+		wp_set_script_translations( $handle, 'amp' );
 
 		$option_settings = [];
 		foreach ( $this->wp_customize->settings() as $setting ) {
@@ -309,7 +311,7 @@ class AMP_Template_Customizer {
 		}
 
 		wp_add_inline_script(
-			'amp-customize-controls',
+			$handle,
 			sprintf(
 				'ampCustomizeControls.boot( %s );',
 				wp_json_encode(
@@ -321,6 +323,7 @@ class AMP_Template_Customizer {
 							'image'    => wp_mime_type_icon( 'image' ),
 							'document' => wp_mime_type_icon( 'document' ),
 						],
+						// @todo Eliminate these in favor of using __() in JS.
 						'l10n'                      => [
 							/* translators: placeholder is URL to non-AMP Customizer. */
 							'ampVersionNotice'     => wp_kses_post( sprintf( __( 'You are customizing the AMP version of your site. <a href="%s">Customize non-AMP version</a>.', 'amp' ), esc_url( admin_url( 'customize.php' ) ) ) ),
