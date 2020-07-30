@@ -211,7 +211,7 @@ export const maybeDisplayNotice = () => {
 
 	const totalRejectedErrorsCount = rejectedBlockValidationErrors.length + rejectedValidationErrors.length;
 	if ( totalRejectedErrorsCount === 0 ) {
-		noticeMessage += __( 'Nevertheless, the invalid markup has been automatically removed.', 'amp' );
+		noticeMessage += __( 'The invalid markup has been automatically removed.', 'amp' );
 	} else {
 		noticeMessage += _n(
 			'You will have to remove the invalid markup (or allow the plugin to remove it) to serve AMP.',
