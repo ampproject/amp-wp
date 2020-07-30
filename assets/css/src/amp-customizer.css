@@ -42,8 +42,11 @@
 
 #customize-controls .control-section-amp_active_theme_settings_import > .accordion-section-title dt {
 	font-weight: bold;
+	margin-top: 10px;
+	margin-bottom: 4px;
 }
 
 #customize-controls .control-section-amp_active_theme_settings_import > .accordion-section-title dd {
 	margin-left: 20px;
+	margin-bottom: 4px;
 }
