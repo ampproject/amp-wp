@@ -39,9 +39,9 @@ body {
 .amp-onboarding-wizard__logo-container h1 {
 	color: var(--amp-settings-color-brand);
 	font-size: 24px;
-	font-weight: 600;
-	letter-spacing: 1px;
+	font-weight: 700;
 	margin-left: 0.75rem;
+	-webkit-font-smoothing: antialiased;
 }
 
 /**
