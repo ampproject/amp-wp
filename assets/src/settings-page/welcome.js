@@ -92,7 +92,7 @@ export function Welcome() {
 					{
 						customizerLink && (
 							<a className="components-button is-link" href={ customizerLink } rel="noreferrer">
-								{ __( 'Visit Customizer', 'amp' ) }
+								{ __( 'Customize Theme', 'amp' ) }
 							</a>
 						)
 					}
