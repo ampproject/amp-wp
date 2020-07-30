@@ -323,12 +323,9 @@ class AMP_Template_Customizer {
 							'image'    => wp_mime_type_icon( 'image' ),
 							'document' => wp_mime_type_icon( 'document' ),
 						],
-						// @todo Eliminate these in favor of using __() in JS.
 						'l10n'                      => [
 							/* translators: placeholder is URL to non-AMP Customizer. */
 							'ampVersionNotice'     => wp_kses_post( sprintf( __( 'You are customizing the AMP version of your site. <a href="%s">Customize non-AMP version</a>.', 'amp' ), esc_url( admin_url( 'customize.php' ) ) ) ),
-							'optionSettingNotice'  => __( 'Also applies to non-AMP version of your site.', 'amp' ),
-							'navMenusPanelNotice'  => __( 'The menus here are shared with the non-AMP version of your site. Assign existing menus to menu locations in the Reader theme or create new AMP-specific menus.', 'amp' ),
 							'rootPanelDescription' => $this->get_amp_panel_description(),
 						],
 					]

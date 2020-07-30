@@ -11,8 +11,6 @@ window.ampCustomizeControls = ( function( api, $ ) {
 			queryVar: '',
 			l10n: {
 				ampVersionNotice: '',
-				optionSettingNotice: '',
-				navMenusPanelNotice: '',
 				rootPanelDescription: '',
 			},
 			optionSettings: [],
@@ -304,7 +302,7 @@ window.ampCustomizeControls = ( function( api, $ ) {
 					'amp_option_setting',
 					{
 						type: 'info',
-						message: component.data.l10n.optionSettingNotice,
+						message: __( 'Also applies to non-AMP version of your site.', 'amp' ),
 					},
 				);
 				setting.notifications.add( notification.code, notification );
@@ -327,7 +325,7 @@ window.ampCustomizeControls = ( function( api, $ ) {
 				'amp_version',
 				{
 					type: 'info',
-					message: component.data.l10n.navMenusPanelNotice,
+					message: __( 'The menus here are shared with the non-AMP version of your site. Assign existing menus to menu locations in the Reader theme or create new AMP-specific menus.', 'amp' ),
 				},
 			);
 			panel.notifications.add( notification.code, notification );
