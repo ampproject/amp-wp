@@ -32,17 +32,20 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 	 *
 	 * [--empty-uploads]
 	 * : Empty the site uploads folder before importing the reference content.
-
+	 *
+	 * [--empty-extensions]
+	 * : Empty the extensions folder (plugins & themes except for the AMP & WordPress Importer plugin) before importing the reference content.
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     # Import content from a reference site definition file
-	 *     $ wp amp reference-site import example-site.json
+	 *     $ wp amp reference-site import example-site
 	 *     Starting the import process...
 	 *     Processing post #1 ("Hello world!") (post_type: post)
 	 *     -- 1 of 1
 	 *     -- Tue, 21 Jun 2016 05:31:12 +0000
 	 *     -- Imported post as post_id #1
-	 *     Success: Finished importing from 'example-site.json' file.
+	 *     Success: Finished importing from 'example-site' file.
 	 *
 	 * @when after_wp_load
 	 */
@@ -57,8 +60,9 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 		$storage->registerStreamWrapper();
 
 		list( $site_definition_file ) = $args;
-		$empty_content = Utils\get_flag_value( $assoc_args, 'empty-content', false );
-		$empty_uploads = Utils\get_flag_value( $assoc_args, 'empty-uploads', false );
+		$empty_content    = Utils\get_flag_value( $assoc_args, 'empty-content', false );
+		$empty_uploads    = Utils\get_flag_value( $assoc_args, 'empty-uploads', false );
+		$empty_extensions = Utils\get_flag_value( $assoc_args, 'empty-extensions', false );
 
 		if ( 0 !== substr_compare( $site_definition_file, '.json', -5 ) ) {
 			$site_definition_file .= '.json';
@@ -83,6 +87,10 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 
 		if ( $empty_content ) {
 			$this->empty_site( $empty_uploads );
+		}
+
+		if ( $empty_extensions ) {
+			$this->empty_extensions();
 		}
 
 		WP_CLI::log(
@@ -174,11 +182,35 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 		}
 
 		WP_CLI::log(
-			WP_CLI::colorize(
-				$empty_uploads ? 'Emptying the site content and uploads...' : 'Emptying the site content...'
-			)
+			$empty_uploads
+				? 'Emptying the site content and uploads...'
+				: 'Emptying the site content...'
 		);
 
 		WP_CLI::runcommand( $command );
+	}
+
+	/**
+	 * Empty the site's extension folders.
+	 *
+	 * This removes all plugins & themes except for the AMP and the WordPress
+	 * Importer plugins.
+	 */
+	private function empty_extensions() {
+		WP_CLI::log( 'Emptying the site extensions...' );
+
+		$plugins = json_decode(
+			WP_CLI::runcommand(
+				'plugin list --field=name --format=json',
+				[ 'return' => true ]
+			),
+			JSON_OBJECT_AS_ARRAY
+		);
+
+		$plugins = array_filter( $plugins, static function ( $plugin ) {
+			return ! in_array( $plugin, [ 'amp', 'wordpress-importer' ], true );
+		} );
+
+		WP_CLI::runcommand( 'plugin delete ' . implode( ' ', $plugins ) );
 	}
 }
