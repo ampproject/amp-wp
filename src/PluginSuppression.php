@@ -199,6 +199,7 @@ final class PluginSuppression implements Service, Registerable {
 			}
 		}
 
+		// @todo Remove?
 		// When the suppressed plugins changed, re-validate so validation errors can be re-computed with the plugins newly-suppressed or un-suppressed.
 		if ( $changes > 0 ) {
 			add_action(
@@ -307,18 +308,7 @@ final class PluginSuppression implements Service, Registerable {
 	 * @return string[] Plugin slugs which are suppressible.
 	 */
 	private function get_suppressible_plugins() {
-		$errors_by_source        = AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source();
-		$erroring_plugin_slugs   = isset( $errors_by_source['plugin'] ) ? array_keys( $errors_by_source['plugin'] ) : [];
-		$suppressed_plugin_slugs = array_keys( AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS ) );
-		$active_plugin_slugs     = array_keys( $this->plugin_registry->get_plugins( true ) );
-
-		// The suppressible plugins are the set of plugins which are erroring and/or suppressed, which are also active.
-		return array_unique(
-			array_intersect(
-				array_merge( $erroring_plugin_slugs, $suppressed_plugin_slugs ),
-				$active_plugin_slugs
-			)
-		);
+		return array_keys( $this->plugin_registry->get_plugins( true ) );
 	}
 
 	/**

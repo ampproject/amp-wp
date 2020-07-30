@@ -122,6 +122,14 @@ SuppressedPluginVersion.propTypes = {
  * @param {Array} props.errors
  */
 function ValidationErrorDetails( { errors } ) {
+	if ( errors.length === 0 ) {
+		return (
+			<p>
+				{ __( 'No validation errors yet detected.', 'amp' ) }
+			</p>
+		);
+	}
+
 	return (
 		<details>
 			<summary>
@@ -315,7 +323,7 @@ export function PluginSuppression() {
 			initialOpen={ false }
 		>
 			<p>
-				{ __( 'When a plugin adds markup which is invalid on AMP pages, you have two options: you can review the validation error, determine that the invalid markup is not needed, and let the AMP plugin remove it. Alternatively, you can suppress the offending plugin from running on AMP pages. Below is the list of active plugins which have caused validation issues.', 'amp' ) }
+				{ __( 'When a plugin adds markup which is invalid on AMP pages, you have two options: you can review the validation error, determine that the invalid markup is not needed, and let the AMP plugin remove it. Alternatively, you can suppress the offending plugin from running on AMP pages.', 'amp' ) }
 			</p>
 			<table id="suppressed-plugins-table" className="wp-list-table widefat fixed striped">
 				<thead>
