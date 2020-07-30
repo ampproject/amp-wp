@@ -2108,7 +2108,7 @@ class AMP_Validated_URL_Post_Type {
 							?>
 						</strong>
 						<?php if ( $is_amp_enabled && count( array_filter( $counts ) ) > 0 ) : ?>
-							<?php esc_html_e( 'AMP is enabled because no invalid markup has been kept.', 'amp' ); ?>
+							<?php esc_html_e( 'AMP is enabled because no invalid markup is being kept.', 'amp' ); ?>
 						<?php elseif ( ! $is_amp_enabled ) : ?>
 							<?php esc_html_e( 'AMP is disabled because some invalid markup has been kept. To enable AMP to be served, either mark the invalid markup as Removed or provide an AMP compatible fix that eliminates the invalid markup.', 'amp' ); ?>
 						<?php endif; ?>
