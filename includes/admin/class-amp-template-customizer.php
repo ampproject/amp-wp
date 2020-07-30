@@ -371,7 +371,13 @@ class AMP_Template_Customizer {
 				$import_theme_mods['nav_menu_locations']
 			);
 			foreach ( $nav_menu_locations as $nav_menu_location => $menu_id ) {
-				$import_settings[ "nav_menu_locations[$nav_menu_location]" ] = $menu_id;
+				$setting = $this->wp_customize->get_setting( "nav_menu_locations[$nav_menu_location]" );
+				if ( $setting instanceof WP_Customize_Setting ) {
+					/** This filter is documented in wp-includes/class-wp-customize-manager.php */
+					$value = apply_filters( "customize_sanitize_js_{$setting->id}", $menu_id, $setting );
+
+					$import_settings[ $setting->id ] = $value;
+				}
 			}
 			unset( $import_theme_mods['nav_menu_locations'] );
 		}
