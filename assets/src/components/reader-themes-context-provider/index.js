@@ -26,12 +26,12 @@ export const ReaderThemes = createContext();
  * @param {string} props.currentTheme The theme currently active on the site.
  * @param {string} props.wpAjaxUrl WP AJAX URL.
  * @param {?any} props.children Component children.
- * @param {string} props.readerThemesEndpoint REST endpoint to fetch reader themes.
+ * @param {string} props.readerThemesRestPath REST endpoint to fetch reader themes.
  * @param {string} props.updatesNonce Nonce for the AJAX request to install a theme.
  * @param {boolean} props.hasErrorBoundary Whether the component is wrapped in an error boundary.
  * @param {boolean} props.hideCurrentlyActiveTheme Whether the currently active theme should be hidden in the UI.
  */
-export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme, hideCurrentlyActiveTheme = false, readerThemesEndpoint, updatesNonce, hasErrorBoundary = false } ) {
+export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme, hideCurrentlyActiveTheme = false, readerThemesRestPath, updatesNonce, hasErrorBoundary = false } ) {
 	const { setAsyncError } = useAsyncError();
 	const { error, setError } = useContext( ErrorContext );
 
@@ -127,7 +127,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	 * Fetches theme data when needed.
 	 */
 	useEffect( () => {
-		if ( error || fetchingThemes || ! readerThemesEndpoint || themes ) {
+		if ( error || fetchingThemes || ! readerThemesRestPath || themes ) {
 			return;
 		}
 
@@ -142,7 +142,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 			setFetchingThemes( true );
 
 			try {
-				const fetchedThemes = await apiFetch( { url: readerThemesEndpoint } );
+				const fetchedThemes = await apiFetch( { path: readerThemesRestPath } );
 
 				if ( hasUnmounted.current === true ) {
 					return;
@@ -165,7 +165,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 
 			setFetchingThemes( false );
 		} )();
-	}, [ error, hasErrorBoundary, fetchingThemes, readerThemesEndpoint, setAsyncError, setError, themes, themeSupport ] );
+	}, [ error, hasErrorBoundary, fetchingThemes, readerThemesRestPath, setAsyncError, setError, themes, themeSupport ] );
 
 	const { filteredThemes } = useMemo( () => {
 		let newFilteredThemes;
@@ -206,8 +206,8 @@ ReaderThemesContextProvider.propTypes = {
 		name: PropTypes.string.isRequired,
 	} ).isRequired,
 	hasErrorBoundary: PropTypes.bool,
+	readerThemesRestPath: PropTypes.string.isRequired,
 	hideCurrentlyActiveTheme: PropTypes.bool,
-	readerThemesEndpoint: PropTypes.string.isRequired,
 	updatesNonce: PropTypes.string.isRequired,
 	wpAjaxUrl: PropTypes.string.isRequired,
 };

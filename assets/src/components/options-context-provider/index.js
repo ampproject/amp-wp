@@ -31,12 +31,12 @@ function waitASecond() {
  *
  * @param {Object} props Component props.
  * @param {?any} props.children Component children.
- * @param {string} props.optionsRestEndpoint REST endpoint to retrieve options.
+ * @param {string} props.optionsRestPath REST endpoint to retrieve options.
  * @param {boolean} props.populateDefaultValues Whether default values should be populated.
  * @param {boolean} props.hasErrorBoundary Whether the component is wrapped in an error boundary.
  * @param {boolean} props.delaySave Whether to delay updating state when saving data.
  */
-export function OptionsContextProvider( { children, optionsRestEndpoint, populateDefaultValues, hasErrorBoundary = false, delaySave = false } ) {
+export function OptionsContextProvider( { children, optionsRestPath, populateDefaultValues, hasErrorBoundary = false, delaySave = false } ) {
 	const [ updates, setUpdates ] = useState( {} );
 	const [ fetchingOptions, setFetchingOptions ] = useState( null );
 	const [ savingOptions, setSavingOptions ] = useState( false );
@@ -45,6 +45,8 @@ export function OptionsContextProvider( { children, optionsRestEndpoint, populat
 
 	const { error, setError } = useContext( ErrorContext );
 	const { setAsyncError } = useAsyncError();
+
+	const [ readerModeWasOverridden, setReaderModeWasOverridden ] = useState( false );
 
 	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
 	const hasUnmounted = useRef( false );
@@ -67,7 +69,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint, populat
 			setFetchingOptions( true );
 
 			try {
-				const fetchedOptions = await apiFetch( { url: optionsRestEndpoint } );
+				const fetchedOptions = await apiFetch( { path: optionsRestPath } );
 
 				if ( true === hasUnmounted.current ) {
 					return;
@@ -95,7 +97,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint, populat
 
 			setFetchingOptions( false );
 		} )();
-	}, [ error, fetchingOptions, hasErrorBoundary, originalOptions, optionsRestEndpoint, populateDefaultValues, setAsyncError, setError ] );
+	}, [ error, fetchingOptions, hasErrorBoundary, originalOptions, optionsRestPath, populateDefaultValues, setAsyncError, setError ] );
 
 	/**
 	 * Sends options to the REST endpoint to be saved.
@@ -131,7 +133,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint, populat
 					apiFetch(
 						{
 							method: 'post',
-							url: optionsRestEndpoint,
+							path: optionsRestPath,
 							data: updatesToSave,
 						},
 					),
@@ -162,7 +164,7 @@ export function OptionsContextProvider( { children, optionsRestEndpoint, populat
 
 		setDidSaveOptions( true );
 		setSavingOptions( false );
-	}, [ delaySave, hasErrorBoundary, optionsRestEndpoint, setAsyncError, originalOptions, setError, updates ] );
+	}, [ delaySave, hasErrorBoundary, optionsRestPath, setAsyncError, originalOptions, setError, updates ] );
 
 	/**
 	 * Updates options in state.
@@ -195,6 +197,8 @@ export function OptionsContextProvider( { children, optionsRestEndpoint, populat
 					savingOptions,
 					unsetOption,
 					updateOptions,
+					readerModeWasOverridden,
+					setReaderModeWasOverridden,
 				}
 			}
 		>
@@ -207,6 +211,6 @@ OptionsContextProvider.propTypes = {
 	children: PropTypes.any,
 	delaySave: PropTypes.bool,
 	hasErrorBoundary: PropTypes.bool,
-	optionsRestEndpoint: PropTypes.string.isRequired,
+	optionsRestPath: PropTypes.string.isRequired,
 	populateDefaultValues: PropTypes.bool.isRequired,
 };

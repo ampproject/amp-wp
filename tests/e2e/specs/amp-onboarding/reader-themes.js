@@ -8,6 +8,13 @@ describe( 'Reader themes', () => {
 		await moveToReaderThemesScreen( { technical: true } );
 	} );
 
+	it( 'shows the correct active stepper item', async () => {
+		const itemCount = await page.$$eval( '.amp-stepper__item', ( els ) => els.length );
+		expect( itemCount ).toBe( 6 );
+
+		await expect( page ).toMatchElement( '.amp-stepper__item--active', { text: 'Theme Selection' } );
+	} );
+
 	it( 'main components exist with no selection', async () => {
 		const itemCount = await page.$$eval( '.theme-card', ( els ) => els.length );
 		expect( itemCount ).toBe( 10 );

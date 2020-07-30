@@ -56,14 +56,23 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 	private $reader_themes;
 
 	/**
+	 * RESTPreloader instance.
+	 *
+	 * @var RESTPreloader
+	 */
+	private $rest_preloader;
+
+	/**
 	 * OnboardingWizardSubmenuPage constructor.
 	 *
-	 * @param GoogleFonts  $google_fonts  An instance of the GoogleFonts service.
-	 * @param ReaderThemes $reader_themes An instance of the ReaderThemes class.
+	 * @param GoogleFonts   $google_fonts  An instance of the GoogleFonts service.
+	 * @param ReaderThemes  $reader_themes An instance of the ReaderThemes class.
+	 * @param RESTPreloader $rest_preloader An instance of the RESTPreloader class.
 	 */
-	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes ) {
-		$this->google_fonts  = $google_fonts;
-		$this->reader_themes = $reader_themes;
+	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes, RESTPreloader $rest_preloader ) {
+		$this->google_fonts   = $google_fonts;
+		$this->reader_themes  = $reader_themes;
+		$this->rest_preloader = $rest_preloader;
 	}
 
 	/**
@@ -227,11 +236,11 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 				'url'             => $theme->get( 'ThemeURI' ),
 			],
 			'FINISH_LINK'                        => $exit_link,
-			'OPTIONS_REST_ENDPOINT'              => rest_url( 'amp/v1/options' ),
-			'READER_THEMES_REST_ENDPOINT'        => rest_url( 'amp/v1/reader-themes' ),
+			'OPTIONS_REST_PATH'                  => '/amp/v1/options',
+			'READER_THEMES_REST_PATH'            => '/amp/v1/reader-themes',
 			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
 			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
-			'USER_REST_ENDPOINT'                 => rest_url( 'wp/v2/users/me' ),
+			'USER_REST_PATH'                     => '/wp/v2/users/me',
 		];
 
 		wp_add_inline_script(
@@ -254,6 +263,24 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 				'wp.i18n.setLocaleData( ' . $translations . ', "amp" );',
 				'after'
 			);
+		}
+
+		$this->add_preload_rest_paths();
+	}
+
+	/**
+	 * Adds REST paths to preload.
+	 */
+	protected function add_preload_rest_paths() {
+		$paths = [
+			'/amp/v1/options',
+			'/amp/v1/reader-themes',
+			'/wp/v2/settings',
+			'/wp/v2/users/me',
+		];
+
+		foreach ( $paths as $path ) {
+			$this->rest_preloader->add_preloaded_path( $path );
 		}
 	}
 }

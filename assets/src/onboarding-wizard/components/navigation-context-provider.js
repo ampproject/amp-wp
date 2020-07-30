@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { createContext, useState, useContext } from '@wordpress/element';
+import { createContext, useState, useContext, useEffect, useMemo } from '@wordpress/element';
 
 /**
  * External dependencies
@@ -11,6 +11,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import { Options } from '../../components/options-context-provider';
+import { READER } from '../../common/constants';
 
 export const Navigation = createContext();
 
@@ -24,13 +25,30 @@ export const Navigation = createContext();
 export function NavigationContextProvider( { children, pages } ) {
 	const [ activePageIndex, setActivePageIndex ] = useState( 0 );
 	const [ canGoForward, setCanGoForward ] = useState( true ); // Allow immediately moving forward on first page. @todo This may need to change in 2.1.
-	const { editedOptions } = useContext( Options );
+	const { editedOptions, readerModeWasOverridden } = useContext( Options );
 
 	const { theme_support: themeSupport } = editedOptions;
 
-	const currentPage = pages[ activePageIndex ];
+	const adaptedPages = useMemo( () => {
+		if ( READER === themeSupport ) {
+			return pages;
+		}
 
-	const isLastPage = activePageIndex === pages.length - 1;
+		return pages.filter( ( page ) => 'theme-selection' !== page.slug );
+	}, [ pages, themeSupport ] );
+
+	const currentPage = adaptedPages[ activePageIndex ];
+
+	const isLastPage = activePageIndex === adaptedPages.length - 1;
+
+	useEffect( () => {
+		if ( readerModeWasOverridden && 'done' === currentPage.slug ) {
+			// If reader mode is overridden, the Theme Selection page will be removed, and means `activePageIndex` will
+			// point to the Done page instead of Summary. To overcome this we decrement `activePageIndex` by 1 so that
+			// it points to the Summary page.
+			setActivePageIndex( activePageIndex - 1 );
+		}
+	}, [ currentPage.slug, activePageIndex, adaptedPages, readerModeWasOverridden ] );
 
 	/**
 	 * Navigates back to the previous page.
@@ -48,10 +66,7 @@ export function NavigationContextProvider( { children, pages } ) {
 			return;
 		}
 
-		// Skip the reader theme screen if the user has not selected that mode. Users can go back to it, however.
-		const forwardCount = pages[ activePageIndex + 1 ].slug === 'theme-selection' && 'reader' !== themeSupport ? 2 : 1;
-
-		setActivePageIndex( activePageIndex + forwardCount );
+		setActivePageIndex( activePageIndex + 1 );
 		setCanGoForward( false ); // Each page is responsible for setting this to true.
 	};
 
@@ -65,7 +80,7 @@ export function NavigationContextProvider( { children, pages } ) {
 					isLastPage,
 					moveBack,
 					moveForward,
-					pages,
+					pages: adaptedPages,
 					setCanGoForward,
 				}
 			}

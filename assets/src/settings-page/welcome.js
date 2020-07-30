@@ -82,7 +82,7 @@ export function Welcome() {
 
 					</h2>
 					<p>
-						{ __( 'The AMP configuration wizard can help you choose the best settings for your theme, plugins, and technical capabilities.', 'amp' ) }
+						{ __( 'The AMP configuration wizard helps you choose the best configuration settings for your site.', 'amp' ) }
 					</p>
 
 					<a className="components-button is-primary settings-welcome__button" href={ onboardingWizardLink } >

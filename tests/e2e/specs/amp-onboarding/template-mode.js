@@ -4,7 +4,13 @@
 /**
  * WordPress dependencies
  */
-import { moveToTemplateModeScreen, clickMode, testNextButton, testPreviousButton, cleanUpSettings } from '../../utils/onboarding-wizard-utils';
+import {
+	moveToTemplateModeScreen,
+	clickMode,
+	testNextButton,
+	testPreviousButton,
+	cleanUpSettings,
+} from '../../utils/onboarding-wizard-utils';
 import { installTheme } from '../../utils/install-theme';
 import { activateTheme } from '../../utils/activate-theme';
 import { deleteTheme } from '../../utils/delete-theme';
@@ -52,6 +58,30 @@ describe( 'Template mode recommendations with reader theme active', () => {
 		await expect( page ).toMatchElement( '#template-mode-standard-container .amp-notice--info' );
 		await expect( page ).toMatchElement( '#template-mode-transitional-container .amp-notice--success' );
 		await expect( page ).toMatchElement( '#template-mode-reader-container .amp-notice--success' );
+	} );
+} );
+
+describe( 'Stepper item modifications', () => {
+	beforeEach( async () => {
+		await moveToTemplateModeScreen( { technical: 'technical' } );
+	} );
+
+	it( 'adds the "Theme Selection" page when reader mode is selected', async () => {
+		await clickMode( 'reader' );
+
+		const itemCount = await page.$$eval( '.amp-stepper__item', ( els ) => els.length );
+		expect( itemCount ).toBe( 6 );
+
+		await expect( page ).toMatchElement( '.amp-stepper__item-title', { text: 'Theme Selection' } );
+	} );
+
+	it( 'removes the "Theme Selection" page when reader mode is not selected', async () => {
+		await clickMode( 'transitional' );
+
+		const itemCount = await page.$$eval( '.amp-stepper__item', ( els ) => els.length );
+		expect( itemCount ).toBe( 5 );
+
+		await expect( page ).not.toMatchElement( '.amp-stepper__item-title', { text: 'Theme Selection' } );
 	} );
 } );
 
