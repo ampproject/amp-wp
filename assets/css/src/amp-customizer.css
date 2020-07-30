@@ -36,7 +36,9 @@
 }
 
 #customize-controls .control-section-amp_active_theme_settings_import > .accordion-section-title summary {
+	cursor: pointer;
 	display: inline-block;
+	font-weight: bold;
 	max-width: 75%;
 }
 

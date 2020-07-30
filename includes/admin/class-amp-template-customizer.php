@@ -29,6 +29,14 @@ class AMP_Template_Customizer {
 	const PANEL_ID = 'amp_panel';
 
 	/**
+	 * Theme mod name to contain timestamps for when theme mods were last modified.
+	 *
+	 * @since 2.0
+	 * @var string
+	 */
+	const THEME_MOD_TIMESTAMPS_KEY = 'amp_customize_setting_modified_timestamps';
+
+	/**
 	 * Customizer instance.
 	 *
 	 * @since 0.4
