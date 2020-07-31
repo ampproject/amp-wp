@@ -388,16 +388,16 @@ class AMP_Template_Customizer {
 	/**
 	 * Get settings to import from the active theme.
 	 *
-	 * @return array Import settings.
+	 * @return array Map of setting IDs to setting values.
 	 */
 	protected function get_active_theme_import_settings() {
-		$active_theme    = $this->reader_theme_loader->get_active_theme();
-		$import_settings = [];
+		$active_theme = $this->reader_theme_loader->get_active_theme();
 		if ( ! $active_theme instanceof WP_Theme ) {
-			return null;
+			return [];
 		}
 
 		$active_theme_mods = get_option( 'theme_mods_' . $active_theme->get_stylesheet(), [] );
+		$import_settings   = [];
 
 		$active_setting_timestamps = isset( $active_theme_mods[ self::THEME_MOD_TIMESTAMPS_KEY ] ) ? $active_theme_mods[ self::THEME_MOD_TIMESTAMPS_KEY ] : [];
 		$reader_setting_timestamps = get_theme_mod( self::THEME_MOD_TIMESTAMPS_KEY, [] );
