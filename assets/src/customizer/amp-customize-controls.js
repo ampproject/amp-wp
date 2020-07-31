@@ -121,6 +121,7 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	 * Custom Logo will update their UI to show the image. Older controls like the Background Image will not however.
 	 *
 	 * @param {wp.customize.UploadControl} control
+	 * @param {Function} control.extended
 	 */
 	function populateUploadControl( control ) {
 		const value = control.setting();
@@ -215,7 +216,7 @@ window.ampCustomizeControls = ( function( api, $ ) {
 			control.setting.id in component.data.activeThemeSettingImports
 		) {
 			control.element.set(
-				checkboxControlElementValueMapping[ control.id ] !== component.data.activeThemeSettingImports[ control.setting.id ]
+				checkboxControlElementValueMapping[ control.id ] !== component.data.activeThemeSettingImports[ control.setting.id ],
 			);
 		}
 	}
@@ -237,6 +238,7 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	 * Import settings for a control.
 	 *
 	 * @param {wp.customize.Control} control Control.
+	 * @param {Function} control.extended Control.
 	 */
 	function importControlSettings( control ) {
 		// Ensure all background settings are shown by ensuring custom preset is selected.
@@ -253,11 +255,11 @@ window.ampCustomizeControls = ( function( api, $ ) {
 			importSettings( Object.values( control.settings ) );
 		}
 
-		// Manually update the UI for controls that don't react to programatic setting updates.
+		// Manually update the UI for controls that don't react to programmatic setting updates.
 		if ( control.extended( api.UploadControl ) ) {
-			populateUploadControl( control );
+			populateUploadControl( /** @type {wp.customize.UploadControl} */ control );
 		} else if ( control.extended( api.HeaderControl ) ) {
-			populateHeaderControl( control );
+			populateHeaderControl( /** @type {wp.customize.HeaderControl} */ control );
 		}
 	}
 
