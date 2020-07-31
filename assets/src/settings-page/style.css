@@ -144,6 +144,10 @@
 	width: 50%;
 }
 
+#suppressed-plugins-table .column-details summary {
+	font-weight: bold;
+}
+
 #suppressed-plugins-table tbody th,
 #suppressed-plugins-table tbody td {
 	vertical-align: top;
@@ -291,6 +295,6 @@ li.error-kept {
 	}
 }
 
-#plugin-suppression-drawer .amp-drawer__panel-body-inner p {
+#plugin-suppression-drawer .amp-drawer__panel-body-inner > p {
 	font-size: 14px;
 }

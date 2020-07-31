@@ -199,7 +199,6 @@ final class PluginSuppression implements Service, Registerable {
 			}
 		}
 
-		// @todo Remove?
 		// When the suppressed plugins changed, re-validate so validation errors can be re-computed with the plugins newly-suppressed or un-suppressed.
 		if ( $changes > 0 ) {
 			add_action(
@@ -315,14 +314,6 @@ final class PluginSuppression implements Service, Registerable {
 			$plugin['validation_errors'] = $this->get_sorted_plugin_validation_errors( $slug );
 			$plugins[ $slug ]            = $plugin;
 		}
-
-		uasort(
-			$plugins,
-			static function ( $a, $b ) {
-				return count( $b['validation_errors'] ) - count( $a['validation_errors'] );
-			}
-		);
-
 		return $plugins;
 	}
 
