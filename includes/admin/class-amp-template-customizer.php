@@ -313,7 +313,16 @@ class AMP_Template_Customizer {
 			$version,
 			true
 		);
-		wp_set_script_translations( $handle, 'amp' );
+		if ( function_exists( 'wp_set_script_translations' ) ) {
+			wp_set_script_translations( $handle, 'amp' );
+		} elseif ( function_exists( 'wp_get_jed_locale_data' ) || function_exists( 'gutenberg_get_jed_locale_data' ) ) {
+			$locale_data = function_exists( 'wp_get_jed_locale_data' ) ? wp_get_jed_locale_data( 'amp' ) : gutenberg_get_jed_locale_data( 'amp' );
+			wp_add_inline_script(
+				$handle,
+				sprintf( 'wp.i18n.setLocaleData( %s, "amp" );', wp_json_encode( $locale_data ) ),
+				'after'
+			);
+		}
 
 		$option_settings = [];
 		foreach ( $this->wp_customize->settings() as $setting ) {
