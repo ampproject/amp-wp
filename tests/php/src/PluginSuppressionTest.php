@@ -103,15 +103,26 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Initialize plugins used for testing.
+	 * Get bad plugin files.
+	 *
+	 * Omit bad-blocks if the block editor is not available.
+	 *
+	 * @return string[]
 	 */
-	private function init_plugins() {
-		update_option( 'active_plugins', MockPluginEnvironment::BAD_PLUGIN_FILES );
-
+	private function get_bad_plugin_files() {
 		$bad_plugin_files = MockPluginEnvironment::BAD_PLUGIN_FILES;
 		if ( ! function_exists( 'register_block_type' ) || ! class_exists( 'WP_Block_Type_Registry' ) ) {
 			$bad_plugin_files = array_diff( $bad_plugin_files, [ MockPluginEnvironment::BAD_BLOCK_PLUGIN_FILE ] );
 		}
+		return $bad_plugin_files;
+	}
+
+	/**
+	 * Initialize plugins used for testing.
+	 */
+	private function init_plugins() {
+		$bad_plugin_files = $this->get_bad_plugin_files();
+		update_option( 'active_plugins', $bad_plugin_files );
 
 		foreach ( $bad_plugin_files as $bad_plugin_file ) {
 			require AMP__DIR__ . '/' . MockPluginEnvironment::BAD_PLUGINS_DIR . '/' . $bad_plugin_file;
@@ -152,7 +163,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 
 		$plugin_file_slugs = array_map(
 			[ $plugin_registry, 'get_plugin_slug_from_file' ],
-			MockPluginEnvironment::BAD_PLUGIN_FILES
+			$this->get_bad_plugin_files()
 		);
 
 		return $plugin_file_slugs;
