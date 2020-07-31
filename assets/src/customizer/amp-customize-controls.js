@@ -257,62 +257,32 @@ window.ampCustomizeControls = ( function( api, $ ) {
 		expand() {},
 
 		/**
-		 * Prevent a section's normal events from being added.
+		 * Get all sections other than this one, sorted by priority.
+		 *
+		 * @return {wp.customize.Section[]} Other sections.
 		 */
-		attachEvents() {},
-
-		/**
-		 * Set up the UI for the section.
-		 */
-		ready() {
-			const importSection = this;
-			api.Section.prototype.ready.call( importSection );
-
-			const importBtn = importSection.headContainer.find( 'button' );
-			importBtn.on( 'click', () => {
-				let remainingCheckboxes = 0;
-
-				importSection.headContainer.find( 'input[type=checkbox]' ).each( function() {
-					const checkbox = $( this );
-					if ( ! checkbox.prop( 'checked' ) ) {
-						remainingCheckboxes++;
-						return;
-					}
-
-					const control = api.control( checkbox.val() );
-					importControlSettings( control );
-					checkbox.closest( 'dd' ).remove();
-				} );
-
-				// Remove any childless dt's.
-				importSection.headContainer.find( 'dt' ).each( function() {
-					const dt = $( this );
-					if ( ! dt.next( 'dd' ).length ) {
-						dt.remove();
-					}
-				} );
-
-				if ( 0 === remainingCheckboxes ) {
-					importSection.active( false );
-				}
-			} );
-
-			const dl = importSection.headContainer.find( 'dl' );
-
-			const otherSections = [];
+		otherSections() {
+			const sections = [];
 			api.section.each( ( otherSection ) => {
-				if ( otherSection.id !== importSection.id ) {
-					otherSections.push( otherSection );
+				if ( otherSection.id !== this.id ) {
+					sections.push( otherSection );
 				}
 			} );
-			otherSections.sort( ( a, b ) => {
+			sections.sort( ( a, b ) => {
 				return a.priority() - b.priority();
 			} );
+			return sections;
+		},
 
-			for ( const otherSection of otherSections ) {
+		/**
+		 * Render details.
+		 */
+		renderDetails() {
+			const dl = this.headContainer.find( 'dl' );
+			for ( const otherSection of this.otherSections() ) {
 				const sectionControls = [];
 				for ( const control of otherSection.controls() ) {
-					if ( importSection.params.controls.has( control ) ) {
+					if ( this.params.controls.has( control ) ) {
 						sectionControls.push( control );
 					}
 				}
@@ -344,6 +314,58 @@ window.ampCustomizeControls = ( function( api, $ ) {
 					dl.append( dd );
 				}
 			}
+		},
+
+		/**
+		 * Attach events.
+		 *
+		 * Override the parent class's normal events from being added to instead add the relevant event for the special section.
+		 */
+		attachEvents() {
+			this.headContainer.find( 'button' ).on( 'click', () => {
+				this.importSelectedSettings();
+			} );
+		},
+
+		/**
+		 * Import the selected settings.
+		 */
+		importSelectedSettings() {
+			const importSection = this;
+			let remainingCheckboxes = 0;
+
+			importSection.headContainer.find( 'input[type=checkbox]' ).each( function() {
+				const checkbox = $( this );
+				if ( ! checkbox.prop( 'checked' ) ) {
+					remainingCheckboxes++;
+					return;
+				}
+
+				const control = api.control( checkbox.val() );
+				importControlSettings( control );
+				checkbox.closest( 'dd' ).remove();
+			} );
+
+			// Remove any childless dt's.
+			importSection.headContainer.find( 'dt' ).each( function() {
+				const dt = $( this );
+				if ( ! dt.next( 'dd' ).length ) {
+					dt.remove();
+				}
+			} );
+
+			if ( 0 === remainingCheckboxes ) {
+				importSection.active( false );
+			}
+		},
+
+		/**
+		 * Set up the UI for the section.
+		 */
+		ready() {
+			api.Section.prototype.ready.call( this );
+
+			this.renderDetails();
 		},
 	} );
 
