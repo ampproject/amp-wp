@@ -188,16 +188,38 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	}
 
 	/**
+	 * Handle special case of updating the "Display Site Title and Tagline" control.
+	 *
+	 * Because of some "juggling" in WordPress core, programmatically updating the value (probably related to double
+	 * data binding of Element and Setting values), updating this control by directly manipulating the Element instance
+	 * as opposed to the underlying Setting that it syncs with.
+	 *
+	 * @param {wp.customize.Control} control Control.
+	 * @see https://github.com/WordPress/wordpress-develop/blob/5.4.2/src/js/_enqueues/wp/customize/controls.js#L9030-L9050
+	 */
+	function populateDisplayHeaderTextControl( control ) {
+		if ( control.setting.id in component.data.activeThemeSettingImports ) {
+			control.element.set( 'blank' !== component.data.activeThemeSettingImports[ control.setting.id ] );
+		}
+	}
+
+	/**
 	 * Import settings for a control.
 	 *
 	 * @param {wp.customize.Control} control Control.
 	 */
 	function importControlSettings( control ) {
+		if ( 'display_header_text' === control.id ) {
+			populateDisplayHeaderTextControl( control );
+			return;
+		}
+
 		for ( const setting of Object.values( control.settings ) ) {
 			if ( setting.id in component.data.activeThemeSettingImports ) {
 				setting.set( component.data.activeThemeSettingImports[ setting.id ] );
 			}
 		}
+
 		if ( control.extended( api.UploadControl ) ) {
 			populateUploadControl( control );
 		} else if ( control.extended( api.HeaderControl ) ) {
