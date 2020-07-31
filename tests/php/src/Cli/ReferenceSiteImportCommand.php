@@ -257,7 +257,7 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 
 		populate_roles();
 
-		activate_plugin( 'amp/amp.php' );
+		WP_CLI::runcommand( 'plugin activate amp' );
 
 		wp_cache_flush();
 	}

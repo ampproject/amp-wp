@@ -18,9 +18,11 @@ final class ExportOptions implements ExportStep {
 	 */
 	const EXCLUDED_OPTIONS = [
 		'/^(_site)?_transient_.*$/',
+		'/^active_plugins$/',
 		'/^admin_email_lifespan$/',
 		'/^amp-options$/',
 		'/^amp_css_transient_monitor_time_series$/',
+		'/^astra-settings$/',
 		'/^_bp_.*$/',
 		'/^bp-(blogs-first-install|disable-account-deletion|disable-cover-image-uploads|disable-group-avatar-uploads|disable-group-cover-image-uploads|disable-profile-sync|emails-unsubscribe-salt)$/',
 		'/^_elementor_installed_time$/',
@@ -172,7 +174,7 @@ final class ExportOptions implements ExportStep {
 
 		return array_combine(
 			array_column( $options, 'option_name' ),
-			array_column( $options, 'option_value' )
+			array_map( 'maybe_unserialize', array_column( $options, 'option_value' ) )
 		);
 	}
 

@@ -7,12 +7,8 @@
 
 namespace AmpProject\AmpWP\Tests\Cli;
 
-use AmpProject\AmpWP\Tests\Cli\Export\ExportActivePlugins;
-use AmpProject\AmpWP\Tests\Cli\Export\ExportActiveThemes;
-use AmpProject\AmpWP\Tests\Cli\Export\ExportOptions;
+use AmpProject\AmpWP\Tests\Cli\Export;
 use AmpProject\AmpWP\Tests\Cli\Export\ExportResult;
-use AmpProject\AmpWP\Tests\Cli\Export\ExportWidgets;
-use AmpProject\AmpWP\Tests\Cli\Export\ExportWxrFile;
 use Exception;
 use WP_CLI;
 use WP_CLI_Command;
@@ -26,11 +22,12 @@ final class ReferenceSiteExportCommand extends WP_CLI_Command {
 	 * @var string
 	 */
 	const EXPORT_STEPS = [
-		ExportActiveThemes::class,
-		ExportActivePlugins::class,
-		ExportOptions::class,
-		ExportWidgets::class,
-		ExportWxrFile::class,
+		Export\ExportActiveThemes::class,
+		Export\ExportActivePlugins::class,
+		Export\ExportOptions::class,
+		Export\ExportCustomizerSettings::class,
+		Export\ExportWidgets::class,
+		Export\ExportWxrFile::class,
 	];
 
 	/**
