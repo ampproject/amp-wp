@@ -201,7 +201,7 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	];
 
 	/**
-	 * Mapping of control ID to the setting value which indicates the checkbox should *unchecked*.
+	 * Mapping of control ID to the setting value which indicates the checkbox should be unchecked.
 	 *
 	 * @type {Object}
 	 */
@@ -215,7 +215,7 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	 * Handle special case of updating certain checkbox controls.
 	 *
 	 * Because of some "juggling" in WordPress core, programmatically updating the value (probably related to double
-	 * data binding of Element and Setting values), updating this control by directly manipulating the Element instance
+	 * data binding of Element and Setting values) is not feasible. It is instead updated by directly manipulating the Element instance
 	 * as opposed to the underlying Setting that it syncs with.
 	 *
 	 * @param {wp.customize.Control} control Control.
