@@ -311,6 +311,7 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 
 		$option_setting    = $wp_customize->add_setting( 'some_option', [ 'type' => 'option' ] );
 		$theme_mod_setting = $wp_customize->add_setting( 'some_theme_mod', [ 'type' => 'theme_mod' ] );
+		$filter_setting    = $wp_customize->add_setting( new WP_Customize_Filter_Setting( $wp_customize, 'some_filter' ) );
 
 		$custom_css_setting = $wp_customize->get_setting( sprintf( 'custom_css[%s]', get_stylesheet() ) );
 		$this->assertInstanceOf( WP_Customize_Custom_CSS_Setting::class, $custom_css_setting );
@@ -318,13 +319,20 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		$nav_menu_location_setting = $wp_customize->get_setting( "nav_menu_locations[{$menu_location}]" );
 		$this->assertInstanceOf( WP_Customize_Setting::class, $nav_menu_location_setting );
 
-		// Ensure initial state and when no changes have been made.
+		// Ensure initial state.
 		$this->assertFalse( get_theme_mod( AMP_Template_Customizer::THEME_MOD_TIMESTAMPS_KEY ) );
+
+		// Ensure empty when no changes have been made.
 		$instance->store_modified_theme_mod_setting_timestamps();
 		$this->assertFalse( get_theme_mod( AMP_Template_Customizer::THEME_MOD_TIMESTAMPS_KEY ) );
 
 		// Ensure updating an option does not cause the theme_mod to be updated.
 		$wp_customize->set_post_value( $option_setting->id, 'foo' );
+		$instance->store_modified_theme_mod_setting_timestamps();
+		$this->assertFalse( get_theme_mod( AMP_Template_Customizer::THEME_MOD_TIMESTAMPS_KEY ) );
+
+		// Ensure updating a "filter setting" does not cause the theme_mod to be updated.
+		$wp_customize->set_post_value( $filter_setting->id, 'foo2' );
 		$instance->store_modified_theme_mod_setting_timestamps();
 		$this->assertFalse( get_theme_mod( AMP_Template_Customizer::THEME_MOD_TIMESTAMPS_KEY ) );
 

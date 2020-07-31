@@ -367,9 +367,13 @@ class AMP_Template_Customizer {
 		$modified_setting_ids = [];
 		foreach ( array_keys( $this->wp_customize->unsanitized_post_values() ) as $setting_id ) {
 			$setting = $this->wp_customize->get_setting( $setting_id );
+			if ( ! ( $setting instanceof WP_Customize_Setting ) || $setting instanceof WP_Customize_Filter_Setting ) {
+				continue;
+			}
+
 			if ( $setting instanceof WP_Customize_Custom_CSS_Setting ) {
 				$modified_setting_ids[] = $setting->id_data()['base']; // Remove theme slug from ID.
-			} elseif ( $setting instanceof WP_Customize_Setting && 'theme_mod' === $setting->type ) {
+			} elseif ( 'theme_mod' === $setting->type ) {
 				$modified_setting_ids[] = $setting->id;
 			}
 		}
