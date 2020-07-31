@@ -203,7 +203,7 @@ function PluginRow( { pluginKey, pluginDetails } ) {
 	);
 
 	return (
-		<tr>
+		<tr className={ pluginDetails.validation_errors.length ? 'has-validation-errors' : '' }>
 			<th className="column-status" scope="row">
 				<SelectControl
 					hideLabelFromVision={ true }

@@ -161,6 +161,23 @@
 	vertical-align: top;
 }
 
+#suppressed-plugins-table tbody tr.has-validation-errors {
+	background-color: #fef7f1;
+}
+
+#suppressed-plugins-table tbody tr > th.column-status {
+	border-left: solid 4px transparent;
+}
+
+#suppressed-plugins-table tbody tr.has-validation-errors > th.column-status {
+	border-color: #d54e21;
+}
+
+#suppressed-plugins-table tbody tr > th,
+#suppressed-plugins-table tbody tr > td {
+	box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
 #suppressed-plugins-table details > ul {
 	margin-left: 30px;
 	margin-top: 0.5em;
