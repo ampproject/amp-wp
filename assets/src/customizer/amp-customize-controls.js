@@ -305,11 +305,14 @@ window.ampCustomizeControls = ( function( api, $ ) {
 
 				for ( const control of sectionControls ) {
 					const dd = $( '<dd></dd>' );
-					const label = $( '<label></label>' );
+					const id = `amp-import-${ control.id }`;
 					const checkbox = $( '<input type=checkbox checked>' );
+					checkbox.attr( 'id', id );
 					checkbox.val( control.id );
-					label.append( checkbox );
-					label.append( document.createTextNode( ' ' + control.params.label ) );
+					const label = $( '<label></label>' );
+					label.attr( 'for', id );
+					label.html( control.params.label );
+					dd.append( checkbox );
 					dd.append( label );
 					dl.append( dd );
 				}
