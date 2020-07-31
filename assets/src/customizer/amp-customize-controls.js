@@ -234,6 +234,37 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	}
 
 	/**
+	 * Mapping of control ID to additional related settings.
+	 *
+	 * @type {Object}
+	 */
+	const controlRelatedSettings = {
+		accent_hue_active: [ 'accent_hue' ],
+	};
+
+	/**
+	 * Populate settings which are related to controls but not directly link.
+	 *
+	 * A good example of such a control is the accent_hue setting which is linked to a hue control. The hue control
+	 * lacks a label so it is not listed among the importable settings. However, when the Primary Color control is set
+	 * to "Custom" then the hue control is displayed.
+	 *
+	 * @param {wp.customize.Control} control
+	 */
+	function populateRelatedSettings( control ) {
+		if ( control.id in controlRelatedSettings ) {
+			const settings = [];
+			for ( const settingId of controlRelatedSettings[ control.id ] ) {
+				const setting = api( settingId );
+				if ( setting ) {
+					settings.push( setting );
+				}
+			}
+			importSettings( settings );
+		}
+	}
+
+	/**
 	 * Import settings if available.
 	 *
 	 * @param {wp.customize.Setting[]} settings Settings collection.
@@ -266,6 +297,8 @@ window.ampCustomizeControls = ( function( api, $ ) {
 		} else {
 			importSettings( Object.values( control.settings ) );
 		}
+
+		populateRelatedSettings( control );
 
 		// Manually update the UI for controls that don't react to programmatic setting updates.
 		if ( control.extended( api.UploadControl ) ) {

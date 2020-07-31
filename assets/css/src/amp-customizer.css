@@ -58,6 +58,6 @@
 	margin-bottom: 4px;
 }
 
-#customize-controls .control-section-amp_active_theme_settings_import > .accordion-section-title dd > input[type=checkbox] {
+#customize-controls .control-section-amp_active_theme_settings_import > .accordion-section-title dd > input[type="checkbox"] {
 	margin: 0 1ex 0 0;
 }
