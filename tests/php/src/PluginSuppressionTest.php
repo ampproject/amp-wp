@@ -67,6 +67,9 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 			'plugin_folder',
 			basename( AMP__DIR__ ) . '/' . MockPluginEnvironment::BAD_PLUGINS_DIR
 		);
+
+		// Work around issue with WP 5.5 compatibility where a failure occurs for undefined property: WP_Block_Type::$supports.
+		remove_filter( 'render_block', 'gutenberg_experimental_apply_classnames_and_styles' );
 	}
 
 	/**
