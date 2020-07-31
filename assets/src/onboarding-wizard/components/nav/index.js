@@ -41,7 +41,7 @@ export function Nav( { closeLink, finishLink } ) {
 	let nextLink;
 
 	if ( isLastPage && READER === themeSupport ) {
-		nextText = __( 'Customize AMP', 'amp' );
+		nextText = __( 'Customize Theme', 'amp' );
 		nextLink = ! savingDeveloperToolsOption && ! savingOptions ? addQueryArgs(
 			CUSTOMIZER_LINK,
 			'legacy' === readerTheme
