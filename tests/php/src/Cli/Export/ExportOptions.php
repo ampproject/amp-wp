@@ -88,6 +88,7 @@ final class ExportOptions implements ExportStep {
 		'/^upload_(path|space_check_disabled|url_path)$/',
 		'/^uploads_use_yearmonth_folders$/',
 		'/^users_can_register$/',
+		'/^widget_.*$/',
 		'/^woocommerce_(admin_notices|allow_bulk_remove_personal_data|allow_tracking|allowed_countries|anonymize_completed_orders|api_enabled|calc_discounts_sequentially|calc_taxes|cart_redirect_after_add|checkout_pay_endpoint|delete_inactive_accounts|demo_store|downloads_grant_access_after_payment|downloads_require_login|file_download_method|meta_box_errors|queue_flush_rewrite_rules|shipping_debug_mode|show_marketplace_suggestions)$/',
 		'/^woocommerce_(db_)?version$/',
 		'/^woocommerce_email_.*$/',

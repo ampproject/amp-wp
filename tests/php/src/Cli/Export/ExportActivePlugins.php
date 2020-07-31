@@ -53,7 +53,7 @@ final class ExportActivePlugins implements ExportStep {
 	 */
 	private function get_active_plugins() {
 		return array_map( static function ( $plugin ) {
-			$filename = basename( $plugin );
+			$filename = basename( dirname( $plugin ) );
 			return preg_replace( '/\.php$/', '', $filename );
 		}, get_option( 'active_plugins', [] ) );
 	}

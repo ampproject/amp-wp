@@ -11,6 +11,7 @@ use AmpProject\AmpWP\Tests\Cli\Export\ExportActivePlugins;
 use AmpProject\AmpWP\Tests\Cli\Export\ExportActiveThemes;
 use AmpProject\AmpWP\Tests\Cli\Export\ExportOptions;
 use AmpProject\AmpWP\Tests\Cli\Export\ExportResult;
+use AmpProject\AmpWP\Tests\Cli\Export\ExportWidgets;
 use AmpProject\AmpWP\Tests\Cli\Export\ExportWxrFile;
 use Exception;
 use WP_CLI;
@@ -28,6 +29,7 @@ final class ReferenceSiteExportCommand extends WP_CLI_Command {
 		ExportActiveThemes::class,
 		ExportActivePlugins::class,
 		ExportOptions::class,
+		ExportWidgets::class,
 		ExportWxrFile::class,
 	];
 
