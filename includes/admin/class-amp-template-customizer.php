@@ -80,7 +80,7 @@ class AMP_Template_Customizer {
 		$self = new self( $wp_customize, $reader_theme_loader );
 
 		$is_reader_mode   = ( AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
-		$has_reader_theme = ( ReaderThemes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME ) );
+		$has_reader_theme = ( ReaderThemes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME ) ); // @todo Verify that the theme actually exists.
 
 		if ( $is_reader_mode ) {
 			if ( $has_reader_theme ) {

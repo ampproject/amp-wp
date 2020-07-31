@@ -289,6 +289,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 	 * @see switch_theme() which ensures the new theme includes the old theme's theme mods.
 	 */
 	public function override_theme() {
+		$this->theme_overridden = false;
 		if ( ! $this->is_enabled() || ! $this->is_amp_request() ) {
 			return;
 		}

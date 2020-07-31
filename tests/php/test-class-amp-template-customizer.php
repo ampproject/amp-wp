@@ -9,6 +9,7 @@ use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\ReaderThemeLoader;
 use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 
 /**
  * Class Test_AMP_Template_Customizer
@@ -18,6 +19,8 @@ use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 
 	use AssertContainsCompatibility;
+
+	use PrivateAccess;
 
 	private $original_theme_directories;
 
@@ -219,6 +222,7 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		/** @var ReaderThemeLoader $reader_theme_loader */
 		$reader_theme_loader = Services::get( 'reader_theme_loader' );
 
+		$reader_theme_loader->override_theme();
 		$this->assertFalse( $reader_theme_loader->is_theme_overridden() );
 
 		$this->assertFalse( amp_is_canonical() );
@@ -363,6 +367,128 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		foreach ( get_theme_mod( AMP_Template_Customizer::THEME_MOD_TIMESTAMPS_KEY ) as $timestamp ) {
 			$this->assertGreaterThanOrEqual( time(), $timestamp );
 		}
+	}
+
+	/** @covers AMP_Template_Customizer::get_active_theme_import_settings() */
+	public function test_get_active_theme_import_settings() {
+		$active_theme_slug = 'twentynineteen';
+		$reader_theme_slug = 'twentytwenty';
+		if ( ! wp_get_theme( $active_theme_slug )->exists() || ! wp_get_theme( $reader_theme_slug )->exists() ) {
+			$this->markTestSkipped();
+		}
+
+		switch_theme( $active_theme_slug );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::READER_THEME, $reader_theme_slug );
+
+		// Set initial theme mods for active theme.
+		$menu_location = 'primary';
+		register_nav_menu( $menu_location, 'Primary' );
+		$menu_id = wp_create_nav_menu( 'Top' );
+		set_theme_mod( 'background_color', '60af88' );
+		set_theme_mod(
+			'nav_menu_locations',
+			[
+				$menu_location => $menu_id,
+			]
+		);
+		$background_color_value = '60af88';
+		$child_value            = 'baby';
+		update_option(
+			"theme_mods_{$active_theme_slug}",
+			[
+				'background_color'   => $background_color_value,
+				'family'             => [
+					'parent' => [
+						'child' => $child_value,
+					],
+				],
+				'nav_menu_locations' => [
+					$menu_location => $menu_id,
+				],
+			]
+		);
+		$custom_css_value = 'body { color: red }';
+		wp_update_custom_css_post( $custom_css_value );
+		$this->assertEqualSets(
+			[ 'background_color', 'nav_menu_locations', 'custom_css_post_id', 'family' ],
+			array_keys( get_option( "theme_mods_{$active_theme_slug}" ) )
+		);
+
+		// Switch to Reader theme.
+		/** @var ReaderThemeLoader $reader_theme_loader */
+		$reader_theme_loader    = Services::get( 'reader_theme_loader' );
+		$_GET[ amp_get_slug() ] = '1';
+		$reader_theme_loader->override_theme();
+		$this->assertTrue( $reader_theme_loader->is_theme_overridden() );
+		$this->assertEquals( $reader_theme_slug, get_stylesheet() );
+
+		// Initialize Customizer.
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$wp_customize = $this->get_customize_manager();
+		$instance     = AMP_Template_Customizer::init( $wp_customize );
+		add_theme_support( 'custom-background' );
+		$wp_customize->register_controls();
+		$wp_customize->nav_menus->customize_register();
+		$child_setting            = $wp_customize->add_setting( 'family[parent][child]' );
+		$background_color_setting = $wp_customize->get_setting( 'background_color' );
+		$this->assertInstanceOf( WP_Customize_Setting::class, $background_color_setting );
+		$nav_menu_location_setting = $wp_customize->get_setting( "nav_menu_locations[{$menu_location}]" );
+		$this->assertInstanceOf( WP_Customize_Setting::class, $nav_menu_location_setting );
+		$custom_css_setting = $wp_customize->get_setting( "custom_css[{$reader_theme_slug}]" );
+		$this->assertInstanceOf( WP_Customize_Custom_CSS_Setting::class, $custom_css_setting );
+
+		// Ensure initially populated settings to import.
+		$expected_active_theme_import_settings = [
+			$child_setting->id             => $child_value,
+			$nav_menu_location_setting->id => $menu_id,
+			$background_color_setting->id  => "#{$background_color_value}",
+			$custom_css_setting->id        => $custom_css_value,
+		];
+		$this->assertEquals(
+			$expected_active_theme_import_settings,
+			$this->call_private_method( $instance, 'get_active_theme_import_settings' )
+		);
+
+		// Update the timestamps in just the active theme, and this should not impact what is exported since the reader theme has no timestamps yet.
+		$active_theme_mods = get_option( "theme_mods_{$active_theme_slug}" );
+		$active_theme_mods[ AMP_Template_Customizer::THEME_MOD_TIMESTAMPS_KEY ] = array_fill_keys(
+			[ $nav_menu_location_setting->id, $background_color_setting->id, 'custom_css', $child_setting->id ],
+			time() - 1
+		);
+		update_option( "theme_mods_{$active_theme_slug}", $active_theme_mods );
+		$this->assertEquals(
+			$expected_active_theme_import_settings,
+			$this->call_private_method( $instance, 'get_active_theme_import_settings' )
+		);
+
+		// Set the timestamps for the Reader theme to be before the active theme, which will ensure the Active theme's settings still will export.
+		set_theme_mod(
+			AMP_Template_Customizer::THEME_MOD_TIMESTAMPS_KEY,
+			array_fill_keys(
+				[ $nav_menu_location_setting->id, $background_color_setting->id, 'custom_css', $child_setting->id ],
+				time() - 2
+			)
+		);
+		$this->assertEquals(
+			$expected_active_theme_import_settings,
+			$this->call_private_method( $instance, 'get_active_theme_import_settings' )
+		);
+
+		// Now update the Reader theme's timestamps to be after the Active theme. No settings should now be exported.
+		set_theme_mod(
+			AMP_Template_Customizer::THEME_MOD_TIMESTAMPS_KEY,
+			array_fill_keys(
+				[ $nav_menu_location_setting->id, $background_color_setting->id, 'custom_css', $child_setting->id ],
+				time() + 1
+			)
+		);
+		$this->assertEquals( [], $this->call_private_method( $instance, 'get_active_theme_import_settings' ) );
+	}
+
+	/** @covers AMP_Template_Customizer::render_setting_import_section_template() */
+	public function test_render_setting_import_section_template() {
+		$this->markTestIncomplete();
 	}
 
 	/** @covers AMP_Template_Customizer::add_legacy_customizer_scripts() */
