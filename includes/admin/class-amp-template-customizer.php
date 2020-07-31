@@ -419,6 +419,7 @@ class AMP_Template_Customizer {
 		unset(
 			$active_theme_mods['sidebars_widgets'],
 			$active_theme_mods['custom_css_post_id'],
+			$active_theme_mods['background_preset'], // Since a meta setting. When importing a background setting, will be set to 'custom'.
 			$active_theme_mods[ self::THEME_MOD_TIMESTAMPS_KEY ]
 		);
 

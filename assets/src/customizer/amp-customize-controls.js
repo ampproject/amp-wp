@@ -204,6 +204,50 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	}
 
 	/**
+	 * Import settings if available.
+	 *
+	 * @param {wp.customize.Setting[]} settings Settings collection.
+	 */
+	function importSettings( settings ) {
+		for ( const setting of settings ) {
+			if ( setting.id in component.data.activeThemeSettingImports ) {
+				setting.set( component.data.activeThemeSettingImports[ setting.id ] );
+			}
+		}
+	}
+
+	/**
+	 * Populate background controls.
+	 *
+	 * @see https://github.com/WordPress/wordpress-develop/blob/5.4.2/src/js/_enqueues/wp/customize/controls.js#L8943-L9028
+	 *
+	 * @param {wp.customize.Control} control Control.
+	 */
+	function populateBackgroundControls( control ) {
+		// Ensure all background settings are shown by ensuring custom preset is selected.
+		const backgroundPreset = api( 'background_preset' );
+		if ( backgroundPreset ) {
+			backgroundPreset.set( 'custom' );
+		}
+
+		switch ( control.id ) {
+			// The attachment and repeat controls must be handled the same way as in populateDisplayHeaderTextControl().
+			case 'background_attachment':
+				if ( control.setting.id in component.data.activeThemeSettingImports ) {
+					control.element.set( 'fixed' !== component.data.activeThemeSettingImports[ control.setting.id ] );
+				}
+				break;
+			case 'background_repeat':
+				if ( control.setting.id in component.data.activeThemeSettingImports ) {
+					control.element.set( 'no-repeat' !== component.data.activeThemeSettingImports[ control.setting.id ] );
+				}
+				break;
+			default:
+				importSettings( Object.values( control.settings ) );
+		}
+	}
+
+	/**
 	 * Import settings for a control.
 	 *
 	 * @param {wp.customize.Control} control Control.
@@ -211,19 +255,16 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	function importControlSettings( control ) {
 		if ( 'display_header_text' === control.id ) {
 			populateDisplayHeaderTextControl( control );
-			return;
-		}
+		} else if ( [ 'background_position', 'background_size', 'background_repeat', 'background_attachment' ].includes( control.id ) ) {
+			populateBackgroundControls( control );
+		} else {
+			importSettings( Object.values( control.settings ) );
 
-		for ( const setting of Object.values( control.settings ) ) {
-			if ( setting.id in component.data.activeThemeSettingImports ) {
-				setting.set( component.data.activeThemeSettingImports[ setting.id ] );
+			if ( control.extended( api.UploadControl ) ) {
+				populateUploadControl( control );
+			} else if ( control.extended( api.HeaderControl ) ) {
+				populateHeaderControl( control );
 			}
-		}
-
-		if ( control.extended( api.UploadControl ) ) {
-			populateUploadControl( control );
-		} else if ( control.extended( api.HeaderControl ) ) {
-			populateHeaderControl( control );
 		}
 	}
 
@@ -386,6 +427,7 @@ window.ampCustomizeControls = ( function( api, $ ) {
 			}
 		}
 
+		// @todo Remove background image settings if there is no background_image to import.
 		// Abort adding any UI if there are no settings to import.
 		if ( differingSettings.size === 0 ) {
 			return;
