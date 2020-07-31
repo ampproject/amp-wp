@@ -128,6 +128,10 @@
 	width: 150px;
 }
 
+#suppressed-plugins-table .column-status .components-base-control__field {
+	margin-bottom: 0;
+}
+
 #suppressed-plugins-table .column-status > select {
 	width: 100%;
 }
@@ -163,6 +167,9 @@
 #suppressed-plugins-table summary {
 	user-select: none;
 	cursor: pointer;
+}
+
+#suppressed-plugins-table .plugin-name {
 	line-height: 30px; /* To match .wp-core-ui select */
 }
 
@@ -176,7 +183,7 @@ li.error-kept {
 
 @media screen and (max-width: 782px) {
 
-	#suppressed-plugins-table summary {
+	#suppressed-plugins-table .plugin-name {
 		line-height: 40px; /* To match .wp-core-ui select */
 	}
 

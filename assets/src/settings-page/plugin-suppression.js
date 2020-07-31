@@ -197,7 +197,7 @@ function PluginRow( { pluginKey, pluginDetails } ) {
 	const isSuppressed = pluginKey in editedSuppressedPlugins && editedSuppressedPlugins[ pluginKey ] !== false;
 
 	const PluginName = () => (
-		<strong>
+		<strong className="plugin-name">
 			{ pluginDetails.Name }
 		</strong>
 	);
