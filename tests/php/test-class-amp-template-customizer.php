@@ -392,8 +392,10 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 				$menu_location => $menu_id,
 			]
 		);
-		$background_color_value = '60af88';
-		$child_value            = 'baby';
+		$background_color_value  = '60af88';
+		$child_value             = 'baby';
+		$background_image_value  = 'https://example.com/bg.jpg';
+		$background_repeat_value = 'repeat-y';
 		update_option(
 			"theme_mods_{$active_theme_slug}",
 			[
@@ -406,12 +408,14 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 				'nav_menu_locations' => [
 					$menu_location => $menu_id,
 				],
+				'background_image'   => $background_image_value,
+				'background_repeat'  => $background_repeat_value,
 			]
 		);
 		$custom_css_value = 'body { color: red }';
 		wp_update_custom_css_post( $custom_css_value );
 		$this->assertEqualSets(
-			[ 'background_color', 'nav_menu_locations', 'custom_css_post_id', 'family' ],
+			[ 'background_color', 'nav_menu_locations', 'custom_css_post_id', 'family', 'background_image', 'background_repeat' ],
 			array_keys( get_option( "theme_mods_{$active_theme_slug}" ) )
 		);
 
@@ -433,6 +437,10 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		$child_setting            = $wp_customize->add_setting( 'family[parent][child]' );
 		$background_color_setting = $wp_customize->get_setting( 'background_color' );
 		$this->assertInstanceOf( WP_Customize_Setting::class, $background_color_setting );
+		$background_image_setting = $wp_customize->get_setting( 'background_image' );
+		$this->assertInstanceOf( WP_Customize_Setting::class, $background_image_setting );
+		$background_repeat_setting = $wp_customize->get_setting( 'background_repeat' );
+		$this->assertInstanceOf( WP_Customize_Setting::class, $background_repeat_setting );
 		$nav_menu_location_setting = $wp_customize->get_setting( "nav_menu_locations[{$menu_location}]" );
 		$this->assertInstanceOf( WP_Customize_Setting::class, $nav_menu_location_setting );
 		$custom_css_setting = $wp_customize->get_setting( "custom_css[{$reader_theme_slug}]" );
@@ -444,16 +452,20 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 			$nav_menu_location_setting->id => $menu_id,
 			$background_color_setting->id  => "#{$background_color_value}",
 			$custom_css_setting->id        => $custom_css_value,
+			$background_image_setting->id  => $background_image_value,
+			$background_repeat_setting->id => $background_repeat_value,
 		];
 		$this->assertEquals(
 			$expected_active_theme_import_settings,
 			$this->call_private_method( $instance, 'get_active_theme_import_settings' )
 		);
 
+		$theme_mod_timestamp_keys = [ $nav_menu_location_setting->id, $background_color_setting->id, 'custom_css', $child_setting->id, $background_repeat_setting->id, $background_image_setting->id ];
+
 		// Update the timestamps in just the active theme, and this should not impact what is exported since the reader theme has no timestamps yet.
 		$active_theme_mods = get_option( "theme_mods_{$active_theme_slug}" );
 		$active_theme_mods[ AMP_Template_Customizer::THEME_MOD_TIMESTAMPS_KEY ] = array_fill_keys(
-			[ $nav_menu_location_setting->id, $background_color_setting->id, 'custom_css', $child_setting->id ],
+			$theme_mod_timestamp_keys,
 			time() - 1
 		);
 		update_option( "theme_mods_{$active_theme_slug}", $active_theme_mods );
@@ -466,10 +478,20 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		set_theme_mod(
 			AMP_Template_Customizer::THEME_MOD_TIMESTAMPS_KEY,
 			array_fill_keys(
-				[ $nav_menu_location_setting->id, $background_color_setting->id, 'custom_css', $child_setting->id ],
+				$theme_mod_timestamp_keys,
 				time() - 2
 			)
 		);
+		$this->assertEquals(
+			$expected_active_theme_import_settings,
+			$this->call_private_method( $instance, 'get_active_theme_import_settings' )
+		);
+
+		// Set the background_image to empty, which should prevent the background_repeat setting from being exported.
+		$active_theme_mods['background_image'] = '';
+		update_option( "theme_mods_{$active_theme_slug}", $active_theme_mods );
+		unset( $expected_active_theme_import_settings['background_repeat'] );
+		$expected_active_theme_import_settings['background_image'] = '';
 		$this->assertEquals(
 			$expected_active_theme_import_settings,
 			$this->call_private_method( $instance, 'get_active_theme_import_settings' )
@@ -479,7 +501,7 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		set_theme_mod(
 			AMP_Template_Customizer::THEME_MOD_TIMESTAMPS_KEY,
 			array_fill_keys(
-				[ $nav_menu_location_setting->id, $background_color_setting->id, 'custom_css', $child_setting->id ],
+				$theme_mod_timestamp_keys,
 				time() + 1
 			)
 		);
