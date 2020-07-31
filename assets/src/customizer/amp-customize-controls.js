@@ -205,12 +205,43 @@ window.ampCustomizeControls = ( function( api, $ ) {
 		}
 	}
 
-	api.sectionConstructor.amp_active_theme_settings_import = api.Section.extend( {
+	/**
+	 * Section to contain the active theme settings import functionality.
+	 *
+	 * This section is somewhat of a hack in that it has contentContainer and it cannot expand. It has no controls.
+	 * It is implemented as a section so that it will be rendered in the root Customizer panel in the same way that
+	 * the Themes panel is.
+	 *
+	 * @class    AmpActiveThemeSettingsImportSection
+	 * @augments wp.customize.Section
+	 */
+	const AmpActiveThemeSettingsImportSection = api.Section.extend( {
+
+		/**
+		 * Force section to be contextually active.
+		 *
+		 * This overrides the section's normal method to force the section to be active since normally the section
+		 * becomes deactivated if it has no controls or none of the controls are active.
+		 *
+		 * @return {boolean} Active.
+		 */
 		isContextuallyActive() {
 			return true;
 		},
+
+		/**
+		 * Override the expand method to prevent the section from being erroneously expanded.
+		 */
 		expand() {},
+
+		/**
+		 * Prevent a section's normal events from being added.
+		 */
 		attachEvents() {},
+
+		/**
+		 * Set up the UI for the section.
+		 */
 		ready() {
 			const importSection = this;
 			api.Section.prototype.ready.call( importSection );
@@ -294,6 +325,8 @@ window.ampCustomizeControls = ( function( api, $ ) {
 		},
 	} );
 
+	api.sectionConstructor.amp_active_theme_settings_import = AmpActiveThemeSettingsImportSection;
+
 	/**
 	 * Add ability to import settings from the active theme.
 	 */
@@ -325,7 +358,7 @@ window.ampCustomizeControls = ( function( api, $ ) {
 			return;
 		}
 
-		const section = new api.sectionConstructor.amp_active_theme_settings_import(
+		const section = new AmpActiveThemeSettingsImportSection(
 			'amp_settings_import',
 			{
 				title: __( 'Primary Theme Settings', 'amp' ),
