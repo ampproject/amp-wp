@@ -445,7 +445,7 @@ window.ampCustomizeControls = ( function( api, $ ) {
 		const controlsWithSettings = new Set();
 		api.control.each( ( control ) => {
 			for ( const setting of Object.values( control.settings ) ) {
-				if ( differingSettings.has( setting.id ) ) {
+				if ( differingSettings.has( setting.id ) && control.params.label ) {
 					controlsWithSettings.add( control );
 				}
 			}
