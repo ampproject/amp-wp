@@ -369,7 +369,7 @@ class AMP_Template_Customizer {
 			$setting = $this->wp_customize->get_setting( $setting_id );
 			if ( $setting instanceof WP_Customize_Custom_CSS_Setting ) {
 				$modified_setting_ids[] = $setting->id_data()['base']; // Remove theme slug from ID.
-			} elseif ( $setting instanceof WP_Customize_Setting ) {
+			} elseif ( $setting instanceof WP_Customize_Setting && 'theme_mod' === $setting->type ) {
 				$modified_setting_ids[] = $setting->id;
 			}
 		}

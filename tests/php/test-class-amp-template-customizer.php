@@ -293,6 +293,70 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		$this->assertEquals( 0, did_action( 'amp_customizer_enqueue_scripts' ) );
 	}
 
+	/** @covers AMP_Template_Customizer::store_modified_theme_mod_setting_timestamps() */
+	public function test_store_modified_theme_mod_setting_timestamps() {
+		if ( ! wp_get_theme( 'twentytwenty' )->exists() ) {
+			$this->markTestSkipped();
+		}
+
+		$menu_location = 'primary';
+		register_nav_menu( $menu_location, 'Primary' );
+
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		switch_theme( 'twentytwenty' );
+		$wp_customize = $this->get_customize_manager();
+		$wp_customize->register_controls();
+		$wp_customize->nav_menus->customize_register();
+		$instance = AMP_Template_Customizer::init( $wp_customize );
+
+		$option_setting    = $wp_customize->add_setting( 'some_option', [ 'type' => 'option' ] );
+		$theme_mod_setting = $wp_customize->add_setting( 'some_theme_mod', [ 'type' => 'theme_mod' ] );
+
+		$custom_css_setting = $wp_customize->get_setting( sprintf( 'custom_css[%s]', get_stylesheet() ) );
+		$this->assertInstanceOf( WP_Customize_Custom_CSS_Setting::class, $custom_css_setting );
+
+		$nav_menu_location_setting = $wp_customize->get_setting( "nav_menu_locations[{$menu_location}]" );
+		$this->assertInstanceOf( WP_Customize_Setting::class, $nav_menu_location_setting );
+
+		// Ensure initial state and when no changes have been made.
+		$this->assertFalse( get_theme_mod( AMP_Template_Customizer::THEME_MOD_TIMESTAMPS_KEY ) );
+		$instance->store_modified_theme_mod_setting_timestamps();
+		$this->assertFalse( get_theme_mod( AMP_Template_Customizer::THEME_MOD_TIMESTAMPS_KEY ) );
+
+		// Ensure updating an option does not cause the theme_mod to be updated.
+		$wp_customize->set_post_value( $option_setting->id, 'foo' );
+		$instance->store_modified_theme_mod_setting_timestamps();
+		$this->assertFalse( get_theme_mod( AMP_Template_Customizer::THEME_MOD_TIMESTAMPS_KEY ) );
+
+		// Ensure updating a theme_mod does cause the theme_mod to be updated.
+		$wp_customize->set_post_value( $theme_mod_setting->id, 'bar' );
+		$instance->store_modified_theme_mod_setting_timestamps();
+		$this->assertEqualSets(
+			[ $theme_mod_setting->id ],
+			array_keys( get_theme_mod( AMP_Template_Customizer::THEME_MOD_TIMESTAMPS_KEY ) )
+		);
+
+		// Ensure that setting a nav menu updates the timestamps.
+		$wp_customize->set_post_value( $nav_menu_location_setting->id, wp_create_nav_menu( 'Menu!' ) );
+		$instance->store_modified_theme_mod_setting_timestamps();
+		$this->assertEqualSets(
+			[ $theme_mod_setting->id, $nav_menu_location_setting->id ],
+			array_keys( get_theme_mod( AMP_Template_Customizer::THEME_MOD_TIMESTAMPS_KEY ) )
+		);
+
+		// Ensure that changing custom CSS also updates timestamps.
+		$wp_customize->set_post_value( $custom_css_setting->id, 'body { color:red }' );
+		$instance->store_modified_theme_mod_setting_timestamps();
+		$this->assertEqualSets(
+			[ $theme_mod_setting->id, $nav_menu_location_setting->id, 'custom_css' ],
+			array_keys( get_theme_mod( AMP_Template_Customizer::THEME_MOD_TIMESTAMPS_KEY ) )
+		);
+
+		foreach ( get_theme_mod( AMP_Template_Customizer::THEME_MOD_TIMESTAMPS_KEY ) as $timestamp ) {
+			$this->assertGreaterThanOrEqual( time(), $timestamp );
+		}
+	}
+
 	/** @covers AMP_Template_Customizer::add_legacy_customizer_scripts() */
 	public function test_add_legacy_customizer_scripts() {
 		$instance = AMP_Template_Customizer::init( $this->get_customize_manager() );
