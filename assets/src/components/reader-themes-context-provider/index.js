@@ -40,7 +40,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	const [ downloadingTheme, setDownloadingTheme ] = useState( false );
 	const [ downloadedTheme, setDownloadedTheme ] = useState( false );
 
-	const { editedOptions, savingOptions } = useContext( Options );
+	const { editedOptions, updateOptions, savingOptions } = useContext( Options );
 	const { reader_theme: readerTheme, theme_support: themeSupport } = editedOptions;
 
 	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
@@ -53,7 +53,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	 * The active reader theme.
 	 */
 	const selectedTheme = useMemo(
-		() => themes ? themes.find( ( { slug } ) => slug === readerTheme ) || { name: null } : { name: null },
+		() => themes ? themes.find( ( { slug } ) => slug === readerTheme ) || { name: null, availability: null } : { name: null, availability: null },
 		[ readerTheme, themes ],
 	);
 
@@ -62,6 +62,16 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	 * after settings have already been saved.
 	 */
 	const [ downloadingThemeError, setDownloadingThemeError ] = useState( null );
+
+	/**
+	 * If the currently selected theme is unavailable and not installable, unset the reader theme option. This will handle cases where
+	 * the reader theme stored in the options is removed and can no longer be installed.
+	 */
+	useEffect( () => {
+		if ( selectedTheme.availability === 'non-installable' ) {
+			updateOptions( { reader_theme: null } );
+		}
+	}, [ selectedTheme.availability, updateOptions ] );
 
 	/**
 	 * Downloads the selected reader theme, if necessary, when options are saved.
