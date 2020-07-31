@@ -108,7 +108,7 @@ final class ReaderThemes {
 		$themes = array_filter(
 			$themes,
 			static function( $theme ) {
-				return is_array( $theme ) && ! empty( $theme ) && ! empty( $theme['screenshot_url'] ); // Screenshots are required.
+				return is_array( $theme ) && ! empty( $theme );
 			}
 		);
 

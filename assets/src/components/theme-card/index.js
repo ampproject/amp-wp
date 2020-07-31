@@ -14,10 +14,11 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
+import './style.css';
+import MobileIcon from '../svg/mobile-icon.svg';
 import { Options } from '../options-context-provider';
 import { Selectable } from '../selectable';
 import { Phone } from '../phone';
-import './style.css';
 
 /**
  * A selectable card showing a theme in a list of themes.
@@ -48,14 +49,18 @@ export function ThemeCard( { description, ElementName = 'li', homepage, screensh
 		>
 			<label htmlFor={ id } className="theme-card__label">
 				<Phone>
-					<img
-						src={ screenshotUrl }
-						alt={ name }
-						height="2165"
-						width="1000"
-						loading="lazy"
-						decoding="async"
-					/>
+					{
+						screenshotUrl ? (
+							<img
+								src={ screenshotUrl }
+								alt={ name }
+								height="2165"
+								width="1000"
+								loading="lazy"
+								decoding="async"
+							/>
+						) : <MobileIcon />
+					}
 					{ disabled && (
 						<div className="theme-card__disabled-overlay">
 							{ __( 'Unavailable', 'amp' ) }
@@ -96,7 +101,7 @@ ThemeCard.propTypes = {
 	description: PropTypes.string.isRequired,
 	ElementName: PropTypes.string,
 	homepage: PropTypes.string.isRequired,
-	screenshotUrl: PropTypes.string.isRequired,
+	screenshotUrl: PropTypes.string,
 	slug: PropTypes.string.isRequired,
 	name: PropTypes.string.isRequired,
 	disabled: PropTypes.bool,
