@@ -350,7 +350,7 @@ class AMP_Template_Customizer {
 			'amp-customizer',
 			amp_get_asset_url( 'css/amp-customizer.css' ),
 			[],
-			$version
+			AMP__VERSION
 		);
 
 		wp_styles()->add_data( 'amp-customizer', 'rtl', 'replace' );
@@ -506,6 +506,9 @@ class AMP_Template_Customizer {
 		<script type="text/html" id="tmpl-customize-section-amp_active_theme_settings_import">
 			<li id="accordion-section-{{ data.id }}" class="accordion-section control-section control-section-{{ data.type }}">
 				<h3 class="accordion-section-title">
+					<button type="button" class="button button-secondary" aria-label="<?php esc_attr_e( 'Import settings', 'amp' ); ?>">
+						<?php echo esc_html( _ex( 'Import', 'theme', 'amp' ) ); ?>
+					</button>
 					<details>
 						<summary>{{ data.title }}</summary>
 						<div>
@@ -515,9 +518,6 @@ class AMP_Template_Customizer {
 							<dl></dl>
 						</div>
 					</details>
-					<button type="button" class="button button-secondary" aria-label="<?php esc_attr_e( 'Import settings', 'amp' ); ?>">
-						<?php echo esc_html( _ex( 'Import', 'theme', 'amp' ) ); ?>
-					</button>
 				</h3>
 				<ul class="accordion-section-content"></ul>
 			</li>

@@ -13,14 +13,13 @@
 }
 
 #customize-theme-controls .control-section-amp_active_theme_settings_import > .accordion-section-title > button {
+	float: right;
 	font-weight: normal;
 	margin-left: 12px;
-	align-self: baseline;
 }
 
 #customize-controls .control-section-amp_active_theme_settings_import > .accordion-section-title,
 #customize-controls .control-section-amp_active_theme_settings_import > .accordion-section-title:hover {
-	display: flex;
 	cursor: default;
 	background: #fff;
 	color: #555d66;
@@ -35,11 +34,11 @@
 
 #customize-controls .control-section-amp_active_theme_settings_import > .accordion-section-title details {
 	margin: 5px 0;
-	flex: auto;
 }
 
 #customize-controls .control-section-amp_active_theme_settings_import > .accordion-section-title summary {
 	cursor: pointer;
+	display: list-item;
 	font-weight: bold;
 }
 
