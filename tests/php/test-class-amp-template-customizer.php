@@ -488,7 +488,11 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 
 	/** @covers AMP_Template_Customizer::render_setting_import_section_template() */
 	public function test_render_setting_import_section_template() {
-		$this->markTestIncomplete();
+		$instance = AMP_Template_Customizer::init( $this->get_customize_manager() );
+		$this->assertStringContains(
+			'<script type="text/html" id="tmpl-customize-section-amp_active_theme_settings_import">',
+			get_echo( [ $instance, 'render_setting_import_section_template' ] )
+		);
 	}
 
 	/** @covers AMP_Template_Customizer::add_legacy_customizer_scripts() */
