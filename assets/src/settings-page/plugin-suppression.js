@@ -225,9 +225,7 @@ function PluginRow( { pluginKey, pluginDetails } ) {
 			<td className="column-plugin">
 				<ConditionalDetails
 					summary={ pluginDetails.PluginURI ? (
-						<a href={ pluginDetails.PluginURI } target="_blank" rel="noreferrer">
-							<PluginName />
-						</a>
+						<PluginName />
 					)
 						: <PluginName /> }
 				>
@@ -235,21 +233,19 @@ function PluginRow( { pluginKey, pluginDetails } ) {
 					{ [
 						pluginDetails.Author && (
 							<p className="plugin-author-uri" key={ `${ pluginKey }-details-author` }>
-								<small>
-									{ pluginDetails.AuthorURI ? (
-										<a href={ pluginDetails.AuthorURI } target="_blank" rel="noreferrer">
-											{
-												/* translators: placeholder is an author name. */
-												sprintf( __( 'By %s' ), pluginDetails.Author )
-											}
-										</a> )
-										: (
+								{ pluginDetails.AuthorURI ? (
+									<a href={ pluginDetails.AuthorURI } target="_blank" rel="noreferrer">
+										{
 											/* translators: placeholder is an author name. */
 											sprintf( __( 'By %s' ), pluginDetails.Author )
-										)
-									}
+										}
+									</a> )
+									: (
+										/* translators: placeholder is an author name. */
+										sprintf( __( 'By %s' ), pluginDetails.Author )
+									)
+								}
 
-								</small>
 							</p>
 						),
 						pluginDetails.Description && (
@@ -258,6 +254,11 @@ function PluginRow( { pluginKey, pluginDetails } ) {
 								className="plugin-description"
 								dangerouslySetInnerHTML={ { __html: autop( pluginDetails.Description ) } }
 							/>
+						),
+						pluginDetails.PluginURI && (
+							<a href={ pluginDetails.PluginURI } target="_blank" rel="noreferrer">
+								{ __( 'More details', 'amp' ) }
+							</a>
 						),
 
 					].filter( ( child ) => child ) }
