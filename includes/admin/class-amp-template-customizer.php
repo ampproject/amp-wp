@@ -423,6 +423,13 @@ class AMP_Template_Customizer {
 			$active_theme_mods[ self::THEME_MOD_TIMESTAMPS_KEY ]
 		);
 
+		// Avoid offering to import background image settings if no background image is set.
+		if ( empty( $active_theme_mods['background_image'] ) ) {
+			foreach ( [ 'background_position_x', 'background_position_y', 'background_size', 'background_repeat', 'background_attachment' ] as $setting_id ) {
+				unset( $active_theme_mods[ $setting_id ] );
+			}
+		}
+
 		// Map nav menus for importing.
 		if ( isset( $active_theme_mods['nav_menu_locations'] ) ) {
 			$nav_menu_locations = wp_map_nav_menu_locations(

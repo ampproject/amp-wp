@@ -189,6 +189,18 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	}
 
 	/**
+	 * Controls which are dependent on the background_image being set.
+	 *
+	 * @type {string[]}
+	 */
+	const backgroundImageDependentControls = [
+		'background_position',
+		'background_size',
+		'background_repeat',
+		'background_attachment',
+	];
+
+	/**
 	 * Mapping of control ID to the setting value which indicates the checkbox should *unchecked*.
 	 *
 	 * @type {Object}
@@ -242,7 +254,7 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	 */
 	function importControlSettings( control ) {
 		// Ensure all background settings are shown by ensuring custom preset is selected.
-		if ( [ 'background_position', 'background_size', 'background_repeat', 'background_attachment' ].includes( control.id ) ) {
+		if ( backgroundImageDependentControls.includes( control.id ) ) {
 			const backgroundPreset = api( 'background_preset' );
 			if ( backgroundPreset ) {
 				backgroundPreset.set( 'custom' );
@@ -342,12 +354,15 @@ window.ampCustomizeControls = ( function( api, $ ) {
 				for ( const control of sectionControls ) {
 					const dd = $( '<dd></dd>' );
 					const id = `amp-import-${ control.id }`;
+
 					const checkbox = $( '<input type=checkbox checked>' );
 					checkbox.attr( 'id', id );
 					checkbox.val( control.id );
+
 					const label = $( '<label></label>' );
 					label.attr( 'for', id );
 					label.html( control.params.label );
+
 					dd.append( checkbox );
 					dd.append( label );
 					dl.append( dd );
@@ -422,7 +437,6 @@ window.ampCustomizeControls = ( function( api, $ ) {
 			}
 		}
 
-		// @todo Remove background image settings if there is no background_image to import.
 		// Abort adding any UI if there are no settings to import.
 		if ( differingSettings.size === 0 ) {
 			return;
