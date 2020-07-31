@@ -188,18 +188,35 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	}
 
 	/**
-	 * Handle special case of updating the "Display Site Title and Tagline" control.
+	 * Mapping of control ID to the setting value which indicates the checkbox should *unchecked*.
+	 *
+	 * @type {Object}
+	 */
+	const checkboxControlElementValueMapping = {
+		display_header_text: 'blank',
+		background_attachment: 'fixed',
+		background_repeat: 'no-repeat',
+	};
+
+	/**
+	 * Handle special case of updating certain checkbox controls.
 	 *
 	 * Because of some "juggling" in WordPress core, programmatically updating the value (probably related to double
 	 * data binding of Element and Setting values), updating this control by directly manipulating the Element instance
 	 * as opposed to the underlying Setting that it syncs with.
 	 *
 	 * @param {wp.customize.Control} control Control.
-	 * @see https://github.com/WordPress/wordpress-develop/blob/5.4.2/src/js/_enqueues/wp/customize/controls.js#L9030-L9050
+	 * @see https://github.com/WordPress/wordpress-develop/blob/5.4.2/src/js/_enqueues/wp/customize/controls.js#L8943-L9050
 	 */
-	function populateDisplayHeaderTextControl( control ) {
-		if ( control.setting.id in component.data.activeThemeSettingImports ) {
-			control.element.set( 'blank' !== component.data.activeThemeSettingImports[ control.setting.id ] );
+	function populateCheckboxControlWithSyncedElement( control ) {
+		if (
+			control.id in checkboxControlElementValueMapping &&
+			'element' in control &&
+			control.setting.id in component.data.activeThemeSettingImports
+		) {
+			control.element.set(
+				checkboxControlElementValueMapping[ control.id ] !== component.data.activeThemeSettingImports[ control.setting.id ]
+			);
 		}
 	}
 
@@ -217,54 +234,30 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	}
 
 	/**
-	 * Populate background controls.
-	 *
-	 * @see https://github.com/WordPress/wordpress-develop/blob/5.4.2/src/js/_enqueues/wp/customize/controls.js#L8943-L9028
-	 *
-	 * @param {wp.customize.Control} control Control.
-	 */
-	function populateBackgroundControls( control ) {
-		// Ensure all background settings are shown by ensuring custom preset is selected.
-		const backgroundPreset = api( 'background_preset' );
-		if ( backgroundPreset ) {
-			backgroundPreset.set( 'custom' );
-		}
-
-		switch ( control.id ) {
-			// The attachment and repeat controls must be handled the same way as in populateDisplayHeaderTextControl().
-			case 'background_attachment':
-				if ( control.setting.id in component.data.activeThemeSettingImports ) {
-					control.element.set( 'fixed' !== component.data.activeThemeSettingImports[ control.setting.id ] );
-				}
-				break;
-			case 'background_repeat':
-				if ( control.setting.id in component.data.activeThemeSettingImports ) {
-					control.element.set( 'no-repeat' !== component.data.activeThemeSettingImports[ control.setting.id ] );
-				}
-				break;
-			default:
-				importSettings( Object.values( control.settings ) );
-		}
-	}
-
-	/**
 	 * Import settings for a control.
 	 *
 	 * @param {wp.customize.Control} control Control.
 	 */
 	function importControlSettings( control ) {
-		if ( 'display_header_text' === control.id ) {
-			populateDisplayHeaderTextControl( control );
-		} else if ( [ 'background_position', 'background_size', 'background_repeat', 'background_attachment' ].includes( control.id ) ) {
-			populateBackgroundControls( control );
+		// Ensure all background settings are shown by ensuring custom preset is selected.
+		if ( [ 'background_position', 'background_size', 'background_repeat', 'background_attachment' ].includes( control.id ) ) {
+			const backgroundPreset = api( 'background_preset' );
+			if ( backgroundPreset ) {
+				backgroundPreset.set( 'custom' );
+			}
+		}
+
+		if ( control.id in checkboxControlElementValueMapping ) {
+			populateCheckboxControlWithSyncedElement( control );
 		} else {
 			importSettings( Object.values( control.settings ) );
+		}
 
-			if ( control.extended( api.UploadControl ) ) {
-				populateUploadControl( control );
-			} else if ( control.extended( api.HeaderControl ) ) {
-				populateHeaderControl( control );
-			}
+		// Manually update the UI for controls that don't react to programatic setting updates.
+		if ( control.extended( api.UploadControl ) ) {
+			populateUploadControl( control );
+		} else if ( control.extended( api.HeaderControl ) ) {
+			populateHeaderControl( control );
 		}
 	}
 
