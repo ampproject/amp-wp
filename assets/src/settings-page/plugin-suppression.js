@@ -256,7 +256,7 @@ function PluginRow( { pluginKey, pluginDetails } ) {
 							/>
 						),
 						pluginDetails.PluginURI && (
-							<a href={ pluginDetails.PluginURI } target="_blank" rel="noreferrer">
+							<a href={ pluginDetails.PluginURI } target="_blank" rel="noreferrer" key={ `${ pluginKey }-details-plugin-uri` }>
 								{ __( 'More details', 'amp' ) }
 							</a>
 						),
