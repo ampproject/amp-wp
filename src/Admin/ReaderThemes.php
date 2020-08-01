@@ -239,6 +239,7 @@ final class ReaderThemes {
 			}
 
 			ob_start(); // Prevent request_filesystem_credentials() from outputting the request-filesystem-credentials-form.
+			require_once ABSPATH . 'wp-admin/includes/template.php'; // Needed for submit_button().
 			$this->can_install_themes = true === ( new WP_Upgrader() )->fs_connect( [ get_theme_root() ] );
 			ob_clean();
 		}
