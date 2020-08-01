@@ -122,6 +122,14 @@ SuppressedPluginVersion.propTypes = {
  * @param {Array} props.errors
  */
 function ValidationErrorDetails( { errors } ) {
+	if ( errors.length === 0 ) {
+		return (
+			<p>
+				{ __( 'No validation errors yet detected.', 'amp' ) }
+			</p>
+		);
+	}
+
 	return (
 		<details>
 			<summary>
@@ -189,13 +197,13 @@ function PluginRow( { pluginKey, pluginDetails } ) {
 	const isSuppressed = pluginKey in editedSuppressedPlugins && editedSuppressedPlugins[ pluginKey ] !== false;
 
 	const PluginName = () => (
-		<strong>
+		<strong className="plugin-name">
 			{ pluginDetails.Name }
 		</strong>
 	);
 
 	return (
-		<tr>
+		<tr className={ classnames( { 'has-validation-errors': pluginDetails.validation_errors.length } ) }>
 			<th className="column-status" scope="row">
 				<SelectControl
 					hideLabelFromVision={ true }
@@ -217,9 +225,7 @@ function PluginRow( { pluginKey, pluginDetails } ) {
 			<td className="column-plugin">
 				<ConditionalDetails
 					summary={ pluginDetails.PluginURI ? (
-						<a href={ pluginDetails.PluginURI } target="_blank" rel="noreferrer">
-							<PluginName />
-						</a>
+						<PluginName />
 					)
 						: <PluginName /> }
 				>
@@ -227,21 +233,19 @@ function PluginRow( { pluginKey, pluginDetails } ) {
 					{ [
 						pluginDetails.Author && (
 							<p className="plugin-author-uri" key={ `${ pluginKey }-details-author` }>
-								<small>
-									{ pluginDetails.AuthorURI ? (
-										<a href={ pluginDetails.AuthorURI } target="_blank" rel="noreferrer">
-											{
-												/* translators: placeholder is an author name. */
-												sprintf( __( 'By %s' ), pluginDetails.Author )
-											}
-										</a> )
-										: (
+								{ pluginDetails.AuthorURI ? (
+									<a href={ pluginDetails.AuthorURI } target="_blank" rel="noreferrer">
+										{
 											/* translators: placeholder is an author name. */
 											sprintf( __( 'By %s' ), pluginDetails.Author )
-										)
-									}
+										}
+									</a> )
+									: (
+										/* translators: placeholder is an author name. */
+										sprintf( __( 'By %s' ), pluginDetails.Author )
+									)
+								}
 
-								</small>
 							</p>
 						),
 						pluginDetails.Description && (
@@ -250,6 +254,11 @@ function PluginRow( { pluginKey, pluginDetails } ) {
 								className="plugin-description"
 								dangerouslySetInnerHTML={ { __html: autop( pluginDetails.Description ) } }
 							/>
+						),
+						pluginDetails.PluginURI && (
+							<a href={ pluginDetails.PluginURI } target="_blank" rel="noreferrer" key={ `${ pluginKey }-details-plugin-uri` }>
+								{ __( 'More details', 'amp' ) }
+							</a>
 						),
 
 					].filter( ( child ) => child ) }
@@ -315,7 +324,7 @@ export function PluginSuppression() {
 			initialOpen={ false }
 		>
 			<p>
-				{ __( 'When a plugin adds markup which is invalid on AMP pages, you have two options: you can review the validation error, determine that the invalid markup is not needed, and let the AMP plugin remove it. Alternatively, you can suppress the offending plugin from running on AMP pages. Below is the list of active plugins which have caused validation issues.', 'amp' ) }
+				{ __( 'When a plugin adds markup that is not allowed in AMP you may let the AMP plugin remove it, or you may suppress the plugin from running on AMP pages. The following list includes all active plugins on your site, with any of those detected to be generating invalid AMP markup appearing first.', 'amp' ) }
 			</p>
 			<table id="suppressed-plugins-table" className="wp-list-table widefat fixed striped">
 				<thead>

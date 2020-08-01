@@ -302,40 +302,18 @@ final class PluginSuppression implements Service, Registerable {
 	}
 
 	/**
-	 * Get suppressible plugin slugs.
+	 * Provides a keyed array of active plugins with keys being slugs and values being plugin info plus validation error details.
 	 *
-	 * @return string[] Plugin slugs which are suppressible.
-	 */
-	private function get_suppressible_plugins() {
-		$errors_by_source        = AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source();
-		$erroring_plugin_slugs   = isset( $errors_by_source['plugin'] ) ? array_keys( $errors_by_source['plugin'] ) : [];
-		$suppressed_plugin_slugs = array_keys( AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS ) );
-		$active_plugin_slugs     = array_keys( $this->plugin_registry->get_plugins( true ) );
-
-		// The suppressible plugins are the set of plugins which are erroring and/or suppressed, which are also active.
-		return array_unique(
-			array_intersect(
-				array_merge( $erroring_plugin_slugs, $suppressed_plugin_slugs ),
-				$active_plugin_slugs
-			)
-		);
-	}
-
-	/**
-	 * Provides a keyed array of suppressible plugins with keys being slugs and values being plugin info plus validation error details.
+	 * Plugins are sorted by validation error count, in descending order.
 	 *
-	 * @return array
+	 * @return array Plugins.
 	 */
 	public function get_suppressible_plugins_with_details() {
-		$plugins = array_intersect_key( // Note that wp_array_slice_assoc() doesn't preserve sort order.
-			$this->plugin_registry->get_plugins( true ),
-			array_fill_keys( $this->get_suppressible_plugins(), true )
-		);
-
-		foreach ( array_keys( $plugins ) as $key ) {
-			$plugins[ $key ]['validation_errors'] = $this->get_sorted_plugin_validation_errors( $key );
+		$plugins = [];
+		foreach ( $this->plugin_registry->get_plugins( true ) as $slug => $plugin ) {
+			$plugin['validation_errors'] = $this->get_sorted_plugin_validation_errors( $slug );
+			$plugins[ $slug ]            = $plugin;
 		}
-
 		return $plugins;
 	}
 
