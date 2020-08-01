@@ -238,7 +238,9 @@ final class ReaderThemes {
 				require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 			}
 
+			ob_start(); // Prevent request_filesystem_credentials() from outputting the request-filesystem-credentials-form.
 			$this->can_install_themes = true === ( new WP_Upgrader() )->fs_connect( [ get_theme_root() ] );
+			ob_clean();
 		}
 
 		if ( ! $this->can_install_themes ) {
