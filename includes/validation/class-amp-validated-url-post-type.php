@@ -1250,7 +1250,7 @@ class AMP_Validated_URL_Post_Type {
 				}
 				$stylesheets = json_decode( get_post_meta( $post->ID, '_amp_stylesheets', true ), true );
 				if ( ! is_array( $stylesheets ) || ! $style_custom_cdata_spec ) {
-					echo '?';
+					echo esc_html( _x( 'n/a', 'CSS usage not available', 'amp' ) );
 				} else {
 					$total_size = 0;
 					foreach ( $stylesheets as $stylesheet ) {
@@ -2201,7 +2201,13 @@ class AMP_Validated_URL_Post_Type {
 		if ( empty( $stylesheets ) ) {
 			printf(
 				'<p><em>%s</em></p>',
-				esc_html__( 'No stylesheet data available. Please try re-checking this URL.', 'amp' )
+				wp_kses_post(
+					sprintf(
+						/* translators: placeholder is URL to recheck the post */
+						__( 'Stylesheet information for this URL is no longer available. Such data is automatically deleted after a week to reduce database storage. It is of little value to store long-term given that it becomes stale as themes and plugins are updated. To obtain the latest stylesheet information, <a href="%s">recheck this URL</a>.', 'amp' ),
+						esc_url( self::get_recheck_url( $post ) . '#amp_stylesheets' )
+					)
+				)
 			);
 			return;
 		}
