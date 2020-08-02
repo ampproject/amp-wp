@@ -792,7 +792,6 @@ class AMP_Validation_Error_Taxonomy {
 		if ( get_taxonomy( self::TAXONOMY_SLUG )->show_in_menu ) {
 			add_action( 'admin_menu', [ __CLASS__, 'add_admin_menu_validation_error_item' ] );
 		}
-		add_action( 'parse_term_query', [ __CLASS__, 'parse_post_php_term_query' ] );
 		add_filter( 'manage_' . self::TAXONOMY_SLUG . '_custom_column', [ __CLASS__, 'filter_manage_custom_columns' ], 10, 3 );
 		add_filter( 'manage_' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG . '_sortable_columns', [ __CLASS__, 'add_single_post_sortable_columns' ] );
 		add_filter( 'posts_where', [ __CLASS__, 'filter_posts_where_for_validation_error_status' ], 10, 2 );
@@ -1674,28 +1673,6 @@ class AMP_Validation_Error_Taxonomy {
 					$submenu_item[0] = $menu_item_label;
 				}
 			}
-		}
-	}
-
-	/**
-	 * Parses the term query on post.php pages (single error URL).
-	 *
-	 * This post.php page for amp_validated_url is more like an edit-tags.php page,
-	 * in that it has a WP_Terms_List_Table of terms (of type amp_validation_error).
-	 * So this needs to only show the terms (errors) associated with this amp_validated_url post.
-	 *
-	 * @param WP_Term_Query $wp_term_query Instance of WP_Term_Query.
-	 */
-	public static function parse_post_php_term_query( $wp_term_query ) {
-		global $pagenow;
-		if ( ! is_admin() || 'post.php' !== $pagenow || ! isset( $_GET['post'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			return;
-		}
-
-		// Only set the query var if this is the validated URL post type.
-		$post_id = (int) $_GET['post']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG === get_post_type( $post_id ) ) {
-			$wp_term_query->query_vars['object_ids'] = $post_id;
 		}
 	}
 
