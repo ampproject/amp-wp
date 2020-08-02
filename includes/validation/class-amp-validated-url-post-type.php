@@ -939,6 +939,45 @@ class AMP_Validated_URL_Post_Type {
 	}
 
 	/**
+	 * Delete batch of stylesheets postmeta.
+	 *
+	 * Given that parsed CSS can be quite large (250KB+) and is not de-duplicated across each validated URL, it is important
+	 * to not store the stylesheet data indefinitely in order to not excessively bloat the database. The reality is that
+	 * keeping around the parsed stylesheet data is of little value given that it will quickly go stale as themes and
+	 * plugins are updated.
+	 *
+	 * @since 2.0
+	 *
+	 * @param int          $count  Count of batch size to delete. Accepts strtotime()-compatible string, or array of 'year', 'month', 'day' values.
+	 * @param string|array $before Date before which to find amp_validated_url posts to delete.
+	 * @return int Count of postmeta that were deleted..
+	 */
+	public static function delete_stylesheets_postmeta_batch( $count, $before ) {
+		$deleted = 0;
+		$query   = new WP_Query(
+			[
+				'post_type'      => self::POST_TYPE_SLUG,
+				'meta_key'       => self::STYLESHEETS_POST_META_KEY,
+				'date_query'     => [
+					[
+						'before' => $before,
+					],
+				],
+				'fields'         => 'ids',
+				'orderby'        => 'date',
+				'order'          => 'ASC',
+				'posts_per_page' => $count,
+			]
+		);
+		foreach ( $query->get_posts() as $post_id ) {
+			if ( delete_post_meta( $post_id, self::STYLESHEETS_POST_META_KEY ) ) {
+				$deleted++;
+			}
+		}
+		return $deleted;
+	}
+
+	/**
 	 * Get recent validation errors by source.
 	 *
 	 * @since 2.0
