@@ -25,15 +25,15 @@ import { Done } from '../../../components/svg/done';
  */
 function getDescription( mode ) {
 	switch ( mode ) {
-		case 'reader':
-			return __( 'Your site is using Reader mode. The AMP version of pages on your site will be served using the Reader theme you have selected (shown to the right), while pages for the non-AMP version of your site will be served using your primary theme.', 'amp' );
-
 		case 'standard':
-			return __( 'Your site is using Standard mode (AMP-first). All canonical URLs are AMP by default. You can still opt out of AMP for specific content types and templates from the AMP settings screen. Depending on the theme and plugins you are using, development work may be required to maintain your site’s AMP compatibility.', 'amp' );
+			return __( 'Your site is ready to serve AMP pages to your users! In Standard mode (AMP-first) all canonical URLs are AMP by default. You can still opt out of AMP for specific content types and templates from the AMP settings screen. Depending on the theme and plugins you are using, development work may be required to maintain your site’s AMP compatibility.', 'amp' );
 
 		case 'transitional':
-			return __( 'Your site is using Transitional mode. Pages for both the AMP and non-AMP versions of your site will be served using your currently active theme. With further development work to address AMP-compatibility issues in your themes and plugins, your site can be made fully AMP-first.', 'amp' );
+			return __( 'Your site is ready to serve AMP pages to your users! In Transitional mode both the AMP and non-AMP versions of your site will be served using your currently active theme. With further development work to address AMP-compatibility issues in your themes and plugins, your site can be made fully AMP-first.', 'amp' );
 
+		case 'reader':
+			return __( 'Your site is ready to serve AMP pages to your users! In Reader mode the AMP version of your site will be served using the Reader theme you have selected (shown to the right), while pages for the non-AMP version of your site will be served using your primary theme. As a last step, make sure you tailor the Reader theme as needed using the Customizer.', 'amp' );
+	
 		default:
 			return '';
 	}
