@@ -2480,7 +2480,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertEquals( $r['url'], AMP_Validated_URL_Post_Type::get_url_from_post( $r['post_id'] ) );
 		$this->assertEquals( $php_error, json_decode( get_post_meta( $r['post_id'], '_amp_php_fatal_error', true ), true ) );
 		$this->assertEquals( $queried_object, get_post_meta( $r['post_id'], '_amp_queried_object', true ) );
-		$this->assertEquals( $stylesheets, json_decode( get_post_meta( $r['post_id'], '_amp_stylesheets', true ), true ) );
+		$this->assertEquals( $stylesheets, json_decode( get_post_meta( $r['post_id'], AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY, true ), true ) );
 
 		$updated_validated_url = home_url( '/bar/' );
 		$previous_post_id      = $r['post_id'];

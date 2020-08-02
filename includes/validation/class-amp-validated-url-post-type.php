@@ -28,6 +28,13 @@ class AMP_Validated_URL_Post_Type {
 	const POST_TYPE_SLUG = 'amp_validated_url';
 
 	/**
+	 * Postmeta key for storing stylesheet data.
+	 *
+	 * @var string
+	 */
+	const STYLESHEETS_POST_META_KEY = '_amp_stylesheets';
+
+	/**
 	 * The action to recheck URLs for AMP validity.
 	 *
 	 * @var string
@@ -915,7 +922,7 @@ class AMP_Validated_URL_Post_Type {
 		}
 		if ( isset( $args['stylesheets'] ) ) {
 			// Note that json_encode() is being used here because wp_slash() will coerce scalar values to strings.
-			update_post_meta( $post_id, '_amp_stylesheets', wp_slash( wp_json_encode( $args['stylesheets'] ) ) );
+			update_post_meta( $post_id, self::STYLESHEETS_POST_META_KEY, wp_slash( wp_json_encode( $args['stylesheets'] ) ) );
 		}
 		if ( isset( $args['php_fatal_error'] ) ) {
 			if ( empty( $args['php_fatal_error'] ) ) {
@@ -1248,7 +1255,7 @@ class AMP_Validated_URL_Post_Type {
 						$style_custom_cdata_spec = $spec_rule[ AMP_Rule_Spec::CDATA ];
 					}
 				}
-				$stylesheets = json_decode( get_post_meta( $post->ID, '_amp_stylesheets', true ), true );
+				$stylesheets = json_decode( get_post_meta( $post->ID, self::STYLESHEETS_POST_META_KEY, true ), true );
 				if ( ! is_array( $stylesheets ) || ! $style_custom_cdata_spec ) {
 					echo esc_html( _x( 'n/a', 'CSS usage not available', 'amp' ) );
 				} else {
@@ -2197,7 +2204,7 @@ class AMP_Validated_URL_Post_Type {
 	 * @return void
 	 */
 	public static function print_stylesheets_meta_box( $post ) {
-		$stylesheets = get_post_meta( $post->ID, '_amp_stylesheets', true );
+		$stylesheets = get_post_meta( $post->ID, self::STYLESHEETS_POST_META_KEY, true );
 		if ( empty( $stylesheets ) ) {
 			printf(
 				'<p><em>%s</em></p>',
