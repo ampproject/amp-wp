@@ -33,7 +33,6 @@ function getDescription( mode ) {
 
 		case 'reader':
 			return __( 'Your site is ready to serve AMP pages to your users! In Reader mode the AMP version of your site will be served using the Reader theme you have selected (shown to the right), while pages for the non-AMP version of your site will be served using your primary theme. As a last step, make sure you tailor the Reader theme as needed using the Customizer.', 'amp' );
-	
 		default:
 			return '';
 	}
