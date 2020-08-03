@@ -37,7 +37,6 @@ export function ReaderThemeCarousel() {
 
 	/** @type {Theme[]} themes */
 	const { currentTheme, fetchingThemes, selectedTheme, themes } = useContext( ReaderThemes );
-
 	const [ includeUnavailableThemes, setIncludeUnavailableThemes ] = useState( false );
 
 	// Separate available themes (both installed and installable) from those that need to be installed manually.

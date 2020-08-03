@@ -14,6 +14,6 @@
 	--font-noto: "Noto Sans", sans-serif;
 	--font-poppins: poppins, sans-serif;
 	--color-valid: #46b450;
-	--color-invalid: #dc3232;
+	--amp-settings-color-invalid: #dc3232;
 	--color-gray-medium: rgba(0, 0, 0, 0.54);
 }

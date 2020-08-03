@@ -115,6 +115,10 @@
 	border-top: 1px solid var(--amp-settings-color-border);
 }
 
+.amp-drawer__panel-body-inner details {
+	margin-bottom: 1.5rem;
+}
+
 .template-mode-selection__details p {
 	font-size: 14px;
 	line-height: 1.85;
