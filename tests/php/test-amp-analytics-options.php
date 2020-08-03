@@ -97,7 +97,10 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 			Option::ANALYTICS,
 			[
 				'__new__-0' => compact( 'type', 'config' ),
-				'__new__-1' => compact( 'type', 'config2' ),
+				'__new__-1' => [
+					'type'   => $type,
+					'config' => '{"good": "good"}',
+				],
 			]
 		);
 	}
