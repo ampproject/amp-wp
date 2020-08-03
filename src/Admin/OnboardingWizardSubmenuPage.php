@@ -232,7 +232,7 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 				'name'            => $theme->get( 'Name' ),
 				'description'     => $theme->get( 'Description' ),
 				'is_reader_theme' => $is_reader_theme,
-				'screenshot'      => $theme->get_screenshot(),
+				'screenshot'      => $theme->get_screenshot() ?: null,
 				'url'             => $theme->get( 'ThemeURI' ),
 			],
 			'FINISH_LINK'                        => $exit_link,

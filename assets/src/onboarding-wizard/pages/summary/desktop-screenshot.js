@@ -12,6 +12,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { Desktop } from '../../components/desktop';
+import DesktopIcon from '../../../components/svg/desktop-icon.svg';
 
 export function DesktopScreenshot( { screenshot, name, description, url } ) {
 	return (
@@ -19,14 +20,18 @@ export function DesktopScreenshot( { screenshot, name, description, url } ) {
 
 			<div className="grid grid-1-2 summary-screenshot">
 				<Desktop>
-					<img
-						src={ screenshot }
-						alt={ name }
-						loading="lazy"
-						decoding="async"
-						height="900"
-						width="1200"
-					/>
+					{
+						screenshot ? (
+							<img
+								src={ screenshot }
+								alt={ name }
+								loading="lazy"
+								decoding="async"
+								height="900"
+								width="1200"
+							/>
+						) : <DesktopIcon />
+					}
 				</Desktop>
 				<div>
 					<h3>

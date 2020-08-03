@@ -20,6 +20,7 @@ import { IconMobile } from '../../../components/svg/icon-mobile';
 import { Options } from '../../../components/options-context-provider';
 import { RedirectToggle } from '../../../components/redirect-toggle';
 import { ReaderThemes } from '../../../components/reader-themes-context-provider';
+import DesktopIcon from '../../../components/svg/desktop-icon.svg';
 import { SummaryHeader } from './summary-header';
 
 /**
@@ -57,14 +58,18 @@ export function Reader( { currentTheme } ) {
 						</AMPInfo>
 
 						<Desktop>
-							<img
-								src={ currentTheme.screenshot }
-								alt={ currentTheme.name }
-								loading="lazy"
-								decoding="async"
-								height="900"
-								width="1200"
-							/>
+							{
+								currentTheme.screenshot ? (
+									<img
+										src={ currentTheme.screenshot }
+										alt={ currentTheme.name }
+										loading="lazy"
+										decoding="async"
+										height="900"
+										width="1200"
+									/>
+								) : <DesktopIcon />
+							}
 
 						</Desktop>
 

@@ -276,7 +276,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 				'name'            => $theme->get( 'Name' ),
 				'description'     => $theme->get( 'Description' ),
 				'is_reader_theme' => $is_reader_theme,
-				'screenshot'      => $theme->get_screenshot(),
+				'screenshot'      => $theme->get_screenshot() ?: null,
 				'url'             => $theme->get( 'ThemeURI' ),
 			],
 			'OPTIONS_REST_PATH'          => '/amp/v1/options',
