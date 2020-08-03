@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useContext, useEffect, useRef, useState, useCallback } from '@wordpress/element';
+import { useContext, useEffect, useRef, useState, useCallback, useMemo } from '@wordpress/element';
 import { Icon, plus, trash } from '@wordpress/icons';
 import { Button, TextControl, PanelRow, BaseControl } from '@wordpress/components';
 
@@ -17,7 +17,26 @@ import { Button, TextControl, PanelRow, BaseControl } from '@wordpress/component
 import { AMPDrawer } from '../components/amp-drawer';
 import { Options } from '../components/options-context-provider';
 
+/**
+ * Prefix for the temporary ID assigned to new entries. Entries receive their permanent ID when saved to the database.
+ */
 const NEW_ENTRY_KEY_PREFIX = '__new__';
+
+/**
+ * Provides a unique temporary key for new entries. Will be replaced with a key generated on the backend when settings are saved.
+ *
+ * @param {string} prefix The prefix for new keys.
+ */
+function useUniqueNewKey( prefix = NEW_ENTRY_KEY_PREFIX ) {
+	const [ currentIndex, setCurrentIndex ] = useState( 0 );
+
+	const getNewKey = useCallback( () => {
+		setCurrentIndex( ( oldIndex ) => oldIndex + 1 );
+		return `${ prefix }-${ currentIndex }`;
+	}, [ currentIndex, prefix ] );
+
+	return getNewKey;
+}
 
 /**
  * Component for a single analytics entry.
@@ -30,20 +49,26 @@ const NEW_ENTRY_KEY_PREFIX = '__new__';
  * @param {string} props.config The config JSON string.
  */
 function AnalyticsEntry( { entryId = '', onChange, onDelete, type = '', config = '{}' } ) {
-	let entrySlug, analyticsTitle;
-
 	const isExistingEntry = 0 !== entryId.indexOf( NEW_ENTRY_KEY_PREFIX );
-	if ( isExistingEntry ) {
-		entrySlug = sprintf(
-			'%1$s%2$s',
-			type ? type + '-' : '',
-			entryId.substr( entryId.length - 6 ),
-		);
-		/* translators: %s: the entry slug. */
-		analyticsTitle = sprintf( __( 'Analytics: %s', 'amp' ), entrySlug );
-	} else {
-		analyticsTitle = __( 'Add new entry:', 'amp' );
-	}
+
+	const { entrySlug, analyticsTitle } = useMemo( () => {
+		if ( isExistingEntry ) {
+			return {
+				entrySlug: sprintf(
+					'%1$s%2$s',
+					type ? type + '-' : '',
+					entryId.substr( entryId.length - 6 ),
+				),
+				/* translators: %s: the entry slug. */
+				analyticsTitle: sprintf( __( 'Analytics: %s', 'amp' ), entrySlug ),
+			};
+		}
+
+		return {
+			entrySlug: '',
+			analyticsTitle: __( 'Add new entry:', 'amp' ),
+		};
+	}, [ entryId, isExistingEntry, type ] );
 
 	/**
 	 * Track the validity of the config JSON object. A nonempty custom validity string will block form submission.
@@ -70,6 +95,9 @@ function AnalyticsEntry( { entryId = '', onChange, onDelete, type = '', config =
 		}
 	}, [ config ] );
 
+	/**
+	 * On creation, focus the cursor in the first input in the entry.
+	 */
 	const inputWrapper = useRef();
 	useEffect( () => {
 		if ( ! inputWrapper?.current ) {
@@ -114,7 +142,6 @@ function AnalyticsEntry( { entryId = '', onChange, onDelete, type = '', config =
 					label={ __( 'JSON Configuration:', 'amp' ) }
 				>
 					<textarea
-
 						rows="10"
 						cols="100"
 						className="amp-analytics-input"
@@ -147,22 +174,6 @@ AnalyticsEntry.propTypes = {
 	onDelete: PropTypes.func.isRequired,
 	type: PropTypes.string,
 };
-
-/**
- * Provides a unique temporary key for new entries. Will be replaced with a key generated on the backend when settings are saved.
- *
- * @param {string} prefix The prefix for new keys.
- */
-function useUniqueNewKey( prefix = NEW_ENTRY_KEY_PREFIX ) {
-	const [ currentIndex, setCurrentIndex ] = useState( 0 );
-
-	const getNewKey = useCallback( () => {
-		setCurrentIndex( ( oldIndex ) => oldIndex + 1 );
-		return `${ prefix }-${ currentIndex }`;
-	}, [ currentIndex, prefix ] );
-
-	return getNewKey;
-}
 
 /**
  * Component handling addition and deletion of analytics entries.
