@@ -363,14 +363,12 @@ class AMP_Options_Manager {
 			foreach ( $new_options[ Option::ANALYTICS ] as $id => $data ) {
 				// Check save/delete pre-conditions and proceed if correct.
 				if ( empty( $data['type'] ) || empty( $data['config'] ) ) {
-					self::add_settings_error( self::OPTION_NAME, 'missing_analytics_vendor_or_config', __( 'Missing vendor type or config.', 'amp' ) );
 					continue;
 				}
 
 				// Validate JSON configuration.
 				$is_valid_json = AMP_HTML_Utils::is_valid_json( $data['config'] );
 				if ( ! $is_valid_json ) {
-					self::add_settings_error( self::OPTION_NAME, 'invalid_analytics_config_json', __( 'Invalid analytics config JSON.', 'amp' ) );
 					continue;
 				}
 
@@ -386,7 +384,6 @@ class AMP_Options_Manager {
 
 					// Avoid duplicates.
 					if ( isset( $new_analytics_option[ $entry_id ] ) ) {
-						self::add_settings_error( self::OPTION_NAME, 'duplicate_analytics_entry', __( 'Duplicate analytics entry found.', 'amp' ) );
 						continue;
 					}
 				}
@@ -534,22 +531,5 @@ class AMP_Options_Manager {
 				)
 			);
 		}
-	}
-
-	/**
-	 * Register a settings error to be displayed to the user.
-	 *
-	 * @see add_settings_error()
-	 *
-	 * @param string $setting Slug title of the setting to which this error applies.
-	 * @param string $code    Slug-name to identify the error. Used as part of 'id' attribute in HTML output.
-	 * @param string $message The formatted message text to display to the user (will be shown inside styled
-	 *                        `<div>` and `<p>` tags).
-	 * @param string $type    Optional. Message type, controls HTML class. Possible values include 'error',
-	 *                        'success', 'warning', 'info'. Default 'error'.
-	 */
-	private static function add_settings_error( $setting, $code, $message, $type = 'error' ) {
-		require_once ABSPATH . 'wp-admin/includes/template.php';
-		add_settings_error( $setting, $code, $message, $type );
 	}
 }
