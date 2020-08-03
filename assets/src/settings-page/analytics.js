@@ -44,10 +44,10 @@ function AnalyticsEntry( { entryId = '', onChange, onDelete, type = '', config =
 		analyticsTitle = __( 'Add new entry:', 'amp' );
 	}
 
-	const textAreaRef = useRef();
 	/**
 	 * Track the validity of the config JSON object. A nonempty custom validity string will block form submission.
 	 */
+	const textAreaRef = useRef();
 	useEffect( () => {
 		if ( ! textAreaRef?.current ) {
 			return;
@@ -69,12 +69,24 @@ function AnalyticsEntry( { entryId = '', onChange, onDelete, type = '', config =
 		}
 	}, [ config ] );
 
+	const inputWrapper = useRef();
+	useEffect( () => {
+		if ( ! inputWrapper?.current ) {
+			return;
+		}
+
+		const firstInput = inputWrapper.current.querySelector( 'input' );
+		if ( firstInput ) {
+			firstInput.focus();
+		}
+	}, [] );
+
 	return (
 		<PanelRow className="amp-analytics-entry">
 			<h4>
 				{ analyticsTitle }
 			</h4>
-			<div className="amp-analytics-entry__options">
+			<div className="amp-analytics-entry__options" ref={ inputWrapper } id={ `amp-analytics-entry${ entryId }` }>
 				<div className="amp-analytics-entry__text-inputs">
 					<TextControl
 						className="option-input"
@@ -241,6 +253,7 @@ function AnalyticsOptions() {
 			) ) }
 
 			<Button
+				id="amp-analytics-add-entry"
 				isPrimary
 				onClick={ () => {
 					updateOptions( {
