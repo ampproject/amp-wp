@@ -97,7 +97,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 			Option::ANALYTICS,
 			[
 				'__new__-0' => compact( 'type', 'config' ),
-				'__new__-1' => compact( 'type', 'config' ),
+				'__new__-1' => compact( 'type', 'config2' ),
 			]
 		);
 	}
@@ -166,38 +166,6 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 		// One amp-analytics component should be in the page
 		$this->assertEquals( 1, $components->length );
-	}
-
-	/**
-	 * Test that two analytics components are added to the page
-	 */
-	public function test_two_analytics_components_added() {
-
-		$this->insert_one_option(
-			$this->vendor,
-			$this->config_one
-		);
-
-		$this->insert_one_option(
-			$this->vendor,
-			$this->config_two
-		);
-
-		ob_start();
-		amp_print_analytics( [] );
-		$amp_rendered = ob_get_clean();
-
-		$libxml_previous_state = libxml_use_internal_errors( true );
-
-		$dom = new Document();
-		$dom->loadHTML( $amp_rendered );
-		$components = $dom->getElementsByTagName( 'amp-analytics' );
-
-		libxml_clear_errors();
-		libxml_use_internal_errors( $libxml_previous_state );
-
-		// Two amp-analytics components should be in the page
-		$this->assertEquals( 2, $components->length );
 	}
 
 	/**
