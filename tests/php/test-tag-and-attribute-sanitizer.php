@@ -769,8 +769,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					<form method="get" action="/form/search-html/get" target="_blank">
 						<fieldset>
 							<label><span>Search for</span><input type="search" placeholder="test" name="term" required></label>
-							<input type="checkbox" checked disabled>
-							<input type="checkbox" checked="CHECKED" disabled="disabled">
+							<input type="checkbox" checked disabled readonly>
+							<input type="checkbox" checked="CHECKED" disabled="disabled" readonly="">
 							<input type="submit" value="Search" enterkeyhint="search"><input type="button" value="Open Lightbox" on="tap:lb1.open">
 						</fieldset>
 					</form>
@@ -2532,6 +2532,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 								layout="responsive"
 								width="450"
 								noloading="noloading"
+								height="300"></amp-img>
+						<amp-img
+								src="/static/inline-examples/images/image4.jpg"
+								layout="responsive"
+								width="450"
+								noloading=""
 								height="300"></amp-img>
 					</amp-base-carousel>
 					<amp-inline-gallery-pagination layout="nodisplay" inset>

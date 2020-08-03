@@ -22,7 +22,7 @@ trait MarkupComparison {
 	 */
 	protected function assertEqualMarkup( $expected, $actual ) { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName
 		// Normalize boolean attributes for which libxml will drop the value.
-		$expected = preg_replace( '/(?<=\s)(checked|disabled|readonly|selected)="\1"/i', '$1', $expected );
+		$expected = preg_replace( '/(?<=\s)(checked|disabled|selected|readonly)="(?:\1|)"/i', '$1', $expected );
 
 		$actual   = preg_replace( '/\s+/', ' ', $actual );
 		$expected = preg_replace( '/\s+/', ' ', $expected );
