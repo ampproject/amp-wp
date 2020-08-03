@@ -51,23 +51,19 @@ function useUniqueNewKey( prefix = NEW_ENTRY_KEY_PREFIX ) {
 function AnalyticsEntry( { entryId = '', onChange, onDelete, type = '', config = '{}' } ) {
 	const isExistingEntry = 0 !== entryId.indexOf( NEW_ENTRY_KEY_PREFIX );
 
-	const { entrySlug, analyticsTitle } = useMemo( () => {
+	const analyticsTitle = useMemo( () => {
 		if ( isExistingEntry ) {
-			return {
-				entrySlug: sprintf(
-					'%1$s%2$s',
-					type ? type + '-' : '',
-					entryId.substr( entryId.length - 6 ),
-				),
-				/* translators: %s: the entry slug. */
-				analyticsTitle: sprintf( __( 'Analytics: %s', 'amp' ), entrySlug ),
-			};
+			const newEntrySlug = sprintf(
+				'%1$s%2$s',
+				type ? type + '-' : '',
+				entryId.substr( entryId.length - 6 ),
+			);
+
+			/* translators: %s: the entry slug. */
+			return sprintf( __( 'Analytics: %s', 'amp' ), newEntrySlug );
 		}
 
-		return {
-			entrySlug: '',
-			analyticsTitle: __( 'Add new entry:', 'amp' ),
-		};
+		return __( 'Add new entry:', 'amp' );
 	}, [ entryId, isExistingEntry, type ] );
 
 	/**
