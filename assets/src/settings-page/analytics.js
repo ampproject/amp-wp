@@ -8,11 +8,12 @@ import PropTypes from 'prop-types';
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { useContext, useEffect, useRef, useState, useCallback } from '@wordpress/element';
+import { Icon, plus, trash } from '@wordpress/icons';
+import { Button, TextControl, PanelRow, BaseControl } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
-import { Button, TextControl, PanelRow, BaseControl } from '@wordpress/components';
 import { AMPDrawer } from '../components/amp-drawer';
 import { Options } from '../components/options-context-provider';
 
@@ -133,7 +134,8 @@ function AnalyticsEntry( { entryId = '', onChange, onDelete, type = '', config =
 				onClick={ onDelete }
 				className="amp-analytics__delete-button"
 			>
-				{ __( 'Delete', 'amp' ) }
+				<Icon icon={ trash } />
+				{ __( 'Remove entry', 'amp' ) }
 			</Button>
 		</PanelRow>
 	);
@@ -254,7 +256,7 @@ function AnalyticsOptions() {
 
 			<Button
 				id="amp-analytics-add-entry"
-				isPrimary
+				className="amp-analytics__entry-appender"
 				onClick={ () => {
 					updateOptions( {
 						analytics: {
@@ -267,7 +269,10 @@ function AnalyticsOptions() {
 					} );
 				} }
 			>
-				{ __( 'Add entry', 'amp' ) }
+				<span className="screen-reader-text">
+					{ __( 'Add entry', 'amp' ) }
+				</span>
+				<Icon icon={ plus } />
 			</Button>
 		</div>
 	);

@@ -82,8 +82,6 @@ class OptionsMenuTest extends WP_UnitTestCase {
 		$this->instance->add_menu_items();
 		$this->assertArrayHasKey( 'amp-options', $_parent_pages );
 		$this->assertEquals( 'amp-options', $_parent_pages['amp-options'] );
-		$this->assertArrayHasKey( 'amp-analytics-options', $_parent_pages );
-		$this->assertEquals( 'amp-options', $_parent_pages['amp-analytics-options'] );
 
 		$this->assertArrayHasKey( 'amp-options', $submenu );
 		$this->assertCount( 3, $submenu['amp-options'] );

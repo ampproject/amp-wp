@@ -234,7 +234,11 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option(
 			Option::ANALYTICS,
 			[
-				'__new__' => [
+				'__new__-1' => [
+					'type'   => 'foo',
+					'config' => '{"good":true}',
+				],
+				'__new__-2' => [
 					'type'   => 'foo',
 					'config' => '{"good":true}',
 				],
@@ -256,6 +260,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option(
 			Option::ANALYTICS,
 			[
+				$id       => $entry,
 				'__new__' => [
 					'type'   => 'bar',
 					'config' => '{"good":true}',
@@ -285,11 +290,9 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option(
 			Option::ANALYTICS,
 			[
-				$id => [
-					'id'     => $id,
-					'type'   => 'foo',
-					'config' => '{"very_good":true}',
-					'delete' => true,
+				'new-entry' => [
+					'type'   => 'bar',
+					'config' => '{"good":true}',
 				],
 			]
 		);

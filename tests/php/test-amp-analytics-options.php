@@ -87,6 +87,22 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Inserts two analytics entries.
+	 *
+	 * @param string $type   Entry type (vendor).
+	 * @param string $config Entry config (JSON).
+	 */
+	private function insert_two_options( $type, $config ) {
+		AMP_Options_Manager::update_option(
+			Option::ANALYTICS,
+			[
+				'__new__-0' => compact( 'type', 'config' ),
+				'__new__-1' => compact( 'type', 'config' ),
+			]
+		);
+	}
+
+	/**
 	 * Test that nothing is added if no analytics option defined in the DB
 	 */
 	public function test_no_options() {
@@ -113,16 +129,11 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	public function test_two_options_inserted() {
 
 		/* Insert analytics option one */
-		$this->insert_one_option(
+		$this->insert_two_options(
 			$this->vendor,
 			$this->config_one
 		);
 
-		/* Insert analytics option two */
-		$this->insert_one_option(
-			$this->vendor,
-			$this->config_two
-		);
 		$options = $this->get_options();
 
 		$this->assertCount( 2, $options );
