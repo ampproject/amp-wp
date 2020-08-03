@@ -316,6 +316,9 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 							'type' => 'string',
 						],
 					],
+					Option::ANALYTICS               => [
+						'type'  => 'object',
+					],
 					self::SUPPORTABLE_POST_TYPES    => [
 						'type'     => 'array',
 						'readonly' => true,

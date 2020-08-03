@@ -80,6 +80,7 @@ class OptionsRESTControllerTest extends WP_UnitTestCase {
 				'suppressed_plugins',
 				'supported_templates',
 				'supported_post_types',
+				'analytics',
 				'preview_permalink',
 				'suppressible_plugins',
 				'supportable_post_types',
