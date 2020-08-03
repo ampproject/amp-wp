@@ -54,6 +54,17 @@ function amp_deactivate( $network_wide = false ) {
  * @since 1.5
  */
 function amp_bootstrap_plugin() {
+	/**
+	 * Filters whether AMP is enabled on the current site.
+	 *
+	 * Useful if the plugin is network activated and you want to turn it off on select sites.
+	 *
+	 * @since 0.2
+	 */
+	if ( false === apply_filters( 'amp_is_enabled', true ) ) {
+		return;
+	}
+
 	AmpWpPluginFactory::create()->register();
 
 	// The plugins_loaded action is the earliest we can run this since that is when pluggable.php has been required and wp_hash() is available.
@@ -218,17 +229,6 @@ function amp_init() {
  */
 function amp_after_setup_theme() {
 	amp_get_slug(); // Ensure AMP_QUERY_VAR is set.
-
-	/**
-	 * Filters whether AMP is enabled on the current site.
-	 *
-	 * Useful if the plugin is network activated and you want to turn it off on select sites.
-	 *
-	 * @since 0.2
-	 */
-	if ( false === apply_filters( 'amp_is_enabled', true ) ) {
-		return;
-	}
 
 	add_action( 'init', 'amp_init', 0 ); // Must be 0 because widgets_init happens at init priority 1.
 }
