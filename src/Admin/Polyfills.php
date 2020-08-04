@@ -30,7 +30,9 @@ final class Polyfills implements Conditional, Delayed, Service, Registerable {
 	 * @return bool Whether the conditional object is needed.
 	 */
 	public static function is_needed() {
-		return isset( $_GET[ AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR ] ) || ( is_admin() && ! wp_doing_ajax() ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return amp_is_dev_mode()
+			|| isset( $_GET[ AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			|| ( is_admin() && ! wp_doing_ajax() );
 	}
 
 	/**
@@ -39,7 +41,7 @@ final class Polyfills implements Conditional, Delayed, Service, Registerable {
 	 * @return string Registration action to use.
 	 */
 	public static function get_registration_action() {
-		return 'plugins_loaded';
+		return 'wp';
 	}
 
 	/**
