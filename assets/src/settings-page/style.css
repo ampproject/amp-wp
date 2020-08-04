@@ -162,7 +162,7 @@
 }
 
 #suppressed-plugins-table tbody tr.is-suppressed {
-	background-color: #f7fcfe;
+	background-color: #effbff;
 }
 
 #suppressed-plugins-table tbody tr:not(.has-border-color) > th.column-status {
@@ -179,7 +179,7 @@
 }
 
 #suppressed-plugins-table tbody tr.is-suppressed > th.column-status {
-	border-color: #00a0d2;
+	border-color: var(--amp-settings-color-brand);
 }
 
 #suppressed-plugins-table tbody tr:not(:last-child) > th,
@@ -199,10 +199,14 @@
 	cursor: pointer;
 }
 
-#suppressed-plugins-table .plugin-name,
-#suppressed-plugins-table .column-details p,
-#suppressed-plugins-table .column-details summary {
-	line-height: 30px; /* To match .wp-core-ui select */
+#suppressed-plugins-table summary:hover {
+	color: var(--amp-settings-color-brand);
+}
+
+#suppressed-plugins-table .inner-cell {
+	display: flex;
+	min-height: 34px;
+	align-items: center;
 }
 
 li.error-removed {
@@ -215,10 +219,16 @@ li.error-kept {
 
 @media screen and (max-width: 782px) {
 
-	#suppressed-plugins-table .plugin-name,
-	#suppressed-plugins-table .column-details p,
-	#suppressed-plugins-table .column-details summary {
-		line-height: 40px; /* To match .wp-core-ui select */
+	#suppressed-plugins-table .column-status {
+		width: 130px;
+	}
+
+	#suppressed-plugins-table .column-status .components-select-control__input {
+		font-size: inherit;
+	}
+
+	#suppressed-plugins-table .inner-cell {
+		min-height: 42px;
 	}
 
 	#suppressed-plugins-table {

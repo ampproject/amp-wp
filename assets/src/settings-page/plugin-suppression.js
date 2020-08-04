@@ -229,65 +229,68 @@ function PluginRow( { pluginKey, pluginDetails } ) {
 				/>
 			</th>
 			<td className="column-plugin">
-				<ConditionalDetails
-					summary={ pluginDetails.PluginURI ? (
-						<PluginName />
-					)
-						: <PluginName /> }
-				>
+				<div className="inner-cell">
+					<ConditionalDetails
+						summary={ (
+							<PluginName />
+						) }
+					>
 
-					{ [
-						pluginDetails.Author && (
-							<p className="plugin-author-uri" key={ `${ pluginKey }-details-author` }>
-								{ pluginDetails.AuthorURI ? (
-									<a href={ pluginDetails.AuthorURI } target="_blank" rel="noreferrer">
-										{
+						{ [
+							pluginDetails.Author && (
+								<p className="plugin-author-uri" key={ `${ pluginKey }-details-author` }>
+									{ pluginDetails.AuthorURI ? (
+										<a href={ pluginDetails.AuthorURI } target="_blank" rel="noreferrer">
+											{
+												/* translators: placeholder is an author name. */
+												sprintf( __( 'By %s' ), pluginDetails.Author )
+											}
+										</a> )
+										: (
 											/* translators: placeholder is an author name. */
 											sprintf( __( 'By %s' ), pluginDetails.Author )
-										}
-									</a> )
-									: (
-										/* translators: placeholder is an author name. */
-										sprintf( __( 'By %s' ), pluginDetails.Author )
-									)
-								}
+										)
+									}
 
-							</p>
-						),
-						pluginDetails.Description && (
-							<div
-								key={ `${ pluginKey }-details-description` }
-								className="plugin-description"
-								dangerouslySetInnerHTML={ { __html: autop( pluginDetails.Description ) } }
-							/>
-						),
-						pluginDetails.PluginURI && (
-							<a href={ pluginDetails.PluginURI } target="_blank" rel="noreferrer" key={ `${ pluginKey }-details-plugin-uri` }>
-								{ __( 'More details', 'amp' ) }
-							</a>
-						),
+								</p>
+							),
+							pluginDetails.Description && (
+								<div
+									key={ `${ pluginKey }-details-description` }
+									className="plugin-description"
+									dangerouslySetInnerHTML={ { __html: autop( pluginDetails.Description ) } }
+								/>
+							),
+							pluginDetails.PluginURI && (
+								<a href={ pluginDetails.PluginURI } target="_blank" rel="noreferrer" key={ `${ pluginKey }-details-plugin-uri` }>
+									{ __( 'More details', 'amp' ) }
+								</a>
+							),
 
-					].filter( ( child ) => child ) }
+						].filter( ( child ) => child ) }
 
-				</ConditionalDetails>
+					</ConditionalDetails>
+				</div>
 			</td>
 			<td className="column-details">
-				{
-					isOriginallySuppressed ? (
-						<p>
-							<SuppressedPluginTime suppressedPlugin={ originalSuppressedPlugins[ pluginKey ] } />
-							{ ' ' }
-							<SuppressedPluginUsername suppressedPlugin={ originalSuppressedPlugins[ pluginKey ] } />
-							{ ' ' }
-							<SuppressedPluginVersion
-								pluginDetails={ pluginDetails }
-								suppressedPlugin={ originalSuppressedPlugins[ pluginKey ] }
-							/>
-						</p>
-					) : (
-						<ValidationErrorDetails errors={ pluginDetails.validation_errors } />
-					)
-				}
+				<div className="inner-cell">
+					{
+						isOriginallySuppressed ? (
+							<p>
+								<SuppressedPluginTime suppressedPlugin={ originalSuppressedPlugins[ pluginKey ] } />
+								{ ' ' }
+								<SuppressedPluginUsername suppressedPlugin={ originalSuppressedPlugins[ pluginKey ] } />
+								{ '  ' }
+								<SuppressedPluginVersion
+									pluginDetails={ pluginDetails }
+									suppressedPlugin={ originalSuppressedPlugins[ pluginKey ] }
+								/>
+							</p>
+						) : (
+							<ValidationErrorDetails errors={ pluginDetails.validation_errors } />
+						)
+					}
+				</div>
 			</td>
 		</tr>
 	);
