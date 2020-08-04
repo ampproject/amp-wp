@@ -189,6 +189,24 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertEquals( AMP__VERSION, $saved_option['version'] );
 	}
 
+	/** @covers ::amp_after_setup_theme() */
+	public function test_amp_after_setup_theme() {
+		remove_all_actions( 'init' );
+		amp_after_setup_theme();
+		$this->assertSame( 0, has_action( 'init', 'amp_init' ) );
+	}
+
+	/**
+	 * @expectedIncorrectUsage add_filter
+	 * @covers ::amp_after_setup_theme()
+	 */
+	public function test_amp_after_setup_theme_bad_filter() {
+		remove_all_actions( 'init' );
+		add_filter( 'amp_is_enabled', '__return_false' );
+		amp_after_setup_theme();
+		$this->assertSame( 0, has_action( 'init', 'amp_init' ) );
+	}
+
 	/**
 	 * Test amp_get_slug().
 	 *
