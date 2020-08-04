@@ -27,12 +27,25 @@ final class ExportResult {
 	private $target_path;
 
 	/**
+	 * Site name to use.
+	 *
+	 * @var string
+	 */
+	private $site_name;
+
+	/**
 	 * Instantiate a ExportResult object.
 	 *
 	 * @param string $target_path Target path of the site definition file.
 	 */
 	public function __construct( $target_path ) {
 		$this->target_path = $target_path;
+
+		$this->site_name = preg_replace(
+			'/\.json$/',
+			'',
+			basename( $this->get_target_path() )
+		);
 	}
 
 	/**
@@ -40,9 +53,19 @@ final class ExportResult {
 	 *
 	 * @return string Target path of the site definition file.
 	 */
-	public function get_target_path(  ) {
+	public function get_target_path() {
 		return $this->target_path;
 	}
+
+	/**
+	 * Get the site name to use.
+	 *
+	 * @var string Site name to use.
+	 */
+	public function get_site_name() {
+		return $this->site_name;
+	}
+
 	/**
 	 * Add a step to the export result.
 	 *
@@ -76,6 +99,11 @@ final class ExportResult {
 		return false === $json ? '{}' : $json;
 	}
 
+	/**
+	 * Get the default values for the export fields.
+	 *
+	 * @return array Associative array of default values.
+	 */
 	private function get_defaults() {
 		return [
 			'name'         => get_option( 'blogname', 'Unnamed WordPress Site' ),

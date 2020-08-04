@@ -70,17 +70,14 @@ final class ImportOptions implements ImportStep {
 					$this->update_page_id_option( $key, $value );
 					break;
 
-				// nav menu locations.
 				case 'nav_menu_locations':
 					//$this->set_nav_menu_locations( $value );
 					break;
 
-				// import WooCommerce category images.
 				case 'woocommerce_product_cat':
 					//$this->set_woocommerce_product_cat( $value );
 					break;
 
-				// insert logo.
 				case 'custom_logo':
 					$this->insert_logo( $value );
 					break;

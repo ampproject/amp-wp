@@ -32,11 +32,7 @@ final class ExportWxrFile implements ExportStep {
 	 * @return ExportResult Adapted export result.
 	 */
 	public function process( ExportResult $export_result ) {
-		$this->site_name = preg_replace(
-			'/\.json$/',
-			'',
-			basename( $export_result->get_target_path() )
-		);
+		$this->site_name = $export_result->get_site_name();
 
 		$wxr_file = preg_replace(
 			'/\.json$/',

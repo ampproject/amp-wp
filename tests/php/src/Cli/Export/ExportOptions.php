@@ -8,6 +8,7 @@
 namespace AmpProject\AmpWP\Tests\Cli\Export;
 
 use AmpProject\AmpWP\Tests\Cli\ExportStep;
+use WP_Post;
 
 final class ExportOptions implements ExportStep {
 
@@ -18,6 +19,7 @@ final class ExportOptions implements ExportStep {
 	 */
 	const EXCLUDED_OPTIONS = [
 		'/^(_site)?_transient_.*$/',
+		'/^action_scheduler_.*$/',
 		'/^active_plugins$/',
 		'/^admin_email_lifespan$/',
 		'/^amp-options$/',
@@ -42,7 +44,7 @@ final class ExportOptions implements ExportStep {
 		'/^default_.*$/',
 		'/^do_activate$/',
 		'/^elementor_(controls_usage|log|remote_info_feed_data|remote_info_library|scheme_color-picker|version)$/',
-		'/^finished_splitting_shared_terms$/',
+		'/^finished_(updating_comment_type|splitting_shared_terms)$/',
 		'/^fresh_site$/',
 		'/^gmt_offset$/',
 		'/^hack_file$/',
@@ -63,7 +65,6 @@ final class ExportOptions implements ExportStep {
 		'/^moderation_(keys|notify)$/',
 		'/^page_comments$/',
 		'/^page_for_posts$/',
-		'/^page_on_front$/',
 		'/^permalink_structure$/',
 		'/^ping_sites$/',
 		'/^post_count$/',
@@ -71,10 +72,10 @@ final class ExportOptions implements ExportStep {
 		'/^recovery_(keys|mode_email_last_sent)$/',
 		'/^require_name_email$/',
 		'/^rewrite_rules$/',
+		'/^schema-ActionScheduler_.*$/',
 		'/^sharing-options$/',
 		'/^show_avatars$/',
 		'/^show_comments_cookies_opt_in$/',
-		'/^show_on_front$/',
 		'/^sidebars_widgets$/',
 		'/^site_icon$/',
 		'/^siteurl$/',
@@ -84,8 +85,10 @@ final class ExportOptions implements ExportStep {
 		'/^supercache_stats$/',
 		'/^tag_base$/',
 		'/^the_seo_framework_(initial_db_version|tested_upgrade_version|upgraded_db_version)$/',
+		'/^theme_mods_.*$/',
 		'/^theme_switched$/',
 		'/^timezone_string$/',
+		'/^uagb-version$/',
 		'/^uninstall_plugins$/',
 		'/^upload_(path|space_check_disabled|url_path)$/',
 		'/^uploads_use_yearmonth_folders$/',
@@ -101,19 +104,47 @@ final class ExportOptions implements ExportStep {
 		'/^woocommerce_specific_.*$/',
 		'/^woocommerce_stock_(email_recipient|format)$/',
 		'/^woocommerce_trash_.*$/',
+		'/^wp_astra_theme_db_migration_.*$/',
 		'/^wp_user_roles$/',
+		'/^wpforms_(activated|version|version_lite)$/',
 		'/^wpseo_(flush_rewrite|ryte)$/',
 		'/^wpsupercache_.*$/',
 	];
 
 	/**
-	 * SQL query to fetch all option keys.
+	 * Associative array of options and their default values for skipping.
 	 *
-	 * This includes a placeholder for the table name.
-	 *
-	 * @var string
+	 * @var array
 	 */
-	const OPTION_KEYS_SQL_QUERY = 'SELECT `option_name` FROM `%s`;';
+	const OPTION_DEFAULTS = [
+		'use_balanceTags'                 => '0',
+		'use_smilies'                     => '1',
+		'posts_per_rss'                   => '10',
+		'rss_use_excerpt'                 => '0',
+		'posts_per_page'                  => '10',
+		'date_format'                     => 'F j, Y',
+		'time_format'                     => 'g:i a',
+		'category_base'                   => '',
+		'template'                        => 'astra',
+		'stylesheet'                      => 'astra',
+		'use_trackback'                   => '0',
+		'thumbnail_size_w'                => '150',
+		'thumbnail_size_h'                => '150',
+		'thumbnail_crop'                  => '1',
+		'medium_size_w'                   => '300',
+		'medium_size_h'                   => '300',
+		'large_size_w'                    => '1024',
+		'large_size_h'                    => '1024',
+		'thread_comments'                 => '1',
+		'thread_comments_depth'           => '5',
+		'comments_per_page'               => '50',
+		'medium_large_size_w'             => '768',
+		'medium_large_size_h'             => '0',
+		'wp_page_for_privacy_policy'      => '0',
+		'disallowed_keys'                 => '',
+		'auto_plugin_theme_update_emails' => [],
+		'__uagb_do_redirect'              => '',
+	];
 
 	/**
 	 * Process the export step.
@@ -129,6 +160,14 @@ final class ExportOptions implements ExportStep {
 		);
 
 		$options = $this->fetch_options( $option_keys );
+		$options = array_merge( $options, $this->fetch_theme_mods() );
+		$options = array_filter(
+			$options,
+			[ $this, 'skip_default_values' ],
+			ARRAY_FILTER_USE_BOTH
+		);
+
+		$options = $this->adapt_options( $options, $export_result );
 
 		$export_result->add_step( 'import_options', compact( 'options' ) );
 
@@ -152,7 +191,7 @@ final class ExportOptions implements ExportStep {
 	 * Fetch the options that are meant to be exported.
 	 *
 	 * @param string[] $keys Keys of the options to fetch.
-	 * @return array Array of options to export.
+	 * @return array Associative array of options to export.
 	 */
 	private function fetch_options( $keys ) {
 		global $wpdb;
@@ -179,10 +218,57 @@ final class ExportOptions implements ExportStep {
 	}
 
 	/**
+	 * Adapt the options to get rid of hard-coded elements like IDs.
+	 *
+	 * @param array        $options       Associative array of options to adapt.
+	 * @param ExportResult $export_result Export result to adapt.
+	 * @return array Adapted associative array of options.
+	 */
+	private function adapt_options( $options, $export_result ) {
+		foreach ( $options as $key => $value ) {
+			switch ( $key ) {
+				case 'woocommerce_shop_page_title':
+				case 'woocommerce_cart_page_title':
+				case 'woocommerce_checkout_page_title':
+				case 'woocommerce_myaccount_page_title':
+				case 'woocommerce_edit_address_page_title':
+				case 'woocommerce_view_order_page_title':
+				case 'woocommerce_change_password_page_title':
+				case 'woocommerce_logout_page_title':
+					// @TODO
+					break;
+
+				case 'page_for_posts':
+				case 'page_on_front':
+					$options[ $key ] = $this->get_page_title_from_post_id( $value );
+					break;
+
+				case 'nav_menu_locations':
+					// @TODO
+					break;
+
+				case 'woocommerce_product_cat':
+					// @TODO
+					break;
+
+				case 'custom_logo':
+					$media_uploader = new MediaFileUploader();
+					$options[ $key ] = $media_uploader->upload(
+						$export_result->get_site_name(),
+						$this->get_attachment_url_from_attachment_id( $value )
+					);
+					break;
+			}
+		}
+
+		return $options;
+	}
+
+	/**
 	 * Skip the options that are marked as excluded.
 	 *
 	 * @param string $option_key Option key to check.
-	 * @return bool Whether to skip the option.
+	 * @return bool Whether to keep the option.
 	 */
 	private function skip_excluded_options( $option_key ) {
 		foreach ( self::EXCLUDED_OPTIONS as $option_pattern ) {
@@ -192,5 +278,60 @@ final class ExportOptions implements ExportStep {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Skip the options that still have their default value.
+	 *
+	 * @param string $option_value Option value to check.
+	 * @param string $option_key   Option key to check.
+	 * @return bool Whether to keep the option.
+	 */
+	private function skip_default_values( $option_value, $option_key ) {
+		if ( ! array_key_exists( $option_key, self::OPTION_DEFAULTS ) ) {
+			return true;
+		}
+
+		return self::OPTION_DEFAULTS[ $option_key ] !== $option_value;
+	}
+
+	/**
+	 * Get the post title from a post ID.
+	 *
+	 * @param string|int $post_id ID of the post to get the title from.
+	 * @return string Post title.
+	 */
+	private function get_page_title_from_post_id( $post_id ) {
+		$post = get_post( $post_id );
+
+		if ( ! $post instanceof WP_Post || empty( $post->post_title ) ) {
+			return $post_id;
+		}
+
+		return $post->post_title;
+	}
+
+	/**
+	 * Get the attachment URL from an attachent ID.
+	 *
+	 * @param string|int $attachment_id ID of the attachment post to get the URL
+	 *                                  for.
+	 * @return string|false Attachment URL, or false if none.
+	 */
+	private function get_attachment_url_from_attachment_id( $attachment_id ) {
+		return wp_get_attachment_url( $attachment_id );
+	}
+
+	/**
+	 * Fetch the theme mods.
+	 *
+	 * @return array Associative array of theme mods.
+	 */
+	private function fetch_theme_mods() {
+		$theme_mods = array_filter( (array) get_theme_mods() );
+
+		unset( $theme_mods['custom_css_post_id'] );
+
+		return $theme_mods;
 	}
 }
