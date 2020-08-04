@@ -71,7 +71,7 @@ final class ImportOptions implements ImportStep {
 					break;
 
 				case 'nav_menu_locations':
-					//$this->set_nav_menu_locations( $value );
+					$this->set_nav_menu_locations( $value );
 					break;
 
 				case 'woocommerce_product_cat':
@@ -94,8 +94,8 @@ final class ImportOptions implements ImportStep {
 	 *
 	 * This adapts the page ID as needed.
 	 *
-	 * @param  string $key   Option key.
-	 * @param  mixed  $value Option value.
+	 * @param string $key   Option key.
+	 * @param mixed  $value Option value.
 	 */
 	private function update_page_id_option( $key, $value ) {
 		$page = get_page_by_title( $value );
@@ -106,11 +106,11 @@ final class ImportOptions implements ImportStep {
 
 		update_option( $key, $page->ID );
 	}
+
 	/**
-	 * Insert Logo By URL
+	 * Insert Logo By URL.
 	 *
-	 * @since 1.0.0
-	 * @param  string $image_url Logo URL.
+	 * @param string $image_url Logo URL.
 	 * @return void
 	 */
 	private function insert_logo( $image_url = '' ) {
@@ -123,7 +123,7 @@ final class ImportOptions implements ImportStep {
 	/**
 	 * Download image by URL.
 	 *
-	 * @param  string $image_url Image URL to download.
+	 * @param string $image_url Image URL to download.
 	 * @return int|false Attachment ID of the image, or false if failed.
 	 */
 	private function download_image( $image_url = '' ) {
@@ -148,5 +148,27 @@ final class ImportOptions implements ImportStep {
 		}
 
 		return $data->attachment_id;
+	}
+
+	/**
+	 * Translate from menu_slug into menu_id.
+	 *
+	 * @param array $nav_menu_locations Associative array of nav menu locations.
+	 */
+	private function set_nav_menu_locations( $nav_menu_locations = [] ) {
+		if ( empty( $nav_menu_locations ) ) {
+			return;
+		}
+
+		$menu_locations = [];
+		foreach ( $nav_menu_locations as $menu => $value ) {
+			$term = get_term_by( 'slug', $value, 'nav_menu' );
+
+			if ( is_object( $term ) ) {
+				$menu_locations[ $menu ] = $term->term_id;
+			}
+		}
+
+		set_theme_mod( 'nav_menu_locations', $menu_locations );
 	}
 }

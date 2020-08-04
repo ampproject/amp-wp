@@ -244,7 +244,7 @@ final class ExportOptions implements ExportStep {
 					break;
 
 				case 'nav_menu_locations':
-					// @TODO
+					$options[ $key ] = $this->get_nav_menu_location( $value );
 					break;
 
 				case 'woocommerce_product_cat':
@@ -333,5 +333,27 @@ final class ExportOptions implements ExportStep {
 		unset( $theme_mods['custom_css_post_id'] );
 
 		return $theme_mods;
+	}
+
+	/**
+	 * Translate from menu_id into menu_slug.
+	 *
+	 * @param array $nav_menu_locations Associative array of nav menu locations.
+	 */
+	private function get_nav_menu_location( $nav_menu_locations ) {
+		if ( empty( $nav_menu_locations ) ) {
+			return [];
+		}
+
+		$menu_locations = [];
+		foreach ( $nav_menu_locations as $menu => $value ) {
+			$term = get_term( $value, 'nav_menu' );
+
+			if ( is_object( $term ) ) {
+				$menu_locations[ $menu ] = $term->slug;
+			}
+		}
+
+		return $menu_locations;
 	}
 }
