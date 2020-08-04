@@ -121,7 +121,7 @@
 
 #suppressed-plugins-table th,
 #suppressed-plugins-table td {
-	padding: 8px 10px;
+	padding: 10px;
 }
 
 #suppressed-plugins-table .column-status {
@@ -152,10 +152,6 @@
 	margin: 0;
 }
 
-#suppressed-plugins-table .column-details summary {
-	font-weight: bold;
-}
-
 #suppressed-plugins-table tbody th,
 #suppressed-plugins-table tbody td {
 	vertical-align: top;
@@ -165,12 +161,25 @@
 	background-color: #fef7f1;
 }
 
-#suppressed-plugins-table tbody tr > th.column-status {
-	border-left: solid 4px transparent;
+#suppressed-plugins-table tbody tr.is-suppressed {
+	background-color: #effbff;
+}
+
+#suppressed-plugins-table tbody tr:not(.has-border-color) > th.column-status {
+	padding-left: 10px;
+}
+
+#suppressed-plugins-table tbody tr.has-border-color > th.column-status {
+	border-left: solid 4px;
+	padding-left: 6px;
 }
 
 #suppressed-plugins-table tbody tr.has-validation-errors > th.column-status {
 	border-color: #d54e21;
+}
+
+#suppressed-plugins-table tbody tr.is-suppressed > th.column-status {
+	border-color: var(--amp-settings-color-brand);
 }
 
 #suppressed-plugins-table tbody tr:not(:last-child) > th,
@@ -190,10 +199,9 @@
 	cursor: pointer;
 }
 
-#suppressed-plugins-table .plugin-name,
-#suppressed-plugins-table .column-details p,
-#suppressed-plugins-table .column-details summary {
-	line-height: 30px; /* To match .wp-core-ui select */
+#suppressed-plugins-table tbody .column-plugin,
+#suppressed-plugins-table tbody .column-details {
+	padding-top: 18px;
 }
 
 li.error-removed {
@@ -206,10 +214,17 @@ li.error-kept {
 
 @media screen and (max-width: 782px) {
 
-	#suppressed-plugins-table .plugin-name,
-	#suppressed-plugins-table .column-details p,
-	#suppressed-plugins-table .column-details summary {
-		line-height: 40px; /* To match .wp-core-ui select */
+	#suppressed-plugins-table .column-status {
+		width: 130px;
+	}
+
+	#suppressed-plugins-table .column-status .components-select-control__input {
+		font-size: inherit;
+	}
+
+	#suppressed-plugins-table tbody .column-plugin,
+	#suppressed-plugins-table tbody .column-details {
+		padding-top: 21px;
 	}
 
 	#suppressed-plugins-table {
