@@ -765,7 +765,16 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'form'                                         => [
-				'<form method="get" action="/form/search-html/get" target="_blank"><fieldset><label><span>Search for</span><input type="search" placeholder="test" name="term" required></label><input type="submit" value="Search" enterkeyhint="search"><input type="button" value="Open Lightbox" on="tap:lb1.open"></fieldset></form>',
+				'
+					<form method="get" action="/form/search-html/get" target="_blank">
+						<fieldset>
+							<label><span>Search for</span><input type="search" placeholder="test" name="term" required></label>
+							<input type="checkbox" checked disabled readonly>
+							<input type="checkbox" checked="CHECKED" disabled="disabled" readonly="">
+							<input type="submit" value="Search" enterkeyhint="search"><input type="button" value="Open Lightbox" on="tap:lb1.open">
+						</fieldset>
+					</form>
+				',
 				null,
 				[ 'amp-form' ],
 			],
@@ -1250,7 +1259,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					[ "\n", "\t" ],
 					'',
 					'
-						<amp-story standalone title="Stories in AMP - Hello World" publisher="AMP Project" publisher-logo-src="https://ampbyexample.com/favicons/coast-228x228.png" poster-portrait-src="https://ampbyexample.com/img/story_dog2_portrait.jpg">
+						<amp-story standalone="standalone" title="Stories in AMP - Hello World" publisher="AMP Project" publisher-logo-src="https://ampbyexample.com/favicons/coast-228x228.png" poster-portrait-src="https://ampbyexample.com/img/story_dog2_portrait.jpg">
 							<amp-sidebar id="sidebar1" layout="nodisplay">
 								<ul>
 									<li><a href="https://www.ampproject.org"> External Link </a></li>
@@ -1616,6 +1625,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 								</li>
 								<li>
 									<amp-img src="/img2.png" width="50" height="50" option="2" disabled></amp-img>
+								</li>
+								<li>
+									<amp-img src="/img3.png" width="50" height="50" option="2" disabled="disabled"></amp-img>
 								</li>
 								<li option="na" selected>None of the Above</li>
 							</ul>
@@ -2513,11 +2525,19 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 								src="/static/inline-examples/images/image2.jpg"
 								layout="responsive"
 								width="450"
+								noloading
 								height="300"></amp-img>
 						<amp-img
 								src="/static/inline-examples/images/image3.jpg"
 								layout="responsive"
 								width="450"
+								noloading="noloading"
+								height="300"></amp-img>
+						<amp-img
+								src="/static/inline-examples/images/image4.jpg"
+								layout="responsive"
+								width="450"
+								noloading=""
 								height="300"></amp-img>
 					</amp-base-carousel>
 					<amp-inline-gallery-pagination layout="nodisplay" inset>

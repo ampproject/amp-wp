@@ -1687,7 +1687,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			$spec_values = (array) $spec_values;
 		}
 		foreach ( $spec_values as $spec_value ) {
-			if ( $spec_value === $attr_value ) {
+			if ( $spec_value === $attr_value || ( '' === $spec_value && strtolower( $attr_value ) === $attr_name ) ) {
 				return true;
 			}
 
