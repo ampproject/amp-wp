@@ -36,10 +36,16 @@
 	flex-shrink: 0;
 }
 
-.theme-card__label-header .h3 {
+.amp .theme-card .theme-card__title {
 	line-height: 1.3;
 	font-size: 1.25rem;
 	margin-left: 5px;
+	margin-bottom: 0;
+	margin-top: 0;
+
+	@media screen and (min-width: 783px) {
+		font-size: 1.5rem;
+	}
 }
 
 .theme-card .phone-inner {

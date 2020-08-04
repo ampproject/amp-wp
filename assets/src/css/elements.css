@@ -8,12 +8,6 @@
 .amp h4,
 .amp h5,
 .amp h6,
-.amp .h1,
-.amp .h2,
-.amp .h3,
-.amp .h4,
-.amp .h5,
-.amp .h6,
 .components-button {
 	font-family: var(--font-poppins);
 }
@@ -26,8 +20,7 @@
 	font-size: 1.5rem;
 }
 
-.amp h3,
-.amp .h3 {
+.amp h3 {
 	font-size: 1rem;
 	line-height: 1.5;
 	margin-bottom: 0;
