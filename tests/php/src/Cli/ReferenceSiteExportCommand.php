@@ -24,10 +24,10 @@ final class ReferenceSiteExportCommand extends WP_CLI_Command {
 	const EXPORT_STEPS = [
 		Export\ExportActiveThemes::class,
 		Export\ExportActivePlugins::class,
+		Export\ExportWxrFile::class,
 		Export\ExportOptions::class,
 		Export\ExportCustomizerSettings::class,
 		Export\ExportWidgets::class,
-		Export\ExportWxrFile::class,
 	];
 
 	/**

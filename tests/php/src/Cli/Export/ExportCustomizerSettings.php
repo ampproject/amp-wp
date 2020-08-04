@@ -31,7 +31,7 @@ final class ExportCustomizerSettings implements ExportStep {
 			$settings['custom-css'] = $custom_css;
 		}
 
-		$export_result->add_step( 'import_customizer_settings', $settings );
+		$export_result->add_step( 'import_customizer_settings', compact( 'settings' ) );
 
 		return $export_result;
 	}

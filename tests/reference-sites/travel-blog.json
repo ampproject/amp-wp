@@ -12,11 +12,11 @@
     },
     {
       "type": "activate_plugin",
-      "plugin": "ultimate-addons-for-gutenberg"
+      "plugin": "astra-widgets"
     },
     {
       "type": "activate_plugin",
-      "plugin": "astra-widgets"
+      "plugin": "ultimate-addons-for-gutenberg"
     },
     {
       "type": "activate_plugin",
