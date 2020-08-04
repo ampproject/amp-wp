@@ -39,6 +39,9 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 	 * [--empty-options]
 	 * : Empty the site options before importing the reference content and only leave default WordPress options in place.
 	 *
+	 * [--skip-site-meta]
+	 * : Skip importing the site meta information like blog name or description.
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     # Import content from a reference site definition file
@@ -67,6 +70,7 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 		$empty_uploads    = Utils\get_flag_value( $assoc_args, 'empty-uploads', false );
 		$empty_extensions = Utils\get_flag_value( $assoc_args, 'empty-extensions', false );
 		$empty_options    = Utils\get_flag_value( $assoc_args, 'empty-options', false );
+		$skip_site_meta   = Utils\get_flag_value( $assoc_args, 'skip-site-meta', false );
 
 		if ( 0 !== substr_compare( $site_definition_file, '.json', -5 ) ) {
 			$site_definition_file .= '.json';
@@ -112,7 +116,7 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 			WP_CLI::log( WP_CLI::colorize( "%b{$attribution}%n" ) );
 		}
 
-		$this->import_site( $site_definition );
+		$this->import_site( $site_definition, $skip_site_meta );
 	}
 
 	/**
@@ -145,8 +149,14 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 	 *
 	 * @param SiteDefinition $site_definition Site definition of the site to
 	 *                                        import.
+	 * @param bool           $skip_site_meta  Skip importing the site meta
+	 *                                        information.
 	 */
-	private function import_site( SiteDefinition $site_definition ) {
+	private function import_site( SiteDefinition $site_definition, $skip_site_meta ) {
+		if ( ! $skip_site_meta ) {
+			( new Import\ImportSiteMeta( $site_definition ) )->process();
+		}
+
 		foreach ( $site_definition->get_import_steps() as $import_step ) {
 			switch ( $import_step['type'] ) {
 				case 'activate_theme':
