@@ -11,7 +11,7 @@ use AmpProject\AmpWP\BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection;
 class ValidatedUrlStylesheetDataGarbageCollectionTest extends WP_UnitTestCase {
 
 	/**
-	 * Test whether an event is actually scheduled when the monitor is registered.
+	 * Test whether an event is actually scheduled when the garbage collection is registered.
 	 *
 	 * @covers ValidatedUrlStylesheetDataGarbageCollection::activate()
 	 * @covers ValidatedUrlStylesheetDataGarbageCollection::deactivate()
@@ -35,7 +35,7 @@ class ValidatedUrlStylesheetDataGarbageCollectionTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test whether time series are calculated and stored when the monitor is processing.
+	 * Test whether stylesheet data is deleted when the garbage collection is processing.
 	 *
 	 * @covers ValidatedUrlStylesheetDataGarbageCollection::process()
 	 */

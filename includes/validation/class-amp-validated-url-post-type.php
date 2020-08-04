@@ -948,9 +948,10 @@ class AMP_Validated_URL_Post_Type {
 	 *
 	 * @since 2.0
 	 *
-	 * @param int          $count  Count of batch size to delete. Accepts strtotime()-compatible string, or array of 'year', 'month', 'day' values.
+	 * @param int          $count  Count of batch size to delete.
 	 * @param string|array $before Date before which to find amp_validated_url posts to delete.
-	 * @return int Count of postmeta that were deleted..
+	 *                             Accepts strtotime()-compatible string, or array of 'year', 'month', 'day' values.
+	 * @return int Count of postmeta that were deleted.
 	 */
 	public static function delete_stylesheets_postmeta_batch( $count, $before ) {
 		$deleted = 0;
