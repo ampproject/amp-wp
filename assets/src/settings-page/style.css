@@ -121,7 +121,7 @@
 
 #suppressed-plugins-table th,
 #suppressed-plugins-table td {
-	padding: 8px 10px;
+	padding: 10px;
 }
 
 #suppressed-plugins-table .column-status {
@@ -152,10 +152,6 @@
 	margin: 0;
 }
 
-#suppressed-plugins-table .column-details summary {
-	font-weight: bold;
-}
-
 #suppressed-plugins-table tbody th,
 #suppressed-plugins-table tbody td {
 	vertical-align: top;
@@ -165,12 +161,25 @@
 	background-color: #fef7f1;
 }
 
-#suppressed-plugins-table tbody tr > th.column-status {
-	border-left: solid 4px transparent;
+#suppressed-plugins-table tbody tr.is-suppressed {
+	background-color: #f7fcfe;
+}
+
+#suppressed-plugins-table tbody tr:not(.has-border-color) > th.column-status {
+	padding-left: 10px;
+}
+
+#suppressed-plugins-table tbody tr.has-border-color > th.column-status {
+	border-left: solid 4px;
+	padding-left: 6px;
 }
 
 #suppressed-plugins-table tbody tr.has-validation-errors > th.column-status {
 	border-color: #d54e21;
+}
+
+#suppressed-plugins-table tbody tr.is-suppressed > th.column-status {
+	border-color: #00a0d2;
 }
 
 #suppressed-plugins-table tbody tr:not(:last-child) > th,

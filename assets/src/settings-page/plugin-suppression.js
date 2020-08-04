@@ -203,7 +203,13 @@ function PluginRow( { pluginKey, pluginDetails } ) {
 	);
 
 	return (
-		<tr className={ classnames( { 'has-validation-errors': pluginDetails.validation_errors.length } ) }>
+		<tr className={ classnames(
+			{
+				'has-border-color': isSuppressed || pluginDetails.validation_errors.length,
+				'has-validation-errors': ! isSuppressed && pluginDetails.validation_errors.length,
+				'is-suppressed': isSuppressed,
+			},
+		) }>
 			<th className="column-status" scope="row">
 				<SelectControl
 					hideLabelFromVision={ true }
@@ -326,7 +332,7 @@ export function PluginSuppression() {
 			<p>
 				{ __( 'When a plugin adds markup that is not allowed in AMP you may let the AMP plugin remove it, or you may suppress the plugin from running on AMP pages. The following list includes all active plugins on your site, with any of those detected to be generating invalid AMP markup appearing first.', 'amp' ) }
 			</p>
-			<table id="suppressed-plugins-table" className="wp-list-table widefat fixed striped">
+			<table id="suppressed-plugins-table" className="wp-list-table widefat fixed">
 				<thead>
 					<tr>
 						<th className="column-status" scope="col">
