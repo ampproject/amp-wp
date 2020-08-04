@@ -60,6 +60,7 @@ function amp_bootstrap_plugin() {
 	 * Useful if the plugin is network activated and you want to turn it off on select sites.
 	 *
 	 * @since 0.2
+	 * @since 2.0 Postponed to run at plugins_loaded:8 instead of right after file load.
 	 */
 	if ( false === apply_filters( 'amp_is_enabled', true ) ) {
 		return;
