@@ -44,7 +44,7 @@
     "@wordpress/components": "10.0.2",
     "@wordpress/data": "4.20.0",
     "@wordpress/e2e-test-utils": "4.9.0",
-    "@wordpress/edit-post": "3.19.0",
+    "@wordpress/edit-post": "3.21.5",
     "@wordpress/eslint-plugin": "7.0.0",
     "@wordpress/hooks": "2.8.0",
     "@wordpress/jest-puppeteer-axe": "1.8.0",
