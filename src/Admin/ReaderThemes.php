@@ -9,6 +9,9 @@
 namespace AmpProject\AmpWP\Admin;
 
 use AMP_Core_Theme_Sanitizer;
+use AMP_Options_Manager;
+use AmpProject\AmpWP\Option;
+use WP_Theme;
 use WP_Upgrader;
 
 /**
@@ -105,6 +108,28 @@ final class ReaderThemes {
 		 */
 		$themes = (array) apply_filters( 'amp_reader_themes', $themes );
 
+		$active_theme_slug = AMP_Options_Manager::get_option( Option::READER_THEME );
+		$theme_slugs = wp_list_pluck( $themes, 'slug' );
+
+		/*
+		 * Check if the chosen Reader theme is among the list of filtered themes. If not, an attempt will be made to
+		 * obtain the theme data from the list of installed themes. If neither case is true, the AMP Legacy theme will
+		 * be used as a fallback.
+		 */
+		if ( ! in_array( $active_theme_slug, $theme_slugs, true ) ) {
+			$active_theme = wp_get_theme( $active_theme_slug );
+
+			if ( $active_theme->exists() ) {
+				$themes[] = $this->normalize_theme_data( $active_theme_slug );
+			}
+		}
+
+		/*
+		 * Append the AMP Legacy theme details after filtering the default themes. This ensures the AMP Legacy theme
+		 * will always be available as a fallback if the chosen Reader theme becomes unavailable.
+		 */
+		$themes[] = $this->get_classic_mode();
+
 		$themes = array_filter(
 			$themes,
 			static function( $theme ) {
@@ -172,7 +197,7 @@ final class ReaderThemes {
 		}
 
 		if ( is_wp_error( $response ) ) {
-			return [ $this->get_classic_mode() ];
+			return [];
 		}
 
 		if ( is_array( $response ) ) {
@@ -192,6 +217,48 @@ final class ReaderThemes {
 			}
 		);
 
+		$reader_themes = array_map(
+			function ( $theme ) {
+				$theme_data = $this->normalize_theme_data( $theme );
+				$theme_data['screenshot_url'] = amp_get_asset_url( "images/reader-themes/{$theme_data['slug']}.jpg" );
+
+				return $theme_data;
+			},
+			$reader_themes
+		);
+
+		$this->default_reader_themes = $reader_themes;
+		return $this->default_reader_themes;
+	}
+
+	/**
+	 * Normalize the specified theme data.
+	 *
+	 * @param WP_Theme|array|\stdClass $theme Theme.
+	 * @return array Normalized theme data.
+	 */
+	public function normalize_theme_data( $theme ) {
+		if ( $theme instanceof WP_Theme ) {
+			if ( $theme->errors() ) {
+				return  [];
+			}
+
+			return [
+				'name'           => $theme->display( 'Name' ),
+				'slug'           => $theme->get_stylesheet(),
+				'preview_url'    => null,
+				'screenshot_url' => $theme->get_screenshot(),
+				'homepage'       => $theme->display( 'ThemeURI' ),
+				'description'    => $theme->display( 'Description' ),
+				'requires'       => $theme->get( 'RequiresWP' ),
+				'requires_php'   => $theme->get( 'RequiresPHP' ),
+			];
+		}
+
+		if ( ! is_array( $theme ) && ! is_object( $theme ) ) {
+			return [];
+		}
+
 		$keys = [
 			'name',
 			'slug',
@@ -203,22 +270,10 @@ final class ReaderThemes {
 			'requires_php',
 		];
 
-		// Supply the screenshots.
-		$reader_themes = array_map(
-			static function ( $theme ) use ( $keys ) {
-				return array_merge(
-					array_fill_keys( $keys, '' ), // Provide empty defaults to make sure all keys are present.
-					wp_array_slice_assoc( (array) $theme, $keys ),
-					[ 'screenshot_url' => amp_get_asset_url( "images/reader-themes/{$theme->slug}.jpg" ) ]
-				);
-			},
-			$reader_themes
+		return array_merge(
+			array_fill_keys( $keys, '' ),
+			wp_array_slice_assoc( (array) $theme, $keys )
 		);
-
-		$reader_themes[] = $this->get_classic_mode();
-
-		$this->default_reader_themes = $reader_themes;
-		return $this->default_reader_themes;
 	}
 
 	/**
@@ -265,7 +320,7 @@ final class ReaderThemes {
 	 * @param array $theme Theme data.
 	 * @return string Theme availability status.
 	 */
-	public function get_theme_availability( $theme ) {
+		public function get_theme_availability( $theme ) {
 		switch ( true ) {
 			case get_stylesheet() === $theme['slug']:
 				return self::STATUS_ACTIVE;
@@ -288,7 +343,7 @@ final class ReaderThemes {
 	 */
 	private function get_classic_mode() {
 		return [
-			'name'           => 'AMP Legacy',
+			'name'           => __( 'AMP Legacy', 'amp' ),
 			'slug'           => 'legacy',
 			'preview_url'    => 'https://amp-wp.org',
 			'screenshot_url' => amp_get_asset_url( 'images/reader-themes/legacy.jpg' ),
