@@ -10,7 +10,7 @@ Requires PHP: 5.6
 
 The Official AMP plugin, supported by the AMP team. Formerly Accelerated Mobile Pages, AMP enables great experiences across both mobile and desktop.
 
-## Description
+== Description ==
 
 **The official AMP plugin** enables AMP content publishing with WordPress in a way that is fully and seamlessly integrated with the standard mechanisms of the platform. The key features are the following:
 
@@ -53,17 +53,17 @@ Many popular theme and plugin developers have taken efforts to support The offic
 
 Although there is a growing ecosystem of AMP compatible WordPress components, still there are some ways to go before 100% AMP compatibility in the ecosystem. If you are a developer, or you have the resources to pursue development projects, you may want, in some cases, develop custom functionality (i.e. as a plugin, or in the theme space) to serve your specific needs. The official AMP plugin can be of great help to you by providing powerful and effective developer tools that shed light into the AMP development process as it is done in WordPress, including mechanisms for detailing the root causes of all validation issues, and the contextual space to understand them properly, and dealing with them during the process of achieving full AMP compatibility.
 
-## Frequently Asked Questions
+== Frequently Asked Questions ==
 
 Please see the [FAQs on amp-wp.org](https://amp-wp.org/documentation/frequently-asked-questions/). Don&#39;t see an answer to your question? Please [search the support forum](https://wordpress.org/support/plugin/amp/) to see if someone has asked your question. Otherwise, please [open a new support topic](https://wordpress.org/support/plugin/amp/#new-post).
 
-## Installation
+== Installation ==
 
 1. Upload the folder to the /wp-content/plugins/ directory.
 2. Activate the plugin through the &#39;Plugins&#39; menu in WordPress.
 3. If you currently use older versions of the plugin in Reader mode, it is strongly encouraged to migrate to Transitional or Standard mode. Depending on your theme/plugins, some development work may be required.
 
-## Getting Started
+== Getting Started ==
 
 To learn more about the plugin and start leveraging its capabilities to power your AMP content creation workflow check [the official AMP plugin product site](https://amp-wp.org/).
 
