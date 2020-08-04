@@ -35,6 +35,27 @@ class AMP_Validated_URL_Post_Type {
 	const STYLESHEETS_POST_META_KEY = '_amp_stylesheets';
 
 	/**
+	 * Postmeta key for storing queried object data.
+	 *
+	 * @var string
+	 */
+	const QUERIED_OBJECT_POST_META_KEY = '_amp_queried_object';
+
+	/**
+	 * Postmeta key for storing validated environment data.
+	 *
+	 * @var string
+	 */
+	const VALIDATED_ENVIRONMENT_POST_META_KEY = '_amp_validated_environment';
+
+	/**
+	 * Postmeta key for storing PHP fatal error data.
+	 *
+	 * @var string
+	 */
+	const PHP_FATAL_ERROR_POST_META_KEY = '_amp_php_fatal_error';
+
+	/**
 	 * The action to recheck URLs for AMP validity.
 	 *
 	 * @var string
@@ -777,6 +798,7 @@ class AMP_Validated_URL_Post_Type {
 	 *     @type int|WP_Post $invalid_url_post Post to update. Optional. If empty, then post is looked up by URL.
 	 *     @type array       $queried_object   Queried object, including keys for type and id. May be empty.
 	 *     @type array       $stylesheets      Stylesheet data. May be empty.
+	 *     @type array       $php_fatal_error  PHP Fatal Error. May be empty.
 	 * }
 	 * @return int|WP_Error $post_id The post ID of the custom post type used, or WP_Error on failure.
 	 * @global WP $wp
@@ -916,9 +938,9 @@ class AMP_Validated_URL_Post_Type {
 		$post_id = $r;
 		wp_set_object_terms( $post_id, wp_list_pluck( $terms, 'term_id' ), AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
 
-		update_post_meta( $post_id, '_amp_validated_environment', self::get_validated_environment() );
+		update_post_meta( $post_id, self::VALIDATED_ENVIRONMENT_POST_META_KEY, self::get_validated_environment() );
 		if ( isset( $args['queried_object'] ) ) {
-			update_post_meta( $post_id, '_amp_queried_object', $args['queried_object'] );
+			update_post_meta( $post_id, self::QUERIED_OBJECT_POST_META_KEY, $args['queried_object'] );
 		}
 		if ( isset( $args['stylesheets'] ) ) {
 			// Note that json_encode() is being used here because wp_slash() will coerce scalar values to strings.
@@ -926,10 +948,10 @@ class AMP_Validated_URL_Post_Type {
 		}
 		if ( isset( $args['php_fatal_error'] ) ) {
 			if ( empty( $args['php_fatal_error'] ) ) {
-				delete_post_meta( $post_id, '_amp_php_fatal_error' );
+				delete_post_meta( $post_id, self::PHP_FATAL_ERROR_POST_META_KEY );
 			} else {
 				// Note that json_encode() is being used here because wp_slash() will coerce scalar values to strings.
-				update_post_meta( $post_id, '_amp_php_fatal_error', wp_slash( wp_json_encode( $args['php_fatal_error'] ) ) );
+				update_post_meta( $post_id, self::PHP_FATAL_ERROR_POST_META_KEY, wp_slash( wp_json_encode( $args['php_fatal_error'] ) ) );
 			}
 		}
 
@@ -1085,7 +1107,7 @@ class AMP_Validated_URL_Post_Type {
 			return [];
 		}
 
-		$old_validated_environment = get_post_meta( $post->ID, '_amp_validated_environment', true );
+		$old_validated_environment = get_post_meta( $post->ID, self::VALIDATED_ENVIRONMENT_POST_META_KEY, true );
 		$new_validated_environment = self::get_validated_environment();
 
 		$staleness = [];
@@ -1340,7 +1362,7 @@ class AMP_Validated_URL_Post_Type {
 	 */
 	public static function render_sources_column( $sources, $post_id ) {
 		$active_theme          = null;
-		$validated_environment = get_post_meta( $post_id, '_amp_validated_environment', true );
+		$validated_environment = get_post_meta( $post_id, self::VALIDATED_ENVIRONMENT_POST_META_KEY, true );
 		if ( isset( $validated_environment['theme'] ) ) {
 			$active_theme = $validated_environment['theme'];
 		}
@@ -1714,7 +1736,7 @@ class AMP_Validated_URL_Post_Type {
 	 * @param WP_Post $post Post.
 	 */
 	private static function render_php_fatal_error_admin_notice( WP_Post $post ) {
-		$error = get_post_meta( $post->ID, '_amp_php_fatal_error', true );
+		$error = get_post_meta( $post->ID, self::PHP_FATAL_ERROR_POST_META_KEY, true );
 		if ( empty( $error ) ) {
 			return;
 		}
@@ -2164,7 +2186,7 @@ class AMP_Validated_URL_Post_Type {
 					<div class="misc-pub-section">
 						<?php
 						$view_label     = __( 'View URL', 'amp' );
-						$queried_object = get_post_meta( $post->ID, '_amp_queried_object', true );
+						$queried_object = get_post_meta( $post->ID, self::QUERIED_OBJECT_POST_META_KEY, true );
 						if ( isset( $queried_object['id'], $queried_object['type'] ) ) {
 							$after = ' | ';
 							if ( 'post' === $queried_object['type'] && get_post( $queried_object['id'] ) && post_type_exists( get_post( $queried_object['id'] )->post_type ) ) {
@@ -3010,7 +3032,7 @@ class AMP_Validated_URL_Post_Type {
 		}
 
 		// Mainly uses the same conditionals as print_status_meta_box().
-		$queried_object = get_post_meta( $post->ID, '_amp_queried_object', true );
+		$queried_object = get_post_meta( $post->ID, self::QUERIED_OBJECT_POST_META_KEY, true );
 		if ( isset( $queried_object['type'], $queried_object['id'] ) ) {
 			$name = null;
 			if ( 'post' === $queried_object['type'] && get_post( $queried_object['id'] ) ) {
