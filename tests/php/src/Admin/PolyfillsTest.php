@@ -63,6 +63,11 @@ class PolyfillsTest extends WP_UnitTestCase {
 		// These should pass in WP 4.9 tests.
 		$this->assertTrue( wp_script_is( 'lodash', 'registered' ) );
 		$this->assertTrue( wp_script_is( 'wp-api-fetch', 'registered' ) );
+		$this->assertTrue( wp_script_is( 'wp-i18n', 'registered' ) );
+		$this->assertTrue( wp_script_is( 'wp-dom-ready', 'registered' ) );
+		$this->assertTrue( wp_script_is( 'wp-polyfill', 'registered' ) );
+		$this->assertTrue( wp_script_is( 'wp-url', 'registered' ) );
+
 		$this->assertTrue( wp_style_is( 'wp-components', 'registered' ) );
 	}
 }
