@@ -63,9 +63,9 @@ Please see the [FAQs on amp-wp.org](https://amp-wp.org/documentation/frequently-
 
 ## Installation ##
 
-1. Upload the folder to the /wp-content/plugins/ directory.
+1. Upload the folder to the `/wp-content/plugins/` directory.
 2. Activate the plugin through the &#39;Plugins&#39; menu in WordPress.
-3. If you currently use older versions of the plugin in Reader mode, it is strongly encouraged to migrate to Transitional or Standard mode. Depending on your theme/plugins, some development work may be required.
+3. If you currently use older versions of the plugin in `Reader` mode, it is strongly encouraged to migrate to `Transitional` or `Standard` mode. Depending on your theme/plugins, some development work may be required.
 
 ## Getting Started ##
 
