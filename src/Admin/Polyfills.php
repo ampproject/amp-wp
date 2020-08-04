@@ -9,9 +9,6 @@
 
 namespace AmpProject\AmpWP\Admin;
 
-use AMP_Theme_Support;
-use AmpProject\AmpWP\Infrastructure\Conditional;
-use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use WP_Scripts;
@@ -22,27 +19,7 @@ use WP_Styles;
  *
  * @since 2.0
  */
-final class Polyfills implements Conditional, Delayed, Service, Registerable {
-
-	/**
-	 * Check whether the conditional object is currently needed.
-	 *
-	 * @return bool Whether the conditional object is needed.
-	 */
-	public static function is_needed() {
-		return amp_is_dev_mode()
-			|| isset( $_GET[ AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			|| ( is_admin() && ! wp_doing_ajax() );
-	}
-
-	/**
-	 * Get the action to use for registering the service.
-	 *
-	 * @return string Registration action to use.
-	 */
-	public static function get_registration_action() {
-		return 'wp';
-	}
+final class Polyfills implements Service, Registerable {
 
 	/**
 	 * Runs on instantiation.
