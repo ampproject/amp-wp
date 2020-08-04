@@ -63,7 +63,7 @@ function amp_bootstrap_plugin() {
 	 * Register AMP scripts regardless of whether AMP is enabled or it is the AMP endpoint
 	 * for the sake of being able to use AMP components on non-AMP documents ("dirty AMP").
 	 */
-	add_action( 'wp_default_scripts', 'amp_register_default_scripts' );
+	add_action( 'wp_default_scripts', 'amp_register_default_scripts', 12 );
 
 	add_action( 'wp_default_styles', 'amp_register_default_styles' );
 

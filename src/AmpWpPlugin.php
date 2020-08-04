@@ -13,6 +13,7 @@ use AmpProject\AmpWP\Admin\OnboardingWizardSubmenu;
 use AmpProject\AmpWP\Admin\OnboardingWizardSubmenuPage;
 use AmpProject\AmpWP\Admin\OptionsMenu;
 use AmpProject\AmpWP\Admin\PluginActivationNotice;
+use AmpProject\AmpWP\Admin\Polyfills;
 use AmpProject\AmpWP\Admin\ReenableCssTransientCachingAjaxAction;
 use AmpProject\AmpWP\Admin\SiteHealth;
 use AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching;
@@ -78,6 +79,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			'rest.options_controller'          => OptionsRESTController::class,
 			'server_timing'                    => ServerTiming::class,
 			'obsolete_block_attribute_remover' => ObsoleteBlockAttributeRemover::class,
+			'admin.polyfills'                  => Polyfills::class,
 		];
 	}
 
