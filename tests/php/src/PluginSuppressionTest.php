@@ -218,11 +218,11 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		$_GET[ amp_get_slug() ] = 1;
 		$this->assertTrue( $instance->is_reader_theme_request() );
 
+		$this->init_plugins();
+		$this->update_suppressed_plugins_option( array_fill_keys( $this->get_bad_plugin_file_slugs(), true ) );
 		$instance->register();
-		$this->assertEquals(
-			defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX, // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
-			has_action( 'plugins_loaded', [ $instance, 'suppress_plugins' ] )
-		);
+		$this->assertFalse( has_action( 'plugins_loaded', [ $instance, 'suppress_plugins' ] ), 'Expected suppression to happen immediately.' );
+		$this->assertEquals( '', do_shortcode( '[bad]' ), 'Expected suppression to happen immediately.' );
 		$this->assertEquals( 10, has_filter( 'amp_default_options', [ $instance, 'filter_default_options' ] ) );
 	}
 
