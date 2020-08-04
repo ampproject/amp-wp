@@ -199,10 +199,6 @@
 	cursor: pointer;
 }
 
-#suppressed-plugins-table summary:hover {
-	color: var(--amp-settings-color-brand);
-}
-
 #suppressed-plugins-table tbody .column-plugin,
 #suppressed-plugins-table tbody .column-details {
 	padding-top: 18px;
