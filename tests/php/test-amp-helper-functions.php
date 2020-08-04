@@ -87,17 +87,53 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		return 'http://overridden.example.com/?' . build_query( compact( 'url', 'post_id', 'current_filter' ) );
 	}
 
+	const BOOTSTRAPPED_ACTIONS = [
+		'wp_default_scripts',
+		'wp_default_styles',
+		'after_setup_theme',
+		'after_setup_theme',
+		'plugins_loaded',
+	];
+
+	const BOOTSTRAPPED_FILTERS = [
+		'script_loader_tag',
+		'style_loader_tag',
+	];
+
+	private function remove_bootstrapped_hooks() {
+		foreach ( self::BOOTSTRAPPED_ACTIONS as $action ) {
+			remove_all_actions( $action );
+		}
+		foreach ( self::BOOTSTRAPPED_FILTERS as $filter ) {
+			remove_all_filters( $filter );
+		}
+	}
+
 	/** @covers ::amp_bootstrap_plugin() */
 	public function test_amp_bootstrap_plugin() {
+		$this->remove_bootstrapped_hooks();
 		amp_bootstrap_plugin();
 
-		$this->assertEquals( ~PHP_INT_MAX, has_action( 'plugins_loaded', [ 'AMP_Validation_Manager', 'init_validate_request' ] ) );
 		$this->assertEquals( 10, has_action( 'wp_default_scripts', 'amp_register_default_scripts' ) );
 		$this->assertEquals( 10, has_action( 'wp_default_styles', 'amp_register_default_styles' ) );
-		$this->assertEquals( PHP_INT_MAX, has_filter( 'script_loader_tag', 'amp_filter_script_loader_tag' ) );
-		$this->assertEquals( 10, has_filter( 'style_loader_tag', 'amp_filter_font_style_loader_tag_with_crossorigin_anonymous' ) );
 		$this->assertEquals( 5, has_action( 'after_setup_theme', 'amp_after_setup_theme' ) );
 		$this->assertEquals( 9, has_action( 'plugins_loaded', '_amp_bootstrap_customizer' ) );
+
+		$this->assertEquals( PHP_INT_MAX, has_filter( 'script_loader_tag', 'amp_filter_script_loader_tag' ) );
+		$this->assertEquals( 10, has_filter( 'style_loader_tag', 'amp_filter_font_style_loader_tag_with_crossorigin_anonymous' ) );
+	}
+
+	/** @covers ::amp_bootstrap_plugin() */
+	public function test_amp_bootstrap_plugin_amp_disabled() {
+		$this->remove_bootstrapped_hooks();
+		add_filter( 'amp_is_enabled', '__return_false' );
+		amp_bootstrap_plugin();
+		foreach ( self::BOOTSTRAPPED_ACTIONS as $action ) {
+			$this->assertFalse( has_action( $action ) );
+		}
+		foreach ( self::BOOTSTRAPPED_FILTERS as $filter ) {
+			$this->assertFalse( has_filter( $filter ) );
+		}
 	}
 
 	/** @covers ::amp_init() */

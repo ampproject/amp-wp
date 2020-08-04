@@ -68,8 +68,9 @@ function amp_bootstrap_plugin() {
 
 	AmpWpPluginFactory::create()->register();
 
-	// The plugins_loaded action is the earliest we can run this since that is when pluggable.php has been required and wp_hash() is available.
-	add_action( 'plugins_loaded', [ 'AMP_Validation_Manager', 'init_validate_request' ], ~PHP_INT_MAX );
+	// The amp_bootstrap_plugin() function is called at the plugins_loaded action with the earliest priority. This is
+	// the earliest we can run this since that is when pluggable.php has been required and wp_hash() is available.
+	AMP_Validation_Manager::init_validate_request();
 
 	/*
 	 * Register AMP scripts regardless of whether AMP is enabled or it is the AMP endpoint
