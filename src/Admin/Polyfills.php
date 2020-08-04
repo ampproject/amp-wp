@@ -9,6 +9,7 @@
 
 namespace AmpProject\AmpWP\Admin;
 
+use AMP_Theme_Support;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
@@ -29,7 +30,7 @@ final class Polyfills implements Conditional, Delayed, Service, Registerable {
 	 * @return bool Whether the conditional object is needed.
 	 */
 	public static function is_needed() {
-		return is_admin() && ! wp_doing_ajax();
+		return isset( $_GET[ AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR ] ) || ( is_admin() && ! wp_doing_ajax() ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**
