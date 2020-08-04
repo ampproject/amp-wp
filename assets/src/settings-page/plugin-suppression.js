@@ -275,7 +275,7 @@ function PluginRow( { pluginKey, pluginDetails } ) {
 							<SuppressedPluginTime suppressedPlugin={ originalSuppressedPlugins[ pluginKey ] } />
 							{ ' ' }
 							<SuppressedPluginUsername suppressedPlugin={ originalSuppressedPlugins[ pluginKey ] } />
-							{ '  ' }
+							{ ' ' }
 							<SuppressedPluginVersion
 								pluginDetails={ pluginDetails }
 								suppressedPlugin={ originalSuppressedPlugins[ pluginKey ] }
