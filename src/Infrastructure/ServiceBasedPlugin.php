@@ -9,7 +9,6 @@ namespace AmpProject\AmpWP\Infrastructure;
 
 use AmpProject\AmpWP\Exception\InvalidService;
 use AmpProject\AmpWP\Infrastructure\ServiceContainer\LazilyInstantiatedService;
-use AmpProject\AmpWP\PluginRegistry;
 
 /**
  * This abstract base plugin provides all the boilerplate code for working with

@@ -7,6 +7,7 @@
 
 namespace AmpProject\AmpWP;
 
+use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AMP_Options_Manager;
@@ -23,7 +24,7 @@ use WP_Customize_Manager;
  *
  * @package AmpProject\AmpWP
  */
-final class ReaderThemeLoader implements Service, Registerable {
+final class ReaderThemeLoader implements Service, Registerable, Conditional {
 
 	/**
 	 * Reader theme.
@@ -49,32 +50,41 @@ final class ReaderThemeLoader implements Service, Registerable {
 	private $theme_overridden = false;
 
 	/**
+	 * Check whether the conditional object is currently needed.
+	 *
+	 * @return bool Whether the conditional object is needed.
+	 */
+	public static function is_needed() {
+		return self::is_amp_request() && self::is_enabled();
+	}
+
+	/**
 	 * Is Reader mode with a Reader theme selected.
 	 *
 	 * @return bool Whether new Reader mode.
 	 */
-	public function is_enabled() {
-		// If the theme was overridden then we know it is enabled. We can't check get_template() at this point because
-		// it will be identical to $reader_theme.
-		if ( $this->is_theme_overridden() ) {
-			return true;
-		}
-
+	public static function is_enabled() {
 		// If Reader mode is not enabled, then a Reader theme is definitely not going to be served.
 		if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
 			return false;
 		}
 
 		// If the Legacy Reader mode is active, then a Reader theme is not going to be served.
-		$reader_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
 		if ( ReaderThemes::DEFAULT_READER_THEME === AMP_Options_Manager::get_option( Option::READER_THEME ) ) {
+			return false;
+		}
+
+		$reader_theme_slug = AMP_Options_Manager::get_option( Option::READER_THEME );
+		$reader_theme = wp_get_theme( $reader_theme_slug );
+
+		if ( ! $reader_theme->exists() ) {
 			return false;
 		}
 
 		// Lastly, if the active theme is not the same as the reader theme, then we can switch to the reader theme.
 		// Otherwise, the site should instead be in Transitional mode. Note that get_stylesheet() is used as opposed
 		// to get_template() because the active theme should be allowed to be a child theme of a Reader theme.
-		return get_stylesheet() !== $reader_theme;
+		return get_stylesheet() !== $reader_theme_slug;
 	}
 
 	/**
@@ -91,7 +101,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 	 *
 	 * @return bool Whether AMP request.
 	 */
-	public function is_amp_request() {
+	public static function is_amp_request() {
 		return isset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 
@@ -289,8 +299,9 @@ final class ReaderThemeLoader implements Service, Registerable {
 	 * @see switch_theme() which ensures the new theme includes the old theme's theme mods.
 	 */
 	public function override_theme() {
-		$this->theme_overridden = false;
-		if ( ! $this->is_enabled() || ! $this->is_amp_request() ) {
+		// If the theme was overridden then we know it is enabled. We can't check get_template() at this point because
+		// it will be identical to $reader_theme.
+		if ( $this->theme_overridden ) {
 			return;
 		}
 
