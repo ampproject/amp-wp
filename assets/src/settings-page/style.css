@@ -203,10 +203,9 @@
 	color: var(--amp-settings-color-brand);
 }
 
-#suppressed-plugins-table .inner-cell {
-	display: flex;
-	min-height: 34px;
-	align-items: center;
+#suppressed-plugins-table tbody .column-plugin,
+#suppressed-plugins-table tbody .column-details {
+	padding-top: 18px;
 }
 
 li.error-removed {
@@ -227,8 +226,9 @@ li.error-kept {
 		font-size: inherit;
 	}
 
-	#suppressed-plugins-table .inner-cell {
-		min-height: 42px;
+	#suppressed-plugins-table tbody .column-plugin,
+	#suppressed-plugins-table tbody .column-details {
+		padding-top: 21px;
 	}
 
 	#suppressed-plugins-table {
