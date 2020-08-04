@@ -75,7 +75,7 @@ final class ReaderThemeLoader implements Service, Registerable, Conditional {
 		}
 
 		$reader_theme_slug = AMP_Options_Manager::get_option( Option::READER_THEME );
-		$reader_theme = wp_get_theme( $reader_theme_slug );
+		$reader_theme      = wp_get_theme( $reader_theme_slug );
 
 		if ( ! $reader_theme->exists() ) {
 			return false;

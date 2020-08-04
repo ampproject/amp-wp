@@ -109,7 +109,7 @@ final class ReaderThemes {
 		$themes = (array) apply_filters( 'amp_reader_themes', $themes );
 
 		$active_theme_slug = AMP_Options_Manager::get_option( Option::READER_THEME );
-		$theme_slugs = wp_list_pluck( $themes, 'slug' );
+		$theme_slugs       = wp_list_pluck( $themes, 'slug' );
 
 		/*
 		 * Check if the chosen Reader theme is among the list of filtered themes. If not, an attempt will be made to
@@ -219,7 +219,7 @@ final class ReaderThemes {
 
 		$reader_themes = array_map(
 			function ( $theme ) {
-				$theme_data = $this->normalize_theme_data( $theme );
+				$theme_data                   = $this->normalize_theme_data( $theme );
 				$theme_data['screenshot_url'] = amp_get_asset_url( "images/reader-themes/{$theme_data['slug']}.jpg" );
 
 				return $theme_data;
@@ -240,7 +240,7 @@ final class ReaderThemes {
 	public function normalize_theme_data( $theme ) {
 		if ( $theme instanceof WP_Theme ) {
 			if ( $theme->errors() ) {
-				return  [];
+				return [];
 			}
 
 			return [
@@ -320,7 +320,7 @@ final class ReaderThemes {
 	 * @param array $theme Theme data.
 	 * @return string Theme availability status.
 	 */
-		public function get_theme_availability( $theme ) {
+	public function get_theme_availability( $theme ) {
 		switch ( true ) {
 			case get_stylesheet() === $theme['slug']:
 				return self::STATUS_ACTIVE;
