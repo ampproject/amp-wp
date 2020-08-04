@@ -12,6 +12,8 @@ use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use WP_Scripts;
+use WP_Styles;
 use WP_UnitTestCase;
 
 /**
@@ -58,7 +60,12 @@ class PolyfillsTest extends WP_UnitTestCase {
 	 * @covers Polyfills::register_shimmed_styles
 	 */
 	public function test_registration() {
+		global $wp_scripts, $wp_styles;
 		$this->instance->register();
+
+		$wp_scripts = new WP_Scripts();
+		$wp_scripts->init();
+		$wp_styles = new WP_Styles();
 
 		// These should pass in WP 4.9 tests.
 		$this->assertTrue( wp_script_is( 'lodash', 'registered' ) );
@@ -69,5 +76,8 @@ class PolyfillsTest extends WP_UnitTestCase {
 		$this->assertTrue( wp_script_is( 'wp-url', 'registered' ) );
 
 		$this->assertTrue( wp_style_is( 'wp-components', 'registered' ) );
+
+		unset( $wp_scripts );
+		unset( $wp_styles );
 	}
 }
