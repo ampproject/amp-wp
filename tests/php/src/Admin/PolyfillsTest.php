@@ -8,8 +8,6 @@
 namespace AmpProject\AmpWP\Tests\Admin;
 
 use AmpProject\AmpWP\Admin\Polyfills;
-use AmpProject\AmpWP\Infrastructure\Conditional;
-use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use WP_Scripts;
@@ -46,8 +44,6 @@ class PolyfillsTest extends WP_UnitTestCase {
 	/** @covers Polyfills::__construct() */
 	public function test__construct() {
 		$this->assertInstanceOf( Polyfills::class, $this->instance );
-		$this->assertInstanceOf( Conditional::class, $this->instance );
-		$this->assertInstanceOf( Delayed::class, $this->instance );
 		$this->assertInstanceOf( Service::class, $this->instance );
 		$this->assertInstanceOf( Registerable::class, $this->instance );
 	}
