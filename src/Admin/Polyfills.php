@@ -48,9 +48,9 @@ final class Polyfills implements Service, Registerable {
 		}
 
 		/*
-		* Polyfill dependencies that are registered in Gutenberg and WordPress 5.0.
-		* Note that Gutenberg will override these at wp_enqueue_scripts if it is active.
-		*/
+		 * Polyfill dependencies that are registered in Gutenberg and WordPress 5.0.
+		 * Note that Gutenberg will override these at wp_enqueue_scripts if it is active.
+		 */
 		$handles = [ 'wp-i18n', 'wp-dom-ready', 'wp-polyfill', 'wp-url' ];
 		foreach ( $handles as $handle ) {
 			if ( ! isset( $wp_scripts->registered[ $handle ] ) ) {
