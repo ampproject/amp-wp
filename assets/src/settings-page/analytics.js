@@ -51,11 +51,7 @@ function AnalyticsEntry( { entryId = '', onChange, onDelete, type = '', config =
 
 	const analyticsTitle = useMemo( () => {
 		if ( isExistingEntry ) {
-			const newEntrySlug = sprintf(
-				'%1$s%2$s',
-				type ? type + '-' : '',
-				entryId.substr( entryId.length - 6 ),
-			);
+			const newEntrySlug = `${ type ? type + '-' : '' }${ entryId.substr( entryId.length - 6 ) }`;
 
 			/* translators: %s: the entry slug. */
 			return sprintf( __( 'Analytics: %s', 'amp' ), newEntrySlug );
