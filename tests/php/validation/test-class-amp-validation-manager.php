@@ -2478,9 +2478,10 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'post_id', $r );
 		$this->assertEquals( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, get_post_type( $r['post_id'] ) );
 		$this->assertEquals( $r['url'], AMP_Validated_URL_Post_Type::get_url_from_post( $r['post_id'] ) );
-		$this->assertEquals( $php_error, json_decode( get_post_meta( $r['post_id'], '_amp_php_fatal_error', true ), true ) );
-		$this->assertEquals( $queried_object, get_post_meta( $r['post_id'], '_amp_queried_object', true ) );
-		$this->assertEquals( $stylesheets, json_decode( get_post_meta( $r['post_id'], '_amp_stylesheets', true ), true ) );
+		$this->assertEquals( $php_error, json_decode( get_post_meta( $r['post_id'], AMP_Validated_URL_Post_Type::PHP_FATAL_ERROR_POST_META_KEY, true ), true ) );
+		$this->assertEquals( $queried_object, get_post_meta( $r['post_id'], AMP_Validated_URL_Post_Type::QUERIED_OBJECT_POST_META_KEY, true ) );
+		$this->assertEquals( $stylesheets, json_decode( get_post_meta( $r['post_id'], AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY, true ), true ) );
+		$this->assertEquals( AMP_Validated_URL_Post_Type::get_validated_environment(), get_post_meta( $r['post_id'], AMP_Validated_URL_Post_Type::VALIDATED_ENVIRONMENT_POST_META_KEY, true ) );
 
 		$updated_validated_url = home_url( '/bar/' );
 		$previous_post_id      = $r['post_id'];
