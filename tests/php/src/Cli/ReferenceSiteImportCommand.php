@@ -259,6 +259,8 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 
 		$wpdb->query( sprintf( 'TRUNCATE `%s`;', $wpdb->options ) );
 
+		wp_cache_flush();
+
 		populate_options( [
 			'siteurl'             => $siteurl,
 			'home'                => $home,
