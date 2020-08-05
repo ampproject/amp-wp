@@ -64,12 +64,12 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	const [ downloadingThemeError, setDownloadingThemeError ] = useState( null );
 
 	/**
-	 * If the currently selected theme is unavailable and not installable, unset the reader theme option. This will handle cases where
-	 * the reader theme stored in the options is removed and can no longer be installed.
+	 * If the currently selected theme is unavailable and not installable, or the current theme is the active theme,
+	 * unset the reader theme option.
 	 */
 	useEffect( () => {
-		if ( selectedTheme.availability === 'non-installable' ) {
-			updateOptions( { reader_theme: null } );
+		if ( selectedTheme.availability === 'non-installable' || selectedTheme.availability === 'active' ) {
+			updateOptions( { reader_theme: 'legacy' } );
 		}
 	}, [ selectedTheme.availability, updateOptions ] );
 
