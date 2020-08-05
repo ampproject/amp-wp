@@ -134,7 +134,7 @@ abstract class CronBasedBackgroundTask implements Service, Registerable, Conditi
 
 		$warning_icon = $this->get_warning_icon();
 		if ( false === strpos( $actions['deactivate'], $warning_icon ) ) {
-			$actions['deactivate'] = preg_replace( '#(?=</a>)#i', ' ' . $this->get_warning_icon(), $actions['deactivate'] );
+			$actions['deactivate'] = preg_replace( '#(?=</a>)#i', ' ' . $warning_icon, $actions['deactivate'] );
 		}
 
 		return $actions;
