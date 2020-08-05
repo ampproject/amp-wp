@@ -3,7 +3,7 @@
  */
 import { visitAdminPage } from '@wordpress/e2e-test-utils';
 
-describe( 'AMP settings screen reader themes carousel', () => {
+describe( 'AMP analytics options', () => {
 	beforeEach( async () => {
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 	} );
