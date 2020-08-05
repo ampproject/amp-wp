@@ -19,7 +19,7 @@ use WP_UnitTestCase;
  *
  * @since 2.0
  *
- * @covers Polyflls.
+ * @covers Polyfills.
  */
 class PolyfillsTest extends WP_UnitTestCase {
 
@@ -73,7 +73,6 @@ class PolyfillsTest extends WP_UnitTestCase {
 
 		$this->assertTrue( wp_style_is( 'wp-components', 'registered' ) );
 
-		unset( $wp_scripts );
-		unset( $wp_styles );
+		unset( $wp_scripts, $wp_styles );
 	}
 }

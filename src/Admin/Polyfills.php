@@ -54,14 +54,14 @@ final class Polyfills implements Service, Registerable {
 		$handles = [ 'wp-i18n', 'wp-dom-ready', 'wp-polyfill', 'wp-url' ];
 		foreach ( $handles as $handle ) {
 			if ( ! isset( $wp_scripts->registered[ $handle ] ) ) {
-				$asset_file   = AMP__DIR__ . '/assets/js/' . $handle . '.asset.php';
+				$asset_file   = AMP__DIR__ . "/assets/js/{$handle}.asset.php";
 				$asset        = require $asset_file;
 				$dependencies = $asset['dependencies'];
 				$version      = $asset['version'];
 
 				$wp_scripts->add(
 					$handle,
-					amp_get_asset_url( sprintf( 'js/%s.js', $handle ) ),
+					amp_get_asset_url( "js/{$handle}.js" ),
 					$dependencies,
 					$version
 				);
@@ -70,13 +70,13 @@ final class Polyfills implements Service, Registerable {
 
 		if ( ! isset( $wp_scripts->registered['wp-api-fetch'] ) ) {
 			$asset_handle = 'wp-api-fetch';
-			$asset_file   = AMP__DIR__ . '/assets/js/' . $asset_handle . '.asset.php';
+			$asset_file   = AMP__DIR__ . "/assets/js/{$asset_handle}.asset.php";
 			$asset        = require $asset_file;
 			$version      = $asset['version'];
 
 			$wp_scripts->add(
 				$asset_handle,
-				amp_get_asset_url( 'js/' . $asset_handle . '.js' ),
+				amp_get_asset_url( "js/{$asset_handle}.js" ),
 				[],
 				$version,
 				true
