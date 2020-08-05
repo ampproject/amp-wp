@@ -351,9 +351,9 @@ li.error-kept {
 .amp .amp-analytics-entry__text-inputs .components-base-control__field {
 	align-items: center;
 	display: flex;
-	margin-bottom: 0.75rem;
+	margin-bottom: 0.25rem;
 	min-width: 240px;
-	padding-right: 1.5rem;
+	padding-right: 2rem;
 }
 
 .amp-analytics-entry__text-inputs .components-base-control__label {

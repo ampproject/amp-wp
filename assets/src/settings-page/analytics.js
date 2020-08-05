@@ -121,11 +121,21 @@ function AnalyticsEntry( { entryId = '', onChange, onDelete, type = '', config =
 						required
 						placeholder={ __( 'e.g. googleanalytics', 'amp' ) }
 						value={ type }
+						help={ <span dangerouslySetInnerHTML={
+							{ __html:
+								sprintf(
+									/* translators: Placeholder is an AMP analytics vendor docs URL. */
+									__( 'See <a href="%s" target="_blank">available vendors</a>.', 'amp' ),
+									__( 'https://www.ampproject.org/docs/analytics/analytics-vendors', 'amp' ),
+								),
+							} }
+						/> }
 					/>
 
 					<TextControl
 						label={ __( 'ID:', 'amp' ) }
 						type="text"
+						help={ isExistingEntry ? '' : __( 'The entry ID will be generated automatically.', 'amp' ) }
 						value={ isExistingEntry ? entryId : '' }
 						readOnly
 					/>
