@@ -195,7 +195,7 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 	 * @param bool $empty_uploads Whether to empty the uploads folder as well.
 	 */
 	private function empty_site( $empty_uploads ) {
-		 $command = 'site empty --yes';
+		$command = 'site empty --yes';
 
 		if ( $empty_uploads ) {
 			$command .= ' --uploads';

@@ -201,7 +201,7 @@ final class ExportOptions implements ExportStep {
 
 		$query = sprintf(
 			'SELECT `option_name`, `option_value` FROM `%s` WHERE `option_name` IN (%s);',
-			$wpdb->options,
+			esc_sql( $wpdb->options ),
 			implode(
 				',',
 				array_map(
@@ -212,7 +212,7 @@ final class ExportOptions implements ExportStep {
 			)
 		);
 
-		$options = array_filter( (array) $wpdb->get_results( $query, 'ARRAY_A' ) );
+		$options = array_filter( (array) $wpdb->get_results( $query, 'ARRAY_A' ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Manually escaped a few lines higher.
 
 		return array_combine(
 			array_column( $options, 'option_name' ),
