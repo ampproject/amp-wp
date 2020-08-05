@@ -18,16 +18,17 @@ final class ExportOptions implements ExportStep {
 	 * @var string[]
 	 */
 	const EXCLUDED_OPTIONS = [
+		'/^__uagb_do_redirect$/',
 		'/^(_site)?_transient_.*$/',
+		'/^_bp_.*$/',
+		'/^_elementor_installed_time$/',
 		'/^action_scheduler_.*$/',
 		'/^active_plugins$/',
-		'/^admin_email_lifespan$/',
+		'/^admin_email(_lifespan)?$/',
 		'/^amp-options$/',
 		'/^amp_css_transient_monitor_time_series$/',
 		'/^astra-settings$/',
-		'/^_bp_.*$/',
 		'/^bp-(blogs-first-install|disable-account-deletion|disable-cover-image-uploads|disable-group-avatar-uploads|disable-group-cover-image-uploads|disable-profile-sync|emails-unsubscribe-salt)$/',
-		'/^_elementor_installed_time$/',
 		'/^auto_core_update_notified$/',
 		'/^avatar_.*$/',
 		'/^blacklist_.*$/',
