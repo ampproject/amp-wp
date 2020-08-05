@@ -75,3 +75,7 @@
 	border-color: var(--amp-settings-color-brand);
 	box-shadow: 0 0 0 1px var(--amp-settings-color-brand);
 }
+
+.amp details summary {
+	cursor: pointer;
+}

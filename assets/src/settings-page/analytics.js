@@ -183,26 +183,9 @@ AnalyticsEntry.propTypes = {
  * Component handling addition and deletion of analytics entries.
  */
 function AnalyticsOptions() {
-	const [ detailsInitialOpen, setDetailsInitialOpen ] = useState( null );
-
 	const getNewKey = useUniqueNewKey();
-	const { editedOptions, fetchingOptions, originalOptions, updateOptions } = useContext( Options );
+	const { editedOptions, originalOptions, updateOptions } = useContext( Options );
 	const { analytics } = editedOptions;
-
-	/**
-	 * Set the initial open state of the details component.
-	 */
-	useEffect( () => {
-		if ( fetchingOptions ) {
-			return;
-		}
-
-		if ( 'boolean' === typeof detailsInitialOpen ) {
-			return;
-		}
-
-		setDetailsInitialOpen( ! Boolean( Object.keys( analytics ).length ) );
-	}, [ analytics, fetchingOptions, detailsInitialOpen ] );
 
 	return (
 		<div>
