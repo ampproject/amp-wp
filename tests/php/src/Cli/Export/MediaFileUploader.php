@@ -67,7 +67,7 @@ final class MediaFileUploader {
 		try {
 			$old_url = $url;
 
-			$media_file = file_get_contents(
+			$media_file = file_get_contents( // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Needed for stream wrapper support.
 				$old_url,
 				false,
 				stream_context_create( $context_options )

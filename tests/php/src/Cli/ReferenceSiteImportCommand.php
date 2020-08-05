@@ -127,7 +127,7 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 	 */
 	private function load_site_definition( $site_definition_file ) {
 		try {
-			$site_definition_json = file_get_contents( $site_definition_file );
+			$site_definition_json = file_get_contents( $site_definition_file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Needed for stream wrapper support.
 		} catch ( Exception $exception ) {
 			$site_definition_json = false;
 		}

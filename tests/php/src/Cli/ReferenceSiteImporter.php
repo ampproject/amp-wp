@@ -79,9 +79,9 @@ final class ReferenceSiteImporter extends WP_Import {
 				'verify_peer_name' => false,
 			],
 		];
-		file_put_contents(
+		file_put_contents( // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents -- Needed for stream wrapper support.
 			$file_array['tmp_name'],
-			file_get_contents(
+			file_get_contents( // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Needed for stream wrapper support.
 				$file,
 				false,
 				stream_context_create( $context_options )
@@ -167,9 +167,9 @@ final class ReferenceSiteImporter extends WP_Import {
 			],
 		];
 
-		file_put_contents(
+		file_put_contents( // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents -- Needed for stream wrapper support.
 			$tmp_file_name,
-			file_get_contents(
+			file_get_contents( // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Needed for stream wrapper support.
 				$url,
 				false,
 				stream_context_create( $context_options )

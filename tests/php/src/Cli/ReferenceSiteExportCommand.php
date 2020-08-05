@@ -90,6 +90,6 @@ final class ReferenceSiteExportCommand extends WP_CLI_Command {
 			$export_result = $export_step->process( $export_result );
 		}
 
-		file_put_contents( $site_definition_file, $export_result->to_json() );
+		file_put_contents( $site_definition_file, $export_result->to_json() ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents -- Needed for stream wrapper support.
 	}
 }
