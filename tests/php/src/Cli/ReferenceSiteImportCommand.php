@@ -66,11 +66,11 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 		$storage->registerStreamWrapper();
 
 		list( $site_definition_file ) = $args;
-		$empty_content    = Utils\get_flag_value( $assoc_args, 'empty-content', false );
-		$empty_uploads    = Utils\get_flag_value( $assoc_args, 'empty-uploads', false );
-		$empty_extensions = Utils\get_flag_value( $assoc_args, 'empty-extensions', false );
-		$empty_options    = Utils\get_flag_value( $assoc_args, 'empty-options', false );
-		$skip_site_meta   = Utils\get_flag_value( $assoc_args, 'skip-site-meta', false );
+		$empty_content                = Utils\get_flag_value( $assoc_args, 'empty-content', false );
+		$empty_uploads                = Utils\get_flag_value( $assoc_args, 'empty-uploads', false );
+		$empty_extensions             = Utils\get_flag_value( $assoc_args, 'empty-extensions', false );
+		$empty_options                = Utils\get_flag_value( $assoc_args, 'empty-options', false );
+		$skip_site_meta               = Utils\get_flag_value( $assoc_args, 'skip-site-meta', false );
 
 		if ( 0 !== substr_compare( $site_definition_file, '.json', -5 ) ) {
 			$site_definition_file .= '.json';
@@ -194,9 +194,8 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 	 *
 	 * @param bool $empty_uploads Whether to empty the uploads folder as well.
 	 */
-	private function empty_site( $empty_uploads )
-	{
-		$command = 'site empty --yes';
+	private function empty_site( $empty_uploads ) {
+		 $command = 'site empty --yes';
 
 		if ( $empty_uploads ) {
 			$command .= ' --uploads';
@@ -228,13 +227,15 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 			JSON_OBJECT_AS_ARRAY
 		);
 
-		$plugins = array_filter( $plugins, static function ( $plugin ) {
-			return ! in_array( $plugin, [ 'amp', 'wordpress-importer' ], true );
-		} );
+		$plugins = array_filter(
+			$plugins,
+			static function ( $plugin ) {
+				return ! in_array( $plugin, [ 'amp', 'wordpress-importer' ], true );
+			}
+		);
 
 		WP_CLI::runcommand( 'plugin delete ' . implode( ' ', $plugins ) );
 	}
-
 
 	/**
 	 * Empty the site's options.
@@ -264,11 +265,13 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 
 		wp_cache_flush();
 
-		populate_options( [
-			'siteurl'             => $siteurl,
-			'home'                => $home,
-			'permalink_structure' => '%postname%',
-		] );
+		populate_options(
+			[
+				'siteurl'             => $siteurl,
+				'home'                => $home,
+				'permalink_structure' => '%postname%',
+			]
+		);
 
 		populate_roles();
 

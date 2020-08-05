@@ -73,7 +73,7 @@ final class ExportResult {
 	 * @param mixed  $content Content of the step.
 	 */
 	public function add_step( $type, $content ) {
-		$step = new stdClass();
+		$step       = new stdClass();
 		$step->type = $type;
 		foreach ( $content as $key => $value ) {
 			$step->$key = $value;

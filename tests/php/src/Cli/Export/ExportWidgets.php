@@ -25,8 +25,8 @@ final class ExportWidgets implements ExportStep {
 			$exported_widgets[ $sidebar ] = [];
 			foreach ( $widgets as $widget_instance_id ) {
 				// Get id_base (remove -# from end) and instance ID number.
-				$id_base = preg_replace( '/-[0-9]+$/', '', $widget_instance_id );
-				$instance = preg_replace( '/^' . preg_quote( $id_base, '/' ) . '-/', '', $widget_instance_id );
+				$id_base        = preg_replace( '/-[0-9]+$/', '', $widget_instance_id );
+				$instance       = preg_replace( '/^' . preg_quote( $id_base, '/' ) . '-/', '', $widget_instance_id );
 				$widget_options = get_option( 'widget_' . $id_base, [] );
 				$exported_widgets[ $sidebar ][ $widget_instance_id ] = $widget_options[ (int) $instance ];
 			}

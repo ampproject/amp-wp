@@ -57,7 +57,7 @@ final class ReferenceSiteExportCommand extends WP_CLI_Command {
 		}
 
 		list( $site_definition_file ) = $args;
-		$force = Utils\get_flag_value( $assoc_args, 'force', false );
+		$force                        = Utils\get_flag_value( $assoc_args, 'force', false );
 
 		if ( 0 !== substr_compare( $site_definition_file, '.json', -5 ) ) {
 			$site_definition_file .= '.json';

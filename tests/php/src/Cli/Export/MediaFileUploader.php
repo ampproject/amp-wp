@@ -58,9 +58,9 @@ final class MediaFileUploader {
 		$this->init();
 
 		$context_options = [
-			"ssl" => [
-				"verify_peer"      => false,
-				"verify_peer_name" => false,
+			'ssl' => [
+				'verify_peer'      => false,
+				'verify_peer_name' => false,
 			],
 		];
 

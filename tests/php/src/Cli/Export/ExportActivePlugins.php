@@ -53,10 +53,13 @@ final class ExportActivePlugins implements ExportStep {
 	 * @return string[] Array of currently active plugins.
 	 */
 	private function get_active_plugins() {
-		return array_map( static function ( $plugin ) {
-			$filename = strtok( $plugin, '/' );
-			return preg_replace( '/\.php$/', '', $filename );
-		}, get_option( 'active_plugins', [] ) );
+		return array_map(
+			static function ( $plugin ) {
+				$filename = strtok( $plugin, '/' );
+				return preg_replace( '/\.php$/', '', $filename );
+			},
+			get_option( 'active_plugins', [] )
+		);
 	}
 
 	/**

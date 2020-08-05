@@ -204,7 +204,11 @@ final class ExportOptions implements ExportStep {
 			$wpdb->options,
 			implode(
 				',',
-				array_map( static function ( $key ) { return "'" . esc_sql( $key ) . "'"; }, $keys )
+				array_map(
+					static function ( $key ) {
+						return "'" . esc_sql( $key ) . "'"; },
+					$keys
+				)
 			)
 		);
 

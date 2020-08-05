@@ -42,7 +42,7 @@ final class ExportThemeMods implements ExportStep {
 					break;
 
 				case 'custom_logo':
-					$media_uploader = new MediaFileUploader();
+					$media_uploader     = new MediaFileUploader();
 					$theme_mods[ $key ] = $media_uploader->upload(
 						$export_result->get_site_name(),
 						wp_get_attachment_url( $value )

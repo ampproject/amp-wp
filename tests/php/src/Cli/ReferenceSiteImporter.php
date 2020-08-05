@@ -52,7 +52,7 @@ final class ReferenceSiteImporter extends WP_Import {
 		if ( empty( $file ) ) {
 			WP_CLI::warning(
 				WP_CLI::colorize(
-					"Provided empty image filename to download, skipping."
+					'Provided empty image filename to download, skipping.'
 				)
 			);
 
@@ -74,9 +74,9 @@ final class ReferenceSiteImporter extends WP_Import {
 
 		// Download file to temp location.
 		$context_options = [
-			"ssl" => [
-				"verify_peer"      => false,
-				"verify_peer_name" => false,
+			'ssl' => [
+				'verify_peer'      => false,
+				'verify_peer_name' => false,
 			],
 		];
 		file_put_contents(
@@ -161,9 +161,9 @@ final class ReferenceSiteImporter extends WP_Import {
 		}
 
 		$context_options = [
-			"ssl" => [
-				"verify_peer"      => false,
-				"verify_peer_name" => false,
+			'ssl' => [
+				'verify_peer'      => false,
+				'verify_peer_name' => false,
 			],
 		];
 
@@ -219,8 +219,8 @@ final class ReferenceSiteImporter extends WP_Import {
 		];
 
 		// Keep track of the old and new urls so we can substitute them later.
-		$this->url_remap[$url] = $upload['url'];
-		$this->url_remap[$post['guid']] = $upload['url'];
+		$this->url_remap[ $url ]          = $upload['url'];
+		$this->url_remap[ $post['guid'] ] = $upload['url'];
 
 		return $upload;
 	}

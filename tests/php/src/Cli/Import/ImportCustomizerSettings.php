@@ -44,7 +44,7 @@ final class ImportCustomizerSettings implements ImportStep {
 		// Add Custom CSS.
 		if ( isset( $this->settings['custom-css'] ) ) {
 			WP_CLI::log(
-				WP_CLI::colorize( "Updating Customizer %GCustom CSS%n..." )
+				WP_CLI::colorize( 'Updating Customizer %GCustom CSS%n...' )
 			);
 
 			wp_update_custom_css_post( $this->settings['custom-css'] );

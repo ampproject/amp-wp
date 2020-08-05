@@ -186,26 +186,26 @@ final class ImportWxrFile implements ImportStep {
 	 * Add filters to shape WXR importer output.
 	 */
 	private function add_wxr_filters() {
-		add_filter( 'wp_import_post_data_raw',       [ $this, 'log_post_processing' ]           );
-		add_action( 'wp_import_insert_post',         [ $this, 'log_imported_post' ],      10, 4 );
-		add_action( 'wp_import_insert_term',         [ $this, 'log_imported_term' ],      10, 4 );
-		add_action( 'wp_import_set_post_terms',      [ $this, 'log_associated_term' ],    10, 5 );
-		add_action( 'wp_import_insert_comment',      [ $this, 'log_imported_comment' ],   10, 4 );
-		add_action( 'import_post_meta',              [ $this, 'log_imported_post_meta' ], 10, 3 );
-		add_filter( 'wp_import_post_data_processed', [ $this, 'remove_guid' ],            10, 2 );
+		add_filter( 'wp_import_post_data_raw', [ $this, 'log_post_processing' ] );
+		add_action( 'wp_import_insert_post', [ $this, 'log_imported_post' ], 10, 4 );
+		add_action( 'wp_import_insert_term', [ $this, 'log_imported_term' ], 10, 4 );
+		add_action( 'wp_import_set_post_terms', [ $this, 'log_associated_term' ], 10, 5 );
+		add_action( 'wp_import_insert_comment', [ $this, 'log_imported_comment' ], 10, 4 );
+		add_action( 'import_post_meta', [ $this, 'log_imported_post_meta' ], 10, 3 );
+		add_filter( 'wp_import_post_data_processed', [ $this, 'remove_guid' ], 10, 2 );
 	}
 
 	/**
 	 * Remove WXR importer output filters again.
 	 */
 	private function remove_wxr_filters() {
-		remove_filter( 'wp_import_post_data_raw',       [ $this, 'log_post_processing' ]       );
-		remove_action( 'wp_import_insert_post',         [ $this, 'log_imported_post' ],      10);
-		remove_action( 'wp_import_insert_term',         [ $this, 'log_imported_term' ],      10);
-		remove_action( 'wp_import_set_post_terms',      [ $this, 'log_associated_term' ],    10);
-		remove_action( 'wp_import_insert_comment',      [ $this, 'log_imported_comment' ],   10);
-		remove_action( 'import_post_meta',              [ $this, 'log_imported_post_meta' ], 10);
-		remove_filter( 'wp_import_post_data_processed', [ $this, 'remove_guid' ],            10);
+		remove_filter( 'wp_import_post_data_raw', [ $this, 'log_post_processing' ] );
+		remove_action( 'wp_import_insert_post', [ $this, 'log_imported_post' ], 10 );
+		remove_action( 'wp_import_insert_term', [ $this, 'log_imported_term' ], 10 );
+		remove_action( 'wp_import_set_post_terms', [ $this, 'log_associated_term' ], 10 );
+		remove_action( 'wp_import_insert_comment', [ $this, 'log_imported_comment' ], 10 );
+		remove_action( 'import_post_meta', [ $this, 'log_imported_post_meta' ], 10 );
+		remove_filter( 'wp_import_post_data_processed', [ $this, 'remove_guid' ], 10 );
 	}
 
 	public function log_post_processing( $post ) {

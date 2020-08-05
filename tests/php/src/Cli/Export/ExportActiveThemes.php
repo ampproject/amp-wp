@@ -20,7 +20,7 @@ final class ExportActiveThemes implements ExportStep {
 	 */
 	public function process( ExportResult $export_result ) {
 		$active_theme = wp_get_theme();
-		$child_theme = $active_theme->get_stylesheet();
+		$child_theme  = $active_theme->get_stylesheet();
 		$parent_theme = $active_theme->get_template();
 
 		if ( $parent_theme !== $child_theme ) {
