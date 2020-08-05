@@ -251,4 +251,4 @@ register_activation_hook( __FILE__, 'amp_activate' );
 
 register_deactivation_hook( __FILE__, 'amp_deactivate' );
 
-amp_bootstrap_plugin();
+add_action( 'plugins_loaded', 'amp_bootstrap_plugin', defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX ); // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
