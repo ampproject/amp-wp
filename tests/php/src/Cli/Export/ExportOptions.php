@@ -255,7 +255,7 @@ final class ExportOptions implements ExportStep {
 					$media_uploader = new MediaFileUploader();
 					$options[ $key ] = $media_uploader->upload(
 						$export_result->get_site_name(),
-						$this->get_attachment_url_from_attachment_id( $value )
+						wp_get_attachment_url( $value )
 					);
 					break;
 			}
@@ -309,17 +309,6 @@ final class ExportOptions implements ExportStep {
 		}
 
 		return $post->post_title;
-	}
-
-	/**
-	 * Get the attachment URL from an attachent ID.
-	 *
-	 * @param string|int $attachment_id ID of the attachment post to get the URL
-	 *                                  for.
-	 * @return string|false Attachment URL, or false if none.
-	 */
-	private function get_attachment_url_from_attachment_id( $attachment_id ) {
-		return wp_get_attachment_url( $attachment_id );
 	}
 
 	/**
