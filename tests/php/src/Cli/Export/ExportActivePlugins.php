@@ -19,6 +19,7 @@ final class ExportActivePlugins implements ExportStep {
 	const EXCLUDED_PLUGINS = [
 		'airplane-mode',
 		'amp',
+		'hello',
 		'query-monitor',
 		'redis-cache',
 		'wp-rocket',
@@ -53,7 +54,7 @@ final class ExportActivePlugins implements ExportStep {
 	 */
 	private function get_active_plugins() {
 		return array_map( static function ( $plugin ) {
-			$filename = basename( dirname( $plugin ) );
+			$filename = strtok( $plugin, '/' );
 			return preg_replace( '/\.php$/', '', $filename );
 		}, get_option( 'active_plugins', [] ) );
 	}
