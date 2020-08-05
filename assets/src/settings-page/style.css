@@ -201,7 +201,7 @@ li.error-removed {
 }
 
 li.error-kept {
-	color: var(--amp-settings-color-invalid);
+	color: var(--amp-settings-color-danger);
 }
 
 @media screen and (max-width: 782px) {
@@ -366,17 +366,27 @@ li.error-kept {
 }
 
 .amp-analytics-input:invalid {
-	border-color: var(--amp-settings-color-invalid);
+	border-color: var(--amp-settings-color-danger);
 }
 
 .options-validation-errors {
-	color: var(--amp-settings-color-invalid);
+	color: var(--amp-settings-color-danger);
 }
 
 .amp .components-button.amp-analytics__delete-button {
 	color: var(--amp-settings-color-black);
 	font-size: 14px;
 	margin-left: auto;
+}
+
+.amp .components-button.is-link.amp-analytics__delete-button:active,
+.amp .components-button.is-link.amp-analytics__delete-button:focus,
+.amp .components-button.is-link.amp-analytics__delete-button:hover {
+	color: var(--amp-settings-color-danger);
+}
+
+.amp .components-button.is-link.amp-analytics__delete-button:focus {
+	outline-color: var(--amp-settings-color-danger);
 }
 
 .amp .amp-analytics__delete-button svg {

@@ -158,7 +158,11 @@ function AnalyticsEntry( { entryId = '', onChange, onDelete, type = '', config =
 			</div>
 			<Button
 				isLink
-				onClick={ onDelete }
+				onClick={ () => {
+					if ( '' === type || global.confirm( __( 'Are you sure you want to delete this entry?', 'amp' ) ) ) {
+						onDelete();
+					}
+				} }
 				className="amp-analytics__delete-button"
 			>
 				<Icon icon={ trash } />
