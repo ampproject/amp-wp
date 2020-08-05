@@ -80,7 +80,7 @@
     "classmap": [
       "tests/php/validation/"
     ],
-    "files":  [
+    "files": [
       "tests/php/register-wp-cli-commands.php"
     ]
   },
