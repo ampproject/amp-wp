@@ -180,6 +180,7 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 			return;
 		}
 
+		/** This action is documented in includes/class-amp-theme-support.php */
 		do_action( 'amp_register_polyfills' );
 
 		/** @var AmpSlugCustomizationWatcher $amp_slug_customization_watcher */

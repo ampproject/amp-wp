@@ -2298,6 +2298,9 @@ class AMP_Theme_Support {
 			return;
 		}
 
+		/**
+		 * Fires before registering plugin assets that may require core asset polyfills.
+		 */
 		do_action( 'amp_register_polyfills' );
 
 		$asset_file   = AMP__DIR__ . '/assets/js/amp-paired-browsing-client.asset.php';
@@ -2389,6 +2392,7 @@ class AMP_Theme_Support {
 			);
 		}
 
+		/** This action is documented in includes/class-amp-theme-support.php */
 		do_action( 'amp_register_polyfills' );
 
 		wp_enqueue_style(

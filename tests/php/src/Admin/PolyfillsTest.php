@@ -65,6 +65,7 @@ class PolyfillsTest extends WP_UnitTestCase {
 		$wp_scripts->init();
 		$wp_styles = new WP_Styles();
 
+		/** This action is documented in includes/class-amp-theme-support.php */
 		do_action( 'amp_register_polyfills' );
 
 		// These should pass in WP 4.9 tests.
