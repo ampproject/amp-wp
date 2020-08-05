@@ -67,7 +67,7 @@ final class ReferenceSiteImporter extends WP_Import {
 
 		// Set variables for storage, fix file filename for query strings.
 		preg_match( '/[^\?]+\.(jpe?g|jpe|svg|gif|png)\b/i', $file, $matches );
-		$url_filename           = basename( parse_url( $file, PHP_URL_PATH ) );
+		$url_filename           = basename( wp_parse_url( $file, PHP_URL_PATH ) );
 		$file_array             = [];
 		$file_array['name']     = basename( $matches[0] );
 		$file_array['tmp_name'] = wp_tempnam( $url_filename );
@@ -149,7 +149,7 @@ final class ReferenceSiteImporter extends WP_Import {
 		}
 
 		// Extract the file name from the URL.
-		$file_name = basename( parse_url( $url, PHP_URL_PATH ) );
+		$file_name = basename( wp_parse_url( $url, PHP_URL_PATH ) );
 
 		if ( ! $file_name ) {
 			$file_name = md5( $url );
