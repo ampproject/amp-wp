@@ -515,6 +515,81 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		}
 	}
 
+	/** @covers AMP_Validated_URL_Post_Type::delete_stylesheets_postmeta_batch() */
+	public function test_delete_stylesheets_postmeta_batch() {
+
+		$old_post_id = self::factory()->post->create(
+			[
+				'post_type'     => 'post',
+				'post_date'     => gmdate( 'Y-m-d H:i:s', strtotime( '1 year ago' ) ),
+				'post_date_gmt' => gmdate( 'Y-m-d H:i:s', strtotime( '1 year ago' ) ),
+			]
+		);
+		add_post_meta( $old_post_id, AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY, [ 'Preserved!' ] );
+		add_post_meta( $old_post_id, 'other', 'Also preserved!' );
+
+		// Expect none to be deleted initially.
+		$this->assertEquals( 0, AMP_Validated_URL_Post_Type::delete_stylesheets_postmeta_batch( 10, '1 week ago' ) );
+
+		// Insert four weeks of validated URLs.
+		$post_ids = [];
+		for ( $days_ago = 1; $days_ago <= 28; $days_ago++ ) {
+			$post_date = gmdate( 'Y-m-d H:i:s', strtotime( "$days_ago days ago" ) + 2 );
+			$post_id   = AMP_Validated_URL_Post_Type::store_validation_errors(
+				[],
+				home_url( "/days-ago-$days_ago/" ),
+				[
+					'stylesheets'    => [ '/*...*/' ],
+					'queried_object' => [
+						'type' => 'post',
+						'id'   => self::factory()->post->create(),
+					],
+				]
+			);
+			wp_update_post(
+				[
+					'ID'            => $post_id,
+					'post_date_gmt' => $post_date,
+					'post_date'     => $post_date,
+				]
+			);
+			$post_ids[ $days_ago ] = $post_id;
+		}
+
+		// Verify that no data is removed if looking before the oldest post.
+		$this->assertEquals( 0, AMP_Validated_URL_Post_Type::delete_stylesheets_postmeta_batch( 100, '1 month ago' ) );
+		foreach ( $post_ids as $post_id ) {
+			$this->assertNotEmpty( get_post_meta( $post_id, AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY ) );
+			$this->assertNotEmpty( get_post_meta( $post_id, AMP_Validated_URL_Post_Type::QUERIED_OBJECT_POST_META_KEY ) );
+		}
+
+		// Delete just one post older than 3 weeks.
+		$this->assertEquals( 1, AMP_Validated_URL_Post_Type::delete_stylesheets_postmeta_batch( 1, '3 weeks ago' ) );
+		foreach ( $post_ids as $days_ago => $post_id ) {
+			$this->assertNotEmpty( get_post_meta( $post_id, AMP_Validated_URL_Post_Type::QUERIED_OBJECT_POST_META_KEY ) );
+			if ( $days_ago > 27 ) {
+				$this->assertEmpty( get_post_meta( $post_id, AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY ), "Expected $days_ago days ago to be empty." );
+			} else {
+				$this->assertNotEmpty( get_post_meta( $post_id, AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY ), "Expected $days_ago days ago to not be empty." );
+			}
+		}
+
+		// Delete everything older than 1 week, so that means 20 days of validated URLs since the 21st was deleted above .
+		$this->assertEquals( 20, AMP_Validated_URL_Post_Type::delete_stylesheets_postmeta_batch( 100, '1 week ago' ) );
+		foreach ( $post_ids as $days_ago => $post_id ) {
+			$this->assertNotEmpty( get_post_meta( $post_id, AMP_Validated_URL_Post_Type::QUERIED_OBJECT_POST_META_KEY ) );
+			if ( $days_ago > 7 ) {
+				$this->assertEmpty( get_post_meta( $post_id, AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY ), "Expected $days_ago days ago to be empty." );
+			} else {
+				$this->assertNotEmpty( get_post_meta( $post_id, AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY ), "Expected $days_ago days ago to not be empty." );
+			}
+		}
+
+		// Make sure other postmeta is retained.
+		$this->assertEquals( [ 'Preserved!' ], get_post_meta( $old_post_id, AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY, true ) );
+		$this->assertEquals( 'Also preserved!', get_post_meta( $old_post_id, 'other', true ) );
+	}
+
 	/**
 	 * Test get_validated_environment().
 	 *

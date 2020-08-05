@@ -50,7 +50,6 @@ final class PluginSuppression implements Service, Registerable {
 	public function register() {
 		add_filter( 'amp_default_options', [ $this, 'filter_default_options' ] );
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
-		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
 
 		// When a Reader theme is selected and an AMP request is being made, start suppressing as early as possible.
 		// This can be done because we know it is an AMP page due to the query parameter, but it also _has_ to be done
@@ -60,11 +59,13 @@ final class PluginSuppression implements Service, Registerable {
 		// but there is no similar need to suppress the registration of Customizer controls in Transitional mode since
 		// there is no separate Customizer for AMP in Transitional mode (or legacy Reader mode).
 		if ( $this->is_reader_theme_request() ) {
-			add_action( 'plugins_loaded', [ $this, 'suppress_plugins' ], $priority );
+			$this->suppress_plugins();
 		} else {
+			$min_priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
+
 			// In Standard mode we _have_ to wait for the wp action because with the absence of a query parameter
 			// we have to rely on is_amp_endpoint() and the WP_Query to determine whether a plugin should be suppressed.
-			add_action( 'wp', [ $this, 'maybe_suppress_plugins' ], $priority );
+			add_action( 'wp', [ $this, 'maybe_suppress_plugins' ], $min_priority );
 		}
 	}
 

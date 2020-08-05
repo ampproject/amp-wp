@@ -54,10 +54,23 @@ function amp_deactivate( $network_wide = false ) {
  * @since 1.5
  */
 function amp_bootstrap_plugin() {
+	/**
+	 * Filters whether AMP is enabled on the current site.
+	 *
+	 * Useful if the plugin is network activated and you want to turn it off on select sites.
+	 *
+	 * @since 0.2
+	 * @since 2.0 Filter now runs earlier at plugins_loaded (with earliest priority) rather than at the after_setup_theme action.
+	 */
+	if ( false === apply_filters( 'amp_is_enabled', true ) ) {
+		return;
+	}
+
 	AmpWpPluginFactory::create()->register();
 
-	// The plugins_loaded action is the earliest we can run this since that is when pluggable.php has been required and wp_hash() is available.
-	add_action( 'plugins_loaded', [ 'AMP_Validation_Manager', 'init_validate_request' ], ~PHP_INT_MAX );
+	// The amp_bootstrap_plugin() function is called at the plugins_loaded action with the earliest priority. This is
+	// the earliest we can run this since that is when pluggable.php has been required and wp_hash() is available.
+	AMP_Validation_Manager::init_validate_request();
 
 	/*
 	 * Register AMP scripts regardless of whether AMP is enabled or it is the AMP endpoint
@@ -219,15 +232,20 @@ function amp_init() {
 function amp_after_setup_theme() {
 	amp_get_slug(); // Ensure AMP_QUERY_VAR is set.
 
-	/**
-	 * Filters whether AMP is enabled on the current site.
-	 *
-	 * Useful if the plugin is network activated and you want to turn it off on select sites.
-	 *
-	 * @since 0.2
-	 */
+	/** This filter is documented in includes/amp-helper-functions.php */
 	if ( false === apply_filters( 'amp_is_enabled', true ) ) {
-		return;
+		_doing_it_wrong(
+			'add_filter',
+			esc_html(
+				sprintf(
+					/* translators: 1: amp_is_enabled filter name, 2: plugins_loaded action */
+					__( 'Filter for "%1$s" added too late. To disable AMP, this filter must be added before the "%2$s" action.', 'amp' ),
+					'amp_is_enabled',
+					'plugins_loaded'
+				)
+			),
+			'2.0'
+		);
 	}
 
 	add_action( 'init', 'amp_init', 0 ); // Must be 0 because widgets_init happens at init priority 1.
