@@ -62,7 +62,7 @@ final class ImportOptions implements ImportStep {
 				case 'woocommerce_view_order_page_title':
 				case 'woocommerce_change_password_page_title':
 				case 'woocommerce_logout_page_title':
-					//$this->update_woocommerce_page_id_by_option_value( $key, $value );
+					// TODO: Translate WooCommerce page IDs.
 					break;
 
 				case 'page_for_posts':
@@ -75,7 +75,7 @@ final class ImportOptions implements ImportStep {
 					break;
 
 				case 'woocommerce_product_cat':
-					//$this->set_woocommerce_product_cat( $value );
+					// TODO: Translate WooCommerce product category taxonomies.
 					break;
 
 				case 'custom_logo':
