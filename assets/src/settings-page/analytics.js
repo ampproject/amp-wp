@@ -42,7 +42,7 @@ function useUniqueNewKey( prefix = NEW_ENTRY_KEY_PREFIX ) {
  * @param {Object} props Component props.
  * @param {string} props.entryId Unique ID for the entry.
  * @param {Function} props.onChange Callback to run when data changes.
- * @param {Function} props.onDelete Callback to run when the entry is to be DocumentAndElementEventHandlers.
+ * @param {Function} props.onDelete Callback to run when the entry is to be deleted.
  * @param {string} props.type The entry type.
  * @param {string} props.config The config JSON string.
  */
