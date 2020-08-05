@@ -30,12 +30,10 @@ const NEW_ENTRY_KEY_PREFIX = '__new__';
 function useUniqueNewKey( prefix = NEW_ENTRY_KEY_PREFIX ) {
 	const [ currentIndex, setCurrentIndex ] = useState( 0 );
 
-	const getNewKey = useCallback( () => {
+	return useCallback( () => {
 		setCurrentIndex( ( oldIndex ) => oldIndex + 1 );
 		return `${ prefix }-${ currentIndex }`;
 	}, [ currentIndex, prefix ] );
-
-	return getNewKey;
 }
 
 /**
