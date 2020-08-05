@@ -75,10 +75,9 @@ final class ExportWxrFile implements ExportStep {
 	 * Upload media files when retrieving attachment URLs.
 	 *
 	 * @param string $url           URL for the given attachment.
-	 * @param int    $attachment_id Attachment post ID.
 	 * @return string URL pointing to Google Storage.
 	 */
-	public function upload_media_file( $url, $attachment_id ) {
+	public function upload_media_file( $url ) {
 		if ( 0 === strncmp( $url, 'gs://', 5 ) ) {
 			return $url;
 		}

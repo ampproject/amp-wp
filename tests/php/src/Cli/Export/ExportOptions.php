@@ -166,7 +166,7 @@ final class ExportOptions implements ExportStep {
 			ARRAY_FILTER_USE_BOTH
 		);
 
-		$options = $this->adapt_options( $options, $export_result );
+		$options = $this->adapt_options( $options );
 
 		$export_result->add_step( 'import_options', compact( 'options' ) );
 
@@ -224,10 +224,9 @@ final class ExportOptions implements ExportStep {
 	 * Adapt the options to get rid of hard-coded elements like IDs.
 	 *
 	 * @param array        $options       Associative array of options to adapt.
-	 * @param ExportResult $export_result Export result to adapt.
 	 * @return array Adapted associative array of options.
 	 */
-	private function adapt_options( $options, $export_result ) {
+	private function adapt_options( $options ) {
 		foreach ( $options as $key => $value ) {
 			switch ( $key ) {
 				case 'woocommerce_shop_page_title':

@@ -218,7 +218,7 @@ final class ImportWxrFile implements ImportStep {
 		return $post;
 	}
 
-	public function log_imported_post( $post_id, $original_post_id, $post, $postdata ) {
+	public function log_imported_post( $post_id ) {
 		if ( is_wp_error( $post_id ) ) {
 			WP_CLI::warning( '-- Error importing post: ' . $post_id->get_error_code() );
 		} else {
@@ -226,11 +226,11 @@ final class ImportWxrFile implements ImportStep {
 		}
 	}
 
-	public function log_imported_term( $t, $import_term, $post_id, $post ) {
+	public function log_imported_term( $t, $import_term ) {
 		WP_CLI::log( "-- Created term \"{$import_term['name']}\"" );
 	}
 
-	public function log_associated_term( $tt_ids, $term_ids, $taxonomy, $post_id, $post ) {
+	public function log_associated_term( $tt_ids, $term_ids, $taxonomy ) {
 		WP_CLI::log(
 			'-- Added terms (' . implode(
 				',',
@@ -239,7 +239,7 @@ final class ImportWxrFile implements ImportStep {
 		);
 	}
 
-	public function log_imported_comment( $comment_id, $comment, $comment_post_id, $post ) {
+	public function log_imported_comment( $comment_id ) {
 		WP_CLI::log(
 			WP_CLI::colorize(
 				"-- Added comment %Y#{$comment_id}%n"
@@ -247,7 +247,7 @@ final class ImportWxrFile implements ImportStep {
 		);
 	}
 
-	public function log_imported_post_meta( $post_id, $key, $value ) {
+	public function log_imported_post_meta( $post_id, $key ) {
 		WP_CLI::log(
 			WP_CLI::colorize(
 				"-- Added post_meta %G'{$key}'%n"
@@ -259,10 +259,9 @@ final class ImportWxrFile implements ImportStep {
 	 * Remove GUID from post data.
 	 *
 	 * @param  array $postdata Post data.
-	 * @param  array $data     Post data.
 	 * @return array Adapted post data.
 	 */
-	public function remove_guid( $postdata, $data ) {
+	public function remove_guid( $postdata ) {
 		$postdata['guid'] = '';
 
 		return $postdata;
