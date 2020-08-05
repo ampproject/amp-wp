@@ -240,7 +240,7 @@ final class ExportOptions implements ExportStep {
 
 				case 'page_for_posts':
 				case 'page_on_front':
-					$options[ $key ] = $this->get_page_title_from_post_id( $value );
+					$options[ $key ] = $this->get_page_title_from_post_id( (int) $value );
 					break;
 
 				case 'nav_menu_locations':
@@ -298,7 +298,7 @@ final class ExportOptions implements ExportStep {
 	/**
 	 * Get the post title from a post ID.
 	 *
-	 * @param string|int $post_id ID of the post to get the title from.
+	 * @param int $post_id ID of the post to get the title from.
 	 * @return string Post title.
 	 */
 	private function get_page_title_from_post_id( $post_id ) {
