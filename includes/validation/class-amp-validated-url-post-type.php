@@ -2273,7 +2273,7 @@ class AMP_Validated_URL_Post_Type {
 				wp_kses_post(
 					sprintf(
 						/* translators: placeholder is URL to recheck the post */
-						__( 'Stylesheet information for this URL is no longer available. Such data is automatically deleted after a week to reduce database storage. It is of little value to store long-term given that it becomes stale as themes and plugins are updated. To obtain the latest stylesheet information, <a href="%s">recheck this URL</a>.', 'amp' ),
+						__( 'Stylesheet information for this URL is no longer available. Such data is automatically deleted after a week to reduce database storage. It is of little value to store long-term given that it becomes stale as themes and plugins are updated. To obtain the latest stylesheet information, <a href="%s">recheck this URL</a>.', 'amp' ),
 						esc_url( self::get_recheck_url( $post ) . '#amp_stylesheets' )
 					)
 				)
