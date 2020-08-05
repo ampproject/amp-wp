@@ -9,6 +9,7 @@
 
 namespace AmpProject\AmpWP\Admin;
 
+use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use WP_Scripts;
@@ -19,14 +20,23 @@ use WP_Styles;
  *
  * @since 2.0
  */
-final class Polyfills implements Service, Registerable {
+final class Polyfills implements Delayed, Service, Registerable {
+
+	/**
+	 * Get the action to use for registering the service.
+	 *
+	 * @return string Registration action to use.
+	 */
+	public static function get_registration_action() {
+		return 'amp_register_polyfills';
+	}
 
 	/**
 	 * Runs on instantiation.
 	 */
 	public function register() {
-		add_action( 'wp_default_scripts', [ $this, 'register_shimmed_scripts' ], 11 ); // Runs immediately after core sets up default scripts.
-		add_action( 'wp_default_styles', [ $this, 'register_shimmed_styles' ], 11 ); // Runs immediately after core sets up default styles.
+		$this->register_shimmed_scripts( wp_scripts() );
+		$this->register_shimmed_styles( wp_styles() );
 	}
 
 	/**

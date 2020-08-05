@@ -8,6 +8,7 @@
 namespace AmpProject\AmpWP\Tests\Admin;
 
 use AmpProject\AmpWP\Admin\Polyfills;
+use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use WP_Scripts;
@@ -45,6 +46,7 @@ class PolyfillsTest extends WP_UnitTestCase {
 	public function test__construct() {
 		$this->assertInstanceOf( Polyfills::class, $this->instance );
 		$this->assertInstanceOf( Service::class, $this->instance );
+		$this->assertInstanceOf( Delayed::class, $this->instance );
 		$this->assertInstanceOf( Registerable::class, $this->instance );
 	}
 
@@ -62,6 +64,8 @@ class PolyfillsTest extends WP_UnitTestCase {
 		$wp_scripts = new WP_Scripts();
 		$wp_scripts->init();
 		$wp_styles = new WP_Styles();
+
+		do_action( 'amp_register_polyfills' );
 
 		// These should pass in WP 4.9 tests.
 		$this->assertTrue( wp_script_is( 'lodash', 'registered' ) );

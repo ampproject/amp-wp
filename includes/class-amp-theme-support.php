@@ -2298,6 +2298,8 @@ class AMP_Theme_Support {
 			return;
 		}
 
+		do_action( 'amp_register_polyfills' );
+
 		$asset_file   = AMP__DIR__ . '/assets/js/amp-paired-browsing-client.asset.php';
 		$asset        = require $asset_file;
 		$dependencies = $asset['dependencies'];
@@ -2386,6 +2388,8 @@ class AMP_Theme_Support {
 				[ 'response' => 403 ]
 			);
 		}
+
+		do_action( 'amp_register_polyfills' );
 
 		wp_enqueue_style(
 			'amp-paired-browsing-app',
