@@ -157,7 +157,7 @@ final class ReferenceSiteImporter extends WP_Import {
 
 		$tmp_file_name = wp_tempnam( $file_name );
 		if ( ! $tmp_file_name ) {
-			return new WP_Error( 'import_no_file', __( 'Could not create temporary file.', 'wordpress-importer' ) );
+			return new WP_Error( 'import_no_file', __( 'Could not create temporary file.', 'amp' ) );
 		}
 
 		$context_options = [
@@ -188,7 +188,7 @@ final class ReferenceSiteImporter extends WP_Import {
 		}
 
 		if ( ( ! $type || ! $ext ) && ! current_user_can( 'unfiltered_upload' ) ) {
-			return new WP_Error( 'import_file_error', __( 'Sorry, this file type is not permitted for security reasons.', 'wordpress-importer' ) );
+			return new WP_Error( 'import_file_error', __( 'Sorry, this file type is not permitted for security reasons.', 'amp' ) );
 		}
 
 		$uploads = wp_upload_dir( $post['upload_date'] );
@@ -203,7 +203,7 @@ final class ReferenceSiteImporter extends WP_Import {
 
 		if ( ! $move_new_file ) {
 			@unlink( $tmp_file_name );
-			return new WP_Error( 'import_file_error', __( 'The uploaded file could not be moved', 'wordpress-importer' ) );
+			return new WP_Error( 'import_file_error', __( 'The uploaded file could not be moved', 'amp' ) );
 		}
 
 		// Set correct file permissions.
