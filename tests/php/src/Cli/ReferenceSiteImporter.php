@@ -202,7 +202,7 @@ final class ReferenceSiteImporter extends WP_Import {
 		$move_new_file = copy( $tmp_file_name, $new_file );
 
 		if ( ! $move_new_file ) {
-			@unlink( $tmp_file_name );
+			@unlink( $tmp_file_name ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- Quietly clean up left-overs.
 			return new WP_Error( 'import_file_error', __( 'The uploaded file could not be moved', 'amp' ) );
 		}
 
