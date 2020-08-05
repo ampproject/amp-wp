@@ -1,6 +1,6 @@
 <?php
 /**
- * Reference site import options step.
+ * Reference site import theme mods step.
  *
  * @package AmpProject\AmpWP
  */
@@ -11,22 +11,22 @@ use AmpProject\AmpWP\Tests\Cli\ReferenceSiteImporter;
 use AmpProject\AmpWP\Tests\Cli\ImportStep;
 use WP_CLI;
 
-final class ImportOptions implements ImportStep {
+final class ImportThemeMods implements ImportStep {
 
 	/**
-	 * Associative array of options to process.
+	 * Associative array of theme_mods to process.
 	 *
 	 * @var array
 	 */
-	private $options;
+	private $theme_mods;
 
 	/**
-	 * ImportOptions constructor.
+	 * ImportThemeMods constructor.
 	 *
-	 * @param array $options Associative array of options to process.
+	 * @param array $theme_mods Associative array of options to process.
 	 */
-	public function __construct( $options ) {
-		$this->options = $options;
+	public function __construct( $theme_mods ) {
+		$this->theme_mods = $theme_mods;
 	}
 
 	/**
@@ -36,11 +36,11 @@ final class ImportOptions implements ImportStep {
 	 *             Returns -1 for failure.
 	 */
 	public function process() {
-		foreach ( $this->options as $key => $value ) {
+		foreach ( $this->theme_mods as $key => $value ) {
 			if ( null === $value ) {
 				WP_CLI::log(
 					WP_CLI::colorize(
-						"Skipping empty option %G'{$key}'%n..."
+						"Skipping empty theme mod %G'{$key}'%n..."
 					)
 				);
 
@@ -49,33 +49,13 @@ final class ImportOptions implements ImportStep {
 
 			WP_CLI::log(
 				WP_CLI::colorize(
-					"Updating option %G'{$key}'%n..."
+					"Updating theme mod %G'{$key}'%n..."
 				)
 			);
 
 			switch ( $key ) {
-				case 'woocommerce_shop_page_title':
-				case 'woocommerce_cart_page_title':
-				case 'woocommerce_checkout_page_title':
-				case 'woocommerce_myaccount_page_title':
-				case 'woocommerce_edit_address_page_title':
-				case 'woocommerce_view_order_page_title':
-				case 'woocommerce_change_password_page_title':
-				case 'woocommerce_logout_page_title':
-					//$this->update_woocommerce_page_id_by_option_value( $key, $value );
-					break;
-
-				case 'page_for_posts':
-				case 'page_on_front':
-					$this->update_page_id_option( $key, $value );
-					break;
-
 				case 'nav_menu_locations':
 					$this->set_nav_menu_locations( $value );
-					break;
-
-				case 'woocommerce_product_cat':
-					//$this->set_woocommerce_product_cat( $value );
 					break;
 
 				case 'custom_logo':
@@ -83,28 +63,10 @@ final class ImportOptions implements ImportStep {
 					break;
 
 				default:
-					update_option( $key, $value );
+					set_theme_mod( $key, $value );
 					break;
 			}
 		}
-	}
-
-	/**
-	 * Update option pointing to a page.
-	 *
-	 * This adapts the page ID as needed.
-	 *
-	 * @param string $key   Option key.
-	 * @param mixed  $value Option value.
-	 */
-	private function update_page_id_option( $key, $value ) {
-		$page = get_page_by_title( $value );
-
-		if ( ! is_object( $page ) ) {
-			return;
-		}
-
-		update_option( $key, $page->ID );
 	}
 
 	/**

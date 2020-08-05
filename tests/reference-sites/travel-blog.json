@@ -29,10 +29,6 @@
     {
       "type": "import_options",
       "options": {
-        "custom_logo": "https://websitedemos.net/travel-07/wp-content/uploads/sites/442/2019/05/logo-1x.png",
-        "nav_menu_locations": {
-          "primary": "primary-header"
-        },
         "show_on_front": "page",
         "page_on_front": "Home",
         "wpforms_settings": {
@@ -40,6 +36,15 @@
           "global-assets": false,
           "gdpr": false
         }
+      }
+    },
+    {
+      "type": "import_theme_mods",
+      "theme_mods": {
+        "nav_menu_locations": {
+          "primary": "primary-header"
+        },
+        "custom_logo": "https://websitedemos.net/travel-07/wp-content/uploads/sites/442/2019/05/logo-1x.png"
       }
     },
     {

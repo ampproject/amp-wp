@@ -176,6 +176,9 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 				case 'import_options':
 					( new Import\ImportOptions( $import_step['options'] ) )->process();
 					break;
+				case 'import_theme_mods':
+					( new Import\ImportThemeMods( $import_step['theme_mods'] ) )->process();
+					break;
 				case 'import_widgets':
 					( new Import\ImportWidgets( $import_step['widgets'] ) )->process();
 					break;

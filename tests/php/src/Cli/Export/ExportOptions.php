@@ -160,7 +160,6 @@ final class ExportOptions implements ExportStep {
 		);
 
 		$options = $this->fetch_options( $option_keys );
-		$options = array_merge( $options, $this->fetch_theme_mods() );
 		$options = array_filter(
 			$options,
 			[ $this, 'skip_default_values' ],
@@ -243,20 +242,8 @@ final class ExportOptions implements ExportStep {
 					$options[ $key ] = $this->get_page_title_from_post_id( (int) $value );
 					break;
 
-				case 'nav_menu_locations':
-					$options[ $key ] = $this->get_nav_menu_location( $value );
-					break;
-
 				case 'woocommerce_product_cat':
 					// @TODO
-					break;
-
-				case 'custom_logo':
-					$media_uploader = new MediaFileUploader();
-					$options[ $key ] = $media_uploader->upload(
-						$export_result->get_site_name(),
-						wp_get_attachment_url( $value )
-					);
 					break;
 			}
 		}
@@ -309,40 +296,5 @@ final class ExportOptions implements ExportStep {
 		}
 
 		return $post->post_title;
-	}
-
-	/**
-	 * Fetch the theme mods.
-	 *
-	 * @return array Associative array of theme mods.
-	 */
-	private function fetch_theme_mods() {
-		$theme_mods = array_filter( (array) get_theme_mods() );
-
-		unset( $theme_mods['custom_css_post_id'] );
-
-		return $theme_mods;
-	}
-
-	/**
-	 * Translate from menu_id into menu_slug.
-	 *
-	 * @param array $nav_menu_locations Associative array of nav menu locations.
-	 */
-	private function get_nav_menu_location( $nav_menu_locations ) {
-		if ( empty( $nav_menu_locations ) ) {
-			return [];
-		}
-
-		$menu_locations = [];
-		foreach ( $nav_menu_locations as $menu => $value ) {
-			$term = get_term( $value, 'nav_menu' );
-
-			if ( is_object( $term ) ) {
-				$menu_locations[ $menu ] = $term->slug;
-			}
-		}
-
-		return $menu_locations;
 	}
 }

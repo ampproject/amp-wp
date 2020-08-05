@@ -26,6 +26,7 @@ final class ReferenceSiteExportCommand extends WP_CLI_Command {
 		Export\ExportActivePlugins::class,
 		Export\ExportWxrFile::class,
 		Export\ExportOptions::class,
+		Export\ExportThemeMods::class,
 		Export\ExportCustomizerSettings::class,
 		Export\ExportWidgets::class,
 	];
