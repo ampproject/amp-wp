@@ -87,7 +87,7 @@ final class ExportResult {
 	 * @return string JSON representation of the export result.
 	 */
 	public function to_json() {
-		$json = json_encode(
+		$json = wp_json_encode(
 			array_merge( $this->get_defaults(), $this->data ),
 			JSON_PRETTY_PRINT
 		);
