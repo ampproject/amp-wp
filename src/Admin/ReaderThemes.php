@@ -172,7 +172,7 @@ final class ReaderThemes {
 		}
 
 		if ( is_wp_error( $response ) ) {
-			return [ $this->get_classic_mode() ];
+			return [ $this->get_legacy_theme() ];
 		}
 
 		if ( is_array( $response ) ) {
@@ -215,7 +215,7 @@ final class ReaderThemes {
 			$reader_themes
 		);
 
-		$reader_themes[] = $this->get_classic_mode();
+		$reader_themes[] = $this->get_legacy_theme();
 
 		$this->default_reader_themes = $reader_themes;
 		return $this->default_reader_themes;
@@ -270,7 +270,7 @@ final class ReaderThemes {
 			case get_stylesheet() === $theme['slug']:
 				return self::STATUS_ACTIVE;
 
-			case 'legacy' === $theme['slug'] || wp_get_theme( $theme['slug'] )->exists():
+			case self::DEFAULT_READER_THEME === $theme['slug'] || wp_get_theme( $theme['slug'] )->exists():
 				return self::STATUS_INSTALLED;
 
 			case $this->can_install_theme( $theme ):
@@ -282,22 +282,18 @@ final class ReaderThemes {
 	}
 
 	/**
-	 * Provides details for the classic theme included with the plugin.
+	 * Provides details for the legacy theme included with the plugin.
 	 *
 	 * @return array
 	 */
-	private function get_classic_mode() {
+	private function get_legacy_theme() {
 		return [
-			'name'           => 'AMP Legacy',
-			'slug'           => 'legacy',
-			'preview_url'    => 'https://amp-wp.org',
+			'name'           => __( 'AMP Legacy', 'amp' ),
+			'slug'           => self::DEFAULT_READER_THEME,
+			'preview_url'    => 'https://amp-wp.org', // This is unused.
 			'screenshot_url' => amp_get_asset_url( 'images/reader-themes/legacy.jpg' ),
-			'homepage'       => 'https://amp-wp.org',
-			'description'    => __(
-				// @todo Improved description text.
-				'A legacy default template that looks nice and clean, with a good balance between ease and extensibility when it comes to customization.',
-				'amp'
-			),
+			'homepage'       => 'https://amp-wp.org/documentation/how-the-plugin-works/classic-templates/',
+			'description'    => __( 'The original templates included in the plugin with limited customization options.', 'amp' ),
 			'requires'       => false,
 			'requires_php'   => false,
 			'availability'   => self::STATUS_INSTALLED,
