@@ -60,6 +60,8 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$wp_rewrite->init();
 		$wp_rewrite->flush_rules();
 
+		delete_site_transient( 'theme_roots' );
+
 		if ( class_exists( 'WP_Block_Type_Registry' ) ) {
 			foreach ( WP_Block_Type_Registry::get_instance()->get_all_registered() as $block ) {
 				if ( 'amp/' === substr( $block->name, 0, 4 ) ) {
@@ -226,6 +228,9 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentynineteen' );
 		$this->assertFalse( amp_is_legacy() );
+
+		AMP_Options_Manager::update_option( Option::READER_THEME, 'foobar' );
+		$this->assertTrue( amp_is_legacy() );
 	}
 
 	/**
@@ -1691,19 +1696,24 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 		$this->go_to( amp_get_permalink( $post_id ) );
 
+		delete_site_transient( 'theme_roots' );
+
 		// Confirm legacy Reader mode works.
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
-		$this->assertTrue( amp_is_legacy() );
-		$admin_bar = new WP_Admin_Bar();
-		wp_admin_bar_customize_menu( $admin_bar );
-		amp_add_admin_bar_view_link( $admin_bar );
-		$item = $admin_bar->get_node( 'amp' );
-		$this->assertInternalType( 'object', $item );
-		$this->assertEquals( esc_url( get_permalink( $post_id ) ), $item->href );
-		$item = $admin_bar->get_node( 'customize' );
-		$this->assertInternalType( 'object', $item );
-		$this->assertStringNotContains( amp_get_slug() . '=', $item->href );
-		$this->assertStringContains( 'autofocus', $item->href );
+		foreach ( [ AMP_Theme_Support::READER_MODE_SLUG, 'foobar' ] as $reader_theme ) {
+			AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+			AMP_Options_Manager::update_option( Option::READER_THEME, $reader_theme );
+			$this->assertTrue( amp_is_legacy() );
+			$admin_bar = new WP_Admin_Bar();
+			wp_admin_bar_customize_menu( $admin_bar );
+			amp_add_admin_bar_view_link( $admin_bar );
+			$item = $admin_bar->get_node( 'amp' );
+			$this->assertInternalType( 'object', $item );
+			$this->assertEquals( esc_url( get_permalink( $post_id ) ), $item->href );
+			$item = $admin_bar->get_node( 'customize' );
+			$this->assertInternalType( 'object', $item );
+			$this->assertStringNotContains( amp_get_slug() . '=', $item->href );
+			$this->assertStringContains( 'autofocus', $item->href );
+		}
 
 		// Confirm Customize link with a Reader theme points to the right place.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );

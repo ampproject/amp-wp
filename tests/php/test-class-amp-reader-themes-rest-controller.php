@@ -69,10 +69,13 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 			];
 		};
 
-		// Test that a theme with no screenshot_url is filtered out.
+		// Test that only the filtered and AMP Legacy themes are returned.
 		$this->controller = new AMP_Reader_Theme_REST_Controller( new ReaderThemes() );
 		add_filter( 'amp_reader_themes', $filter );
-		$this->assertEquals( 0, count( $this->controller->get_items( new WP_REST_Request( 'GET', 'amp/v1' ) )->data ) );
+
+		$data = $this->controller->get_items( new WP_REST_Request( 'GET', 'amp/v1' ) )->data;
+
+		$this->assertEquals( [ 'my-theme', 'legacy' ], wp_list_pluck( $data, 'slug' ) );
 		remove_filter( 'amp_reader_themes', $filter );
 	}
 }
