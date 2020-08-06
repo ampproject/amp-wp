@@ -81,7 +81,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option(
 			Option::ANALYTICS,
 			[
-				'__new__' => compact( 'type', 'config' ),
+				'abcdefghijkl' => compact( 'type', 'config' ),
 			]
 		);
 	}
@@ -96,8 +96,8 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option(
 			Option::ANALYTICS,
 			[
-				'__new__-0' => compact( 'type', 'config' ),
-				'__new__-1' => [
+				'abcdefghijkl' => compact( 'type', 'config' ),
+				'mnopqrstuvwx' => [
 					'type'   => $type,
 					'config' => '{"good": "good"}',
 				],

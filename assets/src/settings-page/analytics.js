@@ -2,12 +2,13 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useContext, useEffect, useRef, useState, useCallback, useMemo } from '@wordpress/element';
+import { useContext, useEffect, useRef } from '@wordpress/element';
 import { Icon, plus, trash } from '@wordpress/icons';
 import { Button, TextControl, PanelRow, BaseControl } from '@wordpress/components';
 
@@ -16,25 +17,6 @@ import { Button, TextControl, PanelRow, BaseControl } from '@wordpress/component
  */
 import { AMPDrawer } from '../components/amp-drawer';
 import { Options } from '../components/options-context-provider';
-
-/**
- * Prefix for the temporary ID assigned to new entries. Entries receive their permanent ID when saved to the database.
- */
-const NEW_ENTRY_KEY_PREFIX = '__new__';
-
-/**
- * Provides a unique temporary key for new entries. Will be replaced with a key generated on the backend when settings are saved.
- *
- * @param {string} prefix The prefix for new keys.
- */
-function useUniqueNewKey( prefix = NEW_ENTRY_KEY_PREFIX ) {
-	const [ currentIndex, setCurrentIndex ] = useState( 0 );
-
-	return useCallback( () => {
-		setCurrentIndex( ( oldIndex ) => oldIndex + 1 );
-		return `${ prefix }-${ currentIndex }`;
-	}, [ currentIndex, prefix ] );
-}
 
 /**
  * Component for a single analytics entry.
@@ -46,20 +28,7 @@ function useUniqueNewKey( prefix = NEW_ENTRY_KEY_PREFIX ) {
  * @param {string} props.type The entry type.
  * @param {string} props.config The config JSON string.
  */
-function AnalyticsEntry( { entryId = '', onChange, onDelete, type = '', config = '{}' } ) {
-	const isExistingEntry = 0 !== entryId.indexOf( NEW_ENTRY_KEY_PREFIX );
-
-	const analyticsTitle = useMemo( () => {
-		if ( isExistingEntry ) {
-			const newEntrySlug = `${ type ? type + '-' : '' }${ entryId.substr( entryId.length - 6 ) }`;
-
-			/* translators: %s: the entry slug. */
-			return sprintf( __( 'Analytics: %s', 'amp' ), newEntrySlug );
-		}
-
-		return __( 'Add new entry:', 'amp' );
-	}, [ entryId, isExistingEntry, type ] );
-
+function AnalyticsEntry( { entryId, onChange, onDelete, type = '', config = '{}' } ) {
 	/**
 	 * Track the validity of the config JSON object. A nonempty custom validity string will block form submission.
 	 */
@@ -103,9 +72,9 @@ function AnalyticsEntry( { entryId = '', onChange, onDelete, type = '', config =
 	return (
 		<PanelRow className="amp-analytics-entry">
 			<h4>
-				{ analyticsTitle }
+				{ __( 'Analytics entry', 'amp' ) }
 			</h4>
-			<div className="amp-analytics-entry__options" ref={ inputWrapper } id={ `amp-analytics-entry${ entryId }` }>
+			<div className="amp-analytics-entry__options" ref={ inputWrapper } id={ `amp-analytics-entry-${ entryId }` }>
 				<div className="amp-analytics-entry__text-inputs">
 					<TextControl
 						className="option-input"
@@ -117,23 +86,6 @@ function AnalyticsEntry( { entryId = '', onChange, onDelete, type = '', config =
 						required
 						placeholder={ __( 'e.g. googleanalytics', 'amp' ) }
 						value={ type }
-						help={ <span dangerouslySetInnerHTML={
-							{ __html:
-								sprintf(
-									/* translators: Placeholder is an AMP analytics vendor docs URL. */
-									__( 'See <a href="%s" target="_blank">available vendors</a>.', 'amp' ),
-									__( 'https://www.ampproject.org/docs/analytics/analytics-vendors', 'amp' ),
-								),
-							} }
-						/> }
-					/>
-
-					<TextControl
-						label={ __( 'ID:', 'amp' ) }
-						type="text"
-						help={ isExistingEntry ? '' : __( 'The entry ID will be generated automatically.', 'amp' ) }
-						value={ isExistingEntry ? entryId : '' }
-						readOnly
 					/>
 				</div>
 
@@ -173,7 +125,7 @@ function AnalyticsEntry( { entryId = '', onChange, onDelete, type = '', config =
 }
 AnalyticsEntry.propTypes = {
 	config: PropTypes.string,
-	entryId: PropTypes.string,
+	entryId: PropTypes.string.isRequired,
 	onChange: PropTypes.func.isRequired,
 	onDelete: PropTypes.func.isRequired,
 	type: PropTypes.string,
@@ -183,7 +135,6 @@ AnalyticsEntry.propTypes = {
  * Component handling addition and deletion of analytics entries.
  */
 function AnalyticsOptions() {
-	const getNewKey = useUniqueNewKey();
 	const { editedOptions, originalOptions, updateOptions } = useContext( Options );
 	const { analytics } = editedOptions;
 
@@ -227,10 +178,11 @@ function AnalyticsOptions() {
 
 				</pre>
 			</details>
-			{ Object.entries( analytics || {} ).map( ( [ key, { type, config } ] ) => (
+			{ Object.entries( analytics || {} ).map( ( [ key, { type, config } ], index ) => (
 				<AnalyticsEntry
-					key={ `analytics-entry-${ key }` }
-					entryId={ key }
+					key={ `analytics-entry-${ index }` }
+					entryId={ String( index ) }
+					isExistingEntry={ key in originalOptions.analytics }
 					type={ type }
 					config={ config }
 					onDelete={ () => {
@@ -259,7 +211,7 @@ function AnalyticsOptions() {
 					updateOptions( {
 						analytics: {
 							...analytics,
-							[ getNewKey() ]: {
+							[ uuidv4() ]: {
 								type: '',
 								config: '{}',
 							},

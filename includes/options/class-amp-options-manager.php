@@ -360,6 +360,9 @@ class AMP_Options_Manager {
 		if ( isset( $new_options[ Option::ANALYTICS ] ) && $new_options[ Option::ANALYTICS ] !== $options[ Option::ANALYTICS ] ) {
 			$new_analytics_option = [];
 
+			// Track existing entries within the loop below to prevent duplicates.
+			$existing_entry_json = [];
+
 			foreach ( $new_options[ Option::ANALYTICS ] as $id => $data ) {
 				// Check save/delete pre-conditions and proceed if correct.
 				if ( empty( $data['type'] ) || empty( $data['config'] ) ) {
@@ -375,23 +378,18 @@ class AMP_Options_Manager {
 				$entry_vendor_type = preg_replace( '/[^a-zA-Z0-9_\-]/', '', $data['type'] );
 				$entry_config      = trim( $data['config'] );
 
-				if ( ! empty( $id ) && 0 !== strpos( $id, '__new__' ) ) {
-					$entry_id = sanitize_key( $id );
-				} else {
-
-					// Generate a hash string to uniquely identify this entry.
-					$entry_id = substr( md5( $entry_vendor_type . $entry_config ), 0, 12 );
-
-					// Avoid duplicates.
-					if ( isset( $new_analytics_option[ $entry_id ] ) ) {
-						continue;
-					}
-				}
-
-				$new_analytics_option[ $entry_id ] = [
+				$new_entry = [
 					'type'   => $entry_vendor_type,
 					'config' => $entry_config,
 				];
+
+				$new_entry_json = wp_json_encode( $new_entry );
+				if ( in_array( $new_entry_json, $existing_entry_json, true ) ) {
+					continue;
+				}
+
+				$existing_entry_json[]       = $new_entry_json;
+				$new_analytics_option[ $id ] = $new_entry;
 			}
 
 			$options[ OPTION::ANALYTICS ] = $new_analytics_option;

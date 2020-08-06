@@ -205,7 +205,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option(
 			Option::ANALYTICS,
 			[
-				'__new__' => [
+				'abcdefghijkl' => [
 					'type'   => 'foo',
 					'config' => '{"good":true}',
 				],
@@ -217,11 +217,11 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option(
 			Option::ANALYTICS,
 			[
-				'__new__-1' => [
+				'abcdefghijkl' => [
 					'type'   => 'foo',
 					'config' => '{"good":true}',
 				],
-				'__new__-2' => [
+				'mnopqrstuvwx' => [
 					'type'   => 'foo',
 					'config' => '{"good":true}',
 				],
@@ -232,7 +232,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		// Confirm format of entry ID.
 		$entries = AMP_Options_Manager::get_option( Option::ANALYTICS );
 		$entry   = current( $entries );
-		$id      = substr( md5( $entry['type'] . $entry['config'] ), 0, 12 );
+		$id      = current( array_keys( $entries ) );
 		$this->assertArrayHasKey( $id, $entries );
 		$this->assertEquals( 'foo', $entries[ $id ]['type'] );
 		$this->assertEquals( '{"good":true}', $entries[ $id ]['config'] );
@@ -241,8 +241,11 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option(
 			Option::ANALYTICS,
 			[
-				$id       => $entry,
-				'__new__' => [
+				'abcdefghijkl' => [
+					'type'   => 'foo',
+					'config' => '{"good":true}',
+				],
+				'mnopqrstuvwx' => [
 					'type'   => 'bar',
 					'config' => '{"good":true}',
 				],
