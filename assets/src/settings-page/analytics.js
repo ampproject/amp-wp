@@ -22,13 +22,13 @@ import { Options } from '../components/options-context-provider';
  * Component for a single analytics entry.
  *
  * @param {Object} props Component props.
- * @param {string} props.entryId Unique ID for the entry.
+ * @param {number} props.entryIndex Index for the entry.
  * @param {Function} props.onChange Callback to run when data changes.
  * @param {Function} props.onDelete Callback to run when the entry is to be deleted.
  * @param {string} props.type The entry type.
  * @param {string} props.config The config JSON string.
  */
-function AnalyticsEntry( { entryId, onChange, onDelete, type = '', config = '{}' } ) {
+function AnalyticsEntry( { entryIndex, onChange, onDelete, type = '', config = '{}' } ) {
 	/**
 	 * Track the validity of the config JSON object. A nonempty custom validity string will block form submission.
 	 */
@@ -58,11 +58,11 @@ function AnalyticsEntry( { entryId, onChange, onDelete, type = '', config = '{}'
 		<PanelRow className="amp-analytics-entry">
 			<h4>
 				{
-					/* translators: placeholder is a unique Id. */
-					sprintf( __( 'Analytics %s', 'amp' ), entryId )
+					/* translators: placeholder is the entry index */
+					sprintf( __( 'Analytics Configuration #%s', 'amp' ), entryIndex )
 				}
 			</h4>
-			<div className="amp-analytics-entry__options" id={ `amp-analytics-entry-${ entryId }` }>
+			<div className="amp-analytics-entry__options" id={ `amp-analytics-entry-${ String( entryIndex ) }` }>
 				<div className="amp-analytics-entry__text-inputs">
 					<TextControl
 						className="option-input"
@@ -77,14 +77,14 @@ function AnalyticsEntry( { entryId, onChange, onDelete, type = '', config = '{}'
 				</div>
 
 				<BaseControl
-					id={ `analytics-textarea-control-${ entryId }` }
+					id={ `analytics-textarea-control-${ entryIndex }` }
 					label={ __( 'JSON Configuration:', 'amp' ) }
 				>
 					<textarea
 						rows="10"
 						cols="100"
 						className="amp-analytics-input"
-						id={ `analytics-textarea-control-${ entryId }` }
+						id={ `analytics-textarea-control-${ entryIndex }` }
 						onChange={ ( event ) => {
 							onChange( { config: event.target.value } );
 						} }
@@ -112,7 +112,7 @@ function AnalyticsEntry( { entryId, onChange, onDelete, type = '', config = '{}'
 }
 AnalyticsEntry.propTypes = {
 	config: PropTypes.string,
-	entryId: PropTypes.string.isRequired,
+	entryIndex: PropTypes.number.isRequired,
 	onChange: PropTypes.func.isRequired,
 	onDelete: PropTypes.func.isRequired,
 	type: PropTypes.string,
@@ -168,7 +168,7 @@ function AnalyticsOptions() {
 			{ Object.entries( analytics || {} ).map( ( [ key, { type, config } ], index ) => (
 				<AnalyticsEntry
 					key={ `analytics-entry-${ index }` }
-					entryId={ String( index + 1 ) }
+					entryIndex={ index + 1 }
 					isExistingEntry={ key in originalOptions.analytics }
 					type={ type }
 					config={ config }
