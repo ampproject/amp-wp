@@ -98,7 +98,7 @@ function AnalyticsEntry( { entryIndex, onChange, onDelete, type = '', config = '
 			<Button
 				isLink
 				onClick={ () => {
-					if ( '' === type || global.confirm( __( 'Are you sure you want to delete this entry?', 'amp' ) ) ) {
+					if ( '{}' === config || global.confirm( __( 'Are you sure you want to delete this entry?', 'amp' ) ) ) {
 						onDelete();
 					}
 				} }
