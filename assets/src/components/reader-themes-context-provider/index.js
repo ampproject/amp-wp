@@ -35,12 +35,15 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	const { setAsyncError } = useAsyncError();
 	const { error, setError } = useContext( ErrorContext );
 
+	const [ themeWasOverridden, setThemeWasOverridden ] = useState( false );
 	const [ themes, setThemes ] = useState( null );
 	const [ fetchingThemes, setFetchingThemes ] = useState( false );
 	const [ downloadingTheme, setDownloadingTheme ] = useState( false );
 	const [ downloadedTheme, setDownloadedTheme ] = useState( false );
 
-	const { editedOptions, updateOptions, savingOptions } = useContext( Options );
+	const { editedOptions, originalOptions, updateOptions, savingOptions } = useContext( Options );
+
+	const { reader_theme: originalReaderTheme } = originalOptions;
 	const { reader_theme: readerTheme, theme_support: themeSupport } = editedOptions;
 
 	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
@@ -52,9 +55,22 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	/**
 	 * The active reader theme.
 	 */
-	const selectedTheme = useMemo(
-		() => themes ? themes.find( ( { slug } ) => slug === readerTheme ) || { name: null, availability: null } : { name: null, availability: null },
-		[ readerTheme, themes ],
+	const { originalSelectedTheme, selectedTheme } = useMemo(
+		() => {
+			const emptyTheme = { name: null, availability: null };
+			if ( ! themes ) {
+				return {
+					originalSelectedTheme: emptyTheme,
+					selectedTheme: emptyTheme,
+				};
+			}
+
+			return {
+				originalSelectedTheme: themes.find( ( { slug } ) => slug === originalReaderTheme ) || emptyTheme,
+				selectedTheme: themes.find( ( { slug } ) => slug === readerTheme ) || emptyTheme,
+			};
+		},
+		[ originalReaderTheme, readerTheme, themes ],
 	);
 
 	/**
@@ -64,14 +80,19 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	const [ downloadingThemeError, setDownloadingThemeError ] = useState( null );
 
 	/**
-	 * If the currently selected theme is unavailable and not installable, unset the reader theme option. This will handle cases where
-	 * the reader theme stored in the options is removed and can no longer be installed.
+	 * If the currently selected theme is unavailable and not installable, or the current theme is the active theme,
+	 * unset the reader theme option.
 	 */
 	useEffect( () => {
-		if ( selectedTheme.availability === 'non-installable' ) {
-			updateOptions( { reader_theme: null } );
+		if ( themeWasOverridden ) { // Only do this once.
+			return;
 		}
-	}, [ selectedTheme.availability, updateOptions ] );
+
+		if ( selectedTheme.availability === 'non-installable' || originalSelectedTheme.availability === 'active' ) {
+			updateOptions( { reader_theme: 'legacy' } );
+			setThemeWasOverridden( true );
+		}
+	}, [ originalSelectedTheme.availability, selectedTheme.availability, themeWasOverridden, updateOptions ] );
 
 	/**
 	 * Downloads the selected reader theme, if necessary, when options are saved.

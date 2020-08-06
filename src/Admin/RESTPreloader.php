@@ -43,6 +43,10 @@ final class RESTPreloader implements Service {
 	 * Preloads data using apiFetch preloading middleware.
 	 */
 	public function preload_data() {
+		if ( ! function_exists( 'rest_preload_api_request' ) ) { // Not available pre-5.0.
+			return;
+		}
+
 		$preload_data = array_reduce( $this->paths, 'rest_preload_api_request', [] );
 
 		wp_add_inline_script(

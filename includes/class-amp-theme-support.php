@@ -2298,6 +2298,13 @@ class AMP_Theme_Support {
 			return;
 		}
 
+		/**
+		 * Fires before registering plugin assets that may require core asset polyfills.
+		 *
+		 * @internal
+		 */
+		do_action( 'amp_register_polyfills' );
+
 		$asset_file   = AMP__DIR__ . '/assets/js/amp-paired-browsing-client.asset.php';
 		$asset        = require $asset_file;
 		$dependencies = $asset['dependencies'];
@@ -2386,6 +2393,9 @@ class AMP_Theme_Support {
 				[ 'response' => 403 ]
 			);
 		}
+
+		/** This action is documented in includes/class-amp-theme-support.php */
+		do_action( 'amp_register_polyfills' );
 
 		wp_enqueue_style(
 			'amp-paired-browsing-app',

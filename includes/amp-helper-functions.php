@@ -891,41 +891,6 @@ function amp_add_generator_metadata() {
  * @param WP_Scripts $wp_scripts Scripts.
  */
 function amp_register_default_scripts( $wp_scripts ) {
-	/*
-	 * Polyfill dependencies that are registered in Gutenberg and WordPress 5.0.
-	 * Note that Gutenberg will override these at wp_enqueue_scripts if it is active.
-	 */
-	$handles = [ 'wp-i18n', 'wp-dom-ready', 'wp-polyfill', 'wp-url' ];
-	foreach ( $handles as $handle ) {
-		if ( ! isset( $wp_scripts->registered[ $handle ] ) ) {
-			$asset_file   = AMP__DIR__ . '/assets/js/' . $handle . '.asset.php';
-			$asset        = require $asset_file;
-			$dependencies = $asset['dependencies'];
-			$version      = $asset['version'];
-
-			$wp_scripts->add(
-				$handle,
-				amp_get_asset_url( sprintf( 'js/%s.js', $handle ) ),
-				$dependencies,
-				$version
-			);
-		}
-	}
-
-	$vendor_scripts = [
-		'lodash' => [
-			'dependencies' => [],
-			'version'      => '4.17.15',
-		],
-	];
-	foreach ( $vendor_scripts as $handle => $handle_data ) {
-		if ( ! isset( $wp_scripts->registered[ $handle ] ) ) {
-			$path = amp_get_asset_url( sprintf( 'js/vendor/%s.js', $handle ) );
-
-			$wp_scripts->add( $handle, $path, $handle_data['dependencies'], $handle_data['version'], 1 );
-		}
-	}
-
 	// AMP Runtime.
 	$handle = 'amp-runtime';
 	$wp_scripts->add(
