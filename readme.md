@@ -131,6 +131,42 @@ But if you need some help, we are right here to support you on this plugin&#39;s
 
 ![A WP-CLI command is provided to check the URLs on a site for AMP validity. Results are available in the admin for inspection.](wp-assets/screenshot-13.png)
 
+### New onboarding wizard to help you get started.
+
+![New onboarding wizard to help you get started.](wp-assets/screenshot-14.png)
+
+### Built for developers and non-technical content creators alike.
+
+![Built for developers and non-technical content creators alike.](wp-assets/screenshot-15.png)
+
+### Three modes to choose from.
+
+![Three modes to choose from.](wp-assets/screenshot-16.png)
+
+### Theme selection to enhance Reader mode experience.
+
+![Theme selection to enhance Reader mode experience.](wp-assets/screenshot-17.png)
+
+### Preview how your site looks across desktop and mobile before finalising changes.
+
+![Preview how your site looks across desktop and mobile before finalising changes.](wp-assets/screenshot-18.png)
+
+### Confirmation message with link to option to further "Customize AMP" experience.
+
+![Confirmation message with link to option to further "Customize AMP" experience.](wp-assets/screenshot-19.png)
+
+### Customize AMP Pages from customizer settings for Reader Mode.
+
+![Customize AMP Pages from customizer settings for Reader Mode.](wp-assets/screenshot-20.png)
+
+### Reopen the settings wizard, change the template mode, or change advanced settings.
+
+![Reopen the settings wizard, change the template mode, or change advanced settings.](wp-assets/screenshot-21.png)
+
+### AMP can handle your entire site but we have ensured you can AMPlify in parts if you need.
+
+![AMP can handle your entire site but we have ensured you can AMPlify in parts if you need.](wp-assets/screenshot-22.png)
+
 ## Changelog ##
 
 For the plugin’s changelog, please see [the Releases page on GitHub](https://github.com/ampproject/amp-wp/releases).
