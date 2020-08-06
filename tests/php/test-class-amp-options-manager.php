@@ -213,7 +213,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		);
 		$this->assertEmpty( get_settings_errors( AMP_Options_Manager::OPTION_NAME ) );
 
-		// Test analytics saves only one of duplicate entries.
+		// Test bad analytics JSON entries are skipped.
 		AMP_Options_Manager::update_option(
 			Option::ANALYTICS,
 			[
@@ -222,12 +222,24 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 					'config' => '{"good":true}',
 				],
 				'mnopqrstuvwx' => [
-					'type'   => 'foo',
-					'config' => '{"good":true}',
+					'type'   => 'bar',
+					'config' => '{"bad":true',
+				],
+				'mshvad9sdasa' => [
+					'type' => 'baz',
 				],
 			]
 		);
-		$this->assertCount( 1, AMP_Options_Manager::get_option( Option::ANALYTICS ) );
+		$updated_entries = AMP_Options_Manager::get_option( Option::ANALYTICS );
+		$this->assertEquals(
+			[
+				'abcdefghijkl' => [
+					'type'   => 'foo',
+					'config' => '{"good":true}',
+				],
+			],
+			$updated_entries
+		);
 
 		// Confirm format of entry ID.
 		$entries = AMP_Options_Manager::get_option( Option::ANALYTICS );
