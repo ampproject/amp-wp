@@ -62,7 +62,7 @@ class PolyfillsTest extends WP_UnitTestCase {
 		$this->instance->register();
 
 		$wp_scripts = new WP_Scripts();
-		$wp_styles = new WP_Styles();
+		$wp_styles  = new WP_Styles();
 
 		/** This action is documented in includes/class-amp-theme-support.php */
 		do_action( 'amp_register_polyfills' );
