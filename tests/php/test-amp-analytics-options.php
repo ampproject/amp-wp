@@ -131,7 +131,6 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	 */
 	public function test_two_options_inserted() {
 
-		/* Insert analytics option one */
 		$this->insert_two_options(
 			$this->vendor,
 			$this->config_one
@@ -143,7 +142,9 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that exactly one analytics component are added to the page
+	 * Test that exactly one analytics component are added to the page.
+	 *
+	 * @covers ::amp_print_analytics()
 	 */
 	public function test_one_analytics_component_added() {
 
@@ -169,6 +170,35 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 		// One amp-analytics component should be in the page
 		$this->assertEquals( 1, $components->length );
+	}
+
+	/**
+	 * Test that two analytics components are added to the page.
+	 *
+	 * @covers ::amp_print_analytics()
+	 */
+	public function test_two_analytics_components_added() {
+
+		$this->insert_two_options(
+			$this->vendor,
+			$this->config_one
+		);
+
+		ob_start();
+		amp_print_analytics( [] );
+		$amp_rendered = ob_get_clean();
+
+		$libxml_previous_state = libxml_use_internal_errors( true );
+
+		$dom = new Document();
+		$dom->loadHTML( $amp_rendered );
+		$components = $dom->getElementsByTagName( 'amp-analytics' );
+
+		libxml_clear_errors();
+		libxml_use_internal_errors( $libxml_previous_state );
+
+		// Two amp-analytics components should be in the page
+		$this->assertEquals( 2, $components->length );
 	}
 
 	/**
