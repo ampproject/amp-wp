@@ -51,7 +51,7 @@ Different modes would be recommended in different scenarios, depending on the sp
 
 It is possible today to assemble great looking user-first sites powered by the AMP plugin by picking and choosing themes and plugins from a growing AMP-compatible ecosystem. In this context, the AMP plugin acts as an orchestrator of the overall AMP content creation and publishing process; it serves as a validator and enforcer making it easier to not only to get to AMP experiences, but to stay in them with confidence.
 
-Many popular theme and plugin developers have taken efforts to support The Official AMP Plugin. If you are using a theme like Astra, Newspack or plugins like Yoast, WP Forms — they will work out of the box! You can see the growing list of tested themes and plugins [here].
+Many popular theme and plugin developers have taken efforts to support The Official AMP Plugin. If you are using a theme like Astra, Newspack or plugins like Yoast, WP Forms — they will work out of the box! You can see the growing list of tested themes and plugins [here](https://amp-wp.org/ecosystem/).
 
 ## AMP Development
 
