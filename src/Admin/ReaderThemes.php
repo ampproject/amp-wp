@@ -120,7 +120,7 @@ final class ReaderThemes {
 			$themes
 		);
 
-		$this->themes = $themes;
+		$this->themes = array_values( $themes );
 
 		return $this->themes;
 	}
