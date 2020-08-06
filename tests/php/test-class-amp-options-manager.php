@@ -201,18 +201,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		);
 		$this->assertEmpty( AMP_Options_Manager::get_option( Option::ANALYTICS ) );
 
-		// Test analytics validation with good fields.
-		AMP_Options_Manager::update_option(
-			Option::ANALYTICS,
-			[
-				'abcdefghijkl' => [
-					'type'   => 'foo',
-					'config' => '{"good":true}',
-				],
-			]
-		);
-		$this->assertEmpty( get_settings_errors( AMP_Options_Manager::OPTION_NAME ) );
-
 		// Test bad analytics JSON entries are skipped.
 		AMP_Options_Manager::update_option(
 			Option::ANALYTICS,
