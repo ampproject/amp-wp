@@ -369,9 +369,13 @@ li.error-kept {
 .amp-analytics-entry {
 	flex-direction: column;
 	align-items: flex-start;
-	padding: 1.5rem 2.25rem;
+	padding: 0 1rem;
 	margin-bottom: 1.5rem;
 	border: 1px solid var(--amp-settings-color-border);
+
+	@media (min-width: 783px) {
+		padding: 1.5rem 2.25rem;
+	}
 }
 
 .amp-analytics-entry__text-inputs {
@@ -393,6 +397,7 @@ li.error-kept {
 
 .amp-analytics-input {
 	font-family: monospace;
+	tab-size: 4;
 	width: 100%;
 }
 
