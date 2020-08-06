@@ -71,7 +71,6 @@ function AnalyticsEntry( { entryId, onChange, onDelete, type = '', config = '{}'
 							onChange( { type: newType } );
 						} }
 						type="text"
-						required
 						placeholder={ __( 'e.g. googleanalytics', 'amp' ) }
 						value={ type }
 					/>

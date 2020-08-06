@@ -365,7 +365,7 @@ class AMP_Options_Manager {
 
 			foreach ( $new_options[ Option::ANALYTICS ] as $id => $data ) {
 				// Check save/delete pre-conditions and proceed if correct.
-				if ( empty( $data['type'] ) || empty( $data['config'] ) ) {
+				if ( empty( $data['config'] ) ) {
 					continue;
 				}
 
@@ -375,7 +375,7 @@ class AMP_Options_Manager {
 					continue;
 				}
 
-				$entry_vendor_type = preg_replace( '/[^a-zA-Z0-9_\-]/', '', $data['type'] );
+				$entry_vendor_type = ! empty( $data['type'] ) ? preg_replace( '/[^a-zA-Z0-9_\-]/', '', $data['type'] ) : '';
 				$entry_config      = trim( $data['config'] );
 
 				$new_entry = [
