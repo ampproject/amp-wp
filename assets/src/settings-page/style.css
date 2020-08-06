@@ -334,6 +334,13 @@ li.error-kept {
 	font-size: 14px;
 }
 
+#analytics-options-drawer details > summary {
+	font-size: 14px;
+}
+
+#analytics-options-drawer details > p {
+	margin-top: 1em;
+}
 
 .amp-analytics-entry {
 	flex-direction: column;
