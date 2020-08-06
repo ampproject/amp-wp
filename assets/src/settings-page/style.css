@@ -104,12 +104,10 @@
 	font-size: 14px;
 }
 
-
 /* Plugin suppression */
 .plugin-suppression > p {
 	font-size: 14px;
 }
-
 
 #suppressed-plugins-table {
 	margin-top: 20px;
@@ -194,6 +192,10 @@
 	list-style-type: disc;
 }
 
+#suppressed-plugins-table details {
+	margin: 0;
+}
+
 #suppressed-plugins-table summary {
 	user-select: none;
 	cursor: pointer;
@@ -202,6 +204,10 @@
 #suppressed-plugins-table tbody .column-plugin,
 #suppressed-plugins-table tbody .column-details {
 	padding-top: 18px;
+}
+
+#suppressed-plugins-table .column-plugin .error-details {
+	display: none;
 }
 
 li.error-removed {
@@ -216,6 +222,21 @@ li.error-kept {
 
 	#suppressed-plugins-table .column-status {
 		width: 130px;
+	}
+
+	#suppressed-plugins-table .column-plugin {
+		width: auto;
+	}
+
+	#suppressed-plugins-table .column-plugin .error-details {
+		display: block;
+		margin-top: 10px;
+		border-top: dotted 1px #ccd0d4;
+		padding-top: 10px;
+	}
+
+	#suppressed-plugins-table .column-details {
+		display: none;
 	}
 
 	#suppressed-plugins-table .column-status .components-select-control__input {

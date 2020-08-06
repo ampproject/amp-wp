@@ -202,6 +202,27 @@ function PluginRow( { pluginKey, pluginDetails } ) {
 		</strong>
 	);
 
+	const errorDetails = (
+		<div className="error-details">
+			{
+				isOriginallySuppressed ? (
+					<p>
+						<SuppressedPluginTime suppressedPlugin={ originalSuppressedPlugins[ pluginKey ] } />
+						{ ' ' }
+						<SuppressedPluginUsername suppressedPlugin={ originalSuppressedPlugins[ pluginKey ] } />
+						{ ' ' }
+						<SuppressedPluginVersion
+							pluginDetails={ pluginDetails }
+							suppressedPlugin={ originalSuppressedPlugins[ pluginKey ] }
+						/>
+					</p>
+				) : (
+					<ValidationErrorDetails errors={ pluginDetails.validation_errors } />
+				)
+			}
+		</div>
+	);
+
 	return (
 		<tr className={ classnames(
 			{
@@ -267,24 +288,11 @@ function PluginRow( { pluginKey, pluginDetails } ) {
 
 					].filter( ( child ) => child ) }
 				</ConditionalDetails>
+
+				{ errorDetails }
 			</td>
 			<td className="column-details">
-				{
-					isOriginallySuppressed ? (
-						<p>
-							<SuppressedPluginTime suppressedPlugin={ originalSuppressedPlugins[ pluginKey ] } />
-							{ ' ' }
-							<SuppressedPluginUsername suppressedPlugin={ originalSuppressedPlugins[ pluginKey ] } />
-							{ ' ' }
-							<SuppressedPluginVersion
-								pluginDetails={ pluginDetails }
-								suppressedPlugin={ originalSuppressedPlugins[ pluginKey ] }
-							/>
-						</p>
-					) : (
-						<ValidationErrorDetails errors={ pluginDetails.validation_errors } />
-					)
-				}
+				{ errorDetails }
 			</td>
 		</tr>
 	);
