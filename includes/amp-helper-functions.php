@@ -105,7 +105,12 @@ function amp_init() {
 	 */
 	do_action( 'amp_init' );
 
+	global $amp_service_worker;
+	$amp_service_worker = new AMP_Service_Worker();
+	$amp_service_worker->init();
+
 	add_filter( 'allowed_redirect_hosts', [ 'AMP_HTTP', 'filter_allowed_redirect_hosts' ] );
+	add_filter( 'wp_redirect', [ 'AMP_HTTP', 'add_purged_query_vars' ] );
 	AMP_HTTP::purge_amp_query_vars();
 	AMP_HTTP::send_cors_headers();
 	AMP_HTTP::handle_xhr_request();
@@ -547,6 +552,7 @@ function _amp_bootstrap_customizer() {
  * Redirects the old AMP URL to the new AMP URL.
  *
  * If post slug is updated the amp page with old post slug will be redirected to the updated url.
+ * Also includes all original query vars.
  *
  * @since 0.5
  *
@@ -798,7 +804,8 @@ function is_amp_endpoint() {
 		return true;
 	}
 
-	$is_amp_url = (
+	$support_args = AMP_Theme_Support::get_theme_support_args();
+	$is_amp_url   = (
 		amp_is_canonical()
 		||
 		isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -807,6 +814,12 @@ function is_amp_endpoint() {
 			$wp_query instanceof WP_Query
 			&&
 			false !== $wp_query->get( amp_get_slug(), false )
+		)
+		||
+		(
+			isset( $support_args['app_shell'] )
+			&&
+			'inner' === AMP_Theme_Support::get_requested_app_shell_component()
 		)
 	);
 
@@ -934,13 +947,6 @@ function amp_register_default_scripts( $wp_scripts ) {
 		[],
 		null
 	);
-	$wp_scripts->add_data(
-		$handle,
-		'amp_script_attributes',
-		[
-			'async' => true,
-		]
-	);
 
 	// Shadow AMP API.
 	$handle = 'amp-shadow';
@@ -950,6 +956,30 @@ function amp_register_default_scripts( $wp_scripts ) {
 		[],
 		null
 	);
+
+	// Add Web Components polyfill if Shadow DOM is not natively available.
+	$wp_scripts->add_inline_script(
+		$handle,
+		sprintf(
+			'if ( ! Element.prototype.attachShadow ) { const script = document.createElement( "script" ); script.src = %s; script.async = true; document.head.appendChild( script ); }',
+			wp_json_encode( 'https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/2.4.1/webcomponents-bundle.js' )
+		),
+		'after'
+	);
+
+	// App shell library.
+	$handle         = 'amp-wp-app-shell';
+	$asset_file     = AMP__DIR__ . '/assets/js/' . $handle . '.asset.php';
+	$asset          = require $asset_file;
+	$dependencies   = $asset['dependencies'];
+	$dependencies[] = 'amp-shadow';
+	$version        = $asset['version'];
+	$wp_scripts->add(
+		$handle,
+		amp_get_asset_url( 'js/' . $handle . '.js' ),
+		$dependencies,
+		$version
+	);
 	$wp_scripts->add_data(
 		$handle,
 		'amp_script_attributes',
@@ -957,6 +987,7 @@ function amp_register_default_scripts( $wp_scripts ) {
 			'async' => true,
 		]
 	);
+	$wp_scripts->add_data( $handle, 'precache', true );
 
 	// Register all AMP components as defined in the spec.
 	foreach ( AMP_Allowed_Tags_Generated::get_extension_specs() as $extension_name => $extension_spec ) {
@@ -1058,19 +1089,18 @@ function amp_render_scripts( $scripts ) {
  * @return string Script loader tag.
  */
 function amp_filter_script_loader_tag( $tag, $handle ) {
-	$prefix = 'https://cdn.ampproject.org/';
-	$src    = wp_scripts()->registered[ $handle ]->src;
-	if ( 0 !== strpos( $src, $prefix ) ) {
+	$prefix     = 'https://cdn.ampproject.org/';
+	$src        = wp_scripts()->registered[ $handle ]->src;
+	$attributes = wp_scripts()->get_data( $handle, 'amp_script_attributes' );
+	if ( empty( $attributes ) && 0 === strpos( $src, $prefix ) ) {
+		// All scripts from AMP CDN should be loaded async.
+		$attributes = [
+			'async' => true,
+		];
+	}
+	if ( empty( $attributes ) ) {
 		return $tag;
 	}
-
-	/*
-	 * All scripts from AMP CDN should be loaded async.
-	 * See <https://www.ampproject.org/docs/integration/pwa-amp/amp-in-pwa#include-"shadow-amp"-in-your-progressive-web-app>.
-	 */
-	$attributes = [
-		'async' => true,
-	];
 
 	// Add custom-template and custom-element attributes. All component scripts look like https://cdn.ampproject.org/v0/:name-:version.js.
 	if ( 'v0' === strtok( substr( $src, strlen( $prefix ) ), '/' ) ) {
@@ -1777,6 +1807,63 @@ function amp_print_schemaorg_metadata() {
 function amp_wp_kses_mustache( $markup ) {
 	$amp_mustache_allowed_html_tags = [ 'strong', 'b', 'em', 'i', 'u', 's', 'small', 'mark', 'del', 'ins', 'sup', 'sub' ];
 	return wp_kses( $markup, array_fill_keys( $amp_mustache_allowed_html_tags, [] ) );
+}
+
+/**
+ * Mark the beginning of the content that will be displayed inside the app shell.
+ *
+ * Depends on adding app_shell to the amp theme support args.
+ *
+ * @since 1.1
+ * @todo Should this take an argument for the content placeholder?
+ */
+function amp_start_app_shell_content() {
+	$support_args = AMP_Theme_Support::get_theme_support_args();
+	if ( ! isset( $support_args['app_shell'] ) ) {
+		return;
+	}
+
+	printf( '<div id="%s">', esc_attr( AMP_Theme_Support::APP_SHELL_CONTENT_ELEMENT_ID ) );
+
+	// Start output buffering if requesting outer shell, since all content will be omitted from the response.
+	if ( 'outer' === AMP_Theme_Support::get_requested_app_shell_component() ) {
+		$content_placeholder = '<p>' . esc_html__( 'Loading&hellip;', 'amp' ) . '</p>';
+
+		/**
+		 * Filters the content which is shown in the app shell for the content before it is loaded.
+		 *
+		 * This is used to display a loading message or a content skeleton.
+		 *
+		 * @since 1.1
+		 * @todo Consider using template part for this instead, or an action with a default.
+		 *
+		 * @param string $content_placeholder Content placeholder.
+		 */
+		echo apply_filters( 'amp_app_shell_content_placeholder', $content_placeholder ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+
+		ob_start();
+	}
+}
+
+/**
+ * Mark the end of the content that will be displayed inside the app shell.
+ *
+ * Depends on adding app_shell to the amp theme support args.
+ *
+ * @since 1.1
+ */
+function amp_end_app_shell_content() {
+	$support_args = AMP_Theme_Support::get_theme_support_args();
+	if ( ! isset( $support_args['app_shell'] ) ) {
+		return;
+	}
+
+	// Clean output buffer if requesting outer shell, since all content will be omitted from the response.
+	if ( 'outer' === AMP_Theme_Support::get_requested_app_shell_component() ) {
+		ob_end_clean();
+	}
+
+	printf( '</div><!-- #%s -->', esc_attr( AMP_Theme_Support::APP_SHELL_CONTENT_ELEMENT_ID ) );
 }
 
 /**

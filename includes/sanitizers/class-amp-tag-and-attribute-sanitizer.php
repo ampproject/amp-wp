@@ -180,6 +180,19 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		parent::__construct( $dom, $args );
 
+		// When serving outer app shell document, replace v0.js with shadow-v0.js.
+		if ( isset( $args['app_shell_component'] ) && 'outer' === $args['app_shell_component'] ) {
+			foreach ( $this->args['amp_allowed_tags']['script'] as $script_spec ) {
+				if ( isset( $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) && 'amphtml engine v0.js script' === $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
+					$shadow_script_spec = $script_spec;
+					$shadow_script_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ]['src'] = 'https://cdn.ampproject.org/shadow-v0.js';
+					$shadow_script_spec[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] = 'amphtml shadow v0.js script';
+					$this->args['amp_allowed_tags']['script'][]                 = $shadow_script_spec;
+					break;
+				}
+			}
+		}
+
 		// Prepare allowlists.
 		$this->allowed_tags = $this->args['amp_allowed_tags'];
 		foreach ( AMP_Rule_Spec::$additional_allowed_tags as $tag_name => $tag_rule_spec ) {

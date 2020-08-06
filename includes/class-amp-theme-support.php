@@ -35,6 +35,21 @@ class AMP_Theme_Support {
 	const SLUG = 'amp';
 
 	/**
+	 * Query var for requesting the inner or outer app shell.
+	 *
+	 * @todo This can go into the AMP_Service_Worker class or rather an AMP_App_Shell class.
+	 * @var string
+	 */
+	const APP_SHELL_COMPONENT_QUERY_VAR = 'amp_app_shell_component';
+
+	/**
+	 * ID for element that contains the content for app shell.
+	 *
+	 * @var string
+	 */
+	const APP_SHELL_CONTENT_ELEMENT_ID = 'amp-app-shell-content';
+
+	/**
 	 * Slug identifying standard website mode.
 	 *
 	 * @since 1.2
@@ -155,12 +170,16 @@ class AMP_Theme_Support {
 		// Ensure extra theme support for core themes is in place.
 		AMP_Core_Theme_Sanitizer::extend_theme_support();
 
+		add_action( 'parse_query', [ __CLASS__, 'init_app_shell' ], 9 );
+
 		/*
-		 * Note that wp action is use instead of template_redirect because some themes/plugins output
-		 * the response at this action and then short-circuit with exit. So this is why the the preceding
-		 * action to template_redirect--the wp action--is used instead.
-		 */
-		add_action( 'wp', [ __CLASS__, 'finish_init' ], PHP_INT_MAX );
+		* Note that wp action is used instead of template_redirect because some themes/plugins output
+		* the response at this action and then short-circuit with exit. So this is why the preceding
+		* action to template_redirect--the wp action--is used instead.
+		*/
+		if ( ! is_admin() ) {
+			add_action( 'wp', [ __CLASS__, 'finish_init' ], PHP_INT_MAX );
+		}
 	}
 
 	/**
@@ -367,6 +386,70 @@ class AMP_Theme_Support {
 			if ( method_exists( $sanitizer_class, 'add_buffering_hooks' ) ) {
 				call_user_func( [ $sanitizer_class, 'add_buffering_hooks' ], $args );
 			}
+		}
+	}
+
+	/**
+	 * Init app shell.
+	 *
+	 * @since 1.1
+	 */
+	public static function init_app_shell() {
+		$theme_support = self::get_theme_support_args();
+		if ( ! isset( $theme_support['app_shell'] ) ) {
+			return;
+		}
+
+		$requested_app_shell_component = self::get_requested_app_shell_component();
+
+		// When inner app shell is requested, it is always an AMP request. Do not allow AMP when getting outer app shell for now (but this should be allowed in the future).
+		if ( 'outer' === $requested_app_shell_component ) {
+			add_action(
+				'template_redirect',
+				function() {
+					if ( ! is_amp_endpoint() ) {
+						return;
+					}
+					wp_die(
+						esc_html__( 'Outer app shell can only be requested of the non-AMP version (thus requires Transitional mode).', 'amp' ),
+						esc_html__( 'AMP Outer App Shell Problem', 'amp' ),
+						[ 'response' => 400 ]
+					);
+				}
+			);
+		}
+
+		// @todo This query param should be standardized and then this can be handled in the same place as WP_Service_Worker_Navigation_Routing_Component::filter_title_for_streaming_header().
+		if ( 'outer' === $requested_app_shell_component ) {
+			add_filter(
+				'pre_get_document_title',
+				function() {
+					return __( 'Loading...', 'amp' );
+				}
+			);
+		}
+
+		// Enqueue scripts for (outer) app shell, including precached app shell and normal site navigation prior to service worker installation.
+		if ( 'inner' !== $requested_app_shell_component ) {
+			add_action(
+				'wp_enqueue_scripts',
+				function() use ( $requested_app_shell_component ) {
+					if ( is_amp_endpoint() ) {
+						return;
+					}
+					wp_enqueue_script( 'amp-shadow' );
+					wp_enqueue_script( 'amp-wp-app-shell' );
+
+					$exports = [
+						'contentElementId'  => AMP_Theme_Support::APP_SHELL_CONTENT_ELEMENT_ID,
+						'homeUrl'           => home_url( '/' ),
+						'adminUrl'          => admin_url( '/' ),
+						'componentQueryVar' => AMP_Theme_Support::APP_SHELL_COMPONENT_QUERY_VAR,
+						'isOuterAppShell'   => 'outer' === $requested_app_shell_component,
+					];
+					wp_add_inline_script( 'amp-wp-app-shell', sprintf( 'var ampAppShell = %s;', wp_json_encode( $exports ) ), 'before' );
+				}
+			);
 		}
 	}
 
@@ -1873,6 +1956,126 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Get the requested app shell component (either inner or outer).
+	 *
+	 * @return string|null App shell component.
+	 */
+	public static function get_requested_app_shell_component() {
+		if ( ! isset( AMP_HTTP::$purged_amp_query_vars[ self::APP_SHELL_COMPONENT_QUERY_VAR ] ) ) {
+			return null;
+		}
+
+		$theme_support_args = self::get_theme_support_args();
+		if ( ! isset( $theme_support_args['app_shell'] ) ) {
+			return null;
+		}
+
+		$component = AMP_HTTP::$purged_amp_query_vars[ self::APP_SHELL_COMPONENT_QUERY_VAR ];
+		if ( in_array( $component, [ 'inner', 'outer' ], true ) ) {
+			return $component;
+		}
+		return null;
+	}
+
+	/**
+	 * Prepare inner app shell.
+	 *
+	 * @param DOMElement $content_element Content element.
+	 */
+	protected static function prepare_inner_app_shell_document( DOMElement $content_element ) {
+		$dom = Document::fromNode( $content_element );
+
+		// Preserve the admin bar.
+		$admin_bar = $dom->getElementById( 'wpadminbar' );
+		if ( $admin_bar ) {
+			$admin_bar->parentNode->removeChild( $admin_bar );
+		}
+
+		// Extract all stylesheet elements before the body gets isolated.
+		$style_elements = [];
+		$lower_case     = 'translate( %s, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz" )'; // In XPath 2.0 this is lower-case().
+		$predicates     = [
+			sprintf( '( self::style and ( not( @type ) or %s = "text/css" ) )', sprintf( $lower_case, '@type' ) ),
+			sprintf( '( self::link and @href and %s = "stylesheet" )', sprintf( $lower_case, '@rel' ) ),
+		];
+		foreach ( $dom->xpath->query( './/*[ ' . implode( ' or ', $predicates ) . ' ]', $dom->body ) as $element ) {
+			$style_elements[] = $element;
+		}
+		foreach ( $style_elements as $style_element ) {
+			$style_element->parentNode->removeChild( $style_element );
+		}
+
+		// Preserve all svg defs which aren't inside the content element.
+		$svgs_with_def = [];
+		foreach ( $dom->xpath->query( '//svg[.//defs]' ) as $svg ) {
+			$svgs_with_def[] = $svg;
+		}
+
+		// Isolate the content element from the rest of the elements in the body.
+		$remove_siblings = function( DOMElement $node ) {
+			while ( $node->previousSibling ) {
+				$node->parentNode->removeChild( $node->previousSibling );
+			}
+			while ( $node->nextSibling ) {
+				$node->parentNode->removeChild( $node->nextSibling );
+			}
+		};
+		$node            = $content_element;
+		do {
+			$remove_siblings( $node );
+			$node = $node->parentNode;
+		} while ( $node && $node !== $dom->body );
+
+		// Restore admin bar element.
+		if ( $admin_bar ) {
+			$dom->body->appendChild( $admin_bar );
+		}
+
+		// Restore style elements.
+		foreach ( $style_elements as $style_element ) {
+			$dom->body->appendChild( $style_element );
+		}
+
+		// Restore SVGs with defs.
+		foreach ( $svgs_with_def as $svg ) {
+			/*
+			 * Check if the node was removed from the document.
+			 * This is needed because Node.compareDocumentPosition() is not available in PHP.
+			 */
+			$is_connected = false;
+			$node         = $svg;
+			while ( $node->parentNode ) {
+				if ( $node === $svg->ownerDocument ) {
+					$is_connected = true;
+					break;
+				}
+				$node = $node->parentNode;
+			}
+
+			// Re-add the SVG element to the body with only its defs elements.
+			if ( ! $is_connected ) {
+				$defs = [];
+				foreach ( $svg->getElementsByTagName( 'defs' ) as $def ) {
+					$defs[] = $def;
+				}
+
+				// Remove all children.
+				while ( $svg->firstChild ) {
+					$svg->removeChild( $svg->firstChild );
+				}
+
+				// Re-add all defs.
+				foreach ( $defs as $def ) {
+					$svg->appendChild( $def );
+				}
+
+				// Add to body.
+				$dom->body->appendChild( $svg );
+			}
+		}
+	}
+
+	/**
 	 * Process response to ensure AMP validity.
 	 *
 	 * @since 0.7
@@ -1934,11 +2137,15 @@ class AMP_Theme_Support {
 			header( 'Content-Type: text/html; charset=utf-8' );
 		}
 
+		// Get request for shadow DOM.
+		$app_shell_component = self::get_requested_app_shell_component();
+
 		$args = array_merge(
 			[
 				'content_max_width'    => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
 				'use_document_element' => true,
 				'user_can_validate'    => AMP_Validation_Manager::has_cap(),
+				'app_shell_component'  => $app_shell_component,
 			],
 			$args
 		);
@@ -1971,6 +2178,19 @@ class AMP_Theme_Support {
 		do_action( 'amp_server_timing_start', 'amp_dom_parse', '', [], true );
 
 		$dom = Document::fromHtml( $response );
+
+		// Remove the children of the content if requesting the outer app shell.
+		$content_element = null;
+		if ( $app_shell_component ) {
+			$content_element = $dom->getElementById( self::APP_SHELL_CONTENT_ELEMENT_ID );
+			if ( ! $content_element ) {
+				status_header( 500 );
+				return esc_html__( 'Unable to locate APP_SHELL_CONTENT_ELEMENT_ID.', 'amp' );
+			}
+			if ( 'inner' === $app_shell_component ) {
+				self::prepare_inner_app_shell_document( $content_element );
+			}
+		}
 
 		if ( AMP_Validation_Manager::$is_validate_request ) {
 			AMP_Validation_Manager::remove_illegal_source_stack_comments( $dom );

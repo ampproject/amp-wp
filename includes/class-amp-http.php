@@ -147,6 +147,7 @@ class AMP_HTTP {
 			self::ACTION_XHR_CONVERTED_QUERY_VAR,
 			'amp_latest_update_time',
 			'amp_last_check_time',
+			AMP_Theme_Support::APP_SHELL_COMPONENT_QUERY_VAR,
 		];
 
 		// Scrub input vars.
@@ -188,6 +189,21 @@ class AMP_HTTP {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Add purged query vars to the supplied URL.
+	 *
+	 * @since 1.0
+	 *
+	 * @param string $url URL.
+	 * @return string URL with purged query vars.
+	 */
+	public static function add_purged_query_vars( $url ) {
+		if ( ! empty( self::$purged_amp_query_vars ) ) {
+			$url = add_query_arg( self::$purged_amp_query_vars, $url );
+		}
+		return $url;
 	}
 
 	/**
