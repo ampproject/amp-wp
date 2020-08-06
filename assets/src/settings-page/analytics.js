@@ -161,7 +161,7 @@ function AnalyticsOptions() {
 							'<code>}</code>',
 							'<code>&lt;script&gt;</code>',
 							'<code>googleanalytics</code>',
-							__( 'https://www.ampproject.org/docs/analytics/analytics-vendors', 'amp' ),
+							__( 'https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/configure-analytics/analytics-vendors/', 'amp' ),
 							'<code>UA-XXXXX-Y</code>',
 						),
 					} }
