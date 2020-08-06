@@ -2,7 +2,7 @@
 # AMP Plugin for WordPress
 
 ![Banner](wp-assets/banner-1544x500.png)
-The official AMP plugin, supported by the AMP team. Formerly Accelerated Mobile Pages, AMP enables great experiences across both mobile and desktop.
+The Official AMP Plugin, supported by the AMP team. Formerly Accelerated Mobile Pages, AMP enables great experiences across both mobile and desktop.
 
 **Contributors:** [google](https://profiles.wordpress.org/google), [xwp](https://profiles.wordpress.org/xwp), [automattic](https://profiles.wordpress.org/automattic), [westonruter](https://profiles.wordpress.org/westonruter), [albertomedina](https://profiles.wordpress.org/albertomedina), [schlessera](https://profiles.wordpress.org/schlessera), [swissspidy](https://profiles.wordpress.org/swissspidy), [pierlo](https://profiles.wordpress.org/pierlo), [johnwatkins0](https://profiles.wordpress.org/johnwatkins0), [joshuawold](https://profiles.wordpress.org/joshuawold), [ryankienstra](https://profiles.wordpress.org/ryankienstra)  
 **Tags:** [amp](https://wordpress.org/plugins/tags/amp), [mobile](https://wordpress.org/plugins/tags/mobile), [optimization](https://wordpress.org/plugins/tags/optimization), [accelerated mobile pages](https://wordpress.org/plugins/tags/accelerated-mobile-pages), [framework](https://wordpress.org/plugins/tags/framework), [components](https://wordpress.org/plugins/tags/components), [blocks](https://wordpress.org/plugins/tags/blocks), [performance](https://wordpress.org/plugins/tags/performance), [ux](https://wordpress.org/plugins/tags/ux), [seo](https://wordpress.org/plugins/tags/seo), [official](https://wordpress.org/plugins/tags/official)  
@@ -16,7 +16,7 @@ The official AMP plugin, supported by the AMP team. Formerly Accelerated Mobile 
 
 ## Description ##
 
-**The official AMP plugin** enables AMP content publishing with WordPress in a way that is fully and seamlessly integrated with the standard mechanisms of the platform. The key features are the following:
+**The Official AMP Plugin** enables AMP content publishing with WordPress in a way that is fully and seamlessly integrated with the standard mechanisms of the platform. The key features are the following:
 
 1. **Automate the process of generating AMP-valid markup as much as possible**, letting users follow the standard workflows they are used to in WordPress.
 2. **Provide effective validation tools** to help users deal with AMP incompatibilities when they happen, including mechanisms for **identifying**, **contextualizing**, and **resolving issues caused by validation errors**.
@@ -24,7 +24,7 @@ The official AMP plugin, supported by the AMP team. Formerly Accelerated Mobile 
 4. **Support the serving of AMP pages** to make it easier for site owners to take advantage of mobile redirection, AMP-to-AMP linking, no serving of invalid AMP pages, and generation of optimized AMP (e.g. AMP optimizer) by default.
 5. **Provide a turnkey solution** for segments of WordPress creators to be able to go from zero to publishing AMP pages in no time, regardless of technical expertise or availability of resources.
 
-The official AMP plugin for WordPress is a powerful tool that helps you build user-first WordPress sites, that is, sites that are fast, beautiful, secure, engaging, and accessible. A user-first site will deliver experiences that delight your users and therefore will increase user engagement and the success of your site. And, contrary to the popular belief of being only for mobile sites (it doesn&#39;t stand for Accelerated _Mobile_ Pages anymore!), AMP is a fully responsive web component framework, which means that you can provide AMP experiences for your users on both mobile and desktop platforms.
+The Official AMP Plugin for WordPress is a powerful tool that helps you build user-first WordPress sites, that is, sites that are fast, beautiful, secure, engaging, and accessible. A user-first site will deliver experiences that delight your users and therefore will increase user engagement and the success of your site. And, contrary to the popular belief of being only for mobile sites (it doesn&#39;t stand for Accelerated _Mobile_ Pages anymore!), AMP is a fully responsive web component framework, which means that you can provide AMP experiences for your users on both mobile and desktop platforms.
 
 ## AMP Plugin Audience: Everyone
 
@@ -33,11 +33,11 @@ This plugin can be used by both developers and non-developer users:
 - If you are a developer or tech savvy user, you can take advantage of advanced developer tools provided by the AMP plugin to fix any validation issues your site may have and reach full AMP compatibility.
 - If you are not a developer or tech savvy user, or you just simply don&#39;t want to deal with validation issues and tackling development tasks, the AMP plugin allows you to assemble fully AMP-compatible sites with different configurations taking advantage of AMP compatible components, and helping you to cope with validation issues by removing offending markup in cases where it is possible, or suppressing all together the execution of any AMP-incompatible plugin in the context of AMP pages.
 
-The bottom line is that regardless of your technical expertise, the official AMP plugin can be useful to you.
+The bottom line is that regardless of your technical expertise, The Official AMP Plugin can be useful to you.
 
 ## Template Modes
 
-The official AMP plugin enables site owners to serve AMP to their users in different ways, which are referred to as template modes: Standard, Transitional, and Reader. The differences between them are in terms of the number of themes used (i.e. one or two), and the number of versions of the site (non-AMP, AMP). Each template mode brings its own value proposition and serves the needs of different scenarios in the large and diverse WordPress ecosystem. And in all cases, the AMP plugin provides as much support as possible in terms of automating the generation of AMP content, as well as keeping the option chosen AMP valid. In a nutshell, the available template modes are the following:
+The Official AMP Plugin enables site owners to serve AMP to their users in different ways, which are referred to as template modes: Standard, Transitional, and Reader. The differences between them are in terms of the number of themes used (i.e. one or two), and the number of versions of the site (non-AMP, AMP). Each template mode brings its own value proposition and serves the needs of different scenarios in the large and diverse WordPress ecosystem. And in all cases, the AMP plugin provides as much support as possible in terms of automating the generation of AMP content, as well as keeping the option chosen AMP valid. In a nutshell, the available template modes are the following:
 
 **Standard Mode**: This template mode is the ideal, as there is only one theme for serving requests and a single version of your site: the AMP version. Besides enabling all of your site to be AMP-first, this has the added benefit of reducing development and maintenance costs. This mode is the best choice for sites where the theme and plugins used in the site are fully AMP-compatible. It&#39;s also a good option if some components are not AMP-compatible but the site owner has the resources or the know-how to fix them.
 
@@ -51,11 +51,11 @@ Different modes would be recommended in different scenarios, depending on the sp
 
 It is possible today to assemble great looking user-first sites powered by the AMP plugin by picking and choosing themes and plugins from a growing AMP-compatible ecosystem. In this context, the AMP plugin acts as an orchestrator of the overall AMP content creation and publishing process; it serves as a validator and enforcer making it easier to not only to get to AMP experiences, but to stay in them with confidence.
 
-Many popular theme and plugin developers have taken efforts to support The official AMP plugin. If you are using a theme like Astra, Newspack or plugins like Yoast, WP Forms — they will work out of the box! You can see the growing list of tested themes and plugins [here].
+Many popular theme and plugin developers have taken efforts to support The Official AMP Plugin. If you are using a theme like Astra, Newspack or plugins like Yoast, WP Forms — they will work out of the box! You can see the growing list of tested themes and plugins [here].
 
 ## AMP Development
 
-Although there is a growing ecosystem of AMP compatible WordPress components, still there are some ways to go before 100% AMP compatibility in the ecosystem. If you are a developer, or you have the resources to pursue development projects, you may want, in some cases, develop custom functionality (i.e. as a plugin, or in the theme space) to serve your specific needs. The official AMP plugin can be of great help to you by providing powerful and effective developer tools that shed light into the AMP development process as it is done in WordPress, including mechanisms for detailing the root causes of all validation issues, and the contextual space to understand them properly, and dealing with them during the process of achieving full AMP compatibility.
+Although there is a growing ecosystem of AMP compatible WordPress components, still there are some ways to go before 100% AMP compatibility in the ecosystem. If you are a developer, or you have the resources to pursue development projects, you may want, in some cases, develop custom functionality (i.e. as a plugin, or in the theme space) to serve your specific needs. The Official AMP Plugin can be of great help to you by providing powerful and effective developer tools that shed light into the AMP development process as it is done in WordPress, including mechanisms for detailing the root causes of all validation issues, and the contextual space to understand them properly, and dealing with them during the process of achieving full AMP compatibility.
 
 ## Frequently Asked Questions ##
 
@@ -69,7 +69,7 @@ Please see the [FAQs on amp-wp.org](https://amp-wp.org/documentation/frequently-
 
 ## Getting Started ##
 
-To learn more about the plugin and start leveraging its capabilities to power your AMP content creation workflow check [the official AMP plugin product site](https://amp-wp.org/).
+To learn more about the plugin and start leveraging its capabilities to power your AMP content creation workflow check [The Official AMP Plugin product site](https://amp-wp.org/).
 
 If you are a developer, we encourage you to [follow along](https://github.com/ampproject/amp-wp) or [contribute](https://github.com/ampproject/amp-wp/blob/develop/contributing.md) to the development of this plugin on GitHub.
 
@@ -134,3 +134,4 @@ But if you need some help, we are right here to support you on this plugin&#39;s
 ## Changelog ##
 
 For the plugin’s changelog, please see [the Releases page on GitHub](https://github.com/ampproject/amp-wp/releases).
+
