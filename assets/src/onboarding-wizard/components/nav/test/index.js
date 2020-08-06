@@ -86,7 +86,7 @@ describe( 'Nav', () => {
 		expect( nextButton ).not.toBeNull();
 	} );
 
-	it( 'changes next button to "Customize Theme" on last page', () => {
+	it( 'changes next button to "Customize" on last page', () => {
 		act( () => {
 			render(
 				<Providers pages={ testPages }>
@@ -104,7 +104,7 @@ describe( 'Nav', () => {
 			nextButton.dispatchEvent( new global.MouseEvent( 'click', { bubbles: true } ) );
 		} );
 
-		expect( nextButton.textContent ).toBe( 'Customize Theme' );
+		expect( nextButton.textContent ).toBe( 'Customize' );
 	} );
 
 	it( 'close button hides on last page when reader mode is not selected', () => {
