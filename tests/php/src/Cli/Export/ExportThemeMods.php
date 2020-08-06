@@ -71,6 +71,7 @@ final class ExportThemeMods implements ExportStep {
 	 * Translate from menu_id into menu_slug.
 	 *
 	 * @param array $nav_menu_locations Associative array of nav menu locations.
+	 * @return array Associative array of translated menu locations.
 	 */
 	private function get_nav_menu_location( $nav_menu_locations ) {
 		if ( empty( $nav_menu_locations ) ) {

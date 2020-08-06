@@ -60,7 +60,7 @@ final class ExportResult {
 	/**
 	 * Get the site name to use.
 	 *
-	 * @var string Site name to use.
+	 * @return string Site name to use.
 	 */
 	public function get_site_name() {
 		return $this->site_name;
