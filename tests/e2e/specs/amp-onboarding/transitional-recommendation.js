@@ -2,6 +2,7 @@
  * Internal dependencies
  */
 import { moveToReaderThemesScreen, moveToTemplateModeScreen, moveToSummaryScreen } from '../../utils/onboarding-wizard-utils';
+import { activateTheme } from '../../utils/activate-theme';
 
 /**
  * When a site has a Reader theme already set as the active theme (e.g. Twenty Twenty), when the user expresses they
@@ -16,14 +17,14 @@ import { moveToReaderThemesScreen, moveToTemplateModeScreen, moveToSummaryScreen
  * @see https://github.com/ampproject/amp-wp/issues/4975
  */
 describe( 'Current active theme is reader theme and user is nontechnical', () => {
-	it( 'correctly recommends transitional when the user is nontechnical and the active theme is a reader theme', async () => {
+	it.skip( 'correctly recommends transitional when the user is nontechnical and the active theme is a reader theme', async () => {
 		await moveToTemplateModeScreen( { technical: false } );
 
 		await expect( '.amp-notice--info' ).countToBe( 1 ); // Standard.
 		await expect( '.amp-notice--success' ).countToBe( 2 ); // Reader and transitional.
 	} );
 
-	it( 'includes active them in reader theme list', async () => {
+	it.skip( 'includes active them in reader theme list', async () => {
 		await moveToReaderThemesScreen( { technical: false } );
 
 		await expect( page ).toMatchElement( '[for="theme-card__twentytwenty"]' );
