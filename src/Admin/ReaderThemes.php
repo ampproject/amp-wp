@@ -120,7 +120,7 @@ final class ReaderThemes {
 			$active_theme = wp_get_theme( $active_theme_slug );
 
 			if ( $active_theme->exists() ) {
-				$themes[] = $this->normalize_theme_data( $active_theme_slug );
+				$themes[] = $this->normalize_theme_data( $active_theme );
 			}
 		}
 

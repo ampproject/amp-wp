@@ -7,7 +7,6 @@
 
 namespace AmpProject\AmpWP;
 
-use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AMP_Options_Manager;
@@ -24,7 +23,7 @@ use WP_Customize_Manager;
  *
  * @package AmpProject\AmpWP
  */
-final class ReaderThemeLoader implements Service, Registerable, Conditional {
+final class ReaderThemeLoader implements Service, Registerable {
 
 	/**
 	 * Reader theme.
@@ -50,20 +49,17 @@ final class ReaderThemeLoader implements Service, Registerable, Conditional {
 	private $theme_overridden = false;
 
 	/**
-	 * Check whether the conditional object is currently needed.
-	 *
-	 * @return bool Whether the conditional object is needed.
-	 */
-	public static function is_needed() {
-		return self::is_amp_request() && self::is_enabled();
-	}
-
-	/**
 	 * Is Reader mode with a Reader theme selected.
 	 *
 	 * @return bool Whether new Reader mode.
 	 */
-	public static function is_enabled() {
+	public function is_enabled() {
+		// If the theme was overridden then we know it is enabled. We can't check get_template() at this point because
+		// it will be identical to $reader_theme.
+		if ( $this->is_theme_overridden() ) {
+			return true;
+		}
+
 		// If Reader mode is not enabled, then a Reader theme is definitely not going to be served.
 		if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
 			return false;
@@ -74,6 +70,8 @@ final class ReaderThemeLoader implements Service, Registerable, Conditional {
 			return false;
 		}
 
+		// If the Reader theme does not exist, then we cannot switch to the reader theme. The Legacy Reader theme will
+		// be used as a fallback instead.
 		$reader_theme_slug = AMP_Options_Manager::get_option( Option::READER_THEME );
 		$reader_theme      = wp_get_theme( $reader_theme_slug );
 
@@ -101,7 +99,7 @@ final class ReaderThemeLoader implements Service, Registerable, Conditional {
 	 *
 	 * @return bool Whether AMP request.
 	 */
-	public static function is_amp_request() {
+	public function is_amp_request() {
 		return isset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 
@@ -299,9 +297,8 @@ final class ReaderThemeLoader implements Service, Registerable, Conditional {
 	 * @see switch_theme() which ensures the new theme includes the old theme's theme mods.
 	 */
 	public function override_theme() {
-		// If the theme was overridden then we know it is enabled. We can't check get_template() at this point because
-		// it will be identical to $reader_theme.
-		if ( $this->theme_overridden ) {
+		$this->theme_overridden = false;
+		if ( ! $this->is_enabled() || ! $this->is_amp_request() ) {
 			return;
 		}
 
