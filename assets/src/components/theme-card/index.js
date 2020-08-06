@@ -72,9 +72,9 @@ export function ThemeCard( { description, ElementName = 'li', homepage, screensh
 							updateOptions( { reader_theme: slug } );
 						} }
 					/>
-					<h3>
+					<h4 className="theme-card__title">
 						{ decodeEntities( name ) }
-					</h3>
+					</h4>
 
 				</div>
 

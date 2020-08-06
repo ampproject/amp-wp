@@ -1170,7 +1170,7 @@ function amp_get_analytics( $analytics = [] ) {
 	 *
 	 * @since 0.7
 	 *
-	 * @param array $analytics_entries An associative array of the analytics entries we want to output. Each array entry must have a unique key, and the value should be an array with the following keys: `type`, `attributes`, `script_data`. See readme for more details.
+	 * @param array $analytics_entries An associative array of the analytics entries we want to output. Each array entry must have a unique key, and the value should be an array with the following keys: `type`, `attributes`, `config_data`. See readme for more details.
 	 */
 	$analytics_entries = apply_filters( 'amp_analytics_entries', $analytics_entries );
 
@@ -1179,11 +1179,13 @@ function amp_get_analytics( $analytics = [] ) {
 	}
 
 	foreach ( $analytics_entries as $entry_id => $entry ) {
-		$analytics[ $entry_id ] = [
-			'type'        => $entry['type'],
-			'attributes'  => isset( $entry['attributes'] ) ? $entry['attributes'] : [],
-			'config_data' => json_decode( $entry['config'] ),
-		];
+		if ( ! isset( $entry['attributes'] ) ) {
+			$entry['attributes'] = [];
+		}
+		if ( ! isset( $entry['config_data'] ) && isset( $entry['config'] ) && is_string( $entry['config'] ) ) {
+			$entry['config_data'] = json_decode( $entry['config'] );
+		}
+		$analytics[ $entry_id ] = $entry;
 	}
 
 	return $analytics;
@@ -1222,14 +1224,13 @@ function amp_print_analytics( $analytics ) {
 
 	// Can enter multiple configs within backend.
 	foreach ( $analytics_entries as $id => $analytics_entry ) {
-		if ( ! isset( $analytics_entry['type'], $analytics_entry['attributes'], $analytics_entry['config_data'] ) ) {
+		if ( ! isset( $analytics_entry['attributes'], $analytics_entry['config_data'] ) ) {
 			_doing_it_wrong(
 				__FUNCTION__,
 				sprintf(
 					/* translators: 1: the analytics entry ID. 2: type. 3: attributes. 4: config_data. 5: comma-separated list of the actual entry keys. */
-					esc_html__( 'Analytics entry for %1$s is missing one of the following keys: `%2$s`, `%3$s`, or `%4$s` (array keys: %5$s)', 'amp' ),
+					esc_html__( 'Analytics entry for %1$s is missing one of the following keys: `%2$s` or `%3$s` (array keys: %4$s)', 'amp' ),
 					esc_html( $id ),
-					'type',
 					'attributes',
 					'config_data',
 					esc_html( implode( ', ', array_keys( $analytics_entry ) ) )
@@ -1247,12 +1248,13 @@ function amp_print_analytics( $analytics ) {
 		);
 
 		$amp_analytics_attr = array_merge(
-			[
-				'id'   => $id,
-				'type' => $analytics_entry['type'],
-			],
+			compact( 'id' ),
 			$analytics_entry['attributes']
 		);
+
+		if ( ! empty( $analytics_entry['type'] ) ) {
+			$amp_analytics_attr['type'] = $analytics_entry['type'];
+		}
 
 		echo AMP_HTML_Utils::build_tag( 'amp-analytics', $amp_analytics_attr, $script_element ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
