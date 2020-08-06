@@ -357,6 +357,15 @@ li.error-kept {
 	margin-top: 1em;
 }
 
+#analytics-options-drawer details > pre {
+	tab-size: 4;
+	overflow-x: auto;
+}
+
+#analytics-options-drawer .components-button:not(.components-panel__body-toggle) svg {
+	display: block;
+}
+
 .amp-analytics-entry {
 	flex-direction: column;
 	align-items: flex-start;
