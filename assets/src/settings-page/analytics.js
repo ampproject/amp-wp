@@ -72,7 +72,10 @@ function AnalyticsEntry( { entryId, onChange, onDelete, type = '', config = '{}'
 	return (
 		<PanelRow className="amp-analytics-entry">
 			<h4>
-				{ __( 'Analytics entry', 'amp' ) }
+				{
+					// Translators: placeholder is a unique Id.
+					sprintf( __( 'Analytics %s', 'amp' ), entryId )
+				}
 			</h4>
 			<div className="amp-analytics-entry__options" ref={ inputWrapper } id={ `amp-analytics-entry-${ entryId }` }>
 				<div className="amp-analytics-entry__text-inputs">
@@ -181,7 +184,7 @@ function AnalyticsOptions() {
 			{ Object.entries( analytics || {} ).map( ( [ key, { type, config } ], index ) => (
 				<AnalyticsEntry
 					key={ `analytics-entry-${ index }` }
-					entryId={ String( index ) }
+					entryId={ String( index + 1 ) }
 					isExistingEntry={ key in originalOptions.analytics }
 					type={ type }
 					config={ config }

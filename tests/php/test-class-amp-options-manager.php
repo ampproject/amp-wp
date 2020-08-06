@@ -231,7 +231,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 
 		// Confirm format of entry ID.
 		$entries = AMP_Options_Manager::get_option( Option::ANALYTICS );
-		$entry   = current( $entries );
 		$id      = current( array_keys( $entries ) );
 		$this->assertArrayHasKey( $id, $entries );
 		$this->assertEquals( 'foo', $entries[ $id ]['type'] );
