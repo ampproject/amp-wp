@@ -366,7 +366,7 @@ class AMP_Options_Manager {
 					continue;
 				}
 
-				$new_analytics_option[ $id ] = [
+				$new_analytics_option[ sanitize_key( $id ) ] = [
 					'type'   => ! empty( $data['type'] ) ? preg_replace( '/[^a-zA-Z0-9_\-]/', '', $data['type'] ) : '',
 					'config' => trim( $data['config'] ),
 				];
