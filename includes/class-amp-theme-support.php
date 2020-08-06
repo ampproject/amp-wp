@@ -2300,6 +2300,8 @@ class AMP_Theme_Support {
 
 		/**
 		 * Fires before registering plugin assets that may require core asset polyfills.
+		 *
+		 * @internal
 		 */
 		do_action( 'amp_register_polyfills' );
 
