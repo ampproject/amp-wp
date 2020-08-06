@@ -37,7 +37,6 @@ export function ReaderThemeCarousel() {
 
 	/** @type {Theme[]} themes */
 	const { currentTheme, fetchingThemes, selectedTheme, themes } = useContext( ReaderThemes );
-
 	const [ includeUnavailableThemes, setIncludeUnavailableThemes ] = useState( false );
 
 	// Separate available themes (both installed and installable) from those that need to be installed manually.
@@ -94,7 +93,7 @@ export function ReaderThemeCarousel() {
 			return pages.map( ( page, index ) => (
 				{
 					label: sprintf(
-						// Translators: Placeholder is a page number.
+						/* translators: Placeholder is a page number. */
 						__( 'Page %d' ),
 						index,
 					),

@@ -6,7 +6,11 @@
 	border: 2px solid var(--amp-settings-color-border);
 	border-radius: 8px;
 	box-shadow: -10px 0 0 var(--amp-settings-color-border);
-	padding: 1.25rem 2.5rem;
+	padding: 1rem 0.75rem;
+
+	@media (min-width: 783px) {
+		padding: 1.25rem 2.5rem;
+	}
 }
 
 .selectable--bottom {

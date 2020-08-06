@@ -13,7 +13,7 @@ import {
  * WordPress dependencies
  */
 import domReady from '@wordpress/dom-ready';
-import { render, useContext } from '@wordpress/element';
+import { render, useContext, useState, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -24,11 +24,11 @@ import '../css/elements.css';
 import '../css/core-components.css';
 import './style.css';
 import { OptionsContextProvider, Options } from '../components/options-context-provider';
-import { ReaderThemesContextProvider } from '../components/reader-themes-context-provider';
+import { ReaderThemesContextProvider, ReaderThemes } from '../components/reader-themes-context-provider';
 import { SiteSettingsProvider } from '../components/site-settings-provider';
 import { Loading } from '../components/loading';
 import { UnsavedChangesWarning } from '../components/unsaved-changes-warning';
-import { AMPNotice, NOTICE_TYPE_ERROR } from '../components/amp-notice';
+import { AMPNotice, NOTICE_TYPE_ERROR, NOTICE_TYPE_SUCCESS } from '../components/amp-notice';
 import { ErrorContextProvider, ErrorContext } from '../components/error-context-provider';
 import { Welcome } from './welcome';
 import { TemplateModes } from './template-modes';
@@ -36,6 +36,7 @@ import { SupportedTemplates } from './supported-templates';
 import { MobileRedirection } from './mobile-redirection';
 import { SettingsFooter } from './settings-footer';
 import { PluginSuppression } from './plugin-suppression';
+import { Analytics } from './analytics';
 
 const { ajaxurl: wpAjaxUrl } = global;
 
@@ -95,8 +96,29 @@ ErrorNotice.propTypes = {
  * Settings page application root.
  */
 function Root() {
-	const { fetchingOptions } = useContext( Options );
+	const { didSaveOptions, fetchingOptions, saveOptions } = useContext( Options );
 	const { error } = useContext( ErrorContext );
+	const { downloadingTheme } = useContext( ReaderThemes );
+	const [ saved, setSaved ] = useState( false );
+
+	/**
+	 * Shows a saved notice on success.
+	 */
+	useEffect( () => {
+		if ( true === didSaveOptions && ! downloadingTheme ) {
+			setSaved( true );
+
+			const timeout = setTimeout( () => [
+				setSaved( false ),
+			], 9000 );
+
+			return () => {
+				clearTimeout( timeout );
+			};
+		}
+
+		return () => undefined;
+	}, [ didSaveOptions, downloadingTheme ] );
 
 	if ( false !== fetchingOptions ) {
 		return <Loading />;
@@ -105,16 +127,29 @@ function Root() {
 	return (
 		<>
 			<Welcome />
-			<TemplateModes />
-			<h2>
-				{ __( 'Advanced Settings', 'amp' ) }
-			</h2>
-			<MobileRedirection />
-			<SupportedTemplates />
-			<PluginSuppression />
-			<SettingsFooter />
+			<form onSubmit={ ( event ) => {
+				event.preventDefault();
+				saveOptions();
+			} }>
+				<TemplateModes />
+				<h2>
+					{ __( 'Advanced Settings', 'amp' ) }
+				</h2>
+				<MobileRedirection />
+				<SupportedTemplates />
+				<Analytics />
+				<PluginSuppression />
+				<SettingsFooter />
+			</form>
 			<UnsavedChangesWarning excludeUserContext={ true } />
 			{ error && <ErrorNotice errorMessage={ error.message || __( 'An error occurred. You might be offline or logged out.', 'amp' ) } /> }
+			{ saved && (
+				<AMPNotice className={ `amp-save-success-notice` } type={ NOTICE_TYPE_SUCCESS }>
+					<p>
+						{ __( 'Settings saved', 'amp' ) }
+					</p>
+				</AMPNotice>
+			) }
 		</>
 	);
 }

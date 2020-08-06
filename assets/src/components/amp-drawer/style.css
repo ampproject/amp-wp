@@ -22,8 +22,8 @@
 	display: flex;
 	height: var(--heading-height);
 	left: 0;
-	padding-left: 0.5rem;
-	padding-right: 0.5rem;
+	padding-left: 0.75rem;
+	padding-right: 0.75rem;
 	overflow: hidden;
 	position: absolute;
 	top: 0;
@@ -87,10 +87,15 @@
 }
 
 .amp .amp-drawer .components-panel__body-title svg {
-	height: 45px;
+	height: 30px;
 	position: static;
 	transform: none;
-	width: 45px;
+	width: 30px;
+
+	@media (min-width: 783px) {
+		height: 45px;
+		width: 45px;
+	}
 }
 
 .amp .amp-drawer--handle-type-full-width .components-panel__body-title svg {
@@ -113,6 +118,10 @@
 
 .amp-drawer__panel-body-inner {
 	border-top: 1px solid var(--amp-settings-color-border);
+}
+
+.amp-drawer__panel-body-inner details {
+	margin-bottom: 1.5rem;
 }
 
 .template-mode-selection__details p {
