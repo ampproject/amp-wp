@@ -142,7 +142,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that exactly one analytics component are added to the page.
+	 * Test that exactly one analytics component is added to the page.
 	 *
 	 * @covers ::amp_print_analytics()
 	 */
