@@ -54,30 +54,15 @@ function AnalyticsEntry( { entryId, onChange, onDelete, type = '', config = '{}'
 		}
 	}, [ config ] );
 
-	/**
-	 * On creation, focus the cursor in the first input in the entry.
-	 */
-	const inputWrapper = useRef();
-	useEffect( () => {
-		if ( ! inputWrapper?.current ) {
-			return;
-		}
-
-		const firstInput = inputWrapper.current.querySelector( 'input' );
-		if ( firstInput ) {
-			firstInput.focus();
-		}
-	}, [] );
-
 	return (
 		<PanelRow className="amp-analytics-entry">
 			<h4>
 				{
-					// Translators: placeholder is a unique Id.
+					/* translators: placeholder is a unique Id. */
 					sprintf( __( 'Analytics %s', 'amp' ), entryId )
 				}
 			</h4>
-			<div className="amp-analytics-entry__options" ref={ inputWrapper } id={ `amp-analytics-entry-${ entryId }` }>
+			<div className="amp-analytics-entry__options" id={ `amp-analytics-entry-${ entryId }` }>
 				<div className="amp-analytics-entry__text-inputs">
 					<TextControl
 						className="option-input"
