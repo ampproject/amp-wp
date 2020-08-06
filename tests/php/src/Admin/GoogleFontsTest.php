@@ -49,7 +49,7 @@ class GoogleFontsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests OnboardingWizardSubmenu::register
+	 * Tests GoogleFonts::register
 	 *
 	 * @covers GoogleFonts::get_handle
 	 * @covers GoogleFonts::register

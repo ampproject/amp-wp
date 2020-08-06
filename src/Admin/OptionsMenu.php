@@ -95,8 +95,6 @@ class OptionsMenu implements Conditional, Service, Registerable {
 
 		$plugin_file = preg_replace( '#.+/(?=.+?/.+?)#', '', AMP__FILE__ );
 		add_filter( "plugin_action_links_{$plugin_file}", [ $this, 'add_plugin_action_links' ] );
-
-		add_action( 'admin_enqueue_scripts', [ $this, 'register_shimmed_assets' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 	}
 
@@ -155,63 +153,6 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	}
 
 	/**
-	 * Registers shimmed assets not guaranteed to be available in core.
-	 */
-	public function register_shimmed_assets() {
-		if ( ! wp_script_is( 'wp-api-fetch', 'registered' ) ) {
-			$asset_handle = 'wp-api-fetch';
-			$asset_file   = AMP__DIR__ . '/assets/js/' . $asset_handle . '.asset.php';
-			$asset        = require $asset_file;
-			$version      = $asset['version'];
-
-			wp_register_script(
-				$asset_handle,
-				amp_get_asset_url( 'js/' . $asset_handle . '.js' ),
-				[],
-				$version,
-				true
-			);
-
-			wp_add_inline_script(
-				$asset_handle,
-				sprintf(
-					'wp.apiFetch.use( wp.apiFetch.createRootURLMiddleware( "%s" ) );',
-					esc_url_raw( get_rest_url() )
-				),
-				'after'
-			);
-			wp_add_inline_script(
-				$asset_handle,
-				implode(
-					"\n",
-					[
-						sprintf(
-							'wp.apiFetch.nonceMiddleware = wp.apiFetch.createNonceMiddleware( "%s" );',
-							( wp_installing() && ! is_multisite() ) ? '' : wp_create_nonce( 'wp_rest' )
-						),
-						'wp.apiFetch.use( wp.apiFetch.nonceMiddleware );',
-						'wp.apiFetch.use( wp.apiFetch.mediaUploadMiddleware );',
-						sprintf(
-							'wp.apiFetch.nonceEndpoint = "%s";',
-							admin_url( 'admin-ajax.php?action=rest-nonce' )
-						),
-					]
-				),
-				'after'
-			);
-		}
-
-		if ( ! wp_style_is( 'wp-components', 'registered' ) ) {
-			wp_register_style(
-				'wp-components',
-				amp_get_asset_url( 'css/wp-components.css' ),
-				[],
-				AMP__VERSION
-			);
-		}
-	}
-
-	/**
 	 * Enqueues settings page assets.
 	 *
 	 * @since 2.0
@@ -222,6 +163,9 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		if ( $this->screen_handle() !== $hook_suffix ) {
 			return;
 		}
+
+		/** This action is documented in includes/class-amp-theme-support.php */
+		do_action( 'amp_register_polyfills' );
 
 		$asset_file   = AMP__DIR__ . '/assets/js/' . self::ASSET_HANDLE . '.asset.php';
 		$asset        = require $asset_file;
