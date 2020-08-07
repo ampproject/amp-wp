@@ -13,9 +13,11 @@ use AmpProject\AmpWP\Admin\OnboardingWizardSubmenu;
 use AmpProject\AmpWP\Admin\OnboardingWizardSubmenuPage;
 use AmpProject\AmpWP\Admin\OptionsMenu;
 use AmpProject\AmpWP\Admin\PluginActivationNotice;
+use AmpProject\AmpWP\Admin\Polyfills;
 use AmpProject\AmpWP\Admin\ReenableCssTransientCachingAjaxAction;
 use AmpProject\AmpWP\Admin\SiteHealth;
 use AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching;
+use AmpProject\AmpWP\BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection;
 use AmpProject\AmpWP\Infrastructure\ServiceBasedPlugin;
 use AmpProject\AmpWP\Instrumentation\ServerTiming;
 use AmpProject\AmpWP\Instrumentation\StopWatch;
@@ -78,6 +80,8 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			'rest.options_controller'          => OptionsRESTController::class,
 			'server_timing'                    => ServerTiming::class,
 			'obsolete_block_attribute_remover' => ObsoleteBlockAttributeRemover::class,
+			'admin.polyfills'                  => Polyfills::class,
+			'validated_url_stylesheet_gc'      => ValidatedUrlStylesheetDataGarbageCollection::class,
 		];
 	}
 

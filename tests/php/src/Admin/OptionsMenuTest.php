@@ -57,7 +57,6 @@ class OptionsMenuTest extends WP_UnitTestCase {
 	public function test_register() {
 		$this->instance->register();
 		$this->assertEquals( 9, has_action( 'admin_menu', [ $this->instance, 'add_menu_items' ] ) );
-		$this->assertEquals( 10, has_action( 'admin_post_amp_analytics_options', 'AMP_Options_Manager::handle_analytics_submit' ) );
 
 		$this->assertEquals( 10, has_filter( 'plugin_action_links_amp/amp.php', [ $this->instance, 'add_plugin_action_links' ] ) );
 
@@ -83,11 +82,9 @@ class OptionsMenuTest extends WP_UnitTestCase {
 		$this->instance->add_menu_items();
 		$this->assertArrayHasKey( 'amp-options', $_parent_pages );
 		$this->assertEquals( 'amp-options', $_parent_pages['amp-options'] );
-		$this->assertArrayHasKey( 'amp-analytics-options', $_parent_pages );
-		$this->assertEquals( 'amp-options', $_parent_pages['amp-analytics-options'] );
 
 		$this->assertArrayHasKey( 'amp-options', $submenu );
-		$this->assertCount( 3, $submenu['amp-options'] );
+		$this->assertCount( 2, $submenu['amp-options'] );
 		$this->assertEquals( 'edit-tags.php?taxonomy=amp_validation_error&amp;post_type=amp_validated_url', $submenu['amp-options'][0][2] );
 		$this->assertEquals( 'amp-options', $submenu['amp-options'][1][2] );
 	}

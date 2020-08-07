@@ -8,12 +8,6 @@
 .amp h4,
 .amp h5,
 .amp h6,
-.amp .h1,
-.amp .h2,
-.amp .h3,
-.amp .h4,
-.amp .h5,
-.amp .h6,
 .components-button {
 	font-family: var(--font-poppins);
 }
@@ -24,6 +18,17 @@
 
 .amp h2 {
 	font-size: 1.5rem;
+}
+
+.amp h3 {
+	font-size: 1rem;
+	line-height: 1.5;
+	margin-bottom: 0;
+	margin-top: 0;
+
+	@media screen and (min-width: 783px) {
+		font-size: 1.5rem;
+	}
 }
 
 .amp p {
@@ -69,4 +74,8 @@
 .amp input[type="radio"]:focus {
 	border-color: var(--amp-settings-color-brand);
 	box-shadow: 0 0 0 1px var(--amp-settings-color-brand);
+}
+
+.amp details summary {
+	cursor: pointer;
 }

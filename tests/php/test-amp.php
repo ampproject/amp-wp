@@ -104,9 +104,9 @@ class Test_AMP extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that init_validate_request will be called super early.
+	 * Test that amp_bootstrap_plugin() will be called as early as possible upon plugins_loaded.
 	 */
-	public function test_init_validate_request_added_to_plugins_loaded_action() {
-		$this->assertSame( ~PHP_INT_MAX, has_action( 'plugins_loaded', [ 'AMP_Validation_Manager', 'init_validate_request' ] ) );
+	public function test_amp_bootstrap_plugin_priority() {
+		$this->assertSame( ~PHP_INT_MAX, has_action( 'plugins_loaded', 'amp_bootstrap_plugin' ) );
 	}
 }

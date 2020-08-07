@@ -54,10 +54,23 @@ function amp_deactivate( $network_wide = false ) {
  * @since 1.5
  */
 function amp_bootstrap_plugin() {
+	/**
+	 * Filters whether AMP is enabled on the current site.
+	 *
+	 * Useful if the plugin is network activated and you want to turn it off on select sites.
+	 *
+	 * @since 0.2
+	 * @since 2.0 Filter now runs earlier at plugins_loaded (with earliest priority) rather than at the after_setup_theme action.
+	 */
+	if ( false === apply_filters( 'amp_is_enabled', true ) ) {
+		return;
+	}
+
 	AmpWpPluginFactory::create()->register();
 
-	// The plugins_loaded action is the earliest we can run this since that is when pluggable.php has been required and wp_hash() is available.
-	add_action( 'plugins_loaded', [ 'AMP_Validation_Manager', 'init_validate_request' ], ~PHP_INT_MAX );
+	// The amp_bootstrap_plugin() function is called at the plugins_loaded action with the earliest priority. This is
+	// the earliest we can run this since that is when pluggable.php has been required and wp_hash() is available.
+	AMP_Validation_Manager::init_validate_request();
 
 	/*
 	 * Register AMP scripts regardless of whether AMP is enabled or it is the AMP endpoint
@@ -219,15 +232,20 @@ function amp_init() {
 function amp_after_setup_theme() {
 	amp_get_slug(); // Ensure AMP_QUERY_VAR is set.
 
-	/**
-	 * Filters whether AMP is enabled on the current site.
-	 *
-	 * Useful if the plugin is network activated and you want to turn it off on select sites.
-	 *
-	 * @since 0.2
-	 */
+	/** This filter is documented in includes/amp-helper-functions.php */
 	if ( false === apply_filters( 'amp_is_enabled', true ) ) {
-		return;
+		_doing_it_wrong(
+			'add_filter',
+			esc_html(
+				sprintf(
+					/* translators: 1: amp_is_enabled filter name, 2: plugins_loaded action */
+					__( 'Filter for "%1$s" added too late. To disable AMP, this filter must be added before the "%2$s" action.', 'amp' ),
+					'amp_is_enabled',
+					'plugins_loaded'
+				)
+			),
+			'2.0'
+		);
 	}
 
 	add_action( 'init', 'amp_init', 0 ); // Must be 0 because widgets_init happens at init priority 1.
@@ -876,41 +894,6 @@ function amp_add_generator_metadata() {
  * @param WP_Scripts $wp_scripts Scripts.
  */
 function amp_register_default_scripts( $wp_scripts ) {
-	/*
-	 * Polyfill dependencies that are registered in Gutenberg and WordPress 5.0.
-	 * Note that Gutenberg will override these at wp_enqueue_scripts if it is active.
-	 */
-	$handles = [ 'wp-i18n', 'wp-dom-ready', 'wp-polyfill', 'wp-url' ];
-	foreach ( $handles as $handle ) {
-		if ( ! isset( $wp_scripts->registered[ $handle ] ) ) {
-			$asset_file   = AMP__DIR__ . '/assets/js/' . $handle . '.asset.php';
-			$asset        = require $asset_file;
-			$dependencies = $asset['dependencies'];
-			$version      = $asset['version'];
-
-			$wp_scripts->add(
-				$handle,
-				amp_get_asset_url( sprintf( 'js/%s.js', $handle ) ),
-				$dependencies,
-				$version
-			);
-		}
-	}
-
-	$vendor_scripts = [
-		'lodash' => [
-			'dependencies' => [],
-			'version'      => '4.17.15',
-		],
-	];
-	foreach ( $vendor_scripts as $handle => $handle_data ) {
-		if ( ! isset( $wp_scripts->registered[ $handle ] ) ) {
-			$path = amp_get_asset_url( sprintf( 'js/vendor/%s.js', $handle ) );
-
-			$wp_scripts->add( $handle, $path, $handle_data['dependencies'], $handle_data['version'], 1 );
-		}
-	}
-
 	// AMP Runtime.
 	$handle = 'amp-runtime';
 	$wp_scripts->add(
@@ -1155,7 +1138,7 @@ function amp_get_analytics( $analytics = [] ) {
 	 *
 	 * @since 0.7
 	 *
-	 * @param array $analytics_entries An associative array of the analytics entries we want to output. Each array entry must have a unique key, and the value should be an array with the following keys: `type`, `attributes`, `script_data`. See readme for more details.
+	 * @param array $analytics_entries An associative array of the analytics entries we want to output. Each array entry must have a unique key, and the value should be an array with the following keys: `type`, `attributes`, `config_data`. See readme for more details.
 	 */
 	$analytics_entries = apply_filters( 'amp_analytics_entries', $analytics_entries );
 
@@ -1164,11 +1147,13 @@ function amp_get_analytics( $analytics = [] ) {
 	}
 
 	foreach ( $analytics_entries as $entry_id => $entry ) {
-		$analytics[ $entry_id ] = [
-			'type'        => $entry['type'],
-			'attributes'  => isset( $entry['attributes'] ) ? $entry['attributes'] : [],
-			'config_data' => json_decode( $entry['config'] ),
-		];
+		if ( ! isset( $entry['attributes'] ) ) {
+			$entry['attributes'] = [];
+		}
+		if ( ! isset( $entry['config_data'] ) && isset( $entry['config'] ) && is_string( $entry['config'] ) ) {
+			$entry['config_data'] = json_decode( $entry['config'] );
+		}
+		$analytics[ $entry_id ] = $entry;
 	}
 
 	return $analytics;
@@ -1207,14 +1192,13 @@ function amp_print_analytics( $analytics ) {
 
 	// Can enter multiple configs within backend.
 	foreach ( $analytics_entries as $id => $analytics_entry ) {
-		if ( ! isset( $analytics_entry['type'], $analytics_entry['attributes'], $analytics_entry['config_data'] ) ) {
+		if ( ! isset( $analytics_entry['attributes'], $analytics_entry['config_data'] ) ) {
 			_doing_it_wrong(
 				__FUNCTION__,
 				sprintf(
 					/* translators: 1: the analytics entry ID. 2: type. 3: attributes. 4: config_data. 5: comma-separated list of the actual entry keys. */
-					esc_html__( 'Analytics entry for %1$s is missing one of the following keys: `%2$s`, `%3$s`, or `%4$s` (array keys: %5$s)', 'amp' ),
+					esc_html__( 'Analytics entry for %1$s is missing one of the following keys: `%2$s` or `%3$s` (array keys: %4$s)', 'amp' ),
 					esc_html( $id ),
-					'type',
 					'attributes',
 					'config_data',
 					esc_html( implode( ', ', array_keys( $analytics_entry ) ) )
@@ -1232,12 +1216,13 @@ function amp_print_analytics( $analytics ) {
 		);
 
 		$amp_analytics_attr = array_merge(
-			[
-				'id'   => $id,
-				'type' => $analytics_entry['type'],
-			],
+			compact( 'id' ),
 			$analytics_entry['attributes']
 		);
+
+		if ( ! empty( $analytics_entry['type'] ) ) {
+			$amp_analytics_attr['type'] = $analytics_entry['type'];
+		}
 
 		echo AMP_HTML_Utils::build_tag( 'amp-analytics', $amp_analytics_attr, $script_element ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}

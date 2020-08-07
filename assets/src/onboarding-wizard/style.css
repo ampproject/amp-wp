@@ -80,7 +80,7 @@ body {
  * Sidebar.
  */
 .amp-onboarding-wizard-plugin-name {
-	color: var(--black);
+	color: var(--amp-settings-color-black);
 	font-size: 16px;
 	line-height: 1.5;
 	padding: 0.5rem 0 0;

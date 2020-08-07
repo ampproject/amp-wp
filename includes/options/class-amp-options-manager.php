@@ -358,47 +358,21 @@ class AMP_Options_Manager {
 
 		// Validate analytics.
 		if ( isset( $new_options[ Option::ANALYTICS ] ) && $new_options[ Option::ANALYTICS ] !== $options[ Option::ANALYTICS ] ) {
-			foreach ( $new_options[ Option::ANALYTICS ] as $data ) {
+			$new_analytics_option = [];
 
-				// Check save/delete pre-conditions and proceed if correct.
-				if ( empty( $data['type'] ) || empty( $data['config'] ) ) {
-					self::add_settings_error( self::OPTION_NAME, 'missing_analytics_vendor_or_config', __( 'Missing vendor type or config.', 'amp' ) );
+			foreach ( $new_options[ Option::ANALYTICS ] as $id => $data ) {
+				if ( empty( $data['config'] ) || ! AMP_HTML_Utils::is_valid_json( $data['config'] ) ) {
+					// Bad JSON or missing config.
 					continue;
 				}
 
-				// Validate JSON configuration.
-				$is_valid_json = AMP_HTML_Utils::is_valid_json( $data['config'] );
-				if ( ! $is_valid_json ) {
-					self::add_settings_error( self::OPTION_NAME, 'invalid_analytics_config_json', __( 'Invalid analytics config JSON.', 'amp' ) );
-					continue;
-				}
-
-				$entry_vendor_type = preg_replace( '/[^a-zA-Z0-9_\-]/', '', $data['type'] );
-				$entry_config      = trim( $data['config'] );
-
-				if ( ! empty( $data['id'] ) && '__new__' !== $data['id'] ) {
-					$entry_id = sanitize_key( $data['id'] );
-				} else {
-
-					// Generate a hash string to uniquely identify this entry.
-					$entry_id = substr( md5( $entry_vendor_type . $entry_config ), 0, 12 );
-
-					// Avoid duplicates.
-					if ( isset( $options[ Option::ANALYTICS ][ $entry_id ] ) ) {
-						self::add_settings_error( self::OPTION_NAME, 'duplicate_analytics_entry', __( 'Duplicate analytics entry found.', 'amp' ) );
-						continue;
-					}
-				}
-
-				if ( isset( $data['delete'] ) ) {
-					unset( $options[ Option::ANALYTICS ][ $entry_id ] );
-				} else {
-					$options[ Option::ANALYTICS ][ $entry_id ] = [
-						'type'   => $entry_vendor_type,
-						'config' => $entry_config,
-					];
-				}
+				$new_analytics_option[ sanitize_key( $id ) ] = [
+					'type'   => ! empty( $data['type'] ) ? preg_replace( '/[^a-zA-Z0-9_\-]/', '', $data['type'] ) : '',
+					'config' => trim( $data['config'] ),
+				];
 			}
+
+			$options[ OPTION::ANALYTICS ] = $new_analytics_option;
 		}
 
 		if ( isset( $new_options[ Option::READER_THEME ] ) ) {
@@ -459,51 +433,6 @@ class AMP_Options_Manager {
 		);
 
 		return update_option( self::OPTION_NAME, $amp_options, false );
-	}
-
-	/**
-	 * Handle analytics submission.
-	 */
-	public static function handle_analytics_submit() {
-
-		// Request must come from user with right capabilities.
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Sorry, you do not have the necessary permissions to perform this action', 'amp' ) );
-		}
-
-		// Ensure request is coming from analytics option form.
-		check_admin_referer( 'analytics-options', 'analytics-options' );
-
-		if ( isset( $_POST[ self::OPTION_NAME ][ Option::ANALYTICS ] ) ) {
-			self::update_option( Option::ANALYTICS, wp_unslash( $_POST[ self::OPTION_NAME ][ Option::ANALYTICS ] ) );
-
-			$errors = get_settings_errors( self::OPTION_NAME );
-			if ( empty( $errors ) ) {
-				self::add_settings_error( self::OPTION_NAME, 'settings_updated', __( 'The analytics entry was successfully saved!', 'amp' ), 'updated' );
-				$errors = get_settings_errors( self::OPTION_NAME );
-			}
-			set_transient( 'settings_errors', $errors );
-		}
-
-		/*
-		 * Redirect to keep the user in the analytics options page.
-		 * Wrap in is_admin() to enable phpunit tests to exercise this code.
-		 */
-		wp_safe_redirect( admin_url( 'admin.php?page=amp-analytics-options&settings-updated=1' ) );
-		exit;
-	}
-
-	/**
-	 * Update analytics options.
-	 *
-	 * @codeCoverageIgnore
-	 * @deprecated
-	 * @param array $data Unsanitized unslashed data.
-	 * @return bool Whether options were updated.
-	 */
-	public static function update_analytics_options( $data ) {
-		_deprecated_function( __METHOD__, '0.6', __CLASS__ . '::update_option' );
-		return self::update_option( Option::ANALYTICS, wp_unslash( $data ) );
 	}
 
 	/**
@@ -580,22 +509,5 @@ class AMP_Options_Manager {
 				)
 			);
 		}
-	}
-
-	/**
-	 * Register a settings error to be displayed to the user.
-	 *
-	 * @see add_settings_error()
-	 *
-	 * @param string $setting Slug title of the setting to which this error applies.
-	 * @param string $code    Slug-name to identify the error. Used as part of 'id' attribute in HTML output.
-	 * @param string $message The formatted message text to display to the user (will be shown inside styled
-	 *                        `<div>` and `<p>` tags).
-	 * @param string $type    Optional. Message type, controls HTML class. Possible values include 'error',
-	 *                        'success', 'warning', 'info'. Default 'error'.
-	 */
-	private static function add_settings_error( $setting, $code, $message, $type = 'error' ) {
-		require_once ABSPATH . 'wp-admin/includes/template.php';
-		add_settings_error( $setting, $code, $message, $type );
 	}
 }

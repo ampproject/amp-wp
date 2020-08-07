@@ -16,7 +16,7 @@
 
 .amp-notice__body .components-panel__body-toggle,
 .amp-notice__body .components-panel__body-toggle:focus:not(:disabled) {
-	color: var(--black);
+	color: var(--amp-settings-color-black);
 	outline: none;
 }
 

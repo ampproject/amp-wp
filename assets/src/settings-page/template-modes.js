@@ -158,7 +158,7 @@ export function TemplateModes() {
 						<div className="reader-themes-drawer__heading">
 							<h3>
 								{ sprintf(
-								// Translators: placeholder is a theme name.
+									/* translators: placeholder is a theme name. */
 									__( 'Reader theme: %s', 'amp' ),
 									selectedTheme.name || '',
 								) }

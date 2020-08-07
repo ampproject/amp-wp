@@ -145,7 +145,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	public function test_get_and_set_options() {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
-		global $wp_settings_errors;
 		wp_using_ext_object_cache( true ); // turn on external object cache flag.
 		AMP_Options_Manager::register_settings(); // Adds validate_options as filter.
 		delete_option( AMP_Options_Manager::OPTION_NAME );
@@ -200,54 +199,39 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				'bad' => [],
 			]
 		);
-		$errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
-		$this->assertEquals( 'missing_analytics_vendor_or_config', $errors[0]['code'] );
-		$wp_settings_errors = [];
+		$this->assertEmpty( AMP_Options_Manager::get_option( Option::ANALYTICS ) );
 
-		// Test analytics validation with bad JSON.
+		// Test bad analytics JSON entries are skipped.
 		AMP_Options_Manager::update_option(
 			Option::ANALYTICS,
 			[
-				'__new__' => [
-					'type'   => 'foo',
-					'config' => 'BAD',
-				],
-			]
-		);
-		$errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
-		$this->assertEquals( 'invalid_analytics_config_json', $errors[0]['code'] );
-		$wp_settings_errors = [];
-
-		// Test analytics validation with good fields.
-		AMP_Options_Manager::update_option(
-			Option::ANALYTICS,
-			[
-				'__new__' => [
+				'abcdefghijkl' => [
 					'type'   => 'foo',
 					'config' => '{"good":true}',
 				],
-			]
-		);
-		$this->assertEmpty( get_settings_errors( AMP_Options_Manager::OPTION_NAME ) );
-
-		// Test analytics validation with duplicate check.
-		AMP_Options_Manager::update_option(
-			Option::ANALYTICS,
-			[
-				'__new__' => [
-					'type'   => 'foo',
-					'config' => '{"good":true}',
+				'mnopqrstuvwx' => [
+					'type'   => 'bar',
+					'config' => '{"bad":true',
+				],
+				'mshvad9sdasa' => [
+					'type' => 'baz',
 				],
 			]
 		);
-		$errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
-		$this->assertEquals( 'duplicate_analytics_entry', $errors[0]['code'] );
-		$wp_settings_errors = [];
+		$updated_entries = AMP_Options_Manager::get_option( Option::ANALYTICS );
+		$this->assertEquals(
+			[
+				'abcdefghijkl' => [
+					'type'   => 'foo',
+					'config' => '{"good":true}',
+				],
+			],
+			$updated_entries
+		);
 
 		// Confirm format of entry ID.
 		$entries = AMP_Options_Manager::get_option( Option::ANALYTICS );
-		$entry   = current( $entries );
-		$id      = substr( md5( $entry['type'] . $entry['config'] ), 0, 12 );
+		$id      = current( array_keys( $entries ) );
 		$this->assertArrayHasKey( $id, $entries );
 		$this->assertEquals( 'foo', $entries[ $id ]['type'] );
 		$this->assertEquals( '{"good":true}', $entries[ $id ]['config'] );
@@ -256,7 +240,11 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option(
 			Option::ANALYTICS,
 			[
-				'__new__' => [
+				'abcdefghijkl' => [
+					'type'   => 'foo',
+					'config' => '{"good":true}',
+				],
+				'mnopqrstuvwx' => [
 					'type'   => 'bar',
 					'config' => '{"good":true}',
 				],
@@ -285,11 +273,9 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option(
 			Option::ANALYTICS,
 			[
-				$id => [
-					'id'     => $id,
-					'type'   => 'foo',
-					'config' => '{"very_good":true}',
-					'delete' => true,
+				'new-entry' => [
+					'type'   => 'bar',
+					'config' => '{"good":true}',
 				],
 			]
 		);
