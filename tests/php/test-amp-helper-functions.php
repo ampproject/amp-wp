@@ -289,8 +289,8 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		$this->assertTrue( amp_is_legacy() );
 
-		$this->assertTrue( wp_get_theme( 'twentynineteen' )->exists() );
-		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentynineteen' );
+		$this->assertTrue( wp_get_theme( 'twentyseventeen' )->exists() );
+		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentyseventeen' );
 		$this->assertFalse( amp_is_legacy() );
 
 		AMP_Options_Manager::update_option( Option::READER_THEME, 'foobar' );
@@ -1781,7 +1781,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 		// Confirm Customize link with a Reader theme points to the right place.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
-		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentynineteen' );
+		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentyseventeen' );
 		$this->assertFalse( amp_is_legacy() );
 		$admin_bar = new WP_Admin_Bar();
 		wp_admin_bar_customize_menu( $admin_bar );
