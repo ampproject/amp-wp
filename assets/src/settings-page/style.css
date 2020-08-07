@@ -430,3 +430,12 @@ li.error-kept {
 	height: 24px;
 	width: 24px;
 }
+
+#setting-error-unavailable_reader_theme {
+	background-color: #fef7f1;
+}
+
+#setting-error-unavailable_reader_theme span.amp-icon {
+	float: left;
+	margin-right: 4px;
+}

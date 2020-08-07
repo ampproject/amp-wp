@@ -8,10 +8,13 @@
 
 namespace AmpProject\AmpWP\Admin;
 
+use AMP_Options_Manager;
+use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\Option;
 
 /**
  * AMP onboarding wizard submenu class.
@@ -57,5 +60,17 @@ final class OnboardingWizardSubmenu implements Conditional, Delayed, Service, Re
 			'__return_empty_string',
 			99
 		);
+
+		if ( amp_is_legacy() && ReaderThemes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME ) ) {
+			$selected_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
+			$error_message  = esc_html__( sprintf( 'The Reader theme "%s" cannot be found. Your site has been updated to use the AMP Legacy Reader theme.', $selected_theme ), 'amp' );
+
+			add_settings_error(
+				AMP_Options_Manager::OPTION_NAME,
+				'unavailable_reader_theme',
+				wp_kses_post(Icon::warning()->to_html() . $error_message ),
+				'warning'
+			);
+		}
 	}
 }
