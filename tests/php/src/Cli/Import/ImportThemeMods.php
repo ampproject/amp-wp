@@ -36,6 +36,8 @@ final class ImportThemeMods implements ImportStep {
 	 *             Returns -1 for failure.
 	 */
 	public function process() {
+		$count = 0;
+
 		foreach ( $this->theme_mods as $key => $value ) {
 			if ( null === $value ) {
 				WP_CLI::log(
