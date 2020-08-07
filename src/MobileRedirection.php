@@ -93,7 +93,7 @@ final class MobileRedirection implements Service, Registerable {
 	public function redirect() {
 		// If a site is AMP-first or AMP is not available for the request, then no redirection functionality will apply.
 		// Additionally, prevent adding redirection logic in the Customizer preview since that will currently complicate things.
-		if ( amp_is_canonical() || ! is_amp_available() ) {
+		if ( amp_is_canonical() || ! amp_is_available() ) {
 			return;
 		}
 
