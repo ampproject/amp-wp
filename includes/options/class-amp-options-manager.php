@@ -519,14 +519,25 @@ class AMP_Options_Manager {
 		if ( amp_is_legacy() && ReaderThemes::DEFAULT_READER_THEME !== self::get_option( Option::READER_THEME ) ) {
 			$selected_theme = self::get_option( Option::READER_THEME );
 			$error_message  = sprintf(
-				/* translators: placeholder is the name of the Reader theme. */
-				esc_html__( 'The Reader theme %s cannot be found. Your site is currently falling back to using the the AMP Legacy Reader theme. Please re-select the desired Reader theme.', 'amp' ),
-				"<code>{$selected_theme}</code>"
+				/* translators: 1: slug of the Reader theme, 2: the URL for the reader theme selection UI */
+				__( 'The AMP Reader theme %1$s cannot be found. Your site is currently falling back to using the Legacy templates for AMP pages. Please <a href="%2$s">re-select</a> the desired Reader theme.', 'amp' ),
+				"<code>{$selected_theme}</code>",
+				esc_url( add_query_arg( 'page', self::OPTION_NAME, admin_url( 'admin.php' ) ) . '#reader-themes-drawer' )
 			);
 			?>
 			<div class="notice notice-warning">
 				<p>
-					<?php echo wp_kses( $error_message, [ 'code' => [] ] ); ?>
+					<?php
+					echo wp_kses(
+						$error_message,
+						[
+							'code' => [],
+							'a'    => [
+								'href' => true,
+							],
+						]
+					);
+					?>
 				</p>
 			</div>
 			<?php
