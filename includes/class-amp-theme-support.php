@@ -160,7 +160,9 @@ class AMP_Theme_Support {
 		 * the response at this action and then short-circuit with exit. So this is why the the preceding
 		 * action to template_redirect--the wp action--is used instead.
 		 */
-		add_action( 'wp', [ __CLASS__, 'finish_init' ], PHP_INT_MAX );
+		if ( ! is_admin() ) {
+			add_action( 'wp', [ __CLASS__, 'finish_init' ], PHP_INT_MAX );
+		}
 	}
 
 	/**
