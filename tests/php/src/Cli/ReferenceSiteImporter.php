@@ -232,6 +232,6 @@ final class ReferenceSiteImporter extends WP_Import {
 	 * @return bool Whether this is a Google Storage URL.
 	 */
 	private function is_google_storage_url( $url ) {
-		return 1 === preg_match( '#^gs://#', $url );
+		return 0 === strncmp( $url, 'gs://', 5 );
 	}
 }
