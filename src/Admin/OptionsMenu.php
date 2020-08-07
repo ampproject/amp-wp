@@ -186,7 +186,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			[
 				$this->google_fonts->get_handle(),
 				'wp-components',
-				'amp-icons'
+				'amp-icons',
 			],
 			AMP__VERSION
 		);

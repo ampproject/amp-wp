@@ -63,12 +63,14 @@ final class OnboardingWizardSubmenu implements Conditional, Delayed, Service, Re
 
 		if ( amp_is_legacy() && ReaderThemes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME ) ) {
 			$selected_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
-			$error_message  = esc_html__( sprintf( 'The Reader theme "%s" cannot be found. Your site has been updated to use the AMP Legacy Reader theme.', $selected_theme ), 'amp' );
+
+			/* translators: placeholder is the name of the Reader theme. */
+			$error_message = sprintf( __( 'The Reader theme "%s" cannot be found. Your site has been updated to use the AMP Legacy Reader theme.', 'amp' ), $selected_theme );
 
 			add_settings_error(
 				AMP_Options_Manager::OPTION_NAME,
 				'unavailable_reader_theme',
-				wp_kses_post(Icon::warning()->to_html() . $error_message ),
+				wp_kses_post( Icon::warning()->to_html() . $error_message ),
 				'warning'
 			);
 		}
