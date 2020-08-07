@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\Dom\Document;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 
@@ -16,23 +17,18 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 
 	use AssertContainsCompatibility;
 	use PrivateAccess;
-
-	private $original_theme_directories;
+	use LoadsCoreThemes;
 
 	public function setUp() {
 		parent::setUp();
 
-		global $wp_theme_directories;
-		$this->original_theme_directories = $wp_theme_directories;
-		register_theme_directory( ABSPATH . 'wp-content/themes' );
-		delete_site_transient( 'theme_roots' );
+		$this->register_core_themes();
 	}
 
 	public function tearDown() {
 		parent::tearDown();
-		global $wp_theme_directories;
-		$wp_theme_directories = $this->original_theme_directories;
-		delete_site_transient( 'theme_roots' );
+
+		$this->restore_theme_directories();
 	}
 
 	/**

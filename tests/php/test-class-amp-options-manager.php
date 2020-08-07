@@ -7,6 +7,7 @@
 
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 
 /**
  * Tests for AMP_Options_Manager.
@@ -15,7 +16,7 @@ use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
  */
 class Test_AMP_Options_Manager extends WP_UnitTestCase {
 
-	use AssertContainsCompatibility;
+	use AssertContainsCompatibility, LoadsCoreThemes;
 
 	/**
 	 * Whether the external object cache was enabled.
@@ -23,8 +24,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 * @var bool
 	 */
 	private $was_wp_using_ext_object_cache;
-
-	private $original_theme_directories;
 
 	/**
 	 * Set up.
@@ -36,10 +35,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		remove_theme_support( 'amp' );
 		$GLOBALS['wp_settings_errors'] = [];
 
-		global $wp_theme_directories;
-		$this->original_theme_directories = $wp_theme_directories;
-		register_theme_directory( ABSPATH . 'wp-content/themes' );
-		delete_site_transient( 'theme_roots' );
+		$this->register_core_themes();
 	}
 
 	/**
@@ -55,9 +51,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 			remove_post_type_support( $post_type, 'amp' );
 		}
 
-		global $wp_theme_directories;
-		$wp_theme_directories = $this->original_theme_directories;
-		delete_site_transient( 'theme_roots' );
+		$this->restore_theme_directories();
 	}
 
 	/**

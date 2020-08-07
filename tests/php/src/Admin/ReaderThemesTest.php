@@ -11,6 +11,7 @@ namespace AmpProject\AmpWP\Tests\Admin;
 use AMP_Options_Manager;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
 use WP_UnitTestCase;
 use Closure;
@@ -24,7 +25,7 @@ use Closure;
  */
 class ReaderThemesTest extends WP_UnitTestCase {
 
-	use ThemesApiRequestMocking;
+	use ThemesApiRequestMocking, LoadsCoreThemes;
 
 	/**
 	 * Test instance.
@@ -32,8 +33,6 @@ class ReaderThemesTest extends WP_UnitTestCase {
 	 * @var ReaderThemes
 	 */
 	private $reader_themes;
-
-	private $original_theme_directories;
 
 	/**
 	 * Setup.
@@ -52,17 +51,13 @@ class ReaderThemesTest extends WP_UnitTestCase {
 		switch_theme( 'twentytwenty' );
 		$this->reader_themes = new ReaderThemes();
 
-		global $wp_theme_directories;
-		$this->original_theme_directories = $wp_theme_directories;
-		register_theme_directory( ABSPATH . 'wp-content/themes' );
-		delete_site_transient( 'theme_roots' );
+		$this->register_core_themes();
 	}
 
 	public function tearDown() {
 		parent::tearDown();
-		global $wp_theme_directories;
-		$wp_theme_directories = $this->original_theme_directories;
-		delete_site_transient( 'theme_roots' );
+
+		$this->restore_theme_directories();
 	}
 
 	/**

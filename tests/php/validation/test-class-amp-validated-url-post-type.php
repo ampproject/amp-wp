@@ -8,6 +8,7 @@
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
+use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 
 // phpcs:disable WordPress.Variables.GlobalVariables.OverrideProhibited
@@ -22,18 +23,14 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	use AssertContainsCompatibility;
 	use HandleValidation;
 	use PrivateAccess;
+	use LoadsCoreThemes;
 
 	const TESTED_CLASS = 'AMP_Validated_URL_Post_Type';
-
-	private $original_theme_directories;
 
 	public function setUp() {
 		parent::setUp();
 
-		global $wp_theme_directories;
-		$this->original_theme_directories = $wp_theme_directories;
-		register_theme_directory( ABSPATH . 'wp-content/themes' );
-		delete_site_transient( 'theme_roots' );
+		$this->register_core_themes();
 	}
 
 	public function tearDown() {
@@ -42,9 +39,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		global $current_screen;
 		$current_screen = null;
 
-		global $wp_theme_directories;
-		$wp_theme_directories = $this->original_theme_directories;
-		delete_site_transient( 'theme_roots' );
+		$this->restore_theme_directories();
 	}
 
 	/**

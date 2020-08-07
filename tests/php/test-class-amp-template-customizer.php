@@ -9,6 +9,7 @@ use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\ReaderThemeLoader;
 use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 
 /**
@@ -19,10 +20,8 @@ use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 
 	use AssertContainsCompatibility;
-
 	use PrivateAccess;
-
-	private $original_theme_directories;
+	use LoadsCoreThemes;
 
 	public static function setUpBeforeClass() {
 		require_once ABSPATH . WPINC . '/class-wp-customize-manager.php';
@@ -32,18 +31,14 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
-		global $wp_theme_directories;
-		$this->original_theme_directories = $wp_theme_directories;
-		register_theme_directory( ABSPATH . 'wp-content/themes' );
-		delete_site_transient( 'theme_roots' );
+		$this->register_core_themes();
 	}
 
 	public function tearDown() {
 		parent::tearDown();
 		unset( $GLOBALS['wp_customize'], $GLOBALS['wp_scripts'], $GLOBALS['wp_styles'] );
-		global $wp_theme_directories;
-		$wp_theme_directories = $this->original_theme_directories;
-		delete_site_transient( 'theme_roots' );
+
+		$this->restore_theme_directories();
 	}
 
 	/**

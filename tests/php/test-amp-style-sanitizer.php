@@ -11,6 +11,7 @@ use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\RemoteRequest\CachedResponse;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\Dom\Document;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
@@ -24,8 +25,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	use AssertContainsCompatibility;
 	use MarkupComparison;
 	use PrivateAccess;
-
-	private $original_theme_directories;
+	use LoadsCoreThemes;
 
 	/**
 	 * Set up.
@@ -37,10 +37,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$wp_scripts = null;
 		delete_option( AMP_Options_Manager::OPTION_NAME ); // Make sure default reader mode option does not override theme support being added.
 
-		global $wp_theme_directories;
-		$this->original_theme_directories = $wp_theme_directories;
-		register_theme_directory( ABSPATH . 'wp-content/themes' );
-		delete_site_transient( 'theme_roots' );
+		$this->register_core_themes();
 	}
 
 	/**
@@ -53,9 +50,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$wp_scripts   = null;
 		$wp_customize = null;
 
-		global $wp_theme_directories;
-		$wp_theme_directories = $this->original_theme_directories;
-		delete_site_transient( 'theme_roots' );
+		$this->restore_theme_directories();
 	}
 
 	/**

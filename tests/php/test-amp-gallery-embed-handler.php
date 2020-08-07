@@ -7,6 +7,7 @@
 
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
 
 /**
@@ -14,7 +15,7 @@ use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
  */
 class AMP_Gallery_Embed_Handler_Test extends WP_UnitTestCase {
 
-	use WithoutBlockPreRendering;
+	use WithoutBlockPreRendering, LoadsCoreThemes;
 
 	private static $original_amp_options;
 
@@ -29,18 +30,20 @@ class AMP_Gallery_Embed_Handler_Test extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
-		register_theme_directory( ABSPATH . 'wp-content/themes' );
-		delete_site_transient( 'theme_roots' );
+		$this->register_core_themes();
 	}
 
 	/**
 	 * Tear down.
 	 */
 	public function tearDown() {
+		parent::tearDown();
+
 		if ( did_action( 'add_attachment' ) ) {
 			$this->remove_added_uploads();
 		}
-		parent::tearDown();
+
+		$this->restore_theme_directories();
 	}
 
 	/**

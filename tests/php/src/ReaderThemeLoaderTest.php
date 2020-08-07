@@ -11,6 +11,7 @@ use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\ReaderThemeLoader;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use WP_Customize_Manager;
 use WP_Customize_Panel;
 use WP_Theme;
@@ -19,28 +20,22 @@ use WP_UnitTestCase;
 /** @covers ReaderThemeLoader */
 final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 
-	use AssertContainsCompatibility;
+	use AssertContainsCompatibility, LoadsCoreThemes;
 
 	/** @var ReaderThemeLoader */
 	private $instance;
-
-	private $original_theme_directories;
 
 	public function setUp() {
 		parent::setUp();
 		$this->instance = new ReaderThemeLoader();
 
-		global $wp_theme_directories;
-		$this->original_theme_directories = $wp_theme_directories;
-		register_theme_directory( ABSPATH . 'wp-content/themes' );
-		delete_site_transient( 'theme_roots' );
+		$this->register_core_themes();
 	}
 
 	public function tearDown() {
 		parent::tearDown();
-		global $wp_theme_directories;
-		$wp_theme_directories = $this->original_theme_directories;
-		delete_site_transient( 'theme_roots' );
+
+		$this->restore_theme_directories();
 	}
 
 	/** @covers ReaderThemeLoader::is_enabled() */
