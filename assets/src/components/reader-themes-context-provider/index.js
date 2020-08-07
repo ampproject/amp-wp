@@ -97,7 +97,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 			updateOptions( { reader_theme: LEGACY_THEME_SLUG } );
 			setThemeWasOverridden( true );
 		}
-	}, [ originalSelectedTheme.availability, selectedTheme.availability, originalSelectedTheme.slug, selectedTheme.slug, themeWasOverridden, updateOptions ] );
+	}, [ originalSelectedTheme.availability, selectedTheme.availability, themeWasOverridden, updateOptions ] );
 
 	/**
 	 * Downloads the selected reader theme, if necessary, when options are saved.
