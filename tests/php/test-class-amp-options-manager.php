@@ -76,6 +76,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		AMP_Options_Manager::init();
 		$this->assertEquals( 10, has_action( 'admin_notices', [ AMP_Options_Manager::class, 'render_php_css_parser_conflict_notice' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', [ AMP_Options_Manager::class, 'insecure_connection_notice' ] ) );
+		$this->assertEquals( 10, has_action( 'admin_notices', [ AMP_Options_Manager::class, 'reader_theme_fallback_notice' ] ) );
 	}
 
 	/**

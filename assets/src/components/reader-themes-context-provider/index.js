@@ -9,6 +9,7 @@ import { __ } from '@wordpress/i18n';
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { LEGACY_THEME_SLUG } from 'amp-settings';
 
 /**
  * Internal dependencies
@@ -65,9 +66,14 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 				};
 			}
 
+			const themeIndexes = {};
+			themes.forEach( ( { slug }, index ) => {
+				themeIndexes[ slug ] = index;
+			} );
+
 			return {
-				originalSelectedTheme: themes.find( ( { slug } ) => slug === originalReaderTheme ) || emptyTheme,
-				selectedTheme: themes.find( ( { slug } ) => slug === readerTheme ) || emptyTheme,
+				originalSelectedTheme: originalReaderTheme in themeIndexes ? themes[ themeIndexes[ originalReaderTheme ] ] : emptyTheme,
+				selectedTheme: readerTheme in themeIndexes ? themes[ themeIndexes[ readerTheme ] ] : themes[ themeIndexes[ LEGACY_THEME_SLUG ] ],
 			};
 		},
 		[ originalReaderTheme, readerTheme, themes ],
@@ -80,19 +86,23 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	const [ downloadingThemeError, setDownloadingThemeError ] = useState( null );
 
 	/**
-	 * If the currently selected theme is unavailable and not installable, or the current theme is the active theme,
-	 * unset the reader theme option.
+	 * If the currently selected theme is unavailable and not installable, the current theme is the active theme, or a
+	 * theme selection was not originally made, set the Reader theme to AMP Legacy.
 	 */
 	useEffect( () => {
 		if ( themeWasOverridden ) { // Only do this once.
 			return;
 		}
 
-		if ( selectedTheme.availability === 'non-installable' || originalSelectedTheme.availability === 'active' ) {
-			updateOptions( { reader_theme: 'legacy' } );
+		if (
+			selectedTheme.availability === 'non-installable' ||
+			originalSelectedTheme.availability === 'active' ||
+			( ! originalSelectedTheme.slug && LEGACY_THEME_SLUG === selectedTheme.slug )
+		) {
+			updateOptions( { reader_theme: LEGACY_THEME_SLUG } );
 			setThemeWasOverridden( true );
 		}
-	}, [ originalSelectedTheme.availability, selectedTheme.availability, themeWasOverridden, updateOptions ] );
+	}, [ originalSelectedTheme.availability, selectedTheme.availability, originalSelectedTheme.slug, selectedTheme.slug, themeWasOverridden, updateOptions ] );
 
 	/**
 	 * Downloads the selected reader theme, if necessary, when options are saved.

@@ -42,6 +42,7 @@ class AMP_Options_Manager {
 	public static function init() {
 		add_action( 'admin_notices', [ __CLASS__, 'render_php_css_parser_conflict_notice' ] );
 		add_action( 'admin_notices', [ __CLASS__, 'insecure_connection_notice' ] );
+		add_action( 'admin_notices', [ __CLASS__, 'reader_theme_fallback_notice' ] );
 	}
 
 	/**
@@ -508,6 +509,27 @@ class AMP_Options_Manager {
 					]
 				)
 			);
+		}
+	}
+
+	/**
+	 * Outputs an admin notice if the AMP Legacy Reader theme is used as a fallback.
+	 */
+	public static function reader_theme_fallback_notice() {
+		if ( amp_is_legacy() && ReaderThemes::DEFAULT_READER_THEME !== self::get_option( Option::READER_THEME ) ) {
+			$selected_theme = self::get_option( Option::READER_THEME );
+			$error_message  = sprintf(
+				/* translators: placeholder is the name of the Reader theme. */
+				esc_html__( 'The Reader theme %s cannot be found. Your site is currently falling back to using the the AMP Legacy Reader theme. Please re-select the desired Reader theme.', 'amp' ),
+				"<code>{$selected_theme}</code>"
+			);
+			?>
+			<div class="notice notice-warning">
+				<p>
+					<?php echo wp_kses( $error_message, [ 'code' => [] ] ); ?>
+				</p>
+			</div>
+			<?php
 		}
 	}
 }
