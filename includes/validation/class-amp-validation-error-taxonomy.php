@@ -3327,10 +3327,11 @@ class AMP_Validation_Error_Taxonomy {
 	 *
 	 * @see \AMP_Validation_Error_Taxonomy::get_validation_error_sanitization()
 	 *
-	 * @param array $sanitization Sanitization.
+	 * @param array $sanitization     Sanitization.
+	 * @param bool  $include_reviewed Include reviewed/unreviewed status.
 	 * @return string Status text.
 	 */
-	public static function get_status_text_with_icon( $sanitization ) {
+	public static function get_status_text_with_icon( $sanitization, $include_reviewed = false ) {
 		if ( $sanitization['term_status'] & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) {
 			$icon = Icon::valid();
 			$text = __( 'Removed', 'amp' );
@@ -3339,13 +3340,15 @@ class AMP_Validation_Error_Taxonomy {
 			$text = __( 'Kept', 'amp' );
 		}
 
-		$text .= ' (';
-		if ( $sanitization['term_status'] & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK ) {
-			$text .= __( 'Reviewed', 'amp' );
-		} else {
-			$text .= __( 'Unreviewed', 'amp' );
+		if ( $include_reviewed ) {
+			$text .= ' (';
+			if ( $sanitization['term_status'] & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK ) {
+				$text .= __( 'Reviewed', 'amp' );
+			} else {
+				$text .= __( 'Unreviewed', 'amp' );
+			}
+			$text .= ')';
 		}
-		$text .= ')';
 
 		return sprintf( '<span class="status-text">%s %s</span>', $icon->to_html(), esc_html( $text ) );
 	}

@@ -1705,7 +1705,7 @@ class AMP_Validated_URL_Post_Type {
 				echo '</p></div>';
 			}
 
-			$status_text   = AMP_Validation_Error_Taxonomy::get_status_text_with_icon( $sanitization );
+			$status_text   = AMP_Validation_Error_Taxonomy::get_status_text_with_icon( $sanitization, true );
 			$status_detail = sprintf( '<dt>%s</dt><dd>%s</dd>', esc_html__( 'Status', 'amp' ), wp_kses_post( $status_text ) );
 
 			$error_details = AMP_Validation_Error_Taxonomy::render_single_url_error_details( $validation_error, $error, false, false );
