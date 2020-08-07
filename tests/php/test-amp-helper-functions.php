@@ -32,6 +32,8 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	private $server_var_backup;
 
+	private $original_theme_directories;
+
 	/**
 	 * Set up.
 	 */
@@ -39,6 +41,11 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		parent::setUp();
 		$this->server_var_backup = $_SERVER;
 		remove_theme_support( 'amp' );
+
+		global $wp_theme_directories;
+		$this->original_theme_directories = $wp_theme_directories;
+		register_theme_directory( ABSPATH . 'wp-content/themes' );
+		delete_site_transient( 'theme_roots' );
 	}
 
 	/**
@@ -60,6 +67,8 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$wp_rewrite->init();
 		$wp_rewrite->flush_rules();
 
+		global $wp_theme_directories;
+		$wp_theme_directories = $this->original_theme_directories;
 		delete_site_transient( 'theme_roots' );
 
 		if ( class_exists( 'WP_Block_Type_Registry' ) ) {
@@ -280,6 +289,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		$this->assertTrue( amp_is_legacy() );
 
+		$this->assertTrue( wp_get_theme( 'twentynineteen' )->exists() );
 		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentynineteen' );
 		$this->assertFalse( amp_is_legacy() );
 
