@@ -3338,6 +3338,15 @@ class AMP_Validation_Error_Taxonomy {
 			$icon = Icon::invalid();
 			$text = __( 'Kept', 'amp' );
 		}
+
+		$text .= ' (';
+		if ( $sanitization['term_status'] & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK ) {
+			$text .= __( 'Reviewed', 'amp' );
+		} else {
+			$text .= __( 'Unreviewed', 'amp' );
+		}
+		$text .= ')';
+
 		return sprintf( '<span class="status-text">%s %s</span>', $icon->to_html(), esc_html( $text ) );
 	}
 }
