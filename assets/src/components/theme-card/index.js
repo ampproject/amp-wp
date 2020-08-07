@@ -59,7 +59,7 @@ export function ThemeCard( { description, ElementName = 'li', homepage, screensh
 								loading="lazy"
 								decoding="async"
 							/>
-						) : <MobileIcon />
+						) : <MobileIcon style={ { width: '100%' } } />
 					}
 					{ disabled && (
 						<div className="theme-card__disabled-overlay">

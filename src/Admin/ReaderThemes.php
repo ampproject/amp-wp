@@ -128,7 +128,7 @@ final class ReaderThemes {
 		 * Append the AMP Legacy theme details after filtering the default themes. This ensures the AMP Legacy theme
 		 * will always be available as a fallback if the chosen Reader theme becomes unavailable.
 		 */
-		$themes[] = $this->get_classic_mode();
+		$themes[] = $this->get_legacy_theme();
 
 		$themes = array_filter(
 			$themes,

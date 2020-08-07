@@ -48,13 +48,10 @@
 	}
 }
 
-.theme-card .phone-inner {
-	max-height: 307px; /* Make all images uniform height. */
-}
-
 .theme-card img {
 	height: auto;
 	width: 100%;
+	margin: auto;
 }
 
 p.theme-card__description {

@@ -4,7 +4,7 @@
 	display: flex;
 	flex-direction: column;
 	margin-bottom: 1rem;
-	max-height: 413px;
+	height: 413px;
 	min-height: 200px;
 	padding: 12px;
 	position: relative;
@@ -25,5 +25,8 @@
 }
 
 .phone-inner {
+	display: flex;
+	background-color: var(--color-gray-medium);
+	flex-grow: 1;
 	overflow: hidden;
 }
