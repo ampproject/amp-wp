@@ -522,7 +522,7 @@ class AMP_Options_Manager {
 
 		$reader_themes = new ReaderThemes();
 
-		if ( $reader_themes->using_fallback_theme() ) {
+		if ( $reader_themes->using_fallback_theme() && current_user_can( 'manage_options' ) ) {
 			$selected_theme = self::get_option( Option::READER_THEME );
 			$error_message  = sprintf(
 				/* translators: 1: slug of the Reader theme, 2: the URL for the reader theme selection UI */

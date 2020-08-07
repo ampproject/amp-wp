@@ -346,10 +346,14 @@ final class ReaderThemes {
 		return in_array( $theme_slug, wp_list_pluck( $this->get_themes(), 'slug' ), true );
 	}
 
+	/**
+	 * Determine if the AMP legacy Reader theme is being used as a fallback.
+	 *
+	 * @return bool True if being used as a fallback, false otherwise.
+	 */
 	public function using_fallback_theme() {
 		return amp_is_legacy()
-			&& self::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME )
-			&& current_user_can( 'manage_options' );
+			&& self::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME );
 	}
 
 	/**
