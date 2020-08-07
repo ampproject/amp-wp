@@ -26,6 +26,13 @@ class AMP_Gallery_Embed_Handler_Test extends WP_UnitTestCase {
 		AMP_Options_Manager::update_options( self::$original_amp_options );
 	}
 
+	public function setUp() {
+		parent::setUp();
+
+		register_theme_directory( ABSPATH . 'wp-content/themes' );
+		delete_site_transient( 'theme_roots' );
+	}
+
 	/**
 	 * Tear down.
 	 */
@@ -181,7 +188,7 @@ class AMP_Gallery_Embed_Handler_Test extends WP_UnitTestCase {
 			AMP_Options_Manager::update_option( Option::READER_THEME, ReaderThemes::DEFAULT_READER_THEME );
 			AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		} else {
-			AMP_Options_Manager::update_option( Option::READER_THEME, 'foobar' );
+			AMP_Options_Manager::update_option( Option::READER_THEME, 'twentyseventeen' );
 		}
 
 		// When we generate new attachments, we neither control the IDs being
