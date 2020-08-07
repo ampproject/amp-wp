@@ -193,9 +193,9 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		switch_theme( 'child-of-core' );
 		AMP_Core_Theme_Sanitizer::extend_theme_support();
 		$this->assertTrue( current_theme_supports( 'amp' ) );
-		$this->assertEquals(
-			[ 'paired' => true ],
-			AMP_Theme_Support::get_theme_support_args()
+		$this->assertEqualSets(
+			[ 'paired', 'nav_menu_toggle', 'nav_menu_dropdown' ],
+			array_keys( AMP_Theme_Support::get_theme_support_args() )
 		);
 	}
 
