@@ -643,7 +643,7 @@ class AMP_Template_Customizer {
 				'ampCustomizePreview.boot( %s );',
 				wp_json_encode(
 					[
-						'available' => is_amp_available(),
+						'available' => amp_is_available(),
 						'enabled'   => is_amp_endpoint(),
 					]
 				)
