@@ -161,7 +161,7 @@ class AMP_Theme_Support {
 		 * action to template_redirect--the wp action--is used instead.
 		 */
 		if ( ! is_admin() ) {
-			add_action( 'wp', array( __CLASS__, 'finish_init' ), PHP_INT_MAX );
+			add_action( 'wp', [ __CLASS__, 'finish_init' ], PHP_INT_MAX );
 		}
 	}
 
