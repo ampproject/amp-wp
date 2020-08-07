@@ -18,4 +18,4 @@ built
 /lib/*/composer.lock
 /phpcs.xml
 /phpunit.xml
-*.sql
+/*.sql
