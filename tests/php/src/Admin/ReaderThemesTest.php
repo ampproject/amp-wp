@@ -8,7 +8,9 @@
 
 namespace AmpProject\AmpWP\Tests\Admin;
 
+use AMP_Options_Manager;
 use AmpProject\AmpWP\Admin\ReaderThemes;
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
 use WP_UnitTestCase;
 use Closure;
@@ -89,6 +91,16 @@ class ReaderThemesTest extends WP_UnitTestCase {
 		foreach ( $themes as $theme ) {
 			$this->assertEqualSets( $keys, array_keys( $theme ) );
 		}
+
+		// Verify that the Reader theme data can be retrieved from the list of installed themes.
+		register_theme_directory( __DIR__ . '/../../data/themes' );
+		delete_site_transient( 'theme_roots' );
+
+		AMP_Options_Manager::update_option( Option::READER_THEME, 'child-of-core' );
+
+		$themes = ( new ReaderThemes() )->get_themes();
+
+		$this->assertContains( 'child-of-core', wp_list_pluck( $themes, 'slug' ) );
 	}
 
 	/**
