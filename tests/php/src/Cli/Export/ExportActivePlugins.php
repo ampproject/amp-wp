@@ -69,6 +69,15 @@ final class ExportActivePlugins implements ExportStep {
 	 * @return bool Whether to skip the active plugin.
 	 */
 	private function skip_excluded_plugins( $active_plugin ) {
-		return ! in_array( $active_plugin, self::EXCLUDED_PLUGINS, true );
+		static $excluded_plugins = null;
+
+		if ( null === $excluded_plugins ) {
+			$excluded_plugins = array_merge(
+				self::EXCLUDED_PLUGINS,
+				getenv( 'AMP_REF_SITE_EXCLUDED_PLUGINS' )
+			);
+		}
+
+		return ! in_array( $active_plugin, $excluded_plugins, true );
 	}
 }
