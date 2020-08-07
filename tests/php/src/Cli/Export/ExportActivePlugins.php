@@ -26,6 +26,13 @@ final class ExportActivePlugins implements ExportStep {
 	];
 
 	/**
+	 * Name of the environment variable to use for excluding additional plugins.
+	 *
+	 * @var string
+	 */
+	const EXCLUDED_PLUGINS_ENV_VARIABLE = 'AMP_REF_SITE_EXCLUDED_PLUGINS';
+
+	/**
 	 * Process the export step.
 	 *
 	 * @param ExportResult $export_result Export result to adapt.
@@ -74,7 +81,7 @@ final class ExportActivePlugins implements ExportStep {
 		if ( null === $excluded_plugins ) {
 			$excluded_plugins = array_merge(
 				self::EXCLUDED_PLUGINS,
-				getenv( 'AMP_REF_SITE_EXCLUDED_PLUGINS' )
+				array_filter( (array) getenv( self::EXCLUDED_PLUGINS_ENV_VARIABLE ) )
 			);
 		}
 
