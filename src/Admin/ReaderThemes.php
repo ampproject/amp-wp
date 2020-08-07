@@ -346,6 +346,12 @@ final class ReaderThemes {
 		return in_array( $theme_slug, wp_list_pluck( $this->get_themes(), 'slug' ), true );
 	}
 
+	public function using_fallback_theme() {
+		return amp_is_legacy()
+			&& self::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME )
+			&& current_user_can( 'manage_options' );
+	}
+
 	/**
 	 * Provides details for the legacy theme included with the plugin.
 	 *

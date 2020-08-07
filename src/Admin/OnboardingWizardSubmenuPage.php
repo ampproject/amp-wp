@@ -213,7 +213,6 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 		wp_styles()->add_data( self::ASSET_HANDLE, 'rtl', 'replace' );
 
 		$theme           = wp_get_theme();
-		$reader_theme    = AMP_Options_Manager::get_option( Option::READER_THEME );
 		$is_reader_theme = $this->reader_themes->theme_data_exists( get_stylesheet() );
 
 		$exit_link = menu_page_url( AMP_Options_Manager::OPTION_NAME, false );
@@ -240,7 +239,7 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 				'screenshot'      => $theme->get_screenshot() ?: null,
 				'url'             => $theme->get( 'ThemeURI' ),
 			],
-			'READER_THEME_AVAILABLE'             => $this->reader_themes->theme_data_exists( $reader_theme ),
+			'USING_FALLBACK_READER_THEME'        => $this->reader_themes->using_fallback_theme(),
 			'FINISH_LINK'                        => $exit_link,
 			'OPTIONS_REST_PATH'                  => '/amp/v1/options',
 			'READER_THEMES_REST_PATH'            => '/amp/v1/reader-themes',

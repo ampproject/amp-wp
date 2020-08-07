@@ -520,7 +520,9 @@ class AMP_Options_Manager {
 			return;
 		}
 
-		if ( amp_is_legacy() && ReaderThemes::DEFAULT_READER_THEME !== self::get_option( Option::READER_THEME ) && current_user_can( 'manage_options' ) ) {
+		$reader_themes = new ReaderThemes();
+
+		if ( $reader_themes->using_fallback_theme() ) {
 			$selected_theme = self::get_option( Option::READER_THEME );
 			$error_message  = sprintf(
 				/* translators: 1: slug of the Reader theme, 2: the URL for the reader theme selection UI */

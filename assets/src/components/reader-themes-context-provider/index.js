@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { READER_THEME_AVAILABLE, LEGACY_THEME_SLUG } from 'amp-settings';
+import { USING_FALLBACK_READER_THEME, LEGACY_THEME_SLUG } from 'amp-settings';
 
 /**
  * Internal dependencies
@@ -92,7 +92,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 		if (
 			selectedTheme.availability === 'non-installable' ||
 			originalSelectedTheme.availability === 'active' ||
-			! READER_THEME_AVAILABLE
+			USING_FALLBACK_READER_THEME
 		) {
 			updateOptions( { reader_theme: LEGACY_THEME_SLUG } );
 			setThemeWasOverridden( true );
