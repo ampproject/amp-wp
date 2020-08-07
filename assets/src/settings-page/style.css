@@ -52,11 +52,19 @@
 
 .amp .settings-welcome__button.is-primary {
 	box-shadow: none;
+	margin-right: 1rem;
+}
 
-	@media (min-width: 783px) {
-		padding-left: 1rem;
-		padding-right: 1.5rem;
-	}
+.settings-welcome__body h2 {
+	margin-bottom: 1rem;
+}
+
+.settings-welcome__body p {
+	margin: 0;
+}
+
+.settings-welcome__body .components-button {
+	margin-top: 1rem;
 }
 
 .amp-settings .theme-card .phone-inner {

@@ -47,6 +47,13 @@
 	text-decoration: none;
 }
 
+.amp .components-button.is-secondary,
+.amp .components-button.is-secondary:hover,
+.amp .components-button.is-secondary:hover:not(:disabled) {
+	border-color: var(--amp-settings-color-brand);
+	box-shadow: inset 0 0 0 1px var(--amp-settings-color-brand);
+}
+
 .amp.amp .components-button:focus:not(:disabled) {
 	outline: 1px solid var(--amp-settings-color-brand);
 }
