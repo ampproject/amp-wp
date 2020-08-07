@@ -516,7 +516,11 @@ class AMP_Options_Manager {
 	 * Outputs an admin notice if the AMP Legacy Reader theme is used as a fallback.
 	 */
 	public static function reader_theme_fallback_notice() {
-		if ( amp_is_legacy() && ReaderThemes::DEFAULT_READER_THEME !== self::get_option( Option::READER_THEME ) ) {
+		if ( ! function_exists( 'get_current_screen' ) || ! in_array( get_current_screen()->id, [ 'themes', 'toplevel_page_' . self::OPTION_NAME ], true ) ) {
+			return;
+		}
+
+		if ( amp_is_legacy() && ReaderThemes::DEFAULT_READER_THEME !== self::get_option( Option::READER_THEME ) && current_user_can( 'manage_options' ) ) {
 			$selected_theme = self::get_option( Option::READER_THEME );
 			$error_message  = sprintf(
 				/* translators: 1: slug of the Reader theme, 2: the URL for the reader theme selection UI */
