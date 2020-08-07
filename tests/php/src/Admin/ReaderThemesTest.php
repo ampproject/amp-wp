@@ -244,4 +244,30 @@ class ReaderThemesTest extends WP_UnitTestCase {
 		$core_theme['requires_php'] = '999.9';
 		$this->assertFalse( $this->reader_themes->can_install_theme( $core_theme ) );
 	}
+
+	/**
+	 * Tests for theme_data_exists.
+	 *
+	 * @covers ReaderThemes::theme_data_exists
+	 */
+	public function test_theme_data_exists() {
+		$this->assertFalse( ( new ReaderThemes() )->theme_data_exists( 'neve' ) );
+
+		$neve_theme        = [
+			'name'         => 'Neve',
+			'requires'     => false,
+			'requires_php' => '5.2',
+			'slug'         => 'neve',
+		];
+		$append_neve_theme = static function ( $themes ) use ( $neve_theme ) {
+			$themes[] = $neve_theme;
+			return $themes;
+		};
+
+		add_filter( 'amp_reader_themes', $append_neve_theme );
+
+		$this->assertTrue( ( new ReaderThemes() )->theme_data_exists( 'neve' ) );
+
+		remove_filter( 'amp_reader_themes', $append_neve_theme );
+	}
 }

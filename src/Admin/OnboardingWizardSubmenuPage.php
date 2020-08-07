@@ -14,6 +14,7 @@ use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Services;
 
@@ -212,7 +213,8 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 		wp_styles()->add_data( self::ASSET_HANDLE, 'rtl', 'replace' );
 
 		$theme           = wp_get_theme();
-		$is_reader_theme = in_array( get_stylesheet(), wp_list_pluck( $this->reader_themes->get_themes(), 'slug' ), true );
+		$reader_theme    = AMP_Options_Manager::get_option( Option::READER_THEME );
+		$is_reader_theme = $this->reader_themes->theme_data_exists( get_stylesheet() );
 
 		$exit_link = menu_page_url( AMP_Options_Manager::OPTION_NAME, false );
 
@@ -238,6 +240,7 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 				'screenshot'      => $theme->get_screenshot() ?: null,
 				'url'             => $theme->get( 'ThemeURI' ),
 			],
+			'READER_THEME_AVAILABLE'             => $this->reader_themes->theme_data_exists( $reader_theme ),
 			'FINISH_LINK'                        => $exit_link,
 			'OPTIONS_REST_PATH'                  => '/amp/v1/options',
 			'READER_THEMES_REST_PATH'            => '/amp/v1/reader-themes',

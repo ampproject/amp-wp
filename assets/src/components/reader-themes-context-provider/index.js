@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { LEGACY_THEME_SLUG } from 'amp-settings';
+import { READER_THEME_AVAILABLE, LEGACY_THEME_SLUG } from 'amp-settings';
 
 /**
  * Internal dependencies
@@ -66,14 +66,9 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 				};
 			}
 
-			const themeIndexes = {};
-			themes.forEach( ( { slug }, index ) => {
-				themeIndexes[ slug ] = index;
-			} );
-
 			return {
-				originalSelectedTheme: originalReaderTheme in themeIndexes ? themes[ themeIndexes[ originalReaderTheme ] ] : emptyTheme,
-				selectedTheme: readerTheme in themeIndexes ? themes[ themeIndexes[ readerTheme ] ] : themes[ themeIndexes[ LEGACY_THEME_SLUG ] ],
+				originalSelectedTheme: themes.find( ( { slug } ) => slug === originalReaderTheme ) || emptyTheme,
+				selectedTheme: themes.find( ( { slug } ) => slug === readerTheme ) || emptyTheme,
 			};
 		},
 		[ originalReaderTheme, readerTheme, themes ],
@@ -86,8 +81,8 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	const [ downloadingThemeError, setDownloadingThemeError ] = useState( null );
 
 	/**
-	 * If the currently selected theme is unavailable and not installable, the current theme is the active theme, or a
-	 * theme selection was not originally made, set the Reader theme to AMP Legacy.
+	 * If the currently selected theme is not installable, is the active theme, or unavailable for selection, set the
+	 * Reader theme to AMP Legacy.
 	 */
 	useEffect( () => {
 		if ( themeWasOverridden ) { // Only do this once.
@@ -97,7 +92,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 		if (
 			selectedTheme.availability === 'non-installable' ||
 			originalSelectedTheme.availability === 'active' ||
-			( ! originalSelectedTheme.slug && LEGACY_THEME_SLUG === selectedTheme.slug )
+			! READER_THEME_AVAILABLE
 		) {
 			updateOptions( { reader_theme: LEGACY_THEME_SLUG } );
 			setThemeWasOverridden( true );

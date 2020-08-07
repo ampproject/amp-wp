@@ -337,6 +337,16 @@ final class ReaderThemes {
 	}
 
 	/**
+	 * Determine if the data for the specified Reader theme exists.
+	 *
+	 * @param string $theme_slug Theme slug.
+	 * @return bool Whether the Reader theme data exists.
+	 */
+	public function theme_data_exists( $theme_slug ) {
+		return in_array( $theme_slug, wp_list_pluck( $this->get_themes(), 'slug' ), true );
+	}
+
+	/**
 	 * Provides details for the legacy theme included with the plugin.
 	 *
 	 * @return array
