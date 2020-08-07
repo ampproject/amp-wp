@@ -55,6 +55,6 @@ export function DesktopScreenshot( { screenshot, name, description, url } ) {
 DesktopScreenshot.propTypes = {
 	description: PropTypes.string.isRequired,
 	name: PropTypes.string.isRequired,
-	screenshot: PropTypes.string.isRequired,
+	screenshot: PropTypes.string,
 	url: PropTypes.string.isRequired,
 };
