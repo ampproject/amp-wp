@@ -41,8 +41,11 @@ final class InstallTheme implements ImportStep {
 			)
 		);
 
-		WP_CLI::runcommand( "theme install {$this->theme}" );
+		$result = WP_CLI::runcommand(
+			"theme install {$this->theme}",
+			[ 'return' => 'return_code' ]
+		);
 
-		return 1;
+		return 0 === $result ? 1 : -1;
 	}
 }

@@ -17,6 +17,20 @@ use WP_CLI\Utils;
 final class ReferenceSiteImportCommand extends WP_CLI_Command {
 
 	/**
+	 * Associative array of result counts.
+	 *
+	 * @var int[]
+	 */
+	private $results = [];
+
+	/**
+	 * Associative array of detected errors.
+	 *
+	 * @var int[]
+	 */
+	private $errors = [];
+
+	/**
 	 * Imports content from a reference site definition.
 	 *
 	 * Uses the WordPress Importer plugin behind the scenes for performing data
@@ -66,11 +80,11 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 		$storage->registerStreamWrapper();
 
 		list( $site_definition_file ) = $args;
-		$empty_content                = Utils\get_flag_value( $assoc_args, 'empty-content', false );
-		$empty_uploads                = Utils\get_flag_value( $assoc_args, 'empty-uploads', false );
-		$empty_extensions             = Utils\get_flag_value( $assoc_args, 'empty-extensions', false );
-		$empty_options                = Utils\get_flag_value( $assoc_args, 'empty-options', false );
-		$skip_site_meta               = Utils\get_flag_value( $assoc_args, 'skip-site-meta', false );
+
+		$empty_content    = Utils\get_flag_value( $assoc_args, 'empty-content', false );
+		$empty_uploads    = Utils\get_flag_value( $assoc_args, 'empty-uploads', false );
+		$empty_extensions = Utils\get_flag_value( $assoc_args, 'empty-extensions', false );
+		$empty_options    = Utils\get_flag_value( $assoc_args, 'empty-options', false );
 
 		if ( 0 !== substr_compare( $site_definition_file, '.json', -5 ) ) {
 			$site_definition_file .= '.json';
@@ -116,7 +130,7 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 			WP_CLI::log( WP_CLI::colorize( "%b{$attribution}%n" ) );
 		}
 
-		$this->import_site( $site_definition, $skip_site_meta );
+		$this->import_site( $site_definition, $assoc_args );
 	}
 
 	/**
@@ -149,21 +163,30 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 	 *
 	 * @param SiteDefinition $site_definition Site definition of the site to
 	 *                                        import.
-	 * @param bool           $skip_site_meta  Skip importing the site meta
-	 *                                        information.
+	 * @param array          $assoc_args      Associative array of associative
+	 *                                        arguments.
 	 */
-	private function import_site( SiteDefinition $site_definition, $skip_site_meta ) {
-		if ( ! $skip_site_meta ) {
-			( new Import\ImportSiteMeta( $site_definition ) )->process();
+	private function import_site( SiteDefinition $site_definition, $assoc_args ) {
+		if ( ! Utils\get_flag_value( $assoc_args, 'skip-site-meta', false ) ) {
+			$this->add_result(
+				'Site Meta',
+				( new Import\ImportSiteMeta( $site_definition ) )->process()
+			);
 		}
 
 		foreach ( $site_definition->get_import_steps() as $import_step ) {
 			switch ( $import_step['type'] ) {
 				case 'activate_theme':
-					( new Import\ActivateTheme( $import_step['theme'] ) )->process();
+					$this->add_result(
+						'Theme',
+						( new Import\ActivateTheme( $import_step['theme'] ) )->process()
+					);
 					break;
 				case 'activate_plugin':
-					( new Import\ActivatePlugin( $import_step['plugin'] ) )->process();
+					$this->add_result(
+						'Plugin',
+						( new Import\ActivatePlugin( $import_step['plugin'] ) )->process()
+					);
 					break;
 				case 'import_wxr_file':
 					$wxr_path = $import_step['filename'];
@@ -171,22 +194,40 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 					if ( ! path_is_absolute( $wxr_path ) ) {
 						$wxr_path = ReferenceSiteCommandNamespace::REFERENCE_SITES_ROOT . $wxr_path;
 					}
-					( new Import\ImportWxrFile( $wxr_path ) )->process();
+
+					$this->add_result(
+						'Post',
+						( new Import\ImportWxrFile( $wxr_path ) )->process()
+					);
 					break;
 				case 'import_options':
-					( new Import\ImportOptions( $import_step['options'] ) )->process();
+					$this->add_result(
+						'Option',
+						( new Import\ImportOptions( $import_step['options'] ) )->process()
+					);
 					break;
 				case 'import_theme_mods':
-					( new Import\ImportThemeMods( $import_step['theme_mods'] ) )->process();
+					$this->add_result(
+						'Theme Mod',
+						( new Import\ImportThemeMods( $import_step['theme_mods'] ) )->process()
+					);
 					break;
 				case 'import_widgets':
-					( new Import\ImportWidgets( $import_step['widgets'] ) )->process();
+					$this->add_result(
+						'Widget',
+						( new Import\ImportWidgets( $import_step['widgets'] ) )->process()
+					);
 					break;
 				case 'import_customizer_settings':
-					( new Import\ImportCustomizerSettings( $import_step['settings'] ) )->process();
+					$this->add_result(
+						'Customizer Setting',
+						( new Import\ImportCustomizerSettings( $import_step['settings'] ) )->process()
+					);
 					break;
 			}
 		}
+
+		$this->print_results( $assoc_args );
 	}
 
 	/**
@@ -278,5 +319,72 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 		WP_CLI::runcommand( 'plugin activate amp' );
 
 		wp_cache_flush();
+	}
+
+	/**
+	 * Add a result to the array of logged results.
+	 *
+	 * @param string $type  Type of result to add.
+	 * @param int    $count Result count.
+	 */
+	private function add_result( $type, $count ) {
+		if ( $count > 0 ) {
+			if ( ! array_key_exists( $type, $this->results ) ) {
+				$this->results[ $type ] = 0;
+			}
+
+			$this->results[ $type ] += $count;
+		} else {
+			if ( ! array_key_exists( $type, $this->errors ) ) {
+				$this->errors[ $type ] = 0;
+			}
+
+			$this->errors[ $type ] += abs( $count );
+		}
+	}
+
+	/**
+	 * Print the import summary as a table with counts per object type.
+	 *
+	 * @param array $assoc_args Associative array of associative arguments.
+	 */
+	private function print_results( $assoc_args ) {
+		$keys = array_unique(
+			array_merge(
+				array_keys( $this->results ),
+				array_keys( $this->errors )
+			)
+		);
+
+		$results = [];
+
+		foreach ( $keys as $key ) {
+			$count = array_key_exists( $key, $this->results )
+				? $this->results[ $key ]
+				: 0;
+
+			if ( $count > 0 ) {
+				$count = "%G{$count}%n";
+			}
+
+			$errors = array_key_exists( $key, $this->errors )
+				? $this->errors[ $key ]
+				: 0;
+
+			if ( $errors > 0 ) {
+				$errors = "%R{$errors}%n";
+			}
+
+			$results[ $key ] = [
+				'Type'              => WP_CLI::colorize( "%b{$key}%n" ),
+				'Imported elements' => WP_CLI::colorize( $count ),
+				'Errors'            => WP_CLI::colorize( $errors ),
+			];
+		}
+
+		WP_CLI::log( WP_CLI::colorize( "\n%BSummary:%n" ) );
+
+		$formatter = new WP_CLI\Formatter( $assoc_args, [ 'Type', 'Imported elements', 'Errors' ] );
+		$formatter->display_items( $results, true );
 	}
 }

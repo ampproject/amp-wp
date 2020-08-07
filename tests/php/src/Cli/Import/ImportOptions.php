@@ -36,6 +36,7 @@ final class ImportOptions implements ImportStep {
 	 *             Returns -1 for failure.
 	 */
 	public function process() {
+		$count = 0;
 		foreach ( $this->options as $key => $value ) {
 			if ( null === $value ) {
 				WP_CLI::log(
@@ -67,26 +68,24 @@ final class ImportOptions implements ImportStep {
 
 				case 'page_for_posts':
 				case 'page_on_front':
-					$this->update_page_id_option( $key, $value );
-					break;
-
-				case 'nav_menu_locations':
-					$this->set_nav_menu_locations( $value );
+					if ( $this->update_page_id_option( $key, $value ) ) {
+						++$count;
+					}
 					break;
 
 				case 'woocommerce_product_cat':
 					// TODO: Translate WooCommerce product category taxonomies.
 					break;
 
-				case 'custom_logo':
-					$this->insert_logo( $value );
-					break;
-
 				default:
-					update_option( $key, $value );
+					if ( update_option( $key, $value ) ) {
+						++$count;
+					}
 					break;
 			}
 		}
+
+		return $count;
 	}
 
 	/**
@@ -96,28 +95,16 @@ final class ImportOptions implements ImportStep {
 	 *
 	 * @param string $key   Option key.
 	 * @param mixed  $value Option value.
+	 * @return bool Whether the update was successful.
 	 */
 	private function update_page_id_option( $key, $value ) {
 		$page = get_page_by_title( $value );
 
 		if ( ! is_object( $page ) ) {
-			return;
+			return false;
 		}
 
-		update_option( $key, $page->ID );
-	}
-
-	/**
-	 * Insert Logo By URL.
-	 *
-	 * @param string $image_url Logo URL.
-	 * @return void
-	 */
-	private function insert_logo( $image_url = '' ) {
-		$attachment_id = $this->download_image( $image_url );
-		if ( $attachment_id ) {
-			set_theme_mod( 'custom_logo', $attachment_id );
-		}
+		return update_option( $key, $page->ID );
 	}
 
 	/**
@@ -148,27 +135,5 @@ final class ImportOptions implements ImportStep {
 		}
 
 		return $data->attachment_id;
-	}
-
-	/**
-	 * Translate from menu_slug into menu_id.
-	 *
-	 * @param array $nav_menu_locations Associative array of nav menu locations.
-	 */
-	private function set_nav_menu_locations( $nav_menu_locations = [] ) {
-		if ( empty( $nav_menu_locations ) ) {
-			return;
-		}
-
-		$menu_locations = [];
-		foreach ( $nav_menu_locations as $menu => $value ) {
-			$term = get_term_by( 'slug', $value, 'nav_menu' );
-
-			if ( is_object( $term ) ) {
-				$menu_locations[ $menu ] = $term->term_id;
-			}
-		}
-
-		set_theme_mod( 'nav_menu_locations', $menu_locations );
 	}
 }

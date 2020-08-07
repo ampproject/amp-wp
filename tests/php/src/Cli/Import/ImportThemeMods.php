@@ -55,31 +55,47 @@ final class ImportThemeMods implements ImportStep {
 
 			switch ( $key ) {
 				case 'nav_menu_locations':
-					$this->set_nav_menu_locations( $value );
+					if ( $this->set_nav_menu_locations( $value ) ) {
+						++$count;
+					}
 					break;
 
 				case 'custom_logo':
-					$this->insert_logo( $value );
+					if ( $this->insert_logo( $value ) ) {
+						++$count;
+					}
 					break;
 
 				default:
 					set_theme_mod( $key, $value );
+					// set_theme_mod does not have a return value, so just
+					// assume it succeeded.
+					++$count;
 					break;
 			}
 		}
+
+		return $count;
 	}
 
 	/**
 	 * Insert Logo By URL.
 	 *
 	 * @param string $image_url Logo URL.
-	 * @return void
+	 * @return bool Whether the logo insertion was successful.
 	 */
 	private function insert_logo( $image_url = '' ) {
 		$attachment_id = $this->download_image( $image_url );
-		if ( $attachment_id ) {
-			set_theme_mod( 'custom_logo', $attachment_id );
+
+		if ( ! $attachment_id ) {
+			return false;
 		}
+
+		set_theme_mod( 'custom_logo', $attachment_id );
+
+		// set_theme_mod does not have a return value, so just assume it
+		// succeeded.
+		return true;
 	}
 
 	/**
@@ -116,10 +132,11 @@ final class ImportThemeMods implements ImportStep {
 	 * Translate from menu_slug into menu_id.
 	 *
 	 * @param array $nav_menu_locations Associative array of nav menu locations.
+	 * @return bool Whether setting the nav menu locations was successful.
 	 */
 	private function set_nav_menu_locations( $nav_menu_locations = [] ) {
 		if ( empty( $nav_menu_locations ) ) {
-			return;
+			return false;
 		}
 
 		$menu_locations = [];
@@ -132,5 +149,9 @@ final class ImportThemeMods implements ImportStep {
 		}
 
 		set_theme_mod( 'nav_menu_locations', $menu_locations );
+
+		// set_theme_mod does not have a return value, so just assume it
+		// succeeded.
+		return true;
 	}
 }

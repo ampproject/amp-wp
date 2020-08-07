@@ -41,8 +41,11 @@ final class ActivatePlugin implements ImportStep {
 			)
 		);
 
-		WP_CLI::runcommand( "plugin install {$this->plugin} --activate" );
+		$result = WP_CLI::runcommand(
+			"plugin install {$this->plugin} --activate",
+			[ 'return' => 'return_code' ]
+		);
 
-		return 1;
+		return 0 === $result ? 1 : -1;
 	}
 }

@@ -36,9 +36,17 @@ final class ImportCustomizerSettings implements ImportStep {
 	 *             Returns -1 for failure.
 	 */
 	public function process() {
+		$count = 0;
+
 		// Update Astra Theme customizer settings.
 		if ( isset( $this->settings['astra-settings'] ) ) {
-			self::import_astra_settings( $this->settings['astra-settings'] );
+			WP_CLI::log(
+				WP_CLI::colorize( 'Updating %GAstra Theme Settings%n...' )
+			);
+
+			if ( self::import_astra_settings( $this->settings['astra-settings'] ) ) {
+				++$count;
+			}
 		}
 
 		// Add Custom CSS.
@@ -47,17 +55,21 @@ final class ImportCustomizerSettings implements ImportStep {
 				WP_CLI::colorize( 'Updating Customizer %GCustom CSS%n...' )
 			);
 
-			wp_update_custom_css_post( $this->settings['custom-css'] );
+			if ( ! is_wp_error( wp_update_custom_css_post( $this->settings['custom-css'] ) ) ) {
+				++$count;
+			}
 		}
 
 		WP_CLI::success( 'Customizer settings imported successfully.' );
+
+		return $count;
 	}
 
 	/**
 	 * Import Astra theme settings.
 	 *
 	 * @param  array $settings Astra Customizer setting array.
-	 * @return void
+	 * @return bool Whether updating the option was successful.
 	 */
 	public static function import_astra_settings( $settings = [] ) {
 		WP_CLI::log(
@@ -83,6 +95,6 @@ final class ImportCustomizerSettings implements ImportStep {
 			WP_CLI::colorize( "Updating option in %G'astra-settings'%n..." )
 		);
 
-		update_option( 'astra-settings', $settings );
+		return update_option( 'astra-settings', $settings );
 	}
 }

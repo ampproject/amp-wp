@@ -35,9 +35,19 @@ final class ImportSiteMeta implements ImportStep {
 	 *             Returns -1 for failure.
 	 */
 	public function process() {
-		update_option( 'blogname', $this->site_definition->get_name() );
-		update_option( 'blogdescription', $this->site_definition->get_description() );
+		$count = 0;
 
-		return 2;
+		$options = [
+			'blogname'        => $this->site_definition->get_name(),
+			'blogdescription' => $this->site_definition->get_description(),
+		];
+
+		foreach ( $options as $key => $value ) {
+			if ( update_option( $key, $value ) ) {
+				++$count;
+			}
+		}
+
+		return $count;
 	}
 }

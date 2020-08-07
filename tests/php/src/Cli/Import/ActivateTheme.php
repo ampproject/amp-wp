@@ -41,8 +41,11 @@ final class ActivateTheme implements ImportStep {
 			)
 		);
 
-		WP_CLI::runcommand( "theme install {$this->theme} --activate" );
+		$result = WP_CLI::runcommand(
+			"theme install {$this->theme} --activate",
+			[ 'return' => 'return_code' ]
+		);
 
-		return 1;
+		return 0 === $result ? 1 : -1;
 	}
 }
