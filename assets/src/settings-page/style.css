@@ -43,10 +43,11 @@
 }
 
 .settings-welcome__illustration {
-	margin-bottom: 2rem;
+	display: none;
+	margin-right: 2rem;
 
 	@media (min-width: 783px) {
-		margin-right: 2rem;
+		display: block;
 	}
 }
 
