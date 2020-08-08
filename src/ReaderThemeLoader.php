@@ -66,23 +66,21 @@ final class ReaderThemeLoader implements Service, Registerable {
 		}
 
 		// If the Legacy Reader mode is active, then a Reader theme is not going to be served.
-		if ( ReaderThemes::DEFAULT_READER_THEME === AMP_Options_Manager::get_option( Option::READER_THEME ) ) {
+		$reader_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
+		if ( ReaderThemes::DEFAULT_READER_THEME === $reader_theme ) {
 			return false;
 		}
 
 		// If the Reader theme does not exist, then we cannot switch to the reader theme. The Legacy Reader theme will
 		// be used as a fallback instead.
-		$reader_theme_slug = AMP_Options_Manager::get_option( Option::READER_THEME );
-		$reader_theme      = wp_get_theme( $reader_theme_slug );
-
-		if ( ! $reader_theme->exists() ) {
+		if ( ! wp_get_theme( $reader_theme )->exists() ) {
 			return false;
 		}
 
 		// Lastly, if the active theme is not the same as the reader theme, then we can switch to the reader theme.
 		// Otherwise, the site should instead be in Transitional mode. Note that get_stylesheet() is used as opposed
 		// to get_template() because the active theme should be allowed to be a child theme of a Reader theme.
-		return get_stylesheet() !== $reader_theme_slug;
+		return get_stylesheet() !== $reader_theme;
 	}
 
 	/**
