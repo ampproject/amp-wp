@@ -108,16 +108,16 @@ final class ReaderThemes {
 		 */
 		$themes = (array) apply_filters( 'amp_reader_themes', $themes );
 
-		$active_theme_slug = AMP_Options_Manager::get_option( Option::READER_THEME );
-		$theme_slugs       = wp_list_pluck( $themes, 'slug' );
+		$selected_theme_slug = AMP_Options_Manager::get_option( Option::READER_THEME );
+		$theme_slugs         = wp_list_pluck( $themes, 'slug' );
 
 		/*
 		 * Check if the chosen Reader theme is among the list of filtered themes. If not, an attempt will be made to
 		 * obtain the theme data from the list of installed themes. If neither case is true, the AMP Legacy theme will
 		 * be used as a fallback.
 		 */
-		if ( ! in_array( $active_theme_slug, $theme_slugs, true ) ) {
-			$active_theme = wp_get_theme( $active_theme_slug );
+		if ( self::DEFAULT_READER_THEME !== $selected_theme_slug && ! in_array( $selected_theme_slug, $theme_slugs, true ) ) {
+			$active_theme = wp_get_theme( $selected_theme_slug );
 
 			if ( $active_theme->exists() ) {
 				$themes[] = $this->normalize_theme_data( $active_theme );
