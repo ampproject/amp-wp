@@ -668,9 +668,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertEmpty( get_echo( [ 'AMP_Options_Manager', 'render_php_css_parser_conflict_notice' ] ) );
 	}
 
-	/**
-	 * @covers AMP_Options_Manager::insecure_connection_notice()
-	 */
+	/** @covers AMP_Options_Manager::insecure_connection_notice() */
 	public function test_insecure_connection_notice() {
 		$_SERVER['HTTPS'] = false;
 		$this->assertEmpty( get_echo( [ 'AMP_Options_Manager', 'insecure_connection_notice' ] ) );
@@ -691,9 +689,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertEmpty( get_echo( [ 'AMP_Options_Manager', 'insecure_connection_notice' ] ) );
 	}
 
-	/**
-	 * @covers AMP_Options_Manager::reader_theme_fallback_notice()
-	 */
+	/** @covers AMP_Options_Manager::reader_theme_fallback_notice() */
 	public function test_reader_theme_fallback_notice() {
 		$admin_user = self::factory()->user->create( [ 'role' => 'administrator' ] );
 		wp_set_current_user( $admin_user );

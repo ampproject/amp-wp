@@ -9,6 +9,7 @@
 namespace AmpProject\AmpWP\Tests\Admin;
 
 use AMP_Options_Manager;
+use AMP_Theme_Support;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
@@ -269,5 +270,23 @@ class ReaderThemesTest extends WP_UnitTestCase {
 		$this->assertTrue( ( new ReaderThemes() )->theme_data_exists( 'neve' ) );
 
 		remove_filter( 'amp_reader_themes', $append_neve_theme );
+	}
+
+	/** @covers ReaderThemes::using_fallback_theme */
+	public function test_using_fallback_theme() {
+		$reader_themes = new ReaderThemes();
+		AMP_Options_Manager::update_options(
+			[
+				Option::THEME_SUPPORT => 'reader',
+				Option::READER_THEME  => ReaderThemes::DEFAULT_READER_THEME,
+			]
+		);
+		$this->assertFalse( $reader_themes->using_fallback_theme() );
+
+		AMP_Options_Manager::update_option( Option::READER_THEME, 'foobar' );
+		$this->assertTrue( $reader_themes->using_fallback_theme() );
+
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+		$this->assertFalse( $reader_themes->using_fallback_theme() );
 	}
 }
