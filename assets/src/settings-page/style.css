@@ -1,20 +1,21 @@
 
-.wrap {
-	margin-right: 12px;
+@media screen and (max-width: 400px) {
+	.wrap {
+		margin-left: 0;
+		margin-right: 10px;
+	}
+}
 
-	@media screen and (max-width: 782px) {
-		margin-right: 0;
+@media screen and (min-width: 401px) and (max-width: 782px) {
+	.wrap {
+		margin-left: 10px;
+		margin-right: 20px;
 	}
 }
 
 #amp-settings {
 	max-width: 1060px;
 	margin: 0 auto;
-
-	@media screen and (max-width: 782px) {
-		margin-left: 5px;
-		margin-right: 5px;
-	}
 }
 
 #amp-settings > h1 {
@@ -49,7 +50,6 @@
 	align-items: center;
 	display: flex;
 	flex-direction: column;
-	width: 100%;
 
 	@media (min-width: 783px) {
 		flex-direction: row;

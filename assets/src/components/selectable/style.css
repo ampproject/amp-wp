@@ -5,12 +5,16 @@
 	background-color: var(--amp-settings-color-background);
 	border: 2px solid var(--amp-settings-color-border);
 	border-radius: 8px;
-	box-shadow: -10px 0 0 var(--amp-settings-color-border);
 	padding: 1rem 0.75rem;
 
 	@media (min-width: 783px) {
 		padding: 1.25rem 2.5rem;
 	}
+}
+
+.selectable--left {
+	box-shadow: -10px 0 0 var(--amp-settings-color-border);
+	margin-right: -10px;
 }
 
 .selectable--bottom {
