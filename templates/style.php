@@ -161,7 +161,8 @@ blockquote p:last-child {
 .amp-wp-tax-tag,
 .amp-wp-comments-link,
 .amp-wp-footer p,
-.back-to-top {
+.back-to-top,
+#amp-mobile-version-switcher {
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen-Sans", "Ubuntu", "Cantarell", "Helvetica Neue", sans-serif;
 }
 

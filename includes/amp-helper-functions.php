@@ -364,11 +364,16 @@ function amp_is_canonical() {
  * @return bool
  */
 function amp_is_legacy() {
-	return (
-		AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
-		&&
-		ReaderThemes::DEFAULT_READER_THEME === AMP_Options_Manager::get_option( Option::READER_THEME )
-	);
+	if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
+		return false;
+	}
+
+	$reader_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
+	if ( ReaderThemes::DEFAULT_READER_THEME === $reader_theme ) {
+		return true;
+	}
+
+	return ! wp_get_theme( $reader_theme )->exists();
 }
 
 /**
@@ -389,7 +394,7 @@ function amp_add_frontend_actions() {
  * @global string $pagenow
  * @global WP_Query $wp_query
  */
-function is_amp_available() {
+function amp_is_available() {
 	global $pagenow, $wp_query;
 
 	// Short-circuit for admin requests or requests to non-frontend pages.
@@ -405,14 +410,14 @@ function is_amp_available() {
 		$message = sprintf(
 			/* translators: %1$s: is_amp_endpoint(), %2$s: the current action, %3$s: the wp action, %4$s: the WP_Query class, %5$s: the amp_skip_post() function */
 			__( '%1$s (or %2$s) was called too early and so it will not work properly. WordPress is currently doing the "%3$s" action. Calling this function before the "%4$s" action means it will not have access to %5$s and the queried object to determine if it is an AMP response, thus neither the "%6$s" filter nor the AMP enabled toggle will be considered.', 'amp' ),
-			'is_amp_available()',
+			'amp_is_available()',
 			'is_amp_endpoint()',
 			current_action(),
 			'wp',
 			'WP_Query',
 			'amp_skip_post()'
 		);
-		_doing_it_wrong( 'is_amp_available', esc_html( $message ), '2.0.0' );
+		_doing_it_wrong( 'amp_is_available', esc_html( $message ), '2.0.0' );
 		$warned = true;
 	};
 
@@ -748,7 +753,7 @@ function amp_add_amphtml_link() {
 		return;
 	}
 
-	if ( ! is_amp_available() ) {
+	if ( ! amp_is_available() ) {
 		printf( '<!-- %s -->', esc_html__( 'There is no amphtml version available for this URL.', 'amp' ) );
 		return;
 	}
@@ -811,11 +816,11 @@ function is_amp_endpoint() {
 	);
 
 	// If AMP is not available, then it's definitely not an AMP endpoint.
-	if ( ! is_amp_available() ) {
+	if ( ! amp_is_available() ) {
 		// But, if WP_Query was not available yet, then we will just assume the query is supported since at this point we do
 		// know either that the site is in Standard mode or the URL was requested with the AMP query var. This can still
 		// produce an undesired result when a Standard mode site has a post that opts out of AMP, but this issue will
-		// have been flagged via _doing_it_wrong() in is_amp_available() above.
+		// have been flagged via _doing_it_wrong() in amp_is_available() above.
 		if ( ! did_action( 'wp' ) || ! $wp_query instanceof WP_Query ) {
 			return $is_amp_url && AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED );
 		}
@@ -1755,7 +1760,7 @@ function amp_wp_kses_mustache( $markup ) {
  * @param WP_Admin_Bar $wp_admin_bar Admin bar.
  */
 function amp_add_admin_bar_view_link( $wp_admin_bar ) {
-	if ( is_admin() || amp_is_canonical() || ! is_amp_available() ) {
+	if ( is_admin() || amp_is_canonical() || ! amp_is_available() ) {
 		return;
 	}
 

@@ -160,7 +160,9 @@ class AMP_Theme_Support {
 		 * the response at this action and then short-circuit with exit. So this is why the the preceding
 		 * action to template_redirect--the wp action--is used instead.
 		 */
-		add_action( 'wp', [ __CLASS__, 'finish_init' ], PHP_INT_MAX );
+		if ( ! is_admin() ) {
+			add_action( 'wp', [ __CLASS__, 'finish_init' ], PHP_INT_MAX );
+		}
 	}
 
 	/**
@@ -309,7 +311,7 @@ class AMP_Theme_Support {
 		if ( self::is_paired_available() ) {
 			self::setup_paired_browsing_client();
 			add_action( 'template_redirect', [ __CLASS__, 'sanitize_url_for_paired_browsing' ] );
-			add_filter( 'template_include', [ __CLASS__, 'serve_paired_browsing_experience' ] );
+			add_filter( 'template_include', [ __CLASS__, 'serve_paired_browsing_experience' ], PHP_INT_MAX );
 		}
 
 		$has_query_var = (

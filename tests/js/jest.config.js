@@ -18,6 +18,9 @@ module.exports = {
 		'<rootDir>/build/',
 		'<rootDir>/tests/shared',
 	],
+	modulePathIgnorePatterns: [
+		'<rootDir>/assets/src/components/.*/__mocks__',
+	],
 	coverageReporters: [ 'lcov' ],
 	coverageDirectory: '<rootDir>/build/logs',
 	reporters: [ [ 'jest-silent-reporter', { useDots: true } ] ],

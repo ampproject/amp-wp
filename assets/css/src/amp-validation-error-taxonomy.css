@@ -315,6 +315,11 @@ body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
 	margin-top: 1px;
 }
 
+.notice.error-details.unreviewed {
+	border-left-color: #d54e21;
+	background-color: #fef7f1;
+}
+
 .wp-heading-inline .status-text {
 	display: inline-block;
 	vertical-align: middle;

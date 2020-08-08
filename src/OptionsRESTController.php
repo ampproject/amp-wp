@@ -277,7 +277,7 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 						'arg_options' => [
 							'validate_callback' => function ( $value ) {
 								// Note: The validate_callback is used instead of enum in order to prevent leaking the list of themes.
-								return in_array( $value, wp_list_pluck( $this->reader_themes->get_themes(), 'slug' ), true );
+								return $this->reader_themes->theme_data_exists( $value );
 							},
 						],
 					],

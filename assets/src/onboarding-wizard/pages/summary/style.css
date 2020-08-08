@@ -31,6 +31,7 @@
 .reader-summary__screens img {
 	width: 100%;
 	height: auto;
+	margin: auto;
 }
 
 .reader-summary__screens .selectable {

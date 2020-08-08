@@ -8,7 +8,11 @@
 
 namespace AmpProject\AmpWP\Tests\Admin;
 
+use AMP_Options_Manager;
+use AMP_Theme_Support;
 use AmpProject\AmpWP\Admin\ReaderThemes;
+use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
 use WP_UnitTestCase;
 use Closure;
@@ -22,7 +26,7 @@ use Closure;
  */
 class ReaderThemesTest extends WP_UnitTestCase {
 
-	use ThemesApiRequestMocking;
+	use ThemesApiRequestMocking, LoadsCoreThemes;
 
 	/**
 	 * Test instance.
@@ -30,8 +34,6 @@ class ReaderThemesTest extends WP_UnitTestCase {
 	 * @var ReaderThemes
 	 */
 	private $reader_themes;
-
-	private $original_theme_directories;
 
 	/**
 	 * Setup.
@@ -50,17 +52,13 @@ class ReaderThemesTest extends WP_UnitTestCase {
 		switch_theme( 'twentytwenty' );
 		$this->reader_themes = new ReaderThemes();
 
-		global $wp_theme_directories;
-		$this->original_theme_directories = $wp_theme_directories;
-		register_theme_directory( ABSPATH . 'wp-content/themes' );
-		delete_site_transient( 'theme_roots' );
+		$this->register_core_themes();
 	}
 
 	public function tearDown() {
 		parent::tearDown();
-		global $wp_theme_directories;
-		$wp_theme_directories = $this->original_theme_directories;
-		delete_site_transient( 'theme_roots' );
+
+		$this->restore_theme_directories();
 	}
 
 	/**
@@ -89,6 +87,16 @@ class ReaderThemesTest extends WP_UnitTestCase {
 		foreach ( $themes as $theme ) {
 			$this->assertEqualSets( $keys, array_keys( $theme ) );
 		}
+
+		// Verify that the Reader theme data can be retrieved from the list of installed themes.
+		register_theme_directory( __DIR__ . '/../../data/themes' );
+		delete_site_transient( 'theme_roots' );
+
+		AMP_Options_Manager::update_option( Option::READER_THEME, 'child-of-core' );
+
+		$themes = ( new ReaderThemes() )->get_themes();
+
+		$this->assertContains( 'child-of-core', wp_list_pluck( $themes, 'slug' ) );
 	}
 
 	/**
@@ -236,5 +244,49 @@ class ReaderThemesTest extends WP_UnitTestCase {
 		$core_theme['requires']     = false;
 		$core_theme['requires_php'] = '999.9';
 		$this->assertFalse( $this->reader_themes->can_install_theme( $core_theme ) );
+	}
+
+	/**
+	 * Tests for theme_data_exists.
+	 *
+	 * @covers ReaderThemes::theme_data_exists
+	 */
+	public function test_theme_data_exists() {
+		$this->assertFalse( ( new ReaderThemes() )->theme_data_exists( 'neve' ) );
+
+		$neve_theme        = [
+			'name'         => 'Neve',
+			'requires'     => false,
+			'requires_php' => '5.2',
+			'slug'         => 'neve',
+		];
+		$append_neve_theme = static function ( $themes ) use ( $neve_theme ) {
+			$themes[] = $neve_theme;
+			return $themes;
+		};
+
+		add_filter( 'amp_reader_themes', $append_neve_theme );
+
+		$this->assertTrue( ( new ReaderThemes() )->theme_data_exists( 'neve' ) );
+
+		remove_filter( 'amp_reader_themes', $append_neve_theme );
+	}
+
+	/** @covers ReaderThemes::using_fallback_theme */
+	public function test_using_fallback_theme() {
+		$reader_themes = new ReaderThemes();
+		AMP_Options_Manager::update_options(
+			[
+				Option::THEME_SUPPORT => 'reader',
+				Option::READER_THEME  => ReaderThemes::DEFAULT_READER_THEME,
+			]
+		);
+		$this->assertFalse( $reader_themes->using_fallback_theme() );
+
+		AMP_Options_Manager::update_option( Option::READER_THEME, 'foobar' );
+		$this->assertTrue( $reader_themes->using_fallback_theme() );
+
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+		$this->assertFalse( $reader_themes->using_fallback_theme() );
 	}
 }

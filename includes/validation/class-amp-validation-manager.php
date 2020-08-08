@@ -362,7 +362,7 @@ class AMP_Validation_Manager {
 	 * @param WP_Admin_Bar $wp_admin_bar Admin bar.
 	 */
 	public static function add_admin_bar_menu_items( $wp_admin_bar ) {
-		if ( is_admin() || ! self::get_dev_tools_user_access()->is_user_enabled() || ! is_amp_available() ) {
+		if ( is_admin() || ! self::get_dev_tools_user_access()->is_user_enabled() || ! amp_is_available() ) {
 			self::$amp_admin_bar_item_added = false;
 			return;
 		}

@@ -20,6 +20,8 @@ import { IconMobile } from '../../../components/svg/icon-mobile';
 import { Options } from '../../../components/options-context-provider';
 import { RedirectToggle } from '../../../components/redirect-toggle';
 import { ReaderThemes } from '../../../components/reader-themes-context-provider';
+import DesktopIcon from '../../../components/svg/desktop-icon.svg';
+import MobileIcon from '../../../components/svg/mobile-icon.svg';
 import { SummaryHeader } from './summary-header';
 
 /**
@@ -57,14 +59,18 @@ export function Reader( { currentTheme } ) {
 						</AMPInfo>
 
 						<Desktop>
-							<img
-								src={ currentTheme.screenshot }
-								alt={ currentTheme.name }
-								loading="lazy"
-								decoding="async"
-								height="900"
-								width="1200"
-							/>
+							{
+								currentTheme.screenshot ? (
+									<img
+										src={ currentTheme.screenshot }
+										alt={ currentTheme.name }
+										loading="lazy"
+										decoding="async"
+										height="900"
+										width="1200"
+									/>
+								) : <DesktopIcon />
+							}
 
 						</Desktop>
 
@@ -89,14 +95,18 @@ export function Reader( { currentTheme } ) {
 						</AMPInfo>
 
 						<Phone>
-							<img
-								src={ readerThemeData.screenshot_url }
-								alt={ readerThemeData.name }
-								loading="lazy"
-								decoding="async"
-								height="2165"
-								width="1000"
-							/>
+							{
+								readerThemeData.screenshot_url ? (
+									<img
+										src={ readerThemeData.screenshot_url }
+										alt={ readerThemeData.name }
+										loading="lazy"
+										decoding="async"
+										height="2165"
+										width="1000"
+									/>
+								) : <MobileIcon style={ { width: '100%' } } />
+							}
 						</Phone>
 
 						<h3>

@@ -17,9 +17,11 @@ import { Nav } from '..';
 import { NavigationContextProvider } from '../../navigation-context-provider';
 import { UserContextProvider } from '../../user-context-provider';
 import { OptionsContextProvider } from '../../../../components/options-context-provider';
+import { ReaderThemesContextProvider } from '../../../../components/reader-themes-context-provider';
 import { STANDARD, READER } from '../../../../common/constants';
 
 jest.mock( '../../../../components/options-context-provider' );
+jest.mock( '../../../../components/reader-themes-context-provider' );
 jest.mock( '../../user-context-provider' );
 
 let container;
@@ -35,11 +37,13 @@ const testPages = [
 	{ PageComponent: MyPageComponent, slug: 'slug-2', title: 'Page 1' },
 ];
 
-const Providers = ( { children, pages, themeSupport = READER } ) => (
+const Providers = ( { children, pages, themeSupport = READER, downloadingTheme = false } ) => (
 	<OptionsContextProvider themeSupport={ themeSupport }>
 		<UserContextProvider>
 			<NavigationContextProvider pages={ pages }>
-				{ children }
+				<ReaderThemesContextProvider downloadingTheme={ downloadingTheme }>
+					{ children }
+				</ReaderThemesContextProvider>
 			</NavigationContextProvider>
 		</UserContextProvider>
 	</OptionsContextProvider>
@@ -48,6 +52,7 @@ Providers.propTypes = {
 	children: PropTypes.any,
 	pages: PropTypes.array,
 	themeSupport: PropTypes.string,
+	downloadingTheme: PropTypes.bool,
 };
 
 describe( 'Nav', () => {
