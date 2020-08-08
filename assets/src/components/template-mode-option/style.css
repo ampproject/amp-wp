@@ -101,16 +101,17 @@
 }
 
 .template-mode-selection__label-extra {
+	display: none;
+	font-size: 14px;
 	margin: 0 0 0 auto;
 
+	@media screen and (min-width: 783px) {
+		display: block;
+	}
 }
 
 .template-mode-selection__label-extra .amp-notice--small {
 	font-size: 14px;
-
-	@media screen and (min-width: 783px) {
-		font-size: 14px;
-	}
 }
 
 .template-mode-option > .amp-notice .components-panel__arrow {
