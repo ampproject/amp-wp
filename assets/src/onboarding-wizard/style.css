@@ -13,6 +13,10 @@ body {
 	max-width: calc(var(--stepper-max-width) + var(--setup-page-max-width));
 	padding: 20px 20px 10rem;
 	width: 100%;
+
+	@media screen and (max-width: 782px) {
+		padding-bottom: 5rem;
+	}
 }
 
 .amp-onboarding-wizard {
