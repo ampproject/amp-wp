@@ -1,6 +1,11 @@
 .summary .selectable {
 	margin-bottom: 2.25rem;
 	padding: 40px 30px;
+
+	/* For the mobile redirection toggle */
+	.amp-setting-toggle .components-form-toggle {
+		margin-right: 30px;
+	}
 }
 
 .summary .amp-notice {

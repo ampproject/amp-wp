@@ -91,7 +91,7 @@ export function Welcome() {
 
 					{
 						customizerLink && (
-							<a className="components-button is-link" href={ customizerLink } rel="noreferrer">
+							<a className="components-button is-secondary" href={ customizerLink } rel="noreferrer">
 								{ __( 'Customize Reader Theme', 'amp' ) }
 							</a>
 						)

@@ -6,9 +6,12 @@
 }
 
 .amp .amp-setting-toggle .components-form-toggle {
-	margin-right: 2.25rem;
-}
+	margin-right: 0.75rem;
 
+	@media (min-width: 783px) {
+		margin-right: 2.25rem;
+	}
+}
 
 .amp-setting-toggle--disabled .components-form-toggle__input {
 	pointer-events: none;
