@@ -442,7 +442,8 @@ class AMP_Options_Manager {
 	 * @return void
 	 */
 	public static function render_php_css_parser_conflict_notice() {
-		if ( 'toplevel_page_' . self::OPTION_NAME !== get_current_screen()->id ) {
+		$current_screen = get_current_screen();
+		if ( ! ( $current_screen instanceof WP_Screen ) || 'toplevel_page_' . self::OPTION_NAME !== $current_screen->id ) {
 			return;
 		}
 
@@ -485,6 +486,8 @@ class AMP_Options_Manager {
 	 * @return void
 	 */
 	public static function insecure_connection_notice() {
+		$current_screen = get_current_screen();
+
 		// is_ssl() only tells us whether the admin backend uses HTTPS here, so we add a few more sanity checks.
 		$uses_ssl = (
 			is_ssl()
@@ -494,7 +497,7 @@ class AMP_Options_Manager {
 			( strpos( get_bloginfo( 'url' ), 'https' ) === 0 )
 		);
 
-		if ( ! $uses_ssl && 'toplevel_page_' . self::OPTION_NAME === get_current_screen()->id ) {
+		if ( ! $uses_ssl && $current_screen instanceof WP_Screen && 'toplevel_page_' . self::OPTION_NAME === $current_screen->id ) {
 			printf(
 				'<div class="notice notice-warning"><p>%s</p></div>',
 				wp_kses(
@@ -516,7 +519,9 @@ class AMP_Options_Manager {
 	 * Outputs an admin notice if the AMP Legacy Reader theme is used as a fallback.
 	 */
 	public static function reader_theme_fallback_notice() {
-		if ( ! function_exists( 'get_current_screen' ) || ! in_array( get_current_screen()->id, [ 'themes', 'toplevel_page_' . self::OPTION_NAME ], true ) ) {
+		$current_screen = get_current_screen();
+
+		if ( ! ( $current_screen instanceof WP_Screen ) || ! in_array( $current_screen->id, [ 'themes', 'toplevel_page_' . self::OPTION_NAME ], true ) ) {
 			return;
 		}
 

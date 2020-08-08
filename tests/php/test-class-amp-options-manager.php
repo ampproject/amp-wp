@@ -8,6 +8,7 @@
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
+use AmpProject\AmpWP\Admin\ReaderThemes;
 
 /**
  * Tests for AMP_Options_Manager.
@@ -46,6 +47,9 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$GLOBALS['_wp_using_ext_object_cache'] = $this->was_wp_using_ext_object_cache;
 		unregister_post_type( 'foo' );
 		unregister_post_type( 'book' );
+
+		global $current_screen;
+		$current_screen = null;
 
 		foreach ( get_post_types() as $post_type ) {
 			remove_post_type_support( $post_type, 'amp' );
@@ -651,5 +655,71 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 			add_theme_support( 'amp', $args );
 		}
 		$this->assertEquals( $expected_mode, AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
+	}
+
+	/** @covers AMP_Options_Manager::render_php_css_parser_conflict_notice() */
+	public function test_render_php_css_parser_conflict_notice() {
+		$this->assertEmpty( get_echo( [ 'AMP_Options_Manager', 'render_php_css_parser_conflict_notice' ] ) );
+
+		set_current_screen( 'themes' );
+		$this->assertEmpty( get_echo( [ 'AMP_Options_Manager', 'render_php_css_parser_conflict_notice' ] ) );
+
+		set_current_screen( 'toplevel_page_' . AMP_Options_Manager::OPTION_NAME );
+		$this->assertEmpty( get_echo( [ 'AMP_Options_Manager', 'render_php_css_parser_conflict_notice' ] ) );
+	}
+
+	/**
+	 * @covers AMP_Options_Manager::insecure_connection_notice()
+	 */
+	public function test_insecure_connection_notice() {
+		$_SERVER['HTTPS'] = false;
+		$this->assertEmpty( get_echo( [ 'AMP_Options_Manager', 'insecure_connection_notice' ] ) );
+
+		set_current_screen( 'themes' );
+		$this->assertEmpty( get_echo( [ 'AMP_Options_Manager', 'insecure_connection_notice' ] ) );
+
+		set_current_screen( 'toplevel_page_' . AMP_Options_Manager::OPTION_NAME );
+		$this->assertStringContains( 'notice-warning', get_echo( [ 'AMP_Options_Manager', 'insecure_connection_notice' ] ) );
+
+		$_SERVER['HTTPS'] = 'on';
+		$set_https_url    = static function ( $url ) {
+			return set_url_scheme( $url, 'https' );
+		};
+		add_filter( 'home_url', $set_https_url );
+		add_filter( 'site_url', $set_https_url );
+		set_current_screen( 'toplevel_page_' . AMP_Options_Manager::OPTION_NAME );
+		$this->assertEmpty( get_echo( [ 'AMP_Options_Manager', 'insecure_connection_notice' ] ) );
+	}
+
+	/**
+	 * @covers AMP_Options_Manager::reader_theme_fallback_notice()
+	 */
+	public function test_reader_theme_fallback_notice() {
+		$admin_user = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $admin_user );
+		AMP_Options_Manager::update_options(
+			[
+				Option::THEME_SUPPORT => 'reader',
+				Option::READER_THEME  => 'foobar',
+			]
+		);
+
+		$this->assertEmpty( get_echo( [ 'AMP_Options_Manager', 'reader_theme_fallback_notice' ] ) );
+
+		set_current_screen( 'index' );
+		$this->assertEmpty( get_echo( [ 'AMP_Options_Manager', 'reader_theme_fallback_notice' ] ) );
+
+		set_current_screen( 'themes' );
+		$this->assertStringContains( 'notice-warning', get_echo( [ 'AMP_Options_Manager', 'reader_theme_fallback_notice' ] ) );
+
+		set_current_screen( 'toplevel_page_' . AMP_Options_Manager::OPTION_NAME );
+		$this->assertStringContains( 'notice-warning', get_echo( [ 'AMP_Options_Manager', 'reader_theme_fallback_notice' ] ) );
+
+		AMP_Options_Manager::update_option( Option::READER_THEME, ReaderThemes::DEFAULT_READER_THEME );
+		$this->assertEmpty( get_echo( [ 'AMP_Options_Manager', 'reader_theme_fallback_notice' ] ) );
+
+		AMP_Options_Manager::update_option( Option::READER_THEME, 'foobar' );
+		wp_set_current_user( 0 );
+		$this->assertEmpty( get_echo( [ 'AMP_Options_Manager', 'reader_theme_fallback_notice' ] ) );
 	}
 }
