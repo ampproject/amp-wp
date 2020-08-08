@@ -67,7 +67,13 @@ final class ReaderThemeLoader implements Service, Registerable {
 
 		// If the Legacy Reader mode is active, then a Reader theme is not going to be served.
 		$reader_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
-		if ( ReaderThemes::DEFAULT_READER_THEME === AMP_Options_Manager::get_option( Option::READER_THEME ) ) {
+		if ( ReaderThemes::DEFAULT_READER_THEME === $reader_theme ) {
+			return false;
+		}
+
+		// If the Reader theme does not exist, then we cannot switch to the reader theme. The Legacy Reader theme will
+		// be used as a fallback instead.
+		if ( ! wp_get_theme( $reader_theme )->exists() ) {
 			return false;
 		}
 

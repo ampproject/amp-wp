@@ -7,21 +7,29 @@
 
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 
 /**
  * Class Test_AMP_Admin_Includes_Functions
  */
 class Test_AMP_Admin_Includes_Functions extends WP_UnitTestCase {
 
+	use LoadsCoreThemes;
+
 	public function setUp() {
 		parent::setUp();
 		remove_all_actions( 'amp_init' );
 		remove_all_actions( 'admin_menu' );
 		remove_all_actions( 'customize_register' );
+
+		$this->register_core_themes();
 	}
 
 	public function tearDown() {
 		parent::tearDown();
+
+		$this->restore_theme_directories();
+
 		unset(
 			$GLOBALS['submenu'],
 			$GLOBALS['menu']
@@ -43,7 +51,7 @@ class Test_AMP_Admin_Includes_Functions extends WP_UnitTestCase {
 	public function test_amp_init_customizer_modern_reader() {
 		switch_theme( 'twentytwenty' );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
-		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentynineteen' );
+		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentyseventeen' );
 		$this->assertFalse( amp_is_legacy() );
 		amp_init_customizer();
 		$this->assertEquals( 500, has_action( 'customize_register', [ 'AMP_Template_Customizer', 'init' ] ) );
@@ -97,7 +105,7 @@ class Test_AMP_Admin_Includes_Functions extends WP_UnitTestCase {
 
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
-		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentynineteen' );
+		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentyseventeen' );
 		$this->assertFalse( amp_is_legacy() );
 		add_filter( 'amp_customizer_is_enabled', '__return_false' ); // This will be ignored.
 		amp_add_customizer_link();
