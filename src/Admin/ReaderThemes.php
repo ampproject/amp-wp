@@ -237,7 +237,7 @@ final class ReaderThemes {
 	 * @param WP_Theme|array|\stdClass $theme Theme.
 	 * @return array Normalized theme data.
 	 */
-	public function normalize_theme_data( $theme ) {
+	private function normalize_theme_data( $theme ) {
 		if ( $theme instanceof WP_Theme ) {
 			if ( $theme->errors() ) {
 				return [];
