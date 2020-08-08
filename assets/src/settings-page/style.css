@@ -270,9 +270,10 @@ li.error-kept {
 
 .supported-templates__fields {
 	display: grid;
-	gap: 1.5rem;
+	gap: 0;
 
 	@media (min-width: 783px) {
+		gap: 1.5rem;
 		grid-template-columns: repeat(2, 1fr);
 	}
 }
