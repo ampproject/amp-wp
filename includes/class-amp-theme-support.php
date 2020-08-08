@@ -311,7 +311,7 @@ class AMP_Theme_Support {
 		if ( self::is_paired_available() ) {
 			self::setup_paired_browsing_client();
 			add_action( 'template_redirect', [ __CLASS__, 'sanitize_url_for_paired_browsing' ] );
-			add_filter( 'template_include', [ __CLASS__, 'serve_paired_browsing_experience' ] );
+			add_filter( 'template_include', [ __CLASS__, 'serve_paired_browsing_experience' ], PHP_INT_MAX );
 		}
 
 		$has_query_var = (
