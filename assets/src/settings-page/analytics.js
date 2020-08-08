@@ -71,7 +71,9 @@ function AnalyticsEntry( { entryIndex, onChange, onDelete, type = '', config = '
 							onChange( { type: newType } );
 						} }
 						type="text"
-						placeholder={ __( 'e.g. googleanalytics', 'amp' ) }
+						pattern="^[a-zA-Z0-9_.-]+$"
+						title={ __( 'Must be a valid vendor or left blank for in-house analytics.', 'amp' ) }
+						placeholder={ __( 'Vendor or blank', 'amp' ) }
 						value={ type }
 					/>
 				</div>
@@ -135,17 +137,18 @@ function AnalyticsOptions() {
 				<p dangerouslySetInnerHTML={
 					{ __html:
 						sprintf(
-							/* translators: 1: AMP Analytics docs URL. 2: AMP for WordPress analytics docs URL. 3: AMP analytics code reference. 4: amp-analytics, 5: {. 6: }. 7: <script>, 8: googleanalytics. 9: AMP analytics vendor docs URL. 10: UA-XXXXX-Y. */
-							__( 'For Google Analytics, please see <a href="%1$s" target="_blank">Adding Analytics to your AMP pages</a>; see also the <a href="%2$s" target="_blank">Analytics wiki page</a> and the AMP project\'s <a href="%3$s" target="_blank">%4$s documentation</a>. The analytics configuration supplied below must take the form of JSON objects, which begin with a %5$s and end with a %6$s. Do not include any HTML tags like %4$s or %7$s. A common entry would have the type %8$s (see <a href="%9$s" target="_blank">available vendors</a>) and a configuration that looks like the following (where %10$s is replaced with your own site\'s account number):', 'amp' ),
-							__( 'https://developers.google.com/analytics/devguides/collection/amp-analytics/', 'amp' ),
-							__( 'https://amp-wp.org/documentation/playbooks/analytics/', 'amp' ),
-							__( 'https://www.ampproject.org/docs/reference/components/amp-analytics', 'amp' ),
+							/* translators: 1: AMP Analytics docs URL, 2: amp-analytics, 3: plugin analytics docs URL, 4: {, 5: }, 6: amp-analytics tag, 7: script tag, 8: AMP analytics vendor docs URL, 9: googleanalytics, 10: Google Analytics AMP docs URL, 11: UA-XXXXX-Y. */
+							__( 'Please see AMP project\'s <a href="%1$s" target="_blank">%2$s documentation</a> as well as the <a href="%3$s" target="_blank">plugin\'s analytics documentation</a>. Each analytics configuration supplied below must take the form of a JSON object beginning with a %4$s and ending with a %5$s. Do not include any HTML tags like %6$s or %7$s. For the type field, supply one of the <a href="%8$s" target="_blank">available analytics vendors</a> or leave it blank for in-house analytics. For Google Analytics specifically, the type should be %9$s, but for full details see documentation for <a href="%10$s" target="_blank">Adding Analytics to your AMP pages</a>; a baseline configuration looks like the following (where %11$s is replaced with your own site\'s account number):', 'amp' ),
+							__( 'https://amp.dev/documentation/components/amp-analytics/', 'amp' ),
 							'<code>amp-analytics</code>',
+							__( 'https://amp-wp.org/documentation/playbooks/analytics/', 'amp' ),
 							'<code>{</code>',
 							'<code>}</code>',
+							'<code>&lt;amp-analytics&gt;</code>',
 							'<code>&lt;script&gt;</code>',
-							'<code>googleanalytics</code>',
 							__( 'https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/configure-analytics/analytics-vendors/', 'amp' ),
+							'<code>googleanalytics</code>',
+							__( 'https://developers.google.com/analytics/devguides/collection/amp-analytics/', 'amp' ),
 							'<code>UA-XXXXX-Y</code>',
 						),
 					} }

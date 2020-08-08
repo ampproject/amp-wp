@@ -445,7 +445,8 @@ li.error-kept {
 	width: 100%;
 }
 
-.amp-analytics-input:invalid {
+.amp-analytics-input:invalid,
+.components-text-control__input:invalid {
 	border-color: var(--amp-settings-color-danger);
 }
 
