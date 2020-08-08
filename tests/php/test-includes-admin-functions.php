@@ -7,13 +7,14 @@
 
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 
 /**
  * Class Test_AMP_Admin_Includes_Functions
  */
 class Test_AMP_Admin_Includes_Functions extends WP_UnitTestCase {
 
-	private $original_theme_directories;
+	use LoadsCoreThemes;
 
 	public function setUp() {
 		parent::setUp();
@@ -21,18 +22,13 @@ class Test_AMP_Admin_Includes_Functions extends WP_UnitTestCase {
 		remove_all_actions( 'admin_menu' );
 		remove_all_actions( 'customize_register' );
 
-		global $wp_theme_directories;
-		$this->original_theme_directories = $wp_theme_directories;
-		register_theme_directory( ABSPATH . 'wp-content/themes' );
-		delete_site_transient( 'theme_roots' );
+		$this->register_core_themes();
 	}
 
 	public function tearDown() {
 		parent::tearDown();
 
-		global $wp_theme_directories;
-		$wp_theme_directories = $this->original_theme_directories;
-		delete_site_transient( 'theme_roots' );
+		$this->restore_theme_directories();
 
 		unset(
 			$GLOBALS['submenu'],

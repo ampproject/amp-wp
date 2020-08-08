@@ -9,6 +9,7 @@ use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
+use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 
 /**
  * Class Test_AMP_Helper_Functions
@@ -17,6 +18,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 	use AssertContainsCompatibility;
 	use HandleValidation;
+	use LoadsCoreThemes;
 
 	/**
 	 * The mock Site Icon value to use in a filter.
@@ -32,8 +34,6 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	private $server_var_backup;
 
-	private $original_theme_directories;
-
 	/**
 	 * Set up.
 	 */
@@ -42,10 +42,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->server_var_backup = $_SERVER;
 		remove_theme_support( 'amp' );
 
-		global $wp_theme_directories;
-		$this->original_theme_directories = $wp_theme_directories;
-		register_theme_directory( ABSPATH . 'wp-content/themes' );
-		delete_site_transient( 'theme_roots' );
+		$this->register_core_themes();
 	}
 
 	/**
@@ -67,9 +64,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$wp_rewrite->init();
 		$wp_rewrite->flush_rules();
 
-		global $wp_theme_directories;
-		$wp_theme_directories = $this->original_theme_directories;
-		delete_site_transient( 'theme_roots' );
+		$this->restore_theme_directories();
 
 		if ( class_exists( 'WP_Block_Type_Registry' ) ) {
 			foreach ( WP_Block_Type_Registry::get_instance()->get_all_registered() as $block ) {
