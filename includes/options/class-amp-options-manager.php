@@ -42,6 +42,7 @@ class AMP_Options_Manager {
 	public static function init() {
 		add_action( 'admin_notices', [ __CLASS__, 'render_php_css_parser_conflict_notice' ] );
 		add_action( 'admin_notices', [ __CLASS__, 'insecure_connection_notice' ] );
+		add_action( 'admin_notices', [ __CLASS__, 'reader_theme_fallback_notice' ] );
 	}
 
 	/**
@@ -441,7 +442,8 @@ class AMP_Options_Manager {
 	 * @return void
 	 */
 	public static function render_php_css_parser_conflict_notice() {
-		if ( 'toplevel_page_' . self::OPTION_NAME !== get_current_screen()->id ) {
+		$current_screen = get_current_screen();
+		if ( ! ( $current_screen instanceof WP_Screen ) || 'toplevel_page_' . self::OPTION_NAME !== $current_screen->id ) {
 			return;
 		}
 
@@ -484,6 +486,8 @@ class AMP_Options_Manager {
 	 * @return void
 	 */
 	public static function insecure_connection_notice() {
+		$current_screen = get_current_screen();
+
 		// is_ssl() only tells us whether the admin backend uses HTTPS here, so we add a few more sanity checks.
 		$uses_ssl = (
 			is_ssl()
@@ -493,7 +497,7 @@ class AMP_Options_Manager {
 			( strpos( get_bloginfo( 'url' ), 'https' ) === 0 )
 		);
 
-		if ( ! $uses_ssl && 'toplevel_page_' . self::OPTION_NAME === get_current_screen()->id ) {
+		if ( ! $uses_ssl && $current_screen instanceof WP_Screen && 'toplevel_page_' . self::OPTION_NAME === $current_screen->id ) {
 			printf(
 				'<div class="notice notice-warning"><p>%s</p></div>',
 				wp_kses(
@@ -508,6 +512,46 @@ class AMP_Options_Manager {
 					]
 				)
 			);
+		}
+	}
+
+	/**
+	 * Outputs an admin notice if the AMP Legacy Reader theme is used as a fallback.
+	 */
+	public static function reader_theme_fallback_notice() {
+		$current_screen = get_current_screen();
+
+		if ( ! ( $current_screen instanceof WP_Screen ) || ! in_array( $current_screen->id, [ 'themes', 'toplevel_page_' . self::OPTION_NAME ], true ) ) {
+			return;
+		}
+
+		$reader_themes = new ReaderThemes();
+
+		if ( $reader_themes->using_fallback_theme() && current_user_can( 'manage_options' ) ) {
+			$selected_theme = self::get_option( Option::READER_THEME );
+			$error_message  = sprintf(
+				/* translators: 1: slug of the Reader theme, 2: the URL for the reader theme selection UI */
+				__( 'The AMP Reader theme %1$s cannot be found. Your site is currently falling back to using the Legacy templates for AMP pages. Please <a href="%2$s">re-select</a> the desired Reader theme.', 'amp' ),
+				"<code>{$selected_theme}</code>",
+				esc_url( add_query_arg( 'page', self::OPTION_NAME, admin_url( 'admin.php' ) ) . '#reader-themes-drawer' )
+			);
+			?>
+			<div class="notice notice-warning">
+				<p>
+					<?php
+					echo wp_kses(
+						$error_message,
+						[
+							'code' => [],
+							'a'    => [
+								'href' => true,
+							],
+						]
+					);
+					?>
+				</p>
+			</div>
+			<?php
 		}
 	}
 }

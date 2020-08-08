@@ -125,7 +125,7 @@ body {
 	position: relative;
 
 	@media screen and (min-width: 783px) {
-		padding: 15px 21px 8px 0;
+		padding: 15px 10px 8px 0;
 	}
 }
 

@@ -9,6 +9,7 @@ import { __ } from '@wordpress/i18n';
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { USING_FALLBACK_READER_THEME, LEGACY_THEME_SLUG } from 'amp-settings';
 
 /**
  * Internal dependencies
@@ -80,16 +81,20 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	const [ downloadingThemeError, setDownloadingThemeError ] = useState( null );
 
 	/**
-	 * If the currently selected theme is unavailable and not installable, or the current theme is the active theme,
-	 * unset the reader theme option.
+	 * If the currently selected theme is not installable, is the active theme, or unavailable for selection, set the
+	 * Reader theme to AMP Legacy.
 	 */
 	useEffect( () => {
 		if ( themeWasOverridden ) { // Only do this once.
 			return;
 		}
 
-		if ( selectedTheme.availability === 'non-installable' || originalSelectedTheme.availability === 'active' ) {
-			updateOptions( { reader_theme: 'legacy' } );
+		if (
+			selectedTheme.availability === 'non-installable' ||
+			originalSelectedTheme.availability === 'active' ||
+			USING_FALLBACK_READER_THEME
+		) {
+			updateOptions( { reader_theme: LEGACY_THEME_SLUG } );
 			setThemeWasOverridden( true );
 		}
 	}, [ originalSelectedTheme.availability, selectedTheme.availability, themeWasOverridden, updateOptions ] );

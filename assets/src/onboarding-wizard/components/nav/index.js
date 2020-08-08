@@ -20,6 +20,7 @@ import './style.css';
 import { Options } from '../../../components/options-context-provider';
 import { User } from '../user-context-provider';
 import { READER } from '../../../common/constants';
+import { ReaderThemes } from '../../../components/reader-themes-context-provider';
 
 /**
  * Navigation component.
@@ -36,6 +37,7 @@ export function Nav( { closeLink, finishLink } ) {
 		originalOptions: { preview_permalink: previewPermalink, reader_theme: readerTheme },
 	} = useContext( Options );
 	const { savingDeveloperToolsOption } = useContext( User );
+	const { downloadingTheme } = useContext( ReaderThemes );
 
 	let nextText;
 	let nextLink;
@@ -97,7 +99,7 @@ export function Nav( { closeLink, finishLink } ) {
 					}
 
 					<Button
-						disabled={ ! canGoForward || savingOptions || savingDeveloperToolsOption }
+						disabled={ ! canGoForward || savingOptions || savingDeveloperToolsOption || downloadingTheme }
 						href={ nextLink }
 						id="next-button"
 						isPrimary

@@ -364,11 +364,16 @@ function amp_is_canonical() {
  * @return bool
  */
 function amp_is_legacy() {
-	return (
-		AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
-		&&
-		ReaderThemes::DEFAULT_READER_THEME === AMP_Options_Manager::get_option( Option::READER_THEME )
-	);
+	if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
+		return false;
+	}
+
+	$reader_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
+	if ( ReaderThemes::DEFAULT_READER_THEME === $reader_theme ) {
+		return true;
+	}
+
+	return ! wp_get_theme( $reader_theme )->exists();
 }
 
 /**
