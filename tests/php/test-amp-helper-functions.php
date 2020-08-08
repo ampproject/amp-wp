@@ -1755,8 +1755,6 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 		$this->go_to( amp_get_permalink( $post_id ) );
 
-		delete_site_transient( 'theme_roots' );
-
 		// Confirm legacy Reader mode works.
 		foreach ( [ AMP_Theme_Support::READER_MODE_SLUG, 'foobar' ] as $reader_theme ) {
 			AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
