@@ -1,5 +1,6 @@
 
 @media screen and (max-width: 400px) {
+
 	.wrap {
 		margin-left: 0;
 		margin-right: 10px;
@@ -7,6 +8,7 @@
 }
 
 @media screen and (min-width: 401px) and (max-width: 782px) {
+
 	.wrap {
 		margin-left: 10px;
 		margin-right: 20px;
