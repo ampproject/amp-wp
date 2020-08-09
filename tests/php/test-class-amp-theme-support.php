@@ -1544,9 +1544,12 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_scripts_get_moved_to_head() {
 		ob_start();
+		remove_all_actions( 'wp_head' );
 		?>
 		<html>
-			<head></head>
+			<head>
+				<?php wp_head(); ?>
+			</head>
 			<body>
 				<amp-list width="auto" height="100" layout="fixed-height" src="/static/inline-examples/data/amp-list-urls.json">
 					<template type="amp-mustache">
@@ -1559,8 +1562,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			</body>
 		</html>
 		<?php
-		$html = ob_get_clean();
-		$html = AMP_Theme_Support::prepare_response( $html );
+		$original_html = ob_get_clean();
+		$html          = AMP_Theme_Support::prepare_response( $original_html );
 
 		$dom = Document::fromHtml( $html );
 
@@ -1615,6 +1618,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			<head></head>
 			<body>
 				<?php wp_print_scripts( array_merge( $required_usage_grandfathered, $required_usage_error, $required_usage_none ) ); ?>
+				<?php wp_footer(); ?>
 			</body>
 		</html>
 		<?php
@@ -1666,6 +1670,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			</head>
 			<body>
 				<?php wp_print_scripts( [ 'amp-video', 'amp-runtime' ] ); ?>
+				<?php wp_footer(); ?>
 			</body>
 		</html>
 		<?php
@@ -1781,6 +1786,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertSame( 3, ob_get_level() );
 
 		echo '<html><head></head><body><img src="test.png"><script data-test>document.write(\'Illegal\');</script>';
+		wp_footer();
 
 		// Additional nested output bufferings which aren't getting closed.
 		ob_start();
@@ -2134,6 +2140,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
 
+		// Make sure that prepare_response saw that a template hook fired.
+		get_echo( 'wp_head' );
+
 		// JSON.
 		$input = '{"success":true}';
 		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
@@ -2161,6 +2170,35 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$output = AMP_Theme_Support::prepare_response( $input );
 		$this->assertStringContains( '<html amp', $output );
 		$this->assertStringContains( '<meta charset="utf-8">', $output );
+	}
+
+	/**
+	 * Test prepare_response for responses that do not trigger standard template actions.
+	 *
+	 * @covers AMP_Theme_Support::prepare_response()
+	 */
+	public function test_prepare_response_doing_template_actions() {
+		global $wp_actions;
+		wp();
+		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
+		AMP_Theme_Support::init();
+		AMP_Theme_Support::finish_init();
+
+		// HTML bit no template actions triggered.
+		$input = '<html><head></head></html>';
+		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
+
+		$get_do_action = static function ( $action ) {
+			return get_echo( 'do_action', [ $action ] );
+		};
+		foreach ( [ 'wp_head', 'wp_footer', 'amp_post_template_head', 'amp_post_template_footer' ] as $action ) {
+			$wp_actions = [];
+			wp_enqueue_scripts();
+			$input  = '<html><head></head>' . $get_do_action( $action ) . '</html>';
+			$output = AMP_Theme_Support::prepare_response( $input );
+			$this->assertStringContains( '<html amp', $output );
+			$this->assertStringContains( '<meta charset="utf-8">', $output );
+		}
 	}
 
 	/**
@@ -2193,6 +2231,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		?>
 		<html>
 			<head>
+				<?php wp_head(); ?>
 			</head>
 			<body>
 				<script>bad</script>

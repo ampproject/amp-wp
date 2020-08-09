@@ -2620,6 +2620,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			</head>
 			<body>
 				<span class="dashicons dashicons-admin-customizer"></span>
+				<?php wp_footer(); ?>
 			</body>
 		</html>
 		<?php
