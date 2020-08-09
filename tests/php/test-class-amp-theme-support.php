@@ -8,11 +8,11 @@
 
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\ConfigurationArgument;
-use AmpProject\AmpWP\MobileRedirection;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\Dom\Document;
 use org\bovigo\vfs;
 
@@ -25,6 +25,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 	use AssertContainsCompatibility;
 	use PrivateAccess;
+	use LoadsCoreThemes;
 
 	/**
 	 * The name of the tested class.
@@ -51,6 +52,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		delete_option( AMP_Options_Manager::OPTION_NAME ); // Make sure default reader mode option does not override theme support being added.
 		add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
 		remove_theme_support( 'amp' );
+		$this->register_core_themes();
 	}
 
 	/**
@@ -91,6 +93,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		remove_all_filters( 'template' );
 		unregister_post_type( 'book' );
 		unregister_post_type( 'announcement' );
+		$this->restore_theme_directories();
 	}
 
 	/**
@@ -263,6 +266,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		add_theme_support( 'amp' );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::READER_THEME, ReaderThemes::DEFAULT_READER_THEME );
+		$this->assertTrue( amp_is_legacy() );
 		$this->go_to( amp_get_permalink( $post_id ) );
 		AMP_Theme_Support::finish_init();
 		$this->assertFalse( current_theme_supports( 'amp' ) );
@@ -271,6 +275,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		remove_theme_support( 'amp' );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentyseventeen' );
+		$this->assertFalse( amp_is_legacy() );
 		$this->go_to( amp_get_permalink( $post_id ) );
 		AMP_Theme_Support::finish_init();
 		$this->assertTrue( current_theme_supports( 'amp' ) );
