@@ -94,9 +94,11 @@ function AnalyticsEntry( { entryIndex, onChange, onDelete, type = '', config = '
 		return textAreaRef.current === document.activeElement;
 	};
 
+	const defaultValue = vendorConfigs[ type ]?.sample || '{}';
+
 	/** @type {string} value */
 	const value = ( '' === config.trim() || map( Object.values( vendorConfigs ), ( c ) => c.sample ).includes( config ) ) && ! isTextareaFocused()
-		? ( vendorConfigs[ type ]?.sample || '{}' )
+		? defaultValue
 		: config;
 
 	return (
@@ -154,7 +156,7 @@ function AnalyticsEntry( { entryIndex, onChange, onDelete, type = '', config = '
 			<Button
 				isLink
 				onClick={ () => {
-					if ( '{}' === config || global.confirm( __( 'Are you sure you want to delete this entry?', 'amp' ) ) ) {
+					if ( defaultValue === config || global.confirm( __( 'Are you sure you want to delete this entry?', 'amp' ) ) ) {
 						onDelete();
 					}
 				} }
