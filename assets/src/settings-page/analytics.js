@@ -265,10 +265,10 @@ export function Analytics() {
 			className="amp-analytics"
 			heading={ (
 				<h3>
-					{ __( 'Analytics Options', 'amp' ) }
+					{ __( 'Analytics', 'amp' ) }
 				</h3>
 			) }
-			hiddenTitle={ __( 'Analytics Options', 'amp' ) }
+			hiddenTitle={ __( 'Analytics', 'amp' ) }
 			id="analytics-options-drawer"
 			initialOpen={ false }
 		>
