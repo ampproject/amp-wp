@@ -12,14 +12,9 @@
 
 .amp .components-button:not(.components-panel__body-toggle) svg {
 	fill: currentColor;
-	display: none;
-	margin-left: 0.5rem;
+	margin: 0 0.5rem;
 	height: 18px;
 	width: 18px;
-
-	@media screen and (min-width: 783px) {
-		display: block;
-	}
 }
 
 .amp .components-panel__body-title button {

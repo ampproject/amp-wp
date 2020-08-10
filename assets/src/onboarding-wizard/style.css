@@ -111,6 +111,10 @@ body {
 	}
 }
 
+.amp-stepper-container__header > .is-link {
+	float: right;
+}
+
 .amp-stepper ul {
 	display: flex;
 	justify-content: space-between;
