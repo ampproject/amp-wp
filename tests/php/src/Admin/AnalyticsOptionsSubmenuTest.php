@@ -71,6 +71,8 @@ class AnalyticsOptionsSubmenuTest extends WP_UnitTestCase {
 	public function test_link_is_added() {
 		global $submenu;
 
+		$original_submenu = $submenu;
+
 		$test_user = self::factory()->user->create(
 			[
 				'role' => 'administrator',
@@ -88,5 +90,7 @@ class AnalyticsOptionsSubmenuTest extends WP_UnitTestCase {
 
 		$dev_tools_user_access->set_user_enabled( $test_user, true );
 		$this->assertEquals( 'AMP Analytics Options', $submenu[ $this->options_menu_instance->get_menu_slug() ][1][0] );
+
+		$submenu = $original_submenu;
 	}
 }
