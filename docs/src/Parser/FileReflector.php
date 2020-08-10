@@ -78,6 +78,8 @@ final class FileReflector extends PhpDocumentorFileReflector {
 	public function enterNode( Node $node ) {
 		parent::enterNode( $node );
 
+		var_dump( $node->getType() );
+
 		switch ( $node->getType() ) {
 			// Add classes, functions, and methods to the current location stack
 			case 'Stmt_Class':
@@ -174,7 +176,7 @@ final class FileReflector extends PhpDocumentorFileReflector {
 								 * That allows us to later get the correct class name for $this, self, parent.
 								 */
 								foreach ( $this->method_uses_queue[ $method->getName() ]['methods'] as $method_call ) {
-									/** @var Method_Call_Reflector $method_call */
+									/** @var MethodCallReflector $method_call */
 									$method_call->set_class( $class );
 								}
 							}
@@ -184,7 +186,7 @@ final class FileReflector extends PhpDocumentorFileReflector {
 					}
 				}
 
-				$this->method_uses_queue = array();
+				$this->method_uses_queue = [];
 				array_pop( $this->location );
 				break;
 
@@ -245,7 +247,7 @@ final class FileReflector extends PhpDocumentorFileReflector {
 	 */
 	protected function isNodeDocumentable( Node $node ) {
 		return parent::isNodeDocumentable( $node )
-		       || ( $node instanceof Node_Expr_FuncCall
+		       || ( $node instanceof Node\Expr\FuncCall
 		            && $this->isFilter( $node ) );
 	}
 }
