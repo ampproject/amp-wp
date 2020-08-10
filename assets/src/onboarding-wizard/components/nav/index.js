@@ -21,6 +21,33 @@ import { Options } from '../../../components/options-context-provider';
 import { User } from '../user-context-provider';
 import { READER } from '../../../common/constants';
 import { ReaderThemes } from '../../../components/reader-themes-context-provider';
+import { useWindowWidth } from '../../../utils/use-window-width';
+
+/**
+ * Renders a link to leave the onboarding wizard.
+ *
+ * @param {Object} props Component props.
+ * @param {string} props.closeLink The link URL.
+ */
+export function CloseLink( { closeLink } ) {
+	return (
+		<Button isLink href={ closeLink }>
+			<svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<mask id="close-icon" mask-type="alpha" maskUnits="userSpaceOnUse" x="3" y="3" width="19" height="19">
+					<path fillRule="evenodd" clipRule="evenodd" d="M19.895 3.71875H5.89502C4.79502 3.71875 3.89502 4.61875 3.89502 5.71875V19.7188C3.89502 20.8188 4.79502 21.7188 5.89502 21.7188H19.895C21.005 21.7188 21.895 20.8188 21.895 19.7188V15.7188H19.895V19.7188H5.89502V5.71875H19.895V9.71875H21.895V5.71875C21.895 4.61875 21.005 3.71875 19.895 3.71875ZM13.395 17.7188L14.805 16.3088L12.225 13.7188H21.895V11.7188H12.225L14.805 9.12875L13.395 7.71875L8.39502 12.7188L13.395 17.7188Z" fill="white" />
+				</mask>
+				<g mask="url(#close-icon)">
+					<rect width="24" height="24" transform="matrix(-1 0 0 1 24.895 0.71875)" fill="#2459E7" />
+				</g>
+			</svg>
+
+			{ __( 'Close', 'amp' ) }
+		</Button>
+	);
+}
+CloseLink.propTypes = {
+	closeLink: PropTypes.string.isRequired,
+};
 
 /**
  * Navigation component.
@@ -30,6 +57,7 @@ import { ReaderThemes } from '../../../components/reader-themes-context-provider
  * @param {string} props.finishLink Link to exit the application.
  */
 export function Nav( { closeLink, finishLink } ) {
+	const { isMobile } = useWindowWidth();
 	const { activePageIndex, canGoForward, isLastPage, moveBack, moveForward } = useContext( Navigation );
 	const {
 		savingOptions,
@@ -62,19 +90,8 @@ export function Nav( { closeLink, finishLink } ) {
 		<div className="onboarding-wizard-nav">
 			<div className="onboarding-wizard-nav__inner">
 				<div className="onboarding-wizard-nav__close">
-					{ ( ! isLastPage || READER === themeSupport ) && (
-						<Button isLink href={ closeLink }>
-							<svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-								<mask id="close-icon" mask-type="alpha" maskUnits="userSpaceOnUse" x="3" y="3" width="19" height="19">
-									<path fillRule="evenodd" clipRule="evenodd" d="M19.895 3.71875H5.89502C4.79502 3.71875 3.89502 4.61875 3.89502 5.71875V19.7188C3.89502 20.8188 4.79502 21.7188 5.89502 21.7188H19.895C21.005 21.7188 21.895 20.8188 21.895 19.7188V15.7188H19.895V19.7188H5.89502V5.71875H19.895V9.71875H21.895V5.71875C21.895 4.61875 21.005 3.71875 19.895 3.71875ZM13.395 17.7188L14.805 16.3088L12.225 13.7188H21.895V11.7188H12.225L14.805 9.12875L13.395 7.71875L8.39502 12.7188L13.395 17.7188Z" fill="white" />
-								</mask>
-								<g mask="url(#close-icon)">
-									<rect width="24" height="24" transform="matrix(-1 0 0 1 24.895 0.71875)" fill="#2459E7" />
-								</g>
-							</svg>
-
-							{ __( 'Close', 'amp' ) }
-						</Button>
+					{ ! isMobile && ( ! isLastPage || READER === themeSupport ) && (
+						<CloseLink closeLink={ closeLink } />
 					) }
 				</div>
 				<div className="onboarding-wizard-nav__prev-next">
