@@ -88,11 +88,15 @@ export function ThemeCard( { description, ElementName = 'li', homepage, screensh
 
 				</p>
 			</label>
-			<p className="theme-card__theme-link">
-				<a href={ homepage } target="_blank" rel="noreferrer noopener">
-					{ __( 'Learn more', 'amp' ) }
-				</a>
-			</p>
+			{
+				homepage && (
+					<p className="theme-card__theme-link">
+						<a href={ homepage } target="_blank" rel="noreferrer noopener">
+							{ __( 'Learn more', 'amp' ) }
+						</a>
+					</p>
+				)
+			}
 		</Selectable>
 	);
 }
@@ -100,7 +104,7 @@ export function ThemeCard( { description, ElementName = 'li', homepage, screensh
 ThemeCard.propTypes = {
 	description: PropTypes.string.isRequired,
 	ElementName: PropTypes.string,
-	homepage: PropTypes.string.isRequired,
+	homepage: PropTypes.string,
 	screenshotUrl: PropTypes.string,
 	slug: PropTypes.string.isRequired,
 	name: PropTypes.string.isRequired,
