@@ -22,17 +22,19 @@ import { AMPNotice, NOTICE_SIZE_SMALL } from '../components/amp-notice';
 
 const GOOGLE_ANALYTICS_VENDOR = 'googleanalytics';
 
+const GOOGLE_ANALYTICS_NOTICE = sprintf(
+	/* translators: 1: URL to Site Kit plugin directory page, 2: Google Analytics dev guide URL */
+	__( 'For Google Analytics please consider using <a href="%1$s" target="_blank" rel="noreferrer">Site Kit by Google</a>. This plugin configures analytics for both non-AMP and AMP pages alike, avoiding the need to manually provide a separate AMP configuration here. Nevertheless, for documentation on manual configuration see <a href="%2$s" target="_blank" rel="noreferrer">Adding Analytics to your AMP pages</a>.', 'amp' ),
+	__( 'https://wordpress.org/plugins/google-site-kit/', 'amp' ),
+	__( 'https://developers.google.com/analytics/devguides/collection/amp-analytics/', 'amp' ),
+);
+
 const vendorConfigs = {
 	'': {
 		sample: '{}',
 	},
 	[ GOOGLE_ANALYTICS_VENDOR ]: {
-		notice: sprintf(
-			/* translators: 1: URL to Site Kit plugin directory page, 2: Google Analytics dev guide URL */
-			__( 'For Google Analytics please consider using <a href="%1$s" target="_blank" rel="noreferrer">Site Kit by Google</a>. This plugin configures analytics for both non-AMP and AMP pages alike, avoiding the need to manually provide a separate AMP configuration here. Nevertheless, for documentation on manual configuration see <a href="%2$s" target="_blank" rel="noreferrer">Adding Analytics to your AMP pages</a>.', 'amp' ),
-			__( 'https://wordpress.org/plugins/google-site-kit/', 'amp' ),
-			__( 'https://developers.google.com/analytics/devguides/collection/amp-analytics/', 'amp' ),
-		),
+		notice: GOOGLE_ANALYTICS_NOTICE,
 		sample: JSON.stringify(
 			{
 				vars: {
@@ -42,6 +44,21 @@ const vendorConfigs = {
 					trackPageview: {
 						on: 'visible',
 						request: 'pageview',
+					},
+				},
+			},
+			null,
+			'\t',
+		),
+	},
+	gtag: {
+		notice: GOOGLE_ANALYTICS_NOTICE,
+		sample: JSON.stringify(
+			{
+				vars: {
+					gtag_id: '<GA_MEASUREMENT_ID>',
+					config: {
+						'<GA_MEASUREMENT_ID>': { groups: 'default' },
 					},
 				},
 			},
