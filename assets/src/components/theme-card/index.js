@@ -83,10 +83,14 @@ export function ThemeCard( { description, ElementName = 'li', homepage, screensh
 
 				</div>
 
-				<p className="theme-card__description">
-					{ decodeEntities( description ) }
+				{
+					description && (
+						<p className="theme-card__description">
+							{ decodeEntities( description ) }
 
-				</p>
+						</p>
+					)
+				}
 			</label>
 			{
 				homepage && (
@@ -102,7 +106,7 @@ export function ThemeCard( { description, ElementName = 'li', homepage, screensh
 }
 
 ThemeCard.propTypes = {
-	description: PropTypes.string.isRequired,
+	description: PropTypes.string,
 	ElementName: PropTypes.string,
 	homepage: PropTypes.string,
 	screenshotUrl: PropTypes.string,
