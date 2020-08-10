@@ -401,11 +401,6 @@ li.error-kept {
 	margin-top: 1em;
 }
 
-#analytics-options-drawer details > pre {
-	tab-size: 4;
-	overflow-x: auto;
-}
-
 #analytics-options-drawer .components-button:not(.components-panel__body-toggle) svg {
 	display: block;
 }
@@ -437,6 +432,10 @@ li.error-kept {
 
 .amp-analytics-entry__text-inputs .components-base-control__label {
 	margin-bottom: 0;
+}
+
+.amp-analytics-entry .amp-notice {
+	margin-bottom: 0.75rem;
 }
 
 .amp-analytics-input {

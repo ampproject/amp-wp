@@ -137,8 +137,8 @@ function Root() {
 				</h2>
 				<MobileRedirection />
 				<SupportedTemplates />
-				<Analytics />
 				<PluginSuppression />
+				<Analytics />
 				<SettingsFooter />
 			</form>
 			<UnsavedChangesWarning excludeUserContext={ true } />
