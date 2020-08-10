@@ -982,11 +982,12 @@ class AMP_Theme_Support {
 		add_action( 'wp_footer', 'amp_print_analytics' );
 
 		/*
-		 * Start output buffering at very low priority for sake of plugins and themes that use template_redirect
-		 * instead of template_include.
+		 * Start output buffering at very end of template_redirect to avoid processing custom templates which are output
+		 * earlier during this action followed by exit. In this way, the plugin will only do post-processing for normal
+		 * WordPress templates that are loaded via the template-loader after being passed through the template_include
+		 * filter.
 		 */
-		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
-		add_action( 'template_redirect', [ __CLASS__, 'start_output_buffering' ], $priority );
+		add_action( 'template_redirect', [ __CLASS__, 'start_output_buffering' ], PHP_INT_MAX );
 
 		// Commenting hooks.
 		add_filter( 'comment_form_defaults', [ __CLASS__, 'filter_comment_form_defaults' ], PHP_INT_MAX );
