@@ -111,8 +111,9 @@ body {
 	}
 }
 
-.amp-stepper-container__header > .is-link {
+.amp .amp-stepper-container__header > .is-link {
 	float: right;
+	padding: 8px;
 }
 
 .amp-stepper ul {
