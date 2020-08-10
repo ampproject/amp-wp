@@ -3,7 +3,6 @@
  */
 import PropTypes from 'prop-types';
 import { v4 as uuidv4 } from 'uuid';
-import { map } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -114,7 +113,7 @@ function AnalyticsEntry( { entryIndex, onChange, onDelete, type = '', config = '
 	const defaultValue = vendorConfigs[ type ]?.sample || '{}';
 
 	/** @type {string} value */
-	const value = ( '' === config.trim() || map( Object.values( vendorConfigs ), ( c ) => c.sample ).includes( config ) ) && ! isTextareaFocused()
+	const value = ( '' === config.trim() || Object.values( vendorConfigs ).find( ( { sample } ) => sample === config ) ) && ! isTextareaFocused()
 		? defaultValue
 		: config;
 
