@@ -85,7 +85,7 @@ class OptionsMenuTest extends WP_UnitTestCase {
 
 		$this->assertArrayHasKey( 'amp-options', $submenu );
 		$this->assertCount( 2, $submenu['amp-options'] );
-		$this->assertEquals( 'amp-options', $submenu['amp-options'][0][2] );
+		$this->assertEquals( 'edit-tags.php?taxonomy=amp_validation_error&amp;post_type=amp_validated_url', $submenu['amp-options'][0][2] );
 	}
 
 	/**
