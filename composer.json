@@ -25,6 +25,7 @@
     "mikey179/vfsstream": "1.6.8",
     "php-stubs/wordpress-stubs": "^5.3.2",
     "phpcompatibility/phpcompatibility-wp": "2.1.0",
+    "phpdocumentor/reflection": "~3.0",
     "roave/security-advisories": "dev-master",
     "sirbrillig/phpcs-variable-analysis": "2.8.3",
     "wp-coding-standards/wpcs": "2.3.0",
@@ -71,6 +72,7 @@
   },
   "autoload-dev": {
     "psr-4": {
+      "AmpProject\\AmpWP\\Documentation\\Parser\\": "docs/parser/src/",
       "AmpProject\\AmpWP\\Tests\\": "tests/php/src/"
     },
     "classmap": [
