@@ -104,7 +104,7 @@ export function TemplateModes() {
 	);
 
 	return (
-		<section className="template-modes">
+		<section className="template-modes" id="template-modes">
 			<h2>
 				{ __( 'Template Mode', 'amp' ) }
 			</h2>

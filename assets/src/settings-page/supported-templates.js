@@ -15,7 +15,6 @@ import { CheckboxControl } from '@wordpress/components';
  */
 import { SupportedTemplatesToggle } from '../components/supported-templates-toggle';
 import { Options } from '../components/options-context-provider';
-import { AMPDrawer } from '../components/amp-drawer';
 
 /**
  * Determine whether the supportable templates include the static front page.
@@ -276,24 +275,11 @@ export function SupportedTemplatesFieldset() {
  */
 export function SupportedTemplates() {
 	return (
-		<AMPDrawer
-
-			heading={ (
-				<h3>
-					{ __( 'Supported Templates', 'amp' ) }
-				</h3>
-			) }
-			hiddenTitle={ __( 'Supported templates', 'amp' ) }
-			id="supported-templates-drawer"
-			initialOpen={ false }
-		>
-
-			<div className="supported-templates">
-				<div className="supported-templates__fields">
-					<SupportedPostTypesFieldset />
-					<SupportedTemplatesFieldset />
-				</div>
+		<div className="supported-templates">
+			<div className="supported-templates__fields">
+				<SupportedPostTypesFieldset />
+				<SupportedTemplatesFieldset />
 			</div>
-		</AMPDrawer>
+		</div>
 	);
 }

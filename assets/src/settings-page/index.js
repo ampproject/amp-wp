@@ -30,6 +30,7 @@ import { Loading } from '../components/loading';
 import { UnsavedChangesWarning } from '../components/unsaved-changes-warning';
 import { AMPNotice, NOTICE_TYPE_ERROR, NOTICE_TYPE_SUCCESS } from '../components/amp-notice';
 import { ErrorContextProvider, ErrorContext } from '../components/error-context-provider';
+import { AMPDrawer } from '../components/amp-drawer';
 import { Welcome } from './welcome';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
@@ -94,8 +95,11 @@ ErrorNotice.propTypes = {
 
 /**
  * Settings page application root.
+ *
+ * @param {Object} props Component props.
+ * @param {string} props.section The initially focused section.
  */
-function Root() {
+function Root( { section } ) {
 	const { didSaveOptions, fetchingOptions, saveOptions } = useContext( Options );
 	const { error } = useContext( ErrorContext );
 	const { downloadingTheme } = useContext( ReaderThemes );
@@ -120,6 +124,25 @@ function Root() {
 		return () => undefined;
 	}, [ didSaveOptions, downloadingTheme ] );
 
+	/**
+	 * Scrolls to the initially focused section after loading.
+	 */
+	useEffect( () => {
+		if ( fetchingOptions ) {
+			return;
+		}
+
+		if ( ! section ) {
+			return;
+		}
+
+		const focusedSection = document.getElementById( section );
+
+		if ( focusedSection ) {
+			focusedSection.scrollIntoView();
+		}
+	}, [ fetchingOptions, section ] );
+
 	if ( false !== fetchingOptions ) {
 		return <Loading />;
 	}
@@ -132,13 +155,48 @@ function Root() {
 				saveOptions();
 			} }>
 				<TemplateModes />
-				<h2>
+				<h2 id="advanced-settings">
 					{ __( 'Advanced Settings', 'amp' ) }
 				</h2>
 				<MobileRedirection />
-				<SupportedTemplates />
-				<PluginSuppression />
-				<Analytics />
+				<AMPDrawer
+
+					heading={ (
+						<h3>
+							{ __( 'Supported Templates', 'amp' ) }
+						</h3>
+					) }
+					hiddenTitle={ __( 'Supported templates', 'amp' ) }
+					id="supported-templates"
+					initialOpen={ 'supported-templates' === section }
+				>
+					<SupportedTemplates />
+				</AMPDrawer>
+				<AMPDrawer
+					heading={ (
+						<h3>
+							{ __( 'Plugin Suppression', 'amp' ) }
+						</h3>
+					) }
+					hiddenTitle={ __( 'Plugin suppression', 'amp' ) }
+					id="plugin-suppression"
+					initialOpen={ 'plugin-suppression' === section }
+				>
+					<PluginSuppression />
+				</AMPDrawer>
+				<AMPDrawer
+					className="amp-analytics"
+					heading={ (
+						<h3>
+							{ __( 'Analytics', 'amp' ) }
+						</h3>
+					) }
+					hiddenTitle={ __( 'Analytics', 'amp' ) }
+					id="analytics-options"
+					initialOpen={ 'analytics-options' === section }
+				>
+					<Analytics />
+				</AMPDrawer>
 				<SettingsFooter />
 			</form>
 			<UnsavedChangesWarning excludeUserContext={ true } />
@@ -153,6 +211,9 @@ function Root() {
 		</>
 	);
 }
+Root.propTypes = {
+	section: PropTypes.string,
+};
 
 domReady( () => {
 	const root = document.getElementById( 'amp-settings-root' );
@@ -161,7 +222,7 @@ domReady( () => {
 		render( (
 			<ErrorContextProvider>
 				<Providers>
-					<Root optionsRestPath={ OPTIONS_REST_PATH } />
+					<Root section={ global.location.hash.replace( /^#/, '' ) } />
 				</Providers>
 			</ErrorContextProvider>
 		), root );

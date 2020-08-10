@@ -9,7 +9,7 @@ describe( 'AMP analytics options', () => {
 	} );
 
 	it( 'allows adding and deleting entries', async () => {
-		await expect( page ).toClick( '#analytics-options-drawer .components-panel__body-toggle' );
+		await expect( page ).toClick( '#analytics-options .components-panel__body-toggle' );
 		await expect( page ).not.toMatchElement( '.amp-analytics-entry' );
 
 		// Add entry.

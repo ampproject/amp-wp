@@ -24,7 +24,7 @@ export function MobileRedirection() {
 	}
 
 	return (
-		<section className="mobile-redirection">
+		<section className="mobile-redirection" id="mobile-redirection">
 			<RedirectToggle direction="left" />
 		</section>
 	);

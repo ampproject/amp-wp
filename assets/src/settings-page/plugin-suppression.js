@@ -19,7 +19,6 @@ import { SelectControl } from '@wordpress/components';
 import { Options } from '../components/options-context-provider';
 import { ConditionalDetails } from '../components/conditional-details';
 import { SiteSettings } from '../components/site-settings-provider';
-import { AMPDrawer } from '../components/amp-drawer';
 
 /**
  * Renders the formatted date for when a plugin was suppressed.
@@ -324,16 +323,7 @@ export function PluginSuppression() {
 	}
 
 	return (
-		<AMPDrawer
-			heading={ (
-				<h3>
-					{ __( 'Plugin Suppression', 'amp' ) }
-				</h3>
-			) }
-			hiddenTitle={ __( 'Plugin suppression', 'amp' ) }
-			id="plugin-suppression-drawer"
-			initialOpen={ false }
-		>
+		<>
 			<p>
 				{ __( 'When a plugin adds markup that is not allowed in AMP you may let the AMP plugin remove it, or you may suppress the plugin from running on AMP pages. The following list includes all active plugins on your site, with any of those detected to be generating invalid AMP markup appearing first.', 'amp' ) }
 			</p>
@@ -361,6 +351,6 @@ export function PluginSuppression() {
 					) ) }
 				</tbody>
 			</table>
-		</AMPDrawer>
+		</>
 	);
 }

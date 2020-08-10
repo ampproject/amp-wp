@@ -378,7 +378,7 @@ li.error-kept {
 	}
 }
 
-#plugin-suppression-drawer .amp-drawer__panel-body-inner,
+#plugin-suppression .amp-drawer__panel-body-inner,
 .amp-analytics .amp-drawer__panel-body-inner {
 	padding: 1.5rem 1.5rem 3rem;
 
@@ -387,21 +387,21 @@ li.error-kept {
 	}
 }
 
-#plugin-suppression-drawer .amp-drawer__panel-body-inner > p,
+#plugin-suppression .amp-drawer__panel-body-inner > p,
 .amp-analytics .amp-drawer__panel-body-inner p {
 	margin-top: 0;
 	font-size: 14px;
 }
 
-#analytics-options-drawer details > summary {
+#analytics-options details > summary {
 	font-size: 14px;
 }
 
-#analytics-options-drawer details > p {
+#analytics-options details > p {
 	margin-top: 1em;
 }
 
-#analytics-options-drawer .components-button:not(.components-panel__body-toggle) svg {
+#analytics-options .components-button:not(.components-panel__body-toggle) svg {
 	display: block;
 }
 
