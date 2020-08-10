@@ -46,7 +46,7 @@ final class MobileRedirection implements Service, Registerable {
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
 
 		if ( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ) {
-			add_action( 'wp', [ $this, 'redirect' ] );
+			add_action( 'template_redirect', [ $this, 'redirect' ], PHP_INT_MAX );
 		}
 	}
 
