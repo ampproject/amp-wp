@@ -53,7 +53,7 @@ export function ThemeCard( { description, ElementName = 'li', homepage, screensh
 						screenshotUrl ? (
 							<img
 								src={ screenshotUrl }
-								alt={ name }
+								alt={ name || slug }
 								height="2165"
 								width="1000"
 								loading="lazy"
@@ -78,7 +78,7 @@ export function ThemeCard( { description, ElementName = 'li', homepage, screensh
 						} }
 					/>
 					<h4 className="theme-card__title">
-						{ decodeEntities( name ) }
+						{ decodeEntities( name || slug ) }
 					</h4>
 
 				</div>
@@ -87,7 +87,6 @@ export function ThemeCard( { description, ElementName = 'li', homepage, screensh
 					description && (
 						<p className="theme-card__description">
 							{ decodeEntities( description ) }
-
 						</p>
 					)
 				}
@@ -111,7 +110,7 @@ ThemeCard.propTypes = {
 	homepage: PropTypes.string,
 	screenshotUrl: PropTypes.string,
 	slug: PropTypes.string.isRequired,
-	name: PropTypes.string.isRequired,
+	name: PropTypes.string,
 	disabled: PropTypes.bool,
 	style: PropTypes.object,
 };
