@@ -2428,6 +2428,7 @@ class AMP_Theme_Support {
 				'ampSlug'                   => amp_get_slug(),
 				'ampPairedBrowsingQueryVar' => self::PAIRED_BROWSING_QUERY_VAR,
 				'noampQueryVar'             => QueryVar::NOAMP,
+				'noampMobile'               => QueryVar::NOAMP_MOBILE,
 				'documentTitlePrefix'       => __( 'AMP Paired Browsing:', 'amp' ),
 			]
 		);
