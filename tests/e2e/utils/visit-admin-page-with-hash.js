@@ -6,7 +6,7 @@ import { join } from 'path';
 /**
  * WordPress dependencies
  */
-import { isCurrentURL, loginUser, getPageError } from '@wordpress/e2e-test-utils';
+import { getPageError } from '@wordpress/e2e-test-utils';
 
 function createURLWithHash( WPPath, query = '', hash = '' ) {
 	const url = new URL( 'http://localhost:8890' );
