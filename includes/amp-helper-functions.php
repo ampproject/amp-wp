@@ -603,7 +603,7 @@ function amp_get_slug() {
  *
  * @since 1.0
  *
- * @return string Current URL.
+ * @return string|null Current URL, or null if in a WP CLI context and the home URL could not be parsed.
  */
 function amp_get_current_url() {
 	$parsed_url = wp_parse_url( home_url() );
