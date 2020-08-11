@@ -24,6 +24,8 @@ use AmpProject\Tag;
  * Class AMP_Theme_Support
  *
  * Callbacks for adding AMP-related things when theme support is added.
+ *
+ * @internal
  */
 class AMP_Theme_Support {
 

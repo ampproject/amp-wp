@@ -11,6 +11,8 @@ use AmpProject\Dom\Document;
  * Class AMP_Embed_Sanitizer
  *
  * Calls sanitize_raw_embeds method on embed handlers.
+ *
+ * @internal
  */
 class AMP_Embed_Sanitizer extends AMP_Base_Sanitizer {
 

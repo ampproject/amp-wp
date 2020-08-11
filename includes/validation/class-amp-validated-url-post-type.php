@@ -17,6 +17,7 @@ use AmpProject\AmpWP\Services;
  * Class AMP_Validated_URL_Post_Type
  *
  * @since 1.0
+ * @internal
  */
 class AMP_Validated_URL_Post_Type {
 

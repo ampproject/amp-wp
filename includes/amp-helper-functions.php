@@ -15,6 +15,7 @@ use AmpProject\AmpWP\QueryVar;
  * Handle activation of plugin.
  *
  * @since 0.2
+ * @internal
  *
  * @param bool $network_wide Whether the activation was done network-wide.
  */
@@ -31,6 +32,7 @@ function amp_activate( $network_wide = false ) {
  * Handle deactivation of plugin.
  *
  * @since 0.2
+ * @internal
  *
  * @param bool $network_wide Whether the activation was done network-wide.
  */
@@ -52,6 +54,7 @@ function amp_deactivate( $network_wide = false ) {
  * Bootstrap plugin.
  *
  * @since 1.5
+ * @internal
  */
 function amp_bootstrap_plugin() {
 	/**
@@ -95,6 +98,7 @@ function amp_bootstrap_plugin() {
  * Init AMP.
  *
  * @since 0.1
+ * @internal
  */
 function amp_init() {
 
@@ -228,6 +232,7 @@ function amp_init() {
  * the AMP setting to declare the post types support earlier than plugins/theme.
  *
  * @since 0.6
+ * @internal
  */
 function amp_after_setup_theme() {
 	amp_get_slug(); // Ensure AMP_QUERY_VAR is set.
@@ -257,6 +262,7 @@ function amp_after_setup_theme() {
  * This avoids issues when filtering the deprecated `query_string` hook.
  *
  * @since 0.3.3
+ * @internal
  *
  * @param array $query_vars Query vars.
  * @return array Query vars.
@@ -274,6 +280,7 @@ function amp_force_query_var_value( $query_vars ) {
  * Normally the front page would not get served if a query var is present other than preview, page, paged, and cpage.
  *
  * @since 0.6
+ * @internal
  * @see WP_Query::parse_query()
  * @link https://github.com/WordPress/wordpress-develop/blob/0baa8ae85c670d338e78e408f8d6e301c6410c86/src/wp-includes/class-wp-query.php#L951-L971
  *
@@ -380,6 +387,7 @@ function amp_is_legacy() {
  * Add frontend actions.
  *
  * @since 0.2
+ * @internal
  */
 function amp_add_frontend_actions() {
 	add_action( 'wp_head', 'amp_add_amphtml_link' );
@@ -543,6 +551,7 @@ function amp_is_available() {
  * And `amp_init_customizer()` will be able to recognize theme support by calling `amp_is_canonical()`.
  *
  * @since 0.4
+ * @internal
  */
 function _amp_bootstrap_customizer() {
 	add_action( 'after_setup_theme', 'amp_init_customizer', 12 );
@@ -554,6 +563,7 @@ function _amp_bootstrap_customizer() {
  * If post slug is updated the amp page with old post slug will be redirected to the updated url.
  *
  * @since 0.5
+ * @internal
  *
  * @param string $link New URL of the post.
  * @return string URL to be redirected.
@@ -602,6 +612,7 @@ function amp_get_slug() {
  * This is needed in particular due to subdirectory installs.
  *
  * @since 1.0
+ * @internal
  *
  * @return string Current URL.
  */
@@ -741,6 +752,7 @@ function amp_remove_endpoint( $url ) {
  * If there are known validation errors for the current URL then do not output anything.
  *
  * @since 1.0
+ * @internal
  */
 function amp_add_amphtml_link() {
 	/**
@@ -834,6 +846,8 @@ function is_amp_endpoint() {
 /**
  * Get AMP asset URL.
  *
+ * @internal
+ *
  * @param string $file Relative path to file in assets directory.
  * @return string URL.
  */
@@ -845,6 +859,7 @@ function amp_get_asset_url( $file ) {
  * Get AMP boilerplate code.
  *
  * @since 0.7
+ * @internal
  * @link https://www.ampproject.org/docs/reference/spec#boilerplate
  *
  * @return string Boilerplate code.
@@ -858,6 +873,7 @@ function amp_get_boilerplate_code() {
  * Get AMP boilerplate stylesheets.
  *
  * @since 1.3
+ * @internal
  * @link https://www.ampproject.org/docs/reference/spec#boilerplate
  *
  * @return string[] Stylesheets, where first is contained in style[amp-boilerplate] and the second in noscript>style[amp-boilerplate].
@@ -875,6 +891,7 @@ function amp_get_boilerplate_stylesheets() {
  * @since 0.6
  * @since 1.0 Add template mode.
  * @since 2.0 Add reader theme.
+ * @internal
  */
 function amp_add_generator_metadata() {
 	$content = sprintf( 'AMP Plugin v%s', AMP__VERSION );
@@ -892,6 +909,8 @@ function amp_add_generator_metadata() {
 
 /**
  * Register default scripts for AMP components.
+ *
+ * @internal
  *
  * @param WP_Scripts $wp_scripts Scripts.
  */
@@ -957,6 +976,7 @@ function amp_register_default_scripts( $wp_scripts ) {
  * Register default styles.
  *
  * @since 2.0
+ * @internal
  *
  * @param WP_Styles $styles Styles.
  */
@@ -981,6 +1001,7 @@ function amp_register_default_styles( WP_Styles $styles ) {
  * @see WP_Scripts::do_items()
  * @see AMP_Base_Embed_Handler::get_scripts()
  * @see AMP_Base_Sanitizer::get_scripts()
+ * @internal
  *
  * @param array $scripts Script handles mapped to URLs or true.
  * @return string HTML for scripts tags that have not yet been done.
@@ -1022,6 +1043,7 @@ function amp_render_scripts( $scripts ) {
  *
  * @link https://core.trac.wordpress.org/ticket/12009
  * @since 0.7
+ * @internal
  *
  * @param string $tag    The script tag.
  * @param string $handle The script handle.
@@ -1094,6 +1116,7 @@ function amp_filter_script_loader_tag( $tag, $handle ) {
  * @link https://developers.google.com/web/tools/workbox/guides/storage-quota#beware_of_opaque_responses
  * @link https://developers.google.com/web/tools/workbox/guides/handle-third-party-requests#cross-origin_requests_and_opaque_responses
  * @todo This should be proposed for WordPress core.
+ * @internal
  *
  * @param string $tag    Link tag HTML.
  * @param string $handle Dependency handle.
@@ -1125,6 +1148,7 @@ function amp_filter_font_style_loader_tag_with_crossorigin_anonymous( $tag, $han
  * Retrieve analytics data added in backend.
  *
  * @since 0.7
+ * @internal
  *
  * @param array $analytics Analytics entries.
  * @return array Analytics.
@@ -1165,6 +1189,7 @@ function amp_get_analytics( $analytics = [] ) {
  * Print analytics data.
  *
  * @since 0.7
+ * @internal
  *
  * @param array|string $analytics Analytics entries, or empty string when called via wp_footer action.
  */
@@ -1234,6 +1259,7 @@ function amp_print_analytics( $analytics ) {
  * Get content embed handlers.
  *
  * @since 0.7
+ * @internal
  *
  * @param WP_Post $post Post that the content belongs to. Deprecated when theme supports AMP, as embeds may apply
  *                      to non-post data (e.g. Text widget).
@@ -1332,6 +1358,7 @@ function amp_is_dev_mode() {
  *
  * @since 0.7
  * @since 1.1 Added AMP_Nav_Menu_Toggle_Sanitizer and AMP_Nav_Menu_Dropdown_Sanitizer.
+ * @internal
  *
  * @param WP_Post $post Post that the content belongs to. Deprecated when theme supports AMP, as sanitizers apply
  *                      to non-post data (e.g. Text widget).
@@ -1519,6 +1546,7 @@ function amp_get_content_sanitizers( $post = null ) {
  * Grabs featured image or the first attached image for the post.
  *
  * @since 0.7 This originally was located in the private method AMP_Post_Template::get_post_image_metadata().
+ * @internal
  *
  * @param WP_Post|int $post Post or post ID.
  * @return array|false $post_image_meta Post image metadata, or false if not found.
@@ -1584,6 +1612,7 @@ function amp_get_post_image_metadata( $post = null ) {
  *
  * @since 1.2.1
  * @link https://developers.google.com/search/docs/data-types/article#logo-guidelines
+ * @internal
  *
  * @return string Publisher logo image URL. WordPress logo if no site icon or custom logo defined, and no logo provided via 'amp_site_icon_url' filter.
  */
@@ -1642,6 +1671,7 @@ function amp_get_publisher_logo() {
  *
  * @since 0.7
  * @see AMP_Post_Template::build_post_data() Where the logic in this function originally existed.
+ * @internal
  *
  * @return array $metadata All schema.org metadata for the post.
  */
@@ -1724,6 +1754,7 @@ function amp_get_schemaorg_metadata() {
  * @since 0.7
  * @since 1.1 we pass `JSON_UNESCAPED_UNICODE` to `wp_json_encode`.
  * @see https://github.com/ampproject/amp-wp/issues/1969
+ * @internal
  */
 function amp_print_schemaorg_metadata() {
 	$metadata = amp_get_schemaorg_metadata();
@@ -1740,6 +1771,7 @@ function amp_print_schemaorg_metadata() {
  *
  * @see wp_kses()
  * @since 1.0
+ * @internal
  *
  * @param string $markup Markup to sanitize.
  * @return string HTML markup with tags allowed by amp-mustache.
@@ -1756,6 +1788,7 @@ function amp_wp_kses_mustache( $markup ) {
  * the `AMP_Validation_Manager::add_admin_bar_menu_items()` method.
  *
  * @see \AMP_Validation_Manager::add_admin_bar_menu_items()
+ * @internal
  *
  * @param WP_Admin_Bar $wp_admin_bar Admin bar.
  */

@@ -17,6 +17,7 @@ use AmpProject\AmpWP\Services;
  * {@see amp_customizer_editor_link()} as a submenu to the Appearance menu.
  *
  * @since 0.4
+ * @internal
  */
 class AMP_Template_Customizer {
 

@@ -8,6 +8,8 @@
 
 /**
  * Class AMP_Service_Worker.
+ *
+ * @internal
  */
 class AMP_Service_Worker {
 

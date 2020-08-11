@@ -10,9 +10,10 @@ use AmpProject\Dom\Document;
 /**
  * Trait AMP_Noscript_Fallback
  *
- * @since 1.1
- *
  * Used for sanitizers that place <noscript> tags with the original nodes on error.
+ *
+ * @since 1.1
+ * @internal
  */
 trait AMP_Noscript_Fallback {
 

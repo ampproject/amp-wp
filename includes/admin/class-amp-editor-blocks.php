@@ -8,6 +8,8 @@
 
 /**
  * Class AMP_Editor_Blocks
+ *
+ * @internal
  */
 class AMP_Editor_Blocks {
 

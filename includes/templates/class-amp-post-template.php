@@ -9,6 +9,7 @@
  * Class AMP_Post_Template
  *
  * @since 0.2
+ * @internal
  */
 class AMP_Post_Template {
 

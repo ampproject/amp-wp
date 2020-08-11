@@ -19,6 +19,7 @@ use AmpProject\Dom\Document;
  * Class AMP_Validation_Manager
  *
  * @since 0.7
+ * @internal
  */
 class AMP_Validation_Manager {
 

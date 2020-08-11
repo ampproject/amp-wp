@@ -9,6 +9,8 @@ use AmpProject\AmpWP\Option;
 
 /**
  * Sets up the AMP template editor for the Customizer.
+ *
+ * @internal
  */
 function amp_init_customizer() {
 
@@ -29,6 +31,7 @@ function amp_init_customizer() {
 /**
  * Get permalink for the first AMP-eligible post.
  *
+ * @internal
  * @return string|null URL on success, null if none found.
  */
 function amp_admin_get_preview_permalink() {
@@ -82,6 +85,7 @@ function amp_admin_get_preview_permalink() {
 /**
  * Provides a URL to the customizer.
  *
+ * @internal
  * @return string
  */
 function amp_get_customizer_url() {
@@ -107,6 +111,8 @@ function amp_get_customizer_url() {
 
 /**
  * Registers a submenu page to access the AMP template editor panel in the Customizer.
+ *
+ * @internal
  */
 function amp_add_customizer_link() {
 	$customizer_url = amp_get_customizer_url();
@@ -131,6 +137,7 @@ function amp_add_customizer_link() {
  *
  * @since 0.5
  * @see amp_get_analytics()
+ * @internal
  *
  * @param array $analytics Analytics.
  * @return array Analytics.
@@ -156,6 +163,8 @@ function amp_add_custom_analytics( $analytics = [] ) {
 
 /**
  * Bootstrap AMP Editor core blocks.
+ *
+ * @internal
  */
 function amp_editor_core_blocks() {
 	$editor_blocks = new AMP_Editor_Blocks();
@@ -166,6 +175,7 @@ function amp_editor_core_blocks() {
  * Bootstraps AMP admin classes.
  *
  * @since 1.5.0
+ * @internal
  */
 function amp_bootstrap_admin() {
 	$admin_pointers = new AMP_Admin_Pointers();
@@ -178,6 +188,7 @@ function amp_bootstrap_admin() {
 /**
  * Whether to activate the new onboarding feature.
  *
+ * @internal
  * @return bool
  */
 function amp_should_use_new_onboarding() {
