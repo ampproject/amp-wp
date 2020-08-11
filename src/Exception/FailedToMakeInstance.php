@@ -12,6 +12,9 @@ use RuntimeException;
 /**
  * Exception thrown when the injector couldn't instantiate a given class or
  * interface.
+ *
+ * @since 2.0
+ * @internal
  */
 final class FailedToMakeInstance
 	extends RuntimeException

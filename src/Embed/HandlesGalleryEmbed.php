@@ -21,6 +21,7 @@ use DOMNodeList;
  * Contains logic related to both gallery shortcodes and blocks.
  *
  * @since 2.0
+ * @internal
  */
 trait HandlesGalleryEmbed {
 

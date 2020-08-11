@@ -17,6 +17,7 @@ use AmpProject\AmpWP\Infrastructure\Service;
  * AMP onboarding wizard submenu class.
  *
  * @since 2.0
+ * @internal
  */
 final class OnboardingWizardSubmenu implements Conditional, Delayed, Service, Registerable {
 	/**

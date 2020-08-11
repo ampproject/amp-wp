@@ -26,6 +26,7 @@ use WP_REST_Server;
  * OptionsRESTController class.
  *
  * @since 2.0
+ * @internal
  */
 final class OptionsRESTController extends WP_REST_Controller implements Delayed, Service, Registerable {
 

@@ -18,6 +18,8 @@ use AmpProject\AmpWP\Infrastructure\Plugin;
  * To read more about why this is preferable to a Singleton,
  *
  * @see https://www.alainschlesser.com/singletons-shared-instances/
+ * @since 2.0
+ * @internal
  */
 final class AmpWpPluginFactory {
 

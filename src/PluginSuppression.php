@@ -25,6 +25,8 @@ use WP_User;
  * Suppress plugins from running by removing their hooks and nullifying their shortcodes, widgets, and blocks.
  *
  * @package AmpProject\AmpWP
+ * @internal
+ * @since 2.0
  */
 final class PluginSuppression implements Service, Registerable {
 

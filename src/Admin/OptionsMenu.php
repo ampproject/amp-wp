@@ -17,6 +17,9 @@ use AmpProject\AmpWP\Option;
 
 /**
  * OptionsMenu class.
+ *
+ * @since 2.0
+ * @internal
  */
 class OptionsMenu implements Conditional, Service, Registerable {
 	/**

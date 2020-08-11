@@ -16,6 +16,8 @@ use AmpProject\AmpWP\Option;
  * Base class to define a new AJAX action.
  *
  * @package AmpProject\AmpWP
+ * @since 2.0
+ * @internal
  */
 final class ReenableCssTransientCachingAjaxAction implements Service, Registerable {
 

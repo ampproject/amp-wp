@@ -22,6 +22,8 @@ use WP_Customize_Manager;
  * service in order to determine whether or a Reader theme is loaded, and if so, what the previously-active theme was.
  *
  * @package AmpProject\AmpWP
+ * @since 2.0
+ * @internal
  */
 final class ReaderThemeLoader implements Service, Registerable {
 

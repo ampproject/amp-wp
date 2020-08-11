@@ -17,6 +17,8 @@ use AmpProject\AmpWP\Infrastructure\ServiceContainer;
  * Always prefer to use constructor injection instead.
  *
  * @package AmpProject\AmpWP
+ * @since 2.0
+ * @internal
  */
 final class Services {
 

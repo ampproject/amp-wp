@@ -17,6 +17,8 @@ use AMP_Theme_Support;
  * Service for redirecting mobile users to the AMP version of a page.
  *
  * @package AmpProject\AmpWP
+ * @since 2.0
+ * @internal
  */
 final class MobileRedirection implements Service, Registerable {
 

@@ -17,6 +17,9 @@ use ArrayObject;
  *
  * We extend ArrayObject so we have default implementations for iterators and
  * array access.
+ *
+ * @since 2.0
+ * @internal
  */
 final class SimpleServiceContainer
 	extends ArrayObject

@@ -18,6 +18,7 @@ use WP_Upgrader;
  * Handles reader themes.
  *
  * @since 2.0
+ * @internal
  */
 final class ReaderThemes {
 	/**
