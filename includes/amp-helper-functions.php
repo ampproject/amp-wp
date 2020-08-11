@@ -607,6 +607,11 @@ function amp_get_slug() {
  */
 function amp_get_current_url() {
 	$parsed_url = wp_parse_url( home_url() );
+
+	if ( defined( 'WP_CLI' ) && WP_CLI && ! is_array( $parsed_url ) ) {
+		return null;
+	}
+
 	if ( ! is_array( $parsed_url ) ) {
 		$parsed_url = [];
 	}
