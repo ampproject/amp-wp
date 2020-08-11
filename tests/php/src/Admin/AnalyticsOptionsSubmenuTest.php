@@ -85,12 +85,16 @@ class AnalyticsOptionsSubmenuTest extends WP_UnitTestCase {
 
 		$dev_tools_user_access = new DevToolsUserAccess();
 
-		$dev_tools_user_access->set_user_enabled( $test_user, true );
-		$this->assertEquals( 'AMP Analytics Options', $submenu[ $this->options_menu_instance->get_menu_slug() ][1][0] );
+		$original_dev_tools_user_access = $dev_tools_user_access->get_user_enabled( $test_user );
 
 		$dev_tools_user_access->set_user_enabled( $test_user, true );
 		$this->assertEquals( 'AMP Analytics Options', $submenu[ $this->options_menu_instance->get_menu_slug() ][1][0] );
 
+		$dev_tools_user_access->set_user_enabled( $test_user, false );
+		$this->assertEquals( 'AMP Analytics Options', $submenu[ $this->options_menu_instance->get_menu_slug() ][1][0] );
+
+		// Reset.
 		$submenu = $original_submenu;
+		$dev_tools_user_access->set_user_enabled( $test_user, $original_dev_tools_user_access );
 	}
 }
