@@ -7,6 +7,7 @@
 
 namespace AmpProject\AmpWP\Documentation\Parser;
 
+use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Name\FullyQualified;
 
 /**
@@ -21,8 +22,14 @@ final class StaticMethodCallReflector extends MethodCallReflector {
 	 */
 	public function getName() {
 		$class  = $this->node->class;
+
+		// Method is called via a variable classname like $class::method()
+		if ( $class instanceof Variable ) {
+			return [ $class, $class->name ];
+		}
+
 		$prefix = ( $class instanceof FullyQualified ) ? '\\' : '';
-		$class  = $prefix . $this->_resolveName( implode( '\\', $class->parts ) );
+		$class  = $prefix . $this->resolveName( implode( '\\', property_exists( $class, 'parts' ) ? $class->parts : [ $class->toString() ] ) );
 
 		return [ $class, $this->getShortName() ];
 	}

@@ -69,7 +69,7 @@ final class GenerateCommand {
 		WP_CLI::line( sprintf( 'Extracting PHPDoc from %1$s. This may take a few minutes...', $path ) );
 		$parser  = new Parser();
 		$is_file = is_file( $path );
-		$files   = $is_file ? [ $path ] : $parser->get_wp_files( $path );
+		$files   = $is_file ? [ $path ] : $parser->get_files( $path, $this->get_excluded_dirs() );
 		$path    = $is_file ? dirname( $path ) : $path;
 
 		if ( $files instanceof WP_Error ) {
@@ -84,5 +84,13 @@ final class GenerateCommand {
 		}
 
 		return $output;
+	}
+
+	private function get_excluded_dirs() {
+		return [
+			'#^.*/amp/(assets|bin|build|node_modules|tests|vendor)/#',
+			'#^.*/amp/lib/common/(tests|vendor)/#',
+			'#^.*/amp/lib/optimizer/(tests|vendor)/#',
+		];
 	}
 }

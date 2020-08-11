@@ -50,7 +50,7 @@ class MethodCallReflector extends BaseReflector {
 			$caller = $caller->toString();
 		}
 
-		$caller = $this->_resolveName( $caller );
+		$caller = $this->resolveName( $caller );
 
 		// If the caller is a function, convert it to the function name.
 		if ( $caller instanceof FuncCall ) {
@@ -58,7 +58,7 @@ class MethodCallReflector extends BaseReflector {
 			$caller = implode( '\\', $caller->name->parts ) . '()';
 		}
 
-		$class_mapping = $this->_getClassMapping();
+		$class_mapping = $this->getClassMapping();
 		if ( array_key_exists( $caller, $class_mapping ) ) {
 			$caller = $class_mapping[ $caller ];
 		}
@@ -90,7 +90,7 @@ class MethodCallReflector extends BaseReflector {
 	 *
 	 * @return array Class mapping to map variable names to classes
 	 */
-	protected function _getClassMapping() {
+	protected function getClassMapping() {
 
 		// List of global use generated using following command:
 		// ack "global \\\$[^;]+;" --no-filename | tr -d '\t' | sort | uniq | sed "s/global //g" | sed "s/, /,/g" | tr , '\n' | sed "s/;//g" | sort | uniq | sed "s/\\\$//g" | sed "s/[^ ][^ ]*/'&' => ''/g"
@@ -146,7 +146,7 @@ class MethodCallReflector extends BaseReflector {
 	 *
 	 * @return string The resolved class name.
 	 */
-	protected function _resolveName( $class ) {
+	protected function resolveName( $class ) {
 		if ( ! $this->called_in_class ) {
 			return $class;
 		}

@@ -189,7 +189,10 @@ final class FileReflector extends PhpDocumentorFileReflector {
 				break;
 
 			case 'Stmt_Function':
-				end( $this->functions )->uses = array_pop( $this->location )->uses;
+				$location = array_pop( $this->location );
+				if ( property_exists( $location, 'uses' ) ) {
+					end( $this->functions )->uses = $location->uses;
+				}
 				break;
 
 			case 'Stmt_ClassMethod':

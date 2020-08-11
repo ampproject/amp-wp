@@ -26,11 +26,12 @@ final class Parser {
 	 *
 	 * @return array|WP_Error
 	 */
-	public function get_wp_files( $directory ) {
-		$iterableFiles = new RecursiveIteratorIterator(
-			new RecursiveDirectoryIterator( $directory )
-		);
-		$files         = [];
+	public function get_files( $directory, $excluded_dirs ) {
+		$directories          = new RecursiveDirectoryIterator( $directory );
+		$filtered_directories = new DirectoryFilter( $directories, $excluded_dirs );
+		$iterableFiles        = new RecursiveIteratorIterator( $filtered_directories );
+
+		$files = [];
 
 		try {
 			foreach ( $iterableFiles as $file ) {
