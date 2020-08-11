@@ -7,7 +7,6 @@
 
 namespace AmpProject\AmpWP\Admin;
 
-use AMP_Options_Manager;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 
