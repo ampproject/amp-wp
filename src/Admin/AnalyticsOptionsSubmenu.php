@@ -25,7 +25,7 @@ final class AnalyticsOptionsSubmenu implements Service, Registerable {
 	/**
 	 * Class constructor.
 	 *
-	 * @param OptionsMenu $options_menu An instance of class handling the parent menu.
+	 * @param OptionsMenu $options_menu An instance of the class handling the parent menu.
 	 */
 	public function __construct( OptionsMenu $options_menu ) {
 		$this->parent_menu_slug = $options_menu->get_menu_slug();
@@ -41,7 +41,7 @@ final class AnalyticsOptionsSubmenu implements Service, Registerable {
 	}
 
 	/**
-	 * Adds the submenu item and adds necessary hooks.
+	 * Adds hooks.
 	 */
 	public function register() {
 		add_action( 'admin_menu', [ $this, 'add_submenu_link' ], 99 );
@@ -49,8 +49,6 @@ final class AnalyticsOptionsSubmenu implements Service, Registerable {
 
 	/**
 	 * Adds a submenu link to the AMP options submenu.
-	 *
-	 * @return void
 	 */
 	public function add_submenu_link() {
 		global $submenu;
