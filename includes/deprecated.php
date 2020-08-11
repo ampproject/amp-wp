@@ -166,6 +166,7 @@ function amp_render_post( $post ) {
 	 * This action is not triggered when 'amp' theme support is present. Instead, you should use 'template_redirect' action and check if `is_amp_endpoint()`.
 	 *
 	 * @since 0.2
+	 * @deprecated
 	 *
 	 * @param int $post_id Post ID.
 	 */
