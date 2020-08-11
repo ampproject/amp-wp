@@ -59,7 +59,7 @@ final class AnalyticsOptionsSubmenu implements Service, Registerable {
 
 		// The link should be the second menu item.
 		$new_menu = array_merge(
-			[ $old_menu [0] ],
+			[ $old_menu[0] ],
 			[
 				[
 					__( 'AMP Analytics Options', 'amp' ),
