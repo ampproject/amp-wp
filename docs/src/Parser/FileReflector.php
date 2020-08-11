@@ -12,6 +12,7 @@ use phpDocumentor\Reflection\BaseReflector;
 use phpDocumentor\Reflection\FileReflector as PhpDocumentorFileReflector;
 use PhpParser\Comment\Doc;
 use PhpParser\Node;
+use PhpParser\Node\Expr\FuncCall;
 
 /**
  * Reflection class for a full file.
@@ -78,8 +79,6 @@ final class FileReflector extends PhpDocumentorFileReflector {
 	public function enterNode( Node $node ) {
 		parent::enterNode( $node );
 
-		var_dump( $node->getType() );
-
 		switch ( $node->getType() ) {
 			// Add classes, functions, and methods to the current location stack
 			case 'Stmt_Class':
@@ -97,8 +96,7 @@ final class FileReflector extends PhpDocumentorFileReflector {
 
 				if ( $this->isFilter( $node ) ) {
 					if ( $this->last_doc && ! $node->getDocComment() ) {
-						$node->setAttribute( 'comments',
-							array( $this->last_doc ) );
+						$node->setAttribute( 'comments', [ $this->last_doc ] );
 						$this->last_doc = null;
 					}
 
@@ -221,16 +219,16 @@ final class FileReflector extends PhpDocumentorFileReflector {
 
 		$calling = (string) $node->name;
 
-		$functions = array(
+		$functions = [
 			'apply_filters',
 			'apply_filters_ref_array',
 			'apply_filters_deprecated',
 			'do_action',
 			'do_action_ref_array',
 			'do_action_deprecated',
-		);
+		];
 
-		return in_array( $calling, $functions );
+		return in_array( $calling, $functions, true );
 	}
 
 	/**
@@ -247,7 +245,7 @@ final class FileReflector extends PhpDocumentorFileReflector {
 	 */
 	protected function isNodeDocumentable( Node $node ) {
 		return parent::isNodeDocumentable( $node )
-		       || ( $node instanceof Node\Expr\FuncCall
+		       || ( $node instanceof FuncCall
 		            && $this->isFilter( $node ) );
 	}
 }

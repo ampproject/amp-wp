@@ -10,6 +10,8 @@ namespace AmpProject\AmpWP\Documentation\Parser;
 use phpDocumentor\Reflection\BaseReflector;
 use PhpParser\Node\Expr\ArrayDimFetch;
 use PhpParser\Node\Expr\Variable;
+use PhpParser\Node\Name;
+use PhpParser\Node\Name\FullyQualified;
 
 /**
  * A reflection of a function call expression.
@@ -28,24 +30,22 @@ final class FunctionCallReflector extends BaseReflector {
 
 		$shortName = $this->getShortName();
 
-		if ( is_a( $shortName, 'PHPParser_Node_Name_FullyQualified' ) ) {
+		if ( $shortName instanceof FullyQualified ) {
 			return '\\' . (string) $shortName;
 		}
 
-		if ( is_a( $shortName, 'PHPParser_Node_Name' ) ) {
+		if ( $shortName instanceof Name ) {
 			return (string) $shortName;
 		}
 
-		/** @var ArrayDimFetch $shortName */
-		if ( is_a( $shortName, 'PHPParser_Node_Expr_ArrayDimFetch' ) ) {
+		if ( $shortName instanceof ArrayDimFetch ) {
 			$var = $shortName->var->name;
 			$dim = $shortName->dim->name->parts[0];
 
 			return "\${$var}[{$dim}]";
 		}
 
-		/** @var Variable $shortName */
-		if ( is_a( $shortName, 'PHPParser_Node_Expr_Variable' ) ) {
+		if ( $shortName instanceof Variable ) {
 			return $shortName->name;
 		}
 

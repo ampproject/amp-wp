@@ -91,7 +91,7 @@ final class HookReflector extends BaseReflector {
 	 */
 	public function getArgs() {
 		$printer = new PrettyPrinter;
-		$args    = array();
+		$args    = [];
 		foreach ( $this->node->args as $arg ) {
 			$args[] = $printer->prettyPrintArg( $arg );
 		}

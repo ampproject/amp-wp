@@ -69,11 +69,11 @@ final class Parser {
 			$file->process();
 
 			// TODO proper exporter
-			$out = array(
+			$out = [
 				'file' => $this->export_docblock( $file ),
 				'path' => str_replace( DIRECTORY_SEPARATOR, '/', $file->getFilename() ),
 				'root' => $root,
-			);
+			];
 
 			if ( ! empty( $file->uses ) ) {
 				$out['uses'] = $this->export_uses( $file->uses );
@@ -124,7 +124,7 @@ final class Parser {
 			}
 
 			foreach ( $file->getClasses() as $class ) {
-				$class_data = array(
+				$class_data = [
 					'name'       => $class->getShortName(),
 					'namespace'  => $class->getNamespace(),
 					'line'       => $class->getLineNumber(),
@@ -137,7 +137,7 @@ final class Parser {
 					'properties' => $this->export_properties( $class->getProperties() ),
 					'methods'    => $this->export_methods( $class->getMethods() ),
 					'doc'        => $this->export_docblock( $class ),
-				);
+				];
 
 				$out['classes'][] = $class_data;
 			}
@@ -203,20 +203,20 @@ final class Parser {
 	private function export_docblock( $element ) {
 		$docblock = $element->getDocBlock();
 		if ( ! $docblock ) {
-			return array(
+			return [
 				'description'      => '',
 				'long_description' => '',
-				'tags'             => array(),
-			);
+				'tags'             => [],
+			];
 		}
 
-		$output = array(
+		$output = [
 			'description'      => preg_replace( '/[\n\r]+/', ' ',
 				$docblock->getShortDescription() ),
 			'long_description' => $this->fix_newlines( $docblock->getLongDescription()
 			                                             ->getFormattedContents() ),
 			'tags'             => [],
-		);
+		];
 
 		foreach ( $docblock->getTags() as $tag ) {
 			$tag_data = [
@@ -262,18 +262,18 @@ final class Parser {
 	 *
 	 * @return array
 	 */
-	private function export_hooks( array $hooks ) {
-		$out = array();
+	private function export_hooks( $hooks ) {
+		$out = [];
 
 		foreach ( $hooks as $hook ) {
-			$out[] = array(
+			$out[] = [
 				'name'      => $hook->getName(),
 				'line'      => $hook->getLineNumber(),
 				'end_line'  => $hook->getNode()->getAttribute( 'endLine' ),
 				'type'      => $hook->getType(),
 				'arguments' => $hook->getArgs(),
 				'doc'       => $this->export_docblock( $hook ),
-			);
+			];
 		}
 
 		return $out;
@@ -284,15 +284,15 @@ final class Parser {
 	 *
 	 * @return array
 	 */
-	private function export_arguments( array $arguments ) {
-		$output = array();
+	private function export_arguments( $arguments ) {
+		$output = [];
 
 		foreach ( $arguments as $argument ) {
-			$output[] = array(
+			$output[] = [
 				'name'    => $argument->getName(),
 				'default' => $argument->getDefault(),
 				'type'    => $argument->getType(),
-			);
+			];
 		}
 
 		return $output;
@@ -303,7 +303,7 @@ final class Parser {
 	 *
 	 * @return array
 	 */
-	private function export_properties( array $properties ) {
+	private function export_properties( $properties ) {
 		$out = [];
 
 		foreach ( $properties as $property ) {
@@ -327,7 +327,7 @@ final class Parser {
 	 *
 	 * @return array
 	 */
-	private function export_methods( array $methods ) {
+	private function export_methods( $methods ) {
 		$output = [];
 
 		foreach ( $methods as $method ) {
@@ -369,7 +369,7 @@ final class Parser {
 	 *
 	 * @return array
 	 */
-	private function export_uses( array $uses ) {
+	private function export_uses( $uses ) {
 		$out = [];
 
 		// Ignore hooks here, they are exported separately.
@@ -384,24 +384,24 @@ final class Parser {
 
 				switch ( $type ) {
 					case 'methods':
-						$out[ $type ][] = array(
+						$out[ $type ][] = [
 							'name'     => $name[1],
 							'class'    => $name[0],
 							'static'   => $element->isStatic(),
 							'line'     => $element->getLineNumber(),
 							'end_line' => $element->getNode()
 							                      ->getAttribute( 'endLine' ),
-						);
+						];
 						break;
 
 					default:
 					case 'functions':
-						$out[ $type ][] = array(
+						$out[ $type ][] = [
 							'name'     => $name,
 							'line'     => $element->getLineNumber(),
 							'end_line' => $element->getNode()
 							                      ->getAttribute( 'endLine' ),
-						);
+						];
 
 						if ( '_deprecated_file' === $name
 						     || '_deprecated_function' === $name

@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP\Documentation\Parser;
 use phpDocumentor\Reflection\BaseReflector;
 use phpDocumentor\Reflection\ClassReflector;
 use PhpParser\Node\Expr;
+use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Name;
 use PhpParser\Node\Name\FullyQualified;
 
@@ -51,11 +52,9 @@ class MethodCallReflector extends BaseReflector {
 
 		$caller = $this->_resolveName( $caller );
 
-		// If the caller is a function, convert it to the function name
-		if ( is_a( $caller, 'PHPParser_Node_Expr_FuncCall' ) ) {
-
-			// Add parentheses to signify this is a function call
-			/** @var Expr\FuncCall $caller */
+		// If the caller is a function, convert it to the function name.
+		if ( $caller instanceof FuncCall ) {
+			// Add parentheses to signify this is a function call.
 			$caller = implode( '\\', $caller->name->parts ) . '()';
 		}
 
@@ -64,7 +63,7 @@ class MethodCallReflector extends BaseReflector {
 			$caller = $class_mapping[ $caller ];
 		}
 
-		return array( $caller, $name );
+		return [ $caller, $name ];
 	}
 
 	/**
@@ -73,7 +72,6 @@ class MethodCallReflector extends BaseReflector {
 	 * @param ClassReflector $class
 	 */
 	public function set_class( ClassReflector $class ) {
-
 		$this->called_in_class = $class;
 	}
 
@@ -129,12 +127,12 @@ class MethodCallReflector extends BaseReflector {
 			'wpdb'                => 'wpdb',
 		];
 
-		$wp_functions = array(
+		$wp_functions = [
 			'get_current_screen()' => 'WP_Screen',
 			'_get_list_table()'    => 'WP_List_Table',
 			// This one differs because there are a lot of different List Tables, assume they all only overwrite existing functions on WP_List_Table
 			'wp_get_theme()'       => 'WP_Theme',
-		);
+		];
 
 		$class_mapping = array_merge( $wp_globals, $wp_functions );
 
@@ -149,7 +147,6 @@ class MethodCallReflector extends BaseReflector {
 	 * @return string The resolved class name.
 	 */
 	protected function _resolveName( $class ) {
-
 		if ( ! $this->called_in_class ) {
 			return $class;
 		}
