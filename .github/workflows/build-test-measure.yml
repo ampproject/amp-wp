@@ -38,41 +38,41 @@ jobs:
       - name: Detect coding standard violations (stylelint)
         run: npm run lint:css
 
-    lint-js:
-      name: 'Lint: JS'
-      runs-on: ubuntu-latest
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v2
+  lint-js:
+    name: 'Lint: JS'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
 
-        - name: Get npm cache directory
-          id: npm-cache
-          run: echo "::set-output name=dir::$(npm config get cache)"
+      - name: Get npm cache directory
+        id: npm-cache
+        run: echo "::set-output name=dir::$(npm config get cache)"
 
-        - name: Configure npm cache
-          uses: actions/cache@v1
-          with:
-            path: ${{ steps.npm-cache.outputs.dir }}
-            key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-            restore-keys: ${{ runner.os }}-node-
+      - name: Configure npm cache
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
 
-        - name: Install Node dependencies
-          run: npm ci
-          env:
-            CI: true
+      - name: Install Node dependencies
+        run: npm ci
+        env:
+          CI: true
 
-        - name: Validate package.json
-          run: npm run lint:pkg-json
+      - name: Validate package.json
+        run: npm run lint:pkg-json
 
-        - name: Detect coding standard violations (ESLint)
-          run: npm run lint:js:report
-          continue-on-error: true
+      - name: Detect coding standard violations (ESLint)
+        run: npm run lint:js:report
+        continue-on-error: true
 
-        - name: Annotate code linting results
-          uses: ataylorme/eslint-annotate-action@1.0.4
-          with:
-            repo-token: '${{ secrets.GITHUB_TOKEN }}'
-            report-json: 'lint-js-report.json'
+      - name: Annotate code linting results
+        uses: ataylorme/eslint-annotate-action@1.0.4
+        with:
+          repo-token: '${{ secrets.GITHUB_TOKEN }}'
+          report-json: 'lint-js-report.json'
 
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -128,10 +128,10 @@ jobs:
     # Only run if it is not a draft PR and the PR is not from a forked repository.
     if: github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
     runs-on: ubuntu-latest
-      needs:
-        - lint-css
-        - lint-js
-        - lint-php
+    needs:
+      - lint-css
+      - lint-js
+      - lint-php
     outputs:
       branch-name: ${{ steps.retrieve-branch-name.outputs.branch_name }}
       git-sha-8: ${{ steps.retrieve-git-sha-8.outputs.sha8 }}
