@@ -111,14 +111,16 @@ jobs:
         run: vendor/bin/phpcs -q --report=checkstyle --runtime-set ignore_errors_on_exit 1 --runtime-set ignore_warnings_on_exit 1 | cs2pr --graceful-warnings
 
       - name: Normalize composer.json
-        # composer-normalize requires PHP 7.1+. Ignore version conflicts.
+        # composer-normalize requires PHP 7.1+.
         run: |
           composer require --no-interaction --dev ergebnis/composer-normalize --ignore-platform-reqs
           composer --no-interaction normalize --dry-run
 
       - name: Static Analysis (PHPStan)
-        # phpstan requires PHP 7.1+. Ignore version conflicts.
-        run: composer analyze
+        # phpstan requires PHP 7.1+.
+        run: |
+          vendor/bin/phpstan --version
+          vendor/bin/phpstan analyse --error-format=checkstyle | cs2pr
         if: always()
 
 #-----------------------------------------------------------------------------------------------------------------------
