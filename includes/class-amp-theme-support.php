@@ -1923,7 +1923,7 @@ class AMP_Theme_Support {
 			);
 		}
 
-		// Abort if an expected template was not rendered.
+		// Abort if an expected template was not rendered, in that template actions didn't fire and response type is not HTML.
 		$did_template_action = (
 			did_action( 'wp_head' )
 			||
@@ -1933,15 +1933,7 @@ class AMP_Theme_Support {
 			||
 			did_action( 'amp_post_template_footer' )
 		);
-		if ( ! $did_template_action ) {
-			return $response;
-		}
-
-		/*
-		 * Abort if the response was not HTML. To be post-processed as an AMP page, the output-buffered document must
-		 * have the HTML mime type and it must start with <html> followed by <head> tag (with whitespace, doctype, and comments optionally interspersed).
-		 */
-		if ( Attribute::TYPE_HTML !== substr( AMP_HTTP::get_response_content_type(), 0, 9 ) || ! preg_match( '#^(?:<!.*?>|\s+)*<html.*?>(?:<!.*?>|\s+)*<head\b(.*?)>#is', $response ) ) {
+		if ( ! $did_template_action || Attribute::TYPE_HTML !== substr( AMP_HTTP::get_response_content_type(), 0, 9 ) ) {
 			return $response;
 		}
 
