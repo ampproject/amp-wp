@@ -34,7 +34,7 @@ export const HANDLE_TYPE_RIGHT = 'right';
  */
 export function AMPDrawer( { children = null, className, heading, handleType = HANDLE_TYPE_FULL_WIDTH, id, initialOpen = false, selected = false, hiddenTitle } ) {
 	const [ opened, setOpened ] = useState( initialOpen );
-	const [ resetting, setResetting ] = useState( false );
+	const [ resetStatus, setResetStatus ] = useState( null );
 
 	/**
 	 * Watch for changes to the panel body attributes and set opened state accordingly.
@@ -60,22 +60,25 @@ export function AMPDrawer( { children = null, className, heading, handleType = H
 		};
 	}, [ id, opened ] );
 
+	// Force a rerender when initialOpen changes, only after the first render.
+	useEffect( () => {
+		if ( null === resetStatus ) {
+			setResetStatus( 'waiting' );
+			return;
+		}
+
+		setResetStatus( 'resetting' );
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ initialOpen ] );
+
 	/**
-	 * Forces a rerender of the PanelBody when the initialOpen prop changes.
+	 * After the `resetting` render, set status back to waiting.
 	 */
 	useEffect( () => {
-		setResetting( true );
-
-		const timeout = setTimeout( () => {
-			setResetting( false );
-		}, 1 );
-
-		return () => {
-			if ( timeout ) {
-				clearTimeout( timeout );
-			}
-		};
-	}, [ initialOpen ] );
+		if ( 'resetting' === resetStatus ) {
+			setResetStatus( 'waiting' );
+		}
+	}, [ resetStatus ] );
 
 	return (
 		<Selectable
@@ -95,7 +98,7 @@ export function AMPDrawer( { children = null, className, heading, handleType = H
 					{ heading }
 				</div>
 			) }
-			{ ! resetting && (
+			{ 'resetting' !== resetStatus && (
 				<PanelBody
 					title={ handleType === HANDLE_TYPE_RIGHT ? (
 						<span className="components-visually-hidden">
