@@ -1941,7 +1941,7 @@ class AMP_Theme_Support {
 		 * Abort if the response was not HTML. To be post-processed as an AMP page, the output-buffered document must
 		 * have the HTML mime type and it must start with <html> followed by <head> tag (with whitespace, doctype, and comments optionally interspersed).
 		 */
-		if ( Attribute::TYPE_HTML !== substr( AMP_HTTP::get_response_content_type(), 0, 9 ) || ! preg_match( '#^(?:<!.*?>|\s+)*+<html.*?>(?:<!.*?>|\s+)*+<head\b(.*?)>#is', $response ) ) {
+		if ( Attribute::TYPE_HTML !== substr( AMP_HTTP::get_response_content_type(), 0, 9 ) ) {
 			return $response;
 		}
 
