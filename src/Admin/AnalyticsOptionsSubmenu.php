@@ -53,8 +53,8 @@ final class AnalyticsOptionsSubmenu implements Service, Registerable {
 	public function add_submenu_link() {
 		add_submenu_page(
 			$this->parent_menu_slug,
-			__( 'AMP Analytics Options', 'amp' ),
-			__( 'AMP Analytics Options', 'amp' ),
+			__( 'Analytics', 'amp' ),
+			__( 'Analytics', 'amp' ),
 			'manage_options',
 			$this->parent_menu_slug . '#analytics-options',
 			'__return_false',
