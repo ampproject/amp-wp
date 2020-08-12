@@ -225,11 +225,9 @@ jobs:
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
       - name: Set up tests
-        run: source bin/install-wp-tests.sh wordpress_test root '' 127.0.0.1:${{ job.services.mysql.ports['3306'] }} ${{ matrix.wp }} true
-
-      - name: Install Gutenberg and PWA plugins
-        # TODO: Add scripts to install plugins instead of relying on .dev-lib
+        # TODO: Add step to install plugins instead of relying on .dev-lib
         run: |
+          source bin/install-wp-tests.sh wordpress_test root '' 127.0.0.1:${{ job.services.mysql.ports['3306'] }} ${{ matrix.wp }} true
           source .dev-lib
           after_wp_install
 
