@@ -133,7 +133,7 @@ final class ReaderThemes {
 		$themes = array_filter(
 			$themes,
 			static function( $theme ) {
-				return is_array( $theme ) && ! empty( $theme );
+				return is_array( $theme ) && ! empty( $theme['slug'] );
 			}
 		);
 

@@ -53,7 +53,7 @@ export function ThemeCard( { description, ElementName = 'li', homepage, screensh
 						screenshotUrl ? (
 							<img
 								src={ screenshotUrl }
-								alt={ name }
+								alt={ name || slug }
 								height="2165"
 								width="1000"
 								loading="lazy"
@@ -78,32 +78,39 @@ export function ThemeCard( { description, ElementName = 'li', homepage, screensh
 						} }
 					/>
 					<h4 className="theme-card__title">
-						{ decodeEntities( name ) }
+						{ decodeEntities( name || slug ) }
 					</h4>
 
 				</div>
 
-				<p className="theme-card__description">
-					{ decodeEntities( description ) }
-
-				</p>
+				{
+					description && (
+						<p className="theme-card__description">
+							{ decodeEntities( description ) }
+						</p>
+					)
+				}
 			</label>
-			<p className="theme-card__theme-link">
-				<a href={ homepage } target="_blank" rel="noreferrer noopener">
-					{ __( 'Learn more', 'amp' ) }
-				</a>
-			</p>
+			{
+				homepage && (
+					<p className="theme-card__theme-link">
+						<a href={ homepage } target="_blank" rel="noreferrer noopener">
+							{ __( 'Learn more', 'amp' ) }
+						</a>
+					</p>
+				)
+			}
 		</Selectable>
 	);
 }
 
 ThemeCard.propTypes = {
-	description: PropTypes.string.isRequired,
+	description: PropTypes.string,
 	ElementName: PropTypes.string,
-	homepage: PropTypes.string.isRequired,
+	homepage: PropTypes.string,
 	screenshotUrl: PropTypes.string,
 	slug: PropTypes.string.isRequired,
-	name: PropTypes.string.isRequired,
+	name: PropTypes.string,
 	disabled: PropTypes.bool,
 	style: PropTypes.object,
 };

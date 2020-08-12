@@ -7,3 +7,4 @@ export const FILE_TYPE_ERROR_VIEW = 'select-file-type-error';
 export const READER = 'reader';
 export const STANDARD = 'standard';
 export const TRANSITIONAL = 'transitional';
+export const DEFAULT_MOBILE_BREAKPOINT = 783;
