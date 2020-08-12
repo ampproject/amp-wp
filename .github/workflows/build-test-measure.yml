@@ -154,6 +154,7 @@ jobs:
         ports:
           - 3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+    continue-on-error: ${{ matrix.experimental == true }}
     strategy:
       matrix:
         php: ['7.3', '7.2', '7.1']
@@ -180,8 +181,6 @@ jobs:
           - php: '5.6'
             wp: '4.9'
             external-http: true
-
-    continue-on-error: ${{ matrix.experimental }}
 
     steps:
       - name: Checkout
@@ -249,7 +248,7 @@ jobs:
 #-----------------------------------------------------------------------------------------------------------------------
 
   dev-zip:
-    name: Build dev build ZIP and upload as GHA artifact
+    name: 'Build: dev build ZIP'
     # Only run if it is not a draft PR and the PR is not from a forked repository.
     if: github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
     runs-on: ubuntu-latest
@@ -330,14 +329,12 @@ jobs:
 #-----------------------------------------------------------------------------------------------------------------------
 
   prod-zip:
-    name: Build prod build ZIP and upload as GHA artifact
+    name: 'Build: prod build ZIP'
     # Only run if it is not a draft PR and the PR is not from a forked repository.
     if: github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
     runs-on: ubuntu-latest
     needs:
-      - lint-css
-      - lint-js
-      - lint-php
+      - unit-test-php
     outputs:
       branch-name: ${{ steps.retrieve-branch-name.outputs.branch_name }}
       git-sha-8: ${{ steps.retrieve-git-sha-8.outputs.sha8 }}
