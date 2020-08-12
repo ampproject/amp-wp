@@ -97,9 +97,11 @@ ErrorNotice.propTypes = {
  * Settings page application root.
  *
  * @param {Object} props Component props.
- * @param {string} props.section The initially focused section.
+ * @param {string} props.focusedSection The initially focused focusedSection.
  */
-function Root( { section } ) {
+function Root() {
+	const [ focusedSection, setFocusedSection ] = useState( global.location.hash.replace( /^#/, '' ) );
+
 	const { didSaveOptions, fetchingOptions, saveOptions } = useContext( Options );
 	const { error } = useContext( ErrorContext );
 	const { downloadingTheme } = useContext( ReaderThemes );
@@ -125,23 +127,31 @@ function Root( { section } ) {
 	}, [ didSaveOptions, downloadingTheme ] );
 
 	/**
-	 * Scrolls to the initially focused section after loading.
+	 * Scrolls to the initially focused focusedSection after loading.
 	 */
 	useEffect( () => {
 		if ( fetchingOptions ) {
 			return;
 		}
 
-		if ( ! section ) {
+		if ( ! focusedSection ) {
 			return;
 		}
 
-		const focusedSection = document.getElementById( section );
+		const focusedSectionElement = document.getElementById( focusedSection );
 
-		if ( focusedSection ) {
-			focusedSection.scrollIntoView();
+		if ( ! focusedSectionElement ) {
+			return;
 		}
-	}, [ fetchingOptions, section ] );
+
+		const firstInput = focusedSectionElement.querySelector( 'input, select, button:not(.components-panel__body-toggle)' );
+
+		if ( firstInput ) {
+			firstInput.focus( { behavior: 'smooth' } );
+		} else {
+			focusedSectionElement.scrollIntoView( { behavior: 'smooth' } );
+		}
+	}, [ fetchingOptions, focusedSection ] );
 
 	if ( false !== fetchingOptions ) {
 		return <Loading />;
@@ -168,7 +178,7 @@ function Root( { section } ) {
 					) }
 					hiddenTitle={ __( 'Supported templates', 'amp' ) }
 					id="supported-templates"
-					initialOpen={ 'supported-templates' === section }
+					initialOpen={ 'supported-templates' === focusedSection }
 				>
 					<SupportedTemplates />
 				</AMPDrawer>
@@ -180,7 +190,7 @@ function Root( { section } ) {
 					) }
 					hiddenTitle={ __( 'Plugin suppression', 'amp' ) }
 					id="plugin-suppression"
-					initialOpen={ 'plugin-suppression' === section }
+					initialOpen={ 'plugin-suppression' === focusedSection }
 				>
 					<PluginSuppression />
 				</AMPDrawer>
@@ -193,7 +203,7 @@ function Root( { section } ) {
 					) }
 					hiddenTitle={ __( 'Analytics', 'amp' ) }
 					id="analytics-options"
-					initialOpen={ 'analytics-options' === section }
+					initialOpen={ 'analytics-options' === focusedSection }
 				>
 					<Analytics />
 				</AMPDrawer>
@@ -212,7 +222,7 @@ function Root( { section } ) {
 	);
 }
 Root.propTypes = {
-	section: PropTypes.string,
+	focusedSection: PropTypes.string,
 };
 
 domReady( () => {
@@ -222,7 +232,7 @@ domReady( () => {
 		render( (
 			<ErrorContextProvider>
 				<Providers>
-					<Root section={ global.location.hash.replace( /^#/, '' ) } />
+					<Root />
 				</Providers>
 			</ErrorContextProvider>
 		), root );
