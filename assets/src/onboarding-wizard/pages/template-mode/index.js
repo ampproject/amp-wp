@@ -6,7 +6,7 @@ import { useEffect, useContext } from '@wordpress/element';
  * Internal dependencies
  */
 import { Navigation } from '../../components/navigation-context-provider';
-import { SiteScan } from '../../components/site-scan-context-provider';
+import { SiteScan } from '../../../components/site-scan-context-provider';
 import { ReaderThemes } from '../../../components/reader-themes-context-provider';
 import { User } from '../../components/user-context-provider';
 import { Options } from '../../../components/options-context-provider';

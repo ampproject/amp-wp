@@ -31,11 +31,11 @@ import { OptionsContextProvider } from '../components/options-context-provider';
 import { ReaderThemesContextProvider } from '../components/reader-themes-context-provider';
 import { ErrorBoundary } from '../components/error-boundary';
 import { ErrorContextProvider } from '../components/error-context-provider';
+import { SiteScanContextProvider } from '../components/site-scan-context-provider';
 import { PAGES } from './pages';
 import { SetupWizard } from './setup-wizard';
 import { NavigationContextProvider } from './components/navigation-context-provider';
 import { UserContextProvider } from './components/user-context-provider';
-import { SiteScanContextProvider } from './components/site-scan-context-provider';
 import { TemplateModeOverrideContextProvider } from './components/template-mode-override-context-provider';
 
 const { ajaxurl: wpAjaxUrl } = global;
