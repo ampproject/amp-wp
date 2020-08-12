@@ -41,9 +41,11 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 
 	/** @covers MobileRedirection::register() */
 	public function test_register() {
+		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, true );
 		$this->instance->register();
 		$this->assertEquals( 10, has_filter( 'amp_default_options', [ $this->instance, 'filter_default_options' ] ) );
 		$this->assertEquals( 10, has_filter( 'amp_options_updating', [ $this->instance, 'sanitize_options' ] ) );
+		$this->assertEquals( PHP_INT_MAX, has_action( 'template_redirect', [ $this->instance, 'redirect' ] ) );
 	}
 
 	/** @covers MobileRedirection::filter_default_options() */
