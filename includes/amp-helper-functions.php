@@ -603,14 +603,10 @@ function amp_get_slug() {
  *
  * @since 1.0
  *
- * @return string|null Current URL, or null if in a WP CLI context and the home URL could not be parsed.
+ * @return string Current URL.
  */
 function amp_get_current_url() {
 	$parsed_url = wp_parse_url( home_url() );
-
-	if ( defined( 'WP_CLI' ) && WP_CLI && ! is_array( $parsed_url ) ) {
-		return null;
-	}
 
 	if ( ! is_array( $parsed_url ) ) {
 		$parsed_url = [];
@@ -619,6 +615,7 @@ function amp_get_current_url() {
 			$parsed_url['host'] = 'localhost';
 		}
 	}
+
 	if ( empty( $parsed_url['scheme'] ) ) {
 		$parsed_url['scheme'] = is_ssl() ? 'https' : 'http';
 	}
