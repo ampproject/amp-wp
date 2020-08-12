@@ -614,6 +614,10 @@ function amp_get_current_url() {
 
 	if ( ! is_array( $parsed_url ) ) {
 		$parsed_url = [];
+
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			$parsed_url['host'] = 'localhost';
+		}
 	}
 	if ( empty( $parsed_url['scheme'] ) ) {
 		$parsed_url['scheme'] = is_ssl() ? 'https' : 'http';
