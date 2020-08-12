@@ -607,14 +607,16 @@ function amp_get_slug() {
  */
 function amp_get_current_url() {
 	$parsed_url = wp_parse_url( home_url() );
+
 	if ( ! is_array( $parsed_url ) ) {
 		$parsed_url = [];
 	}
+
 	if ( empty( $parsed_url['scheme'] ) ) {
 		$parsed_url['scheme'] = is_ssl() ? 'https' : 'http';
 	}
 	if ( ! isset( $parsed_url['host'] ) ) {
-		$parsed_url['host'] = wp_unslash( $_SERVER['HTTP_HOST'] );
+		$parsed_url['host'] = isset( $_SERVER['HTTP_HOST'] ) ? wp_unslash( $_SERVER['HTTP_HOST'] ) : 'localhost';
 	}
 
 	$current_url = $parsed_url['scheme'] . '://';
