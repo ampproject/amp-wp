@@ -392,7 +392,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			},
 
 			'default_to_localhost'        => function () {
-				unset( $_SERVER['HTTP_HOST'] );
+				unset( $_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI'] );
 				$this->set_home_url_with_filter( ':' );
 				$this->assertEquals(
 					'http://localhost/',
