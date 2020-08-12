@@ -159,6 +159,7 @@ jobs:
       matrix:
         php: ['7.3', '7.2', '7.1']
         wp: ['latest']
+        install-pwa-plugin: [true]
         include:
           - php: '8.0'
             wp: 'trunk'
@@ -181,6 +182,7 @@ jobs:
           - php: '5.6'
             wp: '4.9'
             external-http: true
+            install-pwa-plugin: false
 
     steps:
       - name: Checkout
@@ -219,6 +221,28 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --prefer-dist --optimize-autoloader  --no-suggest --no-progress --no-interaction
 
+      - name: Get npm cache directory
+        id: npm-cache
+        run: echo "::set-output name=dir::$(npm config get cache)"
+
+      - name: Configure npm cache
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-${{ env.cache-name }}-
+            ${{ runner.os }}-npm-
+            ${{ runner.os }}-
+
+      - name: Install Node dependencies
+        run: npm ci
+        env:
+          CI: true
+
+      - name: Build plugin
+        run: npm run build:dev
+
       # Scan the logs for failing tests and surface that information by creating annotations and log file decorations.
       - name: Setup problem matcher to provide annotations for PHPUnit
         # The JSON file is provided by the `shivammathur/setup-php` action. See https://github.com/shivammathur/setup-php#problem-matchers.
@@ -230,6 +254,8 @@ jobs:
           source bin/install-wp-tests.sh wordpress_test root '' 127.0.0.1:${{ job.services.mysql.ports['3306'] }} ${{ matrix.wp }} true
           source .dev-lib
           after_wp_install
+        env:
+          INSTALL_PWA_PLUGIN: ${{ matrix.install-pwa-plugin }}
 
       - name: Run tests
         if: ${{ ! matrix.coverage }}
