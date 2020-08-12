@@ -161,6 +161,7 @@ jobs:
         php: ['7.3', '7.2', '7.1']
         wp: ['latest']
         install-pwa-plugin: [true]
+        coverage: ['none']
         include:
           - php: '8.0'
             wp: 'trunk'
@@ -172,7 +173,7 @@ jobs:
 
           - php: '7.4'
             wp: 'latest'
-            coverage: true
+            coverage: xdebug
 
           - php: '7.0'
             wp: '5.1'
@@ -194,7 +195,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           extensions: mysql
-          coverage: xdebug
+          coverage: ${{ matrix.coverage }}
           tools: composer, cs2pr
 
       - name: Shutdown default MySQL service
@@ -259,11 +260,11 @@ jobs:
           INSTALL_PWA_PLUGIN: ${{ matrix.install-pwa-plugin }}
 
       - name: Run tests
-        if: ${{ ! matrix.coverage }}
+        if: ${{ matrix.coverage == 'none'/ }}
         run: vendor/bin/phpunit
 
       - name: Run tests with coverage
-        if: ${{ matrix.coverage }}
+        if: ${{ matrix.coverage != 'none' }}
         run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
 
       - name: Run external HTTP tests
