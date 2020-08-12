@@ -51,23 +51,14 @@ final class AnalyticsOptionsSubmenu implements Service, Registerable {
 	 * Adds a submenu link to the AMP options submenu.
 	 */
 	public function add_submenu_link() {
-		global $submenu;
-
-		$old_menu = $submenu[ $this->parent_menu_slug ];
-
-		// The link should be the second menu item.
-		$new_menu = array_merge(
-			[ $old_menu[0] ],
-			[
-				[
-					__( 'AMP Analytics Options', 'amp' ),
-					'manage_options',
-					menu_page_url( $this->parent_menu_slug, false ) . '#analytics-options',
-				],
-			],
-			array_slice( $old_menu, 1 )
+		add_submenu_page(
+			$this->parent_menu_slug,
+			__( 'AMP Analytics Options', 'amp' ),
+			__( 'AMP Analytics Options', 'amp' ),
+			'manage_options',
+			$this->parent_menu_slug . '#analytics-options',
+			'__return_false',
+			1
 		);
-
-		$submenu[ $this->parent_menu_slug ] = array_values( $new_menu ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 	}
 }
