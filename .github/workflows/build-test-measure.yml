@@ -41,6 +41,8 @@ jobs:
       - name: Detect coding standard violations (stylelint)
         run: npm run lint:css
 
+#-----------------------------------------------------------------------------------------------------------------------
+
   lint-js:
     name: 'Lint: JS'
     runs-on: ubuntu-latest
@@ -133,15 +135,126 @@ jobs:
 
 #-----------------------------------------------------------------------------------------------------------------------
 
+  # Adapted from workflow for running PHP unit tests on google/web-stories-wp.
+  # See https://github.com/google/web-stories-wp/blob/cb2ebada48039171e25c279bdb27d3712dd70b22/.github/workflows/continuous-integration-lint-php.yml.
+  unit-test-php:
+    name: 'Unit test: PHP ${{ matrix.php }} - WP ${{ matrix.wp }}'
+    runs-on: ubuntu-latest
+    needs:
+      - lint-css
+      - lint-js
+      - lint-php
+    services:
+      mysql:
+        image: mariadb:latest
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
+          MYSQL_ROOT_PASSWORD:
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+    strategy:
+      matrix:
+        php: ['7.3', '7.2', '7.1']
+        wp: ['latest']
+        include:
+          - php: '8.0'
+            wp: 'trunk'
+            experimental: true
+
+          - php: '7.4'
+            wp: 'latest'
+            external-http: true
+
+          - php: '7.4'
+            wp: 'latest'
+            coverage: true
+
+          - php: '7.0'
+            wp: '5.1'
+
+          - php: '5.6'
+            wp: '5.0'
+
+          - php: '5.6'
+            wp: '4.9'
+            external-http: true
+
+    continue-on-error: ${{ matrix.experimental }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mysql
+          coverage: xdebug
+          tools: composer, cs2pr
+
+      - name: Shutdown default MySQL service
+        run: sudo service mysql stop
+
+      - name: Verify MariaDB connection
+        run: |
+          while ! mysqladmin ping -h"127.0.0.1" -P"${{ job.services.mysql.ports[3306] }}" --silent; do
+            sleep 1
+          done
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Configure Composer cache
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+            ${{ runner.os }}-
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --optimize-autoloader  --no-suggest --no-progress --no-interaction
+
+      # Scan the logs for failing tests and surface that information by creating annotations and log file decorations.
+      - name: Setup problem matcher to provide annotations for PHPUnit
+        # The JSON file is provided by the `shivammathur/setup-php` action. See https://github.com/shivammathur/setup-php#problem-matchers.
+        run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+
+      - name: Set up tests
+        run: source bin/install-wp-tests.sh wordpress_test root '' 127.0.0.1:${{ job.services.mysql.ports['3306'] }} ${{ matrix.wp }} true
+
+      - name: Install Gutenberg and PWA plugins
+        # TODO: Add scripts to install plugins instead of relying on .dev-lib
+        run: |
+          source .dev-lib
+          after_wp_install
+
+      - name: Run tests
+        if: ${{ ! matrix.coverage }}
+        run: vendor/bin/phpunit
+
+      - name: Run tests with coverage
+        if: ${{ matrix.coverage }}
+        run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+
+      - name: Run external HTTP tests
+        if: ${{ matrix.external-http }}
+        run: vendor/bin/phpunit --testsuite external-http
+
+#-----------------------------------------------------------------------------------------------------------------------
+
   dev-zip:
     name: Build dev build ZIP and upload as GHA artifact
     # Only run if it is not a draft PR and the PR is not from a forked repository.
     if: github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
     runs-on: ubuntu-latest
     needs:
-      - lint-css
-      - lint-js
-      - lint-php
+      - unit-test-php
     outputs:
       branch-name: ${{ steps.retrieve-branch-name.outputs.branch_name }}
       git-sha-8: ${{ steps.retrieve-git-sha-8.outputs.sha8 }}
