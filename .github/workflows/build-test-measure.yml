@@ -158,10 +158,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        coverage: ['none']
+        external-http: [false]
+        install-pwa-plugin: [true]
         php: ['7.3', '7.2', '7.1']
         wp: ['latest']
-        install-pwa-plugin: [true]
-        coverage: ['none']
         include:
           - php: '8.0'
             wp: 'trunk'
@@ -173,7 +174,7 @@ jobs:
 
           - php: '7.4'
             wp: 'latest'
-            coverage: xdebug
+            coverage: 'xdebug'
 
           - php: '7.0'
             wp: '5.1'
@@ -185,6 +186,10 @@ jobs:
             wp: '4.9'
             external-http: true
             install-pwa-plugin: ''
+
+          - php: '7.4'
+            wp: 'latest'
+            coverage: 'xdebug'
 
     steps:
       - name: Checkout
@@ -260,7 +265,7 @@ jobs:
           INSTALL_PWA_PLUGIN: ${{ matrix.install-pwa-plugin }}
 
       - name: Run tests
-        if: ${{ matrix.coverage == 'none'/ }}
+        if: ${{ matrix.coverage == 'none' }}
         run: vendor/bin/phpunit
 
       - name: Run tests with coverage
