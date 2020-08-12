@@ -25,7 +25,7 @@ import { useWindowWidth } from '../../utils/use-window-width';
  * Component for selecting a reader theme.
  */
 export function ReaderThemeCarousel() {
-	const windowWidth = useWindowWidth();
+	const { windowWidth } = useWindowWidth();
 
 	/**
 	 * @typedef Theme

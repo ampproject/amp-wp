@@ -4,9 +4,24 @@
 import { useEffect, useState } from '@wordpress/element';
 
 /**
- * Hook providing the current window width as state.
+ * Internal dependencies
  */
-export function useWindowWidth() {
+import { DEFAULT_MOBILE_BREAKPOINT } from '../common/constants';
+
+/**
+ * Hook providing the current window width as state.
+ *
+ * @param {Object} args Hook arguments.
+ * @param {number} args.mobileBreakpoint The mobile breakpoint in pixels.
+ */
+export function useWindowWidth( args = {} ) {
+	args = {
+		...args,
+		mobileBreakpoint: DEFAULT_MOBILE_BREAKPOINT,
+	};
+
+	const { mobileBreakpoint } = args;
+
 	const [ width, setWidth ] = useState( window.innerWidth );
 
 	useEffect( () => {
@@ -21,5 +36,5 @@ export function useWindowWidth() {
 		};
 	}, [] );
 
-	return width;
+	return { windowWidth: width, isMobile: width < mobileBreakpoint };
 }

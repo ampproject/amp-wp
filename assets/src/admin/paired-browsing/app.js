@@ -8,7 +8,7 @@ import { addQueryArgs, hasQueryArg, removeQueryArgs } from '@wordpress/url';
 import './app.css';
 
 const { app, history } = window;
-const { ampSlug, noampQueryVar, ampPairedBrowsingQueryVar, documentTitlePrefix } = app;
+const { ampSlug, noampQueryVar, noampMobile, ampPairedBrowsingQueryVar, documentTitlePrefix } = app;
 
 class PairedBrowsingApp {
 	/**
@@ -194,7 +194,7 @@ class PairedBrowsingApp {
 		return addQueryArgs(
 			url,
 			{
-				[ ampSlug ]: '',
+				[ ampSlug ]: '1',
 			},
 		);
 	}
@@ -271,7 +271,7 @@ class PairedBrowsingApp {
 			}
 
 			// Update the AMP link above the iframe used for exiting paired browsing.
-			this.ampLink.href = this.ampIframe.contentWindow.location.href;
+			this.ampLink.href = removeQueryArgs( this.ampIframe.contentWindow.location.href, noampQueryVar );
 
 			this.ampPageHasErrors = false;
 			oppositeWindow = this.nonAmpIframe.contentWindow;
@@ -283,7 +283,10 @@ class PairedBrowsingApp {
 			}
 
 			// Update the non-AMP link above the iframe used for exiting paired browsing.
-			this.nonAmpLink.href = this.nonAmpIframe.contentWindow.location.href;
+			this.nonAmpLink.href = addQueryArgs(
+				this.nonAmpIframe.contentWindow.location.href,
+				{ [ noampQueryVar ]: noampMobile },
+			);
 
 			oppositeWindow = this.ampIframe.contentWindow;
 		}

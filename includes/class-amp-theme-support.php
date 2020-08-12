@@ -1923,6 +1923,20 @@ class AMP_Theme_Support {
 			);
 		}
 
+		// Abort if an expected template was not rendered.
+		$did_template_action = (
+			did_action( 'wp_head' )
+			||
+			did_action( 'wp_footer' )
+			||
+			did_action( 'amp_post_template_head' )
+			||
+			did_action( 'amp_post_template_footer' )
+		);
+		if ( ! $did_template_action ) {
+			return $response;
+		}
+
 		/*
 		 * Abort if the response was not HTML. To be post-processed as an AMP page, the output-buffered document must
 		 * have the HTML mime type and it must start with <html> followed by <head> tag (with whitespace, doctype, and comments optionally interspersed).
@@ -2428,6 +2442,7 @@ class AMP_Theme_Support {
 				'ampSlug'                   => amp_get_slug(),
 				'ampPairedBrowsingQueryVar' => self::PAIRED_BROWSING_QUERY_VAR,
 				'noampQueryVar'             => QueryVar::NOAMP,
+				'noampMobile'               => QueryVar::NOAMP_MOBILE,
 				'documentTitlePrefix'       => __( 'AMP Paired Browsing:', 'amp' ),
 			]
 		);

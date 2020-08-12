@@ -35,7 +35,7 @@ export function Carousel( {
 	namespace = 'amp-carousel',
 	highlightedItemIndex = 0,
 } ) {
-	const windowWidth = useWindowWidth();
+	const { windowWidth } = useWindowWidth();
 	const [ currentPage, originalSetCurrentPage ] = useState( null );
 	const [ pageWidth, setPageWidth ] = useState( 0 );
 	const carouselListRef = useRef();
