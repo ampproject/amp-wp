@@ -390,9 +390,18 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 					amp_get_current_url()
 				);
 			},
+
+			'default_to_localhost'         => function () {
+				unset( $_SERVER['HTTP_HOST'] );
+				$this->set_home_url_with_filter( ':' );
+				$this->assertEquals(
+					'http://localhost/',
+					amp_get_current_url()
+				);
+			},
 		];
 		return array_map(
-			function ( $assertion ) {
+			static function ( $assertion ) {
 				return [ $assertion ];
 			},
 			$assertions
