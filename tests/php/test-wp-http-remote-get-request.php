@@ -10,7 +10,7 @@ use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
 /**
  * Tests for the WpHttpRemoteGetRequest class.
  *
- * @covers WpHttpRemoteGetRequest
+ * @coversDefaultClass \AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest
  */
 class Test_WP_Http_Remote_Get_Request extends \WP_UnitTestCase {
 
@@ -36,7 +36,7 @@ class Test_WP_Http_Remote_Get_Request extends \WP_UnitTestCase {
 	 *
 	 * @dataProvider headers_test_data()
 	 *
-	 * @covers WpHttpRemoteGetRequest::get()
+	 * @covers ::get()
 	 *
 	 * @param mixed  $headers Headers that are provided to the response.
 	 * @param string $header_to_check Name of the header entry to check.

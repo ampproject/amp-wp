@@ -17,7 +17,7 @@ use WP_Customize_Panel;
 use WP_Theme;
 use WP_UnitTestCase;
 
-/** @covers ReaderThemeLoader */
+/** @coversDefaultClass \AmpProject\AmpWP\ReaderThemeLoader */
 final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 
 	use AssertContainsCompatibility, LoadsCoreThemes;
@@ -38,7 +38,7 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 		$this->restore_theme_directories();
 	}
 
-	/** @covers ReaderThemeLoader::is_enabled() */
+	/** @covers ::is_enabled() */
 	public function test_is_enabled() {
 		$active_theme_slug = 'twentytwenty';
 		$reader_theme_slug = 'twentynineteen';
@@ -65,7 +65,7 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 		$this->assertTrue( $this->instance->is_enabled() );
 	}
 
-	/** @covers ReaderThemeLoader::is_amp_request() */
+	/** @covers ::is_amp_request() */
 	public function test_is_amp_request() {
 		$_GET[ amp_get_slug() ] = '1';
 		$this->assertTrue( $this->instance->is_amp_request() );
@@ -74,14 +74,13 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 		$this->assertFalse( $this->instance->is_amp_request() );
 	}
 
-	/** @covers ReaderThemeLoader::__construct() */
 	public function test__construct() {
 		$this->assertInstanceOf( ReaderThemeLoader::class, $this->instance );
 		$this->assertInstanceOf( Service::class, $this->instance );
 		$this->assertInstanceOf( Registerable::class, $this->instance );
 	}
 
-	/** @covers ReaderThemeLoader::register() */
+	/** @covers ::register() */
 	public function test_register() {
 		$this->instance->register();
 		$this->assertEquals( 9, has_action( 'plugins_loaded', [ $this->instance, 'override_theme' ] ) );
@@ -89,7 +88,7 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'admin_print_footer_scripts-themes.php', [ $this->instance, 'inject_theme_single_template_modifications' ] ) );
 	}
 
-	/** @covers ReaderThemeLoader::filter_wp_prepare_themes_to_indicate_reader_theme() */
+	/** @covers ::filter_wp_prepare_themes_to_indicate_reader_theme() */
 	public function test_filter_wp_prepare_themes_to_indicate_reader_theme() {
 		$active_theme_slug = 'twentytwenty';
 		$reader_theme_slug = 'twentyseventeen';
@@ -116,13 +115,13 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'ampReaderThemeNotice', $themes[1] );
 	}
 
-	/** @covers ReaderThemeLoader::inject_theme_single_template_modifications() */
+	/** @covers ::inject_theme_single_template_modifications() */
 	public function test_inject_theme_single_template_modifications() {
 		$output = get_echo( [ $this->instance, 'inject_theme_single_template_modifications' ] );
 		$this->assertStringContains( '<script>', $output );
 	}
 
-	/** @covers ReaderThemeLoader::get_reader_theme() */
+	/** @covers ::get_reader_theme() */
 	public function test_get_reader_theme() {
 		$reader_theme_slug = 'twentynineteen';
 		if ( ! wp_get_theme( $reader_theme_slug )->exists() ) {
@@ -140,9 +139,9 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @covers ReaderThemeLoader::override_theme()
-	 * @covers ReaderThemeLoader::get_active_theme()
-	 * @covers ReaderThemeLoader::is_theme_overridden()
+	 * @covers ::override_theme()
+	 * @covers ::get_active_theme()
+	 * @covers ::is_theme_overridden()
 	 */
 	public function test_override_theme() {
 		$active_theme_slug = 'twentytwenty';
@@ -199,7 +198,7 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 
 	}
 
-	/** @covers ReaderThemeLoader::disable_widgets() */
+	/** @covers ::disable_widgets() */
 	public function test_disable_widgets() {
 		remove_all_filters( 'sidebars_widgets' );
 		$this->assertNotEmpty( wp_get_sidebars_widgets() );
@@ -212,7 +211,7 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 		$this->assertNotContains( 'widgets', apply_filters( 'customize_loaded_components', [ 'widgets' ] ) );
 	}
 
-	/** @covers ReaderThemeLoader::customize_previewable_devices() */
+	/** @covers ::customize_previewable_devices() */
 	public function test_customize_previewable_devices() {
 		$original_devices = [
 			'desktop' => [
@@ -232,7 +231,7 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 		$this->assertFalse( empty( $devices['tablet']['default'] ) );
 	}
 
-	/** @covers ReaderThemeLoader::remove_customizer_themes_panel() */
+	/** @covers ::remove_customizer_themes_panel() */
 	public function test_remove_customizer_themes_panel() {
 		require_once ABSPATH . WPINC . '/class-wp-customize-manager.php';
 		$wp_customize = new WP_Customize_Manager();
