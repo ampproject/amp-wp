@@ -34,6 +34,7 @@ export const HANDLE_TYPE_RIGHT = 'right';
  */
 export function AMPDrawer( { children = null, className, heading, handleType = HANDLE_TYPE_FULL_WIDTH, id, initialOpen = false, selected = false, hiddenTitle } ) {
 	const [ opened, setOpened ] = useState( initialOpen );
+	const [ resetting, setResetting ] = useState( false );
 
 	/**
 	 * Watch for changes to the panel body attributes and set opened state accordingly.
@@ -59,6 +60,23 @@ export function AMPDrawer( { children = null, className, heading, handleType = H
 		};
 	}, [ id, opened ] );
 
+	/**
+	 * Forces a rerender of the PanelBody when the initialOpen prop changes.
+	 */
+	useEffect( () => {
+		setResetting( true );
+
+		const timeout = setTimeout( () => {
+			setResetting( false );
+		}, 1 );
+
+		return () => {
+			if ( timeout ) {
+				clearTimeout( timeout );
+			}
+		};
+	}, [ initialOpen ] );
+
 	return (
 		<Selectable
 			id={ id }
@@ -77,23 +95,25 @@ export function AMPDrawer( { children = null, className, heading, handleType = H
 					{ heading }
 				</div>
 			) }
-			<PanelBody
-				title={ handleType === HANDLE_TYPE_RIGHT ? (
-					<span className="components-visually-hidden">
-						{ hiddenTitle }
-					</span>
-				) : (
-					<div className="amp-drawer__heading">
-						{ heading }
+			{ ! resetting && (
+				<PanelBody
+					title={ handleType === HANDLE_TYPE_RIGHT ? (
+						<span className="components-visually-hidden">
+							{ hiddenTitle }
+						</span>
+					) : (
+						<div className="amp-drawer__heading">
+							{ heading }
+						</div>
+					) }
+					className="amp-drawer__panel-body"
+					initialOpen={ initialOpen }
+				>
+					<div className="amp-drawer__panel-body-inner">
+						{ children }
 					</div>
-				) }
-				className="amp-drawer__panel-body"
-				initialOpen={ initialOpen }
-			>
-				<div className="amp-drawer__panel-body-inner">
-					{ children }
-				</div>
-			</PanelBody>
+				</PanelBody>
+			) }
 		</Selectable>
 	);
 }

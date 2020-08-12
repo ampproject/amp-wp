@@ -94,10 +94,28 @@ ErrorNotice.propTypes = {
 };
 
 /**
- * Settings page application root.
+ * Scrolls to the first focusable element in a section, or to the section if no focusable elements are found.
  *
- * @param {Object} props Component props.
- * @param {string} props.focusedSection The initially focused focusedSection.
+ * @param {string} focusedSectionId A section ID.
+ */
+function scrollFocusedSectionIntoView( focusedSectionId ) {
+	const focusedSectionElement = document.getElementById( focusedSectionId );
+
+	if ( ! focusedSectionElement ) {
+		return;
+	}
+
+	const firstInput = focusedSectionElement.querySelector( 'input, select, textarea, button:not(.components-panel__body-toggle)' );
+
+	if ( firstInput ) {
+		firstInput.focus();
+	} else {
+		focusedSectionElement.scrollIntoView( { behavior: 'smooth' } );
+	}
+}
+
+/**
+ * Settings page application root.
  */
 function Root() {
 	const [ focusedSection, setFocusedSection ] = useState( global.location.hash.replace( /^#/, '' ) );
@@ -126,32 +144,40 @@ function Root() {
 		return () => undefined;
 	}, [ didSaveOptions, downloadingTheme ] );
 
-	/**
-	 * Scrolls to the initially focused focusedSection after loading.
-	 */
 	useEffect( () => {
 		if ( fetchingOptions ) {
-			return;
+			return () => null;
 		}
+		const timeout = setTimeout( () => {
+			scrollFocusedSectionIntoView( focusedSection );
+		} );
 
-		if ( ! focusedSection ) {
-			return;
-		}
-
-		const focusedSectionElement = document.getElementById( focusedSection );
-
-		if ( ! focusedSectionElement ) {
-			return;
-		}
-
-		const firstInput = focusedSectionElement.querySelector( 'input, select, button:not(.components-panel__body-toggle)' );
-
-		if ( firstInput ) {
-			firstInput.focus( { behavior: 'smooth' } );
-		} else {
-			focusedSectionElement.scrollIntoView( { behavior: 'smooth' } );
-		}
+		return () => {
+			clearTimeout( timeout );
+		};
 	}, [ fetchingOptions, focusedSection ] );
+
+	/**
+	 * Resets the focused element state when the hash changes on the page.
+	 */
+	useEffect( () => {
+		const hashChangeCallback = ( event = null ) => {
+			if ( event ) {
+				event.preventDefault();
+			}
+
+			// Ensure this runs after state upates.
+			const newFocusedSection = global.location.hash.replace( /^#/, '' );
+			setFocusedSection( newFocusedSection );
+		};
+
+		hashChangeCallback();
+		global.addEventListener( 'hashchange', hashChangeCallback );
+
+		return () => {
+			global.removeEventListener( 'hashchange', hashChangeCallback );
+		};
+	}, [ fetchingOptions ] );
 
 	if ( false !== fetchingOptions ) {
 		return <Loading />;
@@ -221,9 +247,6 @@ function Root() {
 		</>
 	);
 }
-Root.propTypes = {
-	focusedSection: PropTypes.string,
-};
 
 domReady( () => {
 	const root = document.getElementById( 'amp-settings-root' );
