@@ -156,6 +156,7 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     continue-on-error: ${{ matrix.experimental == true }}
     strategy:
+      fail-fast: false
       matrix:
         php: ['7.3', '7.2', '7.1']
         wp: ['latest']
@@ -182,7 +183,7 @@ jobs:
           - php: '5.6'
             wp: '4.9'
             external-http: true
-            install-pwa-plugin: false
+            install-pwa-plugin: ''
 
     steps:
       - name: Checkout
