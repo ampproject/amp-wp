@@ -8,6 +8,7 @@
 
 namespace AmpProject\AmpWP\Validation;
 
+use AMP_Theme_Support;
 use AMP_Validation_Manager;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
@@ -61,7 +62,31 @@ final class ThemeScanRESTController extends WP_REST_Controller implements Delaye
 				[
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => [ $this, 'get_items' ],
-					'args'                => [],
+					'args'                => [
+						'include' => [
+							'default'     => [],
+							'description' => __( 'Array of callbacks that. If set, a URL will only be scanned if one is true.', 'amp' ),
+							'type'        => 'array',
+							'items'       => [
+								'type' => 'string',
+							],
+						],
+						'limit'   => [
+							'default'     => 10,
+							'description' => __( 'The maximum number of URLs to validate for each type.', 'amp' ),
+							'type'        => 'integer',
+						],
+						'mode'    => [
+							'default'     => AMP_Theme_Support::STANDARD_MODE_SLUG,
+							'description' => __( 'The mode to use during the scan.', 'amp' ),
+							'enum'        => [
+								AMP_Theme_Support::READER_MODE_SLUG,
+								AMP_Theme_Support::STANDARD_MODE_SLUG,
+								AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
+							],
+							'type'        => 'string',
+						],
+					],
 					'permission_callback' => [ $this, 'get_items_permissions_check' ],
 				],
 				'schema' => $this->get_public_item_schema(),
