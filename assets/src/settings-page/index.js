@@ -166,7 +166,7 @@ function Root() {
 				event.preventDefault();
 			}
 
-			// Ensure this runs after state upates.
+			// Ensure this runs after state updates.
 			const newFocusedSection = global.location.hash.replace( /^#/, '' );
 			setFocusedSection( newFocusedSection );
 		};
