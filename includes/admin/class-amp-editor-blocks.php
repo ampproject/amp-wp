@@ -130,7 +130,7 @@ class AMP_Editor_Blocks {
 	 * @return string Content (unmodified).
 	 */
 	public function tally_content_requiring_amp_scripts( $content ) {
-		if ( ! is_amp_endpoint() ) {
+		if ( ! amp_is_request() ) {
 			$pattern = sprintf( '/<(%s)\b.*?>/s', implode( '|', $this->amp_blocks ) );
 			if ( preg_match_all( $pattern, $content, $matches ) ) {
 				$this->content_required_amp_scripts = array_merge(
@@ -146,7 +146,7 @@ class AMP_Editor_Blocks {
 	 * Print AMP scripts required for AMP components used in a non-AMP document (dirty AMP).
 	 */
 	public function print_dirty_amp_scripts() {
-		if ( ! is_amp_endpoint() && ! empty( $this->content_required_amp_scripts ) ) {
+		if ( ! amp_is_request() && ! empty( $this->content_required_amp_scripts ) ) {
 			wp_scripts()->do_items( $this->content_required_amp_scripts );
 		}
 	}

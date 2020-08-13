@@ -154,7 +154,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		set_query_var( QueryVar::AMP, '1' );
 		$this->assertFalse( amp_is_canonical() );
 		$this->assertTrue( amp_is_available() );
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_request() );
 		$this->instance->redirect();
 		$this->assertEquals( 10, has_action( 'wp_head', [ $this->instance, 'add_mobile_version_switcher_styles' ] ) );
 		$this->assertEquals( 10, has_action( 'amp_post_template_head', [ $this->instance, 'add_mobile_version_switcher_styles' ] ) );
@@ -174,7 +174,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		add_filter( 'amp_pre_is_mobile', '__return_false' );
 
 		$this->go_to( add_query_arg( QueryVar::AMP, '1', '/' ) );
-		$this->assertFalse( is_amp_endpoint() );
+		$this->assertFalse( amp_is_request() );
 		$this->assertFalse( $this->instance->is_mobile_request() );
 
 		$this->instance->redirect();
@@ -186,7 +186,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 
 		$this->go_to( '/' );
-		$this->assertFalse( is_amp_endpoint() );
+		$this->assertFalse( amp_is_request() );
 		$this->assertTrue( amp_is_available() );
 		$this->instance->redirect();
 		$this->assertEquals( 10, has_action( 'wp_head', [ $this->instance, 'add_mobile_version_switcher_styles' ] ) );
@@ -201,7 +201,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		add_filter( 'amp_pre_is_mobile', '__return_true' );
 
 		$this->go_to( '/' );
-		$this->assertFalse( is_amp_endpoint() );
+		$this->assertFalse( amp_is_request() );
 		$this->assertTrue( amp_is_available() );
 		$redirected_url = null;
 		add_filter(
@@ -226,7 +226,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		add_filter( 'amp_pre_is_mobile', '__return_true' );
 
 		$this->go_to( '/' );
-		$this->assertFalse( is_amp_endpoint() );
+		$this->assertFalse( amp_is_request() );
 		$this->assertTrue( amp_is_available() );
 		$_COOKIE[ MobileRedirection::DISABLED_STORAGE_KEY ] = '1';
 		$this->instance->redirect();
@@ -242,7 +242,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 
 		$this->go_to( add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, '/' ) );
 		$_GET[ QueryVar::NOAMP ] = QueryVar::NOAMP_MOBILE;
-		$this->assertFalse( is_amp_endpoint() );
+		$this->assertFalse( amp_is_request() );
 		$this->assertTrue( amp_is_available() );
 
 		$this->assertArrayNotHasKey( MobileRedirection::DISABLED_STORAGE_KEY, $_COOKIE );
@@ -262,7 +262,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		set_query_var( QueryVar::AMP, '1' );
 		$this->assertFalse( amp_is_canonical() );
 		$this->assertTrue( amp_is_available() );
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_request() );
 		$_COOKIE[ MobileRedirection::DISABLED_STORAGE_KEY ] = '1';
 		$this->instance->redirect();
 		$this->assertArrayNotHasKey( MobileRedirection::DISABLED_STORAGE_KEY, $_COOKIE );
@@ -465,7 +465,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		if ( $is_amp ) {
 			set_query_var( QueryVar::AMP, '1' );
 		}
-		$this->assertEquals( $is_amp, is_amp_endpoint() );
+		$this->assertEquals( $is_amp, amp_is_request() );
 		ob_start();
 		$this->instance->add_mobile_version_switcher_link();
 		$output = ob_get_clean();
@@ -476,7 +476,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		add_filter(
 			'amp_mobile_version_switcher_link_text',
 			function ( $link_text ) {
-				return $link_text . ' ' . ( is_amp_endpoint() ? '(non-AMP version)' : '(AMP version)' );
+				return $link_text . ' ' . ( amp_is_request() ? '(non-AMP version)' : '(AMP version)' );
 			}
 		);
 
@@ -484,7 +484,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		ob_start();
 		$this->instance->add_mobile_version_switcher_link();
 		$output = ob_get_clean();
-		$this->assertStringContains( is_amp_endpoint() ? '(non-AMP version)' : '(AMP version)', $output );
+		$this->assertStringContains( amp_is_request() ? '(non-AMP version)' : '(AMP version)', $output );
 		$this->assertStringContains( '<script data-ampdevmode>', $output );
 		$this->assertStringContains( 'notApplicableMessage', $output );
 	}

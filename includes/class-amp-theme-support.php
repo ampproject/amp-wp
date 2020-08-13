@@ -322,7 +322,7 @@ class AMP_Theme_Support {
 			false !== get_query_var( amp_get_slug(), false )
 		);
 
-		if ( ! is_amp_endpoint() ) {
+		if ( ! amp_is_request() ) {
 			/*
 			 * Redirect to AMP-less URL if AMP is not available for this URL and yet the query var is present.
 			 * Temporary redirect is used for admin users because implied transitional mode and template support can be
@@ -415,7 +415,7 @@ class AMP_Theme_Support {
 			 * When in AMP transitional mode *with* theme support, then the proper AMP URL has the 'amp' URL param
 			 * and not the /amp/ endpoint. The URL param is now the exclusive way to mark AMP in transitional mode
 			 * when amp theme support present. This is important for plugins to be able to reliably call
-			 * is_amp_endpoint() before the parse_query action.
+			 * amp_is_request() before the parse_query action.
 			 */
 			$old_url = amp_get_current_url();
 			$new_url = add_query_arg( amp_get_slug(), '', amp_remove_endpoint( $old_url ) );
@@ -514,7 +514,7 @@ class AMP_Theme_Support {
 	 *
 	 * @since 1.0
 	 * @global WP_Query $wp_query
-	 * @see post_supports_amp()
+	 * @see amp_is_post_supported()
 	 *
 	 * @param WP_Query|WP_Post|null $query Query or queried post. If null then the global query will be used.
 	 * @return array {
@@ -2327,7 +2327,7 @@ class AMP_Theme_Support {
 		add_filter(
 			'script_loader_tag',
 			static function( $tag, $handle ) {
-				if ( is_amp_endpoint() && self::has_dependency( wp_scripts(), 'amp-paired-browsing-client', $handle ) ) {
+				if ( amp_is_request() && self::has_dependency( wp_scripts(), 'amp-paired-browsing-client', $handle ) ) {
 					$tag = preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
 				}
 				return $tag;

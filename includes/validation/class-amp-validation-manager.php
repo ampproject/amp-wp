@@ -283,7 +283,7 @@ class AMP_Validation_Manager {
 			&&
 			'trash' !== $post->post_status
 			&&
-			post_supports_amp( $post )
+			amp_is_post_supported( $post )
 		);
 	}
 
@@ -368,7 +368,7 @@ class AMP_Validation_Manager {
 			return;
 		}
 
-		$is_amp_endpoint = is_amp_endpoint();
+		$is_amp_endpoint = amp_is_request();
 
 		$current_url = amp_get_current_url();
 		$non_amp_url = amp_remove_endpoint( $current_url );

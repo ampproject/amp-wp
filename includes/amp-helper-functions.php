@@ -416,9 +416,10 @@ function amp_is_available() {
 			return;
 		}
 		$message = sprintf(
-			/* translators: %1$s: is_amp_endpoint(), %2$s: the current action, %3$s: the wp action, %4$s: the WP_Query class, %5$s: the amp_skip_post() function */
-			__( '%1$s (or %2$s) was called too early and so it will not work properly. WordPress is currently doing the "%3$s" action. Calling this function before the "%4$s" action means it will not have access to %5$s and the queried object to determine if it is an AMP response, thus neither the "%6$s" filter nor the AMP enabled toggle will be considered.', 'amp' ),
+			/* translators: %1$s: amp_is_request(), %2$s: is_amp_endpoint(), %3$s: the current action, %4$s: the wp action, %5$s: the WP_Query class, %6$s: the amp_skip_post() function */
+			__( '%1$s (or %2$s, formerly %3$s) was called too early and so it will not work properly. WordPress is currently doing the "%4$s" action. Calling this function before the "%5$s" action means it will not have access to %6$s and the queried object to determine if it is an AMP response, thus neither the "%7$s" filter nor the AMP enabled toggle will be considered.', 'amp' ),
 			'amp_is_available()',
+			'amp_is_request()',
 			'is_amp_endpoint()',
 			current_action(),
 			'wp',
@@ -532,7 +533,7 @@ function amp_is_available() {
 		$queried_object instanceof WP_Post &&
 		$wp_query instanceof WP_Query &&
 		( $wp_query->is_singular() || $wp_query->is_posts_page ) &&
-		post_supports_amp( $queried_object ) )
+		amp_is_post_supported( $queried_object ) )
 	) {
 		// Abort if in legacy Reader mode and the post doesn't support AMP.
 		return false;
@@ -570,7 +571,7 @@ function _amp_bootstrap_customizer() {
  */
 function amp_redirect_old_slug_to_new_url( $link ) {
 
-	if ( is_amp_endpoint() && ! amp_is_canonical() ) {
+	if ( amp_is_request() && ! amp_is_canonical() ) {
 		if ( ! amp_is_legacy() ) {
 			$link = add_query_arg( amp_get_slug(), '', $link );
 		} else {
@@ -785,19 +786,33 @@ function amp_add_amphtml_link() {
 /**
  * Determine whether a given post supports AMP.
  *
+ * @since 2.0 Formerly known as post_supports_amp().
+ * @see AMP_Post_Type_Support::get_support_errors()
+ *
+ * @param WP_Post $post Post.
+ * @return bool Whether the post supports AMP.
+ */
+function amp_is_post_supported( $post ) {
+	return 0 === count( AMP_Post_Type_Support::get_support_errors( $post ) );
+}
+
+/**
+ * Determine whether a given post supports AMP.
+ *
  * @since 0.1
  * @since 0.6 Returns false when post has meta to disable AMP.
- * @see   AMP_Post_Type_Support::get_support_errors()
+ * @since 2.0 Renamed to AMP-prefixed version, amp_is_endpoint().
+ * @deprecated Use amp_is_post_supported() instead.
  *
  * @param WP_Post $post Post.
  * @return bool Whether the post supports AMP.
  */
 function post_supports_amp( $post ) {
-	return 0 === count( AMP_Post_Type_Support::get_support_errors( $post ) );
+	return amp_is_post_supported( $post );
 }
 
 /**
- * Determine whether the current response being served as AMP.
+ * Determine whether the current request is for an AMP page.
  *
  * This function cannot be called before the parse_query action because it needs to be able
  * to determine the queried object is able to be served as AMP. If 'amp' theme support is not
@@ -805,10 +820,12 @@ function post_supports_amp( $post ) {
  * present, then it returns true in transitional mode if an AMP template is available and the query
  * var is present, or else in standard mode if just the template is available.
  *
+ * @since 2.0 Formerly known as is_amp_endpoint().
+ *
  * @return bool Whether it is the AMP endpoint.
  * @global WP_Query $wp_query
  */
-function is_amp_endpoint() {
+function amp_is_request() {
 	global $wp_query;
 
 	if ( AMP_Validation_Manager::$is_validate_request ) {
@@ -844,8 +861,28 @@ function is_amp_endpoint() {
 }
 
 /**
+ * Determine whether the current response being served as AMP.
+ *
+ * This function cannot be called before the parse_query action because it needs to be able
+ * to determine the queried object is able to be served as AMP. If 'amp' theme support is not
+ * present, this function returns true just if the query var is present. If theme support is
+ * present, then it returns true in transitional mode if an AMP template is available and the query
+ * var is present, or else in standard mode if just the template is available.
+ *
+ * @since 0.1
+ * @since 2.0 Renamed to AMP-prefixed version, amp_is_endpoint().
+ * @deprecated Use amp_is_endpoint() instead.
+ *
+ * @return bool Whether it is the AMP endpoint.
+ */
+function is_amp_endpoint() {
+	return amp_is_request();
+}
+
+/**
  * Get AMP asset URL.
  *
+ * @since 0.1
  * @internal
  *
  * @param string $file Relative path to file in assets directory.
@@ -1797,7 +1834,7 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 		return;
 	}
 
-	$is_amp_endpoint = is_amp_endpoint();
+	$is_amp_endpoint = amp_is_request();
 
 	if ( $is_amp_endpoint ) {
 		$href = amp_remove_endpoint( amp_get_current_url() );

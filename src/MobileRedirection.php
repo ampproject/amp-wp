@@ -109,7 +109,7 @@ final class MobileRedirection implements Service, Registerable {
 
 			// Now abort if it's not an AMP page and the user agent is not mobile, since there won't be any redirection
 			// to the AMP version and we don't need to show a footer link to go to the AMP version.
-			if ( ! $this->is_mobile_request() && ! is_amp_endpoint() ) {
+			if ( ! $this->is_mobile_request() && ! amp_is_request() ) {
 				return;
 			}
 		}
@@ -118,7 +118,7 @@ final class MobileRedirection implements Service, Registerable {
 		add_action( 'wp_head', [ $this, 'add_mobile_version_switcher_styles' ] );
 		add_action( 'amp_post_template_head', [ $this, 'add_mobile_version_switcher_styles' ] ); // For legacy Reader mode theme.
 
-		if ( ! is_amp_endpoint() ) {
+		if ( ! amp_is_request() ) {
 			add_action( 'wp_head', [ $this, 'add_mobile_alternative_link' ] );
 			if ( $js ) {
 				// Add mobile redirection script.
@@ -425,7 +425,7 @@ final class MobileRedirection implements Service, Registerable {
 	public function add_mobile_version_switcher_link() {
 		$should_redirect_via_js = $this->is_using_client_side_redirection();
 
-		$is_amp = is_amp_endpoint();
+		$is_amp = amp_is_request();
 		if ( $is_amp ) {
 			$rel  = [ Attribute::REL_NOAMPHTML, Attribute::REL_NOFOLLOW ];
 			$url  = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, amp_remove_endpoint( amp_get_current_url() ) );
@@ -439,7 +439,7 @@ final class MobileRedirection implements Service, Registerable {
 		/**
 		 * Filters the text to be used in the mobile switcher link.
 		 *
-		 * Use the `is_amp_endpoint()` function to determine whether you are filtering the
+		 * Use the `amp_is_request()` function to determine whether you are filtering the
 		 * text for the link to go to the non-AMP version or the AMP version.
 		 *
 		 * @since 2.0

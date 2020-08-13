@@ -66,7 +66,7 @@ final class PluginSuppression implements Service, Registerable {
 			$min_priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
 
 			// In Standard mode we _have_ to wait for the wp action because with the absence of a query parameter
-			// we have to rely on is_amp_endpoint() and the WP_Query to determine whether a plugin should be suppressed.
+			// we have to rely on amp_is_request() and the WP_Query to determine whether a plugin should be suppressed.
 			add_action( 'wp', [ $this, 'maybe_suppress_plugins' ], $min_priority );
 		}
 	}
@@ -103,7 +103,7 @@ final class PluginSuppression implements Service, Registerable {
 	 * @return bool Whether plugins are being suppressed.
 	 */
 	public function maybe_suppress_plugins() {
-		if ( is_amp_endpoint() ) {
+		if ( amp_is_request() ) {
 			return $this->suppress_plugins();
 		}
 		return false;
