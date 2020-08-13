@@ -94,20 +94,6 @@ final class SiteScan {
 	public $validity_by_type = [];
 
 	/**
-	 * Whether the scan is running in a CLI script.
-	 *
-	 * @var boolean
-	 */
-	private $is_wp_cli;
-
-	/**
-	 * The callback to run when a post is being validated.
-	 *
-	 * @var callable|null
-	 */
-	private $tick_callback;
-
-	/**
 	 * URLs to crawl.
 	 *
 	 * @var array
@@ -117,24 +103,18 @@ final class SiteScan {
 	/**
 	 * Class constructor.
 	 *
-	 * @param integer       $limit_type_validate_count The maximum number of URLs to validate for each type.
-	 * @param array         $include_conditionals An allowlist of conditionals to use for validation.
-	 * @param boolean       $force_crawl_urls Whether to force crawling of URLs.
-	 * @param boolean       $is_wp_cli Whether the scan is running in a CLI script.
-	 * @param callable|null $tick_callback The callback to run when a post is being validated.
+	 * @param integer $limit_type_validate_count The maximum number of URLs to validate for each type.
+	 * @param array   $include_conditionals An allowlist of conditionals to use for validation.
+	 * @param boolean $force_crawl_urls Whether to force crawling of URLs.
 	 */
 	public function __construct(
 		$limit_type_validate_count = 10,
 		$include_conditionals = [],
-		$force_crawl_urls = false,
-		$is_wp_cli = false,
-		$tick_callback = null
+		$force_crawl_urls = false
 	) {
 		$this->limit_type_validate_count = $limit_type_validate_count;
 		$this->include_conditionals      = $include_conditionals;
 		$this->force_crawl_urls          = $force_crawl_urls;
-		$this->is_wp_cli                 = $is_wp_cli;
-		$this->tick_callback             = $tick_callback;
 	}
 
 	/**
@@ -236,19 +216,6 @@ final class SiteScan {
 
 		// Check whether this taxonomy's template is supported, including in the 'AMP Settings' > 'Supported Templates' UI.
 		return ! empty( $supportable_templates[ $template ]['supported'] );
-	}
-
-	/**
-	 * Validates the URLs of the entire site.
-	 *
-	 * Includes the URLs of public, published posts, public taxonomies, and other templates.
-	 * This validates one of each type at a time,
-	 * and iterates until it reaches the maximum number of URLs for each type.
-	 */
-	public function crawl_site() {
-		foreach ( $this->get_urls() as $url ) {
-			$this->validate_and_store_url( ...$url );
-		}
 	}
 
 	/**
@@ -406,7 +373,7 @@ final class SiteScan {
 	 * @param string $url  The URL to validate.
 	 * @param string $type The type of template, post, or taxonomy.
 	 */
-	private function validate_and_store_url( $url, $type ) {
+	public function validate_and_store_url( $url, $type ) {
 		$validity = AMP_Validation_Manager::validate_url_and_store( $url );
 
 		/*
@@ -414,14 +381,7 @@ final class SiteScan {
 		 * One cause of an error is if the validation request results in a 404 response code.
 		 */
 		if ( is_wp_error( $validity ) ) {
-			if ( $this->is_wp_cli ) {
-				WP_CLI::warning( sprintf( 'Validate URL error (%1$s): %2$s URL: %3$s', $validity->get_error_code(), $validity->get_error_message(), $url ) );
-			}
-			return;
-		}
-
-		if ( is_callable( $this->tick_callback ) ) {
-			call_user_func( $this->tick_callback );
+			return $validity;
 		}
 
 		$validation_errors      = wp_list_pluck( $validity['results'], 'error' );
@@ -458,5 +418,7 @@ final class SiteScan {
 		if ( 0 === $unaccepted_error_count ) {
 			$this->validity_by_type[ $type ]['valid']++;
 		}
+
+		return true;
 	}
 }

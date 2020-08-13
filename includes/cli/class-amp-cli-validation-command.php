@@ -136,8 +136,7 @@ final class AMP_CLI_Validation_Command {
 			$limit_type_validate_count,
 			$include_conditionals,
 			$force_crawl_urls,
-			true,
-			[ $this, 'tick' ]
+			true
 		);
 
 		$number_urls_to_crawl = $this->site_scan->count_urls_to_validate();
@@ -165,7 +164,7 @@ final class AMP_CLI_Validation_Command {
 			sprintf( 'Validating %d URLs...', $number_urls_to_crawl ),
 			$number_urls_to_crawl
 		);
-		$this->site_scan->crawl_site();
+		$this->crawl_site();
 		$this->wp_cli_progress->finish();
 
 		$key_template_type = 'Template or content type';
@@ -211,11 +210,20 @@ final class AMP_CLI_Validation_Command {
 	}
 
 	/**
-	 * Ticks the progress bar.
+	 * Validates the URLs of the entire site.
+	 *
+	 * Includes the URLs of public, published posts, public taxonomies, and other templates.
+	 * This validates one of each type at a time,
+	 * and iterates until it reaches the maximum number of URLs for each type.
 	 */
-	public function tick() {
-		if ( $this->wp_cli_progress ) {
+	private function crawl_site() {
+		foreach ( $this->site_scan->get_urls() as $url ) {
+			$validity = $this->site_scan->validate_and_store_url( ...$url );
 			$this->wp_cli_progress->tick();
+
+			if ( is_wp_error( $validity ) ) {
+				WP_CLI::warning( sprintf( 'Validate URL error (%1$s): %2$s URL: %3$s', $validity->get_error_code(), $validity->get_error_message(), $url ) );
+			}
 		}
 	}
 
