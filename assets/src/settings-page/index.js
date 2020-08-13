@@ -148,13 +148,8 @@ function Root() {
 		if ( fetchingOptions ) {
 			return () => null;
 		}
-		const timeout = setTimeout( () => {
-			scrollFocusedSectionIntoView( focusedSection );
-		} );
 
-		return () => {
-			clearTimeout( timeout );
-		};
+		scrollFocusedSectionIntoView( focusedSection );
 	}, [ fetchingOptions, focusedSection ] );
 
 	/**
