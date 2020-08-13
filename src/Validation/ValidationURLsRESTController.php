@@ -8,8 +8,6 @@
 
 namespace AmpProject\AmpWP\Validation;
 
-use AMP_Theme_Support;
-use AMP_Validation_Manager;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -20,18 +18,18 @@ use WP_REST_Response;
 use WP_REST_Server;
 
 /**
- * OptionsRESTController class.
+ * ValidationURLsRESTController class.
  *
  * @since 2.1
  */
-final class ThemeScanRESTController extends WP_REST_Controller implements Delayed, Service, Registerable {
+final class ValidationURLsRESTController extends WP_REST_Controller implements Delayed, Service, Registerable {
 
 	/**
-	 * AMP_Validation_Manager instance.
+	 * Response schema.
 	 *
-	 * @var AMP_Validation_Manager
+	 * @var array
 	 */
-	private $validation_manager;
+	protected $schema;
 
 	/**
 	 * Get the action to use for registering the service.
@@ -46,9 +44,8 @@ final class ThemeScanRESTController extends WP_REST_Controller implements Delaye
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->validation_manager = new AMP_Validation_Manager();
-		$this->namespace          = 'amp/v1';
-		$this->rest_base          = 'theme-scan';
+		$this->namespace = 'amp/v1';
+		$this->rest_base = 'validation-urls';
 	}
 
 	/**
@@ -61,7 +58,7 @@ final class ThemeScanRESTController extends WP_REST_Controller implements Delaye
 			[
 				[
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => [ $this, 'get_items' ],
+					'callback'            => [ $this, 'get_urls' ],
 					'args'                => [
 						'include' => [
 							'default'     => [],
@@ -76,16 +73,6 @@ final class ThemeScanRESTController extends WP_REST_Controller implements Delaye
 							'description' => __( 'The maximum number of URLs to validate for each type.', 'amp' ),
 							'type'        => 'integer',
 						],
-						'mode'    => [
-							'default'     => AMP_Theme_Support::STANDARD_MODE_SLUG,
-							'description' => __( 'The mode to use during the scan.', 'amp' ),
-							'enum'        => [
-								AMP_Theme_Support::READER_MODE_SLUG,
-								AMP_Theme_Support::STANDARD_MODE_SLUG,
-								AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
-							],
-							'type'        => 'string',
-						],
 					],
 					'permission_callback' => [ $this, 'get_items_permissions_check' ],
 				],
@@ -95,7 +82,7 @@ final class ThemeScanRESTController extends WP_REST_Controller implements Delaye
 	}
 
 	/**
-	 * Checks whether the current user has permission to manage options.
+	 * Checks whether the current user has permission to receive URLs.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return true|WP_Error True if the request has permission; WP_Error object otherwise.
@@ -113,15 +100,15 @@ final class ThemeScanRESTController extends WP_REST_Controller implements Delaye
 	}
 
 	/**
-	 * Retrieves all AMP plugin options.
+	 * Retrieves URLs to scan.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
-	public function get_items( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		$scan_results = [];
+	public function get_urls( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+		$site_scan = new SiteScan( $request['limit'], $request['include'] );
 
-		return rest_ensure_response( $scan_results );
+		return rest_ensure_response( $site_scan->get_urls() );
 	}
 
 	/**
@@ -132,10 +119,12 @@ final class ThemeScanRESTController extends WP_REST_Controller implements Delaye
 	public function get_item_schema() {
 		if ( ! $this->schema ) {
 			$this->schema = [
-				'$schema'    => 'http://json-schema.org/draft-04/schema#',
-				'title'      => 'amp-wp-theme-scan',
-				'type'       => 'object',
-				'properties' => [],
+				'$schema' => 'http://json-schema.org/draft-04/schema#',
+				'title'   => 'amp-wp-validation-urls',
+				'type'    => 'array',
+				'items'   => [
+					'type' => 'array',
+				],
 			];
 		}
 

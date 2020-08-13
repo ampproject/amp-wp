@@ -108,6 +108,13 @@ final class SiteScan {
 	private $tick_callback;
 
 	/**
+	 * URLs to crawl.
+	 *
+	 * @var array
+	 */
+	private $urls;
+
+	/**
 	 * Class constructor.
 	 *
 	 * @param integer       $limit_type_validate_count The maximum number of URLs to validate for each type.
@@ -131,6 +138,67 @@ final class SiteScan {
 	}
 
 	/**
+	 * Provides the array of URLs to check. Each URL is an array with two elements, with the URL at index 0 and the type at index 1.
+	 *
+	 * @return array Array of URLs and types.
+	 */
+	public function get_urls() {
+		if ( ! is_null( $this->urls ) ) {
+			return $this->urls;
+		}
+
+		/*
+		 * If 'Your homepage displays' is set to 'Your latest posts', validate the homepage.
+		 * It will not be part of the page validation below.
+		 */
+		if ( 'posts' === get_option( 'show_on_front' ) && $this->is_template_supported( 'is_home' ) ) {
+			$this->urls[] = [ home_url( '/' ), 'home' ];
+		}
+
+		$amp_enabled_taxonomies = array_filter(
+			get_taxonomies( [ 'public' => true ] ),
+			[ $this, 'does_taxonomy_support_amp' ]
+		);
+		$public_post_types      = get_post_types( [ 'public' => true ], 'names' );
+
+		// Validate one URL of each template/content type, then another URL of each type on the next iteration.
+		for ( $i = 0; $i < $this->limit_type_validate_count; $i++ ) {
+			// Validate all public, published posts.
+			foreach ( $public_post_types as $post_type ) {
+				$post_ids = $this->get_posts_that_support_amp( $this->get_posts_by_type( $post_type, $i, 1 ) );
+				if ( ! empty( $post_ids[0] ) ) {
+					$this->urls[] = [ get_permalink( $post_ids[0] ), $post_type ];
+				}
+			}
+
+			foreach ( $amp_enabled_taxonomies as $taxonomy ) {
+				$taxonomy_links = $this->get_taxonomy_links( $taxonomy, $i, 1 );
+				$link           = reset( $taxonomy_links );
+				if ( ! empty( $link ) ) {
+					$this->urls[] = [ $link, $taxonomy ];
+				}
+			}
+
+			$author_page_urls = $this->get_author_page_urls( $i, 1 );
+			if ( ! empty( $author_page_urls[0] ) ) {
+				$this->urls[] = [ $author_page_urls[0], 'author' ];
+			}
+		}
+
+		// Only validate 1 date and 1 search page.
+		$url = $this->get_date_page();
+		if ( $url ) {
+			$this->urls[] = [ $url, 'date' ];
+		}
+		$url = $this->get_search_page();
+		if ( $url ) {
+			$this->urls[] = [ $url, 'search' ];
+		}
+
+		return $this->urls;
+	}
+
+	/**
 	 * Gets the total number of URLs to validate.
 	 *
 	 * By default, this only counts AMP-enabled posts and terms.
@@ -141,52 +209,7 @@ final class SiteScan {
 	 * @return int The number of URLs to validate.
 	 */
 	public function count_urls_to_validate() {
-		/*
-		 * If the homepage is set to 'Your latest posts,' start the $total_count at 1.
-		 * Otherwise, it will probably be counted in the query for pages below.
-		 */
-		$total_count = 'posts' === get_option( 'show_on_front' ) && $this->is_template_supported( 'is_home' ) ? 1 : 0;
-
-		$amp_enabled_taxonomies = array_filter(
-			get_taxonomies( [ 'public' => true ] ),
-			[ $this, 'does_taxonomy_support_amp' ]
-		);
-
-		// Count all public taxonomy terms.
-		foreach ( $amp_enabled_taxonomies as $taxonomy ) {
-			$term_query = new WP_Term_Query(
-				[
-					'taxonomy' => $taxonomy,
-					'fields'   => 'ids',
-					'number'   => $this->limit_type_validate_count,
-				]
-			);
-
-			// If $term_query->terms is an empty array, passing it to count() will throw an error.
-			$total_count += ! empty( $term_query->terms ) ? count( $term_query->terms ) : 0;
-		}
-
-		// Count posts by type, like post, page, attachment, etc.
-		$public_post_types = get_post_types( [ 'public' => true ], 'names' );
-		foreach ( $public_post_types as $post_type ) {
-			$posts        = $this->get_posts_that_support_amp( $this->get_posts_by_type( $post_type ) );
-			$total_count += ! empty( $posts ) ? count( $posts ) : 0;
-		}
-
-		// Count author pages, like https://example.com/author/admin/.
-		$total_count += count( $this->get_author_page_urls() );
-
-		// Count a single example date page, like https://example.com/?year=2019.
-		if ( $this->get_date_page() ) {
-			$total_count++;
-		}
-
-		// Count a single example search page, like https://example.com/?s=example.
-		if ( $this->get_search_page() ) {
-			$total_count++;
-		}
-
-		return $total_count;
+		return count( $this->get_urls() );
 	}
 
 	/**
@@ -223,52 +246,8 @@ final class SiteScan {
 	 * and iterates until it reaches the maximum number of URLs for each type.
 	 */
 	public function crawl_site() {
-		/*
-		 * If 'Your homepage displays' is set to 'Your latest posts', validate the homepage.
-		 * It will not be part of the page validation below.
-		 */
-		if ( 'posts' === get_option( 'show_on_front' ) && $this->is_template_supported( 'is_home' ) ) {
-			$this->validate_and_store_url( home_url( '/' ), 'home' );
-		}
-
-		$amp_enabled_taxonomies = array_filter(
-			get_taxonomies( [ 'public' => true ] ),
-			[ $this, 'does_taxonomy_support_amp' ]
-		);
-		$public_post_types      = get_post_types( [ 'public' => true ], 'names' );
-
-		// Validate one URL of each template/content type, then another URL of each type on the next iteration.
-		for ( $i = 0; $i < $this->limit_type_validate_count; $i++ ) {
-			// Validate all public, published posts.
-			foreach ( $public_post_types as $post_type ) {
-				$post_ids = $this->get_posts_that_support_amp( $this->get_posts_by_type( $post_type, $i, 1 ) );
-				if ( ! empty( $post_ids[0] ) ) {
-					$this->validate_and_store_url( get_permalink( $post_ids[0] ), $post_type );
-				}
-			}
-
-			foreach ( $amp_enabled_taxonomies as $taxonomy ) {
-				$taxonomy_links = $this->get_taxonomy_links( $taxonomy, $i, 1 );
-				$link           = reset( $taxonomy_links );
-				if ( ! empty( $link ) ) {
-					$this->validate_and_store_url( $link, $taxonomy );
-				}
-			}
-
-			$author_page_urls = $this->get_author_page_urls( $i, 1 );
-			if ( ! empty( $author_page_urls[0] ) ) {
-				$this->validate_and_store_url( $author_page_urls[0], 'author' );
-			}
-		}
-
-		// Only validate 1 date and 1 search page.
-		$url = $this->get_date_page();
-		if ( $url ) {
-			$this->validate_and_store_url( $url, 'date' );
-		}
-		$url = $this->get_search_page();
-		if ( $url ) {
-			$this->validate_and_store_url( $url, 'search' );
+		foreach ( $this->get_urls() as $url ) {
+			$this->validate_and_store_url( ...$url );
 		}
 	}
 

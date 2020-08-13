@@ -21,7 +21,8 @@ use AmpProject\AmpWP\BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection;
 use AmpProject\AmpWP\Infrastructure\ServiceBasedPlugin;
 use AmpProject\AmpWP\Instrumentation\ServerTiming;
 use AmpProject\AmpWP\Instrumentation\StopWatch;
-use AmpProject\AmpWP\Validation\ThemeScanRESTController;
+use AmpProject\AmpWP\Validation\ValidateURLRESTController;
+use AmpProject\AmpWP\Validation\ValidationURLsRESTController;
 
 use function is_user_logged_in;
 
@@ -84,7 +85,8 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			'obsolete_block_attribute_remover' => ObsoleteBlockAttributeRemover::class,
 			'admin.polyfills'                  => Polyfills::class,
 			'validated_url_stylesheet_gc'      => ValidatedUrlStylesheetDataGarbageCollection::class,
-			'theme_scan_rest_controller'       => ThemeScanRESTController::class,
+			'validation_urls_rest_controller'  => ValidationURLsRESTController::class,
+			'validate_url_rest_controller'     => ValidateURLRESTController::class,
 		];
 	}
 
