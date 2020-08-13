@@ -2134,50 +2134,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test prepare_response for responses that may or may not be valid HTML.
-	 *
-	 * @covers AMP_Theme_Support::prepare_response()
-	 */
-	public function test_prepare_response_varying_html() {
-		wp();
-		add_filter( 'amp_validation_error_sanitized', '__return_true' );
-		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
-		AMP_Theme_Support::init();
-		AMP_Theme_Support::finish_init();
-
-		// Make sure that prepare_response saw that a template hook fired.
-		get_echo( 'wp_head' );
-
-		// JSON.
-		$input = '{"success":true}';
-		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
-
-		// Nothing, for redirect.
-		$input = '';
-		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
-
-		// HTML, but a fragment.
-		$input = '<ul><li>one</li><li>two</li><li>three</li></ul>';
-		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
-
-		// HTML, but still a fragment.
-		$input = '<html><header><h1>HellO!</h1></header></html>';
-		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
-
-		// HTML, but very stripped down.
-		$input  = '<html><head></head>Hello</html>';
-		$output = AMP_Theme_Support::prepare_response( $input );
-		$this->assertStringContains( '<html amp', $output );
-		$this->assertStringContains( '<meta charset="utf-8">', $output );
-
-		// HTML with doctype, comments, and whitespace before head.
-		$input  = "   <!--\nHello world!\n-->\n\n<!DOCTYPE html>  <html\n\n>\n<head profile='http://www.acme.com/profiles/core'></head><body>Hello</body></html>";
-		$output = AMP_Theme_Support::prepare_response( $input );
-		$this->assertStringContains( '<html amp', $output );
-		$this->assertStringContains( '<meta charset="utf-8">', $output );
-	}
-
-	/**
 	 * Test prepare_response for responses that do not trigger standard template actions.
 	 *
 	 * @covers AMP_Theme_Support::prepare_response()
