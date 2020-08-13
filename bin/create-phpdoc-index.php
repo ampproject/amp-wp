@@ -14,7 +14,7 @@ if ( ! function_exists( 'WP_Parser\get_wp_files' ) || ! function_exists( 'WP_Par
 	WP_CLI::error( 'Install and activate the phpdoc-parser plugin.' );
 }
 
-error_reporting( 0 ); // phpcs:ignore -- Because of some phpdoc internal errors.
+error_reporting( E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED ); // phpcs:ignore -- Because of some phpdoc internal errors.
 
 chdir( __DIR__ . '/..' );
 $files = [];
