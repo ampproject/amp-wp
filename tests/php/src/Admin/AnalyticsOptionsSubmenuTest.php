@@ -8,11 +8,11 @@
 namespace AmpProject\AmpWP\Tests\Admin;
 
 use AmpProject\AmpWP\Admin\AnalyticsOptionsSubmenu;
-use AmpProject\AmpWP\Admin\DevToolsUserAccess;
 use AmpProject\AmpWP\Admin\GoogleFonts;
 use AmpProject\AmpWP\Admin\OptionsMenu;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Admin\RESTPreloader;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use WP_UnitTestCase;
 
 /**
@@ -22,6 +22,8 @@ use WP_UnitTestCase;
  * @coversDefaultClass \AmpProject\AmpWP\Admin\AnalyticsOptionsSubmenu
  */
 class AnalyticsOptionsSubmenuTest extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/**
 	 * Instance of OptionsMenu class.
@@ -83,18 +85,8 @@ class AnalyticsOptionsSubmenuTest extends WP_UnitTestCase {
 		$this->options_menu_instance->add_menu_items();
 		$this->instance->add_submenu_link();
 
-		$dev_tools_user_access = new DevToolsUserAccess();
+		$this->assertContains( 'Analytics', wp_list_pluck( $submenu[ $this->options_menu_instance->get_menu_slug() ], 0 ) );
 
-		$original_dev_tools_user_access = $dev_tools_user_access->get_user_enabled( $test_user );
-
-		$dev_tools_user_access->set_user_enabled( $test_user, true );
-		$this->assertEquals( 'Analytics', $submenu[ $this->options_menu_instance->get_menu_slug() ][1][0] );
-
-		$dev_tools_user_access->set_user_enabled( $test_user, false );
-		$this->assertEquals( 'Analytics', $submenu[ $this->options_menu_instance->get_menu_slug() ][1][0] );
-
-		// Reset.
 		$submenu = $original_submenu;
-		$dev_tools_user_access->set_user_enabled( $test_user, $original_dev_tools_user_access );
 	}
 }
