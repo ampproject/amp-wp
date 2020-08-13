@@ -194,7 +194,7 @@ function Root() {
 				<h2 id="advanced-settings">
 					{ __( 'Advanced Settings', 'amp' ) }
 				</h2>
-				<MobileRedirection />
+				<MobileRedirection id="mobile-redirection" />
 				<AMPDrawer
 
 					heading={ (
