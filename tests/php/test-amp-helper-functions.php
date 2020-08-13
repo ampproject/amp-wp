@@ -773,6 +773,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 *
 	 * @dataProvider get_transitional_mode_amphtml_urls
 	 * @covers ::amp_add_amphtml_link()
+	 * @expectedDeprecated amp_frontend_show_canonical
 	 *
 	 * @param callable $data_provider Provider.
 	 */
