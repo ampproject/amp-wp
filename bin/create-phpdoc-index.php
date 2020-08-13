@@ -22,6 +22,8 @@ if ( empty( $files ) ) {
 	$directories = [
 		'src/',
 		'includes/',
+		'templates/',
+		'back-compat/',
 	];
 
 	$files = [];
@@ -154,6 +156,11 @@ foreach ( $parsed as $parsed_file ) {
 	if ( isset( $parsed_file['functions'] ) ) {
 		foreach ( $parsed_file['functions'] as $parsed_function ) {
 			$entries = array_merge( $entries, process_function( $parsed_function, null ) );
+		}
+	}
+	if ( isset( $parsed_file['hooks'] ) ) {
+		foreach ( $parsed_file['hooks'] as $parsed_hook ) {
+			$entries = array_merge( $entries, process_hook( $parsed_hook, null ) );
 		}
 	}
 }
