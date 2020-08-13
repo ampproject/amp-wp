@@ -6,6 +6,7 @@ import { visitAdminPage } from '@wordpress/e2e-test-utils';
 describe( 'AMP settings screen reader themes carousel', () => {
 	beforeEach( async () => {
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
+		await page.addStyleTag( { content: 'html {scroll-behavior: auto !important;}' } );
 	} );
 
 	it( 'allows selection of carousel items', async () => {

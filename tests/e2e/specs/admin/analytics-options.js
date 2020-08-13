@@ -6,6 +6,7 @@ import { visitAdminPage } from '@wordpress/e2e-test-utils';
 describe( 'AMP analytics options', () => {
 	beforeEach( async () => {
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
+		await page.addStyleTag( { content: 'html {scroll-behavior: auto !important;}' } );
 	} );
 
 	it( 'allows adding and deleting entries', async () => {
