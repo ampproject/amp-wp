@@ -7,7 +7,6 @@
 
 namespace AmpProject\AmpWP\Tests\Admin;
 
-use AMP_Options_Manager;
 use AmpProject\AmpWP\Admin\AnalyticsOptionsSubmenu;
 use AmpProject\AmpWP\Admin\DevToolsUserAccess;
 use AmpProject\AmpWP\Admin\GoogleFonts;
@@ -20,6 +19,7 @@ use WP_UnitTestCase;
  * Tests for AnalyticsOptionsSubmenu.
  *
  * @group options-menu
+ * @coversDefaultClass \AmpProject\AmpWP\Admin\AnalyticsOptionsSubmenu
  */
 class AnalyticsOptionsSubmenuTest extends WP_UnitTestCase {
 
@@ -56,7 +56,7 @@ class AnalyticsOptionsSubmenuTest extends WP_UnitTestCase {
 	/**
 	 * Test register.
 	 *
-	 * @see AnalyticsOptionsSubmenu::register()
+	 * @covers :register()
 	 */
 	public function test_register() {
 		$this->instance->register();
@@ -66,7 +66,7 @@ class AnalyticsOptionsSubmenuTest extends WP_UnitTestCase {
 	/**
 	 * Test add_submenu_link.
 	 *
-	 * @covers AnalyticsOptionsSubmenu::add_submenu_link()
+	 * @covers ::add_submenu_link()
 	 */
 	public function test_link_is_added() {
 		global $submenu;
