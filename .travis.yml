@@ -66,30 +66,6 @@ jobs:
     - env: WP_VERSION=trunk  DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1
       php: nightly
   include:
-    - stage: lint
-      name: Lint (PHP, JavaScript, and configuration files)
-      php: "7.4"
-      env: WP_VERSION=latest DEV_LIB_ONLY=phpsyntax
-      before_script:
-        - phpenv config-rm xdebug.ini || echo "xdebug.ini does not exist."
-        - composer require --dev localheinz/composer-normalize --ignore-platform-reqs
-      script:
-        - source "$DEV_LIB_PATH/travis.script.sh"
-        - composer validate --no-check-all
-        - composer normalize --dry-run
-        - npm run lint
-        - npm run build:js
-      after_success:
-        - npx sizereport --config
-
-    - stage: analyze
-      name: Static analysis (PHP)
-      php: "7.4"
-      install:
-        - composer install
-      script:
-        - composer analyze
-
     - stage: test
       name: JavaScript unit tests
       php: "7.4"
@@ -118,27 +94,27 @@ jobs:
 
     - name: PHP unit tests (7.3, WordPress latest)
       php: "7.3"
-      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit,phpsyntax                      INSTALL_PWA_PLUGIN=1
+      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit                                INSTALL_PWA_PLUGIN=1
 
     - name: PHP unit tests (7.2, WordPress latest)
       php: "7.2"
-      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit,phpsyntax                      INSTALL_PWA_PLUGIN=1
+      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit                                INSTALL_PWA_PLUGIN=1
 
     - name: PHP unit tests (7.1, WordPress latest)
       php: "7.1"
-      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit,phpsyntax                      INSTALL_PWA_PLUGIN=1
+      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit                                INSTALL_PWA_PLUGIN=1
 
     - name: PHP unit tests (7.0, WordPress 5.1)
       php: "7.0"
-      env: WP_VERSION=5.1    DEV_LIB_ONLY=phpunit,phpsyntax                      INSTALL_PWA_PLUGIN=1
+      env: WP_VERSION=5.1    DEV_LIB_ONLY=phpunit                                INSTALL_PWA_PLUGIN=1
 
     - name: PHP unit tests (5.6, WordPress 5.0)
       php: "5.6"
-      env: WP_VERSION=5.0    DEV_LIB_ONLY=phpunit,phpsyntax                      INSTALL_PWA_PLUGIN=1
+      env: WP_VERSION=5.0    DEV_LIB_ONLY=phpunit                                INSTALL_PWA_PLUGIN=1
 
     - name: PHP unit tests w/ external-http (5.6, WordPress 4.9)
       php: "5.6"
-      env: WP_VERSION=4.9    DEV_LIB_ONLY=phpunit,phpsyntax                     PHPUNIT_EXTRA_SUITE=external-http
+      env: WP_VERSION=4.9    DEV_LIB_ONLY=phpunit                                PHPUNIT_EXTRA_SUITE=external-http
 
     - name: PHP unit tests (8.0, WordPress trunk)
       php: "nightly"
