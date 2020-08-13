@@ -8,7 +8,7 @@ use WP_Query;
 /**
  * Class ValidationRequestMocking
  *
- * Helpers for validation tests tests.
+ * Helpers for validation tests.
  */
 final class ValidationRequestMocking {
 

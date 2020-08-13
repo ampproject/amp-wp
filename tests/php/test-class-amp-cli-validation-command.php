@@ -14,6 +14,8 @@ use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
  * Tests for Test_AMP_CLI_Validation_Command class.
  *
  * @since 1.0
+ *
+ * @coversDefaultClass AMP_CLI_Validation_Command
  */
 class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 
@@ -43,7 +45,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 	/**
 	 * Test crawl_site.
 	 *
-	 * @covers AMP_CLI_Validation_Command::crawl_site()
+	 * @covers ::crawl_site()
 	 */
 	public function test_crawl_site() {
 		$number_of_posts = 20;

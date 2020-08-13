@@ -151,7 +151,7 @@ final class SiteScanTest extends WP_UnitTestCase {
 	/**
 	 * Test get_author_page_urls.
 	 *
-	 * @covers AMP_CLI_Validation_Command::get_author_page_urls()
+	 * @covers ::get_author_page_urls()
 	 */
 	public function test_get_author_page_urls() {
 		self::factory()->user->create();
@@ -187,7 +187,7 @@ final class SiteScanTest extends WP_UnitTestCase {
 	/**
 	 * Test does_taxonomy_support_amp.
 	 *
-	 * @covers AMP_CLI_Validation_Command::does_taxonomy_support_amp()
+	 * @covers ::does_taxonomy_support_amp()
 	 */
 	public function test_does_taxonomy_support_amp() {
 		$custom_taxonomy = 'foo_custom_taxonomy';
@@ -236,7 +236,7 @@ final class SiteScanTest extends WP_UnitTestCase {
 	/**
 	 * Test is_template_supported.
 	 *
-	 * @covers AMP_CLI_Validation_Command::is_template_supported()
+	 * @covers ::is_template_supported()
 	 */
 	public function test_is_template_supported() {
 		$author_conditional = 'is_author';
@@ -255,7 +255,7 @@ final class SiteScanTest extends WP_UnitTestCase {
 	/**
 	 * Test get_posts_by_type.
 	 *
-	 * @covers AMP_CLI_Validation_Command::get_posts_by_type()
+	 * @covers ::get_posts_by_type()
 	 */
 	public function test_get_posts_by_type() {
 		$number_posts_each_post_type = 20;
@@ -295,7 +295,7 @@ final class SiteScanTest extends WP_UnitTestCase {
 	/**
 	 * Test get_taxonomy_links.
 	 *
-	 * @covers AMP_CLI_Validation_Command::get_taxonomy_links()
+	 * @covers ::get_taxonomy_links()
 	 */
 	public function test_get_taxonomy_links() {
 		$number_links_each_taxonomy = 20;
@@ -346,7 +346,7 @@ final class SiteScanTest extends WP_UnitTestCase {
 	/**
 	 * Test get_search_page.
 	 *
-	 * @covers AMP_CLI_Validation_Command::get_search_page()
+	 * @covers ::get_search_page()
 	 */
 	public function test_get_search_page() {
 		// Normally, this should return a string, unless the user has opted out of the search template.
@@ -365,7 +365,7 @@ final class SiteScanTest extends WP_UnitTestCase {
 	/**
 	 * Test get_date_page.
 	 *
-	 * @covers AMP_CLI_Validation_Command::get_date_page()
+	 * @covers ::get_date_page()
 	 */
 	public function test_get_date_page() {
 		$year = gmdate( 'Y' );
@@ -387,7 +387,7 @@ final class SiteScanTest extends WP_UnitTestCase {
 	/**
 	 * Test validate_and_store_url.
 	 *
-	 * @covers AMP_CLI_Validation_Command::validate_and_store_url()
+	 * @covers ::validate_and_store_url()
 	 */
 	public function test_validate_and_store_url() {
 		$single_post_permalink = get_permalink( self::factory()->post->create() );
