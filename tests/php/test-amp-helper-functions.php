@@ -1418,11 +1418,11 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test post_supports_amp().
+	 * Test amp_is_post_supported().
 	 *
 	 * @covers ::amp_is_post_supported()
 	 */
-	public function test_post_supports_amp() {
+	public function test_amp_is_post_supported() {
 		add_post_type_support( 'page', AMP_Post_Type_Support::SLUG );
 
 		// Test disabled by default for page for posts and show on front.

@@ -510,7 +510,7 @@ class AMP_Theme_Support {
 	/**
 	 * Determine template availability of AMP for the given query.
 	 *
-	 * This is not intended to return whether AMP is available for a _specific_ post. For that, use `post_supports_amp()`.
+	 * This is not intended to return whether AMP is available for a _specific_ post. For that, use `amp_is_post_supported()`.
 	 *
 	 * @since 1.0
 	 * @global WP_Query $wp_query
@@ -756,7 +756,7 @@ class AMP_Theme_Support {
 			$matching_template['errors'][] = 'template_unsupported';
 		}
 
-		// For singular queries, post_supports_amp() is given the final say.
+		// For singular queries, amp_is_post_supported() is given the final say.
 		if ( $query->is_singular() || $query->is_posts_page ) {
 			/**
 			 * Queried object.
