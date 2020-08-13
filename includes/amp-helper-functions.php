@@ -416,7 +416,7 @@ function amp_is_available() {
 			return;
 		}
 		$message = sprintf(
-			/* translators: %1$s: amp_is_request(), %2$s: is_amp_endpoint(), %3$s: the current action, %4$s: the wp action, %5$s: the WP_Query class, %6$s: the amp_skip_post() function */
+			/* translators: %1$s: amp_is_available(), %2$s: amp_is_request(), %3$s: is_amp_endpoint, %4$s: the current action, %5$s: the wp action, %6$s: the WP_Query class, %7$s: the amp_skip_post() function */
 			__( '%1$s (or %2$s, formerly %3$s) was called too early and so it will not work properly. WordPress is currently doing the "%4$s" action. Calling this function before the "%5$s" action means it will not have access to %6$s and the queried object to determine if it is an AMP response, thus neither the "%7$s" filter nor the AMP enabled toggle will be considered.', 'amp' ),
 			'amp_is_available()',
 			'amp_is_request()',
@@ -1857,9 +1857,9 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 		return;
 	}
 
-	$is_amp_endpoint = amp_is_request();
+	$is_amp_request = amp_is_request();
 
-	if ( $is_amp_endpoint ) {
+	if ( $is_amp_request ) {
 		$href = amp_remove_endpoint( amp_get_current_url() );
 	} elseif ( is_singular() ) {
 		$href = amp_get_permalink( get_queried_object_id() ); // For sake of Reader mode.
@@ -1869,7 +1869,7 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 
 	$href = remove_query_arg( QueryVar::NOAMP, $href );
 
-	$icon = $is_amp_endpoint ? Icon::logo() : Icon::link();
+	$icon = $is_amp_request ? Icon::logo() : Icon::link();
 	$attr = [
 		'id'    => 'amp-admin-bar-item-status-icon',
 		'class' => 'ab-icon',
@@ -1887,14 +1887,14 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 		[
 			'parent' => 'amp',
 			'id'     => 'amp-view',
-			'title'  => esc_html( $is_amp_endpoint ? __( 'View non-AMP version', 'amp' ) : __( 'View AMP version', 'amp' ) ),
+			'title'  => esc_html( $is_amp_request ? __( 'View non-AMP version', 'amp' ) : __( 'View AMP version', 'amp' ) ),
 			'href'   => esc_url( $href ),
 		]
 	);
 
 	// Make sure the Customizer opens with AMP enabled.
 	$customize_node = $wp_admin_bar->get_node( 'customize' );
-	if ( $customize_node && $is_amp_endpoint && AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
+	if ( $customize_node && $is_amp_request && AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
 		$args = get_object_vars( $customize_node );
 		if ( amp_is_legacy() ) {
 			$args['href'] = add_query_arg( 'autofocus[panel]', AMP_Template_Customizer::PANEL_ID, $args['href'] );
