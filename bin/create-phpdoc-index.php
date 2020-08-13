@@ -64,8 +64,8 @@ function is_internal_doc( $parsed ) {
 /**
  * Process function.
  *
- * @param array         $parsed_function Parsed function.
- * @param string|null  $class            Class name the function belongs to. Defaults to null.
+ * @param array        $parsed_function Parsed function.
+ * @param string|null  $class           Class name the function belongs to. Defaults to null.
  * @return array Entities.
  */
 function process_function( $parsed_function, $class = null ) {
