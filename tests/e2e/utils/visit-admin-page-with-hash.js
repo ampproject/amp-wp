@@ -9,7 +9,7 @@ import { join } from 'path';
 import { getPageError } from '@wordpress/e2e-test-utils';
 
 function createURLWithHash( WPPath, query = '', hash = '' ) {
-	const url = new URL( 'http://localhost:8890' );
+	const url = new URL( process.env.WP_BASE_URL );
 
 	url.pathname = join( url.pathname, WPPath );
 	url.search = query;
@@ -25,7 +25,7 @@ function createURLWithHash( WPPath, query = '', hash = '' ) {
  * @param {string} query String to be serialized as query portion of URL.
  * @param {string} hash URL hash.
  */
-export async function visitAdminPageWithHash( adminPath, query, hash = null ) {
+export async function visitAdminPageWithHash( adminPath, query, hash = '' ) {
 	await page.goto( createURLWithHash( join( 'wp-admin', adminPath ), query, hash ) );
 
 	const error = await getPageError();
