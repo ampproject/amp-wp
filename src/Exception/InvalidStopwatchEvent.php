@@ -11,6 +11,9 @@ use InvalidArgumentException;
 
 /**
  * Exception thrown when an invalid stopwatch name was requested.
+ *
+ * @since 2.0
+ * @internal
  */
 final class InvalidStopwatchEvent
 	extends InvalidArgumentException

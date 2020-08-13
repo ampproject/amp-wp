@@ -14,6 +14,7 @@ use AmpProject\Dom\Document;
  *
  * @since 1.0
  * @see https://www.ampproject.org/docs/reference/components/amp-o2-player
+ * @internal
  */
 class AMP_O2_Player_Sanitizer extends AMP_Base_Sanitizer {
 	/**

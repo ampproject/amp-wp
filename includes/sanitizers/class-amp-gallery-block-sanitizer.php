@@ -12,6 +12,8 @@ use AmpProject\Tag;
  * Class AMP_Gallery_Block_Sanitizer
  *
  * Modifies gallery block to match the block's AMP-specific configuration.
+ *
+ * @internal
  */
 class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 

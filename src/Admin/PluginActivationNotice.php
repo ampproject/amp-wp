@@ -21,6 +21,7 @@ use AmpProject\AmpWP\Option;
  * Class PluginActivationNotice
  *
  * @since 2.0
+ * @internal
  */
 final class PluginActivationNotice implements Delayed, Service, Registerable {
 

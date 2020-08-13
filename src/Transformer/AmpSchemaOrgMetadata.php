@@ -18,6 +18,8 @@ use AmpProject\Tag;
  * Ensure there is a schema.org script in the document.
  *
  * @package AmpProject\AmpWP
+ * @since 2.0
+ * @internal
  */
 final class AmpSchemaOrgMetadata implements Transformer {
 

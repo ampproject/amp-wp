@@ -19,6 +19,7 @@ use WP_Styles;
  * Registers assets that may not be available in the current site's version of core.
  *
  * @since 2.0
+ * @internal
  */
 final class Polyfills implements Delayed, Service, Registerable {
 

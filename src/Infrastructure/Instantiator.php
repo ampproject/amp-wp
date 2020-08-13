@@ -12,6 +12,9 @@ namespace AmpProject\AmpWP\Infrastructure;
  *
  * This way, a more elaborate mechanism can be plugged in, like using
  * ProxyManager to instantiate proxies instead of actual objects.
+ *
+ * @since 2.0
+ * @internal
  */
 interface Instantiator {
 

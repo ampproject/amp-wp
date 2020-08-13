@@ -13,6 +13,8 @@ use AmpProject\AmpWP\Infrastructure\Service;
  * Suppress plugins from running by removing their hooks and nullifying their shortcodes, widgets, and blocks.
  *
  * @package AmpProject\AmpWP
+ * @internal
+ * @since 2.0
  */
 final class PluginRegistry implements Service {
 

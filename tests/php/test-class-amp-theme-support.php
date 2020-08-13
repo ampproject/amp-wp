@@ -217,14 +217,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		// Test transitional mode singular, where not on endpoint that it causes amphtml link to be added.
 		remove_action( 'wp_head', 'amp_add_amphtml_link' );
 		$this->go_to( get_permalink( $post_id ) );
-		$this->assertFalse( is_amp_endpoint() );
+		$this->assertFalse( amp_is_request() );
 		AMP_Theme_Support::finish_init();
 		$this->assertEquals( 10, has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 
 		// Test transitional mode homepage, where still not on endpoint that it causes amphtml link to be added.
 		remove_action( 'wp_head', 'amp_add_amphtml_link' );
 		$this->go_to( home_url() );
-		$this->assertFalse( is_amp_endpoint() );
+		$this->assertFalse( amp_is_request() );
 		AMP_Theme_Support::finish_init();
 		$this->assertEquals( 10, has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 
@@ -238,7 +238,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			]
 		);
 		$this->go_to( get_permalink( $post_id ) );
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_request() );
 		AMP_Theme_Support::finish_init();
 		$this->assertFalse( has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 		$this->assertEquals( 10, has_filter( 'index_template_hierarchy', [ 'AMP_Theme_Support', 'filter_amp_template_hierarchy' ] ), 'Expected add_amp_template_filters to have been called since template_dir is not empty' );
@@ -249,7 +249,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		remove_theme_support( 'amp' );
 		$this->go_to( amp_get_permalink( $post_id ) );
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_request() );
 		AMP_Theme_Support::finish_init();
 		$this->assertTrue( current_theme_supports( 'amp' ) );
 
@@ -257,7 +257,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		add_theme_support( 'amp', [ 'foo' => 'bar' ] );
 		$this->go_to( amp_get_permalink( $post_id ) );
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_request() );
 		AMP_Theme_Support::finish_init();
 		$this->assertTrue( current_theme_supports( 'amp' ) );
 		$this->assertEquals( [ [ 'foo' => 'bar' ] ], get_theme_support( 'amp' ) );
@@ -290,9 +290,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$post          = self::factory()->post->create();
 		$requested_url = get_permalink( $post );
 		$this->assertEquals( AMP_Theme_Support::READER_MODE_SLUG, AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
-		$this->assertTrue( post_supports_amp( $post ) );
+		$this->assertTrue( amp_is_post_supported( $post ) );
 		add_filter( 'amp_skip_post', '__return_true' );
-		$this->assertFalse( post_supports_amp( $post ) );
+		$this->assertFalse( amp_is_post_supported( $post ) );
 
 		$redirected = false;
 		add_filter(
@@ -2024,7 +2024,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$wp_widget_factory->widgets = [];
 		wp_widgets_init();
 
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_request() );
 
 		add_action(
 			'wp_enqueue_scripts',
@@ -2186,7 +2186,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		);
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_request() );
 
 		ob_start();
 		?>

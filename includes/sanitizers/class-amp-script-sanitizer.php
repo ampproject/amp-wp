@@ -12,6 +12,7 @@ use AmpProject\DevMode;
  * Class AMP_Script_Sanitizer
  *
  * @since 1.0
+ * @internal
  */
 class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 

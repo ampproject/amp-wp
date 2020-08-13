@@ -23,6 +23,9 @@ namespace AmpProject\AmpWP\Infrastructure;
  * objects to "share" (always handing out the same instance) or not to share
  * (always returning a fresh new instance on each subsequent call). This
  * effectively gets rid of the dreaded Singletons.
+ *
+ * @since 2.0
+ * @internal
  */
 interface Injector extends Service {
 

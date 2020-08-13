@@ -10,6 +10,8 @@ use AmpProject\AmpWP\Option;
 
 /**
  * Class AMP_Options_Manager
+ *
+ * @internal
  */
 class AMP_Options_Manager {
 

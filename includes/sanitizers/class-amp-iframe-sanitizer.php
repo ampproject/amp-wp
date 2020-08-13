@@ -13,6 +13,8 @@ use AmpProject\Layout;
  * Class AMP_Iframe_Sanitizer
  *
  * Converts <iframe> tags to <amp-iframe>
+ *
+ * @internal
  */
 class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	use AMP_Noscript_Fallback;

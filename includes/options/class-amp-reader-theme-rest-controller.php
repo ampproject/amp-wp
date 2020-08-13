@@ -12,6 +12,7 @@ use AmpProject\AmpWP\Admin\ReaderThemes;
  * AMP reader theme REST controller.
  *
  * @since 2.0
+ * @internal
  */
 final class AMP_Reader_Theme_REST_Controller extends WP_REST_Controller {
 

@@ -16,6 +16,9 @@ namespace AmpProject\AmpWP\Infrastructure;
  * This can be used to only register a given object after certain contextual
  * requirements are met, like registering a frontend rendering service only
  * after the loop has been set up.
+ *
+ * @since 2.0
+ * @internal
  */
 interface Delayed {
 

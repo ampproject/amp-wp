@@ -7,6 +7,8 @@
 
 /**
  * Class AMP_Pinterest_Embed_Handler
+ *
+ * @internal
  */
 class AMP_Pinterest_Embed_Handler extends AMP_Base_Embed_Handler {
 

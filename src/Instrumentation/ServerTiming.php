@@ -16,6 +16,8 @@ use AmpProject\AmpWP\Infrastructure\Service;
  * Collect Server-Timing metrics.
  *
  * @package AmpProject\AmpWP
+ * @since 2.0
+ * @internal
  */
 final class ServerTiming implements Service, Registerable, Delayed {
 

@@ -10,6 +10,7 @@
  * Post meta box class.
  *
  * @since 0.6
+ * @internal
  */
 class AMP_Post_Meta_Box {
 

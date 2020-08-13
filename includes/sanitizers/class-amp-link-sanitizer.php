@@ -23,6 +23,7 @@ use AmpProject\Tag;
  *
  * @link https://github.com/ampproject/amphtml/issues/12496
  * @since 1.4.0
+ * @internal
  */
 class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 

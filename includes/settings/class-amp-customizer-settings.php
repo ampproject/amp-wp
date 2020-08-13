@@ -7,6 +7,8 @@
 
 /**
  * Class AMP_Customizer_Settings
+ *
+ * @internal
  */
 class AMP_Customizer_Settings {
 

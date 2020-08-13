@@ -29,6 +29,9 @@ use function is_user_logged_in;
  * In here we assemble our infrastructure, configure it for the specific use
  * case the plugin is meant to solve and then kick off the services so that they
  * can hook themselves into the WordPress lifecycle.
+ *
+ * @since 2.0
+ * @internal
  */
 final class AmpWpPlugin extends ServiceBasedPlugin {
 	/*
