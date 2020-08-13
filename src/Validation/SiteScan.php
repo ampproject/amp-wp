@@ -12,7 +12,6 @@ use AMP_Theme_Support;
 use AMP_Validation_Error_Taxonomy;
 use AMP_Validation_Manager;
 use WP_Query;
-use WP_Term_Query;
 
 /**
  * SiteScan class.
@@ -132,7 +131,10 @@ final class SiteScan {
 		 * It will not be part of the page validation below.
 		 */
 		if ( 'posts' === get_option( 'show_on_front' ) && $this->is_template_supported( 'is_home' ) ) {
-			$this->urls[] = [ home_url( '/' ), 'home' ];
+			$this->urls[] = [
+				'url'  => home_url( '/' ),
+				'type' => 'home',
+			];
 		}
 
 		$amp_enabled_taxonomies = array_filter(
@@ -147,7 +149,10 @@ final class SiteScan {
 			foreach ( $public_post_types as $post_type ) {
 				$post_ids = $this->get_posts_that_support_amp( $this->get_posts_by_type( $post_type, $i, 1 ) );
 				if ( ! empty( $post_ids[0] ) ) {
-					$this->urls[] = [ get_permalink( $post_ids[0] ), $post_type ];
+					$this->urls[] = [
+						'url'  => get_permalink( $post_ids[0] ),
+						'type' => $post_type,
+					];
 				}
 			}
 
@@ -155,24 +160,36 @@ final class SiteScan {
 				$taxonomy_links = $this->get_taxonomy_links( $taxonomy, $i, 1 );
 				$link           = reset( $taxonomy_links );
 				if ( ! empty( $link ) ) {
-					$this->urls[] = [ $link, $taxonomy ];
+					$this->urls[] = [
+						'url'  => $link,
+						'type' => $taxonomy,
+					];
 				}
 			}
 
 			$author_page_urls = $this->get_author_page_urls( $i, 1 );
 			if ( ! empty( $author_page_urls[0] ) ) {
-				$this->urls[] = [ $author_page_urls[0], 'author' ];
+				$this->urls[] = [
+					'url'  => $author_page_urls[0],
+					'type' => 'author',
+				];
 			}
 		}
 
 		// Only validate 1 date and 1 search page.
 		$url = $this->get_date_page();
 		if ( $url ) {
-			$this->urls[] = [ $url, 'date' ];
+			$this->urls[] = [
+				'url'  => $url,
+				'type' => 'date',
+			];
 		}
 		$url = $this->get_search_page();
 		if ( $url ) {
-			$this->urls[] = [ $url, 'search' ];
+			$this->urls[] = [
+				'url'  => $url,
+				'type' => 'search',
+			];
 		}
 
 		return $this->urls;

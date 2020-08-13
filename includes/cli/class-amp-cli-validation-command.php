@@ -67,6 +67,13 @@ final class AMP_CLI_Validation_Command {
 	private $site_scan;
 
 	/**
+	 * Associative args passed to the command.
+	 *
+	 * @var array
+	 */
+	private $assoc_args;
+
+	/**
 	 * Crawl the entire site to get AMP validation results.
 	 *
 	 * ## OPTIONS
@@ -92,6 +99,111 @@ final class AMP_CLI_Validation_Command {
 	 * @throws Exception If an error happens.
 	 */
 	public function run( $args, $assoc_args ) {
+		$this->assoc_args = $assoc_args;
+		$site_scan        = $this->get_site_scan();
+
+		$number_urls_to_crawl = $site_scan->count_urls_to_validate();
+		if ( ! $number_urls_to_crawl ) {
+			if ( ! empty( $this->include_conditionals ) ) {
+				WP_CLI::error(
+					sprintf(
+						'The templates passed via the --%s argument did not match any URLs. You might try passing different templates to it.',
+						self::INCLUDE_ARGUMENT
+					)
+				);
+			} else {
+				WP_CLI::error(
+					sprintf(
+						'All of your templates might be unchecked in AMP Settings > Supported Templates. You might pass --%s to this command.',
+						self::FLAG_NAME_FORCE_VALIDATION
+					)
+				);
+			}
+		}
+
+		WP_CLI::log( 'Crawling the site for AMP validity.' );
+
+		$this->wp_cli_progress = WP_CLI\Utils\make_progress_bar(
+			sprintf( 'Validating %d URLs...', $number_urls_to_crawl ),
+			$number_urls_to_crawl
+		);
+		$this->crawl_site();
+		$this->wp_cli_progress->finish();
+
+		$key_template_type = 'Template or content type';
+		$key_url_count     = 'URL Count';
+		$key_validity_rate = 'Validity Rate';
+
+		$table_validation_by_type = [];
+		foreach ( $site_scan->validity_by_type as $type_name => $validity ) {
+			$table_validation_by_type[] = [
+				$key_template_type => $type_name,
+				$key_url_count     => $validity['total'],
+				$key_validity_rate => sprintf( '%d%%', 100.0 * ( $validity['valid'] / $validity['total'] ) ),
+			];
+		}
+
+		if ( empty( $table_validation_by_type ) ) {
+			WP_CLI::error( 'No validation results were obtained from the URLs.' );
+			return;
+		}
+
+		WP_CLI::success(
+			sprintf(
+				'%3$d crawled URLs have invalid markup kept out of %2$d total with AMP validation issue(s); %1$d URLs were crawled.',
+				$site_scan->number_crawled,
+				$site_scan->total_errors,
+				$site_scan->unaccepted_errors
+			)
+		);
+
+		// Output a table of validity by template/content type.
+		WP_CLI\Utils\format_items(
+			'table',
+			$table_validation_by_type,
+			[ $key_template_type, $key_url_count, $key_validity_rate ]
+		);
+
+		$url_more_details = add_query_arg(
+			'post_type',
+			AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+			admin_url( 'edit.php' )
+		);
+		WP_CLI::line( sprintf( 'For more details, please see: %s', $url_more_details ) );
+	}
+
+	/**
+	 * Provides the associative args for the command.
+	 *
+	 * @return array
+	 */
+	private function get_assoc_args() {
+		if ( ! is_array( $this->assoc_args ) ) {
+			$this->assoc_args = [];
+		}
+
+		return array_merge(
+			[
+				self::LIMIT_URLS_ARGUMENT        => 100,
+				self::INCLUDE_ARGUMENT           => [],
+				self::FLAG_NAME_FORCE_VALIDATION => false,
+			],
+			$this->assoc_args
+		);
+	}
+
+	/**
+	 * Provides the site scan class.
+	 *
+	 * @return SiteScan
+	 */
+	private function get_site_scan() {
+		if ( ! is_null( $this->site_scan ) ) {
+			return $this->site_scan;
+		}
+
+		$assoc_args = $this->get_assoc_args();
+
 		$include_conditionals      = [];
 		$force_crawl_urls          = false;
 		$limit_type_validate_count = (int) $assoc_args[ self::LIMIT_URLS_ARGUMENT ];
@@ -139,74 +251,7 @@ final class AMP_CLI_Validation_Command {
 			true
 		);
 
-		$number_urls_to_crawl = $this->site_scan->count_urls_to_validate();
-		if ( ! $number_urls_to_crawl ) {
-			if ( ! empty( $this->include_conditionals ) ) {
-				WP_CLI::error(
-					sprintf(
-						'The templates passed via the --%s argument did not match any URLs. You might try passing different templates to it.',
-						self::INCLUDE_ARGUMENT
-					)
-				);
-			} else {
-				WP_CLI::error(
-					sprintf(
-						'All of your templates might be unchecked in AMP Settings > Supported Templates. You might pass --%s to this command.',
-						self::FLAG_NAME_FORCE_VALIDATION
-					)
-				);
-			}
-		}
-
-		WP_CLI::log( 'Crawling the site for AMP validity.' );
-
-		$this->wp_cli_progress = WP_CLI\Utils\make_progress_bar(
-			sprintf( 'Validating %d URLs...', $number_urls_to_crawl ),
-			$number_urls_to_crawl
-		);
-		$this->crawl_site();
-		$this->wp_cli_progress->finish();
-
-		$key_template_type = 'Template or content type';
-		$key_url_count     = 'URL Count';
-		$key_validity_rate = 'Validity Rate';
-
-		$table_validation_by_type = [];
-		foreach ( $this->site_scan->validity_by_type as $type_name => $validity ) {
-			$table_validation_by_type[] = [
-				$key_template_type => $type_name,
-				$key_url_count     => $validity['total'],
-				$key_validity_rate => sprintf( '%d%%', 100.0 * ( $validity['valid'] / $validity['total'] ) ),
-			];
-		}
-
-		if ( empty( $table_validation_by_type ) ) {
-			WP_CLI::error( 'No validation results were obtained from the URLs.' );
-			return;
-		}
-
-		WP_CLI::success(
-			sprintf(
-				'%3$d crawled URLs have invalid markup kept out of %2$d total with AMP validation issue(s); %1$d URLs were crawled.',
-				$this->site_scan->number_crawled,
-				$this->site_scan->total_errors,
-				$this->site_scan->unaccepted_errors
-			)
-		);
-
-		// Output a table of validity by template/content type.
-		WP_CLI\Utils\format_items(
-			'table',
-			$table_validation_by_type,
-			[ $key_template_type, $key_url_count, $key_validity_rate ]
-		);
-
-		$url_more_details = add_query_arg(
-			'post_type',
-			AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-			admin_url( 'edit.php' )
-		);
-		WP_CLI::line( sprintf( 'For more details, please see: %s', $url_more_details ) );
+		return $this->site_scan;
 	}
 
 	/**
@@ -217,9 +262,14 @@ final class AMP_CLI_Validation_Command {
 	 * and iterates until it reaches the maximum number of URLs for each type.
 	 */
 	private function crawl_site() {
-		foreach ( $this->site_scan->get_urls() as $url ) {
-			$validity = $this->site_scan->validate_and_store_url( ...$url );
-			$this->wp_cli_progress->tick();
+		$site_scan = $this->get_site_scan();
+
+		foreach ( $site_scan->get_urls() as $url ) {
+			$validity = $site_scan->validate_and_store_url( $url['url'], $url['type'] );
+
+			if ( $this->wp_cli_progress ) {
+				$this->wp_cli_progress->tick();
+			}
 
 			if ( is_wp_error( $validity ) ) {
 				WP_CLI::warning( sprintf( 'Validate URL error (%1$s): %2$s URL: %3$s', $validity->get_error_code(), $validity->get_error_message(), $url ) );
