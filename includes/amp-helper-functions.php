@@ -753,16 +753,39 @@ function amp_remove_endpoint( $url ) {
  * If there are known validation errors for the current URL then do not output anything.
  *
  * @since 1.0
- * @internal
  */
 function amp_add_amphtml_link() {
-	/**
-	 * Filters whether to show the amphtml link on the frontend.
-	 *
-	 * @todo This filter's name is incorrect. It's not about adding a canonical link but adding the amphtml link.
-	 * @since 0.2
-	 */
-	if ( amp_is_canonical() || false === apply_filters( 'amp_frontend_show_canonical', true ) ) {
+	if (
+		amp_is_canonical()
+		||
+		/**
+		 * Filters whether to show the amphtml link on the frontend.
+		 *
+		 * This is deprecated since the name was wrong and the use case is not clear. To remove this from being printed,
+		 * instead of using the filter you can rather do:
+		 *
+		 *     add_action( 'template_redirect', static function () {
+		 *         remove_action( 'wp_head', 'amp_add_amphtml_link' );
+		 *     } );
+		 *
+		 * @since 0.2
+		 * @deprecated
+		 */
+		false === apply_filters_deprecated(
+			'amp_frontend_show_canonical',
+			[ true ],
+			'2.0',
+			'',
+			sprintf(
+				/* translators: 1: amphtml, 2: amp_add_amphtml_link(), 3: wp_head, 4: template_redirect */
+				esc_html__( 'Removal of %1$s link should be done by removing %2$s from the %3$s action at %4$s.', 'amp' ),
+				'amphtml',
+				__FUNCTION__ . '()',
+				'wp_head',
+				'template_redirect'
+			)
+		)
+	) {
 		return;
 	}
 
