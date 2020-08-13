@@ -146,7 +146,7 @@ function Root() {
 
 	useEffect( () => {
 		if ( fetchingOptions ) {
-			return () => null;
+			return;
 		}
 
 		scrollFocusedSectionIntoView( focusedSection );
