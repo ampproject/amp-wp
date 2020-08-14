@@ -108,7 +108,7 @@ function scrollFocusedSectionIntoView( focusedSectionId ) {
 		return;
 	}
 
-	focusedSectionElement.scrollIntoView( { behavior: 'smooth' } );
+	focusedSectionElement.scrollIntoView();
 
 	const firstInput = focusedSectionElement.querySelector( 'input, select, textarea, button' );
 	if ( firstInput ) {
