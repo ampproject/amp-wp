@@ -90,7 +90,7 @@ final class ReaderThemes {
 
 		$themes = $this->get_default_reader_themes();
 
-		// Also include themes that declare AMP-compatibility their style.css.
+		// Also include themes that declare AMP-compatibility in their style.css.
 		$default_reader_theme_slugs = wp_list_pluck( $themes, 'slug' );
 		foreach ( $this->get_compatible_installed_themes() as $compatible_installed_theme ) {
 			if ( ! in_array( $compatible_installed_theme->get_stylesheet(), $default_reader_theme_slugs, true ) ) {
