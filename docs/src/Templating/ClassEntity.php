@@ -48,6 +48,19 @@ final class ClassEntity {
 	}
 
 	/**
+	 * Process the properties entry.
+	 *
+	 * @param array $value Array of property entries.
+	 */
+	private function process_properties( $value ) {
+		$this->properties = [];
+
+		foreach ( $value as $property ) {
+			$this->properties[ $property[ 'name' ] ] = new PropertyEntity( $value );
+		}
+	}
+
+	/**
 	 * Process a doc-block entry.
 	 *
 	 * @param array $value Associative array of the doc-block.
