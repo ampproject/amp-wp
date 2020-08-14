@@ -278,11 +278,23 @@ final class ReaderThemes {
 				return [];
 			}
 
+			$mobile_screenshot = null;
+			if ( file_exists( $theme->get_stylesheet_directory() . '/screenshot-mobile.png' ) ) {
+				$mobile_screenshot = $theme->get_stylesheet_directory_uri() . '/screenshot-mobile.png';
+			} elseif ( file_exists( $theme->get_stylesheet_directory() . '/screenshot-mobile.jpg' ) ) {
+				$mobile_screenshot = $theme->get_stylesheet_directory_uri() . '/screenshot-mobile.jpg';
+			} else {
+				$mobile_screenshot = $theme->get_screenshot();
+			}
+			if ( $mobile_screenshot ) {
+				$mobile_screenshot = add_query_arg( 'ver', $theme->get( 'Version' ), $mobile_screenshot );
+			}
+
 			return [
 				'name'           => $theme->display( 'Name' ) ?: $theme->get_stylesheet(),
 				'slug'           => $theme->get_stylesheet(),
 				'preview_url'    => null,
-				'screenshot_url' => $theme->get_screenshot() ?: '',
+				'screenshot_url' => $mobile_screenshot ?: '',
 				'homepage'       => $theme->display( 'ThemeURI' ),
 				'description'    => $theme->display( 'Description' ),
 				'requires'       => $theme->get( 'RequiresWP' ),
