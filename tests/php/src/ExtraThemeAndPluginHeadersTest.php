@@ -29,7 +29,6 @@ final class ExtraThemeAndPluginHeadersTest extends WP_UnitTestCase {
 	public function test_register() {
 		$this->instance->register();
 		$this->assertEquals( 10, has_action( 'extra_theme_headers', [ $this->instance, 'filter_extra_headers' ] ) );
-		$this->assertEquals( 10, has_action( 'extra_plugin_headers', [ $this->instance, 'filter_extra_headers' ] ) );
 	}
 
 	/** @covers ::filter_extra_headers() */

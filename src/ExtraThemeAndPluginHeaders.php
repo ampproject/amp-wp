@@ -46,9 +46,6 @@ final class ExtraThemeAndPluginHeaders implements Service, Registerable {
 	public function register() {
 		// Filter must be added as soon as possible since once wp_get_themes() is called, the results are cached.
 		add_filter( 'extra_theme_headers', [ $this, 'filter_extra_headers' ] );
-
-		// Note that get_plugins() may have already been called, resulting in this returning stale data. See \WC_Helper::get_local_woo_plugins().
-		add_filter( 'extra_plugin_headers', [ $this, 'filter_extra_headers' ] );
 	}
 
 	/**
