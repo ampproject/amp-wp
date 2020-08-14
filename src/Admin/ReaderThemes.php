@@ -273,7 +273,7 @@ final class ReaderThemes {
 				'name'           => $theme->display( 'Name' ),
 				'slug'           => $theme->get_stylesheet(),
 				'preview_url'    => null,
-				'screenshot_url' => $theme->get_screenshot(),
+				'screenshot_url' => $theme->get_screenshot() ?: '',
 				'homepage'       => $theme->display( 'ThemeURI' ),
 				'description'    => $theme->display( 'Description' ),
 				'requires'       => $theme->get( 'RequiresWP' ),
