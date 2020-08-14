@@ -61,6 +61,19 @@ final class ClassEntity {
 	}
 
 	/**
+	 * Process the methods entry.
+	 *
+	 * @param array $value Array of property entries.
+	 */
+	private function process_methods( $value ) {
+		$this->methods = [];
+
+		foreach ( $value as $method ) {
+			$this->methods[ $method[ 'name' ] ] = new MethodEntity( $value );
+		}
+	}
+
+	/**
 	 * Process a doc-block entry.
 	 *
 	 * @param array $value Associative array of the doc-block.
