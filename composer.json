@@ -23,6 +23,7 @@
     "civicrm/composer-downloads-plugin": "^2.1",
     "dealerdirect/phpcodesniffer-composer-installer": "0.7.0",
     "mikey179/vfsstream": "1.6.8",
+    "mustache/mustache": "^2",
     "php-stubs/wordpress-stubs": "^5.3.2",
     "phpcompatibility/phpcompatibility-wp": "2.1.0",
     "phpdocumentor/reflection": "~3.0",
