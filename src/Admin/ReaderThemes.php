@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP\Admin;
 
 use AMP_Core_Theme_Sanitizer;
 use AMP_Options_Manager;
+use AmpProject\AmpWP\ExtraThemeAndPluginHeaders;
 use AmpProject\AmpWP\Option;
 use WP_Theme;
 use WP_Upgrader;
@@ -89,6 +90,14 @@ final class ReaderThemes {
 
 		$themes = $this->get_default_reader_themes();
 
+		// Also include themes that declare AMP-compatibility in their style.css.
+		$default_reader_theme_slugs = wp_list_pluck( $themes, 'slug' );
+		foreach ( $this->get_compatible_installed_themes() as $compatible_installed_theme ) {
+			if ( ! in_array( $compatible_installed_theme->get_stylesheet(), $default_reader_theme_slugs, true ) ) {
+				$themes[] = $this->normalize_theme_data( $compatible_installed_theme );
+			}
+		}
+
 		/**
 		 * Filters supported reader themes.
 		 *
@@ -125,12 +134,6 @@ final class ReaderThemes {
 			}
 		}
 
-		/*
-		 * Append the AMP Legacy theme details after filtering the default themes. This ensures the AMP Legacy theme
-		 * will always be available as a fallback if the chosen Reader theme becomes unavailable.
-		 */
-		$themes[] = $this->get_legacy_theme();
-
 		$themes = array_filter(
 			$themes,
 			static function( $theme ) {
@@ -140,11 +143,26 @@ final class ReaderThemes {
 
 		$themes = array_map(
 			function ( $theme ) {
+				$theme                 = $this->normalize_theme_data( $theme );
 				$theme['availability'] = $this->get_theme_availability( $theme );
 				return $theme;
 			},
 			$themes
 		);
+
+		// Sort themes alphabetically before AMP Legacy.
+		usort(
+			$themes,
+			static function ( $a, $b ) {
+				return strcmp( $a['name'], $b['name'] );
+			}
+		);
+
+		/*
+		 * Append the AMP Legacy theme details after filtering the default themes. This ensures the AMP Legacy theme
+		 * will always be available as a fallback if the chosen Reader theme becomes unavailable.
+		 */
+		$themes[] = $this->get_legacy_theme();
 
 		$this->themes = array_values( $themes );
 
@@ -233,6 +251,22 @@ final class ReaderThemes {
 	}
 
 	/**
+	 * Get installed themes that are marked as being AMP-compatible.
+	 *
+	 * @return WP_Theme[] Themes.
+	 */
+	private function get_compatible_installed_themes() {
+		$compatible_themes = [];
+		foreach ( wp_get_themes() as $theme ) {
+			$value = $theme->get( ExtraThemeAndPluginHeaders::AMP_HEADER );
+			if ( rest_sanitize_boolean( $value ) && ExtraThemeAndPluginHeaders::AMP_HEADER_LEGACY !== $value ) {
+				$compatible_themes[] = $theme;
+			}
+		}
+		return $compatible_themes;
+	}
+
+	/**
 	 * Normalize the specified theme data.
 	 *
 	 * @param WP_Theme|array|\stdClass $theme Theme.
@@ -244,11 +278,23 @@ final class ReaderThemes {
 				return [];
 			}
 
+			$mobile_screenshot = null;
+			if ( file_exists( $theme->get_stylesheet_directory() . '/screenshot-mobile.png' ) ) {
+				$mobile_screenshot = $theme->get_stylesheet_directory_uri() . '/screenshot-mobile.png';
+			} elseif ( file_exists( $theme->get_stylesheet_directory() . '/screenshot-mobile.jpg' ) ) {
+				$mobile_screenshot = $theme->get_stylesheet_directory_uri() . '/screenshot-mobile.jpg';
+			} else {
+				$mobile_screenshot = $theme->get_screenshot();
+			}
+			if ( $mobile_screenshot ) {
+				$mobile_screenshot = add_query_arg( 'ver', $theme->get( 'Version' ), $mobile_screenshot );
+			}
+
 			return [
-				'name'           => $theme->display( 'Name' ),
+				'name'           => $theme->display( 'Name' ) ?: $theme->get_stylesheet(),
 				'slug'           => $theme->get_stylesheet(),
 				'preview_url'    => null,
-				'screenshot_url' => $theme->get_screenshot(),
+				'screenshot_url' => $mobile_screenshot ?: '',
 				'homepage'       => $theme->display( 'ThemeURI' ),
 				'description'    => $theme->display( 'Description' ),
 				'requires'       => $theme->get( 'RequiresWP' ),

@@ -68,6 +68,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 */
 	protected function get_service_classes() {
 		return [
+			'extra_theme_and_plugin_headers'   => ExtraThemeAndPluginHeaders::class,
 			'dev_tools.user_access'            => DevToolsUserAccess::class,
 			'css_transient_cache.monitor'      => MonitorCssTransientCaching::class,
 			'css_transient_cache.ajax_handler' => ReenableCssTransientCachingAjaxAction::class,
