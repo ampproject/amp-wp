@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP\Admin;
 
 use AMP_Core_Theme_Sanitizer;
 use AMP_Options_Manager;
+use AmpProject\AmpWP\ExtraThemeAndPluginHeaders;
 use AmpProject\AmpWP\Option;
 use WP_Theme;
 use WP_Upgrader;
@@ -88,6 +89,14 @@ final class ReaderThemes {
 		}
 
 		$themes = $this->get_default_reader_themes();
+
+		// Also include themes that declare AMP-compatibility their style.css.
+		$default_reader_theme_slugs = wp_list_pluck( $themes, 'slug' );
+		foreach ( $this->get_compatible_installed_themes() as $compatible_installed_theme ) {
+			if ( ! in_array( $compatible_installed_theme->get_stylesheet(), $default_reader_theme_slugs, true ) ) {
+				$themes[] = $this->normalize_theme_data( $compatible_installed_theme );
+			}
+		}
 
 		/**
 		 * Filters supported reader themes.
@@ -230,6 +239,22 @@ final class ReaderThemes {
 
 		$this->default_reader_themes = $reader_themes;
 		return $this->default_reader_themes;
+	}
+
+	/**
+	 * Get installed themes that are marked as being AMP-comaptible.
+	 *
+	 * @return WP_Theme[] Themes.
+	 */
+	private function get_compatible_installed_themes() {
+		$compatible_themes = [];
+		foreach ( wp_get_themes() as $theme ) {
+			$value = $theme->get( ExtraThemeAndPluginHeaders::AMP_HEADER );
+			if ( $value && preg_match( '/^(true|theme[-_]?support|yes)$/i', $value ) ) {
+				$compatible_themes[] = $theme;
+			}
+		}
+		return $compatible_themes;
 	}
 
 	/**
