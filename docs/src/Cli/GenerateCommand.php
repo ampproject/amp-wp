@@ -86,6 +86,11 @@ final class GenerateCommand {
 		return $output;
 	}
 
+	/**
+	 * Get the list of regex patterns of folders to exclude.
+	 *
+	 * @return string[] Array of regex patterns.
+	 */
 	private function get_excluded_dirs() {
 		return [
 			'#^.*/amp/(assets|bin|build|node_modules|tests|vendor)/#',
