@@ -251,7 +251,7 @@ final class ReaderThemes {
 	}
 
 	/**
-	 * Get installed themes that are marked as being AMP-comaptible.
+	 * Get installed themes that are marked as being AMP-compatible.
 	 *
 	 * @return WP_Theme[] Themes.
 	 */

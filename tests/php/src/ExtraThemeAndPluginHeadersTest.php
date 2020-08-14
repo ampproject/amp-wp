@@ -18,7 +18,6 @@ final class ExtraThemeAndPluginHeadersTest extends WP_UnitTestCase {
 		$this->instance = new ExtraThemeAndPluginHeaders();
 	}
 
-	/** @covers ::__construct() */
 	public function test__construct() {
 		$this->assertInstanceOf( ExtraThemeAndPluginHeaders::class, $this->instance );
 		$this->assertInstanceOf( Service::class, $this->instance );

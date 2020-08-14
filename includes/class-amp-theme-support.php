@@ -261,7 +261,7 @@ class AMP_Theme_Support {
 	 * Get the theme support args.
 	 *
 	 * This avoids having to repeatedly call `get_theme_support()`, check the args, shift an item off the array, and so on.
-	 * Note that if the theme's `style.css` has `AMP: true` or `AMP: theme-support`, then this function will return the same
+	 * Note that if the theme's `style.css` has the `AMP` header with a value that when converted to a boolean evaluates to `true`, then this function will return the same
 	 * as if the theme had done `add_theme_support('amp')`.
 	 *
 	 * @since 1.0
