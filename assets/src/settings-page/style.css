@@ -364,13 +364,13 @@ li.error-kept {
 	border-bottom-width: 1px;
 }
 
-#reader-themes-drawer {
+#reader-themes {
 	border-top-left-radius: 0;
 	border-top-right-radius: 0;
 	border-top-width: 0;
 }
 
-#reader-themes-drawer .amp-drawer__heading {
+#reader-themes .amp-drawer__heading {
 	align-items: center;
 	display: flex;
 	padding-left: 1.5rem;

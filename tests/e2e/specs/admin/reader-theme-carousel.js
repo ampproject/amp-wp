@@ -11,7 +11,7 @@ describe( 'AMP settings screen reader themes carousel', () => {
 
 	it( 'allows selection of carousel items', async () => {
 		await expect( page ).toClick( '#template-mode-reader' );
-		await expect( page ).toClick( '#reader-themes-drawer .components-panel__body-toggle' );
+		await expect( page ).toClick( '#reader-themes .components-panel__body-toggle' );
 
 		await expect( page ).toMatchElement( '.amp-carousel__carousel' );
 		await expect( page ).toMatchElement( '#theme-card__twentynineteen' );

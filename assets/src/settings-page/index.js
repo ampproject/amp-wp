@@ -105,12 +105,11 @@ function scrollFocusedSectionIntoView( focusedSectionId ) {
 		return;
 	}
 
-	const firstInput = focusedSectionElement.querySelector( 'input, select, textarea, button:not(.components-panel__body-toggle)' );
+	const firstInput = focusedSectionElement.querySelector( 'input, select, textarea, button' );
 
+	focusedSectionElement.scrollIntoView( { behavior: 'smooth' } );
 	if ( firstInput ) {
 		firstInput.focus();
-	} else {
-		focusedSectionElement.scrollIntoView( { behavior: 'smooth' } );
 	}
 }
 
@@ -144,6 +143,9 @@ function Root() {
 		return () => undefined;
 	}, [ didSaveOptions, downloadingTheme ] );
 
+	/**
+	 * Scroll to the focused element on load or when it changes.
+	 */
 	useEffect( () => {
 		if ( fetchingOptions ) {
 			return;
@@ -185,7 +187,7 @@ function Root() {
 				event.preventDefault();
 				saveOptions();
 			} }>
-				<TemplateModes />
+				<TemplateModes focusReaderThemes={ 'reader-themes' === focusedSection } />
 				<h2 id="advanced-settings">
 					{ __( 'Advanced Settings', 'amp' ) }
 				</h2>
