@@ -113,12 +113,21 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			[
 				'settings' => sprintf(
 					'<a href="%1$s">%2$s</a>',
-					esc_url( add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, admin_url( 'admin.php' ) ) ),
+					esc_url( add_query_arg( 'page', $this->get_menu_slug(), admin_url( 'admin.php' ) ) ),
 					esc_html__( 'Settings', 'amp' )
 				),
 			],
 			$links
 		);
+	}
+
+	/**
+	 * Returns the slug for the settings page.
+	 *
+	 * @return string
+	 */
+	public function get_menu_slug() {
+		return AMP_Options_Manager::OPTION_NAME;
 	}
 
 	/**
@@ -133,17 +142,17 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			esc_html__( 'AMP Settings', 'amp' ),
 			esc_html__( 'AMP', 'amp' ),
 			'manage_options',
-			AMP_Options_Manager::OPTION_NAME,
+			$this->get_menu_slug(),
 			[ $this, 'render_screen' ],
 			self::ICON_BASE64_SVG
 		);
 
 		add_submenu_page(
-			AMP_Options_Manager::OPTION_NAME,
+			$this->get_menu_slug(),
 			esc_html__( 'AMP Settings', 'amp' ),
 			esc_html__( 'Settings', 'amp' ),
 			'manage_options',
-			AMP_Options_Manager::OPTION_NAME
+			$this->get_menu_slug()
 		);
 	}
 
@@ -153,7 +162,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	 * @return string
 	 */
 	public function screen_handle() {
-		return sprintf( 'toplevel_page_%s', AMP_Options_Manager::OPTION_NAME );
+		return sprintf( 'toplevel_page_%s', $this->get_menu_slug() );
 	}
 
 	/**
@@ -253,7 +262,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		?>
 		<div class="wrap">
 			<form id="amp-settings" action="options.php" method="post">
-				<?php settings_fields( AMP_Options_Manager::OPTION_NAME ); ?>
+				<?php settings_fields( $this->get_menu_slug() ); ?>
 				<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 				<?php settings_errors(); ?>
 
