@@ -7,6 +7,7 @@
 
 namespace AmpProject\AmpWP;
 
+use AmpProject\AmpWP\Admin\AnalyticsOptionsSubmenu;
 use AmpProject\AmpWP\Admin\DevToolsUserAccess;
 use AmpProject\AmpWP\Admin\GoogleFonts;
 use AmpProject\AmpWP\Admin\OnboardingWizardSubmenu;
@@ -21,6 +22,7 @@ use AmpProject\AmpWP\BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection;
 use AmpProject\AmpWP\Infrastructure\ServiceBasedPlugin;
 use AmpProject\AmpWP\Instrumentation\ServerTiming;
 use AmpProject\AmpWP\Instrumentation\StopWatch;
+
 use function is_user_logged_in;
 
 /**
@@ -86,6 +88,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			'obsolete_block_attribute_remover' => ObsoleteBlockAttributeRemover::class,
 			'admin.polyfills'                  => Polyfills::class,
 			'validated_url_stylesheet_gc'      => ValidatedUrlStylesheetDataGarbageCollection::class,
+			'admin.analytics_menu'             => AnalyticsOptionsSubmenu::class,
 		];
 	}
 
