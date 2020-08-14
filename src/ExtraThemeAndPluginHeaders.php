@@ -27,6 +27,18 @@ final class ExtraThemeAndPluginHeaders implements Service, Registerable {
 	const AMP_HEADER = 'AMP';
 
 	/**
+	 * Values which indicate the theme has 'amp' theme support.
+	 *
+	 * @var string[]
+	 */
+	const AMP_THEME_SUPPORT_VALUES = [
+		'theme-support',
+		'theme_support',
+		'true',
+		'yes',
+	];
+
+	/**
 	 * Register the service with the system.
 	 *
 	 * @return void

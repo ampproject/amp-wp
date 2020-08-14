@@ -250,7 +250,7 @@ final class ReaderThemes {
 		$compatible_themes = [];
 		foreach ( wp_get_themes() as $theme ) {
 			$value = $theme->get( ExtraThemeAndPluginHeaders::AMP_HEADER );
-			if ( $value && preg_match( '/^(true|theme[-_]?support|yes)$/i', $value ) ) {
+			if ( in_array( strtolower( $value ), ExtraThemeAndPluginHeaders::AMP_THEME_SUPPORT_VALUES, true ) ) {
 				$compatible_themes[] = $theme;
 			}
 		}
