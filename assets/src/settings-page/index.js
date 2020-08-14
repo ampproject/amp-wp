@@ -99,15 +99,18 @@ ErrorNotice.propTypes = {
  * @param {string} focusedSectionId A section ID.
  */
 function scrollFocusedSectionIntoView( focusedSectionId ) {
-	const focusedSectionElement = document.getElementById( focusedSectionId );
+	if ( ! focusedSectionId ) {
+		return;
+	}
 
+	const focusedSectionElement = document.getElementById( focusedSectionId );
 	if ( ! focusedSectionElement ) {
 		return;
 	}
 
-	const firstInput = focusedSectionElement.querySelector( 'input, select, textarea, button' );
-
 	focusedSectionElement.scrollIntoView( { behavior: 'smooth' } );
+
+	const firstInput = focusedSectionElement.querySelector( 'input, select, textarea, button' );
 	if ( firstInput ) {
 		firstInput.focus();
 	}
