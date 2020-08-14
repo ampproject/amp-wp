@@ -826,7 +826,7 @@ function amp_is_post_supported( $post ) {
  *
  * @since 0.1
  * @since 0.6 Returns false when post has meta to disable AMP.
- * @since 2.0 Renamed to AMP-prefixed version, amp_is_endpoint().
+ * @since 2.0 Renamed to AMP-prefixed version, amp_is_post_supported().
  * @deprecated Use amp_is_post_supported() instead.
  *
  * @param WP_Post $post Post.
@@ -895,8 +895,8 @@ function amp_is_request() {
  * var is present, or else in standard mode if just the template is available.
  *
  * @since 0.1
- * @since 2.0 Renamed to AMP-prefixed version, amp_is_endpoint().
- * @deprecated Use amp_is_endpoint() instead.
+ * @since 2.0 Renamed to AMP-prefixed version, amp_is_request().
+ * @deprecated Use amp_is_request() instead.
  *
  * @return bool Whether it is the AMP endpoint.
  */
