@@ -134,12 +134,6 @@ final class ReaderThemes {
 			}
 		}
 
-		/*
-		 * Append the AMP Legacy theme details after filtering the default themes. This ensures the AMP Legacy theme
-		 * will always be available as a fallback if the chosen Reader theme becomes unavailable.
-		 */
-		$themes[] = $this->get_legacy_theme();
-
 		$themes = array_filter(
 			$themes,
 			static function( $theme ) {
@@ -149,11 +143,26 @@ final class ReaderThemes {
 
 		$themes = array_map(
 			function ( $theme ) {
+				$theme                 = $this->normalize_theme_data( $theme );
 				$theme['availability'] = $this->get_theme_availability( $theme );
 				return $theme;
 			},
 			$themes
 		);
+
+		// Sort themes alphabetically before AMP Legacy.
+		usort(
+			$themes,
+			static function ( $a, $b ) {
+				return strcmp( $a['name'], $b['name'] );
+			}
+		);
+
+		/*
+		 * Append the AMP Legacy theme details after filtering the default themes. This ensures the AMP Legacy theme
+		 * will always be available as a fallback if the chosen Reader theme becomes unavailable.
+		 */
+		$themes[] = $this->get_legacy_theme();
 
 		$this->themes = array_values( $themes );
 
@@ -270,7 +279,7 @@ final class ReaderThemes {
 			}
 
 			return [
-				'name'           => $theme->display( 'Name' ),
+				'name'           => $theme->display( 'Name' ) ?: $theme->get_stylesheet(),
 				'slug'           => $theme->get_stylesheet(),
 				'preview_url'    => null,
 				'screenshot_url' => $theme->get_screenshot() ?: '',
