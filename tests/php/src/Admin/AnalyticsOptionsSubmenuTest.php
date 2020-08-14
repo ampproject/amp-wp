@@ -58,7 +58,7 @@ class AnalyticsOptionsSubmenuTest extends WP_UnitTestCase {
 	/**
 	 * Test register.
 	 *
-	 * @covers :register()
+	 * @covers ::register()
 	 */
 	public function test_register() {
 		$this->instance->register();
