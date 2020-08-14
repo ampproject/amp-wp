@@ -259,7 +259,7 @@ final class ReaderThemes {
 		$compatible_themes = [];
 		foreach ( wp_get_themes() as $theme ) {
 			$value = $theme->get( ExtraThemeAndPluginHeaders::AMP_HEADER );
-			if ( in_array( strtolower( $value ), ExtraThemeAndPluginHeaders::AMP_THEME_SUPPORT_VALUES, true ) ) {
+			if ( rest_sanitize_boolean( $value ) && ExtraThemeAndPluginHeaders::AMP_HEADER_LEGACY !== $value ) {
 				$compatible_themes[] = $theme;
 			}
 		}

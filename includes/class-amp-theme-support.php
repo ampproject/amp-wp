@@ -270,13 +270,8 @@ class AMP_Theme_Support {
 	 */
 	public static function get_theme_support_args() {
 		if ( ! current_theme_supports( self::SLUG ) ) {
-			if (
-				in_array(
-					strtolower( wp_get_theme()->get( ExtraThemeAndPluginHeaders::AMP_HEADER ) ),
-					ExtraThemeAndPluginHeaders::AMP_THEME_SUPPORT_VALUES,
-					true
-				)
-			) {
+			$theme_header = wp_get_theme()->get( ExtraThemeAndPluginHeaders::AMP_HEADER );
+			if ( rest_sanitize_boolean( $theme_header ) && ExtraThemeAndPluginHeaders::AMP_HEADER_LEGACY !== $theme_header ) {
 				return [
 					self::PAIRED_FLAG => true,
 				];
