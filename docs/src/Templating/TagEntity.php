@@ -10,8 +10,10 @@ namespace AmpProject\AmpWP\Documentation\Templating;
 /**
  * Entity object representing a doc-block tag.
  *
- * @property string $name
- * @property string $content
+ * @property string   $name
+ * @property string   $content
+ * @property string[] $types
+ * @property string   $variable
  */
 final class TagEntity {
 
@@ -26,6 +28,8 @@ final class TagEntity {
 		return [
 			'name',
 			'content',
+			'types',
+			'variable',
 		];
 	}
 }
