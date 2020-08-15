@@ -2129,7 +2129,8 @@ class AMP_Validation_Manager {
 				[
 					'cookies'     => wp_unslash( $_COOKIE ), // Pass along cookies so private pages and drafts can be accessed.
 					'timeout'     => 15, // Increase from default of 5 to give extra time for the plugin to identify the sources for any given validation errors.
-					'sslverify'   => false,
+					/** This filter is documented in wp-includes/class-wp-http-streams.php */
+					'sslverify'   => apply_filters( 'https_local_ssl_verify', false ),
 					'redirection' => 0, // Because we're in a loop for redirection.
 					'headers'     => [
 						'Cache-Control' => 'no-cache',
