@@ -11,6 +11,8 @@ use AmpProject\Dom\Document;
  * Class AMP_Comments_Sanitizer
  *
  * Strips and corrects attributes in forms.
+ *
+ * @internal
  */
 class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 

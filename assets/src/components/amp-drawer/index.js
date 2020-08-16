@@ -34,6 +34,7 @@ export const HANDLE_TYPE_RIGHT = 'right';
  */
 export function AMPDrawer( { children = null, className, heading, handleType = HANDLE_TYPE_FULL_WIDTH, id, initialOpen = false, selected = false, hiddenTitle } ) {
 	const [ opened, setOpened ] = useState( initialOpen );
+	const [ resetStatus, setResetStatus ] = useState( null );
 
 	/**
 	 * Watch for changes to the panel body attributes and set opened state accordingly.
@@ -59,6 +60,26 @@ export function AMPDrawer( { children = null, className, heading, handleType = H
 		};
 	}, [ id, opened ] );
 
+	// Force a rerender when initialOpen changes, only after the first render.
+	useEffect( () => {
+		if ( null === resetStatus ) {
+			setResetStatus( 'waiting' );
+			return;
+		}
+
+		setResetStatus( 'resetting' );
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ initialOpen ] );
+
+	/**
+	 * After the `resetting` render, set status back to waiting.
+	 */
+	useEffect( () => {
+		if ( 'resetting' === resetStatus ) {
+			setResetStatus( 'waiting' );
+		}
+	}, [ resetStatus ] );
+
 	return (
 		<Selectable
 			id={ id }
@@ -77,23 +98,25 @@ export function AMPDrawer( { children = null, className, heading, handleType = H
 					{ heading }
 				</div>
 			) }
-			<PanelBody
-				title={ handleType === HANDLE_TYPE_RIGHT ? (
-					<span className="components-visually-hidden">
-						{ hiddenTitle }
-					</span>
-				) : (
-					<div className="amp-drawer__heading">
-						{ heading }
+			{ 'resetting' !== resetStatus && (
+				<PanelBody
+					title={ handleType === HANDLE_TYPE_RIGHT ? (
+						<span className="components-visually-hidden">
+							{ hiddenTitle }
+						</span>
+					) : (
+						<div className="amp-drawer__heading">
+							{ heading }
+						</div>
+					) }
+					className="amp-drawer__panel-body"
+					initialOpen={ initialOpen }
+				>
+					<div className="amp-drawer__panel-body-inner">
+						{ children }
 					</div>
-				) }
-				className="amp-drawer__panel-body"
-				initialOpen={ initialOpen }
-			>
-				<div className="amp-drawer__panel-body-inner">
-					{ children }
-				</div>
-			</PanelBody>
+				</PanelBody>
+			) }
 		</Selectable>
 	);
 }

@@ -15,6 +15,9 @@ use LogicException;
  *
  * It is used to detect circular dependencies, and can also be dumped for
  * debugging information.
+ *
+ * @since 2.0
+ * @internal
  */
 final class InjectionChain {
 

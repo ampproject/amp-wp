@@ -17,6 +17,8 @@ use AmpProject\AmpWP\Infrastructure\Service;
  * Abstract base class for using cron to execute a background task.
  *
  * @package AmpProject\AmpWP
+ * @since 2.0
+ * @internal
  */
 abstract class CronBasedBackgroundTask implements Service, Registerable, Conditional, Deactivateable {
 

@@ -9,6 +9,8 @@
  * Class AMP_Block_Sanitizer
  *
  * Modifies elements created as blocks to match the blocks' AMP-specific configuration.
+ *
+ * @internal
  */
 class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 

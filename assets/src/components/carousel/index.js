@@ -205,6 +205,7 @@ function Style( { gutterWidth, itemWidth, namespace } ) {
 .${ namespace }__nav .components-button.is-primary svg {
 	display: block;
 	margin-left: 0;
+	margin-right: 0;
 }
 
 .${ namespace }__nav .components-button.is-primary svg path {

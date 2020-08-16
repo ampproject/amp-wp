@@ -10,6 +10,8 @@
  * `mandatory_parent_denylist` in the amp_wp_build.py script.
  *
  * phpcs:ignoreFile
+ *
+ * @internal
  */
 class AMP_Allowed_Tags_Generated {
 

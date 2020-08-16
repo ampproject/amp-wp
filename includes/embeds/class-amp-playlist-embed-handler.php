@@ -12,6 +12,7 @@
  * Creates AMP-compatible markup for the WordPress 'playlist' shortcode.
  *
  * @package AMP
+ * @internal
  */
 class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 

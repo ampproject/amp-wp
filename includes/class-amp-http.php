@@ -8,6 +8,8 @@
 
 /**
  * Class AMP_HTTP
+ *
+ * @internal
  */
 class AMP_HTTP {
 

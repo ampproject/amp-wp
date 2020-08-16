@@ -1,3 +1,6 @@
+html {
+	scroll-behavior: smooth;
+}
 
 @media screen and (max-width: 400px) {
 
@@ -361,13 +364,13 @@ li.error-kept {
 	border-bottom-width: 1px;
 }
 
-#reader-themes-drawer {
+#reader-themes {
 	border-top-left-radius: 0;
 	border-top-right-radius: 0;
 	border-top-width: 0;
 }
 
-#reader-themes-drawer .amp-drawer__heading {
+#reader-themes .amp-drawer__heading {
 	align-items: center;
 	display: flex;
 	padding-left: 1.5rem;
@@ -378,7 +381,7 @@ li.error-kept {
 	}
 }
 
-#plugin-suppression-drawer .amp-drawer__panel-body-inner,
+#plugin-suppression .amp-drawer__panel-body-inner,
 .amp-analytics .amp-drawer__panel-body-inner {
 	padding: 1.5rem 1.5rem 3rem;
 
@@ -387,21 +390,21 @@ li.error-kept {
 	}
 }
 
-#plugin-suppression-drawer .amp-drawer__panel-body-inner > p,
+#plugin-suppression .amp-drawer__panel-body-inner > p,
 .amp-analytics .amp-drawer__panel-body-inner p {
 	margin-top: 0;
 	font-size: 14px;
 }
 
-#analytics-options-drawer details > summary {
+#analytics-options details > summary {
 	font-size: 14px;
 }
 
-#analytics-options-drawer details > p {
+#analytics-options details > p {
 	margin-top: 1em;
 }
 
-#analytics-options-drawer .components-button:not(.components-panel__body-toggle) svg {
+#analytics-options .components-button:not(.components-panel__body-toggle) svg {
 	display: block;
 }
 

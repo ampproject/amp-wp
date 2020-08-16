@@ -11,6 +11,7 @@ use AmpProject\Dom\Document;
  * Class AMP_Content_Sanitizer
  *
  * @since 0.4.1
+ * @internal
  */
 class AMP_Content_Sanitizer {
 

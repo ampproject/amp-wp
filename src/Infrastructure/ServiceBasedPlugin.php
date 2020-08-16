@@ -13,6 +13,9 @@ use AmpProject\AmpWP\Infrastructure\ServiceContainer\LazilyInstantiatedService;
 /**
  * This abstract base plugin provides all the boilerplate code for working with
  * the dependency injector and the service container.
+ *
+ * @since 2.0
+ * @internal
  */
 abstract class ServiceBasedPlugin implements Plugin {
 

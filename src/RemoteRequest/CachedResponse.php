@@ -14,6 +14,8 @@ use DateTimeInterface;
  * Serializable object that represents a cached response together with its expiry time.
  *
  * @package AmpProject\AmpWP
+ * @since 2.0
+ * @internal
  */
 final class CachedResponse {
 

@@ -31,6 +31,7 @@
 			<exclude>
 				<directory suffix=".php">svn</directory>
 				<directory suffix=".php">node_modules</directory>
+				<directory suffix=".php">back-compat</directory>
 				<directory suffix=".php">bin</directory>
 				<directory suffix=".php">tests</directory>
 				<directory suffix=".php">vendor</directory>

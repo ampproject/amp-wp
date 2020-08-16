@@ -12,9 +12,9 @@ use AmpProject\AmpWP\Exception\InvalidStopwatchEvent;
 /**
  * Record the timing of multiple events.
  *
- * @internal
- *
  * @package AmpProject\AmpWP
+ * @since 2.0
+ * @internal
  */
 final class StopWatch {
 

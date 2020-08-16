@@ -22,6 +22,7 @@ use AMP_Validated_URL_Post_Type;
  *
  * @link https://github.com/ampproject/amp-wp/issues/5132
  * @package AmpProject\AmpWP
+ * @internal
  */
 final class ValidatedUrlStylesheetDataGarbageCollection extends CronBasedBackgroundTask {
 

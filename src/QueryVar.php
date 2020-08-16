@@ -11,6 +11,8 @@ namespace AmpProject\AmpWP;
  * An interface to capture URL query vars used in the plugin.
  *
  * @package AmpProject\AmpWP
+ * @since 2.0
+ * @internal
  */
 interface QueryVar {
 

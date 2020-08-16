@@ -7,6 +7,7 @@
 
 namespace AmpProject\AmpWP;
 
+use AmpProject\AmpWP\Admin\AnalyticsOptionsSubmenu;
 use AmpProject\AmpWP\Admin\DevToolsUserAccess;
 use AmpProject\AmpWP\Admin\GoogleFonts;
 use AmpProject\AmpWP\Admin\OnboardingWizardSubmenu;
@@ -21,6 +22,7 @@ use AmpProject\AmpWP\BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection;
 use AmpProject\AmpWP\Infrastructure\ServiceBasedPlugin;
 use AmpProject\AmpWP\Instrumentation\ServerTiming;
 use AmpProject\AmpWP\Instrumentation\StopWatch;
+
 use function is_user_logged_in;
 
 /**
@@ -29,6 +31,9 @@ use function is_user_logged_in;
  * In here we assemble our infrastructure, configure it for the specific use
  * case the plugin is meant to solve and then kick off the services so that they
  * can hook themselves into the WordPress lifecycle.
+ *
+ * @since 2.0
+ * @internal
  */
 final class AmpWpPlugin extends ServiceBasedPlugin {
 	/*
@@ -63,6 +68,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 */
 	protected function get_service_classes() {
 		return [
+			'extra_theme_and_plugin_headers'   => ExtraThemeAndPluginHeaders::class,
 			'dev_tools.user_access'            => DevToolsUserAccess::class,
 			'css_transient_cache.monitor'      => MonitorCssTransientCaching::class,
 			'css_transient_cache.ajax_handler' => ReenableCssTransientCachingAjaxAction::class,
@@ -82,6 +88,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			'obsolete_block_attribute_remover' => ObsoleteBlockAttributeRemover::class,
 			'admin.polyfills'                  => Polyfills::class,
 			'validated_url_stylesheet_gc'      => ValidatedUrlStylesheetDataGarbageCollection::class,
+			'admin.analytics_menu'             => AnalyticsOptionsSubmenu::class,
 		];
 	}
 

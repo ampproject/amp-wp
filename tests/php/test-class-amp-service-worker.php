@@ -202,7 +202,7 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 		$this->assertFalse( has_action( 'wp_footer', [ 'AMP_Service_Worker', 'install_service_worker' ] ) );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_request() );
 		AMP_Service_Worker::add_install_hooks();
 		$this->assertSame( 10, has_action( 'wp_footer', [ 'AMP_Service_Worker', 'install_service_worker' ] ) );
 		$this->assertFalse( has_action( 'wp_print_scripts', [ 'AMP_Service_Worker', 'wp_print_service_workers' ] ) );

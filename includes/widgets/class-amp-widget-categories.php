@@ -34,7 +34,7 @@ class AMP_Widget_Categories extends WP_Widget_Categories {
 	 * @return void
 	 */
 	public function widget( $args, $instance ) {
-		if ( ! is_amp_endpoint() ) {
+		if ( ! amp_is_request() ) {
 			parent::widget( $args, $instance );
 			return;
 		}

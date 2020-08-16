@@ -10,6 +10,8 @@ use AmpProject\Dom\Document;
 
 /**
  * Class AMP_Base_Sanitizer
+ *
+ * @since 0.2
  */
 abstract class AMP_Base_Sanitizer {
 

@@ -270,7 +270,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		$instance = $this->get_instance( true );
 		$this->go_to( $url );
 
-		$this->assertFalse( is_amp_endpoint() );
+		$this->assertFalse( amp_is_request() );
 		$this->assertFalse( $instance->maybe_suppress_plugins(), 'Expected no suppression since not an AMP endpoint.' );
 		$this->assert_plugin_suppressed_state( false, $bad_plugin_file_slugs );
 	}
@@ -286,7 +286,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		$instance = $this->get_instance( true );
 		$this->go_to( $url );
 
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_request() );
 		$this->assertTrue( $instance->maybe_suppress_plugins(), 'Expected suppression since an AMP endpoint and there are suppressible plugins.' );
 		$this->assert_plugin_suppressed_state( true, $bad_plugin_file_slugs );
 	}
@@ -302,7 +302,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		$instance = $this->get_instance( true );
 		$this->go_to( $url );
 
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_request() );
 		$this->assertFalse( $instance->suppress_plugins(), 'Expected no suppression since no suppressible plugins.' );
 		$this->assert_plugin_suppressed_state( false, $bad_plugin_file_slugs );
 	}
@@ -318,7 +318,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		$this->go_to( $url );
 		AMP_Options_Manager::update_option( Option::SUPPRESSED_PLUGINS, [] );
 
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_request() );
 		$this->assertFalse( $instance->suppress_plugins(), 'Expected no suppression since no plugins are being suppressed.' );
 		$this->assert_plugin_suppressed_state( false, $bad_plugin_file_slugs );
 	}
@@ -344,7 +344,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		$this->assert_plugin_suppressed_state( false, $bad_plugin_file_slugs );
 
 		$this->update_suppressed_plugins_option( array_fill_keys( $bad_plugin_file_slugs, true ) );
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_request() );
 		$this->assertTrue( $instance->suppress_plugins() );
 		$this->assert_plugin_suppressed_state( true, $bad_plugin_file_slugs );
 	}
@@ -373,7 +373,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		$this->assert_plugin_suppressed_state( false, $bad_plugin_file_slugs );
 
 		$this->update_suppressed_plugins_option( array_fill_keys( $suppressed_slugs, true ) );
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_request() );
 		$this->assertTrue( $instance->suppress_plugins() );
 		$this->assert_plugin_suppressed_state( true, $suppressed_slugs );
 		$this->assert_plugin_suppressed_state( false, $unsuppressed_slugs );

@@ -9,6 +9,8 @@
  * Class AMP_DailyMotion_Embed_Handler
  *
  * Much of this class is borrowed from Jetpack embeds
+ *
+ * @internal
  */
 class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 

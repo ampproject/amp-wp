@@ -16,6 +16,9 @@ namespace AmpProject\AmpWP\Infrastructure;
  *
  * This allows for a more systematic and automated optimization of how the
  * different parts of the plugin are enabled or disabled.
+ *
+ * @since 2.0
+ * @internal
  */
 interface Conditional {
 

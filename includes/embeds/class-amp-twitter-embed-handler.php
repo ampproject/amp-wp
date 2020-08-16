@@ -10,7 +10,9 @@ use AmpProject\Dom\Document;
 /**
  * Class AMP_Twitter_Embed_Handler
  *
- *  Much of this class is borrowed from Jetpack embeds
+ * Much of this class is borrowed from Jetpack embeds
+ *
+ * @internal
  */
 class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 

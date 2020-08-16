@@ -9,6 +9,7 @@
  * Class AMP_SoundCloud_Embed_Handler
  *
  * @since 0.5
+ * @internal
  */
 class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 

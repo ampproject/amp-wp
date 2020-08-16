@@ -6,10 +6,11 @@ import { visitAdminPage } from '@wordpress/e2e-test-utils';
 describe( 'AMP analytics options', () => {
 	beforeEach( async () => {
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
+		await page.addStyleTag( { content: 'html {scroll-behavior: auto !important;}' } );
 	} );
 
 	it( 'allows adding and deleting entries', async () => {
-		await expect( page ).toClick( '#analytics-options-drawer .components-panel__body-toggle' );
+		await expect( page ).toClick( '#analytics-options .components-panel__body-toggle' );
 		await expect( page ).not.toMatchElement( '.amp-analytics-entry' );
 
 		// Add entry.

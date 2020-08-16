@@ -19,6 +19,8 @@ use Exception;
  * This checks whether there's excessive cycling of CSS cached stylesheets and disables transient caching if so.
  *
  * @package AmpProject\AmpWP
+ * @since 2.0
+ * @internal
  */
 final class MonitorCssTransientCaching extends CronBasedBackgroundTask {
 

@@ -1,6 +1,11 @@
 /**
  * External dependencies
  */
+import PropTypes from 'prop-types';
+
+/**
+ * External dependencies
+ */
 import {
 	IS_CORE_THEME,
 	THEME_SUPPORT_ARGS,
@@ -91,8 +96,11 @@ function getReaderNotice( selected ) {
 
 /**
  * Template modes section of the settings page.
+ *
+ * @param {Object} props Component props.
+ * @param {boolean} props.focusReaderThemes Whether the reader themes drawer should be opened and focused.
  */
-export function TemplateModes() {
+export function TemplateModes( { focusReaderThemes } ) {
 	const { editedOptions } = useContext( Options );
 	const { selectedTheme } = useContext( ReaderThemes );
 
@@ -104,7 +112,7 @@ export function TemplateModes() {
 	);
 
 	return (
-		<section className="template-modes">
+		<section className="template-modes" id="template-modes">
 			<h2>
 				{ __( 'Template Mode', 'amp' ) }
 			</h2>
@@ -155,7 +163,7 @@ export function TemplateModes() {
 				<AMPDrawer
 					selected={ true }
 					heading={ (
-						<div className="reader-themes-drawer__heading">
+						<div className="reader-themes__heading">
 							<h3>
 								{ sprintf(
 									/* translators: placeholder is a theme name. */
@@ -166,8 +174,8 @@ export function TemplateModes() {
 						</div>
 					) }
 					hiddenTitle={ __( 'Show reader themes', 'amp' ) }
-					id="reader-themes-drawer"
-					initialOpen={ false }
+					id="reader-themes"
+					initialOpen={ focusReaderThemes }
 				>
 					<ReaderThemeCarousel />
 				</AMPDrawer>
@@ -175,3 +183,6 @@ export function TemplateModes() {
 		</section>
 	);
 }
+TemplateModes.propTypes = {
+	focusReaderThemes: PropTypes.bool.isRequired,
+};

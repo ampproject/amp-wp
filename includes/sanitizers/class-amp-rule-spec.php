@@ -9,6 +9,8 @@
  * Class AMP_Rule_Spec
  *
  * Set of constants used throughout the sanitizer.
+ *
+ * @internal
  */
 abstract class AMP_Rule_Spec {
 	/*

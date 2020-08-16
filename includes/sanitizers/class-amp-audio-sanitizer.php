@@ -11,6 +11,8 @@ use AmpProject\DevMode;
  * Class AMP_Audio_Sanitizer
  *
  * Converts <audio> tags to <amp-audio>
+ *
+ * @internal
  */
 class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 	use AMP_Noscript_Fallback;

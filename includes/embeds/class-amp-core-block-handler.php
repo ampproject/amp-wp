@@ -12,6 +12,7 @@ use AmpProject\Dom\Document;
  * Class AMP_Core_Block_Handler
  *
  * @since 1.0
+ * @internal
  */
 class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 

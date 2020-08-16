@@ -30,6 +30,7 @@ import { Loading } from '../components/loading';
 import { UnsavedChangesWarning } from '../components/unsaved-changes-warning';
 import { AMPNotice, NOTICE_TYPE_ERROR, NOTICE_TYPE_SUCCESS } from '../components/amp-notice';
 import { ErrorContextProvider, ErrorContext } from '../components/error-context-provider';
+import { AMPDrawer } from '../components/amp-drawer';
 import { Welcome } from './welcome';
 import { TemplateModes } from './template-modes';
 import { SupportedTemplates } from './supported-templates';
@@ -93,9 +94,34 @@ ErrorNotice.propTypes = {
 };
 
 /**
+ * Scrolls to the first focusable element in a section, or to the section if no focusable elements are found.
+ *
+ * @param {string} focusedSectionId A section ID.
+ */
+function scrollFocusedSectionIntoView( focusedSectionId ) {
+	if ( ! focusedSectionId ) {
+		return;
+	}
+
+	const focusedSectionElement = document.getElementById( focusedSectionId );
+	if ( ! focusedSectionElement ) {
+		return;
+	}
+
+	focusedSectionElement.scrollIntoView();
+
+	const firstInput = focusedSectionElement.querySelector( 'input, select, textarea, button' );
+	if ( firstInput ) {
+		firstInput.focus();
+	}
+}
+
+/**
  * Settings page application root.
  */
 function Root() {
+	const [ focusedSection, setFocusedSection ] = useState( global.location.hash.replace( /^#/, '' ) );
+
 	const { didSaveOptions, fetchingOptions, saveOptions } = useContext( Options );
 	const { error } = useContext( ErrorContext );
 	const { downloadingTheme } = useContext( ReaderThemes );
@@ -120,6 +146,39 @@ function Root() {
 		return () => undefined;
 	}, [ didSaveOptions, downloadingTheme ] );
 
+	/**
+	 * Scroll to the focused element on load or when it changes.
+	 */
+	useEffect( () => {
+		if ( fetchingOptions ) {
+			return;
+		}
+
+		scrollFocusedSectionIntoView( focusedSection );
+	}, [ fetchingOptions, focusedSection ] );
+
+	/**
+	 * Resets the focused element state when the hash changes on the page.
+	 */
+	useEffect( () => {
+		const hashChangeCallback = ( event = null ) => {
+			if ( event ) {
+				event.preventDefault();
+			}
+
+			// Ensure this runs after state updates.
+			const newFocusedSection = global.location.hash.replace( /^#/, '' );
+			setFocusedSection( newFocusedSection );
+		};
+
+		hashChangeCallback();
+		global.addEventListener( 'hashchange', hashChangeCallback );
+
+		return () => {
+			global.removeEventListener( 'hashchange', hashChangeCallback );
+		};
+	}, [ fetchingOptions ] );
+
 	if ( false !== fetchingOptions ) {
 		return <Loading />;
 	}
@@ -131,14 +190,49 @@ function Root() {
 				event.preventDefault();
 				saveOptions();
 			} }>
-				<TemplateModes />
-				<h2>
+				<TemplateModes focusReaderThemes={ 'reader-themes' === focusedSection } />
+				<h2 id="advanced-settings">
 					{ __( 'Advanced Settings', 'amp' ) }
 				</h2>
-				<MobileRedirection />
-				<SupportedTemplates />
-				<PluginSuppression />
-				<Analytics />
+				<MobileRedirection id="mobile-redirection" />
+				<AMPDrawer
+
+					heading={ (
+						<h3>
+							{ __( 'Supported Templates', 'amp' ) }
+						</h3>
+					) }
+					hiddenTitle={ __( 'Supported templates', 'amp' ) }
+					id="supported-templates"
+					initialOpen={ 'supported-templates' === focusedSection }
+				>
+					<SupportedTemplates />
+				</AMPDrawer>
+				<AMPDrawer
+					heading={ (
+						<h3>
+							{ __( 'Plugin Suppression', 'amp' ) }
+						</h3>
+					) }
+					hiddenTitle={ __( 'Plugin suppression', 'amp' ) }
+					id="plugin-suppression"
+					initialOpen={ 'plugin-suppression' === focusedSection }
+				>
+					<PluginSuppression />
+				</AMPDrawer>
+				<AMPDrawer
+					className="amp-analytics"
+					heading={ (
+						<h3>
+							{ __( 'Analytics', 'amp' ) }
+						</h3>
+					) }
+					hiddenTitle={ __( 'Analytics', 'amp' ) }
+					id="analytics-options"
+					initialOpen={ 'analytics-options' === focusedSection }
+				>
+					<Analytics />
+				</AMPDrawer>
 				<SettingsFooter />
 			</form>
 			<UnsavedChangesWarning excludeUserContext={ true } />
@@ -161,7 +255,7 @@ domReady( () => {
 		render( (
 			<ErrorContextProvider>
 				<Providers>
-					<Root optionsRestPath={ OPTIONS_REST_PATH } />
+					<Root />
 				</Providers>
 			</ErrorContextProvider>
 		), root );

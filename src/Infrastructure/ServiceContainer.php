@@ -20,6 +20,8 @@ use Traversable;
  * be able to easily swap out the implementation for something else later on.
  *
  * @see https://www.php-fig.org/psr/psr-11/
+ * @since 2.0
+ * @internal
  */
 interface ServiceContainer extends Traversable, Countable, ArrayAccess {
 

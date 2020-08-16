@@ -14,6 +14,7 @@ use AmpProject\AmpWP\Services;
  * Class AMP_Validation_Error_Taxonomy
  *
  * @since 1.0
+ * @internal
  */
 class AMP_Validation_Error_Taxonomy {
 
