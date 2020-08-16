@@ -145,6 +145,7 @@ jobs:
       env: WP_VERSION=trunk  DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1
 
     - name: PHP and JavaScript unit tests (7.4, WordPress trunk, with code coverage)
+      if: branch = develop AND type = push
       php: "7.4"
       env: WP_VERSION=latest DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1 RUN_PHPUNIT_COVERAGE=1
       before_script:
