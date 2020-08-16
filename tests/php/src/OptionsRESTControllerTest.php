@@ -22,7 +22,7 @@ use WP_UnitTestCase;
  *
  * @group amp-options
  *
- * @covers OptionsRESTController
+ * @coversDefaultClass \AmpProject\AmpWP\OptionsRESTController
  */
 class OptionsRESTControllerTest extends WP_UnitTestCase {
 
@@ -53,7 +53,7 @@ class OptionsRESTControllerTest extends WP_UnitTestCase {
 	/**
 	 * Tests OptionsRESTController::get_items_permissions_check.
 	 *
-	 * @covers OptionsRESTController::get_items_permissions_check
+	 * @covers ::get_items_permissions_check
 	 */
 	public function test_get_items_permissions_check() {
 		$this->assertWPError( $this->controller->get_items_permissions_check( new WP_REST_Request( 'GET', '/amp/v1/options' ) ) );
@@ -66,7 +66,7 @@ class OptionsRESTControllerTest extends WP_UnitTestCase {
 	/**
 	 * Tests OptionsRESTController::get_items.
 	 *
-	 * @covers OptionsRESTController::get_items.
+	 * @covers ::get_items
 	 */
 	public function test_get_items() {
 		$data = $this->controller->get_items( new WP_REST_Request( 'GET', '/amp/v1/options' ) )->get_data();
@@ -106,7 +106,7 @@ class OptionsRESTControllerTest extends WP_UnitTestCase {
 	/**
 	 * Tests OptionsRESTController::update_items.
 	 *
-	 * @covers OptionsRESTController::update_items.
+	 * @covers ::update_items
 	 */
 	public function test_update_items() {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
@@ -149,7 +149,7 @@ class OptionsRESTControllerTest extends WP_UnitTestCase {
 	/**
 	 * Tests OptionsRESTController::get_item_schema.
 	 *
-	 * @covers OptionsRESTController::get_item_schema.
+	 * @covers ::get_item_schema
 	 */
 	public function test_get_item_schema() {
 		$schema = $this->controller->get_item_schema();

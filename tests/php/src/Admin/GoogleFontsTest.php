@@ -18,7 +18,7 @@ use WP_UnitTestCase;
  *
  * @since 2.0
  *
- * @covers GoogleFonts
+ * @coversDefaultClass \AmpProject\AmpWP\Admin\GoogleFonts
  */
 class GoogleFontsTest extends WP_UnitTestCase {
 
@@ -40,7 +40,6 @@ class GoogleFontsTest extends WP_UnitTestCase {
 		$this->instance = new GoogleFonts();
 	}
 
-	/** @covers GoogleFonts::__construct() */
 	public function test__construct() {
 		$this->assertInstanceOf( GoogleFonts::class, $this->instance );
 		$this->assertInstanceOf( Delayed::class, $this->instance );
@@ -51,8 +50,8 @@ class GoogleFontsTest extends WP_UnitTestCase {
 	/**
 	 * Tests GoogleFonts::register
 	 *
-	 * @covers GoogleFonts::get_handle
-	 * @covers GoogleFonts::register
+	 * @covers ::get_handle
+	 * @covers ::register
 	 */
 	public function test_register_style() {
 		$this->instance->register_style( wp_styles() );

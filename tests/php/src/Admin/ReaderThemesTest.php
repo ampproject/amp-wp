@@ -23,7 +23,7 @@ use Closure;
  *
  * @group reader-themes
  *
- * @covers ReaderThemes
+ * @coversDefaultClass \AmpProject\AmpWP\Admin\ReaderThemes
  */
 class ReaderThemesTest extends WP_UnitTestCase {
 
@@ -65,9 +65,9 @@ class ReaderThemesTest extends WP_UnitTestCase {
 	/**
 	 * Test for get_themes.
 	 *
-	 * @covers ReaderThemes::get_themes
-	 * @covers ReaderThemes::get_default_reader_themes
-	 * @covers ReaderThemes::get_classic_mode
+	 * @covers ::get_themes
+	 * @covers ::get_default_reader_themes
+	 * @covers ::get_legacy_theme
 	 */
 	public function test_get_themes() {
 		register_theme_directory( __DIR__ . '/../../data/themes' );
@@ -107,7 +107,7 @@ class ReaderThemesTest extends WP_UnitTestCase {
 	/**
 	 * Test for get_reader_theme_by_slug.
 	 *
-	 * @covers ReaderThemes::get_reader_theme_by_slug
+	 * @covers ::get_reader_theme_by_slug
 	 */
 	public function test_get_reader_theme_by_slug() {
 		$this->assertFalse( $this->reader_themes->get_reader_theme_by_slug( 'some-theme' ) );
@@ -199,8 +199,8 @@ class ReaderThemesTest extends WP_UnitTestCase {
 	/**
 	 * Test for get_theme_availability.
 	 *
-	 * @covers ReaderThemes::get_theme_availability
-	 * @covers ReaderThemes::can_install_theme
+	 * @covers ::get_theme_availability
+	 * @covers ::can_install_theme
 	 *
 	 * @dataProvider get_availability_test_themes
 	 *
@@ -218,7 +218,7 @@ class ReaderThemesTest extends WP_UnitTestCase {
 	/**
 	 * Tests for can_install_theme.
 	 *
-	 * @covers ReaderThemes::can_install_theme
+	 * @covers ::can_install_theme
 	 */
 	public function test_can_install_theme() {
 		$core_theme = [
@@ -254,7 +254,7 @@ class ReaderThemesTest extends WP_UnitTestCase {
 	/**
 	 * Tests for theme_data_exists.
 	 *
-	 * @covers ReaderThemes::theme_data_exists
+	 * @covers ::theme_data_exists
 	 */
 	public function test_theme_data_exists() {
 		$this->assertFalse( ( new ReaderThemes() )->theme_data_exists( 'neve' ) );
@@ -277,7 +277,7 @@ class ReaderThemesTest extends WP_UnitTestCase {
 		remove_filter( 'amp_reader_themes', $append_neve_theme );
 	}
 
-	/** @covers ReaderThemes::using_fallback_theme */
+	/** @covers ::using_fallback_theme */
 	public function test_using_fallback_theme() {
 		$reader_themes = new ReaderThemes();
 		AMP_Options_Manager::update_options(

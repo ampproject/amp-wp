@@ -8,7 +8,7 @@ use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use WP_UnitTestCase;
 
-/** @covers AmpSlugCustomizationWatcher */
+/** @coversDefaultClass \AmpProject\AmpWP\AmpSlugCustomizationWatcher */
 final class AmpSlugCustomizationWatcherTest extends WP_UnitTestCase {
 
 	use AssertContainsCompatibility;
@@ -21,20 +21,19 @@ final class AmpSlugCustomizationWatcherTest extends WP_UnitTestCase {
 		$this->instance = new AmpSlugCustomizationWatcher();
 	}
 
-	/** @covers AmpSlugCustomizationWatcher::__construct() */
 	public function test__construct() {
 		$this->assertInstanceOf( AmpSlugCustomizationWatcher::class, $this->instance );
 		$this->assertInstanceOf( Service::class, $this->instance );
 		$this->assertInstanceOf( Registerable::class, $this->instance );
 	}
 
-	/** @covers AmpSlugCustomizationWatcher::register() */
+	/** @covers ::register() */
 	public function test_register() {
 		$this->instance->register();
 		$this->assertEquals( 8, has_action( 'plugins_loaded', [ $this->instance, 'determine_early_customization' ] ) );
 	}
 
-	/** @covers AmpSlugCustomizationWatcher::determine_early_customization() */
+	/** @covers ::determine_early_customization() */
 	public function test_determine_early_customization() {
 		$this->assertFalse( $this->instance->did_customize_early() );
 		$this->assertFalse( $this->instance->did_customize_late() );
@@ -50,8 +49,8 @@ final class AmpSlugCustomizationWatcherTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @covers AmpSlugCustomizationWatcher::determine_early_customization()
-	 * @covers AmpSlugCustomizationWatcher::determine_late_customization()
+	 * @covers ::determine_early_customization()
+	 * @covers ::determine_late_customization()
 	 */
 	public function test_determine_late_customization() {
 		$this->assertFalse( $this->instance->did_customize_early() );

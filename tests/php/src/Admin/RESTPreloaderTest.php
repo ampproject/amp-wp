@@ -15,7 +15,7 @@ use WP_UnitTestCase;
  *
  * @since 2.0
  *
- * @covers RESTPreloader
+ * @coversDefaultClass \AmpProject\AmpWP\Admin\RESTPreloader
  */
 class RESTPreloaderTest extends WP_UnitTestCase {
 
@@ -42,8 +42,8 @@ class RESTPreloaderTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @covers RESTPreloader::add_preloaded_path
-	 * @covers RESTPreloader::preload_data
+	 * @covers ::add_preloaded_path
+	 * @covers ::preload_data
 	 */
 	public function test_adding_preloaded_data() {
 		global $wp_scripts;

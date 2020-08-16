@@ -18,6 +18,7 @@ use WP_UnitTestCase;
  * Tests for OptionsMenu.
  *
  * @group options-menu
+ * @coversDefaultClass \AmpProject\AmpWP\Admin\OptionsMenu
  */
 class OptionsMenuTest extends WP_UnitTestCase {
 
@@ -66,7 +67,7 @@ class OptionsMenuTest extends WP_UnitTestCase {
 	/**
 	 * Test admin_menu.
 	 *
-	 * @covers OptionsMenu::add_menu_items()
+	 * @covers ::add_menu_items()
 	 */
 	public function test_add_menu_items() {
 		global $_parent_pages, $submenu;
@@ -97,7 +98,7 @@ class OptionsMenuTest extends WP_UnitTestCase {
 	/**
 	 * Test render_screen for admin users.
 	 *
-	 * @covers OptionsMenu::render_screen()
+	 * @covers ::render_screen()
 	 */
 	public function test_render_screen_for_admin_user() {
 		wp_set_current_user(

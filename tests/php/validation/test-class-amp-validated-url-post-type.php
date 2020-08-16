@@ -532,7 +532,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		// Insert four weeks of validated URLs.
 		$post_ids = [];
 		for ( $days_ago = 1; $days_ago <= 28; $days_ago++ ) {
-			$post_date = gmdate( 'Y-m-d H:i:s', strtotime( "$days_ago days ago" ) + 2 );
+			$post_date = gmdate( 'Y-m-d H:i:s', strtotime( "$days_ago days ago" ) + 5 );
 			$post_id   = AMP_Validated_URL_Post_Type::store_validation_errors(
 				[],
 				home_url( "/days-ago-$days_ago/" ),

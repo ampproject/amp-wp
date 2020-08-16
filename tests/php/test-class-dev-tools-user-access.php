@@ -14,7 +14,7 @@ use AmpProject\AmpWP\Admin\DevToolsUserAccess;
  *
  * @since 2.0
  *
- * @covers DevToolsUserAccess
+ * @coversDefaultClass \AmpProject\AmpWP\Admin\DevToolsUserAccess
  */
 class Test_DevToolsUserAccess extends WP_UnitTestCase {
 
@@ -34,7 +34,7 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 	/**
 	 * Tests DevToolsUserAccess::register
 	 *
-	 * @covers DevToolsUserAccess::register
+	 * @covers ::register
 	 */
 	public function test_register() {
 		$this->dev_tools_user_access->register();
@@ -47,7 +47,7 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 	/**
 	 * Tests DevToolsUserAccess::is_user_enabled
 	 *
-	 * @covers DevToolsUserAccess::is_user_enabled
+	 * @covers ::is_user_enabled
 	 */
 	public function test_is_user_enabled() {
 		$admin_user  = self::factory()->user->create_and_get( [ 'role' => 'administrator' ] );
@@ -68,7 +68,7 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 	/**
 	 * Tests DevToolsUserAccess::get_user_enabled
 	 *
-	 * @covers DevToolsUserAccess::get_user_enabled
+	 * @covers ::get_user_enabled
 	 */
 	public function test_get_user_enabled() {
 		$this->assertTrue( $this->dev_tools_user_access->get_user_enabled( self::factory()->user->create_and_get( [ 'role' => 'administrator' ] ) ) );
@@ -77,7 +77,7 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 	/**
 	 * Tests DevToolsUserAccess::set_user_enabled
 	 *
-	 * @covers DevToolsUserAccess::set_user_enabled
+	 * @covers ::set_user_enabled
 	 */
 	public function test_set_user_enabled() {
 		$admin_user = self::factory()->user->create_and_get( [ 'role' => 'administrator' ] );
@@ -90,7 +90,7 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 	/**
 	 * Tests DevToolsUserAccess::register_rest_field
 	 *
-	 * @covers DevToolsUserAccess::register_rest_field
+	 * @covers ::register_rest_field
 	 */
 	public function test_register_rest_field() {
 		global $wp_rest_additional_fields;
@@ -103,7 +103,7 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 	/**
 	 * Tests DevToolsUserAccess::print_personal_options
 	 *
-	 * @covers DevToolsUserAccess::print_personal_options
+	 * @covers ::print_personal_options
 	 */
 	public function test_print_personal_options() {
 		$admin_user  = self::factory()->user->create_and_get( [ 'role' => 'administrator' ] );
@@ -126,7 +126,7 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 	/**
 	 * Tests DevToolsUserAccess::update_user_setting
 	 *
-	 * @covers DevToolsUserAccess::update_user_setting
+	 * @covers ::update_user_setting
 	 */
 	public function test_update_user_setting() {
 		$admin_user  = self::factory()->user->create_and_get( [ 'role' => 'administrator' ] );
@@ -149,7 +149,7 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 	/**
 	 * Tests DevToolsUserAccess::rest_get_dev_tools_enabled
 	 *
-	 * @covers DevToolsUserAccess::rest_get_dev_tools_enabled
+	 * @covers ::rest_get_dev_tools_enabled
 	 */
 	public function test_rest_get_dev_tools_enabled() {
 		$user = self::factory()->user->create_and_get( [ 'role' => 'author' ] );
@@ -169,7 +169,7 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 	/**
 	 * Tests DevToolsUserAccess::rest_update_dev_tools_enabled
 	 *
-	 * @covers DevToolsUserAccess::rest_update_dev_tools_enabled
+	 * @covers ::rest_update_dev_tools_enabled
 	 */
 	public function test_rest_update_dev_tools_enabled() {
 		$author_user = self::factory()->user->create_and_get( [ 'role' => 'author' ] );
