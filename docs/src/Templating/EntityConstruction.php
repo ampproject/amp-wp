@@ -10,11 +10,20 @@ namespace AmpProject\AmpWP\Documentation\Templating;
 trait EntityConstruction {
 
 	/**
+	 * Store a reference to the parent entity.
+	 *
+	 * @var Entity|null Parent entity, or null if none.
+	 */
+	protected $parent;
+
+	/**
 	 * EntityConstruction constructor.
 	 *
-	 * @param array $data Associative array of data to process.
+	 * @param array       $data   Associative array of data to process.
+	 * @param Entity|null $parent Parent entity, or null if none.
 	 */
-	public function __construct( $data ) {
+	public function __construct( $data, $parent = null ) {
+		$this->parent = $parent;
 		foreach ( $this->get_known_keys() as $key ) {
 			$this->process_key( $key, $data );
 		}
@@ -46,5 +55,15 @@ trait EntityConstruction {
 		} else {
 			$this->$key = $value;
 		}
+	}
+
+
+	/**
+	 * Get the parent entity object of the current entity.
+	 *
+	 * @return Entity|null Parent entity, or null if none.
+	 */
+	public function get_parent() {
+		return $this->parent;
 	}
 }
