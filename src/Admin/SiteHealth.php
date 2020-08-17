@@ -23,6 +23,7 @@ use AmpProject\AmpWP\Option;
  * Adds tests and debugging information for Site Health.
  *
  * @since 1.5.0
+ * @internal
  */
 final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 

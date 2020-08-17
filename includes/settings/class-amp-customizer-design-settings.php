@@ -9,6 +9,8 @@ use AmpProject\AmpWP\Option;
 
 /**
  * Class AMP_Customizer_Design_Settings
+ *
+ * @internal
  */
 class AMP_Customizer_Design_Settings {
 

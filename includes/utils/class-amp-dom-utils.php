@@ -12,6 +12,8 @@ use AmpProject\Tag;
  * Class AMP_DOM_Utils
  *
  * Functionality to simplify working with Dom\Documents and DOMElements.
+ *
+ * @internal
  */
 class AMP_DOM_Utils {
 

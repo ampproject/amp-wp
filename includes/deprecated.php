@@ -42,7 +42,7 @@ function amp_maybe_add_actions() {
 		return;
 	}
 
-	$is_amp_endpoint = is_amp_endpoint();
+	$is_amp_request = amp_is_request();
 
 	/**
 	 * Queried post object.
@@ -50,8 +50,8 @@ function amp_maybe_add_actions() {
 	 * @var WP_Post $post
 	 */
 	$post = get_queried_object();
-	if ( ! post_supports_amp( $post ) ) {
-		if ( $is_amp_endpoint ) {
+	if ( ! amp_is_post_supported( $post ) ) {
+		if ( $is_amp_request ) {
 			/*
 			 * Temporary redirect is used for admin users because reader mode and AMP support can be enabled by user at any time,
 			 * so they will be able to make AMP available for this URL and see the change without wrestling with the redirect cache.
@@ -62,7 +62,7 @@ function amp_maybe_add_actions() {
 		return;
 	}
 
-	if ( $is_amp_endpoint ) {
+	if ( $is_amp_request ) {
 
 		// Prevent infinite URL space under /amp/ endpoint.
 		global $wp;
@@ -146,7 +146,7 @@ function amp_render_post( $post ) {
 	$post_id = $post->ID;
 
 	/*
-	 * If amp_render_post is called directly outside of the standard endpoint, is_amp_endpoint() will return false,
+	 * If amp_render_post is called directly outside of the standard endpoint, amp_is_request() will return false,
 	 * which is not ideal for any code that expects to run in an AMP context.
 	 * Let's force the value to be true while we render AMP.
 	 */
@@ -163,9 +163,10 @@ function amp_render_post( $post ) {
 	/**
 	 * Fires before rendering a post in AMP.
 	 *
-	 * This action is not triggered when 'amp' theme support is present. Instead, you should use 'template_redirect' action and check if `is_amp_endpoint()`.
+	 * This action is not triggered when 'amp' theme support is present. Instead, you should use 'template_redirect' action and check if `amp_is_request()`.
 	 *
 	 * @since 0.2
+	 * @deprecated
 	 *
 	 * @param int $post_id Post ID.
 	 */

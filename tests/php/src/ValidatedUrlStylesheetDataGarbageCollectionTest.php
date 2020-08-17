@@ -7,14 +7,14 @@
 
 use AmpProject\AmpWP\BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection;
 
-/** @covers ValidatedUrlStylesheetDataGarbageCollection */
+/** @coversDefaultClass \AmpProject\AmpWP\BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection */
 class ValidatedUrlStylesheetDataGarbageCollectionTest extends WP_UnitTestCase {
 
 	/**
 	 * Test whether an event is actually scheduled when the garbage collection is registered.
 	 *
-	 * @covers ValidatedUrlStylesheetDataGarbageCollection::get_interval()
-	 * @covers ValidatedUrlStylesheetDataGarbageCollection::get_event_name()
+	 * @covers ::get_interval()
+	 * @covers ::get_event_name()
 	 */
 	public function test_event_gets_scheduled_and_unscheduled() {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
@@ -37,7 +37,7 @@ class ValidatedUrlStylesheetDataGarbageCollectionTest extends WP_UnitTestCase {
 	/**
 	 * Test whether stylesheet data is deleted when the garbage collection is processing.
 	 *
-	 * @covers ValidatedUrlStylesheetDataGarbageCollection::process()
+	 * @covers ::process()
 	 */
 	public function test_event_can_be_processed() {
 		$monitor = new ValidatedUrlStylesheetDataGarbageCollection();

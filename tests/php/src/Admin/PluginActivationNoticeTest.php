@@ -19,7 +19,7 @@ use WP_UnitTestCase;
  *
  * @since 2.0
  *
- * @covers PluginActivationNotice
+ * @coversDefaultClass \AmpProject\AmpWP\Admin\PluginActivationNotice
  */
 class PluginActivationNoticeTest extends WP_UnitTestCase {
 
@@ -40,7 +40,7 @@ class PluginActivationNoticeTest extends WP_UnitTestCase {
 	/**
 	 * Tests PluginActivationNotice::register
 	 *
-	 * @covers PluginActivationNotice::register
+	 * @covers ::register
 	 */
 	public function test_register() {
 		$this->plugin_activation_notice->register();
@@ -48,7 +48,7 @@ class PluginActivationNoticeTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @covers PluginActivationNotice::render_notice
+	 * @covers ::render_notice
 	 */
 	public function test_user_sees_notice() {
 		set_current_screen( 'plugins' );
@@ -59,7 +59,7 @@ class PluginActivationNoticeTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @covers PluginActivationNotice::render_notice
+	 * @covers ::render_notice
 	 */
 	public function test_user_can_dismiss_notice() {
 		wp_set_current_user( 1 );
@@ -77,7 +77,7 @@ class PluginActivationNoticeTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @covers PluginActivationNotice::render_notice
+	 * @covers ::render_notice
 	 */
 	public function test_notice_doesnt_show_if_wizard_completed() {
 		$original_option = AMP_Options_Manager::get_option( Option::PLUGIN_CONFIGURED );

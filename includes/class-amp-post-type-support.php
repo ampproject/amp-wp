@@ -10,6 +10,8 @@ use AmpProject\AmpWP\Option;
 
 /**
  * Class AMP_Post_Type_Support.
+ *
+ * @internal
  */
 class AMP_Post_Type_Support {
 

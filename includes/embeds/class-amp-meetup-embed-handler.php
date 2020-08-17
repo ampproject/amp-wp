@@ -8,6 +8,8 @@
 
 /**
  * Class AMP_Meetup_Embed_Handler
+ *
+ * @internal
  */
 class AMP_Meetup_Embed_Handler extends AMP_Base_Embed_Handler {
 

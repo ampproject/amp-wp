@@ -10,9 +10,10 @@ use AmpProject\DevMode;
 /**
  * Class AMP_Video_Sanitizer
  *
- * @since 0.2
- *
  * Converts <video> tags to <amp-video>
+ *
+ * @since 0.2
+ * @internal
  */
 class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	use AMP_Noscript_Fallback;

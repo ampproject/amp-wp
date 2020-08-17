@@ -9,6 +9,8 @@
 
 /**
  * Class AMP_Base_Embed_Handler
+ *
+ * @since 0.2
  */
 abstract class AMP_Base_Embed_Handler {
 	/**

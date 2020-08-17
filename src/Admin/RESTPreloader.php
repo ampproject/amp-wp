@@ -13,6 +13,8 @@ use AmpProject\AmpWP\Infrastructure\Service;
  * Preloads REST responses for client-side applications to prevent having to call fetch on page load.
  *
  * @package AmpProject\AmpWP
+ * @since 2.0
+ * @internal
  */
 final class RESTPreloader implements Service {
 

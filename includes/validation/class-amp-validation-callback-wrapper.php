@@ -9,6 +9,7 @@
  * Class AMP_Validation_Callback_Wrapper
  *
  * @since 1.2.1
+ * @internal
  */
 class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 

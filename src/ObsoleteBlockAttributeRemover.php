@@ -34,6 +34,8 @@ use WP_REST_Response;
  * @link https://github.com/ampproject/amp-wp/pull/4775
  *
  * @package AmpProject\AmpWP
+ * @since 2.0
+ * @internal
  */
 final class ObsoleteBlockAttributeRemover implements Service, Registerable, Delayed {
 

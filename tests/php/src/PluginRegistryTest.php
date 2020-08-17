@@ -7,6 +7,7 @@ use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\Tests\Helpers\MockPluginEnvironment;
 use PHPUnit\Framework\TestCase;
 
+/** @coversDefaultClass \AmpProject\AmpWP\PluginRegistry */
 final class PluginRegistryTest extends TestCase {
 
 	private function populate_plugins() {
@@ -21,7 +22,7 @@ final class PluginRegistryTest extends TestCase {
 		$this->assertInstanceOf( Service::class, $plugin_registry );
 	}
 
-	/** @covers PluginRegistry::get_plugin_slug_from_file() */
+	/** @covers ::get_plugin_slug_from_file() */
 	public function test_get_plugin_slug_from_file() {
 		$plugin_registry = new PluginRegistry();
 
@@ -30,7 +31,7 @@ final class PluginRegistryTest extends TestCase {
 		$this->assertEquals( 'foo.php', $plugin_registry->get_plugin_slug_from_file( 'foo.php' ) );
 	}
 
-	/** @covers PluginRegistry::get_plugins() */
+	/** @covers ::get_plugins() */
 	public function test_get_plugins() {
 		$this->populate_plugins();
 
@@ -54,7 +55,7 @@ final class PluginRegistryTest extends TestCase {
 		);
 	}
 
-	/** @covers PluginRegistry::get_plugin_from_slug() */
+	/** @covers ::get_plugin_from_slug() */
 	public function test_get_plugin_from_slug() {
 		$this->populate_plugins();
 		$plugin_registry = new PluginRegistry();

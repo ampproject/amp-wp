@@ -33,6 +33,8 @@ use Sabberworm\CSS\CSSList\Document as CSSDocument;
  * Class AMP_Style_Sanitizer
  *
  * Collects inline styles and outputs them in the amp-custom stylesheet.
+ *
+ * @internal
  */
 class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 

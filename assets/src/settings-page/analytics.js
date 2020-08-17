@@ -15,7 +15,6 @@ import { Button, TextControl, PanelRow, BaseControl } from '@wordpress/component
 /**
  * Internal dependencies
  */
-import { AMPDrawer } from '../components/amp-drawer';
 import { Options } from '../components/options-context-provider';
 import { AMPNotice, NOTICE_SIZE_SMALL } from '../components/amp-notice';
 
@@ -195,7 +194,7 @@ AnalyticsEntry.propTypes = {
 /**
  * Component handling addition and deletion of analytics entries.
  */
-function AnalyticsOptions() {
+export function Analytics() {
 	const { editedOptions, originalOptions, updateOptions } = useContext( Options );
 	const { analytics } = editedOptions;
 
@@ -274,23 +273,3 @@ function AnalyticsOptions() {
 	);
 }
 
-/**
- * Analytics section of the settings screen. Displays as a closed drawer on initial load.
- */
-export function Analytics() {
-	return (
-		<AMPDrawer
-			className="amp-analytics"
-			heading={ (
-				<h3>
-					{ __( 'Analytics', 'amp' ) }
-				</h3>
-			) }
-			hiddenTitle={ __( 'Analytics', 'amp' ) }
-			id="analytics-options-drawer"
-			initialOpen={ false }
-		>
-			<AnalyticsOptions />
-		</AMPDrawer>
-	);
-}

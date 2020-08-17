@@ -29,6 +29,8 @@ use AmpProject\Tag;
  *     - `ChildTagSpec`       - Places restrictions on the number and type of child tags.
  *     - `if_value_regex`     - if one attribute value matches, this places a restriction
  *                              on another attribute/value.
+ *
+ * @internal
  */
 class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 

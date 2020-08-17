@@ -390,9 +390,18 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 					amp_get_current_url()
 				);
 			},
+
+			'default_to_localhost'        => function () {
+				unset( $_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI'] );
+				$this->set_home_url_with_filter( ':' );
+				$this->assertEquals(
+					'http://localhost/',
+					amp_get_current_url()
+				);
+			},
 		];
 		return array_map(
-			function ( $assertion ) {
+			static function ( $assertion ) {
 				return [ $assertion ];
 			},
 			$assertions
@@ -674,6 +683,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 *
 	 * @dataProvider get_reader_mode_amphtml_urls
 	 * @covers ::amp_add_amphtml_link()
+	 * @expectedDeprecated amp_frontend_show_canonical
 	 *
 	 * @param callable $data_provider Provider.
 	 */
@@ -772,6 +782,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 *
 	 * @dataProvider get_transitional_mode_amphtml_urls
 	 * @covers ::amp_add_amphtml_link()
+	 * @expectedDeprecated amp_frontend_show_canonical
 	 *
 	 * @param callable $data_provider Provider.
 	 */
@@ -831,45 +842,45 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test amp_is_available() and is_amp_endpoint() functions.
+	 * Test amp_is_available() and amp_is_request() functions.
 	 *
 	 * @covers ::amp_is_available()
-	 * @covers ::is_amp_endpoint()
+	 * @covers ::amp_is_request()
 	 */
-	public function test_is_amp_endpoint() {
+	public function test_amp_is_request() {
 		$this->go_to( get_permalink( self::factory()->post->create() ) );
 		$this->assertTrue( amp_is_available() );
-		$this->assertFalse( is_amp_endpoint() );
+		$this->assertFalse( amp_is_request() );
 
 		// Legacy query var.
 		set_query_var( amp_get_slug(), '' );
 		$this->assertTrue( amp_is_available() );
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_request() );
 		unset( $GLOBALS['wp_query']->query_vars[ amp_get_slug() ] );
 		$this->assertTrue( amp_is_available() );
-		$this->assertFalse( is_amp_endpoint() );
+		$this->assertFalse( amp_is_request() );
 
 		// Transitional theme support.
 		add_theme_support( AMP_Theme_Support::SLUG, [ 'template_dir' => './' ] );
 		$_GET['amp'] = '';
 		$this->assertTrue( amp_is_available() );
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_request() );
 		unset( $_GET['amp'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$this->assertTrue( amp_is_available() );
-		$this->assertFalse( is_amp_endpoint() );
+		$this->assertFalse( amp_is_request() );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 
 		// Standard theme support.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->assertTrue( amp_is_available() );
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_request() );
 
 		// Special core pages.
 		$pages = [ 'wp-login.php', 'wp-signup.php', 'wp-activate.php' ];
 		foreach ( $pages as $page ) {
 			$GLOBALS['pagenow'] = $page;
 			$this->assertFalse( amp_is_available() );
-			$this->assertFalse( is_amp_endpoint() );
+			$this->assertFalse( amp_is_request() );
 		}
 		unset( $GLOBALS['pagenow'] );
 
@@ -883,24 +894,24 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		// A post shouldn't be an AMP endpoint, as it was unchecked in the UI via the options above.
 		$this->go_to( self::factory()->post->create() );
 		$this->assertFalse( amp_is_available() );
-		$this->assertFalse( is_amp_endpoint() );
+		$this->assertFalse( amp_is_request() );
 
 		// The homepage shouldn't be an AMP endpoint, as it was also unchecked in the UI.
 		$this->go_to( home_url( '/' ) );
 		$this->assertFalse( amp_is_available() );
-		$this->assertFalse( is_amp_endpoint() );
+		$this->assertFalse( amp_is_request() );
 
 		// When the user passes a flag to the WP-CLI command, it forces AMP validation no matter whether the user disabled AMP on any template.
 		AMP_Validation_Manager::$is_validate_request = true;
 		$this->assertTrue( amp_is_available() );
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_request() );
 	}
 
 	/**
 	 * Test amp_is_available() function when availability is blocked due to validation errors.
 	 *
 	 * @covers ::amp_is_available()
-	 * @covers ::is_amp_endpoint()
+	 * @covers ::amp_is_request()
 	 */
 	public function test_amp_is_available_when_noamp_due_to_validation_errors() {
 		$post_id = self::factory()->post->create();
@@ -909,129 +920,129 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 		$this->go_to( amp_get_permalink( $post_id ) );
 		$this->assertTrue( amp_is_available() );
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_request() );
 
 		$this->go_to( get_permalink( $post_id ) );
 		$this->assertTrue( amp_is_available() );
-		$this->assertFalse( is_amp_endpoint() );
+		$this->assertFalse( amp_is_request() );
 
 		$this->go_to( add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_AVAILABLE, get_permalink( $post_id ) ) );
 		$this->assertFalse( amp_is_available() );
-		$this->assertFalse( is_amp_endpoint() );
+		$this->assertFalse( amp_is_request() );
 
 		// Now go AMP-first.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->go_to( add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_AVAILABLE, get_permalink( $post_id ) ) );
 		$this->assertTrue( amp_is_available() );
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_request() );
 	}
 
 	/**
-	 * Test is_amp_endpoint() function for post embeds and feeds.
+	 * Test amp_is_request() function for post embeds and feeds.
 	 *
 	 * @covers ::amp_is_available()
-	 * @covers ::is_amp_endpoint()
+	 * @covers ::amp_is_request()
 	 * global WP_Query $wp_the_query
 	 */
-	public function test_is_amp_endpoint_for_post_embeds_and_feeds() {
+	public function test_amp_is_request_for_post_embeds_and_feeds() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$post_id = self::factory()->post->create_and_get()->ID;
 
 		$this->go_to( home_url( "?p=$post_id" ) );
 		$this->assertTrue( amp_is_available() );
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_request() );
 
 		$this->go_to( home_url( "?p=$post_id&embed=1" ) );
 		$this->assertFalse( amp_is_available() );
-		$this->assertFalse( is_amp_endpoint() );
+		$this->assertFalse( amp_is_request() );
 
 		$this->go_to( home_url( '?feed=rss' ) );
 		$this->assertFalse( amp_is_available() );
-		$this->assertFalse( is_amp_endpoint() );
+		$this->assertFalse( amp_is_request() );
 
 		if ( class_exists( 'WP_Service_Workers' ) && defined( 'WP_Service_Workers::QUERY_VAR' ) && function_exists( 'pwa_add_error_template_query_var' ) ) {
 			$this->go_to( home_url( "?p=$post_id" ) );
 			global $wp_query;
 			$wp_query->set( WP_Service_Workers::QUERY_VAR, WP_Service_Workers::SCOPE_FRONT );
 			$this->assertFalse( amp_is_available() );
-			$this->assertFalse( is_amp_endpoint() );
+			$this->assertFalse( amp_is_request() );
 		}
 	}
 
 	/**
-	 * Test is_amp_endpoint() function before the parse_query action happens.
+	 * Test amp_is_request() function before the parse_query action happens.
 	 *
 	 * @covers ::amp_is_available()
-	 * @covers ::is_amp_endpoint()
+	 * @covers ::amp_is_request()
 	 * @expectedIncorrectUsage amp_is_available
 	 */
 	public function test_amp_is_available_before_parse_query_action() {
 		global $wp_actions;
 		unset( $wp_actions['parse_query'] );
-		$this->assertFalse( is_amp_endpoint() );
+		$this->assertFalse( amp_is_request() );
 		$this->assertFalse( amp_is_available() );
 	}
 
 	/**
-	 * Test is_amp_endpoint() function when there is no WP_Query.
+	 * Test amp_is_request() function when there is no WP_Query.
 	 *
 	 * @covers ::amp_is_available()
-	 * @covers ::is_amp_endpoint()
+	 * @covers ::amp_is_request()
 	 * @expectedIncorrectUsage amp_is_available
 	 */
-	public function test_is_amp_endpoint_when_no_wp_query() {
+	public function test_amp_is_request_when_no_wp_query() {
 		global $wp_query;
 		$wp_query = null;
 		$this->assertFalse( amp_is_available() );
-		$this->assertFalse( is_amp_endpoint() );
+		$this->assertFalse( amp_is_request() );
 	}
 
 	/**
-	 * Test is_amp_endpoint() function before the wp action happens in Standard mode.
+	 * Test amp_is_request() function before the wp action happens in Standard mode.
 	 *
-	 * @covers ::is_amp_endpoint()
+	 * @covers ::amp_is_request()
 	 * @covers ::amp_is_available()
 	 * @expectedIncorrectUsage amp_is_available
 	 */
-	public function test_is_amp_endpoint_before_wp_action_for_standard_mode() {
+	public function test_amp_is_request_before_wp_action_for_standard_mode() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		global $wp_actions;
 		unset( $wp_actions['wp'] );
 		$this->assertTrue( AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) );
 		$this->assertTrue( amp_is_canonical() );
 		$this->assertTrue( amp_is_available(), 'Expected available even before wp action because AMP-First' );
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_request() );
 
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		$this->assertFalse( amp_is_available() );
-		$this->assertFalse( is_amp_endpoint() );
+		$this->assertFalse( amp_is_request() );
 	}
 
 	/**
-	 * Test is_amp_endpoint() function before the wp action happens in Reader mode.
+	 * Test amp_is_request() function before the wp action happens in Reader mode.
 	 *
-	 * @covers ::is_amp_endpoint()
+	 * @covers ::amp_is_request()
 	 * @covers ::amp_is_available()
 	 * @expectedIncorrectUsage amp_is_available
 	 */
-	public function test_is_amp_endpoint_before_wp_action_for_reader_mode() {
+	public function test_amp_is_request_before_wp_action_for_reader_mode() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		$this->go_to( home_url( '/' ) );
 		global $wp_actions;
 		unset( $wp_actions['wp'] );
 		$this->assertFalse( amp_is_canonical() );
 		$this->assertFalse( amp_is_available() );
-		$this->assertFalse( is_amp_endpoint() );
+		$this->assertFalse( amp_is_request() );
 	}
 
 	/**
-	 * Test is_amp_endpoint() function before the wp action happens in Transitional mode (with no AMP query var present).
+	 * Test amp_is_request() function before the wp action happens in Transitional mode (with no AMP query var present).
 	 *
-	 * @covers ::is_amp_endpoint()
+	 * @covers ::amp_is_request()
 	 * @covers ::amp_is_available()
 	 * @expectedIncorrectUsage amp_is_available
 	 */
-	public function test_is_amp_endpoint_before_wp_action_for_transitional_mode_with_query_var() {
+	public function test_amp_is_request_before_wp_action_for_transitional_mode_with_query_var() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		$this->go_to( add_query_arg( amp_get_slug(), '1', home_url( '/' ) ) );
 		global $wp_actions;
@@ -1039,11 +1050,11 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertTrue( AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) );
 		$this->assertFalse( amp_is_canonical() );
 		$this->assertTrue( amp_is_available() );
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_request() );
 
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		$this->assertFalse( amp_is_available() );
-		$this->assertFalse( is_amp_endpoint() );
+		$this->assertFalse( amp_is_request() );
 	}
 
 	/**
@@ -1418,30 +1429,30 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test post_supports_amp().
+	 * Test amp_is_post_supported().
 	 *
-	 * @covers ::post_supports_amp()
+	 * @covers ::amp_is_post_supported()
 	 */
-	public function test_post_supports_amp() {
+	public function test_amp_is_post_supported() {
 		add_post_type_support( 'page', AMP_Post_Type_Support::SLUG );
 
 		// Test disabled by default for page for posts and show on front.
 		update_option( 'show_on_front', 'page' );
 		$post = self::factory()->post->create_and_get( [ 'post_type' => 'page' ] );
-		$this->assertTrue( post_supports_amp( $post ) );
+		$this->assertTrue( amp_is_post_supported( $post ) );
 		update_option( 'show_on_front', 'page' );
-		$this->assertTrue( post_supports_amp( $post ) );
+		$this->assertTrue( amp_is_post_supported( $post ) );
 		update_option( 'page_for_posts', $post->ID );
-		$this->assertFalse( post_supports_amp( $post ) );
+		$this->assertFalse( amp_is_post_supported( $post ) );
 		update_option( 'page_for_posts', '' );
 		update_option( 'page_on_front', $post->ID );
-		$this->assertFalse( post_supports_amp( $post ) );
+		$this->assertFalse( amp_is_post_supported( $post ) );
 		update_option( 'show_on_front', 'posts' );
-		$this->assertTrue( post_supports_amp( $post ) );
+		$this->assertTrue( amp_is_post_supported( $post ) );
 
 		// Test disabled by default for page templates.
 		update_post_meta( $post->ID, '_wp_page_template', 'foo.php' );
-		$this->assertFalse( post_supports_amp( $post ) );
+		$this->assertFalse( amp_is_post_supported( $post ) );
 
 		// Reset.
 		remove_post_type_support( 'page', AMP_Post_Type_Support::SLUG );
@@ -1737,14 +1748,14 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 		// Confirm that link is added to non-AMP version.
 		set_query_var( amp_get_slug(), '' );
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_request() );
 		$admin_bar = new WP_Admin_Bar();
 		amp_add_admin_bar_view_link( $admin_bar );
 		$item = $admin_bar->get_node( 'amp' );
 		$this->assertInternalType( 'object', $item );
 		$this->assertEquals( esc_url( get_permalink( $post_id ) ), $item->href );
 		unset( $wp_query->query_vars[ amp_get_slug() ] );
-		$this->assertFalse( is_amp_endpoint() );
+		$this->assertFalse( amp_is_request() );
 
 		// Confirm post opt-out works.
 		add_filter( 'amp_skip_post', '__return_true' );

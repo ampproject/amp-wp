@@ -10,6 +10,8 @@ use AmpProject\AmpWP\Option;
 
 /**
  * Class AMP_Options_Manager
+ *
+ * @internal
  */
 class AMP_Options_Manager {
 
@@ -533,7 +535,7 @@ class AMP_Options_Manager {
 				/* translators: 1: slug of the Reader theme, 2: the URL for the reader theme selection UI */
 				__( 'The AMP Reader theme %1$s cannot be found. Your site is currently falling back to using the Legacy templates for AMP pages. Please <a href="%2$s">re-select</a> the desired Reader theme.', 'amp' ),
 				"<code>{$selected_theme}</code>",
-				esc_url( add_query_arg( 'page', self::OPTION_NAME, admin_url( 'admin.php' ) ) . '#reader-themes-drawer' )
+				esc_url( add_query_arg( 'page', self::OPTION_NAME, admin_url( 'admin.php' ) ) . '#reader-themes' )
 			);
 			?>
 			<div class="notice notice-warning">

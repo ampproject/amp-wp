@@ -17,6 +17,9 @@ use ReflectionParameter;
 
 /**
  * A simplified implementation of a dependency injector.
+ *
+ * @since 2.0
+ * @internal
  */
 final class SimpleInjector implements Injector {
 

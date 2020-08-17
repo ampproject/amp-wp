@@ -20,6 +20,9 @@ namespace AmpProject\AmpWP\Infrastructure;
  * Additionally, we provide a means to get access to the plugin's container that
  * collects all the services it is made up of. This allows direct access to the
  * services to outside code if needed.
+ *
+ * @since 2.0
+ * @internal
  */
 interface Plugin extends Activateable, Deactivateable, Registerable {
 

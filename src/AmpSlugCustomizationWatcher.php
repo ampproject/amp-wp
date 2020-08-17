@@ -14,6 +14,7 @@ use AmpProject\AmpWP\Infrastructure\Service;
  * Service for redirecting mobile users to the AMP version of a page.
  *
  * @package AmpProject\AmpWP
+ * @internal
  */
 final class AmpSlugCustomizationWatcher implements Service, Registerable {
 

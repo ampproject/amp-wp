@@ -20,7 +20,7 @@ use WP_UnitTestCase;
  *
  * @since 2.0
  *
- * @covers OnboardingWizardSubmenu
+ * @coversDefaultClass \AmpProject\AmpWP\Admin\OnboardingWizardSubmenu
  */
 class OnboardingWizardSubmenuTest  extends WP_UnitTestCase {
 
@@ -42,7 +42,6 @@ class OnboardingWizardSubmenuTest  extends WP_UnitTestCase {
 		$this->instance = new OnboardingWizardSubmenu();
 	}
 
-	/** @covers OnboardingWizardSubmenu::__construct() */
 	public function test__construct() {
 		$this->assertInstanceOf( OnboardingWizardSubmenu::class, $this->instance );
 		$this->assertInstanceOf( Delayed::class, $this->instance );
@@ -53,7 +52,7 @@ class OnboardingWizardSubmenuTest  extends WP_UnitTestCase {
 	/**
 	 * Tests OnboardingWizardSubmenu::register
 	 *
-	 * @covers OnboardingWizardSubmenu::register
+	 * @covers ::register
 	 */
 	public function test_register() {
 		global $submenu;

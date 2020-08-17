@@ -20,7 +20,7 @@ use WP_UnitTestCase;
  *
  * @since 2.0
  *
- * @covers Polyfills.
+ * @coversDefaultClass \AmpProject\AmpWP\Admin\Polyfills
  */
 class PolyfillsTest extends WP_UnitTestCase {
 
@@ -42,7 +42,6 @@ class PolyfillsTest extends WP_UnitTestCase {
 		$this->instance = new Polyfills();
 	}
 
-	/** @covers Polyfills::__construct() */
 	public function test__construct() {
 		$this->assertInstanceOf( Polyfills::class, $this->instance );
 		$this->assertInstanceOf( Service::class, $this->instance );
@@ -53,9 +52,9 @@ class PolyfillsTest extends WP_UnitTestCase {
 	/**
 	 * Tests Polyfills::register
 	 *
-	 * @covers Polyfills::register
-	 * @covers Polyfills::register_shimmed_scripts
-	 * @covers Polyfills::register_shimmed_styles
+	 * @covers ::register
+	 * @covers ::register_shimmed_scripts
+	 * @covers ::register_shimmed_styles
 	 */
 	public function test_registration() {
 		global $wp_scripts, $wp_styles;

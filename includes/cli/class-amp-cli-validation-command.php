@@ -16,6 +16,7 @@ use AmpProject\AmpWP\Validation\SiteScan;
  *
  * @since 1.0
  * @since 1.3.0 Renamed subcommands.
+ * @internal
  */
 final class AMP_CLI_Validation_Command {
 

@@ -18,6 +18,7 @@ use WP_UnitTestCase;
  * Tests for OptionsMenu.
  *
  * @group options-menu
+ * @coversDefaultClass \AmpProject\AmpWP\Admin\OptionsMenu
  */
 class OptionsMenuTest extends WP_UnitTestCase {
 
@@ -66,10 +67,13 @@ class OptionsMenuTest extends WP_UnitTestCase {
 	/**
 	 * Test admin_menu.
 	 *
-	 * @covers OptionsMenu::add_menu_items()
+	 * @covers ::add_menu_items()
 	 */
 	public function test_add_menu_items() {
 		global $_parent_pages, $submenu;
+
+		$original_submenu      = $submenu;
+		$original_parent_pages = $_parent_pages;
 
 		wp_set_current_user(
 			self::factory()->user->create(
@@ -84,15 +88,17 @@ class OptionsMenuTest extends WP_UnitTestCase {
 		$this->assertEquals( 'amp-options', $_parent_pages['amp-options'] );
 
 		$this->assertArrayHasKey( 'amp-options', $submenu );
-		$this->assertCount( 2, $submenu['amp-options'] );
-		$this->assertEquals( 'edit-tags.php?taxonomy=amp_validation_error&amp;post_type=amp_validated_url', $submenu['amp-options'][0][2] );
-		$this->assertEquals( 'amp-options', $submenu['amp-options'][1][2] );
+		$this->assertCount( 1, $submenu['amp-options'] );
+		$this->assertEquals( 'amp-options', $submenu['amp-options'][0][2] );
+
+		$submenu       = $original_submenu;
+		$_parent_pages = $original_parent_pages;
 	}
 
 	/**
 	 * Test render_screen for admin users.
 	 *
-	 * @covers OptionsMenu::render_screen()
+	 * @covers ::render_screen()
 	 */
 	public function test_render_screen_for_admin_user() {
 		wp_set_current_user(

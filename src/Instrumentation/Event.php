@@ -13,6 +13,8 @@ use AmpProject\AmpWP\Exception\InvalidEventProperties;
  * A server-timing event.
  *
  * @package AmpProject\AmpWP
+ * @since 2.0
+ * @internal
  */
 class Event {
 

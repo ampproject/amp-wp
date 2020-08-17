@@ -19,6 +19,7 @@ use WP_Styles;
  * Registers assets that may not be available in the current site's version of core.
  *
  * @since 2.0
+ * @internal
  */
 final class Polyfills implements Delayed, Service, Registerable {
 
@@ -128,6 +129,10 @@ final class Polyfills implements Delayed, Service, Registerable {
 	 * @param WP_Styles $wp_styles The WP_Styles instance for the current page.
 	 */
 	public function register_shimmed_styles( $wp_styles ) {
+		if ( version_compare( get_bloginfo( 'version' ), '5.4', '<' ) ) {
+			$wp_styles->remove( 'wp-components' );
+		}
+
 		if ( ! isset( $wp_styles->registered['wp-components'] ) ) {
 			$wp_styles->add(
 				'wp-components',

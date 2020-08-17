@@ -19,6 +19,7 @@ use WP_User;
  * Class DevToolsUserAccess
  *
  * @since 2.0
+ * @internal
  */
 final class DevToolsUserAccess implements Service, Registerable {
 

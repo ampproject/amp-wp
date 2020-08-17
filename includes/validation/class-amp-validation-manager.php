@@ -19,6 +19,7 @@ use AmpProject\Dom\Document;
  * Class AMP_Validation_Manager
  *
  * @since 0.7
+ * @internal
  */
 class AMP_Validation_Manager {
 
@@ -282,7 +283,7 @@ class AMP_Validation_Manager {
 			&&
 			'trash' !== $post->post_status
 			&&
-			post_supports_amp( $post )
+			amp_is_post_supported( $post )
 		);
 	}
 
@@ -367,7 +368,7 @@ class AMP_Validation_Manager {
 			return;
 		}
 
-		$is_amp_endpoint = is_amp_endpoint();
+		$is_amp_request = amp_is_request();
 
 		$current_url = amp_get_current_url();
 		$non_amp_url = amp_remove_endpoint( $current_url );
@@ -388,7 +389,7 @@ class AMP_Validation_Manager {
 		$validate_url = AMP_Validated_URL_Post_Type::get_recheck_url( AMP_Validated_URL_Post_Type::get_invalid_url_post( $amp_url ) ?: $amp_url );
 
 		// Construct the parent admin bar item.
-		if ( $is_amp_endpoint ) {
+		if ( $is_amp_request ) {
 			$icon = Icon::valid(); // This will get overridden in AMP_Validation_Manager::finalize_validation() if there are unaccepted errors.
 			$href = $validate_url;
 		} else {
@@ -426,18 +427,18 @@ class AMP_Validation_Manager {
 		$link_item = [
 			'parent' => 'amp',
 			'id'     => 'amp-view',
-			'href'   => esc_url( $is_amp_endpoint ? $non_amp_url : $amp_url ),
+			'href'   => esc_url( $is_amp_request ? $non_amp_url : $amp_url ),
 		];
 		if ( amp_is_canonical() ) {
 			$link_item['title'] = esc_html__( 'View with AMP disabled', 'amp' );
 		} else {
-			$link_item['title'] = esc_html( $is_amp_endpoint ? __( 'View non-AMP version', 'amp' ) : __( 'View AMP version', 'amp' ) );
+			$link_item['title'] = esc_html( $is_amp_request ? __( 'View non-AMP version', 'amp' ) : __( 'View AMP version', 'amp' ) );
 		}
 
 		// Add top-level menu item. Note that this will correctly merge/amend any existing AMP nav menu item added in amp_add_admin_bar_view_link().
 		$wp_admin_bar->add_node( $parent );
 
-		if ( $is_amp_endpoint ) {
+		if ( $is_amp_request ) {
 			$wp_admin_bar->add_node( $validate_item );
 			$wp_admin_bar->add_node( $link_item );
 		} else {
@@ -2128,7 +2129,8 @@ class AMP_Validation_Manager {
 				[
 					'cookies'     => wp_unslash( $_COOKIE ), // Pass along cookies so private pages and drafts can be accessed.
 					'timeout'     => 15, // Increase from default of 5 to give extra time for the plugin to identify the sources for any given validation errors.
-					'sslverify'   => false,
+					/** This filter is documented in wp-includes/class-wp-http-streams.php */
+					'sslverify'   => apply_filters( 'https_local_ssl_verify', false ),
 					'redirection' => 0, // Because we're in a loop for redirection.
 					'headers'     => [
 						'Cache-Control' => 'no-cache',

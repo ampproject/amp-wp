@@ -57,7 +57,25 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 	 * @covers AMP_Reader_Theme_REST_Controller::get_items
 	 */
 	public function test_get_items() {
-		$this->assertEquals( 10, count( $this->controller->get_items( new WP_REST_Request( 'GET', 'amp/v1' ) )->data ) );
+		$data = $this->controller->get_items( new WP_REST_Request( 'GET', 'amp/v1' ) )->data;
+
+		$actual_reader_themes   = wp_list_pluck( $data, 'slug' );
+		$expected_reader_themes = [
+			'twentytwenty',
+			'twentynineteen',
+			'twentyseventeen',
+			'twentysixteen',
+			'twentyfifteen',
+			'twentyfourteen',
+			'twentythirteen',
+			'twentytwelve',
+			'twentyeleven',
+			'legacy',
+		];
+
+		foreach ( $expected_reader_themes as $expected_reader_theme ) {
+			$this->assertContains( $expected_reader_theme, $actual_reader_themes );
+		}
 
 		$filter = static function() {
 			return [

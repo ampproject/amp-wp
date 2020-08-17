@@ -11,6 +11,8 @@ namespace AmpProject\AmpWP;
  * An interface to share knowledge about options stored in the AMP Options Manager.
  *
  * @package AmpProject\AmpWP
+ * @since 2.0
+ * @internal
  */
 interface Option {
 

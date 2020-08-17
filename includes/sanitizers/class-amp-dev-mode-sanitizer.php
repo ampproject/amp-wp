@@ -12,6 +12,7 @@
  * Class AMP_Dev_Mode_Sanitizer
  *
  * @since 1.3
+ * @internal
  */
 final class AMP_Dev_Mode_Sanitizer extends AMP_Base_Sanitizer {
 

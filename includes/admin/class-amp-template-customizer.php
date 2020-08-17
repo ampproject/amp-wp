@@ -17,6 +17,7 @@ use AmpProject\AmpWP\Services;
  * {@see amp_customizer_editor_link()} as a submenu to the Appearance menu.
  *
  * @since 0.4
+ * @internal
  */
 class AMP_Template_Customizer {
 
@@ -644,7 +645,7 @@ class AMP_Template_Customizer {
 				wp_json_encode(
 					[
 						'available' => amp_is_available(),
-						'enabled'   => is_amp_endpoint(),
+						'enabled'   => amp_is_request(),
 					]
 				)
 			)

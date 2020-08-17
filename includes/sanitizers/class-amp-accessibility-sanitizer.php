@@ -12,6 +12,7 @@ use AmpProject\Role;
  * Sanitizes attributes required for AMP accessibility requirements.
  *
  * @since 1.5.3
+ * @internal
  */
 class AMP_Accessibility_Sanitizer extends AMP_Base_Sanitizer {
 

@@ -18,6 +18,9 @@ namespace AmpProject\AmpWP\Infrastructure;
  *
  * Registering such an object is the explicit act of making it known to the
  * overarching system.
+ *
+ * @since 2.0
+ * @internal
  */
 interface Registerable {
 

@@ -11,6 +11,9 @@ use AmpProject\AmpWP\Infrastructure\Instantiator;
 
 /**
  * Fallback instantiator to use in case none was provided.
+ *
+ * @since 2.0
+ * @internal
  */
 final class FallbackInstantiator implements Instantiator {
 

@@ -13,6 +13,7 @@ use AmpProject\Tag;
  * Class AMP_Gallery_Embed_Handler
  *
  * @since 0.2
+ * @internal
  */
 class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 

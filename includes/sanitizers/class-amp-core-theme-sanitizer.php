@@ -17,6 +17,7 @@ use AmpProject\Role;
  *
  * @see AMP_Validation_Error_Taxonomy::accept_core_theme_validation_errors()
  * @since 1.0
+ * @internal
  */
 class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 

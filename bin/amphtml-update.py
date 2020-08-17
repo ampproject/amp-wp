@@ -149,6 +149,8 @@ def GenerateHeaderPHP(out):
 	out.append(' * `mandatory_parent_denylist` in the amp_wp_build.py script.')
 	out.append(' *')
 	out.append(' * phpcs:ignoreFile')
+	out.append(' *')
+	out.append(' * @internal')
 	out.append(' */')
 	out.append('class AMP_Allowed_Tags_Generated {')
 	out.append('')
