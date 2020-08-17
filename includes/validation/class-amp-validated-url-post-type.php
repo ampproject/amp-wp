@@ -1742,6 +1742,10 @@ class AMP_Validated_URL_Post_Type {
 	 * @param WP_Post $post Post.
 	 */
 	private static function render_php_fatal_error_admin_notice( WP_Post $post ) {
+		if ( ! ( defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY ) ) {
+			return;
+		}
+
 		$error = get_post_meta( $post->ID, self::PHP_FATAL_ERROR_POST_META_KEY, true );
 		if ( empty( $error ) ) {
 			return;
