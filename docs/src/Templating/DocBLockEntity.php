@@ -42,7 +42,7 @@ final class DocBlockEntity {
 		$this->tags = [];
 
 		foreach ( $value as $tag ) {
-			$this->tags[ $tag['name'] ] = new TagEntity( $tag );
+			$this->tags[ $tag['name'] ] = new TagEntity( $tag, $this );
 		}
 	}
 

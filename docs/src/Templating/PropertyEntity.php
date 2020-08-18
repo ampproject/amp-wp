@@ -43,9 +43,8 @@ final class PropertyEntity {
 	 * Process a doc-block entry.
 	 *
 	 * @param array $value Associative array of the doc-block.
-	 * @return DocBlockEntity Doc-block entity object.
 	 */
 	private function process_doc( $value ) {
-		return new DocBlockEntity( $value );
+		$this->doc = new DocBlockEntity( $value );
 	}
 }

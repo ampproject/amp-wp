@@ -56,7 +56,7 @@ final class ClassEntity {
 		$this->properties = [];
 
 		foreach ( $value as $property ) {
-			$this->properties[ $property[ 'name' ] ] = new PropertyEntity( $value );
+			$this->properties[ $property[ 'name' ] ] = new PropertyEntity( $value, $this );
 		}
 	}
 
@@ -69,7 +69,7 @@ final class ClassEntity {
 		$this->methods = [];
 
 		foreach ( $value as $method ) {
-			$this->methods[ $method[ 'name' ] ] = new MethodEntity( $value );
+			$this->methods[ $method[ 'name' ] ] = new MethodEntity( $value, $this );
 		}
 	}
 
@@ -77,9 +77,8 @@ final class ClassEntity {
 	 * Process a doc-block entry.
 	 *
 	 * @param array $value Associative array of the doc-block.
-	 * @return DocBlockEntity Doc-block entity object.
 	 */
 	private function process_doc( $value ) {
-		return new DocBlockEntity( $value );
+		$this->doc = new DocBlockEntity( $value, $this );
 	}
 }
