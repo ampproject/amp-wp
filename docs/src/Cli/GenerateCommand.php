@@ -9,6 +9,7 @@ namespace AmpProject\AmpWP\Documentation\Cli;
 
 use AmpProject\AmpWP\Documentation\Parser\Parser;
 use WP_CLI;
+use WP_CLI\Utils;
 use WP_Error;
 
 /**
@@ -37,23 +38,36 @@ final class GenerateCommand {
 	 */
 	public function __invoke( $args, $assoc_args ) {
 		list( $source_folder, $destination_folder ) = $args;
+		$format = (string) Utils\get_flag_value( $assoc_args, 'format', 'json' );
 
 		$source_folder      = realpath( $source_folder );
 		$destination_folder = realpath( $destination_folder );
 
 		$output_file = $destination_folder . '/docs.json';
 
-		$json   = $this->get_phpdoc_data( $source_folder );
-		$result = file_put_contents( $output_file, $json );
+		$data = $this->get_phpdoc_data( $source_folder );
+
+		switch ( $format ) {
+			case 'json':
+				$json   = json_encode( $data, JSON_PRETTY_PRINT );
+				$result = file_put_contents( $output_file, $data );
+				break;
+			case 'markdown':
+				// TODO
+			case '':
+				WP_CLI::error( "A value of 'json' or 'markdown' is required for the --format flag." );
+			default:
+				WP_CLI::error( "Invalid --format value '{$format}' provided. Possible values: json, markdown" );
+		}
 
 		WP_CLI::line();
 
 		if ( false === $result ) {
-			WP_CLI::error( sprintf( 'Problem writing %1$s bytes of data to %2$s', strlen( $json ), $output_file ) );
+			WP_CLI::error( "Problem writing data to file '{$output_file}'" );
 			exit;
 		}
 
-		WP_CLI::success( sprintf( 'Data exported to %1$s', $output_file ) );
+		WP_CLI::success( "Data exported to {$output_file}" );
 		WP_CLI::line();
 	}
 
@@ -65,7 +79,7 @@ final class GenerateCommand {
 	 *
 	 * @return string|array
 	 */
-	private function get_phpdoc_data( $path, $format = 'json' ) {
+	private function get_phpdoc_data( $path ) {
 		WP_CLI::line( sprintf( 'Extracting PHPDoc from %1$s. This may take a few minutes...', $path ) );
 		$parser  = new Parser();
 		$is_file = is_file( $path );
@@ -77,13 +91,7 @@ final class GenerateCommand {
 			exit;
 		}
 
-		$output = $parser->parse_files( $files, $path );
-
-		if ( 'json' === $format ) {
-			return json_encode( $output, JSON_PRETTY_PRINT );
-		}
-
-		return $output;
+		return $parser->parse_files( $files, $path );
 	}
 
 	/**
