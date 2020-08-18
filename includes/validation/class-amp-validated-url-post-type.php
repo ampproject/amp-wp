@@ -1742,10 +1742,6 @@ class AMP_Validated_URL_Post_Type {
 	 * @param WP_Post $post Post.
 	 */
 	private static function render_php_fatal_error_admin_notice( WP_Post $post ) {
-		if ( ! ( defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY ) ) {
-			return;
-		}
-
 		$error = get_post_meta( $post->ID, self::PHP_FATAL_ERROR_POST_META_KEY, true );
 		if ( empty( $error ) ) {
 			return;
@@ -1757,13 +1753,19 @@ class AMP_Validated_URL_Post_Type {
 		?>
 		<div class="notice notice-error">
 			<p><?php echo AMP_Validation_Manager::get_validate_url_error_message( 'fatal_error_during_validation' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p>
-			<blockquote>
-				<pre><?php echo esc_html( $error_data['message'] ); ?></pre>
-			</blockquote>
-			<p>
-				<?php esc_html_e( 'Location:', 'amp' ); ?>
-				<code><?php echo esc_html( sprintf( '%s:%d', $error_data['file'], $error_data['line'] ) ); ?></code>
-			</p>
+			<?php
+			if ( defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY ) {
+				?>
+				<blockquote>
+					<pre><?php echo esc_html( $error_data['message'] ); ?></pre>
+				</blockquote>
+				<p>
+					<?php esc_html_e( 'Location:', 'amp' ); ?>
+					<code><?php echo esc_html( sprintf( '%s:%d', $error_data['file'], $error_data['line'] ) ); ?></code>
+				</p>
+				<?php
+			}
+			?>
 		</div>
 		<?php
 	}
