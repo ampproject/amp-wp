@@ -12,7 +12,7 @@ namespace AmpProject\AmpWP\Documentation\Model;
  *
  * @property string     $name
  * @property string     $namespace
- * @property Alias_[]   $aliases
+ * @property string[]   $aliases
  * @property int        $line
  * @property int        $end_line
  * @property bool       $final
@@ -24,7 +24,7 @@ namespace AmpProject\AmpWP\Documentation\Model;
  * @property Usage[]    $uses
  * @property Hook[]     $hooks
  */
-final class Method {
+final class Method implements Leaf {
 
 	use LeafConstruction;
 
@@ -37,7 +37,7 @@ final class Method {
 		return [
 			'name',
 			'namespace',
-			// 'aliases',
+			'aliases',
 			'line',
 			'end_line',
 			'final',
@@ -60,7 +60,7 @@ final class Method {
 		$this->arguments = [];
 
 		foreach ( $value as $argument ) {
-			$this->arguments[ $argument[ 'name' ] ] = new Argument( $value, $this );
+			$this->arguments[ $argument[ 'name' ] ] = new Argument( $argument, $this );
 		}
 	}
 
@@ -82,7 +82,7 @@ final class Method {
 		$this->uses = [];
 
 		foreach ( $value as $use ) {
-			$this->uses[ $use[ 'name' ] ] = new Usage( $value, $this );
+			$this->uses[ $use[ 'name' ] ] = new Usage( $use, $this );
 		}
 	}
 
@@ -95,7 +95,67 @@ final class Method {
 		$this->hooks = [];
 
 		foreach ( $value as $hook ) {
-			$this->hooks[ $hook[ 'name' ] ] = new Hook( $value, $this );
+			$this->hooks[ $hook[ 'name' ] ] = new Hook( $hook, $this );
 		}
+	}
+
+	/**
+	 * Get the signature of the method.
+	 *
+	 * @return string Method signature.
+	 */
+	public function get_signature() {
+		return sprintf(
+			'%s%s%s%s %s(%s)',
+			$this->final ? 'final ' : '',
+			$this->abstract ? 'abstract ' : '',
+			$this->static ? 'static ' : '',
+			$this->visibility ?: 'public',
+			$this->name,
+			count( $this->arguments ) > 0
+				? ' ' . implode( ', ', $this->get_arguments() ) . ' '
+				: ''
+		);
+	}
+
+	/**
+	 * Get the argument signatures.
+	 *
+	 * @return string[] Array of argument signatures.
+	 */
+	private function get_arguments(  ) {
+		$arguments = [];
+
+		foreach ( $this->arguments as $argument ) {
+			$arguments[] = sprintf(
+				'%s%s%s',
+				$argument->type ? "{$this->map_alias( $argument->type )} " : '',
+				$argument->name,
+				$argument->default ? " = {$argument->default}" : ''
+			);
+		}
+
+		return $arguments;
+	}
+
+	/**
+	 * Get the alias for a fully qualified element.
+	 *
+	 * @param string $fully_qualified_element Fully qualified element to map an
+	 *                                        alias to.
+	 * @return string Alias, or fully qualified element if none found.
+	 */
+	private function map_alias( $fully_qualified_element ) {
+		if ( empty( $fully_qualified_element ) ) {
+			return '';
+		}
+
+		$key = array_search( $fully_qualified_element, $this->aliases, true );
+
+		if ( false === $key ) {
+			return $fully_qualified_element;
+		}
+
+		return $key;
 	}
 }

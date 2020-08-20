@@ -22,7 +22,7 @@ namespace AmpProject\AmpWP\Documentation\Model;
  * @property Method[]   $methods
  * @property DocBlock   $doc
  */
-final class Class_ {
+final class Class_ implements Leaf {
 
 	use LeafConstruction;
 
@@ -56,7 +56,7 @@ final class Class_ {
 		$this->properties = [];
 
 		foreach ( $value as $property ) {
-			$this->properties[ $property[ 'name' ] ] = new Property( $value, $this );
+			$this->properties[ $property[ 'name' ] ] = new Property( $property, $this );
 		}
 	}
 
@@ -69,7 +69,7 @@ final class Class_ {
 		$this->methods = [];
 
 		foreach ( $value as $method ) {
-			$this->methods[ $method[ 'name' ] ] = new Method( $value, $this );
+			$this->methods[] = new Method( $method, $this );
 		}
 	}
 
@@ -80,5 +80,33 @@ final class Class_ {
 	 */
 	private function process_doc( $value ) {
 		$this->doc = new DocBlock( $value, $this );
+	}
+
+	/**
+	 * Get the fully qualified class name of the class.
+	 *
+	 * @return string Fully qualified class name.
+	 */
+	public function get_fqcn() {
+		if ( empty( $this->namespace ) || 'global' === $this->namespace ) {
+			return $this->name;
+		}
+
+		return "{$this->namespace}\\{$this->name}";
+	}
+
+	/**
+	 * Get the filename to use for the class.
+	 *
+	 * @return string Filename to use.
+	 */
+	public function get_filename() {
+		$relative_class_name = str_replace(
+			'AmpProject\\AmpWP\\',
+			'',
+			$this->get_fqcn()
+		);
+
+		return str_replace( '\\', '/', $relative_class_name );
 	}
 }

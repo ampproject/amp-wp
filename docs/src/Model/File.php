@@ -18,7 +18,7 @@ namespace AmpProject\AmpWP\Documentation\Model;
  * @property Function_[] $functions
  * @property Include_[]  $includes
  */
-final class File {
+final class File implements Leaf {
 
 	use LeafConstruction;
 
@@ -48,7 +48,7 @@ final class File {
 		$this->classes = [];
 
 		foreach ( $value as $class ) {
-			$this->classes[ $class[ 'name' ] ] = new Class_( $value, $this );
+			$this->classes[ $class[ 'name' ] ] = new Class_( $class, $this );
 		}
 	}
 
@@ -61,7 +61,7 @@ final class File {
 		$this->uses = [];
 
 		foreach ( $value as $use ) {
-			$this->uses[ $use[ 'name' ] ] = new Usage( $value, $this );
+			$this->uses[ $use[ 'name' ] ] = new Usage( $use, $this );
 		}
 	}
 
@@ -74,7 +74,7 @@ final class File {
 		$this->functions = [];
 
 		foreach ( $value as $function ) {
-			$this->functions[ $function[ 'name' ] ] = new Function_( $value, $this );
+			$this->functions[ $function[ 'name' ] ] = new Function_( $function, $this );
 		}
 	}
 
@@ -87,7 +87,7 @@ final class File {
 		$this->includes = [];
 
 		foreach ( $value as $include ) {
-			$this->includes[ $include[ 'name' ] ] = new Include_( $value, $this );
+			$this->includes[ $include[ 'name' ] ] = new Include_( $include, $this );
 		}
 	}
 }

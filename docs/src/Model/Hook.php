@@ -17,7 +17,7 @@ namespace AmpProject\AmpWP\Documentation\Model;
  * @property Argument[] $arguments
  * @property DocBlock   $doc
  */
-final class Hook {
+final class Hook implements Leaf {
 
 	use LeafConstruction;
 
@@ -46,7 +46,7 @@ final class Hook {
 		$this->arguments = [];
 
 		foreach ( $value as $argument ) {
-			$this->arguments[ $argument[ 'name' ] ] = new Argument( $value, $this );
+			$this->arguments[ $argument[ 'name' ] ] = new Argument( $argument, $this );
 		}
 	}
 

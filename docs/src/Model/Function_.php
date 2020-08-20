@@ -20,7 +20,7 @@ namespace AmpProject\AmpWP\Documentation\Model;
  * @property Hook[]     $hooks
  * @property Usage[]    $uses
  */
-final class Function_ {
+final class Function_ implements Leaf {
 
 	use LeafConstruction;
 
@@ -52,7 +52,7 @@ final class Function_ {
 		$this->arguments = [];
 
 		foreach ( $value as $argument ) {
-			$this->arguments[ $argument[ 'name' ] ] = new Argument( $value, $this );
+			$this->arguments[ $argument[ 'name' ] ] = new Argument( $argument, $this );
 		}
 	}
 
@@ -74,7 +74,7 @@ final class Function_ {
 		$this->hooks = [];
 
 		foreach ( $value as $hook ) {
-			$this->hooks[ $hook[ 'name' ] ] = new Hook( $value, $this );
+			$this->hooks[ $hook[ 'name' ] ] = new Hook( $hook, $this );
 		}
 	}
 
@@ -87,7 +87,7 @@ final class Function_ {
 		$this->uses = [];
 
 		foreach ( $value as $use ) {
-			$this->uses[ $use[ 'name' ] ] = new Usage( $value, $this );
+			$this->uses[ $use[ 'name' ] ] = new Usage( $use, $this );
 		}
 	}
 }

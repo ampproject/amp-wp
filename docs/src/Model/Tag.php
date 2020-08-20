@@ -15,7 +15,7 @@ namespace AmpProject\AmpWP\Documentation\Model;
  * @property string[] $types
  * @property string   $variable
  */
-final class Tag {
+final class Tag implements Leaf {
 
 	use LeafConstruction;
 

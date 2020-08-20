@@ -14,7 +14,7 @@ namespace AmpProject\AmpWP\Documentation\Model;
  * @property mixed  $default
  * @property string $type
  */
-final class Argument {
+final class Argument implements Leaf {
 
 	use LeafConstruction;
 

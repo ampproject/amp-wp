@@ -16,7 +16,7 @@ use RuntimeException;
  * @property string $long_description
  * @property Tag[]  $tags
  */
-final class DocBlock {
+final class DocBlock implements Leaf {
 
 	use LeafConstruction;
 

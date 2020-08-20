@@ -14,7 +14,7 @@ namespace AmpProject\AmpWP\Documentation\Model;
  * @property int    $line
  * @property string $type
  */
-final class Include_ {
+final class Include_ implements Leaf {
 
 	use LeafConstruction;
 

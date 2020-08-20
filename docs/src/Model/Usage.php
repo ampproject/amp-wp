@@ -14,7 +14,7 @@ namespace AmpProject\AmpWP\Documentation\Model;
  * @property Function_[] $functions
  * @property Method[]    $methods
  */
-final class Usage {
+final class Usage implements Leaf {
 
 	use LeafConstruction;
 
@@ -39,7 +39,7 @@ final class Usage {
 		$this->functions = [];
 
 		foreach ( $value as $function ) {
-			$this->functions[ $function[ 'name' ] ] = new Function_( $value, $this );
+			$this->functions[ $function[ 'name' ] ] = new Function_( $function, $this );
 		}
 	}
 
@@ -52,7 +52,7 @@ final class Usage {
 		$this->methods = [];
 
 		foreach ( $value as $method ) {
-			$this->methods[ $method[ 'name' ] ] = new Method( $value, $this );
+			$this->methods[ $method[ 'name' ] ] = new Method( $method, $this );
 		}
 	}
 }

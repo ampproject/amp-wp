@@ -18,7 +18,7 @@ namespace AmpProject\AmpWP\Documentation\Model;
  * @property string   $visibility
  * @property DocBlock $doc
  */
-final class Property {
+final class Property implements Leaf {
 
 	use LeafConstruction;
 
@@ -45,6 +45,6 @@ final class Property {
 	 * @param array $value Associative array of the doc-block.
 	 */
 	private function process_doc( $value ) {
-		$this->doc = new DocBlock( $value );
+		$this->doc = new DocBlock( $value, $this );
 	}
 }

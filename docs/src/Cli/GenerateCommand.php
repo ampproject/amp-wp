@@ -7,7 +7,13 @@
 
 namespace AmpProject\AmpWP\Documentation\Cli;
 
+use AmpProject\AmpWP\Documentation\Model\Class_;
+use AmpProject\AmpWP\Documentation\Model\Root;
 use AmpProject\AmpWP\Documentation\Parser\Parser;
+use AmpProject\AmpWP\Documentation\Templating\Markdown;
+use AmpProject\AmpWP\Documentation\Templating\MustacheTemplateEngine;
+use AmpProject\AmpWP\Documentation\Templating\TemplateEngine;
+use Generator;
 use WP_CLI;
 use WP_CLI\Utils;
 use WP_Error;
@@ -32,6 +38,15 @@ final class GenerateCommand {
 	 * <destination_folder>
 	 * : Path to the destination folder where the output should be written to.
 	 *
+	 * [--format=<format>]
+	 * : Output format to generate.
+	 * ---
+	 * default: markdown
+	 * options:
+	 *   - json
+	 *   - markdown
+	 * ---
+	 *
 	 * ## EXAMPLES
 	 *
 	 * @when before_wp_load
@@ -50,10 +65,19 @@ final class GenerateCommand {
 		switch ( $format ) {
 			case 'json':
 				$json   = json_encode( $data, JSON_PRETTY_PRINT );
-				$result = file_put_contents( $output_file, $data );
+				$result = file_put_contents( $output_file, $json );
 				break;
 			case 'markdown':
-				// TODO
+				$doc_tree        = new Root( $data );
+				$template_engine = new MustacheTemplateEngine();
+
+				foreach( $this->generate_markdown( $doc_tree, $template_engine ) as $markdown ) {
+					/** @var Markdown $markdown */
+					$filepath = "{$destination_folder}/{$markdown->get_filename()}";
+					$this->ensure_dir_exists( dirname( $filepath ) );
+					file_put_contents( $filepath, $markdown->get_contents() );
+				}
+				break;
 			case '':
 				WP_CLI::error( "A value of 'json' or 'markdown' is required for the --format flag." );
 			default:
@@ -74,8 +98,7 @@ final class GenerateCommand {
 	/**
 	 * Generate the data from the PHPDoc markup.
 	 *
-	 * @param string $path   Directory or file to scan for PHPDoc
-	 * @param string $format What format the data is returned in: [json|array].
+	 * @param string $path Directory or file to scan for PHPDoc
 	 *
 	 * @return string|array
 	 */
@@ -101,9 +124,49 @@ final class GenerateCommand {
 	 */
 	private function get_excluded_dirs() {
 		return [
-			'#^.*/amp/(assets|bin|build|node_modules|tests|vendor)/#',
-			'#^.*/amp/lib/common/(tests|vendor)/#',
-			'#^.*/amp/lib/optimizer/(tests|vendor)/#',
+			'#^.*/amp/(assets|bin|build|docs|node_modules|tests|vendor)/#',
+			'#^.*/amp/lib/(common|optimizer)/#',
 		];
+	}
+
+	/**
+	 * Generate all of the markdown files.
+	 *
+	 * @param Root           $doc_tree        Reference object tree.
+	 * @param TemplateEngine $template_engine Templating engine to use.
+	 * @return Generator Generator producing Markdown objects.
+	 */
+	private function generate_markdown( Root $doc_tree, TemplateEngine $template_engine ) {
+		$markdown_files = [];
+
+		foreach ( $doc_tree->get_classes() as $class ) {
+			/** @var Class_ $class */
+			$filename = "class/{$class->get_filename()}.md";
+			$contents = $template_engine->render( 'class', $class );
+			yield new Markdown( $filename, $contents );
+		}
+/*
+		foreach ( $doc_tree->get_functions() as $function ) {
+			$filename = "function/{$function}.md";
+			$contents = $template_engine->render( 'function', $function );
+			yield new Markdown( $filename, $contents );
+		}*/
+	}
+
+	/**
+	 * Ensure a provided directory does exist on the filesystem.
+	 *
+	 * @param string $directory Directory to ensure the existence of.
+	 */
+	private function ensure_dir_exists( $directory ) {
+		$parent = dirname( $directory );
+
+		if ( ! empty( $parent ) && ! is_dir( $parent ) ) {
+			$this->ensure_dir_exists( $parent );
+		}
+
+		if ( ! is_dir( $directory ) && ! mkdir( $directory ) && ! is_dir( $directory ) ) {
+			WP_CLI::error( "Couldn't create directory '{$directory}'." );
+		}
 	}
 }

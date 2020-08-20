@@ -51,7 +51,7 @@ trait LeafConstruction {
 		$method = "process_{$key}";
 
 		if ( method_exists( $this, $method ) ) {
-			$this->$key = $this->$method( $value );
+			$this->$method( $value );
 		} else {
 			$this->$key = $value;
 		}
