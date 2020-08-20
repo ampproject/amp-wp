@@ -52,7 +52,6 @@ final class File {
 		}
 	}
 
-
 	/**
 	 * Process the uses entry.
 	 *
@@ -66,7 +65,6 @@ final class File {
 		}
 	}
 
-
 	/**
 	 * Process the functions entry.
 	 *
@@ -79,7 +77,6 @@ final class File {
 			$this->functions[ $function[ 'name' ] ] = new Function_( $value, $this );
 		}
 	}
-
 
 	/**
 	 * Process the includes entry.

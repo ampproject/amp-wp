@@ -51,4 +51,17 @@ final class Function_ {
 	private function process_doc( $value ) {
 		$this->doc = new DocBlock( $value, $this );
 	}
+
+	/**
+	 * Process the uses entry.
+	 *
+	 * @param array $value Array of usage entries.
+	 */
+	private function process_uses( $value ) {
+		$this->uses = [];
+
+		foreach ( $value as $use ) {
+			$this->uses[ $use[ 'name' ] ] = new Usage( $value, $this );
+		}
+	}
 }
