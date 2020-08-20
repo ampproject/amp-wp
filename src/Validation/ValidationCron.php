@@ -8,51 +8,42 @@
 
 namespace AmpProject\AmpWP\Validation;
 
-use AMP_Validated_URL_Post_Type;
-use AMP_Validation_Manager;
-use AmpProject\AmpWP\Infrastructure\Delayed;
-use AmpProject\AmpWP\Infrastructure\Registerable;
-use AmpProject\AmpWP\Infrastructure\Service;
-use WP_Error;
-use WP_REST_Controller;
-use WP_REST_Request;
-use WP_REST_Response;
-use WP_REST_Server;
+use AmpProject\AmpWP\BackgroundTask\CronBasedBackgroundTask;
 
 /**
  * ValidationCron class.
  *
  * @since 2.1
  */
-final class ValidationCron implements Delayed, Service, Registerable {
-	const CRON_ACTION = 'amp_validate_urls';
+final class ValidationCron extends CronBasedBackgroundTask {
+	const EVENT_NAME = 'amp_validate_urls';
 
 	/**
-	 * Get the action to use for registering the service.
+	 * Get the event name.
 	 *
-	 * @return string Registration action to use.
+	 * This is the "slug" of the event, not the display name.
+	 *
+	 * Note: the event name should be prefixed to prevent naming collisions.
+	 *
+	 * @return string Name of the event.
 	 */
-	public static function get_registration_action() {
-		return 'wp';
+	protected function get_event_name() {
+		return self::EVENT_NAME;
 	}
 
 	/**
-	 * Schedules the cron action.
+	 * Get the interval to use for the event.
 	 *
-	 * @return void
+	 * @return string An existing interval name.
 	 */
-	public function register() {
-		add_action( self::CRON_ACTION, [ $this, 'validate_urls' ] );
-
-		if ( ! wp_next_scheduled( self::CRON_ACTION ) ) {
-			wp_schedule_event( time(), 'hourly', self::CRON_ACTION );
-		}
+	protected function get_interval() {
+		return self::DEFAULT_INTERVAL_HOURLY;
 	}
 
 	/**
 	 * Validates URLs.
 	 */
-	public function validate_urls() {
+	public function process() {
 		$urls = ( new ValidationURLProvider( 2, [], true ) )->get_urls();
 
 		$validation_provider = new ValidationProvider();
