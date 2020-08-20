@@ -1,6 +1,6 @@
 <?php
 /**
- * Abstract class TemplateEngine.
+ * Class Tag.
  *
  * @package AmpProject\AmpWP
  */
@@ -8,14 +8,14 @@
 namespace AmpProject\AmpWP\Documentation\Model;
 
 /**
- * Entity object representing a doc-block tag.
+ * Documentation reference object representing a doc-block annotation.
  *
  * @property string   $name
  * @property string   $content
  * @property string[] $types
  * @property string   $variable
  */
-final class TagEntity {
+final class Tag {
 
 	use LeafConstruction;
 

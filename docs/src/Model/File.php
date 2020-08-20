@@ -1,6 +1,6 @@
 <?php
 /**
- * Class FileEntity.
+ * Class File.
  *
  * @package AmpProject\AmpWP
  */
@@ -8,17 +8,17 @@
 namespace AmpProject\AmpWP\Documentation\Model;
 
 /**
- * Entity object representing a file.
+ * Documentation reference object representing a file.
  *
- * @property DocBlockEntity   $file
- * @property string           $path
- * @property int              $root
- * @property ClassEntity[]    $classes
- * @property UseEntity[]      $uses
- * @property FunctionEntity[] $functions
- * @property IncludeEntity[]  $includes
+ * @property DocBlock    $file
+ * @property string      $path
+ * @property int         $root
+ * @property Class_[]    $classes
+ * @property Usage[]     $uses
+ * @property Function_[] $functions
+ * @property Include_[]  $includes
  */
-final class FileEntity {
+final class File {
 
 	use LeafConstruction;
 

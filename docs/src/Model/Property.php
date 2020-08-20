@@ -1,6 +1,6 @@
 <?php
 /**
- * Class PropertyEntity.
+ * Class Property.
  *
  * @package AmpProject\AmpWP
  */
@@ -8,17 +8,17 @@
 namespace AmpProject\AmpWP\Documentation\Model;
 
 /**
- * Entity object representing a property.
+ * Documentation reference object representing a property.
  *
- * @property string         $name
- * @property int            $line
- * @property int            $end_line
- * @property mixed          $default
- * @property bool           $static
- * @property string         $visibility
- * @property DocBlockEntity $doc
+ * @property string   $name
+ * @property int      $line
+ * @property int      $end_line
+ * @property mixed    $default
+ * @property bool     $static
+ * @property string   $visibility
+ * @property DocBlock $doc
  */
-final class PropertyEntity {
+final class Property {
 
 	use LeafConstruction;
 
@@ -45,6 +45,6 @@ final class PropertyEntity {
 	 * @param array $value Associative array of the doc-block.
 	 */
 	private function process_doc( $value ) {
-		$this->doc = new DocBlockEntity( $value );
+		$this->doc = new DocBlock( $value );
 	}
 }

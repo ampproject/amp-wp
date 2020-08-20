@@ -1,6 +1,6 @@
 <?php
 /**
- * Abstract class TemplateEngine.
+ * Class DocBlock.
  *
  * @package AmpProject\AmpWP
  */
@@ -10,13 +10,13 @@ namespace AmpProject\AmpWP\Documentation\Model;
 use RuntimeException;
 
 /**
- * Entity object representing a class.
+ * Documentation reference object representing a class.
  *
- * @property string      $description
- * @property string      $long_description
- * @property TagEntity[] $tags
+ * @property string $description
+ * @property string $long_description
+ * @property Tag[]  $tags
  */
-final class DocBlockEntity {
+final class DocBlock {
 
 	use LeafConstruction;
 
@@ -42,7 +42,7 @@ final class DocBlockEntity {
 		$this->tags = [];
 
 		foreach ( $value as $tag ) {
-			$this->tags[ $tag['name'] ] = new TagEntity( $tag, $this );
+			$this->tags[ $tag['name'] ] = new Tag( $tag, $this );
 		}
 	}
 
