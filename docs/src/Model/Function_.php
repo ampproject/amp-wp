@@ -33,7 +33,7 @@ final class Function_ {
 		return [
 			'name',
 			'namespace',
-			'aliases',
+			//'aliases',
 			'line',
 			'end_line',
 			'arguments',
@@ -41,6 +41,19 @@ final class Function_ {
 			'hooks',
 			'uses',
 		];
+	}
+
+	/**
+	 * Process the arguments entry.
+	 *
+	 * @param array $value Array of argument entries.
+	 */
+	private function process_arguments( $value ) {
+		$this->arguments = [];
+
+		foreach ( $value as $argument ) {
+			$this->arguments[ $argument[ 'name' ] ] = new Argument( $value, $this );
+		}
 	}
 
 	/**

@@ -36,7 +36,7 @@ final class Method {
 		return [
 			'name',
 			'namespace',
-			'aliases',
+			// 'aliases',
 			'line',
 			'end_line',
 			'final',
@@ -47,6 +47,19 @@ final class Method {
 			'doc',
 			'uses',
 		];
+	}
+
+	/**
+	 * Process the arguments entry.
+	 *
+	 * @param array $value Array of argument entries.
+	 */
+	private function process_arguments( $value ) {
+		$this->arguments = [];
+
+		foreach ( $value as $argument ) {
+			$this->arguments[ $argument[ 'name' ] ] = new Argument( $value, $this );
+		}
 	}
 
 	/**

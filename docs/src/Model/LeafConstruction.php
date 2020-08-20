@@ -57,7 +57,6 @@ trait LeafConstruction {
 		}
 	}
 
-
 	/**
 	 * Get the parent leaf object of the current leaf.
 	 *
