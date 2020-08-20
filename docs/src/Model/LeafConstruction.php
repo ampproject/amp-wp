@@ -1,26 +1,26 @@
 <?php
 /**
- * Trait EntityConstruction;
+ * Trait LeafConstruction.
  *
  * @package AmpProject\AmpWP
  */
 
 namespace AmpProject\AmpWP\Documentation\Model;
 
-trait EntityConstruction {
+trait LeafConstruction {
 
 	/**
-	 * Store a reference to the parent entity.
+	 * Store a reference to the parent leaf.
 	 *
-	 * @var Entity|null Parent entity, or null if none.
+	 * @var Leaf|null Parent leaf, or null if none.
 	 */
 	protected $parent;
 
 	/**
-	 * EntityConstruction constructor.
+	 * LeafConstruction constructor.
 	 *
-	 * @param array       $data   Associative array of data to process.
-	 * @param Entity|null $parent Parent entity, or null if none.
+	 * @param array     $data   Associative array of data to process.
+	 * @param Leaf|null $parent Parent leaf, or null if none.
 	 */
 	public function __construct( $data, $parent = null ) {
 		$this->parent = $parent;
@@ -59,9 +59,9 @@ trait EntityConstruction {
 
 
 	/**
-	 * Get the parent entity object of the current entity.
+	 * Get the parent leaf object of the current leaf.
 	 *
-	 * @return Entity|null Parent entity, or null if none.
+	 * @return Leaf|null Parent leaf, or null if none.
 	 */
 	public function get_parent() {
 		return $this->parent;

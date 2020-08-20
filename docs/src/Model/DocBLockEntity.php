@@ -18,7 +18,7 @@ use RuntimeException;
  */
 final class DocBlockEntity {
 
-	use EntityConstruction;
+	use LeafConstruction;
 
 	/**
 	 * Get an associative array of known keys.

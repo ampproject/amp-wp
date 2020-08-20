@@ -20,7 +20,7 @@ namespace AmpProject\AmpWP\Documentation\Model;
  */
 final class FileEntity {
 
-	use EntityConstruction;
+	use LeafConstruction;
 
 	/**
 	 * Get an associative array of known keys.

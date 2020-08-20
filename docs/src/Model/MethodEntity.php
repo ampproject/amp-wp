@@ -25,7 +25,7 @@ namespace AmpProject\AmpWP\Documentation\Model;
  */
 final class MethodEntity {
 
-	use EntityConstruction;
+	use LeafConstruction;
 
 	/**
 	 * Get an associative array of known keys.
