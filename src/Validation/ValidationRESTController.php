@@ -8,23 +8,21 @@
 
 namespace AmpProject\AmpWP\Validation;
 
-use AMP_Validation_Manager;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use WP_Error;
-use WP_Post;
 use WP_REST_Controller;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 
 /**
- * ValidateURLRESTController class.
+ * ValidationRESTController class.
  *
  * @since 2.1
  */
-final class ValidateURLRESTController extends WP_REST_Controller implements Delayed, Service, Registerable {
+final class ValidationRESTController extends WP_REST_Controller implements Delayed, Service, Registerable {
 
 	/**
 	 * Response schema.
@@ -47,7 +45,7 @@ final class ValidateURLRESTController extends WP_REST_Controller implements Dela
 	 */
 	public function __construct() {
 		$this->namespace = 'amp/v1';
-		$this->rest_base = 'validate-url';
+		$this->rest_base = 'validate';
 	}
 
 	/**
@@ -60,15 +58,22 @@ final class ValidateURLRESTController extends WP_REST_Controller implements Dela
 			[
 				[
 					'methods'             => WP_REST_Server::READABLE, // @todo Make this CREATABLE before merging.
-					'callback'            => [ $this, 'validate_url' ],
+					'callback'            => [ $this, 'validate_urls' ],
 					'args'                => [
-						'type' => [
-							'required' => true,
-							'type'     => 'string',
-						],
-						'url'  => [
-							'required' => true,
-							'type'     => 'string',
+						'urls' => [
+							'default' => [],
+							'type'    => 'array',
+							'items'   => [
+								'type'       => 'object',
+								'properties' => [
+									'url'  => [
+										'type' => 'string',
+									],
+									'type' => [
+										'type' => 'string',
+									],
+								],
+							],
 						],
 					],
 					'permission_callback' => [ $this, 'get_items_permissions_check' ],
@@ -97,25 +102,42 @@ final class ValidateURLRESTController extends WP_REST_Controller implements Dela
 	}
 
 	/**
-	 * Validates a URL.
+	 * Given a list of URLs, validates the URLs one by one, returning results with the remaining URLs after the first unstored validation check.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
-	public function validate_url( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		$post_type = get_post_type_object( $request['type'] );
+	public function validate_urls( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+		$validation_provider = new ValidationProvider();
+		$results             = [];
+		$urls                = $request['urls'];
+		$locked              = boolval( $validation_provider->is_locked() );
 
-		$post = null;
-		if ( $post_type ) {
-			$post = get_post( url_to_postid( $request['url'] ) );
+		while ( ! $locked && ! empty( $urls ) ) {
+			$url = array_shift( $urls );
+
+			$validation = $validation_provider->get_url_validation( $url['url'], $url['type'] );
+
+			if ( ! empty( $validation['validity'] ) ) {
+				$results[] = $validation['validity'];
+			}
+
+			// Return after the first URL is validated. The frontend application will make multiple requests until there are no more URLs.
+			if ( true === $validation['revalidated'] ) {
+				break;
+			}
 		}
 
-		$result = AMP_Validation_Manager::validate_url_and_store(
-			$request['url'],
-			is_a( $post, WP_Post::class ) ? $post : null
+		return rest_ensure_response(
+			[
+				'locked'            => $locked,
+				'results'           => $results,
+				'total_errors'      => $validation_provider->total_errors,
+				'unaccepted_errors' => $validation_provider->unaccepted_errors,
+				'validity_by_type'  => $validation_provider->validity_by_type,
+				'remaining_urls'    => $urls,
+			]
 		);
-
-		return rest_ensure_response( $result );
 	}
 
 	/**

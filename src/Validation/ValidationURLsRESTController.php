@@ -62,7 +62,7 @@ final class ValidationURLsRESTController extends WP_REST_Controller implements D
 					'args'                => [
 						'include' => [
 							'default'     => [],
-							'description' => __( 'Array of callbacks that. If set, a URL will only be scanned if one is true.', 'amp' ),
+							'description' => __( 'Array of callbacks. If set, a URL will only be scanned if one is true.', 'amp' ),
 							'type'        => 'array',
 							'items'       => [
 								'type' => 'string',
@@ -106,9 +106,9 @@ final class ValidationURLsRESTController extends WP_REST_Controller implements D
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function get_urls( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		$site_scan = new SiteScan( $request['limit'], $request['include'] );
+		$site_scan_url_provider = new ValidationURLProvider( $request['limit'], $request['include'], true );
 
-		return rest_ensure_response( $site_scan->get_urls() );
+		return rest_ensure_response( $site_scan_url_provider->get_urls(), 'url' );
 	}
 
 	/**
@@ -123,7 +123,7 @@ final class ValidationURLsRESTController extends WP_REST_Controller implements D
 				'title'   => 'amp-wp-validation-urls',
 				'type'    => 'array',
 				'items'   => [
-					'type' => 'array',
+					'type' => 'string',
 				],
 			];
 		}

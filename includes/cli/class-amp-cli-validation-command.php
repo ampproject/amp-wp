@@ -9,7 +9,8 @@
 
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Validation\SiteScan;
+use AmpProject\AmpWP\Validation\ValidationProvider;
+use AmpProject\AmpWP\Validation\ValidationURLProvider;
 
 /**
  * Crawls the site for validation errors or resets the stored validation errors.
@@ -61,11 +62,18 @@ final class AMP_CLI_Validation_Command {
 	public $wp_cli_progress;
 
 	/**
-	 * SiteScan instance.
+	 * ValidationProvider instance.
 	 *
-	 * @var SiteScan
+	 * @var ValidationProvider
 	 */
-	private $site_scan;
+	private $validation_provider;
+
+	/**
+	 * ValidationURLProvider instance.
+	 *
+	 * @var ValidationURLProvider
+	 */
+	private $site_scan_url_provider;
 
 	/**
 	 * Associative args passed to the command.
@@ -101,9 +109,11 @@ final class AMP_CLI_Validation_Command {
 	 */
 	public function run( $args, $assoc_args ) {
 		$this->assoc_args = $assoc_args;
-		$site_scan        = $this->get_site_scan();
 
-		$number_urls_to_crawl = $site_scan->count_urls_to_validate();
+		$site_scan_url_provider = $this->get_site_scan_url_provider();
+		$validation_provider              = $this->get_validation_provider();
+
+		$number_urls_to_crawl = count( $site_scan_url_provider->get_urls() );
 		if ( ! $number_urls_to_crawl ) {
 			if ( ! empty( $this->include_conditionals ) ) {
 				WP_CLI::error(
@@ -136,7 +146,7 @@ final class AMP_CLI_Validation_Command {
 		$key_validity_rate = 'Validity Rate';
 
 		$table_validation_by_type = [];
-		foreach ( $site_scan->validity_by_type as $type_name => $validity ) {
+		foreach ( $validation_provider->validity_by_type as $type_name => $validity ) {
 			$table_validation_by_type[] = [
 				$key_template_type => $type_name,
 				$key_url_count     => $validity['total'],
@@ -152,9 +162,9 @@ final class AMP_CLI_Validation_Command {
 		WP_CLI::success(
 			sprintf(
 				'%3$d crawled URLs have invalid markup kept out of %2$d total with AMP validation issue(s); %1$d URLs were crawled.',
-				$site_scan->number_crawled,
-				$site_scan->total_errors,
-				$site_scan->unaccepted_errors
+				$validation_provider->number_crawled,
+				$validation_provider->total_errors,
+				$validation_provider->unaccepted_errors
 			)
 		);
 
@@ -194,13 +204,13 @@ final class AMP_CLI_Validation_Command {
 	}
 
 	/**
-	 * Provides the site scan class.
+	 * Provides the ValidationURLProvider instance.
 	 *
-	 * @return SiteScan
+	 * @return ValidationURLProvider
 	 */
-	private function get_site_scan() {
-		if ( ! is_null( $this->site_scan ) ) {
-			return $this->site_scan;
+	private function get_site_scan_url_provider() {
+		if ( ! is_null( $this->site_scan_url_provider ) ) {
+			return $this->site_scan_url_provider;
 		}
 
 		$assoc_args = $this->get_assoc_args();
@@ -245,14 +255,28 @@ final class AMP_CLI_Validation_Command {
 			}
 		}
 
-		$this->site_scan = new SiteScan(
+		$this->site_scan_url_provider = new ValidationURLProvider(
 			$limit_type_validate_count,
 			$include_conditionals,
-			$force_crawl_urls,
-			true
+			$force_crawl_urls
 		);
 
-		return $this->site_scan;
+		return $this->site_scan_url_provider;
+	}
+
+	/**
+	 * Provides the site scan instance.
+	 *
+	 * @return ValidationProvider
+	 */
+	private function get_validation_provider() {
+		if ( ! is_null( $this->validation_provider ) ) {
+			return $this->validation_provider;
+		}
+
+		$this->validation_provider = new ValidationProvider();
+
+		return $this->validation_provider;
 	}
 
 	/**
@@ -263,19 +287,36 @@ final class AMP_CLI_Validation_Command {
 	 * and iterates until it reaches the maximum number of URLs for each type.
 	 */
 	private function crawl_site() {
-		$site_scan = $this->get_site_scan();
+		$site_scan_url_provider = $this->get_site_scan_url_provider();
+		$validation_provider    = $this->get_validation_provider();
 
-		foreach ( $site_scan->get_urls() as $url ) {
-			$validity = $site_scan->validate_and_store_url( $url['url'], $url['type'] );
+		if ( $validation_provider->is_locked() ) {
+			WP_CLI::error( 'The site cannot be crawled at this time because validation is running in another process.' );
+			return;
+		}
+
+		$validation_provider->lock( 'cli_script' );
+
+		foreach ( $site_scan_url_provider->get_urls() as $url ) {
+			$validity = $validation_provider->get_url_validation( $url['url'], $url['type'], true );
 
 			if ( $this->wp_cli_progress ) {
 				$this->wp_cli_progress->tick();
 			}
 
-			if ( is_wp_error( $validity ) ) {
-				WP_CLI::warning( sprintf( 'Validate URL error (%1$s): %2$s URL: %3$s', $validity->get_error_code(), $validity->get_error_message(), $url ) );
+			if ( is_wp_error( $validity['error'] ) ) {
+				WP_CLI::warning(
+					sprintf(
+						'Validate URL error (%1$s): %2$s URL: %3$s',
+						$validity['error']->get_error_code(),
+						$validity['error']->get_error_message(),
+						$url
+					)
+				);
 			}
 		}
+
+		$validation_provider->unlock();
 	}
 
 	/**

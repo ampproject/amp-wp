@@ -1,6 +1,6 @@
 <?php
 /**
- * Provides site scan results.
+ * Provides URLs to scan.
  *
  * @package AMP
  * @since 2.1
@@ -9,88 +9,39 @@
 namespace AmpProject\AmpWP\Validation;
 
 use AMP_Theme_Support;
-use AMP_Validation_Error_Taxonomy;
-use AMP_Validation_Manager;
 use WP_Query;
 
 /**
- * SiteScan class.
+ * ValidationURLProvider class.
  *
  * @since 2.1
  */
-final class SiteScan {
+final class ValidationURLProvider {
 
 	/**
-	 * The total number of validation errors, regardless of whether they were accepted.
-	 *
-	 * @var int
-	 */
-	public $total_errors = 0;
-
-	/**
-	 * The total number of unaccepted validation errors.
-	 *
-	 * If an error has been accepted in the /wp-admin validation UI,
-	 * it won't count toward this.
-	 *
-	 * @var int
-	 */
-	public $unaccepted_errors = 0;
-
-	/**
-	 * The number of URLs crawled, regardless of whether they have validation errors.
-	 *
-	 * @var int
-	 */
-	public $number_crawled = 0;
-
-	/**
-	 * Whether to force crawling of URLs.
-	 *
-	 * By default, this script only crawls URLs that support AMP,
-	 * where the user has not opted-out of AMP for the URL.
-	 * For example, by un-checking 'Posts' in 'AMP Settings' > 'Supported Templates'.
-	 * Or un-checking 'Enable AMP' in the post's editor.
+	 * Whether to include URLs that don't support AMP.
 	 *
 	 * @var bool
 	 */
-	public $force_crawl_urls;
+	public $include_unsupported;
 
 	/**
-	 * An allowlist of conditionals to use for validation.
+	 * An allowlist of conditionals to use for querying URLs.
 	 *
-	 * Usually, this script will validate all of the templates that don't have AMP disabled.
-	 * But this allows validating based on only these conditionals.
-	 * This is set if the WP-CLI command has an --include argument.
+	 * Usually, this class will query all of the templates that don't have AMP disabled. This allows inclusion based on only these conditionals.
 	 *
 	 * @var array
 	 */
 	public $include_conditionals;
 
 	/**
-	 * The maximum number of URLs to validate for each type.
+	 * The maximum number of URLs to provide for each content type.
 	 *
-	 * Templates are each a separate type, like those for is_category() and is_tag().
-	 * Also, each post type is a separate type.
-	 * This value is overridden if the WP-CLI command has an --limit argument, like --limit=10.
+	 * Templates are each a separate type, like those for is_category() and is_tag(), and each post type is a type.
 	 *
 	 * @var int
 	 */
-	public $limit_type_validate_count;
-
-	/**
-	 * The validation counts by type, like template or post type.
-	 *
-	 * @var array[] {
-	 *     Validity by type.
-	 *
-	 *     @type array $type {
-	 *         @type int $valid The number of valid URLs for this type.
-	 *         @type int $total The total number of URLs for this type, valid or invalid.
-	 *     }
-	 * }
-	 */
-	public $validity_by_type = [];
+	public $limit_per_type;
 
 	/**
 	 * URLs to crawl.
@@ -102,18 +53,18 @@ final class SiteScan {
 	/**
 	 * Class constructor.
 	 *
-	 * @param integer $limit_type_validate_count The maximum number of URLs to validate for each type.
+	 * @param integer $limit_per_type The maximum number of URLs to validate for each type.
 	 * @param array   $include_conditionals An allowlist of conditionals to use for validation.
-	 * @param boolean $force_crawl_urls Whether to force crawling of URLs.
+	 * @param boolean $include_unsupported Whether to include URLs that don't support AMP.
 	 */
 	public function __construct(
-		$limit_type_validate_count = 10,
+		$limit_per_type = 20,
 		$include_conditionals = [],
-		$force_crawl_urls = false
+		$include_unsupported = false
 	) {
-		$this->limit_type_validate_count = $limit_type_validate_count;
-		$this->include_conditionals      = $include_conditionals;
-		$this->force_crawl_urls          = $force_crawl_urls;
+		$this->limit_per_type       = $limit_per_type;
+		$this->include_conditionals = $include_conditionals;
+		$this->include_unsupported  = $include_unsupported;
 	}
 
 	/**
@@ -127,8 +78,7 @@ final class SiteScan {
 		}
 
 		/*
-		 * If 'Your homepage displays' is set to 'Your latest posts', validate the homepage.
-		 * It will not be part of the page validation below.
+		 * If 'Your homepage displays' is set to 'Your latest posts', include the homepage.
 		 */
 		if ( 'posts' === get_option( 'show_on_front' ) && $this->is_template_supported( 'is_home' ) ) {
 			$this->urls[] = [
@@ -143,9 +93,9 @@ final class SiteScan {
 		);
 		$public_post_types      = get_post_types( [ 'public' => true ], 'names' );
 
-		// Validate one URL of each template/content type, then another URL of each type on the next iteration.
-		for ( $i = 0; $i < $this->limit_type_validate_count; $i++ ) {
-			// Validate all public, published posts.
+		// Include one URL of each template/content type, then another URL of each type on the next iteration.
+		for ( $i = 0; $i < $this->limit_per_type; $i++ ) {
+			// Include all public, published posts.
 			foreach ( $public_post_types as $post_type ) {
 				$post_ids = $this->get_posts_that_support_amp( $this->get_posts_by_type( $post_type, $i, 1 ) );
 				if ( ! empty( $post_ids[0] ) ) {
@@ -196,20 +146,6 @@ final class SiteScan {
 	}
 
 	/**
-	 * Gets the total number of URLs to validate.
-	 *
-	 * By default, this only counts AMP-enabled posts and terms.
-	 * But if $force_crawl_urls is true, it counts all of them, regardless of their AMP status.
-	 * It also uses $this->maximum_urls_to_validate_for_each_type,
-	 * which can be overridden with a command line argument.
-	 *
-	 * @return int The number of URLs to validate.
-	 */
-	public function count_urls_to_validate() {
-		return count( $this->get_urls() );
-	}
-
-	/**
 	 * Gets whether the template is supported.
 	 *
 	 * If the user has passed an include argument to the WP-CLI command, use that to find if this template supports AMP.
@@ -220,12 +156,12 @@ final class SiteScan {
 	 * @param string $template The template to check.
 	 * @return bool Whether the template is supported.
 	 */
-	public function is_template_supported( $template ) {
+	private function is_template_supported( $template ) {
 		// If the --include argument is present in the WP-CLI command, this template conditional must be present in it.
 		if ( ! empty( $this->include_conditionals ) ) {
 			return in_array( $template, $this->include_conditionals, true );
 		}
-		if ( $this->force_crawl_urls ) {
+		if ( $this->include_unsupported ) {
 			return true;
 		}
 
@@ -241,7 +177,7 @@ final class SiteScan {
 	 * By default, this only gets the post IDs if they support AMP.
 	 * This means that 'Posts' isn't deselected in 'AMP Settings' > 'Supported Templates'.
 	 * And 'Enable AMP' isn't unchecked in the post's editor.
-	 * But if $force_crawl_urls is true, this simply returns all of the IDs.
+	 * But if $include_unsupported is true, this simply returns all of the IDs.
 	 *
 	 * @param array $ids THe post IDs to check for AMP support.
 	 * @return array The post IDs that support AMP, or an empty array.
@@ -251,7 +187,7 @@ final class SiteScan {
 			return [];
 		}
 
-		if ( $this->force_crawl_urls ) {
+		if ( $this->include_unsupported ) {
 			return $ids;
 		}
 
@@ -272,7 +208,7 @@ final class SiteScan {
 	private function get_posts_by_type( $post_type, $offset = null, $number = null ) {
 		$args = [
 			'post_type'      => $post_type,
-			'posts_per_page' => is_int( $number ) ? $number : $this->limit_type_validate_count,
+			'posts_per_page' => is_int( $number ) ? $number : $this->limit_per_type,
 			'post_status'    => 'publish',
 			'orderby'        => 'ID',
 			'order'          => 'DESC',
@@ -307,7 +243,7 @@ final class SiteScan {
 			return $author_page_urls;
 		}
 
-		$number = ! empty( $number ) ? $number : $this->limit_type_validate_count;
+		$number = ! empty( $number ) ? $number : $this->limit_per_type;
 		foreach ( get_users( compact( 'offset', 'number' ) ) as $author ) {
 			$author_page_urls[] = get_author_posts_url( $author->ID, $author->user_nicename );
 		}
@@ -382,60 +318,5 @@ final class SiteScan {
 				)
 			)
 		);
-	}
-
-	/**
-	 * Validates the URL, stores the results, and increments the counts.
-	 *
-	 * @param string $url  The URL to validate.
-	 * @param string $type The type of template, post, or taxonomy.
-	 */
-	public function validate_and_store_url( $url, $type ) {
-		$validity = AMP_Validation_Manager::validate_url_and_store( $url );
-
-		/*
-		 * If the request to validate this returns a WP_Error, return.
-		 * One cause of an error is if the validation request results in a 404 response code.
-		 */
-		if ( is_wp_error( $validity ) ) {
-			return $validity;
-		}
-
-		$validation_errors      = wp_list_pluck( $validity['results'], 'error' );
-		$unaccepted_error_count = count(
-			array_filter(
-				$validation_errors,
-				static function( $error ) {
-					$validation_status = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error );
-					return (
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $validation_status['term_status']
-					&&
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS !== $validation_status['term_status']
-					);
-				}
-			)
-		);
-
-		if ( count( $validation_errors ) > 0 ) {
-			$this->total_errors++;
-		}
-		if ( $unaccepted_error_count > 0 ) {
-			$this->unaccepted_errors++;
-		}
-
-		$this->number_crawled++;
-
-		if ( ! isset( $this->validity_by_type[ $type ] ) ) {
-			$this->validity_by_type[ $type ] = [
-				'valid' => 0,
-				'total' => 0,
-			];
-		}
-		$this->validity_by_type[ $type ]['total']++;
-		if ( 0 === $unaccepted_error_count ) {
-			$this->validity_by_type[ $type ]['valid']++;
-		}
-
-		return true;
 	}
 }
