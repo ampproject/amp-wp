@@ -44,8 +44,7 @@ final class Parser {
 		} catch ( UnexpectedValueException $exc ) {
 			return new WP_Error(
 				'unexpected_value_exception',
-				sprintf( 'Directory [%s] contained a directory we can not recurse into',
-					$directory )
+				sprintf( 'Directory [%s] contained a directory we can not recurse into', $directory )
 			);
 		}
 
@@ -177,8 +176,7 @@ final class Parser {
 		$text = preg_replace_callback(
 			"/(?<=<pre><code>)(.+)(?=<\/code><\/pre>)/s",
 			static function ( $matches ) use ( $replacement_string ) {
-				return preg_replace( '/[\n\r]/', $replacement_string,
-					$matches[1] );
+				return preg_replace( '/[\n\r]/', $replacement_string, $matches[1] );
 			},
 			$text
 		);
@@ -212,18 +210,26 @@ final class Parser {
 		}
 
 		$output = [
-			'description'      => preg_replace( '/[\n\r]+/', ' ',
-				$docblock->getShortDescription() ),
-			'long_description' => $this->fix_newlines( $docblock->getLongDescription()
-			                                             ->getFormattedContents() ),
+			'description'      => preg_replace(
+				'/[\n\r]+/',
+				' ',
+				$docblock->getShortDescription()
+			),
+			'long_description' => $this->fix_newlines(
+				$docblock->getLongDescription()
+				         ->getFormattedContents()
+			),
 			'tags'             => [],
 		];
 
 		foreach ( $docblock->getTags() as $tag ) {
 			$tag_data = [
 				'name'    => $tag->getName(),
-				'content' => preg_replace( '/[\n\r]+/', ' ',
-					$this->format_description( $tag->getDescription() ) ),
+				'content' => preg_replace(
+					'/[\n\r]+/',
+					' ',
+					$this->format_description( $tag->getDescription() )
+				),
 			];
 			if ( method_exists( $tag, 'getTypes' ) ) {
 				$tag_data['types'] = $tag->getTypes();

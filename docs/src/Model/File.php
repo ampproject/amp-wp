@@ -38,4 +38,59 @@ final class File {
 			'includes',
 		];
 	}
+
+	/**
+	 * Process the classes entry.
+	 *
+	 * @param array $value Array of class entries.
+	 */
+	private function process_classes( $value ) {
+		$this->classes = [];
+
+		foreach ( $value as $class ) {
+			$this->classes[ $class[ 'name' ] ] = new Class_( $value, $this );
+		}
+	}
+
+
+	/**
+	 * Process the uses entry.
+	 *
+	 * @param array $value Array of usage entries.
+	 */
+	private function process_uses( $value ) {
+		$this->uses = [];
+
+		foreach ( $value as $use ) {
+			$this->uses[ $use[ 'name' ] ] = new Usage( $value, $this );
+		}
+	}
+
+
+	/**
+	 * Process the functions entry.
+	 *
+	 * @param array $value Array of function entries.
+	 */
+	private function process_functions( $value ) {
+		$this->functions = [];
+
+		foreach ( $value as $function ) {
+			$this->functions[ $function[ 'name' ] ] = new Function_( $value, $this );
+		}
+	}
+
+
+	/**
+	 * Process the includes entry.
+	 *
+	 * @param array $value Array of include entries.
+	 */
+	private function process_includes( $value ) {
+		$this->includes = [];
+
+		foreach ( $value as $include ) {
+			$this->includes[ $include[ 'name' ] ] = new Include_( $value, $this );
+		}
+	}
 }
