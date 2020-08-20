@@ -22,6 +22,7 @@ namespace AmpProject\AmpWP\Documentation\Model;
  * @property Argument[] $arguments
  * @property DocBlock   $doc
  * @property Usage[]    $uses
+ * @property Hook[]     $hooks
  */
 final class Method {
 
@@ -46,6 +47,7 @@ final class Method {
 			'arguments',
 			'doc',
 			'uses',
+			'hooks',
 		];
 	}
 
@@ -81,6 +83,19 @@ final class Method {
 
 		foreach ( $value as $use ) {
 			$this->uses[ $use[ 'name' ] ] = new Usage( $value, $this );
+		}
+	}
+
+	/**
+	 * Process the hooks entry.
+	 *
+	 * @param array $value Array of hook entries.
+	 */
+	private function process_hooks( $value ) {
+		$this->hooks = [];
+
+		foreach ( $value as $hook ) {
+			$this->hooks[ $hook[ 'name' ] ] = new Hook( $value, $this );
 		}
 	}
 }

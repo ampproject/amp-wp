@@ -11,8 +11,8 @@ namespace AmpProject\AmpWP\Documentation\Model;
  * Documentation reference object representing the usage of a function or
  * method.
  *
- * @property Function[] $functions
- * @property Method[]   $methods
+ * @property Function_[] $functions
+ * @property Method[]    $methods
  */
 final class Usage {
 
