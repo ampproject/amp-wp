@@ -3082,9 +3082,23 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			// Replace focus selectors with :focus-within.
 			if ( $this->focus_class_name_selector_pattern ) {
 				$count    = 0;
-				$selector = preg_replace(
+				$selector = preg_replace_callback(
 					$this->focus_class_name_selector_pattern,
-					':focus-within',
+					static function ( $matches ) {
+						if ( ! empty( $matches['combinator'] ) ) {
+							/*
+							 * If a whitespace combinator precedes the focus selector, prefix the pseudo class selector
+							 * with a class selector that's known to be common among themes that use the focus selector.
+							 * This is to prevent the pseudo class selector being applied to the ancestor selector,
+							 * which can cause unintended behavior on the page.
+							 */
+
+							// Prefixed whitespace is necessary since the previous whitespace is being replaced.
+							return ' .menu-item-has-children:focus-within';
+						}
+
+						return ':focus-within';
+					},
 					$selector,
 					-1,
 					$count
@@ -3176,7 +3190,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				(array) $class_names
 			)
 		);
-		return "/\.({$class_pattern})(?=$|[^a-zA-Z0-9_-])/";
+		return "/(?<combinator>(?<![>+~])\s+)?\.(?<class>{$class_pattern})(?=$|[^a-zA-Z0-9_-])/";
 	}
 
 	/**
