@@ -5,7 +5,7 @@
  * @package AmpProject\AmpWP
  */
 
-namespace AmpProject\AmpWP\Documentation\Templating;
+namespace AmpProject\AmpWP\Documentation\Model;
 
 interface Entity {
 
