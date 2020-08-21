@@ -83,7 +83,8 @@ final class ValidationCron extends CronBasedBackgroundTask {
 
 		$validation_provider = new ValidationProvider();
 
-		$validation_provider->with_lock(
+		// with_lock returns an error if the process is locked.
+		$potential_error = $validation_provider->with_lock(
 			static function() use ( $validation_provider, $urls ) {
 				foreach ( $urls as $url ) {
 					$validation_provider->get_url_validation( $url['url'], $url['type'] );
@@ -92,6 +93,9 @@ final class ValidationCron extends CronBasedBackgroundTask {
 			}
 		);
 
-		set_transient( self::OFFSET_KEY, $offset + 2 );
+		// If the process was locked, run with the same offset last time.
+		if ( ! is_wp_error( $potential_error ) ) {
+			set_transient( self::OFFSET_KEY, $offset + 2 );
+		}
 	}
 }
