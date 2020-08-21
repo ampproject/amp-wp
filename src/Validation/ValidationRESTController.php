@@ -109,34 +109,37 @@ final class ValidationRESTController extends WP_REST_Controller implements Delay
 	 */
 	public function validate_urls( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		$validation_provider = new ValidationProvider();
-		$results             = [];
-		$urls                = $request['urls'];
-		$locked              = boolval( $validation_provider->is_locked() );
 
-		while ( ! $locked && ! empty( $urls ) ) {
-			$url = array_shift( $urls );
+		return $validation_provider->with_lock(
+			function() use ( $request, $validation_provider ) {
+				$results = [];
+				$urls    = $request['urls'];
 
-			$validation = $validation_provider->get_url_validation( $url['url'], $url['type'] );
+				while ( ! empty( $urls ) ) {
+					$url = array_shift( $urls );
 
-			if ( ! empty( $validation['validity'] ) ) {
-				$results[] = $validation['validity'];
+					$validation = $validation_provider->get_url_validation( $url['url'], $url['type'] );
+
+					if ( ! empty( $validation['validity'] ) ) {
+						$results[] = $validation['validity'];
+					}
+
+					// Return after the first URL is validated. The frontend application will make multiple requests until there are no more URLs.
+					if ( true === $validation['revalidated'] ) {
+						break;
+					}
+				}
+
+				return rest_ensure_response(
+					[
+						'results'           => $results,
+						'total_errors'      => $validation_provider->total_errors,
+						'unaccepted_errors' => $validation_provider->unaccepted_errors,
+						'validity_by_type'  => $validation_provider->validity_by_type,
+						'remaining_urls'    => $urls,
+					]
+				);
 			}
-
-			// Return after the first URL is validated. The frontend application will make multiple requests until there are no more URLs.
-			if ( true === $validation['revalidated'] ) {
-				break;
-			}
-		}
-
-		return rest_ensure_response(
-			[
-				'locked'            => $locked,
-				'results'           => $results,
-				'total_errors'      => $validation_provider->total_errors,
-				'unaccepted_errors' => $validation_provider->unaccepted_errors,
-				'validity_by_type'  => $validation_provider->validity_by_type,
-				'remaining_urls'    => $urls,
-			]
 		);
 	}
 

@@ -73,6 +73,12 @@ final class ValidationURLsRESTController extends WP_REST_Controller implements D
 							'description' => __( 'The maximum number of URLs to validate for each type.', 'amp' ),
 							'type'        => 'integer',
 						],
+						'offset'  => [
+							'default'     => 0,
+							'description' => __( 'The number of URLs to offset by for each content type.', 'amp' ),
+							'type'        => 'integer',
+						],
+
 					],
 					'permission_callback' => [ $this, 'get_items_permissions_check' ],
 				],
@@ -108,7 +114,7 @@ final class ValidationURLsRESTController extends WP_REST_Controller implements D
 	public function get_urls( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		$site_scan_url_provider = new ValidationURLProvider( $request['limit'], $request['include'], true );
 
-		return rest_ensure_response( $site_scan_url_provider->get_urls(), 'url' );
+		return rest_ensure_response( $site_scan_url_provider->get_urls( $request['offset'] ), 'url' );
 	}
 
 	/**
@@ -123,7 +129,15 @@ final class ValidationURLsRESTController extends WP_REST_Controller implements D
 				'title'   => 'amp-wp-validation-urls',
 				'type'    => 'array',
 				'items'   => [
-					'type' => 'string',
+					'type'       => 'object',
+					'properties' => [
+						'url'  => [
+							'type' => 'string',
+						],
+						'type' => [
+							'type' => 'string',
+						],
+					],
 				],
 			];
 		}

@@ -62,15 +62,17 @@ final class ValidationProviderTest extends WP_UnitTestCase {
 	 * @covers ::unlock
 	 * @covers ::is_locked
 	 * @covers ::get_lock_timeout
+	 * @covers ::with_lock
 	 */
 	public function test_locking() {
-		$lock_key = 'my-lock';
+		$this->assertFalse( get_transient( ValidationProvider::LOCK_TRANSIENT ) );
 
-		$this->validation_provider->lock( $lock_key );
-		$this->assertEquals( $lock_key, $this->validation_provider->is_locked() );
+		$this->validation_provider->with_lock(
+			function() {
+				$this->assertEquals( 'locked', get_transient( ValidationProvider::LOCK_TRANSIENT ) );
+			}
+		);
 
-		$this->validation_provider->unlock();
-
-		$this->assertFalse( $this->validation_provider->is_locked() );
+		$this->assertFalse( get_transient( ValidationProvider::LOCK_TRANSIENT ) );
 	}
 }

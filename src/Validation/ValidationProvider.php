@@ -11,6 +11,7 @@ namespace AmpProject\AmpWP\Validation;
 use AMP_Validated_URL_Post_Type;
 use AMP_Validation_Error_Taxonomy;
 use AMP_Validation_Manager;
+use WP_Error;
 
 /**
  * ValidationProvider class.
@@ -66,17 +67,15 @@ final class ValidationProvider {
 
 	/**
 	 * Locks validation.
-	 *
-	 * @param string $value A string to save as the transient value. Can be used to determine which process is running validation.
 	 */
-	public function lock( $value = 'default' ) {
-		set_transient( self::LOCK_TRANSIENT, $value, $this->get_lock_timeout() );
+	private function lock() {
+		set_transient( self::LOCK_TRANSIENT, 'locked', $this->get_lock_timeout() );
 	}
 
 	/**
 	 * Unlocks validation.
 	 */
-	public function unlock() {
+	private function unlock() {
 		delete_transient( self::LOCK_TRANSIENT );
 	}
 
@@ -85,7 +84,7 @@ final class ValidationProvider {
 	 *
 	 * @return boolean
 	 */
-	public function is_locked() {
+	private function is_locked() {
 		return get_transient( self::LOCK_TRANSIENT );
 	}
 
@@ -97,10 +96,31 @@ final class ValidationProvider {
 	private function get_lock_timeout() {
 		/**
 		 * Filters the length of time to lock URL validation when a process starts.
-		 * 
+		 *
 		 * @param int $timeout Time in seconds. Default 300 seconds.
 		 */
 		return apply_filters( 'amp_validation_lock_timeout', 5 * MINUTE_IN_SECONDS );
+	}
+
+	/**
+	 * Runs a callback with a lock set during the duration of the callback.
+	 *
+	 * @param callable $callback Callback to run with the lock set.
+	 * @return mixed  WP_Error is a lock is in place. Otherwise, the result of the callback or void if it doesn't return anything.
+	 */
+	public function with_lock( $callback ) {
+		if ( $this->is_locked() ) {
+			return new WP_Error(
+				'amp_url_validation_locked',
+				__( 'URL validation cannot start right now because another process is already validating URLs. Try again in a few minutes.', 'amp ' )
+			);
+		}
+
+		$this->lock();
+		$result = call_user_func( $callback );
+		$this->unlock();
+
+		return $result;
 	}
 
 	/**
@@ -132,7 +152,7 @@ final class ValidationProvider {
 		if ( is_wp_error( $validity ) ) {
 			$validity = null;
 			$error    = $validity;
-		} else {
+		} elseif ( $validity ) {
 			$this->update_state_from_validity( $validity, $type );
 		}
 

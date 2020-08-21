@@ -111,7 +111,7 @@ final class AMP_CLI_Validation_Command {
 		$this->assoc_args = $assoc_args;
 
 		$site_scan_url_provider = $this->get_site_scan_url_provider();
-		$validation_provider              = $this->get_validation_provider();
+		$validation_provider    = $this->get_validation_provider();
 
 		$number_urls_to_crawl = count( $site_scan_url_provider->get_urls() );
 		if ( ! $number_urls_to_crawl ) {
@@ -290,33 +290,33 @@ final class AMP_CLI_Validation_Command {
 		$site_scan_url_provider = $this->get_site_scan_url_provider();
 		$validation_provider    = $this->get_validation_provider();
 
-		if ( $validation_provider->is_locked() ) {
+		$result = $validation_provider->with_lock(
+			function() use ( $site_scan_url_provider, $validation_provider ) {
+				foreach ( $site_scan_url_provider->get_urls() as $url ) {
+					$validity = $validation_provider->get_url_validation( $url['url'], $url['type'], true );
+
+					if ( $this->wp_cli_progress ) {
+						$this->wp_cli_progress->tick();
+					}
+
+					if ( is_wp_error( $validity['error'] ) ) {
+						WP_CLI::warning(
+							sprintf(
+								'Validate URL error (%1$s): %2$s URL: %3$s',
+								$validity['error']->get_error_code(),
+								$validity['error']->get_error_message(),
+								$url
+							)
+						);
+					}
+				}
+			}
+		);
+
+		if ( is_wp_error( $result ) ) {
 			WP_CLI::error( 'The site cannot be crawled at this time because validation is running in another process.' );
 			return;
 		}
-
-		$validation_provider->lock( 'cli_script' );
-
-		foreach ( $site_scan_url_provider->get_urls() as $url ) {
-			$validity = $validation_provider->get_url_validation( $url['url'], $url['type'], true );
-
-			if ( $this->wp_cli_progress ) {
-				$this->wp_cli_progress->tick();
-			}
-
-			if ( is_wp_error( $validity['error'] ) ) {
-				WP_CLI::warning(
-					sprintf(
-						'Validate URL error (%1$s): %2$s URL: %3$s',
-						$validity['error']->get_error_code(),
-						$validity['error']->get_error_message(),
-						$url
-					)
-				);
-			}
-		}
-
-		$validation_provider->unlock();
 	}
 
 	/**
