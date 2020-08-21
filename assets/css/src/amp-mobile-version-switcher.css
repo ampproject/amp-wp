@@ -1,6 +1,12 @@
+#amp-mobile-version-switcher {
+	position: absolute;
+	width: 100%;
+	left: 0;
+	z-index: 100;
+}
+
 #amp-mobile-version-switcher > a {
 	display: block;
-	width: 100%;
 	padding: 15px 0;
 	font-size: 16px;
 	font-weight: 600;
