@@ -16,6 +16,11 @@ use AmpProject\AmpWP\BackgroundTask\CronBasedBackgroundTask;
  * @since 2.1
  */
 final class ValidationCron extends CronBasedBackgroundTask {
+	/**
+	 * The cron action name.
+	 * 
+	 * @var string
+	 */
 	const EVENT_NAME = 'amp_validate_urls';
 
 	/**
@@ -24,6 +29,13 @@ final class ValidationCron extends CronBasedBackgroundTask {
 	 * @var string
 	 */
 	const OFFSET_KEY = 'amp_validate_urls_cron_offset';
+
+	/**
+	 * The number of URLs to check per type each time the cron action runs.
+	 * 
+	 * @var int
+	 */
+	const LIMIT_PER_TYPE = 2;
 
 	/**
 	 * The length of time to store the offset transient.
@@ -67,7 +79,7 @@ final class ValidationCron extends CronBasedBackgroundTask {
 	 * @param boolean $reset_if_no_urls_found If true and no URLs are found, the method will reset the offset to 0 and rerun.
 	 */
 	public function validate_urls( $reset_if_no_urls_found = true ) {
-		$validation_url_provider = new ValidationURLProvider( 2, [], true );
+		$validation_url_provider = new ValidationURLProvider( self::LIMIT_PER_TYPE, [], true );
 		$offset                  = get_transient( self::OFFSET_KEY ) ?: 0;
 		$urls                    = $validation_url_provider->get_urls( $offset );
 
@@ -95,7 +107,7 @@ final class ValidationCron extends CronBasedBackgroundTask {
 
 		// If the process was locked, run with the same offset last time.
 		if ( ! is_wp_error( $potential_error ) ) {
-			set_transient( self::OFFSET_KEY, $offset + 2 );
+			set_transient( self::OFFSET_KEY, $offset + self::LIMIT_PER_TYPE );
 		}
 	}
 }
