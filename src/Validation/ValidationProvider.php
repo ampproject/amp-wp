@@ -103,16 +103,16 @@ final class ValidationProvider {
 	}
 
 	/**
-	 * Runs a callback with a lock set during the duration of the callback.
+	 * Runs a callback with a lock set for the duration of the callback.
 	 *
 	 * @param callable $callback Callback to run with the lock set.
-	 * @return mixed  WP_Error is a lock is in place. Otherwise, the result of the callback or void if it doesn't return anything.
+	 * @return mixed  WP_Error if a lock is in place. Otherwise, the result of the callback or void if it doesn't return anything.
 	 */
 	public function with_lock( $callback ) {
 		if ( $this->is_locked() ) {
 			return new WP_Error(
 				'amp_url_validation_locked',
-				__( 'URL validation cannot start right now because another process is already validating URLs. Try again in a few minutes.', 'amp ' )
+				__( 'URL validation cannot start right now because another process is already validating URLs. Try again in a few minutes.', 'amp' )
 			);
 		}
 

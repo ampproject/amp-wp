@@ -87,6 +87,7 @@ final class ValidationCron extends CronBasedBackgroundTask {
 			static function() use ( $validation_provider, $urls ) {
 				foreach ( $urls as $url ) {
 					$validation_provider->get_url_validation( $url['url'], $url['type'] );
+					sleep( 1 );
 				}
 			}
 		);
