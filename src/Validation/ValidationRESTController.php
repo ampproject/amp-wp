@@ -57,7 +57,7 @@ final class ValidationRESTController extends WP_REST_Controller implements Delay
 			'/' . $this->rest_base,
 			[
 				[
-					'methods'             => WP_REST_Server::READABLE, // @todo Make this CREATABLE before merging.
+					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => [ $this, 'validate_urls' ],
 					'args'                => [
 						'urls' => [
@@ -90,7 +90,7 @@ final class ValidationRESTController extends WP_REST_Controller implements Delay
 	 * @return true|WP_Error True if the request has permission; WP_Error object otherwise.
 	 */
 	public function get_items_permissions_check( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		if ( false && ! current_user_can( 'manage_options' ) ) { // @todo Remove false before merging.
+		if ( ! current_user_can( 'manage_options' ) ) {
 			return new WP_Error(
 				'amp_rest_cannot_manage_options',
 				__( 'Sorry, you are not allowed to manage options for the AMP plugin for WordPress.', 'amp' ),
@@ -152,9 +152,25 @@ final class ValidationRESTController extends WP_REST_Controller implements Delay
 		if ( ! $this->schema ) {
 			$this->schema = [
 				'$schema'    => 'http://json-schema.org/draft-04/schema#',
-				'title'      => 'amp-wp-validate-url',
+				'title'      => 'amp-wp-validation',
 				'type'       => 'object',
-				'properties' => [],
+				'properties' => [
+					'results'           => [
+						'type' => 'array',
+					],
+					'total_errors'      => [
+						'type' => 'integer',
+					],
+					'unaccepted_errors' => [
+						'type' => 'integer',
+					],
+					'validity_by_type'  => [
+						'type' => 'object',
+					],
+					'remaining_urls'    => [
+						'type' => 'array',
+					],
+				],
 			];
 		}
 

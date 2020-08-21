@@ -1,6 +1,6 @@
 <?php
 /**
- * Provides site scan results.
+ * Provides URL validation.
  *
  * @package AMP
  * @since 2.1
@@ -152,7 +152,7 @@ final class ValidationProvider {
 		if ( is_wp_error( $validity ) ) {
 			$validity = null;
 			$error    = $validity;
-		} elseif ( $validity ) {
+		} elseif ( $validity && isset( $validity['results'] ) ) {
 			$this->update_state_from_validity( $validity, $type );
 		}
 

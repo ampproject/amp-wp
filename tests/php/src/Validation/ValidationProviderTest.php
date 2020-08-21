@@ -67,12 +67,30 @@ final class ValidationProviderTest extends WP_UnitTestCase {
 	public function test_locking() {
 		$this->assertFalse( get_transient( ValidationProvider::LOCK_TRANSIENT ) );
 
-		$this->validation_provider->with_lock(
-			function() {
+		$expected_result = 'EXPECTED RESULT';
+		$result          = $this->validation_provider->with_lock(
+			function() use ( $expected_result ) {
 				$this->assertEquals( 'locked', get_transient( ValidationProvider::LOCK_TRANSIENT ) );
+
+				// Expect an error when lock is already in place.
+				$this->assertWPError( $this->validation_provider->with_lock( '__return_empty_string' ) );
+
+				return $expected_result;
 			}
 		);
 
+		$this->assertEquals( $expected_result, $result );
+		$this->assertFalse( get_transient( ValidationProvider::LOCK_TRANSIENT ) );
+
+		// Test with_lock with no return value.
+		$this->assertNull(
+			$this->validation_provider->with_lock(
+				function() {
+					$this->assertEquals( 'locked', get_transient( ValidationProvider::LOCK_TRANSIENT ) );
+					return;
+				}
+			)
+		);
 		$this->assertFalse( get_transient( ValidationProvider::LOCK_TRANSIENT ) );
 	}
 }

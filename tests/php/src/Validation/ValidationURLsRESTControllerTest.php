@@ -55,14 +55,21 @@ class ValidationURLsRESTControllerTest extends WP_UnitTestCase {
 	 * @covers ::get_urls
 	 */
 	public function test_get_urls() {
-		$request = new WP_REST_Request( 'GET', '/amp/v1/validation-urls' );
+		$this->factory()->post->create_many( 20 );
 
-		$data = $this->controller->get_urls( $request )->get_data();
+		$data = $this->controller->get_urls(
+			[
+				'offset'  => 0,
+				'limit'   => 2,
+				'include' => [],
+			]
+		)->get_data();
 
-		$this->assertEquals(
-			3,
-			count( $data )
-		);
+		$this->assertEquals( 7, count( $data ) );
+
+		foreach ( $data as $item ) {
+			$this->assertEquals( [ 'url', 'type' ], array_keys( $item ) );
+		}
 	}
 
 	/**

@@ -1,6 +1,6 @@
 <?php
 /**
- * REST endpoint providing theme scan results.
+ * WP cron process to validate URLs in the background.
  *
  * @package AMP
  * @since 2.1
@@ -18,7 +18,7 @@ use AmpProject\AmpWP\BackgroundTask\CronBasedBackgroundTask;
 final class ValidationCron extends CronBasedBackgroundTask {
 	/**
 	 * The cron action name.
-	 * 
+	 *
 	 * @var string
 	 */
 	const EVENT_NAME = 'amp_validate_urls';
@@ -32,7 +32,7 @@ final class ValidationCron extends CronBasedBackgroundTask {
 
 	/**
 	 * The number of URLs to check per type each time the cron action runs.
-	 * 
+	 *
 	 * @var int
 	 */
 	const LIMIT_PER_TYPE = 2;
@@ -77,8 +77,9 @@ final class ValidationCron extends CronBasedBackgroundTask {
 	 * Validates URLs beginning at the next offset.
 	 *
 	 * @param boolean $reset_if_no_urls_found If true and no URLs are found, the method will reset the offset to 0 and rerun.
+	 * @param boolean $sleep Whether to sleep between URLs. This should only be off in testing.
 	 */
-	public function validate_urls( $reset_if_no_urls_found = true ) {
+	public function validate_urls( $reset_if_no_urls_found = true, $sleep = true ) {
 		$validation_url_provider = new ValidationURLProvider( self::LIMIT_PER_TYPE, [], true );
 		$offset                  = get_transient( self::OFFSET_KEY ) ?: 0;
 		$urls                    = $validation_url_provider->get_urls( $offset );
@@ -97,15 +98,17 @@ final class ValidationCron extends CronBasedBackgroundTask {
 
 		// with_lock returns an error if the process is locked.
 		$potential_error = $validation_provider->with_lock(
-			static function() use ( $validation_provider, $urls ) {
+			static function() use ( $validation_provider, $sleep, $urls ) {
 				foreach ( $urls as $url ) {
 					$validation_provider->get_url_validation( $url['url'], $url['type'] );
-					sleep( 1 );
+					if ( $sleep ) {
+						sleep( 1 );
+					}
 				}
 			}
 		);
 
-		// If the process was locked, run with the same offset last time.
+		// If the process was locked, run with the same offset next time around.
 		if ( ! is_wp_error( $potential_error ) ) {
 			set_transient( self::OFFSET_KEY, $offset + self::LIMIT_PER_TYPE );
 		}

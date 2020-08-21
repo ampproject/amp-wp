@@ -69,7 +69,7 @@ final class ValidationURLsRESTController extends WP_REST_Controller implements D
 							],
 						],
 						'limit'   => [
-							'default'     => 10,
+							'default'     => 2,
 							'description' => __( 'The maximum number of URLs to validate for each type.', 'amp' ),
 							'type'        => 'integer',
 						],
@@ -94,7 +94,7 @@ final class ValidationURLsRESTController extends WP_REST_Controller implements D
 	 * @return true|WP_Error True if the request has permission; WP_Error object otherwise.
 	 */
 	public function get_items_permissions_check( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		if ( false && ! current_user_can( 'manage_options' ) ) { // @todo Remove false before merging.
+		if ( ! current_user_can( 'manage_options' ) ) {
 			return new WP_Error(
 				'amp_rest_cannot_manage_options',
 				__( 'Sorry, you are not allowed to manage options for the AMP plugin for WordPress.', 'amp' ),
@@ -112,9 +112,9 @@ final class ValidationURLsRESTController extends WP_REST_Controller implements D
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function get_urls( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		$site_scan_url_provider = new ValidationURLProvider( $request['limit'], $request['include'], true );
+		$validation_url_provider = new ValidationURLProvider( $request['limit'], $request['include'], true );
 
-		return rest_ensure_response( $site_scan_url_provider->get_urls( $request['offset'] ), 'url' );
+		return rest_ensure_response( $validation_url_provider->get_urls( $request['offset'] ) );
 	}
 
 	/**
