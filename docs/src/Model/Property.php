@@ -21,6 +21,7 @@ namespace AmpProject\AmpWP\Documentation\Model;
 final class Property implements Leaf {
 
 	use LeafConstruction;
+	use HasDocBlock;
 
 	/**
 	 * Get an associative array of known keys.
@@ -37,14 +38,5 @@ final class Property implements Leaf {
 			'visibility',
 			'doc',
 		];
-	}
-
-	/**
-	 * Process a doc-block entry.
-	 *
-	 * @param array $value Associative array of the doc-block.
-	 */
-	private function process_doc( $value ) {
-		$this->doc = new DocBlock( $value, $this );
 	}
 }

@@ -25,6 +25,7 @@ namespace AmpProject\AmpWP\Documentation\Model;
 final class Class_ implements Leaf {
 
 	use LeafConstruction;
+	use HasDocBlock;
 
 	/**
 	 * Get an associative array of known keys.
@@ -71,15 +72,6 @@ final class Class_ implements Leaf {
 		foreach ( $value as $method ) {
 			$this->methods[] = new Method( $method, $this );
 		}
-	}
-
-	/**
-	 * Process a doc-block entry.
-	 *
-	 * @param array $value Associative array of the doc-block data.
-	 */
-	private function process_doc( $value ) {
-		$this->doc = new DocBlock( $value, $this );
 	}
 
 	/**
