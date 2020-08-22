@@ -7,8 +7,6 @@
 
 namespace AmpProject\AmpWP\Documentation\Model;
 
-use Generator;
-
 /**
  * Documentation reference object representing the root of the parsed object
  * tree.

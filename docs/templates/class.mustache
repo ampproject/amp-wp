@@ -1,12 +1,9 @@
 ## Class `{{ get_fqcn }}`
-{{# doc.description }}
-{{ doc.description }}
 
-{{/ doc.description }}
-{{# doc.long_description }}
-{{ doc.long_description }}
+{{# has_description }}
+{{ get_description }}
 
-{{/ doc.long_description }}
+{{/ has_description }}
 ### Methods
 {{# methods }}
 {{> method }}

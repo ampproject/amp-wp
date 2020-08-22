@@ -150,4 +150,13 @@ final class Method implements Leaf {
 
 		return $key;
 	}
+
+	/**
+	 * Get the display name of the method.
+	 *
+	 * @return string Display name of the method.
+	 */
+	public function get_display_name() {
+		return "{$this->parent->name}::{$this->name}()";
+	}
 }

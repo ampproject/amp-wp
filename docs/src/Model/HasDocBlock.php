@@ -26,21 +26,31 @@ trait HasDocBlock {
 	}
 
 	/**
+	 * Check if a description is available.
+	 *
+	 * @return bool Whether a description is available.
+	 */
+	public function has_description() {
+		if ( empty( trim( $this->doc->description ) ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
 	 * Get the assembled description from the doc-block.
 	 *
 	 * @return string Assembled description.
 	 */
-	protected function get_description() {
-		if ( empty( $this->doc->description ) ) {
-			return '';
-		}
-
-		$description = $this->doc->description;
+	public function get_description() {
+		$description = trim( $this->doc->description );
 
 		if ( ! empty( $this->doc->long_description ) ) {
-			$description .= "\n{$this->doc->long_description}";
+			$description .= "\n\n";
+			$description .= trim( $this->doc->long_description );
 		}
 
-		return $description;
+		return trim( $description );
 	}
 }
