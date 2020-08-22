@@ -2,10 +2,10 @@
 
 Official AMP plugin, supported by the AMP team. Formerly Accelerated Mobile Pages, AMP enables great experiences across both mobile and desktop.
 
-# Reference Documentation
+## Reference Documentation
 
-## [Classes](class/README.md)
-## [Methods](method/README.md)
-## [Functions](function/README.md)
-## [Hooks](hook/README.md)
+### [▹ Classes](class/README.md)
+### [▹ Methods](method/README.md)
+### [▹ Functions](function/README.md)
+### [▹ Hooks](hook/README.md)
 
