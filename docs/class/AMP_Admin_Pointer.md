@@ -4,7 +4,7 @@ Class representing a single admin pointer.
 
 ### Methods
 <details>
-<summary>`__construct`</summary>
+<summary><code>__construct</code></summary>
 
 ```php
 public __construct( $slug, array $args )
@@ -15,7 +15,7 @@ Constructor.
 
 </details>
 <details>
-<summary>`get_slug`</summary>
+<summary><code>get_slug</code></summary>
 
 ```php
 public get_slug()
@@ -26,7 +26,7 @@ Gets the pointer slug.
 
 </details>
 <details>
-<summary>`is_active`</summary>
+<summary><code>is_active</code></summary>
 
 ```php
 public is_active( $hook_suffix )
@@ -39,7 +39,7 @@ This method executes the active callback and looks at whether the pointer has be
 
 </details>
 <details>
-<summary>`enqueue`</summary>
+<summary><code>enqueue</code></summary>
 
 ```php
 public enqueue()
@@ -50,7 +50,7 @@ Enqueues the script for the pointer.
 
 </details>
 <details>
-<summary>`print_js`</summary>
+<summary><code>print_js</code></summary>
 
 ```php
 private print_js()

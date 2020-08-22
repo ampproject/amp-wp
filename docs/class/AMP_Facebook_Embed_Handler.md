@@ -4,7 +4,7 @@ Class AMP_Facebook_Embed_Handler
 
 ### Methods
 <details>
-<summary>`register_embed`</summary>
+<summary><code>register_embed</code></summary>
 
 ```php
 public register_embed()
@@ -15,7 +15,7 @@ Registers embed.
 
 </details>
 <details>
-<summary>`unregister_embed`</summary>
+<summary><code>unregister_embed</code></summary>
 
 ```php
 public unregister_embed()
@@ -26,7 +26,7 @@ Unregisters embed.
 
 </details>
 <details>
-<summary>`sanitize_raw_embeds`</summary>
+<summary><code>sanitize_raw_embeds</code></summary>
 
 ```php
 public sanitize_raw_embeds( Document $dom )
@@ -37,7 +37,7 @@ Sanitized &lt;div class=&quot;fb-video&quot; data-href=&gt; tags to &lt;amp-face
 
 </details>
 <details>
-<summary>`get_embed_type`</summary>
+<summary><code>get_embed_type</code></summary>
 
 ```php
 private get_embed_type( \DOMElement $node )
@@ -48,7 +48,7 @@ Get embed type.
 
 </details>
 <details>
-<summary>`create_amp_facebook_and_replace_node`</summary>
+<summary><code>create_amp_facebook_and_replace_node</code></summary>
 
 ```php
 private create_amp_facebook_and_replace_node( Document $dom, \DOMElement $node, $embed_type )

@@ -4,7 +4,7 @@ Class AMP_Gallery_Embed_Handler
 
 ### Methods
 <details>
-<summary>`register_embed`</summary>
+<summary><code>register_embed</code></summary>
 
 ```php
 public register_embed()
@@ -15,7 +15,7 @@ Register embed.
 
 </details>
 <details>
-<summary>`generate_gallery_markup`</summary>
+<summary><code>generate_gallery_markup</code></summary>
 
 ```php
 public generate_gallery_markup( $html, $attrs )
@@ -26,7 +26,7 @@ Override the output of gallery_shortcode().
 
 </details>
 <details>
-<summary>`filter_post_gallery_markup`</summary>
+<summary><code>filter_post_gallery_markup</code></summary>
 
 ```php
 protected filter_post_gallery_markup( $html, $attrs )
@@ -37,7 +37,7 @@ Filter the output of gallery_shortcode().
 
 </details>
 <details>
-<summary>`unregister_embed`</summary>
+<summary><code>unregister_embed</code></summary>
 
 ```php
 public unregister_embed()
@@ -48,7 +48,7 @@ Unregister embed.
 
 </details>
 <details>
-<summary>`sanitize_raw_embeds`</summary>
+<summary><code>sanitize_raw_embeds</code></summary>
 
 ```php
 public sanitize_raw_embeds( Document $dom )
@@ -59,7 +59,7 @@ Sanitizes gallery raw embeds to become an amp-carousel and/or amp-image-lightbox
 
 </details>
 <details>
-<summary>`get_caption_element`</summary>
+<summary><code>get_caption_element</code></summary>
 
 ```php
 protected get_caption_element( \DOMElement $img_element )
@@ -70,7 +70,7 @@ Get the caption element for the specified image element.
 
 </details>
 <details>
-<summary>`get_parent_container_for_image`</summary>
+<summary><code>get_parent_container_for_image</code></summary>
 
 ```php
 protected get_parent_container_for_image( \DOMElement $image_element )
@@ -81,7 +81,7 @@ Get the parent container for the specified image element.
 
 </details>
 <details>
-<summary>`print_styles`</summary>
+<summary><code>print_styles</code></summary>
 
 ```php
 public print_styles()

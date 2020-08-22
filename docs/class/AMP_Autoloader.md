@@ -6,7 +6,7 @@ Class AMP_Autoloader
 
 ### Methods
 <details>
-<summary>`register`</summary>
+<summary><code>register</code></summary>
 
 ```php
 static public register()
@@ -17,7 +17,7 @@ Registers this autoloader to PHP.
 
 </details>
 <details>
-<summary>`register_autoload_class`</summary>
+<summary><code>register_autoload_class</code></summary>
 
 ```php
 static public register_autoload_class( $class_name, $filepath )

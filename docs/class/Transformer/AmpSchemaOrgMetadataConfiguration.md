@@ -4,7 +4,7 @@ Configuration for the AmpSchemaOrgMetadata transformer.
 
 ### Methods
 <details>
-<summary>`getAllowedKeys`</summary>
+<summary><code>getAllowedKeys</code></summary>
 
 ```php
 protected getAllowedKeys()
@@ -17,7 +17,7 @@ The array index is the key and the array value is the key&#039;s default value.
 
 </details>
 <details>
-<summary>`validate`</summary>
+<summary><code>validate</code></summary>
 
 ```php
 protected validate( $key, $value )

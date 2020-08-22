@@ -6,7 +6,7 @@ Converts &lt;img&gt; tags to &lt;amp-img&gt; or &lt;amp-anim&gt;
 
 ### Methods
 <details>
-<summary>`get_selector_conversion_mapping`</summary>
+<summary><code>get_selector_conversion_mapping</code></summary>
 
 ```php
 public get_selector_conversion_mapping()
@@ -17,7 +17,7 @@ Get mapping of HTML selectors to the AMP component selectors which they may be c
 
 </details>
 <details>
-<summary>`sanitize`</summary>
+<summary><code>sanitize</code></summary>
 
 ```php
 public sanitize()
@@ -28,7 +28,7 @@ Sanitize the &lt;img&gt; elements from the HTML contained in this instance&#039;
 
 </details>
 <details>
-<summary>`filter_attributes`</summary>
+<summary><code>filter_attributes</code></summary>
 
 ```php
 private filter_attributes( $attributes )
@@ -39,7 +39,7 @@ private filter_attributes( $attributes )
 
 </details>
 <details>
-<summary>`determine_dimensions`</summary>
+<summary><code>determine_dimensions</code></summary>
 
 ```php
 private determine_dimensions( $need_dimensions )
@@ -52,7 +52,7 @@ Attempt to determine actual dimensions, otherwise set reasonable defaults.
 
 </details>
 <details>
-<summary>`adjust_and_replace_nodes_in_array_map`</summary>
+<summary><code>adjust_and_replace_nodes_in_array_map</code></summary>
 
 ```php
 private adjust_and_replace_nodes_in_array_map( $node_lists )
@@ -63,7 +63,7 @@ Now that all images have width and height attributes, make final tweaks and repl
 
 </details>
 <details>
-<summary>`adjust_and_replace_node`</summary>
+<summary><code>adjust_and_replace_node</code></summary>
 
 ```php
 private adjust_and_replace_node( $node )
@@ -74,7 +74,7 @@ Make final modifications to DOMNode
 
 </details>
 <details>
-<summary>`maybe_add_lightbox_attributes`</summary>
+<summary><code>maybe_add_lightbox_attributes</code></summary>
 
 ```php
 private maybe_add_lightbox_attributes( $attributes, $node )
@@ -85,7 +85,7 @@ Set lightbox attributes.
 
 </details>
 <details>
-<summary>`does_node_have_block_class`</summary>
+<summary><code>does_node_have_block_class</code></summary>
 
 ```php
 private does_node_have_block_class( $node )
@@ -96,7 +96,7 @@ Gets whether a node has the class &#039;wp-block-image&#039;, meaning it is a wr
 
 </details>
 <details>
-<summary>`is_gif_url`</summary>
+<summary><code>is_gif_url</code></summary>
 
 ```php
 private is_gif_url( $url )

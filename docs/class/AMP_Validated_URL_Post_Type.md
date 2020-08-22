@@ -4,7 +4,7 @@ Class AMP_Validated_URL_Post_Type
 
 ### Methods
 <details>
-<summary>`register`</summary>
+<summary><code>register</code></summary>
 
 ```php
 static public register()
@@ -15,7 +15,7 @@ Registers the post type to store URLs with validation errors.
 
 </details>
 <details>
-<summary>`handle_plugin_update`</summary>
+<summary><code>handle_plugin_update</code></summary>
 
 ```php
 static public handle_plugin_update( $old_version )
@@ -26,7 +26,7 @@ Handle update to plugin.
 
 </details>
 <details>
-<summary>`add_admin_hooks`</summary>
+<summary><code>add_admin_hooks</code></summary>
 
 ```php
 static public add_admin_hooks()
@@ -37,7 +37,7 @@ Add admin hooks.
 
 </details>
 <details>
-<summary>`enqueue_post_list_screen_scripts`</summary>
+<summary><code>enqueue_post_list_screen_scripts</code></summary>
 
 ```php
 static public enqueue_post_list_screen_scripts()
@@ -48,7 +48,7 @@ Enqueue style.
 
 </details>
 <details>
-<summary>`render_link_to_error_index_screen`</summary>
+<summary><code>render_link_to_error_index_screen</code></summary>
 
 ```php
 static public render_link_to_error_index_screen()
@@ -59,7 +59,7 @@ On the &#039;AMP Validated URLs&#039; screen, renders a link to the &#039;Error 
 
 </details>
 <details>
-<summary>`add_admin_menu_new_invalid_url_count`</summary>
+<summary><code>add_admin_menu_new_invalid_url_count</code></summary>
 
 ```php
 static public add_admin_menu_new_invalid_url_count()
@@ -70,7 +70,7 @@ Add count of how many validation error posts there are to the admin menu.
 
 </details>
 <details>
-<summary>`get_validation_error_urls_count`</summary>
+<summary><code>get_validation_error_urls_count</code></summary>
 
 ```php
 static protected get_validation_error_urls_count()
@@ -81,7 +81,7 @@ Get the count of URLs that have new validation errors.
 
 </details>
 <details>
-<summary>`get_invalid_url_validation_errors`</summary>
+<summary><code>get_invalid_url_validation_errors</code></summary>
 
 ```php
 static public get_invalid_url_validation_errors( $url, $args = array() )
@@ -92,7 +92,7 @@ Gets validation errors for a given validated URL post.
 
 </details>
 <details>
-<summary>`display_invalid_url_validation_error_counts_summary`</summary>
+<summary><code>display_invalid_url_validation_error_counts_summary</code></summary>
 
 ```php
 static public display_invalid_url_validation_error_counts_summary( $post )
@@ -103,7 +103,7 @@ Display summary of the validation error counts for a given post.
 
 </details>
 <details>
-<summary>`get_invalid_url_post`</summary>
+<summary><code>get_invalid_url_post</code></summary>
 
 ```php
 static public get_invalid_url_post( $url, $options = array() )
@@ -114,7 +114,7 @@ Gets the existing custom post that stores errors for the $url, if it exists.
 
 </details>
 <details>
-<summary>`get_url_from_post`</summary>
+<summary><code>get_url_from_post</code></summary>
 
 ```php
 static public get_url_from_post( $post )
@@ -127,7 +127,7 @@ The URL will be returned with the amp query var added to it if the site is not c
 
 </details>
 <details>
-<summary>`get_markup_status_preview_url`</summary>
+<summary><code>get_markup_status_preview_url</code></summary>
 
 ```php
 static protected get_markup_status_preview_url( $url )
@@ -140,7 +140,7 @@ Adds a _wpnonce query param for the markup status preview action.
 
 </details>
 <details>
-<summary>`normalize_url_for_storage`</summary>
+<summary><code>normalize_url_for_storage</code></summary>
 
 ```php
 static protected normalize_url_for_storage( $url )
@@ -153,7 +153,7 @@ The AMP query param is removed to facilitate switching between standard and tran
 
 </details>
 <details>
-<summary>`store_validation_errors`</summary>
+<summary><code>store_validation_errors</code></summary>
 
 ```php
 static public store_validation_errors( $validation_errors, $url, $args = array() )
@@ -166,7 +166,7 @@ If there are no validation errors provided, then any existing amp_validated_url 
 
 </details>
 <details>
-<summary>`delete_stylesheets_postmeta_batch`</summary>
+<summary><code>delete_stylesheets_postmeta_batch</code></summary>
 
 ```php
 static public delete_stylesheets_postmeta_batch( $count, $before )
@@ -179,7 +179,7 @@ Given that parsed CSS can be quite large (250KB+) and is not de-duplicated acros
 
 </details>
 <details>
-<summary>`get_recent_validation_errors_by_source`</summary>
+<summary><code>get_recent_validation_errors_by_source</code></summary>
 
 ```php
 static public get_recent_validation_errors_by_source( $count = 100 )
@@ -190,7 +190,7 @@ Get recent validation errors by source.
 
 </details>
 <details>
-<summary>`get_validated_environment`</summary>
+<summary><code>get_validated_environment</code></summary>
 
 ```php
 static public get_validated_environment()
@@ -201,7 +201,7 @@ Get the environment properties which will likely effect whether validation resul
 
 </details>
 <details>
-<summary>`get_post_staleness`</summary>
+<summary><code>get_post_staleness</code></summary>
 
 ```php
 static public get_post_staleness( $post )
@@ -212,7 +212,7 @@ Get the differences between the current themes, plugins, and relevant options wh
 
 </details>
 <details>
-<summary>`add_post_columns`</summary>
+<summary><code>add_post_columns</code></summary>
 
 ```php
 static public add_post_columns( $columns )
@@ -223,7 +223,7 @@ Adds post columns to the UI for the validation errors.
 
 </details>
 <details>
-<summary>`add_single_post_columns`</summary>
+<summary><code>add_single_post_columns</code></summary>
 
 ```php
 static public add_single_post_columns()
@@ -234,7 +234,7 @@ Adds post columns to the /wp-admin/post.php page for amp_validated_url.
 
 </details>
 <details>
-<summary>`output_custom_column`</summary>
+<summary><code>output_custom_column</code></summary>
 
 ```php
 static public output_custom_column( $column_name, $post_id )
@@ -245,7 +245,7 @@ Outputs custom columns in the /wp-admin UI for the AMP validation errors.
 
 </details>
 <details>
-<summary>`render_sources_column`</summary>
+<summary><code>render_sources_column</code></summary>
 
 ```php
 static public render_sources_column( $sources, $post_id )
@@ -256,7 +256,7 @@ Renders the sources column on the the single error URL page and the &#039;AMP Va
 
 </details>
 <details>
-<summary>`filter_bulk_actions`</summary>
+<summary><code>filter_bulk_actions</code></summary>
 
 ```php
 static public filter_bulk_actions( $actions )
@@ -269,7 +269,7 @@ Ensure only delete action is present, not trash.
 
 </details>
 <details>
-<summary>`handle_bulk_action`</summary>
+<summary><code>handle_bulk_action</code></summary>
 
 ```php
 static public handle_bulk_action( $redirect, $action, $items )
@@ -280,7 +280,7 @@ Handles the &#039;Recheck&#039; bulk action on the edit.php page.
 
 </details>
 <details>
-<summary>`print_admin_notice`</summary>
+<summary><code>print_admin_notice</code></summary>
 
 ```php
 static public print_admin_notice()
@@ -291,7 +291,7 @@ Outputs an admin notice after rechecking URL(s) on the custom post page.
 
 </details>
 <details>
-<summary>`render_php_fatal_error_admin_notice`</summary>
+<summary><code>render_php_fatal_error_admin_notice</code></summary>
 
 ```php
 static private render_php_fatal_error_admin_notice( \WP_Post $post )
@@ -302,7 +302,7 @@ Render PHP fatal error admin notice.
 
 </details>
 <details>
-<summary>`handle_validate_request`</summary>
+<summary><code>handle_validate_request</code></summary>
 
 ```php
 static public handle_validate_request()
@@ -313,7 +313,7 @@ Handles clicking &#039;recheck&#039; on the inline post actions and in the admin
 
 </details>
 <details>
-<summary>`recheck_post`</summary>
+<summary><code>recheck_post</code></summary>
 
 ```php
 static public recheck_post( $post )
@@ -324,7 +324,7 @@ Re-check validated URL post for whether it has blocking validation errors.
 
 </details>
 <details>
-<summary>`handle_validation_error_status_update`</summary>
+<summary><code>handle_validation_error_status_update</code></summary>
 
 ```php
 static public handle_validation_error_status_update()
@@ -335,7 +335,7 @@ Handle validation error status update.
 
 </details>
 <details>
-<summary>`enqueue_edit_post_screen_scripts`</summary>
+<summary><code>enqueue_edit_post_screen_scripts</code></summary>
 
 ```php
 static public enqueue_edit_post_screen_scripts()
@@ -346,7 +346,7 @@ Enqueue scripts for the edit post screen.
 
 </details>
 <details>
-<summary>`add_meta_boxes`</summary>
+<summary><code>add_meta_boxes</code></summary>
 
 ```php
 static public add_meta_boxes()
@@ -357,7 +357,7 @@ Adds the meta boxes to the CPT post.php page.
 
 </details>
 <details>
-<summary>`print_status_meta_box`</summary>
+<summary><code>print_status_meta_box</code></summary>
 
 ```php
 static public print_status_meta_box( $post )
@@ -370,7 +370,7 @@ This is partially copied from meta-boxes.php. Adds &#039;Published on,&#039; and
 
 </details>
 <details>
-<summary>`print_stylesheets_meta_box`</summary>
+<summary><code>print_stylesheets_meta_box</code></summary>
 
 ```php
 static public print_stylesheets_meta_box( $post )
@@ -381,7 +381,7 @@ Renders stylesheet info for the validated URL.
 
 </details>
 <details>
-<summary>`render_single_url_list_table`</summary>
+<summary><code>render_single_url_list_table</code></summary>
 
 ```php
 static public render_single_url_list_table( $post )
@@ -394,7 +394,7 @@ Mainly copied from edit-tags.php. This is output on the post.php page for amp_va
 
 </details>
 <details>
-<summary>`get_terms_per_page`</summary>
+<summary><code>get_terms_per_page</code></summary>
 
 ```php
 static public get_terms_per_page( $terms_per_page )
@@ -405,7 +405,7 @@ Gets the number of amp_validation_error terms that should appear on the single a
 
 </details>
 <details>
-<summary>`add_taxonomy`</summary>
+<summary><code>add_taxonomy</code></summary>
 
 ```php
 static public add_taxonomy()
@@ -418,7 +418,7 @@ It would be ideal to do this in render_single_url_list_table(), but set_current_
 
 </details>
 <details>
-<summary>`print_url_as_title`</summary>
+<summary><code>print_url_as_title</code></summary>
 
 ```php
 static public print_url_as_title( $post )
@@ -429,7 +429,7 @@ Show URL at the top of the edit form in place of the title (since title support 
 
 </details>
 <details>
-<summary>`filter_the_title_in_post_list_table`</summary>
+<summary><code>filter_the_title_in_post_list_table</code></summary>
 
 ```php
 static public filter_the_title_in_post_list_table( $title, $id = null )
@@ -440,7 +440,7 @@ Strip host name from AMP validated URL being printed.
 
 </details>
 <details>
-<summary>`render_post_filters`</summary>
+<summary><code>render_post_filters</code></summary>
 
 ```php
 static public render_post_filters( $post_type, $which )
@@ -451,7 +451,7 @@ Renders the filters on the validated URL post type edit.php page.
 
 </details>
 <details>
-<summary>`get_recheck_url`</summary>
+<summary><code>get_recheck_url</code></summary>
 
 ```php
 static public get_recheck_url( $url_or_post )
@@ -464,7 +464,7 @@ Appends a query var to $redirect_url. On clicking the link, it checks if errors 
 
 </details>
 <details>
-<summary>`filter_dashboard_glance_items`</summary>
+<summary><code>filter_dashboard_glance_items</code></summary>
 
 ```php
 static public filter_dashboard_glance_items( $items )
@@ -475,7 +475,7 @@ Filter At a Glance items add AMP Validation Errors.
 
 </details>
 <details>
-<summary>`print_dashboard_glance_styles`</summary>
+<summary><code>print_dashboard_glance_styles</code></summary>
 
 ```php
 static public print_dashboard_glance_styles()
@@ -486,7 +486,7 @@ Print styles for the At a Glance widget.
 
 </details>
 <details>
-<summary>`filter_admin_title`</summary>
+<summary><code>filter_admin_title</code></summary>
 
 ```php
 static public filter_admin_title( $admin_title )
@@ -497,7 +497,7 @@ Filters the document title on the single URL page at /wp-admin/post.php.
 
 </details>
 <details>
-<summary>`is_validated_url_admin_screen`</summary>
+<summary><code>is_validated_url_admin_screen</code></summary>
 
 ```php
 static private is_validated_url_admin_screen()
@@ -508,7 +508,7 @@ Determines whether the current screen is for a validated URL.
 
 </details>
 <details>
-<summary>`get_validated_url_title`</summary>
+<summary><code>get_validated_url_title</code></summary>
 
 ```php
 static public get_validated_url_title( $post = null )
@@ -519,7 +519,7 @@ Gets the title for validated URL, corresponding with the title for the queried o
 
 </details>
 <details>
-<summary>`filter_post_row_actions`</summary>
+<summary><code>filter_post_row_actions</code></summary>
 
 ```php
 static public filter_post_row_actions( $actions, $post )
@@ -532,7 +532,7 @@ Manages links for details, recheck, view, forget, and forget permanently.
 
 </details>
 <details>
-<summary>`filter_table_views`</summary>
+<summary><code>filter_table_views</code></summary>
 
 ```php
 static public filter_table_views( $views )
@@ -543,7 +543,7 @@ Filters table views for the post type.
 
 </details>
 <details>
-<summary>`filter_bulk_post_updated_messages`</summary>
+<summary><code>filter_bulk_post_updated_messages</code></summary>
 
 ```php
 static public filter_bulk_post_updated_messages( $messages, $bulk_counts )
@@ -556,7 +556,7 @@ Note that trashing is replaced with deletion whenever possible, so the trashed a
 
 </details>
 <details>
-<summary>`is_amp_enabled_on_post`</summary>
+<summary><code>is_amp_enabled_on_post</code></summary>
 
 ```php
 static public is_amp_enabled_on_post( $post )
@@ -567,7 +567,7 @@ Is AMP Enabled on Post
 
 </details>
 <details>
-<summary>`count_invalid_url_validation_errors`</summary>
+<summary><code>count_invalid_url_validation_errors</code></summary>
 
 ```php
 static protected count_invalid_url_validation_errors( $validation_errors )

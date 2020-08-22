@@ -4,7 +4,7 @@ Enqueue Google Fonts stylesheet.
 
 ### Methods
 <details>
-<summary>`is_needed`</summary>
+<summary><code>is_needed</code></summary>
 
 ```php
 static public is_needed()
@@ -15,7 +15,7 @@ Check whether the conditional object is currently needed.
 
 </details>
 <details>
-<summary>`get_registration_action`</summary>
+<summary><code>get_registration_action</code></summary>
 
 ```php
 static public get_registration_action()
@@ -26,7 +26,7 @@ Get the action to use for registering the service.
 
 </details>
 <details>
-<summary>`get_handle`</summary>
+<summary><code>get_handle</code></summary>
 
 ```php
 public get_handle()
@@ -37,7 +37,7 @@ Provides the asset handle.
 
 </details>
 <details>
-<summary>`register`</summary>
+<summary><code>register</code></summary>
 
 ```php
 public register()
@@ -48,7 +48,7 @@ Runs on instantiation.
 
 </details>
 <details>
-<summary>`register_style`</summary>
+<summary><code>register_style</code></summary>
 
 ```php
 public register_style( WP_Styles $wp_styles )

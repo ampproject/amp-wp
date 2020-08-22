@@ -4,7 +4,7 @@ Remote request transport using the WordPress WP_Http abstraction layer.
 
 ### Methods
 <details>
-<summary>`__construct`</summary>
+<summary><code>__construct</code></summary>
 
 ```php
 public __construct( $ssl_verify = true, $timeout = self::DEFAULT_TIMEOUT, $retries = self::DEFAULT_RETRIES )
@@ -15,7 +15,7 @@ Instantiate a WpHttpRemoteGetRequest object.
 
 </details>
 <details>
-<summary>`get`</summary>
+<summary><code>get</code></summary>
 
 ```php
 public get( $url )

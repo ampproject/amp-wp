@@ -4,7 +4,7 @@ Class AMP_Validation_Manager
 
 ### Methods
 <details>
-<summary>`get_dev_tools_user_access`</summary>
+<summary><code>get_dev_tools_user_access</code></summary>
 
 ```php
 static private get_dev_tools_user_access()
@@ -15,7 +15,7 @@ Get dev tools user access service.
 
 </details>
 <details>
-<summary>`init`</summary>
+<summary><code>init</code></summary>
 
 ```php
 static public init()
@@ -26,7 +26,7 @@ Initialize.
 
 </details>
 <details>
-<summary>`post_supports_validation`</summary>
+<summary><code>post_supports_validation</code></summary>
 
 ```php
 static public post_supports_validation( $post )
@@ -37,7 +37,7 @@ Determine if a post supports AMP validation.
 
 </details>
 <details>
-<summary>`is_theme_support_forced`</summary>
+<summary><code>is_theme_support_forced</code></summary>
 
 ```php
 static public is_theme_support_forced()
@@ -48,7 +48,7 @@ Determine whether AMP theme support is forced via the amp_validate query param.
 
 </details>
 <details>
-<summary>`is_sanitization_auto_accepted`</summary>
+<summary><code>is_sanitization_auto_accepted</code></summary>
 
 ```php
 static public is_sanitization_auto_accepted( $error = null )
@@ -63,7 +63,7 @@ To reject all new validation errors by default, a filter can be used like so:
 
 </details>
 <details>
-<summary>`add_admin_bar_menu_items`</summary>
+<summary><code>add_admin_bar_menu_items</code></summary>
 
 ```php
 static public add_admin_bar_menu_items( $wp_admin_bar )
@@ -78,7 +78,7 @@ When on a non-AMP response (transitional mode), then the admin bar item should i
 
 </details>
 <details>
-<summary>`override_validation_error_statuses`</summary>
+<summary><code>override_validation_error_statuses</code></summary>
 
 ```php
 static public override_validation_error_statuses()
@@ -91,7 +91,7 @@ When a query var is present along with the required nonce, override the status o
 
 </details>
 <details>
-<summary>`init_validate_request`</summary>
+<summary><code>init_validate_request</code></summary>
 
 ```php
 static public init_validate_request()
@@ -104,7 +104,7 @@ This function is called as early as possible, at the plugins_loaded action, to s
 
 </details>
 <details>
-<summary>`add_validation_error_sourcing`</summary>
+<summary><code>add_validation_error_sourcing</code></summary>
 
 ```php
 static public add_validation_error_sourcing()
@@ -115,7 +115,7 @@ Add hooks for doing determining sources for validation errors during preprocessi
 
 </details>
 <details>
-<summary>`set_theme_variables`</summary>
+<summary><code>set_theme_variables</code></summary>
 
 ```php
 static public set_theme_variables()
@@ -126,7 +126,7 @@ Set theme variables.
 
 </details>
 <details>
-<summary>`handle_save_post_prompting_validation`</summary>
+<summary><code>handle_save_post_prompting_validation</code></summary>
 
 ```php
 static public handle_save_post_prompting_validation( $post_id )
@@ -139,7 +139,7 @@ This is intended to only apply to post edits made in the classic editor.
 
 </details>
 <details>
-<summary>`validate_queued_posts_on_frontend`</summary>
+<summary><code>validate_queued_posts_on_frontend</code></summary>
 
 ```php
 static public validate_queued_posts_on_frontend()
@@ -150,7 +150,7 @@ Validate the posts pending frontend validation.
 
 </details>
 <details>
-<summary>`add_rest_api_fields`</summary>
+<summary><code>add_rest_api_fields</code></summary>
 
 ```php
 static public add_rest_api_fields()
@@ -161,7 +161,7 @@ Adds fields to the REST API responses, in order to display validation errors.
 
 </details>
 <details>
-<summary>`get_amp_validity_rest_field`</summary>
+<summary><code>get_amp_validity_rest_field</code></summary>
 
 ```php
 static public get_amp_validity_rest_field( $post_data, $field_name, $request )
@@ -174,7 +174,7 @@ First, get existing errors for the post. If there are none, validate the post an
 
 </details>
 <details>
-<summary>`map_meta_cap`</summary>
+<summary><code>map_meta_cap</code></summary>
 
 ```php
 static public map_meta_cap( $caps, $cap )
@@ -187,7 +187,7 @@ Using a meta capability allows a site to customize which users get access to per
 
 </details>
 <details>
-<summary>`has_cap`</summary>
+<summary><code>has_cap</code></summary>
 
 ```php
 static public has_cap( $user = null )
@@ -200,7 +200,7 @@ Checks for permissions before validating.
 
 </details>
 <details>
-<summary>`add_validation_error`</summary>
+<summary><code>add_validation_error</code></summary>
 
 ```php
 static public add_validation_error( array $error, array $data = array() )
@@ -211,7 +211,7 @@ Add validation error.
 
 </details>
 <details>
-<summary>`reset_validation_results`</summary>
+<summary><code>reset_validation_results</code></summary>
 
 ```php
 static public reset_validation_results()
@@ -224,7 +224,7 @@ After testing if the markup is valid, these static values will remain. So reset 
 
 </details>
 <details>
-<summary>`print_edit_form_validation_status`</summary>
+<summary><code>print_edit_form_validation_status</code></summary>
 
 ```php
 static public print_edit_form_validation_status( $post )
@@ -238,7 +238,7 @@ If it&#039;s not valid AMP, it displays an error message above the &#039;Classic
 
 </details>
 <details>
-<summary>`get_source_comment`</summary>
+<summary><code>get_source_comment</code></summary>
 
 ```php
 static public get_source_comment( array $source, $is_start = true )
@@ -249,7 +249,7 @@ Get source start comment.
 
 </details>
 <details>
-<summary>`parse_source_comment`</summary>
+<summary><code>parse_source_comment</code></summary>
 
 ```php
 static public parse_source_comment( \DOMComment $comment )
@@ -260,7 +260,7 @@ Parse source comment.
 
 </details>
 <details>
-<summary>`has_dependency`</summary>
+<summary><code>has_dependency</code></summary>
 
 ```php
 static protected has_dependency( \WP_Dependencies $dependencies, $current_handle, $dependency_handle )
@@ -271,7 +271,7 @@ Recursively determine if a given dependency depends on another.
 
 </details>
 <details>
-<summary>`is_matching_script`</summary>
+<summary><code>is_matching_script</code></summary>
 
 ```php
 static protected is_matching_script( \DOMElement $element, $script_handle )
@@ -282,7 +282,7 @@ Determine if a script element matches a given script handle.
 
 </details>
 <details>
-<summary>`locate_sources`</summary>
+<summary><code>locate_sources</code></summary>
 
 ```php
 static public locate_sources( \DOMNode $node )
@@ -293,7 +293,7 @@ Walk back tree to find the open sources.
 
 </details>
 <details>
-<summary>`add_block_source_comments`</summary>
+<summary><code>add_block_source_comments</code></summary>
 
 ```php
 static public add_block_source_comments( $content )
@@ -304,7 +304,7 @@ Add block source comments.
 
 </details>
 <details>
-<summary>`handle_block_source_comment_replacement`</summary>
+<summary><code>handle_block_source_comment_replacement</code></summary>
 
 ```php
 static protected handle_block_source_comment_replacement( $matches )
@@ -315,7 +315,7 @@ Handle block source comment replacement.
 
 </details>
 <details>
-<summary>`wrap_widget_callbacks`</summary>
+<summary><code>wrap_widget_callbacks</code></summary>
 
 ```php
 static public wrap_widget_callbacks()
@@ -326,7 +326,7 @@ Wrap callbacks for registered widgets to keep track of queued assets and the sou
 
 </details>
 <details>
-<summary>`wrap_hook_callbacks`</summary>
+<summary><code>wrap_hook_callbacks</code></summary>
 
 ```php
 static public wrap_hook_callbacks( $hook )
@@ -339,7 +339,7 @@ Wrapped callback functions are reset to their original functions after invocatio
 
 </details>
 <details>
-<summary>`has_parameters_passed_by_reference`</summary>
+<summary><code>has_parameters_passed_by_reference</code></summary>
 
 ```php
 static protected has_parameters_passed_by_reference( $reflection )
@@ -350,7 +350,7 @@ Determine whether the given reflection method/function has params passed by refe
 
 </details>
 <details>
-<summary>`decorate_shortcode_source`</summary>
+<summary><code>decorate_shortcode_source</code></summary>
 
 ```php
 static public decorate_shortcode_source( $output, $tag )
@@ -361,7 +361,7 @@ Filters the output created by a shortcode callback.
 
 </details>
 <details>
-<summary>`decorate_embed_source`</summary>
+<summary><code>decorate_embed_source</code></summary>
 
 ```php
 static public decorate_embed_source( $output, $url, $attr )
@@ -372,7 +372,7 @@ Filters the output created by embeds.
 
 </details>
 <details>
-<summary>`decorate_filter_source`</summary>
+<summary><code>decorate_filter_source</code></summary>
 
 ```php
 static public decorate_filter_source( $value )
@@ -383,7 +383,7 @@ Wraps output of a filter to add source stack comments.
 
 </details>
 <details>
-<summary>`get_source`</summary>
+<summary><code>get_source</code></summary>
 
 ```php
 static public get_source( $callback )
@@ -394,7 +394,7 @@ Gets the plugin or theme of the callback, if one exists.
 
 </details>
 <details>
-<summary>`can_output_buffer`</summary>
+<summary><code>can_output_buffer</code></summary>
 
 ```php
 static public can_output_buffer()
@@ -407,7 +407,7 @@ This is to guard against a fatal error: &quot;ob_start(): Cannot use output buff
 
 </details>
 <details>
-<summary>`wrapped_callback`</summary>
+<summary><code>wrapped_callback</code></summary>
 
 ```php
 static public wrapped_callback( $callback )
@@ -420,7 +420,7 @@ If the sanitizer removes markup, this indicates which plugin it was from. The ca
 
 </details>
 <details>
-<summary>`wrap_buffer_with_source_comments`</summary>
+<summary><code>wrap_buffer_with_source_comments</code></summary>
 
 ```php
 static public wrap_buffer_with_source_comments( $output )
@@ -433,7 +433,7 @@ A key reason for why this is a method and not a closure is so that the can_outpu
 
 </details>
 <details>
-<summary>`get_amp_validate_nonce`</summary>
+<summary><code>get_amp_validate_nonce</code></summary>
 
 ```php
 static public get_amp_validate_nonce()
@@ -446,7 +446,7 @@ The returned nonce is irrespective of the authenticated user.
 
 </details>
 <details>
-<summary>`should_validate_response`</summary>
+<summary><code>should_validate_response</code></summary>
 
 ```php
 static public should_validate_response()
@@ -459,7 +459,7 @@ All AMP responses get validated, but when the amp_validate query parameter is pr
 
 </details>
 <details>
-<summary>`get_validate_response_data`</summary>
+<summary><code>get_validate_response_data</code></summary>
 
 ```php
 static public get_validate_response_data( $sanitization_results )
@@ -470,7 +470,7 @@ Get response data for a validate request.
 
 </details>
 <details>
-<summary>`remove_illegal_source_stack_comments`</summary>
+<summary><code>remove_illegal_source_stack_comments</code></summary>
 
 ```php
 static public remove_illegal_source_stack_comments( Document $dom )
@@ -483,7 +483,7 @@ HTML comments that appear inside of script and style elements get parsed as text
 
 </details>
 <details>
-<summary>`finalize_validation`</summary>
+<summary><code>finalize_validation</code></summary>
 
 ```php
 static public finalize_validation( Document $dom )
@@ -494,7 +494,7 @@ Finalize validation.
 
 </details>
 <details>
-<summary>`update_admin_bar_item`</summary>
+<summary><code>update_admin_bar_item</code></summary>
 
 ```php
 static private update_admin_bar_item( Document $dom, $total_count, $kept_count, $unreviewed_count )
@@ -505,7 +505,7 @@ Override AMP status in admin bar set in \AMP_Validation_Manager::add_admin_bar_m
 
 </details>
 <details>
-<summary>`filter_sanitizer_args`</summary>
+<summary><code>filter_sanitizer_args</code></summary>
 
 ```php
 static public filter_sanitizer_args( $sanitizers )
@@ -516,7 +516,7 @@ Adds the validation callback if front-end validation is needed.
 
 </details>
 <details>
-<summary>`validate_after_plugin_activation`</summary>
+<summary><code>validate_after_plugin_activation</code></summary>
 
 ```php
 static public validate_after_plugin_activation()
@@ -527,7 +527,7 @@ Validates the latest published post.
 
 </details>
 <details>
-<summary>`validate_url`</summary>
+<summary><code>validate_url</code></summary>
 
 ```php
 static public validate_url( $url )
@@ -540,7 +540,7 @@ The validation errors will be stored in the validation status custom post type, 
 
 </details>
 <details>
-<summary>`validate_url_and_store`</summary>
+<summary><code>validate_url_and_store</code></summary>
 
 ```php
 static public validate_url_and_store( $url, $post = null )
@@ -551,7 +551,7 @@ Validate URL and store result.
 
 </details>
 <details>
-<summary>`serialize_validation_error_messages`</summary>
+<summary><code>serialize_validation_error_messages</code></summary>
 
 ```php
 static public serialize_validation_error_messages( $messages )
@@ -564,7 +564,7 @@ In order to safely pass validation error messages through redirects with query p
 
 </details>
 <details>
-<summary>`unserialize_validation_error_messages`</summary>
+<summary><code>unserialize_validation_error_messages</code></summary>
 
 ```php
 static public unserialize_validation_error_messages( $serialized )
@@ -575,7 +575,7 @@ Unserialize validation error messages.
 
 </details>
 <details>
-<summary>`get_validate_url_error_message`</summary>
+<summary><code>get_validate_url_error_message</code></summary>
 
 ```php
 static public get_validate_url_error_message( $error_code, $error_message = '' )
@@ -586,7 +586,7 @@ Get error message for a validate URL failure.
 
 </details>
 <details>
-<summary>`print_plugin_notice`</summary>
+<summary><code>print_plugin_notice</code></summary>
 
 ```php
 static public print_plugin_notice()
@@ -597,7 +597,7 @@ On activating a plugin, display a notice if a plugin causes an AMP validation er
 
 </details>
 <details>
-<summary>`enqueue_block_validation`</summary>
+<summary><code>enqueue_block_validation</code></summary>
 
 ```php
 static public enqueue_block_validation()

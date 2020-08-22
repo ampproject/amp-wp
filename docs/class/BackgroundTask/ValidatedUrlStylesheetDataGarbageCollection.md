@@ -6,7 +6,7 @@ This background task will update the oldest 100 amp_validated_url posts each tim
 
 ### Methods
 <details>
-<summary>`get_interval`</summary>
+<summary><code>get_interval</code></summary>
 
 ```php
 protected get_interval()
@@ -17,7 +17,7 @@ Get the interval to use for the event.
 
 </details>
 <details>
-<summary>`get_event_name`</summary>
+<summary><code>get_event_name</code></summary>
 
 ```php
 protected get_event_name()
@@ -31,7 +31,7 @@ This is the &quot;slug&quot; of the event, not the display name.
 
 </details>
 <details>
-<summary>`process`</summary>
+<summary><code>process</code></summary>
 
 ```php
 public process()

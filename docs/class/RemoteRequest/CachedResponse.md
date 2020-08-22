@@ -4,7 +4,7 @@ Serializable object that represents a cached response together with its expiry t
 
 ### Methods
 <details>
-<summary>`__construct`</summary>
+<summary><code>__construct</code></summary>
 
 ```php
 public __construct( $body, $headers, $status_code, DateTimeInterface $expiry )
@@ -15,7 +15,7 @@ Instantiate a CachedResponse object.
 
 </details>
 <details>
-<summary>`get_body`</summary>
+<summary><code>get_body</code></summary>
 
 ```php
 public get_body()
@@ -26,7 +26,7 @@ Get the cached body.
 
 </details>
 <details>
-<summary>`get_headers`</summary>
+<summary><code>get_headers</code></summary>
 
 ```php
 public get_headers()
@@ -37,7 +37,7 @@ Get the cached headers.
 
 </details>
 <details>
-<summary>`get_status_code`</summary>
+<summary><code>get_status_code</code></summary>
 
 ```php
 public get_status_code()
@@ -48,7 +48,7 @@ Get the cached status code.
 
 </details>
 <details>
-<summary>`is_valid`</summary>
+<summary><code>is_valid</code></summary>
 
 ```php
 public is_valid()
@@ -59,7 +59,7 @@ Determine the validity of the cached response.
 
 </details>
 <details>
-<summary>`get_expiry`</summary>
+<summary><code>get_expiry</code></summary>
 
 ```php
 public get_expiry()
@@ -70,7 +70,7 @@ Get the expiry of the cached value.
 
 </details>
 <details>
-<summary>`is_expired`</summary>
+<summary><code>is_expired</code></summary>
 
 ```php
 public is_expired()

@@ -4,7 +4,7 @@ Class AMP_HTTP
 
 ### Methods
 <details>
-<summary>`send_header`</summary>
+<summary><code>send_header</code></summary>
 
 ```php
 static public send_header( $name, $value, $args = array() )
@@ -17,7 +17,7 @@ This largely exists to facilitate unit testing but it also provides a better int
 
 </details>
 <details>
-<summary>`send_server_timing`</summary>
+<summary><code>send_server_timing</code></summary>
 
 ```php
 static public send_server_timing( $name, $duration = null, $description = null )
@@ -30,7 +30,7 @@ If WP_DEBUG is not enabled and an admin user (who can manage_options) is not log
 
 </details>
 <details>
-<summary>`purge_amp_query_vars`</summary>
+<summary><code>purge_amp_query_vars</code></summary>
 
 ```php
 static public purge_amp_query_vars()
@@ -43,7 +43,7 @@ WordPress should generally not respond differently to requests when these parame
 
 </details>
 <details>
-<summary>`filter_allowed_redirect_hosts`</summary>
+<summary><code>filter_allowed_redirect_hosts</code></summary>
 
 ```php
 static public filter_allowed_redirect_hosts( $allowed_hosts )
@@ -54,7 +54,7 @@ Filter the allowed redirect hosts to include AMP caches.
 
 </details>
 <details>
-<summary>`get_amp_cache_hosts`</summary>
+<summary><code>get_amp_cache_hosts</code></summary>
 
 ```php
 static public get_amp_cache_hosts()
@@ -65,7 +65,7 @@ Get list of AMP cache hosts (that is, CORS origins).
 
 </details>
 <details>
-<summary>`send_cors_headers`</summary>
+<summary><code>send_cors_headers</code></summary>
 
 ```php
 static public send_cors_headers()
@@ -85,7 +85,7 @@ From the AMP docs: Restrict requests to source origins In all fetch requests, th
 
 </details>
 <details>
-<summary>`handle_xhr_request`</summary>
+<summary><code>handle_xhr_request</code></summary>
 
 ```php
 static public handle_xhr_request()
@@ -96,7 +96,7 @@ Hook into a POST form submissions, such as the comment form or some other form s
 
 </details>
 <details>
-<summary>`intercept_post_request_redirect`</summary>
+<summary><code>intercept_post_request_redirect</code></summary>
 
 ```php
 static public intercept_post_request_redirect( $location )
@@ -107,7 +107,7 @@ Intercept the response to a POST request.
 
 </details>
 <details>
-<summary>`handle_wp_die`</summary>
+<summary><code>handle_wp_die</code></summary>
 
 ```php
 static public handle_wp_die( $error, $title = '', $args = array() )
@@ -118,7 +118,7 @@ New error handler for AMP form submission.
 
 </details>
 <details>
-<summary>`filter_comment_post_redirect`</summary>
+<summary><code>filter_comment_post_redirect</code></summary>
 
 ```php
 static public filter_comment_post_redirect( $url, $comment )
@@ -129,7 +129,7 @@ Handle comment_post_redirect to ensure page reload is done when comments_live_li
 
 </details>
 <details>
-<summary>`get_response_content_type`</summary>
+<summary><code>get_response_content_type</code></summary>
 
 ```php
 static public get_response_content_type()

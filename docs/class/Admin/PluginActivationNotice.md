@@ -4,7 +4,7 @@ Class PluginActivationNotice
 
 ### Methods
 <details>
-<summary>`get_registration_action`</summary>
+<summary><code>get_registration_action</code></summary>
 
 ```php
 static public get_registration_action()
@@ -15,7 +15,7 @@ Get the action to use for registering the service.
 
 </details>
 <details>
-<summary>`register`</summary>
+<summary><code>register</code></summary>
 
 ```php
 public register()
@@ -26,7 +26,7 @@ Runs on instantiation.
 
 </details>
 <details>
-<summary>`render_notice`</summary>
+<summary><code>render_notice</code></summary>
 
 ```php
 public render_notice()

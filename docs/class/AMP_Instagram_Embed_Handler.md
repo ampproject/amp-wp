@@ -6,7 +6,7 @@ Much of this class is borrowed from Jetpack embeds
 
 ### Methods
 <details>
-<summary>`register_embed`</summary>
+<summary><code>register_embed</code></summary>
 
 ```php
 public register_embed()
@@ -17,7 +17,7 @@ Registers embed.
 
 </details>
 <details>
-<summary>`unregister_embed`</summary>
+<summary><code>unregister_embed</code></summary>
 
 ```php
 public unregister_embed()
@@ -28,7 +28,7 @@ Unregisters embed.
 
 </details>
 <details>
-<summary>`oembed`</summary>
+<summary><code>oembed</code></summary>
 
 ```php
 public oembed( $matches, $attr, $url )
@@ -39,7 +39,7 @@ WordPress OEmbed rendering callback.
 
 </details>
 <details>
-<summary>`render`</summary>
+<summary><code>render</code></summary>
 
 ```php
 public render( $args )
@@ -50,7 +50,7 @@ Gets the rendered embed markup.
 
 </details>
 <details>
-<summary>`get_instagram_id_from_url`</summary>
+<summary><code>get_instagram_id_from_url</code></summary>
 
 ```php
 private get_instagram_id_from_url( $url )
@@ -61,7 +61,7 @@ Get Instagram ID from URL.
 
 </details>
 <details>
-<summary>`sanitize_raw_embeds`</summary>
+<summary><code>sanitize_raw_embeds</code></summary>
 
 ```php
 public sanitize_raw_embeds( Document $dom )
@@ -72,7 +72,7 @@ Sanitized &lt;blockquote class=&quot;instagram-media&quot;&gt; tags to &lt;amp-i
 
 </details>
 <details>
-<summary>`create_amp_instagram_and_replace_node`</summary>
+<summary><code>create_amp_instagram_and_replace_node</code></summary>
 
 ```php
 private create_amp_instagram_and_replace_node( $dom, $node )
@@ -83,7 +83,7 @@ Make final modifications to DOMNode
 
 </details>
 <details>
-<summary>`sanitize_embed_script`</summary>
+<summary><code>sanitize_embed_script</code></summary>
 
 ```php
 private sanitize_embed_script( $node )

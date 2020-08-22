@@ -4,7 +4,7 @@ Class AMP_Widget_Categories
 
 ### Methods
 <details>
-<summary>`widget`</summary>
+<summary><code>widget</code></summary>
 
 ```php
 public widget( $args, $instance )

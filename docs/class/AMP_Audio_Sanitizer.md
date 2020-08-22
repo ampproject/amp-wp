@@ -6,7 +6,7 @@ Converts &lt;audio&gt; tags to &lt;amp-audio&gt;
 
 ### Methods
 <details>
-<summary>`get_selector_conversion_mapping`</summary>
+<summary><code>get_selector_conversion_mapping</code></summary>
 
 ```php
 public get_selector_conversion_mapping()
@@ -17,7 +17,7 @@ Get mapping of HTML selectors to the AMP component selectors which they may be c
 
 </details>
 <details>
-<summary>`sanitize`</summary>
+<summary><code>sanitize</code></summary>
 
 ```php
 public sanitize()
@@ -28,7 +28,7 @@ Sanitize the &lt;audio&gt; elements from the HTML contained in this instance&#03
 
 </details>
 <details>
-<summary>`filter_attributes`</summary>
+<summary><code>filter_attributes</code></summary>
 
 ```php
 private filter_attributes( $attributes )

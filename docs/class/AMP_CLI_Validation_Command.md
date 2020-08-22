@@ -4,7 +4,7 @@ Crawls the site for validation errors or resets the stored validation errors.
 
 ### Methods
 <details>
-<summary>`run`</summary>
+<summary><code>run</code></summary>
 
 ```php
 public run( $args, $assoc_args )
@@ -22,7 +22,7 @@ Crawl the entire site to get AMP validation results.
 
 </details>
 <details>
-<summary>`reset`</summary>
+<summary><code>reset</code></summary>
 
 ```php
 public reset( $args, $assoc_args )
@@ -39,7 +39,7 @@ This deletes all amp_validated_url posts and all amp_validation_error terms.
 
 </details>
 <details>
-<summary>`generate_nonce`</summary>
+<summary><code>generate_nonce</code></summary>
 
 ```php
 public generate_nonce()
@@ -50,7 +50,7 @@ Generate the authorization nonce needed for a validate request.
 
 </details>
 <details>
-<summary>`check_url`</summary>
+<summary><code>check_url</code></summary>
 
 ```php
 public check_url( $args )
@@ -67,7 +67,7 @@ The results are returned in JSON format.
 
 </details>
 <details>
-<summary>`count_urls_to_validate`</summary>
+<summary><code>count_urls_to_validate</code></summary>
 
 ```php
 private count_urls_to_validate()
@@ -80,7 +80,7 @@ By default, this only counts AMP-enabled posts and terms. But if $force_crawl_ur
 
 </details>
 <details>
-<summary>`get_posts_that_support_amp`</summary>
+<summary><code>get_posts_that_support_amp</code></summary>
 
 ```php
 private get_posts_that_support_amp( $ids )
@@ -93,7 +93,7 @@ By default, this only gets the post IDs if they support AMP. This means that &#0
 
 </details>
 <details>
-<summary>`does_taxonomy_support_amp`</summary>
+<summary><code>does_taxonomy_support_amp</code></summary>
 
 ```php
 private does_taxonomy_support_amp( $taxonomy )
@@ -106,7 +106,7 @@ This only gets the term IDs if they support AMP. If their taxonomy is unchecked 
 
 </details>
 <details>
-<summary>`is_template_supported`</summary>
+<summary><code>is_template_supported</code></summary>
 
 ```php
 private is_template_supported( $template )
@@ -119,7 +119,7 @@ If the user has passed an include argument to the WP-CLI command, use that to fi
 
 </details>
 <details>
-<summary>`get_posts_by_type`</summary>
+<summary><code>get_posts_by_type</code></summary>
 
 ```php
 private get_posts_by_type( $post_type, $offset = null, $number = null )
@@ -130,7 +130,7 @@ Gets the IDs of public, published posts.
 
 </details>
 <details>
-<summary>`get_taxonomy_links`</summary>
+<summary><code>get_taxonomy_links</code></summary>
 
 ```php
 private get_taxonomy_links( $taxonomy, $offset = '', $number = 1 )
@@ -143,7 +143,7 @@ For example, https://example.org/?cat=2
 
 </details>
 <details>
-<summary>`get_author_page_urls`</summary>
+<summary><code>get_author_page_urls</code></summary>
 
 ```php
 private get_author_page_urls( $offset = '', $number = '' )
@@ -156,7 +156,7 @@ Accepts an $offset parameter, for the query of authors. 0 is the first author in
 
 </details>
 <details>
-<summary>`get_search_page`</summary>
+<summary><code>get_search_page</code></summary>
 
 ```php
 private get_search_page()
@@ -167,7 +167,7 @@ Gets a single search page URL, like https://example.com/?s=example.
 
 </details>
 <details>
-<summary>`get_date_page`</summary>
+<summary><code>get_date_page</code></summary>
 
 ```php
 private get_date_page()
@@ -178,7 +178,7 @@ Gets a single date page URL, like https://example.com/?year=2018.
 
 </details>
 <details>
-<summary>`crawl_site`</summary>
+<summary><code>crawl_site</code></summary>
 
 ```php
 private crawl_site()
@@ -191,7 +191,7 @@ Includes the URLs of public, published posts, public taxonomies, and other templ
 
 </details>
 <details>
-<summary>`validate_and_store_url`</summary>
+<summary><code>validate_and_store_url</code></summary>
 
 ```php
 private validate_and_store_url( $url, $type )

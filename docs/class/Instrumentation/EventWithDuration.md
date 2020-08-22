@@ -4,7 +4,7 @@ A server-timing event with a duration.
 
 ### Methods
 <details>
-<summary>`__construct`</summary>
+<summary><code>__construct</code></summary>
 
 ```php
 public __construct( $name, $description = null, $properties = array(), $duration = 0.0 )
@@ -15,7 +15,7 @@ Event constructor.
 
 </details>
 <details>
-<summary>`set_duration`</summary>
+<summary><code>set_duration</code></summary>
 
 ```php
 public set_duration( $duration )
@@ -26,7 +26,7 @@ Set the event duration.
 
 </details>
 <details>
-<summary>`get_duration`</summary>
+<summary><code>get_duration</code></summary>
 
 ```php
 public get_duration()
@@ -37,7 +37,7 @@ Get the event duration.
 
 </details>
 <details>
-<summary>`get_header_string`</summary>
+<summary><code>get_header_string</code></summary>
 
 ```php
 public get_header_string()

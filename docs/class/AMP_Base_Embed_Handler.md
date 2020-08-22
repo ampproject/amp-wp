@@ -4,7 +4,7 @@ Class AMP_Base_Embed_Handler
 
 ### Methods
 <details>
-<summary>`register_embed`</summary>
+<summary><code>register_embed</code></summary>
 
 ```php
 abstract public register_embed()
@@ -15,7 +15,7 @@ Registers embed.
 
 </details>
 <details>
-<summary>`unregister_embed`</summary>
+<summary><code>unregister_embed</code></summary>
 
 ```php
 abstract public unregister_embed()
@@ -26,7 +26,7 @@ Unregisters embed.
 
 </details>
 <details>
-<summary>`__construct`</summary>
+<summary><code>__construct</code></summary>
 
 ```php
 public __construct( $args = array() )
@@ -37,7 +37,7 @@ Constructor.
 
 </details>
 <details>
-<summary>`get_scripts`</summary>
+<summary><code>get_scripts</code></summary>
 
 ```php
 public get_scripts()
@@ -50,7 +50,7 @@ This is normally no longer needed because the validating sanitizer will automati
 
 </details>
 <details>
-<summary>`match_element_attributes`</summary>
+<summary><code>match_element_attributes</code></summary>
 
 ```php
 protected match_element_attributes( $html, $tag_name, $attribute_names )

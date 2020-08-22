@@ -4,7 +4,7 @@ A service that only gets properly instantiated when it is actually being retriev
 
 ### Methods
 <details>
-<summary>`__construct`</summary>
+<summary><code>__construct</code></summary>
 
 ```php
 public __construct( callable $instantiation )
@@ -15,7 +15,7 @@ Instantiate a LazilyInstantiatedService object.
 
 </details>
 <details>
-<summary>`instantiate`</summary>
+<summary><code>instantiate</code></summary>
 
 ```php
 public instantiate()

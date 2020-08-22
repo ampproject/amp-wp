@@ -8,7 +8,7 @@ This is a list of HTML tags and attributes that are allowed by the AMP specifica
 
 ### Methods
 <details>
-<summary>`get_allowed_tags`</summary>
+<summary><code>get_allowed_tags</code></summary>
 
 ```php
 static public get_allowed_tags()
@@ -19,7 +19,7 @@ Get allowed tags.
 
 </details>
 <details>
-<summary>`get_extension_specs`</summary>
+<summary><code>get_extension_specs</code></summary>
 
 ```php
 static public get_extension_specs()
@@ -30,7 +30,7 @@ Get extension specs.
 
 </details>
 <details>
-<summary>`get_allowed_tag`</summary>
+<summary><code>get_allowed_tag</code></summary>
 
 ```php
 static public get_allowed_tag( $node_name )
@@ -43,7 +43,7 @@ Get the rules for a single tag so that the entire data structure needn&#039;t be
 
 </details>
 <details>
-<summary>`get_descendant_tag_lists`</summary>
+<summary><code>get_descendant_tag_lists</code></summary>
 
 ```php
 static public get_descendant_tag_lists()
@@ -54,7 +54,7 @@ Get descendant tag lists.
 
 </details>
 <details>
-<summary>`get_descendant_tag_list`</summary>
+<summary><code>get_descendant_tag_list</code></summary>
 
 ```php
 static public get_descendant_tag_list( $name )
@@ -67,7 +67,7 @@ Get the descendant rules for a single tag so that the entire data structure need
 
 </details>
 <details>
-<summary>`get_reference_point_spec`</summary>
+<summary><code>get_reference_point_spec</code></summary>
 
 ```php
 static public get_reference_point_spec( $tag_spec_name )
@@ -78,7 +78,7 @@ Get reference point spec.
 
 </details>
 <details>
-<summary>`get_allowed_attributes`</summary>
+<summary><code>get_allowed_attributes</code></summary>
 
 ```php
 static public get_allowed_attributes()
@@ -89,7 +89,7 @@ Get list of globally-allowed attributes.
 
 </details>
 <details>
-<summary>`get_layout_attributes`</summary>
+<summary><code>get_layout_attributes</code></summary>
 
 ```php
 static public get_layout_attributes()

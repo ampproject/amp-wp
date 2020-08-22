@@ -6,7 +6,7 @@ Modifies elements created as blocks to match the blocks&#039; AMP-specific confi
 
 ### Methods
 <details>
-<summary>`sanitize`</summary>
+<summary><code>sanitize</code></summary>
 
 ```php
 public sanitize()
@@ -17,7 +17,7 @@ Sanitize the AMP elements contained by &lt;figure&gt; element where necessary.
 
 </details>
 <details>
-<summary>`set_attributes`</summary>
+<summary><code>set_attributes</code></summary>
 
 ```php
 protected set_attributes( \DOMElement $node, \DOMElement $parent_node, $attributes )

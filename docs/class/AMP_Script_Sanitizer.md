@@ -4,7 +4,7 @@ Class AMP_Script_Sanitizer
 
 ### Methods
 <details>
-<summary>`sanitize`</summary>
+<summary><code>sanitize</code></summary>
 
 ```php
 public sanitize()

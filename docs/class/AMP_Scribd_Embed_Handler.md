@@ -4,7 +4,7 @@ Class AMP_Scribd_Embed_Handler
 
 ### Methods
 <details>
-<summary>`register_embed`</summary>
+<summary><code>register_embed</code></summary>
 
 ```php
 public register_embed()
@@ -15,7 +15,7 @@ Registers embed.
 
 </details>
 <details>
-<summary>`unregister_embed`</summary>
+<summary><code>unregister_embed</code></summary>
 
 ```php
 public unregister_embed()
@@ -26,7 +26,7 @@ Unregisters embed.
 
 </details>
 <details>
-<summary>`filter_embed_oembed_html`</summary>
+<summary><code>filter_embed_oembed_html</code></summary>
 
 ```php
 public filter_embed_oembed_html( $cache, $url )
@@ -37,7 +37,7 @@ Filter oEmbed HTML for Scribd to be AMP compatible.
 
 </details>
 <details>
-<summary>`sanitize_iframe`</summary>
+<summary><code>sanitize_iframe</code></summary>
 
 ```php
 private sanitize_iframe( $html )

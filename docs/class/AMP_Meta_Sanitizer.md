@@ -6,7 +6,7 @@ Sanitizes meta tags found in the header.
 
 ### Methods
 <details>
-<summary>`get_body_meta_tag_name_attribute_deny_pattern`</summary>
+<summary><code>get_body_meta_tag_name_attribute_deny_pattern</code></summary>
 
 ```php
 private get_body_meta_tag_name_attribute_deny_pattern()
@@ -17,7 +17,7 @@ Get tag spec for meta tags which are allowed in the body.
 
 </details>
 <details>
-<summary>`sanitize`</summary>
+<summary><code>sanitize</code></summary>
 
 ```php
 public sanitize()
@@ -28,7 +28,7 @@ Sanitize.
 
 </details>
 <details>
-<summary>`ensure_charset_is_present`</summary>
+<summary><code>ensure_charset_is_present</code></summary>
 
 ```php
 protected ensure_charset_is_present()
@@ -41,7 +41,7 @@ The charset is set to utf-8, which is what AMP requires.
 
 </details>
 <details>
-<summary>`ensure_viewport_is_present`</summary>
+<summary><code>ensure_viewport_is_present</code></summary>
 
 ```php
 protected ensure_viewport_is_present()
@@ -54,7 +54,7 @@ The viewport defaults to &#039;width=device-width&#039;, which is the bare minim
 
 </details>
 <details>
-<summary>`ensure_boilerplate_is_present`</summary>
+<summary><code>ensure_boilerplate_is_present</code></summary>
 
 ```php
 protected ensure_boilerplate_is_present()
@@ -67,7 +67,7 @@ The AMP boilerplate styles should appear at the end of the head: &quot;Finally, 
 
 </details>
 <details>
-<summary>`process_amp_script_meta_tags`</summary>
+<summary><code>process_amp_script_meta_tags</code></summary>
 
 ```php
 protected process_amp_script_meta_tags()
@@ -78,7 +78,7 @@ Parse and concatenate &lt;amp-script&gt; source meta tags.
 
 </details>
 <details>
-<summary>`create_charset_element`</summary>
+<summary><code>create_charset_element</code></summary>
 
 ```php
 protected create_charset_element()
@@ -89,7 +89,7 @@ Create a new meta tag for the charset value.
 
 </details>
 <details>
-<summary>`create_viewport_element`</summary>
+<summary><code>create_viewport_element</code></summary>
 
 ```php
 protected create_viewport_element( $viewport )
@@ -100,7 +100,7 @@ Create a new meta tag for the viewport setting.
 
 </details>
 <details>
-<summary>`re_add_meta_tags_in_optimized_order`</summary>
+<summary><code>re_add_meta_tags_in_optimized_order</code></summary>
 
 ```php
 protected re_add_meta_tags_in_optimized_order()

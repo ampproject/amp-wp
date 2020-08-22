@@ -6,7 +6,7 @@ These HTML attributes serve as processing instructions to control how the saniti
 
 ### Methods
 <details>
-<summary>`get_registration_action`</summary>
+<summary><code>get_registration_action</code></summary>
 
 ```php
 static public get_registration_action()
@@ -17,7 +17,7 @@ Get registration action.
 
 </details>
 <details>
-<summary>`register`</summary>
+<summary><code>register</code></summary>
 
 ```php
 public register()
@@ -28,7 +28,7 @@ Register the service with the system.
 
 </details>
 <details>
-<summary>`get_obsolete_attribute_pattern`</summary>
+<summary><code>get_obsolete_attribute_pattern</code></summary>
 
 ```php
 protected get_obsolete_attribute_pattern()
@@ -41,7 +41,7 @@ Get obsolete attribute regular expression to match the obsolete attribute key/va
 
 </details>
 <details>
-<summary>`filter_rest_prepare_post`</summary>
+<summary><code>filter_rest_prepare_post</code></summary>
 
 ```php
 public filter_rest_prepare_post( WP_REST_Response $response )

@@ -4,7 +4,7 @@ Exception thrown when an invalid service was requested.
 
 ### Methods
 <details>
-<summary>`from_service`</summary>
+<summary><code>from_service</code></summary>
 
 ```php
 static public from_service( $service )
@@ -15,7 +15,7 @@ Create a new instance of the exception for a service class name that is not reco
 
 </details>
 <details>
-<summary>`from_service_id`</summary>
+<summary><code>from_service_id</code></summary>
 
 ```php
 static public from_service_id( $service_id )

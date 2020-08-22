@@ -6,7 +6,7 @@ A direct, formed link to the AMP editor in the Customizer is added via {@see amp
 
 ### Methods
 <details>
-<summary>`__construct`</summary>
+<summary><code>__construct</code></summary>
 
 ```php
 protected __construct( \WP_Customize_Manager $wp_customize, ReaderThemeLoader $reader_theme_loader )
@@ -17,7 +17,7 @@ AMP_Template_Customizer constructor.
 
 </details>
 <details>
-<summary>`init`</summary>
+<summary><code>init</code></summary>
 
 ```php
 static public init( \WP_Customize_Manager $wp_customize )
@@ -28,7 +28,7 @@ Initialize the template Customizer feature class.
 
 </details>
 <details>
-<summary>`set_refresh_setting_transport`</summary>
+<summary><code>set_refresh_setting_transport</code></summary>
 
 ```php
 protected set_refresh_setting_transport()
@@ -43,7 +43,7 @@ In the AMP Customizer preview, selective refresh partial for `custom_header` wil
 
 </details>
 <details>
-<summary>`remove_cover_template_section`</summary>
+<summary><code>remove_cover_template_section</code></summary>
 
 ```php
 protected remove_cover_template_section()
@@ -56,7 +56,7 @@ Prevent showing the &quot;Cover Template&quot; section if the active (non-Reader
 
 </details>
 <details>
-<summary>`remove_homepage_settings_section`</summary>
+<summary><code>remove_homepage_settings_section</code></summary>
 
 ```php
 protected remove_homepage_settings_section()
@@ -69,7 +69,7 @@ The Homepage Settings section exclusively contains controls for options which ap
 
 </details>
 <details>
-<summary>`init_legacy_preview`</summary>
+<summary><code>init_legacy_preview</code></summary>
 
 ```php
 public init_legacy_preview()
@@ -80,7 +80,7 @@ Init Customizer preview for legacy.
 
 </details>
 <details>
-<summary>`register_legacy_ui`</summary>
+<summary><code>register_legacy_ui</code></summary>
 
 ```php
 public register_legacy_ui()
@@ -91,7 +91,7 @@ Sets up the AMP Customizer preview.
 
 </details>
 <details>
-<summary>`get_amp_panel_description`</summary>
+<summary><code>get_amp_panel_description</code></summary>
 
 ```php
 protected get_amp_panel_description()
@@ -104,7 +104,7 @@ This is also added to the root panel description in the AMP Customizer when a Re
 
 </details>
 <details>
-<summary>`register_legacy_settings`</summary>
+<summary><code>register_legacy_settings</code></summary>
 
 ```php
 public register_legacy_settings()
@@ -115,7 +115,7 @@ Registers settings for customizing Legacy Reader AMP templates.
 
 </details>
 <details>
-<summary>`add_customizer_scripts`</summary>
+<summary><code>add_customizer_scripts</code></summary>
 
 ```php
 public add_customizer_scripts()
@@ -126,7 +126,7 @@ Load up AMP scripts needed for Customizer integrations when a Reader theme has b
 
 </details>
 <details>
-<summary>`store_modified_theme_mod_setting_timestamps`</summary>
+<summary><code>store_modified_theme_mod_setting_timestamps</code></summary>
 
 ```php
 public store_modified_theme_mod_setting_timestamps()
@@ -139,7 +139,7 @@ This is used to determine which settings from the Active theme should be present
 
 </details>
 <details>
-<summary>`get_active_theme_import_settings`</summary>
+<summary><code>get_active_theme_import_settings</code></summary>
 
 ```php
 protected get_active_theme_import_settings()
@@ -150,7 +150,7 @@ Get settings to import from the active theme.
 
 </details>
 <details>
-<summary>`render_setting_import_section_template`</summary>
+<summary><code>render_setting_import_section_template</code></summary>
 
 ```php
 public render_setting_import_section_template()
@@ -163,7 +163,7 @@ This section only has a menu item and it is not intended to expand.
 
 </details>
 <details>
-<summary>`add_legacy_customizer_scripts`</summary>
+<summary><code>add_legacy_customizer_scripts</code></summary>
 
 ```php
 public add_legacy_customizer_scripts()
@@ -174,7 +174,7 @@ Load up AMP scripts needed for Customizer integrations in Legacy Reader mode.
 
 </details>
 <details>
-<summary>`enqueue_legacy_preview_scripts`</summary>
+<summary><code>enqueue_legacy_preview_scripts</code></summary>
 
 ```php
 public enqueue_legacy_preview_scripts()
@@ -185,7 +185,7 @@ Enqueues scripts used in both the AMP and non-AMP Customizer preview (only appli
 
 </details>
 <details>
-<summary>`add_legacy_customize_preview_styles`</summary>
+<summary><code>add_legacy_customize_preview_styles</code></summary>
 
 ```php
 public add_legacy_customize_preview_styles()
@@ -196,7 +196,7 @@ Add AMP Customizer preview styles for Legacy Reader mode.
 
 </details>
 <details>
-<summary>`add_legacy_preview_scripts`</summary>
+<summary><code>add_legacy_preview_scripts</code></summary>
 
 ```php
 public add_legacy_preview_scripts()
@@ -209,7 +209,7 @@ This breaks AMP validation in the customizer but is necessary for the live previ
 
 </details>
 <details>
-<summary>`print_legacy_controls_templates`</summary>
+<summary><code>print_legacy_controls_templates</code></summary>
 
 ```php
 public print_legacy_controls_templates()
@@ -220,7 +220,7 @@ Print templates needed for AMP in Customizer (for Legacy Reader mode).
 
 </details>
 <details>
-<summary>`is_amp_customizer`</summary>
+<summary><code>is_amp_customizer</code></summary>
 
 ```php
 static public is_amp_customizer()

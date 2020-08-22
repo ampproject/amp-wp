@@ -4,7 +4,7 @@ This abstract base plugin provides all the boilerplate code for working with the
 
 ### Methods
 <details>
-<summary>`__construct`</summary>
+<summary><code>__construct</code></summary>
 
 ```php
 public __construct( $enable_filters = null, \AmpProject\AmpWP\Infrastructure\Injector $injector = null, \AmpProject\AmpWP\Infrastructure\ServiceContainer $service_container = null )
@@ -15,7 +15,7 @@ Instantiate a Theme object.
 
 </details>
 <details>
-<summary>`activate`</summary>
+<summary><code>activate</code></summary>
 
 ```php
 public activate( $network_wide )
@@ -26,7 +26,7 @@ Activate the plugin.
 
 </details>
 <details>
-<summary>`deactivate`</summary>
+<summary><code>deactivate</code></summary>
 
 ```php
 public deactivate( $network_wide )
@@ -37,7 +37,7 @@ Deactivate the plugin.
 
 </details>
 <details>
-<summary>`register`</summary>
+<summary><code>register</code></summary>
 
 ```php
 public register()
@@ -48,7 +48,7 @@ Register the plugin with the WordPress system.
 
 </details>
 <details>
-<summary>`register_services`</summary>
+<summary><code>register_services</code></summary>
 
 ```php
 public register_services()
@@ -59,7 +59,7 @@ Register the individual services of this plugin.
 
 </details>
 <details>
-<summary>`validate_services`</summary>
+<summary><code>validate_services</code></summary>
 
 ```php
 protected validate_services( $services, $fallback )
@@ -72,7 +72,7 @@ As the array of services could be filtered, we need to ensure it is always in a 
 
 </details>
 <details>
-<summary>`get_identifier_from_fqcn`</summary>
+<summary><code>get_identifier_from_fqcn</code></summary>
 
 ```php
 protected get_identifier_from_fqcn( $fqcn )
@@ -83,7 +83,7 @@ Generate a valid identifier for a provided FQCN.
 
 </details>
 <details>
-<summary>`register_service`</summary>
+<summary><code>register_service</code></summary>
 
 ```php
 protected register_service( $id, $class )
@@ -94,7 +94,7 @@ Register a single service.
 
 </details>
 <details>
-<summary>`get_container`</summary>
+<summary><code>get_container</code></summary>
 
 ```php
 public get_container()
@@ -105,7 +105,7 @@ Get the service container that contains the services that make up the plugin.
 
 </details>
 <details>
-<summary>`instantiate_service`</summary>
+<summary><code>instantiate_service</code></summary>
 
 ```php
 protected instantiate_service( $class )
@@ -116,7 +116,7 @@ Instantiate a single service.
 
 </details>
 <details>
-<summary>`configure_injector`</summary>
+<summary><code>configure_injector</code></summary>
 
 ```php
 protected configure_injector( \AmpProject\AmpWP\Infrastructure\Injector $injector )
@@ -130,7 +130,7 @@ This method defines the mappings that the injector knows about, and the logic it
 
 </details>
 <details>
-<summary>`get_service_classes`</summary>
+<summary><code>get_service_classes</code></summary>
 
 ```php
 protected get_service_classes()
@@ -141,7 +141,7 @@ Get the list of services to register.
 
 </details>
 <details>
-<summary>`get_bindings`</summary>
+<summary><code>get_bindings</code></summary>
 
 ```php
 protected get_bindings()
@@ -154,7 +154,7 @@ The bindings let you map interfaces (or classes) to the classes that should be u
 
 </details>
 <details>
-<summary>`get_arguments`</summary>
+<summary><code>get_arguments</code></summary>
 
 ```php
 protected get_arguments()
@@ -167,7 +167,7 @@ The argument bindings let you map specific argument values for specific classes.
 
 </details>
 <details>
-<summary>`get_shared_instances`</summary>
+<summary><code>get_shared_instances</code></summary>
 
 ```php
 protected get_shared_instances()
@@ -181,7 +181,7 @@ These classes will only be instantiated once by the injector and then reused on 
 
 </details>
 <details>
-<summary>`get_delegations`</summary>
+<summary><code>get_delegations</code></summary>
 
 ```php
 protected get_delegations()
@@ -194,7 +194,7 @@ These are basically factories to provide custom instantiation logic for classes.
 
 </details>
 <details>
-<summary>`maybe_resolve`</summary>
+<summary><code>maybe_resolve</code></summary>
 
 ```php
 protected maybe_resolve( $value )

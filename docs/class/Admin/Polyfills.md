@@ -4,7 +4,7 @@ Registers assets that may not be available in the current site&#039;s version of
 
 ### Methods
 <details>
-<summary>`get_registration_action`</summary>
+<summary><code>get_registration_action</code></summary>
 
 ```php
 static public get_registration_action()
@@ -15,7 +15,7 @@ Get the action to use for registering the service.
 
 </details>
 <details>
-<summary>`register`</summary>
+<summary><code>register</code></summary>
 
 ```php
 public register()
@@ -26,7 +26,7 @@ Runs on instantiation.
 
 </details>
 <details>
-<summary>`register_shimmed_scripts`</summary>
+<summary><code>register_shimmed_scripts</code></summary>
 
 ```php
 public register_shimmed_scripts( $wp_scripts )
@@ -37,7 +37,7 @@ Registers scripts not guaranteed to be available in core.
 
 </details>
 <details>
-<summary>`register_shimmed_styles`</summary>
+<summary><code>register_shimmed_styles</code></summary>
 
 ```php
 public register_shimmed_styles( $wp_styles )

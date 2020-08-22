@@ -4,7 +4,7 @@ Class AMP_Base_Sanitizer
 
 ### Methods
 <details>
-<summary>`__construct`</summary>
+<summary><code>__construct</code></summary>
 
 ```php
 public __construct( $dom, $args = array() )
@@ -15,7 +15,7 @@ AMP_Base_Sanitizer constructor.
 
 </details>
 <details>
-<summary>`add_buffering_hooks`</summary>
+<summary><code>add_buffering_hooks</code></summary>
 
 ```php
 static public add_buffering_hooks( $args = array() )
@@ -28,7 +28,7 @@ Add actions and filters before the page is rendered so that the sanitizer can fi
 
 </details>
 <details>
-<summary>`get_selector_conversion_mapping`</summary>
+<summary><code>get_selector_conversion_mapping</code></summary>
 
 ```php
 public get_selector_conversion_mapping()
@@ -39,7 +39,7 @@ Get mapping of HTML selectors to the AMP component selectors which they may be c
 
 </details>
 <details>
-<summary>`init`</summary>
+<summary><code>init</code></summary>
 
 ```php
 public init( $sanitizers )
@@ -52,7 +52,7 @@ After the sanitizers are instantiated but before calling sanitize on each of the
 
 </details>
 <details>
-<summary>`sanitize`</summary>
+<summary><code>sanitize</code></summary>
 
 ```php
 abstract public sanitize()
@@ -63,7 +63,7 @@ Sanitize the HTML contained in the DOMDocument received by the constructor
 
 </details>
 <details>
-<summary>`get_scripts`</summary>
+<summary><code>get_scripts</code></summary>
 
 ```php
 public get_scripts()
@@ -76,7 +76,7 @@ Array keys are AMP element names and array values are their respective Javascrip
 
 </details>
 <details>
-<summary>`get_styles`</summary>
+<summary><code>get_styles</code></summary>
 
 ```php
 public get_styles()
@@ -87,7 +87,7 @@ Return array of values that would be valid as an HTML `style` attribute.
 
 </details>
 <details>
-<summary>`get_stylesheets`</summary>
+<summary><code>get_stylesheets</code></summary>
 
 ```php
 public get_stylesheets()
@@ -98,7 +98,7 @@ Get stylesheets.
 
 </details>
 <details>
-<summary>`get_body_node`</summary>
+<summary><code>get_body_node</code></summary>
 
 ```php
 protected get_body_node()
@@ -109,7 +109,7 @@ Get HTML body as DOMElement from Dom\Document received by the constructor.
 
 </details>
 <details>
-<summary>`sanitize_dimension`</summary>
+<summary><code>sanitize_dimension</code></summary>
 
 ```php
 public sanitize_dimension( $value, $dimension )
@@ -120,7 +120,7 @@ Sanitizes a CSS dimension specifier while being sensitive to dimension context.
 
 </details>
 <details>
-<summary>`is_empty_attribute_value`</summary>
+<summary><code>is_empty_attribute_value</code></summary>
 
 ```php
 public is_empty_attribute_value( $value )
@@ -131,7 +131,7 @@ Determine if an attribute value is empty.
 
 </details>
 <details>
-<summary>`set_layout`</summary>
+<summary><code>set_layout</code></summary>
 
 ```php
 public set_layout( $attributes )
@@ -142,7 +142,7 @@ Sets the layout, and possibly the &#039;height&#039; and &#039;width&#039; attri
 
 </details>
 <details>
-<summary>`add_or_append_attribute`</summary>
+<summary><code>add_or_append_attribute</code></summary>
 
 ```php
 public add_or_append_attribute( $attributes, $key, $value, $separator = ' ' )
@@ -155,7 +155,7 @@ Adds key and value to list of attributes, or if the key already exists in the ar
 
 </details>
 <details>
-<summary>`maybe_enforce_https_src`</summary>
+<summary><code>maybe_enforce_https_src</code></summary>
 
 ```php
 public maybe_enforce_https_src( $src, $force_https = false )
@@ -168,7 +168,7 @@ If not required, the implementing class may want to try and force https instead.
 
 </details>
 <details>
-<summary>`is_document_in_dev_mode`</summary>
+<summary><code>is_document_in_dev_mode</code></summary>
 
 ```php
 protected is_document_in_dev_mode()
@@ -179,7 +179,7 @@ Check whether the document of a given node is in dev mode.
 
 </details>
 <details>
-<summary>`has_dev_mode_exemption`</summary>
+<summary><code>has_dev_mode_exemption</code></summary>
 
 ```php
 protected has_dev_mode_exemption( \DOMNode $node )
@@ -190,7 +190,7 @@ Check whether a node is exempt from validation during dev mode.
 
 </details>
 <details>
-<summary>`is_exempt_from_validation`</summary>
+<summary><code>is_exempt_from_validation</code></summary>
 
 ```php
 protected is_exempt_from_validation( \DOMNode $node )
@@ -201,7 +201,7 @@ Check whether a certain node should be exempt from validation.
 
 </details>
 <details>
-<summary>`remove_invalid_child`</summary>
+<summary><code>remove_invalid_child</code></summary>
 
 ```php
 public remove_invalid_child( $node, $validation_error = array() )
@@ -214,7 +214,7 @@ Also, calls the mutation callback for it. This tracks all the nodes that were re
 
 </details>
 <details>
-<summary>`remove_invalid_attribute`</summary>
+<summary><code>remove_invalid_attribute</code></summary>
 
 ```php
 public remove_invalid_attribute( $element, $attribute, $validation_error = array(), $attr_spec = array() )
@@ -227,7 +227,7 @@ Also, calls the mutation callback for it. This tracks all the attributes that we
 
 </details>
 <details>
-<summary>`should_sanitize_validation_error`</summary>
+<summary><code>should_sanitize_validation_error</code></summary>
 
 ```php
 public should_sanitize_validation_error( $validation_error, $data = array() )
@@ -238,7 +238,7 @@ Check whether or not sanitization should occur in response to validation error.
 
 </details>
 <details>
-<summary>`prepare_validation_error`</summary>
+<summary><code>prepare_validation_error</code></summary>
 
 ```php
 public prepare_validation_error( array $error = array(), array $data = array() )
@@ -249,7 +249,7 @@ Prepare validation error.
 
 </details>
 <details>
-<summary>`clean_up_after_attribute_removal`</summary>
+<summary><code>clean_up_after_attribute_removal</code></summary>
 
 ```php
 protected clean_up_after_attribute_removal( $element, $attribute )
@@ -260,7 +260,7 @@ Cleans up artifacts after the removal of an attribute node.
 
 </details>
 <details>
-<summary>`get_data_amp_attributes`</summary>
+<summary><code>get_data_amp_attributes</code></summary>
 
 ```php
 public get_data_amp_attributes( $node )
@@ -271,7 +271,7 @@ Get data-amp-* values from the parent node &#039;figure&#039; added by editor bl
 
 </details>
 <details>
-<summary>`filter_data_amp_attributes`</summary>
+<summary><code>filter_data_amp_attributes</code></summary>
 
 ```php
 public filter_data_amp_attributes( $attributes, $amp_data )
@@ -282,7 +282,7 @@ Set AMP attributes.
 
 </details>
 <details>
-<summary>`filter_attachment_layout_attributes`</summary>
+<summary><code>filter_attachment_layout_attributes</code></summary>
 
 ```php
 public filter_attachment_layout_attributes( $node, $new_attributes, $layout )
@@ -293,7 +293,7 @@ Set attributes to node&#039;s parent element according to layout.
 
 </details>
 <details>
-<summary>`parse_style_string`</summary>
+<summary><code>parse_style_string</code></summary>
 
 ```php
 protected parse_style_string( $style_string )
@@ -304,7 +304,7 @@ Parse a style string into an associative array of style attributes.
 
 </details>
 <details>
-<summary>`reassemble_style_string`</summary>
+<summary><code>reassemble_style_string</code></summary>
 
 ```php
 protected reassemble_style_string( $styles )
@@ -315,7 +315,7 @@ Reassemble a style string that can be used in a &#039;style&#039; attribute.
 
 </details>
 <details>
-<summary>`get_validate_response_data`</summary>
+<summary><code>get_validate_response_data</code></summary>
 
 ```php
 public get_validate_response_data()

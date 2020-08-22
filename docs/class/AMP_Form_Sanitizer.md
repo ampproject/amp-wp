@@ -6,7 +6,7 @@ Strips and corrects attributes in forms.
 
 ### Methods
 <details>
-<summary>`sanitize`</summary>
+<summary><code>sanitize</code></summary>
 
 ```php
 public sanitize()
@@ -17,7 +17,7 @@ Sanitize the &lt;form&gt; elements from the HTML contained in this instance&#039
 
 </details>
 <details>
-<summary>`get_action_url`</summary>
+<summary><code>get_action_url</code></summary>
 
 ```php
 protected get_action_url( $action_url )
@@ -28,7 +28,7 @@ Get the action URL for the form element.
 
 </details>
 <details>
-<summary>`ensure_response_message_elements`</summary>
+<summary><code>ensure_response_message_elements</code></summary>
 
 ```php
 public ensure_response_message_elements( $form )

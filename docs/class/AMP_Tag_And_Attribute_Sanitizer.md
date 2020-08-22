@@ -7,7 +7,7 @@ Allowed tags array is generated from this protocol buffer:
 
 ### Methods
 <details>
-<summary>`__construct`</summary>
+<summary><code>__construct</code></summary>
 
 ```php
 public __construct( $dom, $args = array() )
@@ -18,7 +18,7 @@ AMP_Tag_And_Attribute_Sanitizer constructor.
 
 </details>
 <details>
-<summary>`get_scripts`</summary>
+<summary><code>get_scripts</code></summary>
 
 ```php
 public get_scripts()
@@ -31,7 +31,7 @@ Array keys are AMP element names and array values are their respective Javascrip
 
 </details>
 <details>
-<summary>`process_alternate_names`</summary>
+<summary><code>process_alternate_names</code></summary>
 
 ```php
 private process_alternate_names( $attr_spec_list )
@@ -42,7 +42,7 @@ Process alternative names in attribute spec list.
 
 </details>
 <details>
-<summary>`sanitize`</summary>
+<summary><code>sanitize</code></summary>
 
 ```php
 public sanitize()
@@ -53,7 +53,7 @@ Sanitize the elements from the HTML contained in this instance&#039;s Dom\Docume
 
 </details>
 <details>
-<summary>`sanitize_element`</summary>
+<summary><code>sanitize_element</code></summary>
 
 ```php
 private sanitize_element( \DOMElement $element )
@@ -66,7 +66,7 @@ Walk the DOM tree with depth first search (DFS) with post order traversal (LRN).
 
 </details>
 <details>
-<summary>`get_rule_spec_list_to_validate`</summary>
+<summary><code>get_rule_spec_list_to_validate</code></summary>
 
 ```php
 private get_rule_spec_list_to_validate( \DOMElement $node, $rule_spec )
@@ -77,7 +77,7 @@ Augment rule spec for validation.
 
 </details>
 <details>
-<summary>`process_node`</summary>
+<summary><code>process_node</code></summary>
 
 ```php
 private process_node( \DOMElement $node )
@@ -90,7 +90,7 @@ Attributes which are not valid are removed. Elements which are not allowed are a
 
 </details>
 <details>
-<summary>`is_missing_mandatory_attribute`</summary>
+<summary><code>is_missing_mandatory_attribute</code></summary>
 
 ```php
 public is_missing_mandatory_attribute( $attr_spec, \DOMElement $node )
@@ -101,7 +101,7 @@ Whether a node is missing a mandatory attribute.
 
 </details>
 <details>
-<summary>`get_missing_mandatory_attributes`</summary>
+<summary><code>get_missing_mandatory_attributes</code></summary>
 
 ```php
 private get_missing_mandatory_attributes( $attr_spec, \DOMElement $node )
@@ -112,7 +112,7 @@ Get list of mandatory missing mandatory attributes.
 
 </details>
 <details>
-<summary>`validate_cdata_for_node`</summary>
+<summary><code>validate_cdata_for_node</code></summary>
 
 ```php
 private validate_cdata_for_node( \DOMElement $element, $cdata_spec )
@@ -123,7 +123,7 @@ Validate element for its CDATA.
 
 </details>
 <details>
-<summary>`get_json_error_code`</summary>
+<summary><code>get_json_error_code</code></summary>
 
 ```php
 private get_json_error_code( $json_last_error )
@@ -134,7 +134,7 @@ Gets the JSON error code for the last error.
 
 </details>
 <details>
-<summary>`validate_tag_spec_for_node`</summary>
+<summary><code>validate_tag_spec_for_node</code></summary>
 
 ```php
 private validate_tag_spec_for_node( \DOMElement $node, $tag_spec )
@@ -148,7 +148,7 @@ Checks to see if a node&#039;s placement with the DOM is be valid for the given 
 
 </details>
 <details>
-<summary>`validate_attr_spec_list_for_node`</summary>
+<summary><code>validate_attr_spec_list_for_node</code></summary>
 
 ```php
 private validate_attr_spec_list_for_node( \DOMElement $node, $attr_spec_list )
@@ -166,7 +166,7 @@ Checks the given node based on the attributes present in the node. This does not
 
 </details>
 <details>
-<summary>`get_spec_name`</summary>
+<summary><code>get_spec_name</code></summary>
 
 ```php
 private get_spec_name( \DOMElement $element, $tag_spec )
@@ -177,7 +177,7 @@ Get spec name for a given tag spec.
 
 </details>
 <details>
-<summary>`sanitize_disallowed_attribute_values_in_node`</summary>
+<summary><code>sanitize_disallowed_attribute_values_in_node</code></summary>
 
 ```php
 private sanitize_disallowed_attribute_values_in_node( \DOMElement $node, $attr_spec_list )
@@ -190,7 +190,7 @@ Allowed values are found $this-&gt;globally_allowed_attributes and in parameter 
 
 </details>
 <details>
-<summary>`is_valid_layout`</summary>
+<summary><code>is_valid_layout</code></summary>
 
 ```php
 private is_valid_layout( $tag_spec, $node )
@@ -203,7 +203,7 @@ This involves checking the layout, width, height and sizes attributes with AMP s
 
 </details>
 <details>
-<summary>`is_inside_mustache_template`</summary>
+<summary><code>is_inside_mustache_template</code></summary>
 
 ```php
 private is_inside_mustache_template( \DOMElement $node )
@@ -214,7 +214,7 @@ Whether the node is inside a mustache template.
 
 </details>
 <details>
-<summary>`has_layout_attribute_with_mustache_variable`</summary>
+<summary><code>has_layout_attribute_with_mustache_variable</code></summary>
 
 ```php
 private has_layout_attribute_with_mustache_variable( \DOMElement $node )
@@ -227,7 +227,7 @@ This is important for whether to validate the layout of the node. Similar to the
 
 </details>
 <details>
-<summary>`calculate_width`</summary>
+<summary><code>calculate_width</code></summary>
 
 ```php
 private calculate_width( $amp_layout_spec, $input_layout, CssLength $input_width )
@@ -241,7 +241,7 @@ This involves considering that some elements, such as amp-audio and amp-pixel, h
 
 </details>
 <details>
-<summary>`calculate_height`</summary>
+<summary><code>calculate_height</code></summary>
 
 ```php
 private calculate_height( $amp_layout_spec, $input_layout, CssLength $input_height )
@@ -254,7 +254,7 @@ Adapted from the `CalculateHeight` method found in `validator.js` from the `ampp
 
 </details>
 <details>
-<summary>`calculate_layout`</summary>
+<summary><code>calculate_layout</code></summary>
 
 ```php
 private calculate_layout( $layout_attr, CssLength $width, CssLength $height, $sizes_attr, $heights_attr )
@@ -268,7 +268,7 @@ This depends on the width / height calculation above. It happens last because we
 
 </details>
 <details>
-<summary>`check_attr_spec_rule_mandatory`</summary>
+<summary><code>check_attr_spec_rule_mandatory</code></summary>
 
 ```php
 private check_attr_spec_rule_mandatory( \DOMElement $node, $attr_name, $attr_spec_rule )
@@ -281,7 +281,7 @@ When checking for the given attribute it also checks valid alternates.
 
 </details>
 <details>
-<summary>`get_element_attribute_intersection`</summary>
+<summary><code>get_element_attribute_intersection</code></summary>
 
 ```php
 private get_element_attribute_intersection( \DOMElement $element, $attribute_names )
@@ -292,7 +292,7 @@ Get the intersection of the element attributes with the supplied attributes.
 
 </details>
 <details>
-<summary>`check_attr_spec_rule_value`</summary>
+<summary><code>check_attr_spec_rule_value</code></summary>
 
 ```php
 private check_attr_spec_rule_value( \DOMElement $node, $attr_name, $attr_spec_rule )
@@ -305,7 +305,7 @@ Checks for value validity by matches against valid values.
 
 </details>
 <details>
-<summary>`check_matching_attribute_value`</summary>
+<summary><code>check_matching_attribute_value</code></summary>
 
 ```php
 private check_matching_attribute_value( $attr_name, $attr_value, $spec_values )
@@ -318,7 +318,7 @@ This takes into account boolean attributes where value can match name (e.g. sele
 
 </details>
 <details>
-<summary>`check_attr_spec_rule_value_casei`</summary>
+<summary><code>check_attr_spec_rule_value_casei</code></summary>
 
 ```php
 private check_attr_spec_rule_value_casei( \DOMElement $node, $attr_name, $attr_spec_rule )
@@ -329,7 +329,7 @@ Check if attribute has a value rule determine if its value matches ignoring case
 
 </details>
 <details>
-<summary>`check_attr_spec_rule_value_regex`</summary>
+<summary><code>check_attr_spec_rule_value_regex</code></summary>
 
 ```php
 private check_attr_spec_rule_value_regex( \DOMElement $node, $attr_name, $attr_spec_rule )
@@ -340,7 +340,7 @@ Check if attribute has a regex value rule determine if it matches.
 
 </details>
 <details>
-<summary>`check_attr_spec_rule_value_regex_casei`</summary>
+<summary><code>check_attr_spec_rule_value_regex_casei</code></summary>
 
 ```php
 private check_attr_spec_rule_value_regex_casei( \DOMElement $node, $attr_name, $attr_spec_rule )
@@ -351,7 +351,7 @@ Check if attribute has a case-insensitive regex value rule determine if it match
 
 </details>
 <details>
-<summary>`check_attr_spec_rule_valid_url`</summary>
+<summary><code>check_attr_spec_rule_valid_url</code></summary>
 
 ```php
 private check_attr_spec_rule_valid_url( \DOMElement $node, $attr_name, $attr_spec_rule )
@@ -362,7 +362,7 @@ Check if attribute has a valid host value
 
 </details>
 <details>
-<summary>`parse_protocol`</summary>
+<summary><code>parse_protocol</code></summary>
 
 ```php
 private parse_protocol( $url )
@@ -375,7 +375,7 @@ This may not be a valid protocol (scheme), but it will be where the protocol sho
 
 </details>
 <details>
-<summary>`normalize_url_from_attribute_value`</summary>
+<summary><code>normalize_url_from_attribute_value</code></summary>
 
 ```php
 private normalize_url_from_attribute_value( $url )
@@ -386,7 +386,7 @@ Normalize a URL that appeared as a tag attribute.
 
 </details>
 <details>
-<summary>`check_attr_spec_rule_allowed_protocol`</summary>
+<summary><code>check_attr_spec_rule_allowed_protocol</code></summary>
 
 ```php
 private check_attr_spec_rule_allowed_protocol( \DOMElement $node, $attr_name, $attr_spec_rule )
@@ -397,7 +397,7 @@ Check if attribute has a protocol value rule determine if it matches.
 
 </details>
 <details>
-<summary>`extract_attribute_urls`</summary>
+<summary><code>extract_attribute_urls</code></summary>
 
 ```php
 private extract_attribute_urls( \DOMAttr $attribute_node, $spec_attr_name = null )
@@ -408,7 +408,7 @@ Extract URLs from attribute.
 
 </details>
 <details>
-<summary>`check_attr_spec_rule_disallowed_relative`</summary>
+<summary><code>check_attr_spec_rule_disallowed_relative</code></summary>
 
 ```php
 private check_attr_spec_rule_disallowed_relative( \DOMElement $node, $attr_name, $attr_spec_rule )
@@ -419,7 +419,7 @@ Check if attribute has disallowed relative URL value according to rule spec.
 
 </details>
 <details>
-<summary>`check_attr_spec_rule_disallowed_empty`</summary>
+<summary><code>check_attr_spec_rule_disallowed_empty</code></summary>
 
 ```php
 private check_attr_spec_rule_disallowed_empty( \DOMElement $node, $attr_name, $attr_spec_rule )
@@ -430,7 +430,7 @@ Check if attribute has disallowed empty value rule determine if value is empty.
 
 </details>
 <details>
-<summary>`check_attr_spec_rule_disallowed_value_regex`</summary>
+<summary><code>check_attr_spec_rule_disallowed_value_regex</code></summary>
 
 ```php
 private check_attr_spec_rule_disallowed_value_regex( \DOMElement $node, $attr_name, $attr_spec_rule )
@@ -441,7 +441,7 @@ Check if attribute has disallowed value via regex match and determine if value m
 
 </details>
 <details>
-<summary>`parse_properties_attribute`</summary>
+<summary><code>parse_properties_attribute</code></summary>
 
 ```php
 private parse_properties_attribute( $value )
@@ -452,7 +452,7 @@ Parse properties attribute (e.g. meta viewport).
 
 </details>
 <details>
-<summary>`serialize_properties_attribute`</summary>
+<summary><code>serialize_properties_attribute</code></summary>
 
 ```php
 private serialize_properties_attribute( $properties )
@@ -463,7 +463,7 @@ Serialize properties attribute (e.g. meta viewport).
 
 </details>
 <details>
-<summary>`check_attr_spec_rule_value_properties`</summary>
+<summary><code>check_attr_spec_rule_value_properties</code></summary>
 
 ```php
 private check_attr_spec_rule_value_properties( \DOMElement $node, $attr_name, $attr_spec_rule )
@@ -474,7 +474,7 @@ Check if attribute has valid properties.
 
 </details>
 <details>
-<summary>`is_amp_allowed_attribute`</summary>
+<summary><code>is_amp_allowed_attribute</code></summary>
 
 ```php
 private is_amp_allowed_attribute( \DOMAttr $attr_node, $attr_spec_list )
@@ -485,7 +485,7 @@ Determine if the supplied attribute name is allowed for AMP.
 
 </details>
 <details>
-<summary>`is_amp_allowed_tag`</summary>
+<summary><code>is_amp_allowed_tag</code></summary>
 
 ```php
 private is_amp_allowed_tag( \DOMElement $node )
@@ -496,7 +496,7 @@ Determine if the supplied $node&#039;s HTML tag is allowed for AMP.
 
 </details>
 <details>
-<summary>`has_parent`</summary>
+<summary><code>has_parent</code></summary>
 
 ```php
 private has_parent( \DOMElement $node, $parent_spec_name )
@@ -507,7 +507,7 @@ Determine if the supplied $node has a parent with the specified spec name.
 
 </details>
 <details>
-<summary>`has_ancestor`</summary>
+<summary><code>has_ancestor</code></summary>
 
 ```php
 private has_ancestor( \DOMElement $node, $ancestor_tag_spec_name )
@@ -518,7 +518,7 @@ Determine if the supplied $node has an ancestor with the specified tag name.
 
 </details>
 <details>
-<summary>`parse_tag_and_attributes_from_spec_name`</summary>
+<summary><code>parse_tag_and_attributes_from_spec_name</code></summary>
 
 ```php
 private parse_tag_and_attributes_from_spec_name( $spec_name )
@@ -531,7 +531,7 @@ Given a spec name like &#039;form [method=post]&#039;, extract the tag name &#03
 
 </details>
 <details>
-<summary>`remove_disallowed_descendants`</summary>
+<summary><code>remove_disallowed_descendants</code></summary>
 
 ```php
 private remove_disallowed_descendants( \DOMElement $node, $allowed_descendants, $spec_name )
@@ -542,7 +542,7 @@ Loop through node&#039;s descendants and remove the ones that are not in the all
 
 </details>
 <details>
-<summary>`check_valid_children`</summary>
+<summary><code>check_valid_children</code></summary>
 
 ```php
 private check_valid_children( \DOMElement $node, $child_tags )
@@ -553,7 +553,7 @@ Check whether the node validates the constraints for children.
 
 </details>
 <details>
-<summary>`get_ancestor_with_matching_spec_name`</summary>
+<summary><code>get_ancestor_with_matching_spec_name</code></summary>
 
 ```php
 private get_ancestor_with_matching_spec_name( \DOMElement $node, $ancestor_spec_name )
@@ -564,7 +564,7 @@ Get the first ancestor node matching the specified tag name for the supplied $no
 
 </details>
 <details>
-<summary>`replace_node_with_children`</summary>
+<summary><code>replace_node_with_children</code></summary>
 
 ```php
 private replace_node_with_children( \DOMElement $node )
@@ -577,7 +577,7 @@ Also adds them to the stack for processing by the sanitize() function.
 
 </details>
 <details>
-<summary>`remove_node`</summary>
+<summary><code>remove_node</code></summary>
 
 ```php
 private remove_node( \DOMElement $node )
@@ -590,7 +590,7 @@ If removing the node makes the parent node empty, then it will remove the parent
 
 </details>
 <details>
-<summary>`supports_layout`</summary>
+<summary><code>supports_layout</code></summary>
 
 ```php
 private supports_layout( $tag_spec, $layout, $fallback = false )

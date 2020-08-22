@@ -4,7 +4,7 @@ Class AMP_Post_Type_Support.
 
 ### Methods
 <details>
-<summary>`get_builtin_supported_post_types`</summary>
+<summary><code>get_builtin_supported_post_types</code></summary>
 
 ```php
 static public get_builtin_supported_post_types()
@@ -15,7 +15,7 @@ Get post types that plugin supports out of the box (which cannot be disabled).
 
 </details>
 <details>
-<summary>`get_eligible_post_types`</summary>
+<summary><code>get_eligible_post_types</code></summary>
 
 ```php
 static public get_eligible_post_types()
@@ -26,7 +26,7 @@ Get post types that are eligible for AMP support.
 
 </details>
 <details>
-<summary>`get_post_types_for_rest_api`</summary>
+<summary><code>get_post_types_for_rest_api</code></summary>
 
 ```php
 static public get_post_types_for_rest_api()
@@ -37,7 +37,7 @@ Get post types that can be shown in the REST API and supports AMP.
 
 </details>
 <details>
-<summary>`get_supported_post_types`</summary>
+<summary><code>get_supported_post_types</code></summary>
 
 ```php
 static public get_supported_post_types()
@@ -48,7 +48,7 @@ Get supported post types.
 
 </details>
 <details>
-<summary>`add_post_type_support`</summary>
+<summary><code>add_post_type_support</code></summary>
 
 ```php
 static public add_post_type_support()
@@ -61,7 +61,7 @@ This function should only be invoked through the &#039;after_setup_theme&#039; a
 
 </details>
 <details>
-<summary>`get_support_errors`</summary>
+<summary><code>get_support_errors</code></summary>
 
 ```php
 static public get_support_errors( $post )

@@ -4,7 +4,7 @@ A simplified implementation of a dependency injector.
 
 ### Methods
 <details>
-<summary>`__construct`</summary>
+<summary><code>__construct</code></summary>
 
 ```php
 public __construct( Instantiator $instantiator = null )
@@ -15,7 +15,7 @@ Instantiate a SimpleInjector object.
 
 </details>
 <details>
-<summary>`make`</summary>
+<summary><code>make</code></summary>
 
 ```php
 public make( $interface_or_class, $arguments = array() )
@@ -26,7 +26,7 @@ Make an object instance out of an interface or class.
 
 </details>
 <details>
-<summary>`bind`</summary>
+<summary><code>bind</code></summary>
 
 ```php
 public bind( $from, $to )
@@ -39,7 +39,7 @@ Note: The implementation can be an interface as well, as long as it can be resol
 
 </details>
 <details>
-<summary>`bind_argument`</summary>
+<summary><code>bind_argument</code></summary>
 
 ```php
 public bind_argument( $interface_or_class, $argument_name, $value )
@@ -50,7 +50,7 @@ Bind an argument for a class to a specific value.
 
 </details>
 <details>
-<summary>`share`</summary>
+<summary><code>share</code></summary>
 
 ```php
 public share( $interface_or_class )
@@ -61,7 +61,7 @@ Always reuse and share the same instance for the provided interface or class.
 
 </details>
 <details>
-<summary>`delegate`</summary>
+<summary><code>delegate</code></summary>
 
 ```php
 public delegate( $interface_or_class, callable $callable )
@@ -72,7 +72,7 @@ Delegate instantiation of an interface or class to a callable.
 
 </details>
 <details>
-<summary>`make_dependency`</summary>
+<summary><code>make_dependency</code></summary>
 
 ```php
 private make_dependency( \AmpProject\AmpWP\Infrastructure\Injector\InjectionChain $injection_chain, $interface_or_class )
@@ -83,7 +83,7 @@ Make an object instance out of an interface or class.
 
 </details>
 <details>
-<summary>`resolve`</summary>
+<summary><code>resolve</code></summary>
 
 ```php
 private resolve( \AmpProject\AmpWP\Infrastructure\Injector\InjectionChain $injection_chain, $interface_or_class )
@@ -94,7 +94,7 @@ Recursively resolve an interface to the class it should be bound to.
 
 </details>
 <details>
-<summary>`get_dependencies_for`</summary>
+<summary><code>get_dependencies_for</code></summary>
 
 ```php
 private get_dependencies_for( \AmpProject\AmpWP\Infrastructure\Injector\InjectionChain $injection_chain, ReflectionClass $reflection, $arguments = array() )
@@ -105,7 +105,7 @@ Get the array of constructor dependencies for a given reflected class.
 
 </details>
 <details>
-<summary>`ensure_is_instantiable`</summary>
+<summary><code>ensure_is_instantiable</code></summary>
 
 ```php
 private ensure_is_instantiable( ReflectionClass $reflection )
@@ -116,7 +116,7 @@ Ensure that a given reflected class is instantiable.
 
 </details>
 <details>
-<summary>`resolve_argument`</summary>
+<summary><code>resolve_argument</code></summary>
 
 ```php
 private resolve_argument( \AmpProject\AmpWP\Infrastructure\Injector\InjectionChain $injection_chain, $class, ReflectionParameter $parameter, $arguments )
@@ -127,7 +127,7 @@ Resolve a given reflected argument.
 
 </details>
 <details>
-<summary>`resolve_argument_by_name`</summary>
+<summary><code>resolve_argument_by_name</code></summary>
 
 ```php
 private resolve_argument_by_name( $class, ReflectionParameter $parameter, $arguments )
@@ -138,7 +138,7 @@ Resolve a given reflected argument by its name.
 
 </details>
 <details>
-<summary>`has_shared_instance`</summary>
+<summary><code>has_shared_instance</code></summary>
 
 ```php
 private has_shared_instance( $class )
@@ -149,7 +149,7 @@ Check whether a shared instance exists for a given class.
 
 </details>
 <details>
-<summary>`get_shared_instance`</summary>
+<summary><code>get_shared_instance</code></summary>
 
 ```php
 private get_shared_instance( $class )
@@ -160,7 +160,7 @@ Get the shared instance for a given class.
 
 </details>
 <details>
-<summary>`has_delegate`</summary>
+<summary><code>has_delegate</code></summary>
 
 ```php
 private has_delegate( $class )
@@ -171,7 +171,7 @@ Check whether a delegate exists for a given class.
 
 </details>
 <details>
-<summary>`get_delegate`</summary>
+<summary><code>get_delegate</code></summary>
 
 ```php
 private get_delegate( $class )
@@ -182,7 +182,7 @@ Get the delegate for a given class.
 
 </details>
 <details>
-<summary>`get_class_reflection`</summary>
+<summary><code>get_class_reflection</code></summary>
 
 ```php
 private get_class_reflection( $class )

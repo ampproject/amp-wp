@@ -7,7 +7,7 @@ Adapts links for AMP-to-AMP navigation:  - In paired AMP (Transitional and Reade
 
 ### Methods
 <details>
-<summary>`__construct`</summary>
+<summary><code>__construct</code></summary>
 
 ```php
 public __construct( $dom, array $args = array() )
@@ -18,7 +18,7 @@ Sanitizer constructor.
 
 </details>
 <details>
-<summary>`sanitize`</summary>
+<summary><code>sanitize</code></summary>
 
 ```php
 public sanitize()
@@ -29,7 +29,7 @@ Sanitize.
 
 </details>
 <details>
-<summary>`add_meta_tag`</summary>
+<summary><code>add_meta_tag</code></summary>
 
 ```php
 public add_meta_tag( $content = self::DEFAULT_META_CONTENT )
@@ -40,7 +40,7 @@ Add the amp-to-amp-navigation meta tag.
 
 </details>
 <details>
-<summary>`process_links`</summary>
+<summary><code>process_links</code></summary>
 
 ```php
 public process_links()
@@ -51,7 +51,7 @@ Process links by adding adding AMP query var to links in paired mode and adding 
 
 </details>
 <details>
-<summary>`process_element`</summary>
+<summary><code>process_element</code></summary>
 
 ```php
 private process_element( \DOMElement $element, $attribute_name )
@@ -62,7 +62,7 @@ Process element.
 
 </details>
 <details>
-<summary>`is_frontend_url`</summary>
+<summary><code>is_frontend_url</code></summary>
 
 ```php
 public is_frontend_url( $url )

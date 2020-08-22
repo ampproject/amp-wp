@@ -6,7 +6,7 @@ Fixes up common issues in core themes and others.
 
 ### Methods
 <details>
-<summary>`get_theme_features_config`</summary>
+<summary><code>get_theme_features_config</code></summary>
 
 ```php
 static protected get_theme_features_config( $theme_slug )
@@ -17,7 +17,7 @@ Retrieve the config for features needed by a theme.
 
 </details>
 <details>
-<summary>`get_supported_themes`</summary>
+<summary><code>get_supported_themes</code></summary>
 
 ```php
 static public get_supported_themes()
@@ -28,7 +28,7 @@ Get list of supported core themes.
 
 </details>
 <details>
-<summary>`get_acceptable_errors`</summary>
+<summary><code>get_acceptable_errors</code></summary>
 
 ```php
 static public get_acceptable_errors()
@@ -39,7 +39,7 @@ Get the acceptable validation errors.
 
 </details>
 <details>
-<summary>`extend_theme_support`</summary>
+<summary><code>extend_theme_support</code></summary>
 
 ```php
 static public extend_theme_support()
@@ -52,7 +52,7 @@ This method is neither a buffering hook nor a sanitization callback and is calle
 
 </details>
 <details>
-<summary>`get_theme_support_args`</summary>
+<summary><code>get_theme_support_args</code></summary>
 
 ```php
 static protected get_theme_support_args( $theme )
@@ -63,7 +63,7 @@ Returns extra arguments to pass to `add_theme_support()`.
 
 </details>
 <details>
-<summary>`get_theme_config`</summary>
+<summary><code>get_theme_config</code></summary>
 
 ```php
 static protected get_theme_config( $theme )
@@ -74,7 +74,7 @@ Get theme config.
 
 </details>
 <details>
-<summary>`get_theme_features`</summary>
+<summary><code>get_theme_features</code></summary>
 
 ```php
 static protected get_theme_features( $args, $static = false )
@@ -85,7 +85,7 @@ Find theme features for core theme.
 
 </details>
 <details>
-<summary>`add_buffering_hooks`</summary>
+<summary><code>add_buffering_hooks</code></summary>
 
 ```php
 static public add_buffering_hooks( $args = array() )
@@ -96,7 +96,7 @@ Add filters to manipulate output during output buffering before the DOM is const
 
 </details>
 <details>
-<summary>`set_twentyseventeen_quotes_icon`</summary>
+<summary><code>set_twentyseventeen_quotes_icon</code></summary>
 
 ```php
 static public set_twentyseventeen_quotes_icon()
@@ -109,7 +109,7 @@ This is only used in Twenty Seventeen.
 
 </details>
 <details>
-<summary>`add_twentyseventeen_attachment_image_attributes`</summary>
+<summary><code>add_twentyseventeen_attachment_image_attributes</code></summary>
 
 ```php
 static public add_twentyseventeen_attachment_image_attributes()
@@ -122,7 +122,7 @@ This is only used in Twenty Seventeen.
 
 </details>
 <details>
-<summary>`sanitize`</summary>
+<summary><code>sanitize</code></summary>
 
 ```php
 public sanitize()
@@ -133,7 +133,7 @@ Fix up core themes to do things in the AMP way.
 
 </details>
 <details>
-<summary>`prevent_sanitize_in_customizer_preview`</summary>
+<summary><code>prevent_sanitize_in_customizer_preview</code></summary>
 
 ```php
 public prevent_sanitize_in_customizer_preview( $xpaths = array() )
@@ -144,7 +144,7 @@ Adds the data-ampdevmode attribute to the set of specified elements to prevent f
 
 </details>
 <details>
-<summary>`dequeue_scripts`</summary>
+<summary><code>dequeue_scripts</code></summary>
 
 ```php
 static public dequeue_scripts( $handles = array() )
@@ -155,7 +155,7 @@ Dequeue scripts.
 
 </details>
 <details>
-<summary>`remove_actions`</summary>
+<summary><code>remove_actions</code></summary>
 
 ```php
 static public remove_actions( $actions = array() )
@@ -166,7 +166,7 @@ Remove actions.
 
 </details>
 <details>
-<summary>`add_smooth_scrolling`</summary>
+<summary><code>add_smooth_scrolling</code></summary>
 
 ```php
 public add_smooth_scrolling( $link_xpaths )
@@ -177,7 +177,7 @@ Add smooth scrolling from link to target element.
 
 </details>
 <details>
-<summary>`force_svg_support`</summary>
+<summary><code>force_svg_support</code></summary>
 
 ```php
 public force_svg_support()
@@ -188,7 +188,7 @@ Force SVG support, replacing no-svg class name with svg class name.
 
 </details>
 <details>
-<summary>`force_fixed_background_support`</summary>
+<summary><code>force_fixed_background_support</code></summary>
 
 ```php
 public force_fixed_background_support()
@@ -199,7 +199,7 @@ Force support for fixed background-attachment.
 
 </details>
 <details>
-<summary>`add_has_header_video_body_class`</summary>
+<summary><code>add_has_header_video_body_class</code></summary>
 
 ```php
 static public add_has_header_video_body_class( $args = array() )
@@ -210,7 +210,7 @@ Add body class when there is a header video.
 
 </details>
 <details>
-<summary>`get_twentyseventeen_navigation_outer_height`</summary>
+<summary><code>get_twentyseventeen_navigation_outer_height</code></summary>
 
 ```php
 static protected get_twentyseventeen_navigation_outer_height()
@@ -221,7 +221,7 @@ Get the (common) navigation outer height.
 
 </details>
 <details>
-<summary>`add_twentytwenty_masthead_styles`</summary>
+<summary><code>add_twentytwenty_masthead_styles</code></summary>
 
 ```php
 static public add_twentytwenty_masthead_styles()
@@ -232,7 +232,7 @@ Add required styles for featured image header and image blocks in Twenty Twenty.
 
 </details>
 <details>
-<summary>`add_twentytwenty_custom_logo_fix`</summary>
+<summary><code>add_twentytwenty_custom_logo_fix</code></summary>
 
 ```php
 static public add_twentytwenty_custom_logo_fix()
@@ -245,7 +245,7 @@ This is required because width:auto on the site-logo amp-img does not preserve t
 
 </details>
 <details>
-<summary>`add_img_display_block_fix`</summary>
+<summary><code>add_img_display_block_fix</code></summary>
 
 ```php
 static public add_img_display_block_fix()
@@ -258,7 +258,7 @@ This is needed to override the AMP core stylesheet which has a more specific sel
 
 </details>
 <details>
-<summary>`add_twentynineteen_masthead_styles`</summary>
+<summary><code>add_twentynineteen_masthead_styles</code></summary>
 
 ```php
 static public add_twentynineteen_masthead_styles()
@@ -271,7 +271,7 @@ The following is necessary because the styles in the theme apply to the featured
 
 </details>
 <details>
-<summary>`add_twentyseventeen_masthead_styles`</summary>
+<summary><code>add_twentyseventeen_masthead_styles</code></summary>
 
 ```php
 static public add_twentyseventeen_masthead_styles()
@@ -284,7 +284,7 @@ This is currently used exclusively for Twenty Seventeen.
 
 </details>
 <details>
-<summary>`add_twentyseventeen_image_styles`</summary>
+<summary><code>add_twentyseventeen_image_styles</code></summary>
 
 ```php
 static public add_twentyseventeen_image_styles()
@@ -297,7 +297,7 @@ Used only for Twenty Seventeen.
 
 </details>
 <details>
-<summary>`add_twentyseventeen_sticky_nav_menu`</summary>
+<summary><code>add_twentyseventeen_sticky_nav_menu</code></summary>
 
 ```php
 public add_twentyseventeen_sticky_nav_menu()
@@ -310,7 +310,7 @@ This is implemented by cloning the navigation-top element, giving it a fixed pos
 
 </details>
 <details>
-<summary>`add_nav_menu_styles`</summary>
+<summary><code>add_nav_menu_styles</code></summary>
 
 ```php
 static public add_nav_menu_styles( $args = array() )
@@ -321,7 +321,7 @@ Add styles for the nav menu specifically to deal with AMP running in a no-js con
 
 </details>
 <details>
-<summary>`adjust_twentynineteen_images`</summary>
+<summary><code>adjust_twentynineteen_images</code></summary>
 
 ```php
 static public adjust_twentynineteen_images()
@@ -332,7 +332,7 @@ Adjust images in twentynineteen.
 
 </details>
 <details>
-<summary>`add_twentyfourteen_masthead_styles`</summary>
+<summary><code>add_twentyfourteen_masthead_styles</code></summary>
 
 ```php
 static public add_twentyfourteen_masthead_styles()
@@ -343,7 +343,7 @@ Add styles for Twenty Fourteen masthead.
 
 </details>
 <details>
-<summary>`add_twentyfourteen_slider_carousel`</summary>
+<summary><code>add_twentyfourteen_slider_carousel</code></summary>
 
 ```php
 public add_twentyfourteen_slider_carousel()
@@ -354,7 +354,7 @@ Add amp-carousel for slider in Twenty Fourteen.
 
 </details>
 <details>
-<summary>`add_twentyfourteen_search`</summary>
+<summary><code>add_twentyfourteen_search</code></summary>
 
 ```php
 public add_twentyfourteen_search()
@@ -365,7 +365,7 @@ Use AMP-based solutions for toggling search bar in Twenty Fourteen.
 
 </details>
 <details>
-<summary>`wrap_modal_in_lightbox`</summary>
+<summary><code>wrap_modal_in_lightbox</code></summary>
 
 ```php
 public wrap_modal_in_lightbox( $args = array() )
@@ -376,7 +376,7 @@ Wrap a modal node tree in an &lt;amp-lightbox&gt; element.
 
 </details>
 <details>
-<summary>`add_twentytwenty_modals`</summary>
+<summary><code>add_twentytwenty_modals</code></summary>
 
 ```php
 public add_twentytwenty_modals()
@@ -389,7 +389,7 @@ Modals implemented in JS will be transformed into &lt;amp-lightbox&gt; equivalen
 
 </details>
 <details>
-<summary>`add_twentytwenty_toggles`</summary>
+<summary><code>add_twentytwenty_toggles</code></summary>
 
 ```php
 public add_twentytwenty_toggles()
@@ -402,7 +402,7 @@ Toggles implemented in JS will be transformed into &lt;amp-bind&gt; equivalents,
 
 </details>
 <details>
-<summary>`get_closest_submenu`</summary>
+<summary><code>get_closest_submenu</code></summary>
 
 ```php
 protected get_closest_submenu( \DOMElement $element )
@@ -413,7 +413,7 @@ Get the closest sub-menu within a menu item.
 
 </details>
 <details>
-<summary>`add_twentytwenty_current_page_awareness`</summary>
+<summary><code>add_twentytwenty_current_page_awareness</code></summary>
 
 ```php
 public add_twentytwenty_current_page_awareness()
@@ -424,7 +424,7 @@ Automatically open the submenus related to the current page in the menu modal.
 
 </details>
 <details>
-<summary>`xpath_from_css_selector`</summary>
+<summary><code>xpath_from_css_selector</code></summary>
 
 ```php
 protected xpath_from_css_selector( $css_selector )
@@ -437,7 +437,7 @@ This is a very simplistic conversion and will only work for very basic CSS selec
 
 </details>
 <details>
-<summary>`guess_modal_role`</summary>
+<summary><code>guess_modal_role</code></summary>
 
 ```php
 protected guess_modal_role( \DOMElement $modal )

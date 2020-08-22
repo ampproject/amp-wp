@@ -7,7 +7,7 @@ It can decide whether to return a shared or a fresh instance as needed.
 
 ### Methods
 <details>
-<summary>`create`</summary>
+<summary><code>create</code></summary>
 
 ```php
 static public create()

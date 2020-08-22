@@ -6,7 +6,7 @@ Functionality to simplify working with Dom\Documents and DOMElements.
 
 ### Methods
 <details>
-<summary>`get_dom`</summary>
+<summary><code>get_dom</code></summary>
 
 ```php
 static public get_dom( $document, $encoding = null )
@@ -17,7 +17,7 @@ Return a valid Dom\Document representing HTML document passed as a parameter.
 
 </details>
 <details>
-<summary>`is_valid_head_node`</summary>
+<summary><code>is_valid_head_node</code></summary>
 
 ```php
 static public is_valid_head_node( \DOMNode $node )
@@ -28,7 +28,7 @@ Determine whether a node can be in the head.
 
 </details>
 <details>
-<summary>`get_amp_bind_placeholder_prefix`</summary>
+<summary><code>get_amp_bind_placeholder_prefix</code></summary>
 
 ```php
 static public get_amp_bind_placeholder_prefix()
@@ -41,7 +41,7 @@ This contains a random string to prevent HTML content containing this data- attr
 
 </details>
 <details>
-<summary>`convert_amp_bind_attributes`</summary>
+<summary><code>convert_amp_bind_attributes</code></summary>
 
 ```php
 static public convert_amp_bind_attributes( $html )
@@ -54,7 +54,7 @@ This is necessary because attributes in square brackets are not understood in PH
 
 </details>
 <details>
-<summary>`restore_amp_bind_attributes`</summary>
+<summary><code>restore_amp_bind_attributes</code></summary>
 
 ```php
 static public restore_amp_bind_attributes( $html )
@@ -67,7 +67,7 @@ This is a reciprocal function of AMP_DOM_Utils::convert_amp_bind_attributes().
 
 </details>
 <details>
-<summary>`get_dom_from_content`</summary>
+<summary><code>get_dom_from_content</code></summary>
 
 ```php
 static public get_dom_from_content( $content, $encoding = null )
@@ -78,7 +78,7 @@ Return a valid Dom\Document representing arbitrary HTML content passed as a para
 
 </details>
 <details>
-<summary>`get_content_from_dom`</summary>
+<summary><code>get_content_from_dom</code></summary>
 
 ```php
 static public get_content_from_dom( Document $dom )
@@ -89,7 +89,7 @@ Return valid HTML *body* content extracted from the Dom\Document passed as a par
 
 </details>
 <details>
-<summary>`get_content_from_dom_node`</summary>
+<summary><code>get_content_from_dom_node</code></summary>
 
 ```php
 static public get_content_from_dom_node( Document $dom, $node )
@@ -100,7 +100,7 @@ Return valid HTML content extracted from the DOMNode passed as a parameter.
 
 </details>
 <details>
-<summary>`create_node`</summary>
+<summary><code>create_node</code></summary>
 
 ```php
 static public create_node( Document $dom, $tag, $attributes )
@@ -111,7 +111,7 @@ Create a new node w/attributes (a DOMElement) and add to the passed Dom\Document
 
 </details>
 <details>
-<summary>`get_node_attributes_as_assoc_array`</summary>
+<summary><code>get_node_attributes_as_assoc_array</code></summary>
 
 ```php
 static public get_node_attributes_as_assoc_array( $node )
@@ -122,7 +122,7 @@ Extract a DOMElement node&#039;s HTML element attributes and return as an array.
 
 </details>
 <details>
-<summary>`add_attributes_to_node`</summary>
+<summary><code>add_attributes_to_node</code></summary>
 
 ```php
 static public add_attributes_to_node( $node, $attributes )
@@ -133,7 +133,7 @@ Add one or more HTML element attributes to a node&#039;s DOMElement.
 
 </details>
 <details>
-<summary>`is_node_empty`</summary>
+<summary><code>is_node_empty</code></summary>
 
 ```php
 static public is_node_empty( $node )
@@ -146,7 +146,7 @@ Determines if a DOMElement&#039;s node is empty or not.
 
 </details>
 <details>
-<summary>`recursive_force_closing_tags`</summary>
+<summary><code>recursive_force_closing_tags</code></summary>
 
 ```php
 static public recursive_force_closing_tags( $dom, $node = null )
@@ -157,7 +157,7 @@ Forces HTML element closing tags given a Dom\Document and optional DOMElement
 
 </details>
 <details>
-<summary>`is_self_closing_tag`</summary>
+<summary><code>is_self_closing_tag</code></summary>
 
 ```php
 static private is_self_closing_tag( $tag )
@@ -168,7 +168,7 @@ Determines if an HTML element tag is validly a self-closing tag per W3C HTML5 sp
 
 </details>
 <details>
-<summary>`has_class`</summary>
+<summary><code>has_class</code></summary>
 
 ```php
 static public has_class( \DOMElement $element, $class )
@@ -179,7 +179,7 @@ Check whether a given element has a specific class.
 
 </details>
 <details>
-<summary>`get_element_id`</summary>
+<summary><code>get_element_id</code></summary>
 
 ```php
 static public get_element_id( $element, $prefix = 'amp-wp-id' )
@@ -192,7 +192,7 @@ If the element does not have an ID, create one first.
 
 </details>
 <details>
-<summary>`add_amp_action`</summary>
+<summary><code>add_amp_action</code></summary>
 
 ```php
 static public add_amp_action( \DOMElement $element, $event, $action )
@@ -205,7 +205,7 @@ If the element already contains one or more events or actions, the method will a
 
 </details>
 <details>
-<summary>`merge_amp_actions`</summary>
+<summary><code>merge_amp_actions</code></summary>
 
 ```php
 static public merge_amp_actions( $first, $second )
@@ -216,7 +216,7 @@ Merge two sets of AMP events &amp; actions.
 
 </details>
 <details>
-<summary>`copy_attributes`</summary>
+<summary><code>copy_attributes</code></summary>
 
 ```php
 static public copy_attributes( $attributes, \DOMElement $from, \DOMElement $to, $default_separator = ',' )

@@ -6,7 +6,7 @@ Converts &lt;iframe&gt; tags to &lt;amp-iframe&gt;
 
 ### Methods
 <details>
-<summary>`get_selector_conversion_mapping`</summary>
+<summary><code>get_selector_conversion_mapping</code></summary>
 
 ```php
 public get_selector_conversion_mapping()
@@ -17,7 +17,7 @@ Get mapping of HTML selectors to the AMP component selectors which they may be c
 
 </details>
 <details>
-<summary>`sanitize`</summary>
+<summary><code>sanitize</code></summary>
 
 ```php
 public sanitize()
@@ -28,7 +28,7 @@ Sanitize the &lt;iframe&gt; elements from the HTML contained in this instance&#0
 
 </details>
 <details>
-<summary>`normalize_attributes`</summary>
+<summary><code>normalize_attributes</code></summary>
 
 ```php
 private normalize_attributes( $attributes )
@@ -39,7 +39,7 @@ Normalize HTML attributes for &lt;amp-iframe&gt; elements.
 
 </details>
 <details>
-<summary>`get_origin_from_url`</summary>
+<summary><code>get_origin_from_url</code></summary>
 
 ```php
 private get_origin_from_url( $url )
@@ -50,7 +50,7 @@ Obtain the origin part of a given URL (scheme, host, port).
 
 </details>
 <details>
-<summary>`build_placeholder`</summary>
+<summary><code>build_placeholder</code></summary>
 
 ```php
 private build_placeholder()
@@ -63,7 +63,7 @@ Important: The element returned must not be block-level (e.g. div) as the PHP DO
 
 </details>
 <details>
-<summary>`sanitize_boolean_digit`</summary>
+<summary><code>sanitize_boolean_digit</code></summary>
 
 ```php
 private sanitize_boolean_digit( $value )

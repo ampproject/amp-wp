@@ -4,7 +4,7 @@ Record the timing of multiple events.
 
 ### Methods
 <details>
-<summary>`start`</summary>
+<summary><code>start</code></summary>
 
 ```php
 public start( $name )
@@ -15,7 +15,7 @@ Start a named event.
 
 </details>
 <details>
-<summary>`stop`</summary>
+<summary><code>stop</code></summary>
 
 ```php
 public stop( $name )

@@ -4,7 +4,7 @@ Suppress plugins from running by removing their hooks and nullifying their short
 
 ### Methods
 <details>
-<summary>`__construct`</summary>
+<summary><code>__construct</code></summary>
 
 ```php
 public __construct( \AmpProject\AmpWP\PluginRegistry $plugin_registry )
@@ -15,7 +15,7 @@ Instantiate the plugin suppression service.
 
 </details>
 <details>
-<summary>`register`</summary>
+<summary><code>register</code></summary>
 
 ```php
 public register()
@@ -26,7 +26,7 @@ Register the service with the system.
 
 </details>
 <details>
-<summary>`is_reader_theme_request`</summary>
+<summary><code>is_reader_theme_request</code></summary>
 
 ```php
 public is_reader_theme_request()
@@ -37,7 +37,7 @@ Is reader theme request.
 
 </details>
 <details>
-<summary>`filter_default_options`</summary>
+<summary><code>filter_default_options</code></summary>
 
 ```php
 public filter_default_options( $defaults )
@@ -48,7 +48,7 @@ Add default option.
 
 </details>
 <details>
-<summary>`maybe_suppress_plugins`</summary>
+<summary><code>maybe_suppress_plugins</code></summary>
 
 ```php
 public maybe_suppress_plugins()
@@ -59,7 +59,7 @@ Suppress plugins if on an AMP endpoint.
 
 </details>
 <details>
-<summary>`suppress_plugins`</summary>
+<summary><code>suppress_plugins</code></summary>
 
 ```php
 public suppress_plugins()
@@ -70,7 +70,7 @@ Suppress plugins.
 
 </details>
 <details>
-<summary>`sanitize_options`</summary>
+<summary><code>sanitize_options</code></summary>
 
 ```php
 public sanitize_options( $options, $new_options )
@@ -81,7 +81,7 @@ Sanitize options.
 
 </details>
 <details>
-<summary>`get_sorted_plugin_validation_errors`</summary>
+<summary><code>get_sorted_plugin_validation_errors</code></summary>
 
 ```php
 private get_sorted_plugin_validation_errors( $plugin_slug )
@@ -92,7 +92,7 @@ Provides validation errors for a plugin specified by slug.
 
 </details>
 <details>
-<summary>`get_suppressible_plugins_with_details`</summary>
+<summary><code>get_suppressible_plugins_with_details</code></summary>
 
 ```php
 public get_suppressible_plugins_with_details()
@@ -105,7 +105,7 @@ Plugins are sorted by validation error count, in descending order.
 
 </details>
 <details>
-<summary>`prepare_suppressed_plugins_for_response`</summary>
+<summary><code>prepare_suppressed_plugins_for_response</code></summary>
 
 ```php
 public prepare_suppressed_plugins_for_response( $suppressed_plugins )
@@ -118,7 +118,7 @@ Augment the suppressed plugins data with additional information.
 
 </details>
 <details>
-<summary>`prepare_user_for_response`</summary>
+<summary><code>prepare_user_for_response</code></summary>
 
 ```php
 private prepare_user_for_response( $username )
@@ -129,7 +129,7 @@ Prepare user for response.
 
 </details>
 <details>
-<summary>`suppress_hooks`</summary>
+<summary><code>suppress_hooks</code></summary>
 
 ```php
 private suppress_hooks( $suppressed_plugins )
@@ -140,7 +140,7 @@ Suppress plugin hooks.
 
 </details>
 <details>
-<summary>`suppress_shortcodes`</summary>
+<summary><code>suppress_shortcodes</code></summary>
 
 ```php
 private suppress_shortcodes( $suppressed_plugins )
@@ -151,7 +151,7 @@ Suppress plugin shortcodes.
 
 </details>
 <details>
-<summary>`suppress_blocks`</summary>
+<summary><code>suppress_blocks</code></summary>
 
 ```php
 private suppress_blocks( $suppressed_plugins )
@@ -162,7 +162,7 @@ Suppress plugin blocks.
 
 </details>
 <details>
-<summary>`suppress_widgets`</summary>
+<summary><code>suppress_widgets</code></summary>
 
 ```php
 private suppress_widgets( $suppressed_plugins )
@@ -173,7 +173,7 @@ Suppress plugin widgets.
 
 </details>
 <details>
-<summary>`is_callback_plugin_suppressed`</summary>
+<summary><code>is_callback_plugin_suppressed</code></summary>
 
 ```php
 private is_callback_plugin_suppressed( $callback, $suppressed_plugins )

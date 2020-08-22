@@ -4,7 +4,7 @@ Class AMP_Validation_Error_Taxonomy
 
 ### Methods
 <details>
-<summary>`register`</summary>
+<summary><code>register</code></summary>
 
 ```php
 static public register()
@@ -15,7 +15,7 @@ Registers the taxonomy to store the validation errors.
 
 </details>
 <details>
-<summary>`get_term`</summary>
+<summary><code>get_term</code></summary>
 
 ```php
 static public get_term( $error )
@@ -26,7 +26,7 @@ Get amp_validation_error taxonomy term by slug or error properties.
 
 </details>
 <details>
-<summary>`delete_empty_terms`</summary>
+<summary><code>delete_empty_terms</code></summary>
 
 ```php
 static public delete_empty_terms()
@@ -37,7 +37,7 @@ Delete all amp_validation_error terms that have zero counts (no amp_validated_ur
 
 </details>
 <details>
-<summary>`delete_empty_term`</summary>
+<summary><code>delete_empty_term</code></summary>
 
 ```php
 static public delete_empty_term( $term_id )
@@ -48,7 +48,7 @@ Delete an amp_validation_error term if it has no amp_validated_url posts associa
 
 </details>
 <details>
-<summary>`sanitize_term_status`</summary>
+<summary><code>sanitize_term_status</code></summary>
 
 ```php
 static public sanitize_term_status( $status, $options = array() )
@@ -59,7 +59,7 @@ Sanitize term status(es).
 
 </details>
 <details>
-<summary>`prepare_term_group_in_sql`</summary>
+<summary><code>prepare_term_group_in_sql</code></summary>
 
 ```php
 static public prepare_term_group_in_sql( $groups )
@@ -70,7 +70,7 @@ Prepare term_group IN condition for SQL WHERE clause.
 
 </details>
 <details>
-<summary>`prepare_validation_error_taxonomy_term`</summary>
+<summary><code>prepare_validation_error_taxonomy_term</code></summary>
 
 ```php
 static public prepare_validation_error_taxonomy_term( $error )
@@ -81,7 +81,7 @@ Prepare a validation error for lookup or insertion as taxonomy term.
 
 </details>
 <details>
-<summary>`is_validation_error_sanitized`</summary>
+<summary><code>is_validation_error_sanitized</code></summary>
 
 ```php
 static public is_validation_error_sanitized( $error )
@@ -92,7 +92,7 @@ Determine whether a validation error should be sanitized.
 
 </details>
 <details>
-<summary>`get_validation_error_sanitization`</summary>
+<summary><code>get_validation_error_sanitization</code></summary>
 
 ```php
 static public get_validation_error_sanitization( $error )
@@ -103,7 +103,7 @@ Get the validation error sanitization.
 
 </details>
 <details>
-<summary>`accept_validation_errors`</summary>
+<summary><code>accept_validation_errors</code></summary>
 
 ```php
 static public accept_validation_errors( $acceptable_errors )
@@ -114,7 +114,7 @@ Automatically (forcibly) accept validation errors that arise (that is, remove th
 
 </details>
 <details>
-<summary>`is_array_subset`</summary>
+<summary><code>is_array_subset</code></summary>
 
 ```php
 static public is_array_subset( $superset, $subset )
@@ -125,7 +125,7 @@ Check if one array is a sparse subset of another array.
 
 </details>
 <details>
-<summary>`get_validation_error_count`</summary>
+<summary><code>get_validation_error_count</code></summary>
 
 ```php
 static public get_validation_error_count( $args = array() )
@@ -136,7 +136,7 @@ Get the count of validation error terms, optionally restricted by term group (e.
 
 </details>
 <details>
-<summary>`filter_posts_where_for_validation_error_status`</summary>
+<summary><code>filter_posts_where_for_validation_error_status</code></summary>
 
 ```php
 static public filter_posts_where_for_validation_error_status( $where, \WP_Query $query )
@@ -149,7 +149,7 @@ Add recognition of amp_validation_error_status query var for amp_validated_url p
 
 </details>
 <details>
-<summary>`summarize_validation_errors`</summary>
+<summary><code>summarize_validation_errors</code></summary>
 
 ```php
 static public summarize_validation_errors( $validation_errors )
@@ -162,7 +162,7 @@ Returns the current validation errors the sanitizers found in rendering the page
 
 </details>
 <details>
-<summary>`summarize_sources`</summary>
+<summary><code>summarize_sources</code></summary>
 
 ```php
 static public summarize_sources( $sources )
@@ -173,7 +173,7 @@ Summarize sources.
 
 </details>
 <details>
-<summary>`add_admin_hooks`</summary>
+<summary><code>add_admin_hooks</code></summary>
 
 ```php
 static public add_admin_hooks()
@@ -184,7 +184,7 @@ Add admin hooks.
 
 </details>
 <details>
-<summary>`add_term_filter_query_var`</summary>
+<summary><code>add_term_filter_query_var</code></summary>
 
 ```php
 static public add_term_filter_query_var( $url, $tax )
@@ -197,7 +197,7 @@ On clicking the &#039;Filter&#039; button on the &#039;AMP Validation Errors&#03
 
 </details>
 <details>
-<summary>`add_group_terms_clauses_filter`</summary>
+<summary><code>add_group_terms_clauses_filter</code></summary>
 
 ```php
 static public add_group_terms_clauses_filter()
@@ -208,7 +208,7 @@ Filter amp_validation_error term query by term group when requested.
 
 </details>
 <details>
-<summary>`add_error_type_clauses_filter`</summary>
+<summary><code>add_error_type_clauses_filter</code></summary>
 
 ```php
 static public add_error_type_clauses_filter()
@@ -221,7 +221,7 @@ Filters &#039;load-edit-tags.php&#039; and &#039;load-post.php&#039;, as the pos
 
 </details>
 <details>
-<summary>`add_order_clauses_from_description_json`</summary>
+<summary><code>add_order_clauses_from_description_json</code></summary>
 
 ```php
 static public add_order_clauses_from_description_json()
@@ -234,7 +234,7 @@ This is used both on the taxonomy edit-tags.php page and the single URL post.php
 
 </details>
 <details>
-<summary>`render_taxonomy_filters`</summary>
+<summary><code>render_taxonomy_filters</code></summary>
 
 ```php
 static public render_taxonomy_filters( $taxonomy_name )
@@ -247,7 +247,7 @@ Similar to what appears on /wp-admin/edit.php for posts and pages, this outputs 
 
 </details>
 <details>
-<summary>`render_link_to_invalid_urls_screen`</summary>
+<summary><code>render_link_to_invalid_urls_screen</code></summary>
 
 ```php
 static public render_link_to_invalid_urls_screen( $taxonomy_name )
@@ -258,7 +258,7 @@ On the &#039;Error Index&#039; screen, renders a link to the &#039;AMP Validated
 
 </details>
 <details>
-<summary>`render_error_status_filter`</summary>
+<summary><code>render_error_status_filter</code></summary>
 
 ```php
 static public render_error_status_filter()
@@ -271,7 +271,7 @@ There is a difference how the errors are counted, depending on which screen this
 
 </details>
 <details>
-<summary>`output_error_status_filter_option_markup`</summary>
+<summary><code>output_error_status_filter_option_markup</code></summary>
 
 ```php
 static private output_error_status_filter_option_markup( $option_text, $option_value, $error_count, $selected_value )
@@ -282,7 +282,7 @@ Output the option markup for a error status filter.
 
 </details>
 <details>
-<summary>`get_error_types`</summary>
+<summary><code>get_error_types</code></summary>
 
 ```php
 static public get_error_types()
@@ -293,7 +293,7 @@ Gets all of the possible error types.
 
 </details>
 <details>
-<summary>`render_error_type_filter`</summary>
+<summary><code>render_error_type_filter</code></summary>
 
 ```php
 static public render_error_type_filter()
@@ -306,7 +306,7 @@ This type filter &lt;select&gt; element is rendered on the validation error post
 
 </details>
 <details>
-<summary>`render_clear_empty_button`</summary>
+<summary><code>render_clear_empty_button</code></summary>
 
 ```php
 static public render_clear_empty_button()
@@ -319,7 +319,7 @@ If there are no terms with a 0 count then this outputs nothing.
 
 </details>
 <details>
-<summary>`filter_terms_clauses_for_description_search`</summary>
+<summary><code>filter_terms_clauses_for_description_search</code></summary>
 
 ```php
 static public filter_terms_clauses_for_description_search( $clauses, $taxonomies, $args )
@@ -330,7 +330,7 @@ Include searching taxonomy term descriptions and sources term meta.
 
 </details>
 <details>
-<summary>`add_admin_notices`</summary>
+<summary><code>add_admin_notices</code></summary>
 
 ```php
 static public add_admin_notices()
@@ -341,7 +341,7 @@ Show notices for changes to amp_validation_error terms.
 
 </details>
 <details>
-<summary>`filter_tag_row_actions`</summary>
+<summary><code>filter_tag_row_actions</code></summary>
 
 ```php
 static public filter_tag_row_actions( $actions, \WP_Term $tag )
@@ -352,7 +352,7 @@ Add row actions.
 
 </details>
 <details>
-<summary>`add_admin_menu_validation_error_item`</summary>
+<summary><code>add_admin_menu_validation_error_item</code></summary>
 
 ```php
 static public add_admin_menu_validation_error_item()
@@ -363,7 +363,7 @@ Show AMP validation errors under AMP admin menu.
 
 </details>
 <details>
-<summary>`get_reader_friendly_error_type_text`</summary>
+<summary><code>get_reader_friendly_error_type_text</code></summary>
 
 ```php
 static public get_reader_friendly_error_type_text( $error_type )
@@ -374,7 +374,7 @@ Provides a reader-friendly string for a term&#039;s error type.
 
 </details>
 <details>
-<summary>`get_details_summary_label`</summary>
+<summary><code>get_details_summary_label</code></summary>
 
 ```php
 static public get_details_summary_label( $validation_error )
@@ -385,7 +385,7 @@ Provides the label for the details summary element.
 
 </details>
 <details>
-<summary>`filter_manage_custom_columns`</summary>
+<summary><code>filter_manage_custom_columns</code></summary>
 
 ```php
 static public filter_manage_custom_columns( $content, $column_name, $term_id )
@@ -396,7 +396,7 @@ Supply the content for the custom columns.
 
 </details>
 <details>
-<summary>`add_single_post_sortable_columns`</summary>
+<summary><code>add_single_post_sortable_columns</code></summary>
 
 ```php
 static public add_single_post_sortable_columns( $sortable_columns )
@@ -407,7 +407,7 @@ Adds post columns to the /wp-admin/post.php page for amp_validated_url.
 
 </details>
 <details>
-<summary>`render_single_url_error_details`</summary>
+<summary><code>render_single_url_error_details</code></summary>
 
 ```php
 static public render_single_url_error_details( $validation_error, $term, $wrap_with_details = true, $with_summary = true )
@@ -418,7 +418,7 @@ Renders error details when viewing a single URL page.
 
 </details>
 <details>
-<summary>`get_file_editor_url`</summary>
+<summary><code>get_file_editor_url</code></summary>
 
 ```php
 static private get_file_editor_url( $source )
@@ -429,7 +429,7 @@ Get the URL for opening the file for a AMP validation error in an external edito
 
 </details>
 <details>
-<summary>`render_source_name`</summary>
+<summary><code>render_source_name</code></summary>
 
 ```php
 static private render_source_name( $name, $type )
@@ -440,7 +440,7 @@ Render source name.
 
 </details>
 <details>
-<summary>`render_sources`</summary>
+<summary><code>render_sources</code></summary>
 
 ```php
 static public render_sources( $sources )
@@ -451,7 +451,7 @@ Render sources.
 
 </details>
 <details>
-<summary>`render_code_details`</summary>
+<summary><code>render_code_details</code></summary>
 
 ```php
 static private render_code_details( $text )
@@ -462,7 +462,7 @@ Render code details.
 
 </details>
 <details>
-<summary>`get_block_title`</summary>
+<summary><code>get_block_title</code></summary>
 
 ```php
 static public get_block_title( $block_name )
@@ -473,7 +473,7 @@ Get block name for a given block slug.
 
 </details>
 <details>
-<summary>`get_translated_type_name`</summary>
+<summary><code>get_translated_type_name</code></summary>
 
 ```php
 static public get_translated_type_name( $validation_error )
@@ -484,7 +484,7 @@ Gets the translated error type name from the given the validation error.
 
 </details>
 <details>
-<summary>`handle_inline_edit_request`</summary>
+<summary><code>handle_inline_edit_request</code></summary>
 
 ```php
 static public handle_inline_edit_request()
@@ -495,7 +495,7 @@ Handle inline edit links.
 
 </details>
 <details>
-<summary>`handle_single_url_page_bulk_and_inline_actions`</summary>
+<summary><code>handle_single_url_page_bulk_and_inline_actions</code></summary>
 
 ```php
 static public handle_single_url_page_bulk_and_inline_actions( $post_id )
@@ -508,7 +508,7 @@ On /wp-admin/post.php, this handles these bulk actions. This page is more like a
 
 </details>
 <details>
-<summary>`handle_validation_error_update`</summary>
+<summary><code>handle_validation_error_update</code></summary>
 
 ```php
 static public handle_validation_error_update( $redirect_to, $action, $term_ids )
@@ -519,7 +519,7 @@ Handle bulk and inline edits to amp_validation_error terms.
 
 </details>
 <details>
-<summary>`handle_clear_empty_terms_request`</summary>
+<summary><code>handle_clear_empty_terms_request</code></summary>
 
 ```php
 static public handle_clear_empty_terms_request()
@@ -530,7 +530,7 @@ Handle request to delete empty terms.
 
 </details>
 <details>
-<summary>`is_validation_error_for_js_script_element`</summary>
+<summary><code>is_validation_error_for_js_script_element</code></summary>
 
 ```php
 static private is_validation_error_for_js_script_element( $validation_error )
@@ -541,7 +541,7 @@ Determine whether a validation error is for a JS script element.
 
 </details>
 <details>
-<summary>`get_error_title_from_code`</summary>
+<summary><code>get_error_title_from_code</code></summary>
 
 ```php
 static public get_error_title_from_code( $validation_error )
@@ -552,7 +552,7 @@ Get Error Title from Code
 
 </details>
 <details>
-<summary>`get_source_key_label`</summary>
+<summary><code>get_source_key_label</code></summary>
 
 ```php
 static public get_source_key_label( $key, $validation_error )
@@ -563,7 +563,7 @@ Get label for object key in validation error source.
 
 </details>
 <details>
-<summary>`get_status_text_with_icon`</summary>
+<summary><code>get_status_text_with_icon</code></summary>
 
 ```php
 static public get_status_text_with_icon( $sanitization, $include_reviewed = false )

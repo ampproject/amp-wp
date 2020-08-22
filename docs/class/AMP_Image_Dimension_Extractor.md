@@ -4,7 +4,7 @@ Class with static methods to extract image dimensions.
 
 ### Methods
 <details>
-<summary>`extract`</summary>
+<summary><code>extract</code></summary>
 
 ```php
 static public extract( $urls )
@@ -15,7 +15,7 @@ Extracts dimensions from image URLs.
 
 </details>
 <details>
-<summary>`normalize_url`</summary>
+<summary><code>normalize_url</code></summary>
 
 ```php
 static public normalize_url( $url )
@@ -28,7 +28,7 @@ This method ensures the URL has a scheme and, if relative, is prepended the Word
 
 </details>
 <details>
-<summary>`register_callbacks`</summary>
+<summary><code>register_callbacks</code></summary>
 
 ```php
 static private register_callbacks()
@@ -39,7 +39,7 @@ Registers the necessary callbacks.
 
 </details>
 <details>
-<summary>`extract_by_downloading_images`</summary>
+<summary><code>extract_by_downloading_images</code></summary>
 
 ```php
 static public extract_by_downloading_images( $dimensions, $mode = false )
@@ -50,7 +50,7 @@ Extract dimensions from downloaded images (or transient/cached dimensions from d
 
 </details>
 <details>
-<summary>`determine_which_images_to_fetch`</summary>
+<summary><code>determine_which_images_to_fetch</code></summary>
 
 ```php
 static private determine_which_images_to_fetch( $dimensions, $urls_to_fetch )
@@ -63,7 +63,7 @@ Creates a short lived transient that acts as a semaphore so that another visitor
 
 </details>
 <details>
-<summary>`fetch_images`</summary>
+<summary><code>fetch_images</code></summary>
 
 ```php
 static private fetch_images( $urls_to_fetch, $images )
@@ -74,7 +74,7 @@ Fetch dimensions of remote images
 
 </details>
 <details>
-<summary>`process_fetched_images`</summary>
+<summary><code>process_fetched_images</code></summary>
 
 ```php
 static private process_fetched_images( $urls_to_fetch, $images, $dimensions, $transient_expiration )
@@ -85,7 +85,7 @@ Determine success or failure of remote fetch, integrate fetched dimensions into 
 
 </details>
 <details>
-<summary>`get_default_user_agent`</summary>
+<summary><code>get_default_user_agent</code></summary>
 
 ```php
 static public get_default_user_agent()

@@ -6,7 +6,7 @@ Handles state for navigation menu dropdown toggles, based on theme support.
 
 ### Methods
 <details>
-<summary>`__construct`</summary>
+<summary><code>__construct</code></summary>
 
 ```php
 public __construct( $dom, $args = array() )
@@ -17,7 +17,7 @@ AMP_Nav_Menu_Dropdown_Sanitizer constructor.
 
 </details>
 <details>
-<summary>`add_buffering_hooks`</summary>
+<summary><code>add_buffering_hooks</code></summary>
 
 ```php
 static public add_buffering_hooks( $args = array() )
@@ -28,7 +28,7 @@ Add filter to manipulate output during output buffering to add AMP-compatible dr
 
 </details>
 <details>
-<summary>`sanitize`</summary>
+<summary><code>sanitize</code></summary>
 
 ```php
 public sanitize()
@@ -39,7 +39,7 @@ Method needs to be stubbed to fulfill base class requirements.
 
 </details>
 <details>
-<summary>`ensure_defaults`</summary>
+<summary><code>ensure_defaults</code></summary>
 
 ```php
 static protected ensure_defaults( $args )

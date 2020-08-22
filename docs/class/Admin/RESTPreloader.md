@@ -4,7 +4,7 @@ Preloads REST responses for client-side applications to prevent having to call f
 
 ### Methods
 <details>
-<summary>`add_preloaded_path`</summary>
+<summary><code>add_preloaded_path</code></summary>
 
 ```php
 public add_preloaded_path( $path )
@@ -15,7 +15,7 @@ Adds a REST path to be preloaded.
 
 </details>
 <details>
-<summary>`preload_data`</summary>
+<summary><code>preload_data</code></summary>
 
 ```php
 public preload_data()

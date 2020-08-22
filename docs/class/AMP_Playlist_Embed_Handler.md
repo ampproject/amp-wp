@@ -6,7 +6,7 @@ Creates AMP-compatible markup for the WordPress &#039;playlist&#039; shortcode.
 
 ### Methods
 <details>
-<summary>`register_embed`</summary>
+<summary><code>register_embed</code></summary>
 
 ```php
 public register_embed()
@@ -17,7 +17,7 @@ Registers the playlist shortcode.
 
 </details>
 <details>
-<summary>`unregister_embed`</summary>
+<summary><code>unregister_embed</code></summary>
 
 ```php
 public unregister_embed()
@@ -28,7 +28,7 @@ Unregisters the playlist shortcode.
 
 </details>
 <details>
-<summary>`enqueue_styles`</summary>
+<summary><code>enqueue_styles</code></summary>
 
 ```php
 public enqueue_styles()
@@ -39,7 +39,7 @@ Enqueues the playlist styling.
 
 </details>
 <details>
-<summary>`shortcode`</summary>
+<summary><code>shortcode</code></summary>
 
 ```php
 public shortcode( $attr )
@@ -52,7 +52,7 @@ Uses the JSON that wp_playlist_shortcode() produces. Gets the markup, based on t
 
 </details>
 <details>
-<summary>`audio_playlist`</summary>
+<summary><code>audio_playlist</code></summary>
 
 ```php
 public audio_playlist( $data )
@@ -63,7 +63,7 @@ Gets an AMP-compliant audio playlist.
 
 </details>
 <details>
-<summary>`video_playlist`</summary>
+<summary><code>video_playlist</code></summary>
 
 ```php
 public video_playlist( $data )
@@ -76,7 +76,7 @@ This uses similar markup to the native playlist shortcode output. So the styles 
 
 </details>
 <details>
-<summary>`get_thumb_dimensions`</summary>
+<summary><code>get_thumb_dimensions</code></summary>
 
 ```php
 public get_thumb_dimensions( $track )
@@ -89,7 +89,7 @@ If the width is higher than the maximum width, reduces it to the maximum width. 
 
 </details>
 <details>
-<summary>`print_tracks`</summary>
+<summary><code>print_tracks</code></summary>
 
 ```php
 public print_tracks( $state_id, $tracks )
@@ -102,7 +102,7 @@ These typically appear below the player. Clicking a track triggers the player to
 
 </details>
 <details>
-<summary>`get_data`</summary>
+<summary><code>get_data</code></summary>
 
 ```php
 public get_data( $attr )
@@ -113,7 +113,7 @@ Gets the data for the playlist.
 
 </details>
 <details>
-<summary>`get_title`</summary>
+<summary><code>get_title</code></summary>
 
 ```php
 public get_title( $track )

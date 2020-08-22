@@ -4,7 +4,7 @@ Class AMP_Widget_Text
 
 ### Methods
 <details>
-<summary>`inject_video_max_width_style`</summary>
+<summary><code>inject_video_max_width_style</code></summary>
 
 ```php
 public inject_video_max_width_style( $matches )

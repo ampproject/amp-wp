@@ -4,7 +4,7 @@ Class with static string utility methods.
 
 ### Methods
 <details>
-<summary>`endswith`</summary>
+<summary><code>endswith</code></summary>
 
 ```php
 static public endswith( $haystack, $needle )

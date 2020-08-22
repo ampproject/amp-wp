@@ -4,7 +4,7 @@ Suppress plugins from running by removing their hooks and nullifying their short
 
 ### Methods
 <details>
-<summary>`get_plugin_dir`</summary>
+<summary><code>get_plugin_dir</code></summary>
 
 ```php
 public get_plugin_dir()
@@ -15,7 +15,7 @@ Get absolute path to plugin directory.
 
 </details>
 <details>
-<summary>`get_plugin_slug_from_file`</summary>
+<summary><code>get_plugin_slug_from_file</code></summary>
 
 ```php
 public get_plugin_slug_from_file( $plugin_file )
@@ -28,7 +28,7 @@ If the plugin file is in a directory, then the slug is just the directory name. 
 
 </details>
 <details>
-<summary>`get_plugins`</summary>
+<summary><code>get_plugins</code></summary>
 
 ```php
 public get_plugins( $active_only = false, $omit_core = true )
@@ -39,7 +39,7 @@ Get array of installed plugins, keyed by slug.
 
 </details>
 <details>
-<summary>`get_plugin_from_slug`</summary>
+<summary><code>get_plugin_from_slug</code></summary>
 
 ```php
 public get_plugin_from_slug( $plugin_slug )
@@ -52,7 +52,7 @@ A slug is a plugin directory name like &#039;amp&#039; or if the plugin is just 
 
 </details>
 <details>
-<summary>`get_plugins_data`</summary>
+<summary><code>get_plugins_data</code></summary>
 
 ```php
 private get_plugins_data()

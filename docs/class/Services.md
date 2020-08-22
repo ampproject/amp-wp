@@ -6,7 +6,7 @@ Using this should always be the last resort. Always prefer to use constructor in
 
 ### Methods
 <details>
-<summary>`get`</summary>
+<summary><code>get</code></summary>
 
 ```php
 static public get( $service )
@@ -17,7 +17,7 @@ Get a particular service out of the service container.
 
 </details>
 <details>
-<summary>`get_container`</summary>
+<summary><code>get_container</code></summary>
 
 ```php
 static public get_container()

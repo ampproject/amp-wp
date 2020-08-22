@@ -6,7 +6,7 @@ Gets the markup for an &lt;amp-carousel&gt;.
 
 ### Methods
 <details>
-<summary>`__construct`</summary>
+<summary><code>__construct</code></summary>
 
 ```php
 public __construct( Document $dom, ElementList $slides )
@@ -17,7 +17,7 @@ Instantiates the class.
 
 </details>
 <details>
-<summary>`get_dom_element`</summary>
+<summary><code>get_dom_element</code></summary>
 
 ```php
 public get_dom_element()
@@ -28,7 +28,7 @@ Gets the carousel element.
 
 </details>
 <details>
-<summary>`get_dimensions`</summary>
+<summary><code>get_dimensions</code></summary>
 
 ```php
 private get_dimensions()
@@ -41,7 +41,7 @@ This will return the width and height of the slide (possibly image) with the wid
 
 </details>
 <details>
-<summary>`is_image_element`</summary>
+<summary><code>is_image_element</code></summary>
 
 ```php
 private is_image_element( DOMElement $element )

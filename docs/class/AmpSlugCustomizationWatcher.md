@@ -4,7 +4,7 @@ Service for redirecting mobile users to the AMP version of a page.
 
 ### Methods
 <details>
-<summary>`register`</summary>
+<summary><code>register</code></summary>
 
 ```php
 public register()
@@ -15,7 +15,7 @@ Register.
 
 </details>
 <details>
-<summary>`did_customize_early`</summary>
+<summary><code>did_customize_early</code></summary>
 
 ```php
 public did_customize_early()
@@ -26,7 +26,7 @@ Whether the slug was customized early (at plugins_loaded action, priority 8).
 
 </details>
 <details>
-<summary>`did_customize_late`</summary>
+<summary><code>did_customize_late</code></summary>
 
 ```php
 public did_customize_late()
@@ -37,7 +37,7 @@ Whether the slug was customized early (at after_setup_theme action, priority 4).
 
 </details>
 <details>
-<summary>`determine_early_customization`</summary>
+<summary><code>determine_early_customization</code></summary>
 
 ```php
 public determine_early_customization()
@@ -50,7 +50,7 @@ Early customization happens by plugins_loaded action at priority 8; this is requ
 
 </details>
 <details>
-<summary>`determine_late_customization`</summary>
+<summary><code>determine_late_customization</code></summary>
 
 ```php
 public determine_late_customization()

@@ -6,7 +6,7 @@ It is used to detect circular dependencies, and can also be dumped for debugging
 
 ### Methods
 <details>
-<summary>`add_to_chain`</summary>
+<summary><code>add_to_chain</code></summary>
 
 ```php
 public add_to_chain( $class )
@@ -17,7 +17,7 @@ Add class to injection chain.
 
 </details>
 <details>
-<summary>`add_resolution`</summary>
+<summary><code>add_resolution</code></summary>
 
 ```php
 public add_resolution( $resolution )
@@ -28,7 +28,7 @@ Add resolution for circular reference detection.
 
 </details>
 <details>
-<summary>`get_class`</summary>
+<summary><code>get_class</code></summary>
 
 ```php
 public get_class()
@@ -39,7 +39,7 @@ Get the last class that was pushed to the injection chain.
 
 </details>
 <details>
-<summary>`get_chain`</summary>
+<summary><code>get_chain</code></summary>
 
 ```php
 public get_chain()
@@ -50,7 +50,7 @@ Get the injection chain.
 
 </details>
 <details>
-<summary>`has_resolution`</summary>
+<summary><code>has_resolution</code></summary>
 
 ```php
 public has_resolution( $resolution )

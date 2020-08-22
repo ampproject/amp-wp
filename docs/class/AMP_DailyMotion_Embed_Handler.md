@@ -6,7 +6,7 @@ Much of this class is borrowed from Jetpack embeds
 
 ### Methods
 <details>
-<summary>`__construct`</summary>
+<summary><code>__construct</code></summary>
 
 ```php
 public __construct( $args = array() )
@@ -17,7 +17,7 @@ AMP_DailyMotion_Embed_Handler constructor.
 
 </details>
 <details>
-<summary>`register_embed`</summary>
+<summary><code>register_embed</code></summary>
 
 ```php
 public register_embed()
@@ -28,7 +28,7 @@ Register embed.
 
 </details>
 <details>
-<summary>`unregister_embed`</summary>
+<summary><code>unregister_embed</code></summary>
 
 ```php
 public unregister_embed()
@@ -39,7 +39,7 @@ Unregister embed.
 
 </details>
 <details>
-<summary>`oembed`</summary>
+<summary><code>oembed</code></summary>
 
 ```php
 public oembed( $matches, $attr, $url )
@@ -50,7 +50,7 @@ Render oEmbed.
 
 </details>
 <details>
-<summary>`render`</summary>
+<summary><code>render</code></summary>
 
 ```php
 public render( $args )
@@ -61,7 +61,7 @@ Render.
 
 </details>
 <details>
-<summary>`get_video_id_from_url`</summary>
+<summary><code>get_video_id_from_url</code></summary>
 
 ```php
 private get_video_id_from_url( $url )

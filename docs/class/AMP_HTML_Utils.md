@@ -4,7 +4,7 @@ Class with static HTML utility methods.
 
 ### Methods
 <details>
-<summary>`build_tag`</summary>
+<summary><code>build_tag</code></summary>
 
 ```php
 static public build_tag( $tag_name, $attributes = array(), $content = '' )
@@ -15,7 +15,7 @@ Generates HTML markup for a given tag, attributes and content.
 
 </details>
 <details>
-<summary>`build_attributes_string`</summary>
+<summary><code>build_attributes_string</code></summary>
 
 ```php
 static public build_attributes_string( $attributes )
@@ -26,7 +26,7 @@ Generates a HTML attributes string from given attributes.
 
 </details>
 <details>
-<summary>`is_valid_json`</summary>
+<summary><code>is_valid_json</code></summary>
 
 ```php
 static public is_valid_json( $data )

@@ -6,7 +6,7 @@ Caching uses WordPress transients.
 
 ### Methods
 <details>
-<summary>`__construct`</summary>
+<summary><code>__construct</code></summary>
 
 ```php
 public __construct( RemoteGetRequest $remote_request, $expiry = MONTH_IN_SECONDS, $min_expiry = DAY_IN_SECONDS, $use_cache_control = true )
@@ -19,7 +19,7 @@ This is a decorator that can wrap around an existing remote request object to ad
 
 </details>
 <details>
-<summary>`get`</summary>
+<summary><code>get</code></summary>
 
 ```php
 public get( $url )
@@ -30,7 +30,7 @@ Do a GET request to retrieve the contents of a remote URL.
 
 </details>
 <details>
-<summary>`get_expiry_time`</summary>
+<summary><code>get_expiry_time</code></summary>
 
 ```php
 private get_expiry_time( Response $response )
@@ -43,7 +43,7 @@ This will use the cache-control header information in the provided response or f
 
 </details>
 <details>
-<summary>`get_max_age`</summary>
+<summary><code>get_max_age</code></summary>
 
 ```php
 private get_max_age( $cache_control_strings )

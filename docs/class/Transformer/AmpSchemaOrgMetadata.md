@@ -4,7 +4,7 @@ Ensure there is a schema.org script in the document.
 
 ### Methods
 <details>
-<summary>`__construct`</summary>
+<summary><code>__construct</code></summary>
 
 ```php
 public __construct( TransformerConfiguration $configuration )
@@ -15,7 +15,7 @@ Instantiate a TransformedIdentifier object.
 
 </details>
 <details>
-<summary>`transform`</summary>
+<summary><code>transform</code></summary>
 
 ```php
 public transform( Document $document, ErrorCollection $errors )

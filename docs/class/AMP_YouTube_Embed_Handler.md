@@ -6,7 +6,7 @@ Much of this class is borrowed from Jetpack embeds.
 
 ### Methods
 <details>
-<summary>`__construct`</summary>
+<summary><code>__construct</code></summary>
 
 ```php
 public __construct( $args = array() )
@@ -17,7 +17,7 @@ AMP_YouTube_Embed_Handler constructor.
 
 </details>
 <details>
-<summary>`register_embed`</summary>
+<summary><code>register_embed</code></summary>
 
 ```php
 public register_embed()
@@ -28,7 +28,7 @@ Register embed.
 
 </details>
 <details>
-<summary>`unregister_embed`</summary>
+<summary><code>unregister_embed</code></summary>
 
 ```php
 public unregister_embed()
@@ -39,7 +39,7 @@ Unregister embed.
 
 </details>
 <details>
-<summary>`filter_embed_oembed_html`</summary>
+<summary><code>filter_embed_oembed_html</code></summary>
 
 ```php
 public filter_embed_oembed_html( $cache, $url )
@@ -50,7 +50,7 @@ Filter oEmbed HTML for YouTube to convert to AMP.
 
 </details>
 <details>
-<summary>`parse_props`</summary>
+<summary><code>parse_props</code></summary>
 
 ```php
 private parse_props( $html, $url, $video_id )
@@ -61,7 +61,7 @@ Parse AMP component from iframe.
 
 </details>
 <details>
-<summary>`render`</summary>
+<summary><code>render</code></summary>
 
 ```php
 public render( $args, $url )
@@ -72,7 +72,7 @@ Render embed.
 
 </details>
 <details>
-<summary>`get_video_id_from_url`</summary>
+<summary><code>get_video_id_from_url</code></summary>
 
 ```php
 private get_video_id_from_url( $url )
@@ -83,7 +83,7 @@ Determine the video ID from the URL.
 
 </details>
 <details>
-<summary>`video_override`</summary>
+<summary><code>video_override</code></summary>
 
 ```php
 public video_override( $html, $attr )

@@ -4,7 +4,7 @@ Sanitizes attributes required for AMP accessibility requirements.
 
 ### Methods
 <details>
-<summary>`sanitize`</summary>
+<summary><code>sanitize</code></summary>
 
 ```php
 public sanitize()
@@ -15,7 +15,7 @@ Sanitize.
 
 </details>
 <details>
-<summary>`add_role_and_tabindex_to_on_tap_actors`</summary>
+<summary><code>add_role_and_tabindex_to_on_tap_actors</code></summary>
 
 ```php
 public add_role_and_tabindex_to_on_tap_actors()

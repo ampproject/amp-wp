@@ -4,7 +4,7 @@ Class ElementList
 
 ### Methods
 <details>
-<summary>`add`</summary>
+<summary><code>add</code></summary>
 
 ```php
 public add( DOMElement $element, DOMElement $caption = null )
@@ -15,7 +15,7 @@ Adds an element to the list, possibly with a caption.
 
 </details>
 <details>
-<summary>`getIterator`</summary>
+<summary><code>getIterator</code></summary>
 
 ```php
 public getIterator()
@@ -28,7 +28,7 @@ This together with the IteratorAggregate turns the object into a &quot;Traversab
 
 </details>
 <details>
-<summary>`count`</summary>
+<summary><code>count</code></summary>
 
 ```php
 public count()

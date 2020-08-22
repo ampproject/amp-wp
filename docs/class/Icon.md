@@ -4,7 +4,7 @@ Icons used to visually represent the state of a validation error.
 
 ### Methods
 <details>
-<summary>`__construct`</summary>
+<summary><code>__construct</code></summary>
 
 ```php
 private __construct( $icon )
@@ -15,7 +15,7 @@ Constructor.
 
 </details>
 <details>
-<summary>`invalid`</summary>
+<summary><code>invalid</code></summary>
 
 ```php
 static public invalid()
@@ -26,7 +26,7 @@ Invalid icon.
 
 </details>
 <details>
-<summary>`link`</summary>
+<summary><code>link</code></summary>
 
 ```php
 static public link()
@@ -37,7 +37,7 @@ Link icon
 
 </details>
 <details>
-<summary>`valid`</summary>
+<summary><code>valid</code></summary>
 
 ```php
 static public valid()
@@ -48,7 +48,7 @@ Valid icon
 
 </details>
 <details>
-<summary>`warning`</summary>
+<summary><code>warning</code></summary>
 
 ```php
 static public warning()
@@ -59,7 +59,7 @@ Warning icon
 
 </details>
 <details>
-<summary>`logo`</summary>
+<summary><code>logo</code></summary>
 
 ```php
 static public logo()
@@ -70,7 +70,7 @@ Logo icon
 
 </details>
 <details>
-<summary>`get_color`</summary>
+<summary><code>get_color</code></summary>
 
 ```php
 public get_color()
@@ -81,7 +81,7 @@ Get color for current icon.
 
 </details>
 <details>
-<summary>`to_html`</summary>
+<summary><code>to_html</code></summary>
 
 ```php
 public to_html( $attributes = array() )

@@ -4,7 +4,7 @@ Exception thrown when an invalid stopwatch name was requested.
 
 ### Methods
 <details>
-<summary>`from_name_to_stop`</summary>
+<summary><code>from_name_to_stop</code></summary>
 
 ```php
 static public from_name_to_stop( $name )

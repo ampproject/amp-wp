@@ -4,7 +4,7 @@ Fallback instantiator to use in case none was provided.
 
 ### Methods
 <details>
-<summary>`instantiate`</summary>
+<summary><code>instantiate</code></summary>
 
 ```php
 public instantiate( $class, $dependencies = array() )

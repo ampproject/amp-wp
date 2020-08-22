@@ -6,7 +6,7 @@ This class does not implement Conditional because other services need to always 
 
 ### Methods
 <details>
-<summary>`is_enabled`</summary>
+<summary><code>is_enabled</code></summary>
 
 ```php
 public is_enabled()
@@ -17,7 +17,7 @@ Is Reader mode with a Reader theme selected.
 
 </details>
 <details>
-<summary>`is_theme_overridden`</summary>
+<summary><code>is_theme_overridden</code></summary>
 
 ```php
 public is_theme_overridden()
@@ -28,7 +28,7 @@ Whether the active theme was overridden with the reader theme.
 
 </details>
 <details>
-<summary>`is_amp_request`</summary>
+<summary><code>is_amp_request</code></summary>
 
 ```php
 public is_amp_request()
@@ -39,7 +39,7 @@ Is an AMP request.
 
 </details>
 <details>
-<summary>`register`</summary>
+<summary><code>register</code></summary>
 
 ```php
 public register()
@@ -50,7 +50,7 @@ Register the service with the system.
 
 </details>
 <details>
-<summary>`filter_wp_prepare_themes_to_indicate_reader_theme`</summary>
+<summary><code>filter_wp_prepare_themes_to_indicate_reader_theme</code></summary>
 
 ```php
 public filter_wp_prepare_themes_to_indicate_reader_theme( $prepared_themes )
@@ -61,7 +61,7 @@ Filter themes for JS to remove action to delete the selected Reader theme and sh
 
 </details>
 <details>
-<summary>`inject_theme_single_template_modifications`</summary>
+<summary><code>inject_theme_single_template_modifications</code></summary>
 
 ```php
 public inject_theme_single_template_modifications()
@@ -74,7 +74,7 @@ This is admittedly hacky, but WordPress doesn&#039;t provide a much better optio
 
 </details>
 <details>
-<summary>`get_reader_theme`</summary>
+<summary><code>get_reader_theme</code></summary>
 
 ```php
 public get_reader_theme()
@@ -87,7 +87,7 @@ If the Reader template mode is enabled
 
 </details>
 <details>
-<summary>`get_active_theme`</summary>
+<summary><code>get_active_theme</code></summary>
 
 ```php
 public get_active_theme()
@@ -100,7 +100,7 @@ The theme that was active before switching to the Reader theme.
 
 </details>
 <details>
-<summary>`override_theme`</summary>
+<summary><code>override_theme</code></summary>
 
 ```php
 public override_theme()
@@ -113,7 +113,7 @@ Note that AMP_Theme_Support will redirect to the non-AMP version if AMP is not a
 
 </details>
 <details>
-<summary>`disable_widgets`</summary>
+<summary><code>disable_widgets</code></summary>
 
 ```php
 public disable_widgets()
@@ -124,7 +124,7 @@ Disable widgets.
 
 </details>
 <details>
-<summary>`customize_previewable_devices`</summary>
+<summary><code>customize_previewable_devices</code></summary>
 
 ```php
 public customize_previewable_devices( $devices )
@@ -135,7 +135,7 @@ Make tablet (smartphone) the default device when opening AMP Customizer.
 
 </details>
 <details>
-<summary>`remove_customizer_themes_panel`</summary>
+<summary><code>remove_customizer_themes_panel</code></summary>
 
 ```php
 public remove_customizer_themes_panel( WP_Customize_Manager $wp_customize )

@@ -6,7 +6,7 @@ In here we assemble our infrastructure, configure it for the specific use case t
 
 ### Methods
 <details>
-<summary>`get_service_classes`</summary>
+<summary><code>get_service_classes</code></summary>
 
 ```php
 protected get_service_classes()
@@ -19,7 +19,7 @@ The services array contains a map of &lt;identifier&gt; =&gt; &lt;service class 
 
 </details>
 <details>
-<summary>`get_bindings`</summary>
+<summary><code>get_bindings</code></summary>
 
 ```php
 protected get_bindings()
@@ -34,7 +34,7 @@ The bindings array contains a map of &lt;interface&gt; =&gt; &lt;implementation&
 
 </details>
 <details>
-<summary>`get_arguments`</summary>
+<summary><code>get_arguments</code></summary>
 
 ```php
 protected get_arguments()
@@ -48,7 +48,7 @@ The arguments array contains a map of &lt;class&gt; =&gt; &lt;associative array 
 
 </details>
 <details>
-<summary>`get_shared_instances`</summary>
+<summary><code>get_shared_instances</code></summary>
 
 ```php
 protected get_shared_instances()
@@ -62,7 +62,7 @@ The shared instances array contains a list of FQCNs that are meant to be reused.
 
 </details>
 <details>
-<summary>`get_delegations`</summary>
+<summary><code>get_delegations</code></summary>
 
 ```php
 protected get_delegations()

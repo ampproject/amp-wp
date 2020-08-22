@@ -6,7 +6,7 @@ Converts &lt;div class=&quot;vdb_player&gt;&lt;script&gt;&lt;/script&gt;&lt;/div
 
 ### Methods
 <details>
-<summary>`sanitize`</summary>
+<summary><code>sanitize</code></summary>
 
 ```php
 public sanitize()
@@ -17,7 +17,7 @@ Sanitize the O2 Player elements from the HTML contained in this instance&#039;s 
 
 </details>
 <details>
-<summary>`create_amp_o2_player`</summary>
+<summary><code>create_amp_o2_player</code></summary>
 
 ```php
 private create_amp_o2_player( Document $dom, \DOMElement $node )
@@ -28,7 +28,7 @@ Replaces node with amp-o2-player
 
 </details>
 <details>
-<summary>`get_o2_player_attributes`</summary>
+<summary><code>get_o2_player_attributes</code></summary>
 
 ```php
 private get_o2_player_attributes( $src )

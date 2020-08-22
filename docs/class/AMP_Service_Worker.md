@@ -4,7 +4,7 @@ Class AMP_Service_Worker.
 
 ### Methods
 <details>
-<summary>`init`</summary>
+<summary><code>init</code></summary>
 
 ```php
 static public init()
@@ -15,7 +15,7 @@ Init.
 
 </details>
 <details>
-<summary>`add_query_var`</summary>
+<summary><code>add_query_var</code></summary>
 
 ```php
 static public add_query_var( $vars )
@@ -26,7 +26,7 @@ Add query var for iframe service worker request.
 
 </details>
 <details>
-<summary>`add_cdn_script_caching`</summary>
+<summary><code>add_cdn_script_caching</code></summary>
 
 ```php
 static public add_cdn_script_caching( $service_workers )
@@ -37,7 +37,7 @@ Add runtime caching for scripts loaded from the AMP CDN with a stale-while-reval
 
 </details>
 <details>
-<summary>`add_image_caching`</summary>
+<summary><code>add_image_caching</code></summary>
 
 ```php
 static public add_image_caching( $service_workers )
@@ -48,7 +48,7 @@ Add runtime image caching from the origin with a cache-first strategy.
 
 </details>
 <details>
-<summary>`add_google_fonts_caching`</summary>
+<summary><code>add_google_fonts_caching</code></summary>
 
 ```php
 static public add_google_fonts_caching( $service_workers )
@@ -59,7 +59,7 @@ Add runtime caching of Google Fonts with stale-while-revalidate strategy for sty
 
 </details>
 <details>
-<summary>`get_precached_script_cdn_urls`</summary>
+<summary><code>get_precached_script_cdn_urls</code></summary>
 
 ```php
 static public get_precached_script_cdn_urls()
@@ -72,7 +72,7 @@ Note that the PWA plugin handles the precaching of custom logo, custom header, a
 
 </details>
 <details>
-<summary>`add_install_hooks`</summary>
+<summary><code>add_install_hooks</code></summary>
 
 ```php
 static public add_install_hooks()
@@ -83,7 +83,7 @@ Add hooks to install the service worker from AMP page.
 
 </details>
 <details>
-<summary>`install_service_worker`</summary>
+<summary><code>install_service_worker</code></summary>
 
 ```php
 static public install_service_worker()
@@ -94,7 +94,7 @@ Install service worker(s).
 
 </details>
 <details>
-<summary>`handle_service_worker_iframe_install`</summary>
+<summary><code>handle_service_worker_iframe_install</code></summary>
 
 ```php
 static public handle_service_worker_iframe_install()
