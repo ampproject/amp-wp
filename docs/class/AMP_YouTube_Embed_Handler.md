@@ -1,0 +1,105 @@
+## Class `AMP_YouTube_Embed_Handler`
+
+Class AMP_YouTube_Embed_Handler
+
+Much of this class is borrowed from Jetpack embeds.
+
+### Methods
+* `__construct`
+
+<details>
+
+```php
+public __construct( $args = array() )
+```
+
+AMP_YouTube_Embed_Handler constructor.
+
+
+</details>
+* `register_embed`
+
+<details>
+
+```php
+public register_embed()
+```
+
+Register embed.
+
+
+</details>
+* `unregister_embed`
+
+<details>
+
+```php
+public unregister_embed()
+```
+
+Unregister embed.
+
+
+</details>
+* `filter_embed_oembed_html`
+
+<details>
+
+```php
+public filter_embed_oembed_html( $cache, $url )
+```
+
+Filter oEmbed HTML for YouTube to convert to AMP.
+
+
+</details>
+* `parse_props`
+
+<details>
+
+```php
+private parse_props( $html, $url, $video_id )
+```
+
+Parse AMP component from iframe.
+
+
+</details>
+* `render`
+
+<details>
+
+```php
+public render( $args, $url )
+```
+
+Render embed.
+
+
+</details>
+* `get_video_id_from_url`
+
+<details>
+
+```php
+private get_video_id_from_url( $url )
+```
+
+Determine the video ID from the URL.
+
+
+</details>
+* `video_override`
+
+<details>
+
+```php
+public video_override( $html, $attr )
+```
+
+Override the output of YouTube videos.
+
+This overrides the value in wp_video_shortcode(). The pattern matching is copied from WP_Widget_Media_Video::render().
+
+
+</details>

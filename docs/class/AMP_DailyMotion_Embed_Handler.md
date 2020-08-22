@@ -1,0 +1,79 @@
+## Class `AMP_DailyMotion_Embed_Handler`
+
+Class AMP_DailyMotion_Embed_Handler
+
+Much of this class is borrowed from Jetpack embeds
+
+### Methods
+* `__construct`
+
+<details>
+
+```php
+public __construct( $args = array() )
+```
+
+AMP_DailyMotion_Embed_Handler constructor.
+
+
+</details>
+* `register_embed`
+
+<details>
+
+```php
+public register_embed()
+```
+
+Register embed.
+
+
+</details>
+* `unregister_embed`
+
+<details>
+
+```php
+public unregister_embed()
+```
+
+Unregister embed.
+
+
+</details>
+* `oembed`
+
+<details>
+
+```php
+public oembed( $matches, $attr, $url )
+```
+
+Render oEmbed.
+
+
+</details>
+* `render`
+
+<details>
+
+```php
+public render( $args )
+```
+
+Render.
+
+
+</details>
+* `get_video_id_from_url`
+
+<details>
+
+```php
+private get_video_id_from_url( $url )
+```
+
+Determine the video ID from the URL.
+
+
+</details>
