@@ -1,7 +1,7 @@
 ## Function `amp_add_admin_bar_view_link`
 
 ```php
-
+function amp_add_admin_bar_view_link( $wp_admin_bar );
 ```
 
 Add &quot;View AMP&quot; admin bar item for Transitional/Reader mode.

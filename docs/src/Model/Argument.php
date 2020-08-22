@@ -94,7 +94,6 @@ final class Argument implements Leaf {
 	 */
 	public function has_description() {
 		$tag = $this->get_docblock_tag();
-		var_dump( $tag );
 
 		return ! empty( trim( $tag->content ) );
 	}

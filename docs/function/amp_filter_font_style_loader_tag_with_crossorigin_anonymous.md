@@ -1,7 +1,7 @@
 ## Function `amp_filter_font_style_loader_tag_with_crossorigin_anonymous`
 
 ```php
-
+function amp_filter_font_style_loader_tag_with_crossorigin_anonymous( $tag, $handle, $href );
 ```
 
 Explicitly opt-in to CORS mode by adding the crossorigin attribute to font stylesheet links.

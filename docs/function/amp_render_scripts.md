@@ -1,7 +1,7 @@
 ## Function `amp_render_scripts`
 
 ```php
-
+function amp_render_scripts( $scripts );
 ```
 
 Generate HTML for AMP scripts that have not yet been printed.

@@ -1,7 +1,7 @@
 ## Function `amp_redirect_old_slug_to_new_url`
 
 ```php
-
+function amp_redirect_old_slug_to_new_url( $link );
 ```
 
 Redirects the old AMP URL to the new AMP URL.

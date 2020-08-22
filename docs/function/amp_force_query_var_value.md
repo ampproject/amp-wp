@@ -1,7 +1,7 @@
 ## Function `amp_force_query_var_value`
 
 ```php
-
+function amp_force_query_var_value( $query_vars );
 ```
 
 Make sure the `amp` query var has an explicit value.

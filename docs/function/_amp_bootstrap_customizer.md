@@ -1,7 +1,7 @@
 ## Function `_amp_bootstrap_customizer`
 
 ```php
-
+function _amp_bootstrap_customizer();
 ```
 
 Bootstraps the AMP customizer.

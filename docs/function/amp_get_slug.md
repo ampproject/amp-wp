@@ -1,7 +1,7 @@
 ## Function `amp_get_slug`
 
 ```php
-
+function amp_get_slug();
 ```
 
 Get the slug used in AMP for the query var, endpoint, and post type support.

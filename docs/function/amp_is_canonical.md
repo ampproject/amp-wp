@@ -1,7 +1,7 @@
 ## Function `amp_is_canonical`
 
 ```php
-
+function amp_is_canonical();
 ```
 
 Whether this is in &#039;canonical mode&#039;.

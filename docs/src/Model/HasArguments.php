@@ -44,4 +44,45 @@ trait HasArguments {
 	public function get_arguments() {
 		return $this->arguments;
 	}
+
+	/**
+	 * Get the argument signatures.
+	 *
+	 * @return string[] Array of argument signatures.
+	 */
+	private function get_argument_names(  ) {
+		$arguments = [];
+
+		foreach ( $this->arguments as $argument ) {
+			$arguments[] = sprintf(
+				'%s%s%s',
+				$argument->type ? "{$this->map_alias( $argument->type )} " : '',
+				$argument->name,
+				$argument->default ? " = {$argument->default}" : ''
+			);
+		}
+
+		return $arguments;
+	}
+
+	/**
+	 * Get the alias for a fully qualified element.
+	 *
+	 * @param string $fully_qualified_element Fully qualified element to map an
+	 *                                        alias to.
+	 * @return string Alias, or fully qualified element if none found.
+	 */
+	private function map_alias( $fully_qualified_element ) {
+		if ( empty( $fully_qualified_element ) ) {
+			return '';
+		}
+
+		$key = array_search( $fully_qualified_element, $this->aliases, true );
+
+		if ( false === $key ) {
+			return $fully_qualified_element;
+		}
+
+		return $key;
+	}
 }

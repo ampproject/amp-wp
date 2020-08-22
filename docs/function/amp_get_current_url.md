@@ -1,7 +1,7 @@
 ## Function `amp_get_current_url`
 
 ```php
-
+function amp_get_current_url();
 ```
 
 Get the URL for the current request.

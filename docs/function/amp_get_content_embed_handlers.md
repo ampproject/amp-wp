@@ -1,7 +1,7 @@
 ## Function `amp_get_content_embed_handlers`
 
 ```php
-
+function amp_get_content_embed_handlers( $post = null );
 ```
 
 Get content embed handlers.

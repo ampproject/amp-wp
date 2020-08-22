@@ -1,7 +1,7 @@
 ## Function `amp_is_dev_mode`
 
 ```php
-
+function amp_is_dev_mode();
 ```
 
 Determine whether AMP dev mode is enabled.

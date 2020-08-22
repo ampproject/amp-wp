@@ -1,7 +1,7 @@
 ## Function `amp_get_publisher_logo`
 
 ```php
-
+function amp_get_publisher_logo();
 ```
 
 Get the publisher logo.

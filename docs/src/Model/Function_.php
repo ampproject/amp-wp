@@ -114,4 +114,20 @@ final class Function_ implements Leaf {
 	public function get_filename() {
 		return str_replace( '\\', '/', $this->get_relative_name() );
 	}
+
+
+	/**
+	 * Get the signature of the function.
+	 *
+	 * @return string Function signature.
+	 */
+	public function get_signature() {
+		return sprintf(
+			'function %s(%s);',
+			$this->name,
+			count( $this->arguments ) > 0
+				? ' ' . implode( ', ', $this->get_argument_names() ) . ' '
+				: ''
+		);
+	}
 }

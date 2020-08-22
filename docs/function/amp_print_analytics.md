@@ -1,7 +1,7 @@
 ## Function `amp_print_analytics`
 
 ```php
-
+function amp_print_analytics( $analytics );
 ```
 
 Print analytics data.

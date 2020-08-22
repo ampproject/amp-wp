@@ -1,7 +1,7 @@
 ## Function `is_amp_endpoint`
 
 ```php
-
+function is_amp_endpoint();
 ```
 
 Determine whether the current response being served as AMP.

@@ -1,7 +1,7 @@
 ## Function `amp_is_request`
 
 ```php
-
+function amp_is_request();
 ```
 
 Determine whether the current request is for an AMP page.

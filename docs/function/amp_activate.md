@@ -1,7 +1,7 @@
 ## Function `amp_activate`
 
 ```php
-
+function amp_activate( $network_wide = false );
 ```
 
 Handle activation of plugin.

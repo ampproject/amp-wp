@@ -1,7 +1,7 @@
 ## Function `amp_after_setup_theme`
 
 ```php
-
+function amp_after_setup_theme();
 ```
 
 Set up AMP.

@@ -1,7 +1,7 @@
 ## Function `amp_generate_script_hash`
 
 ```php
-
+function amp_generate_script_hash( $script );
 ```
 
 Generate hash for inline amp-script.

@@ -1,7 +1,7 @@
 ## Function `amp_get_content_sanitizers`
 
 ```php
-
+function amp_get_content_sanitizers( $post = null );
 ```
 
 Get content sanitizers.

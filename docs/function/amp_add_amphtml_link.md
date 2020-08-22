@@ -1,7 +1,7 @@
 ## Function `amp_add_amphtml_link`
 
 ```php
-
+function amp_add_amphtml_link();
 ```
 
 Add amphtml link.

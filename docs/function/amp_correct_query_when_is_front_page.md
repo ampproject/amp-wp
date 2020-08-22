@@ -1,7 +1,7 @@
 ## Function `amp_correct_query_when_is_front_page`
 
 ```php
-
+function amp_correct_query_when_is_front_page( \WP_Query $query );
 ```
 
 Fix up WP_Query for front page when amp query var is present.

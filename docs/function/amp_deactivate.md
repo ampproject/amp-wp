@@ -1,7 +1,7 @@
 ## Function `amp_deactivate`
 
 ```php
-
+function amp_deactivate( $network_wide = false );
 ```
 
 Handle deactivation of plugin.
