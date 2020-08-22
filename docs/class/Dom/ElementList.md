@@ -3,41 +3,38 @@
 Class ElementList
 
 ### Methods
-* `add`
+<details>
+<summary>`add`</summary>
 
-	<details>
+```php
+public add( DOMElement $element, DOMElement $caption = null )
+```
 
-	```php
-	public add( DOMElement $element, DOMElement $caption = null )
-	```
-
-	Adds an element to the list, possibly with a caption.
+Adds an element to the list, possibly with a caption.
 
 
-	</details>
-* `getIterator`
+</details>
+<details>
+<summary>`getIterator`</summary>
 
-	<details>
+```php
+public getIterator()
+```
 
-	```php
-	public getIterator()
-	```
-
-	Gets an iterator with the elements.
+Gets an iterator with the elements.
 
 This together with the IteratorAggregate turns the object into a &quot;Traversable&quot;, so you can just foreach over it and receive its elements in the correct type.
 
 
-	</details>
-* `count`
+</details>
+<details>
+<summary>`count`</summary>
 
-	<details>
+```php
+public count()
+```
 
-	```php
-	public count()
-	```
-
-	Gets the count of the elements.
+Gets the count of the elements.
 
 
-	</details>
+</details>

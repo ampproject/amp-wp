@@ -3,75 +3,69 @@
 Class AMP_TikTok_Embed_Handler
 
 ### Methods
-* `register_embed`
+<details>
+<summary>`register_embed`</summary>
 
-	<details>
+```php
+public register_embed()
+```
 
-	```php
-	public register_embed()
-	```
-
-	Registers embed.
-
-
-	</details>
-* `unregister_embed`
-
-	<details>
-
-	```php
-	public unregister_embed()
-	```
-
-	Unregisters embed.
+Registers embed.
 
 
-	</details>
-* `sanitize_raw_embeds`
+</details>
+<details>
+<summary>`unregister_embed`</summary>
 
-	<details>
+```php
+public unregister_embed()
+```
 
-	```php
-	public sanitize_raw_embeds( Document $dom )
-	```
-
-	Sanitize TikTok embeds to be AMP compatible.
-
-
-	</details>
-* `is_raw_embed`
-
-	<details>
-
-	```php
-	protected is_raw_embed( \DOMElement $node )
-	```
-
-	Determine if the node has already been sanitized.
+Unregisters embed.
 
 
-	</details>
-* `make_embed_amp_compatible`
+</details>
+<details>
+<summary>`sanitize_raw_embeds`</summary>
 
-	<details>
+```php
+public sanitize_raw_embeds( Document $dom )
+```
 
-	```php
-	protected make_embed_amp_compatible( \DOMElement $blockquote_node )
-	```
-
-	Make TikTok embed AMP compatible.
-
-
-	</details>
-* `remove_embed_script`
-
-	<details>
-
-	```php
-	protected remove_embed_script( \DOMElement $node )
-	```
-
-	Remove the TikTok embed script if it exists.
+Sanitize TikTok embeds to be AMP compatible.
 
 
-	</details>
+</details>
+<details>
+<summary>`is_raw_embed`</summary>
+
+```php
+protected is_raw_embed( \DOMElement $node )
+```
+
+Determine if the node has already been sanitized.
+
+
+</details>
+<details>
+<summary>`make_embed_amp_compatible`</summary>
+
+```php
+protected make_embed_amp_compatible( \DOMElement $blockquote_node )
+```
+
+Make TikTok embed AMP compatible.
+
+
+</details>
+<details>
+<summary>`remove_embed_script`</summary>
+
+```php
+protected remove_embed_script( \DOMElement $node )
+```
+
+Remove the TikTok embed script if it exists.
+
+
+</details>

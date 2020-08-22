@@ -5,192 +5,177 @@ Monitor the CSS transient caching to detect and remedy issues.
 This checks whether there&#039;s excessive cycling of CSS cached stylesheets and disables transient caching if so.
 
 ### Methods
-* `register`
+<details>
+<summary>`register`</summary>
 
-	<details>
+```php
+public register()
+```
 
-	```php
-	public register()
-	```
-
-	Register the service with the system.
-
-
-	</details>
-* `get_interval`
-
-	<details>
-
-	```php
-	protected get_interval()
-	```
-
-	Get the interval to use for the event.
+Register the service with the system.
 
 
-	</details>
-* `get_event_name`
+</details>
+<details>
+<summary>`get_interval`</summary>
 
-	<details>
+```php
+protected get_interval()
+```
 
-	```php
-	protected get_event_name()
-	```
+Get the interval to use for the event.
 
-	Get the event name.
+
+</details>
+<details>
+<summary>`get_event_name`</summary>
+
+```php
+protected get_event_name()
+```
+
+Get the event name.
 
 This is the &quot;slug&quot; of the event, not the display name.
  Note: the event name should be prefixed to prevent naming collisions.
 
 
-	</details>
-* `process`
+</details>
+<details>
+<summary>`process`</summary>
 
-	<details>
+```php
+public process( DateTimeInterface $date = null, $transient_count = null )
+```
 
-	```php
-	public process( DateTimeInterface $date = null, $transient_count = null )
-	```
-
-	Process a single cron tick.
-
-
-	</details>
-* `is_css_transient_caching_disabled`
-
-	<details>
-
-	```php
-	private is_css_transient_caching_disabled()
-	```
-
-	Check whether transient caching of stylesheets is disabled.
+Process a single cron tick.
 
 
-	</details>
-* `disable_css_transient_caching`
+</details>
+<details>
+<summary>`is_css_transient_caching_disabled`</summary>
 
-	<details>
+```php
+private is_css_transient_caching_disabled()
+```
 
-	```php
-	private disable_css_transient_caching()
-	```
-
-	Disable transient caching of stylesheets.
-
-
-	</details>
-* `query_css_transient_count`
-
-	<details>
-
-	```php
-	public query_css_transient_count()
-	```
-
-	Query the number of transients containing cache stylesheets.
+Check whether transient caching of stylesheets is disabled.
 
 
-	</details>
-* `handle_plugin_update`
+</details>
+<details>
+<summary>`disable_css_transient_caching`</summary>
 
-	<details>
+```php
+private disable_css_transient_caching()
+```
 
-	```php
-	public handle_plugin_update( $old_version )
-	```
-
-	Handle update to plugin.
-
-
-	</details>
-* `get_time_series`
-
-	<details>
-
-	```php
-	public get_time_series()
-	```
-
-	Get the time series stored in the WordPress options table.
+Disable transient caching of stylesheets.
 
 
-	</details>
-* `get_default_threshold`
+</details>
+<details>
+<summary>`query_css_transient_count`</summary>
 
-	<details>
+```php
+public query_css_transient_count()
+```
 
-	```php
-	public get_default_threshold()
-	```
-
-	Get the default threshold to use.
-
-
-	</details>
-* `get_default_sampling_range`
-
-	<details>
-
-	```php
-	public get_default_sampling_range()
-	```
-
-	Get the default sampling range to use.
+Query the number of transients containing cache stylesheets.
 
 
-	</details>
-* `persist_time_series`
+</details>
+<details>
+<summary>`handle_plugin_update`</summary>
 
-	<details>
+```php
+public handle_plugin_update( $old_version )
+```
 
-	```php
-	private persist_time_series( $time_series )
-	```
-
-	Persist the time series in the database.
+Handle update to plugin.
 
 
-	</details>
-* `calculate_average`
+</details>
+<details>
+<summary>`get_time_series`</summary>
 
-	<details>
+```php
+public get_time_series()
+```
 
-	```php
-	private calculate_average( $time_series )
-	```
+Get the time series stored in the WordPress options table.
 
-	Calculate the average for the provided time series.
+
+</details>
+<details>
+<summary>`get_default_threshold`</summary>
+
+```php
+public get_default_threshold()
+```
+
+Get the default threshold to use.
+
+
+</details>
+<details>
+<summary>`get_default_sampling_range`</summary>
+
+```php
+public get_default_sampling_range()
+```
+
+Get the default sampling range to use.
+
+
+</details>
+<details>
+<summary>`persist_time_series`</summary>
+
+```php
+private persist_time_series( $time_series )
+```
+
+Persist the time series in the database.
+
+
+</details>
+<details>
+<summary>`calculate_average`</summary>
+
+```php
+private calculate_average( $time_series )
+```
+
+Calculate the average for the provided time series.
 
 Note: The single highest value is discarded to calculate the average, so as to avoid a single outlier causing the threshold to be reached.
 
 
-	</details>
-* `get_threshold`
+</details>
+<details>
+<summary>`get_threshold`</summary>
 
-	<details>
+```php
+private get_threshold()
+```
 
-	```php
-	private get_threshold()
-	```
-
-	Get the threshold to check the moving average against.
+Get the threshold to check the moving average against.
 
 This can be filtered via the &#039;amp_css_transient_monitoring_threshold&#039; filter.
 
 
-	</details>
-* `get_sampling_range`
+</details>
+<details>
+<summary>`get_sampling_range`</summary>
 
-	<details>
+```php
+private get_sampling_range()
+```
 
-	```php
-	private get_sampling_range()
-	```
-
-	Get the sampling range to limit the time series to for calculating the moving average.
+Get the sampling range to limit the time series to for calculating the moving average.
 
 This can be filtered via the &#039;amp_css_transient_monitoring_sampling_range&#039; filter.
 
 
-	</details>
+</details>

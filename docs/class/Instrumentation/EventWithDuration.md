@@ -3,51 +3,47 @@
 A server-timing event with a duration.
 
 ### Methods
-* `__construct`
+<details>
+<summary>`__construct`</summary>
 
-	<details>
+```php
+public __construct( $name, $description = null, $properties = array(), $duration = 0.0 )
+```
 
-	```php
-	public __construct( $name, $description = null, $properties = array(), $duration = 0.0 )
-	```
-
-	Event constructor.
-
-
-	</details>
-* `set_duration`
-
-	<details>
-
-	```php
-	public set_duration( $duration )
-	```
-
-	Set the event duration.
+Event constructor.
 
 
-	</details>
-* `get_duration`
+</details>
+<details>
+<summary>`set_duration`</summary>
 
-	<details>
+```php
+public set_duration( $duration )
+```
 
-	```php
-	public get_duration()
-	```
-
-	Get the event duration.
-
-
-	</details>
-* `get_header_string`
-
-	<details>
-
-	```php
-	public get_header_string()
-	```
-
-	Get the server timing header string.
+Set the event duration.
 
 
-	</details>
+</details>
+<details>
+<summary>`get_duration`</summary>
+
+```php
+public get_duration()
+```
+
+Get the event duration.
+
+
+</details>
+<details>
+<summary>`get_header_string`</summary>
+
+```php
+public get_header_string()
+```
+
+Get the server timing header string.
+
+
+</details>

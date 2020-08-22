@@ -3,99 +3,91 @@
 Icons used to visually represent the state of a validation error.
 
 ### Methods
-* `__construct`
+<details>
+<summary>`__construct`</summary>
 
-	<details>
+```php
+private __construct( $icon )
+```
 
-	```php
-	private __construct( $icon )
-	```
-
-	Constructor.
-
-
-	</details>
-* `invalid`
-
-	<details>
-
-	```php
-	static public invalid()
-	```
-
-	Invalid icon.
+Constructor.
 
 
-	</details>
-* `link`
+</details>
+<details>
+<summary>`invalid`</summary>
 
-	<details>
+```php
+static public invalid()
+```
 
-	```php
-	static public link()
-	```
-
-	Link icon
-
-
-	</details>
-* `valid`
-
-	<details>
-
-	```php
-	static public valid()
-	```
-
-	Valid icon
+Invalid icon.
 
 
-	</details>
-* `warning`
+</details>
+<details>
+<summary>`link`</summary>
 
-	<details>
+```php
+static public link()
+```
 
-	```php
-	static public warning()
-	```
-
-	Warning icon
-
-
-	</details>
-* `logo`
-
-	<details>
-
-	```php
-	static public logo()
-	```
-
-	Logo icon
+Link icon
 
 
-	</details>
-* `get_color`
+</details>
+<details>
+<summary>`valid`</summary>
 
-	<details>
+```php
+static public valid()
+```
 
-	```php
-	public get_color()
-	```
-
-	Get color for current icon.
-
-
-	</details>
-* `to_html`
-
-	<details>
-
-	```php
-	public to_html( $attributes = array() )
-	```
-
-	Render icon as HTML.
+Valid icon
 
 
-	</details>
+</details>
+<details>
+<summary>`warning`</summary>
+
+```php
+static public warning()
+```
+
+Warning icon
+
+
+</details>
+<details>
+<summary>`logo`</summary>
+
+```php
+static public logo()
+```
+
+Logo icon
+
+
+</details>
+<details>
+<summary>`get_color`</summary>
+
+```php
+public get_color()
+```
+
+Get color for current icon.
+
+
+</details>
+<details>
+<summary>`to_html`</summary>
+
+```php
+public to_html( $attributes = array() )
+```
+
+Render icon as HTML.
+
+
+</details>

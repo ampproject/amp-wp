@@ -3,15 +3,14 @@
 Exception thrown when an invalid stopwatch name was requested.
 
 ### Methods
-* `from_name_to_stop`
+<details>
+<summary>`from_name_to_stop`</summary>
 
-	<details>
+```php
+static public from_name_to_stop( $name )
+```
 
-	```php
-	static public from_name_to_stop( $name )
-	```
-
-	Create a new instance of the exception for a stopwatch event name that is not recognized but requested to be stopped.
+Create a new instance of the exception for a stopwatch event name that is not recognized but requested to be stopped.
 
 
-	</details>
+</details>

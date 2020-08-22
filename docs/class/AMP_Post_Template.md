@@ -3,233 +3,214 @@
 Class AMP_Post_Template
 
 ### Methods
-* `__construct`
+<details>
+<summary>`__construct`</summary>
 
-	<details>
+```php
+public __construct( $post )
+```
 
-	```php
-	public __construct( $post )
-	```
-
-	AMP_Post_Template constructor.
+AMP_Post_Template constructor.
 
 
-	</details>
-* `set_data`
+</details>
+<details>
+<summary>`set_data`</summary>
 
-	<details>
+```php
+private set_data()
+```
 
-	```php
-	private set_data()
-	```
-
-	Set data.
+Set data.
 
 This is called in the get method the first time it is called.
 
 
-	</details>
-* `get_template_dir`
+</details>
+<details>
+<summary>`get_template_dir`</summary>
 
-	<details>
+```php
+private get_template_dir()
+```
 
-	```php
-	private get_template_dir()
-	```
+Get template directory for Reader mode.
 
-	Get template directory for Reader mode.
 
+</details>
+<details>
+<summary>`get`</summary>
 
-	</details>
-* `get`
+```php
+public get( $property, $default = null )
+```
 
-	<details>
+Getter.
 
-	```php
-	public get( $property, $default = null )
-	```
 
-	Getter.
+</details>
+<details>
+<summary>`get_customizer_setting`</summary>
 
+```php
+public get_customizer_setting( $name, $default = null )
+```
 
-	</details>
-* `get_customizer_setting`
+Get customizer setting.
 
-	<details>
 
-	```php
-	public get_customizer_setting( $name, $default = null )
-	```
+</details>
+<details>
+<summary>`load`</summary>
 
-	Get customizer setting.
+```php
+public load()
+```
 
+Load and print the template parts for the given post.
 
-	</details>
-* `load`
 
-	<details>
+</details>
+<details>
+<summary>`load_parts`</summary>
 
-	```php
-	public load()
-	```
+```php
+public load_parts( $templates )
+```
 
-	Load and print the template parts for the given post.
+Load template parts.
 
 
-	</details>
-* `load_parts`
+</details>
+<details>
+<summary>`get_template_path`</summary>
 
-	<details>
+```php
+private get_template_path( $template )
+```
 
-	```php
-	public load_parts( $templates )
-	```
+Get template path.
 
-	Load template parts.
 
+</details>
+<details>
+<summary>`add_data`</summary>
 
-	</details>
-* `get_template_path`
+```php
+private add_data( $data )
+```
 
-	<details>
+Add data.
 
-	```php
-	private get_template_path( $template )
-	```
 
-	Get template path.
+</details>
+<details>
+<summary>`add_data_by_key`</summary>
 
+```php
+private add_data_by_key( $key, $value )
+```
 
-	</details>
-* `add_data`
+Add data by key.
 
-	<details>
 
-	```php
-	private add_data( $data )
-	```
+</details>
+<details>
+<summary>`build_post_data`</summary>
 
-	Add data.
+```php
+private build_post_data()
+```
 
+Build post data.
 
-	</details>
-* `add_data_by_key`
 
-	<details>
+</details>
+<details>
+<summary>`build_post_comments_data`</summary>
 
-	```php
-	private add_data_by_key( $key, $value )
-	```
+```php
+private build_post_comments_data()
+```
 
-	Add data by key.
+Build post comments data.
 
 
-	</details>
-* `build_post_data`
+</details>
+<details>
+<summary>`build_post_content`</summary>
 
-	<details>
+```php
+private build_post_content()
+```
 
-	```php
-	private build_post_data()
-	```
+Build post content.
 
-	Build post data.
 
+</details>
+<details>
+<summary>`build_post_featured_image`</summary>
 
-	</details>
-* `build_post_comments_data`
+```php
+private build_post_featured_image()
+```
 
-	<details>
+Build post featured image.
 
-	```php
-	private build_post_comments_data()
-	```
 
-	Build post comments data.
+</details>
+<details>
+<summary>`build_customizer_settings`</summary>
 
+```php
+private build_customizer_settings()
+```
 
-	</details>
-* `build_post_content`
+Build customizer settings.
 
-	<details>
 
-	```php
-	private build_post_content()
-	```
+</details>
+<details>
+<summary>`build_html_tag_attributes`</summary>
 
-	Build post content.
+```php
+private build_html_tag_attributes()
+```
 
+Build HTML tag attributes.
 
-	</details>
-* `build_post_featured_image`
 
-	<details>
+</details>
+<details>
+<summary>`verify_and_include`</summary>
 
-	```php
-	private build_post_featured_image()
-	```
+```php
+private verify_and_include( $file, $template_type )
+```
 
-	Build post featured image.
+Verify and include.
 
 
-	</details>
-* `build_customizer_settings`
+</details>
+<details>
+<summary>`locate_template`</summary>
 
-	<details>
+```php
+private locate_template( $file )
+```
 
-	```php
-	private build_customizer_settings()
-	```
+Locate template.
 
-	Build customizer settings.
 
+</details>
+<details>
+<summary>`is_valid_template`</summary>
 
-	</details>
-* `build_html_tag_attributes`
+```php
+private is_valid_template( $template )
+```
 
-	<details>
+Is valid template.
 
-	```php
-	private build_html_tag_attributes()
-	```
 
-	Build HTML tag attributes.
-
-
-	</details>
-* `verify_and_include`
-
-	<details>
-
-	```php
-	private verify_and_include( $file, $template_type )
-	```
-
-	Verify and include.
-
-
-	</details>
-* `locate_template`
-
-	<details>
-
-	```php
-	private locate_template( $file )
-	```
-
-	Locate template.
-
-
-	</details>
-* `is_valid_template`
-
-	<details>
-
-	```php
-	private is_valid_template( $template )
-	```
-
-	Is valid template.
-
-
-	</details>
+</details>

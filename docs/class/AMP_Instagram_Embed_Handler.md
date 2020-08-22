@@ -5,99 +5,91 @@ Class AMP_Instagram_Embed_Handler
 Much of this class is borrowed from Jetpack embeds
 
 ### Methods
-* `register_embed`
+<details>
+<summary>`register_embed`</summary>
 
-	<details>
+```php
+public register_embed()
+```
 
-	```php
-	public register_embed()
-	```
-
-	Registers embed.
-
-
-	</details>
-* `unregister_embed`
-
-	<details>
-
-	```php
-	public unregister_embed()
-	```
-
-	Unregisters embed.
+Registers embed.
 
 
-	</details>
-* `oembed`
+</details>
+<details>
+<summary>`unregister_embed`</summary>
 
-	<details>
+```php
+public unregister_embed()
+```
 
-	```php
-	public oembed( $matches, $attr, $url )
-	```
-
-	WordPress OEmbed rendering callback.
-
-
-	</details>
-* `render`
-
-	<details>
-
-	```php
-	public render( $args )
-	```
-
-	Gets the rendered embed markup.
+Unregisters embed.
 
 
-	</details>
-* `get_instagram_id_from_url`
+</details>
+<details>
+<summary>`oembed`</summary>
 
-	<details>
+```php
+public oembed( $matches, $attr, $url )
+```
 
-	```php
-	private get_instagram_id_from_url( $url )
-	```
-
-	Get Instagram ID from URL.
-
-
-	</details>
-* `sanitize_raw_embeds`
-
-	<details>
-
-	```php
-	public sanitize_raw_embeds( Document $dom )
-	```
-
-	Sanitized &lt;blockquote class=&quot;instagram-media&quot;&gt; tags to &lt;amp-instagram&gt;
+WordPress OEmbed rendering callback.
 
 
-	</details>
-* `create_amp_instagram_and_replace_node`
+</details>
+<details>
+<summary>`render`</summary>
 
-	<details>
+```php
+public render( $args )
+```
 
-	```php
-	private create_amp_instagram_and_replace_node( $dom, $node )
-	```
-
-	Make final modifications to DOMNode
-
-
-	</details>
-* `sanitize_embed_script`
-
-	<details>
-
-	```php
-	private sanitize_embed_script( $node )
-	```
-
-	Removes Instagram&#039;s embed &lt;script&gt; tag.
+Gets the rendered embed markup.
 
 
-	</details>
+</details>
+<details>
+<summary>`get_instagram_id_from_url`</summary>
+
+```php
+private get_instagram_id_from_url( $url )
+```
+
+Get Instagram ID from URL.
+
+
+</details>
+<details>
+<summary>`sanitize_raw_embeds`</summary>
+
+```php
+public sanitize_raw_embeds( Document $dom )
+```
+
+Sanitized &lt;blockquote class=&quot;instagram-media&quot;&gt; tags to &lt;amp-instagram&gt;
+
+
+</details>
+<details>
+<summary>`create_amp_instagram_and_replace_node`</summary>
+
+```php
+private create_amp_instagram_and_replace_node( $dom, $node )
+```
+
+Make final modifications to DOMNode
+
+
+</details>
+<details>
+<summary>`sanitize_embed_script`</summary>
+
+```php
+private sanitize_embed_script( $node )
+```
+
+Removes Instagram&#039;s embed &lt;script&gt; tag.
+
+
+</details>

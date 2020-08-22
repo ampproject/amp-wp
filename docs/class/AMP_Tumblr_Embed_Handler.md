@@ -3,39 +3,36 @@
 Class AMP_Tumblr_Embed_Handler
 
 ### Methods
-* `register_embed`
+<details>
+<summary>`register_embed`</summary>
 
-	<details>
+```php
+public register_embed()
+```
 
-	```php
-	public register_embed()
-	```
-
-	Register embed.
-
-
-	</details>
-* `unregister_embed`
-
-	<details>
-
-	```php
-	public unregister_embed()
-	```
-
-	Unregister embed.
+Register embed.
 
 
-	</details>
-* `filter_embed_oembed_html`
+</details>
+<details>
+<summary>`unregister_embed`</summary>
 
-	<details>
+```php
+public unregister_embed()
+```
 
-	```php
-	public filter_embed_oembed_html( $cache, $url )
-	```
-
-	Filter oEmbed HTML for Tumblr to prepare it for AMP.
+Unregister embed.
 
 
-	</details>
+</details>
+<details>
+<summary>`filter_embed_oembed_html`</summary>
+
+```php
+public filter_embed_oembed_html( $cache, $url )
+```
+
+Filter oEmbed HTML for Tumblr to prepare it for AMP.
+
+
+</details>

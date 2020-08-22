@@ -3,135 +3,124 @@
 Class AMP_Content
 
 ### Methods
-* `__construct`
+<details>
+<summary>`__construct`</summary>
 
-	<details>
+```php
+public __construct( $content, $embed_handler_classes, $sanitizer_classes, $args = array() )
+```
 
-	```php
-	public __construct( $content, $embed_handler_classes, $sanitizer_classes, $args = array() )
-	```
-
-	AMP_Content constructor.
-
-
-	</details>
-* `get_amp_content`
-
-	<details>
-
-	```php
-	public get_amp_content()
-	```
-
-	Get AMP content.
+AMP_Content constructor.
 
 
-	</details>
-* `get_amp_scripts`
+</details>
+<details>
+<summary>`get_amp_content`</summary>
 
-	<details>
+```php
+public get_amp_content()
+```
 
-	```php
-	public get_amp_scripts()
-	```
-
-	Get AMP scripts.
-
-
-	</details>
-* `get_amp_styles`
-
-	<details>
-
-	```php
-	public get_amp_styles()
-	```
-
-	Get AMP styles.
+Get AMP content.
 
 
-	</details>
-* `get_amp_stylesheets`
+</details>
+<details>
+<summary>`get_amp_scripts`</summary>
 
-	<details>
+```php
+public get_amp_scripts()
+```
 
-	```php
-	public get_amp_stylesheets()
-	```
-
-	Get AMP styles.
-
-
-	</details>
-* `transform`
-
-	<details>
-
-	```php
-	private transform()
-	```
-
-	Transform.
+Get AMP scripts.
 
 
-	</details>
-* `add_scripts`
+</details>
+<details>
+<summary>`get_amp_styles`</summary>
 
-	<details>
+```php
+public get_amp_styles()
+```
 
-	```php
-	private add_scripts( $scripts )
-	```
-
-	Add scripts.
-
-
-	</details>
-* `add_stylesheets`
-
-	<details>
-
-	```php
-	private add_stylesheets( $stylesheets )
-	```
-
-	Add stylesheets.
+Get AMP styles.
 
 
-	</details>
-* `register_embed_handlers`
+</details>
+<details>
+<summary>`get_amp_stylesheets`</summary>
 
-	<details>
+```php
+public get_amp_stylesheets()
+```
 
-	```php
-	private register_embed_handlers( $embed_handler_classes )
-	```
-
-	Register embed handlers.
-
-
-	</details>
-* `unregister_embed_handlers`
-
-	<details>
-
-	```php
-	private unregister_embed_handlers( $embed_handlers )
-	```
-
-	Unregister embed handlers.
+Get AMP styles.
 
 
-	</details>
-* `sanitize`
+</details>
+<details>
+<summary>`transform`</summary>
 
-	<details>
+```php
+private transform()
+```
 
-	```php
-	private sanitize( $content )
-	```
-
-	Sanitize.
+Transform.
 
 
-	</details>
+</details>
+<details>
+<summary>`add_scripts`</summary>
+
+```php
+private add_scripts( $scripts )
+```
+
+Add scripts.
+
+
+</details>
+<details>
+<summary>`add_stylesheets`</summary>
+
+```php
+private add_stylesheets( $stylesheets )
+```
+
+Add stylesheets.
+
+
+</details>
+<details>
+<summary>`register_embed_handlers`</summary>
+
+```php
+private register_embed_handlers( $embed_handler_classes )
+```
+
+Register embed handlers.
+
+
+</details>
+<details>
+<summary>`unregister_embed_handlers`</summary>
+
+```php
+private unregister_embed_handlers( $embed_handlers )
+```
+
+Unregister embed handlers.
+
+
+</details>
+<details>
+<summary>`sanitize`</summary>
+
+```php
+private sanitize( $content )
+```
+
+Sanitize.
+
+
+</details>

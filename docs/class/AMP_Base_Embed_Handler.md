@@ -3,65 +3,60 @@
 Class AMP_Base_Embed_Handler
 
 ### Methods
-* `register_embed`
+<details>
+<summary>`register_embed`</summary>
 
-	<details>
+```php
+abstract public register_embed()
+```
 
-	```php
-	abstract public register_embed()
-	```
-
-	Registers embed.
-
-
-	</details>
-* `unregister_embed`
-
-	<details>
-
-	```php
-	abstract public unregister_embed()
-	```
-
-	Unregisters embed.
+Registers embed.
 
 
-	</details>
-* `__construct`
+</details>
+<details>
+<summary>`unregister_embed`</summary>
 
-	<details>
+```php
+abstract public unregister_embed()
+```
 
-	```php
-	public __construct( $args = array() )
-	```
-
-	Constructor.
+Unregisters embed.
 
 
-	</details>
-* `get_scripts`
+</details>
+<details>
+<summary>`__construct`</summary>
 
-	<details>
+```php
+public __construct( $args = array() )
+```
 
-	```php
-	public get_scripts()
-	```
+Constructor.
 
-	Get mapping of AMP component names to AMP script URLs.
+
+</details>
+<details>
+<summary>`get_scripts`</summary>
+
+```php
+public get_scripts()
+```
+
+Get mapping of AMP component names to AMP script URLs.
 
 This is normally no longer needed because the validating sanitizer will automatically detect the need for them via the spec.
 
 
-	</details>
-* `match_element_attributes`
+</details>
+<details>
+<summary>`match_element_attributes`</summary>
 
-	<details>
+```php
+protected match_element_attributes( $html, $tag_name, $attribute_names )
+```
 
-	```php
-	protected match_element_attributes( $html, $tag_name, $attribute_names )
-	```
-
-	Get regex pattern for matching HTML attributes from a given tag name.
+Get regex pattern for matching HTML attributes from a given tag name.
 
 
-	</details>
+</details>

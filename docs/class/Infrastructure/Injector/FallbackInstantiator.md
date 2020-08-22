@@ -3,15 +3,14 @@
 Fallback instantiator to use in case none was provided.
 
 ### Methods
-* `instantiate`
+<details>
+<summary>`instantiate`</summary>
 
-	<details>
+```php
+public instantiate( $class, $dependencies = array() )
+```
 
-	```php
-	public instantiate( $class, $dependencies = array() )
-	```
-
-	Make an object instance out of an interface or class.
+Make an object instance out of an interface or class.
 
 
-	</details>
+</details>

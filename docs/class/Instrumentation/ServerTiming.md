@@ -3,99 +3,91 @@
 Collect Server-Timing metrics.
 
 ### Methods
-* `get_registration_action`
+<details>
+<summary>`get_registration_action`</summary>
 
-	<details>
+```php
+static public get_registration_action()
+```
 
-	```php
-	static public get_registration_action()
-	```
-
-	Get the action to use for registering the service.
-
-
-	</details>
-* `__construct`
-
-	<details>
-
-	```php
-	public __construct( \AmpProject\AmpWP\Instrumentation\StopWatch $stopwatch, $verbose = false )
-	```
-
-	ServerTiming constructor.
+Get the action to use for registering the service.
 
 
-	</details>
-* `register`
+</details>
+<details>
+<summary>`__construct`</summary>
 
-	<details>
+```php
+public __construct( \AmpProject\AmpWP\Instrumentation\StopWatch $stopwatch, $verbose = false )
+```
 
-	```php
-	public register()
-	```
-
-	Register the service.
-
-
-	</details>
-* `start`
-
-	<details>
-
-	```php
-	public start( $event_name, $event_description = null, $properties = array(), $verbose_only = false )
-	```
-
-	Start recording an event.
+ServerTiming constructor.
 
 
-	</details>
-* `stop`
+</details>
+<details>
+<summary>`register`</summary>
 
-	<details>
+```php
+public register()
+```
 
-	```php
-	public stop( $event_name )
-	```
-
-	Stop recording an event.
-
-
-	</details>
-* `log`
-
-	<details>
-
-	```php
-	public log( $event_name, $event_description = '', $properties = array(), $verbose_only = false )
-	```
-
-	Log an event that does not have a duration.
+Register the service.
 
 
-	</details>
-* `send`
+</details>
+<details>
+<summary>`start`</summary>
 
-	<details>
+```php
+public start( $event_name, $event_description = null, $properties = array(), $verbose_only = false )
+```
 
-	```php
-	public send()
-	```
-
-	Send the server-timing header.
-
-
-	</details>
-* `get_header_string`
-
-	<details>
-
-	```php
-	public get_header_string()
-	```
-
-	Get the server timing header string for all collected events.
+Start recording an event.
 
 
-	</details>
+</details>
+<details>
+<summary>`stop`</summary>
+
+```php
+public stop( $event_name )
+```
+
+Stop recording an event.
+
+
+</details>
+<details>
+<summary>`log`</summary>
+
+```php
+public log( $event_name, $event_description = '', $properties = array(), $verbose_only = false )
+```
+
+Log an event that does not have a duration.
+
+
+</details>
+<details>
+<summary>`send`</summary>
+
+```php
+public send()
+```
+
+Send the server-timing header.
+
+
+</details>
+<details>
+<summary>`get_header_string`</summary>
+
+```php
+public get_header_string()
+```
+
+Get the server timing header string for all collected events.
+
+
+</details>

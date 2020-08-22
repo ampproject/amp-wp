@@ -3,39 +3,36 @@
 Class CaptionedSlide
 
 ### Methods
-* `__construct`
+<details>
+<summary>`__construct`</summary>
 
-	<details>
+```php
+public __construct( DOMElement $slide_element, DOMElement $caption_element )
+```
 
-	```php
-	public __construct( DOMElement $slide_element, DOMElement $caption_element )
-	```
-
-	Constructs the class.
-
-
-	</details>
-* `get_caption_element`
-
-	<details>
-
-	```php
-	public get_caption_element()
-	```
-
-	Gets the caption element.
+Constructs the class.
 
 
-	</details>
-* `get_slide_element`
+</details>
+<details>
+<summary>`get_caption_element`</summary>
 
-	<details>
+```php
+public get_caption_element()
+```
 
-	```php
-	public get_slide_element()
-	```
-
-	Gets the slide element.
+Gets the caption element.
 
 
-	</details>
+</details>
+<details>
+<summary>`get_slide_element`</summary>
+
+```php
+public get_slide_element()
+```
+
+Gets the slide element.
+
+
+</details>

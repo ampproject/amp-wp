@@ -3,41 +3,38 @@
 Base class to define a new AJAX action.
 
 ### Methods
-* `register`
+<details>
+<summary>`register`</summary>
 
-	<details>
+```php
+public register()
+```
 
-	```php
-	public register()
-	```
-
-	Register the AJAX action with the WordPress system.
-
-
-	</details>
-* `register_ajax_script`
-
-	<details>
-
-	```php
-	public register_ajax_script( $hook_suffix )
-	```
-
-	Register the AJAX logic.
+Register the AJAX action with the WordPress system.
 
 
-	</details>
-* `reenable_css_transient_caching`
+</details>
+<details>
+<summary>`register_ajax_script`</summary>
 
-	<details>
+```php
+public register_ajax_script( $hook_suffix )
+```
 
-	```php
-	public reenable_css_transient_caching()
-	```
+Register the AJAX logic.
 
-	Re-enable the CSS Transient caching.
+
+</details>
+<details>
+<summary>`reenable_css_transient_caching`</summary>
+
+```php
+public reenable_css_transient_caching()
+```
+
+Re-enable the CSS Transient caching.
 
 This is triggered via an AJAX call from the Site Health panel.
 
 
-	</details>
+</details>

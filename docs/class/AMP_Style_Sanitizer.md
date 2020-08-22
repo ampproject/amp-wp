@@ -5,553 +5,509 @@ Class AMP_Style_Sanitizer
 Collects inline styles and outputs them in the amp-custom stylesheet.
 
 ### Methods
-* `get_css_parser_validation_error_codes`
+<details>
+<summary>`get_css_parser_validation_error_codes`</summary>
 
-	<details>
+```php
+static public get_css_parser_validation_error_codes()
+```
 
-	```php
-	static public get_css_parser_validation_error_codes()
-	```
-
-	Get error codes that can be raised during parsing of CSS.
+Get error codes that can be raised during parsing of CSS.
 
 This is used to determine which validation errors should be taken into account when determining which validation errors should vary the parse cache.
 
 
-	</details>
-* `has_required_php_css_parser`
+</details>
+<details>
+<summary>`has_required_php_css_parser`</summary>
 
-	<details>
+```php
+static public has_required_php_css_parser()
+```
 
-	```php
-	static public has_required_php_css_parser()
-	```
-
-	Determine whether the version of PHP-CSS-Parser loaded has all required features for tree shaking and CSS processing.
-
-
-	</details>
-* `__construct`
-
-	<details>
-
-	```php
-	public __construct( $dom, array $args = array() )
-	```
-
-	AMP_Base_Sanitizer constructor.
+Determine whether the version of PHP-CSS-Parser loaded has all required features for tree shaking and CSS processing.
 
 
-	</details>
-* `get_styles`
+</details>
+<details>
+<summary>`__construct`</summary>
 
-	<details>
+```php
+public __construct( $dom, array $args = array() )
+```
 
-	```php
-	public get_styles()
-	```
-
-	Get list of CSS styles in HTML content of Dom\Document ($this-&gt;dom).
-
-
-	</details>
-* `get_stylesheets`
-
-	<details>
-
-	```php
-	public get_stylesheets()
-	```
-
-	Get stylesheets for amp-custom.
+AMP_Base_Sanitizer constructor.
 
 
-	</details>
-* `get_used_class_names`
+</details>
+<details>
+<summary>`get_styles`</summary>
 
-	<details>
+```php
+public get_styles()
+```
 
-	```php
-	private get_used_class_names()
-	```
-
-	Get list of all the class names used in the document, including those used in [class] attributes.
-
-
-	</details>
-* `has_used_class_name`
-
-	<details>
-
-	```php
-	private has_used_class_name( $class_names )
-	```
-
-	Determine if all the supplied class names are used.
+Get list of CSS styles in HTML content of Dom\Document ($this-&gt;dom).
 
 
-	</details>
-* `get_used_tag_names`
+</details>
+<details>
+<summary>`get_stylesheets`</summary>
 
-	<details>
+```php
+public get_stylesheets()
+```
 
-	```php
-	private get_used_tag_names()
-	```
-
-	Get list of all the tag names used in the document.
-
-
-	</details>
-* `has_used_tag_names`
-
-	<details>
-
-	```php
-	private has_used_tag_names( $tag_names )
-	```
-
-	Determine if all the supplied tag names are used.
+Get stylesheets for amp-custom.
 
 
-	</details>
-* `has_used_attributes`
+</details>
+<details>
+<summary>`get_used_class_names`</summary>
 
-	<details>
+```php
+private get_used_class_names()
+```
 
-	```php
-	private has_used_attributes( $attribute_names )
-	```
-
-	Check whether the attributes exist.
+Get list of all the class names used in the document, including those used in [class] attributes.
 
 
-	</details>
-* `is_class_allowed_in_amp_date_picker`
+</details>
+<details>
+<summary>`has_used_class_name`</summary>
 
-	<details>
+```php
+private has_used_class_name( $class_names )
+```
 
-	```php
-	private is_class_allowed_in_amp_date_picker( $class )
-	```
+Determine if all the supplied class names are used.
 
-	Whether a given class is allowed to be styled in &lt;amp-date-picker&gt;.
+
+</details>
+<details>
+<summary>`get_used_tag_names`</summary>
+
+```php
+private get_used_tag_names()
+```
+
+Get list of all the tag names used in the document.
+
+
+</details>
+<details>
+<summary>`has_used_tag_names`</summary>
+
+```php
+private has_used_tag_names( $tag_names )
+```
+
+Determine if all the supplied tag names are used.
+
+
+</details>
+<details>
+<summary>`has_used_attributes`</summary>
+
+```php
+private has_used_attributes( $attribute_names )
+```
+
+Check whether the attributes exist.
+
+
+</details>
+<details>
+<summary>`is_class_allowed_in_amp_date_picker`</summary>
+
+```php
+private is_class_allowed_in_amp_date_picker( $class )
+```
+
+Whether a given class is allowed to be styled in &lt;amp-date-picker&gt;.
 
 That component has child classes that won&#039;t be present in the document yet. So get whether a class is an allowed child.
 
 
-	</details>
-* `init`
+</details>
+<details>
+<summary>`init`</summary>
 
-	<details>
+```php
+public init( $sanitizers )
+```
 
-	```php
-	public init( $sanitizers )
-	```
-
-	Run logic before any sanitizers are run.
+Run logic before any sanitizers are run.
 
 After the sanitizers are instantiated but before calling sanitize on each of them, this method is called with list of all the instantiated sanitizers.
 
 
-	</details>
-* `sanitize`
+</details>
+<details>
+<summary>`sanitize`</summary>
 
-	<details>
+```php
+public sanitize()
+```
 
-	```php
-	public sanitize()
-	```
-
-	Sanitize CSS styles within the HTML contained in this instance&#039;s Dom\Document.
+Sanitize CSS styles within the HTML contained in this instance&#039;s Dom\Document.
 
 
-	</details>
-* `get_stylesheet_priority`
+</details>
+<details>
+<summary>`get_stylesheet_priority`</summary>
 
-	<details>
+```php
+private get_stylesheet_priority( \DOMNode $node )
+```
 
-	```php
-	private get_stylesheet_priority( \DOMNode $node )
-	```
-
-	Get the priority of the stylesheet associated with the given element.
+Get the priority of the stylesheet associated with the given element.
 
 As with hooks, lower priorities mean they should be included first. The higher the priority value, the more likely it will be that the stylesheet will be among those excluded due to STYLESHEET_TOO_LONG when concatenated CSS reaches 75KB.
 
 
-	</details>
-* `unrelativize_path`
+</details>
+<details>
+<summary>`unrelativize_path`</summary>
 
-	<details>
+```php
+private unrelativize_path( $path )
+```
 
-	```php
-	private unrelativize_path( $path )
-	```
-
-	Eliminate relative segments (.
+Eliminate relative segments (.
 
 ./ and ./) from a path.
 
 
-	</details>
-* `reconstruct_url`
+</details>
+<details>
+<summary>`reconstruct_url`</summary>
 
-	<details>
+```php
+private reconstruct_url( $parsed_url )
+```
 
-	```php
-	private reconstruct_url( $parsed_url )
-	```
-
-	Construct a URL from a parsed one.
-
-
-	</details>
-* `get_validated_url_file_path`
-
-	<details>
-
-	```php
-	public get_validated_url_file_path( $url, $allowed_extensions = array() )
-	```
-
-	Generate a URL&#039;s fully-qualified file path.
+Construct a URL from a parsed one.
 
 
-	</details>
-* `set_current_node`
+</details>
+<details>
+<summary>`get_validated_url_file_path`</summary>
 
-	<details>
+```php
+public get_validated_url_file_path( $url, $allowed_extensions = array() )
+```
 
-	```php
-	private set_current_node( $node )
-	```
-
-	Set the current node (and its sources when required).
-
-
-	</details>
-* `process_style_element`
-
-	<details>
-
-	```php
-	private process_style_element( \DOMElement $element )
-	```
-
-	Process style element.
+Generate a URL&#039;s fully-qualified file path.
 
 
-	</details>
-* `process_link_element`
+</details>
+<details>
+<summary>`set_current_node`</summary>
 
-	<details>
+```php
+private set_current_node( $node )
+```
 
-	```php
-	private process_link_element( \DOMElement $element )
-	```
-
-	Process link element.
-
-
-	</details>
-* `get_stylesheet_from_url`
-
-	<details>
-
-	```php
-	private get_stylesheet_from_url( $stylesheet_url )
-	```
-
-	Get stylesheet from URL.
+Set the current node (and its sources when required).
 
 
-	</details>
-* `fetch_external_stylesheet`
+</details>
+<details>
+<summary>`process_style_element`</summary>
 
-	<details>
+```php
+private process_style_element( \DOMElement $element )
+```
 
-	```php
-	private fetch_external_stylesheet( $url )
-	```
-
-	Fetch external stylesheet.
+Process style element.
 
 
-	</details>
-* `get_parsed_stylesheet`
+</details>
+<details>
+<summary>`process_link_element`</summary>
 
-	<details>
+```php
+private process_link_element( \DOMElement $element )
+```
 
-	```php
-	private get_parsed_stylesheet( $stylesheet, $options = array() )
-	```
+Process link element.
 
-	Get parsed stylesheet (from cache).
+
+</details>
+<details>
+<summary>`get_stylesheet_from_url`</summary>
+
+```php
+private get_stylesheet_from_url( $stylesheet_url )
+```
+
+Get stylesheet from URL.
+
+
+</details>
+<details>
+<summary>`fetch_external_stylesheet`</summary>
+
+```php
+private fetch_external_stylesheet( $url )
+```
+
+Fetch external stylesheet.
+
+
+</details>
+<details>
+<summary>`get_parsed_stylesheet`</summary>
+
+```php
+private get_parsed_stylesheet( $stylesheet, $options = array() )
+```
+
+Get parsed stylesheet (from cache).
 
 If the sanitization status has changed for the validation errors in the cached stylesheet since it was cached, then the cache is invalidated, as the parsed stylesheet needs to be re-constructed.
 
 
-	</details>
-* `should_use_transient_caching`
+</details>
+<details>
+<summary>`should_use_transient_caching`</summary>
 
-	<details>
+```php
+private should_use_transient_caching()
+```
 
-	```php
-	private should_use_transient_caching()
-	```
-
-	Check whether transient caching for stylesheets should be used.
-
-
-	</details>
-* `splice_imported_stylesheet`
-
-	<details>
-
-	```php
-	private splice_imported_stylesheet( Import $item, CSSList $css_list, $options )
-	```
-
-	Parse imported stylesheet and replace the `@import` rule with the imported rules in the provided CSS list (in place).
+Check whether transient caching for stylesheets should be used.
 
 
-	</details>
-* `create_validated_css_document`
+</details>
+<details>
+<summary>`splice_imported_stylesheet`</summary>
 
-	<details>
+```php
+private splice_imported_stylesheet( Import $item, CSSList $css_list, $options )
+```
 
-	```php
-	private create_validated_css_document( $stylesheet_string, $options )
-	```
-
-	Create validated CSS document.
+Parse imported stylesheet and replace the `@import` rule with the imported rules in the provided CSS list (in place).
 
 
-	</details>
-* `parse_stylesheet`
+</details>
+<details>
+<summary>`create_validated_css_document`</summary>
 
-	<details>
+```php
+private create_validated_css_document( $stylesheet_string, $options )
+```
 
-	```php
-	private parse_stylesheet( $stylesheet_string, $options = array() )
-	```
+Create validated CSS document.
 
-	Parse stylesheet.
+
+</details>
+<details>
+<summary>`parse_stylesheet`</summary>
+
+```php
+private parse_stylesheet( $stylesheet_string, $options = array() )
+```
+
+Parse stylesheet.
 
 Sanitizes invalid CSS properties and rules, compresses the CSS to remove whitespace and comments, and parses declaration blocks to allow selectors to later be evaluated for whether they apply to the current document during tree-shaking.
 
 
-	</details>
-* `should_sanitize_validation_error`
+</details>
+<details>
+<summary>`should_sanitize_validation_error`</summary>
 
-	<details>
+```php
+public should_sanitize_validation_error( $validation_error, $data = array() )
+```
 
-	```php
-	public should_sanitize_validation_error( $validation_error, $data = array() )
-	```
-
-	Check whether or not sanitization should occur in response to validation error.
+Check whether or not sanitization should occur in response to validation error.
 
 Supply sources to the error and the current node to data.
 
 
-	</details>
-* `remove_spaces_from_url_values`
+</details>
+<details>
+<summary>`remove_spaces_from_url_values`</summary>
 
-	<details>
+```php
+private remove_spaces_from_url_values( $css )
+```
 
-	```php
-	private remove_spaces_from_url_values( $css )
-	```
-
-	Remove spaces from CSS URL values which PHP-CSS-Parser doesn&#039;t handle.
-
-
-	</details>
-* `process_css_list`
-
-	<details>
-
-	```php
-	private process_css_list( CSSList $css_list, $options )
-	```
-
-	Process CSS list.
+Remove spaces from CSS URL values which PHP-CSS-Parser doesn&#039;t handle.
 
 
-	</details>
-* `real_path_urls`
+</details>
+<details>
+<summary>`process_css_list`</summary>
 
-	<details>
+```php
+private process_css_list( CSSList $css_list, $options )
+```
 
-	```php
-	private real_path_urls( $urls, $stylesheet_url )
-	```
-
-	Convert URLs in to non-relative real-paths.
-
-
-	</details>
-* `process_css_declaration_block`
-
-	<details>
-
-	```php
-	private process_css_declaration_block( RuleSet $ruleset, CSSList $css_list, $options )
-	```
-
-	Process CSS rule set.
+Process CSS list.
 
 
-	</details>
-* `process_font_face_at_rule`
+</details>
+<details>
+<summary>`real_path_urls`</summary>
 
-	<details>
+```php
+private real_path_urls( $urls, $stylesheet_url )
+```
 
-	```php
-	private process_font_face_at_rule( AtRuleSet $ruleset, $options )
-	```
-
-	Process @font-face by making src URLs non-relative and converting data: URLs into file URLs (with educated guessing).
-
-
-	</details>
-* `process_css_keyframes`
-
-	<details>
-
-	```php
-	private process_css_keyframes( KeyFrame $css_list, $options )
-	```
-
-	Process CSS keyframes.
+Convert URLs in to non-relative real-paths.
 
 
-	</details>
-* `transform_important_qualifiers`
+</details>
+<details>
+<summary>`process_css_declaration_block`</summary>
 
-	<details>
+```php
+private process_css_declaration_block( RuleSet $ruleset, CSSList $css_list, $options )
+```
 
-	```php
-	private transform_important_qualifiers( RuleSet $ruleset, CSSList $css_list, $options )
-	```
-
-	Replace !important qualifiers with more specific rules.
+Process CSS rule set.
 
 
-	</details>
-* `collect_inline_styles`
+</details>
+<details>
+<summary>`process_font_face_at_rule`</summary>
 
-	<details>
+```php
+private process_font_face_at_rule( AtRuleSet $ruleset, $options )
+```
 
-	```php
-	private collect_inline_styles( \DOMElement $element )
-	```
+Process @font-face by making src URLs non-relative and converting data: URLs into file URLs (with educated guessing).
 
-	Collect and store all CSS style attributes.
+
+</details>
+<details>
+<summary>`process_css_keyframes`</summary>
+
+```php
+private process_css_keyframes( KeyFrame $css_list, $options )
+```
+
+Process CSS keyframes.
+
+
+</details>
+<details>
+<summary>`transform_important_qualifiers`</summary>
+
+```php
+private transform_important_qualifiers( RuleSet $ruleset, CSSList $css_list, $options )
+```
+
+Replace !important qualifiers with more specific rules.
+
+
+</details>
+<details>
+<summary>`collect_inline_styles`</summary>
+
+```php
+private collect_inline_styles( \DOMElement $element )
+```
+
+Collect and store all CSS style attributes.
 
 Collects the CSS styles from within the HTML contained in this instance&#039;s Dom\Document.
 
 
-	</details>
-* `finalize_styles`
+</details>
+<details>
+<summary>`finalize_styles`</summary>
 
-	<details>
+```php
+private finalize_styles()
+```
 
-	```php
-	private finalize_styles()
-	```
-
-	Finalize stylesheets for style[amp-custom] and style[amp-keyframes] elements.
+Finalize stylesheets for style[amp-custom] and style[amp-keyframes] elements.
 
 Concatenate all pending stylesheets, remove unused rules, and add to AMP style elements in document. Combine all amp-keyframe styles and add them to the end of the body.
 
 
-	</details>
-* `remove_admin_bar_if_css_excluded`
+</details>
+<details>
+<summary>`remove_admin_bar_if_css_excluded`</summary>
 
-	<details>
+```php
+private remove_admin_bar_if_css_excluded()
+```
 
-	```php
-	private remove_admin_bar_if_css_excluded()
-	```
-
-	Remove admin bar if its CSS was excluded.
-
-
-	</details>
-* `get_validate_response_data`
-
-	<details>
-
-	```php
-	public get_validate_response_data()
-	```
-
-	Get data to amend to the validate response.
+Remove admin bar if its CSS was excluded.
 
 
-	</details>
-* `add_css_budget_to_admin_bar`
+</details>
+<details>
+<summary>`get_validate_response_data`</summary>
 
-	<details>
+```php
+public get_validate_response_data()
+```
 
-	```php
-	public add_css_budget_to_admin_bar()
-	```
-
-	Update admin bar.
-
-
-	</details>
-* `ampify_ruleset_selectors`
-
-	<details>
-
-	```php
-	private ampify_ruleset_selectors( $ruleset )
-	```
-
-	Convert CSS selectors and remove obsolete selector hacks for IE.
+Get data to amend to the validate response.
 
 
-	</details>
-* `get_class_name_selector_pattern`
+</details>
+<details>
+<summary>`add_css_budget_to_admin_bar`</summary>
 
-	<details>
+```php
+public add_css_budget_to_admin_bar()
+```
 
-	```php
-	static private get_class_name_selector_pattern( $class_names )
-	```
-
-	Given a list of class names, create a regular expression pattern to match them in a selector.
-
-
-	</details>
-* `finalize_stylesheet_group`
-
-	<details>
-
-	```php
-	private finalize_stylesheet_group( $group, $group_config )
-	```
-
-	Finalize a stylesheet group (amp-custom or amp-keyframes).
+Update admin bar.
 
 
-	</details>
-* `create_meta_viewport`
+</details>
+<details>
+<summary>`ampify_ruleset_selectors`</summary>
 
-	<details>
+```php
+private ampify_ruleset_selectors( $ruleset )
+```
 
-	```php
-	private create_meta_viewport( \DOMElement $element, $viewport_rules )
-	```
+Convert CSS selectors and remove obsolete selector hacks for IE.
 
-	Creates and inserts a meta[name=&quot;viewport&quot;] tag if there are @viewport style rules.
+
+</details>
+<details>
+<summary>`get_class_name_selector_pattern`</summary>
+
+```php
+static private get_class_name_selector_pattern( $class_names )
+```
+
+Given a list of class names, create a regular expression pattern to match them in a selector.
+
+
+</details>
+<details>
+<summary>`finalize_stylesheet_group`</summary>
+
+```php
+private finalize_stylesheet_group( $group, $group_config )
+```
+
+Finalize a stylesheet group (amp-custom or amp-keyframes).
+
+
+</details>
+<details>
+<summary>`create_meta_viewport`</summary>
+
+```php
+private create_meta_viewport( \DOMElement $element, $viewport_rules )
+```
+
+Creates and inserts a meta[name=&quot;viewport&quot;] tag if there are @viewport style rules.
 
 These rules aren&#039;t valid in CSS, but they might be valid in that meta tag. So this adds them to the content attribute of a new meta tag. These are later processed, to merge the content values into a single meta tag.
 
 
-	</details>
+</details>

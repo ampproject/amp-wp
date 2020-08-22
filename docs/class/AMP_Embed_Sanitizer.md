@@ -5,27 +5,25 @@ Class AMP_Embed_Sanitizer
 Calls sanitize_raw_embeds method on embed handlers.
 
 ### Methods
-* `__construct`
+<details>
+<summary>`__construct`</summary>
 
-	<details>
+```php
+public __construct( $dom, $args = array() )
+```
 
-	```php
-	public __construct( $dom, $args = array() )
-	```
-
-	AMP_Embed_Sanitizer constructor.
-
-
-	</details>
-* `sanitize`
-
-	<details>
-
-	```php
-	public sanitize()
-	```
-
-	Checks if each embed_handler has sanitize_raw_method and calls it.
+AMP_Embed_Sanitizer constructor.
 
 
-	</details>
+</details>
+<details>
+<summary>`sanitize`</summary>
+
+```php
+public sanitize()
+```
+
+Checks if each embed_handler has sanitize_raw_method and calls it.
+
+
+</details>

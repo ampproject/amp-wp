@@ -5,89 +5,82 @@ Class AMP_Vimeo_Embed_Handler
 Much of this class is borrowed from Jetpack embeds
 
 ### Methods
-* `__construct`
+<details>
+<summary>`__construct`</summary>
 
-	<details>
+```php
+public __construct( $args = array() )
+```
 
-	```php
-	public __construct( $args = array() )
-	```
-
-	AMP_Vimeo_Embed_Handler constructor.
-
-
-	</details>
-* `register_embed`
-
-	<details>
-
-	```php
-	public register_embed()
-	```
-
-	Register embed.
+AMP_Vimeo_Embed_Handler constructor.
 
 
-	</details>
-* `unregister_embed`
+</details>
+<details>
+<summary>`register_embed`</summary>
 
-	<details>
+```php
+public register_embed()
+```
 
-	```php
-	public unregister_embed()
-	```
-
-	Unregister embed.
-
-
-	</details>
-* `oembed`
-
-	<details>
-
-	```php
-	public oembed( $matches, $attr, $url )
-	```
-
-	Render oEmbed.
+Register embed.
 
 
-	</details>
-* `render`
+</details>
+<details>
+<summary>`unregister_embed`</summary>
 
-	<details>
+```php
+public unregister_embed()
+```
 
-	```php
-	public render( $args )
-	```
-
-	Render.
-
-
-	</details>
-* `get_video_id_from_url`
-
-	<details>
-
-	```php
-	private get_video_id_from_url( $url )
-	```
-
-	Determine the video ID from the URL.
+Unregister embed.
 
 
-	</details>
-* `video_override`
+</details>
+<details>
+<summary>`oembed`</summary>
 
-	<details>
+```php
+public oembed( $matches, $attr, $url )
+```
 
-	```php
-	public video_override( $html, $attr )
-	```
+Render oEmbed.
 
-	Override the output of Vimeo videos.
+
+</details>
+<details>
+<summary>`render`</summary>
+
+```php
+public render( $args )
+```
+
+Render.
+
+
+</details>
+<details>
+<summary>`get_video_id_from_url`</summary>
+
+```php
+private get_video_id_from_url( $url )
+```
+
+Determine the video ID from the URL.
+
+
+</details>
+<details>
+<summary>`video_override`</summary>
+
+```php
+public video_override( $html, $attr )
+```
+
+Override the output of Vimeo videos.
 
 This overrides the value in wp_video_shortcode(). The pattern matching is copied from WP_Widget_Media_Video::render().
 
 
-	</details>
+</details>

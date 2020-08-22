@@ -3,135 +3,124 @@
 Class AMP_Options_Manager
 
 ### Methods
-* `init`
+<details>
+<summary>`init`</summary>
 
-	<details>
+```php
+static public init()
+```
 
-	```php
-	static public init()
-	```
-
-	Sets up hooks.
-
-
-	</details>
-* `register_settings`
-
-	<details>
-
-	```php
-	static public register_settings()
-	```
-
-	Register settings.
+Sets up hooks.
 
 
-	</details>
-* `maybe_flush_rewrite_rules`
+</details>
+<details>
+<summary>`register_settings`</summary>
 
-	<details>
+```php
+static public register_settings()
+```
 
-	```php
-	static public maybe_flush_rewrite_rules( $old_options, $new_options )
-	```
-
-	Flush rewrite rules if the supported_post_types have changed.
-
-
-	</details>
-* `get_options`
-
-	<details>
-
-	```php
-	static public get_options()
-	```
-
-	Get plugin options.
+Register settings.
 
 
-	</details>
-* `get_option`
+</details>
+<details>
+<summary>`maybe_flush_rewrite_rules`</summary>
 
-	<details>
+```php
+static public maybe_flush_rewrite_rules( $old_options, $new_options )
+```
 
-	```php
-	static public get_option( $option, $default = false )
-	```
-
-	Get plugin option.
-
-
-	</details>
-* `validate_options`
-
-	<details>
-
-	```php
-	static public validate_options( $new_options )
-	```
-
-	Validate options.
+Flush rewrite rules if the supported_post_types have changed.
 
 
-	</details>
-* `update_option`
+</details>
+<details>
+<summary>`get_options`</summary>
 
-	<details>
+```php
+static public get_options()
+```
 
-	```php
-	static public update_option( $option, $value )
-	```
-
-	Update plugin option.
-
-
-	</details>
-* `update_options`
-
-	<details>
-
-	```php
-	static public update_options( $options )
-	```
-
-	Update plugin options.
+Get plugin options.
 
 
-	</details>
-* `render_php_css_parser_conflict_notice`
+</details>
+<details>
+<summary>`get_option`</summary>
 
-	<details>
+```php
+static public get_option( $option, $default = false )
+```
 
-	```php
-	static public render_php_css_parser_conflict_notice()
-	```
-
-	Render PHP-CSS-Parser conflict notice.
-
-
-	</details>
-* `insecure_connection_notice`
-
-	<details>
-
-	```php
-	static public insecure_connection_notice()
-	```
-
-	Outputs an admin notice if the site is not served over HTTPS.
+Get plugin option.
 
 
-	</details>
-* `reader_theme_fallback_notice`
+</details>
+<details>
+<summary>`validate_options`</summary>
 
-	<details>
+```php
+static public validate_options( $new_options )
+```
 
-	```php
-	static public reader_theme_fallback_notice()
-	```
-
-	Outputs an admin notice if the AMP Legacy Reader theme is used as a fallback.
+Validate options.
 
 
-	</details>
+</details>
+<details>
+<summary>`update_option`</summary>
+
+```php
+static public update_option( $option, $value )
+```
+
+Update plugin option.
+
+
+</details>
+<details>
+<summary>`update_options`</summary>
+
+```php
+static public update_options( $options )
+```
+
+Update plugin options.
+
+
+</details>
+<details>
+<summary>`render_php_css_parser_conflict_notice`</summary>
+
+```php
+static public render_php_css_parser_conflict_notice()
+```
+
+Render PHP-CSS-Parser conflict notice.
+
+
+</details>
+<details>
+<summary>`insecure_connection_notice`</summary>
+
+```php
+static public insecure_connection_notice()
+```
+
+Outputs an admin notice if the site is not served over HTTPS.
+
+
+</details>
+<details>
+<summary>`reader_theme_fallback_notice`</summary>
+
+```php
+static public reader_theme_fallback_notice()
+```
+
+Outputs an admin notice if the AMP Legacy Reader theme is used as a fallback.
+
+
+</details>

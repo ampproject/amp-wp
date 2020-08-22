@@ -6,75 +6,69 @@ Adapts links for AMP-to-AMP navigation:  - In paired AMP (Transitional and Reade
  Adapted from https://gist.github.com/westonruter/f9ee9ea717d52471bae092879e3d52b0
 
 ### Methods
-* `__construct`
+<details>
+<summary>`__construct`</summary>
 
-	<details>
+```php
+public __construct( $dom, array $args = array() )
+```
 
-	```php
-	public __construct( $dom, array $args = array() )
-	```
-
-	Sanitizer constructor.
-
-
-	</details>
-* `sanitize`
-
-	<details>
-
-	```php
-	public sanitize()
-	```
-
-	Sanitize.
+Sanitizer constructor.
 
 
-	</details>
-* `add_meta_tag`
+</details>
+<details>
+<summary>`sanitize`</summary>
 
-	<details>
+```php
+public sanitize()
+```
 
-	```php
-	public add_meta_tag( $content = self::DEFAULT_META_CONTENT )
-	```
-
-	Add the amp-to-amp-navigation meta tag.
-
-
-	</details>
-* `process_links`
-
-	<details>
-
-	```php
-	public process_links()
-	```
-
-	Process links by adding adding AMP query var to links in paired mode and adding rel=amphtml.
+Sanitize.
 
 
-	</details>
-* `process_element`
+</details>
+<details>
+<summary>`add_meta_tag`</summary>
 
-	<details>
+```php
+public add_meta_tag( $content = self::DEFAULT_META_CONTENT )
+```
 
-	```php
-	private process_element( \DOMElement $element, $attribute_name )
-	```
-
-	Process element.
-
-
-	</details>
-* `is_frontend_url`
-
-	<details>
-
-	```php
-	public is_frontend_url( $url )
-	```
-
-	Determine whether a URL is for the frontend.
+Add the amp-to-amp-navigation meta tag.
 
 
-	</details>
+</details>
+<details>
+<summary>`process_links`</summary>
+
+```php
+public process_links()
+```
+
+Process links by adding adding AMP query var to links in paired mode and adding rel=amphtml.
+
+
+</details>
+<details>
+<summary>`process_element`</summary>
+
+```php
+private process_element( \DOMElement $element, $attribute_name )
+```
+
+Process element.
+
+
+</details>
+<details>
+<summary>`is_frontend_url`</summary>
+
+```php
+public is_frontend_url( $url )
+```
+
+Determine whether a URL is for the frontend.
+
+
+</details>

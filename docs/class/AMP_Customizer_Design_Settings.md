@@ -3,159 +3,146 @@
 Class AMP_Customizer_Design_Settings
 
 ### Methods
-* `is_amp_customizer_enabled`
+<details>
+<summary>`is_amp_customizer_enabled`</summary>
 
-	<details>
+```php
+static public is_amp_customizer_enabled()
+```
 
-	```php
-	static public is_amp_customizer_enabled()
-	```
+Returns whether the AMP design settings are enabled.
 
-	Returns whether the AMP design settings are enabled.
 
+</details>
+<details>
+<summary>`init`</summary>
 
-	</details>
-* `init`
+```php
+static public init()
+```
 
-	<details>
+Init.
 
-	```php
-	static public init()
-	```
 
-	Init.
+</details>
+<details>
+<summary>`init_customizer`</summary>
 
+```php
+static public init_customizer()
+```
 
-	</details>
-* `init_customizer`
+Init customizer.
 
-	<details>
 
-	```php
-	static public init_customizer()
-	```
+</details>
+<details>
+<summary>`register_customizer_settings`</summary>
 
-	Init customizer.
+```php
+static public register_customizer_settings( $wp_customize )
+```
 
+Register default Customizer settings for AMP.
 
-	</details>
-* `register_customizer_settings`
 
-	<details>
+</details>
+<details>
+<summary>`register_customizer_ui`</summary>
 
-	```php
-	static public register_customizer_settings( $wp_customize )
-	```
+```php
+static public register_customizer_ui( $wp_customize )
+```
 
-	Register default Customizer settings for AMP.
+Register default Customizer sections and controls for AMP.
 
 
-	</details>
-* `register_customizer_ui`
+</details>
+<details>
+<summary>`render_header_bar`</summary>
 
-	<details>
+```php
+static public render_header_bar()
+```
 
-	```php
-	static public register_customizer_ui( $wp_customize )
-	```
+Render header bar template.
 
-	Register default Customizer sections and controls for AMP.
 
+</details>
+<details>
+<summary>`render_footer`</summary>
 
-	</details>
-* `render_header_bar`
+```php
+static public render_footer()
+```
 
-	<details>
+Render footer template.
 
-	```php
-	static public render_header_bar()
-	```
 
-	Render header bar template.
+</details>
+<details>
+<summary>`enqueue_customizer_preview_scripts`</summary>
 
+```php
+static public enqueue_customizer_preview_scripts()
+```
 
-	</details>
-* `render_footer`
+Enqueue scripts for default AMP Customizer preview.
 
-	<details>
 
-	```php
-	static public render_footer()
-	```
+</details>
+<details>
+<summary>`append_settings`</summary>
 
-	Render footer template.
+```php
+static public append_settings( $settings )
+```
 
+Merge default Customizer settings on top of settings for merging into AMP post template.
 
-	</details>
-* `enqueue_customizer_preview_scripts`
 
-	<details>
+</details>
+<details>
+<summary>`get_color_scheme_names`</summary>
 
-	```php
-	static public enqueue_customizer_preview_scripts()
-	```
+```php
+static protected get_color_scheme_names()
+```
 
-	Enqueue scripts for default AMP Customizer preview.
+Get color scheme names.
 
 
-	</details>
-* `append_settings`
+</details>
+<details>
+<summary>`get_color_schemes`</summary>
 
-	<details>
+```php
+static protected get_color_schemes()
+```
 
-	```php
-	static public append_settings( $settings )
-	```
+Get color schemes.
 
-	Merge default Customizer settings on top of settings for merging into AMP post template.
 
+</details>
+<details>
+<summary>`get_colors_for_color_scheme`</summary>
 
-	</details>
-* `get_color_scheme_names`
+```php
+static protected get_colors_for_color_scheme( $scheme )
+```
 
-	<details>
+Get colors for color scheme.
 
-	```php
-	static protected get_color_scheme_names()
-	```
 
-	Get color scheme names.
+</details>
+<details>
+<summary>`sanitize_color_scheme`</summary>
 
+```php
+static public sanitize_color_scheme( $value )
+```
 
-	</details>
-* `get_color_schemes`
+Sanitize color scheme.
 
-	<details>
 
-	```php
-	static protected get_color_schemes()
-	```
-
-	Get color schemes.
-
-
-	</details>
-* `get_colors_for_color_scheme`
-
-	<details>
-
-	```php
-	static protected get_colors_for_color_scheme( $scheme )
-	```
-
-	Get colors for color scheme.
-
-
-	</details>
-* `sanitize_color_scheme`
-
-	<details>
-
-	```php
-	static public sanitize_color_scheme( $value )
-	```
-
-	Sanitize color scheme.
-
-
-	</details>
+</details>

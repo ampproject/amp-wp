@@ -5,155 +5,143 @@ Switches to the designated Reader theme when template mode enabled and when requ
 This class does not implement Conditional because other services need to always be able to access this service in order to determine whether or a Reader theme is loaded, and if so, what the previously-active theme was.
 
 ### Methods
-* `is_enabled`
+<details>
+<summary>`is_enabled`</summary>
 
-	<details>
+```php
+public is_enabled()
+```
 
-	```php
-	public is_enabled()
-	```
-
-	Is Reader mode with a Reader theme selected.
-
-
-	</details>
-* `is_theme_overridden`
-
-	<details>
-
-	```php
-	public is_theme_overridden()
-	```
-
-	Whether the active theme was overridden with the reader theme.
+Is Reader mode with a Reader theme selected.
 
 
-	</details>
-* `is_amp_request`
+</details>
+<details>
+<summary>`is_theme_overridden`</summary>
 
-	<details>
+```php
+public is_theme_overridden()
+```
 
-	```php
-	public is_amp_request()
-	```
-
-	Is an AMP request.
-
-
-	</details>
-* `register`
-
-	<details>
-
-	```php
-	public register()
-	```
-
-	Register the service with the system.
+Whether the active theme was overridden with the reader theme.
 
 
-	</details>
-* `filter_wp_prepare_themes_to_indicate_reader_theme`
+</details>
+<details>
+<summary>`is_amp_request`</summary>
 
-	<details>
+```php
+public is_amp_request()
+```
 
-	```php
-	public filter_wp_prepare_themes_to_indicate_reader_theme( $prepared_themes )
-	```
-
-	Filter themes for JS to remove action to delete the selected Reader theme and show a notice.
+Is an AMP request.
 
 
-	</details>
-* `inject_theme_single_template_modifications`
+</details>
+<details>
+<summary>`register`</summary>
 
-	<details>
+```php
+public register()
+```
 
-	```php
-	public inject_theme_single_template_modifications()
-	```
+Register the service with the system.
 
-	Inject new logic into the Backbone templates for rendering a theme lightbox.
+
+</details>
+<details>
+<summary>`filter_wp_prepare_themes_to_indicate_reader_theme`</summary>
+
+```php
+public filter_wp_prepare_themes_to_indicate_reader_theme( $prepared_themes )
+```
+
+Filter themes for JS to remove action to delete the selected Reader theme and show a notice.
+
+
+</details>
+<details>
+<summary>`inject_theme_single_template_modifications`</summary>
+
+```php
+public inject_theme_single_template_modifications()
+```
+
+Inject new logic into the Backbone templates for rendering a theme lightbox.
 
 This is admittedly hacky, but WordPress doesn&#039;t provide a much better option.
 
 
-	</details>
-* `get_reader_theme`
+</details>
+<details>
+<summary>`get_reader_theme`</summary>
 
-	<details>
+```php
+public get_reader_theme()
+```
 
-	```php
-	public get_reader_theme()
-	```
-
-	Get reader theme.
+Get reader theme.
 
 If the Reader template mode is enabled
 
 
-	</details>
-* `get_active_theme`
+</details>
+<details>
+<summary>`get_active_theme`</summary>
 
-	<details>
+```php
+public get_active_theme()
+```
 
-	```php
-	public get_active_theme()
-	```
-
-	Get active theme.
+Get active theme.
 
 The theme that was active before switching to the Reader theme.
 
 
-	</details>
-* `override_theme`
+</details>
+<details>
+<summary>`override_theme`</summary>
 
-	<details>
+```php
+public override_theme()
+```
 
-	```php
-	public override_theme()
-	```
-
-	Switch theme if in Reader mode, a Reader theme was selected, and the AMP query var is present.
+Switch theme if in Reader mode, a Reader theme was selected, and the AMP query var is present.
 
 Note that AMP_Theme_Support will redirect to the non-AMP version if AMP is not available for the query.
 
 
-	</details>
-* `disable_widgets`
+</details>
+<details>
+<summary>`disable_widgets`</summary>
 
-	<details>
+```php
+public disable_widgets()
+```
 
-	```php
-	public disable_widgets()
-	```
-
-	Disable widgets.
-
-
-	</details>
-* `customize_previewable_devices`
-
-	<details>
-
-	```php
-	public customize_previewable_devices( $devices )
-	```
-
-	Make tablet (smartphone) the default device when opening AMP Customizer.
+Disable widgets.
 
 
-	</details>
-* `remove_customizer_themes_panel`
+</details>
+<details>
+<summary>`customize_previewable_devices`</summary>
 
-	<details>
+```php
+public customize_previewable_devices( $devices )
+```
 
-	```php
-	public remove_customizer_themes_panel( WP_Customize_Manager $wp_customize )
-	```
-
-	Remove themes panel from AMP Customizer.
+Make tablet (smartphone) the default device when opening AMP Customizer.
 
 
-	</details>
+</details>
+<details>
+<summary>`remove_customizer_themes_panel`</summary>
+
+```php
+public remove_customizer_themes_panel( WP_Customize_Manager $wp_customize )
+```
+
+Remove themes panel from AMP Customizer.
+
+
+</details>

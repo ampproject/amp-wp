@@ -3,135 +3,124 @@
 Class AMP_Validation_Callback_Wrapper
 
 ### Methods
-* `__construct`
+<details>
+<summary>`__construct`</summary>
 
-	<details>
+```php
+public __construct( $callback )
+```
 
-	```php
-	public __construct( $callback )
-	```
-
-	AMP_Validation_Callback_Wrapper constructor.
-
-
-	</details>
-* `prepare`
-
-	<details>
-
-	```php
-	protected prepare( $args )
-	```
-
-	Prepare for invocation.
+AMP_Validation_Callback_Wrapper constructor.
 
 
-	</details>
-* `__invoke`
+</details>
+<details>
+<summary>`prepare`</summary>
 
-	<details>
+```php
+protected prepare( $args )
+```
 
-	```php
-	public __invoke( $args )
-	```
-
-	Invoke wrapped callback.
-
-
-	</details>
-* `invoke_with_first_ref_arg`
-
-	<details>
-
-	```php
-	public invoke_with_first_ref_arg( $first_arg, $other_args )
-	```
-
-	Invoke wrapped callback with first argument passed by reference.
+Prepare for invocation.
 
 
-	</details>
-* `finalize`
+</details>
+<details>
+<summary>`__invoke`</summary>
 
-	<details>
+```php
+public __invoke( $args )
+```
 
-	```php
-	protected finalize( array $preparation )
-	```
-
-	Finalize invocation.
-
-
-	</details>
-* `finalize_styles`
-
-	<details>
-
-	```php
-	protected finalize_styles( \WP_Styles $wp_styles, array $before_registered, array $before_enqueued, array $before_extras )
-	```
-
-	Finalize styles after invocation.
+Invoke wrapped callback.
 
 
-	</details>
-* `finalize_scripts`
+</details>
+<details>
+<summary>`invoke_with_first_ref_arg`</summary>
 
-	<details>
+```php
+public invoke_with_first_ref_arg( $first_arg, $other_args )
+```
 
-	```php
-	protected finalize_scripts( \WP_Scripts $wp_scripts, array $before_registered, array $before_enqueued, array $before_extras )
-	```
-
-	Finalize scripts after invocation.
-
-
-	</details>
-* `offsetSet`
-
-	<details>
-
-	```php
-	public offsetSet( $offset, $value )
-	```
-
-	Offset set.
+Invoke wrapped callback with first argument passed by reference.
 
 
-	</details>
-* `offsetExists`
+</details>
+<details>
+<summary>`finalize`</summary>
 
-	<details>
+```php
+protected finalize( array $preparation )
+```
 
-	```php
-	public offsetExists( $offset )
-	```
-
-	Offset exists.
-
-
-	</details>
-* `offsetUnset`
-
-	<details>
-
-	```php
-	public offsetUnset( $offset )
-	```
-
-	Offset unset.
+Finalize invocation.
 
 
-	</details>
-* `offsetGet`
+</details>
+<details>
+<summary>`finalize_styles`</summary>
 
-	<details>
+```php
+protected finalize_styles( \WP_Styles $wp_styles, array $before_registered, array $before_enqueued, array $before_extras )
+```
 
-	```php
-	public offsetGet( $offset )
-	```
-
-	Offset get.
+Finalize styles after invocation.
 
 
-	</details>
+</details>
+<details>
+<summary>`finalize_scripts`</summary>
+
+```php
+protected finalize_scripts( \WP_Scripts $wp_scripts, array $before_registered, array $before_enqueued, array $before_extras )
+```
+
+Finalize scripts after invocation.
+
+
+</details>
+<details>
+<summary>`offsetSet`</summary>
+
+```php
+public offsetSet( $offset, $value )
+```
+
+Offset set.
+
+
+</details>
+<details>
+<summary>`offsetExists`</summary>
+
+```php
+public offsetExists( $offset )
+```
+
+Offset exists.
+
+
+</details>
+<details>
+<summary>`offsetUnset`</summary>
+
+```php
+public offsetUnset( $offset )
+```
+
+Offset unset.
+
+
+</details>
+<details>
+<summary>`offsetGet`</summary>
+
+```php
+public offsetGet( $offset )
+```
+
+Offset get.
+
+
+</details>

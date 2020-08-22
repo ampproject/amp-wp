@@ -3,51 +3,47 @@
 Record the timing of a single event.
 
 ### Methods
-* `__construct`
+<details>
+<summary>`__construct`</summary>
 
-	<details>
+```php
+public __construct()
+```
 
-	```php
-	public __construct()
-	```
-
-	StopWatchEvent constructor.
-
-
-	</details>
-* `stop`
-
-	<details>
-
-	```php
-	public stop()
-	```
-
-	Stop the event.
+StopWatchEvent constructor.
 
 
-	</details>
-* `get_duration`
+</details>
+<details>
+<summary>`stop`</summary>
 
-	<details>
+```php
+public stop()
+```
 
-	```php
-	public get_duration()
-	```
-
-	Get the duration of the event in milliseconds.
-
-
-	</details>
-* `get_now`
-
-	<details>
-
-	```php
-	private get_now()
-	```
-
-	Get the current time in milliseconds.
+Stop the event.
 
 
-	</details>
+</details>
+<details>
+<summary>`get_duration`</summary>
+
+```php
+public get_duration()
+```
+
+Get the duration of the event in milliseconds.
+
+
+</details>
+<details>
+<summary>`get_now`</summary>
+
+```php
+private get_now()
+```
+
+Get the current time in milliseconds.
+
+
+</details>

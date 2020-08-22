@@ -3,51 +3,47 @@
 AMP reader theme REST controller.
 
 ### Methods
-* `__construct`
+<details>
+<summary>`__construct`</summary>
 
-	<details>
+```php
+public __construct( ReaderThemes $reader_themes )
+```
 
-	```php
-	public __construct( ReaderThemes $reader_themes )
-	```
-
-	Constructor.
-
-
-	</details>
-* `register_routes`
-
-	<details>
-
-	```php
-	public register_routes()
-	```
-
-	Registers routes for the controller.
+Constructor.
 
 
-	</details>
-* `get_items_permissions_check`
+</details>
+<details>
+<summary>`register_routes`</summary>
 
-	<details>
+```php
+public register_routes()
+```
 
-	```php
-	public get_items_permissions_check( $request )
-	```
-
-	Checks whether the current user has permission to manage options.
-
-
-	</details>
-* `get_items`
-
-	<details>
-
-	```php
-	public get_items( $request )
-	```
-
-	Retrieves all AMP plugin options specified in the endpoint schema.
+Registers routes for the controller.
 
 
-	</details>
+</details>
+<details>
+<summary>`get_items_permissions_check`</summary>
+
+```php
+public get_items_permissions_check( $request )
+```
+
+Checks whether the current user has permission to manage options.
+
+
+</details>
+<details>
+<summary>`get_items`</summary>
+
+```php
+public get_items( $request )
+```
+
+Retrieves all AMP plugin options specified in the endpoint schema.
+
+
+</details>

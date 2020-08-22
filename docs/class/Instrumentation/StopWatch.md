@@ -3,27 +3,25 @@
 Record the timing of multiple events.
 
 ### Methods
-* `start`
+<details>
+<summary>`start`</summary>
 
-	<details>
+```php
+public start( $name )
+```
 
-	```php
-	public start( $name )
-	```
-
-	Start a named event.
-
-
-	</details>
-* `stop`
-
-	<details>
-
-	```php
-	public stop( $name )
-	```
-
-	Stop a named event.
+Start a named event.
 
 
-	</details>
+</details>
+<details>
+<summary>`stop`</summary>
+
+```php
+public stop( $name )
+```
+
+Stop a named event.
+
+
+</details>

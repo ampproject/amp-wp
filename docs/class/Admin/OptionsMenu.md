@@ -3,111 +3,102 @@
 OptionsMenu class.
 
 ### Methods
-* `is_needed`
+<details>
+<summary>`is_needed`</summary>
 
-	<details>
+```php
+static public is_needed()
+```
 
-	```php
-	static public is_needed()
-	```
-
-	Check whether the conditional object is currently needed.
-
-
-	</details>
-* `__construct`
-
-	<details>
-
-	```php
-	public __construct( \AmpProject\AmpWP\Admin\GoogleFonts $google_fonts, \AmpProject\AmpWP\Admin\ReaderThemes $reader_themes, \AmpProject\AmpWP\Admin\RESTPreloader $rest_preloader )
-	```
-
-	OptionsMenu constructor.
+Check whether the conditional object is currently needed.
 
 
-	</details>
-* `register`
+</details>
+<details>
+<summary>`__construct`</summary>
 
-	<details>
+```php
+public __construct( \AmpProject\AmpWP\Admin\GoogleFonts $google_fonts, \AmpProject\AmpWP\Admin\ReaderThemes $reader_themes, \AmpProject\AmpWP\Admin\RESTPreloader $rest_preloader )
+```
 
-	```php
-	public register()
-	```
-
-	Adds hooks.
-
-
-	</details>
-* `add_plugin_action_links`
-
-	<details>
-
-	```php
-	public add_plugin_action_links( $links )
-	```
-
-	Add plugin action links.
+OptionsMenu constructor.
 
 
-	</details>
-* `add_menu_items`
+</details>
+<details>
+<summary>`register`</summary>
 
-	<details>
+```php
+public register()
+```
 
-	```php
-	public add_menu_items()
-	```
-
-	Add menu.
-
-
-	</details>
-* `screen_handle`
-
-	<details>
-
-	```php
-	public screen_handle()
-	```
-
-	Provides the settings screen handle.
+Adds hooks.
 
 
-	</details>
-* `enqueue_assets`
+</details>
+<details>
+<summary>`add_plugin_action_links`</summary>
 
-	<details>
+```php
+public add_plugin_action_links( $links )
+```
 
-	```php
-	public enqueue_assets( $hook_suffix )
-	```
-
-	Enqueues settings page assets.
-
-
-	</details>
-* `render_screen`
-
-	<details>
-
-	```php
-	public render_screen()
-	```
-
-	Display Settings.
+Add plugin action links.
 
 
-	</details>
-* `add_preload_rest_paths`
+</details>
+<details>
+<summary>`add_menu_items`</summary>
 
-	<details>
+```php
+public add_menu_items()
+```
 
-	```php
-	protected add_preload_rest_paths()
-	```
-
-	Adds REST paths to preload.
+Add menu.
 
 
-	</details>
+</details>
+<details>
+<summary>`screen_handle`</summary>
+
+```php
+public screen_handle()
+```
+
+Provides the settings screen handle.
+
+
+</details>
+<details>
+<summary>`enqueue_assets`</summary>
+
+```php
+public enqueue_assets( $hook_suffix )
+```
+
+Enqueues settings page assets.
+
+
+</details>
+<details>
+<summary>`render_screen`</summary>
+
+```php
+public render_screen()
+```
+
+Display Settings.
+
+
+</details>
+<details>
+<summary>`add_preload_rest_paths`</summary>
+
+```php
+protected add_preload_rest_paths()
+```
+
+Adds REST paths to preload.
+
+
+</details>

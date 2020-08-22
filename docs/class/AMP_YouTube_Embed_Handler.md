@@ -5,101 +5,93 @@ Class AMP_YouTube_Embed_Handler
 Much of this class is borrowed from Jetpack embeds.
 
 ### Methods
-* `__construct`
+<details>
+<summary>`__construct`</summary>
 
-	<details>
+```php
+public __construct( $args = array() )
+```
 
-	```php
-	public __construct( $args = array() )
-	```
-
-	AMP_YouTube_Embed_Handler constructor.
-
-
-	</details>
-* `register_embed`
-
-	<details>
-
-	```php
-	public register_embed()
-	```
-
-	Register embed.
+AMP_YouTube_Embed_Handler constructor.
 
 
-	</details>
-* `unregister_embed`
+</details>
+<details>
+<summary>`register_embed`</summary>
 
-	<details>
+```php
+public register_embed()
+```
 
-	```php
-	public unregister_embed()
-	```
-
-	Unregister embed.
-
-
-	</details>
-* `filter_embed_oembed_html`
-
-	<details>
-
-	```php
-	public filter_embed_oembed_html( $cache, $url )
-	```
-
-	Filter oEmbed HTML for YouTube to convert to AMP.
+Register embed.
 
 
-	</details>
-* `parse_props`
+</details>
+<details>
+<summary>`unregister_embed`</summary>
 
-	<details>
+```php
+public unregister_embed()
+```
 
-	```php
-	private parse_props( $html, $url, $video_id )
-	```
-
-	Parse AMP component from iframe.
-
-
-	</details>
-* `render`
-
-	<details>
-
-	```php
-	public render( $args, $url )
-	```
-
-	Render embed.
+Unregister embed.
 
 
-	</details>
-* `get_video_id_from_url`
+</details>
+<details>
+<summary>`filter_embed_oembed_html`</summary>
 
-	<details>
+```php
+public filter_embed_oembed_html( $cache, $url )
+```
 
-	```php
-	private get_video_id_from_url( $url )
-	```
-
-	Determine the video ID from the URL.
+Filter oEmbed HTML for YouTube to convert to AMP.
 
 
-	</details>
-* `video_override`
+</details>
+<details>
+<summary>`parse_props`</summary>
 
-	<details>
+```php
+private parse_props( $html, $url, $video_id )
+```
 
-	```php
-	public video_override( $html, $attr )
-	```
+Parse AMP component from iframe.
 
-	Override the output of YouTube videos.
+
+</details>
+<details>
+<summary>`render`</summary>
+
+```php
+public render( $args, $url )
+```
+
+Render embed.
+
+
+</details>
+<details>
+<summary>`get_video_id_from_url`</summary>
+
+```php
+private get_video_id_from_url( $url )
+```
+
+Determine the video ID from the URL.
+
+
+</details>
+<details>
+<summary>`video_override`</summary>
+
+```php
+public video_override( $html, $attr )
+```
+
+Override the output of YouTube videos.
 
 This overrides the value in wp_video_shortcode(). The pattern matching is copied from WP_Widget_Media_Video::render().
 
 
-	</details>
+</details>

@@ -3,67 +3,62 @@
 Class representing a single admin pointer.
 
 ### Methods
-* `__construct`
+<details>
+<summary>`__construct`</summary>
 
-	<details>
+```php
+public __construct( $slug, array $args )
+```
 
-	```php
-	public __construct( $slug, array $args )
-	```
-
-	Constructor.
-
-
-	</details>
-* `get_slug`
-
-	<details>
-
-	```php
-	public get_slug()
-	```
-
-	Gets the pointer slug.
+Constructor.
 
 
-	</details>
-* `is_active`
+</details>
+<details>
+<summary>`get_slug`</summary>
 
-	<details>
+```php
+public get_slug()
+```
 
-	```php
-	public is_active( $hook_suffix )
-	```
+Gets the pointer slug.
 
-	Checks whether the pointer is active.
+
+</details>
+<details>
+<summary>`is_active`</summary>
+
+```php
+public is_active( $hook_suffix )
+```
+
+Checks whether the pointer is active.
 
 This method executes the active callback and looks at whether the pointer has been dismissed in order to determine whether the pointer should be active or not.
 
 
-	</details>
-* `enqueue`
+</details>
+<details>
+<summary>`enqueue`</summary>
 
-	<details>
+```php
+public enqueue()
+```
 
-	```php
-	public enqueue()
-	```
-
-	Enqueues the script for the pointer.
+Enqueues the script for the pointer.
 
 
-	</details>
-* `print_js`
+</details>
+<details>
+<summary>`print_js`</summary>
 
-	<details>
+```php
+private print_js()
+```
 
-	```php
-	private print_js()
-	```
-
-	Prints the script for the pointer inline.
+Prints the script for the pointer inline.
 
 Requires the &#039;wp-pointer&#039; script to be loaded.
 
 
-	</details>
+</details>

@@ -5,39 +5,36 @@ Class AMP_Comments_Sanitizer
 Strips and corrects attributes in forms.
 
 ### Methods
-* `sanitize`
+<details>
+<summary>`sanitize`</summary>
 
-	<details>
+```php
+public sanitize()
+```
 
-	```php
-	public sanitize()
-	```
-
-	Pre-process the comment form and comment list for AMP.
-
-
-	</details>
-* `process_comment_form`
-
-	<details>
-
-	```php
-	protected process_comment_form( $comment_form )
-	```
-
-	Comment form.
+Pre-process the comment form and comment list for AMP.
 
 
-	</details>
-* `add_amp_live_list_comment_attributes`
+</details>
+<details>
+<summary>`process_comment_form`</summary>
 
-	<details>
+```php
+protected process_comment_form( $comment_form )
+```
 
-	```php
-	protected add_amp_live_list_comment_attributes( $comment_element )
-	```
-
-	Add attributes to comment elements when comments are being presented in amp-live-list, when comments_live_list theme support flag is present.
+Comment form.
 
 
-	</details>
+</details>
+<details>
+<summary>`add_amp_live_list_comment_attributes`</summary>
+
+```php
+protected add_amp_live_list_comment_attributes( $comment_element )
+```
+
+Add attributes to comment elements when comments are being presented in amp-live-list, when comments_live_list theme support flag is present.
+
+
+</details>

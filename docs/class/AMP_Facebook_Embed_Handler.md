@@ -3,63 +3,58 @@
 Class AMP_Facebook_Embed_Handler
 
 ### Methods
-* `register_embed`
+<details>
+<summary>`register_embed`</summary>
 
-	<details>
+```php
+public register_embed()
+```
 
-	```php
-	public register_embed()
-	```
-
-	Registers embed.
-
-
-	</details>
-* `unregister_embed`
-
-	<details>
-
-	```php
-	public unregister_embed()
-	```
-
-	Unregisters embed.
+Registers embed.
 
 
-	</details>
-* `sanitize_raw_embeds`
+</details>
+<details>
+<summary>`unregister_embed`</summary>
 
-	<details>
+```php
+public unregister_embed()
+```
 
-	```php
-	public sanitize_raw_embeds( Document $dom )
-	```
-
-	Sanitized &lt;div class=&quot;fb-video&quot; data-href=&gt; tags to &lt;amp-facebook&gt;.
-
-
-	</details>
-* `get_embed_type`
-
-	<details>
-
-	```php
-	private get_embed_type( \DOMElement $node )
-	```
-
-	Get embed type.
+Unregisters embed.
 
 
-	</details>
-* `create_amp_facebook_and_replace_node`
+</details>
+<details>
+<summary>`sanitize_raw_embeds`</summary>
 
-	<details>
+```php
+public sanitize_raw_embeds( Document $dom )
+```
 
-	```php
-	private create_amp_facebook_and_replace_node( Document $dom, \DOMElement $node, $embed_type )
-	```
-
-	Create amp-facebook and replace node.
+Sanitized &lt;div class=&quot;fb-video&quot; data-href=&gt; tags to &lt;amp-facebook&gt;.
 
 
-	</details>
+</details>
+<details>
+<summary>`get_embed_type`</summary>
+
+```php
+private get_embed_type( \DOMElement $node )
+```
+
+Get embed type.
+
+
+</details>
+<details>
+<summary>`create_amp_facebook_and_replace_node`</summary>
+
+```php
+private create_amp_facebook_and_replace_node( Document $dom, \DOMElement $node, $embed_type )
+```
+
+Create amp-facebook and replace node.
+
+
+</details>

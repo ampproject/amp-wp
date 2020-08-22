@@ -5,55 +5,51 @@ Caching decorator for RemoteGetRequest implementations.
 Caching uses WordPress transients.
 
 ### Methods
-* `__construct`
+<details>
+<summary>`__construct`</summary>
 
-	<details>
+```php
+public __construct( RemoteGetRequest $remote_request, $expiry = MONTH_IN_SECONDS, $min_expiry = DAY_IN_SECONDS, $use_cache_control = true )
+```
 
-	```php
-	public __construct( RemoteGetRequest $remote_request, $expiry = MONTH_IN_SECONDS, $min_expiry = DAY_IN_SECONDS, $use_cache_control = true )
-	```
-
-	Instantiate a CachedRemoteGetRequest object.
+Instantiate a CachedRemoteGetRequest object.
 
 This is a decorator that can wrap around an existing remote request object to add a caching layer.
 
 
-	</details>
-* `get`
+</details>
+<details>
+<summary>`get`</summary>
 
-	<details>
+```php
+public get( $url )
+```
 
-	```php
-	public get( $url )
-	```
-
-	Do a GET request to retrieve the contents of a remote URL.
+Do a GET request to retrieve the contents of a remote URL.
 
 
-	</details>
-* `get_expiry_time`
+</details>
+<details>
+<summary>`get_expiry_time`</summary>
 
-	<details>
+```php
+private get_expiry_time( Response $response )
+```
 
-	```php
-	private get_expiry_time( Response $response )
-	```
-
-	Get the expiry time of the data to cache.
+Get the expiry time of the data to cache.
 
 This will use the cache-control header information in the provided response or fall back to the provided default expiry.
 
 
-	</details>
-* `get_max_age`
+</details>
+<details>
+<summary>`get_max_age`</summary>
 
-	<details>
+```php
+private get_max_age( $cache_control_strings )
+```
 
-	```php
-	private get_max_age( $cache_control_strings )
-	```
-
-	Get the max age setting from one or more cache-control header strings.
+Get the max age setting from one or more cache-control header strings.
 
 
-	</details>
+</details>

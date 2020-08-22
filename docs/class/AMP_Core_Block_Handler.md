@@ -3,157 +3,145 @@
 Class AMP_Core_Block_Handler
 
 ### Methods
-* `register_embed`
+<details>
+<summary>`register_embed`</summary>
 
-	<details>
+```php
+public register_embed()
+```
 
-	```php
-	public register_embed()
-	```
-
-	Register embed.
-
-
-	</details>
-* `unregister_embed`
-
-	<details>
-
-	```php
-	public unregister_embed()
-	```
-
-	Unregister embed.
+Register embed.
 
 
-	</details>
-* `filter_rendered_block`
+</details>
+<details>
+<summary>`unregister_embed`</summary>
 
-	<details>
+```php
+public unregister_embed()
+```
 
-	```php
-	public filter_rendered_block( $block_content, $block )
-	```
-
-	Filters the content of a single block to make it AMP valid.
+Unregister embed.
 
 
-	</details>
-* `ampify_categories_block`
+</details>
+<details>
+<summary>`filter_rendered_block`</summary>
 
-	<details>
+```php
+public filter_rendered_block( $block_content, $block )
+```
 
-	```php
-	public ampify_categories_block( $block_content )
-	```
+Filters the content of a single block to make it AMP valid.
 
-	Fix rendering of categories block when displayAsDropdown.
+
+</details>
+<details>
+<summary>`ampify_categories_block`</summary>
+
+```php
+public ampify_categories_block( $block_content )
+```
+
+Fix rendering of categories block when displayAsDropdown.
 
 This excludes the disallowed JS scrips, adds &lt;form&gt; tags, and uses on:change for &lt;select&gt;.
 
 
-	</details>
-* `ampify_archives_block`
+</details>
+<details>
+<summary>`ampify_archives_block`</summary>
 
-	<details>
+```php
+public ampify_archives_block( $block_content )
+```
 
-	```php
-	public ampify_archives_block( $block_content )
-	```
-
-	Fix rendering of archives block when displayAsDropdown.
+Fix rendering of archives block when displayAsDropdown.
 
 This replaces disallowed script with the use of on:change for &lt;select&gt;.
 
 
-	</details>
-* `ampify_video_block`
+</details>
+<details>
+<summary>`ampify_video_block`</summary>
 
-	<details>
+```php
+public ampify_video_block( $block_content, $block )
+```
 
-	```php
-	public ampify_video_block( $block_content, $block )
-	```
-
-	Ampify video block.
+Ampify video block.
 
 Inject the video attachment&#039;s dimensions if available. This prevents having to try to look up the attachment post by the video URL in `\AMP_Video_Sanitizer::filter_video_dimensions()`.
 
 
-	</details>
-* `ampify_cover_block`
+</details>
+<details>
+<summary>`ampify_cover_block`</summary>
 
-	<details>
+```php
+public ampify_cover_block( $block_content, $block )
+```
 
-	```php
-	public ampify_cover_block( $block_content, $block )
-	```
-
-	Ampify cover block.
+Ampify cover block.
 
 This specifically fixes the layout of the block when a background video is assigned.
 
 
-	</details>
-* `sanitize_raw_embeds`
+</details>
+<details>
+<summary>`sanitize_raw_embeds`</summary>
 
-	<details>
+```php
+public sanitize_raw_embeds( Document $dom, $args = array() )
+```
 
-	```php
-	public sanitize_raw_embeds( Document $dom, $args = array() )
-	```
-
-	Sanitize widgets that are not added via Gutenberg.
-
-
-	</details>
-* `process_categories_widgets`
-
-	<details>
-
-	```php
-	private process_categories_widgets( Document $dom )
-	```
-
-	Process &quot;Categories&quot; widgets.
+Sanitize widgets that are not added via Gutenberg.
 
 
-	</details>
-* `process_archives_widgets`
+</details>
+<details>
+<summary>`process_categories_widgets`</summary>
 
-	<details>
+```php
+private process_categories_widgets( Document $dom )
+```
 
-	```php
-	private process_archives_widgets( Document $dom, $args = array() )
-	```
-
-	Process &quot;Archives&quot; widgets.
+Process &quot;Categories&quot; widgets.
 
 
-	</details>
-* `preserve_widget_text_element_dimensions`
+</details>
+<details>
+<summary>`process_archives_widgets`</summary>
 
-	<details>
+```php
+private process_archives_widgets( Document $dom, $args = array() )
+```
 
-	```php
-	public preserve_widget_text_element_dimensions( $content )
-	```
+Process &quot;Archives&quot; widgets.
 
-	Preserve dimensions of elements in a Text widget to later restore to circumvent WordPress core stripping them out.
+
+</details>
+<details>
+<summary>`preserve_widget_text_element_dimensions`</summary>
+
+```php
+public preserve_widget_text_element_dimensions( $content )
+```
+
+Preserve dimensions of elements in a Text widget to later restore to circumvent WordPress core stripping them out.
 
 Core strips out the dimensions to prevent the element being made too wide for the sidebar. This is not a concern in AMP because of responsive sizing. So this logic is here to undo what core is doing.
 
 
-	</details>
-* `process_text_widgets`
+</details>
+<details>
+<summary>`process_text_widgets`</summary>
 
-	<details>
+```php
+private process_text_widgets( Document $dom )
+```
 
-	```php
-	private process_text_widgets( Document $dom )
-	```
-
-	Process &quot;Text&quot; widgets.
+Process &quot;Text&quot; widgets.
 
 
-	</details>
+</details>

@@ -3,51 +3,47 @@
 Registers assets that may not be available in the current site&#039;s version of core.
 
 ### Methods
-* `get_registration_action`
+<details>
+<summary>`get_registration_action`</summary>
 
-	<details>
+```php
+static public get_registration_action()
+```
 
-	```php
-	static public get_registration_action()
-	```
-
-	Get the action to use for registering the service.
-
-
-	</details>
-* `register`
-
-	<details>
-
-	```php
-	public register()
-	```
-
-	Runs on instantiation.
+Get the action to use for registering the service.
 
 
-	</details>
-* `register_shimmed_scripts`
+</details>
+<details>
+<summary>`register`</summary>
 
-	<details>
+```php
+public register()
+```
 
-	```php
-	public register_shimmed_scripts( $wp_scripts )
-	```
-
-	Registers scripts not guaranteed to be available in core.
-
-
-	</details>
-* `register_shimmed_styles`
-
-	<details>
-
-	```php
-	public register_shimmed_styles( $wp_styles )
-	```
-
-	Registers shimmed assets not guaranteed to be available in core.
+Runs on instantiation.
 
 
-	</details>
+</details>
+<details>
+<summary>`register_shimmed_scripts`</summary>
+
+```php
+public register_shimmed_scripts( $wp_scripts )
+```
+
+Registers scripts not guaranteed to be available in core.
+
+
+</details>
+<details>
+<summary>`register_shimmed_styles`</summary>
+
+```php
+public register_shimmed_styles( $wp_styles )
+```
+
+Registers shimmed assets not guaranteed to be available in core.
+
+
+</details>

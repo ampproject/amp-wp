@@ -5,255 +5,234 @@ Class SiteHealth
 Adds tests and debugging information for Site Health.
 
 ### Methods
-* `is_needed`
+<details>
+<summary>`is_needed`</summary>
 
-	<details>
+```php
+static public is_needed()
+```
 
-	```php
-	static public is_needed()
-	```
+Check whether the conditional object is currently needed.
 
-	Check whether the conditional object is currently needed.
 
+</details>
+<details>
+<summary>`get_registration_action`</summary>
 
-	</details>
-* `get_registration_action`
+```php
+static public get_registration_action()
+```
 
-	<details>
+Get the action to use for registering the service.
 
-	```php
-	static public get_registration_action()
-	```
 
-	Get the action to use for registering the service.
+</details>
+<details>
+<summary>`__construct`</summary>
 
+```php
+public __construct( MonitorCssTransientCaching $css_transient_caching )
+```
 
-	</details>
-* `__construct`
+SiteHealth constructor.
 
-	<details>
 
-	```php
-	public __construct( MonitorCssTransientCaching $css_transient_caching )
-	```
+</details>
+<details>
+<summary>`register`</summary>
 
-	SiteHealth constructor.
+```php
+public register()
+```
 
+Adds the filters.
 
-	</details>
-* `register`
 
-	<details>
+</details>
+<details>
+<summary>`add_tests`</summary>
 
-	```php
-	public register()
-	```
+```php
+public add_tests( $tests )
+```
 
-	Adds the filters.
+Adds Site Health tests related to this plugin.
 
 
-	</details>
-* `add_tests`
+</details>
+<details>
+<summary>`get_persistent_object_cache_learn_more_action`</summary>
 
-	<details>
+```php
+private get_persistent_object_cache_learn_more_action()
+```
 
-	```php
-	public add_tests( $tests )
-	```
+Get action HTML for the link to learn more about persistent object caching.
 
-	Adds Site Health tests related to this plugin.
 
+</details>
+<details>
+<summary>`persistent_object_cache`</summary>
 
-	</details>
-* `get_persistent_object_cache_learn_more_action`
+```php
+public persistent_object_cache()
+```
 
-	<details>
+Gets the test result data for whether there is a persistent object cache.
 
-	```php
-	private get_persistent_object_cache_learn_more_action()
-	```
 
-	Get action HTML for the link to learn more about persistent object caching.
+</details>
+<details>
+<summary>`curl_multi_functions`</summary>
 
+```php
+public curl_multi_functions()
+```
 
-	</details>
-* `persistent_object_cache`
+Gets the test result data for whether the curl_multi_* functions exist.
 
-	<details>
 
-	```php
-	public persistent_object_cache()
-	```
+</details>
+<details>
+<summary>`icu_version`</summary>
 
-	Gets the test result data for whether there is a persistent object cache.
+```php
+public icu_version()
+```
 
+Gets the test result data for whether the proper ICU version is available.
 
-	</details>
-* `curl_multi_functions`
 
-	<details>
+</details>
+<details>
+<summary>`css_transient_caching`</summary>
 
-	```php
-	public curl_multi_functions()
-	```
+```php
+public css_transient_caching()
+```
 
-	Gets the test result data for whether the curl_multi_* functions exist.
+Gets the test result data for whether transient caching for stylesheets was disabled.
 
 
-	</details>
-* `icu_version`
+</details>
+<details>
+<summary>`xdebug_extension`</summary>
 
-	<details>
+```php
+public xdebug_extension()
+```
 
-	```php
-	public icu_version()
-	```
+Gets the test result data for whether the Xdebug extension is loaded.
 
-	Gets the test result data for whether the proper ICU version is available.
 
+</details>
+<details>
+<summary>`add_debug_information`</summary>
 
-	</details>
-* `css_transient_caching`
+```php
+public add_debug_information( $debugging_information )
+```
 
-	<details>
+Adds debug information for AMP.
 
-	```php
-	public css_transient_caching()
-	```
 
-	Gets the test result data for whether transient caching for stylesheets was disabled.
+</details>
+<details>
+<summary>`modify_test_result`</summary>
 
+```php
+public modify_test_result( $test_result )
+```
 
-	</details>
-* `xdebug_extension`
+Modify test results.
 
-	<details>
 
-	```php
-	public xdebug_extension()
-	```
+</details>
+<details>
+<summary>`get_supported_templates`</summary>
 
-	Gets the test result data for whether the Xdebug extension is loaded.
+```php
+private get_supported_templates()
+```
 
+Gets the templates that support AMP.
 
-	</details>
-* `add_debug_information`
 
-	<details>
+</details>
+<details>
+<summary>`get_serve_all_templates`</summary>
 
-	```php
-	public add_debug_information( $debugging_information )
-	```
+```php
+private get_serve_all_templates()
+```
 
-	Adds debug information for AMP.
+Gets whether the option to serve all templates is selected.
 
 
-	</details>
-* `modify_test_result`
+</details>
+<details>
+<summary>`get_css_transient_caching_disabled`</summary>
 
-	<details>
+```php
+private get_css_transient_caching_disabled()
+```
 
-	```php
-	public modify_test_result( $test_result )
-	```
+Gets whether the transient caching of stylesheets was disabled.
 
-	Modify test results.
 
+</details>
+<details>
+<summary>`get_css_transient_caching_threshold`</summary>
 
-	</details>
-* `get_supported_templates`
+```php
+private get_css_transient_caching_threshold()
+```
 
-	<details>
+Gets the threshold being used to when monitoring the transient caching of stylesheets.
 
-	```php
-	private get_supported_templates()
-	```
 
-	Gets the templates that support AMP.
+</details>
+<details>
+<summary>`get_css_transient_caching_sampling_range`</summary>
 
+```php
+private get_css_transient_caching_sampling_range()
+```
 
-	</details>
-* `get_serve_all_templates`
+Gets the sampling range being used to when monitoring the transient caching of stylesheets.
 
-	<details>
 
-	```php
-	private get_serve_all_templates()
-	```
+</details>
+<details>
+<summary>`add_extensions`</summary>
 
-	Gets whether the option to serve all templates is selected.
+```php
+public add_extensions( $core_extensions )
+```
 
+Adds suggested PHP extensions to those that Core depends on.
 
-	</details>
-* `get_css_transient_caching_disabled`
 
-	<details>
+</details>
+<details>
+<summary>`add_styles`</summary>
 
-	```php
-	private get_css_transient_caching_disabled()
-	```
+```php
+public add_styles()
+```
 
-	Gets whether the transient caching of stylesheets was disabled.
+Add needed styles for the Site Health integration.
 
 
-	</details>
-* `get_css_transient_caching_threshold`
+</details>
+<details>
+<summary>`is_intl_extension_needed`</summary>
 
-	<details>
+```php
+private is_intl_extension_needed()
+```
 
-	```php
-	private get_css_transient_caching_threshold()
-	```
+Determine if the `intl` extension is needed.
 
-	Gets the threshold being used to when monitoring the transient caching of stylesheets.
 
-
-	</details>
-* `get_css_transient_caching_sampling_range`
-
-	<details>
-
-	```php
-	private get_css_transient_caching_sampling_range()
-	```
-
-	Gets the sampling range being used to when monitoring the transient caching of stylesheets.
-
-
-	</details>
-* `add_extensions`
-
-	<details>
-
-	```php
-	public add_extensions( $core_extensions )
-	```
-
-	Adds suggested PHP extensions to those that Core depends on.
-
-
-	</details>
-* `add_styles`
-
-	<details>
-
-	```php
-	public add_styles()
-	```
-
-	Add needed styles for the Site Health integration.
-
-
-	</details>
-* `is_intl_extension_needed`
-
-	<details>
-
-	```php
-	private is_intl_extension_needed()
-	```
-
-	Determine if the `intl` extension is needed.
-
-
-	</details>
+</details>

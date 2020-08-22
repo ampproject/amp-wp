@@ -5,75 +5,69 @@ Class AMP_DailyMotion_Embed_Handler
 Much of this class is borrowed from Jetpack embeds
 
 ### Methods
-* `__construct`
+<details>
+<summary>`__construct`</summary>
 
-	<details>
+```php
+public __construct( $args = array() )
+```
 
-	```php
-	public __construct( $args = array() )
-	```
-
-	AMP_DailyMotion_Embed_Handler constructor.
-
-
-	</details>
-* `register_embed`
-
-	<details>
-
-	```php
-	public register_embed()
-	```
-
-	Register embed.
+AMP_DailyMotion_Embed_Handler constructor.
 
 
-	</details>
-* `unregister_embed`
+</details>
+<details>
+<summary>`register_embed`</summary>
 
-	<details>
+```php
+public register_embed()
+```
 
-	```php
-	public unregister_embed()
-	```
-
-	Unregister embed.
-
-
-	</details>
-* `oembed`
-
-	<details>
-
-	```php
-	public oembed( $matches, $attr, $url )
-	```
-
-	Render oEmbed.
+Register embed.
 
 
-	</details>
-* `render`
+</details>
+<details>
+<summary>`unregister_embed`</summary>
 
-	<details>
+```php
+public unregister_embed()
+```
 
-	```php
-	public render( $args )
-	```
-
-	Render.
-
-
-	</details>
-* `get_video_id_from_url`
-
-	<details>
-
-	```php
-	private get_video_id_from_url( $url )
-	```
-
-	Determine the video ID from the URL.
+Unregister embed.
 
 
-	</details>
+</details>
+<details>
+<summary>`oembed`</summary>
+
+```php
+public oembed( $matches, $attr, $url )
+```
+
+Render oEmbed.
+
+
+</details>
+<details>
+<summary>`render`</summary>
+
+```php
+public render( $args )
+```
+
+Render.
+
+
+</details>
+<details>
+<summary>`get_video_id_from_url`</summary>
+
+```php
+private get_video_id_from_url( $url )
+```
+
+Determine the video ID from the URL.
+
+
+</details>

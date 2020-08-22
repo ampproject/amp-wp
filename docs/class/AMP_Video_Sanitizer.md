@@ -5,53 +5,49 @@ Class AMP_Video_Sanitizer
 Converts &lt;video&gt; tags to &lt;amp-video&gt;
 
 ### Methods
-* `get_selector_conversion_mapping`
+<details>
+<summary>`get_selector_conversion_mapping`</summary>
 
-	<details>
+```php
+public get_selector_conversion_mapping()
+```
 
-	```php
-	public get_selector_conversion_mapping()
-	```
-
-	Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
-
-
-	</details>
-* `sanitize`
-
-	<details>
-
-	```php
-	public sanitize()
-	```
-
-	Sanitize the &lt;video&gt; elements from the HTML contained in this instance&#039;s Dom\Document.
+Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
 
 
-	</details>
-* `filter_video_dimensions`
+</details>
+<details>
+<summary>`sanitize`</summary>
 
-	<details>
+```php
+public sanitize()
+```
 
-	```php
-	protected filter_video_dimensions( $new_attributes, $src )
-	```
+Sanitize the &lt;video&gt; elements from the HTML contained in this instance&#039;s Dom\Document.
 
-	Filter video dimensions, try to get width and height from original file if missing.
+
+</details>
+<details>
+<summary>`filter_video_dimensions`</summary>
+
+```php
+protected filter_video_dimensions( $new_attributes, $src )
+```
+
+Filter video dimensions, try to get width and height from original file if missing.
 
 The video block will automatically have the width/height supplied for attachments.
 
 
-	</details>
-* `filter_attributes`
+</details>
+<details>
+<summary>`filter_attributes`</summary>
 
-	<details>
+```php
+private filter_attributes( $attributes )
+```
 
-	```php
-	private filter_attributes( $attributes )
-	```
-
-	&quot;Filter&quot; HTML attributes for &lt;amp-audio&gt; elements.
+&quot;Filter&quot; HTML attributes for &lt;amp-audio&gt; elements.
 
 
-	</details>
+</details>
