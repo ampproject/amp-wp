@@ -115,6 +115,9 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		$this->assertFalse( amp_is_canonical() );
 		$this->assertTrue( amp_is_legacy() );
 
+		/** @var ReaderThemeLoader $reader_theme_loader */
+		$reader_theme_loader = Services::get( 'reader_theme_loader' );
+
 		add_theme_support( 'header-video', [ 'video' => [] ] );
 		$wp_customize = $this->get_customize_manager();
 		$wp_customize->register_controls();
@@ -136,6 +139,7 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'customize_controls_print_footer_scripts', [ $instance, 'print_legacy_controls_templates' ] ) );
 		$this->assertEquals( 10, has_action( 'customize_preview_init', [ $instance, 'init_legacy_preview' ] ) );
 		$this->assertEquals( 10, has_action( 'customize_controls_enqueue_scripts', [ $instance, 'add_legacy_customizer_scripts' ] ) );
+		$this->assertEquals( 10, has_filter( 'customize_previewable_devices', [ $reader_theme_loader, 'customize_previewable_devices' ] ) );
 
 		foreach ( [ $header_video_setting, $external_header_video_setting ] as $setting ) {
 			$this->assertEquals( 'postMessage', $setting->transport );
@@ -190,6 +194,7 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		$this->assertFalse( has_action( 'customize_controls_print_footer_scripts', [ $instance, 'print_legacy_controls_templates' ] ) );
 		$this->assertFalse( has_action( 'customize_preview_init', [ $instance, 'init_legacy_preview' ] ) );
 		$this->assertFalse( has_action( 'customize_controls_enqueue_scripts', [ $instance, 'add_legacy_customizer_scripts' ] ) );
+		$this->assertFalse( has_filter( 'customize_previewable_devices', [ $reader_theme_loader, 'customize_previewable_devices' ] ) );
 
 		foreach ( [ $header_video_setting, $external_header_video_setting ] as $setting ) {
 			$this->assertEquals( 'refresh', $setting->transport );
@@ -245,6 +250,7 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		$this->assertFalse( has_action( 'customize_controls_print_footer_scripts', [ $instance, 'print_legacy_controls_templates' ] ) );
 		$this->assertFalse( has_action( 'customize_preview_init', [ $instance, 'init_legacy_preview' ] ) );
 		$this->assertFalse( has_action( 'customize_controls_enqueue_scripts', [ $instance, 'add_legacy_customizer_scripts' ] ) );
+		$this->assertFalse( has_filter( 'customize_previewable_devices', [ $reader_theme_loader, 'customize_previewable_devices' ] ) );
 
 		foreach ( [ $header_video_setting, $external_header_video_setting ] as $setting ) {
 			$this->assertEquals( 'postMessage', $setting->transport );
