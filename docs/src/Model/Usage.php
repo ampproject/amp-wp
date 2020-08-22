@@ -21,12 +21,12 @@ final class Usage implements Leaf {
 	/**
 	 * Get an associative array of known keys.
 	 *
-	 * @return string[]
+	 * @return array
 	 */
 	protected function get_known_keys() {
 		return [
-			'functions',
-			'methods',
+			'functions' => [],
+			'methods'   => [],
 		];
 	}
 
@@ -39,7 +39,7 @@ final class Usage implements Leaf {
 		$this->functions = [];
 
 		foreach ( $value as $function ) {
-			$this->functions[ $function[ 'name' ] ] = new Function_( $function, $this );
+			$this->functions[] = new Function_( $function, $this );
 		}
 	}
 
@@ -52,7 +52,7 @@ final class Usage implements Leaf {
 		$this->methods = [];
 
 		foreach ( $value as $method ) {
-			$this->methods[ $method[ 'name' ] ] = new Method( $method, $this );
+			$this->methods[] = new Method( $method, $this );
 		}
 	}
 }

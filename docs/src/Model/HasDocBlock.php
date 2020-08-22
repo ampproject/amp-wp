@@ -53,4 +53,13 @@ trait HasDocBlock {
 
 		return trim( $description );
 	}
+
+	/**
+	 * Get the assembled description from the doc-block.
+	 *
+	 * @return string Assembled description.
+	 */
+	public function get_short_description() {
+		return trim( $this->doc->description );
+	}
 }

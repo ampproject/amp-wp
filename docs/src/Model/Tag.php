@@ -22,14 +22,14 @@ final class Tag implements Leaf {
 	/**
 	 * Get an associative array of known keys.
 	 *
-	 * @return string[]
+	 * @return array
 	 */
 	protected function get_known_keys() {
 		return [
-			'name',
-			'content',
-			'types',
-			'variable',
+			'name'     => '',
+			'content'  => '',
+			'types'    => [],
+			'variable' => '',
 		];
 	}
 }

@@ -7,6 +7,8 @@
 
 namespace AmpProject\AmpWP\Documentation\Model;
 
+use RuntimeException;
+
 trait LeafConstruction {
 
 	/**
@@ -24,7 +26,7 @@ trait LeafConstruction {
 	 */
 	public function __construct( $data, $parent = null ) {
 		$this->parent = $parent;
-		foreach ( $this->get_known_keys() as $key ) {
+		foreach ( $this->get_known_keys() as $key => $default ) {
 			$this->process_key( $key, $data );
 		}
 	}
@@ -32,7 +34,7 @@ trait LeafConstruction {
 	/**
 	 * Get an associative array of known keys.
 	 *
-	 * @return string[]
+	 * @return array
 	 */
 	abstract protected function get_known_keys();
 
@@ -43,7 +45,7 @@ trait LeafConstruction {
 	 * @param array  $data Associative array of data.
 	 */
 	protected function process_key( $key, $data ) {
-		if ( ! array_key_exists( $key, $data ) ) {
+		if ( ! is_array( $data ) || ! array_key_exists( $key, $data ) ) {
 			return;
 		}
 
@@ -64,5 +66,24 @@ trait LeafConstruction {
 	 */
 	public function get_parent() {
 		return $this->parent;
+	}
+
+	/**
+	 * Magic getter to return default values when needed.
+	 *
+	 * @param string $property Property that was requested.
+	 * @return mixed Default value for the requested property.
+	 * @throws RuntimeException If the property is not known.
+	 */
+	public function __get( $property ) {
+		$known_keys = $this->get_known_keys();
+
+		if ( array_key_exists( $property, $known_keys ) ) {
+			return $known_keys[ $property ];
+		}
+
+		throw new RuntimeException(
+			"Tried to fetch unknown property {$property}."
+		);
 	}
 }

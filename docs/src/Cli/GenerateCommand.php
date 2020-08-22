@@ -1,6 +1,6 @@
 <?php
 /**
- * Class FileReflector.
+ * Class GenerateCommand.
  *
  * @package AmpProject\AmpWP
  */
@@ -8,6 +8,10 @@
 namespace AmpProject\AmpWP\Documentation\Cli;
 
 use AmpProject\AmpWP\Documentation\Model\Class_;
+use AmpProject\AmpWP\Documentation\Model\File;
+use AmpProject\AmpWP\Documentation\Model\Function_;
+use AmpProject\AmpWP\Documentation\Model\Hook;
+use AmpProject\AmpWP\Documentation\Model\Method;
 use AmpProject\AmpWP\Documentation\Model\Root;
 use AmpProject\AmpWP\Documentation\Parser\Parser;
 use AmpProject\AmpWP\Documentation\Templating\Markdown;
@@ -130,7 +134,104 @@ final class GenerateCommand {
 			exit;
 		}
 
-		return $parser->parse_files( $files, $path );
+		$parsed_data = $parser->parse_files( $files, $path );
+
+		return array_filter( $parsed_data, [ $this, 'filter_parsed_data' ] );
+	}
+
+	/**
+	 * Filter the parsed data to remove internal and deprecated elements.
+	 *
+	 * @param File $file Individual file to filter.
+	 * @return bool Whether the file should be included or not.
+	 */
+	private function filter_parsed_data( $file ) {
+		if ( isset( $file['classes'] ) ) {
+			$file['classes'] = array_filter(
+				$file['classes'],
+				[ $this, 'is_not_internal' ]
+			);
+
+			foreach ( $file['classes'] as $index => $class ) {
+				if ( isset( $class['methods'] ) ) {
+					$file['classes'][ $index ]['methods'] = array_filter(
+						$class['methods'],
+						[ $this, 'is_not_internal' ]
+					);
+
+					foreach ( $class['methods'] as $method_index => $method ) {
+						if ( isset( $method['hooks'] ) ) {
+							$file['classes'][ $index ]['methods'][ $method_index ]['hooks'] = array_filter(
+								$method['hooks'],
+								[ $this, 'is_not_internal' ]
+							);
+						}
+					}
+				}
+			}
+		}
+
+		if ( isset( $file['functions'] ) ) {
+			$file['functions'] = array_filter(
+				$file['functions'],
+				[ $this, 'is_not_internal' ]
+			);
+
+			foreach ( $file['functions'] as $index => $function ) {
+				if ( isset( $class['hooks'] ) ) {
+					$file['functions'][ $index ]['hooks'] = array_filter(
+						$class['hooks'],
+						[ $this, 'is_not_internal' ]
+					);
+				}
+			}
+		}
+
+		if ( isset( $file['hooks'] ) ) {
+			$file['hooks'] = array_filter(
+				$file['hooks'],
+				[ $this, 'is_not_internal' ]
+			);
+		}
+
+		return ! empty( $file['classes'] )
+			|| ! empty( $file['functions'] )
+			|| ! empty( $file['hooks'] );
+	}
+
+	/**
+	 * Ensure a checked element is not internal or deprecated.
+	 *
+	 * @param array $parsed Parsed element.
+	 * @return bool Whether element is neither internal not deprecated.
+	 */
+	private function is_not_internal( $parsed ) {
+		if ( isset( $parsed['visibility'] ) && 'private' === $parsed['visibility'] ) {
+			return false;
+		}
+
+		if (
+			isset( $parsed['doc']['description'] )
+			&& preg_match( '/This (filter|action) is documented in/', $parsed['doc']['description'] )
+		) {
+			return false;
+		}
+
+		if ( empty( $parsed['doc']['tags'] ) ) {
+			return true;
+		}
+
+		foreach ( $parsed['doc']['tags'] as $tag ) {
+			if ( 'internal' === $tag['name'] ) {
+				return false;
+			}
+
+			if ( 'deprecated' === $tag['name'] ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -140,8 +241,8 @@ final class GenerateCommand {
 	 */
 	private function get_excluded_dirs() {
 		return [
-			'#^.*/amp/(assets|bin|build|docs|node_modules|tests|vendor)/#',
-			'#^.*/amp/lib/(common|optimizer)/#',
+			'#^.*/amp/(assets|bin|build|docs|node_modules|tests|vendor)/*#',
+			'#^.*/amp/lib/(common|optimizer)/*#',
 		];
 	}
 
@@ -153,20 +254,49 @@ final class GenerateCommand {
 	 * @return Generator Generator producing Markdown objects.
 	 */
 	private function generate_markdown( Root $doc_tree, TemplateEngine $template_engine ) {
-		$markdown_files = [];
+		$classes  = $doc_tree->get_classes();
+		$filename = 'class/README.md';
+		$contents = $template_engine->render( 'class_index', $classes );
+		yield new Markdown( $filename, $contents );
 
-		foreach ( $doc_tree->get_classes() as $class ) {
-			/** @var Class_ $class */
+		foreach ( $classes as $class ) {
 			$filename = "class/{$class->get_filename()}.md";
 			$contents = $template_engine->render( 'class', $class );
 			yield new Markdown( $filename, $contents );
 		}
-/*
-		foreach ( $doc_tree->get_functions() as $function ) {
-			$filename = "function/{$function}.md";
+
+		$methods  = $doc_tree->get_methods();
+		$filename = 'method/README.md';
+		$contents = $template_engine->render( 'method_index', $methods );
+		yield new Markdown( $filename, $contents );
+
+		foreach ( $methods as $method ) {
+			$filename = "method/{$method->get_filename()}.md";
+			$contents = $template_engine->render( 'method', $method );
+			yield new Markdown( $filename, $contents );
+		}
+
+		$functions = $doc_tree->get_functions();
+		$filename  = 'function/README.md';
+		$contents  = $template_engine->render( 'function_index', $functions );
+		yield new Markdown( $filename, $contents );
+
+		foreach ( $functions as $function ) {
+			$filename = "function/{$function->get_filename()}.md";
 			$contents = $template_engine->render( 'function', $function );
 			yield new Markdown( $filename, $contents );
-		}*/
+		}
+
+		$hooks    = $doc_tree->get_hooks();
+		$filename = 'hook/README.md';
+		$contents = $template_engine->render( 'hook_index', $hooks );
+		yield new Markdown( $filename, $contents );
+
+		foreach ( $hooks as $hook ) {
+			$filename = "hook/{$hook->get_filename()}.md";
+			$contents = $template_engine->render( 'hook', $hook );
+			yield new Markdown( $filename, $contents );
+		}
 	}
 
 	/**

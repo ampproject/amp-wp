@@ -25,16 +25,16 @@ final class Hook implements Leaf {
 	/**
 	 * Get an associative array of known keys.
 	 *
-	 * @return string[]
+	 * @return array
 	 */
 	protected function get_known_keys() {
 		return [
-			'name',
-			'line',
-			'end_line',
-			'type',
-			'arguments',
-			'doc',
+			'name'      => '',
+			'line'      => 0,
+			'end_line'  => 0,
+			'type'      => '',
+			'arguments' => [],
+			'doc'       => new DocBlock( [] ),
 		];
 	}
 
@@ -47,7 +47,34 @@ final class Hook implements Leaf {
 		$this->arguments = [];
 
 		foreach ( $value as $argument ) {
-			$this->arguments[ $argument[ 'name' ] ] = new Argument( $argument, $this );
+			$this->arguments[] = new Argument( $argument, $this );
 		}
+	}
+
+	/**
+	 * Get the filename to use for the hook.
+	 *
+	 * @return string Filename to use.
+	 */
+	public function get_filename() {
+		return $this->name;
+	}
+
+	/**
+	 * Check if a description is available.
+	 *
+	 * @return bool Whether a description is available.
+	 */
+	public function has_description() {
+		return true;
+	}
+
+	/**
+	 * Get the description of the hook.
+	 *
+	 * @return string Description of the hook.
+	 */
+	public function get_description() {
+		return 'TODO';
 	}
 }

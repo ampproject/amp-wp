@@ -28,6 +28,20 @@ final class Root {
 	private $functions;
 
 	/**
+	 * Collection of methods across all files.
+	 *
+	 * @var Method[]
+	 */
+	private $methods;
+
+	/**
+	 * Collection of hooks across all files.
+	 *
+	 * @var Hook[]
+	 */
+	private $hooks;
+
+	/**
 	 * Collection of files that represent the source code to be documented.
 	 *
 	 * @var File[]
@@ -41,7 +55,7 @@ final class Root {
 	 */
 	public function __construct( $data ) {
 		foreach ( $data as $file_data ) {
-			$this->files[ $file_data['path'] ] = new File( $file_data, $this );
+			$this->files[] = new File( $file_data, $this );
 		}
 	}
 
@@ -68,6 +82,16 @@ final class Root {
 					$this->classes[] = $class;
 				}
 			}
+
+			usort(
+				$this->classes,
+				static function ( $a, $b ) {
+					return strcmp(
+						$a->get_relative_name(),
+						$b->get_relative_name()
+					);
+				}
+			);
 		}
 
 		return $this->classes;
@@ -87,8 +111,79 @@ final class Root {
 					$this->functions[] = $function;
 				}
 			}
+
+			usort(
+				$this->functions,
+				static function ( $a, $b ) {
+					return strcmp(
+						$a->get_relative_name(),
+						$b->get_relative_name()
+					);
+				}
+			);
 		}
 
 		return $this->functions;
+	}
+
+	/**
+	 * Get the methods across all of the files.
+	 *
+	 * @return Method[] Collection of method reference objects.
+	 */
+	public function get_methods( ) {
+		if ( null === $this->methods ) {
+			$this->methods = [];
+
+			foreach ( $this->get_classes() as $class ) {
+				foreach ( $class->methods as $method ) {
+					$this->methods[] = $method;
+				}
+			}
+
+			usort(
+				$this->methods,
+				static function ( $a, $b ) {
+					return strcmp(
+						$a->get_display_name(),
+						$b->get_display_name()
+					);
+				}
+			);
+		}
+
+		return $this->methods;
+	}
+
+	/**
+	 * Get the hooks across all of the files.
+	 *
+	 * @return Hook[] Collection of hook reference objects.
+	 */
+	public function get_hooks( ) {
+		if ( null === $this->hooks ) {
+			$this->hooks = [];
+
+			foreach ( $this->get_functions() as $function ) {
+				foreach ( $function->hooks as $hook ) {
+					$this->hooks[] = $hook;
+				}
+			}
+
+			foreach ( $this->get_methods() as $method ) {
+				foreach ( $method->hooks as $hook ) {
+					$this->hooks[] = $hook;
+				}
+			}
+
+			usort(
+				$this->hooks,
+				static function ( $a, $b ) {
+					return strcmp( $a->name, $b->name );
+				}
+			);
+		}
+
+		return $this->hooks;
 	}
 }

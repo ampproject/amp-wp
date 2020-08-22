@@ -23,13 +23,13 @@ final class DocBlock implements Leaf {
 	/**
 	 * Get an associative array of known keys.
 	 *
-	 * @return string[]
+	 * @return array
 	 */
 	protected function get_known_keys() {
 		return [
-			'description',
-			'long_description',
-			'tags',
+			'description'      => '',
+			'long_description' => '',
+			'tags'             => [],
 		];
 	}
 
@@ -42,7 +42,7 @@ final class DocBlock implements Leaf {
 		$this->tags = [];
 
 		foreach ( $value as $tag ) {
-			$this->tags[ $tag['name'] ] = new Tag( $tag, $this );
+			$this->tags[] = new Tag( $tag, $this );
 		}
 	}
 

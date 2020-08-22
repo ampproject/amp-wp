@@ -21,13 +21,13 @@ final class Include_ implements Leaf {
 	/**
 	 * Get an associative array of known keys.
 	 *
-	 * @return string[]
+	 * @return array
 	 */
 	protected function get_known_keys() {
 		return [
-			'name',
-			'line',
-			'type',
+			'name' => '',
+			'line' => 0,
+			'type' => '',
 		];
 	}
 }

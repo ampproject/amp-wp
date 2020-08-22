@@ -23,23 +23,24 @@ namespace AmpProject\AmpWP\Documentation\Model;
 final class Function_ implements Leaf {
 
 	use LeafConstruction;
+	use HasDocBlock;
 
 	/**
 	 * Get an associative array of known keys.
 	 *
-	 * @return string[]
+	 * @return array
 	 */
 	protected function get_known_keys() {
 		return [
-			'name',
-			'namespace',
-			//'aliases',
-			'line',
-			'end_line',
-			'arguments',
-			'doc',
-			'hooks',
-			'uses',
+			'name'      => '',
+			'namespace' => '',
+			'aliases'   => [],
+			'line'      => 0,
+			'end_line'  => 0,
+			'arguments' => [],
+			'doc'       => new DocBlock( [] ),
+			'hooks'     => [],
+			'uses'      => [],
 		];
 	}
 
@@ -52,7 +53,7 @@ final class Function_ implements Leaf {
 		$this->arguments = [];
 
 		foreach ( $value as $argument ) {
-			$this->arguments[ $argument[ 'name' ] ] = new Argument( $argument, $this );
+			$this->arguments[] = new Argument( $argument, $this );
 		}
 	}
 
@@ -74,7 +75,7 @@ final class Function_ implements Leaf {
 		$this->hooks = [];
 
 		foreach ( $value as $hook ) {
-			$this->hooks[ $hook[ 'name' ] ] = new Hook( $hook, $this );
+			$this->hooks[] = new Hook( $hook, $this );
 		}
 	}
 
@@ -87,7 +88,42 @@ final class Function_ implements Leaf {
 		$this->uses = [];
 
 		foreach ( $value as $use ) {
-			$this->uses[ $use[ 'name' ] ] = new Usage( $use, $this );
+			$this->uses[] = new Usage( $use, $this );
 		}
+	}
+
+	/**
+	 * Get the fully qualified function name of the function.
+	 *
+	 * @return string Fully qualified function name.
+	 */
+	public function get_fully_qualified_name() {
+		if ( empty( $this->namespace ) || 'global' === $this->namespace ) {
+			return $this->name;
+		}
+
+		return "{$this->namespace}\\{$this->name}";
+	}
+
+	/**
+	 * Get the name of the function relative to the root package namespace.
+	 *
+	 * @return string Relative name of the function.
+	 */
+	public function get_relative_name() {
+		return str_replace(
+			'AmpProject\\AmpWP\\',
+			'',
+			$this->get_fully_qualified_name()
+		);
+	}
+
+	/**
+	 * Get the filename to use for the function.
+	 *
+	 * @return string Filename to use.
+	 */
+	public function get_filename() {
+		return str_replace( '\\', '/', $this->get_relative_name() );
 	}
 }

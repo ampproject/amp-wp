@@ -12,7 +12,7 @@ namespace AmpProject\AmpWP\Documentation\Model;
  *
  * @property DocBlock    $file
  * @property string      $path
- * @property int         $root
+ * @property string      $root
  * @property Class_[]    $classes
  * @property Usage[]     $uses
  * @property Function_[] $functions
@@ -25,17 +25,17 @@ final class File implements Leaf {
 	/**
 	 * Get an associative array of known keys.
 	 *
-	 * @return string[]
+	 * @return array
 	 */
 	protected function get_known_keys() {
 		return [
-			'file',
-			'path',
-			'root',
-			'classes',
-			'uses',
-			'functions',
-			'includes',
+			'file'      => new DocBlock( [] ),
+			'path'      => '',
+			'root'      => '',
+			'classes'   => [],
+			'uses'      => [],
+			'functions' => [],
+			'includes'  => [],
 		];
 	}
 
@@ -48,7 +48,7 @@ final class File implements Leaf {
 		$this->classes = [];
 
 		foreach ( $value as $class ) {
-			$this->classes[ $class[ 'name' ] ] = new Class_( $class, $this );
+			$this->classes[] = new Class_( $class, $this );
 		}
 	}
 
@@ -61,7 +61,7 @@ final class File implements Leaf {
 		$this->uses = [];
 
 		foreach ( $value as $use ) {
-			$this->uses[ $use[ 'name' ] ] = new Usage( $use, $this );
+			$this->uses[] = new Usage( $use, $this );
 		}
 	}
 
@@ -74,7 +74,7 @@ final class File implements Leaf {
 		$this->functions = [];
 
 		foreach ( $value as $function ) {
-			$this->functions[ $function[ 'name' ] ] = new Function_( $function, $this );
+			$this->functions[] = new Function_( $function, $this );
 		}
 	}
 
@@ -87,7 +87,7 @@ final class File implements Leaf {
 		$this->includes = [];
 
 		foreach ( $value as $include ) {
-			$this->includes[ $include[ 'name' ] ] = new Include_( $include, $this );
+			$this->includes[] = new Include_( $include, $this );
 		}
 	}
 }

@@ -1,0 +1,14 @@
+## Method `AMP_Base_Sanitizer::init()`
+
+```php
+public function init( $sanitizers );
+```
+
+Run logic before any sanitizers are run.
+
+After the sanitizers are instantiated but before calling sanitize on each of them, this method is called with list of all the instantiated sanitizers.
+
+
+## Arguments
+
+* `$sanitizers` - TODO

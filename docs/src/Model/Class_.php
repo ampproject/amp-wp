@@ -30,21 +30,21 @@ final class Class_ implements Leaf {
 	/**
 	 * Get an associative array of known keys.
 	 *
-	 * @return string[]
+	 * @return array
 	 */
 	protected function get_known_keys() {
 		return [
-			'name',
-			'namespace',
-			'line',
-			'end_line',
-			'final',
-			'abstract',
-			'extends',
-			'implements',
-			'properties',
-			'methods',
-			'doc',
+			'name'       => '',
+			'namespace'  => '',
+			'line'       => 0,
+			'end_line'   => 0,
+			'final'      => false,
+			'abstract'   => false,
+			'extends'    => false,
+			'implements' => [],
+			'properties' => [],
+			'methods'    => [],
+			'doc'        => new DocBlock( [] ),
 		];
 	}
 
@@ -57,7 +57,7 @@ final class Class_ implements Leaf {
 		$this->properties = [];
 
 		foreach ( $value as $property ) {
-			$this->properties[ $property[ 'name' ] ] = new Property( $property, $this );
+			$this->properties[] = new Property( $property, $this );
 		}
 	}
 
@@ -79,7 +79,7 @@ final class Class_ implements Leaf {
 	 *
 	 * @return string Fully qualified class name.
 	 */
-	public function get_fqcn() {
+	public function get_fully_qualified_name() {
 		if ( empty( $this->namespace ) || 'global' === $this->namespace ) {
 			return $this->name;
 		}
@@ -88,17 +88,24 @@ final class Class_ implements Leaf {
 	}
 
 	/**
+	 * Get the name of the class relative to the root package namespace.
+	 *
+	 * @return string Relative class name.
+	 */
+	public function get_relative_name() {
+		return str_replace(
+			'AmpProject\\AmpWP\\',
+			'',
+			$this->get_fully_qualified_name()
+		);
+	}
+
+	/**
 	 * Get the filename to use for the class.
 	 *
 	 * @return string Filename to use.
 	 */
 	public function get_filename() {
-		$relative_class_name = str_replace(
-			'AmpProject\\AmpWP\\',
-			'',
-			$this->get_fqcn()
-		);
-
-		return str_replace( '\\', '/', $relative_class_name );
+		return str_replace( '\\', '/', $this->get_relative_name() );
 	}
 }

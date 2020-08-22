@@ -26,17 +26,17 @@ final class Property implements Leaf {
 	/**
 	 * Get an associative array of known keys.
 	 *
-	 * @return string[]
+	 * @return array
 	 */
 	protected function get_known_keys() {
 		return [
-			'name',
-			'line',
-			'end_line',
-			'default',
-			'static',
-			'visibility',
-			'doc',
+			'name'       => '',
+			'line'       => '',
+			'end_line'   => '',
+			'default'    => 0,
+			'static'     => false,
+			'visibility' => '',
+			'doc'        => new DocBlock( [] ),
 		];
 	}
 }
