@@ -13,6 +13,7 @@ use AmpProject\AmpWP\Documentation\Parser\Parser;
 use AmpProject\AmpWP\Documentation\Templating\Markdown;
 use AmpProject\AmpWP\Documentation\Templating\MustacheTemplateEngine;
 use AmpProject\AmpWP\Documentation\Templating\TemplateEngine;
+use Exception;
 use Generator;
 use WP_CLI;
 use WP_CLI\Utils;
@@ -68,14 +69,29 @@ final class GenerateCommand {
 				$result = file_put_contents( $output_file, $json );
 				break;
 			case 'markdown':
-				$doc_tree        = new Root( $data );
+				try {
+					$doc_tree = new Root( $data );
+				} catch ( Exception $exception ) {
+					WP_CLI::error(
+						'Failed to build documentation object tree: ' . $exception->getMessage()
+					);
+				}
+
 				$template_engine = new MustacheTemplateEngine();
 
-				foreach( $this->generate_markdown( $doc_tree, $template_engine ) as $markdown ) {
-					/** @var Markdown $markdown */
-					$filepath = "{$destination_folder}/{$markdown->get_filename()}";
-					$this->ensure_dir_exists( dirname( $filepath ) );
-					file_put_contents( $filepath, $markdown->get_contents() );
+				try {
+					foreach (
+						$this->generate_markdown( $doc_tree, $template_engine ) as $markdown
+					) {
+						/** @var Markdown $markdown */
+						$filepath = "{$destination_folder}/{$markdown->get_filename()}";
+						$this->ensure_dir_exists( dirname( $filepath ) );
+						$result = file_put_contents( $filepath, $markdown->get_contents() );
+					}
+				} catch ( Exception $exception ) {
+					WP_CLI::error(
+						'Failed to generate markdown files: ' . $exception->getMessage()
+					);
 				}
 				break;
 			case '':
