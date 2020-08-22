@@ -8,6 +8,3 @@ Get data that is returned in validate responses.
 
 The array returned is merged with the overall validate response data.
 
-
-## Arguments
-

@@ -1,6 +1,6 @@
 <?php
 /**
- * Trait Description
+ * Trait HasDocBlock
  *
  * @package AmpProject\AmpWP
  */
@@ -14,7 +14,7 @@ trait HasDocBlock {
 	 *
 	 * @var DocBlock
 	 */
-	protected $doc;
+	public $doc;
 
 	/**
 	 * Process a doc-block entry.

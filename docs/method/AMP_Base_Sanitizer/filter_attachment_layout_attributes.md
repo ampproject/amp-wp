@@ -6,9 +6,9 @@ public function filter_attachment_layout_attributes( $node, $new_attributes, $la
 
 Set attributes to node&#039;s parent element according to layout.
 
+### Arguments
 
-## Arguments
+* `\DOMElement $node` - Node.
+* `array $new_attributes` - Attributes array.
+* `string $layout` - Layout.
 
-* `$node` - TODO
-* `$new_attributes` - TODO
-* `$layout` - TODO

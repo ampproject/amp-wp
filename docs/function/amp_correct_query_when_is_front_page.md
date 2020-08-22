@@ -8,3 +8,7 @@ Fix up WP_Query for front page when amp query var is present.
 
 Normally the front page would not get served if a query var is present other than preview, page, paged, and cpage.
 
+### Arguments
+
+* `\WP_Query $query` - Query.
+

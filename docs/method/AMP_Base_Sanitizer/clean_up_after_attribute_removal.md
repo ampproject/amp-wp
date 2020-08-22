@@ -6,8 +6,8 @@ protected function clean_up_after_attribute_removal( $element, $attribute );
 
 Cleans up artifacts after the removal of an attribute node.
 
+### Arguments
 
-## Arguments
+* `\DOMElement $element` - The node for which the attribute was removed.
+* `\DOMAttr $attribute` - The attribute that was removed.
 
-* `$element` - TODO
-* `$attribute` - TODO

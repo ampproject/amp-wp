@@ -6,3 +6,7 @@
 
 Retrieve analytics data added in backend.
 
+### Arguments
+
+* `array $analytics` - Analytics entries.
+

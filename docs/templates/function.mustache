@@ -8,3 +8,11 @@
 {{ get_description }}
 
 {{/ has_description }}
+{{# has_arguments }}
+### Arguments
+
+{{# arguments }}
+* `{{{ guess_type }}} {{{ name }}}`{{# has_description}} - {{ get_description }}{{/has_description}}
+{{/ arguments }}
+
+{{/ has_arguments }}

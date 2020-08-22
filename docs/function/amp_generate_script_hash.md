@@ -8,3 +8,7 @@ Generate hash for inline amp-script.
 
 The sha384 hash used by amp-script is represented not as hexadecimal but as base64url, which is defined in RFC 4648 under section 5, &quot;Base 64 Encoding with URL and Filename Safe Alphabet&quot;. It is sometimes referred to as &quot;web safe&quot;.
 
+### Arguments
+
+* `string $script` - Script.
+

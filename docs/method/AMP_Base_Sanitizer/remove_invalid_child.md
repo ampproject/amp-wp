@@ -8,8 +8,8 @@ Removes an invalid child of a node.
 
 Also, calls the mutation callback for it. This tracks all the nodes that were removed.
 
+### Arguments
 
-## Arguments
+* `\DOMNode|\DOMElement $node` - The node to remove.
+* `array $validation_error` - Validation error details.
 
-* `$node` - TODO
-* `$validation_error` - TODO

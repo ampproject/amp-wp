@@ -6,7 +6,7 @@ protected function reassemble_style_string( $styles );
 
 Reassemble a style string that can be used in a &#039;style&#039; attribute.
 
+### Arguments
 
-## Arguments
+* `array $styles` - Associative array of styles to reassemble into a string.
 
-* `$styles` - TODO

@@ -6,7 +6,7 @@ protected function has_dev_mode_exemption( \DOMNode $node );
 
 Check whether a node is exempt from validation during dev mode.
 
+### Arguments
 
-## Arguments
+* `\DOMNode $node` - Node to check.
 
-* `$node` - TODO

@@ -8,7 +8,7 @@ Run logic before any sanitizers are run.
 
 After the sanitizers are instantiated but before calling sanitize on each of them, this method is called with list of all the instantiated sanitizers.
 
+### Arguments
 
-## Arguments
+* `\AMP_Base_Sanitizer[] $sanitizers` - Sanitizers.
 
-* `$sanitizers` - TODO

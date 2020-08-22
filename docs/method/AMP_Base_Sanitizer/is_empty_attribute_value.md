@@ -6,7 +6,7 @@ public function is_empty_attribute_value( $value );
 
 Determine if an attribute value is empty.
 
+### Arguments
 
-## Arguments
+* `string|null $value` - Attribute value.
 
-* `$value` - TODO

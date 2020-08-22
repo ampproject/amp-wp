@@ -24,6 +24,7 @@ final class Function_ implements Leaf {
 
 	use LeafConstruction;
 	use HasDocBlock;
+	use HasArguments;
 
 	/**
 	 * Get an associative array of known keys.
@@ -42,19 +43,6 @@ final class Function_ implements Leaf {
 			'hooks'     => [],
 			'uses'      => [],
 		];
-	}
-
-	/**
-	 * Process the arguments entry.
-	 *
-	 * @param array $value Array of argument entries.
-	 */
-	private function process_arguments( $value ) {
-		$this->arguments = [];
-
-		foreach ( $value as $argument ) {
-			$this->arguments[] = new Argument( $argument, $this );
-		}
 	}
 
 	/**

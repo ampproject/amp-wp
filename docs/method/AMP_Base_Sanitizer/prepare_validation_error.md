@@ -6,8 +6,8 @@ public function prepare_validation_error( array $error = array(), array $data = 
 
 Prepare validation error.
 
+### Arguments
 
-## Arguments
+* `array $error` - {     Error.     @type string $code Error code. }
+* `array $data` - {     Data.     @type DOMElement|DOMNode $node The removed node. }
 
-* `$error` - TODO
-* `$data` - TODO

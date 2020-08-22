@@ -6,8 +6,8 @@ public function should_sanitize_validation_error( $validation_error, $data = arr
 
 Check whether or not sanitization should occur in response to validation error.
 
+### Arguments
 
-## Arguments
+* `array $validation_error` - Validation error.
+* `array $data` - Data including the node.
 
-* `$validation_error` - TODO
-* `$data` - TODO

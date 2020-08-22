@@ -6,6 +6,3 @@ public function get_styles();
 
 Return array of values that would be valid as an HTML `style` attribute.
 
-
-## Arguments
-

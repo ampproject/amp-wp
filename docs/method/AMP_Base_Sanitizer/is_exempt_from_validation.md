@@ -6,7 +6,7 @@ protected function is_exempt_from_validation( \DOMNode $node );
 
 Check whether a certain node should be exempt from validation.
 
+### Arguments
 
-## Arguments
+* `\DOMNode $node` - Node to check.
 
-* `$node` - TODO

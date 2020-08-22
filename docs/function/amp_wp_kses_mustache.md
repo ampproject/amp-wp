@@ -6,3 +6,7 @@
 
 Filters content and keeps only allowable HTML elements by amp-mustache.
 
+### Arguments
+
+* `string $markup` - Markup to sanitize.
+

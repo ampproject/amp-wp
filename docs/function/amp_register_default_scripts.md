@@ -6,3 +6,7 @@
 
 Register default scripts for AMP components.
 
+### Arguments
+
+* `\WP_Scripts $wp_scripts` - Scripts.
+

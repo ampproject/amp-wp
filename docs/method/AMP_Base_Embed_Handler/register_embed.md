@@ -6,6 +6,3 @@ abstract public function register_embed();
 
 Registers embed.
 
-
-## Arguments
-

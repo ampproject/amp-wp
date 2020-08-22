@@ -6,3 +6,8 @@
 
 Add AMP script attributes to enqueued scripts.
 
+### Arguments
+
+* `string $tag` - The script tag.
+* `string $handle` - The script handle.
+

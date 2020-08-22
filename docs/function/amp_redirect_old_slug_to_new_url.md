@@ -8,3 +8,7 @@ Redirects the old AMP URL to the new AMP URL.
 
 If post slug is updated the amp page with old post slug will be redirected to the updated url.
 
+### Arguments
+
+* `string $link` - New URL of the post.
+

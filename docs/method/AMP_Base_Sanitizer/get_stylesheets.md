@@ -6,6 +6,3 @@ public function get_stylesheets();
 
 Get stylesheets.
 
-
-## Arguments
-

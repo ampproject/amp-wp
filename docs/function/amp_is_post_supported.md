@@ -6,3 +6,7 @@
 
 Determine whether a given post supports AMP.
 
+### Arguments
+
+* `\WP_Post $post` - Post.
+

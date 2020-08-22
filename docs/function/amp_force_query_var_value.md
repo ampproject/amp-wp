@@ -8,3 +8,7 @@ Make sure the `amp` query var has an explicit value.
 
 This avoids issues when filtering the deprecated `query_string` hook.
 
+### Arguments
+
+* `array $query_vars` - Query vars.
+

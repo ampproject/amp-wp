@@ -6,6 +6,3 @@ abstract public function unregister_embed();
 
 Unregisters embed.
 
-
-## Arguments
-

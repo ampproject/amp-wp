@@ -6,9 +6,9 @@ protected function match_element_attributes( $html, $tag_name, $attribute_names 
 
 Get regex pattern for matching HTML attributes from a given tag name.
 
+### Arguments
 
-## Arguments
+* `string $html` - HTML source haystack.
+* `string $tag_name` - Tag name.
+* `string[] $attribute_names` - Attribute names.
 
-* `$html` - TODO
-* `$tag_name` - TODO
-* `$attribute_names` - TODO

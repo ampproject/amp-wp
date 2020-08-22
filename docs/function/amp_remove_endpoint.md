@@ -6,3 +6,7 @@
 
 Remove the AMP endpoint (and query var) from a given URL.
 
+### Arguments
+
+* `string $url` - URL.
+

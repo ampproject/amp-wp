@@ -6,7 +6,7 @@ protected function parse_style_string( $style_string );
 
 Parse a style string into an associative array of style attributes.
 
+### Arguments
 
-## Arguments
+* `string $style_string` - Style string to parse.
 
-* `$style_string` - TODO

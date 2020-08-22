@@ -6,7 +6,7 @@ public function __construct( $args = array() );
 
 Constructor.
 
+### Arguments
 
-## Arguments
+* `array $args` - Height and width for embed.
 
-* `$args` - TODO

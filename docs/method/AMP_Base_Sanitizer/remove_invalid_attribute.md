@@ -8,10 +8,10 @@ Removes an invalid attribute of a node.
 
 Also, calls the mutation callback for it. This tracks all the attributes that were removed.
 
+### Arguments
 
-## Arguments
+* `\DOMElement $element` - The node for which to remove the attribute.
+* `\DOMAttr|string $attribute` - The attribute to remove from the element.
+* `array $validation_error` - Validation error details.
+* `array $attr_spec` - Attribute spec.
 
-* `$element` - TODO
-* `$attribute` - TODO
-* `$validation_error` - TODO
-* `$attr_spec` - TODO

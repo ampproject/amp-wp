@@ -6,3 +6,7 @@
 
 Register default styles.
 
+### Arguments
+
+* `\WP_Styles $styles` - Styles.
+
