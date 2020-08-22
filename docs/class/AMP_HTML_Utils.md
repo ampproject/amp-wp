@@ -5,37 +5,37 @@ Class with static HTML utility methods.
 ### Methods
 * `build_tag`
 
-<details>
+	<details>
 
-```php
-static public build_tag( $tag_name, $attributes = array(), $content = '' )
-```
+	```php
+	static public build_tag( $tag_name, $attributes = array(), $content = '' )
+	```
 
-Generates HTML markup for a given tag, attributes and content.
+	Generates HTML markup for a given tag, attributes and content.
 
 
-</details>
+	</details>
 * `build_attributes_string`
 
-<details>
+	<details>
 
-```php
-static public build_attributes_string( $attributes )
-```
+	```php
+	static public build_attributes_string( $attributes )
+	```
 
-Generates a HTML attributes string from given attributes.
+	Generates a HTML attributes string from given attributes.
 
 
-</details>
+	</details>
 * `is_valid_json`
 
-<details>
+	<details>
 
-```php
-static public is_valid_json( $data )
-```
+	```php
+	static public is_valid_json( $data )
+	```
 
-Checks whether the given string is valid JSON.
+	Checks whether the given string is valid JSON.
 
 
-</details>
+	</details>

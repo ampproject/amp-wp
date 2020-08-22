@@ -5,101 +5,101 @@ Class with static methods to extract image dimensions.
 ### Methods
 * `extract`
 
-<details>
+	<details>
 
-```php
-static public extract( $urls )
-```
+	```php
+	static public extract( $urls )
+	```
 
-Extracts dimensions from image URLs.
+	Extracts dimensions from image URLs.
 
 
-</details>
+	</details>
 * `normalize_url`
 
-<details>
+	<details>
 
-```php
-static public normalize_url( $url )
-```
+	```php
+	static public normalize_url( $url )
+	```
 
-Normalizes the given URL.
+	Normalizes the given URL.
 
 This method ensures the URL has a scheme and, if relative, is prepended the WordPress site URL.
 
 
-</details>
+	</details>
 * `register_callbacks`
 
-<details>
+	<details>
 
-```php
-static private register_callbacks()
-```
+	```php
+	static private register_callbacks()
+	```
 
-Registers the necessary callbacks.
+	Registers the necessary callbacks.
 
 
-</details>
+	</details>
 * `extract_by_downloading_images`
 
-<details>
+	<details>
 
-```php
-static public extract_by_downloading_images( $dimensions, $mode = false )
-```
+	```php
+	static public extract_by_downloading_images( $dimensions, $mode = false )
+	```
 
-Extract dimensions from downloaded images (or transient/cached dimensions from downloaded images)
+	Extract dimensions from downloaded images (or transient/cached dimensions from downloaded images)
 
 
-</details>
+	</details>
 * `determine_which_images_to_fetch`
 
-<details>
+	<details>
 
-```php
-static private determine_which_images_to_fetch( $dimensions, $urls_to_fetch )
-```
+	```php
+	static private determine_which_images_to_fetch( $dimensions, $urls_to_fetch )
+	```
 
-Determine which images to fetch by checking for dimensions in transient/cache.
+	Determine which images to fetch by checking for dimensions in transient/cache.
 
 Creates a short lived transient that acts as a semaphore so that another visitor doesn&#039;t trigger a remote fetch for the same image at the same time.
 
 
-</details>
+	</details>
 * `fetch_images`
 
-<details>
+	<details>
 
-```php
-static private fetch_images( $urls_to_fetch, $images )
-```
+	```php
+	static private fetch_images( $urls_to_fetch, $images )
+	```
 
-Fetch dimensions of remote images
+	Fetch dimensions of remote images
 
 
-</details>
+	</details>
 * `process_fetched_images`
 
-<details>
+	<details>
 
-```php
-static private process_fetched_images( $urls_to_fetch, $images, $dimensions, $transient_expiration )
-```
+	```php
+	static private process_fetched_images( $urls_to_fetch, $images, $dimensions, $transient_expiration )
+	```
 
-Determine success or failure of remote fetch, integrate fetched dimensions into url to dimension mapping, cache fetched dimensions via transient and release/delete semaphore transient
+	Determine success or failure of remote fetch, integrate fetched dimensions into url to dimension mapping, cache fetched dimensions via transient and release/delete semaphore transient
 
 
-</details>
+	</details>
 * `get_default_user_agent`
 
-<details>
+	<details>
 
-```php
-static public get_default_user_agent()
-```
+	```php
+	static public get_default_user_agent()
+	```
 
-Get default user agent
+	Get default user agent
 
 
-</details>
+	</details>

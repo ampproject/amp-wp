@@ -5,49 +5,49 @@ Class AMP_Pinterest_Embed_Handler
 ### Methods
 * `register_embed`
 
-<details>
+	<details>
 
-```php
-public register_embed()
-```
+	```php
+	public register_embed()
+	```
 
-Registers embed.
+	Registers embed.
 
 
-</details>
+	</details>
 * `unregister_embed`
 
-<details>
+	<details>
 
-```php
-public unregister_embed()
-```
+	```php
+	public unregister_embed()
+	```
 
-Unregisters embed.
+	Unregisters embed.
 
 
-</details>
+	</details>
 * `oembed`
 
-<details>
+	<details>
 
-```php
-public oembed( $matches, $attr, $url )
-```
+	```php
+	public oembed( $matches, $attr, $url )
+	```
 
-WordPress OEmbed rendering callback.
+	WordPress OEmbed rendering callback.
 
 
-</details>
+	</details>
 * `render`
 
-<details>
+	<details>
 
-```php
-public render( $args )
-```
+	```php
+	public render( $args )
+	```
 
-Gets the rendered embed markup.
+	Gets the rendered embed markup.
 
 
-</details>
+	</details>

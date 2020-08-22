@@ -7,97 +7,97 @@ Much of this class is borrowed from Jetpack embeds
 ### Methods
 * `register_embed`
 
-<details>
+	<details>
 
-```php
-public register_embed()
-```
+	```php
+	public register_embed()
+	```
 
-Registers embed.
+	Registers embed.
 
 
-</details>
+	</details>
 * `unregister_embed`
 
-<details>
+	<details>
 
-```php
-public unregister_embed()
-```
+	```php
+	public unregister_embed()
+	```
 
-Unregisters embed.
+	Unregisters embed.
 
 
-</details>
+	</details>
 * `oembed_timeline`
 
-<details>
+	<details>
 
-```php
-public oembed_timeline( $matches )
-```
+	```php
+	public oembed_timeline( $matches )
+	```
 
-Render oEmbed for a timeline.
+	Render oEmbed for a timeline.
 
 
-</details>
+	</details>
 * `sanitize_raw_embeds`
 
-<details>
+	<details>
 
-```php
-public sanitize_raw_embeds( Document $dom )
-```
+	```php
+	public sanitize_raw_embeds( Document $dom )
+	```
 
-Sanitized &lt;blockquote class=&quot;twitter-tweet&quot;&gt; tags to &lt;amp-twitter&gt;.
+	Sanitized &lt;blockquote class=&quot;twitter-tweet&quot;&gt; tags to &lt;amp-twitter&gt;.
 
 
-</details>
+	</details>
 * `is_tweet_raw_embed`
 
-<details>
+	<details>
 
-```php
-private is_tweet_raw_embed( $node )
-```
+	```php
+	private is_tweet_raw_embed( $node )
+	```
 
-Checks whether it&#039;s a twitter blockquote or not.
+	Checks whether it&#039;s a twitter blockquote or not.
 
 
-</details>
+	</details>
 * `create_amp_twitter_and_replace_node`
 
-<details>
+	<details>
 
-```php
-private create_amp_twitter_and_replace_node( Document $dom, \DOMElement $node )
-```
+	```php
+	private create_amp_twitter_and_replace_node( Document $dom, \DOMElement $node )
+	```
 
-Make final modifications to DOMNode
+	Make final modifications to DOMNode
 
 
-</details>
+	</details>
 * `get_tweet_id`
 
-<details>
+	<details>
 
-```php
-private get_tweet_id( $node )
-```
+	```php
+	private get_tweet_id( $node )
+	```
 
-Extracts Tweet id.
+	Extracts Tweet id.
 
 
-</details>
+	</details>
 * `sanitize_embed_script`
 
-<details>
+	<details>
 
-```php
-private sanitize_embed_script( $node )
-```
+	```php
+	private sanitize_embed_script( $node )
+	```
 
-Removes Twitter&#039;s embed &lt;script&gt; tag.
+	Removes Twitter&#039;s embed &lt;script&gt; tag.
 
 
-</details>
+	</details>

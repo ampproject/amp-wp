@@ -5,37 +5,37 @@ Class AMP_Crowdsignal_Embed_Handler
 ### Methods
 * `register_embed`
 
-<details>
+	<details>
 
-```php
-public register_embed()
-```
+	```php
+	public register_embed()
+	```
 
-Register embed.
+	Register embed.
 
 
-</details>
+	</details>
 * `unregister_embed`
 
-<details>
+	<details>
 
-```php
-public unregister_embed()
-```
+	```php
+	public unregister_embed()
+	```
 
-Unregister embed.
+	Unregister embed.
 
 
-</details>
+	</details>
 * `filter_embed_oembed_html`
 
-<details>
+	<details>
 
-```php
-public filter_embed_oembed_html( $cache, $url, $attr )
-```
+	```php
+	public filter_embed_oembed_html( $cache, $url, $attr )
+	```
 
-Filter oEmbed HTML for Crowdsignal for AMP output.
+	Filter oEmbed HTML for Crowdsignal for AMP output.
 
 
-</details>
+	</details>

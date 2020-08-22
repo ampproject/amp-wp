@@ -5,221 +5,221 @@ This abstract base plugin provides all the boilerplate code for working with the
 ### Methods
 * `__construct`
 
-<details>
+	<details>
 
-```php
-public __construct( $enable_filters = null, \AmpProject\AmpWP\Infrastructure\Injector $injector = null, \AmpProject\AmpWP\Infrastructure\ServiceContainer $service_container = null )
-```
+	```php
+	public __construct( $enable_filters = null, \AmpProject\AmpWP\Infrastructure\Injector $injector = null, \AmpProject\AmpWP\Infrastructure\ServiceContainer $service_container = null )
+	```
 
-Instantiate a Theme object.
+	Instantiate a Theme object.
 
 
-</details>
+	</details>
 * `activate`
 
-<details>
+	<details>
 
-```php
-public activate( $network_wide )
-```
+	```php
+	public activate( $network_wide )
+	```
 
-Activate the plugin.
+	Activate the plugin.
 
 
-</details>
+	</details>
 * `deactivate`
 
-<details>
+	<details>
 
-```php
-public deactivate( $network_wide )
-```
+	```php
+	public deactivate( $network_wide )
+	```
 
-Deactivate the plugin.
+	Deactivate the plugin.
 
 
-</details>
+	</details>
 * `register`
 
-<details>
+	<details>
 
-```php
-public register()
-```
+	```php
+	public register()
+	```
 
-Register the plugin with the WordPress system.
+	Register the plugin with the WordPress system.
 
 
-</details>
+	</details>
 * `register_services`
 
-<details>
+	<details>
 
-```php
-public register_services()
-```
+	```php
+	public register_services()
+	```
 
-Register the individual services of this plugin.
+	Register the individual services of this plugin.
 
 
-</details>
+	</details>
 * `validate_services`
 
-<details>
+	<details>
 
-```php
-protected validate_services( $services, $fallback )
-```
+	```php
+	protected validate_services( $services, $fallback )
+	```
 
-Validates the services array to make sure it is in a usable shape.
+	Validates the services array to make sure it is in a usable shape.
 
 As the array of services could be filtered, we need to ensure it is always in a state where it doesn&#039;t throw PHP warnings or errors.
 
 
-</details>
+	</details>
 * `get_identifier_from_fqcn`
 
-<details>
+	<details>
 
-```php
-protected get_identifier_from_fqcn( $fqcn )
-```
+	```php
+	protected get_identifier_from_fqcn( $fqcn )
+	```
 
-Generate a valid identifier for a provided FQCN.
+	Generate a valid identifier for a provided FQCN.
 
 
-</details>
+	</details>
 * `register_service`
 
-<details>
+	<details>
 
-```php
-protected register_service( $id, $class )
-```
+	```php
+	protected register_service( $id, $class )
+	```
 
-Register a single service.
+	Register a single service.
 
 
-</details>
+	</details>
 * `get_container`
 
-<details>
+	<details>
 
-```php
-public get_container()
-```
+	```php
+	public get_container()
+	```
 
-Get the service container that contains the services that make up the plugin.
+	Get the service container that contains the services that make up the plugin.
 
 
-</details>
+	</details>
 * `instantiate_service`
 
-<details>
+	<details>
 
-```php
-protected instantiate_service( $class )
-```
+	```php
+	protected instantiate_service( $class )
+	```
 
-Instantiate a single service.
+	Instantiate a single service.
 
 
-</details>
+	</details>
 * `configure_injector`
 
-<details>
+	<details>
 
-```php
-protected configure_injector( \AmpProject\AmpWP\Infrastructure\Injector $injector )
-```
+	```php
+	protected configure_injector( \AmpProject\AmpWP\Infrastructure\Injector $injector )
+	```
 
-Configure the provided injector.
+	Configure the provided injector.
 
 This method defines the mappings that the injector knows about, and the logic it requires to make more complex instantiations work.
  For more complex plugins, this should be extracted into a separate object or into configuration files.
 
 
-</details>
+	</details>
 * `get_service_classes`
 
-<details>
+	<details>
 
-```php
-protected get_service_classes()
-```
+	```php
+	protected get_service_classes()
+	```
 
-Get the list of services to register.
+	Get the list of services to register.
 
 
-</details>
+	</details>
 * `get_bindings`
 
-<details>
+	<details>
 
-```php
-protected get_bindings()
-```
+	```php
+	protected get_bindings()
+	```
 
-Get the bindings for the dependency injector.
+	Get the bindings for the dependency injector.
 
 The bindings let you map interfaces (or classes) to the classes that should be used to implement them.
 
 
-</details>
+	</details>
 * `get_arguments`
 
-<details>
+	<details>
 
-```php
-protected get_arguments()
-```
+	```php
+	protected get_arguments()
+	```
 
-Get the argument bindings for the dependency injector.
+	Get the argument bindings for the dependency injector.
 
 The argument bindings let you map specific argument values for specific classes.
 
 
-</details>
+	</details>
 * `get_shared_instances`
 
-<details>
+	<details>
 
-```php
-protected get_shared_instances()
-```
+	```php
+	protected get_shared_instances()
+	```
 
-Get the shared instances for the dependency injector.
+	Get the shared instances for the dependency injector.
 
 These classes will only be instantiated once by the injector and then reused on subsequent requests.
  This effectively turns them into singletons, without any of the drawbacks of the actual Singleton anti-pattern.
 
 
-</details>
+	</details>
 * `get_delegations`
 
-<details>
+	<details>
 
-```php
-protected get_delegations()
-```
+	```php
+	protected get_delegations()
+	```
 
-Get the delegations for the dependency injector.
+	Get the delegations for the dependency injector.
 
 These are basically factories to provide custom instantiation logic for classes.
 
 
-</details>
+	</details>
 * `maybe_resolve`
 
-<details>
+	<details>
 
-```php
-protected maybe_resolve( $value )
-```
+	```php
+	protected maybe_resolve( $value )
+	```
 
-Maybe resolve a value that is a callable instead of a scalar.
+	Maybe resolve a value that is a callable instead of a scalar.
 
 Values that are passed through this method can optionally be provided as callables instead of direct values and will be evaluated when needed.
 
 
-</details>
+	</details>

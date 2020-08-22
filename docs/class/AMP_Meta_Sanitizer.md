@@ -7,119 +7,119 @@ Sanitizes meta tags found in the header.
 ### Methods
 * `get_body_meta_tag_name_attribute_deny_pattern`
 
-<details>
+	<details>
 
-```php
-private get_body_meta_tag_name_attribute_deny_pattern()
-```
+	```php
+	private get_body_meta_tag_name_attribute_deny_pattern()
+	```
 
-Get tag spec for meta tags which are allowed in the body.
+	Get tag spec for meta tags which are allowed in the body.
 
 
-</details>
+	</details>
 * `sanitize`
 
-<details>
+	<details>
 
-```php
-public sanitize()
-```
+	```php
+	public sanitize()
+	```
 
-Sanitize.
+	Sanitize.
 
 
-</details>
+	</details>
 * `ensure_charset_is_present`
 
-<details>
+	<details>
 
-```php
-protected ensure_charset_is_present()
-```
+	```php
+	protected ensure_charset_is_present()
+	```
 
-Always ensure that we have an HTML 5 charset meta tag.
+	Always ensure that we have an HTML 5 charset meta tag.
 
 The charset is set to utf-8, which is what AMP requires.
 
 
-</details>
+	</details>
 * `ensure_viewport_is_present`
 
-<details>
+	<details>
 
-```php
-protected ensure_viewport_is_present()
-```
+	```php
+	protected ensure_viewport_is_present()
+	```
 
-Always ensure we have a viewport tag.
+	Always ensure we have a viewport tag.
 
 The viewport defaults to &#039;width=device-width&#039;, which is the bare minimum that AMP requires. If there are `@viewport` style rules, these will have been moved into the content attribute of their own meta[name=viewport] tags by the style sanitizer. When there are multiple such meta tags, this method extracts the viewport properties of each and then merges them into a single meta[name=viewport] tag. Any invalid properties will get removed by the tag-and-attribute sanitizer.
 
 
-</details>
+	</details>
 * `ensure_boilerplate_is_present`
 
-<details>
+	<details>
 
-```php
-protected ensure_boilerplate_is_present()
-```
+	```php
+	protected ensure_boilerplate_is_present()
+	```
 
-Always ensure we have a style[amp-boilerplate] and a noscript&gt;style[amp-boilerplate].
+	Always ensure we have a style[amp-boilerplate] and a noscript&gt;style[amp-boilerplate].
 
 The AMP boilerplate styles should appear at the end of the head: &quot;Finally, specify the AMP boilerplate code. By putting the boilerplate code last, it prevents custom styles from accidentally overriding the boilerplate css rules.&quot;
 
 
-</details>
+	</details>
 * `process_amp_script_meta_tags`
 
-<details>
+	<details>
 
-```php
-protected process_amp_script_meta_tags()
-```
+	```php
+	protected process_amp_script_meta_tags()
+	```
 
-Parse and concatenate &lt;amp-script&gt; source meta tags.
+	Parse and concatenate &lt;amp-script&gt; source meta tags.
 
 
-</details>
+	</details>
 * `create_charset_element`
 
-<details>
+	<details>
 
-```php
-protected create_charset_element()
-```
+	```php
+	protected create_charset_element()
+	```
 
-Create a new meta tag for the charset value.
+	Create a new meta tag for the charset value.
 
 
-</details>
+	</details>
 * `create_viewport_element`
 
-<details>
+	<details>
 
-```php
-protected create_viewport_element( $viewport )
-```
+	```php
+	protected create_viewport_element( $viewport )
+	```
 
-Create a new meta tag for the viewport setting.
+	Create a new meta tag for the viewport setting.
 
 
-</details>
+	</details>
 * `re_add_meta_tags_in_optimized_order`
 
-<details>
+	<details>
 
-```php
-protected re_add_meta_tags_in_optimized_order()
-```
+	```php
+	protected re_add_meta_tags_in_optimized_order()
+	```
 
-Re-add the meta tags to the &lt;head&gt; node in the optimized order.
+	Re-add the meta tags to the &lt;head&gt; node in the optimized order.
 
 The order is defined by the array entries in $this-&gt;meta_tags.
  The optimal loading order for AMP pages is documented at: https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/optimize_amp/#optimize-the-amp-runtime-loading
  &quot;1. The first tag should be the meta charset tag, followed by any remaining meta tags.&quot;
 
 
-</details>
+	</details>

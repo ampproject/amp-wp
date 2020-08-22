@@ -5,73 +5,73 @@ Exception thrown when the injector couldn&#039;t instantiate a given class or in
 ### Methods
 * `for_circular_reference`
 
-<details>
+	<details>
 
-```php
-static public for_circular_reference( $interface_or_class )
-```
+	```php
+	static public for_circular_reference( $interface_or_class )
+	```
 
-Create a new instance of the exception for an interface or class that created a circular reference.
+	Create a new instance of the exception for an interface or class that created a circular reference.
 
 
-</details>
+	</details>
 * `for_unresolved_interface`
 
-<details>
+	<details>
 
-```php
-static public for_unresolved_interface( $interface )
-```
+	```php
+	static public for_unresolved_interface( $interface )
+	```
 
-Create a new instance of the exception for an interface that could not be resolved to an instantiable class.
+	Create a new instance of the exception for an interface that could not be resolved to an instantiable class.
 
 
-</details>
+	</details>
 * `for_unreflectable_class`
 
-<details>
+	<details>
 
-```php
-static public for_unreflectable_class( $interface_or_class )
-```
+	```php
+	static public for_unreflectable_class( $interface_or_class )
+	```
 
-Create a new instance of the exception for an interface or class that could not be reflected upon.
+	Create a new instance of the exception for an interface or class that could not be reflected upon.
 
 
-</details>
+	</details>
 * `for_unresolved_argument`
 
-<details>
+	<details>
 
-```php
-static public for_unresolved_argument( $argument_name, $class )
-```
+	```php
+	static public for_unresolved_argument( $argument_name, $class )
+	```
 
-Create a new instance of the exception for an argument that could not be resolved.
+	Create a new instance of the exception for an argument that could not be resolved.
 
 
-</details>
+	</details>
 * `for_uninstantiated_shared_instance`
 
-<details>
+	<details>
 
-```php
-static public for_uninstantiated_shared_instance( $class )
-```
+	```php
+	static public for_uninstantiated_shared_instance( $class )
+	```
 
-Create a new instance of the exception for a class that was meant to be reused but was not yet instantiated.
+	Create a new instance of the exception for a class that was meant to be reused but was not yet instantiated.
 
 
-</details>
+	</details>
 * `for_invalid_delegate`
 
-<details>
+	<details>
 
-```php
-static public for_invalid_delegate( $class )
-```
+	```php
+	static public for_invalid_delegate( $class )
+	```
 
-Create a new instance of the exception for a delegate that was requested for a class that doesn&#039;t have one.
+	Create a new instance of the exception for a delegate that was requested for a class that doesn&#039;t have one.
 
 
-</details>
+	</details>

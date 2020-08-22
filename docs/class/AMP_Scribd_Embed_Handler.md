@@ -5,49 +5,49 @@ Class AMP_Scribd_Embed_Handler
 ### Methods
 * `register_embed`
 
-<details>
+	<details>
 
-```php
-public register_embed()
-```
+	```php
+	public register_embed()
+	```
 
-Registers embed.
+	Registers embed.
 
 
-</details>
+	</details>
 * `unregister_embed`
 
-<details>
+	<details>
 
-```php
-public unregister_embed()
-```
+	```php
+	public unregister_embed()
+	```
 
-Unregisters embed.
+	Unregisters embed.
 
 
-</details>
+	</details>
 * `filter_embed_oembed_html`
 
-<details>
+	<details>
 
-```php
-public filter_embed_oembed_html( $cache, $url )
-```
+	```php
+	public filter_embed_oembed_html( $cache, $url )
+	```
 
-Filter oEmbed HTML for Scribd to be AMP compatible.
+	Filter oEmbed HTML for Scribd to be AMP compatible.
 
 
-</details>
+	</details>
 * `sanitize_iframe`
 
-<details>
+	<details>
 
-```php
-private sanitize_iframe( $html )
-```
+	```php
+	private sanitize_iframe( $html )
+	```
 
-Retrieves iframe element from HTML string and amends or appends the correct sandbox permissions.
+	Retrieves iframe element from HTML string and amends or appends the correct sandbox permissions.
 
 
-</details>
+	</details>

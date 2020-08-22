@@ -5,97 +5,97 @@ Class AMP_SoundCloud_Embed_Handler
 ### Methods
 * `register_embed`
 
-<details>
+	<details>
 
-```php
-public register_embed()
-```
+	```php
+	public register_embed()
+	```
 
-Register embed.
+	Register embed.
 
 
-</details>
+	</details>
 * `unregister_embed`
 
-<details>
+	<details>
 
-```php
-public unregister_embed()
-```
+	```php
+	public unregister_embed()
+	```
 
-Unregister embed.
+	Unregister embed.
 
 
-</details>
+	</details>
 * `oembed`
 
-<details>
+	<details>
 
-```php
-public oembed( $matches, $attr, $url )
-```
+	```php
+	public oembed( $matches, $attr, $url )
+	```
 
-Render oEmbed.
+	Render oEmbed.
 
 
-</details>
+	</details>
 * `filter_embed_oembed_html`
 
-<details>
+	<details>
 
-```php
-public filter_embed_oembed_html( $cache, $url )
-```
+	```php
+	public filter_embed_oembed_html( $cache, $url )
+	```
 
-Filter oEmbed HTML for SoundCloud to convert to AMP.
+	Filter oEmbed HTML for SoundCloud to convert to AMP.
 
 
-</details>
+	</details>
 * `parse_amp_component_from_iframe`
 
-<details>
+	<details>
 
-```php
-private parse_amp_component_from_iframe( $html, $url = null )
-```
+	```php
+	private parse_amp_component_from_iframe( $html, $url = null )
+	```
 
-Parse AMP component from iframe.
+	Parse AMP component from iframe.
 
 
-</details>
+	</details>
 * `render`
 
-<details>
+	<details>
 
-```php
-public render( $args, $url )
-```
+	```php
+	public render( $args, $url )
+	```
 
-Render embed.
+	Render embed.
 
 
-</details>
+	</details>
 * `render_embed_fallback`
 
-<details>
+	<details>
 
-```php
-private render_embed_fallback( $url )
-```
+	```php
+	private render_embed_fallback( $url )
+	```
 
-Render embed fallback.
+	Render embed fallback.
 
 
-</details>
+	</details>
 * `extract_params_from_iframe_src`
 
-<details>
+	<details>
 
-```php
-private extract_params_from_iframe_src( $url )
-```
+	```php
+	private extract_params_from_iframe_src( $url )
+	```
 
-Get params from Soundcloud iframe src.
+	Get params from Soundcloud iframe src.
 
 
-</details>
+	</details>

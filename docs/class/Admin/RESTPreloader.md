@@ -5,25 +5,25 @@ Preloads REST responses for client-side applications to prevent having to call f
 ### Methods
 * `add_preloaded_path`
 
-<details>
+	<details>
 
-```php
-public add_preloaded_path( $path )
-```
+	```php
+	public add_preloaded_path( $path )
+	```
 
-Adds a REST path to be preloaded.
+	Adds a REST path to be preloaded.
 
 
-</details>
+	</details>
 * `preload_data`
 
-<details>
+	<details>
 
-```php
-public preload_data()
-```
+	```php
+	public preload_data()
+	```
 
-Preloads data using apiFetch preloading middleware.
+	Preloads data using apiFetch preloading middleware.
 
 
-</details>
+	</details>

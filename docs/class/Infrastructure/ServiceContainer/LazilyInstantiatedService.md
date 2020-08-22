@@ -5,25 +5,25 @@ A service that only gets properly instantiated when it is actually being retriev
 ### Methods
 * `__construct`
 
-<details>
+	<details>
 
-```php
-public __construct( callable $instantiation )
-```
+	```php
+	public __construct( callable $instantiation )
+	```
 
-Instantiate a LazilyInstantiatedService object.
+	Instantiate a LazilyInstantiatedService object.
 
 
-</details>
+	</details>
 * `instantiate`
 
-<details>
+	<details>
 
-```php
-public instantiate()
-```
+	```php
+	public instantiate()
+	```
 
-Do the actual service instantiation and return the real service.
+	Do the actual service instantiation and return the real service.
 
 
-</details>
+	</details>

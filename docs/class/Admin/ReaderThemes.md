@@ -5,109 +5,109 @@ Handles reader themes.
 ### Methods
 * `get_themes`
 
-<details>
+	<details>
 
-```php
-public get_themes()
-```
+	```php
+	public get_themes()
+	```
 
-Retrieves all AMP plugin options specified in the endpoint schema.
+	Retrieves all AMP plugin options specified in the endpoint schema.
 
 
-</details>
+	</details>
 * `get_reader_theme_by_slug`
 
-<details>
+	<details>
 
-```php
-public get_reader_theme_by_slug( $slug )
-```
+	```php
+	public get_reader_theme_by_slug( $slug )
+	```
 
-Gets a reader theme by slug.
+	Gets a reader theme by slug.
 
 
-</details>
+	</details>
 * `get_default_reader_themes`
 
-<details>
+	<details>
 
-```php
-public get_default_reader_themes()
-```
+	```php
+	public get_default_reader_themes()
+	```
 
-Retrieves theme data.
+	Retrieves theme data.
 
 
-</details>
+	</details>
 * `normalize_theme_data`
 
-<details>
+	<details>
 
-```php
-private normalize_theme_data( $theme )
-```
+	```php
+	private normalize_theme_data( $theme )
+	```
 
-Normalize the specified theme data.
+	Normalize the specified theme data.
 
 
-</details>
+	</details>
 * `can_install_theme`
 
-<details>
+	<details>
 
-```php
-public can_install_theme( $theme )
-```
+	```php
+	public can_install_theme( $theme )
+	```
 
-Returns whether a theme can be installed on the system.
+	Returns whether a theme can be installed on the system.
 
 
-</details>
+	</details>
 * `get_theme_availability`
 
-<details>
+	<details>
 
-```php
-public get_theme_availability( $theme )
-```
+	```php
+	public get_theme_availability( $theme )
+	```
 
-Returns reader theme availability status.
+	Returns reader theme availability status.
 
 
-</details>
+	</details>
 * `theme_data_exists`
 
-<details>
+	<details>
 
-```php
-public theme_data_exists( $theme_slug )
-```
+	```php
+	public theme_data_exists( $theme_slug )
+	```
 
-Determine if the data for the specified Reader theme exists.
+	Determine if the data for the specified Reader theme exists.
 
 
-</details>
+	</details>
 * `using_fallback_theme`
 
-<details>
+	<details>
 
-```php
-public using_fallback_theme()
-```
+	```php
+	public using_fallback_theme()
+	```
 
-Determine if the AMP legacy Reader theme is being used as a fallback.
+	Determine if the AMP legacy Reader theme is being used as a fallback.
 
 
-</details>
+	</details>
 * `get_legacy_theme`
 
-<details>
+	<details>
 
-```php
-private get_legacy_theme()
-```
+	```php
+	private get_legacy_theme()
+	```
 
-Provides details for the legacy theme included with the plugin.
+	Provides details for the legacy theme included with the plugin.
 
 
-</details>
+	</details>

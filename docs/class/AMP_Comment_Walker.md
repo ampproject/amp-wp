@@ -7,37 +7,37 @@ Walker to wrap comments in mustache tags for amp-template.
 ### Methods
 * `start_el`
 
-<details>
+	<details>
 
-```php
-public start_el( $output, $comment, $depth, $args = array(), $id )
-```
+	```php
+	public start_el( $output, $comment, $depth, $args = array(), $id )
+	```
 
-Starts the element output.
+	Starts the element output.
 
 
-</details>
+	</details>
 * `paged_walk`
 
-<details>
+	<details>
 
-```php
-public paged_walk( $elements, $max_depth, $page_num, $per_page, $args )
-```
+	```php
+	public paged_walk( $elements, $max_depth, $page_num, $per_page, $args )
+	```
 
-Output amp-list template code and place holder for comments.
+	Output amp-list template code and place holder for comments.
 
 
-</details>
+	</details>
 * `build_thread_latest_date`
 
-<details>
+	<details>
 
-```php
-protected build_thread_latest_date( $elements, $time, $is_child = false )
-```
+	```php
+	protected build_thread_latest_date( $elements, $time, $is_child = false )
+	```
 
-Find the timestamp of the latest child comment of a thread to set the updated time.
+	Find the timestamp of the latest child comment of a thread to set the updated time.
 
 
-</details>
+	</details>

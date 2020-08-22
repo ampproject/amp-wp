@@ -7,37 +7,37 @@ Strips and corrects attributes in forms.
 ### Methods
 * `sanitize`
 
-<details>
+	<details>
 
-```php
-public sanitize()
-```
+	```php
+	public sanitize()
+	```
 
-Pre-process the comment form and comment list for AMP.
+	Pre-process the comment form and comment list for AMP.
 
 
-</details>
+	</details>
 * `process_comment_form`
 
-<details>
+	<details>
 
-```php
-protected process_comment_form( $comment_form )
-```
+	```php
+	protected process_comment_form( $comment_form )
+	```
 
-Comment form.
+	Comment form.
 
 
-</details>
+	</details>
 * `add_amp_live_list_comment_attributes`
 
-<details>
+	<details>
 
-```php
-protected add_amp_live_list_comment_attributes( $comment_element )
-```
+	```php
+	protected add_amp_live_list_comment_attributes( $comment_element )
+	```
 
-Add attributes to comment elements when comments are being presented in amp-live-list, when comments_live_list theme support flag is present.
+	Add attributes to comment elements when comments are being presented in amp-live-list, when comments_live_list theme support flag is present.
 
 
-</details>
+	</details>

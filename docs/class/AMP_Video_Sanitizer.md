@@ -7,51 +7,51 @@ Converts &lt;video&gt; tags to &lt;amp-video&gt;
 ### Methods
 * `get_selector_conversion_mapping`
 
-<details>
+	<details>
 
-```php
-public get_selector_conversion_mapping()
-```
+	```php
+	public get_selector_conversion_mapping()
+	```
 
-Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
+	Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
 
 
-</details>
+	</details>
 * `sanitize`
 
-<details>
+	<details>
 
-```php
-public sanitize()
-```
+	```php
+	public sanitize()
+	```
 
-Sanitize the &lt;video&gt; elements from the HTML contained in this instance&#039;s Dom\Document.
+	Sanitize the &lt;video&gt; elements from the HTML contained in this instance&#039;s Dom\Document.
 
 
-</details>
+	</details>
 * `filter_video_dimensions`
 
-<details>
+	<details>
 
-```php
-protected filter_video_dimensions( $new_attributes, $src )
-```
+	```php
+	protected filter_video_dimensions( $new_attributes, $src )
+	```
 
-Filter video dimensions, try to get width and height from original file if missing.
+	Filter video dimensions, try to get width and height from original file if missing.
 
 The video block will automatically have the width/height supplied for attachments.
 
 
-</details>
+	</details>
 * `filter_attributes`
 
-<details>
+	<details>
 
-```php
-private filter_attributes( $attributes )
-```
+	```php
+	private filter_attributes( $attributes )
+	```
 
-&quot;Filter&quot; HTML attributes for &lt;amp-audio&gt; elements.
+	&quot;Filter&quot; HTML attributes for &lt;amp-audio&gt; elements.
 
 
-</details>
+	</details>

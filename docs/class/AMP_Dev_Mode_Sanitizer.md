@@ -5,13 +5,13 @@ Class AMP_Dev_Mode_Sanitizer
 ### Methods
 * `sanitize`
 
-<details>
+	<details>
 
-```php
-public sanitize()
-```
+	```php
+	public sanitize()
+	```
 
-Sanitize document for dev mode.
+	Sanitize document for dev mode.
 
 
-</details>
+	</details>

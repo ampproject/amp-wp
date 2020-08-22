@@ -5,25 +5,25 @@ Class AMP_Layout_Sanitizer
 ### Methods
 * `sanitize`
 
-<details>
+	<details>
 
-```php
-public sanitize()
-```
+	```php
+	public sanitize()
+	```
 
-Sanitize any element that has the `layout` or `data-amp-layout` attribute.
+	Sanitize any element that has the `layout` or `data-amp-layout` attribute.
 
 
-</details>
+	</details>
 * `set_layout_fill`
 
-<details>
+	<details>
 
-```php
-private set_layout_fill( \DOMElement $node )
-```
+	```php
+	private set_layout_fill( \DOMElement $node )
+	```
 
-Apply the `fill` layout.
+	Apply the `fill` layout.
 
 
-</details>
+	</details>

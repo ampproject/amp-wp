@@ -7,37 +7,37 @@ Converts Playbuzz embed to &lt;amp-playbuzz&gt;
 ### Methods
 * `get_selector_conversion_mapping`
 
-<details>
+	<details>
 
-```php
-public get_selector_conversion_mapping()
-```
+	```php
+	public get_selector_conversion_mapping()
+	```
 
-Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
+	Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
 
 
-</details>
+	</details>
 * `sanitize`
 
-<details>
+	<details>
 
-```php
-public sanitize()
-```
+	```php
+	public sanitize()
+	```
 
-Sanitize the Playbuzz elements from the HTML contained in this instance&#039;s Dom\Document.
+	Sanitize the Playbuzz elements from the HTML contained in this instance&#039;s Dom\Document.
 
 
-</details>
+	</details>
 * `filter_attributes`
 
-<details>
+	<details>
 
-```php
-private filter_attributes( $attributes )
-```
+	```php
+	private filter_attributes( $attributes )
+	```
 
-&quot;Filter&quot; HTML attributes for &lt;amp-audio&gt; elements.
+	&quot;Filter&quot; HTML attributes for &lt;amp-audio&gt; elements.
 
 
-</details>
+	</details>

@@ -5,157 +5,157 @@ Class AMP_Customizer_Design_Settings
 ### Methods
 * `is_amp_customizer_enabled`
 
-<details>
+	<details>
 
-```php
-static public is_amp_customizer_enabled()
-```
+	```php
+	static public is_amp_customizer_enabled()
+	```
 
-Returns whether the AMP design settings are enabled.
+	Returns whether the AMP design settings are enabled.
 
 
-</details>
+	</details>
 * `init`
 
-<details>
+	<details>
 
-```php
-static public init()
-```
+	```php
+	static public init()
+	```
 
-Init.
+	Init.
 
 
-</details>
+	</details>
 * `init_customizer`
 
-<details>
+	<details>
 
-```php
-static public init_customizer()
-```
+	```php
+	static public init_customizer()
+	```
 
-Init customizer.
+	Init customizer.
 
 
-</details>
+	</details>
 * `register_customizer_settings`
 
-<details>
+	<details>
 
-```php
-static public register_customizer_settings( $wp_customize )
-```
+	```php
+	static public register_customizer_settings( $wp_customize )
+	```
 
-Register default Customizer settings for AMP.
+	Register default Customizer settings for AMP.
 
 
-</details>
+	</details>
 * `register_customizer_ui`
 
-<details>
+	<details>
 
-```php
-static public register_customizer_ui( $wp_customize )
-```
+	```php
+	static public register_customizer_ui( $wp_customize )
+	```
 
-Register default Customizer sections and controls for AMP.
+	Register default Customizer sections and controls for AMP.
 
 
-</details>
+	</details>
 * `render_header_bar`
 
-<details>
+	<details>
 
-```php
-static public render_header_bar()
-```
+	```php
+	static public render_header_bar()
+	```
 
-Render header bar template.
+	Render header bar template.
 
 
-</details>
+	</details>
 * `render_footer`
 
-<details>
+	<details>
 
-```php
-static public render_footer()
-```
+	```php
+	static public render_footer()
+	```
 
-Render footer template.
+	Render footer template.
 
 
-</details>
+	</details>
 * `enqueue_customizer_preview_scripts`
 
-<details>
+	<details>
 
-```php
-static public enqueue_customizer_preview_scripts()
-```
+	```php
+	static public enqueue_customizer_preview_scripts()
+	```
 
-Enqueue scripts for default AMP Customizer preview.
+	Enqueue scripts for default AMP Customizer preview.
 
 
-</details>
+	</details>
 * `append_settings`
 
-<details>
+	<details>
 
-```php
-static public append_settings( $settings )
-```
+	```php
+	static public append_settings( $settings )
+	```
 
-Merge default Customizer settings on top of settings for merging into AMP post template.
+	Merge default Customizer settings on top of settings for merging into AMP post template.
 
 
-</details>
+	</details>
 * `get_color_scheme_names`
 
-<details>
+	<details>
 
-```php
-static protected get_color_scheme_names()
-```
+	```php
+	static protected get_color_scheme_names()
+	```
 
-Get color scheme names.
+	Get color scheme names.
 
 
-</details>
+	</details>
 * `get_color_schemes`
 
-<details>
+	<details>
 
-```php
-static protected get_color_schemes()
-```
+	```php
+	static protected get_color_schemes()
+	```
 
-Get color schemes.
+	Get color schemes.
 
 
-</details>
+	</details>
 * `get_colors_for_color_scheme`
 
-<details>
+	<details>
 
-```php
-static protected get_colors_for_color_scheme( $scheme )
-```
+	```php
+	static protected get_colors_for_color_scheme( $scheme )
+	```
 
-Get colors for color scheme.
+	Get colors for color scheme.
 
 
-</details>
+	</details>
 * `sanitize_color_scheme`
 
-<details>
+	<details>
 
-```php
-static public sanitize_color_scheme( $value )
-```
+	```php
+	static public sanitize_color_scheme( $value )
+	```
 
-Sanitize color scheme.
+	Sanitize color scheme.
 
 
-</details>
+	</details>

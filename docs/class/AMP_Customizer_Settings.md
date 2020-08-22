@@ -5,25 +5,25 @@ Class AMP_Customizer_Settings
 ### Methods
 * `get_stored_options`
 
-<details>
+	<details>
 
-```php
-static private get_stored_options()
-```
+	```php
+	static private get_stored_options()
+	```
 
-Gets the AMP Customizer settings directly from the option.
+	Gets the AMP Customizer settings directly from the option.
 
 
-</details>
+	</details>
 * `get_settings`
 
-<details>
+	<details>
 
-```php
-static public get_settings()
-```
+	```php
+	static public get_settings()
+	```
 
-Gets the AMP Customizer settings.
+	Gets the AMP Customizer settings.
 
 
-</details>
+	</details>

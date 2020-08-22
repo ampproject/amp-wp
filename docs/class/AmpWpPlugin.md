@@ -7,76 +7,76 @@ In here we assemble our infrastructure, configure it for the specific use case t
 ### Methods
 * `get_service_classes`
 
-<details>
+	<details>
 
-```php
-protected get_service_classes()
-```
+	```php
+	protected get_service_classes()
+	```
 
-Get the list of services to register.
+	Get the list of services to register.
 
 The services array contains a map of &lt;identifier&gt; =&gt; &lt;service class name&gt; associations.
 
 
-</details>
+	</details>
 * `get_bindings`
 
-<details>
+	<details>
 
-```php
-protected get_bindings()
-```
+	```php
+	protected get_bindings()
+	```
 
-Get the bindings for the dependency injector.
+	Get the bindings for the dependency injector.
 
 The bindings array contains a map of &lt;interface&gt; =&gt; &lt;implementation&gt; mappings, both of which should be fully qualified class names (FQCNs).
  The &lt;interface&gt; does not need to be the actual PHP `interface` language construct, it can be a `class` as well.
  Whenever you ask the injector to &quot;make()&quot; an &lt;interface&gt;, it will resolve these mappings and return an instance of the final &lt;class&gt; it found.
 
 
-</details>
+	</details>
 * `get_arguments`
 
-<details>
+	<details>
 
-```php
-protected get_arguments()
-```
+	```php
+	protected get_arguments()
+	```
 
-Get the argument bindings for the dependency injector.
+	Get the argument bindings for the dependency injector.
 
 The arguments array contains a map of &lt;class&gt; =&gt; &lt;associative array of arguments&gt; mappings.
  The array is provided in the form &lt;argument name&gt; =&gt; &lt;argument value&gt;.
 
 
-</details>
+	</details>
 * `get_shared_instances`
 
-<details>
+	<details>
 
-```php
-protected get_shared_instances()
-```
+	```php
+	protected get_shared_instances()
+	```
 
-Get the shared instances for the dependency injector.
+	Get the shared instances for the dependency injector.
 
 The shared instances array contains a list of FQCNs that are meant to be reused. For multiple &quot;make()&quot; requests, the injector will return the same instance reference for these, instead of always returning a new one.
  This effectively turns these FQCNs into a &quot;singleton&quot;, without incurring all the drawbacks of the Singleton design anti-pattern.
 
 
-</details>
+	</details>
 * `get_delegations`
 
-<details>
+	<details>
 
-```php
-protected get_delegations()
-```
+	```php
+	protected get_delegations()
+	```
 
-Get the delegations for the dependency injector.
+	Get the delegations for the dependency injector.
 
 The delegations array contains a map of &lt;class&gt; =&gt; &lt;callable&gt; mappings.
  The &lt;callable&gt; is basically a factory to provide custom instantiation logic for the given &lt;class&gt;.
 
 
-</details>
+	</details>

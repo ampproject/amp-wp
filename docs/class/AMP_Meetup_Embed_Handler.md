@@ -5,37 +5,37 @@ Class AMP_Meetup_Embed_Handler
 ### Methods
 * `register_embed`
 
-<details>
+	<details>
 
-```php
-public register_embed()
-```
+	```php
+	public register_embed()
+	```
 
-Register embed.
+	Register embed.
 
 
-</details>
+	</details>
 * `unregister_embed`
 
-<details>
+	<details>
 
-```php
-public unregister_embed()
-```
+	```php
+	public unregister_embed()
+	```
 
-Unregister embed.
+	Unregister embed.
 
 
-</details>
+	</details>
 * `filter_embed_oembed_html`
 
-<details>
+	<details>
 
-```php
-public filter_embed_oembed_html( $cache, $url )
-```
+	```php
+	public filter_embed_oembed_html( $cache, $url )
+	```
 
-Filter oEmbed HTML for Meetup to prepare it for AMP.
+	Filter oEmbed HTML for Meetup to prepare it for AMP.
 
 
-</details>
+	</details>

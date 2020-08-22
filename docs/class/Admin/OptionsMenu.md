@@ -5,109 +5,109 @@ OptionsMenu class.
 ### Methods
 * `is_needed`
 
-<details>
+	<details>
 
-```php
-static public is_needed()
-```
+	```php
+	static public is_needed()
+	```
 
-Check whether the conditional object is currently needed.
+	Check whether the conditional object is currently needed.
 
 
-</details>
+	</details>
 * `__construct`
 
-<details>
+	<details>
 
-```php
-public __construct( \AmpProject\AmpWP\Admin\GoogleFonts $google_fonts, \AmpProject\AmpWP\Admin\ReaderThemes $reader_themes, \AmpProject\AmpWP\Admin\RESTPreloader $rest_preloader )
-```
+	```php
+	public __construct( \AmpProject\AmpWP\Admin\GoogleFonts $google_fonts, \AmpProject\AmpWP\Admin\ReaderThemes $reader_themes, \AmpProject\AmpWP\Admin\RESTPreloader $rest_preloader )
+	```
 
-OptionsMenu constructor.
+	OptionsMenu constructor.
 
 
-</details>
+	</details>
 * `register`
 
-<details>
+	<details>
 
-```php
-public register()
-```
+	```php
+	public register()
+	```
 
-Adds hooks.
+	Adds hooks.
 
 
-</details>
+	</details>
 * `add_plugin_action_links`
 
-<details>
+	<details>
 
-```php
-public add_plugin_action_links( $links )
-```
+	```php
+	public add_plugin_action_links( $links )
+	```
 
-Add plugin action links.
+	Add plugin action links.
 
 
-</details>
+	</details>
 * `add_menu_items`
 
-<details>
+	<details>
 
-```php
-public add_menu_items()
-```
+	```php
+	public add_menu_items()
+	```
 
-Add menu.
+	Add menu.
 
 
-</details>
+	</details>
 * `screen_handle`
 
-<details>
+	<details>
 
-```php
-public screen_handle()
-```
+	```php
+	public screen_handle()
+	```
 
-Provides the settings screen handle.
+	Provides the settings screen handle.
 
 
-</details>
+	</details>
 * `enqueue_assets`
 
-<details>
+	<details>
 
-```php
-public enqueue_assets( $hook_suffix )
-```
+	```php
+	public enqueue_assets( $hook_suffix )
+	```
 
-Enqueues settings page assets.
+	Enqueues settings page assets.
 
 
-</details>
+	</details>
 * `render_screen`
 
-<details>
+	<details>
 
-```php
-public render_screen()
-```
+	```php
+	public render_screen()
+	```
 
-Display Settings.
+	Display Settings.
 
 
-</details>
+	</details>
 * `add_preload_rest_paths`
 
-<details>
+	<details>
 
-```php
-protected add_preload_rest_paths()
-```
+	```php
+	protected add_preload_rest_paths()
+	```
 
-Adds REST paths to preload.
+	Adds REST paths to preload.
 
 
-</details>
+	</details>

@@ -7,51 +7,51 @@ These HTML attributes serve as processing instructions to control how the saniti
 ### Methods
 * `get_registration_action`
 
-<details>
+	<details>
 
-```php
-static public get_registration_action()
-```
+	```php
+	static public get_registration_action()
+	```
 
-Get registration action.
+	Get registration action.
 
 
-</details>
+	</details>
 * `register`
 
-<details>
+	<details>
 
-```php
-public register()
-```
+	```php
+	public register()
+	```
 
-Register the service with the system.
+	Register the service with the system.
 
 
-</details>
+	</details>
 * `get_obsolete_attribute_pattern`
 
-<details>
+	<details>
 
-```php
-protected get_obsolete_attribute_pattern()
-```
+	```php
+	protected get_obsolete_attribute_pattern()
+	```
 
-Get obsolete attribute regular expression to match the obsolete attribute key/value pair in an HTML start tag.
+	Get obsolete attribute regular expression to match the obsolete attribute key/value pair in an HTML start tag.
 
 .
 
 
-</details>
+	</details>
 * `filter_rest_prepare_post`
 
-<details>
+	<details>
 
-```php
-public filter_rest_prepare_post( WP_REST_Response $response )
-```
+	```php
+	public filter_rest_prepare_post( WP_REST_Response $response )
+	```
 
-Filter post response object to purge obsolete attributes from the raw content.
+	Filter post response object to purge obsolete attributes from the raw content.
 
 
-</details>
+	</details>

@@ -5,61 +5,61 @@ A server-timing event.
 ### Methods
 * `__construct`
 
-<details>
+	<details>
 
-```php
-public __construct( $name, $description = null, $properties = array() )
-```
+	```php
+	public __construct( $name, $description = null, $properties = array() )
+	```
 
-Event constructor.
+	Event constructor.
 
 
-</details>
+	</details>
 * `get_name`
 
-<details>
+	<details>
 
-```php
-public get_name()
-```
+	```php
+	public get_name()
+	```
 
-Get the name of the event.
+	Get the name of the event.
 
 
-</details>
+	</details>
 * `get_description`
 
-<details>
+	<details>
 
-```php
-public get_description()
-```
+	```php
+	public get_description()
+	```
 
-Get the description of the event.
+	Get the description of the event.
 
 
-</details>
+	</details>
 * `add_properties`
 
-<details>
+	<details>
 
-```php
-public add_properties( $properties )
-```
+	```php
+	public add_properties( $properties )
+	```
 
-Add additional properties to the event.
+	Add additional properties to the event.
 
 
-</details>
+	</details>
 * `get_header_string`
 
-<details>
+	<details>
 
-```php
-public get_header_string()
-```
+	```php
+	public get_header_string()
+	```
 
-Get the server timing header string.
+	Get the server timing header string.
 
 
-</details>
+	</details>

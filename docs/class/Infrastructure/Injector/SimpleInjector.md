@@ -5,207 +5,207 @@ A simplified implementation of a dependency injector.
 ### Methods
 * `__construct`
 
-<details>
+	<details>
 
-```php
-public __construct( Instantiator $instantiator = null )
-```
+	```php
+	public __construct( Instantiator $instantiator = null )
+	```
 
-Instantiate a SimpleInjector object.
+	Instantiate a SimpleInjector object.
 
 
-</details>
+	</details>
 * `make`
 
-<details>
+	<details>
 
-```php
-public make( $interface_or_class, $arguments = array() )
-```
+	```php
+	public make( $interface_or_class, $arguments = array() )
+	```
 
-Make an object instance out of an interface or class.
+	Make an object instance out of an interface or class.
 
 
-</details>
+	</details>
 * `bind`
 
-<details>
+	<details>
 
-```php
-public bind( $from, $to )
-```
+	```php
+	public bind( $from, $to )
+	```
 
-Bind a given interface or class to an implementation.
+	Bind a given interface or class to an implementation.
 
 Note: The implementation can be an interface as well, as long as it can be resolved to an instantiatable class at runtime.
 
 
-</details>
+	</details>
 * `bind_argument`
 
-<details>
+	<details>
 
-```php
-public bind_argument( $interface_or_class, $argument_name, $value )
-```
+	```php
+	public bind_argument( $interface_or_class, $argument_name, $value )
+	```
 
-Bind an argument for a class to a specific value.
+	Bind an argument for a class to a specific value.
 
 
-</details>
+	</details>
 * `share`
 
-<details>
+	<details>
 
-```php
-public share( $interface_or_class )
-```
+	```php
+	public share( $interface_or_class )
+	```
 
-Always reuse and share the same instance for the provided interface or class.
+	Always reuse and share the same instance for the provided interface or class.
 
 
-</details>
+	</details>
 * `delegate`
 
-<details>
+	<details>
 
-```php
-public delegate( $interface_or_class, callable $callable )
-```
+	```php
+	public delegate( $interface_or_class, callable $callable )
+	```
 
-Delegate instantiation of an interface or class to a callable.
+	Delegate instantiation of an interface or class to a callable.
 
 
-</details>
+	</details>
 * `make_dependency`
 
-<details>
+	<details>
 
-```php
-private make_dependency( \AmpProject\AmpWP\Infrastructure\Injector\InjectionChain $injection_chain, $interface_or_class )
-```
+	```php
+	private make_dependency( \AmpProject\AmpWP\Infrastructure\Injector\InjectionChain $injection_chain, $interface_or_class )
+	```
 
-Make an object instance out of an interface or class.
+	Make an object instance out of an interface or class.
 
 
-</details>
+	</details>
 * `resolve`
 
-<details>
+	<details>
 
-```php
-private resolve( \AmpProject\AmpWP\Infrastructure\Injector\InjectionChain $injection_chain, $interface_or_class )
-```
+	```php
+	private resolve( \AmpProject\AmpWP\Infrastructure\Injector\InjectionChain $injection_chain, $interface_or_class )
+	```
 
-Recursively resolve an interface to the class it should be bound to.
+	Recursively resolve an interface to the class it should be bound to.
 
 
-</details>
+	</details>
 * `get_dependencies_for`
 
-<details>
+	<details>
 
-```php
-private get_dependencies_for( \AmpProject\AmpWP\Infrastructure\Injector\InjectionChain $injection_chain, ReflectionClass $reflection, $arguments = array() )
-```
+	```php
+	private get_dependencies_for( \AmpProject\AmpWP\Infrastructure\Injector\InjectionChain $injection_chain, ReflectionClass $reflection, $arguments = array() )
+	```
 
-Get the array of constructor dependencies for a given reflected class.
+	Get the array of constructor dependencies for a given reflected class.
 
 
-</details>
+	</details>
 * `ensure_is_instantiable`
 
-<details>
+	<details>
 
-```php
-private ensure_is_instantiable( ReflectionClass $reflection )
-```
+	```php
+	private ensure_is_instantiable( ReflectionClass $reflection )
+	```
 
-Ensure that a given reflected class is instantiable.
+	Ensure that a given reflected class is instantiable.
 
 
-</details>
+	</details>
 * `resolve_argument`
 
-<details>
+	<details>
 
-```php
-private resolve_argument( \AmpProject\AmpWP\Infrastructure\Injector\InjectionChain $injection_chain, $class, ReflectionParameter $parameter, $arguments )
-```
+	```php
+	private resolve_argument( \AmpProject\AmpWP\Infrastructure\Injector\InjectionChain $injection_chain, $class, ReflectionParameter $parameter, $arguments )
+	```
 
-Resolve a given reflected argument.
+	Resolve a given reflected argument.
 
 
-</details>
+	</details>
 * `resolve_argument_by_name`
 
-<details>
+	<details>
 
-```php
-private resolve_argument_by_name( $class, ReflectionParameter $parameter, $arguments )
-```
+	```php
+	private resolve_argument_by_name( $class, ReflectionParameter $parameter, $arguments )
+	```
 
-Resolve a given reflected argument by its name.
+	Resolve a given reflected argument by its name.
 
 
-</details>
+	</details>
 * `has_shared_instance`
 
-<details>
+	<details>
 
-```php
-private has_shared_instance( $class )
-```
+	```php
+	private has_shared_instance( $class )
+	```
 
-Check whether a shared instance exists for a given class.
+	Check whether a shared instance exists for a given class.
 
 
-</details>
+	</details>
 * `get_shared_instance`
 
-<details>
+	<details>
 
-```php
-private get_shared_instance( $class )
-```
+	```php
+	private get_shared_instance( $class )
+	```
 
-Get the shared instance for a given class.
+	Get the shared instance for a given class.
 
 
-</details>
+	</details>
 * `has_delegate`
 
-<details>
+	<details>
 
-```php
-private has_delegate( $class )
-```
+	```php
+	private has_delegate( $class )
+	```
 
-Check whether a delegate exists for a given class.
+	Check whether a delegate exists for a given class.
 
 
-</details>
+	</details>
 * `get_delegate`
 
-<details>
+	<details>
 
-```php
-private get_delegate( $class )
-```
+	```php
+	private get_delegate( $class )
+	```
 
-Get the delegate for a given class.
+	Get the delegate for a given class.
 
 
-</details>
+	</details>
 * `get_class_reflection`
 
-<details>
+	<details>
 
-```php
-private get_class_reflection( $class )
-```
+	```php
+	private get_class_reflection( $class )
+	```
 
-Get the reflection for a class or throw an exception.
+	Get the reflection for a class or throw an exception.
 
 
-</details>
+	</details>

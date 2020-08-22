@@ -5,49 +5,49 @@ Class AMP_Reddit_Embed_Handler
 ### Methods
 * `register_embed`
 
-<details>
+	<details>
 
-```php
-public register_embed()
-```
+	```php
+	public register_embed()
+	```
 
-Register embed.
+	Register embed.
 
 
-</details>
+	</details>
 * `unregister_embed`
 
-<details>
+	<details>
 
-```php
-public unregister_embed()
-```
+	```php
+	public unregister_embed()
+	```
 
-Unregister embed.
+	Unregister embed.
 
 
-</details>
+	</details>
 * `oembed`
 
-<details>
+	<details>
 
-```php
-public oembed( $matches, $attr, $url )
-```
+	```php
+	public oembed( $matches, $attr, $url )
+	```
 
-Embed found with matching URL callback.
+	Embed found with matching URL callback.
 
 
-</details>
+	</details>
 * `render`
 
-<details>
+	<details>
 
-```php
-public render( $args )
-```
+	```php
+	public render( $args )
+	```
 
-Output the Reddit amp element.
+	Output the Reddit amp element.
 
 
-</details>
+	</details>

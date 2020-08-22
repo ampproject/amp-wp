@@ -7,51 +7,51 @@ Gets the markup for an &lt;amp-carousel&gt;.
 ### Methods
 * `__construct`
 
-<details>
+	<details>
 
-```php
-public __construct( Document $dom, ElementList $slides )
-```
+	```php
+	public __construct( Document $dom, ElementList $slides )
+	```
 
-Instantiates the class.
+	Instantiates the class.
 
 
-</details>
+	</details>
 * `get_dom_element`
 
-<details>
+	<details>
 
-```php
-public get_dom_element()
-```
+	```php
+	public get_dom_element()
+	```
 
-Gets the carousel element.
+	Gets the carousel element.
 
 
-</details>
+	</details>
 * `get_dimensions`
 
-<details>
+	<details>
 
-```php
-private get_dimensions()
-```
+	```php
+	private get_dimensions()
+	```
 
-Gets the carousel&#039;s width and height, based on its elements.
+	Gets the carousel&#039;s width and height, based on its elements.
 
 This will return the width and height of the slide (possibly image) with the widest aspect ratio, not necessarily that with the biggest absolute width.
 
 
-</details>
+	</details>
 * `is_image_element`
 
-<details>
+	<details>
 
-```php
-private is_image_element( DOMElement $element )
-```
+	```php
+	private is_image_element( DOMElement $element )
+	```
 
-Determine whether an element is an image (either an &lt;amp-img&gt; or an &lt;img&gt;).
+	Determine whether an element is an image (either an &lt;amp-img&gt; or an &lt;img&gt;).
 
 
-</details>
+	</details>

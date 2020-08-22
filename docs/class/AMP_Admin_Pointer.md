@@ -5,65 +5,65 @@ Class representing a single admin pointer.
 ### Methods
 * `__construct`
 
-<details>
+	<details>
 
-```php
-public __construct( $slug, array $args )
-```
+	```php
+	public __construct( $slug, array $args )
+	```
 
-Constructor.
+	Constructor.
 
 
-</details>
+	</details>
 * `get_slug`
 
-<details>
+	<details>
 
-```php
-public get_slug()
-```
+	```php
+	public get_slug()
+	```
 
-Gets the pointer slug.
+	Gets the pointer slug.
 
 
-</details>
+	</details>
 * `is_active`
 
-<details>
+	<details>
 
-```php
-public is_active( $hook_suffix )
-```
+	```php
+	public is_active( $hook_suffix )
+	```
 
-Checks whether the pointer is active.
+	Checks whether the pointer is active.
 
 This method executes the active callback and looks at whether the pointer has been dismissed in order to determine whether the pointer should be active or not.
 
 
-</details>
+	</details>
 * `enqueue`
 
-<details>
+	<details>
 
-```php
-public enqueue()
-```
+	```php
+	public enqueue()
+	```
 
-Enqueues the script for the pointer.
+	Enqueues the script for the pointer.
 
 
-</details>
+	</details>
 * `print_js`
 
-<details>
+	<details>
 
-```php
-private print_js()
-```
+	```php
+	private print_js()
+	```
 
-Prints the script for the pointer inline.
+	Prints the script for the pointer inline.
 
 Requires the &#039;wp-pointer&#039; script to be loaded.
 
 
-</details>
+	</details>

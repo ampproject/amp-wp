@@ -5,61 +5,61 @@ Enqueue Google Fonts stylesheet.
 ### Methods
 * `is_needed`
 
-<details>
+	<details>
 
-```php
-static public is_needed()
-```
+	```php
+	static public is_needed()
+	```
 
-Check whether the conditional object is currently needed.
+	Check whether the conditional object is currently needed.
 
 
-</details>
+	</details>
 * `get_registration_action`
 
-<details>
+	<details>
 
-```php
-static public get_registration_action()
-```
+	```php
+	static public get_registration_action()
+	```
 
-Get the action to use for registering the service.
+	Get the action to use for registering the service.
 
 
-</details>
+	</details>
 * `get_handle`
 
-<details>
+	<details>
 
-```php
-public get_handle()
-```
+	```php
+	public get_handle()
+	```
 
-Provides the asset handle.
+	Provides the asset handle.
 
 
-</details>
+	</details>
 * `register`
 
-<details>
+	<details>
 
-```php
-public register()
-```
+	```php
+	public register()
+	```
 
-Runs on instantiation.
+	Runs on instantiation.
 
 
-</details>
+	</details>
 * `register_style`
 
-<details>
+	<details>
 
-```php
-public register_style( WP_Styles $wp_styles )
-```
+	```php
+	public register_style( WP_Styles $wp_styles )
+	```
 
-Registers the google font style.
+	Registers the google font style.
 
 
-</details>
+	</details>

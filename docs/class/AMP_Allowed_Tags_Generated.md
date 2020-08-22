@@ -9,101 +9,101 @@ This is a list of HTML tags and attributes that are allowed by the AMP specifica
 ### Methods
 * `get_allowed_tags`
 
-<details>
+	<details>
 
-```php
-static public get_allowed_tags()
-```
+	```php
+	static public get_allowed_tags()
+	```
 
-Get allowed tags.
+	Get allowed tags.
 
 
-</details>
+	</details>
 * `get_extension_specs`
 
-<details>
+	<details>
 
-```php
-static public get_extension_specs()
-```
+	```php
+	static public get_extension_specs()
+	```
 
-Get extension specs.
+	Get extension specs.
 
 
-</details>
+	</details>
 * `get_allowed_tag`
 
-<details>
+	<details>
 
-```php
-static public get_allowed_tag( $node_name )
-```
+	```php
+	static public get_allowed_tag( $node_name )
+	```
 
-Get allowed tag.
+	Get allowed tag.
 
 Get the rules for a single tag so that the entire data structure needn&#039;t be passed around.
 
 
-</details>
+	</details>
 * `get_descendant_tag_lists`
 
-<details>
+	<details>
 
-```php
-static public get_descendant_tag_lists()
-```
+	```php
+	static public get_descendant_tag_lists()
+	```
 
-Get descendant tag lists.
+	Get descendant tag lists.
 
 
-</details>
+	</details>
 * `get_descendant_tag_list`
 
-<details>
+	<details>
 
-```php
-static public get_descendant_tag_list( $name )
-```
+	```php
+	static public get_descendant_tag_list( $name )
+	```
 
-Get allowed descendant tag list for a tag.
+	Get allowed descendant tag list for a tag.
 
 Get the descendant rules for a single tag so that the entire data structure needn&#039;t be passed around.
 
 
-</details>
+	</details>
 * `get_reference_point_spec`
 
-<details>
+	<details>
 
-```php
-static public get_reference_point_spec( $tag_spec_name )
-```
+	```php
+	static public get_reference_point_spec( $tag_spec_name )
+	```
 
-Get reference point spec.
+	Get reference point spec.
 
 
-</details>
+	</details>
 * `get_allowed_attributes`
 
-<details>
+	<details>
 
-```php
-static public get_allowed_attributes()
-```
+	```php
+	static public get_allowed_attributes()
+	```
 
-Get list of globally-allowed attributes.
+	Get list of globally-allowed attributes.
 
 
-</details>
+	</details>
 * `get_layout_attributes`
 
-<details>
+	<details>
 
-```php
-static public get_layout_attributes()
-```
+	```php
+	static public get_layout_attributes()
+	```
 
-Get layout attributes.
+	Get layout attributes.
 
 
-</details>
+	</details>

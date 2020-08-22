@@ -5,231 +5,231 @@ Class AMP_Post_Template
 ### Methods
 * `__construct`
 
-<details>
+	<details>
 
-```php
-public __construct( $post )
-```
+	```php
+	public __construct( $post )
+	```
 
-AMP_Post_Template constructor.
+	AMP_Post_Template constructor.
 
 
-</details>
+	</details>
 * `set_data`
 
-<details>
+	<details>
 
-```php
-private set_data()
-```
+	```php
+	private set_data()
+	```
 
-Set data.
+	Set data.
 
 This is called in the get method the first time it is called.
 
 
-</details>
+	</details>
 * `get_template_dir`
 
-<details>
+	<details>
 
-```php
-private get_template_dir()
-```
+	```php
+	private get_template_dir()
+	```
 
-Get template directory for Reader mode.
+	Get template directory for Reader mode.
 
 
-</details>
+	</details>
 * `get`
 
-<details>
+	<details>
 
-```php
-public get( $property, $default = null )
-```
+	```php
+	public get( $property, $default = null )
+	```
 
-Getter.
+	Getter.
 
 
-</details>
+	</details>
 * `get_customizer_setting`
 
-<details>
+	<details>
 
-```php
-public get_customizer_setting( $name, $default = null )
-```
+	```php
+	public get_customizer_setting( $name, $default = null )
+	```
 
-Get customizer setting.
+	Get customizer setting.
 
 
-</details>
+	</details>
 * `load`
 
-<details>
+	<details>
 
-```php
-public load()
-```
+	```php
+	public load()
+	```
 
-Load and print the template parts for the given post.
+	Load and print the template parts for the given post.
 
 
-</details>
+	</details>
 * `load_parts`
 
-<details>
+	<details>
 
-```php
-public load_parts( $templates )
-```
+	```php
+	public load_parts( $templates )
+	```
 
-Load template parts.
+	Load template parts.
 
 
-</details>
+	</details>
 * `get_template_path`
 
-<details>
+	<details>
 
-```php
-private get_template_path( $template )
-```
+	```php
+	private get_template_path( $template )
+	```
 
-Get template path.
+	Get template path.
 
 
-</details>
+	</details>
 * `add_data`
 
-<details>
+	<details>
 
-```php
-private add_data( $data )
-```
+	```php
+	private add_data( $data )
+	```
 
-Add data.
+	Add data.
 
 
-</details>
+	</details>
 * `add_data_by_key`
 
-<details>
+	<details>
 
-```php
-private add_data_by_key( $key, $value )
-```
+	```php
+	private add_data_by_key( $key, $value )
+	```
 
-Add data by key.
+	Add data by key.
 
 
-</details>
+	</details>
 * `build_post_data`
 
-<details>
+	<details>
 
-```php
-private build_post_data()
-```
+	```php
+	private build_post_data()
+	```
 
-Build post data.
+	Build post data.
 
 
-</details>
+	</details>
 * `build_post_comments_data`
 
-<details>
+	<details>
 
-```php
-private build_post_comments_data()
-```
+	```php
+	private build_post_comments_data()
+	```
 
-Build post comments data.
+	Build post comments data.
 
 
-</details>
+	</details>
 * `build_post_content`
 
-<details>
+	<details>
 
-```php
-private build_post_content()
-```
+	```php
+	private build_post_content()
+	```
 
-Build post content.
+	Build post content.
 
 
-</details>
+	</details>
 * `build_post_featured_image`
 
-<details>
+	<details>
 
-```php
-private build_post_featured_image()
-```
+	```php
+	private build_post_featured_image()
+	```
 
-Build post featured image.
+	Build post featured image.
 
 
-</details>
+	</details>
 * `build_customizer_settings`
 
-<details>
+	<details>
 
-```php
-private build_customizer_settings()
-```
+	```php
+	private build_customizer_settings()
+	```
 
-Build customizer settings.
+	Build customizer settings.
 
 
-</details>
+	</details>
 * `build_html_tag_attributes`
 
-<details>
+	<details>
 
-```php
-private build_html_tag_attributes()
-```
+	```php
+	private build_html_tag_attributes()
+	```
 
-Build HTML tag attributes.
+	Build HTML tag attributes.
 
 
-</details>
+	</details>
 * `verify_and_include`
 
-<details>
+	<details>
 
-```php
-private verify_and_include( $file, $template_type )
-```
+	```php
+	private verify_and_include( $file, $template_type )
+	```
 
-Verify and include.
+	Verify and include.
 
 
-</details>
+	</details>
 * `locate_template`
 
-<details>
+	<details>
 
-```php
-private locate_template( $file )
-```
+	```php
+	private locate_template( $file )
+	```
 
-Locate template.
+	Locate template.
 
 
-</details>
+	</details>
 * `is_valid_template`
 
-<details>
+	<details>
 
-```php
-private is_valid_template( $template )
-```
+	```php
+	private is_valid_template( $template )
+	```
 
-Is valid template.
+	Is valid template.
 
 
-</details>
+	</details>

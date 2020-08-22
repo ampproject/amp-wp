@@ -7,111 +7,111 @@ Converts &lt;img&gt; tags to &lt;amp-img&gt; or &lt;amp-anim&gt;
 ### Methods
 * `get_selector_conversion_mapping`
 
-<details>
+	<details>
 
-```php
-public get_selector_conversion_mapping()
-```
+	```php
+	public get_selector_conversion_mapping()
+	```
 
-Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
+	Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
 
 
-</details>
+	</details>
 * `sanitize`
 
-<details>
+	<details>
 
-```php
-public sanitize()
-```
+	```php
+	public sanitize()
+	```
 
-Sanitize the &lt;img&gt; elements from the HTML contained in this instance&#039;s Dom\Document.
+	Sanitize the &lt;img&gt; elements from the HTML contained in this instance&#039;s Dom\Document.
 
 
-</details>
+	</details>
 * `filter_attributes`
 
-<details>
+	<details>
 
-```php
-private filter_attributes( $attributes )
-```
+	```php
+	private filter_attributes( $attributes )
+	```
 
-&quot;Filter&quot; HTML attributes for &lt;amp-anim&gt; elements.
+	&quot;Filter&quot; HTML attributes for &lt;amp-anim&gt; elements.
 
 
-</details>
+	</details>
 * `determine_dimensions`
 
-<details>
+	<details>
 
-```php
-private determine_dimensions( $need_dimensions )
-```
+	```php
+	private determine_dimensions( $need_dimensions )
+	```
 
-Determine width and height attribute values for images without them.
+	Determine width and height attribute values for images without them.
 
 Attempt to determine actual dimensions, otherwise set reasonable defaults.
 
 
-</details>
+	</details>
 * `adjust_and_replace_nodes_in_array_map`
 
-<details>
+	<details>
 
-```php
-private adjust_and_replace_nodes_in_array_map( $node_lists )
-```
+	```php
+	private adjust_and_replace_nodes_in_array_map( $node_lists )
+	```
 
-Now that all images have width and height attributes, make final tweaks and replace original image nodes
+	Now that all images have width and height attributes, make final tweaks and replace original image nodes
 
 
-</details>
+	</details>
 * `adjust_and_replace_node`
 
-<details>
+	<details>
 
-```php
-private adjust_and_replace_node( $node )
-```
+	```php
+	private adjust_and_replace_node( $node )
+	```
 
-Make final modifications to DOMNode
+	Make final modifications to DOMNode
 
 
-</details>
+	</details>
 * `maybe_add_lightbox_attributes`
 
-<details>
+	<details>
 
-```php
-private maybe_add_lightbox_attributes( $attributes, $node )
-```
+	```php
+	private maybe_add_lightbox_attributes( $attributes, $node )
+	```
 
-Set lightbox attributes.
+	Set lightbox attributes.
 
 
-</details>
+	</details>
 * `does_node_have_block_class`
 
-<details>
+	<details>
 
-```php
-private does_node_have_block_class( $node )
-```
+	```php
+	private does_node_have_block_class( $node )
+	```
 
-Gets whether a node has the class &#039;wp-block-image&#039;, meaning it is a wrapper for an Image block.
+	Gets whether a node has the class &#039;wp-block-image&#039;, meaning it is a wrapper for an Image block.
 
 
-</details>
+	</details>
 * `is_gif_url`
 
-<details>
+	<details>
 
-```php
-private is_gif_url( $url )
-```
+	```php
+	private is_gif_url( $url )
+	```
 
-Determines if a URL is considered a GIF URL
+	Determines if a URL is considered a GIF URL
 
 
-</details>
+	</details>

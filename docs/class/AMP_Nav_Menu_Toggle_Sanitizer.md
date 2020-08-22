@@ -7,49 +7,49 @@ Handles state for navigation menu toggles, based on theme support.
 ### Methods
 * `__construct`
 
-<details>
+	<details>
 
-```php
-public __construct( $dom, $args = array() )
-```
+	```php
+	public __construct( $dom, $args = array() )
+	```
 
-AMP_Nav_Menu_Toggle_Sanitizer constructor.
+	AMP_Nav_Menu_Toggle_Sanitizer constructor.
 
 
-</details>
+	</details>
 * `sanitize`
 
-<details>
+	<details>
 
-```php
-public sanitize()
-```
+	```php
+	public sanitize()
+	```
 
-If supported per the constructor arguments, inject `amp-state` and bind dynamic classes accordingly.
+	If supported per the constructor arguments, inject `amp-state` and bind dynamic classes accordingly.
 
 
-</details>
+	</details>
 * `get_nav_container`
 
-<details>
+	<details>
 
-```php
-protected get_nav_container()
-```
+	```php
+	protected get_nav_container()
+	```
 
-Retrieves the navigation container element.
+	Retrieves the navigation container element.
 
 
-</details>
+	</details>
 * `get_menu_button`
 
-<details>
+	<details>
 
-```php
-protected get_menu_button()
-```
+	```php
+	protected get_menu_button()
+	```
 
-Retrieves the navigation menu button element.
+	Retrieves the navigation menu button element.
 
 
-</details>
+	</details>

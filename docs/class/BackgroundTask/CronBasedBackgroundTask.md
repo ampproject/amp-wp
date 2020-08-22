@@ -5,128 +5,128 @@ Abstract base class for using cron to execute a background task.
 ### Methods
 * `is_needed`
 
-<details>
+	<details>
 
-```php
-static public is_needed()
-```
+	```php
+	static public is_needed()
+	```
 
-Check whether the conditional object is currently needed.
+	Check whether the conditional object is currently needed.
 
 
-</details>
+	</details>
 * `register`
 
-<details>
+	<details>
 
-```php
-public register()
-```
+	```php
+	public register()
+	```
 
-Register the service with the system.
+	Register the service with the system.
 
 
-</details>
+	</details>
 * `get_warning_icon`
 
-<details>
+	<details>
 
-```php
-private get_warning_icon()
-```
+	```php
+	private get_warning_icon()
+	```
 
-Get warning icon markup.
+	Get warning icon markup.
 
 
-</details>
+	</details>
 * `schedule_event`
 
-<details>
+	<details>
 
-```php
-public schedule_event()
-```
+	```php
+	public schedule_event()
+	```
 
-Schedule the event.
+	Schedule the event.
 
 This does nothing if the event is already scheduled.
 
 
-</details>
+	</details>
 * `deactivate`
 
-<details>
+	<details>
 
-```php
-public deactivate( $network_wide )
-```
+	```php
+	public deactivate( $network_wide )
+	```
 
-Run deactivation logic.
+	Run deactivation logic.
 
 This should be hooked up to the WordPress deactivation hook.
 
 
-</details>
+	</details>
 * `add_warning_sign_to_network_deactivate_action`
 
-<details>
+	<details>
 
-```php
-public add_warning_sign_to_network_deactivate_action( $actions )
-```
+	```php
+	public add_warning_sign_to_network_deactivate_action( $actions )
+	```
 
-Add a warning sign to the network deactivate action on the network plugins screen.
+	Add a warning sign to the network deactivate action on the network plugins screen.
 
 
-</details>
+	</details>
 * `add_warning_to_plugin_meta`
 
-<details>
+	<details>
 
-```php
-public add_warning_to_plugin_meta( $plugin_meta, $plugin_file )
-```
+	```php
+	public add_warning_to_plugin_meta( $plugin_meta, $plugin_file )
+	```
 
-Add a warning to the plugin meta row on the network plugins screen.
+	Add a warning to the plugin meta row on the network plugins screen.
 
 
-</details>
+	</details>
 * `get_interval`
 
-<details>
+	<details>
 
-```php
-abstract protected get_interval()
-```
+	```php
+	abstract protected get_interval()
+	```
 
-Get the interval to use for the event.
+	Get the interval to use for the event.
 
 
-</details>
+	</details>
 * `get_event_name`
 
-<details>
+	<details>
 
-```php
-abstract protected get_event_name()
-```
+	```php
+	abstract protected get_event_name()
+	```
 
-Get the event name.
+	Get the event name.
 
 This is the &quot;slug&quot; of the event, not the display name.
  Note: the event name should be prefixed to prevent naming collisions.
 
 
-</details>
+	</details>
 * `process`
 
-<details>
+	<details>
 
-```php
-abstract public process()
-```
+	```php
+	abstract public process()
+	```
 
-Process a single cron tick.
+	Process a single cron tick.
 
 
-</details>
+	</details>

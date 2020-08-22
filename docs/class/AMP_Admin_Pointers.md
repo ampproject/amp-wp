@@ -5,37 +5,37 @@ Class managing admin pointers to enhance discoverability.
 ### Methods
 * `init`
 
-<details>
+	<details>
 
-```php
-public init()
-```
+	```php
+	public init()
+	```
 
-Registers functionality through WordPress hooks.
+	Registers functionality through WordPress hooks.
 
 
-</details>
+	</details>
 * `enqueue_scripts`
 
-<details>
+	<details>
 
-```php
-public enqueue_scripts( $hook_suffix )
-```
+	```php
+	public enqueue_scripts( $hook_suffix )
+	```
 
-Initializes admin pointers by enqueuing necessary scripts.
+	Initializes admin pointers by enqueuing necessary scripts.
 
 
-</details>
+	</details>
 * `get_pointers`
 
-<details>
+	<details>
 
-```php
-private get_pointers()
-```
+	```php
+	private get_pointers()
+	```
 
-Gets available admin pointers.
+	Gets available admin pointers.
 
 
-</details>
+	</details>

@@ -7,49 +7,49 @@ Handles state for navigation menu dropdown toggles, based on theme support.
 ### Methods
 * `__construct`
 
-<details>
+	<details>
 
-```php
-public __construct( $dom, $args = array() )
-```
+	```php
+	public __construct( $dom, $args = array() )
+	```
 
-AMP_Nav_Menu_Dropdown_Sanitizer constructor.
+	AMP_Nav_Menu_Dropdown_Sanitizer constructor.
 
 
-</details>
+	</details>
 * `add_buffering_hooks`
 
-<details>
+	<details>
 
-```php
-static public add_buffering_hooks( $args = array() )
-```
+	```php
+	static public add_buffering_hooks( $args = array() )
+	```
 
-Add filter to manipulate output during output buffering to add AMP-compatible dropdown toggles.
+	Add filter to manipulate output during output buffering to add AMP-compatible dropdown toggles.
 
 
-</details>
+	</details>
 * `sanitize`
 
-<details>
+	<details>
 
-```php
-public sanitize()
-```
+	```php
+	public sanitize()
+	```
 
-Method needs to be stubbed to fulfill base class requirements.
+	Method needs to be stubbed to fulfill base class requirements.
 
 
-</details>
+	</details>
 * `ensure_defaults`
 
-<details>
+	<details>
 
-```php
-static protected ensure_defaults( $args )
-```
+	```php
+	static protected ensure_defaults( $args )
+	```
 
-Ensure that some defaults are always set as fallback.
+	Ensure that some defaults are always set as fallback.
 
 
-</details>
+	</details>

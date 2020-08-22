@@ -5,97 +5,97 @@ Collect Server-Timing metrics.
 ### Methods
 * `get_registration_action`
 
-<details>
+	<details>
 
-```php
-static public get_registration_action()
-```
+	```php
+	static public get_registration_action()
+	```
 
-Get the action to use for registering the service.
+	Get the action to use for registering the service.
 
 
-</details>
+	</details>
 * `__construct`
 
-<details>
+	<details>
 
-```php
-public __construct( \AmpProject\AmpWP\Instrumentation\StopWatch $stopwatch, $verbose = false )
-```
+	```php
+	public __construct( \AmpProject\AmpWP\Instrumentation\StopWatch $stopwatch, $verbose = false )
+	```
 
-ServerTiming constructor.
+	ServerTiming constructor.
 
 
-</details>
+	</details>
 * `register`
 
-<details>
+	<details>
 
-```php
-public register()
-```
+	```php
+	public register()
+	```
 
-Register the service.
+	Register the service.
 
 
-</details>
+	</details>
 * `start`
 
-<details>
+	<details>
 
-```php
-public start( $event_name, $event_description = null, $properties = array(), $verbose_only = false )
-```
+	```php
+	public start( $event_name, $event_description = null, $properties = array(), $verbose_only = false )
+	```
 
-Start recording an event.
+	Start recording an event.
 
 
-</details>
+	</details>
 * `stop`
 
-<details>
+	<details>
 
-```php
-public stop( $event_name )
-```
+	```php
+	public stop( $event_name )
+	```
 
-Stop recording an event.
+	Stop recording an event.
 
 
-</details>
+	</details>
 * `log`
 
-<details>
+	<details>
 
-```php
-public log( $event_name, $event_description = '', $properties = array(), $verbose_only = false )
-```
+	```php
+	public log( $event_name, $event_description = '', $properties = array(), $verbose_only = false )
+	```
 
-Log an event that does not have a duration.
+	Log an event that does not have a duration.
 
 
-</details>
+	</details>
 * `send`
 
-<details>
+	<details>
 
-```php
-public send()
-```
+	```php
+	public send()
+	```
 
-Send the server-timing header.
+	Send the server-timing header.
 
 
-</details>
+	</details>
 * `get_header_string`
 
-<details>
+	<details>
 
-```php
-public get_header_string()
-```
+	```php
+	public get_header_string()
+	```
 
-Get the server timing header string for all collected events.
+	Get the server timing header string for all collected events.
 
 
-</details>
+	</details>

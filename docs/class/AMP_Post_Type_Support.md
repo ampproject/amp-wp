@@ -5,75 +5,75 @@ Class AMP_Post_Type_Support.
 ### Methods
 * `get_builtin_supported_post_types`
 
-<details>
+	<details>
 
-```php
-static public get_builtin_supported_post_types()
-```
+	```php
+	static public get_builtin_supported_post_types()
+	```
 
-Get post types that plugin supports out of the box (which cannot be disabled).
+	Get post types that plugin supports out of the box (which cannot be disabled).
 
 
-</details>
+	</details>
 * `get_eligible_post_types`
 
-<details>
+	<details>
 
-```php
-static public get_eligible_post_types()
-```
+	```php
+	static public get_eligible_post_types()
+	```
 
-Get post types that are eligible for AMP support.
+	Get post types that are eligible for AMP support.
 
 
-</details>
+	</details>
 * `get_post_types_for_rest_api`
 
-<details>
+	<details>
 
-```php
-static public get_post_types_for_rest_api()
-```
+	```php
+	static public get_post_types_for_rest_api()
+	```
 
-Get post types that can be shown in the REST API and supports AMP.
+	Get post types that can be shown in the REST API and supports AMP.
 
 
-</details>
+	</details>
 * `get_supported_post_types`
 
-<details>
+	<details>
 
-```php
-static public get_supported_post_types()
-```
+	```php
+	static public get_supported_post_types()
+	```
 
-Get supported post types.
+	Get supported post types.
 
 
-</details>
+	</details>
 * `add_post_type_support`
 
-<details>
+	<details>
 
-```php
-static public add_post_type_support()
-```
+	```php
+	static public add_post_type_support()
+	```
 
-Declare support for post types.
+	Declare support for post types.
 
 This function should only be invoked through the &#039;after_setup_theme&#039; action to allow plugins/theme to overwrite the post types support.
 
 
-</details>
+	</details>
 * `get_support_errors`
 
-<details>
+	<details>
 
-```php
-static public get_support_errors( $post )
-```
+	```php
+	static public get_support_errors( $post )
+	```
 
-Return error codes for why a given post does not have AMP support.
+	Return error codes for why a given post does not have AMP support.
 
 
-</details>
+	</details>

@@ -5,133 +5,133 @@ Class AMP_Options_Manager
 ### Methods
 * `init`
 
-<details>
+	<details>
 
-```php
-static public init()
-```
+	```php
+	static public init()
+	```
 
-Sets up hooks.
+	Sets up hooks.
 
 
-</details>
+	</details>
 * `register_settings`
 
-<details>
+	<details>
 
-```php
-static public register_settings()
-```
+	```php
+	static public register_settings()
+	```
 
-Register settings.
+	Register settings.
 
 
-</details>
+	</details>
 * `maybe_flush_rewrite_rules`
 
-<details>
+	<details>
 
-```php
-static public maybe_flush_rewrite_rules( $old_options, $new_options )
-```
+	```php
+	static public maybe_flush_rewrite_rules( $old_options, $new_options )
+	```
 
-Flush rewrite rules if the supported_post_types have changed.
+	Flush rewrite rules if the supported_post_types have changed.
 
 
-</details>
+	</details>
 * `get_options`
 
-<details>
+	<details>
 
-```php
-static public get_options()
-```
+	```php
+	static public get_options()
+	```
 
-Get plugin options.
+	Get plugin options.
 
 
-</details>
+	</details>
 * `get_option`
 
-<details>
+	<details>
 
-```php
-static public get_option( $option, $default = false )
-```
+	```php
+	static public get_option( $option, $default = false )
+	```
 
-Get plugin option.
+	Get plugin option.
 
 
-</details>
+	</details>
 * `validate_options`
 
-<details>
+	<details>
 
-```php
-static public validate_options( $new_options )
-```
+	```php
+	static public validate_options( $new_options )
+	```
 
-Validate options.
+	Validate options.
 
 
-</details>
+	</details>
 * `update_option`
 
-<details>
+	<details>
 
-```php
-static public update_option( $option, $value )
-```
+	```php
+	static public update_option( $option, $value )
+	```
 
-Update plugin option.
+	Update plugin option.
 
 
-</details>
+	</details>
 * `update_options`
 
-<details>
+	<details>
 
-```php
-static public update_options( $options )
-```
+	```php
+	static public update_options( $options )
+	```
 
-Update plugin options.
+	Update plugin options.
 
 
-</details>
+	</details>
 * `render_php_css_parser_conflict_notice`
 
-<details>
+	<details>
 
-```php
-static public render_php_css_parser_conflict_notice()
-```
+	```php
+	static public render_php_css_parser_conflict_notice()
+	```
 
-Render PHP-CSS-Parser conflict notice.
+	Render PHP-CSS-Parser conflict notice.
 
 
-</details>
+	</details>
 * `insecure_connection_notice`
 
-<details>
+	<details>
 
-```php
-static public insecure_connection_notice()
-```
+	```php
+	static public insecure_connection_notice()
+	```
 
-Outputs an admin notice if the site is not served over HTTPS.
+	Outputs an admin notice if the site is not served over HTTPS.
 
 
-</details>
+	</details>
 * `reader_theme_fallback_notice`
 
-<details>
+	<details>
 
-```php
-static public reader_theme_fallback_notice()
-```
+	```php
+	static public reader_theme_fallback_notice()
+	```
 
-Outputs an admin notice if the AMP Legacy Reader theme is used as a fallback.
+	Outputs an admin notice if the AMP Legacy Reader theme is used as a fallback.
 
 
-</details>
+	</details>

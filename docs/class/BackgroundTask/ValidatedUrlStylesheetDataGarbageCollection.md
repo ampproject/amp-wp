@@ -7,40 +7,40 @@ This background task will update the oldest 100 amp_validated_url posts each tim
 ### Methods
 * `get_interval`
 
-<details>
+	<details>
 
-```php
-protected get_interval()
-```
+	```php
+	protected get_interval()
+	```
 
-Get the interval to use for the event.
+	Get the interval to use for the event.
 
 
-</details>
+	</details>
 * `get_event_name`
 
-<details>
+	<details>
 
-```php
-protected get_event_name()
-```
+	```php
+	protected get_event_name()
+	```
 
-Get the event name.
+	Get the event name.
 
 This is the &quot;slug&quot; of the event, not the display name.
  Note: the event name should be prefixed to prevent naming collisions.
 
 
-</details>
+	</details>
 * `process`
 
-<details>
+	<details>
 
-```php
-public process()
-```
+	```php
+	public process()
+	```
 
-Process a single cron tick.
+	Process a single cron tick.
 
 
-</details>
+	</details>

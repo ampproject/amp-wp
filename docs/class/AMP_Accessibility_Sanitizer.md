@@ -5,25 +5,25 @@ Sanitizes attributes required for AMP accessibility requirements.
 ### Methods
 * `sanitize`
 
-<details>
+	<details>
 
-```php
-public sanitize()
-```
+	```php
+	public sanitize()
+	```
 
-Sanitize.
+	Sanitize.
 
 
-</details>
+	</details>
 * `add_role_and_tabindex_to_on_tap_actors`
 
-<details>
+	<details>
 
-```php
-public add_role_and_tabindex_to_on_tap_actors()
-```
+	```php
+	public add_role_and_tabindex_to_on_tap_actors()
+	```
 
-Adds the role and tabindex attributes to all elements that use a tap action via AMP&#039;s &quot;on&quot; event.
+	Adds the role and tabindex attributes to all elements that use a tap action via AMP&#039;s &quot;on&quot; event.
 
 
-</details>
+	</details>

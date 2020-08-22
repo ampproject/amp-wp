@@ -5,37 +5,37 @@ AMP onboarding wizard submenu class.
 ### Methods
 * `is_needed`
 
-<details>
+	<details>
 
-```php
-static public is_needed()
-```
+	```php
+	static public is_needed()
+	```
 
-Check whether the conditional object is currently needed.
+	Check whether the conditional object is currently needed.
 
 
-</details>
+	</details>
 * `get_registration_action`
 
-<details>
+	<details>
 
-```php
-static public get_registration_action()
-```
+	```php
+	static public get_registration_action()
+	```
 
-Get the action to use for registering the service.
+	Get the action to use for registering the service.
 
 
-</details>
+	</details>
 * `register`
 
-<details>
+	<details>
 
-```php
-public register()
-```
+	```php
+	public register()
+	```
 
-Runs on instantiation.
+	Runs on instantiation.
 
 
-</details>
+	</details>

@@ -5,109 +5,109 @@ Class DevToolsUserAccess
 ### Methods
 * `register`
 
-<details>
+	<details>
 
-```php
-public register()
-```
+	```php
+	public register()
+	```
 
-Runs on instantiation.
+	Runs on instantiation.
 
 
-</details>
+	</details>
 * `is_user_enabled`
 
-<details>
+	<details>
 
-```php
-public is_user_enabled( $user = null )
-```
+	```php
+	public is_user_enabled( $user = null )
+	```
 
-Determine whether developer tools are enabled for the a user and whether they can access them.
+	Determine whether developer tools are enabled for the a user and whether they can access them.
 
 
-</details>
+	</details>
 * `get_user_enabled`
 
-<details>
+	<details>
 
-```php
-public get_user_enabled( $user )
-```
+	```php
+	public get_user_enabled( $user )
+	```
 
-Get user enabled (regardless of whether they have the required capability).
+	Get user enabled (regardless of whether they have the required capability).
 
 
-</details>
+	</details>
 * `set_user_enabled`
 
-<details>
+	<details>
 
-```php
-public set_user_enabled( $user, $enabled )
-```
+	```php
+	public set_user_enabled( $user, $enabled )
+	```
 
-Set user enabled.
+	Set user enabled.
 
 
-</details>
+	</details>
 * `register_rest_field`
 
-<details>
+	<details>
 
-```php
-public register_rest_field()
-```
+	```php
+	public register_rest_field()
+	```
 
-Register REST field.
+	Register REST field.
 
 
-</details>
+	</details>
 * `print_personal_options`
 
-<details>
+	<details>
 
-```php
-public print_personal_options( $profile_user )
-```
+	```php
+	public print_personal_options( $profile_user )
+	```
 
-Add the developer tools checkbox to the user edit screen.
+	Add the developer tools checkbox to the user edit screen.
 
 
-</details>
+	</details>
 * `update_user_setting`
 
-<details>
+	<details>
 
-```php
-public update_user_setting( $user_id )
-```
+	```php
+	public update_user_setting( $user_id )
+	```
 
-Update the user setting from the edit user screen).
+	Update the user setting from the edit user screen).
 
 
-</details>
+	</details>
 * `rest_get_dev_tools_enabled`
 
-<details>
+	<details>
 
-```php
-public rest_get_dev_tools_enabled( $user )
-```
+	```php
+	public rest_get_dev_tools_enabled( $user )
+	```
 
-Provides the user&#039;s dev tools enabled setting.
+	Provides the user&#039;s dev tools enabled setting.
 
 
-</details>
+	</details>
 * `rest_update_dev_tools_enabled`
 
-<details>
+	<details>
 
-```php
-public rest_update_dev_tools_enabled( $new_value, WP_User $user )
-```
+	```php
+	public rest_update_dev_tools_enabled( $new_value, WP_User $user )
+	```
 
-Updates a user&#039;s dev tools enabled setting.
+	Updates a user&#039;s dev tools enabled setting.
 
 
-</details>
+	</details>

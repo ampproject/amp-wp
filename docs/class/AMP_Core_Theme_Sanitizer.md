@@ -7,481 +7,481 @@ Fixes up common issues in core themes and others.
 ### Methods
 * `get_theme_features_config`
 
-<details>
+	<details>
 
-```php
-static protected get_theme_features_config( $theme_slug )
-```
+	```php
+	static protected get_theme_features_config( $theme_slug )
+	```
 
-Retrieve the config for features needed by a theme.
+	Retrieve the config for features needed by a theme.
 
 
-</details>
+	</details>
 * `get_supported_themes`
 
-<details>
+	<details>
 
-```php
-static public get_supported_themes()
-```
+	```php
+	static public get_supported_themes()
+	```
 
-Get list of supported core themes.
+	Get list of supported core themes.
 
 
-</details>
+	</details>
 * `get_acceptable_errors`
 
-<details>
+	<details>
 
-```php
-static public get_acceptable_errors()
-```
+	```php
+	static public get_acceptable_errors()
+	```
 
-Get the acceptable validation errors.
+	Get the acceptable validation errors.
 
 
-</details>
+	</details>
 * `extend_theme_support`
 
-<details>
+	<details>
 
-```php
-static public extend_theme_support()
-```
+	```php
+	static public extend_theme_support()
+	```
 
-Adds extra theme support arguments on the fly.
+	Adds extra theme support arguments on the fly.
 
 This method is neither a buffering hook nor a sanitization callback and is called manually by {@see AMP_Theme_Support}. Typically themes will add theme support directly and don&#039;t need such a method. In this case, it is a workaround for adding theme support on behalf of external themes.
 
 
-</details>
+	</details>
 * `get_theme_support_args`
 
-<details>
+	<details>
 
-```php
-static protected get_theme_support_args( $theme )
-```
+	```php
+	static protected get_theme_support_args( $theme )
+	```
 
-Returns extra arguments to pass to `add_theme_support()`.
+	Returns extra arguments to pass to `add_theme_support()`.
 
 
-</details>
+	</details>
 * `get_theme_config`
 
-<details>
+	<details>
 
-```php
-static protected get_theme_config( $theme )
-```
+	```php
+	static protected get_theme_config( $theme )
+	```
 
-Get theme config.
+	Get theme config.
 
 
-</details>
+	</details>
 * `get_theme_features`
 
-<details>
+	<details>
 
-```php
-static protected get_theme_features( $args, $static = false )
-```
+	```php
+	static protected get_theme_features( $args, $static = false )
+	```
 
-Find theme features for core theme.
+	Find theme features for core theme.
 
 
-</details>
+	</details>
 * `add_buffering_hooks`
 
-<details>
+	<details>
 
-```php
-static public add_buffering_hooks( $args = array() )
-```
+	```php
+	static public add_buffering_hooks( $args = array() )
+	```
 
-Add filters to manipulate output during output buffering before the DOM is constructed.
+	Add filters to manipulate output during output buffering before the DOM is constructed.
 
 
-</details>
+	</details>
 * `set_twentyseventeen_quotes_icon`
 
-<details>
+	<details>
 
-```php
-static public set_twentyseventeen_quotes_icon()
-```
+	```php
+	static public set_twentyseventeen_quotes_icon()
+	```
 
-Add filter to output the quote icons in front of the article content.
+	Add filter to output the quote icons in front of the article content.
 
 This is only used in Twenty Seventeen.
 
 
-</details>
+	</details>
 * `add_twentyseventeen_attachment_image_attributes`
 
-<details>
+	<details>
 
-```php
-static public add_twentyseventeen_attachment_image_attributes()
-```
+	```php
+	static public add_twentyseventeen_attachment_image_attributes()
+	```
 
-Add filter to adjust the attachment image attributes to ensure attachment pages have a consistent &lt;amp-img&gt; rendering.
+	Add filter to adjust the attachment image attributes to ensure attachment pages have a consistent &lt;amp-img&gt; rendering.
 
 This is only used in Twenty Seventeen.
 
 
-</details>
+	</details>
 * `sanitize`
 
-<details>
+	<details>
 
-```php
-public sanitize()
-```
+	```php
+	public sanitize()
+	```
 
-Fix up core themes to do things in the AMP way.
+	Fix up core themes to do things in the AMP way.
 
 
-</details>
+	</details>
 * `prevent_sanitize_in_customizer_preview`
 
-<details>
+	<details>
 
-```php
-public prevent_sanitize_in_customizer_preview( $xpaths = array() )
-```
+	```php
+	public prevent_sanitize_in_customizer_preview( $xpaths = array() )
+	```
 
-Adds the data-ampdevmode attribute to the set of specified elements to prevent further sanitization. This is necessary as certain features in the Customizer require these elements to be present in their unaltered state.
+	Adds the data-ampdevmode attribute to the set of specified elements to prevent further sanitization. This is necessary as certain features in the Customizer require these elements to be present in their unaltered state.
 
 
-</details>
+	</details>
 * `dequeue_scripts`
 
-<details>
+	<details>
 
-```php
-static public dequeue_scripts( $handles = array() )
-```
+	```php
+	static public dequeue_scripts( $handles = array() )
+	```
 
-Dequeue scripts.
+	Dequeue scripts.
 
 
-</details>
+	</details>
 * `remove_actions`
 
-<details>
+	<details>
 
-```php
-static public remove_actions( $actions = array() )
-```
+	```php
+	static public remove_actions( $actions = array() )
+	```
 
-Remove actions.
+	Remove actions.
 
 
-</details>
+	</details>
 * `add_smooth_scrolling`
 
-<details>
+	<details>
 
-```php
-public add_smooth_scrolling( $link_xpaths )
-```
+	```php
+	public add_smooth_scrolling( $link_xpaths )
+	```
 
-Add smooth scrolling from link to target element.
+	Add smooth scrolling from link to target element.
 
 
-</details>
+	</details>
 * `force_svg_support`
 
-<details>
+	<details>
 
-```php
-public force_svg_support()
-```
+	```php
+	public force_svg_support()
+	```
 
-Force SVG support, replacing no-svg class name with svg class name.
+	Force SVG support, replacing no-svg class name with svg class name.
 
 
-</details>
+	</details>
 * `force_fixed_background_support`
 
-<details>
+	<details>
 
-```php
-public force_fixed_background_support()
-```
+	```php
+	public force_fixed_background_support()
+	```
 
-Force support for fixed background-attachment.
+	Force support for fixed background-attachment.
 
 
-</details>
+	</details>
 * `add_has_header_video_body_class`
 
-<details>
+	<details>
 
-```php
-static public add_has_header_video_body_class( $args = array() )
-```
+	```php
+	static public add_has_header_video_body_class( $args = array() )
+	```
 
-Add body class when there is a header video.
+	Add body class when there is a header video.
 
 
-</details>
+	</details>
 * `get_twentyseventeen_navigation_outer_height`
 
-<details>
+	<details>
 
-```php
-static protected get_twentyseventeen_navigation_outer_height()
-```
+	```php
+	static protected get_twentyseventeen_navigation_outer_height()
+	```
 
-Get the (common) navigation outer height.
+	Get the (common) navigation outer height.
 
 
-</details>
+	</details>
 * `add_twentytwenty_masthead_styles`
 
-<details>
+	<details>
 
-```php
-static public add_twentytwenty_masthead_styles()
-```
+	```php
+	static public add_twentytwenty_masthead_styles()
+	```
 
-Add required styles for featured image header and image blocks in Twenty Twenty.
+	Add required styles for featured image header and image blocks in Twenty Twenty.
 
 
-</details>
+	</details>
 * `add_twentytwenty_custom_logo_fix`
 
-<details>
+	<details>
 
-```php
-static public add_twentytwenty_custom_logo_fix()
-```
+	```php
+	static public add_twentytwenty_custom_logo_fix()
+	```
 
-Fix display of Custom Logo in Twenty Twenty.
+	Fix display of Custom Logo in Twenty Twenty.
 
 This is required because width:auto on the site-logo amp-img does not preserve the proportional width in the same way as the same styles applied to an img.
 
 
-</details>
+	</details>
 * `add_img_display_block_fix`
 
-<details>
+	<details>
 
-```php
-static public add_img_display_block_fix()
-```
+	```php
+	static public add_img_display_block_fix()
+	```
 
-Add style rule with a selector of higher specificity than just `img` to make `amp-img` have `display:block` rather than `display:inline-block`.
+	Add style rule with a selector of higher specificity than just `img` to make `amp-img` have `display:block` rather than `display:inline-block`.
 
 This is needed to override the AMP core stylesheet which has a more specific selector `.i-amphtml-layout-intrinsic` which is given a `display: inline-block`; this display value prevents margins from collapsing with surrounding block elements, resulting in larger margins in AMP than expected.
 
 
-</details>
+	</details>
 * `add_twentynineteen_masthead_styles`
 
-<details>
+	<details>
 
-```php
-static public add_twentynineteen_masthead_styles()
-```
+	```php
+	static public add_twentynineteen_masthead_styles()
+	```
 
-Add required styles for featured image header in Twenty Nineteen.
+	Add required styles for featured image header in Twenty Nineteen.
 
 The following is necessary because the styles in the theme apply to the featured img, and the CSS parser will then convert the selectors to amp-img. Nevertheless, object-fit does not apply on amp-img and it needs to apply on an actual img.
 
 
-</details>
+	</details>
 * `add_twentyseventeen_masthead_styles`
 
-<details>
+	<details>
 
-```php
-static public add_twentyseventeen_masthead_styles()
-```
+	```php
+	static public add_twentyseventeen_masthead_styles()
+	```
 
-Add required styles for video and image headers.
+	Add required styles for video and image headers.
 
 This is currently used exclusively for Twenty Seventeen.
 
 
-</details>
+	</details>
 * `add_twentyseventeen_image_styles`
 
-<details>
+	<details>
 
-```php
-static public add_twentyseventeen_image_styles()
-```
+	```php
+	static public add_twentyseventeen_image_styles()
+	```
 
-Override the featured image header styling in style.css.
+	Override the featured image header styling in style.css.
 
 Used only for Twenty Seventeen.
 
 
-</details>
+	</details>
 * `add_twentyseventeen_sticky_nav_menu`
 
-<details>
+	<details>
 
-```php
-public add_twentyseventeen_sticky_nav_menu()
-```
+	```php
+	public add_twentyseventeen_sticky_nav_menu()
+	```
 
-Add sticky nav menu to Twenty Seventeen.
+	Add sticky nav menu to Twenty Seventeen.
 
 This is implemented by cloning the navigation-top element, giving it a fixed position outside of the viewport, and then showing it at the top of the window as soon as the original nav begins to get scrolled out of view. In order to improve accessibility, the cloned nav gets aria-hidden=true and all of the links get tabindex=-1 to prevent the keyboard from focusing on elements off the screen; it is not necessary to focus on the elements in the fixed nav menu because as soon as the original nav menu is focused then the window is scrolled to the top anyway.
 
 
-</details>
+	</details>
 * `add_nav_menu_styles`
 
-<details>
+	<details>
 
-```php
-static public add_nav_menu_styles( $args = array() )
-```
+	```php
+	static public add_nav_menu_styles( $args = array() )
+	```
 
-Add styles for the nav menu specifically to deal with AMP running in a no-js context.
+	Add styles for the nav menu specifically to deal with AMP running in a no-js context.
 
 
-</details>
+	</details>
 * `adjust_twentynineteen_images`
 
-<details>
+	<details>
 
-```php
-static public adjust_twentynineteen_images()
-```
+	```php
+	static public adjust_twentynineteen_images()
+	```
 
-Adjust images in twentynineteen.
+	Adjust images in twentynineteen.
 
 
-</details>
+	</details>
 * `add_twentyfourteen_masthead_styles`
 
-<details>
+	<details>
 
-```php
-static public add_twentyfourteen_masthead_styles()
-```
+	```php
+	static public add_twentyfourteen_masthead_styles()
+	```
 
-Add styles for Twenty Fourteen masthead.
+	Add styles for Twenty Fourteen masthead.
 
 
-</details>
+	</details>
 * `add_twentyfourteen_slider_carousel`
 
-<details>
+	<details>
 
-```php
-public add_twentyfourteen_slider_carousel()
-```
+	```php
+	public add_twentyfourteen_slider_carousel()
+	```
 
-Add amp-carousel for slider in Twenty Fourteen.
+	Add amp-carousel for slider in Twenty Fourteen.
 
 
-</details>
+	</details>
 * `add_twentyfourteen_search`
 
-<details>
+	<details>
 
-```php
-public add_twentyfourteen_search()
-```
+	```php
+	public add_twentyfourteen_search()
+	```
 
-Use AMP-based solutions for toggling search bar in Twenty Fourteen.
+	Use AMP-based solutions for toggling search bar in Twenty Fourteen.
 
 
-</details>
+	</details>
 * `wrap_modal_in_lightbox`
 
-<details>
+	<details>
 
-```php
-public wrap_modal_in_lightbox( $args = array() )
-```
+	```php
+	public wrap_modal_in_lightbox( $args = array() )
+	```
 
-Wrap a modal node tree in an &lt;amp-lightbox&gt; element.
+	Wrap a modal node tree in an &lt;amp-lightbox&gt; element.
 
 
-</details>
+	</details>
 * `add_twentytwenty_modals`
 
-<details>
+	<details>
 
-```php
-public add_twentytwenty_modals()
-```
+	```php
+	public add_twentytwenty_modals()
+	```
 
-Add generic modal interactivity compat for the Twenty Twenty theme.
+	Add generic modal interactivity compat for the Twenty Twenty theme.
 
 Modals implemented in JS will be transformed into &lt;amp-lightbox&gt; equivalents, with the tap actions being attached to their associated toggles.
 
 
-</details>
+	</details>
 * `add_twentytwenty_toggles`
 
-<details>
+	<details>
 
-```php
-public add_twentytwenty_toggles()
-```
+	```php
+	public add_twentytwenty_toggles()
+	```
 
-Add generic toggle interactivity compat for the Twentytwenty theme.
+	Add generic toggle interactivity compat for the Twentytwenty theme.
 
 Toggles implemented in JS will be transformed into &lt;amp-bind&gt; equivalents, with &lt;amp-state&gt; components storing the CSS classes to set.
 
 
-</details>
+	</details>
 * `get_closest_submenu`
 
-<details>
+	<details>
 
-```php
-protected get_closest_submenu( \DOMElement $element )
-```
+	```php
+	protected get_closest_submenu( \DOMElement $element )
+	```
 
-Get the closest sub-menu within a menu item.
+	Get the closest sub-menu within a menu item.
 
 
-</details>
+	</details>
 * `add_twentytwenty_current_page_awareness`
 
-<details>
+	<details>
 
-```php
-public add_twentytwenty_current_page_awareness()
-```
+	```php
+	public add_twentytwenty_current_page_awareness()
+	```
 
-Automatically open the submenus related to the current page in the menu modal.
+	Automatically open the submenus related to the current page in the menu modal.
 
 
-</details>
+	</details>
 * `xpath_from_css_selector`
 
-<details>
+	<details>
 
-```php
-protected xpath_from_css_selector( $css_selector )
-```
+	```php
+	protected xpath_from_css_selector( $css_selector )
+	```
 
-Provides a &quot;best guess&quot; as to what XPath would mirror a given CSS selector.
+	Provides a &quot;best guess&quot; as to what XPath would mirror a given CSS selector.
 
 This is a very simplistic conversion and will only work for very basic CSS selectors.
 
 
-</details>
+	</details>
 * `guess_modal_role`
 
-<details>
+	<details>
 
-```php
-protected guess_modal_role( \DOMElement $modal )
-```
+	```php
+	protected guess_modal_role( \DOMElement $modal )
+	```
 
-Try to guess the role of a modal based on its classes.
+	Try to guess the role of a modal based on its classes.
 
 
-</details>
+	</details>

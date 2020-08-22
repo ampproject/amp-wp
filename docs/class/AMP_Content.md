@@ -5,133 +5,133 @@ Class AMP_Content
 ### Methods
 * `__construct`
 
-<details>
+	<details>
 
-```php
-public __construct( $content, $embed_handler_classes, $sanitizer_classes, $args = array() )
-```
+	```php
+	public __construct( $content, $embed_handler_classes, $sanitizer_classes, $args = array() )
+	```
 
-AMP_Content constructor.
+	AMP_Content constructor.
 
 
-</details>
+	</details>
 * `get_amp_content`
 
-<details>
+	<details>
 
-```php
-public get_amp_content()
-```
+	```php
+	public get_amp_content()
+	```
 
-Get AMP content.
+	Get AMP content.
 
 
-</details>
+	</details>
 * `get_amp_scripts`
 
-<details>
+	<details>
 
-```php
-public get_amp_scripts()
-```
+	```php
+	public get_amp_scripts()
+	```
 
-Get AMP scripts.
+	Get AMP scripts.
 
 
-</details>
+	</details>
 * `get_amp_styles`
 
-<details>
+	<details>
 
-```php
-public get_amp_styles()
-```
+	```php
+	public get_amp_styles()
+	```
 
-Get AMP styles.
+	Get AMP styles.
 
 
-</details>
+	</details>
 * `get_amp_stylesheets`
 
-<details>
+	<details>
 
-```php
-public get_amp_stylesheets()
-```
+	```php
+	public get_amp_stylesheets()
+	```
 
-Get AMP styles.
+	Get AMP styles.
 
 
-</details>
+	</details>
 * `transform`
 
-<details>
+	<details>
 
-```php
-private transform()
-```
+	```php
+	private transform()
+	```
 
-Transform.
+	Transform.
 
 
-</details>
+	</details>
 * `add_scripts`
 
-<details>
+	<details>
 
-```php
-private add_scripts( $scripts )
-```
+	```php
+	private add_scripts( $scripts )
+	```
 
-Add scripts.
+	Add scripts.
 
 
-</details>
+	</details>
 * `add_stylesheets`
 
-<details>
+	<details>
 
-```php
-private add_stylesheets( $stylesheets )
-```
+	```php
+	private add_stylesheets( $stylesheets )
+	```
 
-Add stylesheets.
+	Add stylesheets.
 
 
-</details>
+	</details>
 * `register_embed_handlers`
 
-<details>
+	<details>
 
-```php
-private register_embed_handlers( $embed_handler_classes )
-```
+	```php
+	private register_embed_handlers( $embed_handler_classes )
+	```
 
-Register embed handlers.
+	Register embed handlers.
 
 
-</details>
+	</details>
 * `unregister_embed_handlers`
 
-<details>
+	<details>
 
-```php
-private unregister_embed_handlers( $embed_handlers )
-```
+	```php
+	private unregister_embed_handlers( $embed_handlers )
+	```
 
-Unregister embed handlers.
+	Unregister embed handlers.
 
 
-</details>
+	</details>
 * `sanitize`
 
-<details>
+	<details>
 
-```php
-private sanitize( $content )
-```
+	```php
+	private sanitize( $content )
+	```
 
-Sanitize.
+	Sanitize.
 
 
-</details>
+	</details>

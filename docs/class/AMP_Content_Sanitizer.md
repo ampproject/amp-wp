@@ -5,25 +5,25 @@ Class AMP_Content_Sanitizer
 ### Methods
 * `sanitize`
 
-<details>
+	<details>
 
-```php
-static public sanitize( $content, array $sanitizer_classes, $global_args = array() )
-```
+	```php
+	static public sanitize( $content, array $sanitizer_classes, $global_args = array() )
+	```
 
-Sanitize _content_.
+	Sanitize _content_.
 
 
-</details>
+	</details>
 * `sanitize_document`
 
-<details>
+	<details>
 
-```php
-static public sanitize_document( Document $dom, $sanitizer_classes, $args )
-```
+	```php
+	static public sanitize_document( Document $dom, $sanitizer_classes, $args )
+	```
 
-Sanitize document.
+	Sanitize document.
 
 
-</details>
+	</details>

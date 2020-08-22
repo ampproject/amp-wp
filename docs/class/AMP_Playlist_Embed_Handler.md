@@ -7,129 +7,129 @@ Creates AMP-compatible markup for the WordPress &#039;playlist&#039; shortcode.
 ### Methods
 * `register_embed`
 
-<details>
+	<details>
 
-```php
-public register_embed()
-```
+	```php
+	public register_embed()
+	```
 
-Registers the playlist shortcode.
+	Registers the playlist shortcode.
 
 
-</details>
+	</details>
 * `unregister_embed`
 
-<details>
+	<details>
 
-```php
-public unregister_embed()
-```
+	```php
+	public unregister_embed()
+	```
 
-Unregisters the playlist shortcode.
+	Unregisters the playlist shortcode.
 
 
-</details>
+	</details>
 * `enqueue_styles`
 
-<details>
+	<details>
 
-```php
-public enqueue_styles()
-```
+	```php
+	public enqueue_styles()
+	```
 
-Enqueues the playlist styling.
+	Enqueues the playlist styling.
 
 
-</details>
+	</details>
 * `shortcode`
 
-<details>
+	<details>
 
-```php
-public shortcode( $attr )
-```
+	```php
+	public shortcode( $attr )
+	```
 
-Gets AMP-compliant markup for the playlist shortcode.
+	Gets AMP-compliant markup for the playlist shortcode.
 
 Uses the JSON that wp_playlist_shortcode() produces. Gets the markup, based on the type of playlist.
 
 
-</details>
+	</details>
 * `audio_playlist`
 
-<details>
+	<details>
 
-```php
-public audio_playlist( $data )
-```
+	```php
+	public audio_playlist( $data )
+	```
 
-Gets an AMP-compliant audio playlist.
+	Gets an AMP-compliant audio playlist.
 
 
-</details>
+	</details>
 * `video_playlist`
 
-<details>
+	<details>
 
-```php
-public video_playlist( $data )
-```
+	```php
+	public video_playlist( $data )
+	```
 
-Gets an AMP-compliant video playlist.
+	Gets an AMP-compliant video playlist.
 
 This uses similar markup to the native playlist shortcode output. So the styles from wp-mediaelement.min.css will apply to it.
 
 
-</details>
+	</details>
 * `get_thumb_dimensions`
 
-<details>
+	<details>
 
-```php
-public get_thumb_dimensions( $track )
-```
+	```php
+	public get_thumb_dimensions( $track )
+	```
 
-Gets the thumbnail image dimensions, including height and width.
+	Gets the thumbnail image dimensions, including height and width.
 
 If the width is higher than the maximum width, reduces it to the maximum width. And it proportionally reduces the height.
 
 
-</details>
+	</details>
 * `print_tracks`
 
-<details>
+	<details>
 
-```php
-public print_tracks( $state_id, $tracks )
-```
+	```php
+	public print_tracks( $state_id, $tracks )
+	```
 
-Outputs the playlist tracks, based on the type of playlist.
+	Outputs the playlist tracks, based on the type of playlist.
 
 These typically appear below the player. Clicking a track triggers the player to appear with its src.
 
 
-</details>
+	</details>
 * `get_data`
 
-<details>
+	<details>
 
-```php
-public get_data( $attr )
-```
+	```php
+	public get_data( $attr )
+	```
 
-Gets the data for the playlist.
+	Gets the data for the playlist.
 
 
-</details>
+	</details>
 * `get_title`
 
-<details>
+	<details>
 
-```php
-public get_title( $track )
-```
+	```php
+	public get_title( $track )
+	```
 
-Gets the title for the track.
+	Gets the title for the track.
 
 
-</details>
+	</details>

@@ -5,147 +5,147 @@ Post meta box class.
 ### Methods
 * `init`
 
-<details>
+	<details>
 
-```php
-public init()
-```
+	```php
+	public init()
+	```
 
-Initialize.
+	Initialize.
 
 
-</details>
+	</details>
 * `sanitize_status`
 
-<details>
+	<details>
 
-```php
-public sanitize_status( $status )
-```
+	```php
+	public sanitize_status( $status )
+	```
 
-Sanitize status.
+	Sanitize status.
 
 
-</details>
+	</details>
 * `enqueue_admin_assets`
 
-<details>
+	<details>
 
-```php
-public enqueue_admin_assets()
-```
+	```php
+	public enqueue_admin_assets()
+	```
 
-Enqueue admin assets.
+	Enqueue admin assets.
 
 
-</details>
+	</details>
 * `enqueue_block_assets`
 
-<details>
+	<details>
 
-```php
-public enqueue_block_assets()
-```
+	```php
+	public enqueue_block_assets()
+	```
 
-Enqueues block assets.
+	Enqueues block assets.
 
 
-</details>
+	</details>
 * `render_status`
 
-<details>
+	<details>
 
-```php
-public render_status( $post )
-```
+	```php
+	public render_status( $post )
+	```
 
-Render AMP status.
+	Render AMP status.
 
 
-</details>
+	</details>
 * `get_status_and_errors`
 
-<details>
+	<details>
 
-```php
-static public get_status_and_errors( $post )
-```
+	```php
+	static public get_status_and_errors( $post )
+	```
 
-Gets the AMP enabled status and errors.
+	Gets the AMP enabled status and errors.
 
 
-</details>
+	</details>
 * `get_error_messages`
 
-<details>
+	<details>
 
-```php
-public get_error_messages( $errors )
-```
+	```php
+	public get_error_messages( $errors )
+	```
 
-Gets the AMP enabled error message(s).
+	Gets the AMP enabled error message(s).
 
 
-</details>
+	</details>
 * `save_amp_status`
 
-<details>
+	<details>
 
-```php
-public save_amp_status( $post_id )
-```
+	```php
+	public save_amp_status( $post_id )
+	```
 
-Save AMP Status.
+	Save AMP Status.
 
 
-</details>
+	</details>
 * `preview_post_link`
 
-<details>
+	<details>
 
-```php
-public preview_post_link( $link )
-```
+	```php
+	public preview_post_link( $link )
+	```
 
-Modify post preview link.
+	Modify post preview link.
 
 Add the AMP query var is the amp-preview flag is set.
 
 
-</details>
+	</details>
 * `add_rest_api_fields`
 
-<details>
+	<details>
 
-```php
-public add_rest_api_fields()
-```
+	```php
+	public add_rest_api_fields()
+	```
 
-Add a REST API field to display whether AMP is enabled on supported post types.
+	Add a REST API field to display whether AMP is enabled on supported post types.
 
 
-</details>
+	</details>
 * `get_amp_enabled_rest_field`
 
-<details>
+	<details>
 
-```php
-public get_amp_enabled_rest_field( $post_data )
-```
+	```php
+	public get_amp_enabled_rest_field( $post_data )
+	```
 
-Get the value of whether AMP is enabled for a REST API request.
+	Get the value of whether AMP is enabled for a REST API request.
 
 
-</details>
+	</details>
 * `update_amp_enabled_rest_field`
 
-<details>
+	<details>
 
-```php
-public update_amp_enabled_rest_field( $is_enabled, $post )
-```
+	```php
+	public update_amp_enabled_rest_field( $is_enabled, $post )
+	```
 
-Update whether AMP is enabled for a REST API request.
+	Update whether AMP is enabled for a REST API request.
 
 
-</details>
+	</details>

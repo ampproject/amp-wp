@@ -5,25 +5,25 @@ Ensure there is a schema.org script in the document.
 ### Methods
 * `__construct`
 
-<details>
+	<details>
 
-```php
-public __construct( TransformerConfiguration $configuration )
-```
+	```php
+	public __construct( TransformerConfiguration $configuration )
+	```
 
-Instantiate a TransformedIdentifier object.
+	Instantiate a TransformedIdentifier object.
 
 
-</details>
+	</details>
 * `transform`
 
-<details>
+	<details>
 
-```php
-public transform( Document $document, ErrorCollection $errors )
-```
+	```php
+	public transform( Document $document, ErrorCollection $errors )
+	```
 
-Apply transformations to the provided DOM document.
+	Apply transformations to the provided DOM document.
 
 
-</details>
+	</details>

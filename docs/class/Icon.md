@@ -5,97 +5,97 @@ Icons used to visually represent the state of a validation error.
 ### Methods
 * `__construct`
 
-<details>
+	<details>
 
-```php
-private __construct( $icon )
-```
+	```php
+	private __construct( $icon )
+	```
 
-Constructor.
+	Constructor.
 
 
-</details>
+	</details>
 * `invalid`
 
-<details>
+	<details>
 
-```php
-static public invalid()
-```
+	```php
+	static public invalid()
+	```
 
-Invalid icon.
+	Invalid icon.
 
 
-</details>
+	</details>
 * `link`
 
-<details>
+	<details>
 
-```php
-static public link()
-```
+	```php
+	static public link()
+	```
 
-Link icon
+	Link icon
 
 
-</details>
+	</details>
 * `valid`
 
-<details>
+	<details>
 
-```php
-static public valid()
-```
+	```php
+	static public valid()
+	```
 
-Valid icon
+	Valid icon
 
 
-</details>
+	</details>
 * `warning`
 
-<details>
+	<details>
 
-```php
-static public warning()
-```
+	```php
+	static public warning()
+	```
 
-Warning icon
+	Warning icon
 
 
-</details>
+	</details>
 * `logo`
 
-<details>
+	<details>
 
-```php
-static public logo()
-```
+	```php
+	static public logo()
+	```
 
-Logo icon
+	Logo icon
 
 
-</details>
+	</details>
 * `get_color`
 
-<details>
+	<details>
 
-```php
-public get_color()
-```
+	```php
+	public get_color()
+	```
 
-Get color for current icon.
+	Get color for current icon.
 
 
-</details>
+	</details>
 * `to_html`
 
-<details>
+	<details>
 
-```php
-public to_html( $attributes = array() )
-```
+	```php
+	public to_html( $attributes = array() )
+	```
 
-Render icon as HTML.
+	Render icon as HTML.
 
 
-</details>
+	</details>

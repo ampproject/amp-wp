@@ -5,211 +5,211 @@ Service for redirecting mobile users to the AMP version of a page.
 ### Methods
 * `register`
 
-<details>
+	<details>
 
-```php
-public register()
-```
+	```php
+	public register()
+	```
 
-Register.
+	Register.
 
 
-</details>
+	</details>
 * `filter_default_options`
 
-<details>
+	<details>
 
-```php
-public filter_default_options( $defaults )
-```
+	```php
+	public filter_default_options( $defaults )
+	```
 
-Add default option.
+	Add default option.
 
 
-</details>
+	</details>
 * `sanitize_options`
 
-<details>
+	<details>
 
-```php
-public sanitize_options( $options, $new_options )
-```
+	```php
+	public sanitize_options( $options, $new_options )
+	```
 
-Sanitize options.
+	Sanitize options.
 
 
-</details>
+	</details>
 * `get_current_amp_url`
 
-<details>
+	<details>
 
-```php
-public get_current_amp_url()
-```
+	```php
+	public get_current_amp_url()
+	```
 
-Get the AMP version of the current URL.
+	Get the AMP version of the current URL.
 
 
-</details>
+	</details>
 * `redirect`
 
-<details>
+	<details>
 
-```php
-public redirect()
-```
+	```php
+	public redirect()
+	```
 
-Add redirection logic if available for request.
+	Add redirection logic if available for request.
 
 
-</details>
+	</details>
 * `filter_amp_to_amp_linking_element_excluded`
 
-<details>
+	<details>
 
-```php
-public filter_amp_to_amp_linking_element_excluded( $excluded, $url )
-```
+	```php
+	public filter_amp_to_amp_linking_element_excluded( $excluded, $url )
+	```
 
-Ensure that links/forms which point to ?noamp up-front are excluded from AMP-to-AMP linking.
+	Ensure that links/forms which point to ?noamp up-front are excluded from AMP-to-AMP linking.
 
 
-</details>
+	</details>
 * `filter_amp_to_amp_linking_element_query_vars`
 
-<details>
+	<details>
 
-```php
-public filter_amp_to_amp_linking_element_query_vars( $query_vars, $excluded )
-```
+	```php
+	public filter_amp_to_amp_linking_element_query_vars( $query_vars, $excluded )
+	```
 
-Ensure that links/forms which point to ?noamp up-front are excluded from AMP-to-AMP linking.
+	Ensure that links/forms which point to ?noamp up-front are excluded from AMP-to-AMP linking.
 
 
-</details>
+	</details>
 * `is_mobile_request`
 
-<details>
+	<details>
 
-```php
-public is_mobile_request()
-```
+	```php
+	public is_mobile_request()
+	```
 
-Determine if the current request is from a mobile device by looking at the User-Agent request header.
+	Determine if the current request is from a mobile device by looking at the User-Agent request header.
 
 This only applies if client-side redirection has been disabled.
 
 
-</details>
+	</details>
 * `is_using_client_side_redirection`
 
-<details>
+	<details>
 
-```php
-public is_using_client_side_redirection()
-```
+	```php
+	public is_using_client_side_redirection()
+	```
 
-Determine if mobile redirection should be done via JavaScript.
+	Determine if mobile redirection should be done via JavaScript.
 
 If auto-redirection is disabled due to being in the Customizer preview or in AMP Dev Mode (and thus possibly in Paired Browsing), then client-side redirection is forced.
 
 
-</details>
+	</details>
 * `get_mobile_user_agents`
 
-<details>
+	<details>
 
-```php
-public get_mobile_user_agents()
-```
+	```php
+	public get_mobile_user_agents()
+	```
 
-Get a list of mobile user agents to use for comparison against the user agent from the current request.
+	Get a list of mobile user agents to use for comparison against the user agent from the current request.
 
 Each entry may either be a simple string needle, or it be a regular expression serialized as a string in the form of `/pattern/[i]*`. If a user agent string does not match this pattern, then the string will be used as a simple string needle for the haystack.
 
 
-</details>
+	</details>
 * `is_redirection_disabled_via_query_param`
 
-<details>
+	<details>
 
-```php
-public is_redirection_disabled_via_query_param()
-```
+	```php
+	public is_redirection_disabled_via_query_param()
+	```
 
-Determine if mobile redirection is disabled via query param.
+	Determine if mobile redirection is disabled via query param.
 
 
-</details>
+	</details>
 * `is_redirection_disabled_via_cookie`
 
-<details>
+	<details>
 
-```php
-public is_redirection_disabled_via_cookie()
-```
+	```php
+	public is_redirection_disabled_via_cookie()
+	```
 
-Determine if mobile redirection is disabled via cookie.
+	Determine if mobile redirection is disabled via cookie.
 
 
-</details>
+	</details>
 * `set_mobile_redirection_disabled_cookie`
 
-<details>
+	<details>
 
-```php
-public set_mobile_redirection_disabled_cookie( $add )
-```
+	```php
+	public set_mobile_redirection_disabled_cookie( $add )
+	```
 
-Sets a cookie to disable/enable mobile redirection for the current browser session.
+	Sets a cookie to disable/enable mobile redirection for the current browser session.
 
 
-</details>
+	</details>
 * `add_mobile_redirect_script`
 
-<details>
+	<details>
 
-```php
-public add_mobile_redirect_script()
-```
+	```php
+	public add_mobile_redirect_script()
+	```
 
-Output the mobile redirection Javascript code.
+	Output the mobile redirection Javascript code.
 
 
-</details>
+	</details>
 * `add_mobile_alternative_link`
 
-<details>
+	<details>
 
-```php
-public add_mobile_alternative_link()
-```
+	```php
+	public add_mobile_alternative_link()
+	```
 
-Add rel=alternate link for AMP version.
+	Add rel=alternate link for AMP version.
 
 
-</details>
+	</details>
 * `add_mobile_version_switcher_styles`
 
-<details>
+	<details>
 
-```php
-public add_mobile_version_switcher_styles()
-```
+	```php
+	public add_mobile_version_switcher_styles()
+	```
 
-Print the styles for the mobile version switcher.
+	Print the styles for the mobile version switcher.
 
 
-</details>
+	</details>
 * `add_mobile_version_switcher_link`
 
-<details>
+	<details>
 
-```php
-public add_mobile_version_switcher_link()
-```
+	```php
+	public add_mobile_version_switcher_link()
+	```
 
-Output the link for the mobile version switcher.
+	Output the link for the mobile version switcher.
 
 
-</details>
+	</details>

@@ -5,37 +5,37 @@ Class AMP_WordPress_TV_Embed_Handler
 ### Methods
 * `register_embed`
 
-<details>
+	<details>
 
-```php
-public register_embed()
-```
+	```php
+	public register_embed()
+	```
 
-Register embed.
+	Register embed.
 
 
-</details>
+	</details>
 * `unregister_embed`
 
-<details>
+	<details>
 
-```php
-public unregister_embed()
-```
+	```php
+	public unregister_embed()
+	```
 
-Unregister embed.
+	Unregister embed.
 
 
-</details>
+	</details>
 * `filter_oembed_html`
 
-<details>
+	<details>
 
-```php
-public filter_oembed_html( $cache, $url )
-```
+	```php
+	public filter_oembed_html( $cache, $url )
+	```
 
-Filters the oembed HTML to make it valid AMP.
+	Filters the oembed HTML to make it valid AMP.
 
 
-</details>
+	</details>

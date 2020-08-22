@@ -5,111 +5,111 @@ Class AMP_Service_Worker.
 ### Methods
 * `init`
 
-<details>
+	<details>
 
-```php
-static public init()
-```
+	```php
+	static public init()
+	```
 
-Init.
+	Init.
 
 
-</details>
+	</details>
 * `add_query_var`
 
-<details>
+	<details>
 
-```php
-static public add_query_var( $vars )
-```
+	```php
+	static public add_query_var( $vars )
+	```
 
-Add query var for iframe service worker request.
+	Add query var for iframe service worker request.
 
 
-</details>
+	</details>
 * `add_cdn_script_caching`
 
-<details>
+	<details>
 
-```php
-static public add_cdn_script_caching( $service_workers )
-```
+	```php
+	static public add_cdn_script_caching( $service_workers )
+	```
 
-Add runtime caching for scripts loaded from the AMP CDN with a stale-while-revalidate strategy.
+	Add runtime caching for scripts loaded from the AMP CDN with a stale-while-revalidate strategy.
 
 
-</details>
+	</details>
 * `add_image_caching`
 
-<details>
+	<details>
 
-```php
-static public add_image_caching( $service_workers )
-```
+	```php
+	static public add_image_caching( $service_workers )
+	```
 
-Add runtime image caching from the origin with a cache-first strategy.
+	Add runtime image caching from the origin with a cache-first strategy.
 
 
-</details>
+	</details>
 * `add_google_fonts_caching`
 
-<details>
+	<details>
 
-```php
-static public add_google_fonts_caching( $service_workers )
-```
+	```php
+	static public add_google_fonts_caching( $service_workers )
+	```
 
-Add runtime caching of Google Fonts with stale-while-revalidate strategy for stylesheets and cache-first strategy for webfont files.
+	Add runtime caching of Google Fonts with stale-while-revalidate strategy for stylesheets and cache-first strategy for webfont files.
 
 
-</details>
+	</details>
 * `get_precached_script_cdn_urls`
 
-<details>
+	<details>
 
-```php
-static public get_precached_script_cdn_urls()
-```
+	```php
+	static public get_precached_script_cdn_urls()
+	```
 
-Register URLs that will be precached in the runtime cache. (Yes, this sounds somewhat strange.)
+	Register URLs that will be precached in the runtime cache. (Yes, this sounds somewhat strange.)
 
 Note that the PWA plugin handles the precaching of custom logo, custom header, and custom background. The PWA plugin also handles precaching &amp; serving of the offline/500 error pages and enabling navigation preload.
 
 
-</details>
+	</details>
 * `add_install_hooks`
 
-<details>
+	<details>
 
-```php
-static public add_install_hooks()
-```
+	```php
+	static public add_install_hooks()
+	```
 
-Add hooks to install the service worker from AMP page.
+	Add hooks to install the service worker from AMP page.
 
 
-</details>
+	</details>
 * `install_service_worker`
 
-<details>
+	<details>
 
-```php
-static public install_service_worker()
-```
+	```php
+	static public install_service_worker()
+	```
 
-Install service worker(s).
+	Install service worker(s).
 
 
-</details>
+	</details>
 * `handle_service_worker_iframe_install`
 
-<details>
+	<details>
 
-```php
-static public handle_service_worker_iframe_install()
-```
+	```php
+	static public handle_service_worker_iframe_install()
+	```
 
-Handle request to install service worker via iframe.
+	Handle request to install service worker via iframe.
 
 
-</details>
+	</details>

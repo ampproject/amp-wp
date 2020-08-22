@@ -7,61 +7,61 @@ It is used to detect circular dependencies, and can also be dumped for debugging
 ### Methods
 * `add_to_chain`
 
-<details>
+	<details>
 
-```php
-public add_to_chain( $class )
-```
+	```php
+	public add_to_chain( $class )
+	```
 
-Add class to injection chain.
+	Add class to injection chain.
 
 
-</details>
+	</details>
 * `add_resolution`
 
-<details>
+	<details>
 
-```php
-public add_resolution( $resolution )
-```
+	```php
+	public add_resolution( $resolution )
+	```
 
-Add resolution for circular reference detection.
+	Add resolution for circular reference detection.
 
 
-</details>
+	</details>
 * `get_class`
 
-<details>
+	<details>
 
-```php
-public get_class()
-```
+	```php
+	public get_class()
+	```
 
-Get the last class that was pushed to the injection chain.
+	Get the last class that was pushed to the injection chain.
 
 
-</details>
+	</details>
 * `get_chain`
 
-<details>
+	<details>
 
-```php
-public get_chain()
-```
+	```php
+	public get_chain()
+	```
 
-Get the injection chain.
+	Get the injection chain.
 
 
-</details>
+	</details>
 * `has_resolution`
 
-<details>
+	<details>
 
-```php
-public has_resolution( $resolution )
-```
+	```php
+	public has_resolution( $resolution )
+	```
 
-Check whether the injection chain already has a given resolution.
+	Check whether the injection chain already has a given resolution.
 
 
-</details>
+	</details>

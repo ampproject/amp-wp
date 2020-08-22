@@ -7,37 +7,37 @@ Strips and corrects attributes in forms.
 ### Methods
 * `sanitize`
 
-<details>
+	<details>
 
-```php
-public sanitize()
-```
+	```php
+	public sanitize()
+	```
 
-Sanitize the &lt;form&gt; elements from the HTML contained in this instance&#039;s Dom\Document.
+	Sanitize the &lt;form&gt; elements from the HTML contained in this instance&#039;s Dom\Document.
 
 
-</details>
+	</details>
 * `get_action_url`
 
-<details>
+	<details>
 
-```php
-protected get_action_url( $action_url )
-```
+	```php
+	protected get_action_url( $action_url )
+	```
 
-Get the action URL for the form element.
+	Get the action URL for the form element.
 
 
-</details>
+	</details>
 * `ensure_response_message_elements`
 
-<details>
+	<details>
 
-```php
-public ensure_response_message_elements( $form )
-```
+	```php
+	public ensure_response_message_elements( $form )
+	```
 
-Ensure that the form has a submit-success and submit-error element templates.
+	Ensure that the form has a submit-success and submit-error element templates.
 
 
-</details>
+	</details>

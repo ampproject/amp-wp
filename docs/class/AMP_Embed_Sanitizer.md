@@ -7,25 +7,25 @@ Calls sanitize_raw_embeds method on embed handlers.
 ### Methods
 * `__construct`
 
-<details>
+	<details>
 
-```php
-public __construct( $dom, $args = array() )
-```
+	```php
+	public __construct( $dom, $args = array() )
+	```
 
-AMP_Embed_Sanitizer constructor.
+	AMP_Embed_Sanitizer constructor.
 
 
-</details>
+	</details>
 * `sanitize`
 
-<details>
+	<details>
 
-```php
-public sanitize()
-```
+	```php
+	public sanitize()
+	```
 
-Checks if each embed_handler has sanitize_raw_method and calls it.
+	Checks if each embed_handler has sanitize_raw_method and calls it.
 
 
-</details>
+	</details>

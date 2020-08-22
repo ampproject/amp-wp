@@ -5,13 +5,13 @@ Class with static string utility methods.
 ### Methods
 * `endswith`
 
-<details>
+	<details>
 
-```php
-static public endswith( $haystack, $needle )
-```
+	```php
+	static public endswith( $haystack, $needle )
+	```
 
-Checks whether a given string ends in the given substring.
+	Checks whether a given string ends in the given substring.
 
 
-</details>
+	</details>

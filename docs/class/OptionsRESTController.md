@@ -5,97 +5,97 @@ OptionsRESTController class.
 ### Methods
 * `get_registration_action`
 
-<details>
+	<details>
 
-```php
-static public get_registration_action()
-```
+	```php
+	static public get_registration_action()
+	```
 
-Get the action to use for registering the service.
+	Get the action to use for registering the service.
 
 
-</details>
+	</details>
 * `__construct`
 
-<details>
+	<details>
 
-```php
-public __construct( ReaderThemes $reader_themes, \AmpProject\AmpWP\PluginSuppression $plugin_suppression )
-```
+	```php
+	public __construct( ReaderThemes $reader_themes, \AmpProject\AmpWP\PluginSuppression $plugin_suppression )
+	```
 
-Constructor.
+	Constructor.
 
 
-</details>
+	</details>
 * `register`
 
-<details>
+	<details>
 
-```php
-public register()
-```
+	```php
+	public register()
+	```
 
-Registers all routes for the controller.
+	Registers all routes for the controller.
 
 
-</details>
+	</details>
 * `get_items_permissions_check`
 
-<details>
+	<details>
 
-```php
-public get_items_permissions_check( $request )
-```
+	```php
+	public get_items_permissions_check( $request )
+	```
 
-Checks whether the current user has permission to manage options.
+	Checks whether the current user has permission to manage options.
 
 
-</details>
+	</details>
 * `get_items`
 
-<details>
+	<details>
 
-```php
-public get_items( $request )
-```
+	```php
+	public get_items( $request )
+	```
 
-Retrieves all AMP plugin options.
+	Retrieves all AMP plugin options.
 
 
-</details>
+	</details>
 * `get_nested_supportable_templates`
 
-<details>
+	<details>
 
-```php
-private get_nested_supportable_templates( $supportable_templates, $parent_template_id = null )
-```
+	```php
+	private get_nested_supportable_templates( $supportable_templates, $parent_template_id = null )
+	```
 
-Provides a hierarchical array of supportable templates.
+	Provides a hierarchical array of supportable templates.
 
 
-</details>
+	</details>
 * `update_items`
 
-<details>
+	<details>
 
-```php
-public update_items( $request )
-```
+	```php
+	public update_items( $request )
+	```
 
-Updates AMP plugin options.
+	Updates AMP plugin options.
 
 
-</details>
+	</details>
 * `get_item_schema`
 
-<details>
+	<details>
 
-```php
-public get_item_schema()
-```
+	```php
+	public get_item_schema()
+	```
 
-Retrieves the schema for plugin options provided by the endpoint.
+	Retrieves the schema for plugin options provided by the endpoint.
 
 
-</details>
+	</details>

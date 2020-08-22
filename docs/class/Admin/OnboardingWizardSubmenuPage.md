@@ -5,121 +5,121 @@ AMP setup wizard submenu page class.
 ### Methods
 * `__construct`
 
-<details>
+	<details>
 
-```php
-public __construct( \AmpProject\AmpWP\Admin\GoogleFonts $google_fonts, \AmpProject\AmpWP\Admin\ReaderThemes $reader_themes, \AmpProject\AmpWP\Admin\RESTPreloader $rest_preloader )
-```
+	```php
+	public __construct( \AmpProject\AmpWP\Admin\GoogleFonts $google_fonts, \AmpProject\AmpWP\Admin\ReaderThemes $reader_themes, \AmpProject\AmpWP\Admin\RESTPreloader $rest_preloader )
+	```
 
-OnboardingWizardSubmenuPage constructor.
+	OnboardingWizardSubmenuPage constructor.
 
 
-</details>
+	</details>
 * `is_needed`
 
-<details>
+	<details>
 
-```php
-static public is_needed()
-```
+	```php
+	static public is_needed()
+	```
 
-Check whether the conditional object is currently needed.
+	Check whether the conditional object is currently needed.
 
 
-</details>
+	</details>
 * `get_registration_action`
 
-<details>
+	<details>
 
-```php
-static public get_registration_action()
-```
+	```php
+	static public get_registration_action()
+	```
 
-Get the action to use for registering the service.
+	Get the action to use for registering the service.
 
 
-</details>
+	</details>
 * `register`
 
-<details>
+	<details>
 
-```php
-public register()
-```
+	```php
+	public register()
+	```
 
-Sets up hooks.
+	Sets up hooks.
 
 
-</details>
+	</details>
 * `override_title`
 
-<details>
+	<details>
 
-```php
-public override_title( $admin_title )
-```
+	```php
+	public override_title( $admin_title )
+	```
 
-Overrides the admin title on the wizard screen. Without this filter, the title portion would be empty.
+	Overrides the admin title on the wizard screen. Without this filter, the title portion would be empty.
 
 
-</details>
+	</details>
 * `override_template`
 
-<details>
+	<details>
 
-```php
-public override_template()
-```
+	```php
+	public override_template()
+	```
 
-Renders the setup wizard screen output and exits.
+	Renders the setup wizard screen output and exits.
 
 
-</details>
+	</details>
 * `render`
 
-<details>
+	<details>
 
-```php
-public render()
-```
+	```php
+	public render()
+	```
 
-Renders the setup wizard screen output, beginning just before the closing head tag.
+	Renders the setup wizard screen output, beginning just before the closing head tag.
 
 
-</details>
+	</details>
 * `screen_handle`
 
-<details>
+	<details>
 
-```php
-public screen_handle()
-```
+	```php
+	public screen_handle()
+	```
 
-Provides the setup screen handle.
+	Provides the setup screen handle.
 
 
-</details>
+	</details>
 * `enqueue_assets`
 
-<details>
+	<details>
 
-```php
-public enqueue_assets( $hook_suffix )
-```
+	```php
+	public enqueue_assets( $hook_suffix )
+	```
 
-Enqueues setup assets.
+	Enqueues setup assets.
 
 
-</details>
+	</details>
 * `add_preload_rest_paths`
 
-<details>
+	<details>
 
-```php
-protected add_preload_rest_paths()
-```
+	```php
+	protected add_preload_rest_paths()
+	```
 
-Adds REST paths to preload.
+	Adds REST paths to preload.
 
 
-</details>
+	</details>

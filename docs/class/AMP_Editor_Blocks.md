@@ -5,51 +5,51 @@ Class AMP_Editor_Blocks
 ### Methods
 * `init`
 
-<details>
+	<details>
 
-```php
-public init()
-```
+	```php
+	public init()
+	```
 
-Init.
+	Init.
 
 
-</details>
+	</details>
 * `include_block_atts_in_wp_kses_allowed_html`
 
-<details>
+	<details>
 
-```php
-public include_block_atts_in_wp_kses_allowed_html( $tags, $context )
-```
+	```php
+	public include_block_atts_in_wp_kses_allowed_html( $tags, $context )
+	```
 
-Allowlist elements and attributes used for AMP.
+	Allowlist elements and attributes used for AMP.
 
 This prevents AMP markup from being deleted in
 
 
-</details>
+	</details>
 * `tally_content_requiring_amp_scripts`
 
-<details>
+	<details>
 
-```php
-public tally_content_requiring_amp_scripts( $content )
-```
+	```php
+	public tally_content_requiring_amp_scripts( $content )
+	```
 
-Tally the AMP component scripts that are needed in a dirty AMP document.
+	Tally the AMP component scripts that are needed in a dirty AMP document.
 
 
-</details>
+	</details>
 * `print_dirty_amp_scripts`
 
-<details>
+	<details>
 
-```php
-public print_dirty_amp_scripts()
-```
+	```php
+	public print_dirty_amp_scripts()
+	```
 
-Print AMP scripts required for AMP components used in a non-AMP document (dirty AMP).
+	Print AMP scripts required for AMP components used in a non-AMP document (dirty AMP).
 
 
-</details>
+	</details>

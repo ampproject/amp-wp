@@ -5,133 +5,133 @@ Class AMP_Validation_Callback_Wrapper
 ### Methods
 * `__construct`
 
-<details>
+	<details>
 
-```php
-public __construct( $callback )
-```
+	```php
+	public __construct( $callback )
+	```
 
-AMP_Validation_Callback_Wrapper constructor.
+	AMP_Validation_Callback_Wrapper constructor.
 
 
-</details>
+	</details>
 * `prepare`
 
-<details>
+	<details>
 
-```php
-protected prepare( $args )
-```
+	```php
+	protected prepare( $args )
+	```
 
-Prepare for invocation.
+	Prepare for invocation.
 
 
-</details>
+	</details>
 * `__invoke`
 
-<details>
+	<details>
 
-```php
-public __invoke( $args )
-```
+	```php
+	public __invoke( $args )
+	```
 
-Invoke wrapped callback.
+	Invoke wrapped callback.
 
 
-</details>
+	</details>
 * `invoke_with_first_ref_arg`
 
-<details>
+	<details>
 
-```php
-public invoke_with_first_ref_arg( $first_arg, $other_args )
-```
+	```php
+	public invoke_with_first_ref_arg( $first_arg, $other_args )
+	```
 
-Invoke wrapped callback with first argument passed by reference.
+	Invoke wrapped callback with first argument passed by reference.
 
 
-</details>
+	</details>
 * `finalize`
 
-<details>
+	<details>
 
-```php
-protected finalize( array $preparation )
-```
+	```php
+	protected finalize( array $preparation )
+	```
 
-Finalize invocation.
+	Finalize invocation.
 
 
-</details>
+	</details>
 * `finalize_styles`
 
-<details>
+	<details>
 
-```php
-protected finalize_styles( \WP_Styles $wp_styles, array $before_registered, array $before_enqueued, array $before_extras )
-```
+	```php
+	protected finalize_styles( \WP_Styles $wp_styles, array $before_registered, array $before_enqueued, array $before_extras )
+	```
 
-Finalize styles after invocation.
+	Finalize styles after invocation.
 
 
-</details>
+	</details>
 * `finalize_scripts`
 
-<details>
+	<details>
 
-```php
-protected finalize_scripts( \WP_Scripts $wp_scripts, array $before_registered, array $before_enqueued, array $before_extras )
-```
+	```php
+	protected finalize_scripts( \WP_Scripts $wp_scripts, array $before_registered, array $before_enqueued, array $before_extras )
+	```
 
-Finalize scripts after invocation.
+	Finalize scripts after invocation.
 
 
-</details>
+	</details>
 * `offsetSet`
 
-<details>
+	<details>
 
-```php
-public offsetSet( $offset, $value )
-```
+	```php
+	public offsetSet( $offset, $value )
+	```
 
-Offset set.
+	Offset set.
 
 
-</details>
+	</details>
 * `offsetExists`
 
-<details>
+	<details>
 
-```php
-public offsetExists( $offset )
-```
+	```php
+	public offsetExists( $offset )
+	```
 
-Offset exists.
+	Offset exists.
 
 
-</details>
+	</details>
 * `offsetUnset`
 
-<details>
+	<details>
 
-```php
-public offsetUnset( $offset )
-```
+	```php
+	public offsetUnset( $offset )
+	```
 
-Offset unset.
+	Offset unset.
 
 
-</details>
+	</details>
 * `offsetGet`
 
-<details>
+	<details>
 
-```php
-public offsetGet( $offset )
-```
+	```php
+	public offsetGet( $offset )
+	```
 
-Offset get.
+	Offset get.
 
 
-</details>
+	</details>
