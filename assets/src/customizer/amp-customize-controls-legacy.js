@@ -238,13 +238,6 @@ window.ampCustomizeControls = ( function( api, $ ) {
 			api.section.bind( 'add', component.updatePanelNotifications );
 		}
 
-		// Enable AMP toggle if available and mobile device selected.
-		api.previewedDevice.bind( function( device ) {
-			if ( api.state( 'ampAvailable' ).get() ) {
-				api.state( 'ampEnabled' ).set( 'mobile' === device );
-			}
-		} );
-
 		// Message coming from previewer.
 		api.previewer.bind( 'amp-status', function( data ) {
 			api.state( 'ampAvailable' ).set( data.available );
