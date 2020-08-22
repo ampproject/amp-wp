@@ -7,11 +7,7 @@
 
 namespace AmpProject\AmpWP\Documentation\Cli;
 
-use AmpProject\AmpWP\Documentation\Model\Class_;
 use AmpProject\AmpWP\Documentation\Model\File;
-use AmpProject\AmpWP\Documentation\Model\Function_;
-use AmpProject\AmpWP\Documentation\Model\Hook;
-use AmpProject\AmpWP\Documentation\Model\Method;
 use AmpProject\AmpWP\Documentation\Model\Root;
 use AmpProject\AmpWP\Documentation\Parser\Parser;
 use AmpProject\AmpWP\Documentation\Templating\Markdown;
@@ -206,7 +202,10 @@ final class GenerateCommand {
 	 * @return bool Whether element is neither internal not deprecated.
 	 */
 	private function is_not_internal( $parsed ) {
-		if ( isset( $parsed['visibility'] ) && 'private' === $parsed['visibility'] ) {
+		if (
+			isset( $parsed['visibility'] )
+			&& 'private' === $parsed['visibility']
+		) {
 			return false;
 		}
 
@@ -297,6 +296,13 @@ final class GenerateCommand {
 			$contents = $template_engine->render( 'hook', $hook );
 			yield new Markdown( $filename, $contents );
 		}
+
+		$filename = 'README.md';
+		$contents = $template_engine->render(
+			'index',
+			compact( 'classes', 'methods', 'functions', 'hooks' )
+		);
+		yield new Markdown( $filename, $contents );
 	}
 
 	/**
