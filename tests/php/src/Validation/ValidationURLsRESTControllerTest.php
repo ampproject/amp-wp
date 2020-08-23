@@ -65,7 +65,7 @@ class ValidationURLsRESTControllerTest extends WP_UnitTestCase {
 			]
 		)->get_data();
 
-		$this->assertEquals( 7, count( $data ) );
+		$this->assertEquals( 7, count( $data['urls'] ) );
 
 		foreach ( $data['urls'] as $item ) {
 			$this->assertEquals( [ 'url', 'type' ], array_keys( $item ) );
