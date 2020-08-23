@@ -1753,9 +1753,7 @@ class AMP_Validated_URL_Post_Type {
 		?>
 		<div class="notice notice-error">
 			<p><?php echo AMP_Validation_Manager::get_validate_url_error_message( 'fatal_error_during_validation' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p>
-			<?php
-			if ( defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY ) {
-				?>
+			<?php if ( defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY ) : ?>
 				<blockquote>
 					<pre><?php echo esc_html( $error_data['message'] ); ?></pre>
 				</blockquote>
@@ -1763,9 +1761,7 @@ class AMP_Validated_URL_Post_Type {
 					<?php esc_html_e( 'Location:', 'amp' ); ?>
 					<code><?php echo esc_html( sprintf( '%s:%d', $error_data['file'], $error_data['line'] ) ); ?></code>
 				</p>
-				<?php
-			}
-			?>
+			<?php endif; ?>
 		</div>
 		<?php
 	}
