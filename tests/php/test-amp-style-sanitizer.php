@@ -984,8 +984,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			],
 			'focus_selector_after_whitespace_combinator' => [
 				'<nav class="main-navigation focused"><ul><li class="menu-item-has-children"><a href="https://example.com/">Example</a><ul><li><a href="https://example.org">Another example</a></li></ul></li></ul></nav>',
-				'.main-navigation ul li:hover > ul, .main-navigation ul    .focus > ul { left: 100%; right: auto; } nav.focused { outline:solid 1px red; }',
-				'.main-navigation ul li:hover > ul,.main-navigation ul .menu-item-has-children:focus-within > ul{left:100%;right:auto}nav.focused{outline:solid 1px red}',
+				'.main-navigation ul li:hover > ul, .main-navigation ul    .focus > ul { left: 100% } .focus > ul { right: auto } nav.focused { outline:solid 1px red; }',
+				'.main-navigation ul li:hover > ul,.main-navigation ul    .menu-item-has-children:focus-within > ul{left:100%}.menu-item-has-children:focus-within > ul{right:auto}nav.focused{outline:solid 1px red}',
 			],
 			'focus_selector_after_child_combinator' => [
 				'<nav class="main-navigation focused"><ul><li><a href="https://example.com/">Example</a><ul><li><a href="https://example.org">Another example</a></li></ul></li></ul></nav>',

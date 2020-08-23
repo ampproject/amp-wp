@@ -3085,19 +3085,27 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$selector = preg_replace_callback(
 					$this->focus_class_name_selector_pattern,
 					static function ( $matches ) {
-						if ( ! empty( $matches['combinator'] ) ) {
+						$replacement = ':focus-within';
+
+						if (
+							'focus' === $matches['class']
+							&&
+							(
+								! empty( $matches['beginning'] )
+								||
+								( ! empty( $matches['combinator'] ) && '' === trim( $matches['combinator'] ) )
+							)
+						) {
 							/*
-							 * If a whitespace combinator precedes the focus selector, prefix the pseudo class selector
+							 * If a descendant combinator precedes the focus selector, prefix the pseudo class selector
 							 * with a class selector that's known to be common among themes that use the focus selector.
 							 * This is to prevent the pseudo class selector being applied to the ancestor selector,
 							 * which can cause unintended behavior on the page.
 							 */
-
-							// Prefixed whitespace is necessary since the previous whitespace is being replaced.
-							return ' .menu-item-has-children:focus-within';
+							$replacement = '.menu-item-has-children' . $replacement;
 						}
 
-						return ':focus-within';
+						return $matches['combinator'] . $replacement;
 					},
 					$selector,
 					-1,
@@ -3176,6 +3184,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * Given a list of class names, create a regular expression pattern to match them in a selector.
 	 *
 	 * @since 1.4
+	 * @since 2.0 In addition to the class, now includes capture groups for an immediately-preceding combinator or whether the class begins the selector.
 	 *
 	 * @param string[] $class_names Class names.
 	 * @return string Regular expression pattern.
@@ -3190,7 +3199,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				(array) $class_names
 			)
 		);
-		return "/(?<combinator>(?<![>+~\s])\s+)?\.(?<class>{$class_pattern})(?=$|[^a-zA-Z0-9_-])/";
+		return "/(?:(?<beginning>^\s*\.)|(?<combinator>[>+~\s]*)\.)(?<class>{$class_pattern})(?=$|[^a-zA-Z0-9_-])/s";
 	}
 
 	/**
