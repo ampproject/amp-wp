@@ -67,7 +67,7 @@ class ValidationURLsRESTControllerTest extends WP_UnitTestCase {
 
 		$this->assertEquals( 7, count( $data ) );
 
-		foreach ( $data as $item ) {
+		foreach ( $data['urls'] as $item ) {
 			$this->assertEquals( [ 'url', 'type' ], array_keys( $item ) );
 		}
 	}
@@ -85,7 +85,7 @@ class ValidationURLsRESTControllerTest extends WP_UnitTestCase {
 				'$schema',
 				'title',
 				'type',
-				'items',
+				'properties',
 			],
 			array_keys( $schema )
 		);
@@ -95,7 +95,7 @@ class ValidationURLsRESTControllerTest extends WP_UnitTestCase {
 				'url',
 				'type',
 			],
-			array_keys( $schema['items']['properties'] )
+			array_keys( $schema['properties']['urls']['items']['properties'] )
 		);
 	}
 }

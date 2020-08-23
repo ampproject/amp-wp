@@ -114,7 +114,9 @@ final class ValidationURLsRESTController extends WP_REST_Controller implements D
 	public function get_urls( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		$validation_url_provider = new ValidationURLProvider( $request['limit'], $request['include'], true );
 
-		return rest_ensure_response( $validation_url_provider->get_urls( $request['offset'] ) );
+		$urls = rest_ensure_response( $validation_url_provider->get_urls( $request['offset'] ) );
+
+		return compact( 'urls' );
 	}
 
 	/**
@@ -125,17 +127,21 @@ final class ValidationURLsRESTController extends WP_REST_Controller implements D
 	public function get_item_schema() {
 		if ( ! $this->schema ) {
 			$this->schema = [
-				'$schema' => 'http://json-schema.org/draft-04/schema#',
-				'title'   => 'amp-wp-validation-urls',
-				'type'    => 'array',
-				'items'   => [
-					'type'       => 'object',
-					'properties' => [
-						'url'  => [
-							'type' => 'string',
-						],
-						'type' => [
-							'type' => 'string',
+				'$schema'    => 'http://json-schema.org/draft-04/schema#',
+				'title'      => 'amp-wp-validation-urls',
+				'properties' => [
+					'urls' => [
+						'type'  => 'array',
+						'items' => [
+							'type'       => 'object',
+							'properties' => [
+								'url'  => [
+									'type' => 'string',
+								],
+								'type' => [
+									'type' => 'string',
+								],
+							],
 						],
 					],
 				],
