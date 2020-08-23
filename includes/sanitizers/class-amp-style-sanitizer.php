@@ -3105,7 +3105,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 							$replacement = '.menu-item-has-children' . $replacement;
 						}
 
-						return $matches['combinator'] . $replacement;
+						// Ensure preceding combinator is preserved.
+						if ( ! empty( $matches['combinator'] ) ) {
+							$replacement = $matches['combinator'] . $replacement;
+						}
+
+						return $replacement;
 					},
 					$selector,
 					-1,
