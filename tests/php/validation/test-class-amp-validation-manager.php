@@ -1435,7 +1435,10 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 
 		// Temporary patch to support running unit tests in Gutenberg<5.7.0.
 		$rendered_block = str_replace(
-			'class="wp-block-latest-posts"',
+			[
+				'class="wp-block-latest-posts"',
+				'class="wp-block-latest-posts__list wp-block-latest-posts"',
+			],
 			'class="wp-block-latest-posts wp-block-latest-posts__list"',
 			$rendered_block
 		);
