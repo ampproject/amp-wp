@@ -3190,7 +3190,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				(array) $class_names
 			)
 		);
-		return "/(?<combinator>(?<![>+~])\s+)?\.(?<class>{$class_pattern})(?=$|[^a-zA-Z0-9_-])/";
+		return "/(?<combinator>(?<![>+~\s])\s+)?\.(?<class>{$class_pattern})(?=$|[^a-zA-Z0-9_-])/";
 	}
 
 	/**
