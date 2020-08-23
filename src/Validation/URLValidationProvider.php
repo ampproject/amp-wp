@@ -14,11 +14,11 @@ use AMP_Validation_Manager;
 use WP_Error;
 
 /**
- * ValidationProvider class.
+ * URLValidationProvider class.
  *
  * @since 2.1
  */
-final class ValidationProvider {
+final class URLValidationProvider {
 
 	/**
 	 * Key for the transient signaling validation is locked.

@@ -9,7 +9,7 @@
 
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Validation\ValidationProvider;
+use AmpProject\AmpWP\Validation\URLValidationProvider;
 use AmpProject\AmpWP\Validation\ValidationURLProvider;
 
 /**
@@ -62,9 +62,9 @@ final class AMP_CLI_Validation_Command {
 	public $wp_cli_progress;
 
 	/**
-	 * ValidationProvider instance.
+	 * URLValidationProvider instance.
 	 *
-	 * @var ValidationProvider
+	 * @var URLValidationProvider
 	 */
 	private $validation_provider;
 
@@ -267,14 +267,14 @@ final class AMP_CLI_Validation_Command {
 	/**
 	 * Provides the site scan instance.
 	 *
-	 * @return ValidationProvider
+	 * @return URLValidationProvider
 	 */
 	private function get_validation_provider() {
 		if ( ! is_null( $this->validation_provider ) ) {
 			return $this->validation_provider;
 		}
 
-		$this->validation_provider = new ValidationProvider();
+		$this->validation_provider = new URLValidationProvider();
 
 		return $this->validation_provider;
 	}

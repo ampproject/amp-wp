@@ -22,8 +22,8 @@ use AmpProject\AmpWP\BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection;
 use AmpProject\AmpWP\Infrastructure\ServiceBasedPlugin;
 use AmpProject\AmpWP\Instrumentation\ServerTiming;
 use AmpProject\AmpWP\Instrumentation\StopWatch;
-use AmpProject\AmpWP\Validation\ValidationCron;
-use AmpProject\AmpWP\Validation\ValidationRESTController;
+use AmpProject\AmpWP\Validation\URLValidationCron;
+use AmpProject\AmpWP\Validation\URLValidationRESTController;
 use AmpProject\AmpWP\Validation\ValidationURLsRESTController;
 
 use function is_user_logged_in;
@@ -92,9 +92,9 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			'admin.polyfills'                  => Polyfills::class,
 			'validated_url_stylesheet_gc'      => ValidatedUrlStylesheetDataGarbageCollection::class,
 			'validation_urls_rest_controller'  => ValidationURLsRESTController::class,
-			'validate_url_rest_controller'     => ValidationRESTController::class,
+			'validate_url_rest_controller'     => URLValidationRESTController::class,
 			'admin.analytics_menu'             => AnalyticsOptionsSubmenu::class,
-			'url_validation_cron'              => ValidationCron::class,
+			'url_validation_cron'              => URLValidationCron::class,
 		];
 	}
 

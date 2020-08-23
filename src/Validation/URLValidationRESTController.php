@@ -18,11 +18,11 @@ use WP_REST_Response;
 use WP_REST_Server;
 
 /**
- * ValidationRESTController class.
+ * URLValidationRESTController class.
  *
  * @since 2.1
  */
-final class ValidationRESTController extends WP_REST_Controller implements Delayed, Service, Registerable {
+final class URLValidationRESTController extends WP_REST_Controller implements Delayed, Service, Registerable {
 
 	/**
 	 * Response schema.
@@ -108,7 +108,7 @@ final class ValidationRESTController extends WP_REST_Controller implements Delay
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function validate_urls( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		$validation_provider = new ValidationProvider();
+		$validation_provider = new URLValidationProvider();
 
 		return $validation_provider->with_lock(
 			function() use ( $request, $validation_provider ) {

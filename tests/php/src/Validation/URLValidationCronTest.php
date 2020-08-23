@@ -5,18 +5,18 @@ namespace AmpProject\AmpWP\Tests\Validation;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
-use AmpProject\AmpWP\Validation\ValidationCron;
-use AmpProject\AmpWP\Validation\ValidationProvider;
+use AmpProject\AmpWP\Validation\URLValidationCron;
+use AmpProject\AmpWP\Validation\URLValidationProvider;
 use WP_UnitTestCase;
 
-/** @coversDefaultClass AmpProject\AmpWP\Validation\ValidationCron */
-final class ValidationCronTest extends WP_UnitTestCase {
+/** @coversDefaultClass AmpProject\AmpWP\Validation\URLValidationCron */
+final class URLValidationCronTest extends WP_UnitTestCase {
 	use PrivateAccess, AssertContainsCompatibility;
 
 	/**
 	 * Test instance
 	 *
-	 * @var ValidationCron
+	 * @var URLValidationCron
 	 */
 	private $validation_cron;
 
@@ -27,7 +27,7 @@ final class ValidationCronTest extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
-		$this->validation_cron = new ValidationCron();
+		$this->validation_cron = new URLValidationCron();
 		add_filter( 'pre_http_request', [ ValidationRequestMocking::class, 'get_validate_response' ] );
 	}
 
@@ -41,26 +41,26 @@ final class ValidationCronTest extends WP_UnitTestCase {
 
 		$this->validation_cron->validate_urls( true, false );
 		$this->assertEquals( 7, count( ValidationRequestMocking::get_validated_urls() ) );
-		$this->assertEquals( 2, get_transient( ValidationCron::OFFSET_KEY ) );
+		$this->assertEquals( 2, get_transient( URLValidationCron::OFFSET_KEY ) );
 
 		$this->validation_cron->validate_urls( true, false );
 		$this->assertEquals( 9, count( ValidationRequestMocking::get_validated_urls() ) );
-		$this->assertEquals( 4, get_transient( ValidationCron::OFFSET_KEY ) );
+		$this->assertEquals( 4, get_transient( URLValidationCron::OFFSET_KEY ) );
 
-		( new ValidationProvider() )->with_lock(
+		( new URLValidationProvider() )->with_lock(
 			function() {
 				$this->validation_cron->validate_urls( true, false );
 			}
 		);
 
-		$this->assertEquals( 4, get_transient( ValidationCron::OFFSET_KEY ) );
+		$this->assertEquals( 4, get_transient( URLValidationCron::OFFSET_KEY ) );
 
 		$this->validation_cron->validate_urls( true, false );
 		$this->assertEquals( 10, count( ValidationRequestMocking::get_validated_urls() ) );
-		$this->assertEquals( 6, get_transient( ValidationCron::OFFSET_KEY ) );
+		$this->assertEquals( 6, get_transient( URLValidationCron::OFFSET_KEY ) );
 
 		// Validation should now reset.
 		$this->validation_cron->validate_urls( true, false );
-		$this->assertEquals( 2, get_transient( ValidationCron::OFFSET_KEY ) );
+		$this->assertEquals( 2, get_transient( URLValidationCron::OFFSET_KEY ) );
 	}
 }

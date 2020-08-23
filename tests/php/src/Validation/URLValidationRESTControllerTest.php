@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for ValidationRESTController.
+ * Tests for URLValidationRESTController.
  *
  * @package AMP
  */
@@ -8,25 +8,25 @@
 namespace AmpProject\AmpWP\Tests;
 
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
-use AmpProject\AmpWP\Validation\ValidationProvider;
-use AmpProject\AmpWP\Validation\ValidationRESTController;
+use AmpProject\AmpWP\Validation\URLValidationProvider;
+use AmpProject\AmpWP\Validation\URLValidationRESTController;
 use AmpProject\AmpWP\Validation\ValidationURLProvider;
 use WP_REST_Request;
 use WP_UnitTestCase;
 
 /**
- * Tests for ValidationRESTController.
+ * Tests for URLValidationRESTController.
  *
  * @group amp-options
  *
- * @coversDefaultClass \AmpProject\AmpWP\Validation\ValidationRESTController
+ * @coversDefaultClass \AmpProject\AmpWP\Validation\URLValidationRESTController
  */
-class ValidationRESTControllerTest extends WP_UnitTestCase {
+class URLValidationRESTControllerTest extends WP_UnitTestCase {
 
 	/**
 	 * Test instance.
 	 *
-	 * @var ValidationRESTController
+	 * @var URLValidationRESTController
 	 */
 	private $controller;
 
@@ -36,7 +36,7 @@ class ValidationRESTControllerTest extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
-		$this->controller = new ValidationRESTController();
+		$this->controller = new URLValidationRESTController();
 		add_filter( 'pre_http_request', [ ValidationRequestMocking::class, 'get_validate_response' ] );
 	}
 
@@ -49,7 +49,7 @@ class ValidationRESTControllerTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests ValidationRESTController::get_items_permissions_check.
+	 * Tests URLValidationRESTController::get_items_permissions_check.
 	 *
 	 * @covers ::get_items_permissions_check
 	 */
@@ -62,7 +62,7 @@ class ValidationRESTControllerTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests ValidationRESTController::validate_urls.
+	 * Tests URLValidationRESTController::validate_urls.
 	 *
 	 * @covers ::validate_urls
 	 */
@@ -97,7 +97,7 @@ class ValidationRESTControllerTest extends WP_UnitTestCase {
 		$this->assertEquals( [ 'home' ], array_keys( $data['validity_by_type'] ) );
 		$this->assertEquals( 5, count( $data['remaining_urls'] ) );
 
-		( new ValidationProvider() )->with_lock(
+		( new URLValidationProvider() )->with_lock(
 			function() use ( $request ) {
 
 				$this->assertWPError( $this->controller->validate_urls( $request ) );
@@ -106,7 +106,7 @@ class ValidationRESTControllerTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests ValidationRESTController::get_item_schema.
+	 * Tests URLValidationRESTController::get_item_schema.
 	 *
 	 * @covers ::get_item_schema
 	 */

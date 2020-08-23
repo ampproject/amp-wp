@@ -11,11 +11,11 @@ namespace AmpProject\AmpWP\Validation;
 use AmpProject\AmpWP\BackgroundTask\CronBasedBackgroundTask;
 
 /**
- * ValidationCron class.
+ * URLValidationCron class.
  *
  * @since 2.1
  */
-final class ValidationCron extends CronBasedBackgroundTask {
+final class URLValidationCron extends CronBasedBackgroundTask {
 	/**
 	 * The cron action name.
 	 *
@@ -94,7 +94,7 @@ final class ValidationCron extends CronBasedBackgroundTask {
 			return;
 		}
 
-		$validation_provider = new ValidationProvider();
+		$validation_provider = new URLValidationProvider();
 
 		// with_lock returns an error if the process is locked.
 		$potential_error = $validation_provider->with_lock(

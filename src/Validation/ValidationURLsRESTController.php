@@ -129,6 +129,7 @@ final class ValidationURLsRESTController extends WP_REST_Controller implements D
 			$this->schema = [
 				'$schema'    => 'http://json-schema.org/draft-04/schema#',
 				'title'      => 'amp-wp-validation-urls',
+				'type'       => 'object',
 				'properties' => [
 					'urls' => [
 						'type'  => 'array',
