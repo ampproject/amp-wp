@@ -35,7 +35,7 @@ final class URLValidationCron extends CronBasedBackgroundTask {
 	 *
 	 * @var int
 	 */
-	const LIMIT_PER_TYPE = 2;
+	const DEFAULT_LIMIT_PER_TYPE = 2;
 
 	/**
 	 * The length of time to store the offset transient.
@@ -74,13 +74,29 @@ final class URLValidationCron extends CronBasedBackgroundTask {
 	}
 
 	/**
+	 * Returns the number of URLs per content type to check.
+	 *
+	 * @return int
+	 */
+	private function get_url_validation_number_per_type() {
+
+		/**
+		 * Filters the number of URLs per content type to check during each run of the cron task.
+		 *
+		 * @param int The number of URLs. Default 2.
+		 */
+		return (int) apply_filters( 'amp_url_validation_number_per_type', self::DEFAULT_LIMIT_PER_TYPE );
+	}
+
+	/**
 	 * Validates URLs beginning at the next offset.
 	 *
 	 * @param boolean $reset_if_no_urls_found If true and no URLs are found, the method will reset the offset to 0 and rerun.
 	 * @param boolean $sleep Whether to sleep between URLs. This should only be off in testing.
 	 */
 	public function validate_urls( $reset_if_no_urls_found = true, $sleep = true ) {
-		$validation_url_provider = new ValidationURLProvider( self::LIMIT_PER_TYPE, [], true );
+		$number_per_type         = $this->get_url_validation_number_per_type();
+		$validation_url_provider = new ValidationURLProvider( $number_per_type, [], true );
 		$offset                  = get_transient( self::OFFSET_KEY ) ?: 0;
 		$urls                    = $validation_url_provider->get_urls( $offset );
 
@@ -110,7 +126,7 @@ final class URLValidationCron extends CronBasedBackgroundTask {
 
 		// If the process was locked, run with the same offset next time around.
 		if ( ! is_wp_error( $potential_error ) ) {
-			set_transient( self::OFFSET_KEY, $offset + self::LIMIT_PER_TYPE );
+			set_transient( self::OFFSET_KEY, $offset + $$number_per_type );
 		}
 	}
 }

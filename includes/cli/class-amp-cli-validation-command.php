@@ -73,7 +73,7 @@ final class AMP_CLI_Validation_Command {
 	 *
 	 * @var ValidationURLProvider
 	 */
-	private $site_scan_url_provider;
+	private $validation_url_provider;
 
 	/**
 	 * Associative args passed to the command.
@@ -110,10 +110,10 @@ final class AMP_CLI_Validation_Command {
 	public function run( $args, $assoc_args ) {
 		$this->assoc_args = $assoc_args;
 
-		$site_scan_url_provider = $this->get_site_scan_url_provider();
-		$validation_provider    = $this->get_validation_provider();
+		$validation_url_provider = $this->get_validation_url_provider();
+		$validation_provider     = $this->get_validation_provider();
 
-		$number_urls_to_crawl = count( $site_scan_url_provider->get_urls() );
+		$number_urls_to_crawl = count( $validation_url_provider->get_urls() );
 		if ( ! $number_urls_to_crawl ) {
 			if ( ! empty( $this->include_conditionals ) ) {
 				WP_CLI::error(
@@ -208,9 +208,9 @@ final class AMP_CLI_Validation_Command {
 	 *
 	 * @return ValidationURLProvider
 	 */
-	private function get_site_scan_url_provider() {
-		if ( ! is_null( $this->site_scan_url_provider ) ) {
-			return $this->site_scan_url_provider;
+	private function get_validation_url_provider() {
+		if ( ! is_null( $this->validation_url_provider ) ) {
+			return $this->validation_url_provider;
 		}
 
 		$assoc_args = $this->get_assoc_args();
@@ -255,13 +255,13 @@ final class AMP_CLI_Validation_Command {
 			}
 		}
 
-		$this->site_scan_url_provider = new ValidationURLProvider(
+		$this->validation_url_provider = new ValidationURLProvider(
 			$limit_type_validate_count,
 			$include_conditionals,
 			$force_crawl_urls
 		);
 
-		return $this->site_scan_url_provider;
+		return $this->validation_url_provider;
 	}
 
 	/**
@@ -287,12 +287,12 @@ final class AMP_CLI_Validation_Command {
 	 * and iterates until it reaches the maximum number of URLs for each type.
 	 */
 	private function crawl_site() {
-		$site_scan_url_provider = $this->get_site_scan_url_provider();
-		$validation_provider    = $this->get_validation_provider();
+		$validation_url_provider = $this->get_validation_url_provider();
+		$validation_provider     = $this->get_validation_provider();
 
 		$result = $validation_provider->with_lock(
-			function() use ( $site_scan_url_provider, $validation_provider ) {
-				foreach ( $site_scan_url_provider->get_urls() as $url ) {
+			function() use ( $validation_url_provider, $validation_provider ) {
+				foreach ( $validation_url_provider->get_urls() as $url ) {
 					$validity = $validation_provider->get_url_validation( $url['url'], $url['type'], true );
 
 					if ( $this->wp_cli_progress ) {
