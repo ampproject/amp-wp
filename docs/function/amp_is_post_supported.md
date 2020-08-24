@@ -12,7 +12,7 @@ Determine whether a given post supports AMP.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:820](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L820-L822)
+:link: [includes/amp-helper-functions.php:820](../../includes/amp-helper-functions.php#L820-L822)
 
 <details>
 <summary>Show Code</summary>

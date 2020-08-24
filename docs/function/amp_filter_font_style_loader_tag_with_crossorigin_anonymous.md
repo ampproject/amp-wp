@@ -17,7 +17,7 @@ This explicitly triggers a CORS request, and gets back a non-opaque response, en
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1188](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L1188-L1207)
+:link: [includes/amp-helper-functions.php:1188](../../includes/amp-helper-functions.php#L1188-L1207)
 
 <details>
 <summary>Show Code</summary>

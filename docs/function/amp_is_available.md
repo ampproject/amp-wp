@@ -8,7 +8,7 @@ Determine whether AMP is available for the current URL.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:405](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L405-L543)
+:link: [includes/amp-helper-functions.php:405](../../includes/amp-helper-functions.php#L405-L543)
 
 <details>
 <summary>Show Code</summary>

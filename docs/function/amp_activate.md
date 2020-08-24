@@ -12,7 +12,7 @@ Handle activation of plugin.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:22](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L22-L29)
+:link: [includes/amp-helper-functions.php:22](../../includes/amp-helper-functions.php#L22-L29)
 
 <details>
 <summary>Show Code</summary>

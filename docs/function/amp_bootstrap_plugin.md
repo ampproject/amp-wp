@@ -8,7 +8,7 @@ Bootstrap plugin.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:59](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L59-L95)
+:link: [includes/amp-helper-functions.php:59](../../includes/amp-helper-functions.php#L59-L95)
 
 <details>
 <summary>Show Code</summary>

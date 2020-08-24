@@ -11,7 +11,7 @@ The following guidelines apply to logos used for general AMP pages.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1681](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L1681-L1729)
+:link: [includes/amp-helper-functions.php:1681](../../includes/amp-helper-functions.php#L1681-L1729)
 
 <details>
 <summary>Show Code</summary>

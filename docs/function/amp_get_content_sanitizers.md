@@ -12,7 +12,7 @@ Get content sanitizers.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1429](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L1429-L1605)
+:link: [includes/amp-helper-functions.php:1429](../../includes/amp-helper-functions.php#L1429-L1605)
 
 <details>
 <summary>Show Code</summary>

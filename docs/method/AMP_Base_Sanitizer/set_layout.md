@@ -12,7 +12,7 @@ Sets the layout, and possibly the &#039;height&#039; and &#039;width&#039; attri
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:282](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L282-L356)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:282](../../includes/sanitizers/class-amp-base-sanitizer.php#L282-L356)
 
 <details>
 <summary>Show Code</summary>

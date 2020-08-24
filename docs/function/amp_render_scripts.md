@@ -14,7 +14,7 @@ This is adapted from `wp_scripts()-&gt;do_items()`, but it runs only the bare mi
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1071](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L1071-L1101)
+:link: [includes/amp-helper-functions.php:1071](../../includes/amp-helper-functions.php#L1071-L1101)
 
 <details>
 <summary>Show Code</summary>

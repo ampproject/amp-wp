@@ -12,7 +12,7 @@ Handle deactivation of plugin.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:39](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L39-L51)
+:link: [includes/amp-helper-functions.php:39](../../includes/amp-helper-functions.php#L39-L51)
 
 <details>
 <summary>Show Code</summary>

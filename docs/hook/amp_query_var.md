@@ -2,7 +2,7 @@
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:606](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L606)
+:link: [includes/amp-helper-functions.php:606](../../includes/amp-helper-functions.php#L606)
 
 <details>
 <summary>Show Code</summary>

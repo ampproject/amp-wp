@@ -14,7 +14,7 @@ Note that when theme support is present (in Native/Transitional modes), the admi
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1857](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L1857-L1908)
+:link: [includes/amp-helper-functions.php:1857](../../includes/amp-helper-functions.php#L1857-L1908)
 
 <details>
 <summary>Show Code</summary>

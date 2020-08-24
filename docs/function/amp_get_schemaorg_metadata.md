@@ -8,7 +8,7 @@ Get schema.org metadata for the current query.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1740](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L1740-L1811)
+:link: [includes/amp-helper-functions.php:1740](../../includes/amp-helper-functions.php#L1740-L1811)
 
 <details>
 <summary>Show Code</summary>

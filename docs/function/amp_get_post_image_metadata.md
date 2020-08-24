@@ -12,7 +12,7 @@ Grabs featured image or the first attached image for the post.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1616](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L1616-L1664)
+:link: [includes/amp-helper-functions.php:1616](../../includes/amp-helper-functions.php#L1616-L1664)
 
 <details>
 <summary>Show Code</summary>

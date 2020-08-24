@@ -8,7 +8,7 @@ Add frontend actions.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:392](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L392-L394)
+:link: [includes/amp-helper-functions.php:392](../../includes/amp-helper-functions.php#L392-L394)
 
 <details>
 <summary>Show Code</summary>

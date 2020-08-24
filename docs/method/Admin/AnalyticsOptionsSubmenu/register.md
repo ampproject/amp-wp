@@ -8,7 +8,7 @@ Adds hooks.
 
 ### Source
 
-:link: [src/Admin/AnalyticsOptionsSubmenu.php:46](https://github.com/ampproject/amp-wp/blob/develop/src/Admin/AnalyticsOptionsSubmenu.php#L46-L48)
+:link: [src/Admin/AnalyticsOptionsSubmenu.php:46](../../src/Admin/AnalyticsOptionsSubmenu.php#L46-L48)
 
 <details>
 <summary>Show Code</summary>

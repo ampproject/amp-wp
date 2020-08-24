@@ -10,7 +10,7 @@ The return value can be overridden by previously defining a AMP_QUERY_VAR consta
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:596](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L596-L607)
+:link: [includes/amp-helper-functions.php:596](../../includes/amp-helper-functions.php#L596-L607)
 
 <details>
 <summary>Show Code</summary>

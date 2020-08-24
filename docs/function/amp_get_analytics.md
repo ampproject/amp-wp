@@ -12,7 +12,7 @@ Retrieve analytics data added in backend.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1218](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L1218-L1248)
+:link: [includes/amp-helper-functions.php:1218](../../includes/amp-helper-functions.php#L1218-L1248)
 
 <details>
 <summary>Show Code</summary>

@@ -10,7 +10,7 @@ This function must be invoked through the &#039;after_setup_theme&#039; action t
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:237](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L237-L257)
+:link: [includes/amp-helper-functions.php:237](../../includes/amp-helper-functions.php#L237-L257)
 
 <details>
 <summary>Show Code</summary>

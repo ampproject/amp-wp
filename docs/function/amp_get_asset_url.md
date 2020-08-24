@@ -12,7 +12,7 @@ Get AMP asset URL.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:916](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L916-L918)
+:link: [includes/amp-helper-functions.php:916](../../includes/amp-helper-functions.php#L916-L918)
 
 <details>
 <summary>Show Code</summary>

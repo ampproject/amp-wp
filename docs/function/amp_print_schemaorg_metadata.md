@@ -8,7 +8,7 @@ Output schema.org metadata.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1821](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L1821-L1829)
+:link: [includes/amp-helper-functions.php:1821](../../includes/amp-helper-functions.php#L1821-L1829)
 
 <details>
 <summary>Show Code</summary>

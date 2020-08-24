@@ -8,7 +8,7 @@ Return array of values that would be valid as an HTML `style` attribute.
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:183](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L183-L185)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:183](../../includes/sanitizers/class-amp-base-sanitizer.php#L183-L185)
 
 <details>
 <summary>Show Code</summary>

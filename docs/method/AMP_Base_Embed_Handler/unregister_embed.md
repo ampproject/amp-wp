@@ -8,7 +8,7 @@ Unregisters embed.
 
 ### Source
 
-:link: [includes/embeds/class-amp-base-embed-handler.php:52](https://github.com/ampproject/amp-wp/blob/develop/includes/embeds/class-amp-base-embed-handler.php#L52)
+:link: [includes/embeds/class-amp-base-embed-handler.php:52](../../includes/embeds/class-amp-base-embed-handler.php#L52)
 
 <details>
 <summary>Show Code</summary>

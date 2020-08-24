@@ -8,7 +8,7 @@ Get HTML body as DOMElement from Dom\Document received by the constructor.
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:212](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L212-L215)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:212](../../includes/sanitizers/class-amp-base-sanitizer.php#L212-L215)
 
 <details>
 <summary>Show Code</summary>

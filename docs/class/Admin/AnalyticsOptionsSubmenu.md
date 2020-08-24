@@ -10,7 +10,7 @@ Class AnalyticsOptionsSubmenu
 * [`add_submenu_link`](../method/Admin/AnalyticsOptionsSubmenu/add_submenu_link.md) - Adds a submenu link to the AMP options submenu.
 ### Source
 
-:link: [src/Admin/AnalyticsOptionsSubmenu.php:16](https://github.com/ampproject/amp-wp/blob/develop/src/Admin/AnalyticsOptionsSubmenu.php#L16-L64)
+:link: [src/Admin/AnalyticsOptionsSubmenu.php:16](../../src/Admin/AnalyticsOptionsSubmenu.php#L16-L64)
 
 <details>
 <summary>Show Code</summary>

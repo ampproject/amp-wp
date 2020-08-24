@@ -36,7 +36,7 @@ trait HasCodeLinks {
 	public function get_github_link() {
 		// TODO: Adapt based on which tag to use for documentation.
 		return sprintf(
-			'https://github.com/ampproject/amp-wp/blob/develop/%s%s',
+			'../../%s%s',
 			$this->get_file_path(),
 			$this->end_line === $this->line
 				? "#L{$this->line}"

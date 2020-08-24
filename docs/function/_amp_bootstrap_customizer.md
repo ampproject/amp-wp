@@ -10,7 +10,7 @@ Uses the priority of 12 for the &#039;after_setup_theme&#039; action. Many theme
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:557](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L557-L559)
+:link: [includes/amp-helper-functions.php:557](../../includes/amp-helper-functions.php#L557-L559)
 
 <details>
 <summary>Show Code</summary>

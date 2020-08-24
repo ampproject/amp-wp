@@ -8,7 +8,7 @@ Get AMP boilerplate code.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:929](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L929-L932)
+:link: [includes/amp-helper-functions.php:929](../../includes/amp-helper-functions.php#L929-L932)
 
 <details>
 <summary>Show Code</summary>

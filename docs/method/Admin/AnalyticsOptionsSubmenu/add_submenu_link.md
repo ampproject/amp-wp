@@ -8,7 +8,7 @@ Adds a submenu link to the AMP options submenu.
 
 ### Source
 
-:link: [src/Admin/AnalyticsOptionsSubmenu.php:53](https://github.com/ampproject/amp-wp/blob/develop/src/Admin/AnalyticsOptionsSubmenu.php#L53-L63)
+:link: [src/Admin/AnalyticsOptionsSubmenu.php:53](../../src/Admin/AnalyticsOptionsSubmenu.php#L53-L63)
 
 <details>
 <summary>Show Code</summary>
