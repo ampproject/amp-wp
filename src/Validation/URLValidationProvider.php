@@ -159,7 +159,7 @@ final class URLValidationProvider {
 			}
 		}
 
-		if ( self::FLAG_NO_REVALIDATE !== $flag && ( is_null( $validity ) || self::FLAG_FORCE_REVALIDATE === true ) ) {
+		if ( self::FLAG_NO_REVALIDATE !== $flag && ( is_null( $validity ) || self::FLAG_FORCE_REVALIDATE === $flag ) ) {
 			$validity = AMP_Validation_Manager::validate_url_and_store( $url );
 		}
 
