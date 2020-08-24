@@ -101,7 +101,7 @@ class URLValidationRESTControllerTest extends WP_UnitTestCase {
 		$this->assertEquals( 1, count( $data['results'] ) );
 		$this->assertEquals( [ 'home' ], array_keys( $data['validity_by_type'] ) );
 		$this->assertEquals( 5, count( $data['remaining_urls'] ) );
-		$this->assertFalse ( $data['locked'] );
+		$this->assertFalse( $data['locked'] );
 
 		( new URLValidationProvider() )->with_lock(
 			function() use ( $request ) {
