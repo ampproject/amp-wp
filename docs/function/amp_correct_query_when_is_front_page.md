@@ -14,7 +14,7 @@ Normally the front page would not get served if a query var is present other tha
 
 ### Source
 
-[includes/amp-helper-functions.php:289](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L289-L316)
+:link: [includes/amp-helper-functions.php:289](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L289-L316)
 
 <details>
 <summary>Show Code</summary>

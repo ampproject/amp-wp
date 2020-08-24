@@ -12,7 +12,7 @@ Get content embed handlers.
 
 ### Source
 
-[includes/amp-helper-functions.php:1330](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L1330-L1380)
+:link: [includes/amp-helper-functions.php:1330](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L1330-L1380)
 
 <details>
 <summary>Show Code</summary>

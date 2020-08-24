@@ -12,7 +12,7 @@ Print analytics data.
 
 ### Source
 
-[includes/amp-helper-functions.php:1258](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L1258-L1318)
+:link: [includes/amp-helper-functions.php:1258](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L1258-L1318)
 
 <details>
 <summary>Show Code</summary>

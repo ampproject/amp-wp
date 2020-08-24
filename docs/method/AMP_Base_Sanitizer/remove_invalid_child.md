@@ -15,7 +15,7 @@ Also, calls the mutation callback for it. This tracks all the nodes that were re
 
 ### Source
 
-[includes/sanitizers/class-amp-base-sanitizer.php:465](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L465-L487)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:465](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L465-L487)
 
 <details>
 <summary>Show Code</summary>

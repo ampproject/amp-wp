@@ -12,7 +12,7 @@ Check whether a certain node should be exempt from validation.
 
 ### Source
 
-[includes/sanitizers/class-amp-base-sanitizer.php:448](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L448-L451)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:448](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L448-L451)
 
 <details>
 <summary>Show Code</summary>

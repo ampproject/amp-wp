@@ -10,7 +10,7 @@ This is normally no longer needed because the validating sanitizer will automati
 
 ### Source
 
-[includes/embeds/class-amp-base-embed-handler.php:79](https://github.com/ampproject/amp-wp/blob/develop/includes/embeds/class-amp-base-embed-handler.php#L79-L81)
+:link: [includes/embeds/class-amp-base-embed-handler.php:79](https://github.com/ampproject/amp-wp/blob/develop/includes/embeds/class-amp-base-embed-handler.php#L79-L81)
 
 <details>
 <summary>Show Code</summary>

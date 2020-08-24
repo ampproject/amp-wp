@@ -14,7 +14,7 @@ After the sanitizers are instantiated but before calling sanitize on each of the
 
 ### Source
 
-[includes/sanitizers/class-amp-base-sanitizer.php:151](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L151)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:151](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L151)
 
 <details>
 <summary>Show Code</summary>

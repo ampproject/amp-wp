@@ -8,7 +8,7 @@ Get AMP boilerplate stylesheets.
 
 ### Source
 
-[includes/amp-helper-functions.php:943](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L943-L948)
+:link: [includes/amp-helper-functions.php:943](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L943-L948)
 
 <details>
 <summary>Show Code</summary>

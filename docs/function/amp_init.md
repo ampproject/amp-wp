@@ -8,7 +8,7 @@ Init AMP.
 
 ### Source
 
-[includes/amp-helper-functions.php:103](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L103-L226)
+:link: [includes/amp-helper-functions.php:103](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L103-L226)
 
 <details>
 <summary>Show Code</summary>

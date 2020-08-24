@@ -10,7 +10,7 @@ When enabled, the &lt;html&gt; element will get the data-ampdevmode attribute an
 
 ### Source
 
-[includes/amp-helper-functions.php:1393](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L1393-L1416)
+:link: [includes/amp-helper-functions.php:1393](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L1393-L1416)
 
 <details>
 <summary>Show Code</summary>

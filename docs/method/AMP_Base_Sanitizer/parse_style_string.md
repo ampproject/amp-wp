@@ -12,7 +12,7 @@ Parse a style string into an associative array of style attributes.
 
 ### Source
 
-[includes/sanitizers/class-amp-base-sanitizer.php:741](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L741-L755)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:741](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L741-L755)
 
 <details>
 <summary>Show Code</summary>

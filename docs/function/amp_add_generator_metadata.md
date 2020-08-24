@@ -8,7 +8,7 @@ Add generator metadata.
 
 ### Source
 
-[includes/amp-helper-functions.php:958](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L958-L970)
+:link: [includes/amp-helper-functions.php:958](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L958-L970)
 
 <details>
 <summary>Show Code</summary>

@@ -14,7 +14,7 @@ Get regex pattern for matching HTML attributes from a given tag name.
 
 ### Source
 
-[includes/embeds/class-amp-base-embed-handler.php:93](https://github.com/ampproject/amp-wp/blob/develop/includes/embeds/class-amp-base-embed-handler.php#L93-L111)
+:link: [includes/embeds/class-amp-base-embed-handler.php:93](https://github.com/ampproject/amp-wp/blob/develop/includes/embeds/class-amp-base-embed-handler.php#L93-L111)
 
 <details>
 <summary>Show Code</summary>

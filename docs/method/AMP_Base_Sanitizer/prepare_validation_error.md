@@ -13,7 +13,7 @@ Prepare validation error.
 
 ### Source
 
-[includes/sanitizers/class-amp-base-sanitizer.php:565](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L565-L631)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:565](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L565-L631)
 
 <details>
 <summary>Show Code</summary>

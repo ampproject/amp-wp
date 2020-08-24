@@ -14,7 +14,7 @@ This avoids issues when filtering the deprecated `query_string` hook.
 
 ### Source
 
-[includes/amp-helper-functions.php:270](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L270-L275)
+:link: [includes/amp-helper-functions.php:270](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L270-L275)
 
 <details>
 <summary>Show Code</summary>

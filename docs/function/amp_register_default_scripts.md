@@ -12,7 +12,7 @@ Register default scripts for AMP components.
 
 ### Source
 
-[includes/amp-helper-functions.php:979](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L979-L1035)
+:link: [includes/amp-helper-functions.php:979](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L979-L1035)
 
 <details>
 <summary>Show Code</summary>

@@ -12,7 +12,7 @@ Check whether a node is exempt from validation during dev mode.
 
 ### Source
 
-[includes/sanitizers/class-amp-base-sanitizer.php:435](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L435-L438)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:435](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L435-L438)
 
 <details>
 <summary>Show Code</summary>

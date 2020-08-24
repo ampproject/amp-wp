@@ -12,7 +12,7 @@ Retrieves the full AMP-specific permalink for the given post ID.
 
 ### Source
 
-[includes/amp-helper-functions.php:662](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L662-L731)
+:link: [includes/amp-helper-functions.php:662](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L662-L731)
 
 <details>
 <summary>Show Code</summary>

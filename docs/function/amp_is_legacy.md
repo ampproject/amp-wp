@@ -8,7 +8,7 @@ Determines whether the legacy AMP post templates are being used.
 
 ### Source
 
-[includes/amp-helper-functions.php:373](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L373-L384)
+:link: [includes/amp-helper-functions.php:373](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L373-L384)
 
 <details>
 <summary>Show Code</summary>

@@ -13,7 +13,7 @@ Set AMP attributes.
 
 ### Source
 
-[includes/sanitizers/class-amp-base-sanitizer.php:689](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L689-L697)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:689](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L689-L697)
 
 <details>
 <summary>Show Code</summary>

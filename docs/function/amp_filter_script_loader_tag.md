@@ -13,7 +13,7 @@ Add AMP script attributes to enqueued scripts.
 
 ### Source
 
-[includes/amp-helper-functions.php:1114](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L1114-L1164)
+:link: [includes/amp-helper-functions.php:1114](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L1114-L1164)
 
 <details>
 <summary>Show Code</summary>

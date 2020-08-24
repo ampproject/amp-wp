@@ -17,7 +17,7 @@ Also, calls the mutation callback for it. This tracks all the attributes that we
 
 ### Source
 
-[includes/sanitizers/class-amp-base-sanitizer.php:503](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L503-L531)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:503](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L503-L531)
 
 <details>
 <summary>Show Code</summary>

@@ -12,7 +12,7 @@ Register default styles.
 
 ### Source
 
-[includes/amp-helper-functions.php:1045](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L1045-L1053)
+:link: [includes/amp-helper-functions.php:1045](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L1045-L1053)
 
 <details>
 <summary>Show Code</summary>

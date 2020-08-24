@@ -8,7 +8,7 @@ Get stylesheets.
 
 ### Source
 
-[includes/sanitizers/class-amp-base-sanitizer.php:193](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L193-L203)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:193](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L193-L203)
 
 <details>
 <summary>Show Code</summary>

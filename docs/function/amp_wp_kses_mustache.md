@@ -12,7 +12,7 @@ Filters content and keeps only allowable HTML elements by amp-mustache.
 
 ### Source
 
-[includes/amp-helper-functions.php:1841](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L1841-L1844)
+:link: [includes/amp-helper-functions.php:1841](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L1841-L1844)
 
 <details>
 <summary>Show Code</summary>

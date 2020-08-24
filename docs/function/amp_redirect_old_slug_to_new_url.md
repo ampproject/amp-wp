@@ -14,7 +14,7 @@ If post slug is updated the amp page with old post slug will be redirected to th
 
 ### Source
 
-[includes/amp-helper-functions.php:572](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L572-L583)
+:link: [includes/amp-helper-functions.php:572](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L572-L583)
 
 <details>
 <summary>Show Code</summary>

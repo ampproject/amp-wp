@@ -12,7 +12,7 @@ Class constructor.
 
 ### Source
 
-[src/Admin/AnalyticsOptionsSubmenu.php:30](https://github.com/ampproject/amp-wp/blob/develop/src/Admin/AnalyticsOptionsSubmenu.php#L30-L32)
+:link: [src/Admin/AnalyticsOptionsSubmenu.php:30](https://github.com/ampproject/amp-wp/blob/develop/src/Admin/AnalyticsOptionsSubmenu.php#L30-L32)
 
 <details>
 <summary>Show Code</summary>

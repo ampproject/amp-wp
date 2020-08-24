@@ -26,6 +26,7 @@ final class Class_ implements Leaf {
 
 	use LeafConstruction;
 	use HasDocBlock;
+	use HasCodeLinks;
 
 	/**
 	 * Get an associative array of known keys.

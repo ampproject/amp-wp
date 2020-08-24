@@ -10,7 +10,7 @@ This function cannot be called before the parse_query action because it needs to
 
 ### Source
 
-[includes/amp-helper-functions.php:903](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L903-L905)
+:link: [includes/amp-helper-functions.php:903](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L903-L905)
 
 <details>
 <summary>Show Code</summary>

@@ -13,7 +13,7 @@ Sanitizes a CSS dimension specifier while being sensitive to dimension context.
 
 ### Source
 
-[includes/sanitizers/class-amp-base-sanitizer.php:225](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L225-L252)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:225](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L225-L252)
 
 <details>
 <summary>Show Code</summary>

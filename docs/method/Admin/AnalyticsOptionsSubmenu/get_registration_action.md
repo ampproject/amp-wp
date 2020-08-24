@@ -8,7 +8,7 @@ Get the action to use for registering the service.
 
 ### Source
 
-[src/Admin/AnalyticsOptionsSubmenu.php:39](https://github.com/ampproject/amp-wp/blob/develop/src/Admin/AnalyticsOptionsSubmenu.php#L39-L41)
+:link: [src/Admin/AnalyticsOptionsSubmenu.php:39](https://github.com/ampproject/amp-wp/blob/develop/src/Admin/AnalyticsOptionsSubmenu.php#L39-L41)
 
 <details>
 <summary>Show Code</summary>
