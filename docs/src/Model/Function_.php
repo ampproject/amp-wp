@@ -131,21 +131,4 @@ final class Function_ implements Leaf {
 				: ''
 		);
 	}
-
-	public function get_file_path() {
-		if ( ! $this->parent instanceof File ) {
-			return '<unknown>';
-		}
-
-		return $this->parent->path;
-	}
-
-	public function get_github_link() {
-		return 'TODO';
-	}
-
-	public function get_code() {
-		// TODO
-		return '<php ?>';
-	}
 }

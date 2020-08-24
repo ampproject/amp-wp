@@ -10,12 +10,15 @@ Uses the priority of 12 for the &#039;after_setup_theme&#039; action. Many theme
 
 ### Source
 
-[includes/amp-helper-functions.php:557](TODO)
+[includes/amp-helper-functions.php:557](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L557-L559)
 
 <details>
 <summary>Show Code</summary>
 
 ```php
-<php ?>```
+function _amp_bootstrap_customizer() {
+	add_action( 'after_setup_theme', 'amp_init_customizer', 12 );
+}
+```
 
 </details>

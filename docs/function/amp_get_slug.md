@@ -10,12 +10,24 @@ The return value can be overridden by previously defining a AMP_QUERY_VAR consta
 
 ### Source
 
-[includes/amp-helper-functions.php:596](TODO)
+[includes/amp-helper-functions.php:596](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L596-L607)
 
 <details>
 <summary>Show Code</summary>
 
 ```php
-<php ?>```
+function amp_get_slug() {
+	/**
+	 * Filter the AMP query variable.
+	 *
+	 * Warning: This filter may become deprecated.
+	 *
+	 * @since 0.3.2
+	 *
+	 * @param string $query_var The AMP query variable.
+	 */
+	return apply_filters( 'amp_query_var', defined( 'AMP_QUERY_VAR' ) ? AMP_QUERY_VAR : QueryVar::AMP );
+}
+```
 
 </details>

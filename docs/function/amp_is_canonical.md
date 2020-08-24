@@ -21,12 +21,15 @@ Themes can register support for this with `add_theme_support( AMP_Theme_Support:
 
 ### Source
 
-[includes/amp-helper-functions.php:363](TODO)
+[includes/amp-helper-functions.php:363](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L363-L365)
 
 <details>
 <summary>Show Code</summary>
 
 ```php
-<php ?>```
+function amp_is_canonical() {
+	return AMP_Theme_Support::STANDARD_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
+}
+```
 
 </details>

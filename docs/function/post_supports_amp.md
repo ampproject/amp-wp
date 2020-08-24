@@ -12,12 +12,15 @@ Determine whether a given post supports AMP.
 
 ### Source
 
-[includes/amp-helper-functions.php:835](TODO)
+[includes/amp-helper-functions.php:835](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L835-L837)
 
 <details>
 <summary>Show Code</summary>
 
 ```php
-<php ?>```
+function post_supports_amp( $post ) {
+	return amp_is_post_supported( $post );
+}
+```
 
 </details>

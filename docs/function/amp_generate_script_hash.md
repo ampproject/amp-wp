@@ -14,12 +14,24 @@ The sha384 hash used by amp-script is represented not as hexadecimal but as base
 
 ### Source
 
-[includes/amp-helper-functions.php:1926](TODO)
+[includes/amp-helper-functions.php:1926](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L1926-L1937)
 
 <details>
 <summary>Show Code</summary>
 
 ```php
-<php ?>```
+function amp_generate_script_hash( $script ) {
+	$sha384 = hash( 'sha384', $script, true );
+	if ( false === $sha384 ) {
+		return null;
+	}
+	$hash = str_replace(
+		[ '+', '/', '=' ],
+		[ '-', '_', '.' ],
+		base64_encode( $sha384 ) // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+	);
+	return 'sha384-' . $hash;
+}
+```
 
 </details>

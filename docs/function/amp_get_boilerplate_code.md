@@ -8,12 +8,16 @@ Get AMP boilerplate code.
 
 ### Source
 
-[includes/amp-helper-functions.php:929](TODO)
+[includes/amp-helper-functions.php:929](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L929-L932)
 
 <details>
 <summary>Show Code</summary>
 
 ```php
-<php ?>```
+function amp_get_boilerplate_code() {
+	$stylesheets = amp_get_boilerplate_stylesheets();
+	return sprintf( '<style amp-boilerplate>%s</style><noscript><style amp-boilerplate>%s</style></noscript>', $stylesheets[0], $stylesheets[1] );
+}
+```
 
 </details>

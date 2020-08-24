@@ -8,12 +8,21 @@ Output schema.org metadata.
 
 ### Source
 
-[includes/amp-helper-functions.php:1821](TODO)
+[includes/amp-helper-functions.php:1821](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L1821-L1829)
 
 <details>
 <summary>Show Code</summary>
 
 ```php
-<php ?>```
+function amp_print_schemaorg_metadata() {
+	$metadata = amp_get_schemaorg_metadata();
+	if ( empty( $metadata ) ) {
+		return;
+	}
+	?>
+	<script type="application/ld+json"><?php echo wp_json_encode( $metadata, JSON_UNESCAPED_UNICODE ); ?></script>
+	<?php
+}
+```
 
 </details>

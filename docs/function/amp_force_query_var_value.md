@@ -14,12 +14,18 @@ This avoids issues when filtering the deprecated `query_string` hook.
 
 ### Source
 
-[includes/amp-helper-functions.php:270](TODO)
+[includes/amp-helper-functions.php:270](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L270-L275)
 
 <details>
 <summary>Show Code</summary>
 
 ```php
-<php ?>```
+function amp_force_query_var_value( $query_vars ) {
+	if ( isset( $query_vars[ amp_get_slug() ] ) && '' === $query_vars[ amp_get_slug() ] ) {
+		$query_vars[ amp_get_slug() ] = 1;
+	}
+	return $query_vars;
+}
+```
 
 </details>

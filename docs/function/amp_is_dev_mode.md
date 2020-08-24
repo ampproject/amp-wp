@@ -10,12 +10,36 @@ When enabled, the &lt;html&gt; element will get the data-ampdevmode attribute an
 
 ### Source
 
-[includes/amp-helper-functions.php:1393](TODO)
+[includes/amp-helper-functions.php:1393](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L1393-L1416)
 
 <details>
 <summary>Show Code</summary>
 
 ```php
-<php ?>```
+function amp_is_dev_mode() {
+
+	/**
+	 * Filters whether AMP mode is enabled.
+	 *
+	 * When enabled, the data-ampdevmode attribute will be added to the document element and it will allow the
+	 * attributes to be added to the admin bar. It will also add the attribute to all elements which match the
+	 * queries for the expressions returned by the 'amp_dev_mode_element_xpaths' filter.
+	 *
+	 * @since 1.3
+	 * @param bool Whether AMP dev mode is enabled.
+	 */
+	return apply_filters(
+		'amp_dev_mode_enabled',
+		(
+			// For the few sites that forcibly show the admin bar even when the user is logged out, only enable dev
+			// mode if the user is actually logged in. This prevents the dev mode from being served to crawlers
+			// when they index the AMP version. The theme support check disables dev mode in Reader mode.
+			( is_admin_bar_showing() && is_user_logged_in() )
+			||
+			is_customize_preview()
+		)
+	);
+}
+```
 
 </details>

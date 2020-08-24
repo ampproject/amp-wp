@@ -12,12 +12,15 @@ Get AMP asset URL.
 
 ### Source
 
-[includes/amp-helper-functions.php:916](TODO)
+[includes/amp-helper-functions.php:916](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L916-L918)
 
 <details>
 <summary>Show Code</summary>
 
 ```php
-<php ?>```
+function amp_get_asset_url( $file ) {
+	return plugins_url( sprintf( 'assets/%s', $file ), AMP__FILE__ );
+}
+```
 
 </details>

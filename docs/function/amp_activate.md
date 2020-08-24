@@ -12,12 +12,20 @@ Handle activation of plugin.
 
 ### Source
 
-[includes/amp-helper-functions.php:22](TODO)
+[includes/amp-helper-functions.php:22](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L22-L29)
 
 <details>
 <summary>Show Code</summary>
 
 ```php
-<php ?>```
+function amp_activate( $network_wide = false ) {
+	AmpWpPluginFactory::create()->activate( $network_wide );
+	amp_after_setup_theme();
+	if ( ! did_action( 'amp_init' ) ) {
+		amp_init();
+	}
+	flush_rewrite_rules();
+}
+```
 
 </details>

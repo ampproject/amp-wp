@@ -14,12 +14,43 @@ This is adapted from `wp_scripts()-&gt;do_items()`, but it runs only the bare mi
 
 ### Source
 
-[includes/amp-helper-functions.php:1071](TODO)
+[includes/amp-helper-functions.php:1071](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L1071-L1101)
 
 <details>
 <summary>Show Code</summary>
 
 ```php
-<php ?>```
+function amp_render_scripts( $scripts ) {
+	$script_tags = '';
+
+	/*
+	 * Make sure the src is up to date. This allows for embed handlers to override the
+	 * default extension version by defining a different URL.
+	 */
+	foreach ( $scripts as $handle => $src ) {
+		if ( is_string( $src ) && wp_script_is( $handle, 'registered' ) ) {
+			wp_scripts()->registered[ $handle ]->src = $src;
+		}
+	}
+
+	foreach ( array_diff( array_keys( $scripts ), wp_scripts()->done ) as $handle ) {
+		if ( ! wp_script_is( $handle, 'registered' ) ) {
+			continue;
+		}
+
+		$script_dep   = wp_scripts()->registered[ $handle ];
+		$script_tags .= amp_filter_script_loader_tag(
+			sprintf(
+				"<script type='text/javascript' src='%s'></script>\n", // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+				esc_url( $script_dep->src )
+			),
+			$handle
+		);
+
+		wp_scripts()->done[] = $handle;
+	}
+	return $script_tags;
+}
+```
 
 </details>

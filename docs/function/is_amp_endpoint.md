@@ -10,12 +10,15 @@ This function cannot be called before the parse_query action because it needs to
 
 ### Source
 
-[includes/amp-helper-functions.php:903](TODO)
+[includes/amp-helper-functions.php:903](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L903-L905)
 
 <details>
 <summary>Show Code</summary>
 
 ```php
-<php ?>```
+function is_amp_endpoint() {
+	return amp_is_request();
+}
+```
 
 </details>

@@ -12,12 +12,25 @@ Handle deactivation of plugin.
 
 ### Source
 
-[includes/amp-helper-functions.php:39](TODO)
+[includes/amp-helper-functions.php:39](https://github.com/ampproject/amp-wp/blob/develop/includes/amp-helper-functions.php#L39-L51)
 
 <details>
 <summary>Show Code</summary>
 
 ```php
-<php ?>```
+function amp_deactivate( $network_wide = false ) {
+	AmpWpPluginFactory::create()->deactivate( $network_wide );
+	// We need to manually remove the amp endpoint.
+	global $wp_rewrite;
+	foreach ( $wp_rewrite->endpoints as $index => $endpoint ) {
+		if ( amp_get_slug() === $endpoint[1] ) {
+			unset( $wp_rewrite->endpoints[ $index ] );
+			break;
+		}
+	}
+
+	flush_rewrite_rules( false );
+}
+```
 
 </details>
