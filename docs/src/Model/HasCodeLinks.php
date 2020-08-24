@@ -71,7 +71,7 @@ trait HasCodeLinks {
 	protected function strip_extra_indentation( $lines ) {
 		// Only a single line, so just trim.
 		if ( count( $lines ) < 2 ) {
-			return [ trim( $lines[0] ) ];
+			return [ ltrim( $lines[0] ) ];
 		}
 
 		// We assume that the first line contains code and is representative for

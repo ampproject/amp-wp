@@ -14,6 +14,7 @@ Unregisters embed.
 <summary>Show Code</summary>
 
 ```php
-abstract public function unregister_embed();```
+abstract public function unregister_embed();
+```
 
 </details>

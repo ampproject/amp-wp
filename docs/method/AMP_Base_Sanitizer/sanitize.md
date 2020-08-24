@@ -14,6 +14,7 @@ Sanitize the HTML contained in the DOMDocument received by the constructor
 <summary>Show Code</summary>
 
 ```php
-abstract public function sanitize();```
+abstract public function sanitize();
+```
 
 </details>

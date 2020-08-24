@@ -8,6 +8,7 @@
 <summary>Show Code</summary>
 
 ```php
-$metadata = apply_filters( 'amp_schemaorg_metadata', $metadata );```
+$metadata = apply_filters( 'amp_schemaorg_metadata', $metadata );
+```
 
 </details>

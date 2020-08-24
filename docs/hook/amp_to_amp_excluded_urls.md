@@ -8,6 +8,7 @@
 <summary>Show Code</summary>
 
 ```php
-$excluded_urls = apply_filters( 'amp_to_amp_excluded_urls', [] );```
+$excluded_urls = apply_filters( 'amp_to_amp_excluded_urls', [] );
+```
 
 </details>

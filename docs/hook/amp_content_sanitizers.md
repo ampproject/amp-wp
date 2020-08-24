@@ -8,6 +8,7 @@
 <summary>Show Code</summary>
 
 ```php
-$sanitizers = apply_filters( 'amp_content_sanitizers', $sanitizers, $post );```
+$sanitizers = apply_filters( 'amp_content_sanitizers', $sanitizers, $post );
+```
 
 </details>

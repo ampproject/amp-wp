@@ -20,6 +20,7 @@ Add actions and filters before the page is rendered so that the sanitizer can fi
 <summary>Show Code</summary>
 
 ```php
-public static function add_buffering_hooks( $args = [] ) {} // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable```
+public static function add_buffering_hooks( $args = [] ) {} // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+```
 
 </details>

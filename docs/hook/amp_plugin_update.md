@@ -8,6 +8,7 @@
 <summary>Show Code</summary>
 
 ```php
-do_action( 'amp_plugin_update', $old_version );```
+do_action( 'amp_plugin_update', $old_version );
+```
 
 </details>

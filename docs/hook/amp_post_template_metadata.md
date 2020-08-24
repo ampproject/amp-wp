@@ -8,6 +8,7 @@
 <summary>Show Code</summary>
 
 ```php
-$metadata = apply_filters( 'amp_post_template_metadata', $metadata, $queried_object );```
+$metadata = apply_filters( 'amp_post_template_metadata', $metadata, $queried_object );
+```
 
 </details>

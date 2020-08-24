@@ -8,6 +8,7 @@
 <summary>Show Code</summary>
 
 ```php
-do_action( 'amp_print_analytics', $analytics_entries );```
+do_action( 'amp_print_analytics', $analytics_entries );
+```
 
 </details>

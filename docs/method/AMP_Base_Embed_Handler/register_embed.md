@@ -14,6 +14,7 @@ Registers embed.
 <summary>Show Code</summary>
 
 ```php
-abstract public function register_embed();```
+abstract public function register_embed();
+```
 
 </details>
