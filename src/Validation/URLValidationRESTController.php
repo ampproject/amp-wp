@@ -146,6 +146,7 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 				'unaccepted_errors' => $validation_provider->unaccepted_errors,
 				'validity_by_type'  => $validation_provider->validity_by_type,
 				'remaining_urls'    => array_merge( $urls, $urls_to_retry ),
+				'locked'            => $validation_provider->is_locked(),
 			]
 		);
 	}
@@ -176,6 +177,9 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 					],
 					'remaining_urls'    => [
 						'type' => 'array',
+					],
+					'locked'            => [
+						'type' => 'boolean',
 					],
 				],
 			];
