@@ -188,13 +188,13 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'customize_save_after', [ $instance, 'store_modified_theme_mod_setting_timestamps' ] ) );
 		$this->assertEquals( 10, has_action( 'customize_controls_enqueue_scripts', [ $instance, 'add_customizer_scripts' ] ) );
 		$this->assertEquals( 10, has_action( 'customize_controls_print_footer_scripts', [ $instance, 'render_setting_import_section_template' ] ) );
+		$this->assertEquals( 10, has_filter( 'customize_previewable_devices', [ $reader_theme_loader, 'customize_previewable_devices' ] ) );
 		$this->assertEquals( 0, did_action( 'amp_customizer_init' ) );
 		$this->assertEquals( 0, did_action( 'amp_customizer_register_settings' ) );
 		$this->assertEquals( 0, did_action( 'amp_customizer_register_ui' ) );
 		$this->assertFalse( has_action( 'customize_controls_print_footer_scripts', [ $instance, 'print_legacy_controls_templates' ] ) );
 		$this->assertFalse( has_action( 'customize_preview_init', [ $instance, 'init_legacy_preview' ] ) );
 		$this->assertFalse( has_action( 'customize_controls_enqueue_scripts', [ $instance, 'add_legacy_customizer_scripts' ] ) );
-		$this->assertFalse( has_filter( 'customize_previewable_devices', [ $reader_theme_loader, 'customize_previewable_devices' ] ) );
 
 		foreach ( [ $header_video_setting, $external_header_video_setting ] as $setting ) {
 			$this->assertEquals( 'refresh', $setting->transport );
