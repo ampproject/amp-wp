@@ -1,8 +1,6 @@
 ## Functions
 
 * [`_amp_bootstrap_customizer`](_amp_bootstrap_customizer.md) - Bootstraps the AMP customizer.
-* [`_amp_incorrect_plugin_slug_admin_notice`](_amp_incorrect_plugin_slug_admin_notice.md) - Print admin notice if plugin installed with incorrect slug (which impacts WordPress&#039;s auto-update system).
-* [`_amp_show_load_errors_admin_notice`](_amp_show_load_errors_admin_notice.md) - Displays an admin notice about why the plugin is unable to load.
 * [`amp_activate`](amp_activate.md) - Handle activation of plugin.
 * [`amp_add_admin_bar_view_link`](amp_add_admin_bar_view_link.md) - Add &quot;View AMP&quot; admin bar item for Transitional/Reader mode.
 * [`amp_add_amphtml_link`](amp_add_amphtml_link.md) - Add amphtml link.

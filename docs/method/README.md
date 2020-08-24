@@ -33,3 +33,7 @@
 * [`AMP_Base_Sanitizer::sanitize_dimension()`](AMP_Base_Sanitizer/sanitize_dimension.md) - Sanitizes a CSS dimension specifier while being sensitive to dimension context.
 * [`AMP_Base_Sanitizer::set_layout()`](AMP_Base_Sanitizer/set_layout.md) - Sets the layout, and possibly the &#039;height&#039; and &#039;width&#039; attributes.
 * [`AMP_Base_Sanitizer::should_sanitize_validation_error()`](AMP_Base_Sanitizer/should_sanitize_validation_error.md) - Check whether or not sanitization should occur in response to validation error.
+* [`AnalyticsOptionsSubmenu::__construct()`](Admin/AnalyticsOptionsSubmenu/__construct.md) - Class constructor.
+* [`AnalyticsOptionsSubmenu::add_submenu_link()`](Admin/AnalyticsOptionsSubmenu/add_submenu_link.md) - Adds a submenu link to the AMP options submenu.
+* [`AnalyticsOptionsSubmenu::get_registration_action()`](Admin/AnalyticsOptionsSubmenu/get_registration_action.md) - Get the action to use for registering the service.
+* [`AnalyticsOptionsSubmenu::register()`](Admin/AnalyticsOptionsSubmenu/register.md) - Adds hooks.
