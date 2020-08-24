@@ -6,6 +6,7 @@
  */
 
 use AmpProject\Amp;
+use AmpProject\AmpWP\ExtraThemeAndPluginHeaders;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
@@ -260,6 +261,8 @@ class AMP_Theme_Support {
 	 * Get the theme support args.
 	 *
 	 * This avoids having to repeatedly call `get_theme_support()`, check the args, shift an item off the array, and so on.
+	 * Note that if the theme's `style.css` has the `AMP` header with a value that when converted to a boolean evaluates to `true`, then this function will return the same
+	 * as if the theme had done `add_theme_support('amp')`.
 	 *
 	 * @since 1.0
 	 *
@@ -267,6 +270,12 @@ class AMP_Theme_Support {
 	 */
 	public static function get_theme_support_args() {
 		if ( ! current_theme_supports( self::SLUG ) ) {
+			$theme_header = wp_get_theme()->get( ExtraThemeAndPluginHeaders::AMP_HEADER );
+			if ( rest_sanitize_boolean( $theme_header ) && ExtraThemeAndPluginHeaders::AMP_HEADER_LEGACY !== $theme_header ) {
+				return [
+					self::PAIRED_FLAG => true,
+				];
+			}
 			return false;
 		}
 		$support = get_theme_support( self::SLUG );

@@ -127,9 +127,10 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	public function test_add_admin_menu_new_invalid_url_count() {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		global $submenu;
-		AMP_Validation_Manager::init(); // Register the post type and taxonomy.
 
-		unset( $submenu[ AMP_Options_Manager::OPTION_NAME ] );
+		$original_submenu = $submenu;
+
+		AMP_Validation_Manager::init(); // Register the post type and taxonomy.
 		AMP_Validated_URL_Post_Type::add_admin_menu_new_invalid_url_count();
 
 		$submenu[ AMP_Options_Manager::OPTION_NAME ] = [
@@ -166,6 +167,8 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		AMP_Validated_URL_Post_Type::add_admin_menu_new_invalid_url_count();
 
 		$this->assertStringContains( '<span class="awaiting-mod"><span class="new-validation-error-urls-count">1</span></span>', $submenu[ AMP_Options_Manager::OPTION_NAME ][2][0] );
+
+		$submenu = $original_submenu;
 	}
 
 	/**
@@ -529,7 +532,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		// Insert four weeks of validated URLs.
 		$post_ids = [];
 		for ( $days_ago = 1; $days_ago <= 28; $days_ago++ ) {
-			$post_date = gmdate( 'Y-m-d H:i:s', strtotime( "$days_ago days ago" ) + 2 );
+			$post_date = gmdate( 'Y-m-d H:i:s', strtotime( "$days_ago days ago" ) + 5 );
 			$post_id   = AMP_Validated_URL_Post_Type::store_validation_errors(
 				[],
 				home_url( "/days-ago-$days_ago/" ),

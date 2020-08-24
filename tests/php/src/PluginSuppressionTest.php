@@ -22,7 +22,7 @@ use Exception;
 use WP_Block_Type_Registry;
 use WP_UnitTestCase;
 
-/** @covers PluginSuppression */
+/** @coversDefaultClass \AmpProject\AmpWP\PluginSuppression */
 final class PluginSuppressionTest extends WP_UnitTestCase {
 
 	use PrivateAccess;
@@ -187,7 +187,6 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		return $instance;
 	}
 
-	/** @covers PluginSuppression::__construct() */
 	public function test_it_can_be_initialized() {
 		$instance = $this->get_instance();
 
@@ -196,7 +195,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		$this->assertInstanceOf( Registerable::class, $instance );
 	}
 
-	/** @covers PluginSuppression::register() */
+	/** @covers ::register() */
 	public function test_register_standard_mode() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$instance = $this->get_instance();
@@ -210,7 +209,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'amp_default_options', [ $instance, 'filter_default_options' ] ) );
 	}
 
-	/** @covers PluginSuppression::register() */
+	/** @covers ::register() */
 	public function test_register_reader_theme_mode() {
 		$instance = $this->get_instance();
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
@@ -226,7 +225,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'amp_default_options', [ $instance, 'filter_default_options' ] ) );
 	}
 
-	/** @covers PluginSuppression::is_reader_theme_request() */
+	/** @covers ::is_reader_theme_request() */
 	public function test_is_reader_theme_request() {
 		$instance = $this->get_instance();
 
@@ -247,7 +246,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		$this->assertTrue( $instance->is_reader_theme_request() );
 	}
 
-	/** @covers PluginSuppression::filter_default_options() */
+	/** @covers ::filter_default_options() */
 	public function test_filter_default_options() {
 		$instance = $this->get_instance( true );
 		$this->assertEquals(
@@ -260,7 +259,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_filter( 'amp_default_options', [ $instance, 'filter_default_options' ] ) );
 	}
 
-	/** @covers PluginSuppression::maybe_suppress_plugins() */
+	/** @covers ::maybe_suppress_plugins() */
 	public function test_maybe_suppress_plugins_not_amp_endpoint() {
 		$url = home_url( '/' );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
@@ -276,7 +275,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		$this->assert_plugin_suppressed_state( false, $bad_plugin_file_slugs );
 	}
 
-	/** @covers PluginSuppression::maybe_suppress_plugins() */
+	/** @covers ::maybe_suppress_plugins() */
 	public function test_maybe_suppress_plugins_yes_amp_endpoint() {
 		$url = home_url( '/' );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
@@ -292,7 +291,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		$this->assert_plugin_suppressed_state( true, $bad_plugin_file_slugs );
 	}
 
-	/** @covers PluginSuppression::suppress_plugins() */
+	/** @covers ::suppress_plugins() */
 	public function test_suppress_plugins_none_suppressible() {
 		$url = home_url( '/' );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
@@ -308,7 +307,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		$this->assert_plugin_suppressed_state( false, $bad_plugin_file_slugs );
 	}
 
-	/** @covers PluginSuppression::suppress_plugins() */
+	/** @covers ::suppress_plugins() */
 	public function test_suppress_plugins_when_no_plugins_suppressed() {
 		$url = home_url( '/' );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
@@ -325,12 +324,12 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @covers PluginSuppression::suppress_plugins()
-	 * @covers PluginSuppression::suppress_blocks()
-	 * @covers PluginSuppression::suppress_hooks()
-	 * @covers PluginSuppression::suppress_shortcodes()
-	 * @covers PluginSuppression::suppress_widgets()
-	 * @covers PluginSuppression::is_callback_plugin_suppressed()
+	 * @covers ::suppress_plugins()
+	 * @covers ::suppress_blocks()
+	 * @covers ::suppress_hooks()
+	 * @covers ::suppress_shortcodes()
+	 * @covers ::suppress_widgets()
+	 * @covers ::is_callback_plugin_suppressed()
 	 */
 	public function test_suppress_plugins_when_conditions_satisfied_for_all() {
 		$url = home_url( '/' );
@@ -351,12 +350,12 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @covers PluginSuppression::suppress_plugins()
-	 * @covers PluginSuppression::suppress_blocks()
-	 * @covers PluginSuppression::suppress_hooks()
-	 * @covers PluginSuppression::suppress_shortcodes()
-	 * @covers PluginSuppression::suppress_widgets()
-	 * @covers PluginSuppression::is_callback_plugin_suppressed()
+	 * @covers ::suppress_plugins()
+	 * @covers ::suppress_blocks()
+	 * @covers ::suppress_hooks()
+	 * @covers ::suppress_shortcodes()
+	 * @covers ::suppress_widgets()
+	 * @covers ::is_callback_plugin_suppressed()
 	 */
 	public function test_suppress_plugins_when_conditions_satisfied_for_some() {
 		$url = home_url( '/' );
@@ -383,7 +382,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 	/**
 	 * Test validating suppressed plugins.
 	 *
-	 * @covers PluginSuppression::sanitize_options()
+	 * @covers ::sanitize_options()
 	 * @covers AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source()
 	 */
 	public function test_sanitize_options() {
@@ -471,8 +470,8 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @covers PluginSuppression::get_suppressible_plugins_with_details()
-	 * @covers PluginSuppression::get_sorted_plugin_validation_errors()
+	 * @covers ::get_suppressible_plugins_with_details()
+	 * @covers ::get_sorted_plugin_validation_errors()
 	 */
 	public function test_get_suppressible_plugins_with_details_but_no_plugins_active() {
 		$instance = $this->get_instance( true );
@@ -480,8 +479,8 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @covers PluginSuppression::get_suppressible_plugins_with_details()
-	 * @covers PluginSuppression::get_sorted_plugin_validation_errors()
+	 * @covers ::get_suppressible_plugins_with_details()
+	 * @covers ::get_sorted_plugin_validation_errors()
 	 */
 	public function test_get_suppressible_plugins_with_no_errors_present() {
 		$this->init_plugins();
@@ -494,8 +493,8 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @covers PluginSuppression::get_suppressible_plugins_with_details()
-	 * @covers PluginSuppression::get_sorted_plugin_validation_errors()
+	 * @covers ::get_suppressible_plugins_with_details()
+	 * @covers ::get_sorted_plugin_validation_errors()
 	 */
 	public function test_get_suppressible_plugins_with_details_when_plugins_active_and_errors_present() {
 		$instance = $this->get_instance( true );

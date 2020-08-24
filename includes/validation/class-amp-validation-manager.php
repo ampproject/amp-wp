@@ -2129,7 +2129,8 @@ class AMP_Validation_Manager {
 				[
 					'cookies'     => wp_unslash( $_COOKIE ), // Pass along cookies so private pages and drafts can be accessed.
 					'timeout'     => 15, // Increase from default of 5 to give extra time for the plugin to identify the sources for any given validation errors.
-					'sslverify'   => false,
+					/** This filter is documented in wp-includes/class-wp-http-streams.php */
+					'sslverify'   => apply_filters( 'https_local_ssl_verify', false ),
 					'redirection' => 0, // Because we're in a loop for redirection.
 					'headers'     => [
 						'Cache-Control' => 'no-cache',
@@ -2380,7 +2381,11 @@ class AMP_Validation_Manager {
 			case 'fatal_error_during_validation':
 				return $implode_non_empty_strings_with_spaces_and_sanitize(
 					[
-						esc_html__( 'A PHP fatal error occurred while validating the URL. This may indicate either a bug in theme/plugin code or it may be due to an issue in the AMP plugin itself. The error details appear below.', 'amp' ),
+						esc_html__( 'A PHP fatal error occurred while validating the URL. This may indicate either a bug in theme/plugin code or it may be due to an issue in the AMP plugin itself.', 'amp' ),
+						defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY
+							? esc_html__( 'The error details appear below.', 'amp' )
+							/* translators: %s is WP_DEBUG_DISPLAY */
+							: $check_error_log . ' ' . wp_kses_post( sprintf( __( 'Alternatively, you may enable %s to show the error details below.', 'amp' ), '<code>WP_DEBUG_DISPLAY</code>' ) ),
 						$support_forum_message,
 					]
 				);

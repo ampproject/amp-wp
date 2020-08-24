@@ -1531,7 +1531,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$parsed         = null;
 		$cache_key      = null;
 		$cached         = true;
-		$cache_group    = 'amp-parsed-stylesheet-v30'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
+		$cache_group    = 'amp-parsed-stylesheet-v31'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
 		$use_transients = $this->should_use_transient_caching();
 
 		$cache_impacting_options = array_merge(
@@ -3082,9 +3082,36 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			// Replace focus selectors with :focus-within.
 			if ( $this->focus_class_name_selector_pattern ) {
 				$count    = 0;
-				$selector = preg_replace(
+				$selector = preg_replace_callback(
 					$this->focus_class_name_selector_pattern,
-					':focus-within',
+					static function ( $matches ) {
+						$replacement = ':focus-within';
+
+						if (
+							'focus' === $matches['class']
+							&&
+							(
+								! empty( $matches['beginning'] )
+								||
+								( ! empty( $matches['combinator'] ) && '' === trim( $matches['combinator'] ) )
+							)
+						) {
+							/*
+							 * If a descendant combinator precedes the focus selector, prefix the pseudo class selector
+							 * with a class selector that's known to be common among themes that use the focus selector.
+							 * This is to prevent the pseudo class selector being applied to the ancestor selector,
+							 * which can cause unintended behavior on the page.
+							 */
+							$replacement = '.menu-item-has-children' . $replacement;
+						}
+
+						// Ensure preceding combinator is preserved.
+						if ( ! empty( $matches['combinator'] ) ) {
+							$replacement = $matches['combinator'] . $replacement;
+						}
+
+						return $replacement;
+					},
 					$selector,
 					-1,
 					$count
@@ -3162,6 +3189,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * Given a list of class names, create a regular expression pattern to match them in a selector.
 	 *
 	 * @since 1.4
+	 * @since 2.0 In addition to the class, now includes capture groups for an immediately-preceding combinator or whether the class begins the selector.
 	 *
 	 * @param string[] $class_names Class names.
 	 * @return string Regular expression pattern.
@@ -3176,7 +3204,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				(array) $class_names
 			)
 		);
-		return "/\.({$class_pattern})(?=$|[^a-zA-Z0-9_-])/";
+		return "/(?:(?<beginning>^\s*\.)|(?<combinator>[>+~\s]*)\.)(?<class>{$class_pattern})(?=$|[^a-zA-Z0-9_-])/s";
 	}
 
 	/**

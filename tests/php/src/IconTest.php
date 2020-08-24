@@ -6,6 +6,7 @@ use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use PHPUnit\Framework\TestCase;
 
+/** @coversDefaultClass \AmpProject\AmpWP\Icon */
 final class IconTest extends TestCase {
 
 	use AssertContainsCompatibility;
@@ -30,14 +31,14 @@ final class IconTest extends TestCase {
 	/**
 	 * @param string $type Icon type.
 	 * @dataProvider get_icon_types
-	 * @covers Icon::__construct()
-	 * @covers Icon::invalid()
-	 * @covers Icon::link()
-	 * @covers Icon::valid()
-	 * @covers Icon::warning()
-	 * @covers Icon::logo()
-	 * @covers Icon::get_color()
-	 * @covers Icon::to_html()
+	 * @covers ::__construct()
+	 * @covers ::invalid()
+	 * @covers ::link()
+	 * @covers ::valid()
+	 * @covers ::warning()
+	 * @covers ::logo()
+	 * @covers ::get_color()
+	 * @covers ::to_html()
 	 */
 	public function test_types( $type ) {
 		/** @var Icon $icon */

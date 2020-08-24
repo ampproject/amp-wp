@@ -12,6 +12,8 @@ use AmpProject\Optimizer\ErrorCollection;
 
 /**
  * Test Site_Health.
+ *
+ * @coversDefaultClass \AmpProject\AmpWP\Transformer\AmpSchemaOrgMetadata
  */
 class AmpSchemaOrgMetadataTest extends WP_UnitTestCase {
 
@@ -44,9 +46,9 @@ class AmpSchemaOrgMetadataTest extends WP_UnitTestCase {
 	/**
 	 * Test the transform method.
 	 *
-	 * @dataProvider get_schema_script_data()
+	 * @dataProvider get_schema_script_data
 	 *
-	 * @covers AmpSchemaOrgMetadata::transform()
+	 * @covers ::transform
 	 *
 	 * @param string $json     JSON data.
 	 * @param int    $expected Expected count of valid JSON+LD schema.
@@ -63,7 +65,7 @@ class AmpSchemaOrgMetadataTest extends WP_UnitTestCase {
 	/**
 	 * Test that an empty metadata array configuration does not produce the schema.org meta script.
 	 *
-	 * @covers AmpSchemaOrgMetadata::transform()
+	 * @covers ::transform
 	 */
 	public function test_empty_metadata_configuration() {
 		add_filter( 'amp_schemaorg_metadata', '__return_empty_array' );
