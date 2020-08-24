@@ -140,11 +140,6 @@ final class ValidationURLProvider {
 	/**
 	 * Gets whether the template is supported.
 	 *
-	 * If the user has passed an include argument to the WP-CLI command, use that to find if this template supports AMP.
-	 * For example, wp amp validation run --include=is_tag,is_category
-	 * would return true only if is_tag() or is_category().
-	 * But passing the self::FLAG_NAME_FORCE_VALIDATION argument to the WP-CLI command overrides this.
-	 *
 	 * @param string $template The template to check.
 	 * @return bool Whether the template is supported.
 	 */
@@ -169,9 +164,8 @@ final class ValidationURLProvider {
 	 * By default, this only gets the post IDs if they support AMP.
 	 * This means that 'Posts' isn't deselected in 'AMP Settings' > 'Supported Templates'.
 	 * And 'Enable AMP' isn't unchecked in the post's editor.
-	 * But if $include_unsupported is true, this simply returns all of the IDs.
 	 *
-	 * @param array $ids THe post IDs to check for AMP support.
+	 * @param array $ids The post IDs to check for AMP support.
 	 * @return array The post IDs that support AMP, or an empty array.
 	 */
 	private function get_posts_that_support_amp( $ids ) {
@@ -275,7 +269,6 @@ final class ValidationURLProvider {
 	 * This only gets the term IDs if they support AMP.
 	 * If their taxonomy is unchecked in 'AMP Settings' > 'Supported Templates,' this does not return them.
 	 * For example, if 'Categories' is unchecked.
-	 * This can be overridden by passing the self::FLAG_NAME_FORCE_VALIDATION argument to the WP-CLI command.
 	 *
 	 * @param string $taxonomy The taxonomy.
 	 * @return boolean Whether the taxonomy supports AMP.
