@@ -107,39 +107,49 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
-	public function validate_urls( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+	public function validate_urls( $request ) {
 		$validation_provider = new URLValidationProvider();
 
-		return $validation_provider->with_lock(
-			function() use ( $request, $validation_provider ) {
-				$results = [];
-				$urls    = $request['urls'];
+		$results      = [];
+		$urls         = $request['urls'];
+		$errored_urls = [];
 
-				while ( ! empty( $urls ) ) {
-					$url = array_shift( $urls );
+		while ( ! empty( $urls ) ) {
+			$url = array_shift( $urls );
 
-					$validation = $validation_provider->get_url_validation( $url['url'], $url['type'] );
+			// Attempt to retrieve the stored result for the URL.
+			$validation = $validation_provider->get_url_validation( $url['url'], $url['type'], URLValidationProvider::FLAG_NO_REVALIDATE );
 
-					if ( ! empty( $validation['validity'] ) ) {
-						$results[] = $validation['validity'];
+			// If there is no stored result, attempt to revalidate the URL. This results in an error if validation is locked.
+			if ( empty( $validation['validity'] ) ) {
+				$validation = $validation_provider->with_lock(
+					static function() use ( $url, $validation_provider ) {
+						return $validation_provider->get_url_validation( $url['url'], $url['type'], URLValidationProvider::FLAG_FORCE_REVALIDATE );
 					}
-
-					// Return after the first URL is validated. The frontend application will make multiple requests until there are no more URLs.
-					if ( true === $validation['revalidated'] ) {
-						break;
-					}
-				}
-
-				return rest_ensure_response(
-					[
-						'results'           => $results,
-						'total_errors'      => $validation_provider->total_errors,
-						'unaccepted_errors' => $validation_provider->unaccepted_errors,
-						'validity_by_type'  => $validation_provider->validity_by_type,
-						'remaining_urls'    => $urls,
-					]
 				);
 			}
+
+			if ( ! is_wp_error( $validation_provider ) && ! empty( $validation['validity'] ) ) {
+				$results[] = $validation['validity'];
+			} elseif ( is_wp_error( $validation_provider ) ) {
+				$errored_urls[] = $url;
+				break;
+			}
+
+			// Return after the first URL is validated. The JS application will make multiple requests until there are no more URLs.
+			if ( true === $validation['revalidated'] ) {
+				break;
+			}
+		}
+
+		return rest_ensure_response(
+			[
+				'results'           => $results,
+				'total_errors'      => $validation_provider->total_errors,
+				'unaccepted_errors' => $validation_provider->unaccepted_errors,
+				'validity_by_type'  => $validation_provider->validity_by_type,
+				'remaining_urls'    => array_merge( $urls, $errored_urls ),
+			]
 		);
 	}
 

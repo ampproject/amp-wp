@@ -293,7 +293,7 @@ final class AMP_CLI_Validation_Command {
 		$result = $validation_provider->with_lock(
 			function() use ( $validation_url_provider, $validation_provider ) {
 				foreach ( $validation_url_provider->get_urls() as $url ) {
-					$validity = $validation_provider->get_url_validation( $url['url'], $url['type'], true );
+					$validity = $validation_provider->get_url_validation( $url['url'], $url['type'], URLValidationProvider::FLAG_FORCE_REVALIDATE );
 
 					if ( $this->wp_cli_progress ) {
 						$this->wp_cli_progress->tick();

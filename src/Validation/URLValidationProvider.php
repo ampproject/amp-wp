@@ -28,6 +28,20 @@ final class URLValidationProvider {
 	const LOCK_TRANSIENT = 'amp_validation_locked';
 
 	/**
+	 * Flag to pass to get_url_validation to force revalidation.
+	 *
+	 * @param string
+	 */
+	const FLAG_FORCE_REVALIDATE = 'amp_force_revalidate';
+
+	/**
+	 * Flag to apss to get_url_validation to skip revalidation.
+	 *
+	 * @param string
+	 */
+	const FLAG_NO_REVALIDATE = 'amp_no_revalidate';
+
+	/**
 	 * The total number of validation errors, regardless of whether they were accepted.
 	 *
 	 * @var int
@@ -126,17 +140,17 @@ final class URLValidationProvider {
 	/**
 	 * Validates a URL, stores the results, and increments the counts.
 	 *
-	 * @param string  $url  The URL to validate.
-	 * @param string  $type The type of template, post, or taxonomy.
-	 * @param boolean $force_revalidate Whether to force revalidation of the URL regardless of whether it has existing validity stored.
+	 * @param string $url  The URL to validate.
+	 * @param string $type The type of template, post, or taxonomy.
+	 * @param string $flag Flag determining whether the URL should be revalidated.
 	 * @return array Associative array containing validity results along with error info and whether the URL was revalidated.
 	 */
-	public function get_url_validation( $url, $type, $force_revalidate = false ) {
+	public function get_url_validation( $url, $type, $flag = null ) {
 		$validity    = null;
 		$revalidated = true;
 		$error       = null;
 
-		if ( ! $force_revalidate ) {
+		if ( self::FLAG_FORCE_REVALIDATE !== $flag ) {
 			$url_post = AMP_Validated_URL_Post_Type::get_invalid_url_post( $url );
 
 			if ( $url_post && empty( AMP_Validated_URL_Post_Type::get_post_staleness( $url_post ) ) ) {
@@ -145,7 +159,7 @@ final class URLValidationProvider {
 			}
 		}
 
-		if ( is_null( $validity ) ) {
+		if ( self::FLAG_NO_REVALIDATE !== $flag && ( is_null( $validity ) || self::FLAG_FORCE_REVALIDATE === true ) ) {
 			$validity = AMP_Validation_Manager::validate_url_and_store( $url );
 		}
 
