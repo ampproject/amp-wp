@@ -35,7 +35,7 @@ final class URLValidationProvider {
 	const FLAG_FORCE_REVALIDATE = 'amp_force_revalidate';
 
 	/**
-	 * Flag to apss to get_url_validation to skip revalidation.
+	 * Flag to pass to get_url_validation to skip revalidation.
 	 *
 	 * @param string
 	 */
@@ -98,7 +98,7 @@ final class URLValidationProvider {
 	 *
 	 * @return boolean
 	 */
-	private function is_locked() {
+	public function is_locked() {
 		return get_transient( self::LOCK_TRANSIENT );
 	}
 
