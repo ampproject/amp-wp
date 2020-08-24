@@ -37,6 +37,18 @@ class ValidationURLsRESTControllerTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests registration of the endpoint.
+	 *
+	 * @covers ::register
+	 */
+	public function test_register() {
+		do_action( 'rest_api_init' );
+		$this->controller->register();
+
+		$this->assertContains( '/amp/v1/validation-urls', array_keys( rest_get_server()->get_routes() ) );
+	}
+
+	/**
 	 * Tests ValidationURLsRESTController::get_items_permissions_check.
 	 *
 	 * @covers ::get_items_permissions_check

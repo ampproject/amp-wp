@@ -40,12 +40,16 @@ class URLValidationRESTControllerTest extends WP_UnitTestCase {
 		add_filter( 'pre_http_request', [ ValidationRequestMocking::class, 'get_validate_response' ] );
 	}
 
+	/**
+	 * Tests registration of the endpoint.
+	 *
+	 * @covers ::register
+	 */
 	public function test_register() {
 		do_action( 'rest_api_init' );
 		$this->controller->register();
 
 		$this->assertContains( '/amp/v1/validate', array_keys( rest_get_server()->get_routes() ) );
-
 	}
 
 	/**

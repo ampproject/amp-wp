@@ -126,7 +126,7 @@ final class URLValidationCron extends CronBasedBackgroundTask {
 
 		// If the process was locked, run with the same offset next time around.
 		if ( ! is_wp_error( $potential_error ) ) {
-			set_transient( self::OFFSET_KEY, $offset + $$number_per_type );
+			set_transient( self::OFFSET_KEY, $offset + $number_per_type );
 		}
 	}
 }
