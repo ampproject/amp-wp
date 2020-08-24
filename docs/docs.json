@@ -1,8 +1,8 @@
 {
-    "64": {
+    "28": {
         "file": {
-            "description": "Plugin Name: AMP Description: Enable AMP on your WordPress site, the WordPress way.",
-            "long_description": "Plugin URI: https:\/\/amp-wp.org Author: AMP Project Contributors Author URI: https:\/\/github.com\/ampproject\/amp-wp\/graphs\/contributors Version: 2.0.0-beta3 Text Domain: amp Domain Path: \/languages\/ License: GPLv2 or later Requires at least: 4.9 Requires PHP: 5.6",
+            "description": "Class AnalyticsOptionsSubmenu",
+            "long_description": "",
             "tags": [
                 {
                     "name": "package",
@@ -10,427 +10,198 @@
                 }
             ]
         },
-        "path": "amp.php",
+        "path": "src\/Admin\/AnalyticsOptionsSubmenu.php",
         "root": "\/app\/public\/content\/plugins\/amp",
-        "uses": {
-            "functions": [
-                {
-                    "name": "define",
-                    "line": 18,
-                    "end_line": 18
-                },
-                {
-                    "name": "define",
-                    "line": 19,
-                    "end_line": 19
-                },
-                {
-                    "name": "dirname",
-                    "line": 19,
-                    "end_line": 19
-                },
-                {
-                    "name": "define",
-                    "line": 20,
-                    "end_line": 20
-                },
-                {
-                    "name": "version_compare",
-                    "line": 33,
-                    "end_line": 33
-                },
-                {
-                    "name": "phpversion",
-                    "line": 33,
-                    "end_line": 33
-                },
-                {
-                    "name": "sprintf",
-                    "line": 36,
-                    "end_line": 40
-                },
-                {
-                    "name": "__",
-                    "line": 38,
-                    "end_line": 38
-                },
-                {
-                    "name": "extension_loaded",
-                    "line": 84,
-                    "end_line": 84
-                },
-                {
-                    "name": "function_exists",
-                    "line": 91,
-                    "end_line": 91
-                },
-                {
-                    "name": "class_exists",
-                    "line": 98,
-                    "end_line": 98
-                },
-                {
-                    "name": "count",
-                    "line": 108,
-                    "end_line": 108
-                },
-                {
-                    "name": "sprintf",
-                    "line": 111,
-                    "end_line": 120
-                },
-                {
-                    "name": "_n",
-                    "line": 113,
-                    "end_line": 118
-                },
-                {
-                    "name": "count",
-                    "line": 116,
-                    "end_line": 116
-                },
-                {
-                    "name": "implode",
-                    "line": 119,
-                    "end_line": 119
-                },
-                {
-                    "name": "count",
-                    "line": 123,
-                    "end_line": 123
-                },
-                {
-                    "name": "sprintf",
-                    "line": 126,
-                    "end_line": 135
-                },
-                {
-                    "name": "_n",
-                    "line": 128,
-                    "end_line": 133
-                },
-                {
-                    "name": "count",
-                    "line": 131,
-                    "end_line": 131
-                },
-                {
-                    "name": "implode",
-                    "line": 134,
-                    "end_line": 134
-                },
-                {
-                    "name": "count",
-                    "line": 138,
-                    "end_line": 138
-                },
-                {
-                    "name": "sprintf",
-                    "line": 141,
-                    "end_line": 150
-                },
-                {
-                    "name": "_n",
-                    "line": 143,
-                    "end_line": 148
-                },
-                {
-                    "name": "count",
-                    "line": 146,
-                    "end_line": 146
-                },
-                {
-                    "name": "implode",
-                    "line": 149,
-                    "end_line": 149
-                },
-                {
-                    "name": "file_exists",
-                    "line": 157,
-                    "end_line": 157
-                },
-                {
-                    "name": "file_exists",
-                    "line": 157,
-                    "end_line": 157
-                },
-                {
-                    "name": "file_exists",
-                    "line": 157,
-                    "end_line": 157
-                },
-                {
-                    "name": "sprintf",
-                    "line": 160,
-                    "end_line": 164
-                },
-                {
-                    "name": "__",
-                    "line": 162,
-                    "end_line": 162
-                },
-                {
-                    "name": "add_action",
-                    "line": 196,
-                    "end_line": 196
-                },
-                {
-                    "name": "defined",
-                    "line": 198,
-                    "end_line": 198
-                },
-                {
-                    "name": "getenv",
-                    "line": 198,
-                    "end_line": 198
-                },
-                {
-                    "name": "__",
-                    "line": 199,
-                    "end_line": 199
-                },
-                {
-                    "name": "array_keys",
-                    "line": 200,
-                    "end_line": 200
-                },
-                {
-                    "name": "array_merge",
-                    "line": 201,
-                    "end_line": 201
-                },
-                {
-                    "name": "implode",
-                    "line": 203,
-                    "end_line": 203
-                },
-                {
-                    "name": "str_replace",
-                    "line": 204,
-                    "end_line": 204
-                },
-                {
-                    "name": "html_entity_decode",
-                    "line": 205,
-                    "end_line": 205
-                },
-                {
-                    "name": "class_exists",
-                    "line": 207,
-                    "end_line": 207
-                },
-                {
-                    "name": "basename",
-                    "line": 244,
-                    "end_line": 244
-                },
-                {
-                    "name": "add_action",
-                    "line": 245,
-                    "end_line": 245
-                },
-                {
-                    "name": "register_activation_hook",
-                    "line": 250,
-                    "end_line": 250
-                },
-                {
-                    "name": "register_deactivation_hook",
-                    "line": 252,
-                    "end_line": 252
-                },
-                {
-                    "name": "add_action",
-                    "line": 254,
-                    "end_line": 254
-                },
-                {
-                    "name": "defined",
-                    "line": 254,
-                    "end_line": 254
-                }
-            ],
-            "methods": [
-                {
-                    "name": "__construct",
-                    "class": "\\WP_Error",
-                    "static": false,
-                    "line": 31,
-                    "end_line": 31
-                },
-                {
-                    "name": "add",
-                    "class": "$_amp_load_errors",
-                    "static": false,
-                    "line": 34,
-                    "end_line": 41
-                },
-                {
-                    "name": "add",
-                    "class": "$_amp_load_errors",
-                    "static": false,
-                    "line": 109,
-                    "end_line": 121
-                },
-                {
-                    "name": "add",
-                    "class": "$_amp_load_errors",
-                    "static": false,
-                    "line": 124,
-                    "end_line": 136
-                },
-                {
-                    "name": "add",
-                    "class": "$_amp_load_errors",
-                    "static": false,
-                    "line": 139,
-                    "end_line": 151
-                },
-                {
-                    "name": "add",
-                    "class": "$_amp_load_errors",
-                    "static": false,
-                    "line": 158,
-                    "end_line": 165
-                },
-                {
-                    "name": "get_error_messages",
-                    "class": "$_amp_load_errors",
-                    "static": false,
-                    "line": 201,
-                    "end_line": 201
-                },
-                {
-                    "name": "warning",
-                    "class": "\\WP_CLI",
-                    "static": true,
-                    "line": 213,
-                    "end_line": 213
-                }
-            ]
-        },
-        "includes": [
+        "classes": [
             {
-                "name": "",
-                "line": 248,
-                "type": "Require Once"
-            }
-        ],
-        "constants": [
-            {
-                "name": "AMP__FILE__",
-                "line": 18,
-                "value": "__FILE__"
-            },
-            {
-                "name": "AMP__DIR__",
-                "line": 19,
-                "value": "dirname(__FILE__)"
-            },
-            {
-                "name": "AMP__VERSION",
-                "line": 20,
-                "value": "'2.0.0-beta3'"
-            }
-        ],
-        "functions": [
-            {
-                "name": "_amp_show_load_errors_admin_notice",
-                "namespace": "global",
-                "aliases": [],
-                "line": 174,
-                "end_line": 192,
-                "arguments": [],
+                "name": "AnalyticsOptionsSubmenu",
+                "namespace": "AmpProject\\AmpWP\\Admin",
+                "line": 16,
+                "end_line": 64,
+                "final": true,
+                "abstract": false,
+                "extends": "",
+                "implements": [
+                    "\\AmpProject\\AmpWP\\Infrastructure\\Service",
+                    "\\AmpProject\\AmpWP\\Infrastructure\\Registerable"
+                ],
+                "properties": [
+                    {
+                        "name": "$parent_menu_slug",
+                        "line": 23,
+                        "end_line": 23,
+                        "default": null,
+                        "static": false,
+                        "visibility": "private",
+                        "doc": {
+                            "description": "The parent menu slug.",
+                            "long_description": "",
+                            "tags": [
+                                {
+                                    "name": "var",
+                                    "content": "",
+                                    "types": [
+                                        "string"
+                                    ],
+                                    "variable": ""
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "methods": [
+                    {
+                        "name": "__construct",
+                        "namespace": "AmpProject\\AmpWP\\Admin",
+                        "aliases": {
+                            "Registerable": "\\AmpProject\\AmpWP\\Infrastructure\\Registerable",
+                            "Service": "\\AmpProject\\AmpWP\\Infrastructure\\Service"
+                        },
+                        "line": 30,
+                        "end_line": 32,
+                        "final": false,
+                        "abstract": false,
+                        "static": false,
+                        "visibility": "public",
+                        "arguments": [
+                            {
+                                "name": "$options_menu",
+                                "default": null,
+                                "type": "\\AmpProject\\AmpWP\\Admin\\OptionsMenu"
+                            }
+                        ],
+                        "doc": {
+                            "description": "Class constructor.",
+                            "long_description": "",
+                            "tags": [
+                                {
+                                    "name": "param",
+                                    "content": "An instance of the class handling the parent menu.",
+                                    "types": [
+                                        "\\AmpProject\\AmpWP\\Admin\\OptionsMenu"
+                                    ],
+                                    "variable": "$options_menu"
+                                }
+                            ]
+                        },
+                        "uses": {
+                            "methods": [
+                                {
+                                    "name": "get_menu_slug",
+                                    "class": "$options_menu",
+                                    "static": false,
+                                    "line": 31,
+                                    "end_line": 31
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "get_registration_action",
+                        "namespace": "AmpProject\\AmpWP\\Admin",
+                        "aliases": {
+                            "Registerable": "\\AmpProject\\AmpWP\\Infrastructure\\Registerable",
+                            "Service": "\\AmpProject\\AmpWP\\Infrastructure\\Service"
+                        },
+                        "line": 39,
+                        "end_line": 41,
+                        "final": false,
+                        "abstract": false,
+                        "static": true,
+                        "visibility": "public",
+                        "arguments": [],
+                        "doc": {
+                            "description": "Get the action to use for registering the service.",
+                            "long_description": "",
+                            "tags": [
+                                {
+                                    "name": "return",
+                                    "content": "Registration action to use.",
+                                    "types": [
+                                        "string"
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "register",
+                        "namespace": "AmpProject\\AmpWP\\Admin",
+                        "aliases": {
+                            "Registerable": "\\AmpProject\\AmpWP\\Infrastructure\\Registerable",
+                            "Service": "\\AmpProject\\AmpWP\\Infrastructure\\Service"
+                        },
+                        "line": 46,
+                        "end_line": 48,
+                        "final": false,
+                        "abstract": false,
+                        "static": false,
+                        "visibility": "public",
+                        "arguments": [],
+                        "doc": {
+                            "description": "Adds hooks.",
+                            "long_description": "",
+                            "tags": []
+                        },
+                        "uses": {
+                            "functions": [
+                                {
+                                    "name": "add_action",
+                                    "line": 47,
+                                    "end_line": 47
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "add_submenu_link",
+                        "namespace": "AmpProject\\AmpWP\\Admin",
+                        "aliases": {
+                            "Registerable": "\\AmpProject\\AmpWP\\Infrastructure\\Registerable",
+                            "Service": "\\AmpProject\\AmpWP\\Infrastructure\\Service"
+                        },
+                        "line": 53,
+                        "end_line": 63,
+                        "final": false,
+                        "abstract": false,
+                        "static": false,
+                        "visibility": "public",
+                        "arguments": [],
+                        "doc": {
+                            "description": "Adds a submenu link to the AMP options submenu.",
+                            "long_description": "",
+                            "tags": []
+                        },
+                        "uses": {
+                            "functions": [
+                                {
+                                    "name": "add_submenu_page",
+                                    "line": 54,
+                                    "end_line": 62
+                                },
+                                {
+                                    "name": "__",
+                                    "line": 56,
+                                    "end_line": 56
+                                },
+                                {
+                                    "name": "__",
+                                    "line": 57,
+                                    "end_line": 57
+                                }
+                            ]
+                        }
+                    }
+                ],
                 "doc": {
-                    "description": "Displays an admin notice about why the plugin is unable to load.",
+                    "description": "Class AnalyticsOptionsSubmenu",
                     "long_description": "",
-                    "tags": [
-                        {
-                            "name": "since",
-                            "content": "1.1.2"
-                        },
-                        {
-                            "name": "global",
-                            "content": "WP_Error $_amp_load_errors"
-                        }
-                    ]
-                },
-                "hooks": [],
-                "uses": {
-                    "functions": [
-                        {
-                            "name": "esc_html_e",
-                            "line": 179,
-                            "end_line": 179
-                        },
-                        {
-                            "name": "array_keys",
-                            "line": 181,
-                            "end_line": 181
-                        },
-                        {
-                            "name": "wp_kses_post",
-                            "line": 184,
-                            "end_line": 184
-                        }
-                    ],
-                    "methods": [
-                        {
-                            "name": "get_error_messages",
-                            "class": "$_amp_load_errors",
-                            "static": false,
-                            "line": 182,
-                            "end_line": 182
-                        }
-                    ]
-                }
-            },
-            {
-                "name": "_amp_incorrect_plugin_slug_admin_notice",
-                "namespace": "global",
-                "aliases": [],
-                "line": 224,
-                "end_line": 242,
-                "arguments": [],
-                "doc": {
-                    "description": "Print admin notice if plugin installed with incorrect slug (which impacts WordPress's auto-update system).",
-                    "long_description": "",
-                    "tags": [
-                        {
-                            "name": "since",
-                            "content": "1.0"
-                        }
-                    ]
-                },
-                "hooks": [],
-                "uses": {
-                    "functions": [
-                        {
-                            "name": "basename",
-                            "line": 225,
-                            "end_line": 225
-                        },
-                        {
-                            "name": "wp_kses_post",
-                            "line": 230,
-                            "end_line": 237
-                        },
-                        {
-                            "name": "sprintf",
-                            "line": 231,
-                            "end_line": 236
-                        },
-                        {
-                            "name": "__",
-                            "line": 233,
-                            "end_line": 233
-                        }
-                    ]
+                    "tags": []
                 }
             }
         ]
     },
-    "89": {
+    "91": {
         "file": {
             "description": "Class AMP_Base_Sanitizer",
             "long_description": "",
@@ -2422,7 +2193,7 @@
             }
         ]
     },
-    "105": {
+    "107": {
         "file": {
             "description": "Load the reader mode template.",
             "long_description": "",
@@ -2517,7 +2288,7 @@
             }
         ]
     },
-    "118": {
+    "120": {
         "file": {
             "description": "AMP Helper Functions",
             "long_description": "",
@@ -7287,7 +7058,7 @@
             }
         ]
     },
-    "123": {
+    "125": {
         "file": {
             "description": "Class AMP_Base_Embed_Handler",
             "long_description": "Used by some children.",
@@ -7634,7 +7405,7 @@
             }
         ]
     },
-    "154": {
+    "156": {
         "file": {
             "description": "",
             "long_description": "",
@@ -7785,7 +7556,7 @@
             }
         ]
     },
-    "162": {
+    "164": {
         "file": {
             "description": "Single view template.",
             "long_description": "\ud83d\udeab\ud83d\udeab\ud83d\udeab DO NOT EDIT THIS FILE WHILE INSIDE THE PLUGIN! Changes You make will be lost when a new version of the AMP plugin is released. You need to copy this file out of the plugin and put it into your custom theme, for example. To learn about how to customize these Reader-mode AMP templates, please see: https:\/\/amp-wp.org\/documentation\/how-the-plugin-works\/classic-templates\/ \ud83d\udeab\ud83d\udeab\ud83d\udeab",
@@ -7934,7 +7705,7 @@
             }
         ]
     },
-    "164": {
+    "166": {
         "file": {
             "description": "",
             "long_description": "",
