@@ -16,10 +16,12 @@ Check whether a node is exempt from validation during dev mode.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 protected function has_dev_mode_exemption( DOMNode $node ) {
 	_deprecated_function( 'AMP_Base_Sanitizer::has_dev_mode_exemption', '1.5', 'AmpProject\DevMode::hasExemptionForNode' );
 	return DevMode::hasExemptionForNode( $node );
 }
 ```
+
 </details>

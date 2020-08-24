@@ -16,9 +16,11 @@ Determine if an attribute value is empty.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 public function is_empty_attribute_value( $value ) {
 	return ! isset( $value ) || '' === $value;
 }
 ```
+
 </details>

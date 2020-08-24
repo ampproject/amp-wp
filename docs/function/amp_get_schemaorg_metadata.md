@@ -12,6 +12,8 @@ Get schema.org metadata for the current query.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

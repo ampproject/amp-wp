@@ -12,6 +12,8 @@ Determine whether AMP is available for the current URL.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

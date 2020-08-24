@@ -18,6 +18,8 @@ The sha384 hash used by amp-script is represented not as hexadecimal but as base
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

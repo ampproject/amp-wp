@@ -16,6 +16,8 @@ Remove the AMP endpoint (and query var) from a given URL.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

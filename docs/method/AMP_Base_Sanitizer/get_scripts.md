@@ -14,9 +14,11 @@ Array keys are AMP element names and array values are their respective Javascrip
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 public function get_scripts() {
 	return [];
 }
 ```
+
 </details>

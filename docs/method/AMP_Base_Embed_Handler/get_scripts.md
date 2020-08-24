@@ -14,9 +14,11 @@ This is normally no longer needed because the validating sanitizer will automati
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 public function get_scripts() {
 	return [];
 }
 ```
+
 </details>

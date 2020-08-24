@@ -17,6 +17,7 @@ AMP_Base_Sanitizer constructor.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 public function __construct( $dom, $args = [] ) {
 	$this->dom  = $dom;
@@ -28,4 +29,5 @@ public function __construct( $dom, $args = [] ) {
 	}
 }
 ```
+
 </details>

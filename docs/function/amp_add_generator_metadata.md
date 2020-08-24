@@ -12,6 +12,8 @@ Add generator metadata.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

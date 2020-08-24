@@ -16,6 +16,7 @@ Reassemble a style string that can be used in a &#039;style&#039; attribute.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 protected function reassemble_style_string( $styles ) {
 	if ( ! is_array( $styles ) ) {
@@ -35,4 +36,5 @@ protected function reassemble_style_string( $styles ) {
 	);
 }
 ```
+
 </details>

@@ -19,6 +19,7 @@ If not required, the implementing class may want to try and force https instead.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 public function maybe_enforce_https_src( $src, $force_https = false ) {
 	$protocol = strtok( $src, ':' ); // @todo What about relative URLs? This should use wp_parse_url( $src, PHP_URL_SCHEME )
@@ -36,4 +37,5 @@ public function maybe_enforce_https_src( $src, $force_https = false ) {
 	return $src;
 }
 ```
+
 </details>

@@ -16,6 +16,8 @@ Retrieve analytics data added in backend.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

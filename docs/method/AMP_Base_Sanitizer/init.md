@@ -18,6 +18,8 @@ After the sanitizers are instantiated but before calling sanitize on each of the
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 public function init( $sanitizers ) {} // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable```
+
 </details>

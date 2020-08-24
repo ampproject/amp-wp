@@ -14,6 +14,8 @@ If there are known validation errors for the current URL then do not output anyt
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

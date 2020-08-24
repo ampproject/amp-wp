@@ -12,9 +12,11 @@ Get mapping of HTML selectors to the AMP component selectors which they may be c
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 public function get_selector_conversion_mapping() {
 	return [];
 }
 ```
+
 </details>

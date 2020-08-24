@@ -17,6 +17,7 @@ Prepare validation error.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 public function prepare_validation_error( array $error = [], array $data = [] ) {
 	$node = null;
@@ -77,4 +78,5 @@ public function prepare_validation_error( array $error = [], array $data = [] ) 
 	return $error;
 }
 ```
+
 </details>

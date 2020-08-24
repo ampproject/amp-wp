@@ -12,6 +12,8 @@ Init AMP.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

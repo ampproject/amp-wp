@@ -12,9 +12,11 @@ Return array of values that would be valid as an HTML `style` attribute.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 public function get_styles() {
 	return [];
 }
 ```
+
 </details>

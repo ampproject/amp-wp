@@ -12,9 +12,11 @@ Get the action to use for registering the service.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 public static function get_registration_action() {
 	return 'admin_init';
 }
 ```
+
 </details>

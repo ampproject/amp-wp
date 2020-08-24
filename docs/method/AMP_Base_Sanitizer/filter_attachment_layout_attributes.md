@@ -18,6 +18,7 @@ Set attributes to node&#039;s parent element according to layout.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 public function filter_attachment_layout_attributes( $node, $new_attributes, $layout ) {
 	// The width has to be unset / auto in case of fixed-height.
@@ -44,4 +45,5 @@ public function filter_attachment_layout_attributes( $node, $new_attributes, $la
 	return $new_attributes;
 }
 ```
+
 </details>

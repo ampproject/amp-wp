@@ -19,6 +19,7 @@ Also, calls the mutation callback for it. This tracks all the nodes that were re
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 public function remove_invalid_child( $node, $validation_error = [] ) {
 	if ( DevMode::isExemptFromValidation( $node ) ) {
@@ -41,4 +42,5 @@ public function remove_invalid_child( $node, $validation_error = [] ) {
 	return $should_remove;
 }
 ```
+
 </details>

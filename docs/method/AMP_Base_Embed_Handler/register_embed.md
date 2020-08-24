@@ -12,6 +12,8 @@ Registers embed.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 abstract public function register_embed();```
+
 </details>

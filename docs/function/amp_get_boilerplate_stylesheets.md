@@ -12,6 +12,8 @@ Get AMP boilerplate stylesheets.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

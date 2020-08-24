@@ -21,6 +21,8 @@ This explicitly triggers a CORS request, and gets back a non-opaque response, en
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

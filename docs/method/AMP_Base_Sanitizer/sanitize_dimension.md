@@ -17,6 +17,7 @@ Sanitizes a CSS dimension specifier while being sensitive to dimension context.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 public function sanitize_dimension( $value, $dimension ) {
 	// Allows 0 to be used as valid dimension.
@@ -41,4 +42,5 @@ public function sanitize_dimension( $value, $dimension ) {
 	return '';
 }
 ```
+
 </details>

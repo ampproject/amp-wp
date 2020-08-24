@@ -16,6 +16,7 @@ Get data-amp-* values from the parent node &#039;figure&#039; added by editor bl
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 public function get_data_amp_attributes( $node ) {
 	$attributes = [];
@@ -33,4 +34,5 @@ public function get_data_amp_attributes( $node ) {
 	return $attributes;
 }
 ```
+
 </details>

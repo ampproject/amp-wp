@@ -16,6 +16,8 @@ Filters content and keeps only allowable HTML elements by amp-mustache.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

@@ -16,6 +16,8 @@ Get content embed handlers.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

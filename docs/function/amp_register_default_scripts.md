@@ -16,6 +16,8 @@ Register default scripts for AMP components.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

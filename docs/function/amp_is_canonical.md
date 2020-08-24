@@ -25,6 +25,8 @@ Themes can register support for this with `add_theme_support( AMP_Theme_Support:
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

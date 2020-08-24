@@ -12,6 +12,7 @@ Get stylesheets.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 public function get_stylesheets() {
 	$stylesheets = [];
@@ -22,4 +23,5 @@ public function get_stylesheets() {
 	return $stylesheets;
 }
 ```
+
 </details>

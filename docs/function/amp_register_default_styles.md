@@ -16,6 +16,8 @@ Register default styles.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

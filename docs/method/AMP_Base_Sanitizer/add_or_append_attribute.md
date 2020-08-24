@@ -21,6 +21,7 @@ Adds key and value to list of attributes, or if the key already exists in the ar
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 public function add_or_append_attribute( &$attributes, $key, $value, $separator = ' ' ) {
 	if ( isset( $attributes[ $key ] ) ) {
@@ -30,4 +31,5 @@ public function add_or_append_attribute( &$attributes, $key, $value, $separator 
 	}
 }
 ```
+
 </details>

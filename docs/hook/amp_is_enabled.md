@@ -6,6 +6,8 @@
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 if ( false === apply_filters( 'amp_is_enabled', true ) ) {```
+
 </details>

@@ -12,6 +12,8 @@ Get AMP boilerplate code.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

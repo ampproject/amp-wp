@@ -6,6 +6,7 @@
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 return apply_filters(
 	'amp_dev_mode_enabled',
@@ -19,4 +20,5 @@ return apply_filters(
 	)
 );
 ```
+
 </details>

@@ -16,6 +16,8 @@ Determine whether a given post supports AMP.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

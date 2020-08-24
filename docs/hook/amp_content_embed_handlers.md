@@ -6,6 +6,7 @@
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 return apply_filters(
 	'amp_content_embed_handlers',
@@ -35,4 +36,5 @@ return apply_filters(
 	$post
 );
 ```
+
 </details>

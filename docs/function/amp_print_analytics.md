@@ -16,6 +16,8 @@ Print analytics data.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

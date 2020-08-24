@@ -17,6 +17,7 @@ Cleans up artifacts after the removal of an attribute node.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 protected function clean_up_after_attribute_removal( $element, $attribute ) {
 	static $attributes_tied_to_href = [ 'target', 'download', 'rel', 'rev', 'hreflang', 'type' ];
@@ -34,4 +35,5 @@ protected function clean_up_after_attribute_removal( $element, $attribute ) {
 	}
 }
 ```
+
 </details>

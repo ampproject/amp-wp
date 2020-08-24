@@ -6,6 +6,7 @@
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 false === apply_filters_deprecated(
 	'amp_frontend_show_canonical',
@@ -22,4 +23,5 @@ false === apply_filters_deprecated(
 	)
 )
 ```
+
 </details>

@@ -16,10 +16,12 @@ Check whether a certain node should be exempt from validation.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 protected function is_exempt_from_validation( DOMNode $node ) {
 	_deprecated_function( 'AMP_Base_Sanitizer::is_exempt_from_validation', '1.5', 'AmpProject\DevMode::isExemptFromValidation' );
 	return DevMode::isExemptFromValidation( $node );
 }
 ```
+
 </details>

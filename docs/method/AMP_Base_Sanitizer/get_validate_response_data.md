@@ -14,9 +14,11 @@ The array returned is merged with the overall validate response data.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 public function get_validate_response_data() {
 	return [];
 }
 ```
+
 </details>

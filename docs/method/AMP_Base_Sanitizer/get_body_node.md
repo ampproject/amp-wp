@@ -12,10 +12,12 @@ Get HTML body as DOMElement from Dom\Document received by the constructor.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 protected function get_body_node() {
 	_deprecated_function( 'Use $this->dom->body instead', '1.5.0' );
 	return $this->dom->body;
 }
 ```
+
 </details>

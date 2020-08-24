@@ -12,6 +12,8 @@ Output schema.org metadata.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

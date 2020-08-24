@@ -6,6 +6,8 @@
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 $dev_mode_xpaths = (array) apply_filters( 'amp_dev_mode_element_xpaths', [] );```
+
 </details>

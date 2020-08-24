@@ -17,6 +17,7 @@ Set AMP attributes.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 public function filter_data_amp_attributes( $attributes, $amp_data ) {
 	if ( isset( $amp_data['layout'] ) ) {
@@ -28,4 +29,5 @@ public function filter_data_amp_attributes( $attributes, $amp_data ) {
 	return $attributes;
 }
 ```
+
 </details>

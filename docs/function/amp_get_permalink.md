@@ -16,6 +16,8 @@ Retrieves the full AMP-specific permalink for the given post ID.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

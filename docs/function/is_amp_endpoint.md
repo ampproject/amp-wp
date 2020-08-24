@@ -14,6 +14,8 @@ This function cannot be called before the parse_query action because it needs to
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

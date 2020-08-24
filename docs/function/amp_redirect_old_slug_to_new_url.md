@@ -18,6 +18,8 @@ If post slug is updated the amp page with old post slug will be redirected to th
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

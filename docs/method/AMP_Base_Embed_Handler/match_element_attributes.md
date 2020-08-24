@@ -18,6 +18,7 @@ Get regex pattern for matching HTML attributes from a given tag name.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 protected function match_element_attributes( $html, $tag_name, $attribute_names ) {
 	$pattern = sprintf(
@@ -39,4 +40,5 @@ protected function match_element_attributes( $html, $tag_name, $attribute_names 
 	return wp_array_slice_assoc( $matches, $attribute_names );
 }
 ```
+
 </details>

@@ -17,6 +17,8 @@ Add AMP script attributes to enqueued scripts.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

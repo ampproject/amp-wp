@@ -6,6 +6,8 @@
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 do_action( 'amp_init' );```
+
 </details>

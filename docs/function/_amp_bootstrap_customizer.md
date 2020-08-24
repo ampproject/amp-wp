@@ -14,6 +14,8 @@ Uses the priority of 12 for the &#039;after_setup_theme&#039; action. Many theme
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

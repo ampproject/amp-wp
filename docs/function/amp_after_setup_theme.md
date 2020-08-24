@@ -14,6 +14,8 @@ This function must be invoked through the &#039;after_setup_theme&#039; action t
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

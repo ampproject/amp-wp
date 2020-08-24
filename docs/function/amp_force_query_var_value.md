@@ -18,6 +18,8 @@ This avoids issues when filtering the deprecated `query_string` hook.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

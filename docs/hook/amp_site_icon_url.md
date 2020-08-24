@@ -6,6 +6,8 @@
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 $logo_image_url = apply_filters( 'amp_site_icon_url', $logo_image_url );```
+
 </details>

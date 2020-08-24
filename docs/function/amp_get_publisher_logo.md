@@ -15,6 +15,8 @@ The following guidelines apply to logos used for general AMP pages.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

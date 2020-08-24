@@ -14,6 +14,8 @@ The return value can be overridden by previously defining a AMP_QUERY_VAR consta
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

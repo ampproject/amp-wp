@@ -12,6 +12,8 @@ Determines whether the legacy AMP post templates are being used.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

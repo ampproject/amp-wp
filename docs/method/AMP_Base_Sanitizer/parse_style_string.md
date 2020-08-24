@@ -16,6 +16,7 @@ Parse a style string into an associative array of style attributes.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 protected function parse_style_string( $style_string ) {
 	// We need to turn the style string into an associative array of styles first.
@@ -30,4 +31,5 @@ protected function parse_style_string( $style_string ) {
 	return array_combine( array_column( $chunks, 0 ), array_column( $chunks, 1 ) );
 }
 ```
+
 </details>

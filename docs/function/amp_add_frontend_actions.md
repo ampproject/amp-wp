@@ -12,6 +12,8 @@ Add frontend actions.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

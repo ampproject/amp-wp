@@ -16,6 +16,7 @@ Constructor.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 public function __construct( $args = [] ) {
 	$this->args = wp_parse_args(
@@ -27,4 +28,5 @@ public function __construct( $args = [] ) {
 	);
 }
 ```
+
 </details>

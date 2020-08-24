@@ -21,6 +21,7 @@ Also, calls the mutation callback for it. This tracks all the attributes that we
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 public function remove_invalid_attribute( $element, $attribute, $validation_error = [], $attr_spec = [] ) {
 	if ( DevMode::isExemptFromValidation( $element ) ) {
@@ -48,4 +49,5 @@ public function remove_invalid_attribute( $element, $attribute, $validation_erro
 	return $should_remove;
 }
 ```
+
 </details>

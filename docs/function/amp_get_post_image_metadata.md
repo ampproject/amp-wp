@@ -16,6 +16,8 @@ Grabs featured image or the first attached image for the post.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

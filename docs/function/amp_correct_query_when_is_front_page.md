@@ -18,6 +18,8 @@ Normally the front page would not get served if a query var is present other tha
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

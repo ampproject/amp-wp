@@ -16,9 +16,11 @@ Class constructor.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 public function __construct( OptionsMenu $options_menu ) {
 	$this->parent_menu_slug = $options_menu->get_menu_slug();
 }
 ```
+
 </details>

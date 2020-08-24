@@ -12,6 +12,7 @@ Adds a submenu link to the AMP options submenu.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 public function add_submenu_link() {
 	add_submenu_page(
@@ -25,4 +26,5 @@ public function add_submenu_link() {
 	);
 }
 ```
+
 </details>

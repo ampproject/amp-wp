@@ -16,6 +16,8 @@ Get AMP asset URL.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

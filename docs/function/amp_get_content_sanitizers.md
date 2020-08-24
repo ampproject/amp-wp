@@ -16,6 +16,8 @@ Get content sanitizers.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

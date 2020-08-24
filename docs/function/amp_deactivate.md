@@ -16,6 +16,8 @@ Handle deactivation of plugin.
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

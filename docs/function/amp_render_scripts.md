@@ -18,6 +18,8 @@ This is adapted from `wp_scripts()-&gt;do_items()`, but it runs only the bare mi
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

@@ -16,6 +16,7 @@ Sets the layout, and possibly the &#039;height&#039; and &#039;width&#039; attri
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 public function set_layout( $attributes ) {
 	if ( isset( $attributes['layout'] ) && ( 'fill' === $attributes['layout'] || 'flex-item' !== $attributes['layout'] ) ) {
@@ -87,4 +88,5 @@ public function set_layout( $attributes ) {
 	return $attributes;
 }
 ```
+
 </details>

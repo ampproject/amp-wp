@@ -14,6 +14,8 @@ When enabled, the &lt;html&gt; element will get the data-ampdevmode attribute an
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>

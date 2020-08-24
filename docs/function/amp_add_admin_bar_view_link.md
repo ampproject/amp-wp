@@ -18,6 +18,8 @@ Note that when theme support is present (in Native/Transitional modes), the admi
 
 <details>
 <summary>Show Code</summary>
+
 ```php
 <php ?>```
+
 </details>
