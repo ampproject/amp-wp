@@ -10,17 +10,17 @@ Class AMP_Base_Sanitizer
 * [`init`](../method/AMP_Base_Sanitizer/init.md) - Run logic before any sanitizers are run.
 * [`sanitize`](../method/AMP_Base_Sanitizer/sanitize.md) - Sanitize the HTML contained in the DOMDocument received by the constructor
 * [`get_scripts`](../method/AMP_Base_Sanitizer/get_scripts.md) - Return array of values that would be valid as an HTML `script` element.
-* [`get_styles`](../method/AMP_Base_Sanitizer/get_styles.md) - Return array of values that would be valid as an HTML `style` attribute.
+* ~~[`get_styles`](../method/AMP_Base_Sanitizer/get_styles.md) - Return array of values that would be valid as an HTML `style` attribute.~~
 * [`get_stylesheets`](../method/AMP_Base_Sanitizer/get_stylesheets.md) - Get stylesheets.
-* [`get_body_node`](../method/AMP_Base_Sanitizer/get_body_node.md) - Get HTML body as DOMElement from Dom\Document received by the constructor.
+* ~~[`get_body_node`](../method/AMP_Base_Sanitizer/get_body_node.md) - Get HTML body as DOMElement from Dom\Document received by the constructor.~~
 * [`sanitize_dimension`](../method/AMP_Base_Sanitizer/sanitize_dimension.md) - Sanitizes a CSS dimension specifier while being sensitive to dimension context.
 * [`is_empty_attribute_value`](../method/AMP_Base_Sanitizer/is_empty_attribute_value.md) - Determine if an attribute value is empty.
 * [`set_layout`](../method/AMP_Base_Sanitizer/set_layout.md) - Sets the layout, and possibly the &#039;height&#039; and &#039;width&#039; attributes.
 * [`add_or_append_attribute`](../method/AMP_Base_Sanitizer/add_or_append_attribute.md) - Adds or appends key and value to list of attributes
 * [`maybe_enforce_https_src`](../method/AMP_Base_Sanitizer/maybe_enforce_https_src.md) - Decide if we should remove a src attribute if https is required.
-* [`is_document_in_dev_mode`](../method/AMP_Base_Sanitizer/is_document_in_dev_mode.md) - Check whether the document of a given node is in dev mode.
-* [`has_dev_mode_exemption`](../method/AMP_Base_Sanitizer/has_dev_mode_exemption.md) - Check whether a node is exempt from validation during dev mode.
-* [`is_exempt_from_validation`](../method/AMP_Base_Sanitizer/is_exempt_from_validation.md) - Check whether a certain node should be exempt from validation.
+* ~~[`is_document_in_dev_mode`](../method/AMP_Base_Sanitizer/is_document_in_dev_mode.md) - Check whether the document of a given node is in dev mode.~~
+* ~~[`has_dev_mode_exemption`](../method/AMP_Base_Sanitizer/has_dev_mode_exemption.md) - Check whether a node is exempt from validation during dev mode.~~
+* ~~[`is_exempt_from_validation`](../method/AMP_Base_Sanitizer/is_exempt_from_validation.md) - Check whether a certain node should be exempt from validation.~~
 * [`remove_invalid_child`](../method/AMP_Base_Sanitizer/remove_invalid_child.md) - Removes an invalid child of a node.
 * [`remove_invalid_attribute`](../method/AMP_Base_Sanitizer/remove_invalid_attribute.md) - Removes an invalid attribute of a node.
 * [`should_sanitize_validation_error`](../method/AMP_Base_Sanitizer/should_sanitize_validation_error.md) - Check whether or not sanitization should occur in response to validation error.

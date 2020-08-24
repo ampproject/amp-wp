@@ -1,5 +1,9 @@
 ## Hook `{{{ name }}}`
 
+{{# is_deprecated }}
+> :warning: This function is deprecated: {{ get_deprecation_reason }}
+
+{{/is_deprecated}}
 ### Source
 
 :link: [{{ get_file_path }}:{{ line }}]({{{ get_github_link }}})

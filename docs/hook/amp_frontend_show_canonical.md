@@ -1,5 +1,7 @@
 ## Hook `amp_frontend_show_canonical`
 
+> :warning: This function is deprecated: 
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:776](../../includes/amp-helper-functions.php#L776-L789)

@@ -62,4 +62,22 @@ trait HasDocBlock {
 	public function get_short_description() {
 		return trim( $this->doc->description );
 	}
+
+	/**
+	 * Check whether the element is marked as being deprecated.
+	 *
+	 * @return bool Whether the element is marked as deprecated.
+	 */
+	public function is_deprecated() {
+		return $this->doc->has_tag( 'deprecated' );
+	}
+
+	/**
+	 * Get the reason for why the element is deprecated.
+	 *
+	 * @return string Deprecation reason.
+	 */
+	public function get_deprecation_reason() {
+		return $this->doc->get_tag( 'deprecated' );
+	}
 }

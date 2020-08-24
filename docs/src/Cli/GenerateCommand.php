@@ -196,10 +196,10 @@ final class GenerateCommand {
 	}
 
 	/**
-	 * Ensure a checked element is not internal or deprecated.
+	 * Ensure a checked element is not internal.
 	 *
 	 * @param array $parsed Parsed element.
-	 * @return bool Whether element is neither internal not deprecated.
+	 * @return bool Whether element is not internal.
 	 */
 	private function is_not_internal( $parsed ) {
 		if (
@@ -222,10 +222,6 @@ final class GenerateCommand {
 
 		foreach ( $parsed['doc']['tags'] as $tag ) {
 			if ( 'internal' === $tag['name'] ) {
-				return false;
-			}
-
-			if ( 'deprecated' === $tag['name'] ) {
 				return false;
 			}
 		}

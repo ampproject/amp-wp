@@ -1,5 +1,7 @@
 ## Method `AMP_Base_Sanitizer::get_styles()`
 
+> :warning: This function is deprecated: As of 1.0, use get_stylesheets().
+
 ```php
 public function get_styles();
 ```

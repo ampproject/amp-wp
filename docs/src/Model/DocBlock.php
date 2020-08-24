@@ -53,7 +53,13 @@ final class DocBlock implements Leaf {
 	 * @return bool Whether the doc-block has the requested tag.
 	 */
 	public function has_tag( $name ) {
-		return array_key_exists( $name, $this->tags );
+		foreach ( $this->tags as $tag ) {
+			if ( $name === $tag->name ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -62,12 +68,14 @@ final class DocBlock implements Leaf {
 	 * @return string Content of the requested tag.
 	 */
 	public function get_tag( $name ) {
-		if ( ! array_key_exists( $name, $this->tags ) ) {
-			throw new RuntimeException(
-				"Trying to get the content of an unknown doc-block tag {$name}"
-			);
+		foreach ( $this->tags as $tag ) {
+			if ( $name === $tag->name ) {
+				return $tag->content;
+			}
 		}
 
-		return $this->tags[ $name ]->content;
+		throw new RuntimeException(
+			"Trying to get the content of an unknown doc-block tag {$name}"
+		);
 	}
 }

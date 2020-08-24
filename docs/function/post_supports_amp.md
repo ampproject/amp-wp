@@ -1,5 +1,7 @@
 ## Function `post_supports_amp`
 
+> :warning: This function is deprecated: Use amp_is_post_supported() instead.
+
 ```php
 function post_supports_amp( $post );
 ```

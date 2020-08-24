@@ -1,5 +1,7 @@
 ## Function `is_amp_endpoint`
 
+> :warning: This function is deprecated: Use amp_is_request() instead.
+
 ```php
 function is_amp_endpoint();
 ```

@@ -17,15 +17,17 @@ trait HasCodeLinks {
 	 * @return string Path to the source file.
 	 */
 	public function get_file_path() {
-		$file = $this->get_parent();
-		if ( ! $file instanceof File ) {
-			$file = $file->get_parent();
-			if ( ! $file instanceof File ) {
-				return '<unknown>';
-			}
-		}
+		$file = $this;
 
-		return $file->path;
+		do {
+			$file = $file->get_parent();
+
+			if ( $file instanceof File ) {
+				return $file->path;
+			}
+		} while ( ! $file instanceof Root );
+
+		return '<unknown>';
 	}
 
 	/**
@@ -50,7 +52,14 @@ trait HasCodeLinks {
 	 * @return string Code snippet.
 	 */
 	public function get_code() {
-		$php_file = new SplFileObject( AMP__DIR__ . "/{$this->get_file_path()}" );
+		$file_path = $this->get_file_path();
+
+		if ( '<unknown>' === $file_path ) {
+			var_dump( $this );
+			return "\n";
+		}
+
+		$php_file = new SplFileObject( AMP__DIR__ . "/{$file_path}" );
 
 		$line = $this->line;
 		$code = [];

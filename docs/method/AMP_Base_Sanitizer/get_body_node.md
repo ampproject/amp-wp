@@ -1,5 +1,7 @@
 ## Method `AMP_Base_Sanitizer::get_body_node()`
 
+> :warning: This function is deprecated: Use $this-&gt;dom-&gt;body instead.
+
 ```php
 protected function get_body_node();
 ```
