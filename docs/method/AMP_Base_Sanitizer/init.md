@@ -12,3 +12,12 @@ After the sanitizers are instantiated but before calling sanitize on each of the
 
 * `\AMP_Base_Sanitizer[] $sanitizers` - Sanitizers.
 
+### Source
+
+[includes/sanitizers/class-amp-base-sanitizer.php:151](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L151)
+
+<details>
+<summary>Show Code</summary>
+```php
+public function init( $sanitizers ) {} // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable```
+</details>

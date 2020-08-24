@@ -10,3 +10,12 @@ Determine whether a given post supports AMP.
 
 * `\WP_Post $post` - Post.
 
+### Source
+
+[includes/amp-helper-functions.php:820](TODO)
+
+<details>
+<summary>Show Code</summary>
+```php
+<php ?>```
+</details>

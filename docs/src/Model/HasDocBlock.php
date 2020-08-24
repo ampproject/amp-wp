@@ -1,6 +1,6 @@
 <?php
 /**
- * Trait HasDocBlock
+ * Trait HasDocBlock.
  *
  * @package AmpProject\AmpWP
  */

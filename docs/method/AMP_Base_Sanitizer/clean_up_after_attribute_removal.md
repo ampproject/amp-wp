@@ -11,3 +11,27 @@ Cleans up artifacts after the removal of an attribute node.
 * `\DOMElement $element` - The node for which the attribute was removed.
 * `\DOMAttr $attribute` - The attribute that was removed.
 
+### Source
+
+[includes/sanitizers/class-amp-base-sanitizer.php:641](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L641-L656)
+
+<details>
+<summary>Show Code</summary>
+```php
+protected function clean_up_after_attribute_removal( $element, $attribute ) {
+	static $attributes_tied_to_href = [ 'target', 'download', 'rel', 'rev', 'hreflang', 'type' ];
+	if ( 'href' === $attribute->nodeName ) {
+		/*
+		 * "The target, download, rel, rev, hreflang, and type attributes must be omitted
+		 * if the href attribute is not present."
+		 * See: https://www.w3.org/TR/2016/REC-html51-20161101/textlevel-semantics.html#the-a-element
+		 */
+		foreach ( $attributes_tied_to_href as $attribute_to_remove ) {
+			if ( $element->hasAttribute( $attribute_to_remove ) ) {
+				$element->removeAttribute( $attribute_to_remove );
+			}
+		}
+	}
+}
+```
+</details>

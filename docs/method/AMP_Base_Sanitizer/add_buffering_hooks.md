@@ -12,3 +12,12 @@ Add actions and filters before the page is rendered so that the sanitizer can fi
 
 * `array $args` - Args.
 
+### Source
+
+[includes/sanitizers/class-amp-base-sanitizer.php:132](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L132)
+
+<details>
+<summary>Show Code</summary>
+```php
+public static function add_buffering_hooks( $args = [] ) {} // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable```
+</details>

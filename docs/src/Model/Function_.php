@@ -12,7 +12,7 @@ namespace AmpProject\AmpWP\Documentation\Model;
  *
  * @property string     $name
  * @property string     $namespace
- * @property Alias_[]   $aliases
+ * @property string[]   $aliases
  * @property int        $line
  * @property int        $end_line
  * @property Argument[] $arguments
@@ -25,6 +25,7 @@ final class Function_ implements Leaf {
 	use LeafConstruction;
 	use HasDocBlock;
 	use HasArguments;
+	use HasCodeLinks;
 
 	/**
 	 * Get an associative array of known keys.
@@ -129,5 +130,22 @@ final class Function_ implements Leaf {
 				? ' ' . implode( ', ', $this->get_argument_names() ) . ' '
 				: ''
 		);
+	}
+
+	public function get_file_path() {
+		if ( ! $this->parent instanceof File ) {
+			return '<unknown>';
+		}
+
+		return $this->parent->path;
+	}
+
+	public function get_github_link() {
+		return 'TODO';
+	}
+
+	public function get_code() {
+		// TODO
+		return '<php ?>';
 	}
 }

@@ -15,3 +15,12 @@ This explicitly triggers a CORS request, and gets back a non-opaque response, en
 * `string $handle` - Dependency handle.
 * `string $href` - Link URL.
 
+### Source
+
+[includes/amp-helper-functions.php:1188](TODO)
+
+<details>
+<summary>Show Code</summary>
+```php
+<php ?>```
+</details>

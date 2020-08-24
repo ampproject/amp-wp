@@ -11,3 +11,12 @@ Add AMP script attributes to enqueued scripts.
 * `string $tag` - The script tag.
 * `string $handle` - The script handle.
 
+### Source
+
+[includes/amp-helper-functions.php:1114](TODO)
+
+<details>
+<summary>Show Code</summary>
+```php
+<php ?>```
+</details>

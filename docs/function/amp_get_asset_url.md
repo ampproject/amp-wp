@@ -10,3 +10,12 @@ Get AMP asset URL.
 
 * `string $file` - Relative path to file in assets directory.
 
+### Source
+
+[includes/amp-helper-functions.php:916](TODO)
+
+<details>
+<summary>Show Code</summary>
+```php
+<php ?>```
+</details>

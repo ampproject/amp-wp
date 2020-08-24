@@ -12,3 +12,12 @@ This is adapted from `wp_scripts()-&gt;do_items()`, but it runs only the bare mi
 
 * `array $scripts` - Script handles mapped to URLs or true.
 
+### Source
+
+[includes/amp-helper-functions.php:1071](TODO)
+
+<details>
+<summary>Show Code</summary>
+```php
+<php ?>```
+</details>

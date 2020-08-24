@@ -10,3 +10,12 @@ Filters content and keeps only allowable HTML elements by amp-mustache.
 
 * `string $markup` - Markup to sanitize.
 
+### Source
+
+[includes/amp-helper-functions.php:1841](TODO)
+
+<details>
+<summary>Show Code</summary>
+```php
+<php ?>```
+</details>

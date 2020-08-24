@@ -12,3 +12,12 @@ Note that when theme support is present (in Native/Transitional modes), the admi
 
 * `\WP_Admin_Bar $wp_admin_bar` - Admin bar.
 
+### Source
+
+[includes/amp-helper-functions.php:1857](TODO)
+
+<details>
+<summary>Show Code</summary>
+```php
+<php ?>```
+</details>

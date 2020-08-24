@@ -12,3 +12,12 @@ This avoids issues when filtering the deprecated `query_string` hook.
 
 * `array $query_vars` - Query vars.
 
+### Source
+
+[includes/amp-helper-functions.php:270](TODO)
+
+<details>
+<summary>Show Code</summary>
+```php
+<php ?>```
+</details>

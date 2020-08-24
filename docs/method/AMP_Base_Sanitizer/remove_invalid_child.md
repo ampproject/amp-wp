@@ -13,3 +13,32 @@ Also, calls the mutation callback for it. This tracks all the nodes that were re
 * `\DOMNode|\DOMElement $node` - The node to remove.
 * `array $validation_error` - Validation error details.
 
+### Source
+
+[includes/sanitizers/class-amp-base-sanitizer.php:465](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L465-L487)
+
+<details>
+<summary>Show Code</summary>
+```php
+public function remove_invalid_child( $node, $validation_error = [] ) {
+	if ( DevMode::isExemptFromValidation( $node ) ) {
+		return false;
+	}
+	// Prevent double-reporting nodes that are rejected for sanitization.
+	if ( isset( $this->nodes_to_keep[ $node->nodeName ] ) && in_array( $node, $this->nodes_to_keep[ $node->nodeName ], true ) ) {
+		return false;
+	}
+	$should_remove = $this->should_sanitize_validation_error( $validation_error, compact( 'node' ) );
+	if ( $should_remove ) {
+		if ( null === $node->parentNode ) {
+			// Node no longer exists.
+			return $should_remove;
+		}
+		$node->parentNode->removeChild( $node );
+	} else {
+		$this->nodes_to_keep[ $node->nodeName ][] = $node;
+	}
+	return $should_remove;
+}
+```
+</details>

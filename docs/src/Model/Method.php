@@ -29,6 +29,7 @@ final class Method implements Leaf {
 	use LeafConstruction;
 	use HasDocBlock;
 	use HasArguments;
+	use HasCodeLinks;
 
 	/**
 	 * Get an associative array of known keys.

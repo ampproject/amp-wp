@@ -1,6 +1,6 @@
 <?php
 /**
- * Trait HasArguments
+ * Trait HasArguments.
  *
  * @package AmpProject\AmpWP
  */

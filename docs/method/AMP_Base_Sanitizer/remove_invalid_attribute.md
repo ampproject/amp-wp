@@ -15,3 +15,37 @@ Also, calls the mutation callback for it. This tracks all the attributes that we
 * `array $validation_error` - Validation error details.
 * `array $attr_spec` - Attribute spec.
 
+### Source
+
+[includes/sanitizers/class-amp-base-sanitizer.php:503](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L503-L531)
+
+<details>
+<summary>Show Code</summary>
+```php
+public function remove_invalid_attribute( $element, $attribute, $validation_error = [], $attr_spec = [] ) {
+	if ( DevMode::isExemptFromValidation( $element ) ) {
+		return false;
+	}
+	if ( is_string( $attribute ) ) {
+		$node = $element->getAttributeNode( $attribute );
+	} else {
+		$node = $attribute;
+	}
+	// Catch edge condition (no known possible way to reach).
+	if ( ! ( $node instanceof DOMAttr ) || $element !== $node->parentNode ) {
+		return false;
+	}
+	$should_remove = $this->should_sanitize_validation_error( $validation_error, compact( 'node' ) );
+	if ( $should_remove ) {
+		$allow_empty  = ! empty( $attr_spec[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] );
+		$is_href_attr = ( isset( $attr_spec[ AMP_Rule_Spec::VALUE_URL ] ) && 'href' === $node->nodeName );
+		if ( $allow_empty && ! $is_href_attr ) {
+			$node->nodeValue = '';
+		} else {
+			$element->removeAttributeNode( $node );
+		}
+	}
+	return $should_remove;
+}
+```
+</details>

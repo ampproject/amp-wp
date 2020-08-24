@@ -12,3 +12,12 @@ If post slug is updated the amp page with old post slug will be redirected to th
 
 * `string $link` - New URL of the post.
 
+### Source
+
+[includes/amp-helper-functions.php:572](TODO)
+
+<details>
+<summary>Show Code</summary>
+```php
+<php ?>```
+</details>

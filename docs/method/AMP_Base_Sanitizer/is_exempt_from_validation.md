@@ -10,3 +10,16 @@ Check whether a certain node should be exempt from validation.
 
 * `\DOMNode $node` - Node to check.
 
+### Source
+
+[includes/sanitizers/class-amp-base-sanitizer.php:448](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L448-L451)
+
+<details>
+<summary>Show Code</summary>
+```php
+protected function is_exempt_from_validation( DOMNode $node ) {
+	_deprecated_function( 'AMP_Base_Sanitizer::is_exempt_from_validation', '1.5', 'AmpProject\DevMode::isExemptFromValidation' );
+	return DevMode::isExemptFromValidation( $node );
+}
+```
+</details>

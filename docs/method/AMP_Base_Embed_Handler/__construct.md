@@ -10,3 +10,21 @@ Constructor.
 
 * `array $args` - Height and width for embed.
 
+### Source
+
+[includes/embeds/class-amp-base-embed-handler.php:59](https://github.com/ampproject/amp-wp/blob/develop/includes/embeds/class-amp-base-embed-handler.php#L59-L67)
+
+<details>
+<summary>Show Code</summary>
+```php
+public function __construct( $args = [] ) {
+	$this->args = wp_parse_args(
+		$args,
+		[
+			'width'  => $this->DEFAULT_WIDTH,
+			'height' => $this->DEFAULT_HEIGHT,
+		]
+	);
+}
+```
+</details>

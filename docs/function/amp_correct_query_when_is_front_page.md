@@ -12,3 +12,12 @@ Normally the front page would not get served if a query var is present other tha
 
 * `\WP_Query $query` - Query.
 
+### Source
+
+[includes/amp-helper-functions.php:289](TODO)
+
+<details>
+<summary>Show Code</summary>
+```php
+<php ?>```
+</details>

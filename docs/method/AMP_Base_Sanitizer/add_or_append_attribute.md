@@ -15,3 +15,19 @@ Adds key and value to list of attributes, or if the key already exists in the ar
 * `string $value` - Value to add or append to array indexed at the key.
 * `string $separator` - Optional; defaults to space but some other separator if needed.
 
+### Source
+
+[includes/sanitizers/class-amp-base-sanitizer.php:377](https://github.com/ampproject/amp-wp/blob/develop/includes/sanitizers/class-amp-base-sanitizer.php#L377-L383)
+
+<details>
+<summary>Show Code</summary>
+```php
+public function add_or_append_attribute( &$attributes, $key, $value, $separator = ' ' ) {
+	if ( isset( $attributes[ $key ] ) ) {
+		$attributes[ $key ] = trim( $attributes[ $key ] . $separator . $value );
+	} else {
+		$attributes[ $key ] = $value;
+	}
+}
+```
+</details>

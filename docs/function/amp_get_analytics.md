@@ -10,3 +10,12 @@ Retrieve analytics data added in backend.
 
 * `array $analytics` - Analytics entries.
 
+### Source
+
+[includes/amp-helper-functions.php:1218](TODO)
+
+<details>
+<summary>Show Code</summary>
+```php
+<php ?>```
+</details>
