@@ -105,6 +105,7 @@ class AMP_HTTP {
 	 * @since 1.0
 	 *
 	 * @deprecated Use the `ServerTiming` service or its associated actions instead.
+	 * @internal
 	 *
 	 * @param string $name        Name.
 	 * @param float  $duration    Duration. If negative, will be added to microtime( true ). Optional.

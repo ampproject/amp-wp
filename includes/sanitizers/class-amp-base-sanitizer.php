@@ -177,6 +177,7 @@ abstract class AMP_Base_Sanitizer {
 	 * @since 0.4
 	 * @codeCoverageIgnore
 	 * @deprecated As of 1.0, use get_stylesheets().
+	 * @internal
 	 *
 	 * @return array[][] Mapping of CSS selectors to arrays of properties.
 	 */

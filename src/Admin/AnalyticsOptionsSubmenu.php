@@ -11,7 +11,10 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 
 /**
- * Class AnalyticsOptionsSubmenu
+ * Add a submenu link to the AMP options submenu.
+ *
+ * @since 2.0
+ * @internal
  */
 final class AnalyticsOptionsSubmenu implements Service, Registerable {
 
