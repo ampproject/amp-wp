@@ -995,7 +995,7 @@ final class ServerSideRendering implements Transformer
         $cssRules   = [];
         $cssRules[] = new CssRule($mainStyle[0], sprintf($mainStyle[1], $lastItem));
 
-        foreach ($sourceSizes as $sourceSize) {
+        foreach (array_reverse($sourceSizes) as $sourceSize) {
             $matches = [];
             if (preg_match(self::CSS_DIMENSION_WITH_MEDIA_CONDITION_REGEX_PATTERN, $sourceSize, $matches)) {
                 $mediaCondition = trim($matches['media_condition'], self::CSS_TRIM_CHARACTERS);
