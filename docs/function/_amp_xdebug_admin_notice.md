@@ -10,7 +10,7 @@ Print admin notice if the Xdebug extension is loaded.
 
 ### Source
 
-:link: [includes/deprecated.php:262](../../includes/deprecated.php#L262-L277)
+:link: [includes/deprecated.php:269](../../includes/deprecated.php#L269-L284)
 
 <details>
 <summary>Show Code</summary>

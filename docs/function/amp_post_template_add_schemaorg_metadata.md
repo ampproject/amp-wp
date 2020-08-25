@@ -10,7 +10,7 @@ Print Schema.org metadata.
 
 ### Source
 
-:link: [includes/deprecated.php:226](../../includes/deprecated.php#L226-L229)
+:link: [includes/deprecated.php:230](../../includes/deprecated.php#L230-L233)
 
 <details>
 <summary>Show Code</summary>

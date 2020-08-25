@@ -21,10 +21,3 @@
 * [`amp_to_amp_excluded_urls`](amp_to_amp_excluded_urls.md) - Filters the list of URLs which are excluded from being included in AMP-to-AMP linking.
 * [`amp_to_amp_linking_enabled`](amp_to_amp_linking_enabled.md) - Filters whether AMP-to-AMP linking should be enabled.
 * ~~[`pre_amp_render_post`](pre_amp_render_post.md) - Fires before rendering a post in AMP.~~
-* [`the_content`](the_content.md) - This filter is documented in wp-includes/post-template.php
-* [`widget_archives_args`](widget_archives_args.md) - This filter is documented in wp-includes/widgets/class-wp-widget-archives.php
-* [`widget_archives_dropdown_args`](widget_archives_dropdown_args.md) - This filter is documented in wp-includes/widgets/class-wp-widget-archives.php
-* [`widget_categories_args`](widget_categories_args.md) - This filter is documented in wp-includes/widgets/class-wp-widget-categories.php
-* [`widget_categories_dropdown_args`](widget_categories_dropdown_args.md) - This filter is documented in wp-includes/widgets/class-wp-widget-categories.php
-* [`widget_title`](widget_title.md) - This filter is documented in wp-includes/widgets/class-wp-widget-pages.php
-* [`widget_title`](widget_title.md) - This filter is documented in wp-includes/widgets/class-wp-widget-pages.php

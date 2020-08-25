@@ -10,7 +10,7 @@ The array returned is merged with the overall validate response data.
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:792](../../includes/sanitizers/class-amp-base-sanitizer.php#L792-L794)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:793](../../includes/sanitizers/class-amp-base-sanitizer.php#L793-L795)
 
 <details>
 <summary>Show Code</summary>

@@ -15,7 +15,7 @@ If not required, the implementing class may want to try and force https instead.
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:394](../../includes/sanitizers/class-amp-base-sanitizer.php#L394-L409)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:395](../../includes/sanitizers/class-amp-base-sanitizer.php#L395-L410)
 
 <details>
 <summary>Show Code</summary>

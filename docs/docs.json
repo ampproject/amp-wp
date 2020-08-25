@@ -1,206 +1,4 @@
 {
-    "28": {
-        "file": {
-            "description": "Class AnalyticsOptionsSubmenu",
-            "long_description": "",
-            "tags": [
-                {
-                    "name": "package",
-                    "content": "AMP"
-                }
-            ]
-        },
-        "path": "src\/Admin\/AnalyticsOptionsSubmenu.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
-        "classes": [
-            {
-                "name": "AnalyticsOptionsSubmenu",
-                "namespace": "AmpProject\\AmpWP\\Admin",
-                "line": 16,
-                "end_line": 64,
-                "final": true,
-                "abstract": false,
-                "extends": "",
-                "implements": [
-                    "\\AmpProject\\AmpWP\\Infrastructure\\Service",
-                    "\\AmpProject\\AmpWP\\Infrastructure\\Registerable"
-                ],
-                "properties": [
-                    {
-                        "name": "$parent_menu_slug",
-                        "line": 23,
-                        "end_line": 23,
-                        "default": null,
-                        "static": false,
-                        "visibility": "private",
-                        "doc": {
-                            "description": "The parent menu slug.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "var",
-                                    "content": "",
-                                    "types": [
-                                        "string"
-                                    ],
-                                    "variable": ""
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "methods": [
-                    {
-                        "name": "__construct",
-                        "namespace": "AmpProject\\AmpWP\\Admin",
-                        "aliases": {
-                            "Registerable": "\\AmpProject\\AmpWP\\Infrastructure\\Registerable",
-                            "Service": "\\AmpProject\\AmpWP\\Infrastructure\\Service"
-                        },
-                        "line": 30,
-                        "end_line": 32,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "public",
-                        "arguments": [
-                            {
-                                "name": "$options_menu",
-                                "default": null,
-                                "type": "\\AmpProject\\AmpWP\\Admin\\OptionsMenu"
-                            }
-                        ],
-                        "doc": {
-                            "description": "Class constructor.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "param",
-                                    "content": "An instance of the class handling the parent menu.",
-                                    "types": [
-                                        "\\AmpProject\\AmpWP\\Admin\\OptionsMenu"
-                                    ],
-                                    "variable": "$options_menu"
-                                }
-                            ]
-                        },
-                        "uses": {
-                            "methods": [
-                                {
-                                    "name": "get_menu_slug",
-                                    "class": "$options_menu",
-                                    "static": false,
-                                    "line": 31,
-                                    "end_line": 31
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "get_registration_action",
-                        "namespace": "AmpProject\\AmpWP\\Admin",
-                        "aliases": {
-                            "Registerable": "\\AmpProject\\AmpWP\\Infrastructure\\Registerable",
-                            "Service": "\\AmpProject\\AmpWP\\Infrastructure\\Service"
-                        },
-                        "line": 39,
-                        "end_line": 41,
-                        "final": false,
-                        "abstract": false,
-                        "static": true,
-                        "visibility": "public",
-                        "arguments": [],
-                        "doc": {
-                            "description": "Get the action to use for registering the service.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "return",
-                                    "content": "Registration action to use.",
-                                    "types": [
-                                        "string"
-                                    ]
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "register",
-                        "namespace": "AmpProject\\AmpWP\\Admin",
-                        "aliases": {
-                            "Registerable": "\\AmpProject\\AmpWP\\Infrastructure\\Registerable",
-                            "Service": "\\AmpProject\\AmpWP\\Infrastructure\\Service"
-                        },
-                        "line": 46,
-                        "end_line": 48,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "public",
-                        "arguments": [],
-                        "doc": {
-                            "description": "Adds hooks.",
-                            "long_description": "",
-                            "tags": []
-                        },
-                        "uses": {
-                            "functions": [
-                                {
-                                    "name": "add_action",
-                                    "line": 47,
-                                    "end_line": 47
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "add_submenu_link",
-                        "namespace": "AmpProject\\AmpWP\\Admin",
-                        "aliases": {
-                            "Registerable": "\\AmpProject\\AmpWP\\Infrastructure\\Registerable",
-                            "Service": "\\AmpProject\\AmpWP\\Infrastructure\\Service"
-                        },
-                        "line": 53,
-                        "end_line": 63,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "public",
-                        "arguments": [],
-                        "doc": {
-                            "description": "Adds a submenu link to the AMP options submenu.",
-                            "long_description": "",
-                            "tags": []
-                        },
-                        "uses": {
-                            "functions": [
-                                {
-                                    "name": "add_submenu_page",
-                                    "line": 54,
-                                    "end_line": 62
-                                },
-                                {
-                                    "name": "__",
-                                    "line": 56,
-                                    "end_line": 56
-                                },
-                                {
-                                    "name": "__",
-                                    "line": 57,
-                                    "end_line": 57
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "doc": {
-                    "description": "Class AnalyticsOptionsSubmenu",
-                    "long_description": "",
-                    "tags": []
-                }
-            }
-        ]
-    },
     "91": {
         "file": {
             "description": "Class AMP_Base_Sanitizer",
@@ -219,7 +17,7 @@
                 "name": "AMP_Base_Sanitizer",
                 "namespace": "global",
                 "line": 16,
-                "end_line": 795,
+                "end_line": 796,
                 "final": false,
                 "abstract": true,
                 "extends": "",
@@ -598,8 +396,8 @@
                             "DevMode": "\\AmpProject\\DevMode",
                             "Document": "\\AmpProject\\Dom\\Document"
                         },
-                        "line": 183,
-                        "end_line": 185,
+                        "line": 184,
+                        "end_line": 186,
                         "final": false,
                         "abstract": false,
                         "static": false,
@@ -623,6 +421,10 @@
                                     "description": "As of 1.0, use get_stylesheets()."
                                 },
                                 {
+                                    "name": "internal",
+                                    "content": ""
+                                },
+                                {
                                     "name": "return",
                                     "content": "Mapping of CSS selectors to arrays of properties.",
                                     "types": [
@@ -639,8 +441,8 @@
                             "DevMode": "\\AmpProject\\DevMode",
                             "Document": "\\AmpProject\\Dom\\Document"
                         },
-                        "line": 193,
-                        "end_line": 203,
+                        "line": 194,
+                        "end_line": 204,
                         "final": false,
                         "abstract": false,
                         "static": false,
@@ -669,25 +471,25 @@
                                     "name": "get_styles",
                                     "class": "\\AMP_Base_Sanitizer",
                                     "static": false,
-                                    "line": 196,
-                                    "end_line": 196
+                                    "line": 197,
+                                    "end_line": 197
                                 }
                             ],
                             "functions": [
                                 {
                                     "name": "sprintf",
-                                    "line": 197,
-                                    "end_line": 197
+                                    "line": 198,
+                                    "end_line": 198
                                 },
                                 {
                                     "name": "implode",
-                                    "line": 197,
-                                    "end_line": 197
+                                    "line": 198,
+                                    "end_line": 198
                                 },
                                 {
                                     "name": "md5",
-                                    "line": 199,
-                                    "end_line": 199
+                                    "line": 200,
+                                    "end_line": 200
                                 }
                             ]
                         }
@@ -699,8 +501,8 @@
                             "DevMode": "\\AmpProject\\DevMode",
                             "Document": "\\AmpProject\\Dom\\Document"
                         },
-                        "line": 212,
-                        "end_line": 215,
+                        "line": 213,
+                        "end_line": 216,
                         "final": false,
                         "abstract": false,
                         "static": false,
@@ -732,8 +534,8 @@
                             "functions": [
                                 {
                                     "name": "_deprecated_function",
-                                    "line": 213,
-                                    "end_line": 213,
+                                    "line": 214,
+                                    "end_line": 214,
                                     "deprecation_version": "1.5.0"
                                 }
                             ]
@@ -746,8 +548,8 @@
                             "DevMode": "\\AmpProject\\DevMode",
                             "Document": "\\AmpProject\\Dom\\Document"
                         },
-                        "line": 225,
-                        "end_line": 252,
+                        "line": 226,
+                        "end_line": 253,
                         "final": false,
                         "abstract": false,
                         "static": false,
@@ -799,28 +601,28 @@
                             "functions": [
                                 {
                                     "name": "is_numeric",
-                                    "line": 238,
-                                    "end_line": 238
-                                },
-                                {
-                                    "name": "max",
                                     "line": 239,
                                     "end_line": 239
                                 },
                                 {
-                                    "name": "absint",
-                                    "line": 243,
-                                    "end_line": 243
+                                    "name": "max",
+                                    "line": 240,
+                                    "end_line": 240
                                 },
                                 {
                                     "name": "absint",
-                                    "line": 247,
-                                    "end_line": 247
+                                    "line": 244,
+                                    "end_line": 244
+                                },
+                                {
+                                    "name": "absint",
+                                    "line": 248,
+                                    "end_line": 248
                                 },
                                 {
                                     "name": "round",
-                                    "line": 248,
-                                    "end_line": 248
+                                    "line": 249,
+                                    "end_line": 249
                                 }
                             ],
                             "methods": [
@@ -828,15 +630,15 @@
                                     "name": "endswith",
                                     "class": "\\AMP_String_Utils",
                                     "static": true,
-                                    "line": 242,
-                                    "end_line": 242
+                                    "line": 243,
+                                    "end_line": 243
                                 },
                                 {
                                     "name": "endswith",
                                     "class": "\\AMP_String_Utils",
                                     "static": true,
-                                    "line": 246,
-                                    "end_line": 246
+                                    "line": 247,
+                                    "end_line": 247
                                 }
                             ]
                         }
@@ -848,8 +650,8 @@
                             "DevMode": "\\AmpProject\\DevMode",
                             "Document": "\\AmpProject\\Dom\\Document"
                         },
-                        "line": 260,
-                        "end_line": 262,
+                        "line": 261,
+                        "end_line": 263,
                         "final": false,
                         "abstract": false,
                         "static": false,
@@ -891,8 +693,8 @@
                             "DevMode": "\\AmpProject\\DevMode",
                             "Document": "\\AmpProject\\Dom\\Document"
                         },
-                        "line": 282,
-                        "end_line": 356,
+                        "line": 283,
+                        "end_line": 357,
                         "final": false,
                         "abstract": false,
                         "static": false,
@@ -931,29 +733,29 @@
                                     "name": "parse_style_string",
                                     "class": "\\AMP_Base_Sanitizer",
                                     "static": false,
-                                    "line": 289,
-                                    "end_line": 289
+                                    "line": 290,
+                                    "end_line": 290
                                 },
                                 {
                                     "name": "reassemble_style_string",
                                     "class": "\\AMP_Base_Sanitizer",
                                     "static": false,
-                                    "line": 303,
-                                    "end_line": 303
+                                    "line": 304,
+                                    "end_line": 304
                                 },
                                 {
                                     "name": "reassemble_style_string",
                                     "class": "\\AMP_Base_Sanitizer",
                                     "static": false,
-                                    "line": 320,
-                                    "end_line": 320
+                                    "line": 321,
+                                    "end_line": 321
                                 },
                                 {
                                     "name": "reassemble_style_string",
                                     "class": "\\AMP_Base_Sanitizer",
                                     "static": false,
-                                    "line": 334,
-                                    "end_line": 334
+                                    "line": 335,
+                                    "end_line": 335
                                 }
                             ]
                         }
@@ -965,8 +767,8 @@
                             "DevMode": "\\AmpProject\\DevMode",
                             "Document": "\\AmpProject\\Dom\\Document"
                         },
-                        "line": 377,
-                        "end_line": 383,
+                        "line": 378,
+                        "end_line": 384,
                         "final": false,
                         "abstract": false,
                         "static": false,
@@ -1035,8 +837,8 @@
                             "functions": [
                                 {
                                     "name": "trim",
-                                    "line": 379,
-                                    "end_line": 379
+                                    "line": 380,
+                                    "end_line": 380
                                 }
                             ]
                         }
@@ -1048,8 +850,8 @@
                             "DevMode": "\\AmpProject\\DevMode",
                             "Document": "\\AmpProject\\Dom\\Document"
                         },
-                        "line": 394,
-                        "end_line": 409,
+                        "line": 395,
+                        "end_line": 410,
                         "final": false,
                         "abstract": false,
                         "static": false,
@@ -1099,13 +901,13 @@
                             "functions": [
                                 {
                                     "name": "strtok",
-                                    "line": 395,
-                                    "end_line": 395
+                                    "line": 396,
+                                    "end_line": 396
                                 },
                                 {
                                     "name": "set_url_scheme",
-                                    "line": 404,
-                                    "end_line": 404
+                                    "line": 405,
+                                    "end_line": 405
                                 }
                             ]
                         }
@@ -1117,8 +919,8 @@
                             "DevMode": "\\AmpProject\\DevMode",
                             "Document": "\\AmpProject\\Dom\\Document"
                         },
-                        "line": 420,
-                        "end_line": 423,
+                        "line": 421,
+                        "end_line": 424,
                         "final": false,
                         "abstract": false,
                         "static": false,
@@ -1150,8 +952,8 @@
                             "functions": [
                                 {
                                     "name": "_deprecated_function",
-                                    "line": 421,
-                                    "end_line": 421,
+                                    "line": 422,
+                                    "end_line": 422,
                                     "deprecation_version": "1.5"
                                 }
                             ],
@@ -1160,8 +962,8 @@
                                     "name": "isActiveForDocument",
                                     "class": "\\AmpProject\\DevMode",
                                     "static": true,
-                                    "line": 422,
-                                    "end_line": 422
+                                    "line": 423,
+                                    "end_line": 423
                                 }
                             ]
                         }
@@ -1173,8 +975,8 @@
                             "DevMode": "\\AmpProject\\DevMode",
                             "Document": "\\AmpProject\\Dom\\Document"
                         },
-                        "line": 435,
-                        "end_line": 438,
+                        "line": 436,
+                        "end_line": 439,
                         "final": false,
                         "abstract": false,
                         "static": false,
@@ -1220,8 +1022,8 @@
                             "functions": [
                                 {
                                     "name": "_deprecated_function",
-                                    "line": 436,
-                                    "end_line": 436,
+                                    "line": 437,
+                                    "end_line": 437,
                                     "deprecation_version": "1.5"
                                 }
                             ],
@@ -1230,8 +1032,8 @@
                                     "name": "hasExemptionForNode",
                                     "class": "\\AmpProject\\DevMode",
                                     "static": true,
-                                    "line": 437,
-                                    "end_line": 437
+                                    "line": 438,
+                                    "end_line": 438
                                 }
                             ]
                         }
@@ -1243,8 +1045,8 @@
                             "DevMode": "\\AmpProject\\DevMode",
                             "Document": "\\AmpProject\\Dom\\Document"
                         },
-                        "line": 448,
-                        "end_line": 451,
+                        "line": 449,
+                        "end_line": 452,
                         "final": false,
                         "abstract": false,
                         "static": false,
@@ -1286,8 +1088,8 @@
                             "functions": [
                                 {
                                     "name": "_deprecated_function",
-                                    "line": 449,
-                                    "end_line": 449,
+                                    "line": 450,
+                                    "end_line": 450,
                                     "deprecation_version": "1.5"
                                 }
                             ],
@@ -1296,8 +1098,8 @@
                                     "name": "isExemptFromValidation",
                                     "class": "\\AmpProject\\DevMode",
                                     "static": true,
-                                    "line": 450,
-                                    "end_line": 450
+                                    "line": 451,
+                                    "end_line": 451
                                 }
                             ]
                         }
@@ -1309,8 +1111,8 @@
                             "DevMode": "\\AmpProject\\DevMode",
                             "Document": "\\AmpProject\\Dom\\Document"
                         },
-                        "line": 465,
-                        "end_line": 487,
+                        "line": 466,
+                        "end_line": 488,
                         "final": false,
                         "abstract": false,
                         "static": false,
@@ -1367,34 +1169,34 @@
                                     "name": "isExemptFromValidation",
                                     "class": "\\AmpProject\\DevMode",
                                     "static": true,
-                                    "line": 466,
-                                    "end_line": 466
+                                    "line": 467,
+                                    "end_line": 467
                                 },
                                 {
                                     "name": "should_sanitize_validation_error",
                                     "class": "\\AMP_Base_Sanitizer",
                                     "static": false,
-                                    "line": 475,
-                                    "end_line": 475
+                                    "line": 476,
+                                    "end_line": 476
                                 },
                                 {
                                     "name": "removeChild",
                                     "class": "$node->parentNode",
                                     "static": false,
-                                    "line": 482,
-                                    "end_line": 482
+                                    "line": 483,
+                                    "end_line": 483
                                 }
                             ],
                             "functions": [
                                 {
                                     "name": "in_array",
-                                    "line": 471,
-                                    "end_line": 471
+                                    "line": 472,
+                                    "end_line": 472
                                 },
                                 {
                                     "name": "compact",
-                                    "line": 475,
-                                    "end_line": 475
+                                    "line": 476,
+                                    "end_line": 476
                                 }
                             ]
                         }
@@ -1406,8 +1208,8 @@
                             "DevMode": "\\AmpProject\\DevMode",
                             "Document": "\\AmpProject\\Dom\\Document"
                         },
-                        "line": 503,
-                        "end_line": 531,
+                        "line": 504,
+                        "end_line": 532,
                         "final": false,
                         "abstract": false,
                         "static": false,
@@ -1490,41 +1292,41 @@
                                     "name": "isExemptFromValidation",
                                     "class": "\\AmpProject\\DevMode",
                                     "static": true,
-                                    "line": 504,
-                                    "end_line": 504
+                                    "line": 505,
+                                    "end_line": 505
                                 },
                                 {
                                     "name": "getAttributeNode",
                                     "class": "$element",
                                     "static": false,
-                                    "line": 509,
-                                    "end_line": 509
+                                    "line": 510,
+                                    "end_line": 510
                                 },
                                 {
                                     "name": "should_sanitize_validation_error",
                                     "class": "\\AMP_Base_Sanitizer",
                                     "static": false,
-                                    "line": 519,
-                                    "end_line": 519
+                                    "line": 520,
+                                    "end_line": 520
                                 },
                                 {
                                     "name": "removeAttributeNode",
                                     "class": "$element",
                                     "static": false,
-                                    "line": 526,
-                                    "end_line": 526
+                                    "line": 527,
+                                    "end_line": 527
                                 }
                             ],
                             "functions": [
                                 {
                                     "name": "is_string",
-                                    "line": 508,
-                                    "end_line": 508
+                                    "line": 509,
+                                    "end_line": 509
                                 },
                                 {
                                     "name": "compact",
-                                    "line": 519,
-                                    "end_line": 519
+                                    "line": 520,
+                                    "end_line": 520
                                 }
                             ]
                         }
@@ -1536,8 +1338,8 @@
                             "DevMode": "\\AmpProject\\DevMode",
                             "Document": "\\AmpProject\\Dom\\Document"
                         },
-                        "line": 542,
-                        "end_line": 548,
+                        "line": 543,
+                        "end_line": 549,
                         "final": false,
                         "abstract": false,
                         "static": false,
@@ -1591,13 +1393,13 @@
                             "functions": [
                                 {
                                     "name": "is_callable",
-                                    "line": 543,
-                                    "end_line": 543
+                                    "line": 544,
+                                    "end_line": 544
                                 },
                                 {
                                     "name": "call_user_func",
-                                    "line": 547,
-                                    "end_line": 547
+                                    "line": 548,
+                                    "end_line": 548
                                 }
                             ],
                             "methods": [
@@ -1605,8 +1407,8 @@
                                     "name": "prepare_validation_error",
                                     "class": "\\AMP_Base_Sanitizer",
                                     "static": false,
-                                    "line": 546,
-                                    "end_line": 546
+                                    "line": 547,
+                                    "end_line": 547
                                 }
                             ]
                         }
@@ -1618,8 +1420,8 @@
                             "DevMode": "\\AmpProject\\DevMode",
                             "Document": "\\AmpProject\\Dom\\Document"
                         },
-                        "line": 565,
-                        "end_line": 631,
+                        "line": 566,
+                        "end_line": 632,
                         "final": false,
                         "abstract": false,
                         "static": false,
@@ -1671,47 +1473,47 @@
                                     "name": "hasAttribute",
                                     "class": "$node",
                                     "static": false,
-                                    "line": 596,
-                                    "end_line": 596
+                                    "line": 597,
+                                    "end_line": 597
                                 },
                                 {
                                     "name": "hasAttributes",
                                     "class": "$node->parentNode",
                                     "static": false,
-                                    "line": 616,
-                                    "end_line": 616
+                                    "line": 617,
+                                    "end_line": 617
                                 }
                             ],
                             "functions": [
                                 {
                                     "name": "strpos",
-                                    "line": 601,
-                                    "end_line": 601
-                                },
-                                {
-                                    "name": "add_query_arg",
                                     "line": 602,
                                     "end_line": 602
                                 },
                                 {
-                                    "name": "strpos",
+                                    "name": "add_query_arg",
                                     "line": 603,
                                     "end_line": 603
                                 },
                                 {
-                                    "name": "add_query_arg",
+                                    "name": "strpos",
                                     "line": 604,
                                     "end_line": 604
                                 },
                                 {
+                                    "name": "add_query_arg",
+                                    "line": 605,
+                                    "end_line": 605
+                                },
+                                {
                                     "name": "preg_match",
-                                    "line": 612,
-                                    "end_line": 612
+                                    "line": 613,
+                                    "end_line": 613
                                 },
                                 {
                                     "name": "trim",
-                                    "line": 623,
-                                    "end_line": 623
+                                    "line": 624,
+                                    "end_line": 624
                                 }
                             ]
                         }
@@ -1723,8 +1525,8 @@
                             "DevMode": "\\AmpProject\\DevMode",
                             "Document": "\\AmpProject\\Dom\\Document"
                         },
-                        "line": 641,
-                        "end_line": 656,
+                        "line": 642,
+                        "end_line": 657,
                         "final": false,
                         "abstract": false,
                         "static": false,
@@ -1773,15 +1575,15 @@
                                     "name": "hasAttribute",
                                     "class": "$element",
                                     "static": false,
-                                    "line": 651,
-                                    "end_line": 651
+                                    "line": 652,
+                                    "end_line": 652
                                 },
                                 {
                                     "name": "removeAttribute",
                                     "class": "$element",
                                     "static": false,
-                                    "line": 652,
-                                    "end_line": 652
+                                    "line": 653,
+                                    "end_line": 653
                                 }
                             ]
                         }
@@ -1793,8 +1595,8 @@
                             "DevMode": "\\AmpProject\\DevMode",
                             "Document": "\\AmpProject\\Dom\\Document"
                         },
-                        "line": 664,
-                        "end_line": 680,
+                        "line": 665,
+                        "end_line": 681,
                         "final": false,
                         "abstract": false,
                         "static": false,
@@ -1833,15 +1635,15 @@
                                     "name": "get_node_attributes_as_assoc_array",
                                     "class": "\\AMP_DOM_Utils",
                                     "static": true,
-                                    "line": 670,
-                                    "end_line": 670
+                                    "line": 671,
+                                    "end_line": 671
                                 }
                             ],
                             "functions": [
                                 {
                                     "name": "filter_var",
-                                    "line": 674,
-                                    "end_line": 674
+                                    "line": 675,
+                                    "end_line": 675
                                 }
                             ]
                         }
@@ -1853,8 +1655,8 @@
                             "DevMode": "\\AmpProject\\DevMode",
                             "Document": "\\AmpProject\\Dom\\Document"
                         },
-                        "line": 689,
-                        "end_line": 697,
+                        "line": 690,
+                        "end_line": 698,
                         "final": false,
                         "abstract": false,
                         "static": false,
@@ -1908,8 +1710,8 @@
                             "DevMode": "\\AmpProject\\DevMode",
                             "Document": "\\AmpProject\\Dom\\Document"
                         },
-                        "line": 707,
-                        "end_line": 733,
+                        "line": 708,
+                        "end_line": 734,
                         "final": false,
                         "abstract": false,
                         "static": false,
@@ -1974,22 +1776,22 @@
                                     "name": "setAttribute",
                                     "class": "$node->parentNode",
                                     "static": false,
-                                    "line": 715,
-                                    "end_line": 715
+                                    "line": 716,
+                                    "end_line": 716
                                 },
                                 {
                                     "name": "setAttribute",
                                     "class": "$node->parentNode",
                                     "static": false,
-                                    "line": 722,
-                                    "end_line": 722
+                                    "line": 723,
+                                    "end_line": 723
                                 },
                                 {
                                     "name": "setAttribute",
                                     "class": "$node->parentNode",
                                     "static": false,
-                                    "line": 725,
-                                    "end_line": 725
+                                    "line": 726,
+                                    "end_line": 726
                                 }
                             ]
                         }
@@ -2001,8 +1803,8 @@
                             "DevMode": "\\AmpProject\\DevMode",
                             "Document": "\\AmpProject\\Dom\\Document"
                         },
-                        "line": 741,
-                        "end_line": 755,
+                        "line": 742,
+                        "end_line": 756,
                         "final": false,
                         "abstract": false,
                         "static": false,
@@ -2039,43 +1841,43 @@
                             "functions": [
                                 {
                                     "name": "trim",
-                                    "line": 743,
-                                    "end_line": 743
-                                },
-                                {
-                                    "name": "preg_split",
                                     "line": 744,
                                     "end_line": 744
                                 },
                                 {
+                                    "name": "preg_split",
+                                    "line": 745,
+                                    "end_line": 745
+                                },
+                                {
                                     "name": "count",
-                                    "line": 746,
-                                    "end_line": 746
+                                    "line": 747,
+                                    "end_line": 747
                                 },
                                 {
                                     "name": "array_pop",
-                                    "line": 748,
-                                    "end_line": 748
+                                    "line": 749,
+                                    "end_line": 749
                                 },
                                 {
                                     "name": "array_chunk",
-                                    "line": 751,
-                                    "end_line": 751
+                                    "line": 752,
+                                    "end_line": 752
                                 },
                                 {
                                     "name": "array_combine",
-                                    "line": 754,
-                                    "end_line": 754
+                                    "line": 755,
+                                    "end_line": 755
                                 },
                                 {
                                     "name": "array_column",
-                                    "line": 754,
-                                    "end_line": 754
+                                    "line": 755,
+                                    "end_line": 755
                                 },
                                 {
                                     "name": "array_column",
-                                    "line": 754,
-                                    "end_line": 754
+                                    "line": 755,
+                                    "end_line": 755
                                 }
                             ]
                         }
@@ -2087,8 +1889,8 @@
                             "DevMode": "\\AmpProject\\DevMode",
                             "Document": "\\AmpProject\\Dom\\Document"
                         },
-                        "line": 763,
-                        "end_line": 782,
+                        "line": 764,
+                        "end_line": 783,
                         "final": false,
                         "abstract": false,
                         "static": false,
@@ -2125,23 +1927,23 @@
                             "functions": [
                                 {
                                     "name": "is_array",
-                                    "line": 764,
-                                    "end_line": 764
+                                    "line": 765,
+                                    "end_line": 765
                                 },
                                 {
                                     "name": "array_filter",
-                                    "line": 769,
-                                    "end_line": 769
+                                    "line": 770,
+                                    "end_line": 770
                                 },
                                 {
                                     "name": "array_reduce",
-                                    "line": 771,
-                                    "end_line": 781
+                                    "line": 772,
+                                    "end_line": 782
                                 },
                                 {
                                     "name": "array_keys",
-                                    "line": 772,
-                                    "end_line": 772
+                                    "line": 773,
+                                    "end_line": 773
                                 }
                             ]
                         }
@@ -2153,8 +1955,8 @@
                             "DevMode": "\\AmpProject\\DevMode",
                             "Document": "\\AmpProject\\Dom\\Document"
                         },
-                        "line": 792,
-                        "end_line": 794,
+                        "line": 793,
+                        "end_line": 795,
                         "final": false,
                         "abstract": false,
                         "static": false,
@@ -2193,713 +1995,6 @@
             }
         ]
     },
-    "97": {
-        "file": {
-            "description": "Class AMP_Widget_Text",
-            "long_description": "",
-            "tags": [
-                {
-                    "name": "since",
-                    "content": "0.7.0"
-                },
-                {
-                    "name": "package",
-                    "content": "AMP"
-                },
-                {
-                    "name": "codeCoverageIgnore",
-                    "content": ""
-                }
-            ]
-        },
-        "path": "includes\/widgets\/class-amp-widget-text.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
-        "uses": {
-            "functions": [
-                {
-                    "name": "_deprecated_file",
-                    "line": 10,
-                    "end_line": 10,
-                    "deprecation_version": "2.0.0"
-                },
-                {
-                    "name": "class_exists",
-                    "line": 12,
-                    "end_line": 12
-                }
-            ]
-        },
-        "classes": [
-            {
-                "name": "AMP_Widget_Text",
-                "namespace": "global",
-                "line": 20,
-                "end_line": 34,
-                "final": false,
-                "abstract": false,
-                "extends": "\\WP_Widget_Text",
-                "implements": [],
-                "properties": [],
-                "methods": [
-                    {
-                        "name": "inject_video_max_width_style",
-                        "namespace": "",
-                        "aliases": [],
-                        "line": 28,
-                        "end_line": 33,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "public",
-                        "arguments": [
-                            {
-                                "name": "$matches",
-                                "default": null,
-                                "type": ""
-                            }
-                        ],
-                        "doc": {
-                            "description": "Overrides the parent callback that strips width and height attributes.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "param",
-                                    "content": "The matches returned from preg_replace_callback().",
-                                    "types": [
-                                        "array"
-                                    ],
-                                    "variable": "$matches"
-                                },
-                                {
-                                    "name": "return",
-                                    "content": "$html The markup, unaltered.",
-                                    "types": [
-                                        "string"
-                                    ]
-                                }
-                            ]
-                        },
-                        "uses": {
-                            "functions": [
-                                {
-                                    "name": "amp_is_request",
-                                    "line": 29,
-                                    "end_line": 29
-                                }
-                            ],
-                            "methods": [
-                                {
-                                    "name": "inject_video_max_width_style",
-                                    "class": "\\WP_Widget_Text",
-                                    "static": true,
-                                    "line": 32,
-                                    "end_line": 32
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "doc": {
-                    "description": "Class AMP_Widget_Text",
-                    "long_description": "",
-                    "tags": [
-                        {
-                            "name": "since",
-                            "content": "0.7.0"
-                        },
-                        {
-                            "name": "deprecated",
-                            "content": "As of 2.0 the AMP_Core_Block_Handler will sanitize the core widgets instead.",
-                            "description": "As of 2.0 the AMP_Core_Block_Handler will sanitize the core widgets instead."
-                        },
-                        {
-                            "name": "package",
-                            "content": "AMP"
-                        }
-                    ]
-                }
-            }
-        ]
-    },
-    "98": {
-        "file": {
-            "description": "Class AMP_Widget_Categories",
-            "long_description": "",
-            "tags": [
-                {
-                    "name": "since",
-                    "content": "0.7.0"
-                },
-                {
-                    "name": "package",
-                    "content": "AMP"
-                },
-                {
-                    "name": "codeCoverageIgnore",
-                    "content": ""
-                }
-            ]
-        },
-        "path": "includes\/widgets\/class-amp-widget-categories.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
-        "uses": {
-            "functions": [
-                {
-                    "name": "_deprecated_file",
-                    "line": 10,
-                    "end_line": 10,
-                    "deprecation_version": "2.0.0"
-                }
-            ]
-        },
-        "classes": [
-            {
-                "name": "AMP_Widget_Categories",
-                "namespace": "global",
-                "line": 19,
-                "end_line": 96,
-                "final": false,
-                "abstract": false,
-                "extends": "\\WP_Widget_Categories",
-                "implements": [],
-                "properties": [],
-                "methods": [
-                    {
-                        "name": "widget",
-                        "namespace": "",
-                        "aliases": [],
-                        "line": 36,
-                        "end_line": 95,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "public",
-                        "arguments": [
-                            {
-                                "name": "$args",
-                                "default": null,
-                                "type": ""
-                            },
-                            {
-                                "name": "$instance",
-                                "default": null,
-                                "type": ""
-                            }
-                        ],
-                        "doc": {
-                            "description": "Echoes the markup of the widget.",
-                            "long_description": "Mainly copied from WP_Widget_Categories::widget() There's now an id for the <form>. And the dropdown is now filtered with 'wp_dropdown_cats.' This enables adding an 'on' attribute, with the id of the form. So changing the dropdown value will redirect to the category page, with valid AMP.",
-                            "tags": [
-                                {
-                                    "name": "since",
-                                    "content": "0.7.0"
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "Widget display data.",
-                                    "types": [
-                                        "array"
-                                    ],
-                                    "variable": "$args"
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "Data for widget.",
-                                    "types": [
-                                        "array"
-                                    ],
-                                    "variable": "$instance"
-                                },
-                                {
-                                    "name": "return",
-                                    "content": "",
-                                    "types": [
-                                        "void"
-                                    ]
-                                }
-                            ]
-                        },
-                        "uses": {
-                            "functions": [
-                                {
-                                    "name": "amp_is_request",
-                                    "line": 37,
-                                    "end_line": 37
-                                },
-                                {
-                                    "name": "__",
-                                    "line": 43,
-                                    "end_line": 43
-                                },
-                                {
-                                    "name": "apply_filters",
-                                    "line": 45,
-                                    "end_line": 45
-                                },
-                                {
-                                    "name": "wp_kses_post",
-                                    "line": 49,
-                                    "end_line": 49
-                                },
-                                {
-                                    "name": "wp_kses_post",
-                                    "line": 51,
-                                    "end_line": 51
-                                },
-                                {
-                                    "name": "sprintf",
-                                    "line": 59,
-                                    "end_line": 59
-                                },
-                                {
-                                    "name": "printf",
-                                    "line": 60,
-                                    "end_line": 60
-                                },
-                                {
-                                    "name": "esc_url",
-                                    "line": 60,
-                                    "end_line": 60
-                                },
-                                {
-                                    "name": "home_url",
-                                    "line": 60,
-                                    "end_line": 60
-                                },
-                                {
-                                    "name": "esc_attr",
-                                    "line": 60,
-                                    "end_line": 60
-                                },
-                                {
-                                    "name": "esc_attr",
-                                    "line": 63,
-                                    "end_line": 63
-                                },
-                                {
-                                    "name": "esc_html",
-                                    "line": 63,
-                                    "end_line": 63
-                                },
-                                {
-                                    "name": "__",
-                                    "line": 64,
-                                    "end_line": 64
-                                },
-                                {
-                                    "name": "wp_dropdown_categories",
-                                    "line": 67,
-                                    "end_line": 73
-                                },
-                                {
-                                    "name": "array_merge",
-                                    "line": 68,
-                                    "end_line": 72
-                                },
-                                {
-                                    "name": "apply_filters",
-                                    "line": 70,
-                                    "end_line": 70
-                                },
-                                {
-                                    "name": "preg_replace",
-                                    "line": 74,
-                                    "end_line": 79
-                                },
-                                {
-                                    "name": "sprintf",
-                                    "line": 76,
-                                    "end_line": 76
-                                },
-                                {
-                                    "name": "esc_attr",
-                                    "line": 76,
-                                    "end_line": 76
-                                },
-                                {
-                                    "name": "wp_list_categories",
-                                    "line": 89,
-                                    "end_line": 89
-                                },
-                                {
-                                    "name": "apply_filters",
-                                    "line": 89,
-                                    "end_line": 89
-                                },
-                                {
-                                    "name": "wp_kses_post",
-                                    "line": 94,
-                                    "end_line": 94
-                                }
-                            ],
-                            "methods": [
-                                {
-                                    "name": "widget",
-                                    "class": "\\WP_Widget_Categories",
-                                    "static": true,
-                                    "line": 38,
-                                    "end_line": 38
-                                }
-                            ]
-                        },
-                        "hooks": [
-                            {
-                                "name": "widget_title",
-                                "line": 45,
-                                "end_line": 45,
-                                "type": "filter",
-                                "arguments": [
-                                    "$title",
-                                    "$instance",
-                                    "$this->id_base"
-                                ],
-                                "doc": {
-                                    "description": "This filter is documented in wp-includes\/widgets\/class-wp-widget-pages.php",
-                                    "long_description": "",
-                                    "tags": []
-                                }
-                            },
-                            {
-                                "name": "widget_categories_dropdown_args",
-                                "line": 70,
-                                "end_line": 70,
-                                "type": "filter",
-                                "arguments": [
-                                    "$cat_args",
-                                    "$instance"
-                                ],
-                                "doc": {
-                                    "description": "This filter is documented in wp-includes\/widgets\/class-wp-widget-categories.php",
-                                    "long_description": "",
-                                    "tags": []
-                                }
-                            },
-                            {
-                                "name": "widget_categories_args",
-                                "line": 89,
-                                "end_line": 89,
-                                "type": "filter",
-                                "arguments": [
-                                    "$cat_args",
-                                    "$instance"
-                                ],
-                                "doc": {
-                                    "description": "This filter is documented in wp-includes\/widgets\/class-wp-widget-categories.php",
-                                    "long_description": "",
-                                    "tags": []
-                                }
-                            }
-                        ]
-                    }
-                ],
-                "doc": {
-                    "description": "Class AMP_Widget_Categories",
-                    "long_description": "",
-                    "tags": [
-                        {
-                            "name": "deprecated",
-                            "content": "As of 2.0 the AMP_Core_Block_Handler will sanitize the core widgets instead.",
-                            "description": "As of 2.0 the AMP_Core_Block_Handler will sanitize the core widgets instead."
-                        },
-                        {
-                            "name": "since",
-                            "content": "0.7.0"
-                        },
-                        {
-                            "name": "package",
-                            "content": "AMP"
-                        }
-                    ]
-                }
-            }
-        ]
-    },
-    "99": {
-        "file": {
-            "description": "Class AMP_Widget_Archives",
-            "long_description": "",
-            "tags": [
-                {
-                    "name": "since",
-                    "content": "0.7.0"
-                },
-                {
-                    "name": "package",
-                    "content": "AMP"
-                },
-                {
-                    "name": "codeCoverageIgnore",
-                    "content": ""
-                }
-            ]
-        },
-        "path": "includes\/widgets\/class-amp-widget-archives.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
-        "uses": {
-            "functions": [
-                {
-                    "name": "_deprecated_file",
-                    "line": 10,
-                    "end_line": 10,
-                    "deprecation_version": "2.0.0"
-                }
-            ]
-        },
-        "classes": [
-            {
-                "name": "AMP_Widget_Archives",
-                "namespace": "global",
-                "line": 19,
-                "end_line": 114,
-                "final": false,
-                "abstract": false,
-                "extends": "\\WP_Widget_Archives",
-                "implements": [],
-                "properties": [],
-                "methods": [
-                    {
-                        "name": "widget",
-                        "namespace": "",
-                        "aliases": [],
-                        "line": 38,
-                        "end_line": 113,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "public",
-                        "arguments": [
-                            {
-                                "name": "$args",
-                                "default": null,
-                                "type": ""
-                            },
-                            {
-                                "name": "$instance",
-                                "default": null,
-                                "type": ""
-                            }
-                        ],
-                        "doc": {
-                            "description": "Echoes the markup of the widget.",
-                            "long_description": "Mainly copied from WP_Widget_Archives::widget() Changes include: An id for the <form>. More escaping. The dropdown is now filtered with 'wp_dropdown_cats.' This enables adding an 'on' attribute, with the id of the form. So changing the dropdown value will redirect to the category page, with valid AMP.",
-                            "tags": [
-                                {
-                                    "name": "since",
-                                    "content": "0.7.0"
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "Widget display data.",
-                                    "types": [
-                                        "array"
-                                    ],
-                                    "variable": "$args"
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "Data for widget.",
-                                    "types": [
-                                        "array"
-                                    ],
-                                    "variable": "$instance"
-                                },
-                                {
-                                    "name": "return",
-                                    "content": "",
-                                    "types": [
-                                        "\\void."
-                                    ]
-                                }
-                            ]
-                        },
-                        "uses": {
-                            "functions": [
-                                {
-                                    "name": "amp_is_request",
-                                    "line": 39,
-                                    "end_line": 39
-                                },
-                                {
-                                    "name": "apply_filters",
-                                    "line": 48,
-                                    "end_line": 48
-                                },
-                                {
-                                    "name": "__",
-                                    "line": 48,
-                                    "end_line": 48
-                                },
-                                {
-                                    "name": "wp_kses_post",
-                                    "line": 49,
-                                    "end_line": 49
-                                },
-                                {
-                                    "name": "wp_kses_post",
-                                    "line": 51,
-                                    "end_line": 51
-                                },
-                                {
-                                    "name": "esc_url",
-                                    "line": 57,
-                                    "end_line": 57
-                                },
-                                {
-                                    "name": "home_url",
-                                    "line": 57,
-                                    "end_line": 57
-                                },
-                                {
-                                    "name": "esc_attr",
-                                    "line": 58,
-                                    "end_line": 58
-                                },
-                                {
-                                    "name": "esc_html",
-                                    "line": 58,
-                                    "end_line": 58
-                                },
-                                {
-                                    "name": "esc_attr",
-                                    "line": 59,
-                                    "end_line": 59
-                                },
-                                {
-                                    "name": "apply_filters",
-                                    "line": 63,
-                                    "end_line": 70
-                                },
-                                {
-                                    "name": "__",
-                                    "line": 74,
-                                    "end_line": 74
-                                },
-                                {
-                                    "name": "__",
-                                    "line": 77,
-                                    "end_line": 77
-                                },
-                                {
-                                    "name": "__",
-                                    "line": 80,
-                                    "end_line": 80
-                                },
-                                {
-                                    "name": "__",
-                                    "line": 83,
-                                    "end_line": 83
-                                },
-                                {
-                                    "name": "__",
-                                    "line": 86,
-                                    "end_line": 86
-                                },
-                                {
-                                    "name": "esc_attr",
-                                    "line": 90,
-                                    "end_line": 90
-                                },
-                                {
-                                    "name": "wp_get_archives",
-                                    "line": 91,
-                                    "end_line": 91
-                                },
-                                {
-                                    "name": "wp_get_archives",
-                                    "line": 99,
-                                    "end_line": 107
-                                },
-                                {
-                                    "name": "apply_filters",
-                                    "line": 100,
-                                    "end_line": 106
-                                },
-                                {
-                                    "name": "wp_kses_post",
-                                    "line": 112,
-                                    "end_line": 112
-                                }
-                            ],
-                            "methods": [
-                                {
-                                    "name": "widget",
-                                    "class": "\\WP_Widget_Archives",
-                                    "static": true,
-                                    "line": 40,
-                                    "end_line": 40
-                                }
-                            ]
-                        },
-                        "hooks": [
-                            {
-                                "name": "widget_title",
-                                "line": 48,
-                                "end_line": 48,
-                                "type": "filter",
-                                "arguments": [
-                                    "empty($instance['title']) ? __('Archives', 'default') : $instance['title']",
-                                    "$instance",
-                                    "$this->id_base"
-                                ],
-                                "doc": {
-                                    "description": "This filter is documented in wp-includes\/widgets\/class-wp-widget-pages.php",
-                                    "long_description": "",
-                                    "tags": []
-                                }
-                            },
-                            {
-                                "name": "widget_archives_dropdown_args",
-                                "line": 63,
-                                "end_line": 70,
-                                "type": "filter",
-                                "arguments": [
-                                    "array('type' => 'monthly', 'format' => 'option', 'show_post_count' => $c)"
-                                ],
-                                "doc": {
-                                    "description": "This filter is documented in wp-includes\/widgets\/class-wp-widget-archives.php",
-                                    "long_description": "",
-                                    "tags": []
-                                }
-                            },
-                            {
-                                "name": "widget_archives_args",
-                                "line": 100,
-                                "end_line": 106,
-                                "type": "filter",
-                                "arguments": [
-                                    "array('type' => 'monthly', 'show_post_count' => $c)"
-                                ],
-                                "doc": {
-                                    "description": "This filter is documented in wp-includes\/widgets\/class-wp-widget-archives.php",
-                                    "long_description": "",
-                                    "tags": []
-                                }
-                            }
-                        ]
-                    }
-                ],
-                "doc": {
-                    "description": "Class AMP_Widget_Archives",
-                    "long_description": "",
-                    "tags": [
-                        {
-                            "name": "deprecated",
-                            "content": "As of 2.0 the AMP_Core_Block_Handler will sanitize the core widgets instead.",
-                            "description": "As of 2.0 the AMP_Core_Block_Handler will sanitize the core widgets instead."
-                        },
-                        {
-                            "name": "since",
-                            "content": "0.7.0"
-                        },
-                        {
-                            "name": "package",
-                            "content": "AMP"
-                        }
-                    ]
-                }
-            }
-        ]
-    },
     "101": {
         "file": {
             "description": "Deprecated functions.",
@@ -2916,7 +2011,7 @@
         "includes": [
             {
                 "name": "",
-                "line": 91,
+                "line": 92,
                 "type": "Require Once"
             }
         ],
@@ -2925,8 +2020,8 @@
                 "name": "amp_load_classes",
                 "namespace": "global",
                 "aliases": [],
-                "line": 15,
-                "end_line": 17,
+                "line": 16,
+                "end_line": 18,
                 "arguments": [],
                 "doc": {
                     "description": "Load classes.",
@@ -2944,6 +2039,10 @@
                             "name": "deprecated",
                             "content": "As of 0.6 since autoloading is now employed.",
                             "description": "As of 0.6 since autoloading is now employed."
+                        },
+                        {
+                            "name": "internal",
+                            "content": ""
                         }
                     ]
                 },
@@ -2952,8 +2051,8 @@
                     "functions": [
                         {
                             "name": "_deprecated_function",
-                            "line": 16,
-                            "end_line": 16,
+                            "line": 17,
+                            "end_line": 17,
                             "deprecation_version": "0.6"
                         }
                     ]
@@ -2963,8 +2062,8 @@
                 "name": "amp_maybe_add_actions",
                 "namespace": "global",
                 "aliases": [],
-                "line": 31,
-                "end_line": 80,
+                "line": 32,
+                "end_line": 81,
                 "arguments": [],
                 "doc": {
                     "description": "Conditionally add AMP actions or render the transitional mode template(s).",
@@ -3001,89 +2100,89 @@
                     "functions": [
                         {
                             "name": "_deprecated_function",
-                            "line": 32,
-                            "end_line": 32,
+                            "line": 33,
+                            "end_line": 33,
                             "deprecation_version": "1.5"
                         },
                         {
                             "name": "current_theme_supports",
-                            "line": 35,
-                            "end_line": 35
+                            "line": 36,
+                            "end_line": 36
                         },
                         {
                             "name": "is_singular",
-                            "line": 41,
-                            "end_line": 41
+                            "line": 42,
+                            "end_line": 42
                         },
                         {
                             "name": "is_feed",
-                            "line": 41,
-                            "end_line": 41
+                            "line": 42,
+                            "end_line": 42
                         },
                         {
                             "name": "amp_is_request",
-                            "line": 45,
-                            "end_line": 45
+                            "line": 46,
+                            "end_line": 46
                         },
                         {
                             "name": "get_queried_object",
-                            "line": 52,
-                            "end_line": 52
-                        },
-                        {
-                            "name": "amp_is_post_supported",
                             "line": 53,
                             "end_line": 53
                         },
                         {
+                            "name": "amp_is_post_supported",
+                            "line": 54,
+                            "end_line": 54
+                        },
+                        {
                             "name": "wp_safe_redirect",
-                            "line": 59,
-                            "end_line": 59
+                            "line": 60,
+                            "end_line": 60
                         },
                         {
                             "name": "get_permalink",
-                            "line": 59,
-                            "end_line": 59
+                            "line": 60,
+                            "end_line": 60
                         },
                         {
                             "name": "current_user_can",
-                            "line": 59,
-                            "end_line": 59
+                            "line": 60,
+                            "end_line": 60
                         },
                         {
                             "name": "wp_parse_str",
-                            "line": 70,
-                            "end_line": 70
-                        },
-                        {
-                            "name": "amp_get_slug",
                             "line": 71,
                             "end_line": 71
                         },
                         {
                             "name": "amp_get_slug",
-                            "line": 71,
-                            "end_line": 71
+                            "line": 72,
+                            "end_line": 72
+                        },
+                        {
+                            "name": "amp_get_slug",
+                            "line": 72,
+                            "end_line": 72
                         },
                         {
                             "name": "wp_safe_redirect",
-                            "line": 72,
-                            "end_line": 72
+                            "line": 73,
+                            "end_line": 73
                         },
                         {
                             "name": "amp_get_permalink",
-                            "line": 72,
-                            "end_line": 72
+                            "line": 73,
+                            "end_line": 73
                         },
                         {
                             "name": "amp_prepare_render",
-                            "line": 76,
-                            "end_line": 76
+                            "line": 77,
+                            "end_line": 77
                         },
                         {
                             "name": "amp_add_frontend_actions",
-                            "line": 78,
-                            "end_line": 78
+                            "line": 79,
+                            "end_line": 79
                         }
                     ]
                 }
@@ -3092,8 +2191,8 @@
                 "name": "amp_add_post_template_actions",
                 "namespace": "global",
                 "aliases": [],
-                "line": 89,
-                "end_line": 93,
+                "line": 90,
+                "end_line": 94,
                 "arguments": [],
                 "doc": {
                     "description": "Add post template actions.",
@@ -3119,14 +2218,14 @@
                     "functions": [
                         {
                             "name": "_deprecated_function",
-                            "line": 90,
-                            "end_line": 90,
+                            "line": 91,
+                            "end_line": 91,
                             "deprecation_version": "1.5"
                         },
                         {
                             "name": "amp_post_template_init_hooks",
-                            "line": 92,
-                            "end_line": 92
+                            "line": 93,
+                            "end_line": 93
                         }
                     ]
                 }
@@ -3135,8 +2234,8 @@
                 "name": "amp_prepare_render",
                 "namespace": "global",
                 "aliases": [],
-                "line": 103,
-                "end_line": 106,
+                "line": 104,
+                "end_line": 107,
                 "arguments": [],
                 "doc": {
                     "description": "Add action to do post template rendering at template_redirect action.",
@@ -3167,14 +2266,14 @@
                     "functions": [
                         {
                             "name": "_deprecated_function",
-                            "line": 104,
-                            "end_line": 104,
+                            "line": 105,
+                            "end_line": 105,
                             "deprecation_version": "1.5"
                         },
                         {
                             "name": "add_action",
-                            "line": 105,
-                            "end_line": 105
+                            "line": 106,
+                            "end_line": 106
                         }
                     ]
                 }
@@ -3183,8 +2282,8 @@
                 "name": "amp_render",
                 "namespace": "global",
                 "aliases": [],
-                "line": 115,
-                "end_line": 124,
+                "line": 116,
+                "end_line": 125,
                 "arguments": [],
                 "doc": {
                     "description": "Render AMP for queried post.",
@@ -3210,19 +2309,19 @@
                     "functions": [
                         {
                             "name": "_deprecated_function",
-                            "line": 116,
-                            "end_line": 116,
+                            "line": 117,
+                            "end_line": 117,
                             "deprecation_version": "1.5"
                         },
                         {
                             "name": "get_queried_object",
-                            "line": 119,
-                            "end_line": 119
+                            "line": 120,
+                            "end_line": 120
                         },
                         {
                             "name": "amp_render_post",
-                            "line": 121,
-                            "end_line": 121
+                            "line": 122,
+                            "end_line": 122
                         }
                     ]
                 }
@@ -3231,8 +2330,8 @@
                 "name": "amp_render_post",
                 "namespace": "global",
                 "aliases": [],
-                "line": 136,
-                "end_line": 182,
+                "line": 137,
+                "end_line": 183,
                 "arguments": [
                     {
                         "name": "$post",
@@ -3275,8 +2374,8 @@
                 "hooks": [
                     {
                         "name": "pre_amp_render_post",
-                        "line": 173,
-                        "end_line": 173,
+                        "line": 174,
+                        "end_line": 174,
                         "type": "action",
                         "arguments": [
                             "$post_id"
@@ -3291,7 +2390,8 @@
                                 },
                                 {
                                     "name": "deprecated",
-                                    "content": ""
+                                    "content": "Check amp_is_request() on the template_redirect action instead.",
+                                    "description": "Check amp_is_request() on the template_redirect action instead."
                                 },
                                 {
                                     "name": "param",
@@ -3309,49 +2409,49 @@
                     "functions": [
                         {
                             "name": "_deprecated_function",
-                            "line": 137,
-                            "end_line": 137,
+                            "line": 138,
+                            "end_line": 138,
                             "deprecation_version": "1.5"
                         },
                         {
                             "name": "get_post",
-                            "line": 141,
-                            "end_line": 141
+                            "line": 142,
+                            "end_line": 142
                         },
                         {
                             "name": "amp_get_slug",
-                            "line": 153,
-                            "end_line": 153
+                            "line": 154,
+                            "end_line": 154
                         },
                         {
                             "name": "amp_get_slug",
-                            "line": 155,
-                            "end_line": 155
+                            "line": 156,
+                            "end_line": 156
                         },
                         {
                             "name": "extension_loaded",
-                            "line": 159,
-                            "end_line": 159
-                        },
-                        {
-                            "name": "newrelic_disable_autorum",
                             "line": 160,
                             "end_line": 160
                         },
                         {
+                            "name": "newrelic_disable_autorum",
+                            "line": 161,
+                            "end_line": 161
+                        },
+                        {
                             "name": "do_action",
-                            "line": 173,
-                            "end_line": 173
+                            "line": 174,
+                            "end_line": 174
                         },
                         {
                             "name": "amp_add_post_template_actions",
-                            "line": 175,
-                            "end_line": 175
+                            "line": 176,
+                            "end_line": 176
                         },
                         {
                             "name": "amp_get_slug",
-                            "line": 180,
-                            "end_line": 180
+                            "line": 181,
+                            "end_line": 181
                         }
                     ],
                     "methods": [
@@ -3359,15 +2459,15 @@
                             "name": "__construct",
                             "class": "\\AMP_Post_Template",
                             "static": false,
-                            "line": 176,
-                            "end_line": 176
+                            "line": 177,
+                            "end_line": 177
                         },
                         {
                             "name": "load",
                             "class": "$template",
                             "static": false,
-                            "line": 177,
-                            "end_line": 177
+                            "line": 178,
+                            "end_line": 178
                         }
                     ]
                 }
@@ -3376,8 +2476,8 @@
                 "name": "amp_post_template_add_scripts",
                 "namespace": "global",
                 "aliases": [],
-                "line": 193,
-                "end_line": 205,
+                "line": 195,
+                "end_line": 207,
                 "arguments": [
                     {
                         "name": "$amp_template",
@@ -3397,6 +2497,10 @@
                             "name": "deprecated",
                             "content": "Scripts are now automatically added.",
                             "description": "Scripts are now automatically added."
+                        },
+                        {
+                            "name": "internal",
+                            "content": ""
                         },
                         {
                             "name": "see",
@@ -3423,19 +2527,19 @@
                     "functions": [
                         {
                             "name": "_deprecated_function",
-                            "line": 194,
-                            "end_line": 194,
+                            "line": 196,
+                            "end_line": 196,
                             "deprecation_version": "1.5"
                         },
                         {
                             "name": "amp_render_scripts",
-                            "line": 196,
-                            "end_line": 204
+                            "line": 198,
+                            "end_line": 206
                         },
                         {
                             "name": "array_merge",
-                            "line": 197,
-                            "end_line": 203
+                            "line": 199,
+                            "end_line": 205
                         }
                     ],
                     "methods": [
@@ -3443,15 +2547,15 @@
                             "name": "get",
                             "class": "$amp_template",
                             "static": false,
-                            "line": 200,
-                            "end_line": 200
+                            "line": 202,
+                            "end_line": 202
                         },
                         {
                             "name": "get",
                             "class": "$amp_template",
                             "static": false,
-                            "line": 202,
-                            "end_line": 202
+                            "line": 204,
+                            "end_line": 204
                         }
                     ]
                 }
@@ -3460,8 +2564,8 @@
                 "name": "amp_post_template_add_boilerplate_css",
                 "namespace": "global",
                 "aliases": [],
-                "line": 215,
-                "end_line": 218,
+                "line": 218,
+                "end_line": 221,
                 "arguments": [],
                 "doc": {
                     "description": "Print boilerplate CSS.",
@@ -3475,6 +2579,10 @@
                             "name": "deprecated",
                             "content": "Boilerplate is now automatically added via the ampproject\/optimizer library.",
                             "description": "Boilerplate is now automatically added via the ampproject\/optimizer library."
+                        },
+                        {
+                            "name": "internal",
+                            "content": ""
                         },
                         {
                             "name": "since",
@@ -3492,14 +2600,14 @@
                     "functions": [
                         {
                             "name": "_deprecated_function",
-                            "line": 216,
-                            "end_line": 216,
+                            "line": 219,
+                            "end_line": 219,
                             "deprecation_version": "1.5"
                         },
                         {
                             "name": "amp_get_boilerplate_code",
-                            "line": 217,
-                            "end_line": 217
+                            "line": 220,
+                            "end_line": 220
                         }
                     ]
                 }
@@ -3508,8 +2616,8 @@
                 "name": "amp_post_template_add_schemaorg_metadata",
                 "namespace": "global",
                 "aliases": [],
-                "line": 226,
-                "end_line": 229,
+                "line": 230,
+                "end_line": 233,
                 "arguments": [],
                 "doc": {
                     "description": "Print Schema.org metadata.",
@@ -3523,6 +2631,10 @@
                             "name": "deprecated",
                             "content": "Since 0.7",
                             "description": "Since 0.7"
+                        },
+                        {
+                            "name": "internal",
+                            "content": ""
                         }
                     ]
                 },
@@ -3531,14 +2643,14 @@
                     "functions": [
                         {
                             "name": "_deprecated_function",
-                            "line": 227,
-                            "end_line": 227,
+                            "line": 231,
+                            "end_line": 231,
                             "deprecation_version": "0.7"
                         },
                         {
                             "name": "amp_print_schemaorg_metadata",
-                            "line": 228,
-                            "end_line": 228
+                            "line": 232,
+                            "end_line": 232
                         }
                     ]
                 }
@@ -3547,8 +2659,8 @@
                 "name": "amp_post_meta_box",
                 "namespace": "global",
                 "aliases": [],
-                "line": 240,
-                "end_line": 242,
+                "line": 245,
+                "end_line": 247,
                 "arguments": [],
                 "doc": {
                     "description": "Bootstrap AMP post meta box.",
@@ -3566,6 +2678,10 @@
                             "name": "deprecated",
                             "content": "Since 1.5.0, as admin class bootstrapping is moved to amp_bootstrap_admin().",
                             "description": "Since 1.5.0, as admin class bootstrapping is moved to amp_bootstrap_admin()."
+                        },
+                        {
+                            "name": "internal",
+                            "content": ""
                         }
                     ]
                 },
@@ -3574,8 +2690,8 @@
                     "functions": [
                         {
                             "name": "_deprecated_function",
-                            "line": 241,
-                            "end_line": 241,
+                            "line": 246,
+                            "end_line": 246,
                             "deprecation_version": "1.5.0"
                         }
                     ]
@@ -3585,8 +2701,8 @@
                 "name": "amp_admin_pointer",
                 "namespace": "global",
                 "aliases": [],
-                "line": 251,
-                "end_line": 253,
+                "line": 257,
+                "end_line": 259,
                 "arguments": [],
                 "doc": {
                     "description": "Bootstrap the AMP admin pointer class.",
@@ -3604,6 +2720,10 @@
                             "name": "deprecated",
                             "content": "Since 1.5.0, as admin class bootstrapping is moved to amp_bootstrap_admin().",
                             "description": "Since 1.5.0, as admin class bootstrapping is moved to amp_bootstrap_admin()."
+                        },
+                        {
+                            "name": "internal",
+                            "content": ""
                         }
                     ]
                 },
@@ -3612,8 +2732,8 @@
                     "functions": [
                         {
                             "name": "_deprecated_function",
-                            "line": 252,
-                            "end_line": 252,
+                            "line": 258,
+                            "end_line": 258,
                             "deprecation_version": "1.5.0"
                         }
                     ]
@@ -3623,8 +2743,8 @@
                 "name": "_amp_xdebug_admin_notice",
                 "namespace": "global",
                 "aliases": [],
-                "line": 262,
-                "end_line": 277,
+                "line": 269,
+                "end_line": 284,
                 "arguments": [],
                 "doc": {
                     "description": "Print admin notice if the Xdebug extension is loaded.",
@@ -3640,6 +2760,10 @@
                             "description": "Warning moved to Site Health."
                         },
                         {
+                            "name": "internal",
+                            "content": ""
+                        },
+                        {
                             "name": "see",
                             "content": "",
                             "refers": "AmpProject\\AmpWP\\Admin\\SiteHealth::xdebug_extension()"
@@ -3651,798 +2775,14 @@
                     "functions": [
                         {
                             "name": "_deprecated_function",
-                            "line": 263,
-                            "end_line": 263,
+                            "line": 270,
+                            "end_line": 270,
                             "deprecation_version": "1.5.0"
                         },
                         {
                             "name": "esc_html_e",
-                            "line": 269,
-                            "end_line": 272
-                        }
-                    ]
-                }
-            }
-        ]
-    },
-    "105": {
-        "file": {
-            "description": "Class AMP_Content",
-            "long_description": "",
-            "tags": [
-                {
-                    "name": "package",
-                    "content": "AMP"
-                }
-            ]
-        },
-        "path": "includes\/templates\/class-amp-content.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
-        "classes": [
-            {
-                "name": "AMP_Content",
-                "namespace": "global",
-                "line": 14,
-                "end_line": 224,
-                "final": false,
-                "abstract": false,
-                "extends": "",
-                "implements": [],
-                "properties": [
-                    {
-                        "name": "$content",
-                        "line": 21,
-                        "end_line": 21,
-                        "default": null,
-                        "static": false,
-                        "visibility": "private",
-                        "doc": {
-                            "description": "Content.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "var",
-                                    "content": "",
-                                    "types": [
-                                        "string"
-                                    ],
-                                    "variable": ""
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "$amp_content",
-                        "line": 28,
-                        "end_line": 28,
-                        "default": "''",
-                        "static": false,
-                        "visibility": "private",
-                        "doc": {
-                            "description": "AMP content.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "var",
-                                    "content": "",
-                                    "types": [
-                                        "string"
-                                    ],
-                                    "variable": ""
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "$amp_scripts",
-                        "line": 35,
-                        "end_line": 35,
-                        "default": "array()",
-                        "static": false,
-                        "visibility": "private",
-                        "doc": {
-                            "description": "AMP scripts.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "var",
-                                    "content": "",
-                                    "types": [
-                                        "array"
-                                    ],
-                                    "variable": ""
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "$amp_stylesheets",
-                        "line": 43,
-                        "end_line": 43,
-                        "default": "array()",
-                        "static": false,
-                        "visibility": "private",
-                        "doc": {
-                            "description": "AMP stylesheets.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "since",
-                                    "content": "1.0"
-                                },
-                                {
-                                    "name": "var",
-                                    "content": "",
-                                    "types": [
-                                        "array"
-                                    ],
-                                    "variable": ""
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "$args",
-                        "line": 50,
-                        "end_line": 50,
-                        "default": null,
-                        "static": false,
-                        "visibility": "private",
-                        "doc": {
-                            "description": "Args.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "var",
-                                    "content": "",
-                                    "types": [
-                                        "array"
-                                    ],
-                                    "variable": ""
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "$embed_handlers",
-                        "line": 57,
-                        "end_line": 57,
-                        "default": null,
-                        "static": false,
-                        "visibility": "private",
-                        "doc": {
-                            "description": "Embed handlers.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "var",
-                                    "content": "",
-                                    "types": [
-                                        "\\AMP_Base_Embed_Handler[]"
-                                    ],
-                                    "variable": ""
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "$sanitizer_classes",
-                        "line": 64,
-                        "end_line": 64,
-                        "default": null,
-                        "static": false,
-                        "visibility": "private",
-                        "doc": {
-                            "description": "Sanitizers, with keys as class names and values as arguments.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "var",
-                                    "content": "",
-                                    "types": [
-                                        "array[]"
-                                    ],
-                                    "variable": ""
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "methods": [
-                    {
-                        "name": "__construct",
-                        "namespace": "",
-                        "aliases": [],
-                        "line": 74,
-                        "end_line": 83,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "public",
-                        "arguments": [
-                            {
-                                "name": "$content",
-                                "default": null,
-                                "type": ""
-                            },
-                            {
-                                "name": "$embed_handler_classes",
-                                "default": null,
-                                "type": ""
-                            },
-                            {
-                                "name": "$sanitizer_classes",
-                                "default": null,
-                                "type": ""
-                            },
-                            {
-                                "name": "$args",
-                                "default": "array()",
-                                "type": ""
-                            }
-                        ],
-                        "doc": {
-                            "description": "AMP_Content constructor.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "param",
-                                    "content": "Content.",
-                                    "types": [
-                                        "string"
-                                    ],
-                                    "variable": "$content"
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "Embed handlers, with keys as class names and values as arguments.",
-                                    "types": [
-                                        "array[]"
-                                    ],
-                                    "variable": "$embed_handler_classes"
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "Sanitizers, with keys as class names and values as arguments.",
-                                    "types": [
-                                        "array[]"
-                                    ],
-                                    "variable": "$sanitizer_classes"
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "Args.",
-                                    "types": [
-                                        "array"
-                                    ],
-                                    "variable": "$args"
-                                }
-                            ]
-                        },
-                        "uses": {
-                            "methods": [
-                                {
-                                    "name": "register_embed_handlers",
-                                    "class": "\\AMP_Content",
-                                    "static": false,
-                                    "line": 77,
-                                    "end_line": 77
-                                },
-                                {
-                                    "name": "transform",
-                                    "class": "\\AMP_Content",
-                                    "static": false,
-                                    "line": 82,
-                                    "end_line": 82
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "get_amp_content",
-                        "namespace": "",
-                        "aliases": [],
-                        "line": 90,
-                        "end_line": 92,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "public",
-                        "arguments": [],
-                        "doc": {
-                            "description": "Get AMP content.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "return",
-                                    "content": "",
-                                    "types": [
-                                        "string"
-                                    ]
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "get_amp_scripts",
-                        "namespace": "",
-                        "aliases": [],
-                        "line": 99,
-                        "end_line": 101,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "public",
-                        "arguments": [],
-                        "doc": {
-                            "description": "Get AMP scripts.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "return",
-                                    "content": "",
-                                    "types": [
-                                        "array"
-                                    ]
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "get_amp_styles",
-                        "namespace": "",
-                        "aliases": [],
-                        "line": 109,
-                        "end_line": 112,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "public",
-                        "arguments": [],
-                        "doc": {
-                            "description": "Get AMP styles.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "deprecated",
-                                    "content": "Since 1.0 in favor of the get_amp_stylesheets method.",
-                                    "description": "Since 1.0 in favor of the get_amp_stylesheets method."
-                                },
-                                {
-                                    "name": "return",
-                                    "content": "Empty list.",
-                                    "types": [
-                                        "array"
-                                    ]
-                                }
-                            ]
-                        },
-                        "uses": {
-                            "functions": [
-                                {
-                                    "name": "_deprecated_function",
-                                    "line": 110,
-                                    "end_line": 110,
-                                    "deprecation_version": "1.0"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "get_amp_stylesheets",
-                        "namespace": "",
-                        "aliases": [],
-                        "line": 120,
-                        "end_line": 122,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "public",
-                        "arguments": [],
-                        "doc": {
-                            "description": "Get AMP styles.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "since",
-                                    "content": "1.0"
-                                },
-                                {
-                                    "name": "return",
-                                    "content": "",
-                                    "types": [
-                                        "array"
-                                    ]
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "transform",
-                        "namespace": "",
-                        "aliases": [],
-                        "line": 127,
-                        "end_line": 139,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "private",
-                        "arguments": [],
-                        "doc": {
-                            "description": "Transform.",
-                            "long_description": "",
-                            "tags": []
-                        },
-                        "uses": {
-                            "functions": [
-                                {
-                                    "name": "apply_filters",
-                                    "line": 132,
-                                    "end_line": 132
-                                }
-                            ],
-                            "methods": [
-                                {
-                                    "name": "unregister_embed_handlers",
-                                    "class": "\\AMP_Content",
-                                    "static": false,
-                                    "line": 133,
-                                    "end_line": 133
-                                },
-                                {
-                                    "name": "sanitize",
-                                    "class": "\\AMP_Content",
-                                    "static": false,
-                                    "line": 136,
-                                    "end_line": 136
-                                }
-                            ]
-                        },
-                        "hooks": [
-                            {
-                                "name": "the_content",
-                                "line": 132,
-                                "end_line": 132,
-                                "type": "filter",
-                                "arguments": [
-                                    "$content"
-                                ],
-                                "doc": {
-                                    "description": "This filter is documented in wp-includes\/post-template.php",
-                                    "long_description": "",
-                                    "tags": []
-                                }
-                            }
-                        ]
-                    },
-                    {
-                        "name": "add_scripts",
-                        "namespace": "",
-                        "aliases": [],
-                        "line": 146,
-                        "end_line": 148,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "private",
-                        "arguments": [
-                            {
-                                "name": "$scripts",
-                                "default": null,
-                                "type": ""
-                            }
-                        ],
-                        "doc": {
-                            "description": "Add scripts.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "param",
-                                    "content": "Scripts.",
-                                    "types": [
-                                        "array"
-                                    ],
-                                    "variable": "$scripts"
-                                }
-                            ]
-                        },
-                        "uses": {
-                            "functions": [
-                                {
-                                    "name": "array_merge",
-                                    "line": 147,
-                                    "end_line": 147
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "add_stylesheets",
-                        "namespace": "",
-                        "aliases": [],
-                        "line": 156,
-                        "end_line": 158,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "private",
-                        "arguments": [
-                            {
-                                "name": "$stylesheets",
-                                "default": null,
-                                "type": ""
-                            }
-                        ],
-                        "doc": {
-                            "description": "Add stylesheets.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "since",
-                                    "content": "1.0"
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "Styles.",
-                                    "types": [
-                                        "array"
-                                    ],
-                                    "variable": "$stylesheets"
-                                }
-                            ]
-                        },
-                        "uses": {
-                            "functions": [
-                                {
-                                    "name": "array_merge",
-                                    "line": 157,
-                                    "end_line": 157
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "register_embed_handlers",
-                        "namespace": "",
-                        "aliases": [],
-                        "line": 166,
-                        "end_line": 193,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "private",
-                        "arguments": [
-                            {
-                                "name": "$embed_handler_classes",
-                                "default": null,
-                                "type": ""
-                            }
-                        ],
-                        "doc": {
-                            "description": "Register embed handlers.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "param",
-                                    "content": "Embed handlers, with keys as class names and values as arguments.",
-                                    "types": [
-                                        "array[]"
-                                    ],
-                                    "variable": "$embed_handler_classes"
-                                },
-                                {
-                                    "name": "return",
-                                    "content": "Registered embed handlers.",
-                                    "types": [
-                                        "\\AMP_Base_Embed_Handler[]"
-                                    ]
-                                }
-                            ]
-                        },
-                        "uses": {
-                            "methods": [
-                                {
-                                    "name": "__construct",
-                                    "class": "$embed_handler_class",
-                                    "static": false,
-                                    "line": 170,
-                                    "end_line": 170
-                                },
-                                {
-                                    "name": "register_embed",
-                                    "class": "$embed_handler",
-                                    "static": false,
-                                    "line": 188,
-                                    "end_line": 188
-                                }
-                            ],
-                            "functions": [
-                                {
-                                    "name": "array_merge",
-                                    "line": 170,
-                                    "end_line": 170
-                                },
-                                {
-                                    "name": "_doing_it_wrong",
-                                    "line": 173,
-                                    "end_line": 184
-                                },
-                                {
-                                    "name": "esc_html",
-                                    "line": 175,
-                                    "end_line": 182
-                                },
-                                {
-                                    "name": "sprintf",
-                                    "line": 176,
-                                    "end_line": 181
-                                },
-                                {
-                                    "name": "__",
-                                    "line": 178,
-                                    "end_line": 178
-                                },
-                                {
-                                    "name": "esc_html",
-                                    "line": 179,
-                                    "end_line": 179
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "unregister_embed_handlers",
-                        "namespace": "",
-                        "aliases": [],
-                        "line": 200,
-                        "end_line": 205,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "private",
-                        "arguments": [
-                            {
-                                "name": "$embed_handlers",
-                                "default": null,
-                                "type": ""
-                            }
-                        ],
-                        "doc": {
-                            "description": "Unregister embed handlers.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "param",
-                                    "content": "Embed handlers.",
-                                    "types": [
-                                        "\\AMP_Base_Embed_Handler[]"
-                                    ],
-                                    "variable": "$embed_handlers"
-                                }
-                            ]
-                        },
-                        "uses": {
-                            "methods": [
-                                {
-                                    "name": "add_scripts",
-                                    "class": "\\AMP_Content",
-                                    "static": false,
-                                    "line": 202,
-                                    "end_line": 202
-                                },
-                                {
-                                    "name": "get_scripts",
-                                    "class": "$embed_handler",
-                                    "static": false,
-                                    "line": 202,
-                                    "end_line": 202
-                                },
-                                {
-                                    "name": "unregister_embed",
-                                    "class": "$embed_handler",
-                                    "static": false,
-                                    "line": 203,
-                                    "end_line": 203
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "sanitize",
-                        "namespace": "",
-                        "aliases": [],
-                        "line": 214,
-                        "end_line": 223,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "private",
-                        "arguments": [
-                            {
-                                "name": "$content",
-                                "default": null,
-                                "type": ""
-                            }
-                        ],
-                        "doc": {
-                            "description": "Sanitize.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "see",
-                                    "content": "",
-                                    "refers": "AMP_Content_Sanitizer::sanitize()"
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "Content.",
-                                    "types": [
-                                        "string"
-                                    ],
-                                    "variable": "$content"
-                                },
-                                {
-                                    "name": "return",
-                                    "content": "Sanitized content.",
-                                    "types": [
-                                        "string"
-                                    ]
-                                }
-                            ]
-                        },
-                        "uses": {
-                            "methods": [
-                                {
-                                    "name": "get_dom_from_content",
-                                    "class": "\\AMP_DOM_Utils",
-                                    "static": true,
-                                    "line": 215,
-                                    "end_line": 215
-                                },
-                                {
-                                    "name": "sanitize_document",
-                                    "class": "\\AMP_Content_Sanitizer",
-                                    "static": true,
-                                    "line": 217,
-                                    "end_line": 217
-                                },
-                                {
-                                    "name": "add_scripts",
-                                    "class": "\\AMP_Content",
-                                    "static": false,
-                                    "line": 219,
-                                    "end_line": 219
-                                },
-                                {
-                                    "name": "add_stylesheets",
-                                    "class": "\\AMP_Content",
-                                    "static": false,
-                                    "line": 220,
-                                    "end_line": 220
-                                },
-                                {
-                                    "name": "get_content_from_dom",
-                                    "class": "\\AMP_DOM_Utils",
-                                    "static": true,
-                                    "line": 222,
-                                    "end_line": 222
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "doc": {
-                    "description": "Class AMP_Content",
-                    "long_description": "",
-                    "tags": [
-                        {
-                            "name": "codeCoverageIgnore",
-                            "content": ""
-                        },
-                        {
-                            "name": "deprecated",
-                            "content": "1.5",
-                            "description": "Reader mode now sanitizes its entire template through the standard post-processor."
+                            "line": 276,
+                            "end_line": 279
                         }
                     ]
                 }
@@ -4544,501 +2884,6 @@
             }
         ]
     },
-    "115": {
-        "file": {
-            "description": "Class AMP_Comment_Walker",
-            "long_description": "",
-            "tags": [
-                {
-                    "name": "codeCoverageIgnore",
-                    "content": ""
-                },
-                {
-                    "name": "deprecated",
-                    "content": "1.1.0",
-                    "description": "This functionality was moved to AMP_Comments_Sanitizer"
-                },
-                {
-                    "name": "package",
-                    "content": "AMP"
-                }
-            ]
-        },
-        "path": "includes\/class-amp-comment-walker.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
-        "uses": {
-            "functions": [
-                {
-                    "name": "_deprecated_file",
-                    "line": 11,
-                    "end_line": 11,
-                    "deprecation_version": "1.1"
-                },
-                {
-                    "name": "sprintf",
-                    "line": 11,
-                    "end_line": 11
-                },
-                {
-                    "name": "esc_html__",
-                    "line": 11,
-                    "end_line": 11
-                }
-            ]
-        },
-        "classes": [
-            {
-                "name": "AMP_Comment_Walker",
-                "namespace": "global",
-                "line": 20,
-                "end_line": 129,
-                "final": false,
-                "abstract": false,
-                "extends": "\\Walker_Comment",
-                "implements": [],
-                "properties": [
-                    {
-                        "name": "$args",
-                        "line": 28,
-                        "end_line": 28,
-                        "default": null,
-                        "static": false,
-                        "visibility": "public",
-                        "doc": {
-                            "description": "The original comments arguments.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "since",
-                                    "content": "0.7"
-                                },
-                                {
-                                    "name": "var",
-                                    "content": "",
-                                    "types": [
-                                        "array"
-                                    ],
-                                    "variable": ""
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "$comment_thread_age",
-                        "line": 36,
-                        "end_line": 36,
-                        "default": "array()",
-                        "static": false,
-                        "visibility": "private",
-                        "doc": {
-                            "description": "Holds the timestamp of the most recent comment in a thread.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "since",
-                                    "content": "0.7"
-                                },
-                                {
-                                    "name": "var",
-                                    "content": "",
-                                    "types": [
-                                        "array"
-                                    ],
-                                    "variable": ""
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "methods": [
-                    {
-                        "name": "start_el",
-                        "namespace": "",
-                        "aliases": [],
-                        "line": 54,
-                        "end_line": 72,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "public",
-                        "arguments": [
-                            {
-                                "name": "$output",
-                                "default": null,
-                                "type": ""
-                            },
-                            {
-                                "name": "$comment",
-                                "default": null,
-                                "type": ""
-                            },
-                            {
-                                "name": "$depth",
-                                "default": "0",
-                                "type": ""
-                            },
-                            {
-                                "name": "$args",
-                                "default": "array()",
-                                "type": ""
-                            },
-                            {
-                                "name": "$id",
-                                "default": "0",
-                                "type": ""
-                            }
-                        ],
-                        "doc": {
-                            "description": "Starts the element output.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "since",
-                                    "content": "0.7.0"
-                                },
-                                {
-                                    "name": "see",
-                                    "content": "",
-                                    "refers": "Walker::start_el()"
-                                },
-                                {
-                                    "name": "see",
-                                    "content": "",
-                                    "refers": "wp_list_comments()"
-                                },
-                                {
-                                    "name": "global",
-                                    "content": "int        $comment_depth"
-                                },
-                                {
-                                    "name": "global",
-                                    "content": "WP_Comment $comment"
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "Used to append additional content. Passed by reference.",
-                                    "types": [
-                                        "string"
-                                    ],
-                                    "variable": "$output"
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "Comment data object.",
-                                    "types": [
-                                        "\\WP_Comment"
-                                    ],
-                                    "variable": "$comment"
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "Optional. Depth of the current comment in reference to parents. Default 0.",
-                                    "types": [
-                                        "int"
-                                    ],
-                                    "variable": "$depth"
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "Optional. An array of arguments. Default empty array.",
-                                    "types": [
-                                        "array"
-                                    ],
-                                    "variable": "$args"
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "Optional. ID of the current comment. Default 0 (unused).",
-                                    "types": [
-                                        "int"
-                                    ],
-                                    "variable": "$id"
-                                }
-                            ]
-                        },
-                        "uses": {
-                            "methods": [
-                                {
-                                    "name": "start_el",
-                                    "class": "\\Walker_Comment",
-                                    "static": true,
-                                    "line": 57,
-                                    "end_line": 57
-                                }
-                            ],
-                            "functions": [
-                                {
-                                    "name": "esc_attr",
-                                    "line": 64,
-                                    "end_line": 64
-                                },
-                                {
-                                    "name": "strtotime",
-                                    "line": 64,
-                                    "end_line": 64
-                                },
-                                {
-                                    "name": "esc_attr",
-                                    "line": 67,
-                                    "end_line": 67
-                                },
-                                {
-                                    "name": "substr",
-                                    "line": 70,
-                                    "end_line": 70
-                                },
-                                {
-                                    "name": "ltrim",
-                                    "line": 70,
-                                    "end_line": 70
-                                },
-                                {
-                                    "name": "strlen",
-                                    "line": 70,
-                                    "end_line": 70
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "paged_walk",
-                        "namespace": "",
-                        "aliases": [],
-                        "line": 88,
-                        "end_line": 98,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "public",
-                        "arguments": [
-                            {
-                                "name": "$elements",
-                                "default": null,
-                                "type": ""
-                            },
-                            {
-                                "name": "$max_depth",
-                                "default": null,
-                                "type": ""
-                            },
-                            {
-                                "name": "$page_num",
-                                "default": null,
-                                "type": ""
-                            },
-                            {
-                                "name": "$per_page",
-                                "default": null,
-                                "type": ""
-                            },
-                            {
-                                "name": "$args",
-                                "default": null,
-                                "type": ""
-                            }
-                        ],
-                        "doc": {
-                            "description": "Output amp-list template code and place holder for comments.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "since",
-                                    "content": "0.7"
-                                },
-                                {
-                                    "name": "see",
-                                    "content": "",
-                                    "refers": "Walker::paged_walk()"
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "List of comment Elements.",
-                                    "types": [
-                                        "\\WP_Comment[]"
-                                    ],
-                                    "variable": "$elements"
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "The maximum hierarchical depth.",
-                                    "types": [
-                                        "int"
-                                    ],
-                                    "variable": "$max_depth"
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "The specific page number, beginning with 1.",
-                                    "types": [
-                                        "int"
-                                    ],
-                                    "variable": "$page_num"
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "Per page counter.",
-                                    "types": [
-                                        "int"
-                                    ],
-                                    "variable": "$per_page"
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "Optional additional arguments.",
-                                    "types": [
-                                        "mixed"
-                                    ],
-                                    "variable": "$args"
-                                },
-                                {
-                                    "name": "return",
-                                    "content": "XHTML of the specified page of elements.",
-                                    "types": [
-                                        "string"
-                                    ]
-                                }
-                            ]
-                        },
-                        "uses": {
-                            "methods": [
-                                {
-                                    "name": "build_thread_latest_date",
-                                    "class": "\\AMP_Comment_Walker",
-                                    "static": false,
-                                    "line": 93,
-                                    "end_line": 93
-                                },
-                                {
-                                    "name": "paged_walk",
-                                    "class": "\\Walker_Comment",
-                                    "static": true,
-                                    "line": 97,
-                                    "end_line": 97
-                                }
-                            ],
-                            "functions": [
-                                {
-                                    "name": "array_slice",
-                                    "line": 95,
-                                    "end_line": 95
-                                },
-                                {
-                                    "name": "func_get_args",
-                                    "line": 95,
-                                    "end_line": 95
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "build_thread_latest_date",
-                        "namespace": "",
-                        "aliases": [],
-                        "line": 110,
-                        "end_line": 128,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "protected",
-                        "arguments": [
-                            {
-                                "name": "$elements",
-                                "default": null,
-                                "type": ""
-                            },
-                            {
-                                "name": "$time",
-                                "default": "0",
-                                "type": ""
-                            },
-                            {
-                                "name": "$is_child",
-                                "default": "false",
-                                "type": ""
-                            }
-                        ],
-                        "doc": {
-                            "description": "Find the timestamp of the latest child comment of a thread to set the updated time.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "since",
-                                    "content": "0.7"
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "The list of comments to get thread times for.",
-                                    "types": [
-                                        "\\WP_Comment[]"
-                                    ],
-                                    "variable": "$elements"
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "$the timestamp to check against.",
-                                    "types": [
-                                        "int"
-                                    ],
-                                    "variable": "$time"
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "Flag used to set the the value or return the time.",
-                                    "types": [
-                                        "bool"
-                                    ],
-                                    "variable": "$is_child"
-                                },
-                                {
-                                    "name": "return",
-                                    "content": "Latest time.",
-                                    "types": [
-                                        "int"
-                                    ]
-                                }
-                            ]
-                        },
-                        "uses": {
-                            "methods": [
-                                {
-                                    "name": "get_children",
-                                    "class": "$element",
-                                    "static": false,
-                                    "line": 114,
-                                    "end_line": 114
-                                },
-                                {
-                                    "name": "build_thread_latest_date",
-                                    "class": "\\AMP_Comment_Walker",
-                                    "static": false,
-                                    "line": 117,
-                                    "end_line": 117
-                                }
-                            ],
-                            "functions": [
-                                {
-                                    "name": "strtotime",
-                                    "line": 115,
-                                    "end_line": 115
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "doc": {
-                    "description": "Class AMP_Comment_Walker",
-                    "long_description": "Walker to wrap comments in mustache tags for amp-template.",
-                    "tags": [
-                        {
-                            "name": "deprecated",
-                            "content": "1.1.0",
-                            "description": "This functionality was moved to AMP_Comments_Sanitizer"
-                        }
-                    ]
-                }
-            }
-        ]
-    },
     "116": {
         "file": {
             "description": "Callbacks for adding AMP-related things to the main theme.",
@@ -5095,7 +2940,8 @@
                     "tags": [
                         {
                             "name": "deprecated",
-                            "content": ""
+                            "content": "Use amp_add_amphtml_link() instead.",
+                            "description": "Use amp_add_amphtml_link() instead."
                         },
                         {
                             "name": "since",
@@ -7087,7 +4933,8 @@
                                 },
                                 {
                                     "name": "deprecated",
-                                    "content": ""
+                                    "content": "Remove amp_add_amphtml_link() call on wp_head action instead.",
+                                    "description": "Remove amp_add_amphtml_link() call on wp_head action instead."
                                 }
                             ]
                         }
@@ -10243,166 +8090,6 @@
                         {
                             "name": "since",
                             "content": "0.2"
-                        }
-                    ]
-                }
-            }
-        ]
-    },
-    "151": {
-        "file": {
-            "description": "Class AMP_Autoloader",
-            "long_description": "",
-            "tags": [
-                {
-                    "name": "package",
-                    "content": "AMP"
-                }
-            ]
-        },
-        "path": "includes\/class-amp-autoloader.php",
-        "root": "\/app\/public\/content\/plugins\/amp",
-        "classes": [
-            {
-                "name": "AMP_Autoloader",
-                "namespace": "global",
-                "line": 15,
-                "end_line": 49,
-                "final": false,
-                "abstract": false,
-                "extends": "",
-                "implements": [],
-                "properties": [
-                    {
-                        "name": "$is_registered",
-                        "line": 21,
-                        "end_line": 21,
-                        "default": "false",
-                        "static": true,
-                        "visibility": "public",
-                        "doc": {
-                            "description": "Is registered.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "var",
-                                    "content": "",
-                                    "types": [
-                                        "bool"
-                                    ],
-                                    "variable": ""
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "methods": [
-                    {
-                        "name": "register",
-                        "namespace": "",
-                        "aliases": [],
-                        "line": 30,
-                        "end_line": 32,
-                        "final": false,
-                        "abstract": false,
-                        "static": true,
-                        "visibility": "public",
-                        "arguments": [],
-                        "doc": {
-                            "description": "Registers this autoloader to PHP.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "since",
-                                    "content": "0.6",
-                                    "description": "Called at the end of this file; calling a second time has no effect."
-                                }
-                            ]
-                        },
-                        "uses": {
-                            "functions": [
-                                {
-                                    "name": "_deprecated_function",
-                                    "line": 31,
-                                    "end_line": 31,
-                                    "deprecation_version": "1.5"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "register_autoload_class",
-                        "namespace": "",
-                        "aliases": [],
-                        "line": 46,
-                        "end_line": 48,
-                        "final": false,
-                        "abstract": false,
-                        "static": true,
-                        "visibility": "public",
-                        "arguments": [
-                            {
-                                "name": "$class_name",
-                                "default": null,
-                                "type": ""
-                            },
-                            {
-                                "name": "$filepath",
-                                "default": null,
-                                "type": ""
-                            }
-                        ],
-                        "doc": {
-                            "description": "Allows an extensions plugin to register a class and its file for autoloading",
-                            "long_description": "phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable",
-                            "tags": [
-                                {
-                                    "name": "since",
-                                    "content": "0.6"
-                                },
-                                {
-                                    "name": "deprecated",
-                                    "content": "Autoloading works via Composer. Extensions need to use their own mechanism.",
-                                    "description": "Autoloading works via Composer. Extensions need to use their own mechanism."
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "Full classname (include namespace if applicable).",
-                                    "types": [
-                                        "string"
-                                    ],
-                                    "variable": "$class_name"
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "Absolute filepath to class file, including .php extension.",
-                                    "types": [
-                                        "string"
-                                    ],
-                                    "variable": "$filepath"
-                                }
-                            ]
-                        },
-                        "uses": {
-                            "functions": [
-                                {
-                                    "name": "_deprecated_function",
-                                    "line": 47,
-                                    "end_line": 47,
-                                    "deprecation_version": "1.5"
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "doc": {
-                    "description": "Autoload the classes used by the AMP plugin.",
-                    "long_description": "Class AMP_Autoloader",
-                    "tags": [
-                        {
-                            "name": "deprecated",
-                            "content": "Uses Composer autoloading instead.",
-                            "description": "Uses Composer autoloading instead."
                         }
                     ]
                 }

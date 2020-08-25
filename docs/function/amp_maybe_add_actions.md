@@ -12,7 +12,7 @@ If the request is for an AMP page and this is in &#039;canonical mode,&#039; red
 
 ### Source
 
-:link: [includes/deprecated.php:31](../../includes/deprecated.php#L31-L80)
+:link: [includes/deprecated.php:32](../../includes/deprecated.php#L32-L81)
 
 <details>
 <summary>Show Code</summary>

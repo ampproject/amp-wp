@@ -12,7 +12,7 @@ This function must be invoked only once through the &#039;wp_loaded&#039; action
 
 ### Source
 
-:link: [includes/deprecated.php:240](../../includes/deprecated.php#L240-L242)
+:link: [includes/deprecated.php:245](../../includes/deprecated.php#L245-L247)
 
 <details>
 <summary>Show Code</summary>

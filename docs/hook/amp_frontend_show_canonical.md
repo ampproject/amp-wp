@@ -1,6 +1,6 @@
 ## Hook `amp_frontend_show_canonical`
 
-> :warning: This function is deprecated: 
+> :warning: This function is deprecated: Remove amp_add_amphtml_link() call on wp_head action instead.
 
 ### Source
 

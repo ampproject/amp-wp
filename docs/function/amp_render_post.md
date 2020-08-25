@@ -14,7 +14,7 @@ Render AMP post template.
 
 ### Source
 
-:link: [includes/deprecated.php:136](../../includes/deprecated.php#L136-L182)
+:link: [includes/deprecated.php:137](../../includes/deprecated.php#L137-L183)
 
 <details>
 <summary>Show Code</summary>
@@ -53,7 +53,7 @@ function amp_render_post( $post ) {
 	 * This action is not triggered when 'amp' theme support is present. Instead, you should use 'template_redirect' action and check if `amp_is_request()`.
 	 *
 	 * @since 0.2
-	 * @deprecated
+	 * @deprecated Check amp_is_request() on the template_redirect action instead.
 	 *
 	 * @param int $post_id Post ID.
 	 */

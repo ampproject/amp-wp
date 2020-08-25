@@ -10,7 +10,7 @@ Load classes.
 
 ### Source
 
-:link: [includes/deprecated.php:15](../../includes/deprecated.php#L15-L17)
+:link: [includes/deprecated.php:16](../../includes/deprecated.php#L16-L18)
 
 <details>
 <summary>Show Code</summary>

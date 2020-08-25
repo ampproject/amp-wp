@@ -12,7 +12,7 @@ Reassemble a style string that can be used in a &#039;style&#039; attribute.
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:763](../../includes/sanitizers/class-amp-base-sanitizer.php#L763-L782)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:764](../../includes/sanitizers/class-amp-base-sanitizer.php#L764-L783)
 
 <details>
 <summary>Show Code</summary>

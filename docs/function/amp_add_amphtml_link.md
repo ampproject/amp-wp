@@ -31,7 +31,7 @@ function amp_add_amphtml_link() {
 		 *     } );
 		 *
 		 * @since 0.2
-		 * @deprecated
+		 * @deprecated Remove amp_add_amphtml_link() call on wp_head action instead.
 		 */
 		false === apply_filters_deprecated(
 			'amp_frontend_show_canonical',

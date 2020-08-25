@@ -10,7 +10,7 @@ Render AMP for queried post.
 
 ### Source
 
-:link: [includes/deprecated.php:115](../../includes/deprecated.php#L115-L124)
+:link: [includes/deprecated.php:116](../../includes/deprecated.php#L116-L125)
 
 <details>
 <summary>Show Code</summary>

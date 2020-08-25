@@ -10,7 +10,7 @@ Print boilerplate CSS.
 
 ### Source
 
-:link: [includes/deprecated.php:215](../../includes/deprecated.php#L215-L218)
+:link: [includes/deprecated.php:218](../../includes/deprecated.php#L218-L221)
 
 <details>
 <summary>Show Code</summary>

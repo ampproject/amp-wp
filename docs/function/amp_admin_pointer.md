@@ -10,7 +10,7 @@ Bootstrap the AMP admin pointer class.
 
 ### Source
 
-:link: [includes/deprecated.php:251](../../includes/deprecated.php#L251-L253)
+:link: [includes/deprecated.php:257](../../includes/deprecated.php#L257-L259)
 
 <details>
 <summary>Show Code</summary>

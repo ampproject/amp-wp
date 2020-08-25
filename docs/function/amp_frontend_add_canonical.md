@@ -1,6 +1,6 @@
 ## Function `amp_frontend_add_canonical`
 
-> :warning: This function is deprecated: 
+> :warning: This function is deprecated: Use amp_add_amphtml_link() instead.
 
 ```php
 function amp_frontend_add_canonical();

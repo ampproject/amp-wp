@@ -14,7 +14,7 @@ Print scripts.
 
 ### Source
 
-:link: [includes/deprecated.php:193](../../includes/deprecated.php#L193-L205)
+:link: [includes/deprecated.php:195](../../includes/deprecated.php#L195-L207)
 
 <details>
 <summary>Show Code</summary>
