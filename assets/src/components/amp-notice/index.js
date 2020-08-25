@@ -75,17 +75,19 @@ function getNoticeIcon( type ) {
  * @param {string} props.size The notice size.
  * @param {string} props.type The notice type.
  */
-export function AMPNotice( { children, className, size = NOTICE_SIZE_LARGE, type = NOTICE_TYPE_INFO } ) {
+export function AMPNotice( { children, className, size = NOTICE_SIZE_LARGE, type = NOTICE_TYPE_INFO, ...props } ) {
 	const noticeIcon = getNoticeIcon( type );
 
 	return (
-		<div className={
-			classnames(
-				className,
-				'amp-notice',
-				`amp-notice--${ type }`,
-				`amp-notice--${ size }`,
-			) }
+		<div
+			className={
+				classnames(
+					className,
+					'amp-notice',
+					`amp-notice--${ type }`,
+					`amp-notice--${ size }`,
+				) }
+			{ ...props }
 		>
 			<div className="amp-notice__icon">
 				{ noticeIcon }

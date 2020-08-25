@@ -253,7 +253,11 @@ function Root() {
 			</form>
 			<UnsavedChangesWarning excludeUserContext={ true } />
 			{ error && <ErrorNotice errorMessage={ error.message || __( 'An error occurred. You might be offline or logged out.', 'amp' ) } /> }
-			<AMPNotice className={ `amp-save-success-notice ${ savedNoticeClass }` } type={ NOTICE_TYPE_SUCCESS }>
+			<AMPNotice
+				className={ `amp-save-success-notice ${ savedNoticeClass }` }
+				type={ NOTICE_TYPE_SUCCESS }
+				aria-hidden={ 'visible' !== savedNoticeClass }
+			>
 				<p>
 					{ __( 'Settings saved', 'amp' ) }
 				</p>
