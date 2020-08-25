@@ -212,7 +212,7 @@ export function Analytics() {
 							__( 'Please see AMP project\'s <a href="%1$s" target="_blank">documentation</a> for %2$s as well as the <a href="%3$s" target="_blank">plugin\'s analytics documentation</a>. Each analytics configuration supplied below must take the form of a JSON object beginning with a %4$s and ending with a %5$s. Do not include any HTML tags like %6$s or %7$s. For the type field, supply one of the <a href="%8$s" target="_blank">available analytics vendors</a> or leave it blank for in-house analytics. For Google Analytics specifically, the type should be %9$s.', 'amp' ),
 							__( 'https://amp.dev/documentation/components/amp-analytics/', 'amp' ),
 							'<code>amp-analytics</code>',
-							__( 'https://amp-wp.org/documentation/playbooks/analytics/', 'amp' ),
+							__( 'https://amp-wp.org/documentation/getting-started/analytics/', 'amp' ),
 							'<code>{</code>',
 							'<code>}</code>',
 							'<code>&lt;amp-analytics&gt;</code>',
