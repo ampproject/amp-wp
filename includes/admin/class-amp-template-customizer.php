@@ -108,8 +108,8 @@ class AMP_Template_Customizer {
 
 				add_action( 'customize_controls_print_footer_scripts', [ $self, 'print_legacy_controls_templates' ] );
 				add_action( 'customize_preview_init', [ $self, 'init_legacy_preview' ] );
+
 				add_action( 'customize_controls_enqueue_scripts', [ $self, 'add_legacy_customizer_scripts' ] );
-				add_filter( 'customize_previewable_devices', [ $reader_theme_loader, 'customize_previewable_devices' ] );
 			}
 		}
 
