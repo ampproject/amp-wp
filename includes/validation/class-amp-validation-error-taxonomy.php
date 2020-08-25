@@ -198,13 +198,6 @@ class AMP_Validation_Error_Taxonomy {
 	const SOURCES_INVALID_OUTPUT = 'sources_with_invalid_output';
 
 	/**
-	 * The key for removed sources.
-	 *
-	 * @var string
-	 */
-	const REMOVED_SOURCES = 'removed_sources';
-
-	/**
 	 * The key for the error status.
 	 *
 	 * @var string
