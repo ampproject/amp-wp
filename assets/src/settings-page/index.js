@@ -127,16 +127,21 @@ function Root() {
 	const { downloadingTheme } = useContext( ReaderThemes );
 	const [ saved, setSaved ] = useState( false );
 
+	// Show the success notice after options have saved.
+	useEffect( () => {
+		if ( didSaveOptions ) {
+			setSaved( true );
+		}
+	}, [ didSaveOptions ] );
+
 	/**
 	 * Shows a saved notice on success.
 	 */
 	useEffect( () => {
-		if ( true === didSaveOptions && ! downloadingTheme ) {
-			setSaved( true );
-
-			const timeout = setTimeout( () => [
-				setSaved( false ),
-			], 9000 );
+		if ( saved && ! downloadingTheme ) {
+			const timeout = setTimeout( () => {
+				setSaved( false );
+			}, 9000 );
 
 			return () => {
 				clearTimeout( timeout );
@@ -144,7 +149,7 @@ function Root() {
 		}
 
 		return () => undefined;
-	}, [ didSaveOptions, downloadingTheme ] );
+	}, [ downloadingTheme, saved ] );
 
 	/**
 	 * Scroll to the focused element on load or when it changes.
