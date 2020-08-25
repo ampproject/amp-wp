@@ -198,13 +198,6 @@ class AMP_Validation_Error_Taxonomy {
 	const SOURCES_INVALID_OUTPUT = 'sources_with_invalid_output';
 
 	/**
-	 * The key for removed sources.
-	 *
-	 * @var string
-	 */
-	const REMOVED_SOURCES = 'removed_sources';
-
-	/**
 	 * The key for the error status.
 	 *
 	 * @var string
@@ -840,21 +833,13 @@ class AMP_Validation_Error_Taxonomy {
 		);
 
 		// Remove bulk actions.
-		add_filter(
-			'bulk_actions-edit-' . self::TAXONOMY_SLUG,
-			static function( $bulk_actions ) {
-				unset( $bulk_actions['delete'] );
-				return $bulk_actions;
-			}
-		);
+		add_filter( 'bulk_actions-edit-' . self::TAXONOMY_SLUG, '__return_empty_array' );
 
 		// Override the columns displayed for the validation error terms.
 		add_filter(
 			'manage_edit-' . self::TAXONOMY_SLUG . '_columns',
-			static function( $old_columns ) {
-
+			static function() {
 				return [
-					'cb'               => $old_columns['cb'],
 					'error_code'       => esc_html__( 'Error', 'amp' ),
 					'status'           => sprintf(
 						'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',

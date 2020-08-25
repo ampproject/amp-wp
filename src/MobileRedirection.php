@@ -415,7 +415,7 @@ final class MobileRedirection implements Service, Registerable {
 		if ( ! apply_filters( 'amp_mobile_version_switcher_styles_used', true ) ) {
 			return;
 		}
-		$source = file_get_contents( __DIR__ . '/../assets/css/amp-mobile-version-switcher' . ( is_rtl() ? '-rtl' : '' ) . '.css' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		$source = file_get_contents( AMP__DIR__ . '/assets/css/amp-mobile-version-switcher' . ( is_rtl() ? '-rtl' : '' ) . '.css' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 		printf( '<style>%s</style>', $source ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 

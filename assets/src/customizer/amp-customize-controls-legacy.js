@@ -238,13 +238,6 @@ window.ampCustomizeControls = ( function( api, $ ) {
 			api.section.bind( 'add', component.updatePanelNotifications );
 		}
 
-		// Enable AMP toggle if available and mobile device selected.
-		api.previewedDevice.bind( function( device ) {
-			if ( api.state( 'ampAvailable' ).get() ) {
-				api.state( 'ampEnabled' ).set( 'mobile' === device );
-			}
-		} );
-
 		// Message coming from previewer.
 		api.previewer.bind( 'amp-status', function( data ) {
 			api.state( 'ampAvailable' ).set( data.available );
@@ -273,6 +266,14 @@ window.ampCustomizeControls = ( function( api, $ ) {
 		api.state( 'ampEnabled' ).bind( function( enabled ) {
 			checkbox.prop( 'checked', enabled );
 			component.updatePreviewUrl();
+
+			// Preview tablet device when AMP is enabled.
+			if ( enabled ) {
+				const ampPreviewDevice = 'tablet';
+				if ( ampPreviewDevice in api.settings.previewableDevices ) {
+					api.state( 'previewedDevice' ).set( ampPreviewDevice );
+				}
+			}
 		} );
 
 		// Listen for ampAvailable state changes.

@@ -1735,11 +1735,7 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(
 					'loop' => array(
-						'value_casei' => array(
-							'false',
-							'number',
-							'true',
-						),
+						'value_regex_casei' => '[1-9][0-9]*|false|true',
 					),
 					'noautoplay' => array(
 						'value' => array(
