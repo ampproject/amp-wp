@@ -20,6 +20,7 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Only handling single videos. Playlists are handled elsewhere.
 	 *
 	 * @deprecated No longer used.
+	 * @internal
 	 * @var string
 	 */
 	const URL_PATTERN = '#https?://(?:www\.)?(?:youtube.com/(?:v/|e/|embed/|watch[/\#?])|youtu\.be/).*#i';
