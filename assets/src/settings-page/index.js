@@ -122,25 +122,36 @@ function scrollFocusedSectionIntoView( focusedSectionId ) {
 function Root() {
 	const [ focusedSection, setFocusedSection ] = useState( global.location.hash.replace( /^#/, '' ) );
 
-	const { didSaveOptions, fetchingOptions, saveOptions } = useContext( Options );
+	const { didSaveOptions, fetchingOptions, hasOptionsChanges, saveOptions } = useContext( Options );
 	const { error } = useContext( ErrorContext );
 	const { downloadingTheme } = useContext( ReaderThemes );
-	const [ saved, setSaved ] = useState( false );
-
-	// Show the success notice after options have saved.
-	useEffect( () => {
-		if ( didSaveOptions ) {
-			setSaved( true );
-		}
-	}, [ didSaveOptions ] );
+	const [ savedNoticeClass, setSavedNoticeClass ] = useState( '' );
 
 	/**
-	 * Shows a saved notice on success.
+	 * Show the success notice after options have saved.
 	 */
 	useEffect( () => {
-		if ( saved && ! downloadingTheme ) {
+		if ( didSaveOptions && ! downloadingTheme ) {
+			setSavedNoticeClass( 'visible' );
+		}
+	}, [ didSaveOptions, downloadingTheme ] );
+
+	/**
+	 * If the success notice is showing and updates have been made, hide the notice.
+	 */
+	useEffect( () => {
+		if ( 'visible' === savedNoticeClass && hasOptionsChanges ) {
+			setSavedNoticeClass( 'dismissed' );
+		}
+	}, [ savedNoticeClass, hasOptionsChanges ] );
+
+	/**
+	 * Hide the success notice after several seconds.
+	 */
+	useEffect( () => {
+		if ( 'visible' === savedNoticeClass ) {
 			const timeout = setTimeout( () => {
-				setSaved( false );
+				setSavedNoticeClass( 'dismissed' );
 			}, 9000 );
 
 			return () => {
@@ -149,7 +160,7 @@ function Root() {
 		}
 
 		return () => undefined;
-	}, [ downloadingTheme, saved ] );
+	}, [ savedNoticeClass ] );
 
 	/**
 	 * Scroll to the focused element on load or when it changes.
@@ -242,13 +253,11 @@ function Root() {
 			</form>
 			<UnsavedChangesWarning excludeUserContext={ true } />
 			{ error && <ErrorNotice errorMessage={ error.message || __( 'An error occurred. You might be offline or logged out.', 'amp' ) } /> }
-			{ saved && (
-				<AMPNotice className={ `amp-save-success-notice` } type={ NOTICE_TYPE_SUCCESS }>
-					<p>
-						{ __( 'Settings saved', 'amp' ) }
-					</p>
-				</AMPNotice>
-			) }
+			<AMPNotice className={ `amp-save-success-notice ${ savedNoticeClass }` } type={ NOTICE_TYPE_SUCCESS }>
+				<p>
+					{ __( 'Settings saved', 'amp' ) }
+				</p>
+			</AMPNotice>
 		</>
 	);
 }
