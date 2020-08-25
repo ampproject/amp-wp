@@ -1882,6 +1882,18 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_URL_PROTOCOL ],
 			],
 
+			'amp-bodymovin-animation'                      => [
+				'
+					<amp-bodymovin-animation layout="responsive" width="1920" height="1080" src="https://amp.dev/static/samples/json/bodymovin_happy_2016.json"></amp-bodymovin-animation>
+					<amp-bodymovin-animation layout="responsive" width="1920" height="1080" src="https://amp.dev/static/samples/json/bodymovin_happy_2016.json" loop="true"></amp-bodymovin-animation>
+					<amp-bodymovin-animation layout="responsive" width="1920" height="1080" src="https://amp.dev/static/samples/json/bodymovin_happy_2016.json" loop="false"></amp-bodymovin-animation>
+					<amp-bodymovin-animation layout="responsive" width="1920" height="1080" src="https://amp.dev/static/samples/json/bodymovin_happy_2016.json" loop="5"></amp-bodymovin-animation>
+				',
+				null,
+				[ 'amp-bodymovin-animation' ],
+				[],
+			],
+
 			'amp-3d-gltf'                                  => [
 				'<amp-3d-gltf layout="responsive" width="320" height="240" alpha="true" antialiasing="true" src="path/to/model.glb"></amp-3d-gltf>',
 				null,
