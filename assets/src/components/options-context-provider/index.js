@@ -162,6 +162,7 @@ export function OptionsContextProvider( { children, optionsRestPath, populateDef
 			return;
 		}
 
+		setUpdates( {} );
 		setDidSaveOptions( true );
 		setSavingOptions( false );
 	}, [ delaySave, hasErrorBoundary, optionsRestPath, setAsyncError, originalOptions, setError, updates ] );
