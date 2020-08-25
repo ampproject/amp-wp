@@ -266,6 +266,14 @@ window.ampCustomizeControls = ( function( api, $ ) {
 		api.state( 'ampEnabled' ).bind( function( enabled ) {
 			checkbox.prop( 'checked', enabled );
 			component.updatePreviewUrl();
+
+			// Preview tablet device when AMP is enabled.
+			if ( enabled ) {
+				const ampPreviewDevice = 'tablet';
+				if ( ampPreviewDevice in api.settings.previewableDevices ) {
+					api.state( 'previewedDevice' ).set( ampPreviewDevice );
+				}
+			}
 		} );
 
 		// Listen for ampAvailable state changes.
