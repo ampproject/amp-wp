@@ -574,12 +574,10 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'load-edit-tags.php', [ self::TESTED_CLASS, 'handle_inline_edit_request' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts' ) );
 
-		$cb              = '<input type="checkbox" />';
-		$initial_columns = [ 'cb' => $cb ];
+		$initial_columns = [ 'cb' => '<input type="checkbox" />' ];
 		$this->assertEquals(
 			array_keys(
 				[
-					'cb'               => $cb,
 					'error_code'       => 'Error',
 					'status'           => 'Status<div class="tooltip dashicons dashicons-editor-help"><h3>Statuses tooltip title</h3><p>An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.</p></div>',
 					'details'          => 'Details<div class="tooltip dashicons dashicons-editor-help"><h3>Details tooltip title</h3><p>An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.</p></div>',
