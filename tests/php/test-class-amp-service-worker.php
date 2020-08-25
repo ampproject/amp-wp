@@ -197,8 +197,9 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 		$post_id = self::factory()->post->create();
 		$this->go_to( get_permalink( $post_id ) );
 
+		$this->assertFalse( amp_is_request() );
 		AMP_Service_Worker::add_install_hooks();
-		$this->assertSame( 10, has_action( 'amp_post_template_footer', [ 'AMP_Service_Worker', 'install_service_worker' ] ) );
+		$this->assertFalse( has_action( 'amp_post_template_footer', [ 'AMP_Service_Worker', 'install_service_worker' ] ) );
 		$this->assertFalse( has_action( 'wp_footer', [ 'AMP_Service_Worker', 'install_service_worker' ] ) );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );

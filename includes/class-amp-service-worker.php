@@ -243,27 +243,20 @@ class AMP_Service_Worker {
 	 * Add hooks to install the service worker from AMP page.
 	 */
 	public static function add_install_hooks() {
-		if ( ! amp_is_legacy() && amp_is_request() ) {
-			add_action( 'wp_footer', [ __CLASS__, 'install_service_worker' ] );
+		if ( ! amp_is_request() ) {
+			return;
+		}
 
-			// Prevent validation error due to the script that installs the service worker on non-AMP pages.
-			foreach ( [ 'wp_print_scripts', 'wp_print_footer_scripts' ] as $action ) {
-				$priority = has_action( $action, 'wp_print_service_workers' );
-				if ( false !== $priority ) {
-					remove_action( $action, 'wp_print_service_workers', $priority );
-				}
+		// Prevent validation error due to the script that installs the service worker on non-AMP pages.
+		foreach ( [ 'wp_print_scripts', 'wp_print_footer_scripts' ] as $action ) {
+			$priority = has_action( $action, 'wp_print_service_workers' );
+			if ( false !== $priority ) {
+				remove_action( $action, 'wp_print_service_workers', $priority );
 			}
 		}
 
-		// Reader mode integration.
+		add_action( 'wp_footer', [ __CLASS__, 'install_service_worker' ] );
 		add_action( 'amp_post_template_footer', [ __CLASS__, 'install_service_worker' ] );
-		add_filter(
-			'amp_post_template_data',
-			static function ( $data ) {
-				$data['amp_component_scripts']['amp-install-serviceworker'] = true;
-				return $data;
-			}
-		);
 	}
 
 	/**
