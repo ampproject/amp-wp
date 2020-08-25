@@ -10,6 +10,10 @@ Remove the AMP endpoint (and query var) from a given URL.
 
 * `string $url` - URL.
 
+### Return value
+
+`string` - URL with AMP stripped.
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:741](../../includes/amp-helper-functions.php#L741-L750)

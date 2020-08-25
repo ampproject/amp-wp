@@ -6,6 +6,10 @@ function amp_get_boilerplate_stylesheets();
 
 Get AMP boilerplate stylesheets.
 
+### Return value
+
+`string[]` - Stylesheets, where first is contained in style[amp-boilerplate] and the second in noscript&gt;style[amp-boilerplate].
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:943](../../includes/amp-helper-functions.php#L943-L948)

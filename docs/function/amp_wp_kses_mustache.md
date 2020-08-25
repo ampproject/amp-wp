@@ -10,6 +10,10 @@ Filters content and keeps only allowable HTML elements by amp-mustache.
 
 * `string $markup` - Markup to sanitize.
 
+### Return value
+
+`string` - HTML markup with tags allowed by amp-mustache.
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:1841](../../includes/amp-helper-functions.php#L1841-L1844)

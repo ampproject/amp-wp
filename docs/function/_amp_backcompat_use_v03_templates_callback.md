@@ -12,6 +12,10 @@ Callback for getting the legacy templates directory.
 
 * `string $templates` - Template directory.
 
+### Return value
+
+`string` - Legacy template directory.
+
 ### Source
 
 :link: [back-compat/back-compat.php:35](../../back-compat/back-compat.php#L35-L37)

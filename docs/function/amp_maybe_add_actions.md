@@ -10,6 +10,10 @@ Conditionally add AMP actions or render the transitional mode template(s).
 
 If the request is for an AMP page and this is in &#039;canonical mode,&#039; redirect to the non-AMP page. It won&#039;t need this plugin&#039;s template system, nor the frontend actions like the &#039;rel&#039; link.
 
+### Return value
+
+`void`
+
 ### Source
 
 :link: [includes/deprecated.php:32](../../includes/deprecated.php#L32-L81)

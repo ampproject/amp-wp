@@ -8,6 +8,10 @@ protected function get_body_node();
 
 Get HTML body as DOMElement from Dom\Document received by the constructor.
 
+### Return value
+
+`\DOMElement` - The body element.
+
 ### Source
 
 :link: [includes/sanitizers/class-amp-base-sanitizer.php:213](../../includes/sanitizers/class-amp-base-sanitizer.php#L213-L216)

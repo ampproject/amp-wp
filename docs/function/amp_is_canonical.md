@@ -19,6 +19,10 @@ Themes can register support for this with `add_theme_support( AMP_Theme_Support:
  Or if you want to force AMP to be used on all templates:
       add_theme_support( AMP_Theme_Support::SLUG, array(          &#039;templates_supported&#039; =&gt; &#039;all&#039;,      ) );
 
+### Return value
+
+`boolean` - Whether this is in AMP &#039;canonical&#039; mode, that is whether it is AMP-first and there is not a separate (paired) AMP URL.
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:363](../../includes/amp-helper-functions.php#L363-L365)

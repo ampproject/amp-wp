@@ -78,6 +78,37 @@ trait HasDocBlock {
 	 * @return string Deprecation reason.
 	 */
 	public function get_deprecation_reason() {
-		return $this->doc->get_tag( 'deprecated' );
+		return $this->doc->get_tag( 'deprecated' )->content;
+	}
+
+	/**
+	 * Check if the element has a return value.
+	 *
+	 * @return bool Whether the element has a return value.
+	 */
+	public function has_return_value() {
+		return $this->doc->has_tag( 'return' );
+	}
+
+	/**
+	 * Get the description for the return value.
+	 *
+	 * @return string Return value description.
+	 */
+	public function has_return_value_description() {
+		return ! empty( trim( $this->get_return_value_description() ) );
+	}
+
+	/**
+	 * Get the description for the return value.
+	 *
+	 * @return string Return value description.
+	 */
+	public function get_return_value_description() {
+		return $this->doc->get_tag( 'return' )->content;
+	}
+
+	public function get_return_value_types() {
+		return implode( '|', $this->doc->get_tag( 'return' )->types );
 	}
 }

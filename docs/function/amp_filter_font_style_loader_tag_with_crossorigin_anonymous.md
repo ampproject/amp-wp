@@ -15,6 +15,10 @@ This explicitly triggers a CORS request, and gets back a non-opaque response, en
 * `string $handle` - Dependency handle.
 * `string $href` - Link URL.
 
+### Return value
+
+`string` - Link tag HTML.
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:1188](../../includes/amp-helper-functions.php#L1188-L1207)

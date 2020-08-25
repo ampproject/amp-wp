@@ -11,6 +11,10 @@ Set AMP attributes.
 * `array $attributes` - Array of attributes.
 * `array $amp_data` - Array of AMP attributes.
 
+### Return value
+
+`array` - Updated attributes.
+
 ### Source
 
 :link: [includes/sanitizers/class-amp-base-sanitizer.php:690](../../includes/sanitizers/class-amp-base-sanitizer.php#L690-L698)

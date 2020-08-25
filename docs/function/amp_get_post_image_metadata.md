@@ -10,6 +10,10 @@ Grabs featured image or the first attached image for the post.
 
 * `\WP_Post|int $post` - Post or post ID.
 
+### Return value
+
+`array|false` - $post_image_meta Post image metadata, or false if not found.
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:1616](../../includes/amp-helper-functions.php#L1616-L1664)

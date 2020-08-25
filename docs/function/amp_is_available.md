@@ -6,6 +6,10 @@ function amp_is_available();
 
 Determine whether AMP is available for the current URL.
 
+### Return value
+
+`bool` - Whether there is an AMP version for the provided URL.
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:405](../../includes/amp-helper-functions.php#L405-L543)

@@ -8,6 +8,10 @@ Get data that is returned in validate responses.
 
 The array returned is merged with the overall validate response data.
 
+### Return value
+
+`array` - Validate response data.
+
 ### Source
 
 :link: [includes/sanitizers/class-amp-base-sanitizer.php:793](../../includes/sanitizers/class-amp-base-sanitizer.php#L793-L795)

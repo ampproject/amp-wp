@@ -10,6 +10,10 @@ Determine if an attribute value is empty.
 
 * `string|null $value` - Attribute value.
 
+### Return value
+
+`bool` - True if empty, false if not.
+
 ### Source
 
 :link: [includes/sanitizers/class-amp-base-sanitizer.php:261](../../includes/sanitizers/class-amp-base-sanitizer.php#L261-L263)

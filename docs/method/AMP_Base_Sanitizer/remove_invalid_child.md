@@ -13,6 +13,10 @@ Also, calls the mutation callback for it. This tracks all the nodes that were re
 * `\DOMNode|\DOMElement $node` - The node to remove.
 * `array $validation_error` - Validation error details.
 
+### Return value
+
+`bool` - Whether the node should have been removed, that is, that the node was sanitized for validity.
+
 ### Source
 
 :link: [includes/sanitizers/class-amp-base-sanitizer.php:466](../../includes/sanitizers/class-amp-base-sanitizer.php#L466-L488)

@@ -10,6 +10,10 @@ Get data-amp-* values from the parent node &#039;figure&#039; added by editor bl
 
 * `\DOMElement $node` - Base node.
 
+### Return value
+
+`array` - AMP data array.
+
 ### Source
 
 :link: [includes/sanitizers/class-amp-base-sanitizer.php:665](../../includes/sanitizers/class-amp-base-sanitizer.php#L665-L681)

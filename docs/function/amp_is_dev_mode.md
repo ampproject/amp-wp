@@ -8,6 +8,10 @@ Determine whether AMP dev mode is enabled.
 
 When enabled, the &lt;html&gt; element will get the data-ampdevmode attribute and the plugin will add the same attribute to elements associated with the admin bar and other elements that are provided by the `amp_dev_mode_element_xpaths` filter.
 
+### Return value
+
+`bool` - Whether AMP dev mode is enabled.
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:1393](../../includes/amp-helper-functions.php#L1393-L1416)

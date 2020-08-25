@@ -6,6 +6,10 @@ public function get_stylesheets();
 
 Get stylesheets.
 
+### Return value
+
+`array` - Values are the CSS stylesheets. Keys are MD5 hashes of the stylesheets.
+
 ### Source
 
 :link: [includes/sanitizers/class-amp-base-sanitizer.php:194](../../includes/sanitizers/class-amp-base-sanitizer.php#L194-L204)

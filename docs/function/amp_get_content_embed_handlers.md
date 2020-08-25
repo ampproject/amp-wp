@@ -10,6 +10,10 @@ Get content embed handlers.
 
 * `\WP_Post $post` - Post that the content belongs to. Deprecated when theme supports AMP, as embeds may apply                      to non-post data (e.g. Text widget).
 
+### Return value
+
+`array` - Embed handlers.
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:1330](../../includes/amp-helper-functions.php#L1330-L1380)

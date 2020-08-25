@@ -10,6 +10,10 @@ Parse a style string into an associative array of style attributes.
 
 * `string $style_string` - Style string to parse.
 
+### Return value
+
+`string[]` - Associative array of style attributes.
+
 ### Source
 
 :link: [includes/sanitizers/class-amp-base-sanitizer.php:742](../../includes/sanitizers/class-amp-base-sanitizer.php#L742-L756)

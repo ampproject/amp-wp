@@ -13,6 +13,10 @@ If not required, the implementing class may want to try and force https instead.
 * `string $src` - URL to convert to HTTPS if forced, or made empty if $args[&#039;require_https_src&#039;].
 * `boolean $force_https` - Force setting of HTTPS if true.
 
+### Return value
+
+`string` - URL which may have been updated with HTTPS, or may have been made empty.
+
 ### Source
 
 :link: [includes/sanitizers/class-amp-base-sanitizer.php:395](../../includes/sanitizers/class-amp-base-sanitizer.php#L395-L410)

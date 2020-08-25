@@ -3,7 +3,7 @@
 {{# is_deprecated }}
 > :warning: This function is deprecated: {{ get_deprecation_reason }}
 
-{{/is_deprecated}}
+{{/ is_deprecated }}
 ```php
 {{{ get_signature }}}
 ```
@@ -16,10 +16,16 @@
 ### Arguments
 
 {{# arguments }}
-* `{{{ guess_type }}} {{{ name }}}`{{# has_description}} - {{ get_description }}{{/has_description}}
+* `{{{ guess_type }}} {{{ name }}}`{{# has_description}} - {{ get_description }}{{/ has_description }}
 {{/ arguments }}
 
 {{/ has_arguments }}
+{{# has_return_value }}
+### Return value
+
+`{{ get_return_value_types }}`{{# has_return_value_description }} - {{ get_return_value_description }}{{/ has_return_value_description }}
+
+{{/ has_return_value }}
 ### Source
 
 :link: [{{ get_file_path }}:{{ line }}]({{{ get_github_link }}})

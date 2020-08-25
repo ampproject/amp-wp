@@ -10,6 +10,10 @@ Sets the layout, and possibly the &#039;height&#039; and &#039;width&#039; attri
 
 * `array $attributes` - {      Attributes.      @type string     $bottom      @type int|string $height      @type string     $layout      @type string     $left      @type string     $position      @type string     $right      @type string     $style      @type string     $top      @type int|string $width }
 
+### Return value
+
+`array` - Attributes.
+
 ### Source
 
 :link: [includes/sanitizers/class-amp-base-sanitizer.php:283](../../includes/sanitizers/class-amp-base-sanitizer.php#L283-L357)

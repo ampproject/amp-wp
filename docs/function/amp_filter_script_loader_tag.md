@@ -11,6 +11,10 @@ Add AMP script attributes to enqueued scripts.
 * `string $tag` - The script tag.
 * `string $handle` - The script handle.
 
+### Return value
+
+`string` - Script loader tag.
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:1114](../../includes/amp-helper-functions.php#L1114-L1164)

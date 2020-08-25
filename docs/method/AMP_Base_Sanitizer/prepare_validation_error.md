@@ -11,6 +11,10 @@ Prepare validation error.
 * `array $error` - {     Error.     @type string $code Error code. }
 * `array $data` - {     Data.     @type DOMElement|DOMNode $node The removed node. }
 
+### Return value
+
+`array` - Error.
+
 ### Source
 
 :link: [includes/sanitizers/class-amp-base-sanitizer.php:566](../../includes/sanitizers/class-amp-base-sanitizer.php#L566-L632)

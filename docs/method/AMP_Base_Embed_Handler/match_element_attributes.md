@@ -12,6 +12,10 @@ Get regex pattern for matching HTML attributes from a given tag name.
 * `string $tag_name` - Tag name.
 * `string[] $attribute_names` - Attribute names.
 
+### Return value
+
+`string[]|null` - Matched attributes, or null if the element was not matched at all.
+
 ### Source
 
 :link: [includes/embeds/class-amp-base-embed-handler.php:93](../../includes/embeds/class-amp-base-embed-handler.php#L93-L111)

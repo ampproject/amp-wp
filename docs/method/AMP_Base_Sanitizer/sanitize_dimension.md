@@ -11,6 +11,10 @@ Sanitizes a CSS dimension specifier while being sensitive to dimension context.
 * `string $value` - A valid CSS dimension specifier; e.g. 50, 50px, 50%. Can be &#039;auto&#039; for width.
 * `string $dimension` - Dimension, either &#039;width&#039; or &#039;height&#039;.
 
+### Return value
+
+`float|int|string` - Returns a numeric dimension value, &#039;auto&#039;, or an empty string.
+
 ### Source
 
 :link: [includes/sanitizers/class-amp-base-sanitizer.php:226](../../includes/sanitizers/class-amp-base-sanitizer.php#L226-L253)

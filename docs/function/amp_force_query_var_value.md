@@ -12,6 +12,10 @@ This avoids issues when filtering the deprecated `query_string` hook.
 
 * `array $query_vars` - Query vars.
 
+### Return value
+
+`array` - Query vars.
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:270](../../includes/amp-helper-functions.php#L270-L275)

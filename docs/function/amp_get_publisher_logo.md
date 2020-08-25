@@ -9,6 +9,10 @@ Get the publisher logo.
 The following guidelines apply to logos used for general AMP pages.
  &quot;The logo should be a rectangle, not a square. The logo should fit in a 60x600px rectangle., and either be exactly 60px high (preferred), or exactly 600px wide. For example, 450x45px would not be acceptable, even though it fits in the 600x60px rectangle.&quot;
 
+### Return value
+
+`string` - Publisher logo image URL. WordPress logo if no site icon or custom logo defined, and no logo provided via &#039;amp_site_icon_url&#039; filter.
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:1681](../../includes/amp-helper-functions.php#L1681-L1729)

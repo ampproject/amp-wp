@@ -10,6 +10,10 @@ Get content sanitizers.
 
 * `\WP_Post $post` - Post that the content belongs to. Deprecated when theme supports AMP, as sanitizers apply                      to non-post data (e.g. Text widget).
 
+### Return value
+
+`array` - Embed handlers.
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:1429](../../includes/amp-helper-functions.php#L1429-L1605)

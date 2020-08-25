@@ -6,6 +6,10 @@ function amp_get_boilerplate_code();
 
 Get AMP boilerplate code.
 
+### Return value
+
+`string` - Boilerplate code.
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:929](../../includes/amp-helper-functions.php#L929-L932)

@@ -15,6 +15,10 @@ Also, calls the mutation callback for it. This tracks all the attributes that we
 * `array $validation_error` - Validation error details.
 * `array $attr_spec` - Attribute spec.
 
+### Return value
+
+`bool` - Whether the node should have been removed, that is, that the node was sanitized for validity.
+
 ### Source
 
 :link: [includes/sanitizers/class-amp-base-sanitizer.php:504](../../includes/sanitizers/class-amp-base-sanitizer.php#L504-L532)

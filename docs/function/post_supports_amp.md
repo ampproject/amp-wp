@@ -12,6 +12,10 @@ Determine whether a given post supports AMP.
 
 * `\WP_Post $post` - Post.
 
+### Return value
+
+`bool` - Whether the post supports AMP.
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:835](../../includes/amp-helper-functions.php#L835-L837)

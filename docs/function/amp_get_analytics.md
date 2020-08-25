@@ -10,6 +10,10 @@ Retrieve analytics data added in backend.
 
 * `array $analytics` - Analytics entries.
 
+### Return value
+
+`array` - Analytics.
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:1218](../../includes/amp-helper-functions.php#L1218-L1248)

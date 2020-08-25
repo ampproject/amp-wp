@@ -6,6 +6,10 @@ function amp_is_legacy();
 
 Determines whether the legacy AMP post templates are being used.
 
+### Return value
+
+`bool`
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:373](../../includes/amp-helper-functions.php#L373-L384)

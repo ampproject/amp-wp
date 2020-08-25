@@ -12,6 +12,10 @@ Set attributes to node&#039;s parent element according to layout.
 * `array $new_attributes` - Attributes array.
 * `string $layout` - Layout.
 
+### Return value
+
+`array` - New attributes.
+
 ### Source
 
 :link: [includes/sanitizers/class-amp-base-sanitizer.php:708](../../includes/sanitizers/class-amp-base-sanitizer.php#L708-L734)

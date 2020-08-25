@@ -12,6 +12,10 @@ The sha384 hash used by amp-script is represented not as hexadecimal but as base
 
 * `string $script` - Script.
 
+### Return value
+
+`string|null` - Script hash or null if the sha384 algorithm is not supported.
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:1926](../../includes/amp-helper-functions.php#L1926-L1937)

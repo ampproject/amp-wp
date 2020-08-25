@@ -11,6 +11,10 @@ Check whether or not sanitization should occur in response to validation error.
 * `array $validation_error` - Validation error.
 * `array $data` - Data including the node.
 
+### Return value
+
+`bool` - Whether to sanitize.
+
 ### Source
 
 :link: [includes/sanitizers/class-amp-base-sanitizer.php:543](../../includes/sanitizers/class-amp-base-sanitizer.php#L543-L549)

@@ -12,6 +12,10 @@ This is adapted from `wp_scripts()-&gt;do_items()`, but it runs only the bare mi
 
 * `array $scripts` - Script handles mapped to URLs or true.
 
+### Return value
+
+`string` - HTML for scripts tags that have not yet been done.
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:1071](../../includes/amp-helper-functions.php#L1071-L1101)

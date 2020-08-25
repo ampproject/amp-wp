@@ -8,6 +8,10 @@ public function get_styles();
 
 Return array of values that would be valid as an HTML `style` attribute.
 
+### Return value
+
+`array[][]` - Mapping of CSS selectors to arrays of properties.
+
 ### Source
 
 :link: [includes/sanitizers/class-amp-base-sanitizer.php:184](../../includes/sanitizers/class-amp-base-sanitizer.php#L184-L186)

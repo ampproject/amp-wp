@@ -10,6 +10,10 @@ Reassemble a style string that can be used in a &#039;style&#039; attribute.
 
 * `array $styles` - Associative array of styles to reassemble into a string.
 
+### Return value
+
+`string` - Reassembled style string.
+
 ### Source
 
 :link: [includes/sanitizers/class-amp-base-sanitizer.php:764](../../includes/sanitizers/class-amp-base-sanitizer.php#L764-L783)

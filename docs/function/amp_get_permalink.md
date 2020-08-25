@@ -10,6 +10,10 @@ Retrieves the full AMP-specific permalink for the given post ID.
 
 * `int $post_id` - Post ID.
 
+### Return value
+
+`string` - AMP permalink.
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:662](../../includes/amp-helper-functions.php#L662-L731)

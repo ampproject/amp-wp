@@ -63,19 +63,19 @@ final class DocBlock implements Leaf {
 	}
 
 	/**
-	 * Get the content of a given tag.
-	 * @param string $name Tag to get the content for.
-	 * @return string Content of the requested tag.
+	 * Get a specific tag.
+	 * @param string $name Tag to get.
+	 * @return Tag The requested tag.
 	 */
 	public function get_tag( $name ) {
 		foreach ( $this->tags as $tag ) {
 			if ( $name === $tag->name ) {
-				return $tag->content;
+				return $tag;
 			}
 		}
 
 		throw new RuntimeException(
-			"Trying to get the content of an unknown doc-block tag {$name}"
+			"Trying to get an unknown doc-block tag {$name}"
 		);
 	}
 }

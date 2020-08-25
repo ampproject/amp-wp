@@ -12,6 +12,10 @@ Check whether a node is exempt from validation during dev mode.
 
 * `\DOMNode $node` - Node to check.
 
+### Return value
+
+`bool` - Whether the node should be exempt during dev mode.
+
 ### Source
 
 :link: [includes/sanitizers/class-amp-base-sanitizer.php:436](../../includes/sanitizers/class-amp-base-sanitizer.php#L436-L439)

@@ -6,6 +6,10 @@ function amp_get_schemaorg_metadata();
 
 Get schema.org metadata for the current query.
 
+### Return value
+
+`array` - $metadata All schema.org metadata for the post.
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:1740](../../includes/amp-helper-functions.php#L1740-L1811)
