@@ -255,11 +255,8 @@ class AMP_Service_Worker {
 			}
 		}
 
-		if ( ! amp_is_legacy() ) {
-			add_action( 'wp_footer', [ __CLASS__, 'install_service_worker' ] );
-		} else {
-			add_action( 'amp_post_template_footer', [ __CLASS__, 'install_service_worker' ] );
-		}
+		add_action( 'wp_footer', [ __CLASS__, 'install_service_worker' ] );
+		add_action( 'amp_post_template_footer', [ __CLASS__, 'install_service_worker' ] );
 	}
 
 	/**
