@@ -259,14 +259,6 @@ class AMP_Service_Worker {
 			add_action( 'wp_footer', [ __CLASS__, 'install_service_worker' ] );
 		} else {
 			add_action( 'amp_post_template_footer', [ __CLASS__, 'install_service_worker' ] );
-			add_filter(
-				'amp_post_template_data',
-				static function ( $data ) {
-					$data['amp_component_scripts']['amp-install-serviceworker'] = true;
-
-					return $data;
-				}
-			);
 		}
 	}
 
