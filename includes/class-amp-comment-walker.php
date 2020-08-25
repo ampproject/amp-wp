@@ -16,6 +16,7 @@ _deprecated_file( __FILE__, '1.1', null, sprintf( esc_html__( '%1$s functionalit
  * Walker to wrap comments in mustache tags for amp-template.
  *
  * @deprecated 1.1.0 This functionality was moved to AMP_Comments_Sanitizer
+ * @internal
  */
 class AMP_Comment_Walker extends Walker_Comment {
 
