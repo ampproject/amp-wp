@@ -80,7 +80,7 @@ final class FileReflector extends PhpDocumentorFileReflector {
 		parent::enterNode( $node );
 
 		switch ( $node->getType() ) {
-			// Add classes, functions, and methods to the current location stack
+			// Add classes, functions, and methods to the current location stack.
 			case 'Stmt_Class':
 			case 'Stmt_Function':
 			case 'Stmt_ClassMethod':
@@ -142,9 +142,9 @@ final class FileReflector extends PhpDocumentorFileReflector {
 		if (
 			! $this->isNodeDocumentable( $node )
 			&& 'Name' !== $node->getType()
-			&& ( $docblock = $node->getDocComment() )
+			&& ( null !== $node->getDocComment() )
 		) {
-			$this->last_doc = $docblock;
+			$this->last_doc = $node->getDocComment();
 		}
 	}
 
@@ -253,8 +253,7 @@ final class FileReflector extends PhpDocumentorFileReflector {
 	 * @return bool Whether the given node is documentable.
 	 */
 	protected function isNodeDocumentable( Node $node ) {
-		return
-			parent::isNodeDocumentable( $node )
+		return parent::isNodeDocumentable( $node )
 			||
 			(
 				$node instanceof FuncCall

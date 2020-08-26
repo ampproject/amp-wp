@@ -19,6 +19,8 @@ namespace AmpProject\AmpWP\Documentation\Model;
  * @property DocBlock   $doc
  * @property Hook[]     $hooks
  * @property Usage[]    $uses
+ *
+ * phpcs:disable PEAR.NamingConventions.ValidClassName.Invalid
  */
 final class Function_ implements Leaf {
 

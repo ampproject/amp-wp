@@ -24,9 +24,11 @@ final class HookReflector extends BaseReflector {
 	}
 
 	/**
-	 * @param string $name
+	 * Clean up the name.
 	 *
-	 * @return string
+	 * @param string $name Name to clean up.
+	 *
+	 * @return string Cleaned-up name.
 	 */
 	private function cleanupName( $name ) {
 		$matches = [];
@@ -80,7 +82,7 @@ final class HookReflector extends BaseReflector {
 			case 'apply_filters_ref_array':
 				$type = 'filter_reference';
 				break;
-			case 'apply_filters_deprecated';
+			case 'apply_filters_deprecated':
 				$type = 'filter_deprecated';
 				break;
 		}

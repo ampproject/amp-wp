@@ -28,19 +28,19 @@ final class Parser {
 	/**
 	 * Get the files to parse.
 	 *
-	 * @param string $directory Directory to look in for files.
-	 *
+	 * @param string $directory     Directory to look in for files.
+	 * @param array  $excluded_dirs List of regex patterns to exclude.
 	 * @return array|WP_Error Array of files, or WP_Error if a problem occurred.
 	 */
 	public function get_files( $directory, $excluded_dirs ) {
 		$directories          = new RecursiveDirectoryIterator( $directory );
 		$filtered_directories = new DirectoryFilter( $directories, $excluded_dirs );
-		$iterableFiles        = new RecursiveIteratorIterator( $filtered_directories );
+		$iterable_files       = new RecursiveIteratorIterator( $filtered_directories );
 
 		$files = [];
 
 		try {
-			foreach ( $iterableFiles as $file ) {
+			foreach ( $iterable_files as $file ) {
 				if ( 'php' !== $file->getExtension() ) {
 					continue;
 				}
@@ -76,7 +76,7 @@ final class Parser {
 
 			$file->process();
 
-			// TODO proper exporter
+			// TODO: Add proper exporter.
 			$out = [
 				'file' => $this->export_docblock( $file ),
 				'path' => str_replace( DIRECTORY_SEPARATOR, '/', $file->getFilename() ),
@@ -136,8 +136,7 @@ final class Parser {
 					'name'       => $class->getShortName(),
 					'namespace'  => $class->getNamespace(),
 					'line'       => $class->getLineNumber(),
-					'end_line'   => $class->getNode()
-										  ->getAttribute( 'endLine' ),
+					'end_line'   => $class->getNode()->getAttribute( 'endLine' ),
 					'final'      => $class->isFinal(),
 					'abstract'   => $class->isAbstract(),
 					'extends'    => $class->getParentClass(),
@@ -227,8 +226,7 @@ final class Parser {
 				$docblock->getShortDescription()
 			),
 			'long_description' => $this->fix_newlines(
-				$docblock->getLongDescription()
-						 ->getFormattedContents()
+				$docblock->getLongDescription()->getFormattedContents()
 			),
 			'tags'             => [],
 		];
@@ -339,7 +337,6 @@ final class Parser {
 				'line'       => $property->getLineNumber(),
 				'end_line'   => $property->getNode()->getAttribute( 'endLine' ),
 				'default'    => $property->getDefault(),
-				// 'final' => $property->isFinal(),
 				'static'     => $property->isStatic(),
 				'visibility' => $property->getVisibility(),
 				'doc'        => $this->export_docblock( $property ),
@@ -392,9 +389,7 @@ final class Parser {
 	/**
 	 * Export the list of elements used by a file or structure.
 	 *
-	 * @param array $uses {
-	 *     @type FunctionCallReflector[] $functions The functions called.
-	 * }
+	 * @param array $uses Array of usage data.
 	 *
 	 * @return array Associative array of usage data.
 	 */
@@ -418,8 +413,7 @@ final class Parser {
 							'class'    => $name[0],
 							'static'   => $element->isStatic(),
 							'line'     => $element->getLineNumber(),
-							'end_line' => $element->getNode()
-												  ->getAttribute( 'endLine' ),
+							'end_line' => $element->getNode()->getAttribute( 'endLine' ),
 						];
 						break;
 
@@ -428,14 +422,17 @@ final class Parser {
 						$out[ $type ][] = [
 							'name'     => $name,
 							'line'     => $element->getLineNumber(),
-							'end_line' => $element->getNode()
-												  ->getAttribute( 'endLine' ),
+							'end_line' => $element->getNode()->getAttribute( 'endLine' ),
 						];
 
-						if ( '_deprecated_file' === $name
-							 || '_deprecated_function' === $name
-							 || '_deprecated_argument' === $name
-							 || '_deprecated_hook' === $name
+						if (
+							'_deprecated_file' === $name
+							||
+							'_deprecated_function' === $name
+							||
+							'_deprecated_argument' === $name
+							||
+							'_deprecated_hook' === $name
 						) {
 							$arguments = $element->getNode()->args;
 

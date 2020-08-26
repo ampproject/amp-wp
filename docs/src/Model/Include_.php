@@ -13,6 +13,8 @@ namespace AmpProject\AmpWP\Documentation\Model;
  * @property string $name
  * @property int    $line
  * @property string $type
+ *
+ * phpcs:disable PEAR.NamingConventions.ValidClassName.Invalid
  */
 final class Include_ implements Leaf {
 
