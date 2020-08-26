@@ -35,9 +35,9 @@ The bottom line is that regardless of your technical expertise, The Official AMP
 
 The Official AMP Plugin enables site owners to serve AMP to their users in different ways, which are referred to as template modes: Standard, Transitional, and Reader. The differences between them are in terms of the number of themes used (i.e. one or two), and the number of versions of the site (non-AMP, AMP). Each template mode brings its own value proposition and serves the needs of different scenarios in the large and diverse WordPress ecosystem. And in all cases, the AMP plugin provides as much support as possible in terms of automating the generation of AMP content, as well as keeping the option chosen AMP valid. In a nutshell, the available template modes are the following:
 
-**Standard Mode**: This template mode is the ideal, as there is only one theme for serving requests and a single version of your site: the AMP version. Besides enabling all of your site to be AMP-first, this has the added benefit of reducing development and maintenance costs. This mode is the best choice for sites where the theme and plugins used in the site are fully AMP-compatible. It&#39;s also a good option if some components are not AMP-compatible but the site owner has the resources or the know-how to fix them.
+**Standard Mode**: This template mode is the ideal, as there is only one theme for serving requests and a single version of your site: the AMP version. Besides enabling all of your site to be AMP-first, this has the added benefit of reducing development and maintenance costs. This mode is the best choice for sites where the theme and plugins used in the site are fully AMP-compatible. It&#39;s also a good option if some components are not AMP-compatible but the site owner has the resources or the know-how to fix them. Checkout sites using Standard Mode of AMP Plugin [here](https://amp-wp.org/showcases/?template_mode=standard).
 
-**Transitional Mode**: In this mode there is also a single theme used, but there can be two versions of each page: AMP, non-AMP. The active theme is used for serving the AMP and non-AMP versions of a given URL. This mode is a good choice if the site uses a theme that is not fully AMP compatible, but the functional differences between the AMP and non-AMP are acceptable (due to graceful degradation). In this case users accessing the site from mobile devices can get the AMP version and get an optimized experience which also retains the look and feel of the non-AMP version .
+**Transitional Mode**: In this mode there is also a single theme used, but there can be two versions of each page: AMP, non-AMP. The active theme is used for serving the AMP and non-AMP versions of a given URL. This mode is a good choice if the site uses a theme that is not fully AMP compatible, but the functional differences between the AMP and non-AMP are acceptable (due to graceful degradation). In this case users accessing the site from mobile devices can get the AMP version and get an optimized experience which also retains the look and feel of the non-AMP version . Checkout sites using Transitional Mode of AMP Plugin [here](https://amp-wp.org/showcases/?template_mode=transitional).
 
 **Reader Mode**: In this mode there are two different themes, one for AMP and another for non-AMP content, and therefore there are also two versions of the site. This mode may be selected when the site is using an AMP-incompatible theme, but the level of incompatibilities is significant without graceful degradation. It&#39;s also a good choice if you are not technically savvy (or simply do not want to deal with the incompatibilities) and therefore want simplified and robust workflows that allow you to take advantage of AMP with minimal effort.
 
@@ -51,7 +51,7 @@ Many popular theme and plugin developers have taken efforts to support The Offic
 
 ## AMP Development
 
-Although there is a growing ecosystem of AMP compatible WordPress components, still there are some ways to go before 100% AMP compatibility in the ecosystem. If you are a developer, or you have the resources to pursue development projects, you may want, in some cases, develop custom functionality (i.e. as a plugin, or in the theme space) to serve your specific needs. The Official AMP Plugin can be of great help to you by providing powerful and effective developer tools that shed light into the AMP development process as it is done in WordPress, including mechanisms for detailing the root causes of all validation issues, and the contextual space to understand them properly, and dealing with them during the process of achieving full AMP compatibility.
+Although there is a growing ecosystem of AMP compatible WordPress components, still there are some ways to go before 100% AMP compatibility in the ecosystem. If you are a developer, or you have the resources to pursue development projects, you may want, in some cases, develop custom functionality (i.e. as a plugin, or in the theme space) to serve your specific needs. The Official AMP Plugin can be of great help to you by providing powerful and effective developer tools that shed light into the AMP development process as it is done in WordPress, including mechanisms for detailing the root causes of all validation issues, and the contextual space to understand them properly, and dealing with them during the process of achieving full AMP compatibility. Read more about [Developer Tools](https://amp-wp.org/documentation/getting-started/developer-tools/).
 
 == Frequently Asked Questions ==
 
@@ -69,34 +69,18 @@ To learn more about the plugin and start leveraging its capabilities to power yo
 
 If you are a developer, we encourage you to [follow along](https://github.com/ampproject/amp-wp) or [contribute](https://github.com/ampproject/amp-wp/blob/develop/contributing.md) to the development of this plugin on GitHub.
 
-We have put up a comprehensive FAQ page and extensive documentation to help you start as smoothly as possible.
+We have put up a comprehensive [FAQ page](https://amp-wp.org/documentation/frequently-asked-questions/) and extensive documentation to help you start as smoothly as possible.
 
-But if you need some help, we are right here to support you on this plugin&#39;s forum section, as well as through Github issues. And yep, our thriving AMPExpert ecosystem has indie freelancers to enterprise grade agencies in case you need commercial support!
+But if you need some help, we are right here to support you on this plugin&#39;s forum section, as well as through Github issues. And yep, our thriving [AMPExpert ecosystem](https://amp-wp.org/ecosystem/amp-experts/) has indie freelancers to enterprise grade agencies in case you need commercial support!
 
 == Screenshots ==
 
-1. In the website experience, theme support enables you to reuse the active theme's templates and stylesheets; all WordPress features (menus, widgets, comments) are available in AMP.
-2. All core themes are supported, and many themes can be served as AMP with minimal changes, Otherwise, behavior is often as if JavaScript is turned off in the browser since scripts are removed.
-3. Reader mode templates are still available, but they differ from the active theme.
-4. Switch from Reader mode to Transitional or Standard mode in AMP settings screen.
-5. Standard mode: Using AMP as the framework for your site, not having to maintain an AMP and non-AMP version. Mobile and desktop users get same experience.
-6. Transitional mode: A path to making your site fully AMP-compatible, with tools to assist with debugging validation issues along the way.
-7. Make the entire site available in AMP or pick specific post types and templates; you can also opt-out on per-post basis.
-8. Plugin checks for AMP validity and will indicate when: no issues are found, new issues need review, or issues block AMP from being served.
-9. The editor will surface validation issues during content authoring. The specific blocks with validation errors are indicated.
-10. Each Validated URL shows the list of validation errors encountered, giving control over whether invalid markup is removed or kept. Keeping invalid markup disables AMP.
-11. Each validation error provides a stack trace to identify which code is responsible for the invalid markup, whether a theme, plugin, embed, content block, and so on.
-12. Styles added by themes and plugins are automatically concatenated, minified, and tree-shaken to try to keep the total under 75KB of inline CSS.
-13. A WP-CLI command is provided to check the URLs on a site for AMP validity. Results are available in the admin for inspection.
-14. New onboarding wizard to help you get started.
-15. Built for developers and non-technical content creators alike.
-16. Three modes to choose from.
-17. Theme selection to enhance Reader mode experience.
-18. Preview how your site looks across desktop and mobile before finalising changes.
-19. Confirmation message with link to option to further "Customize AMP" experience.
-20. Customize AMP Pages from customizer settings for Reader Mode.
-21. Reopen the settings wizard, change the template mode, or change advanced settings.
-22. AMP can handle your entire site but we have ensured you can AMPlify in parts if you need.
+1. New onboarding wizard to help you get started.
+2. Built for developers and non-technical content creators alike.
+3. Theme selection to enhance Reader mode experience.
+4. Preview how your site looks across desktop and mobile before finalising changes.
+5. Customize AMP Pages from customizer settings for Reader Mode.
+6. Reopen the settings wizard, change the template mode, or change advanced settings.
 
 == Changelog ==
 
