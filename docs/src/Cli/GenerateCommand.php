@@ -114,7 +114,11 @@ final class GenerateCommand {
 			exit;
 		}
 
-		WP_CLI::success( "Data exported to {$output_file}" );
+		$success_message = ( 'json' === $format )
+			? "Generated JSON data saved to '{$output_file}'."
+			: "Generated Markdown files stored in '{$destination_folder}'.";
+
+		WP_CLI::success( $success_message );
 		WP_CLI::line();
 	}
 
