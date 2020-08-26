@@ -13,6 +13,7 @@ use phpDocumentor\Reflection\FileReflector as PhpDocumentorFileReflector;
 use PhpParser\Comment\Doc;
 use PhpParser\Node;
 use PhpParser\Node\Expr\FuncCall;
+use PhpParser\NodeAbstract;
 
 /**
  * Reflection class for a full file.
@@ -74,7 +75,7 @@ final class FileReflector extends PhpDocumentorFileReflector {
 	 * documentable, so they can be assigned to the hooks to which they may
 	 * belong.
 	 *
-	 * @param Node $node Node that is being entered.
+	 * @param Node|NodeAbstract $node Node that is being entered.
 	 */
 	public function enterNode( Node $node ) {
 		parent::enterNode( $node );

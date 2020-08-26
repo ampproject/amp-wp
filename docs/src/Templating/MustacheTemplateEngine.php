@@ -7,6 +7,7 @@
 
 namespace AmpProject\AmpWP\Documentation\Templating;
 
+use AmpProject\AmpWP\Documentation\Model\Leaf;
 use Mustache_Engine;
 use Mustache_Loader_FilesystemLoader;
 use RuntimeException;
@@ -45,8 +46,8 @@ final class MustacheTemplateEngine implements TemplateEngine {
 	/**
 	 * Render a specific template.
 	 *
-	 * @param string $template_name Name of the template to use.
-	 * @param mixed  $data          Associative array of data to use for rendering.
+	 * @param string     $template_name Name of the template to use.
+	 * @param array|Leaf $data          Associative array of data to use for rendering.
 	 * @return string Rendered result.
 	 * @throws RuntimeException If the template file could not be located.
 	 * @throws RuntimeException If the template file could not be loaded.

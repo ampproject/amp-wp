@@ -66,6 +66,7 @@ final class GenerateCommand {
 
 		$data = $this->get_phpdoc_data( $source_folder );
 
+		$result = false;
 		switch ( $format ) {
 			case 'json':
 				$json   = wp_json_encode( $data, JSON_PRETTY_PRINT );
@@ -76,8 +77,10 @@ final class GenerateCommand {
 					$doc_tree = new Root( $data );
 				} catch ( Exception $exception ) {
 					WP_CLI::error(
-						'Failed to build documentation object tree: ' . $exception->getMessage()
+						'Failed to build documentation object tree: ' . $exception->getMessage(),
+						false
 					);
+					exit;
 				}
 
 				$template_engine = new MustacheTemplateEngine();
@@ -178,7 +181,7 @@ final class GenerateCommand {
 			);
 
 			foreach ( $file['functions'] as $index => $function ) {
-				if ( isset( $class['hooks'] ) ) {
+				if ( isset( $class, $class['hooks'] ) ) {
 					$file['functions'][ $index ]['hooks'] = array_filter(
 						$class['hooks'],
 						[ $this, 'is_not_internal' ]

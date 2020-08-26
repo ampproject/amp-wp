@@ -85,7 +85,7 @@ final class Root {
 
 			usort(
 				$this->classes,
-				static function ( $a, $b ) {
+				static function ( Class_ $a, Class_ $b ) {
 					return strcmp(
 						$a->get_relative_name(),
 						$b->get_relative_name()
@@ -114,7 +114,7 @@ final class Root {
 
 			usort(
 				$this->functions,
-				static function ( $a, $b ) {
+				static function ( Function_ $a, Function_ $b ) {
 					return strcmp(
 						$a->get_relative_name(),
 						$b->get_relative_name()
@@ -143,7 +143,7 @@ final class Root {
 
 			usort(
 				$this->methods,
-				static function ( $a, $b ) {
+				static function ( Method $a, Method $b ) {
 					return strcmp(
 						$a->get_display_name(),
 						$b->get_display_name()
