@@ -13,8 +13,8 @@
     "ext-json": "*",
     "ext-libxml": "*",
     "ext-spl": "*",
-    "ampproject/common": "^1",
-    "ampproject/optimizer": "^1",
+    "ampproject/common": "*",
+    "ampproject/optimizer": "*",
     "cweagans/composer-patches": "1.6.7",
     "fasterimage/fasterimage": "1.5.0",
     "sabberworm/php-css-parser": "dev-master#bfdd976"
