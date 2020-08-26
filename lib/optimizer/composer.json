@@ -8,7 +8,7 @@
     "ext-dom": "*",
     "ext-iconv": "*",
     "ext-libxml": "*",
-    "ampproject/common": "^1",
+    "ampproject/common": "*",
     "php-parallel-lint/php-parallel-lint": "^1.2"
   },
   "require-dev": {
@@ -30,10 +30,6 @@
     "sort-packages": true
   },
   "extra": {
-    "branch-alias": {
-      "dev-master": "1.0.x-dev",
-      "dev-develop": "1.0.x-dev"
-    },
     "downloads": {
       "phpstan": {
         "url": "https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar",

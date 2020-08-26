@@ -308,22 +308,32 @@ li.error-kept {
 	}
 }
 
-@keyframes fadeOut {
+@keyframes slideOut {
 
 	from {
-		opacity: 1;
+		transform: translate3d(0, 0, 0);
 	}
 
 	to {
-		opacity: 0;
+		transform: translate3d(300px, 0, 0);
 	}
 }
 
+.amp .amp-save-success-notice.amp-notice:not(.dismissed):not(.visible) {
+	transform: translate3d(300px, 0, 0);
+}
 
-.amp .amp-save-success-notice.amp-notice {
-	animation: slideIn, fadeOut;
-	animation-delay: 0s, 8s;
-	animation-duration: 0.5s, 0.5s;
+.amp .amp-save-success-notice.amp-notice.visible {
+	animation: slideIn;
+	animation-delay: 0s;
+	animation-duration: 0.5s;
+	animation-fill-mode: both;
+}
+
+.amp .amp-save-success-notice.amp-notice.dismissed {
+	animation: slideOut;
+	animation-delay: 0s;
+	animation-duration: 0.5s;
 	animation-fill-mode: both;
 }
 
