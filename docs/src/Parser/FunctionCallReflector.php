@@ -28,29 +28,29 @@ final class FunctionCallReflector extends BaseReflector {
 			return '\\' . implode( '\\', $this->node->namespacedName->parts );
 		}
 
-		$shortName = $this->getShortName();
+		$short_name = $this->getShortName();
 
-		if ( $shortName instanceof FullyQualified ) {
-			return '\\' . (string) $shortName;
+		if ( $short_name instanceof FullyQualified ) {
+			return '\\' . (string) $short_name;
 		}
 
-		if ( $shortName instanceof Name ) {
-			return (string) $shortName;
+		if ( $short_name instanceof Name ) {
+			return (string) $short_name;
 		}
 
-		if ( $shortName instanceof ArrayDimFetch ) {
-			$var = $shortName->var->name;
-			$dim = $shortName->dim->name
-				? $shortName->dim->name->parts[0]
+		if ( $short_name instanceof ArrayDimFetch ) {
+			$var = $short_name->var->name;
+			$dim = $short_name->dim->name
+				? $short_name->dim->name->parts[0]
 				: false;
 
 			return false === $dim ? "\${$var}" : "\${$var}[{$dim}]";
 		}
 
-		if ( $shortName instanceof Variable ) {
-			return $shortName->name;
+		if ( $short_name instanceof Variable ) {
+			return $short_name->name;
 		}
 
-		return (string) $shortName;
+		return (string) $short_name;
 	}
 }

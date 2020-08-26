@@ -55,7 +55,6 @@ trait HasCodeLinks {
 		$file_path = $this->get_file_path();
 
 		if ( '<unknown>' === $file_path ) {
-			var_dump( $this );
 			return "\n";
 		}
 
@@ -89,7 +88,7 @@ trait HasCodeLinks {
 
 		foreach ( $lines as &$line ) {
 			// Skip blank lines without indentation.
-			if ( $line === '' ) {
+			if ( '' === $line ) {
 				continue;
 			}
 

@@ -1,4 +1,9 @@
 <?php
+/**
+ * Register the WP-CLI commands for documentation generation.
+ *
+ * @package AmpProject\AmpWP
+ */
 
 use AmpProject\AmpWP\Documentation\Cli\DocsCommandNamespace;
 use AmpProject\AmpWP\Documentation\Cli\GenerateCommand;

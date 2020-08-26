@@ -51,6 +51,9 @@ final class GenerateCommand {
 	 * ## EXAMPLES
 	 *
 	 * @when before_wp_load
+	 *
+	 * @param array $args       Positional arguments.
+	 * @param array $assoc_args Flags.
 	 */
 	public function __invoke( $args, $assoc_args ) {
 		list( $source_folder, $destination_folder ) = $args;
@@ -65,8 +68,8 @@ final class GenerateCommand {
 
 		switch ( $format ) {
 			case 'json':
-				$json   = json_encode( $data, JSON_PRETTY_PRINT );
-				$result = file_put_contents( $output_file, $json );
+				$json   = wp_json_encode( $data, JSON_PRETTY_PRINT );
+				$result = file_put_contents( $output_file, $json ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
 				break;
 			case 'markdown':
 				try {
@@ -86,7 +89,7 @@ final class GenerateCommand {
 						/** @var Markdown $markdown */
 						$filepath = "{$destination_folder}/{$markdown->get_filename()}";
 						$this->ensure_dir_exists( dirname( $filepath ) );
-						$result = file_put_contents( $filepath, $markdown->get_contents() );
+						$result = file_put_contents( $filepath, $markdown->get_contents() ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
 					}
 				} catch ( Exception $exception ) {
 					WP_CLI::error(
@@ -96,6 +99,7 @@ final class GenerateCommand {
 				break;
 			case '':
 				WP_CLI::error( "A value of 'json' or 'markdown' is required for the --format flag." );
+				break;
 			default:
 				WP_CLI::error( "Invalid --format value '{$format}' provided. Possible values: json, markdown" );
 		}
@@ -114,7 +118,7 @@ final class GenerateCommand {
 	/**
 	 * Generate the data from the PHPDoc markup.
 	 *
-	 * @param string $path Directory or file to scan for PHPDoc
+	 * @param string $path Directory or file to scan for PHPDoc.
 	 *
 	 * @return string|array
 	 */

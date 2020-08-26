@@ -19,12 +19,18 @@ use RecursiveIteratorIterator;
 use UnexpectedValueException;
 use WP_Error;
 
+/**
+ * Parser class that goes over files and extracts the key information we need
+ * for the documentation.
+ */
 final class Parser {
 
 	/**
-	 * @param string $directory
+	 * Get the files to parse.
 	 *
-	 * @return array|WP_Error
+	 * @param string $directory Directory to look in for files.
+	 *
+	 * @return array|WP_Error Array of files, or WP_Error if a problem occurred.
 	 */
 	public function get_files( $directory, $excluded_dirs ) {
 		$directories          = new RecursiveDirectoryIterator( $directory );
@@ -52,10 +58,12 @@ final class Parser {
 	}
 
 	/**
-	 * @param array  $files
-	 * @param string $root
+	 * Parse the files.
 	 *
-	 * @return array
+	 * @param array  $files List of files to parse.
+	 * @param string $root  Root folder that the files are in.
+	 *
+	 * @return array Associative array of parsed data.
 	 */
 	public function parse_files( $files, $root ) {
 		$output = [];
@@ -164,9 +172,9 @@ final class Parser {
 	 * and `<pre>` tags, as newlines appearing in those tags are always
 	 * intentional.
 	 *
-	 * @param string $text
+	 * @param string $text Text for which to fix the newlines.
 	 *
-	 * @return string
+	 * @return string Fixed text.
 	 */
 	private function fix_newlines( $text ) {
 		// Non-naturally occurring string to use as temporary replacement.
@@ -195,9 +203,12 @@ final class Parser {
 	}
 
 	/**
-	 * @param BaseReflector|ReflectionAbstract $element
+	 * Export a docblock for a provided element.
 	 *
-	 * @return array
+	 * @param BaseReflector|ReflectionAbstract $element Element to extract the
+	 *                                                  doc-block for.
+	 *
+	 * @return array Associative array of doc-block data.
 	 */
 	private function export_docblock( $element ) {
 		$docblock = $element->getDocBlock();
@@ -268,9 +279,11 @@ final class Parser {
 	}
 
 	/**
-	 * @param HookReflector[] $hooks
+	 * Export the hooks.
 	 *
-	 * @return array
+	 * @param HookReflector[] $hooks Hooks to export.
+	 *
+	 * @return array Associative array of hooks data.
 	 */
 	private function export_hooks( $hooks ) {
 		$out = [];
@@ -290,9 +303,11 @@ final class Parser {
 	}
 
 	/**
-	 * @param ArgumentReflector[] $arguments
+	 * Export the arguments.
 	 *
-	 * @return array
+	 * @param ArgumentReflector[] $arguments Arguments to export.
+	 *
+	 * @return array Associative array of argument data.
 	 */
 	private function export_arguments( $arguments ) {
 		$output = [];
@@ -309,9 +324,11 @@ final class Parser {
 	}
 
 	/**
-	 * @param PropertyReflector[] $properties
+	 * Export the properties.
 	 *
-	 * @return array
+	 * @param PropertyReflector[] $properties Properties to export.
+	 *
+	 * @return array Associative array of property data.
 	 */
 	private function export_properties( $properties ) {
 		$out = [];
@@ -333,9 +350,11 @@ final class Parser {
 	}
 
 	/**
-	 * @param MethodReflector[] $methods
+	 * Export the methods.
 	 *
-	 * @return array
+	 * @param MethodReflector[] $methods Methods to export.
+	 *
+	 * @return array Associative array of method data.
 	 */
 	private function export_methods( $methods ) {
 		$output = [];
@@ -377,7 +396,7 @@ final class Parser {
 	 *     @type FunctionCallReflector[] $functions The functions called.
 	 * }
 	 *
-	 * @return array
+	 * @return array Associative array of usage data.
 	 */
 	private function export_uses( $uses ) {
 		$out = [];

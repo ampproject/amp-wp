@@ -7,6 +7,9 @@
 
 namespace AmpProject\AmpWP\Documentation\Model;
 
+/**
+ * A trait for an object that has a doc-block and needs to interact with it.
+ */
 trait HasDocBlock {
 
 	/**
@@ -108,6 +111,11 @@ trait HasDocBlock {
 		return $this->doc->get_tag( 'return' )->content;
 	}
 
+	/**
+	 * Get the return value type(s).
+	 *
+	 * @return string Return value type(s).
+	 */
 	public function get_return_value_types() {
 		return implode( '|', $this->doc->get_tag( 'return' )->types );
 	}

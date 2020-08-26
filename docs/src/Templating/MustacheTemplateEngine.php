@@ -11,6 +11,9 @@ use Mustache_Engine;
 use Mustache_Loader_FilesystemLoader;
 use RuntimeException;
 
+/**
+ * Mustache-based implementation of the templating engine.
+ */
 final class MustacheTemplateEngine implements TemplateEngine {
 
 	/**

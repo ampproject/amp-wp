@@ -74,7 +74,7 @@ final class FileReflector extends PhpDocumentorFileReflector {
 	 * documentable, so they can be assigned to the hooks to which they may
 	 * belong.
 	 *
-	 * @param Node $node
+	 * @param Node $node Node that is being entered.
 	 */
 	public function enterNode( Node $node ) {
 		parent::enterNode( $node );
@@ -156,7 +156,7 @@ final class FileReflector extends PhpDocumentorFileReflector {
 	 * queued hooks to them. The reflector for a node isn't created until the
 	 * node is left.
 	 *
-	 * @param Node $node
+	 * @param Node $node Node that is being left.
 	 */
 	public function leaveNode( Node $node ) {
 		parent::leaveNode( $node );
@@ -210,12 +210,14 @@ final class FileReflector extends PhpDocumentorFileReflector {
 	}
 
 	/**
-	 * @param Node $node
+	 * Check whether a given node is a filter.
 	 *
-	 * @return bool
+	 * @param Node $node Node to check.
+	 *
+	 * @return bool Whether the node is a filter.
 	 */
 	protected function isFilter( Node $node ) {
-		// Ignore variable functions
+		// Ignore variable functions.
 		if ( 'Name' !== $node->name->getType() ) {
 			return false;
 		}
@@ -235,20 +237,29 @@ final class FileReflector extends PhpDocumentorFileReflector {
 	}
 
 	/**
-	 * @return self
+	 * Get the current location.
+	 *
+	 * @return self Current location.
 	 */
 	protected function getLocation() {
 		return empty( $this->location ) ? $this : end( $this->location );
 	}
 
 	/**
-	 * @param Node $node
+	 * Check whether a given node is documentable.
 	 *
-	 * @return bool
+	 * @param Node $node Node to check.
+	 *
+	 * @return bool Whether the given node is documentable.
 	 */
 	protected function isNodeDocumentable( Node $node ) {
-		return parent::isNodeDocumentable( $node )
-			   || ( $node instanceof FuncCall
-					&& $this->isFilter( $node ) );
+		return
+			parent::isNodeDocumentable( $node )
+			||
+			(
+				$node instanceof FuncCall
+				&&
+				$this->isFilter( $node )
+			);
 	}
 }

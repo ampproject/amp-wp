@@ -10,6 +10,9 @@ namespace AmpProject\AmpWP\Documentation\Parser;
 use RecursiveFilterIterator;
 use RecursiveIterator;
 
+/**
+ * Filter class to filter a recursive directory iterator.
+ */
 final class DirectoryFilter extends RecursiveFilterIterator {
 
 	/**

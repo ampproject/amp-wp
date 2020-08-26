@@ -31,16 +31,16 @@ final class HookReflector extends BaseReflector {
 	private function cleanupName( $name ) {
 		$matches = [];
 
-		// quotes on both ends of a string
+		// Quotes on both ends of a string.
 		if ( preg_match( '/^[\'"]([^\'"]*)[\'"]$/', $name, $matches ) ) {
 			return $matches[1];
 		}
 
-		// two concatenated things, last one of them a variable
+		// Two concatenated things, last one of them a variable.
 		if ( preg_match(
-			'/(?:[\'"]([^\'"]*)[\'"]\s*\.\s*)?' . // First filter name string (optional)
-			'(\$[^\s]*)' . // Dynamic variable
-			'(?:\s*\.\s*[\'"]([^\'"]*)[\'"])?/',  // Second filter name string (optional)
+			'/(?:[\'"]([^\'"]*)[\'"]\s*\.\s*)?' . // First filter name string (optional).
+			'(\$[^\s]*)' . // Dynamic variable.
+			'(?:\s*\.\s*[\'"]([^\'"]*)[\'"])?/',  // Second filter name string (optional).
 			$name,
 			$matches
 		) ) {
@@ -98,7 +98,7 @@ final class HookReflector extends BaseReflector {
 			$args[] = $printer->prettyPrintArg( $arg );
 		}
 
-		// Skip the filter name
+		// Skip the filter name.
 		array_shift( $args );
 
 		return $args;

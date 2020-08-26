@@ -67,6 +67,7 @@ final class DocBlock implements Leaf {
 	 *
 	 * @param string $name Tag to get.
 	 * @return Tag The requested tag.
+	 * @throws RuntimeException If the requested doc-block tag is not found.
 	 */
 	public function get_tag( $name ) {
 		foreach ( $this->tags as $tag ) {
