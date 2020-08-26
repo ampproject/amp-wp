@@ -5,6 +5,7 @@
  * This class is based on code from the WordPress/phpdoc-parser project by
  * Ryan McCue, Paul Gibbs, Andrey "Rarst" Savchenko and Contributors,
  * licensed under the GPLv2 or later.
+ *
  * @link https://github.com/WordPress/phpdoc-parser
  *
  * @package AmpProject\AmpWP
