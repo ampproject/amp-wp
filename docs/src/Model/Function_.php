@@ -116,7 +116,6 @@ final class Function_ implements Leaf {
 		return str_replace( '\\', '/', $this->get_relative_name() );
 	}
 
-
 	/**
 	 * Get the signature of the function.
 	 *

@@ -54,7 +54,7 @@ final class GenerateCommand {
 	 */
 	public function __invoke( $args, $assoc_args ) {
 		list( $source_folder, $destination_folder ) = $args;
-		$format = (string) Utils\get_flag_value( $assoc_args, 'format', 'json' );
+		$format                                     = (string) Utils\get_flag_value( $assoc_args, 'format', 'json' );
 
 		$source_folder      = realpath( $source_folder );
 		$destination_folder = realpath( $destination_folder );

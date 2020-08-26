@@ -248,7 +248,7 @@ final class FileReflector extends PhpDocumentorFileReflector {
 	 */
 	protected function isNodeDocumentable( Node $node ) {
 		return parent::isNodeDocumentable( $node )
-		       || ( $node instanceof FuncCall
-		            && $this->isFilter( $node ) );
+			   || ( $node instanceof FuncCall
+					&& $this->isFilter( $node ) );
 	}
 }

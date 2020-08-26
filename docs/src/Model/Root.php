@@ -73,7 +73,7 @@ final class Root {
 	 *
 	 * @return Class_[] Collection of class reference objects.
 	 */
-	public function get_classes( ) {
+	public function get_classes() {
 		if ( null === $this->classes ) {
 			$this->classes = [];
 
@@ -102,7 +102,7 @@ final class Root {
 	 *
 	 * @return Function_[] Collection of function reference objects.
 	 */
-	public function get_functions( ) {
+	public function get_functions() {
 		if ( null === $this->functions ) {
 			$this->functions = [];
 
@@ -131,7 +131,7 @@ final class Root {
 	 *
 	 * @return Method[] Collection of method reference objects.
 	 */
-	public function get_methods( ) {
+	public function get_methods() {
 		if ( null === $this->methods ) {
 			$this->methods = [];
 
@@ -160,7 +160,7 @@ final class Root {
 	 *
 	 * @return Hook[] Collection of hook reference objects.
 	 */
-	public function get_hooks( ) {
+	public function get_hooks() {
 		if ( null === $this->hooks ) {
 			$this->hooks = [];
 

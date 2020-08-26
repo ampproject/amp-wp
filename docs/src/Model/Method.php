@@ -108,7 +108,6 @@ final class Method implements Leaf {
 		return "{$this->parent->name}::{$this->name}()";
 	}
 
-
 	/**
 	 * Get the filename to use for the method.
 	 *

@@ -87,9 +87,9 @@ trait HasCodeLinks {
 		// the indentation to strip across the whole snippet.
 		$indent = strspn( $lines[0], "\t" );
 
-		foreach( $lines as &$line ) {
+		foreach ( $lines as &$line ) {
 			// Skip blank lines without indentation.
-			if( $line === '' ) {
+			if ( $line === '' ) {
 				continue;
 			}
 

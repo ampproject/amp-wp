@@ -106,7 +106,7 @@ final class Parser {
 					'aliases'   => $function->getNamespaceAliases(),
 					'line'      => $function->getLineNumber(),
 					'end_line'  => $function->getNode()
-					                        ->getAttribute( 'endLine' ),
+											->getAttribute( 'endLine' ),
 					'arguments' => $this->export_arguments( $function->getArguments() ),
 					'doc'       => $this->export_docblock( $function ),
 					'hooks'     => [],
@@ -129,7 +129,7 @@ final class Parser {
 					'namespace'  => $class->getNamespace(),
 					'line'       => $class->getLineNumber(),
 					'end_line'   => $class->getNode()
-					                      ->getAttribute( 'endLine' ),
+										  ->getAttribute( 'endLine' ),
 					'final'      => $class->isFinal(),
 					'abstract'   => $class->isAbstract(),
 					'extends'    => $class->getParentClass(),
@@ -174,7 +174,7 @@ final class Parser {
 
 		// Replace newline characters within 'code' and 'pre' tags with replacement string.
 		$text = preg_replace_callback(
-			"/(?<=<pre><code>)(.+)(?=<\/code><\/pre>)/s",
+			'/(?<=<pre><code>)(.+)(?=<\/code><\/pre>)/s',
 			static function ( $matches ) use ( $replacement_string ) {
 				return preg_replace( '/[\n\r]/', $replacement_string, $matches[1] );
 			},
@@ -217,7 +217,7 @@ final class Parser {
 			),
 			'long_description' => $this->fix_newlines(
 				$docblock->getLongDescription()
-				         ->getFormattedContents()
+						 ->getFormattedContents()
 			),
 			'tags'             => [],
 		];
@@ -251,8 +251,11 @@ final class Parser {
 				}
 				// Description string.
 				if ( method_exists( $tag, 'getDescription' ) ) {
-					$description = preg_replace( '/[\n\r]+/', ' ',
-						$this->format_description( $tag->getDescription() ) );
+					$description = preg_replace(
+						'/[\n\r]+/',
+						' ',
+						$this->format_description( $tag->getDescription() )
+					);
 					if ( ! empty( $description ) ) {
 						$tag_data['description'] = $description;
 					}
@@ -319,7 +322,7 @@ final class Parser {
 				'line'       => $property->getLineNumber(),
 				'end_line'   => $property->getNode()->getAttribute( 'endLine' ),
 				'default'    => $property->getDefault(),
-				//			'final' => $property->isFinal(),
+				// 'final' => $property->isFinal(),
 				'static'     => $property->isStatic(),
 				'visibility' => $property->getVisibility(),
 				'doc'        => $this->export_docblock( $property ),
@@ -397,7 +400,7 @@ final class Parser {
 							'static'   => $element->isStatic(),
 							'line'     => $element->getLineNumber(),
 							'end_line' => $element->getNode()
-							                      ->getAttribute( 'endLine' ),
+												  ->getAttribute( 'endLine' ),
 						];
 						break;
 
@@ -407,13 +410,13 @@ final class Parser {
 							'name'     => $name,
 							'line'     => $element->getLineNumber(),
 							'end_line' => $element->getNode()
-							                      ->getAttribute( 'endLine' ),
+												  ->getAttribute( 'endLine' ),
 						];
 
 						if ( '_deprecated_file' === $name
-						     || '_deprecated_function' === $name
-						     || '_deprecated_argument' === $name
-						     || '_deprecated_hook' === $name
+							 || '_deprecated_function' === $name
+							 || '_deprecated_argument' === $name
+							 || '_deprecated_hook' === $name
 						) {
 							$arguments = $element->getNode()->args;
 

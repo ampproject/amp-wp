@@ -32,7 +32,7 @@ final class MustacheTemplateEngine implements TemplateEngine {
 		$this->engine = new Mustache_Engine(
 			[
 				'entity_flags' => ENT_QUOTES,
-				'loader' => new Mustache_Loader_FilesystemLoader(
+				'loader'       => new Mustache_Loader_FilesystemLoader(
 					self::TEMPLATES_ROOT
 				),
 			]

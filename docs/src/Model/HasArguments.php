@@ -50,7 +50,7 @@ trait HasArguments {
 	 *
 	 * @return string[] Array of argument signatures.
 	 */
-	private function get_argument_names(  ) {
+	private function get_argument_names() {
 		$arguments = [];
 
 		foreach ( $this->arguments as $argument ) {

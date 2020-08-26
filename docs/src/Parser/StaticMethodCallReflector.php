@@ -21,7 +21,7 @@ final class StaticMethodCallReflector extends MethodCallReflector {
 	 * @return string[] Index 0 is the class name, 1 is the method name.
 	 */
 	public function getName() {
-		$class  = $this->node->class;
+		$class = $this->node->class;
 
 		// Method is called via a variable classname like $class::method()
 		if ( $class instanceof Variable ) {

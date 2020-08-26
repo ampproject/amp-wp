@@ -39,9 +39,11 @@ final class HookReflector extends BaseReflector {
 		// two concatenated things, last one of them a variable
 		if ( preg_match(
 			'/(?:[\'"]([^\'"]*)[\'"]\s*\.\s*)?' . // First filter name string (optional)
-			'(\$[^\s]*)' .                        // Dynamic variable
+			'(\$[^\s]*)' . // Dynamic variable
 			'(?:\s*\.\s*[\'"]([^\'"]*)[\'"])?/',  // Second filter name string (optional)
-			$name, $matches ) ) {
+			$name,
+			$matches
+		) ) {
 
 			if ( isset( $matches[3] ) ) {
 				return $matches[1] . '{' . $matches[2] . '}' . $matches[3];
@@ -90,7 +92,7 @@ final class HookReflector extends BaseReflector {
 	 * @return array
 	 */
 	public function getArgs() {
-		$printer = new PrettyPrinter;
+		$printer = new PrettyPrinter();
 		$args    = [];
 		foreach ( $this->node->args as $arg ) {
 			$args[] = $printer->prettyPrintArg( $arg );

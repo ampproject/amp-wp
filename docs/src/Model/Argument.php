@@ -32,9 +32,9 @@ final class Argument implements Leaf {
 	 */
 	protected function get_known_keys() {
 		return [
-			'name' => '',
+			'name'    => '',
 			'default' => 0,
-			'type' => '',
+			'type'    => '',
 		];
 	}
 
@@ -54,7 +54,7 @@ final class Argument implements Leaf {
 			foreach ( $tags as $tag ) {
 				if (
 					'param' === $tag->name
-					&& isset ( $tag->variable )
+					&& isset( $tag->variable )
 					&& $tag->variable === $this->name
 				) {
 					$this->tag = $tag;

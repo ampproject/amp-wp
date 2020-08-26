@@ -64,6 +64,7 @@ final class DocBlock implements Leaf {
 
 	/**
 	 * Get a specific tag.
+	 *
 	 * @param string $name Tag to get.
 	 * @return Tag The requested tag.
 	 */
