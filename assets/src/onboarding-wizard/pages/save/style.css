@@ -46,7 +46,7 @@
 }
 
 .done__preview-container .phone {
-	max-height: 610px;
+	height: auto;
 	padding-bottom: 2rem;
 }
 
