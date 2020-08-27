@@ -414,23 +414,60 @@ function amp_is_available() {
 	}
 
 	$warn = function () {
-		static $warned = false;
-		if ( $warned ) {
+		static $already_warned_sources = [];
+
+		// Gather the themes and plugins responsible for calling the function incorrectly.
+		$closest_source = [
+			'type' => '',
+			'name' => '',
+		];
+
+		foreach ( debug_backtrace( 0 ) as $call_stack ) { // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace
+			if ( empty( $call_stack['file'] ) ) {
+				continue;
+			}
+
+			$source = AMP_Validation_Manager::get_file_source( $call_stack['file'] );
+			if ( empty( $source ) || 'core' === $source['type'] || ( 'plugin' === $source['type'] && 'amp' === $source['name'] ) ) {
+				continue;
+			}
+
+			$closest_source = $source;
+			break;
+		}
+
+		$closest_source_identifier = $closest_source['type'] . ':' . $closest_source['name'];
+		if ( in_array( $closest_source_identifier, $already_warned_sources, true ) ) {
 			return;
 		}
+
 		$message = sprintf(
-			/* translators: %1$s: amp_is_available(), %2$s: amp_is_request(), %3$s: is_amp_endpoint(), %4$s: the current action, %5$s: the wp action, %6$s: the WP_Query class, %7$s: the amp_skip_post() function */
-			__( '%1$s (or %2$s, formerly %3$s) was called too early and so it will not work properly. WordPress is currently doing the "%4$s" action. Calling this function before the "%5$s" action means it will not have access to %6$s and the queried object to determine if it is an AMP response, thus neither the "%7$s" filter nor the AMP enabled toggle will be considered.', 'amp' ),
+			/* translators: 1: amp_is_available() function, 2: amp_is_request() function, 3: is_amp_endpoint() function */
+			__( '%1$s (or %2$s, formerly %3$s) was called too early and so it will not work properly.', 'amp' ),
 			'amp_is_available()',
 			'amp_is_request()',
-			'is_amp_endpoint()',
+			'is_amp_endpoint()'
+		);
+
+		if ( ! empty( $closest_source['type'] ) && ! empty( $closest_source['name'] ) ) {
+			$message .= ' ' . sprintf(
+				/* translators: 1: type (theme, plugin, must-use plugin), 2: name */
+				__( 'It appears the %1$s with slug %2$s is responsible; please contact the author.', 'amp' ),
+				'`' . $closest_source['type'] . '`',
+				'`' . $closest_source['name'] . '`'
+			);
+		}
+
+		$message .= ' ' . sprintf(
+			/* translators: 1: the current action, 2: the wp action, 4: the WP_Query class, 4: the amp_skip_post() function */
+			__( 'WordPress is currently doing the "%1$s" action. Calling this function before the "%2$s" action means it will not have access to %3$s and the queried object to determine if it is an AMP response, thus neither the "%4$s" filter nor the AMP enabled toggle will be considered.', 'amp' ),
 			current_action(),
 			'wp',
 			'WP_Query',
 			'amp_skip_post()'
 		);
 		_doing_it_wrong( 'amp_is_available', esc_html( $message ), '2.0.0' );
-		$warned = true;
+		$already_warned_sources[] = $closest_source_identifier;
 	};
 
 	// Make sure the parse_request action has triggered before trying to read from the REST_REQUEST constant, which is set during rest_api_loaded().

@@ -1546,8 +1546,9 @@ class AMP_Validation_Manager {
 	 * @return array|null {
 	 *     The source data.
 	 *
-	 *     @type string $type Source type (core, plugin, mu-plugin, or theme).
-	 *     @type string $name Source name.
+	 *     @type string $type     Source type (core, plugin, mu-plugin, or theme).
+	 *     @type string $name     Source name.
+	 *     @type string $file     Relative file path based on the type.
 	 *     @type string $function Normalized function name.
 	 *     @type ReflectionMethod|ReflectionFunction $reflection Reflection.
 	 * }
@@ -1585,11 +1586,52 @@ class AMP_Validation_Manager {
 
 		$source = compact( 'reflection' );
 
+		$file   = wp_normalize_path( $reflection->getFileName() );
+		$source = array_merge( $source, self::get_file_source( $file ) );
+
+		// If a file was identified, then also supply the line number.
+		if ( isset( $source['file'] ) ) {
+			$source['line'] = $reflection->getStartLine();
+		}
+
+		if ( $reflection instanceof ReflectionMethod ) {
+			$source['function'] = $reflection->getDeclaringClass()->getName() . '::' . $reflection->getName();
+		} else {
+			$source['function'] = $reflection->getName();
+		}
+
+		return $source;
+	}
+
+	/**
+	 * Identify the type, name, and relative path for a file.
+	 *
+	 * @since 2.0.1
+	 *
+	 * @param string $file File.
+	 * @return array {
+	 *     @type string $type Source type (core, plugin, mu-plugin, or theme).
+	 *     @type string $name Source name.
+	 *     @type string $file Relative file path based on the type.
+	 * }
+	 */
+	public static function get_file_source( $file ) {
+		if (
+			! isset( self::$template_directory )
+			||
+			! isset( self::$template_slug )
+			||
+			! isset( self::$stylesheet_directory )
+			||
+			! isset( self::$stylesheet_slug )
+		) {
+			self::set_theme_variables();
+		}
+
 		/** @var PluginRegistry $plugin_registry */
 		$plugin_registry = Services::get( 'plugin_registry' );
 
-		// Identify the type, name, and relative file path.
-		$file         = wp_normalize_path( $reflection->getFileName() );
+		$source       = [];
 		$slug_pattern = '(?<slug>[^/]+)';
 		if ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( $plugin_registry->get_plugin_dir() ) ), ':' ) . $slug_pattern . '(/(?P<file>.*$))?:s', $file, $matches ) ) {
 			$source['type'] = 'plugin';
@@ -1612,18 +1654,6 @@ class AMP_Validation_Manager {
 			$source['name'] = $matches['slug'];
 			$source['file'] = $matches['file'];
 		}
-
-		// If a file was identified, then also supply the line number.
-		if ( isset( $source['file'] ) ) {
-			$source['line'] = $reflection->getStartLine();
-		}
-
-		if ( $reflection instanceof ReflectionMethod ) {
-			$source['function'] = $reflection->getDeclaringClass()->getName() . '::' . $reflection->getName();
-		} else {
-			$source['function'] = $reflection->getName();
-		}
-
 		return $source;
 	}
 
