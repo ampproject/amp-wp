@@ -34,7 +34,7 @@ interface Attribute
     const CLASS_                = 'class'; // Underscore needed because 'class' is a PHP keyword.
     const CONTENT               = 'content';
     const CUSTOM_ELEMENT        = 'custom-element';
-    const CUSTOM_TEMPLATE       = 'custom-template';
+    const CUSTOM_TEMPLATE       = 'custom-template'
     const DECODING              = 'decoding';
     const DISABLE_INLINE_WIDTH  = 'disable-inline-width';
     const HEIGHT                = 'height';
@@ -93,4 +93,6 @@ interface Attribute
     const REL_PRELOAD      = 'preload';
     const REL_PRERENDER    = 'prerender';
     const REL_STYLESHEET   = 'stylesheet';
+
+    const DATA_HERO = 'data-hero';
 }

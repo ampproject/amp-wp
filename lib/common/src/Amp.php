@@ -2,6 +2,7 @@
 
 namespace AmpProject;
 
+use AmpProject\Dom\Document;
 use DOMElement;
 use DOMNode;
 
@@ -247,6 +248,23 @@ final class Amp
     public static function isCustomElement(DOMNode $node)
     {
         return $node instanceof DOMElement && strpos($node->tagName, Extension::PREFIX) === 0;
+    }
+
+    /**
+     * Check whether the given document is an AMP story.
+     *
+     * @param Document $document Document of the page to check within.
+     * @return bool Whether the provided document is an AMP story.
+     */
+    public static function isAmpStory(Document $document)
+    {
+        foreach ($document->head->childNodes as $node) {
+            if (self::getExtensionName($node) === 'amp-story') {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
