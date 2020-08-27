@@ -95,6 +95,8 @@ function amp_post_template_add_block_styles() {
  * @param AMP_Post_Template $amp_template Template.
  */
 function amp_post_template_add_styles( $amp_template ) {
+	echo file_get_contents( AMP__DIR__ . '/assets/css/amp-default.css' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+
 	$stylesheets = $amp_template->get( 'post_amp_stylesheets' );
 	if ( ! empty( $stylesheets ) ) {
 		echo '/* Inline stylesheets */' . PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
