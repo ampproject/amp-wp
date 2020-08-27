@@ -78,7 +78,7 @@ final class ServerSideRendering implements Transformer
      *
      * @var string
      */
-    const CSS_DIMENSION_WITH_MEDIA_CONDITION_REGEX_PATTERN = '/(?<media_condition>.*)\s(?<dimension>.*)/m';
+    const CSS_DIMENSION_WITH_MEDIA_CONDITION_REGEX_PATTERN = '/\s*\(\s*(?<media_condition>.*)\s*\)\s+(?<dimension>.*)\s*/m';
 
     /**
      * Characters to use for trimming CSS values.
@@ -997,25 +997,27 @@ final class ServerSideRendering implements Transformer
 
         foreach (array_reverse($sourceSizes) as $sourceSize) {
             $matches = [];
-            if (preg_match(self::CSS_DIMENSION_WITH_MEDIA_CONDITION_REGEX_PATTERN, $sourceSize, $matches)) {
-                $mediaCondition = trim($matches['media_condition'], self::CSS_TRIM_CHARACTERS);
-
-                if (empty($mediaCondition)) {
-                    throw InvalidHtmlAttribute::fromAttribute($attribute->nodeName, $element);
-                }
-
-                $dimension = trim($matches['dimension'], self::CSS_TRIM_CHARACTERS);
-
-                if (empty($dimension)) {
-                    throw InvalidHtmlAttribute::fromAttribute($attribute->nodeName, $element);
-                }
-
-                $cssRules[] = CssRule::withMediaQuery(
-                    sprintf($mediaQueryStyle[0], $mediaCondition),
-                    $mediaQueryStyle[1],
-                    sprintf($mediaQueryStyle[2], $dimension)
-                );
+            if (!preg_match(self::CSS_DIMENSION_WITH_MEDIA_CONDITION_REGEX_PATTERN, $sourceSize, $matches)) {
+                throw InvalidHtmlAttribute::fromAttribute($attribute->nodeName, $element);
             }
+
+            $mediaCondition = trim($matches['media_condition'], self::CSS_TRIM_CHARACTERS);
+
+            if (empty($mediaCondition)) {
+                throw InvalidHtmlAttribute::fromAttribute($attribute->nodeName, $element);
+            }
+
+            $dimension = trim($matches['dimension'], self::CSS_TRIM_CHARACTERS);
+
+            if (empty($dimension)) {
+                throw InvalidHtmlAttribute::fromAttribute($attribute->nodeName, $element);
+            }
+
+            $cssRules[] = CssRule::withMediaQuery(
+                sprintf($mediaQueryStyle[0], $mediaCondition),
+                $mediaQueryStyle[1],
+                sprintf($mediaQueryStyle[2], $dimension)
+            );
         }
 
         $elementId = $document->getElementId($element);
