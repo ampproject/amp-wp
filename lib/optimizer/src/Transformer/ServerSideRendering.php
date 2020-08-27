@@ -186,13 +186,12 @@ final class ServerSideRendering implements Transformer
             }
 
             /*
-             * Try to adapt 'sizes', 'heights' and 'media' attribute to turn them from blocking attributes into CSS
-             * styles we add to <style amp-custom>.
+             * Try to adapt 'sizes', 'heights' and 'media' attribute to turn them from blocking attributes into
+             * CSS styles we add to <style amp-custom>.
              */
             $attributesToRemove = $this->adaptBlockingAttributes($document, $ampElement, $errors);
             if ($attributesToRemove === false) {
                 $canRemoveBoilerplate = false;
-                continue;
             }
 
             /*
@@ -202,12 +201,13 @@ final class ServerSideRendering implements Transformer
             if (! $this->applyLayout($document, $ampElement, $errors)) {
                 $errors->add(Error\CannotRemoveBoilerplate::fromUnsupportedLayout($ampElement));
                 $canRemoveBoilerplate = false;
-                continue;
             }
 
             // Removal of attributes is deferred as layout application needs them.
-            foreach ($attributesToRemove as $attributeToRemove) {
-                $ampElement->removeAttribute($attributeToRemove);
+            if (is_array($attributesToRemove)) {
+                foreach ($attributesToRemove as $attributeToRemove) {
+                    $ampElement->removeAttribute($attributeToRemove);
+                }
             }
         }
 
