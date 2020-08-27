@@ -228,7 +228,7 @@ final class ServerSideRenderingTest extends TestCase
 
             'bad sizes attribute' => [
                 $input('<amp-img height="300" layout="responsive" srcset="https://acme.org/image1.png 320w, https://acme.org/image2.png 640w, https://acme.org/image3.png 1280w" sizes=",,," src="https://acme.org/image1.png" width="400"></amp-img>'),
-                $expectWithBoilerplate('<amp-img height="300" layout="responsive" srcset="https://acme.org/image1.png 320w, https://acme.org/image2.png 640w, https://acme.org/image3.png 1280w" sizes=",,,"  src="https://acme.org/image1.png" width="400"></amp-img>'),
+                $expectWithBoilerplate('<amp-img height="300" layout="responsive" srcset="https://acme.org/image1.png 320w, https://acme.org/image2.png 640w, https://acme.org/image3.png 1280w" sizes=",,,"  src="https://acme.org/image1.png" width="400"><i-amphtml-sizer style="display:block;padding-top:75.0000%;"></i-amphtml-sizer></amp-img>'),
                 [
                     Error\CannotRemoveBoilerplate::fromAttributeThrowingException(
                         InvalidHtmlAttribute::fromAttribute(
@@ -265,7 +265,7 @@ final class ServerSideRenderingTest extends TestCase
             'bad heights attribute' => [
                 $input('<amp-img height="256" heights=",,," layout="responsive" width="320"></amp-img>'),
                 // This adds an ID as it stores the CSS to inline before the actual error is detected.
-                $expectWithBoilerplate('<amp-img height="256" heights=",,," layout="responsive" width="320" id="i-amp-0"></amp-img>'),
+                $expectWithBoilerplate('<amp-img height="256" heights=",,," layout="responsive" width="320" id="i-amp-0"><i-amphtml-sizer style="display:block;padding-top:75.0000%;"></i-amphtml-sizer></amp-img>'),
                 [
                     Error\CannotRemoveBoilerplate::fromAttributeThrowingException(
                         InvalidHtmlAttribute::fromAttribute(
