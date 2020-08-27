@@ -18,7 +18,7 @@ function amp_post_template_init_hooks() {
 	add_action( 'amp_post_template_head', 'amp_add_generator_metadata' );
 	add_action( 'amp_post_template_head', 'wp_generator' );
 	add_action( 'amp_post_template_head', 'amp_post_template_add_block_styles' );
-	add_action( 'amp_post_template_css', 'amp_post_template_add_default_styles', 0 );
+	add_action( 'amp_post_template_head', 'amp_post_template_add_default_styles' );
 	add_action( 'amp_post_template_css', 'amp_post_template_add_styles', 99 );
 	add_action( 'amp_post_template_data', 'amp_post_template_add_analytics_script' );
 	add_action( 'amp_post_template_footer', 'amp_post_template_add_analytics_data' );
@@ -95,7 +95,7 @@ function amp_post_template_add_block_styles() {
  * @internal
  */
 function amp_post_template_add_default_styles() {
-	echo file_get_contents( AMP__DIR__ . '/assets/css/amp-default.css' ); // phpcs:ignore WordPress.WP.AlternativeFunctions, WordPress.Security.EscapeOutput.OutputNotEscaped
+	wp_print_styles( 'amp-default' );
 }
 
 /**
