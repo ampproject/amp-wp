@@ -1,12 +1,16 @@
 /* This stylesheet only applies to Legacy Reader mode */
 
-.amp-toggle {
+.devices-wrapper {
 	position: relative;
+}
+
+.amp-toggle {
+	position: absolute;
 	display: inline-block;
 	width: 30px;
 	height: 15px;
 	top: 15px;
-	left: 130px;
+	left: -47px;
 }
 
 .amp-toggle input,
@@ -115,9 +119,22 @@
 	z-index: 0;
 }
 
+.wp-core-ui .wp-full-overlay .collapse-sidebar {
+
+	/* Add same padding to right as left since label now hidden. */
+	padding: 9px 10px;
+}
+
 #customize-footer-actions .collapse-sidebar-label {
-	font-size: 11px;
-	margin-left: -3px;
+
+	/* This is moved to a tooltip in amp-customize-controls-legacy.js */
+	display: none;
+}
+
+.wp-full-overlay-footer .devices {
+
+	/* Remove box-shadow because not needed to cause long "Hide Controls" text to fade since it is hidden altogether. */
+	box-shadow: none;
 }
 
 .devices-wrapper .preview-desktop {
