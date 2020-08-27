@@ -78,7 +78,7 @@ final class ServerSideRendering implements Transformer
      *
      * @var string
      */
-    const CSS_DIMENSION_WITH_MEDIA_CONDITION_REGEX_PATTERN = '/\s*\(\s*(?<media_condition>.*)\s*\)\s+(?<dimension>.*)\s*/m';
+    const CSS_DIMENSION_WITH_MEDIA_CONDITION_REGEX_PATTERN = '/\s*(?<media_condition>\(.*\))\s+(?<dimension>.*)\s*/m';
 
     /**
      * Characters to use for trimming CSS values.
