@@ -18,6 +18,7 @@ function amp_post_template_init_hooks() {
 	add_action( 'amp_post_template_head', 'amp_add_generator_metadata' );
 	add_action( 'amp_post_template_head', 'wp_generator' );
 	add_action( 'amp_post_template_head', 'amp_post_template_add_block_styles' );
+	add_action( 'amp_post_template_head', 'amp_post_template_add_default_styles' );
 	add_action( 'amp_post_template_css', 'amp_post_template_add_styles', 99 );
 	add_action( 'amp_post_template_data', 'amp_post_template_add_analytics_script' );
 	add_action( 'amp_post_template_footer', 'amp_post_template_add_analytics_data' );
@@ -85,6 +86,16 @@ function amp_post_template_add_block_styles() {
 
 	// Note that this will also print the admin-bar styles since WP_Admin_Bar::initialize() has been called.
 	wp_styles()->do_items();
+}
+
+/**
+ * Print default styles.
+ *
+ * @since 2.0.1
+ * @internal
+ */
+function amp_post_template_add_default_styles() {
+	wp_print_styles( 'amp-default' );
 }
 
 /**
