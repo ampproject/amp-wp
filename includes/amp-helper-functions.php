@@ -444,9 +444,9 @@ function amp_is_available() {
 		$message = sprintf(
 			/* translators: 1: amp_is_available() function, 2: amp_is_request() function, 3: is_amp_endpoint() function */
 			__( '%1$s (or %2$s, formerly %3$s) was called too early and so it will not work properly.', 'amp' ),
-			'amp_is_available()',
-			'amp_is_request()',
-			'is_amp_endpoint()'
+			'`amp_is_available()`',
+			'`amp_is_request()`',
+			'`is_amp_endpoint()`'
 		);
 
 		if ( ! empty( $closest_source['type'] ) && ! empty( $closest_source['name'] ) ) {
@@ -460,11 +460,11 @@ function amp_is_available() {
 
 		$message .= ' ' . sprintf(
 			/* translators: 1: the current action, 2: the wp action, 4: the WP_Query class, 4: the amp_skip_post() function */
-			__( 'WordPress is currently doing the "%1$s" action. Calling this function before the "%2$s" action means it will not have access to %3$s and the queried object to determine if it is an AMP response, thus neither the "%4$s" filter nor the AMP enabled toggle will be considered.', 'amp' ),
-			current_action(),
-			'wp',
-			'WP_Query',
-			'amp_skip_post()'
+			__( 'WordPress is currently doing the %1$s action. Calling this function before the %2$s action means it will not have access to %3$s and the queried object to determine if it is an AMP response, thus neither the %4$s filter nor the AMP enabled toggle will be considered.', 'amp' ),
+			'`' . current_action() . '`',
+			'`wp`',
+			'`WP_Query`',
+			'`amp_skip_post()`'
 		);
 		_doing_it_wrong( 'amp_is_available', esc_html( $message ), '2.0.0' );
 		$already_warned_sources[] = $closest_source_identifier;
