@@ -1044,6 +1044,14 @@ function amp_register_default_scripts( $wp_scripts ) {
  */
 function amp_register_default_styles( WP_Styles $styles ) {
 	$styles->add(
+		'amp-default',
+		amp_get_asset_url( 'css/amp-default.css' ),
+		[],
+		AMP__VERSION
+	);
+	$styles->add_data( 'amp-default', 'rtl', 'replace' );
+
+	$styles->add(
 		'amp-icons',
 		amp_get_asset_url( 'css/amp-icons.css' ),
 		[ 'dashicons' ],

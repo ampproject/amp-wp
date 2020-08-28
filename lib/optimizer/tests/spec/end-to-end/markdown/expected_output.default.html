@@ -1,7 +1,7 @@
 <!doctype html>
 <html amp i-amphtml-layout i-amphtml-no-boilerplate transformed="self;v=1">
 <head>
-  <meta data-auto charset="utf-8"><style amp-runtime i-amphtml-version="123456789000000">/* ampproject.org/rtv v0.css */</style>
+  <meta data-auto charset="utf-8"><style amp-runtime i-amphtml-version="123456789000000">/* ampproject.org/rtv v0.css */amp-img[i-amphtml-ssr]:not(.i-amphtml-element):not([layout=container])>*{display: block;}</style>
   <meta data-auto name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <link rel="preload" href="https://cdn.ampproject.org/v0.js" as="script">
   <script data-auto async src="https://cdn.ampproject.org/v0.js"></script>
@@ -163,8 +163,8 @@ line 3 of code
   </p>
   <h2>Images</h2>
   <p>
-    <amp-img src="https://octodex.github.com/images/minion.png" alt="Minion" width="896" height="896" layout="intrinsic" class="i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" i-amphtml-layout="intrinsic">
-      <i-amphtml-sizer class="i-amphtml-sizer"><img alt aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="data:image/svg+xml;charset=utf-8,<svg height=&quot;896&quot; width=&quot;896&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; version=&quot;1.1&quot;/>"></i-amphtml-sizer>
+    <amp-img src="https://octodex.github.com/images/minion.png" alt="Minion" width="896" height="896" layout="intrinsic" i-amphtml-ssr data-hero class="i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" i-amphtml-layout="intrinsic">
+      <i-amphtml-sizer class="i-amphtml-sizer"><img alt aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="data:image/svg+xml;charset=utf-8,<svg height=&quot;896&quot; width=&quot;896&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; version=&quot;1.1&quot;/>"></i-amphtml-sizer><img class="i-amphtml-fill-content i-amphtml-replaced-content" decoding="async" alt="Minion" src="https://octodex.github.com/images/minion.png">
     </amp-img>
     <amp-img src="https://octodex.github.com/images/stormtroopocat.jpg" alt="Stormtroopocat" title="The Stormtroopocat" width="704" height="676" layout="intrinsic" class="i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" i-amphtml-layout="intrinsic">
       <i-amphtml-sizer class="i-amphtml-sizer"><img alt aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="data:image/svg+xml;charset=utf-8,<svg height=&quot;676&quot; width=&quot;704&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; version=&quot;1.1&quot;/>"></i-amphtml-sizer>
