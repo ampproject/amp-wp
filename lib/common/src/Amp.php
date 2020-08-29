@@ -268,6 +268,31 @@ final class Amp
     }
 
     /**
+     * Check whether a given node is an AMP template.
+     *
+     * @param DOMNode $node Node to check.
+     * @return bool Whether the node is an AMP template.
+     */
+    public static function isTemplate(DOMNode $node)
+    {
+        if (! $node instanceof DOMElement) {
+            return false;
+        }
+
+        if ($node->tagName === 'template') {
+            return true;
+        }
+
+        if ($node->tagName === 'script'
+            && $node->hasAttribute(Attribute::TEMPLATE)
+            && $node->getAttribute(Attribute::TEMPLATE) === 'amp-mustache') {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Check whether a given node is an async <script> element.
      *
      * @param DOMNode $node Node to check.

@@ -1612,7 +1612,7 @@ final class Document extends DOMDocument
                 return $this->body;
             case 'viewport':
                 // TODO: Can this be cached in an instance property as well?
-                for($node = $this->head->firstChild; $node !== null; $node = $node->nextSibling) {
+                for ($node = $this->head->firstChild; $node !== null; $node = $node->nextSibling) {
                     if ($node->tagName === 'meta' && $node->getAttribute('name') === 'viewport') {
                         return $node;
                     }
