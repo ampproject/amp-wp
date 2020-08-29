@@ -485,7 +485,24 @@ final class PreloadHeroImage implements Transformer
      */
     private function hasExistingImagePreload(Document $document, $src)
     {
-        // TODO: Check for existing preloads.
+        foreach ($document->head->childNodes as $node) {
+            if (! $node instanceof DOMElement) {
+                continue;
+            }
+
+            if (! $node->getAttribute(Attribute::REL) === Attribute::REL_PRELOAD) {
+                continue;
+            }
+
+            if (! $node->getAttribute('as') === 'image') {
+                continue;
+            }
+
+            if ($node->getAttribute(Attribute::HREF) === $src) {
+                return true;
+            }
+        }
+
         return false;
     }
 
