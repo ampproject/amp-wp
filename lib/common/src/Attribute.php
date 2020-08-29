@@ -29,12 +29,13 @@ interface Attribute
     const AMP_SCRIPT_SRC        = 'amp-script-src';
     const ARIA_HIDDEN           = 'aria-hidden';
     const ASYNC                 = 'async';
+    const ATTRIBUTION           = 'attribution';
     const AUTOPLAY              = 'autoplay';
     const CHARSET               = 'charset';
     const CLASS_                = 'class'; // Underscore needed because 'class' is a PHP keyword.
     const CONTENT               = 'content';
     const CUSTOM_ELEMENT        = 'custom-element';
-    const CUSTOM_TEMPLATE       = 'custom-template'
+    const CUSTOM_TEMPLATE       = 'custom-template';
     const DECODING              = 'decoding';
     const DISABLE_INLINE_WIDTH  = 'disable-inline-width';
     const HEIGHT                = 'height';
@@ -43,6 +44,7 @@ interface Attribute
     const HOST_SERVICE          = 'host-service';
     const HREF                  = 'href';
     const HTTP_EQUIV            = 'http-equiv';
+    const I_AMPHTML_SSR         = 'i-amphtml-ssr';
     const I_AMPHTML_VERSION     = 'i-amphtml-version';
     const ID                    = 'id';
     const IMPORTANCE            = 'importance';
@@ -55,8 +57,12 @@ interface Attribute
     const NAME                  = 'name';
     const NOLOADING             = 'noloading';
     const OBJECT_FIT            = 'object-fit';
+    const OBJECT_POSITION       = 'object-position';
     const ON                    = 'on';
+    const PLACEHOLDER           = 'placeholder';
+    const POSTER                = 'poster';
     const PROFILE               = 'profile';
+    const REFERRERPOLICY        = 'referrerpolicy';
     const REL                   = 'rel';
     const ROLE                  = 'role';
     const SRCSET                = 'srcset';
