@@ -20,6 +20,14 @@ class AMP_Pinterest_Embed_Handler_Test extends WP_UnitTestCase {
 				'http://www.pinterest.com/pin/606156431067611861/' . PHP_EOL,
 				'<p><amp-pinterest width="450" height="750" data-do="embedPin" data-url="http://www.pinterest.com/pin/606156431067611861/"></amp-pinterest></p>' . PHP_EOL,
 			],
+			'simple_url_without_subdomain'  => [
+				'https://pinterest.com/pin/606156431067611861/' . PHP_EOL,
+				'<p><amp-pinterest width="450" height="750" data-do="embedPin" data-url="https://pinterest.com/pin/606156431067611861/"></amp-pinterest></p>' . PHP_EOL,
+			],
+			'simple_url_with_regional_tld'  => [
+				'https://pinterest.de/pin/8092474319950168/' . PHP_EOL,
+				'<p><amp-pinterest width="450" height="750" data-do="embedPin" data-url="https://pinterest.de/pin/8092474319950168/"></amp-pinterest></p>' . PHP_EOL,
+			],
 		];
 	}
 
