@@ -177,8 +177,10 @@ final class PreloadHeroImage implements Transformer
      */
     private function detectImageWithDataHero(DOMElement $element)
     {
-        if ($element->tagName === Extension::IMAGE
-            && $element->hasAttribute(Attribute::DATA_HERO)) {
+        if (
+            $element->tagName === Extension::IMAGE
+            && $element->hasAttribute(Attribute::DATA_HERO)
+        ) {
             return new HeroImage(
                 $element->getAttribute(Attribute::SRC),
                 $element->getAttribute(Attribute::MEDIA),
@@ -187,8 +189,10 @@ final class PreloadHeroImage implements Transformer
             );
         }
 
-        if ($this->isAmpIframe($element)
-            && $element->hasAttribute(Attribute::DATA_HERO)) {
+        if (
+            $this->isAmpIframe($element)
+            && $element->hasAttribute(Attribute::DATA_HERO)
+        ) {
             return $this->getPlaceholderImage($element);
         }
 
@@ -205,8 +209,10 @@ final class PreloadHeroImage implements Transformer
      */
     private function detectHeroImageCandidate(DOMElement $element)
     {
-        if ($element->hasAttribute(Attribute::LAYOUT)
-            && $element->getAttribute(Attribute::LAYOUT) === Layout::NODISPLAY) {
+        if (
+            $element->hasAttribute(Attribute::LAYOUT)
+            && $element->getAttribute(Attribute::LAYOUT) === Layout::NODISPLAY
+        ) {
             return null;
         }
 
@@ -380,9 +386,11 @@ final class PreloadHeroImage implements Transformer
     private function getPlaceholderImage(DOMElement $element)
     {
         foreach ($element->childNodes as $childNode) {
-            if (! $childNode instanceof DOMElement
+            if (
+                ! $childNode instanceof DOMElement
                 || $childNode->tagName !== Extension::IMAGE
-                || ! $childNode->hasAttribute(Attribute::PLACEHOLDER)) {
+                || ! $childNode->hasAttribute(Attribute::PLACEHOLDER)
+            ) {
                 continue;
             }
 
