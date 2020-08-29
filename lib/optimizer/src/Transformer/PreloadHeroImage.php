@@ -76,6 +76,22 @@ final class PreloadHeroImage implements Transformer
     const DATA_HERO_MAX = 2;
 
     /**
+     * Default URL parts to use when constructing an absolute URL out of a relative one.
+     *
+     * @var string[]
+     */
+    const URL_DEFAULT_PARTS = [
+        'scheme'   => 'https',
+        'host'     => 'example.com',
+        'port'     => '',
+        'user'     => '',
+        'pass'     => '',
+        'path'     => '',
+        'query'    => '',
+        'fragment' => '',
+    ];
+
+    /**
      * Apply transformations to the provided DOM document.
      *
      * @param Document        $document DOM document to apply the transformations to.
@@ -515,8 +531,39 @@ final class PreloadHeroImage implements Transformer
      */
     private function isValidImageSrc($src)
     {
-        // TODO: Add validation logic.
-        return true;
+        list($scheme, $host, $port, $user, $pass, $path, $query, $fragment) = array_values(
+            array_merge(
+                self::URL_DEFAULT_PARTS,
+                (array)parse_url($src)
+            )
+        );
+
+        if ($scheme === 'data') {
+            return false;
+        }
+
+        $userpass = $user;
+
+        if (! empty($pass)) {
+            $userpass = "{$user}:{$pass}";
+        }
+
+        if (! empty($userpass)) {
+            $userpass .= '@';
+        }
+
+        $url = sprintf(
+            '%s://%s%s%s/%s%s%s',
+            $scheme,
+            $host,
+            $userpass,
+            empty($port) ? '' : ":{$port}",
+            ltrim($path, '/'),
+            empty($query) ? '' : "?{$query}",
+            empty($fragment) ? '' : "#{$fragment}"
+        );
+
+        return (bool)filter_var($url, FILTER_VALIDATE_URL);
     }
 
     /**
