@@ -7,6 +7,7 @@ use AmpProject\Optimizer\Configuration\AmpRuntimeCssConfiguration;
 use AmpProject\Optimizer\Tests\MarkupComparison;
 use AmpProject\Optimizer\Tests\TestMarkup;
 use AmpProject\Optimizer\Transformer\AmpRuntimeCss;
+use AmpProject\Optimizer\Transformer\PreloadHeroImage;
 use AmpProject\Optimizer\Transformer\ReorderHead;
 use AmpProject\Optimizer\Transformer\ServerSideRendering;
 use AmpProject\RemoteRequest\StubbedRemoteGetRequest;
@@ -60,6 +61,7 @@ final class SpecTest extends TestCase
                 AmpRuntimeCss::class,
                 self::TRANSFORMER_SPEC_PATH . '/AmpBoilerplateTransformer',
             ],
+            'PreloadHeroImage'    => [PreloadHeroImage::class, self::TRANSFORMER_SPEC_PATH . '/PreloadHeroImage'],
         ];
 
         foreach ($suites as $key => list($transformerClass, $specFileFolder)) {
