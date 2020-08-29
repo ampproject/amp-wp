@@ -16,11 +16,14 @@ interface Extension
     const DYNAMIC_CSS_CLASSES = 'amp-dynamic-css-classes';
     const EXPERIMENT          = 'amp-experiment';
     const GEO                 = 'amp-geo';
+    const IFRAME              = 'amp-iframe';
+    const IMAGE               = 'amp-img';
     const MUSTACHE            = 'amp-mustache';
     const PIXEL               = 'amp-pixel';
     const SOCIAL_SHARE        = 'amp-social-share';
     const STORY               = 'amp-story';
     const VIDEO               = 'amp-video';
+    const VIDEO_IFRAME        = 'amp-video-iframe';
     const YOUTUBE             = 'amp-youtube';
 
     /**

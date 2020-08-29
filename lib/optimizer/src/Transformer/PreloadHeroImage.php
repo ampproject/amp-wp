@@ -5,6 +5,7 @@ namespace AmpProject\Optimizer\Transformer;
 use AmpProject\Amp;
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
+use AmpProject\Extension;
 use AmpProject\Layout;
 use AmpProject\Optimizer\ErrorCollection;
 use AmpProject\Optimizer\HeroImage;
@@ -160,7 +161,7 @@ final class PreloadHeroImage implements Transformer
      */
     private function detectImageWithDataHero(DOMElement $element)
     {
-        if ($element->tagName === 'amp-img'
+        if ($element->tagName === Extension::IMAGE
             && $element->hasAttribute(Attribute::DATA_HERO)) {
             return new HeroImage(
                 $element->getAttribute(Attribute::SRC),
@@ -193,11 +194,11 @@ final class PreloadHeroImage implements Transformer
             return null;
         }
 
-        if ($element->tagName === 'amp-img') {
+        if ($element->tagName === Extension::IMAGE) {
             return $this->detectHeroImageCandidateForAmpImg($element);
         }
 
-        if ($element->tagName === 'amp-video') {
+        if ($element->tagName === EXTENSION::VIDEO) {
             return $this->detectHeroImageCandidateForPosterImage($element);
         }
 
@@ -365,7 +366,7 @@ final class PreloadHeroImage implements Transformer
     {
         foreach ($element->childNodes as $childNode) {
             if (! $childNode instanceof DOMElement
-                || $childNode->tagName !== 'amp-img'
+                || $childNode->tagName !== Extension::IMAGE
                 || ! $childNode->hasAttribute(Attribute::PLACEHOLDER)) {
                 continue;
             }
@@ -526,7 +527,7 @@ final class PreloadHeroImage implements Transformer
      */
     private function isAmpIframe(DOMElement $element)
     {
-        return $element->tagName === 'amp-iframe'
-               || $element->tagName === 'amp-video-iframe';
+        return $element->tagName === Extension::IFRAME
+               || $element->tagName === Extension::VIDEO_IFRAME;
     }
 }
