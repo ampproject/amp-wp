@@ -61,7 +61,7 @@ final class HeroImage
     /**
      * Get the <amp-img> element wrapping the actual hero image.
      *
-     * @return DOMElement|null <amp-img> element or null if none.
+     * @return DOMElement|null AMP image element or null if none.
      */
     public function getAmpImg()
     {

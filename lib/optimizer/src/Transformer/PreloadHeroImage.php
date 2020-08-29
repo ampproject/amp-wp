@@ -313,8 +313,7 @@ final class PreloadHeroImage implements Transformer
             return false;
         }
 
-        return ($width > 0 && $width < self::TINY_IMG_THRESHOLD)
-               || ($height > 0 && $height < self::TINY_IMG_THRESHOLD);
+        return $width < self::TINY_IMG_THRESHOLD || $height < self::TINY_IMG_THRESHOLD;
     }
 
     /**
