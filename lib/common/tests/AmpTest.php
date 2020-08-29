@@ -206,6 +206,40 @@ class AmpTest extends TestCase
     }
 
     /**
+     * Provide data for the testIsTemplate() method.
+     *
+     * @return array[] Array
+     */
+    public function dataIsTemplate()
+    {
+        $dom = new Document();
+
+        $templateScript = $dom->createElement(Tag::SCRIPT);
+        $templateScript->setAttribute(Attribute::TEMPLATE, Extension::MUSTACHE);
+
+        return [
+            'non-element'         => [$dom->createTextNode('template'), false],
+            'template-element'    => [$dom->createElement(Tag::TEMPLATE), true],
+            'template-script'     => [$templateScript, true],
+            'non-template-script' => [$dom->createElement(Tag::SCRIPT), false],
+        ];
+    }
+
+    /**
+     * Test the check whether a given node is an AMP template.
+     *
+     * @dataProvider dataIsTemplate
+     * @covers       Amp::isTemplate()
+     *
+     * @param DOMNode $node     Node to check
+     * @param bool    $expected Expected boolean result.
+     */
+    public function testIsTemplate(DOMNode $node, $expected)
+    {
+        $this->assertEquals($expected, Amp::isTemplate($node));
+    }
+
+    /**
      * Create an AMP CDN script to a given URL.
      *
      * @param Document $dom DOM document object to use.

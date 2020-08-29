@@ -279,13 +279,15 @@ final class Amp
             return false;
         }
 
-        if ($node->tagName === 'template') {
+        if ($node->tagName === Tag::TEMPLATE) {
             return true;
         }
 
-        if ($node->tagName === 'script'
+        if (
+            $node->tagName === Tag::SCRIPT
             && $node->hasAttribute(Attribute::TEMPLATE)
-            && $node->getAttribute(Attribute::TEMPLATE) === 'amp-mustache') {
+            && $node->getAttribute(Attribute::TEMPLATE) === Extension::MUSTACHE
+        ) {
             return true;
         }
 
