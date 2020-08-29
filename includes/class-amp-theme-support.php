@@ -1926,6 +1926,9 @@ class AMP_Theme_Support {
 			if ( is_bool( $status_code ) ) {
 				$status_code = 200; // Not a web server environment.
 			}
+			if ( ! headers_sent() ) {
+				header( 'Content-Type: application/json; charset=utf-8' );
+			}
 			return wp_json_encode(
 				[
 					'status_code' => $status_code,
@@ -1945,6 +1948,19 @@ class AMP_Theme_Support {
 			did_action( 'amp_post_template_footer' )
 		);
 		if ( ! $did_template_action || Attribute::TYPE_HTML !== substr( AMP_HTTP::get_response_content_type(), 0, 9 ) ) {
+			if ( AMP_Validation_Manager::$is_validate_request ) {
+				if ( ! headers_sent() ) {
+					status_header( 400 );
+					header( 'Content-Type: application/json; charset=utf-8' );
+				}
+				return wp_json_encode(
+					[
+						'code'    => 'RENDERED_PAGE_NOT_AMP',
+						'message' => __( 'The requested URL did not result in an AMP page being rendered.', 'amp' ),
+					]
+				);
+			}
+
 			return $response;
 		}
 

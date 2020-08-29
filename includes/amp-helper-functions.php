@@ -498,16 +498,6 @@ function amp_is_available() {
 		return false;
 	}
 
-	/*
-	 * If this is a URL for validation, and validation is forced for all URLs, return true.
-	 * Normally, this would be false if the user has deselected a template,
-	 * like by unchecking 'Categories' in 'AMP Settings' > 'Supported Templates'.
-	 * But there's a flag for the WP-CLI command that sets this query var to validate all URLs.
-	 */
-	if ( AMP_Validation_Manager::is_theme_support_forced() ) {
-		return true;
-	}
-
 	$queried_object = get_queried_object();
 	if ( ! $is_legacy ) {
 		// Abort if in Transitional mode and AMP is not available for the URL.
@@ -852,10 +842,6 @@ function post_supports_amp( $post ) {
  */
 function amp_is_request() {
 	global $wp_query;
-
-	if ( AMP_Validation_Manager::$is_validate_request ) {
-		return true;
-	}
 
 	$is_amp_url = (
 		amp_is_canonical()

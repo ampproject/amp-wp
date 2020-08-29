@@ -254,6 +254,7 @@ class AMP_Validation_Manager {
 
 		add_action( 'all_admin_notices', [ __CLASS__, 'print_plugin_notice' ] );
 		add_action( 'admin_bar_menu', [ __CLASS__, 'add_admin_bar_menu_items' ], 101 );
+		add_action( 'wp', [ __CLASS__, 'maybe_fail_validate_request' ] );
 		add_action( 'wp', [ __CLASS__, 'override_validation_error_statuses' ] );
 	}
 
@@ -285,17 +286,6 @@ class AMP_Validation_Manager {
 			&&
 			amp_is_post_supported( $post )
 		);
-	}
-
-	/**
-	 * Determine whether AMP theme support is forced via the amp_validate query param.
-	 *
-	 * @since 1.0
-	 *
-	 * @return bool Whether theme support forced.
-	 */
-	public static function is_theme_support_forced() {
-		return self::$is_validate_request;
 	}
 
 	/**
@@ -520,6 +510,26 @@ class AMP_Validation_Manager {
 			self::$validation_error_status_overrides[ $slug ] = $status;
 			ksort( self::$validation_error_status_overrides );
 		}
+	}
+
+	/**
+	 * Short-circuit validation requests which are for URLs that are not AMP pages.
+	 *
+	 * @since 2.1
+	 */
+	public static function maybe_fail_validate_request() {
+		if ( ! self::$is_validate_request || amp_is_request() ) {
+			return;
+		}
+
+		if ( ! amp_is_available() ) {
+			$code    = 'AMP_NOT_AVAILABLE';
+			$message = __( 'The requested URL is not an AMP page. AMP may have been disabled for the URL. If so, you can forget the Validated URL.', 'amp' );
+		} else {
+			$code    = 'AMP_NOT_REQUESTED';
+			$message = __( 'The URL as requested is not an AMP page.', 'amp' );
+		}
+		wp_send_json( compact( 'code', 'message' ), 400 );
 	}
 
 	/**
@@ -2117,7 +2127,10 @@ class AMP_Validation_Manager {
 			self::VALIDATE_QUERY_VAR   => self::get_amp_validate_nonce(),
 			self::CACHE_BUST_QUERY_VAR => wp_rand(),
 		];
-		$validation_url   = add_query_arg( $added_query_vars, $url );
+		if ( ! amp_is_canonical() ) {
+			$added_query_vars[ amp_get_slug() ] = '1';
+		}
+		$validation_url = add_query_arg( $added_query_vars, $url );
 
 		$r = null;
 
