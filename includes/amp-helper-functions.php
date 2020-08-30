@@ -1915,14 +1915,7 @@ function amp_generate_script_hash( $script ) {
  * @return string AMP URL.
  */
 function amp_get_url( $url ) {
-	/**
-	 * Filters the AMP version of the given URL.
-	 *
-	 * @since 2.1
-	 *
-	 * @param string URL with AMP query parameter added.
-	 */
-	return apply_filters( 'amp_url', add_query_arg( amp_get_slug(), 1, $url ) );
+	return add_query_arg( amp_get_slug(), 1, $url );
 }
 
 /**

@@ -326,9 +326,9 @@ class AMP_Theme_Support {
 		}
 
 		$has_query_var = (
-				isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				||
-				false !== get_query_var( amp_get_slug(), false )
+			isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			||
+			false !== get_query_var( amp_get_slug(), false )
 		);
 
 		if ( ! amp_is_request() ) {
