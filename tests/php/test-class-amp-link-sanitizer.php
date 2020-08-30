@@ -253,7 +253,7 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, true );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
-		$this->go_to( add_query_arg( amp_get_slug(), '', home_url( '/' ) ) );
+		$this->go_to( amp_get_url( home_url( '/' ) ) );
 		$mobile_redirection->redirect();
 
 		$link = home_url( '/' );
@@ -276,7 +276,7 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, true );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
-		$this->go_to( add_query_arg( amp_get_slug(), '', home_url( '/' ) ) );
+		$this->go_to( amp_get_url( home_url( '/' ) ) );
 		$mobile_redirection->redirect();
 
 		$link = home_url( '/' );

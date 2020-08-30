@@ -326,9 +326,9 @@ class AMP_Theme_Support {
 		}
 
 		$has_query_var = (
-			isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			||
-			false !== get_query_var( amp_get_slug(), false )
+				isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				||
+				false !== get_query_var( amp_get_slug(), false )
 		);
 
 		if ( ! amp_is_request() ) {
@@ -411,7 +411,7 @@ class AMP_Theme_Support {
 			global $wp;
 			$path_args = [];
 			wp_parse_str( $wp->matched_query, $path_args );
-			if ( isset( $path_args[ amp_get_slug() ] ) && '' !== $path_args[ amp_get_slug() ] ) {
+			if ( isset( $path_args[ amp_get_slug() ] ) && '1' !== $path_args[ amp_get_slug() ] ) {
 				if ( wp_safe_redirect( amp_get_permalink( get_queried_object_id() ), 301 ) ) {
 					// @codeCoverageIgnoreStart
 					exit;
@@ -419,7 +419,7 @@ class AMP_Theme_Support {
 				}
 				return true;
 			}
-		} elseif ( $has_query_var && ! $has_url_param ) {
+		} elseif ( $has_query_var && ! amp_has_query_var() ) {
 			/*
 			 * When in AMP transitional mode *with* theme support, then the proper AMP URL has the 'amp' URL param
 			 * and not the /amp/ endpoint. The URL param is now the exclusive way to mark AMP in transitional mode
@@ -427,7 +427,7 @@ class AMP_Theme_Support {
 			 * amp_is_request() before the parse_query action.
 			 */
 			$old_url = amp_get_current_url();
-			$new_url = add_query_arg( amp_get_slug(), '', amp_remove_endpoint( $old_url ) );
+			$new_url = amp_get_url( amp_remove_endpoint( $old_url ) );
 			if ( $old_url !== $new_url ) {
 				// A temporary redirect is used for admin users to allow them to see changes between reader mode and transitional modes.
 				if ( wp_safe_redirect( $new_url, current_user_can( 'manage_options' ) ? 302 : 301 ) ) {
@@ -1130,7 +1130,7 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Amend the comments/redpond links to go to non-AMP page when in legacy Reader mode.
+	 * Amend the comments/respond links to go to non-AMP page when in legacy Reader mode.
 	 *
 	 * @see get_comments_link()
 	 * @see comments_popup_link()

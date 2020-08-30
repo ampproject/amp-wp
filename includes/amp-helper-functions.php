@@ -573,7 +573,7 @@ function amp_redirect_old_slug_to_new_url( $link ) {
 
 	if ( amp_is_request() && ! amp_is_canonical() ) {
 		if ( ! amp_is_legacy() ) {
-			$link = add_query_arg( amp_get_slug(), '', $link );
+			$link = amp_get_url( $link );
 		} else {
 			$link = trailingslashit( trailingslashit( $link ) . amp_get_slug() );
 		}
@@ -660,16 +660,6 @@ function amp_get_current_url() {
  * @return string AMP permalink.
  */
 function amp_get_permalink( $post_id ) {
-
-	// When theme support is present (i.e. not using legacy Reader post templates), the plain query var should always be used.
-	if ( ! amp_is_legacy() ) {
-		$permalink = get_permalink( $post_id );
-		if ( ! amp_is_canonical() ) {
-			$permalink = add_query_arg( amp_get_slug(), '', $permalink );
-		}
-		return $permalink;
-	}
-
 	/**
 	 * Filters the AMP permalink to short-circuit normal generation.
 	 *
@@ -688,35 +678,7 @@ function amp_get_permalink( $post_id ) {
 	}
 
 	$permalink = get_permalink( $post_id );
-
-	if ( amp_is_canonical() ) {
-		$amp_url = $permalink;
-	} else {
-		$parsed_url    = wp_parse_url( get_permalink( $post_id ) );
-		$structure     = get_option( 'permalink_structure' );
-		$use_query_var = (
-			// If pretty permalinks aren't available, then query var must be used.
-			empty( $structure )
-			||
-			// If there are existing query vars, then always use the amp query var as well.
-			! empty( $parsed_url['query'] )
-			||
-			// If the post type is hierarchical then the /amp/ endpoint isn't available.
-			is_post_type_hierarchical( get_post_type( $post_id ) )
-			||
-			// Attachment pages don't accept the /amp/ endpoint.
-			'attachment' === get_post_type( $post_id )
-		);
-		if ( $use_query_var ) {
-			$amp_url = add_query_arg( amp_get_slug(), '', $permalink );
-		} else {
-			$amp_url = preg_replace( '/#.*/', '', $permalink );
-			$amp_url = trailingslashit( $amp_url ) . user_trailingslashit( amp_get_slug(), 'single_amp' );
-			if ( ! empty( $parsed_url['fragment'] ) ) {
-				$amp_url .= '#' . $parsed_url['fragment'];
-			}
-		}
-	}
+	$amp_url   = amp_is_canonical() ? $permalink : amp_get_url( $permalink );
 
 	/**
 	 * Filters AMP permalink.
@@ -797,7 +759,7 @@ function amp_add_amphtml_link() {
 	}
 
 	if ( AMP_Theme_Support::is_paired_available() ) {
-		$amp_url = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
+		$amp_url = amp_get_url( amp_get_current_url() );
 	} else {
 		$amp_url = amp_get_permalink( get_queried_object_id() );
 	}
@@ -1874,7 +1836,7 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 	} elseif ( is_singular() ) {
 		$href = amp_get_permalink( get_queried_object_id() ); // For sake of Reader mode.
 	} else {
-		$href = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
+		$href = amp_get_url( amp_get_current_url() );
 	}
 
 	$href = remove_query_arg( QueryVar::NOAMP, $href );
@@ -1909,7 +1871,7 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 		if ( amp_is_legacy() ) {
 			$args['href'] = add_query_arg( 'autofocus[panel]', AMP_Template_Customizer::PANEL_ID, $args['href'] );
 		} else {
-			$args['href'] = add_query_arg( amp_get_slug(), '1', $args['href'] );
+			$args['href'] = amp_get_url( $args['href'] );
 		}
 		$wp_admin_bar->add_node( $args );
 	}
@@ -1942,4 +1904,34 @@ function amp_generate_script_hash( $script ) {
 		base64_encode( $sha384 ) // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 	);
 	return 'sha384-' . $hash;
+}
+
+/**
+ * Get the AMP version of a URL.
+ *
+ * @since 2.1
+ *
+ * @param string $url URL.
+ * @return string AMP URL.
+ */
+function amp_get_url( $url ) {
+	/**
+	 * Filters the AMP version of the given URL.
+	 *
+	 * @since 2.1
+	 *
+	 * @param string URL with AMP query parameter added.
+	 */
+	return apply_filters( 'amp_url', add_query_arg( amp_get_slug(), 1, $url ) );
+}
+
+/**
+ * Determine whether the current request has the AMP query parameter set with the required value '1'.
+ *
+ * @since 2.1
+ *
+ * @return bool True if the AMP query parameter is set with the required value, false if not.
+ */
+function amp_has_query_var() {
+	return isset( $_GET[ amp_get_slug() ] ) && 1 === filter_var( $_GET[ amp_get_slug() ], FILTER_VALIDATE_INT ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 }

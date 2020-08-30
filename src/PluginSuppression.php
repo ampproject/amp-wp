@@ -82,7 +82,7 @@ final class PluginSuppression implements Service, Registerable {
 			&&
 			ReaderThemes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME )
 			&&
-			isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			amp_has_query_var()
 		);
 	}
 

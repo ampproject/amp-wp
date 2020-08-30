@@ -9,7 +9,7 @@ use AmpProject\AmpWP\QueryVar;
 
 $url         = remove_query_arg( [ AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR, QueryVar::NOAMP ] );
 $non_amp_url = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $url );
-$amp_url     = add_query_arg( amp_get_slug(), '1', $url );
+$amp_url     = amp_get_url( $url );
 ?>
 
 <!DOCTYPE html>

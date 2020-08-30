@@ -108,7 +108,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 	public function test_get_current_amp_url() {
 		$this->go_to( add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, '/foo/' ) );
 		$this->assertEquals(
-			add_query_arg( QueryVar::AMP, '1', home_url( '/foo/' ) ),
+			amp_get_url( home_url( '/foo/' ) ),
 			$this->instance->get_current_amp_url()
 		);
 	}
@@ -140,7 +140,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, [ 'is_author' ] );
-		$this->go_to( add_query_arg( QueryVar::AMP, '1', '/' ) );
+		$this->go_to( amp_get_url( '/' ) );
 		$this->assertFalse( amp_is_canonical() );
 		$this->assertFalse( amp_is_available() );
 		$this->instance->redirect();
@@ -174,7 +174,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		add_filter( 'amp_mobile_client_side_redirection', '__return_false' );
 		add_filter( 'amp_pre_is_mobile', '__return_false' );
 
-		$this->go_to( add_query_arg( QueryVar::AMP, '1', '/' ) );
+		$this->go_to( amp_get_url( '/' ) );
 		$this->assertFalse( amp_is_request() );
 		$this->assertFalse( $this->instance->is_mobile_request() );
 
@@ -215,7 +215,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		$this->instance->redirect();
 		$this->assertNotNull( $redirected_url );
 		$this->assertEquals(
-			add_query_arg( QueryVar::AMP, '1', home_url( '/' ) ),
+			amp_get_url( home_url( '/' ) ),
 			$redirected_url
 		);
 	}

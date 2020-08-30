@@ -383,7 +383,7 @@ class AMP_Validation_Manager {
 			$current_url
 		);
 		if ( ! amp_is_canonical() ) {
-			$amp_url = add_query_arg( amp_get_slug(), '', $amp_url );
+			$amp_url = amp_get_url( $amp_url );
 		}
 
 		$validate_url = AMP_Validated_URL_Post_Type::get_recheck_url( AMP_Validated_URL_Post_Type::get_invalid_url_post( $amp_url ) ?: $amp_url );

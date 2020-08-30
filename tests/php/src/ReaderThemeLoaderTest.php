@@ -65,15 +65,6 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 		$this->assertTrue( $this->instance->is_enabled() );
 	}
 
-	/** @covers ::is_amp_request() */
-	public function test_is_amp_request() {
-		$_GET[ amp_get_slug() ] = '1';
-		$this->assertTrue( $this->instance->is_amp_request() );
-
-		unset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$this->assertFalse( $this->instance->is_amp_request() );
-	}
-
 	public function test__construct() {
 		$this->assertInstanceOf( ReaderThemeLoader::class, $this->instance );
 		$this->assertInstanceOf( Service::class, $this->instance );

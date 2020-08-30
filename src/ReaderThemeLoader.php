@@ -95,15 +95,6 @@ final class ReaderThemeLoader implements Service, Registerable {
 	}
 
 	/**
-	 * Is an AMP request.
-	 *
-	 * @return bool Whether AMP request.
-	 */
-	public function is_amp_request() {
-		return isset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-	}
-
-	/**
 	 * Register the service with the system.
 	 *
 	 * @return void
@@ -298,7 +289,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 	 */
 	public function override_theme() {
 		$this->theme_overridden = false;
-		if ( ! $this->is_enabled() || ! $this->is_amp_request() ) {
+		if ( ! $this->is_enabled() || ! amp_has_query_var() ) {
 			return;
 		}
 
