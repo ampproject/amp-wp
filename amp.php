@@ -5,17 +5,19 @@
  * Plugin URI: https://amp-wp.org
  * Author: AMP Project Contributors
  * Author URI: https://github.com/ampproject/amp-wp/graphs/contributors
- * Version: 1.5.0-RC1
+ * Version: 2.1.0-alpha
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
+ * Requires at least: 4.9
+ * Requires PHP: 5.6
  *
  * @package AMP
  */
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '1.5.0-RC1' );
+define( 'AMP__VERSION', '2.1.0-alpha' );
 
 /**
  * Errors encountered while loading the plugin.
@@ -156,9 +158,9 @@ if ( ! file_exists( AMP__DIR__ . '/vendor/autoload.php' ) || ! file_exists( AMP_
 	$_amp_load_errors->add(
 		'build_required',
 		sprintf(
-			/* translators: %s: composer install && npm install && npm run build */
+			/* translators: %s: composer install && npm install && npm run build:prod */
 			__( 'You appear to be running the AMP plugin from source. Please do %s to finish installation.', 'amp' ), // phpcs:ignore WordPress.Security.EscapeOutput
-			'<code>composer install &amp;&amp; npm install &amp;&amp; npm run build</code>'
+			'<code>composer install &amp;&amp; npm install &amp;&amp; npm run build:prod</code>'
 		)
 	);
 }
@@ -167,6 +169,7 @@ if ( ! file_exists( AMP__DIR__ . '/vendor/autoload.php' ) || ! file_exists( AMP_
  * Displays an admin notice about why the plugin is unable to load.
  *
  * @since 1.1.2
+ * @internal
  * @global WP_Error $_amp_load_errors
  */
 function _amp_show_load_errors_admin_notice() {
@@ -218,6 +221,7 @@ if ( ! empty( $_amp_load_errors->errors ) ) {
  * Print admin notice if plugin installed with incorrect slug (which impacts WordPress's auto-update system).
  *
  * @since 1.0
+ * @internal
  */
 function _amp_incorrect_plugin_slug_admin_notice() {
 	$actual_slug = basename( AMP__DIR__ );
@@ -249,4 +253,4 @@ register_activation_hook( __FILE__, 'amp_activate' );
 
 register_deactivation_hook( __FILE__, 'amp_deactivate' );
 
-amp_bootstrap_plugin();
+add_action( 'plugins_loaded', 'amp_bootstrap_plugin', defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX ); // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound

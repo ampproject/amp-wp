@@ -26,27 +26,16 @@ final class AmpBoilerplateTest extends TestCase
      */
     public function dataTransform()
     {
-        $inputWithBoilerplate = static function ($html, $boilerplate) {
+        $htmlDocument = static function ($html, $headEnd = '') {
             return TestMarkup::DOCTYPE . $html . '<head>' .
                    TestMarkup::META_CHARSET . TestMarkup::META_VIEWPORT . TestMarkup::SCRIPT_AMPRUNTIME .
                    TestMarkup::LINK_FAVICON . TestMarkup::LINK_CANONICAL .
-                   $boilerplate .
+                   $headEnd .
                    '</head><body></body></html>';
         };
 
-        $inputWithoutBoilerplate = static function ($html) {
-            return TestMarkup::DOCTYPE . $html . '<head>' .
-                   TestMarkup::META_CHARSET . TestMarkup::META_VIEWPORT . TestMarkup::SCRIPT_AMPRUNTIME .
-                   TestMarkup::LINK_FAVICON . TestMarkup::LINK_CANONICAL .
-                   '</head><body></body></html>';
-        };
-
-        $expected = static function ($html, $boilerplate) {
-            return TestMarkup::DOCTYPE . $html . '<head>' .
-                   TestMarkup::META_CHARSET . TestMarkup::META_VIEWPORT . TestMarkup::SCRIPT_AMPRUNTIME .
-                   TestMarkup::LINK_FAVICON . TestMarkup::LINK_CANONICAL .
-                   $boilerplate .
-                   '</head><body></body></html>';
+        $repeatTwice = static function ($value) {
+            return array_fill(0, 2, $value);
         };
 
         $ampBoilerplate = '<style ' . Attribute::AMP_BOILERPLATE . '>' . Amp::BOILERPLATE_CSS . '</style>' .
@@ -57,65 +46,81 @@ final class AmpBoilerplateTest extends TestCase
         $amp4EmailBoilerplate = '<style ' . Attribute::AMP4EMAIL_BOILERPLATE . '>' . Amp::AMP4ADS_AND_AMP4EMAIL_BOILERPLATE_CSS . '</style>';
 
         return [
-            'keeps boilerplate' => [
-                $inputWithBoilerplate('<html ⚡>', $ampBoilerplate),
-                $expected('<html ⚡>', $ampBoilerplate),
+            'keeps boilerplate' => $repeatTwice(
+                $htmlDocument('<html ⚡>', $ampBoilerplate)
+            ),
+
+            'keeps boilerplate again' => $repeatTwice(
+                $htmlDocument('<html amp>', $ampBoilerplate)
+            ),
+
+            'removes incorrect boilerplates' => [
+                $htmlDocument('<html amp>', $ampBoilerplate . $amp4AdsBoilerplate . $amp4EmailBoilerplate),
+                $htmlDocument('<html amp>', $ampBoilerplate),
             ],
 
-            'keeps boilerplate for amp4ads' => [
-                $inputWithBoilerplate('<html amp4ads>', $amp4AdsBoilerplate),
-                $expected('<html amp4ads>', $amp4AdsBoilerplate),
+            'leaves out boilerplate' => $repeatTwice(
+                $htmlDocument('<html amp i-amphtml-no-boilerplate>')
+            ),
+
+            'removes boilerplate' => [
+                $htmlDocument('<html amp i-amphtml-no-boilerplate>', $ampBoilerplate),
+                $htmlDocument('<html amp i-amphtml-no-boilerplate>'),
             ],
 
-            'keeps boilerplate for ⚡4ads' => [
-                $inputWithBoilerplate('<html ⚡4ads>', $amp4AdsBoilerplate),
-                $expected('<html ⚡4ads>', $amp4AdsBoilerplate),
-            ],
+            'keeps boilerplate for amp4ads' => $repeatTwice(
+                $htmlDocument('<html amp4ads>', $amp4AdsBoilerplate)
+            ),
 
-            'keeps boilerplate for amp4email' => [
-                $inputWithBoilerplate('<html amp4email>', $amp4EmailBoilerplate),
-                $expected('<html amp4email>', $amp4EmailBoilerplate),
-            ],
+            'keeps boilerplate for ⚡4ads' => $repeatTwice(
+                $htmlDocument('<html ⚡4ads>', $amp4AdsBoilerplate)
+            ),
 
-            'keeps boilerplate for ⚡4email' => [
-                $inputWithBoilerplate('<html ⚡4email>', $amp4EmailBoilerplate),
-                $expected('<html ⚡4email>', $amp4EmailBoilerplate),
-            ],
+            'keeps boilerplate for amp4email' => $repeatTwice(
+                $htmlDocument('<html amp4email>', $amp4EmailBoilerplate)
+            ),
+
+            'keeps boilerplate for ⚡4email' => $repeatTwice(
+                $htmlDocument('<html ⚡4email>', $amp4EmailBoilerplate)
+            ),
 
             'adds boilerplate if missing' => [
-                $inputWithoutBoilerplate('<html ⚡>'),
-                $expected('<html ⚡>', $ampBoilerplate),
+                $htmlDocument('<html ⚡>'),
+                $htmlDocument('<html ⚡>', $ampBoilerplate),
             ],
 
             'adds boilerplate if missing for amp4ads' => [
-                $inputWithoutBoilerplate('<html amp4ads>'),
-                $expected('<html amp4ads>', $amp4AdsBoilerplate),
+                $htmlDocument('<html amp4ads>'),
+                $htmlDocument('<html amp4ads>', $amp4AdsBoilerplate),
             ],
 
             'adds boilerplate if missing for ⚡4ads' => [
-                $inputWithoutBoilerplate('<html ⚡4ads>'),
-                $expected('<html ⚡4ads>', $amp4AdsBoilerplate),
+                $htmlDocument('<html ⚡4ads>'),
+                $htmlDocument('<html ⚡4ads>', $amp4AdsBoilerplate),
             ],
 
             'adds boilerplate if missing for amp4email' => [
-                $inputWithoutBoilerplate('<html amp4email>'),
-                $expected('<html amp4email>', $amp4EmailBoilerplate),
+                $htmlDocument('<html amp4email>'),
+                $htmlDocument('<html amp4email>', $amp4EmailBoilerplate),
             ],
 
             'adds boilerplate if missing for ⚡4email' => [
-                $inputWithoutBoilerplate('<html ⚡4email>'),
-                $expected('<html ⚡4email>', $amp4EmailBoilerplate),
+                $htmlDocument('<html ⚡4email>'),
+                $htmlDocument('<html ⚡4email>', $amp4EmailBoilerplate),
             ],
 
-            'keeps devmode nodes when in devmode' => [
-                $inputWithBoilerplate('<html ⚡ data-ampdevmode>', '<style data-ampdevmode>h1: red;</style>' . $ampBoilerplate),
-                $expected('<html ⚡ data-ampdevmode>', '<style data-ampdevmode>h1: red;</style>' . $ampBoilerplate),
+            'leaves styles that lack boilerplate attribute' => $repeatTwice(
+                $htmlDocument('<html ⚡>', '<style>h1{color:red}</style><noscript><style>h2{color:blue}</style></noscript>' . $ampBoilerplate)
+            ),
+
+            'leaves styles that lack boilerplate attribute and adds boilerplate' => [
+                $htmlDocument('<html ⚡>', '<style>h1{color:red}</style><noscript><style>h2{color:blue}</style></noscript>'),
+                $htmlDocument('<html ⚡>', '<style>h1{color:red}</style><noscript><style>h2{color:blue}</style></noscript>' . $ampBoilerplate),
             ],
 
-            'removes devmode nodes when not in devmode' => [
-                $inputWithBoilerplate('<html ⚡>', '<style data-ampdevmode>h1: red;</style>' . $ampBoilerplate),
-                $expected('<html ⚡>', $ampBoilerplate),
-            ],
+            'leaves styles that lack boilerplate attribute and leaves out boilerplate' => $repeatTwice(
+                $htmlDocument('<html amp i-amphtml-no-boilerplate>', '<style>h1{color:red}</style><noscript><style>h2{color:blue}</style></noscript>')
+            ),
         ];
     }
 

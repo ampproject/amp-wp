@@ -3,7 +3,7 @@
 module.exports = function( grunt ) {
 	'use strict';
 
-	// Root paths to include in the plugin build ZIP when running `npm run build`.
+	// Root paths to include in the plugin build ZIP when running `npm run build:prod`.
 	const productionIncludedRootFiles = [
 		'LICENSE',
 		'amp.php',
@@ -41,8 +41,10 @@ module.exports = function( grunt ) {
 		'vendor/*/*/tests',
 		'vendor/ampproject/common/phpstan.neon.dist',
 		'vendor/ampproject/optimizer/bin',
+		'vendor/ampproject/optimizer/conceptual-diagram.svg',
 		'vendor/ampproject/optimizer/phpstan.neon.dist',
 		'vendor/bin',
+		'vendor/php-parallel-lint',
 	];
 
 	grunt.initConfig( {
@@ -52,7 +54,13 @@ module.exports = function( grunt ) {
 		// Clean up the build.
 		clean: {
 			compiled: {
-				src: [ 'assets/js/*.js', '!assets/js/amp-service-worker-runtime-precaching.js', 'assets/js/*.asset.php' ],
+				src: [
+					'assets/js/**/*.js',
+					'assets/js/**/*.js.map',
+					'!assets/js/amp-service-worker-runtime-precaching.js',
+					'assets/js/**/*.asset.php',
+					'assets/css/*.css',
+				],
 			},
 			build: {
 				src: [ 'build' ],
@@ -80,7 +88,7 @@ module.exports = function( grunt ) {
 					'composer remove cweagans/composer-patches --update-no-dev -o',
 					'rm -r ' + productionVendorExcludedFilePatterns.join( ' ' ),
 					'if [ -d vendor/ampproject/common/vendor ]; then rm -r vendor/ampproject/common/vendor; fi',
-					'if [ -d vendor/ampproject/optimizer/vendor ]; then rm -r vendor/ampproject/optimizer/vendor; fi'
+					'if [ -d vendor/ampproject/optimizer/vendor ]; then rm -r vendor/ampproject/optimizer/vendor; fi',
 				].join( ' && ' ),
 			},
 			create_build_zip: {
@@ -153,10 +161,14 @@ module.exports = function( grunt ) {
 
 			paths.push( 'composer.*' ); // Copy in order to be able to do run composer_install.
 			paths.push( 'lib/**' );
-			paths.push( 'assets/js/*.js' ); // @todo Also include *.map files?
-			paths.push( 'assets/js/*.asset.php' );
+			paths.push( 'assets/js/**/*.js' );
+			paths.push( 'assets/js/**/*.asset.php' );
 			paths.push( 'assets/css/*.css' );
 			paths.push( 'patches/*.patch' );
+
+			if ( 'development' === process.env.NODE_ENV ) {
+				paths.push( 'assets/js/**/*.js.map' );
+			}
 
 			grunt.config.set( 'copy', {
 				build: {

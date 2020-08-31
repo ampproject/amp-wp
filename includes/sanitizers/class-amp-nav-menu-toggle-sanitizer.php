@@ -13,6 +13,7 @@ use AmpProject\Dom\Document;
  * Handles state for navigation menu toggles, based on theme support.
  *
  * @since 1.1.0
+ * @internal
  */
 class AMP_Nav_Menu_Toggle_Sanitizer extends AMP_Base_Sanitizer {
 

@@ -7,11 +7,15 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Admin\ReaderThemes;
+use AmpProject\AmpWP\Option;
+
 /**
  * Crawls the site for validation errors or resets the stored validation errors.
  *
  * @since 1.0
  * @since 1.3.0 Renamed subcommands.
+ * @internal
  */
 final class AMP_CLI_Validation_Command {
 
@@ -87,12 +91,12 @@ final class AMP_CLI_Validation_Command {
 	 * For example, by un-checking 'Posts' in 'AMP Settings' > 'Supported Templates'.
 	 * Or un-checking 'Enable AMP' in the post's editor.
 	 *
-	 * @var int
+	 * @var bool
 	 */
 	public $force_crawl_urls = false;
 
 	/**
-	 * A whitelist of conditionals to use for validation.
+	 * An allowlist of conditionals to use for validation.
 	 *
 	 * Usually, this script will validate all of the templates that don't have AMP disabled.
 	 * But this allows validating based on only these conditionals.
@@ -116,11 +120,13 @@ final class AMP_CLI_Validation_Command {
 	/**
 	 * The validation counts by type, like template or post type.
 	 *
-	 * @var int[] {
+	 * @var array[] {
 	 *     Validity by type.
 	 *
-	 *     @type int $valid The number of valid URLs for this type.
-	 *     @type int $total The total number of URLs for this type, valid or invalid.
+	 *     @type array $type {
+	 *         @type int $valid The number of valid URLs for this type.
+	 *         @type int $total The total number of URLs for this type, valid or invalid.
+	 *     }
 	 * }
 	 */
 	public $validity_by_type = [];
@@ -167,21 +173,27 @@ final class AMP_CLI_Validation_Command {
 			$this->force_crawl_urls = true;
 		}
 
-		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-			if ( $this->force_crawl_urls ) {
-				/*
-				 * There is no theme support added programmatically or via options.
-				 * So make sure that theme support is present so that AMP_Validation_Manager::validate_url()
-				 * will use a canonical URL as the basis for obtaining validation results.
-				 */
-				add_theme_support( AMP_Theme_Support::SLUG );
-			} else {
-				WP_CLI::error(
-					sprintf(
-						'Your templates are currently in Reader mode, which does not allow crawling the site. Please pass the --%s flag in order to force crawling for validation.',
-						self::FLAG_NAME_FORCE_VALIDATION
-					)
-				);
+		// Handle special case for Legacy Reader mode.
+		if (
+			AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
+			&&
+			ReaderThemes::DEFAULT_READER_THEME === AMP_Options_Manager::get_option( Option::READER_THEME )
+		) {
+			$allowed_templates = [
+				'is_singular',
+			];
+			if ( 'page' === get_option( 'show_on_front' ) ) {
+				$allowed_templates[] = 'is_home';
+				$allowed_templates[] = 'is_front_page';
+			}
+
+			$disallowed_templates = array_diff( $this->include_conditionals, $allowed_templates );
+			if ( ! empty( $disallowed_templates ) ) {
+				WP_CLI::error( sprintf( 'Templates not supported in legacy Reader mode with current configuration: %s', implode( ',', $disallowed_templates ) ) );
+			}
+
+			if ( empty( $this->include_conditionals ) ) {
+				$this->include_conditionals = $allowed_templates;
 			}
 		}
 
@@ -466,7 +478,7 @@ final class AMP_CLI_Validation_Command {
 
 		return array_filter(
 			$ids,
-			'post_supports_amp'
+			'amp_is_post_supported'
 		);
 	}
 
@@ -683,7 +695,7 @@ final class AMP_CLI_Validation_Command {
 	 * @param string $type The type of template, post, or taxonomy.
 	 */
 	private function validate_and_store_url( $url, $type ) {
-		$validity = AMP_Validation_Manager::validate_url( $url );
+		$validity = AMP_Validation_Manager::validate_url_and_store( $url );
 
 		/*
 		 * If the request to validate this returns a WP_Error, return.
@@ -697,12 +709,7 @@ final class AMP_CLI_Validation_Command {
 			$this->wp_cli_progress->tick();
 		}
 
-		$validation_errors = wp_list_pluck( $validity['results'], 'error' );
-		AMP_Validated_URL_Post_Type::store_validation_errors(
-			$validation_errors,
-			$validity['url'],
-			wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets' ] )
-		);
+		$validation_errors      = wp_list_pluck( $validity['results'], 'error' );
 		$unaccepted_error_count = count(
 			array_filter(
 				$validation_errors,

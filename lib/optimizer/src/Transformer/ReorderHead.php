@@ -10,6 +10,7 @@ use AmpProject\Optimizer\Transformer;
 use AmpProject\Tag;
 use DOMElement;
 use DOMNode;
+use DOMNodeList;
 
 /**
  * Transformer applying the head reordering transformations to the HTML input.
@@ -17,7 +18,7 @@ use DOMNode;
  * ReorderHead reorders the children of <head>. Specifically, it
  * orders the <head> like so:
  * (0) <meta charset> tag
- * (1) <style amp-runtime> (inserted by ampruntimecss.go)
+ * (1) <style amp-runtime> (inserted by AmpRuntimeCss transformer)
  * (2) remaining <meta> tags (those other than <meta charset>)
  * (3) AMP runtime .js <script> tag
  * (4) AMP viewer runtime .js <script>
@@ -33,7 +34,6 @@ use DOMNode;
  * This is ported from the NodeJS optimizer while verifying against the Go version.
  *
  * NodeJS:
- *
  * @version c92d6023ea4c9edadff593742a992da2b400a75d
  * @link    https://github.com/ampproject/amp-toolbox/blob/c92d6023ea4c9edadff593742a992da2b400a75d/packages/optimizer/lib/transformers/ReorderHeadTransformer.js
  *
@@ -82,7 +82,7 @@ final class ReorderHead implements Transformer
     {
         $nodes = $document->head->childNodes;
 
-        if (! $nodes) {
+        if (! $nodes instanceof DOMNodeList || $nodes->length === 0) {
             return;
         }
 

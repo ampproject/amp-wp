@@ -2,6 +2,7 @@
 
 namespace AmpProject\RemoteRequest;
 
+use AmpProject\Exception\FailedRemoteRequest;
 use AmpProject\Exception\FailedToGetFromRemoteUrl;
 use AmpProject\RemoteGetRequest;
 use AmpProject\Response;
@@ -19,16 +20,17 @@ final class FilesystemRemoteGetRequest implements RemoteGetRequest
 {
 
     /**
-     * Associative array of data for mapping between arguments and returned results.
+     * Associative array of data for mapping between arguments and filepaths pointing to the results to return.
      *
      * @var array
      */
     private $argumentMap;
 
     /**
-     * Instantiate a StubbedRemoteGetRequest object.
+     * Instantiate a FilesystemRemoteGetRequest object.
      *
-     * @param array $argumentMap Associative array of data for mapping between arguments and returned results.
+     * @param array $argumentMap Associative array of data for mapping between arguments and filepaths pointing to the
+     *                           results to return.
      */
     public function __construct($argumentMap)
     {
@@ -40,7 +42,7 @@ final class FilesystemRemoteGetRequest implements RemoteGetRequest
      *
      * @param string $url URL to get.
      * @return Response Response for the executed request.
-     * @throws FailedToGetFromRemoteUrl If retrieving the contents from the URL failed.
+     * @throws FailedRemoteRequest If retrieving the contents from the URL failed.
      */
     public function get($url)
     {
@@ -49,7 +51,10 @@ final class FilesystemRemoteGetRequest implements RemoteGetRequest
         }
 
         if (! file_exists($this->argumentMap[$url]) || ! is_readable($this->argumentMap[$url])) {
-            throw new LogicException("Trying to get a remote request from the filesystem for a file that is not accessible: {$url} => {$this->argumentMap[$url]}.");
+            throw new LogicException(
+                'Trying to get a remote request from the filesystem for a file that is not accessible: '
+                . "{$url} => {$this->argumentMap[$url]}."
+            );
         }
 
         try {

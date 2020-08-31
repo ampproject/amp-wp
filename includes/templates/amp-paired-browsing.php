@@ -5,8 +5,11 @@
  * @package AMP
  */
 
-$url     = remove_query_arg( AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR );
-$amp_url = add_query_arg( amp_get_slug(), '1', $url );
+use AmpProject\AmpWP\QueryVar;
+
+$url         = remove_query_arg( [ AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR, QueryVar::NOAMP ] );
+$non_amp_url = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $url );
+$amp_url     = add_query_arg( amp_get_slug(), '1', $url );
 ?>
 
 <!DOCTYPE html>
@@ -23,7 +26,7 @@ $amp_url = add_query_arg( amp_get_slug(), '1', $url );
 		<section>
 			<nav id="header">
 				<ul>
-					<li class="iframe-label non-amp"><a id="non-amp-link" class="exit-link" title="<?php esc_attr_e( 'Exit paired browsing onto the non-AMP version.', 'amp' ); ?>" href="<?php echo esc_url( $url ); ?>"><?php esc_html_e( 'Non-AMP', 'amp' ); ?><span class="dashicons dashicons-migrate"></span></a></li>
+					<li class="iframe-label non-amp"><a id="non-amp-link" class="exit-link" title="<?php esc_attr_e( 'Exit paired browsing onto the non-AMP version.', 'amp' ); ?>" href="<?php echo esc_url( $non_amp_url ); ?>"><?php esc_html_e( 'Non-AMP', 'amp' ); ?><span class="dashicons dashicons-migrate"></span></a></li>
 					<li class="iframe-label amp"><a id="amp-link" class="exit-link" title="<?php esc_attr_e( 'Exit paired browsing onto the AMP version.', 'amp' ); ?>" href="<?php echo esc_url( $amp_url ); ?>"><?php esc_html_e( 'AMP', 'amp' ); ?><span class="dashicons dashicons-migrate"></span></a></li>
 				</ul>
 			</nav>
@@ -59,16 +62,18 @@ $amp_url = add_query_arg( amp_get_slug(), '1', $url );
 
 			<div id="non-amp">
 				<iframe
-					src="<?php echo esc_url( $url ); ?>"
-					sandbox="allow-forms allow-scripts allow-same-origin allow-popups"
+					name="paired-browsing-non-amp"
+					src="<?php echo esc_url( $non_amp_url ); ?>"
+					sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-modals"
 					title="<?php esc_attr__( 'Non-AMP version', 'amp' ); ?>"
 				></iframe>
 			</div>
 
 			<div id="amp">
 				<iframe
+					name="paired-browsing-amp"
 					src="<?php echo esc_url( $amp_url ); ?>"
-					sandbox="allow-forms allow-scripts allow-same-origin allow-popups"
+					sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-modals"
 					title="<?php esc_attr__( 'AMP version', 'amp' ); ?>"
 				></iframe>
 			</div>

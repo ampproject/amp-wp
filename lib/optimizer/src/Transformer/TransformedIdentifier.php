@@ -3,7 +3,6 @@
 namespace AmpProject\Optimizer\Transformer;
 
 use AmpProject\Dom\Document;
-use AmpProject\Optimizer\Configurable;
 use AmpProject\Optimizer\Configuration\TransformedIdentifierConfiguration;
 use AmpProject\Optimizer\ErrorCollection;
 use AmpProject\Optimizer\Transformer;
@@ -15,7 +14,6 @@ use AmpProject\Optimizer\TransformerConfiguration;
  * This is ported from the NodeJS optimizer while verifying against the Go version.
  *
  * NodeJS:
- *
  * @version 2ca65a94b77130c91ac11fcc32c94b93cbd2b7a0
  * @link    https://github.com/ampproject/amp-toolbox/blob/2ca65a94b77130c91ac11fcc32c94b93cbd2b7a0/packages/optimizer/lib/transformers/AddTransformedFlag.js
  *
@@ -25,7 +23,7 @@ use AmpProject\Optimizer\TransformerConfiguration;
  *
  * @package ampproject/optimizer
  */
-final class TransformedIdentifier implements Transformer, Configurable
+final class TransformedIdentifier implements Transformer
 {
 
     /**

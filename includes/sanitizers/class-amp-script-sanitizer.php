@@ -12,6 +12,7 @@ use AmpProject\DevMode;
  * Class AMP_Script_Sanitizer
  *
  * @since 1.0
+ * @internal
  */
 class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 
@@ -19,7 +20,7 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 	 * Sanitize noscript elements.
 	 *
 	 * Eventually this should also handle script elements, if there is a known AMP equivalent.
-	 * If nothing is done with script elements, the whitelist sanitizer will deal with them ultimately.
+	 * If nothing is done with script elements, the validating sanitizer will deal with them ultimately.
 	 *
 	 * @todo Eventually this try to automatically convert script tags to AMP when they are recognized. See <https://github.com/ampproject/amp-wp/issues/1032>.
 	 * @todo When a script has an adjacent noscript, consider removing the script here to prevent validation error later. See <https://github.com/ampproject/amp-wp/issues/1213>.

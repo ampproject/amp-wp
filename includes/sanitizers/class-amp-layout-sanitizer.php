@@ -6,10 +6,13 @@
  * @package AMP
  */
 
+use AmpProject\Layout;
+
 /**
  * Class AMP_Layout_Sanitizer
  *
  * @since 1.5.0
+ * @internal
  */
 class AMP_Layout_Sanitizer extends AMP_Base_Sanitizer {
 	use AMP_Noscript_Fallback;
@@ -96,7 +99,7 @@ class AMP_Layout_Sanitizer extends AMP_Base_Sanitizer {
 			// If the width is `100%`, convert the layout to `fixed-height` and width to `auto`.
 			if ( '100%' === $width ) {
 				$node->setAttribute( 'width', 'auto' );
-				$node->setAttribute( 'layout', AMP_Rule_Spec::LAYOUT_FIXED_HEIGHT );
+				$node->setAttribute( 'layout', Layout::FIXED_HEIGHT );
 			}
 		}
 
@@ -114,8 +117,8 @@ class AMP_Layout_Sanitizer extends AMP_Base_Sanitizer {
 			$node->removeAttribute( 'height' );
 		}
 
-		if ( AMP_Rule_Spec::LAYOUT_FILL !== $node->getAttribute( 'layout' ) ) {
-			$node->setAttribute( 'layout', AMP_Rule_Spec::LAYOUT_FILL );
+		if ( Layout::FILL !== $node->getAttribute( 'layout' ) ) {
+			$node->setAttribute( 'layout', Layout::FILL );
 		}
 	}
 }

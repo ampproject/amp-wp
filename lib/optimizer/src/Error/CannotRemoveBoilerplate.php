@@ -4,14 +4,20 @@ namespace AmpProject\Optimizer\Error;
 
 use AmpProject\Optimizer\Error;
 use DOMElement;
+use Exception;
 
 final class CannotRemoveBoilerplate implements Error
 {
     use ErrorProperties;
 
-    const ATTRIBUTES_STRING             = 'Cannot remove boilerplate as either heights, media or sizes attribute is set: ';
-    const RENDER_DELAYING_SCRIPT_STRING = 'Cannot remove boilerplate because the document contains a render-delaying extension: ';
-    const AMP_AUDIO_STRING              = 'Cannot remove boilerplate because the document contains an extension that needs to know the dimensions of the browser: ';
+    const ATTRIBUTES_STRING             = 'Cannot remove boilerplate as either heights, media or sizes attribute is '
+                                          . 'set and cannot be adapted: ';
+    const ATTRIBUTES_EXCEPTION_STRING   = 'Cannot remove boilerplate as the removal of either heights, media or sizes '
+                                          . 'attribute produced an error: ';
+    const RENDER_DELAYING_SCRIPT_STRING = 'Cannot remove boilerplate because the document contains a render-delaying '
+                                          . 'extension: ';
+    const AMP_AUDIO_STRING              = 'Cannot remove boilerplate because the document contains an extension that '
+                                          . 'needs to know the dimensions of the browser: ';
     const UNSUPPORTED_LAYOUT_STRING     = 'Cannot remove boilerplate because of an unsupported layout: ';
 
     /**
@@ -23,6 +29,17 @@ final class CannotRemoveBoilerplate implements Error
     public static function fromAttributesRequiringBoilerplate(DOMElement $element)
     {
         return new self(self::ATTRIBUTES_STRING . new ElementDump($element));
+    }
+
+    /**
+     * Instantiate a CannotRemoveBoilerplate object for attributes that require the boilerplate to be around.
+     *
+     * @param Exception $exception Exception being thrown.
+     * @return self
+     */
+    public static function fromAttributeThrowingException($exception)
+    {
+        return new self(self::ATTRIBUTES_EXCEPTION_STRING . $exception->getMessage());
     }
 
     /**

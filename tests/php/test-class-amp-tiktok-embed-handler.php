@@ -5,16 +5,22 @@
  * @package AMP.
  */
 
+use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
+
 /**
  * Class Test_AMP_TikTok_Embed_Handler
  */
 class Test_AMP_TikTok_Embed_Handler extends WP_UnitTestCase {
 
+	use WithoutBlockPreRendering {
+		setUp as public prevent_block_pre_render;
+	}
+
 	/**
 	 * Set up.
 	 */
 	public function setUp() {
-		parent::setUp();
+		$this->prevent_block_pre_render();
 
 		// Mock the HTTP request.
 		add_filter( 'pre_http_request', [ $this, 'mock_http_request' ], 10, 3 );
@@ -45,11 +51,7 @@ class Test_AMP_TikTok_Embed_Handler extends WP_UnitTestCase {
 			return $pre;
 		}
 
-		if ( false !== strpos( $url, 'no-video-id' ) ) {
-			$body = '{"version":"1.0","type":"video","title":"Scramble up ur name & I’ll try to guess it😍❤️ #foryoupage #petsoftiktok #aesthetic","author_url":"https://www.tiktok.com/@scout2015","author_name":"Scout & Suki","width":"100%","height":"100%","html":"<blockquote class=\"tiktok-embed\" cite=\"https://www.tiktok.com/@scout2015/video/no-video-id\" style=\"max-width: 605px;min-width: 325px;\" > <section> <a target=\"_blank\" title=\"@scout2015\" href=\"https://www.tiktok.com/@scout2015\">@scout2015</a> <p>Scramble up ur name & I’ll try to guess it😍❤️ <a title=\"foryoupage\" target=\"_blank\" href=\"https://www.tiktok.com/tag/foryoupage\">#foryoupage</a> <a title=\"petsoftiktok\" target=\"_blank\" href=\"https://www.tiktok.com/tag/petsoftiktok\">#petsoftiktok</a> <a title=\"aesthetic\" target=\"_blank\" href=\"https://www.tiktok.com/tag/aesthetic\">#aesthetic</a></p> <a target=\"_blank\" title=\"♬ original sound - 𝐇𝐚𝐰𝐚𝐢𝐢𓆉\" href=\"https://www.tiktok.com/music/original-sound-6689804660171082501\">♬ original sound - 𝐇𝐚𝐰𝐚𝐢𝐢𓆉</a> </section> </blockquote> <script async src=\"https://www.tiktok.com/embed.js\"></script>","thumbnail_width":720,"thumbnail_height":1280,"thumbnail_url":"https://p16.muscdn.com/obj/tos-maliva-p-0068/06kv6rfcesljdjr45ukb0000d844090v0200000a05","provider_url":"https://www.tiktok.com","provider_name":"TikTok"}'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-		} else {
-			$body = '{"version":"1.0","type":"video","title":"Scramble up ur name & I’ll try to guess it😍❤️ #foryoupage #petsoftiktok #aesthetic","author_url":"https://www.tiktok.com/@scout2015","author_name":"Scout & Suki","width":"100%","height":"100%","html":"<blockquote class=\"tiktok-embed\" cite=\"https://www.tiktok.com/@scout2015/video/6718335390845095173\" data-video-id=\"6718335390845095173\" style=\"max-width: 605px;min-width: 325px;\" > <section> <a target=\"_blank\" title=\"@scout2015\" href=\"https://www.tiktok.com/@scout2015\">@scout2015</a> <p>Scramble up ur name & I’ll try to guess it😍❤️ <a title=\"foryoupage\" target=\"_blank\" href=\"https://www.tiktok.com/tag/foryoupage\">#foryoupage</a> <a title=\"petsoftiktok\" target=\"_blank\" href=\"https://www.tiktok.com/tag/petsoftiktok\">#petsoftiktok</a> <a title=\"aesthetic\" target=\"_blank\" href=\"https://www.tiktok.com/tag/aesthetic\">#aesthetic</a></p> <a target=\"_blank\" title=\"♬ original sound - 𝐇𝐚𝐰𝐚𝐢𝐢𓆉\" href=\"https://www.tiktok.com/music/original-sound-6689804660171082501\">♬ original sound - 𝐇𝐚𝐰𝐚𝐢𝐢𓆉</a> </section> </blockquote> <script async src=\"https://www.tiktok.com/embed.js\"></script>","thumbnail_width":720,"thumbnail_height":1280,"thumbnail_url":"https://p16.muscdn.com/obj/tos-maliva-p-0068/06kv6rfcesljdjr45ukb0000d844090v0200000a05","provider_url":"https://www.tiktok.com","provider_name":"TikTok"}'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-		}
+		$body = '{"version":"1.0","type":"video","title":"Scramble up ur name & I’ll try to guess it😍❤️ #foryoupage #PetsOfTikTok #aesthetic","author_url":"https://www.tiktok.com/@scout2015","author_name":"Scout & Suki","width":"100%","height":"100%","html":"<blockquote class=\"tiktok-embed\" cite=\"https://www.tiktok.com/@scout2015/video/6718335390845095173\" data-video-id=\"6718335390845095173\" style=\"max-width: 605px;min-width: 325px;\" > <section> <a target=\"_blank\" title=\"@scout2015\" href=\"https://www.tiktok.com/@scout2015\">@scout2015</a> <p>Scramble up ur name & I’ll try to guess it😍❤️ <a title=\"foryoupage\" target=\"_blank\" href=\"https://www.tiktok.com/tag/foryoupage\">#foryoupage</a> <a title=\"PetsOfTikTok\" target=\"_blank\" href=\"https://www.tiktok.com/tag/PetsOfTikTok\">#petsoftiktok</a> <a title=\"aesthetic\" target=\"_blank\" href=\"https://www.tiktok.com/tag/aesthetic\">#aesthetic</a></p> <a target=\"_blank\" title=\"♬ original sound - 𝐇𝐚𝐰𝐚𝐢𝐢𓆉\" href=\"https://www.tiktok.com/music/original-sound-6689804660171082501\">♬ original sound - 𝐇𝐚𝐰𝐚𝐢𝐢𓆉</a> </section> </blockquote> <script async src=\"https://www.tiktok.com/embed.js\"></script>","thumbnail_width":720,"thumbnail_height":1280,"thumbnail_url":"https://p16.muscdn.com/obj/tos-maliva-p-0068/06kv6rfcesljdjr45ukb0000d844090v0200000a05","provider_url":"https://www.tiktok.com","provider_name":"TikTok"}'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 
 		return [
 			'body'     => $body,
@@ -67,29 +69,17 @@ class Test_AMP_TikTok_Embed_Handler extends WP_UnitTestCase {
 	 */
 	public function get_conversion_data() {
 		return [
-			'no_embed'        => [
+			'no_embed'   => [
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>' . PHP_EOL,
 			],
 
-			'url_simple'      => [
+			'url_simple' => [
 				'https://www.tiktok.com/@scout2015/video/6718335390845095173' . PHP_EOL,
 
-				'<blockquote class="tiktok-embed" cite="https://www.tiktok.com/@scout2015/video/6718335390845095173" data-video-id="6718335390845095173" style="max-width: 605px;min-width: 325px;">' . PHP_EOL . PHP_EOL .
-				'<amp-iframe layout="fixed-height" height="900" src="https://www.tiktok.com/embed/v2/6718335390845095173" sandbox="allow-scripts allow-same-origin allow-popups"><section placeholder=""> <a target="_blank" title="@scout2015" href="https://www.tiktok.com/@scout2015">@scout2015</a> ' . PHP_EOL .
-				'<p>Scramble up ur name &amp; I’ll try to guess it😍❤️ <a title="foryoupage" target="_blank" href="https://www.tiktok.com/tag/foryoupage">#foryoupage</a> <a title="petsoftiktok" target="_blank" href="https://www.tiktok.com/tag/petsoftiktok">#petsoftiktok</a> <a title="aesthetic" target="_blank" href="https://www.tiktok.com/tag/aesthetic">#aesthetic</a></p>' . PHP_EOL .
-				'<p> <a target="_blank" title="♬ original sound - 𝐇𝐚𝐰𝐚𝐢𝐢𓆉" href="https://www.tiktok.com/music/original-sound-6689804660171082501">♬ original sound – 𝐇𝐚𝐰𝐚𝐢𝐢𓆉</a> </p></section></amp-iframe></blockquote>' . PHP_EOL . PHP_EOL,
-			],
-
-			'url_no_video_id' => [
-				'https://www.tiktok.com/@scout2015/video/no-video-id',
-
-				'<blockquote class="tiktok-embed" cite="https://www.tiktok.com/@scout2015/video/no-video-id" style="max-width: 605px;min-width: 325px;">' . PHP_EOL .
-				'<section> <a target="_blank" title="@scout2015" href="https://www.tiktok.com/@scout2015">@scout2015</a> ' . PHP_EOL .
-				'<p>Scramble up ur name &amp; I’ll try to guess it😍❤️ <a title="foryoupage" target="_blank" href="https://www.tiktok.com/tag/foryoupage">#foryoupage</a> <a title="petsoftiktok" target="_blank" href="https://www.tiktok.com/tag/petsoftiktok">#petsoftiktok</a> <a title="aesthetic" target="_blank" href="https://www.tiktok.com/tag/aesthetic">#aesthetic</a></p>' . PHP_EOL .
-				'<p> <a target="_blank" title="♬ original sound - 𝐇𝐚𝐰𝐚𝐢𝐢𓆉" href="https://www.tiktok.com/music/original-sound-6689804660171082501">♬ original sound – 𝐇𝐚𝐰𝐚𝐢𝐢𓆉</a> </p></section>' . PHP_EOL .
-				'</blockquote>' . PHP_EOL .
-				'<p> <script async src="https://www.tiktok.com/embed.js"></script></p>' . PHP_EOL, // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+				'<amp-embedly-card layout="responsive" height="700" width="340" data-card-controls="0" data-url="https://www.tiktok.com/@scout2015/video/6718335390845095173"><section placeholder=""> <a target="_blank" title="@scout2015" href="https://www.tiktok.com/@scout2015">@scout2015</a> ' . PHP_EOL .
+				'<p>Scramble up ur name &amp; I’ll try to guess it😍❤️ <a title="foryoupage" target="_blank" href="https://www.tiktok.com/tag/foryoupage">#foryoupage</a> <a title="PetsOfTikTok" target="_blank" href="https://www.tiktok.com/tag/PetsOfTikTok">#petsoftiktok</a> <a title="aesthetic" target="_blank" href="https://www.tiktok.com/tag/aesthetic">#aesthetic</a></p>' . PHP_EOL .
+				'<p> <a target="_blank" title="♬ original sound - 𝐇𝐚𝐰𝐚𝐢𝐢𓆉" href="https://www.tiktok.com/music/original-sound-6689804660171082501">♬ original sound – 𝐇𝐚𝐰𝐚𝐢𝐢𓆉</a> </p></section></amp-embedly-card>' . PHP_EOL . PHP_EOL,
 			],
 		];
 	}

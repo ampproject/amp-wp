@@ -6,7 +6,7 @@ wiki
 amp.zip
 /assets/css/*
 !/assets/css/src/
-assets/js/*.js
+assets/js/**/*.js
 assets/js/*.asset.php
 !assets/js/amp-service-worker-runtime-precaching.js
 assets/js/*.map
@@ -16,3 +16,5 @@ built
 .idea/
 /lib/*/vendor/
 /lib/*/composer.lock
+/phpcs.xml
+/phpunit.xml

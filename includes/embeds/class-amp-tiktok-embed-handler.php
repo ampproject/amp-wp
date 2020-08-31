@@ -9,6 +9,8 @@ use AmpProject\Dom\Document;
 
 /**
  * Class AMP_TikTok_Embed_Handler
+ *
+ * @internal
  */
 class AMP_TikTok_Embed_Handler extends AMP_Base_Embed_Handler {
 
@@ -50,7 +52,7 @@ class AMP_TikTok_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return bool Whether the node is a raw embed.
 	 */
 	protected function is_raw_embed( DOMElement $node ) {
-		return ! $node->firstChild || ( $node->firstChild && 'amp-iframe' !== $node->firstChild->nodeName );
+		return ! $node->firstChild || ( $node->firstChild && 'amp-embedly-card' !== $node->firstChild->nodeName );
 	}
 
 	/**
@@ -59,34 +61,25 @@ class AMP_TikTok_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param DOMElement $blockquote_node The <blockquote> node to make AMP compatible.
 	 */
 	protected function make_embed_amp_compatible( DOMElement $blockquote_node ) {
-		$dom      = $blockquote_node->ownerDocument;
-		$video_id = $blockquote_node->getAttribute( 'data-video-id' );
+		$dom       = $blockquote_node->ownerDocument;
+		$video_url = $blockquote_node->getAttribute( 'cite' );
 
-		// If there is no video ID, stop here as its needed for the iframe `src` attribute.
-		if ( empty( $video_id ) ) {
+		// If there is no video ID, stop here as its needed for the `data-url` parameter.
+		if ( empty( $video_url ) ) {
 			return;
 		}
 
 		$this->remove_embed_script( $blockquote_node );
 
-		$amp_iframe_node = AMP_DOM_Utils::create_node(
+		$amp_node = AMP_DOM_Utils::create_node(
 			Document::fromNode( $dom ),
-			'amp-iframe',
+			'amp-embedly-card',
 			[
-				'layout'  => 'fixed-height',
-
-				/*
-				 * The iframe dimensions cannot be derived from the embed, so we default to a dimension that should
-				 * allow the embed to be fully shown.
-				 */
-				'height'  => 900,
-
-				/*
-				 * A `lang` query parameter is added to the URL via JS. This can't be determined here so it is not
-				 * added. Whether it alters the embed in any way or not has not been determined.
-				 */
-				'src'     => 'https://www.tiktok.com/embed/v2/' . $video_id,
-				'sandbox' => 'allow-scripts allow-same-origin allow-popups',
+				'layout'             => 'responsive',
+				'height'             => 700,
+				'width'              => 340,
+				'data-card-controls' => 0,
+				'data-url'           => $video_url,
 			]
 		);
 
@@ -99,23 +92,22 @@ class AMP_TikTok_Embed_Handler extends AMP_Base_Embed_Handler {
 			// Append the placeholder if it was found.
 			if ( 'section' === $child->nodeName ) {
 				/**
-				 * Placeholder to append to the iframe.
+				 * Placeholder to append to the AMP component.
 				 *
 				 * @var DOMElement $placeholder_node
 				 */
 				$placeholder_node = $blockquote_node->removeChild( $child );
 				$placeholder_node->setAttribute( 'placeholder', '' );
-				$amp_iframe_node->appendChild( $placeholder_node );
+				$amp_node->appendChild( $placeholder_node );
 				break;
 			}
 		}
 
-		// On the non-amp page the embed is wrapped with a <blockquote>, so the same is done here.
-		$blockquote_node->appendChild( $amp_iframe_node );
+		$blockquote_node->parentNode->replaceChild( $amp_node, $blockquote_node );
 	}
 
 	/**
-	 * Remove TikTok's embed script if it exists.
+	 * Remove the TikTok embed script if it exists.
 	 *
 	 * @param DOMElement $node The DOMNode to make AMP compatible.
 	 */

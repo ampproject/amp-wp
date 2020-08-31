@@ -1,6 +1,7 @@
 <?php
 
-use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\Dom\Document;
 
 class AMP_Analytics_Options_Test extends WP_UnitTestCase {
@@ -56,7 +57,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	}';
 
 	private function get_options() {
-		return AMP_Options_Manager::get_option( 'analytics', [] );
+		return AMP_Options_Manager::get_option( Option::ANALYTICS, [] );
 	}
 
 	private function render_post() {
@@ -78,9 +79,28 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	 */
 	private function insert_one_option( $type, $config ) {
 		AMP_Options_Manager::update_option(
-			'analytics',
+			Option::ANALYTICS,
 			[
-				'__new__' => compact( 'type', 'config' ),
+				'abcdefghijkl' => compact( 'type', 'config' ),
+			]
+		);
+	}
+
+	/**
+	 * Inserts two analytics entries.
+	 *
+	 * @param string $type   Entry type (vendor).
+	 * @param string $config Entry config (JSON).
+	 */
+	private function insert_two_options( $type, $config ) {
+		AMP_Options_Manager::update_option(
+			Option::ANALYTICS,
+			[
+				'abcdefghijkl' => compact( 'type', 'config' ),
+				'mnopqrstuvwx' => [
+					'type'   => $type,
+					'config' => '{"good": "good"}',
+				],
 			]
 		);
 	}
@@ -111,24 +131,20 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	 */
 	public function test_two_options_inserted() {
 
-		/* Insert analytics option one */
-		$this->insert_one_option(
+		$this->insert_two_options(
 			$this->vendor,
 			$this->config_one
 		);
 
-		/* Insert analytics option two */
-		$this->insert_one_option(
-			$this->vendor,
-			$this->config_two
-		);
 		$options = $this->get_options();
 
 		$this->assertCount( 2, $options );
 	}
 
 	/**
-	 * Test that exactly one analytics component are added to the page
+	 * Test that exactly one analytics component is added to the page.
+	 *
+	 * @covers ::amp_print_analytics()
 	 */
 	public function test_one_analytics_component_added() {
 
@@ -157,18 +173,15 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that two analytics components are added to the page
+	 * Test that two analytics components are added to the page.
+	 *
+	 * @covers ::amp_print_analytics()
 	 */
 	public function test_two_analytics_components_added() {
 
-		$this->insert_one_option(
+		$this->insert_two_options(
 			$this->vendor,
 			$this->config_one
-		);
-
-		$this->insert_one_option(
-			$this->vendor,
-			$this->config_two
 		);
 
 		ob_start();
@@ -206,7 +219,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'type', $analytics[ $key ] );
 		$this->assertEquals( 'googleanalytics', $analytics[ $key ]['type'] );
 
-		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		add_filter(
 			'amp_analytics_entries',
 			static function( $analytics ) use ( $key ) {

@@ -10,6 +10,8 @@ use AmpProject\AmpWP\Option;
 
 /**
  * Test MonitorCssTransientCaching.
+ *
+ * @coversDefaultClass \AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching
  */
 class Test_Monitor_CSS_Transient_Caching extends WP_UnitTestCase {
 
@@ -42,11 +44,11 @@ class Test_Monitor_CSS_Transient_Caching extends WP_UnitTestCase {
 	/**
 	 * Test whether an event is actually scheduled when the monitor is registered.
 	 *
-	 * @covers MonitorCssTransientCaching::activate()
-	 * @covers MonitorCssTransientCaching::deactivate()
+	 * @uses \AmpProject\AmpWP\BackgroundTask\CronBasedBackgroundTask::schedule_event
+	 * @uses \AmpProject\AmpWP\BackgroundTask\CronBasedBackgroundTask::deactivate
 	 */
 	public function test_event_gets_scheduled_and_unscheduled() {
-		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$this->assertFalse( wp_next_scheduled( MonitorCssTransientCaching::EVENT_NAME ) );
 
 		$monitor = new MonitorCssTransientCaching();
@@ -66,7 +68,7 @@ class Test_Monitor_CSS_Transient_Caching extends WP_UnitTestCase {
 	/**
 	 * Test whether time series are calculated and stored when the monitor is processing.
 	 *
-	 * @covers MonitorCssTransientCaching::process()
+	 * @covers ::process()
 	 */
 	public function test_event_can_be_processed() {
 		delete_option( MonitorCssTransientCaching::TIME_SERIES_OPTION_KEY );
@@ -78,9 +80,9 @@ class Test_Monitor_CSS_Transient_Caching extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test whether transient caching is disabled once it hits the treshold.
+	 * Test whether transient caching is disabled once it hits the threshold.
 	 *
-	 * @covers MonitorCssTransientCaching::process()
+	 * @covers ::process()
 	 */
 	public function test_transient_caching_is_disabled() {
 		delete_option( MonitorCssTransientCaching::TIME_SERIES_OPTION_KEY );

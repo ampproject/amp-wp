@@ -12,6 +12,8 @@ use AmpProject\Tag;
  * Class AMP_DOM_Utils
  *
  * Functionality to simplify working with Dom\Documents and DOMElements.
+ *
+ * @internal
  */
 class AMP_DOM_Utils {
 
@@ -20,6 +22,7 @@ class AMP_DOM_Utils {
 	 *
 	 * @since 1.2.1
 	 * @deprecated Use AmpProject\Dom\Document::AMP_BIND_DATA_ATTR_PREFIX instead.
+	 * @internal
 	 * @var string
 	 */
 	const AMP_BIND_DATA_ATTR_PREFIX = Document::AMP_BIND_DATA_ATTR_PREFIX;
@@ -112,6 +115,7 @@ class AMP_DOM_Utils {
 	 * @since 0.7
 	 * @codeCoverageIgnore
 	 * @deprecated This is handled automatically via AmpProject\Dom\Document.
+	 * @internal
 	 * @see \AMP_DOM_Utils::convert_amp_bind_attributes()
 	 * @link https://www.ampproject.org/docs/reference/components/amp-bind
 	 *
@@ -132,6 +136,7 @@ class AMP_DOM_Utils {
 	 * @see \AMP_DOM_Utils::convert_amp_bind_attributes()
 	 * @codeCoverageIgnore
 	 * @deprecated This is handled automatically via AmpProject\Dom\Document.
+	 * @internal
 	 * @link https://www.ampproject.org/docs/reference/components/amp-bind
 	 *
 	 * @param string $html HTML with amp-bind attributes converted.
@@ -284,11 +289,12 @@ class AMP_DOM_Utils {
 	}
 
 	/**
-	 * Forces HTML element closing tags given a Dom\Document and optional DOMElement
+	 * Forces HTML element closing tags given a Dom\Document and optional DOMElement.
 	 *
 	 * @since 0.2
 	 * @codeCoverageIgnore
 	 * @deprecated
+	 * @internal
 	 *
 	 * @param Document   $dom  Represents HTML document on which to force closing tags.
 	 * @param DOMElement $node Represents HTML element to start closing tags on.
@@ -309,7 +315,7 @@ class AMP_DOM_Utils {
 			/*
 			 * Ensure there is no text content to accidentally force a child
 			 */
-			$node->textContent = null;
+			$node->textContent = '';
 			return;
 		}
 
@@ -365,31 +371,22 @@ class AMP_DOM_Utils {
 	 * If the element does not have an ID, create one first.
 	 *
 	 * @since 1.4.0
+	 * @since 1.5.1 Deprecated for AmpProject\Dom\Document::getElementId()
+	 *
+	 * @deprecated Use AmpProject\Dom\Document::getElementId() instead.
 	 *
 	 * @param DOMElement $element Element to get the ID for.
-	 * @param string     $prefix  Optional. Defaults to '_amp_wp_id_'.
+	 * @param string     $prefix  Optional. Defaults to 'amp-wp-id'.
 	 * @return string ID to use.
 	 */
 	public static function get_element_id( $element, $prefix = 'amp-wp-id' ) {
-		static $index_counter = [];
+		_deprecated_function(
+			'AMP_DOM_Utils::get_element_id',
+			'1.5.1',
+			'Use AmpProject\Amp\Dom\Document::getElementId() instead'
+		);
 
-		if ( $element->hasAttribute( 'id' ) ) {
-			return $element->getAttribute( 'id' );
-		}
-
-		if ( ! array_key_exists( $prefix, $index_counter ) ) {
-			$index_counter[ $prefix ] = 2;
-			$element->setAttribute( 'id', $prefix );
-
-			return $prefix;
-		}
-
-		$id = "{$prefix}-{$index_counter[ $prefix ]}";
-		$index_counter[ $prefix ] ++;
-
-		$element->setAttribute( 'id', $id );
-
-		return $id;
+		return Document::fromNode( $element )->getElementId( $element, $prefix );
 	}
 
 	/**

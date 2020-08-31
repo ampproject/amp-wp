@@ -17,6 +17,8 @@ use AmpProject\Optimizer\Transformer\TransformedIdentifier;
  * @property array $metadata Associative array of metadata.
  *
  * @package ampproject/optimizer
+ * @since 2.0
+ * @internal
  */
 final class AmpSchemaOrgMetadataConfiguration extends BaseTransformerConfiguration {
 
@@ -36,7 +38,7 @@ final class AmpSchemaOrgMetadataConfiguration extends BaseTransformerConfigurati
 	 */
 	protected function getAllowedKeys() {
 		return [
-			self::METADATA => amp_get_schemaorg_metadata(),
+			self::METADATA => (array) amp_get_schemaorg_metadata(),
 		];
 	}
 
@@ -52,7 +54,7 @@ final class AmpSchemaOrgMetadataConfiguration extends BaseTransformerConfigurati
 		switch ( $key ) {
 			case self::METADATA:
 				if ( ! is_array( $value ) ) {
-					throw InvalidConfigurationValue::forInvalidSubValueType( TransformedIdentifier::class, self::METADATA, 'array', gettype( $value ) );
+					throw InvalidConfigurationValue::forInvalidSubValueType( self::class, self::METADATA, 'array', gettype( $value ) );
 				}
 				break;
 		}

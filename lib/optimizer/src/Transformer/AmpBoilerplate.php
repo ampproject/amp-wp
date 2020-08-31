@@ -4,7 +4,6 @@ namespace AmpProject\Optimizer\Transformer;
 
 use AmpProject\Amp;
 use AmpProject\Attribute;
-use AmpProject\DevMode;
 use AmpProject\Dom\Document;
 use AmpProject\Optimizer\ErrorCollection;
 use AmpProject\Optimizer\Transformer;
@@ -12,13 +11,13 @@ use AmpProject\Tag;
 use DOMElement;
 
 /**
- * Transformer that removes <style> and <noscript> tags in <head>, keeping only the amp-custom style tag. It then
- * inserts the amp-boilerplate.
+ * Transformer that removes AMP boilerplate <style> and <noscript> tags in <head>, keeping only the amp-custom <style>
+ * tag. It then (re-)inserts the amp-boilerplate unless the document is marked with the i-amphtml-no-boilerplate
+ * attribute.
  *
  * This is ported from the Go optimizer.
  *
  * Go:
- *
  * @version c9993b8ac4d17d1f05d3a1289956dadf3f9c370a
  * @link    https://github.com/ampproject/amppackager/blob/c9993b8ac4d17d1f05d3a1289956dadf3f9c370a/transformer/transformers/ampboilerplate.go
  *
@@ -68,31 +67,44 @@ final class AmpBoilerplate implements Transformer
     }
 
     /**
-     * Remove all <style> and <noscript> tags except for the <style amp-custom> tag.
+     * Remove all <style> and <noscript> tags which are for the boilerplate.
      *
      * @param Document $document Document to remove the tags from.
      */
     private function removeStyleAndNoscriptTags(Document $document)
     {
-        $headNode = $document->head->firstChild;
-        $devMode = DevMode::isActiveForDocument($document);
-        while ($headNode) {
-            $nextSibling = $headNode->nextSibling;
-            if ($headNode instanceof DOMElement && (! $devMode || ! DevMode::hasExemptionForNode($headNode))) {
-                switch ($headNode->tagName) {
-                    case Tag::STYLE:
-                        if (! $headNode->hasAttribute(Attribute::AMP_CUSTOM)) {
-                            $document->head->removeChild($headNode);
-                        }
-                        break;
-                    case Tag::NOSCRIPT:
-                        $document->head->removeChild($headNode);
-                        break;
-                }
+        /**
+         * Style element.
+         *
+         * @var DOMElement $style
+         */
+        foreach (iterator_to_array($document->head->getElementsByTagName('style')) as $style) {
+            if (! $this->isBoilerplateStyle($style)) {
+                continue;
             }
-
-            $headNode = $nextSibling;
+            if (Tag::NOSCRIPT === $style->parentNode->nodeName) {
+                $style->parentNode->parentNode->removeChild($style->parentNode);
+            } else {
+                $style->parentNode->removeChild($style);
+            }
         }
+    }
+
+    /**
+     * Check whether an element is a boilerplate style.
+     *
+     * @param DOMElement $element Element to check.
+     * @return bool Whether the element is a boilerplate style.
+     */
+    private function isBoilerplateStyle(DOMElement $element)
+    {
+        foreach (Attribute::ALL_BOILERPLATES as $boilerplate) {
+            if ($element->hasAttribute($boilerplate)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -126,7 +138,13 @@ final class AmpBoilerplate implements Transformer
         foreach (Attribute::ALL_AMP4ADS as $attribute) {
             if (
                 $htmlElement->hasAttribute($attribute)
-                || ($htmlElement->getAttribute(Document::EMOJI_AMP_ATTRIBUTE_PLACEHOLDER) === str_replace(Attribute::AMP_EMOJI, '', $attribute))
+                || (
+                    $htmlElement->getAttribute(Document::EMOJI_AMP_ATTRIBUTE_PLACEHOLDER) === str_replace(
+                        Attribute::AMP_EMOJI,
+                        '',
+                        $attribute
+                    )
+                )
             ) {
                 $boilerplate = Attribute::AMP4ADS_BOILERPLATE;
                 $css         = Amp::AMP4ADS_AND_AMP4EMAIL_BOILERPLATE_CSS;
@@ -136,7 +154,13 @@ final class AmpBoilerplate implements Transformer
         foreach (Attribute::ALL_AMP4EMAIL as $attribute) {
             if (
                 $htmlElement->hasAttribute($attribute)
-                || ($htmlElement->getAttribute(Document::EMOJI_AMP_ATTRIBUTE_PLACEHOLDER) === str_replace(Attribute::AMP_EMOJI, '', $attribute))
+                || (
+                    $htmlElement->getAttribute(Document::EMOJI_AMP_ATTRIBUTE_PLACEHOLDER) === str_replace(
+                        Attribute::AMP_EMOJI,
+                        '',
+                        $attribute
+                    )
+                )
             ) {
                 $boilerplate = Attribute::AMP4EMAIL_BOILERPLATE;
                 $css         = Amp::AMP4ADS_AND_AMP4EMAIL_BOILERPLATE_CSS;

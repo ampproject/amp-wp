@@ -94,8 +94,6 @@ $alignwide_max = $content_max_width > 0 ? $content_max_width * 2 : 1920
 	margin: 0 auto;
 }
 
-<?php echo file_get_contents( AMP__DIR__ . '/assets/css/amp-default.css' ); // phpcs:ignore WordPress.WP.AlternativeFunctions ?>
-
 /* Template Styles */
 
 .amp-wp-content,
@@ -185,21 +183,6 @@ blockquote p:last-child {
 	color: <?php echo sanitize_hex_color( $header_color ); ?>;
 	text-decoration: none;
 }
-
-<?php if ( $this->get( 'post_canonical_link_url' ) || is_customize_preview() ) : ?>
-	.amp-wp-header .amp-wp-canonical-link {
-		font-size: 0.8em;
-		text-decoration: underline;
-		position: absolute;
-		<?php
-		$distance = 18;
-		if ( $this->get( 'site_icon_url' ) ) {
-			$distance += 32 + 10; // Width of site icon with margin.
-		}
-		printf( '%s: %dpx;', is_rtl() ? 'left' : 'right', $distance ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		?>
-	}
-<?php endif; ?>
 
 .amp-wp-header .amp-wp-site-icon {
 	/** site icon is 32px **/

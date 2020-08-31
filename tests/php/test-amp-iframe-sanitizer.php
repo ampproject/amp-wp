@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
+
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 
 /**
@@ -13,6 +15,8 @@
  * @covers AMP_Iframe_Sanitizer
  */
 class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
+
+	use MarkupComparison;
 
 	/**
 	 * Data provider.
@@ -150,7 +154,7 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 				',
 			],
 
-			'iframe_with_blacklisted_attribute'         => [
+			'iframe_with_disallowed_attribute'         => [
 				'<iframe src="https://example.com/embed/132886713" width="500" height="281" scrolling="auto"></iframe>',
 				'
 					<amp-iframe src="https://example.com/embed/132886713" width="500" height="281" scrolling="auto" sandbox="allow-scripts allow-same-origin" layout="intrinsic" class="amp-wp-enforced-sizes">
@@ -401,6 +405,26 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 				[
 					'add_noscript_fallback' => true,
 					'add_placeholder'       => true,
+					'align_wide_support'    => true,
+				],
+			],
+
+			'iframe_with_wide_width_alignment'               => [
+				'<figure class="alignwide"><iframe width="750" height="422" src="https://videopress.com/embed/yFCmLMGL?hd=0" frameborder="0" allowfullscreen="" data-origwidth="750" data-origheight="422"></iframe></figure>',
+				'
+					<figure class="alignwide">
+						<amp-iframe width="750" height="422" src="https://videopress.com/embed/yFCmLMGL?hd=0" frameborder="0" allowfullscreen="" data-origwidth="750" data-origheight="422" sandbox="allow-scripts allow-same-origin" layout="responsive" class="amp-wp-enforced-sizes">
+							<span placeholder="" class="amp-wp-iframe-placeholder"></span>
+							<noscript>
+								<iframe width="750" height="422" src="https://videopress.com/embed/yFCmLMGL?hd=0" frameborder="0"></iframe>
+							</noscript>
+						</amp-iframe>
+					</figure>
+				',
+				[
+					'add_noscript_fallback' => true,
+					'add_placeholder'       => true,
+					'align_wide_support'    => true,
 				],
 			],
 
@@ -444,6 +468,16 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 
 			'iframe_with_security_attr' => [
 				'<iframe security="restricted" src="https://example.com" width="320" height="640"></iframe>',
+				'
+					<amp-iframe src="https://example.com" width="320" height="640" sandbox="allow-scripts allow-same-origin" layout="intrinsic" class="amp-wp-enforced-sizes">
+						<noscript>
+							<iframe src="https://example.com" width="320" height="640"></iframe>
+						</noscript>
+					</amp-iframe>',
+			],
+
+			'iframe_with_type_html_attr' => [
+				'<iframe type="text/html" src="https://example.com" width="320" height="640"></iframe>',
 				'
 					<amp-iframe src="https://example.com" width="320" height="640" sandbox="allow-scripts allow-same-origin" layout="intrinsic" class="amp-wp-enforced-sizes">
 						<noscript>
@@ -595,12 +629,12 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Iframe_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$whitelist_sanitizer->sanitize();
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$validating_sanitizer->sanitize();
 
 		$scripts = array_merge(
 			$sanitizer->get_scripts(),
-			$whitelist_sanitizer->get_scripts()
+			$validating_sanitizer->get_scripts()
 		);
 		$this->assertEquals( $expected, $scripts );
 	}
@@ -616,12 +650,12 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Iframe_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$whitelist_sanitizer->sanitize();
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$validating_sanitizer->sanitize();
 
 		$scripts = array_merge(
 			$sanitizer->get_scripts(),
-			$whitelist_sanitizer->get_scripts()
+			$validating_sanitizer->get_scripts()
 		);
 		$this->assertEquals( $expected, $scripts );
 	}
@@ -644,21 +678,5 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 
 		$this->assertEquals( $expected, $content );
-	}
-
-	/**
-	 * Assert markup is equal.
-	 *
-	 * @param string $expected Expected markup.
-	 * @param string $actual   Actual markup.
-	 */
-	public function assertEqualMarkup( $expected, $actual ) {
-		$actual   = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $actual ) );
-		$expected = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $expected ) );
-
-		$this->assertEquals(
-			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $expected, -1, PREG_SPLIT_DELIM_CAPTURE ) ),
-			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $actual, -1, PREG_SPLIT_DELIM_CAPTURE ) )
-		);
 	}
 }

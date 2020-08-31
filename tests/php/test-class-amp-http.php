@@ -6,7 +6,8 @@
  * @since 1.0
  */
 
-use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 
 /**
  * Tests for AMP_HTTP.
@@ -108,6 +109,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 	 * @covers \AMP_HTTP::send_server_timing()
 	 */
 	public function test_send_server_timing_positive_duration() {
+		$this->setExpectedDeprecated( 'AMP_HTTP::send_server_timing' );
 		AMP_HTTP::send_server_timing( 'name', 123, 'Description' );
 		$this->assertCount( 1, AMP_HTTP::$headers_sent );
 		$this->assertEquals( 'Server-Timing', AMP_HTTP::$headers_sent[0]['name'] );
@@ -125,6 +127,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 	 * @covers \AMP_HTTP::send_server_timing()
 	 */
 	public function test_send_server_timing_negative_duration() {
+		$this->setExpectedDeprecated( 'AMP_HTTP::send_server_timing' );
 		AMP_HTTP::send_server_timing( 'name', -microtime( true ) );
 		$this->assertCount( 1, AMP_HTTP::$headers_sent );
 		$this->assertEquals( 'Server-Timing', AMP_HTTP::$headers_sent[0]['name'] );
@@ -395,7 +398,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 	 */
 	public function test_intercept_post_request_redirect() {
 
-		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$url = home_url( '', 'https' ) . ':443/?test=true#test';
 
 		add_filter( 'wp_doing_ajax', '__return_true' );
@@ -547,7 +550,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 			}
 		);
 
-		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$post    = self::factory()->post->create_and_get();
 		$comment = self::factory()->comment->create_and_get(
 			[

@@ -5,8 +5,9 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
-use AmpProject\AmpWP\Tests\PrivateAccess;
+use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 
 /**
  * Tests for Test_AMP_CLI_Validation_Command class.
@@ -49,11 +50,11 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		$this->assertEquals( $number_original_urls, $this->call_private_method( $this->validation, 'count_urls_to_validate' ) );
 		$this->validation->limit_type_validate_count = 100;
 
-		$category         = $this->factory()->term->create( [ 'taxonomy' => 'category' ] );
+		$category         = self::factory()->term->create( [ 'taxonomy' => 'category' ] );
 		$number_new_posts = $this->validation->limit_type_validate_count / 2;
 		$post_ids         = [];
 		for ( $i = 0; $i < $number_new_posts; $i++ ) {
-			$post_ids[] = $this->factory()->post->create(
+			$post_ids[] = self::factory()->post->create(
 				[
 					'tax_input' => [ 'category' => $category ],
 				]
@@ -72,7 +73,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		$taxonomy                   = 'category';
 		$terms_for_current_taxonomy = [];
 		for ( $i = 0; $i < $number_of_new_terms; $i++ ) {
-			$terms_for_current_taxonomy[] = $this->factory()->term->create(
+			$terms_for_current_taxonomy[] = self::factory()->term->create(
 				[
 					'taxonomy' => $taxonomy,
 				]
@@ -98,7 +99,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		$number_of_posts = 20;
 		$ids             = [];
 		for ( $i = 0; $i < $number_of_posts; $i++ ) {
-			$ids[] = $this->factory()->post->create();
+			$ids[] = self::factory()->post->create();
 		}
 
 		// This should count all of the newly-created posts as supporting AMP.
@@ -125,7 +126,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		$this->validation->force_crawl_urls = false;
 
 		// In AMP-first, the IDs should include all of the newly-created posts.
-		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->assertEquals( $ids, $this->call_private_method( $this->validation, 'get_posts_that_support_amp', [ $ids ] ) );
 
 		// In Transitional Mode, the IDs should also include all of the newly-created posts.
@@ -162,7 +163,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		$custom_taxonomy = 'foo_custom_taxonomy';
 		register_taxonomy( $custom_taxonomy, 'post' );
 		$taxonomies_to_test = [ $custom_taxonomy, 'category', 'post_tag' ];
-		AMP_Options_Manager::update_option( 'supported_templates', [ 'is_category', 'is_tag', sprintf( 'is_tax[%s]', $custom_taxonomy ) ] );
+		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, [ 'is_category', 'is_tag', sprintf( 'is_tax[%s]', $custom_taxonomy ) ] );
 
 		// When these templates are not unchecked in the 'AMP Settings' UI, these should be supported.
 		foreach ( $taxonomies_to_test as $taxonomy ) {
@@ -170,8 +171,8 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		}
 
 		// When the user has not checked the boxes for 'Categories' and 'Tags,' this should be false.
-		AMP_Options_Manager::update_option( 'supported_templates', [ 'is_author' ] );
-		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, [ 'is_author' ] );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		foreach ( $taxonomies_to_test as $taxonomy ) {
 			$this->assertFalse( $this->call_private_method( $this->validation, 'does_taxonomy_support_amp', [ $taxonomy ] ) );
 		}
@@ -183,12 +184,12 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		}
 		$this->validation->force_crawl_urls = false;
 
-		// When the user has checked the 'all_templates_supported' box, this should always be true.
-		AMP_Options_Manager::update_option( 'all_templates_supported', true );
+		// When the user has checked the Option::ALL_TEMPLATES_SUPPORTED box, this should always be true.
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, true );
 		foreach ( $taxonomies_to_test as $taxonomy ) {
 			$this->assertTrue( $this->call_private_method( $this->validation, 'does_taxonomy_support_amp', [ $taxonomy ] ) );
 		}
-		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 
 		/*
 		 * If the user passed allowed conditionals to the WP-CLI command like wp amp validate-site --include=is_category,is_tag
@@ -211,12 +212,12 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		$author_conditional = 'is_author';
 		$search_conditional = 'is_search';
 
-		AMP_Options_Manager::update_option( 'supported_templates', [ $author_conditional ] );
-		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, [ $author_conditional ] );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		$this->assertTrue( $this->call_private_method( $this->validation, 'is_template_supported', [ $author_conditional ] ) );
 		$this->assertFalse( $this->call_private_method( $this->validation, 'is_template_supported', [ $search_conditional ] ) );
 
-		AMP_Options_Manager::update_option( 'supported_templates', [ $search_conditional ] );
+		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, [ $search_conditional ] );
 		$this->assertTrue( $this->call_private_method( $this->validation, 'is_template_supported', [ $search_conditional ] ) );
 		$this->assertFalse( $this->call_private_method( $this->validation, 'is_template_supported', [ $author_conditional ] ) );
 	}
@@ -243,7 +244,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 			for ( $i = 0; $i < $number_posts_each_post_type; $i++ ) {
 				array_unshift(
 					$expected_posts,
-					$this->factory()->post->create(
+					self::factory()->post->create(
 						[
 							'post_type' => $post_type,
 						]
@@ -279,7 +280,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 			$expected_links             = array_map( 'get_term_link', get_terms( [ 'taxonomy' => $taxonomy ] ) );
 			$terms_for_current_taxonomy = [];
 			for ( $i = 0; $i < $number_links_each_taxonomy; $i++ ) {
-				$terms_for_current_taxonomy[] = $this->factory()->term->create(
+				$terms_for_current_taxonomy[] = self::factory()->term->create(
 					[
 						'taxonomy' => $taxonomy,
 					]
@@ -288,7 +289,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 
 			// Terms need to be associated with a post in order to be returned in get_terms().
 			wp_set_post_terms(
-				$this->factory()->post->create(),
+				self::factory()->post->create(),
 				$terms_for_current_taxonomy,
 				$taxonomy
 			);
@@ -318,7 +319,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 	 * @covers AMP_CLI_Validation_Command::get_author_page_urls()
 	 */
 	public function test_get_author_page_urls() {
-		$this->factory()->user->create();
+		self::factory()->user->create();
 		$users             = get_users();
 		$first_author      = $users[0];
 		$first_author_url  = get_author_posts_url( $first_author->ID, $first_author->user_nicename );
@@ -402,7 +403,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		$terms           = [];
 
 		for ( $i = 0; $i < $number_of_posts; $i++ ) {
-			$post_id           = $this->factory()->post->create();
+			$post_id           = self::factory()->post->create();
 			$posts[]           = $post_id;
 			$post_permalinks[] = get_permalink( $post_id );
 		}
@@ -412,7 +413,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		$this->assertEmpty( array_diff( $post_permalinks, self::get_validated_urls() ) );
 
 		for ( $i = 0; $i < $number_of_terms; $i++ ) {
-			$terms[] = $this->factory()->category->create();
+			$terms[] = self::factory()->category->create();
 		}
 
 		// Terms need to be associated with a post in order to be returned in get_terms().
@@ -432,7 +433,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 	 * @covers AMP_CLI_Validation_Command::validate_and_store_url()
 	 */
 	public function test_validate_and_store_url() {
-		$single_post_permalink = get_permalink( $this->factory()->post->create() );
+		$single_post_permalink = get_permalink( self::factory()->post->create() );
 		$this->call_private_method( $this->validation, 'validate_and_store_url', [ $single_post_permalink, 'post' ] );
 		$this->assertTrue( in_array( $single_post_permalink, self::get_validated_urls(), true ) );
 
@@ -440,7 +441,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		$post_permalinks = [];
 
 		for ( $i = 0; $i < $number_of_posts; $i++ ) {
-			$permalink         = get_permalink( $this->factory()->post->create() );
+			$permalink         = get_permalink( self::factory()->post->create() );
 			$post_permalinks[] = $permalink;
 			$this->call_private_method( $this->validation, 'validate_and_store_url', [ $permalink, 'post' ] );
 		}

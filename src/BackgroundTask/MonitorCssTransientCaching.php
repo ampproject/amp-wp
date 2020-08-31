@@ -19,6 +19,8 @@ use Exception;
  * This checks whether there's excessive cycling of CSS cached stylesheets and disables transient caching if so.
  *
  * @package AmpProject\AmpWP
+ * @since 2.0
+ * @internal
  */
 final class MonitorCssTransientCaching extends CronBasedBackgroundTask {
 
@@ -39,9 +41,11 @@ final class MonitorCssTransientCaching extends CronBasedBackgroundTask {
 	/**
 	 * Default threshold to use for problem detection in number of transients per day.
 	 *
+	 * This is set high to avoid false positives and only trigger on high-traffic sites that exhibit serious problems.
+	 *
 	 * @var float
 	 */
-	const DEFAULT_THRESHOLD = 50.0;
+	const DEFAULT_THRESHOLD = 5000.0;
 
 	/**
 	 * Sampling range in days to calculate the moving average from.
@@ -49,6 +53,16 @@ final class MonitorCssTransientCaching extends CronBasedBackgroundTask {
 	 * @var int
 	 */
 	const DEFAULT_SAMPLING_RANGE = 14;
+
+	/**
+	 * Register the service with the system.
+	 *
+	 * @return void
+	 */
+	public function register() {
+		add_action( 'amp_plugin_update', [ $this, 'handle_plugin_update' ] );
+		parent::register();
+	}
 
 	/**
 	 * Get the interval to use for the event.
@@ -93,7 +107,7 @@ final class MonitorCssTransientCaching extends CronBasedBackgroundTask {
 		}
 
 		if ( null === $transient_count ) {
-			$transient_count = self::query_css_transient_count();
+			$transient_count = $this->query_css_transient_count();
 		}
 
 		$date_string = $date->format( 'Ymd' );
@@ -135,7 +149,7 @@ final class MonitorCssTransientCaching extends CronBasedBackgroundTask {
 	 *
 	 * @return int Count of transients caching stylesheets.
 	 */
-	public static function query_css_transient_count() {
+	public function query_css_transient_count() {
 		global $wpdb;
 
 		return (int) $wpdb->get_var(
@@ -144,12 +158,42 @@ final class MonitorCssTransientCaching extends CronBasedBackgroundTask {
 	}
 
 	/**
+	 * Handle update to plugin.
+	 *
+	 * @param string $old_version Old version.
+	 */
+	public function handle_plugin_update( $old_version ) {
+		// Reset the disabling of the CSS caching subsystem when updating from versions 1.5.0 or 1.5.1.
+		if ( version_compare( $old_version, '1.5.0', '>=' ) && version_compare( $old_version, '1.5.2', '<' ) ) {
+			AMP_Options_Manager::update_option( Option::DISABLE_CSS_TRANSIENT_CACHING, false );
+		}
+	}
+
+	/**
 	 * Get the time series stored in the WordPress options table.
 	 *
 	 * @return int[] Time series with the count of transients per day.
 	 */
-	private function get_time_series() {
+	public function get_time_series() {
 		return (array) get_option( self::TIME_SERIES_OPTION_KEY, [] );
+	}
+
+	/**
+	 * Get the default threshold to use.
+	 *
+	 * @return float Default threshold to use.
+	 */
+	public function get_default_threshold() {
+		return self::DEFAULT_THRESHOLD;
+	}
+
+	/**
+	 * Get the default sampling range to use.
+	 *
+	 * @return int Default sampling range to use.
+	 */
+	public function get_default_sampling_range() {
+		return self::DEFAULT_SAMPLING_RANGE;
 	}
 
 	/**

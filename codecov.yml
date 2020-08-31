@@ -11,3 +11,4 @@ comment: off
 
 ignore:
   - "/bin"
+  - "/back-compat"

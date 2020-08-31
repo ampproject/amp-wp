@@ -10,7 +10,7 @@ use RuntimeException;
  *
  * @package ampproject/common
  */
-final class FailedToGetFromRemoteUrl extends RuntimeException implements AmpException
+final class FailedToGetFromRemoteUrl extends RuntimeException implements FailedRemoteRequest
 {
 
     /**
@@ -18,7 +18,7 @@ final class FailedToGetFromRemoteUrl extends RuntimeException implements AmpExce
      *
      * This is not always set.
      *
-     * @var int
+     * @var int|null
      */
     private $statusCode;
 

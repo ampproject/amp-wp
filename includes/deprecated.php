@@ -11,6 +11,7 @@
  * @since 0.2
  * @codeCoverageIgnore
  * @deprecated As of 0.6 since autoloading is now employed.
+ * @internal
  */
 function amp_load_classes() {
 	_deprecated_function( __FUNCTION__, '0.6' );
@@ -42,7 +43,7 @@ function amp_maybe_add_actions() {
 		return;
 	}
 
-	$is_amp_endpoint = is_amp_endpoint();
+	$is_amp_request = amp_is_request();
 
 	/**
 	 * Queried post object.
@@ -50,8 +51,8 @@ function amp_maybe_add_actions() {
 	 * @var WP_Post $post
 	 */
 	$post = get_queried_object();
-	if ( ! post_supports_amp( $post ) ) {
-		if ( $is_amp_endpoint ) {
+	if ( ! amp_is_post_supported( $post ) ) {
+		if ( $is_amp_request ) {
 			/*
 			 * Temporary redirect is used for admin users because reader mode and AMP support can be enabled by user at any time,
 			 * so they will be able to make AMP available for this URL and see the change without wrestling with the redirect cache.
@@ -62,7 +63,7 @@ function amp_maybe_add_actions() {
 		return;
 	}
 
-	if ( $is_amp_endpoint ) {
+	if ( $is_amp_request ) {
 
 		// Prevent infinite URL space under /amp/ endpoint.
 		global $wp;
@@ -146,7 +147,7 @@ function amp_render_post( $post ) {
 	$post_id = $post->ID;
 
 	/*
-	 * If amp_render_post is called directly outside of the standard endpoint, is_amp_endpoint() will return false,
+	 * If amp_render_post is called directly outside of the standard endpoint, amp_is_request() will return false,
 	 * which is not ideal for any code that expects to run in an AMP context.
 	 * Let's force the value to be true while we render AMP.
 	 */
@@ -163,9 +164,10 @@ function amp_render_post( $post ) {
 	/**
 	 * Fires before rendering a post in AMP.
 	 *
-	 * This action is not triggered when 'amp' theme support is present. Instead, you should use 'template_redirect' action and check if `is_amp_endpoint()`.
+	 * This action is not triggered when 'amp' theme support is present. Instead, you should use 'template_redirect' action and check if `amp_is_request()`.
 	 *
 	 * @since 0.2
+	 * @deprecated Check amp_is_request() on the template_redirect action instead.
 	 *
 	 * @param int $post_id Post ID.
 	 */
@@ -185,6 +187,7 @@ function amp_render_post( $post ) {
  *
  * @codeCoverageIgnore
  * @deprecated Scripts are now automatically added.
+ * @internal
  * @see amp_register_default_scripts()
  * @see amp_filter_script_loader_tag()
  * @param AMP_Post_Template $amp_template Template.
@@ -208,6 +211,7 @@ function amp_post_template_add_scripts( $amp_template ) {
  *
  * @codeCoverageIgnore
  * @deprecated Boilerplate is now automatically added via the ampproject/optimizer library.
+ * @internal
  * @since 0.3
  * @see amp_get_boilerplate_code()
  */
@@ -221,6 +225,7 @@ function amp_post_template_add_boilerplate_css() {
  *
  * @codeCoverageIgnore
  * @deprecated Since 0.7
+ * @internal
  */
 function amp_post_template_add_schemaorg_metadata() {
 	_deprecated_function( __FUNCTION__, '0.7', 'amp_print_schemaorg_metadata' );
@@ -235,6 +240,7 @@ function amp_post_template_add_schemaorg_metadata() {
  * @since 0.6
  * @codeCoverageIgnore
  * @deprecated Since 1.5.0, as admin class bootstrapping is moved to amp_bootstrap_admin().
+ * @internal
  */
 function amp_post_meta_box() {
 	_deprecated_function( __FUNCTION__, '1.5.0' );
@@ -246,6 +252,7 @@ function amp_post_meta_box() {
  * @since 1.0
  * @codeCoverageIgnore
  * @deprecated Since 1.5.0, as admin class bootstrapping is moved to amp_bootstrap_admin().
+ * @internal
  */
 function amp_admin_pointer() {
 	_deprecated_function( __FUNCTION__, '1.5.0' );
@@ -256,6 +263,7 @@ function amp_admin_pointer() {
  *
  * @since 1.3
  * @deprecated 1.5.0 Warning moved to Site Health.
+ * @internal
  * @see AmpProject\AmpWP\Admin\SiteHealth::xdebug_extension()
  */
 function _amp_xdebug_admin_notice() {

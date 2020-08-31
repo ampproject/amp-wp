@@ -3,7 +3,7 @@
 // phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_var_dump
 // phpcs:disable WordPress.XSS.EscapeOutput.OutputNotEscaped
 
-use AmpProject\AmpWP\Tests\PrivateAccess;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 
 class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCase {
 
@@ -315,7 +315,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 				],
 				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
 			],
-			'test_attr_spec_rule_blacklisted_value_regex_pass' => [
+			'test_attr_spec_rule_disallowed_value_regex_pass' => [
 				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'a',
@@ -323,11 +323,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'attribute_value' => 'whatever',
 					'include_attr' => true,
 					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_blacklisted_value_regex',
+					'func_name' => 'check_attr_spec_rule_disallowed_value_regex',
 				],
 				'expected' => AMP_Rule_Spec::PASS,
 			],
-			'test_attr_spec_rule_blacklisted_value_regex_fail' => [
+			'test_attr_spec_rule_disallowed_value_regex_fail' => [
 				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'a',
@@ -335,11 +335,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'attribute_value' => 'components',
 					'include_attr' => true,
 					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_blacklisted_value_regex',
+					'func_name' => 'check_attr_spec_rule_disallowed_value_regex',
 				],
 				'expected' => AMP_Rule_Spec::FAIL,
 			],
-			'test_attr_spec_rule_blacklisted_value_regex_fail_2' => [
+			'test_attr_spec_rule_disallowed_value_regex_fail_2' => [
 				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'a',
@@ -347,11 +347,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'attribute_value' => 'import',
 					'include_attr' => true,
 					'include_attr_value' => true,
-					'func_name' => 'check_attr_spec_rule_blacklisted_value_regex',
+					'func_name' => 'check_attr_spec_rule_disallowed_value_regex',
 				],
 				'expected' => AMP_Rule_Spec::FAIL,
 			],
-			'test_attr_spec_rule_blacklisted_value_regex_na' => [
+			'test_attr_spec_rule_disallowed_value_regex_na' => [
 				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'a',
@@ -359,7 +359,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'attribute_value' => 'invalid',
 					'include_attr' => false,
 					'include_attr_value' => false,
-					'func_name' => 'check_attr_spec_rule_blacklisted_value_regex',
+					'func_name' => 'check_attr_spec_rule_disallowed_value_regex',
 				],
 				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
 			],
@@ -409,7 +409,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 	public function get_is_allowed_attribute_data() {
 		return [
-			'test_is_amp_allowed_attribute_whitelisted_regex_pass' => [
+			'test_is_amp_allowed_attribute_allowlisted_regex_pass' => [
 				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'amp-social-share',
@@ -1034,13 +1034,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 				],
 				2, // Allow empty is not used until sanitization.
 			],
-			'attributes_blacklisted_regex' => [
+			'attributes_disallowed_regex' => [
 				[
-					'source' => '<div attribute1="blacklisted_value"></div>',
+					'source' => '<div attribute1="disallowed_value"></div>',
 					'node_tag_name' => 'div',
 					'attr_spec_list' => [
 						'attribute1' => [
-							'blacklisted_value_regex' => 'blacklisted_value',
+							'disallowed_value_regex' => 'disallowed_value',
 							'alternative_names' => [
 								'attribute1_alternative1',
 								'attribute1_alternative2',
@@ -1337,7 +1337,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
 
-	public function get_check_attr_spec_rule_blacklisted_value_regex() {
+	public function get_check_attr_spec_rule_disallowed_value_regex() {
 		return [
 			'no_attributes' => [
 				[
@@ -1354,7 +1354,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
 					'attr_spec_rule' => [
-						'blacklisted_value_regex' => '(not_this|or_this)',
+						'disallowed_value_regex' => '(not_this|or_this)',
 					],
 				],
 				AMP_Rule_Spec::PASS,
@@ -1365,7 +1365,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
 					'attr_spec_rule' => [
-						'blacklisted_value_regex' => '(not_this|or_this)',
+						'disallowed_value_regex' => '(not_this|or_this)',
 					],
 				],
 				AMP_Rule_Spec::FAIL,
@@ -1376,7 +1376,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
 					'attr_spec_rule' => [
-						'blacklisted_value_regex' => '(not_this|or_this)',
+						'disallowed_value_regex' => '(not_this|or_this)',
 					],
 				],
 				AMP_Rule_Spec::NOT_APPLICABLE,
@@ -1387,7 +1387,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
 					'attr_spec_rule' => [
-						'blacklisted_value_regex' => '(not_this|or_this)',
+						'disallowed_value_regex' => '(not_this|or_this)',
 						'alternative_names' => [
 							'attribute1_alternative1',
 						],
@@ -1401,7 +1401,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
 					'attr_spec_rule' => [
-						'blacklisted_value_regex' => '(not_this|or_this)',
+						'disallowed_value_regex' => '(not_this|or_this)',
 						'alternative_names' => [
 							'attribute1_alternative1',
 						],
@@ -1473,15 +1473,15 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 	}
 
 	/**
-	 * @dataProvider get_check_attr_spec_rule_blacklisted_value_regex
+	 * @dataProvider get_check_attr_spec_rule_disallowed_value_regex
 	 * @group allowed-tags-private-methods
 	 */
-	public function test_check_attr_spec_rule_blacklisted_value_regex( $data, $expected ) {
+	public function test_check_attr_spec_rule_disallowed_value_regex( $data, $expected ) {
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
 		$node      = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 
-		$got = $this->call_private_method( $sanitizer, 'check_attr_spec_rule_blacklisted_value_regex', [ $node, $data['attr_name'], $data['attr_spec_rule'] ] );
+		$got = $this->call_private_method( $sanitizer, 'check_attr_spec_rule_disallowed_value_regex', [ $node, $data['attr_name'], $data['attr_spec_rule'] ] );
 
 		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}

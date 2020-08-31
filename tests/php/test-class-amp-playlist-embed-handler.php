@@ -6,7 +6,8 @@
  * @since 0.7
  */
 
-use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
 
 /**
  * Tests for AMP_Playlist_Embed_Handler.
@@ -17,6 +18,9 @@ use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
 class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 
 	use AssertContainsCompatibility;
+	use WithoutBlockPreRendering {
+		setUp as public prevent_block_pre_render;
+	}
 
 	/**
 	 * Instance of the tested class.
@@ -43,7 +47,7 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 	 * Set up test.
 	 */
 	public function setUp() {
-		parent::setUp();
+		$this->prevent_block_pre_render();
 		$this->instance = new AMP_Playlist_Embed_Handler();
 	}
 

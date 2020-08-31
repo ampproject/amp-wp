@@ -10,6 +10,8 @@ use AmpProject\Dom\Document;
 
 /**
  * Class AMP_Base_Sanitizer
+ *
+ * @since 0.2
  */
 abstract class AMP_Base_Sanitizer {
 
@@ -55,8 +57,6 @@ abstract class AMP_Base_Sanitizer {
 	 *      @type array $amp_globally_allowed_attributes
 	 *      @type array $amp_layout_allowed_attributes
 	 *      @type array $amp_bind_placeholder_prefix
-	 *      @type bool $allow_dirty_styles
-	 *      @type bool $allow_dirty_scripts
 	 *      @type bool $should_locate_sources
 	 *      @type callable $validation_error_callback
 	 * }
@@ -177,6 +177,7 @@ abstract class AMP_Base_Sanitizer {
 	 * @since 0.4
 	 * @codeCoverageIgnore
 	 * @deprecated As of 1.0, use get_stylesheets().
+	 * @internal
 	 *
 	 * @return array[][] Mapping of CSS selectors to arrays of properties.
 	 */

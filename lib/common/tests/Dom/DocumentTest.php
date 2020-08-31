@@ -7,6 +7,8 @@ use AmpProject\Dom\Document;
 use AmpProject\Tests\AssertContainsCompatibility;
 use DOMNode;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
+use ReflectionException;
 
 /**
  * Tests for AmpProject\Dom\Document.
@@ -40,7 +42,7 @@ class DocumentTest extends TestCase
             ],
             'emoji_amp_attribute'                      => [
                 'utf-8',
-                '<!DOCTYPE html><html ' . Attribute::AMP_EMOJI . '>' . $head . '<body></body></html>',
+                '<!DOCTYPE html><html' . PHP_EOL . Attribute::AMP_EMOJI . '>' . $head . '<body></body></html>',
                 '<!DOCTYPE html><html ' . Attribute::AMP_EMOJI . '>' . $head . '<body></body></html>',
             ],
             // The next one is different, see https://github.com/ampproject/amphtml/issues/25990.
@@ -307,6 +309,49 @@ class DocumentTest extends TestCase
                 '<!DOCTYPE html><html>' . $head . '<body><script template="amp-mustache" type="text/plain" id="foo"><table><tr>{{#example}}<td></td>{{/example}}</tr></table></script><script type="text/plain" template="amp-mustache" id="example"><p>{{#baz}}This is inside a template{{/baz}}</p></script></body></html>',
                 '<!DOCTYPE html><html>' . $head . '<body><script template="amp-mustache" type="text/plain" id="foo"><table><tr>{{#example}}<td></td>{{/example}}</tr></table></script><script type="text/plain" template="amp-mustache" id="example"><p>{{#baz}}This is inside a template{{/baz}}</p></script></body></html>',
             ],
+            'multiline_mustache_templates_appear'      => [
+                'utf-8',
+                '
+                <!DOCTYPE html>
+                <html>
+                    <head><meta charset="utf-8"></head>
+                    <body>
+                    <script type="text/plain" template="amp-mustache">
+                      <table>
+                        <tr>
+                    {{#foo}}<td></td>{{/foo}}
+                        </tr>
+                      </table>
+                    </script>
+                    </body>
+                </html>
+                ',
+                '
+                <!DOCTYPE html>
+                <html>
+                    <head><meta charset="utf-8"></head>
+                    <body>
+                    <script type="text/plain" template="amp-mustache">
+                      <table>
+                        <tr>
+                    {{#foo}}<td></td>{{/foo}}
+                        </tr>
+                      </table>
+                    </script>
+                    </body>
+                </html>
+                ',
+            ],
+            'mustache_url_encoded_attributes_in_template_tags' => [
+              'utf-8',
+                '<!DOCTYPE html><html>' . $head . '<body><template type="amp-mustache"><div><form action="{{action}}"><a href="{{url}}"><img src="{{src}}"></a></form></div></template></body></html>',
+                '<!DOCTYPE html><html>' . $head . '<body><template type="amp-mustache"><div><form action="{{action}}"><a href="{{url}}"><img src="{{src}}"></a></form></div></template></body></html>',
+            ],
+            'mustache_url_encoded_attributes_in_script_tags' => [
+              'utf-8',
+                '<!DOCTYPE html><html>' . $head . '<body><script type="text/plain" template="amp-mustache"><div><form action="{{action}}"><a href="{{url}}"><img src="{{src}}"></a></form></div></script></body></html>',
+                '<!DOCTYPE html><html>' . $head . '<body><script type="text/plain" template="amp-mustache"><div><form action="{{action}}"><a href="{{url}}"><img src="{{src}}"></a></form></div></script></body></html>',
+            ],
         ];
     }
 
@@ -380,6 +425,42 @@ class DocumentTest extends TestCase
             $converted = Document::fromHtml($html)->saveHTML();
             $this->assertStringNotContains(Document::AMP_BIND_DATA_ATTR_PREFIX, $converted, "Source: {$html}");
         }
+    }
+
+    /**
+     * Test handling noscript elements in the head.
+     *
+     * @covers Document::maybeReplaceNoscriptElements()
+     * @covers Document::maybeRestoreNoscriptElements()
+     */
+    public function testHeadNoscriptElementHandling()
+    {
+        $original = '
+            <html>
+                <head>
+                    <noscript>
+                        <style>/*1*/</style>
+                    </noscript>
+                    <title>Hello</title>
+                    <noscript>
+                        <style>/*2*/</style>
+                    </noscript>
+                </head>
+                <body>
+                    <noscript>
+                        <style>/*3*/</style>
+                    </noscript>
+                </body>
+            </html>
+        ';
+
+        $dom = Document::fromHtml($original);
+        $noscripts = $dom->getElementsByTagName('noscript');
+
+        $this->assertEquals(3, $noscripts->length);
+        $this->assertEquals('head', $noscripts->item(0)->parentNode->nodeName);
+        $this->assertEquals('head', $noscripts->item(1)->parentNode->nodeName);
+        $this->assertEquals('body', $noscripts->item(2)->parentNode->nodeName);
     }
 
     /**
@@ -661,5 +742,106 @@ class DocumentTest extends TestCase
     public function testHasInitialAmpDevMode($document, $hasInitialDevMode)
     {
         $this->assertEquals($hasInitialDevMode, $document->hasInitialAmpDevMode());
+    }
+
+    /**
+     * Data provider for Dom\Document::getElementId() tests.
+     *
+     * @return array
+     */
+    public function getGetElementIdData()
+    {
+        $elementFactory = static function ($dom, $id = null) {
+            $element = $dom->createElement('div');
+
+            if ($id) {
+                $element->setAttribute('id', $id);
+            }
+
+            $dom->body->appendChild($element);
+
+            return $element;
+        };
+
+        return [
+            'single check with existing ID'         => [
+                [
+                    [ $elementFactory, 'my-id', 'some-prefix', 'my-id' ],
+                ],
+            ],
+
+            'single check without existing ID'      => [
+                [
+                    [ $elementFactory, null, 'some-prefix', 'some-prefix-0' ],
+                ],
+            ],
+
+            'consecutive checks count upwards'      => [
+                [
+                    [ $elementFactory, null, 'some-prefix', 'some-prefix-0' ],
+                    [ $elementFactory, null, 'some-prefix', 'some-prefix-1' ],
+                ],
+            ],
+
+            'consecutive checks for same element return same ID' => [
+                [
+                    [ $elementFactory, null, 'some-prefix', 'some-prefix-0' ],
+                    [ null, null, 'some-prefix', 'some-prefix-0' ],
+                ],
+            ],
+
+            'mixing prefixes keeps counts separate' => [
+                [
+                    [ $elementFactory, 'my-id', 'some-prefix', 'my-id' ],
+                    [ $elementFactory, null, 'some-prefix', 'some-prefix-0' ],
+                    [ $elementFactory, null, 'some-prefix', 'some-prefix-1' ],
+                    [ $elementFactory, null, 'other-prefix', 'other-prefix-0' ],
+                    [ $elementFactory, null, 'other-prefix', 'other-prefix-1' ],
+                    [ $elementFactory, null, 'some-prefix', 'some-prefix-2' ],
+                    [ $elementFactory, 'another-id', 'some-prefix', 'another-id' ],
+                    [ $elementFactory, null, 'some-prefix', 'some-prefix-3' ],
+                    [ null, null, 'some-prefix', 'some-prefix-3' ],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Test Document::getElementId().
+     *
+     * @dataProvider getGetElementIdData
+     * @covers Document::getElementId()
+     *
+     * @param array $checks Checks to perform. Each check is an array containing an element, a prefix and an expected ID.
+     */
+    public function testGetElementId($checks)
+    {
+        $dom = new Document();
+        foreach ($checks as list($elementFactory, $id, $prefix, $expected)) {
+            // If no element factory was passed, just reuse the previous element.
+            if ($elementFactory) {
+                $element = $elementFactory($dom, $id);
+            }
+
+            $actual = $dom->getElementId($element, $prefix);
+            $this->assertEquals($expected, $actual);
+        }
+    }
+
+    /**
+     * Test whether existing element IDs are taken into account, even if the index counter is off.
+     *
+     * @covers Document::getElementId()
+     */
+    public function testGetElementIdOnPreexistingIds()
+    {
+        $dom = Document::fromHtml(
+            '<body><div id="some-prefix-0"><div id="some-prefix-1"><div id="some-prefix-2"></body>'
+        );
+
+        $element = $dom->createElement('div');
+        $dom->body->appendChild($element);
+
+        $this->assertEquals('some-prefix-3', $dom->getElementId($element, 'some-prefix'));
     }
 }

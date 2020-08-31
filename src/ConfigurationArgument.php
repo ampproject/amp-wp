@@ -11,6 +11,8 @@ namespace AmpProject\AmpWP;
  * Constants for the options that the AmpWP plugin supports.
  *
  * @package AmpProject\AmpWP
+ * @since 2.0
+ * @internal
  */
 interface ConfigurationArgument {
 

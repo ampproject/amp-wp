@@ -5,12 +5,18 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
+
 /**
  * Class AMP_Twitter_Embed_Handler_Test
  *
  * @covers AMP_Twitter_Embed_Handler
  */
 class AMP_Twitter_Embed_Handler_Test extends WP_UnitTestCase {
+
+	use WithoutBlockPreRendering {
+		setUp as public prevent_block_pre_render;
+	}
 
 	/**
 	 * oEmbed response for the tweet ID 987437752164737025.
@@ -30,7 +36,8 @@ class AMP_Twitter_Embed_Handler_Test extends WP_UnitTestCase {
 	 * Set up each test.
 	 */
 	public function setUp() {
-		parent::setUp();
+		$this->prevent_block_pre_render();
+
 		add_filter( 'pre_http_request', [ $this, 'mock_http_request' ], 10, 3 );
 	}
 
@@ -168,12 +175,12 @@ class AMP_Twitter_Embed_Handler_Test extends WP_UnitTestCase {
 		$dom              = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
 		$embed->sanitize_raw_embeds( $dom );
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$whitelist_sanitizer->sanitize();
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$validating_sanitizer->sanitize();
 
 		$scripts = array_merge(
 			$embed->get_scripts(),
-			$whitelist_sanitizer->get_scripts()
+			$validating_sanitizer->get_scripts()
 		);
 
 		$this->assertEquals( $expected, $scripts );

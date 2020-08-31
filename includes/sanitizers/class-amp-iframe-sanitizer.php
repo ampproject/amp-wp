@@ -6,11 +6,15 @@
  */
 
 use AmpProject\DevMode;
+use AmpProject\Attribute;
+use AmpProject\Layout;
 
 /**
  * Class AMP_Iframe_Sanitizer
  *
  * Converts <iframe> tags to <amp-iframe>
+ *
+ * @internal
  */
 class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	use AMP_Noscript_Fallback;
@@ -124,8 +128,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			$this->did_convert_elements = true;
-			if ( empty( $normalized_attributes['layout'] ) && ! empty( $normalized_attributes['width'] ) && ! empty( $normalized_attributes['height'] ) ) {
-				$normalized_attributes['layout'] = 'intrinsic';
+			if ( empty( $normalized_attributes[ Attribute::LAYOUT ] ) && ! empty( $normalized_attributes[ Attribute::HEIGHT ] ) && ! empty( $normalized_attributes[ Attribute::WIDTH ] ) ) {
 
 				// Set layout to responsive if the iframe is aligned to full width.
 				$figure_node = null;
@@ -135,8 +138,15 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				if ( $node->parentNode->parentNode instanceof DOMElement && 'figure' === $node->parentNode->parentNode->tagName ) {
 					$figure_node = $node->parentNode->parentNode;
 				}
-				if ( $figure_node && $figure_node->hasAttribute( 'class' ) && in_array( 'alignfull', explode( ' ', $figure_node->getAttribute( 'class' ) ), true ) ) {
-					$normalized_attributes['layout'] = 'responsive';
+
+				if (
+					! empty( $this->args['align_wide_support'] )
+					&& $figure_node
+					&& preg_match( '/(^|\s)(alignwide|alignfull)(\s|$)/', $figure_node->getAttribute( Attribute::CLASS_ ) )
+				) {
+					$normalized_attributes[ Attribute::LAYOUT ] = Layout::RESPONSIVE;
+				} else {
+					$normalized_attributes[ Attribute::LAYOUT ] = Layout::INTRINSIC;
 				}
 
 				$this->add_or_append_attribute( $normalized_attributes, 'class', 'amp-wp-enforced-sizes' );
@@ -161,7 +171,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			// Add placeholder.
 			if ( $placeholder_node || true === $this->args['add_placeholder'] ) {
 				if ( ! $placeholder_node ) {
-					$placeholder_node = $this->build_placeholder( $normalized_attributes ); // @todo Can a better placeholder default be devised?
+					$placeholder_node = $this->build_placeholder(); // @todo Can a better placeholder default be devised?
 				}
 				$new_node->appendChild( $placeholder_node );
 			}
@@ -213,6 +223,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type int $frameborder <iframe> `frameborder` attribute - Filter to '0' or '1'; default to '0'
 	 *      @type bool $allowfullscreen <iframe> `allowfullscreen` attribute - Convert 'false' to empty string ''
 	 *      @type bool $allowtransparency <iframe> `allowtransparency` attribute - Convert 'false' to empty string ''
+	 *      @type string $type <iframe> `type` attribute - Pass along if value is not `text/html`
 	 * }
 	 * @return array Returns HTML attributes; normalizes src, dimensions, frameborder, sandbox, allowtransparency and allowfullscreen
 	 */
@@ -296,6 +307,16 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 					// No need to copy.
 					break;
 
+				case 'type':
+					/*
+					 * Omit the `type` attribute if its value is `text/html`. Popular embed providers such as Amazon
+					 * Kindle use this non-standard attribute, which is apparently a vestige from usage on <object>.
+					 */
+					if ( 'text/html' !== strtolower( $value ) ) {
+						$out[ $name ] = $value;
+					}
+					break;
+
 				default:
 					$out[ $name ] = $value;
 					break;
@@ -344,16 +365,10 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.2
 	 *
-	 * @param string[] $parent_attributes {
-	 *      Attributes.
-	 *
-	 *      @type string $placeholder AMP HTML <amp-iframe> `placeholder` attribute; default to 'amp-wp-iframe-placeholder'
-	 *      @type string $class AMP HTML <amp-iframe> `class` attribute; default to 'amp-wp-iframe-placeholder'
-	 * }
 	 * @return DOMElement|false
 	 */
-	private function build_placeholder( $parent_attributes ) {
-		$placeholder_node = AMP_DOM_Utils::create_node(
+	private function build_placeholder() {
+		return AMP_DOM_Utils::create_node(
 			$this->dom,
 			'span',
 			[
@@ -361,8 +376,6 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				'class'       => 'amp-wp-iframe-placeholder',
 			]
 		);
-
-		return $placeholder_node;
 	}
 
 	/**

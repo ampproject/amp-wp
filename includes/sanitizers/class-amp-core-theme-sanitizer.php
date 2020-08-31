@@ -6,7 +6,9 @@
  * @since 1.0
  */
 
+use AmpProject\Attribute;
 use AmpProject\Dom\Document;
+use AmpProject\Role;
 
 /**
  * Class AMP_Core_Theme_Sanitizer
@@ -15,6 +17,7 @@ use AmpProject\Dom\Document;
  *
  * @see AMP_Validation_Error_Taxonomy::accept_core_theme_validation_errors()
  * @since 1.0
+ * @internal
  */
 class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
@@ -54,15 +57,15 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected static $modal_roles = [
-		'navigation',
-		'menu',
-		'search',
-		'alert',
-		'figure',
-		'form',
-		'img',
-		'toolbar',
-		'tooltip',
+		Role::NAVIGATION,
+		Role::MENU,
+		Role::SEARCH,
+		Role::ALERT,
+		Role::FIGURE,
+		Role::FORM,
+		Role::IMG,
+		Role::TOOLBAR,
+		Role::TOOLTIP,
 	];
 
 	/**
@@ -79,6 +82,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			// Twenty Twenty.
 			case 'twentytwenty':
 				$config = [
+					'prevent_sanitize_in_customizer_preview' => [
+						'//style[ @id = "twentytwenty-style-inline-css" ]',
+					],
 					'dequeue_scripts'                  => [
 						'twentytwenty-js',
 					],
@@ -129,6 +135,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			// Twenty Seventeen.
 			case 'twentyseventeen':
 				return [
+					'prevent_sanitize_in_customizer_preview' => [
+						'//link[ @id = "twentyseventeen-colors-dark-css" ]',
+					],
 					// @todo Try to implement belowEntryMetaClass().
 					'dequeue_scripts'                     => [
 						'twentyseventeen-html5', // Only relevant for IE<9.
@@ -239,7 +248,14 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 			// Twenty Eleven.
 			case 'twentyeleven':
-				// Twenty Ten.
+				return [
+					'prevent_sanitize_in_customizer_preview' => [
+						'//style[ @id = "twentyeleven-header-css" ]',
+						'//link[ @id = "dark-css" ]',
+					],
+				];
+
+			// Twenty Ten.
 			case 'twentyten':
 				return [];
 
@@ -282,12 +298,12 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.1
 	 */
 	public static function extend_theme_support() {
-		$args = self::get_theme_support_args( get_template() );
-
-		if ( empty( $args ) ) {
+		$template = get_template();
+		if ( ! in_array( $template, self::get_supported_themes(), true ) ) {
 			return;
 		}
 
+		$args    = self::get_theme_support_args( $template );
 		$support = AMP_Theme_Support::get_theme_support_args();
 		if ( ! is_array( $support ) ) {
 			$support = [];
@@ -556,6 +572,28 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Adds the data-ampdevmode attribute to the set of specified elements to prevent further sanitization. This is
+	 * necessary as certain features in the Customizer require these elements to be present in their unaltered state.
+	 *
+	 * @param array $xpaths List of XPaths.
+	 */
+	public function prevent_sanitize_in_customizer_preview( $xpaths = [] ) {
+		if ( ! is_customize_preview() ) {
+			return;
+		}
+
+		// We can't use the `amp_dev_mode_element_xpaths` filter here as AMP_Dev_Mode_Sanitizer has already been
+		// executed.
+		foreach ( $xpaths as $xpath ) {
+			foreach ( $this->dom->xpath->query( $xpath ) as $node ) {
+				if ( $node instanceof DOMElement ) {
+					$node->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
+				}
+			}
+		}
+	}
+
+	/**
 	 * Dequeue scripts.
 	 *
 	 * @since 1.0
@@ -602,13 +640,13 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	public function add_smooth_scrolling( $link_xpaths ) {
 		foreach ( $link_xpaths as $link_xpath ) {
 			foreach ( $this->dom->xpath->query( $link_xpath ) as $link ) {
-				if ( $link instanceof DOMElement && preg_match( '/#(.+)/', $link->getAttribute( 'href' ), $matches ) ) {
-					$link->setAttribute( 'on', sprintf( 'tap:%s.scrollTo(duration=600)', $matches[1] ) );
+				if ( $link instanceof DOMElement && preg_match( '/#(.+)/', $link->getAttribute( Attribute::HREF ), $matches ) ) {
+					$link->setAttribute( Attribute::ON, sprintf( 'tap:%s.scrollTo(duration=600)', $matches[1] ) );
 
 					// Prevent browser from jumping immediately to the link target.
-					$link->removeAttribute( 'href' );
-					$link->setAttribute( 'tabindex', '0' );
-					$link->setAttribute( 'role', 'button' );
+					$link->removeAttribute( Attribute::HREF );
+					$link->setAttribute( Attribute::TABINDEX, '0' );
+					$link->setAttribute( Attribute::ROLE, Role::BUTTON );
 				}
 			}
 		}
@@ -1026,7 +1064,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			 *
 			 * @var DOMElement $link
 			 */
-			$link->setAttribute( 'tabindex', '-1' );
+			$link->setAttribute( Attribute::TABINDEX, '-1' );
 		}
 
 		$navigation_top->parentNode->insertBefore( $navigation_top_fixed, $navigation_top->nextSibling );
@@ -1551,8 +1589,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				$a->setAttribute( 'class', 'slider-active' );
 			}
 			$a->setAttribute( Document::AMP_BIND_DATA_ATTR_PREFIX . 'class', "$selected_slide_state_id == $i ? 'slider-active' : ''" );
-			$a->setAttribute( 'role', 'button' );
-			$a->setAttribute( 'on', "tap:AMP.setState( { $selected_slide_state_id: $i } )" );
+			$a->setAttribute( Attribute::ROLE, Role::BUTTON );
+			$a->setAttribute( Attribute::ON, "tap:AMP.setState( { $selected_slide_state_id: $i } )" );
 			$li->setAttribute( 'option', (string) $i );
 			$a->appendChild( $this->dom->createTextNode( $i + 1 ) );
 			$li->appendChild( $a );
@@ -1599,9 +1637,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			$search_input_el->setAttribute( 'id', $search_input_id );
 			$on .= ",$search_input_id.focus()";
 		}
-		$search_toggle_link->setAttribute( 'on', $on );
-		$search_toggle_link->setAttribute( 'tabindex', '0' );
-		$search_toggle_link->setAttribute( 'role', 'button' );
+		$search_toggle_link->setAttribute( Attribute::ON, $on );
+		$search_toggle_link->setAttribute( Attribute::TABINDEX, '0' );
+		$search_toggle_link->setAttribute( Attribute::ROLE, Role::BUTTON );
 
 		// Set visibility and aria-expanded based of the link based on whether the search bar is expanded.
 		$search_toggle_link->setAttribute( 'aria-expanded', wp_json_encode( $hidden ) );
@@ -1636,7 +1674,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$body_id = AMP_DOM_Utils::get_element_id( $this->dom->body, 'body' );
+		$body_id = $this->dom->getElementId( $this->dom->body, 'body' );
 
 		$open_xpaths  = isset( $args['open_button_xpath'] ) ? $args['open_button_xpath'] : [];
 		$close_xpaths = isset( $args['close_button_xpath'] ) ? $args['close_button_xpath'] : [];
@@ -1688,9 +1726,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			 *
 			 * @var DOMElement $event_element
 			 */
-			$event_element->setAttribute( 'role', $this->guess_modal_role( $modal_content_node ) );
+			$event_element->setAttribute( Attribute::ROLE, $this->guess_modal_role( $modal_content_node ) );
 			// Setting tabindex to -1 (not reachable) as keyboard focus is handled through toggles.
-			$event_element->setAttribute( 'tabindex', -1 );
+			$event_element->setAttribute( Attribute::TABINDEX, -1 );
 		}
 
 		$parent_node = $modal_content_node->parentNode;
@@ -1774,7 +1812,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 
-			$modal_id = AMP_DOM_Utils::get_element_id( $modal );
+			$modal_id = $this->dom->getElementId( $modal );
 
 			// Add the lightbox itself as a close button xpath as well.
 			// With twentytwenty compat, the lightbox fills the entire screen, and only an inner wrapper will contain
@@ -1806,7 +1844,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function add_twentytwenty_toggles() {
 		$toggles = $this->dom->xpath->query( '//*[ @data-toggle-target ]' );
-		$body_id = AMP_DOM_Utils::get_element_id( $this->dom->body, 'body' );
+		$body_id = $this->dom->getElementId( $this->dom->body, 'body' );
 
 		if ( false === $toggles || 0 === $toggles->length ) {
 			return;
@@ -1819,7 +1857,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		foreach ( $toggles as $toggle ) {
 			$toggle_target = $toggle->getAttribute( 'data-toggle-target' );
-			$toggle_id     = AMP_DOM_Utils::get_element_id( $toggle );
+			$toggle_id     = $this->dom->getElementId( $toggle );
 
 			if ( 'next' === $toggle_target ) {
 				$target_node = $toggle->nextSibling;
@@ -1845,7 +1883,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 			$is_sub_menu     = AMP_DOM_Utils::has_class( $target_node, 'sub-menu' );
 			$new_target_node = $is_sub_menu ? $this->get_closest_submenu( $toggle ) : $target_node;
-			$new_target_id   = AMP_DOM_Utils::get_element_id( $new_target_node );
+			$new_target_id   = $this->dom->getElementId( $new_target_node );
 
 			$state_string = str_replace( '-', '_', $new_target_id );
 
@@ -1867,7 +1905,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						// Skip adding the 'active' class on the "Close" button in the primary nav menu.
 						continue;
 					}
-					$target_toggle_id = AMP_DOM_Utils::get_element_id( $target_toggle );
+					$target_toggle_id = $this->dom->getElementId( $target_toggle );
 					AMP_DOM_Utils::add_amp_action( $toggle, 'tap', "{$target_toggle_id}.toggleClass(class='active')" );
 				}
 			}
@@ -1886,7 +1924,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					$focus_element = $this->dom->xpath->query( $focus_xpath )->item( 0 );
 
 					if ( $focus_element instanceof DOMElement ) {
-						$focus_element_id = AMP_DOM_Utils::get_element_id( $focus_element );
+						$focus_element_id = $this->dom->getElementId( $focus_element );
 						AMP_DOM_Utils::add_amp_action( $toggle, 'tap', "{$focus_element_id}.focus" );
 					}
 				}
@@ -2012,11 +2050,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected function guess_modal_role( DOMElement $modal ) {
 		// No classes to base our guess on, so keep it generic.
-		if ( ! $modal->hasAttribute( 'class' ) ) {
-			return 'dialog';
+		if ( ! $modal->hasAttribute( Attribute::CLASS_ ) ) {
+			return Role::DIALOG;
 		}
 
-		$classes = preg_split( '/\s+/', trim( $modal->getAttribute( 'class' ) ) );
+		$classes = preg_split( '/\s+/', trim( $modal->getAttribute( Attribute::CLASS_ ) ) );
 
 		foreach ( self::$modal_roles as $role ) {
 			if ( in_array( $role, $classes, true ) ) {
@@ -2025,6 +2063,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// None of the roles we are looking for match any of the classes.
-		return 'dialog';
+		return Role::DIALOG;
 	}
 }

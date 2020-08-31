@@ -7,11 +7,14 @@
 
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 
-use AmpProject\AmpWP\RemoteRequest\CachedData;
+use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\RemoteRequest\CachedResponse;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
-use AmpProject\AmpWP\Tests\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
+use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
 use AmpProject\Dom\Document;
-use AmpProject\AmpWP\Tests\PrivateAccess;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\Exception\FailedToGetFromRemoteUrl;
 
 /**
@@ -20,7 +23,9 @@ use AmpProject\Exception\FailedToGetFromRemoteUrl;
 class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 	use AssertContainsCompatibility;
+	use MarkupComparison;
 	use PrivateAccess;
+	use LoadsCoreThemes;
 
 	/**
 	 * Set up.
@@ -31,6 +36,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$wp_styles  = null;
 		$wp_scripts = null;
 		delete_option( AMP_Options_Manager::OPTION_NAME ); // Make sure default reader mode option does not override theme support being added.
+
+		$this->register_core_themes();
 	}
 
 	/**
@@ -38,9 +45,12 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function tearDown() {
 		parent::tearDown();
-		global $wp_styles, $wp_scripts;
-		$wp_styles  = null;
-		$wp_scripts = null;
+		global $wp_styles, $wp_scripts, $wp_customize;
+		$wp_styles    = null;
+		$wp_scripts   = null;
+		$wp_customize = null;
+
+		$this->restore_theme_directories();
 	}
 
 	/**
@@ -230,6 +240,14 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				],
 			],
 
+			'nested_css_var_in_function'         => [
+				'<style>.opacity3 { color: rgba(0, 0, 255, var(--opacity)); }</style><p class="opacity3"></p>',
+				'<p class="opacity3"></p>',
+				[
+					'.opacity3{color:rgba(0,0,255,var(--opacity))}',
+				],
+			],
+
 			'multi_selector_in_not_pseudo_class'         => [
 				'<style>.widget:not(.widget_text,.jetpack_widget_social_icons[title="a,b"]) ul { color:red; }</style><div class="widget"><ul></ul></div>',
 				'<div class="widget"><ul></ul></div>',
@@ -277,6 +295,40 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 								<div class="custom-population">Population: {{population}}</div>
 							</div>
 						</template>
+					</amp-autocomplete>
+				</form>
+				',
+				[
+					'.custom-population{color:red}',
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-f2a1aff{color:blue}',
+					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-d4ea4c7{outline:solid 1px black}',
+				],
+			],
+			'with_mustache_template_script' => [
+				'
+				<style>
+				.custom-population { color: red; }
+				</style>
+				<form id="myform" role="search" class="search-form" method="get" action="https://example.com/" target="_top" style="color: blue">
+					<amp-autocomplete filter="substring" items="." filter-value="title" max-entries="6" min-characters="2" submit-on-enter="" src="https://example.com/autocomplete/">
+						<script template="amp-mustache" type="text/plain" id="amp-template-custom">
+							<div class="city-item" data-value="{{city}}, {{state}}" style="outline: solid 1px black;">
+								<div style="color: {{regionColor}}">{{city}}, {{state}}</div>
+								<div class="custom-population">Population: {{population}}</div>
+							</div>
+						</script>
+					</amp-autocomplete>
+				</form>
+				',
+				'
+				<form id="myform" role="search" class="search-form amp-wp-f2a1aff" method="get" action="https://example.com/" target="_top" data-amp-original-style="color: blue">
+					<amp-autocomplete filter="substring" items="." filter-value="title" max-entries="6" min-characters="2" submit-on-enter="" src="https://example.com/autocomplete/">
+						<script template="amp-mustache" type="text/plain" id="amp-template-custom">
+							<div class="city-item amp-wp-d4ea4c7" data-value="{{city}}, {{state}}" data-amp-original-style="outline: solid 1px black;">
+								<div style="color: {{regionColor}}">{{city}}, {{state}}</div>
+								<div class="custom-population">Population: {{population}}</div>
+							</div>
+						</script>
 					</amp-autocomplete>
 				</form>
 				',
@@ -627,6 +679,33 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				],
 				[],
 			],
+			'classes_in_mustache_template' => [
+				'
+				<html>
+					<head>
+						<noscript>
+							<style>h2.one { color: green }</style>
+						</noscript>
+					</head>
+					<body>
+						<style>
+							h2.two { color: red }
+						</style>
+						<template type="amp-mustache">
+							<h2 class="one">One</h2>
+						</template>
+						<script type="text/plain" template="amp-mustache">
+							<h2 class="two">Two</h2>
+						</script>
+					</body>
+				</html>
+				',
+				[
+					'h2.one{color:green}',
+					'h2.two{color:red}',
+				],
+				[],
+			],
 		];
 	}
 
@@ -675,8 +754,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Style_Sanitizer( $dom, $args );
 		$sanitizer->sanitize();
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom, $args );
-		$whitelist_sanitizer->sanitize();
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom, $args );
+		$validating_sanitizer->sanitize();
 
 		$sanitized_html     = $dom->saveHTML( $dom->documentElement );
 		$actual_stylesheets = array_values( array_filter( $sanitizer->get_stylesheets() ) );
@@ -699,6 +778,71 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		if ( $actual_stylesheets ) {
 			$this->assertStringContains( "\n\n/*# sourceURL=amp-custom.css */", $sanitized_html );
 		}
+	}
+
+	/**
+	 * Test that tree shaking and CSS limits are disabled when in the Customizer Preview.
+	 */
+	public function test_tree_shaking_disabled_in_customizer_preview() {
+		$active_theme = 'twentynineteen';
+		$reader_theme = 'twentytwenty';
+		if ( ! wp_get_theme( $active_theme )->exists() || ! wp_get_theme( $reader_theme )->exists() ) {
+			$this->markTestSkipped();
+		}
+		switch_theme( $active_theme );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::READER_THEME, $reader_theme );
+
+		require_once ABSPATH . WPINC . '/class-wp-customize-manager.php';
+		global $wp_customize;
+		$wp_customize = new WP_Customize_Manager();
+		$wp_customize->start_previewing_theme();
+		$this->assertTrue( is_customize_preview() );
+
+		$dom = Document::fromHtml(
+			sprintf(
+				'
+				<html>
+					<head>
+						<style>
+						.selective-refresh-container {
+							outline: solid 1px red;
+						}
+						</style>
+						<style>
+						.my-partial {
+							outline: solid 1px blue;
+							content: "%s";
+						}
+						</style>
+					</head>
+					<body>
+						<div class="selective-refresh-container">
+							<!-- Selective refresh may render my-partial here. -->
+						</div>
+					</body>
+				</html>
+				',
+				str_repeat( 'a', 75001 )
+			)
+		);
+
+		$args = [
+			'use_document_element' => true,
+		];
+
+		$sanitizer = new AMP_Style_Sanitizer( $dom, $args );
+		$sanitizer->sanitize();
+
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom, $args );
+		$validating_sanitizer->sanitize();
+
+		$actual_stylesheets = array_values( array_filter( $sanitizer->get_stylesheets() ) );
+
+		$this->assertCount( 2, $actual_stylesheets );
+		$this->assertStringStartsWith( '.selective-refresh-container{', $actual_stylesheets[0] );
+		$this->assertStringStartsWith( '.my-partial{', $actual_stylesheets[1] );
+		$this->assertGreaterThan( 75000, strlen( implode( '', $actual_stylesheets ) ) );
 	}
 
 	/**
@@ -838,6 +982,16 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'.main-navigation ul ul li:hover > ul, .main-navigation ul ul li.focus > ul { left: 100%; right: auto; } nav.focused { outline:solid 1px red; }',
 				'.main-navigation ul ul li:hover > ul,.main-navigation ul ul li:focus-within > ul{left:100%;right:auto}nav.focused{outline:solid 1px red}',
 			],
+			'focus_selector_after_whitespace_combinator' => [
+				'<nav class="main-navigation focused"><ul><li class="menu-item-has-children"><a href="https://example.com/">Example</a><ul><li><a href="https://example.org">Another example</a></li></ul></li></ul></nav>',
+				'.main-navigation ul li:hover > ul, .main-navigation ul    .focus > ul { left: 100% } .focus > ul { right: auto } nav.focused { outline:solid 1px red; }',
+				'.main-navigation ul li:hover > ul,.main-navigation ul    .menu-item-has-children:focus-within > ul{left:100%}.menu-item-has-children:focus-within > ul{right:auto}nav.focused{outline:solid 1px red}',
+			],
+			'focus_selector_after_child_combinator' => [
+				'<nav class="main-navigation focused"><ul><li><a href="https://example.com/">Example</a><ul><li><a href="https://example.org">Another example</a></li></ul></li></ul></nav>',
+				'.main-navigation ul ul li:hover > ul, .main-navigation ul ul    >    .focus > ul { left: 100%; right: auto; } nav.focused { outline:solid 1px red; }',
+				'.main-navigation ul ul li:hover > ul,.main-navigation ul ul    >    :focus-within > ul{left:100%;right:auto}nav.focused{outline:solid 1px red}',
+			],
 			'style_attribute_selector' => [
 				'<figure class="wp-block-pullquote" style="border-color:#ce3a0d">',
 				'.wp-block-pullquote:not(.is-style-solid-color)[style*="border-color"] { border: 2px solid; }',
@@ -945,7 +1099,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				],
 			],
 			'escaped_char_class_name' => [
-				'<div class="bg-black w-16 lg:w-full hover:bg-blue @@@"></div>',
+				'<div class="bg-black w-16 lg:w-full hover:bg-blue @@@ w-1/3"></div>',
 				[
 					'.lg'               => false,
 					'.hover'            => false,
@@ -955,6 +1109,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'.lg\:w-medium'     => false,
 					'.\@\@\@'           => true,
 					'.\@\@\@\@'         => false,
+					'.w-1\/3'           => true,
+					'.w-2\/3'           => false,
 				],
 			],
 			'toggle_class' => [
@@ -1587,22 +1743,24 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$request_count = 0;
 		$href          = 'https://www.example.com/styles.css';
 		$response_body = 'body{color:red}';
+		$headers       = [
+			'content-type'  => 'text/css',
+			'cache-control' => 'max-age=' . ( YEAR_IN_SECONDS + MONTH_IN_SECONDS ),
+		];
+		$status_code   = 200;
 
 		add_filter(
 			'pre_http_request',
-			function( $preempt, $request, $url ) use ( $href, &$request_count, $response_body ) {
+			function( $preempt, $request, $url ) use ( $href, &$request_count, $response_body, $headers, $status_code ) {
 				$this->assertRegExp( '#^https?://#', $url );
 				if ( set_url_scheme( $url, 'https' ) === set_url_scheme( $href, 'https' ) ) {
 					$request_count++;
 					$preempt = [
 						'response' => [
-							'code'    => 200,
+							'code' => $status_code,
 						],
-						'headers' => [
-							'content-type' => 'text/css',
-							'cache-control' => 'max-age=' . ( YEAR_IN_SECONDS + MONTH_IN_SECONDS ),
-						],
-						'body' => $response_body,
+						'headers'  => $headers,
+						'body'     => $response_body,
 					];
 				}
 				return $preempt;
@@ -1645,16 +1803,18 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertNotFalse( $transient );
 
 		/**
-		 * Cached data.
+		 * Cached response.
 		 *
-		 * @var CachedData
+		 * @var CachedResponse
 		 */
-		$cached_data = unserialize( $transient ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
-		$this->assertInstanceOf( CachedData::class, $cached_data );
+		$cached_response = unserialize( $transient ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
+		$this->assertInstanceOf( CachedResponse::class, $cached_response );
 
-		$this->assertEquals( $response_body, $cached_data->get_value() );
+		$this->assertEquals( $response_body, $cached_response->get_body() );
+		$this->assertEquals( $headers, $cached_response->get_headers() );
+		$this->assertEquals( $status_code, $cached_response->get_status_code() );
 
-		$expiry = $cached_data->get_expiry();
+		$expiry = $cached_response->get_expiry();
 		$this->assertGreaterThan( ( new DateTimeImmutable( '+ 1 year' ) )->getTimestamp(), $expiry->getTimestamp() );
 
 		$sanitize_and_get_stylesheets();
@@ -1662,28 +1822,82 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that external stylesheets fetches are cached when failures occur.
+	 * Data for test_external_stylesheet()
 	 *
-	 * @covers AMP_Style_Sanitizer::process_link_element()
+	 * @return array
 	 */
-	public function test_external_stylesheet_not_found() {
+	public function get_external_stylesheet_data() {
+		return [
+			'successful' => [
+				'style_url'     => 'https://www.example.com/styles.css',
+				'http_response' => [
+					'body'    => 'body { color: #fff }',
+					'code'    => 200,
+					'headers' => [
+						'cache-control' => 'max-age=1441',
+						'content-type'  => 'text/css',
+					],
+				],
+				'expected_styles' => [ 'body{color:#fff}' ],
+				'expected_errors' => [],
+				'cached_data'    => new CachedResponse(
+					'body { color: #fff }',
+					[
+						'cache-control' => 'max-age=1441',
+						'content-type'  => 'text/css',
+					],
+					200,
+					new DateTimeImmutable( '+ 1441 seconds' )
+				),
+			],
+			'failed' => [
+				'style_url'     => 'https://www.example.com/not-found/styles.css',
+				'http_response' => [
+					'body'    => 'Not Found!',
+					'code'    => 404,
+					'headers' => [
+						'content-type' => 'text/html',
+					],
+				],
+				'expected_styles' => [],
+				'expected_errors' => [ AMP_Style_Sanitizer::STYLESHEET_FETCH_ERROR ],
+				'cached_data'    => new CachedResponse(
+					FailedToGetFromRemoteUrl::withHttpStatus( 'https://www.example.com/not-found/styles.css', 404 )->getMessage(),
+					[],
+					404,
+					new DateTimeImmutable( '+ ' . DAY_IN_SECONDS . ' seconds' )
+				),
+			],
+		];
+	}
+
+	/**
+	 * Test that external stylesheets fetches are cached.
+	 *
+	 * @dataProvider get_external_stylesheet_data
+	 * @covers AMP_Style_Sanitizer::process_link_element()
+	 *
+	 * @param string         $style_url                Stylesheet URL.
+	 * @param array          $http_response            Mocked HTTP response.
+	 * @param array          $expected_styles          Expected minified stylesheets.
+	 * @param array          $expected_errors          Expected error codes.
+	 * @param CachedResponse $expected_cached_response Expected cache response.
+	 */
+	public function test_external_stylesheet( $style_url, $http_response, $expected_styles, $expected_errors, $expected_cached_response ) {
 		$request_count = 0;
-		$href          = 'https://www.example.com/styles.css';
 
 		add_filter(
 			'pre_http_request',
-			function( $preempt, $request, $url ) use ( $href, &$request_count ) {
+			function( $preempt, $request, $url ) use ( $style_url, $http_response, &$request_count ) {
 				$this->assertRegExp( '#^https?://#', $url );
-				if ( set_url_scheme( $url, 'https' ) === set_url_scheme( $href, 'https' ) ) {
+				if ( set_url_scheme( $url, 'https' ) === set_url_scheme( $style_url, 'https' ) ) {
 					$request_count++;
 					$preempt = [
 						'response' => [
-							'code'    => 404,
+							'code'    => $http_response['code'],
 						],
-						'headers' => [
-							'content-type' => 'text/html',
-						],
-						'body' => 'Not Found!',
+						'headers' => $http_response['headers'],
+						'body' => $http_response['body'],
 					];
 				}
 				return $preempt;
@@ -1692,8 +1906,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			3
 		);
 
-		$sanitize_and_get_stylesheets = static function() use ( $href ) {
-			$html = sprintf( '<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="%s"></head><body></body></html>', esc_url( $href ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$sanitize_and_get_stylesheets = static function( $css_url ) {
+			$html = sprintf( '<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="%s"></head><body></body></html>', esc_url( $css_url ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 			$dom  = Document::fromHtml( $html );
 
 			$found_error_codes = [];
@@ -1714,33 +1928,32 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 		$this->assertEquals( 0, $request_count );
 
-		list( $found_error_codes, $actual_stylesheets ) = $sanitize_and_get_stylesheets();
+		list( $found_error_codes, $actual_stylesheets ) = $sanitize_and_get_stylesheets( $style_url );
 
-		$this->assertEquals( [ AMP_Style_Sanitizer::STYLESHEET_FETCH_ERROR ], $found_error_codes );
-		$this->assertEmpty( $actual_stylesheets );
+		$this->assertEquals( $expected_errors, $found_error_codes );
+		$this->assertEquals( $expected_styles, $actual_stylesheets );
 		$this->assertEquals( 1, $request_count, 'Expected HTTP request.' );
 
-		$cache_key = CachedRemoteGetRequest::TRANSIENT_PREFIX . md5( CachedRemoteGetRequest::class . $href );
+		$cache_key = CachedRemoteGetRequest::TRANSIENT_PREFIX . md5( CachedRemoteGetRequest::class . $style_url );
 		$transient = get_transient( $cache_key );
 		$this->assertNotFalse( $transient );
 
 		/**
-		 * Cached data.
+		 * Cached response.
 		 *
-		 * @var CachedData
+		 * @var CachedResponse
 		 */
-		$cached_data = unserialize( $transient ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
-		$this->assertInstanceOf( CachedData::class, $cached_data );
+		$cached_response = unserialize( $transient ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
+		$this->assertInstanceOf( CachedResponse::class, $cached_response );
 
-		$expected_exception = FailedToGetFromRemoteUrl::withHttpStatus( $href, 404 );
-		$this->assertEquals( $expected_exception->getMessage(), $cached_data->get_value() );
+		$this->assertEquals( $expected_cached_response->get_body(), $cached_response->get_body() );
+		$this->assertEquals( $expected_cached_response->get_headers(), $cached_response->get_headers() );
+		$this->assertEquals( $expected_cached_response->get_status_code(), $cached_response->get_status_code() );
 
-		// Verify that CachedRemoteGetRequest::$min_expiry is used for HTTP failures. It is set to 1 day.
-		$expiry = $cached_data->get_expiry();
-		$this->assertLessThanOrEqual( ( new DateTimeImmutable( '+ 1 day' ) )->getTimestamp(), $expiry->getTimestamp() );
-		$this->assertGreaterThan( ( new DateTimeImmutable( '+ 12 hours' ) )->getTimestamp(), $expiry->getTimestamp() );
+		$expiry = $cached_response->get_expiry();
+		$this->assertEquals( $cached_response->get_expiry()->getTimestamp(), $expiry->getTimestamp() );
 
-		$sanitize_and_get_stylesheets();
+		$sanitize_and_get_stylesheets( $style_url );
 		$this->assertEquals( 1, $request_count, 'Expected HTTP request to be cached.' );
 	}
 
@@ -1778,7 +1991,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				[],
 			],
 
-			'blacklisted_and_whitelisted_keyframe_properties' => [
+			'denylisted_and_allowlisted_keyframe_properties' => [
 				'<style amp-keyframes>@keyframes anim1 { 50% { width: 50%; animation-timing-function: ease; opacity: 0.5; height:10%; offset-distance: 50%; visibility: visible; transform: rotate(0.5turn); -webkit-transform: rotate(0.5turn); color:red; } }</style>',
 				'<style amp-keyframes="">@keyframes anim1{50%{animation-timing-function:ease;opacity:.5;offset-distance:50%;visibility:visible;transform:rotate(.5 turn);-webkit-transform:rotate(.5 turn)}}</style>',
 				array_fill( 0, 3, AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_PROPERTY ),
@@ -2026,6 +2239,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			],
 			'tangerine3'  => [
 				'http://fonts.googleapis.com/css?family=Tangerine',
+				[],
+			],
+			'tangerine4'  => [
+				'https://fonts.googleapis.com/css2?family=Tangerine',
 				[],
 			],
 			'typekit'     => [
@@ -2398,7 +2615,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function test_unicode_stylesheet() {
 		wp();
-		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
 
@@ -2413,6 +2630,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			</head>
 			<body>
 				<span class="dashicons dashicons-admin-customizer"></span>
+				<?php wp_footer(); ?>
 			</body>
 		</html>
 		<?php
@@ -2509,7 +2727,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		return [
 			'admin_bar_included' => [
 				function () use ( $render_template ) {
-					$this->go_to( home_url() );
+					$this->go_to( amp_get_permalink( self::factory()->post->create() ) );
 					show_admin_bar( true );
 					_wp_admin_bar_init();
 					switch_theme( 'twentyten' );
@@ -2529,7 +2747,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 						'wp_footer',
 						function() {
 							?>
-							<div class="is-style-outline"><button class="wp-block-button__link"></button></div>
+							<figure class="wp-block-audio"><figcaption></figcaption></figure>
 							<div class="wp-block-foo"><figcaption></figcaption></div>
 							<img src="https://example.com/example.jpg" width="100" height="200">
 							<?php
@@ -2552,7 +2770,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					$this->assertStringContains( 'admin-bar', $original_dom->body->getAttribute( 'class' ) );
 					$this->assertStringContains( 'earlyprintstyle', $original_source, 'Expected early print style to not be present.' );
 
-					$this->assertStringContains( '.is-style-outline .wp-block-button__link', $amphtml_source, 'Expected block-library/style.css' );
+					$this->assertStringContains( '.wp-block-audio figcaption', $amphtml_source, 'Expected block-library/style.css' );
 					$this->assertStringContains( '[class^="wp-block-"]:not(.wp-block-gallery) figcaption', $amphtml_source, 'Expected twentyten/blocks.css' );
 					$this->assertStringContains( 'amp-img.amp-wp-enforced-sizes', $amphtml_source, 'Expected amp-default.css' );
 					$this->assertStringContains( 'ab-empty-item', $amphtml_source, 'Expected admin-bar.css to still be present.' );
@@ -2580,6 +2798,20 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			$this->markTestSkipped( 'Requires WordPress 5.0.' );
 		}
 		global $wp_theme_directories; // Note that get_theme_roots() does not work, for some reason.
+
+		// @todo Remove once https://github.com/WordPress/gutenberg/pull/23104 is in a release.
+		// Temporarily fixes an issue with PHP errors being thrown in Gutenberg v8.3.0 on PHP 7.4.
+		$theme_features = [
+			'editor-color-palette',
+			'editor-gradient-presets',
+			'editor-font-sizes',
+		];
+		foreach ( $theme_features as $theme_feature ) {
+			if ( ! current_theme_supports( $theme_feature ) ) {
+				add_theme_support( $theme_feature, [] );
+			}
+		}
+
 		$theme_exists = false;
 		foreach ( $wp_theme_directories as $theme_root ) {
 			$theme_exists = wp_get_theme( 'twentyten', $theme_root )->exists();
@@ -2591,7 +2823,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			$this->markTestSkipped( 'Requires Twenty Ten to be installed.' );
 		}
 
-		add_theme_support( 'amp' );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->go_to( home_url() );
 		$html = $html_generator();
 
@@ -2612,8 +2844,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Style_Sanitizer( $amphtml_dom, $args );
 		$sanitizer->sanitize();
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $amphtml_dom, $args );
-		$whitelist_sanitizer->sanitize();
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $amphtml_dom, $args );
+		$validating_sanitizer->sanitize();
 
 		$assert( $original_dom, $html, $amphtml_dom, $amphtml_dom->saveHTML(), $sanitizer->get_stylesheets() );
 	}
@@ -2868,24 +3100,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( [], $sanitizer->get_styles() );
 	}
 
-	/**
-	 * Assert markup is equal.
-	 *
-	 * @param string $expected Expected markup.
-	 * @param string $actual   Actual markup.
-	 */
-	public function assertEqualMarkup( $expected, $actual ) {
-		$actual   = preg_replace( '/\s+/', ' ', $actual );
-		$expected = preg_replace( '/\s+/', ' ', $expected );
-		$actual   = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $actual ) );
-		$expected = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $expected ) );
-
-		$this->assertEquals(
-			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $expected, -1, PREG_SPLIT_DELIM_CAPTURE ) ),
-			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $actual, -1, PREG_SPLIT_DELIM_CAPTURE ) )
-		);
-	}
-
 	/*
 	 * Gets the test data for test_viewport_rules_added_to_meta_viewport().
 	 *
@@ -2907,6 +3121,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			'viewport_merged_rules' => [
 				'<meta name="viewport" content="width=device-width,user-scalable=no"><style>@viewport{ initial-scale: 1; }</style><style>@-moz-viewport{ user-scalable: yes; }</style><style>@-o-viewport { minimum-scale: 0.5; }</style><style>@-baz-viewport { unrecognized: 1; }</style>',
 				'<meta name="viewport" content="width=device-width,user-scalable=yes,initial-scale=1,minimum-scale=.5,unrecognized=1">',
+			],
+			'nested_viewport_in_at_rule' => [
+				'<style>@media screen { @viewport{ width: device-width; } }</style>',
+				'<meta name="viewport" content="width=device-width">',
 			],
 		];
 	}

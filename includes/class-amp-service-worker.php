@@ -8,6 +8,8 @@
 
 /**
  * Class AMP_Service_Worker.
+ *
+ * @internal
  */
 class AMP_Service_Worker {
 
@@ -153,7 +155,7 @@ class AMP_Service_Worker {
 	 *
 	 * @link https://developers.google.com/web/tools/workbox/guides/common-recipes#google_fonts
 	 * @link https://github.com/ampproject/amp-by-example/blob/4593af61609898043302a101826ddafe7206bfd9/boilerplate-generator/templates/files/serviceworkerJs.js#L76-L103
-	 * @link https://github.com/xwp/pwa-wp/blob/master/integrations/class-wp-service-worker-fonts-integration.php
+	 * @link https://github.com/GoogleChromeLabs/pwa-wp/blob/d0eb52a2f348259123f39941093813f1351c0e21/integrations/class-wp-service-worker-fonts-integration.php
 	 *
 	 * @param WP_Service_Worker_Scripts $service_workers Service workers.
 	 */
@@ -241,27 +243,20 @@ class AMP_Service_Worker {
 	 * Add hooks to install the service worker from AMP page.
 	 */
 	public static function add_install_hooks() {
-		if ( current_theme_supports( 'amp' ) && is_amp_endpoint() ) {
-			add_action( 'wp_footer', [ __CLASS__, 'install_service_worker' ] );
+		if ( ! amp_is_request() ) {
+			return;
+		}
 
-			// Prevent validation error due to the script that installs the service worker on non-AMP pages.
-			foreach ( [ 'wp_print_scripts', 'wp_print_footer_scripts' ] as $action ) {
-				$priority = has_action( $action, 'wp_print_service_workers' );
-				if ( false !== $priority ) {
-					remove_action( $action, 'wp_print_service_workers', $priority );
-				}
+		// Prevent validation error due to the script that installs the service worker on non-AMP pages.
+		foreach ( [ 'wp_print_scripts', 'wp_print_footer_scripts' ] as $action ) {
+			$priority = has_action( $action, 'wp_print_service_workers' );
+			if ( false !== $priority ) {
+				remove_action( $action, 'wp_print_service_workers', $priority );
 			}
 		}
 
-		// Reader mode integration.
+		add_action( 'wp_footer', [ __CLASS__, 'install_service_worker' ] );
 		add_action( 'amp_post_template_footer', [ __CLASS__, 'install_service_worker' ] );
-		add_filter(
-			'amp_post_template_data',
-			static function ( $data ) {
-				$data['amp_component_scripts']['amp-install-serviceworker'] = true;
-				return $data;
-			}
-		);
 	}
 
 	/**

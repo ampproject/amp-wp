@@ -36,7 +36,7 @@ abstract class BaseTransformerConfiguration implements TransformerConfiguration
 
         foreach ($configuration as $key => $value) {
             if (! array_key_exists($key, $this->allowedKeys)) {
-                throw InvalidConfigurationKey::fromTransformerKey(self::class, $key);
+                throw InvalidConfigurationKey::fromTransformerKey(static::class, $key);
             }
             $this->$key = $this->validate($key, $value);
         }
@@ -55,7 +55,7 @@ abstract class BaseTransformerConfiguration implements TransformerConfiguration
     public function get($key)
     {
         if (! array_key_exists($key, $this->allowedKeys)) {
-            throw UnknownConfigurationKey::fromTransformerKey(self::class, $key);
+            throw UnknownConfigurationKey::fromTransformerKey(static::class, $key);
         }
 
         // At this point, the configuration should either have received this value or filled it with a default.
