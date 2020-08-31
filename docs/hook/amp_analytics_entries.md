@@ -2,7 +2,7 @@
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1231](../../includes/amp-helper-functions.php#L1231)
+:link: [includes/amp-helper-functions.php:1242](../../includes/amp-helper-functions.php#L1242)
 
 <details>
 <summary>Show Code</summary>

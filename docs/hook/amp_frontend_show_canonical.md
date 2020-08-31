@@ -4,7 +4,7 @@
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:776](../../includes/amp-helper-functions.php#L776-L789)
+:link: [includes/amp-helper-functions.php:779](../../includes/amp-helper-functions.php#L779-L792)
 
 <details>
 <summary>Show Code</summary>

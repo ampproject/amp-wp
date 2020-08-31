@@ -1,0 +1,14 @@
+## Hook `amp_customizer_enqueue_preview_scripts`
+
+### Source
+
+:link: [includes/admin/class-amp-template-customizer.php:702](../../includes/admin/class-amp-template-customizer.php#L702)
+
+<details>
+<summary>Show Code</summary>
+
+```php
+do_action( 'amp_customizer_enqueue_preview_scripts', $this->wp_customize );
+```
+
+</details>
