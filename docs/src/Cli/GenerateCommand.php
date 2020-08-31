@@ -7,7 +7,6 @@
 
 namespace AmpProject\AmpWP\Documentation\Cli;
 
-use AmpProject\AmpWP\Documentation\Model\File;
 use AmpProject\AmpWP\Documentation\Model\Root;
 use AmpProject\AmpWP\Documentation\Parser\Parser;
 use AmpProject\AmpWP\Documentation\Templating\Markdown;
@@ -142,64 +141,60 @@ final class GenerateCommand {
 			exit;
 		}
 
-		$parsed_data = array_map( [ $this, 'filter_internal_data'], $parser->parse_files( $files, $path ) );
+		$parsed_data = array_map( [ $this, 'filter_internal_data' ], $parser->parse_files( $files, $path ) );
 
-		return array_filter( $parsed_data, static function ( $file ) {
-			return ! empty( $file['classes'] )
+		return array_filter(
+			$parsed_data,
+			static function ( $file ) {
+				return ! empty( $file['classes'] )
 				|| ! empty( $file['functions'] )
 				|| ! empty( $file['hooks'] );
-		} );
+			}
+		);
 	}
 
 	/**
 	 * Filter the parsed data to remove internal and deprecated elements.
 	 *
-	 * @param File $file Individual file to filter.
-	 * @return File File without internal and deprecated elements.
+	 * @param array $file Individual file data to filter.
+	 * @return array File data without internal and deprecated elements.
 	 */
 	private function filter_internal_data( $file ) {
-		if ( isset( $file['classes'] ) ) {
-			$file['classes'] = array_filter(
-				$file['classes'],
-				[ $this, 'is_not_internal' ]
-			);
+		$file['hooks'] = [];
 
+		if ( isset( $file['classes'] ) ) {
 			foreach ( $file['classes'] as $index => $class ) {
 				if ( isset( $class['methods'] ) ) {
-					$file['classes'][ $index ]['methods'] = array_filter(
-						$class['methods'],
-						[ $this, 'is_not_internal' ]
-					);
-
 					foreach ( $class['methods'] as $method_index => $method ) {
 						if ( isset( $method['hooks'] ) ) {
-							$file['classes'][ $index ]['methods'][ $method_index ]['hooks'] = array_filter(
-								$method['hooks'],
-								[ $this, 'is_not_internal' ]
-							);
+							$file['hooks'] = array_merge( $file['hooks'], $method['hooks'] );
+						}
+
+						if ( ! $this->is_not_internal( $method ) ) {
+							unset( $file['classes'][ $index ]['methods'][ $method_index ] );
 						}
 					}
+				}
+
+				if ( ! $this->is_not_internal( $class ) ) {
+					unset( $file['classes'][ $index ] );
 				}
 			}
 		}
 
 		if ( isset( $file['functions'] ) ) {
-			$file['functions'] = array_filter(
-				$file['functions'],
-				[ $this, 'is_not_internal' ]
-			);
-
 			foreach ( $file['functions'] as $index => $function ) {
 				if ( isset( $function['hooks'] ) ) {
-					$file['functions'][ $index ]['hooks'] = array_filter(
-						$function['hooks'],
-						[ $this, 'is_not_internal' ]
-					);
+					$file['hooks'] = array_merge( $file['hooks'], $function['hooks'] );
+				}
+
+				if ( ! $this->is_not_internal( $function ) ) {
+					unset( $file['functions'][ $index ] );
 				}
 			}
 		}
 
-		if ( isset( $file['hooks'] ) ) {
+		if ( ! empty( $file['hooks'] ) ) {
 			$file['hooks'] = array_filter(
 				$file['hooks'],
 				[ $this, 'is_not_internal' ]
