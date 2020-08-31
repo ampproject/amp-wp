@@ -142,18 +142,22 @@ final class GenerateCommand {
 			exit;
 		}
 
-		$parsed_data = $parser->parse_files( $files, $path );
+		$parsed_data = array_map( [ $this, 'filter_internal_data'], $parser->parse_files( $files, $path ) );
 
-		return array_filter( $parsed_data, [ $this, 'filter_parsed_data' ] );
+		return array_filter( $parsed_data, static function ( $file ) {
+			return ! empty( $file['classes'] )
+				|| ! empty( $file['functions'] )
+				|| ! empty( $file['hooks'] );
+		} );
 	}
 
 	/**
 	 * Filter the parsed data to remove internal and deprecated elements.
 	 *
 	 * @param File $file Individual file to filter.
-	 * @return bool Whether the file should be included or not.
+	 * @return File File without internal and deprecated elements.
 	 */
-	private function filter_parsed_data( $file ) {
+	private function filter_internal_data( $file ) {
 		if ( isset( $file['classes'] ) ) {
 			$file['classes'] = array_filter(
 				$file['classes'],
@@ -186,9 +190,9 @@ final class GenerateCommand {
 			);
 
 			foreach ( $file['functions'] as $index => $function ) {
-				if ( isset( $class, $class['hooks'] ) ) {
+				if ( isset( $function['hooks'] ) ) {
 					$file['functions'][ $index ]['hooks'] = array_filter(
-						$class['hooks'],
+						$function['hooks'],
 						[ $this, 'is_not_internal' ]
 					);
 				}
@@ -202,9 +206,7 @@ final class GenerateCommand {
 			);
 		}
 
-		return ! empty( $file['classes'] )
-			|| ! empty( $file['functions'] )
-			|| ! empty( $file['hooks'] );
+		return $file;
 	}
 
 	/**
