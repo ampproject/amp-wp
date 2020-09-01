@@ -43,11 +43,11 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test crawl_site.
+	 * Test validate_urls.
 	 *
-	 * @covers ::crawl_site()
+	 * @covers ::validate_urls()
 	 */
-	public function test_crawl_site() {
+	public function test_validate_urls() {
 		$number_of_posts = 20;
 		$number_of_terms = 30;
 		$posts           = [];
@@ -59,7 +59,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 			$posts[]           = $post_id;
 			$post_permalinks[] = get_permalink( $post_id );
 		}
-		$this->call_private_method( $this->validation, 'crawl_site' );
+		$this->call_private_method( $this->validation, 'validate_urls' );
 
 		// All of the posts created above should be present in $validated_urls.
 		$this->assertEmpty( array_diff( $post_permalinks, ValidationRequestMocking::get_validated_urls() ) );
@@ -71,7 +71,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 
 		// Terms need to be associated with a post in order to be returned in get_terms().
 		wp_set_post_terms( $posts[0], $terms, 'category' );
-		$this->call_private_method( $this->validation, 'crawl_site' );
+		$this->call_private_method( $this->validation, 'validate_urls' );
 		$expected_validated_urls = array_map( 'get_term_link', $terms );
 		$actual_validated_urls   = ValidationRequestMocking::get_validated_urls();
 

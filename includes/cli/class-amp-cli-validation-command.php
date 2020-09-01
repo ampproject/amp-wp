@@ -138,7 +138,18 @@ final class AMP_CLI_Validation_Command {
 			sprintf( 'Validating %d URLs...', $number_urls_to_crawl ),
 			$number_urls_to_crawl
 		);
-		$this->crawl_site();
+
+		$result = $validation_provider->with_lock(
+			function() {
+				$this->validate_urls();
+			}
+		);
+
+		if ( is_wp_error( $result ) ) {
+			WP_CLI::error( 'The site cannot be crawled at this time because validation is running in another process.' );
+			return;
+		}
+
 		$this->wp_cli_progress->finish();
 
 		$key_template_type = 'Template or content type';
@@ -280,42 +291,29 @@ final class AMP_CLI_Validation_Command {
 	}
 
 	/**
-	 * Validates the URLs of the entire site.
-	 *
-	 * Includes the URLs of public, published posts, public taxonomies, and other templates.
-	 * This validates one of each type at a time,
-	 * and iterates until it reaches the maximum number of URLs for each type.
+	 * Validates the URLs.
 	 */
-	private function crawl_site() {
+	private function validate_urls() {
 		$validation_url_provider = $this->get_validation_url_provider();
 		$validation_provider     = $this->get_validation_provider();
 
-		$result = $validation_provider->with_lock(
-			function() use ( $validation_url_provider, $validation_provider ) {
-				foreach ( $validation_url_provider->get_urls() as $url ) {
-					$validity = $validation_provider->get_url_validation( $url['url'], $url['type'], URLValidationProvider::FLAG_FORCE_REVALIDATE );
+		foreach ( $validation_url_provider->get_urls() as $url ) {
+			$validity = $validation_provider->get_url_validation( $url['url'], $url['type'], URLValidationProvider::FLAG_FORCE_REVALIDATE );
 
-					if ( $this->wp_cli_progress ) {
-						$this->wp_cli_progress->tick();
-					}
-
-					if ( is_wp_error( $validity['error'] ) ) {
-						WP_CLI::warning(
-							sprintf(
-								'Validate URL error (%1$s): %2$s URL: %3$s',
-								$validity['error']->get_error_code(),
-								$validity['error']->get_error_message(),
-								$url
-							)
-						);
-					}
-				}
+			if ( $this->wp_cli_progress ) {
+				$this->wp_cli_progress->tick();
 			}
-		);
 
-		if ( is_wp_error( $result ) ) {
-			WP_CLI::error( 'The site cannot be crawled at this time because validation is running in another process.' );
-			return;
+			if ( is_wp_error( $validity ) ) {
+				WP_CLI::warning(
+					sprintf(
+						'Validate URL error (%1$s): %2$s URL: %3$s',
+						$validity['error']->get_error_code(),
+						$validity['error']->get_error_message(),
+						$url
+					)
+				);
+			}
 		}
 	}
 
