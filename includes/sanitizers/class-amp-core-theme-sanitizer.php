@@ -130,6 +130,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					],
 					'add_twentynineteen_masthead_styles' => [],
 					'adjust_twentynineteen_images'       => [],
+					'accept_remove_moz_document_at_rule' => [],
 				];
 
 			// Twenty Seventeen.
@@ -286,6 +287,27 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	public static function get_acceptable_errors() {
 		_deprecated_function( __METHOD__, '1.5' );
 		return [];
+	}
+
+	/**
+	 * Accept the removal of `@-moz-document` at-rules.
+	 *
+	 * This is temporary with the hope that the at-rule will become allowed in AMP.
+	 *
+	 * @since 2.0.1
+	 * @link https://github.com/ampproject/amp-wp/issues/5302
+	 * @link https://github.com/ampproject/amphtml/issues/26406
+	 */
+	public static function accept_remove_moz_document_at_rule() {
+		AMP_Validation_Error_Taxonomy::accept_validation_errors(
+			[
+				AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE => [
+					[
+						'at_rule' => '-moz-document',
+					],
+				],
+			]
+		);
 	}
 
 	/**

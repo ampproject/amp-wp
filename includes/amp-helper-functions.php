@@ -235,7 +235,10 @@ function amp_init() {
  * @internal
  */
 function amp_after_setup_theme() {
-	amp_get_slug(); // Ensure AMP_QUERY_VAR is set.
+	// Ensure AMP_QUERY_VAR is set since some plugins still try reading it instead of using amp_get_slug().
+	if ( ! defined( 'AMP_QUERY_VAR' ) ) {
+		define( 'AMP_QUERY_VAR', amp_get_slug() );
+	}
 
 	/** This filter is documented in includes/amp-helper-functions.php */
 	if ( false === apply_filters( 'amp_is_enabled', true ) ) {
