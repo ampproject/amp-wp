@@ -8,6 +8,7 @@ use AmpProject\Dom\Document;
 use AmpProject\Extension;
 use AmpProject\Layout;
 use AmpProject\Optimizer\Configuration\PreloadHeroImageConfiguration;
+use AmpProject\Optimizer\Error;
 use AmpProject\Optimizer\ErrorCollection;
 use AmpProject\Optimizer\HeroImage;
 use AmpProject\Optimizer\Transformer;
@@ -113,14 +114,14 @@ final class PreloadHeroImage implements Transformer
 
         $heroImageCount = count($heroImages);
         if ($heroImageCount > self::DATA_HERO_MAX) {
-            // TODO: Throw error.
+            $errors->add(Error\TooManyHeroImages::whenPastMaximum());
             $heroImageCount = self::DATA_HERO_MAX;
         }
 
         $isAmpStory = Amp::isAmpStory($document);
 
         for ($index = 0; $index < $heroImageCount; $index++) {
-            $this->generatePreload($heroImages[$index], $document, $referenceNode);
+            $this->generatePreload($heroImages[$index], $document, $errors, $referenceNode);
             if (! $isAmpStory) {
                 // AMP Stories don't support SSR'd <amp-img> yet.
                 // See https://github.com/ampproject/amphtml/issues/29850.
@@ -422,14 +423,19 @@ final class PreloadHeroImage implements Transformer
     /**
      * Generate the preload link for a given hero image.
      *
-     * @param HeroImage    $heroImage     Hero image to generate the preload link for.
-     * @param Document     $document      Document to generate the preload link in.
-     * @param DOMNode|null $referenceNode Reference node after which to insert the preload link. Null if none.
+     * @param HeroImage       $heroImage     Hero image to generate the preload link for.
+     * @param Document        $document      Document to generate the preload link in.
+     * @param ErrorCollection $errors        Collection of errors that are collected during transformation.
+     * @param DOMNode|null    $referenceNode Reference node after which to insert the preload link. Null if none.
      */
-    private function generatePreload(HeroImage $heroImage, Document $document, DOMNode $referenceNode = null)
-    {
+    private function generatePreload(
+        HeroImage $heroImage,
+        Document $document,
+        ErrorCollection $errors,
+        DOMNode $referenceNode = null
+    ) {
         if ($heroImage->getSrcset()) {
-            // TODO: Throw error.
+            $errors->add(Error\CannotPreloadImage::fromImageWithSrcsetAttribute($heroImage->getAmpImg()));
             return;
         }
 
