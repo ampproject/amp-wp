@@ -175,7 +175,7 @@ final class PreloadHeroImage implements Transformer
         }
 
         if (
-            $this->isAmpIframe($element)
+            Amp::isAmpIframe($element)
             && $element->hasAttribute(Attribute::DATA_HERO)
         ) {
             return $this->getPlaceholderImage($element);
@@ -209,7 +209,7 @@ final class PreloadHeroImage implements Transformer
             return $this->detectHeroImageCandidateForPosterImage($element);
         }
 
-        if ($this->isAmpIframe($element)) {
+        if (Amp::isAmpIframe($element)) {
             return $this->detectHeroImageCandidateForIframePlaceholderImage($element);
         }
 
@@ -530,17 +530,5 @@ final class PreloadHeroImage implements Transformer
         }
 
         return $this->skipNodeAndChildren($node->parentNode);
-    }
-
-    /**
-     * Check whether a given element is an AMP iframe.
-     *
-     * @param DOMElement $element Element to check.
-     * @return bool Whether the element is an AMP iframe.
-     */
-    private function isAmpIframe(DOMElement $element)
-    {
-        return $element->tagName === Extension::IFRAME
-               || $element->tagName === Extension::VIDEO_IFRAME;
     }
 }

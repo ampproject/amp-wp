@@ -324,4 +324,20 @@ final class Amp
 
         return true;
     }
+
+    /**
+     * Check whether a given node is an AMP iframe.
+     *
+     * @param DOMNode $node Node to check.
+     * @return bool Whether the node is an AMP iframe.
+     */
+    public static function isAmpIframe(DOMNode $node)
+    {
+        if (! $node instanceof DOMElement) {
+            return false;
+        }
+
+        return $node->tagName === Extension::IFRAME
+               || $node->tagName === Extension::VIDEO_IFRAME;
+    }
 }

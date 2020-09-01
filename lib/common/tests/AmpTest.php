@@ -274,7 +274,7 @@ class AmpTest extends TestCase
      * @dataProvider dataIsTemplate
      * @covers       Amp::isTemplate()
      *
-     * @param DOMNode $node     Node to check
+     * @param DOMNode $node     Node to check.
      * @param bool    $expected Expected boolean result.
      */
     public function testIsTemplate(DOMNode $node, $expected)
@@ -310,5 +310,39 @@ class AmpTest extends TestCase
         $element = $dom->createElement(Tag::SCRIPT);
         $element->setAttribute($type, $name);
         return $element;
+    }
+
+    /**
+     * Provide data for the testIsAmpIframe() method.
+     *
+     * @return array[] Array
+     */
+    public function dataIsAmpIframe()
+    {
+        $dom = new Document();
+
+        $templateScript = $dom->createElement(Tag::SCRIPT);
+        $templateScript->setAttribute(Attribute::TEMPLATE, Extension::MUSTACHE);
+
+        return [
+            'non-element'              => [$dom->createTextNode(Extension::IFRAME), false],
+            'amp-iframe-element'       => [$dom->createElement(Extension::IFRAME), true],
+            'amp-video-iframe-element' => [$dom->createElement(Extension::VIDEO_IFRAME), true],
+            'other-element'            => [$dom->createElement(Extension::VIDEO), false],
+        ];
+    }
+
+    /**
+     * Test the check whether a given node is an AMP iframe.
+     *
+     * @dataProvider dataIsAmpIframe
+     * @covers       Amp::isAmpIframe()
+     *
+     * @param DOMNode $node     Node to check.
+     * @param bool    $expected Expected boolean result.
+     */
+    public function testIsAmpIframe(DOMNode $node, $expected)
+    {
+        $this->assertEquals($expected, Amp::isAmpIframe($node));
     }
 }
