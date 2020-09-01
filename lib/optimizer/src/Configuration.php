@@ -3,6 +3,7 @@
 namespace AmpProject\Optimizer;
 
 use AmpProject\Optimizer\Configuration\AmpRuntimeCssConfiguration;
+use AmpProject\Optimizer\Configuration\PreloadHeroImageConfiguration;
 use AmpProject\Optimizer\Configuration\TransformedIdentifierConfiguration;
 use AmpProject\Optimizer\Exception\InvalidConfigurationValue;
 use AmpProject\Optimizer\Exception\UnknownConfigurationClass;
@@ -70,6 +71,7 @@ final class Configuration
      */
     private $transformerConfigurationClasses = [
         AmpRuntimeCss::class         => AmpRuntimeCssConfiguration::class,
+        PreloadHeroImage::class      => PreloadHeroImageConfiguration::class,
         TransformedIdentifier::class => TransformedIdentifierConfiguration::class,
     ];
 

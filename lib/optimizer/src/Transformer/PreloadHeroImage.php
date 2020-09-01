@@ -7,9 +7,11 @@ use AmpProject\Attribute;
 use AmpProject\Dom\Document;
 use AmpProject\Extension;
 use AmpProject\Layout;
+use AmpProject\Optimizer\Configuration\PreloadHeroImageConfiguration;
 use AmpProject\Optimizer\ErrorCollection;
 use AmpProject\Optimizer\HeroImage;
 use AmpProject\Optimizer\Transformer;
+use AmpProject\Optimizer\TransformerConfiguration;
 use AmpProject\Tag;
 use AmpProject\Url;
 use DOMElement;
@@ -77,6 +79,23 @@ final class PreloadHeroImage implements Transformer
     const DATA_HERO_MAX = 2;
 
     /**
+     * Configuration store to use.
+     *
+     * @var TransformerConfiguration
+     */
+    private $configuration;
+
+    /**
+     * Instantiate a PreloadHeroImage object.
+     *
+     * @param TransformerConfiguration $configuration Configuration store to use.
+     */
+    public function __construct(TransformerConfiguration $configuration)
+    {
+        $this->configuration = $configuration;
+    }
+
+    /**
      * Apply transformations to the provided DOM document.
      *
      * @param Document        $document DOM document to apply the transformations to.
@@ -85,6 +104,10 @@ final class PreloadHeroImage implements Transformer
      */
     public function transform(Document $document, ErrorCollection $errors)
     {
+        if($this->configuration->get(PreloadHeroImageConfiguration::PRELOAD_HERO_IMAGE) === false) {
+            return;
+        }
+
         $heroImages    = $this->findHeroImages($document);
         $referenceNode = $document->viewport;
 

@@ -5,21 +5,21 @@ namespace AmpProject\Optimizer\Configuration;
 use AmpProject\Optimizer\Exception\InvalidConfigurationValue;
 
 /**
- * Configuration for the TransformedIdentifier transformer.
+ * Configuration for the PreloadHeroImage transformer.
  *
- * @property int $version Version number to use. Defaults to 0.
+ * @property string  $preloadHeroImage Whether to preload hero images. Defaults to true.
  *
  * @package ampproject/optimizer
  */
-final class TransformedIdentifierConfiguration extends BaseTransformerConfiguration
+final class PreloadHeroImageConfiguration extends BaseTransformerConfiguration
 {
 
     /**
-     * Configuration key that holds the version number to use.
+     * Configuration key that holds the switch to disable preloading of hero images.
      *
      * @var string
      */
-    const VERSION = 'version';
+    const PRELOAD_HERO_IMAGE = 'preloadHeroImage';
 
     /**
      * Get the associative array of allowed keys and their respective default values.
@@ -31,7 +31,7 @@ final class TransformedIdentifierConfiguration extends BaseTransformerConfigurat
     protected function getAllowedKeys()
     {
         return [
-            self::VERSION => 1,
+            self::PRELOAD_HERO_IMAGE => true,
         ];
     }
 
@@ -45,12 +45,12 @@ final class TransformedIdentifierConfiguration extends BaseTransformerConfigurat
     protected function validate($key, $value)
     {
         switch ($key) {
-            case self::VERSION:
-                if (! is_int($value)) {
+            case self::PRELOAD_HERO_IMAGE:
+                if (! is_bool($value)) {
                     throw InvalidConfigurationValue::forInvalidSubValueType(
                         self::class,
-                        self::VERSION,
-                        'integer',
+                        self::PRELOAD_HERO_IMAGE,
+                        'boolean',
                         gettype($value)
                     );
                 }
