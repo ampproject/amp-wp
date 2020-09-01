@@ -11,6 +11,7 @@ use AmpProject\Optimizer\ErrorCollection;
 use AmpProject\Optimizer\HeroImage;
 use AmpProject\Optimizer\Transformer;
 use AmpProject\Tag;
+use AmpProject\Url;
 use DOMElement;
 use DOMNode;
 
@@ -74,22 +75,6 @@ final class PreloadHeroImage implements Transformer
      * @var int
      */
     const DATA_HERO_MAX = 2;
-
-    /**
-     * Default URL parts to use when constructing an absolute URL out of a relative one.
-     *
-     * @var string[]
-     */
-    const URL_DEFAULT_PARTS = [
-        'scheme'   => 'https',
-        'host'     => 'example.com',
-        'port'     => '',
-        'user'     => '',
-        'pass'     => '',
-        'path'     => '',
-        'query'    => '',
-        'fragment' => '',
-    ];
 
     /**
      * Apply transformations to the provided DOM document.
@@ -245,7 +230,7 @@ final class PreloadHeroImage implements Transformer
             return null;
         }
 
-        if (! $this->isValidImageSrc($src)) {
+        if (! Url::isValidImageSrc($src)) {
             return null;
         }
 
@@ -336,7 +321,7 @@ final class PreloadHeroImage implements Transformer
             return null;
         }
 
-        if (! $this->isValidImageSrc($poster)) {
+        if (! Url::isValidImageSrc($poster)) {
             return null;
         }
 
@@ -396,7 +381,7 @@ final class PreloadHeroImage implements Transformer
 
             $src = $childNode->getAttribute(Attribute::SRC);
 
-            if (! $this->isValidImageSrc($src)) {
+            if (! Url::isValidImageSrc($src)) {
                 continue;
             }
 
@@ -545,49 +530,6 @@ final class PreloadHeroImage implements Transformer
         }
 
         return $this->skipNodeAndChildren($node->parentNode);
-    }
-
-    /**
-     * Check whether a given src string is a valid image source URL.
-     *
-     * @param string $src Src string to validate.
-     * @return bool Whether the src string is a valid image source URL.
-     */
-    private function isValidImageSrc($src)
-    {
-        list($scheme, $host, $port, $user, $pass, $path, $query, $fragment) = array_values(
-            array_merge(
-                self::URL_DEFAULT_PARTS,
-                (array)parse_url($src)
-            )
-        );
-
-        if ($scheme === 'data') {
-            return false;
-        }
-
-        $userpass = $user;
-
-        if (! empty($pass)) {
-            $userpass = "{$user}:{$pass}";
-        }
-
-        if (! empty($userpass)) {
-            $userpass .= '@';
-        }
-
-        $url = sprintf(
-            '%s://%s%s%s/%s%s%s',
-            $scheme,
-            $host,
-            $userpass,
-            empty($port) ? '' : ":{$port}",
-            ltrim($path, '/'),
-            empty($query) ? '' : "?{$query}",
-            empty($fragment) ? '' : "#{$fragment}"
-        );
-
-        return (bool)filter_var($url, FILTER_VALIDATE_URL);
     }
 
     /**
