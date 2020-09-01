@@ -143,12 +143,11 @@ final class URLValidationProvider {
 	 * @param string $url  The URL to validate.
 	 * @param string $type The type of template, post, or taxonomy.
 	 * @param string $flag Flag determining whether the URL should be revalidated.
-	 * @return array Associative array containing validity results along with error info and whether the URL was revalidated.
+	 * @return array|WP_Error Associative array containing validity result and whether the URL was revalidated, or a WP_Error on failure.
 	 */
 	public function get_url_validation( $url, $type, $flag = null ) {
 		$validity    = null;
 		$revalidated = true;
-		$error       = null;
 
 		if ( self::FLAG_FORCE_REVALIDATE !== $flag ) {
 			$url_post = AMP_Validated_URL_Post_Type::get_invalid_url_post( $url );
@@ -164,13 +163,12 @@ final class URLValidationProvider {
 		}
 
 		if ( is_wp_error( $validity ) ) {
-			$validity = null;
-			$error    = $validity;
+			return $validity;
 		} elseif ( $validity && isset( $validity['results'] ) ) {
 			$this->update_state_from_validity( $validity, $type );
 		}
 
-		return compact( 'validity', 'revalidated', 'error' );
+		return compact( 'validity', 'revalidated' );
 	}
 
 	/**
