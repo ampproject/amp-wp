@@ -86,14 +86,14 @@ final class ObsoleteBlockAttributeRemoverTest extends WP_UnitTestCase {
 				',
 				0, // Expect props.
 			],
-			'huge_post' => [
+			'huge_post'                 => [
 				'
 				<!-- wp:paragraph -->'
 				. str_repeat( 'a', 111101 ) .
 				'<!-- /wp:paragraph -->
 				',
 				0, // Expect props.
-			]
+			],
 		];
 	}
 
