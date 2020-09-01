@@ -206,6 +206,49 @@ class AmpTest extends TestCase
     }
 
     /**
+     * Provide data for the testIsAmpStory() method.
+     *
+     * @return array[] Array
+     */
+    public function dataIsAmpStory()
+    {
+        $domAmpStoryCustomElement = Document::fromHtml('');
+        $ampStoryCustomElement    = $domAmpStoryCustomElement->createElement(Tag::SCRIPT);
+        $ampStoryCustomElement->setAttribute(Attribute::CUSTOM_ELEMENT, 'amp-story');
+        $domAmpStoryCustomElement->head->appendChild($ampStoryCustomElement);
+
+        $domOtherCustomElement = Document::fromHtml('');
+        $otherCustomElement    = $domOtherCustomElement->createElement(Tag::SCRIPT);
+        $otherCustomElement->setAttribute(Attribute::CUSTOM_ELEMENT, 'amp-something-else');
+        $domOtherCustomElement->head->appendChild($otherCustomElement);
+
+        $domAmpStoryCustomTemplate = Document::fromHtml('');
+        $ampStoryCustomTemplate    = $domAmpStoryCustomTemplate->createElement(Tag::SCRIPT);
+        $ampStoryCustomTemplate->setAttribute(Attribute::CUSTOM_TEMPLATE, 'amp-story');
+        $domAmpStoryCustomTemplate->head->appendChild($ampStoryCustomTemplate);
+
+        return [
+            'amp-story-custom-element' => [$domAmpStoryCustomElement, true],
+            'other-custom-element'     => [$domOtherCustomElement, false],
+            'amp-story-template'       => [$domAmpStoryCustomTemplate, false],
+        ];
+    }
+
+    /**
+     * Test the check for whether a document is an AMP Story.
+     *
+     * @dataProvider dataIsAmpStory
+     * @covers       Amp::isAmpStory()
+     *
+     * @param Document $document Document to get check for an AMP Story.
+     * @param bool     $expected Expected result.
+     */
+    public function testIsAmpStory(Document $document, $expected)
+    {
+        $this->assertEquals($expected, Amp::isAmpStory($document));
+    }
+
+    /**
      * Provide data for the testIsTemplate() method.
      *
      * @return array[] Array

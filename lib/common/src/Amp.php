@@ -259,7 +259,13 @@ final class Amp
     public static function isAmpStory(Document $document)
     {
         foreach ($document->head->childNodes as $node) {
-            if (self::getExtensionName($node) === 'amp-story') {
+            if (
+                $node instanceof DOMElement
+                &&
+                $node->tagName === Tag::SCRIPT
+                &&
+                $node->getAttribute(Attribute::CUSTOM_ELEMENT) === Extension::STORY
+            ) {
                 return true;
             }
         }
