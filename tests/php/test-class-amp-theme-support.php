@@ -2145,9 +2145,49 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
 
-		// HTML bit no template actions triggered.
+		// JSON.
+		$input = '{"success":true}';
+		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
+
+		// Nothing, for redirect.
+		$input = '';
+		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
+
+		// HTML, but a fragment.
+		$input = '<ul><li>one</li><li>two</li><li>three</li></ul>';
+		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
+
+		// HTML, but still a fragment.
+		$input = '<html><header><h1>HellO!</h1></header></html>';
+		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
+
+		// HTML but no template actions triggered.
 		$input = '<html><head></head></html>';
 		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
+
+		// HTML with AMP attribute.
+		$input  = '<html amp><head></head>Hello</html>';
+		$output = AMP_Theme_Support::prepare_response( $input );
+		$this->assertStringContains( '<html amp', $output );
+		$this->assertStringContains( '<meta charset="utf-8">', $output );
+
+		// HTML with AMP emoji attribute.
+		$input  = '<html ⚡><head></head>Hello</html>';
+		$output = AMP_Theme_Support::prepare_response( $input );
+		$this->assertStringContains( '<html amp', $output );
+		$this->assertStringContains( '<meta charset="utf-8">', $output );
+
+		// HTML with alternative AMP emoji attribute.
+		$input  = '<html lang="en-US" ⚡️ foo="" bar="baz"><head></head>Hello</html>';
+		$output = AMP_Theme_Support::prepare_response( $input );
+		$this->assertStringContains( '<html lang="en-US" amp', $output );
+		$this->assertStringContains( '<meta charset="utf-8">', $output );
+
+		// HTML with doctype, comments, and whitespace before head.
+		$input  = "   <!--\nHello world!\n-->\n\n<!DOCTYPE html>  <html\n\namp>\n<head profile='http://www.acme.com/profiles/core'></head><body>Hello</body></html>";
+		$output = AMP_Theme_Support::prepare_response( $input );
+		$this->assertStringContains( '<html amp', $output );
+		$this->assertStringContains( '<meta charset="utf-8">', $output );
 
 		$get_do_action = static function ( $action ) {
 			return get_echo( 'do_action', [ $action ] );

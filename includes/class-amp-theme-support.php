@@ -1934,8 +1934,14 @@ class AMP_Theme_Support {
 			);
 		}
 
-		// Abort if an expected template was not rendered, in that template actions didn't fire and response type is not HTML.
-		$did_template_action = (
+		$amp_attribute_pattern = sprintf(
+			'#^(?:<!.*?>|\s+)*+<html[^>]*?\s(%1$s|%2$s|%3$s)(?:=".*?")?.*?(?>>.*?<)head[^>]*?>#is',
+			Attribute::AMP,
+			Attribute::AMP_EMOJI,
+			Attribute::AMP_EMOJI_ALT
+		);
+
+		$should_be_processed = (
 			did_action( 'wp_head' )
 			||
 			did_action( 'wp_footer' )
@@ -1943,8 +1949,13 @@ class AMP_Theme_Support {
 			did_action( 'amp_post_template_head' )
 			||
 			did_action( 'amp_post_template_footer' )
+			||
+			preg_match( $amp_attribute_pattern, $response )
 		);
-		if ( ! $did_template_action || Attribute::TYPE_HTML !== substr( AMP_HTTP::get_response_content_type(), 0, 9 ) ) {
+
+		// Abort if an expected template action didn't fire, the HTML tag does not have the AMP attribute or if the
+		// response type is not HTML.
+		if ( ! $should_be_processed || Attribute::TYPE_HTML !== substr( AMP_HTTP::get_response_content_type(), 0, 9 ) ) {
 			return $response;
 		}
 
