@@ -113,7 +113,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 */
 	protected function get_arguments() {
 		return [
-			ServerTiming::class => [
+			Instrumentation\ServerTiming::class => [
 				// Wrapped in a closure so it is lazily evaluated. Otherwise,
 				// is_user_logged_in() breaks because it's used too early.
 				'verbose' => static function () {
@@ -144,7 +144,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	protected function get_shared_instances() {
 		return [
 			PluginRegistry::class,
-			StopWatch::class,
+			Instrumentation\StopWatch::class,
 		];
 	}
 
