@@ -1934,14 +1934,13 @@ class AMP_Theme_Support {
 			);
 		}
 
-		$amp_attribute_pattern = sprintf(
-			'#^(?:<!.*?>|\s+)*+<html[^>]*?\s(%1$s|%2$s|%3$s)(?:=".*?")?.*?(?>>.*?<)head[^>]*?>#is',
-			Attribute::AMP,
-			Attribute::AMP_EMOJI,
-			Attribute::AMP_EMOJI_ALT
-		);
+		// Abort if response type is not HTML.
+		if ( Attribute::TYPE_HTML !== substr( AMP_HTTP::get_response_content_type(), 0, 9 ) ) {
+			return $response;
+		}
 
-		$should_be_processed = (
+		// Abort if an expected template action didn't fire or if the HTML tag does not have the AMP attribute.
+		if ( ! (
 			did_action( 'wp_head' )
 			||
 			did_action( 'wp_footer' )
@@ -1950,12 +1949,16 @@ class AMP_Theme_Support {
 			||
 			did_action( 'amp_post_template_footer' )
 			||
-			preg_match( $amp_attribute_pattern, $response )
-		);
-
-		// Abort if an expected template action didn't fire, the HTML tag does not have the AMP attribute or if the
-		// response type is not HTML.
-		if ( ! $should_be_processed || Attribute::TYPE_HTML !== substr( AMP_HTTP::get_response_content_type(), 0, 9 ) ) {
+			preg_match(
+				sprintf(
+					'#^(?:<!.*?>|\s+)*+<html[^>]*?\s(%1$s|%2$s|%3$s)(?:=".*?")?.*?(?>>.*?<)head[^>]*?>#is',
+					Attribute::AMP,
+					Attribute::AMP_EMOJI,
+					Attribute::AMP_EMOJI_ALT
+				),
+				$response
+			)
+		) ) {
 			return $response;
 		}
 
