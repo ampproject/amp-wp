@@ -12,7 +12,7 @@
  */
 class AMP_Pinterest_Embed_Handler extends AMP_Base_Embed_Handler {
 
-	const URL_PATTERN = '#https?://(www\.)?pinterest\.com/pin/.*#i';
+	const URL_PATTERN = '#https?://(?:www\.)?(?:[a-z]{2}\.)?pinterest\.[a-z.]+/pin/[^/]+/?#i';
 
 	/**
 	 * Default width.
