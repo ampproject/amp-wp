@@ -13,7 +13,7 @@ final class ErrorPageTest extends WP_UnitTestCase {
 	public function test_error_page_output() {
 		// Set up temporary capture of error log to test error log output.
 		$capture = tmpfile();
-		$backup  = ini_set(
+		$backup  = ini_set( // phpcs:ignore WordPress.PHP.IniSet.Risky
 			'error_log',
 			stream_get_meta_data( $capture )['uri']
 		);
@@ -32,7 +32,7 @@ final class ErrorPageTest extends WP_UnitTestCase {
 		);
 
 		// Reset error log back to initial settings.
-		ini_set( 'error_log', $backup );
+		ini_set( 'error_log', $backup ); // phpcs:ignore WordPress.PHP.IniSet.Risky
 
 		// Test HTML output.
 		$this->assertStringContains( '<title>Error Page Title</title>', $output );

@@ -2156,7 +2156,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	public function test_prepare_response_throwing_exception() {
 		// Set up temporary capture of error log to test error log output.
 		$capture = tmpfile();
-		$backup  = ini_set(
+		$backup  = ini_set( // phpcs:ignore WordPress.PHP.IniSet.Risky
 			'error_log',
 			stream_get_meta_data( $capture )['uri']
 		);
@@ -2169,6 +2169,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		);
 
 		if ( ! function_exists( 'newrelic_disable_autorum' ) ) {
+
 			/**
 			 * Define newrelic_disable_autorum to allow passing line.
 			 */
@@ -2183,11 +2184,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		// Verify that error log was properly populated.
 		$this->assertRegExp(
 			'/^\[[^\]]*\] A server error occurred while trying to prepare the AMP response. - FAILURE \(42\) \[RuntimeException\].*/',
-			stream_get_contents($capture)
+			stream_get_contents( $capture )
 		);
 
 		// Reset error log back to initial settings.
-		ini_set( 'error_log', $backup );
+		ini_set( 'error_log', $backup ); // phpcs:ignore WordPress.PHP.IniSet.Risky
 
 		$this->assertStringContains( 'Failed to prepare AMP response', $output );
 	}
