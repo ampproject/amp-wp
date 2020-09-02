@@ -1846,7 +1846,7 @@ class AMP_Theme_Support {
 			/** @var ErrorPage $error_page */
 			$error_page = Services::get( 'error_page' );
 
-			$error_page
+			$response = $error_page
 				->with_title( $title )
 				->with_message( $message )
 				->with_exception( $exception )

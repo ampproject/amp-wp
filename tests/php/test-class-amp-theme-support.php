@@ -2178,16 +2178,13 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		}
 
 		wp();
-		$original_html = $this->get_original_html();
-		AMP_Theme_Support::start_output_buffering();
-		echo $original_html;
-		$output = ob_get_clean();
+		$output = AMP_Theme_Support::finish_output_buffering( $this->get_original_html() );
 
 		// Verify that error log was properly populated.
-		//$this->assertRegExp(
-		//	'/^\[[^\]]*\] A server error occurred while trying to prepare the AMP response. - FAILURE \(42\) \[RuntimeException\].*/',
-		//	stream_get_contents($capture)
-		//);
+		$this->assertRegExp(
+			'/^\[[^\]]*\] A server error occurred while trying to prepare the AMP response. - FAILURE \(42\) \[RuntimeException\].*/',
+			stream_get_contents($capture)
+		);
 
 		// Reset error log back to initial settings.
 		ini_set( 'error_log', $backup );
