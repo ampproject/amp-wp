@@ -231,7 +231,10 @@ export const maybeDisplayNotice = () => {
 		options.actions = [
 			{
 				label: __( 'Review issues', 'amp' ),
-				url: reviewLink,
+				className: 'components-button components-notice__action is-link',
+				onClick: () => {
+					window.open( reviewLink, '_blank' );
+				},
 			},
 		];
 	}
