@@ -121,6 +121,12 @@ final class ErrorPage implements Service {
 	 * Send the exception that was caught to the error log.
 	 */
 	private function send_to_error_log() {
+		// Don't send to error log if fatal errors are not to be reported.
+		$error_level = error_reporting(); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting,WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting
+		if ( ! (bool) ( $error_level & E_ERROR ) ) {
+			return;
+		}
+
 		error_log( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			sprintf(
 				"%s - %s (%s) [%s]\n%s",
