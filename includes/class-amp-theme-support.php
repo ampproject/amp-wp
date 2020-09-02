@@ -11,6 +11,7 @@ use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\ConfigurationArgument;
+use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Transformer;
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
@@ -1834,7 +1835,20 @@ class AMP_Theme_Support {
 	 */
 	public static function finish_output_buffering( $response ) {
 		self::$is_output_buffering = false;
-		$response                  = self::prepare_response( $response );
+
+		try {
+			$response = self::prepare_response( $response );
+		} catch ( Exception $exception ) {
+			$title   = __( 'Failed to prepare AMP response', 'amp' );
+			$message = __( 'A server error occurred while trying to prepare the AMP response.', 'amp' );
+
+			return Services::get( 'error_page' )
+				->with_title( $title )
+				->with_message( $message )
+				->with_exception( $exception )
+				->with_response_code( 500 )
+				->render();
+		}
 
 		/**
 		 * Fires when server timings should be sent.
