@@ -201,12 +201,17 @@ HTML;
 			return '';
 		}
 
-		if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG ) {
-			return '';
-		}
-
-		if ( ! defined( 'WP_DEBUG_DISPLAY' ) || ! WP_DEBUG_DISPLAY ) {
-			return '';
+		if (
+			! defined( 'WP_DEBUG' )
+			|| ! WP_DEBUG
+			|| ! defined( 'WP_DEBUG_DISPLAY' )
+			|| ! WP_DEBUG_DISPLAY
+		) {
+			return sprintf(
+				'<p><em>%s<br>%s</em></p>',
+				__( 'The exact details of the error are hidden for security reasons.', 'amp' ),
+				__( 'To learn more about this error, enable the WordPress debugging display (by setting both WP_DEBUG and WP_DEBUG_DISPLAY to true), or look into the PHP error log.', 'amp' )
+			);
 		}
 
 		return sprintf(
