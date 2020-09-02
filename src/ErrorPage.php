@@ -120,8 +120,8 @@ final class ErrorPage implements Service {
 	/**
 	 * Send the exception that was caught to the error log.
 	 */
-	private function send_to_error_log(  ) {
-		error_log(
+	private function send_to_error_log() {
+		error_log( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			sprintf(
 				"%s - %s (%s) [%s]\n%s",
 				$this->message,
