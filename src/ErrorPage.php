@@ -86,7 +86,7 @@ final class ErrorPage implements Service {
 	/**
 	 * Set the response_code of the error page.
 	 *
-	 * @param string $response_code Response code to use.
+	 * @param int $response_code Response code to use.
 	 * @return self
 	 */
 	public function with_response_code( $response_code ) {

@@ -6,6 +6,7 @@
  */
 
 use AmpProject\Amp;
+use AmpProject\AmpWP\ErrorPage;
 use AmpProject\AmpWP\ExtraThemeAndPluginHeaders;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
@@ -1842,7 +1843,10 @@ class AMP_Theme_Support {
 			$title   = __( 'Failed to prepare AMP response', 'amp' );
 			$message = __( 'A server error occurred while trying to prepare the AMP response.', 'amp' );
 
-			return Services::get( 'error_page' )
+			/** @var ErrorPage $error_page */
+			$error_page = Services::get( 'error_page' );
+
+			$error_page
 				->with_title( $title )
 				->with_message( $message )
 				->with_exception( $exception )
