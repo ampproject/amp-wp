@@ -2149,6 +2149,53 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test prepare_response for responses that throw an exception.
+	 *
+	 * @covers AMP_Theme_Support::prepare_response()
+	 */
+	public function test_prepare_response_throwing_exception() {
+		// Set up temporary capture of error log to test error log output.
+		$capture = tmpfile();
+		$backup  = ini_set(
+			'error_log',
+			stream_get_meta_data( $capture )['uri']
+		);
+
+		add_filter(
+			'amp_schemaorg_metadata',
+			static function () {
+				throw new RuntimeException( 'FAILURE', 42 );
+			}
+		);
+
+		if ( ! function_exists( 'newrelic_disable_autorum' ) ) {
+			/**
+			 * Define newrelic_disable_autorum to allow passing line.
+			 */
+			function newrelic_disable_autorum() {
+				return true;
+			}
+		}
+
+		wp();
+		$original_html = $this->get_original_html();
+		AMP_Theme_Support::start_output_buffering();
+		echo $original_html;
+		$output = ob_get_clean();
+
+		// Verify that error log was properly populated.
+		//$this->assertRegExp(
+		//	'/^\[[^\]]*\] A server error occurred while trying to prepare the AMP response. - FAILURE \(42\) \[RuntimeException\].*/',
+		//	stream_get_contents($capture)
+		//);
+
+		// Reset error log back to initial settings.
+		ini_set( 'error_log', $backup );
+
+		$this->assertStringContains( 'Failed to prepare AMP response', $output );
+	}
+
+	/**
 	 * Test prepare_response will cache redirects when validation errors happen.
 	 *
 	 * @covers AMP_Theme_Support::prepare_response()

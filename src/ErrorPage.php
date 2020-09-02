@@ -159,12 +159,9 @@ final class ErrorPage implements Service {
 	 * @return string HTML output.
 	 */
 	private function get_html( $styles, $text_direction ) {
-		$no_robots = '';
-		if ( function_exists( 'wp_no_robots' ) ) {
-			ob_start();
-			wp_no_robots();
-			$no_robots = ob_get_clean();
-		}
+		$no_robots = get_option( 'blog_public' )
+			? "<meta name='robots' content='noindex,follow' />\n"
+			: "<meta name='robots' content='noindex,nofollow' />\n";
 
 		return <<<HTML
 <!DOCTYPE html>

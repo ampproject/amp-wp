@@ -28,11 +28,11 @@ final class ErrorPageTest extends WP_UnitTestCase {
 		// Verify that error log was properly populated.
 		$this->assertRegExp(
 			'/^\[[^\]]*\] Error Page Message - FAILURE \(42\) \[RuntimeException\].*/',
-			stream_get_contents($capture)
+			stream_get_contents( $capture )
 		);
 
 		// Reset error log back to initial settings.
-		ini_set('error_log', $backup);
+		ini_set( 'error_log', $backup );
 
 		// Test HTML output.
 		$this->assertStringContains( '<title>Error Page Title</title>', $output );
