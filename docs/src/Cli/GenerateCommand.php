@@ -78,7 +78,7 @@ final class GenerateCommand {
 				} catch ( Exception $exception ) {
 					WP_CLI::error(
 						"Failed to build documentation object tree: {$exception->getMessage()}\n{$exception->getTraceAsString()}",
-						false
+						false // Using separate exit for PHPStan.
 					);
 					exit;
 				}
@@ -96,7 +96,7 @@ final class GenerateCommand {
 					}
 				} catch ( Exception $exception ) {
 					WP_CLI::error(
-						"Failed to generate markdown files: {$exception->getMessage()}\n{$exception->getTraceAsString()}",
+						"Failed to generate markdown files: {$exception->getMessage()}\n{$exception->getTraceAsString()}"
 					);
 				}
 				break;

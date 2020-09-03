@@ -76,7 +76,6 @@ final class Hook implements Leaf {
 		return 'filter' === $this->type;
 	}
 
-
 	/**
 	 * Get the signature of the method.
 	 *
@@ -115,10 +114,8 @@ final class Hook implements Leaf {
 
 	/**
 	 * Process the arguments entry.
-	 *
-	 * @param array $value Array of argument entries.
 	 */
-	private function process_arguments( $value ) {
+	private function process_arguments() {
 		if ( empty( $this->doc->tags ) ) {
 			$this->arguments = [];
 			return;
