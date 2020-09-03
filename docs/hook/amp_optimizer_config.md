@@ -16,7 +16,7 @@ Filter the configuration to be used for the AMP Optimizer.
 
 ### Source
 
-:link: [includes/class-amp-theme-support.php:2256](../../includes/class-amp-theme-support.php#L2256-L2262)
+:link: [includes/class-amp-theme-support.php:2304](../../includes/class-amp-theme-support.php#L2304-L2310)
 
 <details>
 <summary>Show Code</summary>
