@@ -1934,8 +1934,13 @@ class AMP_Theme_Support {
 			);
 		}
 
-		// Abort if an expected template was not rendered, in that template actions didn't fire and response type is not HTML.
-		$did_template_action = (
+		// Abort if response type is not HTML.
+		if ( Attribute::TYPE_HTML !== substr( AMP_HTTP::get_response_content_type(), 0, 9 ) ) {
+			return $response;
+		}
+
+		// Abort if an expected template action didn't fire or if the HTML tag does not have the AMP attribute.
+		if ( ! (
 			did_action( 'wp_head' )
 			||
 			did_action( 'wp_footer' )
@@ -1943,8 +1948,17 @@ class AMP_Theme_Support {
 			did_action( 'amp_post_template_head' )
 			||
 			did_action( 'amp_post_template_footer' )
-		);
-		if ( ! $did_template_action || Attribute::TYPE_HTML !== substr( AMP_HTTP::get_response_content_type(), 0, 9 ) ) {
+			||
+			preg_match(
+				sprintf(
+					'#^(?:<!.*?>|\s+)*+<html(?=\s)[^>]*?\s(%1$s|%2$s|%3$s)(\s|=|>)#is',
+					preg_quote( Attribute::AMP, '#' ),
+					preg_quote( Attribute::AMP_EMOJI, '#' ),
+					preg_quote( Attribute::AMP_EMOJI_ALT, '#' )
+				),
+				$response
+			)
+		) ) {
 			return $response;
 		}
 
