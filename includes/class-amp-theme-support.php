@@ -1846,12 +1846,28 @@ class AMP_Theme_Support {
 			/** @var ErrorPage $error_page */
 			$error_page = Services::get( 'error_page' );
 
-			$response = $error_page
+			$error_page
 				->with_title( $title )
 				->with_message( $message )
 				->with_exception( $exception )
-				->with_response_code( 500 )
-				->render();
+				->with_response_code( 500 );
+
+			// Add link to non-AMP version if not canonical.
+			if ( ! amp_is_canonical() ) {
+				$non_amp_url = amp_remove_endpoint( amp_get_current_url() );
+
+				// Prevent user from being redirected back to AMP version.
+				if ( true === AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ) {
+					$non_amp_url = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $non_amp_url );
+				}
+
+				$error_page->with_back_link(
+					$non_amp_url,
+					__( 'Go to non-AMP version', 'amp' )
+				);
+			}
+
+			$response = $error_page->render();
 		}
 
 		/**

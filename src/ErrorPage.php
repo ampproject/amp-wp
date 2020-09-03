@@ -1,6 +1,6 @@
 <?php
 /**
- * Class ExtraThemeAndPluginHeaders.
+ * Class ErrorPage.
  *
  * @package AmpProject\AmpWP
  */
@@ -16,6 +16,7 @@ use Exception;
  * The actual wp_die() function cannot be used within the AMP response
  * preparation code, as its 'exit' argument is only usable from WP 5.1 onwards.
  *
+ * @see wp_die()
  * @package AmpProject\AmpWP
  * @since   2.0.1
  * @internal
@@ -35,6 +36,20 @@ final class ErrorPage implements Service {
 	 * @var string
 	 */
 	private $message = '';
+
+	/**
+	 * Back link URL.
+	 *
+	 * @var string
+	 */
+	private $link_url = '';
+
+	/**
+	 * Back link text.
+	 *
+	 * @var string
+	 */
+	private $link_text = '';
 
 	/**
 	 * Exception of the error page.
@@ -69,6 +84,19 @@ final class ErrorPage implements Service {
 	 */
 	public function with_message( $message ) {
 		$this->message = $message;
+		return $this;
+	}
+
+	/**
+	 * Set the message of the error page.
+	 *
+	 * @param string $link_url  Link URL.
+	 * @param string $link_text Link text.
+	 * @return self
+	 */
+	public function with_back_link( $link_url, $link_text ) {
+		$this->link_url  = $link_url;
+		$this->link_text = $link_text;
 		return $this;
 	}
 
@@ -183,6 +211,7 @@ final class ErrorPage implements Service {
 		<h1>{$this->render_title()}</h1>
 		<p>{$this->render_message()}</p>
 		{$this->render_exception()}
+		{$this->render_back_link()}
 	</body>
 </html>
 HTML;
@@ -238,6 +267,22 @@ HTML;
 			$this->exception->getCode(),
 			get_class( $this->exception ),
 			str_replace( "\n", '<br>', $this->exception->getTraceAsString() )
+		);
+	}
+
+	/**
+	 * Render back link.
+	 *
+	 * @return string Back link.
+	 */
+	private function render_back_link() {
+		if ( empty( $this->link_text ) || empty( $this->link_url ) ) {
+			return '';
+		}
+		return sprintf(
+			'<p><a href="%s" class="button button-large">%s</a></p>',
+			esc_url( $this->link_url ),
+			esc_html( $this->link_text )
 		);
 	}
 

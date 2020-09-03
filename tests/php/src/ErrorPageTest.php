@@ -23,6 +23,7 @@ final class ErrorPageTest extends WP_UnitTestCase {
 			->with_message( 'Error Page Message' )
 			->with_exception( new RuntimeException( 'FAILURE', 42 ) )
 			->with_response_code( 123 )
+			->with_back_link( 'https://back.example.com', 'Go Back' )
 			->render();
 
 		// Verify that error log was properly populated.
@@ -43,5 +44,8 @@ final class ErrorPageTest extends WP_UnitTestCase {
 		$this->assertStringContains( '<meta name="viewport"', $output );
 		$this->assertStringContains( '<body id="error-page">', $output );
 		$this->assertStringContains( '<style type="text/css">', $output );
+		$this->assertStringContains( 'button button-large', $output );
+		$this->assertStringContains( 'https://back.example.com', $output );
+		$this->assertStringContains( 'Go Back', $output );
 	}
 }
