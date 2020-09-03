@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Admin\DevToolsUserAccess;
+use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\PluginRegistry;
@@ -218,10 +218,10 @@ class AMP_Validation_Manager {
 	/**
 	 * Get dev tools user access service.
 	 *
-	 * @return DevToolsUserAccess
+	 * @return UserAccess
 	 */
 	private static function get_dev_tools_user_access() {
-		/** @var DevToolsUserAccess $service */
+		/** @var UserAccess $service */
 		$service = Services::get( 'dev_tools.user_access' );
 		return $service;
 	}

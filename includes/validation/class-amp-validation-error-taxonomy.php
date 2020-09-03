@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Admin\DevToolsUserAccess;
+use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\Services;
@@ -227,7 +227,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return void
 	 */
 	public static function register() {
-		/** @var DevToolsUserAccess $dev_tools_user_access */
+		/** @var UserAccess $dev_tools_user_access */
 		$dev_tools_user_access = Services::get( 'dev_tools.user_access' );
 
 		// Show in the admin menu if dev tools are enabled for the user or if the user is on any dev tools screen.

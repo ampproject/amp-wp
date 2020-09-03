@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP\Admin;
 
 use AMP_Options_Manager;
 use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
+use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
@@ -246,7 +247,7 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 			'OPTIONS_REST_PATH'                  => '/amp/v1/options',
 			'READER_THEMES_REST_PATH'            => '/amp/v1/reader-themes',
 			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
-			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
+			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
 			'USER_REST_PATH'                     => '/wp/v2/users/me',
 		];
 

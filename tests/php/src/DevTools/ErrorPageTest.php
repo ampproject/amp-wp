@@ -1,8 +1,8 @@
 <?php
 
-namespace AmpProject\AmpWP\Tests;
+namespace AmpProject\AmpWP\Tests\DevTools;
 
-use AmpProject\AmpWP\ErrorPage;
+use AmpProject\AmpWP\DevTools\ErrorPage;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use RuntimeException;
 use WP_UnitTestCase;

@@ -5,7 +5,7 @@
  * @package AmpProject\AmpWP
  */
 
-namespace AmpProject\AmpWP;
+namespace AmpProject\AmpWP\DevTools;
 
 use AmpProject\AmpWP\Infrastructure\Service;
 use Exception;
@@ -260,6 +260,8 @@ HTML;
 				)
 			);
 		}
+
+		return print_r( $this->exception->getFile(), true );
 
 		return sprintf(
 			'<pre class="exception"><strong>%s</strong> (%s) [<em>%s</em>]<br><br><small>%s</small></pre>',

@@ -6,7 +6,7 @@
  */
 
 use AmpProject\Amp;
-use AmpProject\AmpWP\ErrorPage;
+use AmpProject\AmpWP\DevTools\ErrorPage;
 use AmpProject\AmpWP\ExtraThemeAndPluginHeaders;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
@@ -1844,7 +1844,7 @@ class AMP_Theme_Support {
 			$message = __( 'A PHP error occurred while trying to prepare the AMP response. This may not be caused by the AMP plugin but by some other active plugin or the current theme. You will need to review the error details to determine the source of the error.', 'amp' );
 
 			/** @var ErrorPage $error_page */
-			$error_page = Services::get( 'error_page' );
+			$error_page = Services::get( 'dev_tools.error_page' );
 
 			$error_page
 				->with_title( $title )

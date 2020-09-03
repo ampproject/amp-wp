@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Admin\DevToolsUserAccess;
+use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Admin\OptionsMenu;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\PluginRegistry;
@@ -141,7 +141,7 @@ class AMP_Validated_URL_Post_Type {
 	public static function register() {
 		add_action( 'amp_plugin_update', [ __CLASS__, 'handle_plugin_update' ] );
 
-		/** @var DevToolsUserAccess $dev_tools_user_access */
+		/** @var UserAccess $dev_tools_user_access */
 		$dev_tools_user_access = Services::get( 'dev_tools.user_access' );
 
 		// Show in the admin menu if dev tools are enabled for the user or if the user is on any dev tools screen.
@@ -270,7 +270,7 @@ class AMP_Validated_URL_Post_Type {
 	public static function add_admin_hooks() {
 		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_post_list_screen_scripts' ] );
 
-		/** @var DevToolsUserAccess $dev_tools_user_access */
+		/** @var UserAccess $dev_tools_user_access */
 		$dev_tools_user_access = Services::get( 'dev_tools.user_access' );
 
 		if ( $dev_tools_user_access->is_user_enabled() ) {
