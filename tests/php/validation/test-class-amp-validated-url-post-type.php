@@ -84,6 +84,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	 * @covers \AMP_Validated_URL_Post_Type::add_admin_hooks()
 	 */
 	public function test_add_admin_hooks() {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		AMP_Validated_URL_Post_Type::add_admin_hooks();
 
