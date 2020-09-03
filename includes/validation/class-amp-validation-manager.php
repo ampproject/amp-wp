@@ -1616,18 +1616,6 @@ class AMP_Validation_Manager {
 	 * }
 	 */
 	public static function get_file_source( $file ) {
-		if (
-			! isset( self::$template_directory )
-			||
-			! isset( self::$template_slug )
-			||
-			! isset( self::$stylesheet_directory )
-			||
-			! isset( self::$stylesheet_slug )
-		) {
-			self::set_theme_variables();
-		}
-
 		/** @var PluginRegistry $plugin_registry */
 		$plugin_registry = Services::get( 'plugin_registry' );
 

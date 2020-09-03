@@ -427,6 +427,7 @@ function amp_is_available() {
 				continue;
 			}
 
+			AMP_Validation_Manager::set_theme_variables();
 			$source = AMP_Validation_Manager::get_file_source( $call_stack['file'] );
 			if ( empty( $source ) || 'core' === $source['type'] || ( 'plugin' === $source['type'] && 'amp' === $source['name'] ) ) {
 				continue;
