@@ -15,7 +15,6 @@
 * [`AMP_Base_Sanitizer::get_data_amp_attributes()`](AMP_Base_Sanitizer/get_data_amp_attributes.md) - Get data-amp-* values from the parent node &#039;figure&#039; added by editor block.
 * [`AMP_Base_Sanitizer::get_scripts()`](AMP_Base_Sanitizer/get_scripts.md) - Return array of values that would be valid as an HTML `script` element.
 * [`AMP_Base_Sanitizer::get_selector_conversion_mapping()`](AMP_Base_Sanitizer/get_selector_conversion_mapping.md) - Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
-* ~~[`AMP_Base_Sanitizer::get_styles()`](AMP_Base_Sanitizer/get_styles.md) - Return array of values that would be valid as an HTML `style` attribute.~~
 * [`AMP_Base_Sanitizer::get_stylesheets()`](AMP_Base_Sanitizer/get_stylesheets.md) - Get stylesheets.
 * [`AMP_Base_Sanitizer::get_validate_response_data()`](AMP_Base_Sanitizer/get_validate_response_data.md) - Get data that is returned in validate responses.
 * ~~[`AMP_Base_Sanitizer::has_dev_mode_exemption()`](AMP_Base_Sanitizer/has_dev_mode_exemption.md) - Check whether a node is exempt from validation during dev mode.~~

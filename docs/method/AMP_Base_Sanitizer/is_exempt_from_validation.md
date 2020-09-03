@@ -1,6 +1,6 @@
 ## Method `AMP_Base_Sanitizer::is_exempt_from_validation()`
 
-> :warning: This function is deprecated: Use AmpProject\DevMode::isExemptFromValidation( $node ) instead.
+> :warning: This method is deprecated: Use AmpProject\DevMode::isExemptFromValidation( $node ) instead.
 
 ```php
 protected function is_exempt_from_validation( \DOMNode $node );

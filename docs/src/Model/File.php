@@ -17,6 +17,7 @@ namespace AmpProject\AmpWP\Documentation\Model;
  * @property Usage[]     $uses
  * @property Function_[] $functions
  * @property Include_[]  $includes
+ * @property Hook[]      $hooks
  */
 final class File implements Leaf {
 
@@ -36,6 +37,7 @@ final class File implements Leaf {
 			'uses'      => [],
 			'functions' => [],
 			'includes'  => [],
+			'hooks'     => [],
 		];
 	}
 
@@ -88,6 +90,19 @@ final class File implements Leaf {
 
 		foreach ( $value as $include ) {
 			$this->includes[] = new Include_( $include, $this );
+		}
+	}
+
+	/**
+	 * Process the hooks entry.
+	 *
+	 * @param array $value Array of hook entries.
+	 */
+	private function process_hooks( $value ) {
+		$this->hooks = [];
+
+		foreach ( $value as $hook ) {
+			$this->hooks[] = new Hook( $hook, $this );
 		}
 	}
 }
