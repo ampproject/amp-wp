@@ -1,5 +1,10 @@
 ## Hook `amp_schemaorg_metadata`
 
+
+Filters Schema.org metadata for a query.
+
+Check the the main query for the context for which metadata should be added.
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:1819](../../includes/amp-helper-functions.php#L1819)

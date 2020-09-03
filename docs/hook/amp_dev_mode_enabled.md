@@ -1,5 +1,10 @@
 ## Hook `amp_dev_mode_enabled`
 
+
+Filters whether AMP mode is enabled.
+
+When enabled, the data-ampdevmode attribute will be added to the document element and it will allow the attributes to be added to the admin bar. It will also add the attribute to all elements which match the queries for the expressions returned by the &#039;amp_dev_mode_element_xpaths&#039; filter.
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:1416](../../includes/amp-helper-functions.php#L1416-L1426)

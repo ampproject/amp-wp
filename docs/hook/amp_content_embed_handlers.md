@@ -1,5 +1,8 @@
 ## Hook `amp_content_embed_handlers`
 
+
+Filters the content embed handlers.
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:1364](../../includes/amp-helper-functions.php#L1364-L1390)

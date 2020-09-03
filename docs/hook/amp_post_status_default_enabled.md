@@ -1,5 +1,8 @@
 ## Hook `amp_post_status_default_enabled`
 
+
+Filters whether default AMP status should be enabled or not.
+
 ### Source
 
 :link: [includes/class-amp-post-type-support.php:190](../../includes/class-amp-post-type-support.php#L190)

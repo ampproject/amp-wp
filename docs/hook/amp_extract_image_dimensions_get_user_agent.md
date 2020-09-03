@@ -1,5 +1,8 @@
 ## Hook `amp_extract_image_dimensions_get_user_agent`
 
+
+Filters the user agent for onbtaining the image dimensions.
+
 ### Source
 
 :link: [includes/utils/class-amp-image-dimension-extractor.php:250](../../includes/utils/class-amp-image-dimension-extractor.php#L250)

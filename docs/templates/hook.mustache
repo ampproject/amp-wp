@@ -4,6 +4,11 @@
 > :warning: This function is deprecated: {{ get_deprecation_reason }}
 
 {{/is_deprecated}}
+
+{{# has_description }}
+{{ get_description }}
+
+{{/ has_description }}
 ### Source
 
 :link: [{{ get_file_path }}:{{ line }}]({{{ get_github_link }}})

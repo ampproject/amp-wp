@@ -1,5 +1,10 @@
 ## Hook `amp_parsed_css_transient_caching_allowed`
 
+
+Filters whether parsed CSS is allowed to be cached in transients.
+
+When this is filtered to be false, parsed CSS will not be stored in transients. This is important when there is highly-variable CSS content in order to prevent filling up the wp_options table with an endless number of entries.
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:1604](../../includes/amp-helper-functions.php#L1604)

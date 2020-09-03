@@ -1,5 +1,10 @@
 ## Hook `amp_print_analytics`
 
+
+Triggers before analytics entries are printed as amp-analytics tags.
+
+This is useful for printing additional `amp-analytics` tags to the page without having to refactor any existing markup generation logic to use the data structure mutated by the `amp_analytics_entries` filter. For such cases, this action should be used for printing `amp-analytics` tags as opposed to using the `wp_footer` and `amp_post_template_footer` actions.
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:1287](../../includes/amp-helper-functions.php#L1287)

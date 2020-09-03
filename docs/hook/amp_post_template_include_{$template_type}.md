@@ -1,5 +1,8 @@
 ## Hook `amp_post_template_include_{$template_type}`
 
+
+Fires before including a template.
+
 ### Source
 
 :link: [includes/templates/class-amp-post-template.php:457](../../includes/templates/class-amp-post-template.php#L457)

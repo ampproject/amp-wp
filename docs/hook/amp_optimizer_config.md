@@ -1,5 +1,8 @@
 ## Hook `amp_optimizer_config`
 
+
+Filter the configuration to be used for the AMP Optimizer.
+
 ### Source
 
 :link: [includes/class-amp-theme-support.php:2256](../../includes/class-amp-theme-support.php#L2256-L2262)

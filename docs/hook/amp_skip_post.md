@@ -1,5 +1,8 @@
 ## Hook `amp_skip_post`
 
+
+Filters whether to skip the post from AMP.
+
 ### Source
 
 :link: [includes/class-amp-post-type-support.php:140](../../includes/class-amp-post-type-support.php#L140)

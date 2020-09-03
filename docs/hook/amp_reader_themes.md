@@ -1,5 +1,8 @@
 ## Hook `amp_reader_themes`
 
+
+Filters supported reader themes.
+
 ### Source
 
 :link: [src/Admin/ReaderThemes.php:119](../../src/Admin/ReaderThemes.php#L119)

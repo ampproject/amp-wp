@@ -1,5 +1,8 @@
 ## Hook `amp_init`
 
+
+Triggers on init when AMP plugin is active.
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:110](../../includes/amp-helper-functions.php#L110)

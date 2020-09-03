@@ -1,5 +1,8 @@
 ## Hook `amp_options_menu_is_enabled`
 
+
+Filter whether to enable the AMP settings.
+
 ### Source
 
 :link: [src/Admin/OptionsMenu.php:78](../../src/Admin/OptionsMenu.php#L78)

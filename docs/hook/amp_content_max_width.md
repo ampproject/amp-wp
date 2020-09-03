@@ -1,5 +1,8 @@
 ## Hook `amp_content_max_width`
 
+
+Filters the content max width for Reader templates.
+
 ### Source
 
 :link: [includes/templates/class-amp-post-template.php:113](../../includes/templates/class-amp-post-template.php#L113)

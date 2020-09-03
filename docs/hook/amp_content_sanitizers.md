@@ -1,5 +1,8 @@
 ## Hook `amp_content_sanitizers`
 
+
+Filters the content sanitizers.
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:1551](../../includes/amp-helper-functions.php#L1551)

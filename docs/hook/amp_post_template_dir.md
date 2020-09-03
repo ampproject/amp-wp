@@ -1,5 +1,8 @@
 ## Hook `amp_post_template_dir`
 
+
+Filters the Reader template directory.
+
 ### Source
 
 :link: [includes/templates/class-amp-post-template.php:177](../../includes/templates/class-amp-post-template.php#L177)

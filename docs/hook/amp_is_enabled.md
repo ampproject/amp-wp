@@ -1,5 +1,10 @@
 ## Hook `amp_is_enabled`
 
+
+Filters whether AMP is enabled on the current site.
+
+Useful if the plugin is network activated and you want to turn it off on select sites.
+
 ### Source
 
 :link: [includes/amp-helper-functions.php:68](../../includes/amp-helper-functions.php#L68)

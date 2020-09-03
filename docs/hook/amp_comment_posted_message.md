@@ -1,5 +1,8 @@
 ## Hook `amp_comment_posted_message`
 
+
+Filters the message when comment submitted success message when
+
 ### Source
 
 :link: [includes/class-amp-http.php:486](../../includes/class-amp-http.php#L486)

@@ -1,5 +1,8 @@
 ## Hook `amp_post_template_file`
 
+
+Filters the template file being loaded for a given template type.
+
 ### Source
 
 :link: [includes/templates/class-amp-post-template.php:443](../../includes/templates/class-amp-post-template.php#L443)

@@ -21,6 +21,7 @@ final class Hook implements Leaf {
 
 	use LeafConstruction;
 	use HasDocBlock;
+	use HasArguments;
 	use HasCodeLinks;
 
 	/**
@@ -40,42 +41,11 @@ final class Hook implements Leaf {
 	}
 
 	/**
-	 * Process the arguments entry.
-	 *
-	 * @param array $value Array of argument entries.
-	 */
-	private function process_arguments( $value ) {
-		$this->arguments = [];
-
-		foreach ( $value as $argument ) {
-			$this->arguments[] = new Argument( $argument, $this );
-		}
-	}
-
-	/**
 	 * Get the filename to use for the hook.
 	 *
 	 * @return string Filename to use.
 	 */
 	public function get_filename() {
 		return $this->name;
-	}
-
-	/**
-	 * Check if a description is available.
-	 *
-	 * @return bool Whether a description is available.
-	 */
-	public function has_description() {
-		return true;
-	}
-
-	/**
-	 * Get the description of the hook.
-	 *
-	 * @return string Description of the hook.
-	 */
-	public function get_description() {
-		return 'TODO';
 	}
 }
