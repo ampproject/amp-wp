@@ -11,6 +11,9 @@ namespace AmpProject\AmpWP\Admin;
 
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\Option;
+use AMP_Options_Manager;
+use AMP_Theme_Support;
 use AMP_Validation_Manager;
 use WP_Error;
 use WP_User;
@@ -72,11 +75,24 @@ final class DevToolsUserAccess implements Service, Registerable {
 		if ( ! $user instanceof WP_User ) {
 			$user = new WP_User( $user );
 		}
-		$value = $user->get( self::USER_FIELD_DEVELOPER_TOOLS_ENABLED );
-		if ( '' === $value ) {
-			$value = true; // @todo Allow to be filtered so that the default status can be changed.
+		$enabled = $user->get( self::USER_FIELD_DEVELOPER_TOOLS_ENABLED );
+		if ( '' === $enabled ) {
+			// Disable Developer Tools by default when in Reader mode.
+			$enabled = AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
+
+			/**
+			 * Filters whether Developer Tools is enabled by default for a user.
+			 *
+			 * When Reader mode is active, Developer Tools is currently disabled by default.
+			 *
+			 * @since 2.0.1
+			 *
+			 * @param bool $enabled DevTools enabled.
+			 * @param int  $user_id User ID.
+			 */
+			$enabled = (bool) apply_filters( 'amp_dev_tools_user_default_enabled', $enabled, $user->ID );
 		}
-		return rest_sanitize_boolean( $value );
+		return rest_sanitize_boolean( $enabled );
 	}
 
 	/**
