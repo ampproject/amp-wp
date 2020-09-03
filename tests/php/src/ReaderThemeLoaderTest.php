@@ -201,6 +201,8 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 	/** @covers ::disable_widgets() */
 	public function test_disable_widgets() {
 		remove_all_filters( 'sidebars_widgets' );
+		remove_filter( 'customize_loaded_components', 'gutenberg_remove_widgets_panel' ); // Added in Gutenberg v8.9.0.
+
 		$this->assertNotEmpty( wp_get_sidebars_widgets() );
 		$this->assertContains( 'widgets', apply_filters( 'customize_loaded_components', [ 'widgets' ] ) );
 

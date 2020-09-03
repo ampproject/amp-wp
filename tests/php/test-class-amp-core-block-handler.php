@@ -77,6 +77,10 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 		$categories_block = '<!-- wp:categories {"displayAsDropdown":true,"showHierarchy":true,"showPostCounts":true} /-->';
 		$archives_block   = '<!-- wp:archives {"displayAsDropdown":true,"showPostCounts":true} /-->';
 
+		if ( defined( 'GUTENBERG_VERSION' ) && version_compare( GUTENBERG_VERSION, '8.9.0', '==' ) ) {
+			$this->markTestSkipped( 'See https://github.com/WordPress/gutenberg/pull/25026' );
+		}
+
 		$handler->register_embed();
 		$rendered = do_blocks( $categories_block );
 		$this->assertStringContains( '<select', $rendered );
