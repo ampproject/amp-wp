@@ -1,4 +1,4 @@
-## Hook `amp_enable_optimizer`
+## Filter `amp_enable_optimizer`
 
 
 Filter whether the generated HTML output should be run through the AMP Optimizer or not.

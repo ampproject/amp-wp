@@ -1,4 +1,4 @@
-## Hook `amp_normalized_dimension_extractor_image_url`
+## Filter `amp_normalized_dimension_extractor_image_url`
 
 
 Apply filters on the normalized image URL for dimension extraction.

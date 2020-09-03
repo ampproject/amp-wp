@@ -1,4 +1,4 @@
-## Hook `amp_parsed_css_transient_caching_allowed`
+## Filter `amp_parsed_css_transient_caching_allowed`
 
 
 Filters whether parsed CSS is allowed to be cached in transients.

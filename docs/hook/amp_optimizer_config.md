@@ -1,4 +1,4 @@
-## Hook `amp_optimizer_config`
+## Filter `amp_optimizer_config`
 
 
 Filter the configuration to be used for the AMP Optimizer.

@@ -1,4 +1,4 @@
-## Hook `amp_get_permalink`
+## Filter `amp_get_permalink`
 
 
 Filters AMP permalink.

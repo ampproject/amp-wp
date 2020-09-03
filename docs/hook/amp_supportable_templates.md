@@ -1,4 +1,4 @@
-## Hook `amp_supportable_templates`
+## Filter `amp_supportable_templates`
 
 
 Filters list of supportable templates.

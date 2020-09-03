@@ -1,4 +1,4 @@
-## Hook `amp_reader_themes`
+## Filter `amp_reader_themes`
 
 
 Filters supported reader themes.

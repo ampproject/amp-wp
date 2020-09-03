@@ -1,4 +1,4 @@
-## Hook `pre_amp_render_post`
+## Action `pre_amp_render_post`
 
 > :warning: This function is deprecated: Check amp_is_request() on the template_redirect action instead.
 

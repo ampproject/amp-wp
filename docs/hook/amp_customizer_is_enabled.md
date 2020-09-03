@@ -1,4 +1,4 @@
-## Hook `amp_customizer_is_enabled`
+## Filter `amp_customizer_is_enabled`
 
 
 Filter whether to enable the AMP default template design settings.

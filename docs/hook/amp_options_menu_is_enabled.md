@@ -1,4 +1,4 @@
-## Hook `amp_options_menu_is_enabled`
+## Filter `amp_options_menu_is_enabled`
 
 
 Filter whether to enable the AMP settings.

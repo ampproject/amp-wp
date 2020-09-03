@@ -1,4 +1,4 @@
-## Hook `amp_pre_is_mobile`
+## Filter `amp_pre_is_mobile`
 
 
 Filters whether the current request is from a mobile device. This is provided as a means to short-circuit the normal determination of a mobile request below.

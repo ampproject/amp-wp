@@ -1,4 +1,4 @@
-## Hook `amp_customizer_register_settings`
+## Action `amp_customizer_register_settings`
 
 
 Fires when plugins should register settings for AMP.

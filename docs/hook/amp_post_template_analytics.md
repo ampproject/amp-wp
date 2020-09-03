@@ -1,4 +1,4 @@
-## Hook `amp_post_template_analytics`
+## Filter `amp_post_template_analytics`
 
 
 Add amp-analytics tags.

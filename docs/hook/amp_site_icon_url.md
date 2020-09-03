@@ -1,4 +1,4 @@
-## Hook `amp_site_icon_url`
+## Filter `amp_site_icon_url`
 
 
 Filters the publisher logo URL in the schema.org data.

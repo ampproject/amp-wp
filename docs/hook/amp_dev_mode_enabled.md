@@ -1,4 +1,4 @@
-## Hook `amp_dev_mode_enabled`
+## Filter `amp_dev_mode_enabled`
 
 
 Filters whether AMP mode is enabled.

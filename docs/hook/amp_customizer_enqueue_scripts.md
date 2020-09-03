@@ -1,4 +1,4 @@
-## Hook `amp_customizer_enqueue_scripts`
+## Action `amp_customizer_enqueue_scripts`
 
 
 Fires when plugins should register settings for AMP.

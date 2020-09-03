@@ -1,4 +1,4 @@
-## Hook `amp_supportable_post_types`
+## Filter `amp_supportable_post_types`
 
 
 Filters the list of post types which may be supported for AMP.

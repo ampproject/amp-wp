@@ -1,4 +1,4 @@
-## Hook `amp_content_max_width`
+## Filter `amp_content_max_width`
 
 
 Filters the content max width for Reader templates.

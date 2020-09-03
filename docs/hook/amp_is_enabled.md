@@ -1,4 +1,4 @@
-## Hook `amp_is_enabled`
+## Filter `amp_is_enabled`
 
 
 Filters whether AMP is enabled on the current site.

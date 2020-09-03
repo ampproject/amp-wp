@@ -1,4 +1,4 @@
-## Hook `amp_post_template_data`
+## Filter `amp_post_template_data`
 
 
 Filters AMP template data.

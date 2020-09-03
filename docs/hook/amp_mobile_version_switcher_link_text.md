@@ -1,4 +1,4 @@
-## Hook `amp_mobile_version_switcher_link_text`
+## Filter `amp_mobile_version_switcher_link_text`
 
 
 Filters the text to be used in the mobile switcher link.

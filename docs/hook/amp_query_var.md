@@ -1,4 +1,4 @@
-## Hook `amp_query_var`
+## Filter `amp_query_var`
 
 
 Filter the AMP query variable.

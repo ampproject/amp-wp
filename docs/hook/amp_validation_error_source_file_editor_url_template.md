@@ -1,4 +1,4 @@
-## Hook `amp_validation_error_source_file_editor_url_template`
+## Filter `amp_validation_error_source_file_editor_url_template`
 
 
 Filters the template for the URL for linking to an external editor to open a file for editing.

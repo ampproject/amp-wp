@@ -1,4 +1,4 @@
-## Hook `amp_customizer_post_type`
+## Filter `amp_customizer_post_type`
 
 
 Filter the post type to retrieve the latest for use in the AMP template customizer.

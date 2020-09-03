@@ -1,4 +1,4 @@
-## Hook `amp_mobile_version_switcher_styles_used`
+## Filter `amp_mobile_version_switcher_styles_used`
 
 
 Filters whether the default mobile version switcher styles are printed.

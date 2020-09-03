@@ -1,4 +1,4 @@
-## Hook `amp_css_transient_monitoring_sampling_range`
+## Filter `amp_css_transient_monitoring_sampling_range`
 
 
 Filters the sampling range to use for monitoring the transient caching of stylesheets.

@@ -1,4 +1,4 @@
-## Hook `amp_content_sanitizers`
+## Filter `amp_content_sanitizers`
 
 
 Filters the content sanitizers.

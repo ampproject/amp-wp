@@ -1,4 +1,4 @@
-## Hook `amp_init`
+## Action `amp_init`
 
 
 Triggers on init when AMP plugin is active.

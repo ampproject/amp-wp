@@ -1,4 +1,4 @@
-## Hook `amp_post_template_customizer_settings`
+## Filter `amp_post_template_customizer_settings`
 
 
 Filter AMP Customizer settings.

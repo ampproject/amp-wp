@@ -1,4 +1,4 @@
-## Hook `amp_to_amp_excluded_urls`
+## Filter `amp_to_amp_excluded_urls`
 
 
 Filters the list of URLs which are excluded from being included in AMP-to-AMP linking.

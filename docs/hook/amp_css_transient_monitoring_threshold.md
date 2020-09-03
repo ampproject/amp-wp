@@ -1,4 +1,4 @@
-## Hook `amp_css_transient_monitoring_threshold`
+## Filter `amp_css_transient_monitoring_threshold`
 
 
 Filters the threshold to use for disabling transient caching of stylesheets.

@@ -1,4 +1,4 @@
-## Hook `amp_schemaorg_metadata`
+## Filter `amp_schemaorg_metadata`
 
 
 Filters Schema.org metadata for a query.

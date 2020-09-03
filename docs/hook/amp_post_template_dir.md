@@ -1,4 +1,4 @@
-## Hook `amp_post_template_dir`
+## Filter `amp_post_template_dir`
 
 
 Filters the Reader template directory.

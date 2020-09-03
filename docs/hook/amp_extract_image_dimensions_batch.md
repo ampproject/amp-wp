@@ -1,4 +1,4 @@
-## Hook `amp_extract_image_dimensions_batch`
+## Filter `amp_extract_image_dimensions_batch`
 
 
 Filters the dimensions extracted from image URLs.

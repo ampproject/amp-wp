@@ -1,4 +1,4 @@
-## Hook `amp_to_amp_linking_enabled`
+## Filter `amp_to_amp_linking_enabled`
 
 
 Filters whether AMP-to-AMP linking should be enabled.

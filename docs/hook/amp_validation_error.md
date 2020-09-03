@@ -1,4 +1,4 @@
-## Hook `amp_validation_error`
+## Filter `amp_validation_error`
 
 
 Filters the validation error array.

@@ -1,4 +1,4 @@
-## Hook `amp_extract_image_dimensions_get_user_agent`
+## Filter `amp_extract_image_dimensions_get_user_agent`
 
 
 Filters the user agent for onbtaining the image dimensions.

@@ -1,4 +1,4 @@
-## Hook `amp_dev_mode_element_xpaths`
+## Filter `amp_dev_mode_element_xpaths`
 
 
 Filters the XPath queries for elements that should be enabled for dev mode.

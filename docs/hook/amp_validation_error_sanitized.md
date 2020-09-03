@@ -1,4 +1,4 @@
-## Hook `amp_validation_error_sanitized`
+## Filter `amp_validation_error_sanitized`
 
 
 Filters whether the validation error should be sanitized.

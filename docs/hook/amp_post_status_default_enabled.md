@@ -1,4 +1,4 @@
-## Hook `amp_post_status_default_enabled`
+## Filter `amp_post_status_default_enabled`
 
 
 Filters whether default AMP status should be enabled or not.

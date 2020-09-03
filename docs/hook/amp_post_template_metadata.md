@@ -1,4 +1,4 @@
-## Hook `amp_post_template_metadata`
+## Filter `amp_post_template_metadata`
 
 
 Filters Schema.org metadata for a post.

@@ -1,4 +1,4 @@
-## Hook `amp_customizer_register_ui`
+## Action `amp_customizer_register_ui`
 
 
 Fires after the AMP panel has been registered for plugins to add additional controls.

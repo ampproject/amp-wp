@@ -1,4 +1,4 @@
-## Hook `amp_content_embed_handlers`
+## Filter `amp_content_embed_handlers`
 
 
 Filters the content embed handlers.

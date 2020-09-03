@@ -1,4 +1,4 @@
-## Hook `amp_enable_ssr`
+## Filter `amp_enable_ssr`
 
 
 Filter whether the AMP Optimizer should use server-side rendering or not.

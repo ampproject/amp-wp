@@ -1,4 +1,4 @@
-## Hook `amp_plugin_update`
+## Action `amp_plugin_update`
 
 
 Triggers when after amp_init when the plugin version has updated.

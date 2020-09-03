@@ -1,4 +1,4 @@
-## Hook `amp_skip_post`
+## Filter `amp_skip_post`
 
 
 Filters whether to skip the post from AMP.

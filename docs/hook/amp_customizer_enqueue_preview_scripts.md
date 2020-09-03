@@ -1,4 +1,4 @@
-## Hook `amp_customizer_enqueue_preview_scripts`
+## Action `amp_customizer_enqueue_preview_scripts`
 
 
 Fires when plugins should enqueue their own scripts for the AMP Customizer preview.

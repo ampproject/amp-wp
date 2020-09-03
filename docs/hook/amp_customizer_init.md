@@ -1,4 +1,4 @@
-## Hook `amp_customizer_init`
+## Action `amp_customizer_init`
 
 
 Fires when the AMP Template Customizer initializes.

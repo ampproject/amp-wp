@@ -1,4 +1,4 @@
-## Hook `amp_pre_get_permalink`
+## Filter `amp_pre_get_permalink`
 
 
 Filters the AMP permalink to short-circuit normal generation.

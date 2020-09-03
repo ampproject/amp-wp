@@ -1,4 +1,4 @@
-## Hook `amp_post_template_file`
+## Filter `amp_post_template_file`
 
 
 Filters the template file being loaded for a given template type.

@@ -1,4 +1,4 @@
-## Hook `amp_print_analytics`
+## Action `amp_print_analytics`
 
 
 Triggers before analytics entries are printed as amp-analytics tags.

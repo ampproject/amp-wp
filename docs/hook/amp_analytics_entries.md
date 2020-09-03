@@ -1,4 +1,4 @@
-## Hook `amp_analytics_entries`
+## Filter `amp_analytics_entries`
 
 
 Add amp-analytics tags.

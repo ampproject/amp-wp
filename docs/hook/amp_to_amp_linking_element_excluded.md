@@ -1,4 +1,4 @@
-## Hook `amp_to_amp_linking_element_excluded`
+## Filter `amp_to_amp_linking_element_excluded`
 
 
 Filters whether AMP-to-AMP is excluded for an element.

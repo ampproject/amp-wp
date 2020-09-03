@@ -1,4 +1,4 @@
-## Hook `amp_validation_error_source_file_path`
+## Filter `amp_validation_error_source_file_path`
 
 
 Filters the file path to be opened in an external editor for a given AMP validation error source.

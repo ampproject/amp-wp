@@ -1,4 +1,4 @@
-## Hook `amp_comment_posted_message`
+## Filter `amp_comment_posted_message`
 
 
 Filters the message when comment submitted success message when

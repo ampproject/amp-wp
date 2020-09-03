@@ -48,4 +48,31 @@ final class Hook implements Leaf {
 	public function get_filename() {
 		return $this->name;
 	}
+
+	/**
+	 * Get the type of the hook with the first letter in uppercase.
+	 *
+	 * @return string Capitalized hook type.
+	 */
+	public function get_capitalized_type() {
+		return ucfirst( $this->type );
+	}
+
+	/**
+	 * Check whether the hook is an action.
+	 *
+	 * @return bool Whether the hook is an action.
+	 */
+	public function is_action() {
+		return 'action' === $this->type;
+	}
+
+	/**
+	 * Check whether the hook is a filter.
+	 *
+	 * @return bool Whether the hook is a filter.
+	 */
+	public function is_filter() {
+		return 'filter' === $this->type;
+	}
 }

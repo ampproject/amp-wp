@@ -1,4 +1,4 @@
-## Hook `amp_post_template_include_{$template_type}`
+## Action `amp_post_template_include_{$template_type}`
 
 
 Fires before including a template.

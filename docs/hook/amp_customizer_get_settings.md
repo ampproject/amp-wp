@@ -1,4 +1,4 @@
-## Hook `amp_customizer_get_settings`
+## Filter `amp_customizer_get_settings`
 
 
 Filters the AMP Customizer settings.

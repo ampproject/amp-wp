@@ -1,4 +1,4 @@
-## Hook `amp_extract_image_dimensions_batch_callbacks_registered`
+## Action `amp_extract_image_dimensions_batch_callbacks_registered`
 
 
 Fires after the amp_extract_image_dimensions_batch filter has been added to extract by downloading images.

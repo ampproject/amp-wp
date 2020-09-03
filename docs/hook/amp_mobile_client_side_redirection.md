@@ -1,4 +1,4 @@
-## Hook `amp_mobile_client_side_redirection`
+## Filter `amp_mobile_client_side_redirection`
 
 
 Filters whether mobile redirection should be done client-side (via JavaScript).
