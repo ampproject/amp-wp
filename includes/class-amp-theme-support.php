@@ -6,11 +6,13 @@
  */
 
 use AmpProject\Amp;
+use AmpProject\AmpWP\ErrorPage;
 use AmpProject\AmpWP\ExtraThemeAndPluginHeaders;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\ConfigurationArgument;
+use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Transformer;
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
@@ -1834,7 +1836,39 @@ class AMP_Theme_Support {
 	 */
 	public static function finish_output_buffering( $response ) {
 		self::$is_output_buffering = false;
-		$response                  = self::prepare_response( $response );
+
+		try {
+			$response = self::prepare_response( $response );
+		} catch ( Exception $exception ) {
+			$title   = __( 'Failed to prepare AMP page', 'amp' );
+			$message = __( 'A PHP error occurred while trying to prepare the AMP response. This may not be caused by the AMP plugin but by some other active plugin or the current theme. You will need to review the error details to determine the source of the error.', 'amp' );
+
+			/** @var ErrorPage $error_page */
+			$error_page = Services::get( 'error_page' );
+
+			$error_page
+				->with_title( $title )
+				->with_message( $message )
+				->with_exception( $exception )
+				->with_response_code( 500 );
+
+			// Add link to non-AMP version if not canonical.
+			if ( ! amp_is_canonical() ) {
+				$non_amp_url = amp_remove_endpoint( amp_get_current_url() );
+
+				// Prevent user from being redirected back to AMP version.
+				if ( true === AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ) {
+					$non_amp_url = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $non_amp_url );
+				}
+
+				$error_page->with_back_link(
+					$non_amp_url,
+					__( 'Go to non-AMP version', 'amp' )
+				);
+			}
+
+			$response = $error_page->render();
+		}
 
 		/**
 		 * Fires when server timings should be sent.

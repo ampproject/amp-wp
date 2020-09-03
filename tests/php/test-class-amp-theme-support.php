@@ -2120,20 +2120,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Returns the "Server-Timing" headers.
-	 *
-	 * @return array Server-Timing headers.
-	 */
-	private function get_server_timing_headers() {
-		return array_filter(
-			AMP_HTTP::$headers_sent,
-			static function( $header ) {
-				return 'Server-Timing' === $header['name'];
-			}
-		);
-	}
-
-	/**
 	 * Test prepare_response for responses that do not trigger standard template actions.
 	 *
 	 * @covers AMP_Theme_Support::prepare_response()
@@ -2200,6 +2186,51 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$this->assertStringContains( '<html amp', $output );
 			$this->assertStringContains( '<meta charset="utf-8">', $output );
 		}
+	}
+
+	/**
+	 * Test prepare_response for responses that throw an exception.
+	 *
+	 * @covers AMP_Theme_Support::prepare_response()
+	 */
+	public function test_prepare_response_throwing_exception() {
+		// Set up temporary capture of error log to test error log output.
+		$capture = tmpfile();
+		$backup  = ini_set( // phpcs:ignore WordPress.PHP.IniSet.Risky
+			'error_log',
+			stream_get_meta_data( $capture )['uri']
+		);
+
+		add_filter(
+			'amp_schemaorg_metadata',
+			static function () {
+				throw new RuntimeException( 'FAILURE', 42 );
+			}
+		);
+
+		if ( ! function_exists( 'newrelic_disable_autorum' ) ) {
+
+			/**
+			 * Define newrelic_disable_autorum to allow passing line.
+			 */
+			function newrelic_disable_autorum() {
+				return true;
+			}
+		}
+
+		wp();
+		$output = AMP_Theme_Support::finish_output_buffering( $this->get_original_html() );
+
+		// Verify that error log was properly populated.
+		$this->assertRegExp(
+			'/^\[[^\]]*\] A PHP error occurred while trying to prepare the AMP response\..*- FAILURE \(42\) \[RuntimeException\].*/',
+			stream_get_contents( $capture )
+		);
+
+		// Reset error log back to initial settings.
+		ini_set( 'error_log', $backup ); // phpcs:ignore WordPress.PHP.IniSet.Risky
+
+		$this->assertStringContains( 'Failed to prepare AMP page', $output );
 	}
 
 	/**
