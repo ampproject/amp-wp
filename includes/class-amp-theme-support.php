@@ -1952,9 +1952,9 @@ class AMP_Theme_Support {
 			preg_match(
 				sprintf(
 					'#^(?:<!.*?>|\s+)*+<html[^>]*?\s(%1$s|%2$s|%3$s)(?:=".*?")?.*?(?>>.*?<)head[^>]*?>#is',
-					Attribute::AMP,
-					Attribute::AMP_EMOJI,
-					Attribute::AMP_EMOJI_ALT
+					preg_quote( Attribute::AMP, '#' ),
+					preg_quote( Attribute::AMP_EMOJI, '#' ),
+					preg_quote( Attribute::AMP_EMOJI_ALT, '#' )
 				),
 				$response
 			)
