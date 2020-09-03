@@ -1951,7 +1951,7 @@ class AMP_Theme_Support {
 			||
 			preg_match(
 				sprintf(
-					'#^(?:<!.*?>|\s+)*+<html[^>]*?\s(%1$s|%2$s|%3$s)(?:=".*?")?.*?(?>>.*?<)head[^>]*?>#is',
+					'#^(?:<!.*?>|\s+)*+<html(?=\s)[^>]*?\s(%1$s|%2$s|%3$s)(\s|=|>)#is',
 					preg_quote( Attribute::AMP, '#' ),
 					preg_quote( Attribute::AMP_EMOJI, '#' ),
 					preg_quote( Attribute::AMP_EMOJI_ALT, '#' )
