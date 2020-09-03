@@ -1,4 +1,10 @@
-## Hook `amp_init`
+## Action `amp_init`
+
+```php
+do_action( 'amp_init' );
+```
+
+Triggers on init when AMP plugin is active.
 
 ### Source
 

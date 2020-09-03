@@ -1,6 +1,6 @@
 ## Method `AMP_Base_Sanitizer::has_dev_mode_exemption()`
 
-> :warning: This function is deprecated: Use AmpProject\DevMode::hasExemptionForNode( $node ) instead.
+> :warning: This method is deprecated: Use AmpProject\DevMode::hasExemptionForNode( $node ) instead.
 
 ```php
 protected function has_dev_mode_exemption( \DOMNode $node );
