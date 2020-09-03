@@ -449,15 +449,6 @@ function amp_is_available() {
 			'`is_amp_endpoint()`'
 		);
 
-		if ( ! empty( $closest_source['type'] ) && ! empty( $closest_source['name'] ) ) {
-			$message .= ' ' . sprintf(
-				/* translators: 1: type (theme, plugin, must-use plugin), 2: name */
-				__( 'It appears the %1$s with slug %2$s is responsible; please contact the author.', 'amp' ),
-				'`' . $closest_source['type'] . '`',
-				'`' . $closest_source['name'] . '`'
-			);
-		}
-
 		$message .= ' ' . sprintf(
 			/* translators: 1: the current action, 2: the wp action, 4: the WP_Query class, 4: the amp_skip_post() function */
 			__( 'WordPress is currently doing the %1$s action. Calling this function before the %2$s action means it will not have access to %3$s and the queried object to determine if it is an AMP response, thus neither the %4$s filter nor the AMP enabled toggle will be considered.', 'amp' ),
@@ -466,6 +457,16 @@ function amp_is_available() {
 			'`WP_Query`',
 			'`amp_skip_post()`'
 		);
+
+		if ( ! empty( $closest_source['type'] ) && ! empty( $closest_source['name'] ) ) {
+			$message .= ' ' . sprintf(
+				/* translators: 1: type (theme, plugin, mu-plugin), 2: name */
+				__( 'It appears the %1$s with slug %2$s is responsible; please contact the author.', 'amp' ),
+				'`' . $closest_source['type'] . '`',
+				'`' . $closest_source['name'] . '`'
+			);
+		}
+
 		_doing_it_wrong( 'amp_is_available', esc_html( $message ), '2.0.0' );
 		$already_warned_sources[] = $closest_source_identifier;
 	};
