@@ -215,7 +215,7 @@ HTML;
 		}
 
 		return sprintf(
-			'<code><strong>%s</strong> (%s) [<em>%s</em>]<br><br><small>%s</small></code>',
+			'<pre class="exception"><strong>%s</strong> (%s) [<em>%s</em>]<br><br><small>%s</small></pre>',
 			$this->exception->getMessage(),
 			$this->exception->getCode(),
 			get_class( $this->exception ),
@@ -225,6 +225,8 @@ HTML;
 
 	/**
 	 * Get the CSS styles to use for the error page.
+	 *
+	 * @see _default_wp_die_handler() Where styles are adapted from.
 	 *
 	 * @param string $text_direction Text direction. Can be 'ltr' or 'rtl'.
 	 * @return string CSS styles to use.
@@ -267,8 +269,9 @@ HTML;
 		line-height: 1.5;
 		margin: 25px 0 20px;
 	}
-	#error-page code {
+	#error-page .exception {
 		font-family: Consolas, Monaco, monospace;
+		overflow-x: auto;
 	}
 	ul li {
 		margin-bottom: 10px;
