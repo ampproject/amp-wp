@@ -51,6 +51,7 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 	 * @covers ::is_user_enabled
 	 */
 	public function test_is_user_enabled() {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$admin_user  = self::factory()->user->create_and_get( [ 'role' => 'administrator' ] );
 		$editor_user = self::factory()->user->create_and_get( [ 'role' => 'editor' ] );
 
@@ -201,6 +202,7 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 	 * @covers ::rest_get_dev_tools_enabled
 	 */
 	public function test_rest_get_dev_tools_enabled() {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$user = self::factory()->user->create_and_get( [ 'role' => 'author' ] );
 
 		$this->assertFalse( $this->dev_tools_user_access->rest_get_dev_tools_enabled( [ 'id' => $user->ID ] ) );
