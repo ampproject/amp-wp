@@ -32,6 +32,7 @@
 * [`amp_enable_ssr`](amp_enable_ssr.md) - Filter whether the AMP Optimizer should use server-side rendering or not.
 * [`amp_extract_image_dimensions_batch`](amp_extract_image_dimensions_batch.md) - Filters the dimensions extracted from image URLs.
 * [`amp_extract_image_dimensions_get_user_agent`](amp_extract_image_dimensions_get_user_agent.md) - Filters the user agent for onbtaining the image dimensions.
+* ~~[`amp_frontend_show_canonical`](amp_frontend_show_canonical.md) - Filters whether to show the amphtml link on the frontend.~~
 * [`amp_get_permalink`](amp_get_permalink.md) - Filters AMP permalink.
 * [`amp_is_enabled`](amp_is_enabled.md) - Filters whether AMP is enabled on the current site.
 * [`amp_mobile_client_side_redirection`](amp_mobile_client_side_redirection.md) - Filters whether mobile redirection should be done client-side (via JavaScript).

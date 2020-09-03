@@ -1,6 +1,6 @@
 ## Action `pre_amp_render_post`
 
-> :warning: This function is deprecated: Check amp_is_request() on the template_redirect action instead.
+> :warning: This action is deprecated: Check amp_is_request() on the template_redirect action instead.
 
 
 Fires before rendering a post in AMP.

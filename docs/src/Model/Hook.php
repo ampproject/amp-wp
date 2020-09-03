@@ -75,4 +75,22 @@ final class Hook implements Leaf {
 	public function is_filter() {
 		return 'filter' === $this->type;
 	}
+
+	/**
+	 * Process the type entry.
+	 *
+	 * @param string $value Value of the type entry.
+	 */
+	private function process_type( $value ) {
+		switch ( $value ) {
+			case 'filter_deprecated':
+				$this->type = 'filter';
+				break;
+			case 'action_deprecated':
+				$this->type = 'action';
+				break;
+			default:
+				$this->type = $value;
+		}
+	}
 }

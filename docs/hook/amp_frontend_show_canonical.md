@@ -1,6 +1,6 @@
-## Filter_deprecated `amp_frontend_show_canonical`
+## Filter `amp_frontend_show_canonical`
 
-> :warning: This function is deprecated: Remove amp_add_amphtml_link() call on wp_head action instead.
+> :warning: This filter is deprecated: Remove amp_add_amphtml_link() call on wp_head action instead.
 
 
 Filters whether to show the amphtml link on the frontend.

@@ -1,6 +1,6 @@
 ## Method `AMP_Base_Sanitizer::is_document_in_dev_mode()`
 
-> :warning: This function is deprecated: Use AmpProject\DevMode::isActiveForDocument( $document ) instead.
+> :warning: This method is deprecated: Use AmpProject\DevMode::isActiveForDocument( $document ) instead.
 
 ```php
 protected function is_document_in_dev_mode();
