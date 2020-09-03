@@ -43,9 +43,20 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 	public function test_register() {
 		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, true );
 		$this->instance->register();
-		$this->assertEquals( 10, has_filter( 'amp_default_options', [ $this->instance, 'filter_default_options' ] ) );
-		$this->assertEquals( 10, has_filter( 'amp_options_updating', [ $this->instance, 'sanitize_options' ] ) );
-		$this->assertEquals( PHP_INT_MAX, has_action( 'template_redirect', [ $this->instance, 'redirect' ] ) );
+		$this->assertSame( 10, has_filter( 'amp_default_options', [ $this->instance, 'filter_default_options' ] ) );
+		$this->assertSame( 10, has_filter( 'amp_options_updating', [ $this->instance, 'sanitize_options' ] ) );
+		$this->assertSame( PHP_INT_MAX, has_action( 'template_redirect', [ $this->instance, 'redirect' ] ) );
+		$this->assertSame( 0, has_filter( 'amp_to_amp_linking_enabled', '__return_true' ) );
+	}
+
+	/** @covers ::register() */
+	public function test_register_not_enabled() {
+		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, false );
+		$this->instance->register();
+		$this->assertSame( 10, has_filter( 'amp_default_options', [ $this->instance, 'filter_default_options' ] ) );
+		$this->assertSame( 10, has_filter( 'amp_options_updating', [ $this->instance, 'sanitize_options' ] ) );
+		$this->assertFalse( has_action( 'template_redirect', [ $this->instance, 'redirect' ] ) );
+		$this->assertFalse( has_filter( 'amp_to_amp_linking_enabled', '__return_true' ) );
 	}
 
 	/** @covers MobileRedirection::filter_default_options() */
