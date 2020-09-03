@@ -28,6 +28,7 @@
 * [`amp_customizer_post_type`](amp_customizer_post_type.md) - Filter the post type to retrieve the latest for use in the AMP template customizer.
 * [`amp_dev_mode_element_xpaths`](amp_dev_mode_element_xpaths.md) - Filters the XPath queries for elements that should be enabled for dev mode.
 * [`amp_dev_mode_enabled`](amp_dev_mode_enabled.md) - Filters whether AMP mode is enabled.
+* [`amp_dev_tools_user_default_enabled`](amp_dev_tools_user_default_enabled.md) - Filters whether Developer Tools is enabled by default for a user.
 * [`amp_enable_optimizer`](amp_enable_optimizer.md) - Filter whether the generated HTML output should be run through the AMP Optimizer or not.
 * [`amp_enable_ssr`](amp_enable_ssr.md) - Filter whether the AMP Optimizer should use server-side rendering or not.
 * [`amp_extract_image_dimensions_batch`](amp_extract_image_dimensions_batch.md) - Filters the dimensions extracted from image URLs.
