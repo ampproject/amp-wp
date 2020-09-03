@@ -2183,14 +2183,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		// Verify that error log was properly populated.
 		$this->assertRegExp(
-			'/^\[[^\]]*\] A server error occurred while trying to prepare the AMP response. - FAILURE \(42\) \[RuntimeException\].*/',
+			'/^\[[^\]]*\] A PHP error occurred while trying to prepare the AMP response\..*- FAILURE \(42\) \[RuntimeException\].*/',
 			stream_get_contents( $capture )
 		);
 
 		// Reset error log back to initial settings.
 		ini_set( 'error_log', $backup ); // phpcs:ignore WordPress.PHP.IniSet.Risky
 
-		$this->assertStringContains( 'Failed to prepare AMP response', $output );
+		$this->assertStringContains( 'Failed to prepare AMP page', $output );
 	}
 
 	/**

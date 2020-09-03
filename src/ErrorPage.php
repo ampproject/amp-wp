@@ -176,16 +176,34 @@ final class ErrorPage implements Service {
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name="viewport" content="width=device-width">
 		{$no_robots}
-		<title>{$this->title}</title>
+		<title>{$this->render_title()}</title>
 		{$styles}
 	</head>
 	<body id="error-page">
-		<h1>{$this->title}</h1>
-		<p>{$this->message}</p>
+		<h1>{$this->render_title()}</h1>
+		<p>{$this->render_message()}</p>
 		{$this->render_exception()}
 	</body>
 </html>
 HTML;
+	}
+
+	/**
+	 * Render title.
+	 *
+	 * @return string HTML-escaped title.
+	 */
+	private function render_title() {
+		return esc_html( $this->title );
+	}
+
+	/**
+	 * Render message.
+	 *
+	 * @return string KSES-sanitized message.
+	 */
+	private function render_message() {
+		return wp_kses_post( $this->message );
 	}
 
 	/**
@@ -207,10 +225,10 @@ HTML;
 			|| ! defined( 'WP_DEBUG_DISPLAY' )
 			|| ! WP_DEBUG_DISPLAY
 		) {
-			return sprintf(
-				'<p><em>%s<br>%s</em></p>',
-				__( 'The exact details of the error are hidden for security reasons.', 'amp' ),
-				__( 'To learn more about this error, enable the WordPress debugging display (by setting both WP_DEBUG and WP_DEBUG_DISPLAY to true), or look into the PHP error log.', 'amp' )
+			return wpautop(
+				wp_kses_post(
+					__( 'The exact details of the error are hidden for security reasons. To learn more about this error, enable the WordPress debugging display (by setting both <code>WP_DEBUG</code> and <code>WP_DEBUG_DISPLAY</code> to <code>true</code>), or look into the PHP error log. Learn more about <a href="https://wordpress.org/support/article/debugging-in-wordpress/">Debugging in WordPress</a>.', 'amp' )
+				)
 			);
 		}
 

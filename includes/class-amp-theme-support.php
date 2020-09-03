@@ -1840,8 +1840,8 @@ class AMP_Theme_Support {
 		try {
 			$response = self::prepare_response( $response );
 		} catch ( Exception $exception ) {
-			$title   = __( 'Failed to prepare AMP response', 'amp' );
-			$message = __( 'A server error occurred while trying to prepare the AMP response.', 'amp' );
+			$title   = __( 'Failed to prepare AMP page', 'amp' );
+			$message = __( 'A PHP error occurred while trying to prepare the AMP response. This may not be caused by the AMP plugin but by some other active plugin or the current theme. You will need to review the error details to determine the source of the error.', 'amp' );
 
 			/** @var ErrorPage $error_page */
 			$error_page = Services::get( 'error_page' );
