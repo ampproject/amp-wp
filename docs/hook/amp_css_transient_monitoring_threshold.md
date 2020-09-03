@@ -1,7 +1,14 @@
 ## Filter `amp_css_transient_monitoring_threshold`
 
+```php
+apply_filters( 'amp_css_transient_monitoring_threshold', $threshold );
+```
 
 Filters the threshold to use for disabling transient caching of stylesheets.
+
+### Arguments
+
+* `int $threshold` - Maximum average number of transients per day.
 
 ### Source
 

@@ -35,8 +35,8 @@ final class Hook implements Leaf {
 			'line'      => 0,
 			'end_line'  => 0,
 			'type'      => '',
-			'arguments' => [],
 			'doc'       => new DocBlock( [] ),
+			'arguments' => [],
 		];
 	}
 
@@ -76,6 +76,23 @@ final class Hook implements Leaf {
 		return 'filter' === $this->type;
 	}
 
+
+	/**
+	 * Get the signature of the method.
+	 *
+	 * @return string Method signature.
+	 */
+	public function get_signature() {
+		return sprintf(
+			'%s( \'%s\'%s );',
+			'action' === $this->type ? 'do_action' : 'apply_filters',
+			$this->name,
+			count( $this->arguments ) > 0
+				? ', ' . implode( ', ', $this->get_argument_names() )
+				: ''
+		);
+	}
+
 	/**
 	 * Process the type entry.
 	 *
@@ -84,13 +101,35 @@ final class Hook implements Leaf {
 	private function process_type( $value ) {
 		switch ( $value ) {
 			case 'filter_deprecated':
+			case 'filter_reference':
 				$this->type = 'filter';
 				break;
 			case 'action_deprecated':
+			case 'action_reference':
 				$this->type = 'action';
 				break;
 			default:
 				$this->type = $value;
+		}
+	}
+
+	/**
+	 * Process the arguments entry.
+	 *
+	 * @param array $value Array of argument entries.
+	 */
+	private function process_arguments( $value ) {
+		if ( empty( $this->doc->tags ) ) {
+			$this->arguments = [];
+			return;
+		}
+
+		foreach ( $this->doc->tags as $tag ) {
+			if ( 'param' !== $tag->name || ! isset( $tag->variable ) ) {
+				continue;
+			}
+
+			$this->arguments[] = new Argument( [ 'name' => $tag->variable ], $this );
 		}
 	}
 }

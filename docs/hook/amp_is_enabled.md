@@ -1,5 +1,8 @@
 ## Filter `amp_is_enabled`
 
+```php
+apply_filters( 'amp_is_enabled' );
+```
 
 Filters whether AMP is enabled on the current site.
 

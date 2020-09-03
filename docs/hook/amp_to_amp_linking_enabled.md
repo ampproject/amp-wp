@@ -1,7 +1,14 @@
 ## Filter `amp_to_amp_linking_enabled`
 
+```php
+apply_filters( 'amp_to_amp_linking_enabled', $amp_to_amp_linking_enabled );
+```
 
 Filters whether AMP-to-AMP linking should be enabled.
+
+### Arguments
+
+* `bool $amp_to_amp_linking_enabled` - Whether AMP-to-AMP linking should be enabled.
 
 ### Source
 

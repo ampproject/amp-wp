@@ -1,9 +1,17 @@
 ## Filter `amp_validation_error_source_file_path`
 
+```php
+apply_filters( 'amp_validation_error_source_file_path', $editor_url_template, $source );
+```
 
 Filters the file path to be opened in an external editor for a given AMP validation error source.
 
 This is useful to map the file path from inside of a Docker container or VM to the host machine.
+
+### Arguments
+
+* `string|null $editor_url_template` - Editor URL template.
+* `array $source` - Source information.
 
 ### Source
 

@@ -1,9 +1,16 @@
 ## Action `amp_customizer_init`
 
+```php
+do_action( 'amp_customizer_init', $self );
+```
 
 Fires when the AMP Template Customizer initializes.
 
 In practice the `customize_register` hook should be used instead.
+
+### Arguments
+
+* `\AMP_Template_Customizer $self` - Instance.
 
 ### Source
 

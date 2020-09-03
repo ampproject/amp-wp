@@ -1,7 +1,14 @@
 ## Filter `amp_options_menu_is_enabled`
 
+```php
+apply_filters( 'amp_options_menu_is_enabled', $enable );
+```
 
 Filter whether to enable the AMP settings.
+
+### Arguments
+
+* `bool $enable` - Whether to enable the AMP settings. Default true.
 
 ### Source
 

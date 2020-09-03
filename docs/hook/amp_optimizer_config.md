@@ -1,7 +1,18 @@
 ## Filter `amp_optimizer_config`
 
+```php
+apply_filters( 'amp_optimizer_config', $configuration );
+```
 
 Filter the configuration to be used for the AMP Optimizer.
+
+### Arguments
+
+* `array $configuration` - Associative array of configuration data.
+
+### Return value
+
+`array` - Filtered associative array of configuration data.
 
 ### Source
 

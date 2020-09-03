@@ -1,5 +1,8 @@
 ## Filter `amp_post_template_dir`
 
+```php
+apply_filters( 'amp_post_template_dir' );
+```
 
 Filters the Reader template directory.
 

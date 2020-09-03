@@ -1,7 +1,15 @@
 ## Filter `amp_content_embed_handlers`
 
+```php
+apply_filters( 'amp_content_embed_handlers', $handlers, $post );
+```
 
 Filters the content embed handlers.
+
+### Arguments
+
+* `array $handlers` - Handlers.
+* `\WP_Post $post` - Post. Deprecated. It will be null when `amp_is_canonical()`.
 
 ### Source
 

@@ -2,6 +2,9 @@
 
 > :warning: This filter is deprecated: Remove amp_add_amphtml_link() call on wp_head action instead.
 
+```php
+apply_filters( 'amp_frontend_show_canonical' );
+```
 
 Filters whether to show the amphtml link on the frontend.
 

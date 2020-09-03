@@ -1,5 +1,8 @@
 ## Filter `amp_comment_posted_message`
 
+```php
+apply_filters( 'amp_comment_posted_message' );
+```
 
 Filters the message when comment submitted success message when
 

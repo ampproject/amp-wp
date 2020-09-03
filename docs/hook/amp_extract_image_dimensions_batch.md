@@ -1,7 +1,14 @@
 ## Filter `amp_extract_image_dimensions_batch`
 
+```php
+apply_filters( 'amp_extract_image_dimensions_batch', $extracted_dimensions );
+```
 
 Filters the dimensions extracted from image URLs.
+
+### Arguments
+
+* `array $extracted_dimensions` - Extracted dimensions, initially mapping images URLs to false.
 
 ### Source
 

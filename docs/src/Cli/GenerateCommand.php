@@ -77,7 +77,7 @@ final class GenerateCommand {
 					$doc_tree = new Root( $data );
 				} catch ( Exception $exception ) {
 					WP_CLI::error(
-						'Failed to build documentation object tree: ' . $exception->getMessage(),
+						"Failed to build documentation object tree: {$exception->getMessage()}\n{$exception->getTraceAsString()}",
 						false
 					);
 					exit;
@@ -96,7 +96,7 @@ final class GenerateCommand {
 					}
 				} catch ( Exception $exception ) {
 					WP_CLI::error(
-						'Failed to generate markdown files: ' . $exception->getMessage()
+						"Failed to generate markdown files: {$exception->getMessage()}\n{$exception->getTraceAsString()}",
 					);
 				}
 				break;

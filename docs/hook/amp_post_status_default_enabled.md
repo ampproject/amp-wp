@@ -1,7 +1,15 @@
 ## Filter `amp_post_status_default_enabled`
 
+```php
+apply_filters( 'amp_post_status_default_enabled', $status, $post );
+```
 
 Filters whether default AMP status should be enabled or not.
+
+### Arguments
+
+* `string $status` - Status.
+* `\WP_Post $post` - Post.
 
 ### Source
 

@@ -1,7 +1,14 @@
 ## Filter `amp_customizer_get_settings`
 
+```php
+apply_filters( 'amp_customizer_get_settings', $settings );
+```
 
 Filters the AMP Customizer settings.
+
+### Arguments
+
+* `array $settings` - Associative array of $setting =&gt; $value pairs.
 
 ### Source
 

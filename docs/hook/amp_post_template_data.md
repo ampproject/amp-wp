@@ -1,7 +1,15 @@
 ## Filter `amp_post_template_data`
 
+```php
+apply_filters( 'amp_post_template_data', $data, $post );
+```
 
 Filters AMP template data.
+
+### Arguments
+
+* `array $data` - Template data.
+* `\WP_Post $post` - Post.
 
 ### Source
 

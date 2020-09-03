@@ -1,9 +1,16 @@
 ## Filter `amp_query_var`
 
+```php
+apply_filters( 'amp_query_var', $query_var );
+```
 
 Filter the AMP query variable.
 
 Warning: This filter may become deprecated.
+
+### Arguments
+
+* `string $query_var` - The AMP query variable.
 
 ### Source
 

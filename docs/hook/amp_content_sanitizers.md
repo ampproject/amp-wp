@@ -1,7 +1,15 @@
 ## Filter `amp_content_sanitizers`
 
+```php
+apply_filters( 'amp_content_sanitizers', $handlers, $post );
+```
 
 Filters the content sanitizers.
+
+### Arguments
+
+* `array $handlers` - Handlers.
+* `\WP_Post $post` - Post. Deprecated.
 
 ### Source
 
