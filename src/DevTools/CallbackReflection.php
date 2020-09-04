@@ -32,7 +32,7 @@ final class CallbackReflection implements Service {
 	/**
 	 * CallbackReflection constructor.
 	 *
-	 * @param FileReflection $file_reflection
+	 * @param FileReflection $file_reflection File reflector to use.
 	 */
 	public function __construct( FileReflection $file_reflection ) {
 		$this->file_reflection = $file_reflection;
@@ -127,7 +127,7 @@ final class CallbackReflection implements Service {
 			if ( is_object( $callback ) && ( 'Closure' === get_class( $callback ) ) ) {
 				return new ReflectionFunction( $callback );
 			}
-		} catch ( Exception $exception ) {
+		} catch ( Exception $exception ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 			// Don't let exceptions through here.
 		}
 

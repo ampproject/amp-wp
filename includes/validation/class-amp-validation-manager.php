@@ -1255,7 +1255,7 @@ class AMP_Validation_Manager {
 		$block_type = WP_Block_Type_Registry::get_instance()->get_registered( $source['block_name'] );
 		if ( $block_type && $block_type->is_dynamic() ) {
 			$callback_reflection = Services::get( 'dev_tools.callback_reflection' );
-			$callback_source = $callback_reflection->get_source( $block_type->render_callback );
+			$callback_source     = $callback_reflection->get_source( $block_type->render_callback );
 			if ( $callback_source ) {
 				$source = array_merge(
 					$source,

@@ -34,9 +34,9 @@ final class FailedToMakeInstance
 	 * Create a new instance of the exception for an interface or class that
 	 * created a circular reference.
 	 *
-	 * @param string $interface_or_class         Interface or class name that
-	 *                                           generated the circular
-	 *                                           reference.
+	 * @param string         $interface_or_class         Interface or class name that
+	 *                                                   generated the circular
+	 *                                                   reference.
 	 * @param InjectionChain $injection_chain    Injection chain that led to the
 	 *                                           circular reference.
 	 * @return self

@@ -21,15 +21,15 @@ use AmpProject\AmpWP\PluginRegistry;
 final class FileReflection implements Service, Registerable {
 
 	// Fields to include in the source array.
-	const SOURCE_FILE          = 'file';
-	const SOURCE_NAME          = 'name';
-	const SOURCE_TYPE          = 'type';
+	const SOURCE_FILE = 'file';
+	const SOURCE_NAME = 'name';
+	const SOURCE_TYPE = 'type';
 
 	// Source types.
-	const TYPE_CORE            = 'core';
-	const TYPE_MU_PLUGIN       = 'mu-plugin';
-	const TYPE_THEME           = 'theme';
-	const TYPE_PLUGIN          = 'plugin';
+	const TYPE_CORE      = 'core';
+	const TYPE_MU_PLUGIN = 'mu-plugin';
+	const TYPE_THEME     = 'theme';
+	const TYPE_PLUGIN    = 'plugin';
 
 	// Regular expression patterns to use.
 	const SLUG_PATTERN         = '(?<slug>[^/]+)';
@@ -128,7 +128,7 @@ final class FileReflection implements Service, Registerable {
 	/**
 	 * FileReflection constructor.
 	 *
-	 * @param PluginRegistry $plugin_registry
+	 * @param PluginRegistry $plugin_registry Plugin registry to use.
 	 */
 	public function __construct( PluginRegistry $plugin_registry ) {
 		$this->plugin_registry = $plugin_registry;
@@ -164,7 +164,6 @@ final class FileReflection implements Service, Registerable {
 	 *     @type string  $name Source name.
 	 *     @type string  $file Relative file path based on the type.
 	 * }
-	 *
 	 */
 	public function get_file_source( $file ) {
 		$matches = [];

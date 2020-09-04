@@ -73,7 +73,7 @@ final class ErrorPage implements Service {
 	/**
 	 * ErrorPage constructor.
 	 *
-	 * @param FileReflection $file_reflection
+	 * @param FileReflection $file_reflection File reflection to use.
 	 */
 	public function __construct( FileReflection $file_reflection ) {
 		$this->file_reflection = $file_reflection;
@@ -256,12 +256,7 @@ HTML;
 	 * @return string File source data.
 	 */
 	private function render_source() {
-		return print_r(
-			$this->file_reflection->get_file_source(
-				$this->exception->getFile()
-			),
-			true
-		);
+		return 'TODO: Use reflectors to provide likely cuplrit.';
 	}
 
 	/**

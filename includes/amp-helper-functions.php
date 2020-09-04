@@ -429,7 +429,7 @@ function amp_is_available() {
 			}
 
 			$file_reflection = Services::get( 'dev_tools.file_reflection' );
-			$source = $file_reflection->get_file_source( $call_stack['file'] );
+			$source          = $file_reflection->get_file_source( $call_stack['file'] );
 			if ( empty( $source ) || 'core' === $source['type'] || ( 'plugin' === $source['type'] && 'amp' === $source['name'] ) ) {
 				continue;
 			}
