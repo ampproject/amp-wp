@@ -10,6 +10,7 @@ use AmpProject\AmpWP\AmpWpPluginFactory;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
+use AmpProject\AmpWP\Services;
 
 /**
  * Handle activation of plugin.
@@ -427,8 +428,8 @@ function amp_is_available() {
 				continue;
 			}
 
-			AMP_Validation_Manager::set_theme_variables();
-			$source = AMP_Validation_Manager::get_file_source( $call_stack['file'] );
+			$file_reflection = Services::get( 'dev_tools.file_reflection' );
+			$source = $file_reflection->get_file_source( $call_stack['file'] );
 			if ( empty( $source ) || 'core' === $source['type'] || ( 'plugin' === $source['type'] && 'amp' === $source['name'] ) ) {
 				continue;
 			}

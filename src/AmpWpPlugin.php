@@ -66,8 +66,10 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			'amp_slug_customization_watcher'   => AmpSlugCustomizationWatcher::class,
 			'css_transient_cache.ajax_handler' => Admin\ReenableCssTransientCachingAjaxAction::class,
 			'css_transient_cache.monitor'      => BackgroundTask\MonitorCssTransientCaching::class,
-			'dev_tools.user_access'            => DevTools\UserAccess::class,
+			'dev_tools.callback_reflection'    => DevTools\CallbackReflection::class,
 			'dev_tools.error_page'             => DevTools\ErrorPage::class,
+			'dev_tools.file_reflection'        => DevTools\FileReflection::class,
+			'dev_tools.user_access'            => DevTools\UserAccess::class,
 			'extra_theme_and_plugin_headers'   => ExtraThemeAndPluginHeaders::class,
 			'mobile_redirection'               => MobileRedirection::class,
 			'obsolete_block_attribute_remover' => ObsoleteBlockAttributeRemover::class,
@@ -145,6 +147,8 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		return [
 			PluginRegistry::class,
 			Instrumentation\StopWatch::class,
+			DevTools\CallbackReflection::class,
+			DevTools\FileReflection::class,
 		];
 	}
 

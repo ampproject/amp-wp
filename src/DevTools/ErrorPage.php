@@ -66,6 +66,20 @@ final class ErrorPage implements Service {
 	private $response_code = 500;
 
 	/**
+	 * @var FileReflection
+	 */
+	private $file_reflection;
+
+	/**
+	 * ErrorPage constructor.
+	 *
+	 * @param FileReflection $file_reflection
+	 */
+	public function __construct( FileReflection $file_reflection ) {
+		$this->file_reflection = $file_reflection;
+	}
+
+	/**
 	 * Set the title of the error page.
 	 *
 	 * @param string $title Title to use.
@@ -210,6 +224,7 @@ final class ErrorPage implements Service {
 	<body id="error-page">
 		<h1>{$this->render_title()}</h1>
 		<p>{$this->render_message()}</p>
+		{$this->render_source()}
 		{$this->render_exception()}
 		{$this->render_back_link()}
 	</body>
@@ -233,6 +248,20 @@ HTML;
 	 */
 	private function render_message() {
 		return wp_kses_post( $this->message );
+	}
+
+	/**
+	 * Render the source of the exception file.
+	 *
+	 * @return string File source data.
+	 */
+	private function render_source() {
+		return print_r(
+			$this->file_reflection->get_file_source(
+				$this->exception->getFile()
+			),
+			true
+		);
 	}
 
 	/**
@@ -260,8 +289,6 @@ HTML;
 				)
 			);
 		}
-
-		return print_r( $this->exception->getFile(), true );
 
 		return sprintf(
 			'<pre class="exception"><strong>%s</strong> (%s) [<em>%s</em>]<br><br><small>%s</small></pre>',

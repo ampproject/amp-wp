@@ -184,38 +184,6 @@ class AMP_Validation_Manager {
 	protected static $amp_admin_bar_item_added = false;
 
 	/**
-	 * Cached template directory to prevent infinite recursion.
-	 *
-	 * @see get_template_directory()
-	 * @var string
-	 */
-	protected static $template_directory;
-
-	/**
-	 * Cached template slug to prevent infinite recursion.
-	 *
-	 * @see get_template()
-	 * @var string
-	 */
-	protected static $template_slug;
-
-	/**
-	 * Cached stylesheet directory to prevent infinite recursion.
-	 *
-	 * @see get_stylesheet_directory()
-	 * @var string
-	 */
-	protected static $stylesheet_directory;
-
-	/**
-	 * Cached stylesheet slug to prevent infinite recursion.
-	 *
-	 * @see get_stylesheet()
-	 * @var string
-	 */
-	protected static $stylesheet_slug;
-
-	/**
 	 * Get dev tools user access service.
 	 *
 	 * @return UserAccess
@@ -564,11 +532,6 @@ class AMP_Validation_Manager {
 	 * Add hooks for doing determining sources for validation errors during preprocessing/sanitizing.
 	 */
 	public static function add_validation_error_sourcing() {
-		self::set_theme_variables();
-
-		// Call again at setup_theme in case a plugin has dynamically changed the theme.
-		add_action( 'setup_theme', [ __CLASS__, 'set_theme_variables' ], ~PHP_INT_MAX );
-
 		add_action( 'wp', [ __CLASS__, 'wrap_widget_callbacks' ] );
 
 		add_action( 'all', [ __CLASS__, 'wrap_hook_callbacks' ] );
@@ -580,16 +543,6 @@ class AMP_Validation_Manager {
 		add_filter( 'do_shortcode_tag', [ __CLASS__, 'decorate_shortcode_source' ], PHP_INT_MAX, 2 );
 		add_filter( 'embed_oembed_html', [ __CLASS__, 'decorate_embed_source' ], PHP_INT_MAX, 3 );
 		add_filter( 'the_content', [ __CLASS__, 'add_block_source_comments' ], 8 ); // The do_blocks() function runs at priority 9.
-	}
-
-	/**
-	 * Set theme variables.
-	 */
-	public static function set_theme_variables() {
-		self::$template_directory   = wp_normalize_path( get_template_directory() );
-		self::$template_slug        = get_template();
-		self::$stylesheet_directory = wp_normalize_path( get_stylesheet_directory() );
-		self::$stylesheet_slug      = get_stylesheet();
 	}
 
 	/**
@@ -1301,7 +1254,8 @@ class AMP_Validation_Manager {
 		}
 		$block_type = WP_Block_Type_Registry::get_instance()->get_registered( $source['block_name'] );
 		if ( $block_type && $block_type->is_dynamic() ) {
-			$callback_source = self::get_source( $block_type->render_callback );
+			$callback_reflection = Services::get( 'dev_tools.callback_reflection' );
+			$callback_source = $callback_reflection->get_source( $block_type->render_callback );
 			if ( $callback_source ) {
 				$source = array_merge(
 					$source,
@@ -1330,8 +1284,9 @@ class AMP_Validation_Manager {
 	 */
 	public static function wrap_widget_callbacks() {
 		global $wp_registered_widgets;
+		$callback_reflection = Services::get( 'dev_tools.callback_reflection' );
 		foreach ( $wp_registered_widgets as $widget_id => &$registered_widget ) {
-			$source = self::get_source( $registered_widget['callback'] );
+			$source = $callback_reflection->get_source( $registered_widget['callback'] );
 			if ( ! $source ) {
 				continue;
 			}
@@ -1363,10 +1318,12 @@ class AMP_Validation_Manager {
 			return;
 		}
 
+		$callback_reflection = Services::get( 'dev_tools.callback_reflection' );
+
 		self::$current_hook_source_stack[ $hook ] = [];
 		foreach ( $wp_filter[ $hook ]->callbacks as $priority => &$callbacks ) {
 			foreach ( $callbacks as &$callback ) {
-				$source = self::get_source( $callback['function'] );
+				$source = $callback_reflection->get_source( $callback['function'] );
 				if ( ! $source ) {
 					continue;
 				}
@@ -1459,7 +1416,10 @@ class AMP_Validation_Manager {
 		if ( ! isset( $shortcode_tags[ $tag ] ) ) {
 			return $output;
 		}
-		$source = self::get_source( $shortcode_tags[ $tag ] );
+
+		$callback_reflection = Services::get( 'dev_tools.callback_reflection' );
+
+		$source = $callback_reflection->get_source( $shortcode_tags[ $tag ] );
 		if ( empty( $source ) ) {
 			return $output;
 		}
@@ -1554,95 +1514,8 @@ class AMP_Validation_Manager {
 	 * }
 	 */
 	public static function get_source( $callback ) {
-		$reflection = null;
-		try {
-			if ( is_string( $callback ) && is_callable( $callback ) ) {
-				// The $callback is a function or static method.
-				$exploded_callback = explode( '::', $callback, 2 );
-				if ( 2 === count( $exploded_callback ) ) {
-					$reflection = new ReflectionMethod( $exploded_callback[0], $exploded_callback[1] );
-				} else {
-					$reflection = new ReflectionFunction( $callback );
-				}
-			} elseif ( is_array( $callback ) && isset( $callback[0], $callback[1] ) && method_exists( $callback[0], $callback[1] ) ) {
-				$reflection = new ReflectionMethod( $callback[0], $callback[1] );
-
-				// Handle the special case of the class being a widget, in which case the display_callback method should
-				// actually map to the underling widget method. It is the display_callback in the end that is wrapped.
-				if ( 'WP_Widget' === $reflection->getDeclaringClass()->getName() && 'display_callback' === $reflection->getName() ) {
-					$reflection = new ReflectionMethod( $callback[0], 'widget' );
-				}
-			} elseif ( is_object( $callback ) && ( 'Closure' === get_class( $callback ) ) ) {
-				$reflection = new ReflectionFunction( $callback );
-			}
-		} catch ( Exception $e ) {
-			return null;
-		}
-
-		// The reflection is needed later for AMP_Validation_Manager::has_parameters_passed_by_reference().
-		if ( ! $reflection ) {
-			return null;
-		}
-
-		$source = compact( 'reflection' );
-
-		$file   = wp_normalize_path( $reflection->getFileName() );
-		$source = array_merge( $source, self::get_file_source( $file ) );
-
-		// If a file was identified, then also supply the line number.
-		if ( isset( $source['file'] ) ) {
-			$source['line'] = $reflection->getStartLine();
-		}
-
-		if ( $reflection instanceof ReflectionMethod ) {
-			$source['function'] = $reflection->getDeclaringClass()->getName() . '::' . $reflection->getName();
-		} else {
-			$source['function'] = $reflection->getName();
-		}
-
-		return $source;
-	}
-
-	/**
-	 * Identify the type, name, and relative path for a file.
-	 *
-	 * @since 2.0.1
-	 *
-	 * @param string $file File.
-	 * @return array {
-	 *     @type string $type Source type (core, plugin, mu-plugin, or theme).
-	 *     @type string $name Source name.
-	 *     @type string $file Relative file path based on the type.
-	 * }
-	 */
-	public static function get_file_source( $file ) {
-		/** @var PluginRegistry $plugin_registry */
-		$plugin_registry = Services::get( 'plugin_registry' );
-
-		$source       = [];
-		$slug_pattern = '(?<slug>[^/]+)';
-		if ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( $plugin_registry->get_plugin_dir() ) ), ':' ) . $slug_pattern . '(/(?P<file>.*$))?:s', $file, $matches ) ) {
-			$source['type'] = 'plugin';
-			$source['name'] = $matches['slug'];
-			$source['file'] = isset( $matches['file'] ) ? $matches['file'] : $matches['slug'];
-		} elseif ( ! empty( self::$template_directory ) && preg_match( ':' . preg_quote( trailingslashit( self::$template_directory ), ':' ) . '(?P<file>.*$):s', $file, $matches ) ) {
-			$source['type'] = 'theme';
-			$source['name'] = self::$template_slug;
-			$source['file'] = $matches['file'];
-		} elseif ( ! empty( self::$stylesheet_directory ) && preg_match( ':' . preg_quote( trailingslashit( self::$stylesheet_directory ), ':' ) . '(?P<file>.*$):s', $file, $matches ) ) {
-			$source['type'] = 'theme';
-			$source['name'] = self::$stylesheet_slug;
-			$source['file'] = $matches['file'];
-		} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WPMU_PLUGIN_DIR ) ), ':' ) . $slug_pattern . '(/(?P<file>.*$))?:s', $file, $matches ) ) {
-			$source['type'] = 'mu-plugin';
-			$source['name'] = $matches['slug'];
-			$source['file'] = isset( $matches['file'] ) ? $matches['file'] : $matches['slug'];
-		} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( ABSPATH ) ), ':' ) . '(?P<slug>wp-admin|wp-includes)/(?P<file>.*$):s', $file, $matches ) ) {
-			$source['type'] = 'core';
-			$source['name'] = $matches['slug'];
-			$source['file'] = $matches['file'];
-		}
-		return $source;
+		return Services::get( 'dev_tools.callback_reflection' )
+			->get_source( $callback );
 	}
 
 	/**
