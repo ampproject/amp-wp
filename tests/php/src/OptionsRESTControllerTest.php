@@ -47,7 +47,8 @@ class OptionsRESTControllerTest extends WP_UnitTestCase {
 
 		$this->add_reader_themes_request_filter();
 
-		$this->controller = new OptionsRESTController( new ReaderThemes(), new PluginSuppression( new PluginRegistry() ) );
+		$this->controller = Services::get( 'injector' )
+			->make( OptionsRESTController::class );
 	}
 
 	/**

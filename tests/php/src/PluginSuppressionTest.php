@@ -178,9 +178,10 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 	 */
 	private function get_instance( $register = false ) {
 		/** @var PluginRegistry $plugin_registry */
-		$plugin_registry = Services::get( 'plugin_registry' );
+		$plugin_registry     = Services::get( 'plugin_registry' );
+		$callback_reflection = Services::get( 'dev_tools.callback_reflection' );
 
-		$instance = new PluginSuppression( $plugin_registry );
+		$instance = new PluginSuppression( $plugin_registry, $callback_reflection );
 		if ( $register ) {
 			$instance->register();
 		}

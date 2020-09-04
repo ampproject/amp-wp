@@ -7,6 +7,8 @@
 
 namespace AmpProject\AmpWP\Tests\DevTools;
 
+use AMP_Options_Manager;
+use AMP_Theme_Support;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Option;
 use WP_Error;
@@ -92,7 +94,7 @@ class UserAccessTest extends WP_UnitTestCase {
 		$this->assertFalse( $this->dev_tools_user_access->get_user_enabled( $admin_user->ID ) );
 
 		// Check filter overriding default to be true in Reader mode, but then user forcing it off via user pref.
-		delete_user_meta( $admin_user->ID, DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED );
+		delete_user_meta( $admin_user->ID, UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED );
 		remove_all_filters( 'amp_dev_tools_user_default_enabled' );
 		add_filter(
 			'amp_dev_tools_user_default_enabled',
@@ -106,11 +108,11 @@ class UserAccessTest extends WP_UnitTestCase {
 		);
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		$this->assertTrue( $this->dev_tools_user_access->get_user_enabled( $admin_user ) );
-		update_user_meta( $admin_user->ID, DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED, 'false' );
+		update_user_meta( $admin_user->ID, UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED, 'false' );
 		$this->assertFalse( $this->dev_tools_user_access->get_user_enabled( $admin_user ) );
 
 		// Check filter overriding default to be false in Standard mode, but then user forcing it on via user pref.
-		delete_user_meta( $admin_user->ID, DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED );
+		delete_user_meta( $admin_user->ID, UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED );
 		remove_all_filters( 'amp_dev_tools_user_default_enabled' );
 		add_filter(
 			'amp_dev_tools_user_default_enabled',
@@ -124,7 +126,7 @@ class UserAccessTest extends WP_UnitTestCase {
 		);
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->assertFalse( $this->dev_tools_user_access->get_user_enabled( $admin_user ) );
-		update_user_meta( $admin_user->ID, DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED, 'true' );
+		update_user_meta( $admin_user->ID, UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED, 'true' );
 		$this->assertTrue( $this->dev_tools_user_access->get_user_enabled( $admin_user ) );
 	}
 
