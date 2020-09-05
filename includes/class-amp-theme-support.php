@@ -1843,7 +1843,6 @@ class AMP_Theme_Support {
 			$title   = __( 'Failed to prepare AMP page', 'amp' );
 			$message = __( 'A PHP error occurred while trying to prepare the AMP response. This may not be caused by the AMP plugin but by some other active plugin or the current theme. You will need to review the error details to determine the source of the error.', 'amp' );
 
-			/** @var ErrorPage $error_page */
 			$error_page = Services::get( 'dev_tools.error_page' );
 
 			$error_page

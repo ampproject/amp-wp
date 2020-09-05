@@ -227,7 +227,6 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return void
 	 */
 	public static function register() {
-		/** @var UserAccess $dev_tools_user_access */
 		$dev_tools_user_access = Services::get( 'dev_tools.user_access' );
 
 		// Show in the admin menu if dev tools are enabled for the user or if the user is on any dev tools screen.
@@ -2360,7 +2359,6 @@ class AMP_Validation_Error_Taxonomy {
 		// Fall back to using the theme/plugin editors if no external editor is offered.
 		if ( ! $edit_url ) {
 			if ( 'plugin' === $source['type'] && current_user_can( 'edit_plugins' ) ) {
-				/** @var PluginRegistry $plugin_registry */
 				$plugin_registry = Services::get( 'plugin_registry' );
 				$plugin          = $plugin_registry->get_plugin_from_slug( $source['name'] );
 				if ( $plugin ) {
@@ -2414,7 +2412,6 @@ class AMP_Validation_Error_Taxonomy {
 				}
 				break;
 			case 'plugin':
-				/** @var PluginRegistry $plugin_registry */
 				$plugin_registry = Services::get( 'plugin_registry' );
 				$plugin          = $plugin_registry->get_plugin_from_slug( $name );
 				if ( $plugin && ! empty( $plugin['data']['Name'] ) ) {

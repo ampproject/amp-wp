@@ -92,7 +92,6 @@ class OptionsRESTControllerTest extends WP_UnitTestCase {
 			array_keys( $data )
 		);
 
-		/** @var PluginRegistry $plugin_registry */
 		$plugin_registry = Services::get( 'plugin_registry' );
 
 		$this->assertEqualSets( array_keys( $plugin_registry->get_plugins( true ) ), array_keys( $data['suppressible_plugins'] ) );

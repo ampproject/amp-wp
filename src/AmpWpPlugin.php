@@ -47,6 +47,41 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	const HOOK_PREFIX = 'amp_';
 
 	/**
+	 * List of services.
+	 *
+	 * The services array contains a map of <identifier> => <service class name>
+	 * associations.
+	 *
+	 * @var string[]
+	 */
+	const SERVICES = [
+		'admin.analytics_menu'             => Admin\AnalyticsOptionsSubmenu::class,
+		'admin.google_fonts'               => Admin\GoogleFonts::class,
+		'admin.onboarding_menu'            => Admin\OnboardingWizardSubmenu::class,
+		'admin.onboarding_wizard'          => Admin\OnboardingWizardSubmenuPage::class,
+		'admin.options_menu'               => Admin\OptionsMenu::class,
+		'admin.polyfills'                  => Admin\Polyfills::class,
+		'amp_slug_customization_watcher'   => AmpSlugCustomizationWatcher::class,
+		'css_transient_cache.ajax_handler' => Admin\ReenableCssTransientCachingAjaxAction::class,
+		'css_transient_cache.monitor'      => BackgroundTask\MonitorCssTransientCaching::class,
+		'dev_tools.callback_reflection'    => DevTools\CallbackReflection::class,
+		'dev_tools.error_page'             => DevTools\ErrorPage::class,
+		'dev_tools.file_reflection'        => DevTools\FileReflection::class,
+		'dev_tools.user_access'            => DevTools\UserAccess::class,
+		'extra_theme_and_plugin_headers'   => ExtraThemeAndPluginHeaders::class,
+		'mobile_redirection'               => MobileRedirection::class,
+		'obsolete_block_attribute_remover' => ObsoleteBlockAttributeRemover::class,
+		'plugin_activation_notice'         => Admin\PluginActivationNotice::class,
+		'plugin_registry'                  => PluginRegistry::class,
+		'plugin_suppression'               => PluginSuppression::class,
+		'reader_theme_loader'              => ReaderThemeLoader::class,
+		'rest.options_controller'          => OptionsRESTController::class,
+		'server_timing'                    => Instrumentation\ServerTiming::class,
+		'site_health_integration'          => Admin\SiteHealth::class,
+		'validated_url_stylesheet_gc'      => BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection::class,
+	];
+
+	/**
 	 * Get the list of services to register.
 	 *
 	 * The services array contains a map of <identifier> => <service class name>
@@ -56,32 +91,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 *                       qualified class names.
 	 */
 	protected function get_service_classes() {
-		return [
-			'admin.analytics_menu'             => Admin\AnalyticsOptionsSubmenu::class,
-			'admin.google_fonts'               => Admin\GoogleFonts::class,
-			'admin.onboarding_menu'            => Admin\OnboardingWizardSubmenu::class,
-			'admin.onboarding_wizard'          => Admin\OnboardingWizardSubmenuPage::class,
-			'admin.options_menu'               => Admin\OptionsMenu::class,
-			'admin.polyfills'                  => Admin\Polyfills::class,
-			'amp_slug_customization_watcher'   => AmpSlugCustomizationWatcher::class,
-			'css_transient_cache.ajax_handler' => Admin\ReenableCssTransientCachingAjaxAction::class,
-			'css_transient_cache.monitor'      => BackgroundTask\MonitorCssTransientCaching::class,
-			'dev_tools.callback_reflection'    => DevTools\CallbackReflection::class,
-			'dev_tools.error_page'             => DevTools\ErrorPage::class,
-			'dev_tools.file_reflection'        => DevTools\FileReflection::class,
-			'dev_tools.user_access'            => DevTools\UserAccess::class,
-			'extra_theme_and_plugin_headers'   => ExtraThemeAndPluginHeaders::class,
-			'mobile_redirection'               => MobileRedirection::class,
-			'obsolete_block_attribute_remover' => ObsoleteBlockAttributeRemover::class,
-			'plugin_activation_notice'         => Admin\PluginActivationNotice::class,
-			'plugin_registry'                  => PluginRegistry::class,
-			'plugin_suppression'               => PluginSuppression::class,
-			'reader_theme_loader'              => ReaderThemeLoader::class,
-			'rest.options_controller'          => OptionsRESTController::class,
-			'server_timing'                    => Instrumentation\ServerTiming::class,
-			'site_health_integration'          => Admin\SiteHealth::class,
-			'validated_url_stylesheet_gc'      => BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection::class,
-		];
+		return self::SERVICES;
 	}
 
 	/**

@@ -75,7 +75,6 @@ class AMP_Template_Customizer {
 	 * @return AMP_Template_Customizer Instance.
 	 */
 	public static function init( WP_Customize_Manager $wp_customize ) {
-		/** @var ReaderThemeLoader $reader_theme_loader */
 		$reader_theme_loader = Services::get( 'reader_theme_loader' );
 
 		$self = new self( $wp_customize, $reader_theme_loader );

@@ -491,7 +491,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$editor_user_id = self::factory()->user->create( [ 'role' => 'editor' ] );
 
 		wp_set_current_user( $admin_user_id );
-		/** @var UserAccess $service */
 		$service = Services::get( 'dev_tools.user_access' );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
@@ -633,7 +632,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		// Make user preference is honored.
-		/** @var UserAccess $service */
 		$service = Services::get( 'dev_tools.user_access' );
 		$service->set_user_enabled( wp_get_current_user()->ID, false );
 		$this->assertNull(
@@ -896,7 +894,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertStringContains( $expected_notice_non_accepted_errors, $output );
 
 		// Ensure not displayed when dev tools is disabled.
-		/** @var UserAccess $service */
 		$service = Services::get( 'dev_tools.user_access' );
 		$service->set_user_enabled( wp_get_current_user()->ID, false );
 		$output = get_echo( [ 'AMP_Validation_Manager', 'print_edit_form_validation_status' ], [ $post ] );
@@ -2552,7 +2549,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertFalse( wp_script_is( $slug, 'enqueued' ) );
 
 		// Ensure not displayed when dev tools is disabled.
-		/** @var UserAccess $service */
 		$service = Services::get( 'dev_tools.user_access' );
 		$this->set_capability();
 		$service->set_user_enabled( wp_get_current_user()->ID, false );

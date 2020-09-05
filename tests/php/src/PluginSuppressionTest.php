@@ -161,7 +161,6 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 	 * @return string[] Plugin file slugs.
 	 */
 	private function get_bad_plugin_file_slugs() {
-		/** @var PluginRegistry $plugin_registry */
 		$plugin_registry = Services::get( 'plugin_registry' );
 
 		$plugin_file_slugs = array_map(
@@ -177,7 +176,6 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 	 * @return PluginSuppression
 	 */
 	private function get_instance( $register = false ) {
-		/** @var PluginRegistry $plugin_registry */
 		$plugin_registry     = Services::get( 'plugin_registry' );
 		$callback_reflection = Services::get( 'dev_tools.callback_reflection' );
 
@@ -390,7 +388,6 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		$instance = $this->get_instance();
 		$instance->register();
 
-		/** @var PluginRegistry $plugin_registry */
 		$plugin_registry = Services::get( 'plugin_registry' );
 
 		$this->init_plugins();
