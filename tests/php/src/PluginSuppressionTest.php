@@ -2,6 +2,8 @@
 
 namespace AmpProject\AmpWP\Tests;
 
+use AmpProject\AmpWP\DevTools\CallbackReflection;
+use AmpProject\AmpWP\DevTools\FileReflection;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
@@ -35,6 +37,13 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 	private $attempted_validate_request_urls = [];
 
 	/**
+	 * Clone of the plugin registry to adapt.
+	 *
+	 * @var PluginRegistry
+	 */
+	private $plugin_registry;
+
+	/**
 	 * Set up.
 	 */
 	public function setUp() {
@@ -62,8 +71,9 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 			3
 		);
 
+		$this->plugin_registry = new PluginRegistry();
 		$this->set_private_property(
-			Services::get( 'plugin_registry' ),
+			$this->plugin_registry,
 			'plugin_folder',
 			basename( AMP__DIR__ ) . '/' . MockPluginEnvironment::BAD_PLUGINS_DIR
 		);
@@ -87,7 +97,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		}
 		$this->reset_widgets();
 		$this->set_private_property(
-			Services::get( 'plugin_registry' ),
+			$this->plugin_registry,
 			'plugin_folder',
 			null
 		);
@@ -161,10 +171,8 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 	 * @return string[] Plugin file slugs.
 	 */
 	private function get_bad_plugin_file_slugs() {
-		$plugin_registry = Services::get( 'plugin_registry' );
-
 		$plugin_file_slugs = array_map(
-			[ $plugin_registry, 'get_plugin_slug_from_file' ],
+			[ $this->plugin_registry, 'get_plugin_slug_from_file' ],
 			$this->get_bad_plugin_files()
 		);
 
@@ -176,10 +184,12 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 	 * @return PluginSuppression
 	 */
 	private function get_instance( $register = false ) {
-		$plugin_registry     = Services::get( 'plugin_registry' );
-		$callback_reflection = Services::get( 'dev_tools.callback_reflection' );
-
-		$instance = new PluginSuppression( $plugin_registry, $callback_reflection );
+		$instance = new PluginSuppression(
+			$this->plugin_registry,
+			new CallbackReflection(
+				new FileReflection( $this->plugin_registry )
+			)
+		);
 		if ( $register ) {
 			$instance->register();
 		}
@@ -388,8 +398,6 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		$instance = $this->get_instance();
 		$instance->register();
 
-		$plugin_registry = Services::get( 'plugin_registry' );
-
 		$this->init_plugins();
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		AMP_Options_Manager::register_settings(); // Adds validate_options as filter.
@@ -451,7 +459,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 			$this->assertEquals( wp_get_current_user()->user_nicename, $suppressed_plugin[ Option::SUPPRESSED_PLUGINS_USERNAME ] );
 			$this->assertArrayHasKey( Option::SUPPRESSED_PLUGINS_ERRORING_URLS, $suppressed_plugin );
 			$this->assertEquals( [ home_url( '/' ) ], $suppressed_plugin[ Option::SUPPRESSED_PLUGINS_ERRORING_URLS ] );
-			$this->assertEquals( $plugin_registry->get_plugin_from_slug( $slug )['data']['Version'], $suppressed_plugin[ Option::SUPPRESSED_PLUGINS_LAST_VERSION ] );
+			$this->assertEquals( $this->plugin_registry->get_plugin_from_slug( $slug )['data']['Version'], $suppressed_plugin[ Option::SUPPRESSED_PLUGINS_LAST_VERSION ] );
 		}
 
 		// Stop suppressing only some plugins.
