@@ -1,4 +1,9 @@
 <?php
+/**
+ * Class ServicesDynamicReturnTypeExtension.
+ *
+ * @package AmpProject\AmpWP
+ */
 
 namespace AmpProject\AmpWP\Tests\PhpStan;
 
@@ -16,6 +21,14 @@ use PHPStan\Type\DynamicStaticMethodReturnTypeExtension;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\Type;
 
+/**
+ * PHPStan extension class that provides the type for services returned via the
+ * static service locator.
+ *
+ * phpcs:disable WordPress.NamingConventions.ValidVariableName
+ * phpcs:disable PHPCompatibility.FunctionDeclarations.NewReturnTypeDeclarations
+ * phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+ */
 final class ServicesDynamicReturnTypeExtension implements DynamicStaticMethodReturnTypeExtension {
 
 	public function getClass(): string {
@@ -54,7 +67,7 @@ final class ServicesDynamicReturnTypeExtension implements DynamicStaticMethodRet
 		MethodReflection $methodReflection,
 		StaticCall $methodCall
 	): Type {
-		$returnType = ParametersAcceptorSelector::selectSingle(
+		$return_type = ParametersAcceptorSelector::selectSingle(
 			$methodReflection->getVariants()
 		)->getReturnType();
 
@@ -63,18 +76,18 @@ final class ServicesDynamicReturnTypeExtension implements DynamicStaticMethodRet
 			||
 			empty( $methodCall->args[0]->value )
 		) {
-			return $returnType;
+			return $return_type;
 		}
 
-		$serviceId = $methodCall->args[0]->value;
-		if ( $serviceId instanceof String_ ) {
-			$serviceId = $serviceId->value;
+		$service_id = $methodCall->args[0]->value;
+		if ( $service_id instanceof String_ ) {
+			$service_id = $service_id->value;
 		}
 
-		if ( array_key_exists( (string) $serviceId, AmpWpPlugin::SERVICES ) ) {
-			return new ObjectType( AmpWpPlugin::SERVICES[ (string) $serviceId ] );
+		if ( array_key_exists( (string) $service_id, AmpWpPlugin::SERVICES ) ) {
+			return new ObjectType( AmpWpPlugin::SERVICES[ (string) $service_id ] );
 		}
 
-		return $returnType;
+		return $return_type;
 	}
 }

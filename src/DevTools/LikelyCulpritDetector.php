@@ -49,6 +49,7 @@ final class LikelyCulpritDetector implements Service {
 	/**
 	 * Detect the themes and plugins responsible for causing the exception.
 	 *
+	 * @param Exception $exception Exception to analyze.
 	 * @return string[] Type and name of extension that is the likely culprit.
 	 */
 	public function analyze_exception( Exception $exception ) {
@@ -60,7 +61,7 @@ final class LikelyCulpritDetector implements Service {
 	/**
 	 * Detect the themes and plugins responsible for an issue in a trace.
 	 *
-	 * @param array $trace Associative array of trace data.
+	 * @param array $trace Associative array of trace data to analyze.
 	 * @return string[] Type and name of extension that is the likely culprit.
 	 */
 	public function analyze_trace( $trace ) {
