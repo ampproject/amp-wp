@@ -94,7 +94,7 @@ final class FileReflection implements Service, Registerable {
 	 *
 	 * Used as cache to avoid running a filtered getter with each file lookup.
 	 *
-	 * @var string
+	 * @var string|null
 	 */
 	private $template_directory;
 
@@ -103,7 +103,7 @@ final class FileReflection implements Service, Registerable {
 	 *
 	 * Used as cache to avoid running a filtered getter with each file lookup.
 	 *
-	 * @var string
+	 * @var string|null
 	 */
 	private $template_slug;
 
@@ -112,7 +112,7 @@ final class FileReflection implements Service, Registerable {
 	 *
 	 * Used as cache to avoid running a filtered getter with each file lookup.
 	 *
-	 * @var string
+	 * @var string|null
 	 */
 	private $stylesheet_directory;
 
@@ -121,7 +121,7 @@ final class FileReflection implements Service, Registerable {
 	 *
 	 * Used as cache to avoid running a filtered getter with each file lookup.
 	 *
-	 * @var string
+	 * @var string|null
 	 */
 	private $stylesheet_slug;
 

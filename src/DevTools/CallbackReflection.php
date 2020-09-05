@@ -87,7 +87,7 @@ final class CallbackReflection implements Service {
 	 *
 	 * @param string|array|callable $callback The callback for which to get the
 	 *                                        plugin.
-	 * @return Reflector|null
+	 * @return ReflectionMethod|ReflectionFunction|null
 	 */
 	private function get_reflection( $callback ) {
 		try {
@@ -111,8 +111,10 @@ final class CallbackReflection implements Service {
 			) {
 				$reflection = new ReflectionMethod( $callback[0], $callback[1] );
 
-				// Handle the special case of the class being a widget, in which case the display_callback method should
-				// actually map to the underling widget method. It is the display_callback in the end that is wrapped.
+				// Handle the special case of the class being a widget, in which
+				// case the display_callback method should actually map to the
+				// underling widget method. It is the display_callback in the
+				// end that is wrapped.
 				if (
 					'display_callback' === $reflection->getName()
 					&&
@@ -124,7 +126,11 @@ final class CallbackReflection implements Service {
 				return $reflection;
 			}
 
-			if ( is_object( $callback ) && ( 'Closure' === get_class( $callback ) ) ) {
+			if (
+				is_object( $callback )
+				&&
+				'Closure' === get_class( $callback )
+			) {
 				return new ReflectionFunction( $callback );
 			}
 		} catch ( Exception $exception ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
