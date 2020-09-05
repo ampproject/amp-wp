@@ -414,30 +414,12 @@ function amp_is_available() {
 		return false;
 	}
 
-	$warn = function () {
+	$warn = static function () {
 		static $already_warned_sources = [];
 
-		// Gather the themes and plugins responsible for calling the function incorrectly.
-		$closest_source = [
-			'type' => '',
-			'name' => '',
-		];
+		$likely_culprit_detector = Services::get( 'dev_tools.likely_culprit_detector' );
 
-		foreach ( debug_backtrace( 0 ) as $call_stack ) { // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace
-			if ( empty( $call_stack['file'] ) ) {
-				continue;
-			}
-
-			$file_reflection = Services::get( 'dev_tools.file_reflection' );
-			$source          = $file_reflection->get_file_source( $call_stack['file'] );
-			if ( empty( $source ) || 'core' === $source['type'] || ( 'plugin' === $source['type'] && 'amp' === $source['name'] ) ) {
-				continue;
-			}
-
-			$closest_source = $source;
-			break;
-		}
-
+		$closest_source            = $likely_culprit_detector->analyze_backtrace();
 		$closest_source_identifier = $closest_source['type'] . ':' . $closest_source['name'];
 		if ( in_array( $closest_source_identifier, $already_warned_sources, true ) ) {
 			return;

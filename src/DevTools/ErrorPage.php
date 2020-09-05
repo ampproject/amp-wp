@@ -66,17 +66,20 @@ final class ErrorPage implements Service {
 	private $response_code = 500;
 
 	/**
-	 * @var FileReflection
+	 * Culprit detection to use.
+	 *
+	 * @var LikelyCulpritDetector
 	 */
-	private $file_reflection;
+	private $likely_culprit_detector;
 
 	/**
 	 * ErrorPage constructor.
 	 *
-	 * @param FileReflection $file_reflection File reflection to use.
+	 * @param LikelyCulpritDetector $likely_culprit_detector Culprit detection
+	 *                                                       to use.
 	 */
-	public function __construct( FileReflection $file_reflection ) {
-		$this->file_reflection = $file_reflection;
+	public function __construct( LikelyCulpritDetector $likely_culprit_detector ) {
+		$this->likely_culprit_detector = $likely_culprit_detector;
 	}
 
 	/**
@@ -256,7 +259,18 @@ HTML;
 	 * @return string File source data.
 	 */
 	private function render_source() {
-		return 'TODO: Use reflectors to provide likely cuplrit.';
+		$source = $this->likely_culprit_detector->analyze_exception( $this->exception );
+
+		if ( ! empty( $source['type'] ) && ! empty( $source['name'] ) ) {
+			return sprintf(
+				/* translators: 1: type (theme, plugin, mu-plugin), 2: name */
+				__( 'It appears the %1$s with slug %2$s is responsible; please contact the author.', 'amp' ),
+				'<strong><code>' . $source['type'] . '</code></strong>',
+				'<strong><code>' . $source['name'] . '</code></strong>'
+			);
+		}
+
+		return '';
 	}
 
 	/**
@@ -286,10 +300,12 @@ HTML;
 		}
 
 		return sprintf(
-			'<pre class="exception"><strong>%s</strong> (%s) [<em>%s</em>]<br><br><small>%s</small></pre>',
+			'<hr><pre class="exception"><strong>%s</strong> (%s) [<em>%s</em>]<br><em>%s:%d</em><br><br><small>%s</small></pre>',
 			$this->exception->getMessage(),
 			$this->exception->getCode(),
 			get_class( $this->exception ),
+			$this->exception->getFile(),
+			$this->exception->getLine(),
 			str_replace( "\n", '<br>', $this->exception->getTraceAsString() )
 		);
 	}
@@ -347,6 +363,11 @@ HTML;
 		padding: 0;
 		padding-bottom: 7px;
 	}
+	hr {
+		margin: 20px 0;
+		border: none;
+		border-top: 1px solid #dadada;
+	}
 	#error-page {
 		margin-top: 50px;
 	}
@@ -356,7 +377,8 @@ HTML;
 		line-height: 1.5;
 		margin: 25px 0 20px;
 	}
-	#error-page .exception {
+	#error-page .exception,
+	code {
 		font-family: Consolas, Monaco, monospace;
 		overflow-x: auto;
 	}
