@@ -205,6 +205,13 @@ class AMP_Validation_Error_Taxonomy {
 	const ERROR_STATUS = 'error_status';
 
 	/**
+	 * Key for the transient storing error index counts.
+	 * 
+	 * @var string
+	 */
+	const TRANSIENT_KEY_ERROR_INDEX_COUNTS = 'amp_error_index_counts';
+
+	/**
 	 * Whether the terms_clauses filter should apply to a term query for validation errors to limit to a given status.
 	 *
 	 * This is set to false when calling wp_count_terms() for the admin menu and for the views.
@@ -279,6 +286,8 @@ class AMP_Validation_Error_Taxonomy {
 		if ( is_admin() ) {
 			self::add_admin_hooks();
 		}
+
+		add_action( 'created_' . self::TAXONOMY_SLUG, [ __CLASS__, 'clear_cached_counts' ] );
 	}
 
 	/**
@@ -332,6 +341,9 @@ class AMP_Validation_Error_Taxonomy {
 				$deleted_count++;
 			}
 		}
+
+		delete_transient( self::TRANSIENT_KEY_ERROR_INDEX_COUNTS );
+
 		return $deleted_count;
 	}
 
@@ -595,6 +607,16 @@ class AMP_Validation_Error_Taxonomy {
 			$args
 		);
 
+		$cache_key     = wp_json_encode( $args );
+		$cached_counts = get_transient( self::TRANSIENT_KEY_ERROR_INDEX_COUNTS );
+		if ( empty( $cached_counts ) ) {
+			$cached_counts = [];
+		}
+
+		if ( isset( $cached_counts[ $cache_key ] ) ) {
+			return $cached_counts[ $cache_key ];
+		}
+
 		$groups = null;
 		if ( isset( $args['group'] ) ) {
 			$groups = self::sanitize_term_status( $args['group'], [ 'multiple' => true ] );
@@ -613,7 +635,13 @@ class AMP_Validation_Error_Taxonomy {
 		if ( isset( $args['group'] ) ) {
 			remove_filter( 'terms_clauses', $filter );
 		}
-		return (int) $term_count;
+
+		$result = (int) $term_count;
+
+		$cached_counts[ $cache_key ] = $result;
+		set_transient( self::TRANSIENT_KEY_ERROR_INDEX_COUNTS, $cached_counts, HOUR_IN_SECONDS );
+
+		return $result;
 	}
 
 	/**
@@ -3337,5 +3365,12 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		return sprintf( '<span class="status-text">%s %s</span>', $icon->to_html(), esc_html( $text ) );
+	}
+
+	/**
+	 * Deletes cached term counts.
+	 */
+	public static function clear_cached_counts() {
+		delete_transient( self::TRANSIENT_KEY_ERROR_INDEX_COUNTS );
 	}
 }

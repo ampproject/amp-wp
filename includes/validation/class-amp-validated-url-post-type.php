@@ -957,6 +957,7 @@ class AMP_Validated_URL_Post_Type {
 		}
 
 		delete_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
+		delete_transient( AMP_Validation_Error_Taxonomy::TRANSIENT_KEY_ERROR_INDEX_COUNTS );
 
 		return $post_id;
 	}
