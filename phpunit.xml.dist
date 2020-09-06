@@ -36,6 +36,7 @@
 				<directory suffix=".php">tests</directory>
 				<directory suffix=".php">vendor</directory>
 				<directory suffix=".php">build</directory>
+				<directory suffix=".php">docs/</directory>
 			</exclude>
 		</whitelist>
 	</filter>
