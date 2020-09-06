@@ -2923,20 +2923,27 @@ class AMP_Validated_URL_Post_Type {
 	 * @return array Items.
 	 */
 	public static function filter_dashboard_glance_items( $items ) {
+		$count = get_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
 
-		$query = new WP_Query(
-			[
-				'post_type'              => self::POST_TYPE_SLUG,
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => [
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
-				],
-				'update_post_meta_cache' => false,
-				'update_post_term_cache' => false,
-			]
-		);
+		if ( false === $count ) {
 
-		if ( 0 !== $query->found_posts ) {
+			$query = new WP_Query(
+				[
+					'post_type'              => self::POST_TYPE_SLUG,
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => [
+						AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
+						AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+					],
+					'update_post_meta_cache' => false,
+					'update_post_term_cache' => false,
+				]
+			);
+
+			$count = $query->found_posts;
+			set_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT, $count, DAY_IN_SECONDS );
+		}
+
+		if ( 0 !== $count ) {
 			$items[] = sprintf(
 				'<a class="amp-validation-errors" href="%s">%s</a>',
 				esc_url(
@@ -2959,10 +2966,10 @@ class AMP_Validated_URL_Post_Type {
 						_n(
 							'%s URL w/ new AMP errors',
 							'%s URLs w/ new AMP errors',
-							$query->found_posts,
+							$count,
 							'amp'
 						),
-						number_format_i18n( $query->found_posts )
+						number_format_i18n( $count )
 					)
 				)
 			);

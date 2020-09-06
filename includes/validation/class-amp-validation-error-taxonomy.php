@@ -639,7 +639,7 @@ class AMP_Validation_Error_Taxonomy {
 		$result = (int) $term_count;
 
 		$cached_counts[ $cache_key ] = $result;
-		set_transient( self::TRANSIENT_KEY_ERROR_INDEX_COUNTS, $cached_counts, HOUR_IN_SECONDS );
+		set_transient( self::TRANSIENT_KEY_ERROR_INDEX_COUNTS, $cached_counts, DAY_IN_SECONDS );
 
 		return $result;
 	}
