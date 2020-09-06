@@ -13,3 +13,4 @@ ignore:
   - "/bin"
   - "/back-compat"
   - "/docs/**/*"
+  - ".phpstorm.meta.php"
