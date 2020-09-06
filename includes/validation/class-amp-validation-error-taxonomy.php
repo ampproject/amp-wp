@@ -206,7 +206,7 @@ class AMP_Validation_Error_Taxonomy {
 
 	/**
 	 * Key for the transient storing error index counts.
-	 * 
+	 *
 	 * @var string
 	 */
 	const TRANSIENT_KEY_ERROR_INDEX_COUNTS = 'amp_error_index_counts';
@@ -2874,6 +2874,7 @@ class AMP_Validation_Error_Taxonomy {
 
 		if ( $updated_count ) {
 			delete_transient( AMP_Validated_URL_Post_Type::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
+			delete_transient( self::TRANSIENT_KEY_ERROR_INDEX_COUNTS );
 		}
 
 		return $redirect_to;
