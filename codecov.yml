@@ -1,11 +1,28 @@
+codecov:
+  notify:
+    # Wait for Jest & PHPUnit reports
+    after_n_builds: 2
+
 coverage:
   status:
-    patch: false
-    changes: false
+    patch:
+      default:
+        base: auto
+        only_pulls: true
+        target: auto
+        threshold: 50%
+
     project:
       default:
         target: auto
         threshold: 0.1%
+      php:
+        paths:
+          - includes
+          - src
+      js:
+        paths:
+          - assets/src
 
 comment: off
 
