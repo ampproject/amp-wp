@@ -10,25 +10,9 @@ use PHPUnit\Framework\TestCase;
 /** @coversDefaultClass \AmpProject\AmpWP\PluginRegistry */
 final class PluginRegistryTest extends TestCase {
 
-	/**
-	 * Associative array of backed-up data.
-	 *
-	 * @var array
-	 */
-	private $backup;
-
 	private function populate_plugins() {
-		$this->backup = [
-			'old_plugins'        => wp_cache_get( 'plugins' ),
-			'old_active_plugins' => get_option( 'active_plugins' ),
-		];
 		wp_cache_set( 'plugins', [ '' => MockPluginEnvironment::PLUGINS_DATA ], 'plugins' );
 		update_option( 'active_plugins', array_diff( array_keys( MockPluginEnvironment::PLUGINS_DATA ), [ MockPluginEnvironment::BAZ_PLUGIN_FILE ] ) );
-	}
-
-	private function reset_plugins() {
-		wp_cache_delete( 'plugins', 'plugins' );
-		update_option( 'active_plugins', $this->backup['old_active_plugins'] );
 	}
 
 	public function test_it_can_be_initialized() {
@@ -69,8 +53,6 @@ final class PluginRegistryTest extends TestCase {
 			array_map( $slugify, [ MockPluginEnvironment::FOO_PLUGIN_FILE, MockPluginEnvironment::BAR_PLUGIN_FILE ] ),
 			array_keys( $plugin_registry->get_plugins( true ) )
 		);
-
-		$this->reset_plugins();
 	}
 
 	/** @covers ::get_plugin_from_slug() */
@@ -95,8 +77,6 @@ final class PluginRegistryTest extends TestCase {
 		);
 
 		$this->assertNull( $plugin_registry->get_plugin_from_slug( 'nobody' ) );
-
-		$this->reset_plugins();
 	}
 
 	/**
