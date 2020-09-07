@@ -1374,7 +1374,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 						: preg_replace( ':.*wp-includes/:', '', $reflection_function->getFileName() )
 					),
 					$reflection_function->getStartLine(),
-					( defined( 'GUTENBERG_VERSION' ) && GUTENBERG_VERSION && version_compare( GUTENBERG_VERSION, '8.8.0', '>=' ) )
+					( defined( 'GUTENBERG_DEVELOPMENT_MODE' ) || defined( 'GUTENBERG_VERSION' ) && GUTENBERG_VERSION && version_compare( GUTENBERG_VERSION, '8.8.0', '>=' ) )
 						? 'wp-block-latest-posts__list wp-block-latest-posts'
 						: 'wp-block-latest-posts wp-block-latest-posts__list'
 				),
