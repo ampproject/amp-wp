@@ -262,10 +262,25 @@ HTML;
 		$source = $this->likely_culprit_detector->analyze_exception( $this->exception );
 
 		if ( ! empty( $source['type'] ) && ! empty( $source['name'] ) ) {
+			switch ( $source['type'] ) {
+				case 'plugin':
+					/* translators: placeholder is the slug of the plugin */
+					$message = __( 'It appears the plugin with slug %s is responsible; please contact the author.', 'amp' );
+					break;
+				case 'mu-plugin':
+					/* translators: placeholder is the slug of the must-use plugin */
+					$message = __( 'It appears the must-use plugin with slug %s is responsible; please contact the author.', 'amp' );
+					break;
+				case 'theme':
+					/* translators: placeholder is the slug of the theme */
+					$message = __( 'It appears the theme with slug %s is responsible; please contact the author.', 'amp' );
+					break;
+				default:
+					return '';
+			}
+
 			return sprintf(
-				/* translators: 1: type (theme, plugin, mu-plugin), 2: name */
-				__( 'It appears the %1$s with slug %2$s is responsible; please contact the author.', 'amp' ),
-				'<strong><code>' . $source['type'] . '</code></strong>',
+				"<p>{$message}</p>",
 				'<strong><code>' . $source['name'] . '</code></strong>'
 			);
 		}
