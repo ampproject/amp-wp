@@ -8,10 +8,7 @@
 namespace AmpProject\AmpWP\Tests;
 
 use AMP_Options_Manager;
-use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\OptionsRESTController;
-use AmpProject\AmpWP\PluginRegistry;
-use AmpProject\AmpWP\PluginSuppression;
 use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
 use WP_REST_Request;

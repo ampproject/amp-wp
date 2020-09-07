@@ -45,13 +45,14 @@ final class FileReflection implements Service, Registerable {
 	private $plugin_registry;
 
 	/**
-	 * Plugin file pattern to use.
+	 * Plugin file pattern(s) to use.
 	 *
 	 * Used as cache to not recreate the pattern with each file lookup.
+	 * This is an array to account for varying plugin dirs.
 	 *
-	 * @var string
+	 * @var string[]
 	 */
-	private $plugin_file_pattern;
+	private $plugin_file_patterns = [];
 
 	/**
 	 * Parent theme pattern to use.
@@ -275,8 +276,9 @@ final class FileReflection implements Service, Registerable {
 	 * @return false|int Number of found matches, or false if an error occurred.
 	 */
 	private function is_plugin_file( $file, &$matches ) {
-		if ( null === $this->plugin_file_pattern ) {
-			$this->plugin_file_pattern = sprintf(
+		$plugin_dir = $this->plugin_registry->get_plugin_dir();
+		if ( ! isset( $this->plugin_file_patterns[ $plugin_dir ] ) ) {
+			$this->plugin_file_patterns[ $plugin_dir ] = sprintf(
 				':%s%s%s:s',
 				preg_quote(
 					trailingslashit(
@@ -291,7 +293,7 @@ final class FileReflection implements Service, Registerable {
 			);
 		}
 
-		return preg_match( $this->plugin_file_pattern, $file, $matches );
+		return preg_match( $this->plugin_file_patterns[ $plugin_dir ], $file, $matches );
 	}
 
 	/**
