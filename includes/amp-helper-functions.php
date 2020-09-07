@@ -443,12 +443,26 @@ function amp_is_available() {
 		);
 
 		if ( ! empty( $closest_source['type'] ) && ! empty( $closest_source['name'] ) ) {
-			$message .= ' ' . sprintf(
-				/* translators: 1: type (theme, plugin, mu-plugin), 2: name */
-				__( 'It appears the %1$s with slug %2$s is responsible; please contact the author.', 'amp' ),
-				'`' . $closest_source['type'] . '`',
-				'`' . $closest_source['name'] . '`'
-			);
+			$translated_string = false;
+
+			switch ( $closest_source['type'] ) {
+				case 'plugin':
+					/* translators: placeholder is the slug of the plugin */
+					$translated_string = __( 'It appears the plugin with slug %s is responsible; please contact the author.', 'amp' );
+					break;
+				case 'mu-plugin':
+					/* translators: placeholder is the slug of the must-use plugin */
+					$translated_string = __( 'It appears the must-use plugin with slug %s is responsible; please contact the author.', 'amp' );
+					break;
+				case 'theme':
+					/* translators: placeholder is the slug of the theme */
+					$translated_string = __( 'It appears the theme with slug %s is responsible; please contact the author.', 'amp' );
+					break;
+			}
+
+			if ( $translated_string ) {
+				$message .= ' ' . sprintf( $translated_string, '`' . $closest_source['name'] . '`' );
+			}
 		}
 
 		_doing_it_wrong( 'amp_is_available', esc_html( $message ), '2.0.0' );
