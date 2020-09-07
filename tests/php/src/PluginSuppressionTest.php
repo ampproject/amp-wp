@@ -73,6 +73,11 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 			'plugin_registry',
 			$plugin_registry
 		);
+		$this->set_private_property(
+			Services::get( 'dev_tools.file_reflection' ),
+			'plugin_file_pattern',
+			null
+		);
 
 		// Work around issue with WP 5.5 compatibility where a failure occurs for undefined property: WP_Block_Type::$supports.
 		remove_filter( 'render_block', 'gutenberg_experimental_apply_classnames_and_styles' );
@@ -98,6 +103,11 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 			$plugin_registry,
 			'plugin_folder',
 			''
+		);
+		$this->set_private_property(
+			Services::get( 'dev_tools.file_reflection' ),
+			'plugin_file_pattern',
+			null
 		);
 	}
 
