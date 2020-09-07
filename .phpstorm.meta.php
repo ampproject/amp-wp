@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @codeCoverageIgnore
- */
 namespace PHPSTORM_META {
 
 	override(
