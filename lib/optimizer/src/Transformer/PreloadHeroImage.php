@@ -359,7 +359,7 @@ final class PreloadHeroImage implements Transformer
 
         $media = $element->getAttribute(Attribute::MEDIA);
 
-        return new HeroImage($poster, $media, '', $element);
+        return new HeroImage($poster, $media, '');
     }
 
     /**
