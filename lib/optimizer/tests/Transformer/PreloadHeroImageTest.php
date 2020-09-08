@@ -70,6 +70,26 @@ final class PreloadHeroImageTest extends TestCase
                     Error\TooManyHeroImages::whenPastMaximum(),
                 ],
             ],
+
+            'throws error when scrset detected on image to be preloaded' => [
+                $input(
+                    '<amp-img width="500" height="400" src="https://example-com.cdn.ampproject.org/foo.png" srcset="test 100w test2 3dpr"></amp-img>'
+                    . '<amp-img width="500" height="400" src="https://example-com.cdn.ampproject.org/foo.png"></amp-img>'
+                ),
+                $output(
+                    '<amp-img width="500" height="400" src="https://example-com.cdn.ampproject.org/foo.png" srcset="test 100w test2 3dpr" i-amphtml-ssr data-hero>'
+                    . '<img class="i-amphtml-fill-content i-amphtml-replaced-content" decoding="async" src="https://example-com.cdn.ampproject.org/foo.png" srcset="test 100w test2 3dpr">'
+                    . '</amp-img>'
+                    . '<amp-img width="500" height="400" src="https://example-com.cdn.ampproject.org/foo.png" srcset="test 100w test2 3dpr" i-amphtml-ssr data-hero></amp-img>'
+                ),
+                [
+                    Error\CannotPreloadImage::fromImageWithSrcsetAttribute(
+                        Document::fromHtmlFragment(
+                            '<amp-img width="500" height="400" src="https://example-com.cdn.ampproject.org/foo.png" srcset="test 100w test2 3dpr">'
+                        )->body->firstChild
+                    ),
+                ],
+            ],
         ];
     }
 
