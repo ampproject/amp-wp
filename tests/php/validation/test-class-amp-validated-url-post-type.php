@@ -65,6 +65,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$this->assertEquals( AMP_Options_Manager::OPTION_NAME, $amp_post_type->show_in_menu );
 		$this->assertTrue( $amp_post_type->show_in_admin_bar );
 		$this->assertNotContains( AMP_Validated_URL_Post_Type::REMAINING_ERRORS, wp_removable_query_args() );
+		$this->assertEquals( 10, has_action( 'admin_menu', [ self::TESTED_CLASS, 'add_admin_menu_new_invalid_url_count' ] ) );
 
 		// Make sure that add_admin_hooks() gets called.
 		set_current_screen( 'index.php' );
@@ -107,7 +108,6 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'admin_notices', [ self::TESTED_CLASS, 'print_admin_notice' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_action_' . AMP_Validated_URL_Post_Type::VALIDATE_ACTION, [ self::TESTED_CLASS, 'handle_validate_request' ] ) );
 		$this->assertEquals( 10, has_action( 'post_action_' . AMP_Validated_URL_Post_Type::UPDATE_POST_TERM_STATUS_ACTION, [ self::TESTED_CLASS, 'handle_validation_error_status_update' ] ) );
-		$this->assertEquals( 10, has_action( 'admin_menu', [ self::TESTED_CLASS, 'add_admin_menu_new_invalid_url_count' ] ) );
 
 		$post = self::factory()->post->create_and_get( [ 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ] );
 		$this->assertEquals( '', apply_filters( 'post_date_column_status', 'publish', $post ) );
