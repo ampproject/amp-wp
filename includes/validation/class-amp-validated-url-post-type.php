@@ -219,6 +219,7 @@ class AMP_Validated_URL_Post_Type {
 		$handle_delete = static function ( $post_id ) {
 			if ( static::POST_TYPE_SLUG === get_post_type( $post_id ) ) {
 				delete_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
+				delete_transient( AMP_Validation_Error_Taxonomy::TRANSIENT_KEY_ERROR_INDEX_COUNTS );
 			}
 		};
 		add_action( 'save_post_' . self::POST_TYPE_SLUG, $handle_delete );
@@ -1971,6 +1972,7 @@ class AMP_Validated_URL_Post_Type {
 			}
 
 			delete_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
+			delete_transient( AMP_Validation_Error_Taxonomy::TRANSIENT_KEY_ERROR_INDEX_COUNTS );
 		}
 
 		$redirect = wp_get_referer();
