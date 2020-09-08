@@ -504,11 +504,11 @@ final class PreloadHeroImage implements Transformer
                 continue;
             }
 
-            if (! $node->getAttribute(Attribute::REL) === Attribute::REL_PRELOAD) {
+            if ($node->getAttribute(Attribute::REL) !== Attribute::REL_PRELOAD) {
                 continue;
             }
 
-            if (! $node->getAttribute('as') === 'image') {
+            if ($node->getAttribute('as') !== 'image') {
                 continue;
             }
 
