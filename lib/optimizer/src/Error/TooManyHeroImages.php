@@ -7,7 +7,6 @@ use AmpProject\Optimizer\Transformer\PreloadHeroImage;
 
 final class TooManyHeroImages implements Error
 {
-
     use ErrorProperties;
 
     const PAST_MAX_STRING = 'Too many images with the "data-hero" attribute were detected, the maximum allowed is %d.';

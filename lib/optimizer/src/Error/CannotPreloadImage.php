@@ -7,10 +7,11 @@ use DOMElement;
 
 final class CannotPreloadImage implements Error
 {
-
     use ErrorProperties;
 
-    const SRCSET_STRING = 'Not preloading the hero image because of the presence of a "srcset" attribute, which can currently only be preloaded by Chromium-based browsers (see https://web.dev/preload-responsive-images/): ';
+    const SRCSET_STRING = 'Not preloading the hero image because of the presence of a "srcset" attribute, which '
+                          . 'can currently only be preloaded by Chromium-based browsers '
+                          . '(see https://web.dev/preload-responsive-images/): ';
 
     /**
      * Instantiate a CannotPreloadImage object for an image with a srcset attribute.

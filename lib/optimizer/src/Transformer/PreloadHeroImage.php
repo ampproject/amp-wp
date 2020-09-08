@@ -105,7 +105,7 @@ final class PreloadHeroImage implements Transformer
      */
     public function transform(Document $document, ErrorCollection $errors)
     {
-        if($this->configuration->get(PreloadHeroImageConfiguration::PRELOAD_HERO_IMAGE) === false) {
+        if ($this->configuration->get(PreloadHeroImageConfiguration::PRELOAD_HERO_IMAGE) === false) {
             return;
         }
 
@@ -277,7 +277,7 @@ final class PreloadHeroImage implements Transformer
         $srcset = $element->getAttribute(Attribute::SRCSET);
         $media  = $element->getAttribute(Attribute::MEDIA);
 
-        return new HeroImage($src, $srcset, $media, $element);
+        return new HeroImage($src, $media, $srcset, $element);
     }
 
     /**
@@ -412,7 +412,7 @@ final class PreloadHeroImage implements Transformer
             return new HeroImage(
                 $src,
                 $childNode->getAttribute(Attribute::MEDIA),
-                $childNode->getAttribute(Attribute::SRCSET) ?: '',
+                $childNode->getAttribute(Attribute::SRCSET),
                 $childNode
             );
         }
