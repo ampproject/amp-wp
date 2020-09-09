@@ -288,6 +288,8 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		add_action( 'created_' . self::TAXONOMY_SLUG, [ __CLASS__, 'clear_cached_counts' ] );
+		add_action( 'edit_' . self::TAXONOMY_SLUG, [ __CLASS__, 'clear_cached_counts' ] );
+		add_action( 'delete_' . self::TAXONOMY_SLUG, [ __CLASS__, 'clear_cached_counts' ] );
 	}
 
 	/**
@@ -341,9 +343,6 @@ class AMP_Validation_Error_Taxonomy {
 				$deleted_count++;
 			}
 		}
-
-		delete_transient( self::TRANSIENT_KEY_ERROR_INDEX_COUNTS );
-
 		return $deleted_count;
 	}
 
@@ -2874,7 +2873,6 @@ class AMP_Validation_Error_Taxonomy {
 
 		if ( $updated_count ) {
 			delete_transient( AMP_Validated_URL_Post_Type::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
-			delete_transient( self::TRANSIENT_KEY_ERROR_INDEX_COUNTS );
 		}
 
 		return $redirect_to;
