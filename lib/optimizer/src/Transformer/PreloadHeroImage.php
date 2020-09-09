@@ -304,10 +304,15 @@ final class PreloadHeroImage implements Transformer
                 continue;
             }
 
-            return [
-                $element->getAttribute(Attribute::WIDTH),
-                $element->getAttribute(Attribute::HEIGHT)
-            ];
+            $width  = $element->getAttribute(Attribute::WIDTH);
+            $height = $element->getAttribute(Attribute::HEIGHT);
+
+            if (trim($width) === 'auto' || trim($height) === 'auto') {
+                // TODO: Skipping for now. Are we able to reliably SSR auto?
+                return [0, 0];
+            }
+
+            return [$width, $height];
         }
 
         return [0, 0];
