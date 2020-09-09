@@ -17,7 +17,11 @@ class UrlTest extends TestCase
     public function dataIsValidImageSrc()
     {
         return [
-            'regular image URL' => ['https://example.com/image.jpg', true],
+            'absolute image URL' => ['https://example.com/image.jpg', true],
+
+            'relative image URL with trailing slash' => ['/image.jpg', true],
+
+            'relative image URL without trailing slash' => ['image.jpg', true],
 
             'data URI' => ['data:image/svg+xml,sagaedbaedbaergea', false],
         ];
