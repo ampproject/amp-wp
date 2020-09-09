@@ -12,7 +12,7 @@ Fires before including a template.
 
 ### Source
 
-:link: [includes/templates/class-amp-post-template.php:457](../../includes/templates/class-amp-post-template.php#L457)
+:link: [includes/templates/class-amp-post-template.php:479](/includes/templates/class-amp-post-template.php#L479)
 
 <details>
 <summary>Show Code</summary>

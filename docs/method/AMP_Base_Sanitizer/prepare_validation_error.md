@@ -17,7 +17,7 @@ Prepare validation error.
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:566](../../includes/sanitizers/class-amp-base-sanitizer.php#L566-L632)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:566](/includes/sanitizers/class-amp-base-sanitizer.php#L566-L632)
 
 <details>
 <summary>Show Code</summary>

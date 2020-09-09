@@ -13,7 +13,7 @@ Filters AMP template data.
 
 ### Source
 
-:link: [includes/templates/class-amp-post-template.php:160](../../includes/templates/class-amp-post-template.php#L160)
+:link: [includes/templates/class-amp-post-template.php:160](/includes/templates/class-amp-post-template.php#L160)
 
 <details>
 <summary>Show Code</summary>

@@ -16,7 +16,7 @@ Returning true this indicates that the validation error is acceptable and should
 
 ### Source
 
-:link: [includes/validation/class-amp-validation-error-taxonomy.php:511](../../includes/validation/class-amp-validation-error-taxonomy.php#L511)
+:link: [includes/validation/class-amp-validation-error-taxonomy.php:511](/includes/validation/class-amp-validation-error-taxonomy.php#L511)
 
 <details>
 <summary>Show Code</summary>

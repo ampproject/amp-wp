@@ -16,7 +16,7 @@ Sets the layout, and possibly the &#039;height&#039; and &#039;width&#039; attri
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:283](../../includes/sanitizers/class-amp-base-sanitizer.php#L283-L357)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:283](/includes/sanitizers/class-amp-base-sanitizer.php#L283-L357)
 
 <details>
 <summary>Show Code</summary>

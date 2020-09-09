@@ -12,7 +12,7 @@ Triggers when after amp_init when the plugin version has updated.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:172](../../includes/amp-helper-functions.php#L172)
+:link: [includes/amp-helper-functions.php:172](/includes/amp-helper-functions.php#L172)
 
 <details>
 <summary>Show Code</summary>

@@ -10,13 +10,9 @@ Filter the configuration to be used for the AMP Optimizer.
 
 * `array $configuration` - Associative array of configuration data.
 
-### Return value
-
-`array` - Filtered associative array of configuration data.
-
 ### Source
 
-:link: [includes/class-amp-theme-support.php:2304](../../includes/class-amp-theme-support.php#L2304-L2310)
+:link: [includes/class-amp-theme-support.php:2301](/includes/class-amp-theme-support.php#L2301-L2307)
 
 <details>
 <summary>Show Code</summary>

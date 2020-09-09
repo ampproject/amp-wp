@@ -8,7 +8,7 @@ Filters the Reader template directory.
 
 ### Source
 
-:link: [includes/templates/class-amp-post-template.php:177](../../includes/templates/class-amp-post-template.php#L177)
+:link: [includes/templates/class-amp-post-template.php:177](/includes/templates/class-amp-post-template.php#L177)
 
 <details>
 <summary>Show Code</summary>
