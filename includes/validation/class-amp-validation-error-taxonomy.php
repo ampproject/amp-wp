@@ -288,7 +288,7 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		add_action( 'created_' . self::TAXONOMY_SLUG, [ __CLASS__, 'clear_cached_counts' ] );
-		add_action( 'edit_' . self::TAXONOMY_SLUG, [ __CLASS__, 'clear_cached_counts' ] );
+		add_action( 'edited_' . self::TAXONOMY_SLUG, [ __CLASS__, 'clear_cached_counts' ] );
 		add_action( 'delete_' . self::TAXONOMY_SLUG, [ __CLASS__, 'clear_cached_counts' ] );
 	}
 
