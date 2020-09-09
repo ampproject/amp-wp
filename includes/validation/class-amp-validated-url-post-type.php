@@ -502,7 +502,7 @@ class AMP_Validated_URL_Post_Type {
 	 */
 	protected static function get_validation_error_urls_count() {
 		$count = get_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
-		if ( false === $count ) {
+		if ( false !== $count ) {
 			// Handle case where integer stored in transient gets returned as string when persistent object cache is not
 			// used. This is due to wp_options.option_value being a string.
 			return (int) $count;
