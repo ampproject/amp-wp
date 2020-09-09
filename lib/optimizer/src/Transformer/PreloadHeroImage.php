@@ -288,7 +288,8 @@ final class PreloadHeroImage implements Transformer
      */
     private function getDimensionsFromParent(DOMElement $element)
     {
-        while ($element->parentNode) {
+        $level = 0;
+        while ($element->parentNode && ++$level < 3) {
             $element = $element->parentNode;
 
             if (! $element instanceof DOMElement) {
