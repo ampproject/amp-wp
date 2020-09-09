@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { createContext, useState, useContext, useEffect, useMemo } from '@wordpress/element';
+import { createContext, useState, useContext, useMemo } from '@wordpress/element';
 
 /**
  * External dependencies
@@ -40,6 +40,7 @@ export function NavigationContextProvider( { children, pages } ) {
 	const currentPage = adaptedPages[ activePageIndex ];
 
 	const isLastPage = activePageIndex === adaptedPages.length - 1;
+
 	/**
 	 * Navigates back to the previous page.
 	 */
