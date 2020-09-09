@@ -88,8 +88,8 @@ describe( 'Stepper item modifications', () => {
 describe( 'Template mode recommendations with non-reader-theme active', () => {
 	beforeEach( async () => {
 		await cleanUpSettings();
-		await installTheme( 'neve' );
-		await activateTheme( 'neve' );
+		await installTheme( 'hestia' );
+		await activateTheme( 'hestia' );
 	} );
 
 	afterEach( async () => {
