@@ -488,6 +488,12 @@ final class PreloadHeroImage implements Transformer
         $element->setAttribute(Attribute::DATA_HERO, null);
 
         $element->appendChild($imgElement);
+
+        // Remove any noscript>img when an amp-img is pre-rendered.
+        $noscript = $document->xpath->query('./noscript[ img ]', $element)->item(0);
+        if ($noscript instanceof DOMElement) {
+            $noscript->parentNode->removeChild($noscript);
+        }
     }
 
     /**
