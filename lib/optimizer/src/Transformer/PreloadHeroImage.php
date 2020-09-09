@@ -295,14 +295,18 @@ final class PreloadHeroImage implements Transformer
                 continue;
             }
 
-            $width  = $element->getAttribute(Attribute::WIDTH);
-            $height = $element->getAttribute(Attribute::HEIGHT);
-
-            if (! $width && ! $height) {
+            if (
+                ! $element->getAttribute(Attribute::WIDTH)
+                &&
+                ! $element->getAttribute(Attribute::HEIGHT)
+            ) {
                 continue;
             }
 
-            return [$width, $height];
+            return [
+                $element->getAttribute(Attribute::WIDTH),
+                $element->getAttribute(Attribute::HEIGHT)
+            ];
         }
 
         return [0, 0];
