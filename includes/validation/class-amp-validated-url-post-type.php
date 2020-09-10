@@ -223,6 +223,7 @@ class AMP_Validated_URL_Post_Type {
 		$handle_delete = static function ( $post_id ) {
 			if ( static::POST_TYPE_SLUG === get_post_type( $post_id ) ) {
 				delete_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
+				delete_transient( AMP_Validation_Error_Taxonomy::TRANSIENT_KEY_ERROR_INDEX_COUNTS );
 			}
 		};
 		add_action( 'save_post_' . self::POST_TYPE_SLUG, $handle_delete );
@@ -482,17 +483,7 @@ class AMP_Validated_URL_Post_Type {
 			return;
 		}
 
-		$new_validation_error_urls = get_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
-
-		if ( false === $new_validation_error_urls ) {
-			$new_validation_error_urls = static::get_validation_error_urls_count();
-			set_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT, $new_validation_error_urls, DAY_IN_SECONDS );
-		} else {
-			// Handle case where integer stored in transient gets returned as string when persistent object cache is not
-			// used. This is due to wp_options.option_value being a string.
-			$new_validation_error_urls = (int) $new_validation_error_urls;
-		}
-
+		$new_validation_error_urls = static::get_validation_error_urls_count();
 		if ( 0 === $new_validation_error_urls ) {
 			return;
 		}
@@ -513,6 +504,13 @@ class AMP_Validated_URL_Post_Type {
 	 * @return int Count of new validation error URLs.
 	 */
 	protected static function get_validation_error_urls_count() {
+		$count = get_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
+		if ( false !== $count ) {
+			// Handle case where integer stored in transient gets returned as string when persistent object cache is not
+			// used. This is due to wp_options.option_value being a string.
+			return (int) $count;
+		}
+
 		$query = new WP_Query(
 			[
 				'post_type'              => self::POST_TYPE_SLUG,
@@ -525,7 +523,11 @@ class AMP_Validated_URL_Post_Type {
 			]
 		);
 
-		return $query->found_posts;
+		$count = $query->found_posts;
+
+		set_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT, $count, DAY_IN_SECONDS );
+
+		return $count;
 	}
 
 	/**
@@ -2925,20 +2927,9 @@ class AMP_Validated_URL_Post_Type {
 	 * @return array Items.
 	 */
 	public static function filter_dashboard_glance_items( $items ) {
+		$count = self::get_validation_error_urls_count();
 
-		$query = new WP_Query(
-			[
-				'post_type'              => self::POST_TYPE_SLUG,
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => [
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
-				],
-				'update_post_meta_cache' => false,
-				'update_post_term_cache' => false,
-			]
-		);
-
-		if ( 0 !== $query->found_posts ) {
+		if ( 0 !== $count ) {
 			$items[] = sprintf(
 				'<a class="amp-validation-errors" href="%s">%s</a>',
 				esc_url(
@@ -2961,10 +2952,10 @@ class AMP_Validated_URL_Post_Type {
 						_n(
 							'%s URL w/ new AMP errors',
 							'%s URLs w/ new AMP errors',
-							$query->found_posts,
+							$count,
 							'amp'
 						),
-						number_format_i18n( $query->found_posts )
+						number_format_i18n( $count )
 					)
 				)
 			);
