@@ -10,13 +10,9 @@ Filter whether the AMP Optimizer should use server-side rendering or not.
 
 * `bool $enable_ssr` - Whether the AMP Optimizer should use server-side rendering or not.
 
-### Return value
-
-`bool` - Filtered value of whether the AMP Optimizer should use server-side rendering or not.
-
 ### Source
 
-:link: [includes/class-amp-theme-support.php:2280](../../includes/class-amp-theme-support.php#L2280)
+:link: [includes/class-amp-theme-support.php:2278](/includes/class-amp-theme-support.php#L2278)
 
 <details>
 <summary>Show Code</summary>

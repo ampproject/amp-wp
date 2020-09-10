@@ -10,13 +10,9 @@ Filter whether the generated HTML output should be run through the AMP Optimizer
 
 * `bool $enable_optimizer` - Whether the generated HTML output should be run through the AMP Optimizer or not.
 
-### Return value
-
-`bool` - Filtered value of whether the generated HTML output should be run through the AMP Optimizer or not.
-
 ### Source
 
-:link: [includes/class-amp-theme-support.php:2160](../../includes/class-amp-theme-support.php#L2160)
+:link: [includes/class-amp-theme-support.php:2159](/includes/class-amp-theme-support.php#L2159)
 
 <details>
 <summary>Show Code</summary>

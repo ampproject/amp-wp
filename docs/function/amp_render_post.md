@@ -14,7 +14,7 @@ Render AMP post template.
 
 ### Source
 
-:link: [includes/deprecated.php:137](../../includes/deprecated.php#L137-L183)
+:link: [includes/deprecated.php:137](/includes/deprecated.php#L137-L183)
 
 <details>
 <summary>Show Code</summary>

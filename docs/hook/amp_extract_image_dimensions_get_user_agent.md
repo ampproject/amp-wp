@@ -12,7 +12,7 @@ Filters the user agent for onbtaining the image dimensions.
 
 ### Source
 
-:link: [includes/utils/class-amp-image-dimension-extractor.php:250](../../includes/utils/class-amp-image-dimension-extractor.php#L250)
+:link: [includes/utils/class-amp-image-dimension-extractor.php:250](/includes/utils/class-amp-image-dimension-extractor.php#L250)
 
 <details>
 <summary>Show Code</summary>

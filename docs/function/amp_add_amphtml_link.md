@@ -10,7 +10,7 @@ If there are known validation errors for the current URL then do not output anyt
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:762](../../includes/amp-helper-functions.php#L762-L812)
+:link: [includes/amp-helper-functions.php:762](/includes/amp-helper-functions.php#L762-L812)
 
 <details>
 <summary>Show Code</summary>
