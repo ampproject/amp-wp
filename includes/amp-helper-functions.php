@@ -434,8 +434,8 @@ function amp_is_available() {
 		);
 
 		$message .= ' ' . sprintf(
-			/* translators: 1: the current action, 2: the wp action, 4: the WP_Query class, 4: the amp_skip_post() function */
-			__( 'WordPress is currently doing the %1$s action. Calling this function before the %2$s action means it will not have access to %3$s and the queried object to determine if it is an AMP response, thus neither the %4$s filter nor the AMP enabled toggle will be considered.', 'amp' ),
+			/* translators: 1: the current hook, 2: the wp action, 4: the WP_Query class, 4: the amp_skip_post() function */
+			__( 'WordPress is currently doing the %1$s hook. Calling this function before the %2$s action means it will not have access to %3$s and the queried object to determine if it is an AMP response, thus neither the %4$s filter nor the AMP enabled toggle will be considered.', 'amp' ),
 			'`' . current_action() . '`',
 			'`wp`',
 			'`WP_Query`',
