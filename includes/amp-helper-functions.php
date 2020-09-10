@@ -409,7 +409,7 @@ function amp_is_available() {
 	global $pagenow, $wp_query;
 
 	// Short-circuit for admin requests or requests to non-frontend pages.
-	if ( is_admin() || in_array( $pagenow, [ 'wp-login.php', 'wp-signup.php', 'wp-activate.php' ], true ) ) {
+	if ( is_admin() || in_array( $pagenow, [ 'wp-login.php', 'wp-signup.php', 'wp-activate.php', 'repair.php' ], true ) ) {
 		return false;
 	}
 
