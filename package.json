@@ -30,7 +30,7 @@
     "@wordpress/html-entities": "2.7.0",
     "@wordpress/i18n": "3.13.0",
     "@wordpress/icons": "2.5.0",
-    "@wordpress/url": "2.16.0",
+    "@wordpress/url": "2.18.0",
     "classnames": "2.2.6",
     "prop-types": "15.7.2"
   },
