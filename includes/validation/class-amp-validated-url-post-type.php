@@ -162,6 +162,7 @@ class AMP_Validated_URL_Post_Type {
 			self::POST_TYPE_SLUG,
 			[
 				'labels'       => [
+					'all_items'          => __( 'All Validated URLs', 'amp' ),
 					'name'               => _x( 'AMP Validated URLs', 'post type general name', 'amp' ),
 					'menu_name'          => __( 'Validated URLs', 'amp' ),
 					'singular_name'      => __( 'Validated URL', 'amp' ),
@@ -199,7 +200,7 @@ class AMP_Validated_URL_Post_Type {
 		);
 
 		if ( $show_in_menu ) {
-			add_action( 'admin_menu', [ __CLASS__, 'add_admin_menu_new_invalid_url_count' ] );
+			add_action( 'admin_menu', [ __CLASS__, 'update_validated_url_menu_item' ] );
 		}
 
 		// Rename the top-level menu from "Validated URLs" to "AMP DevTools" when the user does not have access to the AMP settings screen.
@@ -469,11 +470,12 @@ class AMP_Validated_URL_Post_Type {
 	}
 
 	/**
-	 * Add count of how many validation error posts there are to the admin menu.
+	 * Update the "Validated URLs" menu item label and append a count of how many validation error posts there are
+	 * next to it.
 	 *
 	 * @global array $submenu
 	 */
-	public static function add_admin_menu_new_invalid_url_count() {
+	public static function update_validated_url_menu_item() {
 		global $submenu;
 
 		$post_type_menu_slug = 'edit.php?post_type=' . self::POST_TYPE_SLUG;
@@ -483,14 +485,17 @@ class AMP_Validated_URL_Post_Type {
 			return;
 		}
 
-		$new_validation_error_urls = static::get_validation_error_urls_count();
-		if ( 0 === $new_validation_error_urls ) {
-			return;
-		}
-
 		foreach ( $submenu[ $parent_menu_slug ] as &$submenu_item ) {
 			if ( $post_type_menu_slug === $submenu_item[2] ) {
-				$submenu_item[0] .= ' <span class="awaiting-mod"><span class="new-validation-error-urls-count">' . esc_html( number_format_i18n( $new_validation_error_urls ) ) . '</span></span>';
+				// Use the `menu_name` label as the submenu label instead of the `all_items` label.
+				$menu_name_label = get_post_type_object( self::POST_TYPE_SLUG )->labels->menu_name;
+				$submenu_item[0] = $menu_name_label;
+
+				// Display the count of new validation errors next to the label, if there are any.
+				$new_validation_error_url_count = self::get_validation_error_urls_count();
+				if ( 0 < $new_validation_error_url_count ) {
+					$submenu_item[0] .= ' <span class="awaiting-mod"><span class="new-validation-error-urls-count">' . esc_html( number_format_i18n( $new_validation_error_url_count ) ) . '</span></span>';
+				}
 				break;
 			}
 		}
