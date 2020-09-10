@@ -12,7 +12,7 @@ Determine whether AMP is available for the current URL.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:408](../../includes/amp-helper-functions.php#L408-L546)
+:link: [includes/amp-helper-functions.php:408](/includes/amp-helper-functions.php#L408-L546)
 
 <details>
 <summary>Show Code</summary>
@@ -22,7 +22,7 @@ function amp_is_available() {
 	global $pagenow, $wp_query;
 
 	// Short-circuit for admin requests or requests to non-frontend pages.
-	if ( is_admin() || in_array( $pagenow, [ 'wp-login.php', 'wp-signup.php', 'wp-activate.php' ], true ) ) {
+	if ( is_admin() || in_array( $pagenow, [ 'wp-login.php', 'wp-signup.php', 'wp-activate.php', 'repair.php' ], true ) ) {
 		return false;
 	}
 

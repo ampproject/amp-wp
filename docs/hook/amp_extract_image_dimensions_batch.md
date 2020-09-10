@@ -12,7 +12,7 @@ Filters the dimensions extracted from image URLs.
 
 ### Source
 
-:link: [includes/utils/class-amp-image-dimension-extractor.php:69](../../includes/utils/class-amp-image-dimension-extractor.php#L69)
+:link: [includes/utils/class-amp-image-dimension-extractor.php:69](/includes/utils/class-amp-image-dimension-extractor.php#L69)
 
 <details>
 <summary>Show Code</summary>

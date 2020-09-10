@@ -11,7 +11,7 @@ Class AMP_Base_Embed_Handler
 * [`match_element_attributes`](../method/AMP_Base_Embed_Handler/match_element_attributes.md) - Get regex pattern for matching HTML attributes from a given tag name.
 ### Source
 
-:link: [includes/embeds/class-amp-base-embed-handler.php:15](../../includes/embeds/class-amp-base-embed-handler.php#L15-L112)
+:link: [includes/embeds/class-amp-base-embed-handler.php:15](/includes/embeds/class-amp-base-embed-handler.php#L15-L112)
 
 <details>
 <summary>Show Code</summary>

@@ -14,7 +14,7 @@ Filters the template file being loaded for a given template type.
 
 ### Source
 
-:link: [includes/templates/class-amp-post-template.php:443](../../includes/templates/class-amp-post-template.php#L443)
+:link: [includes/templates/class-amp-post-template.php:465](/includes/templates/class-amp-post-template.php#L465)
 
 <details>
 <summary>Show Code</summary>
