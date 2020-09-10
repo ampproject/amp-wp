@@ -85,7 +85,7 @@
     "postcss": "7.0.32",
     "postcss-color-function": "4.1.0",
     "postcss-import": "12.0.1",
-    "postcss-loader": "4.0.0",
+    "postcss-loader": "4.0.1",
     "postcss-nested": "4.2.1",
     "postcss-preset-env": "6.7.0",
     "puppeteer": "npm:puppeteer-core@3.0.0",
