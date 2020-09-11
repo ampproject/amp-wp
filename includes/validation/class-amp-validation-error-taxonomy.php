@@ -3201,6 +3201,14 @@ class AMP_Validation_Error_Taxonomy {
 					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>'
 				);
 
+			case AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_DIMENSION:
+				return sprintf(
+					/* translators: %1$s is the attribute name, %2$s is the tag name */
+					esc_html__( 'Multiple image candidates with the same width or pixel density found in attribute %1$s in tag %2$s', 'amp' ),
+					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>',
+					'<code>' . esc_html( $validation_error['parent_name'] ) . '</code>'
+				);
+
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_WIDTH:
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_HEIGHT:
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_AUTO_HEIGHT:

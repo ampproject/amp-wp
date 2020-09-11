@@ -46,6 +46,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	const DISALLOWED_RELATIVE_URL              = 'DISALLOWED_RELATIVE_URL';
 	const DISALLOWED_TAG                       = 'DISALLOWED_TAG';
 	const DISALLOWED_TAG_ANCESTOR              = 'DISALLOWED_TAG_ANCESTOR';
+	const DUPLICATE_DIMENSION                  = 'DUPLICATE_DIMENSION';
 	const DUPLICATE_ONEOF_ATTRS                = 'DUPLICATE_ONEOF_ATTRS';
 	const DUPLICATE_UNIQUE_TAG                 = 'DUPLICATE_UNIQUE_TAG';
 	const IMPLIED_LAYOUT_INVALID               = 'IMPLIED_LAYOUT_INVALID';
@@ -1248,6 +1249,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_disallowed_empty( $node, $attr_name, $attr_spec_rule ) ) {
 				$attrs_to_remove[] = [ $attr_node, self::MISSING_URL, null ];
+			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ] ) &&
+				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_duplicate_dimension( $node, $attr_name ) ) {
+				$attrs_to_remove[] = [ $attr_node, self::DUPLICATE_DIMENSION, null ];
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_disallowed_relative( $node, $attr_name, $attr_spec_rule ) ) {
 				$attrs_to_remove[] = [ $attr_node, self::DISALLOWED_RELATIVE_URL, null ];
@@ -1941,8 +1945,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function extract_attribute_urls( DOMAttr $attribute_node, $spec_attr_name = null ) {
 		/*
-		 * Handle the srcset special case where the attribute value can contain multiple parts, each in the format `URL [WIDTH] [PIXEL_DENSITY]`.
-		 * So we split the srcset attribute value by commas and then return the first token of each item, omitting width descriptor and pixel density descriptor.
+		 * Handle the srcset special case where the attribute value can contain multiple parts, each in the format `URL [WIDTH OR PIXEL_DENSITY]`.
+		 * So we split the srcset attribute value by commas and then return the first token of each item, omitting width or pixel density descriptor.
 		 * This splitting cannot be done for other URLs because it a comma can appear in a URL itself generally, but the syntax can break in srcset,
 		 * unless the commas are URL-encoded.
 		 */
@@ -2045,6 +2049,37 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 			return AMP_Rule_Spec::PASS;
 		}
+		return AMP_Rule_Spec::NOT_APPLICABLE;
+	}
+
+	/**
+	 * Check if attribute has multiple image candidates with the same width or pixel density.
+	 *
+	 * @since 2.0.2
+	 *
+	 * @param DOMElement $node      Node.
+	 * @param string     $attr_name Attribute name.
+	 *
+	 * @return int:
+	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
+	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
+	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there are no duplicate dimensions.
+	 */
+	private function check_attr_spec_rule_duplicate_dimension( DOMElement $node, $attr_name ) {
+		if (
+			Attribute::SRCSET === $attr_name
+			&&
+			$node->hasAttribute( $attr_name )
+			&&
+			preg_match_all( '/(?:[^,\s]\S*[^,\s])\s*([\d]+.?[\d]*[wx])/', $node->getAttribute( $attr_name ), $matches )
+		) {
+			if ( count( $matches[1] ) !== count( array_flip( $matches[1] ) ) ) {
+				return AMP_Rule_Spec::FAIL;
+			}
+
+			return AMP_Rule_Spec::PASS;
+		}
+
 		return AMP_Rule_Spec::NOT_APPLICABLE;
 	}
 
