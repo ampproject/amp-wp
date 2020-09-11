@@ -199,7 +199,6 @@ final class ReaderThemes {
 		$cache_key = 'amp_themes_wporg';
 		$response  = get_transient( $cache_key );
 		if ( ! $response ) {
-			// Note: This can be used to refresh the hardcoded raw theme data.
 			require_once ABSPATH . 'wp-admin/includes/theme.php';
 
 			$response = themes_api(
@@ -210,17 +209,21 @@ final class ReaderThemes {
 				]
 			);
 
-			if ( ! is_wp_error( $response ) ) {
+			if ( is_array( $response ) ) {
+				$response = (object) $response;
+			}
+
+			/**
+			 * The response must minimally be an object with a themes array.
+			 *
+			 * @see https://wordpress.org/support/topic/issue-during-activating-the-updated-plugins/#post-13383737
+			 */
+			if ( is_wp_error( $response ) || ! is_object( $response ) || ! is_array( $response->themes ) ) {
+				$response = (object) [ 'themes' => [] ];
+			} else {
+				// Store the transient only if the response was valid.
 				set_transient( $cache_key, $response, DAY_IN_SECONDS );
 			}
-		}
-
-		if ( is_wp_error( $response ) ) {
-			return [];
-		}
-
-		if ( is_array( $response ) ) {
-			$response = (object) $response;
 		}
 
 		$supported_themes = array_diff(
