@@ -2071,7 +2071,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			&&
 			$node->hasAttribute( $attr_name )
 			&&
-			preg_match_all( '/(?:[^,\s]\S*[^,\s])\s*([\d]+.?[\d]*[wx])/', $node->getAttribute( $attr_name ), $matches )
+			preg_match_all( '/(?:[^,\s]\S*[^,\s])\s*([\d]+.?[\d]*[wx](?=\s*,|\s*$))/', $node->getAttribute( $attr_name ), $matches )
 		) {
 			if ( count( $matches[1] ) !== count( array_flip( $matches[1] ) ) ) {
 				return AMP_Rule_Spec::FAIL;

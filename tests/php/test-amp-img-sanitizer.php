@@ -298,6 +298,18 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-img src="http://placehold.it/350x150" srcset="http://placehold.it/1024x768 1024w" width="350" height="150" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="http://placehold.it/350x150" srcset="http://placehold.it/1024x768 1024w" width="350" height="150"></noscript></amp-img>',
 			],
 
+			'img_with_duplicate_img_candidate'         => [
+				'<img src="https://example.com/image.jpg" srcset="https://example.com/image.jpg, https://example.com/image-1.jpg     1024w, https://example.com/image-1.jpg 1024w   , https://example.com/image-2.jpg 300w, https://example.com/image-3.jpg 768w" width="350" height="150">',
+				'<amp-img src="https://example.com/image.jpg" srcset="https://example.com/image.jpg ,https://example.com/image-1.jpg 1024w,https://example.com/image-2.jpg 300w,https://example.com/image-3.jpg 768w" width="350" height="150" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://example.com/image.jpg" srcset="https://example.com/image.jpg ,https://example.com/image-1.jpg 1024w,https://example.com/image-2.jpg 300w,https://example.com/image-3.jpg 768w" width="350" height="150"></noscript></amp-img>',
+			],
+
+			'img_with_duplicate_img_candidate_and_different_url' => [
+				'<img src="https://example.com/image.jpg" srcset="https://example.com/image.jpg, https://example.com/image-1.jpg     1024w, https://example.com/image-2.jpg 1024w   , https://example.com/image-2.jpg 300w, https://example.com/image-3.jpg 768w" width="350" height="150">',
+				'<amp-img src="https://example.com/image.jpg" width="350" height="150" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://example.com/image.jpg" width="350" height="150"></noscript></amp-img>',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_DIMENSION, AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_DIMENSION ],
+			],
+
 			'img_with_fill_layout_inline_style'        => [
 				'<img src="https://placehold.it/20x20" data-amp-layout="fill" style="display: inline">',
 				'<amp-img src="https://placehold.it/20x20" layout="fill" style="display:block" class="amp-wp-enforced-sizes"></amp-img>',
