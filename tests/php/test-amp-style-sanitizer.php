@@ -176,8 +176,25 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'illegal_at_rules_removed' => [
-				'<style>@charset "utf-8"; @namespace svg url(http://www.w3.org/2000/svg); @page { margin: 1cm; } @viewport { width: device-width; } @counter-style thumbs { system: cyclic; symbols: "\1F44D"; suffix: " "; } body { color: black; }</style>',
-				'<meta name="viewport" content="width=device-width">',
+				'
+					<html>
+						<head>
+							<meta name="viewport" content="width=device-width">
+							<style>@charset "utf-8"; @namespace svg url(http://www.w3.org/2000/svg); @page { margin: 1cm; } @viewport { initial-scale: 1.0 } @counter-style thumbs { system: cyclic; symbols: "\1F44D"; suffix: " "; } body { color: black; }</style>
+						</head>
+						<body></body>
+					</html>
+				',
+				'
+					<!DOCTYPE html>
+					<html>
+						<head>
+							<meta charset="utf-8">
+							<meta name="viewport" content="width=device-width,initial-scale=1">
+						</head>
+						<body></body>
+					</html>
+				',
 				[
 					'@page{margin:1cm}body{color:black}',
 				],
@@ -228,8 +245,9 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'col_with_star_width_attribute' => [
 				'<table><colgroup><col width="0*"/></colgroup></table>',
-				'<table><colgroup><col width="0*"></colgroup></table>',
+				'<table><colgroup><col></colgroup></table>',
 				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR ],
 			],
 
 			'col_with_width_attribute_and_existing_style' => [
@@ -351,10 +369,16 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @param array  $expected_errors      Expected error codes.
 	 */
 	public function test_body_style_attribute_sanitizer( $source, $expected_content, $expected_stylesheets, $expected_errors = [] ) {
-		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$use_document_element = false !== strpos( $source, '<html' );
+		if ( $use_document_element ) {
+			$dom = Document::fromHtml( $source );
+		} else {
+			$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		}
 
 		$error_codes = [];
 		$args        = [
+			'use_document_element'      => $use_document_element,
 			'validation_error_callback' => static function( $error ) use ( &$error_codes ) {
 				$error_codes[] = $error['code'];
 			},
@@ -363,8 +387,26 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Style_Sanitizer( $dom, $args );
 		$sanitizer->sanitize();
 
+		$meta_sanitizer = new AMP_Meta_Sanitizer( $dom, $args );
+		$meta_sanitizer->sanitize();
+
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom, $args );
+		$validating_sanitizer->sanitize();
+
+		// Remove style elements since we will examine the underlying stylesheets instead.
+		foreach ( iterator_to_array( $dom->getElementsByTagName( 'style' ) ) as $element ) {
+			$element->parentNode->removeChild( $element );
+		}
+		foreach ( iterator_to_array( $dom->getElementsByTagName( 'noscript' ) ) as $element ) {
+			$element->parentNode->removeChild( $element );
+		}
+
 		// Test content.
-		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		if ( $use_document_element ) {
+			$content = $dom->saveHTML();
+		} else {
+			$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		}
 		$this->assertEqualMarkup( $expected_content, $content );
 
 		// Test stylesheet.
