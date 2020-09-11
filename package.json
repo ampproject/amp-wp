@@ -70,7 +70,7 @@
     "eslint-plugin-jest": "24.0.0",
     "eslint-plugin-jsdoc": "30.4.0",
     "eslint-plugin-react": "7.20.6",
-    "eslint-plugin-react-hooks": "4.1.0",
+    "eslint-plugin-react-hooks": "4.1.2",
     "grunt": "1.2.0",
     "grunt-contrib-clean": "2.0.0",
     "grunt-contrib-copy": "1.0.0",
