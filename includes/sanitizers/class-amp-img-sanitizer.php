@@ -241,7 +241,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		if ( preg_match_all( '/\s*(?:,\s*)?(?<url>[^,\s]\S*[^,\s])\s*(?<dimension>[\d]+.?[\d]*[wx](?=\s*,|\s*$))?\s*(?:(,)\s*)?/', $srcset, $matches ) ) {
+		if ( preg_match_all( '/\s*(?:,\s*)?(?<url>[^,\s]\S*[^,\s])\s*(?<dimension>[\d]+.?[\d]*[wx])?\s*(?:(,)\s*)?/', $srcset, $matches ) ) {
 			// Bail if there are no duplicate image candidates.
 			if ( count( $matches['dimension'] ) === count( array_flip( $matches['dimension'] ) ) ) {
 				return;
