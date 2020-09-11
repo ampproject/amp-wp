@@ -555,6 +555,30 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 									</amp-twitter>
 								</amp-story-page-attachment>
 							</amp-story-page>
+							<amp-story-page id="interactive-poll">
+								<amp-story-grid-layer template="fill">
+									<amp-story-interactive-poll id="correct-poll" endpoint="https://webstoriesinteractivity-beta.web.app/api/v1" theme="dark" chip-style="shadow" class="nice-quiz" prompt-text="What country do you like the most?" option-1-text="France" option-1-confetti="🇺🇾" option-1-results-category="Dog" option-2-text="Spain" option-2-confetti="🇺🇾" option-2-results-category="Cat" option-3-text="Uruguay" option-3-confetti="🇺🇾" option-3-results-category="Bunny" option-4-text="Brazil" option-4-confetti="🇺🇾" option-4-results-category="Mouse">
+									</amp-story-interactive-poll>
+								</amp-story-grid-layer>
+							</amp-story-page>
+							<amp-story-page id="amp-story-interactive-binary-poll">
+								<amp-story-grid-layer template="fill">
+									<amp-story-interactive-binary-poll id="correct-binary-poll" endpoint="https://webstoriesinteractivity-beta.web.app/api/v1" theme="dark" class="cool-binary-poll" option-1-text="France" option-1-confetti="🇺🇾" option-2-text="Spain" option-2-confetti="🇺🇾">
+									</amp-story-interactive-binary-poll>
+								</amp-story-grid-layer>
+							</amp-story-page>
+							<amp-story-page id="amp-story-interactive-quiz">
+								<amp-story-grid-layer template="fill">
+									<amp-story-interactive-quiz id="correct-quiz" endpoint="https://webstoriesinteractivity-beta.web.app/api/v1" theme="dark" chip-style="shadow" class="nice-quiz" prompt-text="Who won the first soccer world cup?" option-1-text="France" option-2-text="Spain" option-3-text="Uruguay" option-3-correct option-3-confetti="🇺🇾" option-4-text="Brazil">
+									</amp-story-interactive-quiz>
+								</amp-story-grid-layer>
+							</amp-story-page>
+							<amp-story-page id="amp-story-interactive-results">
+								<amp-story-grid-layer template="fill">
+									<amp-story-interactive-results id="correct-results" theme="dark" class="nice-quiz" prompt-text="What country do you like the most?" option-1-text="France" option-1-results-category="Dog" option-1-image="./dog.png" option-2-text="Spain" option-2-results-category="Cat" option-2-image="./cat.png" option-3-text="Uruguay" option-3-results-category="Bunny" option-3-image="./bunny.png" option-4-text="Brazil" option-4-results-category="Mouse" option-4-image="./mouse.png">
+									</amp-story-interactive-results>
+								</amp-story-grid-layer>
+							</amp-story-page>
 							<amp-story-bookend src="bookendv1.json" layout="nodisplay"></amp-story-bookend>
 							<amp-analytics id="75a1fdc3143c" type="googleanalytics"><script type="application/json">{"vars":{"account":"UA-XXXXXX-1"},"triggers":{"trackPageview":{"on":"visible","request":"pageview"}}}</script></amp-analytics>
 						</amp-story>
@@ -564,7 +588,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					return [
 						$html,
 						preg_replace( '#<\w+[^>]*>bad</\w+>#', '', $html ),
-						[ 'amp-story', 'amp-analytics', 'amp-story-360', 'amp-twitter', 'amp-youtube', 'amp-video' ],
+						[ 'amp-story', 'amp-analytics', 'amp-story-360', 'amp-twitter', 'amp-youtube', 'amp-video', 'amp-story-interactive' ],
 						[
 							[
 								'code'      => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_DESCENDANT_TAG,
