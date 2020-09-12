@@ -176,8 +176,25 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'illegal_at_rules_removed' => [
-				'<style>@charset "utf-8"; @namespace svg url(http://www.w3.org/2000/svg); @page { margin: 1cm; } @viewport { width: device-width; } @counter-style thumbs { system: cyclic; symbols: "\1F44D"; suffix: " "; } body { color: black; }</style>',
-				'<meta name="viewport" content="width=device-width">',
+				'
+					<html>
+						<head>
+							<meta name="viewport" content="width=device-width">
+							<style>@charset "utf-8"; @namespace svg url(http://www.w3.org/2000/svg); @page { margin: 1cm; } @viewport { initial-scale: 1.0 } @counter-style thumbs { system: cyclic; symbols: "\1F44D"; suffix: " "; } body { color: black; }</style>
+						</head>
+						<body></body>
+					</html>
+				',
+				'
+					<!DOCTYPE html>
+					<html>
+						<head>
+							<meta charset="utf-8">
+							<meta name="viewport" content="width=device-width,initial-scale=1">
+						</head>
+						<body></body>
+					</html>
+				',
 				[
 					'@page{margin:1cm}body{color:black}',
 				],
@@ -228,8 +245,9 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'col_with_star_width_attribute' => [
 				'<table><colgroup><col width="0*"/></colgroup></table>',
-				'<table><colgroup><col width="0*"></colgroup></table>',
+				'<table><colgroup><col></colgroup></table>',
 				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR ],
 			],
 
 			'col_with_width_attribute_and_existing_style' => [
@@ -338,6 +356,73 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-d4ea4c7{outline:solid 1px black}',
 				],
 			],
+			'with_internal_amp_selectors_and_class_names' => [
+				'
+					<html>
+						<head>
+							<style>
+								amp-img[layout=intrinsic],
+								amp-img.i-amphtml-layout-responsive,
+								amp-img:not(:not(.i-amphtml-layout-responsive)), /* Double :not() to prevent tree-shaker from masking validation error. */
+								amp-img.size-full {
+									outline: solid 1px red;
+								}
+							</style>
+							<style>
+								amp-img > *:first-child,
+								amp-img > *:first-child:not(:not(.i-amphtml-sizer)), /* Double :not() to prevent tree-shaker from masking validation error. */
+								i-amphtml-sizer.i-amphtml-sizer
+								{
+									outline: dotted 2px orange;
+								}
+							</style>
+						</head>
+						<body>
+							<amp-img class="size-full wp-image-904 alignright amp-wp-enforced-sizes i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" title="Image Alignment 150x150" alt="Image Alignment 150x150" src="https://example.com/wp-content/uploads/2013/03/image-alignment-150x150-1.jpg" width="150" height="150" layout="intrinsic" i-amphtml-layout="intrinsic">
+								<i-amphtml-sizer class="i-amphtml-sizer">
+									<img alt="" aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9JzE1MCcgd2lkdGg9JzE1MCcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2ZXJzaW9uPScxLjEnLz4=">
+								</i-amphtml-sizer>
+								<noscript>
+									<img loading="lazy" class="size-full wp-image-904 alignright" title="Image Alignment 150x150" alt="Image Alignment 150x150" src="https://example.com/wp-content/uploads/2013/03/image-alignment-150x150-1.jpg" width="150" height="150">
+								</noscript>
+							</amp-img>
+						</body>
+					</html>
+				',
+				'
+					<!DOCTYPE html>
+					<html>
+						<head>
+							<meta charset="utf-8">
+							<meta name="viewport" content="width=device-width">
+						</head>
+						<body>
+							<amp-img class="size-full wp-image-904 alignright amp-wp-enforced-sizes" title="Image Alignment 150x150" alt="Image Alignment 150x150" src="https://example.com/wp-content/uploads/2013/03/image-alignment-150x150-1.jpg" width="150" height="150" layout="intrinsic">
+								<noscript>
+									<img loading="lazy" class="size-full wp-image-904 alignright" title="Image Alignment 150x150" alt="Image Alignment 150x150" src="https://example.com/wp-content/uploads/2013/03/image-alignment-150x150-1.jpg" width="150" height="150">
+								</noscript>
+							</amp-img>
+						</body>
+					</html>
+				',
+				[
+					'amp-img[layout=intrinsic],amp-img.size-full{outline:solid 1px red}',
+					'amp-img > *:first-child{outline:dotted 2px orange}',
+				],
+				[
+					AMP_Style_Sanitizer::CSS_DISALLOWED_SELECTOR,
+					AMP_Style_Sanitizer::CSS_DISALLOWED_SELECTOR,
+					AMP_Style_Sanitizer::CSS_DISALLOWED_SELECTOR,
+					AMP_Style_Sanitizer::CSS_DISALLOWED_SELECTOR,
+					AMP_Style_Sanitizer::DISALLOWED_ATTR_CLASS_NAME,
+					AMP_Style_Sanitizer::DISALLOWED_ATTR_CLASS_NAME,
+					AMP_Style_Sanitizer::DISALLOWED_ATTR_CLASS_NAME,
+					AMP_Style_Sanitizer::DISALLOWED_ATTR_CLASS_NAME,
+					AMP_Tag_And_Attribute_Sanitizer::MANDATORY_TAG_ANCESTOR,
+					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
+					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
+				],
+			],
 		];
 	}
 
@@ -351,10 +436,16 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @param array  $expected_errors      Expected error codes.
 	 */
 	public function test_body_style_attribute_sanitizer( $source, $expected_content, $expected_stylesheets, $expected_errors = [] ) {
-		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$use_document_element = false !== strpos( $source, '<html' );
+		if ( $use_document_element ) {
+			$dom = Document::fromHtml( $source );
+		} else {
+			$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		}
 
 		$error_codes = [];
 		$args        = [
+			'use_document_element'      => $use_document_element,
 			'validation_error_callback' => static function( $error ) use ( &$error_codes ) {
 				$error_codes[] = $error['code'];
 			},
@@ -363,8 +454,31 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Style_Sanitizer( $dom, $args );
 		$sanitizer->sanitize();
 
+		$meta_sanitizer = new AMP_Meta_Sanitizer( $dom, $args );
+		$meta_sanitizer->sanitize();
+
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom, $args );
+		$validating_sanitizer->sanitize();
+
+		if ( $use_document_element && count( $sanitizer->get_stylesheets() ) > 0 ) {
+			$this->assertEquals( 1, $dom->xpath->query( '//style[ @amp-custom ]' )->length, 'Expected stylesheet to be present in page. Failure means INVALID_CDATA_CSS_I_AMPHTML_NAME happened.' );
+		}
+
+		// Remove style elements since we will examine the underlying stylesheets instead.
+		foreach ( iterator_to_array( $dom->getElementsByTagName( 'style' ) ) as $element ) {
+			if ( 'noscript' === $element->parentNode->nodeName ) {
+				$element->parentNode->parentNode->removeChild( $element->parentNode );
+			} else {
+				$element->parentNode->removeChild( $element );
+			}
+		}
+
 		// Test content.
-		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		if ( $use_document_element ) {
+			$content = $dom->saveHTML();
+		} else {
+			$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		}
 		$this->assertEqualMarkup( $expected_content, $content );
 
 		// Test stylesheet.
@@ -3085,9 +3199,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			AMP_Style_Sanitizer::CSS_SYNTAX_PARSE_ERROR,
 			AMP_Style_Sanitizer::STYLESHEET_FETCH_ERROR,
 			AMP_Style_Sanitizer::STYLESHEET_TOO_LONG,
+			AMP_Style_Sanitizer::CSS_DISALLOWED_SELECTOR,
 		];
 
-		$this->assertEquals( $expected, AMP_Style_Sanitizer::get_css_parser_validation_error_codes() );
+		$this->assertEqualSets( $expected, AMP_Style_Sanitizer::get_css_parser_validation_error_codes() );
 	}
 
 	/**
