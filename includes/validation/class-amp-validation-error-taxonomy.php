@@ -2152,7 +2152,7 @@ class AMP_Validation_Error_Taxonomy {
 				?>
 				<dt><?php echo esc_html( self::get_source_key_label( $key, $validation_error ) ); ?></dt>
 				<dd class="detailed">
-					<?php if ( in_array( $key, [ 'node_name', 'parent_name', 'required_parent_name', 'required_attr_value' ], true ) ) : ?>
+					<?php if ( in_array( $key, [ 'node_name', 'parent_name', 'required_parent_name', 'required_attr_value', 'css_selector', 'class_name' ], true ) ) : ?>
 						<code><?php echo esc_html( $value ); ?></code>
 					<?php elseif ( 'css_property_name' === $key ) : ?>
 						<?php
@@ -2996,6 +2996,14 @@ class AMP_Validation_Error_Taxonomy {
 					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['css_property_name'] ) );
 				}
 				return $title;
+			case AMP_Style_Sanitizer::CSS_DISALLOWED_SELECTOR:
+				return esc_html__( 'Illegal CSS selector', 'amp' );
+			case AMP_Style_Sanitizer::DISALLOWED_ATTR_CLASS_NAME:
+				$title = esc_html__( 'Disallowed class name', 'amp' );
+				if ( isset( $validation_error['class_name'] ) ) {
+					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['class_name'] ) );
+				}
+				return $title;
 			case AMP_Tag_And_Attribute_Sanitizer::CDATA_TOO_LONG:
 			case AMP_Tag_And_Attribute_Sanitizer::MANDATORY_CDATA_MISSING_OR_INCORRECT:
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_HTML_COMMENTS:
@@ -3277,6 +3285,10 @@ class AMP_Validation_Error_Taxonomy {
 				return __( 'Parent element', 'amp' );
 			case 'css_property_name':
 				return __( 'CSS property', 'amp' );
+			case 'css_selector':
+				return __( 'CSS selector', 'amp' );
+			case 'class_name':
+				return __( 'Class name', 'amp' );
 			case 'duplicate_oneof_attrs':
 				return __( 'Mutually exclusive attributes', 'amp' );
 			case 'text':
