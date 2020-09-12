@@ -218,7 +218,12 @@ final class ReaderThemes {
 			 *
 			 * @see https://wordpress.org/support/topic/issue-during-activating-the-updated-plugins/#post-13383737
 			 */
-			if ( is_wp_error( $response ) || ! is_object( $response ) || ! is_array( $response->themes ) ) {
+			if (
+				is_wp_error( $response )
+				|| ! is_object( $response )
+				|| ! property_exists( $response, 'themes' )
+				|| ! is_array( $response->themes )
+			) {
 				$response = (object) [ 'themes' => [] ];
 			} else {
 				// Store the transient only if the response was valid.
