@@ -8,6 +8,7 @@
 namespace AmpProject\AmpWP\Tests\PhpStan;
 
 use AmpProject\AmpWP\AmpWpPlugin;
+use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Services;
 use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Scalar\String_;
@@ -84,8 +85,13 @@ final class ServicesDynamicReturnTypeExtension implements DynamicStaticMethodRet
 			$service_id = $service_id->value;
 		}
 
-		if ( array_key_exists( (string) $service_id, AmpWpPlugin::SERVICES ) ) {
-			return new ObjectType( AmpWpPlugin::SERVICES[ (string) $service_id ] );
+		$services = array_merge(
+			[ 'injector' => Injector::class ],
+			AmpWpPlugin::SERVICES
+		);
+
+		if ( array_key_exists( (string) $service_id, $services ) ) {
+			return new ObjectType( $services[ (string) $service_id ] );
 		}
 
 		return $return_type;
