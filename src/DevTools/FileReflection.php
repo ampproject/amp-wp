@@ -168,14 +168,6 @@ final class FileReflection implements Service, Registerable {
 	public function get_file_source( $file ) {
 		$matches = [];
 
-		if ( $this->is_plugin_file( $file, $matches ) ) {
-			return $this->get_file_source_array(
-				self::TYPE_PLUGIN,
-				$matches['slug'],
-				isset( $matches['file'] ) ? $matches['file'] : $matches['slug']
-			);
-		}
-
 		if ( $this->is_parent_theme_file( $file, $matches ) ) {
 			return $this->get_file_source_array(
 				self::TYPE_THEME,
@@ -189,6 +181,14 @@ final class FileReflection implements Service, Registerable {
 				self::TYPE_THEME,
 				$this->get_stylesheet_slug(),
 				$matches['file']
+			);
+		}
+
+		if ( $this->is_plugin_file( $file, $matches ) ) {
+			return $this->get_file_source_array(
+				self::TYPE_PLUGIN,
+				$matches['slug'],
+				isset( $matches['file'] ) ? $matches['file'] : $matches['slug']
 			);
 		}
 
