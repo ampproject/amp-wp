@@ -1905,21 +1905,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_source
-	 *
-	 * @covers AMP_Validation_Manager::get_source()
-	 */
-	public function test_get_source() {
-		$source = AMP_Validation_Manager::get_source( 'amp_after_setup_theme' );
-		$this->assertEquals( 'amp', $source['name'] );
-		$this->assertEquals( 'plugin', $source['type'] );
-
-		$source = AMP_Validation_Manager::get_source( 'the_content' );
-		$this->assertEquals( 'wp-includes', $source['name'] );
-		$this->assertEquals( 'core', $source['type'] );
-	}
-
-	/**
 	 * Test can_output_buffer.
 	 *
 	 * Note that this method cannot currently be fully tested because

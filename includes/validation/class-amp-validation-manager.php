@@ -1501,6 +1501,9 @@ class AMP_Validation_Manager {
 	/**
 	 * Gets the plugin or theme of the callback, if one exists.
 	 *
+	 * @deprecated 2.0.2 Use \AmpProject\AmpWP\DevTools\CallbackReflection::get_source().
+	 * @codeCoverageIgnore
+	 *
 	 * @param string|array|callable $callback The callback for which to get the plugin.
 	 * @return array|null {
 	 *     The source data.
@@ -1513,6 +1516,11 @@ class AMP_Validation_Manager {
 	 * }
 	 */
 	public static function get_source( $callback ) {
+		_deprecated_function(
+			__METHOD__,
+			'2.0.2',
+			'\AmpProject\AmpWP\DevTools\CallbackReflection::get_source'
+		);
 		return Services::get( 'dev_tools.callback_reflection' )
 			->get_source( $callback );
 	}
