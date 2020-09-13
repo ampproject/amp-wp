@@ -53,27 +53,27 @@ class LikelyCulpritDetectorTest extends WP_UnitTestCase {
 	 */
 	public function single_step_trace_data() {
 		return [
-			'core'   => [
+			'core'         => [
 				[ ABSPATH . '/wp-includes/some-file.php' ],
 				// Core is skipped as culprit, so source remains empty.
 				'',
 				'',
 			],
 
-			'amp plugin' => [
+			'amp plugin'   => [
 				[ __FILE__ ],
 				// AMP plugin is skipped as culprit, so source remains empty.
 				'',
 				'',
 			],
 
-			'plugin' => [
+			'plugin'       => [
 				[ WP_PLUGIN_DIR . '/bad-plugin/bad-plugin.php' ],
 				'plugin',
 				'bad-plugin',
 			],
 
-			'mu-plugin' => [
+			'mu-plugin'    => [
 				[ WP_CONTENT_DIR . '/mu-plugins/bad-mu-plugin.php' ],
 				'mu-plugin',
 				// TODO: Is this a correct slug for a single file (MU) plugin?
@@ -86,7 +86,7 @@ class LikelyCulpritDetectorTest extends WP_UnitTestCase {
 				'default',
 			],
 
-			'child theme' => [
+			'child theme'  => [
 				[ get_stylesheet_directory() . '/functions.php' ],
 				'theme',
 				'default',
@@ -103,7 +103,7 @@ class LikelyCulpritDetectorTest extends WP_UnitTestCase {
 		return array_merge(
 			$this->single_step_trace_data(),
 			[
-				'all skipped'   => [
+				'all skipped'  => [
 					[
 						ABSPATH . '/wp-includes/some-file.php',
 						__FILE__,
@@ -114,7 +114,7 @@ class LikelyCulpritDetectorTest extends WP_UnitTestCase {
 					'',
 				],
 
-				'plugin' => [
+				'plugin'       => [
 					[
 						ABSPATH . '/wp-includes/some-file.php', // Core is skipped.
 						__FILE__, // AMP plugin is skipped.
@@ -127,7 +127,7 @@ class LikelyCulpritDetectorTest extends WP_UnitTestCase {
 					'bad-plugin',
 				],
 
-				'mu-plugin' => [
+				'mu-plugin'    => [
 					[
 						ABSPATH . '/wp-includes/some-file.php', // Core is skipped.
 						__FILE__, // AMP plugin is skipped.
@@ -154,7 +154,7 @@ class LikelyCulpritDetectorTest extends WP_UnitTestCase {
 					'default',
 				],
 
-				'child theme' => [
+				'child theme'  => [
 					[
 						ABSPATH . '/wp-includes/some-file.php', // Core is skipped.
 						__FILE__, // AMP plugin is skipped.
