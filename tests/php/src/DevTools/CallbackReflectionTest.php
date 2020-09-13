@@ -13,6 +13,7 @@ use AmpProject\AmpWP\PluginRegistry;
 use ReflectionFunction;
 use ReflectionMethod;
 use WP_UnitTestCase;
+use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 
 /**
  * Tests for CallbackReflection class.
@@ -23,6 +24,8 @@ use WP_UnitTestCase;
  */
 class CallbackReflectionTest extends WP_UnitTestCase {
 
+	use LoadsCoreThemes;
+
 	/**
 	 * Test instance.
 	 *
@@ -32,6 +35,8 @@ class CallbackReflectionTest extends WP_UnitTestCase {
 
 	public function setUp() {
 		parent::setUp();
+
+		$this->register_core_themes();
 
 		$plugin_registry = new PluginRegistry();
 		$file_reflection = new FileReflection( $plugin_registry );
@@ -47,20 +52,33 @@ class CallbackReflectionTest extends WP_UnitTestCase {
 			}
 		);
 		register_theme_directory( $theme_root );
-		switch_theme( 'custom' );
+	}
+
+	public function tearDown() {
+		parent::tearDown();
+		$this->restore_theme_directories();
 	}
 
 	/** @return array */
 	public function data_get_source() {
 		require_once ABSPATH . '/wp-admin/includes/widgets.php';
 		require_once dirname( dirname( __DIR__ ) ) . '/data/themes/custom/functions.php';
+		require_once dirname( dirname( __DIR__ ) ) . '/data/themes/child-of-core/functions.php';
 		return [
-			'theme_function'                      => [
+			'parent_theme_function'               => [
 				'my_custom_after_setup_theme',
 				'my_custom_after_setup_theme',
 				'custom',
 				'theme',
 				'functions.php',
+				ReflectionFunction::class,
+			],
+			'child_theme_function'                => [
+				'child_of_core_after_setup_theme',
+				'child_of_core_after_setup_theme',
+				'child-of-core',
+				'theme',
+				'actions.php',
 				ReflectionFunction::class,
 			],
 			'plugin_function'                     => [
@@ -120,6 +138,7 @@ class CallbackReflectionTest extends WP_UnitTestCase {
 	 * @dataProvider data_get_source
 	 * @covers ::get_source()
 	 * @covers ::get_reflection()
+	 * @covers \AmpProject\AmpWP\DevTools\FileReflection::get_file_source()
 	 *
 	 * @param string $function         Function.
 	 * @param string $source_function  Source function identified.
@@ -129,6 +148,10 @@ class CallbackReflectionTest extends WP_UnitTestCase {
 	 * @param string $reflection_class Reflection class.
 	 */
 	public function test_get_source( $function, $source_function, $name, $type, $file, $reflection_class ) {
+		if ( 'theme' === $type ) {
+			switch_theme( $name );
+		}
+
 		$source = $this->callback_reflection->get_source( $function );
 		$this->assertEquals( $type, $source['type'] );
 		$this->assertEquals( $name, $source['name'] );
