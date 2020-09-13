@@ -140,4 +140,17 @@ class CallbackReflectionTest extends WP_UnitTestCase {
 		$this->assertInstanceOf( $reflection_class, $reflection );
 		$this->assertEquals( preg_replace( '/.*::/', '', $source['function'] ), $reflection->getName() );
 	}
+
+	/**
+	 * Test get_source() when function doesn't exist.
+	 *
+	 * @covers ::get_source()
+	 * @covers ::get_reflection()
+	 */
+	public function test_get_source_non_existent_callback() {
+		$function = 'this_function_does_not_exist';
+		$this->assertFalse( function_exists( $function ) );
+		$source = $this->callback_reflection->get_source( $function );
+		$this->assertNull( $source );
+	}
 }
