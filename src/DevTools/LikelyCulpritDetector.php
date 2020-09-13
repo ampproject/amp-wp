@@ -81,7 +81,7 @@ final class LikelyCulpritDetector implements Service {
 					FileReflection::TYPE_PLUGIN === $source[ FileReflection::SOURCE_TYPE ]
 					&&
 					// Per \AmpProject\AmpWP\PluginRegistry::get_plugins(), AMP and Gutenberg are considered core.
-					in_array( $source[ FileReflection::SOURCE_NAME ], [ 'amp' /*, 'gutenberg'*/ ], true )
+					in_array( $source[ FileReflection::SOURCE_NAME ], [ 'amp', 'gutenberg' ], true )
 				)
 			) {
 				// We skip WordPress Core (likely hooks subsystem) and the AMP
