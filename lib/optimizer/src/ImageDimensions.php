@@ -102,7 +102,7 @@ final class ImageDimensions
      *
      * A tiny image is any image with width or height less than 150 pixels and a non-responsive layout.
      *
-     * @param int $threshold Optional. Threshold to use. Defaults to 150 pixels.
+     * @param int|null $threshold Optional. Threshold to use. Defaults to 150 pixels.
      * @return bool Whether the image is tiny.
      */
     public function isTiny($threshold = self::TINY_THRESHOLD)
