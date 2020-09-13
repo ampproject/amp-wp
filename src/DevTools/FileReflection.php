@@ -176,33 +176,41 @@ final class FileReflection implements Service, Registerable {
 				$this->get_template_slug(),
 				$matches['file']
 			);
-		} elseif ( $this->is_child_theme_file( $file, $matches ) ) {
+		}
+
+		if ( $this->is_child_theme_file( $file, $matches ) ) {
 			return $this->get_file_source_array(
 				self::TYPE_THEME,
 				$this->get_stylesheet_slug(),
 				$matches['file']
 			);
-		} elseif ( $this->is_plugin_file( $file, $matches ) ) {
+		}
+
+		if ( $this->is_plugin_file( $file, $matches ) ) {
 			return $this->get_file_source_array(
 				self::TYPE_PLUGIN,
 				$matches['slug'],
 				isset( $matches['file'] ) ? $matches['file'] : $matches['slug']
 			);
-		} elseif ( $this->is_mu_plugin_file( $file, $matches ) ) {
+		}
+
+		if ( $this->is_mu_plugin_file( $file, $matches ) ) {
 			return $this->get_file_source_array(
 				self::TYPE_MU_PLUGIN,
 				$matches['slug'],
 				isset( $matches['file'] ) ? $matches['file'] : $matches['slug']
 			);
-		} elseif ( $this->is_core_file( $file, $matches ) ) {
+		}
+
+		if ( $this->is_core_file( $file, $matches ) ) {
 			return $this->get_file_source_array(
 				self::TYPE_CORE,
 				$matches['slug'],
 				$matches['file']
 			);
-		} else {
-			return [];
 		}
+
+		return [];
 	}
 
 	/**
