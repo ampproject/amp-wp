@@ -95,11 +95,12 @@ final class CallbackReflection implements Service {
 				// The $callback is a function or static method.
 				$exploded_callback = explode( '::', $callback, 2 );
 
-				if ( 2 === count( $exploded_callback ) ) {
-					return new ReflectionMethod( $exploded_callback[0], $exploded_callback[1] );
+				if ( 2 !== count( $exploded_callback ) ) {
+					return new ReflectionFunction( $callback );
 				}
 
-				return new ReflectionFunction( $callback );
+				// Since identified as method, handle as ReflectionMethod below.
+				$callback = $exploded_callback;
 			}
 
 			if (
