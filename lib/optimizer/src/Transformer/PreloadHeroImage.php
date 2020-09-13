@@ -11,6 +11,7 @@ use AmpProject\Optimizer\Configuration\PreloadHeroImageConfiguration;
 use AmpProject\Optimizer\Error;
 use AmpProject\Optimizer\ErrorCollection;
 use AmpProject\Optimizer\HeroImage;
+use AmpProject\Optimizer\ImageDimensions;
 use AmpProject\Optimizer\Transformer;
 use AmpProject\Optimizer\TransformerConfiguration;
 use AmpProject\Tag;
@@ -64,13 +65,6 @@ final class PreloadHeroImage implements Transformer
         Attribute::SIZES,
         Attribute::TITLE,
     ];
-
-    /**
-     * Images smaller than 150px are considered tiny.
-     *
-     * @var int
-     */
-    const TINY_IMG_THRESHOLD = 150;
 
     /**
      * Maximum number of hero images defined via data-hero attribute.
@@ -258,19 +252,7 @@ final class PreloadHeroImage implements Transformer
             return null;
         }
 
-        $width  = $element->getAttribute(Attribute::WIDTH);
-        $height = $element->getAttribute(Attribute::HEIGHT);
-        $layout = $element->getAttribute(Attribute::LAYOUT);
-
-        if (! $width && ! $height) {
-            if ($layout === Layout::FILL) {
-                list($width, $height) = $this->getDimensionsFromParent($element);
-            } else {
-                return null;
-            }
-        }
-
-        if ($this->isTinyElement($layout, $width, $height)) {
+        if ((new ImageDimensions($element))->isTiny()) {
             return null;
         }
 
@@ -278,67 +260,6 @@ final class PreloadHeroImage implements Transformer
         $media  = $element->getAttribute(Attribute::MEDIA);
 
         return new HeroImage($src, $media, $srcset, $element);
-    }
-
-    /**
-     * Get the dimensions to use from an element's parent(s).
-     *
-     * @param DOMElement $element Element to check the parents of.
-     * @return array Array containing the width and the height.
-     */
-    private function getDimensionsFromParent(DOMElement $element)
-    {
-        $level = 0;
-        while ($element->parentNode && ++$level < 3) {
-            $element = $element->parentNode;
-
-            if (! $element instanceof DOMElement) {
-                continue;
-            }
-
-            if (
-                ! $element->getAttribute(Attribute::WIDTH)
-                &&
-                ! $element->getAttribute(Attribute::HEIGHT)
-            ) {
-                continue;
-            }
-
-            $width  = $element->getAttribute(Attribute::WIDTH);
-            $height = $element->getAttribute(Attribute::HEIGHT);
-
-            if (trim($width) === 'auto' || trim($height) === 'auto') {
-                // TODO: Skipping for now. Are we able to reliably SSR auto?
-                return [0, 0];
-            }
-
-            return [$width, $height];
-        }
-
-        return [0, 0];
-    }
-
-    /**
-     * Check whether an element is to be considered tiny and should be ignored.
-     *
-     * A tiny element is any element with width or height less than 150 pixels and a non-responsive layout.
-     *
-     * @param string $layout Layout of the element.
-     * @param int    $width  Width of the element.
-     * @param int    $height Height of the element.
-     * @return bool Whether the element is tiny.
-     */
-    private function isTinyElement($layout, $width, $height)
-    {
-        if ($width <= 0 || $height <= 0) {
-            return true;
-        }
-
-        if ($layout === Layout::INTRINSIC || $layout === Layout::RESPONSIVE) {
-            return false;
-        }
-
-        return $width < self::TINY_IMG_THRESHOLD || $height < self::TINY_IMG_THRESHOLD;
     }
 
     /**
@@ -359,11 +280,7 @@ final class PreloadHeroImage implements Transformer
             return null;
         }
 
-        $width  = $element->getAttribute(Attribute::WIDTH);
-        $height = $element->getAttribute(Attribute::HEIGHT);
-        $layout = $element->getAttribute(Attribute::LAYOUT);
-
-        if ($this->isTinyElement($layout, $width, $height)) {
+        if ((new ImageDimensions($element))->isTiny()) {
             return null;
         }
 
@@ -385,11 +302,7 @@ final class PreloadHeroImage implements Transformer
             return null;
         }
 
-        $width  = $element->getAttribute(Attribute::WIDTH);
-        $height = $element->getAttribute(Attribute::HEIGHT);
-        $layout = $element->getAttribute(Attribute::LAYOUT);
-
-        if ($this->isTinyElement($layout, $width, $height)) {
+        if ((new ImageDimensions($element))->isTiny()) {
             return null;
         }
 
