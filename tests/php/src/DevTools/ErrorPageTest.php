@@ -1,8 +1,8 @@
 <?php
 
-namespace AmpProject\AmpWP\Tests;
+namespace AmpProject\AmpWP\Tests\DevTools;
 
-use AmpProject\AmpWP\ErrorPage;
+use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use RuntimeException;
 use WP_UnitTestCase;
@@ -18,7 +18,7 @@ final class ErrorPageTest extends WP_UnitTestCase {
 			stream_get_meta_data( $capture )['uri']
 		);
 
-		$output = ( new ErrorPage() )
+		$output = Services::get( 'dev_tools.error_page' )
 			->with_title( 'Error Page Title' )
 			->with_message( 'Error Page Message' )
 			->with_exception( new RuntimeException( 'FAILURE', 42 ) )
