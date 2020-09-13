@@ -162,9 +162,9 @@ final class FileReflection implements Service, Registerable {
 	 *
 	 * @param string $file File.
 	 * @return array {
-	 *     @type string  $type Source type (core, plugin, mu-plugin, or theme).
-	 *     @type string  $name Source name.
-	 *     @type string  $file Relative file path based on the type.
+	 *     @type string $type Source type (core, plugin, mu-plugin, or theme). Not set if no match.
+	 *     @type string $name Source name. Not set if no match.
+	 *     @type string $file Relative file path based on the type. Not set if no match.
 	 * }
 	 */
 	public function get_file_source( $file ) {
@@ -176,41 +176,33 @@ final class FileReflection implements Service, Registerable {
 				$this->get_template_slug(),
 				$matches['file']
 			);
-		}
-
-		if ( $this->is_child_theme_file( $file, $matches ) ) {
+		} elseif ( $this->is_child_theme_file( $file, $matches ) ) {
 			return $this->get_file_source_array(
 				self::TYPE_THEME,
 				$this->get_stylesheet_slug(),
 				$matches['file']
 			);
-		}
-
-		if ( $this->is_plugin_file( $file, $matches ) ) {
+		} elseif ( $this->is_plugin_file( $file, $matches ) ) {
 			return $this->get_file_source_array(
 				self::TYPE_PLUGIN,
 				$matches['slug'],
 				isset( $matches['file'] ) ? $matches['file'] : $matches['slug']
 			);
-		}
-
-		if ( $this->is_mu_plugin_file( $file, $matches ) ) {
+		} elseif ( $this->is_mu_plugin_file( $file, $matches ) ) {
 			return $this->get_file_source_array(
 				self::TYPE_MU_PLUGIN,
 				$matches['slug'],
 				isset( $matches['file'] ) ? $matches['file'] : $matches['slug']
 			);
-		}
-
-		if ( $this->is_core_file( $file, $matches ) ) {
+		} elseif ( $this->is_core_file( $file, $matches ) ) {
 			return $this->get_file_source_array(
 				self::TYPE_CORE,
 				$matches['slug'],
 				$matches['file']
 			);
+		} else {
+			return [];
 		}
-
-		return [];
 	}
 
 	/**
