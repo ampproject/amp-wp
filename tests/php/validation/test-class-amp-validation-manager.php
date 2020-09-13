@@ -7,7 +7,6 @@
 
 // phpcs:disable Generic.Formatting.MultipleStatementAlignment.NotSameWarning
 
-use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Services;

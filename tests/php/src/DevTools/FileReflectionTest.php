@@ -8,13 +8,13 @@
 namespace AmpProject\AmpWP\Tests\DevTools;
 
 use AmpProject\AmpWP\DevTools\FileReflection;
-use AmpProject\AmpWP\PluginRegistry;
+use AmpProject\AmpWP\Services;
 use WP_UnitTestCase;
 
 /**
  * Tests for FileReflection class.
  *
- * @since 2.0
+ * @since 2.0.2
  *
  * @coversDefaultClass \AmpProject\AmpWP\DevTools\FileReflection
  */
@@ -29,13 +29,11 @@ class FileReflectionTest extends WP_UnitTestCase {
 
 	public function setUp() {
 		parent::setUp();
-
-		$plugin_registry       = new PluginRegistry();
-		$this->file_reflection = new FileReflection( $plugin_registry );
+		$this->file_reflection = Services::get( 'injector' )->make( FileReflection::class );
 	}
 
 	/**
-	 * Tests FileReflection::register
+	 * Tests FileReflection::register().
 	 *
 	 * @covers ::register
 	 */
@@ -45,7 +43,7 @@ class FileReflectionTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests FileReflection::test_get_file_source
+	 * Tests FileReflection::get_file_source().
 	 *
 	 * Note that this is mainly tested in CallbackReflectionTest.
 	 *
