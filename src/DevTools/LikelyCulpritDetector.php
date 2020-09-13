@@ -40,7 +40,12 @@ final class LikelyCulpritDetector implements Service {
 	 * Detect the themes and plugins responsible for causing the current debug
 	 * backtrace.
 	 *
-	 * @return string[] Type and name of extension that is the likely culprit.
+	 * @return array {
+	 *     Type and name of extension that is the likely culprit.
+	 *
+	 *     @type string $type Type. Empty if none matched.
+	 *     @type string $name Name. Empty if none matched.
+	 * }
 	 */
 	public function analyze_backtrace() {
 		return $this->analyze_trace( debug_backtrace( 0 ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace
@@ -50,7 +55,12 @@ final class LikelyCulpritDetector implements Service {
 	 * Detect the themes and plugins responsible for causing the exception.
 	 *
 	 * @param Exception $exception Exception to analyze.
-	 * @return string[] Type and name of extension that is the likely culprit.
+	 * @return array {
+	 *     Type and name of extension that is the likely culprit.
+	 *
+	 *     @type string $type Type. Empty if none matched.
+	 *     @type string $name Name. Empty if none matched.
+	 * }
 	 */
 	public function analyze_exception( Exception $exception ) {
 		$trace = $exception->getTrace();
@@ -62,7 +72,12 @@ final class LikelyCulpritDetector implements Service {
 	 * Detect the themes and plugins responsible for an issue in a trace.
 	 *
 	 * @param array $trace Associative array of trace data to analyze.
-	 * @return string[] Type and name of extension that is the likely culprit.
+	 * @return array {
+	 *     Type and name of extension that is the likely culprit.
+	 *
+	 *     @type string $type Type. Empty if none matched.
+	 *     @type string $name Name. Empty if none matched.
+	 * }
 	 */
 	public function analyze_trace( $trace ) {
 		foreach ( $trace as $call_stack ) {
