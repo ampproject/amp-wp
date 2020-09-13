@@ -40,10 +40,56 @@ class LikelyCulpritDetectorTest extends WP_UnitTestCase {
 	/**
 	 * Tests LikelyCulpritDetector::analyze_backtrace
 	 *
+	 * This only tests a single scenario as it is non-trivial to shape the
+	 * debug_backtrace(). The rest of the cases are already covered by the tests
+	 * for analyze_trace().
+	 *
 	 * @covers ::analyze_backtrace
 	 */
 	public function test_analyze_backtrace() {
-		$this->markTestIncomplete();
+		$source = [];
+
+		// We need to provide a way to trigger the culprit detection after the
+		// code has passed through a theme or plugin that is not seen as being
+		// part of the AMP plugin. We therefore use a theme, as these are
+		// detected by active parent or child theme name instead of file
+		// location (which would still be a subfolder of the AMP plugin).
+
+		$analyze_trace_callback = function () use ( &$source ) {
+			$source = $this->likely_culprit_detector->analyze_backtrace();
+		};
+
+		$theme_root = dirname( dirname( __DIR__ ) ) . '/data/themes';
+
+		$set_theme_root_callback = static function () use ( $theme_root ) {
+			return $theme_root;
+		};
+
+		add_action( 'execute_from_within_theme', $analyze_trace_callback );
+		add_filter( 'theme_root', $set_theme_root_callback );
+		register_theme_directory( $theme_root );
+
+		$previous_theme = get_stylesheet();
+		switch_theme( 'custom' );
+
+		// Refresh internal reflection caches.
+		do_action( 'setup_theme' );
+
+		do_action( 'trigger_action_to_execute' );
+
+		$this->assertArrayHasKey( 'type', $source );
+		$this->assertArrayHasKey( 'name', $source );
+
+		$this->assertEquals( 'theme', $source['type'] );
+		$this->assertEquals( 'custom', $source['name'] );
+
+		switch_theme( $previous_theme );
+
+		remove_filter( 'theme_root', $set_theme_root_callback );
+		remove_action( 'execute_from_within_theme', $analyze_trace_callback );
+
+		// Refresh internal reflection caches.
+		do_action( 'setup_theme' );
 	}
 
 	/**
