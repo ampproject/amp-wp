@@ -262,26 +262,28 @@ HTML;
 		$source = $this->likely_culprit_detector->analyze_exception( $this->exception );
 
 		if ( ! empty( $source['type'] ) && ! empty( $source['name'] ) ) {
+			$name_markup = "<strong><code>{$source['name']}</code></strong>";
+
 			switch ( $source['type'] ) {
 				case 'plugin':
 					/* translators: placeholder is the slug of the plugin */
-					$message = __( 'It appears the plugin with slug %s is responsible; please contact the author.', 'amp' );
+					$message = sprintf( __( 'It appears the plugin with slug %s is responsible; please contact the author.', 'amp' ), $name_markup );
 					break;
 				case 'mu-plugin':
 					/* translators: placeholder is the slug of the must-use plugin */
-					$message = __( 'It appears the must-use plugin with slug %s is responsible; please contact the author.', 'amp' );
+					$message = sprintf( __( 'It appears the must-use plugin with slug %s is responsible; please contact the author.', 'amp' ), $name_markup );
 					break;
 				case 'theme':
 					/* translators: placeholder is the slug of the theme */
-					$message = __( 'It appears the theme with slug %s is responsible; please contact the author.', 'amp' );
+					$message = sprintf( __( 'It appears the theme with slug %s is responsible; please contact the author.', 'amp' ), $name_markup );
 					break;
 				default:
 					return '';
 			}
 
-			return sprintf(
+			return wp_kses(
 				"<p>{$message}</p>",
-				'<strong><code>' . $source['name'] . '</code></strong>'
+				array_fill_keys( [ 'p', 'strong', 'code' ], [] )
 			);
 		}
 
@@ -314,15 +316,29 @@ HTML;
 			);
 		}
 
-		return sprintf(
-			'<hr><pre class="exception"><strong>%s</strong> (%s) [<em>%s</em>]<br><em>%s:%d</em><br><br><small>%s</small></pre>',
-			$this->exception->getMessage(),
-			$this->exception->getCode(),
-			get_class( $this->exception ),
-			$this->exception->getFile(),
-			$this->exception->getLine(),
-			str_replace( "\n", '<br>', $this->exception->getTraceAsString() )
+		$contents = implode(
+			"\n",
+			[
+				sprintf(
+					'<strong>%s</strong> (%s) [<em>%s</em>]',
+					esc_html( $this->exception->getMessage() ),
+					esc_html( $this->exception->getCode() ),
+					esc_html( get_class( $this->exception ) )
+				),
+				sprintf(
+					'<em>%s:%d</em>',
+					esc_html( $this->exception->getFile() ),
+					esc_html( $this->exception->getLine() )
+				),
+				'',
+				sprintf(
+					'<small>%s</small>',
+					esc_html( $this->exception->getTraceAsString() )
+				),
+			]
 		);
+
+		return "<hr><pre class='exception'>{$contents}</pre>";
 	}
 
 	/**
