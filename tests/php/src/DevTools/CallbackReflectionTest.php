@@ -121,12 +121,12 @@ class CallbackReflectionTest extends WP_UnitTestCase {
 	 * @covers ::get_source()
 	 * @covers ::get_reflection()
 	 *
-	 * @param string                           $function         Function.
-	 * @param string                           $source_function  Source function identified.
-	 * @param string                           $name             Name.
-	 * @param string                           $type             Type.
-	 * @param string                           $file             File.
-	 * @param string|\PHPUnit\Framework\string $reflection_class Reflection class.
+	 * @param string $function         Function.
+	 * @param string $source_function  Source function identified.
+	 * @param string $name             Name.
+	 * @param string $type             Type.
+	 * @param string $file             File.
+	 * @param string $reflection_class Reflection class.
 	 */
 	public function test_get_source( $function, $source_function, $name, $type, $file, $reflection_class ) {
 		$source = $this->callback_reflection->get_source( $function );
