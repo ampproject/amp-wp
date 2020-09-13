@@ -13,7 +13,7 @@ If you want to use the template that shipped with v0.3 and earlier, you can use 
 
 ### Source
 
-:link: [back-compat/back-compat.php:20](../../back-compat/back-compat.php#L20-L24)
+:link: [back-compat/back-compat.php:20](/back-compat/back-compat.php#L20-L24)
 
 <details>
 <summary>Show Code</summary>

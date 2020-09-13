@@ -361,6 +361,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 				return array_diff( $components, [ 'widgets' ] );
 			}
 		);
+		remove_theme_support( 'widgets-block-editor' );
 	}
 
 	/**

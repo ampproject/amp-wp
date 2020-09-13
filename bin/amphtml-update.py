@@ -416,7 +416,7 @@ def ParseRules(out_dir):
 				for val in list.tag:
 
 					# Skip tags specific to transformed AMP.
-					if val in ( 'I-AMPHTML-SIZER', ):
+					if val in ( 'I-AMPHTML-SIZER', 'IMG', ):
 						continue
 
 					descendant_lists[list.name].append( val.lower() )

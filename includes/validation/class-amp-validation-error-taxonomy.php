@@ -205,6 +205,13 @@ class AMP_Validation_Error_Taxonomy {
 	const ERROR_STATUS = 'error_status';
 
 	/**
+	 * Key for the transient storing error index counts.
+	 *
+	 * @var string
+	 */
+	const TRANSIENT_KEY_ERROR_INDEX_COUNTS = 'amp_error_index_counts';
+
+	/**
 	 * Whether the terms_clauses filter should apply to a term query for validation errors to limit to a given status.
 	 *
 	 * This is set to false when calling wp_count_terms() for the admin menu and for the views.
@@ -279,6 +286,10 @@ class AMP_Validation_Error_Taxonomy {
 		if ( is_admin() ) {
 			self::add_admin_hooks();
 		}
+
+		add_action( 'created_' . self::TAXONOMY_SLUG, [ __CLASS__, 'clear_cached_counts' ] );
+		add_action( 'edited_' . self::TAXONOMY_SLUG, [ __CLASS__, 'clear_cached_counts' ] );
+		add_action( 'delete_' . self::TAXONOMY_SLUG, [ __CLASS__, 'clear_cached_counts' ] );
 	}
 
 	/**
@@ -595,6 +606,16 @@ class AMP_Validation_Error_Taxonomy {
 			$args
 		);
 
+		$cache_key     = wp_json_encode( $args );
+		$cached_counts = get_transient( self::TRANSIENT_KEY_ERROR_INDEX_COUNTS );
+		if ( empty( $cached_counts ) ) {
+			$cached_counts = [];
+		}
+
+		if ( isset( $cached_counts[ $cache_key ] ) ) {
+			return $cached_counts[ $cache_key ];
+		}
+
 		$groups = null;
 		if ( isset( $args['group'] ) ) {
 			$groups = self::sanitize_term_status( $args['group'], [ 'multiple' => true ] );
@@ -613,7 +634,13 @@ class AMP_Validation_Error_Taxonomy {
 		if ( isset( $args['group'] ) ) {
 			remove_filter( 'terms_clauses', $filter );
 		}
-		return (int) $term_count;
+
+		$result = (int) $term_count;
+
+		$cached_counts[ $cache_key ] = $result;
+		set_transient( self::TRANSIENT_KEY_ERROR_INDEX_COUNTS, $cached_counts, DAY_IN_SECONDS );
+
+		return $result;
 	}
 
 	/**
@@ -2125,7 +2152,7 @@ class AMP_Validation_Error_Taxonomy {
 				?>
 				<dt><?php echo esc_html( self::get_source_key_label( $key, $validation_error ) ); ?></dt>
 				<dd class="detailed">
-					<?php if ( in_array( $key, [ 'node_name', 'parent_name', 'required_parent_name', 'required_attr_value' ], true ) ) : ?>
+					<?php if ( in_array( $key, [ 'node_name', 'parent_name', 'required_parent_name', 'required_attr_value', 'css_selector', 'class_name' ], true ) ) : ?>
 						<code><?php echo esc_html( $value ); ?></code>
 					<?php elseif ( 'css_property_name' === $key ) : ?>
 						<?php
@@ -2969,6 +2996,14 @@ class AMP_Validation_Error_Taxonomy {
 					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['css_property_name'] ) );
 				}
 				return $title;
+			case AMP_Style_Sanitizer::CSS_DISALLOWED_SELECTOR:
+				return esc_html__( 'Illegal CSS selector', 'amp' );
+			case AMP_Style_Sanitizer::DISALLOWED_ATTR_CLASS_NAME:
+				$title = esc_html__( 'Disallowed class name', 'amp' );
+				if ( isset( $validation_error['class_name'] ) ) {
+					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['class_name'] ) );
+				}
+				return $title;
 			case AMP_Tag_And_Attribute_Sanitizer::CDATA_TOO_LONG:
 			case AMP_Tag_And_Attribute_Sanitizer::MANDATORY_CDATA_MISSING_OR_INCORRECT:
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_HTML_COMMENTS:
@@ -3250,6 +3285,10 @@ class AMP_Validation_Error_Taxonomy {
 				return __( 'Parent element', 'amp' );
 			case 'css_property_name':
 				return __( 'CSS property', 'amp' );
+			case 'css_selector':
+				return __( 'CSS selector', 'amp' );
+			case 'class_name':
+				return __( 'Class name', 'amp' );
 			case 'duplicate_oneof_attrs':
 				return __( 'Mutually exclusive attributes', 'amp' );
 			case 'text':
@@ -3337,5 +3376,12 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		return sprintf( '<span class="status-text">%s %s</span>', $icon->to_html(), esc_html( $text ) );
+	}
+
+	/**
+	 * Deletes cached term counts.
+	 */
+	public static function clear_cached_counts() {
+		delete_transient( self::TRANSIENT_KEY_ERROR_INDEX_COUNTS );
 	}
 }

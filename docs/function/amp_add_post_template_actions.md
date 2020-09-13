@@ -10,7 +10,7 @@ Add post template actions.
 
 ### Source
 
-:link: [includes/deprecated.php:90](../../includes/deprecated.php#L90-L94)
+:link: [includes/deprecated.php:90](/includes/deprecated.php#L90-L94)
 
 <details>
 <summary>Show Code</summary>

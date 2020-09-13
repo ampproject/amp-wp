@@ -1,6 +1,6 @@
 ## Method `AMP_Base_Sanitizer::get_body_node()`
 
-> :warning: This function is deprecated: Use $this-&gt;dom-&gt;body instead.
+> :warning: This method is deprecated: Use $this-&gt;dom-&gt;body instead.
 
 ```php
 protected function get_body_node();
@@ -14,7 +14,7 @@ Get HTML body as DOMElement from Dom\Document received by the constructor.
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:213](../../includes/sanitizers/class-amp-base-sanitizer.php#L213-L216)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:213](/includes/sanitizers/class-amp-base-sanitizer.php#L213-L216)
 
 <details>
 <summary>Show Code</summary>

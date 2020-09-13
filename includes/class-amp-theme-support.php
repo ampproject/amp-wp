@@ -6,11 +6,13 @@
  */
 
 use AmpProject\Amp;
+use AmpProject\AmpWP\ErrorPage;
 use AmpProject\AmpWP\ExtraThemeAndPluginHeaders;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\ConfigurationArgument;
+use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Transformer;
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
@@ -1834,7 +1836,39 @@ class AMP_Theme_Support {
 	 */
 	public static function finish_output_buffering( $response ) {
 		self::$is_output_buffering = false;
-		$response                  = self::prepare_response( $response );
+
+		try {
+			$response = self::prepare_response( $response );
+		} catch ( Exception $exception ) {
+			$title   = __( 'Failed to prepare AMP page', 'amp' );
+			$message = __( 'A PHP error occurred while trying to prepare the AMP response. This may not be caused by the AMP plugin but by some other active plugin or the current theme. You will need to review the error details to determine the source of the error.', 'amp' );
+
+			/** @var ErrorPage $error_page */
+			$error_page = Services::get( 'error_page' );
+
+			$error_page
+				->with_title( $title )
+				->with_message( $message )
+				->with_exception( $exception )
+				->with_response_code( 500 );
+
+			// Add link to non-AMP version if not canonical.
+			if ( ! amp_is_canonical() ) {
+				$non_amp_url = amp_remove_endpoint( amp_get_current_url() );
+
+				// Prevent user from being redirected back to AMP version.
+				if ( true === AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ) {
+					$non_amp_url = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $non_amp_url );
+				}
+
+				$error_page->with_back_link(
+					$non_amp_url,
+					__( 'Go to non-AMP version', 'amp' )
+				);
+			}
+
+			$response = $error_page->render();
+		}
 
 		/**
 		 * Fires when server timings should be sent.
@@ -1934,8 +1968,13 @@ class AMP_Theme_Support {
 			);
 		}
 
-		// Abort if an expected template was not rendered, in that template actions didn't fire and response type is not HTML.
-		$did_template_action = (
+		// Abort if response type is not HTML.
+		if ( Attribute::TYPE_HTML !== substr( AMP_HTTP::get_response_content_type(), 0, 9 ) ) {
+			return $response;
+		}
+
+		// Abort if an expected template action didn't fire or if the HTML tag does not have the AMP attribute.
+		if ( ! (
 			did_action( 'wp_head' )
 			||
 			did_action( 'wp_footer' )
@@ -1943,8 +1982,17 @@ class AMP_Theme_Support {
 			did_action( 'amp_post_template_head' )
 			||
 			did_action( 'amp_post_template_footer' )
-		);
-		if ( ! $did_template_action || Attribute::TYPE_HTML !== substr( AMP_HTTP::get_response_content_type(), 0, 9 ) ) {
+			||
+			preg_match(
+				sprintf(
+					'#^(?:<!.*?>|\s+)*+<html(?=\s)[^>]*?\s(%1$s|%2$s|%3$s)(\s|=|>)#is',
+					preg_quote( Attribute::AMP, '#' ),
+					preg_quote( Attribute::AMP_EMOJI, '#' ),
+					preg_quote( Attribute::AMP_EMOJI_ALT, '#' )
+				),
+				$response
+			)
+		) ) {
 			return $response;
 		}
 
@@ -2107,7 +2155,6 @@ class AMP_Theme_Support {
 		 * @since 1.5.0
 		 *
 		 * @param bool $enable_optimizer Whether the generated HTML output should be run through the AMP Optimizer or not.
-		 * @return bool Filtered value of whether the generated HTML output should be run through the AMP Optimizer or not.
 		 */
 		$enable_optimizer = apply_filters( 'amp_enable_optimizer', $enable_optimizer );
 
@@ -2227,7 +2274,6 @@ class AMP_Theme_Support {
 		 * @since 1.5.0
 		 *
 		 * @param bool $enable_ssr Whether the AMP Optimizer should use server-side rendering or not.
-		 * @return bool Filtered value of whether the AMP Optimizer should use server-side rendering or not.
 		 */
 		$enable_ssr = apply_filters( 'amp_enable_ssr', $enable_ssr );
 
@@ -2251,7 +2297,6 @@ class AMP_Theme_Support {
 		 * @since 1.5.0
 		 *
 		 * @param array $configuration Associative array of configuration data.
-		 * @return array Filtered associative array of configuration data.
 		 */
 		$configuration = apply_filters(
 			'amp_optimizer_config',

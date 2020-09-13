@@ -65,6 +65,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$this->assertEquals( AMP_Options_Manager::OPTION_NAME, $amp_post_type->show_in_menu );
 		$this->assertTrue( $amp_post_type->show_in_admin_bar );
 		$this->assertNotContains( AMP_Validated_URL_Post_Type::REMAINING_ERRORS, wp_removable_query_args() );
+		$this->assertEquals( 10, has_action( 'admin_menu', [ self::TESTED_CLASS, 'update_validated_url_menu_item' ] ) );
 
 		// Make sure that add_admin_hooks() gets called.
 		set_current_screen( 'index.php' );
@@ -84,6 +85,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	 * @covers \AMP_Validated_URL_Post_Type::add_admin_hooks()
 	 */
 	public function test_add_admin_hooks() {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		AMP_Validated_URL_Post_Type::add_admin_hooks();
 
@@ -106,7 +108,6 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'admin_notices', [ self::TESTED_CLASS, 'print_admin_notice' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_action_' . AMP_Validated_URL_Post_Type::VALIDATE_ACTION, [ self::TESTED_CLASS, 'handle_validate_request' ] ) );
 		$this->assertEquals( 10, has_action( 'post_action_' . AMP_Validated_URL_Post_Type::UPDATE_POST_TERM_STATUS_ACTION, [ self::TESTED_CLASS, 'handle_validation_error_status_update' ] ) );
-		$this->assertEquals( 10, has_action( 'admin_menu', [ self::TESTED_CLASS, 'add_admin_menu_new_invalid_url_count' ] ) );
 
 		$post = self::factory()->post->create_and_get( [ 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ] );
 		$this->assertEquals( '', apply_filters( 'post_date_column_status', 'publish', $post ) );
@@ -120,18 +121,18 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test add_admin_menu_new_invalid_url_count.
+	 * Test update_validated_url_menu_item.
 	 *
-	 * @covers \AMP_Validated_URL_Post_Type::add_admin_menu_new_invalid_url_count()
+	 * @covers \AMP_Validated_URL_Post_Type::update_validated_url_menu_item()
 	 */
-	public function test_add_admin_menu_new_invalid_url_count() {
+	public function test_update_validated_url_menu_item() {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		global $submenu;
 
 		$original_submenu = $submenu;
 
 		AMP_Validation_Manager::init(); // Register the post type and taxonomy.
-		AMP_Validated_URL_Post_Type::add_admin_menu_new_invalid_url_count();
+		AMP_Validated_URL_Post_Type::update_validated_url_menu_item();
 
 		$submenu[ AMP_Options_Manager::OPTION_NAME ] = [
 			0 => [
@@ -147,10 +148,10 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 				3 => 'AMP Analytics Options',
 			],
 			2 => [
-				0 => 'Invalid Pages',
-				1 => 'edit_posts',
+				0 => 'All Validated URLs',
+				1 => 'amp_validate',
 				2 => 'edit.php?post_type=amp_validated_url',
-				3 => 'Invalid AMP Pages (URLs)',
+				3 => 'AMP Validated URLs',
 			],
 		];
 
@@ -164,9 +165,9 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		);
 		$this->assertNotInstanceOf( 'WP_Error', $invalid_url_post_id );
 
-		AMP_Validated_URL_Post_Type::add_admin_menu_new_invalid_url_count();
+		AMP_Validated_URL_Post_Type::update_validated_url_menu_item();
 
-		$this->assertStringContains( '<span class="awaiting-mod"><span class="new-validation-error-urls-count">1</span></span>', $submenu[ AMP_Options_Manager::OPTION_NAME ][2][0] );
+		$this->assertSame( 'Validated URLs <span class="awaiting-mod"><span class="new-validation-error-urls-count">1</span></span>', $submenu[ AMP_Options_Manager::OPTION_NAME ][2][0] );
 
 		$submenu = $original_submenu;
 	}

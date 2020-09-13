@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\Admin\DevToolsUserAccess;
+use AmpProject\AmpWP\Option;
 
 /**
  * Tests for DevToolsUserAccess class.
@@ -50,6 +51,7 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 	 * @covers ::is_user_enabled
 	 */
 	public function test_is_user_enabled() {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$admin_user  = self::factory()->user->create_and_get( [ 'role' => 'administrator' ] );
 		$editor_user = self::factory()->user->create_and_get( [ 'role' => 'editor' ] );
 
@@ -71,7 +73,55 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 	 * @covers ::get_user_enabled
 	 */
 	public function test_get_user_enabled() {
-		$this->assertTrue( $this->dev_tools_user_access->get_user_enabled( self::factory()->user->create_and_get( [ 'role' => 'administrator' ] ) ) );
+		$admin_user = self::factory()->user->create_and_get( [ 'role' => 'administrator' ] );
+
+		// Enabled by default in Transitional mode.
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+		$this->assertTrue( $this->dev_tools_user_access->get_user_enabled( $admin_user ) );
+
+		// Enabled by default in Standard mode.
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->assertTrue( $this->dev_tools_user_access->get_user_enabled( $admin_user->ID ) );
+
+		// Disabled by default in Reader mode.
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		$this->assertFalse( $this->dev_tools_user_access->get_user_enabled( $admin_user->ID ) );
+
+		// Check filter overriding default to be true in Reader mode, but then user forcing it off via user pref.
+		delete_user_meta( $admin_user->ID, DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED );
+		remove_all_filters( 'amp_dev_tools_user_default_enabled' );
+		add_filter(
+			'amp_dev_tools_user_default_enabled',
+			function ( $enabled, $user_id ) use ( $admin_user ) {
+				unset( $enabled );
+				$this->assertSame( $user_id, $admin_user->ID );
+				return true;
+			},
+			10,
+			2
+		);
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		$this->assertTrue( $this->dev_tools_user_access->get_user_enabled( $admin_user ) );
+		update_user_meta( $admin_user->ID, DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED, 'false' );
+		$this->assertFalse( $this->dev_tools_user_access->get_user_enabled( $admin_user ) );
+
+		// Check filter overriding default to be false in Standard mode, but then user forcing it on via user pref.
+		delete_user_meta( $admin_user->ID, DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED );
+		remove_all_filters( 'amp_dev_tools_user_default_enabled' );
+		add_filter(
+			'amp_dev_tools_user_default_enabled',
+			function ( $enabled, $user_id ) use ( $admin_user ) {
+				unset( $enabled );
+				$this->assertSame( $user_id, $admin_user->ID );
+				return false;
+			},
+			10,
+			2
+		);
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->assertFalse( $this->dev_tools_user_access->get_user_enabled( $admin_user ) );
+		update_user_meta( $admin_user->ID, DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED, 'true' );
+		$this->assertTrue( $this->dev_tools_user_access->get_user_enabled( $admin_user ) );
 	}
 
 	/**
@@ -152,6 +202,7 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 	 * @covers ::rest_get_dev_tools_enabled
 	 */
 	public function test_rest_get_dev_tools_enabled() {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$user = self::factory()->user->create_and_get( [ 'role' => 'author' ] );
 
 		$this->assertFalse( $this->dev_tools_user_access->rest_get_dev_tools_enabled( [ 'id' => $user->ID ] ) );

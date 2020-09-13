@@ -878,7 +878,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						// There are only a few error messages, so map them to error codes.
 						switch ( $disallowed_cdata_regex['error_message'] ) {
 							case 'CSS i-amphtml- name prefix':
-								return [ 'code' => self::INVALID_CDATA_CSS_I_AMPHTML_NAME ]; // @todo This really should be done as part of the CSS sanitizer.
+								// The prefix used in selectors is handled by style sanitizer.
+								return [ 'code' => self::INVALID_CDATA_CSS_I_AMPHTML_NAME ];
 							case 'contents':
 								return [ 'code' => self::INVALID_CDATA_CONTENTS ];
 							case 'html comments':
