@@ -50,9 +50,18 @@ class FileReflectionTest extends WP_UnitTestCase {
 	 * @see \AmpProject\AmpWP\Tests\DevTools\CallbackReflectionTest::test_get_source()
 	 * @covers ::get_file_source
 	 */
-	public function test_get_file_source() {
+	public function test_get_file_source_plugin() {
 		$source = $this->file_reflection->get_file_source( __FILE__ );
 		$this->assertEquals( 'plugin', $source['type'] );
 		$this->assertEquals( 'amp', $source['name'] );
+	}
+
+	/**
+	 * Tests FileReflection::get_file_source() for unknown file.
+	 *
+	 * @covers ::get_file_source
+	 */
+	public function test_get_file_source_unknown() {
+		$this->assertEquals( [], $this->file_reflection->get_file_source( '/tmp' ) );
 	}
 }

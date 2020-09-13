@@ -151,8 +151,10 @@ final class FileReflection implements Service, Registerable {
 	public function reset_theme_variables() {
 		$this->template_directory   = null;
 		$this->template_slug        = null;
+		$this->parent_theme_pattern = null;
 		$this->stylesheet_directory = null;
 		$this->stylesheet_slug      = null;
+		$this->child_theme_pattern  = null;
 	}
 
 	/**
