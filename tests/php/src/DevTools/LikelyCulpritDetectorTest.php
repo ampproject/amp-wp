@@ -182,15 +182,13 @@ class LikelyCulpritDetectorTest extends WP_UnitTestCase {
 	 * @covers ::analyze_exception
 	 */
 	public function test_analyze_exception( $file_stack, $expected_type, $expected_name ) {
-		$trace = array_map(
-			static function ( $file ) {
-				return [ 'file' => $file ];
-			},
-			$file_stack
-		);
-
+		$trace     = $this->get_trace_from_file_stack( $file_stack );
 		$exception = new RuntimeException();
-		$this->set_private_property( $exception, 'file', array_shift( $trace )['file'] );
+		$this->set_private_property(
+			$exception,
+			'file',
+			array_shift( $trace )['file']
+		);
 
 		// The trace of the exception cannot be set as it is defined by a final
 		// method and not stored as a property. Therefore, we can only test
@@ -214,16 +212,26 @@ class LikelyCulpritDetectorTest extends WP_UnitTestCase {
 	 * @covers ::analyze_trace
 	 */
 	public function test_analyze_trace( $file_stack, $expected_type, $expected_name ) {
-		$trace = array_map(
+		$source = $this->likely_culprit_detector->analyze_trace(
+			$this->get_trace_from_file_stack( $file_stack )
+		);
+
+		$this->assertEquals( $expected_type, $source['type'] );
+		$this->assertEquals( $expected_name, $source['name'] );
+	}
+
+	/**
+	 * Convert a file stack into a (simplified) trace.
+	 *
+	 * @param string[] $file_stack File stack to convert.
+	 * @return array[] Associative of (simplified) trace data.
+	 */
+	private function get_trace_from_file_stack( $file_stack ) {
+		return array_map(
 			static function ( $file ) {
 				return [ 'file' => $file ];
 			},
 			$file_stack
 		);
-
-		$source = $this->likely_culprit_detector->analyze_trace( $trace );
-
-		$this->assertEquals( $expected_type, $source['type'] );
-		$this->assertEquals( $expected_name, $source['name'] );
 	}
 }
