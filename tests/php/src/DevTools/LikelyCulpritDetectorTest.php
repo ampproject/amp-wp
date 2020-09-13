@@ -8,6 +8,7 @@
 namespace AmpProject\AmpWP\Tests\DevTools;
 
 use AmpProject\AmpWP\DevTools\LikelyCulpritDetector;
+use AmpProject\AmpWP\Services;
 use WP_UnitTestCase;
 
 /**
