@@ -22,6 +22,7 @@ namespace PHPSTORM_META {
 			'dev_tools.likely_culprit_detector' => \AmpProject\AmpWP\DevTools\LikelyCulpritDetector::class,
 			'dev_tools.user_access'             => \AmpProject\AmpWP\DevTools\UserAccess::class,
 			'extra_theme_and_plugin_headers'    => \AmpProject\AmpWP\ExtraThemeAndPluginHeaders::class,
+			'injector'                          => \AmpProject\AmpWP\Infrastructure\Injector::class,
 			'mobile_redirection'                => \AmpProject\AmpWP\MobileRedirection::class,
 			'obsolete_block_attribute_remover'  => \AmpProject\AmpWP\ObsoleteBlockAttributeRemover::class,
 			'plugin_activation_notice'          => \AmpProject\AmpWP\Admin\PluginActivationNotice::class,
