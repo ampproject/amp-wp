@@ -58,7 +58,7 @@ final class FileReflection implements Service, Registerable {
 	 *
 	 * Used as cache to not recreate the pattern with each file lookup.
 	 *
-	 * @var string
+	 * @var string|null
 	 */
 	private $parent_theme_pattern;
 
@@ -67,7 +67,7 @@ final class FileReflection implements Service, Registerable {
 	 *
 	 * Used as cache to not recreate the pattern with each file lookup.
 	 *
-	 * @var string
+	 * @var string|null
 	 */
 	private $child_theme_pattern;
 
