@@ -122,7 +122,6 @@ class LikelyCulpritDetectorTest extends WP_UnitTestCase {
 			'mu-plugin'    => [
 				[ WP_CONTENT_DIR . '/mu-plugins/bad-mu-plugin.php' ],
 				'mu-plugin',
-				// TODO: Is this a correct slug for a single file (MU) plugin?
 				'bad-mu-plugin.php',
 			],
 
@@ -183,7 +182,6 @@ class LikelyCulpritDetectorTest extends WP_UnitTestCase {
 						get_stylesheet_directory() . '/functions.php',
 					],
 					'mu-plugin',
-					// TODO: Is this a correct slug for a single file (MU) plugin?
 					'bad-mu-plugin.php',
 				],
 

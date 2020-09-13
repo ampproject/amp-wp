@@ -54,7 +54,7 @@ final class LikelyCulpritDetector implements Service {
 	 */
 	public function analyze_exception( Exception $exception ) {
 		$trace = $exception->getTrace();
-		array_unshift( $trace, [ 'file' => $exception->getFile() ] );
+		array_unshift( $trace, [ FileReflection::SOURCE_FILE => $exception->getFile() ] );
 		return $this->analyze_trace( $trace );
 	}
 
@@ -66,18 +66,23 @@ final class LikelyCulpritDetector implements Service {
 	 */
 	public function analyze_trace( $trace ) {
 		foreach ( $trace as $call_stack ) {
-			if ( empty( $call_stack['file'] ) ) {
+			if ( empty( $call_stack[ FileReflection::SOURCE_FILE ] ) ) {
 				continue;
 			}
 
-			$source = $this->file_reflection->get_file_source( $call_stack['file'] );
+			$source = $this->file_reflection->get_file_source( $call_stack[ FileReflection::SOURCE_FILE ] );
 
 			if (
 				empty( $source )
 				||
-				'core' === $source['type']
+				FileReflection::TYPE_CORE === $source[ FileReflection::SOURCE_TYPE ]
 				||
-				( 'plugin' === $source['type'] && 'amp' === $source['name'] )
+				(
+					FileReflection::TYPE_PLUGIN === $source[ FileReflection::SOURCE_TYPE ]
+					&&
+					// Per \AmpProject\AmpWP\PluginRegistry::get_plugins(), AMP and Gutenberg are considered core.
+					in_array( $source[ FileReflection::SOURCE_NAME ], [ 'amp' /*, 'gutenberg'*/ ], true )
+				)
 			) {
 				// We skip WordPress Core (likely hooks subsystem) and the AMP
 				// plugin itself.
@@ -88,8 +93,8 @@ final class LikelyCulpritDetector implements Service {
 		}
 
 		return [
-			'type' => '',
-			'name' => '',
+			FileReflection::SOURCE_TYPE => '',
+			FileReflection::SOURCE_NAME => '',
 		];
 	}
 }
