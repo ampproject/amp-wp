@@ -1931,6 +1931,7 @@ class AMP_Theme_Support {
 	 */
 	public static function prepare_response( $response, $args = [] ) {
 		global $content_width;
+		$last_error = error_get_last();
 
 		if ( isset( $args['validation_error_callback'] ) ) {
 			_doing_it_wrong( __METHOD__, 'Do not supply validation_error_callback arg.', '1.0' );
@@ -2098,11 +2099,10 @@ class AMP_Theme_Support {
 		if ( AMP_Validation_Manager::$is_validate_request ) {
 			status_header( 200 );
 			header( 'Content-Type: application/json; charset=utf-8' );
-			$data       = [
+			$data = [
 				'http_status_code' => $status_code,
 				'php_fatal_error'  => false,
 			];
-			$last_error = error_get_last();
 			if ( $last_error && in_array( $last_error['type'], [ E_ERROR, E_RECOVERABLE_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR, E_PARSE ], true ) ) {
 				$data['php_fatal_error'] = $last_error;
 			}
