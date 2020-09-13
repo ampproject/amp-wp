@@ -7,7 +7,6 @@
 
 // phpcs:disable Generic.Formatting.MultipleStatementAlignment.NotSameWarning
 
-use AmpProject\AmpWP\Admin\DevToolsUserAccess;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Services;
@@ -453,7 +452,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 */
 	public function test_add_validation_error_sourcing() {
 		AMP_Validation_Manager::add_validation_error_sourcing();
-		$this->assertEquals( ~PHP_INT_MAX, has_filter( 'setup_theme', [ self::TESTED_CLASS, 'set_theme_variables' ] ) );
 		$this->assertEquals( 10, has_action( 'wp', [ self::TESTED_CLASS, 'wrap_widget_callbacks' ] ) );
 		$this->assertEquals( 10, has_action( 'all', [ self::TESTED_CLASS, 'wrap_hook_callbacks' ] ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_content', [ self::TESTED_CLASS, 'decorate_filter_source' ] ) );
@@ -492,7 +490,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$editor_user_id = self::factory()->user->create( [ 'role' => 'editor' ] );
 
 		wp_set_current_user( $admin_user_id );
-		/** @var DevToolsUserAccess $service */
 		$service = Services::get( 'dev_tools.user_access' );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
@@ -634,7 +631,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		// Make user preference is honored.
-		/** @var DevToolsUserAccess $service */
 		$service = Services::get( 'dev_tools.user_access' );
 		$service->set_user_enabled( wp_get_current_user()->ID, false );
 		$this->assertNull(
@@ -897,7 +893,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertStringContains( $expected_notice_non_accepted_errors, $output );
 
 		// Ensure not displayed when dev tools is disabled.
-		/** @var DevToolsUserAccess $service */
 		$service = Services::get( 'dev_tools.user_access' );
 		$service->set_user_enabled( wp_get_current_user()->ID, false );
 		$output = get_echo( [ 'AMP_Validation_Manager', 'print_edit_form_validation_status' ], [ $post ] );
@@ -1909,21 +1904,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_source
-	 *
-	 * @covers AMP_Validation_Manager::get_source()
-	 */
-	public function test_get_source() {
-		$source = AMP_Validation_Manager::get_source( 'amp_after_setup_theme' );
-		$this->assertEquals( 'amp', $source['name'] );
-		$this->assertEquals( 'plugin', $source['type'] );
-
-		$source = AMP_Validation_Manager::get_source( 'the_content' );
-		$this->assertEquals( 'wp-includes', $source['name'] );
-		$this->assertEquals( 'core', $source['type'] );
-	}
-
-	/**
 	 * Test can_output_buffer.
 	 *
 	 * Note that this method cannot currently be fully tested because
@@ -2553,7 +2533,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertFalse( wp_script_is( $slug, 'enqueued' ) );
 
 		// Ensure not displayed when dev tools is disabled.
-		/** @var DevToolsUserAccess $service */
 		$service = Services::get( 'dev_tools.user_access' );
 		$this->set_capability();
 		$service->set_user_enabled( wp_get_current_user()->ID, false );

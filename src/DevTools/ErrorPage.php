@@ -5,7 +5,7 @@
  * @package AmpProject\AmpWP
  */
 
-namespace AmpProject\AmpWP;
+namespace AmpProject\AmpWP\DevTools;
 
 use AmpProject\AmpWP\Infrastructure\Service;
 use Exception;
@@ -64,6 +64,23 @@ final class ErrorPage implements Service {
 	 * @var int
 	 */
 	private $response_code = 500;
+
+	/**
+	 * Culprit detection to use.
+	 *
+	 * @var LikelyCulpritDetector
+	 */
+	private $likely_culprit_detector;
+
+	/**
+	 * ErrorPage constructor.
+	 *
+	 * @param LikelyCulpritDetector $likely_culprit_detector Culprit detection
+	 *                                                       to use.
+	 */
+	public function __construct( LikelyCulpritDetector $likely_culprit_detector ) {
+		$this->likely_culprit_detector = $likely_culprit_detector;
+	}
 
 	/**
 	 * Set the title of the error page.
@@ -210,6 +227,7 @@ final class ErrorPage implements Service {
 	<body id="error-page">
 		<h1>{$this->render_title()}</h1>
 		<p>{$this->render_message()}</p>
+		{$this->render_source()}
 		{$this->render_exception()}
 		{$this->render_back_link()}
 	</body>
@@ -233,6 +251,43 @@ HTML;
 	 */
 	private function render_message() {
 		return wp_kses_post( $this->message );
+	}
+
+	/**
+	 * Render the source of the exception file.
+	 *
+	 * @return string File source data.
+	 */
+	private function render_source() {
+		$source = $this->likely_culprit_detector->analyze_exception( $this->exception );
+
+		if ( ! empty( $source['type'] ) && ! empty( $source['name'] ) ) {
+			$name_markup = "<strong><code>{$source['name']}</code></strong>";
+
+			switch ( $source['type'] ) {
+				case 'plugin':
+					/* translators: placeholder is the slug of the plugin */
+					$message = sprintf( __( 'It appears the plugin with slug %s is responsible; please contact the author.', 'amp' ), $name_markup );
+					break;
+				case 'mu-plugin':
+					/* translators: placeholder is the slug of the must-use plugin */
+					$message = sprintf( __( 'It appears the must-use plugin with slug %s is responsible; please contact the author.', 'amp' ), $name_markup );
+					break;
+				case 'theme':
+					/* translators: placeholder is the slug of the theme */
+					$message = sprintf( __( 'It appears the theme with slug %s is responsible; please contact the author.', 'amp' ), $name_markup );
+					break;
+				default:
+					return '';
+			}
+
+			return wp_kses(
+				"<p>{$message}</p>",
+				array_fill_keys( [ 'p', 'strong', 'code' ], [] )
+			);
+		}
+
+		return '';
 	}
 
 	/**
@@ -261,13 +316,29 @@ HTML;
 			);
 		}
 
-		return sprintf(
-			'<pre class="exception"><strong>%s</strong> (%s) [<em>%s</em>]<br><br><small>%s</small></pre>',
-			$this->exception->getMessage(),
-			$this->exception->getCode(),
-			get_class( $this->exception ),
-			str_replace( "\n", '<br>', $this->exception->getTraceAsString() )
+		$contents = implode(
+			"\n",
+			[
+				sprintf(
+					'<strong>%s</strong> (%s) [<em>%s</em>]',
+					esc_html( $this->exception->getMessage() ),
+					esc_html( $this->exception->getCode() ),
+					esc_html( get_class( $this->exception ) )
+				),
+				sprintf(
+					'<em>%s:%d</em>',
+					esc_html( $this->exception->getFile() ),
+					esc_html( $this->exception->getLine() )
+				),
+				'',
+				sprintf(
+					'<small>%s</small>',
+					esc_html( $this->exception->getTraceAsString() )
+				),
+			]
 		);
+
+		return "<hr><pre class='exception'>{$contents}</pre>";
 	}
 
 	/**
@@ -323,6 +394,11 @@ HTML;
 		padding: 0;
 		padding-bottom: 7px;
 	}
+	hr {
+		margin: 20px 0;
+		border: none;
+		border-top: 1px solid #dadada;
+	}
 	#error-page {
 		margin-top: 50px;
 	}
@@ -332,7 +408,8 @@ HTML;
 		line-height: 1.5;
 		margin: 25px 0 20px;
 	}
-	#error-page .exception {
+	#error-page .exception,
+	code {
 		font-family: Consolas, Monaco, monospace;
 		overflow-x: auto;
 	}

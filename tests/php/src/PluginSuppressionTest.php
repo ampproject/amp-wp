@@ -5,7 +5,6 @@ namespace AmpProject\AmpWP\Tests;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\PluginSuppression;
 use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
@@ -62,10 +61,22 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 			3
 		);
 
+		$plugin_suppression = Services::get( 'plugin_suppression' );
+		$plugin_registry    = $this->get_private_property( $plugin_suppression, 'plugin_registry' );
 		$this->set_private_property(
-			Services::get( 'plugin_registry' ),
+			$plugin_registry,
 			'plugin_folder',
 			basename( AMP__DIR__ ) . '/' . MockPluginEnvironment::BAD_PLUGINS_DIR
+		);
+		$this->set_private_property(
+			$plugin_suppression,
+			'plugin_registry',
+			$plugin_registry
+		);
+		$this->set_private_property(
+			Services::get( 'dev_tools.file_reflection' ),
+			'plugin_file_pattern',
+			null
 		);
 
 		// Work around issue with WP 5.5 compatibility where a failure occurs for undefined property: WP_Block_Type::$supports.
@@ -86,9 +97,16 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 			WP_Block_Type_Registry::get_instance()->unregister( 'bad/bad-block' );
 		}
 		$this->reset_widgets();
+		$plugin_suppression = Services::get( 'plugin_suppression' );
+		$plugin_registry    = $this->get_private_property( $plugin_suppression, 'plugin_registry' );
 		$this->set_private_property(
-			Services::get( 'plugin_registry' ),
+			$plugin_registry,
 			'plugin_folder',
+			''
+		);
+		$this->set_private_property(
+			Services::get( 'dev_tools.file_reflection' ),
+			'plugin_file_pattern',
 			null
 		);
 	}
@@ -161,11 +179,8 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 	 * @return string[] Plugin file slugs.
 	 */
 	private function get_bad_plugin_file_slugs() {
-		/** @var PluginRegistry $plugin_registry */
-		$plugin_registry = Services::get( 'plugin_registry' );
-
 		$plugin_file_slugs = array_map(
-			[ $plugin_registry, 'get_plugin_slug_from_file' ],
+			[ Services::get( 'plugin_registry' ), 'get_plugin_slug_from_file' ],
 			$this->get_bad_plugin_files()
 		);
 
@@ -177,10 +192,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 	 * @return PluginSuppression
 	 */
 	private function get_instance( $register = false ) {
-		/** @var PluginRegistry $plugin_registry */
-		$plugin_registry = Services::get( 'plugin_registry' );
-
-		$instance = new PluginSuppression( $plugin_registry );
+		$instance = Services::get( 'plugin_suppression' );
 		if ( $register ) {
 			$instance->register();
 		}
@@ -389,9 +401,6 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 		$instance = $this->get_instance();
 		$instance->register();
 
-		/** @var PluginRegistry $plugin_registry */
-		$plugin_registry = Services::get( 'plugin_registry' );
-
 		$this->init_plugins();
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		AMP_Options_Manager::register_settings(); // Adds validate_options as filter.
@@ -453,7 +462,7 @@ final class PluginSuppressionTest extends WP_UnitTestCase {
 			$this->assertEquals( wp_get_current_user()->user_nicename, $suppressed_plugin[ Option::SUPPRESSED_PLUGINS_USERNAME ] );
 			$this->assertArrayHasKey( Option::SUPPRESSED_PLUGINS_ERRORING_URLS, $suppressed_plugin );
 			$this->assertEquals( [ home_url( '/' ) ], $suppressed_plugin[ Option::SUPPRESSED_PLUGINS_ERRORING_URLS ] );
-			$this->assertEquals( $plugin_registry->get_plugin_from_slug( $slug )['data']['Version'], $suppressed_plugin[ Option::SUPPRESSED_PLUGINS_LAST_VERSION ] );
+			$this->assertEquals( Services::get( 'plugin_registry' )->get_plugin_from_slug( $slug )['data']['Version'], $suppressed_plugin[ Option::SUPPRESSED_PLUGINS_LAST_VERSION ] );
 		}
 
 		// Stop suppressing only some plugins.

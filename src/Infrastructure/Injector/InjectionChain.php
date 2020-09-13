@@ -34,9 +34,10 @@ final class InjectionChain {
 	 * @return self Modified injection chain.
 	 */
 	public function add_to_chain( $class ) {
-		$this->chain[] = $class;
+		$new_chain          = clone $this;
+		$new_chain->chain[] = $class;
 
-		return $this;
+		return $new_chain;
 	}
 
 	/**
@@ -46,9 +47,10 @@ final class InjectionChain {
 	 * @return self Modified injection chain.
 	 */
 	public function add_resolution( $resolution ) {
-		$this->resolutions[ $resolution ] = true;
+		$new_chain                             = clone $this;
+		$new_chain->resolutions[ $resolution ] = true;
 
-		return $this;
+		return $new_chain;
 	}
 
 	/**
@@ -84,5 +86,15 @@ final class InjectionChain {
 	 */
 	public function has_resolution( $resolution ) {
 		return \array_key_exists( $resolution, $this->resolutions );
+	}
+
+	/**
+	 * Check whether the injection chain already encountered a class.
+	 *
+	 * @param string $class Class to check.
+	 * @return bool Whether the given class is already part of the chain.
+	 */
+	public function is_in_chain( $class ) {
+		return in_array( $class, $this->chain, true );
 	}
 }

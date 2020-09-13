@@ -10,7 +10,7 @@ namespace AmpProject\AmpWP;
 use AmpProject\AmpWP\Infrastructure\Service;
 
 /**
- * Suppress plugins from running by removing their hooks and nullifying their shortcodes, widgets, and blocks.
+ * Get information about plugins and their current status.
  *
  * @package AmpProject\AmpWP
  * @internal

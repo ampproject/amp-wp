@@ -1,13 +1,13 @@
 <?php
 /**
- * Class DevToolsUserAccess.
+ * Class UserAccess.
  *
  * @since 2.0
  *
  * @package AMP
  */
 
-namespace AmpProject\AmpWP\Admin;
+namespace AmpProject\AmpWP\DevTools;
 
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -19,12 +19,12 @@ use WP_Error;
 use WP_User;
 
 /**
- * Class DevToolsUserAccess
+ * Class UserAccess
  *
  * @since 2.0
  * @internal
  */
-final class DevToolsUserAccess implements Service, Registerable {
+final class UserAccess implements Service, Registerable {
 
 	/**
 	 * User meta key enabling or disabling developer tools.

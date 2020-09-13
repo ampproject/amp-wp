@@ -159,7 +159,6 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentytwenty' );
 
-		/** @var ReaderThemeLoader $reader_theme_loader */
 		$reader_theme_loader = Services::get( 'reader_theme_loader' );
 
 		$_GET[ amp_get_slug() ] = '1';
@@ -214,7 +213,6 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentytwenty' );
 
-		/** @var ReaderThemeLoader $reader_theme_loader */
 		$reader_theme_loader = Services::get( 'reader_theme_loader' );
 
 		$reader_theme_loader->override_theme();
@@ -415,7 +413,6 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		);
 
 		// Switch to Reader theme.
-		/** @var ReaderThemeLoader $reader_theme_loader */
 		$reader_theme_loader    = Services::get( 'reader_theme_loader' );
 		$_GET[ amp_get_slug() ] = '1';
 		$reader_theme_loader->override_theme();
