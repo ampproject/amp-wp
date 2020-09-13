@@ -39,7 +39,10 @@ class CallbackReflectionTest extends WP_UnitTestCase {
 
 		$this->register_core_themes();
 
-		$this->callback_reflection = Services::get( 'injector' )->make( CallbackReflection::class );
+		$plugin_registry = new PluginRegistry();
+		$file_reflection = new FileReflection( $plugin_registry );
+		$file_reflection->register();
+		$this->callback_reflection = new CallbackReflection( $file_reflection );
 
 		$theme_root = dirname( dirname( __DIR__ ) ) . '/data/themes';
 		add_filter(
