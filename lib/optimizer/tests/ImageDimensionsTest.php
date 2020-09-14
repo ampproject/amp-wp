@@ -47,6 +47,15 @@ class ImageDimensionsTest extends TestCase
             'width only (string)'     => ['500', '', true, false, 500, null],
             'height only (string)'    => ['', '500', false, true, null, 500],
             'width & height (string)' => ['640', '480', true, true, 640, 480],
+            'width only (float)'      => [500.3, null, true, false, 500.3, null],
+            'height only (float)'     => [null, 500.7, false, true, null, 500.7],
+            'width & height (float)'  => [640.0, 480.0, true, true, 640.0, 480.0],
+            'auto width'              => ['auto', null, true, false, 'auto', null],
+            'auto height'             => [null, 'auto', false, true, null, 'auto'],
+            'auto width & height'     => ['auto', 'auto', true, true, 'auto', 'auto'],
+            'fluid width'             => ['fluid', null, true, false, 'fluid', null],
+            'fluid height'            => [null, 'fluid', false, true, null, 'fluid'],
+            'fluid width & height'    => ['fluid', 'fluid', true, true, 'fluid', 'fluid'],
         ];
     }
 

@@ -26,14 +26,14 @@ final class ImageDimensions
     /**
      * Width of the image.
      *
-     * @var int|null
+     * @var int|float|string|null
      */
     private $width;
 
     /**
      * Height of the image.
      *
-     * @var int|null
+     * @var int|float|string|null
      */
     private $height;
 
@@ -167,16 +167,18 @@ final class ImageDimensions
     /**
      * Get the width of the image.
      *
-     * @return int|null Width of the image, or null if the image has no width.
+     * @return int|float|string|null Width of the image, or null if the image has no width.
      */
     public function getWidth()
     {
         if ($this->width === null) {
             $this->width = -1;
-            if ($this->image->hasAttribute(Attribute::WIDTH)) {
-                $width = $this->image->getAttribute(Attribute::WIDTH);
-                if (! empty($width)) {
-                    $this->width = (int)$width;
+            $width       = $this->image->getAttribute(Attribute::WIDTH);
+            if (! empty($width)) {
+                if (is_numeric($width)) {
+                    $this->width = $width + 0; // Cast string into either int or float as needed.
+                } else {
+                    $this->width = $width;
                 }
             }
         }
@@ -187,16 +189,18 @@ final class ImageDimensions
     /**
      * Get the height of the image.
      *
-     * @return int|null Height of the image, or null if the image has no width.
+     * @return int|float|string|null Height of the image, or null if the image has no width.
      */
     public function getHeight()
     {
         if ($this->height === null) {
             $this->height = -1;
-            if ($this->image->hasAttribute(Attribute::HEIGHT)) {
-                $height = $this->image->getAttribute(Attribute::HEIGHT);
-                if (! empty($height)) {
-                    $this->height = (int)$height;
+            $height       = $this->image->getAttribute(Attribute::HEIGHT);
+            if (! empty($height)) {
+                if (is_numeric($height)) {
+                    $this->height = $height + 0; // Cast string into either int or float as needed.
+                } else {
+                    $this->height = $height;
                 }
             }
         }
