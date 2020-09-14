@@ -6,7 +6,7 @@
  */
 
 use AmpProject\Amp;
-use AmpProject\AmpWP\ErrorPage;
+use AmpProject\AmpWP\DevTools\ErrorPage;
 use AmpProject\AmpWP\ExtraThemeAndPluginHeaders;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
@@ -1843,8 +1843,7 @@ class AMP_Theme_Support {
 			$title   = __( 'Failed to prepare AMP page', 'amp' );
 			$message = __( 'A PHP error occurred while trying to prepare the AMP response. This may not be caused by the AMP plugin but by some other active plugin or the current theme. You will need to review the error details to determine the source of the error.', 'amp' );
 
-			/** @var ErrorPage $error_page */
-			$error_page = Services::get( 'error_page' );
+			$error_page = Services::get( 'dev_tools.error_page' );
 
 			$error_page
 				->with_title( $title )
@@ -1931,6 +1930,7 @@ class AMP_Theme_Support {
 	 */
 	public static function prepare_response( $response, $args = [] ) {
 		global $content_width;
+		$last_error = error_get_last();
 
 		if ( isset( $args['validation_error_callback'] ) ) {
 			_doing_it_wrong( __METHOD__, 'Do not supply validation_error_callback arg.', '1.0' );
@@ -2098,11 +2098,10 @@ class AMP_Theme_Support {
 		if ( AMP_Validation_Manager::$is_validate_request ) {
 			status_header( 200 );
 			header( 'Content-Type: application/json; charset=utf-8' );
-			$data       = [
+			$data = [
 				'http_status_code' => $status_code,
 				'php_fatal_error'  => false,
 			];
-			$last_error = error_get_last();
 			if ( $last_error && in_array( $last_error['type'], [ E_ERROR, E_RECOVERABLE_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR, E_PARSE ], true ) ) {
 				$data['php_fatal_error'] = $last_error;
 			}

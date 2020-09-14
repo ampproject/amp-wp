@@ -1,39 +1,45 @@
 <?php
 /**
- * Tests for DevToolsUserAccess class.
+ * Tests for UserAccess class.
  *
  * @package AMP
  */
 
-use AmpProject\AmpWP\Admin\DevToolsUserAccess;
+namespace AmpProject\AmpWP\Tests\DevTools;
+
+use AMP_Options_Manager;
+use AMP_Theme_Support;
+use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Option;
+use WP_Error;
+use WP_UnitTestCase;
 
 /**
- * Tests for DevToolsUserAccess class.
+ * Tests for UserAccess class.
  *
  * @group dev-tools-user-access
  *
  * @since 2.0
  *
- * @coversDefaultClass \AmpProject\AmpWP\Admin\DevToolsUserAccess
+ * @coversDefaultClass \AmpProject\AmpWP\DevTools\UserAccess
  */
-class Test_DevToolsUserAccess extends WP_UnitTestCase {
+class UserAccessTest extends WP_UnitTestCase {
 
 	/**
 	 * Test instance.
 	 *
-	 * @var DevToolsUserAccess
+	 * @var UserAccess
 	 */
 	private $dev_tools_user_access;
 
 	public function setUp() {
 		parent::setUp();
 
-		$this->dev_tools_user_access = new DevToolsUserAccess();
+		$this->dev_tools_user_access = new UserAccess();
 	}
 
 	/**
-	 * Tests DevToolsUserAccess::register
+	 * Tests UserAccess::register
 	 *
 	 * @covers ::register
 	 */
@@ -46,7 +52,7 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests DevToolsUserAccess::is_user_enabled
+	 * Tests UserAccess::is_user_enabled
 	 *
 	 * @covers ::is_user_enabled
 	 */
@@ -68,7 +74,7 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests DevToolsUserAccess::get_user_enabled
+	 * Tests UserAccess::get_user_enabled
 	 *
 	 * @covers ::get_user_enabled
 	 */
@@ -88,7 +94,7 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 		$this->assertFalse( $this->dev_tools_user_access->get_user_enabled( $admin_user->ID ) );
 
 		// Check filter overriding default to be true in Reader mode, but then user forcing it off via user pref.
-		delete_user_meta( $admin_user->ID, DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED );
+		delete_user_meta( $admin_user->ID, UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED );
 		remove_all_filters( 'amp_dev_tools_user_default_enabled' );
 		add_filter(
 			'amp_dev_tools_user_default_enabled',
@@ -102,11 +108,11 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 		);
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		$this->assertTrue( $this->dev_tools_user_access->get_user_enabled( $admin_user ) );
-		update_user_meta( $admin_user->ID, DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED, 'false' );
+		update_user_meta( $admin_user->ID, UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED, 'false' );
 		$this->assertFalse( $this->dev_tools_user_access->get_user_enabled( $admin_user ) );
 
 		// Check filter overriding default to be false in Standard mode, but then user forcing it on via user pref.
-		delete_user_meta( $admin_user->ID, DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED );
+		delete_user_meta( $admin_user->ID, UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED );
 		remove_all_filters( 'amp_dev_tools_user_default_enabled' );
 		add_filter(
 			'amp_dev_tools_user_default_enabled',
@@ -120,12 +126,12 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 		);
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->assertFalse( $this->dev_tools_user_access->get_user_enabled( $admin_user ) );
-		update_user_meta( $admin_user->ID, DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED, 'true' );
+		update_user_meta( $admin_user->ID, UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED, 'true' );
 		$this->assertTrue( $this->dev_tools_user_access->get_user_enabled( $admin_user ) );
 	}
 
 	/**
-	 * Tests DevToolsUserAccess::set_user_enabled
+	 * Tests UserAccess::set_user_enabled
 	 *
 	 * @covers ::set_user_enabled
 	 */
@@ -138,7 +144,7 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests DevToolsUserAccess::register_rest_field
+	 * Tests UserAccess::register_rest_field
 	 *
 	 * @covers ::register_rest_field
 	 */
@@ -151,7 +157,7 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests DevToolsUserAccess::print_personal_options
+	 * Tests UserAccess::print_personal_options
 	 *
 	 * @covers ::print_personal_options
 	 */
@@ -174,7 +180,7 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests DevToolsUserAccess::update_user_setting
+	 * Tests UserAccess::update_user_setting
 	 *
 	 * @covers ::update_user_setting
 	 */
@@ -182,7 +188,7 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 		$admin_user  = self::factory()->user->create_and_get( [ 'role' => 'administrator' ] );
 		$editor_user = self::factory()->user->create_and_get( [ 'role' => 'editor' ] );
 
-		$_POST[ DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED ] = 'true';
+		$_POST[ UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED ] = 'true';
 
 		$this->assertFalse( $this->dev_tools_user_access->update_user_setting( $admin_user->ID ) );
 
@@ -191,13 +197,13 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 
 		$this->assertTrue( $this->dev_tools_user_access->update_user_setting( $admin_user->ID ) );
 		$this->assertTrue( $this->dev_tools_user_access->get_user_enabled( $admin_user ) );
-		$_POST[ DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED ] = null;
+		$_POST[ UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED ] = null;
 		$this->assertTrue( $this->dev_tools_user_access->update_user_setting( $admin_user->ID ) );
 		$this->assertFalse( $this->dev_tools_user_access->get_user_enabled( $admin_user ) );
 	}
 
 	/**
-	 * Tests DevToolsUserAccess::rest_get_dev_tools_enabled
+	 * Tests UserAccess::rest_get_dev_tools_enabled
 	 *
 	 * @covers ::rest_get_dev_tools_enabled
 	 */
@@ -218,7 +224,7 @@ class Test_DevToolsUserAccess extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests DevToolsUserAccess::rest_update_dev_tools_enabled
+	 * Tests UserAccess::rest_update_dev_tools_enabled
 	 *
 	 * @covers ::rest_update_dev_tools_enabled
 	 */

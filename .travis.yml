@@ -134,11 +134,11 @@ jobs:
 
     - name: PHP unit tests (5.6, WordPress 5.0)
       php: "5.6"
-      env: WP_VERSION=5.0    DEV_LIB_ONLY=phpunit,phpsyntax                      INSTALL_PWA_PLUGIN=1
+      env: WP_VERSION=5.0    DEV_LIB_ONLY=phpunit,phpsyntax                      INSTALL_PWA_PLUGIN=1 PATH_EXCLUDES_PATTERN='^(.*/)?(vendor|bower_components|node_modules|PhpStan)/.*'
 
     - name: PHP unit tests w/ external-http (5.6, WordPress 4.9)
       php: "5.6"
-      env: WP_VERSION=4.9    DEV_LIB_ONLY=phpunit,phpsyntax                     PHPUNIT_EXTRA_SUITE=external-http
+      env: WP_VERSION=4.9    DEV_LIB_ONLY=phpunit,phpsyntax                     PHPUNIT_EXTRA_SUITE=external-http PATH_EXCLUDES_PATTERN='^(.*/)?(vendor|bower_components|node_modules|PhpStan)/.*'
 
     - name: PHP unit tests (8.0, WordPress trunk)
       php: "nightly"

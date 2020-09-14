@@ -247,7 +247,6 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 	 * Test disabling mobile redirection if the URL is excluded.
 	 */
 	public function test_disable_mobile_redirect_for_excluded_url() {
-		/** @var MobileRedirection $mobile_redirection */
 		$mobile_redirection = Services::get( 'mobile_redirection' );
 
 		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, true );
@@ -270,7 +269,6 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 	 * Test disabling mobile redirection if the link has the `noamphtml` relationship.
 	 */
 	public function test_disable_mobile_redirect_for_url_with_noamphtml_rel() {
-		/** @var MobileRedirection $mobile_redirection */
 		$mobile_redirection = Services::get( 'mobile_redirection' );
 
 		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, true );
