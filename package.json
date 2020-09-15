@@ -77,6 +77,7 @@
     "grunt-shell": "3.0.1",
     "grunt-wp-deploy": "2.1.2",
     "jest-silent-reporter": "0.2.1",
+    "lint-staged": "10.3.0",
     "lodash": "4.17.20",
     "mini-css-extract-plugin": "0.10.0",
     "moment": "2.27.0",
@@ -118,14 +119,15 @@
     "env:stop": "./bin/local-env/stop.sh",
     "env:reset-site": "./bin/local-env/install-wordpress.sh --reset-site",
     "lint": "npm-run-all --parallel lint:*",
-    "lint:css": "git diff HEAD^ --diff-filter=d --name-only | grep -E '\\.s?css$' | xargs -r wp-scripts lint-style",
+    "lint:css": "wp-scripts lint-style",
     "lint:css:fix": "npm run lint:css -- --fix",
-    "lint:js": "git diff HEAD^ --diff-filter=d --name-only | grep -E '\\.js$' | xargs -r wp-scripts lint-js",
+    "lint:js": "wp-scripts lint-js",
     "lint:js:fix": "npm run lint:js -- --fix",
-    "lint:php": "git diff HEAD^ --diff-filter=d --name-only | grep -E '\\.php$' | xargs -r ./vendor/bin/phpcs",
-    "lint:php:fix": "git diff HEAD^ --diff-filter=d --name-only | grep -E '\\.php$' | xargs -r ./bin/phpcbf.sh",
+    "lint:php": "vendor/bin/phpcs",
+    "lint:php:fix": "./bin/phpcbf.sh",
     "lint:plugin-bootstrap": "vendor/bin/phpcs --runtime-set testVersion 5.2- amp.php",
     "lint:pkg-json": "wp-scripts lint-pkg-json --ignorePath .gitignore",
+    "lint:staged": "lint-staged",
     "start": "wp-scripts start",
     "test": "npm-run-all --parallel test:*",
     "test:e2e": "cross-env WP_BASE_URL=http://localhost:8890 wp-scripts test-e2e --config=tests/e2e/jest.config.js",
@@ -138,6 +140,23 @@
     "test:js:watch": "npm run test:js -- --watch",
     "test:php": "phpunit",
     "test:php:help": "npm run test:php -- --help"
+  },
+  "lint-staged": {
+    "package.json": [
+      "npm run lint:pkg-json"
+    ],
+    "**/*.css": [
+      "npm run lint:css:fix"
+    ],
+    "**/*.js": [
+      "npm run lint:js:fix"
+    ],
+    "**/!(amp).php": [
+      "npm run lint:php"
+    ],
+    "amp.php": [
+      "npm run lint:plugin-bootstrap"
+    ]
   },
   "npmpackagejsonlint": {
     "extends": "@wordpress/npm-package-json-lint-config",
