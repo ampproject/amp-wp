@@ -1481,10 +1481,10 @@ function amp_get_content_sanitizers( $post = null ) {
 				'force_svg_support' => [], // Always replace 'no-svg' class with 'svg' if it exists.
 			],
 		],
+		'AMP_Srcset_Sanitizer'            => [],
 		'AMP_Img_Sanitizer'               => [
 			'align_wide_support' => current_theme_supports( 'align-wide' ),
 		],
-		'AMP_Srcset_Sanitizer'            => [],
 		'AMP_Form_Sanitizer'              => [],
 		'AMP_Comments_Sanitizer'          => [
 			'comments_live_list' => ! empty( $theme_support_args['comments_live_list'] ),
