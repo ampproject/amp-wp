@@ -235,8 +235,8 @@ class ImageDimensionsTest extends TestCase
             'small intrinsic'                         => [50, 50, Layout::INTRINSIC, null, false],
             'large responsive'                        => [500, 500, Layout::RESPONSIVE, null, false],
             'small responsive'                        => [50, 50, Layout::RESPONSIVE, null, false],
-            'large fixed height'                      => [500, 500, Layout::FIXED_HEIGHT, null, true],
-            'small fixed height'                      => [50, 50, Layout::FIXED_HEIGHT, null, true],
+            'large fixed height'                      => ['auto', 500, Layout::FIXED_HEIGHT, null, true],
+            'small fixed height'                      => ['auto', 50, Layout::FIXED_HEIGHT, null, true],
             'no dimensions no layout'                 => [null, null, null, null, true],
             'no dimensions fill (checks parent size)' => [null, null, Layout::FILL, null, false],
         ];
