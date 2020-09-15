@@ -45,6 +45,18 @@ class AMP_Srcset_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE ],
 			],
 
+			'amp_img_srcset_empty'         => [
+				'<img src="https://example.com/image.jpg" height="100" width="200" srcset="">',
+				'<img src="https://example.com/image.jpg" height="100" width="200" srcset="">',
+				[],
+			],
+
+			'amp_img_srcset_whitespace'    => [
+				'<img src="https://example.com/image.jpg" height="100" width="200" srcset="    ">',
+				'<img src="https://example.com/image.jpg" height="100" width="200">',
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE ],
+			],
+
 			'amp_img_srcset_invalid'       => [
 				'<img src="https://example.com/image.jpg" height="100" width="200" srcset="1">',
 				'<img src="https://example.com/image.jpg" height="100" width="200">',
