@@ -229,54 +229,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Parse the srcset attribute and deduplicate image candidates that have the same URL and width or pixel density
-	 * defined.
-	 *
-	 * @param DOMElement $node The img element.
-	 */
-	private function validate_srcset( $node ) {
-		$srcset = $node->getAttribute( Attribute::SRCSET );
-
-		if ( empty( $srcset ) ) {
-			return;
-		}
-
-		if ( preg_match_all( '/\s*(?:,\s*)?(?<url>[^,\s]\S*[^,\s])\s*(?<dimension>[\d]+.?[\d]*[wx])?\s*(?:(,)\s*)?/', $srcset, $matches ) ) {
-			// Bail if there are no duplicate image candidates.
-			if ( count( $matches['dimension'] ) === count( array_flip( $matches['dimension'] ) ) ) {
-				return;
-			}
-
-			$image_candidates = [];
-
-			// Filter the duplicate image candidates that have the same URL.
-			foreach ( $matches['dimension'] as $index => $dimension ) {
-				if ( isset( $image_candidates[ $dimension ] ) ) {
-					// Bail if there are duplicate dimensions that have different URLs. In such cases a validation
-					// error will be raised.
-					if ( $matches['url'][ $index ] !== $image_candidates[ $dimension ] ) {
-						return;
-					}
-					continue;
-				}
-				$image_candidates[ $dimension ] = $matches['url'][ $index ];
-			}
-
-			$new_srcset = implode(
-				',',
-				array_map(
-					static function ( $dimension ) use ( $image_candidates ) {
-						return $image_candidates[ $dimension ] . ' ' . $dimension;
-					},
-					array_keys( $image_candidates )
-				)
-			);
-
-			$node->setAttribute( Attribute::SRCSET, $new_srcset );
-		}
-	}
-
-	/**
 	 * Determine width and height attribute values for images without them.
 	 *
 	 * Attempt to determine actual dimensions, otherwise set reasonable defaults.
@@ -358,7 +310,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param DOMElement $node The img element to adjust and replace.
 	 */
 	private function adjust_and_replace_node( $node ) {
-		$this->validate_srcset( $node );
 
 		$amp_data       = $this->get_data_amp_attributes( $node );
 		$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );

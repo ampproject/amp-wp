@@ -1249,9 +1249,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_disallowed_empty( $node, $attr_name, $attr_spec_rule ) ) {
 				$attrs_to_remove[] = [ $attr_node, self::MISSING_URL, null ];
-			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ] ) &&
-				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_duplicate_dimension( $node, $attr_name ) ) {
-				$attrs_to_remove[] = [ $attr_node, self::DUPLICATE_DIMENSION, null ];
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) &&
 				AMP_Rule_Spec::FAIL === $this->check_attr_spec_rule_disallowed_relative( $node, $attr_name, $attr_spec_rule ) ) {
 				$attrs_to_remove[] = [ $attr_node, self::DISALLOWED_RELATIVE_URL, null ];
@@ -2049,37 +2046,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 			return AMP_Rule_Spec::PASS;
 		}
-		return AMP_Rule_Spec::NOT_APPLICABLE;
-	}
-
-	/**
-	 * Check if attribute has multiple image candidates with the same width or pixel density.
-	 *
-	 * @since 2.0.2
-	 *
-	 * @param DOMElement $node      Node.
-	 * @param string     $attr_name Attribute name.
-	 *
-	 * @return int:
-	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
-	 *      - AMP_Rule_Spec::FAIL - $attr_name has a value that does *not* match rule.
-	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name does not exist or there are no duplicate dimensions.
-	 */
-	private function check_attr_spec_rule_duplicate_dimension( DOMElement $node, $attr_name ) {
-		if (
-			Attribute::SRCSET === $attr_name
-			&&
-			$node->hasAttribute( $attr_name )
-			&&
-			preg_match_all( '/(?:[^,\s]\S*[^,\s])\s*([\d]+.?[\d]*[wx])?\s*(?:(,)\s*)?/', $node->getAttribute( $attr_name ), $matches )
-		) {
-			if ( count( $matches[1] ) !== count( array_flip( $matches[1] ) ) ) {
-				return AMP_Rule_Spec::FAIL;
-			}
-
-			return AMP_Rule_Spec::PASS;
-		}
-
 		return AMP_Rule_Spec::NOT_APPLICABLE;
 	}
 

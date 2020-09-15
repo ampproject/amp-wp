@@ -1484,6 +1484,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		'AMP_Img_Sanitizer'               => [
 			'align_wide_support' => current_theme_supports( 'align-wide' ),
 		],
+		'AMP_Srcset_Sanitizer'            => [],
 		'AMP_Form_Sanitizer'              => [],
 		'AMP_Comments_Sanitizer'          => [
 			'comments_live_list' => ! empty( $theme_support_args['comments_live_list'] ),
@@ -1603,8 +1604,8 @@ function amp_get_content_sanitizers( $post = null ) {
 	 */
 	$sanitizers['AMP_Style_Sanitizer']['allow_transient_caching'] = apply_filters( 'amp_parsed_css_transient_caching_allowed', true );
 
-	// Force style sanitizer, meta sanitizer, and validating sanitizer to be at end.
-	foreach ( [ 'AMP_Style_Sanitizer', 'AMP_Meta_Sanitizer', 'AMP_Tag_And_Attribute_Sanitizer' ] as $class_name ) {
+	// Force style, meta, layout and validating sanitizers to be at the end.
+	foreach ( [ 'AMP_Style_Sanitizer', 'AMP_Meta_Sanitizer', 'AMP_Layout_Sanitizer', 'AMP_Tag_And_Attribute_Sanitizer' ] as $class_name ) {
 		if ( isset( $sanitizers[ $class_name ] ) ) {
 			$sanitizer = $sanitizers[ $class_name ];
 			unset( $sanitizers[ $class_name ] );
