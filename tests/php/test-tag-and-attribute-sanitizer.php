@@ -2234,6 +2234,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::MISSING_URL, AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
 			],
 
+			'amp_img_missing_srcset'                       => [
+				'<amp-img srcset="" height="100" width="200"></amp-img>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::MISSING_URL, AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
+			],
+
 			'amp_pixel_blank_src'                          => [
 				'<amp-pixel src="" layout="nodisplay"></amp-pixel>',
 				null,
