@@ -2234,13 +2234,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::MISSING_URL, AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
 			],
 
-			'amp_duplicate_dimension'                      => [
-				'<amp-img src="https://example.com/image.jpg" height="100" width="200" srcset="https://example.com/image-1.jpg 1024w, https://example.com/image-2.jpg 1024w"></amp-img>',
-				'<amp-img src="https://example.com/image.jpg" height="100" width="200"></amp-img>',
-				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_DIMENSION ],
-			],
-
 			'amp_pixel_blank_src'                          => [
 				'<amp-pixel src="" layout="nodisplay"></amp-pixel>',
 				null,

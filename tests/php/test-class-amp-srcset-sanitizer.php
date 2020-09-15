@@ -1,0 +1,87 @@
+<?php
+/**
+ * Class AMP_Srcset_Sanitizer_Test.
+ *
+ * @package AMP
+ */
+
+use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
+
+/**
+ * Class AMP_Srcset_Sanitizer_Test
+ *
+ * @coversDefaultClass AMP_Srcset_Sanitizer
+ */
+class AMP_Srcset_Sanitizer_Test extends WP_UnitTestCase {
+
+	use MarkupComparison;
+
+	/**
+	 * Provide the data to test the sanitize() method.
+	 *
+	 * @return array[] Test data.
+	 */
+	public function data_sanitize() {
+		return [
+			'img_with_valid_srcset'        => [
+				'<img src="https://example.com/image.jpg" srcset="https://example.com/image.jpg, https://example.com/image-1.jpg     512w, https://example.com/image-2.jpg 1024w   , https://example.com/image-3.jpg 300w, https://example.com/image-4.jpg 768w" width="350" height="150">',
+				'<img src="https://example.com/image.jpg" srcset="https://example.com/image.jpg, https://example.com/image-1.jpg     512w, https://example.com/image-2.jpg 1024w   , https://example.com/image-3.jpg 300w, https://example.com/image-4.jpg 768w" width="350" height="150">',
+			],
+
+			'img_with_duplicate_img_candidate_but_same_url' => [
+				'<img src="https://example.com/image.jpg" srcset="https://example.com/image.jpg, https://example.com/image-1.jpg     1024w, https://example.com/image-1.jpg 1024w   , https://example.com/image-2.jpg 300w, https://example.com/image-3.jpg 768w" width="350" height="150">',
+				'<img src="https://example.com/image.jpg" srcset="https://example.com/image.jpg 1x, https://example.com/image-1.jpg 1024w, https://example.com/image-2.jpg 300w, https://example.com/image-3.jpg 768w" width="350" height="150">',
+			],
+
+			'img_with_duplicate_img_candidate_but_different_url' => [
+				'<img src="https://example.com/image.jpg" srcset="https://example.com/image.jpg, https://example.com/image-1.jpg     1024w, https://example.com/image-2.jpg 1024w   , https://example.com/image-2.jpg 300w, https://example.com/image-3.jpg 768w" width="350" height="150">',
+				'<img src="https://example.com/image.jpg" width="350" height="150">',
+				[ AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_DIMENSION ],
+			],
+
+			'amp_img_srcset_missing_comma' => [
+				'<img src="https://example.com/image.jpg" height="100" width="200" srcset="https://example.com/image-1.jpg 1024w https://example.com/image-2.jpg 1024w">',
+				'<img src="https://example.com/image.jpg" height="100" width="200">',
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE ],
+			],
+
+			'amp_img_srcset_invalid'       => [
+				'<img src="https://example.com/image.jpg" height="100" width="200" srcset="1">',
+				'<img src="https://example.com/image.jpg" height="100" width="200">',
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE ],
+			],
+		];
+	}
+
+	/**
+	 * Test the sanitize() method.
+	 *
+	 * @covers ::sanitize()
+	 * @dataProvider data_sanitize()
+	 *
+	 * @param string $source               Source.
+	 * @param string $expected             Expected.
+	 * @param array  $expected_error_codes Expected error codes.
+	 */
+	public function test_sanitize( $source, $expected, $expected_error_codes = [] ) {
+		$error_codes = [];
+
+		$args = [
+			'use_document_element'      => true,
+			'validation_error_callback' => static function( $error ) use ( &$error_codes ) {
+				$error_codes[] = $error['code'];
+			},
+		];
+
+		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+
+		$sanitizer = new AMP_Srcset_Sanitizer( $dom, $args );
+		$sanitizer->sanitize();
+
+		$this->assertEqualSets( $error_codes, $expected_error_codes );
+
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+
+		$this->assertEqualMarkup( $expected, $content );
+	}
+}
