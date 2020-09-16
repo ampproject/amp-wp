@@ -572,41 +572,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		$merged_attr_spec_list = array_merge(
+		$attr_spec_list = array_merge(
 			$this->globally_allowed_attributes,
 			$attr_spec_list
 		);
-
-		// Add required AMP component scripts.
-		$script_components = [];
-		if ( ! empty( $tag_spec['requires_extension'] ) ) {
-			$script_components = array_merge( $script_components, $tag_spec['requires_extension'] );
-		}
-
-		// Add required AMP components for attributes.
-		foreach ( $node->attributes as $attribute ) {
-			if ( isset( $merged_attr_spec_list[ $attribute->nodeName ]['requires_extension'] ) ) {
-				$script_components = array_merge(
-					$script_components,
-					$merged_attr_spec_list[ $attribute->nodeName ]['requires_extension']
-				);
-			}
-		}
-
-		// Manually add components for attributes; this is hard-coded because attributes do not have requires_extension like tags do. See <https://github.com/ampproject/amp-wp/issues/1808>.
-		if ( $node->hasAttribute( 'lightbox' ) ) {
-			$script_components[] = 'amp-lightbox-gallery';
-		}
-
-		// Check if element needs amp-bind component.
-		if ( $node instanceof DOMElement && ! in_array( 'amp-bind', $this->script_components, true ) ) {
-			foreach ( $node->attributes as $name => $value ) {
-				if ( Document::AMP_BIND_DATA_ATTR_PREFIX === substr( $name, 0, 14 ) ) {
-					$script_components[] = 'amp-bind';
-					break;
-				}
-			}
-		}
 
 		// Remove element if it has illegal CDATA.
 		if ( ! empty( $cdata ) && $node instanceof DOMElement ) {
@@ -619,18 +588,18 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						[ 'spec_name' => $this->get_spec_name( $node, $tag_spec ) ]
 					)
 				);
-				return $sanitized ? null : $script_components;
+				return $sanitized ? null : $this->get_required_script_components( $node, $tag_spec, $attr_spec_list );
 			}
 		}
 
 		// Amend spec list with layout.
 		if ( isset( $tag_spec['amp_layout'] ) ) {
-			$merged_attr_spec_list = array_merge( $merged_attr_spec_list, $this->layout_allowed_attributes );
+			$attr_spec_list = array_merge( $attr_spec_list, $this->layout_allowed_attributes );
 
 			if ( isset( $tag_spec['amp_layout']['supported_layouts'] ) ) {
 				$layouts = wp_array_slice_assoc( Layout::FROM_SPEC, $tag_spec['amp_layout']['supported_layouts'] );
 
-				$merged_attr_spec_list['layout'][ AMP_Rule_Spec::VALUE_REGEX_CASEI ] = '(' . implode( '|', $layouts ) . ')';
+				$attr_spec_list['layout'][ AMP_Rule_Spec::VALUE_REGEX_CASEI ] = '(' . implode( '|', $layouts ) . ')';
 			}
 		}
 
@@ -657,11 +626,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		$layout_validity = $this->is_valid_layout( $tag_spec, $node );
 		if ( true !== $layout_validity ) {
 			$sanitized = $this->remove_invalid_child( $node, $layout_validity );
-			return $sanitized ? null : $script_components;
+			return $sanitized ? null : $this->get_required_script_components( $node, $tag_spec, $attr_spec_list );
 		}
 
 		// Identify attribute values that don't conform to the attr_spec.
-		$disallowed_attributes = $this->sanitize_disallowed_attribute_values_in_node( $node, $merged_attr_spec_list );
+		$disallowed_attributes = $this->sanitize_disallowed_attribute_values_in_node( $node, $attr_spec_list );
 
 		// Remove all invalid attributes.
 		if ( ! empty( $disallowed_attributes ) ) {
@@ -709,7 +678,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 					if ( $this->should_sanitize_validation_error( $validation_error, [ 'node' => $attr_node ] ) ) {
 						$properties = $this->parse_properties_attribute( $attr_node->nodeValue );
-						if ( ! empty( $merged_attr_spec_list[ $attr_node->nodeName ]['value_properties'][ $error_data['name'] ]['mandatory'] ) ) {
+						if ( ! empty( $attr_spec_list[ $attr_node->nodeName ]['value_properties'][ $error_data['name'] ]['mandatory'] ) ) {
 							$properties[ $error_data['name'] ] = $error_data['required_value'];
 						} else {
 							unset( $properties[ $error_data['name'] ] );
@@ -727,7 +696,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						$node->setAttribute( $attr_node->nodeName, $this->serialize_properties_attribute( $properties ) );
 					}
 				} else {
-					$attr_spec = isset( $merged_attr_spec_list[ $attr_node->nodeName ] ) ? $merged_attr_spec_list[ $attr_node->nodeName ] : [];
+					$attr_spec = isset( $attr_spec_list[ $attr_node->nodeName ] ) ? $attr_spec_list[ $attr_node->nodeName ] : [];
 					if ( $this->remove_invalid_attribute( $node, $attr_node, $validation_error, $attr_spec ) ) {
 						$removed_attributes[] = $attr_node;
 					}
@@ -756,7 +725,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// After attributes have been sanitized (and potentially removed), if mandatory attribute(s) are missing, remove the element.
-		$missing_mandatory_attributes = $this->get_missing_mandatory_attributes( $merged_attr_spec_list, $node );
+		$missing_mandatory_attributes = $this->get_missing_mandatory_attributes( $attr_spec_list, $node );
 		if ( ! empty( $missing_mandatory_attributes ) ) {
 			$sanitized = $this->remove_invalid_child(
 				$node,
@@ -766,7 +735,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					'spec_name'  => $this->get_spec_name( $node, $tag_spec ),
 				]
 			);
-			return $sanitized ? null : $script_components;
+			return $sanitized ? null : $this->get_required_script_components( $node, $tag_spec, $attr_spec_list );
 		}
 
 		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_ANYOF ] ) ) {
@@ -780,7 +749,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						'spec_name'             => $this->get_spec_name( $node, $tag_spec ),
 					]
 				);
-				return $sanitized ? null : $script_components;
+				return $sanitized ? null : $this->get_required_script_components( $node, $tag_spec, $attr_spec_list );
 			}
 		}
 
@@ -795,7 +764,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						'spec_name'             => $this->get_spec_name( $node, $tag_spec ),
 					]
 				);
-				return $sanitized ? null : $script_components;
+				return $sanitized ? null : $this->get_required_script_components( $node, $tag_spec, $attr_spec_list );
 			} elseif ( count( $oneof_attributes ) > 1 ) {
 				$sanitized = $this->remove_invalid_child(
 					$node,
@@ -805,10 +774,51 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						'spec_name'             => $this->get_spec_name( $node, $tag_spec ),
 					]
 				);
-				return $sanitized ? null : $script_components;
+				return $sanitized ? null : $this->get_required_script_components( $node, $tag_spec, $attr_spec_list );
 			}
 		}
 
+		return $this->get_required_script_components( $node, $tag_spec, $attr_spec_list );
+	}
+
+	/**
+	 * Get required AMP component scripts.
+	 *
+	 * @param DOMElement $node           Element.
+	 * @param array      $tag_spec       Tag spec.
+	 * @param array      $attr_spec_list Attribute spec list.
+	 * @return string[] Script component handles.
+	 */
+	private function get_required_script_components( DOMElement $node, $tag_spec, $attr_spec_list ) {
+		$script_components = [];
+		if ( ! empty( $tag_spec['requires_extension'] ) ) {
+			$script_components = array_merge( $script_components, $tag_spec['requires_extension'] );
+		}
+
+		// Add required AMP components for attributes.
+		foreach ( $node->attributes as $attribute ) {
+			if ( isset( $attr_spec_list[ $attribute->nodeName ]['requires_extension'] ) ) {
+				$script_components = array_merge(
+					$script_components,
+					$attr_spec_list[ $attribute->nodeName ]['requires_extension']
+				);
+			}
+		}
+
+		// Manually add components for attributes; this is hard-coded because attributes do not have requires_extension like tags do. See <https://github.com/ampproject/amp-wp/issues/1808>.
+		if ( $node->hasAttribute( 'lightbox' ) ) {
+			$script_components[] = 'amp-lightbox-gallery';
+		}
+
+		// Check if element needs amp-bind component.
+		if ( $node instanceof DOMElement && ! in_array( 'amp-bind', $this->script_components, true ) ) {
+			foreach ( $node->attributes as $name => $value ) {
+				if ( Document::AMP_BIND_DATA_ATTR_PREFIX === substr( $name, 0, 14 ) ) {
+					$script_components[] = 'amp-bind';
+					break;
+				}
+			}
+		}
 		return $script_components;
 	}
 
