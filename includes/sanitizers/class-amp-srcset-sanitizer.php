@@ -6,8 +6,6 @@
  */
 
 /**
- * Class AMP_Srcset_Sanitizer
- *
  * Sanitizes the `srcset` attribute of elements.
  *
  * @internal
