@@ -3200,7 +3200,7 @@ class AMP_Validation_Error_Taxonomy {
 					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>'
 				);
 
-			case AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_DIMENSION:
+			case AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_DIMENSIONS:
 				return sprintf(
 					/* translators: %1$s is the attribute name, %2$s is the tag name */
 					esc_html__( 'Multiple image candidates with the same width or pixel density found in attribute %1$s in tag %2$s', 'amp' ),
@@ -3337,6 +3337,8 @@ class AMP_Validation_Error_Taxonomy {
 				return __( 'URL', 'amp' );
 			case 'message':
 				return __( 'Message', 'amp' );
+			case 'duplicate_dimensions':
+				return __( 'Duplicate dimensions', 'amp' );
 			default:
 				return $key;
 		}

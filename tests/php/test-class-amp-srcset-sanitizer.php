@@ -35,8 +35,8 @@ class AMP_Srcset_Sanitizer_Test extends WP_UnitTestCase {
 
 			'img_with_duplicate_img_candidate_but_different_url' => [
 				'<img src="https://example.com/image.jpg" srcset="https://example.com/image.jpg, https://example.com/image-1.jpg     1024w, https://example.com/image-2.jpg 1024w   , https://example.com/image-2.jpg 300w, https://example.com/image-3.jpg 768w" width="350" height="150">',
-				'<img src="https://example.com/image.jpg" width="350" height="150">',
-				[ AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_DIMENSION ],
+				'<img src="https://example.com/image.jpg" srcset="https://example.com/image.jpg 1x, https://example.com/image-1.jpg 1024w, https://example.com/image-2.jpg 300w, https://example.com/image-3.jpg 768w" width="350" height="150">',
+				[ AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_DIMENSIONS ],
 			],
 
 			'amp_img_srcset_missing_comma' => [

@@ -46,7 +46,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	const DISALLOWED_RELATIVE_URL              = 'DISALLOWED_RELATIVE_URL';
 	const DISALLOWED_TAG                       = 'DISALLOWED_TAG';
 	const DISALLOWED_TAG_ANCESTOR              = 'DISALLOWED_TAG_ANCESTOR';
-	const DUPLICATE_DIMENSION                  = 'DUPLICATE_DIMENSION';
+	const DUPLICATE_DIMENSIONS                 = 'DUPLICATE_DIMENSIONS';
 	const DUPLICATE_ONEOF_ATTRS                = 'DUPLICATE_ONEOF_ATTRS';
 	const DUPLICATE_UNIQUE_TAG                 = 'DUPLICATE_UNIQUE_TAG';
 	const IMPLIED_LAYOUT_INVALID               = 'IMPLIED_LAYOUT_INVALID';

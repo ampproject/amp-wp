@@ -85,35 +85,35 @@ class AMP_Srcset_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$image_candidates = [];
+		$image_candidates     = [];
+		$duplicate_dimensions = [];
 
 		foreach ( $matches['dimension'] as $index => $dimension ) {
 			if ( empty( trim( $dimension ) ) ) {
 				$dimension = '1x';
 			}
 
-			if ( isset( $image_candidates[ $dimension ] ) ) {
-				// Bail if there are duplicate dimensions that have different URLs. In such cases a validation
-				// error will be raised.
-				if ( $matches['url'][ $index ] !== $image_candidates[ $dimension ] ) {
-					$validation_error = [
-						'code'                => AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_DIMENSION,
-						'duplicate_dimension' => $dimension,
-					];
-
-					if ( $this->remove_invalid_attribute( $attribute->ownerElement, $attribute, $validation_error ) ) {
-						return;
-					}
-				}
-
+			// Catch if there are duplicate dimensions that have different URLs. In such cases a validation error will be raised.
+			if ( isset( $image_candidates[ $dimension ] ) && $matches['url'][ $index ] !== $image_candidates[ $dimension ] ) {
+				$duplicate_dimensions[] = $dimension;
 				continue;
 			}
 
 			$image_candidates[ $dimension ] = $matches['url'][ $index ];
 		}
 
-		// Reform the srcset with the filtered image candidates.
-		$new_srcset = implode(
+		// If there are duplicates, raise a validation error and stop short-circuit processing if the error is not removed.
+		if ( ! empty( $duplicate_dimensions ) ) {
+			$validation_error = [
+				'code'                 => AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_DIMENSIONS,
+				'duplicate_dimensions' => $duplicate_dimensions,
+			];
+			if ( ! $this->should_sanitize_validation_error( $validation_error, [ 'node' => $attribute ] ) ) {
+				return;
+			}
+		}
+
+		$attribute->value = implode(
 			', ',
 			array_map(
 				static function ( $dimension ) use ( $image_candidates ) {
@@ -122,7 +122,5 @@ class AMP_Srcset_Sanitizer extends AMP_Base_Sanitizer {
 				array_keys( $image_candidates )
 			)
 		);
-
-		$attribute->value = $new_srcset;
 	}
 }
