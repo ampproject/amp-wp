@@ -43,7 +43,7 @@ class AMP_Srcset_Sanitizer extends AMP_Base_Sanitizer {
 		$srcset = $attribute->value;
 
 		// Regex below is adapted from the JS validator. See https://github.com/ampproject/amphtml/blob/5fcb29a41d06867b25ed6aca69b4aeaf96456c8c/validator/js/engine/parse-srcset.js#L72-L81.
-		$matched = preg_match_all( '/\s*(?:,\s*)?(?<url>[^,\s]\S*[^,\s])\s*(?<dimension>[\d]+.?[\d]*[wx])?\s*(?:(?<comma>,)\s*)?/', $srcset, $matches );
+		$matched = preg_match_all( '/\s*(?:,\s*)?(?<url>[^,\s]\S*[^,\s])\s*(?<dimension>[\d]+(?:\.[\d]+)?[wx])?\s*(?:(?<comma>,)\s*)?/', $srcset, $matches );
 		if ( ! $matched ) {
 			// Bail and raise a validation error if no image candidates were found.
 			$validation_error = [
