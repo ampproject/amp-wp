@@ -3161,10 +3161,9 @@ class AMP_Validation_Error_Taxonomy {
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX_CASEI:
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_DISALLOWED_VALUE_REGEX:
 				return sprintf(
-					/* translators: %1$s is the attribute name, %2$s is the invalid attribute value */
-					esc_html__( 'The attribute %1$s is set to the invalid value %2$s', 'amp' ),
-					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>',
-					'<code>' . esc_html( $validation_error['element_attributes'][ $validation_error['node_name'] ] ) . '</code>'
+					/* translators: %s is the attribute name */
+					esc_html__( 'The attribute %s is set to an invalid value', 'amp' ),
+					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>'
 				);
 
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_URL_PROTOCOL:
