@@ -572,6 +572,42 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
+		$merged_attr_spec_list = array_merge(
+			$this->globally_allowed_attributes,
+			$attr_spec_list
+		);
+
+		// Add required AMP component scripts.
+		$script_components = [];
+		if ( ! empty( $tag_spec['requires_extension'] ) ) {
+			$script_components = array_merge( $script_components, $tag_spec['requires_extension'] );
+		}
+
+		// Add required AMP components for attributes.
+		foreach ( $node->attributes as $attribute ) {
+			if ( isset( $merged_attr_spec_list[ $attribute->nodeName ]['requires_extension'] ) ) {
+				$script_components = array_merge(
+					$script_components,
+					$merged_attr_spec_list[ $attribute->nodeName ]['requires_extension']
+				);
+			}
+		}
+
+		// Manually add components for attributes; this is hard-coded because attributes do not have requires_extension like tags do. See <https://github.com/ampproject/amp-wp/issues/1808>.
+		if ( $node->hasAttribute( 'lightbox' ) ) {
+			$script_components[] = 'amp-lightbox-gallery';
+		}
+
+		// Check if element needs amp-bind component.
+		if ( $node instanceof DOMElement && ! in_array( 'amp-bind', $this->script_components, true ) ) {
+			foreach ( $node->attributes as $name => $value ) {
+				if ( Document::AMP_BIND_DATA_ATTR_PREFIX === substr( $name, 0, 14 ) ) {
+					$script_components[] = 'amp-bind';
+					break;
+				}
+			}
+		}
+
 		// Remove element if it has illegal CDATA.
 		if ( ! empty( $cdata ) && $node instanceof DOMElement ) {
 			$validity = $this->validate_cdata_for_node( $node, $cdata );
@@ -586,11 +622,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				return null;
 			}
 		}
-
-		$merged_attr_spec_list = array_merge(
-			$this->globally_allowed_attributes,
-			$attr_spec_list
-		);
 
 		// Amend spec list with layout.
 		if ( isset( $tag_spec['amp_layout'] ) ) {
@@ -775,37 +806,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					]
 				);
 				return null;
-			}
-		}
-
-		// Add required AMP component scripts.
-		$script_components = [];
-		if ( ! empty( $tag_spec['requires_extension'] ) ) {
-			$script_components = array_merge( $script_components, $tag_spec['requires_extension'] );
-		}
-
-		// Add required AMP components for attributes.
-		foreach ( $node->attributes as $attribute ) {
-			if ( isset( $merged_attr_spec_list[ $attribute->nodeName ]['requires_extension'] ) ) {
-				$script_components = array_merge(
-					$script_components,
-					$merged_attr_spec_list[ $attribute->nodeName ]['requires_extension']
-				);
-			}
-		}
-
-		// Manually add components for attributes; this is hard-coded because attributes do not have requires_extension like tags do. See <https://github.com/ampproject/amp-wp/issues/1808>.
-		if ( $node->hasAttribute( 'lightbox' ) ) {
-			$script_components[] = 'amp-lightbox-gallery';
-		}
-
-		// Check if element needs amp-bind component.
-		if ( $node instanceof DOMElement && ! in_array( 'amp-bind', $this->script_components, true ) ) {
-			foreach ( $node->attributes as $name => $value ) {
-				if ( Document::AMP_BIND_DATA_ATTR_PREFIX === substr( $name, 0, 14 ) ) {
-					$script_components[] = 'amp-bind';
-					break;
-				}
 			}
 		}
 
