@@ -46,16 +46,13 @@ class AMP_Srcset_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Regex below is adapted from the JS validator. See https://github.com/ampproject/amphtml/blob/5fcb29a41d06867b25ed6aca69b4aeaf96456c8c/validator/js/engine/parse-srcset.js#L72-L81.
 		$matched = preg_match_all( '/\s*(?:,\s*)?(?<url>[^,\s]\S*[^,\s])\s*(?<dimension>[\d]+.?[\d]*[wx])?\s*(?:(?<comma>,)\s*)?/', $srcset, $matches );
-
 		if ( ! $matched ) {
 			// Bail and raise a validation error if no image candidates were found.
 			$validation_error = [
 				'code' => AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE,
 			];
-
-			if ( $this->remove_invalid_attribute( $attribute->ownerElement, $attribute, $validation_error ) ) {
-				return;
-			}
+			$this->remove_invalid_attribute( $attribute->ownerElement, $attribute, $validation_error );
+			return;
 		}
 
 		$dimension_count = count( $matches['dimension'] );
@@ -68,7 +65,7 @@ class AMP_Srcset_Sanitizer extends AMP_Base_Sanitizer {
 			)
 		);
 
-		// Bail and raise a validation error if the number of dimensions does not match the number os URLs, or there
+		// Bail and raise a validation error if the number of dimensions does not match the number of URLs, or there
 		// are not enough commas to separate the image candidates.
 		if ( count( $matches['url'] ) !== $dimension_count || ( $dimension_count - 1 ) !== $commas_count ) {
 			$validation_error = [
@@ -113,6 +110,7 @@ class AMP_Srcset_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
+		// Otherwise, output the normalized/validated srcset value.
 		$attribute->value = implode(
 			', ',
 			array_map(
