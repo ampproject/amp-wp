@@ -612,14 +612,14 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! empty( $cdata ) && $node instanceof DOMElement ) {
 			$validity = $this->validate_cdata_for_node( $node, $cdata );
 			if ( true !== $validity ) {
-				$this->remove_invalid_child(
+				$sanitized = $this->remove_invalid_child(
 					$node,
 					array_merge(
 						$validity,
 						[ 'spec_name' => $this->get_spec_name( $node, $tag_spec ) ]
 					)
 				);
-				return null;
+				return $sanitized ? null : $script_components;
 			}
 		}
 
@@ -656,8 +656,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// Remove the element if it is has an invalid layout.
 		$layout_validity = $this->is_valid_layout( $tag_spec, $node );
 		if ( true !== $layout_validity ) {
-			$this->remove_invalid_child( $node, $layout_validity );
-			return null;
+			$sanitized = $this->remove_invalid_child( $node, $layout_validity );
+			return $sanitized ? null : $script_components;
 		}
 
 		// Identify attribute values that don't conform to the attr_spec.
@@ -758,7 +758,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// After attributes have been sanitized (and potentially removed), if mandatory attribute(s) are missing, remove the element.
 		$missing_mandatory_attributes = $this->get_missing_mandatory_attributes( $merged_attr_spec_list, $node );
 		if ( ! empty( $missing_mandatory_attributes ) ) {
-			$this->remove_invalid_child(
+			$sanitized = $this->remove_invalid_child(
 				$node,
 				[
 					'code'       => self::ATTR_REQUIRED_BUT_MISSING,
@@ -766,13 +766,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					'spec_name'  => $this->get_spec_name( $node, $tag_spec ),
 				]
 			);
-			return null;
+			return $sanitized ? null : $script_components;
 		}
 
 		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_ANYOF ] ) ) {
 			$anyof_attributes = $this->get_element_attribute_intersection( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_ANYOF ] );
 			if ( 0 === count( $anyof_attributes ) ) {
-				$this->remove_invalid_child(
+				$sanitized = $this->remove_invalid_child(
 					$node,
 					[
 						'code'                  => self::MANDATORY_ANYOF_ATTR_MISSING,
@@ -780,14 +780,14 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						'spec_name'             => $this->get_spec_name( $node, $tag_spec ),
 					]
 				);
-				return null;
+				return $sanitized ? null : $script_components;
 			}
 		}
 
 		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_ONEOF ] ) ) {
 			$oneof_attributes = $this->get_element_attribute_intersection( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_ONEOF ] );
 			if ( 0 === count( $oneof_attributes ) ) {
-				$this->remove_invalid_child(
+				$sanitized = $this->remove_invalid_child(
 					$node,
 					[
 						'code'                  => self::MANDATORY_ONEOF_ATTR_MISSING,
@@ -795,9 +795,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						'spec_name'             => $this->get_spec_name( $node, $tag_spec ),
 					]
 				);
-				return null;
+				return $sanitized ? null : $script_components;
 			} elseif ( count( $oneof_attributes ) > 1 ) {
-				$this->remove_invalid_child(
+				$sanitized = $this->remove_invalid_child(
 					$node,
 					[
 						'code'                  => self::DUPLICATE_ONEOF_ATTRS,
@@ -805,7 +805,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						'spec_name'             => $this->get_spec_name( $node, $tag_spec ),
 					]
 				);
-				return null;
+				return $sanitized ? null : $script_components;
 			}
 		}
 
