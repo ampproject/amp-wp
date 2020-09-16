@@ -44,9 +44,6 @@ class AMP_Srcset_Sanitizer extends AMP_Base_Sanitizer {
 	private function sanitize_srcset_attribute( DOMAttr $attribute ) {
 		$srcset = $attribute->value;
 
-		$attr_rules = AMP_Allowed_Tags_Generated::get_allowed_tag( $attribute->ownerElement->nodeName );
-		$attr_spec  = isset( $attr_rules[ AMP_Rule_Spec::ATTR_SPEC_LIST ] ) ? $attr_rules[ AMP_Rule_Spec::ATTR_SPEC_LIST ] : [];
-
 		// Regex below is adapted from the JS validator. See https://github.com/ampproject/amphtml/blob/5fcb29a41d06867b25ed6aca69b4aeaf96456c8c/validator/js/engine/parse-srcset.js#L72-L81.
 		$matched = preg_match_all( '/\s*(?:,\s*)?(?<url>[^,\s]\S*[^,\s])\s*(?<dimension>[\d]+.?[\d]*[wx])?\s*(?:(?<comma>,)\s*)?/', $srcset, $matches );
 
@@ -56,7 +53,7 @@ class AMP_Srcset_Sanitizer extends AMP_Base_Sanitizer {
 				'code' => AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE,
 			];
 
-			if ( $this->remove_invalid_attribute( $attribute->ownerElement, $attribute, $validation_error, $attr_spec ) ) {
+			if ( $this->remove_invalid_attribute( $attribute->ownerElement, $attribute, $validation_error ) ) {
 				return;
 			}
 		}
@@ -77,8 +74,7 @@ class AMP_Srcset_Sanitizer extends AMP_Base_Sanitizer {
 			$validation_error = [
 				'code' => AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE,
 			];
-
-			if ( $this->remove_invalid_attribute( $attribute->ownerElement, $attribute, $validation_error, $attr_spec ) ) {
+			if ( $this->remove_invalid_attribute( $attribute->ownerElement, $attribute, $validation_error ) ) {
 				return;
 			}
 		}
@@ -105,7 +101,7 @@ class AMP_Srcset_Sanitizer extends AMP_Base_Sanitizer {
 						'duplicate_dimension' => $dimension,
 					];
 
-					if ( $this->remove_invalid_attribute( $attribute->ownerElement, $attribute, $validation_error, $attr_spec ) ) {
+					if ( $this->remove_invalid_attribute( $attribute->ownerElement, $attribute, $validation_error ) ) {
 						return;
 					}
 				}
