@@ -1604,7 +1604,7 @@ function amp_get_content_sanitizers( $post = null ) {
 	 */
 	$sanitizers['AMP_Style_Sanitizer']['allow_transient_caching'] = apply_filters( 'amp_parsed_css_transient_caching_allowed', true );
 
-	// Force style, meta, layout and validating sanitizers to be at the end.
+	// Force layout, style, meta, and validating sanitizers to be at the end.
 	foreach ( [ 'AMP_Layout_Sanitizer', 'AMP_Style_Sanitizer', 'AMP_Meta_Sanitizer', 'AMP_Tag_And_Attribute_Sanitizer' ] as $class_name ) {
 		if ( isset( $sanitizers[ $class_name ] ) ) {
 			$sanitizer = $sanitizers[ $class_name ];

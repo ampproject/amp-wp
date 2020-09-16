@@ -19,22 +19,33 @@ class AMP_Srcset_Sanitizer extends AMP_Base_Sanitizer {
 	 * Sanitize the HTML contained in the DOMDocument received by the constructor
 	 */
 	public function sanitize() {
-		$attrs = $this->dom->xpath->query( '//*/@srcset' );
+		$attribute_query = $this->dom->xpath->query( '//*/@srcset' );
 
-		if ( 0 === $attrs->length ) {
+		if ( 0 === $attribute_query->length ) {
 			return;
 		}
 
-		foreach ( $attrs as $attr ) {
-			/**
-			 * @var DOMAttr $attr
-			 */
-			if ( empty( $attr->value ) ) {
-				continue;
+		foreach ( $attribute_query as $attribute ) {
+			/** @var DOMAttr $attribute */
+			if ( ! empty( $attribute->value ) ) {
+				$this->sanitize_srcset_attribute( $attribute );
 			}
-
-			$this->sanitize_srcset_attr( $attr );
 		}
+	}
+
+	/**
+	 * Get element attributes as key/value mapping.
+	 *
+	 * @param DOMElement $element Element.
+	 * @return array Attribute key/value mapping.
+	 */
+	private function get_element_attribute_values( DOMElement $element ) {
+		return array_map(
+			static function ( $attribute ) {
+				return $attribute->value;
+			},
+			iterator_to_array( $element->attributes )
+		);
 	}
 
 	/**
@@ -45,18 +56,11 @@ class AMP_Srcset_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param DOMAttr $attribute Srcset attribute.
 	 */
-	private function sanitize_srcset_attr( $attribute ) {
+	private function sanitize_srcset_attribute( DOMAttr $attribute ) {
 		$srcset = $attribute->value;
 
 		$attr_rules = AMP_Allowed_Tags_Generated::get_allowed_tag( $attribute->ownerElement->nodeName );
 		$attr_spec  = isset( $attr_rules[ AMP_Rule_Spec::ATTR_SPEC_LIST ] ) ? $attr_rules[ AMP_Rule_Spec::ATTR_SPEC_LIST ] : [];
-
-		$element_attrs = array_map(
-			static function ( $attribute ) {
-				return $attribute->value;
-			},
-			iterator_to_array( $attribute->ownerElement->attributes )
-		);
 
 		// Regex below is adapted from the JS validator. See https://github.com/ampproject/amphtml/blob/5fcb29a41d06867b25ed6aca69b4aeaf96456c8c/validator/js/engine/parse-srcset.js#L72-L81.
 		$matched = preg_match_all( '/\s*(?:,\s*)?(?<url>[^,\s]\S*[^,\s])\s*(?<dimension>[\d]+.?[\d]*[wx])?\s*(?:(?<comma>,)\s*)?/', $srcset, $matches );
@@ -65,7 +69,7 @@ class AMP_Srcset_Sanitizer extends AMP_Base_Sanitizer {
 			// Bail and raise a validation error if no image candidates were found.
 			$validation_error = [
 				'code'               => AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE,
-				'element_attributes' => $element_attrs,
+				'element_attributes' => $this->get_element_attribute_values( $attribute->ownerElement ),
 			];
 
 			if ( $this->remove_invalid_attribute( $attribute->ownerElement, $attribute, $validation_error, $attr_spec ) ) {
@@ -88,7 +92,7 @@ class AMP_Srcset_Sanitizer extends AMP_Base_Sanitizer {
 		if ( count( $matches['url'] ) !== $dimension_count || ( $dimension_count - 1 ) !== $commas_count ) {
 			$validation_error = [
 				'code'               => AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE,
-				'element_attributes' => $element_attrs,
+				'element_attributes' => $this->get_element_attribute_values( $attribute->ownerElement ),
 			];
 
 			if ( $this->remove_invalid_attribute( $attribute->ownerElement, $attribute, $validation_error, $attr_spec ) ) {
