@@ -71,9 +71,8 @@ class AMP_Srcset_Sanitizer extends AMP_Base_Sanitizer {
 			$validation_error = [
 				'code' => AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE,
 			];
-			if ( $this->remove_invalid_attribute( $attribute->ownerElement, $attribute, $validation_error ) ) {
-				return;
-			}
+			$this->remove_invalid_attribute( $attribute->ownerElement, $attribute, $validation_error );
+			return;
 		}
 
 		// Bail if there are no duplicate image candidates.
