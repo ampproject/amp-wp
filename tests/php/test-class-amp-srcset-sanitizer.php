@@ -70,13 +70,13 @@ class AMP_Srcset_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'amp_img_srcset_invalid_space_in_dimension' => [
-				'<img src="https://example.com/image.jpg" height="100" width="200" srcset="https://example.com/image.jpg 500px">',
+				'<img src="https://example.com/image.jpg" height="100" width="200" srcset="https://example.com/image.jpg 2 x">',
 				'<img src="https://example.com/image.jpg" height="100" width="200">',
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE ],
 			],
 
 			'amp_img_srcset_invalid_dimension_type'     => [
-				'<img src="https://example.com/image.jpg" height="100" width="200" srcset="https://example.com/image.jpg 500px">',
+				'<img src="https://example.com/image.jpg" height="100" width="200" srcset="https://example.com/image.jpg 5kw">',
 				'<img src="https://example.com/image.jpg" height="100" width="200">',
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE ],
 			],
