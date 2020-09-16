@@ -34,21 +34,6 @@ class AMP_Srcset_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Get element attributes as key/value mapping.
-	 *
-	 * @param DOMElement $element Element.
-	 * @return array Attribute key/value mapping.
-	 */
-	private function get_element_attribute_values( DOMElement $element ) {
-		return array_map(
-			static function ( $attribute ) {
-				return $attribute->value;
-			},
-			iterator_to_array( $element->attributes )
-		);
-	}
-
-	/**
 	 * Parses the `srcset` attribute and validates each image candidate defined.
 	 *
 	 * Validation errors will be raised if the attribute value is malformed or contains image candidates
@@ -68,8 +53,7 @@ class AMP_Srcset_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! $matched ) {
 			// Bail and raise a validation error if no image candidates were found.
 			$validation_error = [
-				'code'               => AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE,
-				'element_attributes' => $this->get_element_attribute_values( $attribute->ownerElement ),
+				'code' => AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE,
 			];
 
 			if ( $this->remove_invalid_attribute( $attribute->ownerElement, $attribute, $validation_error, $attr_spec ) ) {
@@ -91,8 +75,7 @@ class AMP_Srcset_Sanitizer extends AMP_Base_Sanitizer {
 		// are not enough commas to separate the image candidates.
 		if ( count( $matches['url'] ) !== $dimension_count || ( $dimension_count - 1 ) !== $commas_count ) {
 			$validation_error = [
-				'code'               => AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE,
-				'element_attributes' => $this->get_element_attribute_values( $attribute->ownerElement ),
+				'code' => AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE,
 			];
 
 			if ( $this->remove_invalid_attribute( $attribute->ownerElement, $attribute, $validation_error, $attr_spec ) ) {
