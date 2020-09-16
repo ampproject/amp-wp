@@ -23,9 +23,9 @@ class AMP_Srcset_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function data_sanitize() {
 		return [
-			'img_with_valid_srcset'        => [
+			'img_with_valid_srcset'                     => [
 				'<img src="https://example.com/image.jpg" srcset="https://example.com/image.jpg, https://example.com/image-1.jpg     512w, https://example.com/image-2.jpg 1024w   , https://example.com/image-3.jpg 300w, https://example.com/image-4.jpg 768w" width="350" height="150">',
-				'<img src="https://example.com/image.jpg" srcset="https://example.com/image.jpg, https://example.com/image-1.jpg     512w, https://example.com/image-2.jpg 1024w   , https://example.com/image-3.jpg 300w, https://example.com/image-4.jpg 768w" width="350" height="150">',
+				null,
 			],
 
 			'img_with_duplicate_img_candidate_but_same_url' => [
@@ -39,26 +39,50 @@ class AMP_Srcset_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_DIMENSIONS ],
 			],
 
-			'amp_img_srcset_missing_comma' => [
+			'amp_img_srcset_missing_comma'              => [
 				'<img src="https://example.com/image.jpg" height="100" width="200" srcset="https://example.com/image-1.jpg 1024w https://example.com/image-2.jpg 1024w">',
 				'<img src="https://example.com/image.jpg" height="100" width="200">',
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE ],
 			],
 
-			'amp_img_srcset_empty'         => [
+			'amp_img_srcset_empty'                      => [
 				'<img src="https://example.com/image.jpg" height="100" width="200" srcset="">',
-				'<img src="https://example.com/image.jpg" height="100" width="200" srcset="">',
+				null,
 				[],
 			],
 
-			'amp_img_srcset_whitespace'    => [
+			'amp_img_srcset_whitespace'                 => [
 				'<img src="https://example.com/image.jpg" height="100" width="200" srcset="    ">',
 				'<img src="https://example.com/image.jpg" height="100" width="200">',
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE ],
 			],
 
-			'amp_img_srcset_invalid'       => [
+			'amp_img_srcset_invalid_bare_number'        => [
 				'<img src="https://example.com/image.jpg" height="100" width="200" srcset="1">',
+				'<img src="https://example.com/image.jpg" height="100" width="200">',
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE ],
+			],
+
+			'amp_img_srcset_invalid_bare_dimension'     => [
+				'<img src="https://example.com/image.jpg" height="100" width="200" srcset="https://example.com/image.jpg 500px">',
+				'<img src="https://example.com/image.jpg" height="100" width="200">',
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE ],
+			],
+
+			'amp_img_srcset_invalid_space_in_dimension' => [
+				'<img src="https://example.com/image.jpg" height="100" width="200" srcset="https://example.com/image.jpg 500px">',
+				'<img src="https://example.com/image.jpg" height="100" width="200">',
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE ],
+			],
+
+			'amp_img_srcset_invalid_dimension_type'     => [
+				'<img src="https://example.com/image.jpg" height="100" width="200" srcset="https://example.com/image.jpg 500px">',
+				'<img src="https://example.com/image.jpg" height="100" width="200">',
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE ],
+			],
+
+			'amp_img_srcset_invalid_tokens'             => [
+				'<img src="https://example.com/image.jpg" height="100" width="200" srcset="bad bad">',
 				'<img src="https://example.com/image.jpg" height="100" width="200">',
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE ],
 			],
@@ -71,12 +95,15 @@ class AMP_Srcset_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers ::sanitize()
 	 * @dataProvider data_sanitize()
 	 *
-	 * @param string $source               Source.
-	 * @param string $expected             Expected.
-	 * @param array  $expected_error_codes Expected error codes.
+	 * @param string      $source               Source.
+	 * @param string|null $expected             Expected. If null, then no change from source.
+	 * @param array       $expected_error_codes Expected error codes.
 	 */
-	public function test_sanitize( $source, $expected, $expected_error_codes = [] ) {
+	public function test_sanitize( $source, $expected = null, $expected_error_codes = [] ) {
 		$error_codes = [];
+		if ( null === $expected ) {
+			$expected = $source;
+		}
 
 		$args = [
 			'use_document_element'      => true,
