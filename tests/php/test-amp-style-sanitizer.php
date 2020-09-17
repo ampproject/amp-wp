@@ -2107,7 +2107,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'denylisted_and_allowlisted_keyframe_properties' => [
 				'<style amp-keyframes>@keyframes anim1 { 50% { width: 50%; animation-timing-function: ease; opacity: 0.5; height:10%; offset-distance: 50%; visibility: visible; transform: rotate(0.5turn); -webkit-transform: rotate(0.5turn); color:red; } }</style>',
-				'<style amp-keyframes="">@keyframes anim1{50%{animation-timing-function:ease;opacity:.5;offset-distance:50%;visibility:visible;transform:rotate(.5 turn);-webkit-transform:rotate(.5 turn)}}</style>',
+				'<style amp-keyframes="">@keyframes anim1{50%{animation-timing-function:ease;opacity:.5;offset-distance:50%;visibility:visible;transform:rotate(.5turn);-webkit-transform:rotate(.5turn)}}</style>',
 				array_fill( 0, 3, AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_PROPERTY ),
 			],
 
@@ -2115,6 +2115,12 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<style amp-keyframes>body { color:red; opacity:1; } @keyframes anim1 { 50% { opacity:0.5 !important; } } @font-face { font-family: "Open Sans"; src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"); }</style>',
 				'<style amp-keyframes="">@keyframes anim1{50%{opacity:.5}}</style>',
 				[ AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_DECLARATION, AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_IMPORTANT, AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE ],
+			],
+
+			'style_amp_keyframes_turn_unit' => [
+				'<style amp-keyframes>@keyframes spin{ to { transform: rotate(1turn) } }</style>',
+				'<style amp-keyframes="">@keyframes spin{to{transform:rotate(1turn)}}</style>',
+				[],
 			],
 		];
 	}
