@@ -221,6 +221,7 @@ final class ReaderThemes {
 
 		$cache_key = 'amp_themes_wporg';
 		$response  = get_transient( $cache_key );
+
 		if ( ! $response ) {
 			require_once ABSPATH . 'wp-admin/includes/theme.php';
 
@@ -247,7 +248,10 @@ final class ReaderThemes {
 				|| ! property_exists( $response, 'themes' )
 				|| ! is_array( $response->themes )
 			) {
-				$response = (object) [ 'themes' => [] ];
+				return new WP_Error(
+					'amp_themes_api_invalid_Response',
+					__( 'The request for reader themes from the WordPress.org themes API resulted in an invalid response.', 'amp' )
+				);
 			} else {
 				// Store the transient only if the response was valid.
 				set_transient( $cache_key, $response, DAY_IN_SECONDS );
