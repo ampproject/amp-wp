@@ -112,6 +112,23 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 		add_filter( 'themes_api_result', '__return_null' );
 
 		$response = $this->controller->get_items( new WP_REST_Request( 'GET', 'amp/v1' ) );
-		$this->assertEquals( [ 'X-AMP-Theme-API-Error' => true ], $response->get_headers() );
+		$this->assertEquals(
+			[ 'X-AMP-Theme-API-Error' => 'The request for reader themes from the WordPress.org resulted in an invalid response. Please try again later or contact your host.' ],
+			$response->get_headers()
+		);
+	}
+
+	public function test_get_items_with_themes_api_empty_array() {
+		$filter_cb = static function() {
+			return (object) [ 'themes' => [] ];
+		};
+		add_filter( 'themes_api_result', $filter_cb );
+
+		$response = $this->controller->get_items( new WP_REST_Request( 'GET', 'amp/v1' ) );
+		$this->assertEquals(
+			[ 'X-AMP-Theme-API-Error' => 'The default reader themes cannot be displayed because a plugin is overriding the themes from WordPress.org.' ],
+			$response->get_headers()
+		);
+
 	}
 }

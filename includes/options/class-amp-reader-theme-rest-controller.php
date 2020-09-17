@@ -85,7 +85,7 @@ final class AMP_Reader_Theme_REST_Controller extends WP_REST_Controller {
 
 		$themes_api_error = $this->reader_themes->get_themes_api_error();
 		if ( is_wp_error( $themes_api_error ) ) {
-			$response->header( 'X-AMP-Theme-API-Error', current( $themes_api_error->get_error_messages() ) );
+			$response->header( 'X-AMP-Theme-API-Error', $themes_api_error->get_error_message() );
 		}
 
 		return $response;

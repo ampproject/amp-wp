@@ -128,9 +128,38 @@ class ReaderThemesTest extends WP_UnitTestCase {
 
 		$this->reader_themes->get_themes();
 
-		$this->assertWPError( $this->reader_themes->get_themes_api_error() );
+		$error = $this->reader_themes->get_themes_api_error();
+		$this->assertWPError( $error );
+		$this->assertEquals(
+			'The request for reader themes from the WordPress.org resulted in an invalid response. Please try again later or contact your host.',
+			$error->get_error_message()
+		);
 
 		remove_filter( 'themes_api_result', '__return_null' );
+	}
+
+	/**
+	 * Test that a themes API response with an empty themes array results in a WP_Error.
+	 *
+	 * @covers ::get_themes
+	 * @covers ::get_default_reader_themes
+	 */
+	public function test_themes_api_empty_array() {
+		$filter_cb = static function() {
+			return (object) [ 'themes' => [] ];
+		};
+		add_filter( 'themes_api_result', $filter_cb );
+
+		$this->reader_themes->get_themes();
+
+		$error = $this->reader_themes->get_themes_api_error();
+		$this->assertWPError( $this->reader_themes->get_themes_api_error() );
+		$this->assertEquals(
+			'The default reader themes cannot be displayed because a plugin is overriding the themes from WordPress.org.',
+			$error->get_error_message()
+		);
+
+		remove_filter( 'themes_api_result', $filter_cb );
 	}
 
 	/**
