@@ -14,6 +14,14 @@
 class AMP_Srcset_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
+	 * Pattern used used for finding image candidates defined within the `srcset` attribute.
+	 * The pattern is adapted from the JS validator. See https://github.com/ampproject/amphtml/blob/5fcb29a41d06867b25ed6aca69b4aeaf96456c8c/validator/js/engine/parse-srcset.js#L72-L81.
+	 *
+	 * @var string
+	 */
+	const SRCSET_REGEX_PATTERN = '/\s*(?:,\s*)?(?<url>[^,\s]\S*[^,\s])\s*(?<dimension>[\d]+[wx]|[\d]+\.[\d]+x)?\s*(?<comma>,)?\s*/';
+
+	/**
 	 * Sanitize the HTML contained in the DOMDocument received by the constructor
 	 */
 	public function sanitize() {
@@ -42,10 +50,14 @@ class AMP_Srcset_Sanitizer extends AMP_Base_Sanitizer {
 	private function sanitize_srcset_attribute( DOMAttr $attribute ) {
 		$srcset = $attribute->value;
 
-		// Regex below is adapted from the JS validator. See https://github.com/ampproject/amphtml/blob/5fcb29a41d06867b25ed6aca69b4aeaf96456c8c/validator/js/engine/parse-srcset.js#L72-L81.
-		$matched = preg_match_all( '/\s*(?:,\s*)?(?<url>[^,\s]\S*[^,\s])\s*(?<dimension>[\d]+(?:\.[\d]+)?[wx])?\s*(?:(?<comma>,)\s*)?/', $srcset, $matches );
-		if ( ! $matched ) {
-			// Bail and raise a validation error if no image candidates were found.
+		// Bail and raise a validation error if no image candidates were found or the last matched group does not
+		// match the end of the `srcset`.
+		if (
+			! preg_match_all( self::SRCSET_REGEX_PATTERN, $srcset, $matches )
+			||
+			end( $matches[0] ) !== substr( $srcset, -strlen( end( $matches[0] ) ) )
+		) {
+
 			$validation_error = [
 				'code' => AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE,
 			];
@@ -54,14 +66,7 @@ class AMP_Srcset_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$dimension_count = count( $matches['dimension'] );
-		$commas_count    = count(
-			array_filter(
-				$matches['comma'],
-				static function ( $comma ) {
-					return ',' === trim( $comma );
-				}
-			)
-		);
+		$commas_count    = count( array_filter( $matches['comma'] ) );
 
 		// Bail and raise a validation error if the number of dimensions does not match the number of URLs, or there
 		// are not enough commas to separate the image candidates.
