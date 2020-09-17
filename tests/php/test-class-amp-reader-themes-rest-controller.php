@@ -118,7 +118,7 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 
 		$response = $this->controller->get_items( new WP_REST_Request( 'GET', 'amp/v1' ) );
 		$this->assertEquals(
-			[ 'X-AMP-Theme-API-Error' => 'The request for reader themes from the WordPress.org resulted in an invalid response. Please try again later or contact your host.' ],
+			[ 'X-AMP-Theme-API-Error' => 'The request for reader themes from the WordPress.org resulted in an invalid response. Check your Site Health to confirm that your site can communicate with WordPress.org. Otherwise, please try again later or contact your host.' ],
 			$response->get_headers()
 		);
 	}
@@ -136,7 +136,7 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 
 		$response = $this->controller->get_items( new WP_REST_Request( 'GET', 'amp/v1' ) );
 		$this->assertEquals(
-			[ 'X-AMP-Theme-API-Error' => 'The default reader themes cannot be displayed because a plugin is overriding the themes from WordPress.org.' ],
+			[ 'X-AMP-Theme-API-Error' => 'The default reader themes cannot be displayed because a plugin appears to be overriding the themes response from WordPress.org.' ],
 			$response->get_headers()
 		);
 

@@ -132,7 +132,7 @@ class ReaderThemesTest extends WP_UnitTestCase {
 		$error = $this->reader_themes->get_themes_api_error();
 		$this->assertWPError( $error );
 		$this->assertEquals(
-			'The request for reader themes from the WordPress.org resulted in an invalid response. Please try again later or contact your host.',
+			'The request for reader themes from the WordPress.org resulted in an invalid response. Check your Site Health to confirm that your site can communicate with WordPress.org. Otherwise, please try again later or contact your host.',
 			$error->get_error_message()
 		);
 
@@ -156,7 +156,7 @@ class ReaderThemesTest extends WP_UnitTestCase {
 		$error = $this->reader_themes->get_themes_api_error();
 		$this->assertWPError( $this->reader_themes->get_themes_api_error() );
 		$this->assertEquals(
-			'The default reader themes cannot be displayed because a plugin is overriding the themes from WordPress.org.',
+			'The default reader themes cannot be displayed because a plugin appears to be overriding the themes response from WordPress.org.',
 			$error->get_error_message()
 		);
 	}
