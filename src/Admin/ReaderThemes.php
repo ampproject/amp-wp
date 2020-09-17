@@ -243,8 +243,13 @@ final class ReaderThemes {
 				|| is_wp_error( $response )
 			) {
 				$message = __( 'The request for reader themes from the WordPress.org resulted in an invalid response. Check your Site Health to confirm that your site can communicate with WordPress.org. Otherwise, please try again later or contact your host.', 'amp' );
-				if ( is_wp_error( $response ) && defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY ) ) {
-					$message .= ' ' . __( 'Error message:', 'amp' ) . ' ' . $response->get_error_message();
+				if ( is_wp_error( $response ) && defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY ) {
+					$message .= ' ' . __( 'Error:', 'amp' );
+					if ( $response->get_error_message() ) {
+						$message .= sprintf( ' %s (%s).', $response->get_error_message(), $response->get_error_code() );
+					} else {
+						$message .= ' ' . $response->get_error_code() . '.';
+					}
 				}
 
 				$this->themes_api_error = new WP_Error(
