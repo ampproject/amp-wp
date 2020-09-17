@@ -251,7 +251,7 @@ final class ReaderThemes {
 
 			if ( empty( $response->themes ) ) {
 				$this->themes_api_error = new WP_Error(
-					'amp_themes_api_invalid_response',
+					'amp_themes_api_empty_themes_array',
 					__( 'The default reader themes cannot be displayed because a plugin is overriding the themes from WordPress.org.', 'amp' )
 				);
 				return [];
