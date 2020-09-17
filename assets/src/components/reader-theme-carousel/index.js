@@ -20,6 +20,7 @@ import { AMPNotice, NOTICE_TYPE_WARNING } from '../amp-notice';
 import { ThemeCard } from '../theme-card';
 import { Carousel, DEFAULT_MOBILE_BREAKPOINT } from '../carousel';
 import { useWindowWidth } from '../../utils/use-window-width';
+import { ThemesAPIError } from '../themes-api-error';
 
 /**
  * Component for selecting a reader theme.
@@ -36,7 +37,7 @@ export function ReaderThemeCarousel() {
 	 */
 
 	/** @type {Theme[]} themes */
-	const { currentTheme, fetchingThemes, selectedTheme, themes, themesAPIError } = useContext( ReaderThemes );
+	const { currentTheme, fetchingThemes, selectedTheme, themes } = useContext( ReaderThemes );
 	const [ includeUnavailableThemes, setIncludeUnavailableThemes ] = useState( false );
 
 	// Separate available themes (both installed and installable) from those that need to be installed manually.
@@ -165,15 +166,7 @@ export function ReaderThemeCarousel() {
 					</p>
 				</AMPNotice>
 			) }
-			{ themesAPIError && (
-				<AMPNotice type={ NOTICE_TYPE_WARNING }>
-					<p>
-						{
-							__( 'There was an error fetching the default reader themes from WordPress.org. Please try again later. Contact your hosting provider if the issue persists.', 'amp' )
-						}
-					</p>
-				</AMPNotice>
-			) }
+			<ThemesAPIError />
 			<div>
 				{
 					hasUnavailableThemes && (

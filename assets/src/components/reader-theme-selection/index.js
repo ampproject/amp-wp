@@ -18,12 +18,13 @@ import { Loading } from '../loading';
 import './style.css';
 import { ThemeCard } from '../theme-card';
 import { AMPNotice, NOTICE_TYPE_WARNING } from '../amp-notice';
+import { ThemesAPIError } from '../themes-api-error';
 
 /**
  * Component for selecting a reader theme.
  */
 export function ReaderThemeSelection() {
-	const { currentTheme, fetchingThemes, themes, themesAPIError } = useContext( ReaderThemes );
+	const { currentTheme, fetchingThemes, themes } = useContext( ReaderThemes );
 
 	// Separate available themes (both installed and installable) from those that need to be installed manually.
 	const { availableThemes, unavailableThemes } = useMemo(
@@ -66,15 +67,7 @@ export function ReaderThemeSelection() {
 					</p>
 				</AMPNotice>
 			) }
-			{ themesAPIError && (
-				<AMPNotice type={ NOTICE_TYPE_WARNING }>
-					<p>
-						{
-							__( 'There was an error fetching the default reader themes from WordPress.org. Please try again later. Contact your hosting provider if the issue persists.', 'amp' )
-						}
-					</p>
-				</AMPNotice>
-			) }
+			<ThemesAPIError />
 			<div>
 				{ 0 < availableThemes.length && (
 					<ul className="choose-reader-theme__grid">
