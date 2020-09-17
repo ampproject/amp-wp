@@ -237,10 +237,10 @@ final class ReaderThemes {
 			 * @see https://wordpress.org/support/topic/issue-during-activating-the-updated-plugins/#post-13383737
 			 */
 			if (
-				is_wp_error( $response )
-				|| ! is_object( $response )
+				! is_object( $response )
 				|| ! property_exists( $response, 'themes' )
 				|| ! is_array( $response->themes )
+				|| is_wp_error( $response )
 			) {
 				$this->themes_api_error = new WP_Error(
 					'amp_themes_api_invalid_response',
