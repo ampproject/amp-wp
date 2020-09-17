@@ -80,18 +80,18 @@ class AMP_Srcset_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE ],
 			],
 
-			'amp_img_srcset_invalid_width_descriptor'     => [
+			'amp_img_srcset_invalid_width_descriptor'   => [
 				'<img src="https://example.com/image.jpg" height="100" width="200" srcset="https://example.com/image.jpg 5.2w">',
 				'<img src="https://example.com/image.jpg" height="100" width="200">',
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE ],
 			],
 
-			'amp_img_srcset_valid_pixel_density'     => [
+			'amp_img_srcset_valid_pixel_density'        => [
 				'<img src="https://example.com/image.jpg" height="100" width="200" srcset="https://example.com/image.jpg 5x">',
 				null,
 			],
 
-			'amp_img_srcset_valid_float_pixel_density'     => [
+			'amp_img_srcset_valid_float_pixel_density'  => [
 				'<img src="https://example.com/image.jpg" height="100" width="200" srcset="https://example.com/image.jpg 5.2x">',
 				null,
 			],
