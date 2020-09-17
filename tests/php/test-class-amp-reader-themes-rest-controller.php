@@ -13,7 +13,7 @@ use AmpProject\AmpWP\Admin\ReaderThemes;
  *
  * @group reader-themes
  *
- * @coversDefaultClass \AmpProject\AmpWP\Admin\ReaderThemes
+ * @coversDefaultClass AMP_Reader_Theme_REST_Controller
  */
 class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 	/**
