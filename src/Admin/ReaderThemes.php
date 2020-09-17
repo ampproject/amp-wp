@@ -245,7 +245,7 @@ final class ReaderThemes {
 				if ( is_wp_error( $response ) ) {
 					$message = $response->get_error_message();
 				} else {
-					$message = __( 'The request for reader themes from the WordPress.org resulted in an invalid response. Please try again later or contact your host.', 'amp' );
+					$message = __( 'The request for reader themes from the WordPress.org resulted in an invalid response. Check your Site Health to confirm that your site can communicate with WordPress.org. Otherwise, please try again later or contact your host.', 'amp' );
 				}
 
 				$this->themes_api_error = new WP_Error(
