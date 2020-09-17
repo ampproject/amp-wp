@@ -65,6 +65,7 @@
 				<element value="firstChild"/>
 				<element value="lastChild"/>
 				<element value="nodeValue"/>
+				<element value="ownerElement"/>
 				<element value="DEFAULT_ARGS"/>
 				<element value="documentElement"/>
 				<element value="removeChild"/>
