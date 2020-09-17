@@ -107,6 +107,7 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 		$response = $this->controller->get_items( new WP_REST_Request( 'GET', 'amp/v1' ) );
 		$this->assertEquals( [], $response->get_headers() );
 
+		delete_transient( 'amp_themes_wporg' );
 		$this->controller = new AMP_Reader_Theme_REST_Controller( new ReaderThemes() );
 		add_filter( 'themes_api_result', '__return_null' );
 
