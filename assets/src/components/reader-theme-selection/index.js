@@ -17,7 +17,7 @@ import { ReaderThemes } from '../reader-themes-context-provider';
 import { Loading } from '../loading';
 import './style.css';
 import { ThemeCard } from '../theme-card';
-import { AMPNotice, NOTICE_TYPE_WARNING } from '../amp-notice';
+import { AMPNotice } from '../amp-notice';
 import { ThemesAPIError } from '../themes-api-error';
 
 /**
