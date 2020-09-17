@@ -118,6 +118,11 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 		);
 	}
 
+	/**
+	 * Tests REST response when themes_api contains an empty themes array.
+	 *
+	 * @covers ::get_items
+	 */
 	public function test_get_items_with_themes_api_empty_array() {
 		$filter_cb = static function() {
 			return (object) [ 'themes' => [] ];
