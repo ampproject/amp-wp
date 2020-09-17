@@ -106,6 +106,18 @@ class ReaderThemesTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that themes API success does not result in a WP_Error.
+	 *
+	 * @covers ::get_themes
+	 * @covers ::get_default_reader_themes
+	 *////
+	public function test_themes_api_success() {
+		$this->reader_themes->get_themes();
+
+		$this->assertNull( $this->reader_themes->get_themes_api_error() );
+	}
+
+	/**
 	 * Test that a themes API failure results in a WP_Error.
 	 *
 	 * @covers ::get_themes
