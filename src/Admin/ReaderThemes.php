@@ -98,12 +98,6 @@ final class ReaderThemes {
 
 		$themes = $this->get_default_reader_themes();
 
-		// If the themes_api request failed, make the error available but go forward here with an empty array.
-		if ( is_wp_error( $themes ) ) {
-			$this->themes_api_error = $themes;
-			$themes                 = [];
-		}
-
 		// Also include themes that declare AMP-compatibility in their style.css.
 		$default_reader_theme_slugs = wp_list_pluck( $themes, 'slug' );
 		foreach ( $this->get_compatible_installed_themes() as $compatible_installed_theme ) {
@@ -212,7 +206,7 @@ final class ReaderThemes {
 	/**
 	 * Retrieves theme data.
 	 *
-	 * @return array|WP_Error Theme data from the wordpress.org API, or an error on failure.
+	 * @return array Theme data from the wordpress.org API, or an empty array on failure.
 	 */
 	public function get_default_reader_themes() {
 		if ( null !== $this->default_reader_themes ) {
@@ -248,11 +242,20 @@ final class ReaderThemes {
 				|| ! property_exists( $response, 'themes' )
 				|| ! is_array( $response->themes )
 			) {
-				return new WP_Error(
+				$this->themes_api_error = new WP_Error(
 					'amp_themes_api_invalid_response',
-					__( 'The request for reader themes from the WordPress.org themes API resulted in an invalid response.', 'amp' )
+					__( 'The request for reader themes from the WordPress.org resulted in an invalid response. Please try again later or contact your host.', 'amp' )
 				);
+				return [];
 			} else {
+				if ( empty( $response->themes ) ) {
+					$this->themes_api_error = new WP_Error(
+						'amp_themes_api_invalid_response',
+						__( 'The default reader themes cannot be displayed because a plugin is overriding the themes from WordPress.org.', 'amp' )
+					);
+					return [];
+				}
+
 				// Store the transient only if the response was valid.
 				set_transient( $cache_key, $response, DAY_IN_SECONDS );
 			}

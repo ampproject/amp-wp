@@ -24,7 +24,7 @@ export function ThemesAPIError() {
 		<AMPNotice type={ NOTICE_TYPE_WARNING }>
 			<p>
 				{
-					__( 'There was an error fetching the default reader themes from WordPress.org. Please try again later. Contact your hosting provider if the issue persists.', 'amp' )
+					themesAPIError
 				}
 			</p>
 		</AMPNotice>
