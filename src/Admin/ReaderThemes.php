@@ -221,7 +221,7 @@ final class ReaderThemes {
 
 		$cache_key = 'amp_themes_wporg';
 		$response  = get_transient( $cache_key );
-		if ( true || ! $response ) {
+		if ( ! $response ) {
 			require_once ABSPATH . 'wp-admin/includes/theme.php';
 
 			$response = themes_api(
