@@ -36,7 +36,7 @@ export function ReaderThemeCarousel() {
 	 */
 
 	/** @type {Theme[]} themes */
-	const { currentTheme, fetchingThemes, selectedTheme, themes } = useContext( ReaderThemes );
+	const { currentTheme, fetchingThemes, selectedTheme, themes, themesAPIError } = useContext( ReaderThemes );
 	const [ includeUnavailableThemes, setIncludeUnavailableThemes ] = useState( false );
 
 	// Separate available themes (both installed and installable) from those that need to be installed manually.
@@ -161,6 +161,15 @@ export function ReaderThemeCarousel() {
 								__( 'Your active theme “%s” is not available as a reader theme. If you wish to use it, Transitional mode may be the best option for you.', 'amp' ),
 								currentTheme.name,
 							)
+						}
+					</p>
+				</AMPNotice>
+			) }
+			{ themesAPIError && (
+				<AMPNotice type={ NOTICE_TYPE_WARNING }>
+					<p>
+						{
+							__( 'There was an error fetching the default reader themes from WordPress.org. Please try again later. Contact your hosting provider if the issue persists.', 'amp' )
 						}
 					</p>
 				</AMPNotice>

@@ -17,13 +17,13 @@ import { ReaderThemes } from '../reader-themes-context-provider';
 import { Loading } from '../loading';
 import './style.css';
 import { ThemeCard } from '../theme-card';
-import { AMPNotice } from '../amp-notice';
+import { AMPNotice, NOTICE_TYPE_WARNING } from '../amp-notice';
 
 /**
  * Component for selecting a reader theme.
  */
 export function ReaderThemeSelection() {
-	const { currentTheme, fetchingThemes, themes } = useContext( ReaderThemes );
+	const { currentTheme, fetchingThemes, themes, themesAPIError } = useContext( ReaderThemes );
 
 	// Separate available themes (both installed and installable) from those that need to be installed manually.
 	const { availableThemes, unavailableThemes } = useMemo(
@@ -62,6 +62,15 @@ export function ReaderThemeSelection() {
 								__( 'Your active theme “%s” is not available as a reader theme. If you wish to use it, Transitional mode may be the best option for you.', 'amp' ),
 								currentTheme.name,
 							)
+						}
+					</p>
+				</AMPNotice>
+			) }
+			{ themesAPIError && (
+				<AMPNotice type={ NOTICE_TYPE_WARNING }>
+					<p>
+						{
+							__( 'There was an error fetching the default reader themes from WordPress.org. Please try again later. Contact your hosting provider if the issue persists.', 'amp' )
 						}
 					</p>
 				</AMPNotice>

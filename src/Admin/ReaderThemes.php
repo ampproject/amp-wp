@@ -12,6 +12,7 @@ use AMP_Core_Theme_Sanitizer;
 use AMP_Options_Manager;
 use AmpProject\AmpWP\ExtraThemeAndPluginHeaders;
 use AmpProject\AmpWP\Option;
+use WP_Error;
 use WP_Theme;
 use WP_Upgrader;
 
@@ -42,6 +43,13 @@ final class ReaderThemes {
 	 * @var bool
 	 */
 	private $can_install_themes;
+
+	/**
+	 * The error resulting from a failed themes_api request.
+	 *
+	 * @var null|WP_Error
+	 */
+	private $themes_api_error;
 
 	/**
 	 * The default reader theme.
@@ -89,6 +97,12 @@ final class ReaderThemes {
 		}
 
 		$themes = $this->get_default_reader_themes();
+
+		// If the themes_api request failed, make the error available but go forward here with an empty array.
+		if ( is_wp_error( $themes ) ) {
+			$this->themes_api_error = $themes;
+			$themes                 = [];
+		}
 
 		// Also include themes that declare AMP-compatibility in their style.css.
 		$default_reader_theme_slugs = wp_list_pluck( $themes, 'slug' );
@@ -170,6 +184,15 @@ final class ReaderThemes {
 	}
 
 	/**
+	 * Provides the themes api error, or null if there is no error.
+	 *
+	 * @return null|WP_Error
+	 */
+	public function get_themes_api_error() {
+		return $this->themes_api_error;
+	}
+
+	/**
 	 * Gets a reader theme by slug.
 	 *
 	 * @param string $slug Theme slug.
@@ -189,7 +212,7 @@ final class ReaderThemes {
 	/**
 	 * Retrieves theme data.
 	 *
-	 * @return array Theme data from the wordpress.org API.
+	 * @return array|WP_Error Theme data from the wordpress.org API, or an error on failure.
 	 */
 	public function get_default_reader_themes() {
 		if ( null !== $this->default_reader_themes ) {
@@ -198,7 +221,7 @@ final class ReaderThemes {
 
 		$cache_key = 'amp_themes_wporg';
 		$response  = get_transient( $cache_key );
-		if ( ! $response ) {
+		if ( true || ! $response ) {
 			require_once ABSPATH . 'wp-admin/includes/theme.php';
 
 			$response = themes_api(
@@ -218,8 +241,13 @@ final class ReaderThemes {
 			 *
 			 * @see https://wordpress.org/support/topic/issue-during-activating-the-updated-plugins/#post-13383737
 			 */
-			if ( is_wp_error( $response ) || ! is_object( $response ) || ! is_array( $response->themes ) ) {
-				$response = (object) [ 'themes' => [] ];
+			if ( is_wp_error( $response ) ) {
+				return $response;
+			} elseif ( ! is_object( $response ) || ! is_array( $response->themes ) ) {
+				return new WP_Error(
+					'amp_themes_api_invalid_Response',
+					__( 'The request for reader themes from the WordPress.org themes API resulted in an invalid response.', 'amp' )
+				);
 			} else {
 				// Store the transient only if the response was valid.
 				set_transient( $cache_key, $response, DAY_IN_SECONDS );

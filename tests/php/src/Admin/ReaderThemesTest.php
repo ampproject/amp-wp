@@ -48,6 +48,7 @@ class ReaderThemesTest extends WP_UnitTestCase {
 			$this->markTestSkipped( 'Requires WordPress 5.0.' );
 		}
 
+		delete_transient( 'amp_themes_wporg' );
 		$this->add_reader_themes_request_filter();
 
 		switch_theme( 'twentytwenty' );
@@ -102,6 +103,22 @@ class ReaderThemesTest extends WP_UnitTestCase {
 		$this->assertContains( 'child-of-core', $available_theme_slugs );
 		$this->assertNotContains( 'custom', $available_theme_slugs );
 		$this->assertNotContains( 'with-legacy', $available_theme_slugs );
+	}
+
+	/**
+	 * Test that a themes API failure results in a WP_Error.
+	 *
+	 * @covers ::get_themes
+	 * @covers ::get_default_reader_themes
+	 */
+	public function test_themes_api_failure() {
+		add_filter( 'themes_api_result', '__return_null' );
+
+		$this->reader_themes->get_themes();
+
+		$this->assertWPError( $this->reader_themes->get_themes_api_error() );
+
+		remove_filter( 'themes_api_result', '__return_null' );
 	}
 
 	/**

@@ -13,7 +13,7 @@ use AmpProject\AmpWP\Admin\ReaderThemes;
  *
  * @group reader-themes
  *
- * @covers AMP_Reader_Theme_REST_Controller
+ * @coversDefaultClass \AmpProject\AmpWP\Admin\ReaderThemes
  */
 class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 	/**
@@ -35,6 +35,7 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 			$this->markTestSkipped( 'Requires WordPress 5.0.' );
 		}
 
+		delete_transient( 'amp_themes_wporg' );
 		do_action( 'rest_api_init' );
 		$this->controller = new AMP_Reader_Theme_REST_Controller( new ReaderThemes() );
 	}
@@ -42,7 +43,7 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 	/**
 	 * Tests AMP_Reader_Theme_REST_Controller::register_routes.
 	 *
-	 * @covers AMP_Reader_Theme_REST_Controller::register_routes
+	 * @covers ::register_routes
 	 */
 	public function test_register_routes() {
 		$this->controller->register_routes();
@@ -54,7 +55,7 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 	/**
 	 * Tests AMP_Reader_Theme_REST_Controller::get_items.
 	 *
-	 * @covers AMP_Reader_Theme_REST_Controller::get_items
+	 * @covers ::get_items
 	 */
 	public function test_get_items() {
 		$data = $this->controller->get_items( new WP_REST_Request( 'GET', 'amp/v1' ) )->data;
@@ -95,5 +96,21 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 
 		$this->assertEquals( [ 'my-theme', 'legacy' ], wp_list_pluck( $data, 'slug' ) );
 		remove_filter( 'amp_reader_themes', $filter );
+	}
+
+	/**
+	 * Tests REST response when themes_api fails.
+	 *
+	 * @covers ::get_items
+	 */
+	public function test_get_items_with_themes_api_failure() {
+		$response = $this->controller->get_items( new WP_REST_Request( 'GET', 'amp/v1' ) );
+		$this->assertEquals( [], $response->get_headers() );
+
+		$this->controller = new AMP_Reader_Theme_REST_Controller( new ReaderThemes() );
+		add_filter( 'themes_api_result', '__return_null' );
+
+		$response = $this->controller->get_items( new WP_REST_Request( 'GET', 'amp/v1' ) );
+		$this->assertEquals( [ 'X-AMP-Theme-API-Error' => true ], $response->get_headers() );
 	}
 }
