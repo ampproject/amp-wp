@@ -62,7 +62,7 @@ class AMP_Srcset_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE ],
 			],
 
-			'amp_img_srcset_invalid_bare_dimension'     => [
+			'amp_img_srcset_invalid_dimension_unit'     => [
 				'<img src="https://example.com/image.jpg" height="100" width="200" srcset="https://example.com/image.jpg 500px">',
 				'<img src="https://example.com/image.jpg" height="100" width="200">',
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE ],
@@ -86,6 +86,18 @@ class AMP_Srcset_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE ],
 			],
 
+			'amp_img_srcset_invalid_zero_width'         => [
+				'<img src="https://example.com/image.jpg" height="100" width="200" srcset="https://example.com/image.jpg 0w">',
+				'<img src="https://example.com/image.jpg" height="100" width="200">',
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE ],
+			],
+
+			'amp_img_srcset_invalid_zero_pixel_density' => [
+				'<img src="https://example.com/image.jpg" height="100" width="200" srcset="https://example.com/image.jpg 0.0x">',
+				'<img src="https://example.com/image.jpg" height="100" width="200">',
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE ],
+			],
+
 			'amp_img_srcset_valid_pixel_density'        => [
 				'<img src="https://example.com/image.jpg" height="100" width="200" srcset="https://example.com/image.jpg 5x">',
 				null,
@@ -93,6 +105,11 @@ class AMP_Srcset_Sanitizer_Test extends WP_UnitTestCase {
 
 			'amp_img_srcset_valid_float_pixel_density'  => [
 				'<img src="https://example.com/image.jpg" height="100" width="200" srcset="https://example.com/image.jpg 5.2x">',
+				null,
+			],
+
+			'amp_img_srcset_valid_float_pixel_density_with_leading_zero' => [
+				'<img src="https://example.com/image.jpg" height="100" width="200" srcset="https://example.com/image.jpg 0.002x">',
 				null,
 			],
 

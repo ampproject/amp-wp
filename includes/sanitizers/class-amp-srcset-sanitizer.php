@@ -19,7 +19,7 @@ class AMP_Srcset_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @var string
 	 */
-	const SRCSET_REGEX_PATTERN = '/\s*(?:,\s*)?(?<url>[^,\s]\S*[^,\s])\s*(?<dimension>[\d]+[wx]|[\d]+\.[\d]+x)?\s*(?<comma>,)?\s*/';
+	const SRCSET_REGEX_PATTERN = '/\s*(?:,\s*)?(?<url>[^,\s]\S*[^,\s])\s*(?<dimension>[1-9]\d*[wx]|[1-9]\d*\.\d+x|0.\d*[1-9]\d*x)?\s*(?<comma>,)?\s*/';
 
 	/**
 	 * Sanitize the HTML contained in the DOMDocument received by the constructor
