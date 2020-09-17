@@ -99,16 +99,21 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests REST response when themes_api fails.
+	 * Test the REST Response headers when themes_api was successful.
 	 *
 	 * @covers ::get_items
 	 */
-	public function test_get_items_with_themes_api_failure() {
+	public function test_get_items_header_with_themes_api_success() {
 		$response = $this->controller->get_items( new WP_REST_Request( 'GET', 'amp/v1' ) );
 		$this->assertEquals( [], $response->get_headers() );
+	}
 
-		delete_transient( 'amp_themes_wporg' );
-		$this->controller = new AMP_Reader_Theme_REST_Controller( new ReaderThemes() );
+	/**
+	 * Tests the REST response headers when themes_api fails.
+	 *
+	 * @covers ::get_items
+	 */
+	public function test_get_items_header_with_themes_api_failure() {
 		add_filter( 'themes_api_result', '__return_null' );
 
 		$response = $this->controller->get_items( new WP_REST_Request( 'GET', 'amp/v1' ) );
@@ -119,11 +124,11 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests REST response when themes_api contains an empty themes array.
+	 * Tests the REST response headers when themes_api contains an empty themes array.
 	 *
 	 * @covers ::get_items
 	 */
-	public function test_get_items_with_themes_api_empty_array() {
+	public function test_get_items_header_with_themes_api_empty_array() {
 		$filter_cb = static function() {
 			return (object) [ 'themes' => [] ];
 		};
