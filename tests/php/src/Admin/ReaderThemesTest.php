@@ -110,7 +110,7 @@ class ReaderThemesTest extends WP_UnitTestCase {
 	 *
 	 * @covers ::get_themes
 	 * @covers ::get_default_reader_themes
-	 *////
+	 */
 	public function test_themes_api_success() {
 		$this->reader_themes->get_themes();
 
