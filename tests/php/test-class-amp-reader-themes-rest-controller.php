@@ -141,4 +141,26 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 		);
 
 	}
+
+	/**
+	 * Test that an error is stored in state when themes_api returns an error.
+	 *
+	 * @covers ::get_themes
+	 * @covers ::get_default_reader_themes
+	 */
+	public function test_themes_api_remote_wp_error() {
+		$filter_cb = static function() {
+			return new WP_Error(
+				'amp_test_error',
+				'Test message'
+			);
+		};
+		add_filter( 'themes_api_result', $filter_cb );
+
+		$response = $this->controller->get_items( new WP_REST_Request( 'GET', 'amp/v1' ) );
+		$this->assertEquals(
+			[ 'X-AMP-Theme-API-Error' => 'Test message' ],
+			$response->get_headers()
+		);
+	}
 }

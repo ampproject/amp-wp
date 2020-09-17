@@ -242,10 +242,17 @@ final class ReaderThemes {
 				|| ! is_array( $response->themes )
 				|| is_wp_error( $response )
 			) {
+				if ( is_wp_error( $response ) ) {
+					$message = $response->get_error_message();
+				} else {
+					$message = __( 'The request for reader themes from the WordPress.org resulted in an invalid response. Please try again later or contact your host.', 'amp' );
+				}
+
 				$this->themes_api_error = new WP_Error(
 					'amp_themes_api_invalid_response',
-					__( 'The request for reader themes from the WordPress.org resulted in an invalid response. Please try again later or contact your host.', 'amp' )
+					$message
 				);
+
 				return [];
 			}
 

@@ -17,6 +17,7 @@ use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
 use WP_UnitTestCase;
 use Closure;
+use WP_Error;
 
 /**
  * Tests for reader themes.
@@ -158,8 +159,31 @@ class ReaderThemesTest extends WP_UnitTestCase {
 			'The default reader themes cannot be displayed because a plugin is overriding the themes from WordPress.org.',
 			$error->get_error_message()
 		);
+	}
 
-		remove_filter( 'themes_api_result', $filter_cb );
+	/**
+	 * Test that an error is stored in state when themes_api returns an error.
+	 *
+	 * @covers ::get_themes
+	 * @covers ::get_default_reader_themes
+	 */
+	public function test_themes_api_wp_error() {
+		$filter_cb = static function() {
+			return new WP_Error(
+				'amp_test_error',
+				'Test message'
+			);
+		};
+		add_filter( 'themes_api_result', $filter_cb );
+
+		$this->reader_themes->get_themes();
+
+		$error = $this->reader_themes->get_themes_api_error();
+		$this->assertWPError( $this->reader_themes->get_themes_api_error() );
+		$this->assertEquals(
+			'Test message',
+			$error->get_error_message()
+		);
 	}
 
 	/**
