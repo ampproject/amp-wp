@@ -241,13 +241,13 @@ final class ReaderThemes {
 			 *
 			 * @see https://wordpress.org/support/topic/issue-during-activating-the-updated-plugins/#post-13383737
 			 */
-			if ( is_wp_error( $response ) ) {
-				return $response;
-			} elseif ( ! is_object( $response ) || ! is_array( $response->themes ) ) {
-				return new WP_Error(
-					'amp_themes_api_invalid_Response',
-					__( 'The request for reader themes from the WordPress.org themes API resulted in an invalid response.', 'amp' )
-				);
+			if (
+				is_wp_error( $response )
+				|| ! is_object( $response )
+				|| ! property_exists( $response, 'themes' )
+				|| ! is_array( $response->themes )
+			) {
+				$response = (object) [ 'themes' => [] ];
 			} else {
 				// Store the transient only if the response was valid.
 				set_transient( $cache_key, $response, DAY_IN_SECONDS );
