@@ -247,18 +247,18 @@ final class ReaderThemes {
 					__( 'The request for reader themes from the WordPress.org resulted in an invalid response. Please try again later or contact your host.', 'amp' )
 				);
 				return [];
-			} else {
-				if ( empty( $response->themes ) ) {
-					$this->themes_api_error = new WP_Error(
-						'amp_themes_api_invalid_response',
-						__( 'The default reader themes cannot be displayed because a plugin is overriding the themes from WordPress.org.', 'amp' )
-					);
-					return [];
-				}
-
-				// Store the transient only if the response was valid.
-				set_transient( $cache_key, $response, DAY_IN_SECONDS );
 			}
+
+			if ( empty( $response->themes ) ) {
+				$this->themes_api_error = new WP_Error(
+					'amp_themes_api_invalid_response',
+					__( 'The default reader themes cannot be displayed because a plugin is overriding the themes from WordPress.org.', 'amp' )
+				);
+				return [];
+			}
+
+			// Store the transient only if the response was valid.
+			set_transient( $cache_key, $response, DAY_IN_SECONDS );
 		}
 
 		$supported_themes = array_diff(
