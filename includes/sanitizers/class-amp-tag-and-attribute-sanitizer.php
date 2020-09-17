@@ -46,6 +46,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	const DISALLOWED_RELATIVE_URL              = 'DISALLOWED_RELATIVE_URL';
 	const DISALLOWED_TAG                       = 'DISALLOWED_TAG';
 	const DISALLOWED_TAG_ANCESTOR              = 'DISALLOWED_TAG_ANCESTOR';
+	const DUPLICATE_DIMENSIONS                 = 'DUPLICATE_DIMENSIONS';
 	const DUPLICATE_ONEOF_ATTRS                = 'DUPLICATE_ONEOF_ATTRS';
 	const DUPLICATE_UNIQUE_TAG                 = 'DUPLICATE_UNIQUE_TAG';
 	const IMPLIED_LAYOUT_INVALID               = 'IMPLIED_LAYOUT_INVALID';
@@ -1942,8 +1943,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function extract_attribute_urls( DOMAttr $attribute_node, $spec_attr_name = null ) {
 		/*
-		 * Handle the srcset special case where the attribute value can contain multiple parts, each in the format `URL [WIDTH] [PIXEL_DENSITY]`.
-		 * So we split the srcset attribute value by commas and then return the first token of each item, omitting width descriptor and pixel density descriptor.
+		 * Handle the srcset special case where the attribute value can contain multiple parts, each in the format `URL [WIDTH OR PIXEL_DENSITY]`.
+		 * So we split the srcset attribute value by commas and then return the first token of each item, omitting width or pixel density descriptor.
 		 * This splitting cannot be done for other URLs because it a comma can appear in a URL itself generally, but the syntax can break in srcset,
 		 * unless the commas are URL-encoded.
 		 */
