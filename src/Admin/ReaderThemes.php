@@ -249,7 +249,7 @@ final class ReaderThemes {
 				|| ! is_array( $response->themes )
 			) {
 				return new WP_Error(
-					'amp_themes_api_invalid_Response',
+					'amp_themes_api_invalid_response',
 					__( 'The request for reader themes from the WordPress.org themes API resulted in an invalid response.', 'amp' )
 				);
 			} else {
