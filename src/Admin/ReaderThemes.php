@@ -242,7 +242,7 @@ final class ReaderThemes {
 				|| ! is_array( $response->themes )
 				|| is_wp_error( $response )
 			) {
-				$message = __( 'The request for reader themes from the WordPress.org resulted in an invalid response. Check your Site Health to confirm that your site can communicate with WordPress.org. Otherwise, please try again later or contact your host.', 'amp' );
+				$message = __( 'The request for reader themes from WordPress.org resulted in an invalid response. Check your Site Health to confirm that your site can communicate with WordPress.org. Otherwise, please try again later or contact your host.', 'amp' );
 				if ( is_wp_error( $response ) && defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY ) {
 					$message .= ' ' . __( 'Error:', 'amp' );
 					if ( $response->get_error_message() ) {

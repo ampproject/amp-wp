@@ -122,7 +122,7 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 
 		$response = $this->controller->get_items( new WP_REST_Request( 'GET', 'amp/v1' ) );
 		$this->assertEquals(
-			[ 'X-AMP-Theme-API-Error' => 'The request for reader themes from the WordPress.org resulted in an invalid response. Check your Site Health to confirm that your site can communicate with WordPress.org. Otherwise, please try again later or contact your host.' ],
+			[ 'X-AMP-Theme-API-Error' => 'The request for reader themes from WordPress.org resulted in an invalid response. Check your Site Health to confirm that your site can communicate with WordPress.org. Otherwise, please try again later or contact your host.' ],
 			$response->get_headers()
 		);
 	}
@@ -165,7 +165,7 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 		$response = $this->controller->get_items( new WP_REST_Request( 'GET', 'amp/v1' ) );
 		$headers  = $response->get_headers();
 		$this->assertArrayHasKey( 'X-AMP-Theme-API-Error', $headers );
-		$this->assertStringStartsWith( 'The request for reader themes from the WordPress.org resulted in an invalid response. Check your Site Health to confirm that your site can communicate with WordPress.org. Otherwise, please try again later or contact your host.', $headers['X-AMP-Theme-API-Error'] );
+		$this->assertStringStartsWith( 'The request for reader themes from WordPress.org resulted in an invalid response. Check your Site Health to confirm that your site can communicate with WordPress.org. Otherwise, please try again later or contact your host.', $headers['X-AMP-Theme-API-Error'] );
 
 		if ( defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY ) {
 			$this->assertStringContains( 'Test message', $headers['X-AMP-Theme-API-Error'] );
