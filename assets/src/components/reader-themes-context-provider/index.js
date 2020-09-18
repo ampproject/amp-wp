@@ -41,6 +41,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	const [ fetchingThemes, setFetchingThemes ] = useState( false );
 	const [ downloadingTheme, setDownloadingTheme ] = useState( false );
 	const [ downloadedTheme, setDownloadedTheme ] = useState( false );
+	const [ themesAPIError, setThemesAPIError ] = useState( null );
 
 	const { editedOptions, originalOptions, updateOptions, savingOptions } = useContext( Options );
 
@@ -178,7 +179,11 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 			setFetchingThemes( true );
 
 			try {
-				const fetchedThemes = await apiFetch( { path: readerThemesRestPath } );
+				const fetchedThemesResponse = await apiFetch( { path: readerThemesRestPath, parse: false } );
+
+				setThemesAPIError( fetchedThemesResponse.headers.get( 'X-AMP-Theme-API-Error' ) );
+
+				const fetchedThemes = await fetchedThemesResponse.json();
 
 				if ( hasUnmounted.current === true ) {
 					return;
@@ -228,6 +233,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 					fetchingThemes,
 					themes: filteredThemes,
 					selectedTheme: selectedTheme || {},
+					themesAPIError,
 				}
 			}
 		>
