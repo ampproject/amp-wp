@@ -20,6 +20,7 @@ import { AMPNotice, NOTICE_TYPE_WARNING } from '../amp-notice';
 import { ThemeCard } from '../theme-card';
 import { Carousel, DEFAULT_MOBILE_BREAKPOINT } from '../carousel';
 import { useWindowWidth } from '../../utils/use-window-width';
+import { ThemesAPIError } from '../themes-api-error';
 
 /**
  * Component for selecting a reader theme.
@@ -165,6 +166,7 @@ export function ReaderThemeCarousel() {
 					</p>
 				</AMPNotice>
 			) }
+			<ThemesAPIError />
 			<div>
 				{
 					hasUnavailableThemes && (
