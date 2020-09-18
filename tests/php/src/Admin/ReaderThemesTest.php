@@ -13,6 +13,7 @@ use AMP_Theme_Support;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\ExtraThemeAndPluginHeaders;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
 use WP_UnitTestCase;
@@ -28,7 +29,7 @@ use WP_Error;
  */
 class ReaderThemesTest extends WP_UnitTestCase {
 
-	use ThemesApiRequestMocking, LoadsCoreThemes;
+	use AssertContainsCompatibility, ThemesApiRequestMocking, LoadsCoreThemes;
 
 	/**
 	 * Test instance.
@@ -180,10 +181,14 @@ class ReaderThemesTest extends WP_UnitTestCase {
 
 		$error = $this->reader_themes->get_themes_api_error();
 		$this->assertWPError( $this->reader_themes->get_themes_api_error() );
-		$this->assertEquals(
-			'Test message',
+		$this->assertStringStartsWith(
+			'The request for reader themes from the WordPress.org resulted in an invalid response. Check your Site Health to confirm that your site can communicate with WordPress.org. Otherwise, please try again later or contact your host.',
 			$error->get_error_message()
 		);
+		if ( defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY ) {
+			$this->assertStringContains( 'Test message', $error->get_error_message() );
+			$this->assertStringContains( 'amp_test_error', $error->get_error_message() );
+		}
 	}
 
 	/**

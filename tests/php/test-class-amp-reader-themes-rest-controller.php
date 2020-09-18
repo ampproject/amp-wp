@@ -7,6 +7,8 @@
  */
 
 use AmpProject\AmpWP\Admin\ReaderThemes;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
 
 /**
  * Tests for AMP_Reader_Theme_REST_Controller.
@@ -16,6 +18,8 @@ use AmpProject\AmpWP\Admin\ReaderThemes;
  * @coversDefaultClass AMP_Reader_Theme_REST_Controller
  */
 class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
+	use AssertContainsCompatibility, ThemesApiRequestMocking;
+
 	/**
 	 * Test instance.
 	 *
@@ -157,10 +161,15 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 		};
 		add_filter( 'themes_api_result', $filter_cb );
 
+		$this->add_reader_themes_request_filter();
 		$response = $this->controller->get_items( new WP_REST_Request( 'GET', 'amp/v1' ) );
-		$this->assertEquals(
-			[ 'X-AMP-Theme-API-Error' => 'Test message' ],
-			$response->get_headers()
-		);
+		$headers  = $response->get_headers();
+		$this->assertArrayHasKey( 'X-AMP-Theme-API-Error', $headers );
+		$this->assertStringStartsWith( 'The request for reader themes from the WordPress.org resulted in an invalid response. Check your Site Health to confirm that your site can communicate with WordPress.org. Otherwise, please try again later or contact your host.', $headers['X-AMP-Theme-API-Error'] );
+
+		if ( defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY ) {
+			$this->assertStringContains( 'Test message', $headers['X-AMP-Theme-API-Error'] );
+			$this->assertStringContains( 'amp_test_error', $headers['X-AMP-Theme-API-Error'] );
+		}
 	}
 }
