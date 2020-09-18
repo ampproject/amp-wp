@@ -25,7 +25,7 @@ Themes can register support for this with `add_theme_support( AMP_Theme_Support:
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:366](/includes/amp-helper-functions.php#L366-L368)
+:link: [includes/amp-helper-functions.php:367](/includes/amp-helper-functions.php#L367-L369)
 
 <details>
 <summary>Show Code</summary>

@@ -12,7 +12,7 @@ Filters supported reader themes.
 
 ### Source
 
-:link: [src/Admin/ReaderThemes.php:119](/src/Admin/ReaderThemes.php#L119)
+:link: [src/Admin/ReaderThemes.php:127](/src/Admin/ReaderThemes.php#L127)
 
 <details>
 <summary>Show Code</summary>
