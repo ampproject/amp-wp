@@ -17,7 +17,7 @@ Users of IDEs that support opening files in via web protocols can use this filte
 
 ### Source
 
-:link: [includes/validation/class-amp-validation-error-taxonomy.php:2307](/includes/validation/class-amp-validation-error-taxonomy.php#L2307)
+:link: [includes/validation/class-amp-validation-error-taxonomy.php:2306](/includes/validation/class-amp-validation-error-taxonomy.php#L2306)
 
 <details>
 <summary>Show Code</summary>
