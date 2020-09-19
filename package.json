@@ -146,10 +146,10 @@
       "npm run lint:pkg-json"
     ],
     "**/*.css": [
-      "npm run lint:css:fix"
+      "npm run lint:css"
     ],
     "**/*.js": [
-      "npm run lint:js:fix"
+      "npm run lint:js"
     ],
     "**/!(amp).php": [
       "npm run lint:php"
