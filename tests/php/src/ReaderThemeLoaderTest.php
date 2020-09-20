@@ -5,7 +5,6 @@ namespace AmpProject\AmpWP\Tests;
 use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AmpProject\AmpWP\Admin\ReaderThemes;
-use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
@@ -117,6 +116,15 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 
 	/** @covers ::inject_theme_single_template_modifications() */
 	public function test_inject_theme_single_template_modifications() {
+		$active_theme_slug = 'twentytwenty';
+		$reader_theme_slug = 'twentynineteen';
+		if ( ! wp_get_theme( $active_theme_slug )->exists() || ! wp_get_theme( $reader_theme_slug )->exists() ) {
+			$this->markTestSkipped();
+		}
+		switch_theme( $active_theme_slug );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::READER_THEME, $reader_theme_slug );
+
 		$output = get_echo( [ $this->instance, 'inject_theme_single_template_modifications' ] );
 		$this->assertStringContains( '<script>', $output );
 	}

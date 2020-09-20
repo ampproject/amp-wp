@@ -10,7 +10,7 @@ namespace AmpProject\AmpWP\Tests\DevTools;
 use AmpProject\AmpWP\DevTools\CallbackReflection;
 use AmpProject\AmpWP\DevTools\FileReflection;
 use AmpProject\AmpWP\PluginRegistry;
-use AmpProject\AmpWP\Services;
+use AmpProject\AmpWP\ReaderThemeLoader;
 use ReflectionFunction;
 use ReflectionMethod;
 use WP_UnitTestCase;
@@ -39,8 +39,7 @@ class CallbackReflectionTest extends WP_UnitTestCase {
 
 		$this->register_core_themes();
 
-		$plugin_registry = new PluginRegistry();
-		$file_reflection = new FileReflection( $plugin_registry );
+		$file_reflection = new FileReflection( new PluginRegistry(), new ReaderThemeLoader() );
 		$file_reflection->register();
 		$this->callback_reflection = new CallbackReflection( $file_reflection );
 

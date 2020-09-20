@@ -47,7 +47,7 @@ class LikelyCulpritDetectorTest extends WP_UnitTestCase {
 	 * @covers ::analyze_backtrace
 	 */
 	public function test_analyze_backtrace() {
-		$source = [];
+		$source = null;
 
 		// We need to provide a way to trigger the culprit detection after the
 		// code has passed through a theme or plugin that is not seen as being
@@ -76,6 +76,8 @@ class LikelyCulpritDetectorTest extends WP_UnitTestCase {
 		do_action( 'setup_theme' );
 
 		do_action( 'trigger_action_to_execute' );
+
+		$this->assertInternalType( 'array', $source, 'Expected the action to be triggered.' );
 
 		$this->assertArrayHasKey( 'type', $source );
 		$this->assertArrayHasKey( 'name', $source );
