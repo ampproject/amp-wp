@@ -2,12 +2,11 @@
 
 namespace AmpProject\AmpWP\Tests\DevTools;
 
-use AmpProject\AmpWP\Services;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use RuntimeException;
-use WP_UnitTestCase;
 
-final class ErrorPageTest extends WP_UnitTestCase {
+final class ErrorPageTest extends DependencyInjectedTestCase {
 	use AssertContainsCompatibility;
 
 	public function test_error_page_output() {
@@ -18,7 +17,7 @@ final class ErrorPageTest extends WP_UnitTestCase {
 			stream_get_meta_data( $capture )['uri']
 		);
 
-		$output = Services::get( 'dev_tools.error_page' )
+		$output = $this->container->get( 'dev_tools.error_page' )
 			->with_title( 'Error Page Title' )
 			->with_message( 'Error Page Message' )
 			->with_exception( new RuntimeException( 'FAILURE', 42 ) )

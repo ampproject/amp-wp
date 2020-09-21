@@ -8,10 +8,9 @@
 namespace AmpProject\AmpWP\Tests\DevTools;
 
 use AmpProject\AmpWP\DevTools\LikelyCulpritDetector;
-use AmpProject\AmpWP\Services;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use RuntimeException;
-use WP_UnitTestCase;
 
 /**
  * Tests for LikelyCulpritDetector class.
@@ -20,7 +19,7 @@ use WP_UnitTestCase;
  *
  * @coversDefaultClass \AmpProject\AmpWP\DevTools\LikelyCulpritDetector
  */
-class LikelyCulpritDetectorTest extends WP_UnitTestCase {
+class LikelyCulpritDetectorTest extends DependencyInjectedTestCase {
 
 	use PrivateAccess;
 
@@ -34,7 +33,7 @@ class LikelyCulpritDetectorTest extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
-		$this->likely_culprit_detector = Services::get( 'injector' )->make( LikelyCulpritDetector::class );
+		$this->likely_culprit_detector = $this->injector->make( LikelyCulpritDetector::class );
 	}
 
 	/**
