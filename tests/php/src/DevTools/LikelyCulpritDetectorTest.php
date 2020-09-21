@@ -70,6 +70,7 @@ class LikelyCulpritDetectorTest extends DependencyInjectedTestCase {
 
 		$previous_theme = get_stylesheet();
 		switch_theme( 'custom' );
+		require get_template_directory() . '/functions.php';
 
 		// Refresh internal reflection caches.
 		do_action( 'setup_theme' );
