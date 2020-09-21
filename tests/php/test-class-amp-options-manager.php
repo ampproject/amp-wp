@@ -394,6 +394,91 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		);
 	}
 
+	/** @return array */
+	public function get_data_for_testing_supported_post_types_options_migration() {
+		return [
+			'reader_with_all_templates'          => [
+				[
+					'theme_support'           => 'reader',
+					'all_templates_supported' => true,
+					'supported_post_types'    => [ 'post' ],
+				],
+				[ 'post', 'book' ],
+			],
+			'reader_without_all_templates'       => [
+				[
+					'theme_support'           => 'reader',
+					'all_templates_supported' => false,
+					'supported_post_types'    => [ 'post' ],
+				],
+				[ 'post', 'book' ],
+			],
+			'transitional__with_all_templates'   => [
+				[
+					'theme_support'           => 'transitional',
+					'all_templates_supported' => true,
+					'supported_post_types'    => [ 'post' ],
+				],
+				[ 'post', 'page', 'book', 'attachment' ],
+			],
+			'transitional_without_all_templates' => [
+				[
+					'theme_support'           => 'transitional',
+					'all_templates_supported' => false,
+					'supported_post_types'    => [ 'post' ],
+				],
+				[ 'post', 'book' ],
+			],
+		];
+	}
+
+	/**
+	 * Test get_options when supported_post_types option is list of post types when upgrading from an old version.
+	 *
+	 * @dataProvider get_data_for_testing_supported_post_types_options_migration
+	 *
+	 * @param array $existing_options              Existing options.
+	 * @param array $expected_supported_post_types Expected supported post types.
+	 * @covers AMP_Options_Manager::get_options()
+	 */
+	public function test_get_options_migration_supported_post_types_from_upgrade( $existing_options, $expected_supported_post_types ) {
+		global $wpdb;
+		foreach ( get_post_types() as $post_type ) {
+			remove_post_type_support( $post_type, 'amp' );
+		}
+
+		register_post_type(
+			'book',
+			[
+				'public'   => true,
+				'supports' => [ 'amp' ],
+			]
+		);
+
+		delete_option( AMP_Options_Manager::OPTION_NAME );
+		$wpdb->insert(
+			$wpdb->options,
+			[
+				'option_name'  => AMP_Options_Manager::OPTION_NAME,
+				'option_value' => serialize( // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
+					array_merge(
+						[
+							'supported_templates' => [ 'is_singular' ],
+							'version'             => '1.5.5',
+						],
+						$existing_options
+					)
+				),
+			]
+		);
+		wp_cache_flush();
+
+		$this->assertEqualSets(
+			$expected_supported_post_types,
+			array_unique( AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES ) )
+		);
+	}
+
 	/**
 	 * Test get_options when all_templates_supported theme support is used.
 	 *
