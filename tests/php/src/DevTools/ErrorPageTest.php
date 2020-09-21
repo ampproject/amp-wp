@@ -2,6 +2,7 @@
 
 namespace AmpProject\AmpWP\Tests\DevTools;
 
+use AmpProject\AmpWP\DevTools\ErrorPage;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use RuntimeException;
@@ -17,7 +18,7 @@ final class ErrorPageTest extends DependencyInjectedTestCase {
 			stream_get_meta_data( $capture )['uri']
 		);
 
-		$output = $this->container->get( 'dev_tools.error_page' )
+		$output = $this->injector->make( ErrorPage::class )
 			->with_title( 'Error Page Title' )
 			->with_message( 'Error Page Message' )
 			->with_exception( new RuntimeException( 'FAILURE', 42 ) )

@@ -35,4 +35,10 @@ namespace PHPSTORM_META {
 			'validated_url_stylesheet_gc'       => \AmpProject\AmpWP\BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection::class,
 		] )
 	);
+
+	// For the injector, the return type should be the same as what the provided FQCN represents.
+	override(
+		\AmpProject\AmpWP\Infrastructure\Injector::make(),
+		map( [ '' => '@' ] )
+	);
 }
