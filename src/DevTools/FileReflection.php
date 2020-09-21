@@ -136,7 +136,8 @@ final class FileReflection implements Service, Registerable {
 	/**
 	 * FileReflection constructor.
 	 *
-	 * @param PluginRegistry $plugin_registry Plugin registry to use.
+	 * @param PluginRegistry    $plugin_registry     Plugin registry to use.
+	 * @param ReaderThemeLoader $reader_theme_loader Reader theme loader to use.
 	 */
 	public function __construct( PluginRegistry $plugin_registry, ReaderThemeLoader $reader_theme_loader ) {
 		$this->plugin_registry     = $plugin_registry;
