@@ -58,8 +58,7 @@ abstract class DependencyInjectedTestCase extends WP_UnitTestCase {
 	/**
 	 * Clean up again after each test run.
 	 */
-	public function tearDown()
-	{
+	public function tearDown() {
 		parent::tearDown();
 
 		// The static Services helper has to be modified to use the same objects
