@@ -8,10 +8,9 @@
 namespace AmpProject\AmpWP\Tests\DevTools;
 
 use AmpProject\AmpWP\DevTools\LikelyCulpritDetector;
-use AmpProject\AmpWP\Services;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use RuntimeException;
-use WP_UnitTestCase;
 
 /**
  * Tests for LikelyCulpritDetector class.
@@ -20,7 +19,7 @@ use WP_UnitTestCase;
  *
  * @coversDefaultClass \AmpProject\AmpWP\DevTools\LikelyCulpritDetector
  */
-class LikelyCulpritDetectorTest extends WP_UnitTestCase {
+class LikelyCulpritDetectorTest extends DependencyInjectedTestCase {
 
 	use PrivateAccess;
 
@@ -34,7 +33,7 @@ class LikelyCulpritDetectorTest extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
-		$this->likely_culprit_detector = Services::get( 'injector' )->make( LikelyCulpritDetector::class );
+		$this->likely_culprit_detector = $this->injector->make( LikelyCulpritDetector::class );
 	}
 
 	/**
@@ -47,7 +46,7 @@ class LikelyCulpritDetectorTest extends WP_UnitTestCase {
 	 * @covers ::analyze_backtrace
 	 */
 	public function test_analyze_backtrace() {
-		$source = [];
+		$source = null;
 
 		// We need to provide a way to trigger the culprit detection after the
 		// code has passed through a theme or plugin that is not seen as being
@@ -71,11 +70,14 @@ class LikelyCulpritDetectorTest extends WP_UnitTestCase {
 
 		$previous_theme = get_stylesheet();
 		switch_theme( 'custom' );
+		require get_template_directory() . '/functions.php';
 
 		// Refresh internal reflection caches.
 		do_action( 'setup_theme' );
 
 		do_action( 'trigger_action_to_execute' );
+
+		$this->assertInternalType( 'array', $source, 'Expected the action to be triggered.' );
 
 		$this->assertArrayHasKey( 'type', $source );
 		$this->assertArrayHasKey( 'name', $source );

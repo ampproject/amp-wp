@@ -160,6 +160,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			Instrumentation\StopWatch::class,
 			DevTools\CallbackReflection::class,
 			DevTools\FileReflection::class,
+			ReaderThemeLoader::class,
 		];
 	}
 

@@ -8,8 +8,7 @@
 namespace AmpProject\AmpWP\Tests\DevTools;
 
 use AmpProject\AmpWP\DevTools\FileReflection;
-use AmpProject\AmpWP\Services;
-use WP_UnitTestCase;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 
 /**
  * Tests for FileReflection class.
@@ -18,7 +17,7 @@ use WP_UnitTestCase;
  *
  * @coversDefaultClass \AmpProject\AmpWP\DevTools\FileReflection
  */
-class FileReflectionTest extends WP_UnitTestCase {
+class FileReflectionTest extends DependencyInjectedTestCase {
 
 	/**
 	 * Test instance.
@@ -29,7 +28,7 @@ class FileReflectionTest extends WP_UnitTestCase {
 
 	public function setUp() {
 		parent::setUp();
-		$this->file_reflection = Services::get( 'injector' )->make( FileReflection::class );
+		$this->file_reflection = $this->injector->make( FileReflection::class );
 	}
 
 	/**

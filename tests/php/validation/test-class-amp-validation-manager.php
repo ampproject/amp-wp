@@ -7,9 +7,10 @@
 
 // phpcs:disable Generic.Formatting.MultipleStatementAlignment.NotSameWarning
 
+use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
-use AmpProject\AmpWP\Services;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
@@ -23,7 +24,7 @@ use AmpProject\Dom\Document;
  * @covers AMP_Validation_Manager
  * @since 0.7
  */
-class Test_AMP_Validation_Manager extends WP_UnitTestCase {
+class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 	use AssertContainsCompatibility;
 	use HandleValidation;
@@ -490,7 +491,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$editor_user_id = self::factory()->user->create( [ 'role' => 'editor' ] );
 
 		wp_set_current_user( $admin_user_id );
-		$service = Services::get( 'dev_tools.user_access' );
+		$service = $this->injector->make( UserAccess::class );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$_SERVER['REQUEST_METHOD'] = 'POST';
@@ -631,7 +632,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		// Make user preference is honored.
-		$service = Services::get( 'dev_tools.user_access' );
+		$service = $this->injector->make( UserAccess::class );
 		$service->set_user_enabled( wp_get_current_user()->ID, false );
 		$this->assertNull(
 			AMP_Validation_Manager::get_amp_validity_rest_field(
@@ -893,7 +894,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertStringContains( $expected_notice_non_accepted_errors, $output );
 
 		// Ensure not displayed when dev tools is disabled.
-		$service = Services::get( 'dev_tools.user_access' );
+		$service = $this->injector->make( UserAccess::class );
 		$service->set_user_enabled( wp_get_current_user()->ID, false );
 		$output = get_echo( [ 'AMP_Validation_Manager', 'print_edit_form_validation_status' ], [ $post ] );
 		$this->assertStringNotContains( 'notice notice-warning', $output );
@@ -2533,7 +2534,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertFalse( wp_script_is( $slug, 'enqueued' ) );
 
 		// Ensure not displayed when dev tools is disabled.
-		$service = Services::get( 'dev_tools.user_access' );
+		$service = $this->injector->make( UserAccess::class );
 		$this->set_capability();
 		$service->set_user_enabled( wp_get_current_user()->ID, false );
 		AMP_Validation_Manager::enqueue_block_validation();

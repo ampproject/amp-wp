@@ -9,11 +9,9 @@ namespace AmpProject\AmpWP\Tests\DevTools;
 
 use AmpProject\AmpWP\DevTools\CallbackReflection;
 use AmpProject\AmpWP\DevTools\FileReflection;
-use AmpProject\AmpWP\PluginRegistry;
-use AmpProject\AmpWP\Services;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use ReflectionFunction;
 use ReflectionMethod;
-use WP_UnitTestCase;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 
 /**
@@ -23,7 +21,7 @@ use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
  *
  * @coversDefaultClass \AmpProject\AmpWP\DevTools\CallbackReflection
  */
-class CallbackReflectionTest extends WP_UnitTestCase {
+class CallbackReflectionTest extends DependencyInjectedTestCase {
 
 	use LoadsCoreThemes;
 
@@ -39,10 +37,7 @@ class CallbackReflectionTest extends WP_UnitTestCase {
 
 		$this->register_core_themes();
 
-		$plugin_registry = new PluginRegistry();
-		$file_reflection = new FileReflection( $plugin_registry );
-		$file_reflection->register();
-		$this->callback_reflection = new CallbackReflection( $file_reflection );
+		$this->callback_reflection = $this->injector->make( CallbackReflection::class );
 
 		$theme_root = dirname( dirname( __DIR__ ) ) . '/data/themes';
 		add_filter(
