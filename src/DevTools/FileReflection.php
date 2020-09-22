@@ -244,12 +244,9 @@ final class FileReflection implements Service, Registerable {
 	 */
 	private function get_template_directory() {
 		if ( null === $this->template_directory ) {
-			if ( $this->reader_theme_loader->is_theme_overridden() ) {
-				$template_directory = $this->reader_theme_loader->get_reader_theme()->get_template_directory();
-			} else {
-				$template_directory = get_template_directory();
-			}
-			$this->template_directory = wp_normalize_path( $template_directory );
+			$this->template_directory = wp_normalize_path(
+				get_template_directory()
+			);
 		}
 
 		return $this->template_directory;
@@ -262,11 +259,7 @@ final class FileReflection implements Service, Registerable {
 	 */
 	private function get_template_slug() {
 		if ( null === $this->template_slug ) {
-			if ( $this->reader_theme_loader->is_theme_overridden() ) {
-				$this->template_slug = $this->reader_theme_loader->get_reader_theme()->get_template();
-			} else {
-				$this->template_slug = get_template();
-			}
+			$this->template_slug = get_template();
 		}
 
 		return $this->template_slug;
@@ -279,12 +272,9 @@ final class FileReflection implements Service, Registerable {
 	 */
 	private function get_stylesheet_directory() {
 		if ( null === $this->stylesheet_directory ) {
-			if ( $this->reader_theme_loader->is_theme_overridden() ) {
-				$stylesheet_directory = $this->reader_theme_loader->get_reader_theme()->get_stylesheet_directory();
-			} else {
-				$stylesheet_directory = get_stylesheet_directory();
-			}
-			$this->stylesheet_directory = wp_normalize_path( $stylesheet_directory );
+			$this->stylesheet_directory = wp_normalize_path(
+				get_stylesheet_directory()
+			);
 		}
 
 		return $this->stylesheet_directory;
@@ -297,11 +287,7 @@ final class FileReflection implements Service, Registerable {
 	 */
 	private function get_stylesheet_slug() {
 		if ( null === $this->stylesheet_slug ) {
-			if ( $this->reader_theme_loader->is_theme_overridden() ) {
-				$this->stylesheet_slug = $this->reader_theme_loader->get_reader_theme()->get_stylesheet();
-			} else {
-				$this->stylesheet_slug = get_stylesheet();
-			}
+			$this->stylesheet_slug = get_stylesheet();
 		}
 		return $this->stylesheet_slug;
 	}
