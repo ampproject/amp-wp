@@ -40,6 +40,8 @@ abstract class DependencyInjectedTestCase extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
+		// We're intentionally avoiding the AmpWpPluginFactory here as it uses a
+		// static instance, because its whole point is to allow reuse across consumers.
 		$this->plugin = new AmpWpPlugin();
 		$this->plugin->register();
 
