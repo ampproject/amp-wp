@@ -169,7 +169,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 						'a' => [ 'href' => true ],
 					]
 				),
-				esc_url( add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, admin_url( 'admin.php' ) ) )
+				esc_url( add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, admin_url( 'admin.php' ) ) . '#reader-themes' )
 			);
 		}
 
