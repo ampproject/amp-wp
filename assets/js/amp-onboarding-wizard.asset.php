@@ -1,0 +1,1 @@
+<?php return array('dependencies' => array('lodash', 'wp-api-fetch', 'wp-dom-ready', 'wp-html-entities', 'wp-url'), 'version' => '8bfd1103b11764922404990188c2088b');
