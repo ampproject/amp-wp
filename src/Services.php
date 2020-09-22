@@ -8,6 +8,7 @@
 namespace AmpProject\AmpWP;
 
 use AmpProject\AmpWP\Infrastructure\Injector;
+use AmpProject\AmpWP\Infrastructure\Plugin;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Infrastructure\ServiceContainer;
 
@@ -26,7 +27,7 @@ final class Services {
 	/**
 	 * Plugin object instance.
 	 *
-	 * @var AmpWpPlugin
+	 * @var Plugin
 	 */
 	private static $plugin;
 
@@ -57,7 +58,7 @@ final class Services {
 	/**
 	 * Get an instance of the plugin.
 	 *
-	 * @return AmpWpPlugin Plugin object instance.
+	 * @return Plugin Plugin object instance.
 	 */
 	public static function get_plugin() {
 		if ( null === self::$plugin ) {
