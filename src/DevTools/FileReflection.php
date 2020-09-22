@@ -178,9 +178,18 @@ final class FileReflection implements Service, Registerable {
 	 * }
 	 */
 	public function get_file_source( $file ) {
+		static $recursion_protection = false;
+
+		if ( $recursion_protection ) {
+			return [];
+		}
+
+		$recursion_protection = true;
+
 		$matches = [];
 
 		if ( $this->is_parent_theme_file( $file, $matches ) ) {
+			$recursion_protection = false;
 			return $this->get_file_source_array(
 				self::TYPE_THEME,
 				$this->get_template_slug(),
@@ -189,6 +198,7 @@ final class FileReflection implements Service, Registerable {
 		}
 
 		if ( $this->is_child_theme_file( $file, $matches ) ) {
+			$recursion_protection = false;
 			return $this->get_file_source_array(
 				self::TYPE_THEME,
 				$this->get_stylesheet_slug(),
@@ -197,6 +207,7 @@ final class FileReflection implements Service, Registerable {
 		}
 
 		if ( $this->is_plugin_file( $file, $matches ) ) {
+			$recursion_protection = false;
 			return $this->get_file_source_array(
 				self::TYPE_PLUGIN,
 				$matches['slug'],
@@ -205,6 +216,7 @@ final class FileReflection implements Service, Registerable {
 		}
 
 		if ( $this->is_mu_plugin_file( $file, $matches ) ) {
+			$recursion_protection = false;
 			return $this->get_file_source_array(
 				self::TYPE_MU_PLUGIN,
 				$matches['slug'],
@@ -213,6 +225,7 @@ final class FileReflection implements Service, Registerable {
 		}
 
 		if ( $this->is_core_file( $file, $matches ) ) {
+			$recursion_protection = false;
 			return $this->get_file_source_array(
 				self::TYPE_CORE,
 				$matches['slug'],
@@ -220,6 +233,7 @@ final class FileReflection implements Service, Registerable {
 			);
 		}
 
+		$recursion_protection = false;
 		return [];
 	}
 
