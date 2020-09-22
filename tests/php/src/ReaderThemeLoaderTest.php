@@ -25,7 +25,6 @@ final class ReaderThemeLoaderTest extends DependencyInjectedTestCase {
 
 	public function setUp() {
 		parent::setUp();
-		remove_all_filters( 'wp_prepare_themes_for_js' );
 		$this->instance = $this->injector->make( ReaderThemeLoader::class );
 
 		$this->register_core_themes();

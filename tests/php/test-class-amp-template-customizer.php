@@ -7,7 +7,6 @@
 
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\ReaderThemeLoader;
-use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
@@ -160,7 +159,7 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentytwenty' );
 
-		$reader_theme_loader = Services::get( 'reader_theme_loader' );
+		$reader_theme_loader = $this->injector->make( ReaderThemeLoader::class );
 
 		$_GET[ amp_get_slug() ] = '1';
 		$reader_theme_loader->override_theme();
@@ -214,7 +213,7 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentytwenty' );
 
-		$reader_theme_loader = Services::get( 'reader_theme_loader' );
+		$reader_theme_loader = $this->injector->make( ReaderThemeLoader::class );
 
 		$reader_theme_loader->override_theme();
 		$this->assertFalse( $reader_theme_loader->is_theme_overridden() );
