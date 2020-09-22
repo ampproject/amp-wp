@@ -35,7 +35,7 @@ abstract class DependencyInjectedTestCase extends WP_UnitTestCase {
 	protected $injector;
 
 	/**
-	 * Runs the routine before each test is executed.
+	 * Set up the service architecture before each test run.
 	 */
 	public function setUp() {
 		parent::setUp();
@@ -53,5 +53,19 @@ abstract class DependencyInjectedTestCase extends WP_UnitTestCase {
 		$this->set_private_property( Services::class, 'plugin', $this->plugin );
 		$this->set_private_property( Services::class, 'container', $this->container );
 		$this->set_private_property( Services::class, 'injector', $this->injector );
+	}
+
+	/**
+	 * Clean up again after each test run.
+	 */
+	public function tearDown()
+	{
+		parent::tearDown();
+
+		// The static Services helper has to be modified to use the same objects
+		// as the ones that are injected into the tests.
+		$this->set_private_property( Services::class, 'plugin', null );
+		$this->set_private_property( Services::class, 'container', null );
+		$this->set_private_property( Services::class, 'injector', null );
 	}
 }
