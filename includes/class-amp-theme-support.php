@@ -411,7 +411,7 @@ class AMP_Theme_Support {
 			global $wp;
 			$path_args = [];
 			wp_parse_str( $wp->matched_query, $path_args );
-			if ( isset( $path_args[ amp_get_slug() ] ) && '1' !== $path_args[ amp_get_slug() ] ) {
+			if ( isset( $path_args[ amp_get_slug() ] ) && '' !== $path_args[ amp_get_slug() ] ) {
 				if ( wp_safe_redirect( amp_get_permalink( get_queried_object_id() ), 301 ) ) {
 					// @codeCoverageIgnoreStart
 					exit;

@@ -1915,16 +1915,16 @@ function amp_generate_script_hash( $script ) {
  * @return string AMP URL.
  */
 function amp_get_url( $url ) {
-	return add_query_arg( amp_get_slug(), 1, $url );
+	return add_query_arg( amp_get_slug(), '1', $url );
 }
 
 /**
- * Determine whether the current request has the AMP query parameter set with the required value '1'.
+ * Determine whether the current request has the AMP query parameter set.
  *
  * @since 2.1
  *
  * @return bool True if the AMP query parameter is set with the required value, false if not.
  */
 function amp_has_query_var() {
-	return isset( $_GET[ amp_get_slug() ] ) && 1 === filter_var( $_GET[ amp_get_slug() ], FILTER_VALIDATE_INT ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	return isset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 }
