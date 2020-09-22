@@ -10,7 +10,6 @@ namespace AmpProject\AmpWP\DevTools;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\PluginRegistry;
-use AmpProject\AmpWP\ReaderThemeLoader;
 
 /**
  * Reflect on a file to deduce its type of source (plugin, theme, core).
@@ -44,13 +43,6 @@ final class FileReflection implements Service, Registerable {
 	 * @var PluginRegistry
 	 */
 	private $plugin_registry;
-
-	/**
-	 * Reader theme loader instance to use.
-	 *
-	 * @var ReaderThemeLoader
-	 */
-	private $reader_theme_loader;
 
 	/**
 	 * Plugin file pattern to use.
@@ -136,12 +128,10 @@ final class FileReflection implements Service, Registerable {
 	/**
 	 * FileReflection constructor.
 	 *
-	 * @param PluginRegistry    $plugin_registry     Plugin registry to use.
-	 * @param ReaderThemeLoader $reader_theme_loader Reader theme loader to use.
+	 * @param PluginRegistry $plugin_registry Plugin registry to use.
 	 */
-	public function __construct( PluginRegistry $plugin_registry, ReaderThemeLoader $reader_theme_loader ) {
-		$this->plugin_registry     = $plugin_registry;
-		$this->reader_theme_loader = $reader_theme_loader;
+	public function __construct( PluginRegistry $plugin_registry ) {
+		$this->plugin_registry = $plugin_registry;
 	}
 
 	/**
@@ -289,6 +279,7 @@ final class FileReflection implements Service, Registerable {
 		if ( null === $this->stylesheet_slug ) {
 			$this->stylesheet_slug = get_stylesheet();
 		}
+
 		return $this->stylesheet_slug;
 	}
 
