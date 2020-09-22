@@ -3,35 +3,18 @@
 namespace AmpProject\AmpWP\Tests\Instrumentation;
 
 use AMP_HTTP;
-use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Instrumentation\Event;
 use AmpProject\AmpWP\Instrumentation\EventWithDuration;
 use AmpProject\AmpWP\Instrumentation\ServerTiming;
 use AmpProject\AmpWP\QueryVar;
-use AmpProject\AmpWP\Services;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use WP_UnitTestCase;
 
-final class ServerTimingTest extends WP_UnitTestCase {
+final class ServerTimingTest extends DependencyInjectedTestCase {
 
 	use AssertContainsCompatibility;
 	use PrivateAccess;
-
-	/**
-	 * Injector instance to use.
-	 *
-	 * @var Injector
-	 */
-	private $injector;
-
-	/**
-	 * Set up the tests.
-	 */
-	public function setUp() {
-		$this->injector = Services::get( 'injector' );
-		parent::setUp();
-	}
 
 	/**
 	 * @covers \AmpProject\AmpWP\Instrumentation\ServerTiming::register()
