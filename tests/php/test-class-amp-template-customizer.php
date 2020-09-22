@@ -11,13 +11,14 @@ use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 
 /**
  * Class Test_AMP_Template_Customizer
  *
  * @covers AMP_Template_Customizer
  */
-class Test_AMP_Template_Customizer extends WP_UnitTestCase {
+class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 
 	use AssertContainsCompatibility;
 	use PrivateAccess;
@@ -413,7 +414,7 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		);
 
 		// Switch to Reader theme.
-		$reader_theme_loader    = Services::get( 'reader_theme_loader' );
+		$reader_theme_loader    = $this->injector->make( ReaderThemeLoader::class );
 		$_GET[ amp_get_slug() ] = '1';
 		$reader_theme_loader->override_theme();
 		$this->assertTrue( $reader_theme_loader->is_theme_overridden() );
@@ -422,7 +423,7 @@ class Test_AMP_Template_Customizer extends WP_UnitTestCase {
 		// Initialize Customizer.
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$wp_customize = $this->get_customize_manager();
-		$instance     = AMP_Template_Customizer::init( $wp_customize );
+		$instance     = AMP_Template_Customizer::init( $wp_customize, $reader_theme_loader );
 		add_theme_support( 'custom-background' );
 		$wp_customize->register_controls();
 		$wp_customize->nav_menus->customize_register();

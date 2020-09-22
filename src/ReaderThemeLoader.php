@@ -129,7 +129,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 		}
 
 		$reader_theme_obj = $this->get_reader_theme();
-		if ( ! $reader_theme_obj ) {
+		if ( ! $reader_theme_obj instanceof WP_Theme ) {
 			return $prepared_themes;
 		}
 		$reader_theme = $reader_theme_obj->get_stylesheet();
