@@ -61,8 +61,6 @@ abstract class DependencyInjectedTestCase extends WP_UnitTestCase {
 	public function tearDown() {
 		parent::tearDown();
 
-		// The static Services helper has to be modified to use the same objects
-		// as the ones that are injected into the tests.
 		$this->set_private_property( Services::class, 'plugin', null );
 		$this->set_private_property( Services::class, 'container', null );
 		$this->set_private_property( Services::class, 'injector', null );
