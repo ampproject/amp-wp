@@ -82,7 +82,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		remove_theme_support( 'custom-header' );
 		$_REQUEST                = []; // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
 		$_SERVER['QUERY_STRING'] = '';
-		unset( $_SERVER['REQUEST_URI'] );
+		$_SERVER['REQUEST_URI']  = '';
 		unset( $_SERVER['REQUEST_METHOD'] );
 		unset( $GLOBALS['content_width'] );
 		if ( isset( $GLOBALS['wp_customize'] ) ) {
