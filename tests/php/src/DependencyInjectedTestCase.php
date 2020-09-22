@@ -7,7 +7,7 @@ use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Infrastructure\ServiceContainer;
 use WP_UnitTestCase;
 
-class DependencyInjectedTestCase extends WP_UnitTestCase {
+abstract class DependencyInjectedTestCase extends WP_UnitTestCase {
 
 	/**
 	 * Plugin instance to test with.
