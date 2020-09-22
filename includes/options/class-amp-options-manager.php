@@ -241,8 +241,8 @@ class AMP_Options_Manager {
 				(array) get_post_types_by_support( AMP_Post_Type_Support::SLUG )
 			);
 
-			// Make sure that all post types get enabled if all templates were supported since they are now independently controlled.
-			if ( ! empty( $options[ Option::ALL_TEMPLATES_SUPPORTED ] ) ) {
+			// Make sure that all post types get enabled if all templates were supported since they are now independently controlled. This only applies to non-Reader mode.
+			if ( ! empty( $options[ Option::ALL_TEMPLATES_SUPPORTED ] ) && AMP_Theme_Support::READER_MODE_SLUG !== $options[ Option::THEME_SUPPORT ] ) {
 				$options[ Option::SUPPORTED_POST_TYPES ] = array_merge(
 					$options[ Option::SUPPORTED_POST_TYPES ],
 					AMP_Post_Type_Support::get_eligible_post_types()
