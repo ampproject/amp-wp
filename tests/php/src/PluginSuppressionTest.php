@@ -398,6 +398,8 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 	 * @covers AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source()
 	 */
 	public function test_sanitize_options() {
+		remove_all_filters( 'amp_options_updating' ); // @todo Figure out why this is needed to prevent duplicate PluginSuppression::sanitize_options() callbacks from being added.
+
 		$instance = $this->get_instance();
 		$instance->register();
 
