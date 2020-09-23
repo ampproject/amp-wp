@@ -155,7 +155,7 @@
       "npm run lint:php"
     ],
     "amp.php": [
-      "npm run lint:plugin-bootstrap"
+      "vendor/bin/phpcs --runtime-set testVersion 5.2-"
     ]
   },
   "npmpackagejsonlint": {
