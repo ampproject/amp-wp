@@ -19,7 +19,7 @@
     "url": "https://github.com/ampproject/amp-wp/issues"
   },
   "dependencies": {
-    "@babel/polyfill": "7.10.1",
+    "@babel/polyfill": "7.11.5",
     "@wordpress/api-fetch": "3.17.0",
     "@wordpress/autop": "2.9.0",
     "@wordpress/compose": "3.20.0",
