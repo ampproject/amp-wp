@@ -20,7 +20,7 @@ use DOMElement;
 use DOMNode;
 
 /**
- * PreloadHeroImage - this transformers optimizes image rendering times for hero images. For hero images it will:
+ * PreloadHeroImage - this transformer optimizes image rendering times for hero images. For hero images it will:
  *
  * 1. Inject a preload hint (if possible)
  * 2. Generate an img tag enabling the browser to render the image without the AMP runtime being loaded.
