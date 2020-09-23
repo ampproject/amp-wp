@@ -116,11 +116,7 @@ final class PreloadHeroImage implements Transformer
 
         for ($index = 0; $index < $heroImageCount; $index++) {
             $this->generatePreload($heroImages[$index], $document, $errors, $referenceNode);
-            if (! $isAmpStory) {
-                // AMP Stories don't support SSR'd <amp-img> yet.
-                // See https://github.com/ampproject/amphtml/issues/29850.
-                $this->generateImg($heroImages[$index], $document);
-            }
+            $this->generateImg($heroImages[$index], $document);
         }
     }
 
