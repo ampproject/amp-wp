@@ -1610,7 +1610,7 @@ final class Document extends DOMDocument
                     $this->body = $this->getElementsByTagName(Tag::BODY)->item(0);
                 }
                 return $this->body;
-            case 'viewport':
+            case Attribute::VIEWPORT:
                 // This is not cached as it could potentially be requested too early, before the viewport was added, and
                 // the cache would then store null without rechecking later on after the viewport has been added.
                 for ($node = $this->head->firstChild; $node !== null; $node = $node->nextSibling) {
