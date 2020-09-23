@@ -10,8 +10,8 @@ namespace AmpProject\AmpWP\Tests\PhpStan;
 use AmpProject\AmpWP\AmpWpPlugin;
 use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\Services;
-use PhpParser\Node\Expr\StaticCall;
+use AmpProject\AmpWP\Infrastructure\ServiceContainer;
+use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Scalar\String_;
 use PHPStan\Analyser\Scope;
@@ -19,7 +19,7 @@ use PHPStan\Reflection\MethodReflection;
 use PHPStan\Reflection\ParametersAcceptorSelector;
 use PHPStan\ShouldNotHappenException;
 use PHPStan\Type\Constant\ConstantBooleanType;
-use PHPStan\Type\DynamicStaticMethodReturnTypeExtension;
+use PHPStan\Type\DynamicMethodReturnTypeExtension;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\Type;
 
@@ -31,32 +31,32 @@ use PHPStan\Type\Type;
  * phpcs:disable PHPCompatibility.FunctionDeclarations.NewReturnTypeDeclarations
  * phpcs:disable VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
  */
-final class ServicesDynamicReturnTypeExtension implements DynamicStaticMethodReturnTypeExtension {
+final class ServiceContainerDynamicReturnTypeExtension implements DynamicMethodReturnTypeExtension {
 
 	public function getClass(): string {
-		return Services::class;
+		return ServiceContainer::class;
 	}
 
-	public function isStaticMethodSupported(
+	public function isMethodSupported(
 		MethodReflection $methodReflection
 	): bool {
 		return in_array( $methodReflection->getName(), [ 'get' ], true );
 	}
 
-	public function getTypeFromStaticMethodCall(
+	public function getTypeFromMethodCall(
 		MethodReflection $methodReflection,
-		StaticCall $methodCall,
+		MethodCall $methodCall,
 		Scope $scope
 	): Type {
 		switch ( $methodReflection->getName() ) {
 			case 'get':
-				return $this->getGetTypeFromStaticMethodCall(
+				return $this->getGetTypeFromMethodCall(
 					$methodReflection,
 					$methodCall
 				);
 
 			case 'has':
-				return $this->getHasTypeFromStaticMethodCall(
+				return $this->getHasTypeFromMethodCall(
 					$methodReflection,
 					$methodCall
 				);
@@ -65,9 +65,9 @@ final class ServicesDynamicReturnTypeExtension implements DynamicStaticMethodRet
 		throw new ShouldNotHappenException();
 	}
 
-	private function getGetTypeFromStaticMethodCall(
+	private function getGetTypeFromMethodCall(
 		MethodReflection $methodReflection,
-		StaticCall $methodCall
+		MethodCall $methodCall
 	): Type {
 		$return_type = ParametersAcceptorSelector::selectSingle(
 			$methodReflection->getVariants()

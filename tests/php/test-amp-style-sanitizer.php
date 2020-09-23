@@ -1596,8 +1596,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				<meta charset="utf-8">
 				<style>.sidebar1 { display:none }</style>
 				<style>.sidebar1.expanded { display:block }</style>
+				<style>.sidebar1.hidden { visibility:hidden }</style>
 				<style>.sidebar2{ visibility:hidden }</style>
-				<style>.sidebar2.visible { display:block }</style>
+				<style>.sidebar2.visible, .sidebar2.displayed, .sidebar2.shown { display:block }</style>
+				<style>.sidebar3.open, .sidebar3.abierto { display:block }</style>
+				<style>.sidebar3.cerrado { display:none }</style>
 				<style>.nothing { visibility:hidden; }</style>
 			</head>
 			<body>
@@ -1608,8 +1611,12 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 						}
 					</script>
 				</amp-state>
-				<aside class="sidebar1" [class]="! mySidebar.expanded ? '' : 'expanded'">...</aside>
-				<aside class="sidebar2" [class]='mySidebar.expanded ? "visible" : ""'>...</aside>
+				<aside class="sidebar1" [class]="! mySidebar.expanded ? 'hidden' : ' expanded '">...</aside>
+				<aside class="sidebar2" [class]='mySidebar.expanded ? "visible shown" : ""'>...</aside>
+				<aside class="sidebar3" [class]='mySidebar.expanded ? " open abierto " : "
+					closed
+					cerrado
+				"'>...</aside>
 			</body>
 		</html>
 		<?php
@@ -1628,11 +1635,19 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer->sanitize();
 		$this->assertEquals( [], $error_codes );
 		$actual_stylesheets = array_values( $sanitizer->get_stylesheets() );
-		$this->assertEquals( '.sidebar1{display:none}', $actual_stylesheets[0] );
-		$this->assertEquals( '.sidebar1.expanded{display:block}', $actual_stylesheets[1] );
-		$this->assertEquals( '.sidebar2{visibility:hidden}', $actual_stylesheets[2] );
-		$this->assertEquals( '.sidebar2.visible{display:block}', $actual_stylesheets[3] );
-		$this->assertEmpty( $actual_stylesheets[4] );
+		$this->assertEquals(
+			[
+				'.sidebar1{display:none}',
+				'.sidebar1.expanded{display:block}',
+				'.sidebar1.hidden{visibility:hidden}',
+				'.sidebar2{visibility:hidden}',
+				'.sidebar2.visible,.sidebar2.shown{display:block}',
+				'.sidebar3.open,.sidebar3.abierto{display:block}',
+				'.sidebar3.cerrado{display:none}',
+				'',
+			],
+			$actual_stylesheets
+		);
 	}
 
 	/**
@@ -2107,7 +2122,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 			'denylisted_and_allowlisted_keyframe_properties' => [
 				'<style amp-keyframes>@keyframes anim1 { 50% { width: 50%; animation-timing-function: ease; opacity: 0.5; height:10%; offset-distance: 50%; visibility: visible; transform: rotate(0.5turn); -webkit-transform: rotate(0.5turn); color:red; } }</style>',
-				'<style amp-keyframes="">@keyframes anim1{50%{animation-timing-function:ease;opacity:.5;offset-distance:50%;visibility:visible;transform:rotate(.5 turn);-webkit-transform:rotate(.5 turn)}}</style>',
+				'<style amp-keyframes="">@keyframes anim1{50%{animation-timing-function:ease;opacity:.5;offset-distance:50%;visibility:visible;transform:rotate(.5turn);-webkit-transform:rotate(.5turn)}}</style>',
 				array_fill( 0, 3, AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_PROPERTY ),
 			],
 
@@ -2115,6 +2130,12 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<style amp-keyframes>body { color:red; opacity:1; } @keyframes anim1 { 50% { opacity:0.5 !important; } } @font-face { font-family: "Open Sans"; src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"); }</style>',
 				'<style amp-keyframes="">@keyframes anim1{50%{opacity:.5}}</style>',
 				[ AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_DECLARATION, AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_IMPORTANT, AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE ],
+			],
+
+			'style_amp_keyframes_turn_unit' => [
+				'<style amp-keyframes>@keyframes spin{ to { transform: rotate(1turn) } }</style>',
+				'<style amp-keyframes="">@keyframes spin{to{transform:rotate(1turn)}}</style>',
+				[],
 			],
 		];
 	}

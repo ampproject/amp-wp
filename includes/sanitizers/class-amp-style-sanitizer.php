@@ -538,7 +538,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		// Find all [class] attributes and capture the contents of any single- or double-quoted strings.
 		foreach ( $this->dom->xpath->query( '//*/@' . Document::AMP_BIND_DATA_ATTR_PREFIX . 'class' ) as $bound_class_attribute ) {
 			if ( preg_match_all( '/([\'"])([^\1]*?)\1/', $bound_class_attribute->nodeValue, $matches ) ) {
-				$classes = array_merge( $classes, $matches[2] );
+				$classes = array_merge(
+					$classes,
+					preg_split( '/\s+/', trim( implode( ' ', $matches[2] ) ) )
+				);
 			}
 		}
 
@@ -1561,7 +1564,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$parsed         = null;
 		$cache_key      = null;
 		$cached         = true;
-		$cache_group    = 'amp-parsed-stylesheet-v32'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
+		$cache_group    = 'amp-parsed-stylesheet-v33'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
 		$use_transients = $this->should_use_transient_caching();
 
 		$cache_impacting_options = array_merge(

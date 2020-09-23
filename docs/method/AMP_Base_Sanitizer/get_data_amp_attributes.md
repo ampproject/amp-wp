@@ -16,7 +16,7 @@ Get data-amp-* values from the parent node &#039;figure&#039; added by editor bl
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:665](/includes/sanitizers/class-amp-base-sanitizer.php#L665-L681)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:671](/includes/sanitizers/class-amp-base-sanitizer.php#L671-L687)
 
 <details>
 <summary>Show Code</summary>

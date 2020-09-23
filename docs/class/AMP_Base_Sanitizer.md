@@ -33,7 +33,7 @@ Class AMP_Base_Sanitizer
 * [`get_validate_response_data`](../method/AMP_Base_Sanitizer/get_validate_response_data.md) - Get data that is returned in validate responses.
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:16](/includes/sanitizers/class-amp-base-sanitizer.php#L16-L796)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:16](/includes/sanitizers/class-amp-base-sanitizer.php#L16-L802)
 
 <details>
 <summary>Show Code</summary>
@@ -620,7 +620,13 @@ abstract class AMP_Base_Sanitizer {
 			}
 
 			// Capture element contents.
-			if ( ( 'script' === $node->nodeName && ! $node->hasAttribute( 'src' ) ) || 'style' === $node->nodeName ) {
+			if (
+				( 'script' === $node->nodeName && ! $node->hasAttribute( 'src' ) )
+				||
+				// Include stylesheet text except for amp-custom and amp-keyframes since it is large and since it should
+				// already be detailed in the stylesheets metabox.
+				( 'style' === $node->nodeName && ! $node->hasAttribute( 'amp-custom' ) && ! $node->hasAttribute( 'amp-keyframes' ) )
+			) {
 				$error['text'] = $node->textContent;
 			}
 

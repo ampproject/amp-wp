@@ -3166,10 +3166,9 @@ class AMP_Validation_Error_Taxonomy {
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX_CASEI:
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_DISALLOWED_VALUE_REGEX:
 				return sprintf(
-					/* translators: %1$s is the attribute name, %2$s is the invalid attribute value */
-					esc_html__( 'The attribute %1$s is set to the invalid value %2$s', 'amp' ),
-					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>',
-					'<code>' . esc_html( $validation_error['element_attributes'][ $validation_error['node_name'] ] ) . '</code>'
+					/* translators: %s is the attribute name */
+					esc_html__( 'The attribute %s is set to an invalid value', 'amp' ),
+					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>'
 				);
 
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_URL_PROTOCOL:
@@ -3204,6 +3203,14 @@ class AMP_Validation_Error_Taxonomy {
 					/* translators: %1$s is attribute name */
 					esc_html__( 'Missing URL for attribute %s', 'amp' ),
 					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>'
+				);
+
+			case AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_DIMENSIONS:
+				return sprintf(
+					/* translators: %1$s is the attribute name, %2$s is the tag name */
+					esc_html__( 'Multiple image candidates with the same width or pixel density found in attribute %1$s in tag %2$s', 'amp' ),
+					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>',
+					'<code>' . esc_html( $validation_error['parent_name'] ) . '</code>'
 				);
 
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_WIDTH:
@@ -3339,6 +3346,8 @@ class AMP_Validation_Error_Taxonomy {
 				return __( 'URL', 'amp' );
 			case 'message':
 				return __( 'Message', 'amp' );
+			case 'duplicate_dimensions':
+				return __( 'Duplicate dimensions', 'amp' );
 			default:
 				return $key;
 		}
