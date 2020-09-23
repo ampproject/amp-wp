@@ -58,8 +58,8 @@ final class Url
         $url = sprintf(
             '%s://%s%s%s/%s%s%s',
             $scheme,
-            $host,
             $userpass,
+            $host,
             empty($port) ? '' : ":{$port}",
             ltrim($path, '/'),
             empty($query) ? '' : "?{$query}",
