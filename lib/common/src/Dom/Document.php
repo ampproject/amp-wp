@@ -1611,7 +1611,8 @@ final class Document extends DOMDocument
                 }
                 return $this->body;
             case 'viewport':
-                // TODO: Can this be cached in an instance property as well?
+                // This is not cached as it could potentially be requested too early, before the viewport was added, and
+                // the cache would then store null without rechecking later on after the viewport has been added.
                 for ($node = $this->head->firstChild; $node !== null; $node = $node->nextSibling) {
                     if (
                         $node instanceof DOMElement
