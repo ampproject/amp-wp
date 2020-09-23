@@ -47,6 +47,34 @@ final class PreloadHeroImageTest extends TestCase
         };
 
         return [
+            'detects regular image as hero image' => [
+                $input(
+                    '<amp-img width="500" height="400" src="/img1.png"></amp-img>'
+                    . '<amp-img width="500" height="400" src="/img2.png"></amp-img>'
+                    . '<amp-img width="500" height="400" src="/img3.png"></amp-img>'
+                ),
+                $output(
+                    '<amp-img data-hero width="500" height="400" src="/img1.png" i-amphtml-ssr><img class="i-amphtml-fill-content i-amphtml-replaced-content" decoding="async" src="/hero1.png"></amp-img>'
+                    . '<amp-img width="500" height="400" src="/img2.png"></amp-img>'
+                    . '<amp-img width="500" height="400" src="/img3.png"></amp-img>',
+                    '<link rel=preload href="/img1.png" as="image" data-hero>'
+                ),
+            ],
+
+            'skips tiny images' => [
+                $input(
+                    '<amp-img width="100" height="100" src="/img1.png"></amp-img>'
+                    . '<amp-img width="500" height="400" src="/img2.png"></amp-img>'
+                    . '<amp-img width="500" height="400" src="/img3.png"></amp-img>'
+                ),
+                $output(
+                    '<amp-img width="100" height="100" src="/img1.png"></amp-img>'
+                    . '<amp-img data-hero width="500" height="400" src="/img2.png" i-amphtml-ssr><img class="i-amphtml-fill-content i-amphtml-replaced-content" decoding="async" src="/hero1.png"></amp-img>'
+                    . '<amp-img width="500" height="400" src="/img3.png"></amp-img>',
+                    '<link rel=preload href="/img2.png" as="image" data-hero>'
+                ),
+            ],
+
             'throws error when past data-hero maximum' => [
                 $input(
                     '<amp-img width="500" height="400" src="/foo.png"></amp-img>'
