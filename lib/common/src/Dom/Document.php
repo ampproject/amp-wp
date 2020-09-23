@@ -1616,8 +1616,8 @@ final class Document extends DOMDocument
                 for ($node = $this->head->firstChild; $node !== null; $node = $node->nextSibling) {
                     if (
                         $node instanceof DOMElement
-                        && $node->tagName === 'meta'
-                        && $node->getAttribute('name') === 'viewport'
+                        && $node->tagName === Tag::META
+                        && $node->getAttribute('name') === Attribute::VIEWPORT
                     ) {
                         return $node;
                     }
