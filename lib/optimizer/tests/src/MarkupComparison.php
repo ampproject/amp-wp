@@ -26,6 +26,10 @@ trait MarkupComparison
         $actual   = preg_replace('/(?<=>)\s+(?=<)/', '', trim($actual));
         $expected = preg_replace('/(?<=>)\s+(?=<)/', '', trim($expected));
 
+        // Normalize boolean attributes that use their name as value.
+        $actual   = preg_replace('/(?<=\s)([a-zA-Z-_]+)="(?:\1|)"/i', '$1', $actual);
+        $expected = preg_replace('/(?<=\s)([a-zA-Z-_]+)="(?:\1|)"/i', '$1', $expected);
+
         // Split into an array of individual elements.
         $actual   = preg_split('#(<[^>]+>|[^<>]+)#', $actual, -1, PREG_SPLIT_DELIM_CAPTURE);
         $expected = preg_split('#(<[^>]+>|[^<>]+)#', $expected, -1, PREG_SPLIT_DELIM_CAPTURE);
@@ -61,9 +65,13 @@ trait MarkupComparison
         $actual   = preg_replace('/(\s+[a-zA-Z-_]+)=(?!")([a-zA-Z-_.]+)/', '\1="\2"', $actual);
         $expected = preg_replace('/(\s+[a-zA-Z-_]+)=(?!")([a-zA-Z-_.]+)/', '\1="\2"', $expected);
 
-        // Normalize empty JSON objects (`<script> { } </script>` => `<script>{}</script>`
+        // Normalize empty JSON objects (`<script> { } </script>` => `<script>{}</script>`).
         $actual   = preg_replace('/>\s*{\s*}\s*</', '>{}<', $actual);
         $expected = preg_replace('/>\s*{\s*}\s*</', '>{}<', $expected);
+
+        // Normalize boolean attributes that use their name as value.
+        $actual   = preg_replace('/(?<=\s)([a-zA-Z-_]+)="(?:\1|)"/i', '$1', $actual);
+        $expected = preg_replace('/(?<=\s)([a-zA-Z-_]+)="(?:\1|)"/i', '$1', $expected);
 
         $normalizeAttributes = static function ($element) {
             // Extract attributes for the given element.
