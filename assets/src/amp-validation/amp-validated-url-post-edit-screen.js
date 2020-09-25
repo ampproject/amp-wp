@@ -394,6 +394,7 @@ const handleBulkActions = () => {
 			if ( row.querySelector( '.check-column input[type=checkbox]' ).checked ) {
 				row.querySelector( 'input[type=checkbox].amp-validation-error-status-review' ).checked = markingAsReviewed;
 				row.classList.toggle( 'new', ! markingAsReviewed );
+				addBeforeUnloadPrompt();
 			}
 		} );
 	} );
