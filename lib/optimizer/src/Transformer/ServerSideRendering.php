@@ -953,7 +953,10 @@ final class ServerSideRendering implements Transformer
      */
     private function extractHeightsAttributeCss(Document $document, DOMElement $element, DOMAttr $attribute)
     {
-        $this->customSizerStyles[$document->getElementId($element)] = '';
+        // TODO: I'm not sure why I initially added this here, it looks very intentional.
+        // However, it doesn't match what the NodeJS version does, which is to add padding-top
+        // to the inline style of the element.
+        // $this->customSizerStyles[$document->getElementId($element)] = '';
 
         return $this->extractAttributeCss(
             $document,
