@@ -2794,6 +2794,8 @@ class AMP_Validated_URL_Post_Type {
 		<div id="remove-keep-buttons" class="hidden">
 			<button type="button" class="button action remove"><?php esc_html_e( 'Remove', 'amp' ); ?></button>
 			<button type="button" class="button action keep"><?php esc_html_e( 'Keep', 'amp' ); ?></button>
+			<button type="button" class="button action reviewed-toggle reviewed"><?php esc_html_e( 'Mark reviewed', 'amp' ); ?></button>
+			<button type="button" class="button action reviewed-toggle unreviewed"><?php esc_html_e( 'Mark unreviewed', 'amp' ); ?></button>
 			<div id="vertical-divider"></div>
 		</div>
 		<div id="url-post-filter" class="alignleft actions">
