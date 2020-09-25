@@ -381,7 +381,7 @@ const handleBulkActions = () => {
 		} );
 	} );
 
-	// Handle click on bulk "Mark as reviewed" and "Mark as unreviewed" buttons.
+	// Handle click on bulk "Mark reviewed" and "Mark unreviewed" buttons.
 	global.addEventListener( 'click', ( { target } ) => {
 		if ( ! target.classList.contains( 'reviewed-toggle' ) ) {
 			return;
