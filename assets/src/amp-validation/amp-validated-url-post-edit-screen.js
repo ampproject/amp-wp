@@ -380,6 +380,23 @@ const handleBulkActions = () => {
 			}
 		} );
 	} );
+
+	// Handle click on bulk "Mark as reviewed" and "Mark as unreviewed" buttons.
+	global.addEventListener( 'click', ( { target } ) => {
+		if ( ! target.classList.contains( 'reviewed-toggle' ) ) {
+			return;
+		}
+
+		const markingAsReviewed = target.classList.contains( 'reviewed' );
+
+		[ ...document.querySelectorAll( 'select.amp-validation-error-status' ) ].forEach( ( select ) => {
+			const row = select.closest( 'tr' );
+			if ( row.querySelector( '.check-column input[type=checkbox]' ).checked ) {
+				select.closest( 'tr' ).querySelector( 'input[type=checkbox].amp-validation-error-status-review' ).checked = markingAsReviewed;
+				row.classList.toggle( 'new', ! markingAsReviewed );
+			}
+		} );
+	} );
 };
 
 /**
