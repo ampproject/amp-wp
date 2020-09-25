@@ -392,7 +392,7 @@ const handleBulkActions = () => {
 		[ ...document.querySelectorAll( 'select.amp-validation-error-status' ) ].forEach( ( select ) => {
 			const row = select.closest( 'tr' );
 			if ( row.querySelector( '.check-column input[type=checkbox]' ).checked ) {
-				select.closest( 'tr' ).querySelector( 'input[type=checkbox].amp-validation-error-status-review' ).checked = markingAsReviewed;
+				row.querySelector( 'input[type=checkbox].amp-validation-error-status-review' ).checked = markingAsReviewed;
 				row.classList.toggle( 'new', ! markingAsReviewed );
 			}
 		} );
