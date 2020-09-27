@@ -154,9 +154,6 @@
     "**/!(amp).php": [
       "npm run lint:php"
     ],
-    "(includes|src)/**/*.php": [
-      "vendor/bin/phpstan analyze --"
-    ],
     "amp.php": [
       "vendor/bin/phpcs --runtime-set testVersion 5.2-"
     ]
