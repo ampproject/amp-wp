@@ -20,7 +20,7 @@ html {
 
 #amp-settings {
 	max-width: 1060px;
-	margin: 0 auto 7.5rem;
+	margin: 0 auto 6rem;
 }
 
 #amp-settings > h1 {
@@ -309,39 +309,25 @@ li.error-kept {
 	z-index: 99;
 }
 
-.settings-footer {
-	align-items: center;
-	background: var(--amp-settings-color-background);
-	bottom: 0;
-	box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.05);
-	display: flex;
-	justify-content: space-between;
-	left: 0;
-	padding: 2.5rem;
-	position: fixed;
-	right: 0;
-	z-index: 20;
-}
-
-.settings-footer .components-button.is-primary {
+.amp-settings-nav .components-button.is-primary {
 	box-shadow: none;
 }
 
 @media (min-width: 783px) {
 
-	.settings-footer {
+	.amp-settings-nav {
 		left: 160px;
 	}
 
-	.wp-admin.folded .settings-footer,
-	.wp-admin.auto-fold .settings-footer {
+	.wp-admin.folded .amp-settings-nav,
+	.wp-admin.auto-fold .amp-settings-nav {
 		left: 36px;
 	}
 }
 
 @media (min-width: 961px) {
 
-	.wp-admin.auto-fold .settings-footer {
+	.wp-admin.auto-fold:not(.folded) .amp-settings-nav {
 		left: 160px;
 	}
 }
