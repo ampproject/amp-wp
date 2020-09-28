@@ -102,3 +102,39 @@ describe( 'AMP Settings Screen after wizard', () => {
 	} );
 } );
 
+describe( 'Saving', () => {
+	beforeEach( async () => {
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+	} );
+
+	afterEach( async () => {
+		await cleanUpSettings();
+	} );
+
+	it( 'allows saving', async () => {
+		const testSave = async () => {
+			await expect( page ).toClick( 'button', { text: 'Save' } );
+			await expect( page ).toMatchElement( 'button[disabled].is-busy', { text: 'Saving' } );
+			await expect( page ).toMatchElement( 'button[disabled]', { text: 'Save' } );
+			await expect( page ).toMatchElement( '.amp-save-success-notice', { text: 'Saved' } );
+		};
+
+		// Save button exists.
+		await expect( page ).toMatchElement( 'button[disabled]', { text: 'Save' } );
+
+		// Toggle transistional mode.
+		await expect( page ).toClick( '#template-mode-transitional' );
+
+		// Button should be enabled.
+		await expect( page ).toMatchElement( 'button:not([disabled])', { text: 'Save' } );
+
+		await testSave();
+
+		// Success notice should disappear on additional change.
+		await expect( page ).toClick( '#template-mode-standard' );
+		await expect( page ).not.toMatchElement( '.amp-save-success-notice', { text: 'Saved' } );
+
+		await testSave();
+	} );
+} );
+
