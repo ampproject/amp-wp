@@ -719,29 +719,3 @@ export const isAMPEnabled = () => {
 	const { getEditedPostAttribute } = select( 'core/editor' );
 	return getEditedPostAttribute( 'amp_enabled' ) || false;
 };
-
-/**
- * Renders the 'Preview AMP' button in the DOM right after the non-AMP 'Preview' button.
- *
- * @param {Object} PreviewComponent The 'Preview AMP' component to render into the DOM.
- */
-export const renderPreviewButton = ( PreviewComponent ) => {
-	const postPreviewButton = document.querySelector( `.${ POST_PREVIEW_CLASS }` );
-	const ampPreviewButtonWrapperId = 'amp-wrapper-post-preview';
-
-	// Exit if the non-AMP 'Preview' button doesn't exist.
-	if ( ! postPreviewButton || ! postPreviewButton.nextSibling ) {
-		return;
-	}
-
-	const buttonWrapper = document.createElement( 'div' );
-	buttonWrapper.id = ampPreviewButtonWrapperId;
-
-	render(
-		<PreviewComponent />,
-		buttonWrapper,
-	);
-
-	// Insert the new AMP preview button after the non-AMP 'Preview' button.
-	postPreviewButton.parentNode.insertBefore( buttonWrapper, postPreviewButton.nextSibling );
-};

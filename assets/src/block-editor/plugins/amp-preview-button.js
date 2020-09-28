@@ -1,16 +1,15 @@
 /**
  * External dependencies
  */
-import { get } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
  */
-import { Component, createRef, renderToString } from '@wordpress/element';
+import { Component, createPortal, renderToString } from '@wordpress/element';
 import { Button, Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { withSelect, withDispatch } from '@wordpress/data';
+import { withDispatch, withSelect } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 import { addQueryArgs } from '@wordpress/url';
 
@@ -110,7 +109,7 @@ function writeInterstitialMessage( targetDocument ) {
  *
  * @see https://github.com/WordPress/gutenberg/blob/95e769df1f82f6b0ef587d81af65dd2f48cd1c38/packages/editor/src/components/post-preview-button/index.js#L95-L200
  */
-class AMPPreview extends Component {
+class AmpPreviewButton extends Component {
 	/**
 	 * Constructs the class.
 	 *
@@ -118,9 +117,22 @@ class AMPPreview extends Component {
 	 */
 	constructor( ...args ) {
 		super( ...args );
-		this.moveButton = this.moveButton.bind( this );
 		this.openPreviewWindow = this.openPreviewWindow.bind( this );
-		this.buttonRef = createRef();
+
+		this.root = document.createElement( 'div' );
+		this.root.id = 'amp-wrapper-post-preview';
+	}
+
+	/**
+	 * Determine whether the component should continue with the rendering or not.
+	 *
+	 * @return {boolean} Whether to update or not.
+	 */
+	shouldComponentUpdate() {
+		this.postPreviewButton = document.querySelector( `.${ POST_PREVIEW_CLASS }` );
+
+		// Only update when the post preview button has been found.
+		return Boolean( this.postPreviewButton );
 	}
 
 	/**
@@ -138,24 +150,8 @@ class AMPPreview extends Component {
 			this.setPreviewWindowLink( previewLink );
 		}
 
-		this.moveButton();
-	}
-
-	/**
-	 * Moves the (non-AMP) 'Preview' button to before this 'Preview AMP' button, if it's not there already.
-	 */
-	moveButton() {
-		const buttonWrapper = get( this, [ 'buttonRef', 'current', 'parentNode' ], false );
-		if ( ! buttonWrapper ) {
-			return;
-		}
-
-		if ( ! buttonWrapper.previousSibling || ! buttonWrapper.previousSibling.classList.contains( POST_PREVIEW_CLASS ) ) {
-			const postPreviewButton = document.querySelector( `.${ POST_PREVIEW_CLASS }` );
-			if ( get( postPreviewButton, 'nextSibling' ) ) {
-				buttonWrapper.parentNode.insertBefore( buttonWrapper, postPreviewButton.nextSibling );
-			}
-		}
+		// Insert the AMP preview button immediately after the post preview button.
+		this.postPreviewButton.parentNode.insertBefore( this.root, this.postPreviewButton.nextSibling );
 	}
 
 	/**
@@ -234,7 +230,7 @@ class AMPPreview extends Component {
 		// just link to the post's URL.
 		const href = previewLink || currentPostLink;
 
-		return (
+		return createPortal(
 			isEnabled && ! errorMessages.length && ! isStandardMode && (
 				<Button
 					className="amp-editor-post-preview"
@@ -253,12 +249,13 @@ class AMPPreview extends Component {
 						}
 					</span>
 				</Button>
-			)
+			),
+			this.root,
 		);
 	}
 }
 
-AMPPreview.propTypes = {
+AmpPreviewButton.propTypes = {
 	autosave: PropTypes.func.isRequired,
 	currentPostLink: PropTypes.string.isRequired,
 	postId: PropTypes.number.isRequired,
@@ -272,7 +269,9 @@ AMPPreview.propTypes = {
 	isStandardMode: PropTypes.bool,
 };
 
-export default compose( [
+export const name = 'amp-preview-button';
+
+export const render = compose( [
 	withSelect( ( select, { forcePreviewLink, forceIsAutosaveable } ) => {
 		const {
 			getCurrentPostId,
@@ -310,4 +309,4 @@ export default compose( [
 		autosave: dispatch( 'core/editor' ).autosave,
 		savePost: dispatch( 'core/editor' ).savePost,
 	} ) ),
-] )( AMPPreview );
+] )( AmpPreviewButton );
