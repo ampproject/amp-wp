@@ -8,7 +8,7 @@ import { ReactElement } from 'react';
  * WordPress dependencies
  */
 import { __, _x } from '@wordpress/i18n';
-import { cloneElement, render } from '@wordpress/element';
+import { cloneElement } from '@wordpress/element';
 import { TextControl, SelectControl, ToggleControl, Notice, PanelBody, FontSizePicker } from '@wordpress/components';
 import { InspectorControls } from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
@@ -16,7 +16,7 @@ import { select } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { TEXT_BLOCKS, MEDIA_BLOCKS, DEFAULT_HEIGHT, DEFAULT_WIDTH, POST_PREVIEW_CLASS } from '../constants';
+import { TEXT_BLOCKS, MEDIA_BLOCKS, DEFAULT_HEIGHT, DEFAULT_WIDTH } from '../constants';
 import { MIN_FONT_SIZE, MAX_FONT_SIZE } from '../../common/constants';
 
 const ampLayoutOptions = [

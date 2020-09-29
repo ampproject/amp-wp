@@ -1,16 +1,17 @@
 /**
  * External dependencies
  */
+import { get } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
  */
-import { Component, createPortal, renderToString } from '@wordpress/element';
+import { Component, createPortal, createRef, renderToString } from '@wordpress/element';
 import { Button, Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { withDispatch, withSelect } from '@wordpress/data';
-import { compose } from '@wordpress/compose';
+import { ifCondition, compose } from '@wordpress/compose';
 import { addQueryArgs } from '@wordpress/url';
 
 /**
@@ -104,8 +105,7 @@ function writeInterstitialMessage( targetDocument ) {
 /**
  * A 'Preview AMP' button, forked from the Core 'Preview' button: <PostPreviewButton>.
  *
- * Rendered into the DOM with renderPreviewButton() in helpers/index.js.
- * This also moves the (non-AMP) 'Preview' button to before this, if it's not already there.
+ * Inserted into the DOM immediately after the 'Preview' button.
  *
  * @see https://github.com/WordPress/gutenberg/blob/95e769df1f82f6b0ef587d81af65dd2f48cd1c38/packages/editor/src/components/post-preview-button/index.js#L95-L200
  */
@@ -117,22 +117,29 @@ class AmpPreviewButton extends Component {
 	 */
 	constructor( ...args ) {
 		super( ...args );
+
+		this.buttonRef = createRef();
 		this.openPreviewWindow = this.openPreviewWindow.bind( this );
 
 		this.root = document.createElement( 'div' );
 		this.root.id = 'amp-wrapper-post-preview';
+
+		this.postPreviewButton = document.querySelector( `.${ POST_PREVIEW_CLASS }` );
 	}
 
 	/**
-	 * Determine whether the component should continue with the rendering or not.
-	 *
-	 * @return {boolean} Whether to update or not.
+	 * Invoked immediately after a component is mounted (inserted into the tree).
 	 */
-	shouldComponentUpdate() {
-		this.postPreviewButton = document.querySelector( `.${ POST_PREVIEW_CLASS }` );
+	componentDidMount() {
+		// Insert the AMP preview button immediately after the post preview button.
+		this.postPreviewButton.parentNode.insertBefore( this.root, this.postPreviewButton.nextSibling );
+	}
 
-		// Only update when the post preview button has been found.
-		return Boolean( this.postPreviewButton );
+	/**
+	 * Invoked immediately before a component is unmounted and destroyed.
+	 */
+	componentWillUnmount() {
+		this.postPreviewButton.parentNode.removeChild( this.root );
 	}
 
 	/**
@@ -149,9 +156,6 @@ class AmpPreviewButton extends Component {
 		if ( previewLink && ! prevProps.previewLink ) {
 			this.setPreviewWindowLink( previewLink );
 		}
-
-		// Insert the AMP preview button immediately after the post preview button.
-		this.postPreviewButton.parentNode.insertBefore( this.root, this.postPreviewButton.nextSibling );
 	}
 
 	/**
@@ -165,6 +169,9 @@ class AmpPreviewButton extends Component {
 
 		if ( previewWindow && ! previewWindow.closed ) {
 			previewWindow.location = url;
+			if ( this.buttonRef.current ) {
+				this.buttonRef.current.focus();
+			}
 		}
 	}
 
@@ -273,6 +280,8 @@ export const name = 'amp-preview-button';
 
 export const render = compose( [
 	withSelect( ( select, { forcePreviewLink, forceIsAutosaveable } ) => {
+		const { getPostType } = select( 'core' );
+
 		const {
 			getCurrentPostId,
 			getCurrentPostAttribute,
@@ -290,8 +299,10 @@ export const render = compose( [
 
 		const queryArgs = {};
 		queryArgs[ getAmpSlug() ] = 1;
+
 		const initialPreviewLink = getEditedPostPreviewLink();
 		const previewLink = initialPreviewLink ? addQueryArgs( initialPreviewLink, queryArgs ) : undefined;
+		const postType = getPostType( getEditedPostAttribute( 'type' ) );
 
 		return {
 			postId: getCurrentPostId(),
@@ -299,6 +310,7 @@ export const render = compose( [
 			previewLink: forcePreviewLink !== undefined ? forcePreviewLink : previewLink,
 			isSaveable: isEditedPostSaveable(),
 			isAutosaveable: forceIsAutosaveable || isEditedPostAutosaveable(),
+			isViewable: get( postType, [ 'viewable' ], false ),
 			isDraft: [ 'draft', 'auto-draft' ].indexOf( getEditedPostAttribute( 'status' ) ) !== -1,
 			isEnabled: isAMPEnabled(),
 			errorMessages: getErrorMessages(),
@@ -309,4 +321,5 @@ export const render = compose( [
 		autosave: dispatch( 'core/editor' ).autosave,
 		savePost: dispatch( 'core/editor' ).savePost,
 	} ) ),
+	ifCondition( ( { isViewable } ) => isViewable ),
 ] )( AmpPreviewButton );
