@@ -6,7 +6,7 @@ import { visitAdminPage } from '@wordpress/e2e-test-utils';
 /**
  * Internal dependencies
  */
-import { completeWizard, cleanUpSettings, clickMode } from '../../utils/onboarding-wizard-utils';
+import { completeWizard, cleanUpSettings, clickMode, scrollToElement } from '../../utils/onboarding-wizard-utils';
 import { installTheme } from '../../utils/install-theme';
 import { activateTheme } from '../../utils/activate-theme';
 
@@ -55,8 +55,9 @@ describe( 'Settings screen when reader theme is active theme', () => {
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
 		await clickMode( 'reader' );
-		await expect( page ).toClick( '#template-mode-reader-container .components-panel__body-toggle' );
+		await scrollToElement( { selector: '#template-mode-reader-container .components-panel__body-toggle', click: true } );
 
+		await scrollToElement( { selector: '#reader-themes .amp-notice__body' } );
 		await expect( page ).toMatchElement( '.amp-notice__body', { text: /^Your active theme/ } );
 
 		await activateTheme( 'twentytwenty' );

@@ -37,14 +37,20 @@ export async function moveToTemplateModeScreen( { technical } ) {
 	await expect( page ).toMatchElement( '.template-mode-option' );
 }
 
-export async function clickMode( mode ) {
-	await page.evaluate( ( templateMode ) => {
-		const el = document.querySelector( `#template-mode-${ templateMode }` );
+export async function scrollToElement( { selector, click = false } ) {
+	await page.evaluate( ( options ) => {
+		const el = document.querySelector( options.selector );
 		if ( el ) {
 			el.scrollIntoView( { block: 'start', inline: 'center' } );
-			el.click();
+			if ( options.click ) {
+				el.click();
+			}
 		}
-	}, mode );
+	}, ( { selector, click } ) );
+}
+
+export async function clickMode( mode ) {
+	await scrollToElement( { selector: `#template-mode-${ mode }`, click: true } );
 }
 
 export async function moveToReaderThemesScreen( { technical } ) {
