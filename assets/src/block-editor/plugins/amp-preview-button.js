@@ -131,6 +131,10 @@ class AmpPreviewButton extends Component {
 	 * Invoked immediately after a component is mounted (inserted into the tree).
 	 */
 	componentDidMount() {
+		if ( ! this.postPreviewButton ) {
+			return;
+		}
+
 		// Insert the AMP preview button immediately after the post preview button.
 		this.postPreviewButton.parentNode.insertBefore( this.root, this.postPreviewButton.nextSibling );
 	}
@@ -139,6 +143,10 @@ class AmpPreviewButton extends Component {
 	 * Invoked immediately before a component is unmounted and destroyed.
 	 */
 	componentWillUnmount() {
+		if ( ! this.postPreviewButton ) {
+			return;
+		}
+
 		this.postPreviewButton.parentNode.removeChild( this.root );
 	}
 
@@ -230,6 +238,10 @@ class AmpPreviewButton extends Component {
 	 * Renders the component.
 	 */
 	render() {
+		if ( ! this.postPreviewButton ) {
+			return null;
+		}
+
 		const { previewLink, currentPostLink, errorMessages, isEnabled, isSaveable, isStandardMode } = this.props;
 
 		// Link to the `?preview=true` URL if we have it, since this lets us see
