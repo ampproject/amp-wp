@@ -7,19 +7,31 @@ import { createNewPost, visitAdminPage } from '@wordpress/e2e-test-utils';
  * Internal dependencies
  */
 import { cleanUpSettings } from '../../utils/onboarding-wizard-utils';
+import { activatePlugin, deactivatePlugin } from '../../utils';
 
 const postPreviewBtnSelector = '.components-button.editor-post-preview';
 const ampPreviewBtnSelector = `${ postPreviewBtnSelector } + #amp-wrapper-post-preview > .amp-editor-post-preview`;
 
 describe( 'AMP Preview button', () => {
-	it( 'is renders on a new post', async () => {
+	it( 'is rendered on a new post', async () => {
 		await createNewPost();
 		await page.waitForSelector( postPreviewBtnSelector );
 
 		await expect( page ).toMatchElement( ampPreviewBtnSelector );
 	} );
 
-	it( 'renders when a post has content', async () => {
+	it( 'is rendered when Gutenberg is disabled', async () => {
+		await deactivatePlugin( 'gutenberg' );
+
+		await createNewPost();
+		await page.waitForSelector( postPreviewBtnSelector );
+
+		await expect( page ).toMatchElement( ampPreviewBtnSelector );
+
+		await activatePlugin( 'gutenberg' );
+	} );
+
+	it( 'is rendered when a post has content', async () => {
 		await createNewPost( {
 			title: 'The Ballad of the Lost Preview Button',
 			content: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consectetur fugiat, impedit.',
