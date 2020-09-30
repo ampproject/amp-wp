@@ -10,7 +10,7 @@ import { cleanUpSettings } from '../../utils/onboarding-wizard-utils';
 import { activatePlugin, deactivatePlugin } from '../../utils';
 
 const postPreviewBtnSelector = '.components-button.editor-post-preview';
-const ampPreviewBtnSelector = `${ postPreviewBtnSelector } + #amp-wrapper-post-preview > .amp-editor-post-preview`;
+const ampPreviewBtnSelector = `${ postPreviewBtnSelector } + .amp-wrapper-post-preview > .amp-editor-post-preview`;
 
 describe( 'AMP Preview button', () => {
 	it( 'is rendered on a new post', async () => {
