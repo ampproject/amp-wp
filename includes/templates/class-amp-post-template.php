@@ -302,8 +302,13 @@ class AMP_Post_Template {
 	 * @return int Post publish UTC timestamp.
 	 */
 	private function build_post_publish_timestamp() {
-		$format    = 'U';
-		$timestamp = (int) get_post_time( $format, true, $this->post, true );
+		$format = 'U';
+
+		if ( empty( $this->post->post_date_gmt ) || '0000-00-00 00:00:00' === $this->post->post_date_gmt ) {
+			$timestamp = time();
+		} else {
+			$timestamp = (int) get_post_time( $format, true, $this->post, true );
+		}
 
 		/** This filter is documented in wp-includes/general-template.php. */
 		$filtered_timestamp = apply_filters( 'get_the_date', $timestamp, $format, $this->post );
