@@ -44,7 +44,7 @@
         "nav_menu_locations": {
           "primary": "primary-header"
         },
-        "custom_logo": "https://websitedemos.net/travel-07/wp-content/uploads/sites/442/2019/05/logo-1x.png"
+        "custom_logo": "gs://ampwp_reference_sites_media_files/travel-blog/logo-1x.png"
       }
     },
     {
