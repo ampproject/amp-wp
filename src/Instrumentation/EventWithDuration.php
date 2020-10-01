@@ -11,6 +11,8 @@ namespace AmpProject\AmpWP\Instrumentation;
  * A server-timing event with a duration.
  *
  * @package AmpProject\AmpWP
+ * @since 2.0
+ * @internal
  */
 class EventWithDuration extends Event {
 

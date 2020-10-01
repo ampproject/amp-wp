@@ -26,7 +26,7 @@ export function Standard( { currentTheme } ) {
 			<SummaryHeader
 				illustration={ <StandardIllustration /> }
 				title={ __( 'Standard', 'amp' ) }
-				text={ __( 'In Standard mode <b>your site will be completely AMP</b> (except in cases where you opt-out of AMP for specific content types), and <b>it will use a single theme</b>. ', 'amp' ) }
+				text={ __( 'In Standard mode <b>your site will be completely AMP</b> (except in cases where you opt-out of AMP for specific parts of your site), and <b>it will use a single theme</b>. ', 'amp' ) }
 			/>
 
 			<DesktopScreenshot { ...currentTheme } />

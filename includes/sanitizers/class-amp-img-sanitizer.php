@@ -14,6 +14,8 @@ use AmpProject\Tag;
  * Class AMP_Img_Sanitizer
  *
  * Converts <img> tags to <amp-img> or <amp-anim>
+ *
+ * @internal
  */
 class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	use AMP_Noscript_Fallback;

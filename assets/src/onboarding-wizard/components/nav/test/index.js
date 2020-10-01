@@ -17,8 +17,11 @@ import { Nav } from '..';
 import { NavigationContextProvider } from '../../navigation-context-provider';
 import { UserContextProvider } from '../../user-context-provider';
 import { OptionsContextProvider } from '../../../../components/options-context-provider';
+import { ReaderThemesContextProvider } from '../../../../components/reader-themes-context-provider';
+import { STANDARD, READER } from '../../../../common/constants';
 
 jest.mock( '../../../../components/options-context-provider' );
+jest.mock( '../../../../components/reader-themes-context-provider' );
 jest.mock( '../../user-context-provider' );
 
 let container;
@@ -34,11 +37,13 @@ const testPages = [
 	{ PageComponent: MyPageComponent, slug: 'slug-2', title: 'Page 1' },
 ];
 
-const Providers = ( { children, pages } ) => (
-	<OptionsContextProvider>
+const Providers = ( { children, pages, themeSupport = READER, downloadingTheme = false } ) => (
+	<OptionsContextProvider themeSupport={ themeSupport }>
 		<UserContextProvider>
 			<NavigationContextProvider pages={ pages }>
-				{ children }
+				<ReaderThemesContextProvider downloadingTheme={ downloadingTheme }>
+					{ children }
+				</ReaderThemesContextProvider>
 			</NavigationContextProvider>
 		</UserContextProvider>
 	</OptionsContextProvider>
@@ -46,6 +51,8 @@ const Providers = ( { children, pages } ) => (
 Providers.propTypes = {
 	children: PropTypes.any,
 	pages: PropTypes.array,
+	themeSupport: PropTypes.string,
+	downloadingTheme: PropTypes.bool,
 };
 
 describe( 'Nav', () => {
@@ -84,7 +91,7 @@ describe( 'Nav', () => {
 		expect( nextButton ).not.toBeNull();
 	} );
 
-	it( 'changes next button to "Finish" on last page', () => {
+	it( 'changes next button to "Customize" on last page', () => {
 		act( () => {
 			render(
 				<Providers pages={ testPages }>
@@ -102,10 +109,33 @@ describe( 'Nav', () => {
 			nextButton.dispatchEvent( new global.MouseEvent( 'click', { bubbles: true } ) );
 		} );
 
-		expect( nextButton.textContent ).toBe( 'Finish' );
+		expect( nextButton.textContent ).toBe( 'Customize' );
 	} );
 
-	it( 'close button hides on last page', () => {
+	it( 'close button hides on last page when reader mode is not selected', () => {
+		act( () => {
+			render(
+				<Providers pages={ testPages } themeSupport={ STANDARD }>
+					<Nav closeLink="http://site.test/wp-admin" finishLink="http://site.test" />
+				</Providers>,
+				container,
+			);
+		} );
+
+		const { nextButton } = getNavButtons( container );
+		let closeButton = container.querySelector( '.onboarding-wizard-nav__close a' );
+
+		expect( closeButton ).not.toBeNull();
+
+		act( () => {
+			nextButton.dispatchEvent( new global.MouseEvent( 'click', { bubbles: true } ) );
+		} );
+
+		closeButton = container.querySelector( '.onboarding-wizard-nav__close a' );
+		expect( closeButton ).toBeNull();
+	} );
+
+	it( 'close button hides on last page when reader mode is selected', () => {
 		act( () => {
 			render(
 				<Providers pages={ testPages }>
@@ -125,6 +155,6 @@ describe( 'Nav', () => {
 		} );
 
 		closeButton = container.querySelector( '.onboarding-wizard-nav__close a' );
-		expect( closeButton ).toBeNull();
+		expect( closeButton ).not.toBeNull();
 	} );
 } );

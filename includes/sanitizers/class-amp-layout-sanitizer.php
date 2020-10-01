@@ -12,6 +12,7 @@ use AmpProject\Layout;
  * Class AMP_Layout_Sanitizer
  *
  * @since 1.5.0
+ * @internal
  */
 class AMP_Layout_Sanitizer extends AMP_Base_Sanitizer {
 	use AMP_Noscript_Fallback;

@@ -272,6 +272,15 @@ tr.expanded.new + tr > td:first-of-type,
 	border-left: 4px solid #d54e21;
 }
 
+.wp-list-table th.column-error_code:first-child,
+.wp-list-table td.column-error_code:first-child {
+	border-left: 4px solid transparent;
+}
+
+.wp-list-table .new td.column-error_code:first-child {
+	border-left: 4px solid #d54e21;
+}
+
 .wp-list-table > tbody > tr > th,
 .wp-list-table > tbody > tr > td {
 	box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.1);
@@ -313,6 +322,11 @@ body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
 
 .notice.error-details {
 	margin-top: 1px;
+}
+
+.notice.error-details.unreviewed {
+	border-left-color: #d54e21;
+	background-color: #fef7f1;
 }
 
 .wp-heading-inline .status-text {

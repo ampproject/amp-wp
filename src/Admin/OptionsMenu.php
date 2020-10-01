@@ -7,16 +7,19 @@
 
 namespace AmpProject\AmpWP\Admin;
 
-use AMP_Analytics_Options_Submenu;
 use AMP_Core_Theme_Sanitizer;
 use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\Option;
 
 /**
  * OptionsMenu class.
+ *
+ * @since 2.0
+ * @internal
  */
 class OptionsMenu implements Conditional, Service, Registerable {
 	/**
@@ -50,6 +53,13 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	private $reader_themes;
 
 	/**
+	 * RESTPreloader instance.
+	 *
+	 * @var RESTPreloader
+	 */
+	private $rest_preloader;
+
+	/**
 	 * Check whether the conditional object is currently needed.
 	 *
 	 * @return bool Whether the conditional object is needed.
@@ -71,25 +81,24 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	/**
 	 * OptionsMenu constructor.
 	 *
-	 * @param GoogleFonts  $google_fonts An instance of the GoogleFonts service.
-	 * @param ReaderThemes $reader_themes An instance of the ReaderThemes class.
+	 * @param GoogleFonts   $google_fonts An instance of the GoogleFonts service.
+	 * @param ReaderThemes  $reader_themes An instance of the ReaderThemes class.
+	 * @param RESTPreloader $rest_preloader An instance of the RESTPreloader class.
 	 */
-	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes ) {
-		$this->google_fonts  = $google_fonts;
-		$this->reader_themes = $reader_themes;
+	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes, RESTPreloader $rest_preloader ) {
+		$this->google_fonts   = $google_fonts;
+		$this->reader_themes  = $reader_themes;
+		$this->rest_preloader = $rest_preloader;
 	}
 
 	/**
 	 * Adds hooks.
 	 */
 	public function register() {
-		add_action( 'admin_post_amp_analytics_options', 'AMP_Options_Manager::handle_analytics_submit' );
 		add_action( 'admin_menu', [ $this, 'add_menu_items' ], 9 );
 
 		$plugin_file = preg_replace( '#.+/(?=.+?/.+?)#', '', AMP__FILE__ );
 		add_filter( "plugin_action_links_{$plugin_file}", [ $this, 'add_plugin_action_links' ] );
-
-		add_action( 'admin_enqueue_scripts', [ $this, 'register_shimmed_assets' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 	}
 
@@ -104,12 +113,21 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			[
 				'settings' => sprintf(
 					'<a href="%1$s">%2$s</a>',
-					esc_url( add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, admin_url( 'admin.php' ) ) ),
+					esc_url( add_query_arg( 'page', $this->get_menu_slug(), admin_url( 'admin.php' ) ) ),
 					esc_html__( 'Settings', 'amp' )
 				),
 			],
 			$links
 		);
+	}
+
+	/**
+	 * Returns the slug for the settings page.
+	 *
+	 * @return string
+	 */
+	public function get_menu_slug() {
+		return AMP_Options_Manager::OPTION_NAME;
 	}
 
 	/**
@@ -124,36 +142,18 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			esc_html__( 'AMP Settings', 'amp' ),
 			esc_html__( 'AMP', 'amp' ),
 			'manage_options',
-			AMP_Options_Manager::OPTION_NAME,
+			$this->get_menu_slug(),
 			[ $this, 'render_screen' ],
 			self::ICON_BASE64_SVG
 		);
 
 		add_submenu_page(
-			AMP_Options_Manager::OPTION_NAME,
+			$this->get_menu_slug(),
 			esc_html__( 'AMP Settings', 'amp' ),
 			esc_html__( 'Settings', 'amp' ),
 			'manage_options',
-			AMP_Options_Manager::OPTION_NAME
+			$this->get_menu_slug()
 		);
-
-		/**
-		 * This fires when settings fields for the AMP Options menu need to be registered.
-		 *
-		 * This action is intended for internal use only, not to be used by other plugins.
-		 *
-		 * @internal
-		 */
-		do_action( 'amp_options_menu_items' );
-
-		$submenus = [
-			new AMP_Analytics_Options_Submenu( AMP_Options_Manager::OPTION_NAME ),
-		];
-
-		// Create submenu items and calls on the Submenu Page object to render the actual contents of the page.
-		foreach ( $submenus as $submenu ) {
-			$submenu->init();
-		}
 	}
 
 	/**
@@ -162,64 +162,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 	 * @return string
 	 */
 	public function screen_handle() {
-		return sprintf( 'toplevel_page_%s', AMP_Options_Manager::OPTION_NAME );
-	}
-
-	/**
-	 * Registers shimmed assets not guaranteed to be available in core.
-	 */
-	public function register_shimmed_assets() {
-		if ( ! wp_script_is( 'wp-api-fetch', 'registered' ) ) {
-			$asset_handle = 'wp-api-fetch';
-			$asset_file   = AMP__DIR__ . '/assets/js/' . $asset_handle . '.asset.php';
-			$asset        = require $asset_file;
-			$version      = $asset['version'];
-
-			wp_register_script(
-				$asset_handle,
-				amp_get_asset_url( 'js/' . $asset_handle . '.js' ),
-				[],
-				$version,
-				true
-			);
-
-			wp_add_inline_script(
-				$asset_handle,
-				sprintf(
-					'wp.apiFetch.use( wp.apiFetch.createRootURLMiddleware( "%s" ) );',
-					esc_url_raw( get_rest_url() )
-				),
-				'after'
-			);
-			wp_add_inline_script(
-				$asset_handle,
-				implode(
-					"\n",
-					[
-						sprintf(
-							'wp.apiFetch.nonceMiddleware = wp.apiFetch.createNonceMiddleware( "%s" );',
-							( wp_installing() && ! is_multisite() ) ? '' : wp_create_nonce( 'wp_rest' )
-						),
-						'wp.apiFetch.use( wp.apiFetch.nonceMiddleware );',
-						'wp.apiFetch.use( wp.apiFetch.mediaUploadMiddleware );',
-						sprintf(
-							'wp.apiFetch.nonceEndpoint = "%s";',
-							admin_url( 'admin-ajax.php?action=rest-nonce' )
-						),
-					]
-				),
-				'after'
-			);
-		}
-
-		if ( ! wp_style_is( 'wp-components', 'registered' ) ) {
-			wp_register_style(
-				'wp-components',
-				amp_get_asset_url( 'css/wp-components.css' ),
-				[],
-				AMP__VERSION
-			);
-		}
+		return sprintf( 'toplevel_page_%s', $this->get_menu_slug() );
 	}
 
 	/**
@@ -233,6 +176,9 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		if ( $this->screen_handle() !== $hook_suffix ) {
 			return;
 		}
+
+		/** This action is documented in includes/class-amp-theme-support.php */
+		do_action( 'amp_register_polyfills' );
 
 		$asset_file   = AMP__DIR__ . '/assets/js/' . self::ASSET_HANDLE . '.asset.php';
 		$asset        = require $asset_file;
@@ -260,28 +206,28 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		wp_styles()->add_data( self::ASSET_HANDLE, 'rtl', 'replace' );
 
 		$theme           = wp_get_theme();
-		$is_reader_theme = in_array( get_stylesheet(), wp_list_pluck( $this->reader_themes->get_themes(), 'slug' ), true );
+		$is_reader_theme = $this->reader_themes->theme_data_exists( get_stylesheet() );
 
 		$js_data = [
-			'CURRENT_THEME'                      => [
+			'CURRENT_THEME'               => [
 				'name'            => $theme->get( 'Name' ),
 				'description'     => $theme->get( 'Description' ),
 				'is_reader_theme' => $is_reader_theme,
-				'screenshot'      => $theme->get_screenshot(),
+				'screenshot'      => $theme->get_screenshot() ?: null,
 				'url'             => $theme->get( 'ThemeURI' ),
 			],
-			'OPTIONS_REST_ENDPOINT'              => rest_url( 'amp/v1/options' ),
-			'READER_THEMES_REST_ENDPOINT'        => rest_url( 'amp/v1/reader-themes' ),
-			'IS_CORE_THEME'                      => in_array(
+			'OPTIONS_REST_PATH'           => '/amp/v1/options',
+			'READER_THEMES_REST_PATH'     => '/amp/v1/reader-themes',
+			'IS_CORE_THEME'               => in_array(
 				get_stylesheet(),
 				AMP_Core_Theme_Sanitizer::get_supported_themes(),
 				true
 			),
-			'THEME_SUPPORT_ARGS'                 => AMP_Theme_Support::get_theme_support_args(),
-			'THEME_SUPPORTS_READER_MODE'         => AMP_Theme_Support::supports_reader_mode(),
-			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
-			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
-			'USER_REST_ENDPOINT'                 => rest_url( 'wp/v2/users/me' ),
+			'LEGACY_THEME_SLUG'           => ReaderThemes::DEFAULT_READER_THEME,
+			'USING_FALLBACK_READER_THEME' => $this->reader_themes->using_fallback_theme(),
+			'THEME_SUPPORT_ARGS'          => AMP_Theme_Support::get_theme_support_args(),
+			'THEME_SUPPORTS_READER_MODE'  => AMP_Theme_Support::supports_reader_mode(),
+			'UPDATES_NONCE'               => wp_create_nonce( 'updates' ),
 		];
 
 		wp_add_inline_script(
@@ -305,6 +251,8 @@ class OptionsMenu implements Conditional, Service, Registerable {
 				'after'
 			);
 		}
+
+		$this->add_preload_rest_paths();
 	}
 
 	/**
@@ -314,7 +262,7 @@ class OptionsMenu implements Conditional, Service, Registerable {
 		?>
 		<div class="wrap">
 			<form id="amp-settings" action="options.php" method="post">
-				<?php settings_fields( AMP_Options_Manager::OPTION_NAME ); ?>
+				<?php settings_fields( $this->get_menu_slug() ); ?>
 				<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 				<?php settings_errors(); ?>
 
@@ -324,5 +272,20 @@ class OptionsMenu implements Conditional, Service, Registerable {
 			</form>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Adds REST paths to preload.
+	 */
+	protected function add_preload_rest_paths() {
+		$paths = [
+			'/amp/v1/options',
+			'/amp/v1/reader-themes',
+			'/wp/v2/settings',
+		];
+
+		foreach ( $paths as $path ) {
+			$this->rest_preloader->add_preloaded_path( $path );
+		}
 	}
 }

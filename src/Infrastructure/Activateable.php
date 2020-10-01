@@ -15,6 +15,9 @@ namespace AmpProject\AmpWP\Infrastructure;
  *
  * This way, we can just add the simple interface marker and not worry about how
  * to wire up the code to reach that part during the static activation hook.
+ *
+ * @since 2.0
+ * @internal
  */
 interface Activateable {
 

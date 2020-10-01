@@ -9,11 +9,13 @@ namespace AmpProject\AmpWP\Infrastructure;
 
 use AmpProject\AmpWP\Exception\InvalidService;
 use AmpProject\AmpWP\Infrastructure\ServiceContainer\LazilyInstantiatedService;
-use AmpProject\AmpWP\PluginRegistry;
 
 /**
  * This abstract base plugin provides all the boilerplate code for working with
  * the dependency injector and the service container.
+ *
+ * @since 2.0
+ * @internal
  */
 abstract class ServiceBasedPlugin implements Plugin {
 

@@ -21,6 +21,7 @@ use WP_Styles;
  * Enqueue Google Fonts stylesheet.
  *
  * @since 2.0
+ * @internal
  */
 final class GoogleFonts implements Conditional, Delayed, Service, Registerable {
 

@@ -2,14 +2,8 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useContext, useEffect, useState } from '@wordpress/element';
-import { addQueryArgs } from '@wordpress/url';
+import { useContext, useEffect } from '@wordpress/element';
 import { Button } from '@wordpress/components';
-
-/**
- * External dependencies
- */
-import { CUSTOMIZER_LINK, AMP_QUERY_VAR } from 'amp-settings'; // From WP inline script.
 
 /**
  * Internal dependencies
@@ -21,6 +15,7 @@ import { ReaderThemes } from '../../../components/reader-themes-context-provider
 import { AMPNotice, NOTICE_SIZE_LARGE, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_INFO } from '../../../components/amp-notice';
 import { Navigation } from '../../components/navigation-context-provider';
 import { Options } from '../../../components/options-context-provider';
+import { Done } from '../../../components/svg/done';
 
 /**
  * Provides the description for the done screen.
@@ -30,15 +25,14 @@ import { Options } from '../../../components/options-context-provider';
  */
 function getDescription( mode ) {
 	switch ( mode ) {
-		case 'reader':
-			return __( 'Your site is using Reader mode. AMP pages on your site will be served using the reader theme you have selected (shown to the right), while your site’s primary theme will still be used where pages are not served using AMP.', 'amp' );
-
 		case 'standard':
-			return __( 'Your site is using Standard mode, which means it is AMP-first, and all canonical URLs are AMP by default. You can still opt specific content types and templates out of AMP upon returning to the AMP settings screen. Depending on your theme and plugins, development work may be required to maintain your site’s AMP compatibility.', 'amp' );
+			return __( 'Your site is ready to serve AMP pages to your users! In Standard mode (AMP-first) all canonical URLs are AMP by default. You can still opt out of AMP for specific content types and templates from the AMP settings screen. Depending on the theme and plugins you are using, development work may be required to maintain your site’s AMP compatibility.', 'amp' );
 
 		case 'transitional':
-			return __( 'Your site is using Transitional mode, which means your current theme will be used to generate both AMP and non-AMP versions of all URLs on your site. With further development work to address AMP-compatibility issues in your themes and plugins, your site can be made fully AMP-first.', 'amp' );
+			return __( 'Your site is ready to serve AMP pages to your users! In Transitional mode both the AMP and non-AMP versions of your site will be served using your currently active theme. With further development work to address AMP-compatibility issues in your themes and plugins, your site can be made fully AMP-first.', 'amp' );
 
+		case 'reader':
+			return __( 'Your site is ready to serve AMP pages to your users! In Reader mode the AMP version of your site will be served using the Reader theme you have selected (shown to the right), while pages for the non-AMP version of your site will be served using your primary theme. As a last step, make sure you tailor the Reader theme as needed using the Customizer.', 'amp' );
 		default:
 			return '';
 	}
@@ -77,14 +71,9 @@ function Saving() {
 }
 
 function Preview() {
-	const [ iframeLoaded, setIframeLoaded ] = useState( false );
-
 	const {
-		editedOptions: { theme_support: themeSupport },
-		originalOptions: { preview_permalink: previewPermalink, reader_theme: readerTheme },
+		originalOptions: { preview_permalink: previewPermalink },
 	} = useContext( Options );
-
-	const opacity = iframeLoaded ? '1' : '0';
 
 	return (
 		<>
@@ -94,35 +83,10 @@ function Preview() {
 					src={ previewPermalink }
 					title={ __( 'Site preview', 'amp' ) }
 					name="amp-wizard-completion-preview"
-					style={ {
-						opacity,
-					} }
-					onLoad={ () => {
-						setIframeLoaded( true );
-					} }
 				/>
 			</Phone>
 			<div className="done__link-buttons">
 
-				{
-					'reader' === themeSupport && (
-						<Button
-							isPrimary
-							href={
-								addQueryArgs(
-									CUSTOMIZER_LINK,
-									'legacy' === readerTheme
-										? { 'autofocus[panel]': 'amp_panel', url: previewPermalink }
-										: { url: previewPermalink, [ AMP_QUERY_VAR ]: '1' },
-								)
-							}
-							target="_blank"
-							rel="noreferrer"
-						>
-							{ __( 'Customize AMP', 'amp' ) }
-						</Button>
-					)
-				}
 				<Button
 					isPrimary
 					href={ previewPermalink }
@@ -193,13 +157,14 @@ export function Save() {
 	return (
 		<div className="done">
 			<div className="done__text">
+				<Done />
 				<h1>
 					{ heading }
 				</h1>
 				{
 					'reader' === themeSupport && downloadedTheme === readerTheme && (
 						<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_SUCCESS }>
-							{ __( 'Your reader theme was automatically installed', 'amp' ) }
+							{ __( 'Your Reader theme was automatically installed', 'amp' ) }
 						</AMPNotice>
 					)
 				}
@@ -210,7 +175,7 @@ export function Save() {
 			<div className="done__preview-container">
 				{ 'reader' === themeSupport && downloadingThemeError && (
 					<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_INFO }>
-						{ __( 'There was an error downloading your reader theme. As a result, your site is currently using the legacy reader theme. Please install your chosen theme manually.', 'amp' ) }
+						{ __( 'There was an error downloading your Reader theme. As a result, your site is currently using the legacy reader theme. Please install your chosen theme manually.', 'amp' ) }
 					</AMPNotice>
 				) }
 				<Preview />

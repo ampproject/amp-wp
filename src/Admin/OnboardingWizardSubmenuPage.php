@@ -10,10 +10,12 @@ namespace AmpProject\AmpWP\Admin;
 
 use AMP_Options_Manager;
 use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
+use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Services;
 
@@ -21,6 +23,7 @@ use AmpProject\AmpWP\Services;
  * AMP setup wizard submenu page class.
  *
  * @since 2.0
+ * @internal
  */
 final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registerable, Service {
 	/**
@@ -56,14 +59,23 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 	private $reader_themes;
 
 	/**
+	 * RESTPreloader instance.
+	 *
+	 * @var RESTPreloader
+	 */
+	private $rest_preloader;
+
+	/**
 	 * OnboardingWizardSubmenuPage constructor.
 	 *
-	 * @param GoogleFonts  $google_fonts  An instance of the GoogleFonts service.
-	 * @param ReaderThemes $reader_themes An instance of the ReaderThemes class.
+	 * @param GoogleFonts   $google_fonts  An instance of the GoogleFonts service.
+	 * @param ReaderThemes  $reader_themes An instance of the ReaderThemes class.
+	 * @param RESTPreloader $rest_preloader An instance of the RESTPreloader class.
 	 */
-	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes ) {
-		$this->google_fonts  = $google_fonts;
-		$this->reader_themes = $reader_themes;
+	public function __construct( GoogleFonts $google_fonts, ReaderThemes $reader_themes, RESTPreloader $rest_preloader ) {
+		$this->google_fonts   = $google_fonts;
+		$this->reader_themes  = $reader_themes;
+		$this->rest_preloader = $rest_preloader;
 	}
 
 	/**
@@ -128,6 +140,7 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 		add_filter( 'admin_footer_text', '__return_empty_string' );
 		remove_all_filters( 'update_footer' );
 
+		/** This action is documented in wp-admin/admin-header.php */
 		do_action( 'admin_head' );
 
 		// <head> tag was opened prior to this action and hasn't been closed.
@@ -171,7 +184,9 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 			return;
 		}
 
-		/** @var AmpSlugCustomizationWatcher $amp_slug_customization_watcher */
+		/** This action is documented in includes/class-amp-theme-support.php */
+		do_action( 'amp_register_polyfills' );
+
 		$amp_slug_customization_watcher = Services::get( 'amp_slug_customization_watcher' );
 
 		$asset_file   = AMP__DIR__ . '/assets/js/' . self::ASSET_HANDLE . '.asset.php';
@@ -200,7 +215,7 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 		wp_styles()->add_data( self::ASSET_HANDLE, 'rtl', 'replace' );
 
 		$theme           = wp_get_theme();
-		$is_reader_theme = in_array( get_stylesheet(), wp_list_pluck( $this->reader_themes->get_themes(), 'slug' ), true );
+		$is_reader_theme = $this->reader_themes->theme_data_exists( get_stylesheet() );
 
 		$exit_link = menu_page_url( AMP_Options_Manager::OPTION_NAME, false );
 
@@ -223,15 +238,16 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 				'name'            => $theme->get( 'Name' ),
 				'description'     => $theme->get( 'Description' ),
 				'is_reader_theme' => $is_reader_theme,
-				'screenshot'      => $theme->get_screenshot(),
+				'screenshot'      => $theme->get_screenshot() ?: null,
 				'url'             => $theme->get( 'ThemeURI' ),
 			],
+			'USING_FALLBACK_READER_THEME'        => $this->reader_themes->using_fallback_theme(),
 			'FINISH_LINK'                        => $exit_link,
-			'OPTIONS_REST_ENDPOINT'              => rest_url( 'amp/v1/options' ),
-			'READER_THEMES_REST_ENDPOINT'        => rest_url( 'amp/v1/reader-themes' ),
+			'OPTIONS_REST_PATH'                  => '/amp/v1/options',
+			'READER_THEMES_REST_PATH'            => '/amp/v1/reader-themes',
 			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
-			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => DevToolsUserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
-			'USER_REST_ENDPOINT'                 => rest_url( 'wp/v2/users/me' ),
+			'USER_FIELD_DEVELOPER_TOOLS_ENABLED' => UserAccess::USER_FIELD_DEVELOPER_TOOLS_ENABLED,
+			'USER_REST_PATH'                     => '/wp/v2/users/me',
 		];
 
 		wp_add_inline_script(
@@ -254,6 +270,24 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 				'wp.i18n.setLocaleData( ' . $translations . ', "amp" );',
 				'after'
 			);
+		}
+
+		$this->add_preload_rest_paths();
+	}
+
+	/**
+	 * Adds REST paths to preload.
+	 */
+	protected function add_preload_rest_paths() {
+		$paths = [
+			'/amp/v1/options',
+			'/amp/v1/reader-themes',
+			'/wp/v2/settings',
+			'/wp/v2/users/me',
+		];
+
+		foreach ( $paths as $path ) {
+			$this->rest_preloader->add_preloaded_path( $path );
 		}
 	}
 }

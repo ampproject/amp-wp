@@ -94,8 +94,6 @@ $alignwide_max = $content_max_width > 0 ? $content_max_width * 2 : 1920
 	margin: 0 auto;
 }
 
-<?php echo file_get_contents( AMP__DIR__ . '/assets/css/amp-default.css' ); // phpcs:ignore WordPress.WP.AlternativeFunctions ?>
-
 /* Template Styles */
 
 .amp-wp-content,

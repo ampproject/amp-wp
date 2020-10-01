@@ -11,6 +11,9 @@ use InvalidArgumentException;
 
 /**
  * Exception thrown when an invalid properties are added to an Event.
+ *
+ * @since 2.0
+ * @internal
  */
 final class InvalidEventProperties
 	extends InvalidArgumentException

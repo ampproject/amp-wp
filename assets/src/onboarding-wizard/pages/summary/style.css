@@ -1,6 +1,11 @@
 .summary .selectable {
 	margin-bottom: 2.25rem;
 	padding: 40px 30px;
+
+	/* For the mobile redirection toggle */
+	.amp-setting-toggle .components-form-toggle {
+		margin-right: 30px;
+	}
 }
 
 .summary .amp-notice {
@@ -12,7 +17,7 @@
  */
 .reader-summary__screens .amp-description {
 	display: -webkit-box;
-	font-size: 13px;
+	font-size: 14px;
 	line-height: 1.85;
 	-webkit-box-orient: vertical;
 	-webkit-line-clamp: 4;
@@ -26,6 +31,7 @@
 .reader-summary__screens img {
 	width: 100%;
 	height: auto;
+	margin: auto;
 }
 
 .reader-summary__screens .selectable {
@@ -37,7 +43,7 @@
  */
 .summary-header__header {
 	align-items: center;
-	border-bottom: 1px solid var(--light-gray);
+	border-bottom: 1px solid var(--amp-settings-color-border);
 	display: flex;
 	font-family: var(--font-poppins);
 	margin-bottom: 1.5rem;
@@ -51,6 +57,11 @@
 
 .summary-header__illustration {
 	margin-right: 1.5rem;
+}
+
+.summary-header__illustration svg {
+	height: auto;
+	width: 60px;
 }
 
 .summary-header p {

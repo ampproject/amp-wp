@@ -21,6 +21,7 @@ use AmpProject\AmpWP\Option;
  * Class PluginActivationNotice
  *
  * @since 2.0
+ * @internal
  */
 final class PluginActivationNotice implements Delayed, Service, Registerable {
 
@@ -75,12 +76,12 @@ final class PluginActivationNotice implements Delayed, Service, Registerable {
 			</div>
 			<div>
 				<h2><?php esc_html_e( 'Welcome to AMP for WordPress', 'amp' ); ?></h2>
-				<p><?php esc_html_e( 'Bring the speed and features of the open source AMP project to your site, complete with the tools to support content authoring and website development.', 'amp' ); ?></p>
+				<p><?php esc_html_e( 'Bring the speed and capabilities of the AMP web framework to your site; support content authoring and website development with the effective tools the AMP plugin provides.', 'amp' ); ?></p>
 
 				<?php if ( amp_should_use_new_onboarding() ) : ?>
-					<p><a href="<?php menu_page_url( OnboardingWizardSubmenu::SCREEN_ID ); ?>"><?php esc_html_e( 'Configure the plugin', 'amp' ); ?></a></p>
+					<p><a href="<?php menu_page_url( OnboardingWizardSubmenu::SCREEN_ID ); ?>"><?php esc_html_e( 'Open the onboarding wizard', 'amp' ); ?></a></p>
 				<?php else : ?>
-					<p><a href="<?php menu_page_url( AMP_Options_Manager::OPTION_NAME ); ?>"><?php esc_html_e( 'Configure the plugin', 'amp' ); ?></a></p>
+					<p><a href="<?php menu_page_url( AMP_Options_Manager::OPTION_NAME ); ?>"><?php esc_html_e( 'Open the onboarding wizard', 'amp' ); ?></a></p>
 				<?php endif; ?>
 			</div>
 		</div>

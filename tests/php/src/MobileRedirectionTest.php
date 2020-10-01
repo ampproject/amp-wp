@@ -13,7 +13,7 @@ use AMP_Theme_Support;
 use WP_UnitTestCase;
 use WP_Customize_Manager;
 
-/** @covers MobileRedirection */
+/** @coversDefaultClass \AmpProject\AmpWP\MobileRedirection */
 final class MobileRedirectionTest extends WP_UnitTestCase {
 
 	use AssertContainsCompatibility;
@@ -32,21 +32,33 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		unset( $GLOBALS['wp_customize'] );
 	}
 
-	/** @covers MobileRedirection::__construct() */
 	public function test__construct() {
 		$this->assertInstanceOf( MobileRedirection::class, $this->instance );
 		$this->assertInstanceOf( Service::class, $this->instance );
 		$this->assertInstanceOf( Registerable::class, $this->instance );
 	}
 
-	/** @covers MobileRedirection::register() */
+	/** @covers ::register() */
 	public function test_register() {
+		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, true );
 		$this->instance->register();
-		$this->assertEquals( 10, has_filter( 'amp_default_options', [ $this->instance, 'filter_default_options' ] ) );
-		$this->assertEquals( 10, has_filter( 'amp_options_updating', [ $this->instance, 'sanitize_options' ] ) );
+		$this->assertSame( 10, has_filter( 'amp_default_options', [ $this->instance, 'filter_default_options' ] ) );
+		$this->assertSame( 10, has_filter( 'amp_options_updating', [ $this->instance, 'sanitize_options' ] ) );
+		$this->assertSame( PHP_INT_MAX, has_action( 'template_redirect', [ $this->instance, 'redirect' ] ) );
+		$this->assertSame( 0, has_filter( 'amp_to_amp_linking_enabled', '__return_true' ) );
 	}
 
-	/** @covers MobileRedirection::filter_default_options() */
+	/** @covers ::register() */
+	public function test_register_not_enabled() {
+		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, false );
+		$this->instance->register();
+		$this->assertSame( 10, has_filter( 'amp_default_options', [ $this->instance, 'filter_default_options' ] ) );
+		$this->assertSame( 10, has_filter( 'amp_options_updating', [ $this->instance, 'sanitize_options' ] ) );
+		$this->assertFalse( has_action( 'template_redirect', [ $this->instance, 'redirect' ] ) );
+		$this->assertFalse( has_filter( 'amp_to_amp_linking_enabled', '__return_true' ) );
+	}
+
+	/** @covers ::filter_default_options() */
 	public function test_filter_default_options() {
 		$this->instance->register();
 		$this->assertEquals(
@@ -58,7 +70,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		);
 	}
 
-	/** @covers MobileRedirection::sanitize_options() */
+	/** @covers ::sanitize_options() */
 	public function test_sanitize_options() {
 		$this->assertEquals(
 			[
@@ -103,7 +115,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		);
 	}
 
-	/** @covers MobileRedirection::get_current_amp_url() */
+	/** @covers ::get_current_amp_url() */
 	public function test_get_current_amp_url() {
 		$this->go_to( add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, '/foo/' ) );
 		$this->assertEquals(
@@ -112,49 +124,49 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		);
 	}
 
-	/** @covers MobileRedirection::redirect() */
+	/** @covers ::redirect() */
 	public function test_redirect_on_canonical_and_available() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->go_to( '/' );
 		$this->assertTrue( amp_is_canonical() );
-		$this->assertTrue( is_amp_available() );
+		$this->assertTrue( amp_is_available() );
 		$this->instance->redirect();
 		$this->assertFalse( has_action( 'wp_head', [ $this->instance, 'add_mobile_version_switcher_styles' ] ) );
 	}
 
-	/** @covers MobileRedirection::redirect() */
+	/** @covers ::redirect() */
 	public function test_redirect_on_canonical_and_not_available() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, [ 'is_author' ] );
 		$this->go_to( '/' );
 		$this->assertTrue( amp_is_canonical() );
-		$this->assertFalse( is_amp_available() );
+		$this->assertFalse( amp_is_available() );
 		$this->instance->redirect();
 		$this->assertFalse( has_action( 'wp_head', [ $this->instance, 'add_mobile_version_switcher_styles' ] ) );
 	}
 
-	/** @covers MobileRedirection::redirect() */
+	/** @covers ::redirect() */
 	public function test_redirect_on_transitional_and_not_available() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, [ 'is_author' ] );
 		$this->go_to( add_query_arg( QueryVar::AMP, '1', '/' ) );
 		$this->assertFalse( amp_is_canonical() );
-		$this->assertFalse( is_amp_available() );
+		$this->assertFalse( amp_is_available() );
 		$this->instance->redirect();
 		$this->assertFalse( has_action( 'wp_head', [ $this->instance, 'add_mobile_version_switcher_styles' ] ) );
 	}
 
-	/** @covers MobileRedirection::redirect() */
+	/** @covers ::redirect() */
 	public function test_redirect_on_transitional_and_available_and_client_side_on_amp_endpoint() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 
 		$this->go_to( '/' );
 		set_query_var( QueryVar::AMP, '1' );
 		$this->assertFalse( amp_is_canonical() );
-		$this->assertTrue( is_amp_available() );
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_available() );
+		$this->assertTrue( amp_is_request() );
 		$this->instance->redirect();
 		$this->assertEquals( 10, has_action( 'wp_head', [ $this->instance, 'add_mobile_version_switcher_styles' ] ) );
 		$this->assertEquals( 10, has_action( 'amp_post_template_head', [ $this->instance, 'add_mobile_version_switcher_styles' ] ) );
@@ -167,46 +179,46 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'amp_post_template_footer', [ $this->instance, 'add_mobile_version_switcher_link' ] ) );
 	}
 
-	/** @covers MobileRedirection::redirect() */
+	/** @covers ::redirect() */
 	public function test_redirect_when_server_side_and_not_applicable() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		add_filter( 'amp_mobile_client_side_redirection', '__return_false' );
 		add_filter( 'amp_pre_is_mobile', '__return_false' );
 
 		$this->go_to( add_query_arg( QueryVar::AMP, '1', '/' ) );
-		$this->assertFalse( is_amp_endpoint() );
+		$this->assertFalse( amp_is_request() );
 		$this->assertFalse( $this->instance->is_mobile_request() );
 
 		$this->instance->redirect();
 		$this->assertFalse( has_action( 'wp_head', [ $this->instance, 'add_mobile_version_switcher_styles' ] ) );
 	}
 
-	/** @covers MobileRedirection::redirect() */
+	/** @covers ::redirect() */
 	public function test_redirect_not_amp_endpoint_with_client_side_redirection() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 
 		$this->go_to( '/' );
-		$this->assertFalse( is_amp_endpoint() );
-		$this->assertTrue( is_amp_available() );
+		$this->assertFalse( amp_is_request() );
+		$this->assertTrue( amp_is_available() );
 		$this->instance->redirect();
 		$this->assertEquals( 10, has_action( 'wp_head', [ $this->instance, 'add_mobile_version_switcher_styles' ] ) );
 		$this->assertEquals( 10, has_action( 'wp_head', [ $this->instance, 'add_mobile_alternative_link' ] ) );
 		$this->assertEquals( 10, has_action( 'wp_footer', [ $this->instance, 'add_mobile_version_switcher_link' ] ) );
 	}
 
-	/** @covers MobileRedirection::redirect() */
+	/** @covers ::redirect() */
 	public function test_redirect_not_amp_endpoint_with_server_side_redirection_on_mobile() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		add_filter( 'amp_mobile_client_side_redirection', '__return_false' );
 		add_filter( 'amp_pre_is_mobile', '__return_true' );
 
 		$this->go_to( '/' );
-		$this->assertFalse( is_amp_endpoint() );
-		$this->assertTrue( is_amp_available() );
+		$this->assertFalse( amp_is_request() );
+		$this->assertTrue( amp_is_available() );
 		$redirected_url = null;
 		add_filter(
 			'wp_redirect',
-			function ( $redirect_url ) use ( &$redirected_url ) {
+			static function ( $redirect_url ) use ( &$redirected_url ) {
 				$redirected_url = $redirect_url;
 				return false;
 			}
@@ -219,22 +231,22 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		);
 	}
 
-	/** @covers MobileRedirection::redirect() */
+	/** @covers ::redirect() */
 	public function test_redirect_not_amp_endpoint_with_server_side_redirection_on_mobile_when_cookie_set() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		add_filter( 'amp_mobile_client_side_redirection', '__return_false' );
 		add_filter( 'amp_pre_is_mobile', '__return_true' );
 
 		$this->go_to( '/' );
-		$this->assertFalse( is_amp_endpoint() );
-		$this->assertTrue( is_amp_available() );
+		$this->assertFalse( amp_is_request() );
+		$this->assertTrue( amp_is_available() );
 		$_COOKIE[ MobileRedirection::DISABLED_STORAGE_KEY ] = '1';
 		$this->instance->redirect();
 
 		$this->assertEquals( 10, has_action( 'wp_footer', [ $this->instance, 'add_mobile_version_switcher_link' ] ) );
 	}
 
-	/** @covers MobileRedirection::redirect() */
+	/** @covers ::redirect() */
 	public function test_redirect_not_amp_endpoint_with_server_side_redirection_on_mobile_when_noamp_query_var_present() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		add_filter( 'amp_mobile_client_side_redirection', '__return_false' );
@@ -242,8 +254,8 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 
 		$this->go_to( add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, '/' ) );
 		$_GET[ QueryVar::NOAMP ] = QueryVar::NOAMP_MOBILE;
-		$this->assertFalse( is_amp_endpoint() );
-		$this->assertTrue( is_amp_available() );
+		$this->assertFalse( amp_is_request() );
+		$this->assertTrue( amp_is_available() );
 
 		$this->assertArrayNotHasKey( MobileRedirection::DISABLED_STORAGE_KEY, $_COOKIE );
 		$this->instance->redirect();
@@ -252,7 +264,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'wp_footer', [ $this->instance, 'add_mobile_version_switcher_link' ] ) );
 	}
 
-	/** @covers MobileRedirection::redirect() */
+	/** @covers ::redirect() */
 	public function test_redirect_on_transitional_and_available_and_server_side_on_amp_endpoint_with_cookie_set() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		add_filter( 'amp_mobile_client_side_redirection', '__return_false' );
@@ -261,8 +273,8 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		$this->go_to( '/' );
 		set_query_var( QueryVar::AMP, '1' );
 		$this->assertFalse( amp_is_canonical() );
-		$this->assertTrue( is_amp_available() );
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_available() );
+		$this->assertTrue( amp_is_request() );
 		$_COOKIE[ MobileRedirection::DISABLED_STORAGE_KEY ] = '1';
 		$this->instance->redirect();
 		$this->assertArrayNotHasKey( MobileRedirection::DISABLED_STORAGE_KEY, $_COOKIE );
@@ -277,7 +289,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'amp_post_template_footer', [ $this->instance, 'add_mobile_version_switcher_link' ] ) );
 	}
 
-	/** @covers MobileRedirection::filter_amp_to_amp_linking_element_excluded() */
+	/** @covers ::filter_amp_to_amp_linking_element_excluded() */
 	public function test_filter_amp_to_amp_linking_element_excluded() {
 		$home_url_without_noamp = home_url( '/' );
 		$home_url_with_noamp    = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, home_url( '/' ) );
@@ -288,7 +300,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		$this->assertEquals( true, $this->instance->filter_amp_to_amp_linking_element_excluded( false, $home_url_with_noamp ) );
 	}
 
-	/** @covers MobileRedirection::filter_amp_to_amp_linking_element_query_vars() */
+	/** @covers ::filter_amp_to_amp_linking_element_query_vars() */
 	public function test_filter_amp_to_amp_linking_element_query_vars() {
 		$this->assertEquals(
 			[ 'foo' => 'bar' ],
@@ -303,7 +315,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		);
 	}
 
-	/** @covers MobileRedirection::is_mobile_request() */
+	/** @covers ::is_mobile_request() */
 	public function test_is_mobile_request() {
 		unset( $_SERVER['HTTP_USER_AGENT'] );
 		$this->assertFalse( $this->instance->is_mobile_request() );
@@ -344,7 +356,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		$this->assertTrue( $this->instance->is_mobile_request() );
 	}
 
-	/** @covers MobileRedirection::is_using_client_side_redirection() */
+	/** @covers ::is_using_client_side_redirection() */
 	public function test_is_using_client_side_redirection() {
 		$this->assertTrue( $this->instance->is_using_client_side_redirection() );
 
@@ -363,7 +375,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		$this->assertTrue( $this->instance->is_using_client_side_redirection() );
 	}
 
-	/** @covers MobileRedirection::get_mobile_user_agents() */
+	/** @covers ::get_mobile_user_agents() */
 	public function test_get_mobile_user_agents() {
 		$this->assertContains( 'Mobile', $this->instance->get_mobile_user_agents() );
 		$this->assertNotContains( 'Watch', $this->instance->get_mobile_user_agents() );
@@ -376,7 +388,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		$this->assertContains( 'Watch', $this->instance->get_mobile_user_agents() );
 	}
 
-	/** @covers MobileRedirection::is_redirection_disabled_via_query_param() */
+	/** @covers ::is_redirection_disabled_via_query_param() */
 	public function test_is_redirection_disabled_via_query_param() {
 		$this->assertFalse( $this->instance->is_redirection_disabled_via_query_param() );
 
@@ -384,14 +396,14 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		$this->assertTrue( $this->instance->is_redirection_disabled_via_query_param() );
 	}
 
-	/** @covers MobileRedirection::is_redirection_disabled_via_cookie() */
+	/** @covers ::is_redirection_disabled_via_cookie() */
 	public function test_is_redirection_disabled_via_cookie() {
 		$this->assertFalse( $this->instance->is_redirection_disabled_via_cookie() );
 		$_COOKIE[ MobileRedirection::DISABLED_STORAGE_KEY ] = '1';
 		$this->assertTrue( $this->instance->is_redirection_disabled_via_cookie() );
 	}
 
-	/** @covers MobileRedirection::set_mobile_redirection_disabled_cookie() */
+	/** @covers ::set_mobile_redirection_disabled_cookie() */
 	public function test_set_mobile_redirection_disabled_cookie() {
 		$this->assertArrayNotHasKey( MobileRedirection::DISABLED_STORAGE_KEY, $_COOKIE );
 		$this->instance->set_mobile_redirection_disabled_cookie( true );
@@ -400,7 +412,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		$this->assertArrayNotHasKey( MobileRedirection::DISABLED_STORAGE_KEY, $_COOKIE );
 	}
 
-	/** @covers MobileRedirection::add_mobile_redirect_script() */
+	/** @covers ::add_mobile_redirect_script() */
 	public function test_add_mobile_redirect_script() {
 		ob_start();
 		$this->instance->add_mobile_redirect_script();
@@ -410,7 +422,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		$this->assertStringContains( 'noampQueryVarName', $output );
 	}
 
-	/** @covers MobileRedirection::add_mobile_alternative_link() */
+	/** @covers ::add_mobile_alternative_link() */
 	public function test_add_mobile_alternative_link() {
 		ob_start();
 		$this->instance->add_mobile_alternative_link();
@@ -419,7 +431,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		$this->assertStringStartsWith( '<link rel="alternate" type="text/html" media="only screen and (max-width: 640px)"', $output );
 	}
 
-	/** @covers MobileRedirection::add_mobile_version_switcher_styles() */
+	/** @covers ::add_mobile_version_switcher_styles() */
 	public function test_add_mobile_version_switcher_styles() {
 		ob_start();
 		$this->instance->add_mobile_version_switcher_styles();
@@ -454,7 +466,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 
 	/**
 	 * @dataProvider get_test_data_for_add_mobile_version_switcher
-	 * @covers MobileRedirection::add_mobile_version_switcher_link()
+	 * @covers ::add_mobile_version_switcher_link()
 	 *
 	 * @param bool   $is_amp   Is AMP.
 	 * @param string $link_rel Expected link relations.
@@ -465,7 +477,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		if ( $is_amp ) {
 			set_query_var( QueryVar::AMP, '1' );
 		}
-		$this->assertEquals( $is_amp, is_amp_endpoint() );
+		$this->assertEquals( $is_amp, amp_is_request() );
 		ob_start();
 		$this->instance->add_mobile_version_switcher_link();
 		$output = ob_get_clean();
@@ -475,8 +487,8 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 
 		add_filter(
 			'amp_mobile_version_switcher_link_text',
-			function ( $link_text ) {
-				return $link_text . ' ' . ( is_amp_endpoint() ? '(non-AMP version)' : '(AMP version)' );
+			static function ( $link_text ) {
+				return $link_text . ' ' . ( amp_is_request() ? '(non-AMP version)' : '(AMP version)' );
 			}
 		);
 
@@ -484,7 +496,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		ob_start();
 		$this->instance->add_mobile_version_switcher_link();
 		$output = ob_get_clean();
-		$this->assertStringContains( is_amp_endpoint() ? '(non-AMP version)' : '(AMP version)', $output );
+		$this->assertStringContains( amp_is_request() ? '(non-AMP version)' : '(AMP version)', $output );
 		$this->assertStringContains( '<script data-ampdevmode>', $output );
 		$this->assertStringContains( 'notApplicableMessage', $output );
 	}

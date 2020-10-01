@@ -1,0 +1,17 @@
+## Hooks
+
+### Actions
+
+{{# . }}
+{{# is_action }}
+* {{# is_deprecated }}~~{{/is_deprecated}}[`{{{ name }}}`]({{{ get_filename }}}.md){{# has_description }} - {{ get_short_description }}{{/ has_description }}{{# is_deprecated }}~~{{/is_deprecated}}
+{{/ is_action }}
+{{/.}}
+
+### Filters
+
+{{# . }}
+{{# is_filter }}
+* {{# is_deprecated }}~~{{/is_deprecated}}[`{{{ name }}}`]({{{ get_filename }}}.md){{# has_description }} - {{ get_short_description }}{{/ has_description }}{{# is_deprecated }}~~{{/is_deprecated}}
+{{/ is_filter }}
+{{/.}}

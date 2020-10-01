@@ -16,36 +16,15 @@ import { useContext, useMemo } from '@wordpress/element';
 import { ReaderThemes } from '../reader-themes-context-provider';
 import { Loading } from '../loading';
 import './style.css';
+import { ThemeCard } from '../theme-card';
 import { AMPNotice } from '../amp-notice';
-import { ThemeCard } from './theme-card';
+import { ThemesAPIError } from '../themes-api-error';
 
 /**
  * Component for selecting a reader theme.
- *
- * @param {Object} props Component props.
- * @param {boolean} props.hideCurrentlyActiveTheme Whether the currently active theme should be unselectable.
  */
-export function ReaderThemeSelection( { hideCurrentlyActiveTheme = false } ) {
-	const { currentTheme, fetchingThemes, themes: unprocessedThemes } = useContext( ReaderThemes );
-
-	const { activeTheme, themes } = useMemo( () => {
-		let active, processedThemes;
-
-		if ( hideCurrentlyActiveTheme ) {
-			processedThemes = ( unprocessedThemes || [] ).filter( ( theme ) => {
-				if ( 'active' === theme.availability ) {
-					active = theme;
-					return false;
-				}
-				return true;
-			} );
-		} else {
-			active = null;
-			processedThemes = unprocessedThemes;
-		}
-
-		return { activeTheme: active, themes: processedThemes };
-	}, [ hideCurrentlyActiveTheme, unprocessedThemes ] );
+export function ReaderThemeSelection() {
+	const { currentTheme, fetchingThemes, themes } = useContext( ReaderThemes );
 
 	// Separate available themes (both installed and installable) from those that need to be installed manually.
 	const { availableThemes, unavailableThemes } = useMemo(
@@ -72,37 +51,33 @@ export function ReaderThemeSelection( { hideCurrentlyActiveTheme = false } ) {
 		<div className="reader-theme-selection">
 			<p>
 				{
-					// @todo Probably improve this text.
 					__( 'Select the theme template for mobile visitors', 'amp' )
 				}
 			</p>
-			{ activeTheme && hideCurrentlyActiveTheme && (
+			{ currentTheme && currentTheme.is_reader_theme && (
 				<AMPNotice>
 					<p>
 						{
 							sprintf(
 								/* translators: placeholder is the name of a WordPress theme. */
 								__( 'Your active theme “%s” is not available as a reader theme. If you wish to use it, Transitional mode may be the best option for you.', 'amp' ),
-								activeTheme.name,
+								currentTheme.name,
 							)
 						}
 					</p>
 				</AMPNotice>
 			) }
+			<ThemesAPIError />
 			<div>
 				{ 0 < availableThemes.length && (
 					<ul className="choose-reader-theme__grid">
-						{ availableThemes.map( ( theme ) => {
-							const disabled = hideCurrentlyActiveTheme && currentTheme.name === theme.name;
-
-							return ! disabled && (
-								<ThemeCard
-									key={ `theme-card-${ theme.slug }` }
-									screenshotUrl={ theme.screenshot_url }
-									{ ...theme }
-								/>
-							);
-						} ) }
+						{ availableThemes.map( ( theme ) => (
+							<ThemeCard
+								key={ `theme-card-${ theme.slug }` }
+								screenshotUrl={ theme.screenshot_url }
+								{ ...theme }
+							/>
+						) ) }
 					</ul>
 				) }
 

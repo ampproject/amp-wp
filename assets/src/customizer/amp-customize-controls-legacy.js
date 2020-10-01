@@ -2,6 +2,11 @@
 
 /* eslint no-magic-numbers: [ "error", { "ignore": [ 0, 1, 250] } ] */
 
+/**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+
 window.ampCustomizeControls = ( function( api, $ ) {
 	'use strict';
 
@@ -238,13 +243,6 @@ window.ampCustomizeControls = ( function( api, $ ) {
 			api.section.bind( 'add', component.updatePanelNotifications );
 		}
 
-		// Enable AMP toggle if available and mobile device selected.
-		api.previewedDevice.bind( function( device ) {
-			if ( api.state( 'ampAvailable' ).get() ) {
-				api.state( 'ampEnabled' ).set( 'mobile' === device );
-			}
-		} );
-
 		// Message coming from previewer.
 		api.previewer.bind( 'amp-status', function( data ) {
 			api.state( 'ampAvailable' ).set( data.available );
@@ -273,6 +271,14 @@ window.ampCustomizeControls = ( function( api, $ ) {
 		api.state( 'ampEnabled' ).bind( function( enabled ) {
 			checkbox.prop( 'checked', enabled );
 			component.updatePreviewUrl();
+
+			// Preview tablet device when AMP is enabled.
+			if ( enabled ) {
+				const ampPreviewDevice = 'tablet';
+				if ( ampPreviewDevice in api.settings.previewableDevices ) {
+					api.state( 'previewedDevice' ).set( ampPreviewDevice );
+				}
+			}
 		} );
 
 		// Listen for ampAvailable state changes.
@@ -286,7 +292,20 @@ window.ampCustomizeControls = ( function( api, $ ) {
 		} );
 
 		// Adding checkbox toggle before device selection.
-		$( '.devices-wrapper' ).before( ampToggleContainer );
+		$( '.devices-wrapper' ).prepend( ampToggleContainer );
+
+		// Update tooltip for Customizer collapse button based on whether the pane is shown.
+		const collapseSidebarButton = $( '.collapse-sidebar.button' );
+		const collapseSidebarLabel = collapseSidebarButton.find( '> .collapse-sidebar-label' );
+		const updateCollapseSidebarTooltip = () => {
+			if ( api.state( 'paneVisible' ).get() ) {
+				collapseSidebarButton.prop( 'title', collapseSidebarLabel.text() );
+			} else {
+				collapseSidebarButton.prop( 'title', __( 'Show Controls', 'amp' ) );
+			}
+		};
+		updateCollapseSidebarTooltip();
+		api.state( 'paneVisible' ).bind( updateCollapseSidebarTooltip );
 
 		// User clicked link within tooltip, go to linked post in preview.
 		tooltipLink.on( 'click', function( event ) {

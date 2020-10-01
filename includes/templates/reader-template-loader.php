@@ -21,7 +21,7 @@ setup_postdata( $post );
 /**
  * Fires before rendering a post in AMP.
  *
- * This action is not triggered when 'amp' theme support is present. Instead, you should use 'template_redirect' action and check if `is_amp_endpoint()`.
+ * This action is not triggered when 'amp' theme support is present. Instead, you should use 'template_redirect' action and check if `amp_is_request()`.
  *
  * @since 0.2
  *

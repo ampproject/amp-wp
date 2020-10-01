@@ -10,7 +10,7 @@ use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use WP_UnitTestCase;
 use WP_REST_Response;
 
-/** @covers ObsoleteBlockAttributeRemover */
+/** @coversDefaultClass \AmpProject\AmpWP\ObsoleteBlockAttributeRemover */
 final class ObsoleteBlockAttributeRemoverTest extends WP_UnitTestCase {
 
 	use AssertContainsCompatibility;
@@ -30,19 +30,18 @@ final class ObsoleteBlockAttributeRemoverTest extends WP_UnitTestCase {
 		$this->instance = new ObsoleteBlockAttributeRemover();
 	}
 
-	/** @covers ObsoleteBlockAttributeRemover::__construct() */
 	public function test_it_can_be_initialized() {
 		$this->assertInstanceOf( Service::class, $this->instance );
 		$this->assertInstanceOf( Registerable::class, $this->instance );
 		$this->assertInstanceOf( Delayed::class, $this->instance );
 	}
 
-	/** @covers ObsoleteBlockAttributeRemover::get_registration_action() */
+	/** @covers ::get_registration_action() */
 	public function test_get_registration_action() {
 		$this->assertEquals( 'rest_api_init', ObsoleteBlockAttributeRemover::get_registration_action() );
 	}
 
-	/** @covers ObsoleteBlockAttributeRemover::register() */
+	/** @covers ::register() */
 	public function test_register() {
 		$editor_post_types = get_post_types_by_support( 'editor' );
 		$this->assertNotEmpty( $editor_post_types );
@@ -87,11 +86,19 @@ final class ObsoleteBlockAttributeRemoverTest extends WP_UnitTestCase {
 				',
 				0, // Expect props.
 			],
+			'huge_post'                 => [
+				'
+				<!-- wp:paragraph -->'
+				. str_repeat( 'a', 111101 ) .
+				'<!-- /wp:paragraph -->
+				',
+				0, // Expect props.
+			],
 		];
 	}
 
 	/**
-	 * @covers ObsoleteBlockAttributeRemover::test_filter_rest_prepare_post()
+	 * @covers ::filter_rest_prepare_post()
 	 *
 	 * @dataProvider get_block_data
 	 * @param string $block_content
@@ -117,6 +124,8 @@ final class ObsoleteBlockAttributeRemoverTest extends WP_UnitTestCase {
 		);
 
 		$filtered_response = $this->instance->filter_rest_prepare_post( clone $response );
+		$this->assertNotNull( $filtered_response );
+
 		if ( $expected_prop_count > 0 ) {
 			$this->assertNotEquals( $response->data['content']['raw'], $filtered_response->data['content']['raw'] );
 		} else {
@@ -136,7 +145,7 @@ final class ObsoleteBlockAttributeRemoverTest extends WP_UnitTestCase {
 		$this->assertEquals( $expected_prop_count, $present_count );
 	}
 
-	/** @covers ObsoleteBlockAttributeRemover::test_filter_rest_prepare_post() */
+	/** @covers ::filter_rest_prepare_post() */
 	public function test_filter_rest_prepare_post_rendered_only() {
 		$response = new WP_REST_Response(
 			[

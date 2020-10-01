@@ -14,7 +14,6 @@ import { CheckboxControl } from '@wordpress/components';
  * Internal dependencies
  */
 import { SupportedTemplatesToggle } from '../components/supported-templates-toggle';
-import { Selectable } from '../components/selectable';
 import { Options } from '../components/options-context-provider';
 
 /**
@@ -276,16 +275,11 @@ export function SupportedTemplatesFieldset() {
  */
 export function SupportedTemplates() {
 	return (
-		<section>
-			<h2>
-				{ __( 'Supported Templates', 'amp' ) }
-			</h2>
-			<Selectable className="supported-templates">
-				<div className="supported-templates__fields">
-					<SupportedPostTypesFieldset />
-					<SupportedTemplatesFieldset />
-				</div>
-			</Selectable>
-		</section>
+		<div className="supported-templates">
+			<div className="supported-templates__fields">
+				<SupportedPostTypesFieldset />
+				<SupportedTemplatesFieldset />
+			</div>
+		</div>
 	);
 }

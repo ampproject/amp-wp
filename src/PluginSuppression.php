@@ -13,6 +13,7 @@ use AMP_Validation_Error_Taxonomy;
 use AMP_Validation_Manager;
 use AMP_Validated_URL_Post_Type;
 use AmpProject\AmpWP\Admin\ReaderThemes;
+use AmpProject\AmpWP\DevTools\CallbackReflection;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use WP_Block_Type_Registry;
@@ -25,6 +26,8 @@ use WP_User;
  * Suppress plugins from running by removing their hooks and nullifying their shortcodes, widgets, and blocks.
  *
  * @package AmpProject\AmpWP
+ * @internal
+ * @since 2.0
  */
 final class PluginSuppression implements Service, Registerable {
 
@@ -36,12 +39,21 @@ final class PluginSuppression implements Service, Registerable {
 	private $plugin_registry;
 
 	/**
+	 * Callback reflector to use.
+	 *
+	 * @var CallbackReflection
+	 */
+	private $callback_reflection;
+
+	/**
 	 * Instantiate the plugin suppression service.
 	 *
-	 * @param PluginRegistry $plugin_registry Plugin registry to use.
+	 * @param PluginRegistry     $plugin_registry     Plugin registry to use.
+	 * @param CallbackReflection $callback_reflection Callback reflector to use.
 	 */
-	public function __construct( PluginRegistry $plugin_registry ) {
-		$this->plugin_registry = $plugin_registry;
+	public function __construct( PluginRegistry $plugin_registry, CallbackReflection $callback_reflection ) {
+		$this->plugin_registry     = $plugin_registry;
+		$this->callback_reflection = $callback_reflection;
 	}
 
 	/**
@@ -50,7 +62,6 @@ final class PluginSuppression implements Service, Registerable {
 	public function register() {
 		add_filter( 'amp_default_options', [ $this, 'filter_default_options' ] );
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
-		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
 
 		// When a Reader theme is selected and an AMP request is being made, start suppressing as early as possible.
 		// This can be done because we know it is an AMP page due to the query parameter, but it also _has_ to be done
@@ -60,11 +71,13 @@ final class PluginSuppression implements Service, Registerable {
 		// but there is no similar need to suppress the registration of Customizer controls in Transitional mode since
 		// there is no separate Customizer for AMP in Transitional mode (or legacy Reader mode).
 		if ( $this->is_reader_theme_request() ) {
-			add_action( 'plugins_loaded', [ $this, 'suppress_plugins' ], $priority );
+			$this->suppress_plugins();
 		} else {
+			$min_priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
+
 			// In Standard mode we _have_ to wait for the wp action because with the absence of a query parameter
-			// we have to rely on is_amp_endpoint() and the WP_Query to determine whether a plugin should be suppressed.
-			add_action( 'wp', [ $this, 'maybe_suppress_plugins' ], $priority );
+			// we have to rely on amp_is_request() and the WP_Query to determine whether a plugin should be suppressed.
+			add_action( 'wp', [ $this, 'maybe_suppress_plugins' ], $min_priority );
 		}
 	}
 
@@ -100,7 +113,7 @@ final class PluginSuppression implements Service, Registerable {
 	 * @return bool Whether plugins are being suppressed.
 	 */
 	public function maybe_suppress_plugins() {
-		if ( is_amp_endpoint() ) {
+		if ( amp_is_request() ) {
 			return $this->suppress_plugins();
 		}
 		return false;
@@ -302,40 +315,18 @@ final class PluginSuppression implements Service, Registerable {
 	}
 
 	/**
-	 * Get suppressible plugin slugs.
+	 * Provides a keyed array of active plugins with keys being slugs and values being plugin info plus validation error details.
 	 *
-	 * @return string[] Plugin slugs which are suppressible.
-	 */
-	private function get_suppressible_plugins() {
-		$errors_by_source        = AMP_Validated_URL_Post_Type::get_recent_validation_errors_by_source();
-		$erroring_plugin_slugs   = isset( $errors_by_source['plugin'] ) ? array_keys( $errors_by_source['plugin'] ) : [];
-		$suppressed_plugin_slugs = array_keys( AMP_Options_Manager::get_option( Option::SUPPRESSED_PLUGINS ) );
-		$active_plugin_slugs     = array_keys( $this->plugin_registry->get_plugins( true ) );
-
-		// The suppressible plugins are the set of plugins which are erroring and/or suppressed, which are also active.
-		return array_unique(
-			array_intersect(
-				array_merge( $erroring_plugin_slugs, $suppressed_plugin_slugs ),
-				$active_plugin_slugs
-			)
-		);
-	}
-
-	/**
-	 * Provides a keyed array of suppressible plugins with keys being slugs and values being plugin info plus validation error details.
+	 * Plugins are sorted by validation error count, in descending order.
 	 *
-	 * @return array
+	 * @return array Plugins.
 	 */
 	public function get_suppressible_plugins_with_details() {
-		$plugins = array_intersect_key( // Note that wp_array_slice_assoc() doesn't preserve sort order.
-			$this->plugin_registry->get_plugins( true ),
-			array_fill_keys( $this->get_suppressible_plugins(), true )
-		);
-
-		foreach ( array_keys( $plugins ) as $key ) {
-			$plugins[ $key ]['validation_errors'] = $this->get_sorted_plugin_validation_errors( $key );
+		$plugins = [];
+		foreach ( $this->plugin_registry->get_plugins( true ) as $slug => $plugin ) {
+			$plugin['validation_errors'] = $this->get_sorted_plugin_validation_errors( $slug );
+			$plugins[ $slug ]            = $plugin;
 		}
-
 		return $plugins;
 	}
 
@@ -492,7 +483,7 @@ final class PluginSuppression implements Service, Registerable {
 	 * @return bool Whether from suppressed plugin.
 	 */
 	private function is_callback_plugin_suppressed( $callback, $suppressed_plugins ) {
-		$source = AMP_Validation_Manager::get_source( $callback );
+		$source = $this->callback_reflection->get_source( $callback );
 		return (
 			isset( $source['type'], $source['name'] ) &&
 			'plugin' === $source['type'] &&

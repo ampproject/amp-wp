@@ -9,6 +9,8 @@ use AmpProject\Dom\Document;
 
 /**
  * Class AMP_TikTok_Embed_Handler
+ *
+ * @internal
  */
 class AMP_TikTok_Embed_Handler extends AMP_Base_Embed_Handler {
 

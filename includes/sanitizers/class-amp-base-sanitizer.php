@@ -10,6 +10,8 @@ use AmpProject\Dom\Document;
 
 /**
  * Class AMP_Base_Sanitizer
+ *
+ * @since 0.2
  */
 abstract class AMP_Base_Sanitizer {
 
@@ -175,6 +177,7 @@ abstract class AMP_Base_Sanitizer {
 	 * @since 0.4
 	 * @codeCoverageIgnore
 	 * @deprecated As of 1.0, use get_stylesheets().
+	 * @internal
 	 *
 	 * @return array[][] Mapping of CSS selectors to arrays of properties.
 	 */
@@ -591,7 +594,13 @@ abstract class AMP_Base_Sanitizer {
 			}
 
 			// Capture element contents.
-			if ( ( 'script' === $node->nodeName && ! $node->hasAttribute( 'src' ) ) || 'style' === $node->nodeName ) {
+			if (
+				( 'script' === $node->nodeName && ! $node->hasAttribute( 'src' ) )
+				||
+				// Include stylesheet text except for amp-custom and amp-keyframes since it is large and since it should
+				// already be detailed in the stylesheets metabox.
+				( 'style' === $node->nodeName && ! $node->hasAttribute( 'amp-custom' ) && ! $node->hasAttribute( 'amp-keyframes' ) )
+			) {
 				$error['text'] = $node->textContent;
 			}
 

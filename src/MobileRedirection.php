@@ -17,6 +17,8 @@ use AMP_Theme_Support;
  * Service for redirecting mobile users to the AMP version of a page.
  *
  * @package AmpProject\AmpWP
+ * @since 2.0
+ * @internal
  */
 final class MobileRedirection implements Service, Registerable {
 
@@ -46,7 +48,11 @@ final class MobileRedirection implements Service, Registerable {
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
 
 		if ( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ) {
-			add_action( 'wp', [ $this, 'redirect' ] );
+			add_action( 'template_redirect', [ $this, 'redirect' ], PHP_INT_MAX );
+
+			// Enable AMP-to-AMP linking by default to avoid redirecting to AMP version when navigating.
+			// A low priority is used so that sites can continue overriding this if they have done so.
+			add_filter( 'amp_to_amp_linking_enabled', '__return_true', 0 );
 		}
 	}
 
@@ -93,7 +99,7 @@ final class MobileRedirection implements Service, Registerable {
 	public function redirect() {
 		// If a site is AMP-first or AMP is not available for the request, then no redirection functionality will apply.
 		// Additionally, prevent adding redirection logic in the Customizer preview since that will currently complicate things.
-		if ( amp_is_canonical() || ! is_amp_available() ) {
+		if ( amp_is_canonical() || ! amp_is_available() ) {
 			return;
 		}
 
@@ -107,7 +113,7 @@ final class MobileRedirection implements Service, Registerable {
 
 			// Now abort if it's not an AMP page and the user agent is not mobile, since there won't be any redirection
 			// to the AMP version and we don't need to show a footer link to go to the AMP version.
-			if ( ! $this->is_mobile_request() && ! is_amp_endpoint() ) {
+			if ( ! $this->is_mobile_request() && ! amp_is_request() ) {
 				return;
 			}
 		}
@@ -116,7 +122,7 @@ final class MobileRedirection implements Service, Registerable {
 		add_action( 'wp_head', [ $this, 'add_mobile_version_switcher_styles' ] );
 		add_action( 'amp_post_template_head', [ $this, 'add_mobile_version_switcher_styles' ] ); // For legacy Reader mode theme.
 
-		if ( ! is_amp_endpoint() ) {
+		if ( ! amp_is_request() ) {
 			add_action( 'wp_head', [ $this, 'add_mobile_alternative_link' ] );
 			if ( $js ) {
 				// Add mobile redirection script.
@@ -139,10 +145,6 @@ final class MobileRedirection implements Service, Registerable {
 			if ( ! $js && $this->is_redirection_disabled_via_cookie() ) {
 				$this->set_mobile_redirection_disabled_cookie( false );
 			}
-
-			// Enable AMP-to-AMP linking by default to avoid redirecting to AMP version when navigating.
-			// A low priority is used so that sites can continue overriding this if they have done so.
-			add_filter( 'amp_to_amp_linking_enabled', '__return_true', 0 );
 
 			add_filter( 'amp_to_amp_linking_element_excluded', [ $this, 'filter_amp_to_amp_linking_element_excluded' ], 100, 2 );
 			add_filter( 'amp_to_amp_linking_element_query_vars', [ $this, 'filter_amp_to_amp_linking_element_query_vars' ], 10, 2 );
@@ -413,7 +415,7 @@ final class MobileRedirection implements Service, Registerable {
 		if ( ! apply_filters( 'amp_mobile_version_switcher_styles_used', true ) ) {
 			return;
 		}
-		$source = file_get_contents( __DIR__ . '/../assets/css/amp-mobile-version-switcher' . ( is_rtl() ? '-rtl' : '' ) . '.css' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		$source = file_get_contents( AMP__DIR__ . '/assets/css/amp-mobile-version-switcher' . ( is_rtl() ? '-rtl' : '' ) . '.css' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 		printf( '<style>%s</style>', $source ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
@@ -423,7 +425,7 @@ final class MobileRedirection implements Service, Registerable {
 	public function add_mobile_version_switcher_link() {
 		$should_redirect_via_js = $this->is_using_client_side_redirection();
 
-		$is_amp = is_amp_endpoint();
+		$is_amp = amp_is_request();
 		if ( $is_amp ) {
 			$rel  = [ Attribute::REL_NOAMPHTML, Attribute::REL_NOFOLLOW ];
 			$url  = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, amp_remove_endpoint( amp_get_current_url() ) );
@@ -437,7 +439,7 @@ final class MobileRedirection implements Service, Registerable {
 		/**
 		 * Filters the text to be used in the mobile switcher link.
 		 *
-		 * Use the `is_amp_endpoint()` function to determine whether you are filtering the
+		 * Use the `amp_is_request()` function to determine whether you are filtering the
 		 * text for the link to go to the non-AMP version or the AMP version.
 		 *
 		 * @since 2.0

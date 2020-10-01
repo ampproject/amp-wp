@@ -217,9 +217,18 @@ final class ServerSideRenderingTest extends TestCase
                 [],
             ],
 
+            'sizes attribute order reversal' => [
+                $input('<amp-img height="300" layout="responsive" srcset="https://acme.org/image1.png 320w, https://acme.org/image2.png 640w, https://acme.org/image3.png 1280w" sizes="(min-width: 200px) 200px, (min-width: 320px) 320px, 100vw" src="https://acme.org/image1.png" width="400"></amp-img>'),
+                $expectWithoutBoilerplate(
+                    '<amp-img class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" height="300" i-amphtml-layout="responsive" id="i-amp-0" layout="responsive" src="https://acme.org/image1.png" srcset="https://acme.org/image1.png 320w, https://acme.org/image2.png 640w, https://acme.org/image3.png 1280w" width="400"><i-amphtml-sizer style="display:block;padding-top:75.0000%;"></i-amphtml-sizer></amp-img>',
+                    '<style amp-custom>#i-amp-0{width:100vw}@media (min-width: 320px){#i-amp-0{width:320px}}@media (min-width: 200px){#i-amp-0{width:200px}}</style>'
+                ),
+                [],
+            ],
+
             'bad sizes attribute' => [
                 $input('<amp-img height="300" layout="responsive" srcset="https://acme.org/image1.png 320w, https://acme.org/image2.png 640w, https://acme.org/image3.png 1280w" sizes=",,," src="https://acme.org/image1.png" width="400"></amp-img>'),
-                $expectWithBoilerplate('<amp-img height="300" layout="responsive" srcset="https://acme.org/image1.png 320w, https://acme.org/image2.png 640w, https://acme.org/image3.png 1280w" sizes=",,,"  src="https://acme.org/image1.png" width="400"></amp-img>'),
+                $expectWithBoilerplate('<amp-img class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" height="300" i-amphtml-layout="responsive" layout="responsive" sizes=",,," src="https://acme.org/image1.png" srcset="https://acme.org/image1.png 320w, https://acme.org/image2.png 640w, https://acme.org/image3.png 1280w" width="400"><i-amphtml-sizer style="display:block;padding-top:75.0000%;"></i-amphtml-sizer></amp-img>'),
                 [
                     Error\CannotRemoveBoilerplate::fromAttributeThrowingException(
                         InvalidHtmlAttribute::fromAttribute(
@@ -235,7 +244,7 @@ final class ServerSideRenderingTest extends TestCase
             'heights attribute without amp-custom' => [
                 $input('<amp-img height="256" heights="(min-width: 500px) 200px, 80%" layout="responsive" width="320"></amp-img>'),
                 $expectWithoutBoilerplate(
-                    '<amp-img height="256" layout="responsive" width="320" id="i-amp-0" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block"></i-amphtml-sizer></amp-img>',
+                    '<amp-img height="256" layout="responsive" width="320" id="i-amp-0" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block;padding-top:80.0000%;"></i-amphtml-sizer></amp-img>',
                     '<style amp-custom>#i-amp-0>:first-child{padding-top:80%}@media (min-width: 500px){#i-amp-0>:first-child{padding-top:200px}}</style>'
                 ),
                 [],
@@ -247,7 +256,7 @@ final class ServerSideRenderingTest extends TestCase
                     '<style amp-custom>body h1{color:red;}</style>'
                 ),
                 $expectWithoutBoilerplate(
-                    '<amp-img height="256" layout="responsive" width="320" id="i-amp-0" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block"></i-amphtml-sizer></amp-img>',
+                    '<amp-img height="256" layout="responsive" width="320" id="i-amp-0" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive"><i-amphtml-sizer style="display:block;padding-top:80.0000%;"></i-amphtml-sizer></amp-img>',
                     '<style amp-custom>body h1{color:red;}#i-amp-0>:first-child{padding-top:80%}@media (min-width: 500px){#i-amp-0>:first-child{padding-top:200px}}</style>'
                 ),
                 [],
@@ -256,7 +265,7 @@ final class ServerSideRenderingTest extends TestCase
             'bad heights attribute' => [
                 $input('<amp-img height="256" heights=",,," layout="responsive" width="320"></amp-img>'),
                 // This adds an ID as it stores the CSS to inline before the actual error is detected.
-                $expectWithBoilerplate('<amp-img height="256" heights=",,," layout="responsive" width="320" id="i-amp-0"></amp-img>'),
+                $expectWithBoilerplate('<amp-img class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" height="256" heights=",,," i-amphtml-layout="responsive" layout="responsive" width="320"><i-amphtml-sizer style="display:block;padding-top:80.0000%;"></i-amphtml-sizer></amp-img>'),
                 [
                     Error\CannotRemoveBoilerplate::fromAttributeThrowingException(
                         InvalidHtmlAttribute::fromAttribute(

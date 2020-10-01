@@ -7,10 +7,10 @@
 
 // phpcs:disable Generic.Formatting.MultipleStatementAlignment.NotSameWarning
 
-use AmpProject\AmpWP\Admin\DevToolsUserAccess;
+use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
-use AmpProject\AmpWP\Services;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
@@ -24,7 +24,7 @@ use AmpProject\Dom\Document;
  * @covers AMP_Validation_Manager
  * @since 0.7
  */
-class Test_AMP_Validation_Manager extends WP_UnitTestCase {
+class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 	use AssertContainsCompatibility;
 	use HandleValidation;
@@ -453,7 +453,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 */
 	public function test_add_validation_error_sourcing() {
 		AMP_Validation_Manager::add_validation_error_sourcing();
-		$this->assertEquals( ~PHP_INT_MAX, has_filter( 'setup_theme', [ self::TESTED_CLASS, 'set_theme_variables' ] ) );
 		$this->assertEquals( 10, has_action( 'wp', [ self::TESTED_CLASS, 'wrap_widget_callbacks' ] ) );
 		$this->assertEquals( 10, has_action( 'all', [ self::TESTED_CLASS, 'wrap_hook_callbacks' ] ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_content', [ self::TESTED_CLASS, 'decorate_filter_source' ] ) );
@@ -492,8 +491,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$editor_user_id = self::factory()->user->create( [ 'role' => 'editor' ] );
 
 		wp_set_current_user( $admin_user_id );
-		/** @var DevToolsUserAccess $service */
-		$service = Services::get( 'dev_tools.user_access' );
+		$service = $this->injector->make( UserAccess::class );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$_SERVER['REQUEST_METHOD'] = 'POST';
@@ -634,8 +632,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		// Make user preference is honored.
-		/** @var DevToolsUserAccess $service */
-		$service = Services::get( 'dev_tools.user_access' );
+		$service = $this->injector->make( UserAccess::class );
 		$service->set_user_enabled( wp_get_current_user()->ID, false );
 		$this->assertNull(
 			AMP_Validation_Manager::get_amp_validity_rest_field(
@@ -874,7 +871,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 
 		// When sanitization is accepted by default.
 		$this->accept_sanitization_by_default( true );
-		$expected_notice_non_accepted_errors = 'There is content which fails AMP validation. You will have to remove the invalid markup (or allow the plugin to remove it) to serve AMP.';
+		$expected_notice_non_accepted_errors = 'There is content which fails AMP validation. In order for AMP to be served you will have to remove the invalid markup or allow the plugin to remove it.';
 		$this->assertStringContains( 'notice notice-warning', $output );
 		$this->assertStringContains( '<code>script</code>', $output );
 		$this->assertStringContains( $expected_notice_non_accepted_errors, $output );
@@ -882,7 +879,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		// When auto-accepting validation errors, if there are unaccepted validation errors, there should be a notice because this will block serving an AMP document.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$output = get_echo( [ 'AMP_Validation_Manager', 'print_edit_form_validation_status' ], [ $post ] );
-		$this->assertStringContains( 'There is content which fails AMP validation. You will have to remove the invalid markup (or allow the plugin to remove it) to serve AMP.', $output );
+		$this->assertStringContains( 'There is content which fails AMP validation. In order for AMP to be served you will have to remove the invalid markup or allow the plugin to remove it.', $output );
 
 		/*
 		 * When there are 'Rejected' or 'New Rejected' errors, there should be a message that explains that this will serve a non-AMP URL.
@@ -897,8 +894,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertStringContains( $expected_notice_non_accepted_errors, $output );
 
 		// Ensure not displayed when dev tools is disabled.
-		/** @var DevToolsUserAccess $service */
-		$service = Services::get( 'dev_tools.user_access' );
+		$service = $this->injector->make( UserAccess::class );
 		$service->set_user_enabled( wp_get_current_user()->ID, false );
 		$output = get_echo( [ 'AMP_Validation_Manager', 'print_edit_form_validation_status' ], [ $post ] );
 		$this->assertStringNotContains( 'notice notice-warning', $output );
@@ -1364,7 +1360,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			'latest_posts' => [
 				'<!-- wp:latest-posts {"postsToShow":1} /-->',
 				sprintf(
-					'<!--amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_content_index":0,"block_attrs":{"postsToShow":1},"type":"%1$s","name":"%2$s","file":%4$s,"line":%5$s,"function":"%3$s"}--><ul class="wp-block-latest-posts wp-block-latest-posts__list"><li><a href="{{url}}">{{title}}</a></li></ul><!--/amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_attrs":{"postsToShow":1},"type":"%1$s","name":"%2$s","file":%4$s,"line":%5$s,"function":"%3$s"}-->',
+					'<!--amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_content_index":0,"block_attrs":{"postsToShow":1},"type":"%1$s","name":"%2$s","file":%4$s,"line":%5$s,"function":"%3$s"}--><ul class="%6$s"><li><a href="{{url}}">{{title}}</a></li></ul><!--/amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_attrs":{"postsToShow":1},"type":"%1$s","name":"%2$s","file":%4$s,"line":%5$s,"function":"%3$s"}-->',
 					$is_gutenberg ? 'plugin' : 'core',
 					$is_gutenberg ? 'gutenberg' : 'wp-includes',
 					$latest_posts_block->render_callback,
@@ -1373,7 +1369,10 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 						? preg_replace( ':.*gutenberg/:', '', $reflection_function->getFileName() )
 						: preg_replace( ':.*wp-includes/:', '', $reflection_function->getFileName() )
 					),
-					$reflection_function->getStartLine()
+					$reflection_function->getStartLine(),
+					( defined( 'GUTENBERG_DEVELOPMENT_MODE' ) || defined( 'GUTENBERG_VERSION' ) && GUTENBERG_VERSION && version_compare( GUTENBERG_VERSION, '8.8.0', '>=' ) )
+						? 'wp-block-latest-posts__list wp-block-latest-posts'
+						: 'wp-block-latest-posts wp-block-latest-posts__list'
 				),
 				[
 					'element' => 'ul',
@@ -1431,13 +1430,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 				get_permalink( $post ),
 			],
 			$expected
-		);
-
-		// Temporary patch to support running unit tests in Gutenberg<5.7.0.
-		$rendered_block = str_replace(
-			'class="wp-block-latest-posts"',
-			'class="wp-block-latest-posts wp-block-latest-posts__list"',
-			$rendered_block
 		);
 
 		$this->assertEquals(
@@ -1910,21 +1902,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			preg_split( '/(?=<)/', $expected_content ),
 			preg_split( '/(?=<)/', $filtered_content )
 		);
-	}
-
-	/**
-	 * Test get_source
-	 *
-	 * @covers AMP_Validation_Manager::get_source()
-	 */
-	public function test_get_source() {
-		$source = AMP_Validation_Manager::get_source( 'amp_after_setup_theme' );
-		$this->assertEquals( 'amp', $source['name'] );
-		$this->assertEquals( 'plugin', $source['type'] );
-
-		$source = AMP_Validation_Manager::get_source( 'the_content' );
-		$this->assertEquals( 'wp-includes', $source['name'] );
-		$this->assertEquals( 'core', $source['type'] );
 	}
 
 	/**
@@ -2478,9 +2455,10 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'post_id', $r );
 		$this->assertEquals( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, get_post_type( $r['post_id'] ) );
 		$this->assertEquals( $r['url'], AMP_Validated_URL_Post_Type::get_url_from_post( $r['post_id'] ) );
-		$this->assertEquals( $php_error, json_decode( get_post_meta( $r['post_id'], '_amp_php_fatal_error', true ), true ) );
-		$this->assertEquals( $queried_object, get_post_meta( $r['post_id'], '_amp_queried_object', true ) );
-		$this->assertEquals( $stylesheets, json_decode( get_post_meta( $r['post_id'], '_amp_stylesheets', true ), true ) );
+		$this->assertEquals( $php_error, json_decode( get_post_meta( $r['post_id'], AMP_Validated_URL_Post_Type::PHP_FATAL_ERROR_POST_META_KEY, true ), true ) );
+		$this->assertEquals( $queried_object, get_post_meta( $r['post_id'], AMP_Validated_URL_Post_Type::QUERIED_OBJECT_POST_META_KEY, true ) );
+		$this->assertEquals( $stylesheets, json_decode( get_post_meta( $r['post_id'], AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY, true ), true ) );
+		$this->assertEquals( AMP_Validated_URL_Post_Type::get_validated_environment(), get_post_meta( $r['post_id'], AMP_Validated_URL_Post_Type::VALIDATED_ENVIRONMENT_POST_META_KEY, true ) );
 
 		$updated_validated_url = home_url( '/bar/' );
 		$previous_post_id      = $r['post_id'];
@@ -2556,8 +2534,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertFalse( wp_script_is( $slug, 'enqueued' ) );
 
 		// Ensure not displayed when dev tools is disabled.
-		/** @var DevToolsUserAccess $service */
-		$service = Services::get( 'dev_tools.user_access' );
+		$service = $this->injector->make( UserAccess::class );
 		$this->set_capability();
 		$service->set_user_enabled( wp_get_current_user()->ID, false );
 		AMP_Validation_Manager::enqueue_block_validation();

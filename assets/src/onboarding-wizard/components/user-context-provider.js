@@ -23,9 +23,9 @@ export const User = createContext();
  * @param {Object} props Component props.
  * @param {?any} props.children Component children.
  * @param {string} props.userOptionDeveloperTools The key of the option to use from the settings endpoint.
- * @param {string} props.userRestEndpoint REST endpoint to retrieve options.
+ * @param {string} props.userRestPath REST endpoint to retrieve options.
  */
-export function UserContextProvider( { children, userOptionDeveloperTools, userRestEndpoint } ) {
+export function UserContextProvider( { children, userOptionDeveloperTools, userRestPath } ) {
 	const { originalOptions, fetchingOptions } = useContext( Options );
 	const [ fetchingUser, setFetchingUser ] = useState( false );
 	const [ developerToolsOption, setDeveloperToolsOption ] = useState( null );
@@ -58,7 +58,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 			return;
 		}
 
-		if ( ! userRestEndpoint || fetchingUser || null !== originalDeveloperToolsOption ) {
+		if ( ! userRestPath || fetchingUser || null !== originalDeveloperToolsOption ) {
 			return;
 		}
 
@@ -69,7 +69,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 			setFetchingUser( true );
 
 			try {
-				const fetchedUser = await apiFetch( { url: userRestEndpoint } );
+				const fetchedUser = await apiFetch( { path: userRestPath } );
 
 				if ( true === hasUnmounted.current ) {
 					return;
@@ -84,7 +84,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 
 			setFetchingUser( false );
 		} )();
-	}, [ fetchingOptions, fetchingUser, originalDeveloperToolsOption, originalOptions.plugin_configured, setAsyncError, userOptionDeveloperTools, userRestEndpoint ] );
+	}, [ fetchingOptions, fetchingUser, originalDeveloperToolsOption, originalOptions.plugin_configured, setAsyncError, userOptionDeveloperTools, userRestPath ] );
 
 	/**
 	 * Sends the option back to the REST endpoint to be saved.
@@ -97,7 +97,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 		setSavingDeveloperToolsOption( true );
 
 		try {
-			const fetchedUser = await apiFetch( { method: 'post', url: userRestEndpoint, data: { [ userOptionDeveloperTools ]: developerToolsOption } } );
+			const fetchedUser = await apiFetch( { method: 'post', path: userRestPath, data: { [ userOptionDeveloperTools ]: developerToolsOption } } );
 
 			if ( true === hasUnmounted.current ) {
 				return;
@@ -112,7 +112,7 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 
 		setDidSaveDeveloperToolsOption( true );
 		setSavingDeveloperToolsOption( false );
-	}, [ hasDeveloperToolsOptionChange, developerToolsOption, setAsyncError, userOptionDeveloperTools, userRestEndpoint ] );
+	}, [ hasDeveloperToolsOptionChange, developerToolsOption, setAsyncError, userOptionDeveloperTools, userRestPath ] );
 
 	return (
 		<User.Provider
@@ -137,5 +137,5 @@ export function UserContextProvider( { children, userOptionDeveloperTools, userR
 UserContextProvider.propTypes = {
 	children: PropTypes.any,
 	userOptionDeveloperTools: PropTypes.string.isRequired,
-	userRestEndpoint: PropTypes.string.isRequired,
+	userRestPath: PropTypes.string.isRequired,
 };

@@ -6,6 +6,7 @@
  */
 
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\Dom\Document;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 
@@ -16,23 +17,18 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 
 	use AssertContainsCompatibility;
 	use PrivateAccess;
-
-	private $original_theme_directories;
+	use LoadsCoreThemes;
 
 	public function setUp() {
 		parent::setUp();
 
-		global $wp_theme_directories;
-		$this->original_theme_directories = $wp_theme_directories;
-		register_theme_directory( ABSPATH . 'wp-content/themes' );
-		delete_site_transient( 'theme_roots' );
+		$this->register_core_themes();
 	}
 
 	public function tearDown() {
 		parent::tearDown();
-		global $wp_theme_directories;
-		$wp_theme_directories = $this->original_theme_directories;
-		delete_site_transient( 'theme_roots' );
+
+		$this->restore_theme_directories();
 	}
 
 	/**
@@ -193,9 +189,9 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		switch_theme( 'child-of-core' );
 		AMP_Core_Theme_Sanitizer::extend_theme_support();
 		$this->assertTrue( current_theme_supports( 'amp' ) );
-		$this->assertEquals(
-			[ 'paired' => true ],
-			AMP_Theme_Support::get_theme_support_args()
+		$this->assertEqualSets(
+			[ 'paired', 'nav_menu_toggle', 'nav_menu_dropdown' ],
+			array_keys( AMP_Theme_Support::get_theme_support_args() )
 		);
 	}
 
@@ -270,7 +266,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function get_modals() {
 		$dom         = new Document();
-		$modal_roles = $this->get_static_private_property( 'AMP_Core_Theme_Sanitizer', 'modal_roles' );
+		$modal_roles = $this->get_private_property( 'AMP_Core_Theme_Sanitizer', 'modal_roles' );
 
 		$a = array_map(
 			static function ( $rule ) use ( $dom ) {

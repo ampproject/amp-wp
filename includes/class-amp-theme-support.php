@@ -6,10 +6,13 @@
  */
 
 use AmpProject\Amp;
+use AmpProject\AmpWP\DevTools\ErrorPage;
+use AmpProject\AmpWP\ExtraThemeAndPluginHeaders;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\RemoteRequest\CachedRemoteGetRequest;
 use AmpProject\AmpWP\ConfigurationArgument;
+use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Transformer;
 use AmpProject\Attribute;
 use AmpProject\Dom\Document;
@@ -24,6 +27,8 @@ use AmpProject\Tag;
  * Class AMP_Theme_Support
  *
  * Callbacks for adding AMP-related things when theme support is added.
+ *
+ * @internal
  */
 class AMP_Theme_Support {
 
@@ -160,7 +165,9 @@ class AMP_Theme_Support {
 		 * the response at this action and then short-circuit with exit. So this is why the the preceding
 		 * action to template_redirect--the wp action--is used instead.
 		 */
-		add_action( 'wp', [ __CLASS__, 'finish_init' ], PHP_INT_MAX );
+		if ( ! is_admin() ) {
+			add_action( 'wp', [ __CLASS__, 'finish_init' ], PHP_INT_MAX );
+		}
 	}
 
 	/**
@@ -256,6 +263,8 @@ class AMP_Theme_Support {
 	 * Get the theme support args.
 	 *
 	 * This avoids having to repeatedly call `get_theme_support()`, check the args, shift an item off the array, and so on.
+	 * Note that if the theme's `style.css` has the `AMP` header with a value that when converted to a boolean evaluates to `true`, then this function will return the same
+	 * as if the theme had done `add_theme_support('amp')`.
 	 *
 	 * @since 1.0
 	 *
@@ -263,6 +272,12 @@ class AMP_Theme_Support {
 	 */
 	public static function get_theme_support_args() {
 		if ( ! current_theme_supports( self::SLUG ) ) {
+			$theme_header = wp_get_theme()->get( ExtraThemeAndPluginHeaders::AMP_HEADER );
+			if ( rest_sanitize_boolean( $theme_header ) && ExtraThemeAndPluginHeaders::AMP_HEADER_LEGACY !== $theme_header ) {
+				return [
+					self::PAIRED_FLAG => true,
+				];
+			}
 			return false;
 		}
 		$support = get_theme_support( self::SLUG );
@@ -309,7 +324,7 @@ class AMP_Theme_Support {
 		if ( self::is_paired_available() ) {
 			self::setup_paired_browsing_client();
 			add_action( 'template_redirect', [ __CLASS__, 'sanitize_url_for_paired_browsing' ] );
-			add_filter( 'template_include', [ __CLASS__, 'serve_paired_browsing_experience' ] );
+			add_filter( 'template_include', [ __CLASS__, 'serve_paired_browsing_experience' ], PHP_INT_MAX );
 		}
 
 		$has_query_var = (
@@ -318,7 +333,7 @@ class AMP_Theme_Support {
 			false !== get_query_var( amp_get_slug(), false )
 		);
 
-		if ( ! is_amp_endpoint() ) {
+		if ( ! amp_is_request() ) {
 			/*
 			 * Redirect to AMP-less URL if AMP is not available for this URL and yet the query var is present.
 			 * Temporary redirect is used for admin users because implied transitional mode and template support can be
@@ -411,7 +426,7 @@ class AMP_Theme_Support {
 			 * When in AMP transitional mode *with* theme support, then the proper AMP URL has the 'amp' URL param
 			 * and not the /amp/ endpoint. The URL param is now the exclusive way to mark AMP in transitional mode
 			 * when amp theme support present. This is important for plugins to be able to reliably call
-			 * is_amp_endpoint() before the parse_query action.
+			 * amp_is_request() before the parse_query action.
 			 */
 			$old_url = amp_get_current_url();
 			$new_url = add_query_arg( amp_get_slug(), '', amp_remove_endpoint( $old_url ) );
@@ -506,11 +521,11 @@ class AMP_Theme_Support {
 	/**
 	 * Determine template availability of AMP for the given query.
 	 *
-	 * This is not intended to return whether AMP is available for a _specific_ post. For that, use `post_supports_amp()`.
+	 * This is not intended to return whether AMP is available for a _specific_ post. For that, use `amp_is_post_supported()`.
 	 *
 	 * @since 1.0
 	 * @global WP_Query $wp_query
-	 * @see post_supports_amp()
+	 * @see amp_is_post_supported()
 	 *
 	 * @param WP_Query|WP_Post|null $query Query or queried post. If null then the global query will be used.
 	 * @return array {
@@ -752,7 +767,7 @@ class AMP_Theme_Support {
 			$matching_template['errors'][] = 'template_unsupported';
 		}
 
-		// For singular queries, post_supports_amp() is given the final say.
+		// For singular queries, amp_is_post_supported() is given the final say.
 		if ( $query->is_singular() || $query->is_posts_page ) {
 			/**
 			 * Queried object.
@@ -1821,7 +1836,38 @@ class AMP_Theme_Support {
 	 */
 	public static function finish_output_buffering( $response ) {
 		self::$is_output_buffering = false;
-		$response                  = self::prepare_response( $response );
+
+		try {
+			$response = self::prepare_response( $response );
+		} catch ( Exception $exception ) {
+			$title   = __( 'Failed to prepare AMP page', 'amp' );
+			$message = __( 'A PHP error occurred while trying to prepare the AMP response. This may not be caused by the AMP plugin but by some other active plugin or the current theme. You will need to review the error details to determine the source of the error.', 'amp' );
+
+			$error_page = Services::get( 'dev_tools.error_page' );
+
+			$error_page
+				->with_title( $title )
+				->with_message( $message )
+				->with_exception( $exception )
+				->with_response_code( 500 );
+
+			// Add link to non-AMP version if not canonical.
+			if ( ! amp_is_canonical() ) {
+				$non_amp_url = amp_remove_endpoint( amp_get_current_url() );
+
+				// Prevent user from being redirected back to AMP version.
+				if ( true === AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ) {
+					$non_amp_url = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $non_amp_url );
+				}
+
+				$error_page->with_back_link(
+					$non_amp_url,
+					__( 'Go to non-AMP version', 'amp' )
+				);
+			}
+
+			$response = $error_page->render();
+		}
 
 		/**
 		 * Fires when server timings should be sent.
@@ -1884,6 +1930,7 @@ class AMP_Theme_Support {
 	 */
 	public static function prepare_response( $response, $args = [] ) {
 		global $content_width;
+		$last_error = error_get_last();
 
 		if ( isset( $args['validation_error_callback'] ) ) {
 			_doing_it_wrong( __METHOD__, 'Do not supply validation_error_callback arg.', '1.0' );
@@ -1921,11 +1968,31 @@ class AMP_Theme_Support {
 			);
 		}
 
-		/*
-		 * Abort if the response was not HTML. To be post-processed as an AMP page, the output-buffered document must
-		 * have the HTML mime type and it must start with <html> followed by <head> tag (with whitespace, doctype, and comments optionally interspersed).
-		 */
-		if ( Attribute::TYPE_HTML !== substr( AMP_HTTP::get_response_content_type(), 0, 9 ) || ! preg_match( '#^(?:<!.*?>|\s+)*<html.*?>(?:<!.*?>|\s+)*<head\b(.*?)>#is', $response ) ) {
+		// Abort if response type is not HTML.
+		if ( Attribute::TYPE_HTML !== substr( AMP_HTTP::get_response_content_type(), 0, 9 ) ) {
+			return $response;
+		}
+
+		// Abort if an expected template action didn't fire or if the HTML tag does not have the AMP attribute.
+		if ( ! (
+			did_action( 'wp_head' )
+			||
+			did_action( 'wp_footer' )
+			||
+			did_action( 'amp_post_template_head' )
+			||
+			did_action( 'amp_post_template_footer' )
+			||
+			preg_match(
+				sprintf(
+					'#^(?:<!.*?>|\s+)*+<html(?=\s)[^>]*?\s(%1$s|%2$s|%3$s)(\s|=|>)#is',
+					preg_quote( Attribute::AMP, '#' ),
+					preg_quote( Attribute::AMP_EMOJI, '#' ),
+					preg_quote( Attribute::AMP_EMOJI_ALT, '#' )
+				),
+				$response
+			)
+		) ) {
 			return $response;
 		}
 
@@ -2031,11 +2098,10 @@ class AMP_Theme_Support {
 		if ( AMP_Validation_Manager::$is_validate_request ) {
 			status_header( 200 );
 			header( 'Content-Type: application/json; charset=utf-8' );
-			$data       = [
+			$data = [
 				'http_status_code' => $status_code,
 				'php_fatal_error'  => false,
 			];
-			$last_error = error_get_last();
 			if ( $last_error && in_array( $last_error['type'], [ E_ERROR, E_RECOVERABLE_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR, E_PARSE ], true ) ) {
 				$data['php_fatal_error'] = $last_error;
 			}
@@ -2088,7 +2154,6 @@ class AMP_Theme_Support {
 		 * @since 1.5.0
 		 *
 		 * @param bool $enable_optimizer Whether the generated HTML output should be run through the AMP Optimizer or not.
-		 * @return bool Filtered value of whether the generated HTML output should be run through the AMP Optimizer or not.
 		 */
 		$enable_optimizer = apply_filters( 'amp_enable_optimizer', $enable_optimizer );
 
@@ -2208,7 +2273,6 @@ class AMP_Theme_Support {
 		 * @since 1.5.0
 		 *
 		 * @param bool $enable_ssr Whether the AMP Optimizer should use server-side rendering or not.
-		 * @return bool Filtered value of whether the AMP Optimizer should use server-side rendering or not.
 		 */
 		$enable_ssr = apply_filters( 'amp_enable_ssr', $enable_ssr );
 
@@ -2232,7 +2296,6 @@ class AMP_Theme_Support {
 		 * @since 1.5.0
 		 *
 		 * @param array $configuration Associative array of configuration data.
-		 * @return array Filtered associative array of configuration data.
 		 */
 		$configuration = apply_filters(
 			'amp_optimizer_config',
@@ -2276,8 +2339,7 @@ class AMP_Theme_Support {
 	 */
 	public static function enqueue_assets() {
 		// Enqueue default styles expected by sanitizer.
-		wp_enqueue_style( 'amp-default', amp_get_asset_url( 'css/amp-default.css' ), [], AMP__VERSION );
-		wp_styles()->add_data( 'amp-default', 'rtl', 'replace' );
+		wp_enqueue_style( 'amp-default' );
 	}
 
 	/**
@@ -2298,6 +2360,13 @@ class AMP_Theme_Support {
 			return;
 		}
 
+		/**
+		 * Fires before registering plugin assets that may require core asset polyfills.
+		 *
+		 * @internal
+		 */
+		do_action( 'amp_register_polyfills' );
+
 		$asset_file   = AMP__DIR__ . '/assets/js/amp-paired-browsing-client.asset.php';
 		$asset        = require $asset_file;
 		$dependencies = $asset['dependencies'];
@@ -2316,7 +2385,7 @@ class AMP_Theme_Support {
 		add_filter(
 			'script_loader_tag',
 			static function( $tag, $handle ) {
-				if ( is_amp_endpoint() && self::has_dependency( wp_scripts(), 'amp-paired-browsing-client', $handle ) ) {
+				if ( amp_is_request() && self::has_dependency( wp_scripts(), 'amp-paired-browsing-client', $handle ) ) {
 					$tag = preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
 				}
 				return $tag;
@@ -2387,6 +2456,9 @@ class AMP_Theme_Support {
 			);
 		}
 
+		/** This action is documented in includes/class-amp-theme-support.php */
+		do_action( 'amp_register_polyfills' );
+
 		wp_enqueue_style(
 			'amp-paired-browsing-app',
 			amp_get_asset_url( '/css/amp-paired-browsing-app.css' ),
@@ -2416,6 +2488,7 @@ class AMP_Theme_Support {
 				'ampSlug'                   => amp_get_slug(),
 				'ampPairedBrowsingQueryVar' => self::PAIRED_BROWSING_QUERY_VAR,
 				'noampQueryVar'             => QueryVar::NOAMP,
+				'noampMobile'               => QueryVar::NOAMP_MOBILE,
 				'documentTitlePrefix'       => __( 'AMP Paired Browsing:', 'amp' ),
 			]
 		);

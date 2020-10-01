@@ -10,6 +10,7 @@
  *
  * @codeCoverageIgnore
  * @deprecated 1.5 Reader mode now sanitizes its entire template through the standard post-processor.
+ * @internal
  */
 class AMP_Content {
 
@@ -128,6 +129,7 @@ class AMP_Content {
 		$content = $this->content;
 
 		// First, embeds + the_content filter.
+		/** This filter is documented in wp-includes/post-template.php */
 		$content = apply_filters( 'the_content', $content );
 		$this->unregister_embed_handlers( $this->embed_handlers );
 

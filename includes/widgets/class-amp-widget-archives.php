@@ -13,6 +13,7 @@ _deprecated_file( __FILE__, '2.0.0' );
  * Class AMP_Widget_Archives
  *
  * @deprecated As of 2.0 the AMP_Core_Block_Handler will sanitize the core widgets instead.
+ * @internal
  * @since 0.7.0
  * @package AMP
  */
@@ -36,7 +37,7 @@ class AMP_Widget_Archives extends WP_Widget_Archives {
 	 * @return void.
 	 */
 	public function widget( $args, $instance ) {
-		if ( ! is_amp_endpoint() ) {
+		if ( ! amp_is_request() ) {
 			parent::widget( $args, $instance );
 			return;
 		}

@@ -11,6 +11,9 @@ use InvalidArgumentException;
 
 /**
  * Exception thrown when an invalid service was requested.
+ *
+ * @since 2.0
+ * @internal
  */
 final class InvalidService
 	extends InvalidArgumentException

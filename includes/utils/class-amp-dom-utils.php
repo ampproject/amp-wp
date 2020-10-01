@@ -12,6 +12,8 @@ use AmpProject\Tag;
  * Class AMP_DOM_Utils
  *
  * Functionality to simplify working with Dom\Documents and DOMElements.
+ *
+ * @internal
  */
 class AMP_DOM_Utils {
 
@@ -20,6 +22,7 @@ class AMP_DOM_Utils {
 	 *
 	 * @since 1.2.1
 	 * @deprecated Use AmpProject\Dom\Document::AMP_BIND_DATA_ATTR_PREFIX instead.
+	 * @internal
 	 * @var string
 	 */
 	const AMP_BIND_DATA_ATTR_PREFIX = Document::AMP_BIND_DATA_ATTR_PREFIX;
@@ -112,6 +115,7 @@ class AMP_DOM_Utils {
 	 * @since 0.7
 	 * @codeCoverageIgnore
 	 * @deprecated This is handled automatically via AmpProject\Dom\Document.
+	 * @internal
 	 * @see \AMP_DOM_Utils::convert_amp_bind_attributes()
 	 * @link https://www.ampproject.org/docs/reference/components/amp-bind
 	 *
@@ -132,6 +136,7 @@ class AMP_DOM_Utils {
 	 * @see \AMP_DOM_Utils::convert_amp_bind_attributes()
 	 * @codeCoverageIgnore
 	 * @deprecated This is handled automatically via AmpProject\Dom\Document.
+	 * @internal
 	 * @link https://www.ampproject.org/docs/reference/components/amp-bind
 	 *
 	 * @param string $html HTML with amp-bind attributes converted.
@@ -284,11 +289,12 @@ class AMP_DOM_Utils {
 	}
 
 	/**
-	 * Forces HTML element closing tags given a Dom\Document and optional DOMElement
+	 * Forces HTML element closing tags given a Dom\Document and optional DOMElement.
 	 *
 	 * @since 0.2
 	 * @codeCoverageIgnore
 	 * @deprecated
+	 * @internal
 	 *
 	 * @param Document   $dom  Represents HTML document on which to force closing tags.
 	 * @param DOMElement $node Represents HTML element to start closing tags on.

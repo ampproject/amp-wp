@@ -7,8 +7,11 @@
 
 /**
  * Register hooks.
+ *
+ * @internal
  */
 function amp_post_template_init_hooks() {
+	add_action( 'amp_post_template_head', 'noindex' );
 	add_action( 'amp_post_template_head', 'amp_post_template_add_title' );
 	add_action( 'amp_post_template_head', 'amp_post_template_add_canonical' );
 	add_action( 'amp_post_template_head', 'amp_post_template_add_fonts' );
@@ -16,6 +19,7 @@ function amp_post_template_init_hooks() {
 	add_action( 'amp_post_template_head', 'amp_add_generator_metadata' );
 	add_action( 'amp_post_template_head', 'wp_generator' );
 	add_action( 'amp_post_template_head', 'amp_post_template_add_block_styles' );
+	add_action( 'amp_post_template_head', 'amp_post_template_add_default_styles' );
 	add_action( 'amp_post_template_css', 'amp_post_template_add_styles', 99 );
 	add_action( 'amp_post_template_data', 'amp_post_template_add_analytics_script' );
 	add_action( 'amp_post_template_footer', 'amp_post_template_add_analytics_data' );
@@ -31,6 +35,8 @@ function amp_post_template_init_hooks() {
 /**
  * Add title.
  *
+ * @internal
+ *
  * @param AMP_Post_Template $amp_template template.
  */
 function amp_post_template_add_title( $amp_template ) {
@@ -41,6 +47,8 @@ function amp_post_template_add_title( $amp_template ) {
 
 /**
  * Add canonical link.
+ *
+ * @internal
  *
  * @param AMP_Post_Template $amp_template Template.
  */
@@ -53,6 +61,8 @@ function amp_post_template_add_canonical( $amp_template ) {
 /**
  * Print fonts.
  *
+ * @internal
+ *
  * @param AMP_Post_Template $amp_template Template.
  */
 function amp_post_template_add_fonts( $amp_template ) {
@@ -64,6 +74,8 @@ function amp_post_template_add_fonts( $amp_template ) {
 
 /**
  * Add block styles for core blocks and third-party blocks.
+ *
+ * @internal
  *
  * @since 1.5.0
  */
@@ -78,7 +90,19 @@ function amp_post_template_add_block_styles() {
 }
 
 /**
+ * Print default styles.
+ *
+ * @since 2.0.1
+ * @internal
+ */
+function amp_post_template_add_default_styles() {
+	wp_print_styles( 'amp-default' );
+}
+
+/**
  * Print styles.
+ *
+ * @internal
  *
  * @param AMP_Post_Template $amp_template Template.
  */
@@ -102,6 +126,8 @@ function amp_post_template_add_styles( $amp_template ) {
 /**
  * Add analytics scripts.
  *
+ * @internal
+ *
  * @param array $data Data.
  * @return array Data.
  */
@@ -114,6 +140,8 @@ function amp_post_template_add_analytics_script( $data ) {
 
 /**
  * Print analytics data.
+ *
+ * @internal
  *
  * @since 0.3.2
  */

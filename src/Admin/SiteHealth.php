@@ -23,6 +23,7 @@ use AmpProject\AmpWP\Option;
  * Adds tests and debugging information for Site Health.
  *
  * @since 1.5.0
+ * @internal
  */
 final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 
@@ -441,6 +442,11 @@ final class SiteHealth implements Service, Registerable, Delayed, Conditional {
 						'amp_css_transient_caching_time_series' => [
 							'label'   => esc_html__( 'Calculated time series for monitoring the stylesheet caching', 'amp' ),
 							'value'   => $this->css_transient_caching->get_time_series(),
+							'private' => false,
+						],
+						'amp_libxml_version'      => [
+							'label'   => 'libxml Version',
+							'value'   => LIBXML_DOTTED_VERSION,
 							'private' => false,
 						],
 					],

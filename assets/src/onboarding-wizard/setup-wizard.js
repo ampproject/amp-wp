@@ -13,10 +13,11 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import { WordmarkLogo } from '../components/svg/wordmark-logo';
+import { Logo } from '../components/svg/logo';
 import { UnsavedChangesWarning } from '../components/unsaved-changes-warning';
+import { useWindowWidth } from '../utils/use-window-width';
 import { Stepper } from './components/stepper';
-import { Nav } from './components/nav';
+import { Nav, CloseLink } from './components/nav';
 import { Navigation } from './components/navigation-context-provider';
 
 /**
@@ -42,6 +43,7 @@ function PageComponentSideEffects( { children } ) {
  * @param {string} props.finishLink Exit link.
  */
 export function SetupWizard( { closeLink, finishLink } ) {
+	const { isMobile } = useWindowWidth();
 	const { activePageIndex, currentPage: { title, PageComponent, showTitle }, moveBack, moveForward, pages } = useContext( Navigation );
 
 	const PageComponentWithSideEffects = useMemo( () => () => (
@@ -52,20 +54,32 @@ export function SetupWizard( { closeLink, finishLink } ) {
 	), [ PageComponent ] );
 
 	return (
-		<div className="amp-settings-container">
-			<div className="amp-settings">
+		<div className="amp-onboarding-wizard-container">
+			<div className="amp-onboarding-wizard">
 				<div className="amp-stepper-container">
-					<WordmarkLogo />
-					<div className="amp-settings-plugin-name">
-						{ __( 'Official AMP Plugin for WordPress', 'amp' ) }
+					<div className="amp-stepper-container__header">
+						{
+							isMobile && (
+								<CloseLink closeLink={ closeLink } />
+							)
+						}
+						<div className="amp-onboarding-wizard__logo-container">
+							<Logo />
+							<h1>
+								{ __( 'AMP', 'amp' ) }
+							</h1>
+						</div>
+						<div className="amp-onboarding-wizard-plugin-name">
+							{ __( 'Official WordPress Plugin', 'amp' ) }
+						</div>
 					</div>
 					<Stepper
 						activePageIndex={ activePageIndex }
 						pages={ pages }
 					/>
 				</div>
-				<div className="amp-settings-panel-container">
-					<Panel className="amp-settings-panel">
+				<div className="amp-onboarding-wizard-panel-container">
+					<Panel className="amp-onboarding-wizard-panel">
 						{ false !== showTitle && (
 							<h1>
 								{ title }

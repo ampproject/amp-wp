@@ -8,22 +8,19 @@
 namespace AmpProject\AmpWP\Tests;
 
 use AMP_Options_Manager;
-use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\OptionsRESTController;
 use AmpProject\AmpWP\PluginRegistry;
-use AmpProject\AmpWP\PluginSuppression;
 use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
 use WP_REST_Request;
-use WP_UnitTestCase;
 
 /**
  * Tests for OptionsRESTController.
  *
  * @group amp-options
  *
- * @covers OptionsRESTController
+ * @coversDefaultClass \AmpProject\AmpWP\OptionsRESTController
  */
-class OptionsRESTControllerTest extends WP_UnitTestCase {
+class OptionsRESTControllerTest extends DependencyInjectedTestCase {
 
 	use ThemesApiRequestMocking;
 
@@ -46,13 +43,13 @@ class OptionsRESTControllerTest extends WP_UnitTestCase {
 
 		$this->add_reader_themes_request_filter();
 
-		$this->controller = new OptionsRESTController( new ReaderThemes(), new PluginSuppression( new PluginRegistry() ) );
+		$this->controller = $this->injector->make( OptionsRESTController::class );
 	}
 
 	/**
 	 * Tests OptionsRESTController::get_items_permissions_check.
 	 *
-	 * @covers OptionsRESTController::get_items_permissions_check
+	 * @covers ::get_items_permissions_check
 	 */
 	public function test_get_items_permissions_check() {
 		$this->assertWPError( $this->controller->get_items_permissions_check( new WP_REST_Request( 'GET', '/amp/v1/options' ) ) );
@@ -65,7 +62,7 @@ class OptionsRESTControllerTest extends WP_UnitTestCase {
 	/**
 	 * Tests OptionsRESTController::get_items.
 	 *
-	 * @covers OptionsRESTController::get_items.
+	 * @covers ::get_items
 	 */
 	public function test_get_items() {
 		$data = $this->controller->get_items( new WP_REST_Request( 'GET', '/amp/v1/options' ) )->get_data();
@@ -79,6 +76,7 @@ class OptionsRESTControllerTest extends WP_UnitTestCase {
 				'suppressed_plugins',
 				'supported_templates',
 				'supported_post_types',
+				'analytics',
 				'preview_permalink',
 				'suppressible_plugins',
 				'supportable_post_types',
@@ -89,10 +87,11 @@ class OptionsRESTControllerTest extends WP_UnitTestCase {
 			array_keys( $data )
 		);
 
-		$this->assertEquals( [], $data['suppressible_plugins'] );
+		$plugin_registry = $this->injector->make( PluginRegistry::class );
+
+		$this->assertEqualSets( array_keys( $plugin_registry->get_plugins( true ) ), array_keys( $data['suppressible_plugins'] ) );
 		$this->assertEquals( null, $data['preview_permalink'] );
 		$this->assertEquals( [], $data['suppressed_plugins'] );
-		$this->assertEquals( [], $data['suppressible_plugins'] );
 		$this->assertArraySubset( [ 'post', 'page', 'attachment' ], wp_list_pluck( $data['supportable_post_types'], 'name' ) );
 		$this->assertEquals( [ 'post', 'page' ], $data['supported_post_types'] );
 		$this->assertContains( 'is_singular', wp_list_pluck( $data['supportable_templates'], 'id' ) );
@@ -102,7 +101,7 @@ class OptionsRESTControllerTest extends WP_UnitTestCase {
 	/**
 	 * Tests OptionsRESTController::update_items.
 	 *
-	 * @covers OptionsRESTController::update_items.
+	 * @covers ::update_items
 	 */
 	public function test_update_items() {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
@@ -145,7 +144,7 @@ class OptionsRESTControllerTest extends WP_UnitTestCase {
 	/**
 	 * Tests OptionsRESTController::get_item_schema.
 	 *
-	 * @covers OptionsRESTController::get_item_schema.
+	 * @covers ::get_item_schema
 	 */
 	public function test_get_item_schema() {
 		$schema = $this->controller->get_item_schema();

@@ -4,7 +4,7 @@
 .amp .components-button:not(.components-panel__body-toggle) {
 	align-items: center;
 	border-radius: 3px;
-	color: var(--brand);
+	color: var(--amp-settings-color-brand);
 	font-size: 1rem;
 	font-weight: 600;
 	padding: 0.5rem 1rem;
@@ -12,14 +12,9 @@
 
 .amp .components-button:not(.components-panel__body-toggle) svg {
 	fill: currentColor;
-	display: none;
-	margin-left: 0.5rem;
+	margin: 0 0.5rem;
 	height: 18px;
 	width: 18px;
-
-	@media screen and (min-width: 783px) {
-		display: block;
-	}
 }
 
 .amp .components-panel__body-title button {
@@ -28,7 +23,7 @@
 }
 
 .amp .components-panel__body-title:hover {
-	background: var(--white);
+	background: var(--amp-settings-color-background);
 }
 
 .amp .components-button.components-panel__body-toggle svg {
@@ -43,12 +38,19 @@
 .amp .components-button:not(.components-panel__body-toggle):focus:not(:disabled),
 .amp .components-button:not(.components-panel__body-toggle):hover {
 	box-shadow: none;
-	color: var(--brand);
+	color: var(--amp-settings-color-brand);
 	text-decoration: none;
 }
 
-.amp .components-button:focus:not(:disabled) {
-	outline: 1px solid var(--brand);
+.amp .components-button.is-secondary,
+.amp .components-button.is-secondary:hover,
+.amp .components-button.is-secondary:hover:not(:disabled) {
+	border-color: var(--amp-settings-color-brand);
+	box-shadow: inset 0 0 0 1px var(--amp-settings-color-brand);
+}
+
+.amp.amp .components-button:focus:not(:disabled) {
+	outline: 1px solid var(--amp-settings-color-brand);
 }
 
 .amp .components-button.is-primary {
@@ -62,8 +64,8 @@
 .amp .components-button.is-primary:focus:not(:disabled),
 .amp .components-button.is-primary:active,
 .amp .components-button.is-primary:not(:disabled):not([aria-disabled="true"]):hover {
-	background: var(--brand);
-	color: var(--white);
+	background: var(--amp-settings-color-brand);
+	color: var(--amp-settings-color-background);
 	text-shadow: none;
 }
 
@@ -75,7 +77,7 @@
 
 .amp .components-button.is-primary:disabled.is-busy {
 	background-size: 100% 100%;
-	background-image: linear-gradient(-45deg, var(--brand) 28%, rgba(36, 89, 231, .8) 28%, rgb(36, 89, 231, .8) 72%, var(--brand) 72%);
+	background-image: linear-gradient(-45deg, var(--amp-settings-color-brand) 28%, rgba(36, 89, 231, .8) 28%, rgb(36, 89, 231, .8) 72%, var(--amp-settings-color-brand) 72%);
 	border-color: var(--color-gray-medium);
 }
 
@@ -86,7 +88,7 @@
 
 
 .amp .components-toggle-control .components-base-control__field {
-	align-items: baseline;
+	align-items: center;
 	margin-bottom: 0;
 }
 
@@ -104,21 +106,21 @@
 }
 
 .amp .components-form-toggle.is-checked .components-form-toggle__thumb {
-	background-color: var(--white);
+	background-color: var(--amp-settings-color-background);
 }
 
 .amp .components-form-toggle.is-checked .components-form-toggle__track {
-	background-color: var(--brand);
+	background-color: var(--amp-settings-color-brand);
 	border-width: 0;
 }
 
 .amp .components-form-toggle__input:focus + .components-form-toggle__track {
-	box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--brand);
+	box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--amp-settings-color-brand);
 }
 
 .amp .components-checkbox-control__input[type="checkbox"]:checked {
-	background: var(--brand);
-	border-color: var(--brand);
+	background: var(--amp-settings-color-brand);
+	border-color: var(--amp-settings-color-brand);
 }
 
 .amp .components-checkbox-control__input[type="checkbox"] {
@@ -135,10 +137,6 @@
 
 /* For WP 5.0. Some of these styles are redundant in later WP versions. */
 .amp input[type="checkbox"]:checked::before {
-	display: none;
-}
-
-.amp .components-visually-hidden {
 	display: none;
 }
 

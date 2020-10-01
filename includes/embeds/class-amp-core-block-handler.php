@@ -12,6 +12,7 @@ use AmpProject\Dom\Document;
  * Class AMP_Core_Block_Handler
  *
  * @since 1.0
+ * @internal
  */
 class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 
@@ -374,7 +375,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			 * MediaElement.js is not used in AMP this stylesheet is not included. In any case, videos in AMP are
 			 * responsive so this is built-in. Note also the style rule for .wp-video in amp-default.css.
 			 */
-			foreach ( $dom->xpath->query( './/div[ @class = "wp-video" and @style ]' ) as $element ) {
+			foreach ( $dom->xpath->query( './/div[ @class = "wp-video" and @style ]', $text_widget ) as $element ) {
 				$element->removeAttribute( 'style' );
 			}
 		}

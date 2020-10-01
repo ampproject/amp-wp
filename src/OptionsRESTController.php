@@ -26,6 +26,7 @@ use WP_REST_Server;
  * OptionsRESTController class.
  *
  * @since 2.0
+ * @internal
  */
 final class OptionsRESTController extends WP_REST_Controller implements Delayed, Service, Registerable {
 
@@ -134,7 +135,7 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 					'permission_callback' => [ $this, 'get_items_permissions_check' ],
 				],
-				'schema' => $this->get_public_item_schema(),
+				'schema' => [ $this, 'get_public_item_schema' ],
 			]
 		);
 	}
@@ -277,7 +278,7 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 						'arg_options' => [
 							'validate_callback' => function ( $value ) {
 								// Note: The validate_callback is used instead of enum in order to prevent leaking the list of themes.
-								return in_array( $value, wp_list_pluck( $this->reader_themes->get_themes(), 'slug' ), true );
+								return $this->reader_themes->theme_data_exists( $value );
 							},
 						],
 					],
@@ -315,6 +316,9 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 						'items' => [
 							'type' => 'string',
 						],
+					],
+					Option::ANALYTICS               => [
+						'type' => 'object',
 					],
 					self::SUPPORTABLE_POST_TYPES    => [
 						'type'     => 'array',

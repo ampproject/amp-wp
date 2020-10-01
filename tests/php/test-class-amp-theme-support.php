@@ -8,11 +8,11 @@
 
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\ConfigurationArgument;
-use AmpProject\AmpWP\MobileRedirection;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\Dom\Document;
 use org\bovigo\vfs;
 
@@ -25,6 +25,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 	use AssertContainsCompatibility;
 	use PrivateAccess;
+	use LoadsCoreThemes;
 
 	/**
 	 * The name of the tested class.
@@ -51,6 +52,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		delete_option( AMP_Options_Manager::OPTION_NAME ); // Make sure default reader mode option does not override theme support being added.
 		add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
 		remove_theme_support( 'amp' );
+		$this->register_core_themes();
 	}
 
 	/**
@@ -80,7 +82,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		remove_theme_support( 'custom-header' );
 		$_REQUEST                = []; // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
 		$_SERVER['QUERY_STRING'] = '';
-		unset( $_SERVER['REQUEST_URI'] );
+		$_SERVER['REQUEST_URI']  = '';
 		unset( $_SERVER['REQUEST_METHOD'] );
 		unset( $GLOBALS['content_width'] );
 		if ( isset( $GLOBALS['wp_customize'] ) ) {
@@ -91,6 +93,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		remove_all_filters( 'template' );
 		unregister_post_type( 'book' );
 		unregister_post_type( 'announcement' );
+		$this->restore_theme_directories();
 	}
 
 	/**
@@ -214,14 +217,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		// Test transitional mode singular, where not on endpoint that it causes amphtml link to be added.
 		remove_action( 'wp_head', 'amp_add_amphtml_link' );
 		$this->go_to( get_permalink( $post_id ) );
-		$this->assertFalse( is_amp_endpoint() );
+		$this->assertFalse( amp_is_request() );
 		AMP_Theme_Support::finish_init();
 		$this->assertEquals( 10, has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 
 		// Test transitional mode homepage, where still not on endpoint that it causes amphtml link to be added.
 		remove_action( 'wp_head', 'amp_add_amphtml_link' );
 		$this->go_to( home_url() );
-		$this->assertFalse( is_amp_endpoint() );
+		$this->assertFalse( amp_is_request() );
 		AMP_Theme_Support::finish_init();
 		$this->assertEquals( 10, has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 
@@ -235,7 +238,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			]
 		);
 		$this->go_to( get_permalink( $post_id ) );
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_request() );
 		AMP_Theme_Support::finish_init();
 		$this->assertFalse( has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 		$this->assertEquals( 10, has_filter( 'index_template_hierarchy', [ 'AMP_Theme_Support', 'filter_amp_template_hierarchy' ] ), 'Expected add_amp_template_filters to have been called since template_dir is not empty' );
@@ -246,7 +249,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		remove_theme_support( 'amp' );
 		$this->go_to( amp_get_permalink( $post_id ) );
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_request() );
 		AMP_Theme_Support::finish_init();
 		$this->assertTrue( current_theme_supports( 'amp' ) );
 
@@ -254,7 +257,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		add_theme_support( 'amp', [ 'foo' => 'bar' ] );
 		$this->go_to( amp_get_permalink( $post_id ) );
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_request() );
 		AMP_Theme_Support::finish_init();
 		$this->assertTrue( current_theme_supports( 'amp' ) );
 		$this->assertEquals( [ [ 'foo' => 'bar' ] ], get_theme_support( 'amp' ) );
@@ -263,6 +266,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		add_theme_support( 'amp' );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::READER_THEME, ReaderThemes::DEFAULT_READER_THEME );
+		$this->assertTrue( amp_is_legacy() );
 		$this->go_to( amp_get_permalink( $post_id ) );
 		AMP_Theme_Support::finish_init();
 		$this->assertFalse( current_theme_supports( 'amp' ) );
@@ -271,6 +275,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		remove_theme_support( 'amp' );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentyseventeen' );
+		$this->assertFalse( amp_is_legacy() );
 		$this->go_to( amp_get_permalink( $post_id ) );
 		AMP_Theme_Support::finish_init();
 		$this->assertTrue( current_theme_supports( 'amp' ) );
@@ -285,9 +290,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$post          = self::factory()->post->create();
 		$requested_url = get_permalink( $post );
 		$this->assertEquals( AMP_Theme_Support::READER_MODE_SLUG, AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
-		$this->assertTrue( post_supports_amp( $post ) );
+		$this->assertTrue( amp_is_post_supported( $post ) );
 		add_filter( 'amp_skip_post', '__return_true' );
-		$this->assertFalse( post_supports_amp( $post ) );
+		$this->assertFalse( amp_is_post_supported( $post ) );
 
 		$redirected = false;
 		add_filter(
@@ -1544,9 +1549,12 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_scripts_get_moved_to_head() {
 		ob_start();
+		remove_all_actions( 'wp_head' );
 		?>
 		<html>
-			<head></head>
+			<head>
+				<?php wp_head(); ?>
+			</head>
 			<body>
 				<amp-list width="auto" height="100" layout="fixed-height" src="/static/inline-examples/data/amp-list-urls.json">
 					<template type="amp-mustache">
@@ -1559,8 +1567,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			</body>
 		</html>
 		<?php
-		$html = ob_get_clean();
-		$html = AMP_Theme_Support::prepare_response( $html );
+		$original_html = ob_get_clean();
+		$html          = AMP_Theme_Support::prepare_response( $original_html );
 
 		$dom = Document::fromHtml( $html );
 
@@ -1615,6 +1623,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			<head></head>
 			<body>
 				<?php wp_print_scripts( array_merge( $required_usage_grandfathered, $required_usage_error, $required_usage_none ) ); ?>
+				<?php wp_footer(); ?>
 			</body>
 		</html>
 		<?php
@@ -1666,6 +1675,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			</head>
 			<body>
 				<?php wp_print_scripts( [ 'amp-video', 'amp-runtime' ] ); ?>
+				<?php wp_footer(); ?>
 			</body>
 		</html>
 		<?php
@@ -1781,6 +1791,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertSame( 3, ob_get_level() );
 
 		echo '<html><head></head><body><img src="test.png"><script data-test>document.write(\'Illegal\');</script>';
+		wp_footer();
 
 		// Additional nested output bufferings which aren't getting closed.
 		ob_start();
@@ -2013,7 +2024,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$wp_widget_factory->widgets = [];
 		wp_widgets_init();
 
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_request() );
 
 		add_action(
 			'wp_enqueue_scripts',
@@ -2109,27 +2120,13 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Returns the "Server-Timing" headers.
-	 *
-	 * @return array Server-Timing headers.
-	 */
-	private function get_server_timing_headers() {
-		return array_filter(
-			AMP_HTTP::$headers_sent,
-			static function( $header ) {
-				return 'Server-Timing' === $header['name'];
-			}
-		);
-	}
-
-	/**
-	 * Test prepare_response for responses that may or may not be valid HTML.
+	 * Test prepare_response for responses that do not trigger standard template actions.
 	 *
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
-	public function test_prepare_response_varying_html() {
+	public function test_prepare_response_doing_template_actions() {
+		global $wp_actions;
 		wp();
-		add_filter( 'amp_validation_error_sanitized', '__return_true' );
 		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
@@ -2150,17 +2147,90 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$input = '<html><header><h1>HellO!</h1></header></html>';
 		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
 
-		// HTML, but very stripped down.
-		$input  = '<html><head></head>Hello</html>';
+		// HTML but no template actions triggered.
+		$input = '<html><head></head></html>';
+		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
+
+		// HTML with AMP attribute.
+		$input  = '<html amp><head></head>Hello</html>';
 		$output = AMP_Theme_Support::prepare_response( $input );
 		$this->assertStringContains( '<html amp', $output );
 		$this->assertStringContains( '<meta charset="utf-8">', $output );
 
-		// HTML with doctype, comments, and whitespace before head.
-		$input  = "   <!--\nHello world!\n-->\n\n<!DOCTYPE html>  <html\n\n>\n<head profile='http://www.acme.com/profiles/core'></head><body>Hello</body></html>";
+		// HTML with AMP emoji attribute.
+		$input  = '<html ⚡><head></head>Hello</html>';
 		$output = AMP_Theme_Support::prepare_response( $input );
 		$this->assertStringContains( '<html amp', $output );
 		$this->assertStringContains( '<meta charset="utf-8">', $output );
+
+		// HTML with alternative AMP emoji attribute.
+		$input  = '<html lang="en-US" ⚡️ foo="" bar="baz"><head></head>Hello</html>';
+		$output = AMP_Theme_Support::prepare_response( $input );
+		$this->assertStringContains( '<html lang="en-US" amp', $output );
+		$this->assertStringContains( '<meta charset="utf-8">', $output );
+
+		// HTML with doctype, comments, and whitespace before head.
+		$input  = "   <!--\nHello world!\n-->\n\n<!DOCTYPE html>  <html\n\namp>\n<head profile='http://www.acme.com/profiles/core'></head><body>Hello</body></html>";
+		$output = AMP_Theme_Support::prepare_response( $input );
+		$this->assertStringContains( '<html amp', $output );
+		$this->assertStringContains( '<meta charset="utf-8">', $output );
+
+		$get_do_action = static function ( $action ) {
+			return get_echo( 'do_action', [ $action ] );
+		};
+		foreach ( [ 'wp_head', 'wp_footer', 'amp_post_template_head', 'amp_post_template_footer' ] as $action ) {
+			$wp_actions = [];
+			wp_enqueue_scripts();
+			$input  = '<html><head></head>' . $get_do_action( $action ) . '</html>';
+			$output = AMP_Theme_Support::prepare_response( $input );
+			$this->assertStringContains( '<html amp', $output );
+			$this->assertStringContains( '<meta charset="utf-8">', $output );
+		}
+	}
+
+	/**
+	 * Test prepare_response for responses that throw an exception.
+	 *
+	 * @covers AMP_Theme_Support::prepare_response()
+	 */
+	public function test_prepare_response_throwing_exception() {
+		// Set up temporary capture of error log to test error log output.
+		$capture = tmpfile();
+		$backup  = ini_set( // phpcs:ignore WordPress.PHP.IniSet.Risky
+			'error_log',
+			stream_get_meta_data( $capture )['uri']
+		);
+
+		add_filter(
+			'amp_schemaorg_metadata',
+			static function () {
+				throw new RuntimeException( 'FAILURE', 42 );
+			}
+		);
+
+		if ( ! function_exists( 'newrelic_disable_autorum' ) ) {
+
+			/**
+			 * Define newrelic_disable_autorum to allow passing line.
+			 */
+			function newrelic_disable_autorum() {
+				return true;
+			}
+		}
+
+		wp();
+		$output = AMP_Theme_Support::finish_output_buffering( $this->get_original_html() );
+
+		// Verify that error log was properly populated.
+		$this->assertRegExp(
+			'/^\[[^\]]*\] A PHP error occurred while trying to prepare the AMP response\..*- FAILURE \(42\) \[RuntimeException\].*/',
+			stream_get_contents( $capture )
+		);
+
+		// Reset error log back to initial settings.
+		ini_set( 'error_log', $backup ); // phpcs:ignore WordPress.PHP.IniSet.Risky
+
+		$this->assertStringContains( 'Failed to prepare AMP page', $output );
 	}
 
 	/**
@@ -2187,12 +2257,13 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		);
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
-		$this->assertTrue( is_amp_endpoint() );
+		$this->assertTrue( amp_is_request() );
 
 		ob_start();
 		?>
 		<html>
 			<head>
+				<?php wp_head(); ?>
 			</head>
 			<body>
 				<script>bad</script>

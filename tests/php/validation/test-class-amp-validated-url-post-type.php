@@ -8,6 +8,7 @@
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
+use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 
 // phpcs:disable WordPress.Variables.GlobalVariables.OverrideProhibited
@@ -22,18 +23,14 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	use AssertContainsCompatibility;
 	use HandleValidation;
 	use PrivateAccess;
+	use LoadsCoreThemes;
 
 	const TESTED_CLASS = 'AMP_Validated_URL_Post_Type';
-
-	private $original_theme_directories;
 
 	public function setUp() {
 		parent::setUp();
 
-		global $wp_theme_directories;
-		$this->original_theme_directories = $wp_theme_directories;
-		register_theme_directory( ABSPATH . 'wp-content/themes' );
-		delete_site_transient( 'theme_roots' );
+		$this->register_core_themes();
 	}
 
 	public function tearDown() {
@@ -42,9 +39,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		global $current_screen;
 		$current_screen = null;
 
-		global $wp_theme_directories;
-		$wp_theme_directories = $this->original_theme_directories;
-		delete_site_transient( 'theme_roots' );
+		$this->restore_theme_directories();
 	}
 
 	/**
@@ -70,6 +65,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$this->assertEquals( AMP_Options_Manager::OPTION_NAME, $amp_post_type->show_in_menu );
 		$this->assertTrue( $amp_post_type->show_in_admin_bar );
 		$this->assertNotContains( AMP_Validated_URL_Post_Type::REMAINING_ERRORS, wp_removable_query_args() );
+		$this->assertEquals( 10, has_action( 'admin_menu', [ self::TESTED_CLASS, 'update_validated_url_menu_item' ] ) );
 
 		// Make sure that add_admin_hooks() gets called.
 		set_current_screen( 'index.php' );
@@ -89,6 +85,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	 * @covers \AMP_Validated_URL_Post_Type::add_admin_hooks()
 	 */
 	public function test_add_admin_hooks() {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		AMP_Validated_URL_Post_Type::add_admin_hooks();
 
@@ -111,7 +108,6 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'admin_notices', [ self::TESTED_CLASS, 'print_admin_notice' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_action_' . AMP_Validated_URL_Post_Type::VALIDATE_ACTION, [ self::TESTED_CLASS, 'handle_validate_request' ] ) );
 		$this->assertEquals( 10, has_action( 'post_action_' . AMP_Validated_URL_Post_Type::UPDATE_POST_TERM_STATUS_ACTION, [ self::TESTED_CLASS, 'handle_validation_error_status_update' ] ) );
-		$this->assertEquals( 10, has_action( 'admin_menu', [ self::TESTED_CLASS, 'add_admin_menu_new_invalid_url_count' ] ) );
 
 		$post = self::factory()->post->create_and_get( [ 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ] );
 		$this->assertEquals( '', apply_filters( 'post_date_column_status', 'publish', $post ) );
@@ -125,17 +121,18 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test add_admin_menu_new_invalid_url_count.
+	 * Test update_validated_url_menu_item.
 	 *
-	 * @covers \AMP_Validated_URL_Post_Type::add_admin_menu_new_invalid_url_count()
+	 * @covers \AMP_Validated_URL_Post_Type::update_validated_url_menu_item()
 	 */
-	public function test_add_admin_menu_new_invalid_url_count() {
+	public function test_update_validated_url_menu_item() {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		global $submenu;
-		AMP_Validation_Manager::init(); // Register the post type and taxonomy.
 
-		unset( $submenu[ AMP_Options_Manager::OPTION_NAME ] );
-		AMP_Validated_URL_Post_Type::add_admin_menu_new_invalid_url_count();
+		$original_submenu = $submenu;
+
+		AMP_Validation_Manager::init(); // Register the post type and taxonomy.
+		AMP_Validated_URL_Post_Type::update_validated_url_menu_item();
 
 		$submenu[ AMP_Options_Manager::OPTION_NAME ] = [
 			0 => [
@@ -151,10 +148,10 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 				3 => 'AMP Analytics Options',
 			],
 			2 => [
-				0 => 'Invalid Pages',
-				1 => 'edit_posts',
+				0 => 'All Validated URLs',
+				1 => 'amp_validate',
 				2 => 'edit.php?post_type=amp_validated_url',
-				3 => 'Invalid AMP Pages (URLs)',
+				3 => 'AMP Validated URLs',
 			],
 		];
 
@@ -168,9 +165,11 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		);
 		$this->assertNotInstanceOf( 'WP_Error', $invalid_url_post_id );
 
-		AMP_Validated_URL_Post_Type::add_admin_menu_new_invalid_url_count();
+		AMP_Validated_URL_Post_Type::update_validated_url_menu_item();
 
-		$this->assertStringContains( '<span class="awaiting-mod"><span class="new-validation-error-urls-count">1</span></span>', $submenu[ AMP_Options_Manager::OPTION_NAME ][2][0] );
+		$this->assertSame( 'Validated URLs <span class="awaiting-mod"><span class="new-validation-error-urls-count">1</span></span>', $submenu[ AMP_Options_Manager::OPTION_NAME ][2][0] );
+
+		$submenu = $original_submenu;
 	}
 
 	/**
@@ -513,6 +512,81 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 			$this->assertEquals( $error_groups[ $i ], $stored_error['term_status'] );
 			$this->assertEquals( $error_groups[ $i ], $term->term_group );
 		}
+	}
+
+	/** @covers AMP_Validated_URL_Post_Type::delete_stylesheets_postmeta_batch() */
+	public function test_delete_stylesheets_postmeta_batch() {
+
+		$old_post_id = self::factory()->post->create(
+			[
+				'post_type'     => 'post',
+				'post_date'     => gmdate( 'Y-m-d H:i:s', strtotime( '1 year ago' ) ),
+				'post_date_gmt' => gmdate( 'Y-m-d H:i:s', strtotime( '1 year ago' ) ),
+			]
+		);
+		add_post_meta( $old_post_id, AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY, [ 'Preserved!' ] );
+		add_post_meta( $old_post_id, 'other', 'Also preserved!' );
+
+		// Expect none to be deleted initially.
+		$this->assertEquals( 0, AMP_Validated_URL_Post_Type::delete_stylesheets_postmeta_batch( 10, '1 week ago' ) );
+
+		// Insert four weeks of validated URLs.
+		$post_ids = [];
+		for ( $days_ago = 1; $days_ago <= 28; $days_ago++ ) {
+			$post_date = gmdate( 'Y-m-d H:i:s', strtotime( "$days_ago days ago" ) + 5 );
+			$post_id   = AMP_Validated_URL_Post_Type::store_validation_errors(
+				[],
+				home_url( "/days-ago-$days_ago/" ),
+				[
+					'stylesheets'    => [ '/*...*/' ],
+					'queried_object' => [
+						'type' => 'post',
+						'id'   => self::factory()->post->create(),
+					],
+				]
+			);
+			wp_update_post(
+				[
+					'ID'            => $post_id,
+					'post_date_gmt' => $post_date,
+					'post_date'     => $post_date,
+				]
+			);
+			$post_ids[ $days_ago ] = $post_id;
+		}
+
+		// Verify that no data is removed if looking before the oldest post.
+		$this->assertEquals( 0, AMP_Validated_URL_Post_Type::delete_stylesheets_postmeta_batch( 100, '1 month ago' ) );
+		foreach ( $post_ids as $post_id ) {
+			$this->assertNotEmpty( get_post_meta( $post_id, AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY ) );
+			$this->assertNotEmpty( get_post_meta( $post_id, AMP_Validated_URL_Post_Type::QUERIED_OBJECT_POST_META_KEY ) );
+		}
+
+		// Delete just one post older than 3 weeks.
+		$this->assertEquals( 1, AMP_Validated_URL_Post_Type::delete_stylesheets_postmeta_batch( 1, '3 weeks ago' ) );
+		foreach ( $post_ids as $days_ago => $post_id ) {
+			$this->assertNotEmpty( get_post_meta( $post_id, AMP_Validated_URL_Post_Type::QUERIED_OBJECT_POST_META_KEY ) );
+			if ( $days_ago > 27 ) {
+				$this->assertEmpty( get_post_meta( $post_id, AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY ), "Expected $days_ago days ago to be empty." );
+			} else {
+				$this->assertNotEmpty( get_post_meta( $post_id, AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY ), "Expected $days_ago days ago to not be empty." );
+			}
+		}
+
+		// Delete everything older than 1 week, so that means 20 days of validated URLs since the 21st was deleted above .
+		$this->assertEquals( 20, AMP_Validated_URL_Post_Type::delete_stylesheets_postmeta_batch( 100, '1 week ago' ) );
+		foreach ( $post_ids as $days_ago => $post_id ) {
+			$this->assertNotEmpty( get_post_meta( $post_id, AMP_Validated_URL_Post_Type::QUERIED_OBJECT_POST_META_KEY ) );
+			if ( $days_ago > 7 ) {
+				$this->assertEmpty( get_post_meta( $post_id, AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY ), "Expected $days_ago days ago to be empty." );
+			} else {
+				$this->assertNotEmpty( get_post_meta( $post_id, AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY ), "Expected $days_ago days ago to not be empty." );
+			}
+		}
+
+		// Make sure other postmeta is retained.
+		$this->assertEquals( [ 'Preserved!' ], get_post_meta( $old_post_id, AMP_Validated_URL_Post_Type::STYLESHEETS_POST_META_KEY, true ) );
+		$this->assertEquals( 'Also preserved!', get_post_meta( $old_post_id, 'other', true ) );
 	}
 
 	/**

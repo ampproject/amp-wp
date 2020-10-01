@@ -7,18 +7,11 @@
 
 namespace AmpProject\AmpWP;
 
-use AmpProject\AmpWP\Admin\DevToolsUserAccess;
-use AmpProject\AmpWP\Admin\GoogleFonts;
-use AmpProject\AmpWP\Admin\OnboardingWizardSubmenu;
-use AmpProject\AmpWP\Admin\OnboardingWizardSubmenuPage;
-use AmpProject\AmpWP\Admin\OptionsMenu;
-use AmpProject\AmpWP\Admin\PluginActivationNotice;
-use AmpProject\AmpWP\Admin\ReenableCssTransientCachingAjaxAction;
-use AmpProject\AmpWP\Admin\SiteHealth;
-use AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching;
+use AmpProject\AmpWP\Admin;
+use AmpProject\AmpWP\BackgroundTask;
 use AmpProject\AmpWP\Infrastructure\ServiceBasedPlugin;
-use AmpProject\AmpWP\Instrumentation\ServerTiming;
-use AmpProject\AmpWP\Instrumentation\StopWatch;
+use AmpProject\AmpWP\Instrumentation;
+
 use function is_user_logged_in;
 
 /**
@@ -27,6 +20,9 @@ use function is_user_logged_in;
  * In here we assemble our infrastructure, configure it for the specific use
  * case the plugin is meant to solve and then kick off the services so that they
  * can hook themselves into the WordPress lifecycle.
+ *
+ * @since 2.0
+ * @internal
  */
 final class AmpWpPlugin extends ServiceBasedPlugin {
 	/*
@@ -51,6 +47,42 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	const HOOK_PREFIX = 'amp_';
 
 	/**
+	 * List of services.
+	 *
+	 * The services array contains a map of <identifier> => <service class name>
+	 * associations.
+	 *
+	 * @var string[]
+	 */
+	const SERVICES = [
+		'admin.analytics_menu'              => Admin\AnalyticsOptionsSubmenu::class,
+		'admin.google_fonts'                => Admin\GoogleFonts::class,
+		'admin.onboarding_menu'             => Admin\OnboardingWizardSubmenu::class,
+		'admin.onboarding_wizard'           => Admin\OnboardingWizardSubmenuPage::class,
+		'admin.options_menu'                => Admin\OptionsMenu::class,
+		'admin.polyfills'                   => Admin\Polyfills::class,
+		'amp_slug_customization_watcher'    => AmpSlugCustomizationWatcher::class,
+		'css_transient_cache.ajax_handler'  => Admin\ReenableCssTransientCachingAjaxAction::class,
+		'css_transient_cache.monitor'       => BackgroundTask\MonitorCssTransientCaching::class,
+		'dev_tools.callback_reflection'     => DevTools\CallbackReflection::class,
+		'dev_tools.error_page'              => DevTools\ErrorPage::class,
+		'dev_tools.file_reflection'         => DevTools\FileReflection::class,
+		'dev_tools.likely_culprit_detector' => DevTools\LikelyCulpritDetector::class,
+		'dev_tools.user_access'             => DevTools\UserAccess::class,
+		'extra_theme_and_plugin_headers'    => ExtraThemeAndPluginHeaders::class,
+		'mobile_redirection'                => MobileRedirection::class,
+		'obsolete_block_attribute_remover'  => ObsoleteBlockAttributeRemover::class,
+		'plugin_activation_notice'          => Admin\PluginActivationNotice::class,
+		'plugin_registry'                   => PluginRegistry::class,
+		'plugin_suppression'                => PluginSuppression::class,
+		'reader_theme_loader'               => ReaderThemeLoader::class,
+		'rest.options_controller'           => OptionsRESTController::class,
+		'server_timing'                     => Instrumentation\ServerTiming::class,
+		'site_health_integration'           => Admin\SiteHealth::class,
+		'validated_url_stylesheet_gc'       => BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection::class,
+	];
+
+	/**
 	 * Get the list of services to register.
 	 *
 	 * The services array contains a map of <identifier> => <service class name>
@@ -60,25 +92,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 *                       qualified class names.
 	 */
 	protected function get_service_classes() {
-		return [
-			'dev_tools.user_access'            => DevToolsUserAccess::class,
-			'css_transient_cache.monitor'      => MonitorCssTransientCaching::class,
-			'css_transient_cache.ajax_handler' => ReenableCssTransientCachingAjaxAction::class,
-			'site_health_integration'          => SiteHealth::class,
-			'plugin_activation_notice'         => PluginActivationNotice::class,
-			'plugin_registry'                  => PluginRegistry::class,
-			'plugin_suppression'               => PluginSuppression::class,
-			'mobile_redirection'               => MobileRedirection::class,
-			'admin.google_fonts'               => GoogleFonts::class,
-			'admin.options_menu'               => OptionsMenu::class,
-			'admin.onboarding_menu'            => OnboardingWizardSubmenu::class,
-			'admin.onboarding_wizard'          => OnboardingWizardSubmenuPage::class,
-			'reader_theme_loader'              => ReaderThemeLoader::class,
-			'amp_slug_customization_watcher'   => AmpSlugCustomizationWatcher::class,
-			'rest.options_controller'          => OptionsRESTController::class,
-			'server_timing'                    => ServerTiming::class,
-			'obsolete_block_attribute_remover' => ObsoleteBlockAttributeRemover::class,
-		];
+		return self::SERVICES;
 	}
 
 	/**
@@ -112,7 +126,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 */
 	protected function get_arguments() {
 		return [
-			ServerTiming::class => [
+			Instrumentation\ServerTiming::class => [
 				// Wrapped in a closure so it is lazily evaluated. Otherwise,
 				// is_user_logged_in() breaks because it's used too early.
 				'verbose' => static function () {
@@ -143,7 +157,10 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	protected function get_shared_instances() {
 		return [
 			PluginRegistry::class,
-			StopWatch::class,
+			Instrumentation\StopWatch::class,
+			DevTools\CallbackReflection::class,
+			DevTools\FileReflection::class,
+			ReaderThemeLoader::class,
 		];
 	}
 

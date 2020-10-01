@@ -17,6 +17,7 @@ use AmpProject\AmpWP\Services;
  * {@see amp_customizer_editor_link()} as a submenu to the Appearance menu.
  *
  * @since 0.4
+ * @internal
  */
 class AMP_Template_Customizer {
 
@@ -27,6 +28,14 @@ class AMP_Template_Customizer {
 	 * @var string
 	 */
 	const PANEL_ID = 'amp_panel';
+
+	/**
+	 * Theme mod name to contain timestamps for when theme mods were last modified.
+	 *
+	 * @since 2.0
+	 * @var string
+	 */
+	const THEME_MOD_TIMESTAMPS_KEY = 'amp_customize_setting_modified_timestamps';
 
 	/**
 	 * Customizer instance.
@@ -62,21 +71,27 @@ class AMP_Template_Customizer {
 	 * @since 0.4
 	 * @access public
 	 *
-	 * @param WP_Customize_Manager $wp_customize Customizer instance.
+	 * @param WP_Customize_Manager $wp_customize        Customizer instance.
+	 * @param ReaderThemeLoader    $reader_theme_loader Reader theme loader.
 	 * @return AMP_Template_Customizer Instance.
 	 */
-	public static function init( WP_Customize_Manager $wp_customize ) {
-		/** @var ReaderThemeLoader $reader_theme_loader */
-		$reader_theme_loader = Services::get( 'reader_theme_loader' );
-
+	public static function init( WP_Customize_Manager $wp_customize, ReaderThemeLoader $reader_theme_loader = null ) {
+		if ( null === $reader_theme_loader ) {
+			$reader_theme_loader = Services::get( 'reader_theme_loader' );
+		}
 		$self = new self( $wp_customize, $reader_theme_loader );
 
 		$is_reader_mode   = ( AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
-		$has_reader_theme = ( ReaderThemes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME ) );
+		$has_reader_theme = ( ReaderThemes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME ) ); // @todo Verify that the theme actually exists.
 
 		if ( $is_reader_mode ) {
+			if ( $has_reader_theme ) {
+				add_action( 'customize_save_after', [ $self, 'store_modified_theme_mod_setting_timestamps' ] );
+			}
+
 			if ( $reader_theme_loader->is_theme_overridden() ) {
 				add_action( 'customize_controls_enqueue_scripts', [ $self, 'add_customizer_scripts' ] );
+				add_action( 'customize_controls_print_footer_scripts', [ $self, 'render_setting_import_section_template' ] );
 			} elseif ( ! $has_reader_theme ) {
 				/**
 				 * Fires when the AMP Template Customizer initializes.
@@ -287,18 +302,32 @@ class AMP_Template_Customizer {
 	 * @since 2.0
 	 */
 	public function add_customizer_scripts() {
+		$handle       = 'amp-customize-controls';
 		$asset_file   = AMP__DIR__ . '/assets/js/amp-customize-controls.asset.php';
 		$asset        = require $asset_file;
 		$dependencies = $asset['dependencies'];
 		$version      = $asset['version'];
 
+		/** This action is documented in includes/class-amp-theme-support.php */
+		do_action( 'amp_register_polyfills' );
+
 		wp_enqueue_script(
-			'amp-customize-controls',
+			$handle,
 			amp_get_asset_url( 'js/amp-customize-controls.js' ),
 			array_merge( $dependencies, [ 'jquery', 'customize-controls' ] ),
 			$version,
 			true
 		);
+		if ( function_exists( 'wp_set_script_translations' ) ) {
+			wp_set_script_translations( $handle, 'amp' );
+		} elseif ( function_exists( 'wp_get_jed_locale_data' ) || function_exists( 'gutenberg_get_jed_locale_data' ) ) {
+			$locale_data = function_exists( 'wp_get_jed_locale_data' ) ? wp_get_jed_locale_data( 'amp' ) : gutenberg_get_jed_locale_data( 'amp' );
+			wp_add_inline_script(
+				$handle,
+				sprintf( 'wp.i18n.setLocaleData( %s, "amp" );', wp_json_encode( $locale_data ) ),
+				'after'
+			);
+		}
 
 		$option_settings = [];
 		foreach ( $this->wp_customize->settings() as $setting ) {
@@ -309,18 +338,21 @@ class AMP_Template_Customizer {
 		}
 
 		wp_add_inline_script(
-			'amp-customize-controls',
+			$handle,
 			sprintf(
 				'ampCustomizeControls.boot( %s );',
 				wp_json_encode(
 					[
-						'queryVar'       => amp_get_slug(),
-						'optionSettings' => $option_settings,
-						'l10n'           => [
+						'queryVar'                  => amp_get_slug(),
+						'optionSettings'            => $option_settings,
+						'activeThemeSettingImports' => $this->get_active_theme_import_settings(),
+						'mimeTypeIcons'             => [
+							'image'    => wp_mime_type_icon( 'image' ),
+							'document' => wp_mime_type_icon( 'document' ),
+						],
+						'l10n'                      => [
 							/* translators: placeholder is URL to non-AMP Customizer. */
 							'ampVersionNotice'     => wp_kses_post( sprintf( __( 'You are customizing the AMP version of your site. <a href="%s">Customize non-AMP version</a>.', 'amp' ), esc_url( admin_url( 'customize.php' ) ) ) ),
-							'optionSettingNotice'  => __( 'Also applies to non-AMP version of your site.', 'amp' ),
-							'navMenusPanelNotice'  => __( 'The menus here are shared with the non-AMP version of your site. Assign existing menus to menu locations in the Reader theme or create new AMP-specific menus.', 'amp' ),
 							'rootPanelDescription' => $this->get_amp_panel_description(),
 						],
 					]
@@ -339,6 +371,187 @@ class AMP_Template_Customizer {
 	}
 
 	/**
+	 * Store the timestamps for modified theme settings.
+	 *
+	 * This is used to determine which settings from the Active theme should be presented for importing into the Reader
+	 * theme. If a setting has been modified more recently in the Reader theme, then it doesn't make much sense to offer
+	 * for the user to re-import a customization they already made.
+	 */
+	public function store_modified_theme_mod_setting_timestamps() {
+		$modified_setting_ids = [];
+		foreach ( array_keys( $this->wp_customize->unsanitized_post_values() ) as $setting_id ) {
+			$setting = $this->wp_customize->get_setting( $setting_id );
+			if ( ! ( $setting instanceof WP_Customize_Setting ) || $setting instanceof WP_Customize_Filter_Setting ) {
+				continue;
+			}
+
+			if ( $setting instanceof WP_Customize_Custom_CSS_Setting ) {
+				$modified_setting_ids[] = $setting->id_data()['base']; // Remove theme slug from ID.
+			} elseif ( 'theme_mod' === $setting->type ) {
+				$modified_setting_ids[] = $setting->id;
+			}
+		}
+
+		if ( empty( $modified_setting_ids ) ) {
+			return;
+		}
+
+		$theme_mod_timestamps = get_theme_mod( self::THEME_MOD_TIMESTAMPS_KEY, [] );
+		foreach ( $modified_setting_ids as $modified_setting_id ) {
+			$theme_mod_timestamps[ $modified_setting_id ] = time();
+		}
+		set_theme_mod( self::THEME_MOD_TIMESTAMPS_KEY, $theme_mod_timestamps );
+	}
+
+	/**
+	 * Get settings to import from the active theme.
+	 *
+	 * @return array Map of setting IDs to setting values.
+	 */
+	protected function get_active_theme_import_settings() {
+		$active_theme = $this->reader_theme_loader->get_active_theme();
+		if ( ! $active_theme instanceof WP_Theme ) {
+			return [];
+		}
+
+		$active_theme_mods = get_option( 'theme_mods_' . $active_theme->get_stylesheet(), [] );
+		$import_settings   = [];
+
+		$active_setting_timestamps = isset( $active_theme_mods[ self::THEME_MOD_TIMESTAMPS_KEY ] ) ? $active_theme_mods[ self::THEME_MOD_TIMESTAMPS_KEY ] : [];
+		$reader_setting_timestamps = get_theme_mod( self::THEME_MOD_TIMESTAMPS_KEY, [] );
+
+		// Remove theme mods which will not be imported directly.
+		unset(
+			$active_theme_mods['sidebars_widgets'],
+			$active_theme_mods['custom_css_post_id'],
+			$active_theme_mods['background_preset'], // Since a meta setting. When importing a background setting, will be set to 'custom'.
+			$active_theme_mods[ self::THEME_MOD_TIMESTAMPS_KEY ]
+		);
+
+		// Avoid offering to import background image settings if no background image is set.
+		if ( empty( $active_theme_mods['background_image'] ) ) {
+			foreach ( [ 'background_position_x', 'background_position_y', 'background_size', 'background_repeat', 'background_attachment' ] as $setting_id ) {
+				unset( $active_theme_mods[ $setting_id ] );
+			}
+		}
+
+		// Map nav menus for importing.
+		if ( isset( $active_theme_mods['nav_menu_locations'] ) ) {
+			$nav_menu_locations = wp_map_nav_menu_locations(
+				get_theme_mod( 'nav_menu_locations', [] ),
+				$active_theme_mods['nav_menu_locations']
+			);
+			foreach ( $nav_menu_locations as $nav_menu_location => $menu_id ) {
+				$setting = $this->wp_customize->get_setting( "nav_menu_locations[$nav_menu_location]" );
+				if (
+					$setting instanceof WP_Customize_Setting
+					&&
+					// Skip presenting settings which have been more recently updated in the Reader theme.
+					(
+						! isset( $active_setting_timestamps[ $setting->id ], $reader_setting_timestamps[ $setting->id ] )
+						||
+						$active_setting_timestamps[ $setting->id ] > $reader_setting_timestamps[ $setting->id ]
+					)
+				) {
+					/** This filter is documented in wp-includes/class-wp-customize-manager.php */
+					$value = apply_filters( "customize_sanitize_js_{$setting->id}", $menu_id, $setting );
+
+					$import_settings[ $setting->id ] = $value;
+				}
+			}
+			unset( $active_theme_mods['nav_menu_locations'] );
+		}
+
+		foreach ( $this->wp_customize->settings() as $setting ) {
+			/** @var WP_Customize_Setting $setting */
+			if (
+				'theme_mod' !== $setting->type
+				||
+				// Skip presenting settings which have been more recently updated in the Reader theme.
+				(
+					isset( $active_setting_timestamps[ $setting->id ], $reader_setting_timestamps[ $setting->id ] )
+					&&
+					$reader_setting_timestamps[ $setting->id ] > $active_setting_timestamps[ $setting->id ]
+				)
+			) {
+				continue;
+			}
+
+			$id_data = $setting->id_data();
+			if ( ! array_key_exists( $id_data['base'], $active_theme_mods ) ) {
+				continue;
+			}
+			$value   = $active_theme_mods[ $id_data['base'] ];
+			$subkeys = $id_data['keys'];
+			while ( ! empty( $subkeys ) ) {
+				$subkey = array_shift( $subkeys );
+				if ( ! is_array( $value ) || ! array_key_exists( $subkey, $value ) ) {
+					// Move on to the next setting.
+					continue 2;
+				}
+				$value = $value[ $subkey ];
+			}
+
+			/** This filter is documented in wp-includes/class-wp-customize-manager.php */
+			$value = apply_filters( "customize_sanitize_js_{$setting->id}", $value, $setting );
+
+			$import_settings[ $setting->id ] = $value;
+		}
+
+		// Import Custom CSS if it has not been more recently updated in the Reader theme.
+		if (
+			! isset( $active_setting_timestamps['custom_css'], $reader_setting_timestamps['custom_css'] )
+			||
+			$active_setting_timestamps['custom_css'] > $reader_setting_timestamps['custom_css']
+		) {
+			$custom_css_setting = $this->wp_customize->get_setting( sprintf( 'custom_css[%s]', get_stylesheet() ) );
+			$custom_css_post    = wp_get_custom_css_post( $active_theme->get_stylesheet() );
+			if ( $custom_css_setting instanceof WP_Customize_Custom_CSS_Setting && $custom_css_post instanceof WP_Post ) {
+				$value = $custom_css_post->post_content;
+
+				/** This filter is documented in wp-includes/class-wp-customize-setting.php */
+				$value = apply_filters( 'customize_value_custom_css', $value, $custom_css_setting );
+
+				/** This filter is documented in wp-includes/class-wp-customize-manager.php */
+				$value = apply_filters( "customize_sanitize_js_{$custom_css_setting->id}", $value, $custom_css_setting );
+
+				$import_settings[ $custom_css_setting->id ] = $value;
+			}
+		}
+
+		return $import_settings;
+	}
+
+	/**
+	 * Render template for the setting import "section".
+	 *
+	 * This section only has a menu item and it is not intended to expand.
+	 */
+	public function render_setting_import_section_template() {
+		?>
+		<script type="text/html" id="tmpl-customize-section-amp_active_theme_settings_import">
+			<li id="accordion-section-{{ data.id }}" class="accordion-section control-section control-section-{{ data.type }}">
+				<h3 class="accordion-section-title">
+					<button type="button" class="button button-secondary" aria-label="<?php esc_attr_e( 'Import settings', 'amp' ); ?>">
+						<?php echo esc_html( _ex( 'Import', 'theme', 'amp' ) ); ?>
+					</button>
+					<details>
+						<summary>{{ data.title }}</summary>
+						<div>
+							<p>
+								<?php esc_html_e( 'You can import some settings from the primary Active theme into the corresponding Reader theme settings.', 'amp' ); ?>
+							</p>
+							<dl></dl>
+						</div>
+					</details>
+				</h3>
+				<ul class="accordion-section-content"></ul>
+			</li>
+		</script>
+		<?php
+	}
+
+	/**
 	 * Load up AMP scripts needed for Customizer integrations in Legacy Reader mode.
 	 *
 	 * @since 0.6 Originally called add_customizer_scripts.
@@ -349,6 +562,9 @@ class AMP_Template_Customizer {
 		$asset        = require $asset_file;
 		$dependencies = $asset['dependencies'];
 		$version      = $asset['version'];
+
+		/** This action is documented in includes/class-amp-theme-support.php */
+		do_action( 'amp_register_polyfills' );
 
 		wp_enqueue_script(
 			'amp-customize-controls', // Note: This is not 'amp-customize-controls-legacy' to not break existing scripts that have this dependency.
@@ -407,6 +623,9 @@ class AMP_Template_Customizer {
 			return;
 		}
 
+		/** This action is documented in includes/class-amp-theme-support.php */
+		do_action( 'amp_register_polyfills' );
+
 		$asset_file   = AMP__DIR__ . '/assets/js/amp-customize-preview-legacy.asset.php';
 		$asset        = require $asset_file;
 		$dependencies = $asset['dependencies'];
@@ -426,8 +645,8 @@ class AMP_Template_Customizer {
 				'ampCustomizePreview.boot( %s );',
 				wp_json_encode(
 					[
-						'available' => is_amp_available(),
-						'enabled'   => is_amp_endpoint(),
+						'available' => amp_is_available(),
+						'enabled'   => amp_is_request(),
 					]
 				)
 			)

@@ -20,6 +20,7 @@ use AmpProject\Tag;
  * Sanitizes meta tags found in the header.
  *
  * @since 1.5.0
+ * @internal
  */
 class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 

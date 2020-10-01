@@ -11,6 +11,8 @@ namespace AmpProject\AmpWP;
  * Icons used to visually represent the state of a validation error.
  *
  * @package AmpProject\AmpWP
+ * @since 2.0
+ * @internal
  */
 final class Icon {
 

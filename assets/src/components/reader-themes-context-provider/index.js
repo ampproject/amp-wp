@@ -9,6 +9,7 @@ import { __ } from '@wordpress/i18n';
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { USING_FALLBACK_READER_THEME, LEGACY_THEME_SLUG } from 'amp-settings';
 
 /**
  * Internal dependencies
@@ -26,20 +27,25 @@ export const ReaderThemes = createContext();
  * @param {string} props.currentTheme The theme currently active on the site.
  * @param {string} props.wpAjaxUrl WP AJAX URL.
  * @param {?any} props.children Component children.
- * @param {string} props.readerThemesEndpoint REST endpoint to fetch reader themes.
+ * @param {string} props.readerThemesRestPath REST endpoint to fetch reader themes.
  * @param {string} props.updatesNonce Nonce for the AJAX request to install a theme.
  * @param {boolean} props.hasErrorBoundary Whether the component is wrapped in an error boundary.
+ * @param {boolean} props.hideCurrentlyActiveTheme Whether the currently active theme should be hidden in the UI.
  */
-export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme, readerThemesEndpoint, updatesNonce, hasErrorBoundary = false } ) {
+export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme, hideCurrentlyActiveTheme = false, readerThemesRestPath, updatesNonce, hasErrorBoundary = false } ) {
 	const { setAsyncError } = useAsyncError();
 	const { error, setError } = useContext( ErrorContext );
 
+	const [ themeWasOverridden, setThemeWasOverridden ] = useState( false );
 	const [ themes, setThemes ] = useState( null );
 	const [ fetchingThemes, setFetchingThemes ] = useState( false );
 	const [ downloadingTheme, setDownloadingTheme ] = useState( false );
 	const [ downloadedTheme, setDownloadedTheme ] = useState( false );
+	const [ themesAPIError, setThemesAPIError ] = useState( null );
 
-	const { editedOptions, savingOptions } = useContext( Options );
+	const { editedOptions, originalOptions, updateOptions, savingOptions } = useContext( Options );
+
+	const { reader_theme: originalReaderTheme } = originalOptions;
 	const { reader_theme: readerTheme, theme_support: themeSupport } = editedOptions;
 
 	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
@@ -51,9 +57,22 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	/**
 	 * The active reader theme.
 	 */
-	const selectedTheme = useMemo(
-		() => themes ? themes.find( ( { slug } ) => slug === readerTheme ) || { name: null } : { name: null },
-		[ readerTheme, themes ],
+	const { originalSelectedTheme, selectedTheme } = useMemo(
+		() => {
+			const emptyTheme = { name: null, availability: null };
+			if ( ! themes ) {
+				return {
+					originalSelectedTheme: emptyTheme,
+					selectedTheme: emptyTheme,
+				};
+			}
+
+			return {
+				originalSelectedTheme: themes.find( ( { slug } ) => slug === originalReaderTheme ) || emptyTheme,
+				selectedTheme: themes.find( ( { slug } ) => slug === readerTheme ) || emptyTheme,
+			};
+		},
+		[ originalReaderTheme, readerTheme, themes ],
 	);
 
 	/**
@@ -61,6 +80,25 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	 * after settings have already been saved.
 	 */
 	const [ downloadingThemeError, setDownloadingThemeError ] = useState( null );
+
+	/**
+	 * If the currently selected theme is not installable, is the active theme, or unavailable for selection, set the
+	 * Reader theme to AMP Legacy.
+	 */
+	useEffect( () => {
+		if ( themeWasOverridden ) { // Only do this once.
+			return;
+		}
+
+		if (
+			selectedTheme.availability === 'non-installable' ||
+			originalSelectedTheme.availability === 'active' ||
+			USING_FALLBACK_READER_THEME
+		) {
+			updateOptions( { reader_theme: LEGACY_THEME_SLUG } );
+			setThemeWasOverridden( true );
+		}
+	}, [ originalSelectedTheme.availability, selectedTheme.availability, themeWasOverridden, updateOptions ] );
 
 	/**
 	 * Downloads the selected reader theme, if necessary, when options are saved.
@@ -126,7 +164,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	 * Fetches theme data when needed.
 	 */
 	useEffect( () => {
-		if ( error || fetchingThemes || ! readerThemesEndpoint || themes ) {
+		if ( error || fetchingThemes || ! readerThemesRestPath || themes ) {
 			return;
 		}
 
@@ -141,7 +179,11 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 			setFetchingThemes( true );
 
 			try {
-				const fetchedThemes = await apiFetch( { url: readerThemesEndpoint } );
+				const fetchedThemesResponse = await apiFetch( { path: readerThemesRestPath, parse: false } );
+
+				setThemesAPIError( fetchedThemesResponse.headers.get( 'X-AMP-Theme-API-Error' ) );
+
+				const fetchedThemes = await fetchedThemesResponse.json();
 
 				if ( hasUnmounted.current === true ) {
 					return;
@@ -164,7 +206,21 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 
 			setFetchingThemes( false );
 		} )();
-	}, [ error, hasErrorBoundary, fetchingThemes, readerThemesEndpoint, setAsyncError, setError, themes, themeSupport ] );
+	}, [ error, hasErrorBoundary, fetchingThemes, readerThemesRestPath, setAsyncError, setError, themes, themeSupport ] );
+
+	const { filteredThemes } = useMemo( () => {
+		let newFilteredThemes;
+
+		if ( hideCurrentlyActiveTheme ) {
+			newFilteredThemes = ( themes || [] ).filter( ( theme ) => {
+				return 'active' !== theme.availability;
+			} );
+		} else {
+			newFilteredThemes = themes;
+		}
+
+		return { filteredThemes: newFilteredThemes };
+	}, [ hideCurrentlyActiveTheme, themes ] );
 
 	return (
 		<ReaderThemes.Provider
@@ -175,8 +231,9 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 					downloadingTheme,
 					downloadingThemeError,
 					fetchingThemes,
-					themes,
-					selectedTheme,
+					themes: filteredThemes,
+					selectedTheme: selectedTheme || {},
+					themesAPIError,
 				}
 			}
 		>
@@ -191,7 +248,8 @@ ReaderThemesContextProvider.propTypes = {
 		name: PropTypes.string.isRequired,
 	} ).isRequired,
 	hasErrorBoundary: PropTypes.bool,
-	readerThemesEndpoint: PropTypes.string.isRequired,
+	readerThemesRestPath: PropTypes.string.isRequired,
+	hideCurrentlyActiveTheme: PropTypes.bool,
 	updatesNonce: PropTypes.string.isRequired,
 	wpAjaxUrl: PropTypes.string.isRequired,
 };

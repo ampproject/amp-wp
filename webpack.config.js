@@ -229,6 +229,7 @@ const setup = {
 			// Most dependencies will be bundled for the AMP setup screen for compatibility across WP versions.
 			requestToHandle: ( handle ) => {
 				switch ( handle ) {
+					case 'lodash':
 					case '@wordpress/api-fetch':
 					case '@wordpress/dom-ready':
 					case '@wordpress/html-entities':
@@ -241,6 +242,7 @@ const setup = {
 			},
 			requestToExternal: ( external ) => {
 				switch ( external ) {
+					case 'lodash':
 					case '@wordpress/api-fetch':
 					case '@wordpress/dom-ready':
 					case '@wordpress/html-entities':
@@ -289,6 +291,7 @@ const settingsPage = {
 			// Most dependencies will be bundled for the AMP setup screen for compatibility across WP versions.
 			requestToHandle: ( handle ) => {
 				switch ( handle ) {
+					case 'lodash':
 					case '@wordpress/api-fetch':
 						return defaultRequestToHandle( handle );
 
@@ -298,6 +301,7 @@ const settingsPage = {
 			},
 			requestToExternal: ( external ) => {
 				switch ( external ) {
+					case 'lodash':
 					case '@wordpress/api-fetch':
 						return defaultRequestToExternal( external );
 

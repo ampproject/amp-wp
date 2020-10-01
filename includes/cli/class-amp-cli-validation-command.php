@@ -15,6 +15,7 @@ use AmpProject\AmpWP\Option;
  *
  * @since 1.0
  * @since 1.3.0 Renamed subcommands.
+ * @internal
  */
 final class AMP_CLI_Validation_Command {
 
@@ -477,7 +478,7 @@ final class AMP_CLI_Validation_Command {
 
 		return array_filter(
 			$ids,
-			'post_supports_amp'
+			'amp_is_post_supported'
 		);
 	}
 

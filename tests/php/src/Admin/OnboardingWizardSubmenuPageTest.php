@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP\Tests\Admin;
 use AmpProject\AmpWP\Admin\GoogleFonts;
 use AmpProject\AmpWP\Admin\OnboardingWizardSubmenuPage;
 use AmpProject\AmpWP\Admin\ReaderThemes;
+use AmpProject\AmpWP\Admin\RESTPreloader;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -23,7 +24,7 @@ use WP_UnitTestCase;
  *
  * @since 2.0
  *
- * @covers OnboardingWizardSubmenu
+ * @coversDefaultClass \AmpProject\AmpWP\Admin\OnboardingWizardSubmenuPage
  */
 class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 
@@ -44,10 +45,10 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
-		$this->page = new OnboardingWizardSubmenuPage( new GoogleFonts(), new ReaderThemes() );
+		$this->page = new OnboardingWizardSubmenuPage( new GoogleFonts(), new ReaderThemes(), new RESTPreloader() );
 	}
 
-	/** @covers OnboardingWizardSubmenu::__construct() */
+	/** @covers ::__construct() */
 	public function test__construct() {
 		$this->assertInstanceOf( OnboardingWizardSubmenuPage::class, $this->page );
 		$this->assertInstanceOf( Delayed::class, $this->page );
@@ -58,7 +59,7 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 	/**
 	 * Tests OnboardingWizardSubmenuPage::register
 	 *
-	 * @covers OnboardingWizardSubmenuPage::register
+	 * @covers ::register
 	 */
 	public function test_register() {
 		$this->page->register();
@@ -71,7 +72,7 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 	/**
 	 * Tests OnboardingWizardSubmenuPage::override_title
 	 *
-	 * @covers OnboardingWizardSubmenuPage::override_title
+	 * @covers ::override_title
 	 */
 	public function test_override_title() {
 		set_current_screen( 'index.php' );
@@ -86,7 +87,7 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 	/**
 	 * Tests OnboardingWizardSubmenuPage::render
 	 *
-	 * @covers OnboardingWizardSubmenuPage::render
+	 * @covers ::render
 	 */
 	public function test_render() {
 		ob_start();
@@ -99,7 +100,7 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 	/**
 	 * Tests OnboardingWizardSubmenuPage::screen_handle
 	 *
-	 * @covers OnboardingWizardSubmenuPage::screen_handle
+	 * @covers ::screen_handle
 	 */
 	public function test_screen_handle() {
 		$this->assertEquals( $this->page->screen_handle(), 'admin_page_amp-onboarding-wizard' );
@@ -108,7 +109,7 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 	/**
 	 * Tests OnboardingWizardSubmenuPage::enqueue_assets
 	 *
-	 * @covers OnboardingWizardSubmenuPage::enqueue_assets
+	 * @covers ::enqueue_assets
 	 */
 	public function test_enqueue_assets() {
 		$handle = 'amp-onboarding-wizard';

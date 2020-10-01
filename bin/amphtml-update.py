@@ -149,6 +149,8 @@ def GenerateHeaderPHP(out):
 	out.append(' * `mandatory_parent_denylist` in the amp_wp_build.py script.')
 	out.append(' *')
 	out.append(' * phpcs:ignoreFile')
+	out.append(' *')
+	out.append(' * @internal')
 	out.append(' */')
 	out.append('class AMP_Allowed_Tags_Generated {')
 	out.append('')
@@ -414,7 +416,7 @@ def ParseRules(out_dir):
 				for val in list.tag:
 
 					# Skip tags specific to transformed AMP.
-					if val in ( 'I-AMPHTML-SIZER', ):
+					if val in ( 'I-AMPHTML-SIZER', 'IMG', ):
 						continue
 
 					descendant_lists[list.name].append( val.lower() )

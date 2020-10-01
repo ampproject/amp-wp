@@ -33,6 +33,8 @@ use Sabberworm\CSS\CSSList\Document as CSSDocument;
  * Class AMP_Style_Sanitizer
  *
  * Collects inline styles and outputs them in the amp-custom stylesheet.
+ *
+ * @internal
  */
 class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
@@ -43,14 +45,19 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	const STYLE_AMP_CUSTOM_GROUP_INDEX    = 0;
 	const STYLE_AMP_KEYFRAMES_GROUP_INDEX = 1;
 
+	// Error codes raised during parsing CSS. See get_css_parser_validation_error_codes.
 	const CSS_SYNTAX_INVALID_AT_RULE         = 'CSS_SYNTAX_INVALID_AT_RULE';
 	const CSS_SYNTAX_INVALID_DECLARATION     = 'CSS_SYNTAX_INVALID_DECLARATION';
 	const CSS_SYNTAX_INVALID_PROPERTY        = 'CSS_SYNTAX_INVALID_PROPERTY';
 	const CSS_SYNTAX_INVALID_PROPERTY_NOLIST = 'CSS_SYNTAX_INVALID_PROPERTY_NOLIST';
 	const CSS_SYNTAX_INVALID_IMPORTANT       = 'CSS_SYNTAX_INVALID_IMPORTANT';
 	const CSS_SYNTAX_PARSE_ERROR             = 'CSS_SYNTAX_PARSE_ERROR';
-	const STYLESHEET_TOO_LONG                = 'STYLESHEET_TOO_LONG';
+	const CSS_DISALLOWED_SELECTOR            = 'CSS_DISALLOWED_SELECTOR';
 	const STYLESHEET_FETCH_ERROR             = 'STYLESHEET_FETCH_ERROR';
+	const STYLESHEET_TOO_LONG                = 'STYLESHEET_TOO_LONG';
+
+	// Error code when encountering 'i-amphtml-' prefixing a class name in an HTML class attribute.
+	const DISALLOWED_ATTR_CLASS_NAME = 'DISALLOWED_ATTR_CLASS_NAME';
 
 	// These are internal to the sanitizer and not exposed as validation error codes.
 	const STYLESHEET_DISALLOWED_FILE_EXT   = 'STYLESHEET_DISALLOWED_FILE_EXT';
@@ -356,10 +363,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		return [
 			self::CSS_SYNTAX_INVALID_AT_RULE,
 			self::CSS_SYNTAX_INVALID_DECLARATION,
-			self::CSS_SYNTAX_INVALID_IMPORTANT,
 			self::CSS_SYNTAX_INVALID_PROPERTY,
 			self::CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
+			self::CSS_SYNTAX_INVALID_IMPORTANT,
 			self::CSS_SYNTAX_PARSE_ERROR,
+			self::CSS_DISALLOWED_SELECTOR,
 			self::STYLESHEET_FETCH_ERROR,
 			self::STYLESHEET_TOO_LONG,
 		];
@@ -498,21 +506,48 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			'amp-mode-keyboard-active',
 		];
 
-		$classes = ' ';
+		$classes = [];
+
+		$i_amphtml_prefix        = 'i-amphtml-';
+		$i_amphtml_prefix_length = 10;
 		foreach ( $this->dom->xpath->query( '//*/@class' ) as $class_attribute ) {
-			$classes .= ' ' . $class_attribute->nodeValue;
+			/** @var DOMAttr $class_attribute */
+			$mutated         = false;
+			$element_classes = [];
+			foreach ( array_filter( preg_split( '/\s+/', trim( $class_attribute->nodeValue ) ) ) as $class_name ) {
+				if ( substr( $class_name, 0, $i_amphtml_prefix_length ) === $i_amphtml_prefix ) {
+					$error     = [
+						'code'       => self::DISALLOWED_ATTR_CLASS_NAME,
+						'type'       => AMP_Validation_Error_Taxonomy::HTML_ATTRIBUTE_ERROR_TYPE,
+						'class_name' => $class_name,
+					];
+					$sanitized = $this->should_sanitize_validation_error( $error, [ 'node' => $class_attribute ] );
+					if ( $sanitized ) {
+						$mutated = true;
+						continue;
+					}
+				}
+				$element_classes[] = $class_name;
+			}
+			if ( $mutated ) {
+				$class_attribute->nodeValue = implode( ' ', $element_classes );
+			}
+			$classes = array_merge( $classes, $element_classes );
 		}
 
 		// Find all [class] attributes and capture the contents of any single- or double-quoted strings.
 		foreach ( $this->dom->xpath->query( '//*/@' . Document::AMP_BIND_DATA_ATTR_PREFIX . 'class' ) as $bound_class_attribute ) {
 			if ( preg_match_all( '/([\'"])([^\1]*?)\1/', $bound_class_attribute->nodeValue, $matches ) ) {
-				$classes .= ' ' . implode( ' ', $matches[2] );
+				$classes = array_merge(
+					$classes,
+					preg_split( '/\s+/', trim( implode( ' ', $matches[2] ) ) )
+				);
 			}
 		}
 
 		$class_names = array_merge(
 			$dynamic_class_names,
-			array_unique( array_filter( preg_split( '/\s+/', trim( $classes ) ) ) )
+			array_unique( array_filter( $classes ) )
 		);
 
 		// Find all instances of the toggleClass() action to prevent the class name from being tree-shaken.
@@ -1529,7 +1564,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$parsed         = null;
 		$cache_key      = null;
 		$cached         = true;
-		$cache_group    = 'amp-parsed-stylesheet-v30'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
+		$cache_group    = 'amp-parsed-stylesheet-v33'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
 		$use_transients = $this->should_use_transient_caching();
 
 		$cache_impacting_options = array_merge(
@@ -2264,7 +2299,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$results = [];
 
 		if ( $ruleset instanceof DeclarationBlock ) {
-			$this->ampify_ruleset_selectors( $ruleset );
+			$results = array_merge(
+				$results,
+				$this->ampify_ruleset_selectors( $ruleset )
+			);
 			if ( 0 === count( $ruleset->getSelectors() ) ) {
 				$css_list->remove( $ruleset );
 				return $results;
@@ -2324,7 +2362,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( 0 === count( $ruleset->getRules() ) ) {
 			$css_list->remove( $ruleset );
 		}
-		// @todo Delete rules with selectors for -amphtml- class and i-amphtml- tags.
 		return $results;
 	}
 
@@ -3008,13 +3045,31 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * Convert CSS selectors and remove obsolete selector hacks for IE.
 	 *
 	 * @param DeclarationBlock $ruleset Ruleset.
+	 * @return array Validation results.
 	 */
 	private function ampify_ruleset_selectors( $ruleset ) {
-		$selectors             = [];
+		$selectors = [];
+		$results   = [];
+
 		$has_changed_selectors = false;
 		$language              = strtolower( get_bloginfo( 'language' ) );
 		foreach ( $ruleset->getSelectors() as $old_selector ) {
 			$selector = $old_selector->getSelector();
+
+			// Strip out selectors that contain the disallowed prefix 'i-amphtml-'.
+			if ( preg_match( '/(^|\W)i-amphtml-/', $selector ) ) {
+				$error     = [
+					'code'         => self::CSS_DISALLOWED_SELECTOR,
+					'type'         => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+					'css_selector' => $selector,
+				];
+				$sanitized = $this->should_sanitize_validation_error( $error );
+				$results[] = compact( 'error', 'sanitized' );
+				if ( $sanitized ) {
+					$has_changed_selectors = true;
+					continue;
+				}
+			}
 
 			// Automatically tree-shake IE6/IE7 hacks for selectors with `* html` and `*+html`.
 			if ( preg_match( '/^\*\s*\+?\s*html/', $selector ) ) {
@@ -3080,9 +3135,36 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			// Replace focus selectors with :focus-within.
 			if ( $this->focus_class_name_selector_pattern ) {
 				$count    = 0;
-				$selector = preg_replace(
+				$selector = preg_replace_callback(
 					$this->focus_class_name_selector_pattern,
-					':focus-within',
+					static function ( $matches ) {
+						$replacement = ':focus-within';
+
+						if (
+							'focus' === $matches['class']
+							&&
+							(
+								! empty( $matches['beginning'] )
+								||
+								( ! empty( $matches['combinator'] ) && '' === trim( $matches['combinator'] ) )
+							)
+						) {
+							/*
+							 * If a descendant combinator precedes the focus selector, prefix the pseudo class selector
+							 * with a class selector that's known to be common among themes that use the focus selector.
+							 * This is to prevent the pseudo class selector being applied to the ancestor selector,
+							 * which can cause unintended behavior on the page.
+							 */
+							$replacement = '.menu-item-has-children' . $replacement;
+						}
+
+						// Ensure preceding combinator is preserved.
+						if ( ! empty( $matches['combinator'] ) ) {
+							$replacement = $matches['combinator'] . $replacement;
+						}
+
+						return $replacement;
+					},
 					$selector,
 					-1,
 					$count
@@ -3154,12 +3236,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( $has_changed_selectors ) {
 			$ruleset->setSelectors( $selectors );
 		}
+
+		return $results;
 	}
 
 	/**
 	 * Given a list of class names, create a regular expression pattern to match them in a selector.
 	 *
 	 * @since 1.4
+	 * @since 2.0 In addition to the class, now includes capture groups for an immediately-preceding combinator or whether the class begins the selector.
 	 *
 	 * @param string[] $class_names Class names.
 	 * @return string Regular expression pattern.
@@ -3174,7 +3259,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				(array) $class_names
 			)
 		);
-		return "/\.({$class_pattern})(?=$|[^a-zA-Z0-9_-])/";
+		return "/(?:(?<beginning>^\s*\.)|(?<combinator>[>+~\s]*)\.)(?<class>{$class_pattern})(?=$|[^a-zA-Z0-9_-])/s";
 	}
 
 	/**

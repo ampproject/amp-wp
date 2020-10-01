@@ -22,6 +22,8 @@ use WP_Customize_Manager;
  * service in order to determine whether or a Reader theme is loaded, and if so, what the previously-active theme was.
  *
  * @package AmpProject\AmpWP
+ * @since 2.0
+ * @internal
  */
 final class ReaderThemeLoader implements Service, Registerable {
 
@@ -67,7 +69,13 @@ final class ReaderThemeLoader implements Service, Registerable {
 
 		// If the Legacy Reader mode is active, then a Reader theme is not going to be served.
 		$reader_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
-		if ( ReaderThemes::DEFAULT_READER_THEME === AMP_Options_Manager::get_option( Option::READER_THEME ) ) {
+		if ( ReaderThemes::DEFAULT_READER_THEME === $reader_theme ) {
+			return false;
+		}
+
+		// If the Reader theme does not exist, then we cannot switch to the reader theme. The Legacy Reader theme will
+		// be used as a fallback instead.
+		if ( ! wp_get_theme( $reader_theme )->exists() ) {
 			return false;
 		}
 
@@ -120,7 +128,12 @@ final class ReaderThemeLoader implements Service, Registerable {
 			return $prepared_themes;
 		}
 
-		$reader_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
+		$reader_theme_obj = $this->get_reader_theme();
+		if ( ! $reader_theme_obj instanceof WP_Theme ) {
+			return $prepared_themes;
+		}
+		$reader_theme = $reader_theme_obj->get_stylesheet();
+
 		if ( isset( $prepared_themes[ $reader_theme ] ) ) {
 
 			// Make sure the AMP Reader theme appears right after the active theme in the list.
@@ -156,7 +169,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 						'a' => [ 'href' => true ],
 					]
 				),
-				esc_url( add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, admin_url( 'admin.php' ) ) )
+				esc_url( add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, admin_url( 'admin.php' ) ) . '#reader-themes' )
 			);
 		}
 
@@ -173,7 +186,11 @@ final class ReaderThemeLoader implements Service, Registerable {
 			return;
 		}
 
-		$reader_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
+		$reader_theme = $this->get_reader_theme();
+		if ( ! $reader_theme instanceof WP_Theme ) {
+			return;
+		}
+
 		?>
 		<script>
 			(function( themeSingleTmpl ) {
@@ -201,7 +218,10 @@ final class ReaderThemeLoader implements Service, Registerable {
 							${startDiv}
 							<# if ( data.ampActiveReaderTheme ) { #>
 								<a href="{{{ data.actions.customize }}}" class="button button-primary customize load-customize hide-if-no-customize">
-									<?php esc_html_e( 'Customize AMP', 'amp' ); ?>
+									<?php esc_html_e( 'Customize', 'default' ); ?>
+								</a>
+								<a href="<?php echo esc_url( add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, admin_url( 'admin.php' ) ) ); ?>" class="button button-secondary">
+									<?php esc_html_e( 'AMP Settings', 'amp' ); ?>
 								</a>
 							<# } else { #>
 								${actionLinks}
@@ -238,7 +258,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 				}
 			}) (
 				document.getElementById( 'tmpl-theme' ),
-				document.querySelector( <?php echo wp_json_encode( sprintf( '#%s-name > span', $reader_theme ) ); ?> )
+				document.querySelector( <?php echo wp_json_encode( sprintf( '#%s-name > span', $reader_theme->get_stylesheet() ) ); ?> )
 			);
 		</script>
 		<?php
@@ -253,6 +273,10 @@ final class ReaderThemeLoader implements Service, Registerable {
 	 * @return WP_Theme|null Theme if selected and no errors.
 	 */
 	public function get_reader_theme() {
+		if ( $this->reader_theme instanceof WP_Theme ) {
+			return $this->reader_theme;
+		}
+
 		$reader_theme_slug = AMP_Options_Manager::get_option( Option::READER_THEME );
 		if ( ! $reader_theme_slug ) {
 			return null;
@@ -283,8 +307,10 @@ final class ReaderThemeLoader implements Service, Registerable {
 	 * Note that AMP_Theme_Support will redirect to the non-AMP version if AMP is not available for the query.
 	 *
 	 * @see WP_Customize_Manager::start_previewing_theme() which provides for much of the inspiration here.
+	 * @see switch_theme() which ensures the new theme includes the old theme's theme mods.
 	 */
 	public function override_theme() {
+		$this->theme_overridden = false;
 		if ( ! $this->is_enabled() || ! $this->is_amp_request() ) {
 			return;
 		}
@@ -348,6 +374,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 				return array_diff( $components, [ 'widgets' ] );
 			}
 		);
+		remove_theme_support( 'widgets-block-editor' );
 	}
 
 	/**

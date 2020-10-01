@@ -5,45 +5,38 @@ namespace AmpProject\AmpWP\Tests;
 use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AmpProject\AmpWP\Admin\ReaderThemes;
-use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\ReaderThemeLoader;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use WP_Customize_Manager;
 use WP_Customize_Panel;
 use WP_Theme;
-use WP_UnitTestCase;
 
-/** @covers ReaderThemeLoader */
-final class ReaderThemeLoaderTest extends WP_UnitTestCase {
+/** @coversDefaultClass \AmpProject\AmpWP\ReaderThemeLoader */
+final class ReaderThemeLoaderTest extends DependencyInjectedTestCase {
 
-	use AssertContainsCompatibility;
+	use AssertContainsCompatibility, LoadsCoreThemes;
 
 	/** @var ReaderThemeLoader */
 	private $instance;
 
-	private $original_theme_directories;
-
 	public function setUp() {
 		parent::setUp();
-		$this->instance = new ReaderThemeLoader();
+		$this->instance = $this->injector->make( ReaderThemeLoader::class );
 
-		global $wp_theme_directories;
-		$this->original_theme_directories = $wp_theme_directories;
-		register_theme_directory( ABSPATH . 'wp-content/themes' );
-		delete_site_transient( 'theme_roots' );
+		$this->register_core_themes();
 	}
 
 	public function tearDown() {
 		parent::tearDown();
-		global $wp_theme_directories;
-		$wp_theme_directories = $this->original_theme_directories;
-		delete_site_transient( 'theme_roots' );
+
+		$this->restore_theme_directories();
 	}
 
-	/** @covers ReaderThemeLoader::is_enabled() */
+	/** @covers ::is_enabled() */
 	public function test_is_enabled() {
 		$active_theme_slug = 'twentytwenty';
 		$reader_theme_slug = 'twentynineteen';
@@ -70,7 +63,7 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 		$this->assertTrue( $this->instance->is_enabled() );
 	}
 
-	/** @covers ReaderThemeLoader::is_amp_request() */
+	/** @covers ::is_amp_request() */
 	public function test_is_amp_request() {
 		$_GET[ amp_get_slug() ] = '1';
 		$this->assertTrue( $this->instance->is_amp_request() );
@@ -79,14 +72,13 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 		$this->assertFalse( $this->instance->is_amp_request() );
 	}
 
-	/** @covers ReaderThemeLoader::__construct() */
 	public function test__construct() {
 		$this->assertInstanceOf( ReaderThemeLoader::class, $this->instance );
 		$this->assertInstanceOf( Service::class, $this->instance );
 		$this->assertInstanceOf( Registerable::class, $this->instance );
 	}
 
-	/** @covers ReaderThemeLoader::register() */
+	/** @covers ::register() */
 	public function test_register() {
 		$this->instance->register();
 		$this->assertEquals( 9, has_action( 'plugins_loaded', [ $this->instance, 'override_theme' ] ) );
@@ -94,7 +86,7 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'admin_print_footer_scripts-themes.php', [ $this->instance, 'inject_theme_single_template_modifications' ] ) );
 	}
 
-	/** @covers ReaderThemeLoader::filter_wp_prepare_themes_to_indicate_reader_theme() */
+	/** @covers ::filter_wp_prepare_themes_to_indicate_reader_theme() */
 	public function test_filter_wp_prepare_themes_to_indicate_reader_theme() {
 		$active_theme_slug = 'twentytwenty';
 		$reader_theme_slug = 'twentyseventeen';
@@ -104,12 +96,17 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 		switch_theme( $active_theme_slug );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::READER_THEME, $reader_theme_slug );
+		$this->assertEquals( $active_theme_slug, get_stylesheet() );
+		$this->assertEquals( $reader_theme_slug, $this->instance->get_reader_theme()->get_stylesheet() );
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
-		$themes = $this->instance->filter_wp_prepare_themes_to_indicate_reader_theme( wp_prepare_themes_for_js() );
+		// Note that this is added via filter and not called directly because the filtered value is keyed by theme slug,
+		// but the return value of wp_prepare_themes_for_js() is keyed with numeric indices.
+		$this->instance->register(); // This adds a `wp_prepare_themes_for_js` filter.
+		$themes = wp_prepare_themes_for_js();
 		$this->assertEquals( $active_theme_slug, $themes[0]['id'] );
 		$this->assertStringNotContains( 'AMP', $themes[0]['description'] );
-		$this->assertArrayHasKey( 'delete', $themes[0]['actions'] );
+		$this->assertArrayHasKey( 'delete', $themes[0]['actions'], 'The delete key is expected even though the theme is active because the delete option is hidden via the JS template.' );
 		$this->assertStringNotContains( amp_get_slug() . '=', $themes[0]['actions']['customize'] );
 		$this->assertArrayNotHasKey( 'ampActiveReaderTheme', $themes[0] );
 		$this->assertArrayNotHasKey( 'ampReaderThemeNotice', $themes[0] );
@@ -121,13 +118,22 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'ampReaderThemeNotice', $themes[1] );
 	}
 
-	/** @covers ReaderThemeLoader::inject_theme_single_template_modifications() */
+	/** @covers ::inject_theme_single_template_modifications() */
 	public function test_inject_theme_single_template_modifications() {
+		$active_theme_slug = 'twentytwenty';
+		$reader_theme_slug = 'twentynineteen';
+		if ( ! wp_get_theme( $active_theme_slug )->exists() || ! wp_get_theme( $reader_theme_slug )->exists() ) {
+			$this->markTestSkipped();
+		}
+		switch_theme( $active_theme_slug );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::READER_THEME, $reader_theme_slug );
+
 		$output = get_echo( [ $this->instance, 'inject_theme_single_template_modifications' ] );
 		$this->assertStringContains( '<script>', $output );
 	}
 
-	/** @covers ReaderThemeLoader::get_reader_theme() */
+	/** @covers ::get_reader_theme() */
 	public function test_get_reader_theme() {
 		$reader_theme_slug = 'twentynineteen';
 		if ( ! wp_get_theme( $reader_theme_slug )->exists() ) {
@@ -145,9 +151,9 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @covers ReaderThemeLoader::override_theme()
-	 * @covers ReaderThemeLoader::get_active_theme()
-	 * @covers ReaderThemeLoader::is_theme_overridden()
+	 * @covers ::override_theme()
+	 * @covers ::get_active_theme()
+	 * @covers ::is_theme_overridden()
 	 */
 	public function test_override_theme() {
 		$active_theme_slug = 'twentytwenty';
@@ -204,20 +210,25 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 
 	}
 
-	/** @covers ReaderThemeLoader::disable_widgets() */
+	/** @covers ::disable_widgets() */
 	public function test_disable_widgets() {
 		remove_all_filters( 'sidebars_widgets' );
+		remove_filter( 'customize_loaded_components', 'gutenberg_remove_widgets_panel' ); // Added in Gutenberg v8.9.0.
+		add_theme_support( 'widgets-block-editor' );
+
 		$this->assertNotEmpty( wp_get_sidebars_widgets() );
 		$this->assertContains( 'widgets', apply_filters( 'customize_loaded_components', [ 'widgets' ] ) );
+		$this->assertTrue( current_theme_supports( 'widgets-block-editor' ) );
 
 		$this->instance->disable_widgets();
 
 		$this->assertTrue( has_filter( 'sidebars_widgets' ) );
 		$this->assertEquals( [], wp_get_sidebars_widgets() );
 		$this->assertNotContains( 'widgets', apply_filters( 'customize_loaded_components', [ 'widgets' ] ) );
+		$this->assertFalse( current_theme_supports( 'widgets-block-editor' ) );
 	}
 
-	/** @covers ReaderThemeLoader::customize_previewable_devices() */
+	/** @covers ::customize_previewable_devices() */
 	public function test_customize_previewable_devices() {
 		$original_devices = [
 			'desktop' => [
@@ -237,7 +248,7 @@ final class ReaderThemeLoaderTest extends WP_UnitTestCase {
 		$this->assertFalse( empty( $devices['tablet']['default'] ) );
 	}
 
-	/** @covers ReaderThemeLoader::remove_customizer_themes_panel() */
+	/** @covers ::remove_customizer_themes_panel() */
 	public function test_remove_customizer_themes_panel() {
 		require_once ABSPATH . WPINC . '/class-wp-customize-manager.php';
 		$wp_customize = new WP_Customize_Manager();

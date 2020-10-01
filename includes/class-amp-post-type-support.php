@@ -10,6 +10,8 @@ use AmpProject\AmpWP\Option;
 
 /**
  * Class AMP_Post_Type_Support.
+ *
+ * @internal
  */
 class AMP_Post_Type_Support {
 
@@ -24,6 +26,7 @@ class AMP_Post_Type_Support {
 	 * Get post types that plugin supports out of the box (which cannot be disabled).
 	 *
 	 * @deprecated
+	 * @internal
 	 * @codeCoverageIgnore
 	 * @return string[] Post types.
 	 */

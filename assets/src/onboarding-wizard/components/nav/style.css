@@ -3,7 +3,7 @@
  */
 .onboarding-wizard-nav {
 	align-items: center;
-	background: var(--white);
+	background: var(--amp-settings-color-background);
 	bottom: 0;
 	box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.05);
 	display: flex;
@@ -24,7 +24,7 @@
 	width: 100%;
 
 	@media screen and (min-width: 783px) {
-		padding: 40px 90px;
+		padding: 30px 90px;
 	}
 }
 

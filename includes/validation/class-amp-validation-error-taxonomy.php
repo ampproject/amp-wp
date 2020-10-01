@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Admin\DevToolsUserAccess;
+use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\Services;
@@ -14,6 +14,7 @@ use AmpProject\AmpWP\Services;
  * Class AMP_Validation_Error_Taxonomy
  *
  * @since 1.0
+ * @internal
  */
 class AMP_Validation_Error_Taxonomy {
 
@@ -197,18 +198,18 @@ class AMP_Validation_Error_Taxonomy {
 	const SOURCES_INVALID_OUTPUT = 'sources_with_invalid_output';
 
 	/**
-	 * The key for removed sources.
-	 *
-	 * @var string
-	 */
-	const REMOVED_SOURCES = 'removed_sources';
-
-	/**
 	 * The key for the error status.
 	 *
 	 * @var string
 	 */
 	const ERROR_STATUS = 'error_status';
+
+	/**
+	 * Key for the transient storing error index counts.
+	 *
+	 * @var string
+	 */
+	const TRANSIENT_KEY_ERROR_INDEX_COUNTS = 'amp_error_index_counts';
 
 	/**
 	 * Whether the terms_clauses filter should apply to a term query for validation errors to limit to a given status.
@@ -226,7 +227,6 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return void
 	 */
 	public static function register() {
-		/** @var DevToolsUserAccess $dev_tools_user_access */
 		$dev_tools_user_access = Services::get( 'dev_tools.user_access' );
 
 		// Show in the admin menu if dev tools are enabled for the user or if the user is on any dev tools screen.
@@ -285,6 +285,10 @@ class AMP_Validation_Error_Taxonomy {
 		if ( is_admin() ) {
 			self::add_admin_hooks();
 		}
+
+		add_action( 'created_' . self::TAXONOMY_SLUG, [ __CLASS__, 'clear_cached_counts' ] );
+		add_action( 'edited_' . self::TAXONOMY_SLUG, [ __CLASS__, 'clear_cached_counts' ] );
+		add_action( 'delete_' . self::TAXONOMY_SLUG, [ __CLASS__, 'clear_cached_counts' ] );
 	}
 
 	/**
@@ -601,6 +605,16 @@ class AMP_Validation_Error_Taxonomy {
 			$args
 		);
 
+		$cache_key     = wp_json_encode( $args );
+		$cached_counts = get_transient( self::TRANSIENT_KEY_ERROR_INDEX_COUNTS );
+		if ( empty( $cached_counts ) ) {
+			$cached_counts = [];
+		}
+
+		if ( isset( $cached_counts[ $cache_key ] ) ) {
+			return $cached_counts[ $cache_key ];
+		}
+
 		$groups = null;
 		if ( isset( $args['group'] ) ) {
 			$groups = self::sanitize_term_status( $args['group'], [ 'multiple' => true ] );
@@ -619,7 +633,13 @@ class AMP_Validation_Error_Taxonomy {
 		if ( isset( $args['group'] ) ) {
 			remove_filter( 'terms_clauses', $filter );
 		}
-		return (int) $term_count;
+
+		$result = (int) $term_count;
+
+		$cached_counts[ $cache_key ] = $result;
+		set_transient( self::TRANSIENT_KEY_ERROR_INDEX_COUNTS, $cached_counts, DAY_IN_SECONDS );
+
+		return $result;
 	}
 
 	/**
@@ -792,7 +812,6 @@ class AMP_Validation_Error_Taxonomy {
 		if ( get_taxonomy( self::TAXONOMY_SLUG )->show_in_menu ) {
 			add_action( 'admin_menu', [ __CLASS__, 'add_admin_menu_validation_error_item' ] );
 		}
-		add_action( 'parse_term_query', [ __CLASS__, 'parse_post_php_term_query' ] );
 		add_filter( 'manage_' . self::TAXONOMY_SLUG . '_custom_column', [ __CLASS__, 'filter_manage_custom_columns' ], 10, 3 );
 		add_filter( 'manage_' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG . '_sortable_columns', [ __CLASS__, 'add_single_post_sortable_columns' ] );
 		add_filter( 'posts_where', [ __CLASS__, 'filter_posts_where_for_validation_error_status' ], 10, 2 );
@@ -840,21 +859,13 @@ class AMP_Validation_Error_Taxonomy {
 		);
 
 		// Remove bulk actions.
-		add_filter(
-			'bulk_actions-edit-' . self::TAXONOMY_SLUG,
-			static function( $bulk_actions ) {
-				unset( $bulk_actions['delete'] );
-				return $bulk_actions;
-			}
-		);
+		add_filter( 'bulk_actions-edit-' . self::TAXONOMY_SLUG, '__return_empty_array' );
 
 		// Override the columns displayed for the validation error terms.
 		add_filter(
 			'manage_edit-' . self::TAXONOMY_SLUG . '_columns',
-			static function( $old_columns ) {
-
+			static function() {
 				return [
-					'cb'               => $old_columns['cb'],
 					'error_code'       => esc_html__( 'Error', 'amp' ),
 					'status'           => sprintf(
 						'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
@@ -1678,28 +1689,6 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * Parses the term query on post.php pages (single error URL).
-	 *
-	 * This post.php page for amp_validated_url is more like an edit-tags.php page,
-	 * in that it has a WP_Terms_List_Table of terms (of type amp_validation_error).
-	 * So this needs to only show the terms (errors) associated with this amp_validated_url post.
-	 *
-	 * @param WP_Term_Query $wp_term_query Instance of WP_Term_Query.
-	 */
-	public static function parse_post_php_term_query( $wp_term_query ) {
-		global $pagenow;
-		if ( ! is_admin() || 'post.php' !== $pagenow || ! isset( $_GET['post'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			return;
-		}
-
-		// Only set the query var if this is the validated URL post type.
-		$post_id = (int) $_GET['post']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG === get_post_type( $post_id ) ) {
-			$wp_term_query->query_vars['object_ids'] = $post_id;
-		}
-	}
-
-	/**
 	 * Provides a reader-friendly string for a term's error type.
 	 *
 	 * @param string $error_type The error type from the term's validation error JSON.
@@ -2065,7 +2054,7 @@ class AMP_Validation_Error_Taxonomy {
 						echo wp_kses_post(
 							sprintf(
 								/* translators: 1: script,  2: Documentation URL, 3: Documentation URL, 4: Documentation URL, 5: onclick, 6: Documentation URL, 7: amp-bind, 8: Documentation URL, 9: amp-script */
-								__( 'Arbitrary JavaScript is not allowed in AMP. You cannot use JS %1$s tags unless they are for loading <a href="%2$s">AMP components</a> (which the AMP plugin will add for you automatically). In order for a page to be served as AMP, the invalid JS code must be removed from the page. Learn more about <a href="%3$s">how AMP works</a>. As an alternative to using custom JS, please consider using a pre-built AMP functionality, including <a href="%4$s">actions and events</a> (as opposed to JS event handler attributes like %5$s) and the <a href="%6$s">%7$s</a> component; you may also add custom JS if encapsulated in the <a href="%8$s">%9$s</a>.', 'amp' ),
+								__( 'AMP does not allow the use of JS %1$s tags unless they are for loading <a href="%2$s">AMP components</a>, which are added automatically by the AMP plugin. For any page to be served as AMP, all invalid script tags must be removed from the page. Instead of custom or third-party JS, please consider using AMP components and functionality such as <a href="%6$s">%7$s</a> and <a href="%4$s">actions and events</a> (as opposed to JS event handler attributes like %5$s). Some custom JS can be added if encapsulated in the <a href="%8$s">%9$s</a>. Learn more about <a href="%3$s">how AMP works</a>.', 'amp' ),
 								'<code>&lt;script&gt;</code>',
 								'https://amp.dev/documentation/components/',
 								'https://amp.dev/about/how-amp-works/',
@@ -2095,7 +2084,7 @@ class AMP_Validation_Error_Taxonomy {
 						echo wp_kses_post(
 							sprintf(
 								/* translators: 1: Documentation URL, 2: Documentation URL. */
-								__( 'AMP has specific set of allowed elements and attributes that are allowed in valid AMP pages. Learn about the <a href="%1$s">AMP HTML specification</a>. If an element or attribute is not allowed in AMP, it must be removed for the page to <a href="%2$s">cached and be eligible for prerendering</a>.', 'amp' ),
+								__( 'AMP allows a specific set of elements and attributes on valid AMP pages. Learn about the <a href="%1$s">AMP HTML specification</a>. If an element or attribute is not allowed in AMP, it must be removed for the page to be <a href="%2$s">cached and eligible for prerendering</a>.', 'amp' ),
 								'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/',
 								'https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/how_amp_pages_are_cached/'
 							)
@@ -2104,7 +2093,7 @@ class AMP_Validation_Error_Taxonomy {
 					<?php endif; ?>
 				</p>
 				<p>
-					<?php echo wp_kses_post( __( 'If you <strong>remove</strong> the invalid markup then it will not block this page from being served as AMP. Note that you need to check what impact the removal of the invalid markup has on the page to see if the result is acceptable. If you <strong>keep</strong> the invalid markup, then the page will not be served as AMP.', 'amp' ) ); ?>
+					<?php echo wp_kses_post( __( 'If all invalid markup is &#8220;removed&#8221; the page will be served as AMP. However, the impact that the removal has on the page must be assessed to determine if the result is acceptable. If any invalid markup is &#8220;kept&#8221; then the page will not be served as AMP.', 'amp' ) ); ?>
 				</p>
 			</dd>
 
@@ -2162,7 +2151,7 @@ class AMP_Validation_Error_Taxonomy {
 				?>
 				<dt><?php echo esc_html( self::get_source_key_label( $key, $validation_error ) ); ?></dt>
 				<dd class="detailed">
-					<?php if ( in_array( $key, [ 'node_name', 'parent_name', 'required_parent_name', 'required_attr_value' ], true ) ) : ?>
+					<?php if ( in_array( $key, [ 'node_name', 'parent_name', 'required_parent_name', 'required_attr_value', 'css_selector', 'class_name' ], true ) ) : ?>
 						<code><?php echo esc_html( $value ); ?></code>
 					<?php elseif ( 'css_property_name' === $key ) : ?>
 						<?php
@@ -2370,7 +2359,6 @@ class AMP_Validation_Error_Taxonomy {
 		// Fall back to using the theme/plugin editors if no external editor is offered.
 		if ( ! $edit_url ) {
 			if ( 'plugin' === $source['type'] && current_user_can( 'edit_plugins' ) ) {
-				/** @var PluginRegistry $plugin_registry */
 				$plugin_registry = Services::get( 'plugin_registry' );
 				$plugin          = $plugin_registry->get_plugin_from_slug( $source['name'] );
 				if ( $plugin ) {
@@ -2424,7 +2412,6 @@ class AMP_Validation_Error_Taxonomy {
 				}
 				break;
 			case 'plugin':
-				/** @var PluginRegistry $plugin_registry */
 				$plugin_registry = Services::get( 'plugin_registry' );
 				$plugin          = $plugin_registry->get_plugin_from_slug( $name );
 				if ( $plugin && ! empty( $plugin['data']['Name'] ) ) {
@@ -3006,6 +2993,14 @@ class AMP_Validation_Error_Taxonomy {
 					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['css_property_name'] ) );
 				}
 				return $title;
+			case AMP_Style_Sanitizer::CSS_DISALLOWED_SELECTOR:
+				return esc_html__( 'Illegal CSS selector', 'amp' );
+			case AMP_Style_Sanitizer::DISALLOWED_ATTR_CLASS_NAME:
+				$title = esc_html__( 'Disallowed class name', 'amp' );
+				if ( isset( $validation_error['class_name'] ) ) {
+					$title .= sprintf( ': <code>%s</code>', esc_html( $validation_error['class_name'] ) );
+				}
+				return $title;
 			case AMP_Tag_And_Attribute_Sanitizer::CDATA_TOO_LONG:
 			case AMP_Tag_And_Attribute_Sanitizer::MANDATORY_CDATA_MISSING_OR_INCORRECT:
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_HTML_COMMENTS:
@@ -3171,10 +3166,9 @@ class AMP_Validation_Error_Taxonomy {
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX_CASEI:
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_DISALLOWED_VALUE_REGEX:
 				return sprintf(
-					/* translators: %1$s is the attribute name, %2$s is the invalid attribute value */
-					esc_html__( 'The attribute %1$s is set to the invalid value %2$s', 'amp' ),
-					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>',
-					'<code>' . esc_html( $validation_error['element_attributes'][ $validation_error['node_name'] ] ) . '</code>'
+					/* translators: %s is the attribute name */
+					esc_html__( 'The attribute %s is set to an invalid value', 'amp' ),
+					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>'
 				);
 
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_URL_PROTOCOL:
@@ -3211,6 +3205,14 @@ class AMP_Validation_Error_Taxonomy {
 					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>'
 				);
 
+			case AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_DIMENSIONS:
+				return sprintf(
+					/* translators: %1$s is the attribute name, %2$s is the tag name */
+					esc_html__( 'Multiple image candidates with the same width or pixel density found in attribute %1$s in tag %2$s', 'amp' ),
+					'<code>' . esc_html( $validation_error['node_name'] ) . '</code>',
+					'<code>' . esc_html( $validation_error['parent_name'] ) . '</code>'
+				);
+
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_WIDTH:
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_HEIGHT:
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_AUTO_HEIGHT:
@@ -3218,12 +3220,20 @@ class AMP_Validation_Error_Taxonomy {
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_FIXED_HEIGHT:
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_AUTO_WIDTH:
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_HEIGHTS:
-				return sprintf(
-					/* translators: %1$s is the invalid attribute value, %2$s is the attribute name */
-					esc_html__( 'Invalid value %1$s for attribute %2$s', 'amp' ),
-					'<code>' . esc_html( $validation_error['node_attributes'][ $validation_error['attribute'] ] ) . '</code>',
-					'<code>' . esc_html( $validation_error['attribute'] ) . '</code>'
-				);
+				if ( isset( $validation_error['node_attributes'][ $validation_error['attribute'] ] ) ) {
+					return sprintf(
+						/* translators: %1$s is the invalid attribute value, %2$s is the attribute name */
+						esc_html__( 'Invalid value %1$s for attribute %2$s', 'amp' ),
+						'<code>' . esc_html( $validation_error['node_attributes'][ $validation_error['attribute'] ] ) . '</code>',
+						'<code>' . esc_html( $validation_error['attribute'] ) . '</code>'
+					);
+				} else {
+					return sprintf(
+						/* translators: %s is the invalid attribute value */
+						esc_html__( 'Invalid or missing value for attribute %s', 'amp' ),
+						'<code>' . esc_html( $validation_error['attribute'] ) . '</code>'
+					);
+				}
 
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_UNIT_DIMENSIONS:
 				return esc_html__( 'Inconsistent units for width and height', 'amp' );
@@ -3287,6 +3297,10 @@ class AMP_Validation_Error_Taxonomy {
 				return __( 'Parent element', 'amp' );
 			case 'css_property_name':
 				return __( 'CSS property', 'amp' );
+			case 'css_selector':
+				return __( 'CSS selector', 'amp' );
+			case 'class_name':
+				return __( 'Class name', 'amp' );
 			case 'duplicate_oneof_attrs':
 				return __( 'Mutually exclusive attributes', 'amp' );
 			case 'text':
@@ -3340,6 +3354,8 @@ class AMP_Validation_Error_Taxonomy {
 				return __( 'URL', 'amp' );
 			case 'message':
 				return __( 'Message', 'amp' );
+			case 'duplicate_dimensions':
+				return __( 'Duplicate dimensions', 'amp' );
 			default:
 				return $key;
 		}
@@ -3350,10 +3366,11 @@ class AMP_Validation_Error_Taxonomy {
 	 *
 	 * @see \AMP_Validation_Error_Taxonomy::get_validation_error_sanitization()
 	 *
-	 * @param array $sanitization Sanitization.
+	 * @param array $sanitization     Sanitization.
+	 * @param bool  $include_reviewed Include reviewed/unreviewed status.
 	 * @return string Status text.
 	 */
-	public static function get_status_text_with_icon( $sanitization ) {
+	public static function get_status_text_with_icon( $sanitization, $include_reviewed = false ) {
 		if ( $sanitization['term_status'] & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) {
 			$icon = Icon::valid();
 			$text = __( 'Removed', 'amp' );
@@ -3361,6 +3378,24 @@ class AMP_Validation_Error_Taxonomy {
 			$icon = Icon::invalid();
 			$text = __( 'Kept', 'amp' );
 		}
+
+		if ( $include_reviewed ) {
+			$text .= ' (';
+			if ( $sanitization['term_status'] & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK ) {
+				$text .= __( 'Reviewed', 'amp' );
+			} else {
+				$text .= __( 'Unreviewed', 'amp' );
+			}
+			$text .= ')';
+		}
+
 		return sprintf( '<span class="status-text">%s %s</span>', $icon->to_html(), esc_html( $text ) );
+	}
+
+	/**
+	 * Deletes cached term counts.
+	 */
+	public static function clear_cached_counts() {
+		delete_transient( self::TRANSIENT_KEY_ERROR_INDEX_COUNTS );
 	}
 }
