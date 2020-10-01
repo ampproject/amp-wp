@@ -157,7 +157,9 @@ final class ReferenceSiteImporter extends WP_Import {
 
 		$tmp_file_name = wp_tempnam( $file_name );
 		if ( ! $tmp_file_name ) {
-			return new WP_Error( 'import_no_file', __( 'Could not create temporary file.', 'amp' ) );
+			$message = __( 'Could not create temporary file.', 'amp' );
+			WP_CLI::warning( $message );
+			return new WP_Error( 'import_no_file', $message );
 		}
 
 		$context_options = [
@@ -167,14 +169,19 @@ final class ReferenceSiteImporter extends WP_Import {
 			],
 		];
 
-		file_put_contents( // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents -- Needed for stream wrapper support.
-			$tmp_file_name,
-			file_get_contents( // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Needed for stream wrapper support.
-				$url,
-				false,
-				stream_context_create( $context_options )
-			)
+		$data = file_get_contents( // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Needed for stream wrapper support.
+			$url,
+			false,
+			stream_context_create( $context_options )
 		);
+
+		if ( false === $data || empty( $data ) ) {
+			$message = __( 'Could not download file from Google Storage: ', 'amp' ) . $url;
+			WP_CLI::warning( $message );
+			return new WP_Error( 'import_no_gs_download', $message );
+		}
+
+		file_put_contents( $tmp_file_name, $data ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents -- Needed for stream wrapper support.
 
 		// Handle the upload like _wp_handle_upload() does.
 		$wp_filetype     = wp_check_filetype_and_ext( $tmp_file_name, $file_name );
