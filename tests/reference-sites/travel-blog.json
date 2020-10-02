@@ -44,7 +44,7 @@
         "nav_menu_locations": {
           "primary": "primary-header"
         },
-        "custom_logo": "gs://ampwp_reference_sites_media_files/travel-blog/logo-1x.png"
+        "custom_logo": "https://storage.googleapis.com/ampwp_reference_sites_media_files/travel-blog/logo-1x.png"
       }
     },
     {

@@ -17,6 +17,22 @@ use WP_User;
 final class ImportWxrFile implements ImportStep {
 
 	/**
+	 * Regular expression pattern to use for detecting upload URLs in post content.
+	 *
+	 * @var string
+	 */
+	const UPLOAD_URL_PATTERN = '#/wp-content/uploads/(\d+/\d+/.*?\.\w+)#i';
+
+	/**
+	 * Regular expression replacement string to use for adapting upload URLs in post content.
+	 *
+	 * This should contain one sprintf placeholder for the upload folder URL.
+	 *
+	 * @var string
+	 */
+	const UPLOAD_URL_REPLACEMENT = '%s/\1';
+
+	/**
 	 * File path to the WXR file to import.
 	 *
 	 * @var string
@@ -192,7 +208,9 @@ final class ImportWxrFile implements ImportStep {
 		add_action( 'wp_import_set_post_terms', [ $this, 'log_associated_term' ], 10, 5 );
 		add_action( 'wp_import_insert_comment', [ $this, 'log_imported_comment' ], 10, 4 );
 		add_action( 'import_post_meta', [ $this, 'log_imported_post_meta' ], 10, 3 );
-		add_filter( 'wp_import_post_data_processed', [ $this, 'remove_guid' ], 10, 2 );
+
+		add_filter( 'wp_import_post_data_processed', [ $this, 'remove_guid' ], 10, 1 );
+		add_filter( 'wp_import_post_data_processed', [ $this, 'adapt_image_links' ], 10, 1 );
 	}
 
 	/**
@@ -205,7 +223,9 @@ final class ImportWxrFile implements ImportStep {
 		remove_action( 'wp_import_set_post_terms', [ $this, 'log_associated_term' ], 10 );
 		remove_action( 'wp_import_insert_comment', [ $this, 'log_imported_comment' ], 10 );
 		remove_action( 'import_post_meta', [ $this, 'log_imported_post_meta' ], 10 );
+
 		remove_filter( 'wp_import_post_data_processed', [ $this, 'remove_guid' ], 10 );
+		remove_filter( 'wp_import_post_data_processed', [ $this, 'adapt_image_links' ], 10 );
 	}
 
 	public function log_post_processing( $post ) {
@@ -263,6 +283,30 @@ final class ImportWxrFile implements ImportStep {
 	 */
 	public function remove_guid( $postdata ) {
 		$postdata['guid'] = '';
+
+		return $postdata;
+	}
+
+	/**
+	 * Adapt image URLs linked in post content.
+	 *
+	 * @param  array $postdata Post data.
+	 * @return array Adapted post data.
+	 */
+	public function adapt_image_links( $postdata )
+	{
+		if ( ! array_key_exists( 'post_content', $postdata ) || empty( $postdata['post_content'] ) ) {
+			return $postdata;
+		}
+
+		$postdata['post_content'] = preg_replace(
+			self::UPLOAD_URL_PATTERN,
+			sprintf(
+				self::UPLOAD_URL_REPLACEMENT,
+				str_replace( 'http://', 'https://', content_url( 'uploads' ) )
+			),
+			$postdata['post_content']
+		);
 
 		return $postdata;
 	}
