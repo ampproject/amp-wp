@@ -697,6 +697,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 							return false;
 						}
 						continue 2;
+					// Class names for amp-next-page, see <https://amp.dev/documentation/components/amp-next-page/#styling>.
+					case 'amp-next-page-':
+						if ( ! $this->has_used_tag_names( [ 'amp-next-page' ] ) ) {
+							return false;
+						}
+						continue 2;
 				}
 
 				switch ( substr( $class_name, 0, 16 ) ) {
