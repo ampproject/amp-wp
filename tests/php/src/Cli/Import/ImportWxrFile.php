@@ -12,6 +12,7 @@ use AmpProject\AmpWP\Tests\Cli\ImportStep;
 use RuntimeException;
 use stdClass;
 use WP_CLI;
+use WP_Error;
 use WP_User;
 
 final class ImportWxrFile implements ImportStep {
@@ -151,7 +152,7 @@ final class ImportWxrFile implements ImportStep {
 	 * Creates users if they don't exist, and build an author mapping file.
 	 *
 	 * @param $author_data
-	 * @return array|int|\WP_Error
+	 * @return array|int|WP_Error
 	 */
 	private function create_authors_for_mapping( $author_data ) {
 		$author_mapping = [];
@@ -228,16 +229,27 @@ final class ImportWxrFile implements ImportStep {
 		remove_filter( 'wp_import_post_data_processed', [ $this, 'adapt_image_links' ], 10 );
 	}
 
-	public function log_post_processing( $post ) {
+	/**
+	 * Log the processing of a post.
+	 *
+	 * @param array $postdata Post data that is being processed.
+	 * @return array Post data.
+	 */
+	public function log_post_processing( $postdata ) {
 		WP_CLI::log(
 			WP_CLI::colorize(
-				"Processing post %Y#{$post['post_id']}%n (%G'{$post['post_title']}'%n) (%B{$post['post_type']}%n)..."
+				"Processing post %Y#{$postdata['post_id']}%n (%G'{$postdata['post_title']}'%n) (%B{$postdata['post_type']}%n)..."
 			)
 		);
 
-		return $post;
+		return $postdata;
 	}
 
+	/**
+	 * Log the importing of a post.
+	 *
+	 * @param int|WP_Error $post_id ID of the post that was imported, or a WP_Error object.
+	 */
 	public function log_imported_post( $post_id ) {
 		if ( is_wp_error( $post_id ) ) {
 			WP_CLI::warning( '-- Error importing post: ' . $post_id->get_error_code() );
@@ -246,11 +258,24 @@ final class ImportWxrFile implements ImportStep {
 		}
 	}
 
-	public function log_imported_term( $t, $import_term ) {
-		WP_CLI::log( "-- Created term \"{$import_term['name']}\"" );
+	/**
+	 * Log the importing of a term.
+	 *
+	 * @param int   $term_id   ID of the term that was imported.
+	 * @param array $term_data Term data that was imported.
+	 */
+	public function log_imported_term( $term_id, $term_data ) {
+		WP_CLI::log( "-- Created term \"{$term_data['name']}\"" );
 	}
 
-	public function log_associated_term( $tt_ids, $term_ids, $taxonomy ) {
+	/**
+	 * Log the addition of a taxonomy term.
+	 *
+	 * @param int[]  $taxonomy_term_ids Taxonomy term IDs.
+	 * @param int[]  $term_ids          Term IDs.
+	 * @param string $taxonomy          Taxonomy name
+	 */
+	public function log_associated_term( $taxonomy_term_ids, $term_ids, $taxonomy ) {
 		WP_CLI::log(
 			'-- Added terms (' . implode(
 				',',
@@ -259,6 +284,11 @@ final class ImportWxrFile implements ImportStep {
 		);
 	}
 
+	/**
+	 * Log the importing of a comment.
+	 *
+	 * @param int $comment_id ID of the comment that was imported.
+	 */
 	public function log_imported_comment( $comment_id ) {
 		WP_CLI::log(
 			WP_CLI::colorize(
@@ -267,6 +297,12 @@ final class ImportWxrFile implements ImportStep {
 		);
 	}
 
+	/**
+	 * Log the importing of post meta.
+	 *
+	 * @param int    $post_id ID of the post that meta was imported for.
+	 * @param string $key     Key of the post meta that was imported.
+	 */
 	public function log_imported_post_meta( $post_id, $key ) {
 		WP_CLI::log(
 			WP_CLI::colorize(
@@ -293,8 +329,7 @@ final class ImportWxrFile implements ImportStep {
 	 * @param  array $postdata Post data.
 	 * @return array Adapted post data.
 	 */
-	public function adapt_image_links( $postdata )
-	{
+	public function adapt_image_links( $postdata ) {
 		if ( ! array_key_exists( 'post_content', $postdata ) || empty( $postdata['post_content'] ) ) {
 			return $postdata;
 		}
