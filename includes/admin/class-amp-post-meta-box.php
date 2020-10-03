@@ -213,6 +213,26 @@ class AMP_Post_Meta_Box {
 			return;
 		}
 
+		$gb_supported = defined( 'GUTENBERG_VERSION' ) && version_compare( GUTENBERG_VERSION, '5.3.0', '>=' );
+		$wp_supported = ! $gb_supported && version_compare( get_bloginfo( 'version' ), '5.2', '>=' );
+
+		// Let the user know that block editor functionality is not available if the current Gutenberg or WordPress version is not supported.
+		if ( ! $gb_supported && ! $wp_supported ) {
+			wp_add_inline_script(
+				'wp-edit-post',
+				sprintf(
+					'wp.domReady(
+						function () {
+							wp.data.dispatch( "core/notices" ).createWarningNotice( "%s" )
+						}
+					);',
+					__( 'AMP functionality is not available in the Block Editor as the current version installed is not supported. Please update the Block Editor plugin to the latest version or use the Classic Editor instead.', 'amp' )
+				)
+			);
+
+			return;
+		}
+
 		$status_and_errors = self::get_status_and_errors( $post );
 
 		// Skip proceeding if there are errors blocking AMP and the user can't do anything about it.
@@ -409,7 +429,7 @@ class AMP_Post_Meta_Box {
 	/**
 	 * Modify post preview link.
 	 *
-	 * Add the AMP query var is the amp-preview flag is set.
+	 * Add the AMP query var if the amp-preview flag is set.
 	 *
 	 * @since 0.6
 	 *
