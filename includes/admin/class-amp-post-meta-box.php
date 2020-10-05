@@ -213,7 +213,8 @@ class AMP_Post_Meta_Box {
 			return;
 		}
 
-		$gb_supported = defined( 'GUTENBERG_VERSION' ) && version_compare( GUTENBERG_VERSION, '5.3.0', '>=' );
+		// Gutenberg v5.4 was bundled with WP 5.2, which is the earliest release known to work without errors.
+		$gb_supported = defined( 'GUTENBERG_VERSION' ) && version_compare( GUTENBERG_VERSION, '5.4.0', '>=' );
 		$wp_supported = ! $gb_supported && version_compare( get_bloginfo( 'version' ), '5.2', '>=' );
 
 		// Let the user know that block editor functionality is not available if the current Gutenberg or WordPress version is not supported.
