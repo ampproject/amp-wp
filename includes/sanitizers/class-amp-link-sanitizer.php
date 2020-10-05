@@ -194,7 +194,7 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 
 			// Only add the AMP query var when requested (in Transitional or Reader mode).
 			if ( ! empty( $this->args['paired'] ) ) {
-				$query_vars[ amp_get_slug() ] = '';
+				$query_vars[ amp_get_slug() ] = '1'; // @todo Would be preferable to use amp_get_url() somehow here.
 			}
 		}
 
