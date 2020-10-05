@@ -740,12 +740,20 @@ function amp_get_permalink( $post_id ) {
  * @return string URL with AMP stripped.
  */
 function amp_remove_endpoint( $url ) {
+	$slug = amp_get_slug();
 
-	// Strip endpoint.
-	$url = preg_replace( ':/' . preg_quote( amp_get_slug(), ':' ) . '(?=/?(\?|#|$)):', '', $url );
+	// Strip endpoint, including /amp/, /amp/amp/, /amp/foo/.
+	$url = preg_replace(
+		sprintf(
+			':(/%s(/[^/?#]+)?)+(?=/?(\?|#|$)):',
+			preg_quote( $slug, ':' )
+		),
+		'',
+		$url
+	);
 
-	// Strip query var.
-	$url = remove_query_arg( amp_get_slug(), $url );
+	// Strip query var, including ?amp, ?amp=1, etc.
+	$url = remove_query_arg( $slug, $url );
 
 	return $url;
 }
