@@ -367,34 +367,49 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test ensure_proper_amp_location for transitional.
+	 * Test ensure_proper_amp_location for infinite URL space.
 	 *
+	 * @link https://github.com/ampproject/amp-wp/pull/1846
 	 * @covers AMP_Theme_Support::ensure_proper_amp_location()
 	 */
-	public function test_ensure_proper_amp_location_transitional() {
-		add_theme_support(
-			AMP_Theme_Support::SLUG,
-			[
-				'template_dir' => './',
-			]
+	public function test_ensure_proper_amp_location_infinite_url_space() {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+
+		global $wp_rewrite;
+		update_option( 'permalink_structure', '/%year%/%monthnum%/%day%/%postname%/' );
+		$wp_rewrite->init();
+		add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
+		$wp_rewrite->flush_rules();
+
+		$redirections = [];
+		add_filter(
+			'wp_redirect',
+			static function ( $url ) use ( &$redirections ) {
+				$redirections[] = $url;
+				return '';
+			}
 		);
-		$e = null;
+		$permalink = get_permalink( self::factory()->post->create() );
 
-		// URL query param, no redirection.
-		$_GET[ amp_get_slug() ] = '1';
-		$_SERVER['REQUEST_URI'] = amp_get_url( '/foo/bar' );
-		$this->assertFalse( AMP_Theme_Support::ensure_proper_amp_location() );
+		$this->go_to( $permalink );
+		$this->assertCount( 0, $redirections );
+		$this->assertFalse( amp_is_request() );
 
-		// Endpoint, redirect.
-		unset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		set_query_var( amp_get_slug(), 1 );
-		$_SERVER['REQUEST_URI'] = '/2016/01/24/foo/amp/';
-		try {
-			$this->assertTrue( AMP_Theme_Support::ensure_proper_amp_location() );
-		} catch ( Exception $exception ) {
-			$e = $exception;
-		}
-		$this->assertStringContains( 'headers already sent', $e->getMessage() );
+		$this->go_to( add_query_arg( 'amp', '1', $permalink ) );
+		$this->assertCount( 0, $redirections );
+		$this->assertTrue( amp_is_request() );
+
+		$this->go_to( $permalink . 'amp/' );
+		$this->assertCount( 0, $redirections );
+		$this->assertTrue( amp_is_request() );
+
+		$this->go_to( $permalink . 'amp/amp/' );
+		$this->assertCount( 1, $redirections );
+		$this->assertEquals( amp_get_url( $permalink ), end( $redirections ) );
+
+		$this->go_to( $permalink . 'amp/foo/' );
+		$this->assertCount( 2, $redirections );
+		$this->assertEquals( amp_get_url( $permalink ), end( $redirections ) );
 	}
 
 	/**

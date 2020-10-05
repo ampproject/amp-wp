@@ -384,13 +384,11 @@ class AMP_Theme_Support {
 	 *
 	 * @since 1.0
 	 * @since 2.0 Removed $exit param.
+	 * @since 2.1 Remove obsolete redirection from /amp/ to ?amp when on non-legacy Reader mode.
 	 *
 	 * @return bool Whether redirection should have been done.
 	 */
 	public static function ensure_proper_amp_location() {
-		$has_query_var = false !== get_query_var( amp_get_slug(), false ); // May come from URL param or endpoint slug.
-		$has_url_param = isset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-
 		if ( amp_is_canonical() ) {
 			/*
 			 * When AMP-first/canonical, then when there is an /amp/ endpoint or ?amp URL param,
@@ -399,34 +397,23 @@ class AMP_Theme_Support {
 			 * should happen infrequently. For admin users, this is kept temporary to allow them
 			 * to not be hampered by browser remembering permanent redirects and preventing test.
 			 */
-			if ( $has_query_var || $has_url_param ) {
+			if ( amp_has_query_var() ) {
 				return self::redirect_non_amp_url( current_user_can( 'manage_options' ) ? 302 : 301 );
 			}
-		} elseif ( amp_is_legacy() && is_singular() ) {
-			// Prevent infinite URL space under /amp/ endpoint.
+		} elseif ( amp_has_query_var() ) {
+			/*
+			 * Prevent infinite URL space under /amp/ endpoint. Note that WordPress allows endpoints to have a value,
+			 * such as the case of /feed/ where /feed/atom/ is the same as saying ?feed=atom. In this case, we need to
+			 * check for /amp/x/ to protect against links like `<a href="./amp/">AMP!</a>`.
+			 * See https://github.com/ampproject/amp-wp/pull/1846.
+			 */
 			global $wp;
 			$path_args = [];
 			wp_parse_str( $wp->matched_query, $path_args );
 			if ( isset( $path_args[ amp_get_slug() ] ) && '' !== $path_args[ amp_get_slug() ] ) {
-				if ( wp_safe_redirect( amp_get_permalink( get_queried_object_id() ), 301 ) ) {
-					// @codeCoverageIgnoreStart
-					exit;
-					// @codeCoverageIgnoreEnd
-				}
-				return true;
-			}
-		} elseif ( $has_query_var && ! amp_has_query_var() ) {
-			/*
-			 * When in AMP transitional mode *with* theme support, then the proper AMP URL has the 'amp' URL param
-			 * and not the /amp/ endpoint. The URL param is now the exclusive way to mark AMP in transitional mode
-			 * when amp theme support present. This is important for plugins to be able to reliably call
-			 * amp_is_request() before the parse_query action.
-			 */
-			$old_url = amp_get_current_url();
-			$new_url = amp_get_url( amp_remove_endpoint( $old_url ) );
-			if ( $old_url !== $new_url ) {
-				// A temporary redirect is used for admin users to allow them to see changes between reader mode and transitional modes.
-				if ( wp_safe_redirect( $new_url, current_user_can( 'manage_options' ) ? 302 : 301 ) ) {
+				$current_url  = amp_get_current_url();
+				$redirect_url = amp_get_url( amp_remove_endpoint( $current_url ) );
+				if ( $current_url !== $redirect_url && wp_safe_redirect( $redirect_url, 301 ) ) {
 					// @codeCoverageIgnoreStart
 					exit;
 					// @codeCoverageIgnoreEnd
