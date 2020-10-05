@@ -223,10 +223,10 @@ class AMP_Post_Meta_Box {
 				sprintf(
 					'wp.domReady(
 						function () {
-							wp.data.dispatch( "core/notices" ).createWarningNotice( "%s" )
+							wp.data.dispatch( "core/notices" ).createWarningNotice( %s )
 						}
 					);',
-					__( 'AMP functionality is not available in the Block Editor as the current version installed is not supported. Please update the Block Editor plugin to the latest version or use the Classic Editor instead.', 'amp' )
+					wp_json_encode( __( 'AMP functionality is not available in the Block Editor as the current version installed is not supported. Please update the Block Editor plugin to the latest version or use the Classic Editor instead.', 'amp' ) )
 				)
 			);
 
