@@ -1818,6 +1818,63 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertSame( 'sha384-_MAJ0_NC2k8jrjehfi-5LdQasBICZXvp4gOwOx0D3mIStvDCGvZDzcTfXLgMrLL1', amp_generate_script_hash( 'document.body.textContent = \'<Hi! & 👋>\';' ) );
 	}
 
+	/** @return array */
+	public function data_amp_has_query_var() {
+		return [
+			'nothing'                 => [
+				'',
+				false,
+			],
+			'url_param_bare'          => [
+				'?amp',
+				true,
+			],
+			'url_param_value'         => [
+				'?amp=1',
+				true,
+			],
+			'endpoint_bare_slashed'   => [
+				'amp/',
+				true,
+			],
+			'endpoint_bare_unslashed' => [
+				'amp',
+				true,
+			],
+			'endpoint_with_value'     => [
+				'amp/x/',
+				true,
+			],
+			'endpoint_and_url_param'  => [
+				'amp/?amp=1',
+				true,
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider data_amp_has_query_var
+	 * @covers ::amp_has_query_var()
+	 * @param string $suffix
+	 * @param bool   $is_amp
+	 */
+	public function test_amp_has_query_var( $suffix, $is_amp ) {
+		add_filter( 'wp_redirect', '__return_empty_string' ); // Prevent ensure_proper_amp_location() from redirecting.
+		global $wp_rewrite;
+		update_option( 'permalink_structure', '/%year%/%monthnum%/%day%/%postname%/' );
+		$wp_rewrite->init();
+		add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
+		$wp_rewrite->flush_rules();
+
+		$permalink = get_permalink( self::factory()->post->create() );
+		$this->assertNotContains( '?', $permalink );
+		$url = $permalink . $suffix;
+		$this->go_to( $url );
+		$this->assertTrue( is_singular(), 'Expected singular query.' );
+		$this->assertTrue( amp_is_available(), 'Expected AMP to be available.' );
+		$this->assertEquals( $is_amp, amp_has_query_var() );
+	}
+
 	/**
 	 * Get a mock publisher logo URL, to test that the filter works as expected.
 	 *

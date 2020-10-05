@@ -869,13 +869,7 @@ function amp_is_request() {
 	$is_amp_url = (
 		amp_is_canonical()
 		||
-		isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		||
-		(
-			$wp_query instanceof WP_Query
-			&&
-			false !== $wp_query->get( amp_get_slug(), false )
-		)
+		amp_has_query_var()
 	);
 
 	// If AMP is not available, then it's definitely not an AMP endpoint.
@@ -1958,6 +1952,7 @@ function amp_generate_script_hash( $script ) {
  * Get the AMP version of a URL.
  *
  * @since 2.1
+ * @todo Rename this to clear up confusion with amp_get_current_url().
  *
  * @param string $url URL.
  * @return string AMP URL.
@@ -1970,9 +1965,21 @@ function amp_get_url( $url ) {
  * Determine whether the current request has the AMP query parameter set.
  *
  * @since 2.1
+ * @todo Rename this to be more agnostic to what the URL contains.
  *
  * @return bool True if the AMP query parameter is set with the required value, false if not.
+ * @global WP_Query $wp_query
  */
 function amp_has_query_var() {
-	return isset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	global $wp_query;
+	$slug = amp_get_slug();
+	return (
+		isset( $_GET[ $slug ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		||
+		(
+			$wp_query instanceof WP_Query
+			&&
+			false !== $wp_query->get( $slug, false )
+		)
+	);
 }
