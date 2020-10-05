@@ -327,12 +327,6 @@ class AMP_Theme_Support {
 			add_filter( 'template_include', [ __CLASS__, 'serve_paired_browsing_experience' ], PHP_INT_MAX );
 		}
 
-		$has_query_var = (
-			isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			||
-			false !== get_query_var( amp_get_slug(), false )
-		);
-
 		if ( ! amp_is_request() ) {
 			/*
 			 * Redirect to AMP-less URL if AMP is not available for this URL and yet the query var is present.
@@ -340,7 +334,7 @@ class AMP_Theme_Support {
 			 * enabled by user ay any time, so they will be able to make AMP available for this URL and see the change
 			 * without wrestling with the redirect cache.
 			 */
-			if ( $has_query_var ) {
+			if ( amp_has_query_var() ) {
 				self::redirect_non_amp_url( current_user_can( 'manage_options' ) ? 302 : 301 );
 			}
 
