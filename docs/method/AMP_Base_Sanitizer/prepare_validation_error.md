@@ -17,7 +17,7 @@ Prepare validation error.
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:566](../../includes/sanitizers/class-amp-base-sanitizer.php#L566-L632)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:566](/includes/sanitizers/class-amp-base-sanitizer.php#L566-L638)
 
 <details>
 <summary>Show Code</summary>
@@ -48,7 +48,13 @@ public function prepare_validation_error( array $error = [], array $data = [] ) 
 			}
 		}
 		// Capture element contents.
-		if ( ( 'script' === $node->nodeName && ! $node->hasAttribute( 'src' ) ) || 'style' === $node->nodeName ) {
+		if (
+			( 'script' === $node->nodeName && ! $node->hasAttribute( 'src' ) )
+			||
+			// Include stylesheet text except for amp-custom and amp-keyframes since it is large and since it should
+			// already be detailed in the stylesheets metabox.
+			( 'style' === $node->nodeName && ! $node->hasAttribute( 'amp-custom' ) && ! $node->hasAttribute( 'amp-keyframes' ) )
+		) {
 			$error['text'] = $node->textContent;
 		}
 		// Suppress 'ver' param from enqueued scripts and styles.

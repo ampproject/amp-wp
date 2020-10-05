@@ -13,6 +13,7 @@ use AMP_Validation_Error_Taxonomy;
 use AMP_Validation_Manager;
 use AMP_Validated_URL_Post_Type;
 use AmpProject\AmpWP\Admin\ReaderThemes;
+use AmpProject\AmpWP\DevTools\CallbackReflection;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use WP_Block_Type_Registry;
@@ -38,12 +39,21 @@ final class PluginSuppression implements Service, Registerable {
 	private $plugin_registry;
 
 	/**
+	 * Callback reflector to use.
+	 *
+	 * @var CallbackReflection
+	 */
+	private $callback_reflection;
+
+	/**
 	 * Instantiate the plugin suppression service.
 	 *
-	 * @param PluginRegistry $plugin_registry Plugin registry to use.
+	 * @param PluginRegistry     $plugin_registry     Plugin registry to use.
+	 * @param CallbackReflection $callback_reflection Callback reflector to use.
 	 */
-	public function __construct( PluginRegistry $plugin_registry ) {
-		$this->plugin_registry = $plugin_registry;
+	public function __construct( PluginRegistry $plugin_registry, CallbackReflection $callback_reflection ) {
+		$this->plugin_registry     = $plugin_registry;
+		$this->callback_reflection = $callback_reflection;
 	}
 
 	/**
@@ -473,7 +483,7 @@ final class PluginSuppression implements Service, Registerable {
 	 * @return bool Whether from suppressed plugin.
 	 */
 	private function is_callback_plugin_suppressed( $callback, $suppressed_plugins ) {
-		$source = AMP_Validation_Manager::get_source( $callback );
+		$source = $this->callback_reflection->get_source( $callback );
 		return (
 			isset( $source['type'], $source['name'] ) &&
 			'plugin' === $source['type'] &&

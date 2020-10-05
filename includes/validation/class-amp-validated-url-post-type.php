@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Admin\DevToolsUserAccess;
+use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Admin\OptionsMenu;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\PluginRegistry;
@@ -141,7 +141,6 @@ class AMP_Validated_URL_Post_Type {
 	public static function register() {
 		add_action( 'amp_plugin_update', [ __CLASS__, 'handle_plugin_update' ] );
 
-		/** @var DevToolsUserAccess $dev_tools_user_access */
 		$dev_tools_user_access = Services::get( 'dev_tools.user_access' );
 
 		// Show in the admin menu if dev tools are enabled for the user or if the user is on any dev tools screen.
@@ -162,6 +161,7 @@ class AMP_Validated_URL_Post_Type {
 			self::POST_TYPE_SLUG,
 			[
 				'labels'       => [
+					'all_items'          => __( 'All Validated URLs', 'amp' ),
 					'name'               => _x( 'AMP Validated URLs', 'post type general name', 'amp' ),
 					'menu_name'          => __( 'Validated URLs', 'amp' ),
 					'singular_name'      => __( 'Validated URL', 'amp' ),
@@ -198,6 +198,10 @@ class AMP_Validated_URL_Post_Type {
 			]
 		);
 
+		if ( $show_in_menu ) {
+			add_action( 'admin_menu', [ __CLASS__, 'update_validated_url_menu_item' ] );
+		}
+
 		// Rename the top-level menu from "Validated URLs" to "AMP DevTools" when the user does not have access to the AMP settings screen.
 		if ( $show_in_menu && ! current_user_can( 'manage_options' ) ) {
 			add_action(
@@ -219,6 +223,7 @@ class AMP_Validated_URL_Post_Type {
 		$handle_delete = static function ( $post_id ) {
 			if ( static::POST_TYPE_SLUG === get_post_type( $post_id ) ) {
 				delete_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
+				delete_transient( AMP_Validation_Error_Taxonomy::TRANSIENT_KEY_ERROR_INDEX_COUNTS );
 			}
 		};
 		add_action( 'save_post_' . self::POST_TYPE_SLUG, $handle_delete );
@@ -264,7 +269,6 @@ class AMP_Validated_URL_Post_Type {
 	public static function add_admin_hooks() {
 		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_post_list_screen_scripts' ] );
 
-		/** @var DevToolsUserAccess $dev_tools_user_access */
 		$dev_tools_user_access = Services::get( 'dev_tools.user_access' );
 
 		if ( $dev_tools_user_access->is_user_enabled() ) {
@@ -314,7 +318,6 @@ class AMP_Validated_URL_Post_Type {
 		add_action( 'admin_notices', [ __CLASS__, 'print_admin_notice' ] );
 		add_action( 'admin_action_' . self::VALIDATE_ACTION, [ __CLASS__, 'handle_validate_request' ] );
 		add_action( 'post_action_' . self::UPDATE_POST_TERM_STATUS_ACTION, [ __CLASS__, 'handle_validation_error_status_update' ] );
-		add_action( 'admin_menu', [ __CLASS__, 'add_admin_menu_new_invalid_url_count' ] );
 		add_filter( 'post_row_actions', [ __CLASS__, 'filter_post_row_actions' ], PHP_INT_MAX, 2 );
 		add_filter( sprintf( 'views_edit-%s', self::POST_TYPE_SLUG ), [ __CLASS__, 'filter_table_views' ] );
 		add_filter( 'bulk_post_updated_messages', [ __CLASS__, 'filter_bulk_post_updated_messages' ], 10, 2 );
@@ -465,11 +468,12 @@ class AMP_Validated_URL_Post_Type {
 	}
 
 	/**
-	 * Add count of how many validation error posts there are to the admin menu.
+	 * Update the "Validated URLs" menu item label and append a count of how many validation error posts there are
+	 * next to it.
 	 *
 	 * @global array $submenu
 	 */
-	public static function add_admin_menu_new_invalid_url_count() {
+	public static function update_validated_url_menu_item() {
 		global $submenu;
 
 		$post_type_menu_slug = 'edit.php?post_type=' . self::POST_TYPE_SLUG;
@@ -479,24 +483,17 @@ class AMP_Validated_URL_Post_Type {
 			return;
 		}
 
-		$new_validation_error_urls = get_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
-
-		if ( false === $new_validation_error_urls ) {
-			$new_validation_error_urls = static::get_validation_error_urls_count();
-			set_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT, $new_validation_error_urls, DAY_IN_SECONDS );
-		} else {
-			// Handle case where integer stored in transient gets returned as string when persistent object cache is not
-			// used. This is due to wp_options.option_value being a string.
-			$new_validation_error_urls = (int) $new_validation_error_urls;
-		}
-
-		if ( 0 === $new_validation_error_urls ) {
-			return;
-		}
-
 		foreach ( $submenu[ $parent_menu_slug ] as &$submenu_item ) {
 			if ( $post_type_menu_slug === $submenu_item[2] ) {
-				$submenu_item[0] .= ' <span class="awaiting-mod"><span class="new-validation-error-urls-count">' . esc_html( number_format_i18n( $new_validation_error_urls ) ) . '</span></span>';
+				// Use the `menu_name` label as the submenu label instead of the `all_items` label.
+				$menu_name_label = get_post_type_object( self::POST_TYPE_SLUG )->labels->menu_name;
+				$submenu_item[0] = $menu_name_label;
+
+				// Display the count of new validation errors next to the label, if there are any.
+				$new_validation_error_url_count = self::get_validation_error_urls_count();
+				if ( 0 < $new_validation_error_url_count ) {
+					$submenu_item[0] .= ' <span class="awaiting-mod"><span class="new-validation-error-urls-count">' . esc_html( number_format_i18n( $new_validation_error_url_count ) ) . '</span></span>';
+				}
 				break;
 			}
 		}
@@ -510,6 +507,13 @@ class AMP_Validated_URL_Post_Type {
 	 * @return int Count of new validation error URLs.
 	 */
 	protected static function get_validation_error_urls_count() {
+		$count = get_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
+		if ( false !== $count ) {
+			// Handle case where integer stored in transient gets returned as string when persistent object cache is not
+			// used. This is due to wp_options.option_value being a string.
+			return (int) $count;
+		}
+
 		$query = new WP_Query(
 			[
 				'post_type'              => self::POST_TYPE_SLUG,
@@ -522,7 +526,11 @@ class AMP_Validated_URL_Post_Type {
 			]
 		);
 
-		return $query->found_posts;
+		$count = $query->found_posts;
+
+		set_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT, $count, DAY_IN_SECONDS );
+
+		return $count;
 	}
 
 	/**
@@ -1067,7 +1075,6 @@ class AMP_Validated_URL_Post_Type {
 	 * @return array Environment.
 	 */
 	public static function get_validated_environment() {
-		/** @var PluginRegistry $plugin_registry */
 		$plugin_registry = Services::get( 'plugin_registry' );
 
 		$theme     = [];
@@ -1368,8 +1375,7 @@ class AMP_Validated_URL_Post_Type {
 			$active_theme = $validated_environment['theme'];
 		}
 
-		$output = [];
-		/** @var PluginRegistry $plugin_registry */
+		$output          = [];
 		$plugin_registry = Services::get( 'plugin_registry' );
 		foreach ( wp_array_slice_assoc( $sources, [ 'plugin', 'mu-plugin' ] ) as $type => $slugs ) {
 			$plugin_names = [];
@@ -2788,6 +2794,8 @@ class AMP_Validated_URL_Post_Type {
 		<div id="remove-keep-buttons" class="hidden">
 			<button type="button" class="button action remove"><?php esc_html_e( 'Remove', 'amp' ); ?></button>
 			<button type="button" class="button action keep"><?php esc_html_e( 'Keep', 'amp' ); ?></button>
+			<button type="button" class="button action reviewed-toggle reviewed"><?php esc_html_e( 'Mark reviewed', 'amp' ); ?></button>
+			<button type="button" class="button action reviewed-toggle unreviewed"><?php esc_html_e( 'Mark unreviewed', 'amp' ); ?></button>
 			<div id="vertical-divider"></div>
 		</div>
 		<div id="url-post-filter" class="alignleft actions">
@@ -2922,20 +2930,9 @@ class AMP_Validated_URL_Post_Type {
 	 * @return array Items.
 	 */
 	public static function filter_dashboard_glance_items( $items ) {
+		$count = self::get_validation_error_urls_count();
 
-		$query = new WP_Query(
-			[
-				'post_type'              => self::POST_TYPE_SLUG,
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => [
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
-				],
-				'update_post_meta_cache' => false,
-				'update_post_term_cache' => false,
-			]
-		);
-
-		if ( 0 !== $query->found_posts ) {
+		if ( 0 !== $count ) {
 			$items[] = sprintf(
 				'<a class="amp-validation-errors" href="%s">%s</a>',
 				esc_url(
@@ -2958,10 +2955,10 @@ class AMP_Validated_URL_Post_Type {
 						_n(
 							'%s URL w/ new AMP errors',
 							'%s URLs w/ new AMP errors',
-							$query->found_posts,
+							$count,
 							'amp'
 						),
-						number_format_i18n( $query->found_posts )
+						number_format_i18n( $count )
 					)
 				)
 			);

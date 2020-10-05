@@ -14,7 +14,7 @@ Add actions and filters before the page is rendered so that the sanitizer can fi
 
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:132](../../includes/sanitizers/class-amp-base-sanitizer.php#L132)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:132](/includes/sanitizers/class-amp-base-sanitizer.php#L132)
 
 <details>
 <summary>Show Code</summary>

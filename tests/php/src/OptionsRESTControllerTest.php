@@ -8,14 +8,10 @@
 namespace AmpProject\AmpWP\Tests;
 
 use AMP_Options_Manager;
-use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\OptionsRESTController;
 use AmpProject\AmpWP\PluginRegistry;
-use AmpProject\AmpWP\PluginSuppression;
-use AmpProject\AmpWP\Services;
 use AmpProject\AmpWP\Tests\Helpers\ThemesApiRequestMocking;
 use WP_REST_Request;
-use WP_UnitTestCase;
 
 /**
  * Tests for OptionsRESTController.
@@ -24,7 +20,7 @@ use WP_UnitTestCase;
  *
  * @coversDefaultClass \AmpProject\AmpWP\OptionsRESTController
  */
-class OptionsRESTControllerTest extends WP_UnitTestCase {
+class OptionsRESTControllerTest extends DependencyInjectedTestCase {
 
 	use ThemesApiRequestMocking;
 
@@ -47,7 +43,7 @@ class OptionsRESTControllerTest extends WP_UnitTestCase {
 
 		$this->add_reader_themes_request_filter();
 
-		$this->controller = new OptionsRESTController( new ReaderThemes(), new PluginSuppression( new PluginRegistry() ) );
+		$this->controller = $this->injector->make( OptionsRESTController::class );
 	}
 
 	/**
@@ -91,8 +87,7 @@ class OptionsRESTControllerTest extends WP_UnitTestCase {
 			array_keys( $data )
 		);
 
-		/** @var PluginRegistry $plugin_registry */
-		$plugin_registry = Services::get( 'plugin_registry' );
+		$plugin_registry = $this->injector->make( PluginRegistry::class );
 
 		$this->assertEqualSets( array_keys( $plugin_registry->get_plugins( true ) ), array_keys( $data['suppressible_plugins'] ) );
 		$this->assertEquals( null, $data['preview_permalink'] );

@@ -266,7 +266,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function get_modals() {
 		$dom         = new Document();
-		$modal_roles = $this->get_static_private_property( 'AMP_Core_Theme_Sanitizer', 'modal_roles' );
+		$modal_roles = $this->get_private_property( 'AMP_Core_Theme_Sanitizer', 'modal_roles' );
 
 		$a = array_map(
 			static function ( $rule ) use ( $dom ) {

@@ -49,6 +49,10 @@ final class MobileRedirection implements Service, Registerable {
 
 		if ( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ) {
 			add_action( 'template_redirect', [ $this, 'redirect' ], PHP_INT_MAX );
+
+			// Enable AMP-to-AMP linking by default to avoid redirecting to AMP version when navigating.
+			// A low priority is used so that sites can continue overriding this if they have done so.
+			add_filter( 'amp_to_amp_linking_enabled', '__return_true', 0 );
 		}
 	}
 
@@ -141,10 +145,6 @@ final class MobileRedirection implements Service, Registerable {
 			if ( ! $js && $this->is_redirection_disabled_via_cookie() ) {
 				$this->set_mobile_redirection_disabled_cookie( false );
 			}
-
-			// Enable AMP-to-AMP linking by default to avoid redirecting to AMP version when navigating.
-			// A low priority is used so that sites can continue overriding this if they have done so.
-			add_filter( 'amp_to_amp_linking_enabled', '__return_true', 0 );
 
 			add_filter( 'amp_to_amp_linking_element_excluded', [ $this, 'filter_amp_to_amp_linking_element_excluded' ], 100, 2 );
 			add_filter( 'amp_to_amp_linking_element_query_vars', [ $this, 'filter_amp_to_amp_linking_element_query_vars' ], 10, 2 );

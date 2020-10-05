@@ -8,13 +8,13 @@
 use AmpProject\AmpWP\MobileRedirection;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
-use AmpProject\AmpWP\Services;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 
 /**
  * Class AMP_Link_Sanitizer_Test
  */
-class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
+class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 
 	use AssertContainsCompatibility;
 
@@ -247,8 +247,7 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 	 * Test disabling mobile redirection if the URL is excluded.
 	 */
 	public function test_disable_mobile_redirect_for_excluded_url() {
-		/** @var MobileRedirection $mobile_redirection */
-		$mobile_redirection = Services::get( 'mobile_redirection' );
+		$mobile_redirection = $this->injector->make( MobileRedirection::class );
 
 		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, true );
 
@@ -270,8 +269,7 @@ class AMP_Link_Sanitizer_Test extends WP_UnitTestCase {
 	 * Test disabling mobile redirection if the link has the `noamphtml` relationship.
 	 */
 	public function test_disable_mobile_redirect_for_url_with_noamphtml_rel() {
-		/** @var MobileRedirection $mobile_redirection */
-		$mobile_redirection = Services::get( 'mobile_redirection' );
+		$mobile_redirection = $this->injector->make( MobileRedirection::class );
 
 		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, true );
 
