@@ -644,7 +644,7 @@ final class Document extends DOMDocument
         $content = "{$htmlStart}{$content}{$htmlEnd}";
 
         // Reinsert a standard doctype (while preserving any potentially leading comments).
-        $doctype = preg_replace( '#<!doctype\s+html[^>]+?>#si', self::DEFAULT_DOCTYPE, $doctype );
+        $doctype = preg_replace('#<!doctype\s+html[^>]+?>#si', self::DEFAULT_DOCTYPE, $doctype);
         $content = "{$doctype}{$content}";
 
         return $content;
