@@ -195,7 +195,7 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 			if ( $paired && $link_data['expected_amp'] ) {
 				$this->assertStringContains( '?' . amp_get_slug(), $element->getAttribute( 'href' ), "ID: $id" );
 			} elseif ( ! $paired || ! $link_data['expected_amp'] ) {
-				$this->assertStringNotContains( '?' . amp_get_slug(), $element->getAttribute( 'href' ), "ID: $id" );
+				$this->assertStringNotContains( '?' . amp_get_slug() . '=1', $element->getAttribute( 'href' ), "ID: $id" );
 			}
 		}
 
