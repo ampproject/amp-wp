@@ -144,7 +144,7 @@ export function testTitle( { text, element = 'h1' } ) {
 }
 
 /**
- * Reset plugin configuration.
+ * Reset plugin configuration'.amp-settings-nav'
  */
 export async function cleanUpSettings() {
 	await visitAdminPage( 'admin.php', 'page=amp-options' );
