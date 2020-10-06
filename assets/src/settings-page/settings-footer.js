@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { Button } from '@wordpress/components';
-import { useContext, useState, useEffect } from '@wordpress/element';
+import { useContext } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
