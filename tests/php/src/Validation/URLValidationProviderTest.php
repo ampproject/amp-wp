@@ -2,15 +2,20 @@
 
 namespace AmpProject\AmpWP\Tests\Validation;
 
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
-use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
 use AmpProject\AmpWP\Validation\URLValidationProvider;
 use WP_UnitTestCase;
 
 /** @coversDefaultClass URLValidationProvider */
 final class URLValidationProviderTest extends WP_UnitTestCase {
-	use PrivateAccess, AssertContainsCompatibility;
+	use AssertContainsCompatibility;
+
+	/**
+	 * Validation provider instance to use.
+	 *
+	 * @var URLValidationProvider
+	 */
+	private $validation_provider;
 
 	/**
 	 * Setup.
@@ -19,7 +24,7 @@ final class URLValidationProviderTest extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
-		$this->validation_provider = new URLValidationProvider( 100 );
+		$this->validation_provider = new URLValidationProvider();
 		add_filter( 'pre_http_request', [ ValidationRequestMocking::class, 'get_validate_response' ] );
 	}
 
@@ -30,8 +35,8 @@ final class URLValidationProviderTest extends WP_UnitTestCase {
 	 */
 	public function test_get_url_validation() {
 		$single_post_permalink = get_permalink( self::factory()->post->create() );
-		$this->call_private_method( $this->validation_provider, 'get_url_validation', [ $single_post_permalink, 'post' ] );
-		$this->assertTrue( in_array( $single_post_permalink, ValidationRequestMocking::get_validated_urls(), true ) );
+		$this->validation_provider->get_url_validation( $single_post_permalink, 'post' );
+		$this->assertContains( $single_post_permalink, ValidationRequestMocking::get_validated_urls() );
 
 		$number_of_posts = 30;
 		$post_permalinks = [];
@@ -39,7 +44,7 @@ final class URLValidationProviderTest extends WP_UnitTestCase {
 		for ( $i = 0; $i < $number_of_posts; $i++ ) {
 			$permalink         = get_permalink( self::factory()->post->create() );
 			$post_permalinks[] = $permalink;
-			$this->call_private_method( $this->validation_provider, 'get_url_validation', [ $permalink, 'post' ] );
+			$this->validation_provider->get_url_validation( $permalink, 'post' );
 		}
 
 		// All of the posts created should be present in the validated URLs.
@@ -69,7 +74,7 @@ final class URLValidationProviderTest extends WP_UnitTestCase {
 
 		$expected_result = 'EXPECTED RESULT';
 		$result          = $this->validation_provider->with_lock(
-			function() use ( $expected_result ) {
+			function () use ( $expected_result ) {
 				$this->assertEquals( 'locked', get_transient( URLValidationProvider::LOCK_TRANSIENT ) );
 
 				// Expect an error when lock is already in place.
@@ -85,9 +90,8 @@ final class URLValidationProviderTest extends WP_UnitTestCase {
 		// Test with_lock with no return value.
 		$this->assertNull(
 			$this->validation_provider->with_lock(
-				function() {
+				function () {
 					$this->assertEquals( 'locked', get_transient( URLValidationProvider::LOCK_TRANSIENT ) );
-					return;
 				}
 			)
 		);

@@ -30,7 +30,7 @@ final class ValidationURLProvider {
 	 *
 	 * Usually, this class will query all of the templates that don't have AMP disabled. This allows inclusion based on only these conditionals.
 	 *
-	 * @var array
+	 * @var string[]
 	 */
 	public $include_conditionals;
 
@@ -46,9 +46,9 @@ final class ValidationURLProvider {
 	/**
 	 * Class constructor.
 	 *
-	 * @param integer $limit_per_type The maximum number of URLs to validate for each type.
+	 * @param integer $limit_per_type       The maximum number of URLs to validate for each type.
 	 * @param array   $include_conditionals An allowlist of conditionals to use for validation.
-	 * @param boolean $include_unsupported Whether to include URLs that don't support AMP.
+	 * @param boolean $include_unsupported  Whether to include URLs that don't support AMP.
 	 */
 	public function __construct(
 		$limit_per_type = 20,
@@ -61,9 +61,11 @@ final class ValidationURLProvider {
 	}
 
 	/**
-	 * Provides the array of URLs to check. Each URL is an array with two elements, with the URL at index 0 and the type at index 1.
+	 * Provides the array of URLs to check.
 	 *
-	 * @param int|null $offset The number of URLs to offset by, where applicable.
+	 * Each URL is an array with two elements, with the URL at index 0 and the type at index 1.
+	 *
+	 * @param int|null $offset Optional. The number of URLs to offset by, where applicable. Defaults to 0.
 	 * @return array Array of URLs and types.
 	 */
 	public function get_urls( $offset = 0 ) {
@@ -143,8 +145,8 @@ final class ValidationURLProvider {
 	 * @param string $template The template to check.
 	 * @return bool Whether the template is supported.
 	 */
-	public function is_template_supported( $template ) {
-		// If the --include argument is present in the WP-CLI command, this template conditional must be present in it.
+	private function is_template_supported( $template ) {
+		// If we received an allowlist of conditionals, this template conditional must be present in it.
 		if ( ! empty( $this->include_conditionals ) ) {
 			return in_array( $template, $this->include_conditionals, true );
 		}
@@ -159,13 +161,13 @@ final class ValidationURLProvider {
 	}
 
 	/**
-	 * Gets the posts IDs that support AMP.
+	 * Gets the post IDs that support AMP.
 	 *
 	 * By default, this only gets the post IDs if they support AMP.
-	 * This means that 'Posts' isn't deselected in 'AMP Settings' > 'Supported Templates'.
-	 * And 'Enable AMP' isn't unchecked in the post's editor.
+	 * This means that 'Posts' isn't deselected in 'AMP Settings' > 'Supported Templates'
+	 * and 'Enable AMP' isn't unchecked in the post's editor.
 	 *
-	 * @param array $ids The post IDs to check for AMP support.
+	 * @param int[] $ids The post IDs to check for AMP support.
 	 * @return array The post IDs that support AMP, or an empty array.
 	 */
 	private function get_posts_that_support_amp( $ids ) {
@@ -221,7 +223,7 @@ final class ValidationURLProvider {
 	 *
 	 * @param int|string $offset The offset for the URL to query for, should be an int if passing an argument.
 	 * @param int|string $number The total number to query for, should be an int if passing an argument.
-	 * @return array The author page URLs, or an empty array.
+	 * @return string[] The author page URLs, or an empty array.
 	 */
 	private function get_author_page_urls( $offset = '', $number = '' ) {
 		$author_page_urls = [];

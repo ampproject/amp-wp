@@ -131,7 +131,7 @@ final class URLValidationProvider {
 		}
 
 		$this->lock();
-		$result = call_user_func( $callback );
+		$result = $callback();
 		$this->unlock();
 
 		return $result;
@@ -164,7 +164,9 @@ final class URLValidationProvider {
 
 		if ( is_wp_error( $validity ) ) {
 			return $validity;
-		} elseif ( $validity && isset( $validity['results'] ) ) {
+		}
+
+		if ( $validity && isset( $validity['results'] ) ) {
 			$this->update_state_from_validity( $validity, $type );
 		}
 

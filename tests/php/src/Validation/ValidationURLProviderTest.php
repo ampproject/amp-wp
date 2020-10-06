@@ -18,6 +18,12 @@ final class ValidationURLProviderTest extends WP_UnitTestCase {
 	use PrivateAccess, AssertContainsCompatibility;
 
 	/**
+	 * Validation URL provider instance to use.
+	 *
+	 * @var ValidationURLProvider
+	 */
+
+	/**
 	 * Setup.
 	 *
 	 * @inheritdoc
@@ -29,16 +35,14 @@ final class ValidationURLProviderTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test retreival of urls.
+	 * Test retrieval of urls.
 	 *
 	 * @covers ::get_urls()
 	 */
 	public function test_count_urls_to_validate() {
-		$this->validation_url_provider = new ValidationURLProvider();
-
 		$number_original_urls = 4;
 
-		$this->assertEquals( $number_original_urls, count( $this->validation_url_provider->get_urls() ) );
+		$this->assertCount( $number_original_urls, $this->validation_url_provider->get_urls() );
 
 		$this->validation_url_provider = new ValidationURLProvider( 100 );
 
@@ -58,7 +62,7 @@ final class ValidationURLProviderTest extends WP_UnitTestCase {
 		 * And ensure that the tested method finds a URL for all of them.
 		 */
 		$expected_url_count = $number_new_posts + $number_original_urls + 1;
-		$this->assertEquals( $expected_url_count, count( $this->validation_url_provider->get_urls() ) );
+		$this->assertCount( $expected_url_count, $this->validation_url_provider->get_urls() );
 
 		$this->validation_url_provider = new ValidationURLProvider( 100 );
 
@@ -75,13 +79,14 @@ final class ValidationURLProviderTest extends WP_UnitTestCase {
 		}
 
 		// Terms need to be associated with a post in order to be returned in get_terms().
-		wp_set_post_terms(
+		$result = wp_set_post_terms(
 			$post_ids[0],
 			$terms_for_current_taxonomy,
 			$taxonomy
 		);
+		$this->assertFalse( is_wp_error( $result ) );
 
-		$this->assertEquals( $expected_url_count, count( $this->validation_url_provider->get_urls() ) );
+		$this->assertCount( $expected_url_count, $this->validation_url_provider->get_urls() );
 	}
 
 	/**
@@ -140,7 +145,7 @@ final class ValidationURLProviderTest extends WP_UnitTestCase {
 		$this->assertEquals( [], $this->call_private_method( $this->validation_url_provider, 'get_posts_that_support_amp', [ $ids ] ) );
 
 		/*
-		 * If is_singular is in the WP-CLI argument, it should allow return these posts as being AMP-enabled.
+		 * If is_singular is in the WP-CLI argument, it should return these posts as being AMP-enabled.
 		 * For example, wp amp validate-site include=is_singular,is_category
 		 */
 		$this->validation_url_provider->include_conditionals = [ 'is_singular', 'is_category' ];
@@ -318,11 +323,12 @@ final class ValidationURLProviderTest extends WP_UnitTestCase {
 			}
 
 			// Terms need to be associated with a post in order to be returned in get_terms().
-			wp_set_post_terms(
-				self::factory()->post->create(),
-				$terms_for_current_taxonomy,
-				$taxonomy
-			);
+			$result = wp_set_post_terms(
+ 				self::factory()->post->create(),
+ 				$terms_for_current_taxonomy,
+ 				$taxonomy
+ 			);
+ 			$this->assertFalse( is_wp_error( $result ) );
 
 			$expected_links  = array_merge(
 				$expected_links,

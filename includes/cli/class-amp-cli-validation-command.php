@@ -140,7 +140,7 @@ final class AMP_CLI_Validation_Command {
 		);
 
 		$result = $validation_provider->with_lock(
-			function() {
+			function () {
 				$this->validate_urls();
 			}
 		);
@@ -232,7 +232,7 @@ final class AMP_CLI_Validation_Command {
 
 		/*
 		 * Handle the argument and flag passed to the command: --include and --force.
-		 * If the self::INCLUDE_ARGUMENT is present, force crawling or URLs.
+		 * If the self::INCLUDE_ARGUMENT is present, force crawling of URLs.
 		 * The WP-CLI command should indicate which templates are crawled, not the /wp-admin options.
 		 */
 		if ( ! empty( $assoc_args[ self::INCLUDE_ARGUMENT ] ) ) {
