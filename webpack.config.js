@@ -234,6 +234,7 @@ const setup = {
 					case '@wordpress/dom-ready':
 					case '@wordpress/html-entities':
 					case '@wordpress/url':
+					case '@wordpress/i18n':
 						return defaultRequestToHandle( handle );
 
 					default:
@@ -247,6 +248,7 @@ const setup = {
 					case '@wordpress/dom-ready':
 					case '@wordpress/html-entities':
 					case '@wordpress/url':
+					case '@wordpress/i18n':
 						return defaultRequestToExternal( external );
 
 					default:
@@ -293,6 +295,7 @@ const settingsPage = {
 				switch ( handle ) {
 					case 'lodash':
 					case '@wordpress/api-fetch':
+					case '@wordpress/i18n':
 						return defaultRequestToHandle( handle );
 
 					default:
@@ -303,6 +306,7 @@ const settingsPage = {
 				switch ( external ) {
 					case 'lodash':
 					case '@wordpress/api-fetch':
+					case '@wordpress/i18n':
 						return defaultRequestToExternal( external );
 
 					default:
