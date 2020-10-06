@@ -302,7 +302,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 	 */
 	public function override_theme() {
 		$this->theme_overridden = false;
-		if ( ! $this->is_enabled() || ! amp_has_query_var() ) {
+		if ( ! $this->is_enabled() || ! amp_is_paired_endpoint() ) {
 			return;
 		}
 

@@ -327,7 +327,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 		$this->assertNotInstanceOf( 'WP_Error', $invalid_post_id );
 
 		$this->assertEquals(
-			amp_get_paired_url( get_permalink( $post ) ),
+			amp_get_paired_endpoint( get_permalink( $post ) ),
 			AMP_Validated_URL_Post_Type::get_url_from_post( $invalid_post_id )
 		);
 

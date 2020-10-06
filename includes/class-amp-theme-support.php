@@ -334,7 +334,7 @@ class AMP_Theme_Support {
 			 * enabled by user ay any time, so they will be able to make AMP available for this URL and see the change
 			 * without wrestling with the redirect cache.
 			 */
-			if ( amp_has_query_var() ) {
+			if ( amp_is_paired_endpoint() ) {
 				self::redirect_non_amp_url( current_user_can( 'manage_options' ) ? 302 : 301 );
 			}
 
@@ -397,10 +397,10 @@ class AMP_Theme_Support {
 			 * should happen infrequently. For admin users, this is kept temporary to allow them
 			 * to not be hampered by browser remembering permanent redirects and preventing test.
 			 */
-			if ( amp_has_query_var() ) {
+			if ( amp_is_paired_endpoint() ) {
 				return self::redirect_non_amp_url( current_user_can( 'manage_options' ) ? 302 : 301 );
 			}
-		} elseif ( amp_has_query_var() ) {
+		} elseif ( amp_is_paired_endpoint() ) {
 			/*
 			 * Prevent infinite URL space under /amp/ endpoint. Note that WordPress allows endpoints to have a value,
 			 * such as the case of /feed/ where /feed/atom/ is the same as saying ?feed=atom. In this case, we need to
@@ -412,7 +412,7 @@ class AMP_Theme_Support {
 			wp_parse_str( $wp->matched_query, $path_args );
 			if ( isset( $path_args[ amp_get_slug() ] ) && '' !== $path_args[ amp_get_slug() ] ) {
 				$current_url  = amp_get_current_url();
-				$redirect_url = amp_get_paired_url( amp_remove_endpoint( $current_url ) );
+				$redirect_url = amp_get_paired_endpoint( amp_remove_endpoint( $current_url ) );
 				if ( $current_url !== $redirect_url && wp_safe_redirect( $redirect_url, 301 ) ) {
 					// @codeCoverageIgnoreStart
 					exit;
