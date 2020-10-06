@@ -21,7 +21,7 @@
   "dependencies": {
     "@babel/polyfill": "7.11.5",
     "@wordpress/api-fetch": "3.17.0",
-    "@wordpress/autop": "2.9.0",
+    "@wordpress/autop": "2.10.0",
     "@wordpress/compose": "3.20.0",
     "@wordpress/date": "3.11.0",
     "@wordpress/dom-ready": "2.9.0",
