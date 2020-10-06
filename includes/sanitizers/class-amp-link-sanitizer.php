@@ -194,13 +194,14 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 
 			// Only add the AMP query var when requested (in Transitional or Reader mode).
 			if ( ! empty( $this->args['paired'] ) ) {
-				$query_vars[ amp_get_slug() ] = '1'; // @todo Would be preferable to use amp_get_url() somehow here.
+				$query_vars[ amp_get_slug() ] = '1'; // @todo Would be preferable to use amp_get_paired_url() somehow here.
 			}
 		}
 
 		/**
 		 * Filters the query vars that are added to the link/form which is considered for AMP-to-AMP linking.
 		 *
+		 * @todo This may end up not being the right approach anymore. We may need to instead just pass the action into amp_get_paired_url().
 		 * @internal
 		 *
 		 * @param string[]   $query_vars Query vars.
@@ -221,7 +222,7 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 					$element->appendChild( $input );
 				}
 			} else {
-				$url = add_query_arg( $query_vars, $url );
+				$url = add_query_arg( $query_vars, $url ); // @todo Instead make use of amp_get_paired_url().
 				$element->setAttribute( $attribute_name, $url );
 			}
 		}

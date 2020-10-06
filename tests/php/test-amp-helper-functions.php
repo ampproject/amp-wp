@@ -641,14 +641,14 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			'is_home'         => static function () {
 				return [
 					home_url( '/' ),
-					amp_get_url( home_url( '/' ) ),
+					amp_get_paired_url( home_url( '/' ) ),
 					false,
 				];
 			},
 			'is_404'          => static function () {
 				return [
 					home_url( '/no-existe/' ),
-					amp_get_url( home_url( '/no-existe/' ) ),
+					amp_get_paired_url( home_url( '/no-existe/' ) ),
 					false,
 				];
 			},
@@ -740,14 +740,14 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			'is_home'         => static function () {
 				return [
 					home_url( '/' ),
-					amp_get_url( home_url( '/' ) ),
+					amp_get_paired_url( home_url( '/' ) ),
 					true,
 				];
 			},
 			'is_404'          => static function () {
 				return [
 					home_url( '/no-existe/' ),
-					amp_get_url( home_url( '/no-existe/' ) ),
+					amp_get_paired_url( home_url( '/no-existe/' ) ),
 					true,
 				];
 			},
@@ -1054,7 +1054,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function test_amp_is_request_before_wp_action_for_transitional_mode_with_query_var() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
-		$this->go_to( amp_get_url( home_url( '/' ) ) );
+		$this->go_to( amp_get_paired_url( home_url( '/' ) ) );
 		global $wp_actions;
 		unset( $wp_actions['wp'] );
 		$this->assertTrue( AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) );
@@ -1816,6 +1816,13 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertSame( 'sha384-nYSGte6layPrGqn7c1Om8wNCgSq5PU-56H0R6j1kTb7R3aLbWeM3ra0YF5xKFuI0', amp_generate_script_hash( 'document.body.textContent += \'Hello world!\';' ) );
 		$this->assertSame( 'sha384-Qdwpb9Wpgg4BE21ukx8rwjbJGEdW2xjanFfsRNtmYQH69a_QeI0it1V8N23ZdsRX', amp_generate_script_hash( 'document.body.textContent = \'¡Hola mundo!\';' ) );
 		$this->assertSame( 'sha384-_MAJ0_NC2k8jrjehfi-5LdQasBICZXvp4gOwOx0D3mIStvDCGvZDzcTfXLgMrLL1', amp_generate_script_hash( 'document.body.textContent = \'<Hi! & 👋>\';' ) );
+	}
+
+	/** @covers ::amp_get_paired_url() */
+	public function test_amp_get_paired_url() {
+		$this->assertEquals( home_url( '/?amp=1' ), amp_get_paired_url( home_url( '/' ) ) );
+		$this->assertEquals( home_url( '/?foo=bar&amp=1' ), amp_get_paired_url( home_url( '/?foo=bar' ) ) );
+		$this->assertEquals( home_url( '/?foo=bar&amp=1#baz' ), amp_get_paired_url( home_url( '/?foo=bar#baz' ) ) );
 	}
 
 	/** @return array */

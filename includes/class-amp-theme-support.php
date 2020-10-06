@@ -412,7 +412,7 @@ class AMP_Theme_Support {
 			wp_parse_str( $wp->matched_query, $path_args );
 			if ( isset( $path_args[ amp_get_slug() ] ) && '' !== $path_args[ amp_get_slug() ] ) {
 				$current_url  = amp_get_current_url();
-				$redirect_url = amp_get_url( amp_remove_endpoint( $current_url ) );
+				$redirect_url = amp_get_paired_url( amp_remove_endpoint( $current_url ) );
 				if ( $current_url !== $redirect_url && wp_safe_redirect( $redirect_url, 301 ) ) {
 					// @codeCoverageIgnoreStart
 					exit;

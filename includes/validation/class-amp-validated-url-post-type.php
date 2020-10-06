@@ -726,7 +726,7 @@ class AMP_Validated_URL_Post_Type {
 
 		// Add AMP query var if in transitional mode.
 		if ( ! amp_is_canonical() ) {
-			$url = amp_get_url( $url );
+			$url = amp_get_paired_url( $url );
 		}
 
 		// Set URL scheme based on whether HTTPS is current.
