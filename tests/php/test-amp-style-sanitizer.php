@@ -701,6 +701,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					<style> .amp-geo-group-foo { color: peru; } </style>
 					<style> .amp-iso-country-us { color: oldlace; } </style>
 					<style> .amp-video-eq { display: none; } </style>
+					<style> .amp-next-page-links, .amp-next-page-link, .amp-next-page-image, .amp-next-page-text, .amp-next-page-separator { outline: solid 1px red; }</style>
 					<style> #accord section[expanded] { outline: solid 1px blue; } </style>
 					<style> .non-existent { color: black; } </style>
 					</head>
@@ -717,6 +718,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 						<amp-video dock width="720" height="305" layout="responsive" src="https://yourhost.com/videos/myvideo.mp4" poster="https://yourhost.com/posters/poster.png" artwork="https://yourhost.com/artworks/artwork.png" title="Awesome video" artist="Awesome artist" album="Amazing album"></amp-video>
 						<amp-geo layout="nodisplay"><script type="application/json">{"ISOCountryGroups": {"foo":["us"]}}</script></amp-geo>
 						<amp-accordion id="accord" disable-session-states><section><h2>Section 1</h2><p>Content in section 1.</p></section><section><h2>Section 2</h2><div>Content in section 2.</div></section></amp-accordion>
+						<amp-next-page><script type="application/json">{}</script></amp-next-page>
 					</body>
 					</html>
 				',
@@ -738,6 +740,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'.amp-geo-group-foo{color:peru}',
 					'.amp-iso-country-us{color:oldlace}',
 					'.amp-video-eq{display:none}',
+					'.amp-next-page-links,.amp-next-page-link,.amp-next-page-image,.amp-next-page-text,.amp-next-page-separator{outline:solid 1px red}',
 					'#accord section[expanded]{outline:solid 1px blue}',
 				],
 				[],
