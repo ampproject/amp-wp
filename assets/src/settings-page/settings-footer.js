@@ -54,43 +54,6 @@ export function SettingsFooter() {
 	const { downloadingTheme } = useContext( ReaderThemes );
 	const { error } = useContext( ErrorContext );
 
-	const [ savedNoticeClass, setSavedNoticeClass ] = useState( '' );
-
-	/**
-	 * Show the success notice after options have saved.
-	 */
-	useEffect( () => {
-		if ( didSaveOptions && ! downloadingTheme ) {
-			setSavedNoticeClass( 'visible' );
-		}
-	}, [ didSaveOptions, downloadingTheme ] );
-
-	/**
-	 * If the success notice is showing and updates have been made, hide the notice.
-	 */
-	useEffect( () => {
-		if ( 'visible' === savedNoticeClass && hasOptionsChanges ) {
-			setSavedNoticeClass( 'dismissed' );
-		}
-	}, [ savedNoticeClass, hasOptionsChanges ] );
-
-	/**
-	 * Hide the success notice after several seconds.
-	 */
-	useEffect( () => {
-		if ( 'visible' === savedNoticeClass ) {
-			const timeout = setTimeout( () => {
-				setSavedNoticeClass( 'dismissed' );
-			}, 9000 );
-
-			return () => {
-				clearTimeout( timeout );
-			};
-		}
-
-		return () => undefined;
-	}, [ savedNoticeClass ] );
-
 	const { reader_theme: readerTheme, theme_support: themeSupport } = editedOptions;
 
 	const disabled = ! themeSupport ||
@@ -112,9 +75,8 @@ export function SettingsFooter() {
 				{ error && <ErrorNotice errorMessage={ error.message || __( 'An error occurred. You might be offline or logged out.', 'amp' ) } /> }
 				{ ! error && ! hasOptionsChanges && didSaveOptions && ! downloadingTheme && (
 					<AMPNotice
-						className={ `amp-save-success-notice ${ savedNoticeClass }` }
+						className="amp-save-success-notice"
 						type={ NOTICE_TYPE_SUCCESS }
-						aria-hidden={ 'visible' !== savedNoticeClass }
 					>
 						<p>
 							{ __( 'Saved', 'amp' ) }

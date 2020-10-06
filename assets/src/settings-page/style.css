@@ -297,10 +297,6 @@ li.error-kept {
 	}
 }
 
-.amp .amp-save-success-notice.amp-notice:not(.dismissed):not(.visible) {
-	transform: translate3d(300px, 0, 0);
-}
-
 .amp .amp-save-success-notice.amp-notice,
 .amp-error-notice .amp-notice {
 	bottom: 3rem;
