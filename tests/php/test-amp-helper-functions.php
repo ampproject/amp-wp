@@ -863,7 +863,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertFalse( amp_is_request() );
 
 		// Legacy query var.
-		set_query_var( amp_get_slug(), 1 );
+		set_query_var( amp_get_slug(), '1' );
 		$this->assertTrue( amp_is_available() );
 		$this->assertTrue( amp_is_request() );
 		unset( $GLOBALS['wp_query']->query_vars[ amp_get_slug() ] );
@@ -872,7 +872,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 		// Transitional theme support.
 		add_theme_support( AMP_Theme_Support::SLUG, [ 'template_dir' => './' ] );
-		$_GET['amp'] = 1;
+		$_GET['amp'] = '1';
 		$this->assertTrue( amp_is_available() );
 		$this->assertTrue( amp_is_request() );
 		unset( $_GET['amp'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -1758,7 +1758,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertStringNotContains( 'autofocus', $item->href );
 
 		// Confirm that link is added to non-AMP version.
-		set_query_var( amp_get_slug(), 1 );
+		set_query_var( amp_get_slug(), '1' );
 		$this->assertTrue( amp_is_request() );
 		$admin_bar = new WP_Admin_Bar();
 		amp_add_admin_bar_view_link( $admin_bar );
