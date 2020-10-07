@@ -324,11 +324,11 @@ final class ValidationURLProviderTest extends WP_UnitTestCase {
 
 			// Terms need to be associated with a post in order to be returned in get_terms().
 			$result = wp_set_post_terms(
- 				self::factory()->post->create(),
- 				$terms_for_current_taxonomy,
- 				$taxonomy
- 			);
- 			$this->assertFalse( is_wp_error( $result ) );
+				self::factory()->post->create(),
+				$terms_for_current_taxonomy,
+				$taxonomy
+			);
+			$this->assertFalse( is_wp_error( $result ) );
 
 			$expected_links  = array_merge(
 				$expected_links,
