@@ -137,6 +137,7 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 
 			// Transient extend beyond cache expiry to allow for serving stale content.
 			// @TODO: We don't serve stale content atm, but rather synchronously refresh.
+			// See https://github.com/ampproject/amp-wp/issues/5477.
 			$transient_expiry = $expiry->modify( "+ {$this->expiry} seconds" );
 			set_transient( $cache_key, serialize( $cached_response ), $transient_expiry->getTimestamp() ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
 		}
