@@ -204,9 +204,9 @@ final class AMP_CLI_Validation_Command {
 			return $this->validation_url_provider;
 		}
 
-		$include_conditionals      = ''; //WP_CLI\Utils\get_flag_value( $this->assoc_args, self::INCLUDE_ARGUMENT, [] );
-		$force_crawl_urls          = false; //WP_CLI\Utils\get_flag_value( $this->assoc_args, self::FLAG_NAME_FORCE_VALIDATION, false );
-		$limit_type_validate_count = 100; //WP_CLI\Utils\get_flag_value( $this->assoc_args, self::LIMIT_URLS_ARGUMENT, 100 );
+		$include_conditionals      = WP_CLI\Utils\get_flag_value( $this->assoc_args, self::INCLUDE_ARGUMENT, [] );
+		$force_crawl_urls          = WP_CLI\Utils\get_flag_value( $this->assoc_args, self::FLAG_NAME_FORCE_VALIDATION, false );
+		$limit_type_validate_count = WP_CLI\Utils\get_flag_value( $this->assoc_args, self::LIMIT_URLS_ARGUMENT, 100 );
 
 		/*
 		 * Handle the argument and flag passed to the command: --include and --force.
@@ -218,7 +218,7 @@ final class AMP_CLI_Validation_Command {
 				$include_conditionals = explode( ',', $include_conditionals );
 			}
 
-			$force_crawl_urls     = true;
+			$force_crawl_urls = true;
 		}
 
 		// Handle special case for Legacy Reader mode.

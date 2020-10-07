@@ -385,7 +385,7 @@ final class ScannableURLProviderTest extends WP_UnitTestCase {
 
 		// If $include_conditionals has is_date, this should return a URL.
 		$this->set_private_property( $this->validation_url_provider, 'include_conditionals', [ 'is_date' ] );
-		$parsed_page_url                                     = wp_parse_url( $this->call_private_method( $this->validation_url_provider, 'get_date_page' ) );
+		$parsed_page_url = wp_parse_url( $this->call_private_method( $this->validation_url_provider, 'get_date_page' ) );
 		$this->assertStringContains( $year, $parsed_page_url['query'] );
 		$this->set_private_property( $this->validation_url_provider, 'include_conditionals', [] );
 	}
