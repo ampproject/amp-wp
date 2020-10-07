@@ -268,10 +268,6 @@ final class ScannableURLProvider {
 	/**
 	 * Gets whether the taxonomy supports AMP.
 	 *
-	 * This only gets the term IDs if they support AMP.
-	 * If their taxonomy is unchecked in 'AMP Settings' > 'Supported Templates,' this does not return them.
-	 * For example, if 'Categories' is unchecked.
-	 *
 	 * @param string $taxonomy The taxonomy.
 	 * @return boolean Whether the taxonomy supports AMP.
 	 */
