@@ -412,7 +412,7 @@ class AMP_Theme_Support {
 			wp_parse_str( $wp->matched_query, $path_args );
 			if ( isset( $path_args[ amp_get_slug() ] ) && '' !== $path_args[ amp_get_slug() ] ) {
 				$current_url  = amp_get_current_url();
-				$redirect_url = amp_get_paired_endpoint( amp_remove_endpoint( $current_url ) );
+				$redirect_url = amp_get_paired_endpoint( amp_remove_paired_endpoint( $current_url ) );
 				if ( $current_url !== $redirect_url && wp_safe_redirect( $redirect_url, 301 ) ) {
 					// @codeCoverageIgnoreStart
 					exit;
@@ -439,7 +439,7 @@ class AMP_Theme_Support {
 	 */
 	public static function redirect_non_amp_url( $status = 302 ) {
 		$current_url = amp_get_current_url();
-		$non_amp_url = amp_remove_endpoint( $current_url );
+		$non_amp_url = amp_remove_paired_endpoint( $current_url );
 		if ( $non_amp_url === $current_url ) {
 			return false;
 		}
@@ -1189,7 +1189,7 @@ class AMP_Theme_Support {
 			$url = add_query_arg( $added_query_vars, $url );
 		}
 
-		return amp_remove_endpoint( $url );
+		return amp_remove_paired_endpoint( $url );
 	}
 
 	/**
@@ -1834,7 +1834,7 @@ class AMP_Theme_Support {
 
 			// Add link to non-AMP version if not canonical.
 			if ( ! amp_is_canonical() ) {
-				$non_amp_url = amp_remove_endpoint( amp_get_current_url() );
+				$non_amp_url = amp_remove_paired_endpoint( amp_get_current_url() );
 
 				// Prevent user from being redirected back to AMP version.
 				if ( true === AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ) {
@@ -2189,7 +2189,7 @@ class AMP_Theme_Support {
 
 		// Redirect to the non-AMP version if not on an AMP-first site.
 		if ( ! $can_serve && ! amp_is_canonical() ) {
-			$non_amp_url = amp_remove_endpoint( amp_get_current_url() );
+			$non_amp_url = amp_remove_paired_endpoint( amp_get_current_url() );
 
 			// Redirect to include query var to preventing AMP from even being considered available.
 			$non_amp_url = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_AVAILABLE, $non_amp_url );

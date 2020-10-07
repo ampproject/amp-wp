@@ -1861,7 +1861,7 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 	$is_amp_request = amp_is_request();
 
 	if ( $is_amp_request ) {
-		$href = amp_remove_endpoint( amp_get_current_url() );
+		$href = amp_remove_paired_endpoint( amp_get_current_url() );
 	} elseif ( is_singular() ) {
 		$href = amp_get_permalink( get_queried_object_id() ); // For sake of Reader mode.
 	} else {

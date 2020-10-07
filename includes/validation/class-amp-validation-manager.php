@@ -338,7 +338,7 @@ class AMP_Validation_Manager {
 		$is_amp_request = amp_is_request();
 
 		$current_url = amp_get_current_url();
-		$non_amp_url = amp_remove_endpoint( $current_url );
+		$non_amp_url = amp_remove_paired_endpoint( $current_url );
 		$non_amp_url = add_query_arg(
 			QueryVar::NOAMP,
 			amp_is_canonical() ? QueryVar::NOAMP_AVAILABLE : QueryVar::NOAMP_MOBILE,
