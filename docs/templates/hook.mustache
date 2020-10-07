@@ -1,9 +1,25 @@
-## Hook `{{{ name }}}`
+## {{ get_capitalized_type }} `{{{ name }}}`
 
 {{# is_deprecated }}
-> :warning: This function is deprecated: {{ get_deprecation_reason }}
+> :warning: This {{ type }} is deprecated: {{ get_deprecation_reason }}
 
 {{/is_deprecated}}
+```php
+{{{ get_signature }}}
+```
+
+{{# has_description }}
+{{ get_description }}
+
+{{/ has_description }}
+{{# has_arguments }}
+### Arguments
+
+{{# arguments }}
+* `{{{ guess_type }}} {{{ name }}}`{{# has_description}} - {{ get_description }}{{/has_description}}
+{{/ arguments }}
+
+{{/ has_arguments }}
 ### Source
 
 :link: [{{ get_file_path }}:{{ line }}]({{{ get_github_link }}})

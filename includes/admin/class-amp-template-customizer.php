@@ -71,13 +71,14 @@ class AMP_Template_Customizer {
 	 * @since 0.4
 	 * @access public
 	 *
-	 * @param WP_Customize_Manager $wp_customize Customizer instance.
+	 * @param WP_Customize_Manager $wp_customize        Customizer instance.
+	 * @param ReaderThemeLoader    $reader_theme_loader Reader theme loader.
 	 * @return AMP_Template_Customizer Instance.
 	 */
-	public static function init( WP_Customize_Manager $wp_customize ) {
-		/** @var ReaderThemeLoader $reader_theme_loader */
-		$reader_theme_loader = Services::get( 'reader_theme_loader' );
-
+	public static function init( WP_Customize_Manager $wp_customize, ReaderThemeLoader $reader_theme_loader = null ) {
+		if ( null === $reader_theme_loader ) {
+			$reader_theme_loader = Services::get( 'reader_theme_loader' );
+		}
 		$self = new self( $wp_customize, $reader_theme_loader );
 
 		$is_reader_mode   = ( AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );

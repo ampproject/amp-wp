@@ -22,6 +22,7 @@
   "require-dev": {
     "civicrm/composer-downloads-plugin": "^2.1",
     "dealerdirect/phpcodesniffer-composer-installer": "0.7.0",
+    "google/cloud-storage": "^1.22",
     "mikey179/vfsstream": "1.6.8",
     "mustache/mustache": "^2",
     "php-stubs/wordpress-stubs": "^5.3.2",
@@ -29,6 +30,8 @@
     "phpdocumentor/reflection": "~3.0",
     "roave/security-advisories": "dev-master",
     "sirbrillig/phpcs-variable-analysis": "2.8.3",
+    "wp-cli/export-command": "^2.0",
+    "wp-cli/extension-command": "^2.0",
     "wp-coding-standards/wpcs": "2.3.0",
     "xwp/wp-dev-lib": "1.6.4"
   },
@@ -52,6 +55,7 @@
     },
     "patches": {
       "sabberworm/php-css-parser": {
+        "Add additional validation for size unit <https://github.com/sabberworm/PHP-CSS-Parser/pull/193>": "patches/php-css-parser-pull-193.patch",
         "Validate name-start code points for identifier <https://github.com/sabberworm/PHP-CSS-Parser/pull/185>": "patches/php-css-parser-pull-185.patch",
         "Fix parsing CSS selectors which contain commas <https://github.com/westonruter/PHP-CSS-Parser/pull/1>": "patches/php-css-parser-commit-10a2501.patch"
       }
@@ -80,6 +84,7 @@
       "tests/php/validation/"
     ],
     "files": [
+      "tests/php/register-wp-cli-commands.php",
       "docs/includes/register-wp-cli-commands.php"
     ]
   },
@@ -107,6 +112,10 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "scripts": {
-    "analyze": "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan --version; phpstan analyze --ansi; fi"
+    "analyze": "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan --version; phpstan analyze --ansi; fi",
+    "pre-commit": [
+      "npm run lint:staged",
+      "@analyze"
+    ]
   }
 }

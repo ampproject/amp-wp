@@ -7,6 +7,7 @@
 
 namespace AmpProject\AmpWP\Exception;
 
+use AmpProject\AmpWP\Infrastructure\Injector\InjectionChain;
 use RuntimeException;
 
 /**
@@ -33,16 +34,26 @@ final class FailedToMakeInstance
 	 * Create a new instance of the exception for an interface or class that
 	 * created a circular reference.
 	 *
-	 * @param string $interface_or_class Interface or class name that generated
-	 *                                   the circular reference.
-	 *
+	 * @param string         $interface_or_class         Interface or class name that
+	 *                                                   generated the circular
+	 *                                                   reference.
+	 * @param InjectionChain $injection_chain    Injection chain that led to the
+	 *                                           circular reference.
 	 * @return self
 	 */
-	public static function for_circular_reference( $interface_or_class ) {
+	public static function for_circular_reference(
+		$interface_or_class,
+		InjectionChain $injection_chain
+	) {
 		$message = \sprintf(
 			'Circular reference detected while trying to resolve the interface or class "%s".',
 			$interface_or_class
 		);
+
+		$message .= "\nInjection chain:\n";
+		foreach ( $injection_chain->get_chain() as $link ) {
+			$message .= "{$link}\n";
+		}
 
 		return new self( $message, self::CIRCULAR_REFERENCE );
 	}

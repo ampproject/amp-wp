@@ -11,6 +11,7 @@
  * @internal
  */
 function amp_post_template_init_hooks() {
+	add_action( 'amp_post_template_head', 'noindex' );
 	add_action( 'amp_post_template_head', 'amp_post_template_add_title' );
 	add_action( 'amp_post_template_head', 'amp_post_template_add_canonical' );
 	add_action( 'amp_post_template_head', 'amp_post_template_add_fonts' );

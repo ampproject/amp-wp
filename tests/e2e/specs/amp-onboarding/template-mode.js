@@ -88,12 +88,12 @@ describe( 'Stepper item modifications', () => {
 describe( 'Template mode recommendations with non-reader-theme active', () => {
 	beforeEach( async () => {
 		await cleanUpSettings();
-		await installTheme( 'astra' );
-		await activateTheme( 'astra' );
+		await installTheme( 'hestia' );
+		await activateTheme( 'hestia' );
 	} );
 
 	afterEach( async () => {
-		await deleteTheme( 'astra', 'twentytwenty' );
+		await deleteTheme( 'hestia', 'twentytwenty' );
 	} );
 
 	it( 'makes correct recommendations when user is not technical and the current theme is not a reader theme', async () => {

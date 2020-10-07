@@ -164,14 +164,8 @@ final class Root {
 		if ( null === $this->hooks ) {
 			$this->hooks = [];
 
-			foreach ( $this->get_functions() as $function ) {
-				foreach ( $function->hooks as $hook ) {
-					$this->hooks[] = $hook;
-				}
-			}
-
-			foreach ( $this->get_methods() as $method ) {
-				foreach ( $method->hooks as $hook ) {
+			foreach ( $this->get_files() as $file ) {
+				foreach ( $file->hooks as $hook ) {
 					$this->hooks[] = $hook;
 				}
 			}

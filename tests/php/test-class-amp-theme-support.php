@@ -82,7 +82,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		remove_theme_support( 'custom-header' );
 		$_REQUEST                = []; // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
 		$_SERVER['QUERY_STRING'] = '';
-		unset( $_SERVER['REQUEST_URI'] );
+		$_SERVER['REQUEST_URI']  = '';
 		unset( $_SERVER['REQUEST_METHOD'] );
 		unset( $GLOBALS['content_width'] );
 		if ( isset( $GLOBALS['wp_customize'] ) ) {
@@ -2120,20 +2120,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Returns the "Server-Timing" headers.
-	 *
-	 * @return array Server-Timing headers.
-	 */
-	private function get_server_timing_headers() {
-		return array_filter(
-			AMP_HTTP::$headers_sent,
-			static function( $header ) {
-				return 'Server-Timing' === $header['name'];
-			}
-		);
-	}
-
-	/**
 	 * Test prepare_response for responses that do not trigger standard template actions.
 	 *
 	 * @covers AMP_Theme_Support::prepare_response()
@@ -2145,9 +2131,49 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
 
-		// HTML bit no template actions triggered.
+		// JSON.
+		$input = '{"success":true}';
+		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
+
+		// Nothing, for redirect.
+		$input = '';
+		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
+
+		// HTML, but a fragment.
+		$input = '<ul><li>one</li><li>two</li><li>three</li></ul>';
+		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
+
+		// HTML, but still a fragment.
+		$input = '<html><header><h1>HellO!</h1></header></html>';
+		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
+
+		// HTML but no template actions triggered.
 		$input = '<html><head></head></html>';
 		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
+
+		// HTML with AMP attribute.
+		$input  = '<html amp><head></head>Hello</html>';
+		$output = AMP_Theme_Support::prepare_response( $input );
+		$this->assertStringContains( '<html amp', $output );
+		$this->assertStringContains( '<meta charset="utf-8">', $output );
+
+		// HTML with AMP emoji attribute.
+		$input  = '<html ⚡><head></head>Hello</html>';
+		$output = AMP_Theme_Support::prepare_response( $input );
+		$this->assertStringContains( '<html amp', $output );
+		$this->assertStringContains( '<meta charset="utf-8">', $output );
+
+		// HTML with alternative AMP emoji attribute.
+		$input  = '<html lang="en-US" ⚡️ foo="" bar="baz"><head></head>Hello</html>';
+		$output = AMP_Theme_Support::prepare_response( $input );
+		$this->assertStringContains( '<html lang="en-US" amp', $output );
+		$this->assertStringContains( '<meta charset="utf-8">', $output );
+
+		// HTML with doctype, comments, and whitespace before head.
+		$input  = "   <!--\nHello world!\n-->\n\n<!DOCTYPE html>  <html\n\namp>\n<head profile='http://www.acme.com/profiles/core'></head><body>Hello</body></html>";
+		$output = AMP_Theme_Support::prepare_response( $input );
+		$this->assertStringContains( '<html amp', $output );
+		$this->assertStringContains( '<meta charset="utf-8">', $output );
 
 		$get_do_action = static function ( $action ) {
 			return get_echo( 'do_action', [ $action ] );
@@ -2160,6 +2186,51 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$this->assertStringContains( '<html amp', $output );
 			$this->assertStringContains( '<meta charset="utf-8">', $output );
 		}
+	}
+
+	/**
+	 * Test prepare_response for responses that throw an exception.
+	 *
+	 * @covers AMP_Theme_Support::prepare_response()
+	 */
+	public function test_prepare_response_throwing_exception() {
+		// Set up temporary capture of error log to test error log output.
+		$capture = tmpfile();
+		$backup  = ini_set( // phpcs:ignore WordPress.PHP.IniSet.Risky
+			'error_log',
+			stream_get_meta_data( $capture )['uri']
+		);
+
+		add_filter(
+			'amp_schemaorg_metadata',
+			static function () {
+				throw new RuntimeException( 'FAILURE', 42 );
+			}
+		);
+
+		if ( ! function_exists( 'newrelic_disable_autorum' ) ) {
+
+			/**
+			 * Define newrelic_disable_autorum to allow passing line.
+			 */
+			function newrelic_disable_autorum() {
+				return true;
+			}
+		}
+
+		wp();
+		$output = AMP_Theme_Support::finish_output_buffering( $this->get_original_html() );
+
+		// Verify that error log was properly populated.
+		$this->assertRegExp(
+			'/^\[[^\]]*\] A PHP error occurred while trying to prepare the AMP response\..*- FAILURE \(42\) \[RuntimeException\].*/',
+			stream_get_contents( $capture )
+		);
+
+		// Reset error log back to initial settings.
+		ini_set( 'error_log', $backup ); // phpcs:ignore WordPress.PHP.IniSet.Risky
+
+		$this->assertStringContains( 'Failed to prepare AMP page', $output );
 	}
 
 	/**

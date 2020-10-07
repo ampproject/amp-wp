@@ -128,7 +128,12 @@ final class ReaderThemeLoader implements Service, Registerable {
 			return $prepared_themes;
 		}
 
-		$reader_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
+		$reader_theme_obj = $this->get_reader_theme();
+		if ( ! $reader_theme_obj instanceof WP_Theme ) {
+			return $prepared_themes;
+		}
+		$reader_theme = $reader_theme_obj->get_stylesheet();
+
 		if ( isset( $prepared_themes[ $reader_theme ] ) ) {
 
 			// Make sure the AMP Reader theme appears right after the active theme in the list.
@@ -164,7 +169,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 						'a' => [ 'href' => true ],
 					]
 				),
-				esc_url( add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, admin_url( 'admin.php' ) ) )
+				esc_url( add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, admin_url( 'admin.php' ) ) . '#reader-themes' )
 			);
 		}
 
@@ -181,7 +186,11 @@ final class ReaderThemeLoader implements Service, Registerable {
 			return;
 		}
 
-		$reader_theme = AMP_Options_Manager::get_option( Option::READER_THEME );
+		$reader_theme = $this->get_reader_theme();
+		if ( ! $reader_theme instanceof WP_Theme ) {
+			return;
+		}
+
 		?>
 		<script>
 			(function( themeSingleTmpl ) {
@@ -249,7 +258,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 				}
 			}) (
 				document.getElementById( 'tmpl-theme' ),
-				document.querySelector( <?php echo wp_json_encode( sprintf( '#%s-name > span', $reader_theme ) ); ?> )
+				document.querySelector( <?php echo wp_json_encode( sprintf( '#%s-name > span', $reader_theme->get_stylesheet() ) ); ?> )
 			);
 		</script>
 		<?php
@@ -264,6 +273,10 @@ final class ReaderThemeLoader implements Service, Registerable {
 	 * @return WP_Theme|null Theme if selected and no errors.
 	 */
 	public function get_reader_theme() {
+		if ( $this->reader_theme instanceof WP_Theme ) {
+			return $this->reader_theme;
+		}
+
 		$reader_theme_slug = AMP_Options_Manager::get_option( Option::READER_THEME );
 		if ( ! $reader_theme_slug ) {
 			return null;
@@ -361,6 +374,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 				return array_diff( $components, [ 'widgets' ] );
 			}
 		);
+		remove_theme_support( 'widgets-block-editor' );
 	}
 
 	/**

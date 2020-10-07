@@ -18,6 +18,7 @@ import { Loading } from '../loading';
 import './style.css';
 import { ThemeCard } from '../theme-card';
 import { AMPNotice } from '../amp-notice';
+import { ThemesAPIError } from '../themes-api-error';
 
 /**
  * Component for selecting a reader theme.
@@ -66,6 +67,7 @@ export function ReaderThemeSelection() {
 					</p>
 				</AMPNotice>
 			) }
+			<ThemesAPIError />
 			<div>
 				{ 0 < availableThemes.length && (
 					<ul className="choose-reader-theme__grid">

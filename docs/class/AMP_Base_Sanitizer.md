@@ -10,7 +10,6 @@ Class AMP_Base_Sanitizer
 * [`init`](../method/AMP_Base_Sanitizer/init.md) - Run logic before any sanitizers are run.
 * [`sanitize`](../method/AMP_Base_Sanitizer/sanitize.md) - Sanitize the HTML contained in the DOMDocument received by the constructor
 * [`get_scripts`](../method/AMP_Base_Sanitizer/get_scripts.md) - Return array of values that would be valid as an HTML `script` element.
-* ~~[`get_styles`](../method/AMP_Base_Sanitizer/get_styles.md) - Return array of values that would be valid as an HTML `style` attribute.~~
 * [`get_stylesheets`](../method/AMP_Base_Sanitizer/get_stylesheets.md) - Get stylesheets.
 * ~~[`get_body_node`](../method/AMP_Base_Sanitizer/get_body_node.md) - Get HTML body as DOMElement from Dom\Document received by the constructor.~~
 * [`sanitize_dimension`](../method/AMP_Base_Sanitizer/sanitize_dimension.md) - Sanitizes a CSS dimension specifier while being sensitive to dimension context.
@@ -34,7 +33,7 @@ Class AMP_Base_Sanitizer
 * [`get_validate_response_data`](../method/AMP_Base_Sanitizer/get_validate_response_data.md) - Get data that is returned in validate responses.
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:16](../../includes/sanitizers/class-amp-base-sanitizer.php#L16-L796)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:16](/includes/sanitizers/class-amp-base-sanitizer.php#L16-L802)
 
 <details>
 <summary>Show Code</summary>
@@ -621,7 +620,13 @@ abstract class AMP_Base_Sanitizer {
 			}
 
 			// Capture element contents.
-			if ( ( 'script' === $node->nodeName && ! $node->hasAttribute( 'src' ) ) || 'style' === $node->nodeName ) {
+			if (
+				( 'script' === $node->nodeName && ! $node->hasAttribute( 'src' ) )
+				||
+				// Include stylesheet text except for amp-custom and amp-keyframes since it is large and since it should
+				// already be detailed in the stylesheets metabox.
+				( 'style' === $node->nodeName && ! $node->hasAttribute( 'amp-custom' ) && ! $node->hasAttribute( 'amp-keyframes' ) )
+			) {
 				$error['text'] = $node->textContent;
 			}
 

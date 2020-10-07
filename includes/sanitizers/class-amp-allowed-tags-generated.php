@@ -15,8 +15,8 @@
  */
 class AMP_Allowed_Tags_Generated {
 
-	private static $spec_file_revision = 1060;
-	private static $minimum_validator_revision_required = 474;
+	private static $spec_file_revision = 1095;
+	private static $minimum_validator_revision_required = 475;
 
 	private static $descendant_tag_lists = array(
 		'amp-mega-menu-allowed-descendants' => array(
@@ -54,6 +54,7 @@ class AMP_Allowed_Tags_Generated {
 			'p',
 			'path',
 			'section',
+			'select',
 			'span',
 			'strike',
 			'strong',
@@ -70,6 +71,7 @@ class AMP_Allowed_Tags_Generated {
 			'tr',
 			'u',
 			'ul',
+			'use',
 		),
 		'amp-nested-menu-allowed-descendants' => array(
 			'a',
@@ -102,6 +104,7 @@ class AMP_Allowed_Tags_Generated {
 			'p',
 			'path',
 			'section',
+			'select',
 			'span',
 			'strike',
 			'strong',
@@ -118,6 +121,7 @@ class AMP_Allowed_Tags_Generated {
 			'tr',
 			'u',
 			'ul',
+			'use',
 		),
 		'amp-story-bookend-allowed-descendants' => array(
 			'script',
@@ -250,6 +254,10 @@ class AMP_Allowed_Tags_Generated {
 			'amp-pixel',
 			'amp-state',
 			'amp-story-360',
+			'amp-story-interactive-binary-poll',
+			'amp-story-interactive-poll',
+			'amp-story-interactive-quiz',
+			'amp-story-interactive-results',
 			'amp-timeago',
 			'amp-twitter',
 			'amp-video',
@@ -823,6 +831,11 @@ class AMP_Allowed_Tags_Generated {
 							'protocol' => array(
 								'https',
 							),
+						),
+					),
+					'sticky' => array(
+						'value' => array(
+							'',
 						),
 					),
 					'template' => array(),
@@ -4094,6 +4107,7 @@ class AMP_Allowed_Tags_Generated {
 							'protocol' => array(
 								'https',
 								'amp-state',
+								'amp-script',
 							),
 						),
 					),
@@ -5179,6 +5193,11 @@ class AMP_Allowed_Tags_Generated {
 						'value_regex' => '[0-9]+',
 					),
 					'media' => array(),
+					'nodom' => array(
+						'value' => array(
+							'',
+						),
+					),
 					'noloading' => array(
 						'value' => array(
 							'',
@@ -5642,6 +5661,23 @@ class AMP_Allowed_Tags_Generated {
 							),
 						),
 					),
+					'entity' => array(),
+					'entity-logo-src' => array(
+						'value_url' => array(
+							'protocol' => array(
+								'http',
+								'https',
+							),
+						),
+					),
+					'entity-url' => array(
+						'value_url' => array(
+							'protocol' => array(
+								'http',
+								'https',
+							),
+						),
+					),
 					'live-story' => array(
 						'value' => array(
 							'',
@@ -5925,6 +5961,225 @@ class AMP_Allowed_Tags_Generated {
 							'mandatory' => false,
 							'unique' => false,
 						),
+					),
+				),
+			),
+		),
+		'amp-story-interactive-binary-poll' => array(
+			array(
+				'attr_spec_list' => array(
+					'chip-style' => array(
+						'value' => array(
+							'shadow',
+							'flat',
+							'transparent',
+						),
+					),
+					'endpoint' => array(
+						'mandatory' => true,
+						'value_url' => array(
+							'allow_empty' => false,
+							'allow_relative' => false,
+							'protocol' => array(
+								'https',
+							),
+						),
+					),
+					'id' => array(
+						'mandatory' => true,
+					),
+					'option-1-confetti' => array(),
+					'option-1-text' => array(
+						'mandatory' => true,
+					),
+					'option-2-confetti' => array(),
+					'option-2-text' => array(
+						'mandatory' => true,
+					),
+					'prompt-size' => array(
+						'value' => array(
+							'small',
+							'medium',
+							'large',
+						),
+					),
+					'prompt-text' => array(),
+					'theme' => array(
+						'value' => array(
+							'light',
+							'dark',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'amp-story-grid-layer',
+					'requires_extension' => array(
+						'amp-story-interactive',
+					),
+				),
+			),
+		),
+		'amp-story-interactive-poll' => array(
+			array(
+				'attr_spec_list' => array(
+					'chip-style' => array(
+						'value' => array(
+							'shadow',
+							'flat',
+							'transparent',
+						),
+					),
+					'endpoint' => array(
+						'mandatory' => true,
+						'value_url' => array(
+							'allow_empty' => false,
+							'allow_relative' => false,
+							'protocol' => array(
+								'https',
+							),
+						),
+					),
+					'id' => array(
+						'mandatory' => true,
+					),
+					'option-1-confetti' => array(),
+					'option-1-results-category' => array(),
+					'option-1-text' => array(
+						'mandatory' => true,
+					),
+					'option-2-confetti' => array(),
+					'option-2-results-category' => array(),
+					'option-2-text' => array(
+						'mandatory' => true,
+					),
+					'option-3-confetti' => array(),
+					'option-3-results-category' => array(),
+					'option-3-text' => array(),
+					'option-4-confetti' => array(),
+					'option-4-results-category' => array(),
+					'option-4-text' => array(),
+					'prompt-size' => array(
+						'value' => array(
+							'small',
+							'medium',
+							'large',
+						),
+					),
+					'prompt-text' => array(),
+					'theme' => array(
+						'value' => array(
+							'light',
+							'dark',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'amp-story-grid-layer',
+					'requires_extension' => array(
+						'amp-story-interactive',
+					),
+				),
+			),
+		),
+		'amp-story-interactive-quiz' => array(
+			array(
+				'attr_spec_list' => array(
+					'chip-style' => array(
+						'value' => array(
+							'shadow',
+							'flat',
+							'transparent',
+						),
+					),
+					'endpoint' => array(
+						'mandatory' => true,
+						'value_url' => array(
+							'allow_empty' => false,
+							'allow_relative' => false,
+							'protocol' => array(
+								'https',
+							),
+						),
+					),
+					'id' => array(
+						'mandatory' => true,
+					),
+					'option-1-confetti' => array(),
+					'option-1-correct' => array(),
+					'option-1-text' => array(
+						'mandatory' => true,
+					),
+					'option-2-confetti' => array(),
+					'option-2-correct' => array(),
+					'option-2-text' => array(
+						'mandatory' => true,
+					),
+					'option-3-confetti' => array(),
+					'option-3-correct' => array(),
+					'option-3-text' => array(),
+					'option-4-confetti' => array(),
+					'option-4-correct' => array(),
+					'option-4-text' => array(),
+					'prompt-size' => array(
+						'value' => array(
+							'small',
+							'medium',
+							'large',
+						),
+					),
+					'prompt-text' => array(),
+					'theme' => array(
+						'value' => array(
+							'light',
+							'dark',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'amp-story-grid-layer',
+					'mandatory_oneof' => array(
+						'option-1-correct',
+						'option-2-correct',
+						'option-3-correct',
+						'option-4-correct',
+					),
+					'requires_extension' => array(
+						'amp-story-interactive',
+					),
+				),
+			),
+		),
+		'amp-story-interactive-results' => array(
+			array(
+				'attr_spec_list' => array(
+					'option-1-image' => array(),
+					'option-1-results-category' => array(
+						'mandatory' => true,
+					),
+					'option-1-text' => array(),
+					'option-2-image' => array(),
+					'option-2-results-category' => array(
+						'mandatory' => true,
+					),
+					'option-2-text' => array(),
+					'option-3-image' => array(),
+					'option-3-results-category' => array(),
+					'option-3-text' => array(),
+					'option-4-image' => array(),
+					'option-4-results-category' => array(),
+					'option-4-text' => array(),
+					'prompt-text' => array(),
+					'theme' => array(
+						'value' => array(
+							'light',
+							'dark',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_ancestor' => 'amp-story-grid-layer',
+					'requires_extension' => array(
+						'amp-story-interactive',
 					),
 				),
 			),
@@ -10396,6 +10651,16 @@ class AMP_Allowed_Tags_Generated {
 					'crossorigin' => array(),
 					'href' => array(),
 					'hreflang' => array(),
+					'imagesizes' => array(),
+					'imagesrcset' => array(
+						'disallowed_value_regex' => '__amp_source_origin',
+						'value_url' => array(
+							'protocol' => array(
+								'http',
+								'https',
+							),
+						),
+					),
 					'media' => array(),
 					'rel' => array(
 						'dispatch_key' => 2,
@@ -11235,6 +11500,42 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_parent' => 'head',
 					'spec_name' => 'meta name=amp-to-amp-navigation',
+					'unique' => true,
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'content' => array(
+						'mandatory' => true,
+					),
+					'name' => array(
+						'mandatory' => true,
+						'value_casei' => array(
+							'amp-story-generator-name',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_parent' => 'head',
+					'spec_name' => 'meta name=amp-story-generator-name',
+					'unique' => true,
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'content' => array(
+						'mandatory' => true,
+					),
+					'name' => array(
+						'mandatory' => true,
+						'value_casei' => array(
+							'amp-story-generator-version',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_parent' => 'head',
+					'spec_name' => 'meta name=amp-story-generator-version',
 					'unique' => true,
 				),
 			),
@@ -15691,6 +15992,36 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
+						'name' => 'amp-story-interactive',
+						'requires_usage' => true,
+						'version' => array(
+							'1.0',
+						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
 						'name' => 'amp-story-player',
 						'requires_usage' => true,
 						'version' => array(
@@ -18524,9 +18855,7 @@ class AMP_Allowed_Tags_Generated {
 		'aria-valuenow' => array(),
 		'aria-valuetext' => array(),
 		'autoscroll' => array(),
-		'class' => array(
-			'disallowed_value_regex' => '(^|\\W)i-amphtml-',
-		),
+		'class' => array(),
 		'content' => array(),
 		'data-amp-bind-aria-activedescendant' => array(),
 		'data-amp-bind-aria-atomic' => array(),
@@ -19019,6 +19348,8 @@ class AMP_Allowed_Tags_Generated {
 						'pulse',
 						'rotate-in-left',
 						'rotate-in-right',
+						'scale-fade-down',
+						'scale-fade-up',
 						'twirl-in',
 						'whoosh-in-left',
 						'whoosh-in-right',
@@ -19071,6 +19402,8 @@ class AMP_Allowed_Tags_Generated {
 						'pulse',
 						'rotate-in-left',
 						'rotate-in-right',
+						'scale-fade-down',
+						'scale-fade-up',
 						'twirl-in',
 						'whoosh-in-left',
 						'whoosh-in-right',
@@ -19169,6 +19502,8 @@ class AMP_Allowed_Tags_Generated {
 						'pulse',
 						'rotate-in-left',
 						'rotate-in-right',
+						'scale-fade-down',
+						'scale-fade-up',
 						'twirl-in',
 						'whoosh-in-left',
 						'whoosh-in-right',

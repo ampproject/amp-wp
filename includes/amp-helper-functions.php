@@ -10,6 +10,7 @@ use AmpProject\AmpWP\AmpWpPluginFactory;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
+use AmpProject\AmpWP\Services;
 
 /**
  * Handle activation of plugin.
@@ -409,28 +410,63 @@ function amp_is_available() {
 	global $pagenow, $wp_query;
 
 	// Short-circuit for admin requests or requests to non-frontend pages.
-	if ( is_admin() || in_array( $pagenow, [ 'wp-login.php', 'wp-signup.php', 'wp-activate.php' ], true ) ) {
+	if ( is_admin() || in_array( $pagenow, [ 'wp-login.php', 'wp-signup.php', 'wp-activate.php', 'repair.php' ], true ) ) {
 		return false;
 	}
 
-	$warn = function () {
-		static $warned = false;
-		if ( $warned ) {
+	$warn = static function () {
+		static $already_warned_sources = [];
+
+		$likely_culprit_detector = Services::get( 'dev_tools.likely_culprit_detector' );
+
+		$closest_source            = $likely_culprit_detector->analyze_backtrace();
+		$closest_source_identifier = $closest_source['type'] . ':' . $closest_source['name'];
+		if ( in_array( $closest_source_identifier, $already_warned_sources, true ) ) {
 			return;
 		}
+
 		$message = sprintf(
-			/* translators: %1$s: amp_is_available(), %2$s: amp_is_request(), %3$s: is_amp_endpoint(), %4$s: the current action, %5$s: the wp action, %6$s: the WP_Query class, %7$s: the amp_skip_post() function */
-			__( '%1$s (or %2$s, formerly %3$s) was called too early and so it will not work properly. WordPress is currently doing the "%4$s" action. Calling this function before the "%5$s" action means it will not have access to %6$s and the queried object to determine if it is an AMP response, thus neither the "%7$s" filter nor the AMP enabled toggle will be considered.', 'amp' ),
-			'amp_is_available()',
-			'amp_is_request()',
-			'is_amp_endpoint()',
-			current_action(),
-			'wp',
-			'WP_Query',
-			'amp_skip_post()'
+			/* translators: 1: amp_is_available() function, 2: amp_is_request() function, 3: is_amp_endpoint() function */
+			__( '%1$s (or %2$s, formerly %3$s) was called too early and so it will not work properly.', 'amp' ),
+			'`amp_is_available()`',
+			'`amp_is_request()`',
+			'`is_amp_endpoint()`'
 		);
+
+		$message .= ' ' . sprintf(
+			/* translators: 1: the current hook, 2: the wp action, 4: the WP_Query class, 4: the amp_skip_post() function */
+			__( 'WordPress is currently doing the %1$s hook. Calling this function before the %2$s action means it will not have access to %3$s and the queried object to determine if it is an AMP response, thus neither the %4$s filter nor the AMP enabled toggle will be considered.', 'amp' ),
+			'`' . current_action() . '`',
+			'`wp`',
+			'`WP_Query`',
+			'`amp_skip_post()`'
+		);
+
+		if ( ! empty( $closest_source['type'] ) && ! empty( $closest_source['name'] ) ) {
+			$translated_string = false;
+
+			switch ( $closest_source['type'] ) {
+				case 'plugin':
+					/* translators: placeholder is the slug of the plugin */
+					$translated_string = __( 'It appears the plugin with slug %s is responsible; please contact the author.', 'amp' );
+					break;
+				case 'mu-plugin':
+					/* translators: placeholder is the slug of the must-use plugin */
+					$translated_string = __( 'It appears the must-use plugin with slug %s is responsible; please contact the author.', 'amp' );
+					break;
+				case 'theme':
+					/* translators: placeholder is the slug of the theme */
+					$translated_string = __( 'It appears the theme with slug %s is responsible; please contact the author.', 'amp' );
+					break;
+			}
+
+			if ( $translated_string ) {
+				$message .= ' ' . sprintf( $translated_string, '`' . $closest_source['name'] . '`' );
+			}
+		}
+
 		_doing_it_wrong( 'amp_is_available', esc_html( $message ), '2.0.0' );
-		$warned = true;
+		$already_warned_sources[] = $closest_source_identifier;
 	};
 
 	// Make sure the parse_request action has triggered before trying to read from the REST_REQUEST constant, which is set during rest_api_loaded().
@@ -1481,6 +1517,7 @@ function amp_get_content_sanitizers( $post = null ) {
 				'force_svg_support' => [], // Always replace 'no-svg' class with 'svg' if it exists.
 			],
 		],
+		'AMP_Srcset_Sanitizer'            => [],
 		'AMP_Img_Sanitizer'               => [
 			'align_wide_support' => current_theme_supports( 'align-wide' ),
 		],
@@ -1603,8 +1640,8 @@ function amp_get_content_sanitizers( $post = null ) {
 	 */
 	$sanitizers['AMP_Style_Sanitizer']['allow_transient_caching'] = apply_filters( 'amp_parsed_css_transient_caching_allowed', true );
 
-	// Force style sanitizer, meta sanitizer, and validating sanitizer to be at end.
-	foreach ( [ 'AMP_Style_Sanitizer', 'AMP_Meta_Sanitizer', 'AMP_Tag_And_Attribute_Sanitizer' ] as $class_name ) {
+	// Force layout, style, meta, and validating sanitizers to be at the end.
+	foreach ( [ 'AMP_Layout_Sanitizer', 'AMP_Style_Sanitizer', 'AMP_Meta_Sanitizer', 'AMP_Tag_And_Attribute_Sanitizer' ] as $class_name ) {
 		if ( isset( $sanitizers[ $class_name ] ) ) {
 			$sanitizer = $sanitizers[ $class_name ];
 			unset( $sanitizers[ $class_name ] );

@@ -7,10 +7,10 @@
 
 // phpcs:disable Generic.Formatting.MultipleStatementAlignment.NotSameWarning
 
-use AmpProject\AmpWP\Admin\DevToolsUserAccess;
+use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
-use AmpProject\AmpWP\Services;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
@@ -24,7 +24,7 @@ use AmpProject\Dom\Document;
  * @covers AMP_Validation_Manager
  * @since 0.7
  */
-class Test_AMP_Validation_Manager extends WP_UnitTestCase {
+class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 	use AssertContainsCompatibility;
 	use HandleValidation;
@@ -453,7 +453,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 	 */
 	public function test_add_validation_error_sourcing() {
 		AMP_Validation_Manager::add_validation_error_sourcing();
-		$this->assertEquals( ~PHP_INT_MAX, has_filter( 'setup_theme', [ self::TESTED_CLASS, 'set_theme_variables' ] ) );
 		$this->assertEquals( 10, has_action( 'wp', [ self::TESTED_CLASS, 'wrap_widget_callbacks' ] ) );
 		$this->assertEquals( 10, has_action( 'all', [ self::TESTED_CLASS, 'wrap_hook_callbacks' ] ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_content', [ self::TESTED_CLASS, 'decorate_filter_source' ] ) );
@@ -492,8 +491,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$editor_user_id = self::factory()->user->create( [ 'role' => 'editor' ] );
 
 		wp_set_current_user( $admin_user_id );
-		/** @var DevToolsUserAccess $service */
-		$service = Services::get( 'dev_tools.user_access' );
+		$service = $this->injector->make( UserAccess::class );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$_SERVER['REQUEST_METHOD'] = 'POST';
@@ -634,8 +632,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		// Make user preference is honored.
-		/** @var DevToolsUserAccess $service */
-		$service = Services::get( 'dev_tools.user_access' );
+		$service = $this->injector->make( UserAccess::class );
 		$service->set_user_enabled( wp_get_current_user()->ID, false );
 		$this->assertNull(
 			AMP_Validation_Manager::get_amp_validity_rest_field(
@@ -897,8 +894,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertStringContains( $expected_notice_non_accepted_errors, $output );
 
 		// Ensure not displayed when dev tools is disabled.
-		/** @var DevToolsUserAccess $service */
-		$service = Services::get( 'dev_tools.user_access' );
+		$service = $this->injector->make( UserAccess::class );
 		$service->set_user_enabled( wp_get_current_user()->ID, false );
 		$output = get_echo( [ 'AMP_Validation_Manager', 'print_edit_form_validation_status' ], [ $post ] );
 		$this->assertStringNotContains( 'notice notice-warning', $output );
@@ -1374,7 +1370,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 						: preg_replace( ':.*wp-includes/:', '', $reflection_function->getFileName() )
 					),
 					$reflection_function->getStartLine(),
-					( defined( 'GUTENBERG_VERSION' ) && GUTENBERG_VERSION && version_compare( GUTENBERG_VERSION, '8.8.0', '>=' ) )
+					( defined( 'GUTENBERG_DEVELOPMENT_MODE' ) || defined( 'GUTENBERG_VERSION' ) && GUTENBERG_VERSION && version_compare( GUTENBERG_VERSION, '8.8.0', '>=' ) )
 						? 'wp-block-latest-posts__list wp-block-latest-posts'
 						: 'wp-block-latest-posts wp-block-latest-posts__list'
 				),
@@ -1906,21 +1902,6 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 			preg_split( '/(?=<)/', $expected_content ),
 			preg_split( '/(?=<)/', $filtered_content )
 		);
-	}
-
-	/**
-	 * Test get_source
-	 *
-	 * @covers AMP_Validation_Manager::get_source()
-	 */
-	public function test_get_source() {
-		$source = AMP_Validation_Manager::get_source( 'amp_after_setup_theme' );
-		$this->assertEquals( 'amp', $source['name'] );
-		$this->assertEquals( 'plugin', $source['type'] );
-
-		$source = AMP_Validation_Manager::get_source( 'the_content' );
-		$this->assertEquals( 'wp-includes', $source['name'] );
-		$this->assertEquals( 'core', $source['type'] );
 	}
 
 	/**
@@ -2553,8 +2534,7 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertFalse( wp_script_is( $slug, 'enqueued' ) );
 
 		// Ensure not displayed when dev tools is disabled.
-		/** @var DevToolsUserAccess $service */
-		$service = Services::get( 'dev_tools.user_access' );
+		$service = $this->injector->make( UserAccess::class );
 		$this->set_capability();
 		$service->set_user_enabled( wp_get_current_user()->ID, false );
 		AMP_Validation_Manager::enqueue_block_validation();
