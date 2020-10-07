@@ -6,7 +6,6 @@
  */
 
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
 
@@ -19,7 +18,6 @@ use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
  */
 class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 
-	use AssertContainsCompatibility;
 	use PrivateAccess;
 
 	/**
