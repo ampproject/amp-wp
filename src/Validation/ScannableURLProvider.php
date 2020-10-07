@@ -12,11 +12,11 @@ use AMP_Theme_Support;
 use WP_Query;
 
 /**
- * ValidationURLProvider class.
+ * ScannableURLProvider class.
  *
  * @since 2.1
  */
-final class ValidationURLProvider {
+final class ScannableURLProvider {
 
 	/**
 	 * Whether to include URLs that don't support AMP.

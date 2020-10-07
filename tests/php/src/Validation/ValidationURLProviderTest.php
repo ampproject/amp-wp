@@ -9,18 +9,18 @@ use AMP_Theme_Support;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
-use AmpProject\AmpWP\Validation\ValidationURLProvider;
+use AmpProject\AmpWP\Validation\ScannableURLProvider;
 use WP_Query;
 use WP_UnitTestCase;
 
-/** @coversDefaultClass ValidationURLProvider */
-final class ValidationURLProviderTest extends WP_UnitTestCase {
+/** @coversDefaultClass ScannableURLProvider */
+final class ScannableURLProviderTest extends WP_UnitTestCase {
 	use PrivateAccess, AssertContainsCompatibility;
 
 	/**
 	 * Validation URL provider instance to use.
 	 *
-	 * @var ValidationURLProvider
+	 * @var ScannableURLProvider
 	 */
 
 	/**
@@ -30,7 +30,7 @@ final class ValidationURLProviderTest extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
-		$this->validation_url_provider = new ValidationURLProvider();
+		$this->validation_url_provider = new ScannableURLProvider();
 		add_filter( 'pre_http_request', [ ValidationRequestMocking::class, 'get_validate_response' ] );
 	}
 
@@ -44,7 +44,7 @@ final class ValidationURLProviderTest extends WP_UnitTestCase {
 
 		$this->assertCount( $number_original_urls, $this->validation_url_provider->get_urls() );
 
-		$this->validation_url_provider = new ValidationURLProvider( 100 );
+		$this->validation_url_provider = new ScannableURLProvider( 100 );
 
 		$category         = self::factory()->term->create( [ 'taxonomy' => 'category' ] );
 		$number_new_posts = 50;
@@ -64,7 +64,7 @@ final class ValidationURLProviderTest extends WP_UnitTestCase {
 		$expected_url_count = $number_new_posts + $number_original_urls + 1;
 		$this->assertCount( $expected_url_count, $this->validation_url_provider->get_urls() );
 
-		$this->validation_url_provider = new ValidationURLProvider( 100 );
+		$this->validation_url_provider = new ScannableURLProvider( 100 );
 
 		$number_of_new_terms        = 20;
 		$expected_url_count        += $number_of_new_terms;

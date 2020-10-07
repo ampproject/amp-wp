@@ -10,8 +10,7 @@
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Validation\URLValidationProvider;
-use AmpProject\AmpWP\Validation\ValidationURLProvider;
-use Utils;
+use AmpProject\AmpWP\Validation\ScannableURLProvider;
 
 /**
  * Crawls the site for validation errors or resets the stored validation errors.
@@ -70,9 +69,9 @@ final class AMP_CLI_Validation_Command {
 	private $validation_provider;
 
 	/**
-	 * ValidationURLProvider instance.
+	 * ScannableURLProvider instance.
 	 *
-	 * @var ValidationURLProvider
+	 * @var ScannableURLProvider
 	 */
 	private $validation_url_provider;
 
@@ -135,7 +134,7 @@ final class AMP_CLI_Validation_Command {
 
 		WP_CLI::log( 'Crawling the site for AMP validity.' );
 
-		$this->wp_cli_progress = Utils::make_progress_bar(
+		$this->wp_cli_progress = WP_CLI\Utils\make_progress_bar(
 			sprintf( 'Validating %d URLs...', $number_urls_to_crawl ),
 			$number_urls_to_crawl
 		);
@@ -181,7 +180,7 @@ final class AMP_CLI_Validation_Command {
 		);
 
 		// Output a table of validity by template/content type.
-		Utils::format_items(
+		WP_CLI\Utils\format_items(
 			'table',
 			$table_validation_by_type,
 			[ $key_template_type, $key_url_count, $key_validity_rate ]
@@ -196,18 +195,18 @@ final class AMP_CLI_Validation_Command {
 	}
 
 	/**
-	 * Provides the ValidationURLProvider instance.
+	 * Provides the ScannableURLProvider instance.
 	 *
-	 * @return ValidationURLProvider
+	 * @return ScannableURLProvider
 	 */
 	private function get_validation_url_provider() {
 		if ( ! is_null( $this->validation_url_provider ) ) {
 			return $this->validation_url_provider;
 		}
 
-		$include_conditionals      = Utils::get_flag_value( $this->assoc_args, self::INCLUDE_ARGUMENT, [] );
-		$force_crawl_urls          = Utils::get_flag_value( $this->assoc_args, self::FLAG_NAME_FORCE_VALIDATION, false );
-		$limit_type_validate_count = Utils::get_flag_value( $this->assoc_args, self::LIMIT_URLS_ARGUMENT, 100 );
+		$include_conditionals      = WP_CLI\Utils\get_flag_value( $this->assoc_args, self::INCLUDE_ARGUMENT, [] );
+		$force_crawl_urls          = WP_CLI\Utils\get_flag_value( $this->assoc_args, self::FLAG_NAME_FORCE_VALIDATION, false );
+		$limit_type_validate_count = WP_CLI\Utils\get_flag_value( $this->assoc_args, self::LIMIT_URLS_ARGUMENT, 100 );
 
 		/*
 		 * Handle the argument and flag passed to the command: --include and --force.
@@ -243,7 +242,7 @@ final class AMP_CLI_Validation_Command {
 			}
 		}
 
-		$this->validation_url_provider = new ValidationURLProvider(
+		$this->validation_url_provider = new ScannableURLProvider(
 			$limit_type_validate_count,
 			$include_conditionals,
 			$force_crawl_urls
@@ -321,7 +320,7 @@ final class AMP_CLI_Validation_Command {
 		$query = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = %s", AMP_Validated_URL_Post_Type::POST_TYPE_SLUG );
 		$posts = new WP_CLI\Iterators\Query( $query, 10000 );
 
-		$progress = Utils::make_progress_bar(
+		$progress = WP_CLI\Utils\make_progress_bar(
 			sprintf( 'Deleting %d amp_validated_url posts...', $count ),
 			$count
 		);
@@ -338,7 +337,7 @@ final class AMP_CLI_Validation_Command {
 		$query = $wpdb->prepare( "SELECT term_id FROM $wpdb->term_taxonomy WHERE taxonomy = %s", AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
 		$terms = new WP_CLI\Iterators\Query( $query, 10000 );
 
-		$progress = Utils::make_progress_bar(
+		$progress = WP_CLI\Utils\make_progress_bar(
 			sprintf( 'Deleting %d amp_taxonomy_error terms...', $count ),
 			$count
 		);
