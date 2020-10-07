@@ -142,7 +142,12 @@ jobs:
 
     - name: PHP unit tests (8.0, WordPress trunk)
       php: "nightly"
-      env: WP_VERSION=trunk  DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1
+      env: WP_VERSION=trunk  DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1 USE_LOCAL_PHPUNIT=1
+      script:
+        - npm run build:js
+        - npm run build:css
+        - composer global require --dev phpunit/phpunit:^9
+        - source "$DEV_LIB_PATH/travis.script.sh"
 
     - name: PHP and JavaScript unit tests (7.4, WordPress trunk, with code coverage)
       if: branch = develop AND type = push

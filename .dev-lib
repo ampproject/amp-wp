@@ -38,6 +38,10 @@ function after_wp_install {
 		unzip -d "$WP_CORE_DIR/src/wp-content/plugins/pwa/" "$WP_CORE_DIR/src/wp-content/plugins/pwa.zip"
 		echo "done"
 	fi
+
+	if [[ ! -z USE_LOCAL_PHPUNIT ]]; then
+		PATH="$(composer config home)/vendor/bin:$PATH"
+	fi
 }
 
 function coverage_clover {
