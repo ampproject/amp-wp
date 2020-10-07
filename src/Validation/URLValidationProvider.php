@@ -46,7 +46,7 @@ final class URLValidationProvider {
 	 *
 	 * @var int
 	 */
-	public $total_errors = 0;
+	private $total_errors = 0;
 
 	/**
 	 * The total number of unaccepted validation errors.
@@ -56,14 +56,14 @@ final class URLValidationProvider {
 	 *
 	 * @var int
 	 */
-	public $unaccepted_errors = 0;
+	private $unaccepted_errors = 0;
 
 	/**
 	 * The number of URLs crawled, regardless of whether they have validation errors.
 	 *
 	 * @var int
 	 */
-	public $number_crawled = 0;
+	private $number_validated = 0;
 
 	/**
 	 * The validation counts by type, like template or post type.
@@ -138,6 +138,33 @@ final class URLValidationProvider {
 	}
 
 	/**
+	 * Provides the total number of validation errors found.
+	 *
+	 * @return int
+	 */
+	public function get_total_errors() {
+		return $this->total_errors;
+	}
+
+	/**
+	 * Provides the total number of unaccepted errors.
+	 *
+	 * @return int
+	 */
+	public function get_unaccepted_errors() {
+		return $this->unaccepted_errors;
+	}
+
+	/**
+	 * Provides the number of URLs that have been checked.
+	 *
+	 * @return int
+	 */
+	public function get_number_validated() {
+		return $this->number_validated;
+	}
+
+	/**
 	 * Validates a URL, stores the results, and increments the counts.
 	 *
 	 * @param string $url  The URL to validate.
@@ -202,7 +229,7 @@ final class URLValidationProvider {
 			$this->unaccepted_errors++;
 		}
 
-		$this->number_crawled++;
+		$this->number_validated++;
 
 		if ( ! isset( $this->validity_by_type[ $type ] ) ) {
 			$this->validity_by_type[ $type ] = [

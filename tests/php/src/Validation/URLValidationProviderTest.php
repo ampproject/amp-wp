@@ -2,6 +2,7 @@
 
 namespace AmpProject\AmpWP\Tests\Validation;
 
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
 use AmpProject\AmpWP\Validation\URLValidationProvider;
 use WP_UnitTestCase;
@@ -32,6 +33,8 @@ final class URLValidationProviderTest extends WP_UnitTestCase {
 	 * Test get_url_validation.
 	 *
 	 * @covers ::get_url_validation()
+	 * @covers ::get_total_errors()
+	 * @covers ::get_unaccepted_errors()
 	 */
 	public function test_get_url_validation() {
 		$single_post_permalink = get_permalink( self::factory()->post->create() );
@@ -50,9 +53,9 @@ final class URLValidationProviderTest extends WP_UnitTestCase {
 		// All of the posts created should be present in the validated URLs.
 		$this->assertEmpty( array_diff( $post_permalinks, ValidationRequestMocking::get_validated_urls() ) );
 
-		$this->assertEquals( 31, $this->validation_provider->total_errors );
-		$this->assertEmpty( $this->validation_provider->unaccepted_errors );
-		$this->assertEquals( 31, $this->validation_provider->number_crawled );
+		$this->assertEquals( 31, $this->validation_provider->get_total_errors() );
+		$this->assertEmpty( $this->validation_provider->get_unaccepted_errors() );
+		$this->assertEquals( 31, $this->validation_provider->get_number_validated() );
 
 		$this->assertEquals(
 			[ 'post' ],

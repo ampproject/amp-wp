@@ -11,6 +11,7 @@ use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Validation\URLValidationProvider;
 use AmpProject\AmpWP\Validation\ValidationURLProvider;
+use Utils;
 
 /**
  * Crawls the site for validation errors or resets the stored validation errors.
@@ -134,7 +135,7 @@ final class AMP_CLI_Validation_Command {
 
 		WP_CLI::log( 'Crawling the site for AMP validity.' );
 
-		$this->wp_cli_progress = WP_CLI\Utils\make_progress_bar(
+		$this->wp_cli_progress = Utils::make_progress_bar(
 			sprintf( 'Validating %d URLs...', $number_urls_to_crawl ),
 			$number_urls_to_crawl
 		);
@@ -173,14 +174,14 @@ final class AMP_CLI_Validation_Command {
 		WP_CLI::success(
 			sprintf(
 				'%3$d crawled URLs have invalid markup kept out of %2$d total with AMP validation issue(s); %1$d URLs were crawled.',
-				$validation_provider->number_crawled,
-				$validation_provider->total_errors,
-				$validation_provider->unaccepted_errors
+				$validation_provider->get_number_validated(),
+				$validation_provider->get_total_errors(),
+				$validation_provider->get_unaccepted_errors()
 			)
 		);
 
 		// Output a table of validity by template/content type.
-		WP_CLI\Utils\format_items(
+		Utils::format_items(
 			'table',
 			$table_validation_by_type,
 			[ $key_template_type, $key_url_count, $key_validity_rate ]
@@ -205,9 +206,10 @@ final class AMP_CLI_Validation_Command {
 			return $this->validation_url_provider;
 		}
 
-		$include_conditionals      = Utils::get_flag_value( $assoc_args, self::INCLUDE_ARGUMENT, [] );
-		$force_crawl_urls          = Utils::get_flag_value( $assoc_args, self::FLAG_NAME_FORCE_VALIDATION, false );
-		$limit_type_validate_count = Utils::get_flag_value( $assoc_args, self::LIMIT_URLS_ARGUMENT, 100 );
+
+		$include_conditionals      = Utils::get_flag_value( $this->assoc_args, self::INCLUDE_ARGUMENT, [] );
+		$force_crawl_urls          = Utils::get_flag_value( $this->assoc_args, self::FLAG_NAME_FORCE_VALIDATION, false );
+		$limit_type_validate_count = Utils::get_flag_value( $this->assoc_args, self::LIMIT_URLS_ARGUMENT, 100 );
 
 		/*
 		 * Handle the argument and flag passed to the command: --include and --force.
@@ -215,7 +217,7 @@ final class AMP_CLI_Validation_Command {
 		 * The WP-CLI command should indicate which templates are crawled, not the /wp-admin options.
 		 */
 		if ( ! empty( $include_conditionals ) ) {
-			$include_conditionals = explode( ',', $assoc_args[ self::INCLUDE_ARGUMENT ] );
+			$include_conditionals = explode( ',', $include_conditionals );
 			$force_crawl_urls     = true;
 		}
 
@@ -321,7 +323,7 @@ final class AMP_CLI_Validation_Command {
 		$query = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = %s", AMP_Validated_URL_Post_Type::POST_TYPE_SLUG );
 		$posts = new WP_CLI\Iterators\Query( $query, 10000 );
 
-		$progress = WP_CLI\Utils\make_progress_bar(
+		$progress = Utils::make_progress_bar(
 			sprintf( 'Deleting %d amp_validated_url posts...', $count ),
 			$count
 		);
@@ -338,7 +340,7 @@ final class AMP_CLI_Validation_Command {
 		$query = $wpdb->prepare( "SELECT term_id FROM $wpdb->term_taxonomy WHERE taxonomy = %s", AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
 		$terms = new WP_CLI\Iterators\Query( $query, 10000 );
 
-		$progress = WP_CLI\Utils\make_progress_bar(
+		$progress = Utils::make_progress_bar(
 			sprintf( 'Deleting %d amp_taxonomy_error terms...', $count ),
 			$count
 		);
