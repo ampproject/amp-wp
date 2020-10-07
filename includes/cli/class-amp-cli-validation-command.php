@@ -11,6 +11,7 @@ use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Validation\URLValidationProvider;
 use AmpProject\AmpWP\Validation\ScannableURLProvider;
+use WP_CLI\Utils;
 
 /**
  * Crawls the site for validation errors or resets the stored validation errors.
@@ -204,9 +205,9 @@ final class AMP_CLI_Validation_Command {
 			return $this->validation_url_provider;
 		}
 
-		$include_conditionals      = WP_CLI\Utils\get_flag_value( $this->assoc_args, self::INCLUDE_ARGUMENT, [] );
-		$force_crawl_urls          = WP_CLI\Utils\get_flag_value( $this->assoc_args, self::FLAG_NAME_FORCE_VALIDATION, false );
-		$limit_type_validate_count = WP_CLI\Utils\get_flag_value( $this->assoc_args, self::LIMIT_URLS_ARGUMENT, 100 );
+		$include_conditionals      = Utils\get_flag_value( $this->assoc_args, self::INCLUDE_ARGUMENT, [] );
+		$force_crawl_urls          = Utils\get_flag_value( $this->assoc_args, self::FLAG_NAME_FORCE_VALIDATION, false );
+		$limit_type_validate_count = Utils\get_flag_value( $this->assoc_args, self::LIMIT_URLS_ARGUMENT, 100 );
 
 		/*
 		 * Handle the argument and flag passed to the command: --include and --force.
