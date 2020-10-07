@@ -54,6 +54,13 @@ final class Document extends DOMDocument
     const DEFAULT_DOCTYPE = '<!DOCTYPE html>';
 
     /**
+     * Regular expression to match the HTML doctype.
+     *
+     * @var string
+     */
+    const HTML_DOCTYPE_REGEX_PATTERN = '#<!doctype\s+html[^>]+?>#si';
+
+    /**
      * Encoding detection order in case we have to guess.
      *
      * This list of encoding detection order is just a wild guess and might need fine-tuning over time.
@@ -105,8 +112,6 @@ final class Document extends DOMDocument
     const HTML_STRUCTURE_BODY_START_TAG  = '/^[^<]*(?><!--.*-->\s*)*(?><body(?>\s+[^>]*)?>)/is';
     const HTML_STRUCTURE_BODY_END_TAG    = '/(?><\/body(?>\s+[^>]*)?>.*)$/is';
     const HTML_STRUCTURE_HEAD_TAG        = '/^(?>[^<]*(?><head(?>\s+[^>]*)?>).*?<\/head(?>\s+[^>]*)?>)/is';
-    const HTML_DOCTYPE_HTML_4_SUFFIX     = ' PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" '
-                                           . '"http://www.w3.org/TR/REC-html40/loose.dtd"';
 
     // Regex patterns used for securing and restoring the doctype node.
     const HTML_SECURE_DOCTYPE_IF_NOT_FIRST_PATTERN = '/(^[^<]*(?>\s*<!--[^>]*>\s*)+<)(!)(doctype)(\s+[^>]+?)(>)/i';
@@ -646,7 +651,7 @@ final class Document extends DOMDocument
         $content = "{$htmlStart}{$content}{$htmlEnd}";
 
         // Reinsert a standard doctype (while preserving any potentially leading comments).
-        $doctype = str_ireplace(self::HTML_DOCTYPE_HTML_4_SUFFIX, '', $doctype);
+        $doctype = preg_replace(self::HTML_DOCTYPE_REGEX_PATTERN, self::DEFAULT_DOCTYPE, $doctype);
         $content = "{$doctype}{$content}";
 
         return $content;
