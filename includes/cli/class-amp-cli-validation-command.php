@@ -195,7 +195,6 @@ final class AMP_CLI_Validation_Command {
 		WP_CLI::line( sprintf( 'For more details, please see: %s', $url_more_details ) );
 	}
 
-
 	/**
 	 * Provides the ValidationURLProvider instance.
 	 *
@@ -205,7 +204,6 @@ final class AMP_CLI_Validation_Command {
 		if ( ! is_null( $this->validation_url_provider ) ) {
 			return $this->validation_url_provider;
 		}
-
 
 		$include_conditionals      = Utils::get_flag_value( $this->assoc_args, self::INCLUDE_ARGUMENT, [] );
 		$force_crawl_urls          = Utils::get_flag_value( $this->assoc_args, self::FLAG_NAME_FORCE_VALIDATION, false );

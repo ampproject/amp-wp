@@ -73,12 +73,12 @@ final class URLValidationProviderTest extends WP_UnitTestCase {
 	 * @covers ::with_lock
 	 */
 	public function test_locking() {
-		$this->assertFalse( get_transient( URLValidationProvider::LOCK_TRANSIENT ) );
+		$this->assertFalse( get_transient( URLValidationProvider::LOCK_KEY ) );
 
 		$expected_result = 'EXPECTED RESULT';
 		$result          = $this->validation_provider->with_lock(
 			function () use ( $expected_result ) {
-				$this->assertEquals( 'locked', get_transient( URLValidationProvider::LOCK_TRANSIENT ) );
+				$this->assertEquals( 'locked', get_transient( URLValidationProvider::LOCK_KEY ) );
 
 				// Expect an error when lock is already in place.
 				$this->assertWPError( $this->validation_provider->with_lock( '__return_empty_string' ) );
@@ -88,16 +88,16 @@ final class URLValidationProviderTest extends WP_UnitTestCase {
 		);
 
 		$this->assertEquals( $expected_result, $result );
-		$this->assertFalse( get_transient( URLValidationProvider::LOCK_TRANSIENT ) );
+		$this->assertFalse( get_transient( URLValidationProvider::LOCK_KEY ) );
 
 		// Test with_lock with no return value.
 		$this->assertNull(
 			$this->validation_provider->with_lock(
 				function () {
-					$this->assertEquals( 'locked', get_transient( URLValidationProvider::LOCK_TRANSIENT ) );
+					$this->assertEquals( 'locked', get_transient( URLValidationProvider::LOCK_KEY ) );
 				}
 			)
 		);
-		$this->assertFalse( get_transient( URLValidationProvider::LOCK_TRANSIENT ) );
+		$this->assertFalse( get_transient( URLValidationProvider::LOCK_KEY ) );
 	}
 }

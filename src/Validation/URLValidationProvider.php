@@ -25,7 +25,7 @@ final class URLValidationProvider {
 	 *
 	 * @var string
 	 */
-	const LOCK_TRANSIENT = 'amp_validation_locked';
+	const LOCK_KEY = 'amp_validation_locked';
 
 	/**
 	 * Flag to pass to get_url_validation to force revalidation.
@@ -83,14 +83,14 @@ final class URLValidationProvider {
 	 * Locks validation.
 	 */
 	private function lock() {
-		set_transient( self::LOCK_TRANSIENT, 'locked', $this->get_lock_timeout() );
+		update_option( self::LOCK_KEY, time(), false );
 	}
 
 	/**
 	 * Unlocks validation.
 	 */
 	private function unlock() {
-		delete_transient( self::LOCK_TRANSIENT );
+		delete_option( self::LOCK_KEY );
 	}
 
 	/**
@@ -99,7 +99,10 @@ final class URLValidationProvider {
 	 * @return boolean
 	 */
 	public function is_locked() {
-		return get_transient( self::LOCK_TRANSIENT );
+		$lock_time = intval( get_option( self::LOCK_KEY, 0 ) );
+
+		// It's locked if the difference between the lock time and the current time is less than the lockout time.
+		return time() - $lock_time < $this->get_lock_timeout();
 	}
 
 	/**
