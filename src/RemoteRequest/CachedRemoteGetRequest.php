@@ -124,6 +124,7 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 			try {
 				$response = $this->remote_request->get( $url );
 				$status   = $response->getStatusCode();
+				/** @var DateTimeImmutable $expiry */
 				$expiry   = $this->get_expiry_time( $response );
 				$headers  = $response->getHeaders();
 				$body     = $response->getBody();
