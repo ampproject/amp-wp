@@ -194,25 +194,6 @@ final class AMP_CLI_Validation_Command {
 		WP_CLI::line( sprintf( 'For more details, please see: %s', $url_more_details ) );
 	}
 
-	/**
-	 * Provides the associative args for the command.
-	 *
-	 * @return array
-	 */
-	private function get_assoc_args() {
-		if ( ! is_array( $this->assoc_args ) ) {
-			$this->assoc_args = [];
-		}
-
-		return array_merge(
-			[
-				self::LIMIT_URLS_ARGUMENT        => 100,
-				self::INCLUDE_ARGUMENT           => [],
-				self::FLAG_NAME_FORCE_VALIDATION => false,
-			],
-			$this->assoc_args
-		);
-	}
 
 	/**
 	 * Provides the ValidationURLProvider instance.
@@ -224,22 +205,18 @@ final class AMP_CLI_Validation_Command {
 			return $this->validation_url_provider;
 		}
 
-		$assoc_args = $this->get_assoc_args();
-
-		$include_conditionals      = [];
-		$force_crawl_urls          = false;
-		$limit_type_validate_count = (int) $assoc_args[ self::LIMIT_URLS_ARGUMENT ];
+		$include_conditionals      = Utils::get_flag_value( $assoc_args, self::INCLUDE_ARGUMENT, [] );
+		$force_crawl_urls          = Utils::get_flag_value( $assoc_args, self::FLAG_NAME_FORCE_VALIDATION, false );
+		$limit_type_validate_count = Utils::get_flag_value( $assoc_args, self::LIMIT_URLS_ARGUMENT, 100 );
 
 		/*
 		 * Handle the argument and flag passed to the command: --include and --force.
 		 * If the self::INCLUDE_ARGUMENT is present, force crawling of URLs.
 		 * The WP-CLI command should indicate which templates are crawled, not the /wp-admin options.
 		 */
-		if ( ! empty( $assoc_args[ self::INCLUDE_ARGUMENT ] ) ) {
+		if ( ! empty( $include_conditionals ) ) {
 			$include_conditionals = explode( ',', $assoc_args[ self::INCLUDE_ARGUMENT ] );
 			$force_crawl_urls     = true;
-		} elseif ( isset( $assoc_args[ self::FLAG_NAME_FORCE_VALIDATION ] ) ) {
-			$force_crawl_urls = true;
 		}
 
 		// Handle special case for Legacy Reader mode.
