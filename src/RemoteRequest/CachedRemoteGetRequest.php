@@ -135,7 +135,10 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 
 			$cached_response = new CachedResponse( $body, $headers, $status, $expiry );
 
-			set_transient( $cache_key, serialize( $cached_response ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
+			// Transient extend beyond cache expiry to allow for serving stale content.
+			// @TODO: We don't serve stale content atm, but rather synchronously refresh.
+			$transient_expiry = $expiry->modify( "+ {$this->expiry} seconds" );
+			set_transient( $cache_key, serialize( $cached_response ), $transient_expiry->getTimestamp() ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
 		}
 
 		if ( ! $cached_response->is_valid() ) {
