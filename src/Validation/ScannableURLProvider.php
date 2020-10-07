@@ -23,7 +23,7 @@ final class ScannableURLProvider {
 	 *
 	 * @var bool
 	 */
-	public $include_unsupported;
+	private $include_unsupported;
 
 	/**
 	 * An allowlist of conditionals to use for querying URLs.
@@ -32,7 +32,7 @@ final class ScannableURLProvider {
 	 *
 	 * @var string[]
 	 */
-	public $include_conditionals;
+	private $include_conditionals;
 
 	/**
 	 * The maximum number of URLs to provide for each content type.
@@ -41,10 +41,10 @@ final class ScannableURLProvider {
 	 *
 	 * @var int
 	 */
-	public $limit_per_type;
+	private $limit_per_type;
 
 	/**
-	 * Class constructor.
+	 * Class construÎctor.
 	 *
 	 * @param integer $limit_per_type       The maximum number of URLs to validate for each type.
 	 * @param array   $include_conditionals An allowlist of conditionals to use for validation.
