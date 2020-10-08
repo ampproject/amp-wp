@@ -1931,6 +1931,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( $response_body, $actual_stylesheets[0] );
 
 		$cache_key = CachedRemoteGetRequest::TRANSIENT_PREFIX . md5( CachedRemoteGetRequest::class . $href );
+
+		// Verify that the transients are not polluting the autoloaded options.
+		$autoloaded_options = wp_load_alloptions();
+		$this->assertArrayNotHasKey( "_transient_{$cache_key}", $autoloaded_options );
+
 		$transient = get_transient( $cache_key );
 		$this->assertNotFalse( $transient );
 
