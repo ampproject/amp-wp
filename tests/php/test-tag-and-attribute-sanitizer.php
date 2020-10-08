@@ -245,13 +245,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'amp-iframe'                                   => [
-				'<amp-iframe width="600" height="200" sandbox="allow-scripts allow-same-origin" layout="responsive" frameborder="0" src="https://www.example.com"></amp-iframe>',
+				'<amp-iframe width="600" height="200" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation" layout="responsive" frameborder="0" src="https://www.example.com"></amp-iframe>',
 				null, // No change.
 				[ 'amp-iframe' ],
 			],
 
 			'amp-iframe_incorrect_protocol'                => [
-				'<amp-iframe width="600" height="200" sandbox="allow-scripts allow-same-origin" layout="responsive" frameborder="0" src="badprotocol://www.example.com"></amp-iframe>',
+				'<amp-iframe width="600" height="200" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation" layout="responsive" frameborder="0" src="badprotocol://www.example.com"></amp-iframe>',
 				'',
 				[],
 				[
