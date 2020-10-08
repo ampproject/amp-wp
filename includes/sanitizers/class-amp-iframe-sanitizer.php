@@ -31,7 +31,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 * | `allow-orientation-lock`                  | Yes      | Since we `allowfullscreen`, useful for games, etc.
 	 * | `allow-pointer-lock`                      | Yes      | Useful for games.
 	 * | `allow-popups`                            | Yes      | To open YouTube video in new window, for example.
-	 * | `allow-popups-to-escape-sandbox`          | Yes      | Useful for ads
+	 * | `allow-popups-to-escape-sandbox`          | Yes      | Useful for ads.
 	 * | `allow-presentation`                      | Yes      | To cast YouTube videos, for example.
 	 * | `allow-same-origin`                       | Yes      | Removed if iframe is same origin.
 	 * | `allow-scripts`                           | Yes      | An iframe's primary use case is custom JS.
