@@ -49,13 +49,6 @@ class AMP_Imgur_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		if ( false !== strpos( $parsed_url['host'], 'imgur.com' ) ) {
-			if ( preg_match( '/width=["\']?(\d+)/', $return, $matches ) ) {
-				$attr['width'] = $matches[1];
-			}
-			if ( preg_match( '/height=["\']?(\d+)/', $return, $matches ) ) {
-				$attr['height'] = $matches[1];
-			}
-
 			if ( empty( $attr['height'] ) ) {
 				return $return;
 			}
