@@ -7,7 +7,6 @@
  * Author URI: https://github.com/ampproject/amp-wp/graphs/contributors
  * Version: 2.1.0-alpha
  * Text Domain: amp
- * Domain Path: /languages/
  * License: GPLv2 or later
  * Requires at least: 4.9
  * Requires PHP: 5.6
