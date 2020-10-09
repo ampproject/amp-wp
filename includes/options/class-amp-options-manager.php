@@ -171,7 +171,7 @@ class AMP_Options_Manager {
 			&&
 			get_stylesheet() === $options[ Option::READER_THEME ]
 			&&
-			! amp_is_paired_endpoint()
+			! amp_has_paired_endpoint()
 		) {
 			/*
 			 * When Reader mode is selected and a Reader theme has been chosen, if the active theme switches to be the

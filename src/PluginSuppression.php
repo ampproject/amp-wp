@@ -92,7 +92,7 @@ final class PluginSuppression implements Service, Registerable {
 			&&
 			ReaderThemes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME )
 			&&
-			amp_is_paired_endpoint()
+			amp_has_paired_endpoint()
 		);
 	}
 

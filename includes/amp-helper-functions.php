@@ -612,7 +612,7 @@ function amp_redirect_old_slug_to_new_url( $link ) {
 
 	if ( amp_is_request() && ! amp_is_canonical() ) {
 		if ( ! amp_is_legacy() ) {
-			$link = amp_get_paired_endpoint( $link );
+			$link = amp_add_paired_endpoint( $link );
 		} else {
 			$link = trailingslashit( trailingslashit( $link ) . amp_get_slug() );
 		}
@@ -717,7 +717,7 @@ function amp_get_permalink( $post_id ) {
 	}
 
 	$permalink = get_permalink( $post_id );
-	$amp_url   = amp_is_canonical() ? $permalink : amp_get_paired_endpoint( $permalink );
+	$amp_url   = amp_is_canonical() ? $permalink : amp_add_paired_endpoint( $permalink );
 
 	/**
 	 * Filters AMP permalink.
@@ -793,7 +793,7 @@ function amp_add_amphtml_link() {
 	}
 
 	if ( AMP_Theme_Support::is_paired_available() ) {
-		$amp_url = amp_get_paired_endpoint( amp_get_current_url() );
+		$amp_url = amp_add_paired_endpoint( amp_get_current_url() );
 	} else {
 		$amp_url = amp_get_permalink( get_queried_object_id() );
 	}
@@ -856,7 +856,7 @@ function amp_is_request() {
 	$is_amp_url = (
 		amp_is_canonical()
 		||
-		amp_is_paired_endpoint()
+		amp_has_paired_endpoint()
 	);
 
 	// If AMP is not available, then it's definitely not an AMP endpoint.
@@ -1865,7 +1865,7 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 	} elseif ( is_singular() ) {
 		$href = amp_get_permalink( get_queried_object_id() ); // For sake of Reader mode.
 	} else {
-		$href = amp_get_paired_endpoint( amp_get_current_url() );
+		$href = amp_add_paired_endpoint( amp_get_current_url() );
 	}
 
 	$href = remove_query_arg( QueryVar::NOAMP, $href );
@@ -1900,7 +1900,7 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 		if ( amp_is_legacy() ) {
 			$args['href'] = add_query_arg( 'autofocus[panel]', AMP_Template_Customizer::PANEL_ID, $args['href'] );
 		} else {
-			$args['href'] = amp_get_paired_endpoint( $args['href'] );
+			$args['href'] = amp_add_paired_endpoint( $args['href'] );
 		}
 		$wp_admin_bar->add_node( $args );
 	}
@@ -1936,19 +1936,19 @@ function amp_generate_script_hash( $script ) {
 }
 
 /**
- * Get the paired AMP endpoint for a URL.
+ * Turn a given URL into a paired AMP URL.
  *
  * @since 2.1
  *
  * @param string $url URL.
  * @return string AMP URL.
  */
-function amp_get_paired_endpoint( $url ) {
+function amp_add_paired_endpoint( $url ) {
 	return add_query_arg( amp_get_slug(), '1', $url );
 }
 
 /**
- * Determine whether the current request has the AMP query parameter set.
+ * Determine a given URL is for a paired AMP request.
  *
  * @since 2.1
  *
@@ -1956,7 +1956,7 @@ function amp_get_paired_endpoint( $url ) {
  * @return bool True if the AMP query parameter is set with the required value, false if not.
  * @global WP_Query $wp_query
  */
-function amp_is_paired_endpoint( $url = '' ) {
+function amp_has_paired_endpoint( $url = '' ) {
 	$slug = amp_get_slug();
 
 	// If the URL was not provided, then use the environment which is already parsed.

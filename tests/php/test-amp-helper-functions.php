@@ -641,14 +641,14 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			'is_home'         => static function () {
 				return [
 					home_url( '/' ),
-					amp_get_paired_endpoint( home_url( '/' ) ),
+					amp_add_paired_endpoint( home_url( '/' ) ),
 					false,
 				];
 			},
 			'is_404'          => static function () {
 				return [
 					home_url( '/no-existe/' ),
-					amp_get_paired_endpoint( home_url( '/no-existe/' ) ),
+					amp_add_paired_endpoint( home_url( '/no-existe/' ) ),
 					false,
 				];
 			},
@@ -740,14 +740,14 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			'is_home'         => static function () {
 				return [
 					home_url( '/' ),
-					amp_get_paired_endpoint( home_url( '/' ) ),
+					amp_add_paired_endpoint( home_url( '/' ) ),
 					true,
 				];
 			},
 			'is_404'          => static function () {
 				return [
 					home_url( '/no-existe/' ),
-					amp_get_paired_endpoint( home_url( '/no-existe/' ) ),
+					amp_add_paired_endpoint( home_url( '/no-existe/' ) ),
 					true,
 				];
 			},
@@ -1054,7 +1054,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function test_amp_is_request_before_wp_action_for_transitional_mode_with_query_var() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
-		$this->go_to( amp_get_paired_endpoint( home_url( '/' ) ) );
+		$this->go_to( amp_add_paired_endpoint( home_url( '/' ) ) );
 		global $wp_actions;
 		unset( $wp_actions['wp'] );
 		$this->assertTrue( AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) );
@@ -1818,15 +1818,15 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertSame( 'sha384-_MAJ0_NC2k8jrjehfi-5LdQasBICZXvp4gOwOx0D3mIStvDCGvZDzcTfXLgMrLL1', amp_generate_script_hash( 'document.body.textContent = \'<Hi! & 👋>\';' ) );
 	}
 
-	/** @covers ::amp_get_paired_endpoint() */
-	public function test_amp_get_paired_endpoint() {
-		$this->assertEquals( home_url( '/?amp=1' ), amp_get_paired_endpoint( home_url( '/' ) ) );
-		$this->assertEquals( home_url( '/?foo=bar&amp=1' ), amp_get_paired_endpoint( home_url( '/?foo=bar' ) ) );
-		$this->assertEquals( home_url( '/?foo=bar&amp=1#baz' ), amp_get_paired_endpoint( home_url( '/?foo=bar#baz' ) ) );
+	/** @covers ::amp_add_paired_endpoint() */
+	public function test_amp_add_paired_endpoint() {
+		$this->assertEquals( home_url( '/?amp=1' ), amp_add_paired_endpoint( home_url( '/' ) ) );
+		$this->assertEquals( home_url( '/?foo=bar&amp=1' ), amp_add_paired_endpoint( home_url( '/?foo=bar' ) ) );
+		$this->assertEquals( home_url( '/?foo=bar&amp=1#baz' ), amp_add_paired_endpoint( home_url( '/?foo=bar#baz' ) ) );
 	}
 
 	/** @return array */
-	public function data_amp_is_paired_endpoint() {
+	public function data_amp_has_paired_endpoint() {
 		return [
 			'nothing'                 => [
 				'',
@@ -1864,13 +1864,13 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @dataProvider data_amp_is_paired_endpoint
-	 * @covers ::amp_is_paired_endpoint()
+	 * @dataProvider data_amp_has_paired_endpoint
+	 * @covers ::amp_has_paired_endpoint()
 	 *
 	 * @param string $suffix
 	 * @param bool   $is_amp
 	 */
-	public function test_amp_is_paired_endpoint_go_to( $suffix, $is_amp ) {
+	public function test_amp_has_paired_endpoint_go_to( $suffix, $is_amp ) {
 		add_filter( 'wp_redirect', '__return_empty_string' ); // Prevent ensure_proper_amp_location() from redirecting.
 		global $wp_rewrite;
 		update_option( 'permalink_structure', '/%year%/%monthnum%/%day%/%postname%/' );
@@ -1884,21 +1884,21 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->go_to( $url );
 		$this->assertTrue( is_singular(), 'Expected singular query.' );
 		$this->assertTrue( amp_is_available(), 'Expected AMP to be available.' );
-		$this->assertEquals( $is_amp, amp_is_paired_endpoint() );
+		$this->assertEquals( $is_amp, amp_has_paired_endpoint() );
 	}
 
 	/**
-	 * @dataProvider data_amp_is_paired_endpoint
-	 * @covers ::amp_is_paired_endpoint()
+	 * @dataProvider data_amp_has_paired_endpoint
+	 * @covers ::amp_has_paired_endpoint()
 	 *
 	 * @param string $suffix
 	 * @param bool   $is_amp
 	 */
-	public function test_amp_is_paired_endpoint_passed( $suffix, $is_amp ) {
+	public function test_amp_has_paired_endpoint_passed( $suffix, $is_amp ) {
 		$permalink = home_url( '/foo/' );
 		$this->assertNotContains( '?', $permalink );
 		$url = $permalink . $suffix;
-		$this->assertEquals( $is_amp, amp_is_paired_endpoint( $url ) );
+		$this->assertEquals( $is_amp, amp_has_paired_endpoint( $url ) );
 	}
 
 	/**

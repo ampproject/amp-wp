@@ -88,7 +88,7 @@ final class MobileRedirection implements Service, Registerable {
 	 * @return string AMP URL.
 	 */
 	public function get_current_amp_url() {
-		$url = amp_get_paired_endpoint( amp_get_current_url() );
+		$url = amp_add_paired_endpoint( amp_get_current_url() );
 		$url = remove_query_arg( QueryVar::NOAMP, $url );
 		return $url;
 	}

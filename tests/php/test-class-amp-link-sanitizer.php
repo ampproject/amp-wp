@@ -252,7 +252,7 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, true );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
-		$this->go_to( amp_get_paired_endpoint( home_url( '/' ) ) );
+		$this->go_to( amp_add_paired_endpoint( home_url( '/' ) ) );
 		$mobile_redirection->redirect();
 
 		$link = home_url( '/' );
@@ -274,7 +274,7 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, true );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
-		$this->go_to( amp_get_paired_endpoint( home_url( '/' ) ) );
+		$this->go_to( amp_add_paired_endpoint( home_url( '/' ) ) );
 		$mobile_redirection->redirect();
 
 		$link = home_url( '/' );
