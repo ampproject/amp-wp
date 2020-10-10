@@ -112,8 +112,6 @@ final class PreloadHeroImage implements Transformer
             $heroImageCount = self::DATA_HERO_MAX;
         }
 
-        $isAmpStory = Amp::isAmpStory($document);
-
         for ($index = 0; $index < $heroImageCount; $index++) {
             $this->generatePreload($heroImages[$index], $document, $errors, $referenceNode);
             $this->generateImg($heroImages[$index], $document);
