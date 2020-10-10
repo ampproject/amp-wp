@@ -3220,12 +3220,20 @@ class AMP_Validation_Error_Taxonomy {
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_FIXED_HEIGHT:
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_AUTO_WIDTH:
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_HEIGHTS:
-				return sprintf(
-					/* translators: %1$s is the invalid attribute value, %2$s is the attribute name */
-					esc_html__( 'Invalid value %1$s for attribute %2$s', 'amp' ),
-					'<code>' . esc_html( $validation_error['node_attributes'][ $validation_error['attribute'] ] ) . '</code>',
-					'<code>' . esc_html( $validation_error['attribute'] ) . '</code>'
-				);
+				if ( isset( $validation_error['node_attributes'][ $validation_error['attribute'] ] ) ) {
+					return sprintf(
+						/* translators: %1$s is the invalid attribute value, %2$s is the attribute name */
+						esc_html__( 'Invalid value %1$s for attribute %2$s', 'amp' ),
+						'<code>' . esc_html( $validation_error['node_attributes'][ $validation_error['attribute'] ] ) . '</code>',
+						'<code>' . esc_html( $validation_error['attribute'] ) . '</code>'
+					);
+				} else {
+					return sprintf(
+						/* translators: %s is the invalid attribute value */
+						esc_html__( 'Invalid or missing value for attribute %s', 'amp' ),
+						'<code>' . esc_html( $validation_error['attribute'] ) . '</code>'
+					);
+				}
 
 			case AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_UNIT_DIMENSIONS:
 				return esc_html__( 'Inconsistent units for width and height', 'amp' );

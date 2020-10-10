@@ -124,9 +124,10 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 			try {
 				$response = $this->remote_request->get( $url );
 				$status   = $response->getStatusCode();
-				$expiry   = $this->get_expiry_time( $response );
-				$headers  = $response->getHeaders();
-				$body     = $response->getBody();
+				/** @var DateTimeImmutable $expiry */
+				$expiry  = $this->get_expiry_time( $response );
+				$headers = $response->getHeaders();
+				$body    = $response->getBody();
 			} catch ( FailedToGetFromRemoteUrl $exception ) {
 				$status = $exception->getStatusCode();
 				$expiry = new DateTimeImmutable( "+ {$this->min_expiry} seconds" );
@@ -135,7 +136,11 @@ final class CachedRemoteGetRequest implements RemoteGetRequest {
 
 			$cached_response = new CachedResponse( $body, $headers, $status, $expiry );
 
-			set_transient( $cache_key, serialize( $cached_response ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
+			// Transient extend beyond cache expiry to allow for serving stale content.
+			// @TODO: We don't serve stale content atm, but rather synchronously refresh.
+			// See https://github.com/ampproject/amp-wp/issues/5477.
+			$transient_expiry = $expiry->modify( "+ {$this->expiry} seconds" );
+			set_transient( $cache_key, serialize( $cached_response ), $transient_expiry->getTimestamp() ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
 		}
 
 		if ( ! $cached_response->is_valid() ) {
