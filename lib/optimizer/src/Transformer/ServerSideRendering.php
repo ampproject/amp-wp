@@ -633,12 +633,15 @@ final class ServerSideRendering implements Transformer
         Document $document,
         CssLength $width,
         CssLength $height,
-        $style = 'padding-top:%1.4F%%;'
+        $style = 'padding-top:%s%%'
     ) {
-        $padding = $height->getNumeral() / $width->getNumeral() * 100;
-        $sizer   = $document->createElement(Amp::SIZER_ELEMENT);
-        $style   = empty($style) ? 'display:block' : "display:block;{$style}";
-        $sizer->setAttribute(Tag::STYLE, sprintf($style, $padding));
+        $padding       = $height->getNumeral() / $width->getNumeral() * 100;
+        $paddingString = (string) round($padding, 4);
+
+        $style = empty($style) ? 'display:block' : "display:block;{$style}";
+
+        $sizer = $document->createElement(Amp::SIZER_ELEMENT);
+        $sizer->setAttribute(Tag::STYLE, sprintf($style, $paddingString));
 
         return $sizer;
     }

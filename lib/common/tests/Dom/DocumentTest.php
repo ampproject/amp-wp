@@ -153,9 +153,19 @@ class DocumentTest extends TestCase
                 '<html amp lang="en">' . $head . '<body class="some-class"><p>Text</p></body></html>',
                 '<!DOCTYPE html><html amp lang="en">' . $head . '<body class="some-class"><p>Text</p></body></html>',
             ],
-            'html_4_doctype'                           => [
+            'html_4_loose_doctype'                     => [
                 'utf-8',
                 '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><html amp lang="en">' . $head . '<body class="some-class"><p>Text</p></body></html>',
+                '<!DOCTYPE html><html amp lang="en">' . $head . '<body class="some-class"><p>Text</p></body></html>',
+            ],
+            'html_401_strict_doctype'                  => [
+                'utf-8',
+                '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"><html amp lang="en">' . $head . '<body class="some-class"><p>Text</p></body></html>',
+                '<!DOCTYPE html><html amp lang="en">' . $head . '<body class="some-class"><p>Text</p></body></html>',
+            ],
+            'xhtml_10_strict_doctype'                  => [
+                'utf-8',
+                '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html amp lang="en">' . $head . '<body class="some-class"><p>Text</p></body></html>',
                 '<!DOCTYPE html><html amp lang="en">' . $head . '<body class="some-class"><p>Text</p></body></html>',
             ],
             'html_with_xmlns_and_xml_lang'             => [
