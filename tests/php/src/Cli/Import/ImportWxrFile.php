@@ -18,11 +18,18 @@ use WP_User;
 final class ImportWxrFile implements ImportStep {
 
 	/**
-	 * Regular expression pattern to use for detecting upload URLs in post content.
+	 * Regular expression pattern for detecting upload URLs in post content.
 	 *
 	 * @var string
 	 */
 	const UPLOAD_URL_PATTERN = '#/wp-content/uploads/(\d+/\d+/.*?\.\w+)#i';
+
+	/**
+	 * Regular expression pattern for detecting a remote URL.
+	 *
+	 * @var string
+	 */
+	const IS_REMOTE_URL = '#^http(s)?://#i';
 
 	/**
 	 * Regular expression replacement string to use for adapting upload URLs in post content.
@@ -41,12 +48,68 @@ final class ImportWxrFile implements ImportStep {
 	private $wxr_file;
 
 	/**
+	 * Whether the WXR file is a temporary file and needs cleanup.
+	 *
+	 * @var bool
+	 */
+	private $wxr_is_temporary_file = false;
+
+	/**
 	 * ImportWxrFile constructor.
 	 *
 	 * @param string $wxr_file File path to the WXR file to import.
 	 */
 	public function __construct( $wxr_file ) {
 		$this->wxr_file = $wxr_file;
+
+		WP_CLI::warning( $this->wxr_file );
+		if ( preg_match( self::IS_REMOTE_URL, $this->wxr_file ) ) {
+			$this->wxr_is_temporary_file = true;
+
+			// Extract the file name from the URL.
+			$file_name = basename( wp_parse_url( $this->wxr_file, PHP_URL_PATH ) );
+
+			if ( ! $file_name ) {
+				$file_name = md5( $this->wxr_file );
+			}
+
+			$tmp_file_name = wp_tempnam( $file_name );
+			if ( ! $tmp_file_name ) {
+				$message = __( 'Could not create temporary file for downloading remote WXR file.', 'amp' );
+				WP_CLI::warning( $message );
+				$this->wxr_file = '';
+				return;
+			}
+
+			$context_options = [
+				'ssl' => [
+					'verify_peer'      => false,
+					'verify_peer_name' => false,
+				],
+			];
+
+			$data = file_get_contents( // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Needed for stream wrapper support.
+				$this->wxr_file,
+				false,
+				stream_context_create( $context_options )
+			);
+
+			if ( false === $data || empty( $data ) ) {
+				$message = __( 'Could not download remote WXR file: ', 'amp' ) . $this->wxr_file;
+				WP_CLI::warning( $message );
+				$this->wxr_file = '';
+				return;
+			}
+
+			file_put_contents( $tmp_file_name, $data ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents -- Needed for stream wrapper support.
+			$this->wxr_file = $tmp_file_name;
+		}
+	}
+
+	public function __destruct() {
+		if ( $this->wxr_is_temporary_file ) {
+			unlink( $this->wxr_file );
+		}
 	}
 
 	/**
@@ -56,6 +119,10 @@ final class ImportWxrFile implements ImportStep {
 	 *             Returns -1 for failure.
 	 */
 	public function process() {
+		if ( empty( $this->wxr_file ) ) {
+			throw new RuntimeException( 'Failed to retrieve WXR file, aborting.' );
+		}
+
 		$importer    = new ReferenceSiteImporter();
 		$import_data = $importer->parse( $this->wxr_file );
 
