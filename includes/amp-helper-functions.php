@@ -1469,6 +1469,7 @@ function amp_get_content_sanitizers( $post = null ) {
 			],
 		],
 		'AMP_Srcset_Sanitizer'            => [],
+		'AMP_Emoji_Sanitizer'             => [],
 		'AMP_Img_Sanitizer'               => [
 			'align_wide_support' => current_theme_supports( 'align-wide' ),
 		],
