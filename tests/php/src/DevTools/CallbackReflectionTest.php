@@ -84,24 +84,16 @@ class CallbackReflectionTest extends DependencyInjectedTestCase {
 				'includes/amp-helper-functions.php',
 				ReflectionFunction::class,
 			],
-			'core_includes_wp_scripts_method'     => [
-				'WP_Scripts::print_scripts',
-				'WP_Scripts::print_scripts',
+			'core_includes_wp_user_static_method' => [
+				'WP_User::get_data_by',
+				'WP_User::get_data_by',
 				'wp-includes',
 				'core',
-				'class.wp-scripts.php',
+				'class-wp-user.php',
 				ReflectionMethod::class,
 			],
 			'core_widget_display_callback_array'  => [
 				[ 'WP_Widget_Text', 'display_callback' ],
-				'WP_Widget_Text::widget',
-				'wp-includes',
-				'core',
-				'widgets/class-wp-widget-text.php',
-				ReflectionMethod::class,
-			],
-			'core_widget_display_callback_string' => [
-				'WP_Widget_Text::display_callback',
 				'WP_Widget_Text::widget',
 				'wp-includes',
 				'core',
