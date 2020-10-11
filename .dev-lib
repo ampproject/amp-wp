@@ -39,8 +39,29 @@ function after_wp_install {
 		echo "done"
 	fi
 
-	if [[ ! -z USE_LOCAL_PHPUNIT ]]; then
-		PATH="$(composer config home)/vendor/bin:$PATH"
+	if [[ $(php -r "echo PHP_VERSION;") == 8.0* ]]; then
+		echo "Installing compatible PHPUnit for use with PHP 8..."
+
+		PATCH=$(cat <<-EOF
+      "${WP_TESTS_DIR}/includes/phpunit7/MockObject/Builder/NamespaceMatch.php",
+      "${WP_TESTS_DIR}/includes/phpunit7/MockObject/Builder/ParametersMatch.php",
+      "${WP_TESTS_DIR}/includes/phpunit7/MockObject/InvocationMocker.php",
+      "${WP_TESTS_DIR}/includes/phpunit7/MockObject/MockMethod.php"
+    ],
+    "exclude-from-classmap": [
+      "vendor/phpunit/phpunit/src/Framework/MockObject/Builder/NamespaceMatch.php",
+      "vendor/phpunit/phpunit/src/Framework/MockObject/Builder/ParametersMatch.php",
+      "vendor/phpunit/phpunit/src/Framework/MockObject/InvocationMocker.php",
+      "vendor/phpunit/phpunit/src/Framework/MockObject/MockMethod.php"
+		EOF
+		)
+
+		sed -i "/register-wp-cli-commands.php\"$/a , $(echo ${PATCH})" composer.json
+		cat composer.json
+		composer require --dev --ignore-platform-reqs phpunit/phpunit:^7.5
+
+		PATH="$(composer config bin-dir --absolute):$PATH"
+		echo "done"
 	fi
 }
 
