@@ -2489,7 +2489,8 @@ class AMP_Theme_Support {
 		?>
 		<style type="text/css">
 			img.wp-smiley,
-			img.emoji {
+			img.emoji,
+			svg.emoji {
 				display: inline-block !important; /* Patched from core, which had display:inline */
 				border: none !important;
 				box-shadow: none !important;

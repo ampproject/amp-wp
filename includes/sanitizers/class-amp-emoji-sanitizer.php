@@ -15,13 +15,51 @@
 class AMP_Emoji_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
+	 * Default args.
+	 *
+	 * @var array
+	 */
+	protected $DEFAULT_ARGS = [
+		'use_svg'     => true,
+		'inline_svg'  => true,
+		'max_fetches' => 32,
+	];
+
+	/**
+	 * Args.
+	 *
+	 * @var array {
+	 *      @type bool $use_svg     Whether SVG emoji should be used.
+	 *      @type bool $inline_svg  Whether SVG emoji should be inlined.
+	 *      @type int  $max_fetches Maximum number of fetches for SVG from s.w.org.
+	 * }
+	 */
+	protected $args;
+
+	/**
+	 * Number of SVG images fetched.
+	 *
+	 * @var int
+	 */
+	private $fetched_count = 0;
+
+	/**
+	 * Twemoji version.
+	 *
+	 * @todo Replace this with the current version in WordPress core.
+	 *
+	 * @var string
+	 */
+	private $twemoji_version = '';
+
+	/**
 	 * CDN URL.
 	 *
 	 * @todo Replace this with what is in the current version of WordPress core.
 	 *
 	 * @var string
 	 */
-	const CDN_URL = 'https://s.w.org/images/core/emoji/13.0.0/svg/';
+	private $twemoji_cdn_url = '';
 
 	/**
 	 * Emoji lookup.
@@ -47,8 +85,18 @@ class AMP_Emoji_Sanitizer extends AMP_Base_Sanitizer {
 	 * @see wp_staticize_emoji()
 	 */
 	public function sanitize() {
-		if ( empty( $this->emoji_lookup ) || empty( $this->emoji_regex ) ) {
-			$this->build_emoji_data();
+		if (
+			empty( $this->twemoji_version )
+			||
+			empty( $this->twemoji_cdn_url )
+			||
+			empty( $this->emoji_lookup )
+			||
+			empty( $this->emoji_regex )
+		) {
+			if ( ! $this->gather_emoji_data() ) {
+				return;
+			}
 		}
 
 		$query = $this->dom->xpath->query( './/text()', $this->dom->body );
@@ -77,17 +125,7 @@ class AMP_Emoji_Sanitizer extends AMP_Base_Sanitizer {
 				}
 
 				if ( isset( $this->emoji_lookup[ $part ] ) ) {
-					$svg_url = self::CDN_URL . $this->emoji_lookup[ $part ] . '.svg';
-
-					// @todo Try to fetch the SVG and store in a transient, and then load it inline.
-					$img_element = $this->dom->createElement( 'img' );
-					$img_element->setAttribute( 'class', 'emoji' );
-					$img_element->setAttribute( 'alt', $part );
-					$img_element->setAttribute( 'draggable', 'false' );
-					$img_element->setAttribute( 'src', $svg_url );
-					$img_element->setAttribute( 'width', '72' );
-					$img_element->setAttribute( 'height', '72' );
-					$fragment->appendChild( $img_element );
+					$fragment->appendChild( $this->create_emoji_image( $part, $this->emoji_lookup[ $part ] ) );
 				} else {
 					$fragment->appendChild( $this->dom->createTextNode( $part ) );
 				}
@@ -97,11 +135,117 @@ class AMP_Emoji_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Create emoji fragment.
+	 *
+	 * @param string $emojum   Emoji character.
+	 * @param string $basename Emoji basename minus file extension.
+	 *
+	 * @return DOMElement SVG or IMG element.
+	 */
+	private function create_emoji_image( $emojum, $basename ) {
+		if ( $this->args['use_svg'] ) {
+			$img_url = $this->twemoji_cdn_url . 'svg/' . $basename . '.svg';
+
+			if ( $this->args['inline_svg'] ) {
+				$svg_element = $this->get_svg_element( $basename, $img_url );
+				if ( $svg_element instanceof DOMElement ) {
+					$title = $this->dom->createElement( 'title' );
+					$title->appendChild( $this->dom->createTextNode( $emojum ) );
+					$svg_element->setAttribute( 'data-src', $img_url );
+					$svg_element->insertBefore( $title, $svg_element->firstChild );
+					$svg_element->setAttribute( 'class', 'emoji' );
+					$svg_element->setAttribute( 'role', 'img' );
+					return $svg_element;
+				}
+			}
+		} else {
+			$img_url = $this->twemoji_cdn_url . '72x72/' . $basename . '.png';
+		}
+
+		// Fallback to when the SVG cannot be inlined.
+		$img_element = $this->dom->createElement( 'img' );
+		$img_element->setAttribute( 'class', 'emoji' );
+		$img_element->setAttribute( 'alt', $emojum );
+		$img_element->setAttribute( 'draggable', 'false' );
+		$img_element->setAttribute( 'src', $img_url );
+		$img_element->setAttribute( 'width', '72' );
+		$img_element->setAttribute( 'height', '72' );
+
+		return $img_element;
+	}
+
+	/**
+	 * Get SVG document.
+	 *
+	 * @param string $basename Emoji basename minus file extension.
+	 * @param string $svg_url  SVG URL.
+	 * @return DOMElement|WP_Error SVG element string or WP_Error on failure.
+	 */
+	private function get_svg_element( $basename, $svg_url ) {
+		$transient_key = "amp-emoji-svg-{$this->twemoji_version}-{$basename}";
+		$svg_doc       = get_transient( $transient_key );
+
+		if ( false === $svg_doc ) {
+			if ( $this->fetched_count >= $this->args['max_fetches'] ) {
+				return new WP_Error( 'exceeded_max_fetches' );
+			}
+			$this->fetched_count++;
+
+			$response = wp_remote_get( $svg_url );
+			if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
+				$error = new WP_Error( wp_remote_retrieve_response_code( $response ), wp_remote_retrieve_response_message( $response ) );
+				set_transient(
+					$transient_key,
+					$error,
+					DAY_IN_SECONDS
+				);
+				return $error;
+			}
+
+			$svg_doc = wp_remote_retrieve_body( $response );
+			set_transient(
+				$transient_key,
+				$svg_doc,
+				MONTH_IN_SECONDS
+			);
+		} elseif ( $svg_doc instanceof WP_Error ) {
+			return $svg_doc;
+		}
+
+		$svg_dom = new DOMDocument();
+		if ( ! @$svg_dom->loadHTML( $svg_doc ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			return new WP_Error( 'parse_error' );
+		}
+
+		$svg_element = $svg_dom->getElementsByTagName( 'svg' )->item( 0 );
+		if ( ! $svg_element instanceof DOMElement ) {
+			return new WP_Error( 'no_svg_element' );
+		}
+
+		/** @var DOMElement $svg_element */
+		$svg_element = $this->dom->importNode( $svg_element, true );
+
+		return $svg_element;
+	}
+
+	/**
 	 * Build emoji data.
 	 *
 	 * This is used during development only.
+	 *
+	 * @return bool Whether data was gathered successfully.
 	 */
-	private function build_emoji_data() {
+	private function gather_emoji_data() {
+		// Obtain version.
+		$staticized = wp_staticize_emoji( '🙂' );
+		if ( preg_match( '#(?P<cdn_url>https?://s\.w\.org/images/core/emoji/(?P<version>\d+(?:\.\d+)*)/)#', $staticized, $matches ) ) {
+			$this->twemoji_version = $matches['version'];
+			$this->twemoji_cdn_url = $matches['cdn_url'];
+		} else {
+			return false;
+		}
+
+		// Obtain emoji lookup and emojum regex.
 		$this->emoji_lookup = [];
 		$this->emoji_regex  = '';
 		foreach ( _wp_emoji_list() as $emoji_entity ) {
@@ -123,5 +267,7 @@ class AMP_Emoji_Sanitizer extends AMP_Base_Sanitizer {
 			}
 			$this->emoji_regex .= preg_quote( $emojum, '/' );
 		}
+
+		return true;
 	}
 }
