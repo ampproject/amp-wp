@@ -62,7 +62,6 @@ final class ImportWxrFile implements ImportStep {
 	public function __construct( $wxr_file ) {
 		$this->wxr_file = $wxr_file;
 
-		WP_CLI::warning( $this->wxr_file );
 		if ( preg_match( self::IS_REMOTE_URL, $this->wxr_file ) ) {
 			$this->wxr_is_temporary_file = true;
 
