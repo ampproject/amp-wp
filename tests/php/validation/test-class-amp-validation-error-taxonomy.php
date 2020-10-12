@@ -986,6 +986,12 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 			[ 'details', 'delete' ],
 			array_keys( $filtered_actions )
 		);
+
+		$pagenow = 'post.php';
+		$actions = AMP_Validation_Error_Taxonomy::filter_tag_row_actions( $initial_actions, get_term( $term_this_taxonomy ) );
+		$this->assertTrue( array_key_exists( 'copy', $actions ) );
+		$this->assertStringContains( 'Copy to clipboard', $actions['copy'] );
+
 	}
 
 	/**
