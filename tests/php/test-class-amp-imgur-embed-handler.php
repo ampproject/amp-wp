@@ -34,6 +34,8 @@ class AMP_Imgur_Embed_Handler_Test extends WP_UnitTestCase {
 					$body = '{"version":"1.0","type":"rich","provider_name":"Imgur","provider_url":"https:\/\/imgur.com","width":500,"height":750,"html":"<blockquote class=\"imgur-embed-pub\" lang=\"en\" data-id=\"fmHGADZ\"><a href=\"https:\/\/imgur.com\/fmHGADZ\">View post on imgur.com<\/a><\/blockquote><script async src=\"\/\/s.imgur.com\/min\/embed.js\" charset=\"utf-8\"><\/script>"}'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 				} elseif ( false !== strpos( $url, '1ApvcWB' ) ) {
 					$body = '{"version":"1.0","type":"rich","provider_name":"Imgur","provider_url":"https:\/\/imgur.com","width":500,"height":750,"html":"<blockquote class=\"imgur-embed-pub\" lang=\"en\" data-id=\"a\/1ApvcWB\"><a href=\"https:\/\/imgur.com\/a\/1ApvcWB\">Oops, all baby yoda<\/a><\/blockquote><script async src=\"\/\/s.imgur.com\/min\/embed.js\" charset=\"utf-8\"><\/script>"}'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+				} elseif ( false !== strpos( $url, 'rAG6Q2w' ) ) {
+					$body = '{"version":"1.0","type":"rich","provider_name":"Imgur","provider_url":"https:\/\/imgur.com","width":540,"height":500,"html":"<blockquote class=\"imgur-embed-pub\" lang=\"en\" data-id=\"a\/rAG6Q2w\"><a href=\"https:\/\/imgur.com\/a\/rAG6Q2w\">View post on imgur.com<\/a><\/blockquote><script async src=\"\/\/s.imgur.com\/min\/embed.js\" charset=\"utf-8\"><\/script>"}'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 				} else {
 					return $pre;
 				}
@@ -61,24 +63,29 @@ class AMP_Imgur_Embed_Handler_Test extends WP_UnitTestCase {
 		$height = 750;
 
 		return [
-			'no_embed'        => [
+			'no_embed'                 => [
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>' . PHP_EOL,
 			],
 
-			'url_simple'      => [
+			'url_simple'               => [
 				'https://imgur.com/fmHGADZ' . PHP_EOL,
 				'<p><amp-imgur width="' . $width . '" height="' . $height . '" data-imgur-id="fmHGADZ"></amp-imgur></p>' . PHP_EOL,
 			],
 
-			'url_with_detail' => [
-				'https://imgur.com/gallery/1ApvcWB' . PHP_EOL,
-				'<p><amp-imgur width="' . $width . '" height="' . $height . '" data-imgur-id="1ApvcWB"></amp-imgur></p>' . PHP_EOL,
+			'album_url'                => [
+				'https://imgur.com/a/rAG6Q2w' . PHP_EOL,
+				'<p><amp-imgur width="' . $width . '" height="' . $height . '" data-imgur-id="a/rAG6Q2w"></amp-imgur></p>' . PHP_EOL,
 			],
 
-			'url_with_params' => [
+			'gallery_url'              => [
+				'https://imgur.com/gallery/1ApvcWB' . PHP_EOL,
+				'<p><amp-imgur width="' . $width . '" height="' . $height . '" data-imgur-id="a/1ApvcWB"></amp-imgur></p>' . PHP_EOL,
+			],
+
+			'gallery_url__with_params' => [
 				'https://imgur.com/gallery/1ApvcWB?foo=bar' . PHP_EOL,
-				'<p><amp-imgur width="' . $width . '" height="' . $height . '" data-imgur-id="1ApvcWB"></amp-imgur></p>' . PHP_EOL,
+				'<p><amp-imgur width="' . $width . '" height="' . $height . '" data-imgur-id="a/1ApvcWB"></amp-imgur></p>' . PHP_EOL,
 			],
 
 		];

@@ -188,7 +188,7 @@ class AMP_Post_Meta_Box {
 				'ampPostMetaBox.boot( %s );',
 				wp_json_encode(
 					[
-						'previewLink'     => esc_url_raw( add_query_arg( amp_get_slug(), '', get_preview_post_link( $post ) ) ),
+						'previewLink'     => esc_url_raw( amp_add_paired_endpoint( get_preview_post_link( $post ) ) ),
 						'canonical'       => amp_is_canonical(),
 						'enabled'         => empty( $support_errors ),
 						'canSupport'      => 0 === count( array_diff( $support_errors, [ 'post-status-disabled' ] ) ),
@@ -447,7 +447,7 @@ class AMP_Post_Meta_Box {
 		);
 
 		if ( $is_amp ) {
-			$link = add_query_arg( amp_get_slug(), true, $link );
+			$link = amp_add_paired_endpoint( $link );
 		}
 
 		return $link;

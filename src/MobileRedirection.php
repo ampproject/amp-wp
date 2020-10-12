@@ -88,7 +88,7 @@ final class MobileRedirection implements Service, Registerable {
 	 * @return string AMP URL.
 	 */
 	public function get_current_amp_url() {
-		$url = add_query_arg( amp_get_slug(), '1', amp_get_current_url() );
+		$url = amp_add_paired_endpoint( amp_get_current_url() );
 		$url = remove_query_arg( QueryVar::NOAMP, $url );
 		return $url;
 	}
@@ -428,7 +428,7 @@ final class MobileRedirection implements Service, Registerable {
 		$is_amp = amp_is_request();
 		if ( $is_amp ) {
 			$rel  = [ Attribute::REL_NOAMPHTML, Attribute::REL_NOFOLLOW ];
-			$url  = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, amp_remove_endpoint( amp_get_current_url() ) );
+			$url  = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, amp_remove_paired_endpoint( amp_get_current_url() ) );
 			$text = __( 'Exit mobile version', 'amp' );
 		} else {
 			$rel  = [ Attribute::REL_AMPHTML ];
