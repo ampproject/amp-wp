@@ -57,7 +57,6 @@ function after_wp_install {
 		)
 
 		sed -i "/register-wp-cli-commands.php\"$/a , $(echo ${PATCH})" composer.json
-		cat composer.json
 		composer require --dev --ignore-platform-reqs phpunit/phpunit:^7.5
 
 		PATH="$(composer config bin-dir --absolute):$PATH"
