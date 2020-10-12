@@ -43,16 +43,16 @@ function after_wp_install {
 		echo "Installing compatible PHPUnit for use with PHP 8..."
 
 		PATCH=$(cat <<-EOF
-      "${WP_TESTS_DIR}/includes/phpunit7/MockObject/Builder/NamespaceMatch.php",
-      "${WP_TESTS_DIR}/includes/phpunit7/MockObject/Builder/ParametersMatch.php",
-      "${WP_TESTS_DIR}/includes/phpunit7/MockObject/InvocationMocker.php",
-      "${WP_TESTS_DIR}/includes/phpunit7/MockObject/MockMethod.php"
-    ],
-    "exclude-from-classmap": [
-      "vendor/phpunit/phpunit/src/Framework/MockObject/Builder/NamespaceMatch.php",
-      "vendor/phpunit/phpunit/src/Framework/MockObject/Builder/ParametersMatch.php",
-      "vendor/phpunit/phpunit/src/Framework/MockObject/InvocationMocker.php",
-      "vendor/phpunit/phpunit/src/Framework/MockObject/MockMethod.php"
+				"${WP_TESTS_DIR}/includes/phpunit7/MockObject/Builder/NamespaceMatch.php",
+				"${WP_TESTS_DIR}/includes/phpunit7/MockObject/Builder/ParametersMatch.php",
+				"${WP_TESTS_DIR}/includes/phpunit7/MockObject/InvocationMocker.php",
+				"${WP_TESTS_DIR}/includes/phpunit7/MockObject/MockMethod.php"
+			],
+			"exclude-from-classmap": [
+				"vendor/phpunit/phpunit/src/Framework/MockObject/Builder/NamespaceMatch.php",
+				"vendor/phpunit/phpunit/src/Framework/MockObject/Builder/ParametersMatch.php",
+				"vendor/phpunit/phpunit/src/Framework/MockObject/InvocationMocker.php",
+				"vendor/phpunit/phpunit/src/Framework/MockObject/MockMethod.php"
 		EOF
 		)
 
