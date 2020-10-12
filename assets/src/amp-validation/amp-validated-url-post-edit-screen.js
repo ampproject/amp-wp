@@ -8,6 +8,8 @@ import { __, _n, sprintf } from '@wordpress/i18n';
  * Internal dependencies
  */
 import setValidationErrorRowsSeenClass from './set-validation-error-rows-seen-class';
+import { handleCopyToClipboardButtons } from './copy-to-clipboard-buttons';
+import { getURLValidationTableRows } from './get-url-validation-table-rows';
 
 /**
  * The id for the 'Showing x of y errors' notice.
@@ -390,13 +392,10 @@ const handleBulkActions = () => {
 
 		const markingAsReviewed = target.classList.contains( 'reviewed' );
 
-		[ ...document.querySelectorAll( 'select.amp-validation-error-status' ) ].forEach( ( select ) => {
-			const row = select.closest( 'tr' );
-			if ( row.querySelector( '.check-column input[type=checkbox]' ).checked ) {
-				row.querySelector( 'input[type=checkbox].amp-validation-error-status-review' ).checked = markingAsReviewed;
-				row.classList.toggle( 'new', ! markingAsReviewed );
-				addBeforeUnloadPrompt();
-			}
+		getURLValidationTableRows( { checkedOnly: true } ).forEach( ( row ) => {
+			row.querySelector( 'input[type=checkbox].amp-validation-error-status-review' ).checked = markingAsReviewed;
+			row.classList.toggle( 'new', ! markingAsReviewed );
+			addBeforeUnloadPrompt();
 		} );
 	} );
 };
@@ -424,66 +423,3 @@ const setupStylesheetsMetabox = () => {
 		}
 	}
 };
-
-/**
- * Copies any string to the clipboard.
- *
- * Note: This only works within a callback responding to a user action.
- *
- * @param {string} value Any string value.
- */
-function copyToClipboard( value ) {
-	const textareaElement = document.createElement( 'textarea' );
-	textareaElement.value = value;
-	textareaElement.style.position = 'absolute';
-	textareaElement.style.left = '-1000%';
-	document.body.appendChild( textareaElement );
-	textareaElement.select();
-	document.execCommand( 'copy' );
-	document.body.removeChild( textareaElement );
-}
-
-/**
- * Callback when a user clicks a button to copy error details to a clipboard.
- *
- * @param {Event} event Click event.
- */
-function handleCopyToClipboardClick( event ) {
-	// Handle a single error detail button.
-	if ( event.target.classList.contains( 'single-url-detail-copy' ) ) {
-		copyToClipboard( event.target.getAttribute( 'data-error-json' ) );
-		return;
-	}
-
-	// Handle a click on the bulk action button.
-	if ( ! event.target.classList.contains( 'copy-all' ) ) {
-		return;
-	}
-
-	const value = [ ...document.querySelectorAll( 'select.amp-validation-error-status' ) ]
-		.map( ( select ) => {
-			const row = select.closest( 'tr' );
-			if ( ! row.querySelector( '.check-column input[type=checkbox]' ).checked ) {
-				return null;
-			}
-
-			const copyButton = row.querySelector( '.single-url-detail-copy' );
-			if ( ! copyButton ) {
-				return null;
-			}
-
-			const data = JSON.parse( copyButton.getAttribute( 'data-error-json' ) );
-
-			return data;
-		} )
-		.filter( ( row ) => row );
-
-	copyToClipboard( JSON.stringify( value ) );
-}
-
-/**
- * Sets up the "Copy to clipboard" buttons on the URL validation screen.
- */
-function handleCopyToClipboardButtons() {
-	global.addEventListener( 'click', handleCopyToClipboardClick );
-}
