@@ -93,7 +93,7 @@ class CallbackReflectionTest extends DependencyInjectedTestCase {
 				ReflectionMethod::class,
 			],
 			'core_widget_display_callback_array'  => [
-				[ 'WP_Widget_Text', 'display_callback' ],
+				[ new \WP_Widget_Text(), 'display_callback' ],
 				'WP_Widget_Text::widget',
 				'wp-includes',
 				'core',
