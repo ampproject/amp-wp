@@ -80,6 +80,15 @@ class AMP_Emoji_Sanitizer extends AMP_Base_Sanitizer {
 	private $emoji_regex = '';
 
 	/**
+	 * Mapping of emoji to existing SVG inline elements in the page.
+	 *
+	 * This is used to speed up processing of repeated emoji.
+	 *
+	 * @var DOMElement[]
+	 */
+	private $already_constructed_emoji_svg_inline_elements = [];
+
+	/**
 	 * Replace UTF-8 emoji with Twemoji SVG.
 	 *
 	 * @see wp_staticize_emoji()
@@ -147,6 +156,13 @@ class AMP_Emoji_Sanitizer extends AMP_Base_Sanitizer {
 			$img_url = $this->twemoji_cdn_url . 'svg/' . $basename . '.svg';
 
 			if ( $this->args['inline_svg'] ) {
+
+				if ( isset( $this->already_constructed_emoji_svg_inline_elements[ $emojum ] ) ) {
+					/** @var DOMElement $svg_element */
+					$svg_element = $this->already_constructed_emoji_svg_inline_elements[ $emojum ]->cloneNode( true );
+					return $svg_element;
+				}
+
 				$svg_element = $this->get_svg_element( $basename, $img_url );
 				if ( $svg_element instanceof DOMElement ) {
 					$title = $this->dom->createElement( 'title' );
@@ -155,6 +171,9 @@ class AMP_Emoji_Sanitizer extends AMP_Base_Sanitizer {
 					$svg_element->insertBefore( $title, $svg_element->firstChild );
 					$svg_element->setAttribute( 'class', 'emoji' );
 					$svg_element->setAttribute( 'role', 'img' );
+
+					$this->already_constructed_emoji_svg_inline_elements[ $emojum ] = $svg_element;
+
 					return $svg_element;
 				}
 			}
