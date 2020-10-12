@@ -74,6 +74,33 @@ final class PreloadHeroImage implements Transformer
     const DATA_HERO_MAX = 2;
 
     /**
+     * List of AMP elements that are an embed that can have a placeholder.
+     *
+     * The array has values assigned so that we can do a fast hash lookup on the element name.
+     *
+     * @var bool[]
+     */
+    const AMP_EMBEDS = [
+        Extension::AD            => true,
+        Extension::ANIM          => true,
+        Extension::BRIGHTCOVE    => true,
+        Extension::DAILYMOTION   => true,
+        Extension::FACEBOOK      => true,
+        Extension::GFYCAT        => true,
+        Extension::IFRAME        => true,
+        Extension::IMGUR         => true,
+        Extension::INSTAGRAM     => true,
+        Extension::PINTEREST     => true,
+        Extension::REDDIT        => true,
+        Extension::TWITTER       => true,
+        Extension::VIDEO         => true,
+        Extension::VIDEO_IFRAME  => true,
+        Extension::VIMEO         => true,
+        Extension::WISTIA_PLAYER => true,
+        Extension::YOUTUBE       => true,
+    ];
+
+    /**
      * Configuration store to use.
      *
      * @var TransformerConfiguration
@@ -192,10 +219,7 @@ final class PreloadHeroImage implements Transformer
         }
 
         if (
-            (
-                Amp::isAmpIframe($element)
-                || $element->tagName === Extension::ANIM
-            )
+            $this->isAmpEmbed($element)
             && $element->hasAttribute(Attribute::DATA_HERO)
         ) {
             return $this->getPlaceholderImage($element);
@@ -229,8 +253,8 @@ final class PreloadHeroImage implements Transformer
             return $this->detectHeroImageCandidateForPosterImage($element);
         }
 
-        if (Amp::isAmpIframe($element)) {
-            return $this->detectHeroImageCandidateForIframePlaceholderImage($element);
+        if ($this->isAmpEmbed($element)) {
+            return $this->detectHeroImageCandidateForPlaceholderImage($element);
         }
 
         return null;
@@ -292,18 +316,19 @@ final class PreloadHeroImage implements Transformer
     }
 
     /**
-     * Detect a hero image candidate from an iframe's placeholder image.
+     * Detect a hero image candidate from a placeholder image.
      *
      * @param DOMElement $element Element to detect for.
      * @return HeroImage|null Detected hero image candidate, or null if none detected.
      */
-    private function detectHeroImageCandidateForIframePlaceholderImage(DOMElement $element)
+    private function detectHeroImageCandidateForPlaceholderImage(DOMElement $element)
     {
-        // A placeholder <amp-img> is required to preload an image for an iframe.
+        // The placeholder will be a child node of the element.
         if (! $element->hasChildNodes()) {
             return null;
         }
 
+        // Don't bother if the element is too small.
         if ((new ImageDimensions($element))->isTiny()) {
             return null;
         }
@@ -402,7 +427,7 @@ final class PreloadHeroImage implements Transformer
     {
         $element = $heroImage->getAmpImg();
 
-        if (! $element) {
+        if (! $element || $element->tagName !== Extension::IMAGE) {
             return;
         }
 
@@ -497,5 +522,16 @@ final class PreloadHeroImage implements Transformer
         }
 
         return $this->skipNodeAndChildren($node->parentNode);
+    }
+
+    /**
+     * Check whether a given element is an AMP embed.
+     *
+     * @param DOMElement $element Element to check.
+     * @return bool Whether the given element is an AMP embed.
+     */
+    private function isAmpEmbed(DOMElement $element)
+    {
+        return array_key_exists($element->tagName, self::AMP_EMBEDS);
     }
 }
