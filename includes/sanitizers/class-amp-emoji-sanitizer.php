@@ -22,7 +22,7 @@ class AMP_Emoji_Sanitizer extends AMP_Base_Sanitizer {
 	protected $DEFAULT_ARGS = [
 		'use_svg'     => true,
 		'inline_svg'  => true,
-		'max_fetches' => 32,
+		'max_fetches' => 12, // WordPress pages at 90th percentile have a maximum of 12 emoji. See https://github.com/ampproject/amp-wp/pull/5498#issuecomment-706840922.
 	];
 
 	/**
