@@ -135,6 +135,20 @@ final class PreloadHeroImageTest extends TestCase
                     '<link rel=preload href="/foo.png" as="image" data-hero>'
                 )
             ],
+
+            'fetches placeholders for youtube' => [
+                $input(
+                    '<amp-youtube data-hero data-videoid="mGENRKrdoGY" layout="responsive" width="480" height="270">'
+                    . '<amp-img placeholder width="480" height="270" src="/foo.png"></amp-img>'
+                    . '</amp-youtube>'
+                ),
+                $output(
+                    '<amp-youtube data-hero data-videoid="mGENRKrdoGY" layout="responsive" width="480" height="270">'
+                    . '<amp-img placeholder data-hero width="480" height="270" src="/foo.png" i-amphtml-ssr><img class="i-amphtml-fill-content i-amphtml-replaced-content" decoding="async" src="/foo.png"></amp-img>'
+                    . '</amp-youtube>',
+                    '<link rel=preload href="/foo.png" as="image" data-hero>'
+                )
+            ],
         ];
     }
 
