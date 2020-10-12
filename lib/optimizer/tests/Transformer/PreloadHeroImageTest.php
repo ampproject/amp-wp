@@ -101,14 +101,17 @@ final class PreloadHeroImageTest extends TestCase
 
             'throws error when scrset detected on image to be preloaded' => [
                 $input(
-                    '<amp-img width="500" height="400" src="https://example-com.cdn.ampproject.org/foo.png" srcset="test 100w test2 3dpr"></amp-img>'
-                    . '<amp-img width="500" height="400" src="https://example-com.cdn.ampproject.org/foo.png"></amp-img>'
+                    '<amp-img data-hero width="500" height="400" src="https://example-com.cdn.ampproject.org/hero1.png" srcset="test 100w test2 3dpr"></amp-img>'
+                    . '<amp-img data-hero width="500" height="400" src="https://example-com.cdn.ampproject.org/hero2.png"></amp-img>'
                 ),
                 $output(
-                    '<amp-img width="500" height="400" src="https://example-com.cdn.ampproject.org/foo.png" srcset="test 100w test2 3dpr"></amp-img>'
-                    . '<amp-img data-hero width="500" height="400" i-amphtml-ssr src="https://example-com.cdn.ampproject.org/foo.png">'
-                    . '<img class="i-amphtml-fill-content i-amphtml-replaced-content" decoding="async" src="https://example-com.cdn.ampproject.org/foo.png" srcset="test 100w test2 3dpr">'
+                    '<amp-img data-hero width="500" height="400" i-amphtml-ssr src="https://example-com.cdn.ampproject.org/hero1.png" srcset="test 100w test2 3dpr">'
+                    . '<img class="i-amphtml-fill-content i-amphtml-replaced-content" decoding="async" src="https://example-com.cdn.ampproject.org/hero1.png" srcset="test 100w test2 3dpr">'
                     . '</amp-img>'
+                    . '<amp-img data-hero width="500" height="400" i-amphtml-ssr src="https://example-com.cdn.ampproject.org/hero2.png">'
+                    . '<img class="i-amphtml-fill-content i-amphtml-replaced-content" decoding="async" src="https://example-com.cdn.ampproject.org/hero2.png">'
+                    . '</amp-img>',
+                    '<link rel=preload href="https://example-com.cdn.ampproject.org/hero2.png" as="image" data-hero>'
                 ),
                 [
                     Error\CannotPreloadImage::fromImageWithSrcsetAttribute(
