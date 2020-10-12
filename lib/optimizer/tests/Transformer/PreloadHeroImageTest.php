@@ -149,6 +149,27 @@ final class PreloadHeroImageTest extends TestCase
                     '<link rel=preload href="/foo.png" as="image" data-hero>'
                 )
             ],
+
+            'fetches descendant placeholders and regular images' => [
+                $input(
+                    '<amp-vimeo data-hero data-videoid="27246366" layout="responsive" width="480" height="270">'
+                    . '<div placeholder><p><amp-img width="480" height="270" src="/hero1.png"></amp-img></p></div>'
+                    . '</amp-vimeo>'
+                    . '<amp-wistia-player data-hero data-media-hashed-id="u8p9wq6mq8" layout="responsive" width="480" height="270">'
+                    . '<div placeholder><p><img width="480" height="270" src="/hero2.png"></p></div>'
+                    . '</amp-wistia-player>'
+                ),
+                $output(
+                    '<amp-vimeo data-hero data-videoid="27246366" layout="responsive" width="480" height="270">'
+                    . '<div placeholder><p><amp-img data-hero width="480" height="270" src="/hero1.png" i-amphtml-ssr><img class="i-amphtml-fill-content i-amphtml-replaced-content" decoding="async" src="/hero1.png"></amp-img></p></div>'
+                    . '</amp-vimeo>'
+                    . '<amp-wistia-player data-hero data-media-hashed-id="u8p9wq6mq8" layout="responsive" width="480" height="270">'
+                    . '<div placeholder><p><img width="480" height="270" src="/hero2.png"></p></div>'
+                    . '</amp-wistia-player>',
+                    '<link rel=preload href="/hero1.png" as="image" data-hero>'
+                    . '<link rel=preload href="/hero2.png" as="image" data-hero>'
+                )
+            ],
         ];
     }
 
