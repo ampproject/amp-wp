@@ -80,13 +80,18 @@ class AMP_Emoji_Sanitizer extends AMP_Base_Sanitizer {
 	private $emoji_regex = '';
 
 	/**
-	 * Mapping of emoji to existing SVG inline elements in the page.
+	 * SVG defs element that contains the symbols for Twemoji on the page.
 	 *
-	 * This is used to speed up processing of repeated emoji.
-	 *
-	 * @var DOMElement[]
+	 * @var DOMElement
 	 */
-	private $already_constructed_emoji_svg_inline_elements = [];
+	private $twemoji_svg_defs_element;
+
+	/**
+	 * Record of which Twemoji have had symbols added.
+	 *
+	 * @var array
+	 */
+	private $added_defs_symbols = [];
 
 	/**
 	 * Replace UTF-8 emoji with Twemoji SVG.
@@ -156,24 +161,8 @@ class AMP_Emoji_Sanitizer extends AMP_Base_Sanitizer {
 			$img_url = $this->twemoji_cdn_url . 'svg/' . $basename . '.svg';
 
 			if ( $this->args['inline_svg'] ) {
-
-				if ( isset( $this->already_constructed_emoji_svg_inline_elements[ $emojum ] ) ) {
-					/** @var DOMElement $svg_element */
-					$svg_element = $this->already_constructed_emoji_svg_inline_elements[ $emojum ]->cloneNode( true );
-					return $svg_element;
-				}
-
-				$svg_element = $this->get_svg_element( $basename, $img_url );
+				$svg_element = $this->get_svg_element( $emojum, $basename, $img_url );
 				if ( $svg_element instanceof DOMElement ) {
-					$title = $this->dom->createElement( 'title' );
-					$title->appendChild( $this->dom->createTextNode( $emojum ) );
-					$svg_element->setAttribute( 'data-src', $img_url );
-					$svg_element->insertBefore( $title, $svg_element->firstChild );
-					$svg_element->setAttribute( 'class', 'emoji' );
-					$svg_element->setAttribute( 'role', 'img' );
-
-					$this->already_constructed_emoji_svg_inline_elements[ $emojum ] = $svg_element;
-
 					return $svg_element;
 				}
 			}
@@ -194,13 +183,59 @@ class AMP_Emoji_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Get Twemoji SVG defs element.
+	 *
+	 * @return DOMElement Defs element.
+	 */
+	private function get_twemoji_svg_defs_element() {
+		if ( ! isset( $this->twemoji_svg_defs_element ) ) {
+			$svg_element = $this->dom->createElement( 'svg' );
+			$svg_element->setAttribute( 'id', 'amp-twemoji' );
+			$svg_element->setAttribute( 'hidden', '' );
+			$this->twemoji_svg_defs_element = $this->dom->createElement( 'defs' );
+			$svg_element->appendChild( $this->twemoji_svg_defs_element );
+			$this->dom->body->insertBefore( $svg_element, $this->dom->body->firstChild ); // Add to beginning of body to ensure symbols can be used immediately.
+		}
+		return $this->twemoji_svg_defs_element;
+	}
+
+	/**
 	 * Get SVG document.
 	 *
+	 * @param string $emojum   Emoji character.
 	 * @param string $basename Emoji basename minus file extension.
 	 * @param string $svg_url  SVG URL.
 	 * @return DOMElement|WP_Error SVG element string or WP_Error on failure.
 	 */
-	private function get_svg_element( $basename, $svg_url ) {
+	private function get_svg_element( $emojum, $basename, $svg_url ) {
+		$added = $this->ensure_twemoji_symbol_added( $emojum, $basename, $svg_url );
+		if ( $added instanceof WP_Error ) {
+			return $added;
+		}
+
+		$svg_element = $this->dom->createElement( 'svg' );
+		$svg_element->setAttribute( 'class', 'emoji' );
+		$svg_element->setAttribute( 'role', 'img' );
+		$use_element = $this->dom->createElement( 'use' );
+		$use_element->setAttribute( 'href', "#twemoji-{$basename}" );
+		$svg_element->appendChild( $use_element );
+
+		return $svg_element;
+	}
+
+	/**
+	 * Ensure SVG symbol is added for Twemoji.
+	 *
+	 * @param string $emojum   Emoji character.
+	 * @param string $basename Emoji basename minus file extension.
+	 * @param string $svg_url  SVG URL.
+	 * @return true|WP_Error SVG element string or WP_Error on failure.
+	 */
+	private function ensure_twemoji_symbol_added( $emojum, $basename, $svg_url ) {
+		if ( isset( $this->added_defs_symbols[ $emojum ] ) ) {
+			return true;
+		}
+
 		$transient_key = "amp-emoji-svg-{$this->twemoji_version}-{$basename}";
 		$svg_doc       = get_transient( $transient_key );
 
@@ -244,7 +279,26 @@ class AMP_Emoji_Sanitizer extends AMP_Base_Sanitizer {
 		/** @var DOMElement $svg_element */
 		$svg_element = $this->dom->importNode( $svg_element, true );
 
-		return $svg_element;
+		// Add the SVG to a symbol which we'll reuse for each instance of the emoji on the page.
+		$symbol = $this->dom->createElement( 'symbol' );
+		foreach ( $svg_element->attributes as $attribute ) {
+			/** @var DOMAttr $attribute */
+			$symbol->setAttribute( $attribute->nodeName, $attribute->nodeValue );
+		}
+		while ( $svg_element->firstChild ) {
+			$symbol->appendChild( $svg_element->removeChild( $svg_element->firstChild ) );
+		}
+		$symbol->setAttribute( 'id', 'twemoji-' . $basename );
+		$symbol->setAttribute( 'data-src', $svg_url );
+
+		$title = $this->dom->createElement( 'title' );
+		$title->appendChild( $this->dom->createTextNode( $emojum ) );
+		$symbol->insertBefore( $title, $symbol->firstChild );
+
+		$this->get_twemoji_svg_defs_element()->appendChild( $symbol );
+		$this->added_defs_symbols[ $emojum ] = true;
+
+		return true;
 	}
 
 	/**
