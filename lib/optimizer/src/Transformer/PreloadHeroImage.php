@@ -187,7 +187,10 @@ final class PreloadHeroImage implements Transformer
         }
 
         if (
-            Amp::isAmpIframe($element)
+            (
+                Amp::isAmpIframe($element)
+                || $element->tagName === Extension::ANIM
+            )
             && $element->hasAttribute(Attribute::DATA_HERO)
         ) {
             return $this->getPlaceholderImage($element);

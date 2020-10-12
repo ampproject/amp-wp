@@ -11,6 +11,7 @@ interface Extension
 {
 
     const ANALYTICS           = 'amp-analytics';
+    const ANIM                = 'amp-anim';
     const AUDIO               = 'amp-audio';
     const BIND                = 'amp-bind';
     const DYNAMIC_CSS_CLASSES = 'amp-dynamic-css-classes';
