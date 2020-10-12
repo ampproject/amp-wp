@@ -81,6 +81,13 @@ final class PreloadHeroImage implements Transformer
     private $configuration;
 
     /**
+     * Reference node to attach preload links to.
+     *
+     * @var DOMElement|null
+     */
+    private $preloadReferenceNode;
+
+    /**
      * Instantiate a PreloadHeroImage object.
      *
      * @param TransformerConfiguration $configuration Configuration store to use.
@@ -103,9 +110,7 @@ final class PreloadHeroImage implements Transformer
             return;
         }
 
-        $heroImages    = $this->findHeroImages($document);
-        $referenceNode = $document->viewport;
-
+        $heroImages     = $this->findHeroImages($document);
         $heroImageCount = count($heroImages);
         if ($heroImageCount > self::DATA_HERO_MAX) {
             $errors->add(Error\TooManyHeroImages::whenPastMaximum());
@@ -113,7 +118,7 @@ final class PreloadHeroImage implements Transformer
         }
 
         for ($index = 0; $index < $heroImageCount; $index++) {
-            $this->generatePreload($heroImages[$index], $document, $errors, $referenceNode);
+            $this->generatePreload($heroImages[$index], $document, $errors);
             $this->generateImg($heroImages[$index], $document);
         }
     }
@@ -343,16 +348,14 @@ final class PreloadHeroImage implements Transformer
     /**
      * Generate the preload link for a given hero image.
      *
-     * @param HeroImage       $heroImage     Hero image to generate the preload link for.
-     * @param Document        $document      Document to generate the preload link in.
-     * @param ErrorCollection $errors        Collection of errors that are collected during transformation.
-     * @param DOMNode|null    $referenceNode Reference node after which to insert the preload link. Null if none.
+     * @param HeroImage       $heroImage Hero image to generate the preload link for.
+     * @param Document        $document  Document to generate the preload link in.
+     * @param ErrorCollection $errors    Collection of errors that are collected during transformation.
      */
     private function generatePreload(
         HeroImage $heroImage,
         Document $document,
-        ErrorCollection $errors,
-        DOMNode $referenceNode = null
+        ErrorCollection $errors
     ) {
         if ($heroImage->getSrcset()) {
             $errors->add(Error\CannotPreloadImage::fromImageWithSrcsetAttribute($heroImage->getAmpImg()));
@@ -361,6 +364,10 @@ final class PreloadHeroImage implements Transformer
 
         if ($this->hasExistingImagePreload($document, $heroImage->getSrc())) {
             return;
+        }
+
+        if ($this->preloadReferenceNode === null) {
+            $this->preloadReferenceNode = $document->viewport;
         }
 
         $preload = $document->createElement(Tag::LINK);
@@ -373,11 +380,16 @@ final class PreloadHeroImage implements Transformer
             $preload->setAttribute(Attribute::MEDIA, $heroImage->getMedia());
         }
 
-        if ($referenceNode) {
-            $referenceNode->parentNode->insertBefore($preload, $referenceNode->nextSibling);
+        if ($this->preloadReferenceNode) {
+            $this->preloadReferenceNode->parentNode->insertBefore(
+                $preload,
+                $this->preloadReferenceNode->nextSibling
+            );
         } else {
             $document->head->appendChild($preload);
         }
+
+        $this->preloadReferenceNode = $preload;
     }
 
     /**
