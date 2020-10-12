@@ -331,7 +331,7 @@ final class PreloadHeroImage implements Transformer
 
             return new HeroImage(
                 $src,
-                $childNode->getAttribute(Attribute::MEDIA),
+                $element->getAttribute(Attribute::MEDIA),
                 $childNode->getAttribute(Attribute::SRCSET),
                 $childNode
             );
