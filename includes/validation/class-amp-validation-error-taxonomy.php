@@ -1619,6 +1619,16 @@ class AMP_Validation_Error_Taxonomy {
 				esc_attr__( 'Toggle error details', 'amp' ),
 				esc_html__( 'Details', 'amp' )
 			);
+
+			$json           = json_decode( $term->description, true );
+			$json['status'] = (bool) ( (int) $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) ? __( 'Removed', 'amp' ) : __( 'Kept', 'amp' );
+
+			$actions['copy'] = sprintf(
+				'<button type="button" aria-label="%s" class="single-url-detail-copy button-link" data-error-json="%s">%s</button>',
+				esc_attr__( 'Copy to clipboard', 'amp' ),
+				esc_attr( wp_json_encode( $json, JSON_PRETTY_PRINT ) ),
+				esc_html__( 'Copy to clipboard', 'amp' )
+			);
 		} elseif ( 'edit-tags.php' === $pagenow ) {
 			$actions['details'] = sprintf(
 				'<a href="%s">%s</a>',
@@ -1646,7 +1656,7 @@ class AMP_Validation_Error_Taxonomy {
 			}
 		}
 
-		$actions = wp_array_slice_assoc( $actions, [ 'details', 'delete' ] );
+		$actions = wp_array_slice_assoc( $actions, [ 'details', 'delete', 'copy' ] );
 
 		return $actions;
 	}
@@ -2251,7 +2261,6 @@ class AMP_Validation_Error_Taxonomy {
 				</dd>
 			<?php endforeach; ?>
 		</dl>
-
 		<?php
 
 		$output = ob_get_clean();

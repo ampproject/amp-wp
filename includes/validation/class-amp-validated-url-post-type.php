@@ -2796,6 +2796,7 @@ class AMP_Validated_URL_Post_Type {
 			<button type="button" class="button action keep"><?php esc_html_e( 'Keep', 'amp' ); ?></button>
 			<button type="button" class="button action reviewed-toggle reviewed"><?php esc_html_e( 'Mark reviewed', 'amp' ); ?></button>
 			<button type="button" class="button action reviewed-toggle unreviewed"><?php esc_html_e( 'Mark unreviewed', 'amp' ); ?></button>
+			<button type="button" class="button action copy-all"><?php esc_html_e( 'Copy error details to clipboard', 'amp' ); ?></button>
 			<div id="vertical-divider"></div>
 		</div>
 		<div id="url-post-filter" class="alignleft actions">

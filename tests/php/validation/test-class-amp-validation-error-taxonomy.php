@@ -983,7 +983,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 
 		$filtered_actions = apply_filters( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_row_actions', $initial_actions, get_term( $term_this_taxonomy ) );
 		$this->assertEqualSets(
-			[ 'details', 'delete' ],
+			[ 'details', 'delete', 'copy' ],
 			array_keys( $filtered_actions )
 		);
 	}
