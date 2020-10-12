@@ -347,23 +347,51 @@ final class PreloadHeroImage implements Transformer
         foreach ($element->childNodes as $childNode) {
             if (
                 ! $childNode instanceof DOMElement
-                || $childNode->tagName !== Extension::IMAGE
                 || ! $childNode->hasAttribute(Attribute::PLACEHOLDER)
             ) {
                 continue;
             }
 
-            $src = $childNode->getAttribute(Attribute::SRC);
+            $placeholder = $childNode;
+
+            while ($placeholder !== null) {
+                if (! $placeholder instanceof DOMElement) {
+                    $placeholder = $this->nextNode($placeholder);
+                    continue;
+                }
+
+                if (
+                    $placeholder->tagName === Extension::IMAGE
+                    || $placeholder->tagName === Tag::IMG
+                ) {
+                    // Found valid candidate for placeholder image.
+                    break;
+                }
+
+                // TODO: Can placeholders contain templates?
+                if (Amp::isTemplate($placeholder)) {
+                    // Ignore images inside templates.
+                    $placeholder = $this->skipNodeAndChildren($placeholder);
+                } else {
+                    $placeholder = $this->nextNode($placeholder);
+                }
+            }
+
+            if (!$placeholder instanceof DOMElement) {
+                break;
+            }
+
+            $src = $placeholder->getAttribute(Attribute::SRC);
 
             if (! Url::isValidImageSrc($src)) {
-                continue;
+                break;
             }
 
             return new HeroImage(
                 $src,
                 $element->getAttribute(Attribute::MEDIA),
-                $childNode->getAttribute(Attribute::SRCSET),
-                $childNode
+                $placeholder->getAttribute(Attribute::SRCSET),
+                $placeholder
             );
         }
 
