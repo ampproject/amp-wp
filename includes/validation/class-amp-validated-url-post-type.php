@@ -726,7 +726,7 @@ class AMP_Validated_URL_Post_Type {
 
 		// Add AMP query var if in transitional mode.
 		if ( ! amp_is_canonical() ) {
-			$url = add_query_arg( amp_get_slug(), '', $url );
+			$url = amp_add_paired_endpoint( $url );
 		}
 
 		// Set URL scheme based on whether HTTPS is current.
@@ -764,7 +764,7 @@ class AMP_Validated_URL_Post_Type {
 	 */
 	protected static function normalize_url_for_storage( $url ) {
 		// Only ever store the canonical version.
-		$url = amp_remove_endpoint( $url );
+		$url = amp_remove_paired_endpoint( $url );
 
 		// Remove fragment identifier in the rare case it could be provided. It is irrelevant for validation.
 		$url = strtok( $url, '#' );

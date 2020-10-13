@@ -5,7 +5,7 @@
   "homepage": "https://github.com/ampproject/amp-wp",
   "license": "GPL-2.0-or-later",
   "require": {
-    "php": "^5.6 || ^7.0",
+    "php": "^5.6 || ^7.0 || ^8.0",
     "ext-curl": "*",
     "ext-date": "*",
     "ext-dom": "*",
@@ -29,7 +29,7 @@
     "phpcompatibility/phpcompatibility-wp": "2.1.0",
     "phpdocumentor/reflection": "~3.0",
     "roave/security-advisories": "dev-master",
-    "sirbrillig/phpcs-variable-analysis": "2.8.3",
+    "sirbrillig/phpcs-variable-analysis": "2.9.0",
     "wp-cli/export-command": "^2.0",
     "wp-cli/extension-command": "^2.0",
     "wp-coding-standards/wpcs": "2.3.0",

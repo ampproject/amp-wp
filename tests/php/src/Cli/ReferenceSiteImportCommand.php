@@ -7,6 +7,7 @@
 
 namespace AmpProject\AmpWP\Tests\Cli;
 
+use AmpProject\AmpWP\Tests\Cli\Import\ImportWxrFile;
 use Exception;
 use Google\Cloud\Storage\StorageClient;
 use RuntimeException;
@@ -191,7 +192,11 @@ final class ReferenceSiteImportCommand extends WP_CLI_Command {
 				case 'import_wxr_file':
 					$wxr_path = $import_step['filename'];
 
-					if ( ! path_is_absolute( $wxr_path ) ) {
+					if (
+						! path_is_absolute( $wxr_path )
+						&&
+						! preg_match( ImportWxrFile::IS_REMOTE_URL, $wxr_path )
+					) {
 						$wxr_path = ReferenceSiteCommandNamespace::REFERENCE_SITES_ROOT . $wxr_path;
 					}
 
