@@ -105,7 +105,14 @@ final class PreloadHeroImage implements Transformer
      *
      * @var string
      */
-    const NOSCRIPT_IMG_XPATH_QUERY = './/noscript[ img ]';
+    const NOSCRIPT_IMG_XPATH_QUERY             = './/noscript[ img ]';
+
+    /**
+     * Regular expression pattern to extract the URL from a CSS background-image property.
+     *
+     * @var string
+     */
+    const CSS_BACKGROUND_IMAGE_URL_REGEX_PATTERN = '/background-image\s*:\s*url\(\s*(?<url>[^)]*\s*)/i';
 
     /**
      * Configuration store to use.
@@ -120,6 +127,15 @@ final class PreloadHeroImage implements Transformer
      * @var DOMElement|null
      */
     private $preloadReferenceNode;
+
+    /**
+     * Inline style backup attribute that stores inline styles that are being moved to <style amp-custom>.
+     *
+     * An empty string signifies that no inline style backup is available.
+     *
+     * @var string
+     */
+    private $inlineStyleBackupAttribute;
 
     /**
      * Instantiate a PreloadHeroImage object.
@@ -143,6 +159,10 @@ final class PreloadHeroImage implements Transformer
         if ($this->configuration->get(PreloadHeroImageConfiguration::PRELOAD_HERO_IMAGE) === false) {
             return;
         }
+
+        $this->inlineStyleBackupAttribute = $this->configuration->get(
+            PreloadHeroImageConfiguration::INLINE_STYLE_BACKUP_ATTRIBUTE
+        );
 
         $heroImages     = $this->findHeroImages($document);
         $heroImageCount = count($heroImages);
@@ -213,10 +233,11 @@ final class PreloadHeroImage implements Transformer
      */
     private function detectImageWithDataHero(DOMElement $element)
     {
-        if (
-            $element->tagName === Extension::IMAGE
-            && $element->hasAttribute(Attribute::DATA_HERO)
-        ) {
+        if (!$element->hasAttribute(Attribute::DATA_HERO)) {
+            return null;
+        }
+
+        if ($element->tagName === Extension::IMAGE) {
             return new HeroImage(
                 $element->getAttribute(Attribute::SRC),
                 $element->getAttribute(Attribute::MEDIA),
@@ -225,11 +246,19 @@ final class PreloadHeroImage implements Transformer
             );
         }
 
-        if (
-            $this->isAmpEmbed($element)
-            && $element->hasAttribute(Attribute::DATA_HERO)
-        ) {
+        if ($this->isAmpEmbed($element)) {
             return $this->getPlaceholderImage($element);
+        }
+
+        $cssBackgroundImage = $this->getCssBackgroundImageUrl($element);
+
+        if (Url::isValidImageSrc($cssBackgroundImage)) {
+            return new HeroImage(
+                $cssBackgroundImage,
+                $element->getAttribute(Attribute::MEDIA),
+                $element->getAttribute(Attribute::SRCSET),
+                $element
+            );
         }
 
         return null;
@@ -568,5 +597,42 @@ final class PreloadHeroImage implements Transformer
     private function isAmpEmbed(DOMElement $element)
     {
         return array_key_exists($element->tagName, self::AMP_EMBEDS);
+    }
+
+    /**
+     * Get the URL of the CSS background-image property.
+     *
+     * This falls back to the data-amp-original-style attribute if the inline
+     * style was already extracted by the CSS tree-shaking.
+     *
+     * @param DOMElement $element
+     * @return string URL of the background image, or an empty string if not found.
+     */
+    private function getCssBackgroundImageUrl(DOMElement $element)
+    {
+        $matches = [];
+
+        if (
+            preg_match(
+                self::CSS_BACKGROUND_IMAGE_URL_REGEX_PATTERN,
+                $element->getAttribute(Attribute::STYLE),
+                $matches
+            )
+        ) {
+            return $matches['url'];
+        }
+
+        if (
+            !empty($this->inlineStyleBackupAttribute)
+            && preg_match(
+                self::CSS_BACKGROUND_IMAGE_URL_REGEX_PATTERN,
+                $element->getAttribute($this->inlineStyleBackupAttribute),
+                $matches
+            )
+        ) {
+            return $matches['url'];
+        }
+
+        return '';
     }
 }

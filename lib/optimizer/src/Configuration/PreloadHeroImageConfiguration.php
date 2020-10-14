@@ -22,6 +22,16 @@ final class PreloadHeroImageConfiguration extends BaseTransformerConfiguration
     const PRELOAD_HERO_IMAGE = 'preloadHeroImage';
 
     /**
+     * Configuration key that holds the attribute that is used to store inline styles that
+     * were moved to <style amp-custom>.
+     *
+     * An empty string signifies that no backup is available.
+     *
+     * @var string.
+     */
+    const INLINE_STYLE_BACKUP_ATTRIBUTE = 'inlineStyleBackupAttribute';
+
+    /**
      * Get the associative array of allowed keys and their respective default values.
      *
      * The array index is the key and the array value is the key's default value.
@@ -31,7 +41,8 @@ final class PreloadHeroImageConfiguration extends BaseTransformerConfiguration
     protected function getAllowedKeys()
     {
         return [
-            self::PRELOAD_HERO_IMAGE => true,
+            self::PRELOAD_HERO_IMAGE            => true,
+            self::INLINE_STYLE_BACKUP_ATTRIBUTE => '',
         ];
     }
 
@@ -51,6 +62,17 @@ final class PreloadHeroImageConfiguration extends BaseTransformerConfiguration
                         self::class,
                         self::PRELOAD_HERO_IMAGE,
                         'boolean',
+                        gettype($value)
+                    );
+                }
+                break;
+
+            case self::INLINE_STYLE_BACKUP_ATTRIBUTE:
+                if (! is_string($value)) {
+                    throw InvalidConfigurationValue::forInvalidSubValueType(
+                        self::class,
+                        self::INLINE_STYLE_BACKUP_ATTRIBUTE,
+                        'string',
                         gettype($value)
                     );
                 }

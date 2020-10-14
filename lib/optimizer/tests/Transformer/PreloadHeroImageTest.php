@@ -170,6 +170,25 @@ final class PreloadHeroImageTest extends TestCase
                     . '<link rel=preload href="/hero2.png" as="image" data-hero>'
                 )
             ],
+
+            'fetches background images in CSS' => [
+                $input(
+                    '<div style="background-image:url(https://example.com/img1.jpg)"></div>'
+                    . '<div style="background-image:url(https://example.com/hero1.jpg)" data-hero></div>'
+                    . '<div data-amp-original-style="background-image:url(https://example.com/hero2.jpg)" data-hero></div>'
+                ),
+                $output(
+                    '<div style="background-image:url(https://example.com/img1.jpg)"></div>'
+                    . '<div style="background-image:url(https://example.com/hero1.jpg)" data-hero></div>'
+                    . '<div data-amp-original-style="background-image:url(https://example.com/hero2.jpg)" data-hero></div>',
+                    '<link rel=preload href="https://example.com/hero1.jpg" as="image" data-hero>'
+                    . '<link rel=preload href="https://example.com/hero2.jpg" as="image" data-hero>'
+                ),
+                [],
+                [
+                    PreloadHeroImageConfiguration::INLINE_STYLE_BACKUP_ATTRIBUTE => 'data-amp-original-style',
+                ]
+            ],
         ];
     }
 
