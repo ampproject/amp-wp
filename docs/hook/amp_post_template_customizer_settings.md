@@ -17,7 +17,7 @@ Inject your Customizer settings here to make them accessible via the getter in y
 
 ### Source
 
-:link: [includes/templates/class-amp-post-template.php:423](/includes/templates/class-amp-post-template.php#L423)
+:link: [includes/templates/class-amp-post-template.php:428](/includes/templates/class-amp-post-template.php#L428)
 
 <details>
 <summary>Show Code</summary>
