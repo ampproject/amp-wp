@@ -2287,7 +2287,7 @@ class AMP_Theme_Support {
 					Optimizer\Configuration::KEY_TRANSFORMERS => $transformers,
 					Optimizer\Transformer\PreloadHeroImage::class => [
 						Optimizer\Configuration\PreloadHeroImageConfiguration::INLINE_STYLE_BACKUP_ATTRIBUTE => 'data-amp-original-style',
-					]
+					],
 				],
 				$args
 			)
