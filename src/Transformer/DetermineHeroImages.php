@@ -17,6 +17,13 @@ use DOMElement;
 /**
  * Determine the images to flag as data-hero so the Optimizer can preload them.
  *
+ * This transformer checks for the following images in the given order:
+ * 1. Featured image of the page
+ * 2. Block editor cover block(s)
+ * 3. Site icon
+ *
+ * It then applies the data-hero attribute to the first two of these.
+ *
  * @package AmpProject\AmpWP
  * @since   2.1
  * @internal
@@ -33,17 +40,30 @@ final class DetermineHeroImages implements Transformer {
 	 * @return void
 	 */
 	public function transform( Document $document, ErrorCollection $errors ) {
-		$hero_image_elements   = [];
-		$hero_image_elements[] = $this->get_site_icon( $document );
-		$hero_image_elements[] = $this->get_featured_image( $document );
-		$hero_image_elements   = array_merge(
+		$hero_image_elements = [];
+
+		$featured_image = $this->get_featured_image( $document );
+		if ( null !== $featured_image ) {
+			$hero_image_elements[] = $featured_image;
+		}
+
+		$hero_image_elements = array_merge(
 			$hero_image_elements,
-			$this->get_cover_blocks( $document )
+			array_filter(
+				$this->get_cover_blocks( $document )
+			)
 		);
+
+		if ( count( $hero_image_elements ) < 2 ) {
+			$site_icon = $this->get_site_icon( $document );
+			if ( null !== $site_icon ) {
+				$hero_image_elements[] = $site_icon;
+			}
+		}
 
 		$this->add_data_hero_attribute(
 			array_slice(
-				array_filter( $hero_image_elements ),
+				$hero_image_elements,
 				0,
 				PreloadHeroImage::DATA_HERO_MAX
 			)
