@@ -1,6 +1,6 @@
 <?php
 /**
- * Abstract class CronBasedBackgroundTask.
+ * Abstract class SingleScheduledBackgroundTask.
  *
  * @package AmpProject\AmpWP
  */
@@ -18,11 +18,14 @@ use AmpProject\AmpWP\Infrastructure\Service;
  * @since 2.0
  * @internal
  */
-abstract class CronBasedBackgroundTask implements Service, Registerable, Conditional {
+abstract class SingleScheduledBackgroundTask implements Service, Registerable, Conditional {
 
-	const DEFAULT_INTERVAL_HOURLY      = 'hourly';
-	const DEFAULT_INTERVAL_TWICE_DAILY = 'twicedaily';
-	const DEFAULT_INTERVAL_DAILY       = 'daily';
+	/**
+	 * The args passed to the schedule event callback through the specified action hook.
+	 *
+	 * @var array
+	 */
+	protected $action_hook_args = [];
 
 	/**
 	 * Class constructor.
@@ -48,7 +51,7 @@ abstract class CronBasedBackgroundTask implements Service, Registerable, Conditi
 	 * @return void
 	 */
 	public function register() {
-		add_action( 'admin_init', [ $this, 'schedule_event' ] );
+		add_action( $this->get_action_hook(), [ $this, 'schedule_event' ], 10, $this->get_action_hook_arg_count() );
 		add_action( $this->get_event_name(), [ $this, 'process' ] );
 	}
 
@@ -57,21 +60,15 @@ abstract class CronBasedBackgroundTask implements Service, Registerable, Conditi
 	 *
 	 * This does nothing if the event is already scheduled.
 	 *
+	 * @params array $args Arguments passed to the function from the action hook.
 	 * @return void
 	 */
-	public function schedule_event() {
+	public function schedule_event( ...$args ) {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
 
-		$event_name = $this->get_event_name();
-		$timestamp  = wp_next_scheduled( $event_name );
-
-		if ( $timestamp ) {
-			return;
-		}
-
-		wp_schedule_event( time(), $this->get_interval(), $event_name );
+		wp_schedule_single_event( time(), $this->get_timestamp(), $this->get_event_name(), ...$args );
 	}
 
 	/**
@@ -79,7 +76,34 @@ abstract class CronBasedBackgroundTask implements Service, Registerable, Conditi
 	 *
 	 * @return string An existing interval name. Valid values are 'hourly', 'twicedaily' or 'daily'.
 	 */
-	abstract protected function get_interval();
+	protected function get_timestamp() {
+		return time();
+	}
+
+	/**
+	 * Provides arguments to pass to the event callback.
+	 *
+	 * @return array Array of arguments that will be passed to the process function.
+	 */
+	protected function get_event_args() {
+		return [];
+	}
+
+	/**
+	 * The number of args expected from the action hook. Default 1.
+	 *
+	 * @return int
+	 */
+	protected function get_action_hook_arg_count() {
+		return 1;
+	}
+
+	/**
+	 * Gets the hook on which to schedule the event.
+	 *
+	 * @return string The action hook name.
+	 */
+	abstract protected function get_action_hook();
 
 	/**
 	 * Get the event name.
@@ -95,7 +119,7 @@ abstract class CronBasedBackgroundTask implements Service, Registerable, Conditi
 	/**
 	 * Process a single cron tick.
 	 *
-	 * @return void
+	 * @param mixed ...$args The args received with the action hook where the event was scheduled.
 	 */
-	abstract public function process();
+	abstract public function process( ...$args );
 }
