@@ -101,6 +101,13 @@ final class PreloadHeroImage implements Transformer
     ];
 
     /**
+     * XPath query to relatively fetch all noscript > img elements.
+     *
+     * @var string
+     */
+    const NOSCRIPT_IMG_XPATH_QUERY = './/noscript[ img ]';
+
+    /**
      * Configuration store to use.
      *
      * @var TransformerConfiguration
@@ -475,7 +482,7 @@ final class PreloadHeroImage implements Transformer
         $element->appendChild($imgElement);
 
         // Remove any noscript>img when an amp-img is pre-rendered.
-        $noscript = $document->xpath->query('.//noscript[ img ]', $element)->item(0);
+        $noscript = $document->xpath->query(self::NOSCRIPT_IMG_XPATH_QUERY, $element)->item(0);
         if ($noscript instanceof DOMElement) {
             $noscript->parentNode->removeChild($noscript);
         }
