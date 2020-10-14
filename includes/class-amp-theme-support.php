@@ -2283,7 +2283,12 @@ class AMP_Theme_Support {
 		$configuration = apply_filters(
 			'amp_optimizer_config',
 			array_merge(
-				[ Optimizer\Configuration::KEY_TRANSFORMERS => $transformers ],
+				[
+					Optimizer\Configuration::KEY_TRANSFORMERS => $transformers,
+					Optimizer\Transformer\PreloadHeroImage::class => [
+						Optimizer\Configuration\PreloadHeroImageConfiguration::INLINE_STYLE_BACKUP_ATTRIBUTE => 'data-amp-original-style',
+					]
+				],
 				$args
 			)
 		);

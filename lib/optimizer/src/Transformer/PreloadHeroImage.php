@@ -619,7 +619,7 @@ final class PreloadHeroImage implements Transformer
                 $matches
             )
         ) {
-            return $matches['url'];
+            return trim($matches['url'], '\'" ');
         }
 
         if (
@@ -630,7 +630,7 @@ final class PreloadHeroImage implements Transformer
                 $matches
             )
         ) {
-            return $matches['url'];
+            return trim($matches['url'], '\'" ');
         }
 
         return '';
