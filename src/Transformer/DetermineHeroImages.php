@@ -18,9 +18,9 @@ use DOMElement;
  * Determine the images to flag as data-hero so the Optimizer can preload them.
  *
  * This transformer checks for the following images in the given order:
- * 1. Featured image of the page
- * 2. Block editor cover block(s)
- * 3. Site icon
+ * 1. Site icon
+ * 2. Featured image of the page
+ * 3. Block editor cover block(s)
  *
  * It then applies the data-hero attribute to the first two of these.
  *
@@ -42,23 +42,23 @@ final class DetermineHeroImages implements Transformer {
 	public function transform( Document $document, ErrorCollection $errors ) {
 		$hero_image_elements = [];
 
+		$site_icon = $this->get_site_icon( $document );
+		if ( null !== $site_icon ) {
+			$hero_image_elements[] = $site_icon;
+		}
+
 		$featured_image = $this->get_featured_image( $document );
 		if ( null !== $featured_image ) {
 			$hero_image_elements[] = $featured_image;
 		}
 
-		$hero_image_elements = array_merge(
-			$hero_image_elements,
-			array_filter(
-				$this->get_cover_blocks( $document )
-			)
-		);
-
 		if ( count( $hero_image_elements ) < 2 ) {
-			$site_icon = $this->get_site_icon( $document );
-			if ( null !== $site_icon ) {
-				$hero_image_elements[] = $site_icon;
-			}
+			$hero_image_elements = array_merge(
+				$hero_image_elements,
+				array_filter(
+					$this->get_cover_blocks( $document )
+				)
+			);
 		}
 
 		$this->add_data_hero_attribute(
@@ -78,6 +78,7 @@ final class DetermineHeroImages implements Transformer {
 	 *                         if not found.
 	 */
 	private function get_site_icon( Document $document ) {
+		// TODO: Add logic to detect site icon.
 		return null;
 	}
 
@@ -89,6 +90,7 @@ final class DetermineHeroImages implements Transformer {
 	 *                         null if not found.
 	 */
 	private function get_featured_image( Document $document ) {
+		// TODO: Add logic to detect featured image.
 		return null;
 	}
 
