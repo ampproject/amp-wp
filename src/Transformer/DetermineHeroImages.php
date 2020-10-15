@@ -78,8 +78,12 @@ final class DetermineHeroImages implements Transformer {
 	 *                         if not found.
 	 */
 	private function get_site_icon( Document $document ) {
-		// TODO: Add logic to detect site icon.
-		return null;
+		$site_icons = $document->xpath->query(
+			".//a[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo-link ' ) ]//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo ' ) ]",
+			$document->body
+		);
+
+		return $site_icons->item( 0 );
 	}
 
 	/**
