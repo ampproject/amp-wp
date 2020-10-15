@@ -1,58 +1,32 @@
 /**
  * Nav component.
  */
-.onboarding-wizard-nav {
-	align-items: center;
-	background: var(--amp-settings-color-background);
-	bottom: 0;
-	box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.05);
-	display: flex;
-	justify-content: flex-end;
-	left: 0;
-	position: fixed;
-	right: 0;
-	z-index: 2;
-}
 
-.onboarding-wizard-nav__inner {
-	align-items: center;
-	display: flex;
-	justify-content: space-between;
-	margin: 0 auto;
-	max-width: 1320px;
-	padding: 15px;
-	width: 100%;
-
-	@media screen and (min-width: 783px) {
-		padding: 30px 90px;
-	}
-}
-
-.onboarding-wizard-nav__prev-next {
+.amp-settings-nav__prev-next {
 	display: flex;
 }
 
-.onboarding-wizard-nav__prev-next > * {
+.amp-settings-nav__prev-next > * {
 	align-items: center;
 	display: flex;
 	height: 36px;
 }
 
-.onboarding-wizard-nav__prev {
+.amp-settings-nav__prev {
 	margin-right: 5px;
 }
 
-.onboarding-wizard-nav__prev svg {
+.amp-settings-nav__prev svg {
 	transform: rotate(180deg);
 	margin-left: 0;
 	margin-right: 0.5rem;
 }
 
-.onboarding-wizard-nav__close {
+.amp-settings-nav__close {
 	align-items: center;
 	display: flex;
 }
 
-.onboarding-wizard-nav__close svg {
+.amp-settings-nav__close svg {
 	margin-right: 0.5rem;
 }
