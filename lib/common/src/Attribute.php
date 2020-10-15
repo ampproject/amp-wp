@@ -28,6 +28,7 @@ interface Attribute
     const AMP_RUNTIME           = 'amp-runtime';
     const AMP_SCRIPT_SRC        = 'amp-script-src';
     const ARIA_HIDDEN           = 'aria-hidden';
+    const AS_                   = 'as'; // Underscore needed because 'as' is a PHP keyword.
     const ASYNC                 = 'async';
     const ATTRIBUTION           = 'attribution';
     const AUTOPLAY              = 'autoplay';
