@@ -87,23 +87,23 @@ export function Nav( { closeLink, finishLink } ) {
 	}
 
 	return (
-		<div className="onboarding-wizard-nav">
-			<div className="onboarding-wizard-nav__inner">
-				<div className="onboarding-wizard-nav__close">
+		<div className="amp-settings-nav">
+			<div className="amp-settings-nav__inner">
+				<div className="amp-settings-nav__close">
 					{ ! isMobile && ( ! isLastPage || READER === themeSupport ) && (
 						<CloseLink closeLink={ closeLink } />
 					) }
 				</div>
-				<div className="onboarding-wizard-nav__prev-next">
+				<div className="amp-settings-nav__prev-next">
 					{ 1 > activePageIndex
 						? (
-							<span className="onboarding-wizard-nav__placeholder">
+							<span className="amp-settings-nav__placeholder">
 								{ ' ' }
 							</span>
 						)
 						: (
 							<Button
-								className="onboarding-wizard-nav__prev"
+								className="amp-settings-nav__prev"
 								onClick={ moveBack }
 							>
 								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">

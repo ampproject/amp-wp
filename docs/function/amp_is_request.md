@@ -14,7 +14,7 @@ This function cannot be called before the parse_query action because it needs to
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:892](/includes/amp-helper-functions.php#L892-L925)
+:link: [includes/amp-helper-functions.php:849](/includes/amp-helper-functions.php#L849-L876)
 
 <details>
 <summary>Show Code</summary>
@@ -30,13 +30,7 @@ function amp_is_request() {
 	$is_amp_url = (
 		amp_is_canonical()
 		||
-		isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		||
-		(
-			$wp_query instanceof WP_Query
-			&&
-			false !== $wp_query->get( amp_get_slug(), false )
-		)
+		amp_has_paired_endpoint()
 	);
 
 	// If AMP is not available, then it's definitely not an AMP endpoint.
