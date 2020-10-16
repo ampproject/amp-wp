@@ -48,6 +48,8 @@ interface Attribute
     const I_AMPHTML_SSR         = 'i-amphtml-ssr';
     const I_AMPHTML_VERSION     = 'i-amphtml-version';
     const ID                    = 'id';
+    const IMAGESRCSET           = 'imagesrcset';
+    const IMAGESIZES            = 'imagesizes';
     const IMPORTANCE            = 'importance';
     const INTRINSICSIZE         = 'intrinsicsize';
     const LAYOUT                = 'layout';

@@ -447,9 +447,15 @@ final class PreloadHeroImage implements Transformer
         Document $document,
         ErrorCollection $errors
     ) {
-        if ($heroImage->getSrcset()) {
+        if ($heroImage->getSrcset() && ! $this->supportsSrcset()) {
             $errors->add(Error\CannotPreloadImage::fromImageWithSrcsetAttribute($heroImage->getAmpImg()));
             return;
+        }
+
+        $img = $heroImage->getAmpImg();
+
+        if ($img && $img->getAttribute(Attribute::LOADING) === 'lazy') {
+            $img->removeAttribute(Attribute::LOADING);
         }
 
         if ($this->hasExistingImagePreload($document, $heroImage->getSrc())) {
@@ -465,6 +471,12 @@ final class PreloadHeroImage implements Transformer
         $preload->setAttribute(Attribute::HREF, $heroImage->getSrc());
         $preload->setAttribute(Attribute::AS_, ResponseDestination::IMAGE);
         $preload->setAttribute(Attribute::DATA_HERO, null);
+        if ($heroImage->getSrcset()) {
+            $preload->setAttribute(Attribute::IMAGESRCSET, $heroImage->getSrcset());
+            if ($img && $img->hasAttribute(Attribute::SIZES)) {
+                $preload->setAttribute(Attribute::IMAGESIZES, $img->getAttribute(Attribute::SIZES));
+            }
+        }
 
         if ($heroImage->getMedia()) {
             $preload->setAttribute(Attribute::MEDIA, $heroImage->getMedia());
@@ -635,5 +647,16 @@ final class PreloadHeroImage implements Transformer
         }
 
         return '';
+    }
+
+    /**
+     * Whether srcset preloading is supported.
+     *
+     * @return bool
+     */
+    private function supportsSrcset()
+    {
+        // TODO: Add logic here or override manually.
+        return false;
     }
 }
