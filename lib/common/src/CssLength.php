@@ -94,7 +94,7 @@ final class CssLength
      */
     public function validate($allowAuto, $allowFluid)
     {
-        if ( $this->isValid() ) {
+        if ($this->isValid()) {
             return;
         }
 
