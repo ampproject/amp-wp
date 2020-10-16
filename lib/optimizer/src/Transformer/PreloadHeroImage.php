@@ -657,6 +657,6 @@ final class PreloadHeroImage implements Transformer
     private function supportsSrcset()
     {
         // TODO: Add logic here or override manually.
-        return false;
+        return true;
     }
 }
