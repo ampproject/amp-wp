@@ -18,7 +18,7 @@ use AmpProject\AmpWP\Infrastructure\Service;
  * @since 2.0
  * @internal
  */
-abstract class SingleScheduledBackgroundTask implements Service, Registerable, Conditional {
+abstract class SingleScheduledBackgroundTask implements Service, Registerable {
 
 	/**
 	 * The args passed to the schedule event callback through the specified action hook.
@@ -37,22 +37,32 @@ abstract class SingleScheduledBackgroundTask implements Service, Registerable, C
 	}
 
 	/**
-	 * Check whether the conditional object is currently needed.
-	 *
-	 * @return bool Whether the conditional object is needed.
-	 */
-	public static function is_needed() {
-		return is_admin() || wp_doing_cron();
-	}
-
-	/**
 	 * Register the service with the system.
 	 *
 	 * @return void
 	 */
 	public function register() {
-		add_action( $this->get_action_hook(), [ $this, 'schedule_event' ], 10, $this->get_action_hook_arg_count() );
+		$action_hooks = $this->get_action_hook();
+
+		if ( ! is_array( $action_hooks ) ) {
+			$action_hooks = [ $action_hooks ];
+		}
+
+		foreach ( $action_hooks as $action_hook ) {
+			add_action( $action_hook, [ $this, 'schedule_event' ], 10, $this->get_action_hook_arg_count( $action_hook ) );
+		}
+
 		add_action( $this->get_event_name(), [ $this, 'process' ] );
+	}
+
+	/**
+	 * Returns whether the event should be scheduled.
+	 *
+	 * @param array $args Arguments passed from the action hook where the event is to be scheduled.
+	 * @return boolean
+	 */
+	protected function should_schedule_event( $args ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+		return false;
 	}
 
 	/**
@@ -60,15 +70,15 @@ abstract class SingleScheduledBackgroundTask implements Service, Registerable, C
 	 *
 	 * This does nothing if the event is already scheduled.
 	 *
-	 * @params array $args Arguments passed to the function from the action hook.
+	 * @param array ...$args Arguments passed to the function from the action hook.
 	 * @return void
 	 */
 	public function schedule_event( ...$args ) {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! $this->should_schedule_event( $args ) ) {
 			return;
 		}
 
-		wp_schedule_single_event( time(), $this->get_timestamp(), $this->get_event_name(), ...$args );
+		wp_schedule_single_event( $this->get_timestamp(), $this->get_event_name(), $args );
 	}
 
 	/**
@@ -92,16 +102,17 @@ abstract class SingleScheduledBackgroundTask implements Service, Registerable, C
 	/**
 	 * The number of args expected from the action hook. Default 1.
 	 *
+	 * @param string $action_hook The action hook name.
 	 * @return int
 	 */
-	protected function get_action_hook_arg_count() {
+	protected function get_action_hook_arg_count( $action_hook ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		return 1;
 	}
 
 	/**
 	 * Gets the hook on which to schedule the event.
 	 *
-	 * @return string The action hook name.
+	 * @return string|array The action hook name or an array of action hooks.
 	 */
 	abstract protected function get_action_hook();
 
@@ -119,7 +130,7 @@ abstract class SingleScheduledBackgroundTask implements Service, Registerable, C
 	/**
 	 * Process a single cron tick.
 	 *
-	 * @param mixed ...$args The args received with the action hook where the event was scheduled.
+	 * @param array $args The args received with the action hook where the event was scheduled.
 	 */
-	abstract public function process( ...$args );
+	abstract public function process( $args );
 }

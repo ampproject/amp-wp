@@ -40,25 +40,41 @@ final class SavePostValidationEvent extends SingleScheduledBackgroundTask {
 	}
 
 	/**
-	 * Callback for the cron action.
+	 * Returns whether the event should be scheduled.
 	 *
-	 * @param array ...$args Any number of args.
+	 * @return boolean
 	 */
-	public function process( ...$args ) {
-		if ( 1 !== count( $args ) ) {
-			return;
+	protected function should_schedule_event( $args ) {
+		if ( ! is_array( $args ) || count( $args ) !== 1 ) {
+			return false;
 		}
 
-		$post_id = reset( $args );
+		$id = reset( $args );
+
+		if ( wp_is_post_revision( $id ) ) {
+			return false;
+		}
+
+		if ( ! amp_is_post_supported( $id ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Callback for the cron action.
+	 *
+	 * @param int $post_id The ID of a saved post.
+	 */
+	public function process( $post_id ) {
+		if ( empty( get_post( $post_id ) ) ) {
+			return;
+		}
 
 		$post_type = get_post_type( $post_id );
 
-		if ( ! post_type_supports( $post_type, AMP_Post_Type_Support::SLUG ) ) {
-			return;
-		}
-
-		( new URLValidationProvider() )
-			->get_url_validation( get_the_permalink( $post_id ), get_post_type() );
+		( new URLValidationProvider() )->get_url_validation( get_the_permalink( $post_id ), $post_type );
 	}
 
 	/**
