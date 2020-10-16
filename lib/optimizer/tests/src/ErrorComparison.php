@@ -20,11 +20,11 @@ trait ErrorComparison
      * @param ErrorCollection|Error[] $expected_errors Set of expected errors.
      * @param ErrorCollection|Error[] $actualErrors    Set of actual errors.
      */
-    protected function assertSameErrors( $expected_errors, $actualErrors)
+    protected function assertSameErrors($expected_errors, $actualErrors)
     {
         $this->assertCount(count($expected_errors), $actualErrors, 'Unexpected number of errors');
 
-        if ( $expected_errors instanceof ErrorCollection) {
+        if ($expected_errors instanceof ErrorCollection) {
             $expected_errors = iterator_to_array($expected_errors, false);
         }
 
