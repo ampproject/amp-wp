@@ -77,7 +77,7 @@ final class CssLength
      */
     public function __construct($attrValue)
     {
-        if ((! isset($attrValue) || '' === $attrValue)) {
+        if (null === $attrValue) {
             $this->isValid = true;
             return;
         }
@@ -94,6 +94,10 @@ final class CssLength
      */
     public function validate($allowAuto, $allowFluid)
     {
+        if ( $this->isValid() ) {
+            return;
+        }
+
         if (self::AUTO === $this->attrValue) {
             $this->isAuto  = true;
             $this->isValid = $allowAuto;
