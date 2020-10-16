@@ -583,8 +583,8 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 							<iframe style="width: 100%; height: 100%; position: absolute; left: 0px; top: 0px;" src="https://example.com/video/132886713" width="100%" height="100%"></iframe>
 						</noscript>
 					</amp-iframe>
-				'
-			]
+				',
+			],
 		];
 	}
 
