@@ -19,7 +19,7 @@ trait ErrorComparison {
 	 * @param ErrorCollection|Error[] $expected_errors Set of expected errors.
 	 * @param ErrorCollection|Error[] $actual_errors   Set of actual errors.
 	 */
-	protected function assertSameErrors( $expected_errors, $actual_errors ) {
+	protected function assertSameErrors( $expected_errors, $actual_errors ) { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName
 		$this->assertCount(
 			count( $expected_errors ),
 			$actual_errors,
