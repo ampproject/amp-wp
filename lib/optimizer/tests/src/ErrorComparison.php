@@ -17,23 +17,24 @@ trait ErrorComparison
     /**
      * Assert that two sets of errors are the same.
      *
-     * @param ErrorCollection|Error[] $expectedErrors Set of expected errors.
-     * @param ErrorCollection|Error[] $actualErrors   Set of actual errors.
+     * @param ErrorCollection|Error[] $expected_errors Set of expected errors.
+     * @param ErrorCollection|Error[] $actualErrors    Set of actual errors.
      */
-    protected function assertSameErrors($expectedErrors, $actualErrors)
+    protected function assertSameErrors( $expected_errors, $actualErrors)
     {
-        $this->assertCount(count($expectedErrors), $actualErrors, 'Unexpected number of errors');
+        $this->assertCount(count($expected_errors), $actualErrors, 'Unexpected number of errors');
 
-        if ($expectedErrors instanceof ErrorCollection) {
-            $expectedErrors = iterator_to_array($expectedErrors);
+        if ( $expected_errors instanceof ErrorCollection) {
+            $expected_errors = iterator_to_array($expected_errors, false);
         }
 
         if ($actualErrors instanceof ErrorCollection) {
-            $actualErrors = iterator_to_array($actualErrors);
+            $actualErrors = iterator_to_array($actualErrors, false);
         }
 
-        for ($index = 0; $index < count($expectedErrors); $index++) {
-            $expectedError = $expectedErrors[$index];
+        $expectedCount = count($expected_errors);
+        for ($index = 0; $index < $expectedCount; $index++) {
+            $expectedError = $expected_errors[ $index];
             $actualError   = $actualErrors[$index];
             if (is_string($expectedError)) {
                 // If strings were passed, assume the error code is used.
