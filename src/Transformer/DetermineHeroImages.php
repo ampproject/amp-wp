@@ -94,8 +94,12 @@ final class DetermineHeroImages implements Transformer {
 	 *                         null if not found.
 	 */
 	private function get_featured_image( Document $document ) {
-		// TODO: Add logic to detect featured image.
-		return null;
+		$elements = $document->xpath->query(
+			".//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-post-image ' ) ]",
+			$document->body
+		);
+
+		return $elements->item( 0 );
 	}
 
 	/**
