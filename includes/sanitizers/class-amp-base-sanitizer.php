@@ -321,6 +321,7 @@ abstract class AMP_Base_Sanitizer {
 					$attributes['style'] = $this->reassemble_style_string( $styles );
 				}
 				$attributes['layout'] = 'fill';
+				unset( $attributes['height'], $attributes['width'] );
 				return $attributes;
 			}
 
