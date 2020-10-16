@@ -566,6 +566,25 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 					'add_placeholder' => true,
 				],
 			],
+
+			'iframe_with_100_percent_with_100_percent_height_position_absolute_top_zero_left_zero' => [
+				'
+					<iframe
+						style="width: 100%; height: 100%; position: absolute; left: 0px; top: 0px;"
+						src="https://example.com/video/132886713"
+						width="100%"
+						height="100%"
+					>
+					</iframe>
+				',
+				'
+					<amp-iframe src="https://example.com/video/132886713" layout="fill" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation">
+						<noscript>
+							<iframe style="width: 100%; height: 100%; position: absolute; left: 0px; top: 0px;" src="https://example.com/video/132886713" width="100%" height="100%"></iframe>
+						</noscript>
+					</amp-iframe>
+				'
+			]
 		];
 	}
 
