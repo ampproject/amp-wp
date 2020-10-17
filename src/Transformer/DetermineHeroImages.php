@@ -42,21 +42,21 @@ final class DetermineHeroImages implements Transformer {
 	 *
 	 * @var string
 	 */
-	const SITE_ICON_XPATH_QUERY = ".//a[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo-link ' ) ]//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo ' ) ]";
+	const SITE_ICON_XPATH_QUERY = ".//a[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo-link ' ) ]//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo ' ) ][ not( @data-hero ) ]";
 
 	/**
 	 * XPath query to find the featured image.
 	 *
 	 * @var string
 	 */
-	const FEATURED_IMAGE_XPATH_QUERY = ".//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-post-image ' ) ]";
+	const FEATURED_IMAGE_XPATH_QUERY = ".//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-post-image ' ) ][ not( @data-hero ) ]";
 
 	/**
 	 * XPath query to find the cover blocks.
 	 *
 	 * @var string
 	 */
-	const COVER_BLOCKS_XPATH_QUERY = ".//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-block-cover ' ) ]";
+	const COVER_BLOCKS_XPATH_QUERY = ".//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-block-cover ' ) ][ not( @data-hero ) ]";
 
 	/**
 	 * Apply transformations to the provided DOM document.
