@@ -31,6 +31,27 @@ use DOMElement;
 final class DetermineHeroImages implements Transformer {
 
 	/**
+	 * XPath query to find the site icon.
+	 *
+	 * @var string
+	 */
+	const SITE_ICON_XPATH_QUERY = ".//a[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo-link ' ) ]//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo ' ) ]";
+
+	/**
+	 * XPath query to find the featured image.
+	 *
+	 * @var string
+	 */
+	const FEATURED_IMAGE_XPATH_QUERY = ".//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-post-image ' ) ]";
+
+	/**
+	 * XPath query to find the cover blocks.
+	 *
+	 * @var string
+	 */
+	const COVER_BLOCKS_XPATH_QUERY = ".//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-block-cover ' ) ]";
+
+	/**
 	 * Apply transformations to the provided DOM document.
 	 *
 	 * @param Document        $document DOM document to apply the
@@ -39,7 +60,7 @@ final class DetermineHeroImages implements Transformer {
 	 *                                  during transformation.
 	 * @return void
 	 */
-	public function transform( Document $document, ErrorCollection $errors ) {
+	public function transform( Document $document, ErrorCollection $errors ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		$hero_image_elements = [];
 
 		$site_icon = $this->get_site_icon( $document );
@@ -78,12 +99,14 @@ final class DetermineHeroImages implements Transformer {
 	 *                         if not found.
 	 */
 	private function get_site_icon( Document $document ) {
-		$site_icons = $document->xpath->query(
-			".//a[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo-link ' ) ]//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo ' ) ]",
+		$elements = $document->xpath->query(
+			self::SITE_ICON_XPATH_QUERY,
 			$document->body
 		);
 
-		return $site_icons->item( 0 );
+		$site_icon = $elements->item( 0 );
+
+		return $site_icon instanceof DOMElement ? $site_icon : null;
 	}
 
 	/**
@@ -95,11 +118,13 @@ final class DetermineHeroImages implements Transformer {
 	 */
 	private function get_featured_image( Document $document ) {
 		$elements = $document->xpath->query(
-			".//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-post-image ' ) ]",
+			self::FEATURED_IMAGE_XPATH_QUERY,
 			$document->body
 		);
 
-		return $elements->item( 0 );
+		$featured_image = $elements->item( 0 );
+
+		return $featured_image instanceof DOMElement ? $featured_image : null;
 	}
 
 	/**
@@ -110,7 +135,7 @@ final class DetermineHeroImages implements Transformer {
 	 */
 	private function get_cover_blocks( Document $document ) {
 		$elements = $document->xpath->query(
-			".//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-block-cover ' ) ]",
+			self::COVER_BLOCKS_XPATH_QUERY,
 			$document->body
 		);
 
