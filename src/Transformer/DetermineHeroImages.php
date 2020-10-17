@@ -31,6 +31,13 @@ use DOMElement;
 final class DetermineHeroImages implements Transformer {
 
 	/**
+	 * XPath query to find the existing hero images (elements with data/hero attribute).
+	 *
+	 * @var string
+	 */
+	const EXISTING_HERO_IMAGES_XPATH_QUERY = './/*[@data-hero]';
+
+	/**
 	 * XPath query to find the site icon.
 	 *
 	 * @var string
@@ -61,19 +68,33 @@ final class DetermineHeroImages implements Transformer {
 	 * @return void
 	 */
 	public function transform( Document $document, ErrorCollection $errors ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+		$existing_hero_images_count = $document->xpath->query(
+			self::EXISTING_HERO_IMAGES_XPATH_QUERY,
+			$document->body
+		)->length;
+
+		$available_hero_image_slots = max(
+			PreloadHeroImage::DATA_HERO_MAX - $existing_hero_images_count,
+			0
+		);
+
 		$hero_image_elements = [];
 
-		$site_icon = $this->get_site_icon( $document );
-		if ( null !== $site_icon ) {
-			$hero_image_elements[] = $site_icon;
+		if ( count( $hero_image_elements ) < $available_hero_image_slots ) {
+			$site_icon = $this->get_site_icon( $document );
+			if ( null !== $site_icon ) {
+				$hero_image_elements[] = $site_icon;
+			}
 		}
 
-		$featured_image = $this->get_featured_image( $document );
-		if ( null !== $featured_image ) {
-			$hero_image_elements[] = $featured_image;
+		if ( count( $hero_image_elements ) < $available_hero_image_slots ) {
+			$featured_image = $this->get_featured_image( $document );
+			if ( null !== $featured_image ) {
+				$hero_image_elements[] = $featured_image;
+			}
 		}
 
-		if ( count( $hero_image_elements ) < 2 ) {
+		if ( count( $hero_image_elements ) < $available_hero_image_slots ) {
 			$hero_image_elements = array_merge(
 				$hero_image_elements,
 				array_filter(
@@ -83,11 +104,7 @@ final class DetermineHeroImages implements Transformer {
 		}
 
 		$this->add_data_hero_attribute(
-			array_slice(
-				$hero_image_elements,
-				0,
-				PreloadHeroImage::DATA_HERO_MAX
-			)
+			array_slice( $hero_image_elements, 0, $available_hero_image_slots )
 		);
 	}
 
