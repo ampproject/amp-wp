@@ -131,6 +131,50 @@ final class DetermineHeroImagesTest extends WP_UnitTestCase {
 					. '</div>'
 				),
 			],
+
+			'pre-existing data-hero images are taken into account - 1' => [
+				$input(
+					'<div class="entry-content">'
+					. '<div class="wp-block-cover has-background-dim alignleft" style="background-image:url(https://example.com/cover-block-1.jpg)"><p class="wp-block-cover-text">This is a left aligned cover block with a background image.</p></div>'
+					. '<div class="wp-block-cover has-pale-pink-background-color has-background-dim has-left-content aligncenter" style="background-image:url(https://example.com/cover-block-2.jpg)"><p class="wp-block-cover-text"><strong>A center aligned cover image block, with a left aligned text.</strong></p></div>'
+					. '<div class="wp-block-cover has-background-dim-20 has-background-dim has-parallax alignfull" style="background-image:url(https://example.com/cover-block-3.jpg)"><p class="wp-block-cover-text">This is a full width cover block with a fixed background image with a 20% opacity.</p></div>'
+					. '<img data-hero width="640" height="480" src="https://example.com/featured-image.jpg" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="" loading="lazy" srcset="https://example.com/featured-image_640.jpg 640w, https://example.com/featured-image_300.jpg 300w" sizes="(max-width: 640px) 100vw, 640px">'
+					. '</div>'
+				),
+				$output(
+					'<div class="entry-content">'
+					. '<div class="wp-block-cover has-background-dim alignleft" style="background-image:url(https://example.com/cover-block-1.jpg)" data-hero><p class="wp-block-cover-text">This is a left aligned cover block with a background image.</p></div>'
+					. '<div class="wp-block-cover has-pale-pink-background-color has-background-dim has-left-content aligncenter" style="background-image:url(https://example.com/cover-block-2.jpg)"><p class="wp-block-cover-text"><strong>A center aligned cover image block, with a left aligned text.</strong></p></div>'
+					. '<div class="wp-block-cover has-background-dim-20 has-background-dim has-parallax alignfull" style="background-image:url(https://example.com/cover-block-3.jpg)"><p class="wp-block-cover-text">This is a full width cover block with a fixed background image with a 20% opacity.</p></div>'
+					. '<img data-hero width="640" height="480" src="https://example.com/featured-image.jpg" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="" loading="lazy" srcset="https://example.com/featured-image_640.jpg 640w, https://example.com/featured-image_300.jpg 300w" sizes="(max-width: 640px) 100vw, 640px">'
+					. '</div>'
+				),
+			],
+
+			'pre-existing data-hero images are taken into account - 2' => [
+				$input(
+					'<div class="entry-content">'
+					. '<div class="wp-block-cover has-background-dim alignleft" style="background-image:url(https://example.com/cover-block-1.jpg)"><p class="wp-block-cover-text">This is a left aligned cover block with a background image.</p></div>'
+					. '<div class="wp-block-cover has-pale-pink-background-color has-background-dim has-left-content aligncenter" style="background-image:url(https://example.com/cover-block-2.jpg)"><p class="wp-block-cover-text"><strong>A center aligned cover image block, with a left aligned text.</strong></p></div>'
+					. '<div class="wp-block-cover has-background-dim-20 has-background-dim has-parallax alignfull" style="background-image:url(https://example.com/cover-block-3.jpg)"><p class="wp-block-cover-text">This is a full width cover block with a fixed background image with a 20% opacity.</p></div>'
+					. '<img data-hero width="640" height="480" src="https://example.com/featured-image.jpg" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="" loading="lazy" srcset="https://example.com/featured-image_640.jpg 640w, https://example.com/featured-image_300.jpg 300w" sizes="(max-width: 640px) 100vw, 640px">'
+					. '<a href="https://amp.lndo.site/" class="custom-logo-link" rel="home">'
+					. '<img data-hero width="789" height="539" src="https://example.com/site-icon.jpg" class="custom-logo" alt="Theme Unit Test" loading="lazy" srcset="https://example.com/site-icon_789.jpg 789w, https://example.com/site-icon_300.jpg 300w, https://example.com/site-icon_768.jpg 768w" sizes="(max-width: 789px) 100vw, 789px">'
+					. '</a>'
+					. '</div>'
+				),
+				$output(
+					'<div class="entry-content">'
+					. '<div class="wp-block-cover has-background-dim alignleft" style="background-image:url(https://example.com/cover-block-1.jpg)"><p class="wp-block-cover-text">This is a left aligned cover block with a background image.</p></div>'
+					. '<div class="wp-block-cover has-pale-pink-background-color has-background-dim has-left-content aligncenter" style="background-image:url(https://example.com/cover-block-2.jpg)"><p class="wp-block-cover-text"><strong>A center aligned cover image block, with a left aligned text.</strong></p></div>'
+					. '<div class="wp-block-cover has-background-dim-20 has-background-dim has-parallax alignfull" style="background-image:url(https://example.com/cover-block-3.jpg)"><p class="wp-block-cover-text">This is a full width cover block with a fixed background image with a 20% opacity.</p></div>'
+					. '<img data-hero width="640" height="480" src="https://example.com/featured-image.jpg" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="" loading="lazy" srcset="https://example.com/featured-image_640.jpg 640w, https://example.com/featured-image_300.jpg 300w" sizes="(max-width: 640px) 100vw, 640px">'
+					. '<a href="https://amp.lndo.site/" class="custom-logo-link" rel="home">'
+					. '<img data-hero width="789" height="539" src="https://example.com/site-icon.jpg" class="custom-logo" alt="Theme Unit Test" loading="lazy" srcset="https://example.com/site-icon_789.jpg 789w, https://example.com/site-icon_300.jpg 300w, https://example.com/site-icon_768.jpg 768w" sizes="(max-width: 789px) 100vw, 789px">'
+					. '</a>'
+					. '</div>'
+				),
+			],
 		];
 	}
 
