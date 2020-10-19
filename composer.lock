@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e307e09d72e2a194042c57c5265696b9",
+    "content-hash": "529568a8a21c834b9b73d724e3485ca0",
     "packages": [
         {
             "name": "ampproject/common",
@@ -346,6 +346,13 @@
                 "phpunit/phpunit": "^4.8.36"
             },
             "type": "library",
+            "extra": {
+                "patches_applied": {
+                    "Add additional validation for size unit <https://github.com/sabberworm/PHP-CSS-Parser/pull/193>": "patches/php-css-parser-pull-193.patch",
+                    "Validate name-start code points for identifier <https://github.com/sabberworm/PHP-CSS-Parser/pull/185>": "patches/php-css-parser-pull-185.patch",
+                    "Fix parsing CSS selectors which contain commas <https://github.com/westonruter/PHP-CSS-Parser/pull/1>": "patches/php-css-parser-commit-10a2501.patch"
+                }
+            },
             "autoload": {
                 "psr-4": {
                     "Sabberworm\\CSS\\": "lib/Sabberworm/CSS/"
@@ -3021,12 +3028,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-cli/wp-cli.git",
-                "reference": "4221b5b0103e375a52483a9c95bad2e092d86904"
+                "reference": "d394b395995e70932df5a58baab18f2942afbc28"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wp-cli/wp-cli/zipball/4221b5b0103e375a52483a9c95bad2e092d86904",
-                "reference": "4221b5b0103e375a52483a9c95bad2e092d86904",
+                "url": "https://api.github.com/repos/wp-cli/wp-cli/zipball/d394b395995e70932df5a58baab18f2942afbc28",
+                "reference": "d394b395995e70932df5a58baab18f2942afbc28",
                 "shasum": ""
             },
             "require": {
@@ -3079,7 +3086,7 @@
                 "cli",
                 "wordpress"
             ],
-            "time": "2020-09-29T08:28:11+00:00"
+            "time": "2020-10-09T07:57:08+00:00"
         },
         {
             "name": "wp-coding-standards/wpcs",
@@ -3174,7 +3181,7 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": "^5.6 || ^7.0",
+        "php": "^5.6 || ^7.0 || ^8.0",
         "ext-curl": "*",
         "ext-date": "*",
         "ext-dom": "*",
