@@ -3,8 +3,6 @@
  * PHPUnit bootstrap file.
  */
 
-define( 'WP_TESTS_DIR', '../../../../tests/phpunit' );
-
 $amp_plugin_root = dirname( dirname( __DIR__ ) );
 
 /**
