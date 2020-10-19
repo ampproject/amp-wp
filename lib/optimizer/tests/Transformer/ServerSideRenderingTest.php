@@ -307,6 +307,24 @@ final class ServerSideRenderingTest extends TestCase
                 ),
                 [],
             ],
+
+            'css overage skips SSR' => [
+                $input(
+                    '<amp-img height="300" layout="responsive" srcset="https://acme.org/image1.png 320w, https://acme.org/image2.png 640w, https://acme.org/image3.png 1280w" sizes="(min-width: 320px) 320px, 100vw" src="https://acme.org/image1.png" width="400"></amp-img>',
+                    '<style amp-custom>' . str_pad('', ServerSideRendering::MAX_CSS_BYTE_COUNT - 1, 'X') . '</style>'
+                ),
+                $expectWithBoilerplate(
+                    '<amp-img class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" height="300" i-amphtml-layout="responsive" id="i-amp-0" layout="responsive" sizes="(min-width: 320px) 320px, 100vw" src="https://acme.org/image1.png" srcset="https://acme.org/image1.png 320w, https://acme.org/image2.png 640w, https://acme.org/image3.png 1280w" width="400"><i-amphtml-sizer style="display:block;padding-top:75%"></i-amphtml-sizer></amp-img>',
+                    '<style amp-custom>' . str_pad('', ServerSideRendering::MAX_CSS_BYTE_COUNT - 1, 'X') . '</style>'
+                ),
+                [
+                    Error\CannotRemoveBoilerplate::fromAttributesRequiringBoilerplate(
+                        Document::fromHtmlFragment(
+                            '<amp-img height="300" layout="responsive" srcset="https://acme.org/image1.png 320w, https://acme.org/image2.png 640w, https://acme.org/image3.png 1280w" sizes="(min-width: 320px) 320px, 100vw" src="https://acme.org/image1.png" width="400"></amp-img>'
+                        )->body->firstChild
+                    ),
+                ],
+            ],
         ];
     }
 
