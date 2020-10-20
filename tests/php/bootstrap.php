@@ -11,6 +11,9 @@ $amp_plugin_root = dirname( dirname( __DIR__ ) );
 require_once $amp_plugin_root . '/vendor/xwp/wp-dev-lib/sample-config/phpunit-plugin-bootstrap.php';
 
 /**
- * Load WP CLI.
+ * Load WP CLI. Its test bootstrap file can't be required as it will load
+ * duplicate class names which are already in use.
  */
-require_once $amp_plugin_root . '/vendor/wp-cli/wp-cli/tests/bootstrap.php';
+define( 'WP_CLI_ROOT', $amp_plugin_root . '/vendor/wp-cli/wp-cli' );
+define( 'WP_CLI_VENDOR_DIR', $amp_plugin_root . '/vendor' );
+require_once WP_CLI_ROOT . '/php/utils.php';
