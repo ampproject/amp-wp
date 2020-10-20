@@ -104,7 +104,7 @@ class AMP_Facebook_Embed_Handler_Test extends WP_UnitTestCase {
 			$this->markTestSkipped( 'Endpoint is down.' );
 		}
 
-		$dom              = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
+		$dom = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
 		$embed->sanitize_raw_embeds( $dom );
 
 		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
@@ -289,7 +289,7 @@ class AMP_Facebook_Embed_Handler_Test extends WP_UnitTestCase {
 			$this->markTestSkipped( 'Endpoint is down.' );
 		}
 
-		$dom              = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
+		$dom = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
 		$embed->sanitize_raw_embeds( $dom );
 
 		$layout_sanitizer = new AMP_Layout_Sanitizer( $dom );
