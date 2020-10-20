@@ -39,7 +39,7 @@ class AMP_Facebook_Embed_Handler_Test extends WP_UnitTestCase {
 	 * @return array Response data.
 	 */
 	public function mock_http_request( $preempt, $r, $url ) {
-		if ( in_array( 'external-http', $_SERVER['argv'], true ) ) {
+		if ( self::is_external_http_test_suite() ) {
 			return $preempt;
 		}
 
@@ -99,6 +99,11 @@ class AMP_Facebook_Embed_Handler_Test extends WP_UnitTestCase {
 		$embed->register_embed();
 
 		$filtered_content = apply_filters( 'the_content', $source );
+
+		if ( self::is_external_http_test_suite() && "<p>$source</p>" === trim( $filtered_content ) ) {
+			$this->markTestSkipped( 'Endpoint is down.' );
+		}
+
 		$dom              = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
 		$embed->sanitize_raw_embeds( $dom );
 
@@ -279,6 +284,11 @@ class AMP_Facebook_Embed_Handler_Test extends WP_UnitTestCase {
 		$embed->register_embed();
 
 		$filtered_content = apply_filters( 'the_content', $source );
+
+		if ( self::is_external_http_test_suite() && "<p>$source</p>" === trim( $filtered_content ) ) {
+			$this->markTestSkipped( 'Endpoint is down.' );
+		}
+
 		$dom              = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
 		$embed->sanitize_raw_embeds( $dom );
 
@@ -291,5 +301,14 @@ class AMP_Facebook_Embed_Handler_Test extends WP_UnitTestCase {
 		$content = preg_replace( '#(<blockquote.*?>).+?(</blockquote>)#s', '$1<!--blockquote_contents-->$2', $content );
 
 		$this->assertEqualMarkup( $expected, $content );
+	}
+
+	/**
+	 * Whether external-http test suite is running.
+	 *
+	 * @return bool Running external-http test suite.
+	 */
+	private static function is_external_http_test_suite() {
+		return in_array( 'external-http', $_SERVER['argv'], true );
 	}
 }
