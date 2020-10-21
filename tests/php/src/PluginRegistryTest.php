@@ -22,6 +22,13 @@ final class PluginRegistryTest extends TestCase {
 		$this->assertInstanceOf( Service::class, $plugin_registry );
 	}
 
+	/** @covers ::get_plugin_dir() */
+	public function test_get_plugin_dir() {
+		$plugin_registry  = new PluginRegistry();
+		$plugin_directory = $plugin_registry->get_plugin_dir();
+		$this->assertEquals( WP_CONTENT_DIR . '/plugins', $plugin_directory );
+	}
+
 	/** @covers ::get_plugin_slug_from_file() */
 	public function test_get_plugin_slug_from_file() {
 		$plugin_registry = new PluginRegistry();
