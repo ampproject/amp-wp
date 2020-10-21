@@ -16,23 +16,13 @@ Retrieves the full AMP-specific permalink for the given post ID.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:701](/includes/amp-helper-functions.php#L701-L770)
+:link: [includes/amp-helper-functions.php:701](/includes/amp-helper-functions.php#L701-L732)
 
 <details>
 <summary>Show Code</summary>
 
 ```php
 function amp_get_permalink( $post_id ) {
-
-	// When theme support is present (i.e. not using legacy Reader post templates), the plain query var should always be used.
-	if ( ! amp_is_legacy() ) {
-		$permalink = get_permalink( $post_id );
-		if ( ! amp_is_canonical() ) {
-			$permalink = add_query_arg( amp_get_slug(), '', $permalink );
-		}
-		return $permalink;
-	}
-
 	/**
 	 * Filters the AMP permalink to short-circuit normal generation.
 	 *
@@ -51,35 +41,7 @@ function amp_get_permalink( $post_id ) {
 	}
 
 	$permalink = get_permalink( $post_id );
-
-	if ( amp_is_canonical() ) {
-		$amp_url = $permalink;
-	} else {
-		$parsed_url    = wp_parse_url( get_permalink( $post_id ) );
-		$structure     = get_option( 'permalink_structure' );
-		$use_query_var = (
-			// If pretty permalinks aren't available, then query var must be used.
-			empty( $structure )
-			||
-			// If there are existing query vars, then always use the amp query var as well.
-			! empty( $parsed_url['query'] )
-			||
-			// If the post type is hierarchical then the /amp/ endpoint isn't available.
-			is_post_type_hierarchical( get_post_type( $post_id ) )
-			||
-			// Attachment pages don't accept the /amp/ endpoint.
-			'attachment' === get_post_type( $post_id )
-		);
-		if ( $use_query_var ) {
-			$amp_url = add_query_arg( amp_get_slug(), '', $permalink );
-		} else {
-			$amp_url = preg_replace( '/#.*/', '', $permalink );
-			$amp_url = trailingslashit( $amp_url ) . user_trailingslashit( amp_get_slug(), 'single_amp' );
-			if ( ! empty( $parsed_url['fragment'] ) ) {
-				$amp_url .= '#' . $parsed_url['fragment'];
-			}
-		}
-	}
+	$amp_url   = amp_is_canonical() ? $permalink : amp_add_paired_endpoint( $permalink );
 
 	/**
 	 * Filters AMP permalink.

@@ -24,7 +24,7 @@ describe( 'AMP analytics options', () => {
 		await expect( page ).toFill( '#amp-analytics-entry-2 input[type="text"]', 'googleanalytics-2' );
 
 		// Save.
-		await expect( page ).toClick( '.settings-footer button[type="submit"]' );
+		await expect( page ).toClick( '.amp-settings-nav button[type="submit"]' );
 
 		// Wait for the success notice. Note: This might not be reliable and should be removed if it causes problems.
 		await page.waitFor( 2000 );
@@ -37,7 +37,7 @@ describe( 'AMP analytics options', () => {
 		await expect( page ).not.toMatchElement( '.amp-analytics-entry' );
 
 		// Save.
-		await expect( page ).toClick( '.settings-footer button[type="submit"]' );
+		await expect( page ).toClick( '.amp-settings-nav button[type="submit"]' );
 		await expect( page ).toMatchElement( '.amp .amp-save-success-notice.amp-notice' );
 	} );
 } );

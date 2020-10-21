@@ -141,6 +141,23 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Check if element is descendant of a template element.
+	 *
+	 * @param DOMElement $node Node.
+	 * @return bool Descendant of template.
+	 */
+	private function is_descendant_of_template_element( DOMElement $node ) {
+		while ( $node instanceof DOMElement ) {
+			$parent = $node->parentNode;
+			if ( $parent instanceof DOMElement && Tag::TEMPLATE === $parent->tagName ) {
+				return true;
+			}
+			$node = $parent;
+		}
+		return false;
+	}
+
+	/**
 	 * Process element.
 	 *
 	 * @param DOMElement $element        Element to process.
@@ -151,6 +168,11 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Skip page anchor links or non-frontend links.
 		if ( empty( $url ) || '#' === substr( $url, 0, 1 ) || ! $this->is_frontend_url( $url ) ) {
+			return;
+		}
+
+		// Skip links with template variables.
+		if ( preg_match( '/{{[^}]+?}}/', $url ) && $this->is_descendant_of_template_element( $element ) ) {
 			return;
 		}
 

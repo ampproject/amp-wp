@@ -234,7 +234,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 *      @type string $src IFrame URL - Empty if HTTPS required per $this->args['require_https_src']
 	 *      @type int $width <iframe> width attribute - Set to numeric value if px or %
-	 *      @type int $height <iframe> width attribute - Set to numeric value if px or %
+	 *      @type int $height <iframe> height attribute - Set to numeric value if px or %
 	 *      @type string $sandbox <iframe> `sandbox` attribute - Pass along if found; default to value of self::SANDBOX_DEFAULTS
 	 *      @type string $class <iframe> `class` attribute - Pass along if found
 	 *      @type string $sizes <iframe> `sizes` attribute - Pass along if found

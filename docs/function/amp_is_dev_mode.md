@@ -14,7 +14,7 @@ When enabled, the &lt;html&gt; element will get the data-ampdevmode attribute an
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1440](/includes/amp-helper-functions.php#L1440-L1463)
+:link: [includes/amp-helper-functions.php:1391](/includes/amp-helper-functions.php#L1391-L1414)
 
 <details>
 <summary>Show Code</summary>

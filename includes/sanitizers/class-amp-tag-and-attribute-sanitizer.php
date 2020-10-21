@@ -1312,7 +1312,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		$allow_fluid  = Layout::FLUID === $layout_attr;
 		$allow_auto   = true;
 
-		$input_width = new CssLength( $node->getAttribute( Attribute::WIDTH ) );
+		$input_width = new CssLength( $node->hasAttribute( Attribute::WIDTH ) ? $node->getAttribute( Attribute::WIDTH ) : null );
 		$input_width->validate( $allow_auto, $allow_fluid );
 		if ( ! $input_width->isValid() ) {
 			return [
@@ -1321,7 +1321,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			];
 		}
 
-		$input_height = new CssLength( $node->getAttribute( Attribute::HEIGHT ) );
+		$input_height = new CssLength( $node->hasAttribute( Attribute::HEIGHT ) ? $node->getAttribute( Attribute::HEIGHT ) : null );
 		$input_height->validate( $allow_auto, $allow_fluid );
 		if ( ! $input_height->isValid() ) {
 			return [
