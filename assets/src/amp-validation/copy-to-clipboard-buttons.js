@@ -26,7 +26,7 @@ function updateJsonStatusField( json, button ) {
  * Sets up the "Copy to clipboard" buttons on the URL validation screen.
  */
 export function handleCopyToClipboardButtons() {
-	/* eslint-disable no-new */
+	// eslint-disable-next-line no-new
 	new Clipboard( 'button.single-url-detail-copy', {
 		text: ( btn ) => {
 			let json = JSON.parse( btn.getAttribute( 'data-error-json' ) );
@@ -36,8 +36,8 @@ export function handleCopyToClipboardButtons() {
 		},
 	} );
 
+	// eslint-disable-next-line no-new
 	new Clipboard( 'button.copy-all', {
-	/* eslint-enable no-new */
 		text: () => {
 			const value = getURLValidationTableRows( { checkedOnly: true } ).map( ( row ) => {
 				const copyButton = row.querySelector( '.single-url-detail-copy' );
