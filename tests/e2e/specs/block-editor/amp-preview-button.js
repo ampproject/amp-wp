@@ -44,7 +44,7 @@ describe( 'AMP Preview button', () => {
 	it( 'does not render the button when in Standard mode', async () => {
 		// Set theme support to Standard mode.
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
-		await page.waitForSelector( '.settings-footer' );
+		await page.waitForSelector( '.amp-settings-nav' );
 		await page.evaluate( async () => {
 			await wp.apiFetch( { path: '/amp/v1/options', method: 'POST', data: { theme_support: 'standard' } } );
 		} );
