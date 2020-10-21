@@ -85,7 +85,6 @@
       "tests/php/validation/"
     ],
     "files": [
-      "vendor/wp-cli/wp-cli/php/utils.php",
       "tests/php/register-wp-cli-commands.php",
       "docs/includes/register-wp-cli-commands.php"
     ]
