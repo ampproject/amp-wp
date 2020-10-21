@@ -19,6 +19,14 @@ use AmpProject\AmpWP\BackgroundTask\SingleScheduledBackgroundTask;
  * @internal
  */
 final class SavePostValidationEvent extends SingleScheduledBackgroundTask {
+
+	/**
+	 * Instance of URLValidationProvider
+	 *
+	 * @var URLValidationPRovider
+	 */
+	private $url_validation_provider;
+
 	/**
 	 * The cron action name.
 	 *
@@ -63,6 +71,19 @@ final class SavePostValidationEvent extends SingleScheduledBackgroundTask {
 	}
 
 	/**
+	 * Provides the URLValidationProvider instance, creating it if needed.
+	 *
+	 * @return URLValidationProvider
+	 */
+	private function get_url_validation_provider() {
+		if ( is_null( $this->url_validation_provider ) ) {
+			$this->url_validation_provider = new URLValidationProvider();
+		}
+
+		return $this->url_validation_provider;
+	}
+
+	/**
 	 * Callback for the cron action.
 	 *
 	 * @param int $post_id The ID of a saved post.
@@ -74,7 +95,7 @@ final class SavePostValidationEvent extends SingleScheduledBackgroundTask {
 
 		$post_type = get_post_type( $post_id );
 
-		( new URLValidationProvider() )->get_url_validation( get_the_permalink( $post_id ), $post_type );
+		$this->get_url_validation_provider()->get_url_validation( get_the_permalink( $post_id ), $post_type );
 	}
 
 	/**

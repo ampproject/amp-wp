@@ -1,19 +1,37 @@
+// bootstrap.php
 <?php
 /**
- * PHPUnit bootstrap file.
+ * Tbootstrap.
+ *
+ * @since 1.0.0
  */
 
-$amp_plugin_root = dirname( dirname( __DIR__ ) );
+define( 'TESTS_PLUGIN_DIR', __DIR__ );
 
-/**
- * Include bootstrap file from wp-dev-lib.
- */
-require_once $amp_plugin_root . '/vendor/xwp/wp-dev-lib/sample-config/phpunit-plugin-bootstrap.php';
+if ( false !== getenv( 'WP_PLUGIN_DIR' ) ) {
+	define( 'WP_PLUGIN_DIR', getenv( 'WP_PLUGIN_DIR' ) );
+} else {
+	define( 'WP_PLUGIN_DIR', dirname( TESTS_PLUGIN_DIR ) );
+}
 
-/**
- * Load WP CLI. Its test bootstrap file can't be required as it will load
- * duplicate class names which are already in use.
- */
-define( 'WP_CLI_ROOT', $amp_plugin_root . '/vendor/wp-cli/wp-cli' );
-define( 'WP_CLI_VENDOR_DIR', $amp_plugin_root . '/vendor' );
-require_once WP_CLI_ROOT . '/php/utils.php';
+if ( ! defined( 'AMP__VERSION' ) ) {
+	define( 'AMP__VERSION', 1 );
+}
+
+// Detect where to load the WordPress tests environment from.
+if ( false !== getenv( 'WP_TESTS_DIR' ) ) {
+	$_test_root = getenv( 'WP_TESTS_DIR' );
+} elseif ( false !== getenv( 'WP_DEVELOP_DIR' ) ) {
+	$_test_root = getenv( 'WP_DEVELOP_DIR' ) . '/tests/phpunit';
+} elseif ( file_exists( '/tmp/wordpress-tests-lib/includes/bootstrap.php' ) ) {
+	$_test_root = '/tmp/wordpress-tests-lib';
+} else {
+	$_test_root = dirname( dirname( dirname( dirname( TESTS_PLUGIN_DIR ) ) ) ) . '/tests/phpunit';
+}
+
+$GLOBALS['wp_tests_options'] = array(
+	'active_plugins' => array( basename( TESTS_PLUGIN_DIR ) . '/amp.php' ),
+);
+
+// Start up the WP testing environment.
+require $_test_root . '/includes/bootstrap.php';
