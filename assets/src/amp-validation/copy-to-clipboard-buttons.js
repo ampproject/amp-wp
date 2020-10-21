@@ -22,6 +22,20 @@ function copyToClipboard( value ) {
 }
 
 /**
+ * Update the status field ("Kept"/"Removed") because it might have changed.
+ *
+ * @param {Object} json Parsed JSON object.
+ * @param {HTMLButtonElement} button The button with JSON data.
+ * @return {Object} Modified JSON object.
+ */
+function updateJsonStatusField( json, button ) {
+	const statusSelect = button.closest( 'tr' ).querySelector( '.amp-validation-error-status' );
+	json.status = statusSelect.options[ statusSelect.selectedIndex ].text;
+
+	return json;
+}
+
+/**
  * Callback when a user clicks a button to copy error details to a clipboard.
  *
  * @param {Event} event Click event.
@@ -29,7 +43,11 @@ function copyToClipboard( value ) {
 function handleCopyToClipboardClick( event ) {
 	// Handle a single error detail button.
 	if ( event.target.classList.contains( 'single-url-detail-copy' ) ) {
-		copyToClipboard( event.target.getAttribute( 'data-error-json' ) );
+		let json = JSON.parse( event.target.getAttribute( 'data-error-json' ) );
+
+		json = updateJsonStatusField( json, event.target );
+
+		copyToClipboard( JSON.stringify( json, null, '\t' ) );
 		return;
 	}
 
@@ -44,9 +62,10 @@ function handleCopyToClipboardClick( event ) {
 			return null;
 		}
 
-		const data = JSON.parse( copyButton.getAttribute( 'data-error-json' ) );
+		let json = JSON.parse( copyButton.getAttribute( 'data-error-json' ) );
+		json = updateJsonStatusField( json, copyButton );
 
-		return data;
+		return json;
 	} )
 		.filter( ( item ) => item );
 
