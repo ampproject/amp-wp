@@ -202,10 +202,60 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'allowed_at_rules_retained' => [
-				'<style>@media screen and ( max-width: 640px ) { body { font-size: small; } } @font-face { font-family: "Open Sans"; src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"); } @supports (display: grid) { div { display: grid; } } @-moz-keyframes appear { from { opacity: 0.0; } to { opacity: 1.0; } } @keyframes appear { from { opacity: 0.0; } to { opacity: 1.0; } }</style><div></div>',
+				'<style>@media screen and ( max-width: 640px ) { body { font-size: small; } } @font-face { font-family: "Open Sans"; src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"); } @-moz-document url-prefix() { body { color:red; } } @supports (display: grid) { div { display: grid; } } @-moz-keyframes appear { from { opacity: 0.0; } to { opacity: 1.0; } } @keyframes appear { from { opacity: 0.0; } to { opacity: 1.0; } }</style><div></div>',
 				'<div></div>',
 				[
-					'@media screen and ( max-width: 640px ){body{font-size:small}}@font-face{font-family:"Open Sans";src:url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2")}@supports (display: grid){div{display:grid}}@-moz-keyframes appear{from{opacity:0}to{opacity:1}}@keyframes appear{from{opacity:0}to{opacity:1}}',
+					'@media screen and ( max-width: 640px ){body{font-size:small}}@font-face{font-family:"Open Sans";src:url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2")}@supports (-moz-appearance:meterbar){body{color:red}}@supports (display: grid){div{display:grid}}@-moz-keyframes appear{from{opacity:0}to{opacity:1}}@keyframes appear{from{opacity:0}to{opacity:1}}',
+				],
+			],
+
+			'moz_document_transformed' => [
+				'
+					<style>
+						@-moz-document url-prefix() {
+							/* From Twenty Nineteen. */
+							.entry .entry-content .has-drop-cap:not(:focus):first-letter {
+								margin-top: 0.2em;
+							}
+						}
+					</style>
+					<style>
+						@-moz-document url-prefix(   ) {
+							.has-drop-cap {
+								/* Firefox does not even allow whitespace in the url-prefix() args. */
+								color: red;
+							}
+						}
+					</style>
+					<style>
+						@-moz-document url-prefix("http://") {
+							/* This rule will be dropped as a validation error since the url-prefix() is not empty. */
+							.has-drop-cap {
+								color: red;
+							}
+						}
+					</style>
+					<style>
+						@-moz-document url("https://example.com/") {
+							/* This rule will be dropped as a validation error since only an empty url-prefix() is allowed. */
+							.has-drop-cap {
+								color: red;
+							}
+						}
+					</style>
+					<div class="entry"><div class="entry-content"><p class="has-drop-cap">Hello</p></div></div>
+				',
+				'
+					<div class="entry"><div class="entry-content"><p class="has-drop-cap">Hello</p></div></div>
+				',
+				[
+					'@supports (-moz-appearance:meterbar){.entry .entry-content .has-drop-cap:not(:focus):first-letter{margin-top:.2em}}',
+					'',
+				],
+				[
+					AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE,
+					AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE,
+					AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE,
 				],
 			],
 
