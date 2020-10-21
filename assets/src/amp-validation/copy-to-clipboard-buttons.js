@@ -9,28 +9,15 @@ import Clipboard from 'clipboard';
 import { getURLValidationTableRows } from './get-url-validation-table-rows';
 
 /**
- * Update the status field ("Kept"/"Removed") because it might have changed.
- *
- * @param {Object} json Parsed JSON object.
- * @param {HTMLButtonElement} button The button with JSON data.
- * @return {Object} Modified JSON object.
- */
-function updateJsonStatusField( json, button ) {
-	const statusSelect = button.closest( 'tr' ).querySelector( '.amp-validation-error-status' );
-	json.status = statusSelect.options[ statusSelect.selectedIndex ].text;
-
-	return json;
-}
-
-/**
  * Sets up the "Copy to clipboard" buttons on the URL validation screen.
  */
 export function handleCopyToClipboardButtons() {
 	// eslint-disable-next-line no-new
 	new Clipboard( 'button.single-url-detail-copy', {
 		text: ( btn ) => {
-			let json = JSON.parse( btn.getAttribute( 'data-error-json' ) );
-			json = updateJsonStatusField( json, btn );
+			const json = JSON.parse( btn.getAttribute( 'data-error-json' ) );
+			const statusSelect = btn.closest( 'tr' ).querySelector( '.amp-validation-error-status' );
+			json.status = statusSelect.options[ statusSelect.selectedIndex ].text;
 
 			return JSON.stringify( json, null, '\t' );
 		},
@@ -45,8 +32,9 @@ export function handleCopyToClipboardButtons() {
 					return null;
 				}
 
-				let json = JSON.parse( copyButton.getAttribute( 'data-error-json' ) );
-				json = updateJsonStatusField( json, copyButton );
+				const json = JSON.parse( copyButton.getAttribute( 'data-error-json' ) );
+				const statusSelect = row.querySelector( '.amp-validation-error-status' );
+				json.status = statusSelect.options[ statusSelect.selectedIndex ].text;
 
 				return json;
 			} )
