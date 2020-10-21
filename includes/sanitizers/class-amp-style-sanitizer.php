@@ -2150,9 +2150,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					// yet allowed in AMP, and this use of @supports is another recognized Firefox-specific CSS hack,
 					// per <http://browserhacks.com/#hack-8e9b5504d9fda44ec75169381b3c3157>.
 					// For adding @-moz-document to AMP, see <https://github.com/ampproject/amphtml/issues/26406>.
-					$supports_at_rule = new AtRuleBlockList( 'supports', '(-moz-appearance:meterbar)' );
-					$supports_at_rule->setContents( $css_item->getContents() );
-					$css_list->splice( $i, 1, [ $supports_at_rule ] );
+					$new_css_item = new AtRuleBlockList( 'supports', '(-moz-appearance:meterbar)' );
+					$new_css_item->setContents( $css_item->getContents() );
+					$css_list->splice( $i, 1, [ $new_css_item ] );
+					$css_item  = $new_css_item; // To process_css_list below.
+					$sanitized = false;
 				} elseif ( ! in_array( $css_item->atRuleName(), $options['allowed_at_rules'], true ) ) {
 					$error                = [
 						'code'      => self::CSS_SYNTAX_INVALID_AT_RULE,

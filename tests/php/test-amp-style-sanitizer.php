@@ -216,6 +216,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 							/* From Twenty Nineteen. */
 							.entry .entry-content .has-drop-cap:not(:focus):first-letter {
 								margin-top: 0.2em;
+								behavior: url(hilite.htc);
+								-moz-binding: url(http://www.example.org/xbl/htmlBindings.xml#checkbox);
 							}
 						}
 					</style>
@@ -253,6 +255,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'',
 				],
 				[
+					AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
+					AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
 					AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE,
 					AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE,
 					AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE,
