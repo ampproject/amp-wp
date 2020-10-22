@@ -1,6 +1,6 @@
 <?php
 /**
- * WP cron process to validate URLs in the background.
+ * Single cron event to validate a saved post's permalink in the background.
  *
  * @package AMP
  * @since 2.1
@@ -8,8 +8,9 @@
 
 namespace AmpProject\AmpWP\Validation;
 
-use AMP_Post_Type_Support;
+use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\SingleScheduledBackgroundTask;
+use AmpProject\AmpWP\DevTools\UserAccess;
 
 /**
  * SavePostValidationEvent class.
@@ -26,6 +27,13 @@ final class SavePostValidationEvent extends SingleScheduledBackgroundTask {
 	 * @var URLValidationPRovider
 	 */
 	private $url_validation_provider;
+
+	/**
+	 * Instance of UserAccess.
+	 *
+	 * @var UserAccess
+	 */
+	private $dev_tools_user_access;
 
 	/**
 	 * The cron action name.
@@ -48,11 +56,29 @@ final class SavePostValidationEvent extends SingleScheduledBackgroundTask {
 	}
 
 	/**
+	 * Class constructor.
+	 *
+	 * @param BackgroundTaskDeactivator $background_task_deactivator Background task deactivator instance.
+	 * @param UserAccess                $dev_tools_user_access Dev tools user access class instance.
+	 */
+	public function __construct( BackgroundTaskDeactivator $background_task_deactivator, UserAccess $dev_tools_user_access ) {
+		parent::__construct( $background_task_deactivator );
+
+		$this->dev_tools_user_access = $dev_tools_user_access;
+	}
+
+	/**
 	 * Returns whether the event should be scheduled.
 	 *
+	 * @param array $args Args passed from the action hook where the event is scheduled.
 	 * @return boolean
 	 */
 	protected function should_schedule_event( $args ) {
+		// Validation is performed on post save if user has dev tools on.
+		if ( $this->dev_tools_user_access->is_user_enabled( wp_get_current_user() ) ) {
+			return false;
+		}
+
 		if ( ! is_array( $args ) || count( $args ) !== 1 ) {
 			return false;
 		}
@@ -93,9 +119,10 @@ final class SavePostValidationEvent extends SingleScheduledBackgroundTask {
 			return;
 		}
 
-		$post_type = get_post_type( $post_id );
-
-		$this->get_url_validation_provider()->get_url_validation( get_the_permalink( $post_id ), $post_type );
+		$this->get_url_validation_provider()->get_url_validation(
+			get_the_permalink( $post_id ),
+			get_post_type( $post_id )
+		);
 	}
 
 	/**

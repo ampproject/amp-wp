@@ -75,10 +75,9 @@ abstract class SingleScheduledBackgroundTask implements Service, Registerable {
 	/**
 	 * The number of args expected from the action hook. Default 1.
 	 *
-	 * @param string $action_hook The action hook name.
 	 * @return int
 	 */
-	protected function get_action_hook_arg_count( $action_hook ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+	protected function get_action_hook_arg_count() { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		return 1;
 	}
 

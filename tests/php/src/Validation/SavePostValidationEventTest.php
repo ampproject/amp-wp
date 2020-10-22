@@ -7,6 +7,7 @@ namespace AmpProject\AmpWP\Tests\Validation;
 
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\SingleScheduledBackgroundTask;
+use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
@@ -28,7 +29,7 @@ final class SavePostValidationEventTest extends WP_UnitTestCase {
 	private $test_instance;
 
 	public function setUp() {
-		$this->test_instance = new SavePostValidationEvent( new BackgroundTaskDeactivator() );
+		$this->test_instance = new SavePostValidationEvent( new BackgroundTaskDeactivator(), new UserAccess() );
 	}
 
 	/**
@@ -68,7 +69,7 @@ final class SavePostValidationEventTest extends WP_UnitTestCase {
 
 		$this->test_instance->process( $post->ID );
 
-		remove_filter( 'pre_http_request', $filter ); 
+		remove_filter( 'pre_http_request', $filter );
 
 		$plugin_property = ( new ReflectionClass( $this->test_instance ) )->getProperty( 'url_validation_provider' );
 		$plugin_property->setAccessible( true );
