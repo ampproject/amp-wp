@@ -381,15 +381,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return bool Returns true if the plugin's forked version of PHP-CSS-Parser is loaded by Composer.
 	 */
 	public static function has_required_php_css_parser() {
-		$has_required_methods = (
-			method_exists( 'Sabberworm\CSS\CSSList\Document', 'splice' )
-			&&
-			method_exists( 'Sabberworm\CSS\CSSList\Document', 'replace' )
-		);
-		if ( ! $has_required_methods ) {
-			return false;
-		}
-
 		$reflection = new ReflectionClass( 'Sabberworm\CSS\OutputFormat' );
 
 		$has_output_format_extensions = (
@@ -1743,7 +1734,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		);
 		$viewport_rules     = $parsed_stylesheet['viewport_rules'];
 
-		if ( ! empty( $parsed_stylesheet['css_document'] ) && method_exists( $css_list, 'replace' ) ) {
+		if ( ! empty( $parsed_stylesheet['css_document'] ) ) {
 			/**
 			 * CSS Doc.
 			 *
@@ -1751,15 +1742,38 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			 */
 			$css_document = $parsed_stylesheet['css_document'];
 
-			// Work around bug in \Sabberworm\CSS\CSSList\CSSList::replace() when array keys are not 0-based.
-			$css_list->setContents( array_values( $css_list->getContents() ) );
-
-			$css_list->replace( $item, $css_document->getContents() );
+			$this->replace_inside_css_list( $css_list, $item, $css_document->getContents() );
 		} else {
 			$css_list->remove( $item );
 		}
 
 		return compact( 'validation_results', 'imported_font_urls', 'viewport_rules' );
+	}
+
+	/**
+	 * Replace an item inside of a CSSList.
+	 *
+	 * This is being used instead of `CSSList::splice()` because it uses `array_splice()` which does not work properly
+	 * if the array keys are not sequentially indexed from 0, which happens when `CSSList::remove()` is employed.
+	 *
+	 * @see CSSList::splice()
+	 * @see CSSList::replace()
+	 * @see CSSList::remove()
+	 *
+	 * @param CSSList                      $css_list  CSS list.
+	 * @param AtRule|RuleSet|CSSList       $old_item  Old item.
+	 * @param AtRule[]|RuleSet[]|CSSList[] $new_items New item(s). If empty, the old item is simply removed.
+	 * @return bool Whether the replacement was successful.
+	 */
+	private function replace_inside_css_list( CSSList $css_list, $old_item, $new_items = [] ) {
+		$contents = array_values( $css_list->getContents() ); // Required to obtain the offset instead of the index.
+		$offset   = array_search( $old_item, $contents, true );
+		if ( false !== $offset ) {
+			array_splice( $contents, $offset, 1, $new_items );
+			$css_list->setContents( $contents );
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -2152,8 +2166,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					// For adding @-moz-document to AMP, see <https://github.com/ampproject/amphtml/issues/26406>.
 					$new_css_item = new AtRuleBlockList( 'supports', '(-moz-appearance:meterbar)' );
 					$new_css_item->setContents( $css_item->getContents() );
-					$css_list->replace( $css_item, $new_css_item );
-					$css_list->remove( $css_item ); // @todo This should be redundant with the replace() above.
+					$this->replace_inside_css_list( $css_list, $css_item, [ $new_css_item ] );
 					$css_item  = $new_css_item; // To process_css_list below.
 					$sanitized = false;
 				} elseif ( ! in_array( $css_item->atRuleName(), $options['allowed_at_rules'], true ) ) {
@@ -2720,13 +2733,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		);
 		$important_ruleset->setRules( $importants );
 
-		$i = array_search( $ruleset, $css_list->getContents(), true );
-		if ( false !== $i && method_exists( $css_list, 'splice' ) ) {
-			$css_list->splice( $i + 1, 0, [ $important_ruleset ] );
-		} else {
-			$css_list->append( $important_ruleset );
+		$contents = array_values( $css_list->getContents() ); // Ensure keys are 0-indexed and sequential.
+		$offset   = array_search( $ruleset, $contents, true );
+		if ( false !== $offset ) {
+			array_splice( $contents, $offset + 1, 0, [ $important_ruleset ] );
+			$css_list->setContents( $contents );
 		}
-
 		return $results;
 	}
 
