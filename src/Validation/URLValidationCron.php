@@ -33,47 +33,10 @@ final class URLValidationCron extends CronBasedBackgroundTask {
 	const DEFAULT_LIMIT_PER_TYPE = 1;
 
 	/**
-	 * Get the event name.
-	 *
-	 * This is the "slug" of the event, not the display name.
-	 *
-	 * Note: the event name should be prefixed to prevent naming collisions.
-	 *
-	 * @return string Name of the event.
-	 */
-	protected function get_event_name() {
-		return self::BACKGROUND_TASK_NAME;
-	}
-
-	/**
-	 * Get the interval to use for the event.
-	 *
-	 * @return string An existing interval name.
-	 */
-	protected function get_interval() {
-		return self::DEFAULT_INTERVAL_HOURLY;
-	}
-
-	/**
 	 * Callback for the cron action.
 	 */
 	public function process() {
 		$this->validate_urls();
-	}
-
-	/**
-	 * Returns the number of URLs per content type to check.
-	 *
-	 * @return int
-	 */
-	private function get_url_validation_number_per_type() {
-
-		/**
-		 * Filters the number of URLs per content type to check during each run of the cron task.
-		 *
-		 * @param int The number of URLs. Default 2.
-		 */
-		return (int) apply_filters( 'amp_url_validation_number_per_type', self::DEFAULT_LIMIT_PER_TYPE );
 	}
 
 	/**
@@ -99,5 +62,42 @@ final class URLValidationCron extends CronBasedBackgroundTask {
 				}
 			}
 		);
+	}
+
+	/**
+	 * Get the event name.
+	 *
+	 * This is the "slug" of the event, not the display name.
+	 *
+	 * Note: the event name should be prefixed to prevent naming collisions.
+	 *
+	 * @return string Name of the event.
+	 */
+	protected function get_event_name() {
+		return self::BACKGROUND_TASK_NAME;
+	}
+
+	/**
+	 * Get the interval to use for the event.
+	 *
+	 * @return string An existing interval name.
+	 */
+	protected function get_interval() {
+		return self::DEFAULT_INTERVAL_HOURLY;
+	}
+
+	/**
+	 * Returns the number of URLs per content type to check.
+	 *
+	 * @return int
+	 */
+	private function get_url_validation_number_per_type() {
+
+		/**
+		 * Filters the number of URLs per content type to check during each run of the cron task.
+		 *
+		 * @param int The number of URLs. Default 2.
+		 */
+		return (int) apply_filters( 'amp_url_validation_number_per_type', self::DEFAULT_LIMIT_PER_TYPE );
 	}
 }

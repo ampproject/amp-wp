@@ -12,7 +12,6 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use ReflectionClass;
 use WP_UnitTestCase;
 
 /**

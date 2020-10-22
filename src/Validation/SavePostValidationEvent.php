@@ -43,6 +43,34 @@ final class SavePostValidationEvent extends SingleScheduledBackgroundTask {
 	const BACKGROUND_TASK_NAME = 'amp_single_post_validate';
 
 	/**
+	 * Class constructor.
+	 *
+	 * @param BackgroundTaskDeactivator $background_task_deactivator Background task deactivator instance.
+	 * @param UserAccess                $dev_tools_user_access Dev tools user access class instance.
+	 */
+	public function __construct( BackgroundTaskDeactivator $background_task_deactivator, UserAccess $dev_tools_user_access ) {
+		parent::__construct( $background_task_deactivator );
+
+		$this->dev_tools_user_access = $dev_tools_user_access;
+	}
+
+	/**
+	 * Callback for the cron action.
+	 *
+	 * @param int $post_id The ID of a saved post.
+	 */
+	public function process( $post_id ) {
+		if ( empty( get_post( $post_id ) ) ) {
+			return;
+		}
+
+		$this->get_url_validation_provider()->get_url_validation(
+			get_the_permalink( $post_id ),
+			get_post_type( $post_id )
+		);
+	}
+
+	/**
 	 * Get the event name.
 	 *
 	 * This is the "slug" of the event, not the display name.
@@ -53,18 +81,6 @@ final class SavePostValidationEvent extends SingleScheduledBackgroundTask {
 	 */
 	protected function get_event_name() {
 		return self::BACKGROUND_TASK_NAME;
-	}
-
-	/**
-	 * Class constructor.
-	 *
-	 * @param BackgroundTaskDeactivator $background_task_deactivator Background task deactivator instance.
-	 * @param UserAccess                $dev_tools_user_access Dev tools user access class instance.
-	 */
-	public function __construct( BackgroundTaskDeactivator $background_task_deactivator, UserAccess $dev_tools_user_access ) {
-		parent::__construct( $background_task_deactivator );
-
-		$this->dev_tools_user_access = $dev_tools_user_access;
 	}
 
 	/**
@@ -97,6 +113,15 @@ final class SavePostValidationEvent extends SingleScheduledBackgroundTask {
 	}
 
 	/**
+	 * Gets the hook on which to schedule the event.
+	 *
+	 * @return string The action hook name.
+	 */
+	protected function get_action_hook() {
+		return 'save_post';
+	}
+
+	/**
 	 * Provides the URLValidationProvider instance, creating it if needed.
 	 *
 	 * @return URLValidationProvider
@@ -107,30 +132,5 @@ final class SavePostValidationEvent extends SingleScheduledBackgroundTask {
 		}
 
 		return $this->url_validation_provider;
-	}
-
-	/**
-	 * Callback for the cron action.
-	 *
-	 * @param int $post_id The ID of a saved post.
-	 */
-	public function process( $post_id ) {
-		if ( empty( get_post( $post_id ) ) ) {
-			return;
-		}
-
-		$this->get_url_validation_provider()->get_url_validation(
-			get_the_permalink( $post_id ),
-			get_post_type( $post_id )
-		);
-	}
-
-	/**
-	 * Gets the hook on which to schedule the event.
-	 *
-	 * @return string The action hook name.
-	 */
-	protected function get_action_hook() {
-		return 'save_post';
 	}
 }

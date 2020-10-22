@@ -58,15 +58,6 @@ final class SavePostValidationEventTest extends WP_UnitTestCase {
 			]
 		);
 
-		$filter = static function() {
-			return [
-				'body'    => '{"results": []}',
-				'headers' => [
-					'content-type' => 'application/json',
-				],
-			];
-		};
-
 		$this->test_instance->process( $post->ID );
 
 		$this->assertCount( 1, ValidationRequestMocking::get_validated_urls() );

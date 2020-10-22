@@ -18,6 +18,7 @@ use AmpProject\AmpWP\Infrastructure\Service;
  * @internal
  */
 abstract class SingleScheduledBackgroundTask implements Service, Registerable {
+
 	/**
 	 * Class constructor.
 	 *
@@ -42,8 +43,6 @@ abstract class SingleScheduledBackgroundTask implements Service, Registerable {
 	/**
 	 * Schedule the event.
 	 *
-	 * This does nothing if the event is already scheduled.
-	 *
 	 * @param array ...$args Arguments passed to the function from the action hook.
 	 * @return void
 	 */
@@ -58,20 +57,27 @@ abstract class SingleScheduledBackgroundTask implements Service, Registerable {
 	/**
 	 * Get the interval to use for the event.
 	 *
-	 * @return string An existing interval name. Valid values are 'hourly', 'twicedaily' or 'daily'.
+	 * @return int A timestamp.
 	 */
 	protected function get_timestamp() {
 		return time();
 	}
 
 	/**
-	 * The number of args expected from the action hook. Default 1.
+	 * Provides the number of args expected from the action hook where the event is registered. Default 1.
 	 *
 	 * @return int
 	 */
-	protected function get_action_hook_arg_count() { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+	protected function get_action_hook_arg_count() {
 		return 1;
 	}
+
+	/**
+	 * Process the event.
+	 *
+	 * @param array $args The args received with the action hook where the event was scheduled.
+	 */
+	abstract public function process( $args );
 
 	/**
 	 * Returns whether the event should be scheduled.
@@ -98,11 +104,4 @@ abstract class SingleScheduledBackgroundTask implements Service, Registerable {
 	 * @return string Name of the event.
 	 */
 	abstract protected function get_event_name();
-
-	/**
-	 * Process a single cron tick.
-	 *
-	 * @param array $args The args received with the action hook where the event was scheduled.
-	 */
-	abstract public function process( $args );
 }

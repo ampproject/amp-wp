@@ -68,7 +68,7 @@ final class BackgroundTaskDeactivator implements Service, Conditional, Registera
 	}
 
 	/**
-	 * Adds an event to the deactivate.
+	 * Adds an event to the deactivate queue.
 	 *
 	 * @param string $event_name The event name.
 	 */
