@@ -5,6 +5,7 @@
  * @package AmpProject\AmpWP
  */
 
+use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection;
 
 /** @coversDefaultClass \AmpProject\AmpWP\BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection */
@@ -20,7 +21,7 @@ class ValidatedUrlStylesheetDataGarbageCollectionTest extends WP_UnitTestCase {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$this->assertFalse( wp_next_scheduled( ValidatedUrlStylesheetDataGarbageCollection::EVENT_NAME ) );
 
-		$monitor = new ValidatedUrlStylesheetDataGarbageCollection();
+		$monitor = new ValidatedUrlStylesheetDataGarbageCollection( new BackgroundTaskDeactivator() );
 		$monitor->schedule_event();
 
 		$timestamp = wp_next_scheduled( ValidatedUrlStylesheetDataGarbageCollection::EVENT_NAME );
@@ -28,10 +29,6 @@ class ValidatedUrlStylesheetDataGarbageCollectionTest extends WP_UnitTestCase {
 		$this->assertNotFalse( $timestamp );
 		$this->assertInternalType( 'int', $timestamp );
 		$this->assertGreaterThan( 0, $timestamp );
-
-		$monitor->deactivate( false );
-
-		$this->assertFalse( wp_next_scheduled( ValidatedUrlStylesheetDataGarbageCollection::EVENT_NAME ) );
 	}
 
 	/**
@@ -40,7 +37,7 @@ class ValidatedUrlStylesheetDataGarbageCollectionTest extends WP_UnitTestCase {
 	 * @covers ::process()
 	 */
 	public function test_event_can_be_processed() {
-		$monitor = new ValidatedUrlStylesheetDataGarbageCollection();
+		$monitor = new ValidatedUrlStylesheetDataGarbageCollection( new BackgroundTaskDeactivator() );
 
 		// Insert four weeks of validated URLs.
 		$post_ids = [];
