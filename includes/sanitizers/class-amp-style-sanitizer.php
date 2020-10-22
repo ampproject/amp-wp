@@ -2130,7 +2130,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$viewport_rules     = [];
 		$imported_font_urls = [];
 
-		foreach ( $css_list->getContents() as $i => $css_item ) {
+		foreach ( $css_list->getContents() as $css_item ) {
 			$sanitized = false;
 			if ( $css_item instanceof DeclarationBlock && empty( $options['validate_keyframes'] ) ) {
 				$validation_results = array_merge(
@@ -2152,7 +2152,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					// For adding @-moz-document to AMP, see <https://github.com/ampproject/amphtml/issues/26406>.
 					$new_css_item = new AtRuleBlockList( 'supports', '(-moz-appearance:meterbar)' );
 					$new_css_item->setContents( $css_item->getContents() );
-					$css_list->splice( $i, 1, [ $new_css_item ] );
+					$css_list->replace( $css_item, $new_css_item );
+					$css_list->remove( $css_item ); // @todo This should be redundant with the replace() above.
 					$css_item  = $new_css_item; // To process_css_list below.
 					$sanitized = false;
 				} elseif ( ! in_array( $css_item->atRuleName(), $options['allowed_at_rules'], true ) ) {
