@@ -11,8 +11,8 @@ use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
 use AmpProject\AmpWP\Validation\SavePostValidationEvent;
-use ReflectionClass;
 use WP_UnitTestCase;
 
 /**
@@ -30,6 +30,7 @@ final class SavePostValidationEventTest extends WP_UnitTestCase {
 
 	public function setUp() {
 		$this->test_instance = new SavePostValidationEvent( new BackgroundTaskDeactivator(), new UserAccess() );
+		add_filter( 'pre_http_request', [ ValidationRequestMocking::class, 'get_validate_response' ] );
 	}
 
 	/**
@@ -65,16 +66,9 @@ final class SavePostValidationEventTest extends WP_UnitTestCase {
 				],
 			];
 		};
-		add_filter( 'pre_http_request', $filter );
 
 		$this->test_instance->process( $post->ID );
 
-		remove_filter( 'pre_http_request', $filter );
-
-		$plugin_property = ( new ReflectionClass( $this->test_instance ) )->getProperty( 'url_validation_provider' );
-		$plugin_property->setAccessible( true );
-		$url_validation_provider = $plugin_property->getValue( $this->test_instance );
-
-		$this->assertEquals( 1, $url_validation_provider->get_number_validated() );
+		$this->assertCount( 1, ValidationRequestMocking::get_validated_urls() );
 	}
 }

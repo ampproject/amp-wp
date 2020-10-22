@@ -11,6 +11,7 @@ use AmpProject\AmpWP\Infrastructure\Deactivateable;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use ReflectionClass;
 use WP_UnitTestCase;
 
@@ -18,7 +19,7 @@ use WP_UnitTestCase;
  * @coversDefaultClass \AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator
  */
 final class BackgroundTaskDeactivatorTest extends WP_UnitTestCase {
-	use AssertContainsCompatibility;
+	use AssertContainsCompatibility, PrivateAccess;
 
 	/**
 	 * BackgroundTaskDeactivator instance.
@@ -42,9 +43,8 @@ final class BackgroundTaskDeactivatorTest extends WP_UnitTestCase {
 		$this->assertInstanceof( Deactivateable::class, $this->test_instance );
 
 		$this->test_instance->register();
-		$plugin_property = ( new ReflectionClass( $this->test_instance ) )->getProperty( 'plugin_file' );
-		$plugin_property->setAccessible( true );
-		$plugin_file = $plugin_property->getValue( $this->test_instance );
+
+		$plugin_file = $this->get_private_property( $this->test_instance, 'plugin_file' );
 		$this->assertEquals( 'amp/amp.php', $plugin_file );
 
 		$this->assertEquals( 10, has_action( "network_admin_plugin_action_links_{$plugin_file}", [ $this->test_instance, 'add_warning_sign_to_network_deactivate_action' ] ) );
