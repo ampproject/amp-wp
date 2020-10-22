@@ -45,7 +45,7 @@ final class BackgroundTaskDeactivatorTest extends WP_UnitTestCase {
 		$plugin_property = ( new ReflectionClass( $this->test_instance ) )->getProperty( 'plugin_file' );
 		$plugin_property->setAccessible( true );
 		$plugin_file = $plugin_property->getValue( $this->test_instance );
-		$this->assertEquals( 'var/www/html/wp-content/plugins/amp/amp.php', $plugin_file );
+		$this->assertEquals( 'amp/amp.php', $plugin_file );
 
 		$this->assertEquals( 10, has_action( "network_admin_plugin_action_links_{$plugin_file}", [ $this->test_instance, 'add_warning_sign_to_network_deactivate_action' ] ) );
 		$this->assertEquals( 10, has_action( 'plugin_row_meta', [ $this->test_instance, 'add_warning_to_plugin_meta' ] ) );

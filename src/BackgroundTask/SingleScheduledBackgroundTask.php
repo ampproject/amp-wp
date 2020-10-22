@@ -7,12 +7,11 @@
 
 namespace AmpProject\AmpWP\BackgroundTask;
 
-use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 
 /**
- * Abstract base class for using cron to execute a background task.
+ * Abstract base class for using cron to execute a background task that runs only once.
  *
  * @package AmpProject\AmpWP
  * @since 2.0
@@ -42,27 +41,10 @@ abstract class SingleScheduledBackgroundTask implements Service, Registerable {
 	 * @return void
 	 */
 	public function register() {
-		$action_hooks = $this->get_action_hook();
+		$action_hook = $this->get_action_hook();
 
-		if ( ! is_array( $action_hooks ) ) {
-			$action_hooks = [ $action_hooks ];
-		}
-
-		foreach ( $action_hooks as $action_hook ) {
-			add_action( $action_hook, [ $this, 'schedule_event' ], 10, $this->get_action_hook_arg_count( $action_hook ) );
-		}
-
+		add_action( $action_hook, [ $this, 'schedule_event' ], 10, $this->get_action_hook_arg_count( $action_hook ) );
 		add_action( $this->get_event_name(), [ $this, 'process' ] );
-	}
-
-	/**
-	 * Returns whether the event should be scheduled.
-	 *
-	 * @param array $args Arguments passed from the action hook where the event is to be scheduled.
-	 * @return boolean
-	 */
-	protected function should_schedule_event( $args ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		return false;
 	}
 
 	/**
@@ -91,15 +73,6 @@ abstract class SingleScheduledBackgroundTask implements Service, Registerable {
 	}
 
 	/**
-	 * Provides arguments to pass to the event callback.
-	 *
-	 * @return array Array of arguments that will be passed to the process function.
-	 */
-	protected function get_event_args() {
-		return [];
-	}
-
-	/**
 	 * The number of args expected from the action hook. Default 1.
 	 *
 	 * @param string $action_hook The action hook name.
@@ -110,9 +83,17 @@ abstract class SingleScheduledBackgroundTask implements Service, Registerable {
 	}
 
 	/**
+	 * Returns whether the event should be scheduled.
+	 *
+	 * @param array $args Arguments passed from the action hook where the event is to be scheduled.
+	 * @return boolean
+	 */
+	abstract protected function should_schedule_event( $args );
+
+	/**
 	 * Gets the hook on which to schedule the event.
 	 *
-	 * @return string|array The action hook name or an array of action hooks.
+	 * @return string The action hook name.
 	 */
 	abstract protected function get_action_hook();
 
