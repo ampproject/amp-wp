@@ -18,14 +18,6 @@ use AmpProject\AmpWP\Infrastructure\Service;
  * @internal
  */
 abstract class SingleScheduledBackgroundTask implements Service, Registerable {
-
-	/**
-	 * The args passed to the schedule event callback through the specified action hook.
-	 *
-	 * @var array
-	 */
-	protected $action_hook_args = [];
-
 	/**
 	 * Class constructor.
 	 *
