@@ -5,6 +5,7 @@
  * @package AmpProject\AmpWP
  */
 
+use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching;
 use AmpProject\AmpWP\Option;
 
@@ -51,7 +52,7 @@ class Test_Monitor_CSS_Transient_Caching extends WP_UnitTestCase {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$this->assertFalse( wp_next_scheduled( MonitorCssTransientCaching::EVENT_NAME ) );
 
-		$monitor = new MonitorCssTransientCaching();
+		$monitor = new MonitorCssTransientCaching( new BackgroundTaskDeactivator() );
 		$monitor->schedule_event();
 
 		$timestamp = wp_next_scheduled( MonitorCssTransientCaching::EVENT_NAME );
@@ -59,10 +60,6 @@ class Test_Monitor_CSS_Transient_Caching extends WP_UnitTestCase {
 		$this->assertNotFalse( $timestamp );
 		$this->assertInternalType( 'int', $timestamp );
 		$this->assertGreaterThan( 0, $timestamp );
-
-		$monitor->deactivate( false );
-
-		$this->assertFalse( wp_next_scheduled( MonitorCssTransientCaching::EVENT_NAME ) );
 	}
 
 	/**
@@ -73,7 +70,7 @@ class Test_Monitor_CSS_Transient_Caching extends WP_UnitTestCase {
 	public function test_event_can_be_processed() {
 		delete_option( MonitorCssTransientCaching::TIME_SERIES_OPTION_KEY );
 
-		$monitor = new MonitorCssTransientCaching();
+		$monitor = new MonitorCssTransientCaching( new BackgroundTaskDeactivator() );
 		$monitor->process();
 
 		$this->assertNotFalse( get_option( MonitorCssTransientCaching::TIME_SERIES_OPTION_KEY ) );
@@ -101,7 +98,7 @@ class Test_Monitor_CSS_Transient_Caching extends WP_UnitTestCase {
 			}
 		);
 
-		$monitor = new MonitorCssTransientCaching();
+		$monitor = new MonitorCssTransientCaching( new BackgroundTaskDeactivator() );
 
 		// Moving average should be 0.
 		$monitor->process( new DateTime( '2000-01-01' ), 5 );
