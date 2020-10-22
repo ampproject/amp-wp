@@ -95,14 +95,14 @@ class AMP_Facebook_Embed_Handler_Test extends WP_UnitTestCase {
 	 * @param array  $expected Expected scripts.
 	 */
 	public function test__get_scripts( $source, $expected ) {
+		if ( self::is_external_http_test_suite() ) {
+			$this->markTestSkipped( 'Endpoint is gone.' );
+		}
+
 		$embed = new AMP_Facebook_Embed_Handler();
 		$embed->register_embed();
 
 		$filtered_content = apply_filters( 'the_content', $source );
-
-		if ( self::is_external_http_test_suite() ) {
-			$this->markTestSkipped( 'Endpoint is down.' );
-		}
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
 		$embed->sanitize_raw_embeds( $dom );
@@ -280,14 +280,14 @@ class AMP_Facebook_Embed_Handler_Test extends WP_UnitTestCase {
 	 * @covers AMP_Facebook_Embed_Handler::sanitize_raw_embeds()
 	 */
 	public function test__raw_embed_sanitizer( $source, $expected ) {
+		if ( self::is_external_http_test_suite() ) {
+			$this->markTestSkipped( 'Endpoint is gone.' );
+		}
+
 		$embed = new AMP_Facebook_Embed_Handler();
 		$embed->register_embed();
 
 		$filtered_content = apply_filters( 'the_content', $source );
-
-		if ( self::is_external_http_test_suite() ) {
-			$this->markTestSkipped( 'Endpoint is down.' );
-		}
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
 		$embed->sanitize_raw_embeds( $dom );
