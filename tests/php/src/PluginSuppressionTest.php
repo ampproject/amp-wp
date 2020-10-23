@@ -33,6 +33,9 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 
 	private $attempted_validate_request_urls = [];
 
+	/** @var PluginSuppression */
+	private $instance;
+
 	/**
 	 * Set up.
 	 */
@@ -43,7 +46,7 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 		$this->reset_widgets();
 		add_filter(
 			'pre_http_request',
-			function( $r, $args, $url ) {
+			function( $r, /** @noinspection PhpUnusedParameterInspection */ $args, $url ) {
 				if ( false === strpos( $url, 'amp_validate=' ) ) {
 					return $r;
 				}
@@ -63,6 +66,7 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 
 		$plugin_suppression = $this->injector->make( PluginSuppression::class );
 		$plugin_registry    = $this->get_private_property( $plugin_suppression, 'plugin_registry' );
+		$this->instance     = $plugin_suppression;
 		$this->set_private_property(
 			$plugin_registry,
 			'plugin_folder',
@@ -146,6 +150,7 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 		update_option( 'active_plugins', $bad_plugin_files );
 
 		foreach ( $bad_plugin_files as $bad_plugin_file ) {
+			/** @noinspection PhpIncludeInspection */
 			require AMP__DIR__ . '/' . MockPluginEnvironment::BAD_PLUGINS_DIR . '/' . $bad_plugin_file;
 		}
 
@@ -187,88 +192,70 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 		return $plugin_file_slugs;
 	}
 
-	/**
-	 * @param bool $register Call the register method.
-	 * @return PluginSuppression
-	 */
-	private function get_instance( $register = false ) {
-		$instance = $this->injector->make( PluginSuppression::class );
-		if ( $register ) {
-			$instance->register();
-		}
-		return $instance;
-	}
-
 	public function test_it_can_be_initialized() {
-		$instance = $this->get_instance();
-
-		$this->assertInstanceOf( PluginSuppression::class, $instance );
-		$this->assertInstanceOf( Service::class, $instance );
-		$this->assertInstanceOf( Registerable::class, $instance );
+		$this->assertInstanceOf( PluginSuppression::class, $this->instance );
+		$this->assertInstanceOf( Service::class, $this->instance );
+		$this->assertInstanceOf( Registerable::class, $this->instance );
 	}
 
 	/** @covers ::register() */
 	public function test_register_standard_mode() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
-		$instance = $this->get_instance();
-		$this->assertFalse( $instance->is_reader_theme_request() );
+		$this->assertFalse( $this->instance->is_reader_theme_request() );
 
-		$instance->register();
+		$this->instance->register();
 		$this->assertEquals(
 			defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX, // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
-			has_action( 'wp', [ $instance, 'maybe_suppress_plugins' ] )
+			has_action( 'wp', [ $this->instance, 'maybe_suppress_plugins' ] )
 		);
-		$this->assertEquals( 10, has_filter( 'amp_default_options', [ $instance, 'filter_default_options' ] ) );
+		$this->assertEquals( 10, has_filter( 'amp_default_options', [ $this->instance, 'filter_default_options' ] ) );
 	}
 
 	/** @covers ::register() */
 	public function test_register_reader_theme_mode() {
-		$instance = $this->get_instance();
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentynineteen' );
 		$_GET[ amp_get_slug() ] = 1;
-		$this->assertTrue( $instance->is_reader_theme_request() );
+		$this->assertTrue( $this->instance->is_reader_theme_request() );
 
 		$this->init_plugins();
 		$this->update_suppressed_plugins_option( array_fill_keys( $this->get_bad_plugin_file_slugs(), true ) );
-		$instance->register();
-		$this->assertFalse( has_action( 'plugins_loaded', [ $instance, 'suppress_plugins' ] ), 'Expected suppression to happen immediately.' );
+		$this->instance->register();
+		$this->assertFalse( has_action( 'plugins_loaded', [ $this->instance, 'suppress_plugins' ] ), 'Expected suppression to happen immediately.' );
 		$this->assertEquals( '', do_shortcode( '[bad]' ), 'Expected suppression to happen immediately.' );
-		$this->assertEquals( 10, has_filter( 'amp_default_options', [ $instance, 'filter_default_options' ] ) );
+		$this->assertEquals( 10, has_filter( 'amp_default_options', [ $this->instance, 'filter_default_options' ] ) );
 	}
 
 	/** @covers ::is_reader_theme_request() */
 	public function test_is_reader_theme_request() {
-		$instance = $this->get_instance();
-
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
-		$this->assertFalse( $instance->is_reader_theme_request() );
+		$this->assertFalse( $this->instance->is_reader_theme_request() );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::READER_THEME, ReaderThemes::DEFAULT_READER_THEME );
-		$this->assertFalse( $instance->is_reader_theme_request() );
+		$this->assertFalse( $this->instance->is_reader_theme_request() );
 		$_GET[ amp_get_slug() ] = 1;
-		$this->assertFalse( $instance->is_reader_theme_request() );
+		$this->assertFalse( $this->instance->is_reader_theme_request() );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentynineteen' );
 		unset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$this->assertFalse( $instance->is_reader_theme_request() );
+		$this->assertFalse( $this->instance->is_reader_theme_request() );
 		$_GET[ amp_get_slug() ] = 1;
-		$this->assertTrue( $instance->is_reader_theme_request() );
+		$this->assertTrue( $this->instance->is_reader_theme_request() );
 	}
 
 	/** @covers ::filter_default_options() */
 	public function test_filter_default_options() {
-		$instance = $this->get_instance( true );
+		$this->instance->register();
 		$this->assertEquals(
 			[
 				'foo'                      => 'bar',
 				Option::SUPPRESSED_PLUGINS => [],
 			],
-			$instance->filter_default_options( [ 'foo' => 'bar' ] )
+			$this->instance->filter_default_options( [ 'foo' => 'bar' ] )
 		);
-		$this->assertEquals( 10, has_filter( 'amp_default_options', [ $instance, 'filter_default_options' ] ) );
+		$this->assertEquals( 10, has_filter( 'amp_default_options', [ $this->instance, 'filter_default_options' ] ) );
 	}
 
 	/** @covers ::maybe_suppress_plugins() */
@@ -279,11 +266,11 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 		$bad_plugin_file_slugs = $this->get_bad_plugin_file_slugs();
 		$this->populate_validation_errors( $url, $bad_plugin_file_slugs );
 		$this->update_suppressed_plugins_option( array_fill_keys( $bad_plugin_file_slugs, true ) );
-		$instance = $this->get_instance( true );
+		$this->instance->register();
 		$this->go_to( $url );
 
 		$this->assertFalse( amp_is_request() );
-		$this->assertFalse( $instance->maybe_suppress_plugins(), 'Expected no suppression since not an AMP endpoint.' );
+		$this->assertFalse( $this->instance->maybe_suppress_plugins(), 'Expected no suppression since not an AMP endpoint.' );
 		$this->assert_plugin_suppressed_state( false, $bad_plugin_file_slugs );
 	}
 
@@ -295,11 +282,11 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 		$bad_plugin_file_slugs = $this->get_bad_plugin_file_slugs();
 		$this->populate_validation_errors( $url, $bad_plugin_file_slugs );
 		$this->update_suppressed_plugins_option( array_fill_keys( $bad_plugin_file_slugs, true ) );
-		$instance = $this->get_instance( true );
+		$this->instance->register();
 		$this->go_to( $url );
 
 		$this->assertTrue( amp_is_request() );
-		$this->assertTrue( $instance->maybe_suppress_plugins(), 'Expected suppression since an AMP endpoint and there are suppressible plugins.' );
+		$this->assertTrue( $this->instance->maybe_suppress_plugins(), 'Expected suppression since an AMP endpoint and there are suppressible plugins.' );
 		$this->assert_plugin_suppressed_state( true, $bad_plugin_file_slugs );
 	}
 
@@ -311,11 +298,11 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 		update_option( 'active_plugins', [] );
 		$bad_plugin_file_slugs = $this->get_bad_plugin_file_slugs();
 		$this->populate_validation_errors( $url, $bad_plugin_file_slugs );
-		$instance = $this->get_instance( true );
+		$this->instance->register();
 		$this->go_to( $url );
 
 		$this->assertTrue( amp_is_request() );
-		$this->assertFalse( $instance->suppress_plugins(), 'Expected no suppression since no suppressible plugins.' );
+		$this->assertFalse( $this->instance->suppress_plugins(), 'Expected no suppression since no suppressible plugins.' );
 		$this->assert_plugin_suppressed_state( false, $bad_plugin_file_slugs );
 	}
 
@@ -326,12 +313,12 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 		$this->init_plugins();
 		$bad_plugin_file_slugs = $this->get_bad_plugin_file_slugs();
 		$this->populate_validation_errors( $url, $bad_plugin_file_slugs );
-		$instance = $this->get_instance( true );
+		$this->instance->register();
 		$this->go_to( $url );
 		AMP_Options_Manager::update_option( Option::SUPPRESSED_PLUGINS, [] );
 
 		$this->assertTrue( amp_is_request() );
-		$this->assertFalse( $instance->suppress_plugins(), 'Expected no suppression since no plugins are being suppressed.' );
+		$this->assertFalse( $this->instance->suppress_plugins(), 'Expected no suppression since no plugins are being suppressed.' );
 		$this->assert_plugin_suppressed_state( false, $bad_plugin_file_slugs );
 	}
 
@@ -346,18 +333,18 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 	public function test_suppress_plugins_when_conditions_satisfied_for_all() {
 		$url = home_url( '/' );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
-		$this->init_plugins();
 
 		$bad_plugin_file_slugs = $this->get_bad_plugin_file_slugs();
 		$this->assertGreaterThan( 0, $bad_plugin_file_slugs );
 		$this->populate_validation_errors( $url, $bad_plugin_file_slugs );
-		$instance = $this->get_instance( true );
+		$this->instance->register();
+		$this->init_plugins();
 		$this->go_to( $url );
 		$this->assert_plugin_suppressed_state( false, $bad_plugin_file_slugs );
 
 		$this->update_suppressed_plugins_option( array_fill_keys( $bad_plugin_file_slugs, true ) );
 		$this->assertTrue( amp_is_request() );
-		$this->assertTrue( $instance->suppress_plugins() );
+		$this->assertTrue( $this->instance->suppress_plugins() );
 		$this->assert_plugin_suppressed_state( true, $bad_plugin_file_slugs );
 	}
 
@@ -372,7 +359,6 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 	public function test_suppress_plugins_when_conditions_satisfied_for_some() {
 		$url = home_url( '/' );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
-		$this->init_plugins();
 
 		$bad_plugin_file_slugs = $this->get_bad_plugin_file_slugs();
 		$this->assertGreaterThan( 0, $bad_plugin_file_slugs );
@@ -380,13 +366,14 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 		$unsuppressed_slugs = array_slice( $bad_plugin_file_slugs, 2 );
 
 		$this->populate_validation_errors( $url, $bad_plugin_file_slugs );
-		$instance = $this->get_instance( true );
+		$this->instance->register();
+		$this->init_plugins();
 		$this->go_to( $url );
 		$this->assert_plugin_suppressed_state( false, $bad_plugin_file_slugs );
 
 		$this->update_suppressed_plugins_option( array_fill_keys( $suppressed_slugs, true ) );
 		$this->assertTrue( amp_is_request() );
-		$this->assertTrue( $instance->suppress_plugins() );
+		$this->assertTrue( $this->instance->suppress_plugins() );
 		$this->assert_plugin_suppressed_state( true, $suppressed_slugs );
 		$this->assert_plugin_suppressed_state( false, $unsuppressed_slugs );
 	}
@@ -400,8 +387,7 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 	public function test_sanitize_options() {
 		remove_all_filters( 'amp_options_updating' ); // @todo Figure out why this is needed to prevent duplicate PluginSuppression::sanitize_options() callbacks from being added.
 
-		$instance = $this->get_instance();
-		$instance->register();
+		$this->instance->register();
 
 		$this->init_plugins();
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
@@ -485,8 +471,8 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 	 * @covers ::get_sorted_plugin_validation_errors()
 	 */
 	public function test_get_suppressible_plugins_with_details_but_no_plugins_active() {
-		$instance = $this->get_instance( true );
-		$this->assertCount( 0, array_keys( $instance->get_suppressible_plugins_with_details() ) );
+		$this->instance->register();
+		$this->assertCount( 0, array_keys( $this->instance->get_suppressible_plugins_with_details() ) );
 	}
 
 	/**
@@ -495,8 +481,8 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 	 */
 	public function test_get_suppressible_plugins_with_no_errors_present() {
 		$this->init_plugins();
-		$instance             = $this->get_instance( true );
-		$suppressible_plugins = $instance->get_suppressible_plugins_with_details();
+		$this->instance->register();
+		$suppressible_plugins = $this->instance->get_suppressible_plugins_with_details();
 		$this->assertEqualSets( $this->get_bad_plugin_file_slugs(), array_keys( $suppressible_plugins ) );
 		foreach ( $suppressible_plugins as $suppressible_plugin ) {
 			$this->assertCount( 0, $suppressible_plugin['validation_errors'] );
@@ -508,12 +494,12 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 	 * @covers ::get_sorted_plugin_validation_errors()
 	 */
 	public function test_get_suppressible_plugins_with_details_when_plugins_active_and_errors_present() {
-		$instance = $this->get_instance( true );
+		$this->instance->register();
 		$this->init_plugins();
 		$bad_plugin_file_slugs = $this->get_bad_plugin_file_slugs();
 		$this->update_suppressed_plugins_option( array_fill_keys( $bad_plugin_file_slugs, false ) );
 		$this->populate_validation_errors( home_url( '/' ), $bad_plugin_file_slugs );
-		$suppressible_plugins = $instance->get_suppressible_plugins_with_details();
+		$suppressible_plugins = $this->instance->get_suppressible_plugins_with_details();
 		$this->assertEqualSets( $bad_plugin_file_slugs, array_keys( $suppressible_plugins ) );
 		foreach ( $suppressible_plugins as $suppressible_plugin ) {
 			$this->assertCount( 1, $suppressible_plugin['validation_errors'] );
