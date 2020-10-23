@@ -150,6 +150,7 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 		update_option( 'active_plugins', $bad_plugin_files );
 
 		foreach ( $bad_plugin_files as $bad_plugin_file ) {
+			/** @noinspection PhpIncludeInspection */
 			require AMP__DIR__ . '/' . MockPluginEnvironment::BAD_PLUGINS_DIR . '/' . $bad_plugin_file;
 		}
 
