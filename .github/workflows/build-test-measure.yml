@@ -175,7 +175,7 @@ jobs:
           - php: '7.4'
             wp: 'latest'
             external-http: true
-            coverage: 'none'
+            coverage: false
             install-pwa-plugin: true
 
           - php: '7.4'
