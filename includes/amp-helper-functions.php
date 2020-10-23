@@ -873,6 +873,11 @@ function amp_is_request() {
 		return false;
 	}
 
+	// AMP standalone content requests are always an AMP endpoint.
+	if ( $wp_query instanceof WP_Query && $wp_query->is_singular() && AMP_Theme_Support::is_standalone_content_request() ) {
+		return true;
+	}
+
 	return $is_amp_url;
 }
 
