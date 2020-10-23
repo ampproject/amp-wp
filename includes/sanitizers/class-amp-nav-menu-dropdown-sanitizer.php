@@ -5,12 +5,15 @@
  * @package AMP
  */
 
+use AmpProject\Dom\Document;
+
 /**
  * Class AMP_Nav_Menu_Dropdown_Sanitizer
  *
  * Handles state for navigation menu dropdown toggles, based on theme support.
  *
  * @since 1.1.0
+ * @internal
  */
 class AMP_Nav_Menu_Dropdown_Sanitizer extends AMP_Base_Sanitizer {
 
@@ -34,8 +37,8 @@ class AMP_Nav_Menu_Dropdown_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 1.1.0
 	 *
-	 * @param DOMDocument $dom  DOM.
-	 * @param array       $args Args.
+	 * @param Document $dom  DOM.
+	 * @param array    $args Args.
 	 */
 	public function __construct( $dom, $args = [] ) {
 		parent::__construct( $dom, $args );

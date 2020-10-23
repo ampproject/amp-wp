@@ -27,40 +27,50 @@ import { isAMPEnabled } from '../helpers';
  * this only displays a Notice with the error(s), not a toggle.
  * Error(s) are imported as errorMessages via wp_localize_script().
  *
+ * @param {Object} props Component props.
+ * @param {boolean} props.isEnabled Whether toggle is enabled.
+ * @param {Function} props.onChange Callback function for when the toggle is changed.
  * @return {Object} AMPToggle component.
  */
 function AMPToggle( { isEnabled, onChange } ) {
 	return (
-		<>
-			<PluginPostStatusInfo>
-				{ ! errorMessages.length && <label htmlFor="amp-enabled">{ __( 'Enable AMP', 'amp' ) }</label> }
-				{
-					! errorMessages.length &&
-					(
-						<FormToggle
-							checked={ isEnabled }
-							onChange={ () => onChange( ! isEnabled ) }
-							id="amp-enabled"
-						/>
-					)
-				}
-				{
-					Boolean( errorMessages.length ) &&
+		<PluginPostStatusInfo>
+			{ ! errorMessages.length && (
+				<>
+					<label htmlFor="amp-enabled">
+						{ __( 'Enable AMP', 'amp' ) }
+					</label>
+					<FormToggle
+						checked={ isEnabled }
+						onChange={ () => onChange( ! isEnabled ) }
+						id="amp-enabled"
+					/>
+				</>
+			) }
+			{
+				Boolean( errorMessages.length ) &&
 					(
 						<Notice
-							status="warning"
+							status="info"
 							isDismissible={ false }
+							className="amp-unavailable-notice"
 						>
-							{
-								errorMessages.map(
-									( message, index ) => <RawHTML key={ index }>{ message }</RawHTML>
-								)
-							}
+							<details>
+								<summary>
+									{ __( 'AMP Unavailable', 'amp' ) }
+								</summary>
+								{
+									errorMessages.map( ( message, index ) => (
+										<RawHTML key={ index }>
+											{ message }
+										</RawHTML>
+									) )
+								}
+							</details>
 						</Notice>
 					)
-				}
-			</PluginPostStatusInfo>
-		</>
+			}
+		</PluginPostStatusInfo>
 	);
 }
 
@@ -82,8 +92,7 @@ export const render = compose(
 	withDispatch( ( dispatch ) => {
 		return {
 			onChange: ( isEnabled ) => {
-				const newStatus = isEnabled ? 'enabled' : 'disabled';
-				dispatch( 'core/editor' ).editPost( { meta: { amp_status: newStatus } } );
+				dispatch( 'core/editor' ).editPost( { amp_enabled: isEnabled } );
 			},
 		};
 	} ),

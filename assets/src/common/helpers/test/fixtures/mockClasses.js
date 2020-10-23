@@ -8,7 +8,7 @@ export class Mock {
 	 * Gets a given value.
 	 *
 	 * @param {string} key The key of the value to get.
-	 * @return {mixed} value The value corresponding to the key.
+	 * @return {*} value The value corresponding to the key.
 	 */
 	get( key ) {
 		if ( this.hasOwnProperty( key ) ) {

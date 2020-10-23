@@ -28,7 +28,7 @@ const BlockSave = ( { attributes } ) => {
 		bridProps.autoplay = autoPlay;
 	}
 	return (
-		<amp-brid-player { ...bridProps }></amp-brid-player>
+		<amp-brid-player { ...bridProps } />
 	);
 };
 

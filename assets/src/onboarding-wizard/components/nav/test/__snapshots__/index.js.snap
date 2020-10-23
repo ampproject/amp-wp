@@ -1,0 +1,82 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Nav matches snapshot 1`] = `
+<div
+  className="amp-settings-nav"
+>
+  <div
+    className="amp-settings-nav__inner"
+  >
+    <div
+      className="amp-settings-nav__close"
+    >
+      <a
+        className="components-button is-link"
+        href="http://site.test/wp-admin"
+      >
+        <svg
+          fill="none"
+          height="25"
+          viewBox="0 0 25 25"
+          width="25"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <mask
+            height="19"
+            id="close-icon"
+            mask-type="alpha"
+            maskUnits="userSpaceOnUse"
+            width="19"
+            x="3"
+            y="3"
+          >
+            <path
+              clipRule="evenodd"
+              d="M19.895 3.71875H5.89502C4.79502 3.71875 3.89502 4.61875 3.89502 5.71875V19.7188C3.89502 20.8188 4.79502 21.7188 5.89502 21.7188H19.895C21.005 21.7188 21.895 20.8188 21.895 19.7188V15.7188H19.895V19.7188H5.89502V5.71875H19.895V9.71875H21.895V5.71875C21.895 4.61875 21.005 3.71875 19.895 3.71875ZM13.395 17.7188L14.805 16.3088L12.225 13.7188H21.895V11.7188H12.225L14.805 9.12875L13.395 7.71875L8.39502 12.7188L13.395 17.7188Z"
+              fill="white"
+              fillRule="evenodd"
+            />
+          </mask>
+          <g
+            mask="url(#close-icon)"
+          >
+            <rect
+              fill="#2459E7"
+              height="24"
+              transform="matrix(-1 0 0 1 24.895 0.71875)"
+              width="24"
+            />
+          </g>
+        </svg>
+        Close
+      </a>
+    </div>
+    <div
+      className="amp-settings-nav__prev-next"
+    >
+      <span
+        className="amp-settings-nav__placeholder"
+      >
+         
+      </span>
+      <button
+        className="components-button is-primary"
+        disabled={false}
+        id="next-button"
+        onClick={[Function]}
+        type="button"
+      >
+        Next
+        <svg
+          viewBox="0 0 64 64"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M43.16 10.18c-0.881-0.881-2.322-0.881-3.203 0s-0.881 2.322 0 3.203l16.335 16.335h-54.051c-1.281 0-2.242 1.041-2.242 2.242 0 1.281 0.961 2.322 2.242 2.322h54.051l-16.415 16.335c-0.881 0.881-0.881 2.322 0 3.203s2.322 0.881 3.203 0l20.259-20.259c0.881-0.881 0.881-2.322 0-3.203l-20.179-20.179z"
+          />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+`;

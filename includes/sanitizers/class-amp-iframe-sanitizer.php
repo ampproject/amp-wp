@@ -5,10 +5,16 @@
  * @package AMP
  */
 
+use AmpProject\DevMode;
+use AmpProject\Attribute;
+use AmpProject\Layout;
+
 /**
  * Class AMP_Iframe_Sanitizer
  *
  * Converts <iframe> tags to <amp-iframe>
+ *
+ * @internal
  */
 class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	use AMP_Noscript_Fallback;
@@ -16,18 +22,37 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Default values for sandboxing IFrame.
 	 *
-	 * @since 0.2
+	 * | Sandbox Token                             | Included | Rationale
+	 * |-------------------------------------------|----------|----------
+	 * | `allow-downloads`                         | Yes      | Useful for downloading documents, etc.
+	 * | `allow-downloads-without-user-activation` | No       | Experimental per MDN. Bad UX.
+	 * | `allow-forms`                             | Yes      | For embeds like polls.
+	 * | `allow-modals`                            | Yes      | For apps to show `confirm()`, etc.
+	 * | `allow-orientation-lock`                  | Yes      | Since we `allowfullscreen`, useful for games, etc.
+	 * | `allow-pointer-lock`                      | Yes      | Useful for games.
+	 * | `allow-popups`                            | Yes      | To open YouTube video in new window, for example.
+	 * | `allow-popups-to-escape-sandbox`          | Yes      | Useful for ads.
+	 * | `allow-presentation`                      | Yes      | To cast YouTube videos, for example.
+	 * | `allow-same-origin`                       | Yes      | Removed if iframe is same origin.
+	 * | `allow-scripts`                           | Yes      | An iframe's primary use case is custom JS.
+	 * | `allow-storage-access-by-user-activation` | No       | Experimental per MDN.
+	 * | `allow-top-navigation`                    | No       | Poor user experience.
+	 * | `allow-top-navigation-by-user-activation` | Yes      | Key for clicking `target=_top` links in iframes.
 	 *
-	 * @const int
+	 * @since 0.2
+	 * @since 2.0.5 Updated to include majority of other sandbox values which are included by default if sandbox is not provided.
+	 * @link https://html.spec.whatwg.org/multipage/iframe-embed-object.html#attr-iframe-sandbox
+	 *
+	 * @const string
 	 */
-	const SANDBOX_DEFAULTS = 'allow-scripts allow-same-origin';
+	const SANDBOX_DEFAULTS = 'allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation';
 
 	/**
 	 * Tag.
 	 *
-	 * @var string HTML <iframe> tag to identify and replace with AMP version.
-	 *
 	 * @since 0.2
+	 *
+	 * @var string HTML <iframe> tag to identify and replace with AMP version.
 	 */
 	public static $tag = 'iframe';
 
@@ -64,7 +89,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Sanitize the <iframe> elements from the HTML contained in this instance's DOMDocument.
+	 * Sanitize the <iframe> elements from the HTML contained in this instance's Dom\Document.
 	 *
 	 * @since 0.2
 	 */
@@ -93,8 +118,8 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			 */
 			$node = $nodes->item( $i );
 
-			// Skip element if already inside of an AMP element as a noscript fallback.
-			if ( $this->is_inside_amp_noscript( $node ) ) {
+			// Skip element if already inside of an AMP element as a noscript fallback, or if it has a dev mode exemption.
+			if ( $this->is_inside_amp_noscript( $node ) || DevMode::hasExemptionForNode( $node ) ) {
 				continue;
 			}
 
@@ -110,27 +135,90 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			 * @see: https://github.com/ampproject/amphtml/issues/2261
 			 */
 			if ( empty( $normalized_attributes['src'] ) ) {
-				$this->remove_invalid_child( $node );
+				$this->remove_invalid_child(
+					$node,
+					[
+						'code'       => AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING,
+						'attributes' => [ 'src' ],
+						'spec_name'  => 'amp-iframe',
+					]
+				);
 				continue;
 			}
 
 			$this->did_convert_elements = true;
-			if ( empty( $normalized_attributes['layout'] ) && ! empty( $normalized_attributes['width'] ) && ! empty( $normalized_attributes['height'] ) ) {
-				$normalized_attributes['layout'] = 'intrinsic';
+			if ( empty( $normalized_attributes[ Attribute::LAYOUT ] ) && ! empty( $normalized_attributes[ Attribute::HEIGHT ] ) && ! empty( $normalized_attributes[ Attribute::WIDTH ] ) ) {
+
+				// Set layout to responsive if the iframe is aligned to full width.
+				$figure_node = null;
+				if ( $node->parentNode instanceof DOMElement && 'figure' === $node->parentNode->tagName ) {
+					$figure_node = $node->parentNode;
+				}
+				if ( $node->parentNode->parentNode instanceof DOMElement && 'figure' === $node->parentNode->parentNode->tagName ) {
+					$figure_node = $node->parentNode->parentNode;
+				}
+
+				if (
+					! empty( $this->args['align_wide_support'] )
+					&& $figure_node
+					&& preg_match( '/(^|\s)(alignwide|alignfull)(\s|$)/', $figure_node->getAttribute( Attribute::CLASS_ ) )
+				) {
+					$normalized_attributes[ Attribute::LAYOUT ] = Layout::RESPONSIVE;
+				} else {
+					$normalized_attributes[ Attribute::LAYOUT ] = Layout::INTRINSIC;
+				}
+
 				$this->add_or_append_attribute( $normalized_attributes, 'class', 'amp-wp-enforced-sizes' );
 			}
 
 			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-iframe', $normalized_attributes );
 
-			if ( true === $this->args['add_placeholder'] ) {
-				$placeholder_node = $this->build_placeholder( $normalized_attributes );
+			// Find existing placeholder/overflow.
+			$placeholder_node = null;
+			$overflow_node    = null;
+			foreach ( iterator_to_array( $node->childNodes ) as $child ) {
+				if ( ! ( $child instanceof DOMElement ) ) {
+					continue;
+				}
+				if ( $child->hasAttribute( 'placeholder' ) ) {
+					$placeholder_node = $node->removeChild( $child );
+				} elseif ( $child->hasAttribute( 'overflow' ) ) {
+					$overflow_node = $node->removeChild( $child );
+				}
+			}
+
+			// Add placeholder.
+			if ( $placeholder_node || true === $this->args['add_placeholder'] ) {
+				if ( ! $placeholder_node ) {
+					$placeholder_node = $this->build_placeholder(); // @todo Can a better placeholder default be devised?
+				}
 				$new_node->appendChild( $placeholder_node );
+			}
+
+			// Add overflow.
+			if ( $new_node->hasAttribute( 'resizable' ) && ! $overflow_node ) {
+				$overflow_node = $this->dom->createElement( 'button' );
+				$overflow_node->setAttribute( 'overflow', '' );
+				if ( $node->hasAttribute( 'data-amp-overflow-text' ) ) {
+					$overflow_text = $node->getAttribute( 'data-amp-overflow-text' );
+				} else {
+					$overflow_text = __( 'Show all', 'amp' );
+				}
+				$overflow_node->appendChild( $this->dom->createTextNode( $overflow_text ) );
+			}
+			if ( $overflow_node ) {
+				$new_node->appendChild( $overflow_node );
 			}
 
 			$node->parentNode->replaceChild( $new_node, $node );
 
 			if ( $this->args['add_noscript_fallback'] ) {
 				$node->setAttribute( 'src', $normalized_attributes['src'] );
+
+				// AMP is stricter than HTML5 for this attribute, so make sure we use a normalized value.
+				if ( $node->hasAttribute( 'frameborder' ) ) {
+					$node->setAttribute( 'frameborder', $normalized_attributes['frameborder'] );
+				}
 
 				// Preserve original node in noscript for no-JS environments.
 				$this->append_old_node_noscript( $new_node, $node, $this->dom );
@@ -146,7 +234,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 *      @type string $src IFrame URL - Empty if HTTPS required per $this->args['require_https_src']
 	 *      @type int $width <iframe> width attribute - Set to numeric value if px or %
-	 *      @type int $height <iframe> width attribute - Set to numeric value if px or %
+	 *      @type int $height <iframe> height attribute - Set to numeric value if px or %
 	 *      @type string $sandbox <iframe> `sandbox` attribute - Pass along if found; default to value of self::SANDBOX_DEFAULTS
 	 *      @type string $class <iframe> `class` attribute - Pass along if found
 	 *      @type string $sizes <iframe> `sizes` attribute - Pass along if found
@@ -154,8 +242,9 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type int $frameborder <iframe> `frameborder` attribute - Filter to '0' or '1'; default to '0'
 	 *      @type bool $allowfullscreen <iframe> `allowfullscreen` attribute - Convert 'false' to empty string ''
 	 *      @type bool $allowtransparency <iframe> `allowtransparency` attribute - Convert 'false' to empty string ''
+	 *      @type string $type <iframe> `type` attribute - Pass along if value is not `text/html`
 	 * }
-	 * @return array Returns HTML attributes; normalizes src, dimensions, frameborder, sandox, allowtransparency and allowfullscreen
+	 * @return array Returns HTML attributes; normalizes src, dimensions, frameborder, sandbox, allowtransparency and allowfullscreen
 	 */
 	private function normalize_attributes( $attributes ) {
 		$out = [];
@@ -189,16 +278,61 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 					break;
 
 				case 'frameborder':
-					if ( '0' !== $value && '1' !== $value ) {
-						$value = '0';
-					}
-					$out[ $name ] = $value;
+					$out[ $name ] = $this->sanitize_boolean_digit( $value );
 					break;
 
 				case 'allowfullscreen':
 				case 'allowtransparency':
-					if ( 'false' !== $value ) {
+					if ( 'false' !== strtolower( $value ) ) {
 						$out[ $name ] = '';
+					}
+					break;
+
+				case 'mozallowfullscreen':
+				case 'webkitallowfullscreen':
+					// Omit these since amp-iframe will add them if needed if the `allowfullscreen` attribute is present.
+					break;
+
+				case 'loading':
+					/*
+					 * The `amp-iframe` component already does lazy-loading by default; trigger a validation error only
+					 * if the value is not `lazy`.
+					 */
+					if ( 'lazy' !== strtolower( $value ) ) {
+						$out[ $name ] = $value;
+					}
+					break;
+
+				case 'security':
+					/*
+					 * Omit the `security` attribute as it now been superseded by the `sandbox` attribute. It is
+					 * (apparently) only supported by IE <https://stackoverflow.com/a/20071528>.
+					 */
+					break;
+
+				case 'marginwidth':
+				case 'marginheight':
+					// These attributes have been obsolete since HTML5. If they have the value `0` they can be omitted.
+					if ( '0' !== $value ) {
+						$out[ $name ] = $value;
+					}
+					break;
+
+				case 'data-amp-resizable':
+					$out['resizable'] = '';
+					break;
+
+				case 'data-amp-overflow-text':
+					// No need to copy.
+					break;
+
+				case 'type':
+					/*
+					 * Omit the `type` attribute if its value is `text/html`. Popular embed providers such as Amazon
+					 * Kindle use this non-standard attribute, which is apparently a vestige from usage on <object>.
+					 */
+					if ( 'text/html' !== strtolower( $value ) ) {
+						$out[ $name ] = $value;
 					}
 					break;
 
@@ -250,16 +384,10 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.2
 	 *
-	 * @param string[] $parent_attributes {
-	 *      Attributes.
-	 *
-	 *      @type string $placeholder AMP HTML <amp-iframe> `placeholder` attribute; default to 'amp-wp-iframe-placeholder'
-	 *      @type string $class AMP HTML <amp-iframe> `class` attribute; default to 'amp-wp-iframe-placeholder'
-	 * }
 	 * @return DOMElement|false
 	 */
-	private function build_placeholder( $parent_attributes ) {
-		$placeholder_node = AMP_DOM_Utils::create_node(
+	private function build_placeholder() {
+		return AMP_DOM_Utils::create_node(
 			$this->dom,
 			'span',
 			[
@@ -267,8 +395,36 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				'class'       => 'amp-wp-iframe-placeholder',
 			]
 		);
-
-		return $placeholder_node;
 	}
 
+	/**
+	 * Sanitizes a boolean character (or string) into a '0' or '1' character.
+	 *
+	 * @param string $value A boolean character to sanitize. If a string containing more than a single
+	 *                      character is provided, only the first character is taken into account.
+	 *
+	 * @return string Returns either '0' or '1'.
+	 */
+	private function sanitize_boolean_digit( $value ) {
+
+		// Default to false if the value was forgotten.
+		if ( empty( $value ) ) {
+			return '0';
+		}
+
+		// Default to false if the value has an unexpected type.
+		if ( ! is_string( $value ) && ! is_numeric( $value ) ) {
+			return '0';
+		}
+
+		// See: https://github.com/ampproject/amp-wp/issues/2335#issuecomment-493209861.
+		switch ( substr( (string) $value, 0, 1 ) ) {
+			case '1':
+			case 'y':
+			case 'Y':
+				return '1';
+		}
+
+		return '0';
+	}
 }

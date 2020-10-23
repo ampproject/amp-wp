@@ -61,7 +61,9 @@ const BlockEdit = ( props ) => {
 			{
 				! url && (
 					<Placeholder label={ __( 'JW Player', 'amp' ) }>
-						<p>{ __( 'Add required data to use the block.', 'amp' ) }</p>
+						<p>
+							{ __( 'Add required data to use the block.', 'amp' ) }
+						</p>
 					</Placeholder>
 				)
 			}

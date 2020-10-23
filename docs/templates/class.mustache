@@ -1,0 +1,26 @@
+## Class `{{ get_fully_qualified_name }}`
+
+{{# is_deprecated }}
+> :warning: This class is deprecated: {{ get_deprecation_reason }}
+
+{{/ is_deprecated }}
+{{# has_description }}
+{{ get_description }}
+
+{{/ has_description }}
+### Methods
+
+{{# methods }}
+* {{# is_deprecated }}~~{{/is_deprecated}}[`{{{ name }}}`](../method/{{{ get_filename }}}.md){{# has_description }} - {{ get_short_description }}{{/ has_description }}{{# is_deprecated }}~~{{/is_deprecated}}
+{{/ methods }}
+### Source
+
+:link: [{{ get_file_path }}:{{ line }}]({{{ get_github_link }}})
+
+<details>
+<summary>Show Code</summary>
+
+```php
+{{{ get_code }}}```
+
+</details>

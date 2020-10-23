@@ -68,7 +68,9 @@ const BlockEdit = ( props ) => {
 			{ url && <MediaPlaceholder name={ __( 'Ooyala Player', 'amp' ) } url={ url } /> }
 			{ ! url && (
 				<Placeholder label={ __( 'Ooyala Player', 'amp' ) }>
-					<p>{ __( 'Add required data to use the block.', 'amp' ) }</p>
+					<p>
+						{ __( 'Add required data to use the block.', 'amp' ) }
+					</p>
 				</Placeholder>
 			) }
 		</>

@@ -1,8 +1,51 @@
 /* eslint-env node */
-/* eslint-disable camelcase, no-console, no-param-reassign */
 
 module.exports = function( grunt ) {
 	'use strict';
+
+	// Root paths to include in the plugin build ZIP when running `npm run build:prod`.
+	const productionIncludedRootFiles = [
+		'LICENSE',
+		'amp.php',
+		'assets',
+		'back-compat',
+		'includes',
+		'readme.txt',
+		'src',
+		'templates',
+		'vendor',
+	];
+
+	// These patterns paths will be excluded from among the above directory.
+	const productionExcludedPathPatterns = [
+		/.*\/src\/.*/,
+	];
+
+	// These will be removed from the vendor directory after installing but prior to creating a ZIP.
+	// ⚠️ Warning: These paths are passed straight to rm command in the shell, without any escaping.
+	const productionVendorExcludedFilePatterns = [
+		'composer.*',
+		'patches',
+		'lib',
+		'vendor/*/*/.editorconfig',
+		'vendor/*/*/.git',
+		'vendor/*/*/.gitignore',
+		'vendor/*/*/composer.*',
+		'vendor/*/*/Doxyfile',
+		'vendor/*/*/LICENSE',
+		'vendor/*/*/phpunit.*',
+		'vendor/*/*/*.md',
+		'vendor/*/*/*.txt',
+		'vendor/*/*/*.yml',
+		'vendor/*/*/.*.yml',
+		'vendor/*/*/tests',
+		'vendor/ampproject/common/phpstan.neon.dist',
+		'vendor/ampproject/optimizer/bin',
+		'vendor/ampproject/optimizer/conceptual-diagram.svg',
+		'vendor/ampproject/optimizer/phpstan.neon.dist',
+		'vendor/bin',
+		'vendor/php-parallel-lint',
+	];
 
 	grunt.initConfig( {
 
@@ -11,7 +54,13 @@ module.exports = function( grunt ) {
 		// Clean up the build.
 		clean: {
 			compiled: {
-				src: [ 'assets/js/*.js', '!assets/js/amp-service-worker-runtime-precaching.js', 'assets/js/*.deps.json' ],
+				src: [
+					'assets/js/**/*.js',
+					'assets/js/**/*.js.map',
+					'!assets/js/amp-service-worker-runtime-precaching.js',
+					'assets/js/**/*.asset.php',
+					'assets/css/*.css',
+				],
 			},
 			build: {
 				src: [ 'build' ],
@@ -27,11 +76,20 @@ module.exports = function( grunt ) {
 			readme: {
 				command: './vendor/xwp/wp-dev-lib/scripts/generate-markdown-readme', // Generate the readme.md.
 			},
-			phpunit: {
-				command: 'phpunit',
-			},
 			verify_matching_versions: {
 				command: 'php bin/verify-version-consistency.php',
+			},
+			composer_install: {
+				command: [
+					'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi',
+					'cd build',
+					'composer install --no-dev -o',
+					'for symlinksource in $(find vendor/ampproject -type l); do symlinktarget=$(readlink "$symlinksource") && rm "$symlinksource" && cp -r "vendor/ampproject/$symlinktarget" "$symlinksource"; done',
+					'composer remove cweagans/composer-patches --update-no-dev -o',
+					'rm -r ' + productionVendorExcludedFilePatterns.join( ' ' ),
+					'if [ -d vendor/ampproject/common/vendor ]; then rm -r vendor/ampproject/common/vendor; fi',
+					'if [ -d vendor/ampproject/optimizer/vendor ]; then rm -r vendor/ampproject/optimizer/vendor; fi',
+				].join( ' && ' ),
 			},
 			create_build_zip: {
 				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; if [ -e amp.zip ]; then rm amp.zip; fi; cd build; zip -r ../amp.zip .; cd ..; echo; echo "ZIP of build: $(pwd)/amp.zip"',
@@ -48,7 +106,6 @@ module.exports = function( grunt ) {
 				},
 			},
 		},
-
 	} );
 
 	// Load tasks.
@@ -79,7 +136,7 @@ module.exports = function( grunt ) {
 			{
 				cmd: 'git',
 				args: [ 'ls-files' ],
-			}
+			},
 		);
 
 		function finalize() {
@@ -88,17 +145,30 @@ module.exports = function( grunt ) {
 			const versionAppend = new Date().toISOString().replace( /\.\d+/, '' ).replace( /-|:/g, '' ) + '-' + commitHash;
 
 			const paths = lsOutput.trim().split( /\n/ ).filter( function( file ) {
-				return ! /^(blocks|\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|readme\.md|composer\..*|patches|webpack.*|assets\/src|docker-compose\.yml|.*\.config\.js|codecov\.yml)/.test( file );
+				const topSegment = file.replace( /\/.*/, '' );
+				if ( ! productionIncludedRootFiles.includes( topSegment ) ) {
+					return false;
+				}
+
+				for ( const productionExcludedPathPattern of productionExcludedPathPatterns ) {
+					if ( productionExcludedPathPattern.test( file ) ) {
+						return false;
+					}
+				}
+
+				return true;
 			} );
 
-			paths.push( 'vendor/autoload.php' );
-			paths.push( 'assets/js/*.js' );
-			paths.push( 'assets/js/*.deps.json' );
+			paths.push( 'composer.*' ); // Copy in order to be able to do run composer_install.
+			paths.push( 'lib/**' );
+			paths.push( 'assets/js/**/*.js' );
+			paths.push( 'assets/js/**/*.asset.php' );
 			paths.push( 'assets/css/*.css' );
-			paths.push( 'vendor/composer/**' );
-			paths.push( 'vendor/sabberworm/php-css-parser/lib/**' );
-			paths.push( 'vendor/fasterimage/fasterimage/src/**' );
-			paths.push( 'vendor/willwashburn/stream/src/**' );
+			paths.push( 'patches/*.patch' );
+
+			if ( 'development' === process.env.NODE_ENV ) {
+				paths.push( 'assets/js/**/*.js.map' );
+			}
 
 			grunt.config.set( 'copy', {
 				build: {
@@ -116,10 +186,13 @@ module.exports = function( grunt ) {
 								matches = content.match( versionRegex );
 								if ( matches ) {
 									version = matches[ 2 ] + '-' + versionAppend;
-									console.log( 'Updating version in amp.php to ' + version );
+									console.log( 'Updating version in amp.php to ' + version ); // eslint-disable-line no-console
 									content = content.replace( versionRegex, '$1' + version );
 									content = content.replace( /(define\(\s*'AMP__VERSION',\s*')(.+?)(?=')/, '$1' + version );
 								}
+
+								// Remove dev mode code blocks.
+								content = content.replace( /\n\/\/\s*DEV_CODE.+?\n}\n/s, '' );
 							}
 							return content;
 						},
@@ -128,6 +201,7 @@ module.exports = function( grunt ) {
 			} );
 			grunt.task.run( 'readme' );
 			grunt.task.run( 'copy' );
+			grunt.task.run( 'shell:composer_install' );
 
 			done();
 		}
@@ -145,7 +219,7 @@ module.exports = function( grunt ) {
 						}
 						stdout.push( res.stdout );
 						doNext();
-					}
+					},
 				);
 			}
 		}
@@ -158,7 +232,6 @@ module.exports = function( grunt ) {
 	] );
 
 	grunt.registerTask( 'deploy', [
-		'shell:phpunit',
 		'shell:verify_matching_versions',
 		'wp_deploy',
 	] );

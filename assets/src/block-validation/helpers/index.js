@@ -47,12 +47,13 @@ export const maybeResetValidationErrors = () => {
  */
 export const updateValidationErrors = () => {
 	const { getBlockCount, getClientIdsWithDescendants, getBlock } = select( 'core/block-editor' );
-	const { getCurrentPost } = select( 'core/editor' );
 	const { resetValidationErrors, addValidationError, updateReviewLink } = dispatch( 'amp/block-validation' );
 
 	if ( 0 === getBlockCount() ) {
 		return;
 	}
+
+	const { getCurrentPost } = select( 'core/editor' );
 
 	const currentPost = getCurrentPost();
 
@@ -70,6 +71,7 @@ export const updateValidationErrors = () => {
 	/**
 	 * @param {Object}  result             Validation error result.
 	 * @param {Object}  result.error       Error object.
+	 * @param {string}  result.title       Error title.
 	 * @param {boolean} result.forced      Whether sanitization was forced.
 	 * @param {boolean} result.sanitized   Whether the error has been sanitized or not.
 	 * @param {number}  result.status      Validation error status.
@@ -77,7 +79,7 @@ export const updateValidationErrors = () => {
 	 */
 	const validationErrors = ampValidity.results.filter( ( result ) => {
 		return result.term_status !== VALIDATION_ERROR_ACK_ACCEPTED_STATUS; // If not accepted by the user.
-	} ).map( ( { error } ) => error );
+	} ).map( ( { error, status, title } ) => ( { ...error, status, title } ) ); // Merge status into error since needed in maybeDisplayNotice.
 
 	if ( isEqual( validationErrors, previousValidationErrors ) ) {
 		return;
@@ -152,9 +154,8 @@ export const updateValidationErrors = () => {
  * @return {void}
  */
 export const maybeDisplayNotice = () => {
-	const { getValidationErrors, isSanitizationAutoAccepted, getReviewLink } = select( 'amp/block-validation' );
+	const { getValidationErrors, getReviewLink } = select( 'amp/block-validation' );
 	const { createWarningNotice } = dispatch( 'core/notices' );
-	const { getCurrentPost } = select( 'core/editor' );
 
 	const validationErrors = getValidationErrors();
 	const validationErrorCount = validationErrors.length;
@@ -167,64 +168,57 @@ export const maybeDisplayNotice = () => {
 			'There is %s issue from AMP validation which needs review.',
 			'There are %s issues from AMP validation which need review.',
 			validationErrorCount,
-			'amp'
+			'amp',
 		),
-		validationErrorCount
+		validationErrorCount,
 	);
 
 	const blockValidationErrors = validationErrors.filter( ( { clientId } ) => clientId );
 	const blockValidationErrorCount = blockValidationErrors.length;
 
-	if ( 'amp_story' !== getCurrentPost().type ) {
-		if ( blockValidationErrorCount > 0 ) {
-			noticeMessage += ' ' + sprintf(
-				/* translators: %s: number of block errors. */
-				_n(
-					'%s issue is directly due to content here.',
-					'%s issues are directly due to content here.',
-					blockValidationErrorCount,
-					'amp'
-				),
-				blockValidationErrorCount
-			);
-		} else if ( validationErrors.length === 1 ) {
-			noticeMessage += ' ' + __( 'The issue is not directly due to content here.', 'amp' );
-		} else {
-			noticeMessage += ' ' + __( 'The issues are not directly due to content here.', 'amp' );
-		}
+	if ( blockValidationErrorCount > 0 ) {
+		noticeMessage += ' ' + sprintf(
+			/* translators: %s: number of block errors. */
+			_n(
+				'%s issue is directly due to content here.',
+				'%s issues are directly due to content here.',
+				blockValidationErrorCount,
+				'amp',
+			),
+			blockValidationErrorCount,
+		);
+	} else if ( validationErrors.length === 1 ) {
+		noticeMessage += ' ' + __( 'The issue is not directly due to content here.', 'amp' );
+	} else {
+		noticeMessage += ' ' + __( 'The issues are not directly due to content here.', 'amp' );
+	}
 
-		noticeMessage += ' ';
+	noticeMessage += ' ';
 
-		if ( isSanitizationAutoAccepted() ) {
-			const rejectedBlockValidationErrors = blockValidationErrors.filter( ( error ) => {
-				return (
-					VALIDATION_ERROR_NEW_REJECTED_STATUS === error.status ||
-					VALIDATION_ERROR_ACK_REJECTED_STATUS === error.status
-				);
-			} );
+	const rejectedBlockValidationErrors = blockValidationErrors.filter( ( error ) => {
+		return (
+			VALIDATION_ERROR_NEW_REJECTED_STATUS === error.status ||
+			VALIDATION_ERROR_ACK_REJECTED_STATUS === error.status
+		);
+	} );
 
-			const rejectedValidationErrors = validationErrors.filter( ( error ) => {
-				return (
-					VALIDATION_ERROR_NEW_REJECTED_STATUS === error.status ||
-					VALIDATION_ERROR_ACK_REJECTED_STATUS === error.status
-				);
-			} );
+	const rejectedValidationErrors = validationErrors.filter( ( error ) => {
+		return (
+			VALIDATION_ERROR_NEW_REJECTED_STATUS === error.status ||
+			VALIDATION_ERROR_ACK_REJECTED_STATUS === error.status
+		);
+	} );
 
-			const totalRejectedErrorsCount = rejectedBlockValidationErrors.length + rejectedValidationErrors.length;
-
-			if ( totalRejectedErrorsCount === 0 ) {
-				noticeMessage += __( 'However, your site is configured to automatically accept sanitization of the offending markup.', 'amp' );
-			} else {
-				noticeMessage += _n(
-					'Your site is configured to automatically accept sanitization errors, but this error could be from when auto-acceptance was not selected, or from manually rejecting an error.',
-					'Your site is configured to automatically accept sanitization errors, but these errors could be from when auto-acceptance was not selected, or from manually rejecting an error.',
-					validationErrors.length,
-					'amp'
-				);
-			}
-		} else {
-			noticeMessage += __( 'Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.', 'amp' );
-		}
+	const totalRejectedErrorsCount = rejectedBlockValidationErrors.length + rejectedValidationErrors.length;
+	if ( totalRejectedErrorsCount === 0 ) {
+		noticeMessage += __( 'The invalid markup has been automatically removed.', 'amp' );
+	} else {
+		noticeMessage += _n(
+			'You will have to remove the invalid markup (or allow the plugin to remove it) to serve AMP.',
+			'You will have to remove the invalid markup (or allow the plugin to remove it) to serve AMP.',
+			validationErrors.length,
+			'amp',
+		);
 	}
 
 	const options = {
@@ -237,7 +231,10 @@ export const maybeDisplayNotice = () => {
 		options.actions = [
 			{
 				label: __( 'Review issues', 'amp' ),
-				url: reviewLink,
+				className: 'is-link',
+				onClick: () => {
+					window.open( reviewLink, '_blank' );
+				},
 			},
 		];
 	}

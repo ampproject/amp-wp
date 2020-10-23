@@ -5,12 +5,16 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+
 /**
  * Class AMP_Img_Sanitizer_Test
  *
  * @covers AMP_Img_Sanitizer
  */
 class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
+
+	use PrivateAccess;
 
 	/**
 	 * Set up.
@@ -53,6 +57,39 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 				],
 			],
 
+			'image_with_new_platform_attributes'       => [
+				'<img src="https://placehold.it/150x300" width="150" height="300" importance="low" intrinsicsize="150x300" loading="lazy">',
+				'<amp-img src="https://placehold.it/150x300" width="150" height="300" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/150x300" width="150" height="300" importance="low" intrinsicsize="150x300" loading="lazy"></noscript></amp-img>',
+				[
+					'add_noscript_fallback' => true,
+				],
+			],
+
+			'image_with_decoding_attribute_of_async'   => [
+				'<img src="https://placehold.it/150x300" width="150" height="300" decoding="async">',
+				'<amp-img src="https://placehold.it/150x300" width="150" height="300" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/150x300" width="150" height="300" decoding="async"></noscript></amp-img>',
+				[
+					'add_noscript_fallback' => true,
+				],
+			],
+
+			'image_with_loading_attribute_of_lazy'     => [
+				'<img src="https://placehold.it/150x300" width="150" height="300" loading="lazy">',
+				'<amp-img src="https://placehold.it/150x300" width="150" height="300" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/150x300" width="150" height="300" loading="lazy"></noscript></amp-img>',
+				[
+					'add_noscript_fallback' => true,
+				],
+			],
+
+			'image_with_wrong_decoding_and_loading'    => [
+				'<img src="https://placehold.it/150x300" width="150" height="300" decoding="sync" loading="eager">',
+				'<amp-img src="https://placehold.it/150x300" width="150" height="300" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/150x300" width="150" height="300" decoding="sync" loading="eager"></noscript></amp-img>',
+				[
+					'add_noscript_fallback' => true,
+				],
+				array_fill( 0, 2, AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR ),
+			],
+
 			'simple_image_without_noscript'            => [
 				'<p><img src="http://placehold.it/300x300" width="300" height="300" /></p>',
 				'<p><amp-img src="http://placehold.it/300x300" width="300" height="300" class="amp-wp-enforced-sizes" layout="intrinsic"></amp-img></p>',
@@ -65,14 +102,14 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 				'<p><img width="300" height="300" /></p>',
 				'<p></p>',
 				[],
-				[ 'invalid_element' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
 			],
 
 			'image_with_empty_src'                     => [
 				'<p><img src="" width="300" height="300" /></p>',
 				'<p></p>',
 				[],
-				[ 'invalid_element' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
 			],
 
 			'image_with_layout'                        => [
@@ -99,7 +136,7 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 				'<p><img src="    " width="300" height="300" /></p>',
 				'<p></p>',
 				[],
-				[ 'invalid_element' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
 			],
 
 			'image_with_empty_width_and_height'        => [
@@ -157,7 +194,7 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-img src="https://placehold.it/350x150" on="tap:my-lightbox" media="(min-width: 650px)" role="button" itemscope="image" tabindex="0" width="350" height="150" alt="ALT!" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/350x150" on="tap:my-lightbox" role="button" itemscope="image" tabindex="0" width="350" height="150" alt="ALT!"></noscript></amp-img>',
 				[],
 				[
-					'invalid_attribute', // The onclick attribute.
+					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR, // The onclick attribute.
 				],
 			],
 
@@ -208,7 +245,7 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 
 			'image_with_custom_lightbox_attrs'         => [
 				'<figure data-amp-lightbox="true"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></figure>',
-				'<figure data-amp-lightbox="true"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" on="tap:amp-image-lightbox" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure><amp-image-lightbox id="amp-image-lightbox" layout="nodisplay" data-close-button-aria-label="Close"></amp-image-lightbox>',
+				'<figure data-amp-lightbox="true"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure>',
 			],
 
 			'wide_image'                               => [
@@ -241,9 +278,9 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 				null,
 			],
 
-			'img_with_sizes_attribute_removed'         => [
+			'img_with_sizes_attribute_kept'            => [
 				'<img width="825" height="510" src="https://placehold.it/825x510" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="" sizes="(max-width: 34.9rem) calc(100vw - 2rem), (max-width: 53rem) calc(8 * (100vw / 12)), (min-width: 53rem) calc(6 * (100vw / 12)), 100vw">',
-				'<amp-img width="825" height="510" src="https://placehold.it/825x510" class="attachment-post-thumbnail size-post-thumbnail wp-post-image amp-wp-enforced-sizes" alt="" layout="intrinsic"><noscript><img width="825" height="510" src="https://placehold.it/825x510" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="" sizes="(max-width: 34.9rem) calc(100vw - 2rem), (max-width: 53rem) calc(8 * (100vw / 12)), (min-width: 53rem) calc(6 * (100vw / 12)), 100vw"></noscript></amp-img>',
+				'<amp-img width="825" height="510" src="https://placehold.it/825x510" class="attachment-post-thumbnail size-post-thumbnail wp-post-image amp-wp-enforced-sizes" alt="" sizes="(max-width: 34.9rem) calc(100vw - 2rem), (max-width: 53rem) calc(8 * (100vw / 12)), (min-width: 53rem) calc(6 * (100vw / 12)), 100vw" layout="intrinsic" disable-inline-width=""><noscript><img width="825" height="510" src="https://placehold.it/825x510" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="" sizes="(max-width: 34.9rem) calc(100vw - 2rem), (max-width: 53rem) calc(8 * (100vw / 12)), (min-width: 53rem) calc(6 * (100vw / 12)), 100vw"></noscript></amp-img>',
 			],
 
 			'amp_img_with_sizes_attribute_retained'    => [
@@ -253,12 +290,12 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 
 			'img_with_http_protocol_src'               => [
 				'<img src="http://placehold.it/350x150" width="350" height="150">',
-				'<amp-img src="http://placehold.it/350x150" width="350" height="150" class="amp-wp-enforced-sizes" layout="intrinsic"></amp-img>',
+				'<amp-img src="http://placehold.it/350x150" width="350" height="150" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="http://placehold.it/350x150" width="350" height="150"></noscript></amp-img>',
 			],
 
 			'img_with_http_protocol_srcset'            => [
-				'<img src="https://placehold.it/350x150" srcset="http://placehold.it/1024x768 1024w" width="350" height="150">',
-				'<amp-img src="https://placehold.it/350x150" srcset="http://placehold.it/1024x768 1024w" width="350" height="150" class="amp-wp-enforced-sizes" layout="intrinsic"></amp-img>',
+				'<img src="http://placehold.it/350x150" srcset="http://placehold.it/1024x768 1024w" width="350" height="150">',
+				'<amp-img src="http://placehold.it/350x150" srcset="http://placehold.it/1024x768 1024w" width="350" height="150" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="http://placehold.it/350x150" srcset="http://placehold.it/1024x768 1024w" width="350" height="150"></noscript></amp-img>',
 			],
 
 			'img_with_fill_layout_inline_style'        => [
@@ -323,7 +360,30 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 				[
 					'add_noscript_fallback' => false,
 				],
-				array_fill( 0, 51, 'invalid_attribute' ),
+				array_fill( 0, 51, AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR ),
+			],
+
+			'image_block_with_lightbox'                => [
+				'<figure class="wp-block-image" data-amp-lightbox="true"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></figure>',
+				'<figure class="wp-block-image" data-amp-lightbox="true"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure>',
+			],
+
+			'image_block_link_attach_page_lightbox'    => [
+				'<figure class="wp-block-image" data-amp-lightbox="true"><a href="https://example.com/example-image"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></a></figure>',
+				'<figure class="wp-block-image" data-amp-lightbox="true"><a href="https://example.com/example-image"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></a></figure>',
+			],
+
+			'aligned_image_block_with_lightbox'        => [
+				'<div data-amp-lightbox="true" class="wp-block-image"><figure class="alignleft is-resized"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></figure></div>',
+				'<div data-amp-lightbox="true" class="wp-block-image"><figure class="alignleft is-resized"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure></div>',
+			],
+
+			'test_with_dev_mode'                       => [
+				'<img data-ampdevmode src="http://example.com/foo.png">',
+				null, // No change.
+				[
+					'add_dev_mode' => true,
+				],
 			],
 		];
 	}
@@ -354,8 +414,10 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 			$args
 		);
 
-		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
-		$img_count = $dom->getElementsByTagName( 'img' )->length;
+		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		if ( ! empty( $args['add_dev_mode'] ) ) {
+			$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
+		}
 
 		$sanitizer = new AMP_Img_Sanitizer( $dom, $args );
 		$sanitizer->sanitize();
@@ -367,9 +429,6 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEquals( $expected, $content );
-
-		$xpath = new DOMXPath( $dom );
-		$this->assertEquals( $img_count ? 1 : 0, $xpath->query( '/html/head/meta[ @name = "amp-experiments-opt-in" ][ @content = "amp-img-auto-sizes" ]' )->length );
 	}
 
 	/**
@@ -383,12 +442,12 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Img_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$whitelist_sanitizer->sanitize();
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$validating_sanitizer->sanitize();
 
 		$scripts = array_merge(
 			$sanitizer->get_scripts(),
-			$whitelist_sanitizer->get_scripts()
+			$validating_sanitizer->get_scripts()
 		);
 		$this->assertEquals( $expected, $scripts );
 	}
@@ -404,13 +463,111 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Img_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$whitelist_sanitizer->sanitize();
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$validating_sanitizer->sanitize();
 
 		$scripts = array_merge(
 			$sanitizer->get_scripts(),
-			$whitelist_sanitizer->get_scripts()
+			$validating_sanitizer->get_scripts()
 		);
 		$this->assertEquals( $expected, $scripts );
+	}
+
+	/**
+	 * Test an Image block wrapped in an <a>, that links to the media file, with 'lightbox' selected.
+	 *
+	 * This should have the <a> stripped, as it interferes with the lightbox.
+	 */
+	public function test_image_block_link_to_media_file_with_lightbox() {
+		$source   = sprintf( '<figure class="wp-block-image" data-amp-lightbox="true"><a href="%s"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></a></figure>', wp_get_attachment_image_url( $this->get_new_attachment_id() ) );
+		$expected = '<figure class="wp-block-image" data-amp-lightbox="true"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure>';
+
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Img_Sanitizer( $dom );
+		$sanitizer->sanitize();
+
+		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$sanitizer->sanitize();
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$this->assertEquals( $expected, $content );
+	}
+
+	/**
+	 * Test an Image block wrapped in an <a>, that has right-alignment, links to the media file, and has 'lightbox' selected.
+	 *
+	 * This should have the <a> stripped, as it interferes with the lightbox.
+	 */
+	public function test_image_block_link_to_media_file_and_alignment_with_lightbox() {
+		$source   = sprintf( '<div data-amp-lightbox="true" class="wp-block-image"><figure class="alignright size-large"><a href="%s"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></a></figure></div>', wp_get_attachment_image_url( $this->get_new_attachment_id() ) );
+		$expected = '<div data-amp-lightbox="true" class="wp-block-image"><figure class="alignright size-large"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" lightbox="" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure></div>';
+
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Img_Sanitizer( $dom );
+		$sanitizer->sanitize();
+
+		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$sanitizer->sanitize();
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$this->assertEquals( $expected, $content );
+	}
+
+	/**
+	 * Gets test data for test_does_node_have_block_class(), using a <figure> element.
+	 *
+	 * @see AMP_Img_Sanitizer_Test::test_does_node_have_block_class()
+	 * @return array Test data for function.
+	 */
+	public function get_data_for_node_block_class_test() {
+		return [
+			'has_no_class'           => [
+				'<figure></figure>',
+				false,
+			],
+			'has_wrong_class'        => [
+				'<figure class="completely-wrong-class"></figure>',
+				false,
+			],
+			'only_has_part_of_class' => [
+				'<figure class="wp-block"></figure>',
+				false,
+			],
+			'has_correct_class'      => [
+				'<figure class="wp-block-image"></figure>',
+				true,
+			],
+		];
+	}
+
+	/**
+	 * Test does_node_have_block_class.
+	 *
+	 * @dataProvider get_data_for_node_block_class_test
+	 * @covers \AMP_Img_Sanitizer::does_node_have_block_class()
+	 *
+	 * @param string $source The source markup to test.
+	 * @param string $expected The expected return of the tested function, using the source markup.
+	 */
+	public function test_does_node_have_block_class( $source, $expected ) {
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Img_Sanitizer( $dom );
+		$figures   = $dom->getElementsByTagName( 'figure' );
+
+		$this->assertEquals( $expected, $this->call_private_method( $sanitizer, 'does_node_have_block_class', [ $figures->item( 0 ) ] ) );
+	}
+
+	/**
+	 * Creates a new image attachment, and gets the ID.
+	 *
+	 * @return int|WP_Error The new attachment ID, or WP_Error.
+	 */
+	public function get_new_attachment_id() {
+		return self::factory()->attachment->create_object(
+			'example-image.jpeg',
+			self::factory()->post->create(),
+			[
+				'post_mime_type' => 'image/jpeg',
+				'post_type'      => 'attachment',
+			]
+		);
 	}
 }

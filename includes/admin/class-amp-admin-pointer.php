@@ -10,6 +10,7 @@
  * Class representing a single admin pointer.
  *
  * @since 1.2
+ * @internal
  */
 class AMP_Admin_Pointer {
 
@@ -144,6 +145,8 @@ class AMP_Admin_Pointer {
 			[ 'wp-pointer' ],
 			AMP__VERSION
 		);
+
+		wp_styles()->add_data( 'amp-validation-tooltips', 'rtl', 'replace' );
 
 		add_action(
 			'admin_print_footer_scripts',

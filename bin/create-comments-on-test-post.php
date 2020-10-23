@@ -87,7 +87,7 @@ function amp_get_test_comment_entries() {
 			'comment_parent'       => '0',
 			'comment_author_IP'    => '127.0.0.1',
 			'comment_agent'        => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36',
-			'comment_date'         => date( 'Y-m-d H:i:s', $time ),
+			'comment_date'         => gmdate( 'Y-m-d H:i:s', $time ),
 			'comment_approved'     => '1',
 		];
 	}

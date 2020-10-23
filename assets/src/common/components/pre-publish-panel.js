@@ -19,9 +19,10 @@ import { validateFeaturedImage } from '../helpers';
 /**
  * Conditionally adds a notice to the pre-publish panel for the featured image.
  *
- * @param {Object}  featuredMedia Media object.
- * @param {Array}   dimensions    Required image dimensions.
- * @param {boolean} required      Whether selecting a featured image is required.
+ * @param {Object} props Component props.
+ * @param {Object} props.featuredMedia Media object.
+ * @param {Array} props.dimensions Required image dimensions.
+ * @param {boolean} props.required Whether selecting a featured image is required.
  *
  * @return {Function} Either a plain pre-publish panel, or the panel with a featured image notice.
  */
@@ -33,25 +34,23 @@ const PrePublishPanel = ( { featuredMedia, dimensions, required } ) => {
 	}
 
 	return (
-		<>
-			<PluginPrePublishPanel
-				title={ __( 'Featured Image', 'amp' ) }
-				initialOpen="true"
+		<PluginPrePublishPanel
+			title={ __( 'Featured Image', 'amp' ) }
+			initialOpen="true"
+		>
+			<Notice
+				status={ required ? 'warning' : 'notice' }
+				isDismissible={ false }
 			>
-				<Notice
-					status={ required ? 'warning' : 'notice' }
-					isDismissible={ false }
-				>
-					{ errors.map( ( errorMessage, index ) => {
-						return (
-							<p key={ `error-${ index }` }>
-								{ errorMessage }
-							</p>
-						);
-					} ) }
-				</Notice>
-			</PluginPrePublishPanel>
-		</>
+				{ errors.map( ( errorMessage, index ) => {
+					return (
+						<p key={ `error-${ index }` }>
+							{ errorMessage }
+						</p>
+					);
+				} ) }
+			</Notice>
+		</PluginPrePublishPanel>
 	);
 };
 

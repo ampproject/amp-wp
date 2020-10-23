@@ -12,9 +12,7 @@ class RowToggler {
 		this.index = index;
 
 		// Since we're adding additional rows, we need to override default .striped tables styles.
-		this.tr.classList.add( this.index % 2 ? 'odd' : 'even' ); // eslint-disable-line no-magic-numbers
-
-		this.toggle = this.toggle.bind( this );
+		this.tr.classList.add( this.index % 2 ? 'odd' : 'even' );
 	}
 
 	/**
@@ -43,7 +41,7 @@ class RowToggler {
 	createNewTr() {
 		this.newTr = document.createElement( 'tr' );
 		this.newTr.classList.add( 'details' );
-		this.newTr.classList.add( this.index % 2 ? 'odd' : 'even' ); // eslint-disable-line no-magic-numbers
+		this.newTr.classList.add( this.index % 2 ? 'odd' : 'even' );
 
 		const newCell = document.createElement( 'td' );
 		newCell.setAttribute( 'colspan', this.getRowColspan() );
@@ -73,7 +71,7 @@ class RowToggler {
 	 *
 	 * @param {Object} target The click event target.
 	 */
-	toggle( target ) {
+	toggle = ( target ) => {
 		if ( this.tr.classList.contains( 'expanded' ) ) {
 			this.onClose( target );
 		} else {

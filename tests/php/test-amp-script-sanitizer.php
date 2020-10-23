@@ -5,12 +5,17 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\Dom\Document;
+
 /**
  * Test AMP_Script_Sanitizer.
  *
  * @covers AMP_Script_Sanitizer
  */
 class AMP_Script_Sanitizer_Test extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/**
 	 * Data for testing noscript handling.
@@ -21,19 +26,23 @@ class AMP_Script_Sanitizer_Test extends WP_UnitTestCase {
 		return [
 			'document_write'      => [
 				'<html><head></head><body>Has script? <script>document.write("Yep!")</script><noscript>Nope!</noscript></body></html>',
-				'<html><head></head><body>Has script? <!--noscript-->Nope!<!--/noscript--></body></html>',
+				'<html><head><meta charset="utf-8"></head><body>Has script? <!--noscript-->Nope!<!--/noscript--></body></html>',
 			],
 			'nested_elements'     => [
 				'<html><head></head><body><noscript>before <em><strong>middle</strong> end</em></noscript></body></html>',
-				'<html><head></head><body><!--noscript-->before <em><strong>middle</strong> end</em><!--/noscript--></body></html>',
+				'<html><head><meta charset="utf-8"></head><body><!--noscript-->before <em><strong>middle</strong> end</em><!--/noscript--></body></html>',
 			],
 			'head_noscript_style' => [
 				'<html><head><noscript><style>body{color:red}</style></noscript></head><body></body></html>',
-				'<html><head><!--noscript--><style>body{color:red}</style><!--/noscript--></head><body></body></html>',
+				'<html><head><meta charset="utf-8"><!--noscript--><style>body{color:red}</style><!--/noscript--></head><body></body></html>',
 			],
 			'head_noscript_span'  => [
 				'<html><head><noscript><span>No script</span></noscript></head><body></body></html>',
-				'<html><head></head><body><!--noscript--><span>No script</span><!--/noscript--></body></html>',
+				'<html><head><meta charset="utf-8"></head><body><!--noscript--><span>No script</span><!--/noscript--></body></html>',
+			],
+			'test_with_dev_mode'  => [
+				'<html data-ampdevmode=""><head><meta charset="utf-8"></head><body><noscript data-ampdevmode="">hey</noscript></body></html>',
+				null,
 			],
 		];
 	}
@@ -47,13 +56,16 @@ class AMP_Script_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Script_Sanitizer::sanitize()
 	 */
 	public function test_noscript_promotion( $source, $expected = null ) {
-		$dom = AMP_DOM_Utils::get_dom( $source );
+		if ( null === $expected ) {
+			$expected = $source;
+		}
+		$dom = Document::fromHtml( $source );
 		$this->assertSame( 1, $dom->getElementsByTagName( 'noscript' )->length );
 		$sanitizer = new AMP_Script_Sanitizer( $dom );
 		$sanitizer->sanitize();
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$whitelist_sanitizer->sanitize();
-		$content = AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$validating_sanitizer->sanitize();
+		$content = $dom->saveHTML( $dom->documentElement );
 		$this->assertEquals( $expected, $content );
 	}
 
@@ -96,14 +108,14 @@ class AMP_Script_Sanitizer_Test extends WP_UnitTestCase {
 			'use_document_element' => true,
 		];
 
-		$dom = AMP_DOM_Utils::get_dom( $html );
+		$dom = Document::fromHtml( $html );
 		AMP_Content_Sanitizer::sanitize_document( $dom, amp_get_content_sanitizers(), $args );
 
-		$content = AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
+		$content = $dom->saveHTML( $dom->documentElement );
 
 		$this->assertRegExp( '/<!-- Google Tag Manager -->\s*<!-- End Google Tag Manager -->/', $content );
-		$this->assertContains( '<noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>', $content );
-		$this->assertContains( 'Has script? <!--noscript-->Nope!<!--/noscript-->', $content );
-		$this->assertContains( '<!--noscript--><amp-iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXX" height="400" layout="fixed-height" width="auto" sandbox="allow-scripts allow-same-origin" class="amp-wp-b3bfe1b"><span placeholder="" class="amp-wp-iframe-placeholder"></span><noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXX" height="0" width="0" class="amp-wp-b3bfe1b"></iframe></noscript></amp-iframe><!--/noscript-->', $content );
+		$this->assertStringContains( '<noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>', $content );
+		$this->assertStringContains( 'Has script? <!--noscript-->Nope!<!--/noscript-->', $content );
+		$this->assertStringContains( '<!--noscript--><amp-iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXX" height="400" layout="fixed-height" width="auto" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation" data-amp-original-style="display:none;visibility:hidden" class="amp-wp-b3bfe1b"><span placeholder="" class="amp-wp-iframe-placeholder"></span><noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXX" height="0" width="0" data-amp-original-style="display:none;visibility:hidden" class="amp-wp-b3bfe1b"></iframe></noscript></amp-iframe><!--/noscript-->', $content );
 	}
 }

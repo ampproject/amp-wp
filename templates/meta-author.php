@@ -12,6 +12,12 @@
  * @package AMP
  */
 
+/**
+ * Context.
+ *
+ * @var AMP_Post_Template $this
+ */
+
 $post_author = $this->get( 'post_author' );
 ?>
 <?php if ( $post_author ) : ?>

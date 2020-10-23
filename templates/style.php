@@ -28,8 +28,21 @@ $border_color            = $this->get_customizer_setting( 'border_color' );
 $link_color              = $this->get_customizer_setting( 'link_color' );
 $header_background_color = $this->get_customizer_setting( 'header_background_color' );
 $header_color            = $this->get_customizer_setting( 'header_color' );
+
+$alignwide_max = $content_max_width > 0 ? $content_max_width * 2 : 1920
 ?>
 /* Generic WP styling */
+
+.alignnone,
+.aligncenter,
+.alignleft,
+.alignright,
+.alignwide {
+	margin-top: 1em;
+	margin-right: auto;
+	margin-bottom: 1em;
+	margin-left: auto;
+}
 
 .alignright {
 	float: right;
@@ -46,13 +59,40 @@ $header_color            = $this->get_customizer_setting( 'header_color' );
 	margin-right: auto;
 }
 
+.alignwide {
+	width: 100%;
+}
+
+@media (min-width: calc(840px - 48px)) {
+	.alignwide {
+		width: calc(100vw - 48px);
+		max-width: calc(100vw - 48px);
+		margin-left: calc(50% - 50vw + 24px);
+		margin-right: calc(50% - 50vw + 24px);
+	}
+}
+
+@media (min-width: calc(<?php echo sprintf( '%dpx', $alignwide_max ); ?>)) {
+	.alignwide {
+		width: calc(<?php echo sprintf( '%dpx', $alignwide_max ); ?> - 48px);
+		max-width: calc(<?php echo sprintf( '%dpx', $alignwide_max ); ?> - 48px);
+		margin-left: calc(calc(50% - <?php echo sprintf( '%dpx', $alignwide_max ); ?> / 2) + 24px);
+		margin-right: calc(calc(50% - <?php echo sprintf( '%dpx', $alignwide_max ); ?> / 2) + 24px);
+	}
+}
+
+.alignfull {
+	width: 100vw;
+	max-width: 100vw;
+	margin-left: calc(50% - 50vw);
+	margin-right: calc(50% - 50vw);
+}
+
 .amp-wp-enforced-sizes {
 	/** Our sizes fallback is 100vw, and we have a padding on the container; the max-width here prevents the element from overflowing. **/
 	max-width: 100%;
 	margin: 0 auto;
 }
-
-<?php echo file_get_contents( AMP__DIR__ . '/assets/css/amp-default.css' ); // phpcs:ignore WordPress.WP.AlternativeFunctions ?>
 
 /* Template Styles */
 
@@ -143,21 +183,6 @@ blockquote p:last-child {
 	color: <?php echo sanitize_hex_color( $header_color ); ?>;
 	text-decoration: none;
 }
-
-<?php if ( $this->get( 'post_canonical_link_url' ) || is_customize_preview() ) : ?>
-	.amp-wp-header .amp-wp-canonical-link {
-		font-size: 0.8em;
-		text-decoration: underline;
-		position: absolute;
-		<?php
-		$distance = 18;
-		if ( $this->get( 'site_icon_url' ) ) {
-			$distance += 32 + 10; // Width of site icon with margin.
-		}
-		printf( '%s: %dpx;', is_rtl() ? 'left' : 'right', $distance ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		?>
-	}
-<?php endif; ?>
 
 .amp-wp-header .amp-wp-site-icon {
 	/** site icon is 32px **/
@@ -268,11 +293,13 @@ blockquote p:last-child {
 	margin: 0 auto;
 }
 
-.amp-wp-article-content amp-img.alignright {
+.amp-wp-article-content amp-img.alignright,
+.amp-wp-article-content .wp-block-cover.alignright {
 	margin: 0 0 1em 16px;
 }
 
-.amp-wp-article-content amp-img.alignleft {
+.amp-wp-article-content amp-img.alignleft,
+.amp-wp-article-content .wp-block-cover.alignleft {
 	margin: 0 16px 1em 0;
 }
 

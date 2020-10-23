@@ -1,0 +1,45 @@
+.welcome {
+	padding-bottom: 45px;
+	padding-top: 30px;
+
+	@media screen and (min-width: 1000px) {
+		padding-left: 90px;
+		padding-right: 90px;
+	}
+}
+
+.welcome__header {
+	border-bottom: 2px solid #d3d9dd;
+	margin-bottom: 3rem;
+	text-align: center;
+}
+
+.welcome__header h1 {
+	margin: 1.5rem auto;
+	max-width: 525px;
+}
+
+.welcome__section {
+	display: flex;
+	padding-bottom: 1.5rem;
+}
+
+.welcome__section-icon {
+	flex-shrink: 0;
+	width: 64px;
+}
+
+.welcome__section h4,
+.welcome__section p {
+	font-family: var(--font-noto);
+	font-size: 1rem;
+}
+
+.welcome__section h4 {
+	margin-bottom: 7px;
+	margin-top: 0;
+}
+
+.welcome__section p {
+	line-height: 1.5;
+}

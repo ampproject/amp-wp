@@ -4,10 +4,8 @@
 import {
 	hasThemeSupport,
 	isStandardMode,
-	isWebsiteEnabled,
-	isStoriesEnabled,
-	getDefaultStatus,
-	getPossibleStatuses,
+	getErrorMessages,
+	getAmpSlug,
 } from '../selectors';
 
 describe( 'selectors', () => {
@@ -27,35 +25,21 @@ describe( 'selectors', () => {
 		} );
 	} );
 
-	describe( 'isWebsiteEnabled', () => {
-		it( 'should return whether the website format is enabled', () => {
-			const state = { isWebsiteEnabled: false };
+	describe( 'getErrorMessages', () => {
+		it( 'should return the AMP validation messages', () => {
+			const expectedMessages = [ 'Disallowed script', 'Disallowed attribute' ];
+			const state = { errorMessages: expectedMessages };
 
-			expect( isWebsiteEnabled( state ) ).toBe( false );
+			expect( getErrorMessages( state ) ).toStrictEqual( expectedMessages );
 		} );
 	} );
 
-	describe( 'isStoriesEnabled', () => {
-		it( 'should return whether the stories format is enabled', () => {
-			const state = { isStoriesEnabled: false };
+	describe( 'getAmpSlug', () => {
+		it( 'should return the AMP slug', () => {
+			const slug = 'amp';
+			const state = { ampSlug: slug };
 
-			expect( isStoriesEnabled( state ) ).toBe( false );
-		} );
-	} );
-
-	describe( 'getDefaultStatus', () => {
-		it( 'should return the default AMP status', () => {
-			const state = { defaultStatus: 'enabled' };
-
-			expect( getDefaultStatus( state ) ).toStrictEqual( 'enabled' );
-		} );
-	} );
-
-	describe( 'getPossibleStatuses', () => {
-		it( 'should return the possible AMP statuses', () => {
-			const state = { possibleStatuses: [ 'enabled', 'disabled' ] };
-
-			expect( getPossibleStatuses( state ) ).toStrictEqual( [ 'enabled', 'disabled' ] );
+			expect( getAmpSlug( state ) ).toStrictEqual( slug );
 		} );
 	} );
 } );

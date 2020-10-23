@@ -10,6 +10,7 @@ module.exports = function( api ) {
 		...config,
 		plugins: [
 			...config.plugins,
+			'@babel/plugin-proposal-class-properties',
 			'inline-react-svg',
 		],
 		sourceMaps: true,
@@ -17,6 +18,7 @@ module.exports = function( api ) {
 			production: {
 				plugins: [
 					...config.plugins,
+					'@babel/plugin-proposal-class-properties',
 					'inline-react-svg',
 					'transform-react-remove-prop-types',
 				],

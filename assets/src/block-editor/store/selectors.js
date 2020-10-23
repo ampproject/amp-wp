@@ -21,45 +21,23 @@ export function isStandardMode( state ) {
 }
 
 /**
- * Returns whether the website experience is enabled.
+ * Returns the AMP validation error messages.
  *
- * @param {Object} state Editor state.
+ * @param {Object} state The editor state.
  *
- * @return {boolean} Whether website experienced enabled.
+ * @return {string[]} The validation error messages.
  */
-export function isWebsiteEnabled( state ) {
-	return Boolean( state.isWebsiteEnabled );
+export function getErrorMessages( state ) {
+	return state.errorMessages;
 }
 
 /**
- * Returns whether the stories experience is enabled.
+ * Returns the AMP slug used in the query var, like 'amp'.
  *
- * @param {Object} state Editor state.
+ * @param {Object} state The editor state.
  *
- * @return {boolean} Whether stories experienced enabled.
+ * @return {string} The slug for AMP, like 'amp'.
  */
-export function isStoriesEnabled( state ) {
-	return Boolean( state.isStoriesEnabled );
-}
-
-/**
- * Returns the default AMP status.
- *
- * @param {Object} state Editor state.
- *
- * @return {string} The default AMP status.
- */
-export function getDefaultStatus( state ) {
-	return state.defaultStatus;
-}
-
-/**
- * Returns the possible AMP statuses.
- *
- * @param {Object} state Editor state.
- *
- * @return {string[]} The possible AMP statuses, 'enabled' and 'disabled'.
- */
-export function getPossibleStatuses( state ) {
-	return state.possibleStatuses;
+export function getAmpSlug( state ) {
+	return state.ampSlug;
 }

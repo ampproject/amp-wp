@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
+
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 
 /**
@@ -13,6 +15,8 @@
  * @covers AMP_Audio_Sanitizer
  */
 class AMP_Audio_Converter_Test extends WP_UnitTestCase {
+
+	use MarkupComparison;
 
 	/**
 	 * Get data.
@@ -52,12 +56,12 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 				'<amp-audio src="https://example.com/audio/file.ogg" width="auto"><a href="https://example.com/audio/file.ogg" fallback="">https://example.com/audio/file.ogg</a><noscript><audio src="https://example.com/audio/file.ogg" autoplay="false"></audio></noscript></amp-audio>',
 			],
 
-			'audio_with_whitelisted_attributes__enabled' => [
+			'audio_with_allowlisted_attributes__enabled' => [
 				'<audio src="https://example.com/audio/file.ogg" class="test" loop="loop" muted></audio>',
 				'<amp-audio src="https://example.com/audio/file.ogg" class="test" loop="" muted="" width="auto"><a href="https://example.com/audio/file.ogg" fallback="">https://example.com/audio/file.ogg</a><noscript><audio src="https://example.com/audio/file.ogg" class="test" loop="loop" muted></audio></noscript></amp-audio>',
 			],
 
-			'audio_with_whitelisted_attributes__disabled' => [
+			'audio_with_allowlisted_attributes__disabled' => [
 				'<audio src="https://example.com/audio/file.ogg" class="test" loop="false" muted="false"></audio>',
 				'<amp-audio src="https://example.com/audio/file.ogg" class="test" width="auto"><a href="https://example.com/audio/file.ogg" fallback="">https://example.com/audio/file.ogg</a><noscript><audio src="https://example.com/audio/file.ogg" class="test" loop="false" muted="false"></audio></noscript></amp-audio>',
 			],
@@ -145,6 +149,7 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 			],
 
 			'audio_block_and_shortcode_output' => [
+				// Note: the IE conditional comment is stripped, as AMP doesn't support those browsers anyway.
 				'
 					<figure class="wp-block-audio">
 						<audio controls src="https://wordpressdev.lndo.site/content/uploads/2019/02/do-you-know-I-am-batman.mp3"></audio>
@@ -168,12 +173,11 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 						<figcaption>Caption</figcaption>
 					</figure>
 
-					<!--[if lt IE 9]><script>document.createElement(\'audio\');</script><![endif]-->
-					<amp-audio class="wp-audio-shortcode amp-wp-199b6f0" id="audio-87-1" preload="none" controls="controls" width="auto">
+					<amp-audio class="wp-audio-shortcode amp-wp-199b6f0" id="audio-87-1" preload="none" controls="controls" width="auto" data-amp-original-style="width: 100%;">
 						<source type="audio/mpeg" src="https://wordpressdev.lndo.site/content/uploads/2019/02/do-you-know-I-am-batman.mp3?_=1">
 						<a href="https://wordpressdev.lndo.site/content/uploads/2019/02/do-you-know-I-am-batman.mp3" fallback="">https://wordpressdev.lndo.site/content/uploads/2019/02/do-you-know-I-am-batman.mp3</a>
 						<noscript>
-							<audio class="wp-audio-shortcode amp-wp-199b6f0" id="audio-87-1" preload="none" controls="controls">
+							<audio class="wp-audio-shortcode amp-wp-199b6f0" id="audio-87-1" preload="none" controls="controls" data-amp-original-style="width: 100%;">
 								<source type="audio/mpeg" src="https://wordpressdev.lndo.site/content/uploads/2019/02/do-you-know-I-am-batman.mp3?_=1">
 							</audio>
 						</noscript>
@@ -209,6 +213,14 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 					'add_noscript_fallback' => true,
 				],
 			],
+
+			'test_with_dev_mode' => [
+				'<audio data-ampdevmode="" src="https://example.com/audio/file.ogg" onclick="foo()" data-foo="bar"></audio>',
+				null, // No change.
+				[
+					'add_dev_mode' => true,
+				],
+			],
 		];
 	}
 
@@ -225,7 +237,11 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 		if ( null === $expected ) {
 			$expected = $source;
 		}
-		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
+		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		if ( ! empty( $args['add_dev_mode'] ) ) {
+			$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
+		}
+
 		$sanitizer = new AMP_Audio_Sanitizer( $dom, $args );
 		$sanitizer->sanitize();
 
@@ -235,8 +251,8 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 		$style_sanitizer = new AMP_Style_Sanitizer( $dom );
 		$style_sanitizer->sanitize();
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$whitelist_sanitizer->sanitize();
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$validating_sanitizer->sanitize();
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEqualMarkup( $expected, $content );
@@ -273,12 +289,12 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Audio_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$whitelist_sanitizer->sanitize();
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$validating_sanitizer->sanitize();
 
 		$scripts = array_merge(
 			$sanitizer->get_scripts(),
-			$whitelist_sanitizer->get_scripts()
+			$validating_sanitizer->get_scripts()
 		);
 		$this->assertEquals( $expected, $scripts );
 	}
@@ -294,29 +310,13 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Audio_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
-		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$whitelist_sanitizer->sanitize();
+		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$validating_sanitizer->sanitize();
 
 		$scripts = array_merge(
 			$sanitizer->get_scripts(),
-			$whitelist_sanitizer->get_scripts()
+			$validating_sanitizer->get_scripts()
 		);
 		$this->assertEquals( $expected, $scripts );
-	}
-
-	/**
-	 * Assert markup is equal.
-	 *
-	 * @param string $expected Expected markup.
-	 * @param string $actual   Actual markup.
-	 */
-	public function assertEqualMarkup( $expected, $actual ) {
-		$actual   = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $actual ) );
-		$expected = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $expected ) );
-
-		$this->assertEquals(
-			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $expected, -1, PREG_SPLIT_DELIM_CAPTURE ) ),
-			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $actual, -1, PREG_SPLIT_DELIM_CAPTURE ) )
-		);
 	}
 }

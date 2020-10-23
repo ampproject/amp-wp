@@ -1,0 +1,162 @@
+/** Arrow icon on title in error column. */
+.column-error_code > .single-url-detail-toggle {
+	position: relative;
+	width: 100%;
+	padding: 5px 36px 5px 0;
+	background: none;
+	border: none;
+	text-align: left;
+	line-height: 1.682;
+	color: #0073aa;
+	cursor: pointer;
+}
+
+.column-error_code > .single-url-detail-toggle::after {
+	position: absolute;
+	top: 0;
+	right: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 12px;
+	height: 18px;
+	margin-top: 5px;
+	background-image: url("../images/down-triangle.svg");
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+	content: "";
+}
+
+tr.expanded .single-url-detail-toggle::after {
+	transform: rotate(180deg);
+}
+
+/** Striped table overrides. */
+table.striped > tbody > tr.odd {
+	background: #f9f9f9;
+}
+
+table.striped > tbody > tr.even {
+	background: #fff;
+}
+
+/** Hide original details content. */
+.details-attributes > .detailed {
+	display: none;
+}
+
+/** Details row styles. */
+.details details.details-attributes:hover {
+	cursor: pointer;
+}
+
+.details dl.detailed {
+	padding-left: 30px;
+	margin-top: 10px;
+}
+
+.details .detailed summary code {
+	display: inline-block;
+	min-width: 240px;
+	margin-left: 12px;
+	font-weight: 600;
+}
+
+.detailed pre {
+	white-space: pre-wrap;
+}
+
+.column-status select {
+	vertical-align: top;
+}
+
+#number-errors {
+	text-align: center;
+	background-color: #d3d3d3b8;
+	color: #000;
+}
+
+#url-post-filter {
+	float: none;
+	display: inline;
+}
+
+.tablenav.top,
+.tablenav.bottom {
+	display: none;
+}
+
+.amp-validated-url a {
+	text-decoration: none;
+}
+
+.curtime.misc-pub-section {
+	margin-top: 0.5rem;
+}
+
+.wp-list-table th.column-error_code {
+	width: 30%;
+}
+
+.wp-list-table th.column-error_type {
+	width: 15%;
+}
+
+.wp-list-table th.column-details {
+	width: 15%;
+}
+
+.wp-list-table th.column-sources_with_invalid_output {
+	width: 30%;
+}
+
+/* Give enough width to prevent the widest column status, 'New Accepted,' from forcing the <select> below the icon. */
+.wp-list-table th.column-status {
+	width: 150px;
+}
+
+.wp-list-table th.column-reviewed {
+	width: 100px;
+}
+
+/** Add space between list table and the filter and search box above it. */
+#post-body-content button.action,
+#post-body-content #url-post-filter,
+#post-body-content .search-box {
+	margin-bottom: 4px;
+}
+
+#post-body-content button.reject {
+	margin-left: 4px;
+}
+
+#remove-keep-buttons:not(.hidden) {
+	display: inline-block;
+}
+
+#vertical-divider {
+	display: inline-block;
+	vertical-align: middle;
+	width: 15px;
+	margin-right: 15px;
+	height: 30px;
+	border-right: 1px solid #a0a5aa;
+}
+
+.amp-validation-error-status-dropdown {
+	display: flex;
+}
+
+.amp-validation-error-status {
+	margin-left: 5px;
+	width: auto;
+	float: none;
+	border-width: 2px;
+}
+
+#amp-invalid-markup > .amp-icon::before {
+	margin-right: 3px;
+	margin-left: -2px;
+	font-size: 24px;
+}

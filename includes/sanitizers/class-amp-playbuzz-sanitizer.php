@@ -11,6 +11,7 @@
  * Converts Playbuzz embed to <amp-playbuzz>
  *
  * @see https://www.playbuzz.com/
+ * @internal
  */
 class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer {
 
@@ -52,7 +53,7 @@ class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Sanitize the Playbuzz elements from the HTML contained in this instance's DOMDocument.
+	 * Sanitize the Playbuzz elements from the HTML contained in this instance's Dom\Document.
 	 *
 	 * @since 0.2
 	 */

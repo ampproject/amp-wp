@@ -2,60 +2,46 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { ReactElement } from 'react';
 
 /**
  * WordPress dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Get message for validation error.
  *
- * @param {?string} code       Error code.
- * @param {?string} nodeName   Node name.
- * @param {?string} parentName Parent node name.
- * @param {?string} message    Error message.
+ * @param {Object}  props Component props.
+ * @param {?string} props.title Title for error (with HTML) as provided by \AMP_Validation_Error_Taxonomy::get_error_title_from_code().
+ * @param {?string} props.code Error code.
+ * @param {?string|ReactElement} props.message Error message.
  *
- * @return {Component} Validation error message.
+ * @return {ReactElement} Validation error message.
  */
-const ValidationErrorMessage = ( { message, code, node_name: nodeName, parent_name: parentName } ) => {
+const ValidationErrorMessage = ( { title, message, code } ) => {
 	if ( message ) {
-		return (
-			<>
-				{ message }
-			</>
-		);
+		return message; // @todo It doesn't appear this is ever set?
 	}
 
-	if ( 'invalid_element' === code && nodeName ) {
-		return (
-			<>
-				{ __( 'Invalid element: ', 'amp' ) }
-				<code>{ nodeName }</code>
-			</>
-		);
-	} else if ( 'invalid_attribute' === code && nodeName ) {
-		return (
-			<>
-				{ __( 'Invalid attribute: ', 'amp' ) }
-				<code>{ parentName ? sprintf( '%s[%s]', parentName, nodeName ) : nodeName }</code>
-			</>
-		);
+	if ( title ) {
+		return <span dangerouslySetInnerHTML={ { __html: title } } />;
 	}
 
 	return (
 		<>
 			{ __( 'Error code: ', 'amp' ) }
-			<code>{ code || __( 'unknown', 'amp' ) }</code>
+			<code>
+				{ code || __( 'unknown', 'amp' ) }
+			</code>
 		</>
 	);
 };
 
 ValidationErrorMessage.propTypes = {
 	message: PropTypes.string,
+	title: PropTypes.string,
 	code: PropTypes.string,
-	node_name: PropTypes.string,
-	parent_name: PropTypes.string,
 };
 
 export default ValidationErrorMessage;

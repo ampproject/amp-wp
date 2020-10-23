@@ -9,6 +9,8 @@
 
 /**
  * Class AMP_Base_Embed_Handler
+ *
+ * @since 0.2
  */
 abstract class AMP_Base_Embed_Handler {
 	/**
@@ -67,7 +69,7 @@ abstract class AMP_Base_Embed_Handler {
 	/**
 	 * Get mapping of AMP component names to AMP script URLs.
 	 *
-	 * This is normally no longer needed because the whitelist
+	 * This is normally no longer needed because the validating
 	 * sanitizer will automatically detect the need for them via
 	 * the spec.
 	 *
@@ -76,5 +78,35 @@ abstract class AMP_Base_Embed_Handler {
 	 */
 	public function get_scripts() {
 		return [];
+	}
+
+	/**
+	 * Get regex pattern for matching HTML attributes from a given tag name.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param string   $html            HTML source haystack.
+	 * @param string   $tag_name        Tag name.
+	 * @param string[] $attribute_names Attribute names.
+	 * @return string[]|null Matched attributes, or null if the element was not matched at all.
+	 */
+	protected function match_element_attributes( $html, $tag_name, $attribute_names ) {
+		$pattern = sprintf(
+			'/<%s%s/',
+			preg_quote( $tag_name, '/' ),
+			implode(
+				'',
+				array_map(
+					function ( $attr_name ) {
+						return sprintf( '(?=[^>]*?%1$s="(?P<%1$s>[^"]+)")?', preg_quote( $attr_name, '/' ) );
+					},
+					$attribute_names
+				)
+			)
+		);
+		if ( ! preg_match( $pattern, $html, $matches ) ) {
+			return null;
+		}
+		return wp_array_slice_assoc( $matches, $attribute_names );
 	}
 }

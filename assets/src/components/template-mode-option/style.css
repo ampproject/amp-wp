@@ -1,0 +1,156 @@
+.template-mode-selection__details {
+	padding: 1rem 1.5rem;
+
+	@media (min-width: 783px) {
+		padding: 1rem 3rem;
+	}
+}
+
+.template-mode-option__label {
+	align-items: center;
+	background-color: var(--amp-settings-color-background);
+	display: flex;
+	padding: 0;
+	width: 100%;
+
+	@media (min-width: 783px) {
+		flex-wrap: wrap;
+		padding: 1.125rem 1.5rem 1.125rem 0;
+	}
+}
+
+
+.template-mode-selection__illustration svg {
+	height: auto;
+	width: 45px;
+
+	@media (min-width: 783px) {
+		width: 66px;
+	}
+}
+
+.template-mode-selection__input-container {
+	margin-right: 0.75rem;
+
+	@media screen and (min-width: 783px) {
+		margin-right: 1.5rem;
+	}
+}
+
+.template-mode-selection__illustration {
+	align-items: center;
+	display: flex;
+	flex-shrink: 0;
+	width: 40px;
+
+	@media screen and (min-width: 783px) {
+		width: 80px;
+	}
+}
+
+.template-mode-selection__illustration svg {
+	width: 60px;
+	height: auto;
+}
+
+.template-mode-option .amp-info {
+	margin-bottom: 0.5rem;
+
+	@media screen and (min-width: 783px) {
+		margin-left: 1.5rem;
+	}
+}
+
+.template-mode-selection__details {
+	margin-bottom: 1rem;
+}
+
+.template-mode-option .components-panel__row {
+	margin-left: -16px;
+}
+
+.template-mode-option .amp-notice .components-panel__body-toggle.components-button {
+	font-family: var(--font-noto);
+	font-size: 14px;
+	font-weight: 400;
+	line-height: 1.85;
+	padding-left: 0;
+}
+
+.template-mode-option .amp-notice .components-panel__body-title:hover {
+	background: rgba(0, 0, 0, 0) !important;
+}
+
+.template-mode-option .amp-notice .components-panel__body-title button .components-panel__arrow {
+	top: 1.125rem;
+	display: none; /* @todo Drawer will be expandable in 2.1 when site scan results are available. */
+}
+
+
+.template-mode-selection__description {
+	align-items: center;
+	display: flex;
+	flex-grow: 1;
+	flex-wrap: wrap;
+	justify-content: flex-start;
+	padding: 0 0 0 1rem;
+
+	@media screen and (min-width: 783px) {
+		margin-bottom: 0;
+	}
+}
+
+.template-mode-selection__label-extra {
+	display: none;
+	font-size: 14px;
+	margin: 0 0 0 auto;
+
+	@media screen and (min-width: 783px) {
+		display: block;
+	}
+}
+
+.template-mode-selection__label-extra .amp-notice--small {
+	font-size: 14px;
+}
+
+.template-mode-option > .amp-notice .components-panel__arrow {
+	right: 0;
+}
+
+.template-mode-option .components-panel__body-title:hover {
+	background: rgba(0, 0, 0, 0);
+}
+
+.template-mode-option .components-panel__body-toggle:hover,
+.template-mode-option .components-panel__body-toggle:active,
+.template-mode-option .components-panel__body-toggle:focus {
+	color: inherit;
+}
+
+.template-mode-option .components-panel__arrow {
+	height: 2rem;
+	width: 2rem;
+}
+
+.template-mode-option .components-panel__body {
+	border-bottom-width: 0;
+	border-top-width: 0;
+}
+
+.template-mode-option .components-panel__row {
+	flex-wrap: wrap;
+}
+
+.template-mode-option .components-panel__row > * {
+	width: 100%;
+}
+
+.template-mode-option .reader-themes {
+	margin-top: 1.5rem;
+}
+
+.template-mode-option .reader-themes__current-theme {
+	font-weight: 400;
+	margin-left: 0.5rem;
+}

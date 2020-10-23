@@ -1,0 +1,23 @@
+/**
+ * AMP setting toggle component.
+ */
+.amp-setting-toggle p {
+	font-size: 14px;
+}
+
+.amp .amp-setting-toggle .components-form-toggle {
+	margin-right: 0.75rem;
+
+	@media (min-width: 783px) {
+		margin-right: 2.25rem;
+	}
+}
+
+.amp-setting-toggle--disabled .components-form-toggle__input {
+	pointer-events: none;
+	opacity: 0.5;
+}
+
+.amp-setting-toggle--disabled .components-toggle-control__label {
+	pointer-events: none;
+}

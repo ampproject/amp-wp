@@ -7,6 +7,9 @@ import jQuery from 'jquery';
  * WordPress dependencies
  */
 import domReady from '@wordpress/dom-ready';
+// Disable reason: Needed so that the wp-pointer script is added to dependencies list by webpack.
+// eslint-disable-next-line import/no-unresolved
+import '@wordpress/pointer';
 
 // WIP Pointer function
 function sourcesPointer() {

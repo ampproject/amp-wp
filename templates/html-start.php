@@ -22,13 +22,51 @@
 <html amp <?php echo AMP_HTML_Utils::build_attributes_string( $this->get( 'html_tag_attributes' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 <head>
 	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
-	<?php do_action( 'amp_post_template_head', $this ); ?>
-	<style amp-custom>
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1">
+	<?php
+	// Note: The following two <style> tags are combined into <style amp-custom> via AMP_Style_Sanitizer.
+	// Splitting up the styles into two stylesheets allows for plugin-supplied styles via the amp_post_template_css action
+	// to be excluded from the styles in the style template part, which are more important given they style the overall page.
+
+	/**
+	 * Fires when rendering <head> in Reader mode templates.
+	 *
+	 * @since 0.2
+	 *
+	 * @param AMP_Post_Template $this
+	 */
+	do_action( 'amp_post_template_head', $this );
+	?>
+	<style class="style-template-part">
 		<?php $this->load_parts( [ 'style' ] ); ?>
-		<?php do_action( 'amp_post_template_css', $this ); ?>
+	</style>
+	<style class="amp-post-template-css-action">
+		<?php
+		/**
+		 * Fires when printing CSS styles in Reader mode templates.
+		 *
+		 * Callbacks should print bare CSS without any `<style>` or `<link>` tags.
+		 * As an alternative to using this, please consider:
+		 *
+		 *     add_action( 'amp_post_template_head', function() { wp_print_styles( 'foo' ); } );
+		 *
+		 * @since 0.3
+		 *
+		 * @param AMP_Post_Template $this
+		 */
+		do_action( 'amp_post_template_css', $this );
+		?>
 	</style>
 </head>
 
 <body class="<?php echo esc_attr( $this->get( 'body_class' ) ); ?>">
-<?php do_action( 'amp_post_template_body_open', $this ); ?>
+<?php
+/**
+ * Fires immediately after printing the <body>.
+ *
+ * @since 1.2.1
+ * @see wp_body_open()
+ *
+ * @param AMP_Post_Template $this
+ */
+do_action( 'amp_post_template_body_open', $this );

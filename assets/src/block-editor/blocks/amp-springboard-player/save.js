@@ -19,7 +19,7 @@ const BlockSave = ( { attributes } ) => {
 		springboardProps.width = attributes.width;
 	}
 	return (
-		<amp-springboard-player { ...springboardProps }></amp-springboard-player>
+		<amp-springboard-player { ...springboardProps } />
 	);
 };
 

@@ -52,7 +52,7 @@ MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
 
 EOT
 
-CURRENT_URL=$(docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run -T --rm cli option get siteurl)
+CURRENT_URL=$(wp option get siteurl | tr -d '\r')
 
 echo -e "\nWelcome to...\n"
 echo -e "\033[95m$AMP\033[0m"

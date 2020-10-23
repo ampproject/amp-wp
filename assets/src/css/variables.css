@@ -1,0 +1,19 @@
+/**
+ * CSS variables for the AMP admin pages.
+ *
+ * @todo Make the naming of these variables more semantic.
+ */
+:root {
+	--amp-settings-color-black: #212121;
+	--amp-settings-color-brand: #2459e7;
+	--gray: #6c7781;
+	--amp-settings-color-border: #e8e8e8;
+	--very-light-gray: #fafafc;
+	--amp-settings-color-background: #fff;
+	--amp-settings-color-warning: #ff9f00;
+	--font-noto: "Noto Sans", sans-serif;
+	--font-poppins: poppins, sans-serif;
+	--color-valid: #46b450;
+	--amp-settings-color-danger: #dc3232;
+	--color-gray-medium: rgba(0, 0, 0, 0.54);
+}

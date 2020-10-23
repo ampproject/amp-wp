@@ -5,8 +5,13 @@
  * @package AMP
  */
 
+use AmpProject\DevMode;
+use AmpProject\Dom\Document;
+
 /**
  * Class AMP_Base_Sanitizer
+ *
+ * @since 0.2
  */
 abstract class AMP_Base_Sanitizer {
 
@@ -20,15 +25,6 @@ abstract class AMP_Base_Sanitizer {
 	const FALLBACK_HEIGHT = 400;
 
 	/**
-	 * Value for <amp-image-lightbox> ID.
-	 *
-	 * @since 1.0
-	 *
-	 * @const string
-	 */
-	const AMP_IMAGE_LIGHTBOX_ID = 'amp-image-lightbox';
-
-	/**
 	 * Placeholder for default args, to be set in child classes.
 	 *
 	 * @since 0.2
@@ -40,7 +36,7 @@ abstract class AMP_Base_Sanitizer {
 	/**
 	 * DOM.
 	 *
-	 * @var DOMDocument A standard PHP representation of an HTML document in object form.
+	 * @var Document An AmpProject\Document representation of an HTML document.
 	 *
 	 * @since 0.2
 	 */
@@ -61,8 +57,6 @@ abstract class AMP_Base_Sanitizer {
 	 *      @type array $amp_globally_allowed_attributes
 	 *      @type array $amp_layout_allowed_attributes
 	 *      @type array $amp_bind_placeholder_prefix
-	 *      @type bool $allow_dirty_styles
-	 *      @type bool $allow_dirty_scripts
 	 *      @type bool $should_locate_sources
 	 *      @type callable $validation_error_callback
 	 * }
@@ -71,7 +65,7 @@ abstract class AMP_Base_Sanitizer {
 
 	/**
 	 * Flag to be set in child class' sanitize() method indicating if the
-	 * HTML contained in the DOMDocument has been sanitized yet or not.
+	 * HTML contained in the Dom\Document has been sanitized yet or not.
 	 *
 	 * @since 0.2
 	 *
@@ -91,15 +85,15 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @var array
 	 */
-	private $should_not_removed_nodes = [];
+	private $nodes_to_keep = [];
 
 	/**
 	 * AMP_Base_Sanitizer constructor.
 	 *
 	 * @since 0.2
 	 *
-	 * @param DOMDocument $dom Represents the HTML document to sanitize.
-	 * @param array       $args {
+	 * @param Document $dom Represents the HTML document to sanitize.
+	 * @param array    $args {
 	 *      Args.
 	 *
 	 *      @type int $content_max_width
@@ -117,7 +111,7 @@ abstract class AMP_Base_Sanitizer {
 		if ( ! empty( $this->args['use_document_element'] ) ) {
 			$this->root_element = $this->dom->documentElement;
 		} else {
-			$this->root_element = $this->dom->getElementsByTagName( 'body' )->item( 0 );
+			$this->root_element = $this->dom->body;
 		}
 	}
 
@@ -135,7 +129,7 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @param array $args Args.
 	 */
-	public static function add_buffering_hooks( $args = [] ) {}
+	public static function add_buffering_hooks( $args = [] ) {} // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 
 	/**
 	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
@@ -154,7 +148,7 @@ abstract class AMP_Base_Sanitizer {
 	 *
 	 * @param AMP_Base_Sanitizer[] $sanitizers Sanitizers.
 	 */
-	public function init( $sanitizers ) {}
+	public function init( $sanitizers ) {} // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 
 	/**
 	 * Sanitize the HTML contained in the DOMDocument received by the constructor
@@ -181,7 +175,9 @@ abstract class AMP_Base_Sanitizer {
 	 * Return array of values that would be valid as an HTML `style` attribute.
 	 *
 	 * @since 0.4
+	 * @codeCoverageIgnore
 	 * @deprecated As of 1.0, use get_stylesheets().
+	 * @internal
 	 *
 	 * @return array[][] Mapping of CSS selectors to arrays of properties.
 	 */
@@ -208,13 +204,15 @@ abstract class AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Get HTML body as DOMElement from DOMDocument received by the constructor.
+	 * Get HTML body as DOMElement from Dom\Document received by the constructor.
 	 *
-	 * @deprecated Just reference $root_element instead.
+	 * @codeCoverageIgnore
+	 * @deprecated Use $this->dom->body instead.
 	 * @return DOMElement The body element.
 	 */
 	protected function get_body_node() {
-		return $this->dom->getElementsByTagName( 'body' )->item( 0 );
+		_deprecated_function( 'Use $this->dom->body instead', '1.5.0' );
+		return $this->dom->body;
 	}
 
 	/**
@@ -255,16 +253,30 @@ abstract class AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Determine if an attribute value is empty.
+	 *
+	 * @param string|null $value Attribute value.
+	 * @return bool True if empty, false if not.
+	 */
+	public function is_empty_attribute_value( $value ) {
+		return ! isset( $value ) || '' === $value;
+	}
+
+	/**
 	 * Sets the layout, and possibly the 'height' and 'width' attributes.
 	 *
-	 * @param string[] $attributes {
+	 * @param array $attributes {
 	 *      Attributes.
 	 *
-	 *      @type int $height
-	 *      @type int $width
-	 *      @type string $sizes
-	 *      @type string $class
-	 *      @type string $layout
+	 *      @type string     $bottom
+	 *      @type int|string $height
+	 *      @type string     $layout
+	 *      @type string     $left
+	 *      @type string     $position
+	 *      @type string     $right
+	 *      @type string     $style
+	 *      @type string     $top
+	 *      @type int|string $width
 	 * }
 	 * @return array Attributes.
 	 */
@@ -272,14 +284,74 @@ abstract class AMP_Base_Sanitizer {
 		if ( isset( $attributes['layout'] ) && ( 'fill' === $attributes['layout'] || 'flex-item' !== $attributes['layout'] ) ) {
 			return $attributes;
 		}
-		if ( empty( $attributes['height'] ) ) {
-			unset( $attributes['width'] );
-			$attributes['height'] = self::FALLBACK_HEIGHT;
+
+		// Special-case handling for inline style that should be transformed into layout=fill.
+		if ( ! empty( $attributes['style'] ) ) {
+			$styles = $this->parse_style_string( $attributes['style'] );
+
+			// Apply fill layout if top, left, bottom, right are used.
+			if ( isset( $styles['position'], $styles['top'], $styles['left'], $styles['bottom'], $styles['right'] )
+				&& 'absolute' === $styles['position']
+				&& 0 === (int) $styles['top']
+				&& 0 === (int) $styles['left']
+				&& 0 === (int) $styles['bottom']
+				&& 0 === (int) $styles['right']
+				&& ( ! isset( $attributes['width'] ) || '100%' === $attributes['width'] )
+				&& ( ! isset( $attributes['height'] ) || '100%' === $attributes['height'] )
+			) {
+				unset( $attributes['style'], $styles['position'], $styles['top'], $styles['left'], $styles['bottom'], $styles['right'] );
+				if ( ! empty( $styles ) ) {
+					$attributes['style'] = $this->reassemble_style_string( $styles );
+				}
+				$attributes['layout'] = 'fill';
+				unset( $attributes['height'], $attributes['width'] );
+				return $attributes;
+			}
+
+			// Apply fill layout if top, left, width, height are used.
+			if ( isset( $styles['position'], $styles['top'], $styles['left'], $styles['width'], $styles['height'] )
+				&& 'absolute' === $styles['position']
+				&& 0 === (int) $styles['top']
+				&& 0 === (int) $styles['left']
+				&& '100%' === (string) $styles['width']
+				&& '100%' === (string) $styles['height']
+			) {
+				unset( $attributes['style'], $styles['position'], $styles['top'], $styles['left'], $styles['width'], $styles['height'] );
+				if ( ! empty( $styles ) ) {
+					$attributes['style'] = $this->reassemble_style_string( $styles );
+				}
+				$attributes['layout'] = 'fill';
+				unset( $attributes['height'], $attributes['width'] );
+				return $attributes;
+			}
+
+			// Apply fill layout if width & height are 100%.
+			if ( isset( $styles['position'], $attributes['width'], $attributes['height'] )
+				&& 'absolute' === $styles['position']
+				&& '100%' === $attributes['width']
+				&& '100%' === $attributes['height']
+			) {
+				unset( $attributes['style'], $styles['position'], $attributes['width'], $attributes['height'] );
+				if ( ! empty( $styles ) ) {
+					$attributes['style'] = $this->reassemble_style_string( $styles );
+				}
+				$attributes['layout'] = 'fill';
+				return $attributes;
+			}
 		}
 
-		if ( empty( $attributes['width'] ) || '100%' === $attributes['width'] ) {
-			$attributes['layout'] = 'fixed-height';
-			$attributes['width']  = 'auto';
+		if ( isset( $attributes['width'], $attributes['height'] ) && '100%' === $attributes['width'] && '100%' === $attributes['height'] ) {
+			unset( $attributes['width'], $attributes['height'] );
+			$attributes['layout'] = 'fill';
+		} else {
+			if ( empty( $attributes['height'] ) ) {
+				unset( $attributes['width'] );
+				$attributes['height'] = self::FALLBACK_HEIGHT;
+			}
+			if ( empty( $attributes['width'] ) || '100%' === $attributes['width'] ) {
+				$attributes['layout'] = 'fixed-height';
+				$attributes['width']  = 'auto';
+			}
 		}
 
 		return $attributes;
@@ -339,6 +411,48 @@ abstract class AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Check whether the document of a given node is in dev mode.
+	 *
+	 * @since 1.3
+	 *
+	 * @deprecated Use AmpProject\DevMode::isActiveForDocument( $document ) instead.
+	 *
+	 * @return bool Whether the document is in dev mode.
+	 */
+	protected function is_document_in_dev_mode() {
+		_deprecated_function( 'AMP_Base_Sanitizer::is_document_in_dev_mode', '1.5', 'AmpProject\DevMode::isActiveForDocument' );
+		return DevMode::isActiveForDocument( $this->dom );
+	}
+
+	/**
+	 * Check whether a node is exempt from validation during dev mode.
+	 *
+	 * @since 1.3
+	 *
+	 * @deprecated Use AmpProject\DevMode::hasExemptionForNode( $node ) instead.
+	 *
+	 * @param DOMNode $node Node to check.
+	 * @return bool Whether the node should be exempt during dev mode.
+	 */
+	protected function has_dev_mode_exemption( DOMNode $node ) {
+		_deprecated_function( 'AMP_Base_Sanitizer::has_dev_mode_exemption', '1.5', 'AmpProject\DevMode::hasExemptionForNode' );
+		return DevMode::hasExemptionForNode( $node );
+	}
+
+	/**
+	 * Check whether a certain node should be exempt from validation.
+	 *
+	 * @deprecated Use AmpProject\DevMode::isExemptFromValidation( $node ) instead.
+	 *
+	 * @param DOMNode $node Node to check.
+	 * @return bool Whether the node should be exempt from validation.
+	 */
+	protected function is_exempt_from_validation( DOMNode $node ) {
+		_deprecated_function( 'AMP_Base_Sanitizer::is_exempt_from_validation', '1.5', 'AmpProject\DevMode::isExemptFromValidation' );
+		return DevMode::isExemptFromValidation( $node );
+	}
+
+	/**
 	 * Removes an invalid child of a node.
 	 *
 	 * Also, calls the mutation callback for it.
@@ -351,17 +465,25 @@ abstract class AMP_Base_Sanitizer {
 	 * @return bool Whether the node should have been removed, that is, that the node was sanitized for validity.
 	 */
 	public function remove_invalid_child( $node, $validation_error = [] ) {
+		if ( DevMode::isExemptFromValidation( $node ) ) {
+			return false;
+		}
 
 		// Prevent double-reporting nodes that are rejected for sanitization.
-		if ( isset( $this->should_not_removed_nodes[ $node->nodeName ] ) && in_array( $node, $this->should_not_removed_nodes[ $node->nodeName ], true ) ) {
+		if ( isset( $this->nodes_to_keep[ $node->nodeName ] ) && in_array( $node, $this->nodes_to_keep[ $node->nodeName ], true ) ) {
 			return false;
 		}
 
 		$should_remove = $this->should_sanitize_validation_error( $validation_error, compact( 'node' ) );
 		if ( $should_remove ) {
+			if ( null === $node->parentNode ) {
+				// Node no longer exists.
+				return $should_remove;
+			}
+
 			$node->parentNode->removeChild( $node );
 		} else {
-			$this->should_not_removed_nodes[ $node->nodeName ][] = $node;
+			$this->nodes_to_keep[ $node->nodeName ][] = $node;
 		}
 		return $should_remove;
 	}
@@ -377,18 +499,36 @@ abstract class AMP_Base_Sanitizer {
 	 * @param DOMElement     $element   The node for which to remove the attribute.
 	 * @param DOMAttr|string $attribute The attribute to remove from the element.
 	 * @param array          $validation_error Validation error details.
+	 * @param array          $attr_spec        Attribute spec.
 	 * @return bool Whether the node should have been removed, that is, that the node was sanitized for validity.
 	 */
-	public function remove_invalid_attribute( $element, $attribute, $validation_error = [] ) {
+	public function remove_invalid_attribute( $element, $attribute, $validation_error = [], $attr_spec = [] ) {
+		if ( DevMode::isExemptFromValidation( $element ) ) {
+			return false;
+		}
+
 		if ( is_string( $attribute ) ) {
 			$node = $element->getAttributeNode( $attribute );
 		} else {
 			$node = $attribute;
 		}
+
+		// Catch edge condition (no known possible way to reach).
+		if ( ! ( $node instanceof DOMAttr ) || $element !== $node->parentNode ) {
+			return false;
+		}
+
 		$should_remove = $this->should_sanitize_validation_error( $validation_error, compact( 'node' ) );
 		if ( $should_remove ) {
-			$element->removeAttributeNode( $node );
+			$allow_empty  = ! empty( $attr_spec[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] );
+			$is_href_attr = ( isset( $attr_spec[ AMP_Rule_Spec::VALUE_URL ] ) && 'href' === $node->nodeName );
+			if ( $allow_empty && ! $is_href_attr ) {
+				$node->nodeValue = '';
+			} else {
+				$element->removeAttributeNode( $node );
+			}
 		}
+
 		return $should_remove;
 	}
 
@@ -425,8 +565,7 @@ abstract class AMP_Base_Sanitizer {
 	 * @return array Error.
 	 */
 	public function prepare_validation_error( array $error = [], array $data = [] ) {
-		$node    = null;
-		$matches = null;
+		$node = null;
 
 		if ( isset( $data['node'] ) && $data['node'] instanceof DOMNode ) {
 			$node = $data['node'];
@@ -439,13 +578,15 @@ abstract class AMP_Base_Sanitizer {
 
 		if ( $node instanceof DOMElement ) {
 			if ( ! isset( $error['code'] ) ) {
-				$error['code'] = AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE;
+				$error['code'] = AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG;
 			}
 
 			if ( ! isset( $error['type'] ) ) {
+				// @todo Also include javascript: protocol for URL errors.
 				$error['type'] = 'script' === $node->nodeName ? AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE : AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE;
 			}
 
+			// @todo Change from node_attributes to element_attributes to harmonize the two.
 			if ( ! isset( $error['node_attributes'] ) ) {
 				$error['node_attributes'] = [];
 				foreach ( $node->attributes as $attribute ) {
@@ -453,8 +594,14 @@ abstract class AMP_Base_Sanitizer {
 				}
 			}
 
-			// Capture script contents.
-			if ( 'script' === $node->nodeName && ! $node->hasAttribute( 'src' ) ) {
+			// Capture element contents.
+			if (
+				( 'script' === $node->nodeName && ! $node->hasAttribute( 'src' ) )
+				||
+				// Include stylesheet text except for amp-custom and amp-keyframes since it is large and since it should
+				// already be detailed in the stylesheets metabox.
+				( 'style' === $node->nodeName && ! $node->hasAttribute( 'amp-custom' ) && ! $node->hasAttribute( 'amp-keyframes' ) )
+			) {
 				$error['text'] = $node->textContent;
 			}
 
@@ -466,7 +613,7 @@ abstract class AMP_Base_Sanitizer {
 			}
 		} elseif ( $node instanceof DOMAttr ) {
 			if ( ! isset( $error['code'] ) ) {
-				$error['code'] = AMP_Validation_Error_Taxonomy::INVALID_ATTRIBUTE_CODE;
+				$error['code'] = AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR;
 			}
 			if ( ! isset( $error['type'] ) ) {
 				// If this is an attribute that begins with on, like onclick, it should be a js_error.
@@ -480,9 +627,40 @@ abstract class AMP_Base_Sanitizer {
 					}
 				}
 			}
+		} elseif ( $node instanceof DOMProcessingInstruction ) {
+			$error['text'] = trim( $node->data, '?' );
+		}
+
+		if ( ! isset( $error['node_type'] ) ) {
+			$error['node_type'] = $node->nodeType;
 		}
 
 		return $error;
+	}
+
+	/**
+	 * Cleans up artifacts after the removal of an attribute node.
+	 *
+	 * @since 1.3
+	 *
+	 * @param DOMElement $element   The node for which the attribute was removed.
+	 * @param DOMAttr    $attribute The attribute that was removed.
+	 */
+	protected function clean_up_after_attribute_removal( $element, $attribute ) {
+		static $attributes_tied_to_href = [ 'target', 'download', 'rel', 'rev', 'hreflang', 'type' ];
+
+		if ( 'href' === $attribute->nodeName ) {
+			/*
+			 * "The target, download, rel, rev, hreflang, and type attributes must be omitted
+			 * if the href attribute is not present."
+			 * See: https://www.w3.org/TR/2016/REC-html51-20161101/textlevel-semantics.html#the-a-element
+			 */
+			foreach ( $attributes_tied_to_href as $attribute_to_remove ) {
+				if ( $element->hasAttribute( $attribute_to_remove ) ) {
+					$element->removeAttribute( $attribute_to_remove );
+				}
+			}
+		}
 	}
 
 	/**
@@ -496,7 +674,7 @@ abstract class AMP_Base_Sanitizer {
 
 		// Editor blocks add 'figure' as the parent node for images. If this node has data-amp-layout then we should add this as the layout attribute.
 		$parent_node = $node->parentNode;
-		if ( 'figure' === $parent_node->tagName ) {
+		if ( $parent_node instanceof DOMELement && 'figure' === $parent_node->tagName ) {
 			$parent_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $parent_node );
 			if ( isset( $parent_attributes['data-amp-layout'] ) ) {
 				$attributes['layout'] = $parent_attributes['data-amp-layout'];
@@ -537,7 +715,7 @@ abstract class AMP_Base_Sanitizer {
 	public function filter_attachment_layout_attributes( $node, $new_attributes, $layout ) {
 
 		// The width has to be unset / auto in case of fixed-height.
-		if ( 'fixed-height' === $layout ) {
+		if ( 'fixed-height' === $layout && $node->parentNode instanceof DOMElement ) {
 			if ( ! isset( $new_attributes['height'] ) ) {
 				$new_attributes['height'] = self::FALLBACK_HEIGHT;
 			}
@@ -545,13 +723,13 @@ abstract class AMP_Base_Sanitizer {
 			$node->parentNode->setAttribute( 'style', 'height: ' . $new_attributes['height'] . 'px; width: auto;' );
 
 			// The parent element should have width/height set and position set in case of 'fill'.
-		} elseif ( 'fill' === $layout ) {
+		} elseif ( 'fill' === $layout && $node->parentNode instanceof DOMElement ) {
 			if ( ! isset( $new_attributes['height'] ) ) {
 				$new_attributes['height'] = self::FALLBACK_HEIGHT;
 			}
 			$node->parentNode->setAttribute( 'style', 'position:relative; width: 100%; height: ' . $new_attributes['height'] . 'px;' );
 			unset( $new_attributes['width'], $new_attributes['height'] );
-		} elseif ( 'responsive' === $layout ) {
+		} elseif ( 'responsive' === $layout && $node->parentNode instanceof DOMElement ) {
 			$node->parentNode->setAttribute( 'style', 'position:relative; width: 100%; height: auto' );
 		} elseif ( 'fixed' === $layout ) {
 			if ( ! isset( $new_attributes['height'] ) ) {
@@ -563,29 +741,63 @@ abstract class AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Add <amp-image-lightbox> element to body tag if it doesn't exist yet.
+	 * Parse a style string into an associative array of style attributes.
+	 *
+	 * @param string $style_string Style string to parse.
+	 * @return string[] Associative array of style attributes.
 	 */
-	public function maybe_add_amp_image_lightbox_node() {
+	protected function parse_style_string( $style_string ) {
+		// We need to turn the style string into an associative array of styles first.
+		$style_string = trim( $style_string, " \t\n\r\0\x0B;" );
+		$elements     = preg_split( '/(\s*:\s*|\s*;\s*)/', $style_string );
 
-		$nodes = $this->dom->getElementById( self::AMP_IMAGE_LIGHTBOX_ID );
-		if ( null !== $nodes ) {
-			return;
+		if ( 0 !== count( $elements ) % 2 ) {
+			// Style string was malformed, try to process as good as possible by stripping the last element.
+			array_pop( $elements );
 		}
 
-		$nodes = $this->dom->getElementsByTagName( 'body' );
-		if ( ! $nodes->length ) {
-			return;
+		$chunks = array_chunk( $elements, 2 );
+
+		// phpcs:ignore PHPCompatibility.FunctionUse.NewFunctions.array_columnFound -- WP Core provides a polyfill.
+		return array_combine( array_column( $chunks, 0 ), array_column( $chunks, 1 ) );
+	}
+
+	/**
+	 * Reassemble a style string that can be used in a 'style' attribute.
+	 *
+	 * @param array $styles Associative array of styles to reassemble into a string.
+	 * @return string Reassembled style string.
+	 */
+	protected function reassemble_style_string( $styles ) {
+		if ( ! is_array( $styles ) ) {
+			return '';
 		}
-		$body_node          = $nodes->item( 0 );
-		$amp_image_lightbox = AMP_DOM_Utils::create_node(
-			$this->dom,
-			'amp-image-lightbox',
-			[
-				'id'                           => self::AMP_IMAGE_LIGHTBOX_ID,
-				'layout'                       => 'nodisplay',
-				'data-close-button-aria-label' => __( 'Close', 'amp' ),
-			]
+
+		// Discard empty values first.
+		$styles = array_filter( $styles );
+
+		return array_reduce(
+			array_keys( $styles ),
+			static function ( $style_string, $style_name ) use ( $styles ) {
+				if ( ! empty( $style_string ) ) {
+					$style_string .= ';';
+				}
+
+				return $style_string . "{$style_name}:{$styles[ $style_name ]}";
+			},
+			''
 		);
-		$body_node->appendChild( $amp_image_lightbox );
+	}
+
+	/**
+	 * Get data that is returned in validate responses.
+	 *
+	 * The array returned is merged with the overall validate response data.
+	 *
+	 * @see \AMP_Validation_Manager::get_validate_response_data()
+	 * @return array Validate response data.
+	 */
+	public function get_validate_response_data() {
+		return [];
 	}
 }

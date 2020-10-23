@@ -5,10 +5,14 @@
  * @package AMP
  */
 
+use AmpProject\Dom\Document;
+
 /**
  * Class AMP_Comments_Sanitizer
  *
  * Strips and corrects attributes in forms.
+ *
+ * @internal
  */
 class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 
@@ -46,8 +50,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		if ( ! empty( $this->args['comments_live_list'] ) ) {
-			$xpath    = new DOMXPath( $this->dom );
-			$comments = $xpath->query( '//amp-live-list/*[ @items ]/*[ starts-with( @id, "comment-" ) ]' );
+			$comments = $this->dom->xpath->query( '//amp-live-list/*[ @items ]/*[ starts-with( @id, "comment-" ) ]' );
 
 			foreach ( $comments as $comment ) {
 				$this->add_amp_live_list_comment_attributes( $comment );
@@ -110,7 +113,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		$amp_bind_attr_format = AMP_DOM_Utils::get_amp_bind_placeholder_prefix() . '%s';
+		$amp_bind_attr_format = Document::AMP_BIND_DATA_ATTR_PREFIX . '%s';
 		foreach ( $form_fields as $name => $form_field ) {
 			foreach ( $form_field as $element ) {
 

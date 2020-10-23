@@ -49,7 +49,7 @@ const BlockEdit = ( props ) => {
 					<DateTimePicker
 						locale="en"
 						currentDate={ dateTime || moment() }
-						onChange={ value => ( setAttributes( { dateTime: moment( value, moment.ISO_8601, true ).format() } ) ) } // eslint-disable-line
+						onChange={ ( value ) => ( setAttributes( { dateTime: moment( value, moment.ISO_8601, true ).format() } ) ) }
 					/>
 					<LayoutControls { ...props } ampLayoutOptions={ ampLayoutOptions } />
 					<TextControl
@@ -70,7 +70,9 @@ const BlockEdit = ( props ) => {
 					controls={ [ 'left', 'center', 'right' ] }
 				/>
 			</BlockControls>
-			<time dateTime={ dateTime }>{ timeAgo }</time>
+			<time dateTime={ dateTime }>
+				{ timeAgo }
+			</time>
 		</>
 	);
 };

@@ -9,40 +9,32 @@ import { select } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { withCroppedFeaturedImage, withFeaturedImageNotice } from '../common/components';
-import { addAMPAttributes, addAMPExtraProps, filterBlocksEdit, filterBlocksSave } from './helpers';
-import { getMinimumFeaturedImageDimensions, getMinimumPortraitFeaturedImageDimensions } from '../common/helpers';
+import { withFeaturedImageNotice } from '../common/components';
+import { getMinimumFeaturedImageDimensions } from '../common/helpers';
+import { withMediaLibraryNotice } from './components';
+import { addAMPAttributes, filterBlocksEdit, filterBlocksSave } from './helpers';
 import './store';
 
 const {
-	isWebsiteEnabled,
-	isStoriesEnabled,
 	isStandardMode,
 } = select( 'amp/block-editor' );
 
-const { ampLatestStoriesBlockData } = window;
+const plugins = require.context( './plugins', true, /.*\.js$/ );
 
-// Add filters if AMP for Website experience is enabled.
-if ( isWebsiteEnabled() ) {
-	const plugins = require.context( './plugins', true, /.*\.js$/ );
+plugins.keys().forEach( ( modulePath ) => {
+	const { name, render, icon } = plugins( modulePath );
 
-	plugins.keys().forEach( ( modulePath ) => {
-		const { name, render, icon } = plugins( modulePath );
+	registerPlugin( name, { icon, render } );
+} );
 
-		registerPlugin( name, { icon, render } );
-	} );
-
-	addFilter( 'blocks.registerBlockType', 'ampEditorBlocks/addAttributes', addAMPAttributes );
-	addFilter( 'blocks.getSaveElement', 'ampEditorBlocks/filterSave', filterBlocksSave );
-	addFilter( 'editor.BlockEdit', 'ampEditorBlocks/filterEdit', filterBlocksEdit, 20 );
-	addFilter( 'blocks.getSaveContent.extraProps', 'ampEditorBlocks/addExtraAttributes', addAMPExtraProps );
-	addFilter( 'editor.PostFeaturedImage', 'ampEditorBlocks/withFeaturedImageNotice', withFeaturedImageNotice );
-	addFilter( 'editor.MediaUpload', 'ampEditorBlocks/addCroppedFeaturedImage', ( InitialMediaUpload ) => withCroppedFeaturedImage( InitialMediaUpload, getMinimumFeaturedImageDimensions(), getMinimumPortraitFeaturedImageDimensions() ) );
-}
+addFilter( 'blocks.registerBlockType', 'ampEditorBlocks/addAttributes', addAMPAttributes );
+addFilter( 'blocks.getSaveElement', 'ampEditorBlocks/filterSave', filterBlocksSave );
+addFilter( 'editor.BlockEdit', 'ampEditorBlocks/filterEdit', filterBlocksEdit, 20 );
+addFilter( 'editor.PostFeaturedImage', 'ampEditorBlocks/withFeaturedImageNotice', withFeaturedImageNotice );
+addFilter( 'editor.MediaUpload', 'ampEditorBlocks/withMediaLibraryNotice', ( InitialMediaUpload ) => withMediaLibraryNotice( InitialMediaUpload, getMinimumFeaturedImageDimensions() ) );
 
 /*
  * If there's no theme support, unregister blocks that are only meant for AMP.
- * The Latest Stories block is meant for AMP and non-AMP, so don't unregister it here.
  */
 const AMP_DEPENDENT_BLOCKS = [
 	'amp/amp-brid-player',
@@ -61,16 +53,7 @@ const blocks = require.context( './blocks', true, /(?<!test\/)index\.js$/ );
 blocks.keys().forEach( ( modulePath ) => {
 	const { name, settings } = blocks( modulePath );
 
-	const isLatestStoriesBlock = 'amp/amp-latest-stories' === name;
-
-	const shouldRegister = (
-		(
-			isWebsiteEnabled() && isStandardMode() && AMP_DEPENDENT_BLOCKS.includes( name )
-		) ||
-		(
-			isStoriesEnabled() && isLatestStoriesBlock && typeof ampLatestStoriesBlockData !== 'undefined'
-		)
-	);
+	const shouldRegister = isStandardMode() && AMP_DEPENDENT_BLOCKS.includes( name );
 
 	if ( shouldRegister ) {
 		registerBlockType( name, settings );

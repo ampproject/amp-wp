@@ -10,7 +10,7 @@ import jQuery from 'jquery';
  *
  * @since 0.6
  */
-window.ampPostMetaBox = ( function( $ ) { // eslint-disable-line no-unused-vars
+window.ampPostMetaBox = ( function( $ ) {
 	'use strict';
 
 	const component = {
@@ -23,7 +23,7 @@ window.ampPostMetaBox = ( function( $ ) { // eslint-disable-line no-unused-vars
 		data: {
 			canonical: false, // Overridden by amp_is_canonical().
 			previewLink: '',
-			enabled: true, // Overridden by post_supports_amp( $post ).
+			enabled: true, // Overridden by amp_is_post_supported( $post ).
 			canSupport: true, // Overridden by count( AMP_Post_Type_Support::get_support_errors( $post ) ) === 0.
 			statusInputName: '',
 			l10n: {

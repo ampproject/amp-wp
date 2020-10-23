@@ -8,6 +8,8 @@
 
 /**
  * Class AMP_Tumblr_Embed_Handler
+ *
+ * @internal
  */
 class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 
@@ -55,6 +57,5 @@ class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		return $cache;
 	}
-
 }
 

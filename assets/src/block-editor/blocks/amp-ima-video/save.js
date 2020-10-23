@@ -20,7 +20,7 @@ const BlockSave = ( { attributes } ) => {
 		imaProps[ 'data-delay-ad-request' ] = dataDelayAdRequest;
 	}
 	return (
-		<amp-ima-video { ...imaProps }></amp-ima-video>
+		<amp-ima-video { ...imaProps } />
 	);
 };
 

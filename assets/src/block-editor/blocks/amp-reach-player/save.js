@@ -15,7 +15,7 @@ const BlockSave = ( { attributes } ) => {
 		reachProps.width = width;
 	}
 	return (
-		<amp-reach-player { ...reachProps }></amp-reach-player>
+		<amp-reach-player { ...reachProps } />
 	);
 };
 

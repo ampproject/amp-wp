@@ -7,6 +7,8 @@
 
 /**
  * Class with static methods to extract image dimensions.
+ *
+ * @internal
  */
 class AMP_Image_Dimension_Extractor {
 
@@ -56,6 +58,14 @@ class AMP_Image_Dimension_Extractor {
 		}
 
 		$extracted_dimensions = array_fill_keys( $normalized_urls, false );
+
+		/**
+		 * Filters the dimensions extracted from image URLs.
+		 *
+		 * @since 0.5.1
+		 *
+		 * @param array $extracted_dimensions Extracted dimensions, initially mapping images URLs to false.
+		 */
 		$extracted_dimensions = apply_filters( 'amp_extract_image_dimensions_batch', $extracted_dimensions );
 
 		// We need to return a map with the original (un-normalized URL) as we that to match nodes that need dimensions.
@@ -77,7 +87,7 @@ class AMP_Image_Dimension_Extractor {
 	 * This method ensures the URL has a scheme and, if relative, is prepended the WordPress site URL.
 	 *
 	 * @param string $url URL to normalize.
-	 * @return string Normalized URL.
+	 * @return string|false Normalized URL, or false if normalization failed.
 	 */
 	public static function normalize_url( $url ) {
 		if ( empty( $url ) ) {
@@ -132,6 +142,11 @@ class AMP_Image_Dimension_Extractor {
 
 		add_filter( 'amp_extract_image_dimensions_batch', [ __CLASS__, 'extract_by_downloading_images' ], 999, 1 );
 
+		/**
+		 * Fires after the amp_extract_image_dimensions_batch filter has been added to extract by downloading images.
+		 *
+		 * @since 0.5.1
+		 */
 		do_action( 'amp_extract_image_dimensions_batch_callbacks_registered' );
 	}
 
@@ -272,7 +287,6 @@ class AMP_Image_Dimension_Extractor {
 			delete_transient( $url_data['transient_lock_name'] );
 		}
 	}
-
 
 	/**
 	 * Get default user agent

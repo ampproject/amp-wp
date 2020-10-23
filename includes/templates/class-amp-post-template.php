@@ -9,6 +9,7 @@
  * Class AMP_Post_Template
  *
  * @since 0.2
+ * @internal
  */
 class AMP_Post_Template {
 
@@ -49,14 +50,6 @@ class AMP_Post_Template {
 	const DEFAULT_NAVBAR_COLOR = '#fff';
 
 	/**
-	 * Template directory.
-	 *
-	 * @since 0.2
-	 * @var string
-	 */
-	private $template_dir;
-
-	/**
 	 * Post template data.
 	 *
 	 * @since 0.2
@@ -73,7 +66,7 @@ class AMP_Post_Template {
 	public $ID;
 
 	/**
-	 * Post.
+	 * Post
 	 *
 	 * @since 0.2
 	 * @var WP_Post
@@ -86,48 +79,60 @@ class AMP_Post_Template {
 	 * @param WP_Post|int $post Post.
 	 */
 	public function __construct( $post ) {
-
-		$this->template_dir = apply_filters( 'amp_post_template_dir', AMP__DIR__ . '/templates' );
-
-		if ( $post instanceof WP_Post ) {
-			$this->post = $post;
-		} else {
+		if ( is_int( $post ) ) {
+			$this->ID   = $post;
 			$this->post = get_post( $post );
+		} elseif ( $post instanceof WP_Post ) {
+			$this->ID   = $post->ID;
+			$this->post = $post;
 		}
+	}
 
-		// Make sure we have a post, or bail if not.
-		if ( $this->post instanceof WP_Post ) {
-			$this->ID = $this->post->ID;
-		} else {
-			return;
-		}
-
+	/**
+	 * Set data.
+	 *
+	 * This is called in the get method the first time it is called.
+	 *
+	 * @since 1.5
+	 *
+	 * @see \AMP_Post_Template::get()
+	 */
+	private function set_data() {
 		$content_max_width = self::CONTENT_MAX_WIDTH;
 		if ( isset( $GLOBALS['content_width'] ) && $GLOBALS['content_width'] > 0 ) {
 			$content_max_width = $GLOBALS['content_width'];
 		}
+
+		/**
+		 * Filters the content max width for Reader templates.
+		 *
+		 * @since 0.2
+		 *
+		 * @param int $content_max_width Content max width.
+		 */
 		$content_max_width = apply_filters( 'amp_content_max_width', $content_max_width );
 
 		$this->data = [
 			'content_max_width'     => $content_max_width,
 
-			'document_title'        => function_exists( 'wp_get_document_title' ) ? wp_get_document_title() : wp_title( '', false ), // Back-compat with 4.3.
-			'canonical_url'         => get_permalink( $this->ID ),
+			'document_title'        => wp_get_document_title(),
+			'canonical_url'         => get_permalink( $this->post ),
 			'home_url'              => home_url( '/' ),
 			'blog_name'             => get_bloginfo( 'name' ),
 
 			'html_tag_attributes'   => [],
 			'body_class'            => '',
 
-			'site_icon_url'         => apply_filters( 'amp_site_icon_url', function_exists( 'get_site_icon_url' ) ? get_site_icon_url( self::SITE_ICON_SIZE ) : '' ),
+			/** This filter is documented in includes/amp-helper-functions.php */
+			'site_icon_url'         => apply_filters( 'amp_site_icon_url', get_site_icon_url( self::SITE_ICON_SIZE ) ),
 			'placeholder_image_url' => amp_get_asset_url( 'images/placeholder-icon.png' ),
 
 			'featured_image'        => false,
 			'comments_link_url'     => false,
 			'comments_link_text'    => false,
 
-			'amp_runtime_script'    => 'https://cdn.ampproject.org/v0.js',
-			'amp_component_scripts' => [],
+			'amp_runtime_script'    => 'https://cdn.ampproject.org/v0.js', // Deprecated.
+			'amp_component_scripts' => [], // Deprecated.
 
 			'customizer_settings'   => [],
 
@@ -156,6 +161,25 @@ class AMP_Post_Template {
 	}
 
 	/**
+	 * Get template directory for Reader mode.
+	 *
+	 * @since 0.2
+	 * @return string Template dir.
+	 */
+	private function get_template_dir() {
+		static $template_dir = null;
+		if ( ! isset( $template_dir ) ) {
+			/**
+			 * Filters the Reader template directory.
+			 *
+			 * @since 0.3.3
+			 */
+			$template_dir = apply_filters( 'amp_post_template_dir', AMP__DIR__ . '/templates' );
+		}
+		return $template_dir;
+	}
+
+	/**
 	 * Getter.
 	 *
 	 * @param string $property Property name.
@@ -164,6 +188,10 @@ class AMP_Post_Template {
 	 * @return mixed Value.
 	 */
 	public function get( $property, $default = null ) {
+		if ( ! isset( $this->data ) ) {
+			$this->set_data();
+		}
+
 		if ( isset( $this->data[ $property ] ) ) {
 			return $this->data[ $property ];
 		}
@@ -218,7 +246,7 @@ class AMP_Post_Template {
 	 * @return string Template path.
 	 */
 	private function get_template_path( $template ) {
-		return sprintf( '%s/%s.php', $this->template_dir, $template );
+		return sprintf( '%s/%s.php', $this->get_template_dir(), $template );
 	}
 
 	/**
@@ -241,46 +269,24 @@ class AMP_Post_Template {
 	}
 
 	/**
-	 * Merge data for key.
-	 *
-	 * @param string $key   Key.
-	 * @param mixed  $value Value.
-	 */
-	private function merge_data_for_key( $key, $value ) {
-		if ( is_array( $this->data[ $key ] ) ) {
-			$this->data[ $key ] = array_merge( $this->data[ $key ], $value );
-		} else {
-			$this->add_data_by_key( $key, $value );
-		}
-	}
-
-	/**
 	 * Build post data.
 	 *
 	 * @since 0.2
 	 */
 	private function build_post_data() {
-		$post_title              = get_the_title( $this->ID );
-		$post_publish_timestamp  = get_the_date( 'U', $this->ID );
+		$post_title              = get_the_title( $this->post );
+		$post_publish_timestamp  = $this->build_post_publish_timestamp();
 		$post_modified_timestamp = get_post_modified_time( 'U', false, $this->post );
 		$post_author             = get_userdata( $this->post->post_author );
 
 		$data = [
-			'post'                     => $this->post,
-			'post_id'                  => $this->ID,
-			'post_title'               => $post_title,
-			'post_publish_timestamp'   => $post_publish_timestamp,
-			'post_modified_timestamp'  => $post_modified_timestamp,
-			'post_author'              => $post_author,
-			'post_canonical_link_url'  => '',
-			'post_canonical_link_text' => '',
+			'post'                    => $this->post,
+			'post_id'                 => $this->ID,
+			'post_title'              => $post_title,
+			'post_publish_timestamp'  => $post_publish_timestamp,
+			'post_modified_timestamp' => $post_modified_timestamp,
+			'post_author'             => $post_author,
 		];
-
-		$customizer_settings = AMP_Customizer_Settings::get_settings();
-		if ( ! empty( $customizer_settings['display_exit_link'] ) ) {
-			$data['post_canonical_link_url']  = get_permalink( $this->ID );
-			$data['post_canonical_link_text'] = __( 'Exit Reader Mode', 'amp' );
-		}
 
 		$this->add_data( $data );
 
@@ -289,14 +295,41 @@ class AMP_Post_Template {
 	}
 
 	/**
-	 * Buuild post comments data.
+	 * Build post publish timestamp.
+	 *
+	 * We can't use `get_the_date( 'U' )` because it always returns the non-GMT value.
+	 *
+	 * @return int Post publish UTC timestamp.
+	 */
+	private function build_post_publish_timestamp() {
+		$format = 'U';
+
+		if ( empty( $this->post->post_date_gmt ) || '0000-00-00 00:00:00' === $this->post->post_date_gmt ) {
+			$timestamp = time();
+		} else {
+			$timestamp = (int) get_post_time( $format, true, $this->post, true );
+		}
+
+		/** This filter is documented in wp-includes/general-template.php. */
+		$filtered_timestamp = apply_filters( 'get_the_date', $timestamp, $format, $this->post );
+
+		// Guard against a plugin poorly filtering get_the_date to be something other than a Unix timestamp.
+		if ( is_int( $filtered_timestamp ) ) {
+			$timestamp = $filtered_timestamp;
+		}
+
+		return $timestamp;
+	}
+
+	/**
+	 * Build post comments data.
 	 */
 	private function build_post_comments_data() {
 		if ( ! post_type_supports( $this->post->post_type, 'comments' ) ) {
 			return;
 		}
 
-		$comments_open = comments_open( $this->ID );
+		$comments_open = comments_open( $this->post );
 
 		// Don't show link if close and no comments.
 		if ( ! $comments_open
@@ -304,7 +337,7 @@ class AMP_Post_Template {
 			return;
 		}
 
-		$comments_link_url  = get_comments_link( $this->ID );
+		$comments_link_url  = get_comments_link( $this->post );
 		$comments_link_text = $comments_open
 			? __( 'Leave a Comment', 'amp' )
 			: __( 'View Comments', 'amp' );
@@ -321,18 +354,19 @@ class AMP_Post_Template {
 	 * Build post content.
 	 */
 	private function build_post_content() {
-		$amp_content = new AMP_Content(
-			$this->post->post_content,
-			amp_get_content_embed_handlers( $this->post ),
-			amp_get_content_sanitizers( $this->post ),
-			[
-				'content_max_width' => $this->get( 'content_max_width' ),
-			]
-		);
+		if ( post_password_required( $this->post ) ) {
+			$content = get_the_password_form( $this->post );
+		} else {
+			/**
+			 * This filter is documented in wp-includes/post-template.php.
+			 *
+			 * Note: This is intentionally not using get_the_content() because the legacy behavior of posts in
+			 * Reader mode is to display multi-page posts as a single page without any pagination links.
+			 */
+			$content = apply_filters( 'the_content', $this->post->post_content );
+		}
 
-		$this->add_data_by_key( 'post_amp_content', $amp_content->get_amp_content() );
-		$this->merge_data_for_key( 'amp_component_scripts', $amp_content->get_amp_scripts() );
-		$this->add_data_by_key( 'post_amp_stylesheets', $amp_content->get_amp_stylesheets() );
+		$this->add_data_by_key( 'post_amp_content', $content );
 	}
 
 	/**
@@ -347,7 +381,11 @@ class AMP_Post_Template {
 			return;
 		}
 
-		$featured_id = get_post_thumbnail_id( $post_id );
+		$featured_id    = get_post_thumbnail_id( $post_id );
+		$featured_image = get_post( $featured_id );
+		if ( ! $featured_image ) {
+			return;
+		}
 
 		// If an image with the same ID as the featured image exists in the content, skip the featured image markup.
 		// Prevents duplicate images, which is especially problematic for photo blogs.
@@ -358,34 +396,13 @@ class AMP_Post_Template {
 			return;
 		}
 
-		$featured_image = get_post( $featured_id );
-
-		$dom    = AMP_DOM_Utils::get_dom_from_content( $featured_html );
-		$assets = AMP_Content_Sanitizer::sanitize_document(
-			$dom,
-			amp_get_content_sanitizers( $this->post ),
-			[
-				'content_max_width' => $this->get( 'content_max_width' ),
-			]
-		);
-
-		$sanitized_html = AMP_DOM_Utils::get_content_from_dom( $dom );
-
 		$this->add_data_by_key(
 			'featured_image',
 			[
-				'amp_html' => $sanitized_html,
+				'amp_html' => $featured_html,
 				'caption'  => $featured_image->post_excerpt,
 			]
 		);
-
-		if ( $assets['scripts'] ) {
-			$this->merge_data_for_key( 'amp_component_scripts', $assets['scripts'] );
-		}
-
-		if ( $assets['stylesheets'] ) {
-			$this->merge_data_for_key( 'post_amp_stylesheets', $assets['stylesheets'] );
-		}
 	}
 
 	/**
@@ -441,6 +458,15 @@ class AMP_Post_Template {
 			$file = $located_file;
 		}
 
+		/**
+		 * Filters the template file being loaded for a given template type.
+		 *
+		 * @since 0.2
+		 *
+		 * @param string  $file          Template file.
+		 * @param string  $template_type Template type.
+		 * @param WP_Post $post          Post.
+		 */
 		$file = apply_filters( 'amp_post_template_file', $file, $template_type, $this->post );
 		if ( ! $this->is_valid_template( $file ) ) {
 			/* translators: 1: the template file, 2: WP_CONTENT_DIR. */
@@ -448,7 +474,14 @@ class AMP_Post_Template {
 			return;
 		}
 
-		do_action( 'amp_post_template_include_' . $template_type, $this );
+		/**
+		 * Fires before including a template.
+		 *
+		 * @since 0.4
+		 *
+		 * @param AMP_Post_Template $this Post template.
+		 */
+		do_action( "amp_post_template_include_{$template_type}", $this );
 		include $file;
 	}
 

@@ -12,6 +12,12 @@
  * @package AMP
  */
 
+/**
+ * Context.
+ *
+ * @var AMP_Post_Template $this
+ */
+
 $categories = get_the_category_list( _x( ', ', 'Used between list items, there is a space after the comma.', 'amp' ), '', $this->ID );
 ?>
 <?php if ( $categories ) : ?>

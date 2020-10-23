@@ -1,0 +1,32 @@
+.phone {
+	background: #f1f1f1;
+	border-radius: 10px;
+	display: flex;
+	flex-direction: column;
+	margin-bottom: 1rem;
+	height: 413px;
+	min-height: 200px;
+	padding: 12px;
+	position: relative;
+}
+
+.phone > * {
+	max-width: 100%;
+}
+
+.phone::before {
+	background: #e6e6e6;
+	border-radius: 3px;
+	content: "";
+	display: block;
+	height: 5px;
+	margin: 9px auto;
+	width: 43px;
+}
+
+.phone-inner {
+	display: flex;
+	background-color: var(--color-gray-medium);
+	flex-grow: 1;
+	overflow: hidden;
+}

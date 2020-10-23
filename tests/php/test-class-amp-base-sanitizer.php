@@ -5,6 +5,9 @@
  * @package AMP
  */
 
+use AmpProject\Dom\Document;
+use AmpProject\AmpWP\Tests\Helpers\StubSanitizer;
+
 /**
  * Test AMP_Base_Sanitizer_Test
  *
@@ -26,7 +29,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	public function tearDown() {
 		parent::tearDown();
 		AMP_Validation_Manager::reset_validation_results();
-		AMP_Validation_Manager::$should_locate_sources = false;
+		AMP_Validation_Manager::$is_validate_request = false;
 	}
 
 	/**
@@ -36,7 +39,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function get_data() {
 		return [
-			'both_dimensions_included' => [
+			'both_dimensions_included'                   => [
 				[
 					'width'  => 100,
 					'height' => 100,
@@ -49,7 +52,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 				],
 			],
 
-			'both_dimensions_missing'  => [
+			'both_dimensions_missing'                    => [
 				[],
 				[
 					'height' => 400,
@@ -58,7 +61,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 				],
 			],
 
-			'both_dimensions_empty'    => [
+			'both_dimensions_empty'                      => [
 				[
 					'width'  => '',
 					'height' => '',
@@ -70,7 +73,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 				],
 			],
 
-			'no_width'                 => [
+			'no_width'                                   => [
 				[
 					'height' => 100,
 				],
@@ -81,7 +84,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 				],
 			],
 
-			'no_height'                => [
+			'no_height'                                  => [
 				[
 					'width' => 200,
 				],
@@ -92,7 +95,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 				],
 			],
 
-			'no_layout_specified'      => [
+			'no_layout_specified'                        => [
 				[
 					'width'  => 100,
 					'height' => 100,
@@ -100,6 +103,88 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 				[
 					'width'  => 100,
 					'height' => 100,
+				],
+			],
+
+			'fill_with_bottom_right_removes_empty_style' => [
+				[
+					'style' => 'position:absolute;top:0;left:0;right:0;bottom:0',
+				],
+				[
+					'layout' => 'fill',
+				],
+			],
+
+			'fill_100p_dimensions_and_absolute_position' => [
+				[
+					'style'  => 'position:absolute;top:0;left:0;right:0;bottom:0',
+					'width'  => '100%',
+					'height' => '100%',
+				],
+				[
+					'layout' => 'fill',
+				],
+			],
+
+			'fill_both_dimensions_and_absolute_position' => [
+				[
+					'width'  => '100%',
+					'height' => '100%',
+					'style'  => 'position:absolute',
+				],
+				[
+					'layout' => 'fill',
+				],
+			],
+
+			'fill_both_dimensions_with_unrelated_style'  => [
+				[
+					'width'  => '100%',
+					'height' => '100%',
+					'style'  => 'position:absolute; color:red',
+				],
+				[
+					'layout' => 'fill',
+					'style'  => 'color:red',
+				],
+			],
+
+			'fill_with_bottom_right_keeps_unrelated_styles' => [
+				[
+					'style' => 'position:absolute;background-color:white;top:0;left:0;right:0;bottom:0;color:red;',
+				],
+				[
+					'layout' => 'fill',
+					'style'  => 'background-color:white;color:red',
+				],
+			],
+
+			'fill_with_width_height_removes_empty_style' => [
+				[
+					'style' => 'position:absolute;top:0;left:0;width:100%;height:100%',
+				],
+				[
+					'layout' => 'fill',
+				],
+			],
+
+			'fill_with_width_height_keeps_unrelated_styles' => [
+				[
+					'style' => 'position:absolute;background-color:white;top:0;left:0;width:100%;height:100%;color:red;',
+				],
+				[
+					'layout' => 'fill',
+					'style'  => 'background-color:white;color:red',
+				],
+			],
+
+			'fill_can_handle_whitespace_noise'           => [
+				[
+					'style' => '; position  :  absolute ;   top : 0; color:  red; left:0;   right:0;;;  bottom:0;; ',
+				],
+				[
+					'layout' => 'fill',
+					'style'  => 'color:red',
 				],
 			],
 		];
@@ -115,7 +200,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Base_Sanitizer::set_layout()
 	 */
 	public function test_set_layout( $source_attributes, $expected_attributes, $args = [] ) {
-		$sanitizer           = new AMP_Test_Stub_Sanitizer( new DOMDocument(), $args );
+		$sanitizer           = new StubSanitizer( new Document(), $args );
 		$returned_attributes = $sanitizer->set_layout( $source_attributes );
 		$this->assertEquals( $expected_attributes, $returned_attributes );
 	}
@@ -191,7 +276,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Base_Sanitizer::sanitize_dimension()
 	 */
 	public function test_sanitize_dimension( $source_params, $expected_value, $args = [] ) {
-		$sanitizer                 = new AMP_Test_Stub_Sanitizer( new DOMDocument(), $args );
+		$sanitizer                 = new StubSanitizer( new Document(), $args );
 		list( $value, $dimension ) = $source_params;
 
 		$actual_value = $sanitizer->sanitize_dimension( $value, $dimension );
@@ -208,15 +293,16 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function test_remove_invalid_child() {
 		$parent_tag_name = 'div';
-		$dom_document    = new DOMDocument( '1.0', 'utf-8' );
+		$dom_document    = new Document( '1.0', 'utf-8' );
 		$parent          = $dom_document->createElement( $parent_tag_name );
 		$child           = $dom_document->createElement( 'script' );
 		$child->setAttribute( 'id', 'foo' );
 		$child->setAttribute( 'src', 'http://example.com/bad.js?ver=123' );
+		$dom_document->appendChild( $parent );
 		$parent->appendChild( $child );
 
 		$expected_error = [
-			'code'            => AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE,
+			'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 			'node_name'       => $child->nodeName,
 			'parent_name'     => $parent_tag_name,
 			'node_attributes' => [
@@ -226,6 +312,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 			'foo'             => 'bar',
 			'sources'         => null,
 			'type'            => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
+			'node_type'       => XML_ELEMENT_NODE,
 		];
 
 		// Test forcibly sanitized with filter.
@@ -271,6 +358,42 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests remove_invalid_child.
+	 *
+	 * @covers AMP_Base_Sanitizer::remove_invalid_child()
+	 * @covers AMP_Base_Sanitizer::is_exempt_from_validation()
+	 */
+	public function test_remove_invalid_child_dev_mode() {
+		$id   = 'target';
+		$html = sprintf( '<div id="%s"></div>', esc_attr( $id ) );
+
+		// Ensure element is not removed when it and document are in dev mode.
+		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
+		$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
+		$element = $dom->getElementById( $id );
+		$element->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
+		$sanitizer = new AMP_Audio_Sanitizer( $dom );
+		$this->assertFalse( $sanitizer->remove_invalid_child( $element ) );
+		$this->assertNotEmpty( $element->parentNode );
+
+		// Ensure invalid element when it has dev-mode attribute but document does not.
+		$dom     = AMP_DOM_Utils::get_dom_from_content( $html );
+		$element = $dom->getElementById( $id );
+		$element->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
+		$sanitizer = new AMP_Audio_Sanitizer( $dom );
+		$this->assertTrue( $sanitizer->remove_invalid_child( $element ) );
+		$this->assertEmpty( $element->parentNode );
+
+		// Ensure element is removed when document is in dev mode but the element lacks the attribute.
+		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
+		$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
+		$element   = $dom->getElementById( $id );
+		$sanitizer = new AMP_Audio_Sanitizer( $dom );
+		$this->assertTrue( $sanitizer->remove_invalid_child( $element ) );
+		$this->assertEmpty( $element->parentNode );
+	}
+
+	/**
 	 * Tests remove_invalid_child and should_sanitize_validation_error.
 	 *
 	 * @covers AMP_Base_Sanitizer::remove_invalid_attribute()
@@ -290,13 +413,14 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 						[
 							'node_name'          => 'onload',
 							'parent_name'        => 'amp-video',
-							'code'               => 'invalid_attribute',
+							'code'               => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
 							'element_attributes' =>
 								[
 									'id'     => 'bar',
 									'onload' => 'someFunc()',
 								],
 							'type'               => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
+							'node_type'          => XML_ATTRIBUTE_NODE,
 						],
 						$error
 					);
@@ -320,13 +444,14 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 						[
 							'node_name'          => 'onload',
 							'parent_name'        => 'amp-video',
-							'code'               => 'invalid_attribute',
+							'code'               => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
 							'element_attributes' =>
 								[
 									'id'     => 'bar',
 									'onload' => 'someFunc()',
 								],
 							'type'               => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
+							'node_type'          => XML_ATTRIBUTE_NODE,
 						],
 						$error
 					);
@@ -342,20 +467,57 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests remove_invalid_attribute in dev mode.
+	 *
+	 * @covers AMP_Base_Sanitizer::remove_invalid_attribute()
+	 * @covers AMP_Base_Sanitizer::is_exempt_from_validation()
+	 */
+	public function test_remove_invalid_attribute_dev_mode() {
+		$id   = 'target';
+		$attr = 'data-bad';
+		$html = sprintf( '<div id="%s" data-bad="%s"></div>', esc_attr( $id ), esc_attr( $attr ) );
+
+		// Ensure element is not removed when it and document are in dev mode.
+		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
+		$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
+		$element = $dom->getElementById( $id );
+		$element->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
+		$sanitizer = new AMP_Audio_Sanitizer( $dom );
+		$this->assertFalse( $sanitizer->remove_invalid_attribute( $element, $attr ) );
+		$this->assertNotEmpty( $element->parentNode );
+
+		// Ensure invalid element when it has dev-mode attribute but document does not.
+		$dom     = AMP_DOM_Utils::get_dom_from_content( $html );
+		$element = $dom->getElementById( $id );
+		$element->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
+		$sanitizer = new AMP_Audio_Sanitizer( $dom );
+		$this->assertTrue( $sanitizer->remove_invalid_attribute( $element, $attr ) );
+		$this->assertFalse( $element->hasAttribute( $attr ) );
+
+		// Ensure element is removed when document is in dev mode but the element lacks the attribute.
+		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
+		$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
+		$element   = $dom->getElementById( $id );
+		$sanitizer = new AMP_Audio_Sanitizer( $dom );
+		$this->assertTrue( $sanitizer->remove_invalid_attribute( $element, $attr ) );
+		$this->assertFalse( $element->hasAttribute( $attr ) );
+	}
+
+	/**
 	 * Tests get_data_amp_attributes.
 	 *
 	 * @covers AMP_Base_Sanitizer::get_data_amp_attributes()
 	 */
 	public function test_get_data_amp_attributes() {
 		$tag          = 'figure';
-		$dom_document = new DOMDocument( '1.0', 'utf-8' );
+		$dom_document = new Document( '1.0', 'utf-8' );
 		$figure       = $dom_document->createElement( $tag );
 		$amp_img      = $dom_document->createElement( 'amp-img' );
 		$figure->appendChild( $amp_img );
 		$figure->setAttribute( 'data-amp-noloading', 'true' );
 		$figure->setAttribute( 'data-amp-layout', 'fixed' );
 
-		$sanitizer = new AMP_Test_Stub_Sanitizer( new DOMDocument(), [] );
+		$sanitizer = new StubSanitizer( new Document(), [] );
 		$amp_args  = $sanitizer->get_data_amp_attributes( $amp_img );
 
 		$expected_args = [
@@ -379,7 +541,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		$attributes = [
 			'width' => 100,
 		];
-		$sanitizer  = new AMP_Test_Stub_Sanitizer( new DOMDocument(), [] );
+		$sanitizer  = new StubSanitizer( new Document(), [] );
 		$attributes = $sanitizer->filter_data_amp_attributes( $attributes, $amp_data );
 
 		$expected = [
@@ -395,9 +557,9 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Base_Sanitizer::filter_attachment_layout_attributes()
 	 */
 	public function test_filter_attachment_layout_attributes() {
-		$sanitizer    = new AMP_Test_Stub_Sanitizer( new DOMDocument(), [] );
+		$sanitizer    = new StubSanitizer( new Document(), [] );
 		$tag          = 'figure';
-		$dom_document = new DOMDocument( '1.0', 'utf-8' );
+		$dom_document = new Document( '1.0', 'utf-8' );
 		$figure       = $dom_document->createElement( $tag );
 		$amp_img      = $dom_document->createElement( 'amp-img' );
 		$layout       = 'fixed-height';
