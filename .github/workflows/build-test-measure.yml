@@ -275,7 +275,7 @@ jobs:
           INSTALL_PWA_PLUGIN: ${{ matrix.install-pwa-plugin == true }}
 
       - name: Copy plugin to WP plugins directory
-        run: cp -R "$PWD" "$WP_CORE_DIR"/wp-content/plugins
+        run: cp -r "$PWD" "$WP_CORE_DIR"/wp-content/plugins/amp
 
       - name: Run tests
         if: ${{ matrix.coverage == false }}
