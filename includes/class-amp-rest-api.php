@@ -24,14 +24,10 @@ class AMP_REST_API {
 	 * @return void
 	 */
 	public static function rest_api_init() {
-		if ( ! AMP_Options_Manager::is_website_experience_enabled() ) {
-			return;
-		}
-
 		// Register a rest_prepare_{$post_type} filter for each one of the post types supported
 		// by the AMP plugin.
-		foreach ( AMP_Post_Type_Support::get_eligible_post_types() as $post_type ) {
-			if ( post_type_supports( $post_type, AMP_Post_Type_Support::SLUG ) && post_type_supports( $post_type, 'editor' ) ) {
+		foreach ( AMP_Post_Type_Support::get_supported_post_types() as $post_type ) {
+			if ( post_type_supports( $post_type, 'editor' ) ) {
 				add_filter( 'rest_prepare_' . $post_type, [ __CLASS__, 'add_content_amp_field' ], 10, 3 );
 
 				// The rest_{$this->post_type}_item_schema filter is still a work in progress: https://core.trac.wordpress.org/ticket/47779.
@@ -41,22 +37,63 @@ class AMP_REST_API {
 	}
 
 	/**
+	 * Adds "amp" to all context arrays in a schema where "view" is present.
+	 *
+	 * @param array $schema API schema.
+	 * @return array Modified schema.
+	 */
+	public static function add_amp_context_where_context_has_view( $schema ) {
+		if ( ! is_array( $schema ) ) {
+			return $schema;
+		}
+
+		if ( isset( $schema['context'] ) && in_array( 'view', $schema['context'], true ) ) {
+			$schema['context'][] = 'amp';
+		}
+
+		if ( ! isset( $schema['type'] ) ) {
+			return $schema;
+		}
+
+		$type           = $schema['type'];
+		$is_array_type  = ( 'array' === $type || ( is_array( $type ) && in_array( 'array', $type, true ) ) ) && isset( $schema['items'] );
+		$is_object_type = ( 'object' === $type || ( is_array( $type ) && in_array( 'object', $type, true ) ) ) && isset( $schema['properties'] );
+
+		if ( ! $is_array_type && ! $is_object_type ) {
+			return $schema;
+		}
+
+		if ( $is_array_type ) {
+			$schema['items'] = array_map( [ __CLASS__, __FUNCTION__ ], $schema );
+			return $schema;
+		}
+
+		foreach ( $schema['properties'] as $key => $value ) {
+			$schema['properties'][ $key ] = self::add_amp_context_where_context_has_view( $value );
+		}
+
+		return $schema;
+	}
+
+	/**
 	 * Extends the schema of the content field with a new `amp` property.
 	 *
 	 * @param array $schema Post schema data.
 	 * @return array Schema.
 	 */
 	public static function extend_content_schema( $schema ) {
+		$schema = self::add_amp_context_where_context_has_view( $schema );
+
 		$schema['properties']['content']['properties']['amp'] = [
 			'description' => __( 'The AMP content for the object.', 'amp' ),
 			'type'        => 'object',
-			'context'     => [ 'view', 'edit' ],
+			'context'     => [ 'amp' ],
 			'readonly'    => true,
 			'properties'  => [
 				'markup'  => [
 					'description' => __( 'HTML content for the object, transformed to be valid AMP.', 'amp' ),
 					'type'        => 'string',
-					'context'     => [ 'view', 'edit' ],
+					'context'     => [ 'amp' ],
 					'readonly'    => true,
 				],
 				'styles'  => [
@@ -65,48 +102,48 @@ class AMP_REST_API {
 					'items'       => [
 						'type' => 'string',
 					],
-					'context'     => [ 'view', 'edit' ],
+					'context'     => [ 'amp' ],
 					'readonly'    => true,
 				],
 				'scripts' => [
 					'description'          => __( 'An object of scripts, extracted from the AMP elements and templates present in the content.', 'amp' ),
 					'type'                 => 'object',
-					'context'              => [ 'view', 'edit' ],
+					'context'              => [ 'amp' ],
 					'readonly'             => true,
 					'additionalProperties' => [
 						'type'       => 'object',
-						'context'    => [ 'view', 'edit' ],
+						'context'    => [ 'amp' ],
 						'readonly'   => true,
 						'properties' => [
 							'src'               => [
 								'type'        => 'string',
 								'description' => __( 'The source of the script.', 'amp' ),
-								'context'     => [ 'view', 'edit' ],
+								'context'     => [ 'amp' ],
 								'readonly'    => true,
 							],
 							'runtime_version'   => [
 								'type'        => 'string',
 								'description' => __( 'The runtime version of AMP used by the script.', 'amp' ),
-								'context'     => [ 'view', 'edit' ],
+								'context'     => [ 'amp' ],
 								'readonly'    => true,
 							],
 							'extension_version' => [
 								'type'        => 'string',
 								'description' => __( 'The version of the script itself.', 'amp' ),
-								'context'     => [ 'view', 'edit' ],
+								'context'     => [ 'amp' ],
 								'readonly'    => true,
 							],
 							'async'             => [
 								'type'        => 'boolean',
 								'description' => __( 'Whether or not the script should be loaded asynchronously.', 'amp' ),
-								'context'     => [ 'view', 'edit' ],
+								'context'     => [ 'amp' ],
 								'readonly'    => true,
 							],
 							'extension_type'    => [
 								'type'        => 'string',
 								'enum'        => [ 'custom-template', 'custom-element' ],
 								'description' => __( 'Type of the script, either a template or an element.', 'amp' ),
-								'context'     => [ 'view', 'edit' ],
+								'context'     => [ 'amp' ],
 								'readonly'    => true,
 							],
 						],
@@ -118,25 +155,25 @@ class AMP_REST_API {
 		$schema['properties']['amp_links'] = [
 			'description'          => __( 'Links for the AMP version.', 'amp' ),
 			'type'                 => 'object',
-			'context'              => [ 'view', 'edit' ],
+			'context'              => [ 'amp' ],
 			'readonly'             => true,
 			'additionalProperties' => [
 				'complete_template'  => [
 					'description'          => __( 'Links for the AMP version in a complete template.', 'amp' ),
 					'type'                 => 'object',
-					'context'              => [ 'view', 'edit' ],
+					'context'              => [ 'amp' ],
 					'readonly'             => true,
 					'additionalProperties' => [
 						'cache'  => [
 							'type'        => 'string',
 							'description' => __( 'Link for the AMP version in a complete template on origin.', 'amp' ),
-							'context'     => [ 'view', 'edit' ],
+							'context'     => [ 'amp' ],
 							'readonly'    => true,
 						],
 						'origin' => [
 							'type'        => 'string',
 							'description' => __( 'Link for the AMP version in a complete template on the ampproject.org AMP Cache.', 'amp' ),
-							'context'     => [ 'view', 'edit' ],
+							'context'     => [ 'amp' ],
 							'readonly'    => true,
 						],
 					],
@@ -144,19 +181,19 @@ class AMP_REST_API {
 				'standalone_content' => [
 					'description'          => __( 'Links for the AMP version in standalone content.', 'amp' ),
 					'type'                 => 'object',
-					'context'              => [ 'view', 'edit' ],
+					'context'              => [ 'amp' ],
 					'readonly'             => true,
 					'additionalProperties' => [
 						'cache'  => [
 							'type'        => 'string',
 							'description' => __( 'Link for the AMP version in standalone content on origin.', 'amp' ),
-							'context'     => [ 'view', 'edit' ],
+							'context'     => [ 'amp' ],
 							'readonly'    => true,
 						],
 						'origin' => [
 							'type'        => 'string',
 							'description' => __( 'Link for the AMP version in standalone content on the ampproject.org AMP Cache.', 'amp' ),
-							'context'     => [ 'view', 'edit' ],
+							'context'     => [ 'amp' ],
 							'readonly'    => true,
 						],
 					],
@@ -177,7 +214,7 @@ class AMP_REST_API {
 	 */
 	public static function add_content_amp_field( $response, $post, $request ) {
 		// Skip if AMP is disabled for the post.
-		if ( ! post_supports_amp( $post ) ) {
+		if ( ! amp_is_post_supported( $post ) ) {
 			return $response;
 		}
 
@@ -194,12 +231,6 @@ class AMP_REST_API {
 				'cache'  => AMP_HTTP::get_amp_cache_url( $content_template_link ),
 			],
 		];
-
-		// Skip if _amp param is not present.
-		// @todo Figure out a better way to selectively include amp content without having to introduce a new query var.
-		if ( null === $request->get_param( '_amp' ) ) {
-			return $response;
-		}
 
 		$sanitizers     = amp_get_content_sanitizers();
 		$embed_handlers = AMP_Theme_Support::register_content_embed_handlers();
