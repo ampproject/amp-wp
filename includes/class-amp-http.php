@@ -265,9 +265,6 @@ class AMP_HTTP {
 			foreach ( self::get_amp_cache_domains() as $cache_domain ) {
 				$hosts[] = sprintf( '%s.%s', $subdomain, $cache_domain );
 			}
-
-			// Bing AMP Cache.
-			$hosts[] = sprintf( '%s.bing-amp.com', $subdomain );
 		}
 
 		return $hosts;
