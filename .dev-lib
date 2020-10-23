@@ -70,7 +70,7 @@ index 4accd09f0..c1ff59f54 100644
 		)
 
 		echo "${DIFF}" | git apply -
-		composer require --dev --ignore-platform-reqs phpunit/phpunit:^7.5
+		composer require --dev --ignore-platform-reqs --update-with-dependencies phpunit/phpunit:^7.5
 
 		PATH="$(composer config bin-dir --absolute):$PATH"
 		echo "done"
