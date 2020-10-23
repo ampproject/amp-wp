@@ -46,8 +46,7 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 		$this->reset_widgets();
 		add_filter(
 			'pre_http_request',
-			function( $r, $args, $url ) {
-				unset( $args );
+			function( $r, /** @noinspection PhpUnusedParameterInspection */ $args, $url ) {
 				if ( false === strpos( $url, 'amp_validate=' ) ) {
 					return $r;
 				}
