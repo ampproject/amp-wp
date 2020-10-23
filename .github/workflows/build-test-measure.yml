@@ -144,6 +144,8 @@ jobs:
       - lint-css
       - lint-js
       - lint-php
+    env:
+      WP_CORE_DIR: /tmp/wordpress
     services:
       mysql:
         image: mariadb:latest
@@ -175,10 +177,6 @@ jobs:
             external-http: true
             coverage: 'none'
             install-pwa-plugin: true
-
-          - php: '7.4'
-            wp: 'latest'
-            coverage: 'xdebug'
 
           - php: '7.0'
             wp: '5.1'
@@ -236,7 +234,7 @@ jobs:
             ${{ runner.os }}-
 
       - name: Install Composer dependencies
-        run: composer install --prefer-dist --optimize-autoloader  --no-suggest --no-progress --no-interaction
+        run: composer install --prefer-dist --ignore-platform-reqs --no-suggest --no-progress --no-interaction
 
       - name: Get npm cache directory
         id: npm-cache
@@ -283,10 +281,12 @@ jobs:
       - name: Run tests with coverage
         if: ${{ matrix.coverage == 'xdebug' }}
         run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+        working-directory: "$WP_CORE_DIR"/wp-content/plugins/amp
 
       - name: Run external HTTP tests
         if: ${{ matrix.external-http == true }}
         run: vendor/bin/phpunit --testsuite external-http
+        working-directory: "$WP_CORE_DIR"/wp-content/plugins/amp
 
 #-----------------------------------------------------------------------------------------------------------------------
 
