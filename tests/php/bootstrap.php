@@ -31,6 +31,7 @@ function amp_filter_active_plugins_for_phpunit( $active_plugins ) {
 	}
 	return $active_plugins;
 }
+
 tests_add_filter( 'site_option_active_sitewide_plugins', 'amp_filter_active_plugins_for_phpunit' );
 tests_add_filter( 'option_active_plugins', 'amp_filter_active_plugins_for_phpunit' );
 
@@ -38,6 +39,7 @@ tests_add_filter( 'option_active_plugins', 'amp_filter_active_plugins_for_phpuni
 function amp_unit_test_load_plugin_file() {
 	require_once TESTS_PLUGIN_DIR . '/amp.php';
 }
+
 tests_add_filter( 'muplugins_loaded', 'amp_unit_test_load_plugin_file' );
 
 // Start up the WP testing environment.
