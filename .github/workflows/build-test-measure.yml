@@ -280,17 +280,17 @@ jobs:
       - name: Run tests
         if: ${{ matrix.coverage == false }}
         run: vendor/bin/phpunit
-        working-directory: "$WP_CORE_DIR"/wp-content/plugins/amp
+        working-directory: ${{ env.WP_CORE_DIR }}/wp-content/plugins/amp
 
       - name: Run tests with coverage
         if: ${{ matrix.coverage == true }}
         run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
-        working-directory: "$WP_CORE_DIR"/wp-content/plugins/amp
+        working-directory: ${{ env.WP_CORE_DIR }}/wp-content/plugins/amp
 
       - name: Run external HTTP tests
         if: ${{ matrix.external-http == true }}
         run: vendor/bin/phpunit --testsuite external-http
-        working-directory: "$WP_CORE_DIR"/wp-content/plugins/amp
+        working-directory: ${{ env.WP_CORE_DIR }}/wp-content/plugins/amp
 
 #-----------------------------------------------------------------------------------------------------------------------
 
