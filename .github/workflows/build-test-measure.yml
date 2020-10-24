@@ -277,8 +277,11 @@ jobs:
 
       - name: Setup PCOV
         if: ${{ matrix.coverage == true }}
+        # phpdocumentor/reflection has to be removed as it makes use of an outdated dependency, making pcov/clobber
+        # unable to be installed.
         run: |
-          composer require --dev --ignore-platform-reqs --update-with-dependencies pcov/clobber
+          composer remove --dev phpdocumentor/reflection
+          composer require --dev --ignore-platform-reqs pcov/clobber
           vendor/bin/pcov clobber
 
       - name: Copy plugin to WP plugins directory
