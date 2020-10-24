@@ -212,12 +212,6 @@ jobs:
           ini-values: pcov.directory=.
           tools: composer, cs2pr
 
-      - name: Setup PCOV
-        if: ${{ matrix.coverage == true }}
-        run: |
-          composer require --dev --ignore-platform-reqs pcov/clobber
-          vendor/bin/pcov clobber
-
       - name: Shutdown default MySQL service
         run: sudo service mysql stop
 
@@ -280,6 +274,12 @@ jobs:
           after_wp_install
         env:
           INSTALL_PWA_PLUGIN: ${{ matrix.install-pwa-plugin == true }}
+
+      - name: Setup PCOV
+        if: ${{ matrix.coverage == true }}
+        run: |
+          composer require --dev --ignore-platform-reqs --update-with-dependencies pcov/clobber
+          vendor/bin/pcov clobber
 
       - name: Copy plugin to WP plugins directory
         run: cp -r "$PWD" "$WP_CORE_DIR/src/wp-content/plugins/amp"
