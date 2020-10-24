@@ -208,8 +208,15 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           extensions: curl, date, dom, gd, iconv, json, libxml, mysql, spl
-          coverage: ${{ matrix.coverage && 'xdebug' || 'none' }}
+          coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
+          ini-values: pcov.directory=.
           tools: composer, cs2pr
+
+      - name: Setup PCOV
+        if: ${{ matrix.coverage == true }}
+        run: |
+          composer require --dev --ignore-platform-reqs pcov/clobber
+          vendor/bin/pcov clobber
 
       - name: Shutdown default MySQL service
         run: sudo service mysql stop
