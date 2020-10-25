@@ -387,7 +387,7 @@ use AmpProject\Optimizer\TransformationEngine;
 $transformationEngine = new TransformationEngine(
 	new Configuration(),
 
-	// A custom implementation that lets you control how eremote requests are handled.
+	// A custom implementation that lets you control how remote requests are handled.
 	new MyCustomRemoteGetRequestImplementation()
 );
 ```
