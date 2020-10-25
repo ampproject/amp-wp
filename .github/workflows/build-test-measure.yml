@@ -164,8 +164,10 @@ jobs:
         env:
           CI: true
 
-      - name: Run unit tests
-        run: npm run test:js -- --ci --cacheDirectory="$HOME/.jest-cache"
+      - name: Run unit tests (with coverage)
+        run: |
+          npm run test:js -- --ci --cacheDirectory="$HOME/.jest-cache" --collectCoverage
+          bash <(curl -s https://codecov.io/bash) -cF javascript -f build/logs/lcov.info
 
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -397,7 +399,9 @@ jobs:
 
       - name: Run tests with coverage
         if: ${{ matrix.coverage == true }}
-        run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+        run: |
+          vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+          bash <(curl -s https://codecov.io/bash) -cF php -f "$PWD/build/logs/clover.xml"
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
 
       - name: Run external HTTP tests
