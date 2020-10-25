@@ -92,7 +92,7 @@ jobs:
         with:
           php-version: '7.4'
           coverage: none
-          tools: composer, cs2pr
+          tools: composer:v1, cs2pr
 
       - name: Get Composer Cache Directory
         id: composer-cache
@@ -205,7 +205,7 @@ jobs:
           extensions: curl, date, dom, gd, iconv, json, libxml, mysql, spl
           coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
           ini-values: pcov.directory=.
-          tools: composer, cs2pr
+          tools: composer:v1, cs2pr
 
       - name: Shutdown default MySQL service
         run: sudo service mysql stop
