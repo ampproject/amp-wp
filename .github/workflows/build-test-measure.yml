@@ -411,8 +411,8 @@ jobs:
 
 #-----------------------------------------------------------------------------------------------------------------------
 
-  dev-zip:
-    name: 'Build: dev build ZIP'
+  build-zip:
+    name: 'Build: ${{ matrix.build }} build ZIP'
     # Only run if it is not a draft PR and the PR is not from a forked repository.
     if: ( github.event.pull_request.draft || github.event.pull_request.head.repo.fork ) == false
     runs-on: ubuntu-latest
@@ -423,6 +423,9 @@ jobs:
     outputs:
       branch-name: ${{ steps.retrieve-branch-name.outputs.branch_name }}
       git-sha-8: ${{ steps.retrieve-git-sha-8.outputs.sha8 }}
+    strategy:
+      matrix:
+        build: ['dev', 'prod']
 
     steps:
       - name: Check out source files
@@ -472,12 +475,12 @@ jobs:
           CI: true
 
       - name: Create destination directories
-        run: mkdir -p builds/dev
+        run: mkdir -p builds/${{ matrix.build }}
 
-      - name: Build develop version
+      - name: Build plugin
         run: |
-          npm run build:dev
-          mv amp.zip builds/dev/amp.zip
+          npm run build:${{ matrix.build }}
+          mv amp.zip builds/${{ matrix.build }}/amp.zip
 
       - name: Retrieve branch name
         id: retrieve-branch-name
@@ -490,92 +493,8 @@ jobs:
       - name: Upload build as artifact
         uses: actions/upload-artifact@v2
         with:
-          name: amp-${{ steps.retrieve-branch-name.outputs.branch_name }}-${{ steps.retrieve-git-sha-8.outputs.sha8 }}-dev
-          path: builds/dev
-
-#-----------------------------------------------------------------------------------------------------------------------
-
-  prod-zip:
-    name: 'Build: prod build ZIP'
-    # Only run if it is not a draft PR and the PR is not from a forked repository.
-    if: ( github.event.pull_request.draft || github.event.pull_request.head.repo.fork ) == false
-    runs-on: ubuntu-latest
-    needs:
-      - unit-test-php
-      - unit-test-js
-      - e2e-test-js
-    outputs:
-      branch-name: ${{ steps.retrieve-branch-name.outputs.branch_name }}
-      git-sha-8: ${{ steps.retrieve-git-sha-8.outputs.sha8 }}
-
-    steps:
-      - name: Check out source files
-        uses: actions/checkout@v2
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '7.4'
-          coverage: none
-          tools: composer:v1
-
-      - name: Get Composer Cache Directory
-        id: composer-cache
-        run: |
-          echo "::set-output name=dir::$(composer config cache-files-dir)"
-
-      - name: Configure Composer cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
-
-      - name: Install Composer dependencies
-        # Scripts are not ignored as they are needed to apply patches for the
-        # `sabberworm/php-css-parser` dependency.
-        run: composer install --prefer-dist --optimize-autoloader
-
-      - name: Get npm cache directory
-        id: npm-cache
-        run: |
-          echo "::set-output name=dir::$(npm config get cache)"
-
-      - name: Configure npm cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.npm-cache.outputs.dir }}
-          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-
-
-      - name: Install Node dependencies
-        run: npm ci
-        env:
-          CI: true
-
-      - name: Create destination directories
-        run: mkdir -p builds/prod
-
-      - name: Build production version
-        run: |
-          npm run build:prod
-          mv amp.zip builds/prod/amp.zip
-
-      - name: Retrieve branch name
-        id: retrieve-branch-name
-        run: echo "::set-output name=branch_name::$(REF=${GITHUB_HEAD_REF:-$GITHUB_REF} && echo ${REF#refs/heads/} | sed 's/\//-/g')"
-
-      - name: Retrieve git SHA-8 string
-        id: retrieve-git-sha-8
-        run: echo "::set-output name=sha8::$(echo ${GITHUB_SHA} | cut -c1-8)"
-
-      - name: Upload build as artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: amp-${{ steps.retrieve-branch-name.outputs.branch_name }}-${{ steps.retrieve-git-sha-8.outputs.sha8 }}-prod
-          path: builds/prod
+          name: amp-${{ steps.retrieve-branch-name.outputs.branch_name }}-${{ steps.retrieve-git-sha-8.outputs.sha8 }}-${{ matrix.build }}
+          path: builds/${{ matrix.build }}
 
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -583,19 +502,18 @@ jobs:
     name: Upload plugin ZIPs to Google Cloud Storage
     runs-on: ubuntu-latest
     needs:
-      - dev-zip
-      - prod-zip
+      - build-zip
     steps:
       - name: Download dev build
         uses: actions/download-artifact@v2
         with:
-          name: amp-${{ needs.dev-zip.outputs.branch-name }}-${{ needs.dev-zip.outputs.git-sha-8 }}-dev
+          name: amp-${{ needs.build-zip.outputs.branch-name }}-${{ needs.build-zip.outputs.git-sha-8 }}-dev
           path: builds/dev
 
       - name: Download prod build
         uses: actions/download-artifact@v2
         with:
-          name: amp-${{ needs.prod-zip.outputs.branch-name }}-${{ needs.prod-zip.outputs.git-sha-8 }}-prod
+          name: amp-${{ needs.build-zip.outputs.branch-name }}-${{ needs.build-zip.outputs.git-sha-8 }}-prod
           path: builds/prod
 
       - name: Setup Google Cloud SDK
