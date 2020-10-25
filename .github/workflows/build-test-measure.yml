@@ -130,6 +130,118 @@ jobs:
 
 #-----------------------------------------------------------------------------------------------------------------------
 
+  unit-test-js:
+    name: 'Unit test: JS'
+    runs-on: ubuntu-latest
+    needs:
+      - lint-css
+      - lint-js
+      - lint-php
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Get npm cache directory
+        id: npm-cache
+        run: echo "::set-output name=dir::$(npm config get cache)"
+
+      - name: Configure npm cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Setup Jest cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.jest-cache
+          key: ${{ runner.os }}-jest
+
+      - name: Install Node dependencies
+        run: npm ci
+        env:
+          CI: true
+
+      - name: Run unit tests
+        run: npm run test:js -- --ci --cacheDirectory="$HOME/.jest-cache"
+
+#-----------------------------------------------------------------------------------------------------------------------
+
+  e2e-test-js:
+    name: 'E2E test: JS'
+    runs-on: ubuntu-latest
+    needs:
+      - lint-css
+      - lint-js
+      - lint-php
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          coverage: none
+          tools: composer:v1
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Configure Composer cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Get npm cache directory
+        id: npm-cache
+        run: echo "::set-output name=dir::$(npm config get cache)"
+
+      - name: Configure npm cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Install Node dependencies
+        run: npm ci
+        env:
+          CI: true
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --optimize-autoloader  --no-suggest --no-progress --no-interaction
+
+      - name: Build plugin
+        run: |
+          npm run build:js
+          npm run build:css
+
+      - name: Start Docker environment
+        run: npm run env:start
+        env:
+          COMPOSE_INTERACTIVE_NO_CLI: true
+
+      - name: Run E2E tests
+        run: npm run test:e2e:ci
+
+      - name: Stop Docker environment
+        run: npm run env:stop
+        if: always()
+        env:
+          COMPOSE_INTERACTIVE_NO_CLI: true
+
+#-----------------------------------------------------------------------------------------------------------------------
+
   # Adapted from workflow for running PHP unit tests on google/web-stories-wp.
   # See https://github.com/google/web-stories-wp/blob/cb2ebada48039171e25c279bdb27d3712dd70b22/.github/workflows/continuous-integration-lint-php.yml.
   unit-test-php:
@@ -296,46 +408,6 @@ jobs:
 
 #-----------------------------------------------------------------------------------------------------------------------
 
-  unit-test-js:
-    name: 'Unit test: JS'
-    runs-on: ubuntu-latest
-    needs:
-      - lint-css
-      - lint-js
-      - lint-php
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Get npm cache directory
-        id: npm-cache
-        run: echo "::set-output name=dir::$(npm config get cache)"
-
-      - name: Configure npm cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.npm-cache.outputs.dir }}
-          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-
-
-      - name: Setup Jest cache
-        uses: actions/cache@v2
-        with:
-          path: ~/.jest-cache
-          key: ${{ runner.os }}-jest
-
-      - name: Install Node dependencies
-        run: npm ci
-        env:
-          CI: true
-
-      - name: Run unit tests
-        run: npm run test:js -- --ci --cacheDirectory="$HOME/.jest-cache"
-
-#-----------------------------------------------------------------------------------------------------------------------
-
   dev-zip:
     name: 'Build: dev build ZIP'
     # Only run if it is not a draft PR and the PR is not from a forked repository.
@@ -344,6 +416,7 @@ jobs:
     needs:
       - unit-test-php
       - unit-test-js
+      - e2e-test-js
     outputs:
       branch-name: ${{ steps.retrieve-branch-name.outputs.branch_name }}
       git-sha-8: ${{ steps.retrieve-git-sha-8.outputs.sha8 }}
@@ -427,6 +500,7 @@ jobs:
     needs:
       - unit-test-php
       - unit-test-js
+      - e2e-test-js
     outputs:
       branch-name: ${{ steps.retrieve-branch-name.outputs.branch_name }}
       git-sha-8: ${{ steps.retrieve-git-sha-8.outputs.sha8 }}
