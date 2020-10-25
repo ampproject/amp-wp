@@ -30,7 +30,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           extensions: dom, iconv, json, libxml
-          tools: composer:v1, cs2pr
+          tools: composer:v1, cs2pr, phpunit:${{ matrix.php == '5.6' && '5.7.27' || '7.5.20' }}
 
       - name: Get Composer Cache Directory
         id: composer-cache
