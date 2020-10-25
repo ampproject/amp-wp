@@ -29,7 +29,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: dom, iconv, json, libxml
+          extensions: dom, iconv, json, libxml, zip
           tools: composer:v1, cs2pr, phpunit:${{ matrix.php == '5.6' && '5.7.27' || '7.5.20' }}
 
       - name: Get Composer Cache Directory
