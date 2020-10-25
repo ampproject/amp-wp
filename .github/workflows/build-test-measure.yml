@@ -29,9 +29,7 @@ jobs:
           path: ${{ steps.npm-cache.outputs.dir }}
           key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-npm-${{ env.cache-name }}-
             ${{ runner.os }}-npm-
-            ${{ runner.os }}-
 
       - name: Install Node dependencies
         run: npm ci
@@ -60,9 +58,7 @@ jobs:
           path: ${{ steps.npm-cache.outputs.dir }}
           key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-npm-${{ env.cache-name }}-
             ${{ runner.os }}-npm-
-            ${{ runner.os }}-
 
       - name: Install Node dependencies
         run: npm ci
@@ -109,7 +105,6 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-
-            ${{ runner.os }}-
 
       - name: Install Composer dependencies
         run: composer install --prefer-dist --optimize-autoloader  --no-suggest --no-progress --no-interaction
@@ -232,7 +227,6 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-
-            ${{ runner.os }}-
 
       - name: Install Composer dependencies
         run: composer install --prefer-dist --ignore-platform-reqs --no-suggest --no-progress --no-interaction
@@ -247,9 +241,7 @@ jobs:
           path: ${{ steps.npm-cache.outputs.dir }}
           key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-npm-${{ env.cache-name }}-
             ${{ runner.os }}-npm-
-            ${{ runner.os }}-
 
       - name: Install Node dependencies
         run: npm ci
@@ -394,13 +386,14 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ steps.npm-cache.outputs.dir }}
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-node-
+            ${{ runner.os }}-npm-
 
       - name: Install Node dependencies
-        # Prevent malicious scripts from being run with `--ignore-scripts`
-        run: npm install --ignore-scripts
+        run: npm ci
+        env:
+          CI: true
 
       - name: Create destination directories
         run: mkdir -p builds/dev
@@ -476,13 +469,14 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ steps.npm-cache.outputs.dir }}
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-node-
+            ${{ runner.os }}-npm-
 
       - name: Install Node dependencies
-        # Prevent malicious scripts from being run with `--ignore-scripts`
-        run: npm install --ignore-scripts
+        run: npm ci
+        env:
+          CI: true
 
       - name: Create destination directories
         run: mkdir -p builds/prod
