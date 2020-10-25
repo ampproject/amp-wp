@@ -232,6 +232,10 @@ class AMP_REST_API {
 			],
 		];
 
+		if ( 'amp' !== $request['context'] ) {
+			return $response;
+		}
+
 		$sanitizers     = amp_get_content_sanitizers();
 		$embed_handlers = AMP_Theme_Support::register_content_embed_handlers();
 		$sanitizers['AMP_Embed_Sanitizer']['embed_handlers'] = $embed_handlers;
