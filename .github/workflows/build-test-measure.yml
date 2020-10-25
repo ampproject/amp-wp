@@ -304,6 +304,46 @@ jobs:
 
 #-----------------------------------------------------------------------------------------------------------------------
 
+  unit-test-js:
+    name: 'Unit test: JS'
+    runs-on: ubuntu-latest
+    needs:
+      - lint-css
+      - lint-js
+      - lint-php
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Get npm cache directory
+        id: npm-cache
+        run: echo "::set-output name=dir::$(npm config get cache)"
+
+      - name: Configure npm cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Setup Jest cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.jest-cache
+          key: ${{ runner.os }}-jest
+
+      - name: Install Node dependencies
+        run: npm ci
+        env:
+          CI: true
+
+      - name: Run unit tests
+        run: npm run test:js -- --ci --cacheDirectory="$HOME/.jest-cache"
+
+#-----------------------------------------------------------------------------------------------------------------------
+
   dev-zip:
     name: 'Build: dev build ZIP'
     # Only run if it is not a draft PR and the PR is not from a forked repository.
@@ -311,6 +351,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - unit-test-php
+      - unit-test-js
     outputs:
       branch-name: ${{ steps.retrieve-branch-name.outputs.branch_name }}
       git-sha-8: ${{ steps.retrieve-git-sha-8.outputs.sha8 }}
@@ -392,6 +433,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - unit-test-php
+      - unit-test-js
     outputs:
       branch-name: ${{ steps.retrieve-branch-name.outputs.branch_name }}
       git-sha-8: ${{ steps.retrieve-git-sha-8.outputs.sha8 }}
