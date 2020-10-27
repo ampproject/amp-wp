@@ -244,7 +244,7 @@ jobs:
 #-----------------------------------------------------------------------------------------------------------------------
 
   # Adapted from workflow for running PHP unit tests on google/web-stories-wp.
-  # See https://github.com/google/web-stories-wp/blob/cb2ebada48039171e25c279bdb27d3712dd70b22/.github/workflows/continuous-integration-lint-php.yml.
+  # See https://github.com/google/web-stories-wp/blob/cb2ebada48039171e25c279bdb27d3712dd70b22/.github/workflows/continuous-integration-unit-php.yml
   unit-test-php:
     name: "Unit test ${{ matrix.coverage && '(with coverage)' || '' }}: PHP ${{ matrix.php }}, WP ${{ matrix.wp }}"
     runs-on: ubuntu-latest
