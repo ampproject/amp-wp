@@ -31,6 +31,7 @@ branches:
     - /^\d+\.\d+$/
 
 install:
+  - travis_retry composer self-update --1
   - nvm install
   - composer install
   - export DEV_LIB_PATH=vendor/xwp/wp-dev-lib/scripts
@@ -86,6 +87,7 @@ jobs:
       name: Static analysis (PHP)
       php: "7.4"
       install:
+        - travis_retry composer self-update --1
         - composer install
       script:
         - composer analyze
@@ -102,6 +104,7 @@ jobs:
       php: "7.4"
       env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit
       install:
+        - travis_retry composer self-update --1
         - nvm install
         - composer install
         - npm install
@@ -162,6 +165,7 @@ jobs:
       php: "5.6"
       env: TEST_SKIP_PHPSTAN=1
       install:
+        - travis_retry composer self-update --1
         - composer --working-dir=lib/common install
         - composer --working-dir=lib/optimizer install
       script:
@@ -172,6 +176,7 @@ jobs:
       php: "7.4"
 
       install:
+        - travis_retry composer self-update --1
         - composer --working-dir=lib/common install
         - composer --working-dir=lib/optimizer install
       script:
