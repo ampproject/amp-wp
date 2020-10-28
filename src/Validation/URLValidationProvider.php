@@ -99,7 +99,7 @@ final class URLValidationProvider {
 	 * @return boolean
 	 */
 	public function is_locked() {
-		$lock_time = intval( get_option( self::LOCK_KEY, 0 ) );
+		$lock_time = (int) get_option( self::LOCK_KEY, 0 );
 
 		// It's locked if the difference between the lock time and the current time is less than the lockout time.
 		return time() - $lock_time < $this->get_lock_timeout();

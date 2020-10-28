@@ -13,7 +13,7 @@ use AmpProject\AmpWP\Validation\ScannableURLProvider;
 use WP_Query;
 use WP_UnitTestCase;
 
-/** @coversDefaultClass ScannableURLProvider */
+/** @coversDefaultClass \AmpProject\AmpWP\Validation\ScannableURLProvider */
 final class ScannableURLProviderTest extends WP_UnitTestCase {
 	use PrivateAccess, AssertContainsCompatibility;
 
@@ -356,7 +356,7 @@ final class ScannableURLProviderTest extends WP_UnitTestCase {
 	 */
 	public function test_get_search_page() {
 		// Normally, this should return a string, unless the user has opted out of the search template.
-		$this->assertTrue( is_string( $this->call_private_method( $this->validation_url_provider, 'get_search_page' ) ) );
+		$this->assertIsString( $this->call_private_method( $this->validation_url_provider, 'get_search_page' ) );
 
 		// If $include_conditionals is set and does not have is_search, this should not return a URL.
 		$this->set_private_property( $this->validation_url_provider, 'include_conditionals', [ 'is_author' ] );
@@ -364,7 +364,7 @@ final class ScannableURLProviderTest extends WP_UnitTestCase {
 
 		// If $include_conditionals has is_search, this should return a URL.
 		$this->set_private_property( $this->validation_url_provider, 'include_conditionals', [ 'is_search' ] );
-		$this->assertTrue( is_string( $this->call_private_method( $this->validation_url_provider, 'get_search_page' ) ) );
+		$this->assertIsString( $this->call_private_method( $this->validation_url_provider, 'get_search_page' ) );
 		$this->set_private_property( $this->validation_url_provider, 'include_conditionals', [] );
 	}
 

@@ -7,7 +7,7 @@ use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
 use AmpProject\AmpWP\Validation\URLValidationProvider;
 use WP_UnitTestCase;
 
-/** @coversDefaultClass URLValidationProvider */
+/** @coversDefaultClass \AmpProject\AmpWP\Validation\URLValidationProvider */
 final class URLValidationProviderTest extends WP_UnitTestCase {
 	use AssertContainsCompatibility;
 

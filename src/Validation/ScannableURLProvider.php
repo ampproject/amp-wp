@@ -44,7 +44,7 @@ final class ScannableURLProvider {
 	private $limit_per_type;
 
 	/**
-	 * Class construÎctor.
+	 * Class constructor.
 	 *
 	 * @param integer $limit_per_type       The maximum number of URLs to validate for each type.
 	 * @param array   $include_conditionals An allowlist of conditionals to use for validation.
@@ -85,7 +85,7 @@ final class ScannableURLProvider {
 			get_taxonomies( [ 'public' => true ] ),
 			[ $this, 'does_taxonomy_support_amp' ]
 		);
-		$public_post_types      = get_post_types( [ 'public' => true ], 'names' );
+		$public_post_types      = get_post_types( [ 'public' => true ] );
 
 		// Include one URL of each template/content type, then another URL of each type on the next iteration.
 		for ( $i = $offset; $i < $this->limit_per_type + $offset; $i++ ) {
