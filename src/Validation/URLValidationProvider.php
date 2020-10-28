@@ -77,7 +77,7 @@ final class URLValidationProvider {
 	 *     }
 	 * }
 	 */
-	public $validity_by_type = [];
+	private $validity_by_type = [];
 
 	/**
 	 * Locks validation.
@@ -165,6 +165,15 @@ final class URLValidationProvider {
 	 */
 	public function get_number_validated() {
 		return $this->number_validated;
+	}
+
+	/**
+	 * Provides the validity counts by type.
+	 *
+	 * @return array[]
+	 */
+	public function get_validity_by_type() {
+		return $this->validity_by_type;
 	}
 
 	/**

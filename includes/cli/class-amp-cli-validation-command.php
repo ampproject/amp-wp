@@ -158,7 +158,7 @@ final class AMP_CLI_Validation_Command {
 		$key_validity_rate = 'Validity Rate';
 
 		$table_validation_by_type = [];
-		foreach ( $validation_provider->validity_by_type as $type_name => $validity ) {
+		foreach ( $validation_provider->get_validity_by_type() as $type_name => $validity ) {
 			$table_validation_by_type[] = [
 				$key_template_type => $type_name,
 				$key_url_count     => $validity['total'],

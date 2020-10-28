@@ -59,7 +59,7 @@ final class URLValidationProviderTest extends WP_UnitTestCase {
 
 		$this->assertEquals(
 			[ 'post' ],
-			array_keys( $this->validation_provider->validity_by_type )
+			array_keys( $this->validation_provider->get_validity_by_type() )
 		);
 	}
 
