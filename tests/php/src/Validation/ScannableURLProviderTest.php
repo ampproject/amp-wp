@@ -22,6 +22,7 @@ final class ScannableURLProviderTest extends WP_UnitTestCase {
 	 *
 	 * @var ScannableURLProvider
 	 */
+	private $validation_url_provider;
 
 	/**
 	 * Setup.
