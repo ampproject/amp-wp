@@ -21,8 +21,17 @@ import { getURLValidationTableRows } from './get-url-validation-table-rows';
  */
 function onSuccess( { trigger } ) {
 	trigger.focus();
+
+	const newInnerText = __( 'Copied to clipboard', 'amp' );
+
+	// Exit if the user has already clicked the button and we are still within the
+	// 4000ms before the setTimeout callback runs.
+	if ( trigger.innerText === newInnerText ) {
+		return;
+	}
+
 	const originalText = trigger.innerText;
-	trigger.innerText = __( 'Copied to clipboard', 'amp' );
+	trigger.innerText = newInnerText;
 
 	setTimeout( () => {
 		if ( document.body.contains( trigger ) ) {
