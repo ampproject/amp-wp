@@ -289,7 +289,11 @@ final class ScannableURLProvider {
 	 * @param int        $number The maximum amount of links to get (optional).
 	 * @return string[]  The term links, as an array of strings.
 	 */
-	private function get_taxonomy_links( $taxonomy, $offset = '', $number = 1 ) {
+	private function get_taxonomy_links( $taxonomy, $offset = '', $number = null ) {
+		if ( is_null( $number ) ) {
+			$number = $this->limit_per_type;
+		}
+
 		return array_map(
 			'get_term_link',
 			get_terms(
