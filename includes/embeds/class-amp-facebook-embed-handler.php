@@ -13,6 +13,15 @@ use AmpProject\Dom\Document;
  * @internal
  */
 class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
+	const URL_PATTERN = '#https?://(www\.)?facebook\.com/.*#i';
+
+	/**
+	 * Default width.
+	 *
+	 * @var int
+	 */
+	protected $DEFAULT_WIDTH = 600;
+
 	/**
 	 * Default height.
 	 *
@@ -38,14 +47,57 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Registers embed.
 	 */
 	public function register_embed() {
-		// Not implemented.
+		wp_embed_register_handler( $this->amp_tag, self::URL_PATTERN, [ $this, 'oembed' ], -1 );
 	}
 
 	/**
 	 * Unregisters embed.
 	 */
 	public function unregister_embed() {
-		// Not implemented.
+		wp_embed_unregister_handler( $this->amp_tag, -1 );
+	}
+
+	/**
+	 * WordPress OEmbed rendering callback.
+	 *
+	 * @param array  $matches URL pattern matches.
+	 * @param array  $attr    Matched attributes.
+	 * @param string $url     Matched URL.
+	 * @return string HTML markup for rendered embed.
+	 */
+	public function oembed( $matches, $attr, $url ) {
+		return $this->render( [ 'url' => $url ] );
+	}
+
+	/**
+	 * Gets the rendered embed markup.
+	 *
+	 * @param array $args Embed rendering arguments.
+	 * @return string HTML markup for rendered embed.
+	 */
+	public function render( $args ) {
+		$args = wp_parse_args(
+			$args,
+			[
+				'url' => false,
+			]
+		);
+
+		if ( empty( $args['url'] ) ) {
+			return '';
+		}
+
+		$this->did_convert_elements = true;
+
+		return AMP_HTML_Utils::build_tag(
+			$this->amp_tag,
+			[
+				'data-href' => $args['url'],
+				'layout'    => 'responsive',
+				'width'     => $this->args['width'],
+				'height'    => $this->args['height'],
+			]
+		);
 	}
 
 	/**
