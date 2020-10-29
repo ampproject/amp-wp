@@ -25,6 +25,13 @@ jobs:
       - name: Check out source files
         uses: actions/checkout@v2
 
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          coverage: none
+          tools: composer:v1
+
       - name: Get Composer Cache Directory
         id: composer-cache
         run: |
@@ -96,6 +103,13 @@ jobs:
     steps:
       - name: Check out source files
         uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          coverage: none
+          tools: composer:v1
 
       - name: Get Composer Cache Directory
         id: composer-cache
