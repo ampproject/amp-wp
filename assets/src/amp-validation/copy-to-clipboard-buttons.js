@@ -49,7 +49,7 @@ export function handleCopyToClipboardButtons() {
 	// eslint-disable-next-line no-new
 	clipboards.push( new Clipboard( 'button.single-url-detail-copy', {
 		text: ( btn ) => {
-			return btn.getAttribute( 'data-error-json' );
+			return JSON.stringify( JSON.parse( btn.getAttribute( 'data-error-json' ) ), null, '\t' );
 		},
 	} ) );
 
