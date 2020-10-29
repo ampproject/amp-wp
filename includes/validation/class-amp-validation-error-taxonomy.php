@@ -1592,6 +1592,31 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
+	 * Returns JSON-formatted error details for an error term.
+	 *
+	 * @param WP_Term $term The term.
+	 * @return string Encoded JSON.
+	 */
+	public static function get_error_details_json( $term ) {
+		$json = json_decode( $term->description, true );
+
+		// Convert the numeric constant value of the node_type to its constant name.
+		$xml_reader_reflection_class = new ReflectionClass( 'XMLReader' );
+		$constants                   = $xml_reader_reflection_class->getConstants();
+		foreach ( $constants as $key => $value ) {
+			if ( $json['node_type'] === $value ) {
+				$json['node_type'] = $key;
+				break;
+			}
+		}
+
+		$json['removed']  = (bool) ( (int) $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
+		$json['reviewed'] = (bool) ( (int) $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
+
+		return wp_json_encode( $json );
+	}
+
+	/**
 	 * Add row actions.
 	 *
 	 * @param array   $actions Actions.
@@ -1618,6 +1643,12 @@ class AMP_Validation_Error_Taxonomy {
 				'<button type="button" aria-label="%s" class="single-url-detail-toggle button-link">%s</button>',
 				esc_attr__( 'Toggle error details', 'amp' ),
 				esc_html__( 'Details', 'amp' )
+			);
+
+			$actions['copy'] = sprintf(
+				'<button type="button" class="single-url-detail-copy button-link" data-error-json="%s">%s</button>',
+				esc_attr( self::get_error_details_json( $term ) ),
+				esc_html__( 'Copy to clipboard', 'amp' )
 			);
 		} elseif ( 'edit-tags.php' === $pagenow ) {
 			$actions['details'] = sprintf(
@@ -1646,7 +1677,7 @@ class AMP_Validation_Error_Taxonomy {
 			}
 		}
 
-		$actions = wp_array_slice_assoc( $actions, [ 'details', 'delete' ] );
+		$actions = wp_array_slice_assoc( $actions, [ 'details', 'delete', 'copy' ] );
 
 		return $actions;
 	}
@@ -2251,7 +2282,6 @@ class AMP_Validation_Error_Taxonomy {
 				</dd>
 			<?php endforeach; ?>
 		</dl>
-
 		<?php
 
 		$output = ob_get_clean();
