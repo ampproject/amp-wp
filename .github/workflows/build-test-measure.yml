@@ -162,9 +162,7 @@ jobs:
     name: 'Unit test: JS'
     runs-on: ubuntu-latest
     needs:
-      - lint-css
       - lint-js
-      - lint-php
 
     steps:
       - name: Checkout
@@ -204,9 +202,7 @@ jobs:
     name: 'E2E test: JS'
     runs-on: ubuntu-latest
     needs:
-      - lint-css
       - lint-js
-      - lint-php
 
     steps:
       - name: Checkout
@@ -278,9 +274,8 @@ jobs:
     name: "Unit test ${{ matrix.coverage && '(with coverage)' || '' }}: PHP ${{ matrix.php }}, WP ${{ matrix.wp }}"
     runs-on: ubuntu-latest
     needs:
-      - lint-css
-      - lint-js
       - lint-php
+      - static-analysis-php
     env:
       WP_CORE_DIR: /tmp/wordpress
     services:
@@ -443,9 +438,10 @@ jobs:
     if: ( github.event.pull_request.draft || github.event.pull_request.head.repo.fork ) == false
     runs-on: ubuntu-latest
     needs:
-      - unit-test-php
-      - unit-test-js
-      - e2e-test-js
+      - lint-css
+      - lint-js
+      - lint-php
+      - static-analysis-php
     outputs:
       branch-name: ${{ steps.retrieve-branch-name.outputs.branch_name }}
       git-sha-8: ${{ steps.retrieve-git-sha-8.outputs.sha8 }}
