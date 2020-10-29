@@ -1610,7 +1610,8 @@ class AMP_Validation_Error_Taxonomy {
 			}
 		}
 
-		$json['status'] = (bool) ( (int) $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK ) ? __( 'Removed', 'amp' ) : __( 'Kept', 'amp' );
+		$json['removed']  = (bool) ( (int) $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
+		$json['reviewed'] = (bool) ( (int) $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
 
 		return wp_json_encode( $json, JSON_PRETTY_PRINT );
 	}
