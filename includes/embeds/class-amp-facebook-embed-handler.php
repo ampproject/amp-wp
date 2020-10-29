@@ -49,29 +49,19 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Sanitized <div class="fb-video" data-href=> tags to <amp-facebook>.
+	 * Sanitize raw embeds.
 	 *
 	 * @param Document $dom DOM.
 	 */
 	public function sanitize_raw_embeds( Document $dom ) {
-		$nodes     = $dom->getElementsByTagName( $this->sanitize_tag );
-		$num_nodes = $nodes->length;
+		$replaced = 0;
 
-		if ( 0 === $num_nodes ) {
+		$replaced += $this->sanitize_raw_embed_divs( $dom );
+
+		$replaced += $this->sanitize_raw_embed_fb_components( $dom );
+
+		if ( 0 === $replaced ) {
 			return;
-		}
-
-		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
-			$node = $nodes->item( $i );
-			if ( ! $node instanceof DOMElement ) {
-				continue;
-			}
-
-			$embed_type = $this->get_embed_type( $node );
-
-			if ( null !== $embed_type ) {
-				$this->create_amp_facebook_and_replace_node( $dom, $node, $embed_type );
-			}
 		}
 
 		/*
@@ -98,6 +88,65 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 				$fb_root->parentNode->removeChild( $fb_root );
 			}
 		}
+	}
+
+	/**
+	 * Sanitize <div class="fb-video" data-href=> tags to <amp-facebook>.
+	 *
+	 * @param Document $dom DOM.
+	 * @return int Replacements made.
+	 */
+	private function sanitize_raw_embed_divs( Document $dom ) {
+		$replaced  = 0;
+		$nodes     = $dom->getElementsByTagName( $this->sanitize_tag );
+		$num_nodes = $nodes->length;
+
+		if ( 0 === $num_nodes ) {
+			return 0;
+		}
+
+		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
+			$node = $nodes->item( $i );
+			if ( ! $node instanceof DOMElement ) {
+				continue;
+			}
+
+			$embed_type = $this->get_embed_type( $node );
+
+			if ( null !== $embed_type ) {
+				$this->create_amp_facebook_and_replace_node( $dom, $node, $embed_type );
+				$replaced++;
+			}
+		}
+		return $replaced;
+	}
+
+	/**
+	 * Sanitize <fb:post> tags to <amp-facebook>.
+	 *
+	 * @param Document $dom DOM.
+	 * @return int Replacements made.
+	 */
+	private function sanitize_raw_embed_fb_components( Document $dom ) {
+		$replaced  = 0;
+		$nodes     = $dom->getElementsByTagName( 'post' );
+		$num_nodes = $nodes->length;
+
+		if ( 0 === $num_nodes ) {
+			return 0;
+		}
+
+		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
+			$node = $nodes->item( $i );
+			if ( ! $node instanceof DOMElement ) {
+				continue;
+			}
+
+			$embed_type = 'post';
+			$this->create_amp_facebook_and_replace_node( $dom, $node, $embed_type );
+			$replaced++;
+		}
+		return $replaced;
 	}
 
 	/**
