@@ -106,6 +106,14 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param Document $dom DOM.
 	 */
 	public function sanitize_raw_embeds( Document $dom ) {
+		$embed_nodes = $dom->getElementsByTagName( $this->amp_tag );
+
+		if ( $embed_nodes->length ) {
+			foreach ( $embed_nodes as $embed_node ) {
+				$this->unwrap_p_element( $embed_node );
+			}
+		}
+
 		$nodes     = $dom->getElementsByTagName( $this->sanitize_tag );
 		$num_nodes = $nodes->length;
 

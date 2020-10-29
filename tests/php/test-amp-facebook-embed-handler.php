@@ -137,38 +137,22 @@ class AMP_Facebook_Embed_Handler_Test extends WP_UnitTestCase {
 
 			'simple_url_https'              => [
 				'https://www.facebook.com/zuck/posts/10102593740125791' . PHP_EOL,
-				'
-					<amp-facebook width="500" height="400" data-href="https://www.facebook.com/zuck/posts/10102593740125791" data-embed-as="post" layout="responsive">
-						<blockquote cite="https://www.facebook.com/zuck/posts/10102593740125791" class="fb-xfbml-parse-ignore" fallback=""><!--blockquote_contents--></blockquote>
-					</amp-facebook>
-				' . PHP_EOL,
+				'<amp-facebook data-href="https://www.facebook.com/zuck/posts/10102593740125791" layout="responsive" width="600" height="400"></amp-facebook>' . PHP_EOL,
 			],
 
 			'notes_url'                     => [
 				'https://www.facebook.com/notes/facebook-engineering/under-the-hood-the-javascript-sdk-truly-asynchronous-loading/10151176218703920/' . PHP_EOL,
-				'
-					<amp-facebook width="500" height="400" data-href="https://www.facebook.com/notes/facebook-engineering/under-the-hood-the-javascript-sdk-truly-asynchronous-loading/10151176218703920/" data-embed-as="post" layout="responsive">
-						<blockquote cite="https://www.facebook.com/notes/facebook-engineering/under-the-hood-the-javascript-sdk-truly-asynchronous-loading/10151176218703920/" class="fb-xfbml-parse-ignore" fallback=""><!--blockquote_contents--></blockquote>
-					</amp-facebook>
-				' . PHP_EOL,
+				'<amp-facebook data-href="https://www.facebook.com/notes/facebook-engineering/under-the-hood-the-javascript-sdk-truly-asynchronous-loading/10151176218703920/" layout="responsive" width="600" height="400"></amp-facebook>' . PHP_EOL,
 			],
 
 			'photo_url'                     => [
 				'https://www.facebook.com/photo.php?fbid=10102533316889441&set=a.529237706231.2034669.4&type=3&theater' . PHP_EOL,
-				'
-					<amp-facebook width="500" height="400" data-href="https://www.facebook.com/photo.php?fbid=10102533316889441&amp;set=a.529237706231.2034669.4&amp;type=3&amp;theater" data-embed-as="post" layout="responsive">
-						<blockquote cite="https://www.facebook.com/photo.php?fbid=10102533316889441&amp;set=a.529237706231&amp;type=3" class="fb-xfbml-parse-ignore" fallback=""><!--blockquote_contents--></blockquote>
-					</amp-facebook>
-				' . PHP_EOL,
+				'<amp-facebook data-href="https://www.facebook.com/photo.php?fbid=10102533316889441&amp;set=a.529237706231.2034669.4&amp;type=3&amp;theater" layout="responsive" width="600" height="400"></amp-facebook>' . PHP_EOL,
 			],
 
 			'video_url'                     => [
 				'https://www.facebook.com/zuck/videos/10102509264909801/' . PHP_EOL,
-				'
-					<amp-facebook width="500" height="400" data-href="https://www.facebook.com/zuck/videos/10102509264909801/" data-embed-as="video" layout="responsive">
-						<blockquote cite="https://www.facebook.com/zuck/videos/10102509264909801/" class="fb-xfbml-parse-ignore" fallback=""><!--blockquote_contents--></blockquote>
-					</amp-facebook>
-				' . PHP_EOL,
+				'<amp-facebook data-href="https://www.facebook.com/zuck/videos/10102509264909801/" layout="responsive" width="600" height="400"></amp-facebook>' . PHP_EOL,
 			],
 
 			'post_embed'                    => [

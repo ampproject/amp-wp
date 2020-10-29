@@ -97,7 +97,7 @@ abstract class AMP_Base_Embed_Handler {
 			implode(
 				'',
 				array_map(
-					function ( $attr_name ) {
+					static function ( $attr_name ) {
 						return sprintf( '(?=[^>]*?%1$s="(?P<%1$s>[^"]+)")?', preg_quote( $attr_name, '/' ) );
 					},
 					$attribute_names
@@ -108,5 +108,44 @@ abstract class AMP_Base_Embed_Handler {
 			return null;
 		}
 		return wp_array_slice_assoc( $matches, $attribute_names );
+	}
+
+	/**
+	 * Get all child elements of the specified element.
+	 *
+	 * @since 2.0.6
+	 *
+	 * @param DOMElement $node Element.
+	 * @return DOMElement[] Array of child elements for specified element.
+	 */
+	protected function get_child_elements( DOMElement $node ) {
+		return array_filter(
+			iterator_to_array( $node->childNodes ),
+			static function ( DOMNode $child ) {
+				return $child instanceof DOMElement;
+			}
+		);
+	}
+
+	/**
+	 * Replace the node's parent with itself if the parent is a <p> tag, has no attributes and has no other children.
+	 * This usually happens while `wpautop()` processes the element.
+	 *
+	 * @since 2.0.6
+	 *
+	 * @param DOMElement $node Node.
+	 */
+	protected function unwrap_p_element( DOMElement $node ) {
+		$parent_node = $node->parentNode;
+		while ( $parent_node && ! ( $parent_node instanceof DOMElement ) ) {
+			$parent_node = $parent_node->parentNode;
+		}
+
+		if ( $parent_node instanceof DOMElement && 'p' === $parent_node->nodeName && false === $parent_node->hasAttributes() ) {
+			$child_element_count = count( $this->get_child_elements( $parent_node ) );
+			if ( 1 === $child_element_count ) {
+				$parent_node->parentNode->replaceChild( $node, $parent_node );
+			}
+		}
 	}
 }
