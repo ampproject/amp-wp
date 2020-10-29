@@ -116,6 +116,7 @@ final class AMP_CLI_Validation_Command {
 
 		$number_urls_to_crawl = count( $validation_url_provider->get_urls() );
 		if ( ! $number_urls_to_crawl ) {
+			/** @phpstan-ignore-next-line */
 			if ( ! empty( Utils\get_flag_value( $this->assoc_args, self::INCLUDE_ARGUMENT, [] ) ) ) {
 				WP_CLI::error(
 					sprintf(
