@@ -1646,8 +1646,7 @@ class AMP_Validation_Error_Taxonomy {
 			);
 
 			$actions['copy'] = sprintf(
-				'<button type="button" aria-label="%s" class="single-url-detail-copy button-link" data-error-json="%s">%s</button>',
-				esc_attr__( 'Copy to clipboard', 'amp' ),
+				'<button type="button" class="single-url-detail-copy button-link" data-error-json="%s">%s</button>',
 				esc_attr( self::get_error_details_json( $term ) ),
 				esc_html__( 'Copy to clipboard', 'amp' )
 			);
