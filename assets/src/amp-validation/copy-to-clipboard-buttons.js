@@ -49,11 +49,7 @@ export function handleCopyToClipboardButtons() {
 	// eslint-disable-next-line no-new
 	clipboards.push( new Clipboard( 'button.single-url-detail-copy', {
 		text: ( btn ) => {
-			const json = JSON.parse( btn.getAttribute( 'data-error-json' ) );
-			const statusSelect = btn.closest( 'tr' ).querySelector( '.amp-validation-error-status' );
-			json.status = statusSelect.options[ statusSelect.selectedIndex ].text;
-
-			return JSON.stringify( json, null, '\t' );
+			return btn.getAttribute( 'data-error-json' );
 		},
 	} ) );
 
@@ -66,11 +62,7 @@ export function handleCopyToClipboardButtons() {
 					return null;
 				}
 
-				const json = JSON.parse( copyButton.getAttribute( 'data-error-json' ) );
-				const statusSelect = row.querySelector( '.amp-validation-error-status' );
-				json.status = statusSelect.options[ statusSelect.selectedIndex ].text;
-
-				return json;
+				return JSON.parse( copyButton.getAttribute( 'data-error-json' ) );
 			} )
 				.filter( ( item ) => item );
 
