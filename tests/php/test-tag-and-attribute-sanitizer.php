@@ -245,13 +245,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'amp-iframe'                                   => [
-				'<amp-iframe width="600" height="200" sandbox="allow-scripts allow-same-origin" layout="responsive" frameborder="0" src="https://www.example.com"></amp-iframe>',
+				'<amp-iframe width="600" height="200" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation" layout="responsive" frameborder="0" src="https://www.example.com"></amp-iframe>',
 				null, // No change.
 				[ 'amp-iframe' ],
 			],
 
 			'amp-iframe_incorrect_protocol'                => [
-				'<amp-iframe width="600" height="200" sandbox="allow-scripts allow-same-origin" layout="responsive" frameborder="0" src="badprotocol://www.example.com"></amp-iframe>',
+				'<amp-iframe width="600" height="200" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation" layout="responsive" frameborder="0" src="badprotocol://www.example.com"></amp-iframe>',
 				'',
 				[],
 				[
@@ -2425,6 +2425,20 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_WIDTH ],
 			],
 
+			'empty_width_attribute'                        => [
+				'<amp-img src="/img1.png" width="" height="50"></amp-img>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_WIDTH ],
+			],
+
+			'empty_height_attribute'                       => [
+				'<amp-img src="/img1.png" width="50" height=""></amp-img>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_HEIGHT ],
+			],
+
 			'variable_attributes_in_mustache_template'     => [
 				'
 				<template type="amp-mustache">
@@ -2461,8 +2475,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				null,
 			],
 
-			'empty_width_attribute'                        => [
-				'<amp-img src="/img1.png" width="" height="50" layout="responsive"></amp-img>',
+			'empty_width_attribute_responsive_layout'      => [
+				'<amp-img src="/img1.png" width="auto" height="50" layout="responsive"></amp-img>',
 				'',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_AUTO_WIDTH ],
@@ -2476,28 +2490,28 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'no_height_fixed_layout'                       => [
-				'<amp-img src="/img1.png" width="50" height="" layout="fixed"></amp-img>',
+				'<amp-img src="/img1.png" width="50" layout="fixed"></amp-img>',
 				'',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_NO_HEIGHT ],
 			],
 
 			'no_height_fixed_height_layout'                => [
-				'<amp-img src="/img1.png" width="50" height="" layout="fixed-height"></amp-img>',
+				'<amp-img src="/img1.png" width="50" layout="fixed-height"></amp-img>',
 				'',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_NO_HEIGHT ],
 			],
 
 			'no_height_intrinsic_layout'                   => [
-				'<amp-img src="/img1.png" width="50" height="" layout="intrinsic"></amp-img>',
+				'<amp-img src="/img1.png" width="50" layout="intrinsic"></amp-img>',
 				'',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_NO_HEIGHT ],
 			],
 
 			'no_height_responsive_layout'                  => [
-				'<amp-img src="/img1.png" width="50" height="" layout="responsive"></amp-img>',
+				'<amp-img src="/img1.png" width="50" layout="responsive"></amp-img>',
 				'',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_NO_HEIGHT ],

@@ -464,9 +464,9 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			]
 		);
 
-		$this->assertStringEndsWith( '&amp', amp_get_permalink( $published_post ) );
-		$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
-		$this->assertStringEndsWith( '&amp', amp_get_permalink( $published_page ) );
+		$this->assertStringEndsWith( '&amp=1', amp_get_permalink( $published_post ) );
+		$this->assertStringEndsWith( '&amp=1', amp_get_permalink( $drafted_post ) );
+		$this->assertStringEndsWith( '&amp=1', amp_get_permalink( $published_page ) );
 
 		add_filter( 'amp_pre_get_permalink', [ $this, 'return_example_url' ], 10, 2 );
 		add_filter( 'amp_get_permalink', [ $this, 'return_example_url' ], 10, 2 );
@@ -478,6 +478,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$url = amp_get_permalink( $published_post );
 		$this->assertStringContains( 'current_filter=amp_get_permalink', $url );
 		remove_filter( 'amp_pre_get_permalink', [ $this, 'return_example_url' ] );
+		remove_filter( 'amp_get_permalink', [ $this, 'return_example_url' ] );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->assertEquals( get_permalink( $published_post ), amp_get_permalink( $published_post ) );
@@ -494,13 +495,16 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		foreach ( $argses as $args ) {
 			delete_option( AMP_Options_Manager::OPTION_NAME ); // To specify the defaults.
 			add_theme_support( AMP_Theme_Support::SLUG, $args );
-			$this->assertStringEndsWith( '&amp', amp_get_permalink( $published_post ) );
-			$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
-			$this->assertStringEndsWith( '&amp', amp_get_permalink( $published_page ) );
+
+			remove_filter( 'amp_pre_get_permalink', [ $this, 'return_example_url' ] );
+			remove_filter( 'amp_get_permalink', [ $this, 'return_example_url' ] );
+			$this->assertStringEndsWith( '&amp=1', amp_get_permalink( $published_post ) );
+			$this->assertStringEndsWith( '&amp=1', amp_get_permalink( $drafted_post ) );
+			$this->assertStringEndsWith( '&amp=1', amp_get_permalink( $published_page ) );
 			add_filter( 'amp_get_permalink', [ $this, 'return_example_url' ], 10, 2 );
-			$this->assertStringNotContains( 'current_filter=amp_get_permalink', amp_get_permalink( $published_post ) ); // Filter does not apply.
+			$this->assertStringEndsWith( 'current_filter=amp_get_permalink', amp_get_permalink( $published_post ) );
 			add_filter( 'amp_pre_get_permalink', [ $this, 'return_example_url' ], 10, 2 );
-			$this->assertStringNotContains( 'current_filter=amp_pre_get_permalink', amp_get_permalink( $published_post ) ); // Filter does not apply.
+			$this->assertStringEndsWith( 'current_filter=amp_pre_get_permalink', amp_get_permalink( $published_post ) );
 		}
 	}
 
@@ -539,12 +543,12 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 				'post_type'   => 'page',
 			]
 		);
-		$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
-		$this->assertStringEndsWith( '/amp/', amp_get_permalink( $published_post ) );
-		$this->assertStringEndsWith( '?amp', amp_get_permalink( $published_page ) );
+		$this->assertStringEndsWith( '&amp=1', amp_get_permalink( $drafted_post ) );
+		$this->assertStringEndsWith( '?amp=1', amp_get_permalink( $published_post ) );
+		$this->assertStringEndsWith( '?amp=1', amp_get_permalink( $published_page ) );
 
 		add_filter( 'post_link', $add_anchor_fragment );
-		$this->assertStringEndsWith( '/amp/#anchor', amp_get_permalink( $published_post ) );
+		$this->assertStringEndsWith( '?amp=1#anchor', amp_get_permalink( $published_post ) );
 		remove_filter( 'post_link', $add_anchor_fragment );
 
 		add_filter( 'amp_pre_get_permalink', [ $this, 'return_example_url' ], 10, 2 );
@@ -560,17 +564,19 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 		// Now check with theme support added (in transitional mode).
 		add_theme_support( AMP_Theme_Support::SLUG, [ 'template_dir' => './' ] );
-		$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
-		$this->assertStringEndsWith( '?amp', amp_get_permalink( $published_post ) );
-		$this->assertStringEndsWith( '?amp', amp_get_permalink( $published_page ) );
+		$this->assertStringEndsWith( '&amp=1', amp_get_permalink( $drafted_post ) );
+		$this->assertStringEndsWith( '?amp=1', amp_get_permalink( $published_post ) );
+		$this->assertStringEndsWith( '?amp=1', amp_get_permalink( $published_page ) );
 		add_filter( 'amp_get_permalink', [ $this, 'return_example_url' ], 10, 2 );
-		$this->assertStringNotContains( 'current_filter=amp_get_permalink', amp_get_permalink( $published_post ) ); // Filter does not apply.
+		$this->assertStringEndsWith( 'current_filter=amp_get_permalink', amp_get_permalink( $published_post ) );
 		add_filter( 'amp_pre_get_permalink', [ $this, 'return_example_url' ], 10, 2 );
-		$this->assertStringNotContains( 'current_filter=amp_pre_get_permalink', amp_get_permalink( $published_post ) ); // Filter does not apply.
+		$this->assertStringEndsWith( 'current_filter=amp_pre_get_permalink', amp_get_permalink( $published_post ) );
 
 		// Make sure that if permalink has anchor that it is persists.
+		remove_filter( 'amp_pre_get_permalink', [ $this, 'return_example_url' ] );
+		remove_filter( 'amp_get_permalink', [ $this, 'return_example_url' ] );
 		add_filter( 'post_link', $add_anchor_fragment );
-		$this->assertStringEndsWith( '/?amp#anchor', amp_get_permalink( $published_post ) );
+		$this->assertStringEndsWith( '/?amp=1#anchor', amp_get_permalink( $published_post ) );
 	}
 
 	/**
@@ -599,15 +605,19 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test amp_remove_endpoint.
+	 * Test amp_remove_paired_endpoint.
 	 *
-	 * @covers ::amp_remove_endpoint()
+	 * @covers ::amp_remove_paired_endpoint()
 	 */
-	public function test_amp_remove_endpoint() {
-		$this->assertEquals( 'https://example.com/foo/', amp_remove_endpoint( 'https://example.com/foo/?amp' ) );
-		$this->assertEquals( 'https://example.com/foo/?#bar', amp_remove_endpoint( 'https://example.com/foo/?amp#bar' ) );
-		$this->assertEquals( 'https://example.com/foo/', amp_remove_endpoint( 'https://example.com/foo/amp/' ) );
-		$this->assertEquals( 'https://example.com/foo/?blaz', amp_remove_endpoint( 'https://example.com/foo/amp/?blaz' ) );
+	public function test_amp_remove_paired_endpoint() {
+		$this->assertEquals( 'https://example.com/foo/', amp_remove_paired_endpoint( 'https://example.com/foo/?amp' ) );
+		$this->assertEquals( 'https://example.com/foo/', amp_remove_paired_endpoint( 'https://example.com/foo/?amp=1' ) );
+		$this->assertEquals( 'https://example.com/foo/', amp_remove_paired_endpoint( 'https://example.com/foo/amp/?amp=1' ) );
+		$this->assertEquals( 'https://example.com/foo/?#bar', amp_remove_paired_endpoint( 'https://example.com/foo/?amp#bar' ) );
+		$this->assertEquals( 'https://example.com/foo/', amp_remove_paired_endpoint( 'https://example.com/foo/amp/' ) );
+		$this->assertEquals( 'https://example.com/foo/?blaz', amp_remove_paired_endpoint( 'https://example.com/foo/amp/?blaz' ) );
+		$this->assertEquals( 'https://example.com/foo/?blaz', amp_remove_paired_endpoint( 'https://example.com/foo/amp/amp/?blaz' ) );
+		$this->assertEquals( 'https://example.com/foo/?blaz', amp_remove_paired_endpoint( 'https://example.com/foo/amp/foo/amp/bar/?blaz' ) );
 	}
 
 	/**
@@ -631,14 +641,14 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			'is_home'         => static function () {
 				return [
 					home_url( '/' ),
-					add_query_arg( amp_get_slug(), '', home_url( '/' ) ),
+					amp_add_paired_endpoint( home_url( '/' ) ),
 					false,
 				];
 			},
 			'is_404'          => static function () {
 				return [
 					home_url( '/no-existe/' ),
-					add_query_arg( amp_get_slug(), '', home_url( '/no-existe/' ) ),
+					amp_add_paired_endpoint( home_url( '/no-existe/' ) ),
 					false,
 				];
 			},
@@ -730,14 +740,14 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			'is_home'         => static function () {
 				return [
 					home_url( '/' ),
-					add_query_arg( amp_get_slug(), '', home_url( '/' ) ),
+					amp_add_paired_endpoint( home_url( '/' ) ),
 					true,
 				];
 			},
 			'is_404'          => static function () {
 				return [
 					home_url( '/no-existe/' ),
-					add_query_arg( amp_get_slug(), '', home_url( '/no-existe/' ) ),
+					amp_add_paired_endpoint( home_url( '/no-existe/' ) ),
 					true,
 				];
 			},
@@ -853,7 +863,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertFalse( amp_is_request() );
 
 		// Legacy query var.
-		set_query_var( amp_get_slug(), '' );
+		set_query_var( amp_get_slug(), '1' );
 		$this->assertTrue( amp_is_available() );
 		$this->assertTrue( amp_is_request() );
 		unset( $GLOBALS['wp_query']->query_vars[ amp_get_slug() ] );
@@ -862,7 +872,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 		// Transitional theme support.
 		add_theme_support( AMP_Theme_Support::SLUG, [ 'template_dir' => './' ] );
-		$_GET['amp'] = '';
+		$_GET['amp'] = '1';
 		$this->assertTrue( amp_is_available() );
 		$this->assertTrue( amp_is_request() );
 		unset( $_GET['amp'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -1044,7 +1054,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function test_amp_is_request_before_wp_action_for_transitional_mode_with_query_var() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
-		$this->go_to( add_query_arg( amp_get_slug(), '1', home_url( '/' ) ) );
+		$this->go_to( amp_add_paired_endpoint( home_url( '/' ) ) );
 		global $wp_actions;
 		unset( $wp_actions['wp'] );
 		$this->assertTrue( AMP_Options_Manager::get_option( Option::ALL_TEMPLATES_SUPPORTED ) );
@@ -1748,7 +1758,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertStringNotContains( 'autofocus', $item->href );
 
 		// Confirm that link is added to non-AMP version.
-		set_query_var( amp_get_slug(), '' );
+		set_query_var( amp_get_slug(), '1' );
 		$this->assertTrue( amp_is_request() );
 		$admin_bar = new WP_Admin_Bar();
 		amp_add_admin_bar_view_link( $admin_bar );
@@ -1806,6 +1816,89 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertSame( 'sha384-nYSGte6layPrGqn7c1Om8wNCgSq5PU-56H0R6j1kTb7R3aLbWeM3ra0YF5xKFuI0', amp_generate_script_hash( 'document.body.textContent += \'Hello world!\';' ) );
 		$this->assertSame( 'sha384-Qdwpb9Wpgg4BE21ukx8rwjbJGEdW2xjanFfsRNtmYQH69a_QeI0it1V8N23ZdsRX', amp_generate_script_hash( 'document.body.textContent = \'¡Hola mundo!\';' ) );
 		$this->assertSame( 'sha384-_MAJ0_NC2k8jrjehfi-5LdQasBICZXvp4gOwOx0D3mIStvDCGvZDzcTfXLgMrLL1', amp_generate_script_hash( 'document.body.textContent = \'<Hi! & 👋>\';' ) );
+	}
+
+	/** @covers ::amp_add_paired_endpoint() */
+	public function test_amp_add_paired_endpoint() {
+		$this->assertEquals( home_url( '/?amp=1' ), amp_add_paired_endpoint( home_url( '/' ) ) );
+		$this->assertEquals( home_url( '/?foo=bar&amp=1' ), amp_add_paired_endpoint( home_url( '/?foo=bar' ) ) );
+		$this->assertEquals( home_url( '/?foo=bar&amp=1#baz' ), amp_add_paired_endpoint( home_url( '/?foo=bar#baz' ) ) );
+	}
+
+	/** @return array */
+	public function data_amp_has_paired_endpoint() {
+		return [
+			'nothing'                 => [
+				'',
+				false,
+			],
+			'url_param_bare'          => [
+				'?amp',
+				true,
+			],
+			'url_param_value'         => [
+				'?amp=1',
+				true,
+			],
+			'endpoint_bare_slashed'   => [
+				'amp/',
+				true,
+			],
+			'endpoint_bare_unslashed' => [
+				'amp',
+				true,
+			],
+			'endpoint_with_value'     => [
+				'amp/x/',
+				true,
+			],
+			'endpoint_and_url_param'  => [
+				'amp/?amp=1',
+				true,
+			],
+			'endpoint_with_extras'    => [
+				'amp/?foo=var#baz',
+				true,
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider data_amp_has_paired_endpoint
+	 * @covers ::amp_has_paired_endpoint()
+	 *
+	 * @param string $suffix
+	 * @param bool   $is_amp
+	 */
+	public function test_amp_has_paired_endpoint_go_to( $suffix, $is_amp ) {
+		add_filter( 'wp_redirect', '__return_empty_string' ); // Prevent ensure_proper_amp_location() from redirecting.
+		global $wp_rewrite;
+		update_option( 'permalink_structure', '/%year%/%monthnum%/%day%/%postname%/' );
+		$wp_rewrite->init();
+		add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
+		$wp_rewrite->flush_rules();
+
+		$permalink = get_permalink( self::factory()->post->create() );
+		$this->assertNotContains( '?', $permalink );
+		$url = $permalink . $suffix;
+		$this->go_to( $url );
+		$this->assertTrue( is_singular(), 'Expected singular query.' );
+		$this->assertTrue( amp_is_available(), 'Expected AMP to be available.' );
+		$this->assertEquals( $is_amp, amp_has_paired_endpoint() );
+	}
+
+	/**
+	 * @dataProvider data_amp_has_paired_endpoint
+	 * @covers ::amp_has_paired_endpoint()
+	 *
+	 * @param string $suffix
+	 * @param bool   $is_amp
+	 */
+	public function test_amp_has_paired_endpoint_passed( $suffix, $is_amp ) {
+		$permalink = home_url( '/foo/' );
+		$this->assertNotContains( '?', $permalink );
+		$url = $permalink . $suffix;
+		$this->assertEquals( $is_amp, amp_has_paired_endpoint( $url ) );
 	}
 
 	/**

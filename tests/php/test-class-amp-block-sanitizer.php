@@ -46,6 +46,11 @@ class AMP_Block_Sanitizer_Test extends WP_UnitTestCase {
 				'<figure class="wp-block-embed-soundcloud wp-block-embed is-type-rich is-provider-soundcloud wp-embed-aspect-4-3 wp-has-aspect-ratio"><div class="wp-block-embed__wrapper"><amp-soundcloud data-trackid="90097394" data-visual="true" height="400" width="640" layout="responsive"></amp-soundcloud></div></figure>',
 				'<figure class="wp-block-embed-soundcloud wp-block-embed is-type-rich is-provider-soundcloud"><div class="wp-block-embed__wrapper"><amp-soundcloud data-trackid="90097394" data-visual="true" height="3" width="4" layout="responsive"></amp-soundcloud></div></figure>',
 			],
+
+			'intrinsic_layout'     => [
+				'<figure class="wp-block-embed-slideshare wp-block-embed is-type-rich is-provider-slideshare wp-embed-aspect-1-1 wp-has-aspect-ratio"><div class="wp-block-embed__wrapper"><amp-iframe title="AMP in WordPress, the WordPress Way" src="https://www.slideshare.net/slideshow/embed_code/key/4wRcvt5FDQhkgB" width="427" height="356" frameborder="0" scrolling="no" allowfullscreen="" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation" layout="intrinsic" class="amp-wp-enforced-sizes"><span placeholder="" class="amp-wp-iframe-placeholder"></span></amp-iframe></div></figure>',
+				'<figure class="wp-block-embed-slideshare wp-block-embed is-type-rich is-provider-slideshare"><div class="wp-block-embed__wrapper"><amp-iframe title="AMP in WordPress, the WordPress Way" src="https://www.slideshare.net/slideshow/embed_code/key/4wRcvt5FDQhkgB" width="1" height="1" frameborder="0" scrolling="no" allowfullscreen="" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation" layout="responsive" class="amp-wp-enforced-sizes"><span placeholder="" class="amp-wp-iframe-placeholder"></span></amp-iframe></div></figure>',
+			],
 		];
 	}
 

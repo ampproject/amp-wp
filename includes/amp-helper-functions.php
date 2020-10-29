@@ -612,7 +612,7 @@ function amp_redirect_old_slug_to_new_url( $link ) {
 
 	if ( amp_is_request() && ! amp_is_canonical() ) {
 		if ( ! amp_is_legacy() ) {
-			$link = add_query_arg( amp_get_slug(), '', $link );
+			$link = amp_add_paired_endpoint( $link );
 		} else {
 			$link = trailingslashit( trailingslashit( $link ) . amp_get_slug() );
 		}
@@ -699,16 +699,6 @@ function amp_get_current_url() {
  * @return string AMP permalink.
  */
 function amp_get_permalink( $post_id ) {
-
-	// When theme support is present (i.e. not using legacy Reader post templates), the plain query var should always be used.
-	if ( ! amp_is_legacy() ) {
-		$permalink = get_permalink( $post_id );
-		if ( ! amp_is_canonical() ) {
-			$permalink = add_query_arg( amp_get_slug(), '', $permalink );
-		}
-		return $permalink;
-	}
-
 	/**
 	 * Filters the AMP permalink to short-circuit normal generation.
 	 *
@@ -727,35 +717,7 @@ function amp_get_permalink( $post_id ) {
 	}
 
 	$permalink = get_permalink( $post_id );
-
-	if ( amp_is_canonical() ) {
-		$amp_url = $permalink;
-	} else {
-		$parsed_url    = wp_parse_url( get_permalink( $post_id ) );
-		$structure     = get_option( 'permalink_structure' );
-		$use_query_var = (
-			// If pretty permalinks aren't available, then query var must be used.
-			empty( $structure )
-			||
-			// If there are existing query vars, then always use the amp query var as well.
-			! empty( $parsed_url['query'] )
-			||
-			// If the post type is hierarchical then the /amp/ endpoint isn't available.
-			is_post_type_hierarchical( get_post_type( $post_id ) )
-			||
-			// Attachment pages don't accept the /amp/ endpoint.
-			'attachment' === get_post_type( $post_id )
-		);
-		if ( $use_query_var ) {
-			$amp_url = add_query_arg( amp_get_slug(), '', $permalink );
-		} else {
-			$amp_url = preg_replace( '/#.*/', '', $permalink );
-			$amp_url = trailingslashit( $amp_url ) . user_trailingslashit( amp_get_slug(), 'single_amp' );
-			if ( ! empty( $parsed_url['fragment'] ) ) {
-				$amp_url .= '#' . $parsed_url['fragment'];
-			}
-		}
-	}
+	$amp_url   = amp_is_canonical() ? $permalink : amp_add_paired_endpoint( $permalink );
 
 	/**
 	 * Filters AMP permalink.
@@ -773,19 +735,14 @@ function amp_get_permalink( $post_id ) {
  * Remove the AMP endpoint (and query var) from a given URL.
  *
  * @since 0.7
+ * @since 2.1 Deprecated.
+ * @deprecated Use amp_remove_paired_endpoint() instead.
  *
  * @param string $url URL.
  * @return string URL with AMP stripped.
  */
 function amp_remove_endpoint( $url ) {
-
-	// Strip endpoint.
-	$url = preg_replace( ':/' . preg_quote( amp_get_slug(), ':' ) . '(?=/?(\?|#|$)):', '', $url );
-
-	// Strip query var.
-	$url = remove_query_arg( amp_get_slug(), $url );
-
-	return $url;
+	return amp_remove_paired_endpoint( $url );
 }
 
 /**
@@ -836,7 +793,7 @@ function amp_add_amphtml_link() {
 	}
 
 	if ( AMP_Theme_Support::is_paired_available() ) {
-		$amp_url = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
+		$amp_url = amp_add_paired_endpoint( amp_get_current_url() );
 	} else {
 		$amp_url = amp_get_permalink( get_queried_object_id() );
 	}
@@ -899,13 +856,7 @@ function amp_is_request() {
 	$is_amp_url = (
 		amp_is_canonical()
 		||
-		isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		||
-		(
-			$wp_query instanceof WP_Query
-			&&
-			false !== $wp_query->get( amp_get_slug(), false )
-		)
+		amp_has_paired_endpoint()
 	);
 
 	// If AMP is not available, then it's definitely not an AMP endpoint.
@@ -1910,11 +1861,11 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 	$is_amp_request = amp_is_request();
 
 	if ( $is_amp_request ) {
-		$href = amp_remove_endpoint( amp_get_current_url() );
+		$href = amp_remove_paired_endpoint( amp_get_current_url() );
 	} elseif ( is_singular() ) {
 		$href = amp_get_permalink( get_queried_object_id() ); // For sake of Reader mode.
 	} else {
-		$href = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
+		$href = amp_add_paired_endpoint( amp_get_current_url() );
 	}
 
 	$href = remove_query_arg( QueryVar::NOAMP, $href );
@@ -1949,7 +1900,7 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 		if ( amp_is_legacy() ) {
 			$args['href'] = add_query_arg( 'autofocus[panel]', AMP_Template_Customizer::PANEL_ID, $args['href'] );
 		} else {
-			$args['href'] = add_query_arg( amp_get_slug(), '1', $args['href'] );
+			$args['href'] = amp_add_paired_endpoint( $args['href'] );
 		}
 		$wp_admin_bar->add_node( $args );
 	}
@@ -1982,4 +1933,91 @@ function amp_generate_script_hash( $script ) {
 		base64_encode( $sha384 ) // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 	);
 	return 'sha384-' . $hash;
+}
+
+/**
+ * Turn a given URL into a paired AMP URL.
+ *
+ * @since 2.1
+ *
+ * @param string $url URL.
+ * @return string AMP URL.
+ */
+function amp_add_paired_endpoint( $url ) {
+	return add_query_arg( amp_get_slug(), '1', $url );
+}
+
+/**
+ * Determine a given URL is for a paired AMP request.
+ *
+ * @since 2.1
+ *
+ * @param string $url URL to examine. If empty, will use the current URL.
+ * @return bool True if the AMP query parameter is set with the required value, false if not.
+ * @global WP_Query $wp_query
+ */
+function amp_has_paired_endpoint( $url = '' ) {
+	$slug = amp_get_slug();
+
+	// If the URL was not provided, then use the environment which is already parsed.
+	if ( empty( $url ) ) {
+		global $wp_query;
+		return (
+			isset( $_GET[ $slug ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			||
+			(
+				$wp_query instanceof WP_Query
+				&&
+				false !== $wp_query->get( $slug, false )
+			)
+		);
+	}
+
+	$parsed_url = wp_parse_url( $url );
+	if ( ! empty( $parsed_url['query'] ) ) {
+		$query_vars = [];
+		wp_parse_str( $parsed_url['query'], $query_vars );
+		if ( isset( $query_vars[ $slug ] ) ) {
+			return true;
+		}
+	}
+
+	if ( ! empty( $parsed_url['path'] ) ) {
+		$pattern = sprintf(
+			'#/%s(/[^/^])?/?$#',
+			preg_quote( $slug, '#' )
+		);
+		if ( preg_match( $pattern, $parsed_url['path'] ) ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Remove the paired AMP endpoint from a given URL.
+ *
+ * @since 2.1
+ *
+ * @param string $url URL.
+ * @return string URL with AMP stripped.
+ */
+function amp_remove_paired_endpoint( $url ) {
+	$slug = amp_get_slug();
+
+	// Strip endpoint, including /amp/, /amp/amp/, /amp/foo/.
+	$url = preg_replace(
+		sprintf(
+			':(/%s(/[^/?#]+)?)+(?=/?(\?|#|$)):',
+			preg_quote( $slug, ':' )
+		),
+		'',
+		$url
+	);
+
+	// Strip query var, including ?amp, ?amp=1, etc.
+	$url = remove_query_arg( $slug, $url );
+
+	return $url;
 }

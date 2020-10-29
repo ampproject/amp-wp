@@ -338,7 +338,7 @@ class AMP_Validation_Manager {
 		$is_amp_request = amp_is_request();
 
 		$current_url = amp_get_current_url();
-		$non_amp_url = amp_remove_endpoint( $current_url );
+		$non_amp_url = amp_remove_paired_endpoint( $current_url );
 		$non_amp_url = add_query_arg(
 			QueryVar::NOAMP,
 			amp_is_canonical() ? QueryVar::NOAMP_AVAILABLE : QueryVar::NOAMP_MOBILE,
@@ -350,7 +350,7 @@ class AMP_Validation_Manager {
 			$current_url
 		);
 		if ( ! amp_is_canonical() ) {
-			$amp_url = add_query_arg( amp_get_slug(), '', $amp_url );
+			$amp_url = amp_add_paired_endpoint( $amp_url );
 		}
 
 		$validate_url = AMP_Validated_URL_Post_Type::get_recheck_url( AMP_Validated_URL_Post_Type::get_invalid_url_post( $amp_url ) ?: $amp_url );

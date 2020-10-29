@@ -188,7 +188,7 @@ class AMP_Post_Meta_Box {
 				'ampPostMetaBox.boot( %s );',
 				wp_json_encode(
 					[
-						'previewLink'     => esc_url_raw( add_query_arg( amp_get_slug(), '', get_preview_post_link( $post ) ) ),
+						'previewLink'     => esc_url_raw( amp_add_paired_endpoint( get_preview_post_link( $post ) ) ),
 						'canonical'       => amp_is_canonical(),
 						'enabled'         => empty( $support_errors ),
 						'canSupport'      => 0 === count( array_diff( $support_errors, [ 'post-status-disabled' ] ) ),
@@ -210,6 +210,29 @@ class AMP_Post_Meta_Box {
 	public function enqueue_block_assets() {
 		$post = get_post();
 		if ( ! in_array( $post->post_type, AMP_Post_Type_Support::get_eligible_post_types(), true ) ) {
+			return;
+		}
+
+		// Gutenberg v5.4 was bundled with WP 5.2, which is the earliest release known to work without errors.
+		$gb_supported = defined( 'GUTENBERG_VERSION' ) && version_compare( GUTENBERG_VERSION, '5.4.0', '>=' );
+		$wp_supported = ! $gb_supported && version_compare( get_bloginfo( 'version' ), '5.2', '>=' );
+
+		// Let the user know that block editor functionality is not available if the current Gutenberg or WordPress version is not supported.
+		if ( ! $gb_supported && ! $wp_supported ) {
+			if ( current_user_can( 'manage_options' ) ) {
+				wp_add_inline_script(
+					'wp-edit-post',
+					sprintf(
+						'wp.domReady(
+							function () {
+								wp.data.dispatch( "core/notices" ).createWarningNotice( %s )
+							}
+						);',
+						wp_json_encode( __( 'AMP functionality is not available since your version of the Block Editor is too old. Please either update WordPress core to the latest version or activate the Gutenberg plugin. As a last resort, you may use the Classic Editor plugin instead.', 'amp' ) )
+					)
+				);
+			}
+
 			return;
 		}
 
@@ -409,7 +432,7 @@ class AMP_Post_Meta_Box {
 	/**
 	 * Modify post preview link.
 	 *
-	 * Add the AMP query var is the amp-preview flag is set.
+	 * Add the AMP query var if the amp-preview flag is set.
 	 *
 	 * @since 0.6
 	 *
@@ -424,7 +447,7 @@ class AMP_Post_Meta_Box {
 		);
 
 		if ( $is_amp ) {
-			$link = add_query_arg( amp_get_slug(), true, $link );
+			$link = amp_add_paired_endpoint( $link );
 		}
 
 		return $link;

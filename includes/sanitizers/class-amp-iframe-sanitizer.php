@@ -22,18 +22,37 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Default values for sandboxing IFrame.
 	 *
-	 * @since 0.2
+	 * | Sandbox Token                             | Included | Rationale
+	 * |-------------------------------------------|----------|----------
+	 * | `allow-downloads`                         | Yes      | Useful for downloading documents, etc.
+	 * | `allow-downloads-without-user-activation` | No       | Experimental per MDN. Bad UX.
+	 * | `allow-forms`                             | Yes      | For embeds like polls.
+	 * | `allow-modals`                            | Yes      | For apps to show `confirm()`, etc.
+	 * | `allow-orientation-lock`                  | Yes      | Since we `allowfullscreen`, useful for games, etc.
+	 * | `allow-pointer-lock`                      | Yes      | Useful for games.
+	 * | `allow-popups`                            | Yes      | To open YouTube video in new window, for example.
+	 * | `allow-popups-to-escape-sandbox`          | Yes      | Useful for ads.
+	 * | `allow-presentation`                      | Yes      | To cast YouTube videos, for example.
+	 * | `allow-same-origin`                       | Yes      | Removed if iframe is same origin.
+	 * | `allow-scripts`                           | Yes      | An iframe's primary use case is custom JS.
+	 * | `allow-storage-access-by-user-activation` | No       | Experimental per MDN.
+	 * | `allow-top-navigation`                    | No       | Poor user experience.
+	 * | `allow-top-navigation-by-user-activation` | Yes      | Key for clicking `target=_top` links in iframes.
 	 *
-	 * @const int
+	 * @since 0.2
+	 * @since 2.0.5 Updated to include majority of other sandbox values which are included by default if sandbox is not provided.
+	 * @link https://html.spec.whatwg.org/multipage/iframe-embed-object.html#attr-iframe-sandbox
+	 *
+	 * @const string
 	 */
-	const SANDBOX_DEFAULTS = 'allow-scripts allow-same-origin';
+	const SANDBOX_DEFAULTS = 'allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation';
 
 	/**
 	 * Tag.
 	 *
-	 * @var string HTML <iframe> tag to identify and replace with AMP version.
-	 *
 	 * @since 0.2
+	 *
+	 * @var string HTML <iframe> tag to identify and replace with AMP version.
 	 */
 	public static $tag = 'iframe';
 
@@ -215,7 +234,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 *      @type string $src IFrame URL - Empty if HTTPS required per $this->args['require_https_src']
 	 *      @type int $width <iframe> width attribute - Set to numeric value if px or %
-	 *      @type int $height <iframe> width attribute - Set to numeric value if px or %
+	 *      @type int $height <iframe> height attribute - Set to numeric value if px or %
 	 *      @type string $sandbox <iframe> `sandbox` attribute - Pass along if found; default to value of self::SANDBOX_DEFAULTS
 	 *      @type string $class <iframe> `class` attribute - Pass along if found
 	 *      @type string $sizes <iframe> `sizes` attribute - Pass along if found

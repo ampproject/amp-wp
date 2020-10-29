@@ -13,7 +13,7 @@ Filters AMP permalink.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:769](/includes/amp-helper-functions.php#L769)
+:link: [includes/amp-helper-functions.php:731](/includes/amp-helper-functions.php#L731)
 
 <details>
 <summary>Show Code</summary>

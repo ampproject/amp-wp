@@ -4,7 +4,7 @@
 }
 
 /* AMP preview button wrapper */
-.wp-core-ui #amp-wrapper-post-preview {
+.wp-core-ui .amp-wrapper-post-preview {
 	margin-left: -6px;
 	margin-right: 6px;
 }
@@ -12,6 +12,7 @@
 /* AMP preview button */
 .wp-core-ui .amp-editor-post-preview {
 	height: 34px;
+	margin-right: 0 !important;
 	padding: 6px 12px;
 	border-top-left-radius: 0;
 	border-bottom-left-radius: 0;

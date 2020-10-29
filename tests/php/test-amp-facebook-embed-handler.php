@@ -39,7 +39,7 @@ class AMP_Facebook_Embed_Handler_Test extends WP_UnitTestCase {
 	 * @return array Response data.
 	 */
 	public function mock_http_request( $preempt, $r, $url ) {
-		if ( in_array( 'external-http', $_SERVER['argv'], true ) ) {
+		if ( self::is_external_http_test_suite() ) {
 			return $preempt;
 		}
 
@@ -95,11 +95,16 @@ class AMP_Facebook_Embed_Handler_Test extends WP_UnitTestCase {
 	 * @param array  $expected Expected scripts.
 	 */
 	public function test__get_scripts( $source, $expected ) {
+		if ( self::is_external_http_test_suite() ) {
+			$this->markTestSkipped( 'Endpoint is gone.' );
+		}
+
 		$embed = new AMP_Facebook_Embed_Handler();
 		$embed->register_embed();
 
 		$filtered_content = apply_filters( 'the_content', $source );
-		$dom              = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
+
+		$dom = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
 		$embed->sanitize_raw_embeds( $dom );
 
 		$validating_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
@@ -275,11 +280,16 @@ class AMP_Facebook_Embed_Handler_Test extends WP_UnitTestCase {
 	 * @covers AMP_Facebook_Embed_Handler::sanitize_raw_embeds()
 	 */
 	public function test__raw_embed_sanitizer( $source, $expected ) {
+		if ( self::is_external_http_test_suite() ) {
+			$this->markTestSkipped( 'Endpoint is gone.' );
+		}
+
 		$embed = new AMP_Facebook_Embed_Handler();
 		$embed->register_embed();
 
 		$filtered_content = apply_filters( 'the_content', $source );
-		$dom              = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
+
+		$dom = AMP_DOM_Utils::get_dom_from_content( $filtered_content );
 		$embed->sanitize_raw_embeds( $dom );
 
 		$layout_sanitizer = new AMP_Layout_Sanitizer( $dom );
@@ -291,5 +301,14 @@ class AMP_Facebook_Embed_Handler_Test extends WP_UnitTestCase {
 		$content = preg_replace( '#(<blockquote.*?>).+?(</blockquote>)#s', '$1<!--blockquote_contents-->$2', $content );
 
 		$this->assertEqualMarkup( $expected, $content );
+	}
+
+	/**
+	 * Whether external-http test suite is running.
+	 *
+	 * @return bool Running external-http test suite.
+	 */
+	private static function is_external_http_test_suite() {
+		return in_array( 'external-http', $_SERVER['argv'], true );
 	}
 }
