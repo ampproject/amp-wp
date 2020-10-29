@@ -170,6 +170,7 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 		$html .= sprintf( '<form id="internal-search" action="%s" method="get"><input name="s" type="search"></form>', esc_url( home_url( '/' ) ) );
 		$html .= sprintf( '<form id="internal-post" action="%s" method="post"><input name="content" type="text"></form>', esc_url( home_url( '/' ) ) );
 		$html .= '<form id="external-search" action="https://search.example.com/" method="get"><input name="s" type="search"></form>';
+		$html .= '<template type="amp-mustache"><div><a id="template-link" href="{{url}}">Link</a></div></template>';
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
 
@@ -195,7 +196,7 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 			if ( $paired && $link_data['expected_amp'] ) {
 				$this->assertStringContains( '?' . amp_get_slug(), $element->getAttribute( 'href' ), "ID: $id" );
 			} elseif ( ! $paired || ! $link_data['expected_amp'] ) {
-				$this->assertStringNotContains( '?' . amp_get_slug(), $element->getAttribute( 'href' ), "ID: $id" );
+				$this->assertStringNotContains( '?' . amp_get_slug() . '=1', $element->getAttribute( 'href' ), "ID: $id" );
 			}
 		}
 
@@ -203,6 +204,8 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 		$this->assertEquals( $paired ? 1 : 0, $dom->xpath->query( '//form[ @id = "internal-search" ]//input[ @name = "amp" ]' )->length );
 		$this->assertEquals( 0, $dom->xpath->query( '//form[ @id = "internal-post" ]//input[ @name = "amp" ]' )->length );
 		$this->assertEquals( 0, $dom->xpath->query( '//form[ @id = "external-search" ]//input[ @name = "amp" ]' )->length );
+
+		$this->assertEquals( '{{url}}', $dom->getElementById( 'template-link' )->getAttribute( 'href' ) );
 	}
 
 	/**
@@ -252,7 +255,7 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, true );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
-		$this->go_to( add_query_arg( amp_get_slug(), '', home_url( '/' ) ) );
+		$this->go_to( amp_add_paired_endpoint( home_url( '/' ) ) );
 		$mobile_redirection->redirect();
 
 		$link = home_url( '/' );
@@ -274,7 +277,7 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, true );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
-		$this->go_to( add_query_arg( amp_get_slug(), '', home_url( '/' ) ) );
+		$this->go_to( amp_add_paired_endpoint( home_url( '/' ) ) );
 		$mobile_redirection->redirect();
 
 		$link = home_url( '/' );

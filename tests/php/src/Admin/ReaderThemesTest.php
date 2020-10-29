@@ -344,7 +344,9 @@ class ReaderThemesTest extends WP_UnitTestCase {
 	 * @covers ::theme_data_exists
 	 */
 	public function test_theme_data_exists() {
-		$this->assertFalse( ( new ReaderThemes() )->theme_data_exists( 'neve' ) );
+		if ( ( new ReaderThemes() )->theme_data_exists( 'neve' ) ) {
+			$this->markTestSkipped( 'Neve is already installed.' );
+		}
 
 		$neve_theme        = [
 			'name'         => 'Neve',

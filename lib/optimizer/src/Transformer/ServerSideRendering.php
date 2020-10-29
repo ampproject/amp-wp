@@ -298,14 +298,16 @@ final class ServerSideRendering implements Transformer
     {
         $ampLayout = $this->parseLayout($element->getAttribute(Attribute::LAYOUT));
 
-        $inputWidth = new CssLength($element->getAttribute(Attribute::WIDTH));
+        $attrWidth  = $element->hasAttribute(Attribute::WIDTH) ? $element->getAttribute(Attribute::WIDTH) : null;
+        $inputWidth = new CssLength($attrWidth);
         $inputWidth->validate(/* $allowAuto */ true, /* $allowFluid */ false);
         if (! $inputWidth->isValid()) {
             $errors->add(Error\CannotPerformServerSideRendering::fromInvalidInputWidth($element));
             return false;
         }
 
-        $inputHeight = new CssLength($element->getAttribute(Attribute::HEIGHT));
+        $attrHeight  = $element->hasAttribute(Attribute::HEIGHT) ? $element->getAttribute(Attribute::HEIGHT) : null;
+        $inputHeight = new CssLength($attrHeight);
         $inputHeight->validate(/* $allowAuto */ true, /* $allowFluid */ $ampLayout === Layout::FLUID);
         if (! $inputHeight->isValid()) {
             $errors->add(Error\CannotPerformServerSideRendering::fromInvalidInputHeight($element));
@@ -633,12 +635,15 @@ final class ServerSideRendering implements Transformer
         Document $document,
         CssLength $width,
         CssLength $height,
-        $style = 'padding-top:%1.4F%%;'
+        $style = 'padding-top:%s%%'
     ) {
-        $padding = $height->getNumeral() / $width->getNumeral() * 100;
-        $sizer   = $document->createElement(Amp::SIZER_ELEMENT);
-        $style   = empty($style) ? 'display:block' : "display:block;{$style}";
-        $sizer->setAttribute(Tag::STYLE, sprintf($style, $padding));
+        $padding       = $height->getNumeral() / $width->getNumeral() * 100;
+        $paddingString = (string) round($padding, 4);
+
+        $style = empty($style) ? 'display:block' : "display:block;{$style}";
+
+        $sizer = $document->createElement(Amp::SIZER_ELEMENT);
+        $sizer->setAttribute(Tag::STYLE, sprintf($style, $paddingString));
 
         return $sizer;
     }

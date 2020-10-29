@@ -5,10 +5,12 @@ namespace AmpProject\AmpWP\Tests;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\Tests\Helpers\MockPluginEnvironment;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use PHPUnit\Framework\TestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\PluginRegistry */
 final class PluginRegistryTest extends TestCase {
+	use PrivateAccess;
 
 	private function populate_plugins() {
 		wp_cache_set( 'plugins', [ '' => MockPluginEnvironment::PLUGINS_DATA ], 'plugins' );
@@ -20,6 +22,18 @@ final class PluginRegistryTest extends TestCase {
 
 		$this->assertInstanceOf( PluginRegistry::class, $plugin_registry );
 		$this->assertInstanceOf( Service::class, $plugin_registry );
+	}
+
+	/** @covers ::get_plugin_dir() */
+	public function test_get_plugin_dir() {
+		$plugin_registry = new PluginRegistry();
+
+		$plugin_directory = $plugin_registry->get_plugin_dir();
+		$this->assertEquals( WP_CONTENT_DIR . '/plugins', $plugin_directory );
+
+		$this->set_private_property( $plugin_registry, 'plugin_folder', 'amp/tests/php/data/plugins' );
+		$plugin_directory = $plugin_registry->get_plugin_dir();
+		$this->assertEquals( WP_CONTENT_DIR . '/plugins/amp/tests/php/data/plugins', $plugin_directory );
 	}
 
 	/** @covers ::get_plugin_slug_from_file() */

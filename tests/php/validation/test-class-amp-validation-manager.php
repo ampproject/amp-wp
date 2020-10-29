@@ -1363,7 +1363,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 					'<!--amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_content_index":0,"block_attrs":{"postsToShow":1},"type":"%1$s","name":"%2$s","file":%4$s,"line":%5$s,"function":"%3$s"}--><ul class="%6$s"><li><a href="{{url}}">{{title}}</a></li></ul><!--/amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_attrs":{"postsToShow":1},"type":"%1$s","name":"%2$s","file":%4$s,"line":%5$s,"function":"%3$s"}-->',
 					$is_gutenberg ? 'plugin' : 'core',
 					$is_gutenberg ? 'gutenberg' : 'wp-includes',
-					$latest_posts_block->render_callback,
+					$latest_posts_block->render_callback instanceof Closure ? '{closure}' : $latest_posts_block->render_callback,
 					wp_json_encode(
 						$is_gutenberg
 						? preg_replace( ':.*gutenberg/:', '', $reflection_function->getFileName() )

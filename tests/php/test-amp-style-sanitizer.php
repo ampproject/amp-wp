@@ -202,10 +202,64 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'allowed_at_rules_retained' => [
-				'<style>@media screen and ( max-width: 640px ) { body { font-size: small; } } @font-face { font-family: "Open Sans"; src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"); } @supports (display: grid) { div { display: grid; } } @-moz-keyframes appear { from { opacity: 0.0; } to { opacity: 1.0; } } @keyframes appear { from { opacity: 0.0; } to { opacity: 1.0; } }</style><div></div>',
+				'<style>@charset "UTF-8"; @charset "UTF-8"; @charset "UTF-8"; html:lang(zz){ color: gray; } @media screen and ( max-width: 640px ) { body { font-size: small; } } @font-face { font-family: "Open Sans"; src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"); } @-moz-document url-prefix() { body { color:red; } } @supports (display: grid) { div { display: grid; } } @-moz-keyframes appear { from { opacity: 0.0; } to { opacity: 1.0; } } @keyframes appear { from { opacity: 0.0; } to { opacity: 1.0; } }</style><div></div>',
 				'<div></div>',
 				[
-					'@media screen and ( max-width: 640px ){body{font-size:small}}@font-face{font-family:"Open Sans";src:url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2")}@supports (display: grid){div{display:grid}}@-moz-keyframes appear{from{opacity:0}to{opacity:1}}@keyframes appear{from{opacity:0}to{opacity:1}}',
+					'@media screen and ( max-width: 640px ){body{font-size:small}}@font-face{font-family:"Open Sans";src:url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2")}@supports (-moz-appearance:meterbar){body{color:red}}@supports (display: grid){div{display:grid}}@-moz-keyframes appear{from{opacity:0}to{opacity:1}}@keyframes appear{from{opacity:0}to{opacity:1}}',
+				],
+			],
+
+			'moz_document_transformed' => [
+				'
+					<style>
+						@-moz-document url-prefix() {
+							/* From Twenty Nineteen. */
+							.entry .entry-content .has-drop-cap:not(:focus):first-letter {
+								margin-top: 0.2em;
+								behavior: url(hilite.htc);
+								-moz-binding: url(http://www.example.org/xbl/htmlBindings.xml#checkbox);
+							}
+						}
+					</style>
+					<style>
+						@-moz-document url-prefix(   ) {
+							.has-drop-cap {
+								/* Firefox does not even allow whitespace in the url-prefix() args. */
+								color: red;
+							}
+						}
+					</style>
+					<style>
+						@-moz-document url-prefix("http://") {
+							/* This rule will be dropped as a validation error since the url-prefix() is not empty. */
+							.has-drop-cap {
+								color: red;
+							}
+						}
+					</style>
+					<style>
+						@-moz-document url("https://example.com/") {
+							/* This rule will be dropped as a validation error since only an empty url-prefix() is allowed. */
+							.has-drop-cap {
+								color: red;
+							}
+						}
+					</style>
+					<div class="entry"><div class="entry-content"><p class="has-drop-cap">Hello</p></div></div>
+				',
+				'
+					<div class="entry"><div class="entry-content"><p class="has-drop-cap">Hello</p></div></div>
+				',
+				[
+					'@supports (-moz-appearance:meterbar){.entry .entry-content .has-drop-cap:not(:focus):first-letter{margin-top:.2em}}',
+					'',
+				],
+				[
+					AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
+					AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
+					AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE,
+					AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE,
+					AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE,
 				],
 			],
 
@@ -701,6 +755,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					<style> .amp-geo-group-foo { color: peru; } </style>
 					<style> .amp-iso-country-us { color: oldlace; } </style>
 					<style> .amp-video-eq { display: none; } </style>
+					<style> .amp-next-page-links, .amp-next-page-link, .amp-next-page-image, .amp-next-page-text, .amp-next-page-separator { outline: solid 1px red; }</style>
 					<style> #accord section[expanded] { outline: solid 1px blue; } </style>
 					<style> .non-existent { color: black; } </style>
 					</head>
@@ -717,6 +772,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 						<amp-video dock width="720" height="305" layout="responsive" src="https://yourhost.com/videos/myvideo.mp4" poster="https://yourhost.com/posters/poster.png" artwork="https://yourhost.com/artworks/artwork.png" title="Awesome video" artist="Awesome artist" album="Amazing album"></amp-video>
 						<amp-geo layout="nodisplay"><script type="application/json">{"ISOCountryGroups": {"foo":["us"]}}</script></amp-geo>
 						<amp-accordion id="accord" disable-session-states><section><h2>Section 1</h2><p>Content in section 1.</p></section><section><h2>Section 2</h2><div>Content in section 2.</div></section></amp-accordion>
+						<amp-next-page><script type="application/json">{}</script></amp-next-page>
 					</body>
 					</html>
 				',
@@ -738,6 +794,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'.amp-geo-group-foo{color:peru}',
 					'.amp-iso-country-us{color:oldlace}',
 					'.amp-video-eq{display:none}',
+					'.amp-next-page-links,.amp-next-page-link,.amp-next-page-image,.amp-next-page-text,.amp-next-page-separator{outline:solid 1px red}',
 					'#accord section[expanded]{outline:solid 1px blue}',
 				],
 				[],
@@ -1928,6 +1985,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( $response_body, $actual_stylesheets[0] );
 
 		$cache_key = CachedRemoteGetRequest::TRANSIENT_PREFIX . md5( CachedRemoteGetRequest::class . $href );
+
+		// Verify that the transients are not polluting the autoloaded options.
+		$autoloaded_options = wp_load_alloptions();
+		$this->assertArrayNotHasKey( "_transient_{$cache_key}", $autoloaded_options );
+
 		$transient = get_transient( $cache_key );
 		$this->assertNotFalse( $transient );
 

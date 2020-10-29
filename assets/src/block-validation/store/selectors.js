@@ -1,5 +1,5 @@
 /**
- * Returns general validation erroxrs.
+ * Returns general validation errors.
  *
  * @param {Object} state Editor state.
  *

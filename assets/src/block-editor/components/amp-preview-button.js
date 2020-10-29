@@ -1,26 +1,24 @@
 /**
  * External dependencies
  */
-import { get } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
  */
-import { Component, createRef, renderToString } from '@wordpress/element';
 import { Button, Icon } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
-import { withSelect, withDispatch } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
+import { withDispatch, withSelect } from '@wordpress/data';
+import { Component, createRef, renderToString } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
  */
-import ampBlackIcon from '../../../images/amp-black-icon.svg';
-import ampFilledIcon from '../../../images/amp-icon.svg';
 import { isAMPEnabled } from '../helpers';
-import { POST_PREVIEW_CLASS } from '../constants';
+import ampFilledIcon from '../../../images/amp-icon.svg';
+import ampBlackIcon from '../../../images/amp-black-icon.svg';
 
 /**
  * Writes the message and graphic in the new preview window that was opened.
@@ -105,12 +103,9 @@ function writeInterstitialMessage( targetDocument ) {
 /**
  * A 'Preview AMP' button, forked from the Core 'Preview' button: <PostPreviewButton>.
  *
- * Rendered into the DOM with renderPreviewButton() in helpers/index.js.
- * This also moves the (non-AMP) 'Preview' button to before this, if it's not already there.
- *
  * @see https://github.com/WordPress/gutenberg/blob/95e769df1f82f6b0ef587d81af65dd2f48cd1c38/packages/editor/src/components/post-preview-button/index.js#L95-L200
  */
-class AMPPreview extends Component {
+class AmpPreviewButton extends Component {
 	/**
 	 * Constructs the class.
 	 *
@@ -118,9 +113,9 @@ class AMPPreview extends Component {
 	 */
 	constructor( ...args ) {
 		super( ...args );
-		this.moveButton = this.moveButton.bind( this );
-		this.openPreviewWindow = this.openPreviewWindow.bind( this );
+
 		this.buttonRef = createRef();
+		this.openPreviewWindow = this.openPreviewWindow.bind( this );
 	}
 
 	/**
@@ -137,25 +132,6 @@ class AMPPreview extends Component {
 		if ( previewLink && ! prevProps.previewLink ) {
 			this.setPreviewWindowLink( previewLink );
 		}
-
-		this.moveButton();
-	}
-
-	/**
-	 * Moves the (non-AMP) 'Preview' button to before this 'Preview AMP' button, if it's not there already.
-	 */
-	moveButton() {
-		const buttonWrapper = get( this, [ 'buttonRef', 'current', 'parentNode' ], false );
-		if ( ! buttonWrapper ) {
-			return;
-		}
-
-		if ( ! buttonWrapper.previousSibling || ! buttonWrapper.previousSibling.classList.contains( POST_PREVIEW_CLASS ) ) {
-			const postPreviewButton = document.querySelector( `.${ POST_PREVIEW_CLASS }` );
-			if ( get( postPreviewButton, 'nextSibling' ) ) {
-				buttonWrapper.parentNode.insertBefore( buttonWrapper, postPreviewButton.nextSibling );
-			}
-		}
 	}
 
 	/**
@@ -169,6 +145,9 @@ class AMPPreview extends Component {
 
 		if ( previewWindow && ! previewWindow.closed ) {
 			previewWindow.location = url;
+			if ( this.buttonRef.current ) {
+				this.buttonRef.current.focus();
+			}
 		}
 	}
 
@@ -234,31 +213,29 @@ class AMPPreview extends Component {
 		// just link to the post's URL.
 		const href = previewLink || currentPostLink;
 
-		return (
-			isEnabled && ! errorMessages.length && ! isStandardMode && (
-				<Button
-					className="amp-editor-post-preview"
-					href={ href }
-					title={ __( 'Preview AMP', 'amp' ) }
-					isSecondary
-					disabled={ ! isSaveable }
-					onClick={ this.openPreviewWindow }
-					ref={ this.buttonRef }
-				>
-					{ ampFilledIcon( { viewBox: '0 0 62 62', width: 18, height: 18 } ) }
-					<span className="screen-reader-text">
-						{
-							/* translators: accessibility text */
-							__( '(opens in a new tab)', 'amp' )
-						}
-					</span>
-				</Button>
-			)
+		return isEnabled && ! errorMessages.length && ! isStandardMode && (
+			<Button
+				className="amp-editor-post-preview"
+				href={ href }
+				title={ __( 'Preview AMP', 'amp' ) }
+				isSecondary
+				disabled={ ! isSaveable }
+				onClick={ this.openPreviewWindow }
+				ref={ this.buttonRef }
+			>
+				{ ampFilledIcon( { viewBox: '0 0 62 62', width: 18, height: 18 } ) }
+				<span className="screen-reader-text">
+					{
+						/* translators: accessibility text */
+						__( '(opens in a new tab)', 'amp' )
+					}
+				</span>
+			</Button>
 		);
 	}
 }
 
-AMPPreview.propTypes = {
+AmpPreviewButton.propTypes = {
 	autosave: PropTypes.func.isRequired,
 	currentPostLink: PropTypes.string.isRequired,
 	postId: PropTypes.number.isRequired,
@@ -291,6 +268,7 @@ export default compose( [
 
 		const queryArgs = {};
 		queryArgs[ getAmpSlug() ] = 1;
+
 		const initialPreviewLink = getEditedPostPreviewLink();
 		const previewLink = initialPreviewLink ? addQueryArgs( initialPreviewLink, queryArgs ) : undefined;
 
@@ -310,4 +288,4 @@ export default compose( [
 		autosave: dispatch( 'core/editor' ).autosave,
 		savePost: dispatch( 'core/editor' ).savePost,
 	} ) ),
-] )( AMPPreview );
+] )( AmpPreviewButton );

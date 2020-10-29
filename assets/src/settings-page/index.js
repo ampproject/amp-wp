@@ -24,12 +24,11 @@ import '../css/elements.css';
 import '../css/core-components.css';
 import './style.css';
 import { OptionsContextProvider, Options } from '../components/options-context-provider';
-import { ReaderThemesContextProvider, ReaderThemes } from '../components/reader-themes-context-provider';
+import { ReaderThemesContextProvider } from '../components/reader-themes-context-provider';
 import { SiteSettingsProvider } from '../components/site-settings-provider';
 import { Loading } from '../components/loading';
 import { UnsavedChangesWarning } from '../components/unsaved-changes-warning';
-import { AMPNotice, NOTICE_TYPE_ERROR, NOTICE_TYPE_SUCCESS } from '../components/amp-notice';
-import { ErrorContextProvider, ErrorContext } from '../components/error-context-provider';
+import { ErrorContextProvider } from '../components/error-context-provider';
 import { AMPDrawer } from '../components/amp-drawer';
 import { Welcome } from './welcome';
 import { TemplateModes } from './template-modes';
@@ -69,31 +68,6 @@ Providers.propTypes = {
 };
 
 /**
- * Renders an error notice.
- *
- * @param {Object} props Component props.
- * @param {string} props.errorMessage Error message text.
- */
-function ErrorNotice( { errorMessage } ) {
-	return (
-		<div className="amp-error-notice">
-			<AMPNotice type={ NOTICE_TYPE_ERROR }>
-				<p>
-					<strong>
-						{ __( 'Error:', 'amp' ) }
-					</strong>
-					{ ' ' }
-					{ errorMessage }
-				</p>
-			</AMPNotice>
-		</div>
-	);
-}
-ErrorNotice.propTypes = {
-	errorMessage: PropTypes.string,
-};
-
-/**
  * Scrolls to the first focusable element in a section, or to the section if no focusable elements are found.
  *
  * @param {string} focusedSectionId A section ID.
@@ -122,45 +96,7 @@ function scrollFocusedSectionIntoView( focusedSectionId ) {
 function Root() {
 	const [ focusedSection, setFocusedSection ] = useState( global.location.hash.replace( /^#/, '' ) );
 
-	const { didSaveOptions, fetchingOptions, hasOptionsChanges, saveOptions } = useContext( Options );
-	const { error } = useContext( ErrorContext );
-	const { downloadingTheme } = useContext( ReaderThemes );
-	const [ savedNoticeClass, setSavedNoticeClass ] = useState( '' );
-
-	/**
-	 * Show the success notice after options have saved.
-	 */
-	useEffect( () => {
-		if ( didSaveOptions && ! downloadingTheme ) {
-			setSavedNoticeClass( 'visible' );
-		}
-	}, [ didSaveOptions, downloadingTheme ] );
-
-	/**
-	 * If the success notice is showing and updates have been made, hide the notice.
-	 */
-	useEffect( () => {
-		if ( 'visible' === savedNoticeClass && hasOptionsChanges ) {
-			setSavedNoticeClass( 'dismissed' );
-		}
-	}, [ savedNoticeClass, hasOptionsChanges ] );
-
-	/**
-	 * Hide the success notice after several seconds.
-	 */
-	useEffect( () => {
-		if ( 'visible' === savedNoticeClass ) {
-			const timeout = setTimeout( () => {
-				setSavedNoticeClass( 'dismissed' );
-			}, 9000 );
-
-			return () => {
-				clearTimeout( timeout );
-			};
-		}
-
-		return () => undefined;
-	}, [ savedNoticeClass ] );
+	const { fetchingOptions, saveOptions } = useContext( Options );
 
 	/**
 	 * Scroll to the focused element on load or when it changes.
@@ -252,16 +188,6 @@ function Root() {
 				<SettingsFooter />
 			</form>
 			<UnsavedChangesWarning excludeUserContext={ true } />
-			{ error && <ErrorNotice errorMessage={ error.message || __( 'An error occurred. You might be offline or logged out.', 'amp' ) } /> }
-			<AMPNotice
-				className={ `amp-save-success-notice ${ savedNoticeClass }` }
-				type={ NOTICE_TYPE_SUCCESS }
-				aria-hidden={ 'visible' !== savedNoticeClass }
-			>
-				<p>
-					{ __( 'Settings saved', 'amp' ) }
-				</p>
-			</AMPNotice>
 		</>
 	);
 }
