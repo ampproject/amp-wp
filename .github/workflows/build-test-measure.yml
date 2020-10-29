@@ -121,11 +121,40 @@ jobs:
           composer require --no-interaction --dev ergebnis/composer-normalize --ignore-platform-reqs
           composer --no-interaction normalize --dry-run
 
+#-----------------------------------------------------------------------------------------------------------------------
+
+  static-analysis-php:
+    name: 'Static Analysis: PHP'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          # phpstan requires PHP 7.1+.
+          php-version: 7.4
+          extensions: dom, iconv, json, libxml, zip
+          tools: composer:v1
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Configure Composer cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install
+
       - name: Static Analysis (PHPStan)
-        # phpstan requires PHP 7.1+.
-        run: |
-          vendor/bin/phpstan --version
-          vendor/bin/phpstan analyse --error-format=checkstyle | cs2pr
+        run: vendor/bin/phpstan analyse
 
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -375,10 +404,7 @@ jobs:
         run: bash bin/ci/install-wp-tests.sh wordpress_test root '' 127.0.0.1:${{ job.services.mysql.ports['3306'] }} ${{ matrix.wp }} true
 
       - name: Post install of WP tests
-        run: bash bin/ci/after-wp-install.sh
-        env:
-          WP_VERSION: ${{ matrix.wp }}
-          INSTALL_PWA_PLUGIN: ${{ matrix.install-pwa-plugin == true }}
+        run: bash bin/ci/after-wp-install.sh ${{ matrix.wp }} ${{ matrix.install-pwa-plugin == true }}
 
       - name: Setup PCOV
         if: ${{ matrix.coverage == true }}
