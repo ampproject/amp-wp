@@ -1613,7 +1613,7 @@ class AMP_Validation_Error_Taxonomy {
 		$json['removed']  = (bool) ( (int) $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
 		$json['reviewed'] = (bool) ( (int) $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
 
-		return wp_json_encode( $json, JSON_PRETTY_PRINT );
+		return wp_json_encode( $json );
 	}
 
 	/**
@@ -1646,8 +1646,7 @@ class AMP_Validation_Error_Taxonomy {
 			);
 
 			$actions['copy'] = sprintf(
-				'<button type="button" aria-label="%s" class="single-url-detail-copy button-link" data-error-json="%s">%s</button>',
-				esc_attr__( 'Copy to clipboard', 'amp' ),
+				'<button type="button" class="single-url-detail-copy button-link" data-error-json="%s">%s</button>',
 				esc_attr( self::get_error_details_json( $term ) ),
 				esc_html__( 'Copy to clipboard', 'amp' )
 			);
