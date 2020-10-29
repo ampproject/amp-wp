@@ -410,7 +410,7 @@ function amp_is_available() {
 	global $pagenow, $wp_query;
 
 	// Short-circuit for cron, CLI, admin requests or requests to non-frontend pages.
-	if ( ( defined( 'DOING_CRON' ) && DOING_CRON ) || defined( 'WP_CLI' ) || is_admin() || in_array( $pagenow, [ 'wp-login.php', 'wp-signup.php', 'wp-activate.php', 'repair.php' ], true ) ) {
+	if ( wp_doing_cron() || defined( 'WP_CLI' ) || is_admin() || in_array( $pagenow, [ 'wp-login.php', 'wp-signup.php', 'wp-activate.php', 'repair.php' ], true ) ) {
 		return false;
 	}
 
