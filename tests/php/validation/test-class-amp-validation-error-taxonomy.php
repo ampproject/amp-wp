@@ -1534,30 +1534,37 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::get_error_details_json()
 	 */
 	public function test_get_error_details_json() {
-		$term   = (object) [
-			'description' => wp_json_encode(
-				[
-					'node_type' => 1,
-				]
-			),
-			'term_group'  => 1,
-		];
+		$term = new WP_Term(
+			(object) [
+				'description' => wp_json_encode(
+					[
+						'node_type' => 1,
+					]
+				),
+				'term_group'  => 1,
+			]
+		);
+
 		$result = json_decode( AMP_Validation_Error_Taxonomy::get_error_details_json( $term ), true );
 
 		$this->assertEquals( 'ELEMENT', $result['node_type'] );
-		$this->assertEquals( 'Removed', $result['status'] );
+		$this->assertEquals( true, $result['removed'] );
+		$this->assertEquals( false, $result['reviewed'] );
 
-		$term   = (object) [
-			'description' => wp_json_encode(
-				[
-					'node_type' => 2,
-				]
-			),
-			'term_group'  => 2,
-		];
+		$term   = new WP_Term(
+			(object) [
+				'description' => wp_json_encode(
+					[
+						'node_type' => 2,
+					]
+				),
+				'term_group'  => 2,
+			]
+		);
 		$result = json_decode( AMP_Validation_Error_Taxonomy::get_error_details_json( $term ), true );
 
 		$this->assertEquals( 'ATTRIBUTE', $result['node_type'] );
-		$this->assertEquals( 'Kept', $result['status'] );
+		$this->assertEquals( false, $result['removed'] );
+		$this->assertEquals( true, $result['reviewed'] );
 	}
 }
