@@ -371,13 +371,13 @@ jobs:
         # The JSON file is provided by the `shivammathur/setup-php` action. See https://github.com/shivammathur/setup-php#problem-matchers.
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
-      - name: Set up tests
-        # TODO: Add step to install plugins instead of relying on .dev-lib
-        run: |
-          source bin/install-wp-tests.sh wordpress_test root '' 127.0.0.1:${{ job.services.mysql.ports['3306'] }} ${{ matrix.wp }} true
-          source .dev-lib
-          after_wp_install
+      - name: Install WP tests
+        run: bash bin/ci/install-wp-tests.sh wordpress_test root '' 127.0.0.1:${{ job.services.mysql.ports['3306'] }} ${{ matrix.wp }} true
+
+      - name: Post install of WP tests
+        run: bash bin/ci/after-wp-install.sh
         env:
+          WP_VERSION: ${{ matrix.wp }}
           INSTALL_PWA_PLUGIN: ${{ matrix.install-pwa-plugin == true }}
 
       - name: Setup PCOV
