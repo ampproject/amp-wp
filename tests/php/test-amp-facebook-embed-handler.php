@@ -224,6 +224,9 @@ class AMP_Facebook_Embed_Handler_Test extends WP_UnitTestCase {
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 
+		// Normalize blockquote contents to account for editing of published posts or variability of localized datetime strings.
+		$content = preg_replace( '#(<blockquote.*?>).+?(</blockquote>)#s', '$1<!--blockquote_contents-->$2', $content );
+
 		$this->assertEqualMarkup( $expected, $content );
 	}
 }
