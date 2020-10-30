@@ -137,9 +137,6 @@ abstract class AMP_Base_Embed_Handler {
 	 */
 	protected function unwrap_p_element( DOMElement $node ) {
 		$parent_node = $node->parentNode;
-		while ( $parent_node && ! ( $parent_node instanceof DOMElement ) ) {
-			$parent_node = $parent_node->parentNode;
-		}
 
 		if ( $parent_node instanceof DOMElement && 'p' === $parent_node->tagName && false === $parent_node->hasAttributes() ) {
 			$child_element_count = count( $this->get_child_elements( $parent_node ) );
