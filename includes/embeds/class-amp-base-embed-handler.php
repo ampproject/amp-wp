@@ -141,7 +141,7 @@ abstract class AMP_Base_Embed_Handler {
 			$parent_node = $parent_node->parentNode;
 		}
 
-		if ( $parent_node instanceof DOMElement && 'p' === $parent_node->nodeName && false === $parent_node->hasAttributes() ) {
+		if ( $parent_node instanceof DOMElement && 'p' === $parent_node->tagName && false === $parent_node->hasAttributes() ) {
 			$child_element_count = count( $this->get_child_elements( $parent_node ) );
 			if ( 1 === $child_element_count ) {
 				$parent_node->parentNode->replaceChild( $node, $parent_node );
