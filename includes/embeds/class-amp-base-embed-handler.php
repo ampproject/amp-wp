@@ -128,21 +128,27 @@ abstract class AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Replace the node's parent with itself if the parent is a <p> tag, has no attributes and has no other children.
+	 * Replace an element's parent with itself if the parent is a <p> tag which has no attributes and has no other children.
+	 *
 	 * This usually happens while `wpautop()` processes the element.
 	 *
 	 * @since 2.0.6
+	 * @see AMP_Tag_And_Attribute_Sanitizer::remove_node()
 	 *
 	 * @param DOMElement $node Node.
 	 */
 	protected function unwrap_p_element( DOMElement $node ) {
 		$parent_node = $node->parentNode;
-
-		if ( $parent_node instanceof DOMElement && 'p' === $parent_node->tagName && false === $parent_node->hasAttributes() ) {
-			$child_element_count = count( $this->get_child_elements( $parent_node ) );
-			if ( 1 === $child_element_count ) {
-				$parent_node->parentNode->replaceChild( $node, $parent_node );
-			}
+		if (
+			$parent_node instanceof DOMElement
+			&&
+			'p' === $parent_node->tagName
+			&&
+			false === $parent_node->hasAttributes()
+			&&
+			1 === count( $this->get_child_elements( $parent_node ) )
+		) {
+			$parent_node->parentNode->replaceChild( $node, $parent_node );
 		}
 	}
 }
