@@ -13,6 +13,12 @@ use AmpProject\Dom\Document;
  * @internal
  */
 class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
+
+	/**
+	 * URL pattern.
+	 *
+	 * @var string
+	 */
 	const URL_PATTERN = '#https?://(www\.)?facebook\.com/.*#i';
 
 	/**
@@ -58,7 +64,7 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * WordPress OEmbed rendering callback.
+	 * WordPress oEmbed rendering callback.
 	 *
 	 * @param array  $matches URL pattern matches.
 	 * @param array  $attr    Matched attributes.
