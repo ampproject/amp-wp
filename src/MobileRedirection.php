@@ -86,9 +86,12 @@ final class MobileRedirection implements Service, Registerable {
 	 * Get the AMP version of the current URL.
 	 *
 	 * @return string AMP URL.
+	 *
+	 * @global \WP_Query $wp_the_query
 	 */
 	public function get_current_amp_url() {
-		$url = amp_add_paired_endpoint( amp_get_current_url() );
+		global $wp_the_query;
+		$url = amp_add_paired_endpoint( amp_get_current_url(), $wp_the_query );
 		$url = remove_query_arg( QueryVar::NOAMP, $url );
 		return $url;
 	}
