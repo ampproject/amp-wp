@@ -408,7 +408,6 @@ final class PreloadHeroImage implements Transformer
                     break;
                 }
 
-                // TODO: Can placeholders contain templates?
                 if (Amp::isTemplate($placeholder)) {
                     // Ignore images inside templates.
                     $placeholder = $this->skipNodeAndChildren($placeholder);
