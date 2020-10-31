@@ -285,7 +285,7 @@ final class PreloadHeroImage implements Transformer
             return null;
         }
 
-        if ($element->tagName === Extension::IMAGE) {
+        if ($element->tagName === Extension::IMAGE || $element->tagName === Tag::IMG) {
             return $this->detectHeroImageCandidateForAmpImg($element);
         }
 
