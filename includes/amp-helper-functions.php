@@ -609,55 +609,10 @@ function _amp_bootstrap_customizer() {
  * @return string URL to be redirected.
  */
 function amp_redirect_old_slug_to_new_url( $link ) {
-	if ( ! amp_is_request() || amp_is_canonical() ) {
-		return $link;
+
+	if ( amp_is_request() && ! amp_is_canonical() ) {
+		$link = amp_add_paired_endpoint( $link );
 	}
-
-	/**
-	 * The following logic for defining the $id is copied from `wp_old_slug_redirect()`.
-	 * This is needed because the post ID is not passed as a parameter to the `old_slug_redirect_url` filter.
-	 *
-	 * @see wp_old_slug_redirect()
-	 * @var int|null
-	 */
-	$post_id = ( function () {
-		// Guess the current post type based on the query vars.
-		if ( get_query_var( 'post_type' ) ) {
-			$post_type = get_query_var( 'post_type' );
-		} elseif ( get_query_var( 'attachment' ) ) {
-			$post_type = 'attachment';
-		} elseif ( get_query_var( 'pagename' ) ) {
-			$post_type = 'page';
-		} else {
-			$post_type = 'post';
-		}
-
-		if ( is_array( $post_type ) ) {
-			if ( count( $post_type ) > 1 ) {
-				return null;
-			}
-			$post_type = reset( $post_type );
-		}
-
-		// Do not attempt redirect for hierarchical post types.
-		if ( is_post_type_hierarchical( $post_type ) ) {
-			return null;
-		}
-
-		$id = _find_post_by_old_slug( $post_type );
-
-		if ( ! $id ) {
-			$id = _find_post_by_old_date( $post_type );
-		}
-
-		/** This filter is documented in wp-includes/query.php */
-		$id = apply_filters( 'old_slug_redirect_post_id', $id );
-
-		return $id;
-	} )();
-
-	$post = $post_id ? get_post( $post_id ) : null;
-	$link = amp_add_paired_endpoint( $link, $post );
 
 	return $link;
 }
@@ -740,7 +695,7 @@ function amp_get_current_url() {
  * @return string AMP permalink.
  */
 function amp_get_permalink( $post_id ) {
-	return amp_add_paired_endpoint( get_permalink( $post_id ), get_post( $post_id ) );
+	return amp_add_paired_endpoint( get_permalink( $post_id ) );
 }
 
 /**
@@ -763,10 +718,8 @@ function amp_remove_endpoint( $url ) {
  * If there are known validation errors for the current URL then do not output anything.
  *
  * @since 1.0
- * @global WP_Query $wp_the_query
  */
 function amp_add_amphtml_link() {
-	global $wp_the_query;
 	if (
 		amp_is_canonical()
 		||
@@ -806,7 +759,7 @@ function amp_add_amphtml_link() {
 		return;
 	}
 
-	$amp_url = amp_add_paired_endpoint( amp_get_current_url(), $wp_the_query );
+	$amp_url = amp_add_paired_endpoint( amp_get_current_url() );
 	if ( $amp_url ) {
 		$amp_url = remove_query_arg( QueryVar::NOAMP, $amp_url );
 		printf( '<link rel="amphtml" href="%s">', esc_url( $amp_url ) );
@@ -1861,20 +1814,17 @@ function amp_wp_kses_mustache( $markup ) {
  * @internal
  *
  * @param WP_Admin_Bar $wp_admin_bar Admin bar.
- * @global WP_Query $wp_the_query
  */
 function amp_add_admin_bar_view_link( $wp_admin_bar ) {
-	global $wp_the_query;
 	if ( is_admin() || amp_is_canonical() || ! amp_is_available() ) {
 		return;
 	}
 
 	$is_amp_request = amp_is_request();
 
-	$amp_url     = amp_add_paired_endpoint( amp_get_current_url(), $wp_the_query );
-	$non_amp_url = amp_remove_paired_endpoint( amp_get_current_url() );
-
-	$amp_url = remove_query_arg( QueryVar::NOAMP, $amp_url );
+	$current_url = remove_query_arg( QueryVar::NOAMP, amp_get_current_url() );
+	$amp_url     = amp_add_paired_endpoint( $current_url );
+	$non_amp_url = amp_remove_paired_endpoint( $current_url );
 
 	$icon = $is_amp_request ? Icon::logo() : Icon::link();
 	$attr = [
@@ -1905,7 +1855,7 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 	if ( $customize_node && $is_amp_request && AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
 		$args = get_object_vars( $customize_node );
 		if ( amp_is_legacy() ) {
-			$args['href'] = add_query_arg( 'autofocus[panel]', AMP_Template_Customizer::PANEL_ID, $amp_url );
+			$args['href'] = add_query_arg( 'autofocus[panel]', AMP_Template_Customizer::PANEL_ID, $args['href'] );
 		} else {
 			$args['href'] = add_query_arg( amp_get_slug(), '1', $args['href'] );
 		}
@@ -1947,16 +1897,17 @@ function amp_generate_script_hash( $script ) {
  *
  * @since 2.1
  *
- * @param string           $url     URL.
- * @param WP_Query|WP_Post $context Context.
+ * @param string $url URL.
  * @return string AMP URL.
  */
-function amp_add_paired_endpoint( $url, $context = null ) {
+function amp_add_paired_endpoint( $url ) {
+
 	$post = null;
-	if ( $context instanceof WP_Query && $context->is_singular() ) {
-		$post = $context->get_queried_object();
-	} elseif ( $context instanceof WP_Post ) {
-		$post = $context;
+	if ( has_filter( 'amp_pre_get_permalink' ) || has_filter( 'amp_get_permalink' ) ) {
+		$post_id = url_to_postid( $url );
+		if ( $post_id ) {
+			$post = get_post( $post_id );
+		}
 	}
 
 	if ( $post instanceof WP_Post ) {
@@ -1968,6 +1919,7 @@ function amp_add_paired_endpoint( $url, $context = null ) {
 		 * @since 0.4
 		 * @since 1.0 This filter does not apply when 'amp' theme support is present.
 		 * @since 2.1 This filter applies again when in non-legacy Reader mode but only when obtaining an AMP URL for a post.
+		 * @todo Deprecate this filter?
 		 *
 		 * @param false $url     Short-circuited URL.
 		 * @param int   $post_id Post ID.
@@ -1988,6 +1940,7 @@ function amp_add_paired_endpoint( $url, $context = null ) {
 		 * @since 0.2
 		 * @since 1.0 This filter does not apply when 'amp' theme support is present.
 		 * @since 2.1 This filter applies again when in non-legacy Reader mode but only when obtaining an AMP URL for a post.
+		 * @todo Deprecate this filter?
 		 *
 		 * @param false $amp_url AMP URL.
 		 * @param int $post_id Post ID.

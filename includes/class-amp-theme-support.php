@@ -388,11 +388,8 @@ class AMP_Theme_Support {
 	 * @since 2.1 Remove obsolete redirection from /amp/ to ?amp when on non-legacy Reader mode.
 	 *
 	 * @return bool Whether redirection should have been done.
-	 *
-	 * @global WP_Query $wp_the_query
 	 */
 	public static function ensure_proper_amp_location() {
-		global $wp_the_query;
 		if ( amp_is_canonical() ) {
 			/*
 			 * When AMP-first/canonical, then when there is an /amp/ endpoint or ?amp URL param,
@@ -416,7 +413,7 @@ class AMP_Theme_Support {
 			wp_parse_str( $wp->matched_query, $path_args );
 			if ( isset( $path_args[ amp_get_slug() ] ) && '' !== $path_args[ amp_get_slug() ] ) {
 				$current_url  = amp_get_current_url();
-				$redirect_url = amp_add_paired_endpoint( amp_remove_paired_endpoint( $current_url ), $wp_the_query );
+				$redirect_url = amp_add_paired_endpoint( amp_remove_paired_endpoint( $current_url ) );
 				if ( $current_url !== $redirect_url && wp_safe_redirect( $redirect_url, 301 ) ) {
 					// @codeCoverageIgnoreStart
 					exit;

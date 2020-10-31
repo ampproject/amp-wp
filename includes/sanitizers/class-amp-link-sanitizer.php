@@ -234,7 +234,7 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Only add the AMP query var when requested (in Transitional or Reader mode).
 		if ( ! $excluded && ! empty( $this->args['paired'] ) ) {
-			$url = amp_add_paired_endpoint( $url, null );
+			$url = amp_add_paired_endpoint( $url );
 		}
 
 		$element->setAttribute( $attribute_name, $url );

@@ -7,11 +7,9 @@
 
 use AmpProject\AmpWP\QueryVar;
 
-global $wp_the_query;
-
 $url         = remove_query_arg( [ AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR, QueryVar::NOAMP ] );
 $non_amp_url = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $url );
-$amp_url     = amp_add_paired_endpoint( $url, $wp_the_query );
+$amp_url     = amp_add_paired_endpoint( $url );
 ?>
 
 <!DOCTYPE html>

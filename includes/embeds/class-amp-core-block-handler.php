@@ -313,7 +313,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 					 *
 					 * @var DOMElement $option
 					 */
-					$option->setAttribute( 'value', amp_add_paired_endpoint( $option->getAttribute( 'value' ), null ) );
+					$option->setAttribute( 'value', amp_add_paired_endpoint( $option->getAttribute( 'value' ) ) );
 				}
 			}
 		}
