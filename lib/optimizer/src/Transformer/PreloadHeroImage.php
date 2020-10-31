@@ -106,7 +106,7 @@ final class PreloadHeroImage implements Transformer
      *
      * @var string
      */
-    const NOSCRIPT_IMG_XPATH_QUERY             = './/noscript[ img ]';
+    const NOSCRIPT_IMG_XPATH_QUERY = './/noscript[ img ]';
 
     /**
      * Regular expression pattern to extract the URL from a CSS background-image property.
