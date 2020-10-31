@@ -3,17 +3,17 @@
 namespace AmpProject;
 
 /**
- * Interface with constants for the different response destinations that are supported.
+ * Interface with constants for the different request destinations that are supported.
  *
  * For the purposes of the AMP implementation, we are only interested in the
- * response destinations that are valid values for the 'as' attribute in preloads.
+ * request destinations that are valid values for the 'as' attribute in preloads.
  *
- * Full list of response destinations:
+ * Full list of request destinations:
  * @see https://fetch.spec.whatwg.org/#concept-request-destination
  *
  * @package ampproject/common
  */
-interface ResponseDestination
+interface RequestDestination
 {
 
     /**

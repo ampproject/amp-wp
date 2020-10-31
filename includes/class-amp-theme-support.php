@@ -21,7 +21,7 @@ use AmpProject\Optimizer;
 use AmpProject\RemoteRequest\FallbackRemoteGetRequest;
 use AmpProject\RemoteRequest\FilesystemRemoteGetRequest;
 use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
-use AmpProject\ResponseDestination;
+use AmpProject\RequestDestination;
 use AmpProject\Tag;
 
 /**
@@ -1668,7 +1668,7 @@ class AMP_Theme_Support {
 			Tag::LINK,
 			[
 				Attribute::REL  => Attribute::REL_PRELOAD,
-				Attribute::AS_  => ResponseDestination::SCRIPT,
+				Attribute::AS_  => RequestDestination::SCRIPT,
 				Attribute::HREF => $runtime_src,
 			]
 		);
@@ -1687,7 +1687,7 @@ class AMP_Theme_Support {
 				Tag::LINK,
 				[
 					Attribute::REL  => Attribute::REL_PRELOAD,
-					Attribute::AS_  => ResponseDestination::SCRIPT,
+					Attribute::AS_  => RequestDestination::SCRIPT,
 					Attribute::HREF => $amp_scripts[ $script_handle ]->getAttribute( Attribute::SRC ),
 				]
 			);
