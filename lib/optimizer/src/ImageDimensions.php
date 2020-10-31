@@ -17,7 +17,7 @@ final class ImageDimensions
     const TINY_THRESHOLD = 150;
 
     /**
-     * Image that this represents the dimensions of.
+     * Image for which this represents the dimensions.
      *
      * @var DOMElement
      */
