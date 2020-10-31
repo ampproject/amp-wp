@@ -37,7 +37,7 @@
   "devDependencies": {
     "@babel/cli": "7.11.6",
     "@babel/core": "7.11.6",
-    "@babel/plugin-proposal-class-properties": "7.10.4",
+    "@babel/plugin-proposal-class-properties": "7.12.1",
     "@wordpress/babel-preset-default": "4.15.0",
     "@wordpress/block-editor": "4.4.0",
     "@wordpress/blocks": "6.18.0",
