@@ -38,7 +38,7 @@
     "@babel/cli": "7.12.1",
     "@babel/core": "7.12.3",
     "@babel/plugin-proposal-class-properties": "7.12.1",
-    "@wordpress/babel-preset-default": "4.15.0",
+    "@wordpress/babel-preset-default": "4.19.0",
     "@wordpress/block-editor": "5.1.1",
     "@wordpress/blocks": "6.24.1",
     "@wordpress/browserslist-config": "2.7.0",
