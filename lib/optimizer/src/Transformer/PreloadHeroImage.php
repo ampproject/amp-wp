@@ -248,7 +248,10 @@ final class PreloadHeroImage implements Transformer
         }
 
         if ($this->isAmpEmbed($element)) {
-            return $this->getPlaceholderImage($element);
+            $placeholderImage = $this->getPlaceholderImage($element);
+            if (null !== $placeholderImage) {
+                return $placeholderImage;
+            }
         }
 
         $cssBackgroundImage = $this->getCssBackgroundImageUrl($element);
