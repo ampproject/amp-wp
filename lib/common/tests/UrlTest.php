@@ -30,6 +30,6 @@ class UrlTest extends TestCase
     /** @dataProvider dataIsValidImageSrc */
     public function testIsValidImageSrc($src, $expected)
     {
-        $this->assertEquals($expected, Url::isValidImageSrc($src));
+        $this->assertEquals($expected, Url::isValidNonDataUrl($src));
     }
 }

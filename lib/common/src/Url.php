@@ -32,7 +32,7 @@ final class Url
      * @param string $src Src string to validate.
      * @return bool Whether the src string is a valid image source URL.
      */
-    public static function isValidImageSrc($src)
+    public static function isValidNonDataUrl( $src)
     {
         list($scheme, $host, $port, $user, $pass, $path, $query, $fragment) = array_values(
             array_merge(
