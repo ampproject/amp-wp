@@ -110,7 +110,7 @@ class AMP_Post_Meta_Box {
 		add_action( 'post_submitbox_misc_actions', [ $this, 'render_status' ] );
 		add_action( 'save_post', [ $this, 'save_amp_status' ] );
 		add_action( 'rest_api_init', [ $this, 'add_rest_api_fields' ] );
-		add_filter( 'preview_post_link', [ $this, 'preview_post_link' ] );
+		add_filter( 'preview_post_link', [ $this, 'preview_post_link' ], 10, 2 );
 	}
 
 	/**
@@ -188,7 +188,7 @@ class AMP_Post_Meta_Box {
 				'ampPostMetaBox.boot( %s );',
 				wp_json_encode(
 					[
-						'previewLink'     => esc_url_raw( amp_add_paired_endpoint( get_preview_post_link( $post ) ) ),
+						'previewLink'     => esc_url_raw( amp_add_paired_endpoint( get_preview_post_link( $post ), $post ) ),
 						'canonical'       => amp_is_canonical(),
 						'enabled'         => empty( $support_errors ),
 						'canSupport'      => 0 === count( array_diff( $support_errors, [ 'post-status-disabled' ] ) ),
@@ -436,10 +436,11 @@ class AMP_Post_Meta_Box {
 	 *
 	 * @since 0.6
 	 *
-	 * @param string $link The post preview link.
+	 * @param string  $link The post preview link.
+	 * @param WP_Post $post The post.
 	 * @return string Preview URL.
 	 */
-	public function preview_post_link( $link ) {
+	public function preview_post_link( $link, $post ) {
 		$is_amp = (
 			isset( $_POST['amp-preview'] ) // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			&&
@@ -447,7 +448,7 @@ class AMP_Post_Meta_Box {
 		);
 
 		if ( $is_amp ) {
-			$link = amp_add_paired_endpoint( $link );
+			$link = amp_add_paired_endpoint( $link, $post );
 		}
 
 		return $link;

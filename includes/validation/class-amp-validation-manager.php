@@ -328,8 +328,11 @@ class AMP_Validation_Manager {
 	 * @see amp_add_admin_bar_view_link() Where an admin bar item may have been added already for Reader/Transitional modes.
 	 *
 	 * @param WP_Admin_Bar $wp_admin_bar Admin bar.
+	 *
+	 * @global WP_Query $wp_the_query
 	 */
 	public static function add_admin_bar_menu_items( $wp_admin_bar ) {
+		global $wp_the_query;
 		if ( is_admin() || ! self::get_dev_tools_user_access()->is_user_enabled() || ! amp_is_available() ) {
 			self::$amp_admin_bar_item_added = false;
 			return;
@@ -350,7 +353,7 @@ class AMP_Validation_Manager {
 			$current_url
 		);
 		if ( ! amp_is_canonical() ) {
-			$amp_url = amp_add_paired_endpoint( $amp_url );
+			$amp_url = amp_add_paired_endpoint( $amp_url, $wp_the_query );
 		}
 
 		$validate_url = AMP_Validated_URL_Post_Type::get_recheck_url( AMP_Validated_URL_Post_Type::get_invalid_url_post( $amp_url ) ?: $amp_url );
