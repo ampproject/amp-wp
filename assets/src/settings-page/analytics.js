@@ -106,7 +106,7 @@ function AnalyticsEntry( { entryIndex, onChange, onDelete, type = '', config = '
 		if ( ! textAreaRef?.current ) {
 			return false;
 		}
-		return textAreaRef.current === document.activeElement;
+		return textAreaRef.current === textAreaRef.current.ownerDocument.activeElement;
 	};
 
 	const defaultValue = vendorConfigs[ type ]?.sample || '{}';
