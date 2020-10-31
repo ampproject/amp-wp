@@ -87,7 +87,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 					// Record that action was converted to action-xhr.
 					$action_url = add_query_arg( AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR, 1, $action_url );
 					if ( ! amp_is_canonical() ) {
-						$action_url = amp_add_paired_endpoint( $action_url, null );
+						$action_url = amp_add_paired_endpoint( $action_url );
 					}
 					$node->setAttribute( 'action-xhr', $action_url );
 					// Append success/error handlers if not found.
