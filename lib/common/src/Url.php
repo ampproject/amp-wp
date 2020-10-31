@@ -48,7 +48,7 @@ final class Url
         $userpass = $user;
 
         if (! empty($pass)) {
-            $userpass = "{$user}:{$pass}";
+            $userpass .= ":{$pass}";
         }
 
         if (! empty($userpass)) {
