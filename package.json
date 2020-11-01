@@ -85,7 +85,7 @@
     "optimize-css-assets-webpack-plugin": "5.0.4",
     "postcss": "8.1.4",
     "postcss-color-function": "4.1.0",
-    "postcss-import": "12.0.1",
+    "postcss-import": "13.0.0",
     "postcss-loader": "4.0.4",
     "postcss-nested": "5.0.1",
     "postcss-preset-env": "6.7.0",
