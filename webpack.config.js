@@ -27,7 +27,7 @@ const sharedConfig = {
 		...defaultConfig.module,
 		rules: defaultConfig.module.rules.map(
 			( rule ) => {
-				const postCssLoader = rule.use.find(
+				const postCssLoader = Array.isArray( rule.use ) && rule.use.find(
 					( loader ) => loader.loader && loader.loader.includes( 'postcss-loader' ),
 				);
 
