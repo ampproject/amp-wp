@@ -89,7 +89,7 @@
     "postcss-loader": "4.0.4",
     "postcss-nested": "5.0.1",
     "postcss-preset-env": "6.7.0",
-    "puppeteer": "npm:puppeteer-core@3.0.0",
+    "puppeteer": "5.4.1",
     "rtlcss": "2.6.1",
     "rtlcss-webpack-plugin": "4.0.4",
     "source-map-loader": "1.1.2",
