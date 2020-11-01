@@ -116,9 +116,9 @@ jobs:
         run: vendor/bin/phpcs -q --report=checkstyle --runtime-set ignore_errors_on_exit 1 --runtime-set ignore_warnings_on_exit 1 | cs2pr --graceful-warnings
 
       - name: Normalize composer.json
-        # composer-normalize requires PHP 7.1+.
+        # composer-normalize requires PHP 7.1+; locked to v2.9.0 as it's the last version that supports Composer v1
         run: |
-          composer require --no-interaction --dev ergebnis/composer-normalize --ignore-platform-reqs
+          composer require --no-interaction --dev ergebnis/composer-normalize:2.9.0 --ignore-platform-reqs
           composer --no-interaction normalize --dry-run
 
 #-----------------------------------------------------------------------------------------------------------------------
