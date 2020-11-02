@@ -89,19 +89,21 @@ export function ReaderThemeSelection() {
 						<p>
 							{ AMP_QUERY_VAR_CUSTOMIZED_LATE
 								/* dangerouslySetInnerHTML reason: Injection of code tags. */
-								? <span
-									dangerouslySetInnerHTML={ {
-										__html: sprintf(
-											/* translators: 1: customized AMP query var, 2: default query var, 3: the AMP_QUERY_VAR constant name, 4: the amp_query_var filter, 5: the plugins_loaded action */
-											__( 'The following themes are not available because your site (probably the active theme) has customized the AMP query var too late (it is set to %1$s as opposed to the default of %2$s). Please make sure that any customizations done by defining the %3$s constant or adding an %4$s filter are done before the %5$s action with priority 8.', 'amp' ),
-											`<code>${ AMP_QUERY_VAR }</code>`,
-											`<code>${ DEFAULT_AMP_QUERY_VAR }</code>`,
-											'<code>AMP_QUERY_VAR</code>',
-											'<code>amp_query_var</code>',
-											'<code>plugins_loaded</code>',
-										),
-									} }
-								/>
+								? (
+									<span
+										dangerouslySetInnerHTML={ {
+											__html: sprintf(
+												/* translators: 1: customized AMP query var, 2: default query var, 3: the AMP_QUERY_VAR constant name, 4: the amp_query_var filter, 5: the plugins_loaded action */
+												__( 'The following themes are not available because your site (probably the active theme) has customized the AMP query var too late (it is set to %1$s as opposed to the default of %2$s). Please make sure that any customizations done by defining the %3$s constant or adding an %4$s filter are done before the %5$s action with priority 8.', 'amp' ),
+												`<code>${ AMP_QUERY_VAR }</code>`,
+												`<code>${ DEFAULT_AMP_QUERY_VAR }</code>`,
+												'<code>AMP_QUERY_VAR</code>',
+												'<code>amp_query_var</code>',
+												'<code>plugins_loaded</code>',
+											),
+										} }
+									/>
+								)
 								: __( 'The following themes are compatible but cannot be installed automatically. Please install them manually, or contact your host if you are not able to do so.', 'amp' )
 							}
 						</p>
