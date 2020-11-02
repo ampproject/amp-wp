@@ -159,9 +159,10 @@ class AMP_Options_Manager {
 			 * Filters default options.
 			 *
 			 * @internal
-			 * @param array $defaults Default options.
+			 * @param array $defaults        Default options.
+			 * @param array $current_options Current options.
 			 */
-			(array) apply_filters( 'amp_default_options', $defaults ),
+			(array) apply_filters( 'amp_default_options', $defaults, $options ),
 			$options
 		);
 

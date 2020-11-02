@@ -44,6 +44,15 @@ interface Option {
 	const DISABLE_CSS_TRANSIENT_CACHING = 'amp_css_transient_monitor_disable_caching';
 
 	/**
+	 * Indicate the structure for Paired AMP URLs.
+	 *
+	 * Default value: 'query_var'
+	 *
+	 * @var string
+	 */
+	const PERMALINK_STRUCTURE = 'permalink_structure';
+
+	/**
 	 * Redirect mobile visitors to the AMP version of a page when the site is in Transitional or Reader mode.
 	 *
 	 * Default value: false

@@ -33,6 +33,7 @@ namespace PHPSTORM_META {
 			'server_timing'                     => \AmpProject\AmpWP\Instrumentation\ServerTiming::class,
 			'site_health_integration'           => \AmpProject\AmpWP\Admin\SiteHealth::class,
 			'validated_url_stylesheet_gc'       => \AmpProject\AmpWP\BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection::class,
+			'paired_amp_routing'                => \AmpProject\AmpWP\PairedAmpRouting::class,
 		] )
 	);
 
