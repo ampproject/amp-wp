@@ -20,7 +20,7 @@
     "sabberworm/php-css-parser": "dev-master#bfdd976"
   },
   "require-dev": {
-    "civicrm/composer-downloads-plugin": "^2.1",
+    "civicrm/composer-downloads-plugin": "^3.0",
     "dealerdirect/phpcodesniffer-composer-installer": "0.7.0",
     "google/cloud-storage": "^1.22",
     "mikey179/vfsstream": "1.6.8",
