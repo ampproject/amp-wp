@@ -20,6 +20,8 @@ use WP_Post;
 /**
  * Service for routing users to and from paired AMP URLs.
  *
+ * @todo Add 404 redirection to non-AMP version.
+ *
  * @package AmpProject\AmpWP
  * @since 2.1
  * @internal
@@ -36,14 +38,14 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	const PERMALINK_STRUCTURE_QUERY_VAR = 'query_var';
 
 	/**
-	 * Endpoint permalink structure.
+	 * Rewrite endpoint permalink structure.
 	 *
 	 * This adds `/amp/` to all URLs, even pages and archives. This is a popular option for those who feel query params
 	 * are bad for SEO.
 	 *
 	 * @var string
 	 */
-	const PERMALINK_STRUCTURE_ENDPOINT = 'endpoint';
+	const PERMALINK_STRUCTURE_REWRITE_ENDPOINT = 'rewrite_endpoint';
 
 	/**
 	 * Legacy transitional permalink structure.
@@ -71,7 +73,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 */
 	const PERMALINK_STRUCTURES = [
 		self::PERMALINK_STRUCTURE_QUERY_VAR,
-		self::PERMALINK_STRUCTURE_ENDPOINT,
+		self::PERMALINK_STRUCTURE_REWRITE_ENDPOINT,
 		self::PERMALINK_STRUCTURE_LEGACY_TRANSITIONAL,
 		self::PERMALINK_STRUCTURE_LEGACY_READER,
 	];
@@ -134,7 +136,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * Add rewrite endpoint.
 	 */
 	public function add_rewrite_endpoint() {
-		if ( self::PERMALINK_STRUCTURE_ENDPOINT === AMP_Options_Manager::get_option( Option::PERMALINK_STRUCTURE ) ) {
+		if ( self::PERMALINK_STRUCTURE_REWRITE_ENDPOINT === AMP_Options_Manager::get_option( Option::PERMALINK_STRUCTURE ) ) {
 			$places = EP_ALL;
 		} else {
 			$places = EP_PERMALINK;
@@ -158,9 +160,9 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 			version_compare( $options[ Option::VERSION ], '2.1', '<' )
 		) {
 			if (
-				ReaderThemes::DEFAULT_READER_THEME === $options[ Option::READER_THEME ]
-				&&
 				AMP_Theme_Support::READER_MODE_SLUG === $options[ Option::THEME_SUPPORT ]
+				&&
+				ReaderThemes::DEFAULT_READER_THEME === $options[ Option::READER_THEME ]
 			) {
 				$value = self::PERMALINK_STRUCTURE_LEGACY_READER;
 			} elseif ( AMP_Theme_Support::STANDARD_MODE_SLUG !== $options[ Option::THEME_SUPPORT ] ) {
@@ -195,54 +197,163 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	/**
 	 * Turn a given URL into a paired AMP URL.
 	 *
+	 * @todo Check if has_filter( 'amp_add_paired_endpoint' ) to defer to custom endpoint.
+	 *
 	 * @param string $url URL.
 	 * @return string AMP URL.
 	 */
 	public function add_paired_endpoint( $url ) {
-		$post = null;
-		if ( has_filter( 'amp_pre_get_permalink' ) || has_filter( 'amp_get_permalink' ) ) {
-			$post_id = url_to_postid( $url );
-			if ( $post_id ) {
-				$post = get_post( $post_id );
-			}
+
+		switch ( AMP_Options_Manager::get_option( Option::PERMALINK_STRUCTURE ) ) {
+			case self::PERMALINK_STRUCTURE_REWRITE_ENDPOINT:
+				return $this->get_rewrite_endpoint_paired_amp_url( $url );
+			case self::PERMALINK_STRUCTURE_LEGACY_TRANSITIONAL:
+				return $this->get_legacy_transitional_paired_amp_url( $url );
+			case self::PERMALINK_STRUCTURE_LEGACY_READER:
+				return $this->get_legacy_reader_paired_amp_url( $url );
 		}
 
-		if ( $post instanceof WP_Post ) {
+		// This is the PERMALINK_STRUCTURE_QUERY_VAR case, the default.
+		return $this->get_query_var_paired_amp_url( $url );
+	}
+
+	/**
+	 * Get paired AMP URL using query var (`?amp=1`).
+	 *
+	 * @param string $url URL.
+	 * @return string AMP URL.
+	 */
+	public function get_query_var_paired_amp_url( $url ) {
+		return add_query_arg( amp_get_slug(), '1', $url );
+	}
+
+	/**
+	 * Get paired AMP URL using a rewrite endpoint.
+	 *
+	 * @todo What are the scenarios where this conflicts with other rewrite endpoints also added?
+	 *
+	 * @param string $url URL.
+	 * @return string AMP URL.
+	 */
+	public function get_rewrite_endpoint_paired_amp_url( $url ) {
+		$url = $this->remove_paired_endpoint( $url );
+
+		$parsed_url = array_merge(
+			wp_parse_url( home_url( '/' ) ),
+			wp_parse_url( $url )
+		);
+		if ( empty( $parsed_url['scheme'] ) ) {
+			$parsed_url['scheme'] = is_ssl() ? 'https' : 'http';
+		}
+		if ( ! isset( $parsed_url['host'] ) ) {
+			$parsed_url['host'] = isset( $_SERVER['HTTP_HOST'] ) ? wp_unslash( $_SERVER['HTTP_HOST'] ) : 'localhost';
+		}
+
+		$parsed_url['path']  = trailingslashit( $parsed_url['path'] );
+		$parsed_url['path'] .= user_trailingslashit( amp_get_slug(), 'amp' );
+
+		$amp_url = $parsed_url['scheme'] . '://';
+		if ( isset( $parsed_url['user'] ) ) {
+			$amp_url .= $parsed_url['user'];
+			if ( isset( $parsed_url['pass'] ) ) {
+				$amp_url .= ':' . $parsed_url['pass'];
+			}
+			$amp_url .= '@';
+		}
+		$amp_url .= $parsed_url['host'];
+		if ( isset( $parsed_url['port'] ) ) {
+			$amp_url .= ':' . $parsed_url['port'];
+		}
+		$amp_url .= $parsed_url['path'];
+		if ( isset( $parsed_url['query'] ) ) {
+			$amp_url .= '?' . $parsed_url['query'];
+		}
+		if ( isset( $parsed_url['fragment'] ) ) {
+			$amp_url .= '#' . $parsed_url['fragment'];
+		}
+		return $amp_url;
+	}
+
+	/**
+	 * Get paired AMP URL using the legacy transitional scheme (`?amp`).
+	 *
+	 * @param string $url URL.
+	 * @return string AMP URL.
+	 */
+	public function get_legacy_transitional_paired_amp_url( $url ) {
+		return add_query_arg( amp_get_slug(), '', $url );
+	}
+
+	/**
+	 * Get paired AMP URL using the legacy reader scheme (`/amp/` or else `?amp`).
+	 *
+	 * @param string $url URL.
+	 * @return string AMP URL.
+	 */
+	public function get_legacy_reader_paired_amp_url( $url ) {
+		$post_id = url_to_postid( $url );
+
+		if ( $post_id ) {
 			/**
 			 * Filters the AMP permalink to short-circuit normal generation.
 			 *
-			 * Returning a non-false value in this filter will cause the `get_permalink()` to get called and the `amp_get_permalink` filter to not apply.
+			 * Returning a string value in this filter will bypass the `get_permalink()` from being called and the `amp_get_permalink` filter will not apply.
 			 *
 			 * @since 0.4
-			 * @since 1.0 This filter does not apply when 'amp' theme support is present.
-			 * @since 2.1 This filter applies again when in non-legacy Reader mode but only when obtaining an AMP URL for a post.
-			 * @todo Deprecate this filter?
+			 * @since 1.0 This filter only applies when using the legacy reader permalink structure.
 			 *
 			 * @param false $url     Short-circuited URL.
 			 * @param int   $post_id Post ID.
 			 */
-			$pre_url = apply_filters( 'amp_pre_get_permalink', false, $post->ID );
+			$pre_url = apply_filters( 'amp_pre_get_permalink', false, $post_id );
 
-			if ( false !== $pre_url ) {
+			if ( is_string( $pre_url ) ) {
 				return $pre_url;
 			}
 		}
 
-		$amp_url = add_query_arg( amp_get_slug(), '1', $url );
+		// Make sure any existing AMP endpoint is removed.
+		$url = $this->remove_paired_endpoint( $url );
 
-		if ( $post instanceof WP_Post ) {
+		$parsed_url    = wp_parse_url( $url );
+		$structure     = get_option( 'permalink_structure' );
+		$use_query_var = (
+			// If pretty permalinks aren't available, then query var must be used.
+			empty( $structure )
+			||
+			// If there are existing query vars, then always use the amp query var as well.
+			! empty( $parsed_url['query'] )
+			||
+			// If no post was found for the URL.
+			! $post_id
+			||
+			// If the post type is hierarchical then the /amp/ endpoint isn't available.
+			is_post_type_hierarchical( get_post_type( $post_id ) )
+			||
+			// Attachment pages don't accept the /amp/ endpoint.
+			'attachment' === get_post_type( $post_id )
+		);
+		if ( $use_query_var ) {
+			$amp_url = add_query_arg( amp_get_slug(), '', $url );
+		} else {
+			$amp_url = preg_replace( '/#.*/', '', $url );
+			$amp_url = trailingslashit( $amp_url ) . user_trailingslashit( amp_get_slug(), 'single_amp' );
+			if ( ! empty( $parsed_url['fragment'] ) ) {
+				$amp_url .= '#' . $parsed_url['fragment'];
+			}
+		}
+
+		if ( $post_id ) {
 			/**
 			 * Filters AMP permalink.
 			 *
 			 * @since 0.2
-			 * @since 1.0 This filter does not apply when 'amp' theme support is present.
-			 * @since 2.1 This filter applies again when in non-legacy Reader mode but only when obtaining an AMP URL for a post.
-			 * @todo Deprecate this filter?
+			 * @since 1.0 This filter only applies when using the legacy reader permalink structure.
 			 *
-			 * @param false $amp_url AMP URL.
-			 * @param int $post_id Post ID.
+			 * @param string $amp_url AMP URL.
+			 * @param int    $post_id Post ID.
 			 */
-			$amp_url = apply_filters( 'amp_get_permalink', $amp_url, $post->ID );
+			$amp_url = apply_filters( 'amp_get_permalink', $amp_url, $post_id );
 		}
 
 		return $amp_url;
