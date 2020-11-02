@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Services;
+
 /**
  * Load classes.
  *
@@ -281,4 +283,21 @@ function _amp_xdebug_admin_notice() {
 		</p>
 	</div>
 	<?php
+}
+
+/**
+ * Redirects the old AMP URL to the new AMP URL.
+ *
+ * If post slug is updated the amp page with old post slug will be redirected to the updated url.
+ *
+ * @since 0.5
+ * @internal
+ * @deprecated
+ *
+ * @param string $link New URL of the post.
+ * @return string URL to be redirected.
+ */
+function amp_redirect_old_slug_to_new_url( $link ) {
+	_deprecated_function( __FUNCTION__, '2.1' );
+	return Services::get( 'paired_amp_routing' )->filter_old_slug_redirect_url( $link );
 }
