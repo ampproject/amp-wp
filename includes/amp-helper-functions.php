@@ -124,9 +124,6 @@ function amp_init() {
 	add_action( 'wp_loaded', 'amp_editor_core_blocks' );
 	add_filter( 'request', 'amp_force_query_var_value' );
 
-	// Redirect the old url of amp page to the updated url.
-	add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
-
 	if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		if ( class_exists( 'WP_CLI\Dispatcher\CommandNamespace' ) ) {
 			WP_CLI::add_command( 'amp', 'AMP_CLI_Namespace' );
@@ -579,26 +576,6 @@ function amp_is_available() {
  */
 function _amp_bootstrap_customizer() {
 	add_action( 'after_setup_theme', 'amp_init_customizer', 12 );
-}
-
-/**
- * Redirects the old AMP URL to the new AMP URL.
- *
- * If post slug is updated the amp page with old post slug will be redirected to the updated url.
- *
- * @since 0.5
- * @internal
- *
- * @param string $link New URL of the post.
- * @return string URL to be redirected.
- */
-function amp_redirect_old_slug_to_new_url( $link ) {
-
-	if ( amp_is_request() && ! amp_is_canonical() ) {
-		$link = amp_add_paired_endpoint( $link );
-	}
-
-	return $link;
 }
 
 /**

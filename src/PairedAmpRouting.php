@@ -118,6 +118,8 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
 
 		add_action( 'init', [ $this, 'add_rewrite_endpoint' ], 0 );
+
+		add_filter( 'old_slug_redirect_url', [ $this, 'filter_old_slug_redirect_url' ] );
 	}
 
 	/**
@@ -312,6 +314,23 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 
 		// Strip query var, including ?amp, ?amp=1, etc.
 		$url = remove_query_arg( $slug, $url );
+
+		return $url;
+	}
+
+	/**
+	 * Redirects the old AMP URL to the new AMP URL.
+	 *
+	 * If post slug is updated the amp page with old post slug will be redirected to the updated url.
+	 *
+	 * @param string $url New URL of the post.
+	 * @return string URL to be redirected.
+	 */
+	public function filter_old_slug_redirect_url( $url ) {
+
+		if ( amp_is_request() && ! amp_is_canonical() ) {
+			$url = amp_add_paired_endpoint( $url );
+		}
 
 		return $url;
 	}
