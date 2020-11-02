@@ -22,11 +22,6 @@ use AmpProject\AmpWP\Services;
  */
 function amp_activate( $network_wide = false ) {
 	AmpWpPluginFactory::create()->activate( $network_wide );
-	amp_after_setup_theme();
-	if ( ! did_action( 'amp_init' ) ) {
-		amp_init();
-	}
-	flush_rewrite_rules();
 }
 
 /**
@@ -39,16 +34,6 @@ function amp_activate( $network_wide = false ) {
  */
 function amp_deactivate( $network_wide = false ) {
 	AmpWpPluginFactory::create()->deactivate( $network_wide );
-	// We need to manually remove the amp endpoint.
-	global $wp_rewrite;
-	foreach ( $wp_rewrite->endpoints as $index => $endpoint ) {
-		if ( amp_get_slug() === $endpoint[1] ) {
-			unset( $wp_rewrite->endpoints[ $index ] );
-			break;
-		}
-	}
-
-	flush_rewrite_rules( false );
 }
 
 /**
@@ -122,7 +107,6 @@ function amp_init() {
 	add_action( 'rest_api_init', 'AMP_Options_Manager::register_settings' );
 	add_action( 'wp_loaded', 'amp_bootstrap_admin' );
 
-	add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
 	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
 	add_action( 'admin_bar_menu', 'amp_add_admin_bar_view_link', 100 );
 
@@ -1901,54 +1885,7 @@ function amp_generate_script_hash( $script ) {
  * @return string AMP URL.
  */
 function amp_add_paired_endpoint( $url ) {
-
-	$post = null;
-	if ( has_filter( 'amp_pre_get_permalink' ) || has_filter( 'amp_get_permalink' ) ) {
-		$post_id = url_to_postid( $url );
-		if ( $post_id ) {
-			$post = get_post( $post_id );
-		}
-	}
-
-	if ( $post instanceof WP_Post ) {
-		/**
-		 * Filters the AMP permalink to short-circuit normal generation.
-		 *
-		 * Returning a non-false value in this filter will cause the `get_permalink()` to get called and the `amp_get_permalink` filter to not apply.
-		 *
-		 * @since 0.4
-		 * @since 1.0 This filter does not apply when 'amp' theme support is present.
-		 * @since 2.1 This filter applies again when in non-legacy Reader mode but only when obtaining an AMP URL for a post.
-		 * @todo Deprecate this filter?
-		 *
-		 * @param false $url     Short-circuited URL.
-		 * @param int   $post_id Post ID.
-		 */
-		$pre_url = apply_filters( 'amp_pre_get_permalink', false, $post->ID );
-
-		if ( false !== $pre_url ) {
-			return $pre_url;
-		}
-	}
-
-	$amp_url = add_query_arg( amp_get_slug(), '1', $url );
-
-	if ( $post instanceof WP_Post ) {
-		/**
-		 * Filters AMP permalink.
-		 *
-		 * @since 0.2
-		 * @since 1.0 This filter does not apply when 'amp' theme support is present.
-		 * @since 2.1 This filter applies again when in non-legacy Reader mode but only when obtaining an AMP URL for a post.
-		 * @todo Deprecate this filter?
-		 *
-		 * @param false $amp_url AMP URL.
-		 * @param int $post_id Post ID.
-		 */
-		$amp_url = apply_filters( 'amp_get_permalink', $amp_url, $post->ID );
-	}
-
-	return $amp_url;
+	return Services::get( 'paired_amp_routing' )->add_paired_endpoint( $url );
 }
 
 /**
@@ -1958,45 +1895,9 @@ function amp_add_paired_endpoint( $url ) {
  *
  * @param string $url URL to examine. If empty, will use the current URL.
  * @return bool True if the AMP query parameter is set with the required value, false if not.
- * @global WP_Query $wp_query
  */
 function amp_has_paired_endpoint( $url = '' ) {
-	$slug = amp_get_slug();
-
-	// If the URL was not provided, then use the environment which is already parsed.
-	if ( empty( $url ) ) {
-		global $wp_query;
-		return (
-			isset( $_GET[ $slug ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			||
-			(
-				$wp_query instanceof WP_Query
-				&&
-				false !== $wp_query->get( $slug, false )
-			)
-		);
-	}
-
-	$parsed_url = wp_parse_url( $url );
-	if ( ! empty( $parsed_url['query'] ) ) {
-		$query_vars = [];
-		wp_parse_str( $parsed_url['query'], $query_vars );
-		if ( isset( $query_vars[ $slug ] ) ) {
-			return true;
-		}
-	}
-
-	if ( ! empty( $parsed_url['path'] ) ) {
-		$pattern = sprintf(
-			'#/%s(/[^/^])?/?$#',
-			preg_quote( $slug, '#' )
-		);
-		if ( preg_match( $pattern, $parsed_url['path'] ) ) {
-			return true;
-		}
-	}
-
-	return false;
+	return Services::get( 'paired_amp_routing' )->has_paired_endpoint( $url );
 }
 
 /**
@@ -2008,20 +1909,5 @@ function amp_has_paired_endpoint( $url = '' ) {
  * @return string URL with AMP stripped.
  */
 function amp_remove_paired_endpoint( $url ) {
-	$slug = amp_get_slug();
-
-	// Strip endpoint, including /amp/, /amp/amp/, /amp/foo/.
-	$url = preg_replace(
-		sprintf(
-			':(/%s(/[^/?#]+)?)+(?=/?(\?|#|$)):',
-			preg_quote( $slug, ':' )
-		),
-		'',
-		$url
-	);
-
-	// Strip query var, including ?amp, ?amp=1, etc.
-	$url = remove_query_arg( $slug, $url );
-
-	return $url;
+	return Services::get( 'paired_amp_routing' )->remove_paired_endpoint( $url );
 }

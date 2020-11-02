@@ -80,6 +80,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'server_timing'                     => Instrumentation\ServerTiming::class,
 		'site_health_integration'           => Admin\SiteHealth::class,
 		'validated_url_stylesheet_gc'       => BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection::class,
+		'paired_amp_routing'                => PairedAmpRouting::class,
 	];
 
 	/**
@@ -161,6 +162,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			DevTools\CallbackReflection::class,
 			DevTools\FileReflection::class,
 			ReaderThemeLoader::class,
+			PairedAmpRouting::class,
 		];
 	}
 
