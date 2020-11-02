@@ -301,3 +301,21 @@ function amp_redirect_old_slug_to_new_url( $link ) {
 	_deprecated_function( __FUNCTION__, '2.1' );
 	return Services::get( 'paired_amp_routing' )->filter_old_slug_redirect_url( $link );
 }
+
+/**
+ * Fix up WP_Query for front page when amp query var is present.
+ *
+ * Normally the front page would not get served if a query var is present other than preview, page, paged, and cpage.
+ *
+ * @since 0.6
+ * @internal
+ * @see WP_Query::parse_query()
+ * @link https://github.com/WordPress/wordpress-develop/blob/0baa8ae85c670d338e78e408f8d6e301c6410c86/src/wp-includes/class-wp-query.php#L951-L971
+ * @deprecated
+ *
+ * @param WP_Query $query Query.
+ */
+function amp_correct_query_when_is_front_page( WP_Query $query ) {
+	_deprecated_function( __FUNCTION__, '2.1' );
+	Services::get( 'paired_amp_routing' )->correct_query_when_is_front_page( $query );
+}
