@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
 class UrlTest extends TestCase
 {
 
-    public function dataIsValidImageSrc()
+    public function dataIsValidNonDataUrl()
     {
         return [
             'absolute image URL' => ['https://example.com/image.jpg', true],
@@ -27,8 +27,8 @@ class UrlTest extends TestCase
         ];
     }
 
-    /** @dataProvider dataIsValidImageSrc */
-    public function testIsValidImageSrc($src, $expected)
+    /** @dataProvider dataIsValidNonDataUrl */
+    public function testIsValidNonDataUrl($src, $expected)
     {
         $this->assertEquals($expected, Url::isValidNonDataUrl($src));
     }
