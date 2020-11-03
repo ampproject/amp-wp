@@ -19,11 +19,12 @@ use DOMXPath;
  *
  * Abstract away some of the difficulties of working with PHP's DOMDocument.
  *
- * @property DOMXPath    $xpath       XPath query object for this document.
- * @property DOMElement  $html        The document's <html> element.
- * @property DOMElement  $head        The document's <head> element.
- * @property DOMElement  $body        The document's <body> element.
- * @property DOMNodeList $ampElements The document's <amp-*> elements.
+ * @property DOMXPath        $xpath       XPath query object for this document.
+ * @property DOMElement      $html        The document's <html> element.
+ * @property DOMElement      $head        The document's <head> element.
+ * @property DOMElement      $body        The document's <body> element.
+ * @property DOMElement|null $viewport    The document's viewport meta element.
+ * @property DOMNodeList     $ampElements The document's <amp-*> elements.
  *
  * @package ampproject/common
  */
@@ -1614,6 +1615,19 @@ final class Document extends DOMDocument
                     $this->body = $this->getElementsByTagName(Tag::BODY)->item(0);
                 }
                 return $this->body;
+            case Attribute::VIEWPORT:
+                // This is not cached as it could potentially be requested too early, before the viewport was added, and
+                // the cache would then store null without rechecking later on after the viewport has been added.
+                for ($node = $this->head->firstChild; $node !== null; $node = $node->nextSibling) {
+                    if (
+                        $node instanceof DOMElement
+                        && $node->tagName === Tag::META
+                        && $node->getAttribute(Attribute::NAME) === Attribute::VIEWPORT
+                    ) {
+                        return $node;
+                    }
+                }
+                return null;
             case 'ampElements':
                 $this->ampElements = $this->xpath->query(".//*[ starts-with( name(), 'amp-' ) ]", $this->body)
                     ?: new DOMNodeList();

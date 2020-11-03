@@ -3,43 +3,40 @@
 namespace AmpProject\Optimizer\Configuration;
 
 use AmpProject\Optimizer\Exception\InvalidConfigurationValue;
-use AmpProject\RuntimeVersion;
 
 /**
- * Configuration for the AmpRuntimeCss transformer.
+ * Configuration for the PreloadHeroImage transformer.
  *
- * @property string  $version Version string to use. Defaults to an empty string.
- * @property boolean $canary  Whether to use the canary version or not. Defaults to false.
+ * @property string  $preloadHeroImage Whether to preload hero images. Defaults to true.
  *
  * @package ampproject/optimizer
  */
-final class AmpRuntimeCssConfiguration extends BaseTransformerConfiguration
+final class PreloadHeroImageConfiguration extends BaseTransformerConfiguration
 {
 
     /**
-     * Configuration key that holds the version number to use.
-     *
-     * If the version is not provided, the latest runtime version is fetched from cdn.ampproject.org.
+     * Configuration key that holds the switch to disable preloading of hero images.
      *
      * @var string
      */
-    const VERSION = 'version';
+    const PRELOAD_HERO_IMAGE = 'preloadHeroImage';
 
     /**
-     * Configuration key that holds the actual runtime CSS styles to use.
+     * Configuration key that holds the attribute that is used to store inline styles that
+     * were moved to <style amp-custom>.
      *
-     * If the styles are not provided, the latest runtime styles are fetched from cdn.ampproject.org.
+     * An empty string signifies that no backup is available.
      *
-     * @var string
+     * @var string.
      */
-    const STYLES = 'styles';
+    const INLINE_STYLE_BACKUP_ATTRIBUTE = 'inlineStyleBackupAttribute';
 
     /**
-     * Configuration key that holds the flag for the canary version of the runtime style.
+     * Configuration key that holds the switch to enable preloading of images with a srcset attribute.
      *
      * @var string
      */
-    const CANARY = RuntimeVersion::OPTION_CANARY;
+    const PRELOAD_SRCSET = 'preloadSrcset';
 
     /**
      * Get the associative array of allowed keys and their respective default values.
@@ -51,9 +48,9 @@ final class AmpRuntimeCssConfiguration extends BaseTransformerConfiguration
     protected function getAllowedKeys()
     {
         return [
-            self::VERSION => '',
-            self::STYLES  => '',
-            self::CANARY  => false,
+            self::PRELOAD_HERO_IMAGE            => true,
+            self::INLINE_STYLE_BACKUP_ATTRIBUTE => '',
+            self::PRELOAD_SRCSET                => false,
         ];
     }
 
@@ -67,35 +64,33 @@ final class AmpRuntimeCssConfiguration extends BaseTransformerConfiguration
     protected function validate($key, $value)
     {
         switch ($key) {
-            case self::VERSION:
-                if (! is_string($value)) {
-                    throw InvalidConfigurationValue::forInvalidSubValueType(
-                        self::class,
-                        self::VERSION,
-                        'string',
-                        gettype($value)
-                    );
-                }
-                $value = trim($value);
-                break;
-
-            case self::STYLES:
-                if (! is_string($value)) {
-                    throw InvalidConfigurationValue::forInvalidSubValueType(
-                        self::class,
-                        self::STYLES,
-                        'string',
-                        gettype($value)
-                    );
-                }
-                $value = trim($value);
-                break;
-
-            case self::CANARY:
+            case self::PRELOAD_HERO_IMAGE:
                 if (! is_bool($value)) {
                     throw InvalidConfigurationValue::forInvalidSubValueType(
                         self::class,
-                        self::CANARY,
+                        self::PRELOAD_HERO_IMAGE,
+                        'boolean',
+                        gettype($value)
+                    );
+                }
+                break;
+
+            case self::INLINE_STYLE_BACKUP_ATTRIBUTE:
+                if (! is_string($value)) {
+                    throw InvalidConfigurationValue::forInvalidSubValueType(
+                        self::class,
+                        self::INLINE_STYLE_BACKUP_ATTRIBUTE,
+                        'string',
+                        gettype($value)
+                    );
+                }
+                break;
+
+            case self::PRELOAD_SRCSET:
+                if (! is_bool($value)) {
+                    throw InvalidConfigurationValue::forInvalidSubValueType(
+                        self::class,
+                        self::PRELOAD_SRCSET,
                         'boolean',
                         gettype($value)
                     );

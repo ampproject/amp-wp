@@ -21,6 +21,7 @@ use AmpProject\Optimizer;
 use AmpProject\RemoteRequest\FallbackRemoteGetRequest;
 use AmpProject\RemoteRequest\FilesystemRemoteGetRequest;
 use AmpProject\AmpWP\RemoteRequest\WpHttpRemoteGetRequest;
+use AmpProject\RequestDestination;
 use AmpProject\Tag;
 
 /**
@@ -1667,7 +1668,7 @@ class AMP_Theme_Support {
 			Tag::LINK,
 			[
 				Attribute::REL  => Attribute::REL_PRELOAD,
-				'as'            => Tag::SCRIPT,
+				Attribute::AS_  => RequestDestination::SCRIPT,
 				Attribute::HREF => $runtime_src,
 			]
 		);
@@ -1686,7 +1687,7 @@ class AMP_Theme_Support {
 				Tag::LINK,
 				[
 					Attribute::REL  => Attribute::REL_PRELOAD,
-					'as'            => Tag::SCRIPT,
+					Attribute::AS_  => RequestDestination::SCRIPT,
 					Attribute::HREF => $amp_scripts[ $script_handle ]->getAttribute( Attribute::SRC ),
 				]
 			);
@@ -2267,6 +2268,8 @@ class AMP_Theme_Support {
 					Optimizer\Transformer\TransformedIdentifier::class,
 				]
 			);
+		} else {
+			array_unshift( $transformers, Transformer\DetermineHeroImages::class );
 		}
 
 		array_unshift( $transformers, Transformer\AmpSchemaOrgMetadata::class );
@@ -2281,7 +2284,12 @@ class AMP_Theme_Support {
 		$configuration = apply_filters(
 			'amp_optimizer_config',
 			array_merge(
-				[ Optimizer\Configuration::KEY_TRANSFORMERS => $transformers ],
+				[
+					Optimizer\Configuration::KEY_TRANSFORMERS => $transformers,
+					Optimizer\Transformer\PreloadHeroImage::class => [
+						Optimizer\Configuration\PreloadHeroImageConfiguration::INLINE_STYLE_BACKUP_ATTRIBUTE => 'data-amp-original-style',
+					],
+				],
 				$args
 			)
 		);

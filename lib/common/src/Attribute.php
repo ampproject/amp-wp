@@ -28,7 +28,9 @@ interface Attribute
     const AMP_RUNTIME           = 'amp-runtime';
     const AMP_SCRIPT_SRC        = 'amp-script-src';
     const ARIA_HIDDEN           = 'aria-hidden';
+    const AS_                   = 'as'; // Underscore needed because 'as' is a PHP keyword.
     const ASYNC                 = 'async';
+    const ATTRIBUTION           = 'attribution';
     const AUTOPLAY              = 'autoplay';
     const CHARSET               = 'charset';
     const CLASS_                = 'class'; // Underscore needed because 'class' is a PHP keyword.
@@ -43,8 +45,11 @@ interface Attribute
     const HOST_SERVICE          = 'host-service';
     const HREF                  = 'href';
     const HTTP_EQUIV            = 'http-equiv';
+    const I_AMPHTML_SSR         = 'i-amphtml-ssr';
     const I_AMPHTML_VERSION     = 'i-amphtml-version';
     const ID                    = 'id';
+    const IMAGESRCSET           = 'imagesrcset';
+    const IMAGESIZES            = 'imagesizes';
     const IMPORTANCE            = 'importance';
     const INTRINSICSIZE         = 'intrinsicsize';
     const LAYOUT                = 'layout';
@@ -55,8 +60,12 @@ interface Attribute
     const NAME                  = 'name';
     const NOLOADING             = 'noloading';
     const OBJECT_FIT            = 'object-fit';
+    const OBJECT_POSITION       = 'object-position';
     const ON                    = 'on';
+    const PLACEHOLDER           = 'placeholder';
+    const POSTER                = 'poster';
     const PROFILE               = 'profile';
+    const REFERRERPOLICY        = 'referrerpolicy';
     const REL                   = 'rel';
     const ROLE                  = 'role';
     const SRCSET                = 'srcset';
@@ -93,4 +102,6 @@ interface Attribute
     const REL_PRELOAD      = 'preload';
     const REL_PRERENDER    = 'prerender';
     const REL_STYLESHEET   = 'stylesheet';
+
+    const DATA_HERO = 'data-hero';
 }

@@ -206,6 +206,83 @@ class AmpTest extends TestCase
     }
 
     /**
+     * Provide data for the testIsAmpStory() method.
+     *
+     * @return array[] Array
+     */
+    public function dataIsAmpStory()
+    {
+        $domAmpStoryCustomElement = Document::fromHtml('');
+        $ampStoryCustomElement    = $domAmpStoryCustomElement->createElement(Tag::SCRIPT);
+        $ampStoryCustomElement->setAttribute(Attribute::CUSTOM_ELEMENT, 'amp-story');
+        $domAmpStoryCustomElement->head->appendChild($ampStoryCustomElement);
+
+        $domOtherCustomElement = Document::fromHtml('');
+        $otherCustomElement    = $domOtherCustomElement->createElement(Tag::SCRIPT);
+        $otherCustomElement->setAttribute(Attribute::CUSTOM_ELEMENT, 'amp-something-else');
+        $domOtherCustomElement->head->appendChild($otherCustomElement);
+
+        $domAmpStoryCustomTemplate = Document::fromHtml('');
+        $ampStoryCustomTemplate    = $domAmpStoryCustomTemplate->createElement(Tag::SCRIPT);
+        $ampStoryCustomTemplate->setAttribute(Attribute::CUSTOM_TEMPLATE, 'amp-story');
+        $domAmpStoryCustomTemplate->head->appendChild($ampStoryCustomTemplate);
+
+        return [
+            'amp-story-custom-element' => [$domAmpStoryCustomElement, true],
+            'other-custom-element'     => [$domOtherCustomElement, false],
+            'amp-story-template'       => [$domAmpStoryCustomTemplate, false],
+        ];
+    }
+
+    /**
+     * Test the check for whether a document is an AMP Story.
+     *
+     * @dataProvider dataIsAmpStory
+     * @covers       Amp::isAmpStory()
+     *
+     * @param Document $document Document to get check for an AMP Story.
+     * @param bool     $expected Expected result.
+     */
+    public function testIsAmpStory(Document $document, $expected)
+    {
+        $this->assertEquals($expected, Amp::isAmpStory($document));
+    }
+
+    /**
+     * Provide data for the testIsTemplate() method.
+     *
+     * @return array[] Array
+     */
+    public function dataIsTemplate()
+    {
+        $dom = new Document();
+
+        $templateScript = $dom->createElement(Tag::SCRIPT);
+        $templateScript->setAttribute(Attribute::TEMPLATE, Extension::MUSTACHE);
+
+        return [
+            'non-element'         => [$dom->createTextNode('template'), false],
+            'template-element'    => [$dom->createElement(Tag::TEMPLATE), true],
+            'template-script'     => [$templateScript, true],
+            'non-template-script' => [$dom->createElement(Tag::SCRIPT), false],
+        ];
+    }
+
+    /**
+     * Test the check whether a given node is an AMP template.
+     *
+     * @dataProvider dataIsTemplate
+     * @covers       Amp::isTemplate()
+     *
+     * @param DOMNode $node     Node to check.
+     * @param bool    $expected Expected boolean result.
+     */
+    public function testIsTemplate(DOMNode $node, $expected)
+    {
+        $this->assertEquals($expected, Amp::isTemplate($node));
+    }
+
+    /**
      * Create an AMP CDN script to a given URL.
      *
      * @param Document $dom DOM document object to use.
@@ -233,5 +310,39 @@ class AmpTest extends TestCase
         $element = $dom->createElement(Tag::SCRIPT);
         $element->setAttribute($type, $name);
         return $element;
+    }
+
+    /**
+     * Provide data for the testIsAmpIframe() method.
+     *
+     * @return array[] Array
+     */
+    public function dataIsAmpIframe()
+    {
+        $dom = new Document();
+
+        $templateScript = $dom->createElement(Tag::SCRIPT);
+        $templateScript->setAttribute(Attribute::TEMPLATE, Extension::MUSTACHE);
+
+        return [
+            'non-element'              => [$dom->createTextNode(Extension::IFRAME), false],
+            'amp-iframe-element'       => [$dom->createElement(Extension::IFRAME), true],
+            'amp-video-iframe-element' => [$dom->createElement(Extension::VIDEO_IFRAME), true],
+            'other-element'            => [$dom->createElement(Extension::VIDEO), false],
+        ];
+    }
+
+    /**
+     * Test the check whether a given node is an AMP iframe.
+     *
+     * @dataProvider dataIsAmpIframe
+     * @covers       Amp::isAmpIframe()
+     *
+     * @param DOMNode $node     Node to check.
+     * @param bool    $expected Expected boolean result.
+     */
+    public function testIsAmpIframe(DOMNode $node, $expected)
+    {
+        $this->assertEquals($expected, Amp::isAmpIframe($node));
     }
 }

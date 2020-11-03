@@ -2,6 +2,7 @@
 
 namespace AmpProject;
 
+use AmpProject\Dom\Document;
 use DOMElement;
 use DOMNode;
 
@@ -250,6 +251,56 @@ final class Amp
     }
 
     /**
+     * Check whether the given document is an AMP story.
+     *
+     * @param Document $document Document of the page to check within.
+     * @return bool Whether the provided document is an AMP story.
+     */
+    public static function isAmpStory(Document $document)
+    {
+        foreach ($document->head->childNodes as $node) {
+            if (
+                $node instanceof DOMElement
+                &&
+                $node->tagName === Tag::SCRIPT
+                &&
+                $node->getAttribute(Attribute::CUSTOM_ELEMENT) === Extension::STORY
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check whether a given node is an AMP template.
+     *
+     * @param DOMNode $node Node to check.
+     * @return bool Whether the node is an AMP template.
+     */
+    public static function isTemplate(DOMNode $node)
+    {
+        if (! $node instanceof DOMElement) {
+            return false;
+        }
+
+        if ($node->tagName === Tag::TEMPLATE) {
+            return true;
+        }
+
+        if (
+            $node->tagName === Tag::SCRIPT
+            && $node->hasAttribute(Attribute::TEMPLATE)
+            && $node->getAttribute(Attribute::TEMPLATE) === Extension::MUSTACHE
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Check whether a given node is an async <script> element.
      *
      * @param DOMNode $node Node to check.
@@ -272,5 +323,21 @@ final class Amp
         }
 
         return true;
+    }
+
+    /**
+     * Check whether a given node is an AMP iframe.
+     *
+     * @param DOMNode $node Node to check.
+     * @return bool Whether the node is an AMP iframe.
+     */
+    public static function isAmpIframe(DOMNode $node)
+    {
+        if (! $node instanceof DOMElement) {
+            return false;
+        }
+
+        return $node->tagName === Extension::IFRAME
+               || $node->tagName === Extension::VIDEO_IFRAME;
     }
 }

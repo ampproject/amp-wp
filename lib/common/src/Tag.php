@@ -18,6 +18,7 @@ interface Tag
     const BODY       = 'body';
     const BR         = 'br';
     const COL        = 'col';
+    const DIV        = 'div';
     const EMBED      = 'embed';
     const FIGCAPTION = 'figcaption';
     const FIGURE     = 'figure';

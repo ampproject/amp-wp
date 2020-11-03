@@ -25,14 +25,15 @@ trait ErrorComparison
         $this->assertCount(count($expectedErrors), $actualErrors, 'Unexpected number of errors');
 
         if ($expectedErrors instanceof ErrorCollection) {
-            $expectedErrors = iterator_to_array($expectedErrors);
+            $expectedErrors = iterator_to_array($expectedErrors, false);
         }
 
         if ($actualErrors instanceof ErrorCollection) {
-            $actualErrors = iterator_to_array($actualErrors);
+            $actualErrors = iterator_to_array($actualErrors, false);
         }
 
-        for ($index = 0; $index < count($expectedErrors); $index++) {
+        $expectedCount = count($expectedErrors);
+        for ($index = 0; $index < $expectedCount; $index++) {
             $expectedError = $expectedErrors[$index];
             $actualError   = $actualErrors[$index];
             if (is_string($expectedError)) {

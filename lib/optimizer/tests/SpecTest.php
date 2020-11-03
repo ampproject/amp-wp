@@ -4,9 +4,11 @@ namespace AmpProject\Optimizer;
 
 use AmpProject\Dom\Document;
 use AmpProject\Optimizer\Configuration\AmpRuntimeCssConfiguration;
+use AmpProject\Optimizer\Configuration\PreloadHeroImageConfiguration;
 use AmpProject\Optimizer\Tests\MarkupComparison;
 use AmpProject\Optimizer\Tests\TestMarkup;
 use AmpProject\Optimizer\Transformer\AmpRuntimeCss;
+use AmpProject\Optimizer\Transformer\PreloadHeroImage;
 use AmpProject\Optimizer\Transformer\ReorderHead;
 use AmpProject\Optimizer\Transformer\ServerSideRendering;
 use AmpProject\RemoteRequest\StubbedRemoteGetRequest;
@@ -60,6 +62,7 @@ final class SpecTest extends TestCase
                 AmpRuntimeCss::class,
                 self::TRANSFORMER_SPEC_PATH . '/AmpBoilerplateTransformer',
             ],
+            'PreloadHeroImage'    => [PreloadHeroImage::class, self::TRANSFORMER_SPEC_PATH . '/PreloadHeroImage'],
         ];
 
         foreach ($suites as $key => list($transformerClass, $specFileFolder)) {
@@ -140,6 +143,9 @@ final class SpecTest extends TestCase
                 case 'ampRuntimeVersion':
                     $mappedConfiguration[AmpRuntimeCss::class][AmpRuntimeCssConfiguration::VERSION] = $value;
                     break;
+                case 'preloadHeroImage':
+                    $mappedConfiguration[PreloadHeroImage::class][PreloadHeroImageConfiguration::PRELOAD_HERO_IMAGE] = $value;
+                    break;
 
                 // @TODO: Known configuration arguments used in spec tests that are not implemented yet.
                 case 'ampUrlPrefix':
@@ -148,7 +154,6 @@ final class SpecTest extends TestCase
                 case 'experimentBindAttribute':
                 case 'geoApiUrl':
                 case 'lts':
-                case 'preloadHeroImage':
                 case 'rtv':
                 default:
                     $this->fail("Configuration argument not yet implemented: {$key}.");
