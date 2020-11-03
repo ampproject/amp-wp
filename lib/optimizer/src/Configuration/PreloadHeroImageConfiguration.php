@@ -32,6 +32,13 @@ final class PreloadHeroImageConfiguration extends BaseTransformerConfiguration
     const INLINE_STYLE_BACKUP_ATTRIBUTE = 'inlineStyleBackupAttribute';
 
     /**
+     * Configuration key that holds the switch to enable preloading of images with a srcset attribute.
+     *
+     * @var string
+     */
+    const PRELOAD_SRCSET = 'preloadSrcset';
+
+    /**
      * Get the associative array of allowed keys and their respective default values.
      *
      * The array index is the key and the array value is the key's default value.
@@ -43,6 +50,7 @@ final class PreloadHeroImageConfiguration extends BaseTransformerConfiguration
         return [
             self::PRELOAD_HERO_IMAGE            => true,
             self::INLINE_STYLE_BACKUP_ATTRIBUTE => '',
+            self::PRELOAD_SRCSET                => false,
         ];
     }
 
@@ -73,6 +81,17 @@ final class PreloadHeroImageConfiguration extends BaseTransformerConfiguration
                         self::class,
                         self::INLINE_STYLE_BACKUP_ATTRIBUTE,
                         'string',
+                        gettype($value)
+                    );
+                }
+                break;
+
+            case self::PRELOAD_SRCSET:
+                if (! is_bool($value)) {
+                    throw InvalidConfigurationValue::forInvalidSubValueType(
+                        self::class,
+                        self::PRELOAD_SRCSET,
+                        'boolean',
                         gettype($value)
                     );
                 }
