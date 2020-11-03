@@ -238,9 +238,10 @@ final class PreloadHeroImage implements Transformer
             return null;
         }
 
-        if ($element->tagName === Extension::IMAGE) {
+        $src = $element->getAttribute(Attribute::SRC);
+        if ($element->tagName === Extension::IMAGE && Url::isValidNonDataUrl($src)) {
             return new HeroImage(
-                $element->getAttribute(Attribute::SRC),
+                $src,
                 $element->getAttribute(Attribute::MEDIA),
                 $element->getAttribute(Attribute::SRCSET),
                 $element
