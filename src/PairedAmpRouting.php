@@ -67,6 +67,15 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	const PERMALINK_STRUCTURE_LEGACY_READER = 'legacy_reader';
 
 	/**
+	 * Custom permalink structure.
+	 *
+	 * This involves a site adding the necessary filters to implement their own permalink structure.
+	 *
+	 * @var string
+	 */
+	const PERMALINK_STRUCTURE_CUSTOM = 'custom';
+
+	/**
 	 * Permalink structures.
 	 *
 	 * @var string[]
@@ -76,6 +85,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		self::PERMALINK_STRUCTURE_REWRITE_ENDPOINT,
 		self::PERMALINK_STRUCTURE_LEGACY_TRANSITIONAL,
 		self::PERMALINK_STRUCTURE_LEGACY_READER,
+		self::PERMALINK_STRUCTURE_CUSTOM,
 	];
 
 	/**
@@ -195,16 +205,39 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	}
 
 	/**
-	 * Turn a given URL into a paired AMP URL.
+	 * Get the current paired AMP permalink structure.
 	 *
-	 * @todo Check if has_filter( 'amp_add_paired_endpoint' ) to defer to custom endpoint.
+	 * @return string Paired AMP permalink structure.
+	 */
+	public function get_permalink_structure() {
+		$has_filters      = [
+			has_filter( 'amp_has_paired_endpoint' ),
+			has_filter( 'amp_add_paired_endpoint' ),
+			has_filter( 'amp_remove_paired_endpoint' ),
+		];
+		$has_filter_count = count( array_filter( $has_filters ) );
+		if ( 3 === $has_filter_count ) {
+			return self::PERMALINK_STRUCTURE_CUSTOM;
+		} elseif ( $has_filter_count > 0 ) {
+			_doing_it_wrong(
+				'add_filter',
+				esc_html__( 'In order to implement a custom paired AMP permalink structure, you must add three filters:', 'amp' ) . ' amp_has_paired_endpoint, amp_add_paired_endpoint, amp_remove_paired_endpoint',
+				'2.1'
+			);
+		}
+
+		return AMP_Options_Manager::get_option( Option::PERMALINK_STRUCTURE );
+	}
+
+	/**
+	 * Turn a given URL into a paired AMP URL.
 	 *
 	 * @param string $url URL.
 	 * @return string AMP URL.
 	 */
 	public function add_paired_endpoint( $url ) {
-
-		switch ( AMP_Options_Manager::get_option( Option::PERMALINK_STRUCTURE ) ) {
+		$permalink_structure = self::get_permalink_structure();
+		switch ( $permalink_structure ) {
 			case self::PERMALINK_STRUCTURE_REWRITE_ENDPOINT:
 				return $this->get_rewrite_endpoint_paired_amp_url( $url );
 			case self::PERMALINK_STRUCTURE_LEGACY_TRANSITIONAL:
@@ -214,7 +247,21 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		}
 
 		// This is the PERMALINK_STRUCTURE_QUERY_VAR case, the default.
-		return $this->get_query_var_paired_amp_url( $url );
+		$amp_url = $this->get_query_var_paired_amp_url( $url );
+
+		if ( self::PERMALINK_STRUCTURE_CUSTOM === $permalink_structure ) {
+			/**
+			 * Filters paired AMP URL to apply a custom permalink structure.
+			 *
+			 * @since 2.1
+			 *
+			 * @param string $amp_url AMP URL. By default the AMP query var is added.
+			 * @param string $url     Original URL.
+			 */
+			$amp_url = apply_filters( 'amp_add_paired_endpoint', $amp_url, $url );
+		}
+
+		return $amp_url;
 	}
 
 	/**
@@ -364,45 +411,59 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 *
 	 * @param string $url URL to examine. If empty, will use the current URL.
 	 * @return bool True if the AMP query parameter is set with the required value, false if not.
-	 * @global WP_Query $wp_query
+	 * @global WP_Query $wp_the_query
 	 */
 	public function has_paired_endpoint( $url = '' ) {
 		$slug = amp_get_slug();
 
 		// If the URL was not provided, then use the environment which is already parsed.
 		if ( empty( $url ) ) {
-			global $wp_query;
-			return (
+			global $wp_the_query;
+			$has_endpoint = (
 				isset( $_GET[ $slug ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				||
 				(
-					$wp_query instanceof WP_Query
+					$wp_the_query instanceof WP_Query
 					&&
-					false !== $wp_query->get( $slug, false )
+					false !== $wp_the_query->get( $slug, false )
 				)
 			);
-		}
+		} else {
+			$has_endpoint = false;
 
-		$parsed_url = wp_parse_url( $url );
-		if ( ! empty( $parsed_url['query'] ) ) {
-			$query_vars = [];
-			wp_parse_str( $parsed_url['query'], $query_vars );
-			if ( isset( $query_vars[ $slug ] ) ) {
-				return true;
+			$parsed_url = wp_parse_url( $url );
+			if ( ! empty( $parsed_url['query'] ) ) {
+				$query_vars = [];
+				wp_parse_str( $parsed_url['query'], $query_vars );
+				if ( isset( $query_vars[ $slug ] ) ) {
+					$has_endpoint = true;
+				}
+			}
+
+			if ( ! $has_endpoint && ! empty( $parsed_url['path'] ) ) {
+				$pattern = sprintf(
+					'#/%s(/[^/^])?/?$#',
+					preg_quote( $slug, '#' )
+				);
+				if ( preg_match( $pattern, $parsed_url['path'] ) ) {
+					$has_endpoint = true;
+				}
 			}
 		}
 
-		if ( ! empty( $parsed_url['path'] ) ) {
-			$pattern = sprintf(
-				'#/%s(/[^/^])?/?$#',
-				preg_quote( $slug, '#' )
-			);
-			if ( preg_match( $pattern, $parsed_url['path'] ) ) {
-				return true;
-			}
+		if ( self::get_permalink_structure() === self::PERMALINK_STRUCTURE_CUSTOM ) {
+			/**
+			 * Filters whether the URL has a paired AMP permalink structure.
+			 *
+			 * @since 2.1
+			 *
+			 * @param bool   $has_endpoint Had endpoint. By default true if the AMP query var or rewrite endpoint is present.
+			 * @param string $url          The URL.
+			 */
+			$has_endpoint = apply_filters( 'amp_has_paired_endpoint', $has_endpoint, $url ?: amp_get_current_url() );
 		}
 
-		return false;
+		return $has_endpoint;
 	}
 
 	/**
@@ -415,7 +476,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		$slug = amp_get_slug();
 
 		// Strip endpoint, including /amp/, /amp/amp/, /amp/foo/.
-		$url = preg_replace(
+		$non_amp_url = preg_replace(
 			sprintf(
 				':(/%s(/[^/?#]+)?)+(?=/?(\?|#|$)):',
 				preg_quote( $slug, ':' )
@@ -425,9 +486,22 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		);
 
 		// Strip query var, including ?amp, ?amp=1, etc.
-		$url = remove_query_arg( $slug, $url );
+		$non_amp_url = remove_query_arg( $slug, $non_amp_url );
 
-		return $url;
+		$permalink_structure = self::get_permalink_structure();
+		if ( self::PERMALINK_STRUCTURE_CUSTOM === $permalink_structure ) {
+			/**
+			 * Filters paired AMP URL to remove a custom permalink structure.
+			 *
+			 * @since 2.1
+			 *
+			 * @param string $non_amp_url AMP URL. By default the rewrite endpoint and query var is removed.
+			 * @param string $url         Original URL.
+			 */
+			$non_amp_url = apply_filters( 'amp_remove_paired_endpoint', $non_amp_url, $url );
+		}
+
+		return $non_amp_url;
 	}
 
 	/**
