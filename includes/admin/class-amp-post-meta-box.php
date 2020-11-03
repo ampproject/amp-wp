@@ -266,7 +266,8 @@ class AMP_Post_Meta_Box {
 		);
 
 		$data = [
-			'ampSlug'         => amp_get_slug(),
+			'ampUrl'          => amp_is_canonical() ? null : amp_add_paired_endpoint( get_permalink( $post ) ),
+			'ampPreviewLink'  => amp_is_canonical() ? null : amp_add_paired_endpoint( get_preview_post_link( $post ) ),
 			'errorMessages'   => $this->get_error_messages( $status_and_errors['errors'] ),
 			'hasThemeSupport' => ! amp_is_legacy(),
 			'isStandardMode'  => amp_is_canonical(),
