@@ -14,7 +14,7 @@ use AmpProject\Optimizer\HeroImage;
 use AmpProject\Optimizer\ImageDimensions;
 use AmpProject\Optimizer\Transformer;
 use AmpProject\Optimizer\TransformerConfiguration;
-use AmpProject\ResponseDestination;
+use AmpProject\RequestDestination;
 use AmpProject\Tag;
 use AmpProject\Url;
 use DOMElement;
@@ -472,7 +472,7 @@ final class PreloadHeroImage implements Transformer
         $preload = $document->createElement(Tag::LINK);
         $preload->setAttribute(Attribute::REL, Attribute::REL_PRELOAD);
         $preload->setAttribute(Attribute::HREF, $heroImage->getSrc());
-        $preload->setAttribute(Attribute::AS_, ResponseDestination::IMAGE);
+        $preload->setAttribute(Attribute::AS_, RequestDestination::IMAGE);
         $preload->setAttribute(Attribute::DATA_HERO, null);
         if ($heroImage->getSrcset()) {
             $preload->setAttribute(Attribute::IMAGESRCSET, $heroImage->getSrcset());
@@ -551,7 +551,7 @@ final class PreloadHeroImage implements Transformer
                 continue;
             }
 
-            if ($node->getAttribute(Attribute::AS_) !== ResponseDestination::IMAGE) {
+            if ($node->getAttribute(Attribute::AS_) !== RequestDestination::IMAGE) {
                 continue;
             }
 
