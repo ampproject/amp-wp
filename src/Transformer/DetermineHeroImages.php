@@ -18,7 +18,7 @@ use DOMElement;
  * Determine the images to flag as data-hero so the Optimizer can preload them.
  *
  * This transformer checks for the following images in the given order:
- * 1. Site icon
+ * 1. Custom logo
  * 2. Featured image of the page
  * 3. Block editor cover block(s)
  *
@@ -38,11 +38,11 @@ final class DetermineHeroImages implements Transformer {
 	const EXISTING_HERO_IMAGES_XPATH_QUERY = './/*[@data-hero]';
 
 	/**
-	 * XPath query to find the site icon.
+	 * XPath query to find the custom logo.
 	 *
 	 * @var string
 	 */
-	const SITE_ICON_XPATH_QUERY = ".//a[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo-link ' ) ]//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo ' ) ][ not( @data-hero ) ]";
+	const CUSTOM_LOGO_XPATH_QUERY = ".//a[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo-link ' ) ]//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo ' ) ][ not( @data-hero ) ]";
 
 	/**
 	 * XPath query to find the featured image.
@@ -81,9 +81,9 @@ final class DetermineHeroImages implements Transformer {
 		$hero_image_elements = [];
 
 		if ( count( $hero_image_elements ) < $available_hero_image_slots ) {
-			$site_icon = $this->get_site_icon( $document );
-			if ( null !== $site_icon ) {
-				$hero_image_elements[] = $site_icon;
+			$custom_logo = $this->get_custom_logo( $document );
+			if ( null !== $custom_logo ) {
+				$hero_image_elements[] = $custom_logo;
 			}
 		}
 
@@ -109,21 +109,21 @@ final class DetermineHeroImages implements Transformer {
 	}
 
 	/**
-	 * Retrieve the element that represents the site icon.
+	 * Retrieve the element that represents the custom logo.
 	 *
-	 * @param Document $document Document to retrieve the site icon from.
-	 * @return DOMElement|null Element that represents the site icon, or null
+	 * @param Document $document Document to retrieve the custom logo from.
+	 * @return DOMElement|null Element that represents the custom logo, or null
 	 *                         if not found.
 	 */
-	private function get_site_icon( Document $document ) {
+	private function get_custom_logo( Document $document ) {
 		$elements = $document->xpath->query(
-			self::SITE_ICON_XPATH_QUERY,
+			self::CUSTOM_LOGO_XPATH_QUERY,
 			$document->body
 		);
 
-		$site_icon = $elements->item( 0 );
+		$custom_logo = $elements->item( 0 );
 
-		return $site_icon instanceof DOMElement ? $site_icon : null;
+		return $custom_logo instanceof DOMElement ? $custom_logo : null;
 	}
 
 	/**
