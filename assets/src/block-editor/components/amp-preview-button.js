@@ -11,7 +11,6 @@ import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { Component, createRef, renderToString } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -253,7 +252,6 @@ export default compose( [
 	withSelect( ( select, { forcePreviewLink, forceIsAutosaveable } ) => {
 		const {
 			getCurrentPostId,
-			getCurrentPostAttribute,
 			getEditedPostAttribute,
 			isEditedPostSaveable,
 			isEditedPostAutosaveable,
@@ -261,20 +259,27 @@ export default compose( [
 		} = select( 'core/editor' );
 
 		const {
-			getAmpSlug,
+			getAmpUrl,
+			getAmpPreviewLink,
 			getErrorMessages,
 			isStandardMode,
 		} = select( 'amp/block-editor' );
 
-		const queryArgs = {};
-		queryArgs[ getAmpSlug() ] = 1;
+		const copyQueryArgs = ( source, destination ) => {
+			const sourceUrl = new URL( source );
+			const destinationUrl = new URL( destination );
+			for ( const [ key, value ] of sourceUrl.searchParams.entries() ) {
+				destinationUrl.searchParams.set( key, value );
+			}
+			return destinationUrl.href;
+		};
 
 		const initialPreviewLink = getEditedPostPreviewLink();
-		const previewLink = initialPreviewLink ? addQueryArgs( initialPreviewLink, queryArgs ) : undefined;
+		const previewLink = initialPreviewLink ? copyQueryArgs( initialPreviewLink, getAmpPreviewLink() ) : undefined;
 
 		return {
 			postId: getCurrentPostId(),
-			currentPostLink: addQueryArgs( getCurrentPostAttribute( 'link' ), queryArgs ),
+			currentPostLink: getAmpUrl(),
 			previewLink: forcePreviewLink !== undefined ? forcePreviewLink : previewLink,
 			isSaveable: isEditedPostSaveable(),
 			isAutosaveable: forceIsAutosaveable || isEditedPostAutosaveable(),
