@@ -11,8 +11,8 @@ import { select } from '@wordpress/data';
  */
 import { withFeaturedImageNotice } from '../common/components';
 import { getMinimumFeaturedImageDimensions } from '../common/helpers';
-import { withMediaLibraryNotice } from './components';
-import { addAMPAttributes, filterBlocksEdit, removeAmpFitTextFromBlocks, removeClassFromAmpFitTextBlocks } from './helpers';
+import { withMediaLibraryNotice, withDeprecationNotice } from './components';
+import { addAMPAttributes, filterBlocksEdit, removeAmpFitTextFromBlocks, removeClassFromAmpFitTextBlocks, filterBlocksSave } from './helpers';
 import './store';
 
 const {
@@ -56,6 +56,7 @@ blocks.keys().forEach( ( modulePath ) => {
 	const shouldRegister = isStandardMode() && ampBlocks.includes( name );
 
 	if ( shouldRegister ) {
+		settings.edit = withDeprecationNotice( settings.edit );
 		registerBlockType( name, settings );
 	}
 } );
