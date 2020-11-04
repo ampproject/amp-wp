@@ -372,12 +372,18 @@ setUpInspectorControls.propTypes = {
 /**
  * Get AMP Layout select control.
  *
+ * @deprecated As of v2.1. Blocks with the `ampLayout` attribute will still be able to use the control.
+ *
  * @param {Object} props Props.
  *
  * @return {ReactElement} Element.
  */
 const AmpLayoutControl = ( props ) => {
 	const { name, attributes: { ampLayout }, setAttributes } = props;
+
+	if ( ! ampLayout ) {
+		return null;
+	}
 
 	let label = __( 'AMP Layout', 'amp' );
 
