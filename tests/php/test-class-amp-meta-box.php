@@ -152,7 +152,6 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 				'wp-i18n',
 				'wp-plugins',
 				'wp-polyfill',
-				'wp-url',
 			],
 			$block_script->deps
 		);
@@ -161,7 +160,8 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 
 		$this->assertContains( 'ampBlockEditor', $block_script->extra['data'] );
 		$expected_localized_values = [
-			'ampSlug',
+			'ampUrl',
+			'ampPreviewLink',
 			'errorMessages',
 			'hasThemeSupport',
 			'isStandardMode',

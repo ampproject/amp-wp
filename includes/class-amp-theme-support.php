@@ -2394,10 +2394,11 @@ class AMP_Theme_Support {
 	 */
 	public static function get_paired_browsing_url( $url = null ) {
 		if ( ! $url ) {
-			$url = wp_unslash( $_SERVER['REQUEST_URI'] );
+			$url = amp_get_current_url();
 		}
+		$url = amp_remove_paired_endpoint( $url );
 		$url = remove_query_arg(
-			[ amp_get_slug(), QueryVar::NOAMP, AMP_Validated_URL_Post_Type::VALIDATE_ACTION, AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ],
+			[ QueryVar::NOAMP, AMP_Validated_URL_Post_Type::VALIDATE_ACTION, AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ],
 			$url
 		);
 		$url = add_query_arg( self::PAIRED_BROWSING_QUERY_VAR, '1', $url );
@@ -2474,7 +2475,6 @@ class AMP_Theme_Support {
 			'amp-paired-browsing-app',
 			'app',
 			[
-				'ampSlug'                   => amp_get_slug(),
 				'ampPairedBrowsingQueryVar' => self::PAIRED_BROWSING_QUERY_VAR,
 				'noampQueryVar'             => QueryVar::NOAMP,
 				'noampMobile'               => QueryVar::NOAMP_MOBILE,
