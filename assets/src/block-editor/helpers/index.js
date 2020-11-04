@@ -411,6 +411,8 @@ AmpLayoutControl.propTypes = {
 /**
  * Get AMP Noloading toggle control.
  *
+ * @deprecated As of v2.1. Blocks with the `ampNoLoading` attribute will still be able to use the control.
+ *
  * @param {Object} props Props.
  *
  * @return {ReactElement} Element.
