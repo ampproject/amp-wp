@@ -52,3 +52,25 @@ export function getAmpPreviewLink( state ) {
 export function getAmpUrl( state ) {
 	return state.ampUrl;
 }
+
+/**
+ * Returns the list of blocks that can only be used for AMP.
+ *
+ * @param {Object} state The editor state.
+ *
+ * @return {string[]} The list of AMP blocks.
+ */
+export function getAmpBlocks( state ) {
+	return state.ampBlocks;
+}
+
+/**
+ * Returns the list of AMP blocks found in the post.
+ *
+ * @param {Object} state The editor state.
+ *
+ * @return {string[]} The list of AMP blocks in post.
+ */
+export function getAmpBlocksInUse( state ) {
+	return state.ampBlocksInUse;
+}

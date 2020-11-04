@@ -17,6 +17,8 @@ import './store';
 
 const {
 	isStandardMode,
+	getAmpBlocks,
+	getAmpBlocksInUse,
 } = select( 'amp/block-editor' );
 
 const plugins = require.context( './plugins', true, /.*\.js$/ );
@@ -38,27 +40,20 @@ addFilter( 'editor.BlockEdit', 'ampEditorBlocks/filterEdit', filterBlocksEdit, 2
 addFilter( 'editor.PostFeaturedImage', 'ampEditorBlocks/withFeaturedImageNotice', withFeaturedImageNotice );
 addFilter( 'editor.MediaUpload', 'ampEditorBlocks/withMediaLibraryNotice', ( InitialMediaUpload ) => withMediaLibraryNotice( InitialMediaUpload, getMinimumFeaturedImageDimensions() ) );
 
-/*
- * If there's no theme support, unregister blocks that are only meant for AMP.
- */
-const AMP_DEPENDENT_BLOCKS = [
-	'amp/amp-brid-player',
-	'amp/amp-ima-video',
-	'amp/amp-jwplayer',
-	'amp/amp-mathml',
-	'amp/amp-o2-player',
-	'amp/amp-ooyala-player',
-	'amp/amp-reach-player',
-	'amp/amp-springboard-player',
-	'amp/amp-timeago',
-];
+const ampBlocks = getAmpBlocks();
+const ampBlocksInUse = getAmpBlocksInUse();
 
 const blocks = require.context( './blocks', true, /(?<!test\/)index\.js$/ );
 
 blocks.keys().forEach( ( modulePath ) => {
 	const { name, settings } = blocks( modulePath );
 
-	const shouldRegister = isStandardMode() && AMP_DEPENDENT_BLOCKS.includes( name );
+	// Hide AMP dependent blocks that are not currently in use.
+	if ( ! ampBlocksInUse.includes( name ) ) {
+		return;
+	}
+
+	const shouldRegister = isStandardMode() && ampBlocks.includes( name );
 
 	if ( shouldRegister ) {
 		registerBlockType( name, settings );

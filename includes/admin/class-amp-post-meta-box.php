@@ -89,6 +89,24 @@ class AMP_Post_Meta_Box {
 	const REST_ATTRIBUTE_NAME = 'amp_enabled';
 
 	/**
+	 * Blocks that are only meant for AMP.
+	 *
+	 * @since 2.1
+	 * @var array
+	 */
+	const AMP_DEPENDENT_BLOCKS = [
+		'amp/amp-brid-player',
+		'amp/amp-ima-video',
+		'amp/amp-jwplayer',
+		'amp/amp-mathml',
+		'amp/amp-o2-player',
+		'amp/amp-ooyala-player',
+		'amp/amp-reach-player',
+		'amp/amp-springboard-player',
+		'amp/amp-timeago',
+	];
+
+	/**
 	 * Initialize.
 	 *
 	 * @since 0.6
@@ -249,7 +267,8 @@ class AMP_Post_Meta_Box {
 			true
 		);
 
-		$is_standard_mode = amp_is_canonical();
+		$is_standard_mode  = amp_is_canonical();
+		$amp_blocks_in_use = $is_standard_mode ? array_filter( self::AMP_DEPENDENT_BLOCKS, 'has_block' ) : [];
 
 		list( $featured_image_minimum_width, $featured_image_minimum_height ) = self::get_featured_image_dimensions();
 
@@ -261,6 +280,8 @@ class AMP_Post_Meta_Box {
 			'isStandardMode'             => $is_standard_mode,
 			'featuredImageMinimumWidth'  => $featured_image_minimum_width,
 			'featuredImageMinimumHeight' => $featured_image_minimum_height,
+			'ampBlocks'                  => self::AMP_DEPENDENT_BLOCKS,
+			'ampBlocksInUse'             => array_values( $amp_blocks_in_use ),
 		];
 
 		wp_add_inline_script(
