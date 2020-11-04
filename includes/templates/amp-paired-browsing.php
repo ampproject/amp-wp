@@ -7,7 +7,7 @@
 
 use AmpProject\AmpWP\QueryVar;
 
-$url         = remove_query_arg( [ AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR, QueryVar::NOAMP ] );
+$url         = remove_query_arg( [ AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR, QueryVar::NOAMP ], amp_get_current_url() );
 $non_amp_url = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $url );
 $amp_url     = amp_add_paired_endpoint( $url );
 ?>
@@ -64,7 +64,7 @@ $amp_url     = amp_add_paired_endpoint( $url );
 				<iframe
 					name="paired-browsing-non-amp"
 					src="<?php echo esc_url( $non_amp_url ); ?>"
-					sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-modals"
+					data-sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-modals"
 					title="<?php esc_attr__( 'Non-AMP version', 'amp' ); ?>"
 				></iframe>
 			</div>
@@ -73,7 +73,7 @@ $amp_url     = amp_add_paired_endpoint( $url );
 				<iframe
 					name="paired-browsing-amp"
 					src="<?php echo esc_url( $amp_url ); ?>"
-					sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-modals"
+					data-sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-modals"
 					title="<?php esc_attr__( 'AMP version', 'amp' ); ?>"
 				></iframe>
 			</div>

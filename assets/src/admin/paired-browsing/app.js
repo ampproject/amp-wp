@@ -8,7 +8,7 @@ import { addQueryArgs, hasQueryArg, removeQueryArgs } from '@wordpress/url';
 import './app.css';
 
 const { app, history } = window;
-const { ampSlug, noampQueryVar, noampMobile, ampPairedBrowsingQueryVar, documentTitlePrefix } = app;
+const { noampQueryVar, noampMobile, ampPairedBrowsingQueryVar, documentTitlePrefix } = app;
 
 class PairedBrowsingApp {
 	/**
@@ -175,28 +175,13 @@ class PairedBrowsingApp {
 	}
 
 	/**
-	 * Removes AMP related query variables from the supplied URL.
+	 * Purge removable query vars from the supplied URL.
 	 *
 	 * @param {string} url URL string.
 	 * @return {string} Modified URL without any AMP related query variables.
 	 */
-	removeAmpQueryVars( url ) {
-		return removeQueryArgs( url, ampSlug, noampQueryVar, ampPairedBrowsingQueryVar );
-	}
-
-	/**
-	 * Adds the AMP query variable to the supplied URL.
-	 *
-	 * @param {string} url URL string.
-	 * @return {string} Modified URL with the AMP query variable.
-	 */
-	addAmpQueryVar( url ) {
-		return addQueryArgs(
-			url,
-			{
-				[ ampSlug ]: '1',
-			},
-		);
+	purgeRemovableQueryVars( url ) {
+		return removeQueryArgs( url, noampQueryVar, ampPairedBrowsingQueryVar );
 	}
 
 	/**
@@ -237,15 +222,42 @@ class PairedBrowsingApp {
 	}
 
 	/**
+	 * Get non-AMP location from a window.
+	 *
+	 * @param {Window} win Window.
+	 * @return {string|null} Non-AMP location.
+	 */
+	getWindowNonAmpLocation( win ) {
+		if ( this.documentIsAmp( win.document ) ) {
+			const canonicalLink = win.document.querySelector( 'head > link[rel=canonical]' );
+			return canonicalLink ? canonicalLink.href : null;
+		}
+		return win.location.href;
+	}
+
+	/**
 	 * Registers the provided client window with its parent, so that it can be managed by it.
 	 *
 	 * @param {Window} win Document window.
 	 */
 	registerClientWindow( win ) {
 		let oppositeWindow;
+		const isAmp = this.documentIsAmp( win.document );
+
+		const amphtmlLink = win.document.querySelector( 'head > link[rel=amphtml]' );
+		const canonicalLink = win.document.querySelector( 'head > link[rel=canonical]' );
+
+		let ampUrl, nonAmpUrl;
+		if ( isAmp ) {
+			ampUrl = win.location.href;
+			nonAmpUrl = canonicalLink ? canonicalLink.href : null;
+		} else {
+			nonAmpUrl = win.location.href;
+			ampUrl = amphtmlLink ? amphtmlLink.href : null;
+		}
 
 		if ( win === this.ampIframe.contentWindow ) {
-			if ( ! this.documentIsAmp( win.document ) ) {
+			if ( ! isAmp ) {
 				if ( this.urlHasValidationErrorQueryVar( win.location.href ) ) {
 					/*
 					 * If the AMP page has validation errors, mark the page as invalid so that the
@@ -254,9 +266,9 @@ class PairedBrowsingApp {
 					this.ampPageHasErrors = true;
 					this.toggleDisconnectOverlay( this.ampIframe );
 					return;
-				} else if ( win.document.querySelector( 'head > link[rel=amphtml]' ) ) {
+				} else if ( ampUrl ) {
 					// Force the AMP iframe to always have an AMP URL, if an AMP version is available.
-					win.location.replace( this.addAmpQueryVar( win.location.href ) );
+					win.location.replace( ampUrl );
 					return;
 				}
 
@@ -277,8 +289,8 @@ class PairedBrowsingApp {
 			oppositeWindow = this.nonAmpIframe.contentWindow;
 		} else {
 			// Force the non-AMP iframe to always have a non-AMP URL.
-			if ( this.documentIsAmp( win.document ) ) {
-				win.location.replace( this.removeAmpQueryVars( win.location.href ) );
+			if ( isAmp ) {
+				win.location.replace( this.purgeRemovableQueryVars( nonAmpUrl ) );
 				return;
 			}
 
@@ -310,13 +322,13 @@ class PairedBrowsingApp {
 			oppositeWindow &&
 			oppositeWindow.location &&
 			(
-				this.removeAmpQueryVars( this.removeUrlHash( oppositeWindow.location.href ) ) !==
-				this.removeAmpQueryVars( this.removeUrlHash( win.location.href ) )
+				this.purgeRemovableQueryVars( this.removeUrlHash( this.getWindowNonAmpLocation( oppositeWindow ) ) ) !==
+				this.purgeRemovableQueryVars( this.removeUrlHash( this.getWindowNonAmpLocation( win ) ) )
 			)
 		) {
 			const url = oppositeWindow === this.ampIframe.contentWindow
-				? this.addAmpQueryVar( win.location.href )
-				: this.removeAmpQueryVars( win.location.href );
+				? ampUrl
+				: nonAmpUrl;
 
 			oppositeWindow.location.replace( url );
 
@@ -328,7 +340,7 @@ class PairedBrowsingApp {
 		history.replaceState(
 			{},
 			'',
-			this.addPairedBrowsingQueryVar( this.removeAmpQueryVars( win.location.href ) ),
+			this.addPairedBrowsingQueryVar( this.purgeRemovableQueryVars( win.location.href ) ),
 		);
 	}
 }
