@@ -32,25 +32,11 @@ class PairedBrowsingApp {
 	ampIframe;
 
 	/**
-	 * Whether the AMP window is loading.
-	 *
-	 * @type {boolean}
-	 */
-	ampWindowLoading = false;
-
-	/**
 	 * Non-AMP IFrame
 	 *
 	 * @type {HTMLIFrameElement}
 	 */
 	nonAmpIframe;
-
-	/**
-	 * Whether the non-AMP window is loading.
-	 *
-	 * @type {boolean}
-	 */
-	nonAmpWindowLoading = false;
 
 	/**
 	 * Current AMP URL.
@@ -325,12 +311,6 @@ class PairedBrowsingApp {
 	replaceLocation( iframe, url ) {
 		// @todo If disconneted we canot send the replaceLocation message.
 
-		if ( iframe === this.ampIframe ) {
-			this.ampWindowLoading = true;
-		} else {
-			this.nonAmpWindowLoading = true;
-		}
-
 		this.sendMessage(
 			iframe.contentWindow,
 			'replaceLocation',
@@ -454,12 +434,6 @@ class PairedBrowsingApp {
 				this.purgeRemovableQueryVars( url ),
 			);
 			return;
-		}
-
-		if ( isAmpSource ) {
-			this.ampWindowLoading = false;
-		} else {
-			this.nonAmpWindowLoading = false;
 		}
 
 		document.title = documentTitlePrefix + ' ' + documentTitle;
