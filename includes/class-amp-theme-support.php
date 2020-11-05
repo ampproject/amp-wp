@@ -2369,6 +2369,20 @@ class AMP_Theme_Support {
 			true
 		);
 
+		$is_amp_request = amp_is_request();
+		$current_url    = amp_get_current_url();
+		$amp_url        = $is_amp_request ? $current_url : amp_add_paired_endpoint( $current_url );
+		$non_amp_url    = ! $is_amp_request ? $current_url : amp_remove_paired_endpoint( $current_url );
+
+		wp_localize_script(
+			'amp-paired-browsing-client',
+			'ampPairedBrowsingClientData',
+			[
+				'ampUrl'    => $amp_url,
+				'nonAmpUrl' => $non_amp_url,
+			]
+		);
+
 		// Mark enqueued script for AMP dev mode so that it is not removed.
 		// @todo Revisit with <https://github.com/google/site-kit-wp/pull/505#discussion_r348683617>.
 		add_filter(
@@ -2473,7 +2487,7 @@ class AMP_Theme_Support {
 
 		wp_localize_script(
 			'amp-paired-browsing-app',
-			'app',
+			'ampPairedBrowsingAppData',
 			[
 				'ampPairedBrowsingQueryVar' => self::PAIRED_BROWSING_QUERY_VAR,
 				'noampQueryVar'             => QueryVar::NOAMP,

@@ -1432,6 +1432,9 @@ function amp_get_content_sanitizers( $post = null ) {
 		 */
 		$dev_mode_xpaths = (array) apply_filters( 'amp_dev_mode_element_xpaths', [] );
 
+		// Paired browsing paths.
+		$dev_mode_xpaths[] = '//script[ contains( text(), "ampPairedBrowsingClient" ) ]';
+
 		if ( is_admin_bar_showing() ) {
 			$dev_mode_xpaths[] = '//*[ @id = "wpadminbar" ]';
 			$dev_mode_xpaths[] = '//*[ @id = "wpadminbar" ]//*';

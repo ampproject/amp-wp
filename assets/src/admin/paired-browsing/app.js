@@ -6,9 +6,15 @@ import { addQueryArgs, hasQueryArg, removeQueryArgs } from '@wordpress/url';
  * Internal dependencies
  */
 import './app.css';
+import { isNonAmpWindow, isAmpWindow } from './utils';
 
-const { app, history } = window;
-const { noampQueryVar, noampMobile, ampPairedBrowsingQueryVar, documentTitlePrefix } = app;
+const { ampPairedBrowsingAppData, history } = window;
+const {
+	noampQueryVar,
+	noampMobile,
+	ampPairedBrowsingQueryVar,
+	documentTitlePrefix,
+} = ampPairedBrowsingAppData;
 
 class PairedBrowsingApp {
 	/**
@@ -26,11 +32,39 @@ class PairedBrowsingApp {
 	ampIframe;
 
 	/**
+	 * Whether the AMP window is loading.
+	 *
+	 * @type {boolean}
+	 */
+	ampWindowLoading = false;
+
+	/**
 	 * Non-AMP IFrame
 	 *
 	 * @type {HTMLIFrameElement}
 	 */
 	nonAmpIframe;
+
+	/**
+	 * Whether the non-AMP window is loading.
+	 *
+	 * @type {boolean}
+	 */
+	nonAmpWindowLoading = false;
+
+	/**
+	 * Current AMP URL.
+	 *
+	 * @type {string}
+	 */
+	currentAmpUrl;
+
+	/**
+	 * Current non-AMP URL.
+	 *
+	 * @type {string}
+	 */
+	currentNonAmpUrl;
 
 	/**
 	 * Non-AMP Link
@@ -47,12 +81,22 @@ class PairedBrowsingApp {
 	ampLink;
 
 	/**
+	 * Active iframe.
+	 *
+	 * @type {HTMLIFrameElement|null}
+	 */
+	activeIframe;
+
+	/**
 	 * Constructor.
 	 */
 	constructor() {
 		this.nonAmpIframe = document.querySelector( '#non-amp iframe' );
 		this.ampIframe = document.querySelector( '#amp iframe' );
-		this.ampPageHasErrors = false;
+		this.ampPageHasErrors = false; // @todo This is obsolete. Remove this and invalid-amp span.
+
+		this.currentNonAmpUrl = this.nonAmpIframe.src;
+		this.currentAmpUrl = this.ampIframe.src;
 
 		// Link to exit paired browsing.
 		this.nonAmpLink = /** @type {HTMLAnchorElement} */ document.getElementById( 'non-amp-link' );
@@ -70,12 +114,71 @@ class PairedBrowsingApp {
 		};
 		this.addDisconnectButtonListeners();
 
+		window.addEventListener( 'message', ( event ) => {
+			this.receiveMessage( event );
+		} );
+
+		// Set the active iframe based on which got the last mouseenter.
+		// Note that setting activeIframe may get set by receiveScroll if the user starts scrolling
+		// before moving the mouse.
+		document.getElementById( 'non-amp' ).addEventListener( 'mouseenter', () => {
+			this.activeIframe = this.nonAmpIframe;
+		} );
+		document.getElementById( 'amp' ).addEventListener( 'mouseenter', () => {
+			this.activeIframe = this.ampIframe;
+		} );
+
 		// Load clients.
-		Promise.all( this.getIframeLoadedPromises() );
+		this.getIframeLoadedPromises();
+	}
+
+	/**
+	 * Send message to app.
+	 *
+	 * @param {Window} win  Window.
+	 * @param {string} type Type.
+	 * @param {Object} data Data.
+	 */
+	sendMessage( win, type, data = {} ) {
+		win.postMessage(
+			{
+				type,
+				...data,
+				ampPairedBrowsing: true,
+			},
+			isAmpWindow( win ) ? this.currentAmpUrl : this.currentNonAmpUrl,
+		);
+	}
+
+	/**
+	 * Receive message.
+	 *
+	 * @param {MessageEvent} event
+	 */
+	receiveMessage( event ) {
+		if ( ! event.data || ! event.data.type || ! event.data.ampPairedBrowsing || ! event.source ) {
+			return;
+		}
+
+		if ( ! isAmpWindow( event.source ) && ! isNonAmpWindow( event.source ) ) {
+			return;
+		}
+
+		switch ( event.data.type ) {
+			case 'heartbeat':
+				this.receiveHeartbeat( event.data, event.source );
+				break;
+			case 'scroll':
+				this.receiveScroll( event.data, event.source );
+				break;
+			default:
+		}
 	}
 
 	/**
 	 * Add event listeners for buttons on disconnect overlay.
+	 *
+	 * @todo Revisit.
 	 */
 	addDisconnectButtonListeners() {
 		// The 'Exit' button navigates the parent window to the URL of the disconnected client.
@@ -98,14 +201,14 @@ class PairedBrowsingApp {
 		return [
 			new Promise( ( resolve ) => {
 				this.nonAmpIframe.addEventListener( 'load', () => {
-					this.toggleDisconnectOverlay( this.nonAmpIframe );
+					//this.toggleDisconnectOverlay( this.nonAmpIframe );
 					resolve();
 				} );
 			} ),
 
 			new Promise( ( resolve ) => {
 				this.ampIframe.addEventListener( 'load', () => {
-					this.toggleDisconnectOverlay( this.ampIframe );
+					//this.toggleDisconnectOverlay( this.ampIframe );
 					resolve();
 				} );
 			} ),
@@ -113,18 +216,9 @@ class PairedBrowsingApp {
 	}
 
 	/**
-	 * Validates whether or not the window document is AMP compatible.
-	 *
-	 * @param {Document} doc Window document.
-	 * @return {boolean} True if AMP compatible, false if not.
-	 */
-	documentIsAmp( doc ) {
-		return doc.querySelector( 'head > script[src="https://cdn.ampproject.org/v0.js"]' );
-	}
-
-	/**
 	 * Toggles the 'disconnected' overlay for the supplied iframe.
 	 *
+	 * @todo Revisit.
 	 * @param {HTMLIFrameElement} iframe The iframe that hosts the paired browsing client.
 	 */
 	toggleDisconnectOverlay( iframe ) {
@@ -162,6 +256,7 @@ class PairedBrowsingApp {
 	/**
 	 * Determines the status of the paired browsing client in an iframe.
 	 *
+	 * @todo Revisit.
 	 * @param {HTMLIFrameElement} iframe The iframe.
 	 */
 	isClientConnected( iframe ) {
@@ -222,43 +317,76 @@ class PairedBrowsingApp {
 	}
 
 	/**
-	 * Get non-AMP location from a window.
+	 * Replace location.
 	 *
-	 * @param {Window} win Window.
-	 * @return {string|null} Non-AMP location.
+	 * @param {HTMLIFrameElement} iframe IFrame Element.
+	 * @param {string}            url    URL.
 	 */
-	getWindowNonAmpLocation( win ) {
-		if ( this.documentIsAmp( win.document ) ) {
-			const canonicalLink = win.document.querySelector( 'head > link[rel=canonical]' );
-			return canonicalLink ? canonicalLink.href : null;
+	replaceLocation( iframe, url ) {
+		// @todo If disconneted we canot send the replaceLocation message.
+
+		if ( iframe === this.ampIframe ) {
+			this.ampWindowLoading = true;
+		} else {
+			this.nonAmpWindowLoading = true;
 		}
-		return win.location.href;
+
+		this.sendMessage(
+			iframe.contentWindow,
+			'replaceLocation',
+			{ href: url },
+		);
 	}
 
 	/**
-	 * Registers the provided client window with its parent, so that it can be managed by it.
+	 * Receive scroll.
 	 *
-	 * @param {Window} win Document window.
+	 * @param {Object}      data         Data.
+	 * @param {boolean}     data.x       X position.
+	 * @param {string|null} data.y       Y position.
+	 * @param {Window}      sourceWindow The source window.
 	 */
-	registerClientWindow( win ) {
-		let oppositeWindow;
-		const isAmp = this.documentIsAmp( win.document );
-
-		const amphtmlLink = win.document.querySelector( 'head > link[rel=amphtml]' );
-		const canonicalLink = win.document.querySelector( 'head > link[rel=canonical]' );
-
-		let ampUrl, nonAmpUrl;
-		if ( isAmp ) {
-			ampUrl = win.location.href;
-			nonAmpUrl = canonicalLink ? canonicalLink.href : null;
-		} else {
-			nonAmpUrl = win.location.href;
-			ampUrl = amphtmlLink ? amphtmlLink.href : null;
+	receiveScroll( { x, y }, sourceWindow ) {
+		// Rely on scroll event to determine initially-active iframe before mouse first moves.
+		if ( ! this.activeIframe ) {
+			this.activeIframe = isAmpWindow( sourceWindow )
+				? this.ampIframe
+				: this.nonAmpIframe;
 		}
 
-		if ( win === this.ampIframe.contentWindow ) {
-			if ( ! isAmp ) {
-				if ( this.urlHasValidationErrorQueryVar( win.location.href ) ) {
+		// Ignore scroll events from the non-active iframe.
+		if ( ! this.activeIframe || sourceWindow !== this.activeIframe.contentWindow ) {
+			return;
+		}
+
+		const otherWindow = isAmpWindow( sourceWindow )
+			? this.nonAmpIframe.contentWindow
+			: this.ampIframe.contentWindow;
+		this.sendMessage( otherWindow, 'scroll', { x, y } );
+	}
+
+	/**
+	 * Receive heartbeat.
+	 *
+	 * @param {Object}      data                   Data.
+	 * @param {boolean}     data.isAmpDocument     Whether the document is actually an AMP page.
+	 * @param {string|null} data.ampUrl            The AMP URL.
+	 * @param {string|null} data.nonAmpUrl         The non-AMP URL.
+	 * @param {string}      data.documentTitle The canonical link URL if present.
+	 * @param {Window}      sourceWindow The source window.
+	 */
+	receiveHeartbeat( { isAmpDocument, ampUrl, nonAmpUrl, documentTitle }, sourceWindow ) {
+		const isAmpSource = isAmpWindow( sourceWindow );
+		const sourceIframe = isAmpSource ? this.ampIframe : this.nonAmpIframe;
+
+		if ( isAmpSource ) {
+			// Stop if the URL has not changed.
+			if ( this.currentAmpUrl === ampUrl ) {
+				return;
+			}
+
+			if ( ! isAmpDocument ) {
+				if ( this.urlHasValidationErrorQueryVar( ampUrl ) ) {
 					/*
 					 * If the AMP page has validation errors, mark the page as invalid so that the
 					 * 'disconnected' overlay can be shown.
@@ -268,7 +396,7 @@ class PairedBrowsingApp {
 					return;
 				} else if ( ampUrl ) {
 					// Force the AMP iframe to always have an AMP URL, if an AMP version is available.
-					win.location.replace( ampUrl );
+					this.replaceLocation( sourceIframe, ampUrl );
 					return;
 				}
 
@@ -278,69 +406,68 @@ class PairedBrowsingApp {
 				 * overlay.
 				 */
 				this.ampPageHasErrors = true;
-				this.toggleDisconnectOverlay( this.ampIframe );
+				// this.toggleDisconnectOverlay( this.ampIframe );
 				return;
 			}
+
+			this.currentAmpUrl = ampUrl;
 
 			// Update the AMP link above the iframe used for exiting paired browsing.
-			this.ampLink.href = removeQueryArgs( this.ampIframe.contentWindow.location.href, noampQueryVar );
+			this.ampLink.href = removeQueryArgs( ampUrl, noampQueryVar );
 
 			this.ampPageHasErrors = false;
-			oppositeWindow = this.nonAmpIframe.contentWindow;
 		} else {
-			// Force the non-AMP iframe to always have a non-AMP URL.
-			if ( isAmp ) {
-				win.location.replace( this.purgeRemovableQueryVars( nonAmpUrl ) );
+			// Stop if the URL has not changed.
+			if ( this.currentNonAmpUrl === nonAmpUrl ) {
 				return;
 			}
+
+			// Force the non-AMP iframe to always have a non-AMP URL.
+			if ( isAmpDocument ) {
+				this.replaceLocation( sourceIframe, nonAmpUrl );
+				return;
+			}
+
+			this.currentNonAmpUrl = nonAmpUrl;
 
 			// Update the non-AMP link above the iframe used for exiting paired browsing.
 			this.nonAmpLink.href = addQueryArgs(
-				this.nonAmpIframe.contentWindow.location.href,
+				nonAmpUrl,
 				{ [ noampQueryVar ]: noampMobile },
 			);
-
-			oppositeWindow = this.ampIframe.contentWindow;
 		}
 
-		// Synchronize scrolling from current window to its opposite.
-		win.addEventListener(
-			'scroll',
-			() => {
-				if ( oppositeWindow && oppositeWindow.ampPairedBrowsingClient && oppositeWindow.scrollTo ) {
-					oppositeWindow.scrollTo( win.scrollX, win.scrollY );
-				}
-			},
-			{ passive: true },
-		);
-
-		// Scrolling is not synchronized if `scroll-behavior` is set to `smooth`.
-		win.document.documentElement.style.setProperty( 'scroll-behavior', 'auto', 'important' );
-
 		// Make sure the opposite iframe is set to match.
+		const thisCurrentUrl = isAmpSource ? nonAmpUrl : ampUrl;
+		const otherCurrentUrl = isAmpSource ? this.currentNonAmpUrl : this.currentAmpUrl;
+
 		if (
-			oppositeWindow &&
-			oppositeWindow.location &&
-			(
-				this.purgeRemovableQueryVars( this.removeUrlHash( this.getWindowNonAmpLocation( oppositeWindow ) ) ) !==
-				this.purgeRemovableQueryVars( this.removeUrlHash( this.getWindowNonAmpLocation( win ) ) )
-			)
+			this.purgeRemovableQueryVars( this.removeUrlHash( thisCurrentUrl ) ) !==
+			this.purgeRemovableQueryVars( this.removeUrlHash( otherCurrentUrl ) )
 		) {
-			const url = oppositeWindow === this.ampIframe.contentWindow
-				? ampUrl
-				: nonAmpUrl;
+			const url = isAmpSource
+				? nonAmpUrl
+				: ampUrl;
 
-			oppositeWindow.location.replace( url );
-
+			this.replaceLocation(
+				isAmpSource ? this.nonAmpIframe : this.ampIframe,
+				this.purgeRemovableQueryVars( url ),
+			);
 			return;
 		}
 
-		document.title = documentTitlePrefix + ' ' + win.document.title;
+		if ( isAmpSource ) {
+			this.ampWindowLoading = false;
+		} else {
+			this.nonAmpWindowLoading = false;
+		}
+
+		document.title = documentTitlePrefix + ' ' + documentTitle;
 
 		history.replaceState(
 			{},
 			'',
-			this.addPairedBrowsingQueryVar( this.purgeRemovableQueryVars( win.location.href ) ),
+			this.addPairedBrowsingQueryVar( this.purgeRemovableQueryVars( nonAmpUrl ) ),
 		);
 	}
 }
