@@ -101,6 +101,22 @@ function receiveScroll( { x, y } ) {
 }
 
 /**
+ * Handle click event.
+ *
+ * @param {MouseEvent} event
+ */
+function handleClick( event ) {
+	const element = event.target;
+	if ( element.matches( '[href]' ) ) {
+		sendMessage(
+			parent,
+			'navigate',
+			{ href: element.href },
+		);
+	}
+}
+
+/**
  * Receive replace location.
  *
  * @param {string} href
@@ -140,6 +156,7 @@ if ( isNonAmpWindow( window ) || isAmpWindow( window ) ) {
 
 		window.addEventListener( 'message', receiveMessage );
 		window.addEventListener( 'scroll', sendScroll, { passive: true } );
+		document.addEventListener( 'click', handleClick, { passive: true } );
 
 		sendLoaded();
 	} );
