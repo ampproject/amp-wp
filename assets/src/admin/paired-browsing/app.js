@@ -60,11 +60,25 @@ class PairedBrowsingApp {
 	currentAmpUrl;
 
 	/**
+	 * The most recent URL that was being navigated to in the AMP window.
+	 *
+	 * @type {?string}
+	 */
+	navigateAmpUrl;
+
+	/**
 	 * Current non-AMP URL.
 	 *
 	 * @type {string}
 	 */
 	currentNonAmpUrl;
+
+	/**
+	 * The most recent URL that was being navigated to in the non-AMP window.
+	 *
+	 * @type {?string}
+	 */
+	navigateNonAmpUrl;
 
 	/**
 	 * Non-AMP Link
@@ -83,7 +97,7 @@ class PairedBrowsingApp {
 	/**
 	 * Active iframe.
 	 *
-	 * @type {HTMLIFrameElement|null}
+	 * @type {?HTMLIFrameElement}
 	 */
 	activeIframe;
 
@@ -104,6 +118,7 @@ class PairedBrowsingApp {
 		// Overlay that is displayed on the client that becomes disconnected.
 		this.disconnectOverlay = document.querySelector( '.disconnect-overlay' );
 		this.disconnectButtons = {
+			exit: document.querySelector( '.disconnect-overlay .button.exit' ),
 			goBack: document.querySelector( '.disconnect-overlay .button.go-back' ),
 		};
 		this.addDisconnectButtonListeners();
@@ -175,6 +190,9 @@ class PairedBrowsingApp {
 			case 'heartbeat':
 				this.receiveHeartbeat( event.source );
 				break;
+			case 'navigate':
+				this.receiveNavigate( event.data, event.source );
+				break;
 			default:
 		}
 	}
@@ -209,6 +227,21 @@ class PairedBrowsingApp {
 	}
 
 	/**
+	 * Receive navigate.
+	 *
+	 * @param {Object} data         Data.
+	 * @param {string} data.href    Href.
+	 * @param {Window} sourceWindow The source window.
+	 */
+	receiveNavigate( { href }, sourceWindow ) {
+		if ( isAmpWindow( sourceWindow ) ) {
+			this.navigateAmpUrl = href;
+		} else {
+			this.navigateNonAmpUrl = href;
+		}
+	}
+
+	/**
 	 * Check connected clients.
 	 */
 	checkConnectedClients() {
@@ -237,6 +270,15 @@ class PairedBrowsingApp {
 	 * @param {HTMLIFrameElement} iframe The iframe that hosts the paired browsing client.
 	 */
 	showDisconnectOverlay( iframe ) {
+		// Show the exit link if we know the URL that the user was last trying to go to.
+		const navigateUrl = this.ampIframe === iframe ? this.navigateAmpUrl : this.navigateNonAmpUrl;
+		if ( navigateUrl ) {
+			this.disconnectButtons.exit.hidden = false;
+			this.disconnectButtons.exit.href = navigateUrl;
+		} else {
+			this.disconnectButtons.exit.hidden = true;
+		}
+
 		// Show the 'Go Back' button if the parent window has history.
 		this.disconnectButtons.goBack.classList.toggle( 'hidden', 0 >= window.history.length );
 
@@ -344,12 +386,12 @@ class PairedBrowsingApp {
 	/**
 	 * Receive loaded.
 	 *
-	 * @param {Object}      data                   Data.
-	 * @param {boolean}     data.isAmpDocument     Whether the document is actually an AMP page.
-	 * @param {string|null} data.ampUrl            The AMP URL.
-	 * @param {string|null} data.nonAmpUrl         The non-AMP URL.
-	 * @param {string}      data.documentTitle The canonical link URL if present.
-	 * @param {Window}      sourceWindow The source window.
+	 * @param {Object}  data                   Data.
+	 * @param {boolean} data.isAmpDocument     Whether the document is actually an AMP page.
+	 * @param {?string} data.ampUrl            The AMP URL.
+	 * @param {?string} data.nonAmpUrl         The non-AMP URL.
+	 * @param {string}  data.documentTitle The canonical link URL if present.
+	 * @param {Window}  sourceWindow The source window.
 	 */
 	receiveLoaded( { isAmpDocument, ampUrl, nonAmpUrl, documentTitle }, sourceWindow ) {
 		const isAmpSource = isAmpWindow( sourceWindow );
