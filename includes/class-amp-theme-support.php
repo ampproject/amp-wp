@@ -2378,8 +2378,9 @@ class AMP_Theme_Support {
 			'amp-paired-browsing-client',
 			'ampPairedBrowsingClientData',
 			[
-				'ampUrl'    => $amp_url,
-				'nonAmpUrl' => $non_amp_url,
+				'isAmpDocument' => $is_amp_request,
+				'ampUrl'        => $amp_url,
+				'nonAmpUrl'     => $non_amp_url,
 			]
 		);
 

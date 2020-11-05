@@ -9,36 +9,7 @@ import domReady from '@wordpress/dom-ready';
 import { isNonAmpWindow, isAmpWindow } from './utils';
 
 const { parent, ampPairedBrowsingClientData } = window;
-const { ampUrl, nonAmpUrl } = ampPairedBrowsingClientData;
-
-/**
- * Validates whether or not the window document is AMP compatible.
- *
- * @return {boolean} True if AMP compatible, false if not.
- */
-function documentIsAmp() {
-	return Boolean( document.querySelector( 'head > script[src="https://cdn.ampproject.org/v0.js"]' ) );
-}
-
-// /**
-//  * Get amphtml link URL.
-//  *
-//  * @return {string|null} URL or null if link not present.
-//  */
-// function getAmphtmlLinkHref() {
-// 	const link = document.querySelector( 'head > link[rel=amphtml]' );
-// 	return link ? link.href : null;
-// }
-//
-// /**
-//  * Get canonical link URL.
-//  *
-//  * @return {string|null} URL or null if link not present.
-//  */
-// function getCanonicalLinkHref() {
-// 	const link = document.querySelector( 'head > link[rel=canonical]' );
-// 	return link ? link.href : null;
-// }
+const { ampUrl, nonAmpUrl, isAmpDocument } = ampPairedBrowsingClientData;
 
 /**
  * Modify document for paired browsing.
@@ -47,7 +18,7 @@ function modifyDocumentForPairedBrowsing() {
 	// Scrolling is not synchronized if `scroll-behavior` is set to `smooth`.
 	document.documentElement.style.setProperty( 'scroll-behavior', 'auto', 'important' );
 
-	if ( documentIsAmp() ) {
+	if ( isAmpDocument ) {
 		// Hide the paired browsing menu item.
 		const pairedBrowsingMenuItem = document.getElementById( 'wp-admin-bar-amp-paired-browsing' );
 		if ( pairedBrowsingMenuItem ) {
@@ -148,8 +119,7 @@ function sendHeartbeat() {
 		parent,
 		'heartbeat',
 		{
-			isAmpDocument: documentIsAmp(),
-			//locationHref: window.location.href,
+			isAmpDocument,
 			ampUrl,
 			nonAmpUrl,
 			documentTitle: document.title,
