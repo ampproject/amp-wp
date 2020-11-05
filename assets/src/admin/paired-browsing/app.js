@@ -398,11 +398,6 @@ class PairedBrowsingApp {
 		const sourceIframe = isAmpSource ? this.ampIframe : this.nonAmpIframe;
 
 		if ( isAmpSource ) {
-			// Stop if the URL has not changed.
-			if ( this.currentAmpUrl === ampUrl ) {
-				return;
-			}
-
 			// Force the AMP iframe to always have an AMP URL.
 			if ( ! isAmpDocument ) {
 				this.replaceLocation( sourceIframe, ampUrl );
@@ -414,11 +409,6 @@ class PairedBrowsingApp {
 			// Update the AMP link above the iframe used for exiting paired browsing.
 			this.ampLink.href = removeQueryArgs( ampUrl, noampQueryVar );
 		} else {
-			// Stop if the URL has not changed.
-			if ( this.currentNonAmpUrl === nonAmpUrl ) {
-				return;
-			}
-
 			// Force the non-AMP iframe to always have a non-AMP URL.
 			if ( isAmpDocument ) {
 				this.replaceLocation( sourceIframe, nonAmpUrl );
