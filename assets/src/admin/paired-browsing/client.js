@@ -44,7 +44,7 @@ function modifyDocumentForPairedBrowsing() {
  * @param {string} type Type.
  * @param {Object} data Data.
  */
-function sendMessage( win, type, data ) {
+function sendMessage( win, type, data = {} ) {
 	win.postMessage(
 		{
 			type,
@@ -110,14 +110,12 @@ function receiveReplaceLocation( { href } ) {
 }
 
 /**
- * Send heartbeat.
- *
- * @see https://github.com/WordPress/wordpress-develop/blob/7a16c4d5809507bbfa9eb0f95178092492b04727/src/js/_enqueues/wp/customize/controls.js#L6679-L6727
+ * Send loaded.
  */
-function sendHeartbeat() {
+function sendLoaded() {
 	sendMessage(
 		parent,
-		'heartbeat',
+		'loaded',
 		{
 			isAmpDocument,
 			ampUrl,
@@ -127,14 +125,22 @@ function sendHeartbeat() {
 	);
 }
 
+/**
+ * Send heartbeat.
+ */
+function sendHeartbeat() {
+	sendMessage( parent, 'heartbeat' );
+}
+
 if ( isNonAmpWindow( window ) || isAmpWindow( window ) ) {
+	setInterval( sendHeartbeat, 500 );
+
 	domReady( () => {
 		modifyDocumentForPairedBrowsing();
 
 		window.addEventListener( 'message', receiveMessage );
 		window.addEventListener( 'scroll', sendScroll, { passive: true } );
 
-		sendHeartbeat();
-		setInterval( sendHeartbeat, 1000 );
+		sendLoaded();
 	} );
 }

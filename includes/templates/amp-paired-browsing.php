@@ -46,9 +46,6 @@ $amp_url     = amp_add_paired_endpoint( $url );
 					</div>
 
 					<div class="dialog-buttons">
-						<button class="button exit">
-							<?php esc_html_e( 'Exit', 'amp' ); ?>
-						</button>
 						<button class="button go-back">
 							<?php esc_html_e( 'Go Back', 'amp' ); ?>
 						</button>
