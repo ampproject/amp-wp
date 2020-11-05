@@ -43,10 +43,6 @@ $amp_url     = amp_add_paired_endpoint( $url );
 						<span class="general">
 							<?php esc_html_e( 'The navigated URL is not available for paired browsing.', 'amp' ); ?>
 						</span>
-
-						<span class="invalid-amp">
-							<?php esc_html_e( 'The navigated page does not have an AMP counterpart due to invalid AMP markup being kept.', 'amp' ); ?>
-						</span>
 					</div>
 
 					<div class="dialog-buttons">

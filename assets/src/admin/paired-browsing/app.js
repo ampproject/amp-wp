@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { addQueryArgs, hasQueryArg, removeQueryArgs } from '@wordpress/url';
+import { addQueryArgs, removeQueryArgs } from '@wordpress/url';
 /**
  * Internal dependencies
  */
@@ -79,7 +79,6 @@ class PairedBrowsingApp {
 	constructor() {
 		this.nonAmpIframe = document.querySelector( '#non-amp iframe' );
 		this.ampIframe = document.querySelector( '#amp iframe' );
-		this.ampPageHasErrors = false; // @todo This is obsolete. Remove this and invalid-amp span.
 
 		this.currentNonAmpUrl = this.nonAmpIframe.src;
 		this.currentAmpUrl = this.ampIframe.src;
@@ -90,10 +89,6 @@ class PairedBrowsingApp {
 
 		// Overlay that is displayed on the client that becomes disconnected.
 		this.disconnectOverlay = document.querySelector( '.disconnect-overlay' );
-		this.disconnectText = {
-			general: document.querySelector( '.disconnect-overlay .dialog-text span.general' ),
-			invalidAmp: document.querySelector( '.disconnect-overlay .dialog-text span.invalid-amp' ),
-		};
 		this.disconnectButtons = {
 			exit: document.querySelector( '.disconnect-overlay .button.exit' ),
 			goBack: document.querySelector( '.disconnect-overlay .button.go-back' ),
@@ -211,16 +206,9 @@ class PairedBrowsingApp {
 		const isClientConnected = this.isClientConnected( iframe );
 
 		if ( ! isClientConnected ) {
-			if ( this.ampIframe === iframe && this.ampPageHasErrors ) {
-				this.disconnectText.general.classList.toggle( 'hidden', true );
-				this.disconnectText.invalidAmp.classList.toggle( 'hidden', false );
-			} else {
-				this.disconnectText.general.classList.toggle( 'hidden', false );
-				this.disconnectText.invalidAmp.classList.toggle( 'hidden', true );
-			}
-
 			// Show the 'Go Back' button if the parent window has history.
 			this.disconnectButtons.goBack.classList.toggle( 'hidden', 0 >= window.history.length );
+
 			// If the document is not available, the window URL cannot be accessed.
 			this.disconnectButtons.exit.classList.toggle( 'hidden', null === iframe.contentDocument );
 
@@ -246,7 +234,7 @@ class PairedBrowsingApp {
 	 * @param {HTMLIFrameElement} iframe The iframe.
 	 */
 	isClientConnected( iframe ) {
-		if ( this.ampIframe === iframe && this.ampPageHasErrors ) {
+		if ( this.ampIframe === iframe ) {
 			return false;
 		}
 
@@ -290,16 +278,6 @@ class PairedBrowsingApp {
 		const parsedUrl = new URL( url );
 		parsedUrl.hash = '';
 		return parsedUrl.href;
-	}
-
-	/**
-	 * Checks if a URL has the 'amp_validation_errors' query variable.
-	 *
-	 * @param {string} url URL string.
-	 * @return {boolean} True if such query var exists, false if not.
-	 */
-	urlHasValidationErrorQueryVar( url ) {
-		return hasQueryArg( url, 'amp_validation_errors' );
 	}
 
 	/**
@@ -365,28 +343,9 @@ class PairedBrowsingApp {
 				return;
 			}
 
+			// Force the AMP iframe to always have an AMP URL.
 			if ( ! isAmpDocument ) {
-				if ( this.urlHasValidationErrorQueryVar( ampUrl ) ) {
-					/*
-					 * If the AMP page has validation errors, mark the page as invalid so that the
-					 * 'disconnected' overlay can be shown.
-					 */
-					this.ampPageHasErrors = true;
-					this.toggleDisconnectOverlay( this.ampIframe );
-					return;
-				} else if ( ampUrl ) {
-					// Force the AMP iframe to always have an AMP URL, if an AMP version is available.
-					this.replaceLocation( sourceIframe, ampUrl );
-					return;
-				}
-
-				/*
-				 * If the AMP iframe has loaded a non-AMP page and none of the conditions above are
-				 * true, then explicitly mark it as having errors and display the 'disconnected
-				 * overlay.
-				 */
-				this.ampPageHasErrors = true;
-				// this.toggleDisconnectOverlay( this.ampIframe );
+				this.replaceLocation( sourceIframe, ampUrl );
 				return;
 			}
 
@@ -394,8 +353,6 @@ class PairedBrowsingApp {
 
 			// Update the AMP link above the iframe used for exiting paired browsing.
 			this.ampLink.href = removeQueryArgs( ampUrl, noampQueryVar );
-
-			this.ampPageHasErrors = false;
 		} else {
 			// Stop if the URL has not changed.
 			if ( this.currentNonAmpUrl === nonAmpUrl ) {
