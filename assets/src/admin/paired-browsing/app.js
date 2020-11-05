@@ -32,11 +32,25 @@ class PairedBrowsingApp {
 	ampIframe;
 
 	/**
+	 * Timestamp when the AMP iframe last sent a heartbeat.
+	 *
+	 * @type {number}
+	 */
+	ampHeartbeatTimestamp = Date.now();
+
+	/**
 	 * Non-AMP IFrame
 	 *
 	 * @type {HTMLIFrameElement}
 	 */
 	nonAmpIframe;
+
+	/**
+	 * Timestamp when the non-AMP iframe last sent a heartbeat.
+	 *
+	 * @type {number}
+	 */
+	nonAmpHeartbeatTimestamp = Date.now();
 
 	/**
 	 * Current AMP URL.
@@ -90,7 +104,6 @@ class PairedBrowsingApp {
 		// Overlay that is displayed on the client that becomes disconnected.
 		this.disconnectOverlay = document.querySelector( '.disconnect-overlay' );
 		this.disconnectButtons = {
-			exit: document.querySelector( '.disconnect-overlay .button.exit' ),
 			goBack: document.querySelector( '.disconnect-overlay .button.go-back' ),
 		};
 		this.addDisconnectButtonListeners();
@@ -110,7 +123,14 @@ class PairedBrowsingApp {
 		} );
 
 		// Load clients.
-		this.getIframeLoadedPromises();
+		Promise.all( this.getIframeLoadedPromises() ).then( () => {
+			setInterval(
+				() => {
+					this.checkConnectedClients();
+				},
+				500,
+			);
+		} );
 	}
 
 	/**
@@ -146,31 +166,17 @@ class PairedBrowsingApp {
 		}
 
 		switch ( event.data.type ) {
-			case 'heartbeat':
-				this.receiveHeartbeat( event.data, event.source );
+			case 'loaded':
+				this.receiveLoaded( event.data, event.source );
 				break;
 			case 'scroll':
 				this.receiveScroll( event.data, event.source );
 				break;
+			case 'heartbeat':
+				this.receiveHeartbeat( event.source );
+				break;
 			default:
 		}
-	}
-
-	/**
-	 * Add event listeners for buttons on disconnect overlay.
-	 *
-	 * @todo Revisit.
-	 */
-	addDisconnectButtonListeners() {
-		// The 'Exit' button navigates the parent window to the URL of the disconnected client.
-		this.disconnectButtons.exit.addEventListener( 'click', () => {
-			window.location.assign( this.disconnectedClient.contentWindow.location.href );
-		} );
-
-		// The 'Go back' button goes back to the previous page of the parent window.
-		this.disconnectButtons.goBack.addEventListener( 'click', () => {
-			window.history.back();
-		} );
 	}
 
 	/**
@@ -181,66 +187,80 @@ class PairedBrowsingApp {
 	getIframeLoadedPromises() {
 		return [
 			new Promise( ( resolve ) => {
-				this.nonAmpIframe.addEventListener( 'load', () => {
-					//this.toggleDisconnectOverlay( this.nonAmpIframe );
-					resolve();
-				} );
+				this.nonAmpIframe.addEventListener( 'load', resolve );
 			} ),
-
 			new Promise( ( resolve ) => {
-				this.ampIframe.addEventListener( 'load', () => {
-					//this.toggleDisconnectOverlay( this.ampIframe );
-					resolve();
-				} );
+				this.ampIframe.addEventListener( 'load', resolve );
 			} ),
 		];
 	}
 
 	/**
-	 * Toggles the 'disconnected' overlay for the supplied iframe.
+	 * Receive heartbeat.
 	 *
-	 * @todo Revisit.
+	 * @param {Window} sourceWindow The source window.
+	 */
+	receiveHeartbeat( sourceWindow ) {
+		if ( isAmpWindow( sourceWindow ) ) {
+			this.ampHeartbeatTimestamp = Date.now();
+		} else {
+			this.nonAmpHeartbeatTimestamp = Date.now();
+		}
+	}
+
+	/**
+	 * Check connected clients.
+	 */
+	checkConnectedClients() {
+		if ( ! this.isClientConnected( this.ampIframe ) ) {
+			this.showDisconnectOverlay( this.ampIframe );
+		} else if ( ! this.isClientConnected( this.nonAmpIframe ) ) {
+			this.showDisconnectOverlay( this.nonAmpIframe );
+		} else {
+			this.disconnectOverlay.classList.remove( 'disconnected' );
+		}
+	}
+
+	/**
+	 * Add event listeners for buttons on disconnect overlay.
+	 */
+	addDisconnectButtonListeners() {
+		// The 'Go back' button goes back to the previous page of the parent window.
+		this.disconnectButtons.goBack.addEventListener( 'click', () => {
+			window.history.back();
+		} );
+	}
+
+	/**
+	 * Shows the 'disconnected' overlay for the supplied iframe.
+	 *
 	 * @param {HTMLIFrameElement} iframe The iframe that hosts the paired browsing client.
 	 */
-	toggleDisconnectOverlay( iframe ) {
-		const isClientConnected = this.isClientConnected( iframe );
-
-		if ( ! isClientConnected ) {
-			// Show the 'Go Back' button if the parent window has history.
-			this.disconnectButtons.goBack.classList.toggle( 'hidden', 0 >= window.history.length );
-
-			// If the document is not available, the window URL cannot be accessed.
-			this.disconnectButtons.exit.classList.toggle( 'hidden', null === iframe.contentDocument );
-
-			this.disconnectedClient = iframe;
-		}
+	showDisconnectOverlay( iframe ) {
+		// Show the 'Go Back' button if the parent window has history.
+		this.disconnectButtons.goBack.classList.toggle( 'hidden', 0 >= window.history.length );
 
 		// Applying the 'amp' class will overlay it on the AMP iframe.
 		this.disconnectOverlay.classList.toggle(
 			'amp',
-			! isClientConnected && this.ampIframe === iframe,
+			this.ampIframe === iframe,
 		);
 
-		this.disconnectOverlay.classList.toggle(
-			'disconnected',
-			! isClientConnected,
-		);
+		this.disconnectOverlay.classList.add( 'disconnected' );
 	}
 
 	/**
 	 * Determines the status of the paired browsing client in an iframe.
 	 *
-	 * @todo Revisit.
 	 * @param {HTMLIFrameElement} iframe The iframe.
+	 * @return {boolean} Whether the client is connected.
 	 */
 	isClientConnected( iframe ) {
-		if ( this.ampIframe === iframe ) {
-			return false;
+		const threshold = 2000;
+		if ( iframe === this.ampIframe ) {
+			return Date.now() - this.ampHeartbeatTimestamp < threshold;
 		}
-
-		return null !== iframe.contentWindow &&
-			null !== iframe.contentDocument &&
-			true === iframe.contentWindow.ampPairedBrowsingClient;
+		return Date.now() - this.nonAmpHeartbeatTimestamp < threshold;
 	}
 
 	/**
@@ -287,8 +307,6 @@ class PairedBrowsingApp {
 	 * @param {string}            url    URL.
 	 */
 	replaceLocation( iframe, url ) {
-		// @todo If disconneted we canot send the replaceLocation message.
-
 		this.sendMessage(
 			iframe.contentWindow,
 			'replaceLocation',
@@ -299,10 +317,10 @@ class PairedBrowsingApp {
 	/**
 	 * Receive scroll.
 	 *
-	 * @param {Object}      data         Data.
-	 * @param {boolean}     data.x       X position.
-	 * @param {string|null} data.y       Y position.
-	 * @param {Window}      sourceWindow The source window.
+	 * @param {Object} data         Data.
+	 * @param {number} data.x       X position.
+	 * @param {number} data.y       Y position.
+	 * @param {Window} sourceWindow The source window.
 	 */
 	receiveScroll( { x, y }, sourceWindow ) {
 		// Rely on scroll event to determine initially-active iframe before mouse first moves.
@@ -324,7 +342,7 @@ class PairedBrowsingApp {
 	}
 
 	/**
-	 * Receive heartbeat.
+	 * Receive loaded.
 	 *
 	 * @param {Object}      data                   Data.
 	 * @param {boolean}     data.isAmpDocument     Whether the document is actually an AMP page.
@@ -333,7 +351,7 @@ class PairedBrowsingApp {
 	 * @param {string}      data.documentTitle The canonical link URL if present.
 	 * @param {Window}      sourceWindow The source window.
 	 */
-	receiveHeartbeat( { isAmpDocument, ampUrl, nonAmpUrl, documentTitle }, sourceWindow ) {
+	receiveLoaded( { isAmpDocument, ampUrl, nonAmpUrl, documentTitle }, sourceWindow ) {
 		const isAmpSource = isAmpWindow( sourceWindow );
 		const sourceIframe = isAmpSource ? this.ampIframe : this.nonAmpIframe;
 
