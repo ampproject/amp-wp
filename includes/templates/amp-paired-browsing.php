@@ -64,7 +64,7 @@ $amp_url     = amp_add_paired_endpoint( $url );
 				<iframe
 					name="paired-browsing-non-amp"
 					src="<?php echo esc_url( $non_amp_url ); ?>"
-					data-sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-modals"
+					sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-modals"
 					title="<?php esc_attr__( 'Non-AMP version', 'amp' ); ?>"
 				></iframe>
 			</div>
@@ -73,7 +73,7 @@ $amp_url     = amp_add_paired_endpoint( $url );
 				<iframe
 					name="paired-browsing-amp"
 					src="<?php echo esc_url( $amp_url ); ?>"
-					data-sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-modals"
+					sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-modals"
 					title="<?php esc_attr__( 'AMP version', 'amp' ); ?>"
 				></iframe>
 			</div>
