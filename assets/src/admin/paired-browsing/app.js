@@ -2,11 +2,6 @@
  * WordPress dependencies
  */
 import { addQueryArgs, removeQueryArgs } from '@wordpress/url';
-/**
- * Internal dependencies
- */
-import './app.css';
-import { isNonAmpWindow, isAmpWindow } from './utils';
 
 const { ampPairedBrowsingAppData, history } = window;
 const {
@@ -143,9 +138,29 @@ class PairedBrowsingApp {
 				() => {
 					this.checkConnectedClients();
 				},
-				500,
+				100,
 			);
 		} );
+	}
+
+	/**
+	 * Return whether the window is for the AMP page.
+	 *
+	 * @param {Window} win Window.
+	 * @return {boolean} Whether AMP window.
+	 */
+	isAmpWindow( win ) {
+		return win === this.ampIframe.contentWindow;
+	}
+
+	/**
+	 * Return whether the window is for the non-AMP page.
+	 *
+	 * @param {Window} win Window.
+	 * @return {boolean} Whether non-AMP window.
+	 */
+	isNonAmpWindow( win ) {
+		return win === this.nonAmpIframe.contentWindow;
 	}
 
 	/**
@@ -162,7 +177,7 @@ class PairedBrowsingApp {
 				...data,
 				ampPairedBrowsing: true,
 			},
-			isAmpWindow( win ) ? this.currentAmpUrl : this.currentNonAmpUrl,
+			this.isAmpWindow( win ) ? this.currentAmpUrl : this.currentNonAmpUrl,
 		);
 	}
 
@@ -176,7 +191,7 @@ class PairedBrowsingApp {
 			return;
 		}
 
-		if ( ! isAmpWindow( event.source ) && ! isNonAmpWindow( event.source ) ) {
+		if ( ! this.isAmpWindow( event.source ) && ! this.isNonAmpWindow( event.source ) ) {
 			return;
 		}
 
@@ -219,7 +234,7 @@ class PairedBrowsingApp {
 	 * @param {Window} sourceWindow The source window.
 	 */
 	receiveHeartbeat( sourceWindow ) {
-		if ( isAmpWindow( sourceWindow ) ) {
+		if ( this.isAmpWindow( sourceWindow ) ) {
 			this.ampHeartbeatTimestamp = Date.now();
 		} else {
 			this.nonAmpHeartbeatTimestamp = Date.now();
@@ -234,7 +249,7 @@ class PairedBrowsingApp {
 	 * @param {Window} sourceWindow The source window.
 	 */
 	receiveNavigate( { href }, sourceWindow ) {
-		if ( isAmpWindow( sourceWindow ) ) {
+		if ( this.isAmpWindow( sourceWindow ) ) {
 			this.navigateAmpUrl = href;
 		} else {
 			this.navigateNonAmpUrl = href;
@@ -245,6 +260,9 @@ class PairedBrowsingApp {
 	 * Check connected clients.
 	 */
 	checkConnectedClients() {
+		this.sendMessage( this.ampIframe.contentWindow, 'init' );
+		this.sendMessage( this.nonAmpIframe.contentWindow, 'init' );
+
 		if ( ! this.isClientConnected( this.ampIframe ) ) {
 			this.showDisconnectOverlay( this.ampIframe );
 		} else if ( ! this.isClientConnected( this.nonAmpIframe ) ) {
@@ -367,7 +385,7 @@ class PairedBrowsingApp {
 	receiveScroll( { x, y }, sourceWindow ) {
 		// Rely on scroll event to determine initially-active iframe before mouse first moves.
 		if ( ! this.activeIframe ) {
-			this.activeIframe = isAmpWindow( sourceWindow )
+			this.activeIframe = this.isAmpWindow( sourceWindow )
 				? this.ampIframe
 				: this.nonAmpIframe;
 		}
@@ -377,7 +395,7 @@ class PairedBrowsingApp {
 			return;
 		}
 
-		const otherWindow = isAmpWindow( sourceWindow )
+		const otherWindow = this.isAmpWindow( sourceWindow )
 			? this.nonAmpIframe.contentWindow
 			: this.ampIframe.contentWindow;
 		this.sendMessage( otherWindow, 'scroll', { x, y } );
@@ -394,7 +412,7 @@ class PairedBrowsingApp {
 	 * @param {Window}  sourceWindow The source window.
 	 */
 	receiveLoaded( { isAmpDocument, ampUrl, nonAmpUrl, documentTitle }, sourceWindow ) {
-		const isAmpSource = isAmpWindow( sourceWindow );
+		const isAmpSource = this.isAmpWindow( sourceWindow );
 		const sourceIframe = isAmpSource ? this.ampIframe : this.nonAmpIframe;
 
 		if ( isAmpSource ) {
