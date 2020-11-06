@@ -112,11 +112,12 @@ function receiveScroll( { x, y } ) {
  */
 function handleClick( event ) {
 	const element = event.target;
-	if ( element.matches( '[href]' ) ) {
+	const link = element.matches( '[href]' ) ? element : element.closest( '[href]' );
+	if ( link ) {
 		sendMessage(
 			parent,
 			'navigate',
-			{ href: element.href },
+			{ href: link.href },
 		);
 	}
 }
