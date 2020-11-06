@@ -516,13 +516,15 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 *
 	 * @covers ::amp_get_permalink()
 	 */
-	public function test_amp_get_permalink_with_pretty_permalinks() {
+	public function test_amp_get_permalink_with_pretty_permalinks_and_legacy_reader_permalink_structure() {
 		global $wp_rewrite;
 		update_option( 'permalink_structure', '/%year%/%monthnum%/%day%/%postname%/' );
+		AMP_Options_Manager::update_option( Option::PERMALINK_STRUCTURE, Option::PERMALINK_STRUCTURE_LEGACY_READER );
 		$wp_rewrite->use_trailing_slashes = true;
 		$wp_rewrite->init();
 		$wp_rewrite->flush_rules();
 
+		// @todo This should also add a query param to see how it behaves.
 		$add_anchor_fragment = static function( $url ) {
 			return $url . '#anchor';
 		};
@@ -546,12 +548,12 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 				'post_type'   => 'page',
 			]
 		);
-		$this->assertStringEndsWith( '&amp=1', amp_get_permalink( $drafted_post ) );
-		$this->assertStringEndsWith( '?amp=1', amp_get_permalink( $published_post ) );
-		$this->assertStringEndsWith( '?amp=1', amp_get_permalink( $published_page ) );
+		$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
+		$this->assertStringEndsWith( '/amp/', amp_get_permalink( $published_post ) );
+		$this->assertStringEndsWith( '?amp', amp_get_permalink( $published_page ) );
 
 		add_filter( 'post_link', $add_anchor_fragment );
-		$this->assertStringEndsWith( '?amp=1#anchor', amp_get_permalink( $published_post ) );
+		$this->assertStringEndsWith( '/amp/#anchor', amp_get_permalink( $published_post ) );
 		remove_filter( 'post_link', $add_anchor_fragment );
 
 		add_filter( 'amp_pre_get_permalink', [ $this, 'return_example_url' ], 10, 2 );
@@ -567,9 +569,9 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 		// Now check with theme support added (in transitional mode).
 		add_theme_support( AMP_Theme_Support::SLUG, [ 'template_dir' => './' ] );
-		$this->assertStringEndsWith( '&amp=1', amp_get_permalink( $drafted_post ) );
-		$this->assertStringEndsWith( '?amp=1', amp_get_permalink( $published_post ) );
-		$this->assertStringEndsWith( '?amp=1', amp_get_permalink( $published_page ) );
+		$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
+		$this->assertStringEndsWith( '/amp/', amp_get_permalink( $published_post ) );
+		$this->assertStringEndsWith( '?amp', amp_get_permalink( $published_page ) );
 		add_filter( 'amp_get_permalink', [ $this, 'return_example_url' ], 10, 2 );
 		$this->assertStringEndsWith( 'current_filter=amp_get_permalink', amp_get_permalink( $published_post ) );
 		add_filter( 'amp_pre_get_permalink', [ $this, 'return_example_url' ], 10, 2 );
@@ -579,7 +581,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		remove_filter( 'amp_pre_get_permalink', [ $this, 'return_example_url' ] );
 		remove_filter( 'amp_get_permalink', [ $this, 'return_example_url' ] );
 		add_filter( 'post_link', $add_anchor_fragment );
-		$this->assertStringEndsWith( '/?amp=1#anchor', amp_get_permalink( $published_post ) );
+		$this->assertStringEndsWith( '/amp/#anchor', amp_get_permalink( $published_post ) );
 	}
 
 	/**

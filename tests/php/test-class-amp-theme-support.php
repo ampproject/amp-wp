@@ -1412,40 +1412,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 				},
 			],
 
-			'admin_bar_scripts_have_dev_mode_with_paired_browsing_client' => [
-				static function () {
-					AMP_Theme_Support::setup_paired_browsing_client();
-					wp_enqueue_script( 'admin-bar' );
-					wp_enqueue_script( 'example-admin-bar', 'https://example.com/example-admin-bar.js', [ 'admin-bar' ], '0.1', false );
-				},
-				function ( DOMXPath $xpath ) {
-					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/example-admin-bar" ) ]' );
-					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/admin-bar" ) ]' );
-					$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/amp-paired-browsing-client" ) ]' );
-					if ( wp_script_is( 'hoverintent-js', 'registered' ) ) {
-						$this->assert_dev_mode_is_on_queried_element( $xpath, '//script[ contains( @src, "/hoverintent-js" ) ]' );
-					}
-				},
-			],
-
-			'admin_bar_scripts_have_dev_mode_with_paired_browsing_app' => [
-				static function () {
-					$_GET[ AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR ] = 1;
-					AMP_Theme_Support::serve_paired_browsing_experience( 'foo' );
-					unset( $_GET[ AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-					wp_enqueue_script( 'admin-bar' );
-					wp_enqueue_script( 'example-admin-bar', 'https://example.com/example-admin-bar.js', [ 'admin-bar' ], '0.1', false );
-				},
-				function ( DOMXPath $xpath ) {
-					$this->assert_queried_element_exists( $xpath, '//script[ contains( @src, "/example-admin-bar" ) ]' );
-					$this->assert_queried_element_exists( $xpath, '//script[ contains( @src, "/admin-bar" ) ]' );
-					$this->assert_queried_element_exists( $xpath, '//script[ contains( @src, "/amp-paired-browsing-app" ) ]' );
-					if ( wp_script_is( 'hoverintent-js', 'registered' ) ) {
-						$this->assert_queried_element_exists( $xpath, '//script[ contains( @src, "/hoverintent-js" ) ]' );
-					}
-				},
-			],
-
 			'hoverintent_enqueued_prevents_dev_mode' => [
 				function () {
 					if ( ! wp_script_is( 'hoverintent-js', 'registered' ) ) {
@@ -2340,89 +2306,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		wp_dequeue_style( $style_slug );
 		AMP_Theme_Support::enqueue_assets();
 		$this->assertContains( $style_slug, wp_styles()->queue );
-	}
-
-	/**
-	 * Test the enqueuing in setup_paired_browsing_client().
-	 *
-	 * @covers AMP_Theme_Support::setup_paired_browsing_client()
-	 */
-	public function test_setup_paired_browsing_client_enqueuing() {
-		$handle = 'amp-paired-browsing-client';
-
-		// The conditions aren't met, so this should not enqueue the script.
-		$_GET[ AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR ] = '1';
-		AMP_Theme_Support::setup_paired_browsing_client();
-		$this->assertFalse( wp_script_is( $handle ) );
-
-		// Only one condition is met, so this should still not enqueue the script.
-		unset( $_GET[ AMP_Theme_Support::PAIRED_BROWSING_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		AMP_Theme_Support::setup_paired_browsing_client();
-		$this->assertFalse( wp_script_is( $handle ) );
-
-		// Both of the conditions to enqueue are met.
-		add_filter( 'amp_dev_mode_enabled', '__return_true' );
-		AMP_Theme_Support::setup_paired_browsing_client();
-		$this->assertTrue( wp_script_is( $handle ) );
-	}
-
-	/**
-	 * Gets the test data for test_setup_paired_browsing_client_filter().
-	 *
-	 * @return array The test data.
-	 */
-	public function get_setup_paired_browsing_data() {
-		$original_script_tag      = '<script src="foo"></script>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-		$script_tag_with_dev_mode = '<script data-ampdevmode src="foo"></script>'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-
-		return [
-			'no_parent_of_dependency'      => [
-				'',
-				$original_script_tag,
-				null,
-			],
-			'wrong_parent_of_dependency'   => [
-				'different-handle-completely',
-				$original_script_tag,
-				null,
-			],
-			'correct_parent_of_dependency' => [
-				'amp-paired-browsing-client',
-				$original_script_tag,
-				$script_tag_with_dev_mode,
-			],
-		];
-	}
-
-	/**
-	 * Test the filter in setup_paired_browsing_client().
-	 *
-	 * @dataProvider get_setup_paired_browsing_data
-	 * @covers AMP_Theme_Support::setup_paired_browsing_client()
-	 *
-	 * @param string $parent_of_dependency The script that has a dependency on the dependency handle.
-	 * @param string $original_script_tag  The <script> tag passed to the filter.
-	 * @param string $expected             The expected return value.
-	 */
-	public function test_setup_paired_browsing_client_filter( $parent_of_dependency, $original_script_tag, $expected ) {
-		if ( null === $expected ) {
-			$expected = $original_script_tag;
-		}
-
-		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
-		$this->go_to( get_permalink( self::factory()->post->create() ) );
-		add_filter( 'amp_dev_mode_enabled', '__return_true' );
-		$src               = 'https://example.com/script.js';
-		$dependency_handle = 'foo-handle';
-
-		wp_enqueue_script( $dependency_handle, $src, [], '0.1.0', true );
-		wp_enqueue_script( $parent_of_dependency, $src, [ $dependency_handle ], '0.1', true );
-		AMP_Theme_Support::setup_paired_browsing_client();
-
-		$this->assertEquals(
-			$expected,
-			apply_filters( 'script_loader_tag', $original_script_tag, $dependency_handle, '' )
-		);
 	}
 
 	/**
