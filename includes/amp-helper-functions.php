@@ -608,12 +608,17 @@ function amp_get_current_url() {
 /**
  * Retrieves the full AMP-specific permalink for the given post ID.
  *
+ * On a site in Standard mode, this is the same as `get_permalink()`.
+ *
  * @since 0.1
  *
  * @param int $post_id Post ID.
  * @return string AMP permalink.
  */
 function amp_get_permalink( $post_id ) {
+	if ( amp_is_canonical() ) {
+		return get_permalink( $post_id );
+	}
 	return amp_add_paired_endpoint( get_permalink( $post_id ) );
 }
 

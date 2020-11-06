@@ -438,9 +438,10 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 *
 	 * @covers ::amp_get_permalink()
 	 */
-	public function test_amp_get_permalink_without_pretty_permalinks() {
+	public function test_amp_get_permalink_without_pretty_permalinks_for_legacy_reader_structure() {
 		delete_option( 'permalink_structure' );
 		flush_rewrite_rules();
+		AMP_Options_Manager::update_option( Option::PERMALINK_STRUCTURE, Option::PERMALINK_STRUCTURE_LEGACY_READER );
 
 		$drafted_post   = self::factory()->post->create(
 			[
@@ -464,9 +465,9 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			]
 		);
 
-		$this->assertStringEndsWith( '&amp=1', amp_get_permalink( $published_post ) );
-		$this->assertStringEndsWith( '&amp=1', amp_get_permalink( $drafted_post ) );
-		$this->assertStringEndsWith( '&amp=1', amp_get_permalink( $published_page ) );
+		$this->assertStringEndsWith( '&amp', amp_get_permalink( $published_post ) );
+		$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
+		$this->assertStringEndsWith( '&amp', amp_get_permalink( $published_page ) );
 
 		add_filter( 'amp_pre_get_permalink', [ $this, 'return_example_url' ], 10, 2 );
 		add_filter( 'amp_get_permalink', [ $this, 'return_example_url' ], 10, 2 );
@@ -480,6 +481,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		remove_filter( 'amp_pre_get_permalink', [ $this, 'return_example_url' ] );
 		remove_filter( 'amp_get_permalink', [ $this, 'return_example_url' ] );
 
+		// Test that amp_get_permalink() is alias for get_permalink() when in Standard mode.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->assertEquals( get_permalink( $published_post ), amp_get_permalink( $published_post ) );
 
@@ -495,12 +497,13 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		foreach ( $argses as $args ) {
 			delete_option( AMP_Options_Manager::OPTION_NAME ); // To specify the defaults.
 			add_theme_support( AMP_Theme_Support::SLUG, $args );
+			AMP_Options_Manager::update_option( Option::PERMALINK_STRUCTURE, Option::PERMALINK_STRUCTURE_LEGACY_READER );
 
 			remove_filter( 'amp_pre_get_permalink', [ $this, 'return_example_url' ] );
 			remove_filter( 'amp_get_permalink', [ $this, 'return_example_url' ] );
-			$this->assertStringEndsWith( '&amp=1', amp_get_permalink( $published_post ) );
-			$this->assertStringEndsWith( '&amp=1', amp_get_permalink( $drafted_post ) );
-			$this->assertStringEndsWith( '&amp=1', amp_get_permalink( $published_page ) );
+			$this->assertStringEndsWith( '&amp', amp_get_permalink( $published_post ) );
+			$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
+			$this->assertStringEndsWith( '&amp', amp_get_permalink( $published_page ) );
 			add_filter( 'amp_get_permalink', [ $this, 'return_example_url' ], 10, 2 );
 			$this->assertStringEndsWith( 'current_filter=amp_get_permalink', amp_get_permalink( $published_post ) );
 			add_filter( 'amp_pre_get_permalink', [ $this, 'return_example_url' ], 10, 2 );
