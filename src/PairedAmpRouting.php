@@ -29,63 +29,16 @@ use WP_Post;
 final class PairedAmpRouting implements Service, Registerable, Activateable, Deactivateable {
 
 	/**
-	 * Query var permalink structure.
-	 *
-	 * This is the default, where all AMP URLs end in `?amp=1`.
-	 *
-	 * @var string
-	 */
-	const PERMALINK_STRUCTURE_QUERY_VAR = 'query_var';
-
-	/**
-	 * Rewrite endpoint permalink structure.
-	 *
-	 * This adds `/amp/` to all URLs, even pages and archives. This is a popular option for those who feel query params
-	 * are bad for SEO.
-	 *
-	 * @var string
-	 */
-	const PERMALINK_STRUCTURE_REWRITE_ENDPOINT = 'rewrite_endpoint';
-
-	/**
-	 * Legacy transitional permalink structure.
-	 *
-	 * This involves using `?amp` for all paired AMP URLs.
-	 *
-	 * @var string
-	 */
-	const PERMALINK_STRUCTURE_LEGACY_TRANSITIONAL = 'legacy_transitional';
-
-	/**
-	 * Legacy transitional permalink structure.
-	 *
-	 * This involves using `/amp/` for all non-hierarchical post URLs which lack endpoints or query vars, or else using
-	 * the same `?amp` as used by legacy transitional.
-	 *
-	 * @var string
-	 */
-	const PERMALINK_STRUCTURE_LEGACY_READER = 'legacy_reader';
-
-	/**
-	 * Custom permalink structure.
-	 *
-	 * This involves a site adding the necessary filters to implement their own permalink structure.
-	 *
-	 * @var string
-	 */
-	const PERMALINK_STRUCTURE_CUSTOM = 'custom';
-
-	/**
 	 * Permalink structures.
 	 *
 	 * @var string[]
 	 */
 	const PERMALINK_STRUCTURES = [
-		self::PERMALINK_STRUCTURE_QUERY_VAR,
-		self::PERMALINK_STRUCTURE_REWRITE_ENDPOINT,
-		self::PERMALINK_STRUCTURE_LEGACY_TRANSITIONAL,
-		self::PERMALINK_STRUCTURE_LEGACY_READER,
-		self::PERMALINK_STRUCTURE_CUSTOM,
+		Option::PERMALINK_STRUCTURE_QUERY_VAR,
+		Option::PERMALINK_STRUCTURE_REWRITE_ENDPOINT,
+		Option::PERMALINK_STRUCTURE_LEGACY_TRANSITIONAL,
+		Option::PERMALINK_STRUCTURE_LEGACY_READER,
+		Option::PERMALINK_STRUCTURE_CUSTOM,
 	];
 
 	/**
@@ -146,7 +99,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * Add rewrite endpoint.
 	 */
 	public function add_rewrite_endpoint() {
-		if ( self::PERMALINK_STRUCTURE_REWRITE_ENDPOINT === AMP_Options_Manager::get_option( Option::PERMALINK_STRUCTURE ) ) {
+		if ( Option::PERMALINK_STRUCTURE_REWRITE_ENDPOINT === AMP_Options_Manager::get_option( Option::PERMALINK_STRUCTURE ) ) {
 			$places = EP_ALL;
 		} else {
 			$places = EP_PERMALINK;
@@ -162,7 +115,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * @return array Defaults.
 	 */
 	public function filter_default_options( $defaults, $options ) {
-		$value = self::PERMALINK_STRUCTURE_QUERY_VAR;
+		$value = Option::PERMALINK_STRUCTURE_QUERY_VAR;
 
 		if (
 			isset( $options[ Option::VERSION ], $options[ Option::THEME_SUPPORT ], $options[ Option::READER_THEME ] )
@@ -174,9 +127,9 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 				&&
 				ReaderThemes::DEFAULT_READER_THEME === $options[ Option::READER_THEME ]
 			) {
-				$value = self::PERMALINK_STRUCTURE_LEGACY_READER;
+				$value = Option::PERMALINK_STRUCTURE_LEGACY_READER;
 			} elseif ( AMP_Theme_Support::STANDARD_MODE_SLUG !== $options[ Option::THEME_SUPPORT ] ) {
-				$value = self::PERMALINK_STRUCTURE_LEGACY_TRANSITIONAL;
+				$value = Option::PERMALINK_STRUCTURE_LEGACY_TRANSITIONAL;
 			}
 		}
 
@@ -217,7 +170,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		];
 		$has_filter_count = count( array_filter( $has_filters ) );
 		if ( 3 === $has_filter_count ) {
-			return self::PERMALINK_STRUCTURE_CUSTOM;
+			return Option::PERMALINK_STRUCTURE_CUSTOM;
 		} elseif ( $has_filter_count > 0 ) {
 			_doing_it_wrong(
 				'add_filter',
@@ -238,18 +191,18 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	public function add_paired_endpoint( $url ) {
 		$permalink_structure = self::get_permalink_structure();
 		switch ( $permalink_structure ) {
-			case self::PERMALINK_STRUCTURE_REWRITE_ENDPOINT:
+			case Option::PERMALINK_STRUCTURE_REWRITE_ENDPOINT:
 				return $this->get_rewrite_endpoint_paired_amp_url( $url );
-			case self::PERMALINK_STRUCTURE_LEGACY_TRANSITIONAL:
+			case Option::PERMALINK_STRUCTURE_LEGACY_TRANSITIONAL:
 				return $this->get_legacy_transitional_paired_amp_url( $url );
-			case self::PERMALINK_STRUCTURE_LEGACY_READER:
+			case Option::PERMALINK_STRUCTURE_LEGACY_READER:
 				return $this->get_legacy_reader_paired_amp_url( $url );
 		}
 
 		// This is the PERMALINK_STRUCTURE_QUERY_VAR case, the default.
 		$amp_url = $this->get_query_var_paired_amp_url( $url );
 
-		if ( self::PERMALINK_STRUCTURE_CUSTOM === $permalink_structure ) {
+		if ( Option::PERMALINK_STRUCTURE_CUSTOM === $permalink_structure ) {
 			/**
 			 * Filters paired AMP URL to apply a custom permalink structure.
 			 *
@@ -451,7 +404,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 			}
 		}
 
-		if ( self::get_permalink_structure() === self::PERMALINK_STRUCTURE_CUSTOM ) {
+		if ( self::get_permalink_structure() === Option::PERMALINK_STRUCTURE_CUSTOM ) {
 			/**
 			 * Filters whether the URL has a paired AMP permalink structure.
 			 *
@@ -489,7 +442,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		$non_amp_url = remove_query_arg( $slug, $non_amp_url );
 
 		$permalink_structure = self::get_permalink_structure();
-		if ( self::PERMALINK_STRUCTURE_CUSTOM === $permalink_structure ) {
+		if ( Option::PERMALINK_STRUCTURE_CUSTOM === $permalink_structure ) {
 			/**
 			 * Filters paired AMP URL to remove a custom permalink structure.
 			 *
