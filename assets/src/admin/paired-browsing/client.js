@@ -3,13 +3,10 @@
  */
 import domReady from '@wordpress/dom-ready';
 
-/**
- * Internal dependencies
- */
-import { isNonAmpWindow, isAmpWindow } from './utils';
-
 const { parent, ampPairedBrowsingClientData } = window;
 const { ampUrl, nonAmpUrl, isAmpDocument } = ampPairedBrowsingClientData;
+
+const nonAmpUrlObject = new URL( nonAmpUrl );
 
 /**
  * Modify document for paired browsing.
@@ -51,9 +48,11 @@ function sendMessage( win, type, data = {} ) {
 			...data,
 			ampPairedBrowsing: true,
 		},
-		nonAmpUrl, // Because the paired browsing app is accessed via the canonical URL.
+		nonAmpUrlObject.origin, // Because the paired browsing app is accessed via the canonical URL.
 	);
 }
+
+let initialized = false;
 
 /**
  * Receive message.
@@ -65,6 +64,12 @@ function receiveMessage( event ) {
 		return;
 	}
 	switch ( event.data.type ) {
+		case 'init':
+			if ( ! initialized ) {
+				initialized = true;
+				receiveInit( event.data );
+			}
+			break;
 		case 'scroll':
 			receiveScroll( event.data );
 			break;
@@ -148,16 +153,18 @@ function sendHeartbeat() {
 	sendMessage( parent, 'heartbeat' );
 }
 
-if ( isNonAmpWindow( window ) || isAmpWindow( window ) ) {
+/**
+ * Receive init.
+ */
+function receiveInit() {
+	sendHeartbeat();
 	setInterval( sendHeartbeat, 500 );
 
-	domReady( () => {
-		modifyDocumentForPairedBrowsing();
+	document.addEventListener( 'click', handleClick, { passive: true } );
+	window.addEventListener( 'scroll', sendScroll, { passive: true } );
+	domReady( modifyDocumentForPairedBrowsing );
 
-		window.addEventListener( 'message', receiveMessage );
-		window.addEventListener( 'scroll', sendScroll, { passive: true } );
-		document.addEventListener( 'click', handleClick, { passive: true } );
-
-		sendLoaded();
-	} );
+	sendLoaded();
 }
+
+window.addEventListener( 'message', receiveMessage );
