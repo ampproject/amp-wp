@@ -809,12 +809,13 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 		$assert_amphtml_link_present = function() use ( $amphtml_url, $get_amp_html_link, $available ) {
 			if ( $available ) {
-				$this->assertTrue( AMP_Theme_Support::is_paired_available() );
+				$this->assertTrue( amp_is_available() );
 				$this->assertEquals(
 					sprintf( '<link rel="amphtml" href="%s">', esc_url( $amphtml_url ) ),
 					$get_amp_html_link()
 				);
 			} else {
+				$this->assertFalse( amp_is_available() );
 				$this->assertStringStartsWith( '<!--', $get_amp_html_link() );
 				$this->assertNotEquals(
 					sprintf( '<link rel="amphtml" href="%s">', esc_url( $amphtml_url ) ),
@@ -831,7 +832,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertEmpty( $get_amp_html_link() );
 		remove_filter( 'amp_frontend_show_canonical', '__return_false' );
 		$assert_amphtml_link_present();
-		$this->assertEquals( $available, AMP_Theme_Support::is_paired_available() );
+		$this->assertEquals( $available, amp_is_available() );
 
 		if ( $available ) {
 			// Make sure that the link is not provided when there are validation errors associated with the URL.
@@ -846,7 +847,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 			// Allow the URL when the errors are forcibly sanitized.
 			add_filter( 'amp_validation_error_sanitized', '__return_true' );
-			$this->assertTrue( AMP_Theme_Support::is_paired_available() );
+			$this->assertTrue( amp_is_available() );
 			$assert_amphtml_link_present();
 		}
 	}
