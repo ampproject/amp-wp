@@ -13,7 +13,7 @@ export default createHigherOrderComponent(
 					status="warning"
 					isDismissible={ false }
 				>
-					{ __( 'This AMP-specific block has been deprecated and will removed in a future version of the AMP plugin.', 'amp' ) }
+					{ __( 'This AMP-specific block has been deprecated and will be removed in a future version of the AMP plugin.', 'amp' ) }
 				</Notice>
 				<BlockEdit { ...props } />
 			</>
