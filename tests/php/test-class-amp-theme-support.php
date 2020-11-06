@@ -465,6 +465,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * Test is_paired_available.
 	 *
 	 * @covers AMP_Theme_Support::is_paired_available()
+	 * @expectedDeprecated AMP_Theme_Support::is_paired_available
 	 */
 	public function test_is_paired_available() {
 
