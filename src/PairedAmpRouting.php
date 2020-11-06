@@ -158,11 +158,11 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	}
 
 	/**
-	 * Get the current paired AMP permalink structure.
+	 * Determine whether a custom permalink structure is being used.
 	 *
-	 * @return string Paired AMP permalink structure.
+	 * @return bool Whether custom permalink structure.
 	 */
-	public function get_permalink_structure() {
+	public function has_custom_permalink_structure() {
 		$has_filters      = [
 			has_filter( 'amp_has_paired_endpoint' ),
 			has_filter( 'amp_add_paired_endpoint' ),
@@ -170,7 +170,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		];
 		$has_filter_count = count( array_filter( $has_filters ) );
 		if ( 3 === $has_filter_count ) {
-			return Option::PERMALINK_STRUCTURE_CUSTOM;
+			return true;
 		} elseif ( $has_filter_count > 0 ) {
 			_doing_it_wrong(
 				'add_filter',
@@ -178,7 +178,18 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 				'2.1'
 			);
 		}
+		return false;
+	}
 
+	/**
+	 * Get the current paired AMP permalink structure.
+	 *
+	 * @return string Paired AMP permalink structure.
+	 */
+	public function get_permalink_structure() {
+		if ( $this->has_custom_permalink_structure() ) {
+			return Option::PERMALINK_STRUCTURE_CUSTOM;
+		}
 		return AMP_Options_Manager::get_option( Option::PERMALINK_STRUCTURE );
 	}
 
@@ -404,7 +415,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 			}
 		}
 
-		if ( self::get_permalink_structure() === Option::PERMALINK_STRUCTURE_CUSTOM ) {
+		if ( $this->has_custom_permalink_structure() ) {
 			/**
 			 * Filters whether the URL has a paired AMP permalink structure.
 			 *
@@ -441,8 +452,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		// Strip query var, including ?amp, ?amp=1, etc.
 		$non_amp_url = remove_query_arg( $slug, $non_amp_url );
 
-		$permalink_structure = self::get_permalink_structure();
-		if ( Option::PERMALINK_STRUCTURE_CUSTOM === $permalink_structure ) {
+		if ( $this->has_custom_permalink_structure() ) {
 			/**
 			 * Filters paired AMP URL to remove a custom permalink structure.
 			 *
