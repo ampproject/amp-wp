@@ -1637,6 +1637,9 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		);
 		$this->assertEquals( wp_get_attachment_image_url( $site_icon_attachment_id, 'full', false ), amp_get_publisher_logo() );
 
+		// Remove custom logo override set by Gutenberg.
+		remove_filter( 'theme_mod_custom_logo', 'gutenberg_override_custom_logo_theme_mod' );
+
 		// Set custom logo which now should get used instead of default for publisher logo.
 		set_theme_mod( 'custom_logo', $custom_logo_attachment_id );
 		$metadata = amp_get_schemaorg_metadata();
