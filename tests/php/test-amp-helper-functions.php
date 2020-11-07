@@ -441,7 +441,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	public function test_amp_get_permalink_without_pretty_permalinks_for_legacy_reader_structure() {
 		delete_option( 'permalink_structure' );
 		flush_rewrite_rules();
-		AMP_Options_Manager::update_option( Option::PERMALINK_STRUCTURE, Option::PERMALINK_STRUCTURE_LEGACY_READER );
+		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, Option::PAIRED_URL_STRUCTURE_LEGACY_READER );
 
 		$drafted_post   = self::factory()->post->create(
 			[
@@ -497,7 +497,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		foreach ( $argses as $args ) {
 			delete_option( AMP_Options_Manager::OPTION_NAME ); // To specify the defaults.
 			add_theme_support( AMP_Theme_Support::SLUG, $args );
-			AMP_Options_Manager::update_option( Option::PERMALINK_STRUCTURE, Option::PERMALINK_STRUCTURE_LEGACY_READER );
+			AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, Option::PAIRED_URL_STRUCTURE_LEGACY_READER );
 
 			remove_filter( 'amp_pre_get_permalink', [ $this, 'return_example_url' ] );
 			remove_filter( 'amp_get_permalink', [ $this, 'return_example_url' ] );
@@ -519,7 +519,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	public function test_amp_get_permalink_with_pretty_permalinks_and_legacy_reader_permalink_structure() {
 		global $wp_rewrite;
 		update_option( 'permalink_structure', '/%year%/%monthnum%/%day%/%postname%/' );
-		AMP_Options_Manager::update_option( Option::PERMALINK_STRUCTURE, Option::PERMALINK_STRUCTURE_LEGACY_READER );
+		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, Option::PAIRED_URL_STRUCTURE_LEGACY_READER );
 		$wp_rewrite->use_trailing_slashes = true;
 		$wp_rewrite->init();
 		$wp_rewrite->flush_rules();
