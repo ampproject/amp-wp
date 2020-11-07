@@ -47,29 +47,29 @@ if [[ $(php -r "echo PHP_VERSION;") == 8.0* ]]; then
 
 	DIFF=$(
 		cat <<-EOF
-			diff --git a/composer.json b/composer.json
-			index 4accd09f0..c1ff59f54 100644
-			--- a/composer.json
-			+++ b/composer.json
-			@@ -85,7 +85,17 @@
-				 ],
-				 "files": [
-					 "tests/php/register-wp-cli-commands.php",
-			-      "docs/includes/register-wp-cli-commands.php"
-			+      "docs/includes/register-wp-cli-commands.php",
-			+      "${WP_TESTS_DIR}/includes/phpunit7/MockObject/Builder/NamespaceMatch.php",
-			+      "${WP_TESTS_DIR}/includes/phpunit7/MockObject/Builder/ParametersMatch.php",
-			+      "${WP_TESTS_DIR}/includes/phpunit7/MockObject/InvocationMocker.php",
-			+      "${WP_TESTS_DIR}/includes/phpunit7/MockObject/MockMethod.php"
-			+    ],
-			+    "exclude-from-classmap": [
-			+      "vendor/phpunit/phpunit/src/Framework/MockObject/Builder/NamespaceMatch.php",
-			+      "vendor/phpunit/phpunit/src/Framework/MockObject/Builder/ParametersMatch.php",
-			+      "vendor/phpunit/phpunit/src/Framework/MockObject/InvocationMocker.php",
-			+      "vendor/phpunit/phpunit/src/Framework/MockObject/MockMethod.php"
-				 ]
-			 },
-			 "repositories": [
+diff --git a/composer.json b/composer.json
+index 4d24ebd44..2a98f63ce 100644
+--- a/composer.json
++++ b/composer.json
+@@ -87,7 +87,17 @@
+     ],
+     "files": [
+       "tests/php/register-wp-cli-commands.php",
+-      "docs/includes/register-wp-cli-commands.php"
++      "docs/includes/register-wp-cli-commands.php",
++      "${WP_TESTS_DIR}/includes/phpunit7/MockObject/Builder/NamespaceMatch.php",
++      "${WP_TESTS_DIR}/includes/phpunit7/MockObject/Builder/ParametersMatch.php",
++      "${WP_TESTS_DIR}/includes/phpunit7/MockObject/InvocationMocker.php",
++      "${WP_TESTS_DIR}/includes/phpunit7/MockObject/MockMethod.php"
++    ],
++    "exclude-from-classmap": [
++      "vendor/phpunit/phpunit/src/Framework/MockObject/Builder/NamespaceMatch.php",
++      "vendor/phpunit/phpunit/src/Framework/MockObject/Builder/ParametersMatch.php",
++      "vendor/phpunit/phpunit/src/Framework/MockObject/InvocationMocker.php",
++      "vendor/phpunit/phpunit/src/Framework/MockObject/MockMethod.php"
+     ]
+   },
+   "repositories": [
 		EOF
 	)
 
