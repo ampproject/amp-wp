@@ -357,7 +357,8 @@ li.error-kept {
 }
 
 #plugin-suppression .amp-drawer__panel-body-inner,
-.amp-analytics .amp-drawer__panel-body-inner {
+.amp-analytics .amp-drawer__panel-body-inner,
+#paired-url-structure .amp-drawer__panel-body-inner {
 	padding: 1.5rem 1.5rem 3rem;
 
 	@media (min-width: 783px) {
@@ -366,7 +367,8 @@ li.error-kept {
 }
 
 #plugin-suppression .amp-drawer__panel-body-inner > p,
-.amp-analytics .amp-drawer__panel-body-inner p {
+.amp-analytics .amp-drawer__panel-body-inner p,
+#paired-url-structure .amp-drawer__panel-body-inner p {
 	margin-top: 0;
 	font-size: 14px;
 }
