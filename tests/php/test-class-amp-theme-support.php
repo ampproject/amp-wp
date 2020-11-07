@@ -472,11 +472,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		// Establish initial state.
 		$post_id = self::factory()->post->create( [ 'post_title' => 'Test' ] );
 		$this->set_template_mode( AMP_Theme_Support::READER_MODE_SLUG );
-		query_posts( [ 'p' => $post_id ] ); // phpcs:ignore
+		$this->go_to( get_permalink( $post_id ) );
 		$this->assertTrue( is_singular() );
 
-		// Transitional support is not available if theme support is not present or canonical.
-		$this->assertFalse( AMP_Theme_Support::is_paired_available() );
+		// Paired is available if not canonical.
+		$this->assertTrue( AMP_Theme_Support::is_paired_available() );
 		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->assertFalse( AMP_Theme_Support::is_paired_available() );
 
@@ -494,7 +494,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		add_filter( 'amp_skip_post', '__return_true' );
 		$this->assertFalse( AMP_Theme_Support::is_paired_available() );
 		$this->assertTrue( is_singular() );
-		query_posts( [ 's' => 'test' ] ); // phpcs:ignore
+		$this->go_to( '/?s=test' );
 		$this->assertTrue( is_search() );
 		$this->assertTrue( AMP_Theme_Support::is_paired_available() );
 		remove_filter( 'amp_skip_post', '__return_true' );
@@ -510,11 +510,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, [ 'is_singular' ] );
 
-		query_posts( [ 'p' => $post_id ] ); // phpcs:ignore
+		$this->go_to( get_permalink( $post_id ) );
 		$this->assertTrue( is_singular() );
 		$this->assertTrue( AMP_Theme_Support::is_paired_available() );
 
-		query_posts( [ 's' => $post_id ] ); // phpcs:ignore
+		$this->go_to( '/?s=test' );
 		$this->assertTrue( is_search() );
 		$this->assertFalse( AMP_Theme_Support::is_paired_available() );
 	}
