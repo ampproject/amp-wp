@@ -161,8 +161,6 @@ jobs:
   unit-test-js:
     name: 'Unit test: JS'
     runs-on: ubuntu-latest
-    needs:
-      - lint-js
 
     steps:
       - name: Checkout
@@ -201,8 +199,6 @@ jobs:
   e2e-test-js:
     name: 'E2E test: JS'
     runs-on: ubuntu-latest
-    needs:
-      - lint-js
 
     steps:
       - name: Checkout
@@ -273,9 +269,6 @@ jobs:
   unit-test-php:
     name: "Unit test ${{ matrix.coverage && '(with coverage)' || '' }}: PHP ${{ matrix.php }}, WP ${{ matrix.wp }}"
     runs-on: ubuntu-latest
-    needs:
-      - lint-php
-      - static-analysis-php
     env:
       WP_CORE_DIR: /tmp/wordpress
     services:
