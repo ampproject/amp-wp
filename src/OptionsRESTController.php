@@ -73,6 +73,14 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 	const CUSTOMIZER_LINK = 'customizer_link';
 
 	/**
+	 * Key for the AMP slug.
+	 *
+	 * @see amp_get_slug()
+	 * @var string
+	 */
+	const AMP_SLUG = 'amp_slug';
+
+	/**
 	 * Reader themes provider class.
 	 *
 	 * @var ReaderThemes
@@ -85,6 +93,13 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 	 * @var PluginSuppression
 	 */
 	private $plugin_suppression;
+
+	/**
+	 * PairedAmpRouting instance.
+	 *
+	 * @var PairedAmpRouting
+	 */
+	private $paired_amp_routing;
 
 	/**
 	 * Cached results of get_item_schema.
@@ -107,12 +122,14 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 	 *
 	 * @param ReaderThemes      $reader_themes Reader themes helper class instance.
 	 * @param PluginSuppression $plugin_suppression An instance of the PluginSuppression class.
+	 * @param PairedAmpRouting  $paired_amp_routing An instance of the PairedAmpRouting class.
 	 */
-	public function __construct( ReaderThemes $reader_themes, PluginSuppression $plugin_suppression ) {
+	public function __construct( ReaderThemes $reader_themes, PluginSuppression $plugin_suppression, PairedAmpRouting $paired_amp_routing ) {
 		$this->namespace          = 'amp/v1';
 		$this->rest_base          = 'options';
 		$this->reader_themes      = $reader_themes;
 		$this->plugin_suppression = $plugin_suppression;
+		$this->paired_amp_routing = $paired_amp_routing;
 	}
 
 	/**
@@ -193,6 +210,10 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 			: null;
 
 		$options[ self::CUSTOMIZER_LINK ] = amp_get_customizer_url();
+
+		$options[ self::AMP_SLUG ] = amp_get_slug();
+
+		$options[ Option::PAIRED_URL_STRUCTURE ] = $this->paired_amp_routing->get_paired_url_structure();
 
 		return rest_ensure_response( $options );
 	}
@@ -319,6 +340,13 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 					],
 					Option::ANALYTICS               => [
 						'type' => 'object',
+					],
+					Option::PAIRED_URL_STRUCTURE    => [
+						'type' => 'string',
+					],
+					self::AMP_SLUG                  => [
+						'type'     => 'string',
+						'readonly' => true,
 					],
 					self::SUPPORTABLE_POST_TYPES    => [
 						'type'     => 'array',
