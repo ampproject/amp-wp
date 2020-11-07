@@ -81,6 +81,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	public function register() {
 		add_filter( 'amp_default_options', [ $this, 'filter_default_options' ], 10, 2 );
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
+		add_action( 'update_option_' . AMP_Options_Manager::OPTION_NAME, [ $this, 'handle_options_update' ], 10, 2 );
 
 		add_action( 'init', [ $this, 'add_rewrite_endpoint' ], 0 );
 		add_action( 'parse_query', [ $this, 'correct_query_when_is_front_page' ] );
@@ -155,6 +156,23 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 			$options[ Option::PAIRED_URL_STRUCTURE ] = $new_options[ Option::PAIRED_URL_STRUCTURE ];
 		}
 		return $options;
+	}
+
+	/**
+	 * Handle options update.
+	 *
+	 * @param array $old_options Old options.
+	 * @param array $new_options New options.
+	 */
+	public function handle_options_update( $old_options, $new_options ) {
+		if (
+			isset( $old_options[ Option::PAIRED_URL_STRUCTURE ], $new_options[ Option::PAIRED_URL_STRUCTURE ] )
+			&&
+			$old_options[ Option::PAIRED_URL_STRUCTURE ] !== $new_options[ Option::PAIRED_URL_STRUCTURE ]
+		) {
+			$this->add_rewrite_endpoint();
+			$this->flush_rewrite_rules();
+		}
 	}
 
 	/**
