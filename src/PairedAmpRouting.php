@@ -29,16 +29,16 @@ use WP_Post;
 final class PairedAmpRouting implements Service, Registerable, Activateable, Deactivateable {
 
 	/**
-	 * Permalink structures.
+	 * Paired URL structures.
 	 *
 	 * @var string[]
 	 */
-	const PERMALINK_STRUCTURES = [
-		Option::PERMALINK_STRUCTURE_QUERY_VAR,
-		Option::PERMALINK_STRUCTURE_REWRITE_ENDPOINT,
-		Option::PERMALINK_STRUCTURE_LEGACY_TRANSITIONAL,
-		Option::PERMALINK_STRUCTURE_LEGACY_READER,
-		Option::PERMALINK_STRUCTURE_CUSTOM,
+	const PAIRED_URL_STRUCTURES = [
+		Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
+		Option::PAIRED_URL_STRUCTURE_REWRITE_ENDPOINT,
+		Option::PAIRED_URL_STRUCTURE_LEGACY_TRANSITIONAL,
+		Option::PAIRED_URL_STRUCTURE_LEGACY_READER,
+		Option::PAIRED_URL_STRUCTURE_CUSTOM,
 	];
 
 	/**
@@ -99,7 +99,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * Add rewrite endpoint.
 	 */
 	public function add_rewrite_endpoint() {
-		if ( Option::PERMALINK_STRUCTURE_REWRITE_ENDPOINT === AMP_Options_Manager::get_option( Option::PERMALINK_STRUCTURE ) ) {
+		if ( Option::PAIRED_URL_STRUCTURE_REWRITE_ENDPOINT === AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE ) ) {
 			$places = EP_ALL;
 		} else {
 			$places = EP_PERMALINK;
@@ -115,7 +115,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * @return array Defaults.
 	 */
 	public function filter_default_options( $defaults, $options ) {
-		$value = Option::PERMALINK_STRUCTURE_QUERY_VAR;
+		$value = Option::PAIRED_URL_STRUCTURE_QUERY_VAR;
 
 		if (
 			isset( $options[ Option::VERSION ], $options[ Option::THEME_SUPPORT ], $options[ Option::READER_THEME ] )
@@ -127,13 +127,13 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 				&&
 				ReaderThemes::DEFAULT_READER_THEME === $options[ Option::READER_THEME ]
 			) {
-				$value = Option::PERMALINK_STRUCTURE_LEGACY_READER;
+				$value = Option::PAIRED_URL_STRUCTURE_LEGACY_READER;
 			} elseif ( AMP_Theme_Support::STANDARD_MODE_SLUG !== $options[ Option::THEME_SUPPORT ] ) {
-				$value = Option::PERMALINK_STRUCTURE_LEGACY_TRANSITIONAL;
+				$value = Option::PAIRED_URL_STRUCTURE_LEGACY_TRANSITIONAL;
 			}
 		}
 
-		$defaults[ Option::PERMALINK_STRUCTURE ] = $value;
+		$defaults[ Option::PAIRED_URL_STRUCTURE ] = $value;
 
 		return $defaults;
 	}
@@ -148,21 +148,21 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 */
 	public function sanitize_options( $options, $new_options ) {
 		if (
-			isset( $new_options[ Option::PERMALINK_STRUCTURE ] )
+			isset( $new_options[ Option::PAIRED_URL_STRUCTURE ] )
 			&&
-			in_array( $new_options[ Option::PERMALINK_STRUCTURE ], self::PERMALINK_STRUCTURES, true )
+			in_array( $new_options[ Option::PAIRED_URL_STRUCTURE ], self::PAIRED_URL_STRUCTURES, true )
 		) {
-			$options[ Option::PERMALINK_STRUCTURE ] = $new_options[ Option::PERMALINK_STRUCTURE ];
+			$options[ Option::PAIRED_URL_STRUCTURE ] = $new_options[ Option::PAIRED_URL_STRUCTURE ];
 		}
 		return $options;
 	}
 
 	/**
-	 * Determine whether a custom permalink structure is being used.
+	 * Determine whether a custom paired URL structure is being used.
 	 *
-	 * @return bool Whether custom permalink structure.
+	 * @return bool Whether custom paired URL structure is used.
 	 */
-	public function has_custom_permalink_structure() {
+	public function has_paired_url_structure() {
 		$has_filters      = [
 			has_filter( 'amp_has_paired_endpoint' ),
 			has_filter( 'amp_add_paired_endpoint' ),
@@ -174,7 +174,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		} elseif ( $has_filter_count > 0 ) {
 			_doing_it_wrong(
 				'add_filter',
-				esc_html__( 'In order to implement a custom paired AMP permalink structure, you must add three filters:', 'amp' ) . ' amp_has_paired_endpoint, amp_add_paired_endpoint, amp_remove_paired_endpoint',
+				esc_html__( 'In order to implement a custom paired AMP URL structure, you must add three filters:', 'amp' ) . ' amp_has_paired_endpoint, amp_add_paired_endpoint, amp_remove_paired_endpoint',
 				'2.1'
 			);
 		}
@@ -182,15 +182,15 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	}
 
 	/**
-	 * Get the current paired AMP permalink structure.
+	 * Get the current paired AMP paired URL structure.
 	 *
-	 * @return string Paired AMP permalink structure.
+	 * @return string Paired AMP paired URL structure.
 	 */
-	public function get_permalink_structure() {
-		if ( $this->has_custom_permalink_structure() ) {
-			return Option::PERMALINK_STRUCTURE_CUSTOM;
+	public function get_paired_url_structure() {
+		if ( $this->has_paired_url_structure() ) {
+			return Option::PAIRED_URL_STRUCTURE_CUSTOM;
 		}
-		return AMP_Options_Manager::get_option( Option::PERMALINK_STRUCTURE );
+		return AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE );
 	}
 
 	/**
@@ -200,22 +200,22 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * @return string AMP URL.
 	 */
 	public function add_paired_endpoint( $url ) {
-		$permalink_structure = self::get_permalink_structure();
-		switch ( $permalink_structure ) {
-			case Option::PERMALINK_STRUCTURE_REWRITE_ENDPOINT:
+		$structure = self::get_paired_url_structure();
+		switch ( $structure ) {
+			case Option::PAIRED_URL_STRUCTURE_REWRITE_ENDPOINT:
 				return $this->get_rewrite_endpoint_paired_amp_url( $url );
-			case Option::PERMALINK_STRUCTURE_LEGACY_TRANSITIONAL:
+			case Option::PAIRED_URL_STRUCTURE_LEGACY_TRANSITIONAL:
 				return $this->get_legacy_transitional_paired_amp_url( $url );
-			case Option::PERMALINK_STRUCTURE_LEGACY_READER:
+			case Option::PAIRED_URL_STRUCTURE_LEGACY_READER:
 				return $this->get_legacy_reader_paired_amp_url( $url );
 		}
 
-		// This is the PERMALINK_STRUCTURE_QUERY_VAR case, the default.
+		// This is the PAIRED_URL_STRUCTURE_QUERY_VAR case, the default.
 		$amp_url = $this->get_query_var_paired_amp_url( $url );
 
-		if ( Option::PERMALINK_STRUCTURE_CUSTOM === $permalink_structure ) {
+		if ( Option::PAIRED_URL_STRUCTURE_CUSTOM === $structure ) {
 			/**
-			 * Filters paired AMP URL to apply a custom permalink structure.
+			 * Filters paired AMP URL to apply a custom paired URL structure.
 			 *
 			 * @since 2.1
 			 *
@@ -311,7 +311,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 			 * Returning a string value in this filter will bypass the `get_permalink()` from being called and the `amp_get_permalink` filter will not apply.
 			 *
 			 * @since 0.4
-			 * @since 1.0 This filter only applies when using the legacy reader permalink structure.
+			 * @since 1.0 This filter only applies when using the legacy reader paired URL structure.
 			 *
 			 * @param false $url     Short-circuited URL.
 			 * @param int   $post_id Post ID.
@@ -326,11 +326,11 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		// Make sure any existing AMP endpoint is removed.
 		$url = $this->remove_paired_endpoint( $url );
 
-		$parsed_url    = wp_parse_url( $url );
-		$structure     = get_option( 'permalink_structure' );
-		$use_query_var = (
+		$parsed_url          = wp_parse_url( $url );
+		$permalink_structure = get_option( 'permalink_structure' );
+		$use_query_var       = (
 			// If pretty permalinks aren't available, then query var must be used.
-			empty( $structure )
+			empty( $permalink_structure )
 			||
 			// If there are existing query vars, then always use the amp query var as well.
 			! empty( $parsed_url['query'] )
@@ -359,7 +359,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 			 * Filters AMP permalink.
 			 *
 			 * @since 0.2
-			 * @since 1.0 This filter only applies when using the legacy reader permalink structure.
+			 * @since 1.0 This filter only applies when using the legacy reader paired URL structure.
 			 *
 			 * @param string $amp_url AMP URL.
 			 * @param int    $post_id Post ID.
@@ -415,9 +415,9 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 			}
 		}
 
-		if ( $this->has_custom_permalink_structure() ) {
+		if ( $this->has_paired_url_structure() ) {
 			/**
-			 * Filters whether the URL has a paired AMP permalink structure.
+			 * Filters whether the URL has a paired AMP paired URL structure.
 			 *
 			 * @since 2.1
 			 *
@@ -452,9 +452,9 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		// Strip query var, including ?amp, ?amp=1, etc.
 		$non_amp_url = remove_query_arg( $slug, $non_amp_url );
 
-		if ( $this->has_custom_permalink_structure() ) {
+		if ( $this->has_paired_url_structure() ) {
 			/**
-			 * Filters paired AMP URL to remove a custom permalink structure.
+			 * Filters paired AMP URL to remove a custom paired URL structure.
 			 *
 			 * @since 2.1
 			 *
