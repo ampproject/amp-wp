@@ -60,7 +60,10 @@ export function PairedUrlStructure( { focusedSection } ) {
 						disabled={ isCustom }
 					/>
 					<label htmlFor="paired_url_structure_query_var">
-						{ __( 'Query parameter (recommended)', 'amp' ) + `: /?${ slug }=1` }
+						{ __( 'Query parameter (recommended)', 'amp' ) + ': ' }
+						<code>
+							{ `?${ slug }=1` }
+						</code>
 					</label>
 				</li>
 				<li>
@@ -75,7 +78,10 @@ export function PairedUrlStructure( { focusedSection } ) {
 						disabled={ isCustom }
 					/>
 					<label htmlFor="paired_url_structure_rewrite_endpoint">
-						{ __( 'Rewrite endpoint', 'amp' ) + `: /${ slug }/` }
+						{ __( 'Rewrite endpoint', 'amp' ) + ': ' }
+						<code>
+							{ `/${ slug }/` }
+						</code>
 					</label>
 				</li>
 				<li>
@@ -90,7 +96,10 @@ export function PairedUrlStructure( { focusedSection } ) {
 						disabled={ isCustom }
 					/>
 					<label htmlFor="paired_url_structure_legacy_transitional">
-						{ __( 'Legacy transitional', 'amp' ) + `: ?${ slug }` }
+						{ __( 'Legacy transitional', 'amp' ) + ': ' }
+						<code>
+							{ `?${ slug }` }
+						</code>
 					</label>
 				</li>
 				<li>
@@ -105,7 +114,14 @@ export function PairedUrlStructure( { focusedSection } ) {
 						disabled={ isCustom }
 					/>
 					<label htmlFor="paired_url_structure_legacy_reader">
-						{ __( 'Legacy reader', 'amp' ) + `: /${ slug }/, ?${ slug }` }
+						{ __( 'Legacy reader', 'amp' ) + ': ' }
+						<code>
+							{ `/${ slug }/` }
+						</code>
+						{ ' & ' }
+						<code>
+							{ `?${ slug }` }
+						</code>
 					</label>
 				</li>
 
