@@ -373,6 +373,18 @@ li.error-kept {
 	font-size: 14px;
 }
 
+#paired-url-structure .amp-drawer__panel-body-inner li {
+	margin-top: 15px;
+}
+
+#paired-url-structure .amp-drawer__panel-body-inner li:first-child {
+	margin-top: 0;
+}
+
+#paired-url-structure .amp-drawer__panel-body-inner input {
+	margin-right: 1ex;
+}
+
 #analytics-options details > summary {
 	font-size: 14px;
 }
