@@ -15,7 +15,7 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use WP_Query;
-use WP_Post;
+use WP_Rewrite;
 
 /**
  * Service for routing users to and from paired AMP URLs.
@@ -40,6 +40,13 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		Option::PAIRED_URL_STRUCTURE_LEGACY_READER,
 		Option::PAIRED_URL_STRUCTURE_CUSTOM,
 	];
+
+	/**
+	 * Regular expression pattern matching any added endpoints in a URL.
+	 *
+	 * @var string
+	 */
+	protected $added_rewrite_endpoints_pattern;
 
 	/**
 	 * Activate.
@@ -257,9 +264,37 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	}
 
 	/**
-	 * Get paired AMP URL using a rewrite endpoint.
+	 * Determine whether a given URL path contains a registered rewrite endpoint.
 	 *
-	 * @todo What are the scenarios where this conflicts with other rewrite endpoints also added?
+	 * This is needed to prevent adding the `/amp/` rewrite endpoint to a URL which already has an existing rewrite
+	 * endpoint, as in this case it will fail to match.
+	 *
+	 * @param string $path URL Path.
+	 * @return bool Whether the supplied path contains a registered rewrite endpoint.
+	 * @global WP_Rewrite
+	 */
+	private function is_added_rewrite_endpoint_in_path( $path ) {
+		global $wp_rewrite;
+		if ( null === $this->added_rewrite_endpoints_pattern && $wp_rewrite instanceof WP_Rewrite ) {
+			$endpoint_patterns = [];
+			foreach ( $wp_rewrite->endpoints as $endpoint ) {
+				$endpoint_patterns[] = preg_quote( $endpoint[1], '#' );
+			}
+			if ( empty( $endpoint_patterns ) ) {
+				return false;
+			}
+			$this->added_rewrite_endpoints_pattern = '#/' . implode( '|', $endpoint_patterns ) . '(/|$)#';
+		}
+
+		if ( empty( $this->added_rewrite_endpoints_pattern ) ) {
+			return false;
+		}
+
+		return (bool) preg_match( $this->added_rewrite_endpoints_pattern, $path );
+	}
+
+	/**
+	 * Get paired AMP URL using a rewrite endpoint.
 	 *
 	 * @param string $url URL.
 	 * @return string AMP URL.
@@ -278,8 +313,11 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 			$parsed_url['host'] = isset( $_SERVER['HTTP_HOST'] ) ? wp_unslash( $_SERVER['HTTP_HOST'] ) : 'localhost';
 		}
 
-		$parsed_url['path']  = trailingslashit( $parsed_url['path'] );
-		$parsed_url['path'] .= user_trailingslashit( amp_get_slug(), 'amp' );
+		$has_existing_rewrite_endpoint = $this->is_added_rewrite_endpoint_in_path( $parsed_url['path'] );
+		if ( ! $has_existing_rewrite_endpoint ) {
+			$parsed_url['path']  = trailingslashit( $parsed_url['path'] );
+			$parsed_url['path'] .= user_trailingslashit( amp_get_slug(), 'amp' );
+		}
 
 		$amp_url = $parsed_url['scheme'] . '://';
 		if ( isset( $parsed_url['user'] ) ) {
@@ -296,6 +334,9 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		$amp_url .= $parsed_url['path'];
 		if ( isset( $parsed_url['query'] ) ) {
 			$amp_url .= '?' . $parsed_url['query'];
+		}
+		if ( $has_existing_rewrite_endpoint ) {
+			$amp_url = $this->get_query_var_paired_amp_url( $amp_url );
 		}
 		if ( isset( $parsed_url['fragment'] ) ) {
 			$amp_url .= '#' . $parsed_url['fragment'];
