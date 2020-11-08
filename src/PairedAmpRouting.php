@@ -180,7 +180,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 *
 	 * @return bool Whether custom paired URL structure is used.
 	 */
-	public function has_paired_url_structure() {
+	public function has_custom_paired_url_structure() {
 		$has_filters      = [
 			has_filter( 'amp_has_paired_endpoint' ),
 			has_filter( 'amp_add_paired_endpoint' ),
@@ -205,7 +205,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * @return string Paired AMP paired URL structure.
 	 */
 	public function get_paired_url_structure() {
-		if ( $this->has_paired_url_structure() ) {
+		if ( $this->has_custom_paired_url_structure() ) {
 			return Option::PAIRED_URL_STRUCTURE_CUSTOM;
 		}
 		return AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE );
@@ -433,7 +433,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 			}
 		}
 
-		if ( $this->has_paired_url_structure() ) {
+		if ( $this->has_custom_paired_url_structure() ) {
 			/**
 			 * Filters whether the URL has a paired AMP paired URL structure.
 			 *
@@ -470,7 +470,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		// Strip query var, including ?amp, ?amp=1, etc.
 		$non_amp_url = remove_query_arg( $slug, $non_amp_url );
 
-		if ( $this->has_paired_url_structure() ) {
+		if ( $this->has_custom_paired_url_structure() ) {
 			/**
 			 * Filters paired AMP URL to remove a custom paired URL structure.
 			 *
