@@ -81,6 +81,14 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 	const AMP_SLUG = 'amp_slug';
 
 	/**
+	 * Key for AMP paired examples.
+	 *
+	 * @see amp_get_slug()
+	 * @var string
+	 */
+	const PAIRED_URL_EXAMPLES = 'paired_url_examples';
+
+	/**
 	 * Reader themes provider class.
 	 *
 	 * @var ReaderThemes
@@ -215,7 +223,50 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 
 		$options[ Option::PAIRED_URL_STRUCTURE ] = $this->paired_amp_routing->get_paired_url_structure();
 
+		$options[ self::PAIRED_URL_EXAMPLES ] = $this->get_paired_url_examples();
+
 		return rest_ensure_response( $options );
+	}
+
+	/**
+	 * Get paired URL examples.
+	 *
+	 * @return array[] Keys are the structures, values are arrays of paired URLs using the structure.
+	 */
+	private function get_paired_url_examples() {
+		$supported_post_types     = AMP_Post_Type_Support::get_supported_post_types();
+		$hierarchical_post_types  = array_intersect(
+			$supported_post_types,
+			get_post_types( [ 'hierarchical' => true ] )
+		);
+		$chronological_post_types = array_intersect(
+			$supported_post_types,
+			get_post_types( [ 'hierarchical' => false ] )
+		);
+
+		$examples = [];
+		foreach ( [ $chronological_post_types, $hierarchical_post_types ] as $post_types ) {
+			if ( empty( $post_types ) ) {
+				continue;
+			}
+			$posts = get_posts(
+				[
+					'post_type'   => $post_types,
+					'post_status' => 'publish',
+				]
+			);
+			foreach ( $posts as $post ) {
+				if ( count( AMP_Post_Type_Support::get_support_errors( $post ) ) !== 0 ) {
+					continue;
+				}
+				$paired_urls = $this->paired_amp_routing->get_all_structure_paired_urls( get_permalink( $post ) );
+				foreach ( $paired_urls as $structure => $paired_url ) {
+					$examples[ $structure ][] = $paired_url;
+				}
+				continue 2;
+			}
+		}
+		return $examples;
 	}
 
 	/**
@@ -343,6 +394,10 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 					],
 					Option::PAIRED_URL_STRUCTURE    => [
 						'type' => 'string',
+					],
+					self::PAIRED_URL_EXAMPLES       => [
+						'type'     => 'object',
+						'readonly' => true,
 					],
 					self::AMP_SLUG                  => [
 						'type'     => 'string',

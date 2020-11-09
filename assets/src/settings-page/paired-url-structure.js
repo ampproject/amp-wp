@@ -14,6 +14,41 @@ import { __ } from '@wordpress/i18n';
  */
 import { Options } from '../components/options-context-provider';
 import { AMPDrawer } from '../components/amp-drawer';
+import { AMPNotice, NOTICE_TYPE_INFO, NOTICE_SIZE_LARGE } from '../components/amp-notice';
+
+/**
+ * Paired URL examples.
+ *
+ * @param {Object} props Component props.
+ * @param {?Array} props.pairedUrls Paired URLs.
+ */
+const PairedUrlExamples = ( { pairedUrls } ) => {
+	if ( ! pairedUrls ) {
+		return null;
+	}
+
+	return (
+		<details className="amp-paired-url-examples">
+			<summary>
+				{ __( 'Examples', 'amp' ) }
+			</summary>
+			{
+				pairedUrls.map( ( pairedUrl ) => {
+					return (
+						<div className="amp-paired-url-example" key={ pairedUrl }>
+							<code>
+								{ pairedUrl }
+							</code>
+						</div>
+					);
+				} )
+			}
+		</details>
+	);
+};
+PairedUrlExamples.propTypes = {
+	pairedUrls: PropTypes.arrayOf( PropTypes.string ),
+};
 
 /**
  * Component rendering the paired URL structure.
@@ -47,6 +82,16 @@ export function PairedUrlStructure( { focusedSection } ) {
 			id="paired-url-structure"
 			initialOpen={ 'paired-url-structure' === focusedSection }
 		>
+
+			{ isCustom && (
+				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_INFO }>
+					<p>
+						{ __( 'A theme or plugin is customizing the paired URL structure, so the following options are unavailable.', 'amp' ) }
+					</p>
+					<PairedUrlExamples pairedUrls={ editedOptions.paired_url_examples.custom } />
+				</AMPNotice>
+			) }
+
 			<ul>
 				<li>
 					<input
@@ -60,11 +105,16 @@ export function PairedUrlStructure( { focusedSection } ) {
 						disabled={ isCustom }
 					/>
 					<label htmlFor="paired_url_structure_query_var">
-						{ __( 'Query parameter (recommended)', 'amp' ) + ': ' }
+						{ __( 'Query parameter', 'amp' ) + ': ' }
 						<code>
 							{ `?${ slug }=1` }
 						</code>
+						{ ' ' }
+						<em>
+							{ __( '(recommended)', 'amp' ) }
+						</em>
 					</label>
+					<PairedUrlExamples pairedUrls={ editedOptions.paired_url_examples.query_var } />
 				</li>
 				<li>
 					<input
@@ -83,6 +133,7 @@ export function PairedUrlStructure( { focusedSection } ) {
 							{ `/${ slug }/` }
 						</code>
 					</label>
+					<PairedUrlExamples pairedUrls={ editedOptions.paired_url_examples.rewrite_endpoint } />
 				</li>
 				<li>
 					<input
@@ -101,6 +152,7 @@ export function PairedUrlStructure( { focusedSection } ) {
 							{ `?${ slug }` }
 						</code>
 					</label>
+					<PairedUrlExamples pairedUrls={ editedOptions.paired_url_examples.legacy_transitional } />
 				</li>
 				<li>
 					<input
@@ -123,22 +175,8 @@ export function PairedUrlStructure( { focusedSection } ) {
 							{ `?${ slug }` }
 						</code>
 					</label>
+					<PairedUrlExamples pairedUrls={ editedOptions.paired_url_examples.legacy_reader } />
 				</li>
-
-				{ isCustom && (
-					<li>
-						<input
-							id="paired_url_structure_custom"
-							type="radio"
-							name="paired_url_structure"
-							checked={ 'custom' === editedOptions.paired_url_structure }
-							disabled={ true }
-						/>
-						<label htmlFor="paired_url_structure_custom">
-							{ __( 'Custom (a theme or plugin is customizing the paired URL structure)', 'amp' ) }
-						</label>
-					</li>
-				) }
 			</ul>
 		</AMPDrawer>
 	);

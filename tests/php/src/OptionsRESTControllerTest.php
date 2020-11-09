@@ -84,6 +84,7 @@ class OptionsRESTControllerTest extends DependencyInjectedTestCase {
 				'onboarding_wizard_link',
 				'customizer_link',
 				'paired_url_structure',
+				'paired_url_examples',
 				'amp_slug',
 			],
 			array_keys( $data )
