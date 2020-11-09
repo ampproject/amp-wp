@@ -219,13 +219,34 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	}
 
 	/**
-	 * Turn a given URL into a paired AMP URL.
+	 * Get paired URLs for all available structures.
 	 *
 	 * @param string $url URL.
+	 * @return array Paired URLs keyed by structure.
+	 */
+	public function get_all_structure_paired_urls( $url ) {
+		$paired_urls = [];
+		$structures  = self::PAIRED_URL_STRUCTURES;
+		if ( ! $this->has_custom_paired_url_structure() ) {
+			$structures = array_diff( $structures, [ Option::PAIRED_URL_STRUCTURE_CUSTOM ] );
+		}
+		foreach ( $structures as $structure ) {
+			$paired_urls[ $structure ] = $this->add_paired_endpoint( $url, $structure );
+		}
+		return $paired_urls;
+	}
+
+	/**
+	 * Turn a given URL into a paired AMP URL.
+	 *
+	 * @param string      $url       URL.
+	 * @param string|null $structure Structure. Defaults to the current paired structure.
 	 * @return string AMP URL.
 	 */
-	public function add_paired_endpoint( $url ) {
-		$structure = self::get_paired_url_structure();
+	public function add_paired_endpoint( $url, $structure = null ) {
+		if ( null === $structure ) {
+			$structure = self::get_paired_url_structure();
+		}
 		switch ( $structure ) {
 			case Option::PAIRED_URL_STRUCTURE_REWRITE_ENDPOINT:
 				return $this->get_rewrite_endpoint_paired_amp_url( $url );
