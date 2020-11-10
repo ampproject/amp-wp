@@ -35,7 +35,7 @@ final class URLValidationProviderTest extends WP_UnitTestCase {
 	 * @covers ::get_url_validation()
 	 * @covers ::get_total_errors()
 	 * @covers ::get_unaccepted_errors()
-	 * @covers ::update_state_from_validity
+	 * @covers ::update_state_from_validity()
 	 */
 	public function test_get_url_validation() {
 		$single_post_permalink = get_permalink( self::factory()->post->create() );
@@ -67,11 +67,11 @@ final class URLValidationProviderTest extends WP_UnitTestCase {
 	/**
 	 * Tests locking and unlocking.
 	 *
-	 * @covers ::lock
-	 * @covers ::unlock
-	 * @covers ::is_locked
-	 * @covers ::get_lock_timeout
-	 * @covers ::with_lock
+	 * @covers ::lock()
+	 * @covers ::unlock()
+	 * @covers ::is_locked()
+	 * @covers ::get_lock_timeout()
+	 * @covers ::with_lock()
 	 */
 	public function test_locking() {
 		$this->assertFalse( get_option( URLValidationProvider::LOCK_KEY ) );
