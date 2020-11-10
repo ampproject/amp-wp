@@ -42,7 +42,7 @@ export default registerStore(
 						ampBroken: Boolean(
 							action.validationErrors.filter( ( { status } ) =>
 								status === VALIDATION_ERROR_NEW_REJECTED_STATUS || status === VALIDATION_ERROR_ACK_REJECTED_STATUS,
-							),
+							)?.length,
 						),
 						reviewedValidationErrors: action.validationErrors
 							.filter( ( { status } ) =>
