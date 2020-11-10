@@ -13,8 +13,7 @@
     "ext-json": "*",
     "ext-libxml": "*",
     "ext-spl": "*",
-    "ampproject/common": "*",
-    "ampproject/optimizer": "*",
+    "ampproject/amp-toolbox": "^0.1",
     "cweagans/composer-patches": "1.7.0",
     "fasterimage/fasterimage": "1.5.0",
     "sabberworm/php-css-parser": "dev-master#bfdd976"
@@ -90,27 +89,6 @@
       "docs/includes/register-wp-cli-commands.php"
     ]
   },
-  "repositories": [
-    {
-      "type": "path",
-      "url": "lib/common",
-      "options": {
-        "symlink": true
-      }
-    },
-    {
-      "type": "path",
-      "url": "lib/optimizer",
-      "options": {
-        "symlink": true
-      }
-    },
-    {
-      "type": "vcs",
-      "url": "https://github.com/sabberworm/PHP-CSS-Parser.git",
-      "no-api": true
-    }
-  ],
   "minimum-stability": "dev",
   "prefer-stable": true,
   "scripts": {

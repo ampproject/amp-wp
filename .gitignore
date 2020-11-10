@@ -14,8 +14,6 @@ built
 /amphtml
 .env
 .idea/
-/lib/*/vendor/
-/lib/*/composer.lock
 /phpcs.xml
 /phpunit.xml
 /*.sql

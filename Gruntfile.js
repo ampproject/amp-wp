@@ -25,9 +25,9 @@ module.exports = function( grunt ) {
 	// ⚠️ Warning: These paths are passed straight to rm command in the shell, without any escaping.
 	const productionVendorExcludedFilePatterns = [
 		'composer.*',
-		'lib',
 		'vendor/*/*/.editorconfig',
 		'vendor/*/*/.git',
+		'vendor/*/*/.github',
 		'vendor/*/*/.gitignore',
 		'vendor/*/*/composer.*',
 		'vendor/*/*/Doxyfile',
@@ -38,12 +38,11 @@ module.exports = function( grunt ) {
 		'vendor/*/*/*.yml',
 		'vendor/*/*/.*.yml',
 		'vendor/*/*/tests',
-		'vendor/ampproject/common/phpstan.neon.dist',
-		'vendor/ampproject/optimizer/bin',
-		'vendor/ampproject/optimizer/conceptual-diagram.svg',
-		'vendor/ampproject/optimizer/phpstan.neon.dist',
+		'vendor/ampproject/amp-toolbox/bin',
+		'vendor/ampproject/amp-toolbox/.phpcs.xml.dist',
+		'vendor/ampproject/amp-toolbox/conceptual-diagram.svg',
+		'vendor/ampproject/amp-toolbox/phpstan.neon.dist',
 		'vendor/bin',
-		'vendor/php-parallel-lint',
 	];
 
 	grunt.initConfig( {
@@ -83,11 +82,8 @@ module.exports = function( grunt ) {
 					'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi',
 					'cd build',
 					'composer install --no-dev -o',
-					'for symlinksource in $(find vendor/ampproject -type l); do symlinktarget=$(readlink "$symlinksource") && rm "$symlinksource" && cp -r "vendor/ampproject/$symlinktarget" "$symlinksource"; done',
 					'composer remove cweagans/composer-patches --update-no-dev -o',
 					'rm -r ' + productionVendorExcludedFilePatterns.join( ' ' ),
-					'if [ -d vendor/ampproject/common/vendor ]; then rm -r vendor/ampproject/common/vendor; fi',
-					'if [ -d vendor/ampproject/optimizer/vendor ]; then rm -r vendor/ampproject/optimizer/vendor; fi',
 				].join( ' && ' ),
 			},
 			create_build_zip: {
@@ -159,7 +155,6 @@ module.exports = function( grunt ) {
 			} );
 
 			paths.push( 'composer.*' ); // Copy in order to be able to do run composer_install.
-			paths.push( 'lib/**' );
 			paths.push( 'assets/js/**/*.js' );
 			paths.push( 'assets/js/**/*.asset.php' );
 			paths.push( 'assets/css/*.css' );
