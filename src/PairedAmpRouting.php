@@ -325,7 +325,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 			foreach ( $rewrite_object->endpoints as $endpoint ) {
 				$endpoint_patterns[] = preg_quote( $endpoint[1], $pattern_delimiter );
 			}
-			$this->added_rewrite_endpoints_pattern = $pattern_delimiter . '/' . implode( '|', $endpoint_patterns ) . '(/|$)' . $pattern_delimiter;
+			$this->added_rewrite_endpoints_pattern = $pattern_delimiter . '/(' . implode( '|', $endpoint_patterns ) . ')(/|$)' . $pattern_delimiter;
 		}
 		return (bool) preg_match( $this->added_rewrite_endpoints_pattern, $path );
 	}
