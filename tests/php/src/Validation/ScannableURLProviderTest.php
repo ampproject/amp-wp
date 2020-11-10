@@ -35,6 +35,11 @@ final class ScannableURLProviderTest extends WP_UnitTestCase {
 		add_filter( 'pre_http_request', [ ValidationRequestMocking::class, 'get_validate_response' ] );
 	}
 
+	/** @covers ::__construct */
+	public function test__construct() {
+		$this->assertInstanceOf( ScannableURLProvider::class, $this->validation_url_provider );
+	}
+
 	/**
 	 * Test retrieval of urls.
 	 *

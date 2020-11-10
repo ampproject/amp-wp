@@ -43,7 +43,9 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 	/**
 	 * Test validate_urls.
 	 *
-	 * @covers ::validate_urls()
+	 * @covers ::validate_urls
+	 * @covers ::get_validation_provider
+	 * @covers ::get_validation_url_provider
 	 */
 	public function test_validate_urls() {
 		$number_of_posts = 20;

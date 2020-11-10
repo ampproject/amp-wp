@@ -35,6 +35,7 @@ final class URLValidationProviderTest extends WP_UnitTestCase {
 	 * @covers ::get_url_validation()
 	 * @covers ::get_total_errors()
 	 * @covers ::get_unaccepted_errors()
+	 * @covers ::update_state_from_validity
 	 */
 	public function test_get_url_validation() {
 		$single_post_permalink = get_permalink( self::factory()->post->create() );
