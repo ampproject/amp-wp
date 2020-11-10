@@ -93,7 +93,8 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		add_action( 'init', [ $this, 'add_rewrite_endpoint' ], 0 );
 		add_action( 'parse_query', [ $this, 'correct_query_when_is_front_page' ] );
 
-		add_filter( 'old_slug_redirect_url', [ $this, 'filter_old_slug_redirect_url' ] );
+		add_filter( 'old_slug_redirect_url', [ $this, 'maybe_add_paired_endpoint' ], 1000 );
+		add_filter( 'redirect_canonical', [ $this, 'maybe_add_paired_endpoint' ], 1000 );
 	}
 
 	/**
@@ -587,19 +588,18 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	}
 
 	/**
-	 * Redirects the old AMP URL to the new AMP URL.
+	 * Add the paired endpoint to a URL if the request is for an AMP page and the Standard mode is not selected.
 	 *
-	 * If post slug is updated the amp page with old post slug will be redirected to the updated url.
+	 * This is used with the `redirect_canonical` and `old_slug_redirect_url` filters to prevent removal of the `/amp/`
+	 * endpoint.
 	 *
-	 * @param string $url New URL of the post.
-	 * @return string URL to be redirected.
+	 * @param string $url URL.
+	 * @return string Resulting URL with AMP endpoint added if needed.
 	 */
-	public function filter_old_slug_redirect_url( $url ) {
-
-		if ( amp_is_request() && ! amp_is_canonical() ) {
-			$url = amp_add_paired_endpoint( $url );
+	public function maybe_add_paired_endpoint( $url ) {
+		if ( $url && ! amp_is_canonical() && amp_is_request() ) {
+			$url = $this->add_paired_endpoint( $url );
 		}
-
 		return $url;
 	}
 }

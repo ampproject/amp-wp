@@ -299,7 +299,7 @@ function _amp_xdebug_admin_notice() {
  */
 function amp_redirect_old_slug_to_new_url( $link ) {
 	_deprecated_function( __FUNCTION__, '2.1' );
-	return Services::get( 'paired_amp_routing' )->filter_old_slug_redirect_url( $link );
+	return Services::get( 'paired_amp_routing' )->maybe_add_paired_endpoint( $link );
 }
 
 /**
