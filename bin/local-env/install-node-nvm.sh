@@ -22,7 +22,7 @@ fi
 cd "$(dirname "$0")/../.."
 
 # Check if nvm is installed
-if [ "$TRAVIS" != "true" ] && ! command_exists "nvm"; then
+if [ "$CI" != "true" ] && ! command_exists "nvm"; then
 	if ask "$(error_message "NVM isn't installed, would you like to download and install it automatically?")" Y; then
 		# The .bash_profile file needs to exist for NVM to install
 		if [ ! -e ~/.bash_profile ]; then
@@ -46,7 +46,7 @@ if [ "$TRAVIS" != "true" ] && ! command_exists "nvm"; then
 fi
 
 # Check if the current nvm version is up to date.
-if [ "$TRAVIS" != "true" ] && [ $NVM_VERSION != "v$(nvm --version)" ]; then
+if [ "$CI" != "true" ] && [ $NVM_VERSION != "v$(nvm --version)" ]; then
 	echo -en $(status_message "Updating NVM..." )
 	download "https://raw.githubusercontent.com/nvm-sh/nvm/$NVM_VERSION/install.sh" | bash >/dev/null 2>&1
 	echo ' done!'
@@ -58,14 +58,14 @@ if [ "$TRAVIS" != "true" ] && [ $NVM_VERSION != "v$(nvm --version)" ]; then
 fi
 
 # Check if the current node version is up to date.
-if [ "$TRAVIS" != "true" ] && [ "$(nvm current)" != "$(nvm version-remote --lts)" ]; then
+if [ "$CI" != "true" ] && [ "$(nvm current)" != "$(nvm version-remote --lts)" ]; then
 	echo -e $(warning_message "Node version does not match the latest long term support version. Please run this command to install and use it:" )
 	echo -e $(warning_message "$(action_format "nvm install")" )
 	echo -e $(warning_message "After that, re-run the setup script to continue." )
 	exit 1
 fi
 
-if [ "$TRAVIS" != "true" ]; then
+if [ "$CI" != "true" ]; then
   # Install/update packages
   echo -e $(status_message "Installing and updating NPM packages..." )
   npm install
@@ -75,7 +75,7 @@ if [ "$TRAVIS" != "true" ]; then
 fi
 
 # There was a bug in NPM that caused changes in package-lock.json. Handle that.
-if [ "$TRAVIS" != "true" ] && ! git diff --no-ext-diff --exit-code package-lock.json >/dev/null; then
+if [ "$CI" != "true" ] && ! git diff --no-ext-diff --exit-code package-lock.json >/dev/null; then
 	if ask "$(warning_message "Your package-lock.json changed, which may mean there's an issue with your NPM cache. Would you like to try and automatically clean it up?" )" N 10; then
 		rm -rf node_modules/
 		npm cache clean --force >/dev/null 2>&1

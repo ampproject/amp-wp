@@ -104,7 +104,7 @@ export async function moveToDoneScreen( { technical = true, mode, readerTheme = 
 	}
 
 	await clickNextButton();
-	await page.waitFor( 1000 );
+	await page.waitForTimeout( 1000 );
 	await page.waitForSelector( '.done__preview-container' );
 }
 

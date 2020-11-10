@@ -8,6 +8,8 @@ import { __, _n, sprintf } from '@wordpress/i18n';
  * Internal dependencies
  */
 import setValidationErrorRowsSeenClass from './set-validation-error-rows-seen-class';
+import { handleCopyToClipboardButtons } from './copy-to-clipboard-buttons';
+import { getURLValidationTableRows } from './get-url-validation-table-rows';
 
 /**
  * The id for the 'Showing x of y errors' notice.
@@ -32,6 +34,7 @@ domReady( () => {
 	handleBulkActions();
 	watchForUnsavedChanges();
 	setupStylesheetsMetabox();
+	handleCopyToClipboardButtons();
 } );
 
 let beforeUnloadPromptAdded = false;
@@ -389,13 +392,10 @@ const handleBulkActions = () => {
 
 		const markingAsReviewed = target.classList.contains( 'reviewed' );
 
-		[ ...document.querySelectorAll( 'select.amp-validation-error-status' ) ].forEach( ( select ) => {
-			const row = select.closest( 'tr' );
-			if ( row.querySelector( '.check-column input[type=checkbox]' ).checked ) {
-				row.querySelector( 'input[type=checkbox].amp-validation-error-status-review' ).checked = markingAsReviewed;
-				row.classList.toggle( 'new', ! markingAsReviewed );
-				addBeforeUnloadPrompt();
-			}
+		getURLValidationTableRows( { checkedOnly: true } ).forEach( ( row ) => {
+			row.querySelector( 'input[type=checkbox].amp-validation-error-status-review' ).checked = markingAsReviewed;
+			row.classList.toggle( 'new', ! markingAsReviewed );
+			addBeforeUnloadPrompt();
 		} );
 	} );
 };

@@ -149,8 +149,7 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 	/**
 	 * Test that an error is stored in state when themes_api returns an error.
 	 *
-	 * @covers ::get_themes
-	 * @covers ::get_default_reader_themes
+	 * @covers ::get_items
 	 */
 	public function test_themes_api_remote_wp_error() {
 		$filter_cb = static function() {
