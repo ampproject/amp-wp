@@ -96,6 +96,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 			add_action( 'parse_query', [ $this, 'correct_query_when_is_front_page' ] );
 			add_filter( 'old_slug_redirect_url', [ $this, 'maybe_add_paired_endpoint' ], 1000 );
 			add_filter( 'redirect_canonical', [ $this, 'maybe_add_paired_endpoint' ], 1000 );
+			add_filter( 'paginate_links', [ $this, 'fix_paginate_links' ] );
 		}
 	}
 
@@ -299,21 +300,16 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 */
 	private function is_added_rewrite_endpoint_in_path( $path ) {
 		global $wp_rewrite;
-		if ( null === $this->added_rewrite_endpoints_pattern && $wp_rewrite instanceof WP_Rewrite ) {
-			$endpoint_patterns = [];
+		if ( null === $this->added_rewrite_endpoints_pattern ) {
+			$pattern_delimiter = '#';
+			$endpoint_patterns = [
+				preg_quote( $wp_rewrite->pagination_base, $pattern_delimiter ) . '/\d+',
+			];
 			foreach ( $wp_rewrite->endpoints as $endpoint ) {
-				$endpoint_patterns[] = preg_quote( $endpoint[1], '#' );
+				$endpoint_patterns[] = preg_quote( $endpoint[1], $pattern_delimiter );
 			}
-			if ( empty( $endpoint_patterns ) ) {
-				return false;
-			}
-			$this->added_rewrite_endpoints_pattern = '#/' . implode( '|', $endpoint_patterns ) . '(/|$)#';
+			$this->added_rewrite_endpoints_pattern = $pattern_delimiter . '/' . implode( '|', $endpoint_patterns ) . '(/|$)' . $pattern_delimiter;
 		}
-
-		if ( empty( $this->added_rewrite_endpoints_pattern ) ) {
-			return false;
-		}
-
 		return (bool) preg_match( $this->added_rewrite_endpoints_pattern, $path );
 	}
 
@@ -603,5 +599,29 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 			$url = $this->add_paired_endpoint( $url );
 		}
 		return $url;
+	}
+
+	/**
+	 * Fix `paginate_links()` erroneously adding the pagination base after the AMP endpoint, e.g. `/amp/page/2/`.
+	 *
+	 * @see paginate_links()
+	 *
+	 * @param string $link The paginated link URL.
+	 * @return string Fixed paged link.
+	 */
+	public function fix_paginate_links( $link ) {
+		global $wp_rewrite;
+
+		$link = preg_replace(
+			sprintf(
+				':/%s(?=/%s/\d+):',
+				preg_quote( amp_get_slug(), ':' ),
+				preg_quote( $wp_rewrite->pagination_base, ':' )
+			),
+			'',
+			$link
+		);
+
+		return $link;
 	}
 }
