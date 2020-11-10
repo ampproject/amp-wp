@@ -46,7 +46,14 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 *
 	 * @var string
 	 */
-	protected $added_rewrite_endpoints_pattern;
+	private $added_rewrite_endpoints_pattern;
+
+	/**
+	 * Regular expression pattern matching a single paged link URL.
+	 *
+	 * @var string
+	 */
+	private $single_paged_link_pattern;
 
 	/**
 	 * Activate.
@@ -71,10 +78,10 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		unset( $network_wide );
 
 		// We need to manually remove the amp endpoint.
-		global $wp_rewrite;
-		foreach ( $wp_rewrite->endpoints as $index => $endpoint ) {
+		$rewrite = $this->get_wp_rewrite();
+		foreach ( $rewrite->endpoints as $index => $endpoint ) {
 			if ( amp_get_slug() === $endpoint[1] ) {
-				unset( $wp_rewrite->endpoints[ $index ] );
+				unset( $rewrite->endpoints[ $index ] );
 				break;
 			}
 		}
@@ -101,10 +108,20 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	}
 
 	/**
+	 * Get the WP_Rewrite object.
+	 *
+	 * @return WP_Rewrite Object.
+	 */
+	private function get_wp_rewrite() {
+		global $wp_rewrite;
+		return $wp_rewrite;
+	}
+
+	/**
 	 * Flush rewrite rules.
 	 */
 	public function flush_rewrite_rules() {
-		flush_rewrite_rules( false );
+		$this->get_wp_rewrite()->flush_rules( false );
 	}
 
 	/**
@@ -116,7 +133,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		} else {
 			$places = EP_PERMALINK;
 		}
-		add_rewrite_endpoint( amp_get_slug(), $places );
+		$this->get_wp_rewrite()->add_endpoint( amp_get_slug(), $places );
 	}
 
 	/**
@@ -299,18 +316,39 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * @global WP_Rewrite
 	 */
 	private function is_added_rewrite_endpoint_in_path( $path ) {
-		global $wp_rewrite;
 		if ( null === $this->added_rewrite_endpoints_pattern ) {
+			$rewrite_object    = $this->get_wp_rewrite();
 			$pattern_delimiter = '#';
 			$endpoint_patterns = [
-				preg_quote( $wp_rewrite->pagination_base, $pattern_delimiter ) . '/\d+',
+				preg_quote( $rewrite_object->pagination_base, $pattern_delimiter ) . '/\d+',
 			];
-			foreach ( $wp_rewrite->endpoints as $endpoint ) {
+			foreach ( $rewrite_object->endpoints as $endpoint ) {
 				$endpoint_patterns[] = preg_quote( $endpoint[1], $pattern_delimiter );
 			}
 			$this->added_rewrite_endpoints_pattern = $pattern_delimiter . '/' . implode( '|', $endpoint_patterns ) . '(/|$)' . $pattern_delimiter;
 		}
 		return (bool) preg_match( $this->added_rewrite_endpoints_pattern, $path );
+	}
+
+	/**
+	 * Check if a URL looks like it is for a single paged link.
+	 *
+	 * @see _wp_link_page()
+	 *
+	 * @param string $path URL path.
+	 * @return bool Is single paged link.
+	 */
+	private function is_single_paged_link( $path ) {
+		if ( null === $this->single_paged_link_pattern ) {
+			$rewrite_object                  = $this->get_wp_rewrite();
+			$this->single_paged_link_pattern = str_replace(
+				$rewrite_object->rewritecode,
+				$rewrite_object->rewritereplace,
+				$rewrite_object->permalink_structure
+			);
+			$this->single_paged_link_pattern = trailingslashit( $this->single_paged_link_pattern ) . '[1-9][0-9]*/?$';
+		}
+		return (bool) preg_match( '#' . $this->single_paged_link_pattern . '#', $path );
 	}
 
 	/**
@@ -326,6 +364,22 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 			wp_parse_url( home_url( '/' ) ),
 			wp_parse_url( $url )
 		);
+
+		$rewrite = $this->get_wp_rewrite();
+
+		// @todo Should this actually do a match on $parsed_url['path'] with /amp/ added across the rewrite rules? If a match, only then can we proceed?
+		$query_var_required = (
+			empty( $rewrite->permalink_structure )
+			||
+			isset( $parsed_url['query'] )
+			||
+			$this->is_added_rewrite_endpoint_in_path( $parsed_url['path'] )
+			||
+			$this->is_single_paged_link( $parsed_url['path'] )
+			||
+			preg_match( '#/' . preg_quote( $rewrite->comments_pagination_base, '#' ) . '-\d+/?#', $parsed_url['path'] )
+		);
+
 		if ( empty( $parsed_url['scheme'] ) ) {
 			$parsed_url['scheme'] = is_ssl() ? 'https' : 'http';
 		}
@@ -333,8 +387,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 			$parsed_url['host'] = isset( $_SERVER['HTTP_HOST'] ) ? wp_unslash( $_SERVER['HTTP_HOST'] ) : 'localhost';
 		}
 
-		$has_existing_rewrite_endpoint = $this->is_added_rewrite_endpoint_in_path( $parsed_url['path'] );
-		if ( ! $has_existing_rewrite_endpoint ) {
+		if ( ! $query_var_required ) {
 			$parsed_url['path']  = trailingslashit( $parsed_url['path'] );
 			$parsed_url['path'] .= user_trailingslashit( amp_get_slug(), 'amp' );
 		}
@@ -355,7 +408,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		if ( isset( $parsed_url['query'] ) ) {
 			$amp_url .= '?' . $parsed_url['query'];
 		}
-		if ( $has_existing_rewrite_endpoint ) {
+		if ( $query_var_required ) {
 			$amp_url = $this->get_query_var_paired_amp_url( $amp_url );
 		}
 		if ( isset( $parsed_url['fragment'] ) ) {
@@ -610,13 +663,15 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * @return string Fixed paged link.
 	 */
 	public function fix_paginate_links( $link ) {
-		global $wp_rewrite;
+		if ( ! $this->get_wp_rewrite()->permalink_structure ) {
+			return $link;
+		}
 
 		$link = preg_replace(
 			sprintf(
 				':/%s(?=/%s/\d+):',
 				preg_quote( amp_get_slug(), ':' ),
-				preg_quote( $wp_rewrite->pagination_base, ':' )
+				preg_quote( $this->get_wp_rewrite()->pagination_base, ':' )
 			),
 			'',
 			$link
