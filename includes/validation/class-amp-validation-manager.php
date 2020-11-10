@@ -2414,6 +2414,10 @@ class AMP_Validation_Manager {
 		wp_styles()->add_data( $slug, 'rtl', 'replace' );
 
 		$data = [
+			'HTML_ATTRIBUTE_ERROR_TYPE'  => AMP_Validation_Error_Taxonomy::HTML_ATTRIBUTE_ERROR_TYPE,
+			'HTML_ELEMENT_ERROR_TYPE'    => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+			'JS_ERROR_TYPE'              => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
+			'CSS_ERROR_TYPE'             => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 			'isSanitizationAutoAccepted' => self::is_sanitization_auto_accepted(),
 		];
 
