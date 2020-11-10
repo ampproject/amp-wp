@@ -369,7 +369,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 
 		// @todo Should this actually do a match on $parsed_url['path'] with /amp/ added across the rewrite rules? If a match, only then can we proceed?
 		$query_var_required = (
-			empty( $rewrite->permalink_structure )
+			! $rewrite->using_permalinks()
 			||
 			isset( $parsed_url['query'] )
 			||
@@ -458,11 +458,10 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		// Make sure any existing AMP endpoint is removed.
 		$url = $this->remove_paired_endpoint( $url );
 
-		$parsed_url          = wp_parse_url( $url );
-		$permalink_structure = get_option( 'permalink_structure' );
-		$use_query_var       = (
+		$parsed_url    = wp_parse_url( $url );
+		$use_query_var = (
 			// If pretty permalinks aren't available, then query var must be used.
-			empty( $permalink_structure )
+			! $this->get_wp_rewrite()->using_permalinks()
 			||
 			// If there are existing query vars, then always use the amp query var as well.
 			! empty( $parsed_url['query'] )
@@ -663,7 +662,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * @return string Fixed paged link.
 	 */
 	public function fix_paginate_links( $link ) {
-		if ( ! $this->get_wp_rewrite()->permalink_structure ) {
+		if ( ! $this->get_wp_rewrite()->using_permalinks() ) {
 			return $link;
 		}
 
