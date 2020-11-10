@@ -91,10 +91,12 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		add_action( 'update_option_' . AMP_Options_Manager::OPTION_NAME, [ $this, 'handle_options_update' ], 10, 2 );
 
 		add_action( 'init', [ $this, 'add_rewrite_endpoint' ], 0 );
-		add_action( 'parse_query', [ $this, 'correct_query_when_is_front_page' ] );
 
-		add_filter( 'old_slug_redirect_url', [ $this, 'maybe_add_paired_endpoint' ], 1000 );
-		add_filter( 'redirect_canonical', [ $this, 'maybe_add_paired_endpoint' ], 1000 );
+		if ( ! amp_is_canonical() ) {
+			add_action( 'parse_query', [ $this, 'correct_query_when_is_front_page' ] );
+			add_filter( 'old_slug_redirect_url', [ $this, 'maybe_add_paired_endpoint' ], 1000 );
+			add_filter( 'redirect_canonical', [ $this, 'maybe_add_paired_endpoint' ], 1000 );
+		}
 	}
 
 	/**
@@ -597,7 +599,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * @return string Resulting URL with AMP endpoint added if needed.
 	 */
 	public function maybe_add_paired_endpoint( $url ) {
-		if ( $url && ! amp_is_canonical() && amp_is_request() ) {
+		if ( $url && amp_is_request() ) {
 			$url = $this->add_paired_endpoint( $url );
 		}
 		return $url;
