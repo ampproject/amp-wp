@@ -111,12 +111,11 @@ final class AMP_CLI_Validation_Command {
 	public function run( $args, $assoc_args ) {
 		$this->assoc_args = $assoc_args;
 
-		$scannable_url_provider = $this->get_validation_url_provider();
-		$url_validation_provider     = $this->get_validation_provider();
+		$scannable_url_provider  = $this->get_validation_url_provider();
+		$url_validation_provider = $this->get_validation_provider();
 
 		$number_urls_to_crawl = count( $scannable_url_provider->get_urls() );
 		if ( ! $number_urls_to_crawl ) {
-			/** @phpstan-ignore-next-line */
 			if ( ! empty( Utils\get_flag_value( $this->assoc_args, self::INCLUDE_ARGUMENT, [] ) ) ) {
 				WP_CLI::error(
 					sprintf(
@@ -275,8 +274,8 @@ final class AMP_CLI_Validation_Command {
 	 * Validates the URLs.
 	 */
 	private function validate_urls() {
-		$scannable_url_provider = $this->get_validation_url_provider();
-		$url_validation_provider     = $this->get_validation_provider();
+		$scannable_url_provider  = $this->get_validation_url_provider();
+		$url_validation_provider = $this->get_validation_provider();
 
 		foreach ( $scannable_url_provider->get_urls() as $url ) {
 			$validity = $url_validation_provider->get_url_validation( $url['url'], $url['type'], URLValidationProvider::FLAG_FORCE_REVALIDATE );
