@@ -16,6 +16,7 @@ use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use WP_Query;
 use WP_Rewrite;
+use WP;
 
 /**
  * Service for routing users to and from paired AMP URLs.
@@ -35,25 +36,18 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 */
 	const PAIRED_URL_STRUCTURES = [
 		Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
-		Option::PAIRED_URL_STRUCTURE_REWRITE_ENDPOINT,
+		Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT,
 		Option::PAIRED_URL_STRUCTURE_LEGACY_TRANSITIONAL,
 		Option::PAIRED_URL_STRUCTURE_LEGACY_READER,
 		Option::PAIRED_URL_STRUCTURE_CUSTOM,
 	];
 
 	/**
-	 * Regular expression pattern matching any added endpoints in a URL.
+	 * Whether the request had the /amp/ endpoint.
 	 *
-	 * @var string
+	 * @var bool
 	 */
-	private $added_rewrite_endpoints_pattern;
-
-	/**
-	 * Regular expression pattern matching a single paged link URL.
-	 *
-	 * @var string
-	 */
-	private $single_paged_link_pattern;
+	private $has_amp_endpoint;
 
 	/**
 	 * Activate.
@@ -100,9 +94,74 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		add_action( 'init', [ $this, 'add_rewrite_endpoint' ], 0 );
 
 		if ( ! amp_is_canonical() ) {
-			add_action( 'parse_query', [ $this, 'correct_query_when_is_front_page' ] );
-			add_action( 'wp', [ $this, 'add_amp_request_hooks' ] );
+			$this->add_paired_hooks();
 		}
+	}
+
+	/**
+	 * Add paired hooks.
+	 */
+	public function add_paired_hooks() {
+		if ( Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT === AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE ) ) {
+			add_filter( 'do_parse_request', [ $this, 'detect_rewrite_endpoint' ], PHP_INT_MAX );
+			add_filter( 'request', [ $this, 'set_query_var_for_endpoint' ] );
+		}
+
+		add_action( 'parse_query', [ $this, 'correct_query_when_is_front_page' ] );
+		add_action( 'wp', [ $this, 'add_amp_request_hooks' ] );
+	}
+
+	/**
+	 * Detect the AMP rewrite endpoint from the PATH_INFO or REQUEST_URI and purge from those environment variables.
+	 *
+	 * @see WP::parse_request()
+	 *
+	 * @param bool $should_parse_request Whether or not to parse the request. Default true.
+	 * @return bool Should parse request.
+	 */
+	public function detect_rewrite_endpoint( $should_parse_request ) {
+		$this->has_amp_endpoint = false;
+
+		if ( ! $should_parse_request ) {
+			return false;
+		}
+
+		$amp_slug = amp_get_slug();
+		$pattern  = sprintf( '#(/%s)(?=/?(\?.*)?$)#', preg_quote( $amp_slug, '#' ) );
+
+		// Detect and purge the AMP endpoint from the request.
+		foreach ( [ 'PATH_INFO', 'REQUEST_URI' ] as $var ) {
+			if ( ! isset( $_SERVER[ $var ] ) ) {
+				continue;
+			}
+			$count = 0;
+
+			$_SERVER[ $var ] = preg_replace(
+				$pattern,
+				'',
+				$_SERVER[ $var ],
+				1,
+				$count
+			);
+			if ( $count > 0 ) {
+				$this->has_amp_endpoint = true;
+			}
+		}
+
+		return $should_parse_request;
+	}
+
+	/**
+	 * Set query var for endpoint.
+	 *
+	 * @param array $query_vars Query vars.
+	 * @return array Query vars.
+	 */
+	public function set_query_var_for_endpoint( $query_vars ) {
+		if ( $this->has_amp_endpoint ) {
+			$query_vars[ amp_get_slug() ] = true;
+		}
+		return $query_vars;
 	}
 
 	/**
@@ -139,12 +198,9 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * Add rewrite endpoint.
 	 */
 	public function add_rewrite_endpoint() {
-		if ( Option::PAIRED_URL_STRUCTURE_REWRITE_ENDPOINT === AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE ) ) {
-			$places = EP_ALL;
-		} else {
-			$places = EP_PERMALINK;
+		if ( Option::PAIRED_URL_STRUCTURE_LEGACY_READER === AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE ) ) {
+			$this->get_wp_rewrite()->add_endpoint( amp_get_slug(), EP_PERMALINK );
 		}
-		$this->get_wp_rewrite()->add_endpoint( amp_get_slug(), $places );
 	}
 
 	/**
@@ -280,7 +336,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 			$structure = self::get_paired_url_structure();
 		}
 		switch ( $structure ) {
-			case Option::PAIRED_URL_STRUCTURE_REWRITE_ENDPOINT:
+			case Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT:
 				return $this->get_rewrite_endpoint_paired_amp_url( $url );
 			case Option::PAIRED_URL_STRUCTURE_LEGACY_TRANSITIONAL:
 				return $this->get_legacy_transitional_paired_amp_url( $url );
@@ -317,52 +373,6 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	}
 
 	/**
-	 * Determine whether a given URL path contains a registered rewrite endpoint.
-	 *
-	 * This is needed to prevent adding the `/amp/` rewrite endpoint to a URL which already has an existing rewrite
-	 * endpoint, as in this case it will fail to match.
-	 *
-	 * @param string $path URL Path.
-	 * @return bool Whether the supplied path contains a registered rewrite endpoint.
-	 * @global WP_Rewrite
-	 */
-	private function is_added_rewrite_endpoint_in_path( $path ) {
-		if ( null === $this->added_rewrite_endpoints_pattern ) {
-			$rewrite_object    = $this->get_wp_rewrite();
-			$pattern_delimiter = '#';
-			$endpoint_patterns = [
-				preg_quote( $rewrite_object->pagination_base, $pattern_delimiter ) . '/\d+',
-			];
-			foreach ( $rewrite_object->endpoints as $endpoint ) {
-				$endpoint_patterns[] = preg_quote( $endpoint[1], $pattern_delimiter );
-			}
-			$this->added_rewrite_endpoints_pattern = $pattern_delimiter . '/(' . implode( '|', $endpoint_patterns ) . ')(/|$)' . $pattern_delimiter;
-		}
-		return (bool) preg_match( $this->added_rewrite_endpoints_pattern, $path );
-	}
-
-	/**
-	 * Check if a URL looks like it is for a single paged link.
-	 *
-	 * @see _wp_link_page()
-	 *
-	 * @param string $path URL path.
-	 * @return bool Is single paged link.
-	 */
-	private function is_single_paged_link( $path ) {
-		if ( null === $this->single_paged_link_pattern ) {
-			$rewrite_object                  = $this->get_wp_rewrite();
-			$this->single_paged_link_pattern = str_replace(
-				$rewrite_object->rewritecode,
-				$rewrite_object->rewritereplace,
-				$rewrite_object->permalink_structure
-			);
-			$this->single_paged_link_pattern = trailingslashit( $this->single_paged_link_pattern ) . '[1-9][0-9]*/?$';
-		}
-		return (bool) preg_match( '#' . $this->single_paged_link_pattern . '#', $path );
-	}
-
-	/**
 	 * Get paired AMP URL using a rewrite endpoint.
 	 *
 	 * @param string $url URL.
@@ -378,17 +388,10 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 
 		$rewrite = $this->get_wp_rewrite();
 
-		// @todo Should this actually do a match on $parsed_url['path'] with /amp/ added across the rewrite rules? If a match, only then can we proceed?
 		$query_var_required = (
 			! $rewrite->using_permalinks()
 			||
 			isset( $parsed_url['query'] )
-			||
-			$this->is_added_rewrite_endpoint_in_path( $parsed_url['path'] )
-			||
-			$this->is_single_paged_link( $parsed_url['path'] )
-			||
-			preg_match( '#/' . preg_quote( $rewrite->comments_pagination_base, '#' ) . '-\d+/?#', $parsed_url['path'] )
 		);
 
 		if ( empty( $parsed_url['scheme'] ) ) {

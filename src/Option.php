@@ -62,14 +62,14 @@ interface Option {
 	const PAIRED_URL_STRUCTURE_QUERY_VAR = 'query_var';
 
 	/**
-	 * Rewrite endpoint paired URL structure.
+	 * Suffix endpoint paired URL structure.
 	 *
 	 * This adds `/amp/` to all URLs, even pages and archives. This is a popular option for those who feel query params
 	 * are bad for SEO.
 	 *
 	 * @var string
 	 */
-	const PAIRED_URL_STRUCTURE_REWRITE_ENDPOINT = 'rewrite_endpoint';
+	const PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT = 'suffix_endpoint';
 
 	/**
 	 * Legacy transitional paired URL structure.

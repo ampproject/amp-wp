@@ -121,9 +121,9 @@ export function PairedUrlStructure( { focusedSection } ) {
 						id="paired_url_structure_rewrite_endpoint"
 						type="radio"
 						name="paired_url_structure"
-						checked={ 'rewrite_endpoint' === editedOptions.paired_url_structure }
+						checked={ 'suffix_endpoint' === editedOptions.paired_url_structure }
 						onChange={ () => {
-							updateOptions( { paired_url_structure: 'rewrite_endpoint' } );
+							updateOptions( { paired_url_structure: 'suffix_endpoint' } );
 						} }
 						disabled={ isCustom }
 					/>
@@ -133,7 +133,7 @@ export function PairedUrlStructure( { focusedSection } ) {
 							{ `/${ slug }/` }
 						</code>
 					</label>
-					<PairedUrlExamples pairedUrls={ editedOptions.paired_url_examples.rewrite_endpoint } />
+					<PairedUrlExamples pairedUrls={ editedOptions.paired_url_examples.suffix_endpoint } />
 				</li>
 				<li>
 					<input
