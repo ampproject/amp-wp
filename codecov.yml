@@ -2,18 +2,17 @@
 
 codecov:
   notify:
-    # Wait for Jest & PHPUnit reports
+    # Wait for Jest & PHPUnit reports before notifying
     after_n_builds: 2
 
 coverage:
   status:
+    # Patch-level coverage (how well is the PR tested)
     patch:
       default:
-        base: auto
-        only_pulls: true
-        target: auto
-        threshold: 50%
+        threshold: 5%
 
+    # Project-level coverage
     project:
       default:
         target: auto
@@ -26,13 +25,18 @@ coverage:
         paths:
           - assets/src
 
+# Pull request comments
+# See https://docs.codecov.io/docs/pull-request-comments
 comment:
   layout: 'reach, diff, flags, files'
   behavior: default
   require_changes: true
   branches:
     - 'develop'
+  # Wait for Jest & PHPUnit reports before commenting
+  after_n_builds: 2
 
+# See https://docs.codecov.io/docs/ignoring-paths
 ignore:
   - "/bin"
   - "/back-compat"
