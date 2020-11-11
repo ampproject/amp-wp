@@ -15,7 +15,7 @@ use AmpProject\AmpWP\Infrastructure\Service;
  * Abstract base class for using cron to execute a background task that runs only once.
  *
  * @package AmpProject\AmpWP
- * @since 2.0
+ * @since 2.1
  * @internal
  */
 abstract class SingleScheduledBackgroundTask implements Service, Registerable, Conditional {
