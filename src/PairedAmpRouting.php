@@ -101,10 +101,21 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 
 		if ( ! amp_is_canonical() ) {
 			add_action( 'parse_query', [ $this, 'correct_query_when_is_front_page' ] );
-			add_filter( 'old_slug_redirect_url', [ $this, 'maybe_add_paired_endpoint' ], 1000 );
-			add_filter( 'redirect_canonical', [ $this, 'maybe_add_paired_endpoint' ], 1000 );
-			add_filter( 'paginate_links', [ $this, 'fix_paginate_links' ] );
+			add_action( 'wp', [ $this, 'add_amp_request_hooks' ] );
 		}
+	}
+
+	/**
+	 * Add AMP hooks if it is an AMP request.
+	 */
+	public function add_amp_request_hooks() {
+		if ( ! amp_is_request() ) {
+			return;
+		}
+
+		add_filter( 'old_slug_redirect_url', [ $this, 'maybe_add_paired_endpoint' ], 1000 );
+		add_filter( 'redirect_canonical', [ $this, 'maybe_add_paired_endpoint' ], 1000 );
+		add_filter( 'paginate_links', [ $this, 'fix_paginate_links' ] );
 	}
 
 	/**
@@ -647,7 +658,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * @return string Resulting URL with AMP endpoint added if needed.
 	 */
 	public function maybe_add_paired_endpoint( $url ) {
-		if ( $url && amp_is_request() ) {
+		if ( $url ) {
 			$url = $this->add_paired_endpoint( $url );
 		}
 		return $url;
