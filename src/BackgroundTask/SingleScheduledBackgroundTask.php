@@ -7,6 +7,7 @@
 
 namespace AmpProject\AmpWP\BackgroundTask;
 
+use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 
@@ -17,7 +18,16 @@ use AmpProject\AmpWP\Infrastructure\Service;
  * @since 2.0
  * @internal
  */
-abstract class SingleScheduledBackgroundTask implements Service, Registerable {
+abstract class SingleScheduledBackgroundTask implements Service, Registerable, Conditional {
+
+	/**
+	 * Check whether the conditional object is currently needed.
+	 *
+	 * @return bool Whether the conditional object is needed.
+	 */
+	public static function is_needed() {
+		return is_admin() || wp_doing_cron();
+	}
 
 	/**
 	 * Class constructor.

@@ -68,7 +68,8 @@ final class SavePostValidationEvent extends SingleScheduledBackgroundTask {
 
 		$this->get_url_validation_provider()->get_url_validation(
 			get_the_permalink( $post_id ),
-			get_post_type( $post_id )
+			get_post_type( $post_id ),
+			URLValidationProvider::FLAG_FORCE_REVALIDATE
 		);
 	}
 

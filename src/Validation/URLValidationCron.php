@@ -55,7 +55,7 @@ final class URLValidationCron extends CronBasedBackgroundTask {
 		$validation_provider->with_lock(
 			static function() use ( $validation_provider, $sleep, $urls ) {
 				foreach ( $urls as $url ) {
-					$validation_provider->get_url_validation( $url['url'], $url['type'] );
+					$validation_provider->get_url_validation( $url['url'], $url['type'], URLValidationProvider::FLAG_FORCE_REVALIDATE );
 					if ( $sleep ) {
 						sleep( 1 );
 					}
