@@ -24,7 +24,7 @@ final class SavePostValidationEvent extends SingleScheduledBackgroundTask {
 	/**
 	 * Instance of URLValidationProvider
 	 *
-	 * @var URLValidationPRovider
+	 * @var URLValidationProvider
 	 */
 	private $url_validation_provider;
 
@@ -57,9 +57,11 @@ final class SavePostValidationEvent extends SingleScheduledBackgroundTask {
 	/**
 	 * Callback for the cron action.
 	 *
-	 * @param int $post_id The ID of a saved post.
+	 * @param mixed ...$args The args received with the action hook where the event was scheduled.
 	 */
-	public function process( $post_id ) {
+	public function process( ...$args ) {
+		$post_id = reset( $args );
+
 		if ( empty( get_post( $post_id ) ) ) {
 			return;
 		}

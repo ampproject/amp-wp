@@ -36,7 +36,7 @@ abstract class SingleScheduledBackgroundTask implements Service, Registerable {
 	public function register() {
 		$action_hook = $this->get_action_hook();
 
-		add_action( $action_hook, [ $this, 'schedule_event' ], 10, $this->get_action_hook_arg_count( $action_hook ) );
+		add_action( $action_hook, [ $this, 'schedule_event' ], 10, $this->get_action_hook_arg_count() );
 		add_action( $this->get_event_name(), [ $this, 'process' ] );
 	}
 
@@ -75,9 +75,9 @@ abstract class SingleScheduledBackgroundTask implements Service, Registerable {
 	/**
 	 * Process the event.
 	 *
-	 * @param array $args The args received with the action hook where the event was scheduled.
+	 * @param mixed ...$args The args received with the action hook where the event was scheduled.
 	 */
-	abstract public function process( $args );
+	abstract public function process( ...$args );
 
 	/**
 	 * Returns whether the event should be scheduled.
