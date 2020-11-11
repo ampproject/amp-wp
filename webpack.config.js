@@ -22,6 +22,23 @@ const sharedConfig = {
 		filename: '[name].js',
 		chunkFilename: '[name].js',
 	},
+	// TODO: Remove the `module` override once @wordpress/scripts upgrades to PostCSS 8.
+	module: {
+		...defaultConfig.module,
+		rules: defaultConfig.module.rules.map(
+			( rule ) => {
+				const postCssLoader = Array.isArray( rule.use ) && rule.use.find(
+					( loader ) => loader.loader && loader.loader.includes( 'postcss-loader' ),
+				);
+
+				if ( postCssLoader ) {
+					postCssLoader.loader = 'postcss-loader';
+				}
+
+				return rule;
+			},
+		),
+	},
 	plugins: [
 		...defaultConfig.plugins
 			.map(

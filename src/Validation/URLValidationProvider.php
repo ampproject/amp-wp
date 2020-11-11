@@ -77,7 +77,7 @@ final class URLValidationProvider {
 	 *     }
 	 * }
 	 */
-	public $validity_by_type = [];
+	private $validity_by_type = [];
 
 	/**
 	 * Locks validation.
@@ -99,7 +99,7 @@ final class URLValidationProvider {
 	 * @return boolean
 	 */
 	public function is_locked() {
-		$lock_time = intval( get_option( self::LOCK_KEY, 0 ) );
+		$lock_time = (int) get_option( self::LOCK_KEY, 0 );
 
 		// It's locked if the difference between the lock time and the current time is less than the lockout time.
 		return time() - $lock_time < $this->get_lock_timeout();
@@ -165,6 +165,15 @@ final class URLValidationProvider {
 	 */
 	public function get_number_validated() {
 		return $this->number_validated;
+	}
+
+	/**
+	 * Provides the validity counts by type.
+	 *
+	 * @return array[]
+	 */
+	public function get_validity_by_type() {
+		return $this->validity_by_type;
 	}
 
 	/**
