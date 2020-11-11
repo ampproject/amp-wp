@@ -317,6 +317,55 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	}
 
 	/**
+	 * Determine whether the AMP endpoint can be appended to the provided path.
+	 *
+	 * @param $path
+	 * @return bool
+	 */
+	private function can_append_endpoint( $path ) {
+		// Endpoint cannot be safely added to relative URLs.
+		if ( false !== strpos( $path, './' ) ) {
+			return false;
+		}
+
+		// Endpoint cannot be safely added to paths that aren't under the home path.
+		$home_path = trailingslashit( wp_parse_url( home_url( '/' ), PHP_URL_PATH ) );
+		if ( 0 !== strpos( $path, $home_path ) ) {
+			return false;
+		}
+
+		// Strip off the home path prefix.
+		$request = substr( $path, strlen( $home_path ) );
+
+		$amp_slug         = amp_get_slug();
+		$amp_request_path = trailingslashit( $request ) . $amp_slug;
+
+		$rewrite_rules = $this->get_wp_rewrite()->wp_rewrite_rules();
+
+		$matched = false;
+		foreach ( $rewrite_rules as $match => $query ) {
+			if (
+				false !== strpos( $query, "&{$amp_slug}=" )
+				&&
+				preg_match( "#^$match#", $amp_request_path )
+			) {
+				$matched = true;
+				break;
+			}
+		}
+
+
+
+		return ! (
+			$this->is_added_rewrite_endpoint_in_path( $path )
+			||
+			$this->is_single_paged_link( $path )
+			||
+			preg_match( '#/' . preg_quote( $this->get_wp_rewrite()->comments_pagination_base, '#' ) . '-\d+/?#', $path )
+		);
+	}
+
+	/**
 	 * Determine whether a given URL path contains a registered rewrite endpoint.
 	 *
 	 * This is needed to prevent adding the `/amp/` rewrite endpoint to a URL which already has an existing rewrite
@@ -384,11 +433,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 			||
 			isset( $parsed_url['query'] )
 			||
-			$this->is_added_rewrite_endpoint_in_path( $parsed_url['path'] )
-			||
-			$this->is_single_paged_link( $parsed_url['path'] )
-			||
-			preg_match( '#/' . preg_quote( $rewrite->comments_pagination_base, '#' ) . '-\d+/?#', $parsed_url['path'] )
+			$this->can_append_endpoint( $parsed_url['path'] )
 		);
 
 		if ( empty( $parsed_url['scheme'] ) ) {
