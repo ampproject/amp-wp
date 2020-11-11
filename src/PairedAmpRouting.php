@@ -16,6 +16,7 @@ use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use WP_Query;
 use WP_Rewrite;
+use WP;
 
 /**
  * Service for routing users to and from paired AMP URLs.
@@ -54,6 +55,13 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * @var string
 	 */
 	private $single_paged_link_pattern;
+
+	/**
+	 * Whether the request had the /amp/ endpoint.
+	 *
+	 * @var bool
+	 */
+	private $has_amp_endpoint;
 
 	/**
 	 * Activate.
@@ -97,12 +105,68 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
 		add_action( 'update_option_' . AMP_Options_Manager::OPTION_NAME, [ $this, 'handle_options_update' ], 10, 2 );
 
-		add_action( 'init', [ $this, 'add_rewrite_endpoint' ], 0 );
+		//add_action( 'init', [ $this, 'add_rewrite_endpoint' ], 0 );
 
 		if ( ! amp_is_canonical() ) {
+			add_filter( 'do_parse_request', [ $this, 'detect_rewrite_endpoint' ], PHP_INT_MAX );
+			add_filter( 'request', [ $this, 'set_query_var_for_endpoint' ] );
+
 			add_action( 'parse_query', [ $this, 'correct_query_when_is_front_page' ] );
 			add_action( 'wp', [ $this, 'add_amp_request_hooks' ] );
 		}
+	}
+
+	/**
+	 * Detect the AMP rewrite endpoint from the PATH_INFO or REQUEST_URI and purge from those environment variables.
+	 *
+	 * @see WP::parse_request()
+	 *
+	 * @param bool $should_parse_request Whether or not to parse the request. Default true.
+	 * @return bool Should parse request.
+	 */
+	public function detect_rewrite_endpoint( $should_parse_request ) {
+		$this->has_amp_endpoint = false;
+
+		if ( ! $should_parse_request ) {
+			return false;
+		}
+
+		$amp_slug = amp_get_slug();
+		$pattern  = sprintf( '#(/%s)(?=/?(\?.*)?$)#', preg_quote( $amp_slug, '#' ) );
+
+		// Detect and purge the AMP endpoint from the request.
+		foreach ( [ 'PATH_INFO', 'REQUEST_URI' ] as $environment_variable ) {
+			if ( ! isset( $_SERVER[ $environment_variable ] ) ) {
+				continue;
+			}
+			$count = 0;
+
+			$_SERVER[ $environment_variable ] = preg_replace(
+				$pattern,
+				'',
+				$_SERVER[ $environment_variable ],
+				1,
+				$count
+			);
+			if ( $count > 0 ) {
+				$this->has_amp_endpoint = true;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Set query var for endpoint.
+	 *
+	 * @param array $query_vars Query vars.
+	 * @return array Query vars.
+	 */
+	public function set_query_var_for_endpoint( $query_vars ) {
+		if ( $this->has_amp_endpoint ) {
+			$query_vars[ amp_get_slug() ] = true;
+		}
+		return $query_vars;
 	}
 
 	/**
@@ -137,6 +201,8 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 
 	/**
 	 * Add rewrite endpoint.
+	 *
+	 * @todo Obsolete?
 	 */
 	public function add_rewrite_endpoint() {
 		if ( Option::PAIRED_URL_STRUCTURE_REWRITE_ENDPOINT === AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE ) ) {
