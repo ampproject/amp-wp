@@ -67,14 +67,14 @@ final class AMP_CLI_Validation_Command {
 	 *
 	 * @var URLValidationProvider
 	 */
-	private $validation_provider;
+	private $url_validation_provider;
 
 	/**
 	 * ScannableURLProvider instance.
 	 *
 	 * @var ScannableURLProvider
 	 */
-	private $validation_url_provider;
+	private $scannable_url_provider;
 
 	/**
 	 * Associative args passed to the command.
@@ -111,10 +111,10 @@ final class AMP_CLI_Validation_Command {
 	public function run( $args, $assoc_args ) {
 		$this->assoc_args = $assoc_args;
 
-		$validation_url_provider = $this->get_validation_url_provider();
-		$validation_provider     = $this->get_validation_provider();
+		$scannable_url_provider = $this->get_validation_url_provider();
+		$url_validation_provider     = $this->get_validation_provider();
 
-		$number_urls_to_crawl = count( $validation_url_provider->get_urls() );
+		$number_urls_to_crawl = count( $scannable_url_provider->get_urls() );
 		if ( ! $number_urls_to_crawl ) {
 			/** @phpstan-ignore-next-line */
 			if ( ! empty( Utils\get_flag_value( $this->assoc_args, self::INCLUDE_ARGUMENT, [] ) ) ) {
@@ -141,7 +141,7 @@ final class AMP_CLI_Validation_Command {
 			$number_urls_to_crawl
 		);
 
-		$result = $validation_provider->with_lock(
+		$result = $url_validation_provider->with_lock(
 			function () {
 				$this->validate_urls();
 			}
@@ -159,7 +159,7 @@ final class AMP_CLI_Validation_Command {
 		$key_validity_rate = 'Validity Rate';
 
 		$table_validation_by_type = [];
-		foreach ( $validation_provider->get_validity_by_type() as $type_name => $validity ) {
+		foreach ( $url_validation_provider->get_validity_by_type() as $type_name => $validity ) {
 			$table_validation_by_type[] = [
 				$key_template_type => $type_name,
 				$key_url_count     => $validity['total'],
@@ -175,9 +175,9 @@ final class AMP_CLI_Validation_Command {
 		WP_CLI::success(
 			sprintf(
 				'%3$d crawled URLs have invalid markup kept out of %2$d total with AMP validation issue(s); %1$d URLs were crawled.',
-				$validation_provider->get_number_validated(),
-				$validation_provider->get_total_errors(),
-				$validation_provider->get_unaccepted_errors()
+				$url_validation_provider->get_number_validated(),
+				$url_validation_provider->get_total_errors(),
+				$url_validation_provider->get_unaccepted_errors()
 			)
 		);
 
@@ -202,8 +202,8 @@ final class AMP_CLI_Validation_Command {
 	 * @return ScannableURLProvider
 	 */
 	private function get_validation_url_provider() {
-		if ( ! is_null( $this->validation_url_provider ) ) {
-			return $this->validation_url_provider;
+		if ( ! is_null( $this->scannable_url_provider ) ) {
+			return $this->scannable_url_provider;
 		}
 
 		$include_conditionals      = Utils\get_flag_value( $this->assoc_args, self::INCLUDE_ARGUMENT, [] );
@@ -247,13 +247,13 @@ final class AMP_CLI_Validation_Command {
 			}
 		}
 
-		$this->validation_url_provider = new ScannableURLProvider(
+		$this->scannable_url_provider = new ScannableURLProvider(
 			$limit_type_validate_count,
 			$include_conditionals,
 			$force_crawl_urls
 		);
 
-		return $this->validation_url_provider;
+		return $this->scannable_url_provider;
 	}
 
 	/**
@@ -262,24 +262,24 @@ final class AMP_CLI_Validation_Command {
 	 * @return URLValidationProvider
 	 */
 	private function get_validation_provider() {
-		if ( ! is_null( $this->validation_provider ) ) {
-			return $this->validation_provider;
+		if ( ! is_null( $this->url_validation_provider ) ) {
+			return $this->url_validation_provider;
 		}
 
-		$this->validation_provider = new URLValidationProvider();
+		$this->url_validation_provider = new URLValidationProvider();
 
-		return $this->validation_provider;
+		return $this->url_validation_provider;
 	}
 
 	/**
 	 * Validates the URLs.
 	 */
 	private function validate_urls() {
-		$validation_url_provider = $this->get_validation_url_provider();
-		$validation_provider     = $this->get_validation_provider();
+		$scannable_url_provider = $this->get_validation_url_provider();
+		$url_validation_provider     = $this->get_validation_provider();
 
-		foreach ( $validation_url_provider->get_urls() as $url ) {
-			$validity = $validation_provider->get_url_validation( $url['url'], $url['type'], URLValidationProvider::FLAG_FORCE_REVALIDATE );
+		foreach ( $scannable_url_provider->get_urls() as $url ) {
+			$validity = $url_validation_provider->get_url_validation( $url['url'], $url['type'], URLValidationProvider::FLAG_FORCE_REVALIDATE );
 
 			if ( $this->wp_cli_progress ) {
 				$this->wp_cli_progress->tick();
