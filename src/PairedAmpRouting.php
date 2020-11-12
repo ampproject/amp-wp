@@ -134,15 +134,20 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 			if ( ! isset( $_SERVER[ $var ] ) ) {
 				continue;
 			}
-			$count = 0;
 
-			$_SERVER[ $var ] = preg_replace(
+			$path = wp_unslash( $_SERVER[ $var ] ); // Because of wp_magic_quotes().
+
+			$count = 0;
+			$path  = preg_replace(
 				$pattern,
 				'',
-				$_SERVER[ $var ],
+				$path,
 				1,
 				$count
 			);
+
+			$_SERVER[ $var ] = wp_slash( $path ); // Because of wp_magic_quotes().
+
 			if ( $count > 0 ) {
 				$this->has_amp_endpoint = true;
 			}
