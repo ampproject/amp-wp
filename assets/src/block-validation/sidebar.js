@@ -47,7 +47,7 @@ export function Sidebar() {
 
 			<PanelBody opened={ true }>
 				<h2>
-					{ __( 'Unreviewed Validation Errors', 'amp' ) }
+					{ __( 'New Validation Errors', 'amp' ) }
 				</h2>
 				<p>
 					{ __( 'The following AMP validation errors have not been marked as reviewed. ', 'amp' ) }
