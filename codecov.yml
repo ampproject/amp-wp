@@ -10,7 +10,7 @@ coverage:
     # Patch-level coverage (how well is the PR tested)
     patch:
       default:
-        threshold: 5%
+        threshold: 75%
 
     # Project-level coverage
     project:
