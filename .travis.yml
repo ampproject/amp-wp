@@ -73,7 +73,8 @@ jobs:
       env: WP_VERSION=latest DEV_LIB_ONLY=phpsyntax
       before_script:
         - phpenv config-rm xdebug.ini || echo "xdebug.ini does not exist."
-        - composer require --dev localheinz/composer-normalize --ignore-platform-reqs
+        # composer-normalize requires PHP 7.1+; locked to v2.9.0 as it's the last version that supports Composer v1
+        - composer require --no-interaction --dev ergebnis/composer-normalize:2.9.0 --ignore-platform-reqs
       script:
         - source "$DEV_LIB_PATH/travis.script.sh"
         - composer validate --no-check-all
