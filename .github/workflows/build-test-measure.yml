@@ -107,7 +107,7 @@ jobs:
             ${{ runner.os }}-composer-
 
       - name: Install Composer dependencies
-        run: composer install --prefer-dist --optimize-autoloader  --no-suggest --no-progress --no-interaction
+        run: composer install --prefer-dist --optimize-autoloader --no-progress --no-interaction
 
       - name: Validate composer.json
         run: composer --no-interaction validate --no-check-all
@@ -234,7 +234,7 @@ jobs:
           CI: true
 
       - name: Install Composer dependencies
-        run: composer install --prefer-dist --optimize-autoloader  --no-suggest --no-progress --no-interaction
+        run: composer install --prefer-dist --optimize-autoloader --no-progress --no-interaction
 
       - name: Build plugin
         run: |
@@ -351,7 +351,7 @@ jobs:
             ${{ runner.os }}-composer-
 
       - name: Install Composer dependencies
-        run: composer install --prefer-dist --ignore-platform-reqs --no-suggest --no-progress --no-interaction
+        run: composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
 
       - name: Get npm cache directory
         id: npm-cache
