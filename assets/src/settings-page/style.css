@@ -368,7 +368,7 @@ li.error-kept {
 
 #plugin-suppression .amp-drawer__panel-body-inner > p,
 .amp-analytics .amp-drawer__panel-body-inner p,
-#paired-url-structure .amp-drawer__panel-body-inner p {
+#paired-url-structure .amp-drawer__panel-body-inner {
 	margin-top: 0;
 	font-size: 14px;
 }
@@ -388,6 +388,10 @@ li.error-kept {
 	line-height: 1.5;
 }
 
+#paired-url-structure .amp-notice--large {
+	align-items: start;
+}
+
 #paired-url-structure .amp-drawer__panel-body-inner li {
 	margin-top: 1em;
 }
@@ -397,8 +401,14 @@ li.error-kept {
 }
 
 #paired-url-structure .amp-drawer__panel-body-inner li .amp-paired-url-examples {
-	margin-left: 32px;
+	margin-left: 34px;
 	margin-bottom: 0;
+}
+
+#paired-url-structure .amp-paired-url-examples summary {
+	display: inline-block;
+	padding-right: 4px;
+	user-select: none;
 }
 
 #paired-url-structure .amp-drawer__panel-body-inner input {
