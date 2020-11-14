@@ -9,6 +9,7 @@ namespace AmpProject\AmpWP;
 
 use AMP_Options_Manager;
 use AMP_Theme_Support;
+use AMP_Post_Type_Support;
 use AmpProject\AmpWP\Infrastructure\Activateable;
 use AmpProject\AmpWP\Infrastructure\Deactivateable;
 use AmpProject\AmpWP\Infrastructure\Registerable;
@@ -41,6 +42,22 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		Option::PAIRED_URL_STRUCTURE_LEGACY_READER,
 		Option::PAIRED_URL_STRUCTURE_CUSTOM,
 	];
+
+	/**
+	 * Key for AMP paired examples.
+	 *
+	 * @see amp_get_slug()
+	 * @var string
+	 */
+	const PAIRED_URL_EXAMPLES = 'paired_url_examples';
+
+	/**
+	 * Key for the AMP slug.
+	 *
+	 * @see amp_get_slug()
+	 * @var string
+	 */
+	const AMP_SLUG = 'amp_slug';
 
 	/**
 	 * Whether the request had the /amp/ endpoint.
@@ -87,6 +104,9 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * Register.
 	 */
 	public function register() {
+		add_filter( 'amp_rest_options_schema', [ $this, 'filter_rest_options_schema' ] );
+		add_filter( 'amp_rest_options', [ $this, 'filter_rest_options' ] );
+
 		add_filter( 'amp_default_options', [ $this, 'filter_default_options' ], 10, 2 );
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
 		add_action( 'update_option_' . AMP_Options_Manager::OPTION_NAME, [ $this, 'handle_options_update' ], 10, 2 );
@@ -96,6 +116,53 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		if ( ! amp_is_canonical() ) {
 			$this->add_paired_hooks();
 		}
+	}
+
+	/**
+	 * Filter the REST options schema to add items.
+	 *
+	 * @param array $schema Schema.
+	 * @return array Schema.
+	 */
+	public function filter_rest_options_schema( $schema ) {
+		return array_merge(
+			$schema,
+			[
+				Option::PAIRED_URL_STRUCTURE => [
+					'type' => 'string',
+					'enum' => [
+						Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
+						Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT,
+						Option::PAIRED_URL_STRUCTURE_LEGACY_TRANSITIONAL,
+						Option::PAIRED_URL_STRUCTURE_LEGACY_READER,
+					],
+				],
+				self::PAIRED_URL_EXAMPLES    => [
+					'type'     => 'object',
+					'readonly' => true,
+				],
+				self::AMP_SLUG               => [
+					'type'     => 'string',
+					'readonly' => true,
+				],
+			]
+		);
+	}
+
+	/**
+	 * Filter the REST options to add items.
+	 *
+	 * @param array $options Options.
+	 * @return array Options.
+	 */
+	public function filter_rest_options( $options ) {
+		$options[ self::AMP_SLUG ] = amp_get_slug();
+
+		$options[ Option::PAIRED_URL_STRUCTURE ] = $this->get_paired_url_structure();
+
+		$options[ self::PAIRED_URL_EXAMPLES ] = $this->get_paired_url_examples();
+
+		return $options;
 	}
 
 	/**
@@ -518,6 +585,47 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		}
 
 		return $amp_url;
+	}
+
+	/**
+	 * Get paired URL examples.
+	 *
+	 * @return array[] Keys are the structures, values are arrays of paired URLs using the structure.
+	 */
+	private function get_paired_url_examples() {
+		$supported_post_types     = AMP_Post_Type_Support::get_supported_post_types();
+		$hierarchical_post_types  = array_intersect(
+			$supported_post_types,
+			get_post_types( [ 'hierarchical' => true ] )
+		);
+		$chronological_post_types = array_intersect(
+			$supported_post_types,
+			get_post_types( [ 'hierarchical' => false ] )
+		);
+
+		$examples = [];
+		foreach ( [ $chronological_post_types, $hierarchical_post_types ] as $post_types ) {
+			if ( empty( $post_types ) ) {
+				continue;
+			}
+			$posts = get_posts(
+				[
+					'post_type'   => $post_types,
+					'post_status' => 'publish',
+				]
+			);
+			foreach ( $posts as $post ) {
+				if ( count( AMP_Post_Type_Support::get_support_errors( $post ) ) !== 0 ) {
+					continue;
+				}
+				$paired_urls = $this->get_all_structure_paired_urls( get_permalink( $post ) );
+				foreach ( $paired_urls as $structure => $paired_url ) {
+					$examples[ $structure ][] = $paired_url;
+				}
+				continue 2;
+			}
+		}
+		return $examples;
 	}
 
 	/**
