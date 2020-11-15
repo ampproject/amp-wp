@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8ec321c2a4b8300a027c573070aa4f28",
+    "content-hash": "f8afe7f66e73cd37fa99b3497c329a98",
     "packages": [
         {
             "name": "ampproject/common",
@@ -174,24 +174,24 @@
         },
         {
             "name": "cweagans/composer-patches",
-            "version": "1.6.7",
+            "version": "1.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cweagans/composer-patches.git",
-                "reference": "2e6f72a2ad8d59cd7e2b729f218bf42adb14f590"
+                "reference": "ae02121445ad75f4eaff800cc532b5e6233e2ddf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cweagans/composer-patches/zipball/2e6f72a2ad8d59cd7e2b729f218bf42adb14f590",
-                "reference": "2e6f72a2ad8d59cd7e2b729f218bf42adb14f590",
+                "url": "https://api.github.com/repos/cweagans/composer-patches/zipball/ae02121445ad75f4eaff800cc532b5e6233e2ddf",
+                "reference": "ae02121445ad75f4eaff800cc532b5e6233e2ddf",
                 "shasum": ""
             },
             "require": {
-                "composer-plugin-api": "^1.0",
+                "composer-plugin-api": "^1.0 || ^2.0",
                 "php": ">=5.3.0"
             },
             "require-dev": {
-                "composer/composer": "~1.0",
+                "composer/composer": "~1.0 || ~2.0",
                 "phpunit/phpunit": "~4.6"
             },
             "type": "composer-plugin",
@@ -214,7 +214,11 @@
                 }
             ],
             "description": "Provides a way to patch Composer packages.",
-            "time": "2019-08-29T20:11:49+00:00"
+            "support": {
+                "issues": "https://github.com/cweagans/composer-patches/issues",
+                "source": "https://github.com/cweagans/composer-patches/tree/1.7.0"
+            },
+            "time": "2020-09-30T17:56:20+00:00"
         },
         {
             "name": "fasterimage/fasterimage",
@@ -269,6 +273,10 @@
                 "image size",
                 "parallel"
             ],
+            "support": {
+                "issues": "https://github.com/willwashburn/fasterimage/issues",
+                "source": "https://github.com/willwashburn/fasterimage/tree/master"
+            },
             "time": "2019-05-25T14:33:33+00:00"
         },
         {
@@ -322,6 +330,10 @@
             ],
             "description": "This tool check syntax of PHP files about 20x faster than serial check.",
             "homepage": "https://github.com/php-parallel-lint/PHP-Parallel-Lint",
+            "support": {
+                "issues": "https://github.com/php-parallel-lint/PHP-Parallel-Lint/issues",
+                "source": "https://github.com/php-parallel-lint/PHP-Parallel-Lint/tree/master"
+            },
             "time": "2020-04-04T12:18:32+00:00"
         },
         {
@@ -345,14 +357,8 @@
                 "codacy/coverage": "^1.4",
                 "phpunit/phpunit": "^4.8.36"
             },
+            "default-branch": true,
             "type": "library",
-            "extra": {
-                "patches_applied": {
-                    "Add additional validation for size unit <https://github.com/sabberworm/PHP-CSS-Parser/pull/193>": "https://github.com/sabberworm/PHP-CSS-Parser/compare/3bc5ded67d77a52b81608cfc97f23b1bb0678e2f%5E...468da3441945e9c1bf402a3340b1d8326723f7d9.patch",
-                    "Validate name-start code points for identifier <https://github.com/sabberworm/PHP-CSS-Parser/pull/185>": "https://github.com/sabberworm/PHP-CSS-Parser/compare/d42b64793f2edaffeb663c63e9de79069cdc0831%5E...113df5d55e94e21c6402021dfa959924941d4c29.patch",
-                    "Fix parsing CSS selectors which contain commas <https://github.com/westonruter/PHP-CSS-Parser/pull/1>": "https://github.com/westonruter/PHP-CSS-Parser/compare/master...10a2501c119abafced3e4014aa3c0a3453a86f67.patch"
-                }
-            },
             "autoload": {
                 "psr-4": {
                     "Sabberworm\\CSS\\": "lib/Sabberworm/CSS/"
@@ -373,7 +379,7 @@
                 "parser",
                 "stylesheet"
             ],
-            "time": "2020-07-21T18:39:46+00:00"
+            "time": "2020-10-31T09:42:15+00:00"
         },
         {
             "name": "willwashburn/stream",
@@ -420,31 +426,35 @@
                 "stream",
                 "streamable"
             ],
+            "support": {
+                "issues": "https://github.com/willwashburn/stream/issues",
+                "source": "https://github.com/willwashburn/stream/tree/master"
+            },
             "time": "2016-03-15T10:54:35+00:00"
         }
     ],
     "packages-dev": [
         {
             "name": "civicrm/composer-downloads-plugin",
-            "version": "v2.1.1",
+            "version": "v3.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/civicrm/composer-downloads-plugin.git",
-                "reference": "8722bc7d547315be39397a3078bb51ee053ca269"
+                "reference": "3aabb6d259a86158d01829fc2c62a2afb9618877"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/civicrm/composer-downloads-plugin/zipball/8722bc7d547315be39397a3078bb51ee053ca269",
-                "reference": "8722bc7d547315be39397a3078bb51ee053ca269",
+                "url": "https://api.github.com/repos/civicrm/composer-downloads-plugin/zipball/3aabb6d259a86158d01829fc2c62a2afb9618877",
+                "reference": "3aabb6d259a86158d01829fc2c62a2afb9618877",
                 "shasum": ""
             },
             "require": {
-                "composer-plugin-api": "^1.1",
+                "composer-plugin-api": "^1.1 || ^2.0",
                 "php": ">=5.6",
                 "togos/gitignore": "~1.1.1"
             },
             "require-dev": {
-                "composer/composer": "~1.0",
+                "composer/composer": "~1.0 || ~2.0",
                 "friendsofphp/php-cs-fixer": "^2.3",
                 "phpunit/phpunit": "^5.7",
                 "totten/process-helper": "^1.0.1"
@@ -473,7 +483,10 @@
                 }
             ],
             "description": "Composer plugin for downloading additional files within any composer package.",
-            "time": "2019-08-28T00:33:51+00:00"
+            "support": {
+                "source": "https://github.com/civicrm/composer-downloads-plugin/tree/v3.0.1"
+            },
+            "time": "2020-11-02T05:26:23+00:00"
         },
         {
             "name": "dealerdirect/phpcodesniffer-composer-installer",
@@ -539,6 +552,10 @@
                 "stylecheck",
                 "tests"
             ],
+            "support": {
+                "issues": "https://github.com/dealerdirect/phpcodesniffer-composer-installer/issues",
+                "source": "https://github.com/dealerdirect/phpcodesniffer-composer-installer"
+            },
             "time": "2020-06-25T14:57:39+00:00"
         },
         {
@@ -585,6 +602,11 @@
             ],
             "description": "Virtual file system to mock the real file system in unit tests.",
             "homepage": "http://vfs.bovigo.org/",
+            "support": {
+                "issues": "https://github.com/bovigo/vfsStream/issues",
+                "source": "https://github.com/bovigo/vfsStream/tree/master",
+                "wiki": "https://github.com/bovigo/vfsStream/wiki"
+            },
             "time": "2019-10-30T15:31:00+00:00"
         },
         {
@@ -631,6 +653,10 @@
                 "mustache",
                 "templating"
             ],
+            "support": {
+                "issues": "https://github.com/bobthecow/mustache.php/issues",
+                "source": "https://github.com/bobthecow/mustache.php/tree/master"
+            },
             "time": "2019-11-23T21:40:31+00:00"
         },
         {
@@ -676,6 +702,10 @@
                 "parser",
                 "php"
             ],
+            "support": {
+                "issues": "https://github.com/nikic/PHP-Parser/issues",
+                "source": "https://github.com/nikic/PHP-Parser/tree/1.x"
+            },
             "time": "2015-09-19T14:15:08+00:00"
         },
         {
@@ -716,6 +746,10 @@
                 "static analysis",
                 "wordpress"
             ],
+            "support": {
+                "issues": "https://github.com/php-stubs/wordpress-stubs/issues",
+                "source": "https://github.com/php-stubs/wordpress-stubs/tree/v5.5.3"
+            },
             "time": "2020-10-31T01:42:05+00:00"
         },
         {
@@ -774,6 +808,10 @@
                 "phpcs",
                 "standards"
             ],
+            "support": {
+                "issues": "https://github.com/PHPCompatibility/PHPCompatibility/issues",
+                "source": "https://github.com/PHPCompatibility/PHPCompatibility"
+            },
             "time": "2019-12-27T09:44:58+00:00"
         },
         {
@@ -826,6 +864,10 @@
                 "polyfill",
                 "standards"
             ],
+            "support": {
+                "issues": "https://github.com/PHPCompatibility/PHPCompatibilityParagonie/issues",
+                "source": "https://github.com/PHPCompatibility/PHPCompatibilityParagonie"
+            },
             "time": "2019-11-04T15:17:54+00:00"
         },
         {
@@ -876,6 +918,10 @@
                 "standards",
                 "wordpress"
             ],
+            "support": {
+                "issues": "https://github.com/PHPCompatibility/PHPCompatibilityWP/issues",
+                "source": "https://github.com/PHPCompatibility/PHPCompatibilityWP"
+            },
             "time": "2019-08-28T14:22:28+00:00"
         },
         {
@@ -930,6 +976,10 @@
                 "reflection",
                 "static analysis"
             ],
+            "support": {
+                "issues": "https://github.com/phpDocumentor/Reflection/issues",
+                "source": "https://github.com/phpDocumentor/Reflection/tree/master"
+            },
             "time": "2016-05-21T08:42:32+00:00"
         },
         {
@@ -979,6 +1029,10 @@
                     "email": "mike.vanriel@naenius.com"
                 }
             ],
+            "support": {
+                "issues": "https://github.com/phpDocumentor/ReflectionDocBlock/issues",
+                "source": "https://github.com/phpDocumentor/ReflectionDocBlock/tree/release/2.x"
+            },
             "time": "2016-01-25T08:17:30+00:00"
         },
         {
@@ -1026,6 +1080,9 @@
                 "psr",
                 "psr-3"
             ],
+            "support": {
+                "source": "https://github.com/php-fig/log/tree/1.1.3"
+            },
             "time": "2020-03-23T09:12:05+00:00"
         },
         {
@@ -1034,12 +1091,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "065a018d3b5c2c84a53db3347cca4e1b7fa362a6"
+                "reference": "0011d773ec873fbf3cde730da5655ff74eddc9f8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/065a018d3b5c2c84a53db3347cca4e1b7fa362a6",
-                "reference": "065a018d3b5c2c84a53db3347cca4e1b7fa362a6",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/0011d773ec873fbf3cde730da5655ff74eddc9f8",
+                "reference": "0011d773ec873fbf3cde730da5655ff74eddc9f8",
                 "shasum": ""
             },
             "conflict": {
@@ -1174,6 +1231,7 @@
                 "phpwhois/phpwhois": "<=4.2.5",
                 "phpxmlrpc/extras": "<0.6.1",
                 "pimcore/pimcore": "<6.3",
+                "pocketmine/pocketmine-mp": "<3.15.4",
                 "prestashop/autoupgrade": ">=4,<4.10.1",
                 "prestashop/contactform": ">1.0.1,<4.3",
                 "prestashop/gamification": "<2.3.2",
@@ -1192,7 +1250,7 @@
                 "serluck/phpwhois": "<=4.2.6",
                 "shopware/core": "<=6.3.2",
                 "shopware/platform": "<=6.3.2",
-                "shopware/shopware": "<5.3.7",
+                "shopware/shopware": "<5.6.9",
                 "silverstripe/admin": ">=1.0.3,<1.0.4|>=1.1,<1.1.1",
                 "silverstripe/assets": ">=1,<1.4.7|>=1.5,<1.5.2",
                 "silverstripe/cms": "<4.3.6|>=4.4,<4.4.4",
@@ -1327,6 +1385,10 @@
                 }
             ],
             "description": "Prevents installation of composer packages with known security vulnerabilities: no API, simply require it",
+            "support": {
+                "issues": "https://github.com/Roave/SecurityAdvisories/issues",
+                "source": "https://github.com/Roave/SecurityAdvisories/tree/latest"
+            },
             "funding": [
                 {
                     "url": "https://github.com/Ocramius",
@@ -1337,7 +1399,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2020-11-01T20:01:47+00:00"
+            "time": "2020-11-13T16:02:31+00:00"
         },
         {
             "name": "sirbrillig/phpcs-variable-analysis",
@@ -1385,6 +1447,11 @@
                 }
             ],
             "description": "A PHPCS sniff to detect problems with variables.",
+            "support": {
+                "issues": "https://github.com/sirbrillig/phpcs-variable-analysis/issues",
+                "source": "https://github.com/sirbrillig/phpcs-variable-analysis",
+                "wiki": "https://github.com/sirbrillig/phpcs-variable-analysis/wiki"
+            },
             "time": "2020-07-11T23:32:06+00:00"
         },
         {
@@ -1436,6 +1503,11 @@
                 "phpcs",
                 "standards"
             ],
+            "support": {
+                "issues": "https://github.com/squizlabs/PHP_CodeSniffer/issues",
+                "source": "https://github.com/squizlabs/PHP_CodeSniffer",
+                "wiki": "https://github.com/squizlabs/PHP_CodeSniffer/wiki"
+            },
             "time": "2020-10-23T02:01:07+00:00"
         },
         {
@@ -1469,6 +1541,10 @@
                 "MIT"
             ],
             "description": "Parser for .gitignore (and sparse-checkout, and anything else using the same format) files",
+            "support": {
+                "issues": "https://github.com/TOGoS/PHPGitIgnore/issues",
+                "source": "https://github.com/TOGoS/PHPGitIgnore/tree/master"
+            },
             "time": "2019-04-19T19:16:58+00:00"
         },
         {
@@ -1515,6 +1591,11 @@
                 "standards",
                 "wordpress"
             ],
+            "support": {
+                "issues": "https://github.com/WordPress/WordPress-Coding-Standards/issues",
+                "source": "https://github.com/WordPress/WordPress-Coding-Standards",
+                "wiki": "https://github.com/WordPress/WordPress-Coding-Standards/wiki"
+            },
             "time": "2020-05-13T23:57:56+00:00"
         },
         {
@@ -1552,6 +1633,10 @@
                 "tools",
                 "wordpress"
             ],
+            "support": {
+                "issues": "https://github.com/xwp/wp-dev-lib/issues",
+                "source": "https://github.com/xwp/wp-dev-lib"
+            },
             "time": "2020-05-12T02:27:04+00:00"
         }
     ],
@@ -1577,5 +1662,5 @@
     "platform-overrides": {
         "php": "5.6"
     },
-    "plugin-api-version": "1.1.0"
+    "plugin-api-version": "2.0.0"
 }

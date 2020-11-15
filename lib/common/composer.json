@@ -12,7 +12,7 @@
     "php-parallel-lint/php-parallel-lint": "^1.2"
   },
   "require-dev": {
-    "civicrm/composer-downloads-plugin": "^2.1",
+    "civicrm/composer-downloads-plugin": "^3.0",
     "dealerdirect/phpcodesniffer-composer-installer": "0.7.0",
     "phpcompatibility/phpcompatibility-wp": "2.1.0",
     "roave/security-advisories": "dev-master",
