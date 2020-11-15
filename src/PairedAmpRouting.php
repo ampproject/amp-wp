@@ -40,8 +40,16 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT,
 		Option::PAIRED_URL_STRUCTURE_LEGACY_TRANSITIONAL,
 		Option::PAIRED_URL_STRUCTURE_LEGACY_READER,
-		Option::PAIRED_URL_STRUCTURE_CUSTOM,
 	];
+
+	/**
+	 * Custom paired URL structure.
+	 *
+	 * This involves a site adding the necessary filters to implement their own paired URL structure.
+	 *
+	 * @var string
+	 */
+	const PAIRED_URL_STRUCTURE_CUSTOM = 'custom';
 
 	/**
 	 * Key for AMP paired examples.
@@ -373,7 +381,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 */
 	public function get_paired_url_structure() {
 		if ( $this->has_custom_paired_url_structure() ) {
-			return Option::PAIRED_URL_STRUCTURE_CUSTOM;
+			return self::PAIRED_URL_STRUCTURE_CUSTOM;
 		}
 		return AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE );
 	}
@@ -387,8 +395,8 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	public function get_all_structure_paired_urls( $url ) {
 		$paired_urls = [];
 		$structures  = self::PAIRED_URL_STRUCTURES;
-		if ( ! $this->has_custom_paired_url_structure() ) {
-			$structures = array_diff( $structures, [ Option::PAIRED_URL_STRUCTURE_CUSTOM ] );
+		if ( $this->has_custom_paired_url_structure() ) {
+			$structures[] = self::PAIRED_URL_STRUCTURE_CUSTOM;
 		}
 		foreach ( $structures as $structure ) {
 			$paired_urls[ $structure ] = $this->add_paired_endpoint( $url, $structure );
@@ -419,7 +427,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		// This is the PAIRED_URL_STRUCTURE_QUERY_VAR case, the default.
 		$amp_url = $this->get_query_var_paired_amp_url( $url );
 
-		if ( Option::PAIRED_URL_STRUCTURE_CUSTOM === $structure ) {
+		if ( self::PAIRED_URL_STRUCTURE_CUSTOM === $structure ) {
 			/**
 			 * Filters paired AMP URL to apply a custom paired URL structure.
 			 *

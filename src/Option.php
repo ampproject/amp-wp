@@ -91,15 +91,6 @@ interface Option {
 	const PAIRED_URL_STRUCTURE_LEGACY_READER = 'legacy_reader';
 
 	/**
-	 * Custom paired URL structure.
-	 *
-	 * This involves a site adding the necessary filters to implement their own paired URL structure.
-	 *
-	 * @var string
-	 */
-	const PAIRED_URL_STRUCTURE_CUSTOM = 'custom';
-
-	/**
 	 * Redirect mobile visitors to the AMP version of a page when the site is in Transitional or Reader mode.
 	 *
 	 * Default value: false
