@@ -138,12 +138,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 			[
 				Option::PAIRED_URL_STRUCTURE => [
 					'type' => 'string',
-					'enum' => [
-						Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
-						Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT,
-						Option::PAIRED_URL_STRUCTURE_LEGACY_TRANSITIONAL,
-						Option::PAIRED_URL_STRUCTURE_LEGACY_READER,
-					],
+					'enum' => self::PAIRED_URL_STRUCTURES,
 				],
 				self::PAIRED_URL_EXAMPLES    => [
 					'type'     => 'object',
@@ -317,9 +312,10 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	/**
 	 * Sanitize options.
 	 *
+	 * @todo This is redundant with the enum defined in the schema.
+	 *
 	 * @param array $options     Existing options with already-sanitized values for updating.
 	 * @param array $new_options Unsanitized options being submitted for updating.
-	 *
 	 * @return array Sanitized options.
 	 */
 	public function sanitize_options( $options, $new_options ) {
