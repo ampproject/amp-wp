@@ -249,7 +249,6 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 
 		add_filter( 'old_slug_redirect_url', [ $this, 'maybe_add_paired_endpoint' ], 1000 );
 		add_filter( 'redirect_canonical', [ $this, 'maybe_add_paired_endpoint' ], 1000 );
-		add_filter( 'paginate_links', [ $this, 'fix_paginate_links' ] );
 	}
 
 	/**
@@ -782,31 +781,5 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 			$url = $this->add_paired_endpoint( $url );
 		}
 		return $url;
-	}
-
-	/**
-	 * Fix `paginate_links()` erroneously adding the pagination base after the AMP endpoint, e.g. `/amp/page/2/`.
-	 *
-	 * @see paginate_links()
-	 *
-	 * @param string $link The paginated link URL.
-	 * @return string Fixed paged link.
-	 */
-	public function fix_paginate_links( $link ) {
-		if ( ! $this->get_wp_rewrite()->using_permalinks() ) {
-			return $link;
-		}
-
-		$link = preg_replace(
-			sprintf(
-				':/%s(?=/%s/\d+):',
-				preg_quote( amp_get_slug(), ':' ),
-				preg_quote( $this->get_wp_rewrite()->pagination_base, ':' )
-			),
-			'',
-			$link
-		);
-
-		return $link;
 	}
 }
