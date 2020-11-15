@@ -15,12 +15,12 @@
     "ext-spl": "*",
     "ampproject/common": "*",
     "ampproject/optimizer": "*",
-    "cweagans/composer-patches": "1.6.7",
+    "cweagans/composer-patches": "1.7.0",
     "fasterimage/fasterimage": "1.5.0",
     "sabberworm/php-css-parser": "dev-master#bfdd976"
   },
   "require-dev": {
-    "civicrm/composer-downloads-plugin": "^2.1",
+    "civicrm/composer-downloads-plugin": "^3.0",
     "dealerdirect/phpcodesniffer-composer-installer": "0.7.0",
     "mikey179/vfsstream": "1.6.8",
     "mustache/mustache": "^2",
