@@ -51,6 +51,39 @@ PairedUrlExamples.propTypes = {
 };
 
 /**
+ * Get custom paired structure sources.
+ *
+ * @param {string[]} sources Sources.
+ * @return {string} Sources string.
+ */
+function getCustomPairedStructureSources( sources ) {
+	let message = __( 'The custom structure is being introduced by:', 'amp' ) + ' ';
+	message += sources.map( ( source ) => {
+		let sourceString = source.name || source.slug;
+		let typeString;
+		switch ( source.type ) {
+			case 'plugin':
+				typeString = __( 'a plugin', 'amp' );
+				break;
+			case 'theme':
+				typeString = __( 'a theme', 'amp' );
+				break;
+			case 'mu-plugin':
+				typeString = __( 'a must-use plugin', 'amp' );
+				break;
+			default:
+				typeString = null;
+		}
+		if ( typeString ) {
+			sourceString += ` (${ typeString })`;
+		}
+
+		return sourceString;
+	} ).join( ', ' ) + '.';
+	return message;
+}
+
+/**
  * Component rendering the paired URL structure.
  *
  * @param {Object} props Component props.
@@ -86,7 +119,9 @@ export function PairedUrlStructure( { focusedSection } ) {
 			{ isCustom && (
 				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_INFO }>
 					<p>
-						{ __( 'A theme or plugin is customizing the paired URL structure, so the following options are unavailable.', 'amp' ) }
+						{ __( 'A custom paired URL structure is being applied so the following options are unavailable.', 'amp' ) }
+						{ editedOptions.custom_paired_endpoint_sources.length > 0 &&
+							' ' + getCustomPairedStructureSources( editedOptions.custom_paired_endpoint_sources ) }
 					</p>
 					<PairedUrlExamples pairedUrls={ editedOptions.paired_url_examples.custom } />
 				</AMPNotice>

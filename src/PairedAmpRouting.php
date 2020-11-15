@@ -9,6 +9,7 @@ namespace AmpProject\AmpWP;
 
 use AMP_Options_Manager;
 use AMP_Theme_Support;
+use AmpProject\AmpWP\DevTools\CallbackReflection;
 use AMP_Post_Type_Support;
 use AmpProject\AmpWP\Infrastructure\Activateable;
 use AmpProject\AmpWP\Infrastructure\Deactivateable;
@@ -18,6 +19,7 @@ use AmpProject\AmpWP\Admin\ReaderThemes;
 use WP_Query;
 use WP_Rewrite;
 use WP;
+use WP_Hook;
 
 /**
  * Service for routing users to and from paired AMP URLs.
@@ -68,11 +70,43 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	const AMP_SLUG = 'amp_slug';
 
 	/**
+	 * Key for the custom paired structure sources.
+	 *
+	 * @var string
+	 */
+	const CUSTOM_PAIRED_ENDPOINT_SOURCES = 'custom_paired_endpoint_sources';
+
+	/**
+	 * Callback refelction.
+	 *
+	 * @var CallbackReflection
+	 */
+	protected $callback_reflection;
+
+	/**
+	 * Plugin registry.
+	 *
+	 * @var PluginRegistry
+	 */
+	protected $plugin_registry;
+
+	/**
 	 * Whether the request had the /amp/ endpoint.
 	 *
 	 * @var bool
 	 */
 	private $has_amp_endpoint;
+
+	/**
+	 * PairedAmpRouting constructor.
+	 *
+	 * @param CallbackReflection $callback_reflection Callback reflection.
+	 * @param PluginRegistry     $plugin_registry     Plugin registry.
+	 */
+	public function __construct( CallbackReflection $callback_reflection, PluginRegistry $plugin_registry ) {
+		$this->callback_reflection = $callback_reflection;
+		$this->plugin_registry     = $plugin_registry;
+	}
 
 	/**
 	 * Activate.
@@ -164,6 +198,8 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		$options[ Option::PAIRED_URL_STRUCTURE ] = $this->get_paired_url_structure();
 
 		$options[ self::PAIRED_URL_EXAMPLES ] = $this->get_paired_url_examples();
+
+		$options[ self::CUSTOM_PAIRED_ENDPOINT_SOURCES ] = $this->get_custom_paired_structure_sources();
 
 		return $options;
 	}
@@ -629,6 +665,65 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 			}
 		}
 		return $examples;
+	}
+
+	/**
+	 * Get sources for the current paired URL structure.
+	 *
+	 * @return array Sources. Each item is an array with keys for type, slug, and name.
+	 * @global WP_Hook[] $wp_filter Filter registry.
+	 */
+	private function get_custom_paired_structure_sources() {
+		global $wp_filter;
+		if ( ! $this->has_custom_paired_url_structure() ) {
+			return [];
+		}
+
+		$sources = [];
+
+		$filter_names = [ 'amp_has_paired_endpoint', 'amp_add_paired_endpoint', 'amp_remove_paired_endpoint' ];
+		foreach ( $filter_names as $filter_name ) {
+			if ( ! isset( $wp_filter[ $filter_name ] ) ) {
+				continue;
+			}
+			$hook = $wp_filter[ $filter_name ];
+			if ( ! $hook instanceof WP_Hook ) {
+				continue;
+			}
+			foreach ( $hook->callbacks as $callbacks ) {
+				foreach ( $callbacks as $callback ) {
+					$source = $this->callback_reflection->get_source( $callback['function'] );
+					if ( ! $source ) {
+						continue;
+					}
+
+					$type = $source['type'];
+					$slug = $source['name'];
+					$name = null;
+
+					if ( 'plugin' === $type ) {
+						$plugin = $this->plugin_registry->get_plugin_from_slug( $slug );
+						if ( isset( $plugin['data']['Name'] ) ) {
+							$name = $plugin['data']['Name'];
+						}
+					} elseif ( 'theme' === $type ) {
+						$theme = wp_get_theme( $slug );
+						if ( ! $theme->errors() ) {
+							$name = $theme->get( 'Name' );
+						}
+					}
+
+					$source = compact( 'type', 'slug', 'name' );
+					if ( in_array( $source, $sources, true ) ) {
+						continue;
+					}
+
+					$sources[] = $source;
+				}
+			}
+		}
+
+		return $sources;
 	}
 
 	/**
