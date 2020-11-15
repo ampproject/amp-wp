@@ -230,12 +230,13 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		<div class="notice notice-info">
 			<p>
 				<?php
-				echo wp_kses_post(
+				echo wp_kses(
 					sprintf(
 						/* translators: %s is the URL to the settings screen */
 						__( 'To customize the structure of the paired AMP URLs (given the site is not using the Standard template mode), go to the <a href="%s">Paired URL Structure</a> section on the AMP settings screen.', 'amp' ),
 						esc_url( admin_url( add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, 'admin.php' ) ) . '#paired-url-structure' )
-					)
+					),
+					[ 'a' => array_fill_keys( [ 'href' ], true ) ]
 				);
 				?>
 			</p>
