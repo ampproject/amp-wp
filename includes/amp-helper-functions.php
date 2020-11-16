@@ -329,6 +329,7 @@ function amp_is_legacy() {
 /**
  * Add frontend actions.
  *
+ * @todo Move to PairedAmpRouting.
  * @since 0.2
  * @internal
  */

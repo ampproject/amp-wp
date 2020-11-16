@@ -6,7 +6,6 @@
  */
 
 use AmpProject\Amp;
-use AmpProject\AmpWP\DevTools\ErrorPage;
 use AmpProject\AmpWP\ExtraThemeAndPluginHeaders;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
@@ -321,6 +320,8 @@ class AMP_Theme_Support {
 			 * Temporary redirect is used for admin users because implied transitional mode and template support can be
 			 * enabled by user ay any time, so they will be able to make AMP available for this URL and see the change
 			 * without wrestling with the redirect cache.
+			 *
+			 * @todo Move to PairedAmpRouting.
 			 */
 			if ( amp_has_paired_endpoint() ) {
 				self::redirect_non_amp_url( current_user_can( 'manage_options' ) ? 302 : 301 );
@@ -330,6 +331,7 @@ class AMP_Theme_Support {
 			return;
 		}
 
+		// @todo Move to PairedAmpRouting.
 		self::ensure_proper_amp_location();
 
 		if ( amp_is_legacy() ) {
@@ -370,6 +372,7 @@ class AMP_Theme_Support {
 	/**
 	 * Ensure that the current AMP location is correct.
 	 *
+	 * @todo Move to PairedAmpRouting.
 	 * @since 1.0
 	 * @since 2.0 Removed $exit param.
 	 * @since 2.1 Remove obsolete redirection from /amp/ to ?amp when on non-legacy Reader mode.
@@ -421,6 +424,7 @@ class AMP_Theme_Support {
 	 * @since 1.0 Added $exit param.
 	 * @since 1.0 Renamed from redirect_canonical_amp().
 	 * @since 2.0 Removed $exit param.
+	 * @todo Move to PairedAmpRouting.
 	 *
 	 * @param int $status Status code (301 or 302).
 	 * @return bool Whether redirection should have be done.
@@ -1086,6 +1090,8 @@ class AMP_Theme_Support {
 
 	/**
 	 * Amend the comment form with the redirect_to field to persist the AMP page after submission.
+	 *
+	 * @todo Move to PairedAmpRouting?
 	 */
 	public static function amend_comment_form() {
 		?>
@@ -1100,6 +1106,7 @@ class AMP_Theme_Support {
 	 *
 	 * @see get_comments_link()
 	 * @see comments_popup_link()
+	 * @todo Move to PairedAmpRouting?
 	 *
 	 * @param string $comments_link Post comments permalink with '#comments' or '#respond' appended.
 	 * @return string The link to the comments.
@@ -1139,6 +1146,7 @@ class AMP_Theme_Support {
 	 * @global WP_Rewrite $wp_rewrite
 	 * @link https://www.ampproject.org/docs/reference/spec#canon.
 	 * @link https://core.trac.wordpress.org/ticket/18660
+	 * @todo This is excessive. On an AMP page, all we need to do is return the current URL that strips off any AMP designation.
 	 *
 	 * @return string Canonical non-AMP URL.
 	 */
@@ -2170,6 +2178,7 @@ class AMP_Theme_Support {
 
 		$can_serve = AMP_Validation_Manager::finalize_validation( $dom );
 
+		// @todo Move to PairedAmpRouting.
 		// Redirect to the non-AMP version if not on an AMP-first site.
 		if ( ! $can_serve && ! amp_is_canonical() ) {
 			$non_amp_url = amp_remove_paired_endpoint( amp_get_current_url() );

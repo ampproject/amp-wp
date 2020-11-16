@@ -279,6 +279,8 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 				$count
 			);
 
+			// @todo We need to check whether there is a post named "AMP" before we proceed here.
+
 			$_SERVER[ $var ] = wp_slash( $path ); // Because of wp_magic_quotes().
 
 			if ( $count > 0 ) {
