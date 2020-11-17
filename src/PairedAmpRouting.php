@@ -327,7 +327,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		}
 
 		$amp_slug = amp_get_slug();
-		$pattern  = sprintf( '#(/%s)(?=/?(\?.*)?$)#', preg_quote( $amp_slug, '#' ) );
+		$pattern  = sprintf( ':/%s(?=/?(\?|$)):', preg_quote( $amp_slug, ':' ) );
 
 		// Detect and purge the AMP endpoint from the request.
 		foreach ( [ 'REQUEST_URI', 'PATH_INFO' ] as $var ) {
@@ -873,8 +873,8 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 
 			if ( ! $has_endpoint && ! empty( $parsed_url['path'] ) ) {
 				$pattern = sprintf(
-					'#/%s(/[^/^])?/?$#',
-					preg_quote( $slug, '#' )
+					':/%s/?$:',
+					preg_quote( $slug, ':' )
 				);
 				if ( preg_match( $pattern, $parsed_url['path'] ) ) {
 					$has_endpoint = true;
@@ -906,10 +906,10 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	public function remove_paired_endpoint( $url ) {
 		$slug = amp_get_slug();
 
-		// Strip endpoint, including /amp/, /amp/amp/, /amp/foo/.
+		// Strip endpoint suffix.
 		$non_amp_url = preg_replace(
 			sprintf(
-				':(/%s(/[^/?#]+)?)+(?=/?(\?|#|$)):',
+				':/%s(?=/?(\?|#|$)):',
 				preg_quote( $slug, ':' )
 			),
 			'',
