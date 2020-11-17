@@ -15,7 +15,7 @@
  */
 class AMP_Allowed_Tags_Generated {
 
-	private static $spec_file_revision = 1095;
+	private static $spec_file_revision = 1119;
 	private static $minimum_validator_revision_required = 475;
 
 	private static $descendant_tag_lists = array(
@@ -554,6 +554,10 @@ class AMP_Allowed_Tags_Generated {
 			'view',
 			'vkern',
 			'wbr',
+		),
+		'amp-story-player-allowed-descendants' => array(
+			'a',
+			'span',
 		),
 	);
 
@@ -1480,6 +1484,7 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'prefetch' => array(),
 					'query' => array(),
 					'src' => array(
 						'value_url' => array(
@@ -4707,6 +4712,37 @@ class AMP_Allowed_Tags_Generated {
 				),
 			),
 		),
+		'amp-onetap-google' => array(
+			array(
+				'attr_spec_list' => array(
+					'data-src' => array(
+						'mandatory' => true,
+						'value_url' => array(
+							'protocol' => array(
+								'https',
+							),
+						),
+					),
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							1,
+						),
+					),
+					'requires_extension' => array(
+						'amp-onetap-google',
+					),
+					'unique' => true,
+				),
+			),
+		),
 		'amp-ooyala-player' => array(
 			array(
 				'attr_spec_list' => array(
@@ -5764,6 +5800,11 @@ class AMP_Allowed_Tags_Generated {
 		'amp-story-360' => array(
 			array(
 				'attr_spec_list' => array(
+					'controls' => array(
+						'value' => array(
+							'gyroscope',
+						),
+					),
 					'duration' => array(
 						'value_regex' => '([0-9\\.]+)\\s*(s|ms)',
 					),
@@ -5777,6 +5818,15 @@ class AMP_Allowed_Tags_Generated {
 						'value_regex' => '-?\\d+\\.?\\d*',
 					),
 					'pitch-start' => array(
+						'value_regex' => '-?\\d+\\.?\\d*',
+					),
+					'scene-heading' => array(
+						'value_regex' => '-?\\d+\\.?\\d*',
+					),
+					'scene-pitch' => array(
+						'value_regex' => '-?\\d+\\.?\\d*',
+					),
+					'scene-roll' => array(
 						'value_regex' => '-?\\d+\\.?\\d*',
 					),
 					'zoom-end' => array(
@@ -5794,12 +5844,12 @@ class AMP_Allowed_Tags_Generated {
 							3,
 							7,
 							1,
-							4,
 						),
 					),
 					'child_tags' => array(
 						'child_tag_name_oneof' => array(
 							'amp-img',
+							'amp-video',
 						),
 						'mandatory_num_child_tags' => 1,
 					),
@@ -6152,21 +6202,39 @@ class AMP_Allowed_Tags_Generated {
 		'amp-story-interactive-results' => array(
 			array(
 				'attr_spec_list' => array(
+					'chip-style' => array(
+						'value' => array(
+							'flat',
+							'transparent',
+						),
+					),
 					'option-1-image' => array(),
 					'option-1-results-category' => array(
 						'mandatory' => true,
+					),
+					'option-1-results-threshold' => array(
+						'value_regex' => '\\d+[.\\d+]?',
 					),
 					'option-1-text' => array(),
 					'option-2-image' => array(),
 					'option-2-results-category' => array(
 						'mandatory' => true,
 					),
+					'option-2-results-threshold' => array(
+						'value_regex' => '\\d+[.\\d+]?',
+					),
 					'option-2-text' => array(),
 					'option-3-image' => array(),
 					'option-3-results-category' => array(),
+					'option-3-results-threshold' => array(
+						'value_regex' => '\\d+[.\\d+]?',
+					),
 					'option-3-text' => array(),
 					'option-4-image' => array(),
 					'option-4-results-category' => array(),
+					'option-4-results-threshold' => array(
+						'value_regex' => '\\d+[.\\d+]?',
+					),
 					'option-4-text' => array(),
 					'prompt-text' => array(),
 					'theme' => array(
@@ -6290,11 +6358,7 @@ class AMP_Allowed_Tags_Generated {
 							4,
 						),
 					),
-					'child_tags' => array(
-						'child_tag_name_oneof' => array(
-							'a',
-						),
-					),
+					'descendant_tag_list' => 'amp-story-player-allowed-descendants',
 					'requires_extension' => array(
 						'amp-story-player',
 					),
@@ -6578,6 +6642,7 @@ class AMP_Allowed_Tags_Generated {
 							2,
 							3,
 							7,
+							9,
 							1,
 							4,
 						),
@@ -6691,6 +6756,7 @@ class AMP_Allowed_Tags_Generated {
 							2,
 							3,
 							7,
+							9,
 							1,
 							4,
 						),
@@ -9581,7 +9647,6 @@ class AMP_Allowed_Tags_Generated {
 						'disallowed_value_regex' => '__amp_source_origin',
 						'mandatory' => true,
 						'value_url' => array(
-							'allow_relative' => true,
 							'protocol' => array(
 								'data',
 								'http',
@@ -9594,6 +9659,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'noscript',
 					'mandatory_ancestor_suggested_alternative' => 'amp-img',
+					'spec_name' => 'noscript > img',
 					'spec_url' => 'https://amp.dev/documentation/components/amp-img/',
 				),
 			),
@@ -12819,7 +12885,6 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
-					'spec_name' => 'amp-ad-custom extension .js script',
 				),
 			),
 			array(
@@ -15235,6 +15300,36 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
+						'name' => 'amp-onetap-google',
+						'requires_usage' => true,
+						'version' => array(
+							'0.1',
+						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
 						'name' => 'amp-ooyala-player',
 						'requires_usage' => true,
 						'version' => array(
@@ -15996,7 +16091,7 @@ class AMP_Allowed_Tags_Generated {
 						'name' => 'amp-story-interactive',
 						'requires_usage' => true,
 						'version' => array(
-							'1.0',
+							'0.1',
 						),
 					),
 				),
@@ -16461,7 +16556,6 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
-					'spec_name' => 'amp-video-docking',
 				),
 			),
 			array(
