@@ -31,7 +31,7 @@ protected function match_element_attributes( $html, $tag_name, $attribute_names 
 		implode(
 			'',
 			array_map(
-				function ( $attr_name ) {
+				static function ( $attr_name ) {
 					return sprintf( '(?=[^>]*?%1$s="(?P<%1$s>[^"]+)")?', preg_quote( $attr_name, '/' ) );
 				},
 				$attribute_names
