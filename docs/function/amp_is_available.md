@@ -21,8 +21,8 @@ Determine whether AMP is available for the current URL.
 function amp_is_available() {
 	global $pagenow, $wp_query;
 
-	// Short-circuit for admin requests or requests to non-frontend pages.
-	if ( is_admin() || in_array( $pagenow, [ 'wp-login.php', 'wp-signup.php', 'wp-activate.php', 'repair.php' ], true ) ) {
+	// Short-circuit for cron, CLI, admin requests or requests to non-frontend pages.
+	if ( wp_doing_cron() || ( defined( 'WP_CLI' ) && WP_CLI ) || is_admin() || in_array( $pagenow, [ 'wp-login.php', 'wp-signup.php', 'wp-activate.php', 'repair.php' ], true ) ) {
 		return false;
 	}
 
