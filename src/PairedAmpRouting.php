@@ -162,7 +162,8 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
 		add_action( 'update_option_' . AMP_Options_Manager::OPTION_NAME, [ $this, 'handle_options_update' ], 10, 2 );
 
-		add_action( 'init', [ $this, 'add_rewrite_endpoint' ], 0 );
+		add_action( 'init', [ $this, 'maybe_add_rewrite_endpoint' ], 0 );
+		add_filter( 'query_vars', [ $this, 'filter_query_vars' ] ); // @todo Move to add_paired_hooks()?
 
 		if ( ! amp_is_canonical() ) {
 			$this->add_paired_hooks();
@@ -404,6 +405,22 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		if ( Option::PAIRED_URL_STRUCTURE_LEGACY_READER === AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE ) ) {
 			$this->get_wp_rewrite()->add_endpoint( amp_get_slug(), EP_PERMALINK );
 		}
+	}
+
+	/**
+	 * Filter query vars to add AMP.
+	 *
+	 * This is necessary when the rewrite endpoint is not added, since it is only added when using the legacy reader paired URL structure.
+	 *
+	 * @param string[] $query_vars Query vars.
+	 * @return string[] Amended query vars.
+	 */
+	public function filter_query_vars( $query_vars ) {
+		$slug = amp_get_slug();
+		if ( ! in_array( $slug, $query_vars, true ) ) {
+			$query_vars[] = $slug;
+		}
+		return $query_vars;
 	}
 
 	/**
