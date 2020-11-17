@@ -20,6 +20,7 @@ use WP_Query;
 use WP_Rewrite;
 use WP;
 use WP_Hook;
+use WP_Term_Query;
 
 /**
  * Service for routing users to and from paired AMP URLs.
@@ -70,6 +71,14 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	const AMP_SLUG = 'amp_slug';
 
 	/**
+	 * REST API field name for entities already using the AMP slug as name.
+	 *
+	 * @see amp_get_slug()
+	 * @var string
+	 */
+	const ENDPOINT_SUFFIX_CONFLICTS = 'endpoint_suffix_conflicts';
+
+	/**
 	 * Key for the custom paired structure sources.
 	 *
 	 * @var string
@@ -77,7 +86,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	const CUSTOM_PAIRED_ENDPOINT_SOURCES = 'custom_paired_endpoint_sources';
 
 	/**
-	 * Callback refelction.
+	 * Callback reflection.
 	 *
 	 * @var CallbackReflection
 	 */
@@ -170,16 +179,20 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		return array_merge(
 			$schema,
 			[
-				Option::PAIRED_URL_STRUCTURE => [
+				Option::PAIRED_URL_STRUCTURE    => [
 					'type' => 'string',
 					'enum' => self::PAIRED_URL_STRUCTURES,
 				],
-				self::PAIRED_URL_EXAMPLES    => [
+				self::PAIRED_URL_EXAMPLES       => [
 					'type'     => 'object',
 					'readonly' => true,
 				],
-				self::AMP_SLUG               => [
+				self::AMP_SLUG                  => [
 					'type'     => 'string',
+					'readonly' => true,
+				],
+				self::ENDPOINT_SUFFIX_CONFLICTS => [
+					'type'     => 'array',
 					'readonly' => true,
 				],
 			]
@@ -201,6 +214,8 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 
 		$options[ self::CUSTOM_PAIRED_ENDPOINT_SOURCES ] = $this->get_custom_paired_structure_sources();
 
+		$options[ self::ENDPOINT_SUFFIX_CONFLICTS ] = $this->get_endpoint_suffix_conflicts();
+
 		return $options;
 	}
 
@@ -214,7 +229,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		}
 
 		add_action( 'parse_query', [ $this, 'correct_query_when_is_front_page' ] );
-		add_action( 'wp', [ $this, 'add_amp_request_hooks' ] );
+		add_action( 'wp', [ $this, 'maybe_add_paired_amp_request_hooks' ] );
 
 		add_action( 'admin_notices', [ $this, 'add_permalink_settings_notice' ] );
 	}
@@ -245,6 +260,57 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	}
 
 	/**
+	 * Get the entities that are already using the AMP slug.
+	 *
+	 * @return array Conflict data.
+	 */
+	public function get_endpoint_suffix_conflicts() {
+		$conflicts = [];
+		$amp_slug  = amp_get_slug();
+
+		$post_query = new WP_Query(
+			[
+				'post_type'      => 'any',
+				'name'           => $amp_slug,
+				'fields'         => 'ids',
+				'posts_per_page' => 100,
+			]
+		);
+		if ( $post_query->post_count > 0 ) {
+			$conflicts['posts'] = $post_query->posts;
+		}
+
+		$term_query = new WP_Term_Query(
+			[
+				'slug'   => $amp_slug,
+				'fields' => 'ids',
+			]
+		);
+		if ( $term_query->terms ) {
+			$conflicts['terms'] = $term_query->terms;
+		}
+
+		$user = get_user_by( 'slug', $amp_slug );
+		if ( $user ) {
+			$conflicts['users'] = [ $user->ID ];
+		}
+
+		foreach ( get_post_types( [], 'objects' ) as $post_type ) {
+			if ( isset( $post_type->rewrite['slug'] ) && $post_type->rewrite['slug'] === $amp_slug ) {
+				$conflicts['post_types'][] = $post_type->name;
+			}
+		}
+
+		foreach ( get_taxonomies( [], 'objects' ) as $taxonomy ) {
+			if ( isset( $taxonomy->rewrite['slug'] ) && $taxonomy->rewrite['slug'] === $amp_slug ) {
+				$conflicts['taxonomies'][] = $taxonomy->name;
+			}
+		}
+
+		return $conflicts;
+	}
+
+	/**
 	 * Detect the AMP rewrite endpoint from the PATH_INFO or REQUEST_URI and purge from those environment variables.
 	 *
 	 * @see WP::parse_request()
@@ -263,8 +329,8 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		$pattern  = sprintf( '#(/%s)(?=/?(\?.*)?$)#', preg_quote( $amp_slug, '#' ) );
 
 		// Detect and purge the AMP endpoint from the request.
-		foreach ( [ 'PATH_INFO', 'REQUEST_URI' ] as $var ) {
-			if ( ! isset( $_SERVER[ $var ] ) ) {
+		foreach ( [ 'REQUEST_URI', 'PATH_INFO' ] as $var ) {
+			if ( empty( $_SERVER[ $var ] ) ) {
 				continue;
 			}
 
@@ -278,8 +344,6 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 				1,
 				$count
 			);
-
-			// @todo We need to check whether there is a post named "AMP" before we proceed here.
 
 			$_SERVER[ $var ] = wp_slash( $path ); // Because of wp_magic_quotes().
 
@@ -307,7 +371,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	/**
 	 * Add AMP hooks if it is an AMP request.
 	 */
-	public function add_amp_request_hooks() {
+	public function maybe_add_paired_amp_request_hooks() {
 		if ( ! amp_is_request() ) {
 			return;
 		}
@@ -334,9 +398,9 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	}
 
 	/**
-	 * Add rewrite endpoint.
+	 * Add rewrite endpoint if the legacy reader paired URL structure is being used.
 	 */
-	public function add_rewrite_endpoint() {
+	public function maybe_add_rewrite_endpoint() {
 		if ( Option::PAIRED_URL_STRUCTURE_LEGACY_READER === AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE ) ) {
 			$this->get_wp_rewrite()->add_endpoint( amp_get_slug(), EP_PERMALINK );
 		}
@@ -405,7 +469,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 			&&
 			$old_options[ Option::PAIRED_URL_STRUCTURE ] !== $new_options[ Option::PAIRED_URL_STRUCTURE ]
 		) {
-			$this->add_rewrite_endpoint();
+			$this->maybe_add_rewrite_endpoint();
 			$this->flush_rewrite_rules();
 		}
 	}
@@ -531,6 +595,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		$query_var_required = (
 			! $rewrite->using_permalinks()
 			||
+			// This is especially the case for post previews.
 			isset( $parsed_url['query'] )
 		);
 

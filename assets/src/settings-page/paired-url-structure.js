@@ -103,6 +103,8 @@ export function PairedUrlStructure( { focusedSection } ) {
 
 	const isCustom = 'custom' === editedOptions.paired_url_structure;
 
+	const endpointSuffixAvailable = editedOptions.endpoint_suffix_conflicts.length === 0;
+
 	return (
 		<AMPDrawer
 			className="amp-paired-url-structure"
@@ -153,20 +155,25 @@ export function PairedUrlStructure( { focusedSection } ) {
 				</li>
 				<li>
 					<input
-						id="paired_url_structure_rewrite_endpoint"
+						id="paired_url_structure_suffix_endpoint"
 						type="radio"
 						name="paired_url_structure"
 						checked={ 'suffix_endpoint' === editedOptions.paired_url_structure }
 						onChange={ () => {
 							updateOptions( { paired_url_structure: 'suffix_endpoint' } );
 						} }
-						disabled={ isCustom }
+						disabled={ isCustom || ! endpointSuffixAvailable }
 					/>
-					<label htmlFor="paired_url_structure_rewrite_endpoint">
-						{ __( 'Rewrite endpoint', 'amp' ) + ': ' }
+					<label htmlFor="paired_url_structure_suffix_endpoint">
+						{ __( 'Suffix endpoint', 'amp' ) + ': ' }
 						<code>
 							{ `/${ slug }/` }
 						</code>
+						{ ! endpointSuffixAvailable && (
+							<em>
+								{ ' ' + __( '(unavailable due to conflicts)', 'amp' ) }
+							</em>
+						) }
 					</label>
 					<PairedUrlExamples pairedUrls={ editedOptions.paired_url_examples.suffix_endpoint } />
 				</li>
