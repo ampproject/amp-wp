@@ -9,12 +9,14 @@ import { VALIDATION_ERROR_ACK_ACCEPTED_STATUS, VALIDATION_ERROR_ACK_REJECTED_STA
 
 export const BLOCK_VALIDATION_STORE_KEY = 'amp/block-validation';
 
+const SET_IS_SHOWING_REVIEWED = 'SET_IS_SHOWING_REVIEWED';
 const SET_RAW_VALIDATION_ERRORS = 'SET_RAW_VALIDATION_ERRORS';
 const SET_REVIEW_LINK = 'SET_REVIEW_LINK';
 const SET_VALIDATION_ERRORS = 'SET_VALIDATION_ERRORS';
 
 const initialState = {
 	ampBroken: false,
+	isShowingReviewed: false,
 	rawValidationErrors: [],
 	reviewLink: null,
 	reviewedValidationErrors: [],
@@ -30,6 +32,9 @@ export default registerStore(
 	{
 		reducer: ( state = initialState, action ) => {
 			switch ( action.type ) {
+				case SET_IS_SHOWING_REVIEWED:
+					return { ...state, isShowingReviewed: action.isShowingReviewed };
+
 				case SET_RAW_VALIDATION_ERRORS:
 					return { ...state, rawValidationErrors: action.rawValidationErrors };
 
@@ -60,6 +65,7 @@ export default registerStore(
 			}
 		},
 		actions: {
+			setIsShowingReviewed: ( isShowingReviewed ) => ( { type: SET_IS_SHOWING_REVIEWED, isShowingReviewed } ),
 			setRawValidationErrors: ( rawValidationErrors ) => ( { type: SET_RAW_VALIDATION_ERRORS, rawValidationErrors } ),
 			setReviewLink: ( reviewLink ) => ( { type: SET_REVIEW_LINK, reviewLink } ),
 			setValidationErrors: ( validationErrors ) => ( { type: SET_VALIDATION_ERRORS, validationErrors } ),
@@ -67,6 +73,7 @@ export default registerStore(
 		selectors: {
 			getAMPBroken: ( { ampBroken } ) => ampBroken,
 			getBlockValidationErrors: ( { validationErrors }, clientId ) => validationErrors.filter( ( error ) => error.clientId === clientId ),
+			getIsShowingReviewed: ( { isShowingReviewed } ) => isShowingReviewed,
 			getRawValidationErrors: ( { rawValidationErrors } ) => rawValidationErrors,
 			getReviewLink: ( { reviewLink } ) => reviewLink,
 			getValidationErrors: ( { validationErrors } ) => validationErrors,

@@ -173,20 +173,23 @@ ErrorContent.propTypes = {
  *
  * @param {Object} props Component props.
  * @param {string} props.clientId
+ * @param {number} props.status
  */
-export function Error( { clientId, ...props } ) {
+export function Error( { clientId, status, ...props } ) {
 	const { selectBlock } = useDispatch( 'core/block-editor' );
+
+	const reviewed = status === VALIDATION_ERROR_ACK_ACCEPTED_STATUS || status === VALIDATION_ERROR_ACK_REJECTED_STATUS;
 
 	return (
 		<li>
 			<PanelBody
-				className="amp-error"
+				className={ `amp-error amp-error--${ reviewed ? 'reviewed' : 'new' }` }
 				title={
-					<ErrorPanelTitle clientId={ clientId } { ...props } />
+					<ErrorPanelTitle { ...props } clientId={ clientId } status={ status } />
 				}
 				initialOpen={ false }
 			>
-				<ErrorContent { ...props } clientId={ clientId } />
+				<ErrorContent { ...props } clientId={ clientId } status={ status } />
 				{
 					clientId && (
 						<p>
@@ -212,6 +215,7 @@ export function Error( { clientId, ...props } ) {
 }
 Error.propTypes = {
 	clientId: PropTypes.string,
+	status: PropTypes.number.isRequired,
 	title: PropTypes.string.isRequired,
 	type: PropTypes.string.isRequired,
 };
