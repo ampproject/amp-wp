@@ -704,6 +704,7 @@ class AMP_Validation_Manager {
 					'status'      => $result['status'],
 					'term_status' => $result['term_status'],
 					'forced'      => $result['forced'],
+					'term_id'     => $result['term']->term_id,
 				];
 			}
 		}

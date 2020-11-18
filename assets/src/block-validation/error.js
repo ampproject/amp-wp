@@ -10,6 +10,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { Button, PanelBody } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -21,6 +22,8 @@ import {
 	VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
 	VALIDATION_ERROR_NEW_REJECTED_STATUS,
 } from './constants';
+import { BLOCK_VALIDATION_STORE_KEY } from './store';
+import { NewTabIcon } from './icon';
 
 /**
  * Component rendering an icon representing JS, CSS, or HTML.
@@ -174,10 +177,12 @@ ErrorContent.propTypes = {
  * @param {Object} props Component props.
  * @param {string} props.clientId
  * @param {number} props.status
+ * @param {number} props.term_id
  */
-export function Error( { clientId, status, ...props } ) {
+export function Error( { clientId, status, term_id: termId, ...props } ) {
 	const { selectBlock } = useDispatch( 'core/block-editor' );
-
+	const reviewLink = useSelect( ( select ) => select( BLOCK_VALIDATION_STORE_KEY ).getReviewLink() );
+	console.log( props );
 	const reviewed = status === VALIDATION_ERROR_ACK_ACCEPTED_STATUS || status === VALIDATION_ERROR_ACK_REJECTED_STATUS;
 
 	return (
@@ -192,7 +197,7 @@ export function Error( { clientId, status, ...props } ) {
 				<ErrorContent { ...props } clientId={ clientId } status={ status } />
 				{
 					clientId && (
-						<p>
+						<div className="amp-error__actions">
 							<Button
 								className="amp-error__select-block"
 								isSecondary
@@ -200,13 +205,13 @@ export function Error( { clientId, status, ...props } ) {
 									selectBlock( clientId );
 								} }
 							>
-								<svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-									<path fillRule="evenodd" clipRule="evenodd" d="M7.46881 12.736L9.51181 10.693L13.0142 14.1954L14.765 12.4446L11.2618 8.94223L13.3056 6.89923L5.71802 5.14844L7.46881 12.736Z" fill="#0071A1" />
-									<path d="M12.2697 4.21094V1.60352C12.2697 1.05123 11.822 0.603516 11.2697 0.603516H2.20801C1.65572 0.603516 1.20801 1.05123 1.20801 1.60352V10.5706C1.20801 11.1229 1.65572 11.5706 2.20801 11.5706H4.72342" stroke="#0071A1" />
-								</svg>
 								{ __( 'Select Block', 'amp' ) }
 							</Button>
-						</p>
+							<a href={ addQueryArgs( reviewLink, { term_id: termId } ) } target="_blank" rel="noreferrer" className="amp-error__details-link">
+								{ __( 'View details', 'amp' ) }
+								<NewTabIcon />
+							</a>
+						</div>
 					)
 				}
 			</PanelBody>
@@ -216,6 +221,7 @@ export function Error( { clientId, status, ...props } ) {
 Error.propTypes = {
 	clientId: PropTypes.string,
 	status: PropTypes.number.isRequired,
+	term_id: PropTypes.number.isRequired,
 	title: PropTypes.string.isRequired,
 	type: PropTypes.string.isRequired,
 };
