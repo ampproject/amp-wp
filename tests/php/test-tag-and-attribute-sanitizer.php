@@ -524,7 +524,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 							<amp-story-page id="my-second-page">
 								<amp-analytics config="https://example.com/analytics.account.config.json"></amp-analytics>
 								<amp-story-grid-layer template="fill">
-									<amp-story-360 layout="responsive" width="100" height="100" heading-start="-45" pitch-start="-20" heading-end="95" pitch-end="-10" zoom-end="4" duration="30s">
+									<amp-story-360 layout="fixed" width="100" height="100" heading-start="-45" pitch-start="-20" heading-end="95" pitch-end="-10" zoom-end="4" duration="30s">
 										<amp-img src="img/panorama1.jpg" layout="fixed" width="200" height="100" crossorigin="anonymous" referrerpolicy="origin"></amp-img>
 									</amp-story-360>
 								</amp-story-grid-layer>
