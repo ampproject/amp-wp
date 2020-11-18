@@ -524,7 +524,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 							<amp-story-page id="my-second-page">
 								<amp-analytics config="https://example.com/analytics.account.config.json"></amp-analytics>
 								<amp-story-grid-layer template="fill">
-									<amp-story-360 layout="fixed" width="100" height="100" heading-start="-45" pitch-start="-20" heading-end="95" pitch-end="-10" zoom-end="4" duration="30s">
+									<amp-story-360 controls="gyroscope" layout="fixed" width="100" height="100" heading-start="-45" pitch-start="-20" heading-end="95" pitch-end="-10" scene-heading="0.00" scene-pitch="0.00" scene-roll="0.00" zoom-end="4" duration="30s">
 										<amp-img src="img/panorama1.jpg" layout="fixed" width="200" height="100" crossorigin="anonymous" referrerpolicy="origin"></amp-img>
 									</amp-story-360>
 								</amp-story-grid-layer>
@@ -559,6 +559,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 								<amp-story-grid-layer template="fill">
 									<amp-story-interactive-poll id="correct-poll" endpoint="https://webstoriesinteractivity-beta.web.app/api/v1" theme="dark" chip-style="shadow" class="nice-quiz" prompt-text="What country do you like the most?" option-1-text="France" option-1-confetti="🇺🇾" option-1-results-category="Dog" option-2-text="Spain" option-2-confetti="🇺🇾" option-2-results-category="Cat" option-3-text="Uruguay" option-3-confetti="🇺🇾" option-3-results-category="Bunny" option-4-text="Brazil" option-4-confetti="🇺🇾" option-4-results-category="Mouse">
 									</amp-story-interactive-poll>
+									<amp-story-interactive-results prompt-text="Your level is" option-1-results-category="Beginner" option-1-image="beginner.png" option-1-results-threshold="10" option-2-results-category="Expet" option-2-image="expert.png" option-2-results-threshold="80"></amp-story-interactive-results>
 								</amp-story-grid-layer>
 							</amp-story-page>
 							<amp-story-page id="amp-story-interactive-binary-poll">
@@ -663,7 +664,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'amp-video'                                    => [
-				'<amp-video width="432" height="987" src="/video/location.mp4"></amp-video>',
+				'<amp-video width="432" height="987" layout="intrinsic" src="/video/location.mp4"></amp-video>',
 				null, // No change.
 				[ 'amp-video' ],
 			],
@@ -2318,7 +2319,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			'amp-autocomplete'                             => [
 				'
 					<form method="post" action-xhr="/form/echo-json/post" target="_blank" on="submit-success:AMP.setState({result: event.response})">
-						<amp-autocomplete id="autocomplete" filter="substring" min-characters="0" inline="@" max-items="10">
+						<amp-autocomplete id="autocomplete" filter="substring" min-characters="0" inline="@" max-items="10" prefetch>
 							<input type="text" id="input">
 							<script type="application/json" id="script">
 							{ "items" : ["apple", "banana", "orange"] }
@@ -2958,6 +2959,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[
 					AMP_Tag_And_Attribute_Sanitizer::SPECIFIED_LAYOUT_INVALID,
 				],
+			],
+
+			'amp-onetap-google'                            => [
+				'<amp-onetap-google layout="nodisplay" data-src="https://rp.com/intermediate"></amp-onetap-google>',
+				null,
+				[ 'amp-onetap-google' ],
 			],
 		];
 	}
