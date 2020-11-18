@@ -71,7 +71,7 @@ class Test_AMP_Content_Sanitizer extends WP_UnitTestCase {
 	public function test_sanitize_all() {
 		$source_html     = '<video style="outline: solid 1px red;" src="https://example.com/foo.mp4" width="100" height="200"></video>';
 		$expected_return = [
-			'<amp-video src="https://example.com/foo.mp4" width="100" height="200" layout="intrinsic" data-amp-original-style="outline: solid 1px red;" class="amp-wp-9f6e771"><a href="https://example.com/foo.mp4" fallback="">https://example.com/foo.mp4</a><noscript><video src="https://example.com/foo.mp4" width="100" height="200" data-amp-original-style="outline: solid 1px red;" class="amp-wp-9f6e771"></video></noscript></amp-video>',
+			'<amp-video src="https://example.com/foo.mp4" width="100" height="200" layout="responsive" data-amp-original-style="outline: solid 1px red;" class="amp-wp-9f6e771"><a href="https://example.com/foo.mp4" fallback="">https://example.com/foo.mp4</a><noscript><video src="https://example.com/foo.mp4" width="100" height="200" data-amp-original-style="outline: solid 1px red;" class="amp-wp-9f6e771"></video></noscript></amp-video>',
 			[ 'amp-video' => true ],
 			[ ':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-9f6e771{outline:solid 1px red}' ],
 		];
