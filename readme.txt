@@ -2,8 +2,8 @@
 Contributors: google, xwp, automattic, westonruter, albertomedina, schlessera, swissspidy, pierlo, johnwatkins0, joshuawold, ryankienstra
 Tags: amp, mobile, optimization, accelerated mobile pages, framework, components, blocks, performance, ux, seo, official
 Requires at least: 4.9
-Tested up to: 5.5
-Stable tag: 2.0.6
+Tested up to: 5.6
+Stable tag: 2.0.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires PHP: 5.6
