@@ -51,6 +51,7 @@ class RowToggler {
 		}
 
 		this.toggle( this.tr.querySelector( '.single-url-detail-toggle' ) );
+		this.tr.scrollIntoView( { block: 'start', behavior: 'smooth' } );
 	}
 
 	/**
