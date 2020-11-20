@@ -39,7 +39,7 @@ fi
 if [[ -n $INSTALL_PWA_PLUGIN ]]; then
 	echo -n "Installing PWA plugin..."
 	wget -O "$WP_CORE_DIR/src/wp-content/plugins/pwa.zip" https://downloads.wordpress.org/plugin/pwa.zip
-	unzip -d "$WP_CORE_DIR/src/wp-content/plugins/pwa/" "$WP_CORE_DIR/src/wp-content/plugins/pwa.zip"
+	unzip -d "$WP_CORE_DIR/src/wp-content/plugins/" "$WP_CORE_DIR/src/wp-content/plugins/pwa.zip"
 	echo "done"
 fi
 
