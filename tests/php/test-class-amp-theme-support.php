@@ -402,14 +402,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->go_to( $permalink . 'amp/' );
 		$this->assertCount( 0, $redirections );
 		$this->assertTrue( amp_is_request() );
-
-		$this->go_to( $permalink . 'amp/amp/' );
-		$this->assertCount( 1, $redirections );
-		$this->assertEquals( amp_add_paired_endpoint( $permalink ), end( $redirections ) );
-
-		$this->go_to( $permalink . 'amp/foo/' );
-		$this->assertCount( 2, $redirections );
-		$this->assertEquals( amp_add_paired_endpoint( $permalink ), end( $redirections ) );
 	}
 
 	/**

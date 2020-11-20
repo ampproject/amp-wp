@@ -621,8 +621,6 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertEquals( 'https://example.com/foo/?#bar', amp_remove_paired_endpoint( 'https://example.com/foo/?amp#bar' ) );
 		$this->assertEquals( 'https://example.com/foo/', amp_remove_paired_endpoint( 'https://example.com/foo/amp/' ) );
 		$this->assertEquals( 'https://example.com/foo/?blaz', amp_remove_paired_endpoint( 'https://example.com/foo/amp/?blaz' ) );
-		$this->assertEquals( 'https://example.com/foo/?blaz', amp_remove_paired_endpoint( 'https://example.com/foo/amp/amp/?blaz' ) );
-		$this->assertEquals( 'https://example.com/foo/?blaz', amp_remove_paired_endpoint( 'https://example.com/foo/amp/foo/amp/bar/?blaz' ) );
 	}
 
 	/**
@@ -1855,10 +1853,6 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			],
 			'endpoint_bare_unslashed' => [
 				'amp',
-				true,
-			],
-			'endpoint_with_value'     => [
-				'amp/x/',
 				true,
 			],
 			'endpoint_and_url_param'  => [
