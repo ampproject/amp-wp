@@ -412,39 +412,6 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	}
 
 	/**
-	 * Filters the term slug to prevent conflicting with the 'amp' slug.
-	 *
-	 * @see wp_unique_term_slug()
-	 *
-	 * @param string $slug Slug.
-	 * @return string Slug.
-	 * @global \wpdb $wpdb WP DB.
-	 */
-	public function filter_unique_term_slug( $slug ) {
-		global $wpdb;
-
-		$amp_slug = amp_get_slug();
-		if ( $amp_slug !== $slug ) {
-			return $slug;
-		}
-
-		$suffix = 2;
-		do {
-			$alt_slug   = "$slug-$suffix";
-			$slug_check = $wpdb->get_var(
-				$wpdb->prepare(
-					"SELECT COUNT(*) FROM $wpdb->terms WHERE slug = %s LIMIT 1",
-					$alt_slug
-				)
-			);
-			$suffix++;
-		} while ( $slug_check );
-		$slug = $alt_slug;
-
-		return $slug;
-	}
-
-	/**
 	 * Add AMP hooks if it is an AMP request.
 	 */
 	public function maybe_add_paired_amp_request_hooks() {
