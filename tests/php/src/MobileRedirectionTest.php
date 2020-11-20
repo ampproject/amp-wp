@@ -34,6 +34,7 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 		parent::tearDown();
 		$_COOKIE = [];
 		unset( $GLOBALS['wp_customize'] );
+		$GLOBALS['wp_the_query'] = $GLOBALS['wp_query']; // This is missing in core.
 	}
 
 	public function test__construct() {

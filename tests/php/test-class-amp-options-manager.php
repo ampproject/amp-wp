@@ -56,6 +56,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		}
 
 		$this->restore_theme_directories();
+		$GLOBALS['wp_the_query'] = $GLOBALS['wp_query']; // This is missing in core.
 	}
 
 	/**
