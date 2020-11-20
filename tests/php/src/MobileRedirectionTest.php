@@ -5,25 +5,29 @@ namespace AmpProject\AmpWP\Tests;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\PairedAmpRouting;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\MobileRedirection;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AMP_Options_Manager;
 use AMP_Theme_Support;
-use WP_UnitTestCase;
 use WP_Customize_Manager;
 
 /** @coversDefaultClass \AmpProject\AmpWP\MobileRedirection */
-final class MobileRedirectionTest extends WP_UnitTestCase {
+final class MobileRedirectionTest extends DependencyInjectedTestCase {
 
 	use AssertContainsCompatibility;
 
 	/** @var MobileRedirection */
 	private $instance;
 
+	/** @var PairedAmpRouting */
+	private $paired_amp_routing;
+
 	public function setUp() {
 		parent::setUp();
-		$this->instance = new MobileRedirection();
+		$this->paired_amp_routing = $this->injector->make( PairedAmpRouting::class );
+		$this->instance           = new MobileRedirection( $this->paired_amp_routing );
 	}
 
 	public function tearDown() {
@@ -119,7 +123,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 	public function test_get_current_amp_url() {
 		$this->go_to( add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, '/foo/' ) );
 		$this->assertEquals(
-			amp_add_paired_endpoint( home_url( '/foo/' ) ),
+			$this->paired_amp_routing->add_paired_endpoint( home_url( '/foo/' ) ),
 			$this->instance->get_current_amp_url()
 		);
 	}
@@ -226,7 +230,7 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		$this->instance->redirect();
 		$this->assertNotNull( $redirected_url );
 		$this->assertEquals(
-			amp_add_paired_endpoint( home_url( '/' ) ),
+			$this->paired_amp_routing->add_paired_endpoint( home_url( '/' ) ),
 			$redirected_url
 		);
 	}
