@@ -1672,6 +1672,11 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 * @throws Exception If assertion fails.
 	 */
 	public function test_decorate_shortcode_and_filter_source() {
+		global $post;
+		if ( empty( $post ) ) {
+			$post = self::factory()->post->create_and_get();
+		}
+
 		AMP_Validation_Manager::add_validation_error_sourcing();
 		$shortcode_fallback = static function() {
 			return '<b>test</b>';
@@ -1877,9 +1882,11 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		$source_json = wp_json_encode(
 			[
-				'hook'    => 'the_content',
-				'filter'  => true,
-				'sources' => $sources,
+				'hook'      => 'the_content',
+				'filter'    => true,
+				'post_id'   => get_the_ID(),
+				'post_type' => get_post_type(),
+				'sources'   => $sources,
 			]
 		);
 
