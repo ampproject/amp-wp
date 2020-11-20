@@ -227,6 +227,10 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		if ( Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT === AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE ) ) {
 			add_filter( 'do_parse_request', [ $this, 'detect_rewrite_endpoint' ], PHP_INT_MAX );
 			add_filter( 'request', [ $this, 'set_query_var_for_endpoint' ] );
+
+			// Note that the wp_unique_term_slug filter does not work in the same way. It will only be applied if there
+			// is actually a duplicate, whereas the wp_unique_post_slug filter applies regardless.
+			add_filter( 'wp_unique_post_slug', [ $this, 'filter_unique_post_slug' ], 10, 4 );
 		}
 
 		add_action( 'parse_query', [ $this, 'correct_query_when_is_front_page' ] );
@@ -367,6 +371,77 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 			$query_vars[ amp_get_slug() ] = true;
 		}
 		return $query_vars;
+	}
+
+	/**
+	 * Filters the post slug to prevent conflicting with the 'amp' slug.
+	 *
+	 * @see wp_unique_post_slug()
+	 *
+	 * @param string $slug        Slug.
+	 * @param int    $post_id     Post ID.
+	 * @param string $post_status The post status.
+	 * @param string $post_type   Post type.
+	 * @return string Slug.
+	 * @global \wpdb $wpdb WP DB.
+	 */
+	public function filter_unique_post_slug( $slug, $post_id, /** @noinspection PhpUnusedParameterInspection */ $post_status, $post_type ) {
+		global $wpdb;
+
+		$amp_slug = amp_get_slug();
+		if ( $amp_slug !== $slug ) {
+			return $slug;
+		}
+
+		$suffix = 2;
+		do {
+			$alt_slug   = "$slug-$suffix";
+			$slug_check = $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM $wpdb->posts WHERE post_name = %s AND post_type = %s AND ID != %d LIMIT 1",
+					$alt_slug,
+					$post_type,
+					$post_id
+				)
+			);
+			$suffix++;
+		} while ( $slug_check );
+		$slug = $alt_slug;
+
+		return $slug;
+	}
+
+	/**
+	 * Filters the term slug to prevent conflicting with the 'amp' slug.
+	 *
+	 * @see wp_unique_term_slug()
+	 *
+	 * @param string $slug Slug.
+	 * @return string Slug.
+	 * @global \wpdb $wpdb WP DB.
+	 */
+	public function filter_unique_term_slug( $slug ) {
+		global $wpdb;
+
+		$amp_slug = amp_get_slug();
+		if ( $amp_slug !== $slug ) {
+			return $slug;
+		}
+
+		$suffix = 2;
+		do {
+			$alt_slug   = "$slug-$suffix";
+			$slug_check = $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM $wpdb->terms WHERE slug = %s LIMIT 1",
+					$alt_slug
+				)
+			);
+			$suffix++;
+		} while ( $slug_check );
+		$slug = $alt_slug;
+
+		return $slug;
 	}
 
 	/**
