@@ -12,7 +12,7 @@ Filter whether the AMP Optimizer should use server-side rendering or not.
 
 ### Source
 
-:link: [includes/class-amp-theme-support.php:2258](/includes/class-amp-theme-support.php#L2258)
+:link: [includes/class-amp-theme-support.php:2259](/includes/class-amp-theme-support.php#L2259)
 
 <details>
 <summary>Show Code</summary>

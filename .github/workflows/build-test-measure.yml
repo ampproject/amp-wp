@@ -92,7 +92,7 @@ jobs:
         with:
           php-version: '7.4'
           coverage: none
-          tools: composer:v1, cs2pr
+          tools: cs2pr
 
       - name: Get Composer Cache Directory
         id: composer-cache
@@ -107,7 +107,7 @@ jobs:
             ${{ runner.os }}-composer-
 
       - name: Install Composer dependencies
-        run: composer install --prefer-dist --optimize-autoloader  --no-suggest --no-progress --no-interaction
+        run: composer install --prefer-dist --optimize-autoloader --no-progress --no-interaction
 
       - name: Validate composer.json
         run: composer --no-interaction validate --no-check-all
@@ -116,9 +116,8 @@ jobs:
         run: vendor/bin/phpcs -q --report=checkstyle --runtime-set ignore_errors_on_exit 1 --runtime-set ignore_warnings_on_exit 1 | cs2pr --graceful-warnings
 
       - name: Normalize composer.json
-        # composer-normalize requires PHP 7.1+; locked to v2.9.0 as it's the last version that supports Composer v1
         run: |
-          composer require --no-interaction --dev ergebnis/composer-normalize:2.9.0 --ignore-platform-reqs
+          composer require --no-interaction --dev ergebnis/composer-normalize --ignore-platform-reqs
           composer --no-interaction normalize --dry-run
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -136,7 +135,6 @@ jobs:
           # phpstan requires PHP 7.1+.
           php-version: 7.4
           extensions: dom, iconv, json, libxml, zip
-          tools: composer:v1
 
       - name: Get Composer Cache Directory
         id: composer-cache
@@ -210,8 +208,6 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '7.4'
-          coverage: none
-          tools: composer:v1
 
       - name: Get Composer Cache Directory
         id: composer-cache
@@ -243,7 +239,7 @@ jobs:
           CI: true
 
       - name: Install Composer dependencies
-        run: composer install --prefer-dist --optimize-autoloader  --no-suggest --no-progress --no-interaction
+        run: composer install --prefer-dist --optimize-autoloader --no-progress --no-interaction
 
       - name: Build plugin
         run: |
@@ -337,7 +333,6 @@ jobs:
           extensions: curl, date, dom, gd, iconv, json, libxml, mysql, spl
           coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
           ini-values: pcov.directory=.
-          tools: composer:v1, cs2pr
 
       - name: Shutdown default MySQL service
         run: sudo service mysql stop
@@ -361,7 +356,7 @@ jobs:
             ${{ runner.os }}-composer-
 
       - name: Install Composer dependencies
-        run: composer install --prefer-dist --ignore-platform-reqs --no-suggest --no-progress --no-interaction
+        run: composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
 
       - name: Get npm cache directory
         id: npm-cache
@@ -452,8 +447,6 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '7.4'
-          coverage: none
-          tools: composer:v1
 
       - name: Get Composer Cache Directory
         id: composer-cache
