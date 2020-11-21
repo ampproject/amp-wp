@@ -75,7 +75,7 @@ ErrorTypeIcon.propTypes = {
  * @param {string} props.type Error type code.
  * @param {number} props.status Number indicating the error status.
  */
-function ErrorPanelTitle( { clientId, title, type, status } ) {
+function ErrorPanelTitle( { clientId, title, type } ) {
 	const { blockType } = useSelect( ( select ) => {
 		const blockDetails = clientId ? select( 'core/block-editor' ).getBlock( clientId ) : null;
 		const blockTypeDetails = blockDetails ? select( 'core/blocks' ).getBlockType( blockDetails.name ) : null;
@@ -85,13 +85,6 @@ function ErrorPanelTitle( { clientId, title, type, status } ) {
 			blockType: blockTypeDetails,
 		};
 	}, [ clientId ] );
-
-	const titleText = useMemo( () => {
-		return `${ title } ${
-			status === VALIDATION_ERROR_NEW_ACCEPTED_STATUS || status === VALIDATION_ERROR_ACK_ACCEPTED_STATUS
-				? __( 'removed', 'amp' )
-				: __( 'kept', 'amp' ) }.`;
-	}, [ status, title ] );
 
 	return (
 		<>
@@ -105,18 +98,12 @@ function ErrorPanelTitle( { clientId, title, type, status } ) {
 					</div>
 				) }
 			</div>
-			<span className="amp-error__title-text" dangerouslySetInnerHTML={ { __html: titleText } } />
+			<span className="amp-error__title-text" dangerouslySetInnerHTML={ { __html: title } } />
 		</>
 	);
 }
 ErrorPanelTitle.propTypes = {
 	clientId: PropTypes.string,
-	status: PropTypes.oneOf( [
-		VALIDATION_ERROR_NEW_REJECTED_STATUS,
-		VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
-		VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
-		VALIDATION_ERROR_ACK_REJECTED_STATUS,
-	] ),
 	title: PropTypes.string.isRequired,
 	type: PropTypes.string.isRequired,
 };
@@ -128,7 +115,8 @@ ErrorPanelTitle.propTypes = {
  * @param {string} props.clientId Block client ID
  * @param {number} props.status Number indicating the error status.
  */
-function ErrorContent( { clientId, status } ) {
+function ErrorContent( { clientId, status, ...props } ) {
+	console.log( props );
 	const paragraphContent = useMemo( () => {
 		const content = [];
 
@@ -182,7 +170,7 @@ ErrorContent.propTypes = {
 export function Error( { clientId, status, term_id: termId, ...props } ) {
 	const { selectBlock } = useDispatch( 'core/block-editor' );
 	const reviewLink = useSelect( ( select ) => select( BLOCK_VALIDATION_STORE_KEY ).getReviewLink() );
-	console.log( props );
+
 	const reviewed = status === VALIDATION_ERROR_ACK_ACCEPTED_STATUS || status === VALIDATION_ERROR_ACK_REJECTED_STATUS;
 
 	return (
