@@ -1,4 +1,4 @@
-name: Build, test & measure
+name: www.onsky.co
 
 on:
   push:
