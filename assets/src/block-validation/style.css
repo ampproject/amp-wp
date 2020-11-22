@@ -132,13 +132,14 @@
 .amp-error__icons {
 	align-items: center;
 	display: flex;
-	padding-right: 1rem;
+	padding-right: 0.5rem;
 }
 
-.amp-error__error-type-icon,
-.amp-error__block-type-icon {
+.amp-error__error-type-icon {
 	align-items: center;
+	background: #707070;
 	border: 1px solid #707070;
+	border-radius: 12px;
 	display: flex;
 	height: 24px;
 	justify-content: center;
@@ -146,20 +147,8 @@
 	width: 24px;
 }
 
-.amp-error__error-type-icon {
-	background: #707070;
-	border-radius: 12px;
-}
-
 .amp-error__block-type-icon {
-	background: #fff;
-	border-radius: 12px;
-	margin-left: -3px;
-}
-
-.amp-error__block-type-icon svg {
-	height: 16px;
-	width: 16px;
+	padding: 0.375rem;
 }
 
 .amp-error__title-text {

@@ -11,6 +11,7 @@ import { Button, PanelBody } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
+import { BlockIcon } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -70,31 +71,20 @@ ErrorTypeIcon.propTypes = {
  * Panel title component for an individual error.
  *
  * @param {Object} props Component props.
- * @param {string} props.clientId Client ID.
+ * @param {Object} props.blockType
  * @param {string} props.title Title string from error data.
  * @param {string} props.type Error type code.
- * @param {number} props.status Number indicating the error status.
  */
-function ErrorPanelTitle( { clientId, title, type } ) {
-	const { blockType } = useSelect( ( select ) => {
-		const blockDetails = clientId ? select( 'core/block-editor' ).getBlock( clientId ) : null;
-		const blockTypeDetails = blockDetails ? select( 'core/blocks' ).getBlockType( blockDetails.name ) : null;
-
-		return {
-			block: blockDetails,
-			blockType: blockTypeDetails,
-		};
-	}, [ clientId ] );
-
+function ErrorPanelTitle( { blockType, title, type } ) {
 	return (
 		<>
 			<div className="amp-error__icons">
 				<div className="amp-error__error-type-icon">
 					<ErrorTypeIcon type={ type } />
 				</div>
-				{ blockType?.icon?.src && (
+				{ blockType?.icon && (
 					<div className="amp-error__block-type-icon">
-						{ blockType.icon.src }
+						<BlockIcon icon={ blockType.icon } />
 					</div>
 				) }
 			</div>
@@ -103,7 +93,7 @@ function ErrorPanelTitle( { clientId, title, type } ) {
 	);
 }
 ErrorPanelTitle.propTypes = {
-	clientId: PropTypes.string,
+	blockType: PropTypes.object.isRequired,
 	title: PropTypes.string.isRequired,
 	type: PropTypes.string.isRequired,
 };
@@ -112,11 +102,12 @@ ErrorPanelTitle.propTypes = {
  * Content inside an error panel.
  *
  * @param {Object} props Component props.
+ * @param {Object} props.blockType Block type details.
  * @param {string} props.clientId Block client ID
  * @param {number} props.status Number indicating the error status.
  */
-function ErrorContent( { clientId, status, ...props } ) {
-	console.log( props );
+function ErrorContent( { blockType, clientId, status, ...props } ) {
+	console.log( blockType );
 	const paragraphContent = useMemo( () => {
 		const content = [];
 
@@ -173,16 +164,25 @@ export function Error( { clientId, status, term_id: termId, ...props } ) {
 
 	const reviewed = status === VALIDATION_ERROR_ACK_ACCEPTED_STATUS || status === VALIDATION_ERROR_ACK_REJECTED_STATUS;
 
+	const { blockType } = useSelect( ( select ) => {
+		const blockDetails = clientId ? select( 'core/block-editor' ).getBlock( clientId ) : null;
+		const blockTypeDetails = blockDetails ? select( 'core/blocks' ).getBlockType( blockDetails.name ) : null;
+
+		return {
+			blockType: blockTypeDetails,
+		};
+	}, [ clientId ] );
+
 	return (
 		<li>
 			<PanelBody
 				className={ `amp-error amp-error--${ reviewed ? 'reviewed' : 'new' }` }
 				title={
-					<ErrorPanelTitle { ...props } clientId={ clientId } status={ status } />
+					<ErrorPanelTitle { ...props } blockType={ blockType } status={ status } />
 				}
 				initialOpen={ false }
 			>
-				<ErrorContent { ...props } clientId={ clientId } status={ status } />
+				<ErrorContent { ...props } blockType={ blockType } status={ status } />
 				{
 					clientId && (
 						<div className="amp-error__actions">

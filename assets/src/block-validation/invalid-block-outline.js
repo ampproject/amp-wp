@@ -3,6 +3,7 @@
  */
 import { useSelect } from '@wordpress/data';
 import { useMemo } from '@wordpress/element';
+
 /**
  * Internal dependencies
  */
