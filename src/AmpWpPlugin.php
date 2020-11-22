@@ -56,6 +56,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 */
 	const SERVICES = [
 		'admin.analytics_menu'              => Admin\AnalyticsOptionsSubmenu::class,
+		'admin.block_sources'               => Admin\BlockSources::class,
 		'admin.google_fonts'                => Admin\GoogleFonts::class,
 		'admin.onboarding_menu'             => Admin\OnboardingWizardSubmenu::class,
 		'admin.onboarding_wizard'           => Admin\OnboardingWizardSubmenuPage::class,
