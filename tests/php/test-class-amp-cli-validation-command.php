@@ -16,7 +16,7 @@ use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
  *
  * @coversDefaultClass AMP_CLI_Validation_Command
  */
-class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
+class Test_AMP_CLI_Validation_Command extends WP_UnitTestCase {
 
 	use PrivateAccess;
 
