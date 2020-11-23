@@ -52,13 +52,17 @@ final class URLValidationCronTest extends WP_UnitTestCase {
 	/**
 	 * Test validate_urls.
 	 *
+	 * @covers ::process()
 	 * @covers ::validate_urls()
 	 * @covers ::get_url_validation_number_per_type()
+	 * @covers ::get_sleep_time()
 	 */
 	public function test_validate_urls() {
 		$this->factory()->post->create_many( 5 );
 
-		$this->test_instance->validate_urls( false );
+		add_filter( 'amp_url_validation_sleep_time', '__return_false' );
+
+		$this->test_instance->process();
 		$this->assertCount( 6, $this->get_validated_urls() );
 	}
 }

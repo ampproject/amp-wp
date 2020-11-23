@@ -33,30 +33,29 @@ final class URLValidationCron extends CronBasedBackgroundTask {
 	const DEFAULT_LIMIT_PER_TYPE = 1;
 
 	/**
+	 * The length of time, in seconds, to sleep between each URL validation.
+	 *
+	 * @var int
+	 */
+	const DEFAULT_SLEEP_TIME = 1;
+
+	/**
 	 * Callback for the cron action.
 	 */
 	public function process() {
-		$this->validate_urls();
-	}
-
-	/**
-	 * Validates URLs beginning at the next offset.
-	 *
-	 * @param boolean $sleep Whether to sleep between URLs. This should only be false in testing.
-	 */
-	public function validate_urls( $sleep = true ) {
 		$number_per_type         = $this->get_url_validation_number_per_type();
 		$validation_url_provider = new ScannableURLProvider( $number_per_type, [], true );
 		$urls                    = $validation_url_provider->get_urls();
+		$sleep_time              = $this->get_sleep_time();
 
 		$validation_provider = new URLValidationProvider();
 
 		$validation_provider->with_lock(
-			static function() use ( $validation_provider, $sleep, $urls ) {
+			static function() use ( $validation_provider, $sleep_time, $urls ) {
 				foreach ( $urls as $url ) {
 					$validation_provider->get_url_validation( $url['url'], $url['type'], true );
-					if ( $sleep ) {
-						sleep( 1 );
+					if ( $sleep_time ) {
+						sleep( $sleep_time );
 					}
 				}
 			}
@@ -95,8 +94,23 @@ final class URLValidationCron extends CronBasedBackgroundTask {
 		/**
 		 * Filters the number of URLs per content type to check during each run of the cron task.
 		 *
-		 * @param int The number of URLs. Default 2.
+		 * @param int The number of URLs. Default 1.
 		 */
 		return (int) apply_filters( 'amp_url_validation_number_per_type', self::DEFAULT_LIMIT_PER_TYPE );
+	}
+
+	/**
+	 * Provides the length of time, in seconds, to sleep between validating URLs.
+	 *
+	 * @return int
+	 */
+	private function get_sleep_time() {
+
+		/**
+		 * Filters the length of time to sleep between validating URLs.
+		 *
+		 * @param int The number of seconds. Default 1.
+		 */
+		return (int) apply_filters( 'amp_url_validation_sleep_time', self::DEFAULT_SLEEP_TIME );
 	}
 }

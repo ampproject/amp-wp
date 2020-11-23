@@ -48,12 +48,18 @@ final class BackgroundTaskDeactivator implements Service, Conditional, Registera
 	}
 
 	/**
+	 * Class constructor.
+	 */
+	public function __construct() {
+		$this->plugin_file = plugin_basename( AMP__DIR__ . '/amp.php' );
+	}
+
+	/**
 	 * Register the service with the system.
 	 *
 	 * @return void
 	 */
 	public function register() {
-		$this->plugin_file = plugin_basename( dirname( dirname( __DIR__ ) ) . '/amp.php' );
 		add_action( "network_admin_plugin_action_links_{$this->plugin_file}", [ $this, 'add_warning_sign_to_network_deactivate_action' ], 10, 1 );
 		add_action( 'plugin_row_meta', [ $this, 'add_warning_to_plugin_meta' ], 10, 2 );
 	}
