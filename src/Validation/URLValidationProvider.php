@@ -226,9 +226,9 @@ final class URLValidationProvider {
 				static function( $error ) {
 					$validation_status = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error );
 					return (
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $validation_status['term_status']
-					&&
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS !== $validation_status['term_status']
+						AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $validation_status['term_status']
+						&&
+						AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS !== $validation_status['term_status']
 					);
 				}
 			)
@@ -249,7 +249,7 @@ final class URLValidationProvider {
 				'total' => 0,
 			];
 		}
-			$this->validity_by_type[ $type ]['total']++;
+		$this->validity_by_type[ $type ]['total']++;
 		if ( 0 === $unaccepted_error_count ) {
 			$this->validity_by_type[ $type ]['valid']++;
 		}
