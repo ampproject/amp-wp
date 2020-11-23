@@ -277,10 +277,11 @@ final class AMP_CLI_Validation_Command {
 	 * @param array $urls URLs to validate, or null to get URLs from the scannable URL provider.
 	 */
 	private function validate_urls( $urls = null ) {
+		$url_validation_provider = $this->get_validation_provider();
+
 		if ( ! $urls ) {
-			$scannable_url_provider  = $this->get_validation_url_provider();
-			$url_validation_provider = $this->get_validation_provider();
-			$urls                    = $scannable_url_provider->get_urls();
+			$scannable_url_provider = $this->get_validation_url_provider();
+			$urls                   = $scannable_url_provider->get_urls();
 		}
 
 		foreach ( $urls as $url ) {
