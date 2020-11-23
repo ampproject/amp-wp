@@ -1,10 +1,12 @@
 ## Methods
 
 * [`AMP_Base_Embed_Handler::__construct()`](AMP_Base_Embed_Handler/__construct.md) - Constructor.
+* [`AMP_Base_Embed_Handler::get_child_elements()`](AMP_Base_Embed_Handler/get_child_elements.md) - Get all child elements of the specified element.
 * [`AMP_Base_Embed_Handler::get_scripts()`](AMP_Base_Embed_Handler/get_scripts.md) - Get mapping of AMP component names to AMP script URLs.
 * [`AMP_Base_Embed_Handler::match_element_attributes()`](AMP_Base_Embed_Handler/match_element_attributes.md) - Get regex pattern for matching HTML attributes from a given tag name.
 * [`AMP_Base_Embed_Handler::register_embed()`](AMP_Base_Embed_Handler/register_embed.md) - Registers embed.
 * [`AMP_Base_Embed_Handler::unregister_embed()`](AMP_Base_Embed_Handler/unregister_embed.md) - Unregisters embed.
+* [`AMP_Base_Embed_Handler::unwrap_p_element()`](AMP_Base_Embed_Handler/unwrap_p_element.md) - Replace an element&#039;s parent with itself if the parent is a &lt;p&gt; tag which has no attributes and has no other children.
 * [`AMP_Base_Sanitizer::__construct()`](AMP_Base_Sanitizer/__construct.md) - AMP_Base_Sanitizer constructor.
 * [`AMP_Base_Sanitizer::add_buffering_hooks()`](AMP_Base_Sanitizer/add_buffering_hooks.md) - Add filters to manipulate output during output buffering before the DOM is constructed.
 * [`AMP_Base_Sanitizer::add_or_append_attribute()`](AMP_Base_Sanitizer/add_or_append_attribute.md) - Adds or appends key and value to list of attributes

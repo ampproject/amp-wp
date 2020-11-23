@@ -15,7 +15,7 @@ use WP_UnitTestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Validation\ScannableURLProvider */
 final class ScannableURLProviderTest extends WP_UnitTestCase {
-	use PrivateAccess, AssertContainsCompatibility;
+	use PrivateAccess, AssertContainsCompatibility, ValidationRequestMocking;
 
 	/**
 	 * Validation URL provider instance to use.
@@ -32,10 +32,10 @@ final class ScannableURLProviderTest extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 		$this->scannable_url_provider = new ScannableURLProvider();
-		add_filter( 'pre_http_request', [ ValidationRequestMocking::class, 'get_validate_response' ] );
+		add_filter( 'pre_http_request', [ $this, 'get_validate_response' ] );
 	}
 
-	/** @covers ::__construct */
+	/** @covers ::__construct() */
 	public function test__construct() {
 		$this->assertInstanceOf( ScannableURLProvider::class, $this->scannable_url_provider );
 	}

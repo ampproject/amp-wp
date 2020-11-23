@@ -28,18 +28,11 @@ final class URLValidationProvider {
 	const LOCK_KEY = 'amp_validation_locked';
 
 	/**
-	 * Flag to pass to get_url_validation to force revalidation.
+	 * The length of time to keep the lock in place if a process fails to unlock.
 	 *
-	 * @param string
+	 * @var int
 	 */
-	const FLAG_FORCE_REVALIDATE = 'amp_force_revalidate';
-
-	/**
-	 * Flag to pass to get_url_validation to skip revalidation.
-	 *
-	 * @param string
-	 */
-	const FLAG_NO_REVALIDATE = 'amp_no_revalidate';
+	const LOCK_TIMEOUT = 5 * MINUTE_IN_SECONDS;
 
 	/**
 	 * The total number of validation errors, regardless of whether they were accepted.
@@ -102,21 +95,7 @@ final class URLValidationProvider {
 		$lock_time = (int) get_option( self::LOCK_KEY, 0 );
 
 		// It's locked if the difference between the lock time and the current time is less than the lockout time.
-		return time() - $lock_time < $this->get_lock_timeout();
-	}
-
-	/**
-	 * Provides the length of time, in seconds, to lock validation when this runs.
-	 *
-	 * @return int
-	 */
-	private function get_lock_timeout() {
-		/**
-		 * Filters the length of time to lock URL validation when a process starts.
-		 *
-		 * @param int $timeout Time in seconds. Default 300 seconds.
-		 */
-		return apply_filters( 'amp_validation_lock_timeout', 5 * MINUTE_IN_SECONDS );
+		return time() - $lock_time < self::LOCK_TIMEOUT;
 	}
 
 	/**
@@ -138,6 +117,13 @@ final class URLValidationProvider {
 		$this->unlock();
 
 		return $result;
+	}
+
+	/**
+	 * Resets the lock timeout. This allows long-running processes to keep running beyond the lock timeout.
+	 */
+	public function reset_lock() {
+		$this->lock();
 	}
 
 	/**
@@ -181,14 +167,14 @@ final class URLValidationProvider {
 	 *
 	 * @param string $url  The URL to validate.
 	 * @param string $type The type of template, post, or taxonomy.
-	 * @param string $flag Flag determining whether the URL should be revalidated.
+	 * @param bool   $force_revalidate Whether to force revalidation regardless of whether the current results are stale.
 	 * @return array|WP_Error Associative array containing validity result and whether the URL was revalidated, or a WP_Error on failure.
 	 */
-	public function get_url_validation( $url, $type, $flag = null ) {
+	public function get_url_validation( $url, $type, $force_revalidate = false ) {
 		$validity    = null;
 		$revalidated = true;
 
-		if ( self::FLAG_FORCE_REVALIDATE !== $flag ) {
+		if ( ! $force_revalidate ) {
 			$url_post = AMP_Validated_URL_Post_Type::get_invalid_url_post( $url );
 
 			if ( $url_post && empty( AMP_Validated_URL_Post_Type::get_post_staleness( $url_post ) ) ) {
@@ -197,7 +183,7 @@ final class URLValidationProvider {
 			}
 		}
 
-		if ( self::FLAG_NO_REVALIDATE !== $flag && ( is_null( $validity ) || self::FLAG_FORCE_REVALIDATE === $flag ) ) {
+		if ( is_null( $validity ) ) {
 			$validity = AMP_Validation_Manager::validate_url_and_store( $url );
 		}
 
@@ -226,9 +212,9 @@ final class URLValidationProvider {
 				static function( $error ) {
 					$validation_status = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error );
 					return (
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $validation_status['term_status']
-					&&
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS !== $validation_status['term_status']
+						AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $validation_status['term_status']
+						&&
+						AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS !== $validation_status['term_status']
 					);
 				}
 			)
@@ -249,7 +235,7 @@ final class URLValidationProvider {
 				'total' => 0,
 			];
 		}
-			$this->validity_by_type[ $type ]['total']++;
+		$this->validity_by_type[ $type ]['total']++;
 		if ( 0 === $unaccepted_error_count ) {
 			$this->validity_by_type[ $type ]['valid']++;
 		}

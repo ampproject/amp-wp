@@ -33,7 +33,7 @@ Class AMP_Base_Sanitizer
 * [`get_validate_response_data`](../method/AMP_Base_Sanitizer/get_validate_response_data.md) - Get data that is returned in validate responses.
 ### Source
 
-:link: [includes/sanitizers/class-amp-base-sanitizer.php:16](/includes/sanitizers/class-amp-base-sanitizer.php#L16-L802)
+:link: [includes/sanitizers/class-amp-base-sanitizer.php:16](/includes/sanitizers/class-amp-base-sanitizer.php#L16-L803)
 
 <details>
 <summary>Show Code</summary>
@@ -347,6 +347,7 @@ abstract class AMP_Base_Sanitizer {
 					$attributes['style'] = $this->reassemble_style_string( $styles );
 				}
 				$attributes['layout'] = 'fill';
+				unset( $attributes['height'], $attributes['width'] );
 				return $attributes;
 			}
 
