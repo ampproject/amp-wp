@@ -127,6 +127,13 @@ final class URLValidationProvider {
 	}
 
 	/**
+	 * Resets the lock timeout. This allows long-running processes to keep running beyond the lock timeout.
+	 */
+	public function reset_lock() {
+		$this->lock();
+	}
+
+	/**
 	 * Provides the total number of validation errors found.
 	 *
 	 * @return int

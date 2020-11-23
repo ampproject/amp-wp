@@ -284,7 +284,12 @@ final class AMP_CLI_Validation_Command {
 			$urls                   = $scannable_url_provider->get_urls();
 		}
 
-		foreach ( $urls as $url ) {
+		foreach ( $urls as $index => $url ) {
+			// Reset lock between every five URLs.
+			if ( 0 === $index % 5 ) {
+				$this->url_validation_provider->reset_lock();
+			}
+
 			$validity = $url_validation_provider->get_url_validation( $url['url'], $url['type'], true );
 
 			if ( $this->wp_cli_progress ) {
