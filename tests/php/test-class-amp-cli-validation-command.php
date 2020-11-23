@@ -18,7 +18,7 @@ use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
  */
 class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 
-	use PrivateAccess;
+	use PrivateAccess, ValidationRequestMocking;
 
 	/**
 	 * Store a reference to the validation command object.
@@ -37,7 +37,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->validation = new AMP_CLI_Validation_Command();
-		add_filter( 'pre_http_request', [ ValidationRequestMocking::class, 'get_validate_response' ] );
+		add_filter( 'pre_http_request', [ $this, 'get_validate_response' ] );
 	}
 
 	/**
@@ -62,7 +62,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		$this->call_private_method( $this->validation, 'validate_urls' );
 
 		// All of the posts created above should be present in $validated_urls.
-		$this->assertEmpty( array_diff( $post_permalinks, ValidationRequestMocking::get_validated_urls() ) );
+		$this->assertEmpty( array_diff( $post_permalinks, $this->get_validated_urls() ) );
 
 		$this->validation = new AMP_CLI_Validation_Command();
 		for ( $i = 0; $i < $number_of_terms; $i++ ) {
@@ -73,10 +73,10 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		wp_set_post_terms( $posts[0], $terms, 'category' );
 		$this->call_private_method( $this->validation, 'validate_urls' );
 		$expected_validated_urls = array_map( 'get_term_link', $terms );
-		$actual_validated_urls   = ValidationRequestMocking::get_validated_urls();
+		$actual_validated_urls   = $this->get_validated_urls();
 
 		// All of the terms created above should be present in $validated_urls.
 		$this->assertEmpty( array_diff( $expected_validated_urls, $actual_validated_urls ) );
-		$this->assertContains( home_url( '/' ), ValidationRequestMocking::get_validated_urls() );
+		$this->assertContains( home_url( '/' ), $this->get_validated_urls() );
 	}
 }

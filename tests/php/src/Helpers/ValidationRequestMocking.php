@@ -6,18 +6,18 @@ use AMP_Validated_URL_Post_Type;
 use WP_Query;
 
 /**
- * Class ValidationRequestMocking
+ * Trait ValidationRequestMocking
  *
  * Helpers for validation tests.
  */
-final class ValidationRequestMocking {
+trait ValidationRequestMocking {
 
 	/**
 	 * Gets all of the validated URLs.
 	 *
 	 * @return string[] $urls The validated URLs.
 	 */
-	public static function get_validated_urls() {
+	public function get_validated_urls() {
 		$query = new WP_Query(
 			[
 				'post_type'      => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
@@ -39,7 +39,7 @@ final class ValidationRequestMocking {
 	 *
 	 * @return array The response.
 	 */
-	public static function get_validate_response() {
+	public function get_validate_response() {
 		$mock_validation = [
 			'results' => [
 				[
