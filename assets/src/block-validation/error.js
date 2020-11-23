@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
  */
 import { useDispatch, useSelect } from '@wordpress/data';
 import { Button, PanelBody } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import { sprintf, __ } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
 import { BlockIcon } from '@wordpress/block-editor';
@@ -33,7 +33,12 @@ import { NewTabIcon } from './icon';
  * @param {string} props.type The error type.
  */
 function ErrorTypeIcon( { type } ) {
-	const { CSS_ERROR_TYPE, HTML_ATTRIBUTE_ERROR_TYPE, HTML_ELEMENT_ERROR_TYPE, JS_ERROR_TYPE } = useInlineData( 'ampBlockValidation', {} );
+	const {
+		CSS_ERROR_TYPE,
+		HTML_ATTRIBUTE_ERROR_TYPE,
+		HTML_ELEMENT_ERROR_TYPE,
+		JS_ERROR_TYPE,
+	} = useInlineData( 'ampBlockValidation', {} );
 
 	switch ( type ) {
 		case HTML_ATTRIBUTE_ERROR_TYPE:
@@ -93,7 +98,7 @@ function ErrorPanelTitle( { blockType, title, type } ) {
 	);
 }
 ErrorPanelTitle.propTypes = {
-	blockType: PropTypes.object.isRequired,
+	blockType: PropTypes.object,
 	title: PropTypes.string.isRequired,
 	type: PropTypes.string.isRequired,
 };
@@ -106,22 +111,60 @@ ErrorPanelTitle.propTypes = {
  * @param {string} props.clientId Block client ID
  * @param {number} props.status Number indicating the error status.
  */
-function ErrorContent( { blockType, clientId, status, ...props } ) {
-	console.log( blockType );
+function ErrorContent( { blockType, clientId, status } ) {
+	const { blockSources } = useInlineData( 'ampBlockValidation' );
+
+	const blockSource = blockSources[ blockType?.name ];
+	const title = blockType?.title;
+
 	const paragraphContent = useMemo( () => {
 		const content = [];
 
-		if ( clientId ) {
-			content.push(
-				__( 'This error comes from a block in this post.', 'amp' ),
-			);
+		if ( clientId && blockSource ) {
+			switch ( blockSource.source ) {
+				case 'core':
+					// Translators: placeholder is block type title.
+					content.push( sprintf(
+						// Translators: placeholder is block type title.
+						__( `This error comes from a %s block registered by WordPress core.`, 'amp' ),
+						title,
+					) );
+					break;
+
+				case 'plugin':
+					content.push( sprintf(
+						// Translators: first placeholder is block type title; second placeholder is the name of a plugin.
+						__( `This error comes from a %1$s block registered by the %2$s plugin.`, 'amp' ),
+						title,
+						blockSource.name,
+					) );
+					break;
+
+				case 'theme':
+					content.push( sprintf(
+						// Translators: first placeholder is block type title; second placeholder is the name of a plugin.
+						__( `This error comes from a %1$s block registered by the %2$s theme.`, 'amp' ),
+						title,
+						blockSource.name,
+					) );
+					break;
+
+				default:
+					content.push( sprintf(
+						// Translators: placeholder is block type title.
+						__( `This error comes from a %1$s block registered by an unknown theme or plugin.`, 'amp' ),
+						title,
+						blockSource.name,
+					) );
+					break;
+			}
 		} else {
 			content.push(
 				__( 'This error comes from outside the post content.', 'amp' ),
 			);
 		}
 
-		if ( 1 === status ) {
+		if ( [ VALIDATION_ERROR_NEW_ACCEPTED_STATUS, VALIDATION_ERROR_ACK_ACCEPTED_STATUS ].includes( status ) ) {
 			content.push(
 				__( 'It has been removed from the page.', 'amp' ),
 			);
@@ -132,7 +175,7 @@ function ErrorContent( { blockType, clientId, status, ...props } ) {
 		}
 
 		return content;
-	}, [ clientId, status ] );
+	}, [ clientId, status, blockSource, title ] );
 
 	return (
 		<p>
@@ -141,6 +184,10 @@ function ErrorContent( { blockType, clientId, status, ...props } ) {
 	);
 }
 ErrorContent.propTypes = {
+	blockType: PropTypes.shape( {
+		name: PropTypes.string,
+		title: PropTypes.string,
+	} ),
 	clientId: PropTypes.string,
 	status: PropTypes.oneOf( [
 		VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
@@ -174,7 +221,7 @@ export function Error( { clientId, status, term_id: termId, ...props } ) {
 	}, [ clientId ] );
 
 	return (
-		<li>
+		<li className="amp-error-container">
 			<PanelBody
 				className={ `amp-error amp-error--${ reviewed ? 'reviewed' : 'new' }` }
 				title={
@@ -182,26 +229,31 @@ export function Error( { clientId, status, term_id: termId, ...props } ) {
 				}
 				initialOpen={ false }
 			>
-				<ErrorContent { ...props } blockType={ blockType } status={ status } />
-				{
-					clientId && (
-						<div className="amp-error__actions">
-							<Button
-								className="amp-error__select-block"
-								isSecondary
-								onClick={ () => {
-									selectBlock( clientId );
-								} }
-							>
-								{ __( 'Select Block', 'amp' ) }
-							</Button>
-							<a href={ addQueryArgs( reviewLink, { term_id: termId } ) } target="_blank" rel="noreferrer" className="amp-error__details-link">
-								{ __( 'View details', 'amp' ) }
-								<NewTabIcon />
-							</a>
-						</div>
-					)
-				}
+				<ErrorContent { ...props } clientId={ clientId } blockType={ blockType } status={ status } />
+
+				<div className="amp-error__actions">
+					{ clientId && (
+						<Button
+							className="amp-error__select-block"
+							isSecondary
+							onClick={ () => {
+								selectBlock( clientId );
+							} }
+						>
+							{ __( 'Select Block', 'amp' ) }
+						</Button>
+					) }
+					<a
+						href={ addQueryArgs( reviewLink, { term_id: termId } ) }
+						target="_blank"
+						rel="noreferrer"
+						className="amp-error__details-link"
+					>
+						{ __( 'View details', 'amp' ) }
+						<NewTabIcon />
+					</a>
+				</div>
+
 			</PanelBody>
 		</li>
 	);
@@ -210,6 +262,4 @@ Error.propTypes = {
 	clientId: PropTypes.string,
 	status: PropTypes.number.isRequired,
 	term_id: PropTypes.number.isRequired,
-	title: PropTypes.string.isRequired,
-	type: PropTypes.string.isRequired,
 };

@@ -130,5 +130,6 @@ export function BlockValidationStateUpdater() {
 		rawValidationErrorsFromSource,
 	] );
 
+	console.log( validationErrors );
 	return null;
 }
