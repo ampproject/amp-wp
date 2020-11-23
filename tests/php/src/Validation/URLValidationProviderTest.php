@@ -70,7 +70,6 @@ final class URLValidationProviderTest extends WP_UnitTestCase {
 	 * @covers ::lock()
 	 * @covers ::unlock()
 	 * @covers ::is_locked()
-	 * @covers ::get_lock_timeout()
 	 * @covers ::with_lock()
 	 */
 	public function test_locking() {

@@ -28,6 +28,13 @@ final class URLValidationProvider {
 	const LOCK_KEY = 'amp_validation_locked';
 
 	/**
+	 * The length of time to keep the lock in place if a process fails to unlock.
+	 * 
+	 * @var int
+	 */
+	const LOCK_TIMEOUT = 5 * MINUTE_IN_SECONDS;
+
+	/**
 	 * The total number of validation errors, regardless of whether they were accepted.
 	 *
 	 * @var int
@@ -88,21 +95,7 @@ final class URLValidationProvider {
 		$lock_time = (int) get_option( self::LOCK_KEY, 0 );
 
 		// It's locked if the difference between the lock time and the current time is less than the lockout time.
-		return time() - $lock_time < $this->get_lock_timeout();
-	}
-
-	/**
-	 * Provides the length of time, in seconds, to lock validation when this runs.
-	 *
-	 * @return int
-	 */
-	private function get_lock_timeout() {
-		/**
-		 * Filters the length of time to lock URL validation when a process starts.
-		 *
-		 * @param int $timeout Time in seconds. Default 300 seconds.
-		 */
-		return apply_filters( 'amp_validation_lock_timeout', 5 * MINUTE_IN_SECONDS );
+		return time() - $lock_time < self::LOCK_TIMEOUT;
 	}
 
 	/**
