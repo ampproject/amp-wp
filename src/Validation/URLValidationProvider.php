@@ -29,7 +29,7 @@ final class URLValidationProvider {
 
 	/**
 	 * The length of time to keep the lock in place if a process fails to unlock.
-	 * 
+	 *
 	 * @var int
 	 */
 	const LOCK_TIMEOUT = 5 * MINUTE_IN_SECONDS;
