@@ -524,9 +524,17 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 */
 	public function handle_options_update( $old_options, $new_options ) {
 		if (
-			isset( $old_options[ Option::PAIRED_URL_STRUCTURE ], $new_options[ Option::PAIRED_URL_STRUCTURE ] )
-			&&
-			$old_options[ Option::PAIRED_URL_STRUCTURE ] !== $new_options[ Option::PAIRED_URL_STRUCTURE ]
+			(
+				isset( $old_options[ Option::THEME_SUPPORT ], $new_options[ Option::THEME_SUPPORT ] )
+				&&
+				$old_options[ Option::THEME_SUPPORT ] !== $new_options[ Option::THEME_SUPPORT ]
+			)
+			||
+			(
+				isset( $old_options[ Option::PAIRED_URL_STRUCTURE ], $new_options[ Option::PAIRED_URL_STRUCTURE ] )
+				&&
+				$old_options[ Option::PAIRED_URL_STRUCTURE ] !== $new_options[ Option::PAIRED_URL_STRUCTURE ]
+			)
 		) {
 			$this->maybe_add_rewrite_endpoint();
 			$this->flush_rewrite_rules();
