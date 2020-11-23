@@ -39,6 +39,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected static $supported_themes = [
+		'twentytwentyone',
 		'twentytwenty',
 		'twentynineteen',
 		'twentyseventeen',
@@ -79,6 +80,24 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected static function get_theme_features_config( $theme_slug ) {
 		switch ( $theme_slug ) {
+			case 'twentytwentyone':
+				return [
+					'dequeue_scripts' => [
+						'twenty-twenty-one-responsive-embeds-script',
+					],
+					'remove_actions'                     => [
+						'wp_print_footer_scripts' => [
+							'twenty_twenty_one_skip_link_focus_fix', // Unnecessary since part of the AMP runtime.
+						],
+						'wp_footer' => [
+							'twentytwentyone_add_ie_class',
+							'twenty_twenty_one_supports_js', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
+							[ 'Twenty_Twenty_One_Dark_Mode', 'the_switch', 10 ],
+						]
+					],
+					'add_twentytwentyone_dark_mode_styles' => [],
+				];
+
 			// Twenty Twenty.
 			case 'twentytwenty':
 				$config = [
@@ -620,11 +639,38 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param array $actions Actions, with action name as key and value being callback.
 	 */
 	public static function remove_actions( $actions = [] ) {
+		global $wp_filter;
+
 		foreach ( $actions as $action => $callbacks ) {
 			foreach ( $callbacks as $callback ) {
-				$priority = has_action( $action, $callback );
-				if ( false !== $priority ) {
-					remove_action( $action, $callback, $priority );
+				if ( is_array( $callback ) ) {
+					list( $class, $method, $priority ) = $callback;
+
+					if ( isset( $wp_filter[ $action ]->callbacks[ $priority ] ) ) {
+						foreach ( $wp_filter[ $action ]->callbacks[ $priority ] as $added_callback ) {
+							if (
+								is_array( $added_callback['function'] )
+								&&
+								isset( $added_callback['function'][0], $added_callback['function'][1] )
+								&&
+								is_object( $added_callback['function'][0] )
+								&&
+								is_string( $added_callback['function'][1] )
+								&&
+								$method === $added_callback['function'][1]
+								&&
+								$class === get_class( $added_callback['function'][0] )
+							) {
+								remove_action( $action, $added_callback['function'] );
+								return;
+							}
+						}
+					}
+				} else {
+					$priority = has_action( $action, $callback );
+					if ( false !== $priority ) {
+						remove_action( $action, $callback, $priority );
+					}
 				}
 			}
 		}
@@ -1894,7 +1940,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			// Adapt the aria-expanded attribute according to the central state.
 			$toggle->setAttribute( 'data-amp-bind-aria-expanded', "{$state_string} ? 'true' : 'false'" );
 
-			// If the toggle target is 'next' ir a sub-menu, only give the clicked toggle the active class.
+			// If the toggle target is 'next' or a sub-menu, only give the clicked toggle the active class.
 			if ( 'next' === $toggle_target || AMP_DOM_Utils::has_class( $target_node, 'sub-menu' ) ) {
 				AMP_DOM_Utils::add_amp_action( $toggle, 'tap', "{$toggle_id}.toggleClass(class='active')" );
 			} else {
@@ -1930,6 +1976,45 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Modify the Twenty Twenty-One dark mode stylesheet to only apply the relevant rules when the user has requested
+	 * the system use a dark color theme.
+	 */
+	public static function add_twentytwentyone_dark_mode_styles() {
+		add_action(
+			'wp_enqueue_scripts',
+			static function() {
+				// Bail if the dark mode stylesheet is not enqueued.
+				if ( ! wp_style_is( 'tt1-dark-mode' ) ) {
+					return;
+				}
+
+				wp_dequeue_style( 'tt1-dark-mode' );
+
+				$dark_mode_css_file = get_theme_file_path(
+					sprintf( 'assets/css/style-dark-mode%s.css', is_rtl() ? '-rtl' : '' )
+				);
+
+				if ( ! file_exists( $dark_mode_css_file ) ) {
+					return;
+				}
+
+				ob_start();
+				include $dark_mode_css_file;
+				$styles = ob_get_clean();
+
+				// Restrict rules to only when the user has requested the system use a dark color theme.
+				$new_styles = str_replace( '@media only screen', '@media only screen and (prefers-color-scheme: dark)', $styles );
+				// Allow for rules to override the light theme related rules.
+				$new_styles = str_replace( '.is-dark-theme.is-dark-theme', ':root', $new_styles );
+				$new_styles = str_replace( '.respect-color-scheme-preference.is-dark-theme body', '.respect-color-scheme-preference body', $new_styles );
+
+				wp_add_inline_style( 'twenty-twenty-one-style', $new_styles );
+			},
+			11
+		);
 	}
 
 	/**
