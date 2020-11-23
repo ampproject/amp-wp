@@ -19,7 +19,7 @@ use WP_UnitTestCase;
  * @coversDefaultClass \AmpProject\AmpWP\Validation\SavePotValidationEvent
  */
 final class SavePostValidationEventTest extends WP_UnitTestCase {
-	use AssertContainsCompatibility;
+	use AssertContainsCompatibility, ValidationRequestMocking;
 
 	/**
 	 * SavePostValidationEvent instance.
@@ -30,7 +30,7 @@ final class SavePostValidationEventTest extends WP_UnitTestCase {
 
 	public function setUp() {
 		$this->test_instance = new SavePostValidationEvent( new BackgroundTaskDeactivator(), new UserAccess() );
-		add_filter( 'pre_http_request', [ ValidationRequestMocking::class, 'get_validate_response' ] );
+		add_filter( 'pre_http_request', [ $this, 'get_validate_response' ] );
 	}
 
 	/**
@@ -60,6 +60,6 @@ final class SavePostValidationEventTest extends WP_UnitTestCase {
 
 		$this->test_instance->process( $post->ID );
 
-		$this->assertCount( 1, ValidationRequestMocking::get_validated_urls() );
+		$this->assertCount( 1, $this->get_validated_urls() );
 	}
 }

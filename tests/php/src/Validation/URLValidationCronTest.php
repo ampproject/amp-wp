@@ -13,6 +13,8 @@ use WP_UnitTestCase;
 
 /** @coversDefaultClass AmpProject\AmpWP\Validation\URLValidationCron */
 final class URLValidationCronTest extends WP_UnitTestCase {
+	use ValidationRequestMocking;
+
 	/**
 	 * Test instance
 	 *
@@ -28,7 +30,7 @@ final class URLValidationCronTest extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 		$this->test_instance = new URLValidationCron( new BackgroundTaskDeactivator() );
-		add_filter( 'pre_http_request', [ ValidationRequestMocking::class, 'get_validate_response' ] );
+		add_filter( 'pre_http_request', [ $this, 'get_validate_response' ] );
 	}
 
 	/**
@@ -57,6 +59,6 @@ final class URLValidationCronTest extends WP_UnitTestCase {
 		$this->factory()->post->create_many( 5 );
 
 		$this->test_instance->validate_urls( false );
-		$this->assertCount( 6, ValidationRequestMocking::get_validated_urls() );
+		$this->assertCount( 6, $this->get_validated_urls() );
 	}
 }
