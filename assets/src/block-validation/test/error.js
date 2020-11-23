@@ -37,7 +37,6 @@ describe( 'Error', () => {
 		);
 
 		dispatch( 'core/block-editor' ).insertBlock( 'amp/test-block' );
-		const block = select( 'core/block-editor' ).getBlocks()[ 0 ];
 
 		createStore( {
 			reviewLink: 'http://review-link.test',
