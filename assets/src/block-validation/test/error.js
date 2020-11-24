@@ -2,44 +2,65 @@
  * External dependencies
  */
 import { act } from 'react-dom/test-utils';
+import { noop } from 'lodash';
 
 /**
  * WordPress dependencies
  */
 import { render } from '@wordpress/element';
-import { dispatch, select } from '@wordpress/data';
+import { dispatch } from '@wordpress/data';
+import { registerBlockType, createBlock } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
-import { registerBlockType } from '@wordpress/blocks';
 import { Error } from '../error';
-import { VALIDATION_ERROR_ACK_ACCEPTED_STATUS, VALIDATION_ERROR_ACK_REJECTED_STATUS, VALIDATION_ERROR_NEW_ACCEPTED_STATUS, VALIDATION_ERROR_NEW_REJECTED_STATUS } from '../constants';
-import '@wordpress/blocks/build/store/';
-import '@wordpress/block-editor/build/store';
+import {
+	VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+	VALIDATION_ERROR_ACK_REJECTED_STATUS,
+	VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+	VALIDATION_ERROR_NEW_REJECTED_STATUS,
+} from '../constants';
 import { createStore } from '../store';
 
-let container;
+let container, block;
+const TEST_BLOCK = 'my-plugin/test-block';
 
 jest.mock( '../use-inline-data', () => ( {
 	useInlineData: () => ( {
-		blockSources: {},
+		blockSources: {
+			'my-plugin/test-block': {
+				source: 'plugin',
+				name: 'My plugin',
+			},
+		},
 	} ),
 } ) );
 
 describe( 'Error', () => {
 	beforeAll( () => {
-		registerBlockType(
-			'amp/test-block',
-			{
-				title: 'My test block',
-			},
-		);
+		registerBlockType( TEST_BLOCK, {
+			attributes: {},
+			save: noop,
+			category: 'widgets',
+			title: 'test block',
+		} );
 
-		dispatch( 'core/block-editor' ).insertBlock( 'amp/test-block' );
+		block = createBlock( TEST_BLOCK, {} );
+		dispatch( 'core/block-editor' ).insertBlock( block );
 
 		createStore( {
 			reviewLink: 'http://review-link.test',
+			validationErrors: [
+				{
+					clientId: block.clientId,
+					code: 'DISALLOWED_TAG',
+					status: 3,
+					term_id: 12,
+					title: 'Invalid script: <code>jquery.js</code>',
+					type: 'js_error',
+				},
+			],
 		} );
 	} );
 
@@ -102,6 +123,7 @@ describe( 'Error', () => {
 		status,
 		() => (
 			<Error
+				clientId={ block.clientId }
 				status={ status }
 				term_id={ 12 }
 				title="My test block"
@@ -122,14 +144,15 @@ describe( 'Error', () => {
 		expect( container.querySelectorAll( `.amp-error--${ newReviewed }` ) ).toHaveLength( 1 );
 		expect( container.querySelector( '.amp-error__details-link' ) ).toBeNull();
 		expect( container.querySelector( `.amp-error--${ newReviewed } button` ) ).not.toBeNull();
-		expect( container.querySelector( '.amp-error__block-type-icon' ) ).toBeNull();
+		expect( container.querySelector( '.amp-error__block-type-icon' ) ).not.toBeNull();
 
 		container.querySelector( `.amp-error--${ newReviewed } button` ).click();
 		expect( container.querySelector( '.amp-error__details-link' ) ).not.toBeNull();
-		expect( container.querySelector( '.amp-error__select-block' ) ).toBeNull();
+		expect( container.querySelector( '.amp-error__select-block' ) ).not.toBeNull();
 
 		expect( container.querySelector( 'li' ).innerHTML ).toContain(
 			[ VALIDATION_ERROR_NEW_ACCEPTED_STATUS, VALIDATION_ERROR_ACK_ACCEPTED_STATUS ].includes( status ) ? 'removed' : 'kept',
 		);
+		expect( container.querySelector( 'li' ).innerHTML ).toContain( 'registered by the My plugin plugin' );
 	} );
 } );

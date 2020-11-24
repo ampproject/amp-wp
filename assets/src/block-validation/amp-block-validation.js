@@ -1,19 +1,13 @@
 /**
- * External dependencies
- */
-import PropTypes from 'prop-types';
-
-/**
  * WordPress dependencies
  */
 import { PluginSidebar, PluginSidebarMoreMenuItem } from '@wordpress/edit-post';
 import { useSelect } from '@wordpress/data';
-import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { BLOCK_VALIDATION_STORE_KEY, createStore } from './store';
+import { BLOCK_VALIDATION_STORE_KEY } from './store';
 import { ToolbarIcon, MoreMenuIcon } from './icon';
 import { Sidebar } from './sidebar';
 import { InvalidBlockOutline } from './invalid-block-outline';
@@ -22,15 +16,8 @@ import { PLUGIN_NAME, PLUGIN_TITLE, SIDEBAR_NAME } from '.';
 
 /**
  * Provides a dedicated sidebar for the plugin, with toggle buttons in the editor toolbar and more menu.
- *
- * @param {Object} props
- * @param {Object} props.initialState Initial store state.
  */
-export function AMPBlockValidation( { initialState } ) {
-	useEffect( () => {
-		createStore( initialState );
-	}, [ initialState ] );
-
+export function AMPBlockValidation() {
 	const { broken, errorCount } = useSelect( ( select ) => ( {
 		broken: select( BLOCK_VALIDATION_STORE_KEY ).getAMPBroken(),
 		errorCount: select( BLOCK_VALIDATION_STORE_KEY ).getUnreviewedValidationErrors()?.length || 0,
@@ -60,6 +47,4 @@ export function AMPBlockValidation( { initialState } ) {
 		</>
 	);
 }
-AMPBlockValidation.propTypes = {
-	initialState: PropTypes.object.isRequired,
-};
+

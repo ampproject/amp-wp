@@ -3,14 +3,17 @@
  */
 import { registerPlugin } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
+import { addFilter } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
  */
-import { INITIAL_STATE } from './store';
+import { INITIAL_STATE, createStore } from './store';
 import { MoreMenuIcon } from './icon';
-import './toolbar-button';
 import { AMPBlockValidation } from './amp-block-validation';
+import { filterBlocksEdit } from './toolbar-button';
+
+createStore( INITIAL_STATE );
 
 export const PLUGIN_NAME = 'amp-block-validation';
 export const SIDEBAR_NAME = 'amp-editor-sidebar';
@@ -20,6 +23,8 @@ registerPlugin(
 	PLUGIN_NAME,
 	{
 		icon: MoreMenuIcon,
-		render: ( props ) => <AMPBlockValidation initialState={ INITIAL_STATE } { ...props } />,
+		render: AMPBlockValidation,
 	},
 );
+
+addFilter( 'editor.BlockEdit', 'ampBlockValidation/filterEdit', filterBlocksEdit, -99 );

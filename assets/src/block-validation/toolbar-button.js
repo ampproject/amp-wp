@@ -8,7 +8,6 @@ import PropTypes from 'prop-types';
  */
 import { BlockControls } from '@wordpress/block-editor';
 import { ToolbarButton } from '@wordpress/components';
-import { addFilter } from '@wordpress/hooks';
 import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
@@ -53,7 +52,7 @@ AMPBlockToolBarButton.propTypes = {
  *
  * @return {Function} Edit function.
  */
-function filterBlocksEdit( BlockEdit ) {
+export function filterBlocksEdit( BlockEdit ) {
 	// Filter a class component.
 	if ( BlockEdit.prototype.render ) {
 		return class BlockEditWithAmpToolBarButtonClass extends BlockEdit {
@@ -84,4 +83,3 @@ function filterBlocksEdit( BlockEdit ) {
 
 	return BlockEditWithAmpToolBarButtonFunction;
 }
-addFilter( 'editor.BlockEdit', 'ampBlockValidation/filterEdit', filterBlocksEdit, -99 );
