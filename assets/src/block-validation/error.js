@@ -119,13 +119,14 @@ function ErrorContent( { blockType, clientId, status } ) {
 
 	const errorContent = useMemo( () => {
 		const content = [];
+		const uniqueKey = ( id ) => `error-${ clientId }-${ id }`;
 
 		if ( clientId && blockSource ) {
 			content.push(
-				<dt>
+				<dt key={ uniqueKey( 'block-type-title' ) }>
 					{ __( 'Block type', 'amp' ) }
 				</dt>,
-				<dd>
+				<dd key={ uniqueKey( 'block-type-description' ) }>
 					{ title }
 				</dd>,
 
@@ -161,10 +162,10 @@ function ErrorContent( { blockType, clientId, status } ) {
 			}
 
 			content.push(
-				<dt>
+				<dt key={ uniqueKey( 'source-title' ) }>
 					{ __( 'Source', 'amp' ) }
 				</dt>,
-				<dd>
+				<dd key={ uniqueKey( 'source-description' ) }>
 					{ source }
 				</dd>,
 			);
@@ -172,16 +173,16 @@ function ErrorContent( { blockType, clientId, status } ) {
 
 		let keptRemoved;
 		if ( [ VALIDATION_ERROR_NEW_ACCEPTED_STATUS, VALIDATION_ERROR_ACK_ACCEPTED_STATUS ].includes( status ) ) {
-			keptRemoved = __( 'removed', 'amp' );
+			keptRemoved = __( 'Removed', 'amp' );
 		} else {
-			keptRemoved = __( 'kept', 'amp' );
+			keptRemoved = __( 'Kept', 'amp' );
 		}
 
 		content.push(
-			<dt>
-				{ __( 'Status', 'amp' ) }
+			<dt key={ uniqueKey( 'markup-status-title' ) }>
+				{ __( 'Markup Status', 'amp' ) }
 			</dt>,
-			<dd>
+			<dd key={ uniqueKey( 'markup-status-description' ) }>
 				{ keptRemoved }
 			</dd>,
 		);
@@ -196,9 +197,11 @@ function ErrorContent( { blockType, clientId, status } ) {
 					{ __( 'This error comes from outside the post content.', 'amp' ) }
 				</p>
 			) }
-			<dl className="amp-error__details">
-				{ errorContent }
-			</dl>
+			{ 0 < errorContent.length && (
+				<dl className="amp-error__details">
+					{ errorContent }
+				</dl>
+			) }
 		</>
 	);
 }

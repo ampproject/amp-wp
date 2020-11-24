@@ -110,8 +110,10 @@ describe( 'Error', () => {
 		expect( container.querySelector( '.amp-error__select-block' ) ).toBeNull();
 
 		expect( container.querySelector( 'li' ).innerHTML ).toContain(
-			[ VALIDATION_ERROR_NEW_ACCEPTED_STATUS, VALIDATION_ERROR_ACK_ACCEPTED_STATUS ].includes( status ) ? 'removed' : 'kept',
+			[ VALIDATION_ERROR_NEW_ACCEPTED_STATUS, VALIDATION_ERROR_ACK_ACCEPTED_STATUS ].includes( status ) ? 'Removed' : 'Kept',
 		);
+
+		expect( container.querySelector( 'li' ).innerHTML ).toContain( 'outside the post content' );
 	} );
 
 	it.each( [
@@ -151,8 +153,8 @@ describe( 'Error', () => {
 		expect( container.querySelector( '.amp-error__select-block' ) ).not.toBeNull();
 
 		expect( container.querySelector( 'li' ).innerHTML ).toContain(
-			[ VALIDATION_ERROR_NEW_ACCEPTED_STATUS, VALIDATION_ERROR_ACK_ACCEPTED_STATUS ].includes( status ) ? 'removed' : 'kept',
+			[ VALIDATION_ERROR_NEW_ACCEPTED_STATUS, VALIDATION_ERROR_ACK_ACCEPTED_STATUS ].includes( status ) ? 'Removed' : 'Kept',
 		);
-		expect( container.querySelector( 'li' ).innerHTML ).toContain( 'registered by the My plugin plugin' );
+		expect( container.querySelector( 'li' ).innerHTML ).toContain( 'My plugin (plugin)' );
 	} );
 } );
