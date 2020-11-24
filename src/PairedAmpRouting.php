@@ -100,11 +100,20 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	protected $plugin_registry;
 
 	/**
-	 * Whether the request had the /amp/ endpoint.
+	 * Whether the request had the /amp/ endpoint suffix.
 	 *
 	 * @var bool
 	 */
-	private $has_amp_endpoint;
+	private $did_request_endpoint_suffix;
+
+	/**
+	 * Original environment variables that were rewritten before parsing the request.
+	 *
+	 * @see PairedAmpRouting::detect_rewrite_endpoint()
+	 * @see PairedAmpRouting::restore_endpoint_suffix_in_environment_variables()
+	 * @var array
+	 */
+	private $suspended_environment_variables = [];
 
 	/**
 	 * PairedAmpRouting constructor.
@@ -227,6 +236,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		if ( Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT === AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE ) ) {
 			add_filter( 'do_parse_request', [ $this, 'detect_rewrite_endpoint' ], PHP_INT_MAX );
 			add_filter( 'request', [ $this, 'set_query_var_for_endpoint' ] );
+			add_action( 'parse_request', [ $this, 'restore_endpoint_suffix_in_environment_variables' ] );
 
 			// Note that the wp_unique_term_slug filter does not work in the same way. It will only be applied if there
 			// is actually a duplicate, whereas the wp_unique_post_slug filter applies regardless.
@@ -324,7 +334,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * @return bool Should parse request.
 	 */
 	public function detect_rewrite_endpoint( $should_parse_request ) {
-		$this->has_amp_endpoint = false;
+		$this->did_request_endpoint_suffix = false;
 
 		if ( ! $should_parse_request ) {
 			return false;
@@ -334,12 +344,14 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		$pattern  = sprintf( ':/%s(?=/?(\?|$)):', preg_quote( $amp_slug, ':' ) );
 
 		// Detect and purge the AMP endpoint from the request.
-		foreach ( [ 'REQUEST_URI', 'PATH_INFO' ] as $var ) {
-			if ( empty( $_SERVER[ $var ] ) ) {
+		foreach ( [ 'REQUEST_URI', 'PATH_INFO' ] as $var_name ) {
+			if ( empty( $_SERVER[ $var_name ] ) ) {
 				continue;
 			}
 
-			$path = wp_unslash( $_SERVER[ $var ] ); // Because of wp_magic_quotes().
+			$this->suspended_environment_variables[ $var_name ] = $_SERVER[ $var_name ];
+
+			$path = wp_unslash( $_SERVER[ $var_name ] ); // Because of wp_magic_quotes().
 
 			$count = 0;
 			$path  = preg_replace(
@@ -350,10 +362,10 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 				$count
 			);
 
-			$_SERVER[ $var ] = wp_slash( $path ); // Because of wp_magic_quotes().
+			$_SERVER[ $var_name ] = wp_slash( $path ); // Because of wp_magic_quotes().
 
 			if ( $count > 0 ) {
-				$this->has_amp_endpoint = true;
+				$this->did_request_endpoint_suffix = true;
 			}
 		}
 
@@ -367,10 +379,24 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * @return array Query vars.
 	 */
 	public function set_query_var_for_endpoint( $query_vars ) {
-		if ( $this->has_amp_endpoint ) {
+		if ( $this->did_request_endpoint_suffix ) {
 			$query_vars[ amp_get_slug() ] = true;
 		}
 		return $query_vars;
+	}
+
+	/**
+	 * Restore the endpoint suffix on environment variables.
+	 *
+	 * @see PairedAmpRouting::detect_rewrite_endpoint()
+	 */
+	public function restore_endpoint_suffix_in_environment_variables() {
+		if ( $this->did_request_endpoint_suffix ) {
+			foreach ( $this->suspended_environment_variables as $var_name => $value ) {
+				$_SERVER[ $var_name ] = $value;
+			}
+			$this->suspended_environment_variables = [];
+		}
 	}
 
 	/**
