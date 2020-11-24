@@ -117,70 +117,89 @@ function ErrorContent( { blockType, clientId, status } ) {
 	const blockSource = blockSources[ blockType?.name ];
 	const title = blockType?.title;
 
-	const paragraphContent = useMemo( () => {
+	const errorContent = useMemo( () => {
 		const content = [];
 
 		if ( clientId && blockSource ) {
+			content.push(
+				<dt>
+					{ __( 'Block type', 'amp' ) }
+				</dt>,
+				<dd>
+					{ title }
+				</dd>,
+
+			);
+
+			let source;
+
 			switch ( blockSource.source ) {
 				case 'core':
-					// Translators: placeholder is block type title.
-					content.push( sprintf(
-						// Translators: placeholder is block type title.
-						__( `This error comes from a %s block registered by WordPress core.`, 'amp' ),
-						title,
-					) );
+					source = __( 'WordPress core', 'amp' );
+
 					break;
 
 				case 'plugin':
-					content.push( sprintf(
-						// Translators: first placeholder is block type title; second placeholder is the name of a plugin.
-						__( `This error comes from a %1$s block registered by the %2$s plugin.`, 'amp' ),
-						title,
+					source = sprintf(
+						// Translators: placeholder is the name of a plugin.
+						__( `%s (plugin)`, 'amp' ),
 						blockSource.name,
-					) );
+					);
 					break;
 
 				case 'theme':
-					content.push( sprintf(
-						// Translators: first placeholder is block type title; second placeholder is the name of a plugin.
-						__( `This error comes from a %1$s block registered by the %2$s theme.`, 'amp' ),
-						title,
+					source = sprintf(
+						// Translators:placeholder is the name of a theme.
+						__( `%s (theme)`, 'amp' ),
 						blockSource.name,
-					) );
+					);
 					break;
 
 				default:
-					content.push( sprintf(
-						// Translators: placeholder is block type title.
-						__( `This error comes from a %1$s block registered by an unknown theme or plugin.`, 'amp' ),
-						title,
-						blockSource.name,
-					) );
+					source = __( 'unknown', 'amp' );
 					break;
 			}
-		} else {
+
 			content.push(
-				__( 'This error comes from outside the post content.', 'amp' ),
+				<dt>
+					{ __( 'Source', 'amp' ) }
+				</dt>,
+				<dd>
+					{ source }
+				</dd>,
 			);
 		}
 
+		let keptRemoved;
 		if ( [ VALIDATION_ERROR_NEW_ACCEPTED_STATUS, VALIDATION_ERROR_ACK_ACCEPTED_STATUS ].includes( status ) ) {
-			content.push(
-				__( 'It has been removed from the page.', 'amp' ),
-			);
+			keptRemoved = __( 'removed', 'amp' );
 		} else {
-			content.push(
-				__( 'It has been kept, which means this page is not AMP-compatible.', 'amp' ),
-			);
+			keptRemoved = __( 'kept', 'amp' );
 		}
+
+		content.push(
+			<dt>
+				{ __( 'Status', 'amp' ) }
+			</dt>,
+			<dd>
+				{ keptRemoved }
+			</dd>,
+		);
 
 		return content;
 	}, [ clientId, status, blockSource, title ] );
 
 	return (
-		<p>
-			{ paragraphContent.join( ' ' ) }
-		</p>
+		<>
+			{ ! clientId && (
+				<p>
+					{ __( 'This error comes from outside the post content.', 'amp' ) }
+				</p>
+			) }
+			<dl className="amp-error__details">
+				{ errorContent }
+			</dl>
+		</>
 	);
 }
 ErrorContent.propTypes = {

@@ -14,6 +14,7 @@ namespace AmpProject\AmpWP\Admin;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\PluginRegistry;
 
 /**
  * BlockSources class.
@@ -73,6 +74,13 @@ final class BlockSources implements Conditional, Service, Registerable {
 	private $block_sources;
 
 	/**
+	 * Plugin registry instance.
+	 *
+	 * @var PluginRegistry
+	 */
+	private $plugin_registry;
+
+	/**
 	 * Check whether the conditional object is currently needed.
 	 *
 	 * @return bool Whether the conditional object is needed.
@@ -82,9 +90,19 @@ final class BlockSources implements Conditional, Service, Registerable {
 	}
 
 	/**
+	 * Class constructor.
+	 *
+	 * @param PluginRegistry $plugin_registry Plugin registry instance.
+	 */
+	public function __construct( PluginRegistry $plugin_registry ) {
+		$this->plugin_registry = $plugin_registry;
+	}
+
+	/**
 	 * Runs on instantiation.
 	 */
 	public function register() {
+		$this->clear_block_sources_cache();
 		$this->set_block_sources_from_cache();
 
 		if ( empty( $this->get_block_sources() ) ) {
@@ -121,44 +139,19 @@ final class BlockSources implements Conditional, Service, Registerable {
 		$backtrace = debug_backtrace(); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace, PHPCompatibility.FunctionUse.ArgumentFunctionsReportCurrentValue.NeedsInspection
 		$files     = array_map(
 			function( $entry ) {
-				return $entry['file'];
+				return is_array( $entry ) && isset( $entry['file'] ) ? $entry['file'] : null;
 			},
 			$backtrace
 		);
+		$files     = array_filter( $files );
 
 		// Reverse the file list because the earliest plugin or theme in the backtrace is likely to be where the block is registered.
 		array_reverse( $files );
 
-		$plugins_directory = trailingslashit( dirname( AMP__DIR__ ) );
-		$plugins           = get_plugins();
-		$theme_directory   = get_stylesheet_directory();
-
-		foreach ( $files as $file ) {
-			if ( 0 === strpos( $file, $theme_directory ) ) {
-				$this->block_sources[ $args['name'] ] = [
-					'source' => self::SOURCE_THEME,
-					'name'   => wp_get_theme()->get( 'Name' ),
-				];
-				return $args;
-			}
-
-			if ( 0 === strpos( $file, $plugins_directory ) ) {
-				$plugin_file      = str_replace( $plugins_directory, '', $file );
-				$plugin_directory = explode( '/', $plugin_file )[0];
-
-				foreach ( $plugins as $possibly_matching_plugin_file => $plugin ) {
-					$possibly_matching_plugin_directory = explode( '/', $possibly_matching_plugin_file )[0];
-
-					if ( $possibly_matching_plugin_directory === $plugin_directory ) {
-						$this->block_sources[ $args['name'] ] = [
-							'source' => self::SOURCE_PLUGIN,
-							'name'   => $plugin['Name'],
-						];
-
-						return $args;
-					}
-				}
-			}
+		$plugin_or_theme_match = $this->get_source_from_file_list( $files );
+		if ( $plugin_or_theme_match ) {
+			$this->block_sources[ $args['name'] ] = $plugin_or_theme_match;
+			return $args;
 		}
 
 		$this->block_sources[ $args['name'] ] = [
@@ -167,6 +160,45 @@ final class BlockSources implements Conditional, Service, Registerable {
 		];
 
 		return $args;
+	}
+
+	/**
+	 * Walks a list of files from a debug backtrace and attempts to match one with a plugin or the current theme.
+	 *
+	 * @param array $files List of absolute file paths.
+	 * @return array|null Array containing source details, or null if none found.
+	 */
+	private function get_source_from_file_list( $files ) {
+		$plugins_directory = trailingslashit( $this->plugin_registry->get_plugin_dir() );
+		$plugins           = $this->plugin_registry->get_plugins( true, false );
+		$theme_directory   = get_stylesheet_directory();
+
+		foreach ( $files as $file ) {
+			if ( 0 === strpos( $file, $theme_directory ) ) {
+				return [
+					'source' => self::SOURCE_THEME,
+					'name'   => wp_get_theme()->get( 'Name' ),
+				];
+			}
+
+			if ( 0 === strpos( $file, $plugins_directory ) ) {
+				$plugin_file = str_replace( $plugins_directory, '', $file );
+				$plugin_slug = explode( '/', $plugin_file )[0];
+
+				foreach ( $plugins as $possibly_matching_plugin_file => $plugin ) {
+					$possibly_matching_plugin = explode( '/', $possibly_matching_plugin_file )[0];
+
+					if ( $possibly_matching_plugin === $plugin_slug ) {
+						return [
+							'source' => self::SOURCE_PLUGIN,
+							'name'   => $plugin['Name'],
+						];
+					}
+				}
+			}
+		}
+
+		return null;
 	}
 
 	/**

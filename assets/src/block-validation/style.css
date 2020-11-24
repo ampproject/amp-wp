@@ -188,3 +188,13 @@
 .amp-error__details-link svg path {
 	fill: currentColor;
 }
+
+.amp-error__details dt {
+	float: left;
+	font-weight: 600;
+}
+
+.amp-error__details dt::after {
+	content: ":";
+	margin-right: 5px;
+}
