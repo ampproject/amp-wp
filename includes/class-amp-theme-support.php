@@ -315,24 +315,9 @@ class AMP_Theme_Support {
 	 */
 	public static function finish_init() {
 		if ( ! amp_is_request() ) {
-			/*
-			 * Redirect to AMP-less URL if AMP is not available for this URL and yet the query var is present.
-			 * Temporary redirect is used for admin users because implied transitional mode and template support can be
-			 * enabled by user ay any time, so they will be able to make AMP available for this URL and see the change
-			 * without wrestling with the redirect cache.
-			 *
-			 * @todo Move to PairedAmpRouting.
-			 */
-			if ( amp_has_paired_endpoint() ) {
-				self::redirect_non_amp_url( current_user_can( 'manage_options' ) ? 302 : 301 );
-			}
-
 			amp_add_frontend_actions();
 			return;
 		}
-
-		// @todo Move to PairedAmpRouting.
-		self::ensure_proper_amp_location();
 
 		if ( amp_is_legacy() ) {
 			// Make sure there is no confusion when serving the legacy Reader template that the normal theme hooks should not be used.
@@ -367,81 +352,6 @@ class AMP_Theme_Support {
 				call_user_func( [ $sanitizer_class, 'add_buffering_hooks' ], $args );
 			}
 		}
-	}
-
-	/**
-	 * Ensure that the current AMP location is correct.
-	 *
-	 * @todo Move to PairedAmpRouting.
-	 * @since 1.0
-	 * @since 2.0 Removed $exit param.
-	 * @since 2.1 Remove obsolete redirection from /amp/ to ?amp when on non-legacy Reader mode.
-	 *
-	 * @return bool Whether redirection should have been done.
-	 */
-	public static function ensure_proper_amp_location() {
-		if ( amp_is_canonical() ) {
-			/*
-			 * When AMP-first/canonical, then when there is an /amp/ endpoint or ?amp URL param,
-			 * then a redirect needs to be done to the URL without any AMP indicator in the URL.
-			 * Permanent redirect is used for unauthenticated users since switching between modes
-			 * should happen infrequently. For admin users, this is kept temporary to allow them
-			 * to not be hampered by browser remembering permanent redirects and preventing test.
-			 */
-			if ( amp_has_paired_endpoint() ) {
-				return self::redirect_non_amp_url( current_user_can( 'manage_options' ) ? 302 : 301 );
-			}
-		} elseif ( amp_has_paired_endpoint() ) {
-			/*
-			 * Prevent infinite URL space under /amp/ endpoint. Note that WordPress allows endpoints to have a value,
-			 * such as the case of /feed/ where /feed/atom/ is the same as saying ?feed=atom. In this case, we need to
-			 * check for /amp/x/ to protect against links like `<a href="./amp/">AMP!</a>`.
-			 * See https://github.com/ampproject/amp-wp/pull/1846.
-			 */
-			global $wp;
-			$path_args = [];
-			wp_parse_str( $wp->matched_query, $path_args );
-			if ( isset( $path_args[ amp_get_slug() ] ) && '' !== $path_args[ amp_get_slug() ] ) {
-				$current_url  = amp_get_current_url();
-				$redirect_url = amp_add_paired_endpoint( amp_remove_paired_endpoint( $current_url ) );
-				if ( $current_url !== $redirect_url && wp_safe_redirect( $redirect_url, 301 ) ) {
-					// @codeCoverageIgnoreStart
-					exit;
-					// @codeCoverageIgnoreEnd
-				}
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Redirect to non-AMP version of the current URL, such as because AMP is canonical or there are unaccepted validation errors.
-	 *
-	 * If the current URL is already AMP-less then do nothing.
-	 *
-	 * @since 0.7
-	 * @since 1.0 Added $exit param.
-	 * @since 1.0 Renamed from redirect_canonical_amp().
-	 * @since 2.0 Removed $exit param.
-	 * @todo Move to PairedAmpRouting.
-	 *
-	 * @param int $status Status code (301 or 302).
-	 * @return bool Whether redirection should have be done.
-	 */
-	public static function redirect_non_amp_url( $status = 302 ) {
-		$current_url = amp_get_current_url();
-		$non_amp_url = amp_remove_paired_endpoint( $current_url );
-		if ( $non_amp_url === $current_url ) {
-			return false;
-		}
-
-		if ( wp_safe_redirect( $non_amp_url, $status ) ) {
-			// @codeCoverageIgnoreStart
-			exit;
-			// @codeCoverageIgnoreEnd
-		}
-		return true;
 	}
 
 	/**
@@ -1180,6 +1090,7 @@ class AMP_Theme_Support {
 			$url = add_query_arg( $added_query_vars, $url );
 		}
 
+		// @todo This is wrong as it can result in /guitar/amp/?amp=1 being rewritten to /guitar/, when `amp` is the slug for an actual post.
 		return amp_remove_paired_endpoint( $url );
 	}
 
