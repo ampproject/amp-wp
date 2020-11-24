@@ -138,7 +138,7 @@ final class BlockSources implements Conditional, Service, Registerable {
 			if ( 0 === strpos( $file, $theme_directory ) ) {
 				$this->block_sources[ $args['name'] ] = [
 					'source' => self::SOURCE_THEME,
-					'name'   => wp_get_theme()->Name,
+					'name'   => wp_get_theme()->get( 'Name' ),
 				];
 				return $args;
 			}
