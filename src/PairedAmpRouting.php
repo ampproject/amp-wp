@@ -634,7 +634,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		}
 		switch ( $structure ) {
 			case Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT:
-				return $this->get_rewrite_endpoint_paired_amp_url( $url );
+				return $this->get_endpoint_suffix_paired_amp_url( $url );
 			case Option::PAIRED_URL_STRUCTURE_LEGACY_TRANSITIONAL:
 				return $this->get_legacy_transitional_paired_amp_url( $url );
 			case Option::PAIRED_URL_STRUCTURE_LEGACY_READER:
@@ -670,12 +670,12 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	}
 
 	/**
-	 * Get paired AMP URL using a rewrite endpoint.
+	 * Get paired AMP URL using a endpoint suffix.
 	 *
 	 * @param string $url URL.
 	 * @return string AMP URL.
 	 */
-	public function get_rewrite_endpoint_paired_amp_url( $url ) {
+	public function get_endpoint_suffix_paired_amp_url( $url ) {
 		$url = $this->remove_paired_endpoint( $url );
 
 		$parsed_url = array_merge(
@@ -947,14 +947,15 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 				}
 			}
 
-			if ( ! $has_endpoint && ! empty( $parsed_url['path'] ) ) {
-				$pattern = sprintf(
-					':/%s/?$:',
-					preg_quote( $slug, ':' )
-				);
-				if ( preg_match( $pattern, $parsed_url['path'] ) ) {
-					$has_endpoint = true;
-				}
+			// @todo Problem: This could end up incorrectly identifying URLs that end in /amp/.
+			if (
+				! $has_endpoint
+				&&
+				! empty( $parsed_url['path'] )
+				&&
+				$this->has_paired_endpoint_suffix( $parsed_url['path'] )
+			) {
+				$has_endpoint = true;
 			}
 		}
 
@@ -974,6 +975,20 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	}
 
 	/**
+	 * Determine whether the given URL path has the endpoint suffix.
+	 *
+	 * @param string $path URL path.
+	 * @return bool Has endpoint suffix.
+	 */
+	private function has_paired_endpoint_suffix( $path ) {
+		$pattern = sprintf(
+			':/%s/?$:',
+			preg_quote( amp_get_slug(), ':' )
+		);
+		return (bool) preg_match( $pattern, $path );
+	}
+
+	/**
 	 * Remove the paired AMP endpoint from a given URL.
 	 *
 	 * @param string $url URL.
@@ -982,15 +997,8 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	public function remove_paired_endpoint( $url ) {
 		$slug = amp_get_slug();
 
-		// Strip endpoint suffix.
-		$non_amp_url = preg_replace(
-			sprintf(
-				':/%s(?=/?(\?|#|$)):',
-				preg_quote( $slug, ':' )
-			),
-			'',
-			$url
-		);
+		// @todo This should only be done if an endpoint suffix is being used, or else the suffix could be erroneously removed.
+		$non_amp_url = $this->remove_paired_endpoint_suffix( $url );
 
 		// Strip query var, including ?amp, ?amp=1, etc.
 		$non_amp_url = remove_query_arg( $slug, $non_amp_url );
@@ -1008,6 +1016,23 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		}
 
 		return $non_amp_url;
+	}
+
+	/**
+	 * Strip endpoint suffix.
+	 *
+	 * @param string $url URL.
+	 * @return string URL.
+	 */
+	private function remove_paired_endpoint_suffix( $url ) {
+		return preg_replace(
+			sprintf(
+				':/%s(?=/?(\?|#|$)):',
+				preg_quote( amp_get_slug(), ':' )
+			),
+			'',
+			$url
+		);
 	}
 
 	/**
