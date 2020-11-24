@@ -53,14 +53,14 @@ final class BlockSources implements Conditional, Service, Registerable {
 
 	/**
 	 * Key of the cached block source data.
-	 * 
+	 *
 	 * @var string
 	 */
 	const CACHE_KEY = 'amp_block_sources';
 
 	/**
 	 * The amount of time to store the block source data in cache.
-	 * 
+	 *
 	 * @var int
 	 */
 	const CACHE_TIMEOUT = DAY_IN_SECONDS;
