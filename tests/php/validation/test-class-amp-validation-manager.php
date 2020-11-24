@@ -651,10 +651,11 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		);
 		$this->assertArrayHasKey( 'results', $field );
 		$this->assertArrayHasKey( 'review_link', $field );
+
 		$this->assertEquals(
 			$field['results'],
 			array_map(
-				static function ( $error ) use ( $id ) {
+				static function ( $error ) use ( $field ) {
 					return [
 						'sanitized'   => false,
 						'title'       => 'Unknown error (test)',
@@ -662,7 +663,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 						'status'      => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
 						'term_status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
 						'forced'      => false,
-						'term_id'     => wp_get_post_terms( $id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, 'ids' )[0],
+						'term_id'     => $field['results'][0]['term_id'],
 					];
 				},
 				$errors
