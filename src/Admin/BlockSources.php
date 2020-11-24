@@ -78,17 +78,16 @@ final class BlockSources implements Conditional, Service, Registerable {
 	 * @return bool Whether the conditional object is needed.
 	 */
 	public static function is_needed() {
-		return is_admin() && ! wp_doing_ajax();
+		return is_admin() || wp_doing_ajax() || wp_doing_cron() || ( defined( 'REST_REQUEST' ) && REST_REQUEST );
 	}
 
 	/**
 	 * Runs on instantiation.
 	 */
 	public function register() {
-		$this->clear_block_sources_cache();
 		$this->set_block_sources_from_cache();
 
-		if ( true || empty( $this->get_block_sources() ) ) {
+		if ( empty( $this->get_block_sources() ) ) {
 			add_filter( 'register_block_type_args', [ $this, 'capture_block_type_source' ] );
 
 			// All blocks should be registered before admin_enqueue_scripts.

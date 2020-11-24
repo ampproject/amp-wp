@@ -104,6 +104,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 * @global $wp_registered_widgets
 	 */
 	public function setUp() {
+		set_current_screen( 'post.php' );
 		unset( $GLOBALS['wp_scripts'], $GLOBALS['wp_styles'] );
 		$this->prevent_block_pre_render();
 
@@ -2536,6 +2537,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			$this->markTestSkipped( 'The block editor is not available.' );
 		}
 
+		set_current_screen( 'post.php' );
 		global $post;
 		$post = self::factory()->post->create_and_get();
 		$slug = 'amp-block-validation';
