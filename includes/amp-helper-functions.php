@@ -736,10 +736,6 @@ function post_supports_amp( $post ) {
 function amp_is_request() {
 	global $wp_query;
 
-	if ( AMP_Validation_Manager::$is_validate_request ) {
-		return true;
-	}
-
 	$is_amp_url = (
 		amp_is_canonical()
 		||
