@@ -327,17 +327,6 @@ function amp_is_legacy() {
 }
 
 /**
- * Add frontend actions.
- *
- * @todo Move to PairedAmpRouting.
- * @since 0.2
- * @internal
- */
-function amp_add_frontend_actions() {
-	add_action( 'wp_head', 'amp_add_amphtml_link' );
-}
-
-/**
  * Determine whether AMP is available for the current URL.
  *
  * @since 2.0

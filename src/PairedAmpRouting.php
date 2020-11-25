@@ -239,7 +239,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 
 		add_filter( 'template_redirect', [ $this, 'redirect_paired_amp_unavailable' ], 9 ); // Must be before redirect_canonical() runs at priority 10.
 		add_action( 'parse_query', [ $this, 'correct_query_when_is_front_page' ] );
-		add_action( 'wp', [ $this, 'maybe_add_paired_amp_request_hooks' ] );
+		add_action( 'wp', [ $this, 'add_paired_request_hooks' ] );
 
 		add_action( 'admin_notices', [ $this, 'add_permalink_settings_notice' ] );
 	}
@@ -433,15 +433,15 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	}
 
 	/**
-	 * Add AMP hooks if it is an AMP request.
+	 * Add hooks based for AMP pages and other hooks for non-AMP pages.
 	 */
-	public function maybe_add_paired_amp_request_hooks() {
-		if ( ! amp_is_request() ) {
-			return;
+	public function add_paired_request_hooks() {
+		if ( amp_is_request() ) {
+			add_filter( 'old_slug_redirect_url', [ $this, 'maybe_add_paired_endpoint' ], 1000 );
+			add_filter( 'redirect_canonical', [ $this, 'maybe_add_paired_endpoint' ], 1000 );
+		} else {
+			add_action( 'wp_head', 'amp_add_amphtml_link' );
 		}
-
-		add_filter( 'old_slug_redirect_url', [ $this, 'maybe_add_paired_endpoint' ], 1000 );
-		add_filter( 'redirect_canonical', [ $this, 'maybe_add_paired_endpoint' ], 1000 );
 	}
 
 	/**
@@ -1085,12 +1085,12 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	}
 
 	/**
-	 * Add the paired endpoint to a URL if the request is for an AMP page and the Standard mode is not selected.
+	 * Add the paired endpoint to a URL.
 	 *
 	 * This is used with the `redirect_canonical` and `old_slug_redirect_url` filters to prevent removal of the `/amp/`
 	 * endpoint.
 	 *
-	 * @param string $url URL.
+	 * @param string|false $url URL. This may be false if another filter is attempting to stop redirection.
 	 * @return string Resulting URL with AMP endpoint added if needed.
 	 */
 	public function maybe_add_paired_endpoint( $url ) {

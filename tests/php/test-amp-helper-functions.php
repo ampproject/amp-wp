@@ -624,17 +624,6 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that hook is added.
-	 *
-	 * @covers ::amp_add_frontend_actions()
-	 */
-	public function test_amp_add_frontend_actions() {
-		$this->assertFalse( has_action( 'wp_head', 'amp_add_amphtml_link' ) );
-		amp_add_frontend_actions();
-		$this->assertEquals( 10, has_action( 'wp_head', 'amp_add_amphtml_link' ) );
-	}
-
-	/**
 	 * URLs to test amphtml link.
 	 *
 	 * @return array

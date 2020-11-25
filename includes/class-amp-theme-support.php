@@ -315,7 +315,6 @@ class AMP_Theme_Support {
 	 */
 	public static function finish_init() {
 		if ( ! amp_is_request() ) {
-			amp_add_frontend_actions();
 			return;
 		}
 

@@ -319,3 +319,15 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
 	_deprecated_function( __FUNCTION__, '2.1' );
 	Services::get( 'paired_amp_routing' )->correct_query_when_is_front_page( $query );
 }
+
+/**
+ * Add frontend actions.
+ *
+ * @since 0.2
+ * @deprecated Since 2.1, moved to PairedAmpRouting.
+ * @internal
+ */
+function amp_add_frontend_actions() {
+	_deprecated_function( __FUNCTION__, '2.1' );
+	add_action( 'wp_head', 'amp_add_amphtml_link' );
+}
