@@ -7,13 +7,14 @@ use AmpProject\AmpWP\BackgroundTask\CronBasedBackgroundTask;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
 use AmpProject\AmpWP\Validation\URLValidationCron;
 use WP_UnitTestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Validation\URLValidationCron */
 final class URLValidationCronTest extends WP_UnitTestCase {
-	use ValidationRequestMocking;
+	use ValidationRequestMocking, PrivateAccess;
 
 	/**
 	 * Test instance
@@ -35,6 +36,7 @@ final class URLValidationCronTest extends WP_UnitTestCase {
 
 	/**
 	 * @covers ::register()
+	 * @covers ::get_event_name()
 	 */
 	public function test_register() {
 		$this->assertInstanceof( CronBasedBackgroundTask::class, $this->test_instance );
@@ -64,5 +66,21 @@ final class URLValidationCronTest extends WP_UnitTestCase {
 
 		$this->test_instance->process();
 		$this->assertCount( 6, $this->get_validated_urls() );
+	}
+
+	/** @covers ::get_event_name() */
+	public function test_get_event_name() {
+		$this->assertEquals(
+			URLValidationCron::BACKGROUND_TASK_NAME,
+			$this->call_private_method( $this->test_instance, 'get_event_name' )
+		);
+	}
+
+	/** @covers ::get_interval() */
+	public function test_get_interval() {
+		$this->assertEquals(
+			URLValidationCron::DEFAULT_INTERVAL_HOURLY,
+			$this->call_private_method( $this->test_instance, 'get_interval' )
+		);
 	}
 }
