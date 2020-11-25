@@ -44,7 +44,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 				$action = $comment_form->getAttribute( 'action' );
 			}
 			$action_path = wp_parse_url( $action, PHP_URL_PATH );
-			if ( preg_match( '#/wp-comments-post\.php$#', $action_path ) ) {
+			if ( 'wp-comments-post.php' === basename( $action_path ) ) {
 				$this->process_comment_form( $comment_form );
 			}
 		}
