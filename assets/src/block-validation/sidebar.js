@@ -13,6 +13,7 @@ import './style.css';
 import { Error } from './error';
 import { BLOCK_VALIDATION_STORE_KEY } from './store';
 import { BrokenIconSVG, NewTabIcon } from './icon';
+import { AMP_VALIDITY_REST_FIELD_NAME } from './constants';
 
 export function Sidebar() {
 	const { setIsShowingReviewed } = useDispatch( BLOCK_VALIDATION_STORE_KEY );
@@ -20,7 +21,7 @@ export function Sidebar() {
 	const { ampBroken, isShowingReviewed, reviewLink } = useSelect( ( select ) => ( {
 		ampBroken: select( BLOCK_VALIDATION_STORE_KEY ).getAMPBroken(),
 		isShowingReviewed: select( BLOCK_VALIDATION_STORE_KEY ).getIsShowingReviewed(),
-		reviewLink: select( BLOCK_VALIDATION_STORE_KEY ).getReviewLink(),
+		reviewLink: select( 'core/editor' ).getEditedPostAttribute( AMP_VALIDITY_REST_FIELD_NAME ).review_link,
 	} ) );
 
 	const { displayedErrors, reviewedValidationErrors, unreviewedValidationErrors, validationErrors } = useSelect( ( select ) => {

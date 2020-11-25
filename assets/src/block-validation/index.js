@@ -15,7 +15,7 @@ import { MoreMenuIcon, ToolbarIcon } from './icon';
 import { addToolbarButtonToBlock } from './add-toolbar-button-to-block';
 import { Sidebar } from './sidebar';
 import { InvalidBlockOutline } from './invalid-block-outline';
-import { BlockValidationStateUpdater } from './block-validation-state-updater';
+import { ValidationErrorStateUpdater } from './validation-error-state-updater';
 
 export const PLUGIN_NAME = 'amp-block-validation';
 export const SIDEBAR_NAME = 'amp-editor-sidebar';
@@ -52,7 +52,7 @@ function AMPBlockValidation() {
 				<Sidebar />
 				<InvalidBlockOutline />
 			</PluginSidebar>
-			<BlockValidationStateUpdater />
+			<ValidationErrorStateUpdater />
 		</>
 	);
 }

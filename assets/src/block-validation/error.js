@@ -18,12 +18,12 @@ import { BlockIcon } from '@wordpress/block-editor';
  */
 import { useInlineData } from './use-inline-data';
 import {
+	AMP_VALIDITY_REST_FIELD_NAME,
 	VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
 	VALIDATION_ERROR_ACK_REJECTED_STATUS,
 	VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
 	VALIDATION_ERROR_NEW_REJECTED_STATUS,
 } from './constants';
-import { BLOCK_VALIDATION_STORE_KEY } from './store';
 import { NewTabIcon } from './icon';
 
 /**
@@ -78,9 +78,10 @@ ErrorTypeIcon.propTypes = {
  * @param {Object} props Component props.
  * @param {Object} props.blockType
  * @param {string} props.title Title string from error data.
- * @param {string} props.type Error type code.
+ * @param {Object} props.error Error details.
+ * @param {string} props.error.type Error type.
  */
-function ErrorPanelTitle( { blockType, title, type } ) {
+function ErrorPanelTitle( { blockType, title, error: { type } } ) {
 	return (
 		<>
 			<div className="amp-error__icons">
@@ -100,7 +101,9 @@ function ErrorPanelTitle( { blockType, title, type } ) {
 ErrorPanelTitle.propTypes = {
 	blockType: PropTypes.object,
 	title: PropTypes.string.isRequired,
-	type: PropTypes.string.isRequired,
+	error: PropTypes.shape( {
+		type: PropTypes.string,
+	} ).isRequired,
 };
 
 /**
@@ -229,7 +232,7 @@ ErrorContent.propTypes = {
  */
 export function Error( { clientId, status, term_id: termId, ...props } ) {
 	const { selectBlock } = useDispatch( 'core/block-editor' );
-	const reviewLink = useSelect( ( select ) => select( BLOCK_VALIDATION_STORE_KEY ).getReviewLink() );
+	const { review_link: reviewLink } = useSelect( ( select ) => select( 'core/editor' ).getEditedPostAttribute( AMP_VALIDITY_REST_FIELD_NAME ) ) || {};
 
 	const reviewed = status === VALIDATION_ERROR_ACK_ACCEPTED_STATUS || status === VALIDATION_ERROR_ACK_REJECTED_STATUS;
 

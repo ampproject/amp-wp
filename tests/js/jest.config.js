@@ -21,6 +21,7 @@ module.exports = {
 	],
 	modulePathIgnorePatterns: [
 		'<rootDir>/assets/src/components/.*/__mocks__',
+		'<rootDir>/assets/src/components/.*/__data__',
 	],
 	coverageReporters: [ 'lcov' ],
 	coverageDirectory: '<rootDir>/build/logs',

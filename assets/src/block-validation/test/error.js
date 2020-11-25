@@ -10,6 +10,7 @@ import { noop } from 'lodash';
 import { render } from '@wordpress/element';
 import { dispatch } from '@wordpress/data';
 import { registerBlockType, createBlock } from '@wordpress/blocks';
+import '@wordpress/editor';
 
 /**
  * Internal dependencies
@@ -50,7 +51,6 @@ describe( 'Error', () => {
 		dispatch( 'core/block-editor' ).insertBlock( block );
 
 		createStore( {
-			reviewLink: 'http://review-link.test',
 			validationErrors: [
 				{
 					clientId: block.clientId,
@@ -58,7 +58,9 @@ describe( 'Error', () => {
 					status: 3,
 					term_id: 12,
 					title: 'Invalid script: <code>jquery.js</code>',
-					type: 'js_error',
+					error: {
+						type: 'js_error',
+					},
 				},
 			],
 		} );
@@ -86,7 +88,7 @@ describe( 'Error', () => {
 				status={ status }
 				term_id={ 12 }
 				title="My test block"
-				type="js_error"
+				error={ { type: 'js_error' } }
 			/>
 		),
 	] ) )( 'errors with no associated blocks work correctly', ( status, ErrorComponent ) => {
@@ -129,7 +131,7 @@ describe( 'Error', () => {
 				status={ status }
 				term_id={ 12 }
 				title="My test block"
-				type="js_error"
+				error={ { type: 'js_error' } }
 			/>
 		),
 	] ) )( 'errors with associated blocks work correctly', ( status, ErrorComponent ) => {

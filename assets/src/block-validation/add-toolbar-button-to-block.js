@@ -32,7 +32,7 @@ export function addToolbarButtonToBlock( BlockEdit ) {
 				render() {
 					return (
 						<>
-							{ this.props.count && (
+							{ 0 < this.props.count && (
 								<AMPToolbarButton count={ this.props.count } />
 							) }
 							{ super.render() }
@@ -53,7 +53,7 @@ export function addToolbarButtonToBlock( BlockEdit ) {
 
 		return (
 			<>
-				{ count &&
+				{ 0 < count &&
 					<AMPToolbarButton count={ count } />
 				}
 				<BlockEdit { ...props } />

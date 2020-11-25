@@ -2,3 +2,4 @@
 includes/sanitizers/class-amp-allowed-tags-generated.php linguist-generated=true
 docs/**/*.md                                             linguist-generated=true
 docs/docs.json                                           linguist-generated=true
+*__DATA__*                                               linguist-generated=true
