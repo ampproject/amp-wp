@@ -1,19 +1,18 @@
 <?php
 /**
- * Class Test_Monitor_CSS_Transient_Caching.
- *
- * @package AmpProject\AmpWP
+ * Tests for the MonitorCssTransientCaching class.
  */
 
+namespace AmpProject\AmpWP\Tests\BackgroundTask;
+
+use AMP_Options_Manager;
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching;
 use AmpProject\AmpWP\Option;
+use DateTime;
+use WP_UnitTestCase;
 
-/**
- * Test MonitorCssTransientCaching.
- *
- * @coversDefaultClass \AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching
- */
+/** @coversDefaultClass \AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching */
 class Test_Monitor_CSS_Transient_Caching extends WP_UnitTestCase {
 
 	/**
