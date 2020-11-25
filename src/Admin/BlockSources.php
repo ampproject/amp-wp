@@ -148,16 +148,7 @@ final class BlockSources implements Conditional, Service, Registerable {
 		// Reverse the file list because the earliest plugin or theme in the backtrace is likely to be where the block is registered.
 		array_reverse( $files );
 
-		$plugin_or_theme_match = $this->get_source_from_file_list( $files );
-		if ( $plugin_or_theme_match ) {
-			$this->block_sources[ $args['name'] ] = $plugin_or_theme_match;
-			return $args;
-		}
-
-		$this->block_sources[ $args['name'] ] = [
-			'source' => self::SOURCE_UNKNOWN,
-			'name'   => null,
-		];
+		$this->block_sources[ $args['name'] ] = $this->get_source_from_file_list( $files );
 
 		return $args;
 	}
@@ -166,7 +157,7 @@ final class BlockSources implements Conditional, Service, Registerable {
 	 * Walks a list of files from a debug backtrace and attempts to match one with a plugin or the current theme.
 	 *
 	 * @param array $files List of absolute file paths.
-	 * @return array|null Array containing source details, or null if none found.
+	 * @return array Array containing source details
 	 */
 	private function get_source_from_file_list( $files ) {
 		$plugins_directory = trailingslashit( $this->plugin_registry->get_plugin_dir() );
@@ -198,7 +189,10 @@ final class BlockSources implements Conditional, Service, Registerable {
 			}
 		}
 
-		return null;
+		return [
+			'source' => self::SOURCE_UNKNOWN,
+			'name'   => null,
+		];
 	}
 
 	/**

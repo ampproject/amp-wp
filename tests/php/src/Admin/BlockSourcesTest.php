@@ -119,10 +119,10 @@ class BlockSourcesTest extends WP_UnitTestCase {
 			$this->instance->get_block_sources()
 		);
 
-		// Test unknown-source block.
+		// Test block with plugin source.
 		$this->instance->capture_block_type_source(
 			[
-				'name' => 'unknown/block',
+				'name' => 'amp/block',
 			]
 		);
 
@@ -132,9 +132,9 @@ class BlockSourcesTest extends WP_UnitTestCase {
 					'source' => 'core',
 					'name'   => null,
 				],
-				'unknown/block'   => [
-					'source' => 'unknown',
-					'name'   => null,
+				'amp/block'       => [
+					'source' => 'plugin',
+					'name'   => 'AMP',
 				],
 			],
 			$this->instance->get_block_sources()
@@ -147,7 +147,7 @@ class BlockSourcesTest extends WP_UnitTestCase {
 			WP_CONTENT_DIR . '/themes/some-other-theme/functions.php',
 			get_stylesheet_directory() . '/functions.php',
 			WP_CONTENT_DIR . '/plugins/my-plugin/my-plugin',
-			ABSPATH . '/wp-config.php',
+			ABSPATH . 'wp-config.php',
 		];
 
 		$expected = [
@@ -166,7 +166,7 @@ class BlockSourcesTest extends WP_UnitTestCase {
 			WP_CONTENT_DIR . '/plugins/my-plugin/my-plugin',
 			WP_CONTENT_DIR . '/plugins/foo/foo.php',
 			WP_CONTENT_DIR . '/themes/some-other-theme/functions.php',
-			ABSPATH . '/wp-config.php',
+			ABSPATH . 'wp-config.php',
 		];
 
 		$expected = [
@@ -180,12 +180,30 @@ class BlockSourcesTest extends WP_UnitTestCase {
 	}
 
 	/** @covers ::get_source_from_file_list() */
+	public function test_unknown_source_from_file_list() {
+		$file_list = [
+			'/var/www/html/some/other/path.php',
+			WP_CONTENT_DIR . '/themes/some-other-theme/functions.php',
+			ABSPATH . 'wp-config.php',
+		];
+
+		$expected = [
+			'source' => 'unknown',
+			'name'   => null,
+		];
+
+		$actual = $this->call_private_method( $this->instance, 'get_source_from_file_list', [ $file_list ] );
+
+		$this->assertEquals( $expected, $actual );
+	}
+
+	/** @covers ::get_source_from_file_list() */
 	public function test_get_single_file_plugin_source_from_file_list() {
 		$file_list = [
 			WP_CONTENT_DIR . '/plugins/my-plugin/my-plugin',
 			WP_CONTENT_DIR . '/plugins/bar.php',
 			WP_CONTENT_DIR . '/themes/some-other-theme/functions.php',
-			ABSPATH . '/wp-config.php',
+			ABSPATH . 'wp-config.php',
 		];
 
 		$expected = [
