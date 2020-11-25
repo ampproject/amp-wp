@@ -48,7 +48,7 @@ registerBlockType( TEST_BLOCK, {
 	title: 'test block',
 } );
 
-describe( 'ToolbarButton: filtering with errors', () => {
+describe( 'addToolbarButtonToBlock: filtering with errors', () => {
 	beforeAll( () => {
 		block = createBlock( TEST_BLOCK, {} );
 		dispatch( 'core/block-editor' ).insertBlock( block );
@@ -126,7 +126,7 @@ describe( 'ToolbarButton: filtering with errors', () => {
 	} );
 } );
 
-describe( 'ToolbarButton: filtering without errors', () => {
+describe( 'addToolbarButtonToBlock: filtering without errors', () => {
 	beforeAll( () => {
 		block = createBlock( TEST_BLOCK, {} );
 		dispatch( 'core/block-editor' ).insertBlock( block );
