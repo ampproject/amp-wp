@@ -275,7 +275,7 @@ final class AMP_CLI_Validation_Command {
 			$urls                   = $scannable_url_provider->get_urls();
 		}
 
-		foreach ( $urls as $index => $url ) {
+		foreach ( $urls as $url ) {
 			$validity = $url_validation_provider->get_url_validation( $url['url'], $url['type'], true );
 
 			if ( $this->wp_cli_progress ) {
