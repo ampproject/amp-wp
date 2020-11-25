@@ -63,32 +63,4 @@ final class URLValidationProviderTest extends WP_UnitTestCase {
 			array_keys( $this->url_validation_provider->get_validity_by_type() )
 		);
 	}
-
-	/**
-	 * Tests locking and unlocking.
-	 *
-	 * @covers ::lock()
-	 * @covers ::unlock()
-	 * @covers ::is_locked()
-	 * @covers ::with_lock()
-	 */
-	public function test_locking() {
-		$this->assertFalse( get_option( URLValidationProvider::LOCK_KEY ) );
-
-		$expected_result = 'EXPECTED RESULT';
-		$result          = $this->url_validation_provider->with_lock(
-			function () use ( $expected_result ) {
-				$this->assertTrue( (bool) get_option( URLValidationProvider::LOCK_KEY ) );
-
-				// Expect an error when lock is already in place.
-				$this->assertWPError( $this->url_validation_provider->with_lock( '__return_empty_string' ) );
-
-				return $expected_result;
-			}
-		);
-
-		$this->assertEquals( $expected_result, $result );
-
-		$this->assertFalse( get_option( URLValidationProvider::LOCK_KEY ) );
-	}
 }

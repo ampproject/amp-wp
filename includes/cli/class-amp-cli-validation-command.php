@@ -141,16 +141,7 @@ final class AMP_CLI_Validation_Command {
 			$number_urls_to_crawl
 		);
 
-		$result = $url_validation_provider->with_lock(
-			function () use ( $urls ) {
-				$this->validate_urls( $urls );
-			}
-		);
-
-		if ( is_wp_error( $result ) ) {
-			WP_CLI::error( 'The site cannot be crawled at this time because validation is running in another process.' );
-			return;
-		}
+		$this->validate_urls( $urls );
 
 		$this->wp_cli_progress->finish();
 
@@ -285,11 +276,6 @@ final class AMP_CLI_Validation_Command {
 		}
 
 		foreach ( $urls as $index => $url ) {
-			// Reset lock between every five URLs.
-			if ( 0 === $index % 5 ) {
-				$this->url_validation_provider->reset_lock();
-			}
-
 			$validity = $url_validation_provider->get_url_validation( $url['url'], $url['type'], true );
 
 			if ( $this->wp_cli_progress ) {
