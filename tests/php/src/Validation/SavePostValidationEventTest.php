@@ -16,7 +16,7 @@ use AmpProject\AmpWP\Validation\SavePostValidationEvent;
 use WP_UnitTestCase;
 
 /**
- * @coversDefaultClass \AmpProject\AmpWP\Validation\SavePotValidationEvent
+ * @coversDefaultClass \AmpProject\AmpWP\Validation\SavePostValidationEvent
  */
 final class SavePostValidationEventTest extends WP_UnitTestCase {
 	use AssertContainsCompatibility, ValidationRequestMocking;
