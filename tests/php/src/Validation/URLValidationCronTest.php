@@ -11,7 +11,7 @@ use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
 use AmpProject\AmpWP\Validation\URLValidationCron;
 use WP_UnitTestCase;
 
-/** @coversDefaultClass AmpProject\AmpWP\Validation\URLValidationCron */
+/** @coversDefaultClass \AmpProject\AmpWP\Validation\URLValidationCron */
 final class URLValidationCronTest extends WP_UnitTestCase {
 	use ValidationRequestMocking;
 
