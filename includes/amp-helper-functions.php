@@ -697,7 +697,7 @@ function amp_add_amphtml_link() {
  * @since 2.0 Formerly known as post_supports_amp().
  * @see AMP_Post_Type_Support::get_support_errors()
  *
- * @param WP_Post $post Post.
+ * @param WP_Post|int $post Post.
  * @return bool Whether the post supports AMP.
  */
 function amp_is_post_supported( $post ) {

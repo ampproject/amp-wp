@@ -831,9 +831,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'comment_form_defaults', [ self::TESTED_CLASS, 'filter_comment_form_defaults' ] ) );
 		$this->assertEquals( 10, has_filter( 'comment_reply_link', [ self::TESTED_CLASS, 'filter_comment_reply_link' ] ) );
 		$this->assertEquals( 10, has_filter( 'cancel_comment_reply_link', [ self::TESTED_CLASS, 'filter_cancel_comment_reply_link' ] ) );
-		$this->assertEquals( 100, has_action( 'comment_form', [ self::TESTED_CLASS, 'amend_comment_form' ] ) );
-		$this->assertEquals( 10, has_filter( 'get_comments_link', [ self::TESTED_CLASS, 'amend_comments_link' ] ) );
-		$this->assertEquals( 10, has_filter( 'respond_link', [ self::TESTED_CLASS, 'amend_comments_link' ] ) );
 		$this->assertFalse( has_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'get_header_image_tag', [ self::TESTED_CLASS, 'amend_header_image_with_video_header' ] ) );
 	}
@@ -853,63 +850,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$property = $this->get_private_property( $embed_handler, 'args' );
 			$this->assertEquals( $content_width, $property['content_max_width'] );
 		}
-	}
-
-	/**
-	 * Test amend_comment_form().
-	 *
-	 * @covers AMP_Theme_Support::amend_comment_form()
-	 */
-	public function test_amend_comment_form() {
-		$post_id = self::factory()->post->create();
-		$this->go_to( get_permalink( $post_id ) );
-		$this->assertTrue( is_singular() );
-
-		// Test AMP-first.
-		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
-		$this->assertTrue( amp_is_canonical() );
-		$output = get_echo( [ 'AMP_Theme_Support', 'amend_comment_form' ] );
-		$this->assertStringNotContains( '<input type="hidden" name="redirect_to"', $output );
-
-		// Test transitional AMP.
-		delete_option( AMP_Options_Manager::OPTION_NAME );
-		add_theme_support(
-			AMP_Theme_Support::SLUG,
-			[
-				'template_dir' => 'amp-templates',
-			]
-		);
-		$this->assertFalse( amp_is_canonical() );
-		$output = get_echo( [ 'AMP_Theme_Support', 'amend_comment_form' ] );
-		$this->assertStringContains( '<input type="hidden" name="redirect_to"', $output );
-	}
-
-	/**
-	 * Test amend_comments_link().
-	 *
-	 * @covers AMP_Theme_Support::amend_comments_link
-	 */
-	public function test_amend_comments_link() {
-		$post_id       = self::factory()->post->create();
-		$comments_link = get_comments_link( $post_id );
-
-		// Test Transitional mode.
-		$this->set_template_mode( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
-		$this->assertStringEndsNotWith( 'noamp=mobile#respond', AMP_Theme_Support::amend_comments_link( $comments_link ) );
-
-		// Test legacy reader mode without mobile redirection.
-		delete_option( AMP_Options_Manager::OPTION_NAME );
-		$this->set_template_mode( AMP_Theme_Support::READER_MODE_SLUG );
-		AMP_Options_Manager::update_option( Option::READER_THEME, ReaderThemes::DEFAULT_READER_THEME );
-		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, false );
-		$this->assertStringEndsNotWith( 'noamp=mobile#respond', AMP_Theme_Support::amend_comments_link( $comments_link ) );
-
-		// Test legacy Reader mode with mobile redirection.
-		delete_option( AMP_Options_Manager::OPTION_NAME );
-		$this->set_template_mode( AMP_Theme_Support::READER_MODE_SLUG );
-		AMP_Options_Manager::update_option( Option::READER_THEME, ReaderThemes::DEFAULT_READER_THEME );
-		AMP_Options_Manager::update_option( Option::MOBILE_REDIRECT, true );
-		$this->assertStringEndsWith( 'noamp=mobile#respond', AMP_Theme_Support::amend_comments_link( $comments_link ) );
 	}
 
 	/**

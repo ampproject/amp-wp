@@ -12,6 +12,7 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\Attribute;
 use AMP_Theme_Support;
+use AMP_HTTP;
 
 /**
  * Service for redirecting mobile users to the AMP version of a page.
@@ -63,12 +64,20 @@ final class MobileRedirection implements Service, Registerable {
 		add_filter( 'amp_default_options', [ $this, 'filter_default_options' ] );
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
 
-		if ( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) ) {
+		if ( AMP_Options_Manager::get_option( Option::MOBILE_REDIRECT ) && ! amp_is_canonical() ) {
 			add_action( 'template_redirect', [ $this, 'redirect' ], PHP_INT_MAX );
 
 			// Enable AMP-to-AMP linking by default to avoid redirecting to AMP version when navigating.
 			// A low priority is used so that sites can continue overriding this if they have done so.
 			add_filter( 'amp_to_amp_linking_enabled', '__return_true', 0 );
+
+			add_filter( 'comment_post_redirect', [ $this, 'filter_comment_post_redirect' ] );
+
+			// Amend the comments/respond links to go to non-AMP page when in legacy Reader mode.
+			if ( amp_is_legacy() ) {
+				add_filter( 'get_comments_link', [ $this, 'add_noamp_mobile_query_var' ] ); // For get_comments_link().
+				add_filter( 'respond_link', [ $this, 'add_noamp_mobile_query_var' ] ); // For comments_popup_link().
+			}
 		}
 	}
 
@@ -415,6 +424,33 @@ final class MobileRedirection implements Service, Registerable {
 			'<link rel="alternate" type="text/html" media="only screen and (max-width: 640px)" href="%s">',
 			esc_url( $this->get_current_amp_url() )
 		);
+	}
+
+	/**
+	 * Redirect to AMP page after submitting comment if the URL is on this site.
+	 *
+	 * @param string $url URL.
+	 * @return string Amended URL.
+	 */
+	public function filter_comment_post_redirect( $url ) {
+		if (
+			isset( AMP_HTTP::$purged_amp_query_vars[ AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR ] )
+			&&
+			wp_parse_url( home_url(), PHP_URL_HOST ) === wp_parse_url( $url, PHP_URL_HOST )
+		) {
+			$url = $this->paired_amp_routing->add_paired_endpoint( $url );
+		}
+		return $url;
+	}
+
+	/**
+	 * Add `?noamp=mobile` to a given URL.
+	 *
+	 * @param string $url URL.
+	 * @return string Amended URL.
+	 */
+	public function add_noamp_mobile_query_var( $url ) {
+		return add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $url );
 	}
 
 	/**
