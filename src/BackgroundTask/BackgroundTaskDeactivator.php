@@ -51,7 +51,7 @@ final class BackgroundTaskDeactivator implements Service, Conditional, Registera
 	 * Class constructor.
 	 */
 	public function __construct() {
-		$this->plugin_file = plugin_basename( AMP__DIR__ . '/amp.php' );
+		$this->plugin_file = plugin_basename( AMP__FILE__ );
 	}
 
 	/**
