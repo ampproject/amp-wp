@@ -1115,7 +1115,6 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * @see PairedAmpRouting::redirect_paired_amp_unavailable()
 	 */
 	public function redirect_extraneous_endpoint_suffix() {
-		$do_redirect   = false;
 		$requested_url = amp_get_current_url();
 		$redirect_url  = $this->remove_paired_endpoint_suffix( $requested_url );
 
@@ -1124,23 +1123,28 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 			return;
 		}
 
-		$is_paired = ! amp_is_canonical();
-
+		$is_paired   = ! amp_is_canonical();
+		$do_redirect = false;
 		if ( is_404() ) {
+			// Always redirect to strip off /amp/ in the case of a 404.
 			$do_redirect = true;
 		} elseif ( $is_paired && Option::PAIRED_URL_STRUCTURE_LEGACY_READER === AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE ) ) {
-			/*
-			 * Prevent infinite URL space under /amp/ endpoint. Note that WordPress allows endpoints to have a value,
-			 * such as the case of /feed/ where /feed/atom/ is the same as saying ?feed=atom. In this case, we need to
-			 * check for /amp/x/ to protect against links like `<a href="./amp/">AMP!</a>`.
-			 * See https://github.com/ampproject/amp-wp/pull/1846.
-			 */
+			// In the one case where a WordPress rewrite endpoint is added, prevent infinite URL space under /amp/ endpoint.
+			// Note that WordPress allows endpoints to have a value, such as the case of /feed/ where /feed/atom/ is the
+			// same as saying ?feed=atom. In this case, we need to check for /amp/x/ to protect against links like
+			// `<a href="./amp/">AMP!</a>`. See https://github.com/ampproject/amp-wp/pull/1846.
+			// In the case where the paired URL structure is "suffix endpoint" (where rewrite rules are not used), then
+			// then this is handled by the previous condition.
 			global $wp;
 			$path_args = [];
 			wp_parse_str( $wp->matched_query, $path_args );
 			if ( isset( $path_args[ amp_get_slug() ] ) && '' !== $path_args[ amp_get_slug() ] ) {
 				$do_redirect = true;
 			}
+		}
+
+		if ( ! $do_redirect ) {
+			return;
 		}
 
 		// To account for switching the paired URL structure from `/amp/` to `?amp=1`, add the query var if in Paired
@@ -1150,13 +1154,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 			$redirect_url = $this->get_query_var_paired_amp_url( $redirect_url );
 		}
 
-		// Redirect to remove the endpoint suffix.
-		$status_code = current_user_can( 'manage_options' ) ? 302 : 301;
-		if ( $do_redirect && wp_safe_redirect( $redirect_url, $status_code ) ) {
-			// @codeCoverageIgnoreStart
-			exit;
-			// @codeCoverageIgnoreEnd
-		}
+		$this->redirect( $redirect_url );
 	}
 
 	/**
@@ -1168,10 +1166,6 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * like /amp/ will redirect to strip the endpoint on Standard mode sites via the `redirect_extraneous_endpoint_suffix`
 	 * method above.
 	 *
-	 * Temporary redirect is used for admin users because implied transitional mode and template support can be
-	 * enabled by user ay any time, so they will be able to make AMP available for this URL and see the change
-	 * without wrestling with the redirect cache.
-	 *
 	 * This happens after `PairedAmpRouting::redirect_extraneous_endpoint_suffix()`.
 	 *
 	 * @see PairedAmpRouting::redirect_extraneous_endpoint_suffix()
@@ -1180,12 +1174,27 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		if ( $this->has_paired_endpoint() && ( amp_is_canonical() || ! amp_is_available() ) ) {
 			$request_url  = amp_get_current_url();
 			$redirect_url = $this->remove_paired_endpoint( $request_url );
-			$status_code  = current_user_can( 'manage_options' ) ? 302 : 301;
-			if ( $redirect_url !== $request_url && wp_safe_redirect( $redirect_url, $status_code ) ) {
-				// @codeCoverageIgnoreStart
-				exit;
-				// @codeCoverageIgnoreEnd
+			if ( $redirect_url !== $request_url ) {
+				$this->redirect( $redirect_url );
 			}
+		}
+	}
+
+	/**
+	 * Redirect a URL.
+	 *
+	 * Temporary redirect is used for admin users because implied transitional mode and template support can be
+	 * enabled by user ay any time, so they will be able to make AMP available for this URL and see the change
+	 * without wrestling with the redirect cache.
+	 *
+	 * @param string $url URL.
+	 */
+	private function redirect( $url ) {
+		$status_code = current_user_can( 'manage_options' ) ? 302 : 301;
+		if ( wp_safe_redirect( $url, $status_code ) ) {
+			// @codeCoverageIgnoreStart
+			exit;
+			// @codeCoverageIgnoreEnd
 		}
 	}
 }
