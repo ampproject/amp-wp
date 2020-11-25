@@ -282,53 +282,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that attempting to access an AMP post in Reader mode that does not support AMP.
-	 *
-	 * @covers AMP_Theme_Support::finish_init()
-	 */
-	public function test_finish_init_when_accessing_singular_post_that_does_not_support_amp() {
-		$post          = self::factory()->post->create();
-		$requested_url = get_permalink( $post );
-		$this->assertEquals( AMP_Theme_Support::READER_MODE_SLUG, AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
-		$this->assertTrue( amp_is_post_supported( $post ) );
-		add_filter( 'amp_skip_post', '__return_true' );
-		$this->assertFalse( amp_is_post_supported( $post ) );
-
-		$redirected = false;
-		add_filter(
-			'wp_redirect',
-			function ( $url ) use ( $requested_url, &$redirected ) {
-				$this->assertEquals( $requested_url, $url );
-				$redirected = true;
-				return null;
-			}
-		);
-		$this->go_to( amp_get_permalink( $post ) );
-		$this->assertTrue( $redirected );
-	}
-
-	/**
-	 * Test that attempting to access an AMP page in Reader Mode for a non-singular query will redirect to the non-AMP version.
-	 *
-	 * @covers AMP_Theme_Support::finish_init()
-	 */
-	public function test_finish_init_when_accessing_non_singular_amp_page_in_reader_mode() {
-		$requested_url = home_url( '/?s=hello' );
-		$this->assertEquals( AMP_Theme_Support::READER_MODE_SLUG, AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
-		$redirected = false;
-		add_filter(
-			'wp_redirect',
-			function ( $url ) use ( $requested_url, &$redirected ) {
-				$this->assertEquals( $requested_url, $url );
-				$redirected = true;
-				return null;
-			}
-		);
-		$this->go_to( amp_add_paired_endpoint( $requested_url ) );
-		$this->assertTrue( $redirected );
-	}
-
-	/**
 	 * Test is_paired_available.
 	 *
 	 * @covers AMP_Theme_Support::is_paired_available()
