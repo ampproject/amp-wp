@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { useContext } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -129,6 +129,21 @@ export function PairedUrlStructure( { focusedSection } ) {
 				</AMPNotice>
 			) }
 
+			{ ! endpointSuffixAvailable && (
+				<AMPNotice size={ NOTICE_SIZE_LARGE } type={ NOTICE_TYPE_INFO }>
+					<p>
+						{
+							sprintf(
+								/* translators: %s is the AMP slug */
+								__( 'There is a post, term, user, or some other entity that is already using the “%s” URL slug. For this reason, you cannot currently use the suffix endpoint or legacy reader paired URL structures.', 'amp' ),
+								slug,
+							)
+						}
+					</p>
+					<PairedUrlExamples pairedUrls={ editedOptions.paired_url_examples.custom } />
+				</AMPNotice>
+			) }
+
 			<ul>
 				<li>
 					<input
@@ -171,7 +186,7 @@ export function PairedUrlStructure( { focusedSection } ) {
 						</code>
 						{ ! endpointSuffixAvailable && (
 							<em>
-								{ ' ' + __( '(unavailable due to conflicts)', 'amp' ) }
+								{ ' ' + __( '(unavailable due to slug conflict)', 'amp' ) }
 							</em>
 						) }
 					</label>
@@ -205,7 +220,7 @@ export function PairedUrlStructure( { focusedSection } ) {
 						onChange={ () => {
 							updateOptions( { paired_url_structure: 'legacy_reader' } );
 						} }
-						disabled={ isCustom }
+						disabled={ isCustom || ! endpointSuffixAvailable }
 					/>
 					<label htmlFor="paired_url_structure_legacy_reader">
 						{ __( 'Legacy reader', 'amp' ) + ': ' }
@@ -216,6 +231,11 @@ export function PairedUrlStructure( { focusedSection } ) {
 						<code>
 							{ `?${ slug }` }
 						</code>
+						{ ! endpointSuffixAvailable && (
+							<em>
+								{ ' ' + __( '(unavailable due to slug conflict)', 'amp' ) }
+							</em>
+						) }
 					</label>
 					<PairedUrlExamples pairedUrls={ editedOptions.paired_url_examples.legacy_reader } />
 				</li>
