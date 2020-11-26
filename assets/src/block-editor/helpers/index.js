@@ -263,7 +263,7 @@ export const getLayoutOptions = ( block ) => {
  *
  * @return {Function} Edit function.
  */
-export const addToolbarButtonToBlock = ( BlockEdit ) => {
+export const filterBlocksEdit = ( BlockEdit ) => {
 	const EnhancedBlockEdit = function( props ) {
 		const { attributes: { ampLayout }, name } = props;
 

@@ -102,13 +102,12 @@ final class BlockSources implements Conditional, Service, Registerable {
 	 * Runs on instantiation.
 	 */
 	public function register() {
-		$this->clear_block_sources_cache();
 		$this->set_block_sources_from_cache();
 
 		if ( empty( $this->get_block_sources() ) ) {
 			add_filter( 'register_block_type_args', [ $this, 'capture_block_type_source' ] );
 
-			// All blocks should be registered before admin_enqueue_scripts.
+			// All blocks should be registered well before admin_enqueue_scripts.
 			add_action( 'admin_enqueue_scripts', [ $this, 'cache_block_sources' ], PHP_INT_MAX );
 		}
 
@@ -172,19 +171,21 @@ final class BlockSources implements Conditional, Service, Registerable {
 				];
 			}
 
-			if ( 0 === strpos( $file, $plugins_directory ) ) {
-				$plugin_file = str_replace( $plugins_directory, '', $file );
-				$plugin_slug = explode( '/', $plugin_file )[0];
+			if ( 0 !== strpos( $file, $plugins_directory ) ) {
+				continue;
+			}
 
-				foreach ( $plugins as $possibly_matching_plugin_file => $plugin ) {
-					$possibly_matching_plugin = explode( '/', $possibly_matching_plugin_file )[0];
+			$plugin_file = str_replace( $plugins_directory, '', $file );
+			$plugin_slug = explode( '/', $plugin_file )[0];
 
-					if ( $possibly_matching_plugin === $plugin_slug ) {
-						return [
-							'source' => self::SOURCE_PLUGIN,
-							'name'   => $plugin['Name'],
-						];
-					}
+			foreach ( $plugins as $possibly_matching_plugin_file => $plugin ) {
+				$possibly_matching_plugin = explode( '/', $possibly_matching_plugin_file )[0];
+
+				if ( $possibly_matching_plugin === $plugin_slug ) {
+					return [
+						'source' => self::SOURCE_PLUGIN,
+						'name'   => $plugin['Name'],
+					];
 				}
 			}
 		}
