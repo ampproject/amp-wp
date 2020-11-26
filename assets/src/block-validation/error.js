@@ -202,7 +202,7 @@ function ErrorContent( { blockType, clientId, status } ) {
 		);
 
 		return content;
-	}, [ clientId, status, blockSource, title ] );
+	}, [ clientId, status, blockSource, selectBlock, title ] );
 
 	return (
 		<>
