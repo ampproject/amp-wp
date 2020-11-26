@@ -2136,7 +2136,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 * @covers \AMP_Validation_Manager::add_admin_bar_menu_items()
 	 */
 	public function test_finalize_validation() {
-		set_current_screen( null );
 		self::set_capability();
 		require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
 		show_admin_bar( true );
