@@ -1727,7 +1727,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @covers ::amp_add_admin_bar_view_link()
 	 * @global WP_Query $wp_query
 	 */
-	public function test_amp_add_admin_bar_item() {
+	public function test_amp_add_admin_bar_view_link() {
 		require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 

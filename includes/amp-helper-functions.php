@@ -1732,9 +1732,14 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 
 	$is_amp_request = amp_is_request();
 
-	$current_url = remove_query_arg( QueryVar::NOAMP, amp_get_current_url() );
-	$amp_url     = amp_add_paired_endpoint( $current_url );
-	$non_amp_url = amp_remove_paired_endpoint( $current_url );
+	$current_url = remove_query_arg( array_merge( wp_removable_query_args(), [ QueryVar::NOAMP ] ), amp_get_current_url() );
+	if ( $is_amp_request ) {
+		$amp_url     = $current_url;
+		$non_amp_url = amp_remove_paired_endpoint( $current_url );
+	} else {
+		$amp_url     = amp_add_paired_endpoint( $current_url );
+		$non_amp_url = $current_url;
+	}
 
 	$icon = $is_amp_request ? Icon::logo() : Icon::link();
 	$attr = [
