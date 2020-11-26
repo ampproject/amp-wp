@@ -163,8 +163,16 @@
 
 .components-button.amp-error__select-block {
 	align-items: center;
-	background-color: #f3f5f6;
-	padding: 5px 7px;
+	display: inline-flex;
+
+}
+
+.components-button.amp-error__select-block::before {
+	content: "(";
+}
+
+.components-button.amp-error__select-block::after {
+	content: ")";
 }
 
 .amp-error__actions {
@@ -196,5 +204,10 @@
 
 .amp-error__details dt::after {
 	content: ":";
-	margin-right: 5px;
+	margin-right: 7px;
 }
+
+.amp-error__details dd {
+	margin-left: 0;
+}
+

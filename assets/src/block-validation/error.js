@@ -117,6 +117,8 @@ ErrorPanelTitle.propTypes = {
 function ErrorContent( { blockType, clientId, status } ) {
 	const { blockSources } = useInlineData( 'ampBlockValidation' );
 
+	const { selectBlock } = useDispatch( 'core/block-editor' );
+
 	const blockSource = blockSources[ blockType?.name ];
 	const title = blockType?.title;
 
@@ -131,6 +133,15 @@ function ErrorContent( { blockType, clientId, status } ) {
 				</dt>,
 				<dd key={ uniqueKey( 'block-type-description' ) }>
 					{ title }
+					<Button
+						className="amp-error__select-block"
+						isLink
+						onClick={ () => {
+							selectBlock( clientId );
+						} }
+					>
+						{ __( 'Select Block', 'amp' ) }
+					</Button>
 				</dd>,
 
 			);
@@ -231,7 +242,6 @@ ErrorContent.propTypes = {
  * @param {number} props.term_id
  */
 export function Error( { clientId, status, term_id: termId, ...props } ) {
-	const { selectBlock } = useDispatch( 'core/block-editor' );
 	const { review_link: reviewLink } = useSelect( ( select ) => select( 'core/editor' ).getEditedPostAttribute( AMP_VALIDITY_REST_FIELD_NAME ) ) || {};
 
 	const reviewed = status === VALIDATION_ERROR_ACK_ACCEPTED_STATUS || status === VALIDATION_ERROR_ACK_REJECTED_STATUS;
@@ -257,17 +267,6 @@ export function Error( { clientId, status, term_id: termId, ...props } ) {
 				<ErrorContent { ...props } clientId={ clientId } blockType={ blockType } status={ status } />
 
 				<div className="amp-error__actions">
-					{ clientId && (
-						<Button
-							className="amp-error__select-block"
-							isSecondary
-							onClick={ () => {
-								selectBlock( clientId );
-							} }
-						>
-							{ __( 'Select Block', 'amp' ) }
-						</Button>
-					) }
 					<a
 						href={ addQueryArgs( reviewLink, { term_id: termId } ) }
 						target="_blank"

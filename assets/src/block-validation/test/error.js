@@ -8,7 +8,7 @@ import { noop } from 'lodash';
  * WordPress dependencies
  */
 import { render } from '@wordpress/element';
-import { dispatch } from '@wordpress/data';
+import { dispatch, select } from '@wordpress/data';
 import { registerBlockType, createBlock } from '@wordpress/blocks';
 import '@wordpress/editor';
 
@@ -84,7 +84,7 @@ registerBlockType( TEST_UNKNOWN_BLOCK, {
 	attributes: {},
 	save: noop,
 	category: 'widgets',
-	title: 'test unnown block',
+	title: 'test unknown block',
 } );
 
 function createTestStoreAndBlocks() {
@@ -99,6 +99,36 @@ function createTestStoreAndBlocks() {
 		validationErrors: [
 			{
 				clientId: pluginBlock.clientId,
+				code: 'DISALLOWED_TAG',
+				status: 3,
+				term_id: 12,
+				title: 'Invalid script: <code>jquery.js</code>',
+				error: {
+					type: 'js_error',
+				},
+			},
+			{
+				clientId: themeBlock.clientId,
+				code: 'DISALLOWED_TAG',
+				status: 3,
+				term_id: 12,
+				title: 'Invalid script: <code>jquery.js</code>',
+				error: {
+					type: 'js_error',
+				},
+			},
+			{
+				clientId: coreBlock.clientId,
+				code: 'DISALLOWED_TAG',
+				status: 3,
+				term_id: 12,
+				title: 'Invalid script: <code>jquery.js</code>',
+				error: {
+					type: 'js_error',
+				},
+			},
+			{
+				clientId: unknownBlock.clientId,
 				code: 'DISALLOWED_TAG',
 				status: 3,
 				term_id: 12,
@@ -236,6 +266,7 @@ describe( 'ErrorTypeIcon', () => {
 			'html_attribute_error',
 			'html_element_error',
 			'css_error',
+			'unknown_error',
 		],
 	)( 'shows the correct error icon', ( errorType ) => {
 		act( () => {
@@ -261,11 +292,19 @@ describe( 'ErrorTypeIcon', () => {
 				expectedClass = '.amp-error__js-error-icon';
 				break;
 
-			default:
+			case 'css_error':
 				expectedClass = '.amp-error__css-error-icon';
+				break;
+
+			default:
+				expectedClass = null;
 		}
 
-		expect( container.querySelector( expectedClass ) ).not.toBeNull();
+		if ( ! expectedClass ) {
+			expect( container.querySelector( 'svg[class^=amp-error]' ) ).toBeNull();
+		} else {
+			expect( container.querySelector( expectedClass ) ).not.toBeNull();
+		}
 	} );
 } );
 
@@ -291,25 +330,25 @@ describe( 'ErrorContent', () => {
 		'core',
 		'unknown',
 	].reduce(
-		( collection, testBlockType ) => [
+		( collection, testBlockSource ) => [
 			...collection,
-			[
+			...[
 				VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
 				VALIDATION_ERROR_ACK_REJECTED_STATUS,
 				VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
 				VALIDATION_ERROR_NEW_REJECTED_STATUS,
 			].map(
-				( status ) => [ testBlockType, status ],
+				( status ) => [ testBlockSource, status ],
 			),
 		],
 		[],
-	) )( 'shows expected content based on whether or not the error has an associated block', ( testBlockType, status ) => {
-		const clientId = getTestBlock( testBlockType )?.clientId || null;
+	) )( 'shows expected content based on whether or not the error has an associated block', ( testBlockSource, status ) => {
+		const clientId = getTestBlock( testBlockSource )?.clientId || null;
 
 		render(
 			<Error
 				clientId={ clientId }
-				status={ 3 }
+				status={ status }
 				term_id={ 12 }
 				title="My test error"
 				error={ { type: 'js_error' } }
@@ -327,10 +366,10 @@ describe( 'ErrorContent', () => {
 			return;
 		}
 
-		expect( container.innerHTML ).toContain( 'Block source' );
+		expect( container.innerHTML ).toContain( '<dt>Source' );
 		expect( container.innerHTML ).not.toContain( 'outside the post content' );
 
-		switch ( testBlockType ) {
+		switch ( testBlockSource ) {
 			case 'plugin':
 				expect( container.innerHTML ).toContain( 'test plugin block' );
 				expect( container.innerHTML ).toContain( 'My plugin (plugin)' );
@@ -343,12 +382,12 @@ describe( 'ErrorContent', () => {
 
 			case 'core':
 				expect( container.innerHTML ).toContain( 'test core block' );
-				expect( container.innerHTML ).toContain( 'WordPress core' );
+				expect( container.innerHTML ).toContain( '<dd>WordPress core' );
 				break;
 
 			case 'unknown':
 				expect( container.innerHTML ).toContain( 'test unknown block' );
-				expect( container.innerHTML ).toContain( 'Unknown' );
+				expect( container.innerHTML ).toContain( '<dd>unknown' );
 				break;
 
 			default:
@@ -362,5 +401,8 @@ describe( 'ErrorContent', () => {
 		expect( container.innerHTML ).not.toContain(
 			[ VALIDATION_ERROR_ACK_REJECTED_STATUS, VALIDATION_ERROR_NEW_REJECTED_STATUS ].includes( status ) ? 'Removed' : 'Kept',
 		);
+
+		container.querySelector( '.amp-error__select-block' ).click();
+		expect( select( 'core/block-editor' ).getSelectedBlock().clientId ).toBe( clientId );
 	} );
 } );
