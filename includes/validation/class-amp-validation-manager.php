@@ -2431,7 +2431,7 @@ class AMP_Validation_Manager {
 			'JS_ERROR_TYPE'              => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
 			'CSS_ERROR_TYPE'             => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 			'isSanitizationAutoAccepted' => self::is_sanitization_auto_accepted(),
-			'blockSources'               => self::get_block_sources_service()->get_block_sources(),
+			'blockSources'               => is_admin() ? self::get_block_sources_service()->get_block_sources() : null,
 		];
 
 		wp_localize_script(
