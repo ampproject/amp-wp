@@ -64,7 +64,6 @@ class AMP_Theme_Support {
 	 */
 	const READER_MODE_SLUG = 'reader';
 
-
 	/**
 	 * Flag used in args passed to add_theme_support('amp') to indicate transitional mode supported.
 	 *

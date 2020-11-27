@@ -16,6 +16,8 @@ use AMP_Theme_Support;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use WP_Post;
+use WP_REST_Response;
 
 /**
  * Class AmpRESTContext.
