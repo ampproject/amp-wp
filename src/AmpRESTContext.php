@@ -17,6 +17,7 @@ use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use WP_Post;
+use WP_REST_Request;
 use WP_REST_Response;
 
 /**
