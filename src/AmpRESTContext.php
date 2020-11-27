@@ -21,7 +21,7 @@ use WP_REST_Response;
 
 /**
  * Class AmpRESTContext.
- * 
+ *
  * @internal
  * @since 2.1
  */

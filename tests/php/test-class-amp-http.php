@@ -213,8 +213,10 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		$expected = [
 			'cdn.ampproject.org',
 			'example-org.cdn.ampproject.org',
+			'example-org.amp.cloudflare.com',
 			'example-org.bing-amp.com',
 			'example-com.cdn.ampproject.org',
+			'example-com.amp.cloudflare.com',
 			'example-com.bing-amp.com',
 		];
 		$this->assertEqualSets( $expected, $hosts );
@@ -227,6 +229,33 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		$this->assertEqualSets(
 			array_merge( $extra_allowed_redirect_hosts, $expected ),
 			AMP_HTTP::filter_allowed_redirect_hosts( $extra_allowed_redirect_hosts )
+		);
+	}
+
+	/** @covers AMP_HTTP::get_amp_cache_domains() */
+	public function test_get_amp_cache_domains() {
+		$this->assertEquals(
+			[ 'cdn.ampproject.org', 'amp.cloudflare.com', 'bing-amp.com' ],
+			AMP_HTTP::get_amp_cache_domains()
+		);
+	}
+
+	/** @covers AMP_HTTP::get_amp_cache_subdomain() */
+	public function test_get_amp_cache_subdomain() {
+		$this->assertEquals( 'my-cool--site-com', AMP_HTTP::get_amp_cache_subdomain( 'my.cool-site.com' ) );
+	}
+
+	/** @covers AMP_HTTP::get_amp_cache_url() */
+	public function test_get_amp_cache_url() {
+		$post_id = $this->factory()->post->create();
+		$this->assertEquals(
+			sprintf( 'https://example-org.cdn.ampproject.org/c/example.org/?p=%d', $post_id ),
+			AMP_HTTP::get_amp_cache_url( get_permalink( $post_id ) )
+		);
+
+		$this->assertEquals(
+			sprintf( 'https://example-org.cdn.ampproject.org/c/example.org/?p=%d', $post_id ),
+			AMP_HTTP::get_amp_cache_url( str_replace( home_url(), '', get_permalink( $post_id ) ) )
 		);
 	}
 
