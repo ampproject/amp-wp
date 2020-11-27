@@ -478,7 +478,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * Update rewrite endpoint.
 	 */
 	public function update_rewrite_endpoint() {
-		if ( Option::PAIRED_URL_STRUCTURE_LEGACY_READER === AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE ) ) {
+		if ( ! amp_is_canonical() && Option::PAIRED_URL_STRUCTURE_LEGACY_READER === AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE ) ) {
 			$this->get_wp_rewrite()->add_endpoint( amp_get_slug(), EP_PERMALINK );
 		} else {
 			$this->remove_rewrite_endpoint();
