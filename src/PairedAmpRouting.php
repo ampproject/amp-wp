@@ -25,8 +25,6 @@ use WP_Term_Query;
 /**
  * Service for routing users to and from paired AMP URLs.
  *
- * @todo Add 404 redirection to non-AMP version.
- *
  * @package AmpProject\AmpWP
  * @since 2.1
  * @internal
@@ -484,9 +482,14 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * Update rewrite endpoint.
 	 */
 	public function update_rewrite_endpoint() {
-		if ( ! amp_is_canonical() && Option::PAIRED_URL_STRUCTURE_LEGACY_READER === AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE ) ) {
+		if (
+			! amp_is_canonical()
+			&&
+			Option::PAIRED_URL_STRUCTURE_LEGACY_READER === AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE )
+		) {
 			$this->get_wp_rewrite()->add_endpoint( amp_get_slug(), EP_PERMALINK );
-		} else {
+		} elseif ( ! $this->has_custom_paired_url_structure() ) {
+			// This is not done for a custom structure which may involve registering rewrite endpoints.
 			$this->remove_rewrite_endpoint();
 		}
 	}
