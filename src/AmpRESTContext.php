@@ -33,18 +33,12 @@ final class AmpRESTContext implements Service, Delayed, Registerable {
 
 	/**
 	 * Registers actions and filters to be used during the REST API initialization.
-	 *
-	 * @return void
 	 */
 	public function register() {
-		// Register a rest_prepare_{$post_type} filter for each one of the post types supported
-		// by the AMP plugin.
 		foreach ( AMP_Post_Type_Support::get_supported_post_types() as $post_type ) {
 			if ( post_type_supports( $post_type, 'editor' ) ) {
-				add_filter( 'rest_prepare_' . $post_type, [ __CLASS__, 'add_content_amp_field' ], 10, 3 );
-
-				// The rest_{$this->post_type}_item_schema filter is still a work in progress: https://core.trac.wordpress.org/ticket/47779.
-				add_filter( 'rest_' . $post_type . '_item_schema', [ __CLASS__, 'extend_content_schema' ] );
+				add_filter( 'rest_prepare_' . $post_type, [ $this, 'add_content_amp_field' ], 10, 3 );
+				add_filter( 'rest_' . $post_type . '_item_schema', [ $this, 'extend_content_schema' ] );
 			}
 		}
 	}
@@ -55,7 +49,7 @@ final class AmpRESTContext implements Service, Delayed, Registerable {
 	 * @param array $schema API schema.
 	 * @return array Modified schema.
 	 */
-	public static function add_amp_context_where_context_has_view( $schema ) {
+	public function add_amp_context_where_context_has_view( $schema ) {
 		if ( ! is_array( $schema ) ) {
 			return $schema;
 		}
@@ -77,12 +71,12 @@ final class AmpRESTContext implements Service, Delayed, Registerable {
 		}
 
 		if ( $is_array_type ) {
-			$schema['items'] = array_map( [ __CLASS__, __FUNCTION__ ], $schema );
+			$schema['items'] = array_map( [ $this, __FUNCTION__ ], $schema );
 			return $schema;
 		}
 
 		foreach ( $schema['properties'] as $key => $value ) {
-			$schema['properties'][ $key ] = self::add_amp_context_where_context_has_view( $value );
+			$schema['properties'][ $key ] = $this->add_amp_context_where_context_has_view( $value );
 		}
 
 		return $schema;
@@ -94,8 +88,8 @@ final class AmpRESTContext implements Service, Delayed, Registerable {
 	 * @param array $schema Post schema data.
 	 * @return array Schema.
 	 */
-	public static function extend_content_schema( $schema ) {
-		$schema = self::add_amp_context_where_context_has_view( $schema );
+	public function extend_content_schema( $schema ) {
+		$schema = $this->add_amp_context_where_context_has_view( $schema );
 
 		$schema['properties']['content']['properties']['amp'] = [
 			'description' => __( 'The AMP content for the object.', 'amp' ),
@@ -225,7 +219,7 @@ final class AmpRESTContext implements Service, Delayed, Registerable {
 	 * @param  WP_REST_Request  $request  Request object.
 	 * @return WP_REST_Response Response object.
 	 */
-	public static function add_content_amp_field( $response, $post, $request ) {
+	public function add_content_amp_field( $response, $post, $request ) {
 		// Skip if AMP is disabled for the post.
 		if ( ! amp_is_post_supported( $post ) ) {
 			return $response;
