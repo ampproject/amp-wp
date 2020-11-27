@@ -348,7 +348,7 @@ class AmpRESTContextTest extends DependencyInjectedTestCase {
 		$post_id = $this->factory()->post->create();
 
 		$request = new WP_REST_Request( 'GET', '/wp/v2/posts/' . $post_id );
-		$data = rest_do_request( $request )->get_data();
+		$data    = rest_do_request( $request )->get_data();
 
 		$this->assertArrayNotHasKey( AmpRESTContext::AMP_LINKS_REST_FIELD, $data );
 		$this->assertArrayNotHasKey( 'amp', $data['content'] );
