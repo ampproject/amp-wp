@@ -2054,7 +2054,6 @@ class AMP_Theme_Support {
 
 		$can_serve = AMP_Validation_Manager::finalize_validation( $dom );
 
-		// @todo Move to PairedAmpRouting.
 		// Redirect to the non-AMP version if not on an AMP-first site.
 		if ( ! $can_serve && ! amp_is_canonical() ) {
 			$non_amp_url = amp_remove_paired_endpoint( amp_get_current_url() );

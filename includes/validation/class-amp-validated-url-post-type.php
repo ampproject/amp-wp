@@ -764,7 +764,9 @@ class AMP_Validated_URL_Post_Type {
 	 */
 	protected static function normalize_url_for_storage( $url ) {
 		// Only ever store the canonical version.
-		$url = amp_remove_paired_endpoint( $url );
+		if ( ! amp_is_canonical() ) {
+			$url = amp_remove_paired_endpoint( $url );
+		}
 
 		// Remove fragment identifier in the rare case it could be provided. It is irrelevant for validation.
 		$url = strtok( $url, '#' );
