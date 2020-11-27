@@ -947,8 +947,9 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 			);
 		} else {
 			$has_endpoint = false;
+			$parsed_url   = wp_parse_url( $url );
 
-			$parsed_url = wp_parse_url( $url );
+			// Check if query var is present.
 			if ( ! empty( $parsed_url['query'] ) ) {
 				$query_vars = [];
 				wp_parse_str( $parsed_url['query'], $query_vars );
@@ -957,11 +958,18 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 				}
 			}
 
-			// @todo Problem: This could end up incorrectly identifying URLs that end in /amp/.
+			// Otherwise, if the endpoint involves an endpoint suffix, check if it is present.
+			$paired_structure = $this->get_paired_url_structure();
 			if (
 				! $has_endpoint
 				&&
 				! empty( $parsed_url['path'] )
+				&&
+				(
+					Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT === $paired_structure
+					||
+					Option::PAIRED_URL_STRUCTURE_LEGACY_READER === $paired_structure
+				)
 				&&
 				$this->has_paired_endpoint_suffix( $parsed_url['path'] )
 			) {
@@ -1005,15 +1013,17 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * @return string URL with AMP stripped.
 	 */
 	public function remove_paired_endpoint( $url ) {
-		$slug = amp_get_slug();
+		$non_amp_url = $this->remove_paired_endpoint_query_var( $url );
 
-		// @todo This should only be done if an endpoint suffix is being used, or else the suffix could be erroneously removed.
-		$non_amp_url = $this->remove_paired_endpoint_suffix( $url );
-
-		// Strip query var, including ?amp, ?amp=1, etc.
-		$non_amp_url = remove_query_arg( $slug, $non_amp_url );
-
-		if ( $this->has_custom_paired_url_structure() ) {
+		// Remove the /amp/ URL endpoint suffix if the paired URL structure makes use of it.
+		$paired_structure = $this->get_paired_url_structure();
+		if (
+			Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT === $paired_structure
+			||
+			Option::PAIRED_URL_STRUCTURE_LEGACY_READER === $paired_structure
+		) {
+			$non_amp_url = $this->remove_paired_endpoint_suffix( $non_amp_url );
+		} elseif ( self::PAIRED_URL_STRUCTURE_CUSTOM === $paired_structure ) {
 			/**
 			 * Filters paired AMP URL to remove a custom paired URL structure.
 			 *
@@ -1029,7 +1039,17 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	}
 
 	/**
-	 * Strip endpoint suffix.
+	 * Strip paired query var.
+	 *
+	 * @param string $url URL.
+	 * @return string URL.
+	 */
+	private function remove_paired_endpoint_query_var( $url ) {
+		return remove_query_arg( amp_get_slug(), $url );
+	}
+
+	/**
+	 * Strip paired endpoint suffix.
 	 *
 	 * @param string $url URL.
 	 * @return string URL.
