@@ -24,6 +24,9 @@ use WP_REST_Response;
  */
 final class AmpRESTContext implements Service, Delayed, Registerable {
 
+	const AMP_CONTENT_REST_FIELD = 'amp';
+	const AMP_LINKS_REST_FIELD   = 'amp_links';
+
 	/**
 	 * Provides the WordPress action on which to register.
 	 *
@@ -41,6 +44,62 @@ final class AmpRESTContext implements Service, Delayed, Registerable {
 			if ( post_type_supports( $post_type, 'editor' ) ) {
 				add_filter( 'rest_prepare_' . $post_type, [ $this, 'add_content_amp_field' ], 10, 3 );
 				add_filter( 'rest_' . $post_type . '_item_schema', [ $this, 'extend_content_schema' ] );
+
+				register_rest_field(
+					$post_type,
+					self::AMP_LINKS_REST_FIELD,
+					[
+						'get_callback' => [ $this, 'get_amp_links' ],
+						'schema'       => [
+							'description' => __( 'Links for the AMP version.', 'amp' ),
+							'type'        => 'object',
+							'context'     => [ 'amp' ],
+							'readonly'    => true,
+							'properties'  => [
+								'complete_template'  => [
+									'description' => __( 'Links for the AMP version in a complete template.', 'amp' ),
+									'type'        => 'object',
+									'context'     => [ 'amp' ],
+									'readonly'    => true,
+									'properties'  => [
+										'cache'  => [
+											'type'        => 'string',
+											'description' => __( 'Link for the AMP version in a complete template on origin.', 'amp' ),
+											'context'     => [ 'amp' ],
+											'readonly'    => true,
+										],
+										'origin' => [
+											'type'        => 'string',
+											'description' => __( 'Link for the AMP version in a complete template on the ampproject.org AMP Cache.', 'amp' ),
+											'context'     => [ 'amp' ],
+											'readonly'    => true,
+										],
+									],
+								],
+								'standalone_content' => [
+									'description' => __( 'Links for the AMP version in standalone content.', 'amp' ),
+									'type'        => 'object',
+									'context'     => [ 'amp' ],
+									'readonly'    => true,
+									'properties'  => [
+										'cache'  => [
+											'type'        => 'string',
+											'description' => __( 'Link for the AMP version in standalone content on origin.', 'amp' ),
+											'context'     => [ 'amp' ],
+											'readonly'    => true,
+										],
+										'origin' => [
+											'type'        => 'string',
+											'description' => __( 'Link for the AMP version in standalone content on the ampproject.org AMP Cache.', 'amp' ),
+											'context'     => [ 'amp' ],
+											'readonly'    => true,
+										],
+									],
+								],
+							],
+						],
+					]
+				);
 			}
 		}
 	}
@@ -73,7 +132,7 @@ final class AmpRESTContext implements Service, Delayed, Registerable {
 		}
 
 		if ( $is_array_type ) {
-			$schema['items'] = array_map( [ $this, __FUNCTION__ ], $schema );
+			$schema['items'] = array_map( [ $this, 'add_amp_context_where_context_has_view' ], $schema['items'] );
 			return $schema;
 		}
 
@@ -93,7 +152,11 @@ final class AmpRESTContext implements Service, Delayed, Registerable {
 	public function extend_content_schema( $schema ) {
 		$schema = $this->add_amp_context_where_context_has_view( $schema );
 
-		$schema['properties']['content']['properties']['amp'] = [
+		if ( ! is_array( $schema ) || ! isset( $schema['properties']['content']['properties'] ) ) {
+			return $schema;
+		}
+
+		$schema['properties']['content']['properties'][ self::AMP_CONTENT_REST_FIELD ] = [
 			'description' => __( 'The AMP content for the object.', 'amp' ),
 			'type'        => 'object',
 			'context'     => [ 'amp' ],
@@ -161,56 +224,33 @@ final class AmpRESTContext implements Service, Delayed, Registerable {
 			],
 		];
 
-		$schema['properties']['amp_links'] = [
-			'description'          => __( 'Links for the AMP version.', 'amp' ),
-			'type'                 => 'object',
-			'context'              => [ 'amp' ],
-			'readonly'             => true,
-			'additionalProperties' => [
-				'complete_template'  => [
-					'description'          => __( 'Links for the AMP version in a complete template.', 'amp' ),
-					'type'                 => 'object',
-					'context'              => [ 'amp' ],
-					'readonly'             => true,
-					'additionalProperties' => [
-						'cache'  => [
-							'type'        => 'string',
-							'description' => __( 'Link for the AMP version in a complete template on origin.', 'amp' ),
-							'context'     => [ 'amp' ],
-							'readonly'    => true,
-						],
-						'origin' => [
-							'type'        => 'string',
-							'description' => __( 'Link for the AMP version in a complete template on the ampproject.org AMP Cache.', 'amp' ),
-							'context'     => [ 'amp' ],
-							'readonly'    => true,
-						],
-					],
-				],
-				'standalone_content' => [
-					'description'          => __( 'Links for the AMP version in standalone content.', 'amp' ),
-					'type'                 => 'object',
-					'context'              => [ 'amp' ],
-					'readonly'             => true,
-					'additionalProperties' => [
-						'cache'  => [
-							'type'        => 'string',
-							'description' => __( 'Link for the AMP version in standalone content on origin.', 'amp' ),
-							'context'     => [ 'amp' ],
-							'readonly'    => true,
-						],
-						'origin' => [
-							'type'        => 'string',
-							'description' => __( 'Link for the AMP version in standalone content on the ampproject.org AMP Cache.', 'amp' ),
-							'context'     => [ 'amp' ],
-							'readonly'    => true,
-						],
-					],
-				],
+		return $schema;
+	}
+
+	/**
+	 * Callback for the amp_links REST field.
+	 *
+	 * @param array $post_array Array of prepared WP Post data.
+	 * @return array
+	 */
+	public function get_amp_links( $post_array ) {
+		$standalone_content_url = add_query_arg(
+			StandaloneContent::STANDALONE_CONTENT_QUERY_VAR,
+			'',
+			get_permalink( $post_array['id'] )
+		);
+		$content_template_link  = amp_get_permalink( $post_array['id'] );
+
+		return [
+			'standalone_content' => [
+				'origin' => $standalone_content_url,
+				'cache'  => AMP_HTTP::get_amp_cache_url( $standalone_content_url ),
+			],
+			'complete_template'  => [
+				'origin' => $content_template_link,
+				'cache'  => AMP_HTTP::get_amp_cache_url( $content_template_link ),
 			],
 		];
-
-		return $schema;
 	}
 
 	/**
@@ -226,20 +266,6 @@ final class AmpRESTContext implements Service, Delayed, Registerable {
 		if ( ! amp_is_post_supported( $post ) ) {
 			return $response;
 		}
-
-		// Obtain the AMP link.
-		$standalone_content_url      = add_query_arg( StandaloneContent::STANDALONE_CONTENT_QUERY_VAR, '', $response->data['link'] );
-		$content_template_link       = amp_get_permalink( $post );
-		$response->data['amp_links'] = [
-			'standalone_content' => [
-				'origin' => $standalone_content_url,
-				'cache'  => AMP_HTTP::get_amp_cache_url( $standalone_content_url ),
-			],
-			'complete_template'  => [
-				'origin' => $content_template_link,
-				'cache'  => AMP_HTTP::get_amp_cache_url( $content_template_link ),
-			],
-		];
 
 		if ( 'amp' !== $request['context'] ) {
 			return $response;
@@ -296,7 +322,7 @@ final class AmpRESTContext implements Service, Delayed, Registerable {
 			}
 		}
 
-		// Remove filters that to clean up applying filters for whatever comes next.
+		// Clean up applying filters for whatever comes next.
 		remove_filter( 'wp_video_shortcode_library', $return_amp );
 		remove_filter( 'wp_audio_shortcode_library', $return_amp );
 		foreach ( $embed_handlers as $embed_handler ) {
