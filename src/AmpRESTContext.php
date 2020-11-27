@@ -226,7 +226,7 @@ final class AmpRESTContext implements Service, Delayed, Registerable {
 		}
 
 		// Obtain the AMP link.
-		$standalone_content_url      = add_query_arg( AMP_Theme_Support::STANDALONE_CONTENT_QUERY_VAR, '', $response->data['link'] );
+		$standalone_content_url      = add_query_arg( StandaloneContent::STANDALONE_CONTENT_QUERY_VAR, '', $response->data['link'] );
 		$content_template_link       = amp_get_permalink( $post );
 		$response->data['amp_links'] = [
 			'standalone_content' => [

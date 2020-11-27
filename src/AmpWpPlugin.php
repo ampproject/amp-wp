@@ -80,6 +80,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'rest.amp_context'                  => AmpRESTContext::class,
 		'server_timing'                     => Instrumentation\ServerTiming::class,
 		'site_health_integration'           => Admin\SiteHealth::class,
+		'standalone_content'                => StandaloneContent::class,
 		'validated_url_stylesheet_gc'       => BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection::class,
 	];
 

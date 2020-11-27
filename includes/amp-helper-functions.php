@@ -11,6 +11,7 @@ use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Services;
+use AmpProject\AmpWP\StandaloneContent;
 
 /**
  * Handle activation of plugin.
@@ -874,7 +875,7 @@ function amp_is_request() {
 	}
 
 	// AMP standalone content requests are always an AMP endpoint.
-	if ( $wp_query instanceof WP_Query && $wp_query->is_singular() && AMP_Theme_Support::is_standalone_content_request() ) {
+	if ( $wp_query instanceof WP_Query && $wp_query->is_singular() && StandaloneContent::is_standalone_content_request() ) {
 		return true;
 	}
 
