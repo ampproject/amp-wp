@@ -73,6 +73,7 @@ jobs:
         continue-on-error: true
 
       - name: Annotate code linting results
+        if: github.repository == 'ampproject/amp-wp'
         uses: ataylorme/eslint-annotate-action@1.0.4
         with:
           repo-token: '${{ secrets.GITHUB_TOKEN }}'
