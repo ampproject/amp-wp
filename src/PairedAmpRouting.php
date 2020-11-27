@@ -77,6 +77,14 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	const ENDPOINT_SUFFIX_CONFLICTS = 'endpoint_suffix_conflicts';
 
 	/**
+	 * REST API field name for whether permalinks are being used.
+	 *
+	 * @see WP_Rewrite::using_permalinks()
+	 * @var string
+	 */
+	const ENDPOINT_USING_PERMALINKS = 'using_permalinks';
+
+	/**
 	 * Key for the custom paired structure sources.
 	 *
 	 * @var string
@@ -217,6 +225,8 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		$options[ self::CUSTOM_PAIRED_ENDPOINT_SOURCES ] = $this->get_custom_paired_structure_sources();
 
 		$options[ self::ENDPOINT_SUFFIX_CONFLICTS ] = $this->get_endpoint_suffix_conflicts();
+
+		$options[ self::ENDPOINT_USING_PERMALINKS ] = $this->get_wp_rewrite()->using_permalinks();
 
 		return $options;
 	}
@@ -529,6 +539,8 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 				AMP_Theme_Support::READER_MODE_SLUG === $options[ Option::THEME_SUPPORT ]
 				&&
 				ReaderThemes::DEFAULT_READER_THEME === $options[ Option::READER_THEME ]
+				&&
+				$this->get_wp_rewrite()->using_permalinks()
 			) {
 				$value = Option::PAIRED_URL_STRUCTURE_LEGACY_READER;
 			} elseif ( AMP_Theme_Support::STANDARD_MODE_SLUG !== $options[ Option::THEME_SUPPORT ] ) {
@@ -702,11 +714,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 			wp_parse_url( $url )
 		);
 
-		$rewrite = $this->get_wp_rewrite();
-
 		$query_var_required = (
-			! $rewrite->using_permalinks()
-			||
 			// This is especially the case for post previews.
 			isset( $parsed_url['query'] )
 		);
@@ -791,9 +799,6 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 
 		$parsed_url    = wp_parse_url( $url );
 		$use_query_var = (
-			// If pretty permalinks aren't available, then query var must be used.
-			! $this->get_wp_rewrite()->using_permalinks()
-			||
 			// If there are existing query vars, then always use the amp query var as well.
 			! empty( $parsed_url['query'] )
 			||

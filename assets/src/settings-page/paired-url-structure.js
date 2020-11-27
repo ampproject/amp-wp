@@ -177,7 +177,7 @@ export function PairedUrlStructure( { focusedSection } ) {
 						onChange={ () => {
 							updateOptions( { paired_url_structure: 'suffix_endpoint' } );
 						} }
-						disabled={ isCustom || ! endpointSuffixAvailable }
+						disabled={ isCustom || ! endpointSuffixAvailable || ! editedOptions.using_permalinks }
 					/>
 					<label htmlFor="paired_url_structure_suffix_endpoint">
 						{ __( 'Suffix endpoint', 'amp' ) + ': ' }
@@ -187,6 +187,11 @@ export function PairedUrlStructure( { focusedSection } ) {
 						{ ! endpointSuffixAvailable && (
 							<em>
 								{ ' ' + __( '(unavailable due to slug conflict)', 'amp' ) }
+							</em>
+						) }
+						{ ! editedOptions.using_permalinks && (
+							<em>
+								{ ' ' + __( '(unavailable due to not using permalinks)', 'amp' ) }
 							</em>
 						) }
 					</label>
@@ -220,7 +225,7 @@ export function PairedUrlStructure( { focusedSection } ) {
 						onChange={ () => {
 							updateOptions( { paired_url_structure: 'legacy_reader' } );
 						} }
-						disabled={ isCustom || ! endpointSuffixAvailable }
+						disabled={ isCustom || ! endpointSuffixAvailable || ! editedOptions.using_permalinks }
 					/>
 					<label htmlFor="paired_url_structure_legacy_reader">
 						{ __( 'Legacy reader', 'amp' ) + ': ' }
@@ -234,6 +239,11 @@ export function PairedUrlStructure( { focusedSection } ) {
 						{ ! endpointSuffixAvailable && (
 							<em>
 								{ ' ' + __( '(unavailable due to slug conflict)', 'amp' ) }
+							</em>
+						) }
+						{ ! editedOptions.using_permalinks && (
+							<em>
+								{ ' ' + __( '(unavailable due to not using permalinks)', 'amp' ) }
 							</em>
 						) }
 					</label>
