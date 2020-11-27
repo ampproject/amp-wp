@@ -117,7 +117,7 @@ function amp_init() {
 	AMP_Theme_Support::init();
 	AMP_Validation_Manager::init();
 	AMP_Service_Worker::init();
-	AMP_REST_API::init();
+
 	add_action( 'admin_init', 'AMP_Options_Manager::init' );
 	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
 	add_action( 'rest_api_init', 'AMP_Options_Manager::register_settings' );

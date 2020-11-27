@@ -1,29 +1,42 @@
 <?php
 /**
- * AMP REST API.
+ * AmpRESTContext.
  *
  * @package AMP
- * @since   2.0
+ * @since   2.1
  */
+
+namespace AmpProject\AmpWP;
+
+use AMP_Content_Sanitizer;
+use AMP_DOM_Utils;
+use AMP_HTTP;
+use AMP_Post_Type_Support;
+use AMP_Theme_Support;
+use AmpProject\AmpWP\Infrastructure\Delayed;
+use AmpProject\AmpWP\Infrastructure\Registerable;
+use AmpProject\AmpWP\Infrastructure\Service;
 
 /**
- * Class AMP_REST_API.
+ * Class AmpRESTContext.
  */
-class AMP_REST_API {
+final class AmpRESTContext implements Service, Delayed, Registerable {
 
 	/**
-	 * Init.
+	 * Provides the WordPress action on which to register.
+	 *
+	 * @return string
 	 */
-	public static function init() {
-		add_action( 'rest_api_init', [ __CLASS__, 'rest_api_init' ] );
+	public static function get_registration_action() {
+		return 'rest_api_init';
 	}
 
 	/**
-	 * Register other actions and filters to be used during the REST API initialization.
+	 * Registers actions and filters to be used during the REST API initialization.
 	 *
 	 * @return void
 	 */
-	public static function rest_api_init() {
+	public function register() {
 		// Register a rest_prepare_{$post_type} filter for each one of the post types supported
 		// by the AMP plugin.
 		foreach ( AMP_Post_Type_Support::get_supported_post_types() as $post_type ) {
