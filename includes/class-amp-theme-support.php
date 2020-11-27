@@ -1014,49 +1014,23 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Get canonical URL for current request.
+	 * Get the canonical/self (non-paired) URL for current request.
 	 *
-	 * @see rel_canonical()
-	 * @global WP $wp
-	 * @global WP_Rewrite $wp_rewrite
+	 * For paired AMP sites, this is not the actual "canonical" URL but rather just the non-amphtml version of the current
+	 * paired URL. For AMP-first sites, this returns just the current self URL. If desiring to have an actual semantically
+	 * canonical URL, then a plugin should be added which adds the desired link to the page. As it stands, this method
+	 * is only used to add canonical links when a page lacks it in the first place.
+	 *
 	 * @link https://www.ampproject.org/docs/reference/spec#canon.
-	 * @link https://core.trac.wordpress.org/ticket/18660
-	 * @todo This is excessive. On an AMP page, all we need to do is return the current URL that strips off any AMP designation.
 	 *
-	 * @return string Canonical non-AMP URL.
+	 * @return string Canonical/self URL.
 	 */
 	public static function get_current_canonical_url() {
-		global $wp, $wp_rewrite;
-
-		$url = null;
-		if ( is_singular() ) {
-			$url = wp_get_canonical_url();
+		$current_url = amp_get_current_url();
+		if ( ! amp_is_canonical() ) {
+			$current_url = amp_remove_paired_endpoint( $current_url );
 		}
-
-		// For non-singular queries, make use of the request URI and public query vars to determine canonical URL.
-		if ( empty( $url ) && $wp instanceof WP && $wp_rewrite instanceof WP_Rewrite ) {
-			$added_query_vars = $wp->query_vars;
-			if ( ! $wp_rewrite->permalink_structure || empty( $wp->request ) ) {
-				$url = home_url( '/' );
-			} else {
-				$url = home_url( user_trailingslashit( $wp->request ) );
-				parse_str( $wp->matched_query, $matched_query_vars );
-				foreach ( $wp->query_vars as $key => $value ) {
-
-					// Remove query vars that were matched in the rewrite rules for the request.
-					if ( isset( $matched_query_vars[ $key ] ) ) {
-						unset( $added_query_vars[ $key ] );
-					}
-				}
-			}
-		}
-
-		if ( ! empty( $added_query_vars ) ) {
-			$url = add_query_arg( $added_query_vars, $url );
-		}
-
-		// @todo This is wrong as it can result in /guitar/amp/?amp=1 being rewritten to /guitar/, when `amp` is the slug for an actual post.
-		return amp_remove_paired_endpoint( $url );
+		return $current_url;
 	}
 
 	/**

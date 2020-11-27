@@ -835,25 +835,48 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_current_canonical_url.
+	 * Test get_current_canonical_url when using Standard mode.
 	 *
 	 * @covers AMP_Theme_Support::get_current_canonical_url()
 	 */
-	public function test_get_current_canonical_url() {
-		global $post, $wp;
-		$home_url = home_url( '/' );
-		$this->assertEquals( $home_url, AMP_Theme_Support::get_current_canonical_url() );
+	public function test_get_current_canonical_url_in_standard_mode() {
+		$this->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 
-		$added_query_vars = [
-			'foo' => 'bar',
-		];
-		$wp->query_vars   = $added_query_vars;
-		$this->assertEquals( add_query_arg( $added_query_vars, $home_url ), AMP_Theme_Support::get_current_canonical_url() );
+		$post = self::factory()->post->create_and_get(
+			[
+				'post_type'   => 'post',
+				'post_name'   => amp_get_slug(),
+				'post_status' => 'publish',
+			]
+		);
 
-		$post = self::factory()->post->create_and_get();
-		$this->go_to( get_permalink( $post ) );
-		$this->assertEquals( wp_get_canonical_url(), AMP_Theme_Support::get_current_canonical_url() );
+		$current_url = home_url( get_permalink( $post ) );
+		$this->go_to( $current_url );
+		$this->assertEquals( $current_url, AMP_Theme_Support::get_current_canonical_url() );
+	}
 
+	/**
+	 * Test get_current_canonical_url when using Transitional mode (a Paired AMP mode).
+	 *
+	 * @covers AMP_Theme_Support::get_current_canonical_url()
+	 */
+	public function test_get_current_canonical_url_in_paired_amp() {
+		$this->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+
+		$post = self::factory()->post->create_and_get(
+			[
+				'post_type'   => 'post',
+				'post_name'   => amp_get_slug(),
+				'post_status' => 'publish',
+			]
+		);
+
+		$canonical_url = get_permalink( $post );
+		$amphtml_url   = amp_add_paired_endpoint( $canonical_url );
+		$this->go_to( $amphtml_url );
+		$this->assertEquals( $canonical_url, AMP_Theme_Support::get_current_canonical_url() );
 	}
 
 	/**
