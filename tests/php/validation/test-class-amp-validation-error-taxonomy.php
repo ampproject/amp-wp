@@ -986,6 +986,12 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 			[ 'details', 'delete' ],
 			array_keys( $filtered_actions )
 		);
+
+		$pagenow = 'post.php';
+		$actions = AMP_Validation_Error_Taxonomy::filter_tag_row_actions( $initial_actions, get_term( $term_this_taxonomy ) );
+		$this->assertTrue( array_key_exists( 'copy', $actions ) );
+		$this->assertStringContains( 'Copy to clipboard', $actions['copy'] );
+
 	}
 
 	/**
@@ -1520,5 +1526,45 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 			'type'            => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 			'node_type'       => XML_ELEMENT_NODE,
 		];
+	}
+
+	/**
+	 * Test get_error_details_json.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::get_error_details_json()
+	 */
+	public function test_get_error_details_json() {
+		$term = new WP_Term(
+			(object) [
+				'description' => wp_json_encode(
+					[
+						'node_type' => 1,
+					]
+				),
+				'term_group'  => 1,
+			]
+		);
+
+		$result = json_decode( AMP_Validation_Error_Taxonomy::get_error_details_json( $term ), true );
+
+		$this->assertEquals( 'ELEMENT', $result['node_type'] );
+		$this->assertEquals( true, $result['removed'] );
+		$this->assertEquals( false, $result['reviewed'] );
+
+		$term   = new WP_Term(
+			(object) [
+				'description' => wp_json_encode(
+					[
+						'node_type' => 2,
+					]
+				),
+				'term_group'  => 2,
+			]
+		);
+		$result = json_decode( AMP_Validation_Error_Taxonomy::get_error_details_json( $term ), true );
+
+		$this->assertEquals( 'ATTRIBUTE', $result['node_type'] );
+		$this->assertEquals( false, $result['removed'] );
+		$this->assertEquals( true, $result['reviewed'] );
 	}
 }

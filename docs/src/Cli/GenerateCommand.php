@@ -246,7 +246,6 @@ final class GenerateCommand {
 	private function get_excluded_dirs() {
 		return [
 			'#^.*/amp/(assets|bin|build|docs|node_modules|tests|vendor)/*#',
-			'#^.*/amp/lib/(common|optimizer)/*#',
 		];
 	}
 

@@ -2103,6 +2103,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		</head>
 		<body><!-- </body></html> -->
 		<div id="dynamic-id-0"></div>
+		<!-- 2nd image is needed for testing <noscript> as first is SSR'ed -->
+		<img width="100" height="100" src="https://example.com/hero.png">
 		<img width="100" height="100" src="https://example.com/test.png">
 		<audio src="https://example.com/audios/myaudio.mp3"></audio>
 		<amp-ad type="a9"

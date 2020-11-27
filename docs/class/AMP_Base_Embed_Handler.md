@@ -9,9 +9,11 @@ Class AMP_Base_Embed_Handler
 * [`__construct`](../method/AMP_Base_Embed_Handler/__construct.md) - Constructor.
 * [`get_scripts`](../method/AMP_Base_Embed_Handler/get_scripts.md) - Get mapping of AMP component names to AMP script URLs.
 * [`match_element_attributes`](../method/AMP_Base_Embed_Handler/match_element_attributes.md) - Get regex pattern for matching HTML attributes from a given tag name.
+* [`get_child_elements`](../method/AMP_Base_Embed_Handler/get_child_elements.md) - Get all child elements of the specified element.
+* [`unwrap_p_element`](../method/AMP_Base_Embed_Handler/unwrap_p_element.md) - Replace an element&#039;s parent with itself if the parent is a &lt;p&gt; tag which has no attributes and has no other children.
 ### Source
 
-:link: [includes/embeds/class-amp-base-embed-handler.php:15](/includes/embeds/class-amp-base-embed-handler.php#L15-L112)
+:link: [includes/embeds/class-amp-base-embed-handler.php:15](/includes/embeds/class-amp-base-embed-handler.php#L15-L154)
 
 <details>
 <summary>Show Code</summary>
@@ -102,7 +104,7 @@ abstract class AMP_Base_Embed_Handler {
 			implode(
 				'',
 				array_map(
-					function ( $attr_name ) {
+					static function ( $attr_name ) {
 						return sprintf( '(?=[^>]*?%1$s="(?P<%1$s>[^"]+)")?', preg_quote( $attr_name, '/' ) );
 					},
 					$attribute_names
@@ -113,6 +115,48 @@ abstract class AMP_Base_Embed_Handler {
 			return null;
 		}
 		return wp_array_slice_assoc( $matches, $attribute_names );
+	}
+
+	/**
+	 * Get all child elements of the specified element.
+	 *
+	 * @since 2.0.6
+	 *
+	 * @param DOMElement $node Element.
+	 * @return DOMElement[] Array of child elements for specified element.
+	 */
+	protected function get_child_elements( DOMElement $node ) {
+		return array_filter(
+			iterator_to_array( $node->childNodes ),
+			static function ( DOMNode $child ) {
+				return $child instanceof DOMElement;
+			}
+		);
+	}
+
+	/**
+	 * Replace an element's parent with itself if the parent is a <p> tag which has no attributes and has no other children.
+	 *
+	 * This usually happens while `wpautop()` processes the element.
+	 *
+	 * @since 2.0.6
+	 * @see AMP_Tag_And_Attribute_Sanitizer::remove_node()
+	 *
+	 * @param DOMElement $node Node.
+	 */
+	protected function unwrap_p_element( DOMElement $node ) {
+		$parent_node = $node->parentNode;
+		if (
+			$parent_node instanceof DOMElement
+			&&
+			'p' === $parent_node->tagName
+			&&
+			false === $parent_node->hasAttributes()
+			&&
+			1 === count( $this->get_child_elements( $parent_node ) )
+		) {
+			$parent_node->parentNode->replaceChild( $node, $parent_node );
+		}
 	}
 }
 ```

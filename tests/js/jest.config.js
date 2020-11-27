@@ -12,6 +12,7 @@ module.exports = {
 		'<rootDir>/node_modules',
 		'<rootDir>/build',
 		'<rootDir>/tests/shared',
+		'<rootDir>/vendor',
 	],
 	coveragePathIgnorePatterns: [
 		'<rootDir>/node_modules',
