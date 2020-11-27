@@ -21,11 +21,18 @@ use WP_REST_Response;
 
 /**
  * Class AmpRESTContext.
+ * 
+ * @internal
+ * @since 2.1
  */
 final class AmpRESTContext implements Service, Delayed, Registerable {
 
-	const AMP_CONTENT_REST_FIELD = 'amp';
-	const AMP_LINKS_REST_FIELD   = 'amp_links';
+	/**
+	 * Key for the REST field containing AMP links.
+	 *
+	 * @var string
+	 */
+	const AMP_LINKS_REST_FIELD = 'amp_links';
 
 	/**
 	 * Provides the WordPress action on which to register.
@@ -156,7 +163,7 @@ final class AmpRESTContext implements Service, Delayed, Registerable {
 			return $schema;
 		}
 
-		$schema['properties']['content']['properties'][ self::AMP_CONTENT_REST_FIELD ] = [
+		$schema['properties']['content']['properties']['amp'] = [
 			'description' => __( 'The AMP content for the object.', 'amp' ),
 			'type'        => 'object',
 			'context'     => [ 'amp' ],

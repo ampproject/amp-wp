@@ -13,8 +13,6 @@ use WP_REST_Request;
 /**
  * Tests for AmpRESTContext.
  *
- * @group amp-options
- *
  * @coversDefaultClass \AmpProject\AmpWP\AmpRESTContext
  */
 class AmpRESTContextTest extends DependencyInjectedTestCase {

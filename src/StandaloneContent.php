@@ -1,5 +1,5 @@
 <?php
-/**
+/**StandaloneContent
  * AmpRESTContext.
  *
  * @package AMP
@@ -15,7 +15,10 @@ use AmpProject\AmpWP\Infrastructure\Service;
 use WP_Post;
 
 /**
- * Class AmpRESTContext.
+ * Class StandaloneContent.
+ *
+ * @internal
+ * @since 2.1
  */
 final class StandaloneContent implements Service, Delayed, Registerable, Conditional {
 
@@ -72,20 +75,32 @@ final class StandaloneContent implements Service, Delayed, Registerable, Conditi
 
 		// Prevent including extraneous stylesheets.
 		add_filter( 'show_admin_bar', '__return_false' );
-		add_filter(
-			'print_styles_array',
-			function ( $handles ) {
-				return array_intersect( $handles, [ 'amp-default', 'wp-block-library', 'wp-block-library-theme' ] );
-			}
-		);
+		add_filter( 'print_styles_array', [ $this, 'remove_unneeded_styles' ] );
 
 		// Override template to only include standalone content.
-		add_filter(
-			'template_include',
-			function () {
-				return AMP__DIR__ . '/includes/templates/standalone-content.php';
-			},
-			PHP_INT_MAX
-		);
+		add_filter( 'template_include', [ $this, 'include_standalone_content_template' ], PHP_INT_MAX );
+	}
+
+	/**
+	 * Prevents inclusion of unneeded stylesheets.
+	 *
+	 * @filter print_styles_array
+	 *
+	 * @param array $handles Stylesheet handles.
+	 * @return array Filtered handles.
+	 */
+	public function remove_unneeded_styles( $handles ) {
+		return array_values( array_intersect( $handles, [ 'amp-default', 'wp-block-library', 'wp-block-library-theme' ] ) );
+	}
+
+	/**
+	 * Overrides the template logic with the standalone content template.
+	 *
+	 * @filter template_include
+	 *
+	 * @return string
+	 */
+	public function include_standalone_content_template() {
+		return AMP__DIR__ . '/includes/templates/standalone-content.php';
 	}
 }
