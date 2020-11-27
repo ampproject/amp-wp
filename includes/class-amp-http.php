@@ -301,7 +301,7 @@ class AMP_HTTP {
 	 *
 	 * @param string $url              URL.
 	 * @param string $amp_cache_domain AMP Cache domain. Defaults to cdn.ampproject.org.
-	 * @return string AMP Cache URL.
+	 * @return string|null AMP Cache URL.
 	 */
 	public static function get_amp_cache_url( $url, $amp_cache_domain = 'cdn.ampproject.org' ) {
 		$parsed_url = wp_parse_url( $url );

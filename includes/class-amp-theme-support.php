@@ -341,6 +341,37 @@ class AMP_Theme_Support {
 	 * @since 0.7
 	 */
 	public static function finish_init() {
+		if ( self::is_standalone_content_request() ) {
+
+			// Fail request if it is not for a single post that supports AMP.
+			$queried_object = get_queried_object();
+			if ( ! ( $queried_object instanceof WP_Post ) || ! amp_is_post_supported( $queried_object ) ) {
+				wp_die(
+					esc_html__( 'AMP content is not available for this URL.', 'amp' ),
+					esc_html__( 'AMP Content Unavailable', 'amp' ),
+					[ 'response' => 400 ]
+				);
+			}
+
+			// Prevent including extraneous stylesheets.
+			add_filter( 'show_admin_bar', '__return_false' );
+			add_filter(
+				'print_styles_array',
+				function ( $handles ) {
+					return array_intersect( $handles, [ 'amp-default', 'wp-block-library', 'wp-block-library-theme' ] );
+				}
+			);
+
+			// Override template to only include standalone content.
+			add_filter(
+				'template_include',
+				function () {
+					return __DIR__ . '/templates/standalone-content.php';
+				},
+				PHP_INT_MAX
+			);
+		}
+
 		if ( self::is_paired_available() ) {
 			self::setup_paired_browsing_client();
 			add_action( 'template_redirect', [ __CLASS__, 'sanitize_url_for_paired_browsing' ] );
