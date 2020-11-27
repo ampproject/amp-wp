@@ -384,13 +384,19 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * Restore the endpoint suffix on environment variables.
 	 *
 	 * @see PairedAmpRouting::detect_rewrite_endpoint()
+	 *
+	 * @param WP $wp WP object.
 	 */
-	public function restore_endpoint_suffix_in_environment_variables() {
+	public function restore_endpoint_suffix_in_environment_variables( WP $wp ) {
 		if ( $this->did_request_endpoint_suffix ) {
 			foreach ( $this->suspended_environment_variables as $var_name => $value ) {
 				$_SERVER[ $var_name ] = $value;
 			}
 			$this->suspended_environment_variables = [];
+
+			// In case a plugin is looking at $wp->request to see if it is AMP, ensure the path suffix is added.
+			// WordPress is not including it because it was removed from the REQUEST_URI during parse_request.
+			$wp->request = trailingslashit( $wp->request ) . amp_get_slug();
 		}
 	}
 
