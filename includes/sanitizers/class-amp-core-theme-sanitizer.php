@@ -81,7 +81,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	protected static function get_theme_features_config( $theme_slug ) {
 		switch ( $theme_slug ) {
 			case 'twentytwentyone':
-				return [
+				$config = [
 					'dequeue_scripts' => [
 						'twenty-twenty-one-responsive-embeds-script',
 					],
@@ -92,11 +92,23 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						'wp_footer' => [
 							'twentytwentyone_add_ie_class',
 							'twenty_twenty_one_supports_js', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
-							[ 'Twenty_Twenty_One_Dark_Mode', 'the_switch', 10 ],
 						]
 					],
-					'add_twentytwentyone_dark_mode_styles' => [],
 				];
+
+				// Dark mode button toggle is only supported in the Customizer for now.
+				// TODO: add note to customizer on why toggle not shown on frontend
+				if ( is_customize_preview() ) {
+					// Make dark mode toggle AMP compatible.
+					$config['add_twentytwentyone_dark_mode_toggle'] = [];
+				} else {
+					// Amend the dark mode stylesheet to only apply its rules when the user's system supports dark mode.
+					$config['amend_twentytwentyone_dark_mode_styles'] = [];
+					// Prevent the dark mode toggle and its accompanying script from being inlined.
+					$config['remove_actions']['wp_footer'][] = [ 'Twenty_Twenty_One_Dark_Mode', 'the_switch', 10 ];
+				}
+
+				return $config;
 
 			// Twenty Twenty.
 			case 'twentytwenty':
@@ -1979,10 +1991,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Modify the Twenty Twenty-One dark mode stylesheet to only apply the relevant rules when the user has requested
+	 * Amend the Twenty Twenty-One dark mode stylesheet to only apply the relevant rules when the user has requested
 	 * the system use a dark color theme.
 	 */
-	public static function add_twentytwentyone_dark_mode_styles() {
+	public static function amend_twentytwentyone_dark_mode_styles() {
 		add_action(
 			'wp_enqueue_scripts',
 			static function() {
@@ -2015,6 +2027,28 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			},
 			11
 		);
+	}
+
+	public function add_twentytwentyone_dark_mode_toggle() {
+		$button = $this->dom->getElementById( 'dark-mode-toggler' );
+
+		if ( ! $button ) {
+			return;
+		}
+
+		$button->setAttribute( Attribute::STYLE, 'display: block;' );
+
+		$toggle_class = 'is-dark-theme';
+		$state_id = str_replace( '-', '_', $toggle_class );
+
+		$body_id = $this->dom->getElementId( $this->dom->body );
+		$document_id = $this->dom->getElementId( $this->dom->documentElement );
+
+		AMP_DOM_Utils::add_amp_action( $button, 'tap', "AMP.setState({{$state_id}: !{$state_id}})" );
+		AMP_DOM_Utils::add_amp_action( $button, 'tap', "{$body_id}.toggleClass(class='{$toggle_class}')" );
+		AMP_DOM_Utils::add_amp_action( $button, 'tap', "{$document_id}.toggleClass(class='{$toggle_class}')" );
+
+		$button->setAttribute( 'data-amp-bind-aria-pressed', "{$state_id} ? 'true' : 'false'" );
 	}
 
 	/**
