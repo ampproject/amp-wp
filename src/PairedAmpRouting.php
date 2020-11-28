@@ -170,7 +170,6 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		add_action( 'update_option_' . AMP_Options_Manager::OPTION_NAME, [ $this, 'handle_options_update' ], 10, 2 );
 
 		add_action( 'init', [ $this, 'update_rewrite_endpoint' ], 0 );
-		add_filter( 'query_vars', [ $this, 'filter_query_vars' ] ); // @todo Move to add_paired_hooks()?
 
 		add_filter( 'template_redirect', [ $this, 'redirect_extraneous_paired_endpoint' ], 8 ); // Must be before redirect_paired_amp_unavailable() runs at priority 9.
 
@@ -235,6 +234,8 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * Add paired hooks.
 	 */
 	public function add_paired_hooks() {
+		add_filter( 'query_vars', [ $this, 'filter_query_vars' ] );
+
 		if ( Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT === AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE ) ) {
 			add_filter( 'do_parse_request', [ $this, 'detect_endpoint_suffix' ], PHP_INT_MAX );
 			add_filter( 'request', [ $this, 'set_query_var_for_endpoint_suffix' ] );
