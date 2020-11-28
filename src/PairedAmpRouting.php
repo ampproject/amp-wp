@@ -115,7 +115,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	/**
 	 * Original environment variables that were rewritten before parsing the request.
 	 *
-	 * @see PairedAmpRouting::detect_rewrite_endpoint()
+	 * @see PairedAmpRouting::detect_endpoint_suffix()
 	 * @see PairedAmpRouting::restore_endpoint_suffix_in_environment_variables()
 	 * @var array
 	 */
@@ -236,8 +236,8 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 */
 	public function add_paired_hooks() {
 		if ( Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT === AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE ) ) {
-			add_filter( 'do_parse_request', [ $this, 'detect_rewrite_endpoint' ], PHP_INT_MAX );
-			add_filter( 'request', [ $this, 'set_query_var_for_endpoint' ] );
+			add_filter( 'do_parse_request', [ $this, 'detect_endpoint_suffix' ], PHP_INT_MAX );
+			add_filter( 'request', [ $this, 'set_query_var_for_endpoint_suffix' ] );
 			add_action( 'parse_request', [ $this, 'restore_endpoint_suffix_in_environment_variables' ] );
 
 			// Note that the wp_unique_term_slug filter does not work in the same way. It will only be applied if there
@@ -336,7 +336,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * @param bool $should_parse_request Whether or not to parse the request. Default true.
 	 * @return bool Should parse request.
 	 */
-	public function detect_rewrite_endpoint( $should_parse_request ) {
+	public function detect_endpoint_suffix( $should_parse_request ) {
 		$this->did_request_endpoint_suffix = false;
 
 		if ( ! $should_parse_request ) {
@@ -376,12 +376,12 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	}
 
 	/**
-	 * Set query var for endpoint.
+	 * Set query var for endpoint suffix.
 	 *
 	 * @param array $query_vars Query vars.
 	 * @return array Query vars.
 	 */
-	public function set_query_var_for_endpoint( $query_vars ) {
+	public function set_query_var_for_endpoint_suffix( $query_vars ) {
 		if ( $this->did_request_endpoint_suffix ) {
 			$query_vars[ amp_get_slug() ] = true;
 		}
@@ -391,7 +391,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	/**
 	 * Restore the endpoint suffix on environment variables.
 	 *
-	 * @see PairedAmpRouting::detect_rewrite_endpoint()
+	 * @see PairedAmpRouting::detect_endpoint_suffix()
 	 *
 	 * @param WP $wp WP object.
 	 */
@@ -1196,7 +1196,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		}
 
 		if ( $redirect_url ) {
-			$this->redirect( $redirect_url );
+			$this->redirect_location( $redirect_url );
 		}
 	}
 
@@ -1218,13 +1218,13 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 			$request_url  = amp_get_current_url();
 			$redirect_url = $this->remove_paired_endpoint( $request_url );
 			if ( $redirect_url !== $request_url ) {
-				$this->redirect( $redirect_url );
+				$this->redirect_location( $redirect_url );
 			}
 		}
 	}
 
 	/**
-	 * Redirect a URL.
+	 * Redirect the location to a given URL.
 	 *
 	 * Temporary redirect is used for admin users because implied transitional mode and template support can be
 	 * enabled by user ay any time, so they will be able to make AMP available for this URL and see the change
@@ -1232,7 +1232,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 *
 	 * @param string $url URL.
 	 */
-	private function redirect( $url ) {
+	private function redirect_location( $url ) {
 		$status_code = current_user_can( 'manage_options' ) ? 302 : 301;
 		if ( wp_safe_redirect( $url, $status_code ) ) {
 			// @codeCoverageIgnoreStart
