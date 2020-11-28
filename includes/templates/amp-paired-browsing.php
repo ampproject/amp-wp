@@ -6,9 +6,9 @@
  */
 
 use AmpProject\AmpWP\QueryVar;
-use AmpProject\AmpWP\Admin\PairedBrowsing;
+use AmpProject\AmpWP\Paired\BrowsingApp;
 
-$url         = remove_query_arg( [ PairedBrowsing::APP_QUERY_VAR, QueryVar::NOAMP ], amp_get_current_url() );
+$url         = remove_query_arg( [ BrowsingApp::APP_QUERY_VAR, QueryVar::NOAMP ], amp_get_current_url() );
 $non_amp_url = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $url );
 $amp_url     = amp_add_paired_endpoint( $url );
 ?>

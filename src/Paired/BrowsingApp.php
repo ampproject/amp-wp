@@ -1,11 +1,11 @@
 <?php
 /**
- * Class PairedBrowsing.
+ * Class BrowsingApp.
  *
  * @package AmpProject\AmpWP
  */
 
-namespace AmpProject\AmpWP\Admin;
+namespace AmpProject\AmpWP\Paired;
 
 use AMP_Options_Manager;
 use AMP_Theme_Support;
@@ -27,7 +27,7 @@ use AmpProject\AmpWP\DevTools\UserAccess;
  * @since 1.5.0
  * @internal
  */
-final class PairedBrowsing implements Service, Registerable, Conditional {
+final class BrowsingApp implements Service, Registerable, Conditional {
 
 	/**
 	 * Query var for requests to open the app.
@@ -53,7 +53,7 @@ final class PairedBrowsing implements Service, Registerable, Conditional {
 	}
 
 	/**
-	 * PairedBrowsing constructor.
+	 * BrowsingApp constructor.
 	 *
 	 * @param UserAccess $dev_tools_user_access DevTools User Access.
 	 */
@@ -152,8 +152,8 @@ final class PairedBrowsing implements Service, Registerable, Conditional {
 
 		$is_amp_request = amp_is_request();
 		$current_url    = amp_get_current_url();
-		$amp_url        = $is_amp_request ? $current_url : amp_add_paired_endpoint( $current_url );
-		$non_amp_url    = ! $is_amp_request ? $current_url : amp_remove_paired_endpoint( $current_url );
+		$amp_url        = $is_amp_request ? $current_url : amp_add_paired_endpoint( $current_url ); // @todo Use the service.
+		$non_amp_url    = ! $is_amp_request ? $current_url : amp_remove_paired_endpoint( $current_url ); // @todo Use the service.
 
 		wp_add_inline_script(
 			$handle,
@@ -217,7 +217,7 @@ final class PairedBrowsing implements Service, Registerable, Conditional {
 		if ( ! $url ) {
 			$url = amp_get_current_url();
 		}
-		$url = amp_remove_paired_endpoint( $url );
+		$url = amp_remove_paired_endpoint( $url ); // @todo Use the service.
 		$url = remove_query_arg(
 			[ QueryVar::NOAMP, AMP_Validated_URL_Post_Type::VALIDATE_ACTION, AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ],
 			$url
