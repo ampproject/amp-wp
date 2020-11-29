@@ -1028,7 +1028,7 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 	 * @return string URL with AMP stripped.
 	 */
 	public function remove_endpoint( $url ) {
-		$non_amp_url = $this->remove_paired_endpoint_query_var( $url );
+		$non_amp_url = self::remove_endpoint_query_var( $url );
 
 		// Remove the /amp/ URL endpoint suffix if the paired URL structure makes use of it.
 		$paired_structure = $this->get_paired_url_structure();
@@ -1037,7 +1037,7 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 			||
 			Option::PAIRED_URL_STRUCTURE_LEGACY_READER === $paired_structure
 		) {
-			$non_amp_url = $this->remove_paired_endpoint_suffix( $non_amp_url );
+			$non_amp_url = self::remove_endpoint_suffix( $non_amp_url );
 		} elseif ( self::PAIRED_URL_STRUCTURE_CUSTOM === $paired_structure ) {
 			/**
 			 * Filters paired AMP URL to remove a custom paired URL structure.
@@ -1059,7 +1059,7 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 	 * @param string $url URL.
 	 * @return string URL.
 	 */
-	private function remove_paired_endpoint_query_var( $url ) {
+	public static function remove_endpoint_query_var( $url ) {
 		return remove_query_arg( amp_get_slug(), $url );
 	}
 
@@ -1069,7 +1069,7 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 	 * @param string $url URL.
 	 * @return string URL.
 	 */
-	private function remove_paired_endpoint_suffix( $url ) {
+	public static function remove_endpoint_suffix( $url ) {
 		return preg_replace(
 			sprintf(
 				':/%s(?=/?(\?|#|$)):',
@@ -1154,8 +1154,8 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 		$requested_url = amp_get_current_url();
 		$redirect_url  = null;
 
-		$endpoint_suffix_removed = $this->remove_paired_endpoint_suffix( $requested_url );
-		$query_var_removed       = $this->remove_paired_endpoint_query_var( $requested_url );
+		$endpoint_suffix_removed = self::remove_endpoint_suffix( $requested_url );
+		$query_var_removed       = self::remove_endpoint_query_var( $requested_url );
 		if ( amp_is_canonical() ) {
 			if ( is_404() && $endpoint_suffix_removed !== $requested_url ) {
 				// Always redirect to strip off /amp/ in the case of a 404.
