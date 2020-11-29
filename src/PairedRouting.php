@@ -1,6 +1,6 @@
 <?php
 /**
- * Class PairedAmpRouting.
+ * Class PairedRouting.
  *
  * @package AmpProject\AmpWP
  */
@@ -29,7 +29,7 @@ use WP_Term_Query;
  * @since 2.1
  * @internal
  */
-final class PairedAmpRouting implements Service, Registerable, Activateable, Deactivateable {
+final class PairedRouting implements Service, Registerable, Activateable, Deactivateable {
 
 	/**
 	 * Paired URL structures.
@@ -115,14 +115,14 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	/**
 	 * Original environment variables that were rewritten before parsing the request.
 	 *
-	 * @see PairedAmpRouting::detect_endpoint_suffix()
-	 * @see PairedAmpRouting::restore_endpoint_suffix_in_environment_variables()
+	 * @see PairedRouting::detect_endpoint_suffix()
+	 * @see PairedRouting::restore_endpoint_suffix_in_environment_variables()
 	 * @var array
 	 */
 	private $suspended_environment_variables = [];
 
 	/**
-	 * PairedAmpRouting constructor.
+	 * PairedRouting constructor.
 	 *
 	 * @param CallbackReflection $callback_reflection Callback reflection.
 	 * @param PluginRegistry     $plugin_registry     Plugin registry.
@@ -392,7 +392,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	/**
 	 * Restore the endpoint suffix on environment variables.
 	 *
-	 * @see PairedAmpRouting::detect_endpoint_suffix()
+	 * @see PairedRouting::detect_endpoint_suffix()
 	 *
 	 * @param WP $wp WP object.
 	 */
@@ -648,7 +648,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 			$structures[] = self::PAIRED_URL_STRUCTURE_CUSTOM;
 		}
 		foreach ( $structures as $structure ) {
-			$paired_urls[ $structure ] = $this->add_paired_endpoint( $url, $structure );
+			$paired_urls[ $structure ] = $this->add_endpoint( $url, $structure );
 		}
 		return $paired_urls;
 	}
@@ -660,7 +660,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * @param string|null $structure Structure. Defaults to the current paired structure.
 	 * @return string AMP URL.
 	 */
-	public function add_paired_endpoint( $url, $structure = null ) {
+	public function add_endpoint( $url, $structure = null ) {
 		if ( null === $structure ) {
 			$structure = self::get_paired_url_structure();
 		}
@@ -708,7 +708,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * @return string AMP URL.
 	 */
 	public function get_endpoint_suffix_paired_amp_url( $url ) {
-		$url = $this->remove_paired_endpoint( $url );
+		$url = $this->remove_endpoint( $url );
 
 		$parsed_url = array_merge(
 			wp_parse_url( home_url( '/' ) ),
@@ -796,7 +796,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 		}
 
 		// Make sure any existing AMP endpoint is removed.
-		$url = $this->remove_paired_endpoint( $url );
+		$url = $this->remove_endpoint( $url );
 
 		$parsed_url    = wp_parse_url( $url );
 		$use_query_var = (
@@ -945,7 +945,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * @return bool True if the AMP query parameter is set with the required value, false if not.
 	 * @global WP_Query $wp_the_query
 	 */
-	public function has_paired_endpoint( $url = '' ) {
+	public function has_endpoint( $url = '' ) {
 		$slug = amp_get_slug();
 
 		// If the URL was not provided, then use the environment which is already parsed.
@@ -1027,7 +1027,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * @param string $url URL.
 	 * @return string URL with AMP stripped.
 	 */
-	public function remove_paired_endpoint( $url ) {
+	public function remove_endpoint( $url ) {
 		$non_amp_url = $this->remove_paired_endpoint_query_var( $url );
 
 		// Remove the /amp/ URL endpoint suffix if the paired URL structure makes use of it.
@@ -1130,7 +1130,7 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 */
 	public function maybe_add_paired_endpoint( $url ) {
 		if ( $url ) {
-			$url = $this->add_paired_endpoint( $url );
+			$url = $this->add_endpoint( $url );
 		}
 		return $url;
 	}
@@ -1146,9 +1146,9 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * When in a Paired AMP mode, this handles a case where an AMP page that has a link to `./amp/` can inadvertently
 	 * cause an infinite URL space such as `./amp/amp/amp/amp/…`.
 	 *
-	 * This happens before `PairedAmpRouting::redirect_paired_amp_unavailable()`.
+	 * This happens before `PairedRouting::redirect_paired_amp_unavailable()`.
 	 *
-	 * @see PairedAmpRouting::redirect_paired_amp_unavailable()
+	 * @see PairedRouting::redirect_paired_amp_unavailable()
 	 */
 	public function redirect_extraneous_paired_endpoint() {
 		$requested_url = amp_get_current_url();
@@ -1210,14 +1210,14 @@ final class PairedAmpRouting implements Service, Registerable, Activateable, Dea
 	 * like /amp/ will redirect to strip the endpoint on Standard mode sites via the `redirect_extraneous_paired_endpoint`
 	 * method above.
 	 *
-	 * This happens after `PairedAmpRouting::redirect_extraneous_paired_endpoint()`.
+	 * This happens after `PairedRouting::redirect_extraneous_paired_endpoint()`.
 	 *
-	 * @see PairedAmpRouting::redirect_extraneous_paired_endpoint()
+	 * @see PairedRouting::redirect_extraneous_paired_endpoint()
 	 */
 	public function redirect_paired_amp_unavailable() {
-		if ( $this->has_paired_endpoint() && ( amp_is_canonical() || ! amp_is_available() ) ) {
+		if ( $this->has_endpoint() && ( amp_is_canonical() || ! amp_is_available() ) ) {
 			$request_url  = amp_get_current_url();
-			$redirect_url = $this->remove_paired_endpoint( $request_url );
+			$redirect_url = $this->remove_endpoint( $request_url );
 			if ( $redirect_url !== $request_url ) {
 				$this->redirect_location( $redirect_url );
 			}

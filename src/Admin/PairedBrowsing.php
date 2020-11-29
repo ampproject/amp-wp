@@ -15,7 +15,7 @@ use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\PairedAmpRouting;
+use AmpProject\AmpWP\PairedRouting;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\DevMode;
 use WP_Post;
@@ -45,11 +45,11 @@ final class PairedBrowsing implements Service, Registerable, Conditional {
 	public $dev_tools_user_access;
 
 	/**
-	 * Paired AMP Routing.
+	 * Paired Routing.
 	 *
-	 * @var PairedAmpRouting
+	 * @var PairedRouting
 	 */
-	public $paired_amp_routing;
+	public $paired_routing;
 
 	/**
 	 * Check whether the conditional object is currently needed.
@@ -63,12 +63,12 @@ final class PairedBrowsing implements Service, Registerable, Conditional {
 	/**
 	 * PairedBrowsing constructor.
 	 *
-	 * @param UserAccess       $dev_tools_user_access DevTools User Access.
-	 * @param PairedAmpRouting $paired_amp_routing    Paired AMP Routing.
+	 * @param UserAccess    $dev_tools_user_access DevTools User Access.
+	 * @param PairedRouting $paired_routing    Paired Routing.
 	 */
-	public function __construct( UserAccess $dev_tools_user_access, PairedAmpRouting $paired_amp_routing ) {
+	public function __construct( UserAccess $dev_tools_user_access, PairedRouting $paired_routing ) {
 		$this->dev_tools_user_access = $dev_tools_user_access;
-		$this->paired_amp_routing    = $paired_amp_routing;
+		$this->paired_routing        = $paired_routing;
 	}
 
 	/**
@@ -162,8 +162,8 @@ final class PairedBrowsing implements Service, Registerable, Conditional {
 
 		$is_amp_request = amp_is_request();
 		$current_url    = amp_get_current_url();
-		$amp_url        = $is_amp_request ? $current_url : $this->paired_amp_routing->add_paired_endpoint( $current_url );
-		$non_amp_url    = ! $is_amp_request ? $current_url : $this->paired_amp_routing->remove_paired_endpoint( $current_url );
+		$amp_url        = $is_amp_request ? $current_url : $this->paired_routing->add_endpoint( $current_url );
+		$non_amp_url    = ! $is_amp_request ? $current_url : $this->paired_routing->remove_endpoint( $current_url );
 
 		wp_add_inline_script(
 			$handle,
@@ -227,7 +227,7 @@ final class PairedBrowsing implements Service, Registerable, Conditional {
 		if ( ! $url ) {
 			$url = amp_get_current_url();
 		}
-		$url = $this->paired_amp_routing->remove_paired_endpoint( $url );
+		$url = $this->paired_routing->remove_endpoint( $url );
 		$url = remove_query_arg(
 			[ QueryVar::NOAMP, AMP_Validated_URL_Post_Type::VALIDATE_ACTION, AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ],
 			$url

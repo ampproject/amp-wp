@@ -299,7 +299,7 @@ function _amp_xdebug_admin_notice() {
  */
 function amp_redirect_old_slug_to_new_url( $link ) {
 	_deprecated_function( __FUNCTION__, '2.1' );
-	return Services::get( 'paired_amp_routing' )->maybe_add_paired_endpoint( $link );
+	return Services::get( 'paired_routing' )->maybe_add_paired_endpoint( $link );
 }
 
 /**
@@ -317,14 +317,14 @@ function amp_redirect_old_slug_to_new_url( $link ) {
  */
 function amp_correct_query_when_is_front_page( WP_Query $query ) {
 	_deprecated_function( __FUNCTION__, '2.1' );
-	Services::get( 'paired_amp_routing' )->correct_query_when_is_front_page( $query );
+	Services::get( 'paired_routing' )->correct_query_when_is_front_page( $query );
 }
 
 /**
  * Add frontend actions.
  *
  * @since 0.2
- * @deprecated Since 2.1, moved to PairedAmpRouting.
+ * @deprecated Since 2.1, moved to PairedRouting.
  * @internal
  */
 function amp_add_frontend_actions() {

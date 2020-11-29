@@ -42,19 +42,19 @@ final class MobileRedirection implements Service, Registerable {
 	const DISABLED_STORAGE_KEY = 'amp_mobile_redirect_disabled';
 
 	/**
-	 * PairedAmpRouting instance.
+	 * PairedRouting instance.
 	 *
-	 * @var PairedAmpRouting
+	 * @var PairedRouting
 	 */
-	private $paired_amp_routing;
+	private $paired_routing;
 
 	/**
 	 * MobileRedirection constructor.
 	 *
-	 * @param PairedAmpRouting $paired_amp_routing Paired AMP Routing.
+	 * @param PairedRouting $paired_routing Paired Routing.
 	 */
-	public function __construct( PairedAmpRouting $paired_amp_routing ) {
-		$this->paired_amp_routing = $paired_amp_routing;
+	public function __construct( PairedRouting $paired_routing ) {
+		$this->paired_routing = $paired_routing;
 	}
 
 	/**
@@ -113,7 +113,7 @@ final class MobileRedirection implements Service, Registerable {
 	 * @return string AMP URL.
 	 */
 	public function get_current_amp_url() {
-		$url = $this->paired_amp_routing->add_paired_endpoint( amp_get_current_url() );
+		$url = $this->paired_routing->add_endpoint( amp_get_current_url() );
 		$url = remove_query_arg( QueryVar::NOAMP, $url );
 		return $url;
 	}
@@ -438,7 +438,7 @@ final class MobileRedirection implements Service, Registerable {
 			&&
 			wp_parse_url( home_url(), PHP_URL_HOST ) === wp_parse_url( $url, PHP_URL_HOST )
 		) {
-			$url = $this->paired_amp_routing->add_paired_endpoint( $url );
+			$url = $this->paired_routing->add_endpoint( $url );
 		}
 		return $url;
 	}
@@ -480,7 +480,7 @@ final class MobileRedirection implements Service, Registerable {
 		$is_amp = amp_is_request();
 		if ( $is_amp ) {
 			$rel  = [ Attribute::REL_NOAMPHTML, Attribute::REL_NOFOLLOW ];
-			$url  = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $this->paired_amp_routing->remove_paired_endpoint( amp_get_current_url() ) );
+			$url  = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, $this->paired_routing->remove_endpoint( amp_get_current_url() ) );
 			$text = __( 'Exit mobile version', 'amp' );
 		} else {
 			$rel  = [ Attribute::REL_AMPHTML ];

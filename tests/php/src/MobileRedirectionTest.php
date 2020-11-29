@@ -6,7 +6,7 @@ use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\PairedAmpRouting;
+use AmpProject\AmpWP\PairedRouting;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\MobileRedirection;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
@@ -23,13 +23,13 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 	/** @var MobileRedirection */
 	private $instance;
 
-	/** @var PairedAmpRouting */
-	private $paired_amp_routing;
+	/** @var PairedRouting */
+	private $paired_routing;
 
 	public function setUp() {
 		parent::setUp();
-		$this->paired_amp_routing = $this->injector->make( PairedAmpRouting::class );
-		$this->instance           = new MobileRedirection( $this->paired_amp_routing );
+		$this->paired_routing = $this->injector->make( PairedRouting::class );
+		$this->instance       = new MobileRedirection( $this->paired_routing );
 	}
 
 	public function tearDown() {
@@ -182,7 +182,7 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 	public function test_get_current_amp_url() {
 		$this->go_to( add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_MOBILE, '/foo/' ) );
 		$this->assertEquals(
-			$this->paired_amp_routing->add_paired_endpoint( home_url( '/foo/' ) ),
+			$this->paired_routing->add_endpoint( home_url( '/foo/' ) ),
 			$this->instance->get_current_amp_url()
 		);
 	}
@@ -290,7 +290,7 @@ final class MobileRedirectionTest extends DependencyInjectedTestCase {
 		$this->instance->redirect();
 		$this->assertNotNull( $redirected_url );
 		$this->assertEquals(
-			$this->paired_amp_routing->add_paired_endpoint( home_url( '/' ) ),
+			$this->paired_routing->add_endpoint( home_url( '/' ) ),
 			$redirected_url
 		);
 	}
