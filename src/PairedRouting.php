@@ -788,7 +788,8 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 	 * Determine a given URL is for a paired AMP request.
 	 *
 	 * If no URL was is provided, then it will check whether WordPress has already parsed the AMP
-	 * query var as part of the request.
+	 * query var as part of the request. If still not present, then it will use get the current URL
+	 * and check if it has an endpoint.
 	 *
 	 * @param string $url URL to examine. If empty, will use the current URL.
 	 * @return bool True if the AMP query parameter is set with the required value, false if not.
@@ -797,16 +798,19 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 	public function has_endpoint( $url = '' ) {
 		if ( empty( $url ) ) {
 			global $wp_the_query;
-			return (
+			if (
 				(
 					$wp_the_query instanceof WP_Query
 					&&
 					false !== $wp_the_query->get( amp_get_slug(), false )
 				)
-			);
-		} else {
-			return $this->get_paired_url_structure()->has_endpoint( $url );
+			) {
+				return true;
+			}
+
+			$url = amp_get_current_url();
 		}
+		return $this->get_paired_url_structure()->has_endpoint( $url );
 	}
 
 	/**
