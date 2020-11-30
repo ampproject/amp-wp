@@ -12,7 +12,7 @@ import { select } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { ValidationErrorStateUpdater } from '../validation-error-state-updater';
+import { useValidationErrorStateUpdates } from '../use-validation-error-state-updates';
 import { BLOCK_VALIDATION_STORE_KEY, createStore } from '../store';
 
 jest.mock( '@wordpress/data/build/components/use-select', () => {
@@ -30,7 +30,7 @@ createStore( {
 
 let container;
 
-describe( 'ValidationErrorStateUpdater', () => {
+describe( 'useValidationErrorStateUpdates', () => {
 	beforeEach( () => {
 		container = document.createElement( 'div' );
 		document.body.appendChild( container );
@@ -44,9 +44,15 @@ describe( 'ValidationErrorStateUpdater', () => {
 	it( 'updates state', () => {
 		expect( select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors() ).toHaveLength( 0 );
 
+		function ComponentContainingHook() {
+			useValidationErrorStateUpdates();
+
+			return null;
+		}
+
 		act( () => {
 			render(
-				<ValidationErrorStateUpdater />,
+				<ComponentContainingHook />,
 				container,
 			);
 		} );

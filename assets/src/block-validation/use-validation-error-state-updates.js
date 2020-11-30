@@ -22,7 +22,7 @@ import { BLOCK_VALIDATION_STORE_KEY } from './store';
  * using a store is necessary because React context is not passed down over slotfills, and we need multiple
  * components within multiple slotfills to have access to the same state.
  */
-export function ValidationErrorStateUpdater() {
+export function useValidationErrorStateUpdates() {
 	const [ trackedValidationErrorsFromPost, setTrackedValidationErrorsFromPost ] = useState( [] );
 
 	const { setValidationErrors } = useDispatch( BLOCK_VALIDATION_STORE_KEY );

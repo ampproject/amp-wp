@@ -15,7 +15,7 @@ import { MoreMenuIcon, ToolbarIcon } from './icon';
 import { withAMPToolbarButton } from './with-amp-toolbar-button';
 import { Sidebar } from './sidebar';
 import { InvalidBlockOutline } from './invalid-block-outline';
-import { ValidationErrorStateUpdater } from './validation-error-state-updater';
+import { useValidationErrorStateUpdates } from './use-validation-error-state-updates';
 
 export const PLUGIN_NAME = 'amp-block-validation';
 export const SIDEBAR_NAME = 'amp-editor-sidebar';
@@ -31,6 +31,8 @@ function AMPBlockValidation() {
 		broken: select( BLOCK_VALIDATION_STORE_KEY ).getAMPBroken(),
 		errorCount: select( BLOCK_VALIDATION_STORE_KEY ).getUnreviewedValidationErrors()?.length || 0,
 	} ) );
+
+	useValidationErrorStateUpdates();
 
 	return (
 		<>
@@ -52,7 +54,6 @@ function AMPBlockValidation() {
 				<Sidebar />
 				<InvalidBlockOutline />
 			</PluginSidebar>
-			<ValidationErrorStateUpdater />
 		</>
 	);
 }
