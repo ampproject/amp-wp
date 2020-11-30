@@ -16,7 +16,7 @@ import { AMP_VALIDITY_REST_FIELD_NAME } from './constants';
 import { BLOCK_VALIDATION_STORE_KEY } from './store';
 
 /**
- * Non-display component managing state updates through effect hooks.
+ * Custom hook managing state updates through effect hooks.
  *
  * Handling state through a context provider might be preferable in other circumstances, but in this case
  * using a store is necessary because React context is not passed down over slotfills, and we need multiple
