@@ -139,22 +139,22 @@ abstract class PairedUrlStructure {
 	}
 
 	/**
+	 * Determine a given URL is for a paired AMP request.
+	 *
+	 * @param string $url URL (or REQUEST_URI).
+	 * @return bool True if the URL has the paired endpoint.
+	 */
+	public function has_endpoint( $url ) {
+		return $url !== $this->remove_endpoint( $url );
+	}
+
+	/**
 	 * Turn a given URL into a paired AMP URL.
 	 *
 	 * @param string $url URL (or REQUEST_URI).
 	 * @return string AMP URL.
 	 */
 	abstract public function add_endpoint( $url );
-
-	/**
-	 * Determine a given URL is for a paired AMP request.
-	 *
-	 * @todo This could have a default implementation that just calls remove_endpoint() and checks if the result is not the same as $url.
-	 *
-	 * @param string $url URL (or REQUEST_URI).
-	 * @return bool True if the AMP query parameter is set with the required value, false if not.
-	 */
-	abstract public function has_endpoint( $url );
 
 	/**
 	 * Remove the paired AMP endpoint from a given URL.

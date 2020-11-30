@@ -559,6 +559,58 @@ final class PairedRouting implements Service, Registerable {
 	}
 
 	/**
+	 * Determine a given URL is for a paired AMP request.
+	 *
+	 * If no URL was is provided, then it will check whether WordPress has already parsed the AMP
+	 * query var as part of the request. If still not present, then it will use get the current URL
+	 * and check if it has an endpoint.
+	 *
+	 * @param string $url URL to examine. If empty, will use the current URL.
+	 * @return bool True if the AMP query parameter is set with the required value, false if not.
+	 * @global WP_Query $wp_the_query
+	 */
+	public function has_endpoint( $url = '' ) {
+		if ( empty( $url ) ) {
+			// This is a shortcut to avoid needing to re-parse the current URL.
+			if ( $this->did_request_endpoint ) {
+				return true;
+			}
+
+			// When not in a frontend context (e.g. the Customizer), the query var is the only possibility.
+			if (
+					is_admin()
+					&&
+					isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			) {
+				return true;
+			}
+
+			$url = amp_get_current_url();
+		}
+		return $this->get_paired_url_structure()->has_endpoint( $url );
+	}
+
+	/**
+	 * Turn a given URL into a paired AMP URL.
+	 *
+	 * @param string $url URL.
+	 * @return string AMP URL.
+	 */
+	public function add_endpoint( $url ) {
+		return $this->get_paired_url_structure()->add_endpoint( $url );
+	}
+
+	/**
+	 * Remove the paired AMP endpoint from a given URL.
+	 *
+	 * @param string $url URL.
+	 * @return string URL with AMP stripped.
+	 */
+	public function remove_endpoint( $url ) {
+		return $this->get_paired_url_structure()->remove_endpoint( $url );
+	}
+
+	/**
 	 * Determine whether a custom paired URL structure is being used.
 	 *
 	 * @return bool Whether custom paired URL structure is used.
@@ -587,16 +639,6 @@ final class PairedRouting implements Service, Registerable {
 		}
 
 		return $paired_urls;
-	}
-
-	/**
-	 * Turn a given URL into a paired AMP URL.
-	 *
-	 * @param string $url URL.
-	 * @return string AMP URL.
-	 */
-	public function add_endpoint( $url ) {
-		return $this->get_paired_url_structure()->add_endpoint( $url );
 	}
 
 	/**
@@ -694,48 +736,6 @@ final class PairedRouting implements Service, Registerable {
 		}
 
 		return $sources;
-	}
-
-	/**
-	 * Determine a given URL is for a paired AMP request.
-	 *
-	 * If no URL was is provided, then it will check whether WordPress has already parsed the AMP
-	 * query var as part of the request. If still not present, then it will use get the current URL
-	 * and check if it has an endpoint.
-	 *
-	 * @param string $url URL to examine. If empty, will use the current URL.
-	 * @return bool True if the AMP query parameter is set with the required value, false if not.
-	 * @global WP_Query $wp_the_query
-	 */
-	public function has_endpoint( $url = '' ) {
-		if ( empty( $url ) ) {
-			// This is a shortcut to avoid needing to re-parse the current URL.
-			if ( $this->did_request_endpoint ) {
-				return true;
-			}
-
-			// When not in a frontend context (e.g. the Customizer), the query var is the only possibility.
-			if (
-				is_admin()
-				&&
-				isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			) {
-				return true;
-			}
-
-			$url = amp_get_current_url();
-		}
-		return $this->get_paired_url_structure()->has_endpoint( $url );
-	}
-
-	/**
-	 * Remove the paired AMP endpoint from a given URL.
-	 *
-	 * @param string $url URL.
-	 * @return string URL with AMP stripped.
-	 */
-	public function remove_endpoint( $url ) {
-		return $this->get_paired_url_structure()->remove_endpoint( $url );
 	}
 
 	/**
