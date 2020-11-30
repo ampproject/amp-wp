@@ -5,9 +5,11 @@
  * @package AmpProject\AmpWP\Tests
  */
 
-namespace AmpProject\AmpWP\Tests\Admin;
+namespace AmpProject\AmpWP\Tests\DevTools;
 
-use AmpProject\AmpWP\Admin\BlockSources;
+use AmpProject\AmpWP\DevTools\BlockSources;
+use AmpProject\AmpWP\DevTools\FileReflection;
+use AmpProject\AmpWP\DevTools\LikelyCulpritDetector;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -21,7 +23,7 @@ use WP_UnitTestCase;
  *
  * @since 2.1
  *
- * @coversDefaultClass \AmpProject\AmpWP\Admin\BlockSources
+ * @coversDefaultClass \AmpProject\AmpWP\DevTools\BlockSources
  */
 class BlockSourcesTest extends WP_UnitTestCase {
 
@@ -47,8 +49,16 @@ class BlockSourcesTest extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
-		$this->instance = new BlockSources( new PluginRegistry() );
+		$this->instance = $this->get_new_instance();
 		$this->populate_plugins();
+	}
+
+	/**
+	 * @return BlockSources.
+	 */
+	public function get_new_instance() {
+		$plugin_registry = new PluginRegistry();
+		return new BlockSources( $plugin_registry, new LikelyCulpritDetector( new FileReflection( $plugin_registry ) ) );
 	}
 
 	/**
@@ -85,135 +95,42 @@ class BlockSourcesTest extends WP_UnitTestCase {
 	 * @covers ::get_block_sources()
 	 */
 	public function test_capture_block_type_source() {
+		$this->populate_plugins();
+		$this->instance->clear_block_sources_cache();
+		$this->instance->register();
+
 		// Test registration of a core block.
-		$this->instance->capture_block_type_source(
-			[
-				'name' => 'core/test-block',
-			]
-		);
+		register_block_type( 'core/test-block' );
 
 		$this->assertEquals(
 			[
 				'core/test-block' => [
-					'source' => 'core',
-					'name'   => null,
+					'name'  => '',
+					'type'  => '',
+					'title' => 'WordPress core',
 				],
 			],
 			$this->instance->get_block_sources()
 		);
 
-		// Test that re-registering the same block doesn't change anything.
-		$this->instance->capture_block_type_source(
-			[
-				'name' => 'core/test-block',
-			]
-		);
+		require_once MockPluginEnvironment::BAD_PLUGINS_DIR . '/' . MockPluginEnvironment::BAD_BLOCK_PLUGIN_FILE;
 
 		$this->assertEquals(
 			[
 				'core/test-block' => [
-					'source' => 'core',
-					'name'   => null,
+					'name'  => '',
+					'type'  => '',
+					'title' => 'WordPress core',
+				],
+				// @todo How to test this with a real plugin in the plugins directory.
+				'bad/bad-block'   => [
+					'name'  => '',
+					'type'  => '',
+					'title' => 'WordPress core',
 				],
 			],
 			$this->instance->get_block_sources()
 		);
-
-		// Test block with plugin source.
-		$this->instance->capture_block_type_source(
-			[
-				'name' => 'amp/block',
-			]
-		);
-
-		$this->assertEquals(
-			[
-				'core/test-block' => [
-					'source' => 'core',
-					'name'   => null,
-				],
-				'amp/block'       => [
-					'source' => 'plugin',
-					'name'   => 'AMP',
-				],
-			],
-			$this->instance->get_block_sources()
-		);
-	}
-
-	/** @covers ::get_source_from_file_list() */
-	public function test_get_theme_source_from_file_list() {
-		$file_list = [
-			WP_CONTENT_DIR . '/themes/some-other-theme/functions.php',
-			get_stylesheet_directory() . '/functions.php',
-			WP_CONTENT_DIR . '/plugins/my-plugin/my-plugin',
-			ABSPATH . 'wp-config.php',
-		];
-
-		$expected = [
-			'source' => 'theme',
-			'name'   => 'WordPress Default',
-		];
-
-		$actual = $this->call_private_method( $this->instance, 'get_source_from_file_list', [ $file_list ] );
-
-		$this->assertEquals( $expected, $actual );
-	}
-
-	/** @covers ::get_source_from_file_list() */
-	public function test_get_plugin_with_subdirectory_source_from_file_list() {
-		$file_list = [
-			WP_CONTENT_DIR . '/plugins/my-plugin/my-plugin',
-			WP_CONTENT_DIR . '/plugins/foo/foo.php',
-			WP_CONTENT_DIR . '/themes/some-other-theme/functions.php',
-			ABSPATH . 'wp-config.php',
-		];
-
-		$expected = [
-			'source' => 'plugin',
-			'name'   => 'Foo',
-		];
-
-		$actual = $this->call_private_method( $this->instance, 'get_source_from_file_list', [ $file_list ] );
-
-		$this->assertEquals( $expected, $actual );
-	}
-
-	/** @covers ::get_source_from_file_list() */
-	public function test_unknown_source_from_file_list() {
-		$file_list = [
-			'/var/www/html/some/other/path.php',
-			WP_CONTENT_DIR . '/themes/some-other-theme/functions.php',
-			ABSPATH . 'wp-config.php',
-		];
-
-		$expected = [
-			'source' => 'unknown',
-			'name'   => null,
-		];
-
-		$actual = $this->call_private_method( $this->instance, 'get_source_from_file_list', [ $file_list ] );
-
-		$this->assertEquals( $expected, $actual );
-	}
-
-	/** @covers ::get_source_from_file_list() */
-	public function test_get_single_file_plugin_source_from_file_list() {
-		$file_list = [
-			WP_CONTENT_DIR . '/plugins/my-plugin/my-plugin',
-			WP_CONTENT_DIR . '/plugins/bar.php',
-			WP_CONTENT_DIR . '/themes/some-other-theme/functions.php',
-			ABSPATH . 'wp-config.php',
-		];
-
-		$expected = [
-			'source' => 'plugin',
-			'name'   => 'Bar',
-		];
-
-		$actual = $this->call_private_method( $this->instance, 'get_source_from_file_list', [ $file_list ] );
-
-		$this->assertEquals( $expected, $actual );
 	}
 
 	/**
@@ -252,14 +169,12 @@ class BlockSourcesTest extends WP_UnitTestCase {
 		$this->set_private_property( $this->instance, 'block_sources', $test_data );
 		$this->instance->cache_block_sources();
 
-		$this->instance = null;
-		$this->instance = new BlockSources( new PluginRegistry() );
+		$this->instance = $this->get_new_instance();
 		$this->assertEquals( $test_data, $this->instance->get_block_sources() );
 
 		$this->instance->clear_block_sources_cache();
 
-		$this->instance = null;
-		$this->instance = new BlockSources( new PluginRegistry() );
+		$this->instance = $this->get_new_instance();
 		$this->assertEquals( [], $this->instance->get_block_sources() );
 
 		wp_using_ext_object_cache( $original_using_object_cache );

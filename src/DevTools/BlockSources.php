@@ -9,7 +9,7 @@
  * @package AmpProject\AmpWP
  */
 
-namespace AmpProject\AmpWP\Admin;
+namespace AmpProject\AmpWP\DevTools;
 
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
@@ -81,6 +81,13 @@ final class BlockSources implements Conditional, Service, Registerable {
 	private $plugin_registry;
 
 	/**
+	 * Likely culprit detector instance.
+	 *
+	 * @var LikelyCulpritDetector
+	 */
+	private $likely_culprit_detector;
+
+	/**
 	 * Check whether the conditional object is currently needed.
 	 *
 	 * @return bool Whether the conditional object is needed.
@@ -92,10 +99,12 @@ final class BlockSources implements Conditional, Service, Registerable {
 	/**
 	 * Class constructor.
 	 *
-	 * @param PluginRegistry $plugin_registry Plugin registry instance.
+	 * @param PluginRegistry        $plugin_registry Plugin registry instance.
+	 * @param LikelyCulpritDetector $likely_culprit_detector Likely culprit detector instance.
 	 */
-	public function __construct( PluginRegistry $plugin_registry ) {
-		$this->plugin_registry = $plugin_registry;
+	public function __construct( PluginRegistry $plugin_registry, LikelyCulpritDetector $likely_culprit_detector ) {
+		$this->plugin_registry         = $plugin_registry;
+		$this->likely_culprit_detector = $likely_culprit_detector;
 	}
 
 	/**
@@ -126,74 +135,24 @@ final class BlockSources implements Conditional, Service, Registerable {
 			return $args;
 		}
 
-		if ( 0 === strpos( $args['name'], 'core/' ) || 0 === strpos( $args['name'], 'core-embed/' ) ) {
-			$this->block_sources[ $args['name'] ] = [
-				'source' => self::SOURCE_CORE,
-				'name'   => null,
-			];
-			return $args;
+		$likely_culprit = $this->likely_culprit_detector->analyze_backtrace();
+
+		if ( in_array( $likely_culprit[ FileReflection::SOURCE_TYPE ], [ FileReflection::TYPE_PLUGIN, FileReflection::TYPE_MU_PLUGIN ], true ) ) {
+			$plugin                  = $this->plugin_registry->get_plugin_from_slug(
+				$likely_culprit[ FileReflection::SOURCE_NAME ],
+				FileReflection::TYPE_MU_PLUGIN === $likely_culprit[ FileReflection::SOURCE_TYPE ]
+			);
+			$likely_culprit['title'] = isset( $plugin['data']['title'] ) ? $plugin['data']['title'] : $likely_culprit[ FileReflection::SOURCE_NAME ];
+		} elseif ( FileReflection::TYPE_THEME === $likely_culprit[ FileReflection::SOURCE_TYPE ] ) {
+			$theme                   = wp_get_theme( $likely_culprit['name'] );
+			$likely_culprit['title'] = $theme->get( 'Name' ) ?: $likely_culprit[ FileReflection::SOURCE_NAME ];
+		} else {
+			$likely_culprit['title'] = __( 'WordPress core', 'amp' );
 		}
 
-		// PHPCS ignore reason: debug_backtrace is being used for user-facing AMP debugging tools.
-		$backtrace = debug_backtrace(); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace, PHPCompatibility.FunctionUse.ArgumentFunctionsReportCurrentValue.NeedsInspection
-		$files     = array_map(
-			function( $entry ) {
-				return is_array( $entry ) && isset( $entry['file'] ) ? $entry['file'] : null;
-			},
-			$backtrace
-		);
-		$files     = array_filter( $files );
-
-		// Reverse the file list because the earliest plugin or theme in the backtrace is likely to be where the block is registered.
-		array_reverse( $files );
-
-		$this->block_sources[ $args['name'] ] = $this->get_source_from_file_list( $files );
+		$this->block_sources[ $args['name'] ] = $likely_culprit;
 
 		return $args;
-	}
-
-	/**
-	 * Walks a list of files from a debug backtrace and attempts to match one with a plugin or the current theme.
-	 *
-	 * @param array $files List of absolute file paths.
-	 * @return array Array containing source details
-	 */
-	private function get_source_from_file_list( $files ) {
-		$plugins_directory = trailingslashit( $this->plugin_registry->get_plugin_dir() );
-		$plugins           = $this->plugin_registry->get_plugins( true, false );
-		$theme_directory   = get_stylesheet_directory();
-
-		foreach ( $files as $file ) {
-			if ( 0 === strpos( $file, $theme_directory ) ) {
-				return [
-					'source' => self::SOURCE_THEME,
-					'name'   => wp_get_theme()->get( 'Name' ),
-				];
-			}
-
-			if ( 0 !== strpos( $file, $plugins_directory ) ) {
-				continue;
-			}
-
-			$plugin_file = str_replace( $plugins_directory, '', $file );
-			$plugin_slug = explode( '/', $plugin_file )[0];
-
-			foreach ( $plugins as $possibly_matching_plugin_file => $plugin ) {
-				$possibly_matching_plugin = explode( '/', $possibly_matching_plugin_file )[0];
-
-				if ( $possibly_matching_plugin === $plugin_slug ) {
-					return [
-						'source' => self::SOURCE_PLUGIN,
-						'name'   => $plugin['Name'],
-					];
-				}
-			}
-		}
-
-		return [
-			'source' => self::SOURCE_UNKNOWN,
-			'name'   => null,
-		];
 	}
 
 	/**

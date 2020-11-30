@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\Admin\BlockSources;
+use AmpProject\AmpWP\DevTools\BlockSources;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
@@ -200,7 +200,7 @@ class AMP_Validation_Manager {
 	 * @return BlockSources
 	 */
 	private static function get_block_sources_service() {
-		$service = Services::get( 'admin.block_sources' );
+		$service = Services::get( 'dev_tools.block_sources' );
 		return $service;
 	}
 

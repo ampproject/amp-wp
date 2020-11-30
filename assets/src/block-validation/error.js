@@ -139,16 +139,11 @@ function ErrorContent( { blockType, clientId, status } ) {
 			let source;
 
 			switch ( blockSource.source ) {
-				case 'core':
-					source = __( 'WordPress core', 'amp' );
-
-					break;
-
 				case 'plugin':
 					source = sprintf(
 						// Translators: placeholder is the name of a plugin.
 						__( `%s (plugin)`, 'amp' ),
-						blockSource.name,
+						blockSource.title,
 					);
 					break;
 
@@ -156,12 +151,12 @@ function ErrorContent( { blockType, clientId, status } ) {
 					source = sprintf(
 						// Translators:placeholder is the name of a theme.
 						__( `%s (theme)`, 'amp' ),
-						blockSource.name,
+						blockSource.title,
 					);
 					break;
 
 				default:
-					source = __( 'unknown', 'amp' );
+					source = blockSource.title || __( 'unknown' );
 					break;
 			}
 

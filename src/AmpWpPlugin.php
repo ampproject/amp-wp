@@ -56,7 +56,6 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 */
 	const SERVICES = [
 		'admin.analytics_menu'              => Admin\AnalyticsOptionsSubmenu::class,
-		'admin.block_sources'               => Admin\BlockSources::class,
 		'admin.google_fonts'                => Admin\GoogleFonts::class,
 		'admin.onboarding_menu'             => Admin\OnboardingWizardSubmenu::class,
 		'admin.onboarding_wizard'           => Admin\OnboardingWizardSubmenuPage::class,
@@ -65,6 +64,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'amp_slug_customization_watcher'    => AmpSlugCustomizationWatcher::class,
 		'css_transient_cache.ajax_handler'  => Admin\ReenableCssTransientCachingAjaxAction::class,
 		'css_transient_cache.monitor'       => BackgroundTask\MonitorCssTransientCaching::class,
+		'dev_tools.block_sources'           => DevTools\BlockSources::class,
 		'dev_tools.callback_reflection'     => DevTools\CallbackReflection::class,
 		'dev_tools.error_page'              => DevTools\ErrorPage::class,
 		'dev_tools.file_reflection'         => DevTools\FileReflection::class,

@@ -37,19 +37,19 @@ jest.mock( '../use-inline-data', () => ( {
 			// Note: values must be hardcoded in mock function.
 			'my-plugin/test-block': {
 				source: 'plugin',
-				name: 'My plugin',
+				title: 'My plugin',
 			},
 			'my-theme/test-block': {
 				source: 'theme',
-				name: 'My theme',
+				title: 'My theme',
 			},
 			'core/test-block': {
-				source: 'core',
-				name: null,
+				source: '',
+				title: 'WordPress core',
 			},
 			'unknown/test-block': {
-				source: 'unknown',
-				name: null,
+				source: '',
+				name: '',
 			},
 		},
 		CSS_ERROR_TYPE: 'css_error',
