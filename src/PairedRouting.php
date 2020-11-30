@@ -16,6 +16,10 @@ use AmpProject\AmpWP\Infrastructure\Deactivateable;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Admin\ReaderThemes;
+use AmpProject\AmpWP\PairedUrlStructure\LegacyReaderUrlStructure;
+use AmpProject\AmpWP\PairedUrlStructure\LegacyTransitionalUrlStructure;
+use AmpProject\AmpWP\PairedUrlStructure\QueryVarUrlStructure;
+use AmpProject\AmpWP\PairedUrlStructure\SuffixUrlStructure;
 use WP_Query;
 use WP_Rewrite;
 use WP;
@@ -34,13 +38,15 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 	/**
 	 * Paired URL structures.
 	 *
+	 * Mapping of the option key to the corresponding paired URL structure class.
+	 *
 	 * @var string[]
 	 */
 	const PAIRED_URL_STRUCTURES = [
-		Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
-		Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT,
-		Option::PAIRED_URL_STRUCTURE_LEGACY_TRANSITIONAL,
-		Option::PAIRED_URL_STRUCTURE_LEGACY_READER,
+		Option::PAIRED_URL_STRUCTURE_QUERY_VAR           => QueryVarUrlStructure::class,
+		Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT     => SuffixUrlStructure::class,
+		Option::PAIRED_URL_STRUCTURE_LEGACY_TRANSITIONAL => LegacyTransitionalUrlStructure::class,
+		Option::PAIRED_URL_STRUCTURE_LEGACY_READER       => LegacyReaderUrlStructure::class,
 	];
 
 	/**
@@ -92,31 +98,38 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 	const CUSTOM_PAIRED_ENDPOINT_SOURCES = 'custom_paired_endpoint_sources';
 
 	/**
+	 * Paired URL structure.
+	 *
+	 * @var PairedUrlStructure
+	 */
+	private $paired_url_structure;
+
+	/**
 	 * Callback reflection.
 	 *
 	 * @var CallbackReflection
 	 */
-	protected $callback_reflection;
+	private $callback_reflection;
 
 	/**
 	 * Plugin registry.
 	 *
 	 * @var PluginRegistry
 	 */
-	protected $plugin_registry;
+	private $plugin_registry;
 
 	/**
 	 * Whether the request had the /amp/ endpoint suffix.
 	 *
 	 * @var bool
 	 */
-	private $did_request_endpoint_suffix;
+	private $did_request_endpoint;
 
 	/**
 	 * Original environment variables that were rewritten before parsing the request.
 	 *
-	 * @see PairedRouting::detect_endpoint_suffix()
-	 * @see PairedRouting::restore_endpoint_suffix_in_environment_variables()
+	 * @see PairedRouting::detect_endpoint_before_request_parsing()
+	 * @see PairedRouting::restore_endpoint_in_environment_variables()
 	 * @var array
 	 */
 	private $suspended_environment_variables = [];
@@ -179,6 +192,35 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 	}
 
 	/**
+	 * Get the paired URL structure.
+	 *
+	 * @return PairedUrlStructure Paired URL structure.
+	 */
+	public function get_paired_url_structure() {
+		if ( ! $this->paired_url_structure instanceof PairedUrlStructure ) {
+			/**
+			 * Filters to allow a custom paired URL structure to be used.
+			 *
+			 * @param string $structure_class Paired URL structure class.
+			 */
+			$structure_class = apply_filters( 'amp_custom_paired_url_structure', null );
+
+			if ( ! $structure_class || ! is_subclass_of( $structure_class, PairedUrlStructure::class ) ) {
+				$structure_slug = AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE );
+				if ( array_key_exists( $structure_slug, static::PAIRED_URL_STRUCTURES ) ) {
+					$structure_class = static::PAIRED_URL_STRUCTURES[ $structure_slug ];
+				} else {
+					$structure_class = QueryVarUrlStructure::class;
+				}
+			}
+
+			// @todo PhpStan error: Instantiated class AmpProject\AmpWP\PairedUrlStructure is abstract.
+			$this->paired_url_structure = new $structure_class();
+		}
+		return $this->paired_url_structure;
+	}
+
+	/**
 	 * Filter the REST options schema to add items.
 	 *
 	 * @param array $schema Schema.
@@ -190,7 +232,7 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 			[
 				Option::PAIRED_URL_STRUCTURE    => [
 					'type' => 'string',
-					'enum' => self::PAIRED_URL_STRUCTURES,
+					'enum' => array_keys( self::PAIRED_URL_STRUCTURES ),
 				],
 				self::PAIRED_URL_EXAMPLES       => [
 					'type'     => 'object',
@@ -217,7 +259,7 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 	public function filter_rest_options( $options ) {
 		$options[ self::AMP_SLUG ] = amp_get_slug();
 
-		$options[ Option::PAIRED_URL_STRUCTURE ] = $this->get_paired_url_structure();
+		$options[ Option::PAIRED_URL_STRUCTURE ] = AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE );
 
 		$options[ self::PAIRED_URL_EXAMPLES ] = $this->get_paired_url_examples();
 
@@ -236,10 +278,9 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 	public function add_paired_hooks() {
 		add_filter( 'query_vars', [ $this, 'filter_query_vars' ] );
 
+		add_action( 'wp_loaded', [ $this, 'add_request_parsing_hooks' ] );
+
 		if ( Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT === AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE ) ) {
-			add_filter( 'do_parse_request', [ $this, 'detect_endpoint_suffix' ], PHP_INT_MAX );
-			add_filter( 'request', [ $this, 'set_query_var_for_endpoint_suffix' ] );
-			add_action( 'parse_request', [ $this, 'restore_endpoint_suffix_in_environment_variables' ] );
 
 			// Note that the wp_unique_term_slug filter does not work in the same way. It will only be applied if there
 			// is actually a duplicate, whereas the wp_unique_post_slug filter applies regardless.
@@ -251,6 +292,20 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 		add_action( 'wp', [ $this, 'add_paired_request_hooks' ] );
 
 		add_action( 'admin_notices', [ $this, 'add_permalink_settings_notice' ] );
+	}
+
+	/**
+	 * Added hooks needed for some paired structures.
+	 */
+	public function add_request_parsing_hooks() {
+		$paired_structure = $this->get_paired_url_structure();
+		if ( ! $paired_structure->needs_request_parsing() ) {
+			return;
+		}
+
+		add_filter( 'do_parse_request', [ $this, 'detect_endpoint_before_request_parsing' ], PHP_INT_MAX );
+		add_filter( 'request', [ $this, 'set_query_var_during_request_parsing' ] );
+		add_action( 'parse_request', [ $this, 'restore_endpoint_in_environment_variables' ] );
 	}
 
 	/**
@@ -337,15 +392,12 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 	 * @param bool $should_parse_request Whether or not to parse the request. Default true.
 	 * @return bool Should parse request.
 	 */
-	public function detect_endpoint_suffix( $should_parse_request ) {
-		$this->did_request_endpoint_suffix = false;
+	public function detect_endpoint_before_request_parsing( $should_parse_request ) {
+		$this->did_request_endpoint = false;
 
 		if ( ! $should_parse_request ) {
 			return false;
 		}
-
-		$amp_slug = amp_get_slug();
-		$pattern  = sprintf( ':/%s(?=/?(\?|$)):', preg_quote( $amp_slug, ':' ) );
 
 		// Detect and purge the AMP endpoint from the request.
 		foreach ( [ 'REQUEST_URI', 'PATH_INFO' ] as $var_name ) {
@@ -355,22 +407,17 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 
 			$this->suspended_environment_variables[ $var_name ] = $_SERVER[ $var_name ];
 
-			$path = wp_unslash( $_SERVER[ $var_name ] ); // Because of wp_magic_quotes().
+			$old_path = wp_unslash( $_SERVER[ $var_name ] ); // Because of wp_magic_quotes().
 
-			$count = 0;
-			$path  = preg_replace(
-				$pattern,
-				'',
-				$path,
-				1,
-				$count
-			);
+			$new_path = $this->get_paired_url_structure()->remove_endpoint( $old_path );
 
-			$_SERVER[ $var_name ] = wp_slash( $path ); // Because of wp_magic_quotes().
-
-			if ( $count > 0 ) {
-				$this->did_request_endpoint_suffix = true;
+			if ( $old_path === $new_path ) {
+				continue;
 			}
+
+			$_SERVER[ $var_name ] = wp_slash( $new_path ); // Because of wp_magic_quotes().
+
+			$this->did_request_endpoint = true;
 		}
 
 		return $should_parse_request;
@@ -382,8 +429,8 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 	 * @param array $query_vars Query vars.
 	 * @return array Query vars.
 	 */
-	public function set_query_var_for_endpoint_suffix( $query_vars ) {
-		if ( $this->did_request_endpoint_suffix ) {
+	public function set_query_var_during_request_parsing( $query_vars ) {
+		if ( $this->did_request_endpoint ) {
 			$query_vars[ amp_get_slug() ] = true;
 		}
 		return $query_vars;
@@ -392,12 +439,12 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 	/**
 	 * Restore the endpoint suffix on environment variables.
 	 *
-	 * @see PairedRouting::detect_endpoint_suffix()
+	 * @see PairedRouting::detect_endpoint_before_request_parsing()
 	 *
 	 * @param WP $wp WP object.
 	 */
-	public function restore_endpoint_suffix_in_environment_variables( WP $wp ) {
-		if ( $this->did_request_endpoint_suffix ) {
+	public function restore_endpoint_in_environment_variables( WP $wp ) {
+		if ( $this->did_request_endpoint ) {
 			foreach ( $this->suspended_environment_variables as $var_name => $value ) {
 				$_SERVER[ $var_name ] = $value;
 			}
@@ -405,7 +452,7 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 
 			// In case a plugin is looking at $wp->request to see if it is AMP, ensure the path suffix is added.
 			// WordPress is not including it because it was removed from the REQUEST_URI during parse_request.
-			$wp->request = trailingslashit( $wp->request ) . amp_get_slug();
+			$wp->request = trim( $this->add_endpoint( '/' . ltrim( $wp->request, '/' ) ), '/' );
 		}
 	}
 
@@ -567,7 +614,7 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 		if (
 			isset( $new_options[ Option::PAIRED_URL_STRUCTURE ] )
 			&&
-			in_array( $new_options[ Option::PAIRED_URL_STRUCTURE ], self::PAIRED_URL_STRUCTURES, true )
+			in_array( $new_options[ Option::PAIRED_URL_STRUCTURE ], array_keys( self::PAIRED_URL_STRUCTURES ), true )
 		) {
 			$options[ Option::PAIRED_URL_STRUCTURE ] = $new_options[ Option::PAIRED_URL_STRUCTURE ];
 		}
@@ -605,34 +652,7 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 	 * @return bool Whether custom paired URL structure is used.
 	 */
 	public function has_custom_paired_url_structure() {
-		$has_filters      = [
-			has_filter( 'amp_has_paired_endpoint' ),
-			has_filter( 'amp_add_paired_endpoint' ),
-			has_filter( 'amp_remove_paired_endpoint' ),
-		];
-		$has_filter_count = count( array_filter( $has_filters ) );
-		if ( 3 === $has_filter_count ) {
-			return true;
-		} elseif ( $has_filter_count > 0 ) {
-			_doing_it_wrong(
-				'add_filter',
-				esc_html__( 'In order to implement a custom paired AMP URL structure, you must add three filters:', 'amp' ) . ' amp_has_paired_endpoint, amp_add_paired_endpoint, amp_remove_paired_endpoint',
-				'2.1'
-			);
-		}
-		return false;
-	}
-
-	/**
-	 * Get the current paired AMP paired URL structure.
-	 *
-	 * @return string Paired AMP paired URL structure.
-	 */
-	public function get_paired_url_structure() {
-		if ( $this->has_custom_paired_url_structure() ) {
-			return self::PAIRED_URL_STRUCTURE_CUSTOM;
-		}
-		return AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE );
+		return has_filter( 'amp_custom_paired_url_structure' );
 	}
 
 	/**
@@ -643,199 +663,28 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 	 */
 	public function get_all_structure_paired_urls( $url ) {
 		$paired_urls = [];
-		$structures  = self::PAIRED_URL_STRUCTURES;
+		foreach ( self::PAIRED_URL_STRUCTURES as $structure_slug => $structure_class ) {
+			/** @var PairedUrlStructure $structure */
+			$structure = new $structure_class();
+
+			$paired_urls[ $structure_slug ] = $structure->add_endpoint( $url );
+		}
+
 		if ( $this->has_custom_paired_url_structure() ) {
-			$structures[] = self::PAIRED_URL_STRUCTURE_CUSTOM;
+			$paired_urls[ self::PAIRED_URL_STRUCTURE_CUSTOM ] = $this->add_endpoint( $url );
 		}
-		foreach ( $structures as $structure ) {
-			$paired_urls[ $structure ] = $this->add_endpoint( $url, $structure );
-		}
+
 		return $paired_urls;
 	}
 
 	/**
 	 * Turn a given URL into a paired AMP URL.
 	 *
-	 * @param string      $url       URL.
-	 * @param string|null $structure Structure. Defaults to the current paired structure.
-	 * @return string AMP URL.
-	 */
-	public function add_endpoint( $url, $structure = null ) {
-		if ( null === $structure ) {
-			$structure = self::get_paired_url_structure();
-		}
-		switch ( $structure ) {
-			case Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT:
-				return $this->get_endpoint_suffix_paired_amp_url( $url );
-			case Option::PAIRED_URL_STRUCTURE_LEGACY_TRANSITIONAL:
-				return $this->get_legacy_transitional_paired_amp_url( $url );
-			case Option::PAIRED_URL_STRUCTURE_LEGACY_READER:
-				return $this->get_legacy_reader_paired_amp_url( $url );
-		}
-
-		// This is the PAIRED_URL_STRUCTURE_QUERY_VAR case, the default.
-		$amp_url = $this->get_query_var_paired_amp_url( $url );
-
-		if ( self::PAIRED_URL_STRUCTURE_CUSTOM === $structure ) {
-			/**
-			 * Filters paired AMP URL to apply a custom paired URL structure.
-			 *
-			 * @since 2.1
-			 *
-			 * @param string $amp_url AMP URL. By default the AMP query var is added.
-			 * @param string $url     Original URL.
-			 */
-			$amp_url = apply_filters( 'amp_add_paired_endpoint', $amp_url, $url );
-		}
-
-		return $amp_url;
-	}
-
-	/**
-	 * Get paired AMP URL using query var (`?amp=1`).
-	 *
 	 * @param string $url URL.
 	 * @return string AMP URL.
 	 */
-	public function get_query_var_paired_amp_url( $url ) {
-		return add_query_arg( amp_get_slug(), '1', $url );
-	}
-
-	/**
-	 * Get paired AMP URL using a endpoint suffix.
-	 *
-	 * @param string $url URL.
-	 * @return string AMP URL.
-	 */
-	public function get_endpoint_suffix_paired_amp_url( $url ) {
-		$url = $this->remove_endpoint( $url );
-
-		$parsed_url = array_merge(
-			wp_parse_url( home_url( '/' ) ),
-			wp_parse_url( $url )
-		);
-
-		$query_var_required = (
-			// This is especially the case for post previews.
-			isset( $parsed_url['query'] )
-		);
-
-		if ( empty( $parsed_url['scheme'] ) ) {
-			$parsed_url['scheme'] = is_ssl() ? 'https' : 'http';
-		}
-		if ( ! isset( $parsed_url['host'] ) ) {
-			$parsed_url['host'] = isset( $_SERVER['HTTP_HOST'] ) ? wp_unslash( $_SERVER['HTTP_HOST'] ) : 'localhost';
-		}
-
-		if ( ! $query_var_required ) {
-			$parsed_url['path']  = trailingslashit( $parsed_url['path'] );
-			$parsed_url['path'] .= user_trailingslashit( amp_get_slug(), 'amp' );
-		}
-
-		$amp_url = $parsed_url['scheme'] . '://';
-		if ( isset( $parsed_url['user'] ) ) {
-			$amp_url .= $parsed_url['user'];
-			if ( isset( $parsed_url['pass'] ) ) {
-				$amp_url .= ':' . $parsed_url['pass'];
-			}
-			$amp_url .= '@';
-		}
-		$amp_url .= $parsed_url['host'];
-		if ( isset( $parsed_url['port'] ) ) {
-			$amp_url .= ':' . $parsed_url['port'];
-		}
-		$amp_url .= $parsed_url['path'];
-		if ( isset( $parsed_url['query'] ) ) {
-			$amp_url .= '?' . $parsed_url['query'];
-		}
-		if ( $query_var_required ) {
-			$amp_url = $this->get_query_var_paired_amp_url( $amp_url );
-		}
-		if ( isset( $parsed_url['fragment'] ) ) {
-			$amp_url .= '#' . $parsed_url['fragment'];
-		}
-		return $amp_url;
-	}
-
-	/**
-	 * Get paired AMP URL using the legacy transitional scheme (`?amp`).
-	 *
-	 * @param string $url URL.
-	 * @return string AMP URL.
-	 */
-	public function get_legacy_transitional_paired_amp_url( $url ) {
-		return add_query_arg( amp_get_slug(), '', $url );
-	}
-
-	/**
-	 * Get paired AMP URL using the legacy reader scheme (`/amp/` or else `?amp`).
-	 *
-	 * @param string $url URL.
-	 * @return string AMP URL.
-	 */
-	public function get_legacy_reader_paired_amp_url( $url ) {
-		$post_id = url_to_postid( $url );
-
-		if ( $post_id ) {
-			/**
-			 * Filters the AMP permalink to short-circuit normal generation.
-			 *
-			 * Returning a string value in this filter will bypass the `get_permalink()` from being called and the `amp_get_permalink` filter will not apply.
-			 *
-			 * @since 0.4
-			 * @since 1.0 This filter only applies when using the legacy reader paired URL structure.
-			 *
-			 * @param false $url     Short-circuited URL.
-			 * @param int   $post_id Post ID.
-			 */
-			$pre_url = apply_filters( 'amp_pre_get_permalink', false, $post_id );
-
-			if ( is_string( $pre_url ) ) {
-				return $pre_url;
-			}
-		}
-
-		// Make sure any existing AMP endpoint is removed.
-		$url = $this->remove_endpoint( $url );
-
-		$parsed_url    = wp_parse_url( $url );
-		$use_query_var = (
-			// If there are existing query vars, then always use the amp query var as well.
-			! empty( $parsed_url['query'] )
-			||
-			// If no post was found for the URL.
-			! $post_id
-			||
-			// If the post type is hierarchical then the /amp/ endpoint isn't available.
-			is_post_type_hierarchical( get_post_type( $post_id ) )
-			||
-			// Attachment pages don't accept the /amp/ endpoint.
-			'attachment' === get_post_type( $post_id )
-		);
-		if ( $use_query_var ) {
-			$amp_url = add_query_arg( amp_get_slug(), '', $url );
-		} else {
-			$amp_url = preg_replace( '/#.*/', '', $url );
-			$amp_url = trailingslashit( $amp_url ) . user_trailingslashit( amp_get_slug(), 'single_amp' );
-			if ( ! empty( $parsed_url['fragment'] ) ) {
-				$amp_url .= '#' . $parsed_url['fragment'];
-			}
-		}
-
-		if ( $post_id ) {
-			/**
-			 * Filters AMP permalink.
-			 *
-			 * @since 0.2
-			 * @since 1.0 This filter only applies when using the legacy reader paired URL structure.
-			 *
-			 * @param string $amp_url AMP URL.
-			 * @param int    $post_id Post ID.
-			 */
-			$amp_url = apply_filters( 'amp_get_permalink', $amp_url, $post_id );
-		}
-
-		return $amp_url;
+	public function add_endpoint( $url ) {
+		return $this->get_paired_url_structure()->add_endpoint( $url );
 	}
 
 	/**
@@ -880,7 +729,7 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 	}
 
 	/**
-	 * Get sources for the current paired URL structure.
+	 * Get sources for the custom paired URL structure (if any).
 	 *
 	 * @return array Sources. Each item is an array with keys for type, slug, and name.
 	 * @global WP_Hook[] $wp_filter Filter registry.
@@ -891,47 +740,44 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 			return [];
 		}
 
+		if ( ! isset( $wp_filter['amp_custom_paired_url_structure'] ) ) {
+			return [];
+		}
+		$hook = $wp_filter['amp_custom_paired_url_structure'];
+		if ( ! $hook instanceof WP_Hook ) {
+			return [];
+		}
+
 		$sources = [];
-
-		$filter_names = [ 'amp_has_paired_endpoint', 'amp_add_paired_endpoint', 'amp_remove_paired_endpoint' ];
-		foreach ( $filter_names as $filter_name ) {
-			if ( ! isset( $wp_filter[ $filter_name ] ) ) {
-				continue;
-			}
-			$hook = $wp_filter[ $filter_name ];
-			if ( ! $hook instanceof WP_Hook ) {
-				continue;
-			}
-			foreach ( $hook->callbacks as $callbacks ) {
-				foreach ( $callbacks as $callback ) {
-					$source = $this->callback_reflection->get_source( $callback['function'] );
-					if ( ! $source ) {
-						continue;
-					}
-
-					$type = $source['type'];
-					$slug = $source['name'];
-					$name = null;
-
-					if ( 'plugin' === $type ) {
-						$plugin = $this->plugin_registry->get_plugin_from_slug( $slug );
-						if ( isset( $plugin['data']['Name'] ) ) {
-							$name = $plugin['data']['Name'];
-						}
-					} elseif ( 'theme' === $type ) {
-						$theme = wp_get_theme( $slug );
-						if ( ! $theme->errors() ) {
-							$name = $theme->get( 'Name' );
-						}
-					}
-
-					$source = compact( 'type', 'slug', 'name' );
-					if ( in_array( $source, $sources, true ) ) {
-						continue;
-					}
-
-					$sources[] = $source;
+		foreach ( $hook->callbacks as $callbacks ) {
+			foreach ( $callbacks as $callback ) {
+				$source = $this->callback_reflection->get_source( $callback['function'] );
+				if ( ! $source ) {
+					continue;
 				}
+
+				$type = $source['type'];
+				$slug = $source['name'];
+				$name = null;
+
+				if ( 'plugin' === $type ) {
+					$plugin = $this->plugin_registry->get_plugin_from_slug( $slug );
+					if ( isset( $plugin['data']['Name'] ) ) {
+						$name = $plugin['data']['Name'];
+					}
+				} elseif ( 'theme' === $type ) {
+					$theme = wp_get_theme( $slug );
+					if ( ! $theme->errors() ) {
+						$name = $theme->get( 'Name' );
+					}
+				}
+
+				$source = compact( 'type', 'slug', 'name' );
+				if ( in_array( $source, $sources, true ) ) {
+					continue;
+				}
+
+				$sources[] = $source;
 			}
 		}
 
@@ -941,84 +787,26 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 	/**
 	 * Determine a given URL is for a paired AMP request.
 	 *
+	 * If no URL was is provided, then it will check whether WordPress has already parsed the AMP
+	 * query var as part of the request.
+	 *
 	 * @param string $url URL to examine. If empty, will use the current URL.
 	 * @return bool True if the AMP query parameter is set with the required value, false if not.
 	 * @global WP_Query $wp_the_query
 	 */
 	public function has_endpoint( $url = '' ) {
-		$slug = amp_get_slug();
-
-		// If the URL was not provided, then use the environment which is already parsed.
 		if ( empty( $url ) ) {
 			global $wp_the_query;
-			$has_endpoint = (
-				isset( $_GET[ $slug ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				||
+			return (
 				(
 					$wp_the_query instanceof WP_Query
 					&&
-					false !== $wp_the_query->get( $slug, false )
+					false !== $wp_the_query->get( amp_get_slug(), false )
 				)
 			);
 		} else {
-			$has_endpoint = false;
-			$parsed_url   = wp_parse_url( $url );
-
-			// Check if query var is present.
-			if ( ! empty( $parsed_url['query'] ) ) {
-				$query_vars = [];
-				wp_parse_str( $parsed_url['query'], $query_vars );
-				if ( isset( $query_vars[ $slug ] ) ) {
-					$has_endpoint = true;
-				}
-			}
-
-			// Otherwise, if the endpoint involves an endpoint suffix, check if it is present.
-			$paired_structure = $this->get_paired_url_structure();
-			if (
-				! $has_endpoint
-				&&
-				! empty( $parsed_url['path'] )
-				&&
-				(
-					Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT === $paired_structure
-					||
-					Option::PAIRED_URL_STRUCTURE_LEGACY_READER === $paired_structure
-				)
-				&&
-				$this->has_paired_endpoint_suffix( $parsed_url['path'] )
-			) {
-				$has_endpoint = true;
-			}
+			return $this->get_paired_url_structure()->has_endpoint( $url );
 		}
-
-		if ( $this->has_custom_paired_url_structure() ) {
-			/**
-			 * Filters whether the URL has a paired AMP paired URL structure.
-			 *
-			 * @since 2.1
-			 *
-			 * @param bool   $has_endpoint Had endpoint. By default true if the AMP query var or rewrite endpoint is present.
-			 * @param string $url          The URL.
-			 */
-			$has_endpoint = apply_filters( 'amp_has_paired_endpoint', $has_endpoint, $url ?: amp_get_current_url() );
-		}
-
-		return $has_endpoint;
-	}
-
-	/**
-	 * Determine whether the given URL path has the endpoint suffix.
-	 *
-	 * @param string $path URL path.
-	 * @return bool Has endpoint suffix.
-	 */
-	private function has_paired_endpoint_suffix( $path ) {
-		$pattern = sprintf(
-			':/%s/?$:',
-			preg_quote( amp_get_slug(), ':' )
-		);
-		return (bool) preg_match( $pattern, $path );
 	}
 
 	/**
@@ -1028,56 +816,7 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 	 * @return string URL with AMP stripped.
 	 */
 	public function remove_endpoint( $url ) {
-		$non_amp_url = self::remove_endpoint_query_var( $url );
-
-		// Remove the /amp/ URL endpoint suffix if the paired URL structure makes use of it.
-		$paired_structure = $this->get_paired_url_structure();
-		if (
-			Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT === $paired_structure
-			||
-			Option::PAIRED_URL_STRUCTURE_LEGACY_READER === $paired_structure
-		) {
-			$non_amp_url = self::remove_endpoint_suffix( $non_amp_url );
-		} elseif ( self::PAIRED_URL_STRUCTURE_CUSTOM === $paired_structure ) {
-			/**
-			 * Filters paired AMP URL to remove a custom paired URL structure.
-			 *
-			 * @since 2.1
-			 *
-			 * @param string $non_amp_url AMP URL. By default the rewrite endpoint and query var is removed.
-			 * @param string $url         Original URL.
-			 */
-			$non_amp_url = apply_filters( 'amp_remove_paired_endpoint', $non_amp_url, $url );
-		}
-
-		return $non_amp_url;
-	}
-
-	/**
-	 * Strip paired query var.
-	 *
-	 * @param string $url URL.
-	 * @return string URL.
-	 */
-	public static function remove_endpoint_query_var( $url ) {
-		return remove_query_arg( amp_get_slug(), $url );
-	}
-
-	/**
-	 * Strip paired endpoint suffix.
-	 *
-	 * @param string $url URL.
-	 * @return string URL.
-	 */
-	public static function remove_endpoint_suffix( $url ) {
-		return preg_replace(
-			sprintf(
-				':/%s(?=/?(\?|#|$)):',
-				preg_quote( amp_get_slug(), ':' )
-			),
-			'',
-			$url
-		);
+		return $this->get_paired_url_structure()->remove_endpoint( $url );
 	}
 
 	/**
@@ -1154,8 +893,8 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 		$requested_url = amp_get_current_url();
 		$redirect_url  = null;
 
-		$endpoint_suffix_removed = self::remove_endpoint_suffix( $requested_url );
-		$query_var_removed       = self::remove_endpoint_query_var( $requested_url );
+		$endpoint_suffix_removed = PairedUrlStructure::remove_path_suffix( $requested_url );
+		$query_var_removed       = PairedUrlStructure::remove_query_var( $requested_url );
 		if ( amp_is_canonical() ) {
 			if ( is_404() && $endpoint_suffix_removed !== $requested_url ) {
 				// Always redirect to strip off /amp/ in the case of a 404.
@@ -1169,7 +908,7 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 				// To account for switching the paired URL structure from `/amp/` to `?amp=1`, add the query var if in Paired
 				// AMP mode. Note this is not necessary to do when sites have switched from a query var to an endpoint suffix
 				// because the query var will always be recognized whereas the reverse is not always true.
-				$redirect_url = $this->get_query_var_paired_amp_url( $endpoint_suffix_removed );
+				$redirect_url = PairedUrlStructure::add_query_var( $endpoint_suffix_removed );
 			} elseif ( Option::PAIRED_URL_STRUCTURE_LEGACY_READER === AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE ) ) {
 				global $wp;
 				$path_args = [];
@@ -1190,7 +929,7 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 						$redirect_url = $query_var_removed;
 					}
 				}
-			} elseif ( $this->did_request_endpoint_suffix && $query_var_removed !== $requested_url ) {
+			} elseif ( $this->did_request_endpoint && $query_var_removed !== $requested_url ) {
 				// Redirect /amp/?amp=1 to /amp/, removing redundant endpoints.
 				$redirect_url = $query_var_removed;
 			}
