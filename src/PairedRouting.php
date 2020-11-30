@@ -259,7 +259,11 @@ final class PairedRouting implements Service, Registerable, Activateable, Deacti
 	public function filter_rest_options( $options ) {
 		$options[ self::AMP_SLUG ] = amp_get_slug();
 
-		$options[ Option::PAIRED_URL_STRUCTURE ] = AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE );
+		if ( $this->has_custom_paired_url_structure() ) {
+			$options[ Option::PAIRED_URL_STRUCTURE ] = self::PAIRED_URL_STRUCTURE_CUSTOM;
+		} else {
+			$options[ Option::PAIRED_URL_STRUCTURE ] = AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE );
+		}
 
 		$options[ self::PAIRED_URL_EXAMPLES ] = $this->get_paired_url_examples();
 
