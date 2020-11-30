@@ -25,34 +25,6 @@ use AmpProject\AmpWP\PluginRegistry;
 final class BlockSources implements Conditional, Service, Registerable {
 
 	/**
-	 * Indicates a block is registered in core.
-	 *
-	 * @var string
-	 */
-	const SOURCE_CORE = 'core';
-
-	/**
-	 * Indicates a block is registered with an unknown source.
-	 *
-	 * @var string
-	 */
-	const SOURCE_UNKNOWN = 'unknown';
-
-	/**
-	 * Indicates a block is registered by a theme.
-	 *
-	 * @var string
-	 */
-	const SOURCE_THEME = 'theme';
-
-	/**
-	 * Indicates a block is registered by a plugin.
-	 *
-	 * @var string
-	 */
-	const SOURCE_PLUGIN = 'plugin';
-
-	/**
 	 * Key of the cached block source data.
 	 *
 	 * @var string
