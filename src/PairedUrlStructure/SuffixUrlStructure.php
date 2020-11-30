@@ -19,18 +19,9 @@ use AmpProject\AmpWP\PairedUrlStructure;
 final class SuffixUrlStructure extends PairedUrlStructure {
 
 	/**
-	 * Determines whether the structure needs to manipulate request parsing.
-	 *
-	 * @return bool
-	 */
-	public function needs_request_parsing() {
-		return true;
-	}
-
-	/**
 	 * Turn a given URL into a paired AMP URL.
 	 *
-	 * @param string $url URL.
+	 * @param string $url URL (or REQUEST_URI).
 	 * @return string AMP URL.
 	 */
 	public function add_endpoint( $url ) {
@@ -40,7 +31,7 @@ final class SuffixUrlStructure extends PairedUrlStructure {
 	/**
 	 * Determine a given URL is for a paired AMP request.
 	 *
-	 * @param string $url URL to examine. If empty, will use the current URL.
+	 * @param string $url URL (or REQUEST_URI).
 	 * @return bool True if the AMP query parameter is set with the required value, false if not.
 	 */
 	public function has_endpoint( $url ) {
@@ -50,7 +41,7 @@ final class SuffixUrlStructure extends PairedUrlStructure {
 	/**
 	 * Remove the paired AMP endpoint from a given URL.
 	 *
-	 * @param string $url URL.
+	 * @param string $url URL (or REQUEST_URI).
 	 * @return string URL with AMP stripped.
 	 */
 	public function remove_endpoint( $url ) {
