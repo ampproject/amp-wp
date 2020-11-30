@@ -12,7 +12,7 @@ import { useSelect } from '@wordpress/data';
  */
 import { INITIAL_STATE, createStore, BLOCK_VALIDATION_STORE_KEY } from './store';
 import { MoreMenuIcon, ToolbarIcon } from './icon';
-import { addToolbarButtonToBlock } from './add-toolbar-button-to-block';
+import { withAMPToolbarButton } from './with-amp-toolbar-button';
 import { Sidebar } from './sidebar';
 import { InvalidBlockOutline } from './invalid-block-outline';
 import { ValidationErrorStateUpdater } from './validation-error-state-updater';
@@ -65,4 +65,4 @@ registerPlugin(
 	},
 );
 
-addFilter( 'editor.BlockEdit', 'ampBlockValidation/filterEdit', addToolbarButtonToBlock, -99 );
+addFilter( 'editor.BlockEdit', 'ampBlockValidation/filterEdit', withAMPToolbarButton, -99 );

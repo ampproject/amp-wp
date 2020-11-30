@@ -16,7 +16,7 @@ import '@wordpress/block-editor'; // Block editor data store needed.
  * Internal dependencies
  */
 import { createStore } from '../store';
-import { addToolbarButtonToBlock } from '../add-toolbar-button-to-block';
+import { withAMPToolbarButton } from '../with-amp-toolbar-button';
 
 let container, block;
 let toolbarButtonWasRendered = false;
@@ -48,7 +48,7 @@ registerBlockType( TEST_BLOCK, {
 	title: 'test block',
 } );
 
-describe( 'addToolbarButtonToBlock: filtering with errors', () => {
+describe( 'withAMPToolbarButton: filtering with errors', () => {
 	beforeAll( () => {
 		block = createBlock( TEST_BLOCK, {} );
 		dispatch( 'core/block-editor' ).insertBlock( block );
@@ -90,7 +90,7 @@ describe( 'addToolbarButtonToBlock: filtering with errors', () => {
 			}
 		}
 
-		const FilteredComponent = addToolbarButtonToBlock( UnfilteredComponent );
+		const FilteredComponent = withAMPToolbarButton( UnfilteredComponent );
 
 		act( () => {
 			render(
@@ -112,7 +112,7 @@ describe( 'addToolbarButtonToBlock: filtering with errors', () => {
 			);
 		}
 
-		const FilteredComponent = addToolbarButtonToBlock( UnfilteredComponent );
+		const FilteredComponent = withAMPToolbarButton( UnfilteredComponent );
 
 		act( () => {
 			render(
@@ -126,7 +126,7 @@ describe( 'addToolbarButtonToBlock: filtering with errors', () => {
 	} );
 } );
 
-describe( 'addToolbarButtonToBlock: filtering without errors', () => {
+describe( 'withAMPToolbarButton: filtering without errors', () => {
 	beforeAll( () => {
 		block = createBlock( TEST_BLOCK, {} );
 		dispatch( 'core/block-editor' ).insertBlock( block );
@@ -159,7 +159,7 @@ describe( 'addToolbarButtonToBlock: filtering without errors', () => {
 			}
 		}
 
-		const FilteredComponent = addToolbarButtonToBlock( UnfilteredComponent );
+		const FilteredComponent = withAMPToolbarButton( UnfilteredComponent );
 
 		act( () => {
 			render(
@@ -181,7 +181,7 @@ describe( 'addToolbarButtonToBlock: filtering without errors', () => {
 			);
 		}
 
-		const FilteredComponent = addToolbarButtonToBlock( UnfilteredComponent );
+		const FilteredComponent = withAMPToolbarButton( UnfilteredComponent );
 
 		act( () => {
 			render(
