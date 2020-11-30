@@ -2401,6 +2401,11 @@ class AMP_Validation_Manager {
 			return;
 		}
 
+		// Block validation script uses features only available beginning with WP 5.3.
+		if ( version_compare( get_bloginfo( 'version' ), '5.3', '<' ) ) {
+			return;
+		}
+
 		$slug = 'amp-block-validation';
 
 		$asset_file   = AMP__DIR__ . '/assets/js/' . $slug . '.asset.php';

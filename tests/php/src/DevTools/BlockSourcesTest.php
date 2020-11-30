@@ -29,11 +29,6 @@ class BlockSourcesTest extends WP_UnitTestCase {
 
 	use PrivateAccess;
 
-	private function populate_plugins() {
-		wp_cache_set( 'plugins', [ '' => MockPluginEnvironment::PLUGINS_DATA ], 'plugins' );
-		update_option( 'active_plugins', array_diff( array_keys( MockPluginEnvironment::PLUGINS_DATA ), [ MockPluginEnvironment::BAZ_PLUGIN_FILE ] ) );
-	}
-
 	/**
 	 * Test instance.
 	 *
@@ -49,8 +44,11 @@ class BlockSourcesTest extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
+		if ( version_compare( get_bloginfo( 'version' ), '5.3', '<' ) ) {
+			$this->markTestSkipped( 'Requires WordPress 5.3.' );
+		}
+
 		$this->instance = $this->get_new_instance();
-		$this->populate_plugins();
 	}
 
 	/**
@@ -95,7 +93,6 @@ class BlockSourcesTest extends WP_UnitTestCase {
 	 * @covers ::get_block_sources()
 	 */
 	public function test_capture_block_type_source() {
-		$this->populate_plugins();
 		$this->instance->clear_block_sources_cache();
 		$this->instance->register();
 
