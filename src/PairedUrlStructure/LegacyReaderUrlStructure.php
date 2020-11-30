@@ -65,7 +65,7 @@ final class LegacyReaderUrlStructure extends PairedUrlStructure {
 			'attachment' === get_post_type( $post_id )
 		);
 		if ( $use_query_var ) {
-			$amp_url = static::add_query_var( $url );
+			$amp_url = static::add_query_var( $url, '' );
 		} else {
 			$amp_url = static::add_path_suffix( $url );
 		}
