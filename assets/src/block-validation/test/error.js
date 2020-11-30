@@ -284,16 +284,19 @@ describe( 'ErrorTypeIcon', () => {
 		let expectedClass;
 		switch ( errorType ) {
 			case 'html_attribute_error':
+				expectedClass = '.amp-error__error-type-icon--html-attribute-error';
+				break;
+
 			case 'html_element_error':
-				expectedClass = '.amp-error__html-error-icon';
+				expectedClass = '.amp-error__error-type-icon--html-element-error';
 				break;
 
 			case 'js_error':
-				expectedClass = '.amp-error__js-error-icon';
+				expectedClass = '.amp-error__error-type-icon--js-error';
 				break;
 
 			case 'css_error':
-				expectedClass = '.amp-error__css-error-icon';
+				expectedClass = '.amp-error__error-type-icon--css-error';
 				break;
 
 			default:
@@ -301,7 +304,7 @@ describe( 'ErrorTypeIcon', () => {
 		}
 
 		if ( ! expectedClass ) {
-			expect( container.querySelector( 'svg[class^=amp-error]' ) ).toBeNull();
+			expect( container.querySelector( 'svg[class^=amp-error__error-type-icon]' ) ).toBeNull();
 		} else {
 			expect( container.querySelector( expectedClass ) ).not.toBeNull();
 		}
