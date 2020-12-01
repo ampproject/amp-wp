@@ -440,7 +440,11 @@ final class PairedRouting implements Service, Registerable {
 
 		// In case a plugin is looking at $wp->request to see if it is AMP, ensure the path endpoint is added.
 		// WordPress is not including it because it was removed in extract_endpoint_from_environment_before_parse_request.
-		$request_path = '/' . trim( $wp->request, '/' ) . '/';
+
+		$request_path = '/';
+		if ( $wp->request ) {
+			$request_path .= trailingslashit( $wp->request );
+		}
 		$request_path = wp_parse_url( $this->add_endpoint( $request_path ), PHP_URL_PATH );
 		$wp->request  = trim( $request_path, '/' );
 	}
