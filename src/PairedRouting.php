@@ -96,6 +96,13 @@ final class PairedRouting implements Service, Registerable {
 	const CUSTOM_PAIRED_ENDPOINT_SOURCES = 'custom_paired_endpoint_sources';
 
 	/**
+	 * Paired URLs service.
+	 *
+	 * @var PairedUrls
+	 */
+	private $paired_urls;
+
+	/**
 	 * Paired URL structure.
 	 *
 	 * @var PairedUrlStructure
@@ -137,10 +144,12 @@ final class PairedRouting implements Service, Registerable {
 	 *
 	 * @param CallbackReflection $callback_reflection Callback reflection.
 	 * @param PluginRegistry     $plugin_registry     Plugin registry.
+	 * @param PairedUrls         $paired_urls         Paired URLs service.
 	 */
-	public function __construct( CallbackReflection $callback_reflection, PluginRegistry $plugin_registry ) {
+	public function __construct( CallbackReflection $callback_reflection, PluginRegistry $plugin_registry, PairedUrls $paired_urls ) {
 		$this->callback_reflection = $callback_reflection;
 		$this->plugin_registry     = $plugin_registry;
+		$this->paired_urls         = $paired_urls;
 	}
 
 	/**
@@ -184,7 +193,7 @@ final class PairedRouting implements Service, Registerable {
 				}
 			}
 
-			$this->paired_url_structure = new $structure_class();
+			$this->paired_url_structure = new $structure_class( $this->paired_urls );
 		}
 		return $this->paired_url_structure;
 	}
@@ -645,7 +654,7 @@ final class PairedRouting implements Service, Registerable {
 		$paired_urls = [];
 		foreach ( self::PAIRED_URL_STRUCTURES as $structure_slug => $structure_class ) {
 			/** @var PairedUrlStructure $structure */
-			$structure = new $structure_class();
+			$structure = new $structure_class( $this->paired_urls );
 
 			$paired_urls[ $structure_slug ] = $structure->add_endpoint( $url );
 		}
@@ -828,8 +837,8 @@ final class PairedRouting implements Service, Registerable {
 		$requested_url = amp_get_current_url();
 		$redirect_url  = null;
 
-		$endpoint_suffix_removed = PairedUrlStructure::remove_path_suffix( $requested_url );
-		$query_var_removed       = PairedUrlStructure::remove_query_var( $requested_url );
+		$endpoint_suffix_removed = $this->paired_urls->remove_path_suffix( $requested_url );
+		$query_var_removed       = $this->paired_urls->remove_query_var( $requested_url );
 		if ( amp_is_canonical() ) {
 			if ( is_404() && $endpoint_suffix_removed !== $requested_url ) {
 				// Always redirect to strip off /amp/ in the case of a 404.
@@ -843,7 +852,7 @@ final class PairedRouting implements Service, Registerable {
 				// To account for switching the paired URL structure from `/amp/` to `?amp=1`, add the query var if in Paired
 				// AMP mode. Note this is not necessary to do when sites have switched from a query var to an endpoint suffix
 				// because the query var will always be recognized whereas the reverse is not always true.
-				$redirect_url = PairedUrlStructure::add_query_var( $endpoint_suffix_removed );
+				$redirect_url = $this->paired_urls->add_query_var( $endpoint_suffix_removed );
 			} elseif ( Option::PAIRED_URL_STRUCTURE_LEGACY_READER === AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE ) ) {
 				global $wp;
 				$path_args = [];

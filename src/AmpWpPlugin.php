@@ -82,6 +82,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'site_health_integration'           => Admin\SiteHealth::class,
 		'validated_url_stylesheet_gc'       => BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection::class,
 		'paired_routing'                    => PairedRouting::class,
+		'paired_urls'                       => PairedUrls::class,
 	];
 
 	/**
