@@ -23,15 +23,8 @@ final class EditorSupportTest extends WP_UnitTestCase {
 
 	public function test_it_can_be_initialized() {
 		$this->assertInstanceOf( EditorSupport::class, $this->instance );
-		$this->assertInstanceOf( Conditional::class, $this->instance );
 		$this->assertInstanceOf( Service::class, $this->instance );
 		$this->assertInstanceOf( Registerable::class, $this->instance );
-		$this->assertInstanceOf( Delayed::class, $this->instance );
-	}
-
-	/** @covers ::get_registration_action() */
-	public function test_get_registration_action() {
-		$this->assertEquals( 'admin_init', EditorSupport::get_registration_action() );
 	}
 
 	/** @covers ::register() */
