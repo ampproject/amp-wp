@@ -11,6 +11,7 @@ use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AmpProject\AmpWP\DevTools\CallbackReflection;
 use AMP_Post_Type_Support;
+use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Admin\ReaderThemes;
@@ -124,6 +125,13 @@ final class PairedRouting implements Service, Registerable {
 	private $plugin_registry;
 
 	/**
+	 * Injector.
+	 *
+	 * @var Injector
+	 */
+	private $injector;
+
+	/**
 	 * Whether the request had the /amp/ endpoint suffix.
 	 *
 	 * @var bool
@@ -142,11 +150,13 @@ final class PairedRouting implements Service, Registerable {
 	/**
 	 * PairedRouting constructor.
 	 *
+	 * @param Injector           $injector            Injector.
 	 * @param CallbackReflection $callback_reflection Callback reflection.
 	 * @param PluginRegistry     $plugin_registry     Plugin registry.
 	 * @param PairedUrl          $paired_url          Paired URL service.
 	 */
-	public function __construct( CallbackReflection $callback_reflection, PluginRegistry $plugin_registry, PairedUrl $paired_url ) {
+	public function __construct( Injector $injector, CallbackReflection $callback_reflection, PluginRegistry $plugin_registry, PairedUrl $paired_url ) {
+		$this->injector            = $injector;
 		$this->callback_reflection = $callback_reflection;
 		$this->plugin_registry     = $plugin_registry;
 		$this->paired_url          = $paired_url;
@@ -193,7 +203,7 @@ final class PairedRouting implements Service, Registerable {
 				}
 			}
 
-			$this->paired_url_structure = new $structure_class( $this->paired_url );
+			$this->paired_url_structure = $this->injector->make( $structure_class );
 		}
 		return $this->paired_url_structure;
 	}
@@ -654,7 +664,7 @@ final class PairedRouting implements Service, Registerable {
 		$paired_urls = [];
 		foreach ( self::PAIRED_URL_STRUCTURES as $structure_slug => $structure_class ) {
 			/** @var PairedUrlStructure $structure */
-			$structure = new $structure_class( $this->paired_url );
+			$structure = $this->injector->make( $structure_class );
 
 			$paired_urls[ $structure_slug ] = $structure->add_endpoint( $url );
 		}

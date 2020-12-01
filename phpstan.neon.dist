@@ -35,5 +35,3 @@ parameters:
 	ignoreErrors:
 		# Uses func_get_args()
 		- '#^Function apply_filters(_ref_array)? invoked with [34567] parameters, 2 required\.$#'
-		# Instantiated class is subclass of the abstract class.
-		- '#^Instantiated class AmpProject\\AmpWP\\PairedUrlStructure is abstract\.$#'

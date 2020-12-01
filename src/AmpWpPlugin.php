@@ -9,6 +9,7 @@ namespace AmpProject\AmpWP;
 
 use AmpProject\AmpWP\Admin;
 use AmpProject\AmpWP\BackgroundTask;
+use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Infrastructure\ServiceBasedPlugin;
 use AmpProject\AmpWP\Instrumentation;
 
@@ -165,6 +166,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			DevTools\FileReflection::class,
 			ReaderThemeLoader::class,
 			PairedRouting::class,
+			Injector::class,
 		];
 	}
 
@@ -180,6 +182,10 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 * @return array<callable> Associative array of callables.
 	 */
 	protected function get_delegations() {
-		return [];
+		return [
+			Injector::class => static function () {
+				return Services::get( 'injector' );
+			},
+		];
 	}
 }
