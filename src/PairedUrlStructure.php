@@ -16,19 +16,19 @@ namespace AmpProject\AmpWP;
 abstract class PairedUrlStructure {
 
 	/**
-	 * Paired URLs service.
+	 * Paired URL service.
 	 *
-	 * @var PairedUrls
+	 * @var PairedUrl
 	 */
-	protected $paired_urls;
+	protected $paired_url;
 
 	/**
 	 * PairedUrlStructure constructor.
 	 *
-	 * @param PairedUrls $paired_urls Paired URLs service.
+	 * @param PairedUrl $paired_url Paired URL service.
 	 */
-	public function __construct( PairedUrls $paired_urls ) {
-		$this->paired_urls = $paired_urls;
+	public function __construct( PairedUrl $paired_url ) {
+		$this->paired_url = $paired_url;
 	}
 
 	/**

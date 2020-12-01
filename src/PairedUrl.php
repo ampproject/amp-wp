@@ -10,13 +10,13 @@ namespace AmpProject\AmpWP;
 use AmpProject\AmpWP\Infrastructure\Service;
 
 /**
- * Service for manipulating paired URLs.
+ * Service for manipulating a paired URL.
  *
  * @package AmpProject\AmpWP
  * @since 2.1
  * @internal
  */
-final class PairedUrls implements Service {
+final class PairedUrl implements Service {
 
 	/**
 	 * Strip paired query var.

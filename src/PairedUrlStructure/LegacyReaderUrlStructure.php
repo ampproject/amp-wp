@@ -47,8 +47,8 @@ final class LegacyReaderUrlStructure extends PairedUrlStructure {
 		}
 
 		// Make sure any existing AMP endpoint is removed.
-		$url = $this->paired_urls->remove_path_suffix( $url );
-		$url = $this->paired_urls->remove_query_var( $url );
+		$url = $this->paired_url->remove_path_suffix( $url );
+		$url = $this->paired_url->remove_query_var( $url );
 
 		$parsed_url    = wp_parse_url( $url );
 		$use_query_var = (
@@ -65,9 +65,9 @@ final class LegacyReaderUrlStructure extends PairedUrlStructure {
 			'attachment' === get_post_type( $post_id )
 		);
 		if ( $use_query_var ) {
-			$amp_url = $this->paired_urls->add_query_var( $url, '' );
+			$amp_url = $this->paired_url->add_query_var( $url, '' );
 		} else {
-			$amp_url = $this->paired_urls->add_path_suffix( $url );
+			$amp_url = $this->paired_url->add_path_suffix( $url );
 		}
 
 		if ( $post_id ) {
@@ -93,7 +93,7 @@ final class LegacyReaderUrlStructure extends PairedUrlStructure {
 	 * @return bool True if the AMP query parameter is set with the required value, false if not.
 	 */
 	public function has_endpoint( $url ) {
-		return $this->paired_urls->has_query_var( $url ) || $this->paired_urls->has_path_suffix( $url );
+		return $this->paired_url->has_query_var( $url ) || $this->paired_url->has_path_suffix( $url );
 	}
 
 	/**
@@ -103,8 +103,8 @@ final class LegacyReaderUrlStructure extends PairedUrlStructure {
 	 * @return string URL with AMP stripped.
 	 */
 	public function remove_endpoint( $url ) {
-		$url = $this->paired_urls->remove_query_var( $url );
-		$url = $this->paired_urls->remove_path_suffix( $url );
+		$url = $this->paired_url->remove_query_var( $url );
+		$url = $this->paired_url->remove_path_suffix( $url );
 		return $url;
 	}
 }

@@ -35,7 +35,7 @@ namespace PHPSTORM_META {
 			'site_health_integration'           => \AmpProject\AmpWP\Admin\SiteHealth::class,
 			'validated_url_stylesheet_gc'       => \AmpProject\AmpWP\BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection::class,
 			'paired_routing'                    => \AmpProject\AmpWP\PairedRouting::class,
-			'paired_urls'                       => \AmpProject\AmpWP\PairedUrls::class,
+			'paired_url'                        => \AmpProject\AmpWP\PairedUrl::class,
 		] )
 	);
 
