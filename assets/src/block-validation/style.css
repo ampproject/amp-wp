@@ -21,6 +21,7 @@
 	margin-left: -5px;
 }
 
+.amp-error-alert,
 .amp-error-count-badge {
 	align-items: center;
 	background: #bb522e;
@@ -32,10 +33,13 @@
 	font-size: 10px;
 	height: 16px;
 	justify-content: center;
+	width: 16px;
+}
+
+.amp-error-count-badge {
 	position: absolute;
 	right: 1px;
 	top: 2px;
-	width: 16px;
 }
 
 .is-pressed .amp-error-count-badge {
@@ -154,7 +158,7 @@
 .amp-error__title-text {
 	font-size: 13px;
 	line-height: 1.4;
-	padding-right: 2.25rem;
+	padding-right: 0.75rem;
 }
 
 .amp-error__title-text code {

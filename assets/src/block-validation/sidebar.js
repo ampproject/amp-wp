@@ -78,11 +78,12 @@ export function Sidebar() {
 				)
 			}
 
-			<PanelBody opened={ true }>
-				<h2>
-					{ __( 'Validation Errors', 'amp' ) }
-				</h2>
-				{ 0 < validationErrors.length && (
+			{ 0 < validationErrors.length && (
+				<PanelBody opened={ true }>
+					<h2>
+						{ __( 'Validation Errors', 'amp' ) }
+					</h2>
+
 					<p>
 						{ __( 'The following AMP validation errors were found at this URL. ', 'amp' ) }
 						{ reviewLink && (
@@ -92,8 +93,9 @@ export function Sidebar() {
 							</a>
 						) }
 					</p>
-				) }
-			</PanelBody>
+
+				</PanelBody>
+			) }
 			{
 				! published && (
 					<PanelBody opened={ true }>

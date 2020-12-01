@@ -70,8 +70,11 @@ ErrorTypeIcon.propTypes = {
  * @param {string} props.title Title string from error data.
  * @param {Object} props.error Error details.
  * @param {string} props.error.type Error type.
+ * @param {number} props.status Error status.
  */
-function ErrorPanelTitle( { blockType, title, error: { type } } ) {
+function ErrorPanelTitle( { blockType, title, error: { type }, status } ) {
+	const kept = status === VALIDATION_ERROR_ACK_REJECTED_STATUS || status === VALIDATION_ERROR_NEW_REJECTED_STATUS;
+
 	return (
 		<>
 			<div className="amp-error__icons">
@@ -85,6 +88,11 @@ function ErrorPanelTitle( { blockType, title, error: { type } } ) {
 				) }
 			</div>
 			<span className="amp-error__title-text" dangerouslySetInnerHTML={ { __html: title } } />
+			{ kept && (
+				<div className="amp-error-alert" title={ __( 'This error has been kept, making this URL not AMP-compatible.', 'amp' ) }>
+					{ '!' }
+				</div>
+			) }
 		</>
 	);
 }
@@ -94,6 +102,7 @@ ErrorPanelTitle.propTypes = {
 	error: PropTypes.shape( {
 		type: PropTypes.string,
 	} ).isRequired,
+	status: PropTypes.number,
 };
 
 /**
@@ -106,7 +115,6 @@ ErrorPanelTitle.propTypes = {
  */
 function ErrorContent( { blockType, clientId, status } ) {
 	const { blockSources } = useInlineData( 'ampBlockValidation' );
-
 	const { selectBlock } = useDispatch( 'core/block-editor' );
 
 	const blockSource = blockSources[ blockType?.name ];

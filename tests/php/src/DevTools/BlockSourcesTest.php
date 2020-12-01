@@ -44,11 +44,11 @@ class BlockSourcesTest extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
+		$this->instance = $this->get_new_instance();
+
 		if ( version_compare( get_bloginfo( 'version' ), '5.3', '<' ) ) {
 			$this->markTestSkipped( 'Requires WordPress 5.3.' );
 		}
-
-		$this->instance = $this->get_new_instance();
 	}
 
 	/**
