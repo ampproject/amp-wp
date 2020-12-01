@@ -101,9 +101,14 @@ final class PairedUrl implements Service {
 	public function add_path_suffix( $url ) {
 		$url = $this->remove_path_suffix( $url );
 
+		$parsed_url = wp_parse_url( $url );
+		if ( false === $parsed_url ) {
+			$parsed_url = [];
+		}
+
 		$parsed_url = array_merge(
 			wp_parse_url( home_url( '/' ) ),
-			wp_parse_url( $url )
+			$parsed_url
 		);
 
 		if ( empty( $parsed_url['scheme'] ) ) {
