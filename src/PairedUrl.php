@@ -109,30 +109,30 @@ final class PairedUrl implements Service {
 		if ( empty( $parsed_url['scheme'] ) ) {
 			$parsed_url['scheme'] = is_ssl() ? 'https' : 'http';
 		}
-		if ( ! isset( $parsed_url['host'] ) ) {
-			$parsed_url['host'] = isset( $_SERVER['HTTP_HOST'] ) ? wp_unslash( $_SERVER['HTTP_HOST'] ) : 'localhost';
+		if ( empty( $parsed_url['host'] ) ) {
+			$parsed_url['host'] = ! empty( $_SERVER['HTTP_HOST'] ) ? wp_unslash( $_SERVER['HTTP_HOST'] ) : 'localhost';
 		}
 
 		$parsed_url['path']  = trailingslashit( $parsed_url['path'] );
 		$parsed_url['path'] .= user_trailingslashit( amp_get_slug(), 'amp' );
 
 		$amp_url = $parsed_url['scheme'] . '://';
-		if ( isset( $parsed_url['user'] ) ) {
+		if ( ! empty( $parsed_url['user'] ) ) {
 			$amp_url .= $parsed_url['user'];
-			if ( isset( $parsed_url['pass'] ) ) {
+			if ( ! empty( $parsed_url['pass'] ) ) {
 				$amp_url .= ':' . $parsed_url['pass'];
 			}
 			$amp_url .= '@';
 		}
 		$amp_url .= $parsed_url['host'];
-		if ( isset( $parsed_url['port'] ) ) {
+		if ( ! empty( $parsed_url['port'] ) ) {
 			$amp_url .= ':' . $parsed_url['port'];
 		}
 		$amp_url .= $parsed_url['path'];
-		if ( isset( $parsed_url['query'] ) ) {
+		if ( ! empty( $parsed_url['query'] ) ) {
 			$amp_url .= '?' . $parsed_url['query'];
 		}
-		if ( isset( $parsed_url['fragment'] ) ) {
+		if ( ! empty( $parsed_url['fragment'] ) ) {
 			$amp_url .= '#' . $parsed_url['fragment'];
 		}
 
