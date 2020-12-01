@@ -135,7 +135,7 @@ export function PairedUrlStructure( { focusedSection } ) {
 						{
 							sprintf(
 								/* translators: %s is the AMP slug */
-								__( 'There is a post, term, user, or some other entity that is already using the “%s” URL slug. For this reason, you cannot currently use the suffix endpoint or legacy reader paired URL structures.', 'amp' ),
+								__( 'There is a post, term, user, or some other entity that is already using the “%s” URL slug. For this reason, you cannot currently use the path suffix or legacy reader paired URL structures.', 'amp' ),
 								slug,
 							)
 						}
@@ -180,7 +180,7 @@ export function PairedUrlStructure( { focusedSection } ) {
 						disabled={ isCustom || ! endpointSuffixAvailable || ! editedOptions.using_permalinks }
 					/>
 					<label htmlFor="paired_url_structure_suffix_endpoint">
-						{ __( 'Suffix endpoint', 'amp' ) + ': ' }
+						{ __( 'Path suffix', 'amp' ) + ': ' }
 						<code>
 							{ `/${ slug }/` }
 						</code>
