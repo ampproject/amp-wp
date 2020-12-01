@@ -5,14 +5,16 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\AmpWpPlugin;
 use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\AssertRestApiField;
 
 /**
  * Tests for AMP_Post_Meta_Box.
  */
-class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
+class Test_AMP_Post_Meta_Box extends DependencyInjectedTestCase {
 
 	use AssertRestApiField;
 	use AssertContainsCompatibility;
@@ -113,6 +115,9 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	 * @covers AMP_Post_Meta_Box::enqueue_block_assets()
 	 */
 	public function test_enqueue_block_assets() {
+		set_current_screen( 'post.php' );
+		get_current_screen()->is_block_editor = true;
+
 		if ( ! function_exists( 'register_block_type' ) ) {
 			$this->markTestSkipped( 'The block editor is not available' );
 		}
@@ -170,6 +175,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		foreach ( $expected_localized_values as $localized_value ) {
 			$this->assertContains( $localized_value, $block_script->extra['data'] );
 		}
+		unset( $GLOBALS['post'], $GLOBALS['current_screen'] );
 	}
 
 	/**

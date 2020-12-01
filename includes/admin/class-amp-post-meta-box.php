@@ -7,6 +7,7 @@
  */
 
 use AmpProject\AmpWP\Editor\EditorSupport;
+use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Services;
 
 /**

@@ -10,8 +10,6 @@
 namespace AmpProject\AmpWP\Editor;
 
 use AMP_Post_Type_Support;
-use AmpProject\AmpWP\Infrastructure\Conditional;
-use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 
@@ -20,7 +18,7 @@ use AmpProject\AmpWP\Infrastructure\Service;
  *
  * @internal
  */
-final class EditorSupport implements Conditional, Delayed, Registerable, Service {
+final class EditorSupport implements Registerable, Service {
 
 	/**
 	 * The minimum version of Gutenberg supported by editor features.
@@ -35,24 +33,6 @@ final class EditorSupport implements Conditional, Delayed, Registerable, Service
 	 * @var string
 	 */
 	const WP_MIN_VERSION = '5.3';
-
-	/**
-	 * Check whether the conditional object is currently needed.
-	 *
-	 * @return bool Whether the conditional object is needed.
-	 */
-	public static function is_needed() {
-		return is_admin();
-	}
-
-	/**
-	 * Get the action to use for registering the service.
-	 *
-	 * @return string Registration action to use.
-	 */
-	public static function get_registration_action() {
-		return 'admin_init';
-	}
 
 	/**
 	 * Runs on instantiation.
