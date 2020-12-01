@@ -616,7 +616,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	 * @covers ::amp_remove_paired_endpoint()
 	 */
 	public function test_amp_remove_paired_endpoint() {
-		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT );
+		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, Option::PAIRED_URL_STRUCTURE_PATH_SUFFIX );
 		$this->assertEquals( 'https://example.com/foo/', amp_remove_paired_endpoint( 'https://example.com/foo/?amp' ) );
 		$this->assertEquals( 'https://example.com/foo/', amp_remove_paired_endpoint( 'https://example.com/foo/?amp=1' ) );
 		$this->assertEquals( 'https://example.com/foo/', amp_remove_paired_endpoint( 'https://example.com/foo/amp/?amp=1' ) );
@@ -1843,22 +1843,22 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 				true,
 			],
 			'endpoint_bare_slashed'   => [
-				Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT,
+				Option::PAIRED_URL_STRUCTURE_PATH_SUFFIX,
 				'amp/',
 				true,
 			],
 			'endpoint_bare_unslashed' => [
-				Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT,
+				Option::PAIRED_URL_STRUCTURE_PATH_SUFFIX,
 				'amp',
 				true,
 			],
 			'endpoint_and_url_param'  => [
-				Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT,
+				Option::PAIRED_URL_STRUCTURE_PATH_SUFFIX,
 				'amp/?amp=1',
 				true,
 			],
 			'endpoint_with_extras'    => [
-				Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT,
+				Option::PAIRED_URL_STRUCTURE_PATH_SUFFIX,
 				'amp/?foo=var#baz',
 				true,
 			],

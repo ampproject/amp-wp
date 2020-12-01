@@ -1,6 +1,6 @@
 <?php
 /**
- * Class SuffixUrlStructure.
+ * Class PathSuffixUrlStructure.
  *
  * @package AmpProject\AmpWP
  */
@@ -10,13 +10,13 @@ namespace AmpProject\AmpWP\PairedUrlStructure;
 use AmpProject\AmpWP\PairedUrlStructure;
 
 /**
- * Descriptor for paired URL structures that end in /amp/ endpoint suffix.
+ * Descriptor for paired URL structures that end in /amp/ path suffix.
  *
  * @package AmpProject\AmpWP
  * @since 2.1
  * @internal
  */
-final class SuffixUrlStructure extends PairedUrlStructure {
+final class PathSuffixUrlStructure extends PairedUrlStructure {
 
 	/**
 	 * Turn a given URL into a paired AMP URL.

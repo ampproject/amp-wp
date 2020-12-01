@@ -18,7 +18,7 @@ use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\PairedUrlStructure\LegacyReaderUrlStructure;
 use AmpProject\AmpWP\PairedUrlStructure\LegacyTransitionalUrlStructure;
 use AmpProject\AmpWP\PairedUrlStructure\QueryVarUrlStructure;
-use AmpProject\AmpWP\PairedUrlStructure\SuffixUrlStructure;
+use AmpProject\AmpWP\PairedUrlStructure\PathSuffixUrlStructure;
 use WP_Query;
 use WP_Rewrite;
 use WP;
@@ -43,7 +43,7 @@ final class PairedRouting implements Service, Registerable {
 	 */
 	const PAIRED_URL_STRUCTURES = [
 		Option::PAIRED_URL_STRUCTURE_QUERY_VAR           => QueryVarUrlStructure::class,
-		Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT     => SuffixUrlStructure::class,
+		Option::PAIRED_URL_STRUCTURE_PATH_SUFFIX         => PathSuffixUrlStructure::class,
 		Option::PAIRED_URL_STRUCTURE_LEGACY_TRANSITIONAL => LegacyTransitionalUrlStructure::class,
 		Option::PAIRED_URL_STRUCTURE_LEGACY_READER       => LegacyReaderUrlStructure::class,
 	];
@@ -79,7 +79,7 @@ final class PairedRouting implements Service, Registerable {
 	 * @see amp_get_slug()
 	 * @var string
 	 */
-	const ENDPOINT_SUFFIX_CONFLICTS = 'endpoint_suffix_conflicts';
+	const ENDPOINT_PATH_SLUG_CONFLICTS = 'endpoint_path_slug_conflicts';
 
 	/**
 	 * REST API field name for whether permalinks are being used.
@@ -218,19 +218,19 @@ final class PairedRouting implements Service, Registerable {
 		return array_merge(
 			$schema,
 			[
-				Option::PAIRED_URL_STRUCTURE    => [
+				Option::PAIRED_URL_STRUCTURE       => [
 					'type' => 'string',
 					'enum' => array_keys( self::PAIRED_URL_STRUCTURES ),
 				],
-				self::PAIRED_URL_EXAMPLES       => [
+				self::PAIRED_URL_EXAMPLES          => [
 					'type'     => 'object',
 					'readonly' => true,
 				],
-				self::AMP_SLUG                  => [
+				self::AMP_SLUG                     => [
 					'type'     => 'string',
 					'readonly' => true,
 				],
-				self::ENDPOINT_SUFFIX_CONFLICTS => [
+				self::ENDPOINT_PATH_SLUG_CONFLICTS => [
 					'type'     => 'array',
 					'readonly' => true,
 				],
@@ -257,7 +257,7 @@ final class PairedRouting implements Service, Registerable {
 
 		$options[ self::CUSTOM_PAIRED_ENDPOINT_SOURCES ] = $this->get_custom_paired_structure_sources();
 
-		$options[ self::ENDPOINT_SUFFIX_CONFLICTS ] = $this->get_endpoint_suffix_conflicts();
+		$options[ self::ENDPOINT_PATH_SLUG_CONFLICTS ] = $this->get_endpoint_path_slug_conflicts();
 
 		$options[ self::ENDPOINT_USING_PERMALINKS ] = $this->get_wp_rewrite()->using_permalinks();
 
@@ -279,7 +279,7 @@ final class PairedRouting implements Service, Registerable {
 			in_array(
 				AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE ),
 				[
-					Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT,
+					Option::PAIRED_URL_STRUCTURE_PATH_SUFFIX,
 					Option::PAIRED_URL_STRUCTURE_LEGACY_READER,
 				],
 				true
@@ -327,7 +327,7 @@ final class PairedRouting implements Service, Registerable {
 	 *
 	 * @return array Conflict data.
 	 */
-	public function get_endpoint_suffix_conflicts() {
+	public function get_endpoint_path_slug_conflicts() {
 		$conflicts = [];
 		$amp_slug  = amp_get_slug();
 

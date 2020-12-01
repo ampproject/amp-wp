@@ -103,7 +103,7 @@ export function PairedUrlStructure( { focusedSection } ) {
 
 	const isCustom = 'custom' === editedOptions.paired_url_structure;
 
-	const endpointSuffixAvailable = editedOptions.endpoint_suffix_conflicts.length === 0;
+	const endpointSuffixAvailable = editedOptions.endpoint_path_slug_conflicts.length === 0;
 
 	return (
 		<AMPDrawer
@@ -170,16 +170,16 @@ export function PairedUrlStructure( { focusedSection } ) {
 				</li>
 				<li>
 					<input
-						id="paired_url_structure_suffix_endpoint"
+						id="paired_url_structure_path_suffix"
 						type="radio"
 						name="paired_url_structure"
-						checked={ 'suffix_endpoint' === editedOptions.paired_url_structure }
+						checked={ 'path_suffix' === editedOptions.paired_url_structure }
 						onChange={ () => {
-							updateOptions( { paired_url_structure: 'suffix_endpoint' } );
+							updateOptions( { paired_url_structure: 'path_suffix' } );
 						} }
 						disabled={ isCustom || ! endpointSuffixAvailable || ! editedOptions.using_permalinks }
 					/>
-					<label htmlFor="paired_url_structure_suffix_endpoint">
+					<label htmlFor="paired_url_structure_path_suffix">
 						{ __( 'Path suffix', 'amp' ) + ': ' }
 						<code>
 							{ `/${ slug }/` }
@@ -195,7 +195,7 @@ export function PairedUrlStructure( { focusedSection } ) {
 							</em>
 						) }
 					</label>
-					<PairedUrlExamples pairedUrls={ editedOptions.paired_url_examples.suffix_endpoint } />
+					<PairedUrlExamples pairedUrls={ editedOptions.paired_url_examples.path_suffix } />
 				</li>
 				<li>
 					<input
