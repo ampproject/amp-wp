@@ -94,6 +94,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 							'twenty_twenty_one_supports_js', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
 						]
 					],
+					'amend_twentytwentyone_styles' => [],
+					'add_twentytwentyone_mobile_modal' => [],
 				];
 
 				// Dark mode button toggle is only supported in the Customizer for now.
@@ -2029,6 +2031,57 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		);
 	}
 
+	public static function amend_twentytwentyone_styles() {
+		add_action(
+			'wp_enqueue_scripts',
+			static function() {
+				$style_handle = 'twenty-twenty-one-style';
+
+				// Bail if the stylesheet is not enqueued.
+				if ( ! wp_style_is( $style_handle ) ) {
+					return;
+				}
+
+				// Set the registered handle as an alias for other stylesheets to depend on.
+				wp_styles()->registered[ $style_handle ]->src = false;
+
+				$css_file = get_theme_file_path(
+					sprintf( 'style%s.css', is_rtl() ? '-rtl' : '' )
+				);
+
+				if ( ! file_exists( $css_file ) ) {
+					return;
+				}
+
+				ob_start();
+				include $css_file;
+				$styles = ob_get_clean();
+
+				// TODO: fix menu toggle after the menu is closed.
+				// TODO: fix desktop menu layout.
+
+				$new_styles = str_replace( '.primary-navigation > .primary-menu-container', '.primary-navigation .primary-menu-container', $styles );
+				$new_styles = str_replace( '.primary-navigation > div > .menu-wrapper', '.primary-navigation div > .menu-wrapper', $new_styles );
+
+				$new_styles .= "
+					.primary-navigation-open .menu-button-container {
+						/* Needs to be shown above amp-lightbox, which has a z-index of 1000. */
+						z-index: 1001;
+					}
+
+					@media only screen and (max-width: 481px)
+						.primary-navigation > .primary-menu-container {
+							display: none;
+						}
+					}
+				";
+
+				wp_add_inline_style( $style_handle, $new_styles );
+			},
+			11
+		);
+	}
+
 	public function add_twentytwentyone_dark_mode_toggle() {
 		$button = $this->dom->getElementById( 'dark-mode-toggler' );
 
@@ -2049,6 +2102,42 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		AMP_DOM_Utils::add_amp_action( $button, 'tap', "{$document_id}.toggleClass(class='{$toggle_class}')" );
 
 		$button->setAttribute( 'data-amp-bind-aria-pressed', "{$state_id} ? 'true' : 'false'" );
+	}
+
+	public function add_twentytwentyone_mobile_modal() {
+		$menus = $this->dom->xpath->query( "//div[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' primary-menu-container ' ) ]" );
+		$menu_toggle = $this->dom->getElementById( 'primary-mobile-menu' );
+
+		if ( 1 !== $menus->length || ! $menu_toggle ) {
+			return;
+		}
+
+		/** @var DOMElement $menu */
+		$menu = $menus->item( 0 );
+
+		$modal = $menu->cloneNode( true );
+
+		$body_id = $this->dom->getElementId( $this->dom->body, 'body' );
+
+		// Create an <amp-lightbox> element that will contain the modal.
+		$amp_lightbox = $this->dom->createElement( 'amp-lightbox' );
+		$amp_lightbox->setAttribute( 'layout', 'nodisplay' );
+		$amp_lightbox->setAttribute( 'animate-in', 'fade-in' );
+		$amp_lightbox->setAttribute( 'scrollable', true );
+		$amp_lightbox_id = $this->dom->getElementId( $amp_lightbox );
+
+		$state_string = str_replace( '-', '_', $amp_lightbox_id );
+
+		AMP_DOM_Utils::add_amp_action( $menu_toggle, 'tap', "{$amp_lightbox_id}.open" );
+		AMP_DOM_Utils::add_amp_action( $menu_toggle, 'tap', "{$body_id}.toggleClass(class=primary-navigation-open,force=true)" );
+
+		AMP_DOM_Utils::add_amp_action( $amp_lightbox, 'lightboxOpen', "AMP.setState({{$state_string}:true})" );
+		AMP_DOM_Utils::add_amp_action( $amp_lightbox, 'lightboxClose', "AMP.setState({{$state_string}:false})" );
+
+		$menu_toggle->setAttribute( 'data-amp-bind-aria-expanded', "{$state_string} ? 'true' : 'false'" );
+
+		$amp_lightbox->appendChild( $modal );
+		$menu->parentNode->insertBefore( $amp_lightbox, $menu );
 	}
 
 	/**
