@@ -87,6 +87,7 @@ final class BlockSources implements Conditional, Service, Registerable {
 			return;
 		}
 
+		$this->clear_block_sources_cache();
 		$this->set_block_sources_from_cache();
 
 		if ( empty( $this->get_block_sources() ) ) {
@@ -114,11 +115,12 @@ final class BlockSources implements Conditional, Service, Registerable {
 		$likely_culprit = $this->likely_culprit_detector->analyze_backtrace();
 
 		if ( in_array( $likely_culprit[ FileReflection::SOURCE_TYPE ], [ FileReflection::TYPE_PLUGIN, FileReflection::TYPE_MU_PLUGIN ], true ) ) {
-			$plugin                  = $this->plugin_registry->get_plugin_from_slug(
+			$plugin = $this->plugin_registry->get_plugin_from_slug(
 				$likely_culprit[ FileReflection::SOURCE_NAME ],
 				FileReflection::TYPE_MU_PLUGIN === $likely_culprit[ FileReflection::SOURCE_TYPE ]
 			);
-			$likely_culprit['title'] = isset( $plugin['data']['title'] ) ? $plugin['data']['title'] : $likely_culprit[ FileReflection::SOURCE_NAME ];
+
+			$likely_culprit['title'] = isset( $plugin['data']['Title'] ) ? $plugin['data']['Title'] : $likely_culprit[ FileReflection::SOURCE_NAME ];
 		} elseif ( FileReflection::TYPE_THEME === $likely_culprit[ FileReflection::SOURCE_TYPE ] ) {
 			$theme                   = wp_get_theme( $likely_culprit['name'] );
 			$likely_culprit['title'] = $theme->get( 'Name' ) ?: $likely_culprit[ FileReflection::SOURCE_NAME ];

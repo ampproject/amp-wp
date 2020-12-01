@@ -70,6 +70,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'dev_tools.file_reflection'         => DevTools\FileReflection::class,
 		'dev_tools.likely_culprit_detector' => DevTools\LikelyCulpritDetector::class,
 		'dev_tools.user_access'             => DevTools\UserAccess::class,
+		'editor.editor_support'             => Editor\EditorSupport::class,
 		'extra_theme_and_plugin_headers'    => ExtraThemeAndPluginHeaders::class,
 		'mobile_redirection'                => MobileRedirection::class,
 		'obsolete_block_attribute_remover'  => ObsoleteBlockAttributeRemover::class,

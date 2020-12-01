@@ -7,6 +7,7 @@
 
 use AmpProject\AmpWP\DevTools\BlockSources;
 use AmpProject\AmpWP\DevTools\UserAccess;
+use AmpProject\AmpWP\Editor\EditorSupport;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\PluginRegistry;
@@ -191,16 +192,6 @@ class AMP_Validation_Manager {
 	 */
 	private static function get_dev_tools_user_access() {
 		$service = Services::get( 'dev_tools.user_access' );
-		return $service;
-	}
-
-	/**
-	 * Get dev tools user access service.
-	 *
-	 * @return BlockSources
-	 */
-	private static function get_block_sources_service() {
-		$service = Services::get( 'dev_tools.block_sources' );
 		return $service;
 	}
 
@@ -2401,8 +2392,11 @@ class AMP_Validation_Manager {
 			return;
 		}
 
+		/** @var EditorSupport */
+		$editor_support = Services::get( 'editor.editor_support' );
+
 		// Block validation script uses features only available beginning with WP 5.3.
-		if ( version_compare( get_bloginfo( 'version' ), '5.3', '<' ) ) {
+		if ( ! $editor_support->editor_supports_amp_block_editor_features() ) {
 			return;
 		}
 
@@ -2430,13 +2424,16 @@ class AMP_Validation_Manager {
 
 		wp_styles()->add_data( $slug, 'rtl', 'replace' );
 
+		/** @var BlockSources|null */
+		$block_sources = BlockSources::is_needed() ? Services::get( 'dev_tools.block_sources' ) : null;
+
 		$data = [
 			'HTML_ATTRIBUTE_ERROR_TYPE'  => AMP_Validation_Error_Taxonomy::HTML_ATTRIBUTE_ERROR_TYPE,
 			'HTML_ELEMENT_ERROR_TYPE'    => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
 			'JS_ERROR_TYPE'              => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
 			'CSS_ERROR_TYPE'             => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 			'isSanitizationAutoAccepted' => self::is_sanitization_auto_accepted(),
-			'blockSources'               => is_admin() ? self::get_block_sources_service()->get_block_sources() : null,
+			'blockSources'               => $block_sources ? $block_sources->get_block_sources() : null,
 		];
 
 		wp_localize_script(

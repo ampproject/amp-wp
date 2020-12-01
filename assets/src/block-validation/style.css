@@ -173,6 +173,7 @@
 
 .components-button.amp-error__select-block::before {
 	content: "(";
+	margin-left: 5px;
 }
 
 .components-button.amp-error__select-block::after {

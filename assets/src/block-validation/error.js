@@ -138,7 +138,7 @@ function ErrorContent( { blockType, clientId, status } ) {
 							selectBlock( clientId );
 						} }
 					>
-						{ __( 'Select Block', 'amp' ) }
+						{ __( 'Select block', 'amp' ) }
 					</Button>
 				</dd>,
 
