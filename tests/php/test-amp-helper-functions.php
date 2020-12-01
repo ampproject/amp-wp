@@ -10,11 +10,12 @@ use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 
 /**
  * Class Test_AMP_Helper_Functions
  */
-class Test_AMP_Helper_Functions extends WP_UnitTestCase {
+class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 
 	use AssertContainsCompatibility;
 	use HandleValidation;
@@ -615,6 +616,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @covers ::amp_remove_paired_endpoint()
 	 */
 	public function test_amp_remove_paired_endpoint() {
+		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT );
 		$this->assertEquals( 'https://example.com/foo/', amp_remove_paired_endpoint( 'https://example.com/foo/?amp' ) );
 		$this->assertEquals( 'https://example.com/foo/', amp_remove_paired_endpoint( 'https://example.com/foo/?amp=1' ) );
 		$this->assertEquals( 'https://example.com/foo/', amp_remove_paired_endpoint( 'https://example.com/foo/amp/?amp=1' ) );
@@ -850,9 +852,11 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @covers ::amp_is_available()
 	 * @covers ::amp_is_request()
 	 */
-	public function test_amp_is_request() {
-		$this->go_to( get_permalink( self::factory()->post->create() ) );
+	public function test_amp_is_request_and_amp_is_available() {
+		$post_id = self::factory()->post->create();
+		$this->go_to( get_permalink( $post_id ) );
 		$this->assertTrue( amp_is_available() );
+		$this->assertFalse( amp_has_paired_endpoint() );
 		$this->assertFalse( amp_is_request() );
 
 		// Legacy query var.
@@ -865,11 +869,10 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 		// Transitional theme support.
 		add_theme_support( AMP_Theme_Support::SLUG, [ 'template_dir' => './' ] );
-		$_GET['amp'] = '1';
+		$this->go_to( amp_get_permalink( $post_id ) );
 		$this->assertTrue( amp_is_available() );
 		$this->assertTrue( amp_is_request() );
-		unset( $_GET['amp'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$this->assertTrue( amp_is_available() );
+		$this->go_to( get_permalink( $post_id ) );
 		$this->assertFalse( amp_is_request() );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 
@@ -1825,30 +1828,37 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	public function data_amp_has_paired_endpoint() {
 		return [
 			'nothing'                 => [
+				Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
 				'',
 				false,
 			],
 			'url_param_bare'          => [
+				Option::PAIRED_URL_STRUCTURE_LEGACY_TRANSITIONAL,
 				'?amp',
 				true,
 			],
 			'url_param_value'         => [
+				Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
 				'?amp=1',
 				true,
 			],
 			'endpoint_bare_slashed'   => [
+				Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT,
 				'amp/',
 				true,
 			],
 			'endpoint_bare_unslashed' => [
+				Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT,
 				'amp',
 				true,
 			],
 			'endpoint_and_url_param'  => [
+				Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT,
 				'amp/?amp=1',
 				true,
 			],
 			'endpoint_with_extras'    => [
+				Option::PAIRED_URL_STRUCTURE_SUFFIX_ENDPOINT,
 				'amp/?foo=var#baz',
 				true,
 			],
@@ -1859,10 +1869,13 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @dataProvider data_amp_has_paired_endpoint
 	 * @covers ::amp_has_paired_endpoint()
 	 *
+	 * @param string $paired_url_structure
 	 * @param string $suffix
 	 * @param bool   $is_amp
 	 */
-	public function test_amp_has_paired_endpoint_go_to( $suffix, $is_amp ) {
+	public function test_amp_has_paired_endpoint_go_to( $paired_url_structure, $suffix, $is_amp ) {
+		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, $paired_url_structure );
+
 		add_filter( 'wp_redirect', '__return_empty_string' ); // Prevent ensure_proper_amp_location() from redirecting.
 		global $wp_rewrite;
 		update_option( 'permalink_structure', '/%year%/%monthnum%/%day%/%postname%/' );
@@ -1883,10 +1896,12 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @dataProvider data_amp_has_paired_endpoint
 	 * @covers ::amp_has_paired_endpoint()
 	 *
+	 * @param string $paired_url_structure
 	 * @param string $suffix
 	 * @param bool   $is_amp
 	 */
-	public function test_amp_has_paired_endpoint_passed( $suffix, $is_amp ) {
+	public function test_amp_has_paired_endpoint_passed( $paired_url_structure, $suffix, $is_amp ) {
+		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, $paired_url_structure );
 		$permalink = home_url( '/foo/' );
 		$this->assertNotContains( '?', $permalink );
 		$url = $permalink . $suffix;

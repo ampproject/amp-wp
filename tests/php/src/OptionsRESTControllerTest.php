@@ -88,6 +88,7 @@ class OptionsRESTControllerTest extends DependencyInjectedTestCase {
 				'amp_slug',
 				'custom_paired_endpoint_sources',
 				'endpoint_suffix_conflicts',
+				'using_permalinks',
 			],
 			array_keys( $data )
 		);

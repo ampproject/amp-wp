@@ -64,5 +64,8 @@ abstract class DependencyInjectedTestCase extends WP_UnitTestCase {
 		$this->set_private_property( Services::class, 'plugin', null );
 		$this->set_private_property( Services::class, 'container', null );
 		$this->set_private_property( Services::class, 'injector', null );
+
+		// WordPress core fails to do this.
+		$GLOBALS['wp_the_query'] = $GLOBALS['wp_query'];
 	}
 }

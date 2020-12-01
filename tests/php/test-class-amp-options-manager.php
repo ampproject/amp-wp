@@ -9,13 +9,14 @@ use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Admin\ReaderThemes;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 
 /**
  * Tests for AMP_Options_Manager.
  *
  * @covers AMP_Options_Manager
  */
-class Test_AMP_Options_Manager extends WP_UnitTestCase {
+class Test_AMP_Options_Manager extends DependencyInjectedTestCase {
 
 	use AssertContainsCompatibility, LoadsCoreThemes;
 
@@ -633,6 +634,10 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				Option::READER_THEME  => 'twentynineteen',
 			]
 		);
+
+		// Make sure the paired URL structure has been set.
+		$this->go_to( '/' );
+
 		$this->assertEquals( AMP_Theme_Support::READER_MODE_SLUG, AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
 		$this->assertEquals( 'twentynineteen', AMP_Options_Manager::get_option( Option::READER_THEME ) );
 

@@ -576,11 +576,23 @@ final class PairedRouting implements Service, Registerable {
 				return true;
 			}
 
+			$slug = amp_get_slug();
+
+			// On frontend, continue support case where the query var has been (manually) set.
+			global $wp_the_query;
+			if (
+				$wp_the_query instanceof WP_Query
+				&&
+				false !== $wp_the_query->get( $slug, false )
+			) {
+				return true;
+			}
+
 			// When not in a frontend context (e.g. the Customizer), the query var is the only possibility.
 			if (
-					is_admin()
-					&&
-					isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				is_admin()
+				&&
+				isset( $_GET[ $slug ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			) {
 				return true;
 			}

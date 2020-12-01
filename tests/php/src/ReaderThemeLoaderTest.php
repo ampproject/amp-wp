@@ -57,7 +57,7 @@ final class ReaderThemeLoaderTest extends DependencyInjectedTestCase {
 		$this->assertTrue( $this->instance->is_enabled() );
 		$this->assertNotEquals( get_template(), $reader_theme_slug );
 
-		$_GET[ amp_get_slug() ] = true;
+		set_query_var( amp_get_slug(), 1 );
 		$this->instance->override_theme();
 		$this->assertEquals( get_template(), $reader_theme_slug );
 		$this->assertTrue( $this->instance->is_enabled() );
@@ -181,7 +181,7 @@ final class ReaderThemeLoaderTest extends DependencyInjectedTestCase {
 		$this->assertEquals( 'Twenty Twenty', get_option( 'current_theme' ) );
 		$this->assertFalse( has_filter( 'sidebars_widgets' ) );
 		AMP_Options_Manager::update_option( Option::READER_THEME, $reader_theme_slug );
-		$_GET[ amp_get_slug() ] = 1;
+		set_query_var( amp_get_slug(), 1 );
 		$this->instance->override_theme();
 		$this->assertTrue( $this->instance->is_theme_overridden() );
 		$active_theme = $this->instance->get_active_theme();
