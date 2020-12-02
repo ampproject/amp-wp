@@ -87,12 +87,14 @@ function ErrorPanelTitle( { blockType, title, error: { type }, status } ) {
 					</div>
 				) }
 			</div>
-			<span className="amp-error__title-text" dangerouslySetInnerHTML={ { __html: title } } />
-			{ kept && (
-				<div className="amp-error-alert" title={ __( 'This error has been kept, making this URL not AMP-compatible.', 'amp' ) }>
-					{ '!' }
-				</div>
-			) }
+			<span className="amp-error__title-text">
+				<span dangerouslySetInnerHTML={ { __html: title } } />
+				{ kept && (
+					<span className="amp-error-alert" title={ __( 'This error has been kept, making this URL not AMP-compatible.', 'amp' ) }>
+						{ '!' }
+					</span>
+				) }
+			</span>
 		</>
 	);
 }
@@ -124,13 +126,15 @@ function ErrorContent( { blockType, clientId, status } ) {
 		const content = [];
 		const uniqueKey = ( id ) => `error-${ clientId }-${ id }`;
 
-		if ( clientId && blockSource ) {
+		if ( clientId ) {
 			content.push(
 				<dt key={ uniqueKey( 'block-type-title' ) }>
 					{ __( 'Block type', 'amp' ) }
 				</dt>,
 				<dd key={ uniqueKey( 'block-type-description' ) }>
-					{ title }
+					<span className="amp-error__block-type-description">
+						{ title }
+					</span>
 					<Button
 						className="amp-error__select-block"
 						isLink
@@ -146,7 +150,7 @@ function ErrorContent( { blockType, clientId, status } ) {
 
 			let source;
 
-			switch ( blockSource.source ) {
+			switch ( blockSource?.source ) {
 				case 'plugin':
 					source = sprintf(
 						// Translators: placeholder is the name of a plugin.
@@ -164,18 +168,20 @@ function ErrorContent( { blockType, clientId, status } ) {
 					break;
 
 				default:
-					source = blockSource.title || __( 'unknown' );
+					source = blockSource?.title;
 					break;
 			}
 
-			content.push(
-				<dt key={ uniqueKey( 'source-title' ) }>
-					{ __( 'Source', 'amp' ) }
-				</dt>,
-				<dd key={ uniqueKey( 'source-description' ) }>
-					{ source }
-				</dd>,
-			);
+			if ( source ) {
+				content.push(
+					<dt key={ uniqueKey( 'source-title' ) }>
+						{ __( 'Source', 'amp' ) }
+					</dt>,
+					<dd key={ uniqueKey( 'source-description' ) }>
+						{ source }
+					</dd>,
+				);
+			}
 		}
 
 		let keptRemoved;

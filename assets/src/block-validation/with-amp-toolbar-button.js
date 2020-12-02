@@ -24,7 +24,9 @@ function BlockEditWithToolbar( props ) {
 	const { BlockEdit, clientId } = props;
 
 	const count = useSelect(
-		( select ) => select( BLOCK_VALIDATION_STORE_KEY ).getBlockValidationErrors( clientId )?.length || 0,
+		( select ) => ( select( BLOCK_VALIDATION_STORE_KEY ).getUnreviewedValidationErrors() || [] )
+			.filter( ( { clientId: validationErrorClientId } ) => clientId === validationErrorClientId )
+			.length || 0,
 		[ clientId ],
 	);
 

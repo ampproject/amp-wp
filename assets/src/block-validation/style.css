@@ -17,6 +17,10 @@
 	width: 100%;
 }
 
+.amp-toolbar-icon svg {
+	fill: #000;
+}
+
 .amp-plugin-icon--has-badge svg {
 	margin-left: -5px;
 }
@@ -28,7 +32,7 @@
 	border: 2px solid transparent;
 	border-radius: 8px;
 	color: #fff;
-	display: flex;
+	display: inline-flex;
 	flex-shrink: 0;
 	font-size: 10px;
 	height: 16px;
@@ -37,6 +41,7 @@
 }
 
 .amp-error-count-badge {
+	display: flex;
 	position: absolute;
 	right: 1px;
 	top: 2px;
@@ -158,22 +163,29 @@
 .amp-error__title-text {
 	font-size: 13px;
 	line-height: 1.4;
-	padding-right: 0.75rem;
+	padding-right: 1.5rem;
+}
+
+.amp-error__title-text span:first-child {
+	margin-right: 5px;
 }
 
 .amp-error__title-text code {
 	white-space: nowrap;
 }
 
+.amp-error__block-type-description {
+	margin-right: 2px;
+}
+
 .components-button.amp-error__select-block {
 	align-items: center;
 	display: inline-flex;
-
+	margin-right: 3px;
 }
 
 .components-button.amp-error__select-block::before {
 	content: "(";
-	margin-left: 5px;
 }
 
 .components-button.amp-error__select-block::after {
