@@ -2427,6 +2427,20 @@ class AMP_Validation_Manager {
 		/** @var BlockSources|null */
 		$block_sources = BlockSources::is_needed() ? Services::get( 'dev_tools.block_sources' ) : null;
 
+		/** @var PluginRegistry */
+		$plugin_registry = Services::get( 'plugin_registry' );
+
+		$plugin_names = array_map(
+			static function ( $plugin ) {
+				if ( isset( $plugin['Title'] ) ) {
+					return $plugin['Title'];
+				}
+
+				return isset( $plugin['Name'] ) ? $plugin['Name'] : '';
+			},
+			$plugin_registry->get_plugins()
+		);
+
 		$data = [
 			'HTML_ATTRIBUTE_ERROR_TYPE'  => AMP_Validation_Error_Taxonomy::HTML_ATTRIBUTE_ERROR_TYPE,
 			'HTML_ELEMENT_ERROR_TYPE'    => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
@@ -2434,6 +2448,9 @@ class AMP_Validation_Manager {
 			'CSS_ERROR_TYPE'             => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 			'isSanitizationAutoAccepted' => self::is_sanitization_auto_accepted(),
 			'blockSources'               => $block_sources ? $block_sources->get_block_sources() : null,
+			'pluginNames'                => $plugin_names,
+			'themeName'                  => wp_get_theme()->get( 'Name' ),
+			'themeSlug'                  => get_option( 'stylesheet' ),
 		];
 
 		wp_localize_script(
