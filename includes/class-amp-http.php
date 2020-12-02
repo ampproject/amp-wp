@@ -206,6 +206,27 @@ class AMP_HTTP {
 	}
 
 	/**
+	 * Get the domains for AMP Caches.
+	 *
+	 * @since 1.3
+	 *
+	 * @todo Eventually this list should be populated dynamically. See <https://github.com/ampproject/amp-wp/issues/2382>.
+	 * @return string[] Domains for AMP caches.
+	 */
+	public static function get_amp_cache_domains() {
+		return [
+			// Google AMP Cache subdomain.
+			'cdn.ampproject.org',
+
+			// Cloudflare AMP Cache.
+			'amp.cloudflare.com',
+
+			// Bing AMP Cache.
+			'bing-amp.com',
+		];
+	}
+
+	/**
 	 * Get list of AMP cache hosts (that is, CORS origins).
 	 *
 	 * @since 1.0
@@ -239,16 +260,75 @@ class AMP_HTTP {
 				// phpcs:ignore PHPCompatibility.Constants.RemovedConstants.intl_idna_variant_2003Deprecated
 				$domain = idn_to_utf8( $domain, IDNA_DEFAULT, defined( 'INTL_IDNA_VARIANT_UTS46' ) ? INTL_IDNA_VARIANT_UTS46 : INTL_IDNA_VARIANT_2003 );
 			}
-			$subdomain = str_replace( [ '-', '.' ], [ '--', '-' ], $domain );
+			$subdomain = self::get_amp_cache_subdomain( $domain );
 
-			// Google AMP Cache subdomain.
-			$hosts[] = sprintf( '%s.cdn.ampproject.org', $subdomain );
-
-			// Bing AMP Cache.
-			$hosts[] = sprintf( '%s.bing-amp.com', $subdomain );
+			foreach ( self::get_amp_cache_domains() as $cache_domain ) {
+				$hosts[] = sprintf( '%s.%s', $subdomain, $cache_domain );
+			}
 		}
 
 		return $hosts;
+	}
+
+	/**
+	 * Convert a domain into the subdomain segment used in AMP caches URLs.
+	 *
+	 * From AMP docs:
+	 * "When possible, the Google AMP Cache will create a subdomain for each AMP document's domain by first converting it
+	 * from IDN (punycode) to UTF-8. The caches replaces every - (dash) with -- (2 dashes) and replace every . (dot) with
+	 * - (dash). For example, pub.com will map to pub-com.cdn.ampproject.org."
+	 *
+	 * @since 1.3
+	 * @link https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cache-urls/
+	 *
+	 * @param string $domain Origin domain.
+	 * @return string Subdomain segment used under an AMP Cache domain.
+	 */
+	public static function get_amp_cache_subdomain( $domain ) {
+		if ( function_exists( 'idn_to_utf8' ) ) {
+			// The third parameter is set explicitly to prevent issues with newer PHP versions compiled with an old ICU version.
+			// phpcs:ignore PHPCompatibility.Constants.RemovedConstants.intl_idna_variant_2003Deprecated
+			$domain = idn_to_utf8( $domain, IDNA_DEFAULT, defined( 'INTL_IDNA_VARIANT_UTS46' ) ? INTL_IDNA_VARIANT_UTS46 : INTL_IDNA_VARIANT_2003 );
+		}
+		return str_replace( [ '-', '.' ], [ '--', '-' ], $domain );
+	}
+
+	/**
+	 * Get the AMP Cache URL for a given URL.
+	 *
+	 * @since 1.3
+	 * @link https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cache-urls/
+	 *
+	 * @param string $url              URL.
+	 * @param string $amp_cache_domain AMP Cache domain. Defaults to cdn.ampproject.org.
+	 * @return string|null AMP Cache URL.
+	 */
+	public static function get_amp_cache_url( $url, $amp_cache_domain = 'cdn.ampproject.org' ) {
+		$parsed_url = wp_parse_url( $url );
+		if ( ! $parsed_url ) {
+			return null;
+		}
+		if ( ! isset( $parsed_url['host'] ) ) {
+			$parsed_url['host'] = wp_parse_url( home_url(), PHP_URL_HOST );
+		}
+		$subdomain = self::get_amp_cache_subdomain( $parsed_url['host'] );
+
+		$cache_url  = sprintf( 'https://%s.%s', $subdomain, $amp_cache_domain );
+		$cache_url .= '/c'; // Fetch AMP document.
+		if ( isset( $parsed_url['scheme'] ) && 'https' === $parsed_url['scheme'] ) {
+			$cache_url .= '/s';
+		}
+		$cache_url .= '/' . $parsed_url['host'];
+		if ( isset( $parsed_url['path'] ) ) {
+			$cache_url .= $parsed_url['path'];
+		}
+		if ( isset( $parsed_url['query'] ) ) {
+			$cache_url .= '?' . $parsed_url['query'];
+		}
+		if ( isset( $parsed_url['fragment'] ) ) {
+			$cache_url .= '#' . $parsed_url['fragment'];
+		}
+		return $cache_url;
 	}
 
 	/**

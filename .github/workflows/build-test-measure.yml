@@ -73,6 +73,7 @@ jobs:
         continue-on-error: true
 
       - name: Annotate code linting results
+        if: github.event.pull_request.head.repo.full_name == github.repository
         uses: ataylorme/eslint-annotate-action@1.0.4
         with:
           repo-token: '${{ secrets.GITHUB_TOKEN }}'
