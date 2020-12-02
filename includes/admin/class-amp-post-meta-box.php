@@ -265,18 +265,20 @@ class AMP_Post_Meta_Box {
 			true
 		);
 
+		$is_standard_mode = amp_is_canonical();
+
 		$data = [
-			'ampUrl'          => amp_is_canonical() ? null : amp_add_paired_endpoint( get_permalink( $post ) ),
-			'ampPreviewLink'  => amp_is_canonical() ? null : amp_add_paired_endpoint( get_preview_post_link( $post ) ),
+			'ampUrl'          => $is_standard_mode ? null : amp_add_paired_endpoint( get_permalink( $post ) ),
+			'ampPreviewLink'  => $is_standard_mode ? null : amp_add_paired_endpoint( get_preview_post_link( $post ) ),
 			'errorMessages'   => $this->get_error_messages( $status_and_errors['errors'] ),
 			'hasThemeSupport' => ! amp_is_legacy(),
-			'isStandardMode'  => amp_is_canonical(),
+			'isStandardMode'  => $is_standard_mode,
 		];
 
-		wp_localize_script(
+		wp_add_inline_script(
 			self::BLOCK_ASSET_HANDLE,
-			'ampBlockEditor',
-			$data
+			sprintf( 'var ampBlockEditor = %s;', wp_json_encode( $data ) ),
+			'before'
 		);
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {
