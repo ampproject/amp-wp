@@ -13,7 +13,6 @@ import { __, sprintf } from '@wordpress/i18n';
  */
 import {
 	FILE_TYPE_ERROR_VIEW,
-	MINIMUM_FEATURED_IMAGE_WIDTH,
 } from '../constants';
 
 /**
@@ -55,9 +54,25 @@ export const hasMinimumDimensions = ( media, dimensions ) => {
  * @return {Object} Minimum dimensions including width and height.
  */
 export const getMinimumFeaturedImageDimensions = () => {
-	const width = MINIMUM_FEATURED_IMAGE_WIDTH;
+	const defaultDimensions = {
+		width: 1200,
+		height: 675,
+	};
+	/**
+	 * If settings not loaded in windows object, use default
+	 * values as fallback.
+	 */
+	if ( window.ampBlockEditor === undefined ||
+		window.ampBlockEditor.featuredImageMinimumWidth === undefined ||
+		window.ampBlockEditor.featuredImageMinimumHeight === undefined ) {
+		return defaultDimensions;
+	}
+	const height = parseInt( window.ampBlockEditor.featuredImageMinimumHeight );
+	const width = parseInt( window.ampBlockEditor.featuredImageMinimumWidth );
 
-	const height = width * ( 9 / 16 );
+	if ( isNaN( height ) || isNaN( width ) ) {
+		return defaultDimensions;
+	}
 
 	return { width, height };
 };
