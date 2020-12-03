@@ -57,15 +57,17 @@ export function Error( { clientId, status, term_id: termId, ...props } ) {
 				<ErrorContent { ...props } clientId={ clientId } blockType={ blockType } status={ status } />
 
 				<div className="amp-error__actions">
-					<Button
-						className="amp-error__select-block"
-						isSecondary
-						onClick={ () => {
-							selectBlock( clientId );
-						} }
-					>
-						{ __( 'Select block', 'amp' ) }
-					</Button>
+					{ clientId && (
+						<Button
+							className="amp-error__select-block"
+							isSecondary
+							onClick={ () => {
+								selectBlock( clientId );
+							} }
+						>
+							{ __( 'Select block', 'amp' ) }
+						</Button>
+					) }
 					<a
 						href={ addQueryArgs( reviewLink, { term_id: termId } ) }
 						target="_blank"

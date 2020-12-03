@@ -59,20 +59,20 @@ function ErrorSource( { clientId, blockTypeName, sources } ) {
 		source = getErrorSourceTitle( sources );
 	}
 
-	if ( source ) {
-		return (
-			<>
-				<dt>
-					{ __( 'Source', 'amp' ) }
-				</dt>
-				<dd>
-					{ source }
-				</dd>
-			</>
-		);
+	if ( ! source ) {
+		source = __( 'Unknown', 'amp' );
 	}
 
-	return null;
+	return (
+		<>
+			<dt>
+				{ __( 'Source', 'amp' ) }
+			</dt>
+			<dd>
+				{ source }
+			</dd>
+		</>
+	);
 }
 ErrorSource.propTypes = {
 	blockTypeName: PropTypes.string,

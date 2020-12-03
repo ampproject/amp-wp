@@ -31,32 +31,33 @@ const TEST_THEME_BLOCK = 'my-theme/test-block';
 const TEST_CORE_BLOCK = 'core/test-block';
 const TEST_UNKNOWN_BLOCK = 'unknown/test-block';
 
-jest.mock( '../use-inline-data', () => ( {
-	useInlineData: () => ( {
-		blockSources: {
-			// Note: values must be hardcoded in mock function.
-			'my-plugin/test-block': {
-				source: 'plugin',
-				title: 'My plugin',
-			},
-			'my-theme/test-block': {
-				source: 'theme',
-				title: 'My theme',
-			},
-			'core/test-block': {
-				source: '',
-				title: 'WordPress core',
-			},
-			'unknown/test-block': {
-				source: '',
-				name: '',
-			},
+global.ampBlockValidation = {
+	blockSources: {
+		'my-plugin/test-block': {
+			source: 'plugin',
+			title: 'My plugin',
 		},
-		CSS_ERROR_TYPE: 'css_error',
-		HTML_ATTRIBUTE_ERROR_TYPE: 'html_attribute_error',
-		HTML_ELEMENT_ERROR_TYPE: 'html_element_error',
-		JS_ERROR_TYPE: 'js_error',
-	} ),
+		'my-theme/test-block': {
+			source: 'theme',
+			title: 'My theme',
+		},
+		'core/test-block': {
+			source: '',
+			title: 'WordPress core',
+		},
+		'unknown/test-block': {
+			source: '',
+			name: '',
+		},
+	},
+	CSS_ERROR_TYPE: 'css_error',
+	HTML_ATTRIBUTE_ERROR_TYPE: 'html_attribute_error',
+	HTML_ELEMENT_ERROR_TYPE: 'html_element_error',
+	JS_ERROR_TYPE: 'js_error',
+};
+
+jest.mock( '../use-inline-data', () => ( {
+	useInlineData: () => global.ampBlockValidation,
 } ) );
 
 registerBlockType( TEST_PLUGIN_BLOCK, {
@@ -105,6 +106,7 @@ function createTestStoreAndBlocks() {
 				title: 'Invalid script: <code>jquery.js</code>',
 				error: {
 					type: 'js_error',
+					sources: [],
 				},
 			},
 			{
@@ -125,6 +127,7 @@ function createTestStoreAndBlocks() {
 				title: 'Invalid script: <code>jquery.js</code>',
 				error: {
 					type: 'js_error',
+					sources: [],
 				},
 			},
 			{
@@ -135,6 +138,7 @@ function createTestStoreAndBlocks() {
 				title: 'Invalid script: <code>jquery.js</code>',
 				error: {
 					type: 'js_error',
+					sources: [],
 				},
 			},
 		],
@@ -187,7 +191,7 @@ describe( 'Error', () => {
 				status={ status }
 				term_id={ 12 }
 				title="My test error"
-				error={ { type: 'js_error' } }
+				error={ { type: 'js_error', sources: [] } }
 			/>
 		),
 	] ) )( 'errors with no associated blocks work correctly', ( status, ErrorComponent ) => {
@@ -331,7 +335,6 @@ describe( 'ErrorContent', () => {
 		'plugin',
 		'theme',
 		'core',
-		'unknown',
 	].reduce(
 		( collection, testBlockSource ) => [
 			...collection,
@@ -354,7 +357,7 @@ describe( 'ErrorContent', () => {
 				status={ status }
 				term_id={ 12 }
 				title="My test error"
-				error={ { type: 'js_error' } }
+				error={ { type: 'js_error', sources: [] } }
 			/>,
 			container,
 		);
@@ -365,7 +368,6 @@ describe( 'ErrorContent', () => {
 
 		if ( null === clientId ) {
 			expect( container.innerHTML ).toContain( 'outside the post content' );
-			expect( container.innerHTML ).not.toContain( 'Source' );
 			return;
 		}
 
@@ -386,11 +388,6 @@ describe( 'ErrorContent', () => {
 			case 'core':
 				expect( container.innerHTML ).toContain( 'test core block' );
 				expect( container.innerHTML ).toContain( '<dd>WordPress core' );
-				break;
-
-			case 'unknown':
-				expect( container.innerHTML ).toContain( 'test unknown block' );
-				expect( container.innerHTML ).toContain( '<dd>unknown' );
 				break;
 
 			default:

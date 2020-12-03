@@ -55,6 +55,16 @@ describe( 'withAMPToolbarButton: filtering with errors', () => {
 
 		createStore( {
 			reviewLink: 'http://review-link.test',
+			unreviewedValidationErrors: [
+				{
+					clientId: block.clientId,
+					code: 'DISALLOWED_TAG',
+					status: 3,
+					term_id: 12,
+					title: 'Invalid script: <code>jquery.js</code>',
+					type: 'js_error',
+				},
+			],
 			validationErrors: [
 				{
 					clientId: block.clientId,
