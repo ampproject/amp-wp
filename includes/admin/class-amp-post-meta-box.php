@@ -270,9 +270,7 @@ class AMP_Post_Meta_Box {
 			'errorMessages'   => $this->get_error_messages( $status_and_errors['errors'] ),
 			'hasThemeSupport' => ! amp_is_legacy(),
 			'isStandardMode'  => amp_is_canonical(),
-			'featuredImageMinimumHeight' => '',
-			'featuredImageMinimumWidth' => '',
-		];
+		] + self::get_featured_image_dimensions();
 
 		wp_localize_script(
 			self::BLOCK_ASSET_HANDLE,
@@ -292,6 +290,34 @@ class AMP_Post_Meta_Box {
 				'after'
 			);
 		}
+	}
+
+	public static function get_featured_image_dimensions() {
+		return array(
+			/**
+			 * Filter name: amp_featured_image_minimum_height
+			 *
+			 * @since 2.0.8
+			 *
+			 * @param int $featured_image_minimum_height The minimum height of the image,
+			 * defaults to 675
+			 *
+			 * @return int
+			 */
+			'featuredImageMinimumHeight' => apply_filters( 'amp_featured_image_minimum_height', 675 ),
+
+			/**
+			 * Filter name: amp_featured_image_minimum_width
+			 *
+			 * @since 2.0.8
+			 *
+			 * @param int $featured_image_minimum_height The minimum width of the image,
+			 * defaults to 1200
+			 *
+			 * @return int
+			 */
+			'featuredImageMinimumWidth' => apply_filters( 'amp_featured_image_minimum_width', 1200 ),
+		);
 	}
 
 	/**
