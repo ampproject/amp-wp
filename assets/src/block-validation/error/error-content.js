@@ -170,8 +170,8 @@ export function ErrorContent( { blockType, clientId, status, error: { sources } 
 				</p>
 			) }
 			<dl className="amp-error__details">
-				<BlockType blockTypeName={ blockTypeName } clientId={ clientId } />
-				<ErrorSource blockTypeTitle={ blockTypeTitle } clientId={ clientId } sources={ sources } />
+				<BlockType blockTypeTitle={ blockTypeTitle } clientId={ clientId } />
+				<ErrorSource blockTypeName={ blockTypeName } clientId={ clientId } sources={ sources } />
 				<MarkupStatus status={ status } />
 			</dl>
 		</>
