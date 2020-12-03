@@ -14,14 +14,14 @@ describe( 'getMinimumFeaturedImageDimensions', () => {
 		};
 		expect( getMinimumFeaturedImageDimensions() ).toStrictEqual( { width: 1200, height: 675 } );
 	} );
-	it( 'should return default values if invalid height is supplied', () => {
+	it( 'should return default values if invalid height and valid width is supplied', () => {
 		window.ampBlockEditor = {
 			featuredImageMinimumWidth: 1200,
 			featuredImageMinimumHeight: 'test',
 		};
 		expect( getMinimumFeaturedImageDimensions() ).toStrictEqual( { width: 1200, height: 675 } );
 	} );
-	it( 'should return supplied values if valid height and width is supplied', () => {
+	it( 'should return supplied values if valid height and invalid width is supplied', () => {
 		window.ampBlockEditor = {
 			featuredImageMinimumWidth: '1200',
 			featuredImageMinimumHeight: '1200',
