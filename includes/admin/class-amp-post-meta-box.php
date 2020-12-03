@@ -270,6 +270,8 @@ class AMP_Post_Meta_Box {
 			'errorMessages'   => $this->get_error_messages( $status_and_errors['errors'] ),
 			'hasThemeSupport' => ! amp_is_legacy(),
 			'isStandardMode'  => amp_is_canonical(),
+			'featuredImageMinimumHeight' => '',
+			'featuredImageMinimumWidth' => '',
 		];
 
 		wp_localize_script(

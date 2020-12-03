@@ -165,8 +165,8 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 			'errorMessages',
 			'hasThemeSupport',
 			'isStandardMode',
-			'minimumFeaturedImageHeight',
-			'minimumFeaturedImageWidth',
+			'featuredImageMinimumHeight',
+			'featuredImageMinimumWidth',
 		];
 
 		foreach ( $expected_localized_values as $localized_value ) {
