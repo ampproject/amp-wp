@@ -25,6 +25,10 @@
 	margin-left: -5px;
 }
 
+.amp-toolbar-broken-icon svg {
+	fill: none;
+}
+
 .amp-error-alert,
 .amp-error-count-badge {
 	align-items: center;
@@ -121,9 +125,13 @@
 	width: 15px;
 }
 
+.amp-error {
+	border-left: 4px solid #e0e0e0;
+}
+
 .amp-error--new {
 	background: #fef7f1;
-	border-left: 4px solid #d54e21;
+	border-left-color: #d54e21;
 }
 
 .amp-error .components-panel__body-title,
@@ -182,14 +190,6 @@
 	align-items: center;
 	display: inline-flex;
 	margin-right: 3px;
-}
-
-.components-button.amp-error__select-block::before {
-	content: "(";
-}
-
-.components-button.amp-error__select-block::after {
-	content: ")";
 }
 
 .amp-error__actions {

@@ -6,8 +6,6 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { Button } from '@wordpress/components';
-import { useDispatch } from '@wordpress/data';
 import { sprintf, __ } from '@wordpress/i18n';
 
 /**
@@ -115,8 +113,6 @@ MarkupStatus.propTypes = {
  * @param {string} props.clientId Block ID.
  */
 function BlockType( { blockTypeTitle, clientId } ) {
-	const { selectBlock } = useDispatch( 'core/block-editor' );
-
 	if ( clientId ) {
 		return (
 			<>
@@ -127,15 +123,6 @@ function BlockType( { blockTypeTitle, clientId } ) {
 					<span className="amp-error__block-type-description">
 						{ blockTypeTitle || __( 'unknown', 'amp' ) }
 					</span>
-					<Button
-						className="amp-error__select-block"
-						isLink
-						onClick={ () => {
-							selectBlock( clientId );
-						} }
-					>
-						{ __( 'Select block', 'amp' ) }
-					</Button>
 				</dd>
 			</>
 		);

@@ -6,8 +6,8 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { useSelect } from '@wordpress/data';
-import { PanelBody } from '@wordpress/components';
+import { useSelect, useDispatch } from '@wordpress/data';
+import { PanelBody, Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 
@@ -32,8 +32,8 @@ import { ErrorContent } from './error-content';
  * @param {number} props.term_id
  */
 export function Error( { clientId, status, term_id: termId, ...props } ) {
+	const { selectBlock } = useDispatch( 'core/block-editor' );
 	const { review_link: reviewLink } = useSelect( ( select ) => select( 'core/editor' ).getEditedPostAttribute( AMP_VALIDITY_REST_FIELD_NAME ) ) || {};
-
 	const reviewed = status === VALIDATION_ERROR_ACK_ACCEPTED_STATUS || status === VALIDATION_ERROR_ACK_REJECTED_STATUS;
 
 	const { blockType } = useSelect( ( select ) => {
@@ -57,6 +57,15 @@ export function Error( { clientId, status, term_id: termId, ...props } ) {
 				<ErrorContent { ...props } clientId={ clientId } blockType={ blockType } status={ status } />
 
 				<div className="amp-error__actions">
+					<Button
+						className="amp-error__select-block"
+						isSecondary
+						onClick={ () => {
+							selectBlock( clientId );
+						} }
+					>
+						{ __( 'Select block', 'amp' ) }
+					</Button>
 					<a
 						href={ addQueryArgs( reviewLink, { term_id: termId } ) }
 						target="_blank"
