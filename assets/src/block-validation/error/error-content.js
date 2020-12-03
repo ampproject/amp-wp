@@ -29,7 +29,7 @@ function ErrorSource( { clientId, blockTypeName, sources } ) {
 		switch ( blockSource?.source ) {
 			case 'plugin':
 				source = sprintf(
-					// Translators: placeholder is the name of a plugin.
+					// Translators: %s: plugin name.
 					__( `%s (plugin)`, 'amp' ),
 					blockSource.title,
 				);
@@ -37,7 +37,7 @@ function ErrorSource( { clientId, blockTypeName, sources } ) {
 
 			case 'mu-plugin':
 				source = sprintf(
-					// Translators: placeholder is the name of a plugin.
+					// Translators: %s: plugin name.
 					__( `%s (must-use plugin)`, 'amp' ),
 					blockSource.title,
 				);
@@ -45,7 +45,7 @@ function ErrorSource( { clientId, blockTypeName, sources } ) {
 
 			case 'theme':
 				source = sprintf(
-					// Translators:placeholder is the name of a theme.
+					// Translators: %s: theme name.
 					__( `%s (theme)`, 'amp' ),
 					blockSource.title,
 				);
@@ -180,4 +180,3 @@ ErrorContent.propTypes = {
 		sources: PropTypes.arrayOf( PropTypes.object ),
 	} ),
 };
-
