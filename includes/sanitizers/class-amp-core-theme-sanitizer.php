@@ -2015,9 +2015,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					return;
 				}
 
-				ob_start();
-				include $dark_mode_css_file;
-				$styles = ob_get_clean();
+				$styles = file_get_contents( $dark_mode_css_file );
 
 				// Restrict rules to only when the user has requested the system use a dark color theme.
 				$new_styles = str_replace( '@media only screen', '@media only screen and (prefers-color-scheme: dark)', $styles );
@@ -2053,9 +2051,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					return;
 				}
 
-				ob_start();
-				include $css_file;
-				$styles = ob_get_clean();
+				$styles = file_get_contents( $css_file );
 
 				// TODO: fix menu toggle after the menu is closed.
 				// TODO: fix desktop menu layout.
