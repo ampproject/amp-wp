@@ -73,7 +73,7 @@ jobs:
         continue-on-error: true
 
       - name: Annotate code linting results
-        uses: ataylorme/eslint-annotate-action@1.0.4
+        uses: ataylorme/eslint-annotate-action@1
         with:
           repo-token: '${{ secrets.GITHUB_TOKEN }}'
           report-json: 'lint-js-report.json'
