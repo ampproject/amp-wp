@@ -32,6 +32,7 @@ final class SpecTest extends TestCase
         'ReorderHead - preserves_amp_custom_style_order' => 'see https://github.com/ampproject/amp-toolbox/issues/604',
 
         'ServerSideRendering - converts_sizes_attribute_to_css' => 'see https://github.com/ampproject/amp-toolbox/issues/819',
+        'ServerSideRendering - transforms_layout_intrinsic'     => 'see https://github.com/ampproject/amp-toolbox/issues/844'
     ];
 
     const CLASS_SKIP_TEST = '__SKIP__';

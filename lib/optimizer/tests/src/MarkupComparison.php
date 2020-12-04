@@ -67,8 +67,8 @@ trait MarkupComparison
             return $token;
         };
 
-        $expected_tokens = array_map($normalize_attributes, array_filter(preg_split('#(<[^>]+>|[^<>]+)#', $expected, -1, PREG_SPLIT_DELIM_CAPTURE)));
-        $actual_tokens   = array_map($normalize_attributes, array_filter(preg_split('#(<[^>]+>|[^<>]+)#', $actual, -1, PREG_SPLIT_DELIM_CAPTURE)));
+        $expected_tokens = array_map($normalize_attributes, array_filter(preg_split('#((?><!--.*?-->)|<(?>"[^"]+"|\'[^\']+\'|[^"\'>]+)+>|(?>[^<>]+))#', $actual, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY)));
+        $actual_tokens   = array_map($normalize_attributes, array_filter(preg_split('#((?><!--.*?-->)|<(?>"[^"]+"|\'[^\']+\'|[^"\'>]+)+>|(?>[^<>]+))#', $expected, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY)));
 
         $this->assertEquals($expected_tokens, $actual_tokens);
     }
