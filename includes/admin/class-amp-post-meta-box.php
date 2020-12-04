@@ -292,8 +292,14 @@ class AMP_Post_Meta_Box {
 		}
 	}
 
+	/**
+	 * Returns the featured image dimensions after filtering
+	 * the height and width
+	 *
+	 * @return array
+	 */
 	public static function get_featured_image_dimensions() {
-		return array(
+		return [
 			/**
 			 * Filter name: amp_featured_image_minimum_height
 			 *
@@ -316,8 +322,8 @@ class AMP_Post_Meta_Box {
 			 *
 			 * @return int
 			 */
-			'featuredImageMinimumWidth' => apply_filters( 'amp_featured_image_minimum_width', 1200 ),
-		);
+			'featuredImageMinimumWidth'  => apply_filters( 'amp_featured_image_minimum_width', 1200 ),
+		];
 	}
 
 	/**

@@ -176,10 +176,10 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 
 	public function test_featured_image_dimensions() {
 		$dimensions = AMP_Post_Meta_Box::get_featured_image_dimensions();
-		$this->assertArrayHasKey('featuredImageMinimumHeight', $dimensions );
-		$this->assertArrayHasKey('featuredImageMinimumWidth', $dimensions );
-		$this->assertEquals($dimensions['featuredImageMinimumWidth'], 1200);
-		$this->assertEquals($dimensions['featuredImageMinimumHeight'], 675);
+		$this->assertArrayHasKey( 'featuredImageMinimumHeight', $dimensions );
+		$this->assertArrayHasKey( 'featuredImageMinimumWidth', $dimensions );
+		$this->assertEquals( $dimensions['featuredImageMinimumWidth'], 1200 );
+		$this->assertEquals( $dimensions['featuredImageMinimumHeight'], 675 );
 	}
 
 	/**
