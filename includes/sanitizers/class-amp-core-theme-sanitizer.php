@@ -2053,9 +2053,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 				$styles = file_get_contents( $css_file );
 
-				// TODO: fix menu toggle after the menu is closed.
-				// TODO: fix desktop menu layout.
-
 				$new_styles = str_replace( '.primary-navigation > .primary-menu-container', '.primary-navigation .primary-menu-container', $styles );
 				$new_styles = str_replace( '.primary-navigation > div > .menu-wrapper', '.primary-navigation div > .menu-wrapper', $new_styles );
 
@@ -2065,7 +2062,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						z-index: 1001;
 					}
 
-					@media only screen and (max-width: 481px)
+					@media only screen and (max-width: 481px) {
 						.primary-navigation > .primary-menu-container {
 							display: none;
 						}
@@ -2129,6 +2126,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 		AMP_DOM_Utils::add_amp_action( $amp_lightbox, 'lightboxOpen', "AMP.setState({{$state_string}:true})" );
 		AMP_DOM_Utils::add_amp_action( $amp_lightbox, 'lightboxClose', "AMP.setState({{$state_string}:false})" );
+		AMP_DOM_Utils::add_amp_action( $amp_lightbox, 'lightboxClose', "{$body_id}.toggleClass(class=primary-navigation-open,force=false)" );
 
 		$menu_toggle->setAttribute( 'data-amp-bind-aria-expanded', "{$state_string} ? 'true' : 'false'" );
 
