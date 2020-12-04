@@ -73,7 +73,9 @@ jobs:
         continue-on-error: true
 
       - name: Annotate code linting results
-        uses: ataylorme/eslint-annotate-action@1.0.4
+        # The action cannot annotate the PR diff when run from a PR fork
+        if: github.event.pull_request.head.repo.fork == false
+        uses: ataylorme/eslint-annotate-action@1.1.2
         with:
           repo-token: '${{ secrets.GITHUB_TOKEN }}'
           report-json: 'lint-js-report.json'
