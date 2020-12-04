@@ -132,6 +132,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function test_get_supported_themes() {
 		$supported_themes = [
+			'twentytwentyone',
 			'twentytwenty',
 			'twentynineteen',
 			'twentyseventeen',
