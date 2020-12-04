@@ -82,24 +82,24 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		switch ( $theme_slug ) {
 			case 'twentytwentyone':
 				$config = [
-					'dequeue_scripts' => [
+					'dequeue_scripts'                  => [
 						'twenty-twenty-one-responsive-embeds-script',
 					],
-					'remove_actions'                     => [
+					'remove_actions'                   => [
 						'wp_print_footer_scripts' => [
 							'twenty_twenty_one_skip_link_focus_fix', // Unnecessary since part of the AMP runtime.
 						],
-						'wp_footer' => [
+						'wp_footer'               => [
 							'twentytwentyone_add_ie_class',
 							'twenty_twenty_one_supports_js', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
-						]
+						],
 					],
-					'amend_twentytwentyone_styles' => [],
+					'amend_twentytwentyone_styles'     => [],
 					'add_twentytwentyone_mobile_modal' => [],
 				];
 
 				// Dark mode button toggle is only supported in the Customizer for now.
-				// TODO: add note to customizer on why toggle not shown on frontend
+				// TODO: add note to customizer on why toggle not shown on frontend.
 				if ( is_customize_preview() ) {
 					// Make dark mode toggle AMP compatible.
 					$config['add_twentytwentyone_dark_mode_toggle'] = [];
@@ -673,7 +673,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 								&&
 								$method === $added_callback['function'][1]
 								&&
-								$class === get_class( $added_callback['function'][0] )
+								get_class( $added_callback['function'][0] ) === $class
 							) {
 								remove_action( $action, $added_callback['function'] );
 								return;
@@ -1995,6 +1995,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Amend the Twenty Twenty-One dark mode stylesheet to only apply the relevant rules when the user has requested
 	 * the system use a dark color theme.
+	 *
+	 * Note: Dark mode will only be available when the user's system supports it. The dark mode toggle is not available
+	 * on the frontend as yet since there is no feasible AMP-compatible way to store and unserialize user's preferences.
 	 */
 	public static function amend_twentytwentyone_dark_mode_styles() {
 		add_action(
@@ -2015,7 +2018,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					return;
 				}
 
-				$styles = file_get_contents( $dark_mode_css_file );
+				$styles = file_get_contents( $dark_mode_css_file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
 				// Restrict rules to only when the user has requested the system use a dark color theme.
 				$new_styles = str_replace( '@media only screen', '@media only screen and (prefers-color-scheme: dark)', $styles );
@@ -2029,6 +2032,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		);
 	}
 
+	/**
+	 * Amend the Twenty Twenty-One stylesheet to make it compatible with the changes made to the document during
+	 * sanitization.
+	 */
 	public static function amend_twentytwentyone_styles() {
 		add_action(
 			'wp_enqueue_scripts',
@@ -2051,23 +2058,27 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					return;
 				}
 
-				$styles = file_get_contents( $css_file );
+				$styles = file_get_contents( $css_file ); //phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
+				// Make the rules for the mobile menu less specific so that it can also be applied to the
+				// amp-lightbox mobile menu also.
 				$new_styles = str_replace( '.primary-navigation > .primary-menu-container', '.primary-navigation .primary-menu-container', $styles );
 				$new_styles = str_replace( '.primary-navigation > div > .menu-wrapper', '.primary-navigation div > .menu-wrapper', $new_styles );
 
-				$new_styles .= "
+				// Append any extra rules that may be needed.
+				$new_styles .= '
 					.primary-navigation-open .menu-button-container {
 						/* Needs to be shown above amp-lightbox, which has a z-index of 1000. */
 						z-index: 1001;
 					}
 
+					/* Hide the desktop menu so that it does not interfere when the amo-lightbox mobile menu is open. */
 					@media only screen and (max-width: 481px) {
 						.primary-navigation > .primary-menu-container {
 							display: none;
 						}
 					}
-				";
+				';
 
 				wp_add_inline_style( $style_handle, $new_styles );
 			},
@@ -2075,6 +2086,12 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		);
 	}
 
+	/**
+	 * Make the dark mode toggle in the Twenty Twenty-One theme AMP compatible.
+	 *
+	 * Note: This is only shown within the Customizer preview for now, as there is no feasible way of persisting and
+	 * unserializing the user's preference when they switch to dark (or light) mode.
+	 */
 	public function add_twentytwentyone_dark_mode_toggle() {
 		$button = $this->dom->getElementById( 'dark-mode-toggler' );
 
@@ -2085,9 +2102,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$button->setAttribute( Attribute::STYLE, 'display: block;' );
 
 		$toggle_class = 'is-dark-theme';
-		$state_id = str_replace( '-', '_', $toggle_class );
+		$state_id     = str_replace( '-', '_', $toggle_class );
 
-		$body_id = $this->dom->getElementId( $this->dom->body );
+		$body_id     = $this->dom->getElementId( $this->dom->body );
 		$document_id = $this->dom->getElementId( $this->dom->documentElement );
 
 		AMP_DOM_Utils::add_amp_action( $button, 'tap', "AMP.setState({{$state_id}: !{$state_id}})" );
@@ -2097,8 +2114,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$button->setAttribute( 'data-amp-bind-aria-pressed', "{$state_id} ? 'true' : 'false'" );
 	}
 
+	/**
+	 * Make the mobile menu for the Twenty Twenty-One theme AMP compatible.
+	 */
 	public function add_twentytwentyone_mobile_modal() {
-		$menus = $this->dom->xpath->query( "//div[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' primary-menu-container ' ) ]" );
+		$menus       = $this->dom->xpath->query( "//div[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' primary-menu-container ' ) ]" );
 		$menu_toggle = $this->dom->getElementById( 'primary-mobile-menu' );
 
 		if ( 1 !== $menus->length || ! $menu_toggle ) {
