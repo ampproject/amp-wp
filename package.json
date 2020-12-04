@@ -44,7 +44,7 @@
     "@wordpress/browserslist-config": "2.7.0",
     "@wordpress/components": "11.1.2",
     "@wordpress/data": "4.25.0",
-    "@wordpress/e2e-test-utils": "4.15.0",
+    "@wordpress/e2e-test-utils": "4.15.1",
     "@wordpress/edit-post": "3.25.5",
     "@wordpress/eslint-plugin": "7.3.0",
     "@wordpress/hooks": "2.10.0",
