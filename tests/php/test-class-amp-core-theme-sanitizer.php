@@ -388,7 +388,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 			<button onclick="foo" class="sub-menu-toggle"></button>
 		';
 
-		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $html );
 		$sanitizer = new AMP_Core_Theme_Sanitizer( $dom );
 
 		$sanitizer->amend_twentytwentyone_sub_menu_toggles();
@@ -418,7 +418,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 			</nav>
 		';
 
-		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $html );
 		$sanitizer = new AMP_Core_Theme_Sanitizer( $dom );
 
 		$sanitizer->add_twentytwentyone_mobile_modal();
@@ -465,7 +465,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 			</nav>
 		';
 
-		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $html );
 		$sanitizer = new AMP_Core_Theme_Sanitizer( $dom );
 
 		$sanitizer->add_twentytwentyone_sub_menu_fix();
@@ -480,13 +480,13 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 			/** @var DOMElement $menu_toggle */
 			$menu_toggle = $query->item( $i - 1 );
 
-			$toggle_id = 'toggle_' . ( $i );
+			$toggle_id       = 'toggle_' . ( $i );
 			$other_toggle_id = 'toggle_' . ( $i === $query->length ? $i - 1 : $i + 1 );
 
 			$this->assertEquals( "{$toggle_id} ? 'true' : 'false'", $menu_toggle->getAttribute( 'data-amp-bind-aria-expanded' ) );
 			$this->assertEquals( "tap:AMP.setState({{$toggle_id}:!{$toggle_id},{$other_toggle_id}:false})", $menu_toggle->getAttribute( 'on' ) );
 		}
 
-		$this->assertEquals( "tap:AMP.setState({toggle_1:false,toggle_2:false})", $dom->body->getAttribute( 'on' ) );
+		$this->assertEquals( 'tap:AMP.setState({toggle_1:false,toggle_2:false})', $dom->body->getAttribute( 'on' ) );
 	}
 }

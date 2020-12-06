@@ -95,10 +95,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 							'twenty_twenty_one_supports_js', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
 						],
 					],
-					'amend_twentytwentyone_styles'           => [],
+					'amend_twentytwentyone_styles'     => [],
 					'amend_twentytwentyone_sub_menu_toggles' => [],
-					'add_twentytwentyone_mobile_modal'       => [],
-					'add_twentytwentyone_sub_menu_fix'       => [],
+					'add_twentytwentyone_mobile_modal' => [],
+					'add_twentytwentyone_sub_menu_fix' => [],
 				];
 
 				// Dark mode button toggle is only supported in the Customizer for now.
@@ -2147,7 +2147,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		/** @var DOMElement $primary_menu */
-		$primary_menu = $menu_query->item( 0 );
+		$primary_menu      = $menu_query->item( 0 );
 		$primary_menu_copy = $primary_menu->cloneNode( true );
 
 		$body_id = $this->dom->getElementId( $this->dom->body, 'body' );
@@ -2201,7 +2201,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			$menu_toggle->setAttribute( 'data-amp-bind-aria-expanded', "{$menu_toggle_id} ? 'true' : 'false'" );
 
 			// Sub-menus to be closed when this one is to be opened.
-			$toggles_to_disable = '';
+			$toggles_to_disable            = '';
 			$toggles_to_disable_for_body[] = "{$menu_toggle_id}:false";
 
 			foreach ( $menu_toggle_ids as $other_menu_toggle_id ) {
