@@ -14,7 +14,6 @@ use AmpProject\AmpWP\Infrastructure\Service;
  *
  * @package AmpProject\AmpWP
  * @since 2.1
- * @internal
  */
 final class PairedUrl implements Service {
 
