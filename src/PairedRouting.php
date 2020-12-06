@@ -82,12 +82,12 @@ final class PairedRouting implements Service, Registerable {
 	const ENDPOINT_PATH_SLUG_CONFLICTS = 'endpoint_path_slug_conflicts';
 
 	/**
-	 * REST API field name for whether permalinks are being used.
+	 * REST API field name for whether permalinks are being used in rewrite rules.
 	 *
 	 * @see WP_Rewrite::using_permalinks()
 	 * @var string
 	 */
-	const ENDPOINT_USING_PERMALINKS = 'using_permalinks';
+	const REWRITE_USING_PERMALINKS = 'rewrite_using_permalinks';
 
 	/**
 	 * Key for the custom paired structure sources.
@@ -259,7 +259,7 @@ final class PairedRouting implements Service, Registerable {
 
 		$options[ self::ENDPOINT_PATH_SLUG_CONFLICTS ] = $this->get_endpoint_path_slug_conflicts();
 
-		$options[ self::ENDPOINT_USING_PERMALINKS ] = $this->get_wp_rewrite()->using_permalinks();
+		$options[ self::REWRITE_USING_PERMALINKS ] = $this->get_wp_rewrite()->using_permalinks();
 
 		return $options;
 	}
