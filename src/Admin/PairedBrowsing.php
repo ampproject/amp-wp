@@ -188,7 +188,7 @@ final class PairedBrowsing implements Service, Registerable, Conditional {
 		);
 		add_filter(
 			'script_loader_tag',
-			static function( $tag, $script_handle ) use ( $dev_mode_handles ) {
+			static function ( $tag, $script_handle ) use ( $dev_mode_handles ) {
 				if ( amp_is_request() && in_array( $script_handle, $dev_mode_handles, true ) ) {
 					$tag = preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . DevMode::DEV_MODE_ATTRIBUTE, $tag );
 				}
