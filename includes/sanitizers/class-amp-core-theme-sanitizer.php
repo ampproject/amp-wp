@@ -660,12 +660,21 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 		foreach ( $actions as $action => $callbacks ) {
 			foreach ( $callbacks as $callback ) {
-				if ( is_array( $callback ) ) {
-					list( $class, $method, $priority ) = $callback;
+				$priority = has_action( $action, $callback );
+				if ( false !== $priority ) {
+					remove_action( $action, $callback, $priority );
+					continue;
+				}
 
-					if ( isset( $wp_filter[ $action ]->callbacks[ $priority ] ) ) {
-						foreach ( $wp_filter[ $action ]->callbacks[ $priority ] as $added_callback ) {
-							if (
+				if ( ! is_array( $callback ) || 3 !== count( $callback ) ) {
+					continue;
+				}
+
+				list( $class, $method, $priority ) = $callback;
+
+				if ( isset( $wp_filter[ $action ]->callbacks[ $priority ] ) ) {
+					foreach ( $wp_filter[ $action ]->callbacks[ $priority ] as $added_callback ) {
+						if (
 								is_array( $added_callback['function'] )
 								&&
 								isset( $added_callback['function'][0], $added_callback['function'][1] )
@@ -677,16 +686,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 								$method === $added_callback['function'][1]
 								&&
 								get_class( $added_callback['function'][0] ) === $class
-							) {
-								remove_action( $action, $added_callback['function'] );
-								return;
-							}
+						) {
+							remove_action( $action, $added_callback['function'] );
+							return;
 						}
-					}
-				} else {
-					$priority = has_action( $action, $callback );
-					if ( false !== $priority ) {
-						remove_action( $action, $callback, $priority );
 					}
 				}
 			}
