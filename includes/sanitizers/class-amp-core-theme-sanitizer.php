@@ -2136,17 +2136,16 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * Make the mobile menu for the Twenty Twenty-One theme AMP compatible.
 	 */
 	public function add_twentytwentyone_mobile_modal() {
-		$menus       = $this->dom->xpath->query( "//div[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' primary-menu-container ' ) ]" );
+		$menu_query  = $this->dom->xpath->query( "//div[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' primary-menu-container ' ) and ./ul[ @id = 'primary-menu-list' ] ]" );
 		$menu_toggle = $this->dom->getElementById( 'primary-mobile-menu' );
 
-		if ( 1 !== $menus->length || ! $menu_toggle ) {
+		if ( 1 !== $menu_query->length || ! $menu_toggle ) {
 			return;
 		}
 
-		/** @var DOMElement $menu */
-		$menu = $menus->item( 0 );
-
-		$modal = $menu->cloneNode( true );
+		/** @var DOMElement $primary_menu */
+		$primary_menu = $menu_query->item( 0 );
+		$primary_menu_copy = $primary_menu->cloneNode( true );
 
 		$body_id = $this->dom->getElementId( $this->dom->body, 'body' );
 
@@ -2168,8 +2167,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 		$menu_toggle->setAttribute( 'data-amp-bind-aria-expanded', "{$state_string} ? 'true' : 'false'" );
 
-		$amp_lightbox->appendChild( $modal );
-		$menu->parentNode->insertBefore( $amp_lightbox, $menu );
+		$amp_lightbox->appendChild( $primary_menu_copy );
+		$primary_menu->parentNode->insertBefore( $amp_lightbox, $primary_menu );
 	}
 
 	/**

@@ -12,6 +12,8 @@ use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 
 /**
  * Class AMP_Core_Theme_Sanitizer_Test
+ *
+ * @coversDefaultClass AMP_Core_Theme_Sanitizer_Test
  */
 class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 
@@ -59,7 +61,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	 * Test xpath_from_css_selector().
 	 *
 	 * @dataProvider get_xpath_from_css_selector_data
-	 * @covers AMP_Core_Theme_Sanitizer::xpath_from_css_selector
+	 * @covers ::xpath_from_css_selector()
 	 *
 	 * @param string $css_selector CSS Selector.
 	 * @param string $expected     Expected XPath expression.
@@ -113,7 +115,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	 * Test get_closest_submenu().
 	 *
 	 * @dataProvider get_get_closest_submenu_data
-	 * @covers AMP_Core_Theme_Sanitizer::get_closest_submenu
+	 * @covers ::get_closest_submenu()
 	 *
 	 * @param Document   $dom      Document.
 	 * @param DOMElement $element  Element.
@@ -128,7 +130,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Test get_supported_themes().
 	 *
-	 * @covers AMP_Core_Theme_Sanitizer::get_supported_themes()
+	 * @covers ::get_supported_themes()
 	 */
 	public function test_get_supported_themes() {
 		$supported_themes = [
@@ -151,7 +153,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Test extend_theme_support().
 	 *
-	 * @covers AMP_Core_Theme_Sanitizer::extend_theme_support()
+	 * @covers ::extend_theme_support()
 	 */
 	public function test_extend_theme_support() {
 		$theme_dir = basename( dirname( AMP__DIR__ ) ) . '/' . basename( AMP__DIR__ ) . '/tests/php/data/themes';
@@ -232,7 +234,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Test add_has_header_video_body_class().
 	 *
-	 * @covers AMP_Core_Theme_Sanitizer::add_has_header_video_body_class
+	 * @covers ::add_has_header_video_body_class()
 	 */
 	public function test_add_has_header_video_body_class() {
 		$args = [ 'foo' ];
@@ -291,7 +293,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	 * Test guess_modal_role().
 	 *
 	 * @dataProvider get_modals
-	 * @covers       AMP_Core_Theme_Sanitizer::guess_modal_role
+	 * @covers       ::guess_modal_role()
 	 *
 	 * @param DOMElement $dom_element Document.
 	 * @param string     $expected    Expected.
@@ -307,7 +309,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Tests add_img_display_block_fix.
 	 *
-	 * @covers AMP_Core_Theme_Sanitizer::add_img_display_block_fix
+	 * @covers ::add_img_display_block_fix()
 	 */
 	public function test_add_img_display_block_fix() {
 		AMP_Core_Theme_Sanitizer::add_img_display_block_fix();
@@ -320,7 +322,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Tests add_twentytwenty_custom_logo_fix.
 	 *
-	 * @covers AMP_Core_Theme_Sanitizer::add_twentytwenty_custom_logo_fix
+	 * @covers ::add_twentytwenty_custom_logo_fix()
 	 */
 	public function test_add_twentytwenty_custom_logo_fix() {
 		add_filter(
@@ -341,7 +343,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Tests prevent_sanitize_in_customizer_preview.
 	 *
-	 * @covers AMP_Core_Theme_Sanitizer::prevent_sanitize_in_customizer_preview
+	 * @covers ::prevent_sanitize_in_customizer_preview()
 	 */
 	public function test_prevent_sanitize_in_customizer_preview() {
 		global $wp_customize;
@@ -364,5 +366,127 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 
 		$this->assertEquals( $expected, $content );
+	}
+
+	/**
+	 * Tests amend_twentytwentyone_sub_menu_toggles.
+	 *
+	 * @covers ::amend_twentytwentyone_sub_menu_toggles()
+	 */
+	public function test_amend_twentytwentyone_sub_menu_toggles() {
+		$html = '
+			<ul id="primary-menu-list">
+				<div>
+					<button class="sub-menu-toggle" onclick="foo"></button>
+				</div>
+			</ul>
+			<ul class="footer-navigation-wrapper foo">
+				<div>
+					<button onclick="foo" class="sub-menu-toggle"></button>
+				</div>
+			</ul>
+			<button onclick="foo" class="sub-menu-toggle"></button>
+		';
+
+		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
+		$sanitizer = new AMP_Core_Theme_Sanitizer( $dom );
+
+		$sanitizer->amend_twentytwentyone_sub_menu_toggles();
+		$elements = $dom->xpath->query( '//*[ @onclick ]' );
+
+		$this->assertEquals( 1, $elements->length );
+	}
+
+	/**
+	 * Tests add_twentytwentyone_mobile_modal.
+	 *
+	 * @covers ::add_twentytwentyone_mobile_modal()
+	 */
+	public function test_add_twentytwentyone_mobile_modal() {
+		$html = '
+			<nav>
+				<div class="menu-button-container">
+					<button id="primary-mobile-menu">Menu button toggle</button>
+				</div>
+				<div class="primary-menu-container">
+					<ul id="primary-menu-list">
+						<li id="menu-item-1">Foo</li>
+						<li id="menu-item-2">Bar</li>
+						<li id="menu-item-3">Baz</li>
+					</ul>
+				</div>
+			</nav>
+		';
+
+		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
+		$sanitizer = new AMP_Core_Theme_Sanitizer( $dom );
+
+		$sanitizer->add_twentytwentyone_mobile_modal();
+
+		$query = $dom->xpath->query(
+			// Verify that the menu button container exists,
+			'//nav/div[ @class = "menu-button-container" ]' .
+			// and is immediately followed by the primary menu container, wrapped in amp-lightbox,
+			'/following-sibling::amp-lightbox[ ./div[ @class = "primary-menu-container" and ./ul ] ]' .
+			// and is also followed by the original primary menu container.
+			'/following-sibling::div[ @class = "primary-menu-container" and ./ul ]'
+		);
+
+		$this->assertEquals( 1, $query->length );
+	}
+
+	/**
+	 * Tests add_twentytwentyone_sub_menu_fix.
+	 *
+	 * @covers ::add_twentytwentyone_sub_menu_fix()
+	 */
+	public function test_add_twentytwentyone_sub_menu_fix() {
+		$html = '
+			<nav>
+				<div class="menu-button-container">
+					<button id="primary-mobile-menu">Menu button toggle</button>
+				</div>
+				<amp-lightbox>
+					<div class="primary-menu-container">
+						<ul id="primary-menu-list">
+							<li id="menu-item-1"><button>Foo</button></li>
+							<li id="menu-item-2"><button class="sub-menu-toggle">Bar</button></li>
+							<li id="menu-item-3"><button class="sub-menu-toggle">Baz</button></li>
+						</ul>
+					</div>
+				</amp-lightbox>
+				<div class="primary-menu-container">
+					<ul id="primary-menu-list">
+						<li id="menu-item-1"><button>Foo</button></li>
+						<li id="menu-item-2"><button class="sub-menu-toggle">Bar</button></li>
+						<li id="menu-item-3"><button class="sub-menu-toggle">Baz</button></li>
+					</ul>
+				</div>
+			</nav>
+		';
+
+		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
+		$sanitizer = new AMP_Core_Theme_Sanitizer( $dom );
+
+		$sanitizer->add_twentytwentyone_sub_menu_fix();
+
+		$query = $dom->xpath->query( '//amp-lightbox//button[ not( @data-amp-bind-aria-expanded ) ]' );
+		$this->assertEquals( 3, $query->length );
+
+		$query = $dom->xpath->query( '//nav/div//button[ @data-amp-bind-aria-expanded ]' );
+		$this->assertEquals( 2, $query->length );
+
+		for ( $i = 1; $i <= $query->length; $i++ ) {
+			/** @var DOMElement $menu_toggle */
+			$menu_toggle = $query->item( $i - 1 );
+
+			$toggle_id = 'toggle_' . ( $i );
+			$other_toggle_id = 'toggle_' . ( $i === $query->length ? $i - 1 : $i + 1 );
+
+			$this->assertEquals( "{$toggle_id} ? 'true' : 'false'", $menu_toggle->getAttribute( 'data-amp-bind-aria-expanded' ) );
+			$this->assertEquals( "tap:AMP.setState({{$toggle_id}:!{$toggle_id},{$other_toggle_id}:false})", $menu_toggle->getAttribute( 'on' ) );
+		}
+
+		$this->assertEquals( "tap:AMP.setState({toggle_1:false,toggle_2:false})", $dom->body->getAttribute( 'on' ) );
 	}
 }
