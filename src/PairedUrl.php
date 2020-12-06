@@ -1,6 +1,6 @@
 <?php
 /**
- * Class PairedUrls.
+ * Class PairedUrl.
  *
  * @package AmpProject\AmpWP
  */
