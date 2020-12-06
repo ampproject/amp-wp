@@ -95,9 +95,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 							'twenty_twenty_one_supports_js', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
 						],
 					],
-					'amend_twentytwentyone_styles'     => [],
-					'add_twentytwentyone_mobile_modal' => [],
-					'add_twentytwentyone_sub_menu_fix' => [],
+					'amend_twentytwentyone_styles'           => [],
+					'amend_twentytwentyone_sub_menu_toggles' => [],
+					'add_twentytwentyone_mobile_modal'       => [],
+					'add_twentytwentyone_sub_menu_fix'       => [],
 				];
 
 				// Dark mode button toggle is only supported in the Customizer for now.
@@ -2214,6 +2215,19 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 		$state_vars = implode( ',', $toggles_to_disable_for_body );
 		AMP_DOM_Utils::add_amp_action( $this->dom->body, 'tap', "AMP.setState({{$state_vars}})" );
+	}
+
+	/**
+	 * Sanitize the sub-menus in the Twenty Twenty-One theme.
+	 */
+	public function amend_twentytwentyone_sub_menu_toggles() {
+		$menu_toggles = $this->dom->xpath->query( '//ul[ @id="primary-menu-list" or contains( concat( " ", normalize-space( @class ), " " ), " footer-navigation-wrapper " ) ]//button[ @onclick and @class and contains( concat( " ", normalize-space( @class ), " " ), " sub-menu-toggle " ) ]' );
+
+		// Remove the `onclick` attribute for sub-menu toggles in the primary and secondary menus.
+		foreach ( $menu_toggles as $menu_toggle ) {
+			/** @var DOMElement $menu_toggle */
+			$menu_toggle->removeAttribute( 'onclick' );
+		}
 	}
 
 	/**
