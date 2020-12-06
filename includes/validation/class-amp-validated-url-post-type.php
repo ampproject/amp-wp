@@ -2236,7 +2236,12 @@ class AMP_Validated_URL_Post_Type {
 						 */
 						$actions = apply_filters( 'amp_validated_url_status_actions', $actions, $post );
 
-						echo implode( ' | ', array_filter( $actions ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						echo wp_kses(
+							implode( ' | ', array_filter( $actions ) ),
+							[
+								'a' => array_fill_keys( [ 'href' ], true ),
+							]
+						);
 						?>
 					</div>
 				</div>
