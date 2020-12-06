@@ -10,7 +10,7 @@ namespace AmpProject\AmpWP\PairedUrlStructure;
 use AmpProject\AmpWP\PairedUrlStructure;
 
 /**
- * Descriptor for paired URL structures that include the ?amp=1 query var.
+ * Descriptor for paired URL structures that include the `?amp=1` query parameter.
  *
  * @todo Rename to QueryArg for better parity with add_query_arg(). Or QueryParam parameter for better spec alignment?
  *

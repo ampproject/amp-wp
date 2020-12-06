@@ -10,7 +10,7 @@ namespace AmpProject\AmpWP\PairedUrlStructure;
 use AmpProject\AmpWP\PairedUrlStructure;
 
 /**
- * Descriptor for paired URL structures that end in /amp/ path suffix.
+ * Descriptor for paired URL structures that end in `/amp/` path suffix.
  *
  * @package AmpProject\AmpWP
  * @since 2.1

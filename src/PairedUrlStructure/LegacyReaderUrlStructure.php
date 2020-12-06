@@ -10,7 +10,7 @@ namespace AmpProject\AmpWP\PairedUrlStructure;
 use AmpProject\AmpWP\PairedUrlStructure;
 
 /**
- * Descriptor for paired URL structures that end in /amp/ path suffix for non-hierarchical posts and ?amp for others.
+ * Descriptor for paired URL structures that end in `/amp/` path suffix for non-hierarchical posts and `?amp` for others.
  *
  * @package AmpProject\AmpWP
  * @since 2.1
