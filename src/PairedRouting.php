@@ -234,6 +234,10 @@ final class PairedRouting implements Service, Registerable {
 					'type'     => 'array',
 					'readonly' => true,
 				],
+				self::REWRITE_USING_PERMALINKS     => [
+					'type'     => 'boolean',
+					'readonly' => true,
+				],
 			]
 		);
 	}
