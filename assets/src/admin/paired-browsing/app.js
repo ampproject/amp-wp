@@ -3,6 +3,11 @@
  */
 import { addQueryArgs, removeQueryArgs } from '@wordpress/url';
 
+/**
+ * Internal dependencies
+ */
+import './app.css';
+
 const { ampPairedBrowsingAppData, history } = window;
 const {
 	noampQueryVar,
