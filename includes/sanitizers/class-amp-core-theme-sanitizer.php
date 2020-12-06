@@ -84,6 +84,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				$config = [
 					'dequeue_scripts'                  => [
 						'twenty-twenty-one-responsive-embeds-script',
+						'twenty-twenty-one-primary-navigation-script',
 					],
 					'remove_actions'                   => [
 						'wp_print_footer_scripts' => [
@@ -96,6 +97,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					],
 					'amend_twentytwentyone_styles'     => [],
 					'add_twentytwentyone_mobile_modal' => [],
+					'add_twentytwentyone_sub_menu_fix' => [],
 				];
 
 				// Dark mode button toggle is only supported in the Customizer for now.
@@ -2078,6 +2080,21 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 							display: none;
 						}
 					}
+
+					/* Show the sub-menu on hover of menu item */
+					.primary-navigation div > .menu-wrapper .menu-item-has-children:hover > .sub-menu {
+						display: block;
+					}
+
+					/* Hide the plus icon on hover of menu item */
+					.primary-navigation div > .menu-wrapper .menu-item-has-children:hover > .sub-menu-toggle > .icon-plus {
+						display: none;
+					}
+
+					/* Show the minus icon on hover of menu item */
+					.primary-navigation div > .menu-wrapper .menu-item-has-children:hover > .sub-menu-toggle > .icon-minus {
+						display: flex;
+					}
 				';
 
 				wp_add_inline_style( $style_handle, $new_styles );
@@ -2152,6 +2169,51 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 		$amp_lightbox->appendChild( $modal );
 		$menu->parentNode->insertBefore( $amp_lightbox, $menu );
+	}
+
+	/**
+	 * Make the sub-menu functionality for the Twenty Twenty-One theme AMP compatible.
+	 *
+	 * Note: Hover functionality is accomplished through CSS.
+	 *
+	 * @see amend_twentytwentyone_styles()
+	 */
+	public function add_twentytwentyone_sub_menu_fix() {
+		// The XPath query has to be specific enough to not interfere with the mobile menu.
+		$menu_toggles = $this->dom->xpath->query( '//nav/div/ul[ @id="primary-menu-list" ]//button[ @class and contains( concat( " ", normalize-space( @class ), " " ), " sub-menu-toggle " ) ]' );
+
+		if ( 0 === $menu_toggles->length ) {
+			return;
+		}
+
+		$menu_toggle_ids = substr_replace( range( 1, $menu_toggles->length ), 'toggle_', 0, 0 );
+
+		// Sub-menus to be closed when the user clicks on the body.
+		$toggles_to_disable_for_body = [];
+
+		foreach ( $menu_toggle_ids as $key => $menu_toggle_id ) {
+			/** @var DOMElement $menu_toggle */
+			$menu_toggle = $menu_toggles->item( $key );
+
+			$menu_toggle->setAttribute( 'data-amp-bind-aria-expanded', "{$menu_toggle_id} ? 'true' : 'false'" );
+
+			// Sub-menus to be closed when this one is to be opened.
+			$toggles_to_disable = '';
+			$toggles_to_disable_for_body[] = "{$menu_toggle_id}:false";
+
+			foreach ( $menu_toggle_ids as $other_menu_toggle_id ) {
+				if ( $menu_toggle_id === $other_menu_toggle_id ) {
+					continue;
+				}
+
+				$toggles_to_disable .= ",{$other_menu_toggle_id}:false";
+			}
+
+			AMP_DOM_Utils::add_amp_action( $menu_toggle, 'tap', "AMP.setState({{$menu_toggle_id}:!{$menu_toggle_id}{$toggles_to_disable}})" );
+		}
+
+		$state_vars = implode( ',', $toggles_to_disable_for_body );
+		AMP_DOM_Utils::add_amp_action( $this->dom->body, 'tap', "AMP.setState({{$state_vars}})" );
 	}
 
 	/**
