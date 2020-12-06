@@ -584,7 +584,7 @@ final class PairedRouting implements Service, Registerable {
 	/**
 	 * Determine a given URL is for a paired AMP request.
 	 *
-	 * If no URL was is provided, then it will check whether WordPress has already parsed the AMP
+	 * If no URL is provided, then it will check whether WordPress has already parsed the AMP
 	 * query var as part of the request. If still not present, then it will get the current URL
 	 * and check if it has an endpoint.
 	 *
