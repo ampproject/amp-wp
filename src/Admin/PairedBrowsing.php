@@ -239,7 +239,10 @@ final class PairedBrowsing implements Service, Registerable, Conditional {
 	/**
 	 * Remove any unnecessary query vars that could hamper the paired browsing experience.
 	 *
-	 * @return bool Whether redirection was done.
+	 * When a redirect is successfully done, this method will exit and not return anything. Exiting is prevented by
+	 * filtering `wp_redirect` to be `false`.
+	 *
+	 * @return bool Whether redirection was needed.
 	 */
 	public function ensure_app_location() {
 		$original_url = amp_get_current_url();
