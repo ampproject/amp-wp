@@ -201,7 +201,7 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 		 *
 		 * @param array $service_options REST Options for Services.
 		 */
-		$service_options = apply_filters( 'amp_rest_options', [] );
+		$service_options = array_filter( (array) apply_filters( 'amp_rest_options', [] ) );
 
 		$options = array_merge(
 			$options,
@@ -360,7 +360,7 @@ final class OptionsRESTController extends WP_REST_Controller implements Delayed,
 			 *
 			 * @param array $schema Schema.
 			 */
-			$services_schema = apply_filters( 'amp_rest_options_schema', [] );
+			$services_schema = array_filter( (array) apply_filters( 'amp_rest_options_schema', [] ) );
 
 			$this->schema['properties'] = array_merge(
 				$this->schema['properties'],
