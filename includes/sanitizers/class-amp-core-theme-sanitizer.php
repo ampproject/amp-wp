@@ -2132,7 +2132,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$style              = $this->dom->createElement( 'style' );
-		$style->textContent = '#dark-mode-toggler { display: block; }';
+		$style->textContent = '.no-js #dark-mode-toggler { display: block; }';
 		$this->dom->head->appendChild( $style );
 
 		$toggle_class = 'is-dark-theme';
