@@ -1,9 +1,3 @@
-/* In the Twenty Twenty-One theme, when on a non-AMP page and the mobile menu is open, the switcher is incorrectly
-shown at the top. In that case the switcher is hidden. */
-body.primary-navigation-open.lock-scrolling > #amp-mobile-version-switcher {
-	display: none;
-}
-
 #amp-mobile-version-switcher {
 	position: absolute;
 	width: 100%;
