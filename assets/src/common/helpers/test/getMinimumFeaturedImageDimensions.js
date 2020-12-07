@@ -14,6 +14,18 @@ describe( 'getMinimumFeaturedImageDimensions', () => {
 		};
 		expect( getMinimumFeaturedImageDimensions() ).toStrictEqual( { width: 1200, height: 675 } );
 	} );
+	it( 'should return default values if width is not supplied', () => {
+		window.ampBlockEditor = {
+			featuredImageMinimumHeight: 675,
+		};
+		expect( getMinimumFeaturedImageDimensions() ).toStrictEqual( { width: 1200, height: 675 } );
+	} );
+	it( 'should return default values if height is not supplied', () => {
+		window.ampBlockEditor = {
+			featuredImageMinimumWidth: 1200,
+		};
+		expect( getMinimumFeaturedImageDimensions() ).toStrictEqual( { width: 1200, height: 675 } );
+	} );
 	it( 'should return default values if invalid height and valid width is supplied', () => {
 		window.ampBlockEditor = {
 			featuredImageMinimumHeight: 'test',
