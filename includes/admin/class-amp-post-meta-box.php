@@ -296,33 +296,29 @@ class AMP_Post_Meta_Box {
 	 * Returns the featured image dimensions after filtering
 	 * the height and width
 	 *
-	 * @return array
+	 * @return int[]
 	 */
 	public static function get_featured_image_dimensions() {
 		return [
 			/**
-			 * Filter name: amp_featured_image_minimum_height
+			 * Filters the minimum height required for a featured image.
 			 *
 			 * @since 2.0.8
 			 *
 			 * @param int $featured_image_minimum_height The minimum height of the image,
-			 * defaults to 675
-			 *
-			 * @return int
+			 * defaults to 675.
 			 */
-			'featuredImageMinimumHeight' => apply_filters( 'amp_featured_image_minimum_height', 675 ),
+			'featuredImageMinimumHeight' => (int) apply_filters( 'amp_featured_image_minimum_height', 675 ),
 
 			/**
-			 * Filter name: amp_featured_image_minimum_width
+			 * Filters the minimum width required for a featured image.
 			 *
 			 * @since 2.0.8
 			 *
 			 * @param int $featured_image_minimum_height The minimum width of the image,
-			 * defaults to 1200
-			 *
-			 * @return int
+			 * defaults to 1200.
 			 */
-			'featuredImageMinimumWidth'  => apply_filters( 'amp_featured_image_minimum_width', 1200 ),
+			'featuredImageMinimumWidth'  => (int) apply_filters( 'amp_featured_image_minimum_width', 1200 ),
 		];
 	}
 
