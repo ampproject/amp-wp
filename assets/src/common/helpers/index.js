@@ -54,27 +54,10 @@ export const hasMinimumDimensions = ( media, dimensions ) => {
  * @return {Object} Minimum dimensions including width and height.
  */
 export const getMinimumFeaturedImageDimensions = () => {
-	const defaultDimensions = {
-		width: 1200,
-		height: 675,
+	return {
+		width: parseInt( window?.ampBlockEditor?.featuredImageMinimumWidth ) || 1200,
+		height: parseInt( window?.ampBlockEditor?.featuredImageMinimumHeight ) || 675,
 	};
-	/**
-	 * If settings not loaded in windows object, use default
-	 * values as fallback.
-	 */
-	if ( window.ampBlockEditor === undefined ||
-		window.ampBlockEditor.featuredImageMinimumWidth === undefined ||
-		window.ampBlockEditor.featuredImageMinimumHeight === undefined ) {
-		return defaultDimensions;
-	}
-	const height = parseInt( window.ampBlockEditor.featuredImageMinimumHeight );
-	const width = parseInt( window.ampBlockEditor.featuredImageMinimumWidth );
-
-	if ( isNaN( height ) || isNaN( width ) ) {
-		return defaultDimensions;
-	}
-
-	return { width, height };
 };
 
 /**
