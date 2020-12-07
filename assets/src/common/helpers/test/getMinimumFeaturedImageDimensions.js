@@ -7,6 +7,10 @@ describe( 'getMinimumFeaturedImageDimensions', () => {
 	it( 'should return size with correct aspect ratio', () => {
 		expect( getMinimumFeaturedImageDimensions() ).toStrictEqual( { width: 1200, height: 675 } );
 	} );
+	it( 'should return default values if window is undefined', () => {
+		window = undefined;
+		expect( getMinimumFeaturedImageDimensions() ).toStrictEqual( { width: 1200, height: 675 } );
+	} );
 	it( 'should return default values if invalid width and valid height is supplied', () => {
 		window.ampBlockEditor = {
 			featuredImageMinimumWidth: 'test',
