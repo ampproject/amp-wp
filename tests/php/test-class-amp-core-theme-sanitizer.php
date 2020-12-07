@@ -489,4 +489,28 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 
 		$this->assertEquals( 'tap:AMP.setState({toggle_1:false,toggle_2:false})', $dom->body->getAttribute( 'on' ) );
 	}
+
+	/**
+	 * Tests add_twentytwentyone_dark_mode_toggle.
+	 *
+	 * @covers ::add_twentytwentyone_dark_mode_toggle()
+	 */
+	public function test_add_twentytwentyone_dark_mode_toggle() {
+		$html = '<button id="dark-mode-toggler">Toggle dark mode</button>';
+
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $html );
+		$sanitizer = new AMP_Core_Theme_Sanitizer( $dom );
+
+		$sanitizer->add_twentytwentyone_dark_mode_toggle();
+
+		$this->assertEquals(
+			'.no-js #dark-mode-toggler { display: block; }',
+			$dom->head->getElementsByTagName( 'style' )->item( 0 )->textContent
+		);
+
+		$this->assertEquals(
+			'<button id="dark-mode-toggler" on="tap:AMP.setState({is_dark_theme: !is_dark_theme}),i-amp-0.toggleClass(class=\'is-dark-theme\'),i-amp-1.toggleClass(class=\'is-dark-theme\')" data-amp-bind-aria-pressed="is_dark_theme ? \'true\' : \'false\'">Toggle dark mode</button>',
+			$dom->saveHTML( $dom->getElementById( 'dark-mode-toggler' ) )
+		);
+	}
 }
