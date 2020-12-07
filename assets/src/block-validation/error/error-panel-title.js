@@ -8,6 +8,10 @@ import PropTypes from 'prop-types';
  */
 import { BlockIcon } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
+/**
+ * Internal dependencies
+ */
+import AMPAlert from '../../../images/amp-alert.svg';
 
 /**
  * Internal dependencies
@@ -28,6 +32,8 @@ import { ErrorTypeIcon } from './error-type-icon';
 export function ErrorPanelTitle( { blockType, title, error: { type }, status } ) {
 	const kept = status === VALIDATION_ERROR_ACK_REJECTED_STATUS || status === VALIDATION_ERROR_NEW_REJECTED_STATUS;
 
+	const [ titleText ] = title.split( ':' );
+
 	return (
 		<>
 			<div className="amp-error__icons">
@@ -40,14 +46,17 @@ export function ErrorPanelTitle( { blockType, title, error: { type }, status } )
 					</div>
 				) }
 			</div>
-			<span className="amp-error__title-text">
-				<span dangerouslySetInnerHTML={ { __html: title } } />
+			<div className="amp-error__title">
+				<div className="amp-error__title-text">
+					{ titleText }
+				</div>
 				{ kept && (
-					<span className="amp-error-alert" title={ __( 'This error has been kept, making this URL not AMP-compatible.', 'amp' ) }>
-						{ '!' }
-					</span>
+					<div className="amp-error-alert" title={ __( 'This error has been kept, making this URL not AMP-compatible.', 'amp' ) }>
+						<AMPAlert />
+						{ __( 'Kept', 'amp' ) }
+					</div>
 				) }
-			</span>
+			</div>
 		</>
 	);
 }

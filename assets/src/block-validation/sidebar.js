@@ -72,7 +72,7 @@ export function Sidebar() {
 					<PanelBody opened={ true } className="amp-sidebar__broken">
 						<BrokenIconSVG />
 						<p>
-							{ __( 'AMP is broken at this URL because there are validation errors that have not been removed.', 'amp' ) }
+							{ __( 'This URL is not fully AMP-compatible because there are validation errors that have not been removed.', 'amp' ) }
 						</p>
 					</PanelBody>
 				)
@@ -119,7 +119,7 @@ export function Sidebar() {
 							<PanelBody opened={ true }>
 								<CheckboxControl
 									checked={ isShowingReviewed }
-									label={ __( 'Include previously reviewed errors', 'amp' ) }
+									label={ __( 'Include reviewed errors', 'amp' ) }
 									onChange={ ( newIsShowingReviewed ) => {
 										setIsShowingReviewed( newIsShowingReviewed );
 									} }

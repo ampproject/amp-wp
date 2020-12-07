@@ -12,6 +12,8 @@ import { sprintf, __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { VALIDATION_ERROR_ACK_ACCEPTED_STATUS, VALIDATION_ERROR_ACK_REJECTED_STATUS, VALIDATION_ERROR_NEW_ACCEPTED_STATUS, VALIDATION_ERROR_NEW_REJECTED_STATUS } from '../constants';
+import AMPAlert from '../../../images/amp-alert.svg';
+import AMPDelete from '../../../images/amp-delete.svg';
 import { getErrorSourceTitle } from './get-error-source-title';
 
 /**
@@ -87,9 +89,30 @@ ErrorSource.propTypes = {
 function MarkupStatus( { status } ) {
 	let keptRemoved;
 	if ( [ VALIDATION_ERROR_NEW_ACCEPTED_STATUS, VALIDATION_ERROR_ACK_ACCEPTED_STATUS ].includes( status ) ) {
-		keptRemoved = __( 'Removed', 'amp' );
+		keptRemoved = (
+			<span className="amp-error__kept-removed amp-error__kept-removed--removed">
+				{ __( 'Removed', 'amp' ) }
+				<span>
+					<AMPDelete />
+				</span>
+			</span>
+		);
 	} else {
-		keptRemoved = __( 'Kept', 'amp' );
+		keptRemoved = (
+			<span className="amp-error__kept-removed amp-error__kept-removed--kept">
+				{ __( 'Kept', 'amp' ) }
+				<span>
+					<AMPAlert />
+				</span>
+			</span>
+		);
+	}
+
+	let reviewed;
+	if ( [ VALIDATION_ERROR_ACK_ACCEPTED_STATUS, VALIDATION_ERROR_ACK_REJECTED_STATUS ].includes( status ) ) {
+		reviewed = __( 'Yes', 'amp' );
+	} else {
+		reviewed = __( 'No', 'amp' );
 	}
 
 	return (
@@ -99,6 +122,12 @@ function MarkupStatus( { status } ) {
 			</dt>
 			<dd>
 				{ keptRemoved }
+			</dd>
+			<dt>
+				{ __( 'Reviewed', 'amp' ) }
+			</dt>
+			<dd>
+				{ reviewed }
 			</dd>
 		</>
 	);
@@ -142,12 +171,15 @@ BlockType.propTypes = {
  * @param {Object} props.blockType Block type details.
  * @param {string} props.clientId Block client ID
  * @param {number} props.status Number indicating the error status.
+ * @param {string} props.title Error title.
  * @param {Object} props.error Error details.
  * @param {Object[]} props.error.sources Sources from the PHP backtrace for the error.
  */
-export function ErrorContent( { blockType, clientId, status, error: { sources } } ) {
+export function ErrorContent( { blockType, clientId, status, title, error: { sources } } ) {
 	const blockTypeTitle = blockType?.title;
 	const blockTypeName = blockType?.name;
+
+	const [ titleText, nodeName ] = title.split( ':' ).map( ( item ) => item.trim() );
 
 	return (
 		<>
@@ -157,6 +189,17 @@ export function ErrorContent( { blockType, clientId, status, error: { sources } 
 				</p>
 			) }
 			<dl className="amp-error__details">
+				{
+					// If node name is empty, the title text displayed in the panel header is enough.
+					nodeName && (
+						<>
+							<dt>
+								{ titleText }
+							</dt>
+							<dd dangerouslySetInnerHTML={ { __html: nodeName } } />
+						</>
+					)
+				}
 				<BlockType blockTypeTitle={ blockTypeTitle } clientId={ clientId } />
 				<ErrorSource blockTypeName={ blockTypeName } clientId={ clientId } sources={ sources } />
 				<MarkupStatus status={ status } />
@@ -176,6 +219,7 @@ ErrorContent.propTypes = {
 		VALIDATION_ERROR_NEW_REJECTED_STATUS,
 		VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
 	] ),
+	title: PropTypes.string,
 	error: PropTypes.shape( {
 		sources: PropTypes.arrayOf( PropTypes.object ),
 	} ),

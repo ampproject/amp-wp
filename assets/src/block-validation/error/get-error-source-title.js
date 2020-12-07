@@ -30,11 +30,11 @@ export function getErrorSourceTitle( sources ) {
 		const muPluginCount = muPluginNames.length;
 
 		if ( 0 < pluginCount ) {
-			output.push( sprintf( '%1$s (%2$d)', __( 'Plugins', 'amp' ) ) );
+			output.push( sprintf( '%1$s (%2$d)', __( 'Plugins', 'amp' ), pluginCount ) );
 		}
 
 		if ( 0 < muPluginCount ) {
-			output.push( sprintf( '%1$s (%2$d)', __( 'Must-use plugins', 'amp' ) ) );
+			output.push( sprintf( '%1$s (%2$d)', __( 'Must-use plugins', 'amp' ), muPluginCount ) );
 		}
 	}
 
