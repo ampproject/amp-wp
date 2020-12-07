@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7b9bd35497c99f7c00dd4e730bea3152",
+    "content-hash": "0c9647bbe095f7318498d3dc967b497e",
     "packages": [
         {
             "name": "ampproject/amp-toolbox",
@@ -3178,24 +3178,24 @@
         },
         {
             "name": "sirbrillig/phpcs-variable-analysis",
-            "version": "v2.9.0",
+            "version": "v2.10.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sirbrillig/phpcs-variable-analysis.git",
-                "reference": "ff54d4ec7f2bd152d526fdabfeff639aa9b8be01"
+                "reference": "50486555fae72a6401ad0337d0b71fd9e775b2f2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sirbrillig/phpcs-variable-analysis/zipball/ff54d4ec7f2bd152d526fdabfeff639aa9b8be01",
-                "reference": "ff54d4ec7f2bd152d526fdabfeff639aa9b8be01",
+                "url": "https://api.github.com/repos/sirbrillig/phpcs-variable-analysis/zipball/50486555fae72a6401ad0337d0b71fd9e775b2f2",
+                "reference": "50486555fae72a6401ad0337d0b71fd9e775b2f2",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.4.0",
-                "squizlabs/php_codesniffer": "^3.1"
+                "squizlabs/php_codesniffer": "^3.5"
             },
             "require-dev": {
-                "dealerdirect/phpcodesniffer-composer-installer": "^0.4.4 || ^0.5 || ^0.6",
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
                 "limedeck/phpunit-detailed-printer": "^3.1 || ^4.0 || ^5.0",
                 "phpstan/phpstan": "^0.11.8",
                 "phpunit/phpunit": "^5.0 || ^6.5 || ^7.0 || ^8.0",
@@ -3222,7 +3222,7 @@
                 }
             ],
             "description": "A PHPCS sniff to detect problems with variables.",
-            "time": "2020-10-07T23:32:29+00:00"
+            "time": "2020-11-23T17:43:05+00:00"
         },
         {
             "name": "squizlabs/php_codesniffer",
@@ -4080,18 +4080,18 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-cli/wp-cli.git",
-                "reference": "f18bba7d29f07b7d7d56ae59c965ddca8691eadc"
+                "reference": "84ed882d46dc46832d0de3d50462a6c5fe3f8ff7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wp-cli/wp-cli/zipball/f18bba7d29f07b7d7d56ae59c965ddca8691eadc",
-                "reference": "f18bba7d29f07b7d7d56ae59c965ddca8691eadc",
+                "url": "https://api.github.com/repos/wp-cli/wp-cli/zipball/84ed882d46dc46832d0de3d50462a6c5fe3f8ff7",
+                "reference": "84ed882d46dc46832d0de3d50462a6c5fe3f8ff7",
                 "shasum": ""
             },
             "require": {
                 "ext-curl": "*",
                 "mustache/mustache": "~2.13",
-                "php": "^5.6 || ^7.0",
+                "php": "^5.6 || ^7.0 || ^8.0",
                 "rmccue/requests": "~1.6",
                 "symfony/finder": ">2.7",
                 "wp-cli/mustangostang-spyc": "^0.6.3",
@@ -4138,7 +4138,7 @@
                 "cli",
                 "wordpress"
             ],
-            "time": "2020-12-07T19:00:18+00:00"
+            "time": "2020-12-07T20:42:10+00:00"
         },
         {
             "name": "wp-coding-standards/wpcs",
