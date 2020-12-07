@@ -2146,7 +2146,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * Make the mobile menu for the Twenty Twenty-One theme AMP compatible.
 	 */
 	public function add_twentytwentyone_mobile_modal() {
-		$menu_query  = $this->dom->xpath->query( "//div[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' primary-menu-container ' ) and ./ul[ @id = 'primary-menu-list' ] ]" );
+		$menu_query  = $this->dom->xpath->query( "//div[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' primary-menu-container ' ) ]" );
 		$menu_toggle = $this->dom->getElementById( 'primary-mobile-menu' );
 
 		if ( 1 !== $menu_query->length || ! $menu_toggle ) {
@@ -2190,7 +2190,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function add_twentytwentyone_sub_menu_fix() {
 		// The XPath query has to be specific enough to not interfere with the mobile menu.
-		$menu_toggles = $this->dom->xpath->query( '//nav/div/ul[ @id="primary-menu-list" ]//button[ @class and contains( concat( " ", normalize-space( @class ), " " ), " sub-menu-toggle " ) ]' );
+		$menu_toggles = $this->dom->xpath->query( '//nav/div/ul//button[ @class and contains( concat( " ", normalize-space( @class ), " " ), " sub-menu-toggle " ) ]' );
 
 		if ( 0 === $menu_toggles->length ) {
 			return;
@@ -2230,7 +2230,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * Sanitize the sub-menus in the Twenty Twenty-One theme.
 	 */
 	public function amend_twentytwentyone_sub_menu_toggles() {
-		$menu_toggles = $this->dom->xpath->query( '//ul[ @id="primary-menu-list" or contains( concat( " ", normalize-space( @class ), " " ), " footer-navigation-wrapper " ) ]//button[ @onclick and @class and contains( concat( " ", normalize-space( @class ), " " ), " sub-menu-toggle " ) ]' );
+		$menu_toggles = $this->dom->xpath->query( '//button[ @onclick = "twentytwentyoneExpandSubMenu(this)" ]' );
 
 		// Remove the `onclick` attribute for sub-menu toggles in the primary and secondary menus.
 		foreach ( $menu_toggles as $menu_toggle ) {
