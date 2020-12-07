@@ -2078,10 +2078,15 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						z-index: 1001;
 					}
 
-					/* Hide the desktop menu so that it does not interfere when the amo-lightbox mobile menu is open. */
 					@media only screen and (max-width: 481px) {
+						/* Hide the desktop menu so that it does not interfere when the amo-lightbox mobile menu is open. */
 						.primary-navigation > .primary-menu-container {
 							display: none;
+						}
+
+						/* Accommodate for the admin bar height */
+						.admin-bar amp-lightbox .primary-menu-container {
+							margin-top: var(--global--admin-bar--height);
 						}
 					}
 
@@ -2120,8 +2125,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$style = $this->dom->createElement( 'style' );
-		$style->textContent = "#dark-mode-toggler { display: block; }";
+		$style              = $this->dom->createElement( 'style' );
+		$style->textContent = '#dark-mode-toggler { display: block; }';
 		$this->dom->head->appendChild( $style );
 
 		$toggle_class = 'is-dark-theme';
