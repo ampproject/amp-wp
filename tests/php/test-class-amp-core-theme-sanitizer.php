@@ -377,15 +377,15 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		$html = '
 			<ul id="primary-menu-list">
 				<div>
-					<button class="sub-menu-toggle" onclick="foo"></button>
+					<button onclick="twentytwentyoneExpandSubMenu(this)"></button>
 				</div>
 			</ul>
 			<ul class="footer-navigation-wrapper foo">
 				<div>
-					<button onclick="foo" class="sub-menu-toggle"></button>
+					<button onclick="twentytwentyoneExpandSubMenu(this)"></button>
 				</div>
 			</ul>
-			<button onclick="foo" class="sub-menu-toggle"></button>
+			<button onclick="foo"></button>
 		';
 
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $html );
