@@ -15,7 +15,6 @@ function amp_post_template_init_hooks() {
 	add_action( 'amp_post_template_head', 'amp_post_template_add_title' );
 	add_action( 'amp_post_template_head', 'amp_post_template_add_canonical' );
 	add_action( 'amp_post_template_head', 'amp_post_template_add_fonts' );
-	add_action( 'amp_post_template_head', 'amp_print_schemaorg_metadata' );
 	add_action( 'amp_post_template_head', 'amp_add_generator_metadata' );
 	add_action( 'amp_post_template_head', 'wp_generator' );
 	add_action( 'amp_post_template_head', 'amp_post_template_add_block_styles' );
