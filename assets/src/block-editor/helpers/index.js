@@ -381,7 +381,7 @@ setUpInspectorControls.propTypes = {
 const AmpLayoutControl = ( props ) => {
 	const { name, attributes: { ampLayout }, setAttributes } = props;
 
-	if ( ! ampLayout ) {
+	if ( undefined === ampLayout ) {
 		return null;
 	}
 
