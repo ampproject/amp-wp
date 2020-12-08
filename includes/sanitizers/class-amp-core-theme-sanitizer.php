@@ -2053,9 +2053,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					return;
 				}
 
-				// Set the registered handle as an alias for other stylesheets to depend on.
-				wp_styles()->registered[ $style_handle ]->src = false;
-
 				$css_file = get_theme_file_path(
 					sprintf( 'style%s.css', is_rtl() ? '-rtl' : '' )
 				);
@@ -2063,6 +2060,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				if ( ! file_exists( $css_file ) ) {
 					return;
 				}
+
+				// Set the registered handle as an alias for other stylesheets to depend on.
+				wp_styles()->registered[ $style_handle ]->src = false;
 
 				$styles = file_get_contents( $css_file ); //phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
