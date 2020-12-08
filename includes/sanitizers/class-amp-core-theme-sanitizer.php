@@ -2162,6 +2162,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		/** @var DOMElement $primary_menu */
 		$primary_menu      = $menu_query->item( 0 );
 		$primary_menu_copy = $primary_menu->cloneNode( true );
+		foreach ( $this->dom->xpath->query( './/*[ @id ]', $primary_menu_copy ) as $element ) {
+			/** @var DOMElement $element */
+			$element->setAttribute( 'id', $element->getAttribute( 'id' ) . '-mobile' );
+		}
 
 		$body_id = $this->dom->getElementId( $this->dom->body, 'body' );
 
