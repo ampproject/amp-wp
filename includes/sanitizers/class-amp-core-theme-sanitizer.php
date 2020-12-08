@@ -102,7 +102,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				];
 
 				// Dark mode button toggle is only supported in the Customizer for now.
-				// TODO: add note to customizer on why toggle not shown on frontend.
+				// A notice is added to the Customizer control in AMP_Template_Customizer::add_dark_mode_toggler_button_notice() via AMP_Template_Customizer::init().
 				if ( is_customize_preview() ) {
 					// Make dark mode toggle AMP compatible.
 					$config['add_twentytwentyone_dark_mode_toggle'] = [];
