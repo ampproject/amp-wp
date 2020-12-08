@@ -265,12 +265,15 @@ class AMP_Post_Meta_Box {
 			true
 		);
 
-		$data = [
-			'ampSlug'         => amp_get_slug(),
-			'errorMessages'   => $this->get_error_messages( $status_and_errors['errors'] ),
-			'hasThemeSupport' => ! amp_is_legacy(),
-			'isStandardMode'  => amp_is_canonical(),
-		] + self::get_featured_image_dimensions();
+		$data = array_merge(
+			[
+				'ampSlug'         => amp_get_slug(),
+				'errorMessages'   => $this->get_error_messages( $status_and_errors['errors'] ),
+				'hasThemeSupport' => ! amp_is_legacy(),
+				'isStandardMode'  => amp_is_canonical(),
+			],
+			self::get_featured_image_dimensions()
+		);
 
 		wp_localize_script(
 			self::BLOCK_ASSET_HANDLE,
