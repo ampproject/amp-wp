@@ -675,17 +675,17 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				if ( isset( $wp_filter[ $action ]->callbacks[ $priority ] ) ) {
 					foreach ( $wp_filter[ $action ]->callbacks[ $priority ] as $added_callback ) {
 						if (
-								is_array( $added_callback['function'] )
-								&&
-								isset( $added_callback['function'][0], $added_callback['function'][1] )
-								&&
-								is_object( $added_callback['function'][0] )
-								&&
-								is_string( $added_callback['function'][1] )
-								&&
-								$method === $added_callback['function'][1]
-								&&
-								get_class( $added_callback['function'][0] ) === $class
+							is_array( $added_callback['function'] )
+							&&
+							isset( $added_callback['function'][0], $added_callback['function'][1] )
+							&&
+							is_object( $added_callback['function'][0] )
+							&&
+							is_string( $added_callback['function'][1] )
+							&&
+							$method === $added_callback['function'][1]
+							&&
+							get_class( $added_callback['function'][0] ) === $class
 						) {
 							remove_action( $action, $added_callback['function'] );
 							return;
