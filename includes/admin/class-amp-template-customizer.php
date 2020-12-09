@@ -224,7 +224,7 @@ class AMP_Template_Customizer {
 	 * Add notice that the dark mode toggler button is not currently available on AMP pages.
 	 */
 	public function add_dark_mode_toggler_button_notice() {
-		$message = __( 'The dark mode toggle button is not currently available on AMP pages. It appears here for preview purposes.', 'amp' );
+		$message = __( 'While dark mode works on AMP pages, the toggle button is not currently available. It appears here only for preview purposes.', 'amp' );
 		?>
 		<script>
 			wp.customize.control( 'respect_user_color_preference', function ( control ) {
