@@ -302,7 +302,10 @@ class AMP_Post_Meta_Box {
 	 * @return int[]
 	 */
 	public static function get_featured_image_dimensions() {
-		return [
+		$default_width  = 1200;
+		$default_height = 675;
+
+		$dimensions = [
 			/**
 			 * Filters the minimum height required for a featured image.
 			 *
@@ -311,7 +314,7 @@ class AMP_Post_Meta_Box {
 			 * @param int $featured_image_minimum_height The minimum height of the image,
 			 * defaults to 675.
 			 */
-			'featuredImageMinimumHeight' => (int) apply_filters( 'amp_featured_image_minimum_height', 675 ),
+			'featuredImageMinimumHeight' => (int) apply_filters( 'amp_featured_image_minimum_height', $default_height ),
 
 			/**
 			 * Filters the minimum width required for a featured image.
@@ -321,8 +324,15 @@ class AMP_Post_Meta_Box {
 			 * @param int $featured_image_minimum_height The minimum width of the image,
 			 * defaults to 1200.
 			 */
-			'featuredImageMinimumWidth'  => (int) apply_filters( 'amp_featured_image_minimum_width', 1200 ),
+			'featuredImageMinimumWidth'  => (int) apply_filters( 'amp_featured_image_minimum_width', $default_width ),
 		];
+		if ( $dimensions['featuredImageMinimumHeight'] <= 0 ) {
+			$dimensions['featuredImageMinimumHeight'] = $default_height;
+		}
+		if ( $dimensions['featuredImageMinimumWidth'] <= 0 ) {
+			$dimensions['featuredImageMinimumWidth'] = $default_width;
+		}
+		return $dimensions;
 	}
 
 	/**
