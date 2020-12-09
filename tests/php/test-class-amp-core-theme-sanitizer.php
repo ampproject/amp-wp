@@ -153,7 +153,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	/** @covers ::dequeue_scripts() */
 	public function test_dequeue_scripts() {
 		$handle = 'foo';
-		wp_enqueue_script( $handle, 'a/random/source' );
+		wp_enqueue_script( $handle, 'a/random/source', [], 'v1', true );
 
 		AMP_Core_Theme_Sanitizer::dequeue_scripts( [ $handle ] );
 
@@ -164,7 +164,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 
 	/** @covers ::force_svg_support() */
 	public function test_force_svg_support() {
-		$dom = AMP_DOM_Utils::get_dom_from_content('');
+		$dom = AMP_DOM_Utils::get_dom_from_content( '' );
 		$dom->documentElement->setAttribute( 'class', 'no-svg' );
 
 		( new AMP_Core_Theme_Sanitizer( $dom ) )->force_svg_support();
@@ -174,7 +174,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 
 	/** @covers ::force_fixed_background_support() */
 	public function test_force_fixed_background_support() {
-		$dom = AMP_DOM_Utils::get_dom_from_content('');
+		$dom = AMP_DOM_Utils::get_dom_from_content( '' );
 
 		( new AMP_Core_Theme_Sanitizer( $dom ) )->force_fixed_background_support();
 
