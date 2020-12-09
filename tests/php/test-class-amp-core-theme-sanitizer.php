@@ -13,7 +13,7 @@ use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 /**
  * Class AMP_Core_Theme_Sanitizer_Test
  *
- * @coversDefaultClass AMP_Core_Theme_Sanitizer_Test
+ * @coversDefaultClass AMP_Core_Theme_Sanitizer
  */
 class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 
