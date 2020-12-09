@@ -2094,17 +2094,17 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					}
 
 					/* Show the sub-menu on hover of menu item */
-					.primary-navigation div > .menu-wrapper .menu-item-has-children:hover > .sub-menu {
+					.primary-navigation > div > .menu-wrapper > .menu-item-has-children:hover > .sub-menu {
 						display: block;
 					}
 
 					/* Hide the plus icon on hover of menu item */
-					.primary-navigation div > .menu-wrapper .menu-item-has-children:hover > .sub-menu-toggle > .icon-plus {
+					.primary-navigation > div > .menu-wrapper > .menu-item-has-children:hover > .sub-menu-toggle > .icon-plus {
 						display: none;
 					}
 
 					/* Show the minus icon on hover of menu item */
-					.primary-navigation div > .menu-wrapper .menu-item-has-children:hover > .sub-menu-toggle > .icon-minus {
+					.primary-navigation > div > .menu-wrapper > .menu-item-has-children:hover > .sub-menu-toggle > .icon-minus {
 						display: flex;
 					}
 
