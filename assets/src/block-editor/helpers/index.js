@@ -2,8 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { ReactElement, useEffect } from 'react';
-import { v4 as uuid } from 'uuid';
+import { ReactElement } from 'react';
 
 /**
  * WordPress dependencies
@@ -266,14 +265,7 @@ export const getLayoutOptions = ( block ) => {
  */
 export const filterBlocksEdit = ( BlockEdit ) => {
 	const EnhancedBlockEdit = function( props ) {
-		const { attributes: { ampLayout, amp_uuid: ampUuid }, name, setAttributes } = props;
-
-		// Set the block's AMP UUID if it has not been set yet.
-		useEffect( () => {
-			if ( ! ampUuid ) {
-				setAttributes( { amp_uuid: uuid() } );
-			}
-		}, [ ampUuid, setAttributes ] );
+		const { attributes: { ampLayout }, name } = props;
 
 		let inspectorControls;
 
@@ -304,7 +296,6 @@ export const filterBlocksEdit = ( BlockEdit ) => {
 
 	EnhancedBlockEdit.propTypes = {
 		attributes: PropTypes.shape( {
-			amp_uuid: PropTypes.oneOf( [ false, PropTypes.string ] ),
 			text: PropTypes.string,
 			ampLayout: PropTypes.string,
 		} ),
