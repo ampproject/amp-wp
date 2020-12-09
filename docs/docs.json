@@ -6511,8 +6511,8 @@
             },
             {
                 "name": "amp_mobile_version_switcher_link_text",
-                "line": 449,
-                "end_line": 449,
+                "line": 460,
+                "end_line": 460,
                 "type": "filter",
                 "arguments": [
                     "$text"
