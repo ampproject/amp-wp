@@ -1,5 +1,5 @@
 {
-    "0": {
+    "1": {
         "file": {
             "description": "Class AMP_Customizer_Design_Settings",
             "long_description": "",
@@ -55,7 +55,7 @@
             }
         ]
     },
-    "1": {
+    "2": {
         "file": {
             "description": "Class AMP_Customizer_Settings",
             "long_description": "",
@@ -99,7 +99,7 @@
             }
         ]
     },
-    "6": {
+    "7": {
         "file": {
             "description": "Class AMP_Links_Sanitizer.",
             "long_description": "",
@@ -166,7 +166,7 @@
             }
         ]
     },
-    "26": {
+    "27": {
         "file": {
             "description": "Class AMP_Base_Sanitizer",
             "long_description": "",
@@ -2132,7 +2132,7 @@
         ],
         "hooks": []
     },
-    "31": {
+    "32": {
         "file": {
             "description": "Callbacks for adding AMP-related things to the main theme.",
             "long_description": "",
@@ -2227,7 +2227,7 @@
         ],
         "hooks": []
     },
-    "32": {
+    "33": {
         "file": {
             "description": "Class AMP_Theme_Support",
             "long_description": "",
@@ -2364,7 +2364,7 @@
             }
         }
     },
-    "33": {
+    "34": {
         "file": {
             "description": "Callbacks for adding AMP-related things to the admin.",
             "long_description": "",
@@ -2440,7 +2440,7 @@
             }
         }
     },
-    "35": {
+    "36": {
         "file": {
             "description": "Class AMP_Template_Customizer",
             "long_description": "",
@@ -2456,17 +2456,17 @@
         "includes": [
             {
                 "name": "",
-                "line": 307,
+                "line": 327,
                 "type": "Require"
             },
             {
                 "name": "",
-                "line": 562,
+                "line": 582,
                 "type": "Require"
             },
             {
                 "name": "",
-                "line": 630,
+                "line": 650,
                 "type": "Require"
             }
         ],
@@ -2501,8 +2501,8 @@
             },
             "1": {
                 "name": "amp_customizer_register_ui",
-                "line": 260,
-                "end_line": 260,
+                "line": 280,
+                "end_line": 280,
                 "type": "action",
                 "arguments": [
                     "$this->wp_customize"
@@ -2528,8 +2528,8 @@
             },
             "2": {
                 "name": "amp_customizer_register_settings",
-                "line": 296,
-                "end_line": 296,
+                "line": 316,
+                "end_line": 316,
                 "type": "action",
                 "arguments": [
                     "$this->wp_customize"
@@ -2555,8 +2555,8 @@
             },
             "9": {
                 "name": "amp_customizer_enqueue_scripts",
-                "line": 612,
-                "end_line": 612,
+                "line": 632,
+                "end_line": 632,
                 "type": "action",
                 "arguments": [
                     "$this->wp_customize"
@@ -2582,8 +2582,8 @@
             },
             "11": {
                 "name": "amp_customizer_enqueue_preview_scripts",
-                "line": 703,
-                "end_line": 703,
+                "line": 723,
+                "end_line": 723,
                 "type": "action",
                 "arguments": [
                     "$this->wp_customize"
@@ -2609,7 +2609,7 @@
             }
         }
     },
-    "39": {
+    "40": {
         "file": {
             "description": "AMP Helper Functions",
             "long_description": "",
@@ -4634,7 +4634,7 @@
             }
         }
     },
-    "43": {
+    "44": {
         "file": {
             "description": "Class AMP_Image_Dimension_Extractor",
             "long_description": "",
@@ -4754,7 +4754,7 @@
             }
         ]
     },
-    "50": {
+    "51": {
         "file": {
             "description": "AMP_Post_Template class.",
             "long_description": "",
@@ -4968,7 +4968,7 @@
             }
         }
     },
-    "60": {
+    "61": {
         "file": {
             "description": "Class AMP_Base_Embed_Handler",
             "long_description": "Used by some children.",
@@ -5446,7 +5446,7 @@
         ],
         "hooks": []
     },
-    "77": {
+    "78": {
         "file": {
             "description": "AMP Post type support.",
             "long_description": "",
@@ -5575,7 +5575,7 @@
             }
         ]
     },
-    "78": {
+    "79": {
         "file": {
             "description": "Class AMP_HTTP",
             "long_description": "",
@@ -5616,7 +5616,7 @@
             }
         ]
     },
-    "84": {
+    "85": {
         "file": {
             "description": "Class AMP_Validation_Manager",
             "long_description": "",
@@ -5718,7 +5718,7 @@
             }
         ]
     },
-    "85": {
+    "86": {
         "file": {
             "description": "Class AMP_Validation_Error_Taxonomy",
             "long_description": "",
@@ -5854,7 +5854,7 @@
             }
         ]
     },
-    "87": {
+    "88": {
         "file": {
             "description": "Deprecated functions.",
             "long_description": "",
@@ -6325,7 +6325,7 @@
             }
         ]
     },
-    "110": {
+    "111": {
         "file": {
             "description": "Functions for managing legacy templates",
             "long_description": "",
@@ -6386,7 +6386,7 @@
         ],
         "hooks": []
     },
-    "117": {
+    "118": {
         "file": {
             "description": "Class MobileRedirection.",
             "long_description": "",
@@ -6538,7 +6538,7 @@
             }
         ]
     },
-    "126": {
+    "127": {
         "file": {
             "description": "Fetches and formats data for AMP reader themes.",
             "long_description": "",
@@ -6604,7 +6604,7 @@
             }
         ]
     },
-    "128": {
+    "129": {
         "file": {
             "description": "Class OptionsMenu",
             "long_description": "",
@@ -6655,7 +6655,7 @@
             }
         ]
     },
-    "146": {
+    "147": {
         "file": {
             "description": "Class MonitorCssTransientCaching.",
             "long_description": "",
@@ -6726,7 +6726,7 @@
             }
         ]
     },
-    "151": {
+    "152": {
         "file": {
             "description": "Class UserAccess.",
             "long_description": "",
