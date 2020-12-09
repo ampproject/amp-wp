@@ -2243,6 +2243,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 		$state_vars = implode( ',', $toggles_to_disable_for_body );
 		AMP_DOM_Utils::add_amp_action( $this->dom->body, 'tap', "AMP.setState({{$state_vars}})" );
+		$this->dom->body->setAttribute( 'role', 'document' );
+		$this->dom->body->setAttribute( 'tabindex', '-1' );
 	}
 
 	/**
