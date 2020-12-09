@@ -399,6 +399,26 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( $expected, $content );
 	}
 
+	/** @covers ::add_twentyfourteen_search() */
+	public function test_add_twentyfourteen_search() {
+		$html = '
+			<div class="search-toggle">
+				<a href="#"></a>
+			</div>
+			<div id="search-container">
+				<input type="text" name="s">
+			</div>
+		';
+
+		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
+
+		( new AMP_Core_Theme_Sanitizer( $dom ) )->add_twentyfourteen_search();
+
+		$this->assertEquals( 1, $dom->xpath->query( '//div[ @id = "search-container" and @data-amp-bind-class and ./amp-state[ ./script ] ]' )->length );
+		$this->assertEquals( 1, $dom->xpath->query( '//a[ not( @href ) and @on and @tabindex and @role and @aria-expanded and @data-amp-bind-aria-expanded ]' )->length );
+		$this->assertEquals( 1, $dom->xpath->query( '//div[ @class = "search-toggle" and @data-amp-bind-class ]' )->length );
+	}
+
 	/**
 	 * Tests amend_twentytwentyone_sub_menu_toggles.
 	 *
