@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { get, now, template } from 'lodash';
+import { featuredImageMinimumWidth, featuredImageMinimumHeight } from 'amp-block-editor-data';
 
 /**
  * WordPress dependencies
@@ -55,8 +56,8 @@ export const hasMinimumDimensions = ( media, dimensions ) => {
  */
 export const getMinimumFeaturedImageDimensions = () => {
 	return {
-		width: parseInt( window?.ampBlockEditor?.featuredImageMinimumWidth ) || 1200,
-		height: parseInt( window?.ampBlockEditor?.featuredImageMinimumHeight ) || 675,
+		width: parseInt( featuredImageMinimumWidth ),
+		height: parseInt( featuredImageMinimumHeight ),
 	};
 };
 
