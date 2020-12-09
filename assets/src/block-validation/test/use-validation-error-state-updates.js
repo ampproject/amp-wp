@@ -20,6 +20,7 @@ jest.mock( '@wordpress/data/build/components/use-select', () => {
 		blockOrder: [],
 		currentPost: { id: 1 },
 		getBlock: () => null,
+		getBlocks: () => [],
 		validationErrorsFromPost: require( './__data__/raw-validation-errors' ).rawValidationErrors,
 	} );
 } );
