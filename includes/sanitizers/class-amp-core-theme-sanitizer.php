@@ -2061,8 +2061,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					return;
 				}
 
+				/** @var _WP_Dependency $dependency */
+				$dependency = wp_styles()->registered[ $style_handle ];
+
 				// Set the registered handle as an alias for other stylesheets to depend on.
-				wp_styles()->registered[ $style_handle ]->src = false;
+				$dependency->src = false;
 
 				$styles = file_get_contents( $css_file ); //phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
@@ -2112,7 +2115,13 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					}
 				';
 
-				wp_add_inline_style( $style_handle, $new_styles );
+				// Ideally wp_add_inline_style() would accept a $position argument like wp_add_inline_script() does, in
+				// which case the following could be replaced with wp_add_inline_style( $style_handle, $new_styles, 'before' ).
+				// But this is not supported, so we have to resort to manipulating the underlying after array.
+				if ( ! isset( $dependency->extra['after'] ) ) {
+					$dependency->extra['after'] = [];
+				}
+				array_unshift( $dependency->extra['after'], $new_styles );
 			},
 			11
 		);
