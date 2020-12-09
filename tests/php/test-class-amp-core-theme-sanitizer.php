@@ -150,6 +150,37 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( $supported_themes, AMP_Core_Theme_Sanitizer::get_supported_themes() );
 	}
 
+	/** @covers ::dequeue_scripts() */
+	public function test_dequeue_scripts() {
+		$handle = 'foo';
+		wp_enqueue_script( $handle, 'a/random/source' );
+
+		AMP_Core_Theme_Sanitizer::dequeue_scripts( [ $handle ] );
+
+		wp_enqueue_scripts();
+
+		$this->assertFalse( wp_script_is( $handle ) );
+	}
+
+	/** @covers ::force_svg_support() */
+	public function test_force_svg_support() {
+		$dom = AMP_DOM_Utils::get_dom_from_content('');
+		$dom->documentElement->setAttribute( 'class', 'no-svg' );
+
+		( new AMP_Core_Theme_Sanitizer( $dom ) )->force_svg_support();
+
+		$this->assertEquals( ' svg ', $dom->documentElement->getAttribute( 'class' ) );
+	}
+
+	/** @covers ::force_fixed_background_support() */
+	public function test_force_fixed_background_support() {
+		$dom = AMP_DOM_Utils::get_dom_from_content('');
+
+		( new AMP_Core_Theme_Sanitizer( $dom ) )->force_fixed_background_support();
+
+		$this->assertStringEndsWith( ' background-fixed', $dom->documentElement->getAttribute( 'class' ) );
+	}
+
 	/**
 	 * Test extend_theme_support().
 	 *
