@@ -26,7 +26,6 @@ class Test_AMP_Post_Template_Functions extends WP_UnitTestCase {
 		$this->assertSame( 10, has_action( 'amp_post_template_head', 'amp_post_template_add_title' ) );
 		$this->assertSame( 10, has_action( 'amp_post_template_head', 'amp_post_template_add_canonical' ) );
 		$this->assertSame( 10, has_action( 'amp_post_template_head', 'amp_post_template_add_fonts' ) );
-		$this->assertSame( 10, has_action( 'amp_post_template_head', 'amp_print_schemaorg_metadata' ) );
 		$this->assertSame( 10, has_action( 'amp_post_template_head', 'amp_add_generator_metadata' ) );
 		$this->assertSame( 10, has_action( 'amp_post_template_head', 'wp_generator' ) );
 		$this->assertSame( 10, has_action( 'amp_post_template_head', 'amp_post_template_add_block_styles' ) );
