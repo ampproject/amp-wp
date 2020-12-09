@@ -127,6 +127,7 @@ function amp_post_template_add_styles( $amp_template ) {
  * Add analytics scripts.
  *
  * @internal
+ * @deprecated This is no longer necessary.
  *
  * @param array $data Data.
  * @return array Data.
