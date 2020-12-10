@@ -78,6 +78,41 @@ final class SavePostValidationEventTest extends WP_UnitTestCase {
 		);
 	}
 
+	/** @covers ::schedule_event() */
+	public function test_schedule_event_with_no_post() {
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
+
+		$event_was_scheduled = false;
+		$filter_cb           = function () use ( &$event_was_scheduled ) {
+			$event_was_scheduled = true;
+			return null;
+		};
+		add_filter( 'pre_schedule_event', $filter_cb );
+
+		$this->test_instance->schedule_event( [] );
+
+		$this->assertFalse( $event_was_scheduled );
+
+		remove_filter( 'pre_schedule_event', $filter_cb );
+	}
+
+	/** @covers ::schedule_event() */
+	public function test_schedule_event_with_post() {
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
+
+		$event_was_scheduled = false;
+		$filter_cb           = function () use ( &$event_was_scheduled ) {
+			$event_was_scheduled = true;
+			return null;
+		};
+		add_filter( 'pre_schedule_event', $filter_cb );
+
+		$post = $this->factory()->post->create();
+		$this->test_instance->schedule_event( [ $post ] );
+
+		$this->assertTrue( $event_was_scheduled );
+	}
+
 	/** @covers ::should_schedule_event() */
 	public function test_should_schedule_event() {
 		// No user set.
