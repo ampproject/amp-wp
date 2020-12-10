@@ -91,17 +91,17 @@ final class SavePostValidationEventTest extends WP_UnitTestCase {
 		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		$event_was_scheduled = false;
-		$filter_cb           = function () use ( &$event_was_scheduled ) {
+		$filter_cb           = function ( $event ) use ( &$event_was_scheduled ) {
 			$event_was_scheduled = true;
-			return null;
+			return $event;
 		};
-		add_filter( 'pre_schedule_event', $filter_cb );
+		add_filter( 'schedule_event', $filter_cb );
 
 		$this->test_instance->schedule_event( [] );
 
 		$this->assertFalse( $event_was_scheduled );
 
-		remove_filter( 'pre_schedule_event', $filter_cb );
+		remove_filter( 'schedule_event', $filter_cb );
 	}
 
 	/** @covers ::schedule_event() */
@@ -110,11 +110,11 @@ final class SavePostValidationEventTest extends WP_UnitTestCase {
 		$this->dev_tools_user_access->set_user_enabled( wp_get_current_user(), true );
 
 		$event_was_scheduled = false;
-		$filter_cb           = function () use ( &$event_was_scheduled ) {
+		$filter_cb           = function ( $event ) use ( &$event_was_scheduled ) {
 			$event_was_scheduled = true;
-			return null;
+			return $event;
 		};
-		add_filter( 'pre_schedule_event', $filter_cb );
+		add_filter( 'schedule_event', $filter_cb );
 
 		$post = $this->factory()->post->create();
 
@@ -122,7 +122,7 @@ final class SavePostValidationEventTest extends WP_UnitTestCase {
 
 		$this->assertTrue( $event_was_scheduled );
 
-		remove_filter( 'pre_schedule_event', $filter_cb );
+		remove_filter( 'schedule_event', $filter_cb );
 	}
 
 	/** @covers ::should_schedule_event() */
