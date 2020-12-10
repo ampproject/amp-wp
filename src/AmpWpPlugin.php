@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP;
 use AmpProject\AmpWP\Admin;
 use AmpProject\AmpWP\BackgroundTask;
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
+use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Infrastructure\ServiceBasedPlugin;
 use AmpProject\AmpWP\Instrumentation;
 use AmpProject\AmpWP\Validation\SavePostValidationEvent;
@@ -167,6 +168,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			DevTools\CallbackReflection::class,
 			DevTools\FileReflection::class,
 			ReaderThemeLoader::class,
+			Injector::class,
 		];
 	}
 
@@ -182,6 +184,10 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 * @return array<callable> Associative array of callables.
 	 */
 	protected function get_delegations() {
-		return [];
+		return [
+			Injector::class => static function () {
+				return Services::get( 'injector' );
+			},
+		];
 	}
 }
