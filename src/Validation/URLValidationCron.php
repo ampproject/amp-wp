@@ -63,8 +63,10 @@ final class URLValidationCron extends CronBasedBackgroundTask {
 
 	/**
 	 * Callback for the cron action.
+	 *
+	 * @param mixed[] ...$args Unused callback arguments.
 	 */
-	public function process() {
+	public function process( ...$args ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		$number_per_type         = $this->get_url_validation_number_per_type();
 		$validation_url_provider = $this->injector->make( ScannableURLProvider::class, [ $number_per_type, [], true ] );
 		$urls                    = $validation_url_provider->get_urls();

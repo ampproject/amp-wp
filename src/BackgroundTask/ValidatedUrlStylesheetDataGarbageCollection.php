@@ -58,9 +58,10 @@ final class ValidatedUrlStylesheetDataGarbageCollection extends CronBasedBackgro
 	/**
 	 * Process a single cron tick.
 	 *
+	 * @param mixed[] ...$args Unused callback arguments.
 	 * @return void
 	 */
-	public function process() {
+	public function process( ...$args ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		AMP_Validated_URL_Post_Type::delete_stylesheets_postmeta_batch( 100, '1 week ago' );
 	}
 }

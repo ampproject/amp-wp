@@ -29,7 +29,7 @@ abstract class CronBasedBackgroundTask implements Service, Registerable, Conditi
 	 *
 	 * @var BackgroundTaskDeactivator
 	 */
-	private $background_task_deactivator;
+	protected $background_task_deactivator;
 
 	/**
 	 * Class constructor.
@@ -56,6 +56,7 @@ abstract class CronBasedBackgroundTask implements Service, Registerable, Conditi
 	 */
 	public function register() {
 		$this->background_task_deactivator->add_event( $this->get_event_name() );
+
 		add_action( 'admin_init', [ $this, 'schedule_event' ] );
 		add_action( $this->get_event_name(), [ $this, 'process' ] );
 	}
@@ -101,9 +102,9 @@ abstract class CronBasedBackgroundTask implements Service, Registerable, Conditi
 	abstract protected function get_event_name();
 
 	/**
-	 * Process a single cron tick.
+	 * Process the event.
 	 *
-	 * @return void
+	 * @param mixed[] ...$args Args to pass to the process callback.
 	 */
-	abstract public function process();
+	abstract public function process( ...$args );
 }
