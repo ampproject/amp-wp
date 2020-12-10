@@ -5,6 +5,7 @@ namespace AmpProject\AmpWP\Tests\Validation;
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\CronBasedBackgroundTask;
 use AmpProject\AmpWP\Infrastructure\Conditional;
+use AmpProject\AmpWP\Infrastructure\Injector\SimpleInjector;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
@@ -30,7 +31,7 @@ final class URLValidationCronTest extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
-		$this->test_instance = new URLValidationCron( new BackgroundTaskDeactivator() );
+		$this->test_instance = new URLValidationCron( new BackgroundTaskDeactivator(), new SimpleInjector() );
 		add_filter( 'pre_http_request', [ $this, 'get_validate_response' ] );
 	}
 

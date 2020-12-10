@@ -8,7 +8,9 @@
 
 namespace AmpProject\AmpWP\Validation;
 
+use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\CronBasedBackgroundTask;
+use AmpProject\AmpWP\Infrastructure\Injector;
 
 /**
  * URLValidationCron class.
@@ -18,6 +20,14 @@ use AmpProject\AmpWP\BackgroundTask\CronBasedBackgroundTask;
  * @internal
  */
 final class URLValidationCron extends CronBasedBackgroundTask {
+
+	/**
+	 * Injector instance.
+	 *
+	 * @var Injector
+	 */
+	private $injector;
+
 	/**
 	 * The cron action name.
 	 *
@@ -40,15 +50,25 @@ final class URLValidationCron extends CronBasedBackgroundTask {
 	const DEFAULT_SLEEP_TIME = 1;
 
 	/**
+	 * Class constructor.
+	 *
+	 * @param BackgroundTaskDeactivator $background_task_deactivator Service that deactivates background events.
+	 */
+	public function __construct( BackgroundTaskDeactivator $background_task_deactivator, Injector $injector ) {
+		parent::__construct( $background_task_deactivator );
+
+		$this->injector = $injector;
+	}
+
+	/**
 	 * Callback for the cron action.
 	 */
 	public function process() {
 		$number_per_type         = $this->get_url_validation_number_per_type();
-		$validation_url_provider = new ScannableURLProvider( $number_per_type, [], true );
+		$validation_url_provider = $this->injector->make( ScannableURLProvider::class, [ $number_per_type, [], true ] );
 		$urls                    = $validation_url_provider->get_urls();
 		$sleep_time              = $this->get_sleep_time();
-
-		$validation_provider = new URLValidationProvider();
+		$validation_provider     = $this->injector->make( URLValidationProvider::class );
 
 		foreach ( $urls as $url ) {
 			$validation_provider->get_url_validation( $url['url'], $url['type'], true );

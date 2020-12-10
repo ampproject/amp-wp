@@ -8,6 +8,7 @@ namespace AmpProject\AmpWP\Tests\Validation;
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\SingleScheduledBackgroundTask;
 use AmpProject\AmpWP\DevTools\UserAccess;
+use AmpProject\AmpWP\Infrastructure\Injector\SimpleInjector;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
@@ -31,7 +32,7 @@ final class SavePostValidationEventTest extends WP_UnitTestCase {
 	private $test_instance;
 
 	public function setUp() {
-		$this->test_instance = new SavePostValidationEvent( new BackgroundTaskDeactivator(), new UserAccess() );
+		$this->test_instance = new SavePostValidationEvent( new BackgroundTaskDeactivator(), new SimpleInjector(), new UserAccess() );
 		add_filter( 'pre_http_request', [ $this, 'get_validate_response' ] );
 	}
 

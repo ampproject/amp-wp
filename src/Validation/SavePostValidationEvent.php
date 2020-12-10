@@ -11,6 +11,7 @@ namespace AmpProject\AmpWP\Validation;
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\SingleScheduledBackgroundTask;
 use AmpProject\AmpWP\DevTools\UserAccess;
+use AmpProject\AmpWP\Infrastructure\Injector;
 
 /**
  * SavePostValidationEvent class.
@@ -20,6 +21,13 @@ use AmpProject\AmpWP\DevTools\UserAccess;
  * @internal
  */
 final class SavePostValidationEvent extends SingleScheduledBackgroundTask {
+
+	/**
+	 * Injector instance.
+	 *
+	 * @var Injector
+	 */
+	private $injector;
 
 	/**
 	 * Instance of URLValidationProvider
@@ -46,11 +54,13 @@ final class SavePostValidationEvent extends SingleScheduledBackgroundTask {
 	 * Class constructor.
 	 *
 	 * @param BackgroundTaskDeactivator $background_task_deactivator Background task deactivator instance.
+	 * @param Injector                  $injector Injector instance.
 	 * @param UserAccess                $dev_tools_user_access Dev tools user access class instance.
 	 */
-	public function __construct( BackgroundTaskDeactivator $background_task_deactivator, UserAccess $dev_tools_user_access ) {
+	public function __construct( BackgroundTaskDeactivator $background_task_deactivator, Injector $injector, UserAccess $dev_tools_user_access ) {
 		parent::__construct( $background_task_deactivator );
 
+		$this->injector              = $injector;
 		$this->dev_tools_user_access = $dev_tools_user_access;
 	}
 
@@ -141,7 +151,7 @@ final class SavePostValidationEvent extends SingleScheduledBackgroundTask {
 	 */
 	private function get_url_validation_provider() {
 		if ( is_null( $this->url_validation_provider ) ) {
-			$this->url_validation_provider = new URLValidationProvider();
+			$this->url_validation_provider = $this->injector->make( URLValidationProvider::class );
 		}
 
 		return $this->url_validation_provider;
