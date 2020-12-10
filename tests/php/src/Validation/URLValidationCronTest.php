@@ -66,7 +66,7 @@ final class URLValidationCronTest extends WP_UnitTestCase {
 		add_filter( 'amp_url_validation_sleep_time', '__return_false' );
 
 		$this->test_instance->process();
-		$this->assertCount( 6, $this->get_validated_urls() );
+		$this->assertCount( 10, $this->get_validated_urls() );
 	}
 
 	/** @covers ::get_event_name() */
