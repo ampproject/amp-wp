@@ -56,32 +56,14 @@ abstract class CronBasedBackgroundTask implements Service, Registerable, Conditi
 	 */
 	public function register() {
 		$this->background_task_deactivator->add_event( $this->get_event_name() );
-
-		add_action( 'admin_init', [ $this, 'schedule_event' ] );
-		add_action( $this->get_event_name(), [ $this, 'process' ] );
 	}
 
 	/**
 	 * Schedule the event.
 	 *
-	 * This does nothing if the event is already scheduled.
-	 *
-	 * @return void
+	 * @param mixed[] ...$args Arguments passed to the function from the action hook.
 	 */
-	public function schedule_event() {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return;
-		}
-
-		$event_name = $this->get_event_name();
-		$timestamp  = wp_next_scheduled( $event_name );
-
-		if ( $timestamp ) {
-			return;
-		}
-
-		wp_schedule_event( time(), $this->get_interval(), $event_name );
-	}
+	abstract protected function schedule_event( ...$args );
 
 	/**
 	 * Get the interval to use for the event.

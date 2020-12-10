@@ -20,7 +20,7 @@ abstract class SingleScheduledBackgroundTask extends CronBasedBackgroundTask {
 	 * Register the service with the system.
 	 */
 	public function register() {
-		$this->background_task_deactivator->add_event( $this->get_event_name() );
+		parent::register();
 
 		add_action( $this->get_action_hook(), [ $this, 'schedule_event' ], 10, $this->get_action_hook_arg_count() );
 		add_action( $this->get_event_name(), [ $this, 'process' ] );

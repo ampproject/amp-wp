@@ -24,7 +24,7 @@ use AMP_Validated_URL_Post_Type;
  * @package AmpProject\AmpWP
  * @internal
  */
-final class ValidatedUrlStylesheetDataGarbageCollection extends CronBasedBackgroundTask {
+final class ValidatedUrlStylesheetDataGarbageCollection extends RecurringBackgroundTask {
 
 	/**
 	 * Name of the event to schedule.

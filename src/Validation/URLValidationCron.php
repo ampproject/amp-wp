@@ -9,7 +9,7 @@
 namespace AmpProject\AmpWP\Validation;
 
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
-use AmpProject\AmpWP\BackgroundTask\CronBasedBackgroundTask;
+use AmpProject\AmpWP\BackgroundTask\RecurringBackgroundTask;
 use AmpProject\AmpWP\Infrastructure\Injector;
 
 /**
@@ -19,7 +19,7 @@ use AmpProject\AmpWP\Infrastructure\Injector;
  *
  * @internal
  */
-final class URLValidationCron extends CronBasedBackgroundTask {
+final class URLValidationCron extends RecurringBackgroundTask {
 
 	/**
 	 * Injector instance.

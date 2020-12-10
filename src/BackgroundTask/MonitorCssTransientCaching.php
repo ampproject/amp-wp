@@ -22,7 +22,7 @@ use Exception;
  * @since 2.0
  * @internal
  */
-final class MonitorCssTransientCaching extends CronBasedBackgroundTask {
+final class MonitorCssTransientCaching extends RecurringBackgroundTask {
 
 	/**
 	 * Name of the event to schedule.
