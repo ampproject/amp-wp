@@ -91,7 +91,7 @@ final class SavePostValidationEventTest extends WP_UnitTestCase {
 		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		$event_was_scheduled = false;
-		$filter_cb           = function ( $event ) use ( &$event_was_scheduled ) {
+		$filter_cb           = static function ( $event ) use ( &$event_was_scheduled ) {
 			$event_was_scheduled = true;
 			return $event;
 		};
@@ -110,7 +110,7 @@ final class SavePostValidationEventTest extends WP_UnitTestCase {
 		$this->dev_tools_user_access->set_user_enabled( wp_get_current_user(), true );
 
 		$event_was_scheduled = false;
-		$filter_cb           = function ( $event ) use ( &$event_was_scheduled ) {
+		$filter_cb           = static function ( $event ) use ( &$event_was_scheduled ) {
 			$event_was_scheduled = true;
 			return $event;
 		};
