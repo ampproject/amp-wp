@@ -87,7 +87,7 @@ final class SavePostValidationEventTest extends WP_UnitTestCase {
 	}
 
 	/** @covers ::schedule_event() */
-	public function xtest_schedule_event_with_no_post() {
+	public function test_schedule_event_with_no_post() {
 		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		$event_was_scheduled = false;
@@ -126,7 +126,7 @@ final class SavePostValidationEventTest extends WP_UnitTestCase {
 	}
 
 	/** @covers ::should_schedule_event() */
-	public function xtest_should_schedule_event() {
+	public function test_should_schedule_event() {
 		// No user set.
 		$this->assertFalse( $this->call_private_method( $this->test_instance, 'should_schedule_event', [ [] ] ) );
 
@@ -143,7 +143,7 @@ final class SavePostValidationEventTest extends WP_UnitTestCase {
 	}
 
 	/** @covers ::get_action_hook() */
-	public function xtest_get_action_hook() {
+	public function test_get_action_hook() {
 		$this->assertEquals( 'save_post', $this->call_private_method( $this->test_instance, 'get_action_hook' ) );
 	}
 }
