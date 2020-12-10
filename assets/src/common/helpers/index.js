@@ -56,8 +56,8 @@ export const hasMinimumDimensions = ( media, dimensions ) => {
  */
 export const getMinimumFeaturedImageDimensions = () => {
 	return {
-		width: parseInt( featuredImageMinimumWidth ),
-		height: parseInt( featuredImageMinimumHeight ),
+		width: featuredImageMinimumWidth,
+		height: featuredImageMinimumHeight,
 	};
 };
 

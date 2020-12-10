@@ -275,10 +275,10 @@ class AMP_Post_Meta_Box {
 			self::get_featured_image_dimensions()
 		);
 
-		wp_localize_script(
+		wp_add_inline_script(
 			self::BLOCK_ASSET_HANDLE,
-			'ampBlockEditor',
-			$data
+			sprintf( 'var ampBlockEditor = %s;', wp_json_encode( $data ) ),
+			'before'
 		);
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {
