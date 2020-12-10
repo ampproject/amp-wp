@@ -3888,16 +3888,16 @@
         },
         {
             "name": "wp-cli/extension-command",
-            "version": "v2.0.13",
+            "version": "v2.0.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-cli/extension-command.git",
-                "reference": "2f97fee8f06c68187d052b89a2861bab7a57d833"
+                "reference": "13ad58b97123c61a0760d2fefdd844ff53cfa4bd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wp-cli/extension-command/zipball/2f97fee8f06c68187d052b89a2861bab7a57d833",
-                "reference": "2f97fee8f06c68187d052b89a2861bab7a57d833",
+                "url": "https://api.github.com/repos/wp-cli/extension-command/zipball/13ad58b97123c61a0760d2fefdd844ff53cfa4bd",
+                "reference": "13ad58b97123c61a0760d2fefdd844ff53cfa4bd",
                 "shasum": ""
             },
             "require": {
@@ -3976,7 +3976,7 @@
             ],
             "description": "Manages plugins and themes, including installs, activations, and updates.",
             "homepage": "https://github.com/wp-cli/extension-command",
-            "time": "2020-11-01T21:54:20+00:00"
+            "time": "2020-12-07T19:28:04+00:00"
         },
         {
             "name": "wp-cli/mustangostang-spyc",
