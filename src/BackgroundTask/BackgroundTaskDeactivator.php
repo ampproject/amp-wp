@@ -97,7 +97,7 @@ final class BackgroundTaskDeactivator implements Service, Conditional, Registera
 			foreach ( get_sites(
 				[
 					'fields' => 'ids',
-					'number' => 0,
+					'number' => 0, // Disables pagination to retrieve all sites. 
 				]
 			) as $blog_id ) {
 				switch_to_blog( $blog_id );
