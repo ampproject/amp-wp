@@ -223,7 +223,7 @@ final class ReaderThemes {
 				'query_themes',
 				[
 					'author'   => 'wordpressdotorg',
-					'per_page' => 24, // There are only 12 as of 05/2020.
+					'per_page' => 24, // There are only 13 as of 12/2020.
 				]
 			);
 

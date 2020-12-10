@@ -416,6 +416,17 @@ final class MobileRedirection implements Service, Registerable {
 			return;
 		}
 		$source = file_get_contents( AMP__DIR__ . '/assets/css/amp-mobile-version-switcher' . ( is_rtl() ? '-rtl' : '' ) . '.css' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+
+		if ( 'twentytwentyone' === get_template() ) {
+			// When on a non-AMP page and the mobile menu is open, the mobile version link is incorrectly shown at the
+			// top of the page. In that case, the mobile version link is hidden.
+			$source .= '
+				body.lock-scrolling > #amp-mobile-version-switcher {
+					display: none;
+				}
+			';
+		}
+
 		printf( '<style>%s</style>', $source ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
