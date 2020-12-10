@@ -62,7 +62,7 @@ final class SavePostValidationEvent extends SingleScheduledBackgroundTask {
 	public function process( ...$args ) {
 		$post_id = reset( $args );
 
-		if ( empty( get_post( $post_id ) ) ) {
+		if ( empty( $post_id ) || empty( get_post( $post_id ) ) ) {
 			return;
 		}
 
