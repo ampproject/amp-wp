@@ -113,7 +113,14 @@ final class URLValidationCron extends CronBasedBackgroundTask {
 		 *
 		 * @param int The number of URLs. Default 1.
 		 */
-		return (int) apply_filters( 'amp_url_validation_number_per_type', self::DEFAULT_LIMIT_PER_TYPE );
+		$url_validation_number_per_type = apply_filters( 'amp_url_validation_number_per_type', self::DEFAULT_LIMIT_PER_TYPE );
+
+		// Valid values are any integer -1 and above.
+		if ( -1 > $url_validation_number_per_type ) {
+			return 1;
+		}
+
+		return $url_validation_number_per_type;
 	}
 
 	/**
@@ -128,6 +135,6 @@ final class URLValidationCron extends CronBasedBackgroundTask {
 		 *
 		 * @param int The number of seconds. Default 1.
 		 */
-		return (int) apply_filters( 'amp_url_validation_sleep_time', self::DEFAULT_SLEEP_TIME );
+		return absint( apply_filters( 'amp_url_validation_sleep_time', self::DEFAULT_SLEEP_TIME ) );
 	}
 }
