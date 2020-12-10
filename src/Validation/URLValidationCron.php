@@ -53,6 +53,7 @@ final class URLValidationCron extends CronBasedBackgroundTask {
 	 * Class constructor.
 	 *
 	 * @param BackgroundTaskDeactivator $background_task_deactivator Service that deactivates background events.
+	 * @param Injector                  $injector Injector instance.
 	 */
 	public function __construct( BackgroundTaskDeactivator $background_task_deactivator, Injector $injector ) {
 		parent::__construct( $background_task_deactivator );
