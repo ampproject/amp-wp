@@ -32,7 +32,8 @@
     "@wordpress/icons": "2.8.0",
     "@wordpress/url": "2.19.0",
     "classnames": "2.2.6",
-    "prop-types": "15.7.2"
+    "prop-types": "15.7.2",
+    "uuid": "8.3.2"
   },
   "devDependencies": {
     "@babel/core": "7.12.9",
@@ -50,7 +51,6 @@
     "@wordpress/jest-puppeteer-axe": "1.10.0",
     "@wordpress/plugins": "2.23.0",
     "@wordpress/scripts": "12.5.0",
-    "autoprefixer": "10.1.0",
     "babel-plugin-inline-react-svg": "1.1.2",
     "babel-plugin-transform-react-remove-prop-types": "0.4.24",
     "copy-webpack-plugin": "6.4.0",
@@ -80,7 +80,6 @@
     "postcss-nested": "5.0.1",
     "postcss-preset-env": "6.7.0",
     "puppeteer": "5.5.0",
-    "rtlcss": "2.6.2",
     "rtlcss-webpack-plugin": "4.0.4",
     "terser-webpack-plugin": "4.2.3",
     "webpackbar": "4.0.0"
