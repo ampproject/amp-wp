@@ -52,6 +52,38 @@ final class URLValidationCronTest extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( URLValidationCron::BACKGROUND_TASK_NAME, [ $this->test_instance, 'process' ] ) );
 	}
 
+	/** @covers ::schedule_event() */
+	public function test_schedule_event_with_no_user() {
+		$event_name = $this->call_private_method( $this->test_instance, 'get_event_name' );
+
+		// No logged-in user.
+		$this->test_instance->schedule_event();
+
+		$this->assertFalse( wp_next_scheduled( $event_name ) );
+	}
+
+	/** @covers ::schedule_event() */
+	public function test_schedule_event_with_user_without_permission() {
+		$event_name = $this->call_private_method( $this->test_instance, 'get_event_name' );
+
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'subscriber' ] ) );
+
+		$this->test_instance->schedule_event();
+
+		$this->assertFalse( wp_next_scheduled( $event_name ) );
+	}
+
+	/** @covers ::schedule_event() */
+	public function test_schedule_event_with_user_with_permission() {
+		$event_name = $this->call_private_method( $this->test_instance, 'get_event_name' );
+
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
+
+		$this->test_instance->schedule_event();
+
+		$this->assertNotFalse( wp_next_scheduled( $event_name ) );
+	}
+
 	/**
 	 * Test validate_urls.
 	 *
