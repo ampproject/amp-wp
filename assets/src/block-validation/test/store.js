@@ -20,11 +20,11 @@ describe( 'Block validation data store', () => {
 		dispatch( BLOCK_VALIDATION_STORE_KEY ).setIsShowingReviewed( false );
 		expect( select( BLOCK_VALIDATION_STORE_KEY ).getIsShowingReviewed() ).toBe( false );
 
-		expect( select( BLOCK_VALIDATION_STORE_KEY ).getAMPBroken() ).toBe( false );
+		expect( select( BLOCK_VALIDATION_STORE_KEY ).getAMPCompatibilityBroken() ).toBe( false );
 
 		dispatch( BLOCK_VALIDATION_STORE_KEY ).setValidationErrors( rawValidationErrors );
 
-		expect( select( BLOCK_VALIDATION_STORE_KEY ).getAMPBroken() ).toBe( true );
+		expect( select( BLOCK_VALIDATION_STORE_KEY ).getAMPCompatibilityBroken() ).toBe( true );
 		expect( select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors() ).toHaveLength( 8 );
 		expect( select( BLOCK_VALIDATION_STORE_KEY ).getReviewedValidationErrors() ).toHaveLength( 3 );
 		expect( select( BLOCK_VALIDATION_STORE_KEY ).getUnreviewedValidationErrors() ).toHaveLength( 5 );

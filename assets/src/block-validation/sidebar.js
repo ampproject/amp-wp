@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { CheckboxControl, PanelBody } from '@wordpress/components';
+import { ToggleControl, PanelBody } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
@@ -10,9 +10,11 @@ import { useEffect } from '@wordpress/element';
  * Internal dependencies
  */
 import './style.css';
+import AMPValidationErrorsIcon from '../../images/amp-validation-errors.svg';
+import AMPValidationErrorsKeptIcon from '../../images/amp-validation-errors-kept.svg';
 import { Error } from './error';
 import { BLOCK_VALIDATION_STORE_KEY } from './store';
-import { BrokenIconSVG, NewTabIcon } from './icon';
+import { NewTabIcon } from './icon';
 import { AMP_VALIDITY_REST_FIELD_NAME } from './constants';
 
 /**
@@ -21,8 +23,8 @@ import { AMP_VALIDITY_REST_FIELD_NAME } from './constants';
 export function Sidebar() {
 	const { setIsShowingReviewed } = useDispatch( BLOCK_VALIDATION_STORE_KEY );
 
-	const { ampBroken, isShowingReviewed, published, reviewLink } = useSelect( ( select ) => ( {
-		ampBroken: select( BLOCK_VALIDATION_STORE_KEY ).getAMPBroken(),
+	const { ampCompatibilityBroken, isShowingReviewed, published, reviewLink } = useSelect( ( select ) => ( {
+		ampCompatibilityBroken: select( BLOCK_VALIDATION_STORE_KEY ).getAMPCompatibilityBroken(),
 		isShowingReviewed: select( BLOCK_VALIDATION_STORE_KEY ).getIsShowingReviewed(),
 		published: 'publish' === select( 'core/editor' )?.getEditedPostAttribute( 'status' ),
 		// eslint-disable-next-line camelcase
@@ -67,35 +69,56 @@ export function Sidebar() {
 
 	return (
 		<div className="amp-sidebar">
-			{
-				ampBroken && (
-					<PanelBody opened={ true } className="amp-sidebar__broken">
-						<BrokenIconSVG />
-						<p>
-							{ __( 'This URL is not fully AMP-compatible because there are validation errors that have not been removed.', 'amp' ) }
-						</p>
-					</PanelBody>
-				)
-			}
 
 			{ 0 < validationErrors.length && (
-				<PanelBody opened={ true }>
-					<h2>
-						{ __( 'Validation Errors', 'amp' ) }
-					</h2>
+				<PanelBody opened={ true } className="amp-sidebar__description-panel">
+					<div className="amp-sidebar__validation-errors-icon">
+						<AMPValidationErrorsIcon />
+					</div>
+					<div>
+						<h2>
+							{ __( 'Validation Errors', 'amp' ) }
+						</h2>
 
-					<p>
-						{ __( 'The following AMP validation errors were found at this URL. ', 'amp' ) }
-						{ reviewLink && (
-							<a href={ reviewLink } className="amp-sidebar__review-link" target="_blank" rel="noreferrer">
-								{ __( 'Review errors.', 'amp' ) }
-								<NewTabIcon />
-							</a>
+						<p>
+							{ reviewLink && (
+								<a href={ reviewLink } className="amp-sidebar__review-link" target="_blank" rel="noreferrer">
+									{ __( 'Review errors', 'amp' ) }
+									<NewTabIcon />
+								</a>
+							) }
+						</p>
+						{ ( 0 < reviewedValidationErrors.length && 0 < unreviewedValidationErrors.length ) && (
+							<ToggleControl
+								checked={ isShowingReviewed }
+								label={ __( 'Include reviewed errors', 'amp' ) }
+								onChange={ ( newIsShowingReviewed ) => {
+									setIsShowingReviewed( newIsShowingReviewed );
+								} }
+							/>
+
 						) }
-					</p>
+					</div>
 
 				</PanelBody>
 			) }
+			{
+				ampCompatibilityBroken && (
+					<div className="amp-sidebar__broken-container">
+						<div className="amp-sidebar__broken">
+							<div className="amp-sidebar__validation-errors-kept-icon">
+								<AMPValidationErrorsKeptIcon />
+							</div>
+							<div>
+								<h3>
+									{ __( 'Validation errors kept', 'amp' ) }
+								</h3>
+								{ __( 'This URL is not fully AMP-compatible.', 'amp' ) }
+							</div>
+						</div>
+					</div>
+				)
+			}
 			{
 				! published && (
 					<PanelBody opened={ true }>
@@ -105,46 +128,31 @@ export function Sidebar() {
 					</PanelBody>
 				)
 			}
-			{ published && validationErrors.length === 0
-				? (
-					<PanelBody opened={ true }>
-						<p>
-							{ __( 'There are no AMP validation errors at this post\'s URL.', 'amp' ) }
-						</p>
-					</PanelBody>
-				)
-				:				(
-					<>
-						{ ( 0 < reviewedValidationErrors.length && 0 < unreviewedValidationErrors.length ) && (
-							<PanelBody opened={ true }>
-								<CheckboxControl
-									checked={ isShowingReviewed }
-									label={ __( 'Include reviewed errors', 'amp' ) }
-									onChange={ ( newIsShowingReviewed ) => {
-										setIsShowingReviewed( newIsShowingReviewed );
-									} }
-								/>
+			{ published && validationErrors.length === 0 && (
+				<PanelBody opened={ true }>
+					<p>
+						{ __( 'There are no AMP validation errors at this post\'s URL.', 'amp' ) }
+					</p>
+				</PanelBody>
+			) }
 
-							</PanelBody>
-						) }
-						{ 0 < displayedErrors.length ? (
-							<ul>
-								{ displayedErrors.map( ( validationError, index ) => (
-									<Error { ...validationError } key={ `${ validationError.clientId }${ index }` } />
-								) ) }
-							</ul>
-						)
-							: published && (
-								<PanelBody opened={ true }>
-									<p>
-										{ __( 'There are no unreviewed AMP validation errors at this post\'s URL.', 'amp' ) }
-									</p>
-								</PanelBody>
-							)
-						}
-
-					</>
+			{ published && 0 < validationErrors.length && (
+				0 < displayedErrors.length ? (
+					<ul>
+						{ displayedErrors.map( ( validationError, index ) => (
+							<Error { ...validationError } key={ `${ validationError.clientId }${ index }` } />
+						) ) }
+					</ul>
 				)
+					: published && (
+						<PanelBody opened={ true }>
+							<p>
+								{ __( 'There are no unreviewed AMP validation errors at this post\'s URL.', 'amp' ) }
+							</p>
+						</PanelBody>
+					)
+
+			)
 			}
 
 		</div>

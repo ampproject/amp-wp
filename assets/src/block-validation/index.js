@@ -29,7 +29,7 @@ createStore( INITIAL_STATE );
  */
 function AMPBlockValidation() {
 	const { broken, errorCount } = useSelect( ( select ) => ( {
-		broken: select( BLOCK_VALIDATION_STORE_KEY ).getAMPBroken(),
+		broken: select( BLOCK_VALIDATION_STORE_KEY ).getAMPCompatibilityBroken(),
 		errorCount: select( BLOCK_VALIDATION_STORE_KEY ).getUnreviewedValidationErrors()?.length || 0,
 	} ) );
 

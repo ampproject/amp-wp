@@ -19,7 +19,7 @@ const SET_IS_SHOWING_REVIEWED = 'SET_IS_SHOWING_REVIEWED';
 const SET_VALIDATION_ERRORS = 'SET_VALIDATION_ERRORS';
 
 export const INITIAL_STATE = {
-	ampBroken: false,
+	ampCompatibilityBroken: false,
 	isShowingReviewed: false,
 	rawValidationErrors: [],
 	reviewLink: null,
@@ -45,7 +45,7 @@ export function createStore( initialState ) {
 					case SET_VALIDATION_ERRORS:
 						return {
 							...state,
-							ampBroken: Boolean(
+							ampCompatibilityBroken: Boolean(
 								action.validationErrors.filter( ( { status } ) =>
 									status === VALIDATION_ERROR_NEW_REJECTED_STATUS || status === VALIDATION_ERROR_ACK_REJECTED_STATUS,
 								)?.length,
@@ -73,7 +73,7 @@ export function createStore( initialState ) {
 				setValidationErrors: ( validationErrors ) => ( { type: SET_VALIDATION_ERRORS, validationErrors } ),
 			},
 			selectors: {
-				getAMPBroken: ( { ampBroken } ) => ampBroken,
+				getAMPCompatibilityBroken: ( { ampCompatibilityBroken } ) => ampCompatibilityBroken,
 				getBlockValidationErrors: ( { validationErrors }, clientId ) => validationErrors.filter( ( error ) => error.clientId === clientId ),
 				getIsShowingReviewed: ( { isShowingReviewed } ) => isShowingReviewed,
 				getValidationErrors: ( { validationErrors } ) => validationErrors,
