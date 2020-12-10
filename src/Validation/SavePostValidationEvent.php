@@ -102,9 +102,19 @@ final class SavePostValidationEvent extends SingleScheduledBackgroundTask {
 			return false;
 		}
 
-		$id = reset( $args );
+		$id   = reset( $args );
+		$post = get_post( $id );
 
-		if ( wp_is_post_revision( $id ) ) {
+		if ( ! $post
+			||
+			wp_is_post_revision( $post )
+			||
+			wp_is_post_autosave( $post )
+			||
+			'auto-draft' === $post->post_status
+			||
+			'trash' === $post->post_status
+		) {
 			return false;
 		}
 
