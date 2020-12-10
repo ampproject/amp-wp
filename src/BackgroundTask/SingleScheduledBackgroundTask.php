@@ -36,7 +36,7 @@ abstract class SingleScheduledBackgroundTask extends CronBasedBackgroundTask {
 			return;
 		}
 
-		wp_schedule_single_event( $this->get_interval(), $this->get_event_name(), $args );
+		wp_schedule_single_event( $this->get_timestamp(), $this->get_event_name(), $args );
 	}
 
 	/**
@@ -44,7 +44,7 @@ abstract class SingleScheduledBackgroundTask extends CronBasedBackgroundTask {
 	 *
 	 * @return int A timestamp. Defaults to the current time.
 	 */
-	protected function get_interval() {
+	protected function get_timestamp() {
 		return time();
 	}
 

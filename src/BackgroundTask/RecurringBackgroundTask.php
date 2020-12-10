@@ -45,4 +45,11 @@ abstract class RecurringBackgroundTask extends CronBasedBackgroundTask {
 
 		wp_schedule_event( time(), $this->get_interval(), $event_name );
 	}
+
+	/**
+	 * Get the interval to use for the event.
+	 *
+	 * @return string An existing interval name. Valid values are 'hourly', 'twicedaily' or 'daily'.
+	 */
+	abstract protected function get_interval();
 }

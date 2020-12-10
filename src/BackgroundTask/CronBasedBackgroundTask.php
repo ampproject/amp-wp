@@ -66,13 +66,6 @@ abstract class CronBasedBackgroundTask implements Service, Registerable, Conditi
 	abstract protected function schedule_event( ...$args );
 
 	/**
-	 * Get the interval to use for the event.
-	 *
-	 * @return string An existing interval name. Valid values are 'hourly', 'twicedaily' or 'daily'.
-	 */
-	abstract protected function get_interval();
-
-	/**
 	 * Get the event name.
 	 *
 	 * This is the "slug" of the event, not the display name.
