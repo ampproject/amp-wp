@@ -309,7 +309,7 @@ class AMP_Post_Meta_Box {
 			/**
 			 * Filters the minimum height required for a featured image.
 			 *
-			 * @since 2.0.8
+			 * @since 2.0.9
 			 *
 			 * @param int $featured_image_minimum_height The minimum height of the image,
 			 * defaults to 675.
@@ -319,7 +319,7 @@ class AMP_Post_Meta_Box {
 			/**
 			 * Filters the minimum width required for a featured image.
 			 *
-			 * @since 2.0.8
+			 * @since 2.0.9
 			 *
 			 * @param int $featured_image_minimum_height The minimum width of the image,
 			 * defaults to 1200.
