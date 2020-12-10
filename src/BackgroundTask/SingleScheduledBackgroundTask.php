@@ -21,6 +21,13 @@ use AmpProject\AmpWP\Infrastructure\Service;
 abstract class SingleScheduledBackgroundTask implements Service, Registerable, Conditional {
 
 	/**
+	 * BackgroundTaskDeactivator instance.
+	 *
+	 * @var BackgroundTaskDeactivator
+	 */
+	private $background_task_deactivator;
+
+	/**
 	 * Check whether the conditional object is currently needed.
 	 *
 	 * @return bool Whether the conditional object is needed.
@@ -35,13 +42,14 @@ abstract class SingleScheduledBackgroundTask implements Service, Registerable, C
 	 * @param BackgroundTaskDeactivator $background_task_deactivator Service that deactivates background events.
 	 */
 	public function __construct( BackgroundTaskDeactivator $background_task_deactivator ) {
-		$background_task_deactivator->add_event( $this->get_event_name() );
+		$this->background_task_deactivator = $background_task_deactivator;
 	}
 
 	/**
 	 * Register the service with the system.
 	 */
 	public function register() {
+		$this->background_task_deactivator->add_event( $this->get_event_name() );
 		add_action( $this->get_action_hook(), [ $this, 'schedule_event' ], 10, $this->get_action_hook_arg_count() );
 		add_action( $this->get_event_name(), [ $this, 'process' ] );
 	}

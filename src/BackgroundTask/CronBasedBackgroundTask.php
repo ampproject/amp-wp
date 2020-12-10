@@ -25,12 +25,19 @@ abstract class CronBasedBackgroundTask implements Service, Registerable, Conditi
 	const DEFAULT_INTERVAL_DAILY       = 'daily';
 
 	/**
+	 * BackgroundTaskDeactivator instance.
+	 *
+	 * @var BackgroundTaskDeactivator
+	 */
+	private $background_task_deactivator;
+
+	/**
 	 * Class constructor.
 	 *
 	 * @param BackgroundTaskDeactivator $background_task_deactivator Service that deactivates background events.
 	 */
 	public function __construct( BackgroundTaskDeactivator $background_task_deactivator ) {
-		$background_task_deactivator->add_event( $this->get_event_name() );
+		$this->background_task_deactivator = $background_task_deactivator;
 	}
 
 	/**
@@ -48,6 +55,7 @@ abstract class CronBasedBackgroundTask implements Service, Registerable, Conditi
 	 * @return void
 	 */
 	public function register() {
+		$this->background_task_deactivator->add_event( $this->get_event_name() );
 		add_action( 'admin_init', [ $this, 'schedule_event' ] );
 		add_action( $this->get_event_name(), [ $this, 'process' ] );
 	}
