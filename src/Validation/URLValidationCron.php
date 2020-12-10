@@ -111,7 +111,7 @@ final class URLValidationCron extends CronBasedBackgroundTask {
 		/**
 		 * Filters the number of URLs per content type to check during each run of the cron task.
 		 *
-		 * @param int The number of URLs. Default 1.
+		 * @param int $url_validation_number_per_type The number of URLs. Default 1.
 		 */
 		$url_validation_number_per_type = apply_filters( 'amp_url_validation_number_per_type', self::DEFAULT_LIMIT_PER_TYPE );
 
