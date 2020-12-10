@@ -103,20 +103,23 @@ final class SavePostValidationEvent extends SingleScheduledBackgroundTask {
 	 * @return boolean
 	 */
 	protected function should_schedule_event( $args ) {
+		if ( ! is_array( $args ) || count( $args ) !== 1 ) {
+			return false;
+		}
+
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return false;
 		}
 
 		// Validation is performed on post save if user has dev tools on.
-		if ( $this->dev_tools_user_access->is_user_enabled( wp_get_current_user() ) ) {
+		if ( ! $this->dev_tools_user_access->is_user_enabled( wp_get_current_user() ) ) {
 			return false;
 		}
 
-		if ( ! is_array( $args ) || count( $args ) !== 1 ) {
+		$id = reset( $args );
+		if ( ! $id ) {
 			return false;
 		}
-
-		$id   = reset( $args );
 		$post = get_post( $id );
 
 		if ( ! $post
