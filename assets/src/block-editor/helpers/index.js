@@ -378,7 +378,7 @@ setUpInspectorControls.propTypes = {
  *
  * @return {ReactElement} Element.
  */
-const AmpLayoutControl = ( props ) => {
+export const AmpLayoutControl = ( props ) => {
 	const { name, attributes: { ampLayout }, setAttributes } = props;
 
 	if ( undefined === ampLayout ) {
