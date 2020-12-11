@@ -417,10 +417,10 @@ AmpLayoutControl.propTypes = {
  *
  * @return {ReactElement} Element.
  */
-const AmpNoloadingToggle = ( props ) => {
+export const AmpNoloadingToggle = ( props ) => {
 	const { attributes: { ampNoLoading }, setAttributes } = props;
 
-	if ( ! ampNoLoading ) {
+	if ( undefined === ampNoLoading ) {
 		return null;
 	}
 
