@@ -101,6 +101,35 @@ final class URLValidationCronTest extends WP_UnitTestCase {
 		$this->assertCount( 10, $this->get_validated_urls() );
 	}
 
+	/** @covers ::@covers ::get_url_validation_number_per_type() */
+	public function test_amp_url_validation_number_per_type() {
+		$this->assertEquals( 1, $this->call_private_method( $this->test_instance, 'get_url_validation_number_per_type' ) );
+
+		add_filter(
+			'amp_url_validation_number_per_type',
+			static function() {
+				return -4;
+			}
+		);
+		$this->assertEquals( 1, $this->call_private_method( $this->test_instance, 'get_url_validation_number_per_type' ) );
+
+		add_filter(
+			'amp_url_validation_number_per_type',
+			static function() {
+				return -1;
+			}
+		);
+		$this->assertEquals( -1, $this->call_private_method( $this->test_instance, 'get_url_validation_number_per_type' ) );
+
+		add_filter(
+			'amp_url_validation_number_per_type',
+			static function() {
+				return 0;
+			}
+		);
+		$this->assertEquals( 0, $this->call_private_method( $this->test_instance, 'get_url_validation_number_per_type' ) );
+	}
+
 	/** @covers ::get_event_name() */
 	public function test_get_event_name() {
 		$this->assertEquals(
