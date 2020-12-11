@@ -1,6 +1,5 @@
 module.exports = {
 	plugins: [
-		require( 'postcss-color-function' ),
 		require( 'postcss-import' ),
 		require( 'postcss-nested' ),
 		require( 'postcss-preset-env' )( {
