@@ -54,6 +54,8 @@ final class SavePostValidationEventTest extends WP_UnitTestCase {
 
 	/**
 	 * @covers ::register()
+	 * @covers ::get_event_name()
+	 * @covers ::get_action_hook_arg_count()
 	 */
 	public function test_register() {
 		$this->test_instance->register();
