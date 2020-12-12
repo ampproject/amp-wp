@@ -312,7 +312,7 @@ class AMP_Post_Meta_Box {
 			 * @since 2.0.9
 			 *
 			 * @param int $featured_image_minimum_height The minimum height of the image,
-			 * defaults to 675.
+			 *                                           defaults to 675.
 			 */
 			'featuredImageMinimumHeight' => (int) apply_filters( 'amp_featured_image_minimum_height', $default_height ),
 
@@ -322,7 +322,7 @@ class AMP_Post_Meta_Box {
 			 * @since 2.0.9
 			 *
 			 * @param int $featured_image_minimum_height The minimum width of the image,
-			 * defaults to 1200.
+			 *                                           defaults to 1200.
 			 */
 			'featuredImageMinimumWidth'  => (int) apply_filters( 'amp_featured_image_minimum_width', $default_width ),
 		];
