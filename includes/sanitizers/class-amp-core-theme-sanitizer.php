@@ -2155,12 +2155,16 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * Make the mobile menu for the Twenty Twenty-One theme AMP compatible.
 	 */
 	public function add_twentytwentyone_mobile_modal() {
-		$menu_query  = $this->dom->xpath->query( "//div[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' primary-menu-container ' ) ]" );
-		$menu_toggle = $this->dom->getElementById( 'primary-mobile-menu' );
+		$menu_query        = $this->dom->xpath->query( "//div[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' primary-menu-container ' ) ]" );
+		$menu_toggle_query = $this->dom->xpath->query( "//button[ @id = 'primary-mobile-menu' and ./span[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' open ' ) ] and ./span[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' close ' ) ] ]" );
 
-		if ( 1 !== $menu_query->length || ! $menu_toggle ) {
+		if ( 1 !== $menu_query->length || 1 !== $menu_toggle_query->length ) {
 			return;
 		}
+
+		$menu_toggle       = $menu_toggle_query->item( 0 );
+		$menu_open_toggle  = $this->dom->xpath->query( "./span[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' open ' ) ]", $menu_toggle )->item( 0 );
+		$menu_close_toggle = $this->dom->xpath->query( "./span[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' close ' ) ]", $menu_toggle )->item( 0 );
 
 		/** @var DOMElement $primary_menu */
 		$primary_menu      = $menu_query->item( 0 );
@@ -2181,12 +2185,14 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 		$state_string = str_replace( '-', '_', $amp_lightbox_id );
 
-		AMP_DOM_Utils::add_amp_action( $menu_toggle, 'tap', "{$amp_lightbox_id}.open" );
-		AMP_DOM_Utils::add_amp_action( $menu_toggle, 'tap', "{$body_id}.toggleClass(class=primary-navigation-open,force=true)" );
+		AMP_DOM_Utils::add_amp_action( $menu_open_toggle, 'tap', "{$amp_lightbox_id}.open" );
+		AMP_DOM_Utils::add_amp_action( $menu_open_toggle, 'tap', "{$body_id}.toggleClass(class=primary-navigation-open,force=true)" );
+
+		AMP_DOM_Utils::add_amp_action( $menu_close_toggle, 'tap', "{$amp_lightbox_id}.close" );
+		AMP_DOM_Utils::add_amp_action( $menu_close_toggle, 'tap', "{$body_id}.toggleClass(class=primary-navigation-open,force=false)" );
 
 		AMP_DOM_Utils::add_amp_action( $amp_lightbox, 'lightboxOpen', "AMP.setState({{$state_string}:true})" );
 		AMP_DOM_Utils::add_amp_action( $amp_lightbox, 'lightboxClose', "AMP.setState({{$state_string}:false})" );
-		AMP_DOM_Utils::add_amp_action( $amp_lightbox, 'lightboxClose', "{$body_id}.toggleClass(class=primary-navigation-open,force=false)" );
 
 		$menu_toggle->setAttribute( 'data-amp-bind-aria-expanded', "{$state_string} ? 'true' : 'false'" );
 

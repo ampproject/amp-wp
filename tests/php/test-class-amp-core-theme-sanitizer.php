@@ -457,7 +457,10 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		$html = '
 			<nav>
 				<div class="menu-button-container">
-					<button id="primary-mobile-menu">Menu button toggle</button>
+					<button id="primary-mobile-menu">
+						<span class="dropdown-icon open">Menu</span>
+						<span class="dropdown-icon close">Close</span>
+					</button>
 				</div>
 				<div class="primary-menu-container">
 					<ul id="primary-menu-list">
@@ -475,8 +478,8 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer->add_twentytwentyone_mobile_modal();
 
 		$query = $dom->xpath->query(
-			// Verify that the menu button container exists,
-			'//nav/div[ @class = "menu-button-container" ]' .
+			// Verify that the menu button container exists and that it contains the button that toggles the amp-lightbox,
+			'//nav/div[ @class = "menu-button-container" and ./button[ @data-amp-bind-aria-expanded and ./span[ @on and contains( @class, " open" ) ] and ./span[ @on and contains( @class, " close" ) ] ] ]' .
 			// and is immediately followed by the primary menu container, wrapped in amp-lightbox,
 			'/following-sibling::amp-lightbox[ ./div[ @class = "primary-menu-container" and ./ul ] ]' .
 			// and is also followed by the original primary menu container.
