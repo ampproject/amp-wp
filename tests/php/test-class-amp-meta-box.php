@@ -188,20 +188,20 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 
 	public function test_when_height_and_width_are_valid_should_return_filter_values() {
 		add_filter(
-			'featuredImageMinimumHeight',
+			'amp_featured_image_minimum_height',
 			static function () {
 				return 1200;
 			}
 		);
 		add_filter(
-			'featuredImageMinimumWidth',
+			'amp_featured_image_minimum_width',
 			static function () {
 				return 1300;
 			}
 		);
 		$dimensions = AMP_Post_Meta_Box::get_featured_image_dimensions();
-		remove_all_filters( 'featuredImageMinimumHeight' );
-		remove_all_filters( 'featuredImageMinimumWidth' );
+		remove_all_filters( 'amp_featured_image_minimum_height' );
+		remove_all_filters( 'amp_featured_image_minimum_width' );
 		$this->assertArrayHasKey( 'featuredImageMinimumHeight', $dimensions );
 		$this->assertArrayHasKey( 'featuredImageMinimumWidth', $dimensions );
 		$this->assertEquals( $dimensions['featuredImageMinimumWidth'], 1300 );
@@ -210,20 +210,20 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 
 	public function test_when_height_and_width_are_invalid_should_return_defaults() {
 		add_filter(
-			'featuredImageMinimumHeight',
+			'amp_featured_image_minimum_height',
 			static function () {
 				return 'invalid-height';
 			}
 		);
 		add_filter(
-			'featuredImageMinimumWidth',
+			'amp_featured_image_minimum_width',
 			static function () {
 				return 'invalid-width';
 			}
 		);
 		$dimensions = AMP_Post_Meta_Box::get_featured_image_dimensions();
-		remove_all_filters( 'featuredImageMinimumHeight' );
-		remove_all_filters( 'featuredImageMinimumWidth' );
+		remove_all_filters( 'amp_featured_image_minimum_height' );
+		remove_all_filters( 'amp_featured_image_minimum_width' );
 		$this->assertArrayHasKey( 'featuredImageMinimumHeight', $dimensions );
 		$this->assertArrayHasKey( 'featuredImageMinimumWidth', $dimensions );
 		$this->assertEquals( $dimensions['featuredImageMinimumWidth'], 1200 );
