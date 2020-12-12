@@ -7,7 +7,7 @@ import { ReactElement } from 'react';
 /**
  * WordPress dependencies
  */
-import { __, _x } from '@wordpress/i18n';
+import { __, _x, sprintf } from '@wordpress/i18n';
 import { cloneElement } from '@wordpress/element';
 import { TextControl, SelectControl, ToggleControl, Notice, PanelBody, FontSizePicker } from '@wordpress/components';
 import { InspectorControls } from '@wordpress/block-editor';
@@ -392,17 +392,32 @@ export const AmpLayoutControl = ( props ) => {
 	}
 
 	return (
-		<SelectControl
-			label={ label }
-			value={ ampLayout }
-			options={ getLayoutOptions( name ) }
-			onChange={ ( value ) => {
-				setAttributes( { ampLayout: value } );
-				if ( 'core/image' === props.name ) {
-					setImageBlockLayoutAttributes( props, value );
-				}
-			} }
-		/>
+		<>
+			<Notice
+				status="warning"
+				isDismissible={ false }
+			>
+				<span dangerouslySetInnerHTML={ {
+					__html: sprintf(
+						/* translators: placeholder is link to support forum. */
+						__( 'The AMP Layout setting is deprecated and is slated for removal. Please <a href="%s" target="_blank" rel="noreferrer">report</a> if you need it.', 'amp' ),
+						'https://wordpress.org/support/plugin/amp/#new-topic-0',
+					),
+				} } />
+			</Notice>
+
+			<SelectControl
+				label={ label }
+				value={ ampLayout }
+				options={ getLayoutOptions( name ) }
+				onChange={ ( value ) => {
+					setAttributes( { ampLayout: value } );
+					if ( 'core/image' === props.name ) {
+						setImageBlockLayoutAttributes( props, value );
+					}
+				} }
+			/>
+		</>
 	);
 };
 
