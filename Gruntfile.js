@@ -83,7 +83,7 @@ module.exports = function( grunt ) {
 					'cd build',
 					'composer install --no-dev -o',
 					'composer remove cweagans/composer-patches --update-no-dev -o',
-					'rm -r ' + productionVendorExcludedFilePatterns.join( ' ' ),
+					'rm -rf ' + productionVendorExcludedFilePatterns.join( ' ' ),
 				].join( ' && ' ),
 			},
 			create_build_zip: {
