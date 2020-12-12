@@ -114,7 +114,8 @@ class AMP_Service_Worker {
 		$service_workers->caching_routes()->register(
 			'^https:\/\/cdn\.ampproject\.org\/.*',
 			[
-				'strategy' => WP_Service_Worker_Caching_Routes::STRATEGY_STALE_WHILE_REVALIDATE,
+				'strategy'   => WP_Service_Worker_Caching_Routes::STRATEGY_STALE_WHILE_REVALIDATE,
+				'cache_name' => 'amp-cdn',
 			]
 		);
 	}
