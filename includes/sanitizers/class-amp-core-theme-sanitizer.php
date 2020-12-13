@@ -2156,7 +2156,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function add_twentytwentyone_mobile_modal() {
 		$menu_query        = $this->dom->xpath->query( "//div[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' primary-menu-container ' ) ]" );
-		$menu_toggle_query = $this->dom->xpath->query( "//button[ @id = 'primary-mobile-menu' and ./span[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' open ' ) ] and ./span[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' close ' ) ] ]" );
+		$menu_toggle_query = $this->dom->xpath->query( "//button[ @id = 'primary-mobile-menu' ]" );
 
 		if ( 1 !== $menu_query->length || 1 !== $menu_toggle_query->length ) {
 			return;
@@ -2166,6 +2166,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$menu_toggle       = $menu_toggle_query->item( 0 );
 		$menu_open_toggle  = $this->dom->xpath->query( "./span[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' open ' ) ]", $menu_toggle )->item( 0 );
 		$menu_close_toggle = $this->dom->xpath->query( "./span[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' close ' ) ]", $menu_toggle )->item( 0 );
+		if ( ! $menu_open_toggle || ! $menu_close_toggle ) {
+			return;
+		}
 
 		/** @var DOMElement $primary_menu */
 		$primary_menu      = $menu_query->item( 0 );
