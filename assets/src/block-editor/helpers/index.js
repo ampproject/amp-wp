@@ -7,7 +7,7 @@ import { ReactElement } from 'react';
 /**
  * WordPress dependencies
  */
-import { __, _x } from '@wordpress/i18n';
+import { __, _x, sprintf } from '@wordpress/i18n';
 import { cloneElement } from '@wordpress/element';
 import { TextControl, SelectControl, ToggleControl, Notice, PanelBody, FontSizePicker } from '@wordpress/components';
 import { InspectorControls } from '@wordpress/block-editor';
@@ -427,11 +427,26 @@ export const AmpNoloadingToggle = ( props ) => {
 	const label = __( 'AMP Noloading', 'amp' );
 
 	return (
-		<ToggleControl
-			label={ label }
-			checked={ ampNoLoading }
-			onChange={ () => setAttributes( { ampNoLoading: ! ampNoLoading } ) }
-		/>
+		<>
+			<Notice
+				status="warning"
+				isDismissible={ false }
+			>
+				<span dangerouslySetInnerHTML={ {
+					__html: sprintf(
+						/* translators: placeholder is link to support forum. */
+						__( 'The AMP Noloading setting is deprecated and is slated for removal. Please <a href="%s" target="_blank" rel="noreferrer">report</a> if you need it.', 'amp' ),
+						'https://wordpress.org/support/plugin/amp/#new-topic-0',
+					),
+				} } />
+			</Notice>
+
+			<ToggleControl
+				label={ label }
+				checked={ ampNoLoading }
+				onChange={ () => setAttributes( { ampNoLoading: ! ampNoLoading } ) }
+			/>
+		</>
 	);
 };
 
