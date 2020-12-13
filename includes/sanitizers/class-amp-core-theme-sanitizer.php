@@ -2081,6 +2081,14 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						z-index: 1001;
 					}
 
+					.menu-button-container #primary-mobile-menu {
+						padding: 0;
+					}
+
+					#primary-mobile-menu .dropdown-icon {
+						padding: calc(var(--button--padding-vertical) - ( .25 * var(--global--spacing-unit) )) calc(.5 * var(--button--padding-horizontal))
+					}
+
 					@media only screen and (max-width: 481px) {
 						/* Hide the desktop menu so that it does not interfere when the amo-lightbox mobile menu is open. */
 						.primary-navigation > .primary-menu-container {
@@ -2198,6 +2206,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		AMP_DOM_Utils::add_amp_action( $amp_lightbox, 'lightboxOpen', "AMP.setState({{$state_string}:true})" );
 		AMP_DOM_Utils::add_amp_action( $amp_lightbox, 'lightboxClose', "AMP.setState({{$state_string}:false})" );
 
+		$menu_toggle->setAttribute( 'tabindex', '-1' );
 		$menu_toggle->setAttribute( 'data-amp-bind-aria-expanded', "{$state_string} ? 'true' : 'false'" );
 
 		$amp_lightbox->appendChild( $primary_menu_copy );
