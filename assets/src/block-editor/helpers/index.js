@@ -372,12 +372,18 @@ setUpInspectorControls.propTypes = {
 /**
  * Get AMP Layout select control.
  *
+ * @deprecated As of v2.1. Blocks with the `ampLayout` attribute will still be able to use the control.
+ *
  * @param {Object} props Props.
  *
  * @return {ReactElement} Element.
  */
-const AmpLayoutControl = ( props ) => {
+export const AmpLayoutControl = ( props ) => {
 	const { name, attributes: { ampLayout }, setAttributes } = props;
+
+	if ( undefined === ampLayout ) {
+		return null;
+	}
 
 	let label = __( 'AMP Layout', 'amp' );
 
@@ -386,17 +392,32 @@ const AmpLayoutControl = ( props ) => {
 	}
 
 	return (
-		<SelectControl
-			label={ label }
-			value={ ampLayout }
-			options={ getLayoutOptions( name ) }
-			onChange={ ( value ) => {
-				setAttributes( { ampLayout: value } );
-				if ( 'core/image' === props.name ) {
-					setImageBlockLayoutAttributes( props, value );
-				}
-			} }
-		/>
+		<>
+			<Notice
+				status="warning"
+				isDismissible={ false }
+			>
+				<span dangerouslySetInnerHTML={ {
+					__html: sprintf(
+						/* translators: placeholder is link to support forum. */
+						__( 'The AMP Layout setting is deprecated and is slated for removal. Please <a href="%s" target="_blank" rel="noreferrer">report</a> if you need it.', 'amp' ),
+						'https://wordpress.org/support/plugin/amp/#new-topic-0',
+					),
+				} } />
+			</Notice>
+
+			<SelectControl
+				label={ label }
+				value={ ampLayout }
+				options={ getLayoutOptions( name ) }
+				onChange={ ( value ) => {
+					setAttributes( { ampLayout: value } );
+					if ( 'core/image' === props.name ) {
+						setImageBlockLayoutAttributes( props, value );
+					}
+				} }
+			/>
+		</>
 	);
 };
 
