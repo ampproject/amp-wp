@@ -2188,6 +2188,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 		$body_id = $this->dom->getElementId( $this->dom->body, 'body' );
 
+		$open_toggle_id  = $this->dom->getElementId( $menu_open_toggle );
+		$close_toggle_id = $this->dom->getElementId( $menu_close_toggle );
+
 		// Create an <amp-lightbox> element that will contain the modal.
 		$amp_lightbox = $this->dom->createElement( 'amp-lightbox' );
 		$amp_lightbox->setAttribute( 'layout', 'nodisplay' );
@@ -2199,12 +2202,14 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 		AMP_DOM_Utils::add_amp_action( $menu_open_toggle, 'tap', "{$amp_lightbox_id}.open" );
 		AMP_DOM_Utils::add_amp_action( $menu_open_toggle, 'tap', "{$body_id}.toggleClass(class=primary-navigation-open,force=true)" );
+		AMP_DOM_Utils::add_amp_action( $menu_open_toggle, 'tap', "{$close_toggle_id}.focus" ); // @todo This is not working since the button is not in the lightbox.
 
-		AMP_DOM_Utils::add_amp_action( $menu_close_toggle, 'tap', "{$amp_lightbox_id}.close" );
 		AMP_DOM_Utils::add_amp_action( $menu_close_toggle, 'tap', "{$body_id}.toggleClass(class=primary-navigation-open,force=false)" );
+		AMP_DOM_Utils::add_amp_action( $menu_close_toggle, 'tap', "{$amp_lightbox_id}.close" );
 
 		AMP_DOM_Utils::add_amp_action( $amp_lightbox, 'lightboxOpen', "AMP.setState({{$state_string}:true})" );
 		AMP_DOM_Utils::add_amp_action( $amp_lightbox, 'lightboxClose', "AMP.setState({{$state_string}:false})" );
+		AMP_DOM_Utils::add_amp_action( $amp_lightbox, 'lightboxClose', "{$open_toggle_id}.focus" );
 
 		$menu_toggle->setAttribute( 'tabindex', '-1' );
 		$menu_toggle->setAttribute( 'data-amp-bind-aria-expanded', "{$state_string} ? 'true' : 'false'" );
