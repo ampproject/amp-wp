@@ -2174,7 +2174,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$menu_toggle       = $menu_toggle_query->item( 0 );
 		$menu_open_toggle  = $this->dom->xpath->query( "./span[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' open ' ) ]", $menu_toggle )->item( 0 );
 		$menu_close_toggle = $this->dom->xpath->query( "./span[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' close ' ) ]", $menu_toggle )->item( 0 );
-		if ( ! $menu_open_toggle || ! $menu_close_toggle ) {
+		if ( ! $menu_open_toggle instanceof DOMElement || ! $menu_close_toggle instanceof DOMElement ) {
 			return;
 		}
 
