@@ -2107,12 +2107,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					.primary-navigation > div > .menu-wrapper > .menu-item-has-children:hover > .sub-menu-toggle > .icon-minus {
 						display: flex;
 					}
-
-					/* In the Twenty Twenty-One theme, when on a non-AMP page and the mobile menu is open, the switcher
-					is incorrectly shown at the top. In that case the switcher is hidden. */
-					body.lock-scrolling > #amp-mobile-version-switcher {
-						display: none;
-					}
 				';
 
 				// Ideally wp_add_inline_style() would accept a $position argument like wp_add_inline_script() does, in

@@ -21,9 +21,11 @@ coverage:
         paths:
           - includes
           - src
+        threshold: 0.1%
       js:
         paths:
           - assets/src
+        threshold: 0.1%
 
 # Pull request comments
 # See https://docs.codecov.io/docs/pull-request-comments

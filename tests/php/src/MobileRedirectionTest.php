@@ -438,6 +438,18 @@ final class MobileRedirectionTest extends WP_UnitTestCase {
 		$output = ob_get_clean();
 		$this->assertStringStartsWith( '<style>', $output );
 		$this->assertStringContains( '#amp-mobile-version-switcher', $output );
+		$this->assertStringNotContains( 'body.lock-scrolling > #amp-mobile-version-switcher', $output );
+
+		add_filter(
+			'template',
+			static function () {
+				return 'twentytwentyone';
+			}
+		);
+		ob_start();
+		$this->instance->add_mobile_version_switcher_styles();
+		$output = ob_get_clean();
+		$this->assertStringContains( 'body.lock-scrolling > #amp-mobile-version-switcher', $output );
 
 		add_filter( 'amp_mobile_version_switcher_styles_used', '__return_false' );
 		ob_start();

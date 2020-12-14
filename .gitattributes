@@ -1,3 +1,7 @@
+# Improve diff output for PHP files.
+*.php                                                    diff=php
+
+# Mark generated files so diffs are hidden by default.
 *.snap                                                   linguist-generated=true
 includes/sanitizers/class-amp-allowed-tags-generated.php linguist-generated=true
 docs/**/*.md                                             linguist-generated=true

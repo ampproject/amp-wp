@@ -1,5 +1,5 @@
 {
-    "0": {
+    "1": {
         "file": {
             "description": "Class AMP_Customizer_Design_Settings",
             "long_description": "",
@@ -55,7 +55,7 @@
             }
         ]
     },
-    "1": {
+    "2": {
         "file": {
             "description": "Class AMP_Customizer_Settings",
             "long_description": "",
@@ -99,7 +99,7 @@
             }
         ]
     },
-    "6": {
+    "7": {
         "file": {
             "description": "Class AMP_Links_Sanitizer.",
             "long_description": "",
@@ -166,7 +166,7 @@
             }
         ]
     },
-    "26": {
+    "27": {
         "file": {
             "description": "Class AMP_Base_Sanitizer",
             "long_description": "",
@@ -2132,7 +2132,7 @@
         ],
         "hooks": []
     },
-    "31": {
+    "32": {
         "file": {
             "description": "Callbacks for adding AMP-related things to the main theme.",
             "long_description": "",
@@ -2227,7 +2227,7 @@
         ],
         "hooks": []
     },
-    "32": {
+    "33": {
         "file": {
             "description": "Class AMP_Theme_Support",
             "long_description": "",
@@ -2364,7 +2364,7 @@
             }
         }
     },
-    "33": {
+    "34": {
         "file": {
             "description": "Callbacks for adding AMP-related things to the admin.",
             "long_description": "",
@@ -2440,7 +2440,7 @@
             }
         }
     },
-    "35": {
+    "36": {
         "file": {
             "description": "Class AMP_Template_Customizer",
             "long_description": "",
@@ -2456,17 +2456,17 @@
         "includes": [
             {
                 "name": "",
-                "line": 307,
+                "line": 327,
                 "type": "Require"
             },
             {
                 "name": "",
-                "line": 562,
+                "line": 582,
                 "type": "Require"
             },
             {
                 "name": "",
-                "line": 630,
+                "line": 650,
                 "type": "Require"
             }
         ],
@@ -2501,8 +2501,8 @@
             },
             "1": {
                 "name": "amp_customizer_register_ui",
-                "line": 260,
-                "end_line": 260,
+                "line": 280,
+                "end_line": 280,
                 "type": "action",
                 "arguments": [
                     "$this->wp_customize"
@@ -2528,8 +2528,8 @@
             },
             "2": {
                 "name": "amp_customizer_register_settings",
-                "line": 296,
-                "end_line": 296,
+                "line": 316,
+                "end_line": 316,
                 "type": "action",
                 "arguments": [
                     "$this->wp_customize"
@@ -2555,8 +2555,8 @@
             },
             "9": {
                 "name": "amp_customizer_enqueue_scripts",
-                "line": 612,
-                "end_line": 612,
+                "line": 632,
+                "end_line": 632,
                 "type": "action",
                 "arguments": [
                     "$this->wp_customize"
@@ -2582,8 +2582,8 @@
             },
             "11": {
                 "name": "amp_customizer_enqueue_preview_scripts",
-                "line": 703,
-                "end_line": 703,
+                "line": 723,
+                "end_line": 723,
                 "type": "action",
                 "arguments": [
                     "$this->wp_customize"
@@ -2609,7 +2609,7 @@
             }
         }
     },
-    "39": {
+    "40": {
         "file": {
             "description": "AMP Helper Functions",
             "long_description": "",
@@ -4758,7 +4758,7 @@
             }
         }
     },
-    "43": {
+    "44": {
         "file": {
             "description": "Class AMP_Image_Dimension_Extractor",
             "long_description": "",
@@ -4878,7 +4878,7 @@
             }
         ]
     },
-    "50": {
+    "51": {
         "file": {
             "description": "AMP_Post_Template class.",
             "long_description": "",
@@ -5092,7 +5092,7 @@
             }
         }
     },
-    "60": {
+    "61": {
         "file": {
             "description": "Class AMP_Base_Embed_Handler",
             "long_description": "Used by some children.",
@@ -5570,7 +5570,7 @@
         ],
         "hooks": []
     },
-    "77": {
+    "78": {
         "file": {
             "description": "AMP Post type support.",
             "long_description": "",
@@ -5699,7 +5699,7 @@
             }
         ]
     },
-    "78": {
+    "79": {
         "file": {
             "description": "Class AMP_HTTP",
             "long_description": "",
@@ -5740,7 +5740,7 @@
             }
         ]
     },
-    "84": {
+    "85": {
         "file": {
             "description": "Class AMP_Validation_Manager",
             "long_description": "",
@@ -5842,7 +5842,7 @@
             }
         ]
     },
-    "85": {
+    "86": {
         "file": {
             "description": "Class AMP_Validation_Error_Taxonomy",
             "long_description": "",
@@ -5978,7 +5978,7 @@
             }
         ]
     },
-    "87": {
+    "88": {
         "file": {
             "description": "Deprecated functions.",
             "long_description": "",
@@ -6449,7 +6449,7 @@
             }
         ]
     },
-    "110": {
+    "111": {
         "file": {
             "description": "Functions for managing legacy templates",
             "long_description": "",
@@ -6510,7 +6510,7 @@
         ],
         "hooks": []
     },
-    "117": {
+    "118": {
         "file": {
             "description": "Class MobileRedirection.",
             "long_description": "",
@@ -6635,8 +6635,8 @@
             },
             {
                 "name": "amp_mobile_version_switcher_link_text",
-                "line": 449,
-                "end_line": 449,
+                "line": 460,
+                "end_line": 460,
                 "type": "filter",
                 "arguments": [
                     "$text"
@@ -6662,7 +6662,7 @@
             }
         ]
     },
-    "127": {
+    "128": {
         "file": {
             "description": "Fetches and formats data for AMP reader themes.",
             "long_description": "",
@@ -6728,7 +6728,7 @@
             }
         ]
     },
-    "129": {
+    "130": {
         "file": {
             "description": "Class OptionsMenu",
             "long_description": "",
@@ -6779,7 +6779,7 @@
             }
         ]
     },
-    "147": {
+    "148": {
         "file": {
             "description": "Class MonitorCssTransientCaching.",
             "long_description": "",
@@ -6850,7 +6850,7 @@
             }
         ]
     },
-    "152": {
+    "153": {
         "file": {
             "description": "Class UserAccess.",
             "long_description": "",
@@ -6906,5 +6906,855 @@
                 }
             }
         ]
+    },
+    "183": {
+        "file": {
+            "description": "Provides URLs to scan.",
+            "long_description": "",
+            "tags": [
+                {
+                    "name": "package",
+                    "content": "AMP"
+                },
+                {
+                    "name": "since",
+                    "content": "2.1"
+                }
+            ]
+        },
+        "path": "src\/Validation\/ScannableURLProvider.php",
+        "root": "\/app\/public\/content\/plugins\/amp",
+        "classes": [
+            {
+                "name": "ScannableURLProvider",
+                "namespace": "AmpProject\\AmpWP\\Validation",
+                "line": 19,
+                "end_line": 309,
+                "final": true,
+                "abstract": false,
+                "extends": "",
+                "implements": [],
+                "properties": [
+                    {
+                        "name": "$include_unsupported",
+                        "line": 26,
+                        "end_line": 26,
+                        "default": null,
+                        "static": false,
+                        "visibility": "private",
+                        "doc": {
+                            "description": "Whether to include URLs that don't support AMP.",
+                            "long_description": "",
+                            "tags": [
+                                {
+                                    "name": "var",
+                                    "content": "",
+                                    "types": [
+                                        "bool"
+                                    ],
+                                    "variable": ""
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "$include_conditionals",
+                        "line": 35,
+                        "end_line": 35,
+                        "default": null,
+                        "static": false,
+                        "visibility": "private",
+                        "doc": {
+                            "description": "An allowlist of conditionals to use for querying URLs.",
+                            "long_description": "Usually, this class will query all of the templates that don't have AMP disabled. This allows inclusion based on only these conditionals.",
+                            "tags": [
+                                {
+                                    "name": "var",
+                                    "content": "",
+                                    "types": [
+                                        "string[]"
+                                    ],
+                                    "variable": ""
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "$limit_per_type",
+                        "line": 44,
+                        "end_line": 44,
+                        "default": null,
+                        "static": false,
+                        "visibility": "private",
+                        "doc": {
+                            "description": "The maximum number of URLs to provide for each content type.",
+                            "long_description": "Templates are each a separate type, like those for is_category() and is_tag(), and each post type is a type.",
+                            "tags": [
+                                {
+                                    "name": "var",
+                                    "content": "",
+                                    "types": [
+                                        "int"
+                                    ],
+                                    "variable": ""
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "methods": [
+                    {
+                        "name": "__construct",
+                        "namespace": "AmpProject\\AmpWP\\Validation",
+                        "aliases": {
+                            "AMP_Theme_Support": "\\AMP_Theme_Support",
+                            "WP_Query": "\\WP_Query"
+                        },
+                        "line": 53,
+                        "end_line": 61,
+                        "final": false,
+                        "abstract": false,
+                        "static": false,
+                        "visibility": "public",
+                        "arguments": [
+                            {
+                                "name": "$limit_per_type",
+                                "default": "20",
+                                "type": ""
+                            },
+                            {
+                                "name": "$include_conditionals",
+                                "default": "array()",
+                                "type": ""
+                            },
+                            {
+                                "name": "$include_unsupported",
+                                "default": "false",
+                                "type": ""
+                            }
+                        ],
+                        "doc": {
+                            "description": "Class constructor.",
+                            "long_description": "",
+                            "tags": [
+                                {
+                                    "name": "param",
+                                    "content": "The maximum number of URLs to validate for each type.",
+                                    "types": [
+                                        "integer"
+                                    ],
+                                    "variable": "$limit_per_type"
+                                },
+                                {
+                                    "name": "param",
+                                    "content": "An allowlist of conditionals to use for validation.",
+                                    "types": [
+                                        "array"
+                                    ],
+                                    "variable": "$include_conditionals"
+                                },
+                                {
+                                    "name": "param",
+                                    "content": "Whether to include URLs that don't support AMP.",
+                                    "types": [
+                                        "boolean"
+                                    ],
+                                    "variable": "$include_unsupported"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "get_urls",
+                        "namespace": "AmpProject\\AmpWP\\Validation",
+                        "aliases": {
+                            "AMP_Theme_Support": "\\AMP_Theme_Support",
+                            "WP_Query": "\\WP_Query"
+                        },
+                        "line": 71,
+                        "end_line": 140,
+                        "final": false,
+                        "abstract": false,
+                        "static": false,
+                        "visibility": "public",
+                        "arguments": [
+                            {
+                                "name": "$offset",
+                                "default": "0",
+                                "type": ""
+                            }
+                        ],
+                        "doc": {
+                            "description": "Provides the array of URLs to check.",
+                            "long_description": "Each URL is an array with two elements, with the URL at index 0 and the type at index 1.",
+                            "tags": [
+                                {
+                                    "name": "param",
+                                    "content": "Optional. The number of URLs to offset by, where applicable. Defaults to 0.",
+                                    "types": [
+                                        "int",
+                                        "null"
+                                    ],
+                                    "variable": "$offset"
+                                },
+                                {
+                                    "name": "return",
+                                    "content": "Array of URLs and types.",
+                                    "types": [
+                                        "array"
+                                    ]
+                                }
+                            ]
+                        },
+                        "uses": {
+                            "functions": [
+                                {
+                                    "name": "get_option",
+                                    "line": 77,
+                                    "end_line": 77
+                                },
+                                {
+                                    "name": "home_url",
+                                    "line": 79,
+                                    "end_line": 79
+                                },
+                                {
+                                    "name": "array_filter",
+                                    "line": 84,
+                                    "end_line": 87
+                                },
+                                {
+                                    "name": "get_taxonomies",
+                                    "line": 85,
+                                    "end_line": 85
+                                },
+                                {
+                                    "name": "get_post_types",
+                                    "line": 88,
+                                    "end_line": 88
+                                },
+                                {
+                                    "name": "get_permalink",
+                                    "line": 97,
+                                    "end_line": 97
+                                },
+                                {
+                                    "name": "reset",
+                                    "line": 105,
+                                    "end_line": 105
+                                }
+                            ],
+                            "methods": [
+                                {
+                                    "name": "is_template_supported",
+                                    "class": "\\AmpProject\\AmpWP\\Validation\\ScannableURLProvider",
+                                    "static": false,
+                                    "line": 77,
+                                    "end_line": 77
+                                },
+                                {
+                                    "name": "get_posts_that_support_amp",
+                                    "class": "\\AmpProject\\AmpWP\\Validation\\ScannableURLProvider",
+                                    "static": false,
+                                    "line": 94,
+                                    "end_line": 94
+                                },
+                                {
+                                    "name": "get_posts_by_type",
+                                    "class": "\\AmpProject\\AmpWP\\Validation\\ScannableURLProvider",
+                                    "static": false,
+                                    "line": 94,
+                                    "end_line": 94
+                                },
+                                {
+                                    "name": "get_taxonomy_links",
+                                    "class": "\\AmpProject\\AmpWP\\Validation\\ScannableURLProvider",
+                                    "static": false,
+                                    "line": 104,
+                                    "end_line": 104
+                                },
+                                {
+                                    "name": "get_author_page_urls",
+                                    "class": "\\AmpProject\\AmpWP\\Validation\\ScannableURLProvider",
+                                    "static": false,
+                                    "line": 114,
+                                    "end_line": 114
+                                },
+                                {
+                                    "name": "get_date_page",
+                                    "class": "\\AmpProject\\AmpWP\\Validation\\ScannableURLProvider",
+                                    "static": false,
+                                    "line": 124,
+                                    "end_line": 124
+                                },
+                                {
+                                    "name": "get_search_page",
+                                    "class": "\\AmpProject\\AmpWP\\Validation\\ScannableURLProvider",
+                                    "static": false,
+                                    "line": 131,
+                                    "end_line": 131
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "doc": {
+                    "description": "ScannableURLProvider class.",
+                    "long_description": "",
+                    "tags": [
+                        {
+                            "name": "since",
+                            "content": "2.1"
+                        }
+                    ]
+                }
+            }
+        ],
+        "hooks": []
+    },
+    "184": {
+        "file": {
+            "description": "Provides URL validation.",
+            "long_description": "",
+            "tags": [
+                {
+                    "name": "package",
+                    "content": "AMP"
+                },
+                {
+                    "name": "since",
+                    "content": "2.1"
+                }
+            ]
+        },
+        "path": "src\/Validation\/URLValidationProvider.php",
+        "root": "\/app\/public\/content\/plugins\/amp",
+        "classes": [
+            {
+                "name": "URLValidationProvider",
+                "namespace": "AmpProject\\AmpWP\\Validation",
+                "line": 21,
+                "end_line": 243,
+                "final": true,
+                "abstract": false,
+                "extends": "",
+                "implements": [],
+                "properties": [
+                    {
+                        "name": "$total_errors",
+                        "line": 42,
+                        "end_line": 42,
+                        "default": "0",
+                        "static": false,
+                        "visibility": "private",
+                        "doc": {
+                            "description": "The total number of validation errors, regardless of whether they were accepted.",
+                            "long_description": "",
+                            "tags": [
+                                {
+                                    "name": "var",
+                                    "content": "",
+                                    "types": [
+                                        "int"
+                                    ],
+                                    "variable": ""
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "$unaccepted_errors",
+                        "line": 52,
+                        "end_line": 52,
+                        "default": "0",
+                        "static": false,
+                        "visibility": "private",
+                        "doc": {
+                            "description": "The total number of unaccepted validation errors.",
+                            "long_description": "If an error has been accepted in the \/wp-admin validation UI, it won't count toward this.",
+                            "tags": [
+                                {
+                                    "name": "var",
+                                    "content": "",
+                                    "types": [
+                                        "int"
+                                    ],
+                                    "variable": ""
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "$number_validated",
+                        "line": 59,
+                        "end_line": 59,
+                        "default": "0",
+                        "static": false,
+                        "visibility": "private",
+                        "doc": {
+                            "description": "The number of URLs crawled, regardless of whether they have validation errors.",
+                            "long_description": "",
+                            "tags": [
+                                {
+                                    "name": "var",
+                                    "content": "",
+                                    "types": [
+                                        "int"
+                                    ],
+                                    "variable": ""
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "$validity_by_type",
+                        "line": 73,
+                        "end_line": 73,
+                        "default": "array()",
+                        "static": false,
+                        "visibility": "private",
+                        "doc": {
+                            "description": "The validation counts by type, like template or post type.",
+                            "long_description": "",
+                            "tags": [
+                                {
+                                    "name": "var",
+                                    "content": "{     Validity by type.     @type array $type {         @type int $valid The number of valid URLs for this type.         @type int $total The total number of URLs for this type, valid or invalid.     } }",
+                                    "types": [
+                                        "array[]"
+                                    ],
+                                    "variable": ""
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "methods": {
+                    "2": {
+                        "name": "is_locked",
+                        "namespace": "AmpProject\\AmpWP\\Validation",
+                        "aliases": {
+                            "AMP_Validated_URL_Post_Type": "\\AMP_Validated_URL_Post_Type",
+                            "AMP_Validation_Error_Taxonomy": "\\AMP_Validation_Error_Taxonomy",
+                            "AMP_Validation_Manager": "\\AMP_Validation_Manager",
+                            "WP_Error": "\\WP_Error"
+                        },
+                        "line": 94,
+                        "end_line": 99,
+                        "final": false,
+                        "abstract": false,
+                        "static": false,
+                        "visibility": "public",
+                        "arguments": [],
+                        "doc": {
+                            "description": "Returns whether validation is currently locked.",
+                            "long_description": "",
+                            "tags": [
+                                {
+                                    "name": "return",
+                                    "content": "",
+                                    "types": [
+                                        "boolean"
+                                    ]
+                                }
+                            ]
+                        },
+                        "uses": {
+                            "functions": [
+                                {
+                                    "name": "get_option",
+                                    "line": 95,
+                                    "end_line": 95
+                                },
+                                {
+                                    "name": "time",
+                                    "line": 98,
+                                    "end_line": 98
+                                }
+                            ]
+                        }
+                    },
+                    "3": {
+                        "name": "with_lock",
+                        "namespace": "AmpProject\\AmpWP\\Validation",
+                        "aliases": {
+                            "AMP_Validated_URL_Post_Type": "\\AMP_Validated_URL_Post_Type",
+                            "AMP_Validation_Error_Taxonomy": "\\AMP_Validation_Error_Taxonomy",
+                            "AMP_Validation_Manager": "\\AMP_Validation_Manager",
+                            "WP_Error": "\\WP_Error"
+                        },
+                        "line": 107,
+                        "end_line": 120,
+                        "final": false,
+                        "abstract": false,
+                        "static": false,
+                        "visibility": "public",
+                        "arguments": [
+                            {
+                                "name": "$callback",
+                                "default": null,
+                                "type": ""
+                            }
+                        ],
+                        "doc": {
+                            "description": "Runs a callback with a lock set for the duration of the callback.",
+                            "long_description": "",
+                            "tags": [
+                                {
+                                    "name": "param",
+                                    "content": "Callback to run with the lock set.",
+                                    "types": [
+                                        "callable"
+                                    ],
+                                    "variable": "$callback"
+                                },
+                                {
+                                    "name": "return",
+                                    "content": "WP_Error if a lock is in place. Otherwise, the result of the callback or void if it doesn't return anything.",
+                                    "types": [
+                                        "mixed"
+                                    ]
+                                }
+                            ]
+                        },
+                        "uses": {
+                            "methods": [
+                                {
+                                    "name": "is_locked",
+                                    "class": "\\AmpProject\\AmpWP\\Validation\\URLValidationProvider",
+                                    "static": false,
+                                    "line": 108,
+                                    "end_line": 108
+                                },
+                                {
+                                    "name": "__construct",
+                                    "class": "\\WP_Error",
+                                    "static": false,
+                                    "line": 109,
+                                    "end_line": 112
+                                },
+                                {
+                                    "name": "lock",
+                                    "class": "\\AmpProject\\AmpWP\\Validation\\URLValidationProvider",
+                                    "static": false,
+                                    "line": 115,
+                                    "end_line": 115
+                                },
+                                {
+                                    "name": "unlock",
+                                    "class": "\\AmpProject\\AmpWP\\Validation\\URLValidationProvider",
+                                    "static": false,
+                                    "line": 117,
+                                    "end_line": 117
+                                }
+                            ],
+                            "functions": [
+                                {
+                                    "name": "__",
+                                    "line": 111,
+                                    "end_line": 111
+                                },
+                                {
+                                    "name": "callback",
+                                    "line": 116,
+                                    "end_line": 116
+                                }
+                            ]
+                        }
+                    },
+                    "4": {
+                        "name": "reset_lock",
+                        "namespace": "AmpProject\\AmpWP\\Validation",
+                        "aliases": {
+                            "AMP_Validated_URL_Post_Type": "\\AMP_Validated_URL_Post_Type",
+                            "AMP_Validation_Error_Taxonomy": "\\AMP_Validation_Error_Taxonomy",
+                            "AMP_Validation_Manager": "\\AMP_Validation_Manager",
+                            "WP_Error": "\\WP_Error"
+                        },
+                        "line": 125,
+                        "end_line": 127,
+                        "final": false,
+                        "abstract": false,
+                        "static": false,
+                        "visibility": "public",
+                        "arguments": [],
+                        "doc": {
+                            "description": "Resets the lock timeout. This allows long-running processes to keep running beyond the lock timeout.",
+                            "long_description": "",
+                            "tags": []
+                        },
+                        "uses": {
+                            "methods": [
+                                {
+                                    "name": "lock",
+                                    "class": "\\AmpProject\\AmpWP\\Validation\\URLValidationProvider",
+                                    "static": false,
+                                    "line": 126,
+                                    "end_line": 126
+                                }
+                            ]
+                        }
+                    },
+                    "5": {
+                        "name": "get_total_errors",
+                        "namespace": "AmpProject\\AmpWP\\Validation",
+                        "aliases": {
+                            "AMP_Validated_URL_Post_Type": "\\AMP_Validated_URL_Post_Type",
+                            "AMP_Validation_Error_Taxonomy": "\\AMP_Validation_Error_Taxonomy",
+                            "AMP_Validation_Manager": "\\AMP_Validation_Manager",
+                            "WP_Error": "\\WP_Error"
+                        },
+                        "line": 134,
+                        "end_line": 136,
+                        "final": false,
+                        "abstract": false,
+                        "static": false,
+                        "visibility": "public",
+                        "arguments": [],
+                        "doc": {
+                            "description": "Provides the total number of validation errors found.",
+                            "long_description": "",
+                            "tags": [
+                                {
+                                    "name": "return",
+                                    "content": "",
+                                    "types": [
+                                        "int"
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    "6": {
+                        "name": "get_unaccepted_errors",
+                        "namespace": "AmpProject\\AmpWP\\Validation",
+                        "aliases": {
+                            "AMP_Validated_URL_Post_Type": "\\AMP_Validated_URL_Post_Type",
+                            "AMP_Validation_Error_Taxonomy": "\\AMP_Validation_Error_Taxonomy",
+                            "AMP_Validation_Manager": "\\AMP_Validation_Manager",
+                            "WP_Error": "\\WP_Error"
+                        },
+                        "line": 143,
+                        "end_line": 145,
+                        "final": false,
+                        "abstract": false,
+                        "static": false,
+                        "visibility": "public",
+                        "arguments": [],
+                        "doc": {
+                            "description": "Provides the total number of unaccepted errors.",
+                            "long_description": "",
+                            "tags": [
+                                {
+                                    "name": "return",
+                                    "content": "",
+                                    "types": [
+                                        "int"
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    "7": {
+                        "name": "get_number_validated",
+                        "namespace": "AmpProject\\AmpWP\\Validation",
+                        "aliases": {
+                            "AMP_Validated_URL_Post_Type": "\\AMP_Validated_URL_Post_Type",
+                            "AMP_Validation_Error_Taxonomy": "\\AMP_Validation_Error_Taxonomy",
+                            "AMP_Validation_Manager": "\\AMP_Validation_Manager",
+                            "WP_Error": "\\WP_Error"
+                        },
+                        "line": 152,
+                        "end_line": 154,
+                        "final": false,
+                        "abstract": false,
+                        "static": false,
+                        "visibility": "public",
+                        "arguments": [],
+                        "doc": {
+                            "description": "Provides the number of URLs that have been checked.",
+                            "long_description": "",
+                            "tags": [
+                                {
+                                    "name": "return",
+                                    "content": "",
+                                    "types": [
+                                        "int"
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    "8": {
+                        "name": "get_validity_by_type",
+                        "namespace": "AmpProject\\AmpWP\\Validation",
+                        "aliases": {
+                            "AMP_Validated_URL_Post_Type": "\\AMP_Validated_URL_Post_Type",
+                            "AMP_Validation_Error_Taxonomy": "\\AMP_Validation_Error_Taxonomy",
+                            "AMP_Validation_Manager": "\\AMP_Validation_Manager",
+                            "WP_Error": "\\WP_Error"
+                        },
+                        "line": 161,
+                        "end_line": 163,
+                        "final": false,
+                        "abstract": false,
+                        "static": false,
+                        "visibility": "public",
+                        "arguments": [],
+                        "doc": {
+                            "description": "Provides the validity counts by type.",
+                            "long_description": "",
+                            "tags": [
+                                {
+                                    "name": "return",
+                                    "content": "",
+                                    "types": [
+                                        "array[]"
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    "9": {
+                        "name": "get_url_validation",
+                        "namespace": "AmpProject\\AmpWP\\Validation",
+                        "aliases": {
+                            "AMP_Validated_URL_Post_Type": "\\AMP_Validated_URL_Post_Type",
+                            "AMP_Validation_Error_Taxonomy": "\\AMP_Validation_Error_Taxonomy",
+                            "AMP_Validation_Manager": "\\AMP_Validation_Manager",
+                            "WP_Error": "\\WP_Error"
+                        },
+                        "line": 173,
+                        "end_line": 199,
+                        "final": false,
+                        "abstract": false,
+                        "static": false,
+                        "visibility": "public",
+                        "arguments": [
+                            {
+                                "name": "$url",
+                                "default": null,
+                                "type": ""
+                            },
+                            {
+                                "name": "$type",
+                                "default": null,
+                                "type": ""
+                            },
+                            {
+                                "name": "$force_revalidate",
+                                "default": "false",
+                                "type": ""
+                            }
+                        ],
+                        "doc": {
+                            "description": "Validates a URL, stores the results, and increments the counts.",
+                            "long_description": "",
+                            "tags": [
+                                {
+                                    "name": "param",
+                                    "content": "The URL to validate.",
+                                    "types": [
+                                        "string"
+                                    ],
+                                    "variable": "$url"
+                                },
+                                {
+                                    "name": "param",
+                                    "content": "The type of template, post, or taxonomy.",
+                                    "types": [
+                                        "string"
+                                    ],
+                                    "variable": "$type"
+                                },
+                                {
+                                    "name": "param",
+                                    "content": "Whether to force revalidation regardless of whether the current results are stale.",
+                                    "types": [
+                                        "bool"
+                                    ],
+                                    "variable": "$force_revalidate"
+                                },
+                                {
+                                    "name": "return",
+                                    "content": "Associative array containing validity result and whether the URL was revalidated, or a WP_Error on failure.",
+                                    "types": [
+                                        "array",
+                                        "\\WP_Error"
+                                    ]
+                                }
+                            ]
+                        },
+                        "uses": {
+                            "methods": [
+                                {
+                                    "name": "get_invalid_url_post",
+                                    "class": "\\AMP_Validated_URL_Post_Type",
+                                    "static": true,
+                                    "line": 178,
+                                    "end_line": 178
+                                },
+                                {
+                                    "name": "get_post_staleness",
+                                    "class": "\\AMP_Validated_URL_Post_Type",
+                                    "static": true,
+                                    "line": 180,
+                                    "end_line": 180
+                                },
+                                {
+                                    "name": "get_invalid_url_validation_errors",
+                                    "class": "\\AMP_Validated_URL_Post_Type",
+                                    "static": true,
+                                    "line": 181,
+                                    "end_line": 181
+                                },
+                                {
+                                    "name": "validate_url_and_store",
+                                    "class": "\\AMP_Validation_Manager",
+                                    "static": true,
+                                    "line": 187,
+                                    "end_line": 187
+                                },
+                                {
+                                    "name": "update_state_from_validity",
+                                    "class": "\\AmpProject\\AmpWP\\Validation\\URLValidationProvider",
+                                    "static": false,
+                                    "line": 195,
+                                    "end_line": 195
+                                }
+                            ],
+                            "functions": [
+                                {
+                                    "name": "is_null",
+                                    "line": 186,
+                                    "end_line": 186
+                                },
+                                {
+                                    "name": "is_wp_error",
+                                    "line": 190,
+                                    "end_line": 190
+                                },
+                                {
+                                    "name": "compact",
+                                    "line": 198,
+                                    "end_line": 198
+                                }
+                            ]
+                        }
+                    }
+                },
+                "doc": {
+                    "description": "URLValidationProvider class.",
+                    "long_description": "",
+                    "tags": [
+                        {
+                            "name": "since",
+                            "content": "2.1"
+                        }
+                    ]
+                }
+            }
+        ],
+        "hooks": []
     }
 }
