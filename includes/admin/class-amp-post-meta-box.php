@@ -296,43 +296,43 @@ class AMP_Post_Meta_Box {
 	}
 
 	/**
-	 * Returns the featured image dimensions after filtering
-	 * the height and width
+	 * Returns a tuple of width and height featured image dimensions after filtering.
 	 *
-	 * @return int[]
+	 * @return int[] {
+	 *     Minimum dimensions.
+	 *
+	 *     @type int $featuredImageMinimumWidth  Image width in pixels. May be zero to disable the dimension constraint.
+	 *     @type int $featuredImageMinimumHeight Image height in pixels. May be zero to disable the dimension constraint.
+	 * }
 	 */
 	public static function get_featured_image_dimensions() {
 		$default_width  = 1200;
 		$default_height = 675;
 
-		$dimensions = [
-			/**
-			 * Filters the minimum height required for a featured image.
-			 *
-			 * @since 2.0.9
-			 *
-			 * @param int $featured_image_minimum_height The minimum height of the image,
-			 *                                           defaults to 675.
-			 */
-			'featuredImageMinimumHeight' => (int) apply_filters( 'amp_featured_image_minimum_height', $default_height ),
+		/**
+		 * Filters the minimum height required for a featured image.
+		 *
+		 * @since 2.0.9
+		 *
+		 * @param int $featured_image_minimum_height The minimum height of the image, defaults to 675.
+		 *                                           Returning a number less than or equal to zero disables the minimum constraint.
+		 */
+		$featured_image_minimum_height = (int) apply_filters( 'amp_featured_image_minimum_height', $default_height );
 
-			/**
-			 * Filters the minimum width required for a featured image.
-			 *
-			 * @since 2.0.9
-			 *
-			 * @param int $featured_image_minimum_height The minimum width of the image,
-			 *                                           defaults to 1200.
-			 */
-			'featuredImageMinimumWidth'  => (int) apply_filters( 'amp_featured_image_minimum_width', $default_width ),
+		/**
+		 * Filters the minimum width required for a featured image.
+		 *
+		 * @since 2.0.9
+		 *
+		 * @param int $featured_image_minimum_width The minimum width of the image, defaults to 1200.
+		 *                                          Returning a number less than or equal to zero disables the minimum constraint.
+		 */
+		$featured_image_minimum_width = (int) apply_filters( 'amp_featured_image_minimum_width', $default_width );
+
+		return [
+			'featuredImageMinimumWidth'  => max( $featured_image_minimum_width, 0 ),
+			'featuredImageMinimumHeight' => max( $featured_image_minimum_height, 0 ),
 		];
-		if ( $dimensions['featuredImageMinimumHeight'] <= 0 ) {
-			$dimensions['featuredImageMinimumHeight'] = $default_height;
-		}
-		if ( $dimensions['featuredImageMinimumWidth'] <= 0 ) {
-			$dimensions['featuredImageMinimumWidth'] = $default_width;
-		}
-		return $dimensions;
 	}
 
 	/**
