@@ -2011,9 +2011,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			static function() {
 				// Bail if the dark mode stylesheet is not enqueued.
 				if ( ! wp_style_is( 'tt1-dark-mode' ) ) {
-					// @codeCoverageIgnoreStart
-					return;
-					// @codeCoverageIgnoreEnd
+					return; // @codeCoverageIgnore
 				}
 
 				wp_dequeue_style( 'tt1-dark-mode' );
@@ -2023,9 +2021,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				);
 
 				if ( ! file_exists( $dark_mode_css_file ) ) {
-					// @codeCoverageIgnoreStart
-					return;
-					// @codeCoverageIgnoreEnd
+					return; // @codeCoverageIgnore
 				}
 
 				$styles = file_get_contents( $dark_mode_css_file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
@@ -2054,9 +2050,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 				// Bail if the stylesheet is not enqueued.
 				if ( ! wp_style_is( $style_handle ) ) {
-					// @codeCoverageIgnoreStart
-					return;
-					// @codeCoverageIgnoreEnd
+					return; // @codeCoverageIgnore
 				}
 
 				$css_file = get_theme_file_path(
@@ -2064,9 +2058,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				);
 
 				if ( ! file_exists( $css_file ) ) {
-					// @codeCoverageIgnoreStart
-					return;
-					// @codeCoverageIgnoreEnd
+					return; // @codeCoverageIgnore
 				}
 
 				/** @var _WP_Dependency $dependency */
