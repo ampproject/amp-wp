@@ -11,7 +11,21 @@ module.exports = function( api ) {
 		plugins: [
 			...config.plugins,
 			'@babel/plugin-proposal-class-properties',
-			'inline-react-svg',
+			[
+				'inline-react-svg',
+				{
+					svgo: {
+						plugins: [
+							{
+								cleanupIDs: {
+									minify: false, // Prevent duplicate SVG IDs from minification.
+								},
+							},
+						],
+
+					},
+				},
+			],
 		],
 		sourceMaps: true,
 		env: {
@@ -19,7 +33,21 @@ module.exports = function( api ) {
 				plugins: [
 					...config.plugins,
 					'@babel/plugin-proposal-class-properties',
-					'inline-react-svg',
+					[
+						'inline-react-svg',
+						{
+							svgo: {
+								plugins: [
+									{
+										cleanupIDs: {
+											minify: false, // Prevent duplicate SVG IDs from minification.
+										},
+									},
+								],
+
+							},
+						},
+					],
 					'transform-react-remove-prop-types',
 				],
 			},

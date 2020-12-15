@@ -69,39 +69,6 @@ export function Sidebar() {
 
 	return (
 		<div className="amp-sidebar">
-
-			{ 0 < validationErrors.length && (
-				<PanelBody opened={ true } className="amp-sidebar__description-panel">
-					<div className="amp-sidebar__validation-errors-icon">
-						<AMPValidationErrorsIcon />
-					</div>
-					<div>
-						<h2>
-							{ __( 'Validation Errors', 'amp' ) }
-						</h2>
-
-						<p>
-							{ reviewLink && (
-								<a href={ reviewLink } className="amp-sidebar__review-link" target="_blank" rel="noreferrer">
-									{ __( 'Review errors', 'amp' ) }
-									<NewTabIcon />
-								</a>
-							) }
-						</p>
-						{ ( 0 < reviewedValidationErrors.length && 0 < unreviewedValidationErrors.length ) && (
-							<ToggleControl
-								checked={ isShowingReviewed }
-								label={ __( 'Include reviewed errors', 'amp' ) }
-								onChange={ ( newIsShowingReviewed ) => {
-									setIsShowingReviewed( newIsShowingReviewed );
-								} }
-							/>
-
-						) }
-					</div>
-
-				</PanelBody>
-			) }
 			{
 				ampCompatibilityBroken && (
 					<div className="amp-sidebar__broken-container">
@@ -119,6 +86,39 @@ export function Sidebar() {
 					</div>
 				)
 			}
+			{ 0 < validationErrors.length && (
+				<PanelBody opened={ true } className="amp-sidebar__description-panel">
+					<div className="amp-sidebar__validation-errors-icon">
+						<AMPValidationErrorsIcon />
+					</div>
+					<div className="amp-sidebar__validation-errors-heading">
+						<h2>
+							{ __( 'Validation Errors', 'amp' ) }
+						</h2>
+
+						<p>
+							{ reviewLink && (
+								<a href={ reviewLink } className="amp-sidebar__review-link" target="_blank" rel="noreferrer">
+									{ __( 'Review errors', 'amp' ) }
+									<NewTabIcon />
+								</a>
+							) }
+						</p>
+					</div>
+					{ ( 0 < reviewedValidationErrors.length && 0 < unreviewedValidationErrors.length ) && (
+						<div>
+							<ToggleControl
+								checked={ isShowingReviewed }
+								label={ __( 'Include reviewed errors', 'amp' ) }
+								onChange={ ( newIsShowingReviewed ) => {
+									setIsShowingReviewed( newIsShowingReviewed );
+								} }
+							/>
+						</div>
+					) }
+				</PanelBody>
+			) }
+
 			{
 				! published && (
 					<PanelBody opened={ true }>
