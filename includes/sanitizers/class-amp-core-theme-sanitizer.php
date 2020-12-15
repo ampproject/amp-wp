@@ -2071,19 +2071,32 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 				// Append any extra rules that may be needed.
 				$styles .= '
-					/* Show the sub-menu on hover of menu item */
-					.primary-navigation > div > .menu-wrapper > .menu-item-has-children:hover > .sub-menu {
-						display: block;
+					/* Trap keyboard navigation within mobile menu when it\'s open */
+					@media only screen and (max-width: 481px) {
+						.primary-navigation-open #page {
+							visibility: hidden !important;
+						}
+
+						#primary-mobile-menu[aria-expanded="true"] {
+							visibility: visible;
+						}
 					}
 
-					/* Hide the plus icon on hover of menu item */
-					.primary-navigation > div > .menu-wrapper > .menu-item-has-children:hover > .sub-menu-toggle > .icon-plus {
-						display: none;
-					}
+					@media (min-width: 482px) {
+						/* Show the sub-menu on hover of menu item */
+						.primary-menu-container > .menu-wrapper > .menu-item-has-children:hover > .sub-menu {
+							display: block;
+						}
 
-					/* Show the minus icon on hover of menu item */
-					.primary-navigation > div > .menu-wrapper > .menu-item-has-children:hover > .sub-menu-toggle > .icon-minus {
-						display: flex;
+						/* Hide the plus icon on hover of menu item */
+						.primary-menu-container > .menu-wrapper > .menu-item-has-children:hover > .sub-menu-toggle > .icon-plus {
+							display: none;
+						}
+
+						/* Show the minus icon on hover of menu item */
+						.primary-menu-container > .menu-wrapper > .menu-item-has-children:hover > .sub-menu-toggle > .icon-minus {
+							display: flex;
+						}
 					}
 				';
 
