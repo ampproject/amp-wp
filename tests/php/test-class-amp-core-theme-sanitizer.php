@@ -30,6 +30,9 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	public function tearDown() {
 		parent::tearDown();
 
+		$GLOBALS['wp_scripts'] = null;
+		$GLOBALS['wp_styles']  = null;
+
 		$this->restore_theme_directories();
 	}
 
