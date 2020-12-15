@@ -477,14 +477,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 
 		$sanitizer->add_twentytwentyone_mobile_modal();
 
-		$query = $dom->xpath->query(
-			// Verify that the menu button container exists and that it contains the button that toggles the amp-lightbox,
-			'//nav/div[ @class = "menu-button-container" and ./button[ @data-amp-bind-aria-expanded and ./span[ @on and contains( @class, " open" ) ] and ./span[ @on and contains( @class, " close" ) ] ] ]' .
-			// and is immediately followed by the primary menu container, wrapped in amp-lightbox,
-			'/following-sibling::amp-lightbox[ ./div[ @class = "primary-menu-container" and ./ul ] ]' .
-			// and is also followed by the original primary menu container.
-			'/following-sibling::div[ @class = "primary-menu-container" and ./ul ]'
-		);
+		$query = $dom->xpath->query( '//button[ @id = "primary-mobile-menu" and @data-amp-bind-aria-expanded and @on ]' );
 
 		$this->assertEquals( 1, $query->length );
 	}
@@ -500,15 +493,6 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 				<div class="menu-button-container">
 					<button id="primary-mobile-menu">Menu button toggle</button>
 				</div>
-				<amp-lightbox>
-					<div class="primary-menu-container">
-						<ul id="primary-menu-list">
-							<li id="menu-item-1"><button>Foo</button></li>
-							<li id="menu-item-2"><button class="sub-menu-toggle">Bar</button></li>
-							<li id="menu-item-3"><button class="sub-menu-toggle">Baz</button></li>
-						</ul>
-					</div>
-				</amp-lightbox>
 				<div class="primary-menu-container">
 					<ul id="primary-menu-list">
 						<li id="menu-item-1"><button>Foo</button></li>
@@ -523,9 +507,6 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Core_Theme_Sanitizer( $dom );
 
 		$sanitizer->add_twentytwentyone_sub_menu_fix();
-
-		$query = $dom->xpath->query( '//amp-lightbox//button[ not( @data-amp-bind-aria-expanded ) ]' );
-		$this->assertEquals( 3, $query->length );
 
 		$query = $dom->xpath->query( '//nav/div//button[ @data-amp-bind-aria-expanded ]' );
 		$this->assertEquals( 2, $query->length );
