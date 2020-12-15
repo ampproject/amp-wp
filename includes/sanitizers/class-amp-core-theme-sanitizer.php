@@ -2085,7 +2085,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 							visibility: hidden;
 						}
 
-						.primary-navigation-open #primary-mobile-menu {
+						.primary-navigation-open .menu-button-container {
 							visibility: visible;
 						}
 					}
