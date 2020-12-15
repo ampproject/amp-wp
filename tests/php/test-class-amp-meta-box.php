@@ -11,6 +11,8 @@ use AmpProject\AmpWP\Tests\Helpers\AssertRestApiField;
 
 /**
  * Tests for AMP_Post_Meta_Box.
+ *
+ * @coversDefaultClass AMP_Post_Meta_Box
  */
 class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 
@@ -52,7 +54,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	/**
 	 * Test init.
 	 *
-	 * @see AMP_Settings::init()
+	 * @covers ::init()
 	 */
 	public function test_init() {
 		$this->instance->init();
@@ -67,7 +69,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	/**
 	 * Test enqueue_admin_assets.
 	 *
-	 * @see AMP_Post_Meta_Box::enqueue_admin_assets()
+	 * @covers ::enqueue_admin_assets()
 	 */
 	public function test_enqueue_admin_assets() {
 		// Test enqueue outside of a post with AMP support.
@@ -110,7 +112,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	/**
 	 * Test enqueue_block_assets.
 	 *
-	 * @covers AMP_Post_Meta_Box::enqueue_block_assets()
+	 * @covers ::enqueue_block_assets()
 	 */
 	public function test_enqueue_block_assets() {
 		if ( ! function_exists( 'register_block_type' ) ) {
@@ -178,14 +180,16 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		}
 	}
 
+	/** @covers ::get_featured_image_dimensions() */
 	public function test_featured_image_dimensions() {
 		$dimensions = AMP_Post_Meta_Box::get_featured_image_dimensions();
 		$this->assertArrayHasKey( 'featuredImageMinimumHeight', $dimensions );
 		$this->assertArrayHasKey( 'featuredImageMinimumWidth', $dimensions );
-		$this->assertEquals( $dimensions['featuredImageMinimumWidth'], 1200 );
-		$this->assertEquals( $dimensions['featuredImageMinimumHeight'], 675 );
+		$this->assertEquals( 1200, $dimensions['featuredImageMinimumWidth'] );
+		$this->assertEquals( 675, $dimensions['featuredImageMinimumHeight'] );
 	}
 
+	/** @covers ::get_featured_image_dimensions() */
 	public function test_when_height_and_width_are_valid_should_return_filter_values() {
 		add_filter(
 			'amp_featured_image_minimum_height',
@@ -204,10 +208,11 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		remove_all_filters( 'amp_featured_image_minimum_width' );
 		$this->assertArrayHasKey( 'featuredImageMinimumHeight', $dimensions );
 		$this->assertArrayHasKey( 'featuredImageMinimumWidth', $dimensions );
-		$this->assertEquals( $dimensions['featuredImageMinimumWidth'], 1300 );
-		$this->assertEquals( $dimensions['featuredImageMinimumHeight'], 1200 );
+		$this->assertEquals( 1300, $dimensions['featuredImageMinimumWidth'] );
+		$this->assertEquals( 1200, $dimensions['featuredImageMinimumHeight'] );
 	}
 
+	/** @covers ::get_featured_image_dimensions() */
 	public function test_when_height_and_width_are_invalid_should_return_defaults() {
 		add_filter(
 			'amp_featured_image_minimum_height',
@@ -226,15 +231,11 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		remove_all_filters( 'amp_featured_image_minimum_width' );
 		$this->assertArrayHasKey( 'featuredImageMinimumHeight', $dimensions );
 		$this->assertArrayHasKey( 'featuredImageMinimumWidth', $dimensions );
-		$this->assertEquals( $dimensions['featuredImageMinimumWidth'], 1200 );
-		$this->assertEquals( $dimensions['featuredImageMinimumHeight'], 675 );
+		$this->assertEquals( 1200, $dimensions['featuredImageMinimumWidth'] );
+		$this->assertEquals( 675, $dimensions['featuredImageMinimumHeight'] );
 	}
 
-	/**
-	 * Test render_status.
-	 *
-	 * @see AMP_Settings::render_status()
-	 */
+	/** @covers ::render_status() */
 	public function test_render_status() {
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		$post = self::factory()->post->create_and_get();
@@ -291,11 +292,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$this->assertEmpty( $output );
 	}
 
-	/**
-	 * Test get_status_and_errors.
-	 *
-	 * @see AMP_Post_Meta_Box::get_status_and_errors()
-	 */
+	/** @covers ::get_status_and_errors() */
 	public function test_get_status_and_errors() {
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		$expected_status_and_errors = [
@@ -343,11 +340,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		);
 	}
 
-	/**
-	 * Test get_error_messages.
-	 *
-	 * @see AMP_Post_Meta_Box::get_error_messages()
-	 */
+	/** @covers ::get_error_messages() */
 	public function test_get_error_messages() {
 		$messages = $this->instance->get_error_messages( [ 'template_unsupported' ] );
 		$this->assertStringContains( 'There are no', $messages[0] );
@@ -371,11 +364,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		);
 	}
 
-	/**
-	 * Test save_amp_status.
-	 *
-	 * @covers AMP_Post_Meta_Box::save_amp_status()
-	 */
+	/** @covers ::save_amp_status() */
 	public function test_save_amp_status() {
 		// Test failure.
 		$post_id = self::factory()->post->create();
@@ -421,11 +410,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$this->assertEquals( AMP_Post_Meta_Box::ENABLED_STATUS, get_post_meta( $post_id, AMP_Post_Meta_Box::STATUS_POST_META_KEY, true ) );
 	}
 
-	/**
-	 * Test preview_post_link.
-	 *
-	 * @covers AMP_Post_Meta_Box::preview_post_link()
-	 */
+	/** @covers ::preview_post_link() */
 	public function test_preview_post_link() {
 		$link = 'https://foo.bar';
 		$this->assertEquals( 'https://foo.bar', $this->instance->preview_post_link( $link ) );
@@ -449,7 +434,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	 * Test add_rest_api_fields.
 	 *
 	 * @dataProvider get_theme_support_data
-	 * @covers AMP_Post_Meta_Box::add_rest_api_fields()
+	 * @covers ::add_rest_api_fields()
 	 *
 	 * @param string $theme_feature Theme feature being added.
 	 * @param array  $support_args Theme support arguments.
@@ -471,11 +456,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		);
 	}
 
-	/**
-	 * Test get_amp_enabled_rest_field.
-	 *
-	 * @covers AMP_Post_Meta_Box::get_amp_enabled_rest_field()
-	 */
+	/** @covers ::get_amp_enabled_rest_field() */
 	public function test_get_amp_enabled_rest_field() {
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 
@@ -510,11 +491,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		);
 	}
 
-	/**
-	 * Test update_amp_enabled_rest_field.
-	 *
-	 * @covers AMP_Post_Meta_Box::update_amp_enabled_rest_field()
-	 */
+	/** @covers ::update_amp_enabled_rest_field() */
 	public function test_update_amp_enabled_rest_field() {
 		// User should not be able to update AMP status if they do not have the `edit_post` capability.
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'subscriber' ] ) );
