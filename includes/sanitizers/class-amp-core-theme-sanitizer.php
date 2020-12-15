@@ -2074,7 +2074,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					/* Trap keyboard navigation within mobile menu when it\'s open */
 					@media only screen and (max-width: 481px) {
 						.primary-navigation-open #page {
-							visibility: hidden !important;
+							visibility: hidden;
 						}
 
 						#primary-mobile-menu[aria-expanded="true"] {
