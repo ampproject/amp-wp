@@ -448,6 +448,43 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( 1, $elements->length );
 	}
 
+	/** @covers ::amend_twentytwentyone_dark_mode_styles() */
+	public function test_amend_twentytwentyone_dark_mode_styles() {
+		$theme_slug = 'twentytwentyone';
+		if ( ! wp_get_theme( $theme_slug )->exists() ) {
+			$this->markTestSkipped();
+			return;
+		}
+
+		switch_theme( $theme_slug );
+		wp_enqueue_style( 'tt1-dark-mode', get_theme_file_path( 'dark-mode.css' ) ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		wp_enqueue_style( 'twenty-twenty-one-style', get_theme_file_path( 'style.css' ) ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		$this->assertEmpty( wp_styles()->registered['twenty-twenty-one-style']->extra );
+		AMP_Core_Theme_Sanitizer::amend_twentytwentyone_dark_mode_styles();
+		wp_enqueue_scripts();
+
+		$this->assertFalse( wp_style_is( 'tt1-dark-mode', 'enqueued' ) );
+		$extra = wp_styles()->registered['twenty-twenty-one-style']->extra;
+		$this->assertNotEmpty( $extra );
+		$this->assertArrayHasKey( 'after', $extra );
+		$after = implode( '', $extra['after'] );
+
+		$replacements = [
+			'@media only screen'           => '@media only screen and (prefers-color-scheme: dark)',
+			'.is-dark-theme.is-dark-theme' => ':root',
+			'.respect-color-scheme-preference.is-dark-theme body' => '.respect-color-scheme-preference body',
+		];
+		foreach ( $replacements as $search => $replacement ) {
+			$this->assertStringNotContains( "$search {", $after );
+			$this->assertStringContains( "$replacement {", $after );
+		}
+	}
+
+	/** @covers ::amend_twentytwentyone_styles() */
+	public function test_amend_twentytwentyone_styles() {
+		$this->markTestIncomplete();
+	}
+
 	/**
 	 * Tests add_twentytwentyone_mobile_modal.
 	 *
