@@ -265,15 +265,16 @@ class AMP_Post_Meta_Box {
 			true
 		);
 
-		$data = array_merge(
-			[
-				'ampSlug'         => amp_get_slug(),
-				'errorMessages'   => $this->get_error_messages( $status_and_errors['errors'] ),
-				'hasThemeSupport' => ! amp_is_legacy(),
-				'isStandardMode'  => amp_is_canonical(),
-			],
-			self::get_featured_image_dimensions()
-		);
+		list( $featured_image_minimum_width, $featured_image_minimum_height ) = self::get_featured_image_dimensions();
+
+		$data = [
+			'ampSlug'                    => amp_get_slug(),
+			'errorMessages'              => $this->get_error_messages( $status_and_errors['errors'] ),
+			'hasThemeSupport'            => ! amp_is_legacy(),
+			'isStandardMode'             => amp_is_canonical(),
+			'featuredImageMinimumWidth'  => $featured_image_minimum_width,
+			'featuredImageMinimumHeight' => $featured_image_minimum_height,
+		];
 
 		wp_add_inline_script(
 			self::BLOCK_ASSET_HANDLE,
@@ -301,8 +302,8 @@ class AMP_Post_Meta_Box {
 	 * @return int[] {
 	 *     Minimum dimensions.
 	 *
-	 *     @type int $featuredImageMinimumWidth  Image width in pixels. May be zero to disable the dimension constraint.
-	 *     @type int $featuredImageMinimumHeight Image height in pixels. May be zero to disable the dimension constraint.
+	 *     @type int $0 Image width in pixels. May be zero to disable the dimension constraint.
+	 *     @type int $1 Image height in pixels. May be zero to disable the dimension constraint.
 	 * }
 	 */
 	public static function get_featured_image_dimensions() {
@@ -330,8 +331,8 @@ class AMP_Post_Meta_Box {
 		$featured_image_minimum_width = (int) apply_filters( 'amp_featured_image_minimum_width', $default_width );
 
 		return [
-			'featuredImageMinimumWidth'  => max( $featured_image_minimum_width, 0 ),
-			'featuredImageMinimumHeight' => max( $featured_image_minimum_height, 0 ),
+			max( $featured_image_minimum_width, 0 ),
+			max( $featured_image_minimum_height, 0 ),
 		];
 	}
 

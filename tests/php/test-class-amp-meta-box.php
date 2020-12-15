@@ -182,11 +182,9 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 
 	/** @covers ::get_featured_image_dimensions() */
 	public function test_featured_image_dimensions() {
-		$dimensions = AMP_Post_Meta_Box::get_featured_image_dimensions();
-		$this->assertArrayHasKey( 'featuredImageMinimumHeight', $dimensions );
-		$this->assertArrayHasKey( 'featuredImageMinimumWidth', $dimensions );
-		$this->assertEquals( 1200, $dimensions['featuredImageMinimumWidth'] );
-		$this->assertEquals( 675, $dimensions['featuredImageMinimumHeight'] );
+		list( $width, $height ) = AMP_Post_Meta_Box::get_featured_image_dimensions();
+		$this->assertEquals( 1200, $width );
+		$this->assertEquals( 675, $height );
 	}
 
 	/** @covers ::get_featured_image_dimensions() */
@@ -203,13 +201,11 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 				return 1300;
 			}
 		);
-		$dimensions = AMP_Post_Meta_Box::get_featured_image_dimensions();
+		list( $width, $height ) = AMP_Post_Meta_Box::get_featured_image_dimensions();
 		remove_all_filters( 'amp_featured_image_minimum_height' );
 		remove_all_filters( 'amp_featured_image_minimum_width' );
-		$this->assertArrayHasKey( 'featuredImageMinimumHeight', $dimensions );
-		$this->assertArrayHasKey( 'featuredImageMinimumWidth', $dimensions );
-		$this->assertEquals( 1300, $dimensions['featuredImageMinimumWidth'] );
-		$this->assertEquals( 1200, $dimensions['featuredImageMinimumHeight'] );
+		$this->assertEquals( 1300, $width );
+		$this->assertEquals( 1200, $height );
 	}
 
 	/** @covers ::get_featured_image_dimensions() */
@@ -226,13 +222,11 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 				return 0;
 			}
 		);
-		$dimensions = AMP_Post_Meta_Box::get_featured_image_dimensions();
+		list( $width, $height ) = AMP_Post_Meta_Box::get_featured_image_dimensions();
 		remove_all_filters( 'amp_featured_image_minimum_height' );
 		remove_all_filters( 'amp_featured_image_minimum_width' );
-		$this->assertArrayHasKey( 'featuredImageMinimumHeight', $dimensions );
-		$this->assertArrayHasKey( 'featuredImageMinimumWidth', $dimensions );
-		$this->assertEquals( 0, $dimensions['featuredImageMinimumWidth'] );
-		$this->assertEquals( 0, $dimensions['featuredImageMinimumHeight'] );
+		$this->assertEquals( 0, $width );
+		$this->assertEquals( 0, $height );
 	}
 
 	/** @covers ::render_status() */
