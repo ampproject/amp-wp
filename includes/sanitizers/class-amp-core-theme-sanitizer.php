@@ -2054,7 +2054,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 				// Bail if the stylesheet is not enqueued.
 				if ( ! wp_style_is( $style_handle ) ) {
+					// @codeCoverageIgnoreStart
 					return;
+					// @codeCoverageIgnoreEnd
 				}
 
 				$css_file = get_theme_file_path(
@@ -2062,7 +2064,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				);
 
 				if ( ! file_exists( $css_file ) ) {
+					// @codeCoverageIgnoreStart
 					return;
+					// @codeCoverageIgnoreEnd
 				}
 
 				/** @var _WP_Dependency $dependency */

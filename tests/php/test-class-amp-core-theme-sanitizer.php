@@ -482,7 +482,26 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 
 	/** @covers ::amend_twentytwentyone_styles() */
 	public function test_amend_twentytwentyone_styles() {
-		$this->markTestIncomplete();
+		$theme_slug = 'twentytwentyone';
+		if ( ! wp_get_theme( $theme_slug )->exists() ) {
+			$this->markTestSkipped();
+			return;
+		}
+
+		switch_theme( $theme_slug );
+
+		$style_handle = 'twenty-twenty-one-style';
+		wp_enqueue_style( $style_handle, get_theme_file_path( 'style.css' ) ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		$this->assertEmpty( wp_styles()->registered[ $style_handle ]->extra );
+
+		wp_add_inline_style( $style_handle, '/*first*/' );
+		AMP_Core_Theme_Sanitizer::amend_twentytwentyone_styles();
+		wp_enqueue_scripts();
+
+		$after = implode( '', wp_styles()->registered[ $style_handle ]->extra['after'] );
+		$this->assertNotEmpty( $after );
+		$this->assertStringContains( '@media only screen and (max-width: 481px)', $after );
+		$this->assertStringEndsWith( '/*first*/', $after );
 	}
 
 	/**
