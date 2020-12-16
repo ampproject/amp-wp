@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { get, now, template } from 'lodash';
+import { featuredImageMinimumWidth, featuredImageMinimumHeight } from 'amp-block-editor-data';
 
 /**
  * WordPress dependencies
@@ -13,7 +14,6 @@ import { __, sprintf } from '@wordpress/i18n';
  */
 import {
 	FILE_TYPE_ERROR_VIEW,
-	MINIMUM_FEATURED_IMAGE_WIDTH,
 } from '../constants';
 
 /**
@@ -37,7 +37,10 @@ export const hasMinimumDimensions = ( media, dimensions ) => {
 
 	const { width, height } = dimensions;
 
-	return ( media.width >= width && media.height >= height );
+	return (
+		( ! width || media.width >= width ) &&
+		( ! height || media.height >= height )
+	);
 };
 
 /**
@@ -55,11 +58,10 @@ export const hasMinimumDimensions = ( media, dimensions ) => {
  * @return {Object} Minimum dimensions including width and height.
  */
 export const getMinimumFeaturedImageDimensions = () => {
-	const width = MINIMUM_FEATURED_IMAGE_WIDTH;
-
-	const height = width * ( 9 / 16 );
-
-	return { width, height };
+	return {
+		width: featuredImageMinimumWidth,
+		height: featuredImageMinimumHeight,
+	};
 };
 
 /**
@@ -71,6 +73,8 @@ export const getMinimumFeaturedImageDimensions = () => {
  * @param {number}  media.media_details.width  Media width in pixels.
  * @param {number}  media.media_details.height Media height in pixels.
  * @param {Object}  dimensions                 An object with minimum required width and height values.
+ * @param {number}  dimensions.width           Minimum required width value.
+ * @param {number}  dimensions.height          Minimum required height value.
  * @param {boolean} required                   Whether the image is required or not.
  *
  * @return {string[]|null} Validation errors, or null if there were no errors.
@@ -96,10 +100,22 @@ export const validateFeaturedImage = ( media, dimensions, required ) => {
 	if ( ! hasMinimumDimensions( media.media_details, dimensions ) ) {
 		const { width, height } = dimensions;
 
-		errors.push(
-			/* translators: 1: minimum width, 2: minimum height. */
-			sprintf( __( 'The featured image should have a size of at least %1$s by %2$s pixels.', 'amp' ), Math.ceil( width ), Math.ceil( height ) ),
-		);
+		if ( width && height ) {
+			errors.push(
+				/* translators: 1: minimum width, 2: minimum height. */
+				sprintf( __( 'The featured image should have a size of at least %1$s by %2$s pixels.', 'amp' ), Math.ceil( width ), Math.ceil( height ) ),
+			);
+		} else if ( dimensions.width ) {
+			errors.push(
+				/* translators: placeholder is minimum width. */
+				sprintf( __( 'The featured image should have a width of at least %s pixels.', 'amp' ), Math.ceil( width ) ),
+			);
+		} else if ( dimensions.height ) {
+			errors.push(
+				/* translators: placeholder is minimum height. */
+				sprintf( __( 'The featured image should have a height of at least %s pixels.', 'amp' ), Math.ceil( height ) ),
+			);
+		}
 	}
 
 	return 0 === errors.length ? null : errors;

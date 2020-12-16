@@ -8,3 +8,4 @@ describe( 'getMinimumFeaturedImageDimensions', () => {
 		expect( getMinimumFeaturedImageDimensions() ).toStrictEqual( { width: 1200, height: 675 } );
 	} );
 } );
+
