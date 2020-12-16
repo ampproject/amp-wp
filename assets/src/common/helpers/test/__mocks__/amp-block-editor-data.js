@@ -3,7 +3,9 @@
  *
  * @type {{featuredImageMinimumHeight: number, featuredImageMinimumWidth: number}}
  */
-export const mockAmpBlockEditorData = {
+const mockAmpBlockEditorData = {
 	featuredImageMinimumWidth: 1200,
 	featuredImageMinimumHeight: 675,
 };
+
+export default mockAmpBlockEditorData;
