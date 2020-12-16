@@ -91,7 +91,7 @@
 }
 
 .amp-sidebar__broken h3 {
-	margin-bottom: 0.5rem;
+	margin-bottom: 0.25rem;
 	margin-top: 0;
 }
 
@@ -101,10 +101,10 @@
 	border-radius: 50%;
 	display: flex;
 	flex: 0 0 auto;
-	height: 45px;
+	height: 40px;
 	justify-content: center;
 	margin: 10px 15px 15px 0;
-	width: 45px;
+	width: 40px;
 }
 
 .amp-sidebar__validation-errors-kept-icon svg {

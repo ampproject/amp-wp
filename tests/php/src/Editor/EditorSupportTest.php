@@ -80,6 +80,7 @@ final class EditorSupportTest extends WP_UnitTestCase {
 
 		register_post_type( 'my-post-type' );
 		$post = $this->factory()->post->create( [ 'post_type' => 'my-post-type' ] );
+		setup_postdata( get_post( $post ) );
 
 		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
 
@@ -91,6 +92,7 @@ final class EditorSupportTest extends WP_UnitTestCase {
 		global $post;
 
 		$post = $this->factory()->post->create();
+		setup_postdata( get_post( $post ) );
 
 		$this->instance->maybe_show_notice();
 
