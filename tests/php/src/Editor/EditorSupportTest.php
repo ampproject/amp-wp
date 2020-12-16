@@ -73,7 +73,7 @@ final class EditorSupportTest extends WP_UnitTestCase {
 		} else {
 			$this->assertFalse( wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false ) );
 		}
-
+		unset( $GLOBALS['current_screen'] );
 	}
 
 	public function test_dont_show_notice_for_unsupported_post_type() {
@@ -88,6 +88,7 @@ final class EditorSupportTest extends WP_UnitTestCase {
 
 		$this->instance->maybe_show_notice();
 		$this->assertFalse( wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false ) );
+		unset( $GLOBALS['current_screen'] );
 	}
 
 	public function test_maybe_show_notice_for_unsupported_user() {
@@ -100,5 +101,6 @@ final class EditorSupportTest extends WP_UnitTestCase {
 		$this->instance->maybe_show_notice();
 
 		$this->assertFalse( wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false ) );
+		unset( $GLOBALS['current_screen'] );
 	}
 }
