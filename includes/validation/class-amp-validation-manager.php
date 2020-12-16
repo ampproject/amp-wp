@@ -2459,28 +2459,6 @@ class AMP_Validation_Manager {
 			$data
 		);
 
-		// Add the amp_uuid attribute to every block.
-		// This is done as an inline script to ensure the filter is added before any blocks are registered.
-		wp_add_inline_script(
-			'wp-hooks',
-			"wp.hooks.addFilter(
-				'blocks.registerBlockType',
-				'amp/block-validation/uuid-attribute',
-				function ( settings ) {
-					if ( ! settings.attributes ) {
-						settings.attributes = {};
-					}
-
-					settings.attributes.amp_uuid = {
-						type: 'string',
-						default: false,
-					};
-
-					return settings;
-				}
-			);"
-		);
-
 		if ( function_exists( 'wp_set_script_translations' ) ) {
 			wp_set_script_translations( $slug, 'amp' );
 		} elseif ( function_exists( 'wp_get_jed_locale_data' ) || function_exists( 'gutenberg_get_jed_locale_data' ) ) {

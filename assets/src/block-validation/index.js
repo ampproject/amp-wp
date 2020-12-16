@@ -16,7 +16,6 @@ import { withAMPToolbarButton } from './with-amp-toolbar-button';
 import { Sidebar } from './sidebar';
 import { InvalidBlockOutline } from './invalid-block-outline';
 import { useValidationErrorStateUpdates } from './use-validation-error-state-updates';
-import { withAMPUuid } from './with-amp-uuid';
 
 export const PLUGIN_NAME = 'amp-block-validation';
 export const SIDEBAR_NAME = 'amp-editor-sidebar';
@@ -68,4 +67,3 @@ registerPlugin(
 );
 
 addFilter( 'editor.BlockEdit', 'ampBlockValidation/filterEdit', withAMPToolbarButton, -99 );
-addFilter( 'editor.BlockEdit', 'ampBlockValidation/withAMPUuid', withAMPUuid, -99 );

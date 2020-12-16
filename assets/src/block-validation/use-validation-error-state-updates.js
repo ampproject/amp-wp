@@ -27,11 +27,10 @@ export function useValidationErrorStateUpdates() {
 
 	const { setValidationErrors } = useDispatch( BLOCK_VALIDATION_STORE_KEY );
 
-	const { blockOrder, currentPost, getBlock, getBlocks, validationErrorsFromPost } = useSelect( ( select ) => ( {
+	const { blockOrder, currentPost, getBlock, validationErrorsFromPost } = useSelect( ( select ) => ( {
 		blockOrder: select( 'core/block-editor' ).getClientIdsWithDescendants(),
 		currentPost: select( 'core/editor' ).getCurrentPost(),
 		getBlock: select( 'core/block-editor' ).getBlock,
-		getBlocks: select( 'core/block-editor' ).getBlocks,
 		validationErrorsFromPost: select( 'core/editor' ).getEditedPostAttribute( AMP_VALIDITY_REST_FIELD_NAME )?.results || [],
 	} ) );
 
@@ -48,8 +47,6 @@ export function useValidationErrorStateUpdates() {
 	 * Adds clientIds to the validation errors that are associated with blocks.
 	 */
 	useEffect( () => {
-		const blocks = getBlocks();
-
 		const newValidationErrors = trackedValidationErrorsFromPost.map( ( validationError ) => {
 			if ( ! validationError.error.sources ) {
 				return validationError;
@@ -61,16 +58,6 @@ export function useValidationErrorStateUpdates() {
 			}
 
 			for ( const source of validationError.error.sources ) {
-				// First, attempt to retrieve the block from the amp_uuid.
-				if ( source.block_attrs && source.block_attrs.amp_uuid ) {
-					for ( const block of blocks ) {
-						if ( block.attributes.amp_uuid === source.block_attrs.amp_uuid ) {
-							return { ...validationError, clientId: block.clientId };
-						}
-					}
-				}
-
-				// If retrieving the source from amp_uuid didn't work, fall back to relying on the block_content_index if set.
 				if ( ! source.block_name || undefined === source.block_content_index ) {
 					continue;
 				}
@@ -103,7 +90,7 @@ export function useValidationErrorStateUpdates() {
 		} );
 
 		setValidationErrors( newValidationErrors );
-	}, [ blockOrder, currentPost.id, getBlock, getBlocks, setValidationErrors, trackedValidationErrorsFromPost ] );
+	}, [ blockOrder, currentPost.id, getBlock, setValidationErrors, trackedValidationErrorsFromPost ] );
 
 	return null;
 }
