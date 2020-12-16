@@ -48,7 +48,7 @@ final class EditorSupportTest extends WP_UnitTestCase {
 	}
 
 	public function test_has_support_from_core() {
-		if ( version_compare( get_bloginfo( 'version' ), '5.3', '>=' ) ) {
+		if ( version_compare( get_bloginfo( 'version' ), EditorSupport::WP_MIN_VERSION, '>=' ) ) {
 			$this->assertTrue( $this->instance->has_support_from_core() );
 		} else {
 			$this->assertFalse( $this->instance->has_support_from_core() );
@@ -60,12 +60,14 @@ final class EditorSupportTest extends WP_UnitTestCase {
 
 		set_current_screen( 'edit.php' );
 		$post = $this->factory()->post->create();
+		setup_postdata( get_post( $post ) );
 
+		get_current_screen()->is_block_editor( true );
 		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		$this->instance->maybe_show_notice();
 
-		if ( version_compare( get_bloginfo( 'version' ), '5.3', '<' ) ) {
+		if ( version_compare( get_bloginfo( 'version' ), EditorSupport::WP_MIN_VERSION, '<' ) ) {
 			$this->assertContains(
 				'AMP functionality',
 				wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false )
@@ -74,6 +76,7 @@ final class EditorSupportTest extends WP_UnitTestCase {
 			$this->assertFalse( wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false ) );
 		}
 		unset( $GLOBALS['current_screen'] );
+		unset( $GLOBALS['wp_scripts'] );
 	}
 
 	public function test_dont_show_notice_for_unsupported_post_type() {
@@ -89,6 +92,7 @@ final class EditorSupportTest extends WP_UnitTestCase {
 		$this->instance->maybe_show_notice();
 		$this->assertFalse( wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false ) );
 		unset( $GLOBALS['current_screen'] );
+		unset( $GLOBALS['wp_scripts'] );
 	}
 
 	public function test_maybe_show_notice_for_unsupported_user() {
@@ -102,5 +106,6 @@ final class EditorSupportTest extends WP_UnitTestCase {
 
 		$this->assertFalse( wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false ) );
 		unset( $GLOBALS['current_screen'] );
+		unset( $GLOBALS['wp_scripts'] );
 	}
 }
