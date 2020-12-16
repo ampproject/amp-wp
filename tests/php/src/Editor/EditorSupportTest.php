@@ -55,30 +55,6 @@ final class EditorSupportTest extends WP_UnitTestCase {
 		}
 	}
 
-	public function test_maybe_show_notice_for_supported_post_type_and_supported_user() {
-		global $post;
-
-		set_current_screen( 'edit.php' );
-		$post = $this->factory()->post->create();
-		setup_postdata( get_post( $post ) );
-
-		get_current_screen()->is_block_editor( true );
-		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
-
-		$this->instance->maybe_show_notice();
-
-		if ( version_compare( get_bloginfo( 'version' ), EditorSupport::WP_MIN_VERSION, '<' ) && ! defined( GUTENBERG_VERSION ) ) {
-			$this->assertContains(
-				'AMP functionality',
-				wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false )
-			);
-		} else {
-			$this->assertFalse( wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false ) );
-		}
-		unset( $GLOBALS['current_screen'] );
-		unset( $GLOBALS['wp_scripts'] );
-	}
-
 	public function test_dont_show_notice_for_unsupported_post_type() {
 		global $post;
 
