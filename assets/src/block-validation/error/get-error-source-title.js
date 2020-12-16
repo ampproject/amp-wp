@@ -50,9 +50,9 @@ export function getErrorSourceTitle( sources ) {
 			output.push( themeName );
 		}
 
-		if ( 0 < inactiveThemeSources ) {
+		if ( 0 < inactiveThemeSources.length ) {
 			// Translators: placeholder is the slug of an inactive WordPress theme.
-			output.push( sprintf( __( 'Inactive theme (%s)', 'amp' ), inactiveThemeSources[ 0 ].name ) );
+			output.push( __( 'Inactive theme(s)', 'amp' ) );
 		}
 	}
 

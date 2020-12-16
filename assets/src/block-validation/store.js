@@ -74,7 +74,6 @@ export function createStore( initialState ) {
 			},
 			selectors: {
 				getAMPCompatibilityBroken: ( { ampCompatibilityBroken } ) => ampCompatibilityBroken,
-				getBlockValidationErrors: ( { validationErrors }, clientId ) => validationErrors.filter( ( error ) => error.clientId === clientId ),
 				getIsShowingReviewed: ( { isShowingReviewed } ) => isShowingReviewed,
 				getValidationErrors: ( { validationErrors } ) => validationErrors,
 				getReviewedValidationErrors: ( { reviewedValidationErrors } ) => reviewedValidationErrors,

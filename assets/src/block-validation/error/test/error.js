@@ -15,14 +15,14 @@ import '@wordpress/editor';
 /**
  * Internal dependencies
  */
-import { Error } from '../error';
+import { Error } from '..';
 import {
 	VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
 	VALIDATION_ERROR_ACK_REJECTED_STATUS,
 	VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
 	VALIDATION_ERROR_NEW_REJECTED_STATUS,
-} from '../constants';
-import { createStore } from '../store';
+} from '../../constants';
+import { createStore } from '../../store';
 
 let container, pluginBlock, themeBlock, coreBlock, unknownBlock;
 
