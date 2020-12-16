@@ -15,7 +15,7 @@
  */
 class AMP_Allowed_Tags_Generated {
 
-	private static $spec_file_revision = 1119;
+	private static $spec_file_revision = 1123;
 	private static $minimum_validator_revision_required = 475;
 
 	private static $descendant_tag_lists = array(
@@ -2277,6 +2277,11 @@ class AMP_Allowed_Tags_Generated {
 							'seconds',
 						),
 					),
+					'data-count-up' => array(
+						'value' => array(
+							'',
+						),
+					),
 					'end-date' => array(
 						'value_regex' => '\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d(:[0-5]\\d(\\.\\d+)?)?(Z|[+-][0-1][0-9]:[0-5][0-9])',
 					),
@@ -3910,7 +3915,7 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'data-media-id' => array(
-						'value_regex_casei' => '[0-9a-z]{8}',
+						'value_regex_casei' => '[0-9a-z]{8}|outstream',
 					),
 					'data-player-id' => array(
 						'mandatory' => true,
@@ -6213,7 +6218,7 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 					),
 					'option-1-results-threshold' => array(
-						'value_regex' => '\\d+[.\\d+]?',
+						'value_regex' => '\\d+(\\.\\d+)?',
 					),
 					'option-1-text' => array(),
 					'option-2-image' => array(),
@@ -6221,19 +6226,19 @@ class AMP_Allowed_Tags_Generated {
 						'mandatory' => true,
 					),
 					'option-2-results-threshold' => array(
-						'value_regex' => '\\d+[.\\d+]?',
+						'value_regex' => '\\d+(\\.\\d+)?',
 					),
 					'option-2-text' => array(),
 					'option-3-image' => array(),
 					'option-3-results-category' => array(),
 					'option-3-results-threshold' => array(
-						'value_regex' => '\\d+[.\\d+]?',
+						'value_regex' => '\\d+(\\.\\d+)?',
 					),
 					'option-3-text' => array(),
 					'option-4-image' => array(),
 					'option-4-results-category' => array(),
 					'option-4-results-threshold' => array(
-						'value_regex' => '\\d+[.\\d+]?',
+						'value_regex' => '\\d+(\\.\\d+)?',
 					),
 					'option-4-text' => array(),
 					'prompt-text' => array(),
@@ -16883,6 +16888,11 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
+					'access-hide' => array(
+						'value' => array(
+							'',
+						),
+					),
 					'data-amp-bind-data-expand' => array(),
 					'expanded' => array(
 						'value' => array(
