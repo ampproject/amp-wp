@@ -532,7 +532,7 @@ def GetTagRules(tag_spec):
 
 	if hasattr(tag_spec, 'also_requires_tag_warning') and len( tag_spec.also_requires_tag_warning ) != 0:
 		for also_requires_tag_warning in tag_spec.also_requires_tag_warning:
-			matches = re.search( r'(amp-\S+) extension .js script', also_requires_tag_warning )
+			matches = re.search( r'(amp-\S+) extension( \.js)? script', also_requires_tag_warning )
 			if not matches:
 				raise Exception( 'Unexpected also_requires_tag_warning format: ' + also_requires_tag_warning )
 			requires_extension_list.add(matches.group(1))

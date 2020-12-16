@@ -15,7 +15,7 @@
  */
 class AMP_Allowed_Tags_Generated {
 
-	private static $spec_file_revision = 1123;
+	private static $spec_file_revision = 1130;
 	private static $minimum_validator_revision_required = 475;
 
 	private static $descendant_tag_lists = array(
@@ -246,7 +246,6 @@ class AMP_Allowed_Tags_Generated {
 			'amp-fit-text',
 			'amp-font',
 			'amp-gist',
-			'amp-google-vrview-image',
 			'amp-img',
 			'amp-install-serviceworker',
 			'amp-list',
@@ -258,6 +257,7 @@ class AMP_Allowed_Tags_Generated {
 			'amp-story-interactive-poll',
 			'amp-story-interactive-quiz',
 			'amp-story-interactive-results',
+			'amp-story-panning-media',
 			'amp-timeago',
 			'amp-twitter',
 			'amp-video',
@@ -404,7 +404,6 @@ class AMP_Allowed_Tags_Generated {
 			'amp-gfycat',
 			'amp-gist',
 			'amp-google-document-embed',
-			'amp-google-vrview-image',
 			'amp-hulu',
 			'amp-ima-video',
 			'amp-image-slider',
@@ -6349,6 +6348,23 @@ class AMP_Allowed_Tags_Generated {
 				),
 			),
 		),
+		'amp-story-panning-media' => array(
+			array(
+				'attr_spec_list' => array(),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							6,
+						),
+					),
+					'mandatory_ancestor' => 'amp-story-grid-layer',
+					'requires_extension' => array(
+						'amp-story-panning-media',
+					),
+					'spec_url' => 'https://amp.dev/documentation/components/amp-story-panning-media',
+				),
+			),
+		),
 		'amp-story-player' => array(
 			array(
 				'attr_spec_list' => array(),
@@ -6359,8 +6375,8 @@ class AMP_Allowed_Tags_Generated {
 							2,
 							3,
 							7,
-							9,
 							4,
+							9,
 						),
 					),
 					'descendant_tag_list' => 'amp-story-player-allowed-descendants',
@@ -6647,7 +6663,6 @@ class AMP_Allowed_Tags_Generated {
 							2,
 							3,
 							7,
-							9,
 							1,
 							4,
 						),
@@ -6761,7 +6776,6 @@ class AMP_Allowed_Tags_Generated {
 							2,
 							3,
 							7,
-							9,
 							1,
 							4,
 						),
@@ -12451,9 +12465,9 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
-					'mandatory_alternatives' => 'amphtml engine v0.js script',
+					'mandatory_alternatives' => 'amphtml engine script',
 					'mandatory_parent' => 'head',
-					'spec_name' => 'amphtml engine v0.js script',
+					'spec_name' => 'amphtml engine script',
 					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup',
 					'unique' => true,
 				),
@@ -12494,9 +12508,9 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
-					'mandatory_alternatives' => 'amphtml engine v0.js script',
+					'mandatory_alternatives' => 'amphtml engine script',
 					'mandatory_parent' => 'head',
-					'spec_name' => 'amphtml engine v0.js lts script',
+					'spec_name' => 'amphtml engine script (LTS)',
 					'spec_url' => 'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup',
 					'unique' => true,
 				),
@@ -12920,7 +12934,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
-					'spec_name' => 'amp-ad extension .js script',
+					'spec_name' => 'amp-ad extension script',
 				),
 			),
 			array(
@@ -16123,6 +16137,36 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
+						'name' => 'amp-story-panning-media',
+						'requires_usage' => true,
+						'version' => array(
+							'0.1',
+						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'crossorigin' => array(
+						'value' => array(
+							'anonymous',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
 						'name' => 'amp-story-player',
 						'requires_usage' => true,
 						'version' => array(
@@ -16621,7 +16665,7 @@ class AMP_Allowed_Tags_Generated {
 							'0.1',
 						),
 					),
-					'spec_name' => 'amp-video extension .js script',
+					'spec_name' => 'amp-video extension script',
 				),
 			),
 			array(
