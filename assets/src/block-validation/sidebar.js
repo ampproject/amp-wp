@@ -106,7 +106,7 @@ export function Sidebar() {
 						</p>
 					</div>
 					{ ( 0 < reviewedValidationErrors.length && 0 < unreviewedValidationErrors.length ) && (
-						<div>
+						<div className="amp-sidebar__options">
 							<ToggleControl
 								checked={ isShowingReviewed }
 								label={ __( 'Include reviewed errors', 'amp' ) }

@@ -67,10 +67,6 @@
 	margin-right: 1rem;
 }
 
-.amp-sidebar__validation-errors-heading {
-	margin-bottom: 1.5rem;
-}
-
 .amp-sidebar > .components-panel__body {
 	border-bottom-width: 0;
 	border-top-width: 0;
@@ -80,10 +76,6 @@
 
 .amp-sidebar__description-panel {
 	border-bottom: 2px solid #e3e4e7;
-}
-
-.amp-sidebar > .amp-sidebar__description-panel.components-panel__body p {
-	margin-bottom: 1rem;
 }
 
 .amp-sidebar__broken-container {
@@ -164,6 +156,10 @@
 	height: 15px;
 	margin-left: 6px;
 	width: 15px;
+}
+
+.amp-sidebar__options {
+	margin-top: 2rem;
 }
 
 .amp-error--new .components-panel__body-title,
