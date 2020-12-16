@@ -111,7 +111,10 @@ class BlockSourcesTest extends WP_UnitTestCase {
 			$this->instance->get_block_sources()
 		);
 
-		$test_register_block_type_args = [ 'arg' => 1, 'name' => 'my-test-block' ];
+		$test_register_block_type_args = [
+			'arg'  => 1,
+			'name' => 'my-test-block',
+		];
 		$this->assertEquals( $test_register_block_type_args, $this->instance->capture_block_type_source( $test_register_block_type_args ) );
 
 		require_once MockPluginEnvironment::BAD_PLUGINS_DIR . '/' . MockPluginEnvironment::BAD_BLOCK_PLUGIN_FILE;
