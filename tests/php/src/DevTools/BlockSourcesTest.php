@@ -97,32 +97,25 @@ class BlockSourcesTest extends WP_UnitTestCase {
 		$this->instance->register();
 
 		// Test registration of a core block.
-		register_block_type( 'core/test-block', [ 'name' => 'my-test-block' ] );
+		register_block_type( 'core/test-block' );
 
-		$test_block = [
-			'name'  => 'my-test-block',
-			'type'  => '',
-			'title' => 'WordPress core',
-		];
 		$this->assertEquals(
 			[
-				'core/test-block' => $test_block,
+				'core/test-block' => [
+					'name'  => '',
+					'type'  => '',
+					'title' => 'WordPress core',
+				],
 			],
 			$this->instance->get_block_sources()
 		);
-
-		$test_register_block_type_args = [
-			'arg'  => 1,
-			'name' => 'my-test-block',
-		];
-		$this->assertEquals( $test_register_block_type_args, $this->instance->capture_block_type_source( $test_register_block_type_args ) );
 
 		require_once MockPluginEnvironment::BAD_PLUGINS_DIR . '/' . MockPluginEnvironment::BAD_BLOCK_PLUGIN_FILE;
 
 		$this->assertEquals(
 			[
 				'core/test-block' => [
-					'name'  => 'my-test-block',
+					'name'  => '',
 					'type'  => '',
 					'title' => 'WordPress core',
 				],
