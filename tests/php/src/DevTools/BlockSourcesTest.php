@@ -97,7 +97,7 @@ class BlockSourcesTest extends WP_UnitTestCase {
 		$this->instance->register();
 
 		// Test registration of a core block.
-		register_block_type( 'core/test-block' );
+		register_block_type( 'core/test-block', [ 'name' => 'my-test-block' ] );
 
 		$test_block = [
 			'name'  => 'my-test-block',
