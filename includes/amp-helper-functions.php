@@ -7,6 +7,7 @@
 
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\AmpWpPluginFactory;
+use AmpProject\AmpWP\Exception\InvalidService;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
@@ -417,9 +418,16 @@ function amp_is_available() {
 	$warn = static function () {
 		static $already_warned_sources = [];
 
-		$likely_culprit_detector = Services::get( 'dev_tools.likely_culprit_detector' );
+		try {
+			$likely_culprit_detector = Services::get( 'dev_tools.likely_culprit_detector' );
+			$closest_source          = $likely_culprit_detector->analyze_backtrace();
+		} catch ( InvalidService $e ) {
+			$closest_source = [
+				'type' => 'exception',
+				'name' => 'invalid_service',
+			];
+		}
 
-		$closest_source            = $likely_culprit_detector->analyze_backtrace();
 		$closest_source_identifier = $closest_source['type'] . ':' . $closest_source['name'];
 		if ( in_array( $closest_source_identifier, $already_warned_sources, true ) ) {
 			return;
@@ -433,10 +441,20 @@ function amp_is_available() {
 			'`is_amp_endpoint()`'
 		);
 
+		$current_hook = current_action();
+		if ( $current_hook ) {
+			/* translators: placeholder is the current hook */
+			$message .= ' ' . sprintf(
+				'WordPress is currently doing the %s hook.',
+				'`' . $current_hook . '`'
+			);
+		} else {
+			$message .= ' ' . __( 'WordPress is not currently doing any hook.', 'amp' );
+		}
+
 		$message .= ' ' . sprintf(
-			/* translators: 1: the current hook, 2: the wp action, 4: the WP_Query class, 4: the amp_skip_post() function */
-			__( 'WordPress is currently doing the %1$s hook. Calling this function before the %2$s action means it will not have access to %3$s and the queried object to determine if it is an AMP response, thus neither the %4$s filter nor the AMP enabled toggle will be considered.', 'amp' ),
-			'`' . current_action() . '`',
+			/* translators: 1: the wp action, 2: the WP_Query class, 3: the amp_skip_post() function */
+			__( 'Calling this function before the %1$s action means it will not have access to %2$s and the queried object to determine if it is an AMP response, thus neither the %3$s filter nor the AMP enabled toggle will be considered.', 'amp' ),
 			'`wp`',
 			'`WP_Query`',
 			'`amp_skip_post()`'
@@ -457,6 +475,9 @@ function amp_is_available() {
 				case 'theme':
 					/* translators: placeholder is the slug of the theme */
 					$translated_string = __( 'It appears the theme with slug %s is responsible; please contact the author.', 'amp' );
+					break;
+				case 'exception':
+					$translated_string = __( 'The function was called too early (before the plugins_loaded action) to determine the plugin source.', 'amp' );
 					break;
 			}
 
