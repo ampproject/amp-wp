@@ -58,6 +58,7 @@ final class EditorSupportTest extends WP_UnitTestCase {
 	public function test_maybe_show_notice_for_supported_post_type_and_supported_user() {
 		global $post;
 
+		set_current_screen( 'edit.php' );
 		$post = $this->factory()->post->create();
 
 		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
@@ -78,6 +79,7 @@ final class EditorSupportTest extends WP_UnitTestCase {
 	public function test_dont_show_notice_for_unsupported_post_type() {
 		global $post;
 
+		set_current_screen( 'edit.php' );
 		register_post_type( 'my-post-type' );
 		$post = $this->factory()->post->create( [ 'post_type' => 'my-post-type' ] );
 		setup_postdata( get_post( $post ) );
@@ -91,6 +93,7 @@ final class EditorSupportTest extends WP_UnitTestCase {
 	public function test_maybe_show_notice_for_unsupported_user() {
 		global $post;
 
+		set_current_screen( 'edit.php' );
 		$post = $this->factory()->post->create();
 		setup_postdata( get_post( $post ) );
 

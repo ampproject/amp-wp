@@ -45,6 +45,16 @@ final class EditorSupport implements Registerable, Service {
 	 * Shows a notice in the editor if the Gutenberg or WP version prevents plugin features from working.
 	 */
 	public function maybe_show_notice() {
+		$screen = get_current_screen();
+
+		if ( ! $screen ) {
+			return;
+		}
+
+		if ( ! isset( $screen->is_block_editor ) || false === $screen->is_block_editor ) {
+			return;
+		}
+
 		if ( ! in_array( get_post_type(), AMP_Post_Type_Support::get_eligible_post_types(), true ) ) {
 			return;
 		}
@@ -72,12 +82,6 @@ final class EditorSupport implements Registerable, Service {
 	 * @return boolean
 	 */
 	public function editor_supports_amp_block_editor_features() {
-		$screen = get_current_screen();
-
-		if ( $screen && isset( $screen->is_block_editor ) && false === $screen->is_block_editor ) {
-			return false;
-		}
-
 		// Check for plugin constant here as well as in the function because editor features won't work in
 		// supported WP versions if an old, unsupported GB version is overriding the editor.
 		if ( defined( 'GUTENBERG_VERSION' ) ) {
