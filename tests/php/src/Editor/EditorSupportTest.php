@@ -48,7 +48,7 @@ final class EditorSupportTest extends WP_UnitTestCase {
 	}
 
 	public function test_has_support_from_core() {
-		if ( version_compare( get_bloginfo('version'), '5.3', '>=' ) ) {
+		if ( version_compare( get_bloginfo( 'version' ), '5.3', '>=' ) ) {
 			$this->assertTrue( $this->instance->has_support_from_core() );
 		} else {
 			$this->assertFalse( $this->instance->has_support_from_core() );
@@ -64,7 +64,7 @@ final class EditorSupportTest extends WP_UnitTestCase {
 
 		$this->instance->maybe_show_notice();
 
-		if ( version_compare( get_bloginfo('version'), '5.3', '<' ) ) {
+		if ( version_compare( get_bloginfo( 'version' ), '5.3', '<' ) ) {
 			$this->assertContains(
 				'AMP functionality',
 				wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false )
