@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { pluginNames, themeName, themeSlug } from 'amp-block-validation';
+
+/**
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
@@ -19,14 +24,14 @@ export function getErrorSourceTitle( sources ) {
 	}
 
 	const output = [];
-	const pluginNames = [ ...new Set( keyedSources.plugin.map( ( { name } ) => name ) ) ];
+	const uniquePluginNames = [ ...new Set( keyedSources.plugin.map( ( { name } ) => name ) ) ];
 	const muPluginNames = [ ...new Set( keyedSources[ 'mu-plugin' ].map( ( { name } ) => name ) ) ];
-	const combinedPluginNames = [ ...pluginNames, ...muPluginNames ];
+	const combinedPluginNames = [ ...uniquePluginNames, ...muPluginNames ];
 
 	if ( 1 === combinedPluginNames.length ) {
-		output.push( global.ampBlockValidation.pluginNames[ combinedPluginNames[ 0 ] ] || combinedPluginNames[ 0 ] );
+		output.push( pluginNames[ combinedPluginNames[ 0 ] ] || combinedPluginNames[ 0 ] );
 	} else {
-		const pluginCount = pluginNames.length;
+		const pluginCount = uniquePluginNames.length;
 		const muPluginCount = muPluginNames.length;
 
 		if ( 0 < pluginCount ) {
@@ -39,10 +44,10 @@ export function getErrorSourceTitle( sources ) {
 	}
 
 	if ( 0 === keyedSources.embed.length ) {
-		const activeThemeSources = keyedSources.theme.filter( ( { name } ) => global.ampBlockValidation.themeSlug === name );
-		const inactiveThemeSources = keyedSources.theme.filter( ( { name } ) => global.ampBlockValidation.themeSlug !== name );
+		const activeThemeSources = keyedSources.theme.filter( ( { name } ) => themeSlug === name );
+		const inactiveThemeSources = keyedSources.theme.filter( ( { name } ) => themeSlug !== name );
 		if ( 0 < activeThemeSources.length ) {
-			output.push( global.ampBlockValidation.themeName );
+			output.push( themeName );
 		}
 
 		if ( 0 < inactiveThemeSources ) {

@@ -27,44 +27,23 @@ import { createStore } from '../store';
 let container, pluginBlock, themeBlock, coreBlock, unknownBlock;
 
 const TEST_PLUGIN_BLOCK = 'my-plugin/test-block';
+const TEST_MU_PLUGIN_BLOCK = 'my-mu-plugin/test-block';
 const TEST_THEME_BLOCK = 'my-theme/test-block';
 const TEST_CORE_BLOCK = 'core/test-block';
 const TEST_UNKNOWN_BLOCK = 'unknown/test-block';
-
-global.ampBlockValidation = {
-	blockSources: {
-		'my-plugin/test-block': {
-			source: 'plugin',
-			title: 'My plugin',
-		},
-		'my-theme/test-block': {
-			source: 'theme',
-			title: 'My theme',
-		},
-		'core/test-block': {
-			source: '',
-			title: 'WordPress core',
-		},
-		'unknown/test-block': {
-			source: '',
-			name: '',
-		},
-	},
-	CSS_ERROR_TYPE: 'css_error',
-	HTML_ATTRIBUTE_ERROR_TYPE: 'html_attribute_error',
-	HTML_ELEMENT_ERROR_TYPE: 'html_element_error',
-	JS_ERROR_TYPE: 'js_error',
-};
-
-jest.mock( '../use-inline-data', () => ( {
-	useInlineData: () => global.ampBlockValidation,
-} ) );
 
 registerBlockType( TEST_PLUGIN_BLOCK, {
 	attributes: {},
 	save: noop,
 	category: 'widgets',
 	title: 'test plugin block',
+} );
+
+registerBlockType( TEST_MU_PLUGIN_BLOCK, {
+	attributes: {},
+	save: noop,
+	category: 'widgets',
+	title: 'test mu-plugin block',
 } );
 
 registerBlockType( TEST_THEME_BLOCK, {
@@ -333,6 +312,7 @@ describe( 'ErrorContent', () => {
 	it.each( [
 		null,
 		'plugin',
+		'mu-plugin',
 		'theme',
 		'core',
 	].reduce(
@@ -378,6 +358,11 @@ describe( 'ErrorContent', () => {
 			case 'plugin':
 				expect( container.innerHTML ).toContain( 'test plugin block' );
 				expect( container.innerHTML ).toContain( 'My plugin (plugin)' );
+				break;
+
+			case 'mu-plugin':
+				expect( container.innerHTML ).toContain( 'test mu-plugin block' );
+				expect( container.innerHTML ).toContain( 'My MU plugin (must-use plugin)' );
 				break;
 
 			case 'theme':

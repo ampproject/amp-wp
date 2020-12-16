@@ -178,6 +178,8 @@ domReady( () => {
 	} else {
 		const urlParams = new URLSearchParams( window.location.search );
 		activeTermId = urlParams.get( 'term_id' );
+
+		// Remove the term_id from the URL; otherwise, the section will be scrolled to again after saving changes.
 		if ( activeTermId ) {
 			urlParams.delete( 'term_id' );
 			window.history.replaceState( {}, document.title, `${ window.location.origin }${ window.location.pathname }?${ urlParams.toString() }` );

@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { blockSources } from 'amp-block-validation';
 
 /**
  * WordPress dependencies
@@ -25,7 +26,11 @@ import { getErrorSourceTitle } from './get-error-source-title';
 function ErrorSource( { clientId, blockTypeName, sources } ) {
 	let source;
 
-	const blockSource = global.ampBlockValidation.blockSources[ blockTypeName ];
+	if ( ! blockSources ) {
+		return null;
+	}
+
+	const blockSource = blockSources?.[ blockTypeName ];
 
 	if ( clientId ) {
 		switch ( blockSource?.source ) {

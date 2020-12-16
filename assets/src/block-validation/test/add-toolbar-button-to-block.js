@@ -23,17 +23,6 @@ let toolbarButtonWasRendered = false;
 
 const TEST_BLOCK = 'my-plugin/test-block';
 
-jest.mock( '../use-inline-data', () => ( {
-	useInlineData: () => ( {
-		blockSources: {
-			'my-plugin/test-block': {
-				source: 'plugin',
-				name: 'My plugin',
-			},
-		},
-	} ),
-} ) );
-
 jest.mock( '../amp-toolbar-button', () => ( {
 	AMPToolbarButton() {
 		toolbarButtonWasRendered = true;
