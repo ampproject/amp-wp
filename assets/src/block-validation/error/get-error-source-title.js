@@ -16,10 +16,12 @@ import { __, sprintf } from '@wordpress/i18n';
  * @param {Object[]} sources Error source details from the PHP backtrace.
  */
 export function getErrorSourceTitle( sources ) {
-	const keyedSources = { theme: [], plugin: [], 'mu-plugin': [], embed: [], core: [] };
+	const keyedSources = { theme: [], plugin: [], 'mu-plugin': [], embed: [], core: [], blocks: [] };
 	for ( const source of sources ) {
 		if ( source.type && source.type in keyedSources ) {
 			keyedSources[ source.type ].push( source );
+		} else if ( 'block_name' in source ) {
+			keyedSources.blocks.push( source );
 		}
 	}
 
@@ -54,6 +56,10 @@ export function getErrorSourceTitle( sources ) {
 			// Translators: placeholder is the slug of an inactive WordPress theme.
 			output.push( __( 'Inactive theme(s)', 'amp' ) );
 		}
+	}
+
+	if ( 0 === output.length && 0 < keyedSources.blocks.length ) {
+		output.push( keyedSources.blocks[ 0 ].block_name );
 	}
 
 	if ( 0 === output.length && 0 < keyedSources.embed.length ) {

@@ -31,10 +31,6 @@ import { getErrorSourceTitle } from './get-error-source-title';
 function ErrorSource( { clientId, blockTypeName, sources } ) {
 	let source;
 
-	if ( ! blockSources ) {
-		return null;
-	}
-
 	const blockSource = blockSources?.[ blockTypeName ];
 
 	if ( clientId ) {
