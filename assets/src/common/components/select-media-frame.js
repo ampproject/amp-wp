@@ -32,8 +32,6 @@ const FeaturedImageSelectionError = wp.media.View.extend( {
 			__( 'The selected image is too small (%1$s by %2$s pixels).', 'amp' ),
 			'{{width}}',
 			'{{height}}',
-			'{{minWidth}}',
-			'{{minHeight}}',
 		);
 
 		message += ' <# if ( minWidth && minHeight ) { #>';
