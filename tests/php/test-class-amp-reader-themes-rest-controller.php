@@ -66,6 +66,7 @@ class Test_Reader_Theme_REST_Controller extends WP_UnitTestCase {
 
 		$actual_reader_themes   = wp_list_pluck( $data, 'slug' );
 		$expected_reader_themes = [
+			'twentytwentyone',
 			'twentytwenty',
 			'twentynineteen',
 			'twentyseventeen',

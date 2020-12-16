@@ -603,7 +603,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'amp_story_player'                             => [
 				'
-				<amp-story-player width="360" height="600">
+				<amp-story-player width="360" height="600" layout="intrinsic">
 					<a href="https://www.example.com" class="story">
 						<span class="title">A local’s guide to what to eat and do in New York City</span>
 					</a>

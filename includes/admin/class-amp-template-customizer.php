@@ -117,6 +117,9 @@ class AMP_Template_Customizer {
 		$self->set_refresh_setting_transport();
 		$self->remove_cover_template_section();
 		$self->remove_homepage_settings_section();
+		if ( get_template() === 'twentytwentyone' ) {
+			add_action( 'customize_controls_print_footer_scripts', [ $self, 'add_dark_mode_toggler_button_notice' ] );
+		}
 		return $self;
 	}
 
@@ -215,6 +218,23 @@ class AMP_Template_Customizer {
 		if ( count( array_diff( $control_ids, $static_front_page_control_ids ) ) === 0 ) {
 			$this->wp_customize->remove_section( $section_id );
 		}
+	}
+
+	/**
+	 * Add notice that the dark mode toggler button is not currently available on AMP pages.
+	 */
+	public function add_dark_mode_toggler_button_notice() {
+		$message = __( 'While dark mode works on AMP pages, the toggle button is not currently available. It appears here only for preview purposes.', 'amp' );
+		?>
+		<script>
+			wp.customize.control( 'respect_user_color_preference', function ( control ) {
+				control.notifications.add( new wp.customize.Notification( 'amp_dark_mode_toggler_availability_notice', {
+					message: <?php echo wp_json_encode( $message ); ?>,
+					type: 'info'
+				} ) );
+			} );
+		</script>
+		<?php
 	}
 
 	/**

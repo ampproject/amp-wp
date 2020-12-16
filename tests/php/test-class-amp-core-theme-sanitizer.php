@@ -12,6 +12,8 @@ use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 
 /**
  * Class AMP_Core_Theme_Sanitizer_Test
+ *
+ * @coversDefaultClass AMP_Core_Theme_Sanitizer
  */
 class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 
@@ -27,6 +29,9 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 
 	public function tearDown() {
 		parent::tearDown();
+
+		$GLOBALS['wp_scripts'] = null;
+		$GLOBALS['wp_styles']  = null;
 
 		$this->restore_theme_directories();
 	}
@@ -59,7 +64,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	 * Test xpath_from_css_selector().
 	 *
 	 * @dataProvider get_xpath_from_css_selector_data
-	 * @covers AMP_Core_Theme_Sanitizer::xpath_from_css_selector
+	 * @covers ::xpath_from_css_selector()
 	 *
 	 * @param string $css_selector CSS Selector.
 	 * @param string $expected     Expected XPath expression.
@@ -113,7 +118,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	 * Test get_closest_submenu().
 	 *
 	 * @dataProvider get_get_closest_submenu_data
-	 * @covers AMP_Core_Theme_Sanitizer::get_closest_submenu
+	 * @covers ::get_closest_submenu()
 	 *
 	 * @param Document   $dom      Document.
 	 * @param DOMElement $element  Element.
@@ -128,10 +133,11 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Test get_supported_themes().
 	 *
-	 * @covers AMP_Core_Theme_Sanitizer::get_supported_themes()
+	 * @covers ::get_supported_themes()
 	 */
 	public function test_get_supported_themes() {
 		$supported_themes = [
+			'twentytwentyone',
 			'twentytwenty',
 			'twentynineteen',
 			'twentyseventeen',
@@ -147,10 +153,41 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( $supported_themes, AMP_Core_Theme_Sanitizer::get_supported_themes() );
 	}
 
+	/** @covers ::dequeue_scripts() */
+	public function test_dequeue_scripts() {
+		$handle = 'foo';
+		wp_enqueue_script( $handle, 'a/random/source', [], 'v1', true );
+
+		AMP_Core_Theme_Sanitizer::dequeue_scripts( [ $handle ] );
+
+		wp_enqueue_scripts();
+
+		$this->assertFalse( wp_script_is( $handle ) );
+	}
+
+	/** @covers ::force_svg_support() */
+	public function test_force_svg_support() {
+		$dom = AMP_DOM_Utils::get_dom_from_content( '' );
+		$dom->documentElement->setAttribute( 'class', 'no-svg' );
+
+		( new AMP_Core_Theme_Sanitizer( $dom ) )->force_svg_support();
+
+		$this->assertEquals( ' svg ', $dom->documentElement->getAttribute( 'class' ) );
+	}
+
+	/** @covers ::force_fixed_background_support() */
+	public function test_force_fixed_background_support() {
+		$dom = AMP_DOM_Utils::get_dom_from_content( '' );
+
+		( new AMP_Core_Theme_Sanitizer( $dom ) )->force_fixed_background_support();
+
+		$this->assertStringEndsWith( ' background-fixed', $dom->documentElement->getAttribute( 'class' ) );
+	}
+
 	/**
 	 * Test extend_theme_support().
 	 *
-	 * @covers AMP_Core_Theme_Sanitizer::extend_theme_support()
+	 * @covers ::extend_theme_support()
 	 */
 	public function test_extend_theme_support() {
 		$theme_dir = basename( dirname( AMP__DIR__ ) ) . '/' . basename( AMP__DIR__ ) . '/tests/php/data/themes';
@@ -231,7 +268,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Test add_has_header_video_body_class().
 	 *
-	 * @covers AMP_Core_Theme_Sanitizer::add_has_header_video_body_class
+	 * @covers ::add_has_header_video_body_class()
 	 */
 	public function test_add_has_header_video_body_class() {
 		$args = [ 'foo' ];
@@ -290,7 +327,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	 * Test guess_modal_role().
 	 *
 	 * @dataProvider get_modals
-	 * @covers       AMP_Core_Theme_Sanitizer::guess_modal_role
+	 * @covers       ::guess_modal_role()
 	 *
 	 * @param DOMElement $dom_element Document.
 	 * @param string     $expected    Expected.
@@ -306,7 +343,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Tests add_img_display_block_fix.
 	 *
-	 * @covers AMP_Core_Theme_Sanitizer::add_img_display_block_fix
+	 * @covers ::add_img_display_block_fix()
 	 */
 	public function test_add_img_display_block_fix() {
 		AMP_Core_Theme_Sanitizer::add_img_display_block_fix();
@@ -319,7 +356,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Tests add_twentytwenty_custom_logo_fix.
 	 *
-	 * @covers AMP_Core_Theme_Sanitizer::add_twentytwenty_custom_logo_fix
+	 * @covers ::add_twentytwenty_custom_logo_fix()
 	 */
 	public function test_add_twentytwenty_custom_logo_fix() {
 		add_filter(
@@ -340,7 +377,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Tests prevent_sanitize_in_customizer_preview.
 	 *
-	 * @covers AMP_Core_Theme_Sanitizer::prevent_sanitize_in_customizer_preview
+	 * @covers ::prevent_sanitize_in_customizer_preview()
 	 */
 	public function test_prevent_sanitize_in_customizer_preview() {
 		global $wp_customize;
@@ -363,5 +400,211 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 
 		$this->assertEquals( $expected, $content );
+	}
+
+	/** @covers ::add_twentyfourteen_search() */
+	public function test_add_twentyfourteen_search() {
+		$html = '
+			<div class="search-toggle">
+				<a href="#"></a>
+			</div>
+			<div id="search-container">
+				<input type="text" name="s">
+			</div>
+		';
+
+		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
+
+		( new AMP_Core_Theme_Sanitizer( $dom ) )->add_twentyfourteen_search();
+
+		$this->assertEquals( 1, $dom->xpath->query( '//div[ @id = "search-container" and @data-amp-bind-class and ./amp-state[ ./script ] ]' )->length );
+		$this->assertEquals( 1, $dom->xpath->query( '//a[ not( @href ) and @on and @tabindex and @role and @aria-expanded and @data-amp-bind-aria-expanded ]' )->length );
+		$this->assertEquals( 1, $dom->xpath->query( '//div[ @class = "search-toggle" and @data-amp-bind-class ]' )->length );
+	}
+
+	/**
+	 * Tests amend_twentytwentyone_sub_menu_toggles.
+	 *
+	 * @covers ::amend_twentytwentyone_sub_menu_toggles()
+	 */
+	public function test_amend_twentytwentyone_sub_menu_toggles() {
+		$html = '
+			<ul id="primary-menu-list">
+				<div>
+					<button onclick="twentytwentyoneExpandSubMenu(this)"></button>
+				</div>
+			</ul>
+			<ul class="footer-navigation-wrapper foo">
+				<div>
+					<button onclick="twentytwentyoneExpandSubMenu(this)"></button>
+				</div>
+			</ul>
+			<button onclick="foo"></button>
+		';
+
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $html );
+		$sanitizer = new AMP_Core_Theme_Sanitizer( $dom );
+
+		$sanitizer->amend_twentytwentyone_sub_menu_toggles();
+		$elements = $dom->xpath->query( '//*[ @onclick ]' );
+
+		$this->assertEquals( 1, $elements->length );
+	}
+
+	/** @covers ::amend_twentytwentyone_dark_mode_styles() */
+	public function test_amend_twentytwentyone_dark_mode_styles() {
+		$theme_slug = 'twentytwentyone';
+		if ( ! wp_get_theme( $theme_slug )->exists() ) {
+			$this->markTestSkipped();
+			return;
+		}
+
+		switch_theme( $theme_slug );
+		wp_enqueue_style( 'tt1-dark-mode', get_theme_file_path( 'dark-mode.css' ) ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		wp_enqueue_style( 'twenty-twenty-one-style', get_theme_file_path( 'style.css' ) ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		$this->assertEmpty( wp_styles()->registered['twenty-twenty-one-style']->extra );
+		AMP_Core_Theme_Sanitizer::amend_twentytwentyone_dark_mode_styles();
+		wp_enqueue_scripts();
+
+		$this->assertFalse( wp_style_is( 'tt1-dark-mode', 'enqueued' ) );
+		$extra = wp_styles()->registered['twenty-twenty-one-style']->extra;
+		$this->assertNotEmpty( $extra );
+		$this->assertArrayHasKey( 'after', $extra );
+		$after = implode( '', $extra['after'] );
+
+		$replacements = [
+			'@media only screen'           => '@media only screen and (prefers-color-scheme: dark)',
+			'.is-dark-theme.is-dark-theme' => ':root',
+			'.respect-color-scheme-preference.is-dark-theme body' => '.respect-color-scheme-preference body',
+		];
+		foreach ( $replacements as $search => $replacement ) {
+			$this->assertStringNotContains( "$search {", $after );
+			$this->assertStringContains( "$replacement {", $after );
+		}
+	}
+
+	/** @covers ::amend_twentytwentyone_styles() */
+	public function test_amend_twentytwentyone_styles() {
+		$theme_slug = 'twentytwentyone';
+		if ( ! wp_get_theme( $theme_slug )->exists() ) {
+			$this->markTestSkipped();
+			return;
+		}
+
+		switch_theme( $theme_slug );
+
+		$style_handle = 'twenty-twenty-one-style';
+		wp_enqueue_style( $style_handle, get_theme_file_path( 'style.css' ) ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		$this->assertEmpty( wp_styles()->registered[ $style_handle ]->extra );
+
+		wp_add_inline_style( $style_handle, '/*first*/' );
+		AMP_Core_Theme_Sanitizer::amend_twentytwentyone_styles();
+		wp_enqueue_scripts();
+
+		$after = implode( '', wp_styles()->registered[ $style_handle ]->extra['after'] );
+		$this->assertNotEmpty( $after );
+		$this->assertStringContains( '@media only screen and (max-width: 481px)', $after );
+		$this->assertStringEndsWith( '/*first*/', $after );
+	}
+
+	/**
+	 * Tests add_twentytwentyone_mobile_modal.
+	 *
+	 * @covers ::add_twentytwentyone_mobile_modal()
+	 */
+	public function test_add_twentytwentyone_mobile_modal() {
+		$html = '
+			<nav>
+				<div class="menu-button-container">
+					<button id="primary-mobile-menu">
+						<span class="dropdown-icon open">Menu</span>
+						<span class="dropdown-icon close">Close</span>
+					</button>
+				</div>
+				<div class="primary-menu-container">
+					<ul id="primary-menu-list">
+						<li id="menu-item-1">Foo</li>
+						<li id="menu-item-2">Bar</li>
+						<li id="menu-item-3">Baz</li>
+					</ul>
+				</div>
+			</nav>
+		';
+
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $html );
+		$sanitizer = new AMP_Core_Theme_Sanitizer( $dom );
+
+		$sanitizer->add_twentytwentyone_mobile_modal();
+
+		$query = $dom->xpath->query( '//button[ @id = "primary-mobile-menu" and @data-amp-bind-aria-expanded and @on ]' );
+
+		$this->assertEquals( 1, $query->length );
+	}
+
+	/**
+	 * Tests add_twentytwentyone_sub_menu_fix.
+	 *
+	 * @covers ::add_twentytwentyone_sub_menu_fix()
+	 */
+	public function test_add_twentytwentyone_sub_menu_fix() {
+		$html = '
+			<nav>
+				<div class="menu-button-container">
+					<button id="primary-mobile-menu">Menu button toggle</button>
+				</div>
+				<div class="primary-menu-container">
+					<ul id="primary-menu-list">
+						<li id="menu-item-1"><button>Foo</button></li>
+						<li id="menu-item-2"><button class="sub-menu-toggle">Bar</button></li>
+						<li id="menu-item-3"><button class="sub-menu-toggle">Baz</button></li>
+					</ul>
+				</div>
+			</nav>
+		';
+
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $html );
+		$sanitizer = new AMP_Core_Theme_Sanitizer( $dom );
+
+		$sanitizer->add_twentytwentyone_sub_menu_fix();
+
+		$query = $dom->xpath->query( '//nav/div//button[ @data-amp-bind-aria-expanded ]' );
+		$this->assertEquals( 2, $query->length );
+
+		for ( $i = 1; $i <= $query->length; $i++ ) {
+			/** @var DOMElement $menu_toggle */
+			$menu_toggle = $query->item( $i - 1 );
+
+			$toggle_id       = 'toggle_' . ( $i );
+			$other_toggle_id = 'toggle_' . ( $i === $query->length ? $i - 1 : $i + 1 );
+
+			$this->assertEquals( "{$toggle_id} ? 'true' : 'false'", $menu_toggle->getAttribute( 'data-amp-bind-aria-expanded' ) );
+			$this->assertEquals( "tap:AMP.setState({{$toggle_id}:!{$toggle_id},{$other_toggle_id}:false})", $menu_toggle->getAttribute( 'on' ) );
+		}
+
+		$this->assertEquals( 'tap:AMP.setState({toggle_1:false,toggle_2:false})', $dom->body->getAttribute( 'on' ) );
+	}
+
+	/**
+	 * Tests add_twentytwentyone_dark_mode_toggle.
+	 *
+	 * @covers ::add_twentytwentyone_dark_mode_toggle()
+	 */
+	public function test_add_twentytwentyone_dark_mode_toggle() {
+		$html = '<button id="dark-mode-toggler">Toggle dark mode</button>';
+
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $html );
+		$sanitizer = new AMP_Core_Theme_Sanitizer( $dom );
+
+		$sanitizer->add_twentytwentyone_dark_mode_toggle();
+
+		$this->assertEquals(
+			'.no-js #dark-mode-toggler { display: block; }',
+			$dom->head->getElementsByTagName( 'style' )->item( 0 )->textContent
+		);
+
+		$this->assertEquals(
+			'<button id="dark-mode-toggler" on="tap:AMP.setState({is_dark_theme: !is_dark_theme}),i-amp-0.toggleClass(class=\'is-dark-theme\'),i-amp-1.toggleClass(class=\'is-dark-theme\')" data-amp-bind-aria-pressed="is_dark_theme ? \'true\' : \'false\'">Toggle dark mode</button>',
+			$dom->saveHTML( $dom->getElementById( 'dark-mode-toggler' ) )
+		);
 	}
 }
