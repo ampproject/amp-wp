@@ -192,7 +192,7 @@ function amp_bootstrap_admin() {
  * @return bool
  */
 function amp_should_use_new_onboarding() {
-	if ( version_compare( get_bloginfo( 'version' ), '5.3', '<' ) ) {
+	if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
 		return false;
 	}
 
