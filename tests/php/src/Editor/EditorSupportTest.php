@@ -67,7 +67,7 @@ final class EditorSupportTest extends WP_UnitTestCase {
 
 		$this->instance->maybe_show_notice();
 
-		if ( version_compare( get_bloginfo( 'version' ), EditorSupport::WP_MIN_VERSION, '<' ) ) {
+		if ( version_compare( get_bloginfo( 'version' ), EditorSupport::WP_MIN_VERSION, '<' ) && ! defined( GUTENBERG_VERSION ) ) {
 			$this->assertContains(
 				'AMP functionality',
 				wp_scripts()->print_inline_script( 'wp-edit-post', 'after', false )
