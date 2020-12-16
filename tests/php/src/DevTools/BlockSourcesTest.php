@@ -46,8 +46,8 @@ class BlockSourcesTest extends WP_UnitTestCase {
 
 		$this->instance = $this->get_new_instance();
 
-		if ( version_compare( get_bloginfo( 'version' ), '5.3', '<' ) ) {
-			$this->markTestSkipped( 'Requires WordPress 5.3.' );
+		if ( version_compare( get_bloginfo( 'version' ), '5.5', '<' ) ) {
+			$this->markTestSkipped( 'Detecting block sources requires WordPress 5.5.' );
 		}
 	}
 

@@ -12,7 +12,12 @@ import { sprintf, __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { VALIDATION_ERROR_ACK_ACCEPTED_STATUS, VALIDATION_ERROR_ACK_REJECTED_STATUS, VALIDATION_ERROR_NEW_ACCEPTED_STATUS, VALIDATION_ERROR_NEW_REJECTED_STATUS } from '../constants';
+import {
+	VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+	VALIDATION_ERROR_ACK_REJECTED_STATUS,
+	VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+	VALIDATION_ERROR_NEW_REJECTED_STATUS,
+} from '../constants';
 import AMPAlert from '../../../images/amp-alert.svg';
 import AMPDelete from '../../../images/amp-delete.svg';
 import { getErrorSourceTitle } from './get-error-source-title';
