@@ -122,7 +122,7 @@ class BlockSourcesTest extends WP_UnitTestCase {
 		$this->assertEquals(
 			[
 				'core/test-block' => [
-					'name'  => '',
+					'name'  => 'my-test-block',
 					'type'  => '',
 					'title' => 'WordPress core',
 				],
