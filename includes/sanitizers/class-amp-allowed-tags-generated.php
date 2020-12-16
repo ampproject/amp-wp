@@ -6354,6 +6354,7 @@ class AMP_Allowed_Tags_Generated {
 							2,
 							3,
 							7,
+							9,
 							4,
 						),
 					),

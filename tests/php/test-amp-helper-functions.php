@@ -1725,6 +1725,27 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	}
 
 	/**
+	 * Test amp_print_schemaorg_metadata().
+	 *
+	 * @covers ::amp_print_schemaorg_metadata()
+	 */
+	public function test_amp_print_schemaorg_metadata() {
+		add_filter( 'amp_schemaorg_metadata', '__return_empty_array' );
+		$output = get_echo( 'amp_print_schemaorg_metadata' );
+		$this->assertEmpty( $output );
+
+		remove_filter( 'amp_schemaorg_metadata', '__return_empty_array' );
+		add_filter(
+			'amp_schemaorg_metadata',
+			static function () {
+				return [ 'foo' => 'bar' ];
+			}
+		);
+		$output = trim( get_echo( 'amp_print_schemaorg_metadata' ) );
+		$this->assertSame( '<script type="application/ld+json">{"foo":"bar"}</script>', $output );
+	}
+
+	/**
 	 * Test amp_add_admin_bar_view_link()
 	 *
 	 * @covers ::amp_add_admin_bar_view_link()

@@ -190,6 +190,7 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 		$this->assertFalse( has_action( 'customize_controls_print_footer_scripts', [ $instance, 'print_legacy_controls_templates' ] ) );
 		$this->assertFalse( has_action( 'customize_preview_init', [ $instance, 'init_legacy_preview' ] ) );
 		$this->assertFalse( has_action( 'customize_controls_enqueue_scripts', [ $instance, 'add_legacy_customizer_scripts' ] ) );
+		$this->assertFalse( has_action( 'customize_controls_print_footer_scripts', [ $instance, 'add_dark_mode_toggler_button_notice' ] ) );
 
 		foreach ( [ $header_video_setting, $external_header_video_setting ] as $setting ) {
 			$this->assertEquals( 'refresh', $setting->transport );
@@ -197,6 +198,24 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 
 		$this->assertNull( $wp_customize->get_section( 'cover_template_options' ) );
 		$this->assertNull( $wp_customize->get_section( 'static_front_page' ) );
+	}
+
+	/**
+	 * @covers AMP_Template_Customizer::init()
+	 * @covers AMP_Template_Customizer::add_dark_mode_toggler_button_notice()
+	 */
+	public function test_init_for_twentytwentyone() {
+		if ( ! wp_get_theme( 'twentytwentyone' )->exists() ) {
+			$this->markTestSkipped();
+		}
+		switch_theme( 'twentytwentyone' );
+
+		$wp_customize = $this->get_customize_manager();
+		$instance     = AMP_Template_Customizer::init( $wp_customize );
+		$this->assertEquals( 10, has_action( 'customize_controls_print_footer_scripts', [ $instance, 'add_dark_mode_toggler_button_notice' ] ) );
+
+		$output = get_echo( [ $instance, 'add_dark_mode_toggler_button_notice' ] );
+		$this->assertStringContains( 'wp.customize.control', $output );
 	}
 
 	/**

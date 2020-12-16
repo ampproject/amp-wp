@@ -7,7 +7,7 @@ import { ReactElement } from 'react';
 /**
  * WordPress dependencies
  */
-import { __, _x } from '@wordpress/i18n';
+import { __, _x, sprintf } from '@wordpress/i18n';
 import { cloneElement } from '@wordpress/element';
 import { TextControl, SelectControl, ToggleControl, Notice, PanelBody, FontSizePicker } from '@wordpress/components';
 import { InspectorControls } from '@wordpress/block-editor';
@@ -372,12 +372,18 @@ setUpInspectorControls.propTypes = {
 /**
  * Get AMP Layout select control.
  *
+ * @deprecated As of v2.1. Blocks with the `ampLayout` attribute will still be able to use the control.
+ *
  * @param {Object} props Props.
  *
  * @return {ReactElement} Element.
  */
-const AmpLayoutControl = ( props ) => {
+export const AmpLayoutControl = ( props ) => {
 	const { name, attributes: { ampLayout }, setAttributes } = props;
+
+	if ( undefined === ampLayout ) {
+		return null;
+	}
 
 	let label = __( 'AMP Layout', 'amp' );
 
@@ -386,17 +392,32 @@ const AmpLayoutControl = ( props ) => {
 	}
 
 	return (
-		<SelectControl
-			label={ label }
-			value={ ampLayout }
-			options={ getLayoutOptions( name ) }
-			onChange={ ( value ) => {
-				setAttributes( { ampLayout: value } );
-				if ( 'core/image' === props.name ) {
-					setImageBlockLayoutAttributes( props, value );
-				}
-			} }
-		/>
+		<>
+			<Notice
+				status="warning"
+				isDismissible={ false }
+			>
+				<span dangerouslySetInnerHTML={ {
+					__html: sprintf(
+						/* translators: placeholder is link to support forum. */
+						__( 'The AMP Layout setting is deprecated and is slated for removal. Please <a href="%s" target="_blank" rel="noreferrer">report</a> if you need it.', 'amp' ),
+						'https://wordpress.org/support/plugin/amp/#new-topic-0',
+					),
+				} } />
+			</Notice>
+
+			<SelectControl
+				label={ label }
+				value={ ampLayout }
+				options={ getLayoutOptions( name ) }
+				onChange={ ( value ) => {
+					setAttributes( { ampLayout: value } );
+					if ( 'core/image' === props.name ) {
+						setImageBlockLayoutAttributes( props, value );
+					}
+				} }
+			/>
+		</>
 	);
 };
 
@@ -411,21 +432,42 @@ AmpLayoutControl.propTypes = {
 /**
  * Get AMP Noloading toggle control.
  *
+ * @deprecated As of v2.1. Blocks with the `ampNoLoading` attribute will still be able to use the control.
+ *
  * @param {Object} props Props.
  *
  * @return {ReactElement} Element.
  */
-const AmpNoloadingToggle = ( props ) => {
+export const AmpNoloadingToggle = ( props ) => {
 	const { attributes: { ampNoLoading }, setAttributes } = props;
+
+	if ( undefined === ampNoLoading ) {
+		return null;
+	}
 
 	const label = __( 'AMP Noloading', 'amp' );
 
 	return (
-		<ToggleControl
-			label={ label }
-			checked={ ampNoLoading }
-			onChange={ () => setAttributes( { ampNoLoading: ! ampNoLoading } ) }
-		/>
+		<>
+			<Notice
+				status="warning"
+				isDismissible={ false }
+			>
+				<span dangerouslySetInnerHTML={ {
+					__html: sprintf(
+						/* translators: placeholder is link to support forum. */
+						__( 'The AMP Noloading setting is deprecated and is slated for removal. Please <a href="%s" target="_blank" rel="noreferrer">report</a> if you need it.', 'amp' ),
+						'https://wordpress.org/support/plugin/amp/#new-topic-0',
+					),
+				} } />
+			</Notice>
+
+			<ToggleControl
+				label={ label }
+				checked={ ampNoLoading }
+				onChange={ () => setAttributes( { ampNoLoading: ! ampNoLoading } ) }
+			/>
+		</>
 	);
 };
 

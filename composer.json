@@ -20,7 +20,7 @@
   },
   "require-dev": {
     "civicrm/composer-downloads-plugin": "^3.0",
-    "dealerdirect/phpcodesniffer-composer-installer": "0.7.0",
+    "dealerdirect/phpcodesniffer-composer-installer": "0.7.1",
     "google/cloud-storage": "^1.22",
     "mikey179/vfsstream": "1.6.8",
     "mustache/mustache": "^2",
@@ -29,7 +29,7 @@
     "phpdocumentor/reflection": "~3.0",
     "phpunit/phpunit": "^5.7 || ^6.5 || ^7.5",
     "roave/security-advisories": "dev-master",
-    "sirbrillig/phpcs-variable-analysis": "2.9.0",
+    "sirbrillig/phpcs-variable-analysis": "2.10.1",
     "wp-cli/export-command": "^2.0",
     "wp-cli/extension-command": "^2.0",
     "wp-cli/wp-cli": "^2.4",
