@@ -8,4 +8,4 @@ const mockAmpBlockEditorData = {
 	featuredImageMinimumHeight: 675,
 };
 
-export default mockAmpBlockEditorData;
+module.exports = mockAmpBlockEditorData;
