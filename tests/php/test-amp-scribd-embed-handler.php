@@ -112,6 +112,7 @@ class AMP_Scribd_Embed_Handler_Test extends WP_UnitTestCase {
 	public function test__conversion( $source, $expected ) {
 		$embed = new AMP_Scribd_Embed_Handler();
 		$embed->register_embed();
+		add_filter( 'wp_lazy_loading_enabled', '__return_false' );
 		$filtered_content = apply_filters( 'the_content', $source );
 
 		$this->assertEquals( $expected, $filtered_content );
