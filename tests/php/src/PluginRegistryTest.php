@@ -69,6 +69,19 @@ final class PluginRegistryTest extends TestCase {
 		);
 	}
 
+	/** @covers ::get_mu_plugins_data() */
+	public function test_get_mu_plugins_data() {
+		$plugin_registry = new PluginRegistry();
+
+		$this->assertEquals(
+			[
+				'allow-using-default-themes.php',
+				'wp-admin-redirect.php',
+			],
+			array_keys( $this->call_private_method( $plugin_registry, 'get_mu_plugins_data' ) )
+		);
+	}
+
 	/** @covers ::get_plugin_from_slug() */
 	public function test_get_plugin_from_slug() {
 		$this->populate_plugins();

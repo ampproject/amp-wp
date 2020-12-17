@@ -45,10 +45,6 @@ class BlockSourcesTest extends WP_UnitTestCase {
 		parent::setUp();
 
 		$this->instance = $this->get_new_instance();
-
-		if ( version_compare( get_bloginfo( 'version' ), '5.5', '<' ) ) {
-			$this->markTestSkipped( 'Detecting block sources requires WordPress 5.5.' );
-		}
 	}
 
 	/**
@@ -68,6 +64,17 @@ class BlockSourcesTest extends WP_UnitTestCase {
 		parent::tearDown();
 
 		$this->instance->clear_block_sources_cache();
+	}
+
+	/** @covers ::is_needed() */
+	public function test_is_needed() {
+		if ( version_compare( get_bloginfo( 'version' ), '5.5', '<' ) ) {
+			$this->assertFalse( BlockSources::is_needed() );
+		} else {
+			$this->assertFalse( BlockSources::is_needed() );
+			set_current_screen( 'edit.php' );
+			$this->assertTrue( BlockSources::is_needed() );
+		}
 	}
 
 	public function test__construct() {
@@ -93,6 +100,10 @@ class BlockSourcesTest extends WP_UnitTestCase {
 	 * @covers ::get_block_sources()
 	 */
 	public function test_capture_block_type_source() {
+		if ( version_compare( get_bloginfo( 'version' ), '5.5', '<' ) ) {
+			$this->markTestSkipped( 'Detecting block sources requires WordPress 5.5.' );
+		}
+
 		$this->instance->clear_block_sources_cache();
 		$this->instance->register();
 
