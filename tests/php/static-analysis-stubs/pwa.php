@@ -1,39 +1,12 @@
 <?php
 /**
- * Interface representing a service worker registry.
- *
- * @since 0.2
- */
-interface WP_Service_Worker_Registry {
-	/**
-	 * Registers an item.
-	 *
-	 * @since 0.2
-	 *
-	 * @param string $handle Handle of the item.
-	 * @param array  $args   Optional. Additional arguments. Default empty array.
-	 */
-	public function register( $handle, $args = array() );
-	/**
-	 * Gets all registered items.
-	 *
-	 * @since 0.2
-	 *
-	 * @return array List of registered items.
-	 */
-	public function get_all();
-}
-/**
  * Class used to register service workers.
  *
  * @since 0.1
  *
  * @see WP_Dependencies
- *
- * @method WP_Service_Worker_Precaching_Routes precaching_routes()
- * @method WP_Service_Worker_Caching_Routes caching_routes()
  */
-class WP_Service_Worker_Scripts extends WP_Scripts implements WP_Service_Worker_Registry {
+class WP_Service_Worker_Scripts extends WP_Scripts {
 	/**
 	 * Constructor.
 	 *
@@ -50,17 +23,27 @@ class WP_Service_Worker_Scripts extends WP_Scripts implements WP_Service_Worker_
 	 */
 	public function init() {
 	}
+
 	/**
-	 * Magic call method. Allows accessing component registries.
+	 * Get caching routes registry.
 	 *
-	 * @since 0.2
+	 * @since 0.6
 	 *
-	 * @param string $method Method name. Should be the identifier for a component registry.
-	 * @param array  $args   Method arguments.
-	 * @return WP_Service_Worker_Registry|null Registry instance if valid method name, otherwise null.
+	 * @return WP_Service_Worker_Caching_Routes Registry.
 	 */
-	public function __call( $method, $args ) {
+	public function caching_routes() {
 	}
+
+	/**
+	 * Get precaching routes registry.
+	 *
+	 * @since 0.6
+	 *
+	 * @return WP_Service_Worker_Precaching_Routes Registry.
+	 */
+	public function precaching_routes() {
+	}
+
 	/**
 	 * Registers a service worker script.
 	 *
@@ -109,7 +92,7 @@ class WP_Service_Worker_Scripts extends WP_Scripts implements WP_Service_Worker_
  *
  * @since 0.2
  */
-class WP_Service_Worker_Caching_Routes implements WP_Service_Worker_Registry
+class WP_Service_Worker_Caching_Routes
 {
     /**
      * Stale while revalidate caching strategy.
@@ -146,24 +129,32 @@ class WP_Service_Worker_Caching_Routes implements WP_Service_Worker_Registry
      * @var string
      */
     const STRATEGY_NETWORK_ONLY = 'NetworkOnly';
+
     /**
      * Registers a route.
      *
-     * @param string $route      Route regular expression, without delimiters.
-     * @param array  $args       {
-     *                           Additional route arguments.
-     *
-     * @type string  $strategy   Required. Strategy, can be WP_Service_Worker_Caching_Routes::STRATEGY_STALE_WHILE_REVALIDATE, WP_Service_Worker_Caching_Routes::STRATEGY_CACHE_FIRST,
-     *                              WP_Service_Worker_Caching_Routes::STRATEGY_NETWORK_FIRST, WP_Service_Worker_Caching_Routes::STRATEGY_CACHE_ONLY,
-     *                              WP_Service_Worker_Caching_Routes::STRATEGY_NETWORK_ONLY.
-     * @type string  $cache_name Name to use for the cache.
-     * @type array   $plugins    Array of plugins with configuration. The key of each plugin in the array must match the plugin's name.
-     *                              See https://developers.google.com/web/tools/workbox/guides/using-plugins#workbox_plugins.
-     * }
      * @since 0.2
      *
+     * @param string       $route    Route regular expression, without delimiters.
+     * @param string|array $strategy Strategy, can be WP_Service_Worker_Caching_Routes::STRATEGY_STALE_WHILE_REVALIDATE,
+     *                               WP_Service_Worker_Caching_Routes::STRATEGY_CACHE_FIRST, WP_Service_Worker_Caching_Routes::STRATEGY_NETWORK_FIRST,
+     *                               WP_Service_Worker_Caching_Routes::STRATEGY_CACHE_ONLY, WP_Service_Worker_Caching_Routes::STRATEGY_NETWORK_ONLY.
+     *                               Deprecated usage: supplying strategy args as an array.
+     * @param array        $args {
+     *     Additional caching strategy route arguments.
+     *
+     *     @type string $cache_name         Name to use for the cache.
+     *     @type array  $expiration         Expiration plugin configuration. See <https://developers.google.com/web/tools/workbox/reference-docs/latest/module-workbox-expiration.ExpirationPlugin>.
+     *     @type array  $broadcast_update   Broadcast update plugin configuration. See <https://developers.google.com/web/tools/workbox/reference-docs/latest/module-workbox-broadcast-update.BroadcastUpdatePlugin>.
+     *     @type array  $cacheable_response Cacheable response plugin configuration. See <https://developers.google.com/web/tools/workbox/reference-docs/latest/module-workbox-cacheable-response.CacheableResponsePlugin>.
+     *     @type array  $background_sync    Background sync plugin configuration. See <https://developers.google.com/web/tools/workbox/reference-docs/latest/module-workbox-background-sync.BackgroundSyncPlugin>.
+     *     @type array  $plugins            Deprecated. Array of plugins with configuration. The key of each plugin in the array must match the plugin's name.
+     *                                      This is deprecated in favor of defining the plugins in the top-level.
+     *                                      See <https://developers.google.com/web/tools/workbox/guides/using-plugins#workbox_plugins>.
+     * @return bool Whether the registration was successful.
+     * }
      */
-    public function register($route, $args = array())
+    public function register( $route, $strategy, $args = array() )
     {
     }
     /**
@@ -209,7 +200,7 @@ interface WP_Service_Worker_Registry_Aware {
  *
  * @see   WP_Dependencies
  */
-class WP_Service_Workers implements WP_Service_Worker_Registry_Aware
+class WP_Service_Workers
 {
     /**
      * Param for service workers.

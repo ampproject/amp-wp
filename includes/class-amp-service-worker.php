@@ -66,6 +66,27 @@ class AMP_Service_Worker {
 	}
 
 	/**
+	 * Register a caching route.
+	 *
+	 * @param WP_Service_Worker_Scripts $service_workers Service workers.
+	 * @param string                    $route           Route.
+	 * @param string                    $strategy        Strategy name.
+	 * @param array                     $args            Strategy args.
+	 * @param array                     $plugins         Plugins.
+	 */
+	private static function register_caching_route( WP_Service_Worker_Scripts $service_workers, $route, $strategy, $args = [], $plugins = [] ) {
+		$caching_routes = $service_workers->caching_routes();
+		if ( defined( 'PWA_VERSION' ) && version_compare( PWA_VERSION, '0.6', '<' ) ) {
+			$args['strategy'] = $strategy;
+			$args['plugins']  = $plugins;
+			$caching_routes->register( $route, $args );
+		} else {
+			$args = array_merge( $args, $plugins );
+			$caching_routes->register( $route, $strategy, $args );
+		}
+	}
+
+	/**
 	 * Add query var for iframe service worker request.
 	 *
 	 * @param array $vars Query vars.
@@ -111,11 +132,10 @@ class AMP_Service_Worker {
 		);
 
 		// Serve the AMP Runtime from cache and check for an updated version in the background. See <https://github.com/ampproject/amp-by-example/blob/4593af61609898043302a101826ddafe7206bfd9/boilerplate-generator/templates/files/serviceworkerJs.js#L54-L58>.
-		$service_workers->caching_routes()->register(
+		self::register_caching_route(
+			$service_workers,
 			'^https:\/\/cdn\.ampproject\.org\/.*',
-			[
-				'strategy' => WP_Service_Worker_Caching_Routes::STRATEGY_STALE_WHILE_REVALIDATE,
-			]
+			WP_Service_Worker_Caching_Routes::STRATEGY_STALE_WHILE_REVALIDATE
 		);
 	}
 
@@ -132,19 +152,20 @@ class AMP_Service_Worker {
 			return;
 		}
 
-		$service_workers->caching_routes()->register(
+		self::register_caching_route(
+			$service_workers,
 			'^' . preg_quote( set_url_scheme( content_url( '/' ), 'https' ), '/' ) . '[^\?]+?\.(?:png|gif|jpg|jpeg|svg|webp)(\?.*)?$',
+			WP_Service_Worker_Caching_Routes::STRATEGY_CACHE_FIRST,
 			[
-				'strategy'  => WP_Service_Worker_Caching_Routes::STRATEGY_CACHE_FIRST,
 				'cacheName' => 'images',
-				'plugins'   => [
-					'cacheableResponse' => [
-						'statuses' => [ 0, 200 ],
-					],
-					'expiration'        => [
-						'maxEntries'    => 60,
-						'maxAgeSeconds' => MONTH_IN_SECONDS,
-					],
+			],
+			[
+				'cacheableResponse' => [
+					'statuses' => [ 0, 200 ],
+				],
+				'expiration'        => [
+					'maxEntries'    => 60,
+					'maxAgeSeconds' => MONTH_IN_SECONDS,
 				],
 			]
 		);
@@ -171,28 +192,30 @@ class AMP_Service_Worker {
 		}
 
 		// Cache the Google Fonts stylesheets with a stale while revalidate strategy.
-		$service_workers->caching_routes()->register(
+		self::register_caching_route(
+			$service_workers,
 			'^https:\/\/fonts\.googleapis\.com',
+			WP_Service_Worker_Caching_Routes::STRATEGY_STALE_WHILE_REVALIDATE,
 			[
-				'strategy'  => WP_Service_Worker_Caching_Routes::STRATEGY_STALE_WHILE_REVALIDATE,
 				'cacheName' => 'google-fonts-stylesheets',
 			]
 		);
 
 		// Cache the Google Fonts webfont files with a cache first strategy for 1 year.
-		$service_workers->caching_routes()->register(
+		self::register_caching_route(
+			$service_workers,
 			'^https:\/\/fonts\.gstatic\.com',
+			WP_Service_Worker_Caching_Routes::STRATEGY_CACHE_FIRST,
 			[
-				'strategy'  => WP_Service_Worker_Caching_Routes::STRATEGY_CACHE_FIRST,
 				'cacheName' => 'google-fonts-webfonts',
-				'plugins'   => [
-					'cacheableResponse' => [
-						'statuses' => [ 0, 200 ],
-					],
-					'expiration'        => [
-						'maxAgeSeconds' => YEAR_IN_SECONDS,
-						'maxEntries'    => 30,
-					],
+			],
+			[
+				'cacheableResponse' => [
+					'statuses' => [ 0, 200 ],
+				],
+				'expiration'        => [
+					'maxAgeSeconds' => YEAR_IN_SECONDS,
+					'maxEntries'    => 30,
 				],
 			]
 		);
