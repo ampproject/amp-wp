@@ -74,10 +74,7 @@ final class PluginRegistryTest extends TestCase {
 		$plugin_registry = new PluginRegistry();
 
 		$this->assertEquals(
-			[
-				'allow-using-default-themes.php',
-				'wp-admin-redirect.php',
-			],
+			[],
 			array_keys( $this->call_private_method( $plugin_registry, 'get_mu_plugins_data' ) )
 		);
 	}
