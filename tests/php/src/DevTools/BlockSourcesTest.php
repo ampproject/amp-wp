@@ -157,6 +157,8 @@ class BlockSourcesTest extends WP_UnitTestCase {
 	 * @covers ::clear_block_sources_cache()
 	 * @covers ::set_block_sources_from_cache()
 	 * @dataProvider get_using_object_cache
+	 *
+	 * @param bool $using_object_cache Using object cache.
 	 */
 	public function test_caching( $using_object_cache ) {
 		$original_using_object_cache = wp_using_ext_object_cache( $using_object_cache );

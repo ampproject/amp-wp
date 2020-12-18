@@ -3,13 +3,11 @@
 namespace AmpProject\AmpWP\Tests\Editor;
 
 use AmpProject\AmpWP\Editor\EditorSupport;
-use AmpProject\AmpWP\Infrastructure\Conditional;
-use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use WP_UnitTestCase;
 
-/** @coversDefaultClass \AmpProject\AmpWP\Tests\Editor\EditorSupport */
+/** @coversDefaultClass \AmpProject\AmpWP\Editor\EditorSupport */
 final class EditorSupportTest extends WP_UnitTestCase {
 
 	/** @var EditorSupport */

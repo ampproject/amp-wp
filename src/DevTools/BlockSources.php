@@ -107,6 +107,7 @@ final class BlockSources implements Conditional, Service, Registerable {
 	 * Registers the google font style.
 	 *
 	 * @param array $args Array of arguments for registering a block type.
+	 * @return array Filtered block type args.
 	 */
 	public function capture_block_type_source( $args ) {
 		if ( isset( $this->get_block_sources()[ $args['name'] ] ) ) {
