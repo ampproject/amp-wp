@@ -1,7 +1,0 @@
-**/*.min.js
-**/node_modules/**
-**/vendor/**
-**/assets/js/*.js
-!assets/js/amp-service-worker-runtime-precaching.js
-build/*
-lib/*

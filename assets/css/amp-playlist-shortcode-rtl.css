@@ -1,0 +1,19 @@
+/**
+* For the custom AMP implementation of the 'playlist' shortcode.
+*/
+.wp-playlist .wp-playlist-current-item img {
+	margin-left: 0;
+}
+
+.wp-playlist .wp-playlist-current-item amp-img {
+	float: right;
+	margin-left: 10px;
+}
+
+.wp-playlist audio {
+	display: block;
+}
+
+.wp-playlist .amp-carousel-button {
+	visibility: hidden;
+}
