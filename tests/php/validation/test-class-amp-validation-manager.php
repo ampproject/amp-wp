@@ -2532,12 +2532,10 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	 * @covers AMP_Validation_Manager::enqueue_block_validation()
 	 */
 	public function test_enqueue_block_validation() {
-		if ( version_compare( get_bloginfo( 'version' ), '5.3', '<' ) ) {
-			return;
-		}
-
 		if ( ! function_exists( 'register_block_type' ) ) {
 			$this->markTestSkipped( 'The block editor is not available.' );
+		} elseif ( version_compare( get_bloginfo( 'version' ), '5.3', '<' ) ) {
+			$this->markTestSkipped( 'Block editor is too old.' );
 		}
 
 		global $post;
