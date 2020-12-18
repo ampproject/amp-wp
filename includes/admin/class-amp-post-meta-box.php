@@ -6,8 +6,6 @@
  * @since 0.6
  */
 
-use AmpProject\AmpWP\Editor\EditorSupport;
-use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Services;
 
 /**
@@ -217,7 +215,6 @@ class AMP_Post_Meta_Box {
 			return;
 		}
 
-		/** @var EditorSupport */
 		$editor_support = Services::get( 'editor.editor_support' );
 		if ( ! $editor_support->editor_supports_amp_block_editor_features() ) {
 			return;

@@ -7,10 +7,8 @@
 
 use AmpProject\AmpWP\DevTools\BlockSources;
 use AmpProject\AmpWP\DevTools\UserAccess;
-use AmpProject\AmpWP\Editor\EditorSupport;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Services;
 use AmpProject\Attribute;
@@ -2392,7 +2390,6 @@ class AMP_Validation_Manager {
 			return;
 		}
 
-		/** @var EditorSupport */
 		$editor_support = Services::get( 'editor.editor_support' );
 
 		// Block validation script uses features only available beginning with WP 5.3.
@@ -2424,10 +2421,8 @@ class AMP_Validation_Manager {
 
 		wp_styles()->add_data( $slug, 'rtl', 'replace' );
 
-		/** @var BlockSources|null */
 		$block_sources = BlockSources::is_needed() ? Services::get( 'dev_tools.block_sources' ) : null;
 
-		/** @var PluginRegistry */
 		$plugin_registry = Services::get( 'plugin_registry' );
 
 		$plugin_names = array_map(
