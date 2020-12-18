@@ -23,10 +23,10 @@ import { AMP_VALIDITY_REST_FIELD_NAME } from './constants';
 export function Sidebar() {
 	const { setIsShowingReviewed } = useDispatch( BLOCK_VALIDATION_STORE_KEY );
 
-	const { ampCompatibilityBroken, isShowingReviewed, published, reviewLink } = useSelect( ( select ) => ( {
+	const { ampCompatibilityBroken, isShowingReviewed, status, reviewLink } = useSelect( ( select ) => ( {
 		ampCompatibilityBroken: select( BLOCK_VALIDATION_STORE_KEY ).getAMPCompatibilityBroken(),
 		isShowingReviewed: select( BLOCK_VALIDATION_STORE_KEY ).getIsShowingReviewed(),
-		published: 'publish' === select( 'core/editor' )?.getEditedPostAttribute( 'status' ),
+		status: select( 'core/editor' )?.getEditedPostAttribute( 'status' ),
 		// eslint-disable-next-line camelcase
 		reviewLink: select( 'core/editor' ).getEditedPostAttribute( AMP_VALIDITY_REST_FIELD_NAME )?.review_link || null,
 	} ) );
@@ -66,6 +66,8 @@ export function Sidebar() {
 			element.focus();
 		}
 	}, [] );
+
+	const saved = 'auto-draft' !== status;
 
 	return (
 		<div className="amp-sidebar">
@@ -120,15 +122,15 @@ export function Sidebar() {
 			) }
 
 			{
-				! published && (
+				! saved && (
 					<PanelBody opened={ true }>
 						<p>
-							{ __( 'This URL will be checked for validation errors when the post is published.', 'amp' ) }
+							{ __( 'This URL will be checked for validation errors when the post is saved.', 'amp' ) }
 						</p>
 					</PanelBody>
 				)
 			}
-			{ published && validationErrors.length === 0 && (
+			{ saved && validationErrors.length === 0 && (
 				<PanelBody opened={ true }>
 					<p>
 						{ __( 'There are no AMP validation errors at this post\'s URL.', 'amp' ) }
@@ -136,7 +138,7 @@ export function Sidebar() {
 				</PanelBody>
 			) }
 
-			{ published && 0 < validationErrors.length && (
+			{ saved && 0 < validationErrors.length && (
 				0 < displayedErrors.length ? (
 					<ul>
 						{ displayedErrors.map( ( validationError, index ) => (
@@ -144,7 +146,7 @@ export function Sidebar() {
 						) ) }
 					</ul>
 				)
-					: published && (
+					: saved && (
 						<PanelBody opened={ true }>
 							<p>
 								{ __( 'There are no unreviewed AMP validation errors at this post\'s URL.', 'amp' ) }
