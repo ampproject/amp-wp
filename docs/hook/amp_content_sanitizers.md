@@ -13,7 +13,7 @@ Filters the content sanitizers.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1539](/includes/amp-helper-functions.php#L1539)
+:link: [includes/amp-helper-functions.php:1560](/includes/amp-helper-functions.php#L1560)
 
 <details>
 <summary>Show Code</summary>
