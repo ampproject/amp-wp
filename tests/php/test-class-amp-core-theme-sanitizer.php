@@ -30,6 +30,9 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	public function tearDown() {
 		parent::tearDown();
 
+		$GLOBALS['wp_scripts'] = null;
+		$GLOBALS['wp_styles']  = null;
+
 		$this->restore_theme_directories();
 	}
 
@@ -448,6 +451,62 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( 1, $elements->length );
 	}
 
+	/** @covers ::amend_twentytwentyone_dark_mode_styles() */
+	public function test_amend_twentytwentyone_dark_mode_styles() {
+		$theme_slug = 'twentytwentyone';
+		if ( ! wp_get_theme( $theme_slug )->exists() ) {
+			$this->markTestSkipped();
+			return;
+		}
+
+		switch_theme( $theme_slug );
+		wp_enqueue_style( 'tt1-dark-mode', get_theme_file_path( 'dark-mode.css' ) ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		wp_enqueue_style( 'twenty-twenty-one-style', get_theme_file_path( 'style.css' ) ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		$this->assertEmpty( wp_styles()->registered['twenty-twenty-one-style']->extra );
+		AMP_Core_Theme_Sanitizer::amend_twentytwentyone_dark_mode_styles();
+		wp_enqueue_scripts();
+
+		$this->assertFalse( wp_style_is( 'tt1-dark-mode', 'enqueued' ) );
+		$extra = wp_styles()->registered['twenty-twenty-one-style']->extra;
+		$this->assertNotEmpty( $extra );
+		$this->assertArrayHasKey( 'after', $extra );
+		$after = implode( '', $extra['after'] );
+
+		$replacements = [
+			'@media only screen'           => '@media only screen and (prefers-color-scheme: dark)',
+			'.is-dark-theme.is-dark-theme' => ':root',
+			'.respect-color-scheme-preference.is-dark-theme body' => '.respect-color-scheme-preference body',
+		];
+		foreach ( $replacements as $search => $replacement ) {
+			$this->assertStringNotContains( "$search {", $after );
+			$this->assertStringContains( "$replacement {", $after );
+		}
+	}
+
+	/** @covers ::amend_twentytwentyone_styles() */
+	public function test_amend_twentytwentyone_styles() {
+		$theme_slug = 'twentytwentyone';
+		if ( ! wp_get_theme( $theme_slug )->exists() ) {
+			$this->markTestSkipped();
+			return;
+		}
+
+		switch_theme( $theme_slug );
+
+		$style_handle = 'twenty-twenty-one-style';
+		wp_enqueue_style( $style_handle, get_theme_file_path( 'style.css' ) ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		$this->assertEmpty( wp_styles()->registered[ $style_handle ]->extra );
+
+		wp_add_inline_style( $style_handle, '/*first*/' );
+		AMP_Core_Theme_Sanitizer::amend_twentytwentyone_styles();
+		wp_enqueue_scripts();
+
+		$after = implode( '', wp_styles()->registered[ $style_handle ]->extra['after'] );
+		$this->assertNotEmpty( $after );
+		$this->assertStringContains( '@media only screen and (max-width: 481px)', $after );
+		$this->assertStringEndsWith( '/*first*/', $after );
+	}
+
 	/**
 	 * Tests add_twentytwentyone_mobile_modal.
 	 *
@@ -457,7 +516,10 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		$html = '
 			<nav>
 				<div class="menu-button-container">
-					<button id="primary-mobile-menu">Menu button toggle</button>
+					<button id="primary-mobile-menu">
+						<span class="dropdown-icon open">Menu</span>
+						<span class="dropdown-icon close">Close</span>
+					</button>
 				</div>
 				<div class="primary-menu-container">
 					<ul id="primary-menu-list">
@@ -474,14 +536,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 
 		$sanitizer->add_twentytwentyone_mobile_modal();
 
-		$query = $dom->xpath->query(
-			// Verify that the menu button container exists,
-			'//nav/div[ @class = "menu-button-container" ]' .
-			// and is immediately followed by the primary menu container, wrapped in amp-lightbox,
-			'/following-sibling::amp-lightbox[ ./div[ @class = "primary-menu-container" and ./ul ] ]' .
-			// and is also followed by the original primary menu container.
-			'/following-sibling::div[ @class = "primary-menu-container" and ./ul ]'
-		);
+		$query = $dom->xpath->query( '//button[ @id = "primary-mobile-menu" and @data-amp-bind-aria-expanded and @on ]' );
 
 		$this->assertEquals( 1, $query->length );
 	}
@@ -497,15 +552,6 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 				<div class="menu-button-container">
 					<button id="primary-mobile-menu">Menu button toggle</button>
 				</div>
-				<amp-lightbox>
-					<div class="primary-menu-container">
-						<ul id="primary-menu-list">
-							<li id="menu-item-1"><button>Foo</button></li>
-							<li id="menu-item-2"><button class="sub-menu-toggle">Bar</button></li>
-							<li id="menu-item-3"><button class="sub-menu-toggle">Baz</button></li>
-						</ul>
-					</div>
-				</amp-lightbox>
 				<div class="primary-menu-container">
 					<ul id="primary-menu-list">
 						<li id="menu-item-1"><button>Foo</button></li>
@@ -520,9 +566,6 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Core_Theme_Sanitizer( $dom );
 
 		$sanitizer->add_twentytwentyone_sub_menu_fix();
-
-		$query = $dom->xpath->query( '//amp-lightbox//button[ not( @data-amp-bind-aria-expanded ) ]' );
-		$this->assertEquals( 3, $query->length );
 
 		$query = $dom->xpath->query( '//nav/div//button[ @data-amp-bind-aria-expanded ]' );
 		$this->assertEquals( 2, $query->length );

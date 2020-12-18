@@ -2011,7 +2011,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			static function() {
 				// Bail if the dark mode stylesheet is not enqueued.
 				if ( ! wp_style_is( 'tt1-dark-mode' ) ) {
-					return;
+					return; // @codeCoverageIgnore
 				}
 
 				wp_dequeue_style( 'tt1-dark-mode' );
@@ -2021,7 +2021,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				);
 
 				if ( ! file_exists( $dark_mode_css_file ) ) {
-					return;
+					return; // @codeCoverageIgnore
 				}
 
 				$styles = file_get_contents( $dark_mode_css_file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
@@ -2050,7 +2050,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 				// Bail if the stylesheet is not enqueued.
 				if ( ! wp_style_is( $style_handle ) ) {
-					return;
+					return; // @codeCoverageIgnore
 				}
 
 				$css_file = get_theme_file_path(
@@ -2058,7 +2058,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				);
 
 				if ( ! file_exists( $css_file ) ) {
-					return;
+					return; // @codeCoverageIgnore
 				}
 
 				/** @var _WP_Dependency $dependency */
@@ -2069,43 +2069,34 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 				$styles = file_get_contents( $css_file ); //phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
-				// Make the rules for the mobile menu less specific so that it can also be applied to the
-				// amp-lightbox mobile menu also.
-				$new_styles = str_replace( '.primary-navigation > .primary-menu-container', '.primary-navigation .primary-menu-container', $styles );
-				$new_styles = str_replace( '.primary-navigation > div > .menu-wrapper', '.primary-navigation div > .menu-wrapper', $new_styles );
-
 				// Append any extra rules that may be needed.
-				$new_styles .= '
-					.primary-navigation-open .menu-button-container {
-						/* Needs to be shown above amp-lightbox, which has a z-index of 1000. */
-						z-index: 1001;
+				$styles .= '
+					/* Trap keyboard navigation within mobile menu when it\'s open */
+					@media only screen and (max-width: 481px) {
+						.primary-navigation-open #page {
+							visibility: hidden;
+						}
+
+						.primary-navigation-open .menu-button-container {
+							visibility: visible;
+						}
 					}
 
-					@media only screen and (max-width: 481px) {
-						/* Hide the desktop menu so that it does not interfere when the amo-lightbox mobile menu is open. */
-						.primary-navigation > .primary-menu-container {
+					@media (min-width: 482px) {
+						/* Show the sub-menu on hover of menu item */
+						.primary-menu-container > .menu-wrapper > .menu-item-has-children:hover > .sub-menu {
+							display: block;
+						}
+
+						/* Hide the plus icon on hover of menu item */
+						.primary-menu-container > .menu-wrapper > .menu-item-has-children:hover > .sub-menu-toggle > .icon-plus {
 							display: none;
 						}
 
-						/* Accommodate for the admin bar height */
-						.admin-bar amp-lightbox .primary-menu-container {
-							margin-top: var(--global--admin-bar--height);
+						/* Show the minus icon on hover of menu item */
+						.primary-menu-container > .menu-wrapper > .menu-item-has-children:hover > .sub-menu-toggle > .icon-minus {
+							display: flex;
 						}
-					}
-
-					/* Show the sub-menu on hover of menu item */
-					.primary-navigation > div > .menu-wrapper > .menu-item-has-children:hover > .sub-menu {
-						display: block;
-					}
-
-					/* Hide the plus icon on hover of menu item */
-					.primary-navigation > div > .menu-wrapper > .menu-item-has-children:hover > .sub-menu-toggle > .icon-plus {
-						display: none;
-					}
-
-					/* Show the minus icon on hover of menu item */
-					.primary-navigation > div > .menu-wrapper > .menu-item-has-children:hover > .sub-menu-toggle > .icon-minus {
-						display: flex;
 					}
 				';
 
@@ -2115,7 +2106,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				if ( ! isset( $dependency->extra['after'] ) ) {
 					$dependency->extra['after'] = [];
 				}
-				array_unshift( $dependency->extra['after'], $new_styles );
+				array_unshift( $dependency->extra['after'], $styles );
 			},
 			11
 		);
@@ -2155,43 +2146,19 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * Make the mobile menu for the Twenty Twenty-One theme AMP compatible.
 	 */
 	public function add_twentytwentyone_mobile_modal() {
-		$menu_query  = $this->dom->xpath->query( "//div[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' primary-menu-container ' ) ]" );
 		$menu_toggle = $this->dom->getElementById( 'primary-mobile-menu' );
 
-		if ( 1 !== $menu_query->length || ! $menu_toggle ) {
+		if ( ! $menu_toggle ) {
 			return;
 		}
 
-		/** @var DOMElement $primary_menu */
-		$primary_menu      = $menu_query->item( 0 );
-		$primary_menu_copy = $primary_menu->cloneNode( true );
-		foreach ( $this->dom->xpath->query( './/*[ @id ]', $primary_menu_copy ) as $element ) {
-			/** @var DOMElement $element */
-			$element->setAttribute( 'id', $element->getAttribute( 'id' ) . '-mobile' );
-		}
+		$state_string = 'mobile_menu_toggled';
+		$body_id      = $this->dom->getElementId( $this->dom->body, 'body' );
 
-		$body_id = $this->dom->getElementId( $this->dom->body, 'body' );
-
-		// Create an <amp-lightbox> element that will contain the modal.
-		$amp_lightbox = $this->dom->createElement( 'amp-lightbox' );
-		$amp_lightbox->setAttribute( 'layout', 'nodisplay' );
-		$amp_lightbox->setAttribute( 'animate-in', 'fade-in' );
-		$amp_lightbox->setAttribute( 'scrollable', true );
-		$amp_lightbox_id = $this->dom->getElementId( $amp_lightbox );
-
-		$state_string = str_replace( '-', '_', $amp_lightbox_id );
-
-		AMP_DOM_Utils::add_amp_action( $menu_toggle, 'tap', "{$amp_lightbox_id}.open" );
-		AMP_DOM_Utils::add_amp_action( $menu_toggle, 'tap', "{$body_id}.toggleClass(class=primary-navigation-open,force=true)" );
-
-		AMP_DOM_Utils::add_amp_action( $amp_lightbox, 'lightboxOpen', "AMP.setState({{$state_string}:true})" );
-		AMP_DOM_Utils::add_amp_action( $amp_lightbox, 'lightboxClose', "AMP.setState({{$state_string}:false})" );
-		AMP_DOM_Utils::add_amp_action( $amp_lightbox, 'lightboxClose', "{$body_id}.toggleClass(class=primary-navigation-open,force=false)" );
-
+		AMP_DOM_Utils::add_amp_action( $menu_toggle, 'tap', "AMP.setState({{$state_string}: !{$state_string}})" );
+		AMP_DOM_Utils::add_amp_action( $menu_toggle, 'tap', "{$body_id}.toggleClass(class=primary-navigation-open)" );
+		AMP_DOM_Utils::add_amp_action( $menu_toggle, 'tap', "{$body_id}.toggleClass(class=lock-scrolling)" );
 		$menu_toggle->setAttribute( 'data-amp-bind-aria-expanded', "{$state_string} ? 'true' : 'false'" );
-
-		$amp_lightbox->appendChild( $primary_menu_copy );
-		$primary_menu->parentNode->insertBefore( $amp_lightbox, $primary_menu );
 	}
 
 	/**
@@ -2202,8 +2169,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @see amend_twentytwentyone_styles()
 	 */
 	public function add_twentytwentyone_sub_menu_fix() {
-		// The XPath query has to be specific enough to not interfere with the mobile menu.
-		$menu_toggles = $this->dom->xpath->query( '//nav/div/ul//button[ @class and contains( concat( " ", normalize-space( @class ), " " ), " sub-menu-toggle " ) ]' );
+		$menu_toggles = $this->dom->xpath->query( '//nav//button[ @class and contains( concat( " ", normalize-space( @class ), " " ), " sub-menu-toggle " ) ]' );
 
 		if ( 0 === $menu_toggles->length ) {
 			return;

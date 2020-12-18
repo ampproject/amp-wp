@@ -33,6 +33,8 @@
 * [`amp_enable_ssr`](amp_enable_ssr.md) - Filter whether the AMP Optimizer should use server-side rendering or not.
 * [`amp_extract_image_dimensions_batch`](amp_extract_image_dimensions_batch.md) - Filters the dimensions extracted from image URLs.
 * [`amp_extract_image_dimensions_get_user_agent`](amp_extract_image_dimensions_get_user_agent.md) - Filters the user agent for onbtaining the image dimensions.
+* [`amp_featured_image_minimum_height`](amp_featured_image_minimum_height.md) - Filters the minimum height required for a featured image.
+* [`amp_featured_image_minimum_width`](amp_featured_image_minimum_width.md) - Filters the minimum width required for a featured image.
 * ~~[`amp_frontend_show_canonical`](amp_frontend_show_canonical.md) - Filters whether to show the amphtml link on the frontend.~~
 * [`amp_get_permalink`](amp_get_permalink.md) - Filters AMP permalink.
 * [`amp_is_enabled`](amp_is_enabled.md) - Filters whether AMP is enabled on the current site.

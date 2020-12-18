@@ -15,7 +15,7 @@ The &#039;post_template&#039; in the filter name here is due to this filter orig
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1793](/includes/amp-helper-functions.php#L1793)
+:link: [includes/amp-helper-functions.php:1814](/includes/amp-helper-functions.php#L1814)
 
 <details>
 <summary>Show Code</summary>
