@@ -13,7 +13,7 @@ Filters the content embed handlers.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1400](/includes/amp-helper-functions.php#L1400-L1426)
+:link: [includes/amp-helper-functions.php:1421](/includes/amp-helper-functions.php#L1421-L1447)
 
 <details>
 <summary>Show Code</summary>

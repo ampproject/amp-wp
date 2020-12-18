@@ -18,7 +18,7 @@ The sha384 hash used by amp-script is represented not as hexadecimal but as base
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1974](/includes/amp-helper-functions.php#L1974-L1985)
+:link: [includes/amp-helper-functions.php:1995](/includes/amp-helper-functions.php#L1995-L2006)
 
 <details>
 <summary>Show Code</summary>

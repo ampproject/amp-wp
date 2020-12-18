@@ -14,7 +14,7 @@ This only applies when the amp_to_amp_linking_enabled filter returns true, which
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1571](/includes/amp-helper-functions.php#L1571)
+:link: [includes/amp-helper-functions.php:1592](/includes/amp-helper-functions.php#L1592)
 
 <details>
 <summary>Show Code</summary>

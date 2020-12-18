@@ -14,7 +14,7 @@ The return value can be overridden by previously defining a AMP_QUERY_VAR consta
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:635](/includes/amp-helper-functions.php#L635-L646)
+:link: [includes/amp-helper-functions.php:656](/includes/amp-helper-functions.php#L656-L667)
 
 <details>
 <summary>Show Code</summary>
