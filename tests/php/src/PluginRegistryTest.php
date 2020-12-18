@@ -73,10 +73,28 @@ final class PluginRegistryTest extends TestCase {
 	public function test_get_mu_plugins_data() {
 		$plugin_registry = new PluginRegistry();
 
-		$this->assertEquals(
-			[],
-			array_keys( $this->call_private_method( $plugin_registry, 'get_mu_plugins_data' ) )
-		);
+		$plugins = $this->call_private_method( $plugin_registry, 'get_mu_plugins_data' );
+		$this->assertInternalType( 'array', $plugins );
+		foreach ( $plugins as $plugin_data ) {
+			$this->assertEqualSets(
+				[
+					'Name',
+					'PluginURI',
+					'Version',
+					'Description',
+					'Author',
+					'AuthorURI',
+					'TextDomain',
+					'DomainPath',
+					'Network',
+					'RequiresWP',
+					'RequiresPHP',
+					'Title',
+					'AuthorName',
+				],
+				array_keys( $plugin_data )
+			);
+		}
 	}
 
 	/** @covers ::get_plugin_from_slug() */
