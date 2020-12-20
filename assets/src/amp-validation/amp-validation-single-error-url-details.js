@@ -47,7 +47,6 @@ class RowToggler {
 		}
 
 		this.toggle( this.tr.querySelector( '.single-url-detail-toggle' ) );
-		this.tr.scrollIntoView( { block: 'start', behavior: 'smooth' } );
 	}
 
 	/**
@@ -168,18 +167,11 @@ class ErrorRows {
 }
 
 domReady( () => {
-	let activeTermId;
-	if ( ! ( 'URLSearchParams' in window ) ) {
-		activeTermId = null;
-	} else {
-		const urlParams = new URLSearchParams( window.location.search );
-		activeTermId = urlParams.get( 'term_id' );
+	let activeTermId = null;
 
-		// Remove the term_id from the URL; otherwise, the section will be scrolled to again after saving changes.
-		if ( activeTermId ) {
-			urlParams.delete( 'term_id' );
-			window.history.replaceState( {}, document.title, `${ window.location.origin }${ window.location.pathname }?${ urlParams.toString() }` );
-		}
+	const matches = window.location.hash.match( /^#tag-(\d+)/ );
+	if ( matches ) {
+		activeTermId = parseInt( matches[ 1 ] );
 	}
 
 	new ErrorRows( activeTermId ).init();

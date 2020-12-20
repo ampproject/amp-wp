@@ -9,7 +9,6 @@ import PropTypes from 'prop-types';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { PanelBody, Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -45,6 +44,9 @@ export function Error( { clientId, status, term_id: termId, ...props } ) {
 		};
 	}, [ clientId ] );
 
+	const detailsUrl = new URL( reviewLink );
+	detailsUrl.hash = `#tag-${ termId }`;
+
 	return (
 		<li className="amp-error-container">
 			<PanelBody
@@ -69,7 +71,7 @@ export function Error( { clientId, status, term_id: termId, ...props } ) {
 						</Button>
 					) }
 					<a
-						href={ addQueryArgs( reviewLink, { term_id: termId } ) }
+						href={ detailsUrl.href }
 						target="_blank"
 						rel="noreferrer"
 						className="amp-error__details-link"
