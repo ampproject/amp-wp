@@ -39,7 +39,7 @@ class RowToggler {
 	}
 
 	/**
-	 * If the term ID retreived from the URL query param matches this row's term ID, expand the row on load.
+	 * If the term ID retrieved from the URL query param matches this row's term ID, expand the row on load.
 	 */
 	maybeInitiallyOpenRow() {
 		if ( ! this.activeTermId ) {
@@ -90,7 +90,7 @@ class RowToggler {
 	 *
 	 * @param {Object} target The click event target.
 	 */
-	toggle = ( target ) => {
+	toggle( target ) {
 		if ( this.tr.classList.contains( 'expanded' ) ) {
 			this.onClose( target );
 		} else {
