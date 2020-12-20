@@ -1745,6 +1745,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$open_xpaths  = isset( $args['open_button_xpath'] ) ? $args['open_button_xpath'] : [];
 		$close_xpaths = isset( $args['close_button_xpath'] ) ? $args['close_button_xpath'] : [];
 
+		// Ensure anchor links also close the modal the same as the the Close Menu button.
+		$close_xpaths[] = sprintf( "//*[ @id = '{$modal_id}' ]//a[ @href and substring( @href, 1, 1 ) = '#' ]" );
+
 		$modal_actions = [
 			"{$modal_id}.open"  => $open_xpaths,
 			// Although we add the 'show-modal' class here, we don't remove it again, as it will
