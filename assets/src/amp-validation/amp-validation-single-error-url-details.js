@@ -42,11 +42,7 @@ class RowToggler {
 	 * If the term ID retrieved from the URL query param matches this row's term ID, expand the row on load.
 	 */
 	maybeInitiallyOpenRow() {
-		if ( ! this.activeTermId ) {
-			return;
-		}
-
-		if ( this.tr.id !== `tag-${ this.activeTermId }` ) {
+		if ( ! this.activeTermId || this.tr.id !== `tag-${ this.activeTermId }` ) {
 			return;
 		}
 
