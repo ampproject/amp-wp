@@ -2162,6 +2162,21 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		AMP_DOM_Utils::add_amp_action( $menu_toggle, 'tap', "{$body_id}.toggleClass(class=primary-navigation-open)" );
 		AMP_DOM_Utils::add_amp_action( $menu_toggle, 'tap', "{$body_id}.toggleClass(class=lock-scrolling)" );
 		$menu_toggle->setAttribute( 'data-amp-bind-aria-expanded', "{$state_string} ? 'true' : 'false'" );
+
+		// Close the mobile modal when clicking in-page anchor links in the menu.
+		foreach ( $this->dom->xpath->query( '//*[ @id = "site-navigation" ]//a[ @href and substring( @href, 1, 1 ) = "#" ]' ) as $link ) {
+			/** @var DOMElement $link */
+			AMP_DOM_Utils::add_amp_action( $link, 'tap', "AMP.setState({{$state_string}: false})" );
+			AMP_DOM_Utils::add_amp_action( $link, 'tap', "{$body_id}.toggleClass(class=primary-navigation-open,force=false)" );
+			AMP_DOM_Utils::add_amp_action( $link, 'tap', "{$body_id}.toggleClass(class=lock-scrolling,force=false)" );
+
+			// Ensure target is scrolled into view. Note that in-page anchor links currently do not work in the non-AMP
+			// version. Normally scrollTo shouldn't be necessary but it appears necessary due to scroll locking.
+			$target = substr( $link->getAttribute( 'href' ), 1 );
+			if ( $target ) {
+				AMP_DOM_Utils::add_amp_action( $link, 'tap', "{$target}.scrollTo" );
+			}
+		}
 	}
 
 	/**
