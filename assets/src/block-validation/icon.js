@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import AMPToolbarIcon from '../../images/amp-toolbar-icon.svg';
+import AMPToolbarIcon from '../../images/amp-icon-toolbar.svg';
 import AMPToolbarIconBroken from '../../images/amp-toolbar-icon-broken.svg';
 import AMPNewTabIcon from '../../images/amp-new-tab-icon.svg';
 

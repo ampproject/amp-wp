@@ -55,7 +55,7 @@
 }
 
 .is-pressed .amp-plugin-icon:not(.amp-plugin-icon--broken) svg {
-	fill: #1e1e1e;
+	fill: #fff;
 }
 
 .amp-block-validation-sidebar {
