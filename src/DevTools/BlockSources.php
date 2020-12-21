@@ -88,7 +88,6 @@ final class BlockSources implements Conditional, Service, Registerable {
 	 * Runs on instantiation.
 	 */
 	public function register() {
-		$this->clear_block_sources_cache();
 		$this->set_block_sources_from_cache();
 
 		if ( empty( $this->get_block_sources() ) ) {
