@@ -2172,8 +2172,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 			// Ensure target is scrolled into view. Note that in-page anchor links currently do not work in the non-AMP
 			// version. Normally scrollTo shouldn't be necessary but it appears necessary due to scroll locking.
-			$target = substr( $link->getAttribute( 'href' ), 1 );
-			if ( $target ) {
+			$target = preg_replace( '/.*#/', '', $link->getAttribute( 'href' ) );
+			if ( $target && $this->dom->getElementById( $target ) ) {
 				AMP_DOM_Utils::add_amp_action( $link, 'tap', "{$target}.scrollTo" );
 			}
 		}
