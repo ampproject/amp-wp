@@ -32,7 +32,7 @@ import { ErrorContent } from './error-content';
  */
 export function Error( { clientId, status, term_id: termId, ...props } ) {
 	const { selectBlock } = useDispatch( 'core/block-editor' );
-	const { review_link: reviewLink } = useSelect( ( select ) => select( 'core/editor' ).getEditedPostAttribute( AMP_VALIDITY_REST_FIELD_NAME ) ) || {};
+	const { review_link: reviewLink } = useSelect( ( select ) => select( 'core/editor' )?.getEditedPostAttribute( AMP_VALIDITY_REST_FIELD_NAME ) ) || {};
 	const reviewed = status === VALIDATION_ERROR_ACK_ACCEPTED_STATUS || status === VALIDATION_ERROR_ACK_REJECTED_STATUS;
 
 	const { blockType } = useSelect( ( select ) => {
