@@ -32,6 +32,8 @@ const TEST_THEME_BLOCK = 'my-theme/test-block';
 const TEST_CORE_BLOCK = 'core/test-block';
 const TEST_UNKNOWN_BLOCK = 'unknown/test-block';
 
+global.URL = class {};
+
 registerBlockType( TEST_PLUGIN_BLOCK, {
 	attributes: {},
 	save: noop,
