@@ -296,6 +296,7 @@
 	justify-content: center;
 	margin-left: 5px;
 	margin-top: -5px;
+	transform: translateY(2px);
 	width: 24px;
 }
 
