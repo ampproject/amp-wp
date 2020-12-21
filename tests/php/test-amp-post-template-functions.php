@@ -31,7 +31,6 @@ class Test_AMP_Post_Template_Functions extends WP_UnitTestCase {
 		$this->assertSame( 10, has_action( 'amp_post_template_head', 'amp_post_template_add_block_styles' ) );
 		$this->assertSame( 10, has_action( 'amp_post_template_head', 'amp_post_template_add_default_styles' ) );
 		$this->assertSame( 99, has_action( 'amp_post_template_css', 'amp_post_template_add_styles' ) );
-		$this->assertSame( 10, has_action( 'amp_post_template_data', 'amp_post_template_add_analytics_script' ) );
 		$this->assertSame( 10, has_action( 'amp_post_template_footer', 'amp_post_template_add_analytics_data' ) );
 		$this->assertSame( 10, has_action( 'admin_bar_init', [ 'AMP_Theme_Support', 'init_admin_bar' ] ) );
 		$this->assertSame( 10, has_action( 'amp_post_template_footer', 'wp_admin_bar_render' ) );
@@ -140,19 +139,6 @@ class Test_AMP_Post_Template_Functions extends WP_UnitTestCase {
 
 		$this->assertStringContains( 'body{color:red', $output );
 		$this->assertStringContains( 'body{color:blue', $output );
-	}
-
-	/** @covers ::amp_post_template_add_analytics_script() */
-	public function test_amp_post_template_add_analytics_script() {
-		$this->assertEmpty( amp_post_template_add_analytics_script( [] ) );
-
-		$data = amp_post_template_add_analytics_script(
-			[
-				'amp_analytics' => [ '...' ],
-			]
-		);
-		$this->assertArrayHasKey( 'amp_component_scripts', $data );
-		$this->assertArrayHasKey( 'amp-analytics', $data['amp_component_scripts'] );
 	}
 
 	/** @covers ::amp_post_template_add_analytics_data() */
