@@ -263,6 +263,7 @@ function amp_admin_pointer() {
  *
  * @since 1.3
  * @deprecated 1.5.0 Warning moved to Site Health.
+ * @codeCoverageIgnore
  * @internal
  * @see AmpProject\AmpWP\Admin\SiteHealth::xdebug_extension()
  */
@@ -281,4 +282,23 @@ function _amp_xdebug_admin_notice() {
 		</p>
 	</div>
 	<?php
+}
+
+/**
+ * Add analytics scripts.
+ *
+ * @internal
+ * @deprecated 2.1 This is no longer necessary since amp-analytics is added automatically to the page during post-processing.
+ * @codeCoverageIgnore
+ *
+ * @param array $data Data.
+ * @return array Data.
+ */
+function amp_post_template_add_analytics_script( $data ) {
+	_deprecated_function( __FUNCTION__, '2.1' );
+
+	if ( ! empty( $data['amp_analytics'] ) ) {
+		$data['amp_component_scripts']['amp-analytics'] = 'https://cdn.ampproject.org/v0/amp-analytics-0.1.js';
+	}
+	return $data;
 }
