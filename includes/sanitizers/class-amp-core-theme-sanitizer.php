@@ -1746,7 +1746,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$close_xpaths = isset( $args['close_button_xpath'] ) ? $args['close_button_xpath'] : [];
 
 		// Ensure anchor links also close the modal the same as the the Close Menu button.
-		$close_xpaths[] = sprintf( "//*[ @id = '{$modal_id}' ]//a[ @href and substring( @href, 1, 1 ) = '#' ]" );
+		$close_xpaths[] = sprintf( "//*[ @id = '{$modal_id}' ]//a[ @href and contains( @href, '#' ) ]" );
 
 		$modal_actions = [
 			"{$modal_id}.open"  => $open_xpaths,
@@ -2164,7 +2164,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$menu_toggle->setAttribute( 'data-amp-bind-aria-expanded', "{$state_string} ? 'true' : 'false'" );
 
 		// Close the mobile modal when clicking in-page anchor links in the menu.
-		foreach ( $this->dom->xpath->query( '//*[ @id = "site-navigation" ]//a[ @href and substring( @href, 1, 1 ) = "#" ]' ) as $link ) {
+		foreach ( $this->dom->xpath->query( '//*[ @id = "site-navigation" ]//a[ @href and contains( @href, "#" ) ]' ) as $link ) {
 			/** @var DOMElement $link */
 			AMP_DOM_Utils::add_amp_action( $link, 'tap', "AMP.setState({{$state_string}: false})" );
 			AMP_DOM_Utils::add_amp_action( $link, 'tap', "{$body_id}.toggleClass(class=primary-navigation-open,force=false)" );

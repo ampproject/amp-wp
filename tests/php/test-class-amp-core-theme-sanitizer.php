@@ -525,7 +525,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 					<ul id="primary-menu-list">
 						<li id="menu-item-1"><a href="https://example.com/">Foo</a></li>
 						<li id="menu-item-2"><a href="#colophon">Bar</a></li>
-						<li id="menu-item-3"><a href="https://example.com/">Baz</a></li>
+						<li id="menu-item-3"><a href="https://example.com/#site-footer">Baz</a></li>
 					</ul>
 				</div>
 			</nav>
@@ -546,7 +546,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		foreach ( $query as $link ) {
 			/** @var DOMElement $link */
 			$href = $link->getAttribute( 'href' );
-			if ( '#' === substr( $href, 0, 1 ) ) {
+			if ( false !== strpos( $href, '#' ) ) {
 				$this->assertTrue( $link->hasAttribute( 'on' ) );
 			} else {
 				$this->assertFalse( $link->hasAttribute( 'on' ) );
