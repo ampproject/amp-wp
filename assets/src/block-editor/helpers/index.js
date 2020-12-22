@@ -7,9 +7,9 @@ import { ReactElement } from 'react';
 /**
  * WordPress dependencies
  */
-import { __, _x, sprintf } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { cloneElement } from '@wordpress/element';
-import { TextControl, SelectControl, ToggleControl, Notice, PanelBody, FontSizePicker } from '@wordpress/components';
+import { SelectControl, ToggleControl, Notice, PanelBody } from '@wordpress/components';
 import { InspectorControls } from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
 
@@ -275,8 +275,6 @@ export const filterBlocksEdit = ( BlockEdit ) => {
 			inspectorControls = setUpImageInspectorControls( props );
 		} else if ( MEDIA_BLOCKS.includes( name ) || 0 === name.indexOf( 'core-embed/' ) ) {
 			inspectorControls = setUpInspectorControls( props );
-		} else if ( TEXT_BLOCKS.includes( name ) ) {
-			inspectorControls = setUpTextBlocksInspectorControls( props );
 		}
 
 		// Return just inspector controls in case of 'nodisplay'.
@@ -474,146 +472,6 @@ export const AmpNoloadingToggle = ( props ) => {
 AmpNoloadingToggle.propTypes = {
 	attributes: PropTypes.shape( {
 		ampNoLoading: PropTypes.bool,
-	} ),
-	setAttributes: PropTypes.func.isRequired,
-};
-
-/**
- * Setup inspector controls for text blocks.
- *
- * @todo Consider wrapping the render function to delete the original font size in text settings when ampFitText.
- *
- * @param {Object} props Props.
- * @param {Function} props.setAttributes Callback to set attributes.
- * @param {Object} props.attributes Attributes.
- * @param {boolean} props.isSelected Is selected.
- *
- * @return {ReactElement} Inspector Controls.
- */
-const setUpTextBlocksInspectorControls = ( props ) => {
-	const { isSelected, attributes, setAttributes } = props;
-	const { ampFitText } = attributes;
-	let { minFont, maxFont, height } = attributes;
-
-	const FONT_SIZES = [
-		{
-			name: 'small',
-			shortName: _x( 'S', 'font size', 'amp' ),
-			size: 14,
-		},
-		{
-			name: 'regular',
-			shortName: _x( 'M', 'font size', 'amp' ),
-			size: 16,
-		},
-		{
-			name: 'large',
-			shortName: _x( 'L', 'font size', 'amp' ),
-			size: 36,
-		},
-		{
-			name: 'larger',
-			shortName: _x( 'XL', 'font size', 'amp' ),
-			size: 48,
-		},
-	];
-
-	if ( ! isSelected ) {
-		return null;
-	}
-
-	const label = __( 'Automatically fit text to container', 'amp' );
-
-	if ( ampFitText ) {
-		maxFont = parseInt( maxFont );
-		height = parseInt( height );
-		minFont = parseInt( minFont );
-	}
-
-	return (
-		<InspectorControls>
-			<PanelBody
-				title={ __( 'AMP Settings', 'amp' ) }
-				className={ ampFitText ? 'is-amp-fit-text' : '' }
-			>
-				<ToggleControl
-					label={ label }
-					checked={ ampFitText }
-					onChange={ () => setAttributes( { ampFitText: ! ampFitText } ) }
-				/>
-			</PanelBody>
-			{ ampFitText && (
-				<>
-					<TextControl
-						label={ __( 'Height', 'amp' ) }
-						value={ height }
-						min={ 1 }
-						onChange={ ( nextHeight ) => {
-							setAttributes( { height: nextHeight } );
-						} }
-					/>
-					{ maxFont > height && (
-						<Notice
-							status="error"
-							isDismissible={ false }
-						>
-							{ __( 'The height must be greater than the max font size.', 'amp' ) }
-						</Notice>
-					) }
-					<PanelBody title={ __( 'Minimum font size', 'amp' ) }>
-						<FontSizePicker
-							fallbackFontSize={ 14 }
-							value={ minFont }
-							fontSizes={ FONT_SIZES }
-							onChange={ ( nextMinFont ) => {
-								if ( ! nextMinFont ) {
-									nextMinFont = MIN_FONT_SIZE; // @todo Supplying fallbackFontSize should be done automatically by the component?
-								}
-
-								if ( parseInt( nextMinFont ) <= maxFont ) {
-									setAttributes( { minFont: nextMinFont } );
-								}
-							} }
-						/>
-					</PanelBody>
-					{ minFont > maxFont && (
-						<Notice
-							status="error"
-							isDismissible={ false }
-						>
-							{ __( 'The min font size must less than the max font size.', 'amp' ) }
-						</Notice>
-					) }
-					<PanelBody title={ __( 'Maximum font size', 'amp' ) }>
-						<FontSizePicker
-							fallbackFontSize={ 48 }
-							value={ maxFont }
-							fontSizes={ FONT_SIZES }
-							onChange={ ( nextMaxFont ) => {
-								if ( ! nextMaxFont ) {
-									nextMaxFont = MAX_FONT_SIZE; // @todo Supplying fallbackFontSize should be done automatically by the component?
-								}
-
-								setAttributes( {
-									maxFont: nextMaxFont,
-									height: Math.max( nextMaxFont, height ),
-								} );
-							} }
-						/>
-					</PanelBody>
-				</>
-			) }
-		</InspectorControls>
-	);
-};
-
-setUpTextBlocksInspectorControls.propTypes = {
-	isSelected: PropTypes.bool,
-	attributes: PropTypes.shape( {
-		ampFitText: PropTypes.bool,
-		minFont: PropTypes.number,
-		maxFont: PropTypes.number,
-		height: PropTypes.number,
 	} ),
 	setAttributes: PropTypes.func.isRequired,
 };

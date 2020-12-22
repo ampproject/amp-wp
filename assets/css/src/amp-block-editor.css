@@ -1,8 +1,3 @@
-.is-amp-fit-text + .blocks-font-size > .components-font-size-picker__buttons,
-.is-amp-fit-text + .blocks-font-size > .components-font-size-picker__custom-input {
-	display: none;
-}
-
 /* AMP preview button wrapper */
 .wp-core-ui .amp-wrapper-post-preview {
 	margin-left: -6px;
