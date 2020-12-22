@@ -1745,9 +1745,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$open_xpaths  = isset( $args['open_button_xpath'] ) ? $args['open_button_xpath'] : [];
 		$close_xpaths = isset( $args['close_button_xpath'] ) ? $args['close_button_xpath'] : [];
 
-		// Ensure anchor links also close the modal the same as the the Close Menu button.
-		$close_xpaths[] = sprintf( "//*[ @id = '{$modal_id}' ]//a[ @href and contains( @href, '#' ) ]" );
-
 		$modal_actions = [
 			"{$modal_id}.open"  => $open_xpaths,
 			// Although we add the 'show-modal' class here, we don't remove it again, as it will
@@ -1887,6 +1884,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			// With twentytwenty compat, the lightbox fills the entire screen, and only an inner wrapper will contain
 			// the actionable elements in the modal. Therefore, the lightbox represents the "background".
 			$close_button_xpaths[] = "//*[ @id = '{$modal_id}' ]";
+
+			// Ensure anchor links also close the modal the same as the the Close Menu button.
+			$close_button_xpaths[] = sprintf( "//*[ @id = '{$modal_id}' ]//a[ @href and contains( @href, '#' ) ]" );
 
 			// Then, add the inner element of the lightbox as an open button xpath.
 			// This is done to prevent the above close action from closing the modal when an inner element is clicked.
