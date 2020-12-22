@@ -139,7 +139,7 @@ function MarkupStatus( { status } ) {
 	);
 }
 MarkupStatus.propTypes = {
-	status: PropTypes.number,
+	status: PropTypes.number.isRequired,
 };
 
 /**
@@ -217,16 +217,16 @@ ErrorContent.propTypes = {
 	blockType: PropTypes.shape( {
 		name: PropTypes.string,
 		title: PropTypes.string,
-	} ),
+	} ).isRequired,
 	clientId: PropTypes.string,
 	status: PropTypes.oneOf( [
 		VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
 		VALIDATION_ERROR_ACK_REJECTED_STATUS,
 		VALIDATION_ERROR_NEW_REJECTED_STATUS,
 		VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
-	] ),
-	title: PropTypes.string,
+	] ).isRequired,
+	title: PropTypes.string.isRequired,
 	error: PropTypes.shape( {
 		sources: PropTypes.arrayOf( PropTypes.object ),
-	} ),
+	} ).isRequired,
 };

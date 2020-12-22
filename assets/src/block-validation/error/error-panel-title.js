@@ -66,5 +66,5 @@ ErrorPanelTitle.propTypes = {
 	error: PropTypes.shape( {
 		type: PropTypes.string,
 	} ).isRequired,
-	status: PropTypes.number,
+	status: PropTypes.number.isRequired,
 };

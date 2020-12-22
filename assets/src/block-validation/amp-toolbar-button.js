@@ -38,5 +38,5 @@ export function AMPToolbarButton( { count } ) {
 	);
 }
 AMPToolbarButton.propTypes = {
-	count: PropTypes.number,
+	count: PropTypes.number.isRequired,
 };
