@@ -82,7 +82,7 @@ export function useValidationErrorStateUpdates() {
 		currentPost: select( 'core/editor' ).getCurrentPost(),
 		getBlock: select( 'core/block-editor' ).getBlock,
 		validationErrorsFromPost: select( 'core/editor' ).getEditedPostAttribute( AMP_VALIDITY_REST_FIELD_NAME )?.results || [],
-	} ) );
+	} ), [] );
 
 	/**
 	 * Runs an equality check when validation errors are received before running the heavier effect.

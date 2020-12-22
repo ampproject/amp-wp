@@ -30,7 +30,7 @@ function AMPBlockValidation() {
 	const { broken, errorCount } = useSelect( ( select ) => ( {
 		broken: select( BLOCK_VALIDATION_STORE_KEY ).getAMPCompatibilityBroken(),
 		errorCount: select( BLOCK_VALIDATION_STORE_KEY ).getUnreviewedValidationErrors()?.length || 0,
-	} ) );
+	} ), [] );
 
 	useValidationErrorStateUpdates();
 

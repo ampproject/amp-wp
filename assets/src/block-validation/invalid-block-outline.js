@@ -13,7 +13,7 @@ import { BLOCK_VALIDATION_STORE_KEY } from './store';
  * Adds a style rule for all blocks with validation errors.
  */
 export function InvalidBlockOutline() {
-	const validationErrors = useSelect( ( select ) => select( BLOCK_VALIDATION_STORE_KEY ).getUnreviewedValidationErrors() );
+	const validationErrors = useSelect( ( select ) => select( BLOCK_VALIDATION_STORE_KEY ).getUnreviewedValidationErrors(), [] );
 
 	const selectors = useMemo( () => {
 		const clientIds = validationErrors.map( ( { clientId } ) => clientId )

@@ -29,7 +29,7 @@ export function Sidebar() {
 		status: select( 'core/editor' )?.getEditedPostAttribute( 'status' ),
 		// eslint-disable-next-line camelcase
 		reviewLink: select( 'core/editor' ).getEditedPostAttribute( AMP_VALIDITY_REST_FIELD_NAME )?.review_link || null,
-	} ) );
+	} ), [] );
 
 	const { displayedErrors, reviewedValidationErrors, unreviewedValidationErrors, validationErrors } = useSelect( ( select ) => {
 		let updatedDisplayedErrors;
