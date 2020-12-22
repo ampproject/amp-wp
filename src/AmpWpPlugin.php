@@ -9,7 +9,6 @@ namespace AmpProject\AmpWP;
 
 use AmpProject\AmpWP\Admin;
 use AmpProject\AmpWP\BackgroundTask;
-use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Infrastructure\ServiceBasedPlugin;
 use AmpProject\AmpWP\Instrumentation;
@@ -86,7 +85,6 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'validated_url_stylesheet_gc'       => BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection::class,
 		'url_validation_cron'               => URLValidationCron::class,
 		'save_post_validation_single_event' => SavePostValidationEvent::class,
-		'background_task_deactivator'       => BackgroundTaskDeactivator::class,
 	];
 
 	/**
@@ -169,6 +167,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			DevTools\FileReflection::class,
 			ReaderThemeLoader::class,
 			Injector::class,
+			BackgroundTask\BackgroundTaskDeactivator::class,
 		];
 	}
 
