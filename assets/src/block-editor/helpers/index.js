@@ -146,7 +146,7 @@ export const removeAmpFitTextFromBlocks = ( settings, name ) => {
 		settings.deprecated.unshift( {
 			supports: settings.supports,
 			attributes: {
-				...( settings?.attributes || {} ),
+				...( settings.attributes || {} ),
 				ampFitText: {
 					type: 'boolean',
 					default: false,
