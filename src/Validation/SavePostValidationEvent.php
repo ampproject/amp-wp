@@ -11,7 +11,6 @@ namespace AmpProject\AmpWP\Validation;
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\SingleScheduledBackgroundTask;
 use AmpProject\AmpWP\DevTools\UserAccess;
-use AmpProject\AmpWP\Infrastructure\Injector;
 
 /**
  * SavePostValidationEvent class.
@@ -21,13 +20,6 @@ use AmpProject\AmpWP\Infrastructure\Injector;
  * @internal
  */
 final class SavePostValidationEvent extends SingleScheduledBackgroundTask {
-
-	/**
-	 * Injector instance.
-	 *
-	 * @var Injector
-	 */
-	private $injector;
 
 	/**
 	 * Instance of URLValidationProvider
@@ -54,14 +46,14 @@ final class SavePostValidationEvent extends SingleScheduledBackgroundTask {
 	 * Class constructor.
 	 *
 	 * @param BackgroundTaskDeactivator $background_task_deactivator Background task deactivator instance.
-	 * @param Injector                  $injector Injector instance.
 	 * @param UserAccess                $dev_tools_user_access Dev tools user access class instance.
+	 * @param URLValidationProvider     $url_validation_provider URLValidationProvider instance.
 	 */
-	public function __construct( BackgroundTaskDeactivator $background_task_deactivator, Injector $injector, UserAccess $dev_tools_user_access ) {
+	public function __construct( BackgroundTaskDeactivator $background_task_deactivator, UserAccess $dev_tools_user_access, URLValidationProvider $url_validation_provider ) {
 		parent::__construct( $background_task_deactivator );
 
-		$this->injector              = $injector;
-		$this->dev_tools_user_access = $dev_tools_user_access;
+		$this->dev_tools_user_access   = $dev_tools_user_access;
+		$this->url_validation_provider = $url_validation_provider;
 	}
 
 	/**
@@ -76,7 +68,7 @@ final class SavePostValidationEvent extends SingleScheduledBackgroundTask {
 			return;
 		}
 
-		$this->get_url_validation_provider()->get_url_validation(
+		$this->url_validation_provider->get_url_validation(
 			get_the_permalink( $post_id ),
 			get_post_type( $post_id ),
 			true
@@ -146,18 +138,5 @@ final class SavePostValidationEvent extends SingleScheduledBackgroundTask {
 	 */
 	protected function get_action_hook() {
 		return 'save_post';
-	}
-
-	/**
-	 * Provides the URLValidationProvider instance, creating it if needed.
-	 *
-	 * @return URLValidationProvider
-	 */
-	private function get_url_validation_provider() {
-		if ( is_null( $this->url_validation_provider ) ) {
-			$this->url_validation_provider = $this->injector->make( URLValidationProvider::class );
-		}
-
-		return $this->url_validation_provider;
 	}
 }

@@ -11,6 +11,7 @@ use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Validation\URLValidationProvider;
 use AmpProject\AmpWP\Validation\ScannableURLProvider;
+use AmpProject\AmpWP\Validation\URLScanningContext;
 use WP_CLI\Utils;
 
 /**
@@ -239,9 +240,11 @@ final class AMP_CLI_Validation_Command {
 		}
 
 		$this->scannable_url_provider = new ScannableURLProvider(
-			$limit_type_validate_count,
-			$include_conditionals,
-			$force_crawl_urls
+			new URLScanningContext(
+				$limit_type_validate_count,
+				$include_conditionals,
+				$force_crawl_urls
+			)
 		);
 
 		return $this->scannable_url_provider;

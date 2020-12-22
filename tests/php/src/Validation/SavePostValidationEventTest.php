@@ -39,7 +39,7 @@ final class SavePostValidationEventTest extends WP_UnitTestCase {
 	private $dev_tools_user_access;
 
 	public function setUp() {
-		$this->test_instance         = new SavePostValidationEvent( new BackgroundTaskDeactivator(), new SimpleInjector(), new UserAccess() );
+		$this->test_instance         = new SavePostValidationEvent( new BackgroundTaskDeactivator(), new UserAccess(), new URLValidationProvider() );
 		$this->dev_tools_user_access = new UserAccess();
 		add_filter( 'pre_http_request', [ $this, 'get_validate_response' ] );
 	}

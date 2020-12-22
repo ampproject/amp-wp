@@ -166,7 +166,6 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			DevTools\CallbackReflection::class,
 			DevTools\FileReflection::class,
 			ReaderThemeLoader::class,
-			Injector::class,
 			BackgroundTask\BackgroundTaskDeactivator::class,
 		];
 	}
@@ -183,10 +182,6 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 * @return array<callable> Associative array of callables.
 	 */
 	protected function get_delegations() {
-		return [
-			Injector::class => static function () {
-				return Services::get( 'injector' );
-			},
-		];
+		return [];
 	}
 }

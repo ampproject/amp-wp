@@ -10,7 +10,6 @@ namespace AmpProject\AmpWP\Validation;
 
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\RecurringBackgroundTask;
-use AmpProject\AmpWP\Infrastructure\Injector;
 
 /**
  * URLValidationCron class.
@@ -22,11 +21,18 @@ use AmpProject\AmpWP\Infrastructure\Injector;
 final class URLValidationCron extends RecurringBackgroundTask {
 
 	/**
-	 * Injector instance.
+	 * ScannableURLProvider instance.
 	 *
-	 * @var Injector
+	 * @var ScannableURLProvider
 	 */
-	private $injector;
+	private $scannable_url_provider;
+
+	/**
+	 * URLValidationProvider instance.
+	 *
+	 * @var URLValidationProvider
+	 */
+	private $url_validation_provider;
 
 	/**
 	 * The cron action name.
@@ -34,13 +40,6 @@ final class URLValidationCron extends RecurringBackgroundTask {
 	 * @var string
 	 */
 	const BACKGROUND_TASK_NAME = 'amp_validate_urls';
-
-	/**
-	 * The number of URLs to check per type each time the cron action runs.
-	 *
-	 * @var int
-	 */
-	const DEFAULT_LIMIT_PER_TYPE = 1;
 
 	/**
 	 * The length of time, in seconds, to sleep between each URL validation.
@@ -53,12 +52,14 @@ final class URLValidationCron extends RecurringBackgroundTask {
 	 * Class constructor.
 	 *
 	 * @param BackgroundTaskDeactivator $background_task_deactivator Service that deactivates background events.
-	 * @param Injector                  $injector Injector instance.
+	 * @param ScannableURLProvider      $scannable_url_provider ScannableURLProvider instance.
+	 * @param URLValidationProvider     $url_validation_provider URLValidationProvider isntance.
 	 */
-	public function __construct( BackgroundTaskDeactivator $background_task_deactivator, Injector $injector ) {
+	public function __construct( BackgroundTaskDeactivator $background_task_deactivator, ScannableURLProvider $scannable_url_provider, URLValidationProvider $url_validation_provider ) {
 		parent::__construct( $background_task_deactivator );
 
-		$this->injector = $injector;
+		$this->scannable_url_provider  = $scannable_url_provider;
+		$this->url_validation_provider = $url_validation_provider;
 	}
 
 	/**
@@ -67,14 +68,11 @@ final class URLValidationCron extends RecurringBackgroundTask {
 	 * @param mixed[] ...$args Unused callback arguments.
 	 */
 	public function process( ...$args ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		$number_per_type         = $this->get_url_validation_number_per_type();
-		$validation_url_provider = $this->injector->make( ScannableURLProvider::class, [ $number_per_type, [], true ] );
-		$urls                    = $validation_url_provider->get_urls();
-		$sleep_time              = $this->get_sleep_time();
-		$validation_provider     = $this->injector->make( URLValidationProvider::class );
+		$urls       = $this->scannable_url_provider->get_urls();
+		$sleep_time = $this->get_sleep_time();
 
 		foreach ( $urls as $url ) {
-			$validation_provider->get_url_validation( $url['url'], $url['type'], true );
+			$this->url_validation_provider->get_url_validation( $url['url'], $url['type'], true );
 			if ( $sleep_time ) {
 				sleep( $sleep_time );
 			}
@@ -101,28 +99,6 @@ final class URLValidationCron extends RecurringBackgroundTask {
 	 */
 	protected function get_interval() {
 		return self::DEFAULT_INTERVAL_HOURLY;
-	}
-
-	/**
-	 * Returns the number of URLs per content type to check.
-	 *
-	 * @return int
-	 */
-	private function get_url_validation_number_per_type() {
-
-		/**
-		 * Filters the number of URLs per content type to check during each run of the cron task.
-		 *
-		 * @param int $url_validation_number_per_type The number of URLs. Default 1.
-		 */
-		$url_validation_number_per_type = apply_filters( 'amp_url_validation_number_per_type', self::DEFAULT_LIMIT_PER_TYPE );
-
-		// Valid values are any integer -1 and above.
-		if ( -1 > $url_validation_number_per_type ) {
-			return 1;
-		}
-
-		return $url_validation_number_per_type;
 	}
 
 	/**
