@@ -102,8 +102,8 @@ final class PluginRegistry implements Service {
 	 * A slug is a plugin directory name like 'amp' or if the plugin is just a single file, then the PHP file in
 	 * the plugins directory.
 	 *
-	 * @param string  $plugin_slug Plugin slug.
-	 * @param bool    $must_use    Whether the slug is for a must-use plugin.
+	 * @param string $plugin_slug Plugin slug.
+	 * @param bool   $must_use    Whether the slug is for a must-use plugin.
 	 * @return array|null {
 	 *     Plugin data if found, otherwise null.
 	 *
