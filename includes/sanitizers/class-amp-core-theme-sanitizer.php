@@ -1885,6 +1885,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			// the actionable elements in the modal. Therefore, the lightbox represents the "background".
 			$close_button_xpaths[] = "//*[ @id = '{$modal_id}' ]";
 
+			// Ensure anchor links also close the modal the same as the the Close Menu button.
+			$close_button_xpaths[] = sprintf( "//*[ @id = '{$modal_id}' ]//a[ @href and contains( @href, '#' ) ]" );
+
 			// Then, add the inner element of the lightbox as an open button xpath.
 			// This is done to prevent the above close action from closing the modal when an inner element is clicked.
 			// Workaround found here: https://stackoverflow.com/a/45971501 .
@@ -2159,6 +2162,21 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		AMP_DOM_Utils::add_amp_action( $menu_toggle, 'tap', "{$body_id}.toggleClass(class=primary-navigation-open)" );
 		AMP_DOM_Utils::add_amp_action( $menu_toggle, 'tap', "{$body_id}.toggleClass(class=lock-scrolling)" );
 		$menu_toggle->setAttribute( 'data-amp-bind-aria-expanded', "{$state_string} ? 'true' : 'false'" );
+
+		// Close the mobile modal when clicking in-page anchor links in the menu.
+		foreach ( $this->dom->xpath->query( '//*[ @id = "site-navigation" ]//a[ @href and contains( @href, "#" ) ]' ) as $link ) {
+			/** @var DOMElement $link */
+			AMP_DOM_Utils::add_amp_action( $link, 'tap', "AMP.setState({{$state_string}: false})" );
+			AMP_DOM_Utils::add_amp_action( $link, 'tap', "{$body_id}.toggleClass(class=primary-navigation-open,force=false)" );
+			AMP_DOM_Utils::add_amp_action( $link, 'tap', "{$body_id}.toggleClass(class=lock-scrolling,force=false)" );
+
+			// Ensure target is scrolled into view. Note that in-page anchor links currently do not work in the non-AMP
+			// version. Normally scrollTo shouldn't be necessary but it appears necessary due to scroll locking.
+			$target = preg_replace( '/.*#/', '', $link->getAttribute( 'href' ) );
+			if ( $target && $this->dom->getElementById( $target ) ) {
+				AMP_DOM_Utils::add_amp_action( $link, 'tap', "{$target}.scrollTo" );
+			}
+		}
 	}
 
 	/**
