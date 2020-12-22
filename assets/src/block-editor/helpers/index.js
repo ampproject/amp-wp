@@ -8,7 +8,6 @@ import { ReactElement } from 'react';
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { cloneElement } from '@wordpress/element';
 import { SelectControl, ToggleControl, Notice, PanelBody } from '@wordpress/components';
 import { InspectorControls } from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
@@ -115,38 +114,6 @@ export const addAMPAttributes = ( settings, name ) => {
 		};
 	}
 
-	const isTextBlock = TEXT_BLOCKS.includes( name );
-
-	// Fit-text for text blocks.
-	if ( isTextBlock ) {
-		if ( ! settings.attributes ) {
-			settings.attributes = {};
-		}
-		settings.attributes.ampFitText = {
-			type: 'boolean',
-			default: false,
-		};
-		settings.attributes.minFont = {
-			default: MIN_FONT_SIZE,
-			source: 'attribute',
-			selector: 'amp-fit-text',
-			attribute: 'min-font-size',
-		};
-		settings.attributes.maxFont = {
-			default: MAX_FONT_SIZE,
-			source: 'attribute',
-			selector: 'amp-fit-text',
-			attribute: 'max-font-size',
-		};
-		settings.attributes.height = {
-			// Needs to be higher than the maximum font size, which defaults to MAX_FONT_SIZE
-			default: 'core/image' === name ? 200 : Math.ceil( MAX_FONT_SIZE / 10 ) * 10,
-			source: 'attribute',
-			selector: 'amp-fit-text',
-			attribute: 'height',
-		};
-	}
-
 	// Layout settings for embeds and media blocks.
 	if ( 0 === name.indexOf( 'core-embed' ) || MEDIA_BLOCKS.includes( name ) ) {
 		if ( ! settings.attributes ) {
@@ -163,68 +130,79 @@ export const addAMPAttributes = ( settings, name ) => {
 };
 
 /**
- * Filters blocks' save function.
+ * Removes `amp-fit-text` related attributes on blocks via block deprecation.
  *
- * @param {Object} element        Element to be saved.
- * @param {string} blockType      Block type.
- * @param {string} blockType.name Block type name.
- * @param {Object} attributes     Attributes.
+ * @param {Object} settings Block settings.
+ * @param {string} name     Block name.
  *
- * @return {Object} Output element.
+ * @return {Object} Modified block settings.
  */
-export const filterBlocksSave = ( element, blockType, attributes ) => { // eslint-disable-line complexity
-	const fitTextProps = {
-		layout: 'fixed-height',
-	};
+export const removeAmpFitTextFromBlocks = ( settings, name ) => {
+	if ( TEXT_BLOCKS.includes( name ) ) {
+		if ( ! settings.deprecated ) {
+			settings.deprecated = [];
+		}
 
-	if ( 'core/paragraph' === blockType.name && ! attributes.ampFitText ) {
-		const content = getAmpFitTextContent( attributes.content );
-		if ( content !== attributes.content ) {
-			return cloneElement(
-				element,
-				{
-					key: 'new',
-					value: content,
+		settings.deprecated.unshift( {
+			supports: settings.supports,
+			attributes: {
+				...settings.attributes,
+				ampFitText: {
+					type: 'boolean',
+					default: false,
 				},
-			);
-		}
-	} else if ( TEXT_BLOCKS.includes( blockType.name ) && attributes.ampFitText ) {
-		if ( attributes.minFont ) {
-			fitTextProps[ 'min-font-size' ] = attributes.minFont;
-		}
-		if ( attributes.maxFont ) {
-			fitTextProps[ 'max-font-size' ] = attributes.maxFont;
-		}
-		if ( attributes.height ) {
-			fitTextProps.height = attributes.height;
-		}
+				minFont: {
+					default: MIN_FONT_SIZE,
+					source: 'attribute',
+					selector: 'amp-fit-text',
+					attribute: 'min-font-size',
+				},
+				maxFont: {
+					default: MAX_FONT_SIZE,
+					source: 'attribute',
+					selector: 'amp-fit-text',
+					attribute: 'max-font-size',
+				},
+				height: {
+					// Needs to be higher than the maximum font size, which defaults to MAX_FONT_SIZE
+					default: 'core/image' === name ? 200 : Math.ceil( MAX_FONT_SIZE / 10 ) * 10,
+					source: 'attribute',
+					selector: 'amp-fit-text',
+					attribute: 'height',
+				},
+			},
+			save( props ) {
+				/* eslint-disable react/prop-types */
+				const { attributes } = props;
+				const fitTextProps = { layout: 'fixed-height' };
 
-		fitTextProps.children = element;
+				if ( attributes.minFont ) {
+					fitTextProps[ 'min-font-size' ] = attributes.minFont;
+				}
+				if ( attributes.maxFont ) {
+					fitTextProps[ 'max-font-size' ] = attributes.maxFont;
+				}
+				if ( attributes.height ) {
+					fitTextProps.height = attributes.height;
+				}
+				/* eslint-enable react/prop-types */
 
-		return <amp-fit-text { ...fitTextProps } />;
+				fitTextProps.children = settings.save( props );
+
+				return <amp-fit-text { ...fitTextProps } />;
+			},
+			isEligible( { ampFitText } ) {
+				return undefined !== ampFitText;
+			},
+			migrate( attributes ) {
+				const deprecatedAttrs = [ 'ampFitText', 'minFont', 'maxFont', 'height' ];
+				deprecatedAttrs.forEach( ( attr ) => delete attributes[ attr ] );
+				return attributes;
+			},
+		} );
 	}
 
-	return element;
-};
-
-/**
- * Returns the inner content of an AMP Fit Text tag.
- *
- * @param {string} content Original content.
- *
- * @return {string} Modified content.
- */
-export const getAmpFitTextContent = ( content ) => {
-	const contentRegex = /<amp-fit-text\b[^>]*>(.*?)<\/amp-fit-text>/;
-	const match = contentRegex.exec( content );
-
-	let newContent = content;
-
-	if ( match && match[ 1 ] ) {
-		newContent = match[ 1 ];
-	}
-
-	return newContent;
+	return settings;
 };
 
 /**
