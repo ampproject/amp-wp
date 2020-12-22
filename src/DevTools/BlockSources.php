@@ -88,8 +88,6 @@ final class BlockSources implements Conditional, Service, Registerable {
 	 * Runs on instantiation.
 	 */
 	public function register() {
-		$this->set_block_sources_from_cache();
-
 		if ( empty( $this->get_block_sources() ) ) {
 			add_filter( 'register_block_type_args', [ $this, 'capture_block_type_source' ] );
 
@@ -138,33 +136,21 @@ final class BlockSources implements Conditional, Service, Registerable {
 	 * Saves the block source data to cache.
 	 */
 	public function cache_block_sources() {
-		if ( wp_using_ext_object_cache() ) {
-			wp_cache_set( self::CACHE_KEY, $this->block_sources, __CLASS__, self::CACHE_TIMEOUT );
-		} else {
-			set_transient( __CLASS__ . self::CACHE_KEY, $this->block_sources, self::CACHE_TIMEOUT );
-		}
+		set_transient( __CLASS__ . self::CACHE_KEY, $this->block_sources, self::CACHE_TIMEOUT );
 	}
 
 	/**
 	 * Clears the cached block source data.
 	 */
 	public function clear_block_sources_cache() {
-		if ( wp_using_ext_object_cache() ) {
-			wp_cache_delete( self::CACHE_KEY, __CLASS__ );
-		} else {
-			delete_transient( __CLASS__ . self::CACHE_KEY );
-		}
+		delete_transient( __CLASS__ . self::CACHE_KEY );
 	}
 
 	/**
 	 * Retrieves block source data from cache.
 	 */
 	private function set_block_sources_from_cache() {
-		if ( wp_using_ext_object_cache() ) {
-			$from_cache = wp_cache_get( self::CACHE_KEY, __CLASS__ );
-		} else {
-			$from_cache = get_transient( __CLASS__ . self::CACHE_KEY );
-		}
+		$from_cache = get_transient( __CLASS__ . self::CACHE_KEY );
 
 		$this->block_sources = is_array( $from_cache ) ? $from_cache : [];
 	}

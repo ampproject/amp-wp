@@ -103,7 +103,7 @@ final class PluginRegistry implements Service {
 	 * the plugins directory.
 	 *
 	 * @param string  $plugin_slug Plugin slug.
-	 * @param boolean $must_use    Whether the slug is for a must-use plugin.
+	 * @param bool    $must_use    Whether the slug is for a must-use plugin.
 	 * @return array|null {
 	 *     Plugin data if found, otherwise null.
 	 *

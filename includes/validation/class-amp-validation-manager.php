@@ -2394,7 +2394,7 @@ class AMP_Validation_Manager {
 
 		// Block validation script uses features only available beginning with WP 5.3.
 		if ( ! $editor_support->editor_supports_amp_block_editor_features() ) {
-			return;
+			return; // @codeCoverageIgnore
 		}
 
 		$slug = 'amp-block-validation';
@@ -2445,7 +2445,7 @@ class AMP_Validation_Manager {
 			'blockSources'               => $block_sources ? $block_sources->get_block_sources() : null,
 			'pluginNames'                => $plugin_names,
 			'themeName'                  => wp_get_theme()->get( 'Name' ),
-			'themeSlug'                  => get_option( 'stylesheet' ),
+			'themeSlug'                  => wp_get_theme()->get_stylesheet(),
 		];
 
 		wp_localize_script(

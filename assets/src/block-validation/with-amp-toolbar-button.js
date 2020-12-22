@@ -19,6 +19,8 @@ import { AMPToolbarButton } from './amp-toolbar-button';
  * Adds the AMPToolbarButton to blocks that have one or more new validation errors.
  *
  * @param {Object} props
+ * @param {Function} props.BlockEdit Block edit function.
+ * @param {string} props.clientId Client ID.
  */
 function BlockEditWithToolbar( props ) {
 	const { BlockEdit, clientId } = props;

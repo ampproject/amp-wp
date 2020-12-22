@@ -80,9 +80,9 @@ export function Sidebar() {
 							</div>
 							<div>
 								<h3>
-									{ __( 'Validation errors kept', 'amp' ) }
+									{ __( 'Invalid markup kept', 'amp' ) }
 								</h3>
-								{ __( 'This URL is not fully AMP-compatible.', 'amp' ) }
+								{ __( 'The permalink will not be served as valid AMP.', 'amp' ) }
 							</div>
 						</div>
 					</div>
@@ -95,13 +95,13 @@ export function Sidebar() {
 					</div>
 					<div className="amp-sidebar__validation-errors-heading">
 						<h2>
-							{ __( 'Validation Errors', 'amp' ) }
+							{ __( 'Validation Issues', 'amp' ) }
 						</h2>
 
 						<p>
 							{ reviewLink && (
 								<a href={ reviewLink } className="amp-sidebar__review-link" target="_blank" rel="noreferrer">
-									{ __( 'Review errors', 'amp' ) }
+									{ __( 'View technical details', 'amp' ) }
 									<NewTabIcon />
 								</a>
 							) }
@@ -111,7 +111,7 @@ export function Sidebar() {
 						<div className="amp-sidebar__options">
 							<ToggleControl
 								checked={ isShowingReviewed }
-								label={ __( 'Include reviewed errors', 'amp' ) }
+								label={ __( 'Include reviewed issues', 'amp' ) }
 								onChange={ ( newIsShowingReviewed ) => {
 									setIsShowingReviewed( newIsShowingReviewed );
 								} }
@@ -125,7 +125,7 @@ export function Sidebar() {
 				! saved && (
 					<PanelBody opened={ true }>
 						<p>
-							{ __( 'This URL will be checked for validation errors when the post is saved.', 'amp' ) }
+							{ __( 'The permalink will be checked for validation issues when the post is saved.', 'amp' ) }
 						</p>
 					</PanelBody>
 				)
@@ -133,7 +133,7 @@ export function Sidebar() {
 			{ saved && validationErrors.length === 0 && (
 				<PanelBody opened={ true }>
 					<p>
-						{ __( 'There are no AMP validation errors at this post\'s URL.', 'amp' ) }
+						{ __( 'There are no AMP validation issues at the permalink.', 'amp' ) }
 					</p>
 				</PanelBody>
 			) }
@@ -149,13 +149,11 @@ export function Sidebar() {
 					: saved && (
 						<PanelBody opened={ true }>
 							<p>
-								{ __( 'There are no unreviewed AMP validation errors at this post\'s URL.', 'amp' ) }
+								{ __( 'There are no unreviewed AMP validation issues at the permalink.', 'amp' ) }
 							</p>
 						</PanelBody>
 					)
-
-			)
-			}
+			) }
 
 		</div>
 	);

@@ -33,7 +33,7 @@ export function convertErrorSourcesToArray( validationError ) {
  * @param {Object} args.validationError Validation error object.
  * @param {Object} args.source A single validation error source.
  * @param {number} args.currentPostId The ID of the current post.
- * @param {Array} args.blockOrder Block client IDs in order.
+ * @param {string[]} args.blockOrder Block client IDs in order.
  * @param {Function} args.getBlock Store selector to get a block in the current editor by client ID.
  */
 export function maybeAddClientIdToValidationError( { validationError, source, currentPostId, blockOrder, getBlock } ) {
@@ -124,6 +124,4 @@ export function useValidationErrorStateUpdates() {
 
 		setValidationErrors( newValidationErrors );
 	}, [ blockOrder, currentPost.id, getBlock, setValidationErrors, trackedValidationErrorsFromPost ] );
-
-	return null;
 }

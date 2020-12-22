@@ -79,7 +79,7 @@ final class EditorSupport implements Registerable, Service {
 	/**
 	 * Returns whether the editor in the current environment supports plugin features.
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function editor_supports_amp_block_editor_features() {
 		// Check for plugin constant here as well as in the function because editor features won't work in
@@ -94,7 +94,7 @@ final class EditorSupport implements Registerable, Service {
 	/**
 	 * Returns whether the Gutenberg plugin provides minimal support.
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function has_support_from_gutenberg_plugin() {
 		return defined( 'GUTENBERG_VERSION' ) && version_compare( GUTENBERG_VERSION, self::GB_MIN_VERSION, '>=' );
@@ -103,7 +103,7 @@ final class EditorSupport implements Registerable, Service {
 	/**
 	 * Returns whether WP core provides minimum Gutenberg support.
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function has_support_from_core() {
 		return version_compare( get_bloginfo( 'version' ), self::WP_MIN_VERSION, '>=' );
