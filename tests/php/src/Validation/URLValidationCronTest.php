@@ -5,12 +5,14 @@ namespace AmpProject\AmpWP\Tests\Validation;
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\CronBasedBackgroundTask;
 use AmpProject\AmpWP\Infrastructure\Conditional;
-use AmpProject\AmpWP\Infrastructure\Injector\SimpleInjector;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
+use AmpProject\AmpWP\Validation\ScannableURLProvider;
+use AmpProject\AmpWP\Validation\URLScanningContext;
 use AmpProject\AmpWP\Validation\URLValidationCron;
+use AmpProject\AmpWP\Validation\URLValidationProvider;
 use WP_UnitTestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Validation\URLValidationCron */
@@ -31,7 +33,7 @@ final class URLValidationCronTest extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
-		$this->test_instance = new URLValidationCron( new BackgroundTaskDeactivator(), new SimpleInjector() );
+		$this->test_instance = new URLValidationCron( new BackgroundTaskDeactivator(), new ScannableURLProvider( new URLScanningContext( 20 ) ), new URLValidationProvider() );
 		add_filter( 'pre_http_request', [ $this, 'get_validate_response' ] );
 	}
 
@@ -89,7 +91,6 @@ final class URLValidationCronTest extends WP_UnitTestCase {
 	 *
 	 * @covers ::process()
 	 * @covers ::validate_urls()
-	 * @covers ::get_url_validation_number_per_type()
 	 * @covers ::get_sleep_time()
 	 */
 	public function test_validate_urls() {
@@ -99,35 +100,6 @@ final class URLValidationCronTest extends WP_UnitTestCase {
 
 		$this->test_instance->process();
 		$this->assertCount( 10, $this->get_validated_urls() );
-	}
-
-	/** @covers ::@covers ::get_url_validation_number_per_type() */
-	public function test_amp_url_validation_number_per_type() {
-		$this->assertEquals( 1, $this->call_private_method( $this->test_instance, 'get_url_validation_number_per_type' ) );
-
-		add_filter(
-			'amp_url_validation_number_per_type',
-			static function() {
-				return -4;
-			}
-		);
-		$this->assertEquals( 1, $this->call_private_method( $this->test_instance, 'get_url_validation_number_per_type' ) );
-
-		add_filter(
-			'amp_url_validation_number_per_type',
-			static function() {
-				return -1;
-			}
-		);
-		$this->assertEquals( -1, $this->call_private_method( $this->test_instance, 'get_url_validation_number_per_type' ) );
-
-		add_filter(
-			'amp_url_validation_number_per_type',
-			static function() {
-				return 0;
-			}
-		);
-		$this->assertEquals( 0, $this->call_private_method( $this->test_instance, 'get_url_validation_number_per_type' ) );
 	}
 
 	/** @covers ::get_event_name() */
