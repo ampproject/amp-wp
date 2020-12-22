@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
  */
 import { BlockIcon } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
+
 /**
  * Internal dependencies
  */
