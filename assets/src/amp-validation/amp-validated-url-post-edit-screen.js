@@ -46,10 +46,12 @@ const addBeforeUnloadPrompt = () => {
 	if ( beforeUnloadPromptAdded ) {
 		return;
 	}
+	// eslint-disable-next-line @wordpress/no-global-event-listener
 	window.addEventListener( 'beforeunload', onBeforeUnload );
 
 	// Remove prompt when clicking trash or update.
 	document.querySelector( '#major-publishing-actions' ).addEventListener( 'click', () => {
+		// eslint-disable-next-line @wordpress/no-global-event-listener
 		window.removeEventListener( 'beforeunload', onBeforeUnload );
 	} );
 

@@ -41,8 +41,9 @@ function PageComponentSideEffects( { children } ) {
  * @param {Object} props Component props.
  * @param {string} props.closeLink Link to return to previous user location.
  * @param {string} props.finishLink Exit link.
+ * @param {Object} props.appRoot App root element.
  */
-export function SetupWizard( { closeLink, finishLink } ) {
+export function SetupWizard( { closeLink, finishLink, appRoot } ) {
 	const { isMobile } = useWindowWidth();
 	const { activePageIndex, currentPage: { title, PageComponent, showTitle }, moveBack, moveForward, pages } = useContext( Navigation );
 
@@ -98,7 +99,7 @@ export function SetupWizard( { closeLink, finishLink } ) {
 					/>
 				</div>
 			</div>
-			<UnsavedChangesWarning />
+			<UnsavedChangesWarning appRoot={ appRoot } />
 		</div>
 	);
 }
@@ -106,4 +107,5 @@ export function SetupWizard( { closeLink, finishLink } ) {
 SetupWizard.propTypes = {
 	closeLink: PropTypes.string.isRequired,
 	finishLink: PropTypes.string.isRequired,
+	appRoot: PropTypes.instanceOf( global.Element ),
 };

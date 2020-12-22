@@ -92,8 +92,11 @@ function scrollFocusedSectionIntoView( focusedSectionId ) {
 
 /**
  * Settings page application root.
+ *
+ * @param {Object} props
+ * @param {Node} props.appRoot App root.
  */
-function Root() {
+function Root( { appRoot } ) {
 	const [ focusedSection, setFocusedSection ] = useState( global.location.hash.replace( /^#/, '' ) );
 
 	const { fetchingOptions, saveOptions } = useContext( Options );
@@ -187,10 +190,13 @@ function Root() {
 				</AMPDrawer>
 				<SettingsFooter />
 			</form>
-			<UnsavedChangesWarning excludeUserContext={ true } />
+			<UnsavedChangesWarning excludeUserContext={ true } appRoot={ appRoot } />
 		</>
 	);
 }
+Root.propTypes = {
+	appRoot: PropTypes.instanceOf( global.Element ),
+};
 
 domReady( () => {
 	const root = document.getElementById( 'amp-settings-root' );
@@ -199,7 +205,7 @@ domReady( () => {
 		render( (
 			<ErrorContextProvider>
 				<Providers>
-					<Root />
+					<Root appRoot={ root } />
 				</Providers>
 			</ErrorContextProvider>
 		), root );
