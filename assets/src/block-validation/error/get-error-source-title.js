@@ -53,7 +53,7 @@ export function getErrorSourceTitle( sources ) {
 		}
 
 		if ( 0 < inactiveThemeSources.length ) {
-			// Translators: placeholder is the slug of an inactive WordPress theme.
+			/* translators: placeholder is the slug of an inactive WordPress theme. */
 			output.push( __( 'Inactive theme(s)', 'amp' ) );
 		}
 	}

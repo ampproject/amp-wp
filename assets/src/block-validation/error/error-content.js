@@ -37,7 +37,7 @@ function ErrorSource( { clientId, blockTypeName, sources } ) {
 		switch ( blockSource?.source ) {
 			case 'plugin':
 				source = sprintf(
-					// Translators: %s: plugin name.
+					/* translators: %s: plugin name. */
 					__( `%s (plugin)`, 'amp' ),
 					blockSource.title,
 				);
@@ -45,7 +45,7 @@ function ErrorSource( { clientId, blockTypeName, sources } ) {
 
 			case 'mu-plugin':
 				source = sprintf(
-					// Translators: %s: plugin name.
+					/* translators: %s: plugin name. */
 					__( `%s (must-use plugin)`, 'amp' ),
 					blockSource.title,
 				);
@@ -53,7 +53,7 @@ function ErrorSource( { clientId, blockTypeName, sources } ) {
 
 			case 'theme':
 				source = sprintf(
-					// Translators: %s: theme name.
+					/* translators: %s: theme name. */
 					__( `%s (theme)`, 'amp' ),
 					blockSource.title,
 				);
