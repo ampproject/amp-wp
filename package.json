@@ -29,7 +29,7 @@
     "@wordpress/element": "2.19.0",
     "@wordpress/escape-html": "1.11.0",
     "@wordpress/html-entities": "2.10.0",
-    "@wordpress/i18n": "3.16.0",
+    "@wordpress/i18n": "3.17.0",
     "@wordpress/icons": "2.8.0",
     "@wordpress/url": "2.19.0",
     "classnames": "2.2.6",
