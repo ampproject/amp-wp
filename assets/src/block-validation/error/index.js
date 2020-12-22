@@ -25,10 +25,10 @@ import { ErrorContent } from './error-content';
 /**
  * Component rendering an individual error. Parent component is a <ul>.
  *
- * @param {Object} props Component props.
- * @param {string} props.clientId
- * @param {number} props.status
- * @param {number} props.term_id
+ * @param {Object} args Component props.
+ * @param {string} args.clientId
+ * @param {number} args.status
+ * @param {number} args.term_id
  */
 export function Error( { clientId, status, term_id: termId, ...props } ) {
 	const { selectBlock } = useDispatch( 'core/block-editor' );
