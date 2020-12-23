@@ -41,7 +41,7 @@ function PageComponentSideEffects( { children } ) {
  * @param {Object} props Component props.
  * @param {string} props.closeLink Link to return to previous user location.
  * @param {string} props.finishLink Exit link.
- * @param {Object} props.appRoot App root element.
+ * @param {Element} props.appRoot App root element.
  */
 export function SetupWizard( { closeLink, finishLink, appRoot } ) {
 	const { isMobile } = useWindowWidth();

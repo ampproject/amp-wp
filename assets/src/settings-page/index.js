@@ -94,7 +94,7 @@ function scrollFocusedSectionIntoView( focusedSectionId ) {
  * Settings page application root.
  *
  * @param {Object} props
- * @param {Node} props.appRoot App root.
+ * @param {Element} props.appRoot App root.
  */
 function Root( { appRoot } ) {
 	const [ focusedSection, setFocusedSection ] = useState( global.location.hash.replace( /^#/, '' ) );

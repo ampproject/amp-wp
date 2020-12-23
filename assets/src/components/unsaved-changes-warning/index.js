@@ -20,7 +20,7 @@ import { Options } from '../options-context-provider';
  *
  * @param {Object} props Component props.
  * @param {boolean} props.excludeUserContext Whether to exclude listening to user context.
- * @param {Node} props.appRoot React app root.
+ * @param {Element} props.appRoot React app root.
  * @return {null} Renders nothing.
  */
 export function UnsavedChangesWarning( { excludeUserContext = false, appRoot } ) {
