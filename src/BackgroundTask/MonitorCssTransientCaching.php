@@ -95,7 +95,7 @@ final class MonitorCssTransientCaching extends RecurringBackgroundTask {
 	 * @param mixed[] ...$args {
 	 *     Arguments passed to the cron callback.
 	 *
-	 *     @type DateTimeInterface @date Optional. Date to use for timestamping the processing (for testing).
+	 *     @type DateTimeInterface $date Optional. Date to use for timestamping the processing (for testing).
 	 *     @type int               $transient_count Optional. Count of transients to use for the processing (for testing).
 	 * }
 	 * @return void
