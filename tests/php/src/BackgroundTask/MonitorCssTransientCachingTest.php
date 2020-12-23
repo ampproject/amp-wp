@@ -13,7 +13,7 @@ use DateTime;
 use WP_UnitTestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching */
-class Test_Monitor_CSS_Transient_Caching extends WP_UnitTestCase {
+class MonitorCssTransientCachingTest extends WP_UnitTestCase {
 
 	/**
 	 * Whether external object cache is being used.
@@ -45,7 +45,7 @@ class Test_Monitor_CSS_Transient_Caching extends WP_UnitTestCase {
 	 * Test whether an event is actually scheduled when the monitor is registered.
 	 *
 	 * @uses \AmpProject\AmpWP\BackgroundTask\CronBasedBackgroundTask::schedule_event
-	 * @uses \AmpProject\AmpWP\BackgroundTask\CronBasedBackgroundTask::deactivate
+	 * @uses \AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator::deactivate
 	 */
 	public function test_event_gets_scheduled_and_unscheduled() {
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
