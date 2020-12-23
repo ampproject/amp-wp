@@ -16,7 +16,10 @@ import { AMP_VALIDITY_REST_FIELD_NAME } from './constants';
 import { BLOCK_VALIDATION_STORE_KEY } from './store';
 
 /**
- * Handles a case that was encountered where a validationError's `sources` was an object (with numeric keys).
+ * Handles cases where a validationError's `sources` are an object (with numeric keys).
+ *
+ * Note: this will no longer be an issue after https://github.com/ampproject/amp-wp/commit/bbb0e495a817a56b37554dfd721170712c92d7b8
+ * but is still required for validation errors stored in the database prior to that commit.
  *
  * @param {Object} validationError
  */
