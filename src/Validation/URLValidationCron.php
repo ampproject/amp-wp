@@ -53,7 +53,7 @@ final class URLValidationCron extends RecurringBackgroundTask {
 	 *
 	 * @param BackgroundTaskDeactivator $background_task_deactivator Service that deactivates background events.
 	 * @param ScannableURLProvider      $scannable_url_provider ScannableURLProvider instance.
-	 * @param URLValidationProvider     $url_validation_provider URLValidationProvider isntance.
+	 * @param URLValidationProvider     $url_validation_provider URLValidationProvider instance.
 	 */
 	public function __construct( BackgroundTaskDeactivator $background_task_deactivator, ScannableURLProvider $scannable_url_provider, URLValidationProvider $url_validation_provider ) {
 		parent::__construct( $background_task_deactivator );
@@ -111,6 +111,7 @@ final class URLValidationCron extends RecurringBackgroundTask {
 		/**
 		 * Filters the length of time to sleep between validating URLs.
 		 *
+		 * @since 2.1
 		 * @param int The number of seconds. Default 1.
 		 */
 		return absint( apply_filters( 'amp_url_validation_sleep_time', self::DEFAULT_SLEEP_TIME ) );

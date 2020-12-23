@@ -8,7 +8,6 @@ namespace AmpProject\AmpWP\Tests\Validation;
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\SingleScheduledBackgroundTask;
 use AmpProject\AmpWP\DevTools\UserAccess;
-use AmpProject\AmpWP\Infrastructure\Injector\SimpleInjector;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
@@ -66,7 +65,6 @@ final class SavePostValidationEventTest extends WP_UnitTestCase {
 
 	/**
 	 * @covers ::process()
-	 * @covers ::get_url_validation_provider
 	 */
 	public function test_process() {
 		$this->test_instance->process();
