@@ -2195,7 +2195,7 @@ class AMP_Theme_Support {
 			// Redirect to include query var to preventing AMP from even being considered available.
 			$non_amp_url = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_AVAILABLE, $non_amp_url );
 
-			wp_safe_redirect( $non_amp_url, 302 );
+			wp_safe_redirect( $non_amp_url, 302 ); // phpcs:ignore WordPressVIPMinimum.Security.ExitAfterRedirect.NoExit -- This is in an output buffer callback handler.
 			return esc_html__( 'Redirecting since AMP version not available.', 'amp' );
 		}
 
@@ -2394,7 +2394,7 @@ class AMP_Theme_Support {
 	 */
 	public static function get_paired_browsing_url( $url = null ) {
 		if ( ! $url ) {
-			$url = wp_unslash( $_SERVER['REQUEST_URI'] );
+			$url = wp_unslash( $_SERVER['REQUEST_URI'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 		}
 		$url = remove_query_arg(
 			[ amp_get_slug(), QueryVar::NOAMP, AMP_Validated_URL_Post_Type::VALIDATE_ACTION, AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ],
@@ -2411,7 +2411,7 @@ class AMP_Theme_Support {
 	 */
 	public static function sanitize_url_for_paired_browsing() {
 		if ( isset( $_GET[ self::PAIRED_BROWSING_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$original_url = wp_unslash( $_SERVER['REQUEST_URI'] );
+			$original_url = wp_unslash( $_SERVER['REQUEST_URI'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 			$updated_url  = self::get_paired_browsing_url( $original_url );
 			if ( $updated_url !== $original_url ) {
 				wp_safe_redirect( $updated_url );
