@@ -185,6 +185,7 @@ export function ErrorContent( { blockType, clientId, status, title, error: { sou
 	const blockTypeTitle = blockType?.title;
 	const blockTypeName = blockType?.name;
 
+	// @todo Refactor AMP_Validation_Error_Taxonomy::get_error_title_from_code() to return structured data.
 	const [ titleText, nodeName ] = title.split( ':' ).map( ( item ) => item.trim() );
 
 	return (
