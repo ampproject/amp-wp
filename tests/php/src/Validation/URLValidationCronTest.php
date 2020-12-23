@@ -90,7 +90,6 @@ final class URLValidationCronTest extends WP_UnitTestCase {
 	 * Test validate_urls.
 	 *
 	 * @covers ::process()
-	 * @covers ::validate_urls()
 	 * @covers ::get_sleep_time()
 	 */
 	public function test_validate_urls() {
