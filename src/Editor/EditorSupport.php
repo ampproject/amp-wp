@@ -59,20 +59,22 @@ final class EditorSupport implements Registerable, Service {
 			return;
 		}
 
-		if ( ! $this->editor_supports_amp_block_editor_features() ) {
-			if ( current_user_can( 'manage_options' ) ) {
-				wp_add_inline_script(
-					'wp-edit-post',
-					sprintf(
-						'wp.domReady(
-							function () {
-								wp.data.dispatch( "core/notices" ).createWarningNotice( %s )
-							}
-						);',
-						wp_json_encode( __( 'AMP functionality is not available since your version of the Block Editor is too old. Please either update WordPress core to the latest version or activate the Gutenberg plugin. As a last resort, you may use the Classic Editor plugin instead.', 'amp' ) )
-					)
-				);
-			}
+		if ( $this->editor_supports_amp_block_editor_features() ) {
+			return;
+		}
+
+		if ( current_user_can( 'manage_options' ) ) {
+			wp_add_inline_script(
+				'wp-edit-post',
+				sprintf(
+					'wp.domReady(
+						function () {
+							wp.data.dispatch( "core/notices" ).createWarningNotice( %s )
+						}
+					);',
+					wp_json_encode( __( 'AMP functionality is not available since your version of the Block Editor is too old. Please either update WordPress core to the latest version or activate the Gutenberg plugin. As a last resort, you may use the Classic Editor plugin instead.', 'amp' ) )
+				)
+			);
 		}
 	}
 
