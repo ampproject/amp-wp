@@ -45,16 +45,16 @@ class URLValidationRESTControllerTest extends WP_UnitTestCase {
 		do_action( 'rest_api_init' );
 		$this->controller->register();
 
-		$this->assertContains( '/amp/v1/validate_post_url', array_keys( rest_get_server()->get_routes() ) );
+		$this->assertContains( '/amp/v1/validate-post-url', array_keys( rest_get_server()->get_routes() ) );
 	}
 
 	/** @covers ::update_items_permissions_check() */
 	public function test_update_items_permissions_check() {
-		$this->assertWPError( $this->controller->update_items_permissions_check( new WP_REST_Request( 'GET', '/amp/v1/validate_post_url' ) ) );
+		$this->assertWPError( $this->controller->update_items_permissions_check( new WP_REST_Request( 'GET', '/amp/v1/validate-post-url' ) ) );
 
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
-		$this->assertTrue( $this->controller->update_items_permissions_check( new WP_REST_Request( 'GET', '/amp/v1/validate_post_url' ) ) );
+		$this->assertTrue( $this->controller->update_items_permissions_check( new WP_REST_Request( 'GET', '/amp/v1/validate-post-url' ) ) );
 	}
 
 	/** @covers ::validate_post_url() */
@@ -65,7 +65,7 @@ class URLValidationRESTControllerTest extends WP_UnitTestCase {
 			]
 		);
 
-		$request = new WP_REST_Request( 'POST', '/amp/v1/validate_post_url' );
+		$request = new WP_REST_Request( 'POST', '/amp/v1/validate-post-url' );
 		$request->set_body_params( compact( 'id' ) );
 
 		$data = $this->controller->validate_post_url( $request )->get_data();
