@@ -2427,10 +2427,6 @@ class AMP_Validation_Manager {
 
 		$plugin_names = array_map(
 			static function ( $plugin ) {
-				if ( isset( $plugin['Title'] ) ) {
-					return $plugin['Title'];
-				}
-
 				return isset( $plugin['Name'] ) ? $plugin['Name'] : '';
 			},
 			$plugin_registry->get_plugins()
