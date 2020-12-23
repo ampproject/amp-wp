@@ -31,7 +31,7 @@ abstract class RecurringBackgroundTask extends CronBasedBackgroundTask {
 	 *
 	 * @param mixed[] ...$args Arguments passed to the function from the action hook.
 	 */
-	public function schedule_event( ...$args ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+	public function schedule_event( ...$args ) {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
@@ -43,7 +43,7 @@ abstract class RecurringBackgroundTask extends CronBasedBackgroundTask {
 			return;
 		}
 
-		wp_schedule_event( time(), $this->get_interval(), $event_name );
+		wp_schedule_event( time(), $this->get_interval(), $event_name, $args );
 	}
 
 	/**
