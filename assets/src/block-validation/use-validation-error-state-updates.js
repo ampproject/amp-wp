@@ -12,7 +12,7 @@ import { useSelect, useDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { AMP_VALIDITY_REST_FIELD_NAME } from './constants';
+import apiFetch from '@wordpress/api-fetch';
 import { BLOCK_VALIDATION_STORE_KEY } from './store';
 
 /**
@@ -73,31 +73,68 @@ export function maybeAddClientIdToValidationError( { validationError, source, cu
  * components within multiple slotfills to have access to the same state.
  */
 export function useValidationErrorStateUpdates() {
-	const [ trackedValidationErrorsFromPost, setTrackedValidationErrorsFromPost ] = useState( [] );
+	const [ previousValidationErrors, setPreviousValidationErrors ] = useState( [] );
 
-	const { setValidationErrors } = useDispatch( BLOCK_VALIDATION_STORE_KEY );
+	const { setIsFetchingErrors, setReviewLink, setValidationErrors } = useDispatch( BLOCK_VALIDATION_STORE_KEY );
 
-	const { blockOrder, currentPost, getBlock, validationErrorsFromPost } = useSelect( ( select ) => ( {
+	const { blockOrder, currentPost, getBlock, isSavingPost, validationErrors } = useSelect( ( select ) => ( {
 		blockOrder: select( 'core/block-editor' ).getClientIdsWithDescendants(),
 		currentPost: select( 'core/editor' ).getCurrentPost(),
 		getBlock: select( 'core/block-editor' ).getBlock,
-		validationErrorsFromPost: select( 'core/editor' ).getEditedPostAttribute( AMP_VALIDITY_REST_FIELD_NAME )?.results || [],
+		isSavingPost: select( 'core/editor' ).isSavingPost(),
+		validationErrors: select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors(),
 	} ), [] );
+
+	/**
+	 * Fetches validation errors for the current post's URL after the editor has loaded and following
+	 * subsequent saves.
+	 */
+	useEffect( () => {
+		if ( isSavingPost ) {
+			return () => undefined;
+		}
+
+		let unmounted = false;
+		( async () => {
+			setIsFetchingErrors( true );
+
+			try {
+				const newValidation = await apiFetch( {
+					path: '/amp/v1/validate-post-url',
+					method: 'POST',
+					data: { id: currentPost.id },
+				} );
+
+				if ( unmounted ) {
+					return;
+				}
+
+				setValidationErrors( newValidation.results );
+				setReviewLink( newValidation.review_link );
+
+				setIsFetchingErrors( false );
+			} catch ( e ) {}
+		} )();
+
+		return () => {
+			unmounted = true;
+		};
+	}, [ currentPost.id, isSavingPost, setIsFetchingErrors, setReviewLink, setValidationErrors ] );
 
 	/**
 	 * Runs an equality check when validation errors are received before running the heavier effect.
 	 */
 	useEffect( () => {
-		if ( ! isEqual( trackedValidationErrorsFromPost, validationErrorsFromPost ) ) {
-			setTrackedValidationErrorsFromPost( validationErrorsFromPost );
+		if ( ! isEqual( previousValidationErrors, validationErrors ) ) {
+			setPreviousValidationErrors( validationErrors );
 		}
-	}, [ trackedValidationErrorsFromPost, validationErrorsFromPost ] );
+	}, [ previousValidationErrors, validationErrors ] );
 
 	/**
 	 * Adds clientIds to the validation errors that are associated with blocks.
 	 */
 	useEffect( () => {
-		const newValidationErrors = trackedValidationErrorsFromPost.map( ( validationError ) => {
+		const newValidationErrors = previousValidationErrors.map( ( validationError ) => {
 			if ( ! validationError.error.sources ) {
 				return validationError;
 			}
@@ -123,5 +160,5 @@ export function useValidationErrorStateUpdates() {
 		} );
 
 		setValidationErrors( newValidationErrors );
-	}, [ blockOrder, currentPost.id, getBlock, setValidationErrors, trackedValidationErrorsFromPost ] );
+	}, [ blockOrder, currentPost.id, getBlock, setValidationErrors, previousValidationErrors ] );
 }

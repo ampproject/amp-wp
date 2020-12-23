@@ -14,11 +14,11 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import {
-	AMP_VALIDITY_REST_FIELD_NAME,
 	VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
 	VALIDATION_ERROR_ACK_REJECTED_STATUS,
 } from '../constants';
 import { NewTabIcon } from '../icon';
+import { BLOCK_VALIDATION_STORE_KEY } from '../store';
 import { ErrorPanelTitle } from './error-panel-title';
 import { ErrorContent } from './error-content';
 
@@ -32,7 +32,7 @@ import { ErrorContent } from './error-content';
  */
 export function Error( { clientId, status, term_id: termId, ...props } ) {
 	const { selectBlock } = useDispatch( 'core/block-editor' );
-	const { review_link: reviewLink } = useSelect( ( select ) => select( 'core/editor' )?.getEditedPostAttribute( AMP_VALIDITY_REST_FIELD_NAME ), [] ) || {};
+	const reviewLink = useSelect( ( select ) => select( BLOCK_VALIDATION_STORE_KEY ).getReviewLink() );
 	const reviewed = status === VALIDATION_ERROR_ACK_ACCEPTED_STATUS || status === VALIDATION_ERROR_ACK_REJECTED_STATUS;
 
 	const { blockType } = useSelect( ( select ) => {
@@ -44,8 +44,11 @@ export function Error( { clientId, status, term_id: termId, ...props } ) {
 		};
 	}, [ clientId ] );
 
-	const detailsUrl = new URL( reviewLink );
-	detailsUrl.hash = `#tag-${ termId }`;
+	let detailsUrl = null;
+	if ( reviewLink ) {
+		detailsUrl = new URL( reviewLink );
+		detailsUrl.hash = `#tag-${ termId }`;
+	}
 
 	return (
 		<li className="amp-error-container">
@@ -70,15 +73,17 @@ export function Error( { clientId, status, term_id: termId, ...props } ) {
 							{ __( 'Select block', 'amp' ) }
 						</Button>
 					) }
-					<a
-						href={ detailsUrl.href }
-						target="_blank"
-						rel="noreferrer"
-						className="amp-error__details-link"
-					>
-						{ __( 'View details', 'amp' ) }
-						<NewTabIcon />
-					</a>
+					{ detailsUrl && (
+						<a
+							href={ detailsUrl.href }
+							target="_blank"
+							rel="noreferrer"
+							className="amp-error__details-link"
+						>
+							{ __( 'View details', 'amp' ) }
+							<NewTabIcon />
+						</a>
+					) }
 				</div>
 
 			</PanelBody>

@@ -12,10 +12,10 @@ import { useEffect } from '@wordpress/element';
 import './style.css';
 import AMPValidationErrorsIcon from '../../images/amp-validation-errors.svg';
 import AMPValidationErrorsKeptIcon from '../../images/amp-validation-errors-kept.svg';
+import { Loading } from '../components/loading';
 import { Error } from './error';
 import { BLOCK_VALIDATION_STORE_KEY } from './store';
 import { NewTabIcon } from './icon';
-import { AMP_VALIDITY_REST_FIELD_NAME } from './constants';
 
 /**
  * Editor sidebar.
@@ -23,12 +23,12 @@ import { AMP_VALIDITY_REST_FIELD_NAME } from './constants';
 export function Sidebar() {
 	const { setIsShowingReviewed } = useDispatch( BLOCK_VALIDATION_STORE_KEY );
 
-	const { ampCompatibilityBroken, isShowingReviewed, status, reviewLink } = useSelect( ( select ) => ( {
+	const { ampCompatibilityBroken, isFetchingErrors, isShowingReviewed, status, reviewLink } = useSelect( ( select ) => ( {
 		ampCompatibilityBroken: select( BLOCK_VALIDATION_STORE_KEY ).getAMPCompatibilityBroken(),
+		isFetchingErrors: select( BLOCK_VALIDATION_STORE_KEY ).getIsFetchingErrors(),
 		isShowingReviewed: select( BLOCK_VALIDATION_STORE_KEY ).getIsShowingReviewed(),
 		status: select( 'core/editor' )?.getEditedPostAttribute( 'status' ),
-		// eslint-disable-next-line camelcase
-		reviewLink: select( 'core/editor' ).getEditedPostAttribute( AMP_VALIDITY_REST_FIELD_NAME )?.review_link || null,
+		reviewLink: select( BLOCK_VALIDATION_STORE_KEY ).getReviewLink(),
 	} ), [] );
 
 	const { displayedErrors, reviewedValidationErrors, unreviewedValidationErrors, validationErrors } = useSelect( ( select ) => {
@@ -68,6 +68,10 @@ export function Sidebar() {
 	}, [] );
 
 	const saved = 'auto-draft' !== status;
+
+	if ( isFetchingErrors ) {
+		return <Loading />;
+	}
 
 	return (
 		<div className="amp-sidebar">

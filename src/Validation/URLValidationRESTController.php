@@ -65,7 +65,7 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 	public function register() {
 		register_rest_route(
 			$this->namespace,
-			'/validate_post_url',
+			'/validate-post-url',
 			[
 				[
 					'methods'             => WP_REST_Server::CREATABLE,

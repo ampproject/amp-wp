@@ -15,11 +15,14 @@ import {
 
 export const BLOCK_VALIDATION_STORE_KEY = 'amp/block-validation';
 
+const SET_IS_FETCHING_ERRORS = 'SET_IS_FETCHING_ERRORS';
 const SET_IS_SHOWING_REVIEWED = 'SET_IS_SHOWING_REVIEWED';
+const SET_REVIEW_LINK = 'SET_REVIEW_LINK';
 const SET_VALIDATION_ERRORS = 'SET_VALIDATION_ERRORS';
 
 export const INITIAL_STATE = {
 	ampCompatibilityBroken: false,
+	isFetchingErrors: true,
 	isShowingReviewed: false,
 	rawValidationErrors: [],
 	reviewLink: null,
@@ -39,8 +42,14 @@ export function createStore( initialState ) {
 		{
 			reducer: ( state = initialState, action ) => {
 				switch ( action.type ) {
+					case SET_IS_FETCHING_ERRORS:
+						return { ...state, isFetchingErrors: action.isFetchingErrors };
+
 					case SET_IS_SHOWING_REVIEWED:
 						return { ...state, isShowingReviewed: action.isShowingReviewed };
+
+					case SET_REVIEW_LINK:
+						return { ...state, reviewLink: action.reviewLink };
 
 					case SET_VALIDATION_ERRORS:
 						return {
@@ -69,15 +78,19 @@ export function createStore( initialState ) {
 				}
 			},
 			actions: {
+				setIsFetchingErrors: ( isFetchingErrors ) => ( { type: SET_IS_FETCHING_ERRORS, isFetchingErrors } ),
 				setIsShowingReviewed: ( isShowingReviewed ) => ( { type: SET_IS_SHOWING_REVIEWED, isShowingReviewed } ),
+				setReviewLink: ( reviewLink ) => ( { type: SET_REVIEW_LINK, reviewLink } ),
 				setValidationErrors: ( validationErrors ) => ( { type: SET_VALIDATION_ERRORS, validationErrors } ),
 			},
 			selectors: {
 				getAMPCompatibilityBroken: ( { ampCompatibilityBroken } ) => ampCompatibilityBroken,
+				getIsFetchingErrors: ( { isFetchingErrors } ) => isFetchingErrors,
 				getIsShowingReviewed: ( { isShowingReviewed } ) => isShowingReviewed,
-				getValidationErrors: ( { validationErrors } ) => validationErrors,
+				getReviewLink: ( { reviewLink } ) => reviewLink,
 				getReviewedValidationErrors: ( { reviewedValidationErrors } ) => reviewedValidationErrors,
 				getUnreviewedValidationErrors: ( { unreviewedValidationErrors } ) => unreviewedValidationErrors,
+				getValidationErrors: ( { validationErrors } ) => validationErrors,
 			},
 			initialState,
 		},
