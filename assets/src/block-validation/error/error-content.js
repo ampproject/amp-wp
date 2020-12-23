@@ -218,7 +218,7 @@ ErrorContent.propTypes = {
 	blockType: PropTypes.shape( {
 		name: PropTypes.string,
 		title: PropTypes.string,
-	} ).isRequired,
+	} ),
 	clientId: PropTypes.string,
 	status: PropTypes.oneOf( [
 		VALIDATION_ERROR_ACK_ACCEPTED_STATUS,

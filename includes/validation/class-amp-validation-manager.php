@@ -1189,7 +1189,7 @@ class AMP_Validation_Manager {
 			}
 		}
 
-		$sources = array_unique( $sources, SORT_REGULAR );
+		$sources = array_values( array_unique( $sources, SORT_REGULAR ) );
 
 		return $sources;
 	}
