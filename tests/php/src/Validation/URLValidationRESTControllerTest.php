@@ -7,6 +7,7 @@
 
 namespace AmpProject\AmpWP\Tests;
 
+use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
 use AmpProject\AmpWP\Validation\URLValidationProvider;
 use AmpProject\AmpWP\Validation\URLValidationRESTController;
@@ -31,44 +32,58 @@ class URLValidationRESTControllerTest extends WP_UnitTestCase {
 	private $controller;
 
 	/**
+	 * Test UserAccess instance.
+	 *
+	 * @var UserAccess
+	 */
+	private $user_access;
+
+	/**
 	 * Set up.
 	 */
 	public function setUp() {
 		parent::setUp();
 
-		$this->controller = new URLValidationRESTController( new URLValidationProvider() );
+		do_action( 'rest_api_init' );
+		$this->user_access = new UserAccess();
+		$this->controller  = new URLValidationRESTController( new URLValidationProvider(), $this->user_access );
 		add_filter( 'pre_http_request', [ $this, 'get_validate_response' ] );
 	}
 
 	/** @covers ::register */
 	public function test_register() {
-		do_action( 'rest_api_init' );
 		$this->controller->register();
 
-		$this->assertContains( '/amp/v1/validate-post-url', array_keys( rest_get_server()->get_routes() ) );
+		$this->assertContains( '/amp/v1/validate-post-url/(?P<id>[\d]+)', array_keys( rest_get_server()->get_routes() ) );
 	}
 
-	/** @covers ::update_items_permissions_check() */
-	public function test_update_items_permissions_check() {
-		$this->assertWPError( $this->controller->update_items_permissions_check( new WP_REST_Request( 'GET', '/amp/v1/validate-post-url' ) ) );
+	/** @covers ::get_item_permissions_check() */
+	public function test_get_item_permissions_check() {
+		$post = $this->factory()->post->create();
 
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->assertWPError( $this->controller->get_item_permissions_check( new WP_REST_Request( 'GET', 'amp/v1/validate-post-url/' . $post ) ) );
 
-		$this->assertTrue( $this->controller->update_items_permissions_check( new WP_REST_Request( 'GET', '/amp/v1/validate-post-url' ) ) );
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'author' ] ) );
+		$this->assertWPError( $this->controller->get_item_permissions_check( new WP_REST_Request( 'GET', 'amp/v1/validate-post-url/' . $post ) ) );
+
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->user_access->set_user_enabled( wp_get_current_user(), true );
+		$this->assertTrue( $this->controller->get_item_permissions_check( new WP_REST_Request( 'GET', 'amp/v1/validate-post-url/' . $post ) ) );
 	}
 
 	/** @covers ::validate_post_url() */
-	public function test_validate_url() {
+	public function test_validate_post_url() {
 		$id = $this->factory()->post->create(
 			[
 				'post_content' => '<img data-src="http://my-invalid-attribute.com" />',
 			]
 		);
 
-		$request = new WP_REST_Request( 'POST', '/amp/v1/validate-post-url' );
-		$request->set_body_params( compact( 'id' ) );
+		$request = new WP_REST_Request( 'GET', 'amp/v1/validate-post-url/' . $id );
+		$request->set_url_params( [ 'context' => URLValidationRESTController::CONTEXT_EDITOR ] );
 
-		$data = $this->controller->validate_post_url( $request )->get_data();
+		$response = $this->controller->validate_post_url( $request );
+		$data     = $response->get_data();
 
 		$this->assertEquals(
 			[

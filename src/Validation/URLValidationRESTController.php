@@ -95,7 +95,7 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 					],
 					'id'      => [
 						'description' => __( 'Unique identifier for the object.', 'amp' ),
-						'required'    => true,
+						'required'    => true, 
 						'type'        => 'integer',
 					],
 				],
@@ -103,7 +103,7 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::READABLE ),
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => [ $this, 'validate_post_url' ],
-					'permission_callback' => [ $this, 'get_items_permissions_check' ],
+					'permission_callback' => [ $this, 'get_item_permissions_check' ],
 				],
 				'schema' => [ $this, 'get_public_item_schema' ],
 			]
@@ -118,7 +118,7 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return true|WP_Error True if the request has permission; WP_Error object otherwise.
 	 */
-	public function get_items_permissions_check( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+	public function get_item_permissions_check( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		if ( ! $this->dev_tools_user_access->is_user_enabled() ) {
 			return new WP_Error(
 				'amp_rest_no_dev_tools',
