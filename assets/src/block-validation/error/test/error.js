@@ -78,6 +78,7 @@ function createTestStoreAndBlocks() {
 	dispatch( 'core/block-editor' ).insertBlocks( [ pluginBlock, themeBlock, coreBlock, unknownBlock ] );
 
 	createStore( {
+		reviewLink: 'http://site.test/wp-admin',
 		validationErrors: [
 			{
 				clientId: pluginBlock.clientId,

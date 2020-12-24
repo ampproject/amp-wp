@@ -80,7 +80,7 @@ export function useValidationErrorStateUpdates() {
 
 	const { setIsFetchingErrors, setReviewLink, setValidationErrors } = useDispatch( BLOCK_VALIDATION_STORE_KEY );
 
-	const { blockOrder, currentPost, getBlock, isAutoSavingPost, isSavingPost, validationErrors } = useSelect( ( select ) => ( {
+	const { blockOrder, currentPost, getBlock, isSavingPost, validationErrors } = useSelect( ( select ) => ( {
 		blockOrder: select( 'core/block-editor' ).getClientIdsWithDescendants(),
 		currentPost: select( 'core/editor' ).getCurrentPost(),
 		getBlock: select( 'core/block-editor' ).getBlock,
@@ -127,7 +127,7 @@ export function useValidationErrorStateUpdates() {
 	 * Runs an equality check when validation errors are received before running the heavier effect.
 	 */
 	useEffect( () => {
-		if ( ! isEqual( previousValidationErrors, validationErrors ) ) {
+		if ( validationErrors && ! isEqual( previousValidationErrors, validationErrors ) ) {
 			setPreviousValidationErrors( validationErrors );
 		}
 	}, [ previousValidationErrors, validationErrors ] );

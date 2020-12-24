@@ -25,6 +25,10 @@ jest.mock( '@wordpress/data/build/components/use-select', () => {
 	} );
 } );
 
+jest.mock( '@wordpress/api-fetch', () => () => new Promise( ( resolve ) => {
+	resolve( { review_link: 'http://site.test/wp-admin', results: require( './__data__/raw-validation-errors' ).rawValidationErrors } );
+} ) );
+
 createStore( {
 	validationErrors: [],
 } );
@@ -42,7 +46,7 @@ describe( 'useValidationErrorStateUpdates', () => {
 		container = null;
 	} );
 
-	it( 'updates state', () => {
+	it( 'updates state', async () => {
 		expect( select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors() ).toHaveLength( 0 );
 
 		function ComponentContainingHook() {
@@ -57,6 +61,11 @@ describe( 'useValidationErrorStateUpdates', () => {
 				container,
 			);
 		} );
+
+		// Wait for re-render that follows fetching results.
+		await ( () => () => new Promise( ( resolve ) => {
+			setTimeout( resolve );
+		} ) )();
 
 		expect( select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors() ).toHaveLength( 8 );
 	} );
