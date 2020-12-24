@@ -42,9 +42,9 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 	private $url_validation_provider;
 
 	/**
-	 * DevToolsUserAccess instance.
+	 * UserAccess instance.
 	 *
-	 * @var DevToolsUserAccess
+	 * @var UserAccess
 	 */
 	private $dev_tools_user_access;
 
