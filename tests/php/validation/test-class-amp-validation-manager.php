@@ -2412,6 +2412,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$expected_dependencies = [
 			'lodash',
 			'react',
+			'wp-api-fetch',
 			'wp-block-editor',
 			'wp-components',
 			'wp-compose',
@@ -2422,6 +2423,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			'wp-i18n',
 			'wp-plugins',
 			'wp-polyfill',
+			'wp-url',
 		];
 
 		$this->assertStringContains( 'js/amp-block-validation.js', $script->src );
