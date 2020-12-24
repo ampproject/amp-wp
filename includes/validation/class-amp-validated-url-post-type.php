@@ -242,7 +242,7 @@ class AMP_Validated_URL_Post_Type {
 	 */
 	public static function handle_plugin_update( $old_version ) {
 
-		// Update the old post type slug from amp_validated_url to amp_validated_url.
+		// Update the old post type slug from amp_invalid_url to amp_validated_url.
 		if ( '1.0-' === substr( $old_version, 0, 4 ) || version_compare( $old_version, '1.0', '<' ) ) {
 			global $wpdb;
 			$post_ids = get_posts(
