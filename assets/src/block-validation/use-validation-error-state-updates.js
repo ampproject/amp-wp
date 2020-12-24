@@ -8,11 +8,12 @@ import { isEqual } from 'lodash';
  */
 import { useEffect, useState } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
+import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
  */
-import apiFetch from '@wordpress/api-fetch';
 import { BLOCK_VALIDATION_STORE_KEY } from './store';
 
 /**
@@ -103,9 +104,7 @@ export function useValidationErrorStateUpdates() {
 
 			try {
 				const newValidation = await apiFetch( {
-					path: '/amp/v1/validate-post-url',
-					method: 'POST',
-					data: { id: currentPost.id },
+					path: addQueryArgs( `/amp/v1/validate-post-url/${ currentPost.id }`, { context: 'amp-editor' } ),
 				} );
 
 				if ( unmounted ) {
