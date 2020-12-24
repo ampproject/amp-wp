@@ -80,7 +80,7 @@ export function useValidationErrorStateUpdates() {
 
 	const { setIsFetchingErrors, setReviewLink, setValidationErrors } = useDispatch( BLOCK_VALIDATION_STORE_KEY );
 
-	const { blockOrder, currentPost, getBlock, isSavingPost, validationErrors } = useSelect( ( select ) => ( {
+	const { blockOrder, currentPost, getBlock, isAutoSavingPost, isSavingPost, validationErrors } = useSelect( ( select ) => ( {
 		blockOrder: select( 'core/block-editor' ).getClientIdsWithDescendants(),
 		currentPost: select( 'core/editor' ).getCurrentPost(),
 		getBlock: select( 'core/block-editor' ).getBlock,
@@ -114,7 +114,6 @@ export function useValidationErrorStateUpdates() {
 
 				setValidationErrors( newValidation.results );
 				setReviewLink( newValidation.review_link );
-
 				setIsFetchingErrors( false );
 			} catch ( e ) {}
 		} )();

@@ -69,10 +69,6 @@ export function Sidebar() {
 
 	const saved = 'auto-draft' !== status;
 
-	if ( isFetchingErrors ) {
-		return <Loading />;
-	}
-
 	return (
 		<div className="amp-sidebar">
 			{
@@ -126,23 +122,27 @@ export function Sidebar() {
 			) }
 
 			{
-				! saved && (
+				! saved && 0 === validationErrors.length && (
 					<PanelBody opened={ true }>
-						<p>
-							{ __( 'The permalink will be checked for validation issues when the post is saved.', 'amp' ) }
-						</p>
+						{ isFetchingErrors ? <Loading /> : (
+							<p>
+								{ __( 'The permalink will be checked for validation issues when the post is saved.', 'amp' ) }
+							</p>
+						) }
 					</PanelBody>
 				)
 			}
 			{ saved && validationErrors.length === 0 && (
 				<PanelBody opened={ true }>
-					<p>
-						{ __( 'There are no AMP validation issues at the permalink.', 'amp' ) }
-					</p>
+					{ isFetchingErrors ? <Loading /> : (
+						<p>
+							{ __( 'There are no AMP validation issues at the permalink.', 'amp' ) }
+						</p>
+					) }
 				</PanelBody>
 			) }
 
-			{ saved && 0 < validationErrors.length && (
+			{ 0 < validationErrors.length && (
 				0 < displayedErrors.length ? (
 					<ul>
 						{ displayedErrors.map( ( validationError, index ) => (
@@ -152,9 +152,11 @@ export function Sidebar() {
 				)
 					: saved && (
 						<PanelBody opened={ true }>
-							<p>
-								{ __( 'There are no unreviewed AMP validation issues at the permalink.', 'amp' ) }
-							</p>
+							{ isFetchingErrors ? <Loading /> : (
+								<p>
+									{ __( 'There are no unreviewed AMP validation issues at the permalink.', 'amp' ) }
+								</p>
+							) }
 						</PanelBody>
 					)
 			) }
