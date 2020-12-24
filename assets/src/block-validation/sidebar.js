@@ -122,7 +122,7 @@ export function Sidebar() {
 			) }
 
 			{
-				! saved && (
+				! saved && 0 === validationErrors.length && (
 					<PanelBody opened={ true }>
 						<p>
 							{ __( 'The permalink will be checked for validation issues when the post is saved.', 'amp' ) }
@@ -138,7 +138,7 @@ export function Sidebar() {
 				</PanelBody>
 			) }
 
-			{ saved && 0 < validationErrors.length && (
+			{ 0 < validationErrors.length && (
 				0 < displayedErrors.length ? (
 					<ul>
 						{ displayedErrors.map( ( validationError, index ) => (
