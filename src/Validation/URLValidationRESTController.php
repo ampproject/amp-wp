@@ -95,7 +95,7 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 					],
 					'id'      => [
 						'description' => __( 'Unique identifier for the object.', 'amp' ),
-						'required'    => true, 
+						'required'    => true,
 						'type'        => 'integer',
 					],
 				],
