@@ -325,42 +325,53 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  *
  * Themes can register support for this with `add_theme_support( AMP_Theme_Support::SLUG )`:
  *
- *      add_theme_support( AMP_Theme_Support::SLUG );
+ * ```php
+ * add_theme_support( AMP_Theme_Support::SLUG );
+ * ```
  *
  * This will serve templates in AMP-first, allowing you to use AMP components in your theme templates.
  * If you want to make available in transitional mode, where templates are served in AMP or non-AMP documents, do:
  *
- *      add_theme_support( AMP_Theme_Support::SLUG, array(
- *          'paired' => true,
- *      ) );
+ * ```php
+ * add_theme_support( AMP_Theme_Support::SLUG, array(
+ *     'paired' => true,
+ * ) );
+ * ```
  *
  * Transitional mode is also implied if you define a template_dir:
  *
- *      add_theme_support( AMP_Theme_Support::SLUG, array(
- *          'template_dir' => 'amp',
- *      ) );
+ * ```php
+ * add_theme_support( AMP_Theme_Support::SLUG, array(
+ *     'template_dir' => 'amp',
+ * ) );
+ * ```
  *
  * If you want to have AMP-specific templates in addition to serving AMP-first, do:
- *
- *      add_theme_support( AMP_Theme_Support::SLUG, array(
- *          'paired'       => false,
- *          'template_dir' => 'amp',
- *      ) );
+ * ```php
+ * add_theme_support( AMP_Theme_Support::SLUG, array(
+ *     'paired'       => false,
+ *     'template_dir' => 'amp',
+ * ) );
+ * ```
  *
  * If you want to force AMP to always be served on a given template, you can use the templates_supported arg,
  * for example to always serve the Category template in AMP:
  *
- *      add_theme_support( AMP_Theme_Support::SLUG, array(
- *          'templates_supported' => array(
- *              'is_category' => true,
- *          ),
- *      ) );
+ * ```php
+ * add_theme_support( AMP_Theme_Support::SLUG, array(
+ *     'templates_supported' => array(
+ *         'is_category' => true,
+ *     ),
+ * ) );
+ * ```
  *
  * Or if you want to force AMP to be used on all templates:
  *
- *      add_theme_support( AMP_Theme_Support::SLUG, array(
- *          'templates_supported' => 'all',
- *      ) );
+ * ```php
+ * add_theme_support( AMP_Theme_Support::SLUG, array(
+ *     'templates_supported' => 'all',
+ * ) );
+ * ```
  *
  * @see AMP_Theme_Support::read_theme_support()
  * @return boolean Whether this is in AMP 'canonical' mode, that is whether it is AMP-first and there is not a separate (paired) AMP URL.
