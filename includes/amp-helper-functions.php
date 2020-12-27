@@ -1432,7 +1432,7 @@ function amp_is_dev_mode() {
 	 * queries for the expressions returned by the 'amp_dev_mode_element_xpaths' filter.
 	 *
 	 * @since 1.3
-	 * @param bool Whether AMP dev mode is enabled.
+	 * @param bool $is_dev_mode_enabled Whether AMP dev mode is enabled.
 	 */
 	return apply_filters(
 		'amp_dev_mode_enabled',
