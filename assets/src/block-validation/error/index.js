@@ -72,12 +72,14 @@ export function Error( { clientId, status, term_id: termId, ...props } ) {
 							{ __( 'Select block', 'amp' ) }
 						</Button>
 					) }
-					<ExternalLink
-						href={ detailsUrl.href }
-						className="amp-error__details-link"
-					>
-						{ __( 'View details', 'amp' ) }
-					</ExternalLink>
+					{ detailsUrl && (
+						<ExternalLink
+							href={ detailsUrl.href }
+							className="amp-error__details-link"
+						>
+							{ __( 'View details', 'amp' ) }
+						</ExternalLink>
+					) }
 				</div>
 
 			</PanelBody>
