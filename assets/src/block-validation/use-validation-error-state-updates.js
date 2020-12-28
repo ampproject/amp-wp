@@ -87,7 +87,7 @@ export function useValidationErrorStateUpdates() {
 		validationErrorsFromPost: select( 'core/editor' ).getEditedPostAttribute( AMP_VALIDITY_REST_FIELD_NAME )?.results || [],
 	} ), [] );
 
-	/**
+	/*
 	 * Runs an equality check when validation errors are received before running the heavier effect.
 	 */
 	useEffect( () => {
@@ -96,7 +96,7 @@ export function useValidationErrorStateUpdates() {
 		}
 	}, [ trackedValidationErrorsFromPost, validationErrorsFromPost ] );
 
-	/**
+	/*
 	 * Adds clientIds to the validation errors that are associated with blocks.
 	 */
 	useEffect( () => {

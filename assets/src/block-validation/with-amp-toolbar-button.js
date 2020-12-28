@@ -16,7 +16,7 @@ import { BLOCK_VALIDATION_STORE_KEY } from './store';
 import { AMPToolbarButton } from './amp-toolbar-button';
 
 /**
- * Adds the AMPToolbarButton to blocks that have one or more new validation errors.
+ * Adds the AMPToolbarButton to blocks that have one or more unreviewed validation errors.
  *
  * @param {Object} props
  * @param {Function} props.BlockEdit Block edit function.
