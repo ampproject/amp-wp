@@ -35,7 +35,7 @@ function BlockEditWithToolbar( props ) {
 	return (
 		<>
 			{ 0 < count &&
-				<AMPToolbarButton count={ count } />
+				<AMPToolbarButton clientId={ clientId } count={ count } />
 			}
 			<BlockEdit { ...props } />
 
