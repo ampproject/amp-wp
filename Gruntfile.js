@@ -3,7 +3,7 @@
 module.exports = function( grunt ) {
 	'use strict';
 
-	// Root paths to include in the plugin build ZIP when running `npm run build:prod`.
+	// Root paths to include in the plugin build ZIP.
 	const productionIncludedRootFiles = [
 		'LICENSE',
 		'amp.php',
@@ -13,7 +13,6 @@ module.exports = function( grunt ) {
 		'readme.txt',
 		'src',
 		'templates',
-		'vendor',
 	];
 
 	// These patterns paths will be excluded from among the above directory.
@@ -38,11 +37,19 @@ module.exports = function( grunt ) {
 		'vendor/*/*/*.yml',
 		'vendor/*/*/.*.yml',
 		'vendor/*/*/tests',
-		'vendor/ampproject/amp-toolbox/bin',
-		'vendor/ampproject/amp-toolbox/.phpcs.xml.dist',
 		'vendor/ampproject/amp-toolbox/conceptual-diagram.svg',
-		'vendor/ampproject/amp-toolbox/phpstan.neon.dist',
 		'vendor/bin',
+		'third-party/composer.json',
+		'scoper.inc.php',
+	];
+
+	// These will be removed from the Composer build of the plugin prior to creating a ZIP.
+	// ⚠️ Warning: These paths are passed straight to rm command in the shell, without any escaping.
+	const productionComposerExcludedFilePatterns = [
+		'vendor',
+		'composer.lock',
+		'third-party/composer.json',
+		'scoper.inc.php',
 	];
 
 	grunt.initConfig( {
@@ -78,13 +85,28 @@ module.exports = function( grunt ) {
 				command: 'php bin/verify-version-consistency.php',
 			},
 			composer_install: {
-				command: [
-					'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi',
-					'cd build',
-					'composer install --no-dev -o',
-					'composer remove cweagans/composer-patches --update-no-dev -o',
-					'rm -rf ' + productionVendorExcludedFilePatterns.join( ' ' ),
-				].join( ' && ' ),
+				command: () => {
+					const command = [
+						'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi',
+						'mkdir -p build/vendor/bin',
+						'cp vendor/bin/php-scoper build/vendor/bin/',
+						'cd build',
+						'composer install --no-dev -o',
+					];
+
+					if ( 'composer' === process.env.BUILD_TYPE ) {
+						command.push(
+							'rm -rf ' + productionComposerExcludedFilePatterns.join( ' ' ),
+						);
+					} else {
+						command.push(
+							'COMPOSER_DISCARD_CHANGES=true composer remove --no-interaction --no-scripts --update-no-dev -o cweagans/composer-patches sabberworm/php-css-parser',
+							'rm -rf ' + productionVendorExcludedFilePatterns.join( ' ' ),
+						);
+					}
+
+					return command.join( ' && ' );
+				},
 			},
 			create_build_zip: {
 				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; if [ -e amp.zip ]; then rm amp.zip; fi; cd build; zip -r ../amp.zip .; cd ..; echo; echo "ZIP of build: $(pwd)/amp.zip"',
@@ -155,6 +177,9 @@ module.exports = function( grunt ) {
 			} );
 
 			paths.push( 'composer.*' ); // Copy in order to be able to do run composer_install.
+			paths.push( 'scoper.inc.php' ); // Copy in order generate scoped Composer dependencies.
+
+			//  Also copy recently built assets.
 			paths.push( 'assets/js/**/*.js' );
 			paths.push( 'assets/js/**/*.asset.php' );
 			paths.push( 'assets/css/*.css' );
@@ -169,7 +194,7 @@ module.exports = function( grunt ) {
 					dest: 'build',
 					expand: true,
 					options: {
-						noProcess: [ '*/**', 'LICENSE' ], // That is, only process amp.php and readme.txt.
+						noProcess: [ '**/*', '!amp.php' ], // That is, only process amp.php.
 						process( content, srcpath ) {
 							let matches, version, versionRegex;
 							if ( /amp\.php$/.test( srcpath ) ) {
@@ -186,6 +211,10 @@ module.exports = function( grunt ) {
 
 								// Remove dev mode code blocks.
 								content = content.replace( /\n\/\/\s*DEV_CODE.+?\n}\n/s, '' );
+
+								if ( 'composer' === process.env.BUILD_TYPE ) {
+									content = content.replace( "require_once AMP__DIR__ . '/vendor/autoload.php';", '' );
+								}
 							}
 							return content;
 						},

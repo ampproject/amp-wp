@@ -85,8 +85,9 @@
     "webpackbar": "4.0.0"
   },
   "scripts": {
-    "build:dev": "cross-env NODE_ENV=development npm-run-all 'build:!(dev|prod)'",
-    "build:prod": "cross-env NODE_ENV=production npm-run-all 'build:!(dev|prod)'",
+    "build:dev": "cross-env NODE_ENV=development npm-run-all 'build:!(dev|prod|composer)'",
+    "build:prod": "cross-env NODE_ENV=production npm-run-all 'build:!(dev|prod|composer)'",
+    "build:composer": "cross-env NODE_ENV=production BUILD_TYPE=composer npm-run-all 'build:!(dev|prod|composer)'",
     "build:prepare": "grunt clean",
     "build:css": "npm-run-all build:css:*",
     "build:css:copy": "cp -R assets/css/src/* assets/css",
