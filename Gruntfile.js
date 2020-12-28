@@ -85,28 +85,15 @@ module.exports = function( grunt ) {
 				command: 'php bin/verify-version-consistency.php',
 			},
 			composer_install: {
-				command: () => {
-					const command = [
-						'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi',
-						'mkdir -p build/vendor/bin',
-						'cp vendor/bin/php-scoper build/vendor/bin/',
-						'cd build',
-						'composer install --no-dev -o',
-					];
-
-					if ( 'composer' === process.env.BUILD_TYPE ) {
-						command.push(
-							'rm -rf ' + productionComposerExcludedFilePatterns.join( ' ' ),
-						);
-					} else {
-						command.push(
-							'COMPOSER_DISCARD_CHANGES=true composer remove --no-interaction --no-scripts --update-no-dev -o cweagans/composer-patches sabberworm/php-css-parser',
-							'rm -rf ' + productionVendorExcludedFilePatterns.join( ' ' ),
-						);
-					}
-
-					return command.join( ' && ' );
-				},
+				command: [
+					'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi',
+					'mkdir -p build/vendor/bin',
+					'cp vendor/bin/php-scoper build/vendor/bin/',
+					'cd build',
+					'composer install --no-dev -o',
+					'COMPOSER_DISCARD_CHANGES=true composer remove --no-interaction --no-scripts --update-no-dev -o cweagans/composer-patches sabberworm/php-css-parser',
+					'rm -rf ' + ( 'composer' === process.env.BUILD_TYPE ? productionComposerExcludedFilePatterns : productionVendorExcludedFilePatterns ).join( ' ' ),
+				].join( ' && ' ),
 			},
 			create_build_zip: {
 				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; if [ -e amp.zip ]; then rm amp.zip; fi; cd build; zip -r ../amp.zip .; cd ..; echo; echo "ZIP of build: $(pwd)/amp.zip"',
