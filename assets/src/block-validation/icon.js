@@ -33,7 +33,7 @@ IconSVG.propTypes = {
  * @param {Object} props
  * @param {boolean} props.hasBadge Whether the icon is showing a number.
  */
-export function BrokenIconSVG( { hasBadge } ) {
+function BrokenIconSVG( { hasBadge } ) {
 	return (
 		<span className={ `amp-toolbar-broken-icon${ hasBadge ? ' amp-toolbar-broken-icon--has-badge' : '' }` } >
 			<AMPToolbarIconBroken />
