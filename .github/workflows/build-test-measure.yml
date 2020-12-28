@@ -328,14 +328,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php }}
-          extensions: curl, date, dom, gd, iconv, json, libxml, mysql, spl
-          coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
-          ini-values: pcov.directory=.
-
       - name: Shutdown default MySQL service
         run: sudo service mysql stop
 
@@ -357,8 +349,31 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-composer-
 
+        # PHP-Scoper only works on PHP 7.3+ but is still a necessary tool to generate the scoped dependencies. To work
+        # around this, a compatible PHP version is temporarily installed and then used to install the dependencies.
+        # Once that is done, the PHP version is replaced with the one meant to be used and the vendor directory is
+        # removed so that the appropriate dependencies can then be later installed.
+
+      - name: Setup PHP 7.4 (to run PHP Scoper)
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.4
+
+      - name: Install Composer dependencies (and scope necessary dependencies)
+        run: |
+          composer install --prefer-dist --no-suggest --no-progress --no-interaction
+          rm -rf vendor
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: curl, date, dom, gd, iconv, json, libxml, mysql, spl
+          coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
+          ini-values: pcov.directory=.
+
       - name: Install Composer dependencies
-        run: composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
+        run: composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction --no-scripts
 
       - name: Get npm cache directory
         id: npm-cache
