@@ -2,6 +2,10 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import {
+	VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+	VALIDATION_ERROR_ACK_REJECTED_STATUS,
+} from 'amp-block-validation';
 
 /**
  * WordPress dependencies
@@ -13,11 +17,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import {
-	AMP_VALIDITY_REST_FIELD_NAME,
-	VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
-	VALIDATION_ERROR_ACK_REJECTED_STATUS,
-} from '../constants';
+import { AMP_VALIDITY_REST_FIELD_NAME } from '../constants';
 import { NewTabIcon } from '../icon';
 import { ErrorPanelTitle } from './error-panel-title';
 import { ErrorContent } from './error-content';
