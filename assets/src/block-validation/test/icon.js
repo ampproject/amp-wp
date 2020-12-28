@@ -1,11 +1,13 @@
 /**
  * External dependencies
  */
+import { act } from 'react-dom/test-utils';
+
 /**
  * WordPress dependencies
  */
 import { render } from '@wordpress/element';
-import { act } from 'react-dom/test-utils';
+
 /**
  * Internal dependencies
  */

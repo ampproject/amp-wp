@@ -4,14 +4,14 @@
 import { registerStore } from '@wordpress/data';
 
 /**
- * Internal dependencies
+ * External dependencies
  */
 import {
 	VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
 	VALIDATION_ERROR_ACK_REJECTED_STATUS,
 	VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
 	VALIDATION_ERROR_NEW_REJECTED_STATUS,
-} from './constants';
+} from 'amp-block-validation';
 
 export const BLOCK_VALIDATION_STORE_KEY = 'amp/block-validation';
 

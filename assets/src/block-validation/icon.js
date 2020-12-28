@@ -8,7 +8,6 @@ import PropTypes from 'prop-types';
  */
 import AMPToolbarIcon from '../../images/amp-icon-toolbar.svg';
 import AMPToolbarIconBroken from '../../images/amp-toolbar-icon-broken.svg';
-import AMPNewTabIcon from '../../images/amp-new-tab-icon.svg';
 
 /**
  * Plugin icon.
@@ -33,7 +32,7 @@ IconSVG.propTypes = {
  * @param {Object} props
  * @param {boolean} props.hasBadge Whether the icon is showing a number.
  */
-export function BrokenIconSVG( { hasBadge } ) {
+function BrokenIconSVG( { hasBadge } ) {
 	return (
 		<span className={ `amp-toolbar-broken-icon${ hasBadge ? ' amp-toolbar-broken-icon--has-badge' : '' }` } >
 			<AMPToolbarIconBroken />
@@ -75,11 +74,4 @@ ToolbarIcon.propTypes = {
  */
 export function MoreMenuIcon() {
 	return <IconSVG hasBadge={ false } />;
-}
-
-/**
- * An icon indicating that a link opens in a new tab.
- */
-export function NewTabIcon() {
-	return <AMPNewTabIcon />;
 }

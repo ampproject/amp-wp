@@ -2,7 +2,13 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { blockSources } from 'amp-block-validation';
+import {
+	blockSources,
+	VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+	VALIDATION_ERROR_ACK_REJECTED_STATUS,
+	VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+	VALIDATION_ERROR_NEW_REJECTED_STATUS,
+} from 'amp-block-validation';
 
 /**
  * WordPress dependencies
@@ -12,12 +18,6 @@ import { sprintf, __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import {
-	VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
-	VALIDATION_ERROR_ACK_REJECTED_STATUS,
-	VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
-	VALIDATION_ERROR_NEW_REJECTED_STATUS,
-} from '../constants';
 import AMPAlert from '../../../images/amp-alert.svg';
 import AMPDelete from '../../../images/amp-delete.svg';
 import { getErrorSourceTitle } from './get-error-source-title';
@@ -145,29 +145,23 @@ MarkupStatus.propTypes = {
 /**
  * @param {Object} props
  * @param {string} props.blockTypeTitle Title of the block type.
- * @param {string} props.clientId Block ID.
  */
-function BlockType( { blockTypeTitle, clientId } ) {
-	if ( clientId ) {
-		return (
-			<>
-				<dt>
-					{ __( 'Block type', 'amp' ) }
-				</dt>
-				<dd>
-					<span className="amp-error__block-type-description">
-						{ blockTypeTitle || __( 'unknown', 'amp' ) }
-					</span>
-				</dd>
-			</>
-		);
-	}
-
-	return null;
+function BlockType( { blockTypeTitle } ) {
+	return (
+		<>
+			<dt>
+				{ __( 'Block type', 'amp' ) }
+			</dt>
+			<dd>
+				<span className="amp-error__block-type-description">
+					{ blockTypeTitle || __( 'unknown', 'amp' ) }
+				</span>
+			</dd>
+		</>
+	);
 }
 BlockType.propTypes = {
 	blockTypeTitle: PropTypes.string,
-	clientId: PropTypes.string,
 };
 
 /**
@@ -207,7 +201,7 @@ export function ErrorContent( { blockType, clientId, status, title, error: { sou
 						</>
 					)
 				}
-				<BlockType blockTypeTitle={ blockTypeTitle } clientId={ clientId } />
+				{ clientId && <BlockType blockTypeTitle={ blockTypeTitle } /> }
 				<ErrorSource blockTypeName={ blockTypeName } clientId={ clientId } sources={ sources } />
 				<MarkupStatus status={ status } />
 			</dl>

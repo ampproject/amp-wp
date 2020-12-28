@@ -2,22 +2,21 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import {
+	VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+	VALIDATION_ERROR_ACK_REJECTED_STATUS,
+} from 'amp-block-validation';
 
 /**
  * WordPress dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
-import { PanelBody, Button } from '@wordpress/components';
+import { PanelBody, Button, ExternalLink } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import {
-	VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
-	VALIDATION_ERROR_ACK_REJECTED_STATUS,
-} from '../constants';
-import { NewTabIcon } from '../icon';
 import { BLOCK_VALIDATION_STORE_KEY } from '../store';
 import { ErrorPanelTitle } from './error-panel-title';
 import { ErrorContent } from './error-content';
@@ -73,17 +72,12 @@ export function Error( { clientId, status, term_id: termId, ...props } ) {
 							{ __( 'Select block', 'amp' ) }
 						</Button>
 					) }
-					{ detailsUrl && (
-						<a
-							href={ detailsUrl.href }
-							target="_blank"
-							rel="noreferrer"
-							className="amp-error__details-link"
-						>
-							{ __( 'View details', 'amp' ) }
-							<NewTabIcon />
-						</a>
-					) }
+					<ExternalLink
+						href={ detailsUrl.href }
+						className="amp-error__details-link"
+					>
+						{ __( 'View details', 'amp' ) }
+					</ExternalLink>
 				</div>
 
 			</PanelBody>

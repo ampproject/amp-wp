@@ -131,7 +131,7 @@ export function useValidationErrorStateUpdates() {
 		}
 	}, [ previousValidationErrors, validationErrors ] );
 
-	/**
+	/*
 	 * Adds clientIds to the validation errors that are associated with blocks.
 	 */
 	useEffect( () => {

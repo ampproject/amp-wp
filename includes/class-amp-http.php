@@ -157,7 +157,7 @@ class AMP_HTTP {
 			if ( ! isset( $_GET[ $query_var ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				continue;
 			}
-			self::$purged_amp_query_vars[ $query_var ] = wp_unslash( $_GET[ $query_var ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			self::$purged_amp_query_vars[ $query_var ] = wp_unslash( $_GET[ $query_var ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			unset( $_REQUEST[ $query_var ], $_GET[ $query_var ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$scrubbed = true;
 		}
@@ -177,12 +177,12 @@ class AMP_HTTP {
 
 			// Scrub QUERY_STRING.
 			if ( ! empty( $_SERVER['QUERY_STRING'] ) ) {
-				$_SERVER['QUERY_STRING'] = $build_query( $_SERVER['QUERY_STRING'] );
+				$_SERVER['QUERY_STRING'] = $build_query( $_SERVER['QUERY_STRING'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			}
 
 			// Scrub REQUEST_URI.
 			if ( ! empty( $_SERVER['REQUEST_URI'] ) ) {
-				list( $path, $query ) = explode( '?', $_SERVER['REQUEST_URI'], 2 );
+				list( $path, $query ) = explode( '?', $_SERVER['REQUEST_URI'], 2 ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 				$pairs                  = $build_query( $query );
 				$_SERVER['REQUEST_URI'] = $path;
@@ -346,14 +346,14 @@ class AMP_HTTP {
 	 *
 	 * @param string $location The location to redirect to.
 	 */
-	public static function intercept_post_request_redirect( $location ) {
+	public static function intercept_post_request_redirect( $location ) { // phpcs:ignore WordPressVIPMinimum.Hooks.AlwaysReturnInFilter.MissingReturnStatement -- It dies.
 
 		// Make sure relative redirects get made absolute.
 		$parsed_location = array_merge(
 			[
 				'scheme' => 'https',
 				'host'   => wp_parse_url( home_url(), PHP_URL_HOST ),
-				'path'   => isset( $_SERVER['REQUEST_URI'] ) ? strtok( wp_unslash( $_SERVER['REQUEST_URI'] ), '?' ) : '/',
+				'path'   => isset( $_SERVER['REQUEST_URI'] ) ? strtok( wp_unslash( $_SERVER['REQUEST_URI'] ), '?' ) : '/', // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			],
 			wp_parse_url( $location )
 		);

@@ -1,10 +1,11 @@
 /**
- * Internal dependencies
- */
-/**
  * WordPress dependencies
  */
 import { dispatch, select } from '@wordpress/data';
+
+/**
+ * Internal dependencies
+ */
 import { BLOCK_VALIDATION_STORE_KEY, createStore, INITIAL_STATE } from '../store';
 import { rawValidationErrors } from './__data__/raw-validation-errors';
 

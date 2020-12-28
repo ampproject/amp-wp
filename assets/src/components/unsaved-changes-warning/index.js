@@ -20,9 +20,10 @@ import { Options } from '../options-context-provider';
  *
  * @param {Object} props Component props.
  * @param {boolean} props.excludeUserContext Whether to exclude listening to user context.
+ * @param {Element} props.appRoot React app root.
  * @return {null} Renders nothing.
  */
-export function UnsavedChangesWarning( { excludeUserContext = false } ) {
+export function UnsavedChangesWarning( { excludeUserContext = false, appRoot } ) {
 	const { hasOptionsChanges, didSaveOptions } = useContext( Options );
 	const [ userState, setUserState ] = useState( { hasDeveloperToolsOptionChange: false, didSaveDeveloperToolsOption: true } );
 
@@ -36,19 +37,20 @@ export function UnsavedChangesWarning( { excludeUserContext = false } ) {
 				return null;
 			};
 
-			window.addEventListener( 'beforeunload', warnIfUnsavedChanges );
+			appRoot.ownerDocument.addEventListener( 'beforeunload', warnIfUnsavedChanges );
 
 			return () => {
-				window.removeEventListener( 'beforeunload', warnIfUnsavedChanges );
+				appRoot.ownerDocument.removeEventListener( 'beforeunload', warnIfUnsavedChanges );
 			};
 		}
 
 		return () => undefined;
-	}, [ hasOptionsChanges, didSaveOptions, hasDeveloperToolsOptionChange, didSaveDeveloperToolsOption ] );
+	}, [ appRoot, hasOptionsChanges, didSaveOptions, hasDeveloperToolsOptionChange, didSaveDeveloperToolsOption ] );
 
 	return excludeUserContext ? null : <WithUserContext setUserState={ setUserState } />;
 }
 UnsavedChangesWarning.propTypes = {
+	appRoot: PropTypes.instanceOf( global.Element ),
 	excludeUserContext: PropTypes.bool,
 };
 

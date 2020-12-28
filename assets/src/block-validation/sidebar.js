@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { ToggleControl, PanelBody } from '@wordpress/components';
+import { ToggleControl, PanelBody, ExternalLink } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
@@ -15,7 +15,6 @@ import AMPValidationErrorsKeptIcon from '../../images/amp-validation-errors-kept
 import { Loading } from '../components/loading';
 import { Error } from './error';
 import { BLOCK_VALIDATION_STORE_KEY } from './store';
-import { NewTabIcon } from './icon';
 
 /**
  * Editor sidebar.
@@ -100,10 +99,9 @@ export function Sidebar() {
 
 						<p>
 							{ reviewLink && (
-								<a href={ reviewLink } className="amp-sidebar__review-link" target="_blank" rel="noreferrer">
+								<ExternalLink href={ reviewLink } className="amp-sidebar__review-link">
 									{ __( 'View technical details', 'amp' ) }
-									<NewTabIcon />
-								</a>
+								</ExternalLink>
 							) }
 						</p>
 					</div>
