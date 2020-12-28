@@ -439,7 +439,7 @@ jobs:
       git-sha-8: ${{ steps.retrieve-git-sha-8.outputs.sha8 }}
     strategy:
       matrix:
-        build: ['dev', 'prod']
+        build: ['dev', 'prod', 'composer']
 
     steps:
       - name: Check out source files
