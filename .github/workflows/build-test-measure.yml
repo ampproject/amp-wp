@@ -573,6 +573,7 @@ jobs:
           body="Plugin builds for ${{ github.event.pull_request.head.sha }} are ready :bellhop_bell:!
           - Download [development build](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/dev/amp.zip)
           - Download [production build](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/prod/amp.zip)"
+          - Download [composer build](https://storage.googleapis.com/ampwp_github_artifacts/${{ github.ref }}/composer/amp.zip)"
           body="${body//$'\n'/'%0A'}"
           echo "::set-output name=body::$body"
 
