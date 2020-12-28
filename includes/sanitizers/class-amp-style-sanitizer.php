@@ -379,6 +379,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Determine whether the version of PHP-CSS-Parser loaded has all required features for tree shaking and CSS processing.
 	 *
+	 * @codeCoverageIgnore
 	 * @deprecated As of v2.1 a patched version of PHP-CSS-Parser is now bundled with the plugin.
 	 * @since 1.0.2
 	 *
