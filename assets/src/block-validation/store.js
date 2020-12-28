@@ -43,8 +43,7 @@ export function createStore( initialState ) {
 						return { ...state, isShowingReviewed: action.isShowingReviewed };
 
 					case SET_VALIDATION_ERRORS:
-						console.log( typeof VALIDATION_ERROR_ACK_ACCEPTED_STATUS, VALIDATION_ERROR_ACK_ACCEPTED_STATUS );
-						const newState = {
+						return {
 							...state,
 							ampCompatibilityBroken: Boolean(
 								action.validationErrors.filter( ( { status } ) =>
@@ -64,8 +63,6 @@ export function createStore( initialState ) {
 
 							validationErrors: action.validationErrors,
 						};
-						console.log( newState );
-						return newState;
 
 					default:
 						return state;
