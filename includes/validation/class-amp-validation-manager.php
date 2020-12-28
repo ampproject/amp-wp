@@ -477,7 +477,7 @@ class AMP_Validation_Manager {
 		 * This can't just easily add an amp_validation_error_sanitized filter because the the filter_sanitizer_args() method
 		 * currently needs to obtain the list of overrides to create a parsed_cache_variant.
 		 */
-		foreach ( $_REQUEST[ AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY ] as $slug => $data ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		foreach ( $_REQUEST[ AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY ] as $slug => $data ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			if ( ! isset( $data[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) ) {
 				continue;
 			}
@@ -1644,7 +1644,7 @@ class AMP_Validation_Manager {
 			return false;
 		}
 
-		$validate_key = wp_unslash( $_GET[ self::VALIDATE_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$validate_key = wp_unslash( $_GET[ self::VALIDATE_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		if ( ! hash_equals( self::get_amp_validate_nonce(), $validate_key ) ) {
 			return new WP_Error(
 				'http_request_failed',
@@ -2026,8 +2026,8 @@ class AMP_Validation_Manager {
 			$r = wp_remote_get(
 				$validation_url,
 				[
-					'cookies'     => wp_unslash( $_COOKIE ), // Pass along cookies so private pages and drafts can be accessed.
-					'timeout'     => 15, // Increase from default of 5 to give extra time for the plugin to identify the sources for any given validation errors.
+					'cookies'     => wp_unslash( $_COOKIE ), // phpcs:ignore WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___COOKIE -- Pass along cookies so private pages and drafts can be accessed.
+					'timeout'     => 15, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout -- Increase from default of 5 to give extra time for the plugin to identify the sources for any given validation errors.
 					/** This filter is documented in wp-includes/class-wp-http-streams.php */
 					'sslverify'   => apply_filters( 'https_local_ssl_verify', false ),
 					'redirection' => 0, // Because we're in a loop for redirection.

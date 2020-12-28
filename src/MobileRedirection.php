@@ -214,6 +214,7 @@ final class MobileRedirection implements Service, Registerable {
 			return false;
 		}
 
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___SERVER__HTTP_USER_AGENT__ -- Value is used only in pattern matching. Logic not used by default since requires amp_mobile_client_side_redirection filter opt-in.
 		$current_user_agent = wp_unslash( $_SERVER['HTTP_USER_AGENT'] );
 		$regex_regex        = sprintf( '#%s#', self::REGEX_REGEX );
 		foreach ( $this->get_mobile_user_agents() as $user_agent_pattern ) {
@@ -304,7 +305,7 @@ final class MobileRedirection implements Service, Registerable {
 	 * @return bool True if disabled, false otherwise.
 	 */
 	public function is_redirection_disabled_via_query_param() {
-		return isset( $_GET[ QueryVar::NOAMP ] ) && QueryVar::NOAMP_MOBILE === wp_unslash( $_GET[ QueryVar::NOAMP ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return isset( $_GET[ QueryVar::NOAMP ] ) && QueryVar::NOAMP_MOBILE === wp_unslash( $_GET[ QueryVar::NOAMP ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 	}
 
 	/**
@@ -327,11 +328,13 @@ final class MobileRedirection implements Service, Registerable {
 			$value   = '1';
 			$expires = 0; // Time till expiry. Setting it to `0` means the cookie will only last for the current browser session.
 
+			// phpcs:ignore WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___COOKIE -- Cookies not used by default. Requires amp_mobile_client_side_redirection filter opt-in
 			$_COOKIE[ self::DISABLED_STORAGE_KEY ] = $value;
 		} else {
 			$value   = null;
 			$expires = time() - YEAR_IN_SECONDS;
 
+			// phpcs:ignore WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___COOKIE -- Cookies not used by default. Requires amp_mobile_client_side_redirection filter opt-in
 			unset( $_COOKIE[ self::DISABLED_STORAGE_KEY ] );
 		}
 
@@ -349,12 +352,14 @@ final class MobileRedirection implements Service, Registerable {
 		// addressed in PHP 7.3 (see <https://github.com/php/php-src/commit/5cb825df7251aeb28b297f071c35b227a3949f01>),
 		// which now allows setting the cookie attribute via an options array.
 		if ( 70300 <= PHP_VERSION_ID ) {
+			// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.cookies_setcookie -- Cookies not used by default. Requires amp_mobile_client_side_redirection filter opt-in
 			setcookie(
 				self::DISABLED_STORAGE_KEY,
 				$value,
 				compact( 'expires', 'path', 'secure', 'httponly', 'samesite', 'domain' )
 			);
 		} else {
+			// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.cookies_setcookie -- Cookies not used by default. Requires amp_mobile_client_side_redirection filter opt-in
 			setcookie(
 				self::DISABLED_STORAGE_KEY,
 				$value,

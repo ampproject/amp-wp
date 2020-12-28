@@ -688,6 +688,7 @@ function amp_get_current_url() {
 		$parsed_url['scheme'] = is_ssl() ? 'https' : 'http';
 	}
 	if ( ! isset( $parsed_url['host'] ) ) {
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$parsed_url['host'] = isset( $_SERVER['HTTP_HOST'] ) ? wp_unslash( $_SERVER['HTTP_HOST'] ) : 'localhost';
 	}
 
@@ -706,6 +707,7 @@ function amp_get_current_url() {
 	$current_url .= '/';
 
 	if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$current_url .= ltrim( wp_unslash( $_SERVER['REQUEST_URI'] ), '/' );
 	}
 	return esc_url_raw( $current_url );

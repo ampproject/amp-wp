@@ -20,7 +20,6 @@ function amp_post_template_init_hooks() {
 	add_action( 'amp_post_template_head', 'amp_post_template_add_block_styles' );
 	add_action( 'amp_post_template_head', 'amp_post_template_add_default_styles' );
 	add_action( 'amp_post_template_css', 'amp_post_template_add_styles', 99 );
-	add_action( 'amp_post_template_data', 'amp_post_template_add_analytics_script' );
 	add_action( 'amp_post_template_footer', 'amp_post_template_add_analytics_data' );
 
 	add_action( 'admin_bar_init', [ 'AMP_Theme_Support', 'init_admin_bar' ] );
@@ -120,22 +119,6 @@ function amp_post_template_add_styles( $amp_template ) {
 			printf( '%1$s{%2$s}', $selector, $declarations ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 	}
-}
-
-/**
- * Add analytics scripts.
- *
- * @internal
- * @deprecated This is no longer necessary.
- *
- * @param array $data Data.
- * @return array Data.
- */
-function amp_post_template_add_analytics_script( $data ) {
-	if ( ! empty( $data['amp_analytics'] ) ) {
-		$data['amp_component_scripts']['amp-analytics'] = 'https://cdn.ampproject.org/v0/amp-analytics-0.1.js';
-	}
-	return $data;
 }
 
 /**

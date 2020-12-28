@@ -553,7 +553,7 @@ class AMP_Template_Customizer {
 			<li id="accordion-section-{{ data.id }}" class="accordion-section control-section control-section-{{ data.type }}">
 				<h3 class="accordion-section-title">
 					<button type="button" class="button button-secondary" aria-label="<?php esc_attr_e( 'Import settings', 'amp' ); ?>">
-						<?php echo esc_html( _ex( 'Import', 'theme', 'amp' ) ); ?>
+						<?php echo esc_html( _x( 'Import', 'theme', 'amp' ) ); ?>
 					</button>
 					<details>
 						<summary>{{ data.title }}</summary>
