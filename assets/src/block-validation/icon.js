@@ -8,7 +8,6 @@ import PropTypes from 'prop-types';
  */
 import AMPToolbarIcon from '../../images/amp-icon-toolbar.svg';
 import AMPToolbarIconBroken from '../../images/amp-toolbar-icon-broken.svg';
-import AMPNewTabIcon from '../../images/amp-new-tab-icon.svg';
 
 /**
  * Plugin icon.
@@ -75,11 +74,4 @@ ToolbarIcon.propTypes = {
  */
 export function MoreMenuIcon() {
 	return <IconSVG hasBadge={ false } />;
-}
-
-/**
- * An icon indicating that a link opens in a new tab.
- */
-export function NewTabIcon() {
-	return <AMPNewTabIcon />;
 }

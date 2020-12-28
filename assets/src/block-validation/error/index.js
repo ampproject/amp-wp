@@ -11,14 +11,13 @@ import {
  * WordPress dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
-import { PanelBody, Button } from '@wordpress/components';
+import { PanelBody, Button, ExternalLink } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import { AMP_VALIDITY_REST_FIELD_NAME } from '../constants';
-import { NewTabIcon } from '../icon';
 import { ErrorPanelTitle } from './error-panel-title';
 import { ErrorContent } from './error-content';
 
@@ -70,15 +69,14 @@ export function Error( { clientId, status, term_id: termId, ...props } ) {
 							{ __( 'Select block', 'amp' ) }
 						</Button>
 					) }
-					<a
+					<ExternalLink
 						href={ detailsUrl.href }
 						target="_blank"
 						rel="noreferrer"
 						className="amp-error__details-link"
 					>
 						{ __( 'View details', 'amp' ) }
-						<NewTabIcon />
-					</a>
+					</ExternalLink>
 				</div>
 
 			</PanelBody>
