@@ -29,9 +29,7 @@ return [
 	// Whitelists a list of files. Unlike the other whitelist related features, this one is about completely leaving
 	// a file untouched.
 	// Paths are relative to the configuration file unless if they are already absolute.
-	'files-whitelist'            => [
-		//
-	],
+	'files-whitelist'            => [],
 
 	// When scoping PHP files, there will be scenarios where some of the code being scoped indirectly references the
 	// original namespace. These will include, for example, strings or string manipulations. PHP-Scoper has limited
@@ -40,7 +38,7 @@ return [
 	//
 	// For more see: https://github.com/humbug/php-scoper#patchers.
 	'patchers'                   => [
-		function ( $filePath, $prefix, $contents ) {
+		function ( $filePath, $prefix, $contents ) { //phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
 			// Change the contents here.
 
 			return $contents;
