@@ -52,7 +52,7 @@ export function Error( { clientId, status, term_id: termId, ...props } ) {
 	return (
 		<li className="amp-error-container">
 			<PanelBody
-				className={ `amp-error amp-error--${ reviewed ? 'reviewed' : 'new' }` }
+				className={ `amp-error amp-error--${ reviewed ? 'reviewed' : 'new' }${ clientId ? ` error-${ clientId }` : '' }` }
 				title={
 					<ErrorPanelTitle { ...props } blockType={ blockType } status={ status } />
 				}
