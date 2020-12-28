@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { VALIDATION_ERROR_ACK_REJECTED_STATUS, VALIDATION_ERROR_NEW_REJECTED_STATUS } from 'amp-block-validation';
 
 /**
  * WordPress dependencies
@@ -13,11 +14,6 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import AMPAlert from '../../../images/amp-alert.svg';
-
-/**
- * Internal dependencies
- */
-import { VALIDATION_ERROR_ACK_REJECTED_STATUS, VALIDATION_ERROR_NEW_REJECTED_STATUS } from '../constants';
 import { ErrorTypeIcon } from './error-type-icon';
 
 /**

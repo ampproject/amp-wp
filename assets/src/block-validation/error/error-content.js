@@ -2,7 +2,13 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { blockSources } from 'amp-block-validation';
+import {
+	blockSources,
+	VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+	VALIDATION_ERROR_ACK_REJECTED_STATUS,
+	VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+	VALIDATION_ERROR_NEW_REJECTED_STATUS,
+} from 'amp-block-validation';
 
 /**
  * WordPress dependencies
@@ -12,12 +18,6 @@ import { sprintf, __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import {
-	VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
-	VALIDATION_ERROR_ACK_REJECTED_STATUS,
-	VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
-	VALIDATION_ERROR_NEW_REJECTED_STATUS,
-} from '../constants';
 import AMPAlert from '../../../images/amp-alert.svg';
 import AMPDelete from '../../../images/amp-delete.svg';
 import { getErrorSourceTitle } from './get-error-source-title';

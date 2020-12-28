@@ -3,6 +3,12 @@
  */
 import { act } from 'react-dom/test-utils';
 import { noop } from 'lodash';
+import {
+	VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+	VALIDATION_ERROR_ACK_REJECTED_STATUS,
+	VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+	VALIDATION_ERROR_NEW_REJECTED_STATUS,
+} from 'amp-block-validation';
 
 /**
  * WordPress dependencies
@@ -16,12 +22,6 @@ import '@wordpress/editor';
  * Internal dependencies
  */
 import { Error } from '..';
-import {
-	VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
-	VALIDATION_ERROR_ACK_REJECTED_STATUS,
-	VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
-	VALIDATION_ERROR_NEW_REJECTED_STATUS,
-} from '../../constants';
 import { createStore } from '../../store';
 
 let container, pluginBlock, themeBlock, coreBlock, unknownBlock;
