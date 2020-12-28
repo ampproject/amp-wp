@@ -16,7 +16,6 @@ import {
 import { render } from '@wordpress/element';
 import { dispatch, select } from '@wordpress/data';
 import { registerBlockType, createBlock } from '@wordpress/blocks';
-import '@wordpress/editor';
 
 /**
  * Internal dependencies
