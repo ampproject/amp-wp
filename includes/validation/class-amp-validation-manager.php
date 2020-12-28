@@ -2421,7 +2421,7 @@ class AMP_Validation_Manager {
 
 		wp_styles()->add_data( $slug, 'rtl', 'replace' );
 
-		$block_sources = BlockSources::is_needed() ? Services::get( 'dev_tools.block_sources' ) : null;
+		$block_sources = Services::has( 'dev_tools.block_sources' ) ? Services::get( 'dev_tools.block_sources' ) : null;
 
 		$plugin_registry = Services::get( 'plugin_registry' );
 
