@@ -11,6 +11,7 @@ use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
 use AmpProject\AmpWP\Validation\URLValidationProvider;
 use AmpProject\AmpWP\Validation\URLValidationRESTController;
+use WP_REST_Controller;
 use WP_REST_Request;
 use WP_UnitTestCase;
 
@@ -48,6 +49,12 @@ class URLValidationRESTControllerTest extends WP_UnitTestCase {
 		$this->user_access = new UserAccess();
 		$this->controller  = new URLValidationRESTController( new URLValidationProvider(), $this->user_access );
 		add_filter( 'pre_http_request', [ $this, 'get_validate_response' ] );
+	}
+
+	/** @covers ::__construct() */
+	public function test__construct() {
+		$this->assertInstanceOf( URLValidationRESTController::class, $this->controller );
+		$this->assertInstanceOf( WP_REST_Controller::class, $this->controller );
 	}
 
 	/** @covers ::register */

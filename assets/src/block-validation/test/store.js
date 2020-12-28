@@ -29,5 +29,11 @@ describe( 'Block validation data store', () => {
 		expect( select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors() ).toHaveLength( 8 );
 		expect( select( BLOCK_VALIDATION_STORE_KEY ).getReviewedValidationErrors() ).toHaveLength( 3 );
 		expect( select( BLOCK_VALIDATION_STORE_KEY ).getUnreviewedValidationErrors() ).toHaveLength( 5 );
+
+		expect( select( BLOCK_VALIDATION_STORE_KEY ).getIsFetchingErrors() ).toBe( true );
+		dispatch( BLOCK_VALIDATION_STORE_KEY ).setIsFetchingErrors( false );
+		expect( select( BLOCK_VALIDATION_STORE_KEY ).getIsFetchingErrors() ).toBe( false );
+		dispatch( BLOCK_VALIDATION_STORE_KEY ).setIsFetchingErrors( true );
+		expect( select( BLOCK_VALIDATION_STORE_KEY ).getIsFetchingErrors() ).toBe( true );
 	} );
 } );
