@@ -5,9 +5,7 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\AmpWpPlugin;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\AssertRestApiField;
 
@@ -16,7 +14,7 @@ use AmpProject\AmpWP\Tests\Helpers\AssertRestApiField;
  *
  * @coversDefaultClass AMP_Post_Meta_Box
  */
-class Test_AMP_Post_Meta_Box extends DependencyInjectedTestCase {
+class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 
 	use AssertRestApiField;
 	use AssertContainsCompatibility;
