@@ -143,4 +143,5 @@
 	<exclude-pattern type="relative">^build/*</exclude-pattern>
 	<exclude-pattern>includes/sanitizers/class-amp-allowed-tags-generated.php</exclude-pattern>
 	<exclude-pattern>assets/js/*.asset.php</exclude-pattern>
+	<exclude-pattern>third-party/*</exclude-pattern>
 </ruleset>

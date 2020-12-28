@@ -152,7 +152,7 @@ if ( count( $_amp_missing_functions ) > 0 ) {
 unset( $_amp_required_extensions, $_amp_missing_extensions, $_amp_required_constructs, $_amp_missing_classes, $_amp_missing_functions, $_amp_required_extension, $_amp_construct_type, $_amp_construct, $_amp_constructs );
 
 // DEV_CODE. This block of code is removed during the build process.
-if ( ! file_exists( AMP__DIR__ . '/vendor/autoload.php' ) || ! file_exists( AMP__DIR__ . '/vendor/sabberworm/php-css-parser' ) || ! file_exists( AMP__DIR__ . '/assets/js/amp-block-editor.js' ) ) {
+if ( ! file_exists( AMP__DIR__ . '/vendor/autoload.php' ) || ! file_exists( AMP__DIR__ . '/third-party/vendor/scoper-autoload.php' ) || ! file_exists( AMP__DIR__ . '/assets/js/amp-block-editor.js' ) ) {
 	$_amp_load_errors->add(
 		'build_required',
 		sprintf(
@@ -246,6 +246,7 @@ if ( 'amp' !== basename( AMP__DIR__ ) ) {
 }
 
 require_once AMP__DIR__ . '/vendor/autoload.php';
+require_once AMP__DIR__ . '/third-party/vendor/scoper-autoload.php';
 
 register_activation_hook( __FILE__, 'amp_activate' );
 

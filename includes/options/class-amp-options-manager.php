@@ -42,7 +42,6 @@ class AMP_Options_Manager {
 	 * Sets up hooks.
 	 */
 	public static function init() {
-		add_action( 'admin_notices', [ __CLASS__, 'render_php_css_parser_conflict_notice' ] );
 		add_action( 'admin_notices', [ __CLASS__, 'insecure_connection_notice' ] );
 		add_action( 'admin_notices', [ __CLASS__, 'reader_theme_fallback_notice' ] );
 	}
@@ -436,48 +435,6 @@ class AMP_Options_Manager {
 		);
 
 		return update_option( self::OPTION_NAME, $amp_options, false );
-	}
-
-	/**
-	 * Render PHP-CSS-Parser conflict notice.
-	 *
-	 * @return void
-	 */
-	public static function render_php_css_parser_conflict_notice() {
-		$current_screen = get_current_screen();
-		if ( ! ( $current_screen instanceof WP_Screen ) || 'toplevel_page_' . self::OPTION_NAME !== $current_screen->id ) {
-			return;
-		}
-
-		if ( AMP_Style_Sanitizer::has_required_php_css_parser() ) {
-			return;
-		}
-
-		try {
-			$reflection = new ReflectionClass( 'Sabberworm\CSS\CSSList\CSSList' );
-			$source_dir = str_replace(
-				trailingslashit( WP_CONTENT_DIR ),
-				'',
-				preg_replace( '#/vendor/sabberworm/.+#', '', $reflection->getFileName() )
-			);
-
-			printf(
-				'<div class="notice notice-warning"><p>%s</p></div>',
-				wp_kses(
-					sprintf(
-						/* translators: %s: path to the conflicting library */
-						__( 'A conflicting version of PHP-CSS-Parser appears to be installed by another plugin or theme (located in %s). Because of this, CSS processing will be limited, and tree shaking will not be available.', 'amp' ),
-						'<code>' . esc_html( $source_dir ) . '</code>'
-					),
-					[ 'code' => [] ]
-				)
-			);
-		} catch ( ReflectionException $e ) {
-			printf(
-				'<div class="notice notice-warning"><p>%s</p></div>',
-				esc_html__( 'PHP-CSS-Parser is not available so CSS processing will not be available.', 'amp' )
-			);
-		}
 	}
 
 	/**

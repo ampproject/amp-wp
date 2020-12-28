@@ -53,6 +53,11 @@
         "path": "vendor/bin/phpstan",
         "type": "phar",
         "url": "https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar"
+      },
+      "php-scoper": {
+        "path": "vendor/bin/php-scoper",
+        "type": "phar",
+        "url": "https://github.com/humbug/php-scoper/releases/download/0.14.0/php-scoper.phar"
       }
     },
     "patches": {
@@ -93,9 +98,21 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "scripts": {
+    "post-install-cmd": [
+      "@scope-dependencies"
+    ],
+    "post-update-cmd": [
+      "@scope-dependencies"
+    ],
     "analyze": "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan --version; phpstan analyze --ansi; fi",
     "pre-commit": [
       "npm run lint:staged"
+    ],
+    "scope-dependencies": [
+      "php-scoper add-prefix --output-dir=third-party --force --quiet",
+      "echo '{ \"autoload\": { \"classmap\": [\"\"] } }' > third-party/composer.json",
+      "composer dump-autoload --working-dir third-party --no-dev --no-plugins --classmap-authoritative",
+      "sed -i'.bak' -e 's/Composer\\\\Autoload/AmpProject\\\\AmpWP\\\\Composer\\\\Autoload/' third-party/vendor/composer/*.php && rm -rf third-party/vendor/composer/*.php.bak"
     ]
   }
 }

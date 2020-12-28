@@ -17,3 +17,4 @@ built
 /phpcs.xml
 /phpunit.xml
 /*.sql
+/third-party

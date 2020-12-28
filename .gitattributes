@@ -27,6 +27,7 @@
 /phpstan.neon.dist    export-ignore
 /phpunit.xml.dist     export-ignore
 /postcss.config.js    export-ignore
+/scoper.inc.php       export-ignore
 /sizereport.config.js export-ignore
 /webpack.config.js    export-ignore
 
