@@ -34,9 +34,11 @@ export function ErrorPanelTitle( { blockType, title, error: { type }, status } )
 	return (
 		<>
 			<div className="amp-error__icons">
-				<div className={ `amp-error__error-type-icon amp-error__error-type-icon--${ type.replace( /_/g, '-' ) }` }>
-					<ErrorTypeIcon type={ type } />
-				</div>
+				{ type && (
+					<div className={ `amp-error__error-type-icon amp-error__error-type-icon--${ type?.replace( /_/g, '-' ) }` }>
+						<ErrorTypeIcon type={ type } />
+					</div>
+				) }
 				{ blockType?.icon && (
 					<div className="amp-error__block-type-icon">
 						<BlockIcon icon={ blockType.icon } />
