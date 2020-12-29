@@ -7,7 +7,6 @@
 
 namespace AmpProject\AmpWP\BackgroundTask;
 
-use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 
@@ -18,7 +17,7 @@ use AmpProject\AmpWP\Infrastructure\Service;
  * @since 2.0
  * @internal
  */
-abstract class CronBasedBackgroundTask implements Service, Registerable, Conditional {
+abstract class CronBasedBackgroundTask implements Service, Registerable {
 
 	const DEFAULT_INTERVAL_HOURLY      = 'hourly';
 	const DEFAULT_INTERVAL_TWICE_DAILY = 'twicedaily';
@@ -38,15 +37,6 @@ abstract class CronBasedBackgroundTask implements Service, Registerable, Conditi
 	 */
 	public function __construct( BackgroundTaskDeactivator $background_task_deactivator ) {
 		$this->background_task_deactivator = $background_task_deactivator;
-	}
-
-	/**
-	 * Check whether the conditional object is currently needed.
-	 *
-	 * @return bool Whether the conditional object is needed.
-	 */
-	public static function is_needed() {
-		return is_admin() || wp_doing_cron();
 	}
 
 	/**
