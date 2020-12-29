@@ -68,11 +68,13 @@ final class URLValidationCronTest extends WP_UnitTestCase {
 	public function test_schedule_event_with_user_without_permission() {
 		$event_name = $this->call_private_method( $this->test_instance, 'get_event_name' );
 
+		$this->assertFalse( wp_next_scheduled( $event_name ) );
+
 		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'subscriber' ] ) );
 
 		$this->test_instance->schedule_event();
 
-		$this->assertFalse( wp_next_scheduled( $event_name ) );
+		$this->assertTrue( is_numeric( wp_next_scheduled( $event_name ) ) );
 	}
 
 	/** @covers ::schedule_event() */

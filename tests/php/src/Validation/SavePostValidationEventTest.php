@@ -120,6 +120,12 @@ final class SavePostValidationEventTest extends WP_UnitTestCase {
 
 		$this->test_instance->schedule_event( $post );
 
+		$this->assertFalse( $event_was_scheduled );
+
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'author' ] ) );
+
+		$this->test_instance->schedule_event( $post );
+
 		$this->assertTrue( $event_was_scheduled );
 
 		remove_filter( 'schedule_event', $filter_cb );
@@ -139,18 +145,18 @@ final class SavePostValidationEventTest extends WP_UnitTestCase {
 		// User with insufficient permissions.
 		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'subscriber' ] ) );
 		$post = $this->factory()->post->create();
-		$this->assertFalse( $this->call_private_method( $this->test_instance, 'should_schedule_event', [ [ $post ] ] ) );
+		$this->assertTrue( $this->call_private_method( $this->test_instance, 'should_schedule_event', [ [ $post ] ] ) );
 
 		// User with dev tools off.
 		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$this->dev_tools_user_access->set_user_enabled( wp_get_current_user(), false );
 		$post = $this->factory()->post->create();
-		$this->assertFalse( $this->call_private_method( $this->test_instance, 'should_schedule_event', [ [ $post ] ] ) );
+		$this->assertTrue( $this->call_private_method( $this->test_instance, 'should_schedule_event', [ [ $post ] ] ) );
 
 		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$this->dev_tools_user_access->set_user_enabled( wp_get_current_user(), true );
 		$post = $this->factory()->post->create();
-		$this->assertTrue( $this->call_private_method( $this->test_instance, 'should_schedule_event', [ [ $post ] ] ) );
+		$this->assertFalse( $this->call_private_method( $this->test_instance, 'should_schedule_event', [ [ $post ] ] ) );
 	}
 
 	/** @covers ::get_action_hook() */
