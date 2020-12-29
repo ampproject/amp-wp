@@ -33,7 +33,7 @@ export function AMPToolbarButton( { clientId, count } ) {
 					openGeneralSidebar( `${ PLUGIN_NAME }/${ SIDEBAR_NAME }` );
 					// eslint-disable-next-line @wordpress/react-no-unsafe-timeout
 					setTimeout( () => {
-						document.querySelector( `.error-${ clientId } button` )?.click();
+						document.querySelector( `.error-${ clientId }:not(.is-opened) button` )?.click();
 					} );
 				} }
 			>
