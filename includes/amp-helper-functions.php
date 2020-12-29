@@ -355,25 +355,6 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  * ) );
  * ```
  *
- * If you want to force AMP to always be served on a given template, you can use the `templates_supported` arg,
- * for example to always serve the Category template in AMP:
- *
- * ```php
- * add_theme_support( AMP_Theme_Support::SLUG, array(
- *     'templates_supported' => array(
- *         'is_category' => true,
- *     ),
- * ) );
- * ```
- *
- * Or if you want to force AMP to be used on all templates:
- *
- * ```php
- * add_theme_support( AMP_Theme_Support::SLUG, array(
- *     'templates_supported' => 'all',
- * ) );
- * ```
- *
  * @see AMP_Theme_Support::read_theme_support()
  * @return boolean Whether this is in AMP 'canonical' mode, that is whether it is AMP-first and there is not a separate (paired) AMP URL.
  */
