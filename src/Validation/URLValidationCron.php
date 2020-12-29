@@ -112,8 +112,8 @@ final class URLValidationCron extends RecurringBackgroundTask {
 		 * Filters the length of time to sleep between validating URLs.
 		 *
 		 * @since 2.1
-		 * @param int The number of seconds. Default 1.
+		 * @param int The number of seconds. Default 1. Setting to 0 or a negative numbers disables all throttling.
 		 */
-		return absint( apply_filters( 'amp_url_validation_sleep_time', self::DEFAULT_SLEEP_TIME ) );
+		return max( (int) apply_filters( 'amp_url_validation_sleep_time', self::DEFAULT_SLEEP_TIME ), 0 );
 	}
 }
