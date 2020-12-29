@@ -530,18 +530,16 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - build-zip
-    steps:
-      - name: Download dev build
-        uses: actions/download-artifact@v2
-        with:
-          name: amp-${{ needs.build-zip.outputs.branch-name }}-${{ needs.build-zip.outputs.git-sha-8 }}-dev
-          path: builds/dev
+    strategy:
+      matrix:
+        build: [ 'dev', 'prod', 'composer' ]
 
-      - name: Download prod build
+    steps:
+      - name: Download ${{ matrix.build }} build
         uses: actions/download-artifact@v2
         with:
-          name: amp-${{ needs.build-zip.outputs.branch-name }}-${{ needs.build-zip.outputs.git-sha-8 }}-prod
-          path: builds/prod
+          name: amp-${{ needs.build-zip.outputs.branch-name }}-${{ needs.build-zip.outputs.git-sha-8 }}-${{ matrix.build }}
+          path: builds/${{ matrix.build }}
 
       - name: Setup Google Cloud SDK
         uses: google-github-actions/setup-gcloud@master
@@ -549,11 +547,8 @@ jobs:
           project_id: ${{ secrets.GCS_PROJECT_ID }}
           service_account_key: ${{ secrets.GCS_APPLICATION_CREDENTIALS }}
 
-      - name: Upload dev build to bucket
-        run: gsutil cp -r builds/dev/amp.zip gs://ampwp_github_artifacts/${{ github.ref }}/dev/amp.zip
-
-      - name: Upload prod build to bucket
-        run: gsutil cp -r builds/prod/amp.zip gs://ampwp_github_artifacts/${{ github.ref }}/prod/amp.zip
+      - name: Upload ${{ matrix.build }} build to bucket
+        run: gsutil cp -r builds/${{ matrix.build }}/amp.zip gs://ampwp_github_artifacts/${{ github.ref }}/${{ matrix.build }}/amp.zip
 
 #-----------------------------------------------------------------------------------------------------------------------
 
