@@ -37,7 +37,7 @@ abstract class RecurringBackgroundTask extends CronBasedBackgroundTask {
 		}
 
 		$event_name = $this->get_event_name();
-		$timestamp  = wp_next_scheduled( $event_name );
+		$timestamp  = wp_next_scheduled( $event_name, $args );
 
 		if ( $timestamp ) {
 			return;
