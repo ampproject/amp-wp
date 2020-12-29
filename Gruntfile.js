@@ -225,10 +225,6 @@ module.exports = function( grunt ) {
 			done();
 		}
 
-		function getPluginVersion() {
-			//
-		}
-
 		function doNext() {
 			const nextSpawnArgs = spawnQueue.shift();
 			if ( ! nextSpawnArgs ) {
