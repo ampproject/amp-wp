@@ -95,8 +95,7 @@
   "scripts": {
     "analyze": "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan --version; phpstan analyze --ansi; fi",
     "pre-commit": [
-      "npm run lint:staged",
-      "@analyze"
+      "npm run lint:staged"
     ]
   }
 }
