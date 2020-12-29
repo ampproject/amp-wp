@@ -92,7 +92,7 @@ final class MonitorCssTransientCaching extends RecurringBackgroundTask {
 	 * @todo This has arbitrary arguments to allow for testing, as we don't have dependency injection for services.
 	 *       With dependency injection, we could for example inject a Clock object and mock it for testing.
 	 *
-	 * @param mixed[] ...$args {
+	 * @param array ...$args {
 	 *     Arguments passed to the cron callback.
 	 *
 	 *     @type DateTimeInterface $date Optional. Date to use for timestamping the processing (for testing).
