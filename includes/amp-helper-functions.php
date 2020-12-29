@@ -338,7 +338,7 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  * ) );
  * ```
  *
- * Transitional mode is also implied if you define a template_dir:
+ * Transitional mode is also implied if you define a `template_dir`:
  *
  * ```php
  * add_theme_support( AMP_Theme_Support::SLUG, array(
@@ -347,6 +347,7 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  * ```
  *
  * If you want to have AMP-specific templates in addition to serving AMP-first, do:
+ *
  * ```php
  * add_theme_support( AMP_Theme_Support::SLUG, array(
  *     'paired'       => false,
@@ -354,7 +355,7 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  * ) );
  * ```
  *
- * If you want to force AMP to always be served on a given template, you can use the templates_supported arg,
+ * If you want to force AMP to always be served on a given template, you can use the `templates_supported` arg,
  * for example to always serve the Category template in AMP:
  *
  * ```php
