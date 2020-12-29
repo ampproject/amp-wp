@@ -4,7 +4,6 @@ namespace AmpProject\AmpWP\Tests\Validation;
 
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\CronBasedBackgroundTask;
-use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
@@ -46,7 +45,6 @@ final class URLValidationCronTest extends WP_UnitTestCase {
 		$this->assertInstanceof( URLValidationCron::class, $this->test_instance );
 		$this->assertInstanceof( Service::class, $this->test_instance );
 		$this->assertInstanceof( Registerable::class, $this->test_instance );
-		$this->assertInstanceof( Conditional::class, $this->test_instance );
 
 		$this->test_instance->register();
 
