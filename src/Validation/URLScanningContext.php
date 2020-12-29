@@ -52,9 +52,9 @@ final class URLScanningContext {
 	/**
 	 * Class constructor.
 	 *
-	 * @param integer $limit_per_type       The maximum number of URLs to validate for each type.
-	 * @param array   $include_conditionals An allowlist of conditionals to use for validation.
-	 * @param boolean $include_unsupported  Whether to include URLs that don't support AMP.
+	 * @param int   $limit_per_type       The maximum number of URLs to validate for each type.
+	 * @param array $include_conditionals An allowlist of conditionals to use for validation.
+	 * @param bool  $include_unsupported  Whether to include URLs that don't support AMP.
 	 */
 	public function __construct(
 		$limit_per_type = self::DEFAULT_LIMIT_PER_TYPE,
