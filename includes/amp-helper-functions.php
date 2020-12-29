@@ -1414,7 +1414,7 @@ function amp_get_content_embed_handlers( $post = null ) {
 /**
  * Determine whether AMP dev mode is enabled.
  *
- * When enabled, the <html> element will get the data-ampdevmode attribute and the plugin will add the same attribute
+ * When enabled, the `<html>` element will get the data-ampdevmode attribute and the plugin will add the same attribute
  * to elements associated with the admin bar and other elements that are provided by the `amp_dev_mode_element_xpaths`
  * filter.
  *
