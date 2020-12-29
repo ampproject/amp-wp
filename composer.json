@@ -50,9 +50,9 @@
   "extra": {
     "downloads": {
       "phpstan": {
-        "url": "https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar",
         "path": "vendor/bin/phpstan",
-        "type": "phar"
+        "type": "phar",
+        "url": "https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar"
       }
     },
     "patches": {
