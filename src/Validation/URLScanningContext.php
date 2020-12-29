@@ -12,6 +12,8 @@ namespace AmpProject\AmpWP\Validation;
  * URLScanningContext class.
  *
  * @since 2.1
+ *
+ * @internal
  */
 final class URLScanningContext {
 
