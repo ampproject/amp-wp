@@ -29,10 +29,10 @@ export function useWindowWidth( args = {} ) {
 			setWidth( window.innerWidth );
 		};
 
-		window.addEventListener( 'resize', resizeCallback, { passive: true } );
+		global.addEventListener( 'resize', resizeCallback, { passive: true } );
 
 		return () => {
-			window.removeEventListener( 'resize', resizeCallback );
+			global.removeEventListener( 'resize', resizeCallback );
 		};
 	}, [] );
 

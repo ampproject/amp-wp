@@ -468,7 +468,7 @@ class AMP_Post_Meta_Box {
 			update_post_meta(
 				$post_id,
 				self::STATUS_POST_META_KEY,
-				$_POST[ self::STATUS_INPUT_NAME ] // Note: The sanitize_callback has been supplied in the register_meta() call above.
+				$_POST[ self::STATUS_INPUT_NAME ] // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The sanitize_callback has been supplied in the register_meta() call above.
 			);
 		}
 	}

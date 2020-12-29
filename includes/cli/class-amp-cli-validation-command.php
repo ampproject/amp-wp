@@ -109,7 +109,7 @@ final class AMP_CLI_Validation_Command {
 	 * @param array $assoc_args Associative args.
 	 * @throws Exception If an error happens.
 	 */
-	public function run( $args, $assoc_args ) {
+	public function run( /** @noinspection PhpUnusedParameterInspection */ $args, $assoc_args ) {
 		$this->assoc_args = $assoc_args;
 
 		$scannable_url_provider  = $this->get_validation_url_provider();
@@ -316,12 +316,12 @@ final class AMP_CLI_Validation_Command {
 	 * @param array $assoc_args Associative args.
 	 * @throws Exception If an error happens.
 	 */
-	public function reset( $args, $assoc_args ) {
+	public function reset( /** @noinspection PhpUnusedParameterInspection */ $args, $assoc_args ) {
 		global $wpdb;
 		WP_CLI::confirm( 'Are you sure you want to empty all amp_validated_url posts and amp_validation_error taxonomy terms?', $assoc_args );
 
 		// Delete all posts.
-		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = %s", AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) );
+		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = %s", AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$query = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = %s", AMP_Validated_URL_Post_Type::POST_TYPE_SLUG );
 		$posts = new WP_CLI\Iterators\Query( $query, 10000 );
 
@@ -338,7 +338,7 @@ final class AMP_CLI_Validation_Command {
 		$progress->finish();
 
 		// Delete all terms. Note that many terms should get deleted when their post counts go to zero above.
-		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( * ) FROM $wpdb->term_taxonomy WHERE taxonomy = %s", AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ) );
+		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( * ) FROM $wpdb->term_taxonomy WHERE taxonomy = %s", AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$query = $wpdb->prepare( "SELECT term_id FROM $wpdb->term_taxonomy WHERE taxonomy = %s", AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
 		$terms = new WP_CLI\Iterators\Query( $query, 10000 );
 

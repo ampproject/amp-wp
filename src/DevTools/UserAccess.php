@@ -161,7 +161,7 @@ final class UserAccess implements Service, Registerable {
 		if ( ! current_user_can( 'edit_user', $user_id ) || ! AMP_Validation_Manager::has_cap( $user_id ) ) {
 			return false;
 		}
-		$enabled = isset( $_POST[ self::USER_FIELD_DEVELOPER_TOOLS_ENABLED ] ) && rest_sanitize_boolean( wp_unslash( $_POST[ self::USER_FIELD_DEVELOPER_TOOLS_ENABLED ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$enabled = isset( $_POST[ self::USER_FIELD_DEVELOPER_TOOLS_ENABLED ] ) && rest_sanitize_boolean( wp_unslash( $_POST[ self::USER_FIELD_DEVELOPER_TOOLS_ENABLED ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce handled by user-edit.php; sanitization used is sanitized.
 		return $this->set_user_enabled( $user_id, $enabled );
 	}
 

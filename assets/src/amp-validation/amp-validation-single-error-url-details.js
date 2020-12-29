@@ -144,7 +144,7 @@ class ErrorRows {
 			} );
 		};
 
-		window.addEventListener( 'click', ( event ) => {
+		global.addEventListener( 'click', ( event ) => {
 			if ( toggleButtons.includes( event.target ) ) {
 				onButtonClick( event.target );
 			}
