@@ -99,10 +99,6 @@ final class SavePostValidationEvent extends SingleScheduledBackgroundTask {
 			return false;
 		}
 
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return false;
-		}
-
 		// Validation is performed on post save if user has dev tools on.
 		if ( ! $this->dev_tools_user_access->is_user_enabled( wp_get_current_user() ) ) {
 			return false;
