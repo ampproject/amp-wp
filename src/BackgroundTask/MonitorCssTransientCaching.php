@@ -106,11 +106,9 @@ final class MonitorCssTransientCaching extends RecurringBackgroundTask {
 			return;
 		}
 
-		/* @var DateTimeInterface */
-		$date = isset( $args[0] ) ? $args[0] : new DateTimeImmutable();
+		$date = isset( $args[0] ) && $args[0] instanceof DateTimeInterface ? $args[0] : new DateTimeImmutable();
 
-		/** @var int */
-		$transient_count = isset( $args[1] ) ? $args[1] : $this->query_css_transient_count();
+		$transient_count = isset( $args[1] ) ? (int) $args[1] : $this->query_css_transient_count();
 
 		$date_string = $date->format( 'Ymd' );
 		$time_series = $this->get_time_series();
