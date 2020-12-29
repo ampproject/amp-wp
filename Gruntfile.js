@@ -175,25 +175,31 @@ module.exports = function( grunt ) {
 				paths.push( 'assets/js/**/*.js.map' );
 			}
 
+			// Get build version from amp.php.
+			const versionRegex = /(\*\s+Version:\s+)(?<version>\d+(\.\d+)+)(?<identifier>-\w+)?/;
+			const { groups: matches } = grunt.file.read( 'amp.php' ).match( versionRegex );
+
+			if ( ! matches || ! matches.version ) {
+				throw new Error( 'Plugin version could not be retrieved from amp.php' );
+			}
+
+			const version = matches.version;
+
 			grunt.config.set( 'copy', {
 				build: {
 					src: paths,
 					dest: 'build',
 					expand: true,
 					options: {
-						noProcess: [ '**/*', '!amp.php' ], // That is, only process amp.php.
+						noProcess: [ '**/*', '!amp.php', '!composer.json' ],
 						process( content, srcpath ) {
-							let matches, version, versionRegex;
-							if ( /amp\.php$/.test( srcpath ) ) {
-								versionRegex = /(\*\s+Version:\s+)(\d+(\.\d+)+-\w+)/;
-
+							if ( /^amp\.php$/.test( srcpath ) ) {
 								// If not a stable build (e.g. 0.7.0-beta), amend the version with the git commit and current timestamp.
-								matches = content.match( versionRegex );
-								if ( matches ) {
-									version = matches[ 2 ] + '-' + versionAppend;
-									console.log( 'Updating version in amp.php to ' + version ); // eslint-disable-line no-console
-									content = content.replace( versionRegex, '$1' + version );
-									content = content.replace( /(define\(\s*'AMP__VERSION',\s*')(.+?)(?=')/, '$1' + version );
+								if ( matches.identifier ) {
+									const pluginVersion = version + matches.identifier + '-' + versionAppend;
+									console.log( 'Updating version in amp.php to ' + pluginVersion ); // eslint-disable-line no-console
+									content = content.replace( versionRegex, '$1' + pluginVersion );
+									content = content.replace( /(define\(\s*'AMP__VERSION',\s*')(.+?)(?=')/, '$1' + pluginVersion );
 								}
 
 								// Remove dev mode code blocks.
@@ -202,7 +208,11 @@ module.exports = function( grunt ) {
 								if ( 'composer' === process.env.BUILD_TYPE ) {
 									content = content.replace( "require_once AMP__DIR__ . '/vendor/autoload.php';", '' );
 								}
+							} else if ( /^composer\.json$/.test( srcpath ) && 'composer' === process.env.BUILD_TYPE ) {
+								console.log( 'Setting version in composer.json to ' + version ); // eslint-disable-line no-console
+								content = content.replace( /"name": "ampproject\/amp-wp",/, '$&\n  "version": "' + version + '",' );
 							}
+
 							return content;
 						},
 					},
@@ -213,6 +223,10 @@ module.exports = function( grunt ) {
 			grunt.task.run( 'shell:composer_install' );
 
 			done();
+		}
+
+		function getPluginVersion() {
+			//
 		}
 
 		function doNext() {
