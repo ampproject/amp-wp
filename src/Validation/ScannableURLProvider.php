@@ -60,8 +60,8 @@ final class ScannableURLProvider {
 			[ $this, 'does_taxonomy_support_amp' ]
 		);
 		$public_post_types      = get_post_types( [ 'public' => true ] );
+		$limit_per_type         = $this->context->get_limit_per_type();
 
-		$limit_per_type = $this->context->get_limit_per_type();
 		// Include one URL of each template/content type, then another URL of each type on the next iteration.
 		for ( $i = $offset; $i < $limit_per_type + $offset; $i++ ) {
 			// Include all public, published posts.
