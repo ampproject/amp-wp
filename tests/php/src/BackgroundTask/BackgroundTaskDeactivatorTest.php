@@ -6,7 +6,6 @@
 namespace AmpProject\AmpWP\Tests\BackgroundTask;
 
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
-use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Deactivateable;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -37,7 +36,6 @@ final class BackgroundTaskDeactivatorTest extends WP_UnitTestCase {
 	public function test_register() {
 		$this->assertInstanceof( BackgroundTaskDeactivator::class, $this->test_instance );
 		$this->assertInstanceof( Service::class, $this->test_instance );
-		$this->assertInstanceof( Conditional::class, $this->test_instance );
 		$this->assertInstanceof( Registerable::class, $this->test_instance );
 		$this->assertInstanceof( Deactivateable::class, $this->test_instance );
 

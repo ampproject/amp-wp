@@ -8,7 +8,6 @@
 namespace AmpProject\AmpWP\BackgroundTask;
 
 use AmpProject\AmpWP\Icon;
-use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Deactivateable;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -20,7 +19,7 @@ use AmpProject\AmpWP\Infrastructure\Service;
  * @since 2.1
  * @internal
  */
-final class BackgroundTaskDeactivator implements Service, Conditional, Registerable, Deactivateable {
+final class BackgroundTaskDeactivator implements Service, Registerable, Deactivateable {
 
 	/**
 	 * List of event names to deactivate.
@@ -37,15 +36,6 @@ final class BackgroundTaskDeactivator implements Service, Conditional, Registera
 	 * @var string
 	 */
 	private $plugin_file;
-
-	/**
-	 * Check whether the conditional object is currently needed.
-	 *
-	 * @return bool Whether the conditional object is needed.
-	 */
-	public static function is_needed() {
-		return is_admin() || wp_doing_cron();
-	}
 
 	/**
 	 * Class constructor.
@@ -103,14 +93,14 @@ final class BackgroundTaskDeactivator implements Service, Conditional, Registera
 				switch_to_blog( $blog_id );
 
 				foreach ( $this->events_to_deactivate as $event_name ) {
-					wp_clear_scheduled_hook( $event_name );
+					wp_unschedule_hook( $event_name );
 				}
 
 				restore_current_blog();
 			}
 		} else {
 			foreach ( $this->events_to_deactivate as $event_name ) {
-				wp_clear_scheduled_hook( $event_name );
+				wp_unschedule_hook( $event_name );
 			}
 		}
 	}
