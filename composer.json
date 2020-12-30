@@ -49,15 +49,15 @@
   },
   "extra": {
     "downloads": {
-      "phpstan": {
-        "path": "vendor/bin/phpstan",
-        "type": "phar",
-        "url": "https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar"
-      },
       "php-scoper": {
         "path": "vendor/bin/php-scoper",
         "type": "phar",
         "url": "https://github.com/humbug/php-scoper/releases/download/0.14.0/php-scoper.phar"
+      },
+      "phpstan": {
+        "path": "vendor/bin/phpstan",
+        "type": "phar",
+        "url": "https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar"
       }
     },
     "patches": {
