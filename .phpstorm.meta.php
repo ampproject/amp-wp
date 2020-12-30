@@ -35,6 +35,9 @@ namespace PHPSTORM_META {
 			'server_timing'                     => \AmpProject\AmpWP\Instrumentation\ServerTiming::class,
 			'site_health_integration'           => \AmpProject\AmpWP\Admin\SiteHealth::class,
 			'validated_url_stylesheet_gc'       => \AmpProject\AmpWP\BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection::class,
+			'url_validation_cron'               => \AmpProject\AmpWP\Validation\URLValidationCron::class,
+			'save_post_validation_event'        => \AmpProject\AmpWP\Validation\SavePostValidationEvent::class,
+			'background_task_deactivator'       => \AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator::class,
 		] )
 	);
 

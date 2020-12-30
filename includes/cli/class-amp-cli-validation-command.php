@@ -11,6 +11,7 @@ use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Validation\URLValidationProvider;
 use AmpProject\AmpWP\Validation\ScannableURLProvider;
+use AmpProject\AmpWP\Validation\URLScanningContext;
 use WP_CLI\Utils;
 
 /**
@@ -141,16 +142,7 @@ final class AMP_CLI_Validation_Command {
 			$number_urls_to_crawl
 		);
 
-		$result = $url_validation_provider->with_lock(
-			function () use ( $urls ) {
-				$this->validate_urls( $urls );
-			}
-		);
-
-		if ( is_wp_error( $result ) ) {
-			WP_CLI::error( 'The site cannot be crawled at this time because validation is running in another process.' );
-			return;
-		}
+		$this->validate_urls( $urls );
 
 		$this->wp_cli_progress->finish();
 
@@ -248,9 +240,11 @@ final class AMP_CLI_Validation_Command {
 		}
 
 		$this->scannable_url_provider = new ScannableURLProvider(
-			$limit_type_validate_count,
-			$include_conditionals,
-			$force_crawl_urls
+			new URLScanningContext(
+				$limit_type_validate_count,
+				$include_conditionals,
+				$force_crawl_urls
+			)
 		);
 
 		return $this->scannable_url_provider;
@@ -284,12 +278,7 @@ final class AMP_CLI_Validation_Command {
 			$urls                   = $scannable_url_provider->get_urls();
 		}
 
-		foreach ( $urls as $index => $url ) {
-			// Reset lock between every five URLs.
-			if ( 0 === $index % 5 ) {
-				$this->url_validation_provider->reset_lock();
-			}
-
+		foreach ( $urls as $url ) {
 			$validity = $url_validation_provider->get_url_validation( $url['url'], $url['type'], true );
 
 			if ( $this->wp_cli_progress ) {

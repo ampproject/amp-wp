@@ -17,23 +17,9 @@ use WP_Error;
  * URLValidationProvider class.
  *
  * @since 2.1
+ * @internal
  */
 final class URLValidationProvider {
-
-	/**
-	 * Key for the transient signaling validation is locked.
-	 *
-	 * @var string
-	 */
-	const LOCK_KEY = 'amp_validation_locked';
-
-	/**
-	 * The length of time to keep the lock in place if a process fails to unlock.
-	 *
-	 * @var int
-	 */
-	const LOCK_TIMEOUT = 5 * MINUTE_IN_SECONDS;
-
 	/**
 	 * The total number of validation errors, regardless of whether they were accepted.
 	 *
@@ -71,60 +57,6 @@ final class URLValidationProvider {
 	 * }
 	 */
 	private $validity_by_type = [];
-
-	/**
-	 * Locks validation.
-	 */
-	private function lock() {
-		update_option( self::LOCK_KEY, time(), false );
-	}
-
-	/**
-	 * Unlocks validation.
-	 */
-	private function unlock() {
-		delete_option( self::LOCK_KEY );
-	}
-
-	/**
-	 * Returns whether validation is currently locked.
-	 *
-	 * @return boolean
-	 */
-	public function is_locked() {
-		$lock_time = (int) get_option( self::LOCK_KEY, 0 );
-
-		// It's locked if the difference between the lock time and the current time is less than the lockout time.
-		return time() - $lock_time < self::LOCK_TIMEOUT;
-	}
-
-	/**
-	 * Runs a callback with a lock set for the duration of the callback.
-	 *
-	 * @param callable $callback Callback to run with the lock set.
-	 * @return mixed  WP_Error if a lock is in place. Otherwise, the result of the callback or void if it doesn't return anything.
-	 */
-	public function with_lock( $callback ) {
-		if ( $this->is_locked() ) {
-			return new WP_Error(
-				'amp_url_validation_locked',
-				__( 'URL validation cannot start right now because another process is already validating URLs. Try again in a few minutes.', 'amp' )
-			);
-		}
-
-		$this->lock();
-		$result = $callback();
-		$this->unlock();
-
-		return $result;
-	}
-
-	/**
-	 * Resets the lock timeout. This allows long-running processes to keep running beyond the lock timeout.
-	 */
-	public function reset_lock() {
-		$this->lock();
-	}
 
 	/**
 	 * Provides the total number of validation errors found.

@@ -17,7 +17,7 @@ import AMPToolbarIconBroken from '../../images/amp-toolbar-icon-broken.svg';
  */
 function IconSVG( { hasBadge } ) {
 	return (
-		<span className={ `amp-toolbar-icon${ hasBadge ? ' amp-toolbar-icon--has-badge' : '' }` }>
+		<span className={ `amp-toolbar-icon components-menu-items__item-icon${ hasBadge ? ' amp-toolbar-icon--has-badge' : '' }` }>
 			<AMPToolbarIcon />
 		</span>
 	);
