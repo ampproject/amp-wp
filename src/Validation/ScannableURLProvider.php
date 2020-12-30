@@ -15,49 +15,24 @@ use WP_Query;
  * ScannableURLProvider class.
  *
  * @since 2.1
+ * @internal
  */
 final class ScannableURLProvider {
 
 	/**
-	 * Whether to include URLs that don't support AMP.
+	 * Instance of URLScanningContext.
 	 *
-	 * @var bool
+	 * @var URLScanningContext
 	 */
-	private $include_unsupported;
-
-	/**
-	 * An allowlist of conditionals to use for querying URLs.
-	 *
-	 * Usually, this class will query all of the templates that don't have AMP disabled. This allows inclusion based on only these conditionals.
-	 *
-	 * @var string[]
-	 */
-	private $include_conditionals;
-
-	/**
-	 * The maximum number of URLs to provide for each content type.
-	 *
-	 * Templates are each a separate type, like those for is_category() and is_tag(), and each post type is a type.
-	 *
-	 * @var int
-	 */
-	private $limit_per_type;
+	private $context;
 
 	/**
 	 * Class constructor.
 	 *
-	 * @param integer $limit_per_type       The maximum number of URLs to validate for each type.
-	 * @param array   $include_conditionals An allowlist of conditionals to use for validation.
-	 * @param boolean $include_unsupported  Whether to include URLs that don't support AMP.
+	 * @param URLScanningContext $context Instance of URLScanningContext.
 	 */
-	public function __construct(
-		$limit_per_type = 20,
-		$include_conditionals = [],
-		$include_unsupported = false
-	) {
-		$this->limit_per_type       = $limit_per_type;
-		$this->include_conditionals = $include_conditionals;
-		$this->include_unsupported  = $include_unsupported;
+	public function __construct( URLScanningContext $context ) {
+		$this->context = $context;
 	}
 
 	/**
@@ -86,9 +61,10 @@ final class ScannableURLProvider {
 			[ $this, 'does_taxonomy_support_amp' ]
 		);
 		$public_post_types      = get_post_types( [ 'public' => true ] );
+		$limit_per_type         = $this->context->get_limit_per_type();
 
 		// Include one URL of each template/content type, then another URL of each type on the next iteration.
-		for ( $i = $offset; $i < $this->limit_per_type + $offset; $i++ ) {
+		for ( $i = $offset; $i < $limit_per_type + $offset; $i++ ) {
 			// Include all public, published posts.
 			foreach ( $public_post_types as $post_type ) {
 				$post_ids = $this->get_posts_that_support_amp( $this->get_posts_by_type( $post_type, $i, 1 ) );
@@ -146,11 +122,13 @@ final class ScannableURLProvider {
 	 * @return bool Whether the template is supported.
 	 */
 	private function is_template_supported( $template ) {
+		$include_conditionals = $this->context->get_include_conditionals();
+
 		// If we received an allowlist of conditionals, this template conditional must be present in it.
-		if ( ! empty( $this->include_conditionals ) ) {
-			return in_array( $template, $this->include_conditionals, true );
+		if ( ! empty( $include_conditionals ) ) {
+			return in_array( $template, $include_conditionals, true );
 		}
-		if ( $this->include_unsupported ) {
+		if ( $this->context->get_include_unsupported() ) {
 			return true;
 		}
 
@@ -175,7 +153,7 @@ final class ScannableURLProvider {
 			return [];
 		}
 
-		if ( $this->include_unsupported ) {
+		if ( $this->context->get_include_unsupported() ) {
 			return $ids;
 		}
 
@@ -196,7 +174,7 @@ final class ScannableURLProvider {
 	private function get_posts_by_type( $post_type, $offset = null, $number = null ) {
 		$args = [
 			'post_type'      => $post_type,
-			'posts_per_page' => is_int( $number ) ? $number : $this->limit_per_type,
+			'posts_per_page' => is_int( $number ) ? $number : $this->context->get_limit_per_type(),
 			'post_status'    => 'publish',
 			'orderby'        => 'ID',
 			'order'          => 'DESC',
@@ -231,7 +209,7 @@ final class ScannableURLProvider {
 			return $author_page_urls;
 		}
 
-		$number = ! empty( $number ) ? $number : $this->limit_per_type;
+		$number = ! empty( $number ) ? $number : $this->context->get_limit_per_type();
 		foreach ( get_users( compact( 'offset', 'number' ) ) as $author ) {
 			$author_page_urls[] = get_author_posts_url( $author->ID, $author->user_nicename );
 		}
@@ -291,7 +269,7 @@ final class ScannableURLProvider {
 	 */
 	private function get_taxonomy_links( $taxonomy, $offset = '', $number = null ) {
 		if ( is_null( $number ) ) {
-			$number = $this->limit_per_type;
+			$number = $this->context->get_limit_per_type();
 		}
 
 		return array_map(
