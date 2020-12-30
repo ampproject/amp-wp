@@ -31,7 +31,7 @@ abstract class RecurringBackgroundTask extends CronBasedBackgroundTask {
 	 *
 	 * @param mixed[] ...$args Arguments passed to the function from the action hook.
 	 */
-	public function schedule_event( ...$args ) {
+	final public function schedule_event( ...$args ) {
 		if ( ! is_user_logged_in() ) {
 			return;
 		}
