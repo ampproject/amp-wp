@@ -25,12 +25,13 @@ export function InvalidBlockOutline() {
 	return (
 		<style>
 			{
-				`${ selectors.join( ',' ) } { 
+				`${ selectors.join( ',' ) } {
 					border-radius: 9px;
 					bottom: -3px;
 					box-shadow: 0 0 0 2px #bb522e;
 					content: '';
 					left: -3px;
+					pointer-events: none;
 					position: absolute;
 					right: -3px;
 					top: -3px;
