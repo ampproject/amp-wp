@@ -17,6 +17,7 @@ use WP_Error;
  * URLValidationProvider class.
  *
  * @since 2.1
+ * @internal
  */
 final class URLValidationProvider {
 	/**

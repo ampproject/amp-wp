@@ -34,13 +34,3 @@
 * [`AMP_Base_Sanitizer::sanitize_dimension()`](AMP_Base_Sanitizer/sanitize_dimension.md) - Sanitizes a CSS dimension specifier while being sensitive to dimension context.
 * [`AMP_Base_Sanitizer::set_layout()`](AMP_Base_Sanitizer/set_layout.md) - Sets the layout, and possibly the &#039;height&#039; and &#039;width&#039; attributes.
 * [`AMP_Base_Sanitizer::should_sanitize_validation_error()`](AMP_Base_Sanitizer/should_sanitize_validation_error.md) - Check whether or not sanitization should occur in response to validation error.
-* [`ScannableURLProvider::__construct()`](Validation/ScannableURLProvider/__construct.md) - Class constructor.
-* [`ScannableURLProvider::get_urls()`](Validation/ScannableURLProvider/get_urls.md) - Provides the array of URLs to check.
-* [`URLValidationProvider::get_number_validated()`](Validation/URLValidationProvider/get_number_validated.md) - Provides the number of URLs that have been checked.
-* [`URLValidationProvider::get_total_errors()`](Validation/URLValidationProvider/get_total_errors.md) - Provides the total number of validation errors found.
-* [`URLValidationProvider::get_unaccepted_errors()`](Validation/URLValidationProvider/get_unaccepted_errors.md) - Provides the total number of unaccepted errors.
-* [`URLValidationProvider::get_url_validation()`](Validation/URLValidationProvider/get_url_validation.md) - Validates a URL, stores the results, and increments the counts.
-* [`URLValidationProvider::get_validity_by_type()`](Validation/URLValidationProvider/get_validity_by_type.md) - Provides the validity counts by type.
-* [`URLValidationProvider::is_locked()`](Validation/URLValidationProvider/is_locked.md) - Returns whether validation is currently locked.
-* [`URLValidationProvider::reset_lock()`](Validation/URLValidationProvider/reset_lock.md) - Resets the lock timeout. This allows long-running processes to keep running beyond the lock timeout.
-* [`URLValidationProvider::with_lock()`](Validation/URLValidationProvider/with_lock.md) - Runs a callback with a lock set for the duration of the callback.

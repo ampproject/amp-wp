@@ -15,6 +15,7 @@ use WP_Query;
  * ScannableURLProvider class.
  *
  * @since 2.1
+ * @internal
  */
 final class ScannableURLProvider {
 
