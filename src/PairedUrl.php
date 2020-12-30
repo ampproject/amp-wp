@@ -114,6 +114,7 @@ final class PairedUrl implements Service {
 			$parsed_url['scheme'] = is_ssl() ? 'https' : 'http';
 		}
 		if ( empty( $parsed_url['host'] ) ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$parsed_url['host'] = ! empty( $_SERVER['HTTP_HOST'] ) ? wp_unslash( $_SERVER['HTTP_HOST'] ) : 'localhost';
 		}
 

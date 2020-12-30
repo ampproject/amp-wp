@@ -172,7 +172,7 @@ final class PairedRouting implements Service, Registerable {
 		add_filter( 'amp_default_options', [ $this, 'filter_default_options' ], 10, 2 );
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
 
-		add_filter( 'template_redirect', [ $this, 'redirect_extraneous_paired_endpoint' ], 8 ); // Must be before redirect_paired_amp_unavailable() runs at priority 9.
+		add_action( 'template_redirect', [ $this, 'redirect_extraneous_paired_endpoint' ], 8 ); // Must be before redirect_paired_amp_unavailable() runs at priority 9.
 
 		if ( ! amp_is_canonical() ) {
 			// Priority 7 needed to run before PluginSuppression::initialize() at priority 8.
@@ -294,7 +294,7 @@ final class PairedRouting implements Service, Registerable {
 			add_filter( 'wp_unique_post_slug', [ $this, 'filter_unique_post_slug' ], 10, 4 );
 		}
 
-		add_filter( 'template_redirect', [ $this, 'redirect_paired_amp_unavailable' ], 9 ); // Must be before redirect_canonical() runs at priority 10.
+		add_action( 'template_redirect', [ $this, 'redirect_paired_amp_unavailable' ], 9 ); // Must be before redirect_canonical() runs at priority 10.
 		add_action( 'parse_query', [ $this, 'correct_query_when_is_front_page' ] );
 		add_action( 'wp', [ $this, 'add_paired_request_hooks' ] );
 
@@ -399,6 +399,7 @@ final class PairedRouting implements Service, Registerable {
 				continue;
 			}
 
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$old_path = wp_unslash( $_SERVER[ $var_name ] ); // Because of wp_magic_quotes().
 			$new_path = $this->get_paired_url_structure()->remove_endpoint( $old_path );
 			if ( $old_path === $new_path ) {
@@ -495,7 +496,7 @@ final class PairedRouting implements Service, Registerable {
 		$suffix = 2;
 		do {
 			$alt_slug   = "$slug-$suffix";
-			$slug_check = $wpdb->get_var(
+			$slug_check = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Logic adapted from wp_unique_post_slug().
 				$wpdb->prepare(
 					"SELECT COUNT(*) FROM $wpdb->posts WHERE post_name = %s AND post_type = %s AND ID != %d LIMIT 1",
 					$alt_slug,

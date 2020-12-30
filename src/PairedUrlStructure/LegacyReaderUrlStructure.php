@@ -25,7 +25,7 @@ final class LegacyReaderUrlStructure extends PairedUrlStructure {
 	 * @return string AMP URL.
 	 */
 	public function add_endpoint( $url ) {
-		$post_id = url_to_postid( $url );
+		$post_id = $this->url_to_postid( $url );
 
 		if ( $post_id ) {
 			/**
@@ -106,5 +106,43 @@ final class LegacyReaderUrlStructure extends PairedUrlStructure {
 		$url = $this->paired_url->remove_query_var( $url );
 		$url = $this->paired_url->remove_path_suffix( $url );
 		return $url;
+	}
+
+	/**
+	 * Cached version of url_to_postid(), which can be expensive.
+	 *
+	 * Examine a url and try to determine the post ID it represents.
+	 *
+	 * This is copied from the WordPress.com VIP implementation.
+	 *
+	 * @link https://github.com/svn2github/wordpress-vip-plugins/blob/4d6f59f9839167d1c11f550610012493c7380dfe/vip-do-not-include-on-wpcom/wpcom-caching.php#L300-L331
+	 * @see wpcom_vip_url_to_postid()
+	 *
+	 * @param string $url Permalink to check.
+	 * @return int Post ID, or 0 on failure.
+	 */
+	private function url_to_postid( $url ) {
+		// Can only run after init, since home_url() has not been filtered to the mapped domain prior to that,
+		// which will cause url_to_postid() to fail.
+		// See <https://vip.wordpress.com/documentation/vip-development-tips-tricks/home_url-vs-site_url/>.
+		if ( ! did_action( 'init' ) ) {
+			_doing_it_wrong( __METHOD__, 'must be called after the init action, as home_url() has not yet been filtered', '' );
+			return 0;
+		}
+
+		// Sanity check; no URLs not from this site.
+		if ( wp_parse_url( $url, PHP_URL_HOST ) !== wp_parse_url( home_url(), PHP_URL_HOST ) ) {
+			return 0;
+		}
+
+		$cache_key = md5( $url );
+		$post_id   = wp_cache_get( $cache_key, 'url_to_postid' );
+
+		if ( false === $post_id ) {
+			$post_id = url_to_postid( $url ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.url_to_postid_url_to_postid -- This method implements the caching.
+			wp_cache_set( $cache_key, $post_id, 'url_to_postid', 3 * HOUR_IN_SECONDS );
+		}
+
+		return $post_id;
 	}
 }
