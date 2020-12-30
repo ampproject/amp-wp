@@ -214,22 +214,17 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$post_id = self::factory()->post->create( [ 'post_title' => 'Test' ] );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 
-		// Test transitional mode singular, where not on endpoint that it causes amphtml link to be added.
-		remove_action( 'wp_head', 'amp_add_amphtml_link' );
+		// Test transitional mode singular.
 		$this->go_to( get_permalink( $post_id ) );
 		$this->assertFalse( amp_is_request() );
 		AMP_Theme_Support::finish_init();
-		$this->assertEquals( 10, has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 
-		// Test transitional mode homepage, where still not on endpoint that it causes amphtml link to be added.
-		remove_action( 'wp_head', 'amp_add_amphtml_link' );
+		// Test transitional mode homepage.
 		$this->go_to( home_url() );
 		$this->assertFalse( amp_is_request() );
 		AMP_Theme_Support::finish_init();
-		$this->assertEquals( 10, has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 
 		// Test canonical, so amphtml link is not added and init finalizes.
-		remove_action( 'wp_head', 'amp_add_amphtml_link' );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
@@ -240,7 +235,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->go_to( get_permalink( $post_id ) );
 		$this->assertTrue( amp_is_request() );
 		AMP_Theme_Support::finish_init();
-		$this->assertFalse( has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 		$this->assertEquals( 10, has_filter( 'index_template_hierarchy', [ 'AMP_Theme_Support', 'filter_amp_template_hierarchy' ] ), 'Expected add_amp_template_filters to have been called since template_dir is not empty' );
 		$this->assertEquals( 20, has_action( 'wp_head', 'amp_add_generator_metadata' ), 'Expected add_hooks to have been called' );
 		$this->assertTrue( current_theme_supports( 'amp' ) );
