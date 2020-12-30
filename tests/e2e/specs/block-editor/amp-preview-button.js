@@ -1,13 +1,12 @@
 /**
  * WordPress dependencies
  */
-import { createNewPost, visitAdminPage } from '@wordpress/e2e-test-utils';
+import { createNewPost, visitAdminPage, activatePlugin, deactivatePlugin } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
  */
 import { cleanUpSettings } from '../../utils/onboarding-wizard-utils';
-import { activatePlugin, deactivatePlugin } from '../../utils';
 
 const postPreviewBtnSelector = '.components-button.editor-post-preview';
 const ampPreviewBtnSelector = `${ postPreviewBtnSelector } + .amp-wrapper-post-preview > .amp-editor-post-preview`;
