@@ -69,7 +69,8 @@ final class ThemeEntitiesRESTController extends WP_REST_Controller implements Co
 	 * @return boolean
 	 */
 	public static function is_needed() {
-		$path = wp_parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH ); // phpcs:ignore
+		// Don't instantiate the class if the server path is not that of the REST endpoint.
+		$path = wp_parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		return 'amp/v1/' . self::REST_BASE !== $path;
 	}
 
@@ -97,7 +98,7 @@ final class ThemeEntitiesRESTController extends WP_REST_Controller implements Co
 	 * Sets up the controller.
 	 */
 	public function register() {
-		if ( self::CONTEXT_THEME_DISABLED === $_GET[ 'context' ] ) { // phpcs:ignore
+		if ( self::CONTEXT_THEME_DISABLED === $_GET['context'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 			$hooks = [
 				'pre_option_template',
 				'option_template',
@@ -126,12 +127,13 @@ final class ThemeEntitiesRESTController extends WP_REST_Controller implements Co
 					'callback'            => [ $this, 'get_results' ],
 					'args'                => [
 						'context' => [
-							'default' => self::CONTEXT_THEME_ONLY,
-							'enum'    => [
+							'default'     => self::CONTEXT_THEME_ONLY,
+							'description' => __( 'The request context.', 'amp' ),
+							'enum'        => [
 								self::CONTEXT_THEME_DISABLED,
 								self::CONTEXT_THEME_ONLY,
 							],
-							'type'    => 'string',
+							'type'        => 'string',
 						],
 					],
 					'permission_callback' => [ $this, 'get_items_permissions_check' ],
@@ -148,7 +150,7 @@ final class ThemeEntitiesRESTController extends WP_REST_Controller implements Co
 	 * @return true|WP_Error True if the request has permission; WP_Error object otherwise.
 	 */
 	public function get_items_permissions_check( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		if ( false && ! $this->dev_tools_user_access->is_user_enabled() ) {
+		if ( ! $this->dev_tools_user_access->is_user_enabled() ) {
 			return new WP_Error(
 				'amp_rest_no_dev_tools',
 				__( 'Sorry, you do not have access to dev tools for the AMP plugin for WordPress.', 'amp' ),
@@ -160,7 +162,7 @@ final class ThemeEntitiesRESTController extends WP_REST_Controller implements Co
 	}
 
 	/**
-	 * Provides registered blocks, post types, taxonomies and widgets.
+	 * Provides registered blocks, post types, taxonomies, and widgets.
 	 *
 	 * @return array
 	 */
@@ -182,20 +184,23 @@ final class ThemeEntitiesRESTController extends WP_REST_Controller implements Co
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function get_results( $request ) {
-		$theme     = wp_get_theme();
-		$cache_key = md5( 'amp-theme-entities' . $theme->get( 'Name' ) . $theme->get( 'Version' ) );
-		
-		$result = get_transient( $cache_key );
-		if ( $result ) {
-			return rest_ensure_response( $result );
+		// As this request can be slow, we cache the result for the current theme and version.
+		$theme         = wp_get_theme();
+		$cache_key     = md5( 'amp-theme-entities' . $theme->get( 'Name' ) . $theme->get( 'Version' ) );
+		$cached_result = get_transient( $cache_key );
+	
+		if ( $cached_result ) {
+			return rest_ensure_response( $cached_result );
 		}
 
+		// If the current request is for the theme-disabled context, the filters to disable the theme will have been added in ::register.
 		if ( self::CONTEXT_THEME_DISABLED === $request['context'] ) {
 			return rest_ensure_response( $this->get_entities() );
 		}
 
 		$entities_with_theme = $this->get_entities();
 
+		// Make a request to this endpoint with the theme disabled context.
 		$disabled_theme_request = wp_remote_get(
 			add_query_arg(
 				[ 'context' => self::CONTEXT_THEME_DISABLED ],
@@ -205,6 +210,7 @@ final class ThemeEntitiesRESTController extends WP_REST_Controller implements Co
 
 		$entities_without_theme = json_decode( wp_remote_retrieve_body( $disabled_theme_request ), true );
 
+		// Collect only those entities that show up only when the theme is active.
 		$theme_entities = [];
 		foreach ( array_keys( $entities_with_theme ) as $key ) {
 			$theme_entities[ $key ] = array_values( array_diff( $entities_with_theme[ $key ], $entities_without_theme[ $key ] ) );
@@ -228,20 +234,20 @@ final class ThemeEntitiesRESTController extends WP_REST_Controller implements Co
 				'type'       => 'object',
 				'properties' => [
 					'blocks'     => [
-						'type'  => 'array',
 						'items' => 'string',
+						'type'  => 'array',
 					],
 					'post_types' => [
-						'type'  => 'array',
 						'items' => 'string',
+						'type'  => 'array',
 					],
 					'taxonomies' => [
-						'type'  => 'array',
 						'items' => 'string',
+						'type'  => 'array',
 					],
 					'widgets'    => [
-						'type'  => 'array',
 						'items' => 'string',
+						'type'  => 'array',
 					],
 				],
 			];
