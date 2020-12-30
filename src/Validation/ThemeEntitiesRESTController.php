@@ -71,7 +71,7 @@ final class ThemeEntitiesRESTController extends WP_REST_Controller implements Co
 	public static function is_needed() {
 		// Don't instantiate the class if the server path is not that of the REST endpoint.
 		$path = wp_parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		return 'amp/v1/' . self::REST_BASE !== $path;
+		return '/wp-json/amp/v1/' . self::REST_BASE === $path;
 	}
 
 	/**
