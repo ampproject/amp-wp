@@ -123,7 +123,7 @@ class PairedBrowsingApp {
 		};
 		this.addDisconnectButtonListeners();
 
-		window.addEventListener( 'message', ( event ) => {
+		global.addEventListener( 'message', ( event ) => {
 			this.receiveMessage( event );
 		} );
 

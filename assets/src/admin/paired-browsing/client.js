@@ -161,11 +161,11 @@ function receiveInit() {
 	sendHeartbeat();
 	setInterval( sendHeartbeat, 500 );
 
-	document.addEventListener( 'click', handleClick, { passive: true } );
-	window.addEventListener( 'scroll', sendScroll, { passive: true } );
+	global.document.addEventListener( 'click', handleClick, { passive: true } );
+	global.addEventListener( 'scroll', sendScroll, { passive: true } );
 	domReady( modifyDocumentForPairedBrowsing );
 
 	sendLoaded();
 }
 
-window.addEventListener( 'message', receiveMessage );
+global.addEventListener( 'message', receiveMessage );
