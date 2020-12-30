@@ -515,7 +515,7 @@ final class PairedRouting implements Service, Registerable {
 	 * Add hooks based for AMP pages and other hooks for non-AMP pages.
 	 */
 	public function add_paired_request_hooks() {
-		if ( amp_is_request() ) {
+		if ( $this->has_endpoint() ) {
 			add_filter( 'old_slug_redirect_url', [ $this, 'maybe_add_paired_endpoint' ], 1000 );
 			add_filter( 'redirect_canonical', [ $this, 'maybe_add_paired_endpoint' ], 1000 );
 		} else {
@@ -917,6 +917,15 @@ final class PairedRouting implements Service, Registerable {
 			$request_url  = amp_get_current_url();
 			$redirect_url = $this->remove_endpoint( $request_url );
 			if ( $redirect_url !== $request_url ) {
+				// Calling wp_old_slug_redirect() here is to account for a site that does not have AMP enabled for the 404 template.
+				// This method is running at template_redirect priority 9 in order to run before redirect_canonical() which runs at
+				// priority 10. However, wp_old_slug_redirect() also runs at priority 10 (normally), and it needs to run before the
+				// redirection happens here since it could be that the 404 template would actually not be getting served but rather
+				// the user should be getting redirected to the new permalink where a singular template is served. For this reason,
+				// wp_old_slug_redirect() is called just-in-time, and maybe_add_paired_endpoint is added as a filter for
+				// old_slug_redirect_url which ensures that the AMP endpoint will persist the slug redirect.
+				wp_old_slug_redirect(); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_old_slug_redirect_wp_old_slug_redirect
+
 				$this->redirect_location( $redirect_url );
 			}
 		}
