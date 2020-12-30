@@ -6,7 +6,7 @@ import { isEqual } from 'lodash';
 /**
  * WordPress dependencies
  */
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useRef, useState } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
@@ -79,6 +79,7 @@ export function maybeAddClientIdToValidationError( { validationError, source, cu
 export function useValidationErrorStateUpdates() {
 	const [ blockOrderBeforeSave, setBlockOrderBeforeSave ] = useState( [] );
 	const [ previousValidationErrors, setPreviousValidationErrors ] = useState( [] );
+	const unmounted = useRef( false );
 
 	const { setIsFetchingErrors, setReviewLink, setValidationErrors } = useDispatch( BLOCK_VALIDATION_STORE_KEY );
 
@@ -91,16 +92,20 @@ export function useValidationErrorStateUpdates() {
 		validationErrors: select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors(),
 	} ), [] );
 
+	// Set unmounted to true on unmount to prevent state updates after async functions.
+	useEffect( () => () => {
+		unmounted.current = true;
+	}, [] );
+
 	/**
 	 * Fetches validation errors for the current post's URL after the editor has loaded and following
 	 * subsequent saves.
 	 */
 	useEffect( () => {
 		if ( isSavingPost ) {
-			return () => undefined;
+			return;
 		}
 
-		let unmounted = false;
 		( async () => {
 			setBlockOrderBeforeSave( getClientIdsWithDescendants() );
 			setIsFetchingErrors( true );
@@ -109,7 +114,7 @@ export function useValidationErrorStateUpdates() {
 				path: addQueryArgs( `/amp/v1/validate-post-url/${ currentPost.id }`, { context: 'amp-editor' } ),
 			} );
 
-			if ( unmounted ) {
+			if ( true === unmounted.current ) {
 				return;
 			}
 
@@ -117,10 +122,6 @@ export function useValidationErrorStateUpdates() {
 			setReviewLink( newValidation.review_link );
 			setIsFetchingErrors( false );
 		} )();
-
-		return () => {
-			unmounted = true;
-		};
 	}, [ currentPost.id, getClientIdsWithDescendants, isSavingPost, setIsFetchingErrors, setReviewLink, setValidationErrors ] );
 
 	/**

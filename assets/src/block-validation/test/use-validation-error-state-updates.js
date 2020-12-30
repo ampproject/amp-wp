@@ -17,10 +17,11 @@ import { BLOCK_VALIDATION_STORE_KEY, createStore } from '../store';
 
 jest.mock( '@wordpress/data/build/components/use-select', () => {
 	return () => ( {
-		blockOrder: [],
 		currentPost: { id: 1 },
+		getClientIdsWithDescendants: () => null,
 		getBlock: () => null,
 		getBlocks: () => [],
+		isSavingPost: false,
 		validationErrorsFromPost: require( './__data__/raw-validation-errors' ).rawValidationErrors,
 	} );
 } );
