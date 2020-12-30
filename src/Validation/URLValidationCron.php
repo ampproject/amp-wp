@@ -98,7 +98,7 @@ final class URLValidationCron extends RecurringBackgroundTask {
 	 * @return string An existing interval name.
 	 */
 	protected function get_interval() {
-		return self::DEFAULT_INTERVAL_HOURLY;
+		return self::DEFAULT_INTERVAL_DAILY;
 	}
 
 	/**

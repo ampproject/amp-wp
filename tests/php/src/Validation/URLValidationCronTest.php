@@ -112,7 +112,7 @@ final class URLValidationCronTest extends WP_UnitTestCase {
 	/** @covers ::get_interval() */
 	public function test_get_interval() {
 		$this->assertEquals(
-			URLValidationCron::DEFAULT_INTERVAL_HOURLY,
+			URLValidationCron::DEFAULT_INTERVAL_DAILY,
 			$this->call_private_method( $this->test_instance, 'get_interval' )
 		);
 	}
