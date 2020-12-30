@@ -123,7 +123,7 @@ export function Sidebar() {
 				! saved && 0 === validationErrors.length && (
 					<PanelBody opened={ true }>
 						<p>
-							{ __( 'The permalink will be checked for validation issues when the post is saved.', 'amp' ) }
+							{ __( 'Validation issues will be checked for when the post is saved.', 'amp' ) }
 						</p>
 					</PanelBody>
 				)
@@ -131,7 +131,7 @@ export function Sidebar() {
 			{ saved && validationErrors.length === 0 && (
 				<PanelBody opened={ true }>
 					<p>
-						{ __( 'There are no AMP validation issues at the permalink.', 'amp' ) }
+						{ __( 'There are no AMP validation issues.', 'amp' ) }
 					</p>
 				</PanelBody>
 			) }
@@ -147,7 +147,7 @@ export function Sidebar() {
 					: saved && (
 						<PanelBody opened={ true }>
 							<p>
-								{ __( 'There are no unreviewed AMP validation issues at the permalink.', 'amp' ) }
+								{ __( 'All AMP validation issues have been reviewed.', 'amp' ) }
 							</p>
 						</PanelBody>
 					)
