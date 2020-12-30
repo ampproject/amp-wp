@@ -24,7 +24,7 @@
 		return;
 	}
 
-	document.addEventListener( 'DOMContentLoaded', () => {
+	global.addEventListener( 'DOMContentLoaded', () => {
 		// Show the mobile version switcher link once the DOM has loaded.
 		const siteVersionSwitcher = document.getElementById( 'amp-mobile-version-switcher' );
 		if ( ! siteVersionSwitcher ) {

@@ -94,6 +94,7 @@ const blockEditor = {
 	externals: {
 		// Make localized data importable.
 		'amp-block-editor-data': 'ampBlockEditor',
+		'amp-block-validation': 'ampBlockValidation',
 	},
 	entry: {
 		'amp-block-editor': './assets/src/block-editor/index.js',

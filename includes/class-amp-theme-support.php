@@ -2035,7 +2035,7 @@ class AMP_Theme_Support {
 			// Redirect to include query var to preventing AMP from even being considered available.
 			$non_amp_url = add_query_arg( QueryVar::NOAMP, QueryVar::NOAMP_AVAILABLE, $non_amp_url );
 
-			wp_safe_redirect( $non_amp_url, 302 );
+			wp_safe_redirect( $non_amp_url, 302 ); // phpcs:ignore WordPressVIPMinimum.Security.ExitAfterRedirect.NoExit -- This is in an output buffer callback handler.
 			return esc_html__( 'Redirecting since AMP version not available.', 'amp' );
 		}
 

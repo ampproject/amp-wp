@@ -211,7 +211,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 					`
 					<# if ( data.ampReaderThemeNotice ) { #>
 						<div class="notice notice-info notice-alt inline">
-							<p>{{{ data.ampReaderThemeNotice }}}</p>
+							<p>{{{ data.ampReaderThemeNotice }}}</p><?php // phpcs:ignore WordPressVIPMinimum.Security.Mustache.OutputNotation -- Contains link and already sanitized with Kses. ?>
 						</div>
 					<# } #>
 					`
@@ -224,7 +224,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 						return `
 							${startDiv}
 							<# if ( data.ampActiveReaderTheme ) { #>
-								<a href="{{{ data.actions.customize }}}" class="button button-primary customize load-customize hide-if-no-customize">
+								<a href="{{ data.actions.customize }}" class="button button-primary customize load-customize hide-if-no-customize">
 									<?php esc_html_e( 'Customize', 'default' ); ?>
 								</a>
 								<a href="<?php echo esc_url( add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, admin_url( 'admin.php' ) ) ); ?>" class="button button-secondary">
@@ -256,7 +256,7 @@ final class ReaderThemeLoader implements Service, Registerable {
 							${startDiv}
 							<# if ( data.ampActiveReaderTheme ) { #>
 								<h2 class="theme-name" id="{{ data.id }}-name">
-									<span><?php echo esc_html( _x( 'Reader:', 'prefix for theme card in list', 'amp' ) ); ?></span> {{{ data.name }}}
+									<span><?php echo esc_html( _x( 'Reader:', 'prefix for theme card in list', 'amp' ) ); ?></span> {{ data.name }}
 								</h2>
 							<# } else if
 						`;

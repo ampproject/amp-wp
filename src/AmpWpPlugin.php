@@ -12,6 +12,9 @@ use AmpProject\AmpWP\BackgroundTask;
 use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Infrastructure\ServiceBasedPlugin;
 use AmpProject\AmpWP\Instrumentation;
+use AmpProject\AmpWP\Validation\SavePostValidationEvent;
+use AmpProject\AmpWP\Validation\URLValidationCron;
+use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 
 use function is_user_logged_in;
 
@@ -66,11 +69,13 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'amp_slug_customization_watcher'    => AmpSlugCustomizationWatcher::class,
 		'css_transient_cache.ajax_handler'  => Admin\ReenableCssTransientCachingAjaxAction::class,
 		'css_transient_cache.monitor'       => BackgroundTask\MonitorCssTransientCaching::class,
+		'dev_tools.block_sources'           => DevTools\BlockSources::class,
 		'dev_tools.callback_reflection'     => DevTools\CallbackReflection::class,
 		'dev_tools.error_page'              => DevTools\ErrorPage::class,
 		'dev_tools.file_reflection'         => DevTools\FileReflection::class,
 		'dev_tools.likely_culprit_detector' => DevTools\LikelyCulpritDetector::class,
 		'dev_tools.user_access'             => DevTools\UserAccess::class,
+		'editor.editor_support'             => Editor\EditorSupport::class,
 		'extra_theme_and_plugin_headers'    => ExtraThemeAndPluginHeaders::class,
 		'mobile_redirection'                => MobileRedirection::class,
 		'obsolete_block_attribute_remover'  => ObsoleteBlockAttributeRemover::class,
@@ -82,6 +87,9 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'server_timing'                     => Instrumentation\ServerTiming::class,
 		'site_health_integration'           => Admin\SiteHealth::class,
 		'validated_url_stylesheet_gc'       => BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection::class,
+		'url_validation_cron'               => URLValidationCron::class,
+		'save_post_validation_event'        => SavePostValidationEvent::class,
+		'background_task_deactivator'       => BackgroundTaskDeactivator::class,
 		'paired_routing'                    => PairedRouting::class,
 		'paired_url'                        => PairedUrl::class,
 	];
@@ -165,6 +173,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			DevTools\CallbackReflection::class,
 			DevTools\FileReflection::class,
 			ReaderThemeLoader::class,
+			BackgroundTask\BackgroundTaskDeactivator::class,
 			PairedRouting::class,
 			Injector::class,
 		];

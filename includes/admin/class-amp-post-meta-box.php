@@ -6,6 +6,8 @@
  * @since 0.6
  */
 
+use AmpProject\AmpWP\Services;
+
 /**
  * Post meta box class.
  *
@@ -213,26 +215,8 @@ class AMP_Post_Meta_Box {
 			return;
 		}
 
-		// Gutenberg v5.4 was bundled with WP 5.2, which is the earliest release known to work without errors.
-		$gb_supported = defined( 'GUTENBERG_VERSION' ) && version_compare( GUTENBERG_VERSION, '5.4.0', '>=' );
-		$wp_supported = ! $gb_supported && version_compare( get_bloginfo( 'version' ), '5.2', '>=' );
-
-		// Let the user know that block editor functionality is not available if the current Gutenberg or WordPress version is not supported.
-		if ( ! $gb_supported && ! $wp_supported ) {
-			if ( current_user_can( 'manage_options' ) ) {
-				wp_add_inline_script(
-					'wp-edit-post',
-					sprintf(
-						'wp.domReady(
-							function () {
-								wp.data.dispatch( "core/notices" ).createWarningNotice( %s )
-							}
-						);',
-						wp_json_encode( __( 'AMP functionality is not available since your version of the Block Editor is too old. Please either update WordPress core to the latest version or activate the Gutenberg plugin. As a last resort, you may use the Classic Editor plugin instead.', 'amp' ) )
-					)
-				);
-			}
-
+		$editor_support = Services::get( 'editor.editor_support' );
+		if ( ! $editor_support->editor_supports_amp_block_editor_features() ) {
 			return;
 		}
 
@@ -267,12 +251,16 @@ class AMP_Post_Meta_Box {
 
 		$is_standard_mode = amp_is_canonical();
 
+		list( $featured_image_minimum_width, $featured_image_minimum_height ) = self::get_featured_image_dimensions();
+
 		$data = [
-			'ampUrl'          => $is_standard_mode ? null : amp_add_paired_endpoint( get_permalink( $post ) ),
-			'ampPreviewLink'  => $is_standard_mode ? null : amp_add_paired_endpoint( get_preview_post_link( $post ) ),
-			'errorMessages'   => $this->get_error_messages( $status_and_errors['errors'] ),
-			'hasThemeSupport' => ! amp_is_legacy(),
-			'isStandardMode'  => $is_standard_mode,
+			'ampUrl'                     => $is_standard_mode ? null : amp_add_paired_endpoint( get_permalink( $post ) ),
+			'ampPreviewLink'             => $is_standard_mode ? null : amp_add_paired_endpoint( get_preview_post_link( $post ) ),
+			'errorMessages'              => $this->get_error_messages( $status_and_errors['errors'] ),
+			'hasThemeSupport'            => ! amp_is_legacy(),
+			'isStandardMode'             => $is_standard_mode,
+			'featuredImageMinimumWidth'  => $featured_image_minimum_width,
+			'featuredImageMinimumHeight' => $featured_image_minimum_height,
 		];
 
 		wp_add_inline_script(
@@ -293,6 +281,46 @@ class AMP_Post_Meta_Box {
 				'after'
 			);
 		}
+	}
+
+	/**
+	 * Returns a tuple of width and height featured image dimensions after filtering.
+	 *
+	 * @return int[] {
+	 *     Minimum dimensions.
+	 *
+	 *     @type int $0 Image width in pixels. May be zero to disable the dimension constraint.
+	 *     @type int $1 Image height in pixels. May be zero to disable the dimension constraint.
+	 * }
+	 */
+	public static function get_featured_image_dimensions() {
+		$default_width  = 1200;
+		$default_height = 675;
+
+		/**
+		 * Filters the minimum height required for a featured image.
+		 *
+		 * @since 2.0.9
+		 *
+		 * @param int $featured_image_minimum_height The minimum height of the image, defaults to 675.
+		 *                                           Returning a number less than or equal to zero disables the minimum constraint.
+		 */
+		$featured_image_minimum_height = (int) apply_filters( 'amp_featured_image_minimum_height', $default_height );
+
+		/**
+		 * Filters the minimum width required for a featured image.
+		 *
+		 * @since 2.0.9
+		 *
+		 * @param int $featured_image_minimum_width The minimum width of the image, defaults to 1200.
+		 *                                          Returning a number less than or equal to zero disables the minimum constraint.
+		 */
+		$featured_image_minimum_width = (int) apply_filters( 'amp_featured_image_minimum_width', $default_width );
+
+		return [
+			max( $featured_image_minimum_width, 0 ),
+			max( $featured_image_minimum_height, 0 ),
+		];
 	}
 
 	/**
@@ -427,7 +455,7 @@ class AMP_Post_Meta_Box {
 			update_post_meta(
 				$post_id,
 				self::STATUS_POST_META_KEY,
-				$_POST[ self::STATUS_INPUT_NAME ] // Note: The sanitize_callback has been supplied in the register_meta() call above.
+				$_POST[ self::STATUS_INPUT_NAME ] // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The sanitize_callback has been supplied in the register_meta() call above.
 			);
 		}
 	}

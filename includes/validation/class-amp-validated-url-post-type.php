@@ -242,7 +242,7 @@ class AMP_Validated_URL_Post_Type {
 	 */
 	public static function handle_plugin_update( $old_version ) {
 
-		// Update the old post type slug from amp_validated_url to amp_validated_url.
+		// Update the old post type slug from amp_invalid_url to amp_validated_url.
 		if ( '1.0-' === substr( $old_version, 0, 4 ) || version_compare( $old_version, '1.0', '<' ) ) {
 			global $wpdb;
 			$post_ids = get_posts(
@@ -253,6 +253,7 @@ class AMP_Validated_URL_Post_Type {
 				]
 			);
 			foreach ( $post_ids as $post_id ) {
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 				$wpdb->update(
 					$wpdb->posts,
 					[ 'post_type' => self::POST_TYPE_SLUG ],
@@ -1593,8 +1594,8 @@ class AMP_Validated_URL_Post_Type {
 		}
 
 		if ( isset( $_GET['amp_validate_error'] ) && is_string( $_GET['amp_validate_error'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			// Note: The input var is validated by the unserialize_validation_error_messages method.
-			$errors = AMP_Validation_Manager::unserialize_validation_error_messages( wp_unslash( $_GET['amp_validate_error'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The input var is validated by the unserialize_validation_error_messages method.
+			$errors = AMP_Validation_Manager::unserialize_validation_error_messages( wp_unslash( $_GET['amp_validate_error'] ) );
 			if ( $errors ) {
 				foreach ( array_unique( $errors ) as $error_message ) {
 					printf(
@@ -1921,6 +1922,7 @@ class AMP_Validated_URL_Post_Type {
 			remove_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
 		}
 
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitization performed in loop.
 		foreach ( $_POST[ self::VALIDATION_ERRORS_INPUT_KEY ] as $term_slug => $data ) {
 			if ( ! is_array( $data ) ) {
 				continue;
@@ -3028,7 +3030,7 @@ class AMP_Validated_URL_Post_Type {
 			||
 			! isset( $_GET['post'], $_GET['action'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			||
-			self::POST_TYPE_SLUG !== get_post_type( $_GET['post'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			self::POST_TYPE_SLUG !== get_post_type( $_GET['post'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		);
 	}
 

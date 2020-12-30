@@ -10,6 +10,7 @@ use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
 use AmpProject\AmpWP\Validation\ScannableURLProvider;
+use AmpProject\AmpWP\Validation\URLScanningContext;
 use WP_Query;
 use WP_UnitTestCase;
 
@@ -31,7 +32,7 @@ final class ScannableURLProviderTest extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
-		$this->scannable_url_provider = new ScannableURLProvider();
+		$this->scannable_url_provider = new ScannableURLProvider( new URLScanningContext( 20, [], false ) );
 		add_filter( 'pre_http_request', [ $this, 'get_validate_response' ] );
 	}
 
@@ -50,7 +51,7 @@ final class ScannableURLProviderTest extends WP_UnitTestCase {
 
 		$this->assertCount( $number_original_urls, $this->scannable_url_provider->get_urls() );
 
-		$this->scannable_url_provider = new ScannableURLProvider( 100 );
+		$this->scannable_url_provider = new ScannableURLProvider( new URLScanningContext( 100 ) );
 
 		$category         = self::factory()->term->create( [ 'taxonomy' => 'category' ] );
 		$number_new_posts = 50;
@@ -70,7 +71,7 @@ final class ScannableURLProviderTest extends WP_UnitTestCase {
 		$expected_url_count = $number_new_posts + $number_original_urls + 1;
 		$this->assertCount( $expected_url_count, $this->scannable_url_provider->get_urls() );
 
-		$this->scannable_url_provider = new ScannableURLProvider( 100 );
+		$this->scannable_url_provider = new ScannableURLProvider( new URLScanningContext( 100 ) );
 
 		$number_of_new_terms        = 20;
 		$expected_url_count        += $number_of_new_terms;
@@ -126,9 +127,9 @@ final class ScannableURLProviderTest extends WP_UnitTestCase {
 		);
 
 		// When the second $force_count_all_urls argument is true, all of the newly-created posts should be part of the URL count.
-		$this->set_private_property( $this->scannable_url_provider, 'include_unsupported', true );
+		$this->scannable_url_provider = new ScannableURLProvider( new URLScanningContext( 20, [], true ) );
 		$this->assertEquals( $ids, $this->call_private_method( $this->scannable_url_provider, 'get_posts_that_support_amp', [ $ids ] ) );
-		$this->set_private_property( $this->scannable_url_provider, 'include_unsupported', false );
+		$this->scannable_url_provider = new ScannableURLProvider( new URLScanningContext( 20, [], false ) );
 
 		// In AMP-first, the IDs should include all of the newly-created posts.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
@@ -147,16 +148,15 @@ final class ScannableURLProviderTest extends WP_UnitTestCase {
 		 * If the WP-CLI command has an include argument, and is_singular isn't in it, no posts will have AMP enabled.
 		 * For example, wp amp validate-site --include=is_tag,is_category
 		 */
-		$this->set_private_property( $this->scannable_url_provider, 'include_conditionals', [ 'is_tag', 'is_category' ] );
+		$this->scannable_url_provider = new ScannableURLProvider( new URLScanningContext( 20, [ 'is_tag', 'is_category' ], false ) );
 		$this->assertEquals( [], $this->call_private_method( $this->scannable_url_provider, 'get_posts_that_support_amp', [ $ids ] ) );
 
 		/*
 		 * If is_singular is in the WP-CLI argument, it should return these posts as being AMP-enabled.
 		 * For example, wp amp validate-site include=is_singular,is_category
 		 */
-		$this->set_private_property( $this->scannable_url_provider, 'include_conditionals', [ 'is_singular', 'is_category' ] );
+		$this->scannable_url_provider = new ScannableURLProvider( new URLScanningContext( 20, [ 'is_singular', 'is_category' ], false ) );
 		$this->assertEmpty( array_diff( $ids, $this->call_private_method( $this->scannable_url_provider, 'get_posts_that_support_amp', [ $ids ] ) ) );
-		$this->set_private_property( $this->scannable_url_provider, 'include_conditionals', [] );
 	}
 
 	/**
@@ -183,16 +183,15 @@ final class ScannableURLProviderTest extends WP_UnitTestCase {
 		$this->assertEquals( [ $second_author_url ], $actual_urls );
 
 		// If $include_conditionals is set and does not have is_author, this should not return a URL.
-		$this->set_private_property( $this->scannable_url_provider, 'include_conditionals', [ 'is_category' ] );
+		$this->scannable_url_provider = new ScannableURLProvider( new URLScanningContext( 20, [ 'is_category' ], false ) );
 		$this->assertEquals( [], $this->call_private_method( $this->scannable_url_provider, 'get_author_page_urls' ) );
 
 		// If $include_conditionals is set and has is_author, this should return URLs.
-		$this->set_private_property( $this->scannable_url_provider, 'include_conditionals', [ 'is_author' ] );
+		$this->scannable_url_provider = new ScannableURLProvider( new URLScanningContext( 20, [ 'is_author' ], false ) );
 		$this->assertEquals(
 			[ $first_author_url, $second_author_url ],
 			$this->call_private_method( $this->scannable_url_provider, 'get_author_page_urls' )
 		);
-		$this->set_private_property( $this->scannable_url_provider, 'include_conditionals', [] );
 	}
 
 	/**
@@ -219,11 +218,11 @@ final class ScannableURLProviderTest extends WP_UnitTestCase {
 		}
 
 		// When $include_unsupported is true, all taxonomies should be supported.
-		$this->set_private_property( $this->scannable_url_provider, 'include_unsupported', true );
+		$this->scannable_url_provider = new ScannableURLProvider( new URLScanningContext( 20, [], true ) );
 		foreach ( $taxonomies_to_test as $taxonomy ) {
 			$this->assertTrue( $this->call_private_method( $this->scannable_url_provider, 'does_taxonomy_support_amp', [ $taxonomy ] ) );
 		}
-		$this->set_private_property( $this->scannable_url_provider, 'include_unsupported', false );
+		$this->scannable_url_provider = new ScannableURLProvider( new URLScanningContext( 20, [], false ) );
 
 		// When the user has checked the Option::ALL_TEMPLATES_SUPPORTED box, this should always be true.
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, true );
@@ -236,12 +235,11 @@ final class ScannableURLProviderTest extends WP_UnitTestCase {
 		 * If the user passed allowed conditionals to the WP-CLI command like wp amp validate-site --include=is_category,is_tag
 		 * these should be supported taxonomies.
 		 */
-		$this->set_private_property( $this->scannable_url_provider, 'include_conditionals', [ 'is_category', 'is_tag' ] );
+		$this->scannable_url_provider = new ScannableURLProvider( new URLScanningContext( 20, [ 'is_category', 'is_tag' ], true ) );
 		$this->assertTrue( $this->call_private_method( $this->scannable_url_provider, 'does_taxonomy_support_amp', [ 'category' ] ) );
 		$this->assertTrue( $this->call_private_method( $this->scannable_url_provider, 'does_taxonomy_support_amp', [ 'tag' ] ) );
 		$this->assertFalse( $this->call_private_method( $this->scannable_url_provider, 'does_taxonomy_support_amp', [ 'author' ] ) );
 		$this->assertFalse( $this->call_private_method( $this->scannable_url_provider, 'does_taxonomy_support_amp', [ 'search' ] ) );
-		$this->set_private_property( $this->scannable_url_provider, 'include_conditionals', [] );
 	}
 
 	/**
@@ -365,13 +363,12 @@ final class ScannableURLProviderTest extends WP_UnitTestCase {
 		$this->assertTrue( is_string( $this->call_private_method( $this->scannable_url_provider, 'get_search_page' ) ) );
 
 		// If $include_conditionals is set and does not have is_search, this should not return a URL.
-		$this->set_private_property( $this->scannable_url_provider, 'include_conditionals', [ 'is_author' ] );
+		$this->scannable_url_provider = new ScannableURLProvider( new URLScanningContext( 20, [ 'is_author' ], false ) );
 		$this->assertEquals( null, $this->call_private_method( $this->scannable_url_provider, 'get_search_page' ) );
 
 		// If $include_conditionals has is_search, this should return a URL.
-		$this->set_private_property( $this->scannable_url_provider, 'include_conditionals', [ 'is_search' ] );
+		$this->scannable_url_provider = new ScannableURLProvider( new URLScanningContext( 20, [ 'is_search' ], false ) );
 		$this->assertTrue( is_string( $this->call_private_method( $this->scannable_url_provider, 'get_search_page' ) ) );
-		$this->set_private_property( $this->scannable_url_provider, 'include_conditionals', [] );
 	}
 
 	/**
@@ -386,13 +383,12 @@ final class ScannableURLProviderTest extends WP_UnitTestCase {
 		$this->assertStringContains( $year, $this->call_private_method( $this->scannable_url_provider, 'get_date_page' ) );
 
 		// If $include_conditionals is set and does not have is_date, this should not return a URL.
-		$this->set_private_property( $this->scannable_url_provider, 'include_conditionals', [ 'is_search' ] );
+		$this->scannable_url_provider = new ScannableURLProvider( new URLScanningContext( 20, [ 'is_search' ], false ) );
 		$this->assertEquals( null, $this->call_private_method( $this->scannable_url_provider, 'get_date_page' ) );
 
 		// If $include_conditionals has is_date, this should return a URL.
-		$this->set_private_property( $this->scannable_url_provider, 'include_conditionals', [ 'is_date' ] );
-		$parsed_page_url = wp_parse_url( $this->call_private_method( $this->scannable_url_provider, 'get_date_page' ) );
+		$this->scannable_url_provider = new ScannableURLProvider( new URLScanningContext( 20, [ 'is_date' ], false ) );
+		$parsed_page_url              = wp_parse_url( $this->call_private_method( $this->scannable_url_provider, 'get_date_page' ) );
 		$this->assertStringContains( $year, $parsed_page_url['query'] );
-		$this->set_private_property( $this->scannable_url_provider, 'include_conditionals', [] );
 	}
 }

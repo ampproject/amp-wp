@@ -14,7 +14,7 @@ When enabled, the data-ampdevmode attribute will be added to the document elemen
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1403](/includes/amp-helper-functions.php#L1403-L1413)
+:link: [includes/amp-helper-functions.php:1424](/includes/amp-helper-functions.php#L1424-L1434)
 
 <details>
 <summary>Show Code</summary>

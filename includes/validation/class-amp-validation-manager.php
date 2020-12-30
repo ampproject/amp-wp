@@ -5,10 +5,10 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\DevTools\BlockSources;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Icon;
 use AmpProject\AmpWP\Option;
-use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Services;
 use AmpProject\Attribute;
@@ -466,7 +466,7 @@ class AMP_Validation_Manager {
 		 * This can't just easily add an amp_validation_error_sanitized filter because the the filter_sanitizer_args() method
 		 * currently needs to obtain the list of overrides to create a parsed_cache_variant.
 		 */
-		foreach ( $_REQUEST[ AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY ] as $slug => $data ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		foreach ( $_REQUEST[ AMP_Validated_URL_Post_Type::VALIDATION_ERRORS_INPUT_KEY ] as $slug => $data ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			if ( ! isset( $data[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) ) {
 				continue;
 			}
@@ -693,6 +693,7 @@ class AMP_Validation_Manager {
 					'status'      => $result['status'],
 					'term_status' => $result['term_status'],
 					'forced'      => $result['forced'],
+					'term_id'     => $result['term']->term_id,
 				];
 			}
 		}
@@ -1177,7 +1178,7 @@ class AMP_Validation_Manager {
 			}
 		}
 
-		$sources = array_unique( $sources, SORT_REGULAR );
+		$sources = array_values( array_unique( $sources, SORT_REGULAR ) );
 
 		return $sources;
 	}
@@ -1632,7 +1633,7 @@ class AMP_Validation_Manager {
 			return false;
 		}
 
-		$validate_key = wp_unslash( $_GET[ self::VALIDATE_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$validate_key = wp_unslash( $_GET[ self::VALIDATE_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		if ( ! hash_equals( self::get_amp_validate_nonce(), $validate_key ) ) {
 			return new WP_Error(
 				'http_request_failed',
@@ -2014,8 +2015,8 @@ class AMP_Validation_Manager {
 			$r = wp_remote_get(
 				$validation_url,
 				[
-					'cookies'     => wp_unslash( $_COOKIE ), // Pass along cookies so private pages and drafts can be accessed.
-					'timeout'     => 15, // Increase from default of 5 to give extra time for the plugin to identify the sources for any given validation errors.
+					'cookies'     => wp_unslash( $_COOKIE ), // phpcs:ignore WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___COOKIE -- Pass along cookies so private pages and drafts can be accessed.
+					'timeout'     => 15, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout -- Increase from default of 5 to give extra time for the plugin to identify the sources for any given validation errors.
 					/** This filter is documented in wp-includes/class-wp-http-streams.php */
 					'sslverify'   => apply_filters( 'https_local_ssl_verify', false ),
 					'redirection' => 0, // Because we're in a loop for redirection.
@@ -2378,6 +2379,13 @@ class AMP_Validation_Manager {
 			return;
 		}
 
+		$editor_support = Services::get( 'editor.editor_support' );
+
+		// Block validation script uses features only available beginning with WP 5.3.
+		if ( ! $editor_support->editor_supports_amp_block_editor_features() ) {
+			return; // @codeCoverageIgnore
+		}
+
 		$slug = 'amp-block-validation';
 
 		$asset_file   = AMP__DIR__ . '/assets/js/' . $slug . '.asset.php';
@@ -2402,14 +2410,40 @@ class AMP_Validation_Manager {
 
 		wp_styles()->add_data( $slug, 'rtl', 'replace' );
 
+		$block_sources = Services::has( 'dev_tools.block_sources' ) ? Services::get( 'dev_tools.block_sources' ) : null;
+
+		$plugin_registry = Services::get( 'plugin_registry' );
+
+		$plugin_names = array_map(
+			static function ( $plugin ) {
+				return isset( $plugin['Name'] ) ? $plugin['Name'] : '';
+			},
+			$plugin_registry->get_plugins()
+		);
+
 		$data = [
-			'isSanitizationAutoAccepted' => self::is_sanitization_auto_accepted(),
+			'HTML_ATTRIBUTE_ERROR_TYPE'            => AMP_Validation_Error_Taxonomy::HTML_ATTRIBUTE_ERROR_TYPE,
+			'HTML_ELEMENT_ERROR_TYPE'              => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+			'JS_ERROR_TYPE'                        => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
+			'CSS_ERROR_TYPE'                       => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+			'VALIDATION_ERROR_NEW_REJECTED_STATUS' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
+			'VALIDATION_ERROR_NEW_ACCEPTED_STATUS' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+			'VALIDATION_ERROR_ACK_REJECTED_STATUS' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
+			'VALIDATION_ERROR_ACK_ACCEPTED_STATUS' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+			'isSanitizationAutoAccepted'           => self::is_sanitization_auto_accepted(),
+			'blockSources'                         => $block_sources ? $block_sources->get_block_sources() : null,
+			'pluginNames'                          => $plugin_names,
+			'themeName'                            => wp_get_theme()->get( 'Name' ),
+			'themeSlug'                            => wp_get_theme()->get_stylesheet(),
 		];
 
-		wp_localize_script(
+		wp_add_inline_script(
 			$slug,
-			'ampBlockValidation',
-			$data
+			sprintf(
+				'var ampBlockValidation = %s;',
+				wp_json_encode( $data )
+			),
+			'before'
 		);
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {
