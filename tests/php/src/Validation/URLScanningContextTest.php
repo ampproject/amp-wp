@@ -44,7 +44,7 @@ final class URLScanningContextTest extends WP_UnitTestCase {
 				return -4;
 			}
 		);
-		$this->assertEquals( 1, $this->test_instance->get_limit_per_type() );
+		$this->assertEquals( -1, $this->test_instance->get_limit_per_type() );
 
 		add_filter(
 			'amp_url_validation_limit_per_type',

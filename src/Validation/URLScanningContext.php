@@ -80,12 +80,7 @@ final class URLScanningContext {
 		 */
 		$url_validation_limit_per_type = (int) apply_filters( 'amp_url_validation_limit_per_type', $this->limit_per_type );
 
-		// Valid values are any integer -1 and above.
-		if ( $url_validation_limit_per_type < -1 ) {
-			$url_validation_limit_per_type = 1;
-		}
-
-		return $url_validation_limit_per_type;
+		return max( $url_validation_limit_per_type, -1 );
 	}
 
 	/**
