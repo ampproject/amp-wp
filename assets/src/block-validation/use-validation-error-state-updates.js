@@ -81,10 +81,11 @@ export function useValidationErrorStateUpdates() {
 
 	const { setIsFetchingErrors, setReviewLink, setValidationErrors } = useDispatch( BLOCK_VALIDATION_STORE_KEY );
 
-	const { blockOrder, currentPost, getBlock, isSavingPost, validationErrors } = useSelect( ( select ) => ( {
+	const { blockOrder, currentPost, getBlock, isFetchingErrors, isSavingPost, validationErrors } = useSelect( ( select ) => ( {
 		blockOrder: select( 'core/block-editor' ).getClientIdsWithDescendants(),
 		currentPost: select( 'core/editor' ).getCurrentPost(),
 		getBlock: select( 'core/block-editor' ).getBlock,
+		isFetchingErrors: select( BLOCK_VALIDATION_STORE_KEY ).getIsFetchingErrors(),
 		isSavingPost: select( 'core/editor' ).isSavingPost(),
 		validationErrors: select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors(),
 	} ), [] );
@@ -94,7 +95,7 @@ export function useValidationErrorStateUpdates() {
 	 * subsequent saves.
 	 */
 	useEffect( () => {
-		if ( isSavingPost ) {
+		if ( isFetchingErrors || isSavingPost ) {
 			return () => undefined;
 		}
 
@@ -102,25 +103,23 @@ export function useValidationErrorStateUpdates() {
 		( async () => {
 			setIsFetchingErrors( true );
 
-			try {
-				const newValidation = await apiFetch( {
-					path: addQueryArgs( `/amp/v1/validate-post-url/${ currentPost.id }`, { context: 'amp-editor' } ),
-				} );
+			const newValidation = await apiFetch( {
+				path: addQueryArgs( `/amp/v1/validate-post-url/${ currentPost.id }`, { context: 'amp-editor' } ),
+			} );
 
-				if ( unmounted ) {
-					return;
-				}
+			if ( unmounted ) {
+				return;
+			}
 
-				setValidationErrors( newValidation.results );
-				setReviewLink( newValidation.review_link );
-				setIsFetchingErrors( false );
-			} catch ( e ) {}
+			setValidationErrors( newValidation.results );
+			setReviewLink( newValidation.review_link );
+			setIsFetchingErrors( false );
 		} )();
 
 		return () => {
 			unmounted = true;
 		};
-	}, [ currentPost.id, isSavingPost, setIsFetchingErrors, setReviewLink, setValidationErrors ] );
+	}, [ currentPost.id, isFetchingErrors, isSavingPost, setIsFetchingErrors, setReviewLink, setValidationErrors ] );
 
 	/**
 	 * Runs an equality check when validation errors are received before running the heavier effect.
