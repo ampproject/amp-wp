@@ -33,7 +33,22 @@ export function AMPToolbarButton( { clientId, count } ) {
 					openGeneralSidebar( `${ PLUGIN_NAME }/${ SIDEBAR_NAME }` );
 					// eslint-disable-next-line @wordpress/react-no-unsafe-timeout
 					setTimeout( () => {
-						document.querySelector( `.error-${ clientId }:not(.is-opened) button` )?.click();
+						const buttons = Array.from( document.querySelectorAll( `.error-${ clientId } button` ) );
+						const firstButton = buttons[ 0 ];
+
+						// Ensure all errors are expanded.
+						// @todo This would be more elegant if this state were captured in the store?
+						buttons.reverse(); // Reverse so that the first one is focused first.
+						for ( const button of buttons ) {
+							if ( 'false' === button.getAttribute( 'aria-expanded' ) ) {
+								button.click();
+							}
+						}
+
+						// Make sure the first is scrolled into view.
+						if ( firstButton ) {
+							firstButton.scrollIntoView( { block: 'start', inline: 'nearest', behavior: 'smooth' } );
+						}
 					} );
 				} }
 			>
