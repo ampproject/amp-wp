@@ -1,37 +1,69 @@
 /**
- * Validates blocks for AMP compatibility.
- *
- * This uses the REST API response from saving a page to find validation errors.
- * If one exists for a block, it display it inline with a Notice component.
- */
-
-/**
  * WordPress dependencies
  */
+import { registerPlugin } from '@wordpress/plugins';
+import { __ } from '@wordpress/i18n';
 import { addFilter } from '@wordpress/hooks';
-import { select, subscribe } from '@wordpress/data';
+import { PluginSidebar, PluginSidebarMoreMenuItem } from '@wordpress/edit-post';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import { isAMPEnabled } from '../block-editor/helpers';
-import { updateValidationErrors, maybeResetValidationErrors } from './helpers';
-import { withValidationErrorNotice } from './components';
-import './store';
-import '../block-editor/store';
+import { INITIAL_STATE, createStore, BLOCK_VALIDATION_STORE_KEY } from './store';
+import { MoreMenuIcon, ToolbarIcon } from './icon';
+import { withAMPToolbarButton } from './with-amp-toolbar-button';
+import { Sidebar } from './sidebar';
+import { InvalidBlockOutline } from './invalid-block-outline';
+import { useValidationErrorStateUpdates } from './use-validation-error-state-updates';
 
-const { isEditedPostDirty } = select( 'core/editor' );
+export const PLUGIN_NAME = 'amp-block-validation';
+export const SIDEBAR_NAME = 'amp-editor-sidebar';
+export const PLUGIN_TITLE = __( 'AMP for WordPress', 'amp' );
 
-subscribe( () => {
-	try {
-		if ( ! isEditedPostDirty() ) {
-			if ( ! isAMPEnabled() ) {
-				maybeResetValidationErrors();
-			} else {
-				updateValidationErrors();
-			}
-		}
-	} catch ( err ) {}
-} );
+createStore( INITIAL_STATE );
 
-addFilter( 'editor.BlockEdit', 'amp/add-notice', withValidationErrorNotice, 99 );
+/**
+ * Provides a dedicated sidebar for the plugin, with toggle buttons in the editor toolbar and more menu.
+ */
+function AMPBlockValidation() {
+	const { broken, errorCount } = useSelect( ( select ) => ( {
+		broken: select( BLOCK_VALIDATION_STORE_KEY ).getAMPCompatibilityBroken(),
+		errorCount: select( BLOCK_VALIDATION_STORE_KEY ).getUnreviewedValidationErrors()?.length || 0,
+	} ), [] );
+
+	useValidationErrorStateUpdates();
+
+	return (
+		<>
+			<PluginSidebarMoreMenuItem
+				icon={ <MoreMenuIcon /> }
+				target={ SIDEBAR_NAME }
+			>
+				{ PLUGIN_TITLE }
+			</PluginSidebarMoreMenuItem>
+			<PluginSidebar
+				className={ `${ PLUGIN_NAME }-sidebar` }
+				icon={ (
+					<ToolbarIcon count={ errorCount } broken={ broken } />
+				) }
+				name={ SIDEBAR_NAME }
+				title={ PLUGIN_TITLE }
+			>
+
+				<Sidebar />
+				<InvalidBlockOutline />
+			</PluginSidebar>
+		</>
+	);
+}
+
+registerPlugin(
+	PLUGIN_NAME,
+	{
+		icon: MoreMenuIcon,
+		render: AMPBlockValidation,
+	},
+);
+
+addFilter( 'editor.BlockEdit', 'ampBlockValidation/filterEdit', withAMPToolbarButton, -99 );

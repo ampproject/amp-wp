@@ -56,6 +56,16 @@ final class Services {
 	}
 
 	/**
+	 * Check if a particular service has been registered in the service container.
+	 *
+	 * @param string $service Service ID to retrieve.
+	 * @return bool
+	 */
+	public static function has( $service ) {
+		return self::get_container()->has( $service );
+	}
+
+	/**
 	 * Get an instance of the plugin.
 	 *
 	 * @return Plugin Plugin object instance.

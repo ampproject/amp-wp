@@ -6,6 +6,8 @@
  * @since 0.6
  */
 
+use AmpProject\AmpWP\Services;
+
 /**
  * Post meta box class.
  *
@@ -213,26 +215,8 @@ class AMP_Post_Meta_Box {
 			return;
 		}
 
-		// Gutenberg v5.4 was bundled with WP 5.2, which is the earliest release known to work without errors.
-		$gb_supported = defined( 'GUTENBERG_VERSION' ) && version_compare( GUTENBERG_VERSION, '5.4.0', '>=' );
-		$wp_supported = ! $gb_supported && version_compare( get_bloginfo( 'version' ), '5.2', '>=' );
-
-		// Let the user know that block editor functionality is not available if the current Gutenberg or WordPress version is not supported.
-		if ( ! $gb_supported && ! $wp_supported ) {
-			if ( current_user_can( 'manage_options' ) ) {
-				wp_add_inline_script(
-					'wp-edit-post',
-					sprintf(
-						'wp.domReady(
-							function () {
-								wp.data.dispatch( "core/notices" ).createWarningNotice( %s )
-							}
-						);',
-						wp_json_encode( __( 'AMP functionality is not available since your version of the Block Editor is too old. Please either update WordPress core to the latest version or activate the Gutenberg plugin. As a last resort, you may use the Classic Editor plugin instead.', 'amp' ) )
-					)
-				);
-			}
-
+		$editor_support = Services::get( 'editor.editor_support' );
+		if ( ! $editor_support->editor_supports_amp_block_editor_features() ) {
 			return;
 		}
 
