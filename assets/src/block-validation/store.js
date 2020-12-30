@@ -22,7 +22,7 @@ const SET_VALIDATION_ERRORS = 'SET_VALIDATION_ERRORS';
 
 export const INITIAL_STATE = {
 	ampCompatibilityBroken: false,
-	isFetchingErrors: true,
+	isFetchingErrors: false,
 	isShowingReviewed: false,
 	rawValidationErrors: [],
 	reviewLink: null,

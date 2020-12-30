@@ -77,15 +77,16 @@ export function maybeAddClientIdToValidationError( { validationError, source, cu
  * components within multiple slotfills to have access to the same state.
  */
 export function useValidationErrorStateUpdates() {
+	const [ blockOrderBeforeSave, setBlockOrderBeforeSave ] = useState( [] );
 	const [ previousValidationErrors, setPreviousValidationErrors ] = useState( [] );
 
 	const { setIsFetchingErrors, setReviewLink, setValidationErrors } = useDispatch( BLOCK_VALIDATION_STORE_KEY );
 
-	const { blockOrder, currentPost, getBlock, isFetchingErrors, isSavingPost, validationErrors } = useSelect( ( select ) => ( {
-		blockOrder: select( 'core/block-editor' ).getClientIdsWithDescendants(),
+	const { currentPost, getBlock, getClientIdsWithDescendants, isSavingPost, validationErrors } = useSelect( ( select ) => ( {
+		getClientIdsWithDescendants: select( 'core/block-editor' ).getClientIdsWithDescendants,
 		currentPost: select( 'core/editor' ).getCurrentPost(),
 		getBlock: select( 'core/block-editor' ).getBlock,
-		isFetchingErrors: select( BLOCK_VALIDATION_STORE_KEY ).getIsFetchingErrors(),
+		getBlocks: select( 'core/block-editor' ).getBlocks(),
 		isSavingPost: select( 'core/editor' ).isSavingPost(),
 		validationErrors: select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors(),
 	} ), [] );
@@ -95,12 +96,13 @@ export function useValidationErrorStateUpdates() {
 	 * subsequent saves.
 	 */
 	useEffect( () => {
-		if ( isFetchingErrors || isSavingPost ) {
+		if ( isSavingPost ) {
 			return () => undefined;
 		}
 
 		let unmounted = false;
 		( async () => {
+			setBlockOrderBeforeSave( getClientIdsWithDescendants() );
 			setIsFetchingErrors( true );
 
 			const newValidation = await apiFetch( {
@@ -119,7 +121,7 @@ export function useValidationErrorStateUpdates() {
 		return () => {
 			unmounted = true;
 		};
-	}, [ currentPost.id, isFetchingErrors, isSavingPost, setIsFetchingErrors, setReviewLink, setValidationErrors ] );
+	}, [ currentPost.id, getClientIdsWithDescendants, isSavingPost, setIsFetchingErrors, setReviewLink, setValidationErrors ] );
 
 	/**
 	 * Runs an equality check when validation errors are received before running the heavier effect.
@@ -151,7 +153,7 @@ export function useValidationErrorStateUpdates() {
 					validationError,
 					source,
 					getBlock,
-					blockOrder,
+					blockOrder: 0 < blockOrderBeforeSave.length ? blockOrderBeforeSave : getClientIdsWithDescendants(), // blockOrderBeforeSave may be empty on initial load.
 					currentPostId: currentPost.id,
 				} );
 			}
@@ -160,5 +162,5 @@ export function useValidationErrorStateUpdates() {
 		} );
 
 		setValidationErrors( newValidationErrors );
-	}, [ blockOrder, currentPost.id, getBlock, setValidationErrors, previousValidationErrors ] );
+	}, [ blockOrderBeforeSave, currentPost.id, getBlock, getClientIdsWithDescendants, setValidationErrors, previousValidationErrors ] );
 }
