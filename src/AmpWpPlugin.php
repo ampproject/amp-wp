@@ -11,6 +11,9 @@ use AmpProject\AmpWP\Admin;
 use AmpProject\AmpWP\BackgroundTask;
 use AmpProject\AmpWP\Infrastructure\ServiceBasedPlugin;
 use AmpProject\AmpWP\Instrumentation;
+use AmpProject\AmpWP\Validation\SavePostValidationEvent;
+use AmpProject\AmpWP\Validation\URLValidationCron;
+use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 
 use function is_user_logged_in;
 
@@ -80,6 +83,9 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'server_timing'                     => Instrumentation\ServerTiming::class,
 		'site_health_integration'           => Admin\SiteHealth::class,
 		'validated_url_stylesheet_gc'       => BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection::class,
+		'url_validation_cron'               => URLValidationCron::class,
+		'save_post_validation_event'        => SavePostValidationEvent::class,
+		'background_task_deactivator'       => BackgroundTaskDeactivator::class,
 	];
 
 	/**
@@ -161,6 +167,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			DevTools\CallbackReflection::class,
 			DevTools\FileReflection::class,
 			ReaderThemeLoader::class,
+			BackgroundTask\BackgroundTaskDeactivator::class,
 		];
 	}
 
