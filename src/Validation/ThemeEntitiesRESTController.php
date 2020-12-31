@@ -23,7 +23,7 @@ use WP_Widget_Factory;
 /**
  * ThemeEntitiesRESTController class.
  *
- * @since 2.1
+ * @since 2.2
  * @internal
  */
 final class ThemeEntitiesRESTController extends WP_REST_Controller implements Conditional, Delayed, Service, Registerable {
@@ -98,7 +98,7 @@ final class ThemeEntitiesRESTController extends WP_REST_Controller implements Co
 	 * Sets up the controller.
 	 */
 	public function register() {
-		if ( self::CONTEXT_THEME_DISABLED === $_GET['context'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+		if ( isset( $_GET['context'] ) && self::CONTEXT_THEME_DISABLED === $_GET['context'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 			$hooks = [
 				'pre_option_template',
 				'option_template',
@@ -111,13 +111,13 @@ final class ThemeEntitiesRESTController extends WP_REST_Controller implements Co
 			}
 		}
 
-		add_action( 'rest_api_init', [ $this, 'register_route' ] );
+		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
 	}
 
 	/**
 	 * Registers all routes for the controller.
 	 */
-	public function register_route() {
+	public function register_routes() {
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
