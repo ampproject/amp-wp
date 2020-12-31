@@ -129,7 +129,7 @@ final class PairedBrowsing implements Service, Registerable, Conditional {
 	 */
 	public function init_app() {
 		add_action( 'template_redirect', [ $this, 'ensure_app_location' ] );
-		add_action( 'template_include', [ $this, 'filter_template_include_for_app' ], PHP_INT_MAX );
+		add_filter( 'template_include', [ $this, 'filter_template_include_for_app' ], PHP_INT_MAX );
 	}
 
 	/**
@@ -211,7 +211,7 @@ final class PairedBrowsing implements Service, Registerable, Conditional {
 					'parent' => 'amp',
 					'id'     => 'amp-paired-browsing',
 					'title'  => esc_html__( 'Paired Browsing', 'amp' ),
-					'href'   => $this->get_paired_browsing_url(),
+					'href'   => esc_url( $this->get_paired_browsing_url() ),
 				]
 			);
 		}
@@ -279,36 +279,42 @@ final class PairedBrowsing implements Service, Registerable, Conditional {
 		/** This action is documented in includes/class-amp-theme-support.php */
 		do_action( 'amp_register_polyfills' );
 
+		$handle = 'amp-paired-browsing-app';
 		wp_enqueue_style(
-			'amp-paired-browsing-app',
+			$handle,
 			amp_get_asset_url( '/css/amp-paired-browsing-app.css' ),
 			[ 'dashicons' ],
 			AMP__VERSION
 		);
 
-		wp_styles()->add_data( 'amp-paired-browsing-app', 'rtl', 'replace' );
+		wp_styles()->add_data( $handle, 'rtl', 'replace' );
 
+		$handle       = 'amp-paired-browsing-app';
 		$asset        = require AMP__DIR__ . '/assets/js/amp-paired-browsing-app.asset.php';
 		$dependencies = $asset['dependencies'];
 		$version      = $asset['version'];
 
 		wp_enqueue_script(
-			'amp-paired-browsing-app',
+			$handle,
 			amp_get_asset_url( '/js/amp-paired-browsing-app.js' ),
 			$dependencies,
 			$version,
 			true
 		);
 
-		wp_localize_script(
-			'amp-paired-browsing-app',
-			'ampPairedBrowsingAppData',
-			[
-				'ampPairedBrowsingQueryVar' => self::APP_QUERY_VAR,
-				'noampQueryVar'             => QueryVar::NOAMP,
-				'noampMobile'               => QueryVar::NOAMP_MOBILE,
-				'documentTitlePrefix'       => __( 'AMP Paired Browsing:', 'amp' ),
-			]
+		$data = [
+			'ampPairedBrowsingQueryVar' => self::APP_QUERY_VAR,
+			'noampQueryVar'             => QueryVar::NOAMP,
+			'noampMobile'               => QueryVar::NOAMP_MOBILE,
+			'documentTitlePrefix'       => __( 'AMP Paired Browsing:', 'amp' ),
+		];
+		wp_add_inline_script(
+			$handle,
+			sprintf(
+				'var ampPairedBrowsingAppData = %s;',
+				wp_json_encode( $data )
+			),
+			'before'
 		);
 
 		return AMP__DIR__ . '/includes/templates/amp-paired-browsing.php';
