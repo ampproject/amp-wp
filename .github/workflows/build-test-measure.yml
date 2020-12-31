@@ -199,8 +199,6 @@ jobs:
   e2e-test-js:
     name: 'E2E test: JS'
     runs-on: ubuntu-latest
-    # Tests are a bit flaky at the moment.
-    continue-on-error: true
 
     steps:
       - name: Checkout
