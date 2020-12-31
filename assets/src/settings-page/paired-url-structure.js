@@ -17,6 +17,11 @@ import { AMPDrawer } from '../components/amp-drawer';
 import { AMPNotice, NOTICE_TYPE_INFO, NOTICE_SIZE_LARGE } from '../components/amp-notice';
 
 /**
+ * @typedef {{name: string, slug: string, type: string}} Source
+ * @typedef {{query_var: string[], path_suffix: string[], legacy_transitional: string[], legacy_reader: string[], custom: string[]}} PairedUrlExamplesData
+ */
+
+/**
  * Paired URL examples.
  *
  * @param {Object} props Component props.
@@ -53,7 +58,7 @@ PairedUrlExamples.propTypes = {
 /**
  * Get custom paired structure sources.
  *
- * @param {string[]} sources Sources.
+ * @param {Array.<Source>} sources Sources.
  * @return {string} Sources string.
  */
 function getCustomPairedStructureSources( sources ) {
@@ -90,6 +95,7 @@ function getCustomPairedStructureSources( sources ) {
  * @param {string} props.focusedSection Focused section.
  */
 export function PairedUrlStructure( { focusedSection } ) {
+	/** @type {{amp_slug:string, endpoint_path_slug_conflicts:Array, custom_paired_endpoint_sources:Array.<Source>, paired_url_examples: PairedUrlExamplesData, rewrite_using_permalinks: boolean}} editedOptions */
 	const { editedOptions, updateOptions } = useContext( Options );
 
 	const { theme_support: themeSupport } = editedOptions || {};
