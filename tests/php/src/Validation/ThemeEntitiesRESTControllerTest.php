@@ -131,7 +131,10 @@ class ThemeEntitiesRESTControllerTest extends WP_UnitTestCase {
 		$this->assertTrue( $this->instance->get_items_permissions_check( new WP_REST_Request( 'GET', '/amp/v1/' . ThemeEntitiesRESTController::REST_BASE ) ) );
 	}
 
-	/** @covers ::get_results() */
+	/**
+	 * @covers ::get_results()
+	 * @covers ::get_entities()
+	 */
 	public function test_get_results_with_theme_disabled_context() {
 		$request = new WP_REST_Request( 'GET', 'amp/v1/theme-entitites' );
 		$request->set_url_params( [ 'context' => ThemeEntitiesRESTController::CONTEXT_THEME_DISABLED ] );
@@ -160,7 +163,10 @@ class ThemeEntitiesRESTControllerTest extends WP_UnitTestCase {
 		$this->assertNotEmpty( $data['widgets'] );
 	}
 
-	/** @covers ::get_results() */
+	/**
+	 * @covers ::get_results()
+	 * @covers ::get_entities()
+	 */
 	public function test_get_results_with_default_context() {
 		$request = new WP_REST_Request( 'GET', 'amp/v1/theme-entitites' );
 
@@ -182,7 +188,10 @@ class ThemeEntitiesRESTControllerTest extends WP_UnitTestCase {
 		$this->assertEmpty( $data['widgets'] );
 	}
 
-	/** @covers ::get_results() */
+	/**
+	 * @covers ::get_results()
+	 * @covers ::get_entities()
+	 */
 	public function test_get_results_cache() {
 		$request = new WP_REST_Request( 'GET', 'amp/v1/theme-entitites' );
 		$this->instance->get_results( $request );
