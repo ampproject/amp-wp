@@ -1768,7 +1768,9 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 			'id'    => 'amp',
 			'title' => $icon->to_html( $attr ) . ' ' . esc_html__( 'AMP', 'amp' ),
 			'href'  => esc_url( $is_amp_request ? $non_amp_url : $amp_url ),
-			// @todo This should have a tooltip to "View non-AMP version" if ! $is_amp_request.
+			'meta'  => [
+				'title' => esc_attr( $is_amp_request ? __( 'Validate URL', 'amp' ) : __( 'View AMP version', 'amp' ) ),
+			],
 		]
 	);
 
