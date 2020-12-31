@@ -149,7 +149,12 @@ class ThemeEntitiesRESTControllerTest extends WP_UnitTestCase {
 			]
 		);
 
-		$this->assertNotEmpty( $data['blocks'] );
+		if ( function_exists( 'get_dynamic_block_names' ) ) {
+			$this->assertNotEmpty( $data['blocks'] );
+		} else {
+			$this->assertEmpty( $data['blocks'] );
+		}
+		
 		$this->assertNotEmpty( $data['post_types'] );
 		$this->assertNotEmpty( $data['taxonomies'] );
 		$this->assertNotEmpty( $data['widgets'] );
