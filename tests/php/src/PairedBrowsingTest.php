@@ -156,6 +156,7 @@ class PairedBrowsingTest extends DependencyInjectedTestCase {
 
 	/** @covers ::add_admin_bar_menu_item() */
 	public function test_add_admin_bar_menu_item() {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
 		add_filter( 'show_admin_bar', '__return_true' );
 		$wp_admin_bar = new WP_Admin_Bar();
