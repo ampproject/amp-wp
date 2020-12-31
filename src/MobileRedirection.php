@@ -434,6 +434,8 @@ final class MobileRedirection implements Service, Registerable {
 	/**
 	 * Redirect to AMP page after submitting comment if the URL is on this site.
 	 *
+	 * This avoids the need for a secondary redirect after having been redirected to the non-AMP URL.
+	 *
 	 * @param string $url URL.
 	 * @return string Amended URL.
 	 */
