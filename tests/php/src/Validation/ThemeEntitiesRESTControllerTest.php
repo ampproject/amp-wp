@@ -136,6 +136,7 @@ class ThemeEntitiesRESTControllerTest extends WP_UnitTestCase {
 		$request = new WP_REST_Request( 'GET', 'amp/v1/theme-entitites' );
 		$request->set_url_params( [ 'context' => ThemeEntitiesRESTController::CONTEXT_THEME_DISABLED ] );
 
+		wp_widgets_init();
 		$data = $this->instance->get_results( $request )->get_data();
 
 		$this->assertEquals(
