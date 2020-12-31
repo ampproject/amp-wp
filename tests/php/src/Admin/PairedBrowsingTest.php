@@ -1,19 +1,25 @@
 <?php
+/**
+ * Tests for PairedBrowsing class.
+ *
+ * @package AmpProject\AmpWP\Tests
+ */
 
-namespace AmpProject\AmpWP\Tests;
+namespace AmpProject\AmpWP\Tests\Admin;
 
-use AmpProject\AmpWP\Admin\PairedBrowsing;
-use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\Infrastructure\Registerable;
-use AmpProject\AmpWP\Infrastructure\Conditional;
 use AMP_Options_Manager;
-use AmpProject\AmpWP\Option;
 use AMP_Theme_Support;
+use AmpProject\AmpWP\Admin\PairedBrowsing;
+use AmpProject\AmpWP\Infrastructure\Conditional;
+use AmpProject\AmpWP\Infrastructure\Registerable;
+use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
-use WP_Admin_Bar;
 use AmpProject\DevMode;
 use WPDieException;
+use WP_Admin_Bar;
 
 /** @coversDefaultClass \AmpProject\AmpWP\Admin\PairedBrowsing */
 class PairedBrowsingTest extends DependencyInjectedTestCase {
