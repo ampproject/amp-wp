@@ -200,7 +200,7 @@ beforeAll( async () => {
 	observeConsoleLogging();
 	await setBrowserViewport( 'large' );
 	await page.setDefaultNavigationTimeout( 10000 );
-	await page.setDefaultTimeout( 3000 );
+	await page.setDefaultTimeout( 10000 );
 } );
 
 // eslint-disable-next-line jest/require-top-level-describe
