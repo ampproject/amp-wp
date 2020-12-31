@@ -92,7 +92,7 @@ describe( 'Template mode recommendations with non-reader-theme active', () => {
 	} );
 
 	afterEach( async () => {
-		await deleteTheme( 'hestia', 'twentytwenty' );
+		await deleteTheme( 'hestia', { newThemeSlug: 'twentytwenty' } );
 	} );
 
 	it( 'makes correct recommendations when user is not technical and the current theme is not a reader theme', async () => {
