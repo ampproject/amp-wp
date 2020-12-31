@@ -359,7 +359,7 @@ class AMP_Theme_Support {
 	 * When 'amp' theme support has not been added or canonical mode is enabled, then this returns false.
 	 *
 	 * @since 0.7
-	 * @deprecated No longer used. Use `! amp_is_canonical() && amp_is_available()`.
+	 * @deprecated No longer used. Consider instead `! amp_is_canonical() && amp_is_available()`.
 	 * @todo There are ecosystem plugins which are still using this method. See <https://wpdirectory.net/search/01EPD9M5CKWHJ7NMQ1WE0YGPJ5>.
 	 *
 	 * @see amp_is_canonical()
@@ -367,8 +367,16 @@ class AMP_Theme_Support {
 	 * @return bool Whether available.
 	 */
 	public static function is_paired_available() {
-		_deprecated_function( __METHOD__, '2.1', 'amp_is_available' );
-		return ! amp_is_canonical() && amp_is_available();
+		if ( amp_is_legacy() ) {
+			return false;
+		}
+
+		if ( amp_is_canonical() ) {
+			return false;
+		}
+
+		$availability = self::get_template_availability();
+		return $availability['supported'];
 	}
 
 	/**

@@ -279,18 +279,17 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * Test is_paired_available.
 	 *
 	 * @covers AMP_Theme_Support::is_paired_available()
-	 * @expectedDeprecated AMP_Theme_Support::is_paired_available
 	 */
 	public function test_is_paired_available() {
 
 		// Establish initial state.
 		$post_id = self::factory()->post->create( [ 'post_title' => 'Test' ] );
 		$this->set_template_mode( AMP_Theme_Support::READER_MODE_SLUG );
-		$this->go_to( get_permalink( $post_id ) );
+		query_posts( [ 'p' => $post_id ] ); // phpcs:ignore
 		$this->assertTrue( is_singular() );
 
-		// Paired is available if not canonical.
-		$this->assertTrue( AMP_Theme_Support::is_paired_available() );
+		// Transitional support is not available if theme support is not present or canonical.
+		$this->assertFalse( AMP_Theme_Support::is_paired_available() );
 		$this->set_template_mode( AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->assertFalse( AMP_Theme_Support::is_paired_available() );
 
@@ -308,7 +307,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		add_filter( 'amp_skip_post', '__return_true' );
 		$this->assertFalse( AMP_Theme_Support::is_paired_available() );
 		$this->assertTrue( is_singular() );
-		$this->go_to( '/?s=test' );
+		query_posts( [ 's' => 'test' ] ); // phpcs:ignore
 		$this->assertTrue( is_search() );
 		$this->assertTrue( AMP_Theme_Support::is_paired_available() );
 		remove_filter( 'amp_skip_post', '__return_true' );
@@ -324,11 +323,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, [ 'is_singular' ] );
 
-		$this->go_to( get_permalink( $post_id ) );
+		query_posts( [ 'p' => $post_id ] ); // phpcs:ignore
 		$this->assertTrue( is_singular() );
 		$this->assertTrue( AMP_Theme_Support::is_paired_available() );
 
-		$this->go_to( '/?s=test' );
+		query_posts( [ 's' => $post_id ] ); // phpcs:ignore
 		$this->assertTrue( is_search() );
 		$this->assertFalse( AMP_Theme_Support::is_paired_available() );
 	}
