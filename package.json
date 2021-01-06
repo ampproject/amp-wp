@@ -45,7 +45,7 @@
     "@wordpress/browserslist-config": "2.7.0",
     "@wordpress/data": "4.26.1",
     "@wordpress/e2e-test-utils": "4.16.0",
-    "@wordpress/edit-post": "3.26.0",
+    "@wordpress/edit-post": "3.26.1",
     "@wordpress/eslint-plugin": "7.4.0",
     "@wordpress/hooks": "2.11.0",
     "@wordpress/jest-puppeteer-axe": "2.0.0",
