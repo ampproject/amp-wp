@@ -115,6 +115,9 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	 * @covers ::enqueue_block_assets()
 	 */
 	public function test_enqueue_block_assets() {
+		set_current_screen( 'post.php' );
+		get_current_screen()->is_block_editor = true;
+
 		if ( ! function_exists( 'register_block_type' ) ) {
 			$this->markTestSkipped( 'The block editor is not available' );
 		}
@@ -178,6 +181,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		foreach ( $expected_localized_values as $localized_value ) {
 			$this->assertContains( $localized_value, $data );
 		}
+		unset( $GLOBALS['post'], $GLOBALS['current_screen'] );
 	}
 
 	/** @covers ::get_featured_image_dimensions() */

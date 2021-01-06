@@ -11,6 +11,7 @@ use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Validation\URLValidationProvider;
 use AmpProject\AmpWP\Validation\ScannableURLProvider;
+use AmpProject\AmpWP\Validation\URLScanningContext;
 use WP_CLI\Utils;
 
 /**
@@ -108,7 +109,7 @@ final class AMP_CLI_Validation_Command {
 	 * @param array $assoc_args Associative args.
 	 * @throws Exception If an error happens.
 	 */
-	public function run( $args, $assoc_args ) {
+	public function run( /** @noinspection PhpUnusedParameterInspection */ $args, $assoc_args ) {
 		$this->assoc_args = $assoc_args;
 
 		$scannable_url_provider  = $this->get_validation_url_provider();
@@ -141,16 +142,7 @@ final class AMP_CLI_Validation_Command {
 			$number_urls_to_crawl
 		);
 
-		$result = $url_validation_provider->with_lock(
-			function () use ( $urls ) {
-				$this->validate_urls( $urls );
-			}
-		);
-
-		if ( is_wp_error( $result ) ) {
-			WP_CLI::error( 'The site cannot be crawled at this time because validation is running in another process.' );
-			return;
-		}
+		$this->validate_urls( $urls );
 
 		$this->wp_cli_progress->finish();
 
@@ -248,9 +240,11 @@ final class AMP_CLI_Validation_Command {
 		}
 
 		$this->scannable_url_provider = new ScannableURLProvider(
-			$limit_type_validate_count,
-			$include_conditionals,
-			$force_crawl_urls
+			new URLScanningContext(
+				$limit_type_validate_count,
+				$include_conditionals,
+				$force_crawl_urls
+			)
 		);
 
 		return $this->scannable_url_provider;
@@ -284,12 +278,7 @@ final class AMP_CLI_Validation_Command {
 			$urls                   = $scannable_url_provider->get_urls();
 		}
 
-		foreach ( $urls as $index => $url ) {
-			// Reset lock between every five URLs.
-			if ( 0 === $index % 5 ) {
-				$this->url_validation_provider->reset_lock();
-			}
-
+		foreach ( $urls as $url ) {
 			$validity = $url_validation_provider->get_url_validation( $url['url'], $url['type'], true );
 
 			if ( $this->wp_cli_progress ) {
@@ -327,12 +316,12 @@ final class AMP_CLI_Validation_Command {
 	 * @param array $assoc_args Associative args.
 	 * @throws Exception If an error happens.
 	 */
-	public function reset( $args, $assoc_args ) {
+	public function reset( /** @noinspection PhpUnusedParameterInspection */ $args, $assoc_args ) {
 		global $wpdb;
 		WP_CLI::confirm( 'Are you sure you want to empty all amp_validated_url posts and amp_validation_error taxonomy terms?', $assoc_args );
 
 		// Delete all posts.
-		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = %s", AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) );
+		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = %s", AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$query = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = %s", AMP_Validated_URL_Post_Type::POST_TYPE_SLUG );
 		$posts = new WP_CLI\Iterators\Query( $query, 10000 );
 
@@ -349,7 +338,7 @@ final class AMP_CLI_Validation_Command {
 		$progress->finish();
 
 		// Delete all terms. Note that many terms should get deleted when their post counts go to zero above.
-		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( * ) FROM $wpdb->term_taxonomy WHERE taxonomy = %s", AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ) );
+		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( * ) FROM $wpdb->term_taxonomy WHERE taxonomy = %s", AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$query = $wpdb->prepare( "SELECT term_id FROM $wpdb->term_taxonomy WHERE taxonomy = %s", AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
 		$terms = new WP_CLI\Iterators\Query( $query, 10000 );
 

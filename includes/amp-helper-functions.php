@@ -325,42 +325,35 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  *
  * Themes can register support for this with `add_theme_support( AMP_Theme_Support::SLUG )`:
  *
- *      add_theme_support( AMP_Theme_Support::SLUG );
+ * ```php
+ * add_theme_support( AMP_Theme_Support::SLUG );
+ * ```
  *
  * This will serve templates in AMP-first, allowing you to use AMP components in your theme templates.
  * If you want to make available in transitional mode, where templates are served in AMP or non-AMP documents, do:
  *
- *      add_theme_support( AMP_Theme_Support::SLUG, array(
- *          'paired' => true,
- *      ) );
+ * ```php
+ * add_theme_support( AMP_Theme_Support::SLUG, array(
+ *     'paired' => true,
+ * ) );
+ * ```
  *
- * Transitional mode is also implied if you define a template_dir:
+ * Transitional mode is also implied if you define a `template_dir`:
  *
- *      add_theme_support( AMP_Theme_Support::SLUG, array(
- *          'template_dir' => 'amp',
- *      ) );
+ * ```php
+ * add_theme_support( AMP_Theme_Support::SLUG, array(
+ *     'template_dir' => 'amp',
+ * ) );
+ * ```
  *
  * If you want to have AMP-specific templates in addition to serving AMP-first, do:
  *
- *      add_theme_support( AMP_Theme_Support::SLUG, array(
- *          'paired'       => false,
- *          'template_dir' => 'amp',
- *      ) );
- *
- * If you want to force AMP to always be served on a given template, you can use the templates_supported arg,
- * for example to always serve the Category template in AMP:
- *
- *      add_theme_support( AMP_Theme_Support::SLUG, array(
- *          'templates_supported' => array(
- *              'is_category' => true,
- *          ),
- *      ) );
- *
- * Or if you want to force AMP to be used on all templates:
- *
- *      add_theme_support( AMP_Theme_Support::SLUG, array(
- *          'templates_supported' => 'all',
- *      ) );
+ * ```php
+ * add_theme_support( AMP_Theme_Support::SLUG, array(
+ *     'paired'       => false,
+ *     'template_dir' => 'amp',
+ * ) );
+ * ```
  *
  * @see AMP_Theme_Support::read_theme_support()
  * @return boolean Whether this is in AMP 'canonical' mode, that is whether it is AMP-first and there is not a separate (paired) AMP URL.
@@ -688,6 +681,7 @@ function amp_get_current_url() {
 		$parsed_url['scheme'] = is_ssl() ? 'https' : 'http';
 	}
 	if ( ! isset( $parsed_url['host'] ) ) {
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$parsed_url['host'] = isset( $_SERVER['HTTP_HOST'] ) ? wp_unslash( $_SERVER['HTTP_HOST'] ) : 'localhost';
 	}
 
@@ -706,6 +700,7 @@ function amp_get_current_url() {
 	$current_url .= '/';
 
 	if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$current_url .= ltrim( wp_unslash( $_SERVER['REQUEST_URI'] ), '/' );
 	}
 	return esc_url_raw( $current_url );
@@ -1401,7 +1396,7 @@ function amp_get_content_embed_handlers( $post = null ) {
 /**
  * Determine whether AMP dev mode is enabled.
  *
- * When enabled, the <html> element will get the data-ampdevmode attribute and the plugin will add the same attribute
+ * When enabled, the `<html>` element will get the data-ampdevmode attribute and the plugin will add the same attribute
  * to elements associated with the admin bar and other elements that are provided by the `amp_dev_mode_element_xpaths`
  * filter.
  *
@@ -1419,7 +1414,7 @@ function amp_is_dev_mode() {
 	 * queries for the expressions returned by the 'amp_dev_mode_element_xpaths' filter.
 	 *
 	 * @since 1.3
-	 * @param bool Whether AMP dev mode is enabled.
+	 * @param bool $is_dev_mode_enabled Whether AMP dev mode is enabled.
 	 */
 	return apply_filters(
 		'amp_dev_mode_enabled',

@@ -1,3 +1,23 @@
+#the-list tr {
+	scroll-margin-top: 32px;
+}
+
+@media screen and (max-width: 782px) {
+
+	#the-list tr {
+		scroll-margin-top: 46px;
+	}
+}
+
+@media screen and (max-width: 600px) {
+
+	#the-list tr {
+
+		/* Since the admin bar is not sticky */
+		scroll-margin-top: 0;
+	}
+}
+
 /** Arrow icon on title in error column. */
 .column-error_code > .single-url-detail-toggle {
 	position: relative;

@@ -22,7 +22,7 @@ use Exception;
  * @since 2.0
  * @internal
  */
-final class MonitorCssTransientCaching extends CronBasedBackgroundTask {
+final class MonitorCssTransientCaching extends RecurringBackgroundTask {
 
 	/**
 	 * Name of the event to schedule.
@@ -92,23 +92,24 @@ final class MonitorCssTransientCaching extends CronBasedBackgroundTask {
 	 * @todo This has arbitrary arguments to allow for testing, as we don't have dependency injection for services.
 	 *       With dependency injection, we could for example inject a Clock object and mock it for testing.
 	 *
-	 * @param DateTimeInterface $date            Optional. Date to use for timestamping the processing (for testing).
-	 * @param int               $transient_count Optional. Count of transients to use for the processing (for testing).
+	 * @param array ...$args {
+	 *     Arguments passed to the cron callback.
+	 *
+	 *     @type DateTimeInterface $date Optional. Date to use for timestamping the processing (for testing).
+	 *     @type int               $transient_count Optional. Count of transients to use for the processing (for testing).
+	 * }
 	 * @return void
 	 * @throws Exception If a date could not be instantiated.
 	 */
-	public function process( DateTimeInterface $date = null, $transient_count = null ) {
+	public function process( ...$args ) {
 		if ( wp_using_ext_object_cache() || $this->is_css_transient_caching_disabled() ) {
 			return;
 		}
 
-		if ( null === $date ) {
-			$date = new DateTimeImmutable();
-		}
+		$date = isset( $args[0] ) && $args[0] instanceof DateTimeInterface ? $args[0] : new DateTimeImmutable();
 
-		if ( null === $transient_count ) {
-			$transient_count = $this->query_css_transient_count();
-		}
+		/** @phpstan-ignore-next-line */
+		$transient_count = isset( $args[1] ) ? (int) $args[1] : $this->query_css_transient_count();
 
 		$date_string = $date->format( 'Ymd' );
 		$time_series = $this->get_time_series();
@@ -152,6 +153,7 @@ final class MonitorCssTransientCaching extends CronBasedBackgroundTask {
 	public function query_css_transient_count() {
 		global $wpdb;
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		return (int) $wpdb->get_var(
 			"SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE '_transient_amp-parsed-stylesheet%'"
 		);

@@ -514,7 +514,7 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function test_add_twentytwentyone_mobile_modal() {
 		$html = '
-			<nav>
+			<nav id="site-navigation">
 				<div class="menu-button-container">
 					<button id="primary-mobile-menu">
 						<span class="dropdown-icon open">Menu</span>
@@ -523,12 +523,14 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 				</div>
 				<div class="primary-menu-container">
 					<ul id="primary-menu-list">
-						<li id="menu-item-1">Foo</li>
-						<li id="menu-item-2">Bar</li>
-						<li id="menu-item-3">Baz</li>
+						<li id="menu-item-1"><a href="https://example.com/">Foo</a></li>
+						<li id="menu-item-2"><a href="#colophon">Bar</a></li>
+						<li id="menu-item-3"><a href="https://example.com/#site-footer">Baz</a></li>
+						<li id="menu-item-2"><a href="' . esc_url( home_url( '/#colophon' ) ) . '">Quux</a></li>
 					</ul>
 				</div>
 			</nav>
+			<div id="colophon"></div>
 		';
 
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $html );
@@ -539,6 +541,23 @@ class AMP_Core_Theme_Sanitizer_Test extends WP_UnitTestCase {
 		$query = $dom->xpath->query( '//button[ @id = "primary-mobile-menu" and @data-amp-bind-aria-expanded and @on ]' );
 
 		$this->assertEquals( 1, $query->length );
+
+		$query = $dom->xpath->query( '//a[ @href ]' );
+		$this->assertSame( 4, $query->length );
+		foreach ( $query as $link ) {
+			/** @var DOMElement $link */
+			$href = $link->getAttribute( 'href' );
+			if ( false !== strpos( $href, '#' ) ) {
+				$this->assertTrue( $link->hasAttribute( 'on' ) );
+				if ( false !== strpos( $href, '#colophon' ) ) {
+					$this->assertStringContains( 'colophon.scrollTo', $link->getAttribute( 'on' ) );
+				} else {
+					$this->assertStringNotContains( 'colophon.scrollTo', $link->getAttribute( 'on' ) );
+				}
+			} else {
+				$this->assertFalse( $link->hasAttribute( 'on' ) );
+			}
+		}
 	}
 
 	/**

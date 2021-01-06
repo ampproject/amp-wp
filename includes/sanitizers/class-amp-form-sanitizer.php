@@ -126,6 +126,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 		 * https URL and must not be a link to a CDN".
 		 */
 		if ( ! $action_url ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 			return esc_url_raw( '//' . $_SERVER['HTTP_HOST'] . wp_unslash( $_SERVER['REQUEST_URI'] ) );
 		}
 
@@ -153,14 +154,17 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		if ( ! isset( $parsed_url['host'] ) ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$parsed_url['host'] = $_SERVER['HTTP_HOST'];
 		}
 
 		if ( ! isset( $parsed_url['path'] ) ) {
 			// If there is action URL path, use the one from the request.
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 			$parsed_url['path'] = trailingslashit( wp_unslash( $_SERVER['REQUEST_URI'] ) );
 		} elseif ( '' !== $parsed_url['path'] && '/' !== $parsed_url['path'][0] ) {
 			// If the path is relative, append it to the current request path.
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 			$parsed_url['path'] = trailingslashit( wp_unslash( $_SERVER['REQUEST_URI'] ) ) . trailingslashit( $parsed_url['path'] );
 		}
 
@@ -229,6 +233,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 			} else {
 				$p = $this->dom->createElement( 'p' );
 				$p->setAttribute( 'class', '{{#redirecting}}amp-wp-form-redirecting{{/redirecting}}' );
+				// phpcs:ignore WordPressVIPMinimum.Security.Mustache.OutputNotation -- Sanitization applied via amp-mustache.
 				$p->appendChild( $this->dom->createTextNode( '{{#message}}{{{message}}}{{/message}}' ) );
 
 				// Show generic message for HTTP success/failure.
