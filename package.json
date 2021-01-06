@@ -49,7 +49,7 @@
     "@wordpress/eslint-plugin": "7.4.0",
     "@wordpress/hooks": "2.11.0",
     "@wordpress/jest-puppeteer-axe": "2.0.0",
-    "@wordpress/plugins": "2.24.0",
+    "@wordpress/plugins": "2.24.1",
     "@wordpress/scripts": "12.6.1",
     "babel-plugin-inline-react-svg": "1.1.2",
     "babel-plugin-transform-react-remove-prop-types": "0.4.24",
