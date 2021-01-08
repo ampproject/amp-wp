@@ -185,7 +185,7 @@ final class PairedRouting implements Service, Registerable {
 	 *
 	 * @return PairedUrlStructure Paired URL structure.
 	 */
-	private function get_paired_url_structure() {
+	public function get_paired_url_structure() {
 		if ( ! $this->paired_url_structure instanceof PairedUrlStructure ) {
 			/**
 			 * Filters to allow a custom paired URL structure to be used.
@@ -349,8 +349,9 @@ final class PairedRouting implements Service, Registerable {
 
 		$term_query = new WP_Term_Query(
 			[
-				'slug'   => $amp_slug,
-				'fields' => 'ids',
+				'slug'       => $amp_slug,
+				'fields'     => 'ids',
+				'hide_empty' => false,
 			]
 		);
 		if ( $term_query->terms ) {
@@ -528,7 +529,7 @@ final class PairedRouting implements Service, Registerable {
 	 *
 	 * @return WP_Rewrite Object.
 	 */
-	private function get_wp_rewrite() {
+	public function get_wp_rewrite() {
 		global $wp_rewrite;
 		return $wp_rewrite;
 	}
@@ -686,7 +687,7 @@ final class PairedRouting implements Service, Registerable {
 	 *
 	 * @return array[] Keys are the structures, values are arrays of paired URLs using the structure.
 	 */
-	private function get_paired_url_examples() {
+	public function get_paired_url_examples() {
 		$supported_post_types     = AMP_Post_Type_Support::get_supported_post_types();
 		$hierarchical_post_types  = array_intersect(
 			$supported_post_types,
@@ -728,7 +729,7 @@ final class PairedRouting implements Service, Registerable {
 	 * @return array Sources. Each item is an array with keys for type, slug, and name.
 	 * @global WP_Hook[] $wp_filter Filter registry.
 	 */
-	private function get_custom_paired_structure_sources() {
+	public function get_custom_paired_structure_sources() {
 		global $wp_filter;
 		if ( ! $this->has_custom_paired_url_structure() ) {
 			return [];
