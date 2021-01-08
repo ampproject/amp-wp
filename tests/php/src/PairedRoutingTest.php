@@ -30,6 +30,11 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$this->instance = $this->injector->make( PairedRouting::class );
 	}
 
+	public function tearDown() {
+		unset( $_SERVER['REQUEST_URI'] );
+		parent::tearDown();
+	}
+
 	/** @covers ::__construct() */
 	public function test__construct() {
 		$this->assertInstanceOf( PairedRouting::class, $this->instance );
@@ -37,26 +42,10 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$this->assertInstanceOf( Registerable::class, $this->instance );
 	}
 
-	/** @return array */
-	public function get_register_data() {
-		return [
-			'paired'    => [ true ],
-			'canonical' => [ false ],
-		];
-	}
-
 	/**
 	 * @covers ::register()
-	 * @dataProvider get_register_data
-	 * @param bool $paired Paired.
 	 */
-	public function test_register( $paired ) {
-		if ( $paired ) {
-			AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
-		} else {
-			AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
-		}
-		$this->assertEquals( $paired, ! amp_is_canonical() );
+	public function test_register() {
 		remove_all_actions( 'plugins_loaded' ); // @todo This is needed because the instance already got registered.
 		$this->instance->register();
 		$this->assertEquals( 10, has_filter( 'amp_rest_options_schema', [ $this->instance, 'filter_rest_options_schema' ] ) );
@@ -64,11 +53,7 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$this->assertEquals( 10, has_filter( 'amp_default_options', [ $this->instance, 'filter_default_options' ] ) );
 		$this->assertEquals( 10, has_filter( 'amp_options_updating', [ $this->instance, 'sanitize_options' ] ) );
 		$this->assertEquals( 8, has_action( 'template_redirect', [ $this->instance, 'redirect_extraneous_paired_endpoint' ] ) );
-		if ( $paired ) {
-			$this->assertEquals( 7, has_action( 'plugins_loaded', [ $this->instance, 'initialize_paired_request' ] ) );
-		} else {
-			$this->assertFalse( has_action( 'plugins_loaded', [ $this->instance, 'initialize_paired_request' ] ) );
-		}
+		$this->assertEquals( 7, has_action( 'plugins_loaded', [ $this->instance, 'initialize_paired_request' ] ) );
 	}
 
 	/** @return array */
@@ -158,6 +143,97 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 	}
 
 	/** @return array */
+	public function get_data_for_test_paired_requests() {
+		return [
+			'query_var_reader_mode_amp'             => [
+				AMP_Theme_Support::READER_MODE_SLUG,
+				Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
+				'/?amp=1',
+				true,
+			],
+			'query_var_reader_mode_non_amp'         => [
+				AMP_Theme_Support::READER_MODE_SLUG,
+				Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
+				'/',
+				false,
+			],
+			'path_suffix_transitional_mode_amp'     => [
+				AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
+				Option::PAIRED_URL_STRUCTURE_PATH_SUFFIX,
+				'/amp/',
+				true,
+			],
+			'path_suffix_transitional_mode_non_amp' => [
+				AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
+				Option::PAIRED_URL_STRUCTURE_PATH_SUFFIX,
+				'/',
+				false,
+			],
+			'legacy_reader_mode_amp'                => [
+				AMP_Theme_Support::READER_MODE_SLUG,
+				Option::PAIRED_URL_STRUCTURE_LEGACY_READER,
+				'/amp/',
+				true,
+			],
+			'legacy_transitional_mode_amp'          => [
+				AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
+				Option::PAIRED_URL_STRUCTURE_LEGACY_TRANSITIONAL,
+				'/?amp=1',
+				true,
+			],
+			'standard_mode'                         => [
+				AMP_Theme_Support::STANDARD_MODE_SLUG,
+				Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
+				'/',
+				null,
+			],
+		];
+	}
+
+	/**
+	 * Test initialize_paired_request, integrated with other methods.
+	 *
+	 * @covers ::initialize_paired_request()
+	 * @covers ::detect_endpoint_in_environment()
+	 * @covers ::extract_endpoint_from_environment_before_parse_request()
+	 * @covers ::filter_request_after_endpoint_extraction()
+	 * @covers ::restore_path_endpoint_in_environment()
+	 *
+	 * @dataProvider get_data_for_test_paired_requests
+	 *
+	 * @param string $mode
+	 * @param string $structure
+	 * @param string $request_uri
+	 * @param bool $did_request_endpoint
+	 */
+	public function test_initialize_paired_request_integration( $mode, $structure, $request_uri, $did_request_endpoint ) {
+		global $wp;
+		$post_id = self::factory()->post->create();
+		$this->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, $mode );
+		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, $structure );
+
+		$permalink   = get_permalink( $post_id );
+		$request_uri = rtrim( wp_parse_url( $permalink, PHP_URL_PATH ), '/' ) . $request_uri;
+
+		$_SERVER['REQUEST_URI'] = $request_uri;
+		$this->instance->initialize_paired_request();
+		$this->go_to( $request_uri );
+
+		$this->assertSame( $did_request_endpoint, $this->get_private_property( $this->instance, 'did_request_endpoint' ) );
+		$this->assertSame( $request_uri, $_SERVER['REQUEST_URI'] );
+		$this->assertEquals(
+			trim( strtok( $request_uri, '?' ), '/' ),
+			$wp->request
+		);
+		if ( $did_request_endpoint ) {
+			$this->assertTrue( get_query_var( amp_get_slug() ) );
+		} else {
+			$this->assertEquals( '', get_query_var( amp_get_slug() ) );
+		}
+	}
+
+	/** @return array */
 	public function get_data_for_test_initialize_paired_request() {
 		return [
 			'query_var'   => [
@@ -173,12 +249,14 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 
 	/**
 	 * @covers ::initialize_paired_request()
+	 *
 	 * @dataProvider get_data_for_test_initialize_paired_request
 	 * @param string $structure
 	 * @param bool $filtering_unique_post_slug
 	 */
 	public function test_initialize_paired_request( $structure, $filtering_unique_post_slug ) {
 		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, $structure );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		$this->instance->initialize_paired_request();
 		$this->assertFalse( $this->get_private_property( $this->instance, 'did_request_endpoint' ) );
 		$this->assertEquals( 10, has_filter( 'do_parse_request', [ $this->instance, 'extract_endpoint_from_environment_before_parse_request' ] ) );
@@ -194,6 +272,15 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$this->assertEquals( 10, has_action( 'parse_query', [ $this->instance, 'correct_query_when_is_front_page' ] ) );
 		$this->assertEquals( 10, has_action( 'wp', [ $this->instance, 'add_paired_request_hooks' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', [ $this->instance, 'add_permalink_settings_notice' ] ) );
+	}
+
+	/** @covers ::initialize_paired_request() */
+	public function test_initialize_paired_request_in_standard_mode() {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, Option::PAIRED_URL_STRUCTURE_QUERY_VAR );
+		$this->instance->initialize_paired_request();
+		$this->assertNull( $this->get_private_property( $this->instance, 'did_request_endpoint' ) );
+		$this->assertFalse( has_filter( 'do_parse_request', [ $this->instance, 'extract_endpoint_from_environment_before_parse_request' ] ) );
 	}
 
 	/** @covers ::add_permalink_settings_notice() */

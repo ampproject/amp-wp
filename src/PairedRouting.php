@@ -174,10 +174,8 @@ final class PairedRouting implements Service, Registerable {
 
 		add_action( 'template_redirect', [ $this, 'redirect_extraneous_paired_endpoint' ], 8 ); // Must be before redirect_paired_amp_unavailable() runs at priority 9.
 
-		if ( ! amp_is_canonical() ) {
-			// Priority 7 needed to run before PluginSuppression::initialize() at priority 8.
-			add_action( 'plugins_loaded', [ $this, 'initialize_paired_request' ], 7 );
-		}
+		// Priority 7 needed to run before PluginSuppression::initialize() at priority 8.
+		add_action( 'plugins_loaded', [ $this, 'initialize_paired_request' ], 7 );
 	}
 
 	/**
@@ -272,6 +270,10 @@ final class PairedRouting implements Service, Registerable {
 	 * Add paired hooks.
 	 */
 	public function initialize_paired_request() {
+		if ( amp_is_canonical() ) {
+			return;
+		}
+
 		// Run necessary logic to properly route a request using the registered paired URL structures.
 		$this->detect_endpoint_in_environment();
 		add_filter( 'do_parse_request', [ $this, 'extract_endpoint_from_environment_before_parse_request' ] );
@@ -478,7 +480,8 @@ final class PairedRouting implements Service, Registerable {
 		if ( $wp->request ) {
 			$request_path .= trailingslashit( $wp->request );
 		}
-		$request_path = wp_parse_url( $this->add_endpoint( $request_path ), PHP_URL_PATH );
+		$endpoint_url = $this->add_endpoint( $request_path );
+		$request_path = wp_parse_url( $endpoint_url, PHP_URL_PATH );
 		$wp->request  = trim( $request_path, '/' );
 	}
 
