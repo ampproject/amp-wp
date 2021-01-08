@@ -142,6 +142,55 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$this->assertEquals( $this->instance->get_wp_rewrite()->using_permalinks(), $options[ PairedRouting::REWRITE_USING_PERMALINKS ] );
 	}
 
+	/** @covers ::get_endpoint_path_slug_conflicts() */
+	public function test_get_endpoint_path_slug_conflicts() {
+		$this->assertCount( 0, $this->instance->get_endpoint_path_slug_conflicts() );
+
+		// Posts.
+		self::factory()->post->create( [ 'post_name' => amp_get_slug() ] );
+		$this->assertEquals(
+			[ 'posts' ],
+			array_keys( $this->instance->get_endpoint_path_slug_conflicts() )
+		);
+
+		// Terms.
+		self::factory()->term->create(
+			[
+				'taxonomy' => 'category',
+				'name'     => amp_get_slug(),
+			]
+		);
+		$this->assertEquals(
+			[ 'posts', 'terms' ],
+			array_keys( $this->instance->get_endpoint_path_slug_conflicts() )
+		);
+
+		// Users.
+		self::factory()->user->create(
+			[
+				'user_login' => 'amp',
+			]
+		);
+		$this->assertEquals(
+			[ 'posts', 'terms', 'users' ],
+			array_keys( $this->instance->get_endpoint_path_slug_conflicts() )
+		);
+
+		// Post types.
+		register_post_type( amp_get_slug() );
+		$this->assertEquals(
+			[ 'posts', 'terms', 'users', 'post_types' ],
+			array_keys( $this->instance->get_endpoint_path_slug_conflicts() )
+		);
+
+		// Taxonomies.
+		register_taxonomy( amp_get_slug(), 'post' );
+		$this->assertEquals(
+			[ 'posts', 'terms', 'users', 'post_types', 'taxonomies' ],
+			array_keys( $this->instance->get_endpoint_path_slug_conflicts() )
+		);
+	}
+
 	/** @return array */
 	public function get_data_for_test_paired_requests() {
 		return [
@@ -283,64 +332,6 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$this->assertFalse( has_filter( 'do_parse_request', [ $this->instance, 'extract_endpoint_from_environment_before_parse_request' ] ) );
 	}
 
-	/** @covers ::add_permalink_settings_notice() */
-	public function test_add_permalink_settings_notice() {
-		set_current_screen( 'options' );
-		$this->assertEmpty( get_echo( [ $this->instance, 'add_permalink_settings_notice' ] ) );
-
-		set_current_screen( 'options-permalink' );
-		$this->assertStringContains( 'notice-info', get_echo( [ $this->instance, 'add_permalink_settings_notice' ] ) );
-	}
-
-	/** @covers ::get_endpoint_path_slug_conflicts() */
-	public function test_get_endpoint_path_slug_conflicts() {
-		$this->assertCount( 0, $this->instance->get_endpoint_path_slug_conflicts() );
-
-		// Posts.
-		self::factory()->post->create( [ 'post_name' => amp_get_slug() ] );
-		$this->assertEquals(
-			[ 'posts' ],
-			array_keys( $this->instance->get_endpoint_path_slug_conflicts() )
-		);
-
-		// Terms.
-		self::factory()->term->create(
-			[
-				'taxonomy' => 'category',
-				'name'     => amp_get_slug(),
-			]
-		);
-		$this->assertEquals(
-			[ 'posts', 'terms' ],
-			array_keys( $this->instance->get_endpoint_path_slug_conflicts() )
-		);
-
-		// Users.
-		self::factory()->user->create(
-			[
-				'user_login' => 'amp',
-			]
-		);
-		$this->assertEquals(
-			[ 'posts', 'terms', 'users' ],
-			array_keys( $this->instance->get_endpoint_path_slug_conflicts() )
-		);
-
-		// Post types.
-		register_post_type( amp_get_slug() );
-		$this->assertEquals(
-			[ 'posts', 'terms', 'users', 'post_types' ],
-			array_keys( $this->instance->get_endpoint_path_slug_conflicts() )
-		);
-
-		// Taxonomies.
-		register_taxonomy( amp_get_slug(), 'post' );
-		$this->assertEquals(
-			[ 'posts', 'terms', 'users', 'post_types', 'taxonomies' ],
-			array_keys( $this->instance->get_endpoint_path_slug_conflicts() )
-		);
-	}
-
 	/** @covers ::detect_endpoint_in_environment() */
 	public function test_detect_endpoint_in_environment() {
 		unset( $_SERVER['REQUEST_URI'] );
@@ -379,6 +370,15 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 	/** @covers ::add_paired_request_hooks() */
 	public function test_add_paired_request_hooks() {
 		$this->markTestIncomplete();
+	}
+
+	/** @covers ::add_permalink_settings_notice() */
+	public function test_add_permalink_settings_notice() {
+		set_current_screen( 'options' );
+		$this->assertEmpty( get_echo( [ $this->instance, 'add_permalink_settings_notice' ] ) );
+
+		set_current_screen( 'options-permalink' );
+		$this->assertStringContains( 'notice-info', get_echo( [ $this->instance, 'add_permalink_settings_notice' ] ) );
 	}
 
 	/** @covers ::get_wp_rewrite() */

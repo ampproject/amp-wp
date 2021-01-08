@@ -267,68 +267,6 @@ final class PairedRouting implements Service, Registerable {
 	}
 
 	/**
-	 * Add paired hooks.
-	 */
-	public function initialize_paired_request() {
-		if ( amp_is_canonical() ) {
-			return;
-		}
-
-		// Run necessary logic to properly route a request using the registered paired URL structures.
-		$this->detect_endpoint_in_environment();
-		add_filter( 'do_parse_request', [ $this, 'extract_endpoint_from_environment_before_parse_request' ] );
-		add_filter( 'request', [ $this, 'filter_request_after_endpoint_extraction' ] );
-		add_action( 'parse_request', [ $this, 'restore_path_endpoint_in_environment' ] );
-
-		// Reserve the 'amp' slug for paired URL structures that use paths.
-		if (
-			in_array(
-				AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE ),
-				[
-					Option::PAIRED_URL_STRUCTURE_PATH_SUFFIX,
-					Option::PAIRED_URL_STRUCTURE_LEGACY_READER,
-				],
-				true
-			)
-		) {
-			// Note that the wp_unique_term_slug filter does not work in the same way. It will only be applied if there
-			// is actually a duplicate, whereas the wp_unique_post_slug filter applies regardless.
-			add_filter( 'wp_unique_post_slug', [ $this, 'filter_unique_post_slug' ], 10, 4 );
-		}
-
-		add_action( 'template_redirect', [ $this, 'redirect_paired_amp_unavailable' ], 9 ); // Must be before redirect_canonical() runs at priority 10.
-		add_action( 'parse_query', [ $this, 'correct_query_when_is_front_page' ] );
-		add_action( 'wp', [ $this, 'add_paired_request_hooks' ] );
-
-		add_action( 'admin_notices', [ $this, 'add_permalink_settings_notice' ] );
-	}
-
-	/**
-	 * Add notice to permalink settings screen for where to customize the paired URL structure.
-	 */
-	public function add_permalink_settings_notice() {
-		if ( 'options-permalink' !== get_current_screen()->id ) {
-			return;
-		}
-		?>
-		<div class="notice notice-info">
-			<p>
-				<?php
-				echo wp_kses(
-					sprintf(
-						/* translators: %s is the URL to the settings screen */
-						__( 'To customize the structure of the paired AMP URLs (given the site is not using the Standard template mode), go to the <a href="%s">Paired URL Structure</a> section on the AMP settings screen.', 'amp' ),
-						esc_url( admin_url( add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, 'admin.php' ) ) . '#paired-url-structure' )
-					),
-					[ 'a' => array_fill_keys( [ 'href' ], true ) ]
-				);
-				?>
-			</p>
-		</div>
-		<?php
-	}
-
-	/**
 	 * Get the entities that are already using the AMP slug.
 	 *
 	 * @return array Conflict data.
@@ -386,6 +324,43 @@ final class PairedRouting implements Service, Registerable {
 		}
 
 		return $conflicts;
+	}
+
+	/**
+	 * Add paired hooks.
+	 */
+	public function initialize_paired_request() {
+		if ( amp_is_canonical() ) {
+			return;
+		}
+
+		// Run necessary logic to properly route a request using the registered paired URL structures.
+		$this->detect_endpoint_in_environment();
+		add_filter( 'do_parse_request', [ $this, 'extract_endpoint_from_environment_before_parse_request' ] );
+		add_filter( 'request', [ $this, 'filter_request_after_endpoint_extraction' ] );
+		add_action( 'parse_request', [ $this, 'restore_path_endpoint_in_environment' ] );
+
+		// Reserve the 'amp' slug for paired URL structures that use paths.
+		if (
+			in_array(
+				AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE ),
+				[
+					Option::PAIRED_URL_STRUCTURE_PATH_SUFFIX,
+					Option::PAIRED_URL_STRUCTURE_LEGACY_READER,
+				],
+				true
+			)
+		) {
+			// Note that the wp_unique_term_slug filter does not work in the same way. It will only be applied if there
+			// is actually a duplicate, whereas the wp_unique_post_slug filter applies regardless.
+			add_filter( 'wp_unique_post_slug', [ $this, 'filter_unique_post_slug' ], 10, 4 );
+		}
+
+		add_action( 'template_redirect', [ $this, 'redirect_paired_amp_unavailable' ], 9 ); // Must be before redirect_canonical() runs at priority 10.
+		add_action( 'parse_query', [ $this, 'correct_query_when_is_front_page' ] );
+		add_action( 'wp', [ $this, 'add_paired_request_hooks' ] );
+
+		add_action( 'admin_notices', [ $this, 'add_permalink_settings_notice' ] );
 	}
 
 	/**
@@ -533,6 +508,31 @@ final class PairedRouting implements Service, Registerable {
 		} else {
 			add_action( 'wp_head', 'amp_add_amphtml_link' );
 		}
+	}
+
+	/**
+	 * Add notice to permalink settings screen for where to customize the paired URL structure.
+	 */
+	public function add_permalink_settings_notice() {
+		if ( 'options-permalink' !== get_current_screen()->id ) {
+			return;
+		}
+		?>
+		<div class="notice notice-info">
+			<p>
+				<?php
+				echo wp_kses(
+					sprintf(
+						/* translators: %s is the URL to the settings screen */
+						__( 'To customize the structure of the paired AMP URLs (given the site is not using the Standard template mode), go to the <a href="%s">Paired URL Structure</a> section on the AMP settings screen.', 'amp' ),
+						esc_url( admin_url( add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, 'admin.php' ) ) . '#paired-url-structure' )
+					),
+					[ 'a' => array_fill_keys( [ 'href' ], true ) ]
+				);
+				?>
+			</p>
+		</div>
+		<?php
 	}
 
 	/**
