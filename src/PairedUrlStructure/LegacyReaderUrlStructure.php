@@ -131,7 +131,8 @@ final class LegacyReaderUrlStructure extends PairedUrlStructure {
 		}
 
 		// Sanity check; no URLs not from this site.
-		if ( wp_parse_url( $url, PHP_URL_HOST ) !== wp_parse_url( home_url(), PHP_URL_HOST ) ) {
+		$host = wp_parse_url( $url, PHP_URL_HOST );
+		if ( $host && wp_parse_url( home_url(), PHP_URL_HOST ) !== $host ) {
 			return 0;
 		}
 
