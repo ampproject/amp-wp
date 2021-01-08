@@ -265,9 +265,27 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$permalink   = get_permalink( $post_id );
 		$request_uri = rtrim( wp_parse_url( $permalink, PHP_URL_PATH ), '/' ) . $request_uri;
 
+		$request_uri_during_parse_request = null;
+		add_filter(
+			'request',
+			function ( $query_vars ) use ( &$request_uri_during_parse_request ) {
+				$request_uri_during_parse_request = $_SERVER['REQUEST_URI'];
+				return $query_vars;
+			}
+		);
+
 		$_SERVER['REQUEST_URI'] = $request_uri;
 		$this->instance->initialize_paired_request();
 		$this->go_to( $request_uri );
+
+		if ( $did_request_endpoint ) {
+			$this->assertNotEmpty( $request_uri_during_parse_request );
+			$this->assertNotEquals( $request_uri_during_parse_request, $request_uri );
+			$this->assertEquals(
+				$this->instance->get_paired_url_structure()->remove_endpoint( $request_uri ),
+				$request_uri_during_parse_request
+			);
+		}
 
 		$this->assertSame( $did_request_endpoint, $this->get_private_property( $this->instance, 'did_request_endpoint' ) );
 		$this->assertSame( $request_uri, $_SERVER['REQUEST_URI'] );
@@ -345,21 +363,6 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$_SERVER['REQUEST_URI'] = $this->instance->add_endpoint( '/' );
 		$this->instance->detect_endpoint_in_environment();
 		$this->assertTrue( $this->get_private_property( $this->instance, 'did_request_endpoint' ) );
-	}
-
-	/** @covers ::extract_endpoint_from_environment_before_parse_request() */
-	public function test_extract_endpoint_from_environment_before_parse_request() {
-		$this->markTestIncomplete();
-	}
-
-	/** @covers ::filter_request_after_endpoint_extraction() */
-	public function test_filter_request_after_endpoint_extraction() {
-		$this->markTestIncomplete();
-	}
-
-	/** @covers ::restore_path_endpoint_in_environment() */
-	public function test_restore_path_endpoint_in_environment() {
-		$this->markTestIncomplete();
 	}
 
 	/** @covers ::filter_unique_post_slug() */
