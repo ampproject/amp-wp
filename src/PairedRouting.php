@@ -364,13 +364,21 @@ final class PairedRouting implements Service, Registerable {
 		}
 
 		foreach ( get_post_types( [], 'objects' ) as $post_type ) {
-			if ( isset( $post_type->rewrite['slug'] ) && $post_type->rewrite['slug'] === $amp_slug ) {
+			if (
+				$amp_slug === $post_type->query_var
+				||
+				isset( $post_type->rewrite['slug'] ) && $post_type->rewrite['slug'] === $amp_slug
+			) {
 				$conflicts['post_types'][] = $post_type->name;
 			}
 		}
 
 		foreach ( get_taxonomies( [], 'objects' ) as $taxonomy ) {
-			if ( isset( $taxonomy->rewrite['slug'] ) && $taxonomy->rewrite['slug'] === $amp_slug ) {
+			if (
+				$amp_slug === $taxonomy->query_var
+				||
+				isset( $taxonomy->rewrite['slug'] ) && $taxonomy->rewrite['slug'] === $amp_slug
+			) {
 				$conflicts['taxonomies'][] = $taxonomy->name;
 			}
 		}
