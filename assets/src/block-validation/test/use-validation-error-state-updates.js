@@ -21,6 +21,8 @@ jest.mock( '@wordpress/data/build/components/use-select', () => {
 		getClientIdsWithDescendants: () => null,
 		getBlock: () => null,
 		getBlocks: () => [],
+		isAutosavingPost: false,
+		isPreviewingPost: false,
 		isSavingPost: false,
 		validationErrorsFromPost: require( './__data__/raw-validation-errors' ).rawValidationErrors,
 	} );
