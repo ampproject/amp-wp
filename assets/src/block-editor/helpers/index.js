@@ -11,6 +11,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { SelectControl, ToggleControl, Notice, PanelBody } from '@wordpress/components';
 import { InspectorControls } from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
+import { cloneElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -203,6 +204,30 @@ export const removeAmpFitTextFromBlocks = ( settings, name ) => {
 	}
 
 	return settings;
+};
+
+/**
+ * Remove the `class` attribute from `amp-fit-text` elements so that it can be deprecated successfully.
+ *
+ * The `class` attribute is added by the `core/generated-class-name/save-props` block editor filter; it is unwanted and
+ * interferes with successful deprecation of the block. By filtering the saved element the `class` attribute can be
+ * removed and the deprecation of the block and proceed without error.
+ *
+ * @see removeAmpFitTextFromBlocks
+ *
+ * @param {Element} element Block save result.
+ *
+ * @return {Element} Modified block if it is of `amp-fit-text` type, otherwise the  original element is returned.
+ */
+export const removeClassFromAmpFitTextBlocks = ( element ) => {
+	if ( 'amp-fit-text' === element.type && undefined !== element.props.className ) {
+		const { className, ...props } = element.props;
+		props.className = null;
+
+		element = cloneElement( element, props );
+	}
+
+	return element;
 };
 
 /**

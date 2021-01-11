@@ -12,7 +12,7 @@ import { select } from '@wordpress/data';
 import { withFeaturedImageNotice } from '../common/components';
 import { getMinimumFeaturedImageDimensions } from '../common/helpers';
 import { withMediaLibraryNotice } from './components';
-import { addAMPAttributes, filterBlocksEdit, removeAmpFitTextFromBlocks } from './helpers';
+import { addAMPAttributes, filterBlocksEdit, removeAmpFitTextFromBlocks, removeClassFromAmpFitTextBlocks } from './helpers';
 import './store';
 
 const {
@@ -29,6 +29,7 @@ plugins.keys().forEach( ( modulePath ) => {
 
 addFilter( 'blocks.registerBlockType', 'ampEditorBlocks/addAttributes', addAMPAttributes );
 addFilter( 'blocks.registerBlockType', 'ampEditorBlocks/deprecateAmpFitText', removeAmpFitTextFromBlocks );
+addFilter( 'blocks.getSaveElement', 'ampEditorBlocks/deprecateAmpFitText/removeMiscAttrs', removeClassFromAmpFitTextBlocks );
 addFilter( 'editor.BlockEdit', 'ampEditorBlocks/filterEdit', filterBlocksEdit, 20 );
 addFilter( 'editor.PostFeaturedImage', 'ampEditorBlocks/withFeaturedImageNotice', withFeaturedImageNotice );
 addFilter( 'editor.MediaUpload', 'ampEditorBlocks/withMediaLibraryNotice', ( InitialMediaUpload ) => withMediaLibraryNotice( InitialMediaUpload, getMinimumFeaturedImageDimensions() ) );
