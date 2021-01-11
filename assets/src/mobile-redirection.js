@@ -58,14 +58,17 @@
 	if ( url.searchParams.has( noampQueryVarName ) && noampQueryVarValue === url.searchParams.get( noampQueryVarName ) ) {
 		// If the noamp query param is present, remember that redirection should be disabled.
 		sessionStorage.setItem( disabledStorageKey, '1' );
-	} else {
+	} else if ( ampUrl !== location.href ) {
 		// Otherwise, since JS is running then we know it's not an AMP page and we need to redirect to the AMP version.
+		// Nevertheless, the `url.href !== location.href` condition was added for the edge case where a caching plugin
+		// is erroneously serving a cached non-AMP page at the AMP URL, so the condition prevents an infinite redirect
+		// from ensuing. See <https://github.com/ampproject/amp-wp/issues/5767>.
 		window.stop(); // Stop loading the page! This should cancel all loading resources.
 
 		// Replace the current page with the AMP version.
 		location.replace( ampUrl );
 	}
 }(
-	// Note: The argument here is replaced with JSON in PHP by \AmpProject\AmpWP\MobileRedirection::add_mobile_redirect_script().
+	// Note: The argument here is replaced with a JSON object literal in PHP by \AmpProject\AmpWP\MobileRedirection::add_mobile_redirect_script().
 	AMP_MOBILE_REDIRECTION,
 ) );
