@@ -79,15 +79,26 @@ export function maybeAddClientIdToValidationError( { validationError, source, cu
 export function useValidationErrorStateUpdates() {
 	const [ blockOrderBeforeSave, setBlockOrderBeforeSave ] = useState( [] );
 	const [ previousValidationErrors, setPreviousValidationErrors ] = useState( [] );
+	const [ skipValidation, setSkipValidation ] = useState( false );
 	const unmounted = useRef( false );
 
 	const { setIsFetchingErrors, setReviewLink, setValidationErrors } = useDispatch( BLOCK_VALIDATION_STORE_KEY );
 
-	const { currentPost, getBlock, getClientIdsWithDescendants, isSavingPost, validationErrors } = useSelect( ( select ) => ( {
+	const {
+		currentPost,
+		getBlock,
+		getClientIdsWithDescendants,
+		isAutosavingPost,
+		isPreviewingPost,
+		isSavingPost,
+		validationErrors,
+	} = useSelect( ( select ) => ( {
 		getClientIdsWithDescendants: select( 'core/block-editor' ).getClientIdsWithDescendants,
 		currentPost: select( 'core/editor' ).getCurrentPost(),
 		getBlock: select( 'core/block-editor' ).getBlock,
 		getBlocks: select( 'core/block-editor' ).getBlocks(),
+		isAutosavingPost: select( 'core/editor' ).isAutosavingPost(),
+		isPreviewingPost: select( 'core/editor' ).isPreviewingPost(),
 		isSavingPost: select( 'core/editor' ).isSavingPost(),
 		validationErrors: select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors(),
 	} ), [] );
@@ -103,6 +114,12 @@ export function useValidationErrorStateUpdates() {
 	 */
 	useEffect( () => {
 		if ( isSavingPost ) {
+			// Skip validation for an autosave that was not triggered by a preview request.
+			setSkipValidation( isAutosavingPost && ! isPreviewingPost );
+			return;
+		}
+
+		if ( skipValidation ) {
 			return;
 		}
 
@@ -122,7 +139,7 @@ export function useValidationErrorStateUpdates() {
 			setReviewLink( newValidation.review_link );
 			setIsFetchingErrors( false );
 		} )();
-	}, [ currentPost.id, getClientIdsWithDescendants, isSavingPost, setIsFetchingErrors, setReviewLink, setValidationErrors ] );
+	}, [ currentPost.id, getClientIdsWithDescendants, isAutosavingPost, isPreviewingPost, isSavingPost, setIsFetchingErrors, setReviewLink, setValidationErrors, skipValidation ] );
 
 	/**
 	 * Runs an equality check when validation errors are received before running the heavier effect.
