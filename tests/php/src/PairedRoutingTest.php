@@ -7,6 +7,7 @@ use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\PairedRouting;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Infrastructure\Registerable;
+use AmpProject\AmpWP\PairedUrl;
 use AmpProject\AmpWP\PairedUrlStructure\LegacyReaderUrlStructure;
 use AmpProject\AmpWP\PairedUrlStructure\LegacyTransitionalUrlStructure;
 use AmpProject\AmpWP\PairedUrlStructure\PathSuffixUrlStructure;
@@ -783,8 +784,83 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 	}
 
 	/** @covers ::redirect_extraneous_paired_endpoint() */
-	public function test_redirect_extraneous_paired_endpoint() {
-		$this->markTestIncomplete();
+	public function test_redirect_extraneous_paired_endpoint_canonical_404_due_to_suffix() {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
+		$path_suffix_structure = $this->injector->make( PathSuffixUrlStructure::class );
+
+		$permalink_url    = get_permalink( self::factory()->post->create() );
+		$amp_endpoint_url = $path_suffix_structure->add_endpoint( $permalink_url );
+		$this->go_to( $amp_endpoint_url );
+
+		$this->assertTrue( amp_is_canonical() );
+		$this->assertTrue( is_404() );
+
+		$redirected_url = null;
+		add_filter(
+			'wp_redirect',
+			static function ( $url ) use ( &$redirected_url ) {
+				$redirected_url = $url;
+				return false;
+			}
+		);
+		$this->instance->redirect_extraneous_paired_endpoint();
+		$this->assertEquals( $permalink_url, $redirected_url );
+	}
+
+	/** @covers ::redirect_extraneous_paired_endpoint() */
+	public function test_redirect_extraneous_paired_endpoint_canonical_extraneous_query_var() {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
+		$query_var_structure = $this->injector->make( QueryVarUrlStructure::class );
+
+		$permalink_url    = get_permalink( self::factory()->post->create() );
+		$amp_endpoint_url = $query_var_structure->add_endpoint( $permalink_url );
+		$this->go_to( $amp_endpoint_url );
+
+		$this->assertTrue( amp_is_canonical() );
+		$this->assertTrue( ! is_404() );
+
+		$redirected_url = null;
+		add_filter(
+			'wp_redirect',
+			static function ( $url ) use ( &$redirected_url ) {
+				$redirected_url = $url;
+				return false;
+			}
+		);
+		$this->instance->redirect_extraneous_paired_endpoint();
+		$this->assertEquals( $permalink_url, $redirected_url );
+	}
+
+	/** @covers ::redirect_extraneous_paired_endpoint() */
+	public function test_redirect_extraneous_paired_endpoint_path_suffix_404() {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, Option::PAIRED_URL_STRUCTURE_QUERY_VAR );
+		$this->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
+		$path_suffix_structure = $this->injector->make( PathSuffixUrlStructure::class );
+		$paired_url            = $this->injector->make( PairedUrl::class );
+
+		$permalink_url    = get_permalink( self::factory()->post->create() );
+		$amp_endpoint_url = $path_suffix_structure->add_endpoint( $permalink_url );
+		$this->go_to( $amp_endpoint_url );
+
+		$this->assertFalse( amp_is_canonical() );
+		$this->assertTrue( is_404() );
+
+		$redirected_url = null;
+		add_filter(
+			'wp_redirect',
+			static function ( $url ) use ( &$redirected_url ) {
+				$redirected_url = $url;
+				return false;
+			}
+		);
+		$this->instance->redirect_extraneous_paired_endpoint();
+		$this->assertEquals(
+			$paired_url->add_query_var( $path_suffix_structure->remove_endpoint( $amp_endpoint_url ) ),
+			$redirected_url
+		);
 	}
 
 	/** @covers ::redirect_paired_amp_unavailable() */

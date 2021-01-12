@@ -874,36 +874,12 @@ final class PairedRouting implements Service, Registerable {
 				// Strip extraneous query var from AMP-first sites.
 				$redirect_url = $query_var_removed;
 			}
-		} elseif ( $endpoint_suffix_removed !== $requested_url ) {
-			if ( is_404() ) {
-				// To account for switching the paired URL structure from `/amp/` to `?amp=1`, add the query var if in Paired
-				// AMP mode. Note this is not necessary to do when sites have switched from a query var to an endpoint suffix
-				// because the query var will always be recognized whereas the reverse is not always true.
-				$redirect_url = $this->paired_url->add_query_var( $endpoint_suffix_removed );
-			} elseif ( Option::PAIRED_URL_STRUCTURE_LEGACY_READER === AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE ) ) {
-				global $wp;
-				$path_args = [];
-				wp_parse_str( $wp->matched_query, $path_args );
-
-				// The URL has an /amp/ rewrite endpoint.
-				if ( isset( $path_args[ amp_get_slug() ] ) ) {
-					if ( '' !== $path_args[ amp_get_slug() ] ) {
-						// In the one case where a WordPress rewrite endpoint is added, prevent infinite URL space under /amp/ endpoint.
-						// Note that WordPress allows endpoints to have a value, such as the case of /feed/ where /feed/atom/ is the
-						// same as saying ?feed=atom. In this case, we need to check for /amp/x/ to protect against links like
-						// `<a href="./amp/">AMP!</a>`. See https://github.com/ampproject/amp-wp/pull/1846.
-						// In the case where the paired URL structure is "suffix endpoint" (where rewrite rules are not used), then
-						// then this is handled by another condition.
-						$redirect_url = $endpoint_suffix_removed;
-					} elseif ( $query_var_removed !== $requested_url ) {
-						// Redirect `/amp/?amp=1` to `/amp/`.
-						$redirect_url = $query_var_removed;
-					}
-				}
-			} elseif ( $this->did_request_endpoint && $query_var_removed !== $requested_url ) {
-				// Redirect /amp/?amp=1 to /amp/, removing redundant endpoints.
-				$redirect_url = $query_var_removed;
-			}
+		} elseif ( is_404() && $endpoint_suffix_removed !== $requested_url ) {
+			// To account for switching the paired URL structure from `/amp/` to `?amp=1`, add the query var if in Paired
+			// AMP mode. Note this is not necessary to do when sites have switched from a query var to an endpoint suffix
+			// because the query var will always be recognized whereas the reverse is not always true.
+			// This also prevents an infinite URL space under /amp/ endpoint.
+			$redirect_url = $this->paired_url->add_query_var( $endpoint_suffix_removed );
 		}
 
 		if ( $redirect_url ) {
