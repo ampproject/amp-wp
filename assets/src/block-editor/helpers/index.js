@@ -215,15 +215,14 @@ export const removeAmpFitTextFromBlocks = ( settings, name ) => {
  *
  * @see removeAmpFitTextFromBlocks
  *
- * @param {Element} element Block save result.
+ * @param {ReactElement} element Block save result.
  *
- * @return {Element} Modified block if it is of `amp-fit-text` type, otherwise the  original element is returned.
+ * @return {ReactElement} Modified block if it is of `amp-fit-text` type, otherwise the  original element is returned.
  */
 export const removeClassFromAmpFitTextBlocks = ( element ) => {
 	if ( 'amp-fit-text' === element.type && undefined !== element.props.className ) {
 		const { className, ...props } = element.props;
 		props.className = null;
-
 		element = cloneElement( element, props );
 	}
 
