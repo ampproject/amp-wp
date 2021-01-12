@@ -2,6 +2,7 @@
 
 namespace AmpProject\AmpWP\Tests;
 
+use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\PairedRouting;
 use AmpProject\AmpWP\Infrastructure\Service;
@@ -449,14 +450,80 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$this->assertInstanceOf( WP_Rewrite::class, $this->instance->get_wp_rewrite() );
 	}
 
-	/** @covers ::filter_default_options() */
-	public function test_filter_default_options() {
-		$this->markTestIncomplete();
+	/** @return array */
+	public function get_data_for_test_filter_default_options() {
+		return [
+			'default'                   => [
+				[
+					Option::VERSION       => AMP__VERSION,
+					Option::THEME_SUPPORT => AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
+					Option::READER_THEME  => ReaderThemes::DEFAULT_READER_THEME,
+				],
+				Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
+			],
+			'old_version_transitional'  => [
+				[
+					Option::VERSION       => '2.0.0',
+					Option::THEME_SUPPORT => AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
+					Option::READER_THEME  => ReaderThemes::DEFAULT_READER_THEME,
+				],
+				Option::PAIRED_URL_STRUCTURE_LEGACY_TRANSITIONAL,
+			],
+			'old_version_reader_legacy' => [
+				[
+					Option::VERSION       => '2.0.0',
+					Option::THEME_SUPPORT => AMP_Theme_Support::READER_MODE_SLUG,
+					Option::READER_THEME  => ReaderThemes::DEFAULT_READER_THEME,
+				],
+				Option::PAIRED_URL_STRUCTURE_LEGACY_READER,
+			],
+			'old_version_reader_theme'  => [
+				[
+					Option::VERSION       => '2.0.0',
+					Option::THEME_SUPPORT => AMP_Theme_Support::READER_MODE_SLUG,
+					Option::READER_THEME  => 'twentytwenty',
+				],
+				Option::PAIRED_URL_STRUCTURE_LEGACY_TRANSITIONAL,
+			],
+		];
+	}
+
+	/**
+	 * @covers ::filter_default_options()
+	 * @dataProvider get_data_for_test_filter_default_options
+	 *
+	 * @param array $options
+	 * @param string $expected_structure
+	 */
+	public function test_filter_default_options( $options, $expected_structure ) {
+		$this->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
+		$this->assertEquals(
+			$expected_structure,
+			$this->instance->filter_default_options(
+				[],
+				$options
+			)[ Option::PAIRED_URL_STRUCTURE ]
+		);
 	}
 
 	/** @covers ::sanitize_options() */
 	public function test_sanitize_options() {
-		$this->markTestIncomplete();
+		$this->assertEmpty(
+			$this->instance->sanitize_options(
+				[],
+				[ Option::PAIRED_URL_STRUCTURE => 'bogus' ]
+			)
+		);
+
+		foreach ( array_keys( PairedRouting::PAIRED_URL_STRUCTURES ) as $paired_url_structure ) {
+			$this->assertEquals(
+				[ Option::PAIRED_URL_STRUCTURE => $paired_url_structure ],
+				$this->instance->sanitize_options(
+					[],
+					[ Option::PAIRED_URL_STRUCTURE => $paired_url_structure ]
+				)
+			);
+		}
 	}
 
 	/** @covers ::has_endpoint() */
