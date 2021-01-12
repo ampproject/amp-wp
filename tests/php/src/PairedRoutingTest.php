@@ -16,6 +16,7 @@ use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AmpProject\AmpWP\Tests\Fixture\DummyPairedUrlStructure;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use WP_Query;
 use WP_Rewrite;
 
 /** @coversDefaultClass \AmpProject\AmpWP\PairedRouting */
@@ -526,49 +527,259 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		}
 	}
 
-	/** @covers ::has_endpoint() */
-	public function test_has_endpoint() {
-		$this->markTestIncomplete();
+	/** @return array */
+	public function get_data_for_test_has_endpoint() {
+		return [
+			'provided_non_amp_url'         => [
+				null,
+				false,
+				static function () {
+					return home_url( '/' );
+				},
+			],
+
+			'provided_amp_url'             => [
+				null,
+				true,
+				function ( PairedRouting $instance ) {
+					return $instance->add_endpoint( home_url( '/' ) );
+				},
+			],
+
+			'non_amp_page_requested'       => [
+				function () {
+					$this->go_to( home_url( '/' ) );
+				},
+				false,
+				'',
+			],
+
+			'yes_amp_page_requested'       => [
+				function ( PairedRouting $instance ) {
+					$this->go_to( $instance->add_endpoint( home_url( '/' ) ) );
+				},
+				true,
+				'',
+			],
+
+			'did_request_endpoint'         => [
+				function ( PairedRouting $instance ) {
+					$this->set_private_property( $instance, 'did_request_endpoint', true );
+				},
+				true,
+				'',
+			],
+
+			'has_query_var_set'            => [
+				function () {
+					set_query_var( amp_get_slug(), true );
+				},
+				true,
+				'',
+			],
+
+			'is_admin_without_query_param' => [
+				function () {
+					set_current_screen( 'index' );
+				},
+				false,
+				'',
+			],
+
+			'is_admin_with_query_param'    => [
+				function () {
+					set_current_screen( 'index' );
+					$_GET[ amp_get_slug() ] = 1;
+				},
+				true,
+				'',
+			],
+		];
 	}
 
-	/** @covers ::add_endpoint() */
-	public function test_add_endpoint() {
-		$this->markTestIncomplete();
+	/**
+	 * @covers ::has_endpoint()
+	 * @dataProvider get_data_for_test_has_endpoint
+	 *
+	 * @param callable|null $setup_callback
+	 * @param bool $expected_has_endpoint
+	 * @param callable|null $url_callback
+	 */
+	public function test_has_endpoint( $setup_callback, $expected_has_endpoint, $url_callback ) {
+		if ( $setup_callback ) {
+			$setup_callback( $this->instance );
+		}
+		$url = $url_callback ? $url_callback( $this->instance ) : '';
+		$this->assertEquals( $expected_has_endpoint, $this->instance->has_endpoint( $url ) );
 	}
 
-	/** @covers ::remove_endpoint() */
-	public function test_remove_endpoint() {
-		$this->markTestIncomplete();
+	/**
+	 * @covers ::add_endpoint()
+	 * @covers ::remove_endpoint()
+	 */
+	public function test_add_has_remove_endpoint() {
+		$base  = home_url( '/' );
+		$added = $this->instance->add_endpoint( $base );
+		$this->assertNotEquals( $base, $added );
+		$removed = $this->instance->remove_endpoint( $added );
+		$this->assertEquals( $base, $removed );
 	}
 
 	/** @covers ::has_custom_paired_url_structure() */
 	public function test_has_custom_paired_url_structure() {
-		$this->markTestIncomplete();
+		$this->assertFalse( $this->instance->has_custom_paired_url_structure() );
+		add_filter(
+			'amp_custom_paired_url_structure',
+			static function () {
+				return DummyPairedUrlStructure::class;
+			}
+		);
+		$this->assertTrue( $this->instance->has_custom_paired_url_structure() );
 	}
 
 	/** @covers ::get_all_structure_paired_urls() */
 	public function test_get_all_structure_paired_urls() {
-		$this->markTestIncomplete();
+		$urls = $this->instance->get_all_structure_paired_urls( home_url( '/foo/' ) );
+		$this->assertEqualSets(
+			array_keys( PairedRouting::PAIRED_URL_STRUCTURES ),
+			array_keys( $urls )
+		);
+
+		add_filter(
+			'amp_custom_paired_url_structure',
+			static function () {
+				return DummyPairedUrlStructure::class;
+			}
+		);
+		$urls = $this->instance->get_all_structure_paired_urls( home_url( '/bar/' ) );
+		$this->assertEqualSets(
+			array_merge(
+				array_keys( PairedRouting::PAIRED_URL_STRUCTURES ),
+				[ 'custom' ]
+			),
+			array_keys( $urls )
+		);
 	}
 
 	/** @covers ::get_paired_url_examples() */
 	public function test_get_paired_url_examples() {
-		$this->markTestIncomplete();
+		$this->factory()->post->create( [ 'post_type' => 'post' ] );
+		$this->factory()->post->create( [ 'post_type' => 'page' ] );
+
+		add_filter(
+			'amp_custom_paired_url_structure',
+			static function () {
+				return DummyPairedUrlStructure::class;
+			}
+		);
+
+		$examples = $this->instance->get_paired_url_examples();
+
+		$this->assertEqualSets(
+			array_merge(
+				array_keys( PairedRouting::PAIRED_URL_STRUCTURES ),
+				[ 'custom' ]
+			),
+			array_keys( $examples )
+		);
+
+		foreach ( $examples as $example_set ) {
+			$this->assertCount( 2, $example_set );
+		}
 	}
 
 	/** @covers ::get_custom_paired_structure_sources() */
 	public function test_get_custom_paired_structure_sources() {
-		$this->markTestIncomplete();
+		$this->assertEquals( [], $this->instance->get_custom_paired_structure_sources() );
+
+		add_filter(
+			'amp_custom_paired_url_structure',
+			static function () {
+				return DummyPairedUrlStructure::class;
+			}
+		);
+
+		$sources = $this->instance->get_custom_paired_structure_sources();
+
+		$this->assertCount( 1, $sources );
+		$this->assertEquals(
+			[
+				'type' => 'plugin',
+				'slug' => 'amp',
+				'name' => 'AMP',
+			],
+			current( $sources )
+		);
 	}
 
-	/** @covers ::correct_query_when_is_front_page() */
-	public function test_correct_query_when_is_front_page() {
-		$this->markTestIncomplete();
+	/** @return array */
+	public function get_data_for_test_correct_query_when_is_front_page() {
+		return [
+			'non_amp_blog_request'            => [
+				null,
+				false,
+			],
+			'amp_front_page'                  => [
+				function ( WP_Query $query ) {
+					$query->set( amp_get_slug(), true );
+				},
+				true,
+			],
+			'amp_front_page_with_other_query' => [
+				function ( WP_Query $query ) {
+					$query->set( amp_get_slug(), true );
+					$query->query = [ 'foo' => 'bar' ];
+				},
+				false,
+			],
+		];
+	}
+
+	/**
+	 * @covers ::correct_query_when_is_front_page()
+	 * @dataProvider get_data_for_test_correct_query_when_is_front_page
+	 * @param callable $setup_callback
+	 * @param bool $expected_is_front_page
+	 */
+	public function test_correct_query_when_is_front_page( $setup_callback, $expected_is_front_page ) {
+		$page_id = self::factory()->post->create( [ 'post_type' => 'page' ] );
+		update_option( 'show_on_front', 'page' );
+		update_option( 'page_on_front', $page_id );
+
+		global $wp_the_query, $wp_query;
+		$wp_query     = new WP_Query();
+		$wp_the_query = $wp_query;
+		$this->assertTrue( $wp_query->is_main_query() );
+		$wp_query->is_home = true;
+
+		if ( $setup_callback ) {
+			$setup_callback( $wp_query );
+		}
+
+		$this->instance->correct_query_when_is_front_page( $wp_query );
+
+		if ( $expected_is_front_page ) {
+			$this->assertFalse( $wp_query->is_home );
+			$this->assertTrue( $wp_query->is_page );
+			$this->assertTrue( $wp_query->is_singular );
+			$this->assertEquals( $page_id, $wp_query->get( 'page_id' ) );
+		} else {
+			$this->assertTrue( $wp_query->is_home );
+			$this->assertFalse( $wp_query->is_page );
+			$this->assertFalse( $wp_query->is_singular );
+			$this->assertNotEquals( $page_id, $wp_query->get( 'page_id' ) );
+		}
 	}
 
 	/** @covers ::maybe_add_paired_endpoint() */
 	public function test_maybe_add_paired_endpoint() {
-		$this->markTestIncomplete();
+		$this->assertSame( '', $this->instance->maybe_add_paired_endpoint( '' ) );
+
+		$home_url = home_url( '/' );
+		$this->assertSame(
+			$this->instance->add_endpoint( $home_url ),
+			$this->instance->maybe_add_paired_endpoint( $home_url )
+		);
 	}
 
 	/** @covers ::redirect_extraneous_paired_endpoint() */

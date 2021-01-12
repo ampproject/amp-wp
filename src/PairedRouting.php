@@ -747,11 +747,11 @@ final class PairedRouting implements Service, Registerable {
 		}
 
 		if ( ! isset( $wp_filter['amp_custom_paired_url_structure'] ) ) {
-			return [];
+			return []; // @codeCoverageIgnore
 		}
 		$hook = $wp_filter['amp_custom_paired_url_structure'];
 		if ( ! $hook instanceof WP_Hook ) {
-			return [];
+			return []; // @codeCoverageIgnore
 		}
 
 		$sources = [];
@@ -809,7 +809,7 @@ final class PairedRouting implements Service, Registerable {
 			// Is AMP endpoint.
 			false !== $query->get( amp_get_slug(), false )
 			&&
-			// Is query not yet fixed uo up to be front page.
+			// Is query not yet fixed up to be front page.
 			! $query->is_front_page()
 			&&
 			// Is showing pages on front.
@@ -955,9 +955,7 @@ final class PairedRouting implements Service, Registerable {
 	private function redirect_location( $url ) {
 		$status_code = current_user_can( 'manage_options' ) ? 302 : 301;
 		if ( wp_safe_redirect( $url, $status_code ) ) {
-			// @codeCoverageIgnoreStart
-			exit;
-			// @codeCoverageIgnoreEnd
+			exit; // @codeCoverageIgnore
 		}
 	}
 }
