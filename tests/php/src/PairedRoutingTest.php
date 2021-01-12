@@ -15,6 +15,7 @@ use AMP_Options_Manager;
 use AMP_Theme_Support;
 use AmpProject\AmpWP\Tests\Fixture\DummyPairedUrlStructure;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use WP_Rewrite;
 
 /** @coversDefaultClass \AmpProject\AmpWP\PairedRouting */
 class PairedRoutingTest extends DependencyInjectedTestCase {
@@ -365,14 +366,73 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$this->assertTrue( $this->get_private_property( $this->instance, 'did_request_endpoint' ) );
 	}
 
-	/** @covers ::filter_unique_post_slug() */
-	public function test_filter_unique_post_slug() {
-		$this->markTestIncomplete();
+	/** @return array */
+	public function get_data_for_test_filter_unique_post_slug() {
+		return [
+			'foo'  => [
+				'foo',
+				[],
+				'foo',
+			],
+			'amp'  => [
+				amp_get_slug(),
+				[],
+				amp_get_slug() . '-2',
+			],
+			'amp3' => [
+				amp_get_slug(),
+				[
+					amp_get_slug() . '-2',
+					amp_get_slug() . '-3',
+				],
+				amp_get_slug() . '-4',
+			],
+		];
+	}
+
+	/**
+	 * @covers ::filter_unique_post_slug()
+	 * @dataProvider get_data_for_test_filter_unique_post_slug
+	 * @param string $post_name
+	 * @param string[] $other_existing_post_names
+	 * @param string $expected_slug
+	 */
+	public function test_filter_unique_post_slug( $post_name, $other_existing_post_names, $expected_slug ) {
+		$post = self::factory()->post->create_and_get( [ 'post_name' => $post_name ] );
+		foreach ( $other_existing_post_names as $other_existing_post_name ) {
+			self::factory()->post->create( [ 'post_name' => $other_existing_post_name ] );
+		}
+
+		$actual_slug = $this->instance->filter_unique_post_slug(
+			$post_name,
+			$post->ID,
+			$post->post_status,
+			$post->post_type
+		);
+
+		$this->assertSame( $expected_slug, $actual_slug );
 	}
 
 	/** @covers ::add_paired_request_hooks() */
-	public function test_add_paired_request_hooks() {
-		$this->markTestIncomplete();
+	public function test_add_paired_request_hooks_when_does_have_endpoint() {
+		$post = self::factory()->post->create();
+		$this->go_to( amp_get_permalink( $post ) );
+		$this->instance->add_paired_request_hooks();
+		$this->assertTrue( $this->instance->has_endpoint() );
+		$this->assertEquals( 1000, has_filter( 'old_slug_redirect_url', [ $this->instance, 'maybe_add_paired_endpoint' ] ) );
+		$this->assertEquals( 1000, has_filter( 'redirect_canonical', [ $this->instance, 'maybe_add_paired_endpoint' ] ) );
+		$this->assertFalse( has_action( 'wp_head', 'amp_add_amphtml_link' ) );
+	}
+
+	/** @covers ::add_paired_request_hooks() */
+	public function test_add_paired_request_hooks_when_not_has_endpoint() {
+		$post = self::factory()->post->create();
+		$this->go_to( get_permalink( $post ) );
+		$this->assertFalse( $this->instance->has_endpoint() );
+		$this->instance->add_paired_request_hooks();
+		$this->assertEquals( 10, has_action( 'wp_head', 'amp_add_amphtml_link' ) );
+		$this->assertFalse( has_filter( 'old_slug_redirect_url', [ $this->instance, 'maybe_add_paired_endpoint' ] ) );
+		$this->assertFalse( has_filter( 'redirect_canonical', [ $this->instance, 'maybe_add_paired_endpoint' ] ) );
 	}
 
 	/** @covers ::add_permalink_settings_notice() */
@@ -386,7 +446,7 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 
 	/** @covers ::get_wp_rewrite() */
 	public function test_get_wp_rewrite() {
-		$this->markTestIncomplete();
+		$this->assertInstanceOf( WP_Rewrite::class, $this->instance->get_wp_rewrite() );
 	}
 
 	/** @covers ::filter_default_options() */
