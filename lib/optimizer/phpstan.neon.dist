@@ -1,8 +1,0 @@
-includes:
-	# @see https://github.com/phpstan/phpstan-src/blob/b9f62d63f2deaa0a5e97f51073e41a422c48aa01/conf/bleedingEdge.neon
-	- phar://phpstan.phar/conf/bleedingEdge.neon
-parameters:
-	level: 4
-	inferPrivatePropertyTypeFromConstructor: true
-	paths:
-		- src/

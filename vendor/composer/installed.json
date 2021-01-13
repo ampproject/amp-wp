@@ -1,0 +1,385 @@
+[
+    {
+        "name": "ampproject/common",
+        "version": "dev-fix/docs-generation-2.0",
+        "version_normalized": "dev-fix/docs-generation-2.0",
+        "dist": {
+            "type": "path",
+            "url": "lib/common",
+            "reference": "68d6534c512a0ebcd6b3fed94131d4b1738d929a"
+        },
+        "require": {
+            "ext-dom": "*",
+            "ext-iconv": "*",
+            "ext-json": "*",
+            "ext-libxml": "*",
+            "php": "^5.6 || ^7.0",
+            "php-parallel-lint/php-parallel-lint": "^1.2"
+        },
+        "require-dev": {
+            "civicrm/composer-downloads-plugin": "^2.1",
+            "dealerdirect/phpcodesniffer-composer-installer": "0.7.0",
+            "phpcompatibility/phpcompatibility-wp": "2.1.0",
+            "roave/security-advisories": "dev-master",
+            "sirbrillig/phpcs-variable-analysis": "2.8.3",
+            "squizlabs/php_codesniffer": "^3"
+        },
+        "suggest": {
+            "ext-mbstring": "Used by Dom\\Document to convert encoding to UTF-8 if needed."
+        },
+        "type": "library",
+        "extra": {
+            "downloads": {
+                "phpstan": {
+                    "url": "https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar",
+                    "path": "vendor/bin/phpstan",
+                    "type": "phar"
+                }
+            }
+        },
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "AmpProject\\": "src/"
+            }
+        },
+        "autoload-dev": {
+            "psr-4": {
+                "AmpProject\\Tests\\": "tests/src/"
+            }
+        },
+        "scripts": {
+            "cbf": [
+                "phpcbf"
+            ],
+            "cs": [
+                "if [ -z $TEST_SKIP_PHPCS ]; then phpcs; fi"
+            ],
+            "lint": [
+                "if [ -z $TEST_SKIP_LINTING ]; then parallel-lint -j 10 --colors --exclude vendor .; fi"
+            ],
+            "test": [
+                "@lint",
+                "@unit",
+                "@cs",
+                "@analyze"
+            ],
+            "analyze": [
+                "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan --version; phpstan analyze --ansi; fi"
+            ],
+            "unit": [
+                "if [ -z $TEST_SKIP_PHPUNIT ]; then phpunit --colors=always; fi"
+            ]
+        },
+        "license": [
+            "MIT"
+        ],
+        "description": "PHP library with common base functionality for AMP integrations.",
+        "transport-options": {
+            "symlink": true
+        }
+    },
+    {
+        "name": "ampproject/optimizer",
+        "version": "dev-fix/docs-generation-2.0",
+        "version_normalized": "dev-fix/docs-generation-2.0",
+        "dist": {
+            "type": "path",
+            "url": "lib/optimizer",
+            "reference": "3c1c51d680d561801981294086d13be509327cc4"
+        },
+        "require": {
+            "ampproject/common": "*",
+            "ext-dom": "*",
+            "ext-iconv": "*",
+            "ext-libxml": "*",
+            "php": "^5.6 || ^7.0",
+            "php-parallel-lint/php-parallel-lint": "^1.2"
+        },
+        "require-dev": {
+            "civicrm/composer-downloads-plugin": "^2.1",
+            "dealerdirect/phpcodesniffer-composer-installer": "0.7.0",
+            "ext-zip": "*",
+            "phpcompatibility/phpcompatibility-wp": "2.1.0",
+            "roave/security-advisories": "dev-master",
+            "sirbrillig/phpcs-variable-analysis": "2.8.3",
+            "squizlabs/php_codesniffer": "^3"
+        },
+        "suggest": {
+            "ext-json": "Provides native implementation of json_encode()/json_decode()."
+        },
+        "type": "library",
+        "extra": {
+            "downloads": {
+                "phpstan": {
+                    "url": "https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar",
+                    "path": "vendor/bin/phpstan",
+                    "type": "phar"
+                }
+            }
+        },
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "AmpProject\\Optimizer\\": "src/"
+            }
+        },
+        "autoload-dev": {
+            "psr-4": {
+                "AmpProject\\Optimizer\\Tests\\": "tests/src/"
+            }
+        },
+        "scripts": {
+            "cbf": [
+                "phpcbf"
+            ],
+            "cs": [
+                "if [ -z $TEST_SKIP_PHPCS ]; then phpcs; fi"
+            ],
+            "lint": [
+                "if [ -z $TEST_SKIP_LINTING ]; then parallel-lint -j 10 --colors --exclude vendor .; fi"
+            ],
+            "post-update-cmd": [
+                "@update-test-specs",
+                "bin/sync-amp-runtime-local-fallback-resources.php"
+            ],
+            "test": [
+                "@lint",
+                "@unit",
+                "@cs",
+                "@analyze"
+            ],
+            "analyze": [
+                "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan --version; phpstan analyze --ansi; fi"
+            ],
+            "unit": [
+                "if [ -z $TEST_SKIP_PHPUNIT ]; then phpunit --colors=always; fi"
+            ],
+            "update-test-specs": [
+                "rm -rf tests/spec && bin/sync-amp-toolbox-test-suite.php"
+            ]
+        },
+        "license": [
+            "MIT"
+        ],
+        "description": "PHP library for optimizing AMP pages.",
+        "transport-options": {
+            "symlink": true
+        }
+    },
+    {
+        "name": "fasterimage/fasterimage",
+        "version": "v1.5.0",
+        "version_normalized": "1.5.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/willwashburn/fasterimage.git",
+            "reference": "42d125a15dc124520aff2157bbed9a4b2d4f310a"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/willwashburn/fasterimage/zipball/42d125a15dc124520aff2157bbed9a4b2d4f310a",
+            "reference": "42d125a15dc124520aff2157bbed9a4b2d4f310a",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.4.0",
+            "willwashburn/stream": ">=1.0"
+        },
+        "require-dev": {
+            "php-coveralls/php-coveralls": "^2.1",
+            "php-mock/php-mock-phpunit": "^2.3",
+            "phpunit/phpunit": "~6.0"
+        },
+        "time": "2019-05-25T14:33:33+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "classmap": [
+                "src"
+            ]
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Will Washburn",
+                "email": "will@tailwindapp.com"
+            },
+            {
+                "name": "Weston Ruter"
+            }
+        ],
+        "description": "FasterImage finds the size or type of a set of images given their uris by fetching as little as needed, in parallel. Originally ported by Tom Moor.",
+        "homepage": "https://github.com/willwashburn/fasterimage",
+        "keywords": [
+            "fast image",
+            "faster image",
+            "fasterimage",
+            "fastimage",
+            "getimagesize",
+            "image size",
+            "parallel"
+        ]
+    },
+    {
+        "name": "php-parallel-lint/php-parallel-lint",
+        "version": "v1.2.0",
+        "version_normalized": "1.2.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/php-parallel-lint/PHP-Parallel-Lint.git",
+            "reference": "474f18bc6cc6aca61ca40bfab55139de614e51ca"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/php-parallel-lint/PHP-Parallel-Lint/zipball/474f18bc6cc6aca61ca40bfab55139de614e51ca",
+            "reference": "474f18bc6cc6aca61ca40bfab55139de614e51ca",
+            "shasum": ""
+        },
+        "require": {
+            "ext-json": "*",
+            "php": ">=5.4.0"
+        },
+        "replace": {
+            "grogy/php-parallel-lint": "*",
+            "jakub-onderka/php-parallel-lint": "*"
+        },
+        "require-dev": {
+            "nette/tester": "^1.3 || ^2.0",
+            "php-parallel-lint/php-console-highlighter": "~0.3",
+            "squizlabs/php_codesniffer": "~3.0"
+        },
+        "suggest": {
+            "php-parallel-lint/php-console-highlighter": "Highlight syntax in code snippet"
+        },
+        "time": "2020-04-04T12:18:32+00:00",
+        "bin": [
+            "parallel-lint"
+        ],
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "classmap": [
+                "./"
+            ]
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "BSD-2-Clause"
+        ],
+        "authors": [
+            {
+                "name": "Jakub Onderka",
+                "email": "ahoj@jakubonderka.cz"
+            }
+        ],
+        "description": "This tool check syntax of PHP files about 20x faster than serial check.",
+        "homepage": "https://github.com/php-parallel-lint/PHP-Parallel-Lint"
+    },
+    {
+        "name": "sabberworm/php-css-parser",
+        "version": "dev-master",
+        "version_normalized": "9999999-dev",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/sabberworm/PHP-CSS-Parser.git",
+            "reference": "bfdd976"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/sabberworm/PHP-CSS-Parser/zipball/bfdd976",
+            "reference": "bfdd976",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.3.2"
+        },
+        "require-dev": {
+            "codacy/coverage": "^1.4",
+            "phpunit/phpunit": "^4.8.36"
+        },
+        "time": "2020-07-21T18:39:46+00:00",
+        "type": "library",
+        "extra": {
+            "patches_applied": {
+                "1. Add additional validation for size unit <https://github.com/sabberworm/PHP-CSS-Parser/pull/193>": "https://github.com/sabberworm/PHP-CSS-Parser/compare/3bc5ded67d77a52b81608cfc97f23b1bb0678e2f%5E...468da3441945e9c1bf402a3340b1d8326723f7d9.patch",
+                "2. Validate name-start code points for identifier <https://github.com/sabberworm/PHP-CSS-Parser/pull/185>": "https://github.com/sabberworm/PHP-CSS-Parser/compare/d42b64793f2edaffeb663c63e9de79069cdc0831%5E...113df5d55e94e21c6402021dfa959924941d4c29.patch",
+                "3. Fix parsing CSS selectors which contain commas <https://github.com/westonruter/PHP-CSS-Parser/pull/1>": "https://github.com/westonruter/PHP-CSS-Parser/compare/master...10a2501c119abafced3e4014aa3c0a3453a86f67.patch"
+            }
+        },
+        "installation-source": "source",
+        "autoload": {
+            "psr-4": {
+                "Sabberworm\\CSS\\": "lib/Sabberworm/CSS/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Raphael Schweikert"
+            }
+        ],
+        "description": "Parser for CSS Files written in PHP",
+        "homepage": "http://www.sabberworm.com/blog/2010/6/10/php-css-parser",
+        "keywords": [
+            "css",
+            "parser",
+            "stylesheet"
+        ]
+    },
+    {
+        "name": "willwashburn/stream",
+        "version": "v1.0.0",
+        "version_normalized": "1.0.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/willwashburn/stream.git",
+            "reference": "345b3062493e3899d987dbdd1fec1c13ee28c903"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/willwashburn/stream/zipball/345b3062493e3899d987dbdd1fec1c13ee28c903",
+            "reference": "345b3062493e3899d987dbdd1fec1c13ee28c903",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.4.0"
+        },
+        "require-dev": {
+            "mockery/mockery": "~0.9",
+            "phpunit/phpunit": "~4.0"
+        },
+        "time": "2016-03-15T10:54:35+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "WillWashburn\\": "src/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Will Washburn",
+                "email": "will.washburn@gmail.com"
+            }
+        ],
+        "description": "model a sequence of data elements made available over time ",
+        "homepage": "https://github.com/willwashburn/stream",
+        "keywords": [
+            "peek",
+            "read",
+            "stream",
+            "streamable"
+        ]
+    }
+]
