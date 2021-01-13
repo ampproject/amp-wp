@@ -2469,6 +2469,31 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	}
 
 	/**
+	 * @covers AMP_Validation_Manager::serialize_validation_error_messages()
+	 * @covers AMP_Validation_Manager::unserialize_validation_error_messages()
+	 */
+	public function test_serialize_unserialize_validation_error_messages() {
+		$messages = [
+			'foo',
+			'bar',
+			'bar',
+			'baz',
+		];
+
+		$encoded_messages = AMP_Validation_Manager::serialize_validation_error_messages( $messages );
+		$this->assertTrue( is_string( $encoded_messages ) );
+		$this->assertStringContains( ':', $encoded_messages );
+
+		$decoded_messages = AMP_Validation_Manager::unserialize_validation_error_messages( $encoded_messages );
+		$this->assertTrue( is_array( $decoded_messages ) );
+		$this->assertCount( 3, $decoded_messages );
+		$this->assertEqualSets( array_unique( $messages ), $decoded_messages );
+
+		$decoded_messages = AMP_Validation_Manager::unserialize_validation_error_messages( 'badhash:badencoding' );
+		$this->assertNull( $decoded_messages );
+	}
+
+	/**
 	 * Test for print_plugin_notice()
 	 *
 	 * @covers AMP_Validation_Manager::print_plugin_notice()

@@ -2170,7 +2170,7 @@ class AMP_Validation_Manager {
 	 */
 	public static function serialize_validation_error_messages( $messages ) {
 		$encoded_messages = base64_encode( wp_json_encode( array_unique( $messages ) ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
-		return wp_hash( $encoded_messages ) . ':' . $encoded_messages;
+		return wp_hash( $encoded_messages . wp_nonce_tick(), 'nonce' ) . ':' . $encoded_messages;
 	}
 
 	/**
@@ -2184,7 +2184,14 @@ class AMP_Validation_Manager {
 	 */
 	public static function unserialize_validation_error_messages( $serialized ) {
 		$parts = explode( ':', $serialized, 2 );
-		if ( count( $parts ) !== 2 || wp_hash( $parts[1] ) !== $parts[0] ) {
+		if (
+			count( $parts ) !== 2
+			||
+			! hash_equals(
+				$parts[0],
+				wp_hash( $parts[1] . wp_nonce_tick(), 'nonce' )
+			)
+		) {
 			return null;
 		}
 		return json_decode( base64_decode( $parts[1] ), true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
