@@ -19,6 +19,7 @@ use AmpProject\AmpWP\Tests\Fixture\DummyPairedUrlStructure;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use WP_Query;
 use WP_Rewrite;
+use Exception;
 
 /** @coversDefaultClass \AmpProject\AmpWP\PairedRouting */
 class PairedRoutingTest extends DependencyInjectedTestCase {
@@ -31,12 +32,15 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 
 	public function setUp() {
 		parent::setUp();
+		unset( $_SERVER['HTTPS'] );
 		$this->instance = $this->injector->make( PairedRouting::class );
 	}
 
 	public function tearDown() {
 		unset( $_SERVER['REQUEST_URI'] );
 		parent::tearDown();
+		unregister_taxonomy( amp_get_slug() );
+		unregister_post_type( amp_get_slug() );
 	}
 
 	/** @covers ::__construct() */
@@ -56,7 +60,7 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$this->assertEquals( 10, has_filter( 'amp_rest_options', [ $this->instance, 'filter_rest_options' ] ) );
 		$this->assertEquals( 10, has_filter( 'amp_default_options', [ $this->instance, 'filter_default_options' ] ) );
 		$this->assertEquals( 10, has_filter( 'amp_options_updating', [ $this->instance, 'sanitize_options' ] ) );
-		$this->assertEquals( 8, has_action( 'template_redirect', [ $this->instance, 'redirect_extraneous_paired_endpoint' ] ) );
+		$this->assertEquals( 9, has_action( 'template_redirect', [ $this->instance, 'redirect_extraneous_paired_endpoint' ] ) );
 		$this->assertEquals( 7, has_action( 'plugins_loaded', [ $this->instance, 'initialize_paired_request' ] ) );
 	}
 
@@ -339,7 +343,6 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 			$this->assertFalse( has_filter( 'wp_unique_post_slug', [ $this->instance, 'filter_unique_post_slug' ] ) );
 		}
 
-		$this->assertEquals( 9, has_action( 'template_redirect', [ $this->instance, 'redirect_paired_amp_unavailable' ] ) );
 		$this->assertEquals( 10, has_action( 'parse_query', [ $this->instance, 'correct_query_when_is_front_page' ] ) );
 		$this->assertEquals( 10, has_action( 'wp', [ $this->instance, 'add_paired_request_hooks' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', [ $this->instance, 'add_permalink_settings_notice' ] ) );
@@ -863,13 +866,81 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		);
 	}
 
-	/** @covers ::redirect_paired_amp_unavailable() */
-	public function test_redirect_paired_amp_unavailable() {
-		$this->markTestIncomplete();
+	/** @covers ::redirect_extraneous_paired_endpoint() */
+	public function test_redirect_extraneous_paired_endpoint_slug_redirect() {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, Option::PAIRED_URL_STRUCTURE_QUERY_VAR );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
+		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, [ 'is_singular' ] );
+		$this->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
+
+		$post_id             = self::factory()->post->create( [ 'post_name' => 'first' ] );
+		$first_permalink_url = get_permalink( $post_id );
+
+		wp_update_post(
+			[
+				'ID'        => $post_id,
+				'post_name' => 'second',
+			]
+		);
+		$second_permalink_url = get_permalink( $post_id );
+
+		$this->assertNotEquals( $first_permalink_url, $second_permalink_url );
+
+		$this->go_to( $this->instance->add_endpoint( $first_permalink_url ) );
+
+		$this->assertTrue( is_404() );
+
+		$redirected_url = null;
+		try {
+			// Throwing an exception si needed because wp_old_slug_redirect() does exit after wp_redirect().
+			add_filter(
+				'wp_redirect',
+				static function ( $url ) {
+					throw new Exception( $url );
+				}
+			);
+			$this->instance->redirect_extraneous_paired_endpoint();
+		} catch ( Exception $exception ) {
+			$redirected_url = $exception->getMessage();
+		}
+
+		$this->assertEquals(
+			$this->instance->add_endpoint( $second_permalink_url ),
+			$redirected_url
+		);
 	}
 
-	/** @covers ::redirect_location() */
-	public function test_redirect_location() {
-		$this->markTestIncomplete();
+	/** @covers ::redirect_extraneous_paired_endpoint() */
+	public function test_redirect_extraneous_paired_endpoint_unavailable_template() {
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, Option::PAIRED_URL_STRUCTURE_QUERY_VAR );
+		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
+		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, [ 'is_singular' ] );
+		$this->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
+
+		$post_id          = self::factory()->post->create();
+		$date_archive_url = trailingslashit( dirname( get_permalink( $post_id ) ) );
+
+		$amp_endpoint_url = $this->instance->add_endpoint( $date_archive_url );
+		$this->go_to( $amp_endpoint_url );
+
+		$this->assertFalse( amp_is_canonical() );
+		$this->assertTrue( is_date() );
+		$this->assertFalse( amp_is_available() );
+
+		$redirected_url = null;
+		add_filter(
+			'wp_redirect',
+			static function ( $url ) use ( &$redirected_url ) {
+				$redirected_url = $url;
+				return false;
+			}
+		);
+		$this->instance->redirect_extraneous_paired_endpoint();
+		$this->assertEquals(
+			$date_archive_url,
+			$redirected_url
+		);
 	}
 }

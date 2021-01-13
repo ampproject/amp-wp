@@ -172,7 +172,7 @@ final class PairedRouting implements Service, Registerable {
 		add_filter( 'amp_default_options', [ $this, 'filter_default_options' ], 10, 2 );
 		add_filter( 'amp_options_updating', [ $this, 'sanitize_options' ], 10, 2 );
 
-		add_action( 'template_redirect', [ $this, 'redirect_extraneous_paired_endpoint' ], 8 ); // Must be before redirect_paired_amp_unavailable() runs at priority 9.
+		add_action( 'template_redirect', [ $this, 'redirect_extraneous_paired_endpoint' ], 9 );
 
 		// Priority 7 needed to run before PluginSuppression::initialize() at priority 8.
 		add_action( 'plugins_loaded', [ $this, 'initialize_paired_request' ], 7 );
@@ -356,7 +356,6 @@ final class PairedRouting implements Service, Registerable {
 			add_filter( 'wp_unique_post_slug', [ $this, 'filter_unique_post_slug' ], 10, 4 );
 		}
 
-		add_action( 'template_redirect', [ $this, 'redirect_paired_amp_unavailable' ], 9 ); // Must be before redirect_canonical() runs at priority 10.
 		add_action( 'parse_query', [ $this, 'correct_query_when_is_front_page' ] );
 		add_action( 'wp', [ $this, 'add_paired_request_hooks' ] );
 
@@ -846,7 +845,7 @@ final class PairedRouting implements Service, Registerable {
 	}
 
 	/**
-	 * Redirect to remove the extraneous paired endpoint from the requested URI.
+	 * Redirect to remove the extraneous/erroneous paired endpoint from the requested URI.
 	 *
 	 * When in Standard mode, the behavior is to strip off /amp/ if it is present on the requested URL when it is a 404.
 	 * This ensures that sites switching to AMP-first will have their /amp/ URLs redirecting to the non-AMP, rather than
@@ -854,11 +853,8 @@ final class PairedRouting implements Service, Registerable {
 	 * redirect happens to remove the 'amp' query var if present.
 	 *
 	 * When in a Paired AMP mode, this handles a case where an AMP page that has a link to `./amp/` can inadvertently
-	 * cause an infinite URL space such as `./amp/amp/amp/amp/…`.
-	 *
-	 * This happens before `PairedRouting::redirect_paired_amp_unavailable()`.
-	 *
-	 * @see PairedRouting::redirect_paired_amp_unavailable()
+	 * cause an infinite URL space such as `./amp/amp/amp/amp/…`. It also handles the case where the AMP endpoint is
+	 * requested but AMP is not available.
 	 */
 	public function redirect_extraneous_paired_endpoint() {
 		$requested_url = amp_get_current_url();
@@ -874,64 +870,33 @@ final class PairedRouting implements Service, Registerable {
 				// Strip extraneous query var from AMP-first sites.
 				$redirect_url = $query_var_removed;
 			}
-		} elseif ( is_404() && $endpoint_suffix_removed !== $requested_url ) {
-			// To account for switching the paired URL structure from `/amp/` to `?amp=1`, add the query var if in Paired
-			// AMP mode. Note this is not necessary to do when sites have switched from a query var to an endpoint suffix
-			// because the query var will always be recognized whereas the reverse is not always true.
-			// This also prevents an infinite URL space under /amp/ endpoint.
-			$redirect_url = $this->paired_url->add_query_var( $endpoint_suffix_removed );
-		}
+		} else {
+			// Calling wp_old_slug_redirect() here is to account for a site that does not have AMP enabled for the 404 template.
+			// This method is running at template_redirect priority 9 in order to run before redirect_canonical() which runs at
+			// priority 10. However, wp_old_slug_redirect() also runs at priority 10 (normally), and it needs to run before the
+			// redirection happens here since it could be that the 404 template would actually not be getting served but rather
+			// the user should be getting redirected to the new permalink where a singular template is served. For this reason,
+			// wp_old_slug_redirect() is called just-in-time, and maybe_add_paired_endpoint is added as a filter for
+			// old_slug_redirect_url which ensures that the AMP endpoint will persist the slug redirect.
+			wp_old_slug_redirect(); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_old_slug_redirect_wp_old_slug_redirect
 
-		if ( $redirect_url ) {
-			$this->redirect_location( $redirect_url );
-		}
-	}
-
-	/**
-	 * Redirect to non-AMP URL if paired AMP is not available for this URL and yet the query var is present.
-	 *
-	 * AMP may not be available either because either it is disabled for the template type or the site has been put into
-	 * Standard mode. In the latter case, when AMP-first/canonical then when there is an ?amp query param, then a
-	 * redirect needs to be done to the URL without any AMP indicator in the URL. Note that URLs with an endpoint suffix
-	 * like /amp/ will redirect to strip the endpoint on Standard mode sites via the `redirect_extraneous_paired_endpoint`
-	 * method above.
-	 *
-	 * This happens after `PairedRouting::redirect_extraneous_paired_endpoint()`.
-	 *
-	 * @see PairedRouting::redirect_extraneous_paired_endpoint()
-	 */
-	public function redirect_paired_amp_unavailable() {
-		if ( $this->has_endpoint() && ( amp_is_canonical() || ! amp_is_available() ) ) {
-			$request_url  = amp_get_current_url();
-			$redirect_url = $this->remove_endpoint( $request_url );
-			if ( $redirect_url !== $request_url ) {
-				// Calling wp_old_slug_redirect() here is to account for a site that does not have AMP enabled for the 404 template.
-				// This method is running at template_redirect priority 9 in order to run before redirect_canonical() which runs at
-				// priority 10. However, wp_old_slug_redirect() also runs at priority 10 (normally), and it needs to run before the
-				// redirection happens here since it could be that the 404 template would actually not be getting served but rather
-				// the user should be getting redirected to the new permalink where a singular template is served. For this reason,
-				// wp_old_slug_redirect() is called just-in-time, and maybe_add_paired_endpoint is added as a filter for
-				// old_slug_redirect_url which ensures that the AMP endpoint will persist the slug redirect.
-				wp_old_slug_redirect(); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_old_slug_redirect_wp_old_slug_redirect
-
-				$this->redirect_location( $redirect_url );
+			if ( is_404() && $endpoint_suffix_removed !== $requested_url ) {
+				// To account for switching the paired URL structure from `/amp/` to `?amp=1`, add the query var if in Paired
+				// AMP mode. Note this is not necessary to do when sites have switched from a query var to an endpoint suffix
+				// because the query var will always be recognized whereas the reverse is not always true.
+				// This also prevents an infinite URL space under /amp/ endpoint.
+				$redirect_url = $this->add_endpoint( $endpoint_suffix_removed );
+			} elseif ( $this->has_endpoint() && ! amp_is_available() ) {
+				// Redirect to non-AMP URL if AMP is not available.
+				$redirect_url = $this->remove_endpoint( $requested_url );
 			}
 		}
-	}
 
-	/**
-	 * Redirect the location to a given URL.
-	 *
-	 * Temporary redirect is used for admin users because implied transitional mode and template support can be
-	 * enabled by user ay any time, so they will be able to make AMP available for this URL and see the change
-	 * without wrestling with the redirect cache.
-	 *
-	 * @param string $url URL.
-	 */
-	private function redirect_location( $url ) {
-		$status_code = current_user_can( 'manage_options' ) ? 302 : 301;
-		if ( wp_safe_redirect( $url, $status_code ) ) {
-			exit; // @codeCoverageIgnore
+		if ( $redirect_url && $redirect_url !== $requested_url ) {
+			$status_code = current_user_can( 'manage_options' ) ? 302 : 301;
+			if ( wp_safe_redirect( $redirect_url, $status_code ) ) {
+				exit; // @codeCoverageIgnore
+			}
 		}
 	}
 }
