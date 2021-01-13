@@ -16,7 +16,7 @@ Remove the AMP endpoint (and query var) from a given URL.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:801](/includes/amp-helper-functions.php#L801-L810)
+:link: [includes/amp-helper-functions.php:794](/includes/amp-helper-functions.php#L794-L803)
 
 <details>
 <summary>Show Code</summary>

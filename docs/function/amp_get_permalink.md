@@ -16,7 +16,7 @@ Retrieves the full AMP-specific permalink for the given post ID.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:722](/includes/amp-helper-functions.php#L722-L791)
+:link: [includes/amp-helper-functions.php:715](/includes/amp-helper-functions.php#L715-L784)
 
 <details>
 <summary>Show Code</summary>
