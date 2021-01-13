@@ -85,7 +85,7 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 			'/validate-post-url/(?P<id>[\d]+)',
 			[
 				'args'   => [
-					'context' => [
+					'context'       => [
 						'description' => __( 'The request context.', 'amp' ),
 						'enum'        => [
 							self::CONTEXT_EDITOR,
@@ -93,10 +93,20 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 						'required'    => true,
 						'type'        => 'string',
 					],
-					'id'      => [
+					'id'            => [
 						'description' => __( 'Unique identifier for the object.', 'amp' ),
 						'required'    => true,
 						'type'        => 'integer',
+					],
+					'preview_id'    => [
+						'description' => __( 'Unique identifier for the preview.', 'amp' ),
+						'required'    => false,
+						'type'        => 'integer',
+					],
+					'preview_nonce' => [
+						'description' => __( 'Preview nonce string.', 'amp' ),
+						'required'    => false,
+						'type'        => 'string',
 					],
 				],
 				[
@@ -137,9 +147,24 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function validate_post_url( $request ) {
-		$post = get_post( $request['id'] );
-		$this->url_validation_provider->get_url_validation( amp_get_permalink( $post ), get_post_type( $post ), true );
-		$validation_status_post = AMP_Validated_URL_Post_Type::get_invalid_url_post( amp_get_permalink( $post ) );
+		$post          = get_post( $request );
+		$preview_id    = $request['preview_id'];
+		$preview_nonce = $request['preview_nonce'];
+		$url           = amp_get_permalink( $post );
+
+		if ( ! empty( $preview_id ) && ! empty( $preview_nonce ) ) {
+			$url = add_query_arg(
+				[
+					'preview'       => 1,
+					'preview_id'    => $preview_id,
+					'preview_nonce' => $preview_nonce,
+				],
+				$url
+			);
+		}
+
+		$this->url_validation_provider->get_url_validation( $url, get_post_type( $post ), true );
+		$validation_status_post = AMP_Validated_URL_Post_Type::get_invalid_url_post( $url );
 
 		$data = [
 			'results'     => [],

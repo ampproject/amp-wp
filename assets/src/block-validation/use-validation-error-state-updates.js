@@ -9,7 +9,7 @@ import { isEqual } from 'lodash';
 import { useEffect, useRef, useState } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
-import { addQueryArgs } from '@wordpress/url';
+import { addQueryArgs, getQueryArg, isURL } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -78,8 +78,9 @@ export function maybeAddClientIdToValidationError( { validationError, source, cu
  */
 export function useValidationErrorStateUpdates() {
 	const [ blockOrderBeforeSave, setBlockOrderBeforeSave ] = useState( [] );
+	const [ hasRequestedPreview, setHasRequestedPreview ] = useState( false );
 	const [ previousValidationErrors, setPreviousValidationErrors ] = useState( [] );
-	const [ skipValidation, setSkipValidation ] = useState( false );
+	const [ shouldValidate, setShouldValidate ] = useState( true );
 	const unmounted = useRef( false );
 
 	const { setIsFetchingErrors, setReviewLink, setValidationErrors } = useDispatch( BLOCK_VALIDATION_STORE_KEY );
@@ -91,6 +92,7 @@ export function useValidationErrorStateUpdates() {
 		isAutosavingPost,
 		isPreviewingPost,
 		isSavingPost,
+		previewLink,
 		validationErrors,
 	} = useSelect( ( select ) => ( {
 		getClientIdsWithDescendants: select( 'core/block-editor' ).getClientIdsWithDescendants,
@@ -100,6 +102,7 @@ export function useValidationErrorStateUpdates() {
 		isAutosavingPost: select( 'core/editor' ).isAutosavingPost(),
 		isPreviewingPost: select( 'core/editor' ).isPreviewingPost(),
 		isSavingPost: select( 'core/editor' ).isSavingPost(),
+		previewLink: select( 'core/editor' ).getEditedPostPreviewLink(),
 		validationErrors: select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors(),
 	} ), [] );
 
@@ -109,17 +112,38 @@ export function useValidationErrorStateUpdates() {
 	}, [] );
 
 	/**
+	 * Set flags when a post is being saved. Validation should not be triggered on autosaves
+	 * with an exception of an autosave initiated by a post preview request.
+	 */
+	useEffect( () => {
+		if ( ! isSavingPost ) {
+			return;
+		}
+
+		if ( isPreviewingPost ) {
+			setShouldValidate( true );
+			setHasRequestedPreview( true );
+			return;
+		}
+
+		if ( isAutosavingPost ) {
+			return;
+		}
+
+		setShouldValidate( true );
+	}, [ isAutosavingPost, isPreviewingPost, isSavingPost ] );
+
+	/**
 	 * Fetches validation errors for the current post's URL after the editor has loaded and following
 	 * subsequent saves.
 	 */
 	useEffect( () => {
-		if ( isSavingPost ) {
-			// Skip validation for an autosave that was not triggered by a preview request.
-			setSkipValidation( isAutosavingPost && ! isPreviewingPost );
+		if ( isSavingPost || ! shouldValidate ) {
 			return;
 		}
 
-		if ( skipValidation ) {
+		// A preview link may not be available right after the saving a post.
+		if ( hasRequestedPreview && ! isURL( previewLink ) ) {
 			return;
 		}
 
@@ -127,8 +151,18 @@ export function useValidationErrorStateUpdates() {
 			setBlockOrderBeforeSave( getClientIdsWithDescendants() );
 			setIsFetchingErrors( true );
 
+			const queryArgs = { context: 'amp-editor' };
+
+			if ( hasRequestedPreview ) {
+				queryArgs.preview_id = getQueryArg( previewLink, 'preview_id' );
+				queryArgs.preview_nonce = getQueryArg( previewLink, 'preview_nonce' );
+			}
+
+			setShouldValidate( false );
+			setHasRequestedPreview( false );
+
 			const newValidation = await apiFetch( {
-				path: addQueryArgs( `/amp/v1/validate-post-url/${ currentPost.id }`, { context: 'amp-editor' } ),
+				path: addQueryArgs( `/amp/v1/validate-post-url/${ currentPost.id }`, queryArgs ),
 			} );
 
 			if ( true === unmounted.current ) {
@@ -139,7 +173,7 @@ export function useValidationErrorStateUpdates() {
 			setReviewLink( newValidation.review_link );
 			setIsFetchingErrors( false );
 		} )();
-	}, [ currentPost.id, getClientIdsWithDescendants, isAutosavingPost, isPreviewingPost, isSavingPost, setIsFetchingErrors, setReviewLink, setValidationErrors, skipValidation ] );
+	}, [ currentPost.id, getClientIdsWithDescendants, hasRequestedPreview, isSavingPost, previewLink, setIsFetchingErrors, setReviewLink, setValidationErrors, shouldValidate ] );
 
 	/**
 	 * Runs an equality check when validation errors are received before running the heavier effect.
