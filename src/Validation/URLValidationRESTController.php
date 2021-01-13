@@ -147,7 +147,7 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function validate_post_url( $request ) {
-		$post          = get_post( $request );
+		$post          = get_post( $request['id'] );
 		$preview_id    = $request['preview_id'];
 		$preview_nonce = $request['preview_nonce'];
 		$url           = amp_get_permalink( $post );
