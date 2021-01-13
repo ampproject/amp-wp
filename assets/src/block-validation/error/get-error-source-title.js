@@ -15,7 +15,7 @@ import { __, sprintf } from '@wordpress/i18n';
  *
  * @param {Object[]} sources Error source details from the PHP backtrace.
  */
-export function getErrorSourceTitle( sources ) {
+export function getErrorSourceTitle( sources = [] ) {
 	const keyedSources = { theme: [], plugin: [], 'mu-plugin': [], embed: [], core: [], blocks: [] };
 	for ( const source of sources ) {
 		if ( source.type && source.type in keyedSources ) {

@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import {
 	VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
@@ -34,11 +35,12 @@ export function Error( { clientId, status, term_id: termId, ...props } ) {
 	const reviewLink = useSelect( ( select ) => select( BLOCK_VALIDATION_STORE_KEY ).getReviewLink() );
 	const reviewed = status === VALIDATION_ERROR_ACK_ACCEPTED_STATUS || status === VALIDATION_ERROR_ACK_REJECTED_STATUS;
 
-	const { blockType } = useSelect( ( select ) => {
+	const { blockExists, blockType } = useSelect( ( select ) => {
 		const blockDetails = clientId ? select( 'core/block-editor' ).getBlock( clientId ) : null;
 		const blockTypeDetails = blockDetails ? select( 'core/blocks' ).getBlockType( blockDetails.name ) : null;
 
 		return {
+			blockExists: Boolean( blockDetails ),
 			blockType: blockTypeDetails,
 		};
 	}, [ clientId ] );
@@ -49,19 +51,32 @@ export function Error( { clientId, status, term_id: termId, ...props } ) {
 		detailsUrl.hash = `#tag-${ termId }`;
 	}
 
+	const panelClassNames = classnames( 'amp-error', {
+		'amp-error--reviewed': reviewed,
+		'amp-error--new': ! reviewed,
+		'amp-error--removed': ! blockExists,
+		[ `error-${ clientId }` ]: clientId,
+	} );
+
 	return (
 		<li className="amp-error-container">
 			<PanelBody
-				className={ `amp-error amp-error--${ reviewed ? 'reviewed' : 'new' }${ clientId ? ` error-${ clientId }` : '' }` }
+				className={ panelClassNames }
 				title={
 					<ErrorPanelTitle { ...props } blockType={ blockType } status={ status } />
 				}
 				initialOpen={ false }
 			>
-				<ErrorContent { ...props } clientId={ clientId } blockType={ blockType } status={ status } />
+				<ErrorContent
+					{ ...props }
+					clientId={ clientId }
+					blockExists={ blockExists }
+					blockType={ blockType }
+					status={ status }
+				/>
 
 				<div className="amp-error__actions">
-					{ clientId && (
+					{ blockExists && (
 						<Button
 							className="amp-error__select-block"
 							isSecondary

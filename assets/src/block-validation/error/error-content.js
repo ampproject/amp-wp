@@ -168,6 +168,7 @@ BlockType.propTypes = {
  * Content inside an error panel.
  *
  * @param {Object} props Component props.
+ * @param {boolean} props.blockExists Flag indicating if the block exists.
  * @param {Object} props.blockType Block type details.
  * @param {string} props.clientId Block client ID
  * @param {number} props.status Number indicating the error status.
@@ -175,7 +176,14 @@ BlockType.propTypes = {
  * @param {Object} props.error Error details.
  * @param {Object[]} props.error.sources Sources from the PHP backtrace for the error.
  */
-export function ErrorContent( { blockType, clientId, status, title, error: { sources } } ) {
+export function ErrorContent( {
+	blockExists,
+	blockType,
+	clientId,
+	status,
+	title,
+	error: { sources },
+} ) {
 	const blockTypeTitle = blockType?.title;
 	const blockTypeName = blockType?.name;
 
@@ -184,6 +192,11 @@ export function ErrorContent( { blockType, clientId, status, title, error: { sou
 
 	return (
 		<>
+			{ ! blockExists && (
+				<p>
+					{ __( 'The block has been removed from the editor.', 'amp' ) }
+				</p>
+			) }
 			{ ! clientId && (
 				<p>
 					{ __( 'This error comes from outside the post content.', 'amp' ) }
@@ -209,6 +222,7 @@ export function ErrorContent( { blockType, clientId, status, title, error: { sou
 	);
 }
 ErrorContent.propTypes = {
+	blockExists: PropTypes.bool,
 	blockType: PropTypes.shape( {
 		name: PropTypes.string,
 		title: PropTypes.string,
