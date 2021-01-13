@@ -12,7 +12,7 @@ Filters the minimum height required for a featured image.
 
 ### Source
 
-:link: [includes/admin/class-amp-post-meta-box.php:321](/includes/admin/class-amp-post-meta-box.php#L321)
+:link: [includes/admin/class-amp-post-meta-box.php:305](/includes/admin/class-amp-post-meta-box.php#L305)
 
 <details>
 <summary>Show Code</summary>

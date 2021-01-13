@@ -1,5 +1,5 @@
 {
-    "1": {
+    "0": {
         "file": {
             "description": "Class AMP_Customizer_Design_Settings",
             "long_description": "",
@@ -55,7 +55,7 @@
             }
         ]
     },
-    "2": {
+    "1": {
         "file": {
             "description": "Class AMP_Customizer_Settings",
             "long_description": "",
@@ -99,7 +99,7 @@
             }
         ]
     },
-    "7": {
+    "6": {
         "file": {
             "description": "Class AMP_Links_Sanitizer.",
             "long_description": "",
@@ -2629,17 +2629,17 @@
         "includes": [
             {
                 "name": "",
-                "line": 165,
+                "line": 167,
                 "type": "Require"
             },
             {
                 "name": "",
-                "line": 256,
+                "line": 240,
                 "type": "Require"
             },
             {
                 "name": "",
-                "line": 377,
+                "line": 361,
                 "type": "Include"
             }
         ],
@@ -2647,8 +2647,8 @@
         "hooks": [
             {
                 "name": "amp_featured_image_minimum_height",
-                "line": 321,
-                "end_line": 321,
+                "line": 305,
+                "end_line": 305,
                 "type": "filter",
                 "arguments": [
                     "$default_height"
@@ -2674,8 +2674,8 @@
             },
             {
                 "name": "amp_featured_image_minimum_width",
-                "line": 331,
-                "end_line": 331,
+                "line": 315,
+                "end_line": 315,
                 "type": "filter",
                 "arguments": [
                     "$default_width"
@@ -2734,12 +2734,12 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 368,
-                "end_line": 370,
+                "line": 361,
+                "end_line": 363,
                 "arguments": [],
                 "doc": {
                     "description": "Whether this is in 'canonical mode'.",
-                    "long_description": "Themes can register support for this with `add_theme_support( AMP_Theme_Support::SLUG )`:\n      add_theme_support( AMP_Theme_Support::SLUG );\n This will serve templates in AMP-first, allowing you to use AMP components in your theme templates. If you want to make available in transitional mode, where templates are served in AMP or non-AMP documents, do:\n      add_theme_support( AMP_Theme_Support::SLUG, array(          'paired' => true,      ) );\n Transitional mode is also implied if you define a template_dir:\n      add_theme_support( AMP_Theme_Support::SLUG, array(          'template_dir' => 'amp',      ) );\n If you want to have AMP-specific templates in addition to serving AMP-first, do:\n      add_theme_support( AMP_Theme_Support::SLUG, array(          'paired'       => false,          'template_dir' => 'amp',      ) );\n If you want to force AMP to always be served on a given template, you can use the templates_supported arg, for example to always serve the Category template in AMP:\n      add_theme_support( AMP_Theme_Support::SLUG, array(          'templates_supported' => array(              'is_category' => true,          ),      ) );\n Or if you want to force AMP to be used on all templates:\n      add_theme_support( AMP_Theme_Support::SLUG, array(          'templates_supported' => 'all',      ) );",
+                    "long_description": "Themes can register support for this with `add_theme_support( AMP_Theme_Support::SLUG )`:\n ```php\nadd_theme_support( AMP_Theme_Support::SLUG );\n```\n\nThis will serve templates in AMP-first, allowing you to use AMP components in your theme templates.\nIf you want to make available in transitional mode, where templates are served in AMP or non-AMP documents, do:\n\n```php\nadd_theme_support( AMP_Theme_Support::SLUG, array(\n    'paired' => true,\n) );\n```\n\nTransitional mode is also implied if you define a `template_dir`:\n\n```php\nadd_theme_support( AMP_Theme_Support::SLUG, array(\n    'template_dir' => 'amp',\n) );\n```\n\nIf you want to have AMP-specific templates in addition to serving AMP-first, do:\n\n```php\nadd_theme_support( AMP_Theme_Support::SLUG, array(\n    'paired'       => false,\n    'template_dir' => 'amp',\n) );\n```",
                     "tags": [
                         {
                             "name": "see",
@@ -2762,8 +2762,8 @@
                             "name": "get_option",
                             "class": "\\AMP_Options_Manager",
                             "static": true,
-                            "line": 369,
-                            "end_line": 369
+                            "line": 362,
+                            "end_line": 362
                         }
                     ]
                 }
@@ -2780,8 +2780,8 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 378,
-                "end_line": 389,
+                "line": 371,
+                "end_line": 382,
                 "arguments": [],
                 "doc": {
                     "description": "Determines whether the legacy AMP post templates are being used.",
@@ -2807,29 +2807,29 @@
                             "name": "get_option",
                             "class": "\\AMP_Options_Manager",
                             "static": true,
-                            "line": 379,
-                            "end_line": 379
+                            "line": 372,
+                            "end_line": 372
                         },
                         {
                             "name": "get_option",
                             "class": "\\AMP_Options_Manager",
                             "static": true,
-                            "line": 383,
-                            "end_line": 383
+                            "line": 376,
+                            "end_line": 376
                         },
                         {
                             "name": "exists",
                             "class": "wp_get_theme($reader_theme)",
                             "static": false,
-                            "line": 388,
-                            "end_line": 388
+                            "line": 381,
+                            "end_line": 381
                         }
                     ],
                     "functions": [
                         {
                             "name": "wp_get_theme",
-                            "line": 388,
-                            "end_line": 388
+                            "line": 381,
+                            "end_line": 381
                         }
                     ]
                 }
@@ -2846,8 +2846,8 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 410,
-                "end_line": 603,
+                "line": 403,
+                "end_line": 596,
                 "arguments": [],
                 "doc": {
                     "description": "Determine whether AMP is available for the current URL.",
@@ -2879,68 +2879,78 @@
                     "functions": [
                         {
                             "name": "wp_doing_cron",
-                            "line": 414,
-                            "end_line": 414
+                            "line": 407,
+                            "end_line": 407
                         },
                         {
                             "name": "defined",
-                            "line": 414,
-                            "end_line": 414
+                            "line": 407,
+                            "end_line": 407
                         },
                         {
                             "name": "is_admin",
-                            "line": 414,
-                            "end_line": 414
+                            "line": 407,
+                            "end_line": 407
                         },
                         {
                             "name": "in_array",
-                            "line": 414,
-                            "end_line": 414
+                            "line": 407,
+                            "end_line": 407
                         },
                         {
                             "name": "in_array",
-                            "line": 432,
-                            "end_line": 432
+                            "line": 425,
+                            "end_line": 425
                         },
                         {
                             "name": "sprintf",
-                            "line": 436,
-                            "end_line": 442
+                            "line": 429,
+                            "end_line": 435
                         },
                         {
                             "name": "__",
-                            "line": 438,
-                            "end_line": 438
+                            "line": 431,
+                            "end_line": 431
                         },
                         {
                             "name": "current_action",
-                            "line": 444,
-                            "end_line": 444
+                            "line": 437,
+                            "end_line": 437
                         },
                         {
                             "name": "sprintf",
-                            "line": 447,
+                            "line": 440,
+                            "end_line": 443
+                        },
+                        {
+                            "name": "__",
+                            "line": 445,
+                            "end_line": 445
+                        },
+                        {
+                            "name": "sprintf",
+                            "line": 448,
+                            "end_line": 454
+                        },
+                        {
+                            "name": "__",
+                            "line": 450,
                             "end_line": 450
                         },
                         {
                             "name": "__",
-                            "line": 452,
-                            "end_line": 452
-                        },
-                        {
-                            "name": "sprintf",
-                            "line": 455,
-                            "end_line": 461
+                            "line": 462,
+                            "end_line": 462
                         },
                         {
                             "name": "__",
-                            "line": 457,
-                            "end_line": 457
+                            "line": 466,
+                            "end_line": 466
                         },
                         {
                             "name": "__",
-                            "line": 469,
-                            "end_line": 469
+                            "line": 470,
+                            "end_line": 470
                         },
                         {
                             "name": "__",
@@ -2948,27 +2958,32 @@
                             "end_line": 473
                         },
                         {
-                            "name": "__",
-                            "line": 477,
-                            "end_line": 477
-                        },
-                        {
-                            "name": "__",
-                            "line": 480,
-                            "end_line": 480
-                        },
-                        {
                             "name": "sprintf",
-                            "line": 485,
-                            "end_line": 485
+                            "line": 478,
+                            "end_line": 478
                         },
                         {
                             "name": "_doing_it_wrong",
-                            "line": 489,
-                            "end_line": 489
+                            "line": 482,
+                            "end_line": 482
                         },
                         {
                             "name": "esc_html",
+                            "line": 482,
+                            "end_line": 482
+                        },
+                        {
+                            "name": "did_action",
+                            "line": 487,
+                            "end_line": 487
+                        },
+                        {
+                            "name": "warn",
+                            "line": 488,
+                            "end_line": 488
+                        },
+                        {
+                            "name": "defined",
                             "line": 489,
                             "end_line": 489
                         },
@@ -2983,84 +2998,69 @@
                             "end_line": 495
                         },
                         {
-                            "name": "defined",
-                            "line": 496,
-                            "end_line": 496
-                        },
-                        {
-                            "name": "did_action",
+                            "name": "class_exists",
                             "line": 501,
                             "end_line": 501
                         },
                         {
-                            "name": "warn",
-                            "line": 502,
-                            "end_line": 502
-                        },
-                        {
-                            "name": "class_exists",
-                            "line": 508,
-                            "end_line": 508
-                        },
-                        {
                             "name": "defined",
-                            "line": 508,
-                            "end_line": 508
+                            "line": 501,
+                            "end_line": 501
                         },
                         {
                             "name": "method_exists",
-                            "line": 528,
-                            "end_line": 528
+                            "line": 521,
+                            "end_line": 521
                         },
                         {
                             "name": "is_customize_preview",
+                            "line": 533,
+                            "end_line": 533
+                        },
+                        {
+                            "name": "amp_is_legacy",
+                            "line": 537,
+                            "end_line": 537
+                        },
+                        {
+                            "name": "did_action",
                             "line": 540,
                             "end_line": 540
                         },
                         {
-                            "name": "amp_is_legacy",
-                            "line": 544,
-                            "end_line": 544
+                            "name": "warn",
+                            "line": 541,
+                            "end_line": 541
                         },
                         {
-                            "name": "did_action",
+                            "name": "amp_is_canonical",
                             "line": 547,
                             "end_line": 547
                         },
                         {
-                            "name": "warn",
-                            "line": 548,
-                            "end_line": 548
-                        },
-                        {
-                            "name": "amp_is_canonical",
-                            "line": 554,
-                            "end_line": 554
-                        },
-                        {
                             "name": "get_queried_object",
-                            "line": 571,
-                            "end_line": 571
+                            "line": 564,
+                            "end_line": 564
                         },
                         {
                             "name": "amp_is_canonical",
-                            "line": 583,
-                            "end_line": 583
+                            "line": 576,
+                            "end_line": 576
                         },
                         {
                             "name": "amp_get_current_url",
-                            "line": 585,
-                            "end_line": 585
+                            "line": 578,
+                            "end_line": 578
                         },
                         {
                             "name": "count",
-                            "line": 588,
-                            "end_line": 588
+                            "line": 581,
+                            "end_line": 581
                         },
                         {
                             "name": "amp_is_post_supported",
-                            "line": 596,
-                            "end_line": 596
+                            "line": 589,
+                            "end_line": 589
                         }
                     ],
                     "methods": [
@@ -3068,127 +3068,127 @@
                             "name": "get",
                             "class": "\\AmpProject\\AmpWP\\Services",
                             "static": true,
-                            "line": 422,
-                            "end_line": 422
+                            "line": 415,
+                            "end_line": 415
                         },
                         {
                             "name": "analyze_backtrace",
                             "class": "$likely_culprit_detector",
                             "static": false,
-                            "line": 423,
-                            "end_line": 423
+                            "line": 416,
+                            "end_line": 416
                         },
                         {
                             "name": "get",
                             "class": "$wp_query",
                             "static": false,
-                            "line": 508,
-                            "end_line": 508
+                            "line": 501,
+                            "end_line": 501
                         },
                         {
                             "name": "is_embed",
                             "class": "$wp_query",
                             "static": false,
-                            "line": 518,
-                            "end_line": 518
+                            "line": 511,
+                            "end_line": 511
                         },
                         {
                             "name": "is_feed",
                             "class": "$wp_query",
                             "static": false,
-                            "line": 520,
-                            "end_line": 520
+                            "line": 513,
+                            "end_line": 513
                         },
                         {
                             "name": "is_comment_feed",
                             "class": "$wp_query",
                             "static": false,
-                            "line": 522,
-                            "end_line": 522
+                            "line": 515,
+                            "end_line": 515
                         },
                         {
                             "name": "is_trackback",
                             "class": "$wp_query",
                             "static": false,
-                            "line": 524,
-                            "end_line": 524
+                            "line": 517,
+                            "end_line": 517
                         },
                         {
                             "name": "is_robots",
                             "class": "$wp_query",
                             "static": false,
-                            "line": 526,
-                            "end_line": 526
+                            "line": 519,
+                            "end_line": 519
                         },
                         {
                             "name": "is_favicon",
                             "class": "$wp_query",
                             "static": false,
-                            "line": 528,
-                            "end_line": 528
+                            "line": 521,
+                            "end_line": 521
                         },
                         {
                             "name": "get_option",
                             "class": "\\AMP_Options_Manager",
                             "static": true,
-                            "line": 536,
-                            "end_line": 536
+                            "line": 529,
+                            "end_line": 529
                         },
                         {
                             "name": "get_option",
                             "class": "\\AMP_Options_Manager",
                             "static": true,
-                            "line": 538,
-                            "end_line": 538
+                            "line": 531,
+                            "end_line": 531
                         },
                         {
                             "name": "get_option",
                             "class": "\\AMP_Options_Manager",
                             "static": true,
-                            "line": 549,
-                            "end_line": 549
+                            "line": 542,
+                            "end_line": 542
                         },
                         {
                             "name": "has_cap",
                             "class": "\\AMP_Validation_Manager",
                             "static": true,
-                            "line": 554,
-                            "end_line": 554
+                            "line": 547,
+                            "end_line": 547
                         },
                         {
                             "name": "is_theme_support_forced",
                             "class": "\\AMP_Validation_Manager",
                             "static": true,
-                            "line": 567,
-                            "end_line": 567
+                            "line": 560,
+                            "end_line": 560
                         },
                         {
                             "name": "get_template_availability",
                             "class": "\\AMP_Theme_Support",
                             "static": true,
-                            "line": 574,
-                            "end_line": 574
+                            "line": 567,
+                            "end_line": 567
                         },
                         {
                             "name": "has_cap",
                             "class": "\\AMP_Validation_Manager",
                             "static": true,
-                            "line": 583,
-                            "end_line": 583
+                            "line": 576,
+                            "end_line": 576
                         },
                         {
                             "name": "get_invalid_url_validation_errors",
                             "class": "\\AMP_Validated_URL_Post_Type",
                             "static": true,
-                            "line": 584,
-                            "end_line": 587
+                            "line": 577,
+                            "end_line": 580
                         },
                         {
                             "name": "is_singular",
                             "class": "$wp_query",
                             "static": false,
-                            "line": 595,
-                            "end_line": 595
+                            "line": 588,
+                            "end_line": 588
                         }
                     ]
                 }
@@ -3205,8 +3205,8 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 656,
-                "end_line": 667,
+                "line": 649,
+                "end_line": 660,
                 "arguments": [],
                 "doc": {
                     "description": "Get the slug used in AMP for the query var, endpoint, and post type support.",
@@ -3228,8 +3228,8 @@
                 "hooks": [
                     {
                         "name": "amp_query_var",
-                        "line": 666,
-                        "end_line": 666,
+                        "line": 659,
+                        "end_line": 659,
                         "type": "filter",
                         "arguments": [
                             "defined('AMP_QUERY_VAR') ? AMP_QUERY_VAR : \\AmpProject\\AmpWP\\QueryVar::AMP"
@@ -3258,13 +3258,13 @@
                     "functions": [
                         {
                             "name": "apply_filters",
-                            "line": 666,
-                            "end_line": 666
+                            "line": 659,
+                            "end_line": 659
                         },
                         {
                             "name": "defined",
-                            "line": 666,
-                            "end_line": 666
+                            "line": 659,
+                            "end_line": 659
                         }
                     ]
                 }
@@ -3281,8 +3281,8 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 722,
-                "end_line": 753,
+                "line": 717,
+                "end_line": 748,
                 "arguments": [
                     {
                         "name": "$post_id",
@@ -3318,8 +3318,8 @@
                 "hooks": [
                     {
                         "name": "amp_pre_get_permalink",
-                        "line": 734,
-                        "end_line": 734,
+                        "line": 729,
+                        "end_line": 729,
                         "type": "filter",
                         "arguments": [
                             "false",
@@ -3359,8 +3359,8 @@
                     },
                     {
                         "name": "amp_get_permalink",
-                        "line": 752,
-                        "end_line": 752,
+                        "line": 747,
+                        "end_line": 747,
                         "type": "filter",
                         "arguments": [
                             "$amp_url",
@@ -3403,28 +3403,28 @@
                     "functions": [
                         {
                             "name": "apply_filters",
-                            "line": 734,
-                            "end_line": 734
+                            "line": 729,
+                            "end_line": 729
                         },
                         {
                             "name": "get_permalink",
-                            "line": 740,
-                            "end_line": 740
+                            "line": 735,
+                            "end_line": 735
                         },
                         {
                             "name": "amp_is_canonical",
-                            "line": 741,
-                            "end_line": 741
+                            "line": 736,
+                            "end_line": 736
                         },
                         {
                             "name": "amp_add_paired_endpoint",
-                            "line": 741,
-                            "end_line": 741
+                            "line": 736,
+                            "end_line": 736
                         },
                         {
                             "name": "apply_filters",
-                            "line": 752,
-                            "end_line": 752
+                            "line": 747,
+                            "end_line": 747
                         }
                     ]
                 }
@@ -3441,8 +3441,8 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 765,
-                "end_line": 767,
+                "line": 760,
+                "end_line": 762,
                 "arguments": [
                     {
                         "name": "$url",
@@ -3490,8 +3490,8 @@
                     "functions": [
                         {
                             "name": "amp_remove_paired_endpoint",
-                            "line": 766,
-                            "end_line": 766
+                            "line": 761,
+                            "end_line": 761
                         }
                     ]
                 }
@@ -3508,8 +3508,8 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 776,
-                "end_line": 826,
+                "line": 771,
+                "end_line": 821,
                 "arguments": [],
                 "doc": {
                     "description": "Add amphtml link.",
@@ -3524,8 +3524,8 @@
                 "hooks": [
                     {
                         "name": "amp_frontend_show_canonical",
-                        "line": 793,
-                        "end_line": 806,
+                        "line": 788,
+                        "end_line": 801,
                         "type": "filter_deprecated",
                         "arguments": [
                             "array(true)",
@@ -3554,73 +3554,73 @@
                     "functions": [
                         {
                             "name": "amp_is_canonical",
-                            "line": 778,
-                            "end_line": 778
+                            "line": 773,
+                            "end_line": 773
                         },
                         {
                             "name": "apply_filters_deprecated",
-                            "line": 793,
-                            "end_line": 806
+                            "line": 788,
+                            "end_line": 801
                         },
                         {
                             "name": "sprintf",
-                            "line": 798,
-                            "end_line": 805
-                        },
-                        {
-                            "name": "esc_html__",
-                            "line": 800,
+                            "line": 793,
                             "end_line": 800
                         },
                         {
+                            "name": "esc_html__",
+                            "line": 795,
+                            "end_line": 795
+                        },
+                        {
                             "name": "amp_is_available",
-                            "line": 811,
-                            "end_line": 811
+                            "line": 806,
+                            "end_line": 806
                         },
                         {
                             "name": "printf",
-                            "line": 812,
-                            "end_line": 812
+                            "line": 807,
+                            "end_line": 807
                         },
                         {
                             "name": "esc_html__",
+                            "line": 807,
+                            "end_line": 807
+                        },
+                        {
+                            "name": "amp_add_paired_endpoint",
                             "line": 812,
                             "end_line": 812
                         },
                         {
-                            "name": "amp_add_paired_endpoint",
-                            "line": 817,
-                            "end_line": 817
-                        },
-                        {
                             "name": "amp_get_current_url",
-                            "line": 817,
-                            "end_line": 817
+                            "line": 812,
+                            "end_line": 812
                         },
                         {
                             "name": "amp_get_permalink",
-                            "line": 819,
-                            "end_line": 819
+                            "line": 814,
+                            "end_line": 814
                         },
                         {
                             "name": "get_queried_object_id",
+                            "line": 814,
+                            "end_line": 814
+                        },
+                        {
+                            "name": "remove_query_arg",
+                            "line": 818,
+                            "end_line": 818
+                        },
+                        {
+                            "name": "printf",
                             "line": 819,
                             "end_line": 819
                         },
                         {
-                            "name": "remove_query_arg",
-                            "line": 823,
-                            "end_line": 823
-                        },
-                        {
-                            "name": "printf",
-                            "line": 824,
-                            "end_line": 824
-                        },
-                        {
                             "name": "esc_url",
-                            "line": 824,
-                            "end_line": 824
+                            "line": 819,
+                            "end_line": 819
                         }
                     ],
                     "methods": [
@@ -3628,8 +3628,8 @@
                             "name": "is_paired_available",
                             "class": "\\AMP_Theme_Support",
                             "static": true,
-                            "line": 816,
-                            "end_line": 816
+                            "line": 811,
+                            "end_line": 811
                         }
                     ]
                 }
@@ -3646,8 +3646,8 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 837,
-                "end_line": 839,
+                "line": 832,
+                "end_line": 834,
                 "arguments": [
                     {
                         "name": "$post",
@@ -3691,8 +3691,8 @@
                     "functions": [
                         {
                             "name": "count",
-                            "line": 838,
-                            "end_line": 838
+                            "line": 833,
+                            "end_line": 833
                         }
                     ],
                     "methods": [
@@ -3700,8 +3700,8 @@
                             "name": "get_support_errors",
                             "class": "\\AMP_Post_Type_Support",
                             "static": true,
-                            "line": 838,
-                            "end_line": 838
+                            "line": 833,
+                            "end_line": 833
                         }
                     ]
                 }
@@ -3718,8 +3718,8 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 852,
-                "end_line": 854,
+                "line": 847,
+                "end_line": 849,
                 "arguments": [
                     {
                         "name": "$post",
@@ -3772,8 +3772,8 @@
                     "functions": [
                         {
                             "name": "amp_is_post_supported",
-                            "line": 853,
-                            "end_line": 853
+                            "line": 848,
+                            "end_line": 848
                         }
                     ]
                 }
@@ -3790,8 +3790,8 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 870,
-                "end_line": 897,
+                "line": 865,
+                "end_line": 892,
                 "arguments": [],
                 "doc": {
                     "description": "Determine whether the current request is for an AMP page.",
@@ -3820,23 +3820,23 @@
                     "functions": [
                         {
                             "name": "amp_is_canonical",
-                            "line": 878,
-                            "end_line": 878
+                            "line": 873,
+                            "end_line": 873
                         },
                         {
                             "name": "amp_has_paired_endpoint",
-                            "line": 880,
-                            "end_line": 880
+                            "line": 875,
+                            "end_line": 875
                         },
                         {
                             "name": "amp_is_available",
-                            "line": 884,
-                            "end_line": 884
+                            "line": 879,
+                            "end_line": 879
                         },
                         {
                             "name": "did_action",
-                            "line": 889,
-                            "end_line": 889
+                            "line": 884,
+                            "end_line": 884
                         }
                     ],
                     "methods": [
@@ -3844,8 +3844,8 @@
                             "name": "get_option",
                             "class": "\\AMP_Options_Manager",
                             "static": true,
-                            "line": 890,
-                            "end_line": 890
+                            "line": 885,
+                            "end_line": 885
                         }
                     ]
                 }
@@ -3862,8 +3862,8 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 914,
-                "end_line": 916,
+                "line": 909,
+                "end_line": 911,
                 "arguments": [],
                 "doc": {
                     "description": "Determine whether the current response being served as AMP.",
@@ -3897,8 +3897,8 @@
                     "functions": [
                         {
                             "name": "amp_is_request",
-                            "line": 915,
-                            "end_line": 915
+                            "line": 910,
+                            "end_line": 910
                         }
                     ]
                 }
@@ -3915,12 +3915,12 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 1412,
-                "end_line": 1435,
+                "line": 1407,
+                "end_line": 1430,
                 "arguments": [],
                 "doc": {
                     "description": "Determine whether AMP dev mode is enabled.",
-                    "long_description": "When enabled, the <html> element will get the data-ampdevmode attribute and the plugin will add the same attribute to elements associated with the admin bar and other elements that are provided by the `amp_dev_mode_element_xpaths` filter.",
+                    "long_description": "When enabled, the `<html>` element will get the data-ampdevmode attribute and the plugin will add the same attribute to elements associated with the admin bar and other elements that are provided by the `amp_dev_mode_element_xpaths` filter.",
                     "tags": [
                         {
                             "name": "since",
@@ -3938,8 +3938,8 @@
                 "hooks": [
                     {
                         "name": "amp_dev_mode_enabled",
-                        "line": 1424,
-                        "end_line": 1434,
+                        "line": 1419,
+                        "end_line": 1429,
                         "type": "filter",
                         "arguments": [
                             "is_admin_bar_showing() && is_user_logged_in() || is_customize_preview()"
@@ -3958,7 +3958,7 @@
                                     "types": [
                                         "bool"
                                     ],
-                                    "variable": ""
+                                    "variable": "$is_dev_mode_enabled"
                                 }
                             ]
                         }
@@ -3968,23 +3968,23 @@
                     "functions": [
                         {
                             "name": "apply_filters",
-                            "line": 1424,
-                            "end_line": 1434
+                            "line": 1419,
+                            "end_line": 1429
                         },
                         {
                             "name": "is_admin_bar_showing",
-                            "line": 1430,
-                            "end_line": 1430
+                            "line": 1425,
+                            "end_line": 1425
                         },
                         {
                             "name": "is_user_logged_in",
-                            "line": 1430,
-                            "end_line": 1430
+                            "line": 1425,
+                            "end_line": 1425
                         },
                         {
                             "name": "is_customize_preview",
-                            "line": 1432,
-                            "end_line": 1432
+                            "line": 1427,
+                            "end_line": 1427
                         }
                     ]
                 }
@@ -4001,8 +4001,8 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 1946,
-                "end_line": 1957,
+                "line": 1941,
+                "end_line": 1952,
                 "arguments": [
                     {
                         "name": "$script",
@@ -4066,18 +4066,18 @@
                     "functions": [
                         {
                             "name": "hash",
-                            "line": 1947,
-                            "end_line": 1947
+                            "line": 1942,
+                            "end_line": 1942
                         },
                         {
                             "name": "str_replace",
-                            "line": 1951,
-                            "end_line": 1955
+                            "line": 1946,
+                            "end_line": 1950
                         },
                         {
                             "name": "base64_encode",
-                            "line": 1954,
-                            "end_line": 1954
+                            "line": 1949,
+                            "end_line": 1949
                         }
                     ]
                 }
@@ -4094,8 +4094,8 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 1967,
-                "end_line": 1969,
+                "line": 1962,
+                "end_line": 1964,
                 "arguments": [
                     {
                         "name": "$url",
@@ -4133,13 +4133,13 @@
                     "functions": [
                         {
                             "name": "add_query_arg",
-                            "line": 1968,
-                            "end_line": 1968
+                            "line": 1963,
+                            "end_line": 1963
                         },
                         {
                             "name": "amp_get_slug",
-                            "line": 1968,
-                            "end_line": 1968
+                            "line": 1963,
+                            "end_line": 1963
                         }
                     ]
                 }
@@ -4156,8 +4156,8 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 1980,
-                "end_line": 2017,
+                "line": 1975,
+                "end_line": 2012,
                 "arguments": [
                     {
                         "name": "$url",
@@ -4199,33 +4199,33 @@
                     "functions": [
                         {
                             "name": "amp_get_slug",
-                            "line": 1981,
-                            "end_line": 1981
+                            "line": 1976,
+                            "end_line": 1976
                         },
                         {
                             "name": "wp_parse_url",
-                            "line": 1997,
-                            "end_line": 1997
+                            "line": 1992,
+                            "end_line": 1992
                         },
                         {
                             "name": "wp_parse_str",
-                            "line": 2000,
-                            "end_line": 2000
+                            "line": 1995,
+                            "end_line": 1995
                         },
                         {
                             "name": "sprintf",
-                            "line": 2007,
-                            "end_line": 2010
+                            "line": 2002,
+                            "end_line": 2005
                         },
                         {
                             "name": "preg_quote",
-                            "line": 2009,
-                            "end_line": 2009
+                            "line": 2004,
+                            "end_line": 2004
                         },
                         {
                             "name": "preg_match",
-                            "line": 2011,
-                            "end_line": 2011
+                            "line": 2006,
+                            "end_line": 2006
                         }
                     ],
                     "methods": [
@@ -4233,8 +4233,8 @@
                             "name": "get",
                             "class": "$wp_query",
                             "static": false,
-                            "line": 1992,
-                            "end_line": 1992
+                            "line": 1987,
+                            "end_line": 1987
                         }
                     ]
                 }
@@ -4251,8 +4251,8 @@
                     "QueryVar": "\\AmpProject\\AmpWP\\QueryVar",
                     "Services": "\\AmpProject\\AmpWP\\Services"
                 },
-                "line": 2027,
-                "end_line": 2044,
+                "line": 2022,
+                "end_line": 2039,
                 "arguments": [
                     {
                         "name": "$url",
@@ -4290,28 +4290,28 @@
                     "functions": [
                         {
                             "name": "amp_get_slug",
-                            "line": 2028,
-                            "end_line": 2028
+                            "line": 2023,
+                            "end_line": 2023
                         },
                         {
                             "name": "preg_replace",
-                            "line": 2031,
-                            "end_line": 2038
+                            "line": 2026,
+                            "end_line": 2033
                         },
                         {
                             "name": "sprintf",
-                            "line": 2032,
-                            "end_line": 2035
+                            "line": 2027,
+                            "end_line": 2030
                         },
                         {
                             "name": "preg_quote",
-                            "line": 2034,
-                            "end_line": 2034
+                            "line": 2029,
+                            "end_line": 2029
                         },
                         {
                             "name": "remove_query_arg",
-                            "line": 2041,
-                            "end_line": 2041
+                            "line": 2036,
+                            "end_line": 2036
                         }
                     ]
                 }
@@ -4384,8 +4384,8 @@
             },
             "4": {
                 "name": "amp_query_var",
-                "line": 666,
-                "end_line": 666,
+                "line": 659,
+                "end_line": 659,
                 "type": "filter",
                 "arguments": [
                     "defined('AMP_QUERY_VAR') ? AMP_QUERY_VAR : \\AmpProject\\AmpWP\\QueryVar::AMP"
@@ -4411,8 +4411,8 @@
             },
             "5": {
                 "name": "amp_pre_get_permalink",
-                "line": 734,
-                "end_line": 734,
+                "line": 729,
+                "end_line": 729,
                 "type": "filter",
                 "arguments": [
                     "false",
@@ -4452,8 +4452,8 @@
             },
             "6": {
                 "name": "amp_get_permalink",
-                "line": 752,
-                "end_line": 752,
+                "line": 747,
+                "end_line": 747,
                 "type": "filter",
                 "arguments": [
                     "$amp_url",
@@ -4493,8 +4493,8 @@
             },
             "7": {
                 "name": "amp_frontend_show_canonical",
-                "line": 793,
-                "end_line": 806,
+                "line": 788,
+                "end_line": 801,
                 "type": "filter_deprecated",
                 "arguments": [
                     "array(true)",
@@ -4520,8 +4520,8 @@
             },
             "8": {
                 "name": "amp_analytics_entries",
-                "line": 1250,
-                "end_line": 1250,
+                "line": 1245,
+                "end_line": 1245,
                 "type": "filter",
                 "arguments": [
                     "$analytics_entries"
@@ -4547,8 +4547,8 @@
             },
             "9": {
                 "name": "amp_print_analytics",
-                "line": 1295,
-                "end_line": 1295,
+                "line": 1290,
+                "end_line": 1290,
                 "type": "action",
                 "arguments": [
                     "$analytics_entries"
@@ -4574,8 +4574,8 @@
             },
             "10": {
                 "name": "amp_content_embed_handlers",
-                "line": 1372,
-                "end_line": 1398,
+                "line": 1367,
+                "end_line": 1393,
                 "type": "filter",
                 "arguments": [
                     "array('AMP_Core_Block_Handler' => array(), 'AMP_Twitter_Embed_Handler' => array(), 'AMP_YouTube_Embed_Handler' => array(), 'AMP_Crowdsignal_Embed_Handler' => array(), 'AMP_DailyMotion_Embed_Handler' => array(), 'AMP_Vimeo_Embed_Handler' => array(), 'AMP_SoundCloud_Embed_Handler' => array(), 'AMP_Instagram_Embed_Handler' => array(), 'AMP_Issuu_Embed_Handler' => array(), 'AMP_Meetup_Embed_Handler' => array(), 'AMP_Facebook_Embed_Handler' => array(), 'AMP_Pinterest_Embed_Handler' => array(), 'AMP_Playlist_Embed_Handler' => array(), 'AMP_Reddit_Embed_Handler' => array(), 'AMP_TikTok_Embed_Handler' => array(), 'AMP_Tumblr_Embed_Handler' => array(), 'AMP_Gallery_Embed_Handler' => array(), 'AMP_Gfycat_Embed_Handler' => array(), 'AMP_Imgur_Embed_Handler' => array(), 'AMP_Scribd_Embed_Handler' => array(), 'AMP_WordPress_TV_Embed_Handler' => array())",
@@ -4615,8 +4615,8 @@
             },
             "11": {
                 "name": "amp_dev_mode_enabled",
-                "line": 1424,
-                "end_line": 1434,
+                "line": 1419,
+                "end_line": 1429,
                 "type": "filter",
                 "arguments": [
                     "is_admin_bar_showing() && is_user_logged_in() || is_customize_preview()"
@@ -4635,15 +4635,15 @@
                             "types": [
                                 "bool"
                             ],
-                            "variable": ""
+                            "variable": "$is_dev_mode_enabled"
                         }
                     ]
                 }
             },
             "12": {
                 "name": "amp_to_amp_linking_enabled",
-                "line": 1476,
-                "end_line": 1479,
+                "line": 1471,
+                "end_line": 1474,
                 "type": "filter",
                 "arguments": [
                     "\\AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === \\AMP_Options_Manager::get_option(\\AmpProject\\AmpWP\\Option::THEME_SUPPORT)"
@@ -4669,8 +4669,8 @@
             },
             "13": {
                 "name": "amp_to_amp_excluded_urls",
-                "line": 1543,
-                "end_line": 1543,
+                "line": 1538,
+                "end_line": 1538,
                 "type": "filter",
                 "arguments": [
                     "array()"
@@ -4696,8 +4696,8 @@
             },
             "14": {
                 "name": "amp_content_sanitizers",
-                "line": 1560,
-                "end_line": 1560,
+                "line": 1555,
+                "end_line": 1555,
                 "type": "filter",
                 "arguments": [
                     "$sanitizers",
@@ -4737,8 +4737,8 @@
             },
             "15": {
                 "name": "amp_dev_mode_element_xpaths",
-                "line": 1573,
-                "end_line": 1573,
+                "line": 1568,
+                "end_line": 1568,
                 "type": "filter",
                 "arguments": [
                     "array()"
@@ -4764,8 +4764,8 @@
             },
             "16": {
                 "name": "amp_parsed_css_transient_caching_allowed",
-                "line": 1613,
-                "end_line": 1613,
+                "line": 1608,
+                "end_line": 1608,
                 "type": "filter",
                 "arguments": [
                     "true"
@@ -4791,8 +4791,8 @@
             },
             "17": {
                 "name": "amp_site_icon_url",
-                "line": 1741,
-                "end_line": 1741,
+                "line": 1736,
+                "end_line": 1736,
                 "type": "filter",
                 "arguments": [
                     "$logo_image_url"
@@ -4818,8 +4818,8 @@
             },
             "18": {
                 "name": "amp_post_template_metadata",
-                "line": 1814,
-                "end_line": 1814,
+                "line": 1809,
+                "end_line": 1809,
                 "type": "filter",
                 "arguments": [
                     "$metadata",
@@ -4854,8 +4854,8 @@
             },
             "19": {
                 "name": "amp_schemaorg_metadata",
-                "line": 1828,
-                "end_line": 1828,
+                "line": 1823,
+                "end_line": 1823,
                 "type": "filter",
                 "arguments": [
                     "$metadata"
@@ -5879,7 +5879,7 @@
         "includes": [
             {
                 "name": "",
-                "line": 2395,
+                "line": 2410,
                 "type": "Require"
             }
         ],
@@ -5929,8 +5929,8 @@
             },
             {
                 "name": "amp_validation_error",
-                "line": 800,
-                "end_line": 800,
+                "line": 801,
+                "end_line": 801,
                 "type": "filter",
                 "arguments": [
                     "$error",
@@ -5981,12 +5981,12 @@
         "includes": [
             {
                 "name": "",
-                "line": 943,
+                "line": 944,
                 "type": "Require"
             },
             {
                 "name": "",
-                "line": 984,
+                "line": 985,
                 "type": "Require"
             }
         ],
@@ -5994,8 +5994,8 @@
         "hooks": [
             {
                 "name": "amp_validation_error_sanitized",
-                "line": 521,
-                "end_line": 521,
+                "line": 522,
+                "end_line": 522,
                 "type": "filter",
                 "arguments": [
                     "null",
@@ -6036,8 +6036,8 @@
             },
             {
                 "name": "amp_validation_error_source_file_editor_url_template",
-                "line": 2336,
-                "end_line": 2336,
+                "line": 2341,
+                "end_line": 2341,
                 "type": "filter",
                 "arguments": [
                     "null"
@@ -6064,8 +6064,8 @@
             },
             {
                 "name": "amp_validation_error_source_file_path",
-                "line": 2372,
-                "end_line": 2372,
+                "line": 2377,
+                "end_line": 2377,
                 "type": "filter",
                 "arguments": [
                     "$file_path",
@@ -6572,7 +6572,7 @@
             }
         ]
     },
-    "111": {
+    "110": {
         "file": {
             "description": "Functions for managing legacy templates",
             "long_description": "",
@@ -6633,7 +6633,7 @@
         ],
         "hooks": []
     },
-    "118": {
+    "117": {
         "file": {
             "description": "Class MobileRedirection.",
             "long_description": "",
@@ -6677,8 +6677,8 @@
             },
             {
                 "name": "amp_mobile_client_side_redirection",
-                "line": 267,
-                "end_line": 267,
+                "line": 268,
+                "end_line": 268,
                 "type": "filter",
                 "arguments": [
                     "true"
@@ -6704,8 +6704,8 @@
             },
             {
                 "name": "amp_mobile_user_agents",
-                "line": 298,
-                "end_line": 298,
+                "line": 299,
+                "end_line": 299,
                 "type": "filter",
                 "arguments": [
                     "$default_user_agents"
@@ -6731,8 +6731,8 @@
             },
             {
                 "name": "amp_mobile_version_switcher_styles_used",
-                "line": 415,
-                "end_line": 415,
+                "line": 420,
+                "end_line": 420,
                 "type": "filter",
                 "arguments": [
                     "true"
@@ -6758,8 +6758,8 @@
             },
             {
                 "name": "amp_mobile_version_switcher_link_text",
-                "line": 460,
-                "end_line": 460,
+                "line": 465,
+                "end_line": 465,
                 "type": "filter",
                 "arguments": [
                     "$text"
@@ -6785,7 +6785,7 @@
             }
         ]
     },
-    "128": {
+    "127": {
         "file": {
             "description": "Fetches and formats data for AMP reader themes.",
             "long_description": "",
@@ -6851,7 +6851,7 @@
             }
         ]
     },
-    "130": {
+    "129": {
         "file": {
             "description": "Class OptionsMenu",
             "long_description": "",
@@ -6902,7 +6902,7 @@
             }
         ]
     },
-    "148": {
+    "150": {
         "file": {
             "description": "Class MonitorCssTransientCaching.",
             "long_description": "",
@@ -6919,8 +6919,8 @@
         "hooks": [
             {
                 "name": "amp_css_transient_monitoring_threshold",
-                "line": 247,
-                "end_line": 247,
+                "line": 249,
+                "end_line": 249,
                 "type": "filter",
                 "arguments": [
                     "self::DEFAULT_THRESHOLD"
@@ -6946,8 +6946,8 @@
             },
             {
                 "name": "amp_css_transient_monitoring_sampling_range",
-                "line": 268,
-                "end_line": 268,
+                "line": 270,
+                "end_line": 270,
                 "type": "filter",
                 "arguments": [
                     "self::DEFAULT_SAMPLING_RANGE"
@@ -6973,7 +6973,7 @@
             }
         ]
     },
-    "153": {
+    "155": {
         "file": {
             "description": "Class UserAccess.",
             "long_description": "",
@@ -7030,9 +7030,9 @@
             }
         ]
     },
-    "183": {
+    "187": {
         "file": {
-            "description": "Provides URLs to scan.",
+            "description": "Provides settings to be used in site scanning.",
             "long_description": "",
             "tags": [
                 {
@@ -7045,299 +7045,42 @@
                 }
             ]
         },
-        "path": "src\/Validation\/ScannableURLProvider.php",
+        "path": "src\/Validation\/URLScanningContext.php",
         "root": "\/app\/public\/content\/plugins\/amp",
-        "classes": [
+        "classes": [],
+        "hooks": [
             {
-                "name": "ScannableURLProvider",
-                "namespace": "AmpProject\\AmpWP\\Validation",
-                "line": 19,
-                "end_line": 309,
-                "final": true,
-                "abstract": false,
-                "extends": "",
-                "implements": [],
-                "properties": [
-                    {
-                        "name": "$include_unsupported",
-                        "line": 26,
-                        "end_line": 26,
-                        "default": null,
-                        "static": false,
-                        "visibility": "private",
-                        "doc": {
-                            "description": "Whether to include URLs that don't support AMP.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "var",
-                                    "content": "",
-                                    "types": [
-                                        "bool"
-                                    ],
-                                    "variable": ""
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "$include_conditionals",
-                        "line": 35,
-                        "end_line": 35,
-                        "default": null,
-                        "static": false,
-                        "visibility": "private",
-                        "doc": {
-                            "description": "An allowlist of conditionals to use for querying URLs.",
-                            "long_description": "Usually, this class will query all of the templates that don't have AMP disabled. This allows inclusion based on only these conditionals.",
-                            "tags": [
-                                {
-                                    "name": "var",
-                                    "content": "",
-                                    "types": [
-                                        "string[]"
-                                    ],
-                                    "variable": ""
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "$limit_per_type",
-                        "line": 44,
-                        "end_line": 44,
-                        "default": null,
-                        "static": false,
-                        "visibility": "private",
-                        "doc": {
-                            "description": "The maximum number of URLs to provide for each content type.",
-                            "long_description": "Templates are each a separate type, like those for is_category() and is_tag(), and each post type is a type.",
-                            "tags": [
-                                {
-                                    "name": "var",
-                                    "content": "",
-                                    "types": [
-                                        "int"
-                                    ],
-                                    "variable": ""
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "methods": [
-                    {
-                        "name": "__construct",
-                        "namespace": "AmpProject\\AmpWP\\Validation",
-                        "aliases": {
-                            "AMP_Theme_Support": "\\AMP_Theme_Support",
-                            "WP_Query": "\\WP_Query"
-                        },
-                        "line": 53,
-                        "end_line": 61,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "public",
-                        "arguments": [
-                            {
-                                "name": "$limit_per_type",
-                                "default": "20",
-                                "type": ""
-                            },
-                            {
-                                "name": "$include_conditionals",
-                                "default": "array()",
-                                "type": ""
-                            },
-                            {
-                                "name": "$include_unsupported",
-                                "default": "false",
-                                "type": ""
-                            }
-                        ],
-                        "doc": {
-                            "description": "Class constructor.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "param",
-                                    "content": "The maximum number of URLs to validate for each type.",
-                                    "types": [
-                                        "integer"
-                                    ],
-                                    "variable": "$limit_per_type"
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "An allowlist of conditionals to use for validation.",
-                                    "types": [
-                                        "array"
-                                    ],
-                                    "variable": "$include_conditionals"
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "Whether to include URLs that don't support AMP.",
-                                    "types": [
-                                        "boolean"
-                                    ],
-                                    "variable": "$include_unsupported"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "get_urls",
-                        "namespace": "AmpProject\\AmpWP\\Validation",
-                        "aliases": {
-                            "AMP_Theme_Support": "\\AMP_Theme_Support",
-                            "WP_Query": "\\WP_Query"
-                        },
-                        "line": 71,
-                        "end_line": 140,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "public",
-                        "arguments": [
-                            {
-                                "name": "$offset",
-                                "default": "0",
-                                "type": ""
-                            }
-                        ],
-                        "doc": {
-                            "description": "Provides the array of URLs to check.",
-                            "long_description": "Each URL is an array with two elements, with the URL at index 0 and the type at index 1.",
-                            "tags": [
-                                {
-                                    "name": "param",
-                                    "content": "Optional. The number of URLs to offset by, where applicable. Defaults to 0.",
-                                    "types": [
-                                        "int",
-                                        "null"
-                                    ],
-                                    "variable": "$offset"
-                                },
-                                {
-                                    "name": "return",
-                                    "content": "Array of URLs and types.",
-                                    "types": [
-                                        "array"
-                                    ]
-                                }
-                            ]
-                        },
-                        "uses": {
-                            "functions": [
-                                {
-                                    "name": "get_option",
-                                    "line": 77,
-                                    "end_line": 77
-                                },
-                                {
-                                    "name": "home_url",
-                                    "line": 79,
-                                    "end_line": 79
-                                },
-                                {
-                                    "name": "array_filter",
-                                    "line": 84,
-                                    "end_line": 87
-                                },
-                                {
-                                    "name": "get_taxonomies",
-                                    "line": 85,
-                                    "end_line": 85
-                                },
-                                {
-                                    "name": "get_post_types",
-                                    "line": 88,
-                                    "end_line": 88
-                                },
-                                {
-                                    "name": "get_permalink",
-                                    "line": 97,
-                                    "end_line": 97
-                                },
-                                {
-                                    "name": "reset",
-                                    "line": 105,
-                                    "end_line": 105
-                                }
-                            ],
-                            "methods": [
-                                {
-                                    "name": "is_template_supported",
-                                    "class": "\\AmpProject\\AmpWP\\Validation\\ScannableURLProvider",
-                                    "static": false,
-                                    "line": 77,
-                                    "end_line": 77
-                                },
-                                {
-                                    "name": "get_posts_that_support_amp",
-                                    "class": "\\AmpProject\\AmpWP\\Validation\\ScannableURLProvider",
-                                    "static": false,
-                                    "line": 94,
-                                    "end_line": 94
-                                },
-                                {
-                                    "name": "get_posts_by_type",
-                                    "class": "\\AmpProject\\AmpWP\\Validation\\ScannableURLProvider",
-                                    "static": false,
-                                    "line": 94,
-                                    "end_line": 94
-                                },
-                                {
-                                    "name": "get_taxonomy_links",
-                                    "class": "\\AmpProject\\AmpWP\\Validation\\ScannableURLProvider",
-                                    "static": false,
-                                    "line": 104,
-                                    "end_line": 104
-                                },
-                                {
-                                    "name": "get_author_page_urls",
-                                    "class": "\\AmpProject\\AmpWP\\Validation\\ScannableURLProvider",
-                                    "static": false,
-                                    "line": 114,
-                                    "end_line": 114
-                                },
-                                {
-                                    "name": "get_date_page",
-                                    "class": "\\AmpProject\\AmpWP\\Validation\\ScannableURLProvider",
-                                    "static": false,
-                                    "line": 124,
-                                    "end_line": 124
-                                },
-                                {
-                                    "name": "get_search_page",
-                                    "class": "\\AmpProject\\AmpWP\\Validation\\ScannableURLProvider",
-                                    "static": false,
-                                    "line": 131,
-                                    "end_line": 131
-                                }
-                            ]
-                        }
-                    }
+                "name": "amp_url_validation_limit_per_type",
+                "line": 81,
+                "end_line": 81,
+                "type": "filter",
+                "arguments": [
+                    "$this->limit_per_type"
                 ],
                 "doc": {
-                    "description": "ScannableURLProvider class.",
+                    "description": "Filters the number of URLs per content type to check during each run of the validation cron task.",
                     "long_description": "",
                     "tags": [
                         {
                             "name": "since",
-                            "content": "2.1"
+                            "content": "2.1.0"
+                        },
+                        {
+                            "name": "param",
+                            "content": "The number of URLs. Defaults to 1. Filtering to -1 will result in all being returned.",
+                            "types": [
+                                "int"
+                            ],
+                            "variable": "$url_validation_number_per_type"
                         }
                     ]
                 }
             }
-        ],
-        "hooks": []
+        ]
     },
-    "184": {
+    "191": {
         "file": {
-            "description": "Provides URL validation.",
+            "description": "WP cron process to validate URLs in the background.",
             "long_description": "",
             "tags": [
                 {
@@ -7350,534 +7093,37 @@
                 }
             ]
         },
-        "path": "src\/Validation\/URLValidationProvider.php",
+        "path": "src\/Validation\/URLValidationCron.php",
         "root": "\/app\/public\/content\/plugins\/amp",
-        "classes": [
+        "classes": [],
+        "hooks": [
             {
-                "name": "URLValidationProvider",
-                "namespace": "AmpProject\\AmpWP\\Validation",
-                "line": 21,
-                "end_line": 243,
-                "final": true,
-                "abstract": false,
-                "extends": "",
-                "implements": [],
-                "properties": [
-                    {
-                        "name": "$total_errors",
-                        "line": 42,
-                        "end_line": 42,
-                        "default": "0",
-                        "static": false,
-                        "visibility": "private",
-                        "doc": {
-                            "description": "The total number of validation errors, regardless of whether they were accepted.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "var",
-                                    "content": "",
-                                    "types": [
-                                        "int"
-                                    ],
-                                    "variable": ""
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "$unaccepted_errors",
-                        "line": 52,
-                        "end_line": 52,
-                        "default": "0",
-                        "static": false,
-                        "visibility": "private",
-                        "doc": {
-                            "description": "The total number of unaccepted validation errors.",
-                            "long_description": "If an error has been accepted in the \/wp-admin validation UI, it won't count toward this.",
-                            "tags": [
-                                {
-                                    "name": "var",
-                                    "content": "",
-                                    "types": [
-                                        "int"
-                                    ],
-                                    "variable": ""
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "$number_validated",
-                        "line": 59,
-                        "end_line": 59,
-                        "default": "0",
-                        "static": false,
-                        "visibility": "private",
-                        "doc": {
-                            "description": "The number of URLs crawled, regardless of whether they have validation errors.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "var",
-                                    "content": "",
-                                    "types": [
-                                        "int"
-                                    ],
-                                    "variable": ""
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "$validity_by_type",
-                        "line": 73,
-                        "end_line": 73,
-                        "default": "array()",
-                        "static": false,
-                        "visibility": "private",
-                        "doc": {
-                            "description": "The validation counts by type, like template or post type.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "var",
-                                    "content": "{     Validity by type.     @type array $type {         @type int $valid The number of valid URLs for this type.         @type int $total The total number of URLs for this type, valid or invalid.     } }",
-                                    "types": [
-                                        "array[]"
-                                    ],
-                                    "variable": ""
-                                }
-                            ]
-                        }
-                    }
+                "name": "amp_url_validation_sleep_time",
+                "line": 117,
+                "end_line": 117,
+                "type": "filter",
+                "arguments": [
+                    "self::DEFAULT_SLEEP_TIME"
                 ],
-                "methods": {
-                    "2": {
-                        "name": "is_locked",
-                        "namespace": "AmpProject\\AmpWP\\Validation",
-                        "aliases": {
-                            "AMP_Validated_URL_Post_Type": "\\AMP_Validated_URL_Post_Type",
-                            "AMP_Validation_Error_Taxonomy": "\\AMP_Validation_Error_Taxonomy",
-                            "AMP_Validation_Manager": "\\AMP_Validation_Manager",
-                            "WP_Error": "\\WP_Error"
-                        },
-                        "line": 94,
-                        "end_line": 99,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "public",
-                        "arguments": [],
-                        "doc": {
-                            "description": "Returns whether validation is currently locked.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "return",
-                                    "content": "",
-                                    "types": [
-                                        "boolean"
-                                    ]
-                                }
-                            ]
-                        },
-                        "uses": {
-                            "functions": [
-                                {
-                                    "name": "get_option",
-                                    "line": 95,
-                                    "end_line": 95
-                                },
-                                {
-                                    "name": "time",
-                                    "line": 98,
-                                    "end_line": 98
-                                }
-                            ]
-                        }
-                    },
-                    "3": {
-                        "name": "with_lock",
-                        "namespace": "AmpProject\\AmpWP\\Validation",
-                        "aliases": {
-                            "AMP_Validated_URL_Post_Type": "\\AMP_Validated_URL_Post_Type",
-                            "AMP_Validation_Error_Taxonomy": "\\AMP_Validation_Error_Taxonomy",
-                            "AMP_Validation_Manager": "\\AMP_Validation_Manager",
-                            "WP_Error": "\\WP_Error"
-                        },
-                        "line": 107,
-                        "end_line": 120,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "public",
-                        "arguments": [
-                            {
-                                "name": "$callback",
-                                "default": null,
-                                "type": ""
-                            }
-                        ],
-                        "doc": {
-                            "description": "Runs a callback with a lock set for the duration of the callback.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "param",
-                                    "content": "Callback to run with the lock set.",
-                                    "types": [
-                                        "callable"
-                                    ],
-                                    "variable": "$callback"
-                                },
-                                {
-                                    "name": "return",
-                                    "content": "WP_Error if a lock is in place. Otherwise, the result of the callback or void if it doesn't return anything.",
-                                    "types": [
-                                        "mixed"
-                                    ]
-                                }
-                            ]
-                        },
-                        "uses": {
-                            "methods": [
-                                {
-                                    "name": "is_locked",
-                                    "class": "\\AmpProject\\AmpWP\\Validation\\URLValidationProvider",
-                                    "static": false,
-                                    "line": 108,
-                                    "end_line": 108
-                                },
-                                {
-                                    "name": "__construct",
-                                    "class": "\\WP_Error",
-                                    "static": false,
-                                    "line": 109,
-                                    "end_line": 112
-                                },
-                                {
-                                    "name": "lock",
-                                    "class": "\\AmpProject\\AmpWP\\Validation\\URLValidationProvider",
-                                    "static": false,
-                                    "line": 115,
-                                    "end_line": 115
-                                },
-                                {
-                                    "name": "unlock",
-                                    "class": "\\AmpProject\\AmpWP\\Validation\\URLValidationProvider",
-                                    "static": false,
-                                    "line": 117,
-                                    "end_line": 117
-                                }
-                            ],
-                            "functions": [
-                                {
-                                    "name": "__",
-                                    "line": 111,
-                                    "end_line": 111
-                                },
-                                {
-                                    "name": "callback",
-                                    "line": 116,
-                                    "end_line": 116
-                                }
-                            ]
-                        }
-                    },
-                    "4": {
-                        "name": "reset_lock",
-                        "namespace": "AmpProject\\AmpWP\\Validation",
-                        "aliases": {
-                            "AMP_Validated_URL_Post_Type": "\\AMP_Validated_URL_Post_Type",
-                            "AMP_Validation_Error_Taxonomy": "\\AMP_Validation_Error_Taxonomy",
-                            "AMP_Validation_Manager": "\\AMP_Validation_Manager",
-                            "WP_Error": "\\WP_Error"
-                        },
-                        "line": 125,
-                        "end_line": 127,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "public",
-                        "arguments": [],
-                        "doc": {
-                            "description": "Resets the lock timeout. This allows long-running processes to keep running beyond the lock timeout.",
-                            "long_description": "",
-                            "tags": []
-                        },
-                        "uses": {
-                            "methods": [
-                                {
-                                    "name": "lock",
-                                    "class": "\\AmpProject\\AmpWP\\Validation\\URLValidationProvider",
-                                    "static": false,
-                                    "line": 126,
-                                    "end_line": 126
-                                }
-                            ]
-                        }
-                    },
-                    "5": {
-                        "name": "get_total_errors",
-                        "namespace": "AmpProject\\AmpWP\\Validation",
-                        "aliases": {
-                            "AMP_Validated_URL_Post_Type": "\\AMP_Validated_URL_Post_Type",
-                            "AMP_Validation_Error_Taxonomy": "\\AMP_Validation_Error_Taxonomy",
-                            "AMP_Validation_Manager": "\\AMP_Validation_Manager",
-                            "WP_Error": "\\WP_Error"
-                        },
-                        "line": 134,
-                        "end_line": 136,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "public",
-                        "arguments": [],
-                        "doc": {
-                            "description": "Provides the total number of validation errors found.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "return",
-                                    "content": "",
-                                    "types": [
-                                        "int"
-                                    ]
-                                }
-                            ]
-                        }
-                    },
-                    "6": {
-                        "name": "get_unaccepted_errors",
-                        "namespace": "AmpProject\\AmpWP\\Validation",
-                        "aliases": {
-                            "AMP_Validated_URL_Post_Type": "\\AMP_Validated_URL_Post_Type",
-                            "AMP_Validation_Error_Taxonomy": "\\AMP_Validation_Error_Taxonomy",
-                            "AMP_Validation_Manager": "\\AMP_Validation_Manager",
-                            "WP_Error": "\\WP_Error"
-                        },
-                        "line": 143,
-                        "end_line": 145,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "public",
-                        "arguments": [],
-                        "doc": {
-                            "description": "Provides the total number of unaccepted errors.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "return",
-                                    "content": "",
-                                    "types": [
-                                        "int"
-                                    ]
-                                }
-                            ]
-                        }
-                    },
-                    "7": {
-                        "name": "get_number_validated",
-                        "namespace": "AmpProject\\AmpWP\\Validation",
-                        "aliases": {
-                            "AMP_Validated_URL_Post_Type": "\\AMP_Validated_URL_Post_Type",
-                            "AMP_Validation_Error_Taxonomy": "\\AMP_Validation_Error_Taxonomy",
-                            "AMP_Validation_Manager": "\\AMP_Validation_Manager",
-                            "WP_Error": "\\WP_Error"
-                        },
-                        "line": 152,
-                        "end_line": 154,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "public",
-                        "arguments": [],
-                        "doc": {
-                            "description": "Provides the number of URLs that have been checked.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "return",
-                                    "content": "",
-                                    "types": [
-                                        "int"
-                                    ]
-                                }
-                            ]
-                        }
-                    },
-                    "8": {
-                        "name": "get_validity_by_type",
-                        "namespace": "AmpProject\\AmpWP\\Validation",
-                        "aliases": {
-                            "AMP_Validated_URL_Post_Type": "\\AMP_Validated_URL_Post_Type",
-                            "AMP_Validation_Error_Taxonomy": "\\AMP_Validation_Error_Taxonomy",
-                            "AMP_Validation_Manager": "\\AMP_Validation_Manager",
-                            "WP_Error": "\\WP_Error"
-                        },
-                        "line": 161,
-                        "end_line": 163,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "public",
-                        "arguments": [],
-                        "doc": {
-                            "description": "Provides the validity counts by type.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "return",
-                                    "content": "",
-                                    "types": [
-                                        "array[]"
-                                    ]
-                                }
-                            ]
-                        }
-                    },
-                    "9": {
-                        "name": "get_url_validation",
-                        "namespace": "AmpProject\\AmpWP\\Validation",
-                        "aliases": {
-                            "AMP_Validated_URL_Post_Type": "\\AMP_Validated_URL_Post_Type",
-                            "AMP_Validation_Error_Taxonomy": "\\AMP_Validation_Error_Taxonomy",
-                            "AMP_Validation_Manager": "\\AMP_Validation_Manager",
-                            "WP_Error": "\\WP_Error"
-                        },
-                        "line": 173,
-                        "end_line": 199,
-                        "final": false,
-                        "abstract": false,
-                        "static": false,
-                        "visibility": "public",
-                        "arguments": [
-                            {
-                                "name": "$url",
-                                "default": null,
-                                "type": ""
-                            },
-                            {
-                                "name": "$type",
-                                "default": null,
-                                "type": ""
-                            },
-                            {
-                                "name": "$force_revalidate",
-                                "default": "false",
-                                "type": ""
-                            }
-                        ],
-                        "doc": {
-                            "description": "Validates a URL, stores the results, and increments the counts.",
-                            "long_description": "",
-                            "tags": [
-                                {
-                                    "name": "param",
-                                    "content": "The URL to validate.",
-                                    "types": [
-                                        "string"
-                                    ],
-                                    "variable": "$url"
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "The type of template, post, or taxonomy.",
-                                    "types": [
-                                        "string"
-                                    ],
-                                    "variable": "$type"
-                                },
-                                {
-                                    "name": "param",
-                                    "content": "Whether to force revalidation regardless of whether the current results are stale.",
-                                    "types": [
-                                        "bool"
-                                    ],
-                                    "variable": "$force_revalidate"
-                                },
-                                {
-                                    "name": "return",
-                                    "content": "Associative array containing validity result and whether the URL was revalidated, or a WP_Error on failure.",
-                                    "types": [
-                                        "array",
-                                        "\\WP_Error"
-                                    ]
-                                }
-                            ]
-                        },
-                        "uses": {
-                            "methods": [
-                                {
-                                    "name": "get_invalid_url_post",
-                                    "class": "\\AMP_Validated_URL_Post_Type",
-                                    "static": true,
-                                    "line": 178,
-                                    "end_line": 178
-                                },
-                                {
-                                    "name": "get_post_staleness",
-                                    "class": "\\AMP_Validated_URL_Post_Type",
-                                    "static": true,
-                                    "line": 180,
-                                    "end_line": 180
-                                },
-                                {
-                                    "name": "get_invalid_url_validation_errors",
-                                    "class": "\\AMP_Validated_URL_Post_Type",
-                                    "static": true,
-                                    "line": 181,
-                                    "end_line": 181
-                                },
-                                {
-                                    "name": "validate_url_and_store",
-                                    "class": "\\AMP_Validation_Manager",
-                                    "static": true,
-                                    "line": 187,
-                                    "end_line": 187
-                                },
-                                {
-                                    "name": "update_state_from_validity",
-                                    "class": "\\AmpProject\\AmpWP\\Validation\\URLValidationProvider",
-                                    "static": false,
-                                    "line": 195,
-                                    "end_line": 195
-                                }
-                            ],
-                            "functions": [
-                                {
-                                    "name": "is_null",
-                                    "line": 186,
-                                    "end_line": 186
-                                },
-                                {
-                                    "name": "is_wp_error",
-                                    "line": 190,
-                                    "end_line": 190
-                                },
-                                {
-                                    "name": "compact",
-                                    "line": 198,
-                                    "end_line": 198
-                                }
-                            ]
-                        }
-                    }
-                },
                 "doc": {
-                    "description": "URLValidationProvider class.",
+                    "description": "Filters the length of time to sleep between validating URLs.",
                     "long_description": "",
                     "tags": [
                         {
                             "name": "since",
                             "content": "2.1"
+                        },
+                        {
+                            "name": "param",
+                            "content": "The number of seconds. Default 1. Setting to 0 or a negative numbers disables all throttling.",
+                            "types": [
+                                "int"
+                            ],
+                            "variable": ""
                         }
                     ]
                 }
             }
-        ],
-        "hooks": []
+        ]
     }
 }

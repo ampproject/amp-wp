@@ -15,7 +15,7 @@ This is useful to map the file path from inside of a Docker container or VM to t
 
 ### Source
 
-:link: [includes/validation/class-amp-validation-error-taxonomy.php:2372](/includes/validation/class-amp-validation-error-taxonomy.php#L2372)
+:link: [includes/validation/class-amp-validation-error-taxonomy.php:2377](/includes/validation/class-amp-validation-error-taxonomy.php#L2377)
 
 <details>
 <summary>Show Code</summary>

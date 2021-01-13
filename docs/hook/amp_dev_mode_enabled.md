@@ -1,7 +1,7 @@
 ## Filter `amp_dev_mode_enabled`
 
 ```php
-apply_filters( 'amp_dev_mode_enabled',  );
+apply_filters( 'amp_dev_mode_enabled', $is_dev_mode_enabled );
 ```
 
 Filters whether AMP mode is enabled.
@@ -10,11 +10,11 @@ When enabled, the data-ampdevmode attribute will be added to the document elemen
 
 ### Arguments
 
-* `bool ` - Whether AMP dev mode is enabled.
+* `bool $is_dev_mode_enabled` - Whether AMP dev mode is enabled.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:1424](/includes/amp-helper-functions.php#L1424-L1434)
+:link: [includes/amp-helper-functions.php:1419](/includes/amp-helper-functions.php#L1419-L1429)
 
 <details>
 <summary>Show Code</summary>

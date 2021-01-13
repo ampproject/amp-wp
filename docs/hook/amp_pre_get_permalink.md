@@ -15,7 +15,7 @@ Returning a non-false value in this filter will cause the `get_permalink()` to g
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:734](/includes/amp-helper-functions.php#L734)
+:link: [includes/amp-helper-functions.php:729](/includes/amp-helper-functions.php#L729)
 
 <details>
 <summary>Show Code</summary>
