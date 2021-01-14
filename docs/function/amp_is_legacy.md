@@ -12,7 +12,7 @@ Determines whether the legacy AMP post templates are being used.
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:378](/includes/amp-helper-functions.php#L378-L389)
+:link: [includes/amp-helper-functions.php:371](/includes/amp-helper-functions.php#L371-L382)
 
 <details>
 <summary>Show Code</summary>
