@@ -147,7 +147,7 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$this->assertEquals( $this->instance->get_paired_url_examples(), $options[ PairedRouting::PAIRED_URL_EXAMPLES ] );
 		$this->assertEquals( $this->instance->get_custom_paired_structure_sources(), $options[ PairedRouting::CUSTOM_PAIRED_ENDPOINT_SOURCES ] );
 		$this->assertEquals( $this->instance->get_endpoint_path_slug_conflicts(), $options[ PairedRouting::ENDPOINT_PATH_SLUG_CONFLICTS ] );
-		$this->assertEquals( $this->instance->get_wp_rewrite()->using_permalinks(), $options[ PairedRouting::REWRITE_USING_PERMALINKS ] );
+		$this->assertEquals( $this->instance->is_using_permalinks(), $options[ PairedRouting::REWRITE_USING_PERMALINKS ] );
 	}
 
 	/** @covers ::get_endpoint_path_slug_conflicts() */
@@ -450,9 +450,13 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$this->assertStringContains( 'notice-info', get_echo( [ $this->instance, 'add_permalink_settings_notice' ] ) );
 	}
 
-	/** @covers ::get_wp_rewrite() */
-	public function test_get_wp_rewrite() {
-		$this->assertInstanceOf( WP_Rewrite::class, $this->instance->get_wp_rewrite() );
+	/** @covers ::is_using_permalinks() */
+	public function test_is_using_permalinks() {
+		$this->set_permalink_structure( '' );
+		$this->assertFalse( $this->instance->is_using_permalinks() );
+
+		$this->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
+		$this->assertTrue( $this->instance->is_using_permalinks() );
 	}
 
 	/** @return array */

@@ -261,7 +261,7 @@ final class PairedRouting implements Service, Registerable {
 
 		$options[ self::ENDPOINT_PATH_SLUG_CONFLICTS ] = $this->get_endpoint_path_slug_conflicts();
 
-		$options[ self::REWRITE_USING_PERMALINKS ] = $this->get_wp_rewrite()->using_permalinks();
+		$options[ self::REWRITE_USING_PERMALINKS ] = $this->is_using_permalinks();
 
 		return $options;
 	}
@@ -535,13 +535,12 @@ final class PairedRouting implements Service, Registerable {
 	}
 
 	/**
-	 * Get the WP_Rewrite object.
+	 * Determine whether permalinks are being used.
 	 *
-	 * @return WP_Rewrite Object.
+	 * @return bool If permalinks are enabled.
 	 */
-	public function get_wp_rewrite() {
-		global $wp_rewrite;
-		return $wp_rewrite;
+	public function is_using_permalinks() {
+		return ! empty( get_option( 'permalink_structure' ) );
 	}
 
 	/**
@@ -564,7 +563,7 @@ final class PairedRouting implements Service, Registerable {
 				&&
 				ReaderThemes::DEFAULT_READER_THEME === $options[ Option::READER_THEME ]
 				&&
-				$this->get_wp_rewrite()->using_permalinks()
+				$this->is_using_permalinks()
 			) {
 				$value = Option::PAIRED_URL_STRUCTURE_LEGACY_READER;
 			} elseif ( AMP_Theme_Support::STANDARD_MODE_SLUG !== $options[ Option::THEME_SUPPORT ] ) {
