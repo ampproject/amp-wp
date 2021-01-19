@@ -34,13 +34,14 @@ export function Error( { clientId, status, term_id: termId, ...props } ) {
 	const { selectBlock } = useDispatch( 'core/block-editor' );
 	const reviewLink = useSelect( ( select ) => select( BLOCK_VALIDATION_STORE_KEY ).getReviewLink() );
 	const reviewed = status === VALIDATION_ERROR_ACK_ACCEPTED_STATUS || status === VALIDATION_ERROR_ACK_REJECTED_STATUS;
+	const external = ! Boolean( clientId );
 
-	const { blockExists, blockType } = useSelect( ( select ) => {
+	const { blockType, removed } = useSelect( ( select ) => {
 		const blockDetails = clientId ? select( 'core/block-editor' ).getBlock( clientId ) : null;
 		const blockTypeDetails = blockDetails ? select( 'core/blocks' ).getBlockType( blockDetails.name ) : null;
 
 		return {
-			blockExists: Boolean( blockDetails ),
+			removed: clientId && ! blockDetails,
 			blockType: blockTypeDetails,
 		};
 	}, [ clientId ] );
@@ -54,7 +55,7 @@ export function Error( { clientId, status, term_id: termId, ...props } ) {
 	const panelClassNames = classnames( 'amp-error', {
 		'amp-error--reviewed': reviewed,
 		'amp-error--new': ! reviewed,
-		'amp-error--removed': ! blockExists,
+		'amp-error--removed': removed,
 		[ `error-${ clientId }` ]: clientId,
 	} );
 
@@ -70,13 +71,14 @@ export function Error( { clientId, status, term_id: termId, ...props } ) {
 				<ErrorContent
 					{ ...props }
 					clientId={ clientId }
-					blockExists={ blockExists }
 					blockType={ blockType }
+					external={ external }
+					removed={ removed }
 					status={ status }
 				/>
 
 				<div className="amp-error__actions">
-					{ blockExists && (
+					{ ! ( removed || external ) && (
 						<Button
 							className="amp-error__select-block"
 							isSecondary
