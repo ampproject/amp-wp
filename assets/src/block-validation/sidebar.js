@@ -1,7 +1,13 @@
 /**
  * WordPress dependencies
  */
-import { ToggleControl, PanelBody, ExternalLink } from '@wordpress/components';
+import {
+	Button,
+	ExternalLink,
+	PanelBody,
+	PanelRow,
+	ToggleControl,
+} from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
@@ -21,9 +27,11 @@ import { BLOCK_VALIDATION_STORE_KEY } from './store';
  */
 export function Sidebar() {
 	const { setIsShowingReviewed } = useDispatch( BLOCK_VALIDATION_STORE_KEY );
+	const { savePost } = useDispatch( 'core/editor' );
 
-	const { ampCompatibilityBroken, isFetchingErrors, isShowingReviewed, status, reviewLink } = useSelect( ( select ) => ( {
+	const { ampCompatibilityBroken, isDirty, isFetchingErrors, isShowingReviewed, status, reviewLink } = useSelect( ( select ) => ( {
 		ampCompatibilityBroken: select( BLOCK_VALIDATION_STORE_KEY ).getAMPCompatibilityBroken(),
+		isDirty: select( 'core/editor' )?.isEditedPostDirty(),
 		isFetchingErrors: select( BLOCK_VALIDATION_STORE_KEY ).getIsFetchingErrors(),
 		isShowingReviewed: select( BLOCK_VALIDATION_STORE_KEY ).getIsShowingReviewed(),
 		status: select( 'core/editor' )?.getEditedPostAttribute( 'status' ),
@@ -67,6 +75,7 @@ export function Sidebar() {
 	}, [] );
 
 	const saved = 'auto-draft' !== status;
+	const forceRevalidate = () => savePost( { preview: true } );
 
 	return (
 		<div className="amp-sidebar">
@@ -123,9 +132,20 @@ export function Sidebar() {
 				! saved && 0 === validationErrors.length && (
 					<PanelBody opened={ true }>
 						{ isFetchingErrors ? <Loading /> : (
-							<p>
-								{ __( 'Validation issues will be checked for when the post is saved.', 'amp' ) }
-							</p>
+							<>
+								<PanelRow>
+									<p>
+										{ __( 'Validation issues will be checked for when the post is saved.', 'amp' ) }
+									</p>
+								</PanelRow>
+								{ isDirty && (
+									<PanelRow>
+										<Button isSecondary onClick={ forceRevalidate }>
+											{ __( 'Save draft and validate now', 'amp' ) }
+										</Button>
+									</PanelRow>
+								) }
+							</>
 						) }
 					</PanelBody>
 				)
@@ -137,6 +157,21 @@ export function Sidebar() {
 							{ __( 'There are no AMP validation issues.', 'amp' ) }
 						</p>
 					) }
+				</PanelBody>
+			) }
+
+			{ isDirty && saved && (
+				<PanelBody opened={ true }>
+					<PanelRow>
+						<p>
+							{ __( 'The post content has been modified since the last AMP validation.', 'amp' ) }
+						</p>
+					</PanelRow>
+					<PanelRow>
+						<Button isSecondary onClick={ forceRevalidate }>
+							{ __( 'Re-validate now', 'amp' ) }
+						</Button>
+					</PanelRow>
 				</PanelBody>
 			) }
 
