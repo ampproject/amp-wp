@@ -1,6 +1,6 @@
 <?php
 
-namespace AmpProject\AmpWP\Tests;
+namespace AmpProject\AmpWP\Tests\PairedUrlStructure;
 
 use AmpProject\AmpWP\PairedUrlStructure\LegacyReaderUrlStructure;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
