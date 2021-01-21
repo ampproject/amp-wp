@@ -323,7 +323,7 @@ class PairedBrowsingApp {
 		}
 
 		// Show the 'Go Back' button if the parent window has history.
-		this.disconnectButtons.goBack.classList.toggle( 'hidden', 0 >= window.history.length );
+		this.disconnectButtons.goBack.hidden = 0 >= window.history.length;
 
 		// Applying the 'amp' class will overlay it on the AMP iframe.
 		this.disconnectOverlay.classList.toggle(

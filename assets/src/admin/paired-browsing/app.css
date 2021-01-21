@@ -153,6 +153,7 @@ iframe {
 }
 
 .disconnect-overlay .dialog .dialog-buttons .button {
+	display: inline-block;
 	text-decoration: none;
 	color: #000;
 	background: rgb(239, 239, 239);
