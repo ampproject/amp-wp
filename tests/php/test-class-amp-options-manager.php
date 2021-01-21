@@ -9,14 +9,13 @@ use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\LoadsCoreThemes;
 use AmpProject\AmpWP\Admin\ReaderThemes;
-use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 
 /**
  * Tests for AMP_Options_Manager.
  *
  * @covers AMP_Options_Manager
  */
-class Test_AMP_Options_Manager extends DependencyInjectedTestCase {
+class Test_AMP_Options_Manager extends WP_UnitTestCase {
 
 	use AssertContainsCompatibility, LoadsCoreThemes;
 
