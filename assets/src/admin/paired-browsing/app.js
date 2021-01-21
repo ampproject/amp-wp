@@ -409,12 +409,12 @@ class PairedBrowsingApp {
 	/**
 	 * Receive loaded.
 	 *
-	 * @param {Object}  data                   Data.
-	 * @param {boolean} data.isAmpDocument     Whether the document is actually an AMP page.
-	 * @param {?string} data.ampUrl            The AMP URL.
-	 * @param {?string} data.nonAmpUrl         The non-AMP URL.
-	 * @param {string}  data.documentTitle The canonical link URL if present.
-	 * @param {Window}  sourceWindow The source window.
+	 * @param {Object}  data                Data.
+	 * @param {boolean} data.isAmpDocument  Whether the document is actually an AMP page.
+	 * @param {string} data.ampUrl         The AMP URL.
+	 * @param {string} data.nonAmpUrl      The non-AMP URL.
+	 * @param {string}  data.documentTitle  The title of the document.
+	 * @param {Window}  sourceWindow        The source window.
 	 */
 	receiveLoaded( { isAmpDocument, ampUrl, nonAmpUrl, documentTitle }, sourceWindow ) {
 		const isAmpSource = this.isAmpWindow( sourceWindow );
