@@ -146,7 +146,6 @@ export function PairedUrlStructure( { focusedSection } ) {
 							)
 						}
 					</p>
-					<PairedUrlExamples pairedUrls={ editedOptions.paired_url_examples.custom } />
 				</AMPNotice>
 			) }
 
