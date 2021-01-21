@@ -17,7 +17,7 @@ use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Admin\ReaderThemes;
 use AmpProject\AmpWP\PairedUrlStructure\LegacyReaderUrlStructure;
 use AmpProject\AmpWP\PairedUrlStructure\LegacyTransitionalUrlStructure;
-use AmpProject\AmpWP\PairedUrlStructure\QueryVarUrlStructure;
+use AmpProject\AmpWP\PairedUrlStructure\QueryParamUrlStructure;
 use AmpProject\AmpWP\PairedUrlStructure\PathSuffixUrlStructure;
 use WP_Query;
 use WP_Rewrite;
@@ -42,7 +42,7 @@ final class PairedRouting implements Service, Registerable {
 	 * @var string[]
 	 */
 	const PAIRED_URL_STRUCTURES = [
-		Option::PAIRED_URL_STRUCTURE_QUERY_VAR           => QueryVarUrlStructure::class,
+		Option::PAIRED_URL_STRUCTURE_QUERY_PARAM         => QueryParamUrlStructure::class,
 		Option::PAIRED_URL_STRUCTURE_PATH_SUFFIX         => PathSuffixUrlStructure::class,
 		Option::PAIRED_URL_STRUCTURE_LEGACY_TRANSITIONAL => LegacyTransitionalUrlStructure::class,
 		Option::PAIRED_URL_STRUCTURE_LEGACY_READER       => LegacyReaderUrlStructure::class,
@@ -197,7 +197,7 @@ final class PairedRouting implements Service, Registerable {
 				if ( array_key_exists( $structure_slug, self::PAIRED_URL_STRUCTURES ) ) {
 					$structure_class = self::PAIRED_URL_STRUCTURES[ $structure_slug ];
 				} else {
-					$structure_class = QueryVarUrlStructure::class;
+					$structure_class = QueryParamUrlStructure::class;
 				}
 			}
 
@@ -253,6 +253,13 @@ final class PairedRouting implements Service, Registerable {
 			$options[ Option::PAIRED_URL_STRUCTURE ] = self::PAIRED_URL_STRUCTURE_CUSTOM;
 		} else {
 			$options[ Option::PAIRED_URL_STRUCTURE ] = AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE );
+
+			// Handle edge case where an unrecognized paired URL structure was saved.
+			if ( ! in_array( $options[ Option::PAIRED_URL_STRUCTURE ], self::PAIRED_URL_STRUCTURES, true ) ) {
+				$defaults = $this->filter_default_options( [], $options );
+
+				$options[ Option::PAIRED_URL_STRUCTURE ] = $defaults[ Option::PAIRED_URL_STRUCTURE ];
+			}
 		}
 
 		$options[ self::PAIRED_URL_EXAMPLES ] = $this->get_paired_url_examples();
@@ -551,7 +558,7 @@ final class PairedRouting implements Service, Registerable {
 	 * @return array Defaults.
 	 */
 	public function filter_default_options( $defaults, $options ) {
-		$value = Option::PAIRED_URL_STRUCTURE_QUERY_VAR;
+		$value = Option::PAIRED_URL_STRUCTURE_QUERY_PARAM;
 
 		if (
 			isset( $options[ Option::VERSION ], $options[ Option::THEME_SUPPORT ], $options[ Option::READER_THEME ] )

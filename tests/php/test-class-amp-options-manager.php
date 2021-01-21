@@ -161,7 +161,7 @@ class Test_AMP_Options_Manager extends DependencyInjectedTestCase {
 				Option::MOBILE_REDIRECT         => false,
 				Option::READER_THEME            => 'legacy',
 				Option::PLUGIN_CONFIGURED       => false,
-				Option::PAIRED_URL_STRUCTURE    => Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
+				Option::PAIRED_URL_STRUCTURE    => Option::PAIRED_URL_STRUCTURE_QUERY_PARAM,
 			],
 			AMP_Options_Manager::get_options()
 		);

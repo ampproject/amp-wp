@@ -11,7 +11,7 @@ use AmpProject\AmpWP\PairedUrl;
 use AmpProject\AmpWP\PairedUrlStructure\LegacyReaderUrlStructure;
 use AmpProject\AmpWP\PairedUrlStructure\LegacyTransitionalUrlStructure;
 use AmpProject\AmpWP\PairedUrlStructure\PathSuffixUrlStructure;
-use AmpProject\AmpWP\PairedUrlStructure\QueryVarUrlStructure;
+use AmpProject\AmpWP\PairedUrlStructure\QueryParamUrlStructure;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AMP_Options_Manager;
 use AMP_Theme_Support;
@@ -67,9 +67,9 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 	/** @return array */
 	public function get_data_for_test_get_paired_url_structure() {
 		return [
-			'query_var'           => [
-				Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
-				QueryVarUrlStructure::class,
+			'query_param'         => [
+				Option::PAIRED_URL_STRUCTURE_QUERY_PARAM,
+				QueryParamUrlStructure::class,
 			],
 			'path_suffix'         => [
 				Option::PAIRED_URL_STRUCTURE_PATH_SUFFIX,
@@ -85,7 +85,7 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 			],
 			'bogus'               => [
 				'bogus',
-				QueryVarUrlStructure::class,
+				QueryParamUrlStructure::class,
 			],
 		];
 	}
@@ -202,15 +202,15 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 	/** @return array */
 	public function get_data_for_test_paired_requests() {
 		return [
-			'query_var_reader_mode_amp'             => [
+			'query_param_reader_mode_amp'           => [
 				AMP_Theme_Support::READER_MODE_SLUG,
-				Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
+				Option::PAIRED_URL_STRUCTURE_QUERY_PARAM,
 				'/?amp=1',
 				true,
 			],
-			'query_var_reader_mode_non_amp'         => [
+			'query_param_reader_mode_non_amp'       => [
 				AMP_Theme_Support::READER_MODE_SLUG,
-				Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
+				Option::PAIRED_URL_STRUCTURE_QUERY_PARAM,
 				'/',
 				false,
 			],
@@ -240,7 +240,7 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 			],
 			'standard_mode'                         => [
 				AMP_Theme_Support::STANDARD_MODE_SLUG,
-				Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
+				Option::PAIRED_URL_STRUCTURE_QUERY_PARAM,
 				'/',
 				null,
 			],
@@ -311,8 +311,8 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 	/** @return array */
 	public function get_data_for_test_initialize_paired_request() {
 		return [
-			'query_var'   => [
-				Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
+			'query_param' => [
+				Option::PAIRED_URL_STRUCTURE_QUERY_PARAM,
 				false,
 			],
 			'path_suffix' => [
@@ -351,7 +351,7 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 	/** @covers ::initialize_paired_request() */
 	public function test_initialize_paired_request_in_standard_mode() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
-		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, Option::PAIRED_URL_STRUCTURE_QUERY_VAR );
+		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, Option::PAIRED_URL_STRUCTURE_QUERY_PARAM );
 		$this->instance->initialize_paired_request();
 		$this->assertNull( $this->get_private_property( $this->instance, 'did_request_endpoint' ) );
 		$this->assertFalse( has_filter( 'do_parse_request', [ $this->instance, 'extract_endpoint_from_environment_before_parse_request' ] ) );
@@ -468,7 +468,7 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 					Option::THEME_SUPPORT => AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
 					Option::READER_THEME  => ReaderThemes::DEFAULT_READER_THEME,
 				],
-				Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
+				Option::PAIRED_URL_STRUCTURE_QUERY_PARAM,
 			],
 			'old_version_transitional'  => [
 				[
@@ -819,10 +819,10 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 	public function test_redirect_extraneous_paired_endpoint_canonical_extraneous_query_var() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
-		$query_var_structure = $this->injector->make( QueryVarUrlStructure::class );
+		$query_param_structure = $this->injector->make( QueryParamUrlStructure::class );
 
 		$permalink_url    = get_permalink( self::factory()->post->create() );
-		$amp_endpoint_url = $query_var_structure->add_endpoint( $permalink_url );
+		$amp_endpoint_url = $query_param_structure->add_endpoint( $permalink_url );
 		$this->go_to( $amp_endpoint_url );
 
 		$this->assertTrue( amp_is_canonical() );
@@ -843,7 +843,7 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 	/** @covers ::redirect_extraneous_paired_endpoint() */
 	public function test_redirect_extraneous_paired_endpoint_path_suffix_404() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
-		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, Option::PAIRED_URL_STRUCTURE_QUERY_VAR );
+		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, Option::PAIRED_URL_STRUCTURE_QUERY_PARAM );
 		$this->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
 		$path_suffix_structure = $this->injector->make( PathSuffixUrlStructure::class );
 		$paired_url            = $this->injector->make( PairedUrl::class );
@@ -873,7 +873,7 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 	/** @covers ::redirect_extraneous_paired_endpoint() */
 	public function test_redirect_extraneous_paired_endpoint_slug_redirect() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
-		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, Option::PAIRED_URL_STRUCTURE_QUERY_VAR );
+		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, Option::PAIRED_URL_STRUCTURE_QUERY_PARAM );
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, [ 'is_singular' ] );
 		$this->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
@@ -918,7 +918,7 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 	/** @covers ::redirect_extraneous_paired_endpoint() */
 	public function test_redirect_extraneous_paired_endpoint_unavailable_template() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
-		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, Option::PAIRED_URL_STRUCTURE_QUERY_VAR );
+		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, Option::PAIRED_URL_STRUCTURE_QUERY_PARAM );
 		AMP_Options_Manager::update_option( Option::ALL_TEMPLATES_SUPPORTED, false );
 		AMP_Options_Manager::update_option( Option::SUPPORTED_TEMPLATES, [ 'is_singular' ] );
 		$this->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );

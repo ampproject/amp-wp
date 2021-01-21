@@ -2,17 +2,17 @@
 
 namespace AmpProject\AmpWP\Tests;
 
-use AmpProject\AmpWP\PairedUrlStructure\QueryVarUrlStructure;
+use AmpProject\AmpWP\PairedUrlStructure\QueryParamUrlStructure;
 
-/** @coversDefaultClass \AmpProject\AmpWP\PairedUrlStructure\QueryVarUrlStructure */
+/** @coversDefaultClass \AmpProject\AmpWP\PairedUrlStructure\QueryParamUrlStructure */
 class QueryVarUrlStructureTest extends DependencyInjectedTestCase {
 
-	/** @var QueryVarUrlStructure */
+	/** @var QueryParamUrlStructure */
 	private $instance;
 
 	public function setUp() {
 		parent::setUp();
-		$this->instance = $this->injector->make( QueryVarUrlStructure::class );
+		$this->instance = $this->injector->make( QueryParamUrlStructure::class );
 	}
 
 	/** @covers ::add_endpoint() */
