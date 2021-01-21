@@ -194,8 +194,8 @@ final class PairedRouting implements Service, Registerable {
 
 			if ( ! $structure_class || ! is_subclass_of( $structure_class, PairedUrlStructure::class ) ) {
 				$structure_slug = AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE );
-				if ( array_key_exists( $structure_slug, static::PAIRED_URL_STRUCTURES ) ) {
-					$structure_class = static::PAIRED_URL_STRUCTURES[ $structure_slug ];
+				if ( array_key_exists( $structure_slug, self::PAIRED_URL_STRUCTURES ) ) {
+					$structure_class = self::PAIRED_URL_STRUCTURES[ $structure_slug ];
 				} else {
 					$structure_class = QueryVarUrlStructure::class;
 				}
