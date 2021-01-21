@@ -12,7 +12,7 @@ import { select, useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { convertErrorSourcesToArray, maybeAddClientIdToValidationError, useValidationErrorStateUpdates } from '../use-validation-error-state-updates';
+import { maybeAddClientIdToValidationError, useValidationErrorStateUpdates } from '../use-validation-error-state-updates';
 import { BLOCK_VALIDATION_STORE_KEY, createStore } from '../store';
 
 // This allows us to tweak the returned value on each test
@@ -142,29 +142,6 @@ describe( 'useValidationErrorStateUpdates', () => {
 		} ) )();
 
 		expect( select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors() ).toHaveLength( 8 );
-	} );
-} );
-
-describe( 'convertValidationErrorSourcesToArray', () => {
-	it( 'converts an object to an array', () => {
-		const validationError = {
-			error: {
-				sources: {
-					0: 'error1',
-					1: 'error2',
-					3: 'error3',
-				},
-			},
-		};
-
-		convertErrorSourcesToArray( validationError );
-		expect( validationError ).toMatchObject(
-			{
-				error: {
-					sources: [ 'error1', 'error2', 'error3' ],
-				},
-			},
-		);
 	} );
 } );
 

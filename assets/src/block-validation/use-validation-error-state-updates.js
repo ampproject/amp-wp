@@ -17,20 +17,6 @@ import { addQueryArgs, getQueryArg, isURL } from '@wordpress/url';
 import { BLOCK_VALIDATION_STORE_KEY } from './store';
 
 /**
- * Handles cases where a validationError's `sources` are an object (with numeric keys).
- *
- * Note: this will no longer be an issue after https://github.com/ampproject/amp-wp/commit/bbb0e495a817a56b37554dfd721170712c92d7b8
- * but is still required for validation errors stored in the database prior to that commit.
- *
- * @param {Object} validationError
- */
-export function convertErrorSourcesToArray( validationError ) {
-	if ( ! Array.isArray( validationError.error.sources ) ) {
-		validationError.error.sources = Object.values( validationError.error.sources );
-	}
-}
-
-/**
  * Attempts to associate a validation error with a block current in the editor.
  *
  * @param {Object} args
@@ -192,8 +178,6 @@ export function useValidationErrorStateUpdates() {
 			if ( ! validationError.error.sources ) {
 				return validationError;
 			}
-
-			convertErrorSourcesToArray( validationError );
 
 			for ( const source of validationError.error.sources ) {
 				// The loop can finish if the validation error (which is passed by reference below) has obtained a clientId.

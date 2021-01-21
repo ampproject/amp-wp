@@ -172,6 +172,14 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 		];
 
 		foreach ( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $validation_status_post ) as $result ) {
+
+			// Handle case where a validationError's `sources` are an object (with numeric keys).
+			// Note: this will no longer be an issue after https://github.com/ampproject/amp-wp/commit/bbb0e495a817a56b37554dfd721170712c92d7b8
+			// but is still required for validation errors stored in the database prior to that commit.
+			if ( isset( $result['data']['sources'] ) ) {
+				$result['data']['sources'] = array_values( $result['data']['sources'] );
+			}
+
 			$data['results'][] = [
 				'error'       => $result['data'],
 				'forced'      => $result['forced'],
