@@ -60,6 +60,13 @@ class PairedBrowsingApp {
 	currentAmpUrl;
 
 	/**
+	 * Initial URL object for the AMP URL.
+	 *
+	 * @type {URL}
+	 */
+	initialAmpUrlObject;
+
+	/**
 	 * The most recent URL that was being navigated to in the AMP window.
 	 *
 	 * @type {?string}
@@ -72,6 +79,13 @@ class PairedBrowsingApp {
 	 * @type {string}
 	 */
 	currentNonAmpUrl;
+
+	/**
+	 * Initial URL object for the non-AMP URL.
+	 *
+	 * @type {URL}
+	 */
+	initialNonAmpUrlObject;
 
 	/**
 	 * The most recent URL that was being navigated to in the non-AMP window.
@@ -109,7 +123,9 @@ class PairedBrowsingApp {
 		this.ampIframe = document.querySelector( '#amp iframe' );
 
 		this.currentNonAmpUrl = this.nonAmpIframe.src;
+		this.initialNonAmpUrlObject = new URL( this.currentNonAmpUrl );
 		this.currentAmpUrl = this.ampIframe.src;
+		this.initialAmpUrlObject = new URL( this.currentNonAmpUrl );
 
 		// Link to exit paired browsing.
 		this.nonAmpLink = /** @type {HTMLAnchorElement} */ document.getElementById( 'non-amp-link' );
@@ -193,6 +209,10 @@ class PairedBrowsingApp {
 	 */
 	receiveMessage( event ) {
 		if ( ! event.data || ! event.data.type || ! event.data.ampPairedBrowsing || ! event.source ) {
+			return;
+		}
+
+		if ( ! [ this.initialNonAmpUrlObject.origin, this.initialAmpUrlObject.origin ].includes( event.origin ) ) {
 			return;
 		}
 

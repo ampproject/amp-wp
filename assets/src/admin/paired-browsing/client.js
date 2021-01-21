@@ -60,7 +60,7 @@ let initialized = false;
  * @param {MessageEvent} event
  */
 function receiveMessage( event ) {
-	if ( ! event.data || ! event.data.ampPairedBrowsing || ! event.data.type || ! event.source ) {
+	if ( ! event.data || ! event.data.ampPairedBrowsing || ! event.data.type || ! event.source || nonAmpUrlObject.origin !== event.origin ) {
 		return;
 	}
 	switch ( event.data.type ) {
