@@ -252,9 +252,7 @@ final class PairedBrowsing implements Service, Registerable, Conditional {
 		}
 
 		if ( wp_safe_redirect( $updated_url ) ) {
-			// @codeCoverageIgnoreStart
-			exit;
-			// @codeCoverageIgnoreEnd
+			exit; // @codeCoverageIgnore
 		}
 		return true;
 	}
