@@ -111,7 +111,7 @@ final class PluginSuppression implements Service, Registerable {
 		// could be done early for Transitional mode as well since a query parameter is also used for frontend requests
 		// but there is no similar need to suppress the registration of Customizer controls in Transitional mode since
 		// there is no separate Customizer for AMP in Transitional mode (or legacy Reader mode).
-		// @todo This could rather check if ! amp_is_canonical().
+		// @todo This check could be replaced with ( ! amp_is_canonical() && $this->paired_routing->has_endpoint() ).
 		if ( $this->is_reader_theme_request() ) {
 			$this->suppress_plugins();
 		} else {
