@@ -579,7 +579,7 @@ final class PairedRouting implements Service, Registerable {
 	/**
 	 * Sanitize options.
 	 *
-	 * @todo This is redundant with the enum defined in the schema.
+	 * Note that in a REST API context this is redundant with the enum defined in the schema.
 	 *
 	 * @param array $options     Existing options with already-sanitized values for updating.
 	 * @param array $new_options Unsanitized options being submitted for updating.
