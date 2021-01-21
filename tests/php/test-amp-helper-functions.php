@@ -1849,7 +1849,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	public function data_amp_has_paired_endpoint() {
 		return [
 			'nothing'                 => [
-				Option::PAIRED_URL_STRUCTURE_QUERY_PARAM,
+				Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
 				'',
 				false,
 			],
@@ -1859,7 +1859,7 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 				true,
 			],
 			'url_param_value'         => [
-				Option::PAIRED_URL_STRUCTURE_QUERY_PARAM,
+				Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
 				'?amp=1',
 				true,
 			],

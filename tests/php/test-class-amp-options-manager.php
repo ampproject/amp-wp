@@ -160,7 +160,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				Option::MOBILE_REDIRECT         => false,
 				Option::READER_THEME            => 'legacy',
 				Option::PLUGIN_CONFIGURED       => false,
-				Option::PAIRED_URL_STRUCTURE    => Option::PAIRED_URL_STRUCTURE_QUERY_PARAM,
+				Option::PAIRED_URL_STRUCTURE    => Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
 			],
 			AMP_Options_Manager::get_options()
 		);

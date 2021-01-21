@@ -46,20 +46,20 @@ interface Option {
 	/**
 	 * Indicate the structure for paired AMP URLs.
 	 *
-	 * Default value: 'query_param'
+	 * Default value: 'query_var'
 	 *
 	 * @var string
 	 */
 	const PAIRED_URL_STRUCTURE = 'paired_url_structure';
 
 	/**
-	 * Query param paired URL structure.
+	 * Query var paired URL structure.
 	 *
 	 * This is the default, where all AMP URLs end in `?amp=1`.
 	 *
 	 * @var string
 	 */
-	const PAIRED_URL_STRUCTURE_QUERY_PARAM = 'query_param';
+	const PAIRED_URL_STRUCTURE_QUERY_VAR = 'query_var';
 
 	/**
 	 * Path suffix paired URL structure.

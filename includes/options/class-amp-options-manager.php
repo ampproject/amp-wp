@@ -35,7 +35,7 @@ class AMP_Options_Manager {
 		Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
 		Option::VERSION                 => AMP__VERSION,
 		Option::READER_THEME            => ReaderThemes::DEFAULT_READER_THEME,
-		Option::PAIRED_URL_STRUCTURE    => Option::PAIRED_URL_STRUCTURE_QUERY_PARAM,
+		Option::PAIRED_URL_STRUCTURE    => Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
 		Option::PLUGIN_CONFIGURED       => false,
 	];
 

@@ -18,7 +18,7 @@ import { AMPNotice, NOTICE_TYPE_INFO, NOTICE_SIZE_LARGE } from '../components/am
 
 /**
  * @typedef {{name: string, slug: string, type: string}} Source
- * @typedef {{query_param: string[], path_suffix: string[], legacy_transitional: string[], legacy_reader: string[], custom: string[]}} PairedUrlExamplesData
+ * @typedef {{query_var: string[], path_suffix: string[], legacy_transitional: string[], legacy_reader: string[], custom: string[]}} PairedUrlExamplesData
  */
 
 /**
@@ -152,16 +152,16 @@ export function PairedUrlStructure( { focusedSection } ) {
 			<ul>
 				<li>
 					<input
-						id="paired_url_structure_query_param"
+						id="paired_url_structure_query_var"
 						type="radio"
 						name="paired_url_structure"
-						checked={ 'query_param' === editedOptions.paired_url_structure }
+						checked={ 'query_var' === editedOptions.paired_url_structure }
 						onChange={ () => {
-							updateOptions( { paired_url_structure: 'query_param' } );
+							updateOptions( { paired_url_structure: 'query_var' } );
 						} }
 						disabled={ isCustom }
 					/>
-					<label htmlFor="paired_url_structure_query_param">
+					<label htmlFor="paired_url_structure_query_var">
 						{ __( 'Query parameter', 'amp' ) + ': ' }
 						<code>
 							{ `?${ slug }=1` }
@@ -171,7 +171,7 @@ export function PairedUrlStructure( { focusedSection } ) {
 							{ __( '(recommended)', 'amp' ) }
 						</em>
 					</label>
-					<PairedUrlExamples pairedUrls={ editedOptions.paired_url_examples.query_param } />
+					<PairedUrlExamples pairedUrls={ editedOptions.paired_url_examples.query_var } />
 				</li>
 				<li>
 					<input

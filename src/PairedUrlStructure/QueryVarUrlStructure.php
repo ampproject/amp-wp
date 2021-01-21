@@ -12,11 +12,14 @@ use AmpProject\AmpWP\PairedUrlStructure;
 /**
  * Descriptor for paired URL structures that include the `?amp=1` query parameter.
  *
+ * A query parameter is also known as a query arg and a query var. Given prior usage of "query var" in the codebase,
+ * the slug for the paired URL structure is `query_var` whereas in the UI it is presented as "query parameter".
+ *
  * @package AmpProject\AmpWP
  * @since 2.1
  * @internal
  */
-final class QueryParamUrlStructure extends PairedUrlStructure {
+final class QueryVarUrlStructure extends PairedUrlStructure {
 
 	/**
 	 * Turn a given URL into a paired AMP URL.
