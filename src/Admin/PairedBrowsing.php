@@ -25,7 +25,7 @@ use AmpProject\AmpWP\DevTools\UserAccess;
 /**
  * Managing the paired browsing app.
  *
- * @since 1.5.0
+ * @since 2.1
  * @internal
  */
 final class PairedBrowsing implements Service, Registerable, Conditional {
