@@ -4,6 +4,7 @@ namespace AmpProject\AmpWP\Tests\PairedUrlStructure;
 
 use AmpProject\AmpWP\PairedUrlStructure\LegacyReaderUrlStructure;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\PairedUrlStructure\LegacyReaderUrlStructure */
 class LegacyReaderUrlStructureTest extends DependencyInjectedTestCase {

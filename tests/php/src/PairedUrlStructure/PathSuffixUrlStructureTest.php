@@ -3,6 +3,7 @@
 namespace AmpProject\AmpWP\Tests\PairedUrlStructure;
 
 use AmpProject\AmpWP\PairedUrlStructure\PathSuffixUrlStructure;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\PairedUrlStructure\PathSuffixUrlStructure */
 class PathSuffixUrlStructureTest extends DependencyInjectedTestCase {

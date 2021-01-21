@@ -3,6 +3,7 @@
 namespace AmpProject\AmpWP\Tests\PairedUrlStructure;
 
 use AmpProject\AmpWP\PairedUrlStructure\LegacyTransitionalUrlStructure;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\PairedUrlStructure\LegacyTransitionalUrlStructure */
 class LegacyTransitionalUrlStructureTest extends DependencyInjectedTestCase {

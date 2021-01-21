@@ -3,6 +3,7 @@
 namespace AmpProject\AmpWP\Tests\PairedUrlStructure;
 
 use AmpProject\AmpWP\PairedUrlStructure\QueryParamUrlStructure;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 
 /** @coversDefaultClass \AmpProject\AmpWP\PairedUrlStructure\QueryParamUrlStructure */
 class QueryVarUrlStructureTest extends DependencyInjectedTestCase {
