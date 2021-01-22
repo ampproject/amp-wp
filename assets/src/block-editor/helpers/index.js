@@ -7,11 +7,11 @@ import { ReactElement } from 'react';
 /**
  * WordPress dependencies
  */
-import { __, _x, sprintf } from '@wordpress/i18n';
-import { cloneElement } from '@wordpress/element';
-import { TextControl, SelectControl, ToggleControl, Notice, PanelBody, FontSizePicker } from '@wordpress/components';
+import { __, sprintf } from '@wordpress/i18n';
+import { SelectControl, ToggleControl, Notice, PanelBody } from '@wordpress/components';
 import { InspectorControls } from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
+import { cloneElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -115,38 +115,6 @@ export const addAMPAttributes = ( settings, name ) => {
 		};
 	}
 
-	const isTextBlock = TEXT_BLOCKS.includes( name );
-
-	// Fit-text for text blocks.
-	if ( isTextBlock ) {
-		if ( ! settings.attributes ) {
-			settings.attributes = {};
-		}
-		settings.attributes.ampFitText = {
-			type: 'boolean',
-			default: false,
-		};
-		settings.attributes.minFont = {
-			default: MIN_FONT_SIZE,
-			source: 'attribute',
-			selector: 'amp-fit-text',
-			attribute: 'min-font-size',
-		};
-		settings.attributes.maxFont = {
-			default: MAX_FONT_SIZE,
-			source: 'attribute',
-			selector: 'amp-fit-text',
-			attribute: 'max-font-size',
-		};
-		settings.attributes.height = {
-			// Needs to be higher than the maximum font size, which defaults to MAX_FONT_SIZE
-			default: 'core/image' === name ? 200 : Math.ceil( MAX_FONT_SIZE / 10 ) * 10,
-			source: 'attribute',
-			selector: 'amp-fit-text',
-			attribute: 'height',
-		};
-	}
-
 	// Layout settings for embeds and media blocks.
 	if ( 0 === name.indexOf( 'core-embed' ) || MEDIA_BLOCKS.includes( name ) ) {
 		if ( ! settings.attributes ) {
@@ -163,68 +131,102 @@ export const addAMPAttributes = ( settings, name ) => {
 };
 
 /**
- * Filters blocks' save function.
+ * Removes `amp-fit-text` related attributes on blocks via block deprecation.
  *
- * @param {Object} element        Element to be saved.
- * @param {string} blockType      Block type.
- * @param {string} blockType.name Block type name.
- * @param {Object} attributes     Attributes.
+ * @param {Object} settings Block settings.
+ * @param {string} name     Block name.
  *
- * @return {Object} Output element.
+ * @return {Object} Modified block settings.
  */
-export const filterBlocksSave = ( element, blockType, attributes ) => { // eslint-disable-line complexity
-	const fitTextProps = {
-		layout: 'fixed-height',
-	};
+export const removeAmpFitTextFromBlocks = ( settings, name ) => {
+	if ( TEXT_BLOCKS.includes( name ) ) {
+		if ( ! settings.deprecated ) {
+			settings.deprecated = [];
+		}
 
-	if ( 'core/paragraph' === blockType.name && ! attributes.ampFitText ) {
-		const content = getAmpFitTextContent( attributes.content );
-		if ( content !== attributes.content ) {
-			return cloneElement(
-				element,
-				{
-					key: 'new',
-					value: content,
+		settings.deprecated.unshift( {
+			supports: settings.supports,
+			attributes: {
+				...( settings.attributes || {} ),
+				ampFitText: {
+					type: 'boolean',
+					default: false,
 				},
-			);
-		}
-	} else if ( TEXT_BLOCKS.includes( blockType.name ) && attributes.ampFitText ) {
-		if ( attributes.minFont ) {
-			fitTextProps[ 'min-font-size' ] = attributes.minFont;
-		}
-		if ( attributes.maxFont ) {
-			fitTextProps[ 'max-font-size' ] = attributes.maxFont;
-		}
-		if ( attributes.height ) {
-			fitTextProps.height = attributes.height;
-		}
+				minFont: {
+					default: MIN_FONT_SIZE,
+					source: 'attribute',
+					selector: 'amp-fit-text',
+					attribute: 'min-font-size',
+				},
+				maxFont: {
+					default: MAX_FONT_SIZE,
+					source: 'attribute',
+					selector: 'amp-fit-text',
+					attribute: 'max-font-size',
+				},
+				height: {
+					// Needs to be higher than the maximum font size, which defaults to MAX_FONT_SIZE
+					default: 'core/image' === name ? 200 : Math.ceil( MAX_FONT_SIZE / 10 ) * 10,
+					source: 'attribute',
+					selector: 'amp-fit-text',
+					attribute: 'height',
+				},
+			},
+			save( props ) {
+				/* eslint-disable react/prop-types */
+				const { attributes } = props;
+				const fitTextProps = { layout: 'fixed-height' };
 
-		fitTextProps.children = element;
+				if ( attributes.minFont ) {
+					fitTextProps[ 'min-font-size' ] = attributes.minFont;
+				}
+				if ( attributes.maxFont ) {
+					fitTextProps[ 'max-font-size' ] = attributes.maxFont;
+				}
+				if ( attributes.height ) {
+					fitTextProps.height = attributes.height;
+				}
+				/* eslint-enable react/prop-types */
 
-		return <amp-fit-text { ...fitTextProps } />;
+				fitTextProps.children = settings.save( props );
+
+				return <amp-fit-text { ...fitTextProps } />;
+			},
+			isEligible( { ampFitText } ) {
+				return undefined !== ampFitText;
+			},
+			migrate( attributes ) {
+				const deprecatedAttrs = [ 'ampFitText', 'minFont', 'maxFont', 'height' ];
+				deprecatedAttrs.forEach( ( attr ) => delete attributes[ attr ] );
+				return attributes;
+			},
+		} );
 	}
 
-	return element;
+	return settings;
 };
 
 /**
- * Returns the inner content of an AMP Fit Text tag.
+ * Remove the `class` attribute from `amp-fit-text` elements so that it can be deprecated successfully.
  *
- * @param {string} content Original content.
+ * The `class` attribute is added by the `core/generated-class-name/save-props` block editor filter; it is unwanted and
+ * interferes with successful deprecation of the block. By filtering the saved element the `class` attribute can be
+ * removed and the deprecation of the block and proceed without error.
  *
- * @return {string} Modified content.
+ * @see removeAmpFitTextFromBlocks
+ *
+ * @param {ReactElement} element Block save result.
+ *
+ * @return {ReactElement} Modified block if it is of `amp-fit-text` type, otherwise the  original element is returned.
  */
-export const getAmpFitTextContent = ( content ) => {
-	const contentRegex = /<amp-fit-text\b[^>]*>(.*?)<\/amp-fit-text>/;
-	const match = contentRegex.exec( content );
-
-	let newContent = content;
-
-	if ( match && match[ 1 ] ) {
-		newContent = match[ 1 ];
+export const removeClassFromAmpFitTextBlocks = ( element ) => {
+	if ( 'amp-fit-text' === element.type && undefined !== element.props.className ) {
+		const { className, ...props } = element.props;
+		props.className = null;
+		element = cloneElement( element, props );
 	}
 
-	return newContent;
+	return element;
 };
 
 /**
@@ -275,8 +277,6 @@ export const filterBlocksEdit = ( BlockEdit ) => {
 			inspectorControls = setUpImageInspectorControls( props );
 		} else if ( MEDIA_BLOCKS.includes( name ) || 0 === name.indexOf( 'core-embed/' ) ) {
 			inspectorControls = setUpInspectorControls( props );
-		} else if ( TEXT_BLOCKS.includes( name ) ) {
-			inspectorControls = setUpTextBlocksInspectorControls( props );
 		}
 
 		// Return just inspector controls in case of 'nodisplay'.
@@ -474,146 +474,6 @@ export const AmpNoloadingToggle = ( props ) => {
 AmpNoloadingToggle.propTypes = {
 	attributes: PropTypes.shape( {
 		ampNoLoading: PropTypes.bool,
-	} ),
-	setAttributes: PropTypes.func.isRequired,
-};
-
-/**
- * Setup inspector controls for text blocks.
- *
- * @todo Consider wrapping the render function to delete the original font size in text settings when ampFitText.
- *
- * @param {Object} props Props.
- * @param {Function} props.setAttributes Callback to set attributes.
- * @param {Object} props.attributes Attributes.
- * @param {boolean} props.isSelected Is selected.
- *
- * @return {ReactElement} Inspector Controls.
- */
-const setUpTextBlocksInspectorControls = ( props ) => {
-	const { isSelected, attributes, setAttributes } = props;
-	const { ampFitText } = attributes;
-	let { minFont, maxFont, height } = attributes;
-
-	const FONT_SIZES = [
-		{
-			name: 'small',
-			shortName: _x( 'S', 'font size', 'amp' ),
-			size: 14,
-		},
-		{
-			name: 'regular',
-			shortName: _x( 'M', 'font size', 'amp' ),
-			size: 16,
-		},
-		{
-			name: 'large',
-			shortName: _x( 'L', 'font size', 'amp' ),
-			size: 36,
-		},
-		{
-			name: 'larger',
-			shortName: _x( 'XL', 'font size', 'amp' ),
-			size: 48,
-		},
-	];
-
-	if ( ! isSelected ) {
-		return null;
-	}
-
-	const label = __( 'Automatically fit text to container', 'amp' );
-
-	if ( ampFitText ) {
-		maxFont = parseInt( maxFont );
-		height = parseInt( height );
-		minFont = parseInt( minFont );
-	}
-
-	return (
-		<InspectorControls>
-			<PanelBody
-				title={ __( 'AMP Settings', 'amp' ) }
-				className={ ampFitText ? 'is-amp-fit-text' : '' }
-			>
-				<ToggleControl
-					label={ label }
-					checked={ ampFitText }
-					onChange={ () => setAttributes( { ampFitText: ! ampFitText } ) }
-				/>
-			</PanelBody>
-			{ ampFitText && (
-				<>
-					<TextControl
-						label={ __( 'Height', 'amp' ) }
-						value={ height }
-						min={ 1 }
-						onChange={ ( nextHeight ) => {
-							setAttributes( { height: nextHeight } );
-						} }
-					/>
-					{ maxFont > height && (
-						<Notice
-							status="error"
-							isDismissible={ false }
-						>
-							{ __( 'The height must be greater than the max font size.', 'amp' ) }
-						</Notice>
-					) }
-					<PanelBody title={ __( 'Minimum font size', 'amp' ) }>
-						<FontSizePicker
-							fallbackFontSize={ 14 }
-							value={ minFont }
-							fontSizes={ FONT_SIZES }
-							onChange={ ( nextMinFont ) => {
-								if ( ! nextMinFont ) {
-									nextMinFont = MIN_FONT_SIZE; // @todo Supplying fallbackFontSize should be done automatically by the component?
-								}
-
-								if ( parseInt( nextMinFont ) <= maxFont ) {
-									setAttributes( { minFont: nextMinFont } );
-								}
-							} }
-						/>
-					</PanelBody>
-					{ minFont > maxFont && (
-						<Notice
-							status="error"
-							isDismissible={ false }
-						>
-							{ __( 'The min font size must less than the max font size.', 'amp' ) }
-						</Notice>
-					) }
-					<PanelBody title={ __( 'Maximum font size', 'amp' ) }>
-						<FontSizePicker
-							fallbackFontSize={ 48 }
-							value={ maxFont }
-							fontSizes={ FONT_SIZES }
-							onChange={ ( nextMaxFont ) => {
-								if ( ! nextMaxFont ) {
-									nextMaxFont = MAX_FONT_SIZE; // @todo Supplying fallbackFontSize should be done automatically by the component?
-								}
-
-								setAttributes( {
-									maxFont: nextMaxFont,
-									height: Math.max( nextMaxFont, height ),
-								} );
-							} }
-						/>
-					</PanelBody>
-				</>
-			) }
-		</InspectorControls>
-	);
-};
-
-setUpTextBlocksInspectorControls.propTypes = {
-	isSelected: PropTypes.bool,
-	attributes: PropTypes.shape( {
-		ampFitText: PropTypes.bool,
-		minFont: PropTypes.number,
-		maxFont: PropTypes.number,
-		height: PropTypes.number,
 	} ),
 	setAttributes: PropTypes.func.isRequired,
 };

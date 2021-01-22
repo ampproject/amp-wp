@@ -1,12 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { createNewPost } from '@wordpress/e2e-test-utils';
-
-/**
- * Internal dependencies
- */
-import { activatePlugin, deactivatePlugin } from '../../utils';
+import { createNewPost, activatePlugin, deactivatePlugin } from '@wordpress/e2e-test-utils';
 
 describe( 'Enable AMP Toggle', () => {
 	it( 'should display even when Gutenberg is not active', async () => {

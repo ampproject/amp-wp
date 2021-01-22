@@ -65,6 +65,8 @@
 * [`amp_to_amp_excluded_urls`](amp_to_amp_excluded_urls.md) - Filters the list of URLs which are excluded from being included in AMP-to-AMP linking.
 * [`amp_to_amp_linking_element_excluded`](amp_to_amp_linking_element_excluded.md) - Filters whether AMP-to-AMP is excluded for an element.
 * [`amp_to_amp_linking_enabled`](amp_to_amp_linking_enabled.md) - Filters whether AMP-to-AMP linking should be enabled.
+* [`amp_url_validation_limit_per_type`](amp_url_validation_limit_per_type.md) - Filters the number of URLs per content type to check during each run of the validation cron task.
+* [`amp_url_validation_sleep_time`](amp_url_validation_sleep_time.md) - Filters the length of time to sleep between validating URLs.
 * [`amp_validation_error`](amp_validation_error.md) - Filters the validation error array.
 * [`amp_validation_error_default_sanitized`](amp_validation_error_default_sanitized.md) - Filters whether sanitization is accepted for a newly-encountered validation error .
 * [`amp_validation_error_sanitized`](amp_validation_error_sanitized.md) - Filters whether the validation error should be sanitized.

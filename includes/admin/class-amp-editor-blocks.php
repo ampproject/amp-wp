@@ -35,7 +35,6 @@ class AMP_Editor_Blocks {
 		'amp-jwplayer',
 		'amp-brid-player',
 		'amp-ima-video',
-		'amp-fit-text',
 	];
 
 	/**

@@ -559,7 +559,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 								<amp-story-grid-layer template="fill">
 									<amp-story-interactive-poll id="correct-poll" endpoint="https://webstoriesinteractivity-beta.web.app/api/v1" theme="dark" chip-style="shadow" class="nice-quiz" prompt-text="What country do you like the most?" option-1-text="France" option-1-confetti="🇺🇾" option-1-results-category="Dog" option-2-text="Spain" option-2-confetti="🇺🇾" option-2-results-category="Cat" option-3-text="Uruguay" option-3-confetti="🇺🇾" option-3-results-category="Bunny" option-4-text="Brazil" option-4-confetti="🇺🇾" option-4-results-category="Mouse">
 									</amp-story-interactive-poll>
-									<amp-story-interactive-results prompt-text="Your level is" option-1-results-category="Beginner" option-1-image="beginner.png" option-1-results-threshold="10" option-2-results-category="Expet" option-2-image="expert.png" option-2-results-threshold="80"></amp-story-interactive-results>
+									<amp-story-interactive-results prompt-text="Your level is" option-1-results-category="Beginner" option-1-image="beginner.png" option-1-results-threshold="1.0" option-2-results-category="Expet" option-2-image="expert.png" option-2-results-threshold="80"></amp-story-interactive-results>
 								</amp-story-grid-layer>
 							</amp-story-page>
 							<amp-story-page id="amp-story-interactive-binary-poll">
@@ -580,6 +580,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 									</amp-story-interactive-results>
 								</amp-story-grid-layer>
 							</amp-story-page>
+							<amp-story-page id="cover">
+								<amp-story-grid-layer template="fill">
+							 		<amp-story-panning-media layout="fill"></amp-story-panning-media>
+								</amp-story-grid-layer>
+						 	</amp-story-page>
 							<amp-story-bookend src="bookendv1.json" layout="nodisplay"></amp-story-bookend>
 							<amp-analytics id="75a1fdc3143c" type="googleanalytics"><script type="application/json">{"vars":{"account":"UA-XXXXXX-1"},"triggers":{"trackPageview":{"on":"visible","request":"pageview"}}}</script></amp-analytics>
 						</amp-story>
@@ -589,7 +594,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					return [
 						$html,
 						preg_replace( '#<\w+[^>]*>bad</\w+>#', '', $html ),
-						[ 'amp-story', 'amp-analytics', 'amp-story-360', 'amp-twitter', 'amp-youtube', 'amp-video', 'amp-story-interactive' ],
+						[ 'amp-story', 'amp-analytics', 'amp-story-360', 'amp-twitter', 'amp-youtube', 'amp-video', 'amp-story-interactive', 'amp-story-panning-media' ],
 						[
 							[
 								'code'      => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_DESCENDANT_TAG,
@@ -1023,7 +1028,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 								<h4>Section 1</h4>
 								<p>Bunch of awesome content.</p>
 							</section>
-							<section>
+							<section access-hide>
 								<h4>Section 2</h4>
 								<div>Bunch of even more awesome content. This time in a <code>&lt;div&gt;</code>.</div>
 							</section>
@@ -1041,7 +1046,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 					return [
 						$html,
-						preg_replace( '#<\w+>bad</\w+>#', '', $html ),
+						null, // No change.
 						[ 'amp-accordion' ],
 					];
 				}
@@ -1926,7 +1931,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'amp-date-countdown'                           => [
-				'<amp-date-countdown timestamp-seconds="2147483648" layout="fixed-height" height="50"><template type="amp-mustache"><p class="p1"> {{d}} days, {{h}} hours, {{m}} minutes and {{s}} seconds until <a href="https://en.wikipedia.org/wiki/Year_2038_problem">Y2K38</a>.</p></template></amp-date-countdown>',
+				'<amp-date-countdown timestamp-seconds="2147483648" data-count-up layout="fixed-height" height="50"><template type="amp-mustache"><p class="p1"> {{d}} days, {{h}} hours, {{m}} minutes and {{s}} seconds until <a href="https://en.wikipedia.org/wiki/Year_2038_problem">Y2K38</a>.</p></template></amp-date-countdown>',
 				null,
 				[ 'amp-date-countdown', 'amp-mustache' ],
 			],

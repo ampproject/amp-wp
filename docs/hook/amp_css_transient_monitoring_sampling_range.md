@@ -12,7 +12,7 @@ Filters the sampling range to use for monitoring the transient caching of styles
 
 ### Source
 
-:link: [src/BackgroundTask/MonitorCssTransientCaching.php:268](/src/BackgroundTask/MonitorCssTransientCaching.php#L268)
+:link: [src/BackgroundTask/MonitorCssTransientCaching.php:270](/src/BackgroundTask/MonitorCssTransientCaching.php#L270)
 
 <details>
 <summary>Show Code</summary>
