@@ -147,10 +147,10 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function validate_post_url( $request ) {
-		$post          = get_post( $request['id'] );
-		$preview_id    = $request['preview_id'];
+		$post_id       = (int) $request['id'];
+		$preview_id    = (int) $request['preview_id'];
 		$preview_nonce = $request['preview_nonce'];
-		$url           = amp_get_permalink( $post );
+		$url           = amp_get_permalink( $post_id );
 
 		if ( ! empty( $preview_id ) && ! empty( $preview_nonce ) ) {
 			$url = add_query_arg(
@@ -163,15 +163,17 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 			);
 		}
 
-		$this->url_validation_provider->get_url_validation( $url, get_post_type( $post ), true );
-		$validation_status_post = AMP_Validated_URL_Post_Type::get_invalid_url_post( $url );
+		$validation_results = $this->url_validation_provider->get_url_validation( $url, get_post_type( $post_id ), true );
+		if ( is_wp_error( $validation_results ) ) {
+			return $validation_results;
+		}
 
 		$data = [
 			'results'     => [],
-			'review_link' => get_edit_post_link( $validation_status_post->ID, 'raw' ),
+			'review_link' => get_edit_post_link( $validation_results['post_id'], 'raw' ),
 		];
 
-		foreach ( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $validation_status_post ) as $result ) {
+		foreach ( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $validation_results['post_id'] ) as $result ) {
 
 			// Handle case where a validationError's `sources` are an object (with numeric keys).
 			// Note: this will no longer be an issue after https://github.com/ampproject/amp-wp/commit/bbb0e495a817a56b37554dfd721170712c92d7b8

@@ -105,6 +105,7 @@ final class URLValidationProvider {
 	public function get_url_validation( $url, $type, $force_revalidate = false ) {
 		$validity    = null;
 		$revalidated = true;
+		$post_id     = null;
 
 		if ( ! $force_revalidate ) {
 			$url_post = AMP_Validated_URL_Post_Type::get_invalid_url_post( $url );
@@ -112,6 +113,7 @@ final class URLValidationProvider {
 			if ( $url_post && empty( AMP_Validated_URL_Post_Type::get_post_staleness( $url_post ) ) ) {
 				$validity    = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $url_post );
 				$revalidated = false;
+				$post_id     = $url_post->ID;
 			}
 		}
 
@@ -124,10 +126,11 @@ final class URLValidationProvider {
 		}
 
 		if ( $validity && isset( $validity['results'] ) ) {
+			$post_id = $validity['post_id'];
 			$this->update_state_from_validity( $validity, $type );
 		}
 
-		return compact( 'validity', 'revalidated' );
+		return compact( 'validity', 'revalidated', 'post_id' );
 	}
 
 	/**
