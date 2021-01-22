@@ -208,70 +208,8 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 
 		$sources_type = [
 			'items' => [
-				'context'    => [ self::CONTEXT_EDITOR ],
-				'properties' => [
-					'block_content_index' => [
-						'context' => [ self::CONTEXT_EDITOR ],
-						'type'    => 'integer',
-					],
-					'block_name'          => [
-						'context' => [ self::CONTEXT_EDITOR ],
-						'type'    => 'string',
-					],
-					'dependency_handle'   => [
-						'context' => [],
-						'type'    => 'string',
-					],
-					'dependency_type'     => [
-						'context' => [],
-						'type'    => 'string',
-					],
-					'extra_key'           => [
-						'context' => [],
-						'type'    => 'string',
-					],
-					'file'                => [
-						'context' => [],
-						'type'    => 'string',
-					],
-					'function'            => [
-						'context' => [],
-						'type'    => 'string',
-					],
-					'handle'              => [
-						'context' => [],
-						'type'    => 'string',
-					],
-					'hook'                => [
-						'context' => [],
-						'type'    => 'string',
-					],
-					'line'                => [
-						'context' => [],
-						'type'    => 'integer',
-					],
-					'name'                => [
-						'context' => [],
-						'type'    => 'string',
-					],
-					'post_id'             => [
-						'context' => [ self::CONTEXT_EDITOR ],
-						'type'    => 'integer',
-					],
-					'priority'            => [
-						'context' => [],
-						'type'    => 'integer',
-					],
-					'text'                => [
-						'context' => [],
-						'type'    => 'string',
-					],
-					'type'                => [
-						'context' => [],
-						'type'    => 'string',
-					],
-				],
-				'type'       => 'object',
+				'context' => [ self::CONTEXT_EDITOR ],
+				'type'    => 'object',
 			],
 			'type'  => 'array',
 		];
