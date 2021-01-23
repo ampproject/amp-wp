@@ -161,7 +161,8 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 
 		$reader_theme_loader = $this->injector->make( ReaderThemeLoader::class );
 
-		$_GET[ amp_get_slug() ] = '1';
+		$post = self::factory()->post->create();
+		$this->go_to( amp_get_permalink( $post ) );
 		$reader_theme_loader->override_theme();
 		$this->assertTrue( $reader_theme_loader->is_theme_overridden() );
 
@@ -234,6 +235,8 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 
 		$reader_theme_loader = $this->injector->make( ReaderThemeLoader::class );
 
+		$post = self::factory()->post->create();
+		$this->go_to( get_permalink( $post ) );
 		$reader_theme_loader->override_theme();
 		$this->assertFalse( $reader_theme_loader->is_theme_overridden() );
 
@@ -432,8 +435,8 @@ class Test_AMP_Template_Customizer extends DependencyInjectedTestCase {
 		);
 
 		// Switch to Reader theme.
-		$reader_theme_loader    = $this->injector->make( ReaderThemeLoader::class );
-		$_GET[ amp_get_slug() ] = '1';
+		$reader_theme_loader = $this->injector->make( ReaderThemeLoader::class );
+		$this->go_to( amp_get_permalink( self::factory()->post->create() ) );
 		$reader_theme_loader->override_theme();
 		$this->assertTrue( $reader_theme_loader->is_theme_overridden() );
 		$this->assertEquals( $reader_theme_slug, get_stylesheet() );

@@ -35,6 +35,7 @@ class AMP_Options_Manager {
 		Option::SUPPORTED_TEMPLATES     => [ 'is_singular' ],
 		Option::VERSION                 => AMP__VERSION,
 		Option::READER_THEME            => ReaderThemes::DEFAULT_READER_THEME,
+		Option::PAIRED_URL_STRUCTURE    => Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
 		Option::PLUGIN_CONFIGURED       => false,
 	];
 
@@ -159,9 +160,10 @@ class AMP_Options_Manager {
 			 * Filters default options.
 			 *
 			 * @internal
-			 * @param array $defaults Default options.
+			 * @param array $defaults        Default options.
+			 * @param array $current_options Current options.
 			 */
-			(array) apply_filters( 'amp_default_options', $defaults ),
+			(array) apply_filters( 'amp_default_options', $defaults, $options ),
 			$options
 		);
 
@@ -171,7 +173,7 @@ class AMP_Options_Manager {
 			&&
 			get_stylesheet() === $options[ Option::READER_THEME ]
 			&&
-			! amp_has_paired_endpoint()
+			! amp_has_paired_endpoint() // @todo Beware infinite recursion, particularly when deciding among custom endpoints!
 		) {
 			/*
 			 * When Reader mode is selected and a Reader theme has been chosen, if the active theme switches to be the

@@ -15,6 +15,7 @@ define( 'WPMU_PLUGIN_URL', 'some_string' );
 define( 'WPINC', 'some_string' );
 define( 'EMPTY_TRASH_DAYS', 30 * 86400 );
 define( 'EP_PERMALINK', 1 );
+define( 'EP_ALL', 8191 );
 define( 'COOKIE_DOMAIN', false );
 
 // Constants for expressing human-readable intervals.

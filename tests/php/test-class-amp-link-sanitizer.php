@@ -169,6 +169,7 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 		}
 		$html .= sprintf( '<form id="internal-search" action="%s" method="get"><input name="s" type="search"></form>', esc_url( home_url( '/' ) ) );
 		$html .= sprintf( '<form id="internal-post" action="%s" method="post"><input name="content" type="text"></form>', esc_url( home_url( '/' ) ) );
+		$html .= sprintf( '<form id="internal-implied-get" action="%s"><input name="s" type="search"></form>', esc_url( home_url( '/' ) ) );
 		$html .= '<form id="external-search" action="https://search.example.com/" method="get"><input name="s" type="search"></form>';
 		$html .= '<template type="amp-mustache"><div><a id="template-link" href="{{url}}">Link</a></div></template>';
 
@@ -203,6 +204,7 @@ class AMP_Link_Sanitizer_Test extends DependencyInjectedTestCase {
 		// Confirm changes to form.
 		$this->assertEquals( $paired ? 1 : 0, $dom->xpath->query( '//form[ @id = "internal-search" ]//input[ @name = "amp" ]' )->length );
 		$this->assertEquals( 0, $dom->xpath->query( '//form[ @id = "internal-post" ]//input[ @name = "amp" ]' )->length );
+		$this->assertEquals( $paired ? 1 : 0, $dom->xpath->query( '//form[ @id = "internal-implied-get" ]//input[ @name = "amp" ]' )->length );
 		$this->assertEquals( 0, $dom->xpath->query( '//form[ @id = "external-search" ]//input[ @name = "amp" ]' )->length );
 
 		$this->assertEquals( '{{url}}', $dom->getElementById( 'template-link' )->getAttribute( 'href' ) );

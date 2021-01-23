@@ -249,13 +249,16 @@ class AMP_Post_Meta_Box {
 			true
 		);
 
+		$is_standard_mode = amp_is_canonical();
+
 		list( $featured_image_minimum_width, $featured_image_minimum_height ) = self::get_featured_image_dimensions();
 
 		$data = [
-			'ampSlug'                    => amp_get_slug(),
+			'ampUrl'                     => $is_standard_mode ? null : amp_add_paired_endpoint( get_permalink( $post ) ),
+			'ampPreviewLink'             => $is_standard_mode ? null : amp_add_paired_endpoint( get_preview_post_link( $post ) ),
 			'errorMessages'              => $this->get_error_messages( $status_and_errors['errors'] ),
 			'hasThemeSupport'            => ! amp_is_legacy(),
-			'isStandardMode'             => amp_is_canonical(),
+			'isStandardMode'             => $is_standard_mode,
 			'featuredImageMinimumWidth'  => $featured_image_minimum_width,
 			'featuredImageMinimumHeight' => $featured_image_minimum_height,
 		];

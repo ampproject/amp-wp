@@ -157,20 +157,21 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 				'wp-i18n',
 				'wp-plugins',
 				'wp-polyfill',
-				'wp-url',
 			],
 			$block_script->deps
 		);
 		$this->assertEquals( AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE, $block_script->handle );
 		$this->assertEquals( amp_get_asset_url( 'js/' . AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE . '.js' ), $block_script->src );
+
 		/**
 		 * @since 2.0.9
 		 * Values are now loaded using wp_inline_script()
 		 */
-		$data = $block_script->extra['before'][1];
-		$this->assertContains( 'ampBlockEditor', $data );
+		$before = implode( '', $block_script->extra['before'] );
+		$this->assertContains( 'ampBlockEditor', $before );
 		$expected_localized_values = [
-			'ampSlug',
+			'ampUrl',
+			'ampPreviewLink',
 			'errorMessages',
 			'hasThemeSupport',
 			'isStandardMode',
@@ -179,7 +180,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		];
 
 		foreach ( $expected_localized_values as $localized_value ) {
-			$this->assertContains( $localized_value, $data );
+			$this->assertContains( $localized_value, $before );
 		}
 		unset( $GLOBALS['post'], $GLOBALS['current_screen'] );
 	}

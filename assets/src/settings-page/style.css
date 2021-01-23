@@ -360,7 +360,8 @@ li.error-kept {
 }
 
 #plugin-suppression .amp-drawer__panel-body-inner,
-.amp-analytics .amp-drawer__panel-body-inner {
+.amp-analytics .amp-drawer__panel-body-inner,
+#paired-url-structure .amp-drawer__panel-body-inner {
 	padding: 1.5rem 1.5rem 3rem;
 
 	@media (min-width: 783px) {
@@ -369,9 +370,52 @@ li.error-kept {
 }
 
 #plugin-suppression .amp-drawer__panel-body-inner > p,
-.amp-analytics .amp-drawer__panel-body-inner p {
+.amp-analytics .amp-drawer__panel-body-inner p,
+#paired-url-structure .amp-drawer__panel-body-inner {
 	margin-top: 0;
 	font-size: 14px;
+}
+
+#paired-url-structure .amp-drawer__panel-body-inner .amp-notice {
+	margin-bottom: 1em;
+}
+
+.amp-drawer__panel-body-inner .amp-paired-url-examples {
+	margin-top: 0.5em;
+	margin-bottom: 0;
+}
+
+.amp-drawer__panel-body-inner .amp-paired-url-example {
+	margin-top: 5px;
+	margin-bottom: 5px;
+	line-height: 1.5;
+}
+
+#paired-url-structure .amp-notice--large {
+	align-items: start;
+}
+
+#paired-url-structure .amp-drawer__panel-body-inner li {
+	margin-top: 1em;
+}
+
+#paired-url-structure .amp-drawer__panel-body-inner li:first-child {
+	margin-top: 0;
+}
+
+#paired-url-structure .amp-drawer__panel-body-inner li .amp-paired-url-examples {
+	margin-left: 34px;
+	margin-bottom: 0;
+}
+
+#paired-url-structure .amp-paired-url-examples summary {
+	display: inline-block;
+	padding-right: 4px;
+	user-select: none;
+}
+
+#paired-url-structure .amp-drawer__panel-body-inner input {
+	margin-right: 8px;
 }
 
 #analytics-options details > summary {

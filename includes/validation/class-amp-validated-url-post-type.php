@@ -765,7 +765,9 @@ class AMP_Validated_URL_Post_Type {
 	 */
 	protected static function normalize_url_for_storage( $url ) {
 		// Only ever store the canonical version.
-		$url = amp_remove_paired_endpoint( $url );
+		if ( ! amp_is_canonical() ) {
+			$url = amp_remove_paired_endpoint( $url );
+		}
 
 		// Remove fragment identifier in the rare case it could be provided. It is irrelevant for validation.
 		$url = strtok( $url, '#' );
@@ -2201,41 +2203,47 @@ class AMP_Validated_URL_Post_Type {
 
 					<div class="misc-pub-section">
 						<?php
+						$actions = [];
+
+						ob_start();
 						$view_label     = __( 'View URL', 'amp' );
 						$queried_object = get_post_meta( $post->ID, self::QUERIED_OBJECT_POST_META_KEY, true );
 						if ( isset( $queried_object['id'], $queried_object['type'] ) ) {
-							$after = ' | ';
 							if ( 'post' === $queried_object['type'] && get_post( $queried_object['id'] ) && post_type_exists( get_post( $queried_object['id'] )->post_type ) ) {
 								$post_type_object = get_post_type_object( get_post( $queried_object['id'] )->post_type );
-								edit_post_link( $post_type_object->labels->edit_item, '', $after, $queried_object['id'] );
+								edit_post_link( $post_type_object->labels->edit_item, '', '', $queried_object['id'] );
 								$view_label = $post_type_object->labels->view_item;
 							} elseif ( 'term' === $queried_object['type'] && get_term( $queried_object['id'] ) && taxonomy_exists( get_term( $queried_object['id'] )->taxonomy ) ) {
 								$taxonomy_object = get_taxonomy( get_term( $queried_object['id'] )->taxonomy );
-								edit_term_link( $taxonomy_object->labels->edit_item, '', $after, get_term( $queried_object['id'] ) );
+								edit_term_link( $taxonomy_object->labels->edit_item, '', '', get_term( $queried_object['id'] ) );
 								$view_label = $taxonomy_object->labels->view_item;
 							} elseif ( 'user' === $queried_object['type'] ) {
 								$link = get_edit_user_link( $queried_object['id'] );
 								if ( $link ) {
-									printf( '<a href="%s">%s</a>%s', esc_url( $link ), esc_html__( 'Edit User', 'amp' ), esc_html( $after ) );
+									printf( '<a href="%s">%s</a>', esc_url( $link ), esc_html__( 'Edit User', 'amp' ) );
 								}
 								$view_label = __( 'View User', 'amp' );
 							}
 						}
-						printf( '<a href="%s">%s</a>', esc_url( self::get_url_from_post( $post ) ), esc_html( $view_label ) );
+						$actions['edit'] = ob_get_clean();
+						$actions['view'] = sprintf( '<a href="%s">%s</a>', esc_url( self::get_url_from_post( $post ) ), esc_html( $view_label ) );
 
-						if (
-							$is_amp_enabled
-							&&
-							AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
-							&&
-							AMP_Theme_Support::is_paired_available()
-						) {
-							printf(
-								' | <a href="%s">%s</a>',
-								esc_url( AMP_Theme_Support::get_paired_browsing_url( self::get_url_from_post( $post ) ) ),
-								esc_html__( 'Paired Browsing', 'amp' )
-							);
-						}
+						/**
+						 * Filters the array of action links shown in the status metabox.
+						 *
+						 * @since 2.1
+						 * @internal
+						 *
+						 * @param string[] $actions Action links.
+						 */
+						$actions = apply_filters( 'amp_validated_url_status_actions', $actions, $post );
+
+						echo wp_kses(
+							implode( ' | ', array_filter( $actions ) ),
+							[
+								'a' => array_fill_keys( [ 'href' ], true ),
+							]
+						);
 						?>
 					</div>
 				</div>

@@ -37,6 +37,7 @@ import { MobileRedirection } from './mobile-redirection';
 import { SettingsFooter } from './settings-footer';
 import { PluginSuppression } from './plugin-suppression';
 import { Analytics } from './analytics';
+import { PairedUrlStructure } from './paired-url-structure';
 
 const { ajaxurl: wpAjaxUrl } = global;
 
@@ -188,6 +189,7 @@ function Root( { appRoot } ) {
 				>
 					<Analytics />
 				</AMPDrawer>
+				<PairedUrlStructure focusedSection={ focusedSection } />
 				<SettingsFooter />
 			</form>
 			<UnsavedChangesWarning excludeUserContext={ true } appRoot={ appRoot } />

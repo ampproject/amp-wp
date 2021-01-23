@@ -71,6 +71,8 @@ class WrappedAmpPreviewButton extends Component {
 
 export const name = 'amp-preview-button-wrapper';
 
+export const onlyPaired = true;
+
 export const render = pure(
 	compose( [
 		withSelect( ( select ) => {

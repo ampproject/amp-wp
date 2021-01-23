@@ -46,6 +46,13 @@ final class PluginSuppression implements Service, Registerable {
 	private $callback_reflection;
 
 	/**
+	 * Paired Routing.
+	 *
+	 * @var PairedRouting
+	 */
+	private $paired_routing;
+
+	/**
 	 * Original render callbacks for blocks.
 	 *
 	 * Populated via the `register_block_type_args` filter at the moment the block is first registered. This is useful
@@ -62,10 +69,12 @@ final class PluginSuppression implements Service, Registerable {
 	 *
 	 * @param PluginRegistry     $plugin_registry     Plugin registry to use.
 	 * @param CallbackReflection $callback_reflection Callback reflector to use.
+	 * @param PairedRouting      $paired_routing      Paired routing service to use.
 	 */
-	public function __construct( PluginRegistry $plugin_registry, CallbackReflection $callback_reflection ) {
+	public function __construct( PluginRegistry $plugin_registry, CallbackReflection $callback_reflection, PairedRouting $paired_routing ) {
 		$this->plugin_registry     = $plugin_registry;
 		$this->callback_reflection = $callback_reflection;
+		$this->paired_routing      = $paired_routing;
 	}
 
 	/**
@@ -87,6 +96,14 @@ final class PluginSuppression implements Service, Registerable {
 			2
 		);
 
+		// Priority 8 needed to run before ReaderThemeLoader::override_theme() at priority 9.
+		add_action( 'plugins_loaded', [ $this, 'initialize' ], 8 );
+	}
+
+	/**
+	 * Initialize.
+	 */
+	public function initialize() {
 		// When a Reader theme is selected and an AMP request is being made, start suppressing as early as possible.
 		// This can be done because we know it is an AMP page due to the query parameter, but it also _has_ to be done
 		// specifically for the case of accessing the AMP Customizer (in which customize.php is requested with the query
@@ -94,6 +111,7 @@ final class PluginSuppression implements Service, Registerable {
 		// could be done early for Transitional mode as well since a query parameter is also used for frontend requests
 		// but there is no similar need to suppress the registration of Customizer controls in Transitional mode since
 		// there is no separate Customizer for AMP in Transitional mode (or legacy Reader mode).
+		// @todo This check could be replaced with ( ! amp_is_canonical() && $this->paired_routing->has_endpoint() ).
 		if ( $this->is_reader_theme_request() ) {
 			$this->suppress_plugins();
 		} else {
@@ -116,7 +134,7 @@ final class PluginSuppression implements Service, Registerable {
 			&&
 			ReaderThemes::DEFAULT_READER_THEME !== AMP_Options_Manager::get_option( Option::READER_THEME )
 			&&
-			amp_has_paired_endpoint()
+			$this->paired_routing->has_endpoint()
 		);
 	}
 

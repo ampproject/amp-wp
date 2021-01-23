@@ -32,12 +32,23 @@ export function getErrorMessages( state ) {
 }
 
 /**
- * Returns the AMP slug used in the query var, like 'amp'.
+ * Returns the AMP preview link (URL).
  *
  * @param {Object} state The editor state.
  *
- * @return {string} The slug for AMP, like 'amp'.
+ * @return {string} The AMP preview link URL.
  */
-export function getAmpSlug( state ) {
-	return state.ampSlug;
+export function getAmpPreviewLink( state ) {
+	return state.ampPreviewLink;
+}
+
+/**
+ * Returns the AMP URL.
+ *
+ * @param {Object} state The editor state.
+ *
+ * @return {string} The AMP URL.
+ */
+export function getAmpUrl( state ) {
+	return state.ampUrl;
 }

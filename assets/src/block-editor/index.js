@@ -22,7 +22,11 @@ const {
 const plugins = require.context( './plugins', true, /.*\.js$/ );
 
 plugins.keys().forEach( ( modulePath ) => {
-	const { name, render, icon } = plugins( modulePath );
+	const { name, render, icon, onlyPaired = false } = plugins( modulePath );
+
+	if ( onlyPaired && isStandardMode() ) {
+		return;
+	}
 
 	registerPlugin( name, { icon, render } );
 } );
