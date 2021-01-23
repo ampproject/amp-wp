@@ -67,5 +67,6 @@ abstract class DependencyInjectedTestCase extends WP_UnitTestCase {
 
 		// WordPress core fails to do this.
 		$GLOBALS['wp_the_query'] = $GLOBALS['wp_query'];
+		unset( $GLOBALS['current_screen'] );
 	}
 }
