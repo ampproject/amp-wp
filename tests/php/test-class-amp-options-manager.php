@@ -56,6 +56,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		}
 
 		$this->restore_theme_directories();
+		$GLOBALS['wp_the_query'] = $GLOBALS['wp_query']; // This is missing in core.
 	}
 
 	/**
@@ -159,6 +160,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				Option::MOBILE_REDIRECT         => false,
 				Option::READER_THEME            => 'legacy',
 				Option::PLUGIN_CONFIGURED       => false,
+				Option::PAIRED_URL_STRUCTURE    => Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
 			],
 			AMP_Options_Manager::get_options()
 		);
@@ -631,6 +633,10 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				Option::READER_THEME  => 'twentynineteen',
 			]
 		);
+
+		// Make sure the paired URL structure has been set.
+		$this->go_to( '/' );
+
 		$this->assertEquals( AMP_Theme_Support::READER_MODE_SLUG, AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) );
 		$this->assertEquals( 'twentynineteen', AMP_Options_Manager::get_option( Option::READER_THEME ) );
 

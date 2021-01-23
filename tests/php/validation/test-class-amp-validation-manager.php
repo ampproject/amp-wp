@@ -329,7 +329,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$node = $admin_bar->get_node( 'amp' );
 		$this->assertInternalType( 'object', $node );
-		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-paired-browsing' ) );
 
 		/*
 		 * Admin bar item available in transitional mode.
@@ -340,7 +339,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$node = $admin_bar->get_node( 'amp' );
 		$this->assertInternalType( 'object', $node );
-		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-paired-browsing' ) );
 
 		// Admin bar item available in paired mode.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );

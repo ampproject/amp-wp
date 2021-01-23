@@ -204,23 +204,34 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 		$this->assertFalse( $this->instance->is_reader_theme_request() );
 
 		$this->instance->register();
+
+		$this->assertEquals( 10, has_filter( 'amp_default_options', [ $this->instance, 'filter_default_options' ] ) );
+		$this->assertSame(
+			8,
+			has_action( 'plugins_loaded', [ $this->instance, 'initialize' ] )
+		);
+	}
+
+	/** @covers ::initialize() */
+	public function test_initialize() {
+		$this->instance->initialize();
 		$this->assertEquals(
 			defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX, // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
 			has_action( 'wp', [ $this->instance, 'maybe_suppress_plugins' ] )
 		);
-		$this->assertEquals( 10, has_filter( 'amp_default_options', [ $this->instance, 'filter_default_options' ] ) );
 	}
 
 	/** @covers ::register() */
 	public function test_register_reader_theme_mode() {
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentynineteen' );
-		$_GET[ amp_get_slug() ] = 1;
+		$this->go_to( amp_get_permalink( self::factory()->post->create() ) );
 		$this->assertTrue( $this->instance->is_reader_theme_request() );
 
 		$this->init_plugins();
 		$this->update_suppressed_plugins_option( array_fill_keys( $this->get_bad_plugin_file_slugs(), true ) );
 		$this->instance->register();
+		$this->instance->initialize();
 		$this->assertFalse( has_action( 'plugins_loaded', [ $this->instance, 'suppress_plugins' ] ), 'Expected suppression to happen immediately.' );
 		$this->assertEquals( '', do_shortcode( '[bad]' ), 'Expected suppression to happen immediately.' );
 		$this->assertEquals( 10, has_filter( 'amp_default_options', [ $this->instance, 'filter_default_options' ] ) );
@@ -228,20 +239,22 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 
 	/** @covers ::is_reader_theme_request() */
 	public function test_is_reader_theme_request() {
+		$post_id = self::factory()->post->create();
+
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$this->assertFalse( $this->instance->is_reader_theme_request() );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::READER_THEME, ReaderThemes::DEFAULT_READER_THEME );
 		$this->assertFalse( $this->instance->is_reader_theme_request() );
-		$_GET[ amp_get_slug() ] = 1;
+		$this->go_to( amp_get_permalink( $post_id ) );
 		$this->assertFalse( $this->instance->is_reader_theme_request() );
 
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::update_option( Option::READER_THEME, 'twentynineteen' );
-		unset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$this->go_to( get_permalink( $post_id ) );
 		$this->assertFalse( $this->instance->is_reader_theme_request() );
-		$_GET[ amp_get_slug() ] = 1;
+		$this->go_to( amp_get_permalink( $post_id ) );
 		$this->assertTrue( $this->instance->is_reader_theme_request() );
 	}
 
@@ -278,11 +291,12 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 	public function test_maybe_suppress_plugins_yes_amp_endpoint() {
 		$url = home_url( '/' );
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
+		$this->instance->register();
+		$this->instance->initialize();
 		$this->init_plugins();
 		$bad_plugin_file_slugs = $this->get_bad_plugin_file_slugs();
 		$this->populate_validation_errors( $url, $bad_plugin_file_slugs );
 		$this->update_suppressed_plugins_option( array_fill_keys( $bad_plugin_file_slugs, true ) );
-		$this->instance->register();
 		$this->go_to( $url );
 
 		$this->assertTrue( amp_is_request() );
@@ -299,6 +313,7 @@ final class PluginSuppressionTest extends DependencyInjectedTestCase {
 		$bad_plugin_file_slugs = $this->get_bad_plugin_file_slugs();
 		$this->populate_validation_errors( $url, $bad_plugin_file_slugs );
 		$this->instance->register();
+		$this->instance->initialize();
 		$this->go_to( $url );
 
 		$this->assertTrue( amp_is_request() );

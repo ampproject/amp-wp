@@ -328,21 +328,28 @@ class AMP_Validation_Manager {
 		}
 
 		$is_amp_request = amp_is_request();
-
-		$current_url = amp_get_current_url();
-		$non_amp_url = amp_remove_paired_endpoint( $current_url );
-		$non_amp_url = add_query_arg(
-			QueryVar::NOAMP,
-			amp_is_canonical() ? QueryVar::NOAMP_AVAILABLE : QueryVar::NOAMP_MOBILE,
-			$non_amp_url
-		);
-
-		$amp_url = remove_query_arg(
+		$current_url    = remove_query_arg(
 			array_merge( wp_removable_query_args(), [ QueryVar::NOAMP ] ),
-			$current_url
+			amp_get_current_url()
 		);
-		if ( ! amp_is_canonical() ) {
-			$amp_url = amp_add_paired_endpoint( $amp_url );
+
+		if ( amp_is_canonical() ) {
+			$amp_url     = $current_url;
+			$non_amp_url = add_query_arg(
+				QueryVar::NOAMP,
+				QueryVar::NOAMP_AVAILABLE,
+				$current_url
+			);
+		} elseif ( $is_amp_request ) {
+			$amp_url     = $current_url;
+			$non_amp_url = add_query_arg(
+				QueryVar::NOAMP,
+				QueryVar::NOAMP_MOBILE,
+				amp_remove_paired_endpoint( $current_url )
+			);
+		} else {
+			$amp_url     = amp_add_paired_endpoint( $current_url );
+			$non_amp_url = $current_url;
 		}
 
 		$validate_url = AMP_Validated_URL_Post_Type::get_recheck_url( AMP_Validated_URL_Post_Type::get_invalid_url_post( $amp_url ) ?: $amp_url );
@@ -403,24 +410,6 @@ class AMP_Validation_Manager {
 		} else {
 			$wp_admin_bar->add_node( $link_item );
 			$wp_admin_bar->add_node( $validate_item );
-		}
-
-		if (
-			AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
-			&&
-			AMP_Theme_Support::is_paired_available()
-			&&
-			amp_is_dev_mode()
-		) {
-			// Construct admin bar item to link to paired browsing experience.
-			$paired_browsing_item = [
-				'parent' => 'amp',
-				'id'     => 'amp-paired-browsing',
-				'title'  => esc_html__( 'Paired Browsing', 'amp' ),
-				'href'   => AMP_Theme_Support::get_paired_browsing_url(),
-			];
-
-			$wp_admin_bar->add_node( $paired_browsing_item );
 		}
 
 		// Add settings link to admin bar.

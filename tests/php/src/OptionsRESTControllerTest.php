@@ -66,7 +66,7 @@ class OptionsRESTControllerTest extends DependencyInjectedTestCase {
 	 */
 	public function test_get_items() {
 		$data = $this->controller->get_items( new WP_REST_Request( 'GET', '/amp/v1/options' ) )->get_data();
-		$this->assertEquals(
+		$this->assertEqualSets(
 			[
 				'theme_support',
 				'reader_theme',
@@ -83,6 +83,12 @@ class OptionsRESTControllerTest extends DependencyInjectedTestCase {
 				'supportable_templates',
 				'onboarding_wizard_link',
 				'customizer_link',
+				'paired_url_structure',
+				'paired_url_examples',
+				'amp_slug',
+				'custom_paired_endpoint_sources',
+				'endpoint_path_slug_conflicts',
+				'rewrite_using_permalinks',
 			],
 			array_keys( $data )
 		);

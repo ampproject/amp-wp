@@ -9,6 +9,7 @@ namespace AmpProject\AmpWP;
 
 use AmpProject\AmpWP\Admin;
 use AmpProject\AmpWP\BackgroundTask;
+use AmpProject\AmpWP\Infrastructure\Injector;
 use AmpProject\AmpWP\Infrastructure\ServiceBasedPlugin;
 use AmpProject\AmpWP\Instrumentation;
 use AmpProject\AmpWP\Validation\SavePostValidationEvent;
@@ -64,6 +65,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'admin.onboarding_wizard'           => Admin\OnboardingWizardSubmenuPage::class,
 		'admin.options_menu'                => Admin\OptionsMenu::class,
 		'admin.polyfills'                   => Admin\Polyfills::class,
+		'admin.paired_browsing'             => Admin\PairedBrowsing::class,
 		'amp_slug_customization_watcher'    => AmpSlugCustomizationWatcher::class,
 		'css_transient_cache.ajax_handler'  => Admin\ReenableCssTransientCachingAjaxAction::class,
 		'css_transient_cache.monitor'       => BackgroundTask\MonitorCssTransientCaching::class,
@@ -89,6 +91,8 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'url_validation_cron'               => URLValidationCron::class,
 		'save_post_validation_event'        => SavePostValidationEvent::class,
 		'background_task_deactivator'       => BackgroundTaskDeactivator::class,
+		'paired_routing'                    => PairedRouting::class,
+		'paired_url'                        => PairedUrl::class,
 	];
 
 	/**
@@ -171,6 +175,8 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 			DevTools\FileReflection::class,
 			ReaderThemeLoader::class,
 			BackgroundTask\BackgroundTaskDeactivator::class,
+			PairedRouting::class,
+			Injector::class,
 		];
 	}
 
@@ -186,6 +192,10 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 	 * @return array<callable> Associative array of callables.
 	 */
 	protected function get_delegations() {
-		return [];
+		return [
+			Injector::class => static function () {
+				return Services::get( 'injector' );
+			},
+		];
 	}
 }

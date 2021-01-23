@@ -28,6 +28,13 @@ use WP_Customize_Manager;
 final class ReaderThemeLoader implements Service, Registerable {
 
 	/**
+	 * Paired routing service.
+	 *
+	 * @var PairedRouting
+	 */
+	private $paired_routing;
+
+	/**
 	 * Reader theme.
 	 *
 	 * @var WP_Theme
@@ -49,6 +56,15 @@ final class ReaderThemeLoader implements Service, Registerable {
 	 * @var bool
 	 */
 	private $theme_overridden = false;
+
+	/**
+	 * ReaderThemeLoader constructor.
+	 *
+	 * @param PairedRouting $paired_routing Paired routing service.
+	 */
+	public function __construct( PairedRouting $paired_routing ) {
+		$this->paired_routing = $paired_routing;
+	}
 
 	/**
 	 * Is Reader mode with a Reader theme selected.
@@ -302,7 +318,8 @@ final class ReaderThemeLoader implements Service, Registerable {
 	 */
 	public function override_theme() {
 		$this->theme_overridden = false;
-		if ( ! $this->is_enabled() || ! amp_has_paired_endpoint() ) {
+
+		if ( ! $this->is_enabled() || ! $this->paired_routing->has_endpoint() ) {
 			return;
 		}
 

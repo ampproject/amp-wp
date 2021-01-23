@@ -1,14 +1,20 @@
 /**
  * WordPress dependencies
  */
-import { addQueryArgs, hasQueryArg, removeQueryArgs } from '@wordpress/url';
+import { addQueryArgs, removeQueryArgs } from '@wordpress/url';
+
 /**
  * Internal dependencies
  */
 import './app.css';
 
-const { app, history } = window;
-const { ampSlug, noampQueryVar, noampMobile, ampPairedBrowsingQueryVar, documentTitlePrefix } = app;
+const { ampPairedBrowsingAppData, history } = window;
+const {
+	noampQueryVar,
+	noampMobile,
+	ampPairedBrowsingQueryVar,
+	documentTitlePrefix,
+} = ampPairedBrowsingAppData;
 
 class PairedBrowsingApp {
 	/**
@@ -26,11 +32,67 @@ class PairedBrowsingApp {
 	ampIframe;
 
 	/**
+	 * Timestamp when the AMP iframe last sent a heartbeat.
+	 *
+	 * @type {number}
+	 */
+	ampHeartbeatTimestamp = Date.now();
+
+	/**
 	 * Non-AMP IFrame
 	 *
 	 * @type {HTMLIFrameElement}
 	 */
 	nonAmpIframe;
+
+	/**
+	 * Timestamp when the non-AMP iframe last sent a heartbeat.
+	 *
+	 * @type {number}
+	 */
+	nonAmpHeartbeatTimestamp = Date.now();
+
+	/**
+	 * Current AMP URL.
+	 *
+	 * @type {string}
+	 */
+	currentAmpUrl;
+
+	/**
+	 * Initial URL object for the AMP URL.
+	 *
+	 * @type {URL}
+	 */
+	initialAmpUrlObject;
+
+	/**
+	 * The most recent URL that was being navigated to in the AMP window.
+	 *
+	 * @type {?string}
+	 */
+	navigateAmpUrl;
+
+	/**
+	 * Current non-AMP URL.
+	 *
+	 * @type {string}
+	 */
+	currentNonAmpUrl;
+
+	/**
+	 * Initial URL object for the non-AMP URL.
+	 *
+	 * @type {URL}
+	 */
+	initialNonAmpUrlObject;
+
+	/**
+	 * The most recent URL that was being navigated to in the non-AMP window.
+	 *
+	 * @type {?string}
+	 */
+	navigateNonAmpUrl;
 
 	/**
 	 * Non-AMP Link
@@ -47,12 +109,23 @@ class PairedBrowsingApp {
 	ampLink;
 
 	/**
+	 * Active iframe.
+	 *
+	 * @type {?HTMLIFrameElement}
+	 */
+	activeIframe;
+
+	/**
 	 * Constructor.
 	 */
 	constructor() {
 		this.nonAmpIframe = document.querySelector( '#non-amp iframe' );
 		this.ampIframe = document.querySelector( '#amp iframe' );
-		this.ampPageHasErrors = false;
+
+		this.currentNonAmpUrl = this.nonAmpIframe.src;
+		this.initialNonAmpUrlObject = new URL( this.currentNonAmpUrl );
+		this.currentAmpUrl = this.ampIframe.src;
+		this.initialAmpUrlObject = new URL( this.currentNonAmpUrl );
 
 		// Link to exit paired browsing.
 		this.nonAmpLink = /** @type {HTMLAnchorElement} */ document.getElementById( 'non-amp-link' );
@@ -60,33 +133,108 @@ class PairedBrowsingApp {
 
 		// Overlay that is displayed on the client that becomes disconnected.
 		this.disconnectOverlay = document.querySelector( '.disconnect-overlay' );
-		this.disconnectText = {
-			general: document.querySelector( '.disconnect-overlay .dialog-text span.general' ),
-			invalidAmp: document.querySelector( '.disconnect-overlay .dialog-text span.invalid-amp' ),
-		};
 		this.disconnectButtons = {
 			exit: document.querySelector( '.disconnect-overlay .button.exit' ),
 			goBack: document.querySelector( '.disconnect-overlay .button.go-back' ),
 		};
 		this.addDisconnectButtonListeners();
 
+		global.addEventListener( 'message', ( event ) => {
+			this.receiveMessage( event );
+		} );
+
+		// Set the active iframe based on which got the last mouseenter.
+		// Note that setting activeIframe may get set by receiveScroll if the user starts scrolling
+		// before moving the mouse.
+		document.getElementById( 'non-amp' ).addEventListener( 'mouseenter', () => {
+			this.activeIframe = this.nonAmpIframe;
+		} );
+		document.getElementById( 'amp' ).addEventListener( 'mouseenter', () => {
+			this.activeIframe = this.ampIframe;
+		} );
+
 		// Load clients.
-		Promise.all( this.getIframeLoadedPromises() );
+		Promise.all( this.getIframeLoadedPromises() ).then( () => {
+			setInterval(
+				() => {
+					this.checkConnectedClients();
+				},
+				100,
+			);
+		} );
 	}
 
 	/**
-	 * Add event listeners for buttons on disconnect overlay.
+	 * Return whether the window is for the AMP page.
+	 *
+	 * @param {Window} win Window.
+	 * @return {boolean} Whether AMP window.
 	 */
-	addDisconnectButtonListeners() {
-		// The 'Exit' button navigates the parent window to the URL of the disconnected client.
-		this.disconnectButtons.exit.addEventListener( 'click', () => {
-			window.location.assign( this.disconnectedClient.contentWindow.location.href );
-		} );
+	isAmpWindow( win ) {
+		return win === this.ampIframe.contentWindow;
+	}
 
-		// The 'Go back' button goes back to the previous page of the parent window.
-		this.disconnectButtons.goBack.addEventListener( 'click', () => {
-			window.history.back();
-		} );
+	/**
+	 * Return whether the window is for the non-AMP page.
+	 *
+	 * @param {Window} win Window.
+	 * @return {boolean} Whether non-AMP window.
+	 */
+	isNonAmpWindow( win ) {
+		return win === this.nonAmpIframe.contentWindow;
+	}
+
+	/**
+	 * Send message to app.
+	 *
+	 * @param {Window} win  Window.
+	 * @param {string} type Type.
+	 * @param {Object} data Data.
+	 */
+	sendMessage( win, type, data = {} ) {
+		win.postMessage(
+			{
+				type,
+				...data,
+				ampPairedBrowsing: true,
+			},
+			this.isAmpWindow( win ) ? this.currentAmpUrl : this.currentNonAmpUrl,
+		);
+	}
+
+	/**
+	 * Receive message.
+	 *
+	 * @param {MessageEvent} event
+	 */
+	receiveMessage( event ) {
+		if ( ! event.data || ! event.data.type || ! event.data.ampPairedBrowsing || ! event.source ) {
+			return;
+		}
+
+		if ( ! [ this.initialNonAmpUrlObject.origin, this.initialAmpUrlObject.origin ].includes( event.origin ) ) {
+			return;
+		}
+
+		if ( ! this.isAmpWindow( event.source ) && ! this.isNonAmpWindow( event.source ) ) {
+			return;
+		}
+
+		switch ( event.data.type ) {
+			case 'loaded':
+				this.receiveLoaded( event.data, event.source );
+				break;
+			case 'scroll':
+				this.receiveScroll( event.data, event.source );
+				break;
+			case 'heartbeat':
+				this.receiveHeartbeat( event.source );
+				break;
+			case 'navigate':
+				this.receiveNavigate( event.data, event.source );
+				break;
+			default:
+		}
 	}
 
 	/**
@@ -97,106 +245,117 @@ class PairedBrowsingApp {
 	getIframeLoadedPromises() {
 		return [
 			new Promise( ( resolve ) => {
-				this.nonAmpIframe.addEventListener( 'load', () => {
-					this.toggleDisconnectOverlay( this.nonAmpIframe );
-					resolve();
-				} );
+				this.nonAmpIframe.addEventListener( 'load', resolve );
 			} ),
-
 			new Promise( ( resolve ) => {
-				this.ampIframe.addEventListener( 'load', () => {
-					this.toggleDisconnectOverlay( this.ampIframe );
-					resolve();
-				} );
+				this.ampIframe.addEventListener( 'load', resolve );
 			} ),
 		];
 	}
 
 	/**
-	 * Validates whether or not the window document is AMP compatible.
+	 * Receive heartbeat.
 	 *
-	 * @param {Document} doc Window document.
-	 * @return {boolean} True if AMP compatible, false if not.
+	 * @param {Window} sourceWindow The source window.
 	 */
-	documentIsAmp( doc ) {
-		return doc.querySelector( 'head > script[src="https://cdn.ampproject.org/v0.js"]' );
+	receiveHeartbeat( sourceWindow ) {
+		if ( this.isAmpWindow( sourceWindow ) ) {
+			this.ampHeartbeatTimestamp = Date.now();
+		} else {
+			this.nonAmpHeartbeatTimestamp = Date.now();
+		}
 	}
 
 	/**
-	 * Toggles the 'disconnected' overlay for the supplied iframe.
+	 * Receive navigate.
+	 *
+	 * @param {Object} data         Data.
+	 * @param {string} data.href    Href.
+	 * @param {Window} sourceWindow The source window.
+	 */
+	receiveNavigate( { href }, sourceWindow ) {
+		if ( this.isAmpWindow( sourceWindow ) ) {
+			this.navigateAmpUrl = href;
+		} else {
+			this.navigateNonAmpUrl = href;
+		}
+	}
+
+	/**
+	 * Check connected clients.
+	 */
+	checkConnectedClients() {
+		this.sendMessage( this.ampIframe.contentWindow, 'init' );
+		this.sendMessage( this.nonAmpIframe.contentWindow, 'init' );
+
+		if ( ! this.isClientConnected( this.ampIframe ) ) {
+			this.showDisconnectOverlay( this.ampIframe );
+		} else if ( ! this.isClientConnected( this.nonAmpIframe ) ) {
+			this.showDisconnectOverlay( this.nonAmpIframe );
+		} else {
+			this.disconnectOverlay.classList.remove( 'disconnected' );
+		}
+	}
+
+	/**
+	 * Add event listeners for buttons on disconnect overlay.
+	 */
+	addDisconnectButtonListeners() {
+		// The 'Go back' button goes back to the previous page of the parent window.
+		this.disconnectButtons.goBack.addEventListener( 'click', () => {
+			window.history.back();
+		} );
+	}
+
+	/**
+	 * Shows the 'disconnected' overlay for the supplied iframe.
 	 *
 	 * @param {HTMLIFrameElement} iframe The iframe that hosts the paired browsing client.
 	 */
-	toggleDisconnectOverlay( iframe ) {
-		const isClientConnected = this.isClientConnected( iframe );
-
-		if ( ! isClientConnected ) {
-			if ( this.ampIframe === iframe && this.ampPageHasErrors ) {
-				this.disconnectText.general.classList.toggle( 'hidden', true );
-				this.disconnectText.invalidAmp.classList.toggle( 'hidden', false );
-			} else {
-				this.disconnectText.general.classList.toggle( 'hidden', false );
-				this.disconnectText.invalidAmp.classList.toggle( 'hidden', true );
-			}
-
-			// Show the 'Go Back' button if the parent window has history.
-			this.disconnectButtons.goBack.classList.toggle( 'hidden', 0 >= window.history.length );
-			// If the document is not available, the window URL cannot be accessed.
-			this.disconnectButtons.exit.classList.toggle( 'hidden', null === iframe.contentDocument );
-
-			this.disconnectedClient = iframe;
+	showDisconnectOverlay( iframe ) {
+		// Show the exit link if we know the URL that the user was last trying to go to.
+		const navigateUrl = this.ampIframe === iframe ? this.navigateAmpUrl : this.navigateNonAmpUrl;
+		if ( navigateUrl ) {
+			this.disconnectButtons.exit.hidden = false;
+			this.disconnectButtons.exit.href = navigateUrl;
+		} else {
+			this.disconnectButtons.exit.hidden = true;
 		}
+
+		// Show the 'Go Back' button if the parent window has history.
+		this.disconnectButtons.goBack.hidden = 0 >= window.history.length;
 
 		// Applying the 'amp' class will overlay it on the AMP iframe.
 		this.disconnectOverlay.classList.toggle(
 			'amp',
-			! isClientConnected && this.ampIframe === iframe,
+			this.ampIframe === iframe,
 		);
 
-		this.disconnectOverlay.classList.toggle(
-			'disconnected',
-			! isClientConnected,
-		);
+		this.disconnectOverlay.classList.add( 'disconnected' );
 	}
 
 	/**
 	 * Determines the status of the paired browsing client in an iframe.
 	 *
 	 * @param {HTMLIFrameElement} iframe The iframe.
+	 * @return {boolean} Whether the client is connected.
 	 */
 	isClientConnected( iframe ) {
-		if ( this.ampIframe === iframe && this.ampPageHasErrors ) {
-			return false;
+		const threshold = 2000;
+		if ( iframe === this.ampIframe ) {
+			return Date.now() - this.ampHeartbeatTimestamp < threshold;
 		}
-
-		return null !== iframe.contentWindow &&
-			null !== iframe.contentDocument &&
-			true === iframe.contentWindow.ampPairedBrowsingClient;
+		return Date.now() - this.nonAmpHeartbeatTimestamp < threshold;
 	}
 
 	/**
-	 * Removes AMP related query variables from the supplied URL.
+	 * Purge removable query vars from the supplied URL.
 	 *
 	 * @param {string} url URL string.
 	 * @return {string} Modified URL without any AMP related query variables.
 	 */
-	removeAmpQueryVars( url ) {
-		return removeQueryArgs( url, ampSlug, noampQueryVar, ampPairedBrowsingQueryVar );
-	}
-
-	/**
-	 * Adds the AMP query variable to the supplied URL.
-	 *
-	 * @param {string} url URL string.
-	 * @return {string} Modified URL with the AMP query variable.
-	 */
-	addAmpQueryVar( url ) {
-		return addQueryArgs(
-			url,
-			{
-				[ ampSlug ]: '1',
-			},
-		);
+	purgeRemovableQueryVars( url ) {
+		return removeQueryArgs( url, noampQueryVar, ampPairedBrowsingQueryVar );
 	}
 
 	/**
@@ -227,108 +386,112 @@ class PairedBrowsingApp {
 	}
 
 	/**
-	 * Checks if a URL has the 'amp_validation_errors' query variable.
+	 * Replace location.
 	 *
-	 * @param {string} url URL string.
-	 * @return {boolean} True if such query var exists, false if not.
+	 * @param {HTMLIFrameElement} iframe IFrame Element.
+	 * @param {string}            url    URL.
 	 */
-	urlHasValidationErrorQueryVar( url ) {
-		return hasQueryArg( url, 'amp_validation_errors' );
+	replaceLocation( iframe, url ) {
+		this.sendMessage(
+			iframe.contentWindow,
+			'replaceLocation',
+			{ href: url },
+		);
 	}
 
 	/**
-	 * Registers the provided client window with its parent, so that it can be managed by it.
+	 * Receive scroll.
 	 *
-	 * @param {Window} win Document window.
+	 * @param {Object} data         Data.
+	 * @param {number} data.x       X position.
+	 * @param {number} data.y       Y position.
+	 * @param {Window} sourceWindow The source window.
 	 */
-	registerClientWindow( win ) {
-		let oppositeWindow;
-
-		if ( win === this.ampIframe.contentWindow ) {
-			if ( ! this.documentIsAmp( win.document ) ) {
-				if ( this.urlHasValidationErrorQueryVar( win.location.href ) ) {
-					/*
-					 * If the AMP page has validation errors, mark the page as invalid so that the
-					 * 'disconnected' overlay can be shown.
-					 */
-					this.ampPageHasErrors = true;
-					this.toggleDisconnectOverlay( this.ampIframe );
-					return;
-				} else if ( win.document.querySelector( 'head > link[rel=amphtml]' ) ) {
-					// Force the AMP iframe to always have an AMP URL, if an AMP version is available.
-					win.location.replace( this.addAmpQueryVar( win.location.href ) );
-					return;
-				}
-
-				/*
-				 * If the AMP iframe has loaded a non-AMP page and none of the conditions above are
-				 * true, then explicitly mark it as having errors and display the 'disconnected
-				 * overlay.
-				 */
-				this.ampPageHasErrors = true;
-				this.toggleDisconnectOverlay( this.ampIframe );
-				return;
-			}
-
-			// Update the AMP link above the iframe used for exiting paired browsing.
-			this.ampLink.href = removeQueryArgs( this.ampIframe.contentWindow.location.href, noampQueryVar );
-
-			this.ampPageHasErrors = false;
-			oppositeWindow = this.nonAmpIframe.contentWindow;
-		} else {
-			// Force the non-AMP iframe to always have a non-AMP URL.
-			if ( this.documentIsAmp( win.document ) ) {
-				win.location.replace( this.removeAmpQueryVars( win.location.href ) );
-				return;
-			}
-
-			// Update the non-AMP link above the iframe used for exiting paired browsing.
-			this.nonAmpLink.href = addQueryArgs(
-				this.nonAmpIframe.contentWindow.location.href,
-				{ [ noampQueryVar ]: noampMobile },
-			);
-
-			oppositeWindow = this.ampIframe.contentWindow;
+	receiveScroll( { x, y }, sourceWindow ) {
+		// Rely on scroll event to determine initially-active iframe before mouse first moves.
+		if ( ! this.activeIframe ) {
+			this.activeIframe = this.isAmpWindow( sourceWindow )
+				? this.ampIframe
+				: this.nonAmpIframe;
 		}
 
-		// Synchronize scrolling from current window to its opposite.
-		win.addEventListener(
-			'scroll',
-			() => {
-				if ( oppositeWindow && oppositeWindow.ampPairedBrowsingClient && oppositeWindow.scrollTo ) {
-					oppositeWindow.scrollTo( win.scrollX, win.scrollY );
-				}
-			},
-			{ passive: true },
-		);
-
-		// Scrolling is not synchronized if `scroll-behavior` is set to `smooth`.
-		win.document.documentElement.style.setProperty( 'scroll-behavior', 'auto', 'important' );
-
-		// Make sure the opposite iframe is set to match.
-		if (
-			oppositeWindow &&
-			oppositeWindow.location &&
-			(
-				this.removeAmpQueryVars( this.removeUrlHash( oppositeWindow.location.href ) ) !==
-				this.removeAmpQueryVars( this.removeUrlHash( win.location.href ) )
-			)
-		) {
-			const url = oppositeWindow === this.ampIframe.contentWindow
-				? this.addAmpQueryVar( win.location.href )
-				: this.removeAmpQueryVars( win.location.href );
-
-			oppositeWindow.location.replace( url );
-
+		// Ignore scroll events from the non-active iframe.
+		if ( ! this.activeIframe || sourceWindow !== this.activeIframe.contentWindow ) {
 			return;
 		}
 
-		document.title = documentTitlePrefix + ' ' + win.document.title;
+		const otherWindow = this.isAmpWindow( sourceWindow )
+			? this.nonAmpIframe.contentWindow
+			: this.ampIframe.contentWindow;
+		this.sendMessage( otherWindow, 'scroll', { x, y } );
+	}
+
+	/**
+	 * Receive loaded.
+	 *
+	 * @param {Object}  data                Data.
+	 * @param {boolean} data.isAmpDocument  Whether the document is actually an AMP page.
+	 * @param {string} data.ampUrl         The AMP URL.
+	 * @param {string} data.nonAmpUrl      The non-AMP URL.
+	 * @param {string}  data.documentTitle  The title of the document.
+	 * @param {Window}  sourceWindow        The source window.
+	 */
+	receiveLoaded( { isAmpDocument, ampUrl, nonAmpUrl, documentTitle }, sourceWindow ) {
+		const isAmpSource = this.isAmpWindow( sourceWindow );
+		const sourceIframe = isAmpSource ? this.ampIframe : this.nonAmpIframe;
+
+		if ( isAmpSource ) {
+			// Force the AMP iframe to always have an AMP URL.
+			if ( ! isAmpDocument ) {
+				this.replaceLocation( sourceIframe, ampUrl );
+				return;
+			}
+
+			this.currentAmpUrl = ampUrl;
+
+			// Update the AMP link above the iframe used for exiting paired browsing.
+			this.ampLink.href = removeQueryArgs( ampUrl, noampQueryVar );
+		} else {
+			// Force the non-AMP iframe to always have a non-AMP URL.
+			if ( isAmpDocument ) {
+				this.replaceLocation( sourceIframe, nonAmpUrl );
+				return;
+			}
+
+			this.currentNonAmpUrl = nonAmpUrl;
+
+			// Update the non-AMP link above the iframe used for exiting paired browsing.
+			this.nonAmpLink.href = addQueryArgs(
+				nonAmpUrl,
+				{ [ noampQueryVar ]: noampMobile },
+			);
+		}
+
+		// Make sure the opposite iframe is set to match.
+		const thisCurrentUrl = isAmpSource ? nonAmpUrl : ampUrl;
+		const otherCurrentUrl = isAmpSource ? this.currentNonAmpUrl : this.currentAmpUrl;
+
+		if (
+			this.purgeRemovableQueryVars( this.removeUrlHash( thisCurrentUrl ) ) !==
+			this.purgeRemovableQueryVars( this.removeUrlHash( otherCurrentUrl ) )
+		) {
+			const url = isAmpSource
+				? nonAmpUrl
+				: ampUrl;
+
+			this.replaceLocation(
+				isAmpSource ? this.nonAmpIframe : this.ampIframe,
+				this.purgeRemovableQueryVars( url ),
+			);
+			return;
+		}
+
+		document.title = documentTitlePrefix + ' ' + documentTitle;
 
 		history.replaceState(
 			{},
 			'',
-			this.addPairedBrowsingQueryVar( this.removeAmpQueryVars( win.location.href ) ),
+			this.addPairedBrowsingQueryVar( this.purgeRemovableQueryVars( nonAmpUrl ) ),
 		);
 	}
 }
