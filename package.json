@@ -42,7 +42,7 @@
     "@wordpress/babel-preset-default": "4.20.0",
     "@wordpress/block-editor": "5.2.1",
     "@wordpress/blocks": "6.25.1",
-    "@wordpress/browserslist-config": "2.7.0",
+    "@wordpress/browserslist-config": "3.0.0",
     "@wordpress/data": "4.26.1",
     "@wordpress/e2e-test-utils": "4.16.1",
     "@wordpress/edit-post": "3.26.1",
