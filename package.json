@@ -31,9 +31,13 @@
     "@wordpress/html-entities": "2.10.0",
     "@wordpress/i18n": "3.17.0",
     "@wordpress/icons": "2.9.0",
+    "@wordpress/is-shallow-equal": "3.0.0",
     "@wordpress/url": "2.21.0",
     "classnames": "2.2.6",
+    "clipboard": "2.0.6",
     "prop-types": "15.7.2",
+    "react": "16.14.0",
+    "react-dom": "16.14.0",
     "uuid": "8.3.2"
   },
   "devDependencies": {
@@ -44,6 +48,7 @@
     "@wordpress/blocks": "6.25.1",
     "@wordpress/browserslist-config": "3.0.0",
     "@wordpress/data": "4.26.1",
+    "@wordpress/dependency-extraction-webpack-plugin": "3.0.0",
     "@wordpress/e2e-test-utils": "4.16.1",
     "@wordpress/edit-post": "3.26.1",
     "@wordpress/eslint-plugin": "8.0.0",
@@ -80,6 +85,7 @@
     "postcss-nested": "5.0.1",
     "postcss-preset-env": "6.7.0",
     "puppeteer": "5.5.0",
+    "react-test-renderer": "17.0.1",
     "rtlcss-webpack-plugin": "4.0.4",
     "terser-webpack-plugin": "4.2.3",
     "webpackbar": "4.0.0"
