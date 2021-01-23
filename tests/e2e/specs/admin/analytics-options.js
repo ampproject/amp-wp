@@ -33,9 +33,7 @@ describe( 'AMP analytics options', () => {
 		// Save.
 		await expect( page ).toClick( '.amp-settings-nav button[type="submit"]' );
 
-		// Wait for the success notice. Note: This might not be reliable and should be removed if it causes problems.
-		await page.waitForTimeout( 2000 );
-		await expect( page ).toMatchElement( '.amp .amp-save-success-notice.amp-notice' );
+		await page.waitForSelector( '.amp .amp-save-success-notice.amp-notice' );
 
 		// Delete entries.
 		await expect( page ).toClick( '.amp-analytics__delete-button' );
