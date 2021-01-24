@@ -1,11 +1,11 @@
 blank_issues_enabled: true
 contact_links:
-  - name: AMP for WordPress
-    url: https://amp-wp.org/
-    about: Find documentation, a showcase of sites using the official AMP plugin, an ecosystem directory of compatible themes/plugins, and a blog with news on the plugin site.
-  - name: Plugin Support Forum
+  - name: ❓ Plugin Support Forum
     url: https://wordpress.org/support/plugin/amp/
     about: For plugin usage questions and compatibility issues with other plugins, please use the plugin's support forum. Before opening a new topic, please search the forum for existing topics as someone else has likely reported the issue already.
-  - name: Video Series
+  - name: ℹ️ AMP for WordPress
+    url: https://amp-wp.org/
+    about: Find documentation, a showcase of sites using the official AMP plugin, an ecosystem directory of compatible themes/plugins, and a blog with news on the plugin site.
+  - name: 📺 Video Series
     url: https://www.youtube.com/playlist?list=PLXTOW_XMsIDRGRr5QDffrvND8Qh1RndFb
     about: Check out our video series on YouTube for an introduction to the plugin and how you can leverage it on your site.
