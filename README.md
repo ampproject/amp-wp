@@ -62,7 +62,7 @@ Although there is a growing ecosystem of AMP-compatible WordPress components, th
 
 To learn more about the plugin and start leveraging its capabilities to power your AMP publishing workflow, check [the official AMP plugin product site](https://amp-wp.org/).
 
-If you are a developer, we encourage you to [follow along](https://github.com/ampproject/amp-wp) or [contribute](https://github.com/ampproject/amp-wp/blob/develop/contributing.md) to the development of this plugin on GitHub.
+If you are a developer, we encourage you to [follow along](https://github.com/ampproject/amp-wp) or [contribute](https://github.com/ampproject/amp-wp/wiki/Contributing) to the development of this plugin on GitHub.
 
 We have put up a comprehensive [FAQ page](https://amp-wp.org/documentation/frequently-asked-questions/) and extensive documentation to help you start as smoothly as possible.
 
