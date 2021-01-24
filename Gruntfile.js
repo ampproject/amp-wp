@@ -10,7 +10,7 @@ module.exports = function( grunt ) {
 		'assets',
 		'back-compat',
 		'includes',
-		'readme.md',
+		'README.md',
 		'src',
 		'templates',
 		'vendor',
@@ -162,7 +162,7 @@ module.exports = function( grunt ) {
 					dest: 'build',
 					expand: true,
 					options: {
-						noProcess: [ '*/**', 'LICENSE' ], // That is, only process amp.php and readme.md.
+						noProcess: [ '*/**', 'LICENSE' ], // That is, only process amp.php and README.md.
 						process( content, srcpath ) {
 							let matches, version, versionRegex;
 							if ( /amp\.php$/.test( srcpath ) ) {
