@@ -97,7 +97,7 @@ module.exports = function( grunt ) {
 				options: {
 					plugin_slug: 'amp',
 					build_dir: 'build',
-					assets_dir: 'wp-assets',
+					assets_dir: '.wordpress-org',
 				},
 			},
 		},
