@@ -36,6 +36,10 @@ This plugin can be used by both developers and non-developer users:
 
 The bottom line is that regardless of your technical expertise, the AMP plugin can be useful to you.
 
+https://www.youtube.com/watch?v=BTbjxU3d918&list=PLXTOW_XMsIDRGRr5QDffrvND8Qh1RndFb&index=5
+
+For more videos like this, check out the ongoing [AMP for WordPress video series](https://www.youtube.com/playlist?list=PLXTOW_XMsIDRGRr5QDffrvND8Qh1RndFb).
+
 ### Template Modes
 
 The official AMP plugin enables site owners to serve AMP to their users in different ways, which are referred to as template modes: Standard, Transitional, and Reader. The differences between them are in terms of the number of themes used (one or two), and the number of versions of the site (non-AMP, AMP). Each template mode brings its own value proposition and serves the needs of different scenarios in the large and diverse WordPress ecosystem. And in all cases, the AMP plugin provides as much support as possible in terms of automating the generation of AMP pages, as well as keeping the option chosen AMP valid. In a nutshell, the available template modes are the following:
