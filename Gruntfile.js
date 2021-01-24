@@ -10,7 +10,7 @@ module.exports = function( grunt ) {
 		'assets',
 		'back-compat',
 		'includes',
-		'readme.txt',
+		'readme.md',
 		'src',
 		'templates',
 		'vendor',
@@ -71,9 +71,6 @@ module.exports = function( grunt ) {
 				stdout: true,
 				stderr: true,
 			},
-			readme: {
-				command: './vendor/xwp/wp-dev-lib/scripts/generate-markdown-readme', // Generate the readme.md.
-			},
 			verify_matching_versions: {
 				command: 'php bin/verify-version-consistency.php',
 			},
@@ -112,10 +109,6 @@ module.exports = function( grunt ) {
 	// Register tasks.
 	grunt.registerTask( 'default', [
 		'build',
-	] );
-
-	grunt.registerTask( 'readme', [
-		'shell:readme',
 	] );
 
 	grunt.registerTask( 'build', function() {
@@ -169,7 +162,7 @@ module.exports = function( grunt ) {
 					dest: 'build',
 					expand: true,
 					options: {
-						noProcess: [ '*/**', 'LICENSE' ], // That is, only process amp.php and readme.txt.
+						noProcess: [ '*/**', 'LICENSE' ], // That is, only process amp.php and readme.md.
 						process( content, srcpath ) {
 							let matches, version, versionRegex;
 							if ( /amp\.php$/.test( srcpath ) ) {
@@ -192,7 +185,6 @@ module.exports = function( grunt ) {
 					},
 				},
 			} );
-			grunt.task.run( 'readme' );
 			grunt.task.run( 'copy' );
 			grunt.task.run( 'shell:composer_install' );
 

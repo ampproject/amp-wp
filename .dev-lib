@@ -1,5 +1,2 @@
-# Variables needed to generate readme
-
-README_MD_TITLE="AMP Plugin for WordPress"
-ASSETS_DIR=.wordpress-org
+# This is used by wp-dev-lib/scripts/check-diff.sh but the functionality is no longer used, so it could be removed.
 DEFAULT_BASE_BRANCH=develop
