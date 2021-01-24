@@ -11,13 +11,19 @@ Requires PHP: 5.6
 
 ![The Official AMP Plugin for WordPress](.wordpress-org/banner-1544x500.png)
 
-The Official AMP Plugin, supported by the AMP team. Formerly Accelerated Mobile Pages, AMP enables great experiences across both mobile and desktop.
+The official AMP Plugin, supported by the AMP team. Formerly Accelerated Mobile Pages, AMP enables great experiences across both mobile and desktop.
 
 [![Build Status](https://github.com/ampproject/amp-wp/workflows/Build,%20test%20&%20measure/badge.svg)](https://github.com/ampproject/amp-wp/actions?query=branch%3Adevelop+workflow%3A%22Build%2C+test+%26+measure%22) [![Coverage Status](https://img.shields.io/codecov/c/github/ampproject/amp-wp/develop.svg)](https://codecov.io/gh/ampproject/amp-wp) [![Built with Grunt](https://gruntjs.com/cdn/builtwith.svg)](http://gruntjs.com)
 
 ## Description
 
-This official plugin from the AMP project enables AMP content publishing with WordPress in a way that is fully and seamlessly integrated with the standard mechanisms of the platform. The key features are the following:
+This official plugin from the AMP project enables AMP content publishing with WordPress in a way that is fully and seamlessly integrated with the standard mechanisms of the platform.
+
+https://www.youtube.com/watch?v=s52JNMT59s8&list=PLXTOW_XMsIDRGRr5QDffrvND8Qh1RndFb
+
+For more videos like this, check out the ongoing [AMP for WordPress video series](https://www.youtube.com/playlist?list=PLXTOW_XMsIDRGRr5QDffrvND8Qh1RndFb).
+
+The key features are the following:
 
 1. **Automate the process of generating AMP-valid markup as much as possible**, letting users follow the standard workflows they are used to in WordPress.
 2. **Provide effective validation tools** to help users deal with AMP incompatibilities when they happen, including mechanisms for **identifying**, **contextualizing**, and **resolving issues caused by validation errors**.
@@ -35,10 +41,6 @@ This plugin can be used by both developers and non-developer users:
 - If you are not a developer or tech savvy user, or you just simply don't want to deal with validation issues and tackling development tasks, the AMP plugin allows you to assemble fully AMP-compatible sites with different configurations taking advantage of AMP-compatible components. The plugin helps you to deal with validation issues by removing invalid AMP markup in cases where it is possible, or altogether suppressing AMP-incompatible plugins on AMP pages.
 
 The bottom line is that regardless of your technical expertise, the AMP plugin can be useful to you.
-
-https://www.youtube.com/watch?v=BTbjxU3d918&list=PLXTOW_XMsIDRGRr5QDffrvND8Qh1RndFb&index=5
-
-For more videos like this, check out the ongoing [AMP for WordPress video series](https://www.youtube.com/playlist?list=PLXTOW_XMsIDRGRr5QDffrvND8Qh1RndFb).
 
 ### Template Modes
 
@@ -103,4 +105,3 @@ For the plugin’s changelog, please see [the Releases page on GitHub](https://g
 ## Upgrade Notice
 
 If you currently use older versions of the plugin in Reader mode, it is strongly encouraged to pick a Reader theme instead of using the legacy Reader templates. You may also want to switch to Standard mode or Transitional mode if you have AMP-compatible theme and plugins.
-
