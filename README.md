@@ -1,6 +1,6 @@
 # AMP
 
-Contributors: google, xwp, automattic, westonruter, albertomedina, schlessera, swissspidy, pierlo,   johnwatkins0, joshuawold, ryankienstra
+Contributors: google, xwp, automattic, westonruter, albertomedina, schlessera, swissspidy, pierlo, johnwatkins0, joshuawold, ryankienstra  
 Tags: amp, mobile, optimization, accelerated mobile pages, framework, components, blocks, performance,   ux, seo, official  
 Requires at least: 4.9  
 Tested up to: 5.6  
