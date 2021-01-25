@@ -1,2 +1,0 @@
-# This is used by wp-dev-lib/scripts/check-diff.sh but the functionality is no longer used, so it could be removed.
-DEFAULT_BASE_BRANCH=develop
