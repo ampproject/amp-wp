@@ -399,7 +399,7 @@ final class PairedRouting implements Service, Registerable {
 				continue;
 			}
 
-			$new_path = $this->get_paired_url_structure()->remove_endpoint( $old_path );
+			$new_path = $paired_url_structure->remove_endpoint( $old_path );
 
 			$this->suspended_environment_variables[ $var_name ] = [ $old_path, $new_path ];
 
