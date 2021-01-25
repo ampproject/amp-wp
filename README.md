@@ -13,7 +13,9 @@ Requires PHP: 5.6
 
 The official AMP Plugin, supported by the AMP team. Formerly Accelerated Mobile Pages, AMP enables great experiences across both mobile and desktop.
 
-[![Build Status](https://github.com/ampproject/amp-wp/workflows/Build,%20test%20&%20measure/badge.svg)](https://github.com/ampproject/amp-wp/actions?query=branch%3Adevelop+workflow%3A%22Build%2C+test+%26+measure%22) [![Coverage Status](https://img.shields.io/codecov/c/github/ampproject/amp-wp/develop.svg)](https://codecov.io/gh/ampproject/amp-wp) [![Built with Grunt](https://gruntjs.com/cdn/builtwith.svg)](http://gruntjs.com)
+[![Build Status](https://github.com/ampproject/amp-wp/workflows/Build,%20test%20&%20measure/badge.svg)](https://github.com/ampproject/amp-wp/actions?query=branch%3Adevelop+workflow%3A%22Build%2C+test+%26+measure%22)
+[![Coverage Status](https://img.shields.io/codecov/c/github/ampproject/amp-wp/develop.svg)](https://codecov.io/gh/ampproject/amp-wp)
+[![Built with Grunt](https://gruntjs.com/cdn/builtwith.svg)](http://gruntjs.com)
 
 ## Description
 
