@@ -8,8 +8,8 @@ A bash script, amphtml-update.sh, is provided to automatically run this script. 
 
 from within a Linux environment such as VVV.
 
-See the Updating Allowed Tags and Attributes section of the Contributing guide
-https://github.com/ampproject/amp-wp/blob/develop/contributing.md#updating-allowed-tags-and-attributes.
+See the Updating Allowed Tags and Attributes section of the Engineering Guidelines
+https://github.com/ampproject/amp-wp/wiki/Engineering-Guidelines#updating-allowed-tags-and-attributes.
 
 Then have fun sanitizing your AMP posts!
 """
