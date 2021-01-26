@@ -100,9 +100,10 @@ $readme_txt = preg_replace(
 );
 
 // Fix up the screenshots.
-$readme_txt = preg_replace_callback(
+$screenshots_captioned = 0;
+$readme_txt            = preg_replace_callback(
 	'/(?<=## Screenshots\n\n)(.+?)(?=## Changelog)/s',
-	static function ( $matches ) {
+	static function ( $matches ) use ( &$screenshots_captioned ) {
 		if ( ! preg_match_all( '/### (.+)/', $matches[0], $screenshot_matches ) ) {
 			fwrite( STDERR, "Unable to parse screenshot headings.\n" );
 			exit( __LINE__ );
@@ -111,6 +112,7 @@ $readme_txt = preg_replace_callback(
 		$screenshot_txt = '';
 		foreach ( $screenshot_matches[1] as $i => $screenshot_caption ) {
 			$screenshot_txt .= sprintf( "%d. %s\n", $i + 1, $screenshot_caption );
+			$screenshots_captioned++;
 		}
 		$screenshot_txt .= "\n";
 
@@ -123,6 +125,18 @@ $readme_txt = preg_replace_callback(
 if ( 0 === $replace_count ) {
 	fwrite( STDERR, "Unable to transform screenshots.\n" );
 	exit( __LINE__ );
+}
+
+$screenshot_files = glob( __DIR__ . '/../.wordpress-org/screenshot-*' );
+if ( count( $screenshot_files ) !== $screenshots_captioned ) {
+	fwrite( STDERR, "Number of screenshot files does not match number of screenshot captions.\n" );
+	exit( __LINE__ );
+}
+foreach ( $screenshot_files as $i => $screenshot_file ) {
+	if ( 0 !== strpos( basename( $screenshot_file ), sprintf( 'screenshot-%d.', $i + 1 ) ) ) {
+		fwrite( STDERR, "Screenshot filename is not sequential: $screenshot_file.\n" );
+		exit( __LINE__ );
+	}
 }
 
 // Convert markdown headings into WP readme headings for good measure.
@@ -156,4 +170,9 @@ if ( 0 === $replace_count ) {
 	exit( __LINE__ );
 }
 
-file_put_contents( __DIR__ . '/../readme.txt', $readme_txt );
+if ( ! file_put_contents( __DIR__ . '/../readme.txt', $readme_txt ) ) {
+	fwrite( STDERR, "Failed to write readme.txt.\n" );
+	exit( __LINE__ );
+}
+
+fwrite( STDOUT, "Validated README.md and generated readme.txt\n" );
