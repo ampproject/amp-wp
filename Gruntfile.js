@@ -10,7 +10,6 @@ module.exports = function( grunt ) {
 		'assets',
 		'back-compat',
 		'includes',
-		'README.md',
 		'src',
 		'templates',
 		'vendor',
@@ -70,6 +69,9 @@ module.exports = function( grunt ) {
 			options: {
 				stdout: true,
 				stderr: true,
+			},
+			transform_readme: {
+				command: 'php bin/transform-readme.php',
 			},
 			verify_matching_versions: {
 				command: 'php bin/verify-version-consistency.php',
@@ -146,6 +148,9 @@ module.exports = function( grunt ) {
 
 				return true;
 			} );
+
+			grunt.task.run( 'shell:transform_readme' );
+			paths.push( 'readme.txt' );
 
 			paths.push( 'composer.*' ); // Copy in order to be able to do run composer_install.
 			paths.push( 'assets/js/**/*.js' );
