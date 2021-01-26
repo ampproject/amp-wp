@@ -43,7 +43,7 @@ $readme_txt = preg_replace_callback(
 		foreach ( explode( "\n", $parts[2] ) as $meta ) {
 			$meta = trim( $meta );
 			if ( ! preg_match( '/^\*\*(?P<key>.+?):\*\* (?P<value>.+)/', $meta, $matches ) ) {
-				fwrite( STDERR, "Parse error on for meta line: $meta.\n" );
+				fwrite( STDERR, "Parse error for meta line: $meta.\n" );
 				exit( __LINE__ );
 			}
 
@@ -76,7 +76,7 @@ $readme_txt = preg_replace_callback(
 		];
 		foreach ( $expected_metadata as $key ) {
 			if ( empty( $metadata[ $key ] ) ) {
-				fwrite( STDERR, "Failed to parse metadata. Missign: $key\n" );
+				fwrite( STDERR, "Failed to parse metadata. Missing: $key\n" );
 				exit( __LINE__ );
 			}
 		}
