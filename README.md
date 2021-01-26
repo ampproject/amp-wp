@@ -1,17 +1,16 @@
-# AMP
+# AMP Plugin for WordPress
 
-Contributors: google, xwp, automattic, westonruter, albertomedina, schlessera, swissspidy, pierlo, johnwatkins0, joshuawold, ryankienstra  
-Tags: amp, mobile, optimization, accelerated mobile pages, framework, components, blocks, performance, ux, seo, official  
-Requires at least: 4.9  
-Tested up to: 5.6  
-Stable tag: 2.0.10  
-License: GPLv2 or later  
-License URI: http://www.gnu.org/licenses/gpl-2.0.html  
-Requires PHP: 5.6  
-
-![The Official AMP Plugin for WordPress](.wordpress-org/banner-1544x500.png)
+![Banner](.wordpress-org/banner-1544x500.png)
 
 The official AMP Plugin, supported by the AMP team. Formerly Accelerated Mobile Pages, AMP enables great experiences across both mobile and desktop.
+
+**Contributors:** [google](https://profiles.wordpress.org/google), [xwp](https://profiles.wordpress.org/xwp), [automattic](https://profiles.wordpress.org/automattic), [westonruter](https://profiles.wordpress.org/westonruter), [albertomedina](https://profiles.wordpress.org/albertomedina), [schlessera](https://profiles.wordpress.org/schlessera), [swissspidy](https://profiles.wordpress.org/swissspidy), [pierlo](https://profiles.wordpress.org/pierlo), [johnwatkins0](https://profiles.wordpress.org/johnwatkins0), [joshuawold](https://profiles.wordpress.org/joshuawold), [ryankienstra](https://profiles.wordpress.org/ryankienstra)  
+**Tags:** [amp](https://wordpress.org/plugins/tags/amp), [mobile](https://wordpress.org/plugins/tags/mobile), [optimization](https://wordpress.org/plugins/tags/optimization), [accelerated mobile pages](https://wordpress.org/plugins/tags/accelerated-mobile-pages), [framework](https://wordpress.org/plugins/tags/framework), [components](https://wordpress.org/plugins/tags/components), [blocks](https://wordpress.org/plugins/tags/blocks), [performance](https://wordpress.org/plugins/tags/performance), [ux](https://wordpress.org/plugins/tags/ux), [seo](https://wordpress.org/plugins/tags/seo), [official](https://wordpress.org/plugins/tags/official)  
+**Requires at least:** 4.9  
+**Tested up to:** 5.6  
+**Stable tag:** 2.0.10  
+**License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
+**Requires PHP:** 5.6
 
 [![Build Status](https://github.com/ampproject/amp-wp/workflows/Build,%20test%20&%20measure/badge.svg)](https://github.com/ampproject/amp-wp/actions?query=branch%3Adevelop+workflow%3A%22Build%2C+test+%26+measure%22)
 [![Coverage Status](https://img.shields.io/codecov/c/github/ampproject/amp-wp/develop.svg)](https://codecov.io/gh/ampproject/amp-wp)
@@ -21,11 +20,11 @@ The official AMP Plugin, supported by the AMP team. Formerly Accelerated Mobile 
 
 This official plugin from the AMP project enables AMP content publishing with WordPress in a way that is fully and seamlessly integrated with the standard mechanisms of the platform.
 
-https://www.youtube.com/watch?v=s52JNMT59s8&list=PLXTOW_XMsIDRGRr5QDffrvND8Qh1RndFb
+[![Play video on YouTube](https://i1.ytimg.com/vi/s52JNMT59s8/hqdefault.jpg)](https://www.youtube.com/watch?v=s52JNMT59s8&list=PLXTOW_XMsIDRGRr5QDffrvND8Qh1RndFb)
 
 For more videos like this, check out the ongoing [AMP for WordPress video series](https://www.youtube.com/playlist?list=PLXTOW_XMsIDRGRr5QDffrvND8Qh1RndFb).
 
-The key features are the following:
+The plugin's key features include:
 
 1. **Automate the process of generating AMP-valid markup as much as possible**, letting users follow the standard workflows they are used to in WordPress.
 2. **Provide effective validation tools** to help users deal with AMP incompatibilities when they happen, including mechanisms for **identifying**, **contextualizing**, and **resolving issues caused by validation errors**.
@@ -88,17 +87,29 @@ Please see the [FAQs on amp-wp.org](https://amp-wp.org/documentation/frequently-
 
 ## Screenshots
 
-1. New onboarding wizard to help you get started.<br>![New onboarding wizard to help you get started.](.wordpress-org/screenshot-1.png)
+### New onboarding wizard to help you get started.
 
-2. Built for developers and non-technical content creators alike.<br>![Built for developers and non-technical content creators alike.](.wordpress-org/screenshot-2.png)
+![New onboarding wizard to help you get started.](.wordpress-org/screenshot-1.png)
 
-3. Theme selection to enhance the Reader mode experience.<br>![Theme selection to enhance the Reader mode experience.](.wordpress-org/screenshot-3.png)
+### Built for developers and non-technical content creators alike.
 
-4. Preview how your site looks across desktop and mobile before finalising changes.<br>![Preview how your site looks across desktop and mobile before finalising changes.](.wordpress-org/screenshot-4.png)
+![Built for developers and non-technical content creators alike.](.wordpress-org/screenshot-2.png)
 
-5. Customize the design of AMP pages in the Customizer.<br>![Customize the design of AMP pages in the Customizer.](.wordpress-org/screenshot-5.png)
+### Theme selection to enhance the Reader mode experience.
 
-6. Reopen the onboarding wizard, change individual options, or manage advanced settings.<br>![Reopen the onboarding wizard, change individual options, or manage advanced settings.](.wordpress-org/screenshot-6.png)
+![Theme selection to enhance the Reader mode experience.](.wordpress-org/screenshot-3.png)
+
+### Preview how your site looks across desktop and mobile before finalising changes.
+
+![Preview how your site looks across desktop and mobile before finalising changes.](.wordpress-org/screenshot-4.png)
+
+### Customize the design of AMP pages in the Customizer.
+
+![Customize the design of AMP pages in the Customizer.](.wordpress-org/screenshot-5.png)
+
+### Reopen the onboarding wizard, change individual options, or manage advanced settings.
+
+![Reopen the onboarding wizard, change individual options, or manage advanced settings.](.wordpress-org/screenshot-6.png)
 
 ## Changelog
 
