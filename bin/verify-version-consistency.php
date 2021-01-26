@@ -15,7 +15,7 @@ if ( 'cli' !== php_sapi_name() ) {
 $versions = [];
 
 $readme_md = file_get_contents( dirname( __FILE__ ) . '/../README.md' );
-if ( ! preg_match( '/Stable tag:\s+(?P<version>\S+)/i', $readme_md, $matches ) ) {
+if ( ! preg_match( '/\*\*Stable tag:\*\*\s+(?P<version>\S+)/i', $readme_md, $matches ) ) {
 	echo "Could not find stable tag in readme\n";
 	exit( 1 );
 }
