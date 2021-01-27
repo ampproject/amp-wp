@@ -214,6 +214,12 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 				'/',
 				false,
 			],
+			'url_with_empty_query_var'              => [
+				AMP_Theme_Support::READER_MODE_SLUG,
+				Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
+				'/?foo=',
+				false,
+			],
 			'path_suffix_transitional_mode_amp'     => [
 				AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
 				Option::PAIRED_URL_STRUCTURE_PATH_SUFFIX,
@@ -370,6 +376,10 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$_SERVER['REQUEST_URI'] = $this->instance->add_endpoint( '/' );
 		$this->instance->detect_endpoint_in_environment();
 		$this->assertTrue( $this->get_private_property( $this->instance, 'did_request_endpoint' ) );
+
+		$_SERVER['REQUEST_URI'] = '/?foo=';
+		$this->instance->detect_endpoint_in_environment();
+		$this->assertFalse( $this->get_private_property( $this->instance, 'did_request_endpoint' ) );
 	}
 
 	/** @return array */

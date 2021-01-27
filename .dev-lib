@@ -1,5 +1,0 @@
-# Variables needed to generate readme
-
-README_MD_TITLE="AMP Plugin for WordPress"
-ASSETS_DIR=wp-assets
-DEFAULT_BASE_BRANCH=develop
