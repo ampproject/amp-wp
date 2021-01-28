@@ -57,6 +57,7 @@ module.exports = function( grunt ) {
 					'!assets/js/amp-service-worker-runtime-precaching.js',
 					'assets/js/**/*.asset.php',
 					'assets/css/*.css',
+					'assets/css/*.css.map',
 				],
 			},
 			build: {
@@ -159,6 +160,7 @@ module.exports = function( grunt ) {
 
 			if ( 'development' === process.env.NODE_ENV ) {
 				paths.push( 'assets/js/**/*.js.map' );
+				paths.push( 'assets/css/*.css.map' );
 			}
 
 			grunt.config.set( 'copy', {
