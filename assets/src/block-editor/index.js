@@ -11,7 +11,7 @@ import { select } from '@wordpress/data';
  */
 import { withFeaturedImageNotice } from '../common/components';
 import { getMinimumFeaturedImageDimensions } from '../common/helpers';
-import { withMediaLibraryNotice, withDeprecationNotice } from './components';
+import { withMediaLibraryNotice } from './components';
 import { addAMPAttributes, filterBlocksEdit, removeAmpFitTextFromBlocks, removeClassFromAmpFitTextBlocks } from './helpers';
 import './store';
 
@@ -48,7 +48,6 @@ blocks.keys().forEach( ( modulePath ) => {
 	const shouldRegister = isStandardMode() && ampBlocksInUse.includes( name );
 
 	if ( shouldRegister ) {
-		settings.edit = withDeprecationNotice( settings.edit );
 		registerBlockType( name, settings );
 	}
 } );
