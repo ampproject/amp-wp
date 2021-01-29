@@ -261,7 +261,7 @@ class AMP_Post_Meta_Box {
 			'isStandardMode'             => $is_standard_mode,
 			'featuredImageMinimumWidth'  => $featured_image_minimum_width,
 			'featuredImageMinimumHeight' => $featured_image_minimum_height,
-			'ampBlocksInUse'             => $this->get_amp_blocks_in_use(),
+			'ampBlocksInUse'             => $is_standard_mode ? [] : $this->get_amp_blocks_in_use(),
 		];
 
 		wp_add_inline_script(
@@ -587,16 +587,10 @@ class AMP_Post_Meta_Box {
 	 *
 	 * @return string[]
 	 */
-	protected function get_amp_blocks_in_use() {
-		static $amp_blocks_in_use = [];
-
-		if ( $amp_blocks_in_use ) {
-			return $amp_blocks_in_use;
-		}
-
+	public function get_amp_blocks_in_use() {
 		// Normalize the AMP block names to include the `amp/` namespace.
 		$amp_blocks        = substr_replace( AMP_Editor_Blocks::AMP_BLOCKS, 'amp/', 0, 0 );
-		$amp_blocks_in_use = amp_is_canonical() ? array_filter( $amp_blocks, 'has_block' ) : [];
+		$amp_blocks_in_use = array_filter( $amp_blocks, 'has_block' );
 
 		return array_values( $amp_blocks_in_use );
 	}

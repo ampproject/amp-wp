@@ -510,4 +510,26 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 
 		$this->assertEquals( AMP_Post_Meta_Box::DISABLED_STATUS, get_post_meta( $post->ID, AMP_Post_Meta_Box::STATUS_POST_META_KEY, true ) );
 	}
+
+	/** @covers ::get_amp_blocks_in_use() */
+	public function test_get_amp_blocks_in_use() {
+		global $post;
+
+		$post = self::factory()->post->create_and_get(
+			[
+				'post_content' => '
+					<!-- wp:amp/amp-mathml -->
+					<amp-mathml data-formula="$$ \cos(θ+φ)=\cos(θ)\cos(φ)−\sin(θ)\sin(φ) $$" layout="container" class="wp-block-amp-amp-mathml"></amp-mathml>
+					<!-- /wp:amp/amp-mathml -->
+
+					<!-- wp:amp/amp-timeago -->
+					<amp-timeago layout="fixed-height" class="wp-block-amp-amp-timeago alignnone" datetime="2020-11-02T15:43:00+00:00" locale="en" height="20">Monday 2 November 15:43</amp-timeago>
+					<!-- /wp:amp/amp-timeago -->
+				',
+			]
+		);
+
+		$result = $this->instance->get_amp_blocks_in_use();
+		$this->assertEquals( [ 'amp/amp-mathml', 'amp/amp-timeago' ], $result );
+	}
 }
