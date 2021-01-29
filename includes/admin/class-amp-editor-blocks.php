@@ -23,9 +23,9 @@ class AMP_Editor_Blocks {
 	/**
 	 * AMP components that have blocks.
 	 *
-	 * @var array
+	 * @var string[]
 	 */
-	public $amp_blocks = [
+	const AMP_BLOCKS = [
 		'amp-mathml',
 		'amp-timeago',
 		'amp-o2-player',
@@ -88,7 +88,7 @@ class AMP_Editor_Blocks {
 
 		unset( $tag );
 
-		foreach ( $this->amp_blocks as $amp_block ) {
+		foreach ( self::AMP_BLOCKS as $amp_block ) {
 			if ( ! isset( $tags[ $amp_block ] ) ) {
 				$tags[ $amp_block ] = [];
 			}
@@ -130,7 +130,7 @@ class AMP_Editor_Blocks {
 	 */
 	public function tally_content_requiring_amp_scripts( $content ) {
 		if ( ! amp_is_request() ) {
-			$pattern = sprintf( '/<(%s)\b.*?>/s', implode( '|', $this->amp_blocks ) );
+			$pattern = sprintf( '/<(%s)\b.*?>/s', implode( '|', self::AMP_BLOCKS ) );
 			if ( preg_match_all( $pattern, $content, $matches ) ) {
 				$this->content_required_amp_scripts = array_merge(
 					$this->content_required_amp_scripts,

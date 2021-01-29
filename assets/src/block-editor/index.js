@@ -12,12 +12,11 @@ import { select } from '@wordpress/data';
 import { withFeaturedImageNotice } from '../common/components';
 import { getMinimumFeaturedImageDimensions } from '../common/helpers';
 import { withMediaLibraryNotice, withDeprecationNotice } from './components';
-import { addAMPAttributes, filterBlocksEdit, removeAmpFitTextFromBlocks, removeClassFromAmpFitTextBlocks, filterBlocksSave } from './helpers';
+import { addAMPAttributes, filterBlocksEdit, removeAmpFitTextFromBlocks, removeClassFromAmpFitTextBlocks } from './helpers';
 import './store';
 
 const {
 	isStandardMode,
-	getAmpBlocks,
 	getAmpBlocksInUse,
 } = select( 'amp/block-editor' );
 
@@ -40,20 +39,13 @@ addFilter( 'editor.BlockEdit', 'ampEditorBlocks/filterEdit', filterBlocksEdit, 2
 addFilter( 'editor.PostFeaturedImage', 'ampEditorBlocks/withFeaturedImageNotice', withFeaturedImageNotice );
 addFilter( 'editor.MediaUpload', 'ampEditorBlocks/withMediaLibraryNotice', ( InitialMediaUpload ) => withMediaLibraryNotice( InitialMediaUpload, getMinimumFeaturedImageDimensions() ) );
 
-const ampBlocks = getAmpBlocks();
 const ampBlocksInUse = getAmpBlocksInUse();
-
 const blocks = require.context( './blocks', true, /(?<!test\/)index\.js$/ );
 
 blocks.keys().forEach( ( modulePath ) => {
 	const { name, settings } = blocks( modulePath );
 
-	// Hide AMP dependent blocks that are not currently in use.
-	if ( ! ampBlocksInUse.includes( name ) ) {
-		return;
-	}
-
-	const shouldRegister = isStandardMode() && ampBlocks.includes( name );
+	const shouldRegister = isStandardMode() && ampBlocksInUse.includes( name );
 
 	if ( shouldRegister ) {
 		settings.edit = withDeprecationNotice( settings.edit );
