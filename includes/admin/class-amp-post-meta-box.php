@@ -261,7 +261,7 @@ class AMP_Post_Meta_Box {
 			'isStandardMode'             => $is_standard_mode,
 			'featuredImageMinimumWidth'  => $featured_image_minimum_width,
 			'featuredImageMinimumHeight' => $featured_image_minimum_height,
-			'ampBlocksInUse'             => $is_standard_mode ? [] : $this->get_amp_blocks_in_use(),
+			'ampBlocksInUse'             => $is_standard_mode ? $this->get_amp_blocks_in_use() : [],
 		];
 
 		wp_add_inline_script(
