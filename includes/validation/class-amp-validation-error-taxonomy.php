@@ -1599,37 +1599,40 @@ class AMP_Validation_Error_Taxonomy {
 	/**
 	 * Returns JSON-formatted error details for an error term.
 	 *
-	 * @param WP_Term $term The term.
+	 * @param int $validation_error_index Index of the validation error row being rendered.
 	 * @return string Encoded JSON.
 	 */
-	public static function get_error_details_json( $term ) {
-		$json = json_decode( $term->description, true );
-
+	public static function get_error_details_json( $validation_error_index ) {
 		$post = get_post();
-		if ( $post instanceof WP_Post && AMP_Validated_URL_Post_Type::POST_TYPE_SLUG === $post->post_type ) {
-			$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $post );
-			foreach ( $validation_errors as $error ) {
-				if ( isset( $error['data']['sources'], $error['term']->term_id ) && $error['term']->term_id === $term->term_id ) {
-					$json['sources'] = $error['data']['sources'];
-					break;
-				}
-			}
+
+		if ( ! $post instanceof WP_Post || AMP_Validated_URL_Post_Type::POST_TYPE_SLUG !== $post->post_type ) {
+			return wp_json_encode( [] );
 		}
+
+		$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $post );
+
+		if ( ! isset( $validation_errors[ $validation_error_index ] ) ) {
+			return wp_json_encode( [] );
+		}
+
+		$validation_error = $validation_errors[ $validation_error_index ];
+		$validation_data  = $validation_error['data'];
 
 		// Convert the numeric constant value of the node_type to its constant name.
 		$xml_reader_reflection_class = new ReflectionClass( 'XMLReader' );
 		$constants                   = $xml_reader_reflection_class->getConstants();
 		foreach ( $constants as $key => $value ) {
-			if ( $json['node_type'] === $value ) {
-				$json['node_type'] = $key;
+			if ( $validation_data['node_type'] === $value ) {
+				$validation_data['node_type'] = $key;
 				break;
 			}
 		}
 
-		$json['removed']  = (bool) ( (int) $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
-		$json['reviewed'] = (bool) ( (int) $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
+		$term                        = $validation_error['term'];
+		$validation_data['removed']  = (bool) ( (int) $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
+		$validation_data['reviewed'] = (bool) ( (int) $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
 
-		return wp_json_encode( $json );
+		return wp_json_encode( $validation_data );
 	}
 
 	/**
@@ -1641,6 +1644,8 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	public static function filter_tag_row_actions( $actions, WP_Term $tag ) {
 		global $pagenow;
+
+		static $row_index = 0;
 
 		$term_id = $tag->term_id;
 		$term    = get_term( $term_id ); // We don't want filter=display given by $tag.
@@ -1663,7 +1668,7 @@ class AMP_Validation_Error_Taxonomy {
 
 			$actions['copy'] = sprintf(
 				'<button type="button" class="single-url-detail-copy button-link" data-error-json="%s">%s</button>',
-				esc_attr( self::get_error_details_json( $term ) ),
+				esc_attr( self::get_error_details_json( $row_index ) ),
 				esc_html__( 'Copy to clipboard', 'amp' )
 			);
 		} elseif ( 'edit-tags.php' === $pagenow ) {
@@ -1694,6 +1699,8 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		$actions = wp_array_slice_assoc( $actions, [ 'details', 'delete', 'copy' ] );
+
+		$row_index++;
 
 		return $actions;
 	}

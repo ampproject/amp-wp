@@ -1542,17 +1542,9 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 			],
 		];
 
-		$term = new WP_Term(
-			(object) [
-				'description' => wp_json_encode( $error ),
-				'term_group'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
-			]
-		);
-
 		$GLOBALS['post'] = AMP_Validated_URL_Post_Type::store_validation_errors( [ $error ], home_url( '/' ) );
 
-		$result = json_decode( AMP_Validation_Error_Taxonomy::get_error_details_json( $term ), true );
-		unset( $GLOBALS['post'] );
+		$result = json_decode( AMP_Validation_Error_Taxonomy::get_error_details_json( 0 ), true );
 
 		// Verify the name of the node type is used instead of its ID.
 		$this->assertEquals( 'ELEMENT', $result['node_type'] );
@@ -1564,22 +1556,21 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		// Verify the other contents of the stored validation error (including sources) are retrieved.
 		$this->assertEquals( $error, $result );
 
-		$term   = new WP_Term(
-			(object) [
-				'description' => wp_json_encode(
-					[
-						'node_type' => XML_ATTRIBUTE_NODE,
-					]
-				),
-				'term_group'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
-			]
-		);
-		$result = json_decode( AMP_Validation_Error_Taxonomy::get_error_details_json( $term ), true );
+		$error = [
+			'node_type' => XML_ATTRIBUTE_NODE,
+		];
+
+		add_filter( 'amp_validation_error_sanitized', '__return_false' );
+		$GLOBALS['post'] = AMP_Validated_URL_Post_Type::store_validation_errors( [ $error ], home_url( '/' ) );
+
+		$result = json_decode( AMP_Validation_Error_Taxonomy::get_error_details_json( 0 ), true );
 
 		// Verify the name of the node type is used instead of its ID.
 		$this->assertEquals( 'ATTRIBUTE', $result['node_type'] );
 		// Verify the status of the error is correctly set.
 		$this->assertEquals( false, $result['removed'] );
 		$this->assertEquals( true, $result['reviewed'] );
+
+		unset( $GLOBALS['post'] );
 	}
 }
