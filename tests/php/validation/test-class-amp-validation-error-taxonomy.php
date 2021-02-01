@@ -1549,10 +1549,10 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 			]
 		);
 
-		$_GET['post'] = AMP_Validated_URL_Post_Type::store_validation_errors( [ $error ], home_url( '/' ) );
+		$GLOBALS['post'] = AMP_Validated_URL_Post_Type::store_validation_errors( [ $error ], home_url( '/' ) );
 
 		$result = json_decode( AMP_Validation_Error_Taxonomy::get_error_details_json( $term ), true );
-		unset( $_GET['post'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		unset( $GLOBALS['post'] );
 
 		// Verify the name of the node type is used instead of its ID.
 		$this->assertEquals( 'ELEMENT', $result['node_type'] );

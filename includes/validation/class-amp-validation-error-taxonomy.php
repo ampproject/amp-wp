@@ -1605,8 +1605,9 @@ class AMP_Validation_Error_Taxonomy {
 	public static function get_error_details_json( $term ) {
 		$json = json_decode( $term->description, true );
 
-		if ( isset( $_GET['post'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( (int) $_GET['post'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+		$post = get_post();
+		if ( $post instanceof WP_Post && AMP_Validated_URL_Post_Type::POST_TYPE_SLUG === $post->post_type ) {
+			$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $post );
 			foreach ( $validation_errors as $error ) {
 				if ( isset( $error['data']['sources'], $error['term']->term_id ) && $error['term']->term_id === $term->term_id ) {
 					$json['sources'] = $error['data']['sources'];
