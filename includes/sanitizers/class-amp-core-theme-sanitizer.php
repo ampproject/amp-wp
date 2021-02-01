@@ -6,7 +6,9 @@
  * @since 1.0
  */
 
-use Amp\AmpWP\Dom\Document;
+use AmpProject\Attribute;
+use AmpProject\Dom\Document;
+use AmpProject\Role;
 
 /**
  * Class AMP_Core_Theme_Sanitizer
@@ -15,6 +17,7 @@ use Amp\AmpWP\Dom\Document;
  *
  * @see AMP_Validation_Error_Taxonomy::accept_core_theme_validation_errors()
  * @since 1.0
+ * @internal
  */
 class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
@@ -36,6 +39,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected static $supported_themes = [
+		'twentytwentyone',
 		'twentytwenty',
 		'twentynineteen',
 		'twentyseventeen',
@@ -49,6 +53,23 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	];
 
 	/**
+	 * Known modal roles.
+	 *
+	 * @var array
+	 */
+	protected static $modal_roles = [
+		Role::NAVIGATION,
+		Role::MENU,
+		Role::SEARCH,
+		Role::ALERT,
+		Role::FIGURE,
+		Role::FORM,
+		Role::IMG,
+		Role::TOOLBAR,
+		Role::TOOLTIP,
+	];
+
+	/**
 	 * Retrieve the config for features needed by a theme.
 	 *
 	 * @since 1.0
@@ -59,9 +80,47 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected static function get_theme_features_config( $theme_slug ) {
 		switch ( $theme_slug ) {
+			case 'twentytwentyone':
+				$config = [
+					'dequeue_scripts'                  => [
+						'twenty-twenty-one-responsive-embeds-script',
+						'twenty-twenty-one-primary-navigation-script',
+					],
+					'remove_actions'                   => [
+						'wp_print_footer_scripts' => [
+							'twenty_twenty_one_skip_link_focus_fix', // Unnecessary since part of the AMP runtime.
+						],
+						'wp_footer'               => [
+							'twentytwentyone_add_ie_class',
+							'twenty_twenty_one_supports_js', // AMP is essentially no-js, with any interactivity added explicitly via amp-bind.
+						],
+					],
+					'amend_twentytwentyone_styles'     => [],
+					'amend_twentytwentyone_sub_menu_toggles' => [],
+					'add_twentytwentyone_mobile_modal' => [],
+					'add_twentytwentyone_sub_menu_fix' => [],
+				];
+
+				// Dark mode button toggle is only supported in the Customizer for now.
+				// A notice is added to the Customizer control in AMP_Template_Customizer::add_dark_mode_toggler_button_notice() via AMP_Template_Customizer::init().
+				if ( is_customize_preview() ) {
+					// Make dark mode toggle AMP compatible.
+					$config['add_twentytwentyone_dark_mode_toggle'] = [];
+				} else {
+					// Amend the dark mode stylesheet to only apply its rules when the user's system supports dark mode.
+					$config['amend_twentytwentyone_dark_mode_styles'] = [];
+					// Prevent the dark mode toggle and its accompanying script from being inlined.
+					$config['remove_actions']['wp_footer'][] = [ 'Twenty_Twenty_One_Dark_Mode', 'the_switch', 10 ];
+				}
+
+				return $config;
+
 			// Twenty Twenty.
 			case 'twentytwenty':
 				$config = [
+					'prevent_sanitize_in_customizer_preview' => [
+						'//style[ @id = "twentytwenty-style-inline-css" ]',
+					],
 					'dequeue_scripts'                  => [
 						'twentytwenty-js',
 					],
@@ -77,6 +136,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					'add_twentytwenty_toggles'         => [],
 					'add_nav_menu_styles'              => [],
 					'add_twentytwenty_masthead_styles' => [],
+					'add_img_display_block_fix'        => [],
+					'add_twentytwenty_custom_logo_fix' => [],
 					'add_twentytwenty_current_page_awareness' => [],
 				];
 
@@ -110,6 +171,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			// Twenty Seventeen.
 			case 'twentyseventeen':
 				return [
+					'prevent_sanitize_in_customizer_preview' => [
+						'//link[ @id = "twentyseventeen-colors-dark-css" ]',
+					],
 					// @todo Try to implement belowEntryMetaClass().
 					'dequeue_scripts'                     => [
 						'twentyseventeen-html5', // Only relevant for IE<9.
@@ -220,7 +284,14 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 			// Twenty Eleven.
 			case 'twentyeleven':
-				// Twenty Ten.
+				return [
+					'prevent_sanitize_in_customizer_preview' => [
+						'//style[ @id = "twentyeleven-header-css" ]',
+						'//link[ @id = "dark-css" ]',
+					],
+				];
+
+			// Twenty Ten.
 			case 'twentyten':
 				return [];
 
@@ -244,23 +315,12 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * Get the acceptable validation errors.
 	 *
 	 * @since 1.0
+	 * @deprecated Now unused because viewport CSS at-rules are extracted from stylesheets into meta[name=viewport] tags.
 	 *
-	 * @param string $template Template.
 	 * @return array Acceptable errors.
 	 */
-	public static function get_acceptable_errors( $template ) {
-		if ( in_array( $template, self::$supported_themes, true ) ) {
-			return [
-				AMP_Style_Sanitizer::CSS_SYNTAX_INVALID_AT_RULE => [
-					[
-						'at_rule' => 'viewport',
-					],
-					[
-						'at_rule' => '-ms-viewport',
-					],
-				],
-			];
-		}
+	public static function get_acceptable_errors() {
+		_deprecated_function( __METHOD__, '1.5' );
 		return [];
 	}
 
@@ -274,12 +334,12 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.1
 	 */
 	public static function extend_theme_support() {
-		$args = self::get_theme_support_args( get_template() );
-
-		if ( empty( $args ) ) {
+		$template = get_template();
+		if ( ! in_array( $template, self::get_supported_themes(), true ) ) {
 			return;
 		}
 
+		$args    = self::get_theme_support_args( $template );
 		$support = AMP_Theme_Support::get_theme_support_args();
 		if ( ! is_array( $support ) ) {
 			$support = [];
@@ -401,6 +461,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * Get theme config.
 	 *
 	 * @since 1.0
+	 * @codeCoverageIgnore
 	 * @deprecated 1.1
 	 *
 	 * @param string $theme Theme slug.
@@ -547,6 +608,28 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Adds the data-ampdevmode attribute to the set of specified elements to prevent further sanitization. This is
+	 * necessary as certain features in the Customizer require these elements to be present in their unaltered state.
+	 *
+	 * @param array $xpaths List of XPaths.
+	 */
+	public function prevent_sanitize_in_customizer_preview( $xpaths = [] ) {
+		if ( ! is_customize_preview() ) {
+			return;
+		}
+
+		// We can't use the `amp_dev_mode_element_xpaths` filter here as AMP_Dev_Mode_Sanitizer has already been
+		// executed.
+		foreach ( $xpaths as $xpath ) {
+			foreach ( $this->dom->xpath->query( $xpath ) as $node ) {
+				if ( $node instanceof DOMElement ) {
+					$node->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
+				}
+			}
+		}
+	}
+
+	/**
 	 * Dequeue scripts.
 	 *
 	 * @since 1.0
@@ -573,11 +656,41 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param array $actions Actions, with action name as key and value being callback.
 	 */
 	public static function remove_actions( $actions = [] ) {
+		global $wp_filter;
+
 		foreach ( $actions as $action => $callbacks ) {
 			foreach ( $callbacks as $callback ) {
 				$priority = has_action( $action, $callback );
 				if ( false !== $priority ) {
 					remove_action( $action, $callback, $priority );
+					continue;
+				}
+
+				if ( ! is_array( $callback ) || 3 !== count( $callback ) ) {
+					continue;
+				}
+
+				list( $class, $method, $priority ) = $callback;
+
+				if ( isset( $wp_filter[ $action ]->callbacks[ $priority ] ) ) {
+					foreach ( $wp_filter[ $action ]->callbacks[ $priority ] as $added_callback ) {
+						if (
+							is_array( $added_callback['function'] )
+							&&
+							isset( $added_callback['function'][0], $added_callback['function'][1] )
+							&&
+							is_object( $added_callback['function'][0] )
+							&&
+							is_string( $added_callback['function'][1] )
+							&&
+							$method === $added_callback['function'][1]
+							&&
+							get_class( $added_callback['function'][0] ) === $class
+						) {
+							remove_action( $action, $added_callback['function'] );
+							return;
+						}
+					}
 				}
 			}
 		}
@@ -593,13 +706,13 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	public function add_smooth_scrolling( $link_xpaths ) {
 		foreach ( $link_xpaths as $link_xpath ) {
 			foreach ( $this->dom->xpath->query( $link_xpath ) as $link ) {
-				if ( $link instanceof DOMElement && preg_match( '/#(.+)/', $link->getAttribute( 'href' ), $matches ) ) {
-					$link->setAttribute( 'on', sprintf( 'tap:%s.scrollTo(duration=600)', $matches[1] ) );
+				if ( $link instanceof DOMElement && preg_match( '/#(.+)/', $link->getAttribute( Attribute::HREF ), $matches ) ) {
+					$link->setAttribute( Attribute::ON, sprintf( 'tap:%s.scrollTo(duration=600)', $matches[1] ) );
 
 					// Prevent browser from jumping immediately to the link target.
-					$link->removeAttribute( 'href' );
-					$link->setAttribute( 'tabindex', '0' );
-					$link->setAttribute( 'role', 'button' );
+					$link->removeAttribute( Attribute::HREF );
+					$link->setAttribute( Attribute::TABINDEX, '0' );
+					$link->setAttribute( Attribute::ROLE, Role::BUTTON );
 				}
 			}
 		}
@@ -709,6 +822,85 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				wp_add_inline_style( get_template() . '-style', $styles );
 			},
 			11
+		);
+	}
+
+	/**
+	 * Fix display of Custom Logo in Twenty Twenty.
+	 *
+	 * This is required because width:auto on the site-logo amp-img does not preserve the proportional width in the same
+	 * way as the same styles applied to an img.
+	 *
+	 * @since 1.5
+	 * @link https://github.com/ampproject/amp-wp/issues/4418
+	 * @link https://codepen.io/westonruter/pen/rNVqadv
+	 */
+	public static function add_twentytwenty_custom_logo_fix() {
+		$method = __METHOD__;
+		add_filter(
+			'get_custom_logo',
+			static function( $html ) use ( $method ) {
+				// Pattern sourced from AMP_Base_Embed_Handler::match_element_attributes().
+				$pattern = sprintf(
+					'/<img%s/',
+					implode(
+						'',
+						array_map(
+							function ( $attr_name ) {
+								return sprintf( '(?=[^>]*?%1$s="(?P<%1$s>\d+)")?', preg_quote( $attr_name, '/' ) );
+							},
+							[ 'width', 'height' ]
+						)
+					)
+				);
+				if ( preg_match( $pattern, $html, $matches ) && isset( $matches['width'] ) && isset( $matches['height'] ) ) {
+					$width  = (int) $matches['width'];
+					$height = (int) $matches['height'];
+
+					$desktop_height = 9; // in rem; see <https://github.com/WordPress/wordpress-develop/blob/ad8d01a7e9e13144d1676b8e6d70c3e81ef703af/src/wp-content/themes/twentytwenty/style.css#L4887>.
+					$mobile_height  = 6; // in rem; see <https://github.com/WordPress/wordpress-develop/blob/ad8d01a7e9e13144d1676b8e6d70c3e81ef703af/src/wp-content/themes/twentytwenty/style.css#L1424>.
+
+					$desktop_width = $desktop_height * ( $width / $height );
+					$mobile_width  = $mobile_height * ( $width / $height );
+
+					$html .= sprintf(
+						'<style data-src="%s">.site-logo amp-img { width: %frem; } @media (min-width: 700px) { .site-logo amp-img { width: %frem; } }</style>',
+						esc_attr( $method ),
+						$mobile_width,
+						$desktop_width
+					);
+
+				}
+				return $html;
+			},
+			PHP_INT_MAX
+		);
+	}
+
+	/**
+	 * Add style rule with a selector of higher specificity than just `img` to make `amp-img` have `display:block` rather than `display:inline-block`.
+	 *
+	 * This is needed to override the AMP core stylesheet which has a more specific selector `.i-amphtml-layout-intrinsic` which
+	 * is given a `display: inline-block`; this display value prevents margins from collapsing with surrounding block elements,
+	 * resulting in larger margins in AMP than expected.
+	 *
+	 * @since 1.5
+	 * @link https://github.com/ampproject/amp-wp/issues/4419
+	 */
+	public static function add_img_display_block_fix() {
+		$method = __METHOD__;
+		// Note that wp_add_inline_style() is not used because this stylesheet needs to be added _before_ style.css so
+		// that any subsequent style rules for images will continue to override.
+		add_action(
+			'wp_print_styles',
+			static function() use ( $method ) {
+				printf(
+					'<style data-src="%s">%s</style>',
+					esc_attr( $method ),
+					// The selector is targeting an attribute that can never appear. It is purely present to increase specificity.
+					'amp-img:not([_]) { display: block }'
+				);
+			}
 		);
 	}
 
@@ -914,28 +1106,40 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function add_twentyseventeen_sticky_nav_menu() {
 		/**
-		 * Elements.
+		 * Top navigation element.
 		 *
-		 * @var DOMElement $link
-		 * @var DOMElement $element
 		 * @var DOMElement $navigation_top
-		 * @var DOMElement $navigation_top_fixed
 		 */
 		$navigation_top = $this->dom->xpath->query( '//header[ @id = "masthead" ]//div[ contains( @class, "navigation-top" ) ]' )->item( 0 );
 		if ( ! $navigation_top ) {
 			return;
 		}
 
+		/**
+		 * Cloned top navigation element to put in fixed position.
+		 *
+		 * @var DOMElement $navigation_top_fixed
+		 */
 		$navigation_top_fixed = $navigation_top->cloneNode( true );
 		$navigation_top_fixed->setAttribute( 'class', $navigation_top_fixed->getAttribute( 'class' ) . ' site-navigation-fixed' );
 
 		$navigation_top_fixed->setAttribute( 'aria-hidden', 'true' );
 		foreach ( $navigation_top_fixed->getElementsByTagName( 'a' ) as $link ) {
-			$link->setAttribute( 'tabindex', '-1' );
+			/**
+			 * Navigation link to add a tab index to.
+			 *
+			 * @var DOMElement $link
+			 */
+			$link->setAttribute( Attribute::TABINDEX, '-1' );
 		}
 
 		$navigation_top->parentNode->insertBefore( $navigation_top_fixed, $navigation_top->nextSibling );
 		foreach ( $this->dom->xpath->query( './/*[ @id ]', $navigation_top_fixed ) as $element ) {
+			/**
+			 * Navigation element in the fixed navigation bar.
+			 *
+			 * @var DOMElement $element
+			 */
 			$element->setAttribute( 'id', $element->getAttribute( 'id' ) . '-fixed' );
 		}
 
@@ -1058,7 +1262,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						}
 					}
 
-				}
 				<?php elseif ( 'twentyseventeen' === get_template() ) : ?>
 					/* Show the button*/
 					.no-js .menu-toggle {
@@ -1452,8 +1655,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				$a->setAttribute( 'class', 'slider-active' );
 			}
 			$a->setAttribute( Document::AMP_BIND_DATA_ATTR_PREFIX . 'class', "$selected_slide_state_id == $i ? 'slider-active' : ''" );
-			$a->setAttribute( 'role', 'button' );
-			$a->setAttribute( 'on', "tap:AMP.setState( { $selected_slide_state_id: $i } )" );
+			$a->setAttribute( Attribute::ROLE, Role::BUTTON );
+			$a->setAttribute( Attribute::ON, "tap:AMP.setState( { $selected_slide_state_id: $i } )" );
 			$li->setAttribute( 'option', (string) $i );
 			$a->appendChild( $this->dom->createTextNode( $i + 1 ) );
 			$li->appendChild( $a );
@@ -1472,7 +1675,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$search_toggle_div  = $this->dom->xpath->query( '//div[ contains( @class, "search-toggle" ) ]' )->item( 0 );
 		$search_toggle_link = $this->dom->xpath->query( './a', $search_toggle_div )->item( 0 );
 		$search_container   = $this->dom->getElementById( 'search-container' );
-		if ( ! $search_toggle_div || ! $search_toggle_link || ! $search_container ) {
+		if (
+			! $search_toggle_div instanceof DOMElement
+			|| ! $search_toggle_link instanceof DOMElement
+			|| ! $search_container instanceof DOMElement
+		) {
 			return;
 		}
 
@@ -1492,13 +1699,13 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$search_input_el = $this->dom->xpath->query( './/input[ @name = "s" ]', $search_container )->item( 0 );
 		$search_toggle_link->removeAttribute( 'href' );
 		$on = "tap:AMP.setState( { $hidden_state_id: ! $hidden_state_id } )";
-		if ( $search_input_el ) {
+		if ( $search_input_el instanceof DOMElement ) {
 			$search_input_el->setAttribute( 'id', $search_input_id );
 			$on .= ",$search_input_id.focus()";
 		}
-		$search_toggle_link->setAttribute( 'on', $on );
-		$search_toggle_link->setAttribute( 'tabindex', '0' );
-		$search_toggle_link->setAttribute( 'role', 'button' );
+		$search_toggle_link->setAttribute( Attribute::ON, $on );
+		$search_toggle_link->setAttribute( Attribute::TABINDEX, '0' );
+		$search_toggle_link->setAttribute( Attribute::ROLE, Role::BUTTON );
 
 		// Set visibility and aria-expanded based of the link based on whether the search bar is expanded.
 		$search_toggle_link->setAttribute( 'aria-expanded', wp_json_encode( $hidden ) );
@@ -1533,7 +1740,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$body_id = AMP_DOM_Utils::get_element_id( $this->dom->body, 'body' );
+		$body_id = $this->dom->getElementId( $this->dom->body, 'body' );
 
 		$open_xpaths  = isset( $args['open_button_xpath'] ) ? $args['open_button_xpath'] : [];
 		$close_xpaths = isset( $args['close_button_xpath'] ) ? $args['close_button_xpath'] : [];
@@ -1580,9 +1787,14 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 		$amp_lightbox_inner_content = $this->dom->xpath->query( ".//*[ @class and contains( concat( ' ', normalize-space( @class ), ' ' ), ' modal-inner ' ) ]", $modal_content_node )->item( 0 );
 		foreach ( [ $amp_lightbox, $amp_lightbox_inner_content ] as $event_element ) {
-			$event_element->setAttribute( 'role', $this->guess_modal_role( $modal_content_node ) );
+			/**
+			 * Event element to add accessibility attributes to.
+			 *
+			 * @var DOMElement $event_element
+			 */
+			$event_element->setAttribute( Attribute::ROLE, $this->guess_modal_role( $modal_content_node ) );
 			// Setting tabindex to -1 (not reachable) as keyboard focus is handled through toggles.
-			$event_element->setAttribute( 'tabindex', -1 );
+			$event_element->setAttribute( Attribute::TABINDEX, -1 );
 		}
 
 		$parent_node = $modal_content_node->parentNode;
@@ -1646,7 +1858,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				/**
 				 * Toggle element to transform.
 				 *
-				 * @var $toggle DOMElement
+				 * @var DOMElement $toggle
 				 */
 
 				$within_modal = false;
@@ -1666,12 +1878,15 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 
-			$modal_id = AMP_DOM_Utils::get_element_id( $modal );
+			$modal_id = $this->dom->getElementId( $modal );
 
 			// Add the lightbox itself as a close button xpath as well.
 			// With twentytwenty compat, the lightbox fills the entire screen, and only an inner wrapper will contain
 			// the actionable elements in the modal. Therefore, the lightbox represents the "background".
 			$close_button_xpaths[] = "//*[ @id = '{$modal_id}' ]";
+
+			// Ensure anchor links also close the modal the same as the the Close Menu button.
+			$close_button_xpaths[] = sprintf( "//*[ @id = '{$modal_id}' ]//a[ @href and contains( @href, '#' ) ]" );
 
 			// Then, add the inner element of the lightbox as an open button xpath.
 			// This is done to prevent the above close action from closing the modal when an inner element is clicked.
@@ -1698,21 +1913,20 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function add_twentytwenty_toggles() {
 		$toggles = $this->dom->xpath->query( '//*[ @data-toggle-target ]' );
-		$body_id = AMP_DOM_Utils::get_element_id( $this->dom->body, 'body' );
+		$body_id = $this->dom->getElementId( $this->dom->body, 'body' );
 
 		if ( false === $toggles || 0 === $toggles->length ) {
 			return;
 		}
 
+		/**
+		 * Toggle to transform.
+		 *
+		 * @var DOMElement $toggle
+		 */
 		foreach ( $toggles as $toggle ) {
-			/**
-			 * Toggle element to transform.
-			 *
-			 * @var $toggle DOMElement
-			 */
-
 			$toggle_target = $toggle->getAttribute( 'data-toggle-target' );
-			$toggle_id     = AMP_DOM_Utils::get_element_id( $toggle );
+			$toggle_id     = $this->dom->getElementId( $toggle );
 
 			if ( 'next' === $toggle_target ) {
 				$target_node = $toggle->nextSibling;
@@ -1729,7 +1943,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				$target_node = $target_nodes->item( 0 );
 			}
 
-			if ( ! $target_node ) {
+			if ( ! $target_node instanceof DOMElement ) {
 				continue;
 			}
 
@@ -1738,7 +1952,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 			$is_sub_menu     = AMP_DOM_Utils::has_class( $target_node, 'sub-menu' );
 			$new_target_node = $is_sub_menu ? $this->get_closest_submenu( $toggle ) : $target_node;
-			$new_target_id   = AMP_DOM_Utils::get_element_id( $new_target_node );
+			$new_target_id   = $this->dom->getElementId( $new_target_node );
 
 			$state_string = str_replace( '-', '_', $new_target_id );
 
@@ -1749,7 +1963,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			// Adapt the aria-expanded attribute according to the central state.
 			$toggle->setAttribute( 'data-amp-bind-aria-expanded', "{$state_string} ? 'true' : 'false'" );
 
-			// If the toggle target is 'next' ir a sub-menu, only give the clicked toggle the active class.
+			// If the toggle target is 'next' or a sub-menu, only give the clicked toggle the active class.
 			if ( 'next' === $toggle_target || AMP_DOM_Utils::has_class( $target_node, 'sub-menu' ) ) {
 				AMP_DOM_Utils::add_amp_action( $toggle, 'tap', "{$toggle_id}.toggleClass(class='active')" );
 			} else {
@@ -1760,7 +1974,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						// Skip adding the 'active' class on the "Close" button in the primary nav menu.
 						continue;
 					}
-					$target_toggle_id = AMP_DOM_Utils::get_element_id( $target_toggle );
+					$target_toggle_id = $this->dom->getElementId( $target_toggle );
 					AMP_DOM_Utils::add_amp_action( $toggle, 'tap', "{$target_toggle_id}.toggleClass(class='active')" );
 				}
 			}
@@ -1779,11 +1993,248 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					$focus_element = $this->dom->xpath->query( $focus_xpath )->item( 0 );
 
 					if ( $focus_element instanceof DOMElement ) {
-						$focus_element_id = AMP_DOM_Utils::get_element_id( $focus_element );
+						$focus_element_id = $this->dom->getElementId( $focus_element );
 						AMP_DOM_Utils::add_amp_action( $toggle, 'tap', "{$focus_element_id}.focus" );
 					}
 				}
 			}
+		}
+	}
+
+	/**
+	 * Amend the Twenty Twenty-One dark mode stylesheet to only apply the relevant rules when the user has requested
+	 * the system use a dark color theme.
+	 *
+	 * Note: Dark mode will only be available when the user's system supports it. The dark mode toggle is not available
+	 * on the frontend as yet since there is no feasible AMP-compatible way to store and unserialize user's preferences.
+	 */
+	public static function amend_twentytwentyone_dark_mode_styles() {
+		add_action(
+			'wp_enqueue_scripts',
+			static function() {
+				// Bail if the dark mode stylesheet is not enqueued.
+				if ( ! wp_style_is( 'tt1-dark-mode' ) ) {
+					return; // @codeCoverageIgnore
+				}
+
+				wp_dequeue_style( 'tt1-dark-mode' );
+
+				$dark_mode_css_file = get_theme_file_path(
+					sprintf( 'assets/css/style-dark-mode%s.css', is_rtl() ? '-rtl' : '' )
+				);
+
+				if ( ! file_exists( $dark_mode_css_file ) ) {
+					return; // @codeCoverageIgnore
+				}
+
+				$styles = file_get_contents( $dark_mode_css_file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+
+				// Restrict rules to only when the user has requested the system use a dark color theme.
+				$new_styles = str_replace( '@media only screen', '@media only screen and (prefers-color-scheme: dark)', $styles );
+				// Allow for rules to override the light theme related rules.
+				$new_styles = str_replace( '.is-dark-theme.is-dark-theme', ':root', $new_styles );
+				$new_styles = str_replace( '.respect-color-scheme-preference.is-dark-theme body', '.respect-color-scheme-preference body', $new_styles );
+
+				wp_add_inline_style( 'twenty-twenty-one-style', $new_styles );
+			},
+			11
+		);
+	}
+
+	/**
+	 * Amend the Twenty Twenty-One stylesheet to make it compatible with the changes made to the document during
+	 * sanitization.
+	 */
+	public static function amend_twentytwentyone_styles() {
+		add_action(
+			'wp_enqueue_scripts',
+			static function() {
+				$style_handle = 'twenty-twenty-one-style';
+
+				// Bail if the stylesheet is not enqueued.
+				if ( ! wp_style_is( $style_handle ) ) {
+					return; // @codeCoverageIgnore
+				}
+
+				$css_file = get_theme_file_path(
+					sprintf( 'style%s.css', is_rtl() ? '-rtl' : '' )
+				);
+
+				if ( ! file_exists( $css_file ) ) {
+					return; // @codeCoverageIgnore
+				}
+
+				/** @var _WP_Dependency $dependency */
+				$dependency = wp_styles()->registered[ $style_handle ];
+
+				// Set the registered handle as an alias for other stylesheets to depend on.
+				$dependency->src = false;
+
+				$styles = file_get_contents( $css_file ); //phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+
+				// Append any extra rules that may be needed.
+				$styles .= '
+					/* Trap keyboard navigation within mobile menu when it\'s open */
+					@media only screen and (max-width: 481px) {
+						.primary-navigation-open #page {
+							visibility: hidden;
+						}
+
+						.primary-navigation-open .menu-button-container {
+							visibility: visible;
+						}
+					}
+
+					@media (min-width: 482px) {
+						/* Show the sub-menu on hover of menu item */
+						.primary-menu-container > .menu-wrapper > .menu-item-has-children:hover > .sub-menu {
+							display: block;
+						}
+
+						/* Hide the plus icon on hover of menu item */
+						.primary-menu-container > .menu-wrapper > .menu-item-has-children:hover > .sub-menu-toggle > .icon-plus {
+							display: none;
+						}
+
+						/* Show the minus icon on hover of menu item */
+						.primary-menu-container > .menu-wrapper > .menu-item-has-children:hover > .sub-menu-toggle > .icon-minus {
+							display: flex;
+						}
+					}
+				';
+
+				// Ideally wp_add_inline_style() would accept a $position argument like wp_add_inline_script() does, in
+				// which case the following could be replaced with wp_add_inline_style( $style_handle, $new_styles, 'before' ).
+				// But this is not supported, so we have to resort to manipulating the underlying after array.
+				if ( ! isset( $dependency->extra['after'] ) ) {
+					$dependency->extra['after'] = [];
+				}
+				array_unshift( $dependency->extra['after'], $styles );
+			},
+			11
+		);
+	}
+
+	/**
+	 * Make the dark mode toggle in the Twenty Twenty-One theme AMP compatible.
+	 *
+	 * Note: This is only shown within the Customizer preview for now, as there is no feasible way of persisting and
+	 * unserializing the user's preference when they switch to dark (or light) mode.
+	 */
+	public function add_twentytwentyone_dark_mode_toggle() {
+		$button = $this->dom->getElementById( 'dark-mode-toggler' );
+
+		if ( ! $button ) {
+			return;
+		}
+
+		$style              = $this->dom->createElement( 'style' );
+		$style->textContent = '.no-js #dark-mode-toggler { display: block; }';
+		$this->dom->head->appendChild( $style );
+
+		$toggle_class = 'is-dark-theme';
+		$state_id     = str_replace( '-', '_', $toggle_class );
+
+		$body_id     = $this->dom->getElementId( $this->dom->body );
+		$document_id = $this->dom->getElementId( $this->dom->documentElement );
+
+		AMP_DOM_Utils::add_amp_action( $button, 'tap', "AMP.setState({{$state_id}: !{$state_id}})" );
+		AMP_DOM_Utils::add_amp_action( $button, 'tap', "{$body_id}.toggleClass(class='{$toggle_class}')" );
+		AMP_DOM_Utils::add_amp_action( $button, 'tap', "{$document_id}.toggleClass(class='{$toggle_class}')" );
+
+		$button->setAttribute( 'data-amp-bind-aria-pressed', "{$state_id} ? 'true' : 'false'" );
+	}
+
+	/**
+	 * Make the mobile menu for the Twenty Twenty-One theme AMP compatible.
+	 */
+	public function add_twentytwentyone_mobile_modal() {
+		$menu_toggle = $this->dom->getElementById( 'primary-mobile-menu' );
+
+		if ( ! $menu_toggle ) {
+			return;
+		}
+
+		$state_string = 'mobile_menu_toggled';
+		$body_id      = $this->dom->getElementId( $this->dom->body, 'body' );
+
+		AMP_DOM_Utils::add_amp_action( $menu_toggle, 'tap', "AMP.setState({{$state_string}: !{$state_string}})" );
+		AMP_DOM_Utils::add_amp_action( $menu_toggle, 'tap', "{$body_id}.toggleClass(class=primary-navigation-open)" );
+		AMP_DOM_Utils::add_amp_action( $menu_toggle, 'tap', "{$body_id}.toggleClass(class=lock-scrolling)" );
+		$menu_toggle->setAttribute( 'data-amp-bind-aria-expanded', "{$state_string} ? 'true' : 'false'" );
+
+		// Close the mobile modal when clicking in-page anchor links in the menu.
+		foreach ( $this->dom->xpath->query( '//*[ @id = "site-navigation" ]//a[ @href and contains( @href, "#" ) ]' ) as $link ) {
+			/** @var DOMElement $link */
+			AMP_DOM_Utils::add_amp_action( $link, 'tap', "AMP.setState({{$state_string}: false})" );
+			AMP_DOM_Utils::add_amp_action( $link, 'tap', "{$body_id}.toggleClass(class=primary-navigation-open,force=false)" );
+			AMP_DOM_Utils::add_amp_action( $link, 'tap', "{$body_id}.toggleClass(class=lock-scrolling,force=false)" );
+
+			// Ensure target is scrolled into view. Note that in-page anchor links currently do not work in the non-AMP
+			// version. Normally scrollTo shouldn't be necessary but it appears necessary due to scroll locking.
+			$target = preg_replace( '/.*#/', '', $link->getAttribute( 'href' ) );
+			if ( $target && $this->dom->getElementById( $target ) ) {
+				AMP_DOM_Utils::add_amp_action( $link, 'tap', "{$target}.scrollTo" );
+			}
+		}
+	}
+
+	/**
+	 * Make the sub-menu functionality for the Twenty Twenty-One theme AMP compatible.
+	 *
+	 * Note: Hover functionality is accomplished through CSS.
+	 *
+	 * @see amend_twentytwentyone_styles()
+	 */
+	public function add_twentytwentyone_sub_menu_fix() {
+		$menu_toggles = $this->dom->xpath->query( '//nav//button[ @class and contains( concat( " ", normalize-space( @class ), " " ), " sub-menu-toggle " ) ]' );
+
+		if ( 0 === $menu_toggles->length ) {
+			return;
+		}
+
+		$menu_toggle_ids = substr_replace( range( 1, $menu_toggles->length ), 'toggle_', 0, 0 );
+
+		// Sub-menus to be closed when the user clicks on the body.
+		$toggles_to_disable_for_body = [];
+
+		foreach ( $menu_toggle_ids as $key => $menu_toggle_id ) {
+			/** @var DOMElement $menu_toggle */
+			$menu_toggle = $menu_toggles->item( $key );
+
+			$menu_toggle->setAttribute( 'data-amp-bind-aria-expanded', "{$menu_toggle_id} ? 'true' : 'false'" );
+
+			// Sub-menus to be closed when this one is to be opened.
+			$toggles_to_disable            = '';
+			$toggles_to_disable_for_body[] = "{$menu_toggle_id}:false";
+
+			foreach ( $menu_toggle_ids as $other_menu_toggle_id ) {
+				if ( $menu_toggle_id === $other_menu_toggle_id ) {
+					continue;
+				}
+
+				$toggles_to_disable .= ",{$other_menu_toggle_id}:false";
+			}
+
+			AMP_DOM_Utils::add_amp_action( $menu_toggle, 'tap', "AMP.setState({{$menu_toggle_id}:!{$menu_toggle_id}{$toggles_to_disable}})" );
+		}
+
+		$state_vars = implode( ',', $toggles_to_disable_for_body );
+		AMP_DOM_Utils::add_amp_action( $this->dom->body, 'tap', "AMP.setState({{$state_vars}})" );
+		$this->dom->body->setAttribute( 'role', 'document' );
+		$this->dom->body->setAttribute( 'tabindex', '-1' );
+	}
+
+	/**
+	 * Sanitize the sub-menus in the Twenty Twenty-One theme.
+	 */
+	public function amend_twentytwentyone_sub_menu_toggles() {
+		$menu_toggles = $this->dom->xpath->query( '//button[ @onclick = "twentytwentyoneExpandSubMenu(this)" ]' );
+
+		// Remove the `onclick` attribute for sub-menu toggles in the primary and secondary menus.
+		foreach ( $menu_toggles as $menu_toggle ) {
+			/** @var DOMElement $menu_toggle */
+			$menu_toggle->removeAttribute( 'onclick' );
 		}
 	}
 
@@ -1905,19 +2356,19 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected function guess_modal_role( DOMElement $modal ) {
 		// No classes to base our guess on, so keep it generic.
-		if ( ! $modal->hasAttribute( 'class' ) ) {
-			return 'dialog';
+		if ( ! $modal->hasAttribute( Attribute::CLASS_ ) ) {
+			return Role::DIALOG;
 		}
 
-		$classes = $modal->getAttribute( 'class' );
+		$classes = preg_split( '/\s+/', trim( $modal->getAttribute( Attribute::CLASS_ ) ) );
 
-		foreach ( [ 'navigation', 'menu', 'search', 'alert', 'figure', 'form', 'img', 'toolbar', 'tooltip' ] as $role ) {
-			if ( false !== strpos( $classes, $role ) ) {
+		foreach ( self::$modal_roles as $role ) {
+			if ( in_array( $role, $classes, true ) ) {
 				return $role;
 			}
 		}
 
 		// None of the roles we are looking for match any of the classes.
-		return 'dialog';
+		return Role::DIALOG;
 	}
 }

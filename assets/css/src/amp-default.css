@@ -11,16 +11,6 @@ amp-anim.amp-wp-enforced-sizes[layout="intrinsic"] > img {
 	object-fit: contain;
 }
 
-amp-fit-text blockquote,
-amp-fit-text h1,
-amp-fit-text h2,
-amp-fit-text h3,
-amp-fit-text h4,
-amp-fit-text h5,
-amp-fit-text h6 {
-	font-size: inherit;
-}
-
 /**
  * Override a style rule in Twenty Sixteen and Twenty Seventeen.
  * It set display:none for audio elements.
@@ -76,4 +66,18 @@ amp-carousel .amp-wp-gallery-caption {
 .wp-block-gallery[data-amp-carousel="true"] {
 	display: block;
 	flex-wrap: unset;
+}
+
+/*
+ * Replicate bottom-margin which is added to .mejs-container by theme styles, although it varies;
+ * - 1.5em in Twenty Seventeen
+ * - 24px in Twenty Eleven, Twenty Thirteen and Twenty Twelve
+ * Other themes set the bottom margin on direct descendants of the .entry-content, in which case this will be overridden.
+ *
+ * The max-width: 100% is normally applied by to .mejs-container by wp-mediaelement.css but this stylesheet is not
+ * included in AMP, so this is why it is included here.
+ */
+.wp-video {
+	margin-bottom: 1.5em;
+	max-width: 100%;
 }

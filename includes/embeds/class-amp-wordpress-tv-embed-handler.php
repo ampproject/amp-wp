@@ -10,6 +10,7 @@
  * Class AMP_WordPress_TV_Embed_Handler
  *
  * @since 1.4
+ * @internal
  */
 class AMP_WordPress_TV_Embed_Handler extends AMP_Base_Embed_Handler {
 

@@ -5,14 +5,15 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Dom\Document;
+use AmpProject\Dom\Document;
 
 /**
  * Trait AMP_Noscript_Fallback
  *
- * @since 1.1
- *
  * Used for sanitizers that place <noscript> tags with the original nodes on error.
+ *
+ * @since 1.1
+ * @internal
  */
 trait AMP_Noscript_Fallback {
 
@@ -71,22 +72,22 @@ trait AMP_Noscript_Fallback {
 	 *
 	 * @since 1.1
 	 *
-	 * @param DOMNode  $new_node New node to append a noscript with the old node to.
-	 * @param DOMNode  $old_node Old node to append in a noscript.
-	 * @param Document $dom DOM document instance.
+	 * @param DOMElement $new_element New element to append a noscript with the old element to.
+	 * @param DOMElement $old_element Old element to append in a noscript.
+	 * @param Document   $dom         DOM document instance.
 	 */
-	protected function append_old_node_noscript( DOMNode $new_node, DOMNode $old_node, Document $dom ) {
+	protected function append_old_node_noscript( DOMElement $new_element, DOMElement $old_element, Document $dom ) {
 		$noscript = $dom->createElement( 'noscript' );
-		$noscript->appendChild( $old_node );
-		$new_node->appendChild( $noscript );
+		$noscript->appendChild( $old_element );
+		$new_element->appendChild( $noscript );
 
 		// Remove all non-allowed attributes preemptively to prevent doubled validation errors.
-		for ( $i = $old_node->attributes->length - 1; $i >= 0; $i-- ) {
-			$attribute = $old_node->attributes->item( $i );
+		for ( $i = $old_element->attributes->length - 1; $i >= 0; $i-- ) {
+			$attribute = $old_element->attributes->item( $i );
 			if ( isset( $this->noscript_fallback_allowed_attributes[ $attribute->nodeName ] ) ) {
 				continue;
 			}
-			$old_node->removeAttribute( $attribute->nodeName );
+			$old_element->removeAttribute( $attribute->nodeName );
 		}
 	}
 }

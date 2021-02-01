@@ -1,7 +1,6 @@
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { dispatch } from '@wordpress/data';
 
 /**
@@ -44,6 +43,10 @@ export default ( InitialMediaUpload, minImageDimensions ) => {
 			if ( 'editor-post-featured-image__media-modal' === this.props.modalClass ) {
 				this.initFeaturedImage = this.initFeaturedImage.bind( this );
 				this.initFeaturedImage();
+			} else {
+				// Restore the original`onOpen` callback as it will be overridden by the parent class.
+				this.frame.off( 'open', this.onOpen );
+				this.frame.on( 'open', super.onOpen.bind( this ) );
 			}
 		}
 
@@ -57,47 +60,82 @@ export default ( InitialMediaUpload, minImageDimensions ) => {
 		 */
 		initFeaturedImage() {
 			const FeaturedImageSelectMediaFrame = getSelectMediaFrame( FeaturedImageToolbarSelect );
+
+			const FeaturedImageLibrary = wp.media.controller.FeaturedImage.extend( {
+				defaults: {
+					...wp.media.controller.FeaturedImage.prototype.defaults,
+					date: false,
+					filterable: false,
+					// Note: These suggestions are shown in the media library image browser.
+					suggestedWidth: EXPECTED_WIDTH,
+					suggestedHeight: EXPECTED_HEIGHT,
+				},
+			} );
+
 			this.frame = new FeaturedImageSelectMediaFrame( {
 				allowedTypes: this.props.allowedTypes,
-				button: {
-					text: __( 'Select', 'amp' ),
-					close: false,
-				},
-				states: [
-					new wp.media.controller.Library( {
-						title: __( 'Choose image', 'amp' ),
-						library: wp.media.query( { type: 'image' } ),
-						multiple: false,
-						date: false,
-						priority: 20,
-						// Note: These suggestions are shown in the media library image browser.
-						suggestedWidth: EXPECTED_WIDTH,
-						suggestedHeight: EXPECTED_HEIGHT,
-					} ),
-				],
+				state: 'featured-image',
+				states: [ new FeaturedImageLibrary(), new wp.media.controller.EditImage() ],
 			} );
+
+			this.frame.on( 'toolbar:create:featured-image', function( toolbar ) {
+				/**
+				 * @this wp.media.view.MediaFrame.Select
+				 */
+				this.createSelectToolbar( toolbar, {
+					text: wp.media.view.l10n.setFeaturedImage,
+					state: this.options.state,
+				} );
+			}, this.frame );
+
+			this.frame.on( 'open', this.onOpen );
+
+			this.frame.state( 'featured-image' ).on( 'select', this.onSelectImage, this );
 
 			// See wp.media() for this.
 			wp.media.frame = this.frame;
+		}
 
-			this.frame.on( 'select', this.onSelectImage, this );
-			this.frame.on( 'close', () => {
-				this.initFeaturedImage();
-			}, this );
+		/**
+		 * Ensure the selected image is the first item in the collection.
+		 *
+		 * @see https://github.com/WordPress/gutenberg/blob/c58b32266f8c950c5b9927d286608343078aee02/packages/media-utils/src/components/media-upload/index.js#L401-L417
+		 */
+		onOpen() {
+			const frameContent = this.frame.content.get();
+			if ( frameContent && frameContent.collection ) {
+				const collection = frameContent.collection;
+
+				// Clean all attachments we have in memory.
+				collection
+					.toArray()
+					.forEach( ( model ) => model.trigger( 'destroy', model ) );
+
+				// Reset has more flag, if library had small amount of items all items may have been loaded before.
+				collection.mirroring._hasMore = true;
+
+				// Request items.
+				collection.more();
+			}
 		}
 
 		/**
 		 * Handles image selection.
 		 */
 		onSelectImage() {
-			const attachment = this.frame.state().get( 'selection' ).first().toJSON();
+			const attachment = this.frame.state( 'featured-image' ).get( 'selection' ).first().toJSON();
 			const dispatchImage = ( attachmentId ) => {
 				dispatch( 'core/editor' ).editPost( { featured_media: attachmentId } );
 			};
 			const { onSelect } = this.props;
 			const { url, id, width, height } = attachment;
 			setImageFromURL( { url, id, width, height, onSelect, dispatchImage } );
-			this.frame.close();
+
+			if ( ! wp.media.view.settings.post.featuredImageId ) {
+				return;
+			}
+
+			wp.media.featuredImage.set( attachment ? attachment.id : -1 );
 		}
 	};
 };

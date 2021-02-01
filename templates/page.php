@@ -25,7 +25,7 @@ $this->load_parts( [ 'html-start' ] );
 
 <article class="amp-wp-article">
 	<header class="amp-wp-article-header">
-		<h1 class="amp-wp-title"><?php echo esc_html( $this->get( 'post_title' ) ); ?></h1>
+		<h1 class="amp-wp-title"><?php echo $this->get( 'post_title' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></h1>
 	</header>
 
 	<?php $this->load_parts( [ 'featured-image' ] ); ?>

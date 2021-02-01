@@ -11,6 +11,7 @@
  * Converts Playbuzz embed to <amp-playbuzz>
  *
  * @see https://www.playbuzz.com/
+ * @internal
  */
 class AMP_Playbuzz_Sanitizer extends AMP_Base_Sanitizer {
 

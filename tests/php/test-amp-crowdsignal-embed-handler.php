@@ -5,12 +5,16 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
+
 /**
  * Class AMP_Crowdsignal_Embed_Handler_Test
  *
  * @covers AMP_Crowdsignal_Embed_Handler
  */
 class AMP_Crowdsignal_Embed_Handler_Test extends WP_UnitTestCase {
+
+	use WithoutBlockPreRendering;
 
 	/**
 	 * Get conversion data.
@@ -38,22 +42,16 @@ class AMP_Crowdsignal_Embed_Handler_Test extends WP_UnitTestCase {
 		];
 
 		$data = [
-			'poll.fm'          => [
+			'poll.fm'        => [
 				'https://poll.fm/7012505',
 				'<p><iframe title="Which design do you prefer?" src="https://poll.fm/7012505/embed" frameborder="0" class="cs-iframe-embed"></iframe></p>',
 				$poll_response,
 			],
 
-			'polldaddy_poll'   => [
+			'polldaddy_poll' => [
 				'https://polldaddy.com/poll/7012505/',
 				'<p><iframe title="Which design do you prefer?" src="https://poll.fm/7012505/embed" frameborder="0" class="cs-iframe-embed"></iframe></p>',
 				$poll_response,
-			],
-
-			'polldaddy_survey' => [
-				'https://rydk.polldaddy.com/s/test-survey',
-				'<p><a href="https://rydk.polldaddy.com/s/test-survey" target="_blank">View Survey</a></p>',
-				$survey_response,
 			],
 		];
 
@@ -115,8 +113,8 @@ class AMP_Crowdsignal_Embed_Handler_Test extends WP_UnitTestCase {
 	}
 
 	private function adapt_iframe_title( $html ) {
-		// Prior to 5.2, there was no 'title' attribute on an iframe.
-		if ( version_compare( get_bloginfo( 'version' ), '5.2', '<' ) ) {
+		// Prior to 5.1, there was no 'title' attribute on an iframe.
+		if ( version_compare( get_bloginfo( 'version' ), '5.1', '<' ) ) {
 			$html = preg_replace( '/(<iframe.*)(\stitle=".+?")/', '${1}', $html );
 		}
 

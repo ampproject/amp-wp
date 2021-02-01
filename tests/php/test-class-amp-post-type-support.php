@@ -6,6 +6,8 @@
  * @since 0.6
  */
 
+use AmpProject\AmpWP\Option;
+
 /**
  * Tests for Post Type Support.
  *
@@ -53,35 +55,24 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 			],
 			AMP_Post_Type_Support::get_eligible_post_types()
 		);
-	}
 
-	/**
-	 * Test add_post_type_support.
-	 *
-	 * @covers AMP_Post_Type_Support::add_post_type_support()
-	 */
-	public function test_add_post_type_support() {
-		remove_theme_support( AMP_Theme_Support::SLUG );
-		register_post_type(
-			'book',
-			[
-				'label'  => 'Book',
-				'public' => true,
-			]
+		add_filter(
+			'amp_supportable_post_types',
+			static function ( $post_types ) {
+				$post_types[] = 'secret';
+				return array_diff( $post_types, [ 'attachment' ] );
+			}
 		);
-		register_post_type(
-			'poem',
-			[
-				'label'  => 'Poem',
-				'public' => true,
-			]
-		);
-		AMP_Options_Manager::update_option( 'supported_post_types', [ 'post', 'poem' ] );
 
-		AMP_Post_Type_Support::add_post_type_support();
-		$this->assertTrue( post_type_supports( 'post', AMP_Post_Type_Support::SLUG ) );
-		$this->assertTrue( post_type_supports( 'poem', AMP_Post_Type_Support::SLUG ) );
-		$this->assertFalse( post_type_supports( 'book', AMP_Post_Type_Support::SLUG ) );
+		$this->assertEqualSets(
+			[
+				'post',
+				'page',
+				'secret',
+				'book',
+			],
+			AMP_Post_Type_Support::get_eligible_post_types()
+		);
 	}
 
 	/**
@@ -90,7 +81,7 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 	 * @covers AMP_Post_Type_Support::get_support_errors()
 	 */
 	public function test_get_support_error() {
-		remove_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		register_post_type(
 			'book',
 			[
@@ -102,7 +93,11 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 		// Post type support.
 		$book_id = self::factory()->post->create( [ 'post_type' => 'book' ] );
 		$this->assertEquals( [ 'post-type-support' ], AMP_Post_Type_Support::get_support_errors( $book_id ) );
-		add_post_type_support( 'book', AMP_Post_Type_Support::SLUG );
+		$supported_post_types = array_merge(
+			AMP_Options_Manager::get_option( Option::SUPPORTED_POST_TYPES ),
+			[ 'book' ]
+		);
+		AMP_Options_Manager::update_option( Option::SUPPORTED_POST_TYPES, $supported_post_types );
 		$this->assertEmpty( AMP_Post_Type_Support::get_support_errors( $book_id ) );
 
 		// Skip-post.

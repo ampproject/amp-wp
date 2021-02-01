@@ -5,12 +5,41 @@
  * @package AMP
  */
 
+use AmpProject\Attribute;
+use AmpProject\Dom\Document;
+
 /**
  * Class AMP_Core_Block_Handler
  *
  * @since 1.0
+ * @internal
  */
 class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
+
+	/**
+	 * Attribute to store the original width on a video or iframe just before WordPress removes it.
+	 *
+	 * @see AMP_Core_Block_Handler::preserve_widget_text_element_dimensions()
+	 * @see AMP_Core_Block_Handler::process_text_widgets()
+	 * @var string
+	 */
+	const AMP_PRESERVED_WIDTH_ATTRIBUTE_NAME = 'amp-preserved-width';
+
+	/**
+	 * Attribute to store the original height on a video or iframe just before WordPress removes it.
+	 *
+	 * @see AMP_Core_Block_Handler::preserve_widget_text_element_dimensions()
+	 * @see AMP_Core_Block_Handler::process_text_widgets()
+	 * @var string
+	 */
+	const AMP_PRESERVED_HEIGHT_ATTRIBUTE_NAME = 'amp-preserved-height';
+
+	/**
+	 * Count of the category widgets encountered.
+	 *
+	 * @var int
+	 */
+	private $category_widget_count = 0;
 
 	/**
 	 * Methods to ampify blocks.
@@ -29,6 +58,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function register_embed() {
 		add_filter( 'render_block', [ $this, 'filter_rendered_block' ], 0, 2 );
+		add_filter( 'widget_text_content', [ $this, 'preserve_widget_text_element_dimensions' ], PHP_INT_MAX );
 	}
 
 	/**
@@ -36,6 +66,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function unregister_embed() {
 		remove_filter( 'render_block', [ $this, 'filter_rendered_block' ], 0 );
+		remove_filter( 'widget_text_content', [ $this, 'preserve_widget_text_element_dimensions' ], PHP_INT_MAX );
 	}
 
 	/**
@@ -49,6 +80,30 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		if ( ! isset( $block['blockName'] ) ) {
 			return $block_content;
 		}
+
+		if ( isset( $block['attrs'] ) && 'core/shortcode' !== $block['blockName'] ) {
+			$injected_attributes    = '';
+			$prop_attribute_mapping = [
+				'ampCarousel'  => 'data-amp-carousel',
+				'ampLayout'    => 'data-amp-layout',
+				'ampLightbox'  => 'data-amp-lightbox',
+				'ampNoLoading' => 'data-amp-noloading',
+			];
+			foreach ( $prop_attribute_mapping as $prop => $attr ) {
+				if ( isset( $block['attrs'][ $prop ] ) ) {
+					$property_value = $block['attrs'][ $prop ];
+					if ( is_bool( $property_value ) ) {
+						$property_value = $property_value ? 'true' : 'false';
+					}
+
+					$injected_attributes .= sprintf( ' %s="%s"', $attr, esc_attr( $property_value ) );
+				}
+			}
+			if ( $injected_attributes ) {
+				$block_content = preg_replace( '/(<\w+)/', '$1' . $injected_attributes, $block_content, 1 );
+			}
+		}
+
 		if ( isset( $this->block_ampify_methods[ $block['blockName'] ] ) ) {
 			$method_name   = $this->block_ampify_methods[ $block['blockName'] ];
 			$block_content = $this->{$method_name}( $block_content, $block );
@@ -177,5 +232,152 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			);
 		}
 		return $block_content;
+	}
+
+	/**
+	 * Sanitize widgets that are not added via Gutenberg.
+	 *
+	 * @param Document $dom  Document.
+	 * @param array    $args Args passed to sanitizer.
+	 */
+	public function sanitize_raw_embeds( Document $dom, $args = [] ) {
+		$this->process_categories_widgets( $dom );
+		$this->process_archives_widgets( $dom, $args );
+		$this->process_text_widgets( $dom );
+	}
+
+	/**
+	 * Process "Categories" widgets.
+	 *
+	 * @since 2.0
+	 *
+	 * @param Document $dom Document.
+	 */
+	private function process_categories_widgets( Document $dom ) {
+		$selects = $dom->xpath->query( '//form/select[ @name = "cat" ]' );
+		foreach ( $selects as $select ) {
+			if ( ! $select instanceof DOMElement ) {
+				continue;
+			}
+			$form = $select->parentNode;
+			if ( ! $form instanceof DOMElement || ! $form->parentNode instanceof DOMElement ) {
+				continue;
+			}
+			$script = $dom->xpath->query( './/script[ contains( text(), "onCatChange" ) ]', $form->parentNode )->item( 0 );
+			if ( ! $script instanceof DOMElement ) {
+				continue;
+			}
+
+			$this->category_widget_count++;
+			$id = sprintf( 'amp-wp-widget-categories-%d', $this->category_widget_count );
+
+			$form->setAttribute( 'id', $id );
+
+			AMP_DOM_Utils::add_amp_action( $select, 'change', sprintf( '%s.submit', $id ) );
+			$script->parentNode->removeChild( $script );
+		}
+	}
+
+	/**
+	 * Process "Archives" widgets.
+	 *
+	 * @since 2.0
+	 *
+	 * @param Document $dom  Select node retrieved from the widget.
+	 * @param array    $args Args passed to sanitizer.
+	 */
+	private function process_archives_widgets( Document $dom, $args = [] ) {
+		$selects = $dom->xpath->query( '//select[ @name = "archive-dropdown" and starts-with( @id, "archives-dropdown-" ) ]' );
+		foreach ( $selects as $select ) {
+			if ( ! $select instanceof DOMElement ) {
+				continue;
+			}
+
+			$script = $dom->xpath->query( './/script[ contains( text(), "onSelectChange" ) ]', $select->parentNode )->item( 0 );
+			if ( $script ) {
+				$script->parentNode->removeChild( $script );
+			} elseif ( $select->hasAttribute( 'onchange' ) ) {
+				// Special condition for WordPress<=5.1.
+				$select->removeAttribute( 'onchange' );
+			} else {
+				continue;
+			}
+
+			AMP_DOM_Utils::add_amp_action( $select, 'change', 'AMP.navigateTo(url=event.value)' );
+
+			// When AMP-to-AMP linking is enabled, ensure links go to the AMP version.
+			if ( ! empty( $args['amp_to_amp_linking_enabled'] ) ) {
+				foreach ( $dom->xpath->query( '//option[ @value != "" ]', $select ) as $option ) {
+					/**
+					 * Option element.
+					 *
+					 * @var DOMElement $option
+					 */
+					$option->setAttribute( 'value', amp_add_paired_endpoint( $option->getAttribute( 'value' ) ) );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Preserve dimensions of elements in a Text widget to later restore to circumvent WordPress core stripping them out.
+	 *
+	 * Core strips out the dimensions to prevent the element being made too wide for the sidebar. This is not a concern
+	 * in AMP because of responsive sizing. So this logic is here to undo what core is doing.
+	 *
+	 * @since 2.0
+	 * @see WP_Widget_Text::inject_video_max_width_style()
+	 * @see AMP_Core_Block_Handler::process_text_widgets()
+	 *
+	 * @param string $content Content.
+	 * @return string Content.
+	 */
+	public function preserve_widget_text_element_dimensions( $content ) {
+		$content = preg_replace_callback(
+			'#<(video|iframe|object|embed)\s[^>]*>#si',
+			static function ( $matches ) {
+				$html = $matches[0];
+				$html = preg_replace( '/(?=\sheight="(\d+)")/', ' ' . self::AMP_PRESERVED_HEIGHT_ATTRIBUTE_NAME . '="$1" ', $html );
+				$html = preg_replace( '/(?=\swidth="(\d+)")/', ' ' . self::AMP_PRESERVED_WIDTH_ATTRIBUTE_NAME . '="$1" ', $html );
+				return $html;
+			},
+			$content
+		);
+
+		return $content;
+	}
+
+	/**
+	 * Process "Text" widgets.
+	 *
+	 * @since 2.0
+	 * @see AMP_Core_Block_Handler::preserve_widget_text_element_dimensions()
+	 *
+	 * @param Document $dom Select node retrieved from the widget.
+	 */
+	private function process_text_widgets( Document $dom ) {
+		foreach ( $dom->xpath->query( '//div[ @class = "textwidget" ]' ) as $text_widget ) {
+			// Restore the width/height attributes which were preserved in preserve_widget_text_element_dimensions.
+			foreach ( $dom->xpath->query( sprintf( './/*[ @%s or @%s ]', self::AMP_PRESERVED_WIDTH_ATTRIBUTE_NAME, self::AMP_PRESERVED_HEIGHT_ATTRIBUTE_NAME ), $text_widget ) as $element ) {
+				if ( $element->hasAttribute( self::AMP_PRESERVED_WIDTH_ATTRIBUTE_NAME ) ) {
+					$element->setAttribute( Attribute::WIDTH, $element->getAttribute( self::AMP_PRESERVED_WIDTH_ATTRIBUTE_NAME ) );
+					$element->removeAttribute( self::AMP_PRESERVED_WIDTH_ATTRIBUTE_NAME );
+				}
+				if ( $element->hasAttribute( self::AMP_PRESERVED_HEIGHT_ATTRIBUTE_NAME ) ) {
+					$element->setAttribute( Attribute::HEIGHT, $element->getAttribute( self::AMP_PRESERVED_HEIGHT_ATTRIBUTE_NAME ) );
+					$element->removeAttribute( self::AMP_PRESERVED_HEIGHT_ATTRIBUTE_NAME );
+				}
+			}
+
+			/*
+			 * Remove inline width style which is added to video shortcode but which overruns the container.
+			 * Normally this width gets overridden by wp-mediaelement.css to be max-width: 100%, but since
+			 * MediaElement.js is not used in AMP this stylesheet is not included. In any case, videos in AMP are
+			 * responsive so this is built-in. Note also the style rule for .wp-video in amp-default.css.
+			 */
+			foreach ( $dom->xpath->query( './/div[ @class = "wp-video" and @style ]', $text_widget ) as $element ) {
+				$element->removeAttribute( 'style' );
+			}
+		}
 	}
 }

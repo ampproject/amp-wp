@@ -5,17 +5,17 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Component\Carousel;
-use Amp\AmpWP\Dom\Document;
-use Amp\AmpWP\Dom\ElementList;
-use Amp\AmpWP\Tests\PrivateAccess;
+use AmpProject\AmpWP\Component\Carousel;
+use AmpProject\Dom\Document;
+use AmpProject\AmpWP\Dom\ElementList;
+use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 
 /**
  * Tests for Carousel class.
  *
- * @covers \Amp\AmpWP\Component\Carousel
+ * @covers \AmpProject\AmpWP\Component\Carousel
  */
-class Test_Carousel extends \WP_UnitTestCase {
+class Test_Carousel extends WP_UnitTestCase {
 
 	use PrivateAccess;
 
@@ -25,27 +25,29 @@ class Test_Carousel extends \WP_UnitTestCase {
 	 * @return array[] An associative array, including the slides and captions, the DOM, and the expected markup.
 	 */
 	public function get_carousel_data() {
-		$dom     = new Document();
-		$src     = 'https://example.com/img.png';
-		$width   = '1200';
-		$height  = '800';
-		$image   = AMP_DOM_Utils::create_node(
+		$dom    = new Document();
+		$src    = 'https://example.com/img.png';
+		$width  = '1200';
+		$height = '800';
+		$image  = AMP_DOM_Utils::create_node(
 			$dom,
 			'amp-img',
 			compact( 'src', 'width', 'height' )
 		);
-		$caption = 'Example caption';
+
+		$caption_element = AMP_DOM_Utils::create_node( $dom, 'a', [ 'href' => 'example.org' ] );
+		$caption_element->appendChild( new DOMText( 'Example caption' ) );
 
 		return [
-			'image_without_caption' => [
-				( new ElementList() )->add( $image, '' ),
+			'image_without_caption'   => [
+				( new ElementList() )->add( $image, null ),
 				$dom,
-				'<amp-carousel width="' . $width . '" height="' . $height . '" type="slides" layout="responsive"><span class="slide"><amp-img src="' . $src . '" width="' . $width . '" height="' . $height . '" layout="fill" object-fit="cover"></amp-img></span></amp-carousel>',
+				'<amp-carousel width="' . $width . '" height="' . $height . '" type="slides" layout="responsive"><figure class="slide"><amp-img src="' . $src . '" width="' . $width . '" height="' . $height . '" layout="fill" object-fit="cover"></amp-img></figure></amp-carousel>',
 			],
-			'image_with_caption'    => [
-				( new ElementList() )->add( $image, $caption ),
+			'image_with_html_caption' => [
+				( new ElementList() )->add( $image, $caption_element ),
 				$dom,
-				'<amp-carousel width="' . $width . '" height="' . $height . '" type="slides" layout="responsive"><span class="slide"><amp-img src="' . $src . '" width="' . $width . '" height="' . $height . '" layout="fill" object-fit="cover"></amp-img><span class="amp-wp-gallery-caption"><span>' . $caption . '</span></span></span></amp-carousel>',
+				'<amp-carousel width="' . $width . '" height="' . $height . '" type="slides" layout="responsive"><figure class="slide"><amp-img src="' . $src . '" width="' . $width . '" height="' . $height . '" layout="fill" object-fit="cover"></amp-img><figcaption class="amp-wp-gallery-caption"><a href="example.org">Example caption</a></figcaption></figure></amp-carousel>',
 			],
 		];
 	}
@@ -54,7 +56,7 @@ class Test_Carousel extends \WP_UnitTestCase {
 	 * Test getting the amp-carousel.
 	 *
 	 * @dataProvider get_carousel_data
-	 * @covers \Amp\AmpWP\Component\Carousel::get_dom_element()
+	 * @covers \AmpProject\AmpWP\Component\Carousel::get_dom_element()
 	 *
 	 * @param ElementList $slides   An array of arrays, with images and their captions (if any).
 	 * @param Document    $dom      The representation of the DOM.
@@ -129,15 +131,15 @@ class Test_Carousel extends \WP_UnitTestCase {
 				[ $wide_image_width, $wide_image_height ],
 			],
 			'image_with_0_height_should_not_affect_ratio' => [
-				( new ElementList() )->add( $image_with_0_height )->add( $wide_image, '' ),
+				( new ElementList() )->add( $image_with_0_height )->add( $wide_image, null ),
 				[ $wide_image_width, $wide_image_height ],
 			],
 			'two_images'                                  => [
-				( new ElementList() )->add( $narrow_image )->add( $wide_image, '' ),
+				( new ElementList() )->add( $narrow_image )->add( $wide_image, null ),
 				[ $wide_image_width, $wide_image_height ],
 			],
 			'two_images_order_changed'                    => [
-				( new ElementList() )->add( $wide_image )->add( $narrow_image, '' ),
+				( new ElementList() )->add( $wide_image )->add( $narrow_image, null ),
 				[ $wide_image_width, $wide_image_height ],
 			],
 		];
@@ -147,7 +149,7 @@ class Test_Carousel extends \WP_UnitTestCase {
 	 * Test get_dimensions.
 	 *
 	 * @dataProvider get_data_carousel_dimensions
-	 * @covers \Amp\AmpWP\Component\Carousel::get_dimensions()
+	 * @covers \AmpProject\AmpWP\Component\Carousel::get_dimensions()
 	 *
 	 * @param ElementList $slides   The slides to get the dimensions from.
 	 * @param array       $expected The expected return value of the tested function.

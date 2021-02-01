@@ -5,7 +5,7 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Dom\Document;
+use AmpProject\Dom\Document;
 
 /**
  * Class AMP_Nav_Menu_Dropdown_Sanitizer
@@ -13,6 +13,7 @@ use Amp\AmpWP\Dom\Document;
  * Handles state for navigation menu dropdown toggles, based on theme support.
  *
  * @since 1.1.0
+ * @internal
  */
 class AMP_Nav_Menu_Dropdown_Sanitizer extends AMP_Base_Sanitizer {
 

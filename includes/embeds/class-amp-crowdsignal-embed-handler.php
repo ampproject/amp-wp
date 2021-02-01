@@ -10,6 +10,8 @@
 
 /**
  * Class AMP_Crowdsignal_Embed_Handler
+ *
+ * @internal
  */
 class AMP_Crowdsignal_Embed_Handler extends AMP_Base_Embed_Handler {
 

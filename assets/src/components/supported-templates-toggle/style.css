@@ -1,0 +1,8 @@
+.amp .supported-templates .amp-setting-toggle .components-form-toggle {
+	margin-right: 1rem;
+}
+
+.supported-templates .amp-setting-toggle .amp-setting-toggle__label-text > p {
+	margin: 0;
+	font-weight: bold;
+}

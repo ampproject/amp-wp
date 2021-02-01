@@ -2,12 +2,12 @@
 /**
  * Class ElementList
  *
- * @package Amp\AmpWP
+ * @package AmpProject\AmpWP
  */
 
-namespace Amp\AmpWP\Dom;
+namespace AmpProject\AmpWP\Dom;
 
-use Amp\AmpWP\Component\CaptionedSlide;
+use AmpProject\AmpWP\Component\CaptionedSlide;
 use IteratorAggregate;
 use Countable;
 use DOMElement;
@@ -31,13 +31,13 @@ final class ElementList implements IteratorAggregate, Countable {
 	/**
 	 * Adds an element to the list, possibly with a caption.
 	 *
-	 * @param DOMElement $element The element to add, possibly an image.
-	 * @param string     $caption The caption to add, if any.
+	 * @param DOMElement      $element The element to add, possibly an image.
+	 * @param DOMElement|null $caption The caption for the element.
 	 * @return ElementList A clone of this list, with the new element added.
 	 */
-	public function add( DOMElement $element, $caption = '' ) {
+	public function add( DOMElement $element, DOMElement $caption = null ) {
 		$cloned_list             = clone $this;
-		$cloned_list->elements[] = empty( $caption ) ? $element : new CaptionedSlide( $element, $caption );
+		$cloned_list->elements[] = null === $caption ? $element : new CaptionedSlide( $element, $caption );
 		return $cloned_list;
 	}
 

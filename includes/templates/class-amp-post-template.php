@@ -8,9 +8,8 @@
 /**
  * Class AMP_Post_Template
  *
- * @property WP_Post $post
- *
  * @since 0.2
+ * @internal
  */
 class AMP_Post_Template {
 
@@ -67,15 +66,25 @@ class AMP_Post_Template {
 	public $ID;
 
 	/**
+	 * Post
+	 *
+	 * @since 0.2
+	 * @var WP_Post
+	 */
+	public $post;
+
+	/**
 	 * AMP_Post_Template constructor.
 	 *
 	 * @param WP_Post|int $post Post.
 	 */
 	public function __construct( $post ) {
 		if ( is_int( $post ) ) {
-			$this->ID = $post;
+			$this->ID   = $post;
+			$this->post = get_post( $post );
 		} elseif ( $post instanceof WP_Post ) {
-			$this->ID = $post->ID;
+			$this->ID   = $post->ID;
+			$this->post = $post;
 		}
 	}
 
@@ -107,7 +116,7 @@ class AMP_Post_Template {
 			'content_max_width'     => $content_max_width,
 
 			'document_title'        => wp_get_document_title(),
-			'canonical_url'         => get_permalink( $this->ID ),
+			'canonical_url'         => get_permalink( $this->post ),
 			'home_url'              => home_url( '/' ),
 			'blog_name'             => get_bloginfo( 'name' ),
 
@@ -149,22 +158,6 @@ class AMP_Post_Template {
 		 * @param WP_Post $post Post.
 		 */
 		$this->data = apply_filters( 'amp_post_template_data', $this->data, $this->post );
-	}
-
-	/**
-	 * Getter.
-	 *
-	 * @since 1.5
-	 *
-	 * @param string $name Property name.
-	 * @return mixed
-	 */
-	public function __get( $name ) {
-		switch ( $name ) {
-			case 'post':
-				return get_post( $this->ID );
-		}
-		return null;
 	}
 
 	/**
@@ -281,32 +274,51 @@ class AMP_Post_Template {
 	 * @since 0.2
 	 */
 	private function build_post_data() {
-		$post_title              = get_the_title( $this->ID );
-		$post_publish_timestamp  = get_the_date( 'U', $this->ID );
+		$post_title              = get_the_title( $this->post );
+		$post_publish_timestamp  = $this->build_post_publish_timestamp();
 		$post_modified_timestamp = get_post_modified_time( 'U', false, $this->post );
 		$post_author             = get_userdata( $this->post->post_author );
 
 		$data = [
-			'post'                     => $this->post,
-			'post_id'                  => $this->ID,
-			'post_title'               => $post_title,
-			'post_publish_timestamp'   => $post_publish_timestamp,
-			'post_modified_timestamp'  => $post_modified_timestamp,
-			'post_author'              => $post_author,
-			'post_canonical_link_url'  => '',
-			'post_canonical_link_text' => '',
+			'post'                    => $this->post,
+			'post_id'                 => $this->ID,
+			'post_title'              => $post_title,
+			'post_publish_timestamp'  => $post_publish_timestamp,
+			'post_modified_timestamp' => $post_modified_timestamp,
+			'post_author'             => $post_author,
 		];
-
-		$customizer_settings = AMP_Customizer_Settings::get_settings();
-		if ( ! empty( $customizer_settings['display_exit_link'] ) ) {
-			$data['post_canonical_link_url']  = get_permalink( $this->ID );
-			$data['post_canonical_link_text'] = __( 'Exit Reader Mode', 'amp' );
-		}
 
 		$this->add_data( $data );
 
 		$this->build_post_featured_image();
 		$this->build_post_comments_data();
+	}
+
+	/**
+	 * Build post publish timestamp.
+	 *
+	 * We can't use `get_the_date( 'U' )` because it always returns the non-GMT value.
+	 *
+	 * @return int Post publish UTC timestamp.
+	 */
+	private function build_post_publish_timestamp() {
+		$format = 'U';
+
+		if ( empty( $this->post->post_date_gmt ) || '0000-00-00 00:00:00' === $this->post->post_date_gmt ) {
+			$timestamp = time();
+		} else {
+			$timestamp = (int) get_post_time( $format, true, $this->post, true );
+		}
+
+		/** This filter is documented in wp-includes/general-template.php. */
+		$filtered_timestamp = apply_filters( 'get_the_date', $timestamp, $format, $this->post );
+
+		// Guard against a plugin poorly filtering get_the_date to be something other than a Unix timestamp.
+		if ( is_int( $filtered_timestamp ) ) {
+			$timestamp = $filtered_timestamp;
+		}
+
+		return $timestamp;
 	}
 
 	/**
@@ -317,7 +329,7 @@ class AMP_Post_Template {
 			return;
 		}
 
-		$comments_open = comments_open( $this->ID );
+		$comments_open = comments_open( $this->post );
 
 		// Don't show link if close and no comments.
 		if ( ! $comments_open
@@ -325,7 +337,7 @@ class AMP_Post_Template {
 			return;
 		}
 
-		$comments_link_url  = get_comments_link( $this->ID );
+		$comments_link_url  = get_comments_link( $this->post );
 		$comments_link_text = $comments_open
 			? __( 'Leave a Comment', 'amp' )
 			: __( 'View Comments', 'amp' );
@@ -342,8 +354,17 @@ class AMP_Post_Template {
 	 * Build post content.
 	 */
 	private function build_post_content() {
-		/** This filter is documented in wp-includes/post-template.php */
-		$content = apply_filters( 'the_content', get_the_content( null, false, $this->post ) );
+		if ( post_password_required( $this->post ) ) {
+			$content = get_the_password_form( $this->post );
+		} else {
+			/**
+			 * This filter is documented in wp-includes/post-template.php.
+			 *
+			 * Note: This is intentionally not using get_the_content() because the legacy behavior of posts in
+			 * Reader mode is to display multi-page posts as a single page without any pagination links.
+			 */
+			$content = apply_filters( 'the_content', $this->post->post_content );
+		}
 
 		$this->add_data_by_key( 'post_amp_content', $content );
 	}

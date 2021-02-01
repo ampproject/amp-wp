@@ -8,8 +8,8 @@ A bash script, amphtml-update.sh, is provided to automatically run this script. 
 
 from within a Linux environment such as VVV.
 
-See the Updating Allowed Tags and Attributes section of the Contributing guide
-https://github.com/ampproject/amp-wp/blob/develop/contributing.md#updating-allowed-tags-and-attributes.
+See the Updating Allowed Tags and Attributes section of the Engineering Guidelines
+https://github.com/ampproject/amp-wp/wiki/Engineering-Guidelines#updating-allowed-tags-and-attributes.
 
 Then have fun sanitizing your AMP posts!
 """
@@ -28,6 +28,7 @@ import json
 import google
 from collections import defaultdict
 import imp
+import re
 
 seen_spec_names = set()
 
@@ -75,7 +76,10 @@ def GenValidatorProtoascii(validator_directory, out_dir):
 	"""
 	logging.info('entering ...')
 
-	protoascii_segments = [open(os.path.join(validator_directory, 'validator-main.protoascii')).read()]
+	protoascii_segments = [
+		open(os.path.join(validator_directory, 'validator-main.protoascii')).read(),
+		open(os.path.join(validator_directory, 'validator-css.protoascii')).read()
+	]
 	extensions = glob.glob(os.path.join(validator_directory, '../extensions/*/validator-*.protoascii'))
 	extensions.sort()
 	for extension in extensions:
@@ -142,9 +146,11 @@ def GenerateHeaderPHP(out):
 	out.append(' *')
 	out.append(' * Note: This file only contains tags that are relevant to the `body` of')
 	out.append(' * an AMP page. To include additional elements modify the variable')
-	out.append(' * `mandatory_parent_blacklist` in the amp_wp_build.py script.')
+	out.append(' * `mandatory_parent_denylist` in the amp_wp_build.py script.')
 	out.append(' *')
 	out.append(' * phpcs:ignoreFile')
+	out.append(' *')
+	out.append(' * @internal')
 	out.append(' */')
 	out.append('class AMP_Allowed_Tags_Generated {')
 	out.append('')
@@ -369,7 +375,7 @@ def ParseRules(out_dir):
 	# Don't include tags that have a mandatory parent with one of these tag names
 	# since we're only concerned with using this tag list to validate the HTML
 	# of the DOM
-	mandatory_parent_blacklist = [
+	mandatory_parent_denylist = [
 		'$ROOT',
 		'!DOCTYPE',
 	]
@@ -379,7 +385,7 @@ def ParseRules(out_dir):
 			for tag_spec in field_val:
 
 				# Ignore tags that are outside of the body
-				if tag_spec.HasField('mandatory_parent') and tag_spec.mandatory_parent in mandatory_parent_blacklist and tag_spec.tag_name != 'HTML':
+				if tag_spec.HasField('mandatory_parent') and tag_spec.mandatory_parent in mandatory_parent_denylist and tag_spec.tag_name != 'HTML':
 					continue
 
 				# Ignore deprecated tags
@@ -410,7 +416,7 @@ def ParseRules(out_dir):
 				for val in list.tag:
 
 					# Skip tags specific to transformed AMP.
-					if val in ( 'I-AMPHTML-SIZER', ):
+					if val in ( 'I-AMPHTML-SIZER', 'IMG', ):
 						continue
 
 					descendant_lists[list.name].append( val.lower() )
@@ -444,10 +450,12 @@ def GetTagSpec(tag_spec, attr_lists):
 			if isinstance(field_value, (unicode, str, bool, int)):
 				cdata_dict[ field_descriptor.name ] = field_value
 			elif isinstance( field_value, google.protobuf.pyext._message.RepeatedCompositeContainer ):
-				cdata_dict[ field_descriptor.name ] = {}
+				cdata_dict[ field_descriptor.name ] = []
 				for value in field_value:
+					entry = {}
 					for (key,val) in value.ListFields():
-						cdata_dict[ field_descriptor.name ][ key.name ] = val
+						entry[ key.name ] = val
+					cdata_dict[ field_descriptor.name ].append( entry )
 			elif hasattr( field_value, '_values' ):
 				cdata_dict[ field_descriptor.name ] = {}
 				for _value in field_value._values:
@@ -480,11 +488,12 @@ def GetTagSpec(tag_spec, attr_lists):
 
 				cdata_dict['css_spec'] = css_spec
 		if len( cdata_dict ) > 0:
-			if 'blacklisted_cdata_regex' in cdata_dict:
-				if 'error_message' not in cdata_dict['blacklisted_cdata_regex']:
-					raise Exception( 'Missing error_message for blacklisted_cdata_regex.' );
-				if cdata_dict['blacklisted_cdata_regex']['error_message'] not in ( 'CSS !important', 'contents', 'html comments' ):
-					raise Exception( 'Unexpected error_message "%s" for blacklisted_cdata_regex.' % cdata_dict['blacklisted_cdata_regex']['error_message'] );
+			if 'disallowed_cdata_regex' in cdata_dict:
+				for entry in cdata_dict['disallowed_cdata_regex']:
+					if 'error_message' not in entry:
+						raise Exception( 'Missing error_message for disallowed_cdata_regex.' );
+					if entry['error_message'] not in ( 'contents', 'html comments', 'CSS i-amphtml- name prefix' ):
+						raise Exception( 'Unexpected error_message "%s" for disallowed_cdata_regex.' % entry['error_message'] );
 			tag_spec_dict['cdata'] = cdata_dict
 
 	if 'spec_name' not in tag_spec_dict['tag_spec']:
@@ -523,7 +532,7 @@ def GetTagRules(tag_spec):
 
 	if hasattr(tag_spec, 'also_requires_tag_warning') and len( tag_spec.also_requires_tag_warning ) != 0:
 		for also_requires_tag_warning in tag_spec.also_requires_tag_warning:
-			matches = re.search( r'(amp-\S+) extension .js script', also_requires_tag_warning )
+			matches = re.search( r'(amp-\S+) extension( \.js)? script', also_requires_tag_warning )
 			if not matches:
 				raise Exception( 'Unexpected also_requires_tag_warning format: ' + also_requires_tag_warning )
 			requires_extension_list.add(matches.group(1))
@@ -654,6 +663,11 @@ def GetTagRules(tag_spec):
 				amp_layout[ field[0].name ] = field[1]
 		tag_rules['amp_layout'] = amp_layout
 
+	for mandatory_of_constraint in ['mandatory_anyof', 'mandatory_oneof']:
+		mandatory_of_spec = GetMandatoryOf(tag_spec.attrs, mandatory_of_constraint)
+		if mandatory_of_spec:
+			tag_rules[ mandatory_of_constraint ] = mandatory_of_spec
+
 	logging.info('... done')
 	return tag_rules
 
@@ -667,6 +681,13 @@ def GetAttrs(attrs):
 		value_dict = GetValues(attr_spec)
 
 		if value_dict is not None:
+
+			# Skip rules for dev mode attributes since the AMP plugin will allow them to pass through.
+			# See <https://github.com/ampproject/amphtml/pull/27174#issuecomment-601391161> for how the rules are
+			# defined in a way that they can never be satisfied, and thus to make the attribute never allowed.
+			# This runs contrary to the needs of the AMP plugin, as the internal sanitizers are built to ignore them.
+			if 'data-ampdevmode' == attr_spec.name:
+				continue
 
 			# Normalize bracketed amp-bind attribute syntax to data-amp-bind-* syntax.
 			name = attr_spec.name
@@ -696,9 +717,9 @@ def GetValues(attr_spec):
 			alt_names_list.append(UnicodeEscape(alternative_name))
 		value_dict['alternative_names'] = alt_names_list
 
-	# Add blacklisted value regex
-	if attr_spec.HasField('blacklisted_value_regex'):
-		value_dict['blacklisted_value_regex'] = attr_spec.blacklisted_value_regex
+	# Add disallowed value regex
+	if attr_spec.HasField('disallowed_value_regex'):
+		value_dict['disallowed_value_regex'] = attr_spec.disallowed_value_regex
 
 	# dispatch_key is an int
 	if attr_spec.HasField('dispatch_key'):
@@ -771,6 +792,29 @@ def UnicodeEscape(string):
 		An escaped string.
 	"""
 	return ('' + string).encode('unicode-escape')
+
+def GetMandatoryOf( attr, constraint ):
+	"""Gets the attributes with the passed mandatory_*of constraint, if there are any.
+
+	Args:
+		attr: The attributes in which to look for the mandatory_*of constraint.
+		constraint: A string of the mandatory_*of constraint, like 'mandatory_anyof'.
+	Returns:
+		A list of attributes that have that constraint name.
+	"""
+	attributes = set()
+	for attr_spec in attr:
+		if attr_spec.HasField(constraint):
+			attributes.add(
+				# Convert something like [src] to data-amp-bind-src.
+				re.sub(
+					"^\[(\S+)\]$",
+					r"data-amp-bind-\1",
+					attr_spec.name
+				)
+			)
+
+	return sorted(attributes)
 
 def Phpize(data, indent=0):
 	"""Helper function to convert JSON-serializable data into PHP literals.

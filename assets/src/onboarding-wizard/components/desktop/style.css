@@ -1,0 +1,27 @@
+.desktop {
+	background: #f1f1f1;
+	border-radius: 12px;
+	margin-bottom: 1.5rem;
+	min-height: 230px;
+	padding: 17px 13px;
+	position: relative;
+}
+
+.desktop > * {
+	max-width: 100%;
+}
+
+.desktop__toolbar {
+	align-items: center;
+	display: flex;
+	padding-bottom: 17px;
+}
+
+.desktop__toolbar > span {
+	background: #e5e5e5;
+	border-radius: 50%;
+	height: 11px;
+	margin-right: 4px;
+	overflow: hidden;
+	width: 11px;
+}

@@ -4,9 +4,6 @@ module.exports = {
 	transform: {
 		'^.+\\.[jt]sx?$': '<rootDir>/node_modules/@wordpress/scripts/config/babel-transform',
 	},
-	moduleNameMapper: {
-		'^@wordpress\\/element$': '<rootDir>/tests/shared/test-utils/wp-element-mock',
-	},
 	setupFiles: [
 		'<rootDir>/tests/js/setup-globals',
 	],
@@ -15,11 +12,16 @@ module.exports = {
 		'<rootDir>/node_modules',
 		'<rootDir>/build',
 		'<rootDir>/tests/shared',
+		'<rootDir>/vendor',
 	],
 	coveragePathIgnorePatterns: [
 		'<rootDir>/node_modules',
 		'<rootDir>/build/',
 		'<rootDir>/tests/shared',
+	],
+	modulePathIgnorePatterns: [
+		'<rootDir>/assets/src/components/.*/__mocks__',
+		'<rootDir>/assets/src/components/.*/__data__',
 	],
 	coverageReporters: [ 'lcov' ],
 	coverageDirectory: '<rootDir>/build/logs',

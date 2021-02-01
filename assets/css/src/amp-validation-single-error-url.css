@@ -1,3 +1,23 @@
+#the-list tr {
+	scroll-margin-top: 32px;
+}
+
+@media screen and (max-width: 782px) {
+
+	#the-list tr {
+		scroll-margin-top: 46px;
+	}
+}
+
+@media screen and (max-width: 600px) {
+
+	#the-list tr {
+
+		/* Since the admin bar is not sticky */
+		scroll-margin-top: 0;
+	}
+}
+
 /** Arrow icon on title in error column. */
 .column-error_code > .single-url-detail-toggle {
 	position: relative;
@@ -71,10 +91,6 @@ table.striped > tbody > tr.even {
 	vertical-align: top;
 }
 
-.column-status img {
-	width: 1.2rem;
-}
-
 #number-errors {
 	text-align: center;
 	background-color: #d3d3d3b8;
@@ -120,6 +136,10 @@ table.striped > tbody > tr.even {
 	width: 150px;
 }
 
+.wp-list-table th.column-reviewed {
+	width: 100px;
+}
+
 /** Add space between list table and the filter and search box above it. */
 #post-body-content button.action,
 #post-body-content #url-post-filter,
@@ -131,7 +151,7 @@ table.striped > tbody > tr.even {
 	margin-left: 4px;
 }
 
-#accept-reject-buttons:not(.hidden) {
+#remove-keep-buttons:not(.hidden) {
 	display: inline-block;
 }
 
@@ -152,4 +172,11 @@ table.striped > tbody > tr.even {
 	margin-left: 5px;
 	width: auto;
 	float: none;
+	border-width: 2px;
+}
+
+#amp-invalid-markup > .amp-icon::before {
+	margin-right: 3px;
+	margin-left: -2px;
+	font-size: 24px;
 }

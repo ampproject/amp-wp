@@ -9,12 +9,28 @@
  * Class AMP_YouTube_Embed_Handler
  *
  * Much of this class is borrowed from Jetpack embeds.
+ *
+ * @internal
  */
 class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 
-	// Only handling single videos. Playlists are handled elsewhere.
+	/**
+	 * URL pattern to match YouTube videos.
+	 *
+	 * Only handling single videos. Playlists are handled elsewhere.
+	 *
+	 * @deprecated No longer used.
+	 * @internal
+	 * @var string
+	 */
 	const URL_PATTERN = '#https?://(?:www\.)?(?:youtube.com/(?:v/|e/|embed/|watch[/\#?])|youtu\.be/).*#i';
-	const RATIO       = 0.5625;
+
+	/**
+	 * Ratio for calculating the default height from the content width.
+	 *
+	 * @param float
+	 */
+	const RATIO = 0.5625;
 
 	/**
 	 * Default width.
@@ -69,11 +85,6 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Embed.
 	 */
 	public function filter_embed_oembed_html( $cache, $url ) {
-		$host = wp_parse_url( $url, PHP_URL_HOST );
-		if ( ! in_array( $host, [ 'youtu.be', 'youtube.com', 'www.youtube.com' ], true ) ) {
-			return $cache;
-		}
-
 		$id = $this->get_video_id_from_url( $url );
 		if ( ! $id ) {
 			return $cache;
@@ -171,11 +182,55 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Determine the video ID from the URL.
 	 *
 	 * @param string $url URL.
-	 * @return integer|false Video ID, or false if none could be retrieved.
+	 * @return string|false Video ID, or false if none could be retrieved.
 	 */
 	private function get_video_id_from_url( $url ) {
-		if ( preg_match( '/(?:watch\?v=|embed\/|youtu.be\/)(?P<id>\w*)/', $url, $match ) ) {
-			return $match['id'];
+		$parsed_url = wp_parse_url( $url );
+
+		if ( ! isset( $parsed_url['host'] ) ) {
+			return false;
+		}
+
+		$domain = implode( '.', array_slice( explode( '.', $parsed_url['host'] ), -2 ) );
+		if ( ! in_array( $domain, [ 'youtu.be', 'youtube.com', 'youtube-nocookie.com' ], true ) ) {
+			return false;
+		}
+
+		if ( ! isset( $parsed_url['path'] ) ) {
+			return false;
+		}
+
+		$segments = explode( '/', trim( $parsed_url['path'], '/' ) );
+
+		$query_vars = [];
+		if ( isset( $parsed_url['query'] ) ) {
+			wp_parse_str( $parsed_url['query'], $query_vars );
+
+			// Handle video ID in v query param, e.g. <https://www.youtube.com/watch?v=XOY3ZUO6P0k>.
+			// Support is also included for other query params which don't appear to be supported by YouTube anymore.
+			if ( isset( $query_vars['v'] ) ) {
+				return $query_vars['v'];
+			} elseif ( isset( $query_vars['vi'] ) ) {
+				return $query_vars['vi'];
+			}
+		}
+
+		if ( empty( $segments[0] ) ) {
+			return false;
+		}
+
+		// For shortened URLs like <http://youtu.be/XOY3ZUO6P0k>, the slug is the first path segment.
+		if ( 'youtu.be' === $parsed_url['host'] ) {
+			return $segments[0];
+		}
+
+		// For non-shortened URLs, the video ID is in the second path segment. For example:
+		// * https://www.youtube.com/watch/XOY3ZUO6P0k
+		// * https://www.youtube.com/embed/XOY3ZUO6P0k
+		// Other top-level segments indicate non-video URLs. There are examples of URLs having segments including
+		// 'v', 'vi', and 'e' but these do not work anymore. In any case, they are added here for completeness.
+		if ( ! empty( $segments[1] ) && in_array( $segments[0], [ 'embed', 'watch', 'v', 'vi', 'e' ], true ) ) {
+			return $segments[1];
 		}
 
 		return false;
@@ -195,16 +250,11 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 		if ( ! isset( $attr['src'] ) ) {
 			return $html;
 		}
-		$src             = $attr['src'];
-		$youtube_pattern = '#^https?://(?:www\.)?(?:youtube\.com/watch|youtu\.be/)#';
-		if ( 1 !== preg_match( $youtube_pattern, $src ) ) {
+		$video_id = $this->get_video_id_from_url( $attr['src'] );
+		if ( ! $video_id ) {
 			return $html;
 		}
 
-		$url      = ltrim( $src, '=' );
-		$video_id = $this->get_video_id_from_url( $url );
-
-		return $this->render( compact( 'video_id' ), $url );
+		return $this->render( compact( 'video_id' ), $attr['src'] );
 	}
-
 }

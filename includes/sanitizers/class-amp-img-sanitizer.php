@@ -5,10 +5,17 @@
  * @package AMP
  */
 
+use AmpProject\Attribute;
+use AmpProject\DevMode;
+use AmpProject\Layout;
+use AmpProject\Tag;
+
 /**
  * Class AMP_Img_Sanitizer
  *
  * Converts <img> tags to <amp-img> or <amp-anim>
+ *
+ * @internal
  */
 class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	use AMP_Noscript_Fallback;
@@ -63,7 +70,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function get_selector_conversion_mapping() {
 		return [
-			'img' => [
+			Tag::IMG => [
 				'amp-img',
 				'amp-anim',
 			],
@@ -80,7 +87,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		/**
 		 * Node list.
 		 *
-		 * @var DOMNodeList $node
+		 * @var DOMNodeList $nodes
 		 */
 		$nodes           = $this->dom->getElementsByTagName( self::$tag );
 		$need_dimensions = [];
@@ -97,7 +104,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node = $nodes->item( $i );
-			if ( ! $node instanceof DOMElement || $this->has_dev_mode_exemption( $node ) ) {
+			if ( ! $node instanceof DOMElement || DevMode::hasExemptionForNode( $node ) ) {
 				continue;
 			}
 
@@ -106,12 +113,12 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			if ( ! $node->hasAttribute( 'src' ) || '' === trim( $node->getAttribute( 'src' ) ) ) {
+			if ( ! $node->hasAttribute( Attribute::SRC ) || '' === trim( $node->getAttribute( Attribute::SRC ) ) ) {
 				$this->remove_invalid_child(
 					$node,
 					[
 						'code'       => AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING,
-						'attributes' => [ 'src' ],
+						'attributes' => [ Attribute::SRC ],
 						'spec_name'  => 'amp-img',
 					]
 				);
@@ -119,35 +126,35 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Short-circuit emoji images from needing to make requests out to https://s.w.org/.
-			if ( 'wp-smiley' === $node->getAttribute( 'class' ) ) {
-				$node->setAttribute( 'width', '72' );
-				$node->setAttribute( 'height', '72' );
-				$node->setAttribute( 'noloading', '' );
+			if ( 'wp-smiley' === $node->getAttribute( Attribute::CLASS_ ) ) {
+				$node->setAttribute( Attribute::WIDTH, '72' );
+				$node->setAttribute( Attribute::HEIGHT, '72' );
+				$node->setAttribute( Attribute::NOLOADING, '' );
 			}
 
 			if ( $node->hasAttribute( 'data-amp-layout' ) ) {
 				$layout = $node->getAttribute( 'data-amp-layout' );
-			} elseif ( $node->hasAttribute( 'layout' ) ) {
-				$layout = $node->getAttribute( 'layout' );
+			} elseif ( $node->hasAttribute( Attribute::LAYOUT ) ) {
+				$layout = $node->getAttribute( Attribute::LAYOUT );
 			} else {
-				$layout = 'intrinsic';
+				$layout = Layout::INTRINSIC;
 			}
 
-			$has_width  = is_numeric( $node->getAttribute( 'width' ) );
-			$has_height = is_numeric( $node->getAttribute( 'height' ) );
+			$has_width  = is_numeric( $node->getAttribute( Attribute::WIDTH ) );
+			$has_height = is_numeric( $node->getAttribute( Attribute::HEIGHT ) );
 
 			// Determine which images need their dimensions determined/extracted.
 			$missing_dimensions = (
-				( ! $has_height && 'fixed-height' === $layout )
+				( ! $has_height && Layout::FIXED_HEIGHT === $layout )
 				||
 				(
 					( ! $has_width || ! $has_height )
 					&&
-					in_array( $layout, [ 'fixed', 'responsive', 'intrinsic' ], true )
+					in_array( $layout, [ Layout::FIXED, Layout::RESPONSIVE, Layout::INTRINSIC ], true )
 				)
 			);
 			if ( $missing_dimensions ) {
-				$need_dimensions[ $node->getAttribute( 'src' ) ][] = $node;
+				$need_dimensions[ $node->getAttribute( Attribute::SRC ) ][] = $node;
 			} else {
 				$this->adjust_and_replace_node( $node );
 			}
@@ -182,8 +189,8 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 		foreach ( $attributes as $name => $value ) {
 			switch ( $name ) {
-				case 'width':
-				case 'height':
+				case Attribute::WIDTH:
+				case Attribute::HEIGHT:
 					$out[ $name ] = $this->sanitize_dimension( $value, $name );
 					break;
 
@@ -196,17 +203,17 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 					break;
 
 				// Skip directly copying new web platform attributes from img to amp-img which are largely handled by AMP already.
-				case 'importance': // Not supported by AMP.
-				case 'intrinsicsize': // Responsive images handled by amp-img directly.
+				case Attribute::IMPORTANCE: // Not supported by AMP.
+				case Attribute::INTRINSICSIZE: // Responsive images handled by amp-img directly.
 					break;
 
-				case 'loading': // Lazy-loading handled by amp-img natively.
+				case Attribute::LOADING: // Lazy-loading handled by amp-img natively.
 					if ( 'lazy' !== strtolower( $value ) ) {
 						$out[ $name ] = $value;
 					}
 					break;
 
-				case 'decoding': // Async decoding handled by AMP.
+				case Attribute::DECODING: // Async decoding handled by AMP.
 					if ( 'async' !== strtolower( $value ) ) {
 						$out[ $name ] = $value;
 					}
@@ -237,12 +244,12 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				if ( ! $node instanceof DOMElement ) {
 					continue;
 				}
-				$class = $node->getAttribute( 'class' );
+				$class = $node->getAttribute( Attribute::CLASS_ );
 				if ( ! $class ) {
 					$class = '';
 				}
 				if ( ! $dimensions ) {
-					$node->setAttribute( 'object-fit', 'contain' );
+					$node->setAttribute( Attribute::OBJECT_FIT, 'contain' );
 					$class .= ' amp-wp-unknown-size';
 				}
 
@@ -255,31 +262,31 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 					$height = $dimensions['height'];
 				}
 
-				if ( ! is_numeric( $node->getAttribute( 'width' ) ) ) {
+				if ( ! is_numeric( $node->getAttribute( Attribute::WIDTH ) ) ) {
 
 					// Let width have the right aspect ratio based on the height attribute.
-					if ( is_numeric( $node->getAttribute( 'height' ) ) && isset( $dimensions['height'], $dimensions['width'] ) ) {
-						$width = ( (float) $node->getAttribute( 'height' ) * $dimensions['width'] ) / $dimensions['height'];
+					if ( is_numeric( $node->getAttribute( Attribute::HEIGHT ) ) && isset( $dimensions['height'], $dimensions['width'] ) ) {
+						$width = ( (float) $node->getAttribute( Attribute::HEIGHT ) * $dimensions['width'] ) / $dimensions['height'];
 					}
 
-					$node->setAttribute( 'width', $width );
+					$node->setAttribute( Attribute::WIDTH, $width );
 					if ( ! isset( $dimensions['width'] ) ) {
 						$class .= ' amp-wp-unknown-width';
 					}
 				}
-				if ( ! is_numeric( $node->getAttribute( 'height' ) ) ) {
+				if ( ! is_numeric( $node->getAttribute( Attribute::HEIGHT ) ) ) {
 
 					// Let height have the right aspect ratio based on the width attribute.
-					if ( is_numeric( $node->getAttribute( 'width' ) ) && isset( $dimensions['height'], $dimensions['width'] ) ) {
-						$height = ( (float) $node->getAttribute( 'width' ) * $dimensions['height'] ) / $dimensions['width'];
+					if ( is_numeric( $node->getAttribute( Attribute::WIDTH ) ) && isset( $dimensions['height'], $dimensions['width'] ) ) {
+						$height = ( (float) $node->getAttribute( Attribute::WIDTH ) * $dimensions['height'] ) / $dimensions['width'];
 					}
 
-					$node->setAttribute( 'height', $height );
+					$node->setAttribute( Attribute::HEIGHT, $height );
 					if ( ! isset( $dimensions['height'] ) ) {
 						$class .= ' amp-wp-unknown-height';
 					}
 				}
-				$node->setAttribute( 'class', trim( $class ) );
+				$node->setAttribute( Attribute::CLASS_, trim( $class ) );
 			}
 		}
 	}
@@ -310,21 +317,27 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		$old_attributes = $this->maybe_add_lightbox_attributes( $old_attributes, $node );
 
 		$new_attributes = $this->filter_attributes( $old_attributes );
-		$layout         = isset( $amp_data['layout'] ) ? $amp_data['layout'] : false;
+		$layout         = isset( $amp_data[ Attribute::LAYOUT ] ) ? $amp_data[ Attribute::LAYOUT ] : false;
 		$new_attributes = $this->filter_attachment_layout_attributes( $node, $new_attributes, $layout );
 
-		$this->add_or_append_attribute( $new_attributes, 'class', 'amp-wp-enforced-sizes' );
-		if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['height'] ) && ! empty( $new_attributes['width'] ) ) {
+		$this->add_or_append_attribute( $new_attributes, Attribute::CLASS_, 'amp-wp-enforced-sizes' );
+		if ( empty( $new_attributes[ Attribute::LAYOUT ] ) && ! empty( $new_attributes[ Attribute::HEIGHT ] ) && ! empty( $new_attributes[ Attribute::WIDTH ] ) ) {
 			// Use responsive images when a theme supports wide and full-bleed images.
-			if ( ! empty( $this->args['align_wide_support'] ) && $node->parentNode && 'figure' === $node->parentNode->nodeName && preg_match( '/(^|\s)(alignwide|alignfull)(\s|$)/', $node->parentNode->getAttribute( 'class' ) ) ) {
-				$new_attributes['layout'] = 'responsive';
+			if (
+				! empty( $this->args['align_wide_support'] )
+				&& $node->parentNode instanceof DOMElement
+				&& 'figure' === $node->parentNode->nodeName
+				&& preg_match( '/(^|\s)(alignwide|alignfull)(\s|$)/', $node->parentNode->getAttribute( Attribute::CLASS_ ) )
+			) {
+				$new_attributes[ Attribute::LAYOUT ] = Layout::RESPONSIVE;
 			} else {
-				$new_attributes['layout'] = 'intrinsic';
+				$new_attributes[ Attribute::LAYOUT ] = Layout::INTRINSIC;
 			}
 		}
 
-		// Remove sizes attribute since it causes headaches in AMP and because AMP will generate it for us. See <https://github.com/ampproject/amphtml/issues/21371>.
-		unset( $new_attributes['sizes'] );
+		if ( isset( $new_attributes[ Attribute::SIZES ] ) ) {
+			$new_attributes[ Attribute::DISABLE_INLINE_WIDTH ] = '';
+		}
 
 		if ( $this->is_gif_url( $new_attributes['src'] ) ) {
 			$this->did_convert_elements = true;
@@ -344,22 +357,22 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		 * case where an image gets a display:inline style via a style rule.
 		 * See <https://github.com/ampproject/amp-wp/issues/1803>.
 		 */
-		if ( $img_node->hasAttribute( 'style' ) ) {
-			$layout = $img_node->getAttribute( 'layout' );
-			if ( in_array( $layout, [ 'fixed-height', 'responsive', 'fill', 'flex-item' ], true ) ) {
+		if ( $img_node->hasAttribute( Attribute::STYLE ) ) {
+			$layout = $img_node->getAttribute( Attribute::LAYOUT );
+			if ( in_array( $layout, [ Layout::FIXED_HEIGHT, Layout::RESPONSIVE, Layout::FILL, Layout::FLEX_ITEM ], true ) ) {
 				$required_display = 'block';
-			} elseif ( 'nodisplay' === $layout ) {
+			} elseif ( Layout::NODISPLAY === $layout ) {
 				$required_display = 'none';
 			} else {
 				// This is also the default for any AMP element (.i-amphtml-element).
 				$required_display = 'inline-block';
 			}
 			$img_node->setAttribute(
-				'style',
+				Attribute::STYLE,
 				preg_replace(
 					'/\bdisplay\s*:\s*[a-z\-]+\b/',
 					"display:$required_display",
-					$img_node->getAttribute( 'style' )
+					$img_node->getAttribute( Attribute::STYLE )
 				)
 			);
 		}
@@ -383,7 +396,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			return $attributes;
 		}
 
-		$is_file_url                        = preg_match( '/\.\w+$/', wp_parse_url( $parent_node->getAttribute( 'href' ), PHP_URL_PATH ) );
+		$is_file_url                        = preg_match( '/\.\w+$/', wp_parse_url( $parent_node->getAttribute( Attribute::HREF ), PHP_URL_PATH ) );
 		$is_node_wrapped_in_media_file_link = (
 			'a' === $parent_node->tagName
 			&&
@@ -410,8 +423,8 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		$parent_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $parent_node );
 
 		if ( isset( $parent_attributes['data-amp-lightbox'] ) && true === filter_var( $parent_attributes['data-amp-lightbox'], FILTER_VALIDATE_BOOLEAN ) ) {
-			$attributes['data-amp-lightbox'] = '';
-			$attributes['lightbox']          = '';
+			$attributes['data-amp-lightbox']   = '';
+			$attributes[ Attribute::LIGHTBOX ] = '';
 
 			/*
 			 * Removes the <a> if the image is wrapped in one, as it can prevent the lightbox from working.
@@ -433,7 +446,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function does_node_have_block_class( $node ) {
 		if ( $node instanceof DOMElement ) {
-			$classes = preg_split( '/\s+/', $node->getAttribute( 'class' ) );
+			$classes = preg_split( '/\s+/', $node->getAttribute( Attribute::CLASS_ ) );
 			if ( in_array( 'wp-block-image', $classes, true ) ) {
 				return true;
 			}

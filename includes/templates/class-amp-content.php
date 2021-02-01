@@ -8,7 +8,9 @@
 /**
  * Class AMP_Content
  *
+ * @codeCoverageIgnore
  * @deprecated 1.5 Reader mode now sanitizes its entire template through the standard post-processor.
+ * @internal
  */
 class AMP_Content {
 
@@ -51,24 +53,24 @@ class AMP_Content {
 	/**
 	 * Embed handlers.
 	 *
-	 * @var AMP_Base_Embed_Handler[] AMP_Base_Embed_Handler[]
+	 * @var AMP_Base_Embed_Handler[]
 	 */
 	private $embed_handlers;
 
 	/**
-	 * Sanitizer class names.
+	 * Sanitizers, with keys as class names and values as arguments.
 	 *
-	 * @var string[]
+	 * @var array[]
 	 */
 	private $sanitizer_classes;
 
 	/**
 	 * AMP_Content constructor.
 	 *
-	 * @param string   $content               Content.
-	 * @param string[] $embed_handler_classes Embed handler class names.
-	 * @param string[] $sanitizer_classes     Sanitizer class names.
-	 * @param array    $args                  Args.
+	 * @param string  $content               Content.
+	 * @param array[] $embed_handler_classes Embed handlers, with keys as class names and values as arguments.
+	 * @param array[] $sanitizer_classes     Sanitizers, with keys as class names and values as arguments.
+	 * @param array   $args                  Args.
 	 */
 	public function __construct( $content, $embed_handler_classes, $sanitizer_classes, $args = [] ) {
 		$this->content           = $content;
@@ -127,6 +129,7 @@ class AMP_Content {
 		$content = $this->content;
 
 		// First, embeds + the_content filter.
+		/** This filter is documented in wp-includes/post-template.php */
 		$content = apply_filters( 'the_content', $content );
 		$this->unregister_embed_handlers( $this->embed_handlers );
 
@@ -158,8 +161,8 @@ class AMP_Content {
 	/**
 	 * Register embed handlers.
 	 *
-	 * @param string[] $embed_handler_classes Embed handler class names.
-	 * @return array
+	 * @param array[] $embed_handler_classes Embed handlers, with keys as class names and values as arguments.
+	 * @return AMP_Base_Embed_Handler[] Registered embed handlers.
 	 */
 	private function register_embed_handlers( $embed_handler_classes ) {
 		$embed_handlers = [];
@@ -193,11 +196,11 @@ class AMP_Content {
 	/**
 	 * Unregister embed handlers.
 	 *
-	 * @param array $embed_handlers Embed handlers.
+	 * @param AMP_Base_Embed_Handler[] $embed_handlers Embed handlers.
 	 */
 	private function unregister_embed_handlers( $embed_handlers ) {
 		foreach ( $embed_handlers as $embed_handler ) {
-			$this->add_scripts( $embed_handler->get_scripts() );
+			$this->add_scripts( $embed_handler->get_scripts() ); // @todo Why add_scripts here? Shouldn't it be array_diff()?
 			$embed_handler->unregister_embed();
 		}
 	}

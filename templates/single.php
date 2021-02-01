@@ -25,8 +25,16 @@ $this->load_parts( [ 'html-start' ] );
 
 <article class="amp-wp-article">
 	<header class="amp-wp-article-header">
-		<h1 class="amp-wp-title"><?php echo esc_html( $this->get( 'post_title' ) ); ?></h1>
-		<?php $this->load_parts( apply_filters( 'amp_post_article_header_meta', [ 'meta-author', 'meta-time' ] ) ); ?>
+		<h1 class="amp-wp-title"><?php echo $this->get( 'post_title' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></h1>
+		<?php
+		/**
+		 * Filters the template parts loaded in the header area of the AMP legacy post template.
+		 *
+		 * @since 0.4
+		 * @param string[] Templates to load.
+		 */
+		$this->load_parts( apply_filters( 'amp_post_article_header_meta', [ 'meta-author', 'meta-time' ] ) );
+		?>
 	</header>
 
 	<?php $this->load_parts( [ 'featured-image' ] ); ?>
@@ -36,7 +44,15 @@ $this->load_parts( [ 'html-start' ] );
 	</div>
 
 	<footer class="amp-wp-article-footer">
-		<?php $this->load_parts( apply_filters( 'amp_post_article_footer_meta', [ 'meta-taxonomy', 'meta-comments-link' ] ) ); ?>
+		<?php
+		/**
+		 * Filters the template parts to load in the footer area of the AMP legacy post template.
+		 *
+		 * @since 0.4
+		 * @param string[] Templates to load.
+		 */
+		$this->load_parts( apply_filters( 'amp_post_article_footer_meta', [ 'meta-taxonomy', 'meta-comments-link' ] ) );
+		?>
 	</footer>
 </article>
 

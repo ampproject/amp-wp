@@ -5,41 +5,33 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Admin\SiteHealth;
-
-/**
- * Obsolete constant for flagging when Customizer is opened for AMP.
- *
- * @deprecated
- * @var string
- */
-define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
+use AmpProject\AmpWP\Option;
 
 /**
  * Sets up the AMP template editor for the Customizer.
  *
- * If this is in AMP canonical mode, exit.
- * There's no need for the 'AMP' Customizer panel,
- * And this does not need to toggle between the AMP and normal display.
+ * @internal
  */
 function amp_init_customizer() {
-	if ( ! AMP_Options_Manager::is_website_experience_enabled() || AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( 'theme_support' ) ) {
-		return;
-	}
 
 	// Fire up the AMP Customizer.
 	add_action( 'customize_register', [ 'AMP_Template_Customizer', 'init' ], 500 );
 
-	// Add some basic design settings + controls to the Customizer.
-	add_action( 'amp_init', [ 'AMP_Customizer_Design_Settings', 'init' ] );
+	if ( amp_is_legacy() ) {
+		// Add some basic design settings + controls to the Customizer.
+		add_action( 'amp_init', [ 'AMP_Customizer_Design_Settings', 'init' ] );
+	}
 
-	// Add a link to the Customizer.
-	add_action( 'admin_menu', 'amp_add_customizer_link' );
+	// Add a link to the AMP Customizer in Reader mode.
+	if ( AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT ) ) {
+		add_action( 'admin_menu', 'amp_add_customizer_link' );
+	}
 }
 
 /**
  * Get permalink for the first AMP-eligible post.
  *
+ * @internal
  * @return string|null URL on success, null if none found.
  */
 function amp_admin_get_preview_permalink() {
@@ -51,7 +43,7 @@ function amp_admin_get_preview_permalink() {
 	$post_type = (string) apply_filters( 'amp_customizer_post_type', 'post' );
 
 	// Make sure the desired post type is actually supported, and if so, prefer it.
-	$supported_post_types = get_post_types_by_support( AMP_Post_Type_Support::SLUG );
+	$supported_post_types = AMP_Post_Type_Support::get_supported_post_types();
 	if ( in_array( $post_type, $supported_post_types, true ) ) {
 		$supported_post_types = array_unique( array_merge( [ $post_type ], $supported_post_types ) );
 	}
@@ -62,7 +54,7 @@ function amp_admin_get_preview_permalink() {
 	}
 
 	// If theme support is present, then bail if the singular template is not supported.
-	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+	if ( ! amp_is_legacy() ) {
 		$supported_templates = AMP_Theme_Support::get_supportable_templates();
 		if ( empty( $supported_templates['is_singular']['supported'] ) ) {
 			return null;
@@ -74,16 +66,15 @@ function amp_admin_get_preview_permalink() {
 			'no_found_rows'    => true,
 			'suppress_filters' => false,
 			'post_status'      => 'publish',
-			'post_password'    => '',
 			'post_type'        => $supported_post_types,
 			'posts_per_page'   => 1,
 			'fields'           => 'ids',
-		// @todo This should eventually do a meta_query to make sure there are none that have AMP_Post_Meta_Box::STATUS_POST_META_KEY = DISABLED_STATUS.
+			// @todo This should eventually do a meta_query to make sure there are none that have AMP_Post_Meta_Box::STATUS_POST_META_KEY = DISABLED_STATUS.
 		]
 	);
 
 	if ( empty( $post_ids ) ) {
-		return false;
+		return null;
 	}
 
 	$post_id = $post_ids[0];
@@ -92,53 +83,51 @@ function amp_admin_get_preview_permalink() {
 }
 
 /**
- * Registers a submenu page to access the AMP template editor panel in the Customizer.
+ * Provides a URL to the customizer.
+ *
+ * @internal
+ * @return string
  */
-function amp_add_customizer_link() {
+function amp_get_customizer_url() {
+	$is_legacy = amp_is_legacy();
+	$mode      = AMP_Options_Manager::get_option( Option::THEME_SUPPORT );
+
 	/** This filter is documented in includes/settings/class-amp-customizer-design-settings.php */
-	if ( ! apply_filters( 'amp_customizer_is_enabled', true ) || current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-		return;
+	if ( 'reader' !== $mode || ( $is_legacy && ! apply_filters( 'amp_customizer_is_enabled', true ) ) ) {
+		return '';
 	}
 
-	$menu_slug = add_query_arg(
-		[
-			'autofocus[panel]' => AMP_Template_Customizer::PANEL_ID,
-			'return'           => rawurlencode( admin_url() ),
-		],
-		'customize.php'
-	);
+	$args = [
+		'url' => amp_admin_get_preview_permalink(),
+	];
+	if ( $is_legacy ) {
+		$args['autofocus[panel]'] = AMP_Template_Customizer::PANEL_ID;
+	} else {
+		$args[ amp_get_slug() ] = '1';
+	}
+
+	return add_query_arg( urlencode_deep( $args ), 'customize.php' );
+}
+
+/**
+ * Registers a submenu page to access the AMP template editor panel in the Customizer.
+ *
+ * @internal
+ */
+function amp_add_customizer_link() {
+	$customizer_url = amp_get_customizer_url();
+
+	if ( ! $customizer_url ) {
+		return;
+	}
 
 	// Add the theme page.
 	add_theme_page(
 		__( 'AMP', 'amp' ),
 		__( 'AMP', 'amp' ),
 		'edit_theme_options',
-		$menu_slug
+		$customizer_url
 	);
-}
-
-/**
- * Registers AMP settings.
- */
-function amp_add_options_menu() {
-	if ( ! is_admin() ) {
-		return;
-	}
-
-	/**
-	 * Filter whether to enable the AMP settings.
-	 *
-	 * @since 0.5
-	 * @param bool $enable Whether to enable the AMP settings. Default true.
-	 */
-	$short_circuit = apply_filters( 'amp_options_menu_is_enabled', true );
-
-	if ( true !== $short_circuit ) {
-		return;
-	}
-
-	$amp_options = new AMP_Options_Menu();
-	$amp_options->init();
 }
 
 /**
@@ -148,6 +137,7 @@ function amp_add_options_menu() {
  *
  * @since 0.5
  * @see amp_get_analytics()
+ * @internal
  *
  * @param array $analytics Analytics.
  * @return array Analytics.
@@ -173,6 +163,8 @@ function amp_add_custom_analytics( $analytics = [] ) {
 
 /**
  * Bootstrap AMP Editor core blocks.
+ *
+ * @internal
  */
 function amp_editor_core_blocks() {
 	$editor_blocks = new AMP_Editor_Blocks();
@@ -183,6 +175,7 @@ function amp_editor_core_blocks() {
  * Bootstraps AMP admin classes.
  *
  * @since 1.5.0
+ * @internal
  */
 function amp_bootstrap_admin() {
 	$admin_pointers = new AMP_Admin_Pointers();
@@ -190,17 +183,18 @@ function amp_bootstrap_admin() {
 
 	$post_meta_box = new AMP_Post_Meta_Box();
 	$post_meta_box->init();
-
-	$site_health = new SiteHealth();
-	$site_health->init();
 }
 
 /**
- * Bootstrap the Story Templates needed in editor.
+ * Whether to activate the new onboarding feature.
  *
- * @since 1.?
+ * @internal
+ * @return bool
  */
-function amp_story_templates() {
-	$story_templates = new AMP_Story_Templates();
-	$story_templates->init();
+function amp_should_use_new_onboarding() {
+	if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
+		return false;
+	}
+
+	return true;
 }

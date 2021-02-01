@@ -1,9 +1,18 @@
 <?php
 /**
- * Class AMP_Links_Sanitizer.
+ * Class AMP_Meta_Sanitizer.
  *
+ * Ensure required markup is present for valid AMP pages.
+ *
+ * @todo Rename to something like AMP_Ensure_Required_Markup_Sanitizer.
+ *
+ * @link https://amp.dev/documentation/guides-and-tutorials/start/create/basic_markup/?format=websites#required-mark-up
  * @package AMP
  */
+
+use AmpProject\Attribute;
+use AmpProject\Dom\Document;
+use AmpProject\Tag;
 
 /**
  * Class AMP_Meta_Sanitizer.
@@ -11,6 +20,7 @@
  * Sanitizes meta tags found in the header.
  *
  * @since 1.5.0
+ * @internal
  */
 class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 
@@ -25,6 +35,7 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	 * Tags array keys.
 	 */
 	const TAG_CHARSET        = 'charset';
+	const TAG_HTTP_EQUIV     = 'http-equiv';
 	const TAG_VIEWPORT       = 'viewport';
 	const TAG_AMP_SCRIPT_SRC = 'amp_script_src';
 	const TAG_OTHER          = 'other';
@@ -37,25 +48,19 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array $tags {
 	 *     An array of meta tag groupings.
 	 *
-	 *     @type DOMElement[] $charset        Charset meta tag(s).
-	 *     @type DOMElement[] $viewport       Viewport meta tag(s).
-	 *     @type DOMElement[] $amp_script_src <amp-script> source meta tags.
-	 *     @type DOMElement[] $other          Remaining meta tags.
+	 *     @type DOMElement[] $charset                  Charset meta tag(s).
+	 *     @type DOMElement[] $viewport                 Viewport meta tag(s).
+	 *     @type DOMElement[] $amp_script_src           <amp-script> source meta tags.
+	 *     @type DOMElement[] $other                    Remaining meta tags.
 	 * }
 	 */
 	protected $meta_tags = [
 		self::TAG_CHARSET        => [],
+		self::TAG_HTTP_EQUIV     => [],
 		self::TAG_VIEWPORT       => [],
 		self::TAG_AMP_SCRIPT_SRC => [],
 		self::TAG_OTHER          => [],
 	];
-
-	/**
-	 * Charset to use for AMP markup.
-	 *
-	 * @var string
-	 */
-	const AMP_CHARSET = 'utf-8';
 
 	/**
 	 * Viewport settings to use for AMP markup.
@@ -65,45 +70,82 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	const AMP_VIEWPORT = 'width=device-width';
 
 	/**
+	 * Spec name for the tag spec for meta elements that are allowed in the body.
+	 *
+	 * @since 1.5.2
+	 * @var string
+	 */
+	const BODY_ANCESTOR_META_TAG_SPEC_NAME = 'meta name= and content=';
+
+	/**
+	 * Get tag spec for meta tags which are allowed in the body.
+	 *
+	 * @since 1.5.2
+	 * @return string Deny pattern.
+	 */
+	private function get_body_meta_tag_name_attribute_deny_pattern() {
+		static $pattern = null;
+		if ( null === $pattern ) {
+			$tag_spec = current(
+				array_filter(
+					AMP_Allowed_Tags_Generated::get_allowed_tag( 'meta' ),
+					static function ( $spec ) {
+						return isset( $spec['tag_spec']['spec_name'] ) && self::BODY_ANCESTOR_META_TAG_SPEC_NAME === $spec['tag_spec']['spec_name'];
+					}
+				)
+			);
+			$pattern  = '/' . $tag_spec['attr_spec_list']['name']['disallowed_value_regex'] . '/';
+		}
+		return $pattern;
+	}
+
+	/**
 	 * Sanitize.
 	 */
 	public function sanitize() {
-		$elements = $this->dom->getElementsByTagName( static::$tag );
+		$meta_elements = iterator_to_array( $this->dom->getElementsByTagName( static::$tag ), false );
 
-		// Remove all nodes for easy reordering later on.
-		$elements = array_map(
-			static function ( $element ) {
-				return $element->parentNode->removeChild( $element );
-			},
-			iterator_to_array( $elements, false )
-		);
+		foreach ( $meta_elements as $meta_element ) {
 
-		foreach ( $elements as $element ) {
+			// Strip whitespace around equal signs. Won't be needed after <https://github.com/ampproject/amphtml/issues/26496> is resolved.
+			if ( $meta_element->hasAttribute( Attribute::CONTENT ) ) {
+				$meta_element->setAttribute(
+					Attribute::CONTENT,
+					preg_replace( '/\s*=\s*/', '=', $meta_element->getAttribute( Attribute::CONTENT ) )
+				);
+			}
+
 			/**
 			 * Meta tag to process.
 			 *
-			 * @var DOMElement $element
+			 * @var DOMElement $meta_element
 			 */
-			if ( $element->hasAttribute( 'charset' ) ) {
-				$this->meta_tags[ self::TAG_CHARSET ][] = $element;
-			} elseif ( 'viewport' === $element->getAttribute( 'name' ) ) {
-				$this->meta_tags[ self::TAG_VIEWPORT ][] = $element;
-			} elseif ( 'amp-script-src' === $element->getAttribute( 'name' ) ) {
-				$this->meta_tags[ self::TAG_AMP_SCRIPT_SRC ][] = $element;
-			} else {
-				$this->meta_tags[ self::TAG_OTHER ][] = $element;
+			if ( $meta_element->hasAttribute( Attribute::CHARSET ) ) {
+				$this->meta_tags[ self::TAG_CHARSET ][] = $meta_element->parentNode->removeChild( $meta_element );
+			} elseif ( $meta_element->hasAttribute( Attribute::HTTP_EQUIV ) ) {
+				$this->meta_tags[ self::TAG_HTTP_EQUIV ][] = $meta_element->parentNode->removeChild( $meta_element );
+			} elseif ( Attribute::VIEWPORT === $meta_element->getAttribute( Attribute::NAME ) ) {
+				$this->meta_tags[ self::TAG_VIEWPORT ][] = $meta_element->parentNode->removeChild( $meta_element );
+			} elseif ( Attribute::AMP_SCRIPT_SRC === $meta_element->getAttribute( Attribute::NAME ) ) {
+				$this->meta_tags[ self::TAG_AMP_SCRIPT_SRC ][] = $meta_element->parentNode->removeChild( $meta_element );
+			} elseif (
+				$meta_element->hasAttribute( 'name' )
+				&&
+				preg_match( $this->get_body_meta_tag_name_attribute_deny_pattern(), $meta_element->getAttribute( 'name' ) )
+			) {
+				$this->meta_tags[ self::TAG_OTHER ][] = $meta_element->parentNode->removeChild( $meta_element );
 			}
 		}
 
 		$this->ensure_charset_is_present();
-
 		$this->ensure_viewport_is_present();
 
 		$this->process_amp_script_meta_tags();
 
 		$this->re_add_meta_tags_in_optimized_order();
-	}
 
+		$this->ensure_boilerplate_is_present();
+	}
 
 	/**
 	 * Always ensure that we have an HTML 5 charset meta tag.
@@ -122,41 +164,83 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	 * Always ensure we have a viewport tag.
 	 *
 	 * The viewport defaults to 'width=device-width', which is the bare minimum that AMP requires.
+	 * If there are `@viewport` style rules, these will have been moved into the content attribute of their own meta[name=viewport]
+	 * tags by the style sanitizer. When there are multiple such meta tags, this method extracts the viewport properties of each
+	 * and then merges them into a single meta[name=viewport] tag. Any invalid properties will get removed by the
+	 * tag-and-attribute sanitizer.
 	 */
 	protected function ensure_viewport_is_present() {
 		if ( empty( $this->meta_tags[ self::TAG_VIEWPORT ] ) ) {
 			$this->meta_tags[ self::TAG_VIEWPORT ][] = $this->create_viewport_element( static::AMP_VIEWPORT );
-			return;
-		}
+		} else {
+			// Merge one or more meta[name=viewport] tags into one.
+			$parsed_rules = [];
 
-		// Ensure we have the 'width=device-width' setting included.
-		/**
-		 * Viewport tag.
-		 *
-		 * @var DOMElement $viewport_tag
-		 */
-		$viewport_tag      = $this->meta_tags[ self::TAG_VIEWPORT ][0];
-		$viewport_content  = $viewport_tag->getAttribute( 'content' );
-		$viewport_settings = array_map( 'trim', explode( ',', $viewport_content ) );
-		$width_found       = false;
-
-		// @todo The invalid/missing properties should raise validation errors. See <https://github.com/ampproject/amp-wp/pull/3758/files#r348074703>.
-		foreach ( $viewport_settings as $index => $viewport_setting ) {
-			list( $property, $value ) = array_map( 'trim', explode( '=', $viewport_setting ) );
-			if ( 'width' === $property ) {
-				if ( 'device-width' !== $value ) {
-					$viewport_settings[ $index ] = 'width=device-width';
+			/**
+			 * Meta viewport element.
+			 *
+			 * @var DOMElement $meta_viewport
+			 */
+			foreach ( $this->meta_tags[ self::TAG_VIEWPORT ] as $meta_viewport ) {
+				$property_pairs = explode( ',', $meta_viewport->getAttribute( 'content' ) );
+				foreach ( $property_pairs as $property_pair ) {
+					$exploded_pair = explode( '=', $property_pair, 2 );
+					if ( isset( $exploded_pair[1] ) ) {
+						$parsed_rules[ trim( $exploded_pair[0] ) ] = trim( $exploded_pair[1] );
+					}
 				}
-				$width_found = true;
-				break;
 			}
+
+			$viewport_value = implode(
+				',',
+				array_map(
+					static function ( $rule_name ) use ( $parsed_rules ) {
+						return $rule_name . '=' . $parsed_rules[ $rule_name ];
+					},
+					array_keys( $parsed_rules )
+				)
+			);
+
+			$this->meta_tags[ self::TAG_VIEWPORT ] = [ $this->create_viewport_element( $viewport_value ) ];
+		}
+	}
+
+	/**
+	 * Always ensure we have a style[amp-boilerplate] and a noscript>style[amp-boilerplate].
+	 *
+	 * The AMP boilerplate styles should appear at the end of the head:
+	 * "Finally, specify the AMP boilerplate code. By putting the boilerplate code last, it prevents custom styles from
+	 * accidentally overriding the boilerplate css rules."
+	 *
+	 * @link https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites
+	 * @link https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/optimize_amp/#optimize-the-amp-runtime-loading
+	 */
+	protected function ensure_boilerplate_is_present() {
+		$style = $this->dom->xpath->query( './style[ @amp-boilerplate ]', $this->dom->head )->item( 0 );
+
+		if ( ! $style ) {
+			$style = $this->dom->createElement( Tag::STYLE );
+			$style->setAttribute( Attribute::AMP_BOILERPLATE, '' );
+			$style->appendChild( $this->dom->createTextNode( amp_get_boilerplate_stylesheets()[0] ) );
+		} else {
+			$style->parentNode->removeChild( $style ); // So we can move it.
 		}
 
-		if ( ! $width_found ) {
-			array_unshift( $viewport_settings, 'width=device-width' );
+		$this->dom->head->appendChild( $style );
+
+		$noscript = $this->dom->xpath->query( './noscript[ style[ @amp-boilerplate ] ]', $this->dom->head )->item( 0 );
+
+		if ( ! $noscript ) {
+			$noscript = $this->dom->createElement( Tag::NOSCRIPT );
+			$style    = $this->dom->createElement( Tag::STYLE );
+			$style->setAttribute( Attribute::AMP_BOILERPLATE, '' );
+			$style->appendChild( $this->dom->createTextNode( amp_get_boilerplate_stylesheets()[1] ) );
+			$noscript->appendChild( $style );
+		} else {
+			$noscript->parentNode->removeChild( $noscript ); // So we can move it.
 		}
 
-		$viewport_tag->setAttribute( 'content', implode( ',', $viewport_settings ) );
+		$this->dom->head->appendChild( $noscript );
 	}
 
 	/**
@@ -168,15 +252,15 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$first_meta_amp_script_src = array_shift( $this->meta_tags[ self::TAG_AMP_SCRIPT_SRC ] );
-		$content_values            = [ $first_meta_amp_script_src->getAttribute( 'content' ) ];
+		$content_values            = [ $first_meta_amp_script_src->getAttribute( Attribute::CONTENT ) ];
 
 		// Merge (and remove) any subsequent meta amp-script-src elements.
 		while ( ! empty( $this->meta_tags[ self::TAG_AMP_SCRIPT_SRC ] ) ) {
 			$meta_amp_script_src = array_shift( $this->meta_tags[ self::TAG_AMP_SCRIPT_SRC ] );
-			$content_values[]    = $meta_amp_script_src->getAttribute( 'content' );
+			$content_values[]    = $meta_amp_script_src->getAttribute( Attribute::CONTENT );
 		}
 
-		$first_meta_amp_script_src->setAttribute( 'content', implode( ' ', $content_values ) );
+		$first_meta_amp_script_src->setAttribute( Attribute::CONTENT, implode( ' ', $content_values ) );
 
 		$this->meta_tags[ self::TAG_AMP_SCRIPT_SRC ][] = $first_meta_amp_script_src;
 	}
@@ -189,9 +273,9 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	protected function create_charset_element() {
 		return AMP_DOM_Utils::create_node(
 			$this->dom,
-			'meta',
+			Tag::META,
 			[
-				'charset' => self::AMP_CHARSET,
+				Attribute::CHARSET => Document::AMP_ENCODING,
 			]
 		);
 	}
@@ -205,10 +289,10 @@ class AMP_Meta_Sanitizer extends AMP_Base_Sanitizer {
 	protected function create_viewport_element( $viewport ) {
 		return AMP_DOM_Utils::create_node(
 			$this->dom,
-			'meta',
+			Tag::META,
 			[
-				'name'    => 'viewport',
-				'content' => $viewport,
+				Attribute::NAME    => Attribute::VIEWPORT,
+				Attribute::CONTENT => $viewport,
 			]
 		);
 	}

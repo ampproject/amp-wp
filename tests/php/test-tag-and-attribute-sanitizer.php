@@ -5,7 +5,10 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Dom\Document;
+use AmpProject\AmpWP\Tests\Helpers\MarkupComparison;
+use AmpProject\Dom\Document;
+
+// phpcs:disable WordPress.WP.EnqueuedResources
 
 /**
  * Test AMP_Tag_And_Attribute_Sanitizer
@@ -13,6 +16,8 @@ use Amp\AmpWP\Dom\Document;
  * @covers AMP_Tag_And_Attribute_Sanitizer
  */
 class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
+
+	use MarkupComparison;
 
 	/**
 	 * Get data for testing sanitization in the body.
@@ -69,6 +74,16 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG_ANCESTOR ],
 			],
 
+			'amp-script-intrinsic'                         => [
+				'
+				<amp-script src="https://example.com/hello-world.js" layout="intrinsic" width="200" height="123">
+					<button>Hello amp-script!</button>
+				</amp-script>
+				',
+				null,
+				[ 'amp-script' ],
+			],
+
 			'bad-svg-stop'                                 => [
 				'<stop offset="5%" stop-color="gold" />',
 				'',
@@ -90,18 +105,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[],
 				[
 					[
-						'code'   => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG_MULTIPLE_CHOICES,
-						'errors' => [
-							[
-								'code'      => AMP_Tag_And_Attribute_Sanitizer::WRONG_PARENT_TAG,
-								'spec_name' => 'noscript enclosure for boilerplate',
-							],
-							[
-								'code'                => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG_ANCESTOR,
-								'disallowed_ancestor' => 'noscript',
-								'spec_name'           => 'noscript',
-							],
-						],
+						'code'                 => AMP_Tag_And_Attribute_Sanitizer::WRONG_PARENT_TAG,
+						'spec_name'            => 'noscript enclosure for boilerplate',
+						'required_parent_name' => 'head',
 					],
 				],
 			],
@@ -156,13 +162,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_CHILD_TAG ],
 			],
 
-			'amp-call-tracking_blacklisted_config'         => [
+			'amp-call-tracking_disallowed_config'          => [
 				'<amp-call-tracking config="__amp_source_origin"><a href="tel:123456789">+1 (23) 456-789</a></amp-call-tracking>',
 				'',
 				[], // Important: This needs to be empty because the amp-call-tracking is stripped.
 				[
 					[
-						'code'      => AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX,
+						'code'      => AMP_Tag_And_Attribute_Sanitizer::INVALID_DISALLOWED_VALUE_REGEX,
 						'node_name' => 'config',
 					],
 					[
@@ -239,16 +245,22 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'amp-iframe'                                   => [
-				'<amp-iframe width="600" height="200" sandbox="allow-scripts allow-same-origin" layout="responsive" frameborder="0" src="https://www.example.com"></amp-iframe>',
+				'<amp-iframe width="600" height="200" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation" layout="responsive" frameborder="0" src="https://www.example.com"></amp-iframe>',
 				null, // No change.
 				[ 'amp-iframe' ],
 			],
 
 			'amp-iframe_incorrect_protocol'                => [
-				'<amp-iframe width="600" height="200" sandbox="allow-scripts allow-same-origin" layout="responsive" frameborder="0" src="masterprotocol://www.example.com"></amp-iframe>',
-				'<amp-iframe width="600" height="200" sandbox="allow-scripts allow-same-origin" layout="responsive" frameborder="0"></amp-iframe>',
-				[ 'amp-iframe' ],
-				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_URL_PROTOCOL ],
+				'<amp-iframe width="600" height="200" sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation" layout="responsive" frameborder="0" src="badprotocol://www.example.com"></amp-iframe>',
+				'',
+				[],
+				[
+					AMP_Tag_And_Attribute_Sanitizer::INVALID_URL_PROTOCOL,
+					[
+						'code'                  => AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ONEOF_ATTR_MISSING,
+						'mandatory_oneof_attrs' => [ 'src', 'srcdoc' ],
+					],
+				],
 			],
 
 			'amp-ima-video'                                => [
@@ -319,8 +331,25 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-bind' ],
 			],
 
+			'amp-list-load-more_no_mandatory_oneof'        => [
+				'<amp-list src="https://foo.com" width="400" height="800"><amp-list-load-more></amp-list-load-more></amp-list>',
+				'<amp-list src="https://foo.com" width="400" height="800"></amp-list>',
+				[ 'amp-list' ],
+				[
+					[
+						'code'                  => AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ONEOF_ATTR_MISSING,
+						'mandatory_oneof_attrs' => [
+							'load-more-button',
+							'load-more-end',
+							'load-more-failed',
+							'load-more-loading',
+						],
+					],
+				],
+			],
+
 			'amp-nexxtv-player'                            => [
-				'<amp-nexxtv-player data-mediaid="123ABC" data-client="4321"></amp-nexxtv-player>',
+				'<amp-nexxtv-player data-mediaid="123ABC" data-client="4321" width="100" height="100"></amp-nexxtv-player>',
 				null, // No change.
 				[ 'amp-nexxtv-player' ],
 			],
@@ -333,8 +362,17 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'amp-playbuzz_no_src'                          => [
 				'<amp-playbuzz height="500" data-item-info="true"></amp-playbuzz>',
-				null, // @todo This actually should be stripped because .
-				[ 'amp-playbuzz' ],
+				'',
+				[],
+				[
+					[
+						'code'                  => AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ONEOF_ATTR_MISSING,
+						'mandatory_oneof_attrs' => [
+							'data-item',
+							'src',
+						],
+					],
+				],
 			],
 
 			'invalid_element_stripped'                     => [
@@ -365,11 +403,69 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				],
 			],
 
-			// AMP-NEXT-PAGE > [separator].
-			'reference-point-amp-next-page-separator'      => [
-				'<amp-next-page src="https://example.com/config.json"><div separator><h1>Keep reading</h1></div></amp-next-page>',
+			'amp-next-page-example'                        => [
+				'
+				<amp-next-page deep-parsing="false" max-pages="5">
+				 <script type="application/json">
+				   [
+				     {
+				       "image": "https://example.com/image1.jpg",
+				       "title": "This article shows first",
+				       "url": "https://example.com/article1.amp.html"
+				     }
+				   ]
+				 </script>
+				</amp-next-page>
+				',
 				null,
 				[ 'amp-next-page' ],
+			],
+
+			'amp-next-page-hide-and-replace'               => [
+				'
+				<header class="my-header" next-page-hide>
+					<h2>Text here.</h2>
+				</header>
+				<div class="sticky" next-page-replace="sticky-123">
+					<h2>The second sticky will replace me once you scroll past my page</h2>
+				</div>
+				',
+				null,
+				[ 'amp-next-page' ],
+			],
+
+			// AMP-NEXT-PAGE > [separator].
+			'reference-point-amp-next-page-separator'      => [
+				'<amp-next-page src="https://example.com/config.json" xssi-prefix=")]}"><div separator><h1>Keep reading</h1></div></amp-next-page>',
+				null,
+				[ 'amp-next-page' ],
+			],
+
+			// AMP-NEXT-PAGE > [footer].
+			'reference-point-amp-next-page-footer'         => [
+				'<amp-next-page src="https://example.com/config.json"><div footer>The footer</div></amp-next-page>',
+				null,
+				[ 'amp-next-page' ],
+			],
+
+			// AMP-NEXT-PAGE > [recommendation-box].
+			'reference-point-amp-next-page-recommendation' => [
+				'
+				<amp-next-page src="https://example.com/config.json">
+				  <div recommendation-box class="my-custom-recommendation-box">
+				    Here are a few more articles:
+				    <template type="amp-mustache">
+				      <div class="recommendation-box-content">
+				{{#pages}}        <span class="title">{{title}}</span>
+				        <span class="url">{{url}}</span>
+				        <span class="image">{{image}}</span>
+				{{/pages}}      </div>
+				    </template>
+				  </div>
+				</amp-next-page>
+				',
+				null,
+				[ 'amp-next-page', 'amp-mustache' ],
 			],
 
 			// amp-next-page extension .json configuration.
@@ -409,8 +505,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						[ "\n", "\t" ],
 						'',
 						'
-						<amp-story standalone live-story-disabled supports-landscape title="My Story" publisher="The AMP Team" publisher-logo-src="https://example.com/logo/1x1.png" poster-portrait-src="https://example.com/my-story/poster/3x4.jpg" poster-square-src="https://example.com/my-story/poster/1x1.jpg" poster-landscape-src="https://example.com/my-story/poster/4x3.jpg" background-audio="my.mp3">
-							<amp-story-page id="my-first-page">
+						<amp-story standalone entity="User" entity-logo-src="https://example.com/logo/1x1.png" entity-url="https://example.com/profile/user" live-story-disabled supports-landscape title="My Story" publisher="The AMP Team" publisher-logo-src="https://example.com/logo/1x1.png" poster-portrait-src="https://example.com/my-story/poster/3x4.jpg" poster-square-src="https://example.com/my-story/poster/1x1.jpg" poster-landscape-src="https://example.com/my-story/poster/4x3.jpg" background-audio="my.mp3">
+							<amp-story-page id="my-first-page" next-page-no-ad>
 								<amp-story-grid-layer template="fill">
 									<amp-img id="object1" animate-in="rotate-in-left" src="https://example.ampproject.org/helloworld/bg1.jpg" width="900" height="1600">
 									</amp-img>
@@ -427,6 +523,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 							</amp-story-page>
 							<amp-story-page id="my-second-page">
 								<amp-analytics config="https://example.com/analytics.account.config.json"></amp-analytics>
+								<amp-story-grid-layer template="fill">
+									<amp-story-360 controls="gyroscope" layout="fixed" width="100" height="100" heading-start="-45" pitch-start="-20" heading-end="95" pitch-end="-10" scene-heading="0.00" scene-pitch="0.00" scene-roll="0.00" zoom-end="4" duration="30s">
+										<amp-img src="img/panorama1.jpg" layout="fixed" width="200" height="100" crossorigin="anonymous" referrerpolicy="origin"></amp-img>
+									</amp-story-360>
+								</amp-story-grid-layer>
 								<amp-story-grid-layer template="thirds">
 									<amp-img grid-area="bottom-third" src="https://example.ampproject.org/helloworld/bg2.gif" width="900" height="1600">
 									</amp-img>
@@ -454,6 +555,36 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 									</amp-twitter>
 								</amp-story-page-attachment>
 							</amp-story-page>
+							<amp-story-page id="interactive-poll">
+								<amp-story-grid-layer template="fill">
+									<amp-story-interactive-poll id="correct-poll" endpoint="https://webstoriesinteractivity-beta.web.app/api/v1" theme="dark" chip-style="shadow" class="nice-quiz" prompt-text="What country do you like the most?" option-1-text="France" option-1-confetti="🇺🇾" option-1-results-category="Dog" option-2-text="Spain" option-2-confetti="🇺🇾" option-2-results-category="Cat" option-3-text="Uruguay" option-3-confetti="🇺🇾" option-3-results-category="Bunny" option-4-text="Brazil" option-4-confetti="🇺🇾" option-4-results-category="Mouse">
+									</amp-story-interactive-poll>
+									<amp-story-interactive-results prompt-text="Your level is" option-1-results-category="Beginner" option-1-image="beginner.png" option-1-results-threshold="1.0" option-2-results-category="Expet" option-2-image="expert.png" option-2-results-threshold="80"></amp-story-interactive-results>
+								</amp-story-grid-layer>
+							</amp-story-page>
+							<amp-story-page id="amp-story-interactive-binary-poll">
+								<amp-story-grid-layer template="fill">
+									<amp-story-interactive-binary-poll id="correct-binary-poll" endpoint="https://webstoriesinteractivity-beta.web.app/api/v1" theme="dark" class="cool-binary-poll" option-1-text="France" option-1-confetti="🇺🇾" option-2-text="Spain" option-2-confetti="🇺🇾">
+									</amp-story-interactive-binary-poll>
+								</amp-story-grid-layer>
+							</amp-story-page>
+							<amp-story-page id="amp-story-interactive-quiz">
+								<amp-story-grid-layer template="fill">
+									<amp-story-interactive-quiz id="correct-quiz" endpoint="https://webstoriesinteractivity-beta.web.app/api/v1" theme="dark" chip-style="shadow" class="nice-quiz" prompt-text="Who won the first soccer world cup?" option-1-text="France" option-2-text="Spain" option-3-text="Uruguay" option-3-correct option-3-confetti="🇺🇾" option-4-text="Brazil">
+									</amp-story-interactive-quiz>
+								</amp-story-grid-layer>
+							</amp-story-page>
+							<amp-story-page id="amp-story-interactive-results">
+								<amp-story-grid-layer template="fill">
+									<amp-story-interactive-results id="correct-results" theme="dark" class="nice-quiz" prompt-text="What country do you like the most?" option-1-text="France" option-1-results-category="Dog" option-1-image="./dog.png" option-2-text="Spain" option-2-results-category="Cat" option-2-image="./cat.png" option-3-text="Uruguay" option-3-results-category="Bunny" option-3-image="./bunny.png" option-4-text="Brazil" option-4-results-category="Mouse" option-4-image="./mouse.png">
+									</amp-story-interactive-results>
+								</amp-story-grid-layer>
+							</amp-story-page>
+							<amp-story-page id="cover">
+								<amp-story-grid-layer template="fill">
+							 		<amp-story-panning-media layout="fill"></amp-story-panning-media>
+								</amp-story-grid-layer>
+						 	</amp-story-page>
 							<amp-story-bookend src="bookendv1.json" layout="nodisplay"></amp-story-bookend>
 							<amp-analytics id="75a1fdc3143c" type="googleanalytics"><script type="application/json">{"vars":{"account":"UA-XXXXXX-1"},"triggers":{"trackPageview":{"on":"visible","request":"pageview"}}}</script></amp-analytics>
 						</amp-story>
@@ -463,7 +594,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					return [
 						$html,
 						preg_replace( '#<\w+[^>]*>bad</\w+>#', '', $html ),
-						[ 'amp-story', 'amp-analytics', 'amp-twitter', 'amp-youtube', 'amp-video' ],
+						[ 'amp-story', 'amp-analytics', 'amp-story-360', 'amp-twitter', 'amp-youtube', 'amp-video', 'amp-story-interactive', 'amp-story-panning-media' ],
 						[
 							[
 								'code'      => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_DESCENDANT_TAG,
@@ -475,6 +606,36 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				}
 			),
 
+			'amp_story_player'                             => [
+				'
+				<amp-story-player width="360" height="600" layout="intrinsic">
+					<a href="https://www.example.com" class="story">
+						<span class="title">A local’s guide to what to eat and do in New York City</span>
+					</a>
+					<a href="https://www.example.com2" class="story">
+						<span class="title">A local’s guide to what to eat and do in Mexico City</span>
+					</a>
+				</amp-story-player>
+				',
+				null,
+				[ 'amp-story-player' ],
+			],
+
+			'amp_story_360'                                => [
+				'
+				<amp-story-player width="360" height="600">
+					<a href="https://www.example.com" class="story">
+						<span class="title">A local’s guide to what to eat and do in New York City</span>
+					</a>
+					<a href="https://www.example.com2" class="story">
+						<span class="title">A local’s guide to what to eat and do in Mexico City</span>
+					</a>
+				</amp-story-player>
+				',
+				null,
+				[ 'amp-story-player' ],
+			],
+
 			'reference-points-bad'                         => [
 				'<div lightbox-thumbnail-id update items pagination separator option selected disabled>BAD REFERENCE POINTS</div>',
 				'<div>BAD REFERENCE POINTS</div>',
@@ -483,15 +644,15 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'amp-position-observer'                        => [
-				'<amp-position-observer intersection-ratios="1"></amp-position-observer>',
+				'<amp-position-observer intersection-ratios="1" layout="nodisplay"></amp-position-observer>',
 				null, // No change.
 				[ 'amp-position-observer' ],
 			],
 
 			'amp-twitter'                                  => [
-				'<amp-twitter width="321" height="543" layout="responsive" data-tweetid="98765"></amp-twitter>',
-				null, // No change.
-				[ 'amp-twitter' ],
+				'<amp-twitter width="321" height="543" layout="responsive" data-tweetid="98765" [data-tweetid]="somestate"></amp-twitter>',
+				'<amp-twitter width="321" height="543" layout="responsive" data-tweetid="98765" data-amp-bind-data-tweetid="somestate"></amp-twitter>',
+				[ 'amp-twitter', 'amp-bind' ],
 			],
 
 			'amp-user-notification'                        => [
@@ -500,8 +661,15 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-user-notification' ],
 			],
 
+			'amp-user-notification-empty-dismiss-href'     => [
+				'<amp-user-notification layout="nodisplay" id="amp-user-notification1" data-show-if-href="" data-dismiss-href="">This site uses cookies to personalize content.<a class="btn" on="tap:amp-user-notification1.dismiss">I accept</a></amp-user-notification>',
+				'<amp-user-notification layout="nodisplay" id="amp-user-notification1">This site uses cookies to personalize content.<a class="btn" on="tap:amp-user-notification1.dismiss">I accept</a></amp-user-notification>',
+				[ 'amp-user-notification' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::MISSING_URL, AMP_Tag_And_Attribute_Sanitizer::MISSING_URL ],
+			],
+
 			'amp-video'                                    => [
-				'<amp-video width="432" height="987" src="/video/location.mp4"></amp-video>',
+				'<amp-video width="432" height="987" layout="intrinsic" src="/video/location.mp4"></amp-video>',
 				null, // No change.
 				[ 'amp-video' ],
 			],
@@ -536,9 +704,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'brid-player'                                  => [
-				'<amp-brid-player data-dynamic="abc" data-partner="264" data-player="4144" data-video="13663" layout="responsive" width="480" height="270"></amp-brid-player>',
+				'<amp-brid-player data-dynamic="abc" data-partner="264" data-player="4144" data-video="13663" layout="responsive" width="480" height="270" dock></amp-brid-player>',
 				null,
-				[ 'amp-brid-player' ],
+				[ 'amp-brid-player', 'amp-video-docking' ],
 			],
 
 			'brightcove'                                   => [
@@ -591,8 +759,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			// Try to test for NAME_VALUE_DISPATCH.
 			'doubleclick-1'                                => [
-				'<amp-ad width="480" height="75" type="doubleclick" data-slot="/4119129/mobile_ad_banner" data-multi-size="320x50" class="dashedborder"></amp-ad>',
-				'<amp-ad width="480" height="75" type="doubleclick" data-slot="/4119129/mobile_ad_banner" data-multi-size="320x50" class="dashedborder"></amp-ad>',
+				'<amp-ad width="480" height="75" type="doubleclick" data-slot="/4119129/mobile_ad_banner" data-multi-size="320x50" class="dashedborder" sticky></amp-ad>',
+				'<amp-ad width="480" height="75" type="doubleclick" data-slot="/4119129/mobile_ad_banner" data-multi-size="320x50" class="dashedborder" sticky></amp-ad>',
 				[ 'amp-ad' ],
 			],
 
@@ -627,8 +795,86 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'form'                                         => [
-				'<form method="get" action="/form/search-html/get" target="_blank"><fieldset><label><span>Search for</span><input type="search" placeholder="test" name="term" required></label><input type="submit" value="Search"></fieldset></form>',
-				'<form method="get" action="/form/search-html/get" target="_blank"><fieldset><label><span>Search for</span><input type="search" placeholder="test" name="term" required></label><input type="submit" value="Search"></fieldset></form>',
+				'
+					<form method="get" action="/form/search-html/get" target="_blank">
+						<fieldset>
+							<label><span>Search for</span><input type="search" placeholder="test" name="term" required></label>
+							<input type="checkbox" checked disabled readonly>
+							<input type="checkbox" checked="CHECKED" disabled="disabled" readonly="">
+							<input type="submit" value="Search" enterkeyhint="search"><input type="button" value="Open Lightbox" on="tap:lb1.open">
+						</fieldset>
+					</form>
+				',
+				null,
+				[ 'amp-form' ],
+			],
+
+			'scripts-gathered-from-invalid-parents'        => [
+				'
+				<ancestor-unknown>
+					<amp-audio src="https://example.com/foo.mp3" width="100" height="200"></amp-audio>
+					<parent-unknown>
+						<amp-form>
+							<form method="GET" id="a_string" class="a_string" action="https://example.com" target="_blank">
+								<unrecognized>who are you?</unrecognized>
+								<input type=text value="test" name="hello">
+							</form>
+						</amp-form>
+					</parent-unknown>
+					<amp-video src="https://example.com/foo.mp4" width="100" height="200"></amp-video>
+				</ancestor-unknown>
+				',
+				'
+				<amp-audio src="https://example.com/foo.mp3" width="100" height="200"></amp-audio>
+				<form method="GET" id="a_string" class="a_string" action="https://example.com" target="_blank">
+					who are you?
+					<input type="text" value="test" name="hello">
+				</form>
+				<amp-video src="https://example.com/foo.mp4" width="100" height="200"></amp-video>
+				',
+				[ 'amp-audio', 'amp-form', 'amp-video' ],
+				array_fill( 0, 4, AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ),
+			],
+
+			'form-visible-when-invalid'                    => [
+				'
+				<form method="post"
+				    action-xhr="https://example.com/subscribe"
+				    custom-validation-reporting="show-all-on-submit" target="_blank">
+				    <fieldset>
+				      <label>
+				        <span>Name:</span>
+				        <input type="text"
+				          name="name"
+				          id="name5"
+				          required
+				          pattern="\w+\s\w+">
+				        <span visible-when-invalid="valueMissing"
+				          validation-for="name5"></span>
+				        <span visible-when-invalid="patternMismatch"
+				          validation-for="name5">
+				          Please enter your first and last name separated by a space (e.g. Jane Miller)
+				        </span>
+				      </label>
+				      <br>
+				      <label>
+				        <span>Email:</span>
+				        <input type="email"
+				          name="email"
+				          id="email5"
+				          required>
+				        <span visible-when-invalid="valueMissing"
+				          validation-for="email5"></span>
+				        <span visible-when-invalid="typeMismatch"
+				          validation-for="email5"></span>
+				      </label>
+				      <br>
+				      <input type="submit"
+				        value="Subscribe">
+				    </fieldset>
+				  </form>
+				',
+				null,
 				[ 'amp-form' ],
 			],
 
@@ -653,11 +899,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR ],
 			],
 
-			'attribute_value_blacklisted_by_regex_removed' => [
+			'attribute_value_disallowed_by_regex_removed'  => [
 				'<a href="__amp_source_origin">Click me.</a>',
 				'<a>Click me.</a>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX ],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_DISALLOWED_VALUE_REGEX ],
 			],
 
 			'host_relative_url_allowed'                    => [
@@ -668,15 +914,15 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<a href="//example.com/path/to/content">Click me.</a>',
 			],
 
-			'node_with_whitelisted_protocol_http_allowed'  => [
+			'node_with_allowlisted_protocol_http_allowed'  => [
 				'<a href="http://example.com/path/to/content">Click me.</a>',
 			],
 
-			'node_with_whitelisted_protocol_https_allowed' => [
+			'node_with_allowlisted_protocol_https_allowed' => [
 				'<a href="https://example.com/path/to/content">Click me.</a>',
 			],
 
-			'node_with_whitelisted_protocol_other_allowed' => [
+			'node_with_allowlisted_protocol_other_allowed' => [
 				implode(
 					'',
 					[
@@ -684,6 +930,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						'<a href="webcal:foo">Click me.</a>',
 						'<a href="whatsapp:foo">Click me.</a>',
 						'<a href="web+mastodon:follow/@handle@instance">Click me.</a>',
+						'<a href="feed://blog.amp.dev/feed/" type="application/rss+xml">Click me.</a>',
 					]
 				),
 			],
@@ -725,20 +972,26 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				],
 			],
 
-			'attribute_requirements_overriden_by_placeholders_within_template' => [
-				'<template type="amp-mustache"><amp-timeago datetime="{{iso}}"></amp-timeago></template>',
+			'attribute_requirements_overridden_by_placeholders_within_mustache_template' => [
+				'<template type="amp-mustache"><amp-timeago datetime="{{iso}}" width="100" height="100"></amp-timeago></template>',
+				null,
+				[ 'amp-mustache', 'amp-timeago' ],
+			],
+
+			'attribute_requirements_overridden_by_placeholders_within_mustache_script' => [
+				'<script template="amp-mustache" type="text/plain"><amp-timeago datetime="{{iso}}" width="100" height="100"></amp-timeago></script>',
 				null,
 				[ 'amp-mustache', 'amp-timeago' ],
 			],
 
 			'attribute_requirements_overriden_by_placeholders_within_template_newlines' => [
-				"<template type=\"amp-mustache\"><amp-timeago datetime=\"first-line\n{{iso}}\"></amp-timeago></template>",
+				"<template type=\"amp-mustache\"><amp-timeago datetime=\"first-line\n{{iso}}\" width=\"100\" height=\"100\"></amp-timeago></template>",
 				null,
 				[ 'amp-mustache', 'amp-timeago' ],
 			],
 
 			'attribute_requirements_not_overriden_by_placeholders_outside_of_template' => [
-				'<amp-timeago datetime="{{iso}}"></amp-timeago>',
+				'<amp-timeago datetime="{{iso}}" width="100" height="100"></amp-timeago>',
 				'',
 				[],
 				[
@@ -748,13 +1001,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'attribute_requirements_overriden_in_indirect_template_parents' => [
-				'<template type="amp-mustache"><div><span><amp-timeago datetime="{{iso}}"></amp-timeago></span></div></template>',
+				'<template type="amp-mustache"><div><span><amp-timeago datetime="{{iso}}" width="100" height="100"></amp-timeago></span></div></template>',
 				null,
 				[ 'amp-mustache', 'amp-timeago' ],
 			],
 
 			'attribute_requirements_not_overriden_in_sibling_template_tags' => [
-				'<template type="amp-mustache"></template><amp-timeago datetime="{{iso}}"></amp-timeago>',
+				'<template type="amp-mustache"></template><amp-timeago datetime="{{iso}}" width="100" height="100"></amp-timeago>',
 				'<template type="amp-mustache"></template>',
 				[ 'amp-mustache' ],
 				[
@@ -775,7 +1028,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 								<h4>Section 1</h4>
 								<p>Bunch of awesome content.</p>
 							</section>
-							<section>
+							<section access-hide>
 								<h4>Section 2</h4>
 								<div>Bunch of even more awesome content. This time in a <code>&lt;div&gt;</code>.</div>
 							</section>
@@ -793,24 +1046,24 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 					return [
 						$html,
-						preg_replace( '#<\w+>bad</\w+>#', '', $html ),
+						null, // No change.
 						[ 'amp-accordion' ],
 					];
 				}
 			),
 
-			'attribute_value_with_blacklisted_regex_removed' => [
+			'attribute_value_with_disallowed_regex_removed' => [
 				'<a rel="import">Click me.</a>',
 				'<a>Click me.</a>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX ],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_DISALLOWED_VALUE_REGEX ],
 			],
 
-			'attribute_value_with_blacklisted_multi-part_regex_removed' => [
+			'attribute_value_with_disallowed_multi-part_regex_removed' => [
 				'<a rel="something else import">Click me.</a>',
 				'<a>Click me.</a>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX ],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_DISALLOWED_VALUE_REGEX ],
 			],
 
 			'attribute_value_with_required_regex'          => [
@@ -844,35 +1097,35 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'attribute_value_with_value_regex_casei_lower' => [
-				'<amp-dailymotion data-videoid="abc"></amp-dailymotion>',
+				'<amp-dailymotion data-videoid="abc" width="100" height="100"></amp-dailymotion>',
 				null, // No change.
 				[ 'amp-dailymotion' ],
 			],
 
 			'attribute_value_with_value_regex_casei_upper' => [
-				'<amp-dailymotion data-videoid="ABC"></amp-dailymotion>',
+				'<amp-dailymotion data-videoid="ABC" width="100" height="100"></amp-dailymotion>',
 				null, // No change.
 				[ 'amp-dailymotion' ],
 			],
 
 			'attribute_value_with_bad_value_regex_casei_removed' => [
 				// data-ui-logo should be true|false.
-				'<amp-dailymotion data-videoid="123" data-ui-logo="maybe"></amp-dailymotion>',
-				'<amp-dailymotion data-videoid="123"></amp-dailymotion>',
+				'<amp-dailymotion data-videoid="123" data-ui-logo="maybe" width="100" height="100"></amp-dailymotion>',
+				'<amp-dailymotion data-videoid="123" width="100" height="100"></amp-dailymotion>',
 				[ 'amp-dailymotion' ],
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE ],
 			],
 
 			'attribute_bad_attr_with_no_value_removed'     => [
-				'<amp-ad type="adsense" bad-attr-no-value><div fallback>something here</div></amp-ad>',
-				'<amp-ad type="adsense"><div fallback>something here</div></amp-ad>',
+				'<amp-ad type="adsense" bad-attr-no-value width="100" height="100"><div fallback>something here</div></amp-ad>',
+				'<amp-ad type="adsense" width="100" height="100"><div fallback>something here</div></amp-ad>',
 				[ 'amp-ad' ],
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR ],
 			],
 
 			'attribute_bad_attr_with_value_removed'        => [
-				'<amp-ad type="adsense" bad-attr="some-value">something here</amp-ad>',
-				'<amp-ad type="adsense">something here</amp-ad>',
+				'<amp-ad type="adsense" bad-attr="some-value" width="100" height="100">something here</amp-ad>',
+				'<amp-ad type="adsense" width="100" height="100">something here</amp-ad>',
 				[ 'amp-ad' ],
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR ],
 			],
@@ -892,8 +1145,57 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
 			],
 
+			'remove_amp_list_no_mandatory_anyof_attribute' => [
+				'<amp-list width="400" height="400"></amp-list>',
+				'',
+				[],
+				[
+					[
+						'code'                  => AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ANYOF_ATTR_MISSING,
+						'mandatory_anyof_attrs' => [
+							'data-amp-bind-src',
+							'src',
+						],
+					],
+				],
+			],
+
+			'allow_amp_list_two_mandatory_anyof_attrs'     => [
+				'<amp-list src="https://foo.com" data-amp-bind-src="https://baz.com" width="400" height="400"></amp-list>',
+				null,
+				[ 'amp-bind', 'amp-list' ],
+			],
+
+			'remove_amp_iframe_no_mandatory_oneof_attr'    => [
+				'<amp-iframe width="200" height="100"></amp-iframe>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::MANDATORY_ONEOF_ATTR_MISSING ],
+			],
+
+			'remove_amp_iframe_two_mandatory_oneof_attrs'  => [
+				'<amp-iframe src="https://example.com" srcdoc="https://foo.com" width="200" height="100"></amp-iframe>',
+				'',
+				[],
+				[
+					[
+						'code'                  => AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_ONEOF_ATTRS,
+						'duplicate_oneof_attrs' => [
+							'src',
+							'srcdoc',
+						],
+					],
+				],
+			],
+
+			'allow_amp_iframe_one_mandatory_oneof_attr'    => [
+				'<amp-iframe srcdoc="https://foo.com" width="200" height="100"></amp-iframe>',
+				null,
+				[ 'amp-iframe' ],
+			],
+
 			'remove_script_with_async_attribute'           => [
-				'<script async src="//cdn.someecards.com/assets/embed/embed-v1.07.min.js" charset="utf-8"></script>', // phpcs:ignore
+				'<script async src="//cdn.someecards.com/assets/embed/embed-v1.07.min.js" charset="utf-8"></script>',
 				'',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
@@ -907,33 +1209,33 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'allow_node_with_valid_mandatory_attribute'    => [
-				'<amp-analytics><script type="application/json"></script></amp-analytics>',
+				'<amp-analytics><script type="application/json">{"vars": {"apid": "XXXX"}}</script></amp-analytics>',
 				null, // No change.
 				[ 'amp-analytics' ],
 			],
 
-			'nodes_with_non_whitelisted_tags_replaced_by_children' => [
+			'nodes_with_non_allowlisted_tags_replaced_by_children' => [
 				'<invalid_tag>this is some text inside the invalid node</invalid_tag>',
 				'this is some text inside the invalid node',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
 			],
 
-			'empty_parent_nodes_of_non_whitelisted_tags_removed' => [
+			'empty_parent_nodes_of_non_allowlisted_tags_removed' => [
 				'<div><span><span><invalid_tag></invalid_tag></span></span></div>',
 				'',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
 			],
 
-			'non_empty_parent_nodes_of_non_whitelisted_tags_removed' => [
+			'non_empty_parent_nodes_of_non_allowlisted_tags_removed' => [
 				'<div><span><span class="not-empty"><invalid_tag></invalid_tag></span></span></div>',
 				'<div><span><span class="not-empty"></span></span></div>',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG ],
 			],
 
-			'replace_non_whitelisted_node_with_children'   => [
+			'replace_non_allowlisted_node_with_children'   => [
 				'<p>This is some text <invalid_tag>with a disallowed tag</invalid_tag> in the middle of it.</p>',
 				'<p>This is some text with a disallowed tag in the middle of it.</p>',
 				[],
@@ -954,10 +1256,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'disallowed_empty_attr_removed'                => [
-				'<amp-user-notification data-dismiss-href></amp-user-notification>',
-				'<amp-user-notification></amp-user-notification>',
+				'<amp-user-notification data-dismiss-href layout="nodisplay"></amp-user-notification>',
+				'<amp-user-notification layout="nodisplay"></amp-user-notification>',
 				[ 'amp-user-notification' ],
-				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_EMPTY_URL ],
+				[ AMP_Tag_And_Attribute_Sanitizer::MISSING_URL ],
 			],
 
 			'allowed_empty_attr'                           => [
@@ -965,8 +1267,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'remove_node_with_disallowed_ancestor_and_disallowed_child_nodes' => [
-				'<amp-sidebar><amp-app-banner>This node is not allowed here.</amp-app-banner><nav><ul><li>Hello</li></ul><ol><li>Hello</li></ol></nav><amp-app-banner>This node is not allowed here.</amp-app-banner></amp-sidebar>',
-				'<amp-sidebar><nav><ul><li>Hello</li></ul><ol><li>Hello</li></ol></nav></amp-sidebar>',
+				'<amp-sidebar layout="nodisplay"><amp-app-banner>This node is not allowed here.</amp-app-banner><nav><ul><li>Hello</li></ul><ol><li>Hello</li></ol></nav><amp-app-banner>This node is not allowed here.</amp-app-banner></amp-sidebar>',
+				'<amp-sidebar layout="nodisplay"><nav><ul><li>Hello</li></ul><ol><li>Hello</li></ol></nav></amp-sidebar>',
 				[ 'amp-sidebar' ],
 				[
 					[
@@ -987,7 +1289,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					[ "\n", "\t" ],
 					'',
 					'
-						<amp-story standalone title="Stories in AMP - Hello World" publisher="AMP Project" publisher-logo-src="https://ampbyexample.com/favicons/coast-228x228.png" poster-portrait-src="https://ampbyexample.com/img/story_dog2_portrait.jpg">
+						<amp-story standalone="standalone" title="Stories in AMP - Hello World" publisher="AMP Project" publisher-logo-src="https://ampbyexample.com/favicons/coast-228x228.png" poster-portrait-src="https://ampbyexample.com/img/story_dog2_portrait.jpg">
 							<amp-sidebar id="sidebar1" layout="nodisplay">
 								<ul>
 									<li><a href="https://www.ampproject.org"> External Link </a></li>
@@ -1062,7 +1364,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'amp-img_with_good_protocols'                  => [
-				'<amp-img src="https://example.com/resource1" srcset="https://example.com/resource1 320w, https://example.com/resource2 480w"></amp-img>',
+				'<amp-img src="https://example.com/resource1" srcset="https://example.com/resource1 320w, https://example.com/resource2 480w" width="100" height="100"></amp-img>',
 			],
 
 			'amp-img_with_relative_urls_containing_colons' => [
@@ -1077,10 +1379,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'disallowed_attributes'                        => [
-				'<a href="/path/to/file.jpg" style="border: 1px solid red !important;">Link</a>',
+				'<a href="/path/to/file.jpg" color="red">Link</a>',
 				'<a href="/path/to/file.jpg">Link</a>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR ],
 			],
 
 			'onclick_attribute'                            => [
@@ -1095,13 +1397,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'multiple_disallowed_attributes'               => [
-				'<a href="/path/to/file.jpg" style="border: 1px solid red !important;" onclick="alert(e);">Link</a>',
+				'<a href="/path/to/file.jpg" color="red" onclick="alert(e);">Link</a>',
 				'<a href="/path/to/file.jpg">Link</a>',
 				[],
 				[
 					[
-						'code'      => AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX,
-						'node_name' => 'style',
+						'code'      => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
+						'node_name' => 'color',
 					],
 					[
 						'code'      => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
@@ -1111,7 +1413,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'attribute_recursive'                          => [
-				'<div style="border: 1px solid red !important;"><a href="/path/to/file.jpg" onclick="alert(e);">Hello World</a></div>',
+				'<div color="red"><a href="/path/to/file.jpg" onclick="alert(e);">Hello World</a></div>',
 				'<div><a href="/path/to/file.jpg">Hello World</a></div>',
 				[],
 				[
@@ -1120,8 +1422,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						'node_name' => 'onclick',
 					],
 					[
-						'code'      => AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX,
-						'node_name' => 'style',
+						'code'      => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
+						'node_name' => 'color',
 					],
 				],
 			],
@@ -1138,7 +1440,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<a name=shadowRoot>Shadow Root!</a>',
 				'<a>Shadow Root!</a>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX ],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_DISALLOWED_VALUE_REGEX ],
 			],
 
 			'a_with_attachment_rel_plus_another_valid_value' => [
@@ -1215,10 +1517,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'a_empty_with_children_with_restricted_attributes' => [
-				'<a><span style="color: red !important;">Red</span>&amp;<span style="color: blue !important;">Orange</span></a>',
+				'<a><span color="red">Red</span>&amp;<span color="orange">Orange</span></a>',
 				'<a><span>Red</span>&amp;<span>Orange</span></a>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX, AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR, AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR ],
 			],
 
 			'spans_with_xml_namespaced_attributes'         => [
@@ -1272,19 +1574,17 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_URL ],
 			],
-			'a_with_mail_host'                             => [
-				'<a class="foo" href="mail to:foo@bar.com">value</a>',
-				'<a class="foo">value</a>',
-				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_URL_PROTOCOL ],
+			'a_with_valid_mail_host'                       => [
+				'<a class="foo" href="mailto:foo@bar.com&amp;body=https://example.org/">value</a>',
+				null,
 			],
 
 			// font is removed so we should check that other elements are checked as well.
 			'font_with_other_bad_elements'                 => [
-				'<font size="1">Headline</font><span style="color: blue !important">Span</span>',
+				'<font size="1">Headline</font><span color="blue">Span</span>',
 				'Headline<span>Span</span>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG, AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG, AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR ],
 			],
 
 			'amp_bind_attr'                                => [
@@ -1356,6 +1656,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 								<li>
 									<amp-img src="/img2.png" width="50" height="50" option="2" disabled></amp-img>
 								</li>
+								<li>
+									<amp-img src="/img3.png" width="50" height="50" option="2" disabled="disabled"></amp-img>
+								</li>
 								<li option="na" selected>None of the Above</li>
 							</ul>
 						</amp-selector>
@@ -1401,13 +1704,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'amp_consent'                                  => [
-				'<amp-consent media="all" noloading></amp-consent>',
+				'<amp-consent media="all" noloading layout="nodisplay"></amp-consent>',
 				null, // No change.
 				[ 'amp-consent' ],
 			],
 
 			'amp_date_picker'                              => [
-				'<amp-date-picker id="simple-date-picker" type="single" mode="overlay" layout="container" on="select:AMP.setState({date1: event.date, dateType1: event.id})" format="Y-MM-DD" open-after-select input-selector="[name=date1]" class="mr1 ml1 flex picker"><div class="ampstart-input inline-block mt1"><input class="border-none p0" name="date1" placeholder="Pick a date"></div><button class="ampstart-btn m1 caps" on="tap: simple-date-picker.clear">Clear</button></amp-date-picker>',
+				'<amp-date-picker id="simple-date-picker" type="single" mode="overlay" layout="container" on="select:AMP.setState({date1: event.date, dateType1: event.id})" format="Y-MM-DD" open-after-select input-selector="[name=date1]" class="mr1 ml1 flex picker" hide-keyboard-shortcuts-panel><div class="ampstart-input inline-block mt1"><input class="border-none p0" name="date1" placeholder="Pick a date"></div><button class="ampstart-btn m1 caps" on="tap: simple-date-picker.clear">Clear</button></amp-date-picker>',
 				null, // No change.
 				[ 'amp-date-picker' ],
 			],
@@ -1443,16 +1746,16 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'amp-img-layout-illegal'                       => [
 				'<amp-img src="/img1.png" width="50" height="50" layout="container"></amp-img>',
-				'<amp-img src="/img1.png" width="50" height="50"></amp-img>',
+				'',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX_CASEI ],
+				[ AMP_Tag_And_Attribute_Sanitizer::SPECIFIED_LAYOUT_INVALID ],
 			],
 
 			'amp-img-layout-unknown'                       => [
 				'<amp-img src="/img1.png" width="50" height="50" layout="bogus-value"></amp-img>',
-				'<amp-img src="/img1.png" width="50" height="50"></amp-img>',
+				'',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX_CASEI ],
+				[ AMP_Tag_And_Attribute_Sanitizer::SPECIFIED_LAYOUT_INVALID ],
 			],
 
 			'non-layout-span-element-attrs'                => [
@@ -1463,15 +1766,15 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'non-layout-col-element-attrs'                 => [
-				'<table><col class="foo" width="123" style="background:red !important;"><col class="bar" style="background:green !important;" width="12%"><col class="baz" style="background:blue !important;" width="2*"><tr><td>1</td><td>2</td><td>3</td></tr></table>',
+				'<table><col class="foo" width="123" color="red"><col class="bar" color="green" width="12%"><col class="baz" color="blue" width="2*"><tr><td>1</td><td>2</td><td>3</td></tr></table>',
 				'<table><col class="foo"><col class="bar"><col class="baz"><tr><td>1</td><td>2</td><td>3</td></tr></table>',
 				[],
 				[
 					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
-					AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX,
-					AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX,
 					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
-					AMP_Tag_And_Attribute_Sanitizer::INVALID_BLACKLISTED_VALUE_REGEX,
+					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
+					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
+					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
 					AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
 				],
 			],
@@ -1609,6 +1912,18 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_URL_PROTOCOL ],
 			],
 
+			'amp-bodymovin-animation'                      => [
+				'
+					<amp-bodymovin-animation layout="responsive" width="1920" height="1080" src="https://amp.dev/static/samples/json/bodymovin_happy_2016.json"></amp-bodymovin-animation>
+					<amp-bodymovin-animation layout="responsive" width="1920" height="1080" src="https://amp.dev/static/samples/json/bodymovin_happy_2016.json" loop="true"></amp-bodymovin-animation>
+					<amp-bodymovin-animation layout="responsive" width="1920" height="1080" src="https://amp.dev/static/samples/json/bodymovin_happy_2016.json" loop="false"></amp-bodymovin-animation>
+					<amp-bodymovin-animation layout="responsive" width="1920" height="1080" src="https://amp.dev/static/samples/json/bodymovin_happy_2016.json" loop="5"></amp-bodymovin-animation>
+				',
+				null,
+				[ 'amp-bodymovin-animation' ],
+				[],
+			],
+
 			'amp-3d-gltf'                                  => [
 				'<amp-3d-gltf layout="responsive" width="320" height="240" alpha="true" antialiasing="true" src="path/to/model.glb"></amp-3d-gltf>',
 				null,
@@ -1616,7 +1931,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'amp-date-countdown'                           => [
-				'<amp-date-countdown timestamp-seconds="2147483648" layout="fixed-height" height="50"><template type="amp-mustache"><p class="p1"> {{d}} days, {{h}} hours, {{m}} minutes and {{s}} seconds until <a href="https://en.wikipedia.org/wiki/Year_2038_problem">Y2K38</a>.</p></template></amp-date-countdown>',
+				'<amp-date-countdown timestamp-seconds="2147483648" data-count-up layout="fixed-height" height="50"><template type="amp-mustache"><p class="p1"> {{d}} days, {{h}} hours, {{m}} minutes and {{s}} seconds until <a href="https://en.wikipedia.org/wiki/Year_2038_problem">Y2K38</a>.</p></template></amp-date-countdown>',
 				null,
 				[ 'amp-date-countdown', 'amp-mustache' ],
 			],
@@ -1688,13 +2003,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'amp-image-slider'                             => [
-				'<amp-image-slider layout="responsive" width="100" height="200"><amp-img src="/green-apple.jpg" alt="A green apple"></amp-img><amp-img src="/red-apple.jpg" alt="A red apple"></amp-img><div first>This apple is green</div><div second>This apple is red</div></amp-image-slider>',
+				'<amp-image-slider layout="responsive" width="100" height="200"><amp-img src="/green-apple.jpg" alt="A green apple" width="100" height="100"></amp-img><amp-img src="/red-apple.jpg" alt="A red apple" width="100" height="100"></amp-img><div first>This apple is green</div><div second>This apple is red</div></amp-image-slider>',
 				null,
 				[ 'amp-image-slider' ],
 			],
 
 			'amp-image-slider-bad-children'                => [
-				'<amp-image-slider layout="responsive" width="100" height="200"><amp-img src="/green-apple.jpg" alt="A green apple"></amp-img></amp-image-slider>',
+				'<amp-image-slider layout="responsive" width="100" height="200"><amp-img src="/green-apple.jpg" alt="A green apple" width="100" height="100"></amp-img></amp-image-slider>',
 				'',
 				[],
 				[
@@ -1718,7 +2033,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'amp-image-slider-more-bad-children'           => [
-				'<amp-image-slider layout="responsive" width="100" height="200"><span>Not allowed</span><amp-img src="/green-apple.jpg" alt="A green apple"></amp-img><i>forbidden</i><amp-img src="/red-apple.jpg" alt="A red apple"></amp-img><div first>This apple is green</div><strong>not allowed</strong><div second>This apple is red</div><i>not</i> <span>ok</span></amp-image-slider>',
+				'<amp-image-slider layout="responsive" width="100" height="200"><span>Not allowed</span><amp-img src="/green-apple.jpg" alt="A green apple" width="100" height="100"></amp-img><i>forbidden</i><amp-img src="/red-apple.jpg" alt="A red apple" width="100" height="100"></amp-img><div first>This apple is green</div><strong>not allowed</strong><div second>This apple is red</div><i>not</i> <span>ok</span></amp-image-slider>',
 				'',
 				[],
 				[
@@ -1753,9 +2068,32 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'amp-list'                                     => [
-				'<amp-list credentials="include" src="https://example.com/json/product.json?clientId=CLIENT_ID(myCookieId)"><template type="amp-mustache">Your personal offer: ${{price}}</template></amp-list>',
+				'<amp-list credentials="include" src="https://example.com/json/product.json?clientId=CLIENT_ID(myCookieId)" width="100" height="100"><template type="amp-mustache">Your personal offer: ${{price}}</template></amp-list>',
 				null,
 				[ 'amp-list', 'amp-mustache' ],
+			],
+
+			'amp-list-amp-script'                          => [
+				'
+					<amp-script id="dataFunctions" script="local-script" nodom></amp-script>
+					<script id="local-script" type="text/plain" target="amp-script">
+						function getRemoteData() { /*...*/ }
+						exportFunction(\'getRemoteData\', getRemoteData);
+					</script>
+
+					<amp-list
+						id="amp-list"
+						width="auto"
+						height="100"
+						layout="fixed-height"
+						src="amp-script:dataFunctions.getRemoteData">
+					  <template type="amp-mustache">
+					    <div>{{.}}</div>
+					  </template>
+					</amp-list>
+				',
+				null,
+				[ 'amp-list', 'amp-mustache', 'amp-script' ],
 			],
 
 			'amp-list-load-more'                           => [
@@ -1763,7 +2101,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					[ "\n", "\t" ],
 					'',
 					'
-						<amp-list load-more="auto" src="https://www.load.more.example.com/" width="400" height="800">
+						<amp-list load-more="auto" src="https://www.load.more.example.com/" width="400" height="800" xssi-prefix=")]}\'">
 							<amp-list-load-more load-more-button>
 								<template type="amp-mustache">
 									Showing {{#count}} out of {{#total}} items
@@ -1799,6 +2137,32 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				),
 				null,
 				[ 'amp-list', 'amp-mustache' ],
+			],
+
+			'amp-list-load-more-bad-buttons'               => [
+				'
+					<amp-list load-more="auto" src="https://www.load.more.example.com/" width="400" height="800">
+						<amp-list-load-more load-more-button load-more-end load-more-failed load-more-loading>
+							<template type="amp-mustache">
+								Showing {{#count}} out of {{#total}} items
+								<button>Click here to see more!</button>
+							</template>
+						</amp-list-load-more>
+					</amp-list>
+				',
+				'<amp-list load-more="auto" src="https://www.load.more.example.com/" width="400" height="800"></amp-list>',
+				[ 'amp-list' ],
+				[
+					[
+						'code'                  => AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_ONEOF_ATTRS,
+						'duplicate_oneof_attrs' => [
+							'load-more-button',
+							'load-more-end',
+							'load-more-failed',
+							'load-more-loading',
+						],
+					],
+				],
 			],
 
 			'amp-recaptcha-input'                          => [
@@ -1891,7 +2255,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'amp-script-5'                                 => [
 				'
-					<amp-script script="myScript" layout="container"></amp-script>
+					<amp-script script="myScript" layout="container" data-ampdevmode></amp-script>
 					<script type="text/plain" target="amp-script" id="myScript">
 					document.body.textContent += \'Hello world!\';
 					</script>
@@ -1916,6 +2280,34 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[],
 			],
 
+			'amp_img_missing_url'                          => [
+				'<amp-img src="" height="100" width="200"></amp-img>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::MISSING_URL, AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
+			],
+
+			'amp_img_missing_srcset'                       => [
+				'<amp-img srcset="" height="100" width="200"></amp-img>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::MISSING_URL, AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
+			],
+
+			'amp_pixel_blank_src'                          => [
+				'<amp-pixel src="" layout="nodisplay"></amp-pixel>',
+				null,
+				[],
+				[],
+			],
+
+			'amp_pixel_missing_src'                        => [
+				'<amp-pixel layout="nodisplay"></amp-pixel>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
+			],
+
 			'amp_link_rewriter'                            => [
 				'<amp-link-rewriter layout="nodisplay"><script type="application/json">{}</script></amp-link-rewriter>',
 				null,
@@ -1932,7 +2324,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			'amp-autocomplete'                             => [
 				'
 					<form method="post" action-xhr="/form/echo-json/post" target="_blank" on="submit-success:AMP.setState({result: event.response})">
-						<amp-autocomplete id="autocomplete" filter="substring" min-characters="0">
+						<amp-autocomplete id="autocomplete" filter="substring" min-characters="0" inline="@" max-items="10" prefetch>
 							<input type="text" id="input">
 							<script type="application/json" id="script">
 							{ "items" : ["apple", "banana", "orange"] }
@@ -1944,6 +2336,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						<script type="application/json" id="script">
 						{ "items" : ["red", "green", "blue"] }
 						</script>
+					</amp-autocomplete>
+					<amp-autocomplete
+						filter="prefix"
+						src="https://example.com/articles.json?ref=CANONICAL_URL"
+						query="q">
+						<input>
 					</amp-autocomplete>
 				',
 				null,
@@ -1966,16 +2364,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				',
 				null,
 				[ 'amp-truncate-text' ],
-			],
-
-			'amp-user-location'                            => [
-				'
-					<button on="tap: location.request()">Use my location</button>
-					<amp-user-location id="location" on="approve:AMP.setState({located: true})" layout="nodisplay">
-					</amp-user-location>
-				',
-				null,
-				[ 'amp-user-location' ],
 			],
 
 			'amp-megaphone'                                => [
@@ -2043,6 +2431,44 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_WIDTH ],
 			],
 
+			'empty_width_attribute'                        => [
+				'<amp-img src="/img1.png" width="" height="50"></amp-img>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_WIDTH ],
+			],
+
+			'empty_height_attribute'                       => [
+				'<amp-img src="/img1.png" width="50" height=""></amp-img>',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_HEIGHT ],
+			],
+
+			'variable_attributes_in_mustache_template'     => [
+				'
+				<template type="amp-mustache">
+					<div><div><div>
+						<amp-img src="/img1.png" width="{{width}}" height="50"></amp-img>
+					</div></div></div>
+				</template>
+				',
+				null,
+				[ 'amp-mustache' ],
+			],
+
+			'variable_attributes_in_mustache_script'       => [
+				'
+				<script template="amp-mustache" type="text/plain">
+					<div><div><div>
+						<amp-img src="/img1.png" width="{{width}}" height="50"></amp-img>
+					</div></div></div>
+				</script>
+				',
+				null,
+				[ 'amp-mustache' ],
+			],
+
 			'illegal_height_attribute'                     => [
 				'<amp-img src="/img1.png" width="50" height="50%"></amp-img>',
 				'',
@@ -2055,8 +2481,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				null,
 			],
 
-			'empty_width_attribute'                        => [
-				'<amp-img src="/img1.png" width="" height="50" layout="responsive"></amp-img>',
+			'empty_width_attribute_responsive_layout'      => [
+				'<amp-img src="/img1.png" width="auto" height="50" layout="responsive"></amp-img>',
 				'',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_AUTO_WIDTH ],
@@ -2070,28 +2496,28 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'no_height_fixed_layout'                       => [
-				'<amp-img src="/img1.png" width="50" height="" layout="fixed"></amp-img>',
+				'<amp-img src="/img1.png" width="50" layout="fixed"></amp-img>',
 				'',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_NO_HEIGHT ],
 			],
 
 			'no_height_fixed_height_layout'                => [
-				'<amp-img src="/img1.png" width="50" height="" layout="fixed-height"></amp-img>',
+				'<amp-img src="/img1.png" width="50" layout="fixed-height"></amp-img>',
 				'',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_NO_HEIGHT ],
 			],
 
 			'no_height_intrinsic_layout'                   => [
-				'<amp-img src="/img1.png" width="50" height="" layout="intrinsic"></amp-img>',
+				'<amp-img src="/img1.png" width="50" layout="intrinsic"></amp-img>',
 				'',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_NO_HEIGHT ],
 			],
 
 			'no_height_responsive_layout'                  => [
-				'<amp-img src="/img1.png" width="50" height="" layout="responsive"></amp-img>',
+				'<amp-img src="/img1.png" width="50" layout="responsive"></amp-img>',
 				'',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_NO_HEIGHT ],
@@ -2151,6 +2577,400 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-img src="/img1.png" layout="fill"></amp-img>',
 				null,
 			],
+
+			'disable-inline-width'                         => [
+				'<amp-img layout="intrinsic" height="160" width="480" disable-inline-width src="https://example.com/elva-fairy-800w.jpg" srcset="https://example.com/elva-fairy-480w.jpg 480w, https://example.com/elva-fairy-800w.jpg 800w" sizes="(max-width: 600px) 480px, 800px"></amp-img>',
+				null,
+			],
+
+			'amp-inline-gallery'                           => [
+				'
+				<amp-inline-gallery layout="container">
+					<amp-base-carousel
+							class="gallery"
+							layout="responsive"
+							width="3.6"
+							height="2"
+							snap-align="center"
+							loop="true"
+							visible-count="1.2"
+							lightbox>
+						<amp-img
+								src="/static/inline-examples/images/image1.jpg"
+								layout="responsive"
+								width="450"
+								height="300"></amp-img>
+						<amp-img
+								src="/static/inline-examples/images/image2.jpg"
+								layout="responsive"
+								width="450"
+								noloading
+								height="300"></amp-img>
+						<amp-img
+								src="/static/inline-examples/images/image3.jpg"
+								layout="responsive"
+								width="450"
+								noloading="noloading"
+								height="300"></amp-img>
+						<amp-img
+								src="/static/inline-examples/images/image4.jpg"
+								layout="responsive"
+								width="450"
+								noloading=""
+								height="300"></amp-img>
+					</amp-base-carousel>
+					<amp-inline-gallery-pagination layout="nodisplay" inset>
+					</amp-inline-gallery-pagination>
+				</amp-inline-gallery>
+				',
+				null,
+				[ 'amp-base-carousel', 'amp-inline-gallery', 'amp-lightbox-gallery' ],
+			],
+
+			'amp-inline-gallery-with-thumbs'               => [
+				'
+				<amp-inline-gallery layout="container">
+				  <!--
+				    The amp-layout with layout="container" is used to display the pagination on
+				    top of the carousel instead of the thumbnails. You can also use a div with
+				    `position: relative;`
+				  -->
+				  <amp-layout layout="container">
+				    <amp-base-carousel
+				      class="gallery"
+				      layout="responsive"
+				      width="3"
+				      height="2"
+				      snap-align="center"
+				      loop="true">
+				      <amp-img
+				        class="slide"
+				        layout="flex-item"
+				        src="https://picsum.photos/id/779/600/400"
+				        srcset="https://picsum.photos/id/779/150/100 150w,
+				                https://picsum.photos/id/779/600/400 600w,
+				                https://picsum.photos/id/779/1200/800 1200w">
+				      </amp-img>
+				      <amp-img
+				        class="slide"
+				        layout="flex-item"
+				        src="https://picsum.photos/id/1048/600/400"
+				        srcset="https://picsum.photos/id/1048/150/100 150w,
+				                https://picsum.photos/id/1048/600/400 600w,
+				                https://picsum.photos/id/1048/1200/800 1200w">
+				      </amp-img>
+				      <amp-img
+				        class="slide"
+				        layout="flex-item"
+				        src="https://picsum.photos/id/108/600/400"
+				        srcset="https://picsum.photos/id/108/150/100 150w,
+				                https://picsum.photos/id/108/600/400 600w,
+				                https://picsum.photos/id/108/1200/800 1200w">
+				      </amp-img>
+				    </amp-base-carousel>
+				    <!--
+				        If using fewer than 8 slides, consider adding something
+				        like media="(max-width: 799px)".
+				      -->
+				    <amp-inline-gallery-pagination layout="nodisplay" inset>
+				    </amp-inline-gallery-pagination>
+				  </amp-layout>
+				  <amp-inline-gallery-thumbnails
+				    media="(min-width: 800px)"
+				    layout="fixed-height"
+				    height="96">
+				  </amp-inline-gallery-thumbnails>
+				</amp-inline-gallery>
+				',
+				null,
+				[ 'amp-base-carousel', 'amp-inline-gallery' ],
+			],
+
+			'amp-mega-menu'                                => [
+				'
+				<amp-mega-menu height="30" layout="fixed-height">
+					<nav>
+						<ul>
+							<li>
+								<span role="button">Image</span>
+								<div role="dialog">
+									<amp-img
+											src="/static/inline-examples/images/image1.jpg"
+											width="300"
+											height="200"></amp-img>
+								</div>
+							</li>
+							<li>
+								<span role="button">List</span>
+								<div role="dialog">
+									<ol>
+										<li>item 1</li>
+										<li>item 2</li>
+										<li>item 3</li>
+									</ol>
+								</div>
+							</li>
+							<li>
+								<a href="https://amp.dev/">Link</a>
+							</li>
+						</ul>
+					</nav>
+				</amp-mega-menu>
+				',
+				null,
+				[ 'amp-mega-menu' ],
+			],
+
+			'amp-mega-menu-with-template'                  => [
+				'
+				<amp-mega-menu height="60" layout="fixed-height">
+				  <amp-list
+				    height="350"
+				    layout="fixed-height"
+				    src="/static/samples/json/product-single-item.json"
+				    single-item>
+				    <template type="amp-mustache">
+				      <nav>
+				        <ul>
+				{{#values}}          <li>
+				            <h4 role="button">{{name}}</h4>
+				            <div role="dialog">
+				              <amp-img
+				                src="{{img}}"
+				                width="320"
+				                height="213"></amp-img>
+				              <p>Price: $<b>{{price}}</b></p>
+				            </div>
+				          </li>
+				{{/values}}        </ul>
+				      </nav>
+				    </template>
+				  </amp-list>
+				</amp-mega-menu>
+				',
+				null,
+				[ 'amp-mega-menu', 'amp-list', 'amp-mustache' ],
+			],
+
+			'amp-mega-menu-disallowed-descendants'         => [
+				'
+				<amp-mega-menu height="30" layout="fixed-height">
+					<nav>
+						<ul>
+							<li>
+								<span role="button">List</span>
+								<div role="dialog">
+									<details><summary>Not</summary> allowed</details>
+								</div>
+							</li>
+							<li>
+								<a href="https://amp.dev/">Link</a>
+							</li>
+						</ul>
+					</nav>
+				</amp-mega-menu>
+				',
+				'
+				<amp-mega-menu height="30" layout="fixed-height">
+					<nav>
+						<ul>
+							<li>
+								<span role="button">List</span>
+								<div role="dialog"></div>
+							</li>
+							<li>
+								<a href="https://amp.dev/">Link</a>
+							</li>
+						</ul>
+					</nav>
+				</amp-mega-menu>
+				',
+				[ 'amp-mega-menu' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_DESCENDANT_TAG ],
+			],
+
+			'amp-mega-menu-invalid-child'                  => [
+				'
+				<amp-mega-menu height="30" layout="fixed-height">
+					<div>Not allowed</div>
+				</amp-mega-menu>
+				',
+				'',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_CHILD_TAG ],
+			],
+
+			'amp-nested-menu'                              => [
+				'
+				<button on="tap:sidebar1">Open Sidebar</button>
+				<amp-sidebar id="sidebar1" layout="nodisplay" style="width:300px">
+					<amp-nested-menu layout="fill">
+						<ul>
+							<li>
+								<h4 amp-nested-submenu-open>Open Sub-Menu</h4>
+								<div amp-nested-submenu>
+									<ul>
+										<li>
+											<h4 amp-nested-submenu-close>go back</h4>
+										</li>
+										<li>
+											<h4 amp-nested-submenu-open>Open Another Sub-Menu</h4>
+											<div amp-nested-submenu>
+												<h4 amp-nested-submenu-close>go back</h4>
+												<amp-img
+														src="/static/inline-examples/images/image1.jpg"
+														layout="responsive"
+														width="450"
+														height="300"></amp-img>
+											</div>
+										</li>
+									</ul>
+								</div>
+							</li>
+							<li>
+								<a href="https://amp.dev/">Link</a>
+							</li>
+						</ul>
+					</amp-nested-menu>
+				</amp-sidebar>
+				',
+				null,
+				[ 'amp-sidebar' ],
+			],
+
+			'amp-nested-menu-with-amp-list'                => [
+				'
+				<button on="tap:sidebar2">Open Sidebar</button>
+				<amp-sidebar id="sidebar2" layout="nodisplay" style="width:300px">
+				  <amp-list
+				    layout="fill"
+				    src="/static/inline-examples/data/amp-list-data.json"
+				    items="."
+				    single-item>
+				    <template type="amp-mustache">
+				      <amp-nested-menu layout="fill">
+				        <ul>
+				{{#items}}          <li>
+				            <h3 amp-nested-submenu-open>{{title}}</h3>
+				            <div amp-nested-submenu>
+				              <button amp-nested-submenu-close>close</button>
+				              <amp-img
+				                src="{{imageUrl}}"
+				                layout="responsive"
+				                width="400"
+				                height="300"></amp-img>
+				            </div>
+				          </li>
+				{{/items}}        </ul>
+				      </amp-nested-menu>
+				    </template>
+				  </amp-list>
+				</amp-sidebar>
+				',
+				null,
+				[ 'amp-sidebar', 'amp-list', 'amp-mustache' ],
+			],
+
+			'amp-redbull-player'                           => [
+				'
+				<amp-redbull-player
+				  id="rbvideo"
+				  data-param-videoid="rrn:content:videos:3965a26c-052e-575f-a28b-ded6bee23ee1:en-INT"
+				  data-param-skinid="com"
+				  data-param-locale="en"
+				  height="360"
+				  width="640"></amp-redbull-player>
+				',
+				null,
+				[ 'amp-redbull-player' ],
+			],
+
+			'mustache_templates_with_variable_attrs'       => [
+				'
+				<template type="amp-mustache">
+					<amp-img src="/img1.png" layout="bad" width="bad" height="bad" heights="bad" sizes="bad"></amp-img>
+					<amp-img src="/img2.png" layout="{{layout}}" width="bad" height="bad" heights="bad" sizes="bad"></amp-img>
+					<amp-img src="/img3.png" layout="bad" width="{{width}}" height="bad" heights="bad" sizes="bad"></amp-img>
+					<amp-img src="/img4.png" layout="bad" width="bad" height="{{height}}" heights="bad" sizes="bad"></amp-img>
+					<amp-img src="/img5.png" layout="bad" width="bad" height="bad" heights="{{heights}}" sizes="bad"></amp-img>
+					<amp-img src="/img6.png" layout="bad" width="bad" height="bad" heights="bad" sizes="{{sizes}}"></amp-img>
+				</template>
+				',
+				'
+				<template type="amp-mustache">
+					<amp-img src="/img2.png" layout="{{layout}}" width="bad" height="bad" heights="bad" sizes="bad"></amp-img>
+					<amp-img src="/img3.png" width="{{width}}" height="bad" heights="bad" sizes="bad"></amp-img>
+					<amp-img src="/img4.png" width="bad" height="{{height}}" heights="bad" sizes="bad"></amp-img>
+					<amp-img src="/img5.png" width="bad" height="bad" heights="{{heights}}" sizes="bad"></amp-img>
+					<amp-img src="/img6.png" width="bad" height="bad" heights="bad" sizes="{{sizes}}"></amp-img>
+				</template>
+				',
+				[ 'amp-mustache' ],
+				[
+					AMP_Tag_And_Attribute_Sanitizer::INVALID_LAYOUT_WIDTH,
+					AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX_CASEI,
+					AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX_CASEI,
+					AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX_CASEI,
+					AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX_CASEI,
+				],
+			],
+
+			'missing-layout-and-width-height'              => [
+				'
+					<amp-img src="https://placeholder.com/350"></amp-img>
+					<amp-gist data-gistid="b9bb35bc68df68259af94430f012425f"></amp-gist>
+					<amp-web-push-widget visibility="unsubscribed"></amp-web-push-widget>
+					<amp-megaphone data-episode="OSC7749686951" data-light></amp-megaphone>
+				',
+				'',
+				[],
+				[
+					AMP_Tag_And_Attribute_Sanitizer::MISSING_LAYOUT_ATTRIBUTES,
+					AMP_Tag_And_Attribute_Sanitizer::IMPLIED_LAYOUT_INVALID,
+					AMP_Tag_And_Attribute_Sanitizer::IMPLIED_LAYOUT_INVALID,
+					AMP_Tag_And_Attribute_Sanitizer::IMPLIED_LAYOUT_INVALID,
+				],
+			],
+
+			'missing-layout-nodisplay'                     => [
+				'
+					<amp-animation><script type="application/json">{}</script></amp-animation>
+					<amp-link-rewriter><script type="application/json">{}</script></amp-link-rewriter>
+					<amp-install-serviceworker src="https://www.example.com/serviceworker.js" data-iframe-src="https://www.example.com/install-serviceworker.html"></amp-install-serviceworker>
+				',
+				'',
+				[],
+				[
+					AMP_Tag_And_Attribute_Sanitizer::IMPLIED_LAYOUT_INVALID,
+					AMP_Tag_And_Attribute_Sanitizer::IMPLIED_LAYOUT_INVALID,
+					AMP_Tag_And_Attribute_Sanitizer::IMPLIED_LAYOUT_INVALID,
+				],
+			],
+
+			'layout-attributes-not-required'               => [
+				'
+					<amp-audio src="https://example.com/foo.mp3"></amp-audio>
+					<amp-pixel src="https://example.com/tracker/foo"></amp-pixel>
+				',
+				null,
+				[ 'amp-audio' ],
+				[],
+			],
+
+			'layout-specified-is-invalid'                  => [
+				'<amp-animation layout="responsive"><script type="application/json">{}</script></amp-animation>',
+				'',
+				[],
+				[
+					AMP_Tag_And_Attribute_Sanitizer::SPECIFIED_LAYOUT_INVALID,
+				],
+			],
+
+			'amp-onetap-google'                            => [
+				'<amp-onetap-google layout="nodisplay" data-src="https://rp.com/intermediate"></amp-onetap-google>',
+				null,
+				[ 'amp-onetap-google' ],
+			],
 		];
 	}
 
@@ -2163,10 +2983,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 	public function get_html_data() {
 		$data = [
 			'meta_charset_and_viewport_and_canonical' => [
-				'<html amp lang="ar" dir="rtl"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width, minimum-scale=1"><base target="_blank"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tangerine"><link rel="canonical" href="self.html"><title>marhabaan bialealim!</title></head><body></body></html>', // phpcs:ignore
+				'<html amp lang="ar" dir="rtl"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="viewport" content="width=device-width, minimum-scale=1"><base target="_blank"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tangerine"><link rel="canonical" href="self.html"><title>marhabaan bialealim!</title></head><body></body></html>',
 			],
 			'script_tag_externals'                    => [
-				'<html amp><head><meta charset="utf-8"><script async type="text/javascript" src="illegal.js"></script><script async src="illegal.js"></script><script src="illegal.js"></script><script type="text/javascript" src="illegal.js"></script></head><body></body></html>', // phpcs:ignore
+				'<html amp><head><meta charset="utf-8"><script async type="text/javascript" src="illegal.js"></script><script async src="illegal.js"></script><script src="illegal.js"></script><script type="text/javascript" src="illegal.js"></script></head><body></body></html>',
 				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
 				[],
 				array_fill(
@@ -2190,7 +3010,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				],
 			],
 			'style_external'                          => [
-				'<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="https://example.com/test.css"></head><body></body></html>', // phpcs:ignore
+				'<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="https://example.com/test.css"></head><body></body></html>',
 				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
 				[],
 				[
@@ -2218,16 +3038,57 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				),
 			],
 			'bad_external_font'                       => [
-				'<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="https://fonts.example.com/css?family=Bad"></head><body></body></html>', // phpcs:ignore
+				'<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="https://fonts.example.com/css?family=Bad"></head><body></body></html>',
 				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_ATTR_VALUE_REGEX, AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
 			],
 			'bad_meta_ua_compatible'                  => [
-				'<html amp><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=9,chrome=1"></head><body></body></html>',
-				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=6,chrome=1,netscape=4"></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="chrome=1"></head><body></body></html>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE, AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE, AMP_Tag_And_Attribute_Sanitizer::MISSING_REQUIRED_PROPERTY_VALUE ],
+			],
+			'bad_meta_width_property'                 => [
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=600, initial-scale=1.0"></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head><body></body></html>',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::MISSING_REQUIRED_PROPERTY_VALUE ],
+			],
+			'bad_meta_width_and_unknown_property'     => [
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=600, initial-scale=1.0, bad=yes"></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head><body></body></html>',
+				[],
+				[
+					[
+						'code'                => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE,
+						'meta_property_name'  => 'bad',
+						'meta_property_value' => 'yes',
+					],
+					[
+						'code'                         => AMP_Tag_And_Attribute_Sanitizer::MISSING_REQUIRED_PROPERTY_VALUE,
+						'meta_property_name'           => 'width',
+						'meta_property_value'          => '600',
+						'meta_property_required_value' => 'device-width',
+					],
+				],
+			],
+			'missing_meta_width_and_unknown_property' => [
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="initial-scale=1.0, bad=yes"></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="initial-scale=1.0,width=device-width"></head><body></body></html>',
+				[],
+				[
+					[
+						'code'                => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE,
+						'meta_property_name'  => 'bad',
+						'meta_property_value' => 'yes',
+					],
+					[
+						'code'                         => AMP_Tag_And_Attribute_Sanitizer::MISSING_MANDATORY_PROPERTY,
+						'meta_property_name'           => 'width',
+						'meta_property_required_value' => 'device-width',
+					],
+				],
 			],
 			'bad_meta_charset'                        => [
 				'<html amp><head><meta charset="latin-1"><title>Mojibake?</title></head><body></body></html>',
@@ -2235,9 +3096,15 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 			'bad_meta_viewport'                       => [
 				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="maximum-scale=1.0"></head><body></body></html>',
-				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="maximum-scale=1.0,width=device-width"></head><body></body></html>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE, AMP_Tag_And_Attribute_Sanitizer::ATTR_REQUIRED_BUT_MISSING ],
+				[ AMP_Tag_And_Attribute_Sanitizer::MISSING_MANDATORY_PROPERTY ],
+			],
+			'invalid_meta_viewport_property'          => [
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,maximum-scale=1.0,foo=bar"></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,maximum-scale=1.0"></head><body></body></html>',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_PROPERTY_IN_ATTR_VALUE ],
 			],
 			'parse_malformed_meta_charset_tag'        => [
 				'<html amp><head><meta charset = "utf-8"></head><body></body></html>',
@@ -2270,7 +3137,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 			'head_with_duplicate_charset'             => [
 				'<html amp><head><meta charset="UTF-8"><meta charset="utf-8"><body><p>Content</p></body></html>',
-				'<html amp><head><meta charset="utf-8"></head><body><p>Content</p></body></html>',
+				'<html amp><head><meta charset="UTF-8"></head><body><p>Content</p></body></html>',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::DUPLICATE_UNIQUE_TAG ],
 			],
@@ -2282,6 +3149,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 			'meta_amp_script_src'                     => [
 				'<html amp><head><meta charset="utf-8"><meta name="amp-script-src" content="sha384-abc123 sha384-def456"></head><body></body></html>',
+				null, // No change.
+			],
+			'meta_story_meta_tags'                    => [
+				'<html amp><head><meta charset="utf-8"><meta name="amp-story-generator-name" content="Web Stories for WordPress"><meta name="amp-story-generator-version" content="1.2.3"></head><body></body></html>',
 				null, // No change.
 			],
 			'link_without_valid_mandatory_href'       => [
@@ -2299,11 +3170,17 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					],
 				],
 			],
-			'cdata_css_important'                     => [
-				'<html amp><head><meta charset="utf-8"><style amp-custom>body { outline: solid 1px red !important; }</style></head><body></body></html>',
+			'cdata_css_i_amphtml_name'                => [
+				'<html amp><head><meta charset="utf-8"><style amp-custom>i-amphtml-scroll-container { outline: solid 1px red; }</style></head><body></body></html>',
 				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
 				[],
-				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_CSS_IMPORTANT ],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_CSS_I_AMPHTML_NAME ],
+			],
+			'cdata_css_html_comment'                  => [
+				'<html amp><head><meta charset="utf-8"><style amp-custom>/* <!-- not good --> */</style></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_HTML_COMMENTS ],
 			],
 			'cdata_contents_bad_comment'              => [
 				'<html><head><meta charset="utf-8"><script type="application/ld+json"><!--{"@context":"http:\/\/schema.org"}--></script></head><body></body></html>',
@@ -2311,8 +3188,50 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_HTML_COMMENTS ],
 			],
+			'cdata_malformed_json'                    => [
+				'<html><head><meta charset="utf-8"></head><body><amp-ima-video width="640" height="360" layout="responsive" data-tag="ads.xml"><script type="application/json">{"example": </script></amp-ima-video></body></html>',
+				'<html><head><meta charset="utf-8"></head><body><amp-ima-video width="640" height="360" layout="responsive" data-tag="ads.xml"></amp-ima-video></body></html>',
+				[ 'amp-ima-video' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_SYNTAX ],
+			],
+			'cdata_malformed_json_with_emojis'        => [
+				'<html><head><meta charset="utf-8"></head><body><amp-ima-video width="640" height="360" layout="responsive" data-tag="ads.xml"><script type="application/json">{"wrong": "' . wp_staticize_emoji( '🚧 🚧' ) . '"}</script></amp-ima-video></body></html>',
+				'<html><head><meta charset="utf-8"></head><body><amp-ima-video width="640" height="360" layout="responsive" data-tag="ads.xml"></amp-ima-video></body></html>',
+				[ 'amp-ima-video' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_SYNTAX ],
+			],
+			'cdata_malformed_utf8_json'               => [
+				sprintf( '<html><head><meta charset="utf-8"></head><body><amp-ima-video width="640" height="360" layout="responsive" data-tag="ads.xml"><script type="application/json">{"wrong": "%s"}</script></amp-ima-video></body></html>', "\xFF" ),
+				'<html><head><meta charset="utf-8"></head><body><amp-ima-video width="640" height="360" layout="responsive" data-tag="ads.xml"></amp-ima-video></body></html>',
+				[ 'amp-ima-video' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_UTF8 ],
+			],
+			'cdata_empty_json_considered_invalid'     => [
+				'<html><head><meta charset="utf-8"></head><body><amp-ima-video width="640" height="360" layout="responsive" data-tag="ads.xml"><script type="application/json"></script></amp-ima-video></body></html>',
+				'<html><head><meta charset="utf-8"></head><body><amp-ima-video width="640" height="360" layout="responsive" data-tag="ads.xml"></amp-ima-video></body></html>',
+				[ 'amp-ima-video' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_EMPTY ],
+			],
+			'cdata_empty_json_not_considered_invalid' => [
+				'<html><head><meta charset="utf-8"><script type="application/ld+json" id="__gaOptOutExtension"></script></head><body></body></html>',
+				null,
+				[],
+				[],
+			],
+			'analytics_empty_json_considered_invalid' => [
+				'<html><head><meta charset="utf-8"></head><body><amp-analytics><script type="application/json"> </script></amp-analytics></body></html>',
+				'<html><head><meta charset="utf-8"></head><body><amp-analytics></amp-analytics></body></html>',
+				[ 'amp-analytics' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_EMPTY ],
+			],
+			'analytics_state_mismatch_json_error'     => [
+				'<html><head><meta charset="utf-8"></head><body><amp-analytics><script type="application/json">{"foo": 1 ] }</script></amp-analytics></body></html>',
+				'<html><head><meta charset="utf-8"></head><body><amp-analytics></amp-analytics></body></html>',
+				[ 'amp-analytics' ],
+				[ AMP_Tag_And_Attribute_Sanitizer::JSON_ERROR_STATE_MISMATCH ],
+			],
 			'script_cdata_contents_bad'               => [
-				'<html><head><meta charset="utf-8"><script async src="https://cdn.ampproject.org/v0.js">document.write("bad");</script></head><body></body></html>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+				'<html><head><meta charset="utf-8"><script async src="https://cdn.ampproject.org/v0.js">document.write("bad");</script></head><body></body></html>',
 				'<html><head><meta charset="utf-8"></head><body></body></html>',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::INVALID_CDATA_CONTENTS ],
@@ -2322,6 +3241,90 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<html><head><meta charset="utf-8"></head><body></body></html>',
 				[],
 				[ AMP_Tag_And_Attribute_Sanitizer::MANDATORY_CDATA_MISSING_OR_INCORRECT ],
+			],
+			'amp_runtime'                             => [
+				'<html><head><meta charset="utf-8"><script async src="https://cdn.ampproject.org/v0.js" crossorigin="anonymous"></script></head><body></body></html>',
+				null,
+				[],
+			],
+			'amp_runtime_lts'                         => [
+				'<html><head><meta charset="utf-8"><script async src="https://cdn.ampproject.org/lts/v0.js" crossorigin="anonymous"></script></head><body></body></html>',
+				null,
+				[],
+			],
+			'amp-subscriptions'                       => [
+				// @todo The <script ciphertext type="application/octet-stream">...</script> but it is not yet supported. Support depends on todo in \AMP_Tag_And_Attribute_Sanitizer::has_parent().
+				'
+					<html>
+						<head>
+							<meta charset="utf-8">
+							<script cryptokeys sha-256-hash type="application/json">{}</script>
+						</head>
+						<body>
+							<section subscriptions-section="content" encrypted swg_amp_cache_nonce="NONCE">
+								...
+							</section>
+							<span swg_amp_cache_nonce="NONCE"></span>
+						</body>
+					</html>
+				',
+				null,
+				[ 'amp-subscriptions' ],
+			],
+			'bad http-equiv meta tag'                 => [
+				'<html><head><meta charset="utf-8"><meta http-equiv="Content-Script-Type" content="text/vbscript"></head><body></body></html>',
+				'<html><head><meta charset="utf-8"><meta content="text/vbscript"></head><body></body></html>',
+				[],
+				[ AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR ],
+			],
+			'responsive_image_preload_links'          => [
+				'<html amp><head><meta charset="utf-8"><link rel="preload" as="image" href="wolf.jpg" imagesrcset="wolf_400px.jpg 400w, wolf_800px.jpg 800w, wolf_1600px.jpg 1600w" imagesizes="50vw"></head><body></body></html>',
+				null, // No change.
+				[],
+				[],
+			],
+		];
+
+		$bad_dev_mode_document = sprintf(
+			'
+				<html amp>
+					<head>
+						<meta charset="utf-8">
+						<style data-ampdevmode>%s</style>
+					</head>
+					<body>
+						<amp-state id="something">
+							<script type="application/json" data-ampdevmode>%s</script>
+						</amp-state>
+						<button data-ampdevmode onclick="alert(\'Hello!\')"></button>
+						<script data-ampdevmode>document.write("Hello World!")</script>
+					</body>
+				</html>
+				',
+			'button::before { content:"' . str_repeat( 'a', 75001 ) . '";"}',
+			'{"foo":"' . str_repeat( 'b', 100001 ) . '"}'
+		);
+
+		$data['dev_mode_not_set_on_html_element'] = [
+			$bad_dev_mode_document,
+			'
+			<html amp>
+				<head>
+					<meta charset="utf-8">
+				</head>
+				<body>
+					<amp-state id="something">
+					</amp-state>
+					<button data-ampdevmode></button>
+				</body>
+			</html>
+			',
+			[ 'amp-bind' ],
+			[
+				AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
+				AMP_Tag_And_Attribute_Sanitizer::CDATA_TOO_LONG,
+				AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_ATTR,
+				AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 			],
 		];
 
@@ -2341,11 +3344,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					</body>
 				</html>
 				',
-			'button::before { content:"' . str_repeat( 'a', 50001 ) . '";"}',
+			'button::before { content:"' . str_repeat( 'a', 75001 ) . '";"}',
 			'{"foo":"' . str_repeat( 'b', 100001 ) . '"}'
 		);
 
-		$data['dev_mode_test'] = [
+		$data['dev_mode_set_on_html_element'] = [
 			$bad_dev_mode_document,
 			null,
 			[ 'amp-bind' ],
@@ -2434,7 +3437,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function test_sanitize( $source, $expected = null, $expected_scripts = [], $expected_errors = [] ) {
 		$expected      = isset( $expected ) ? $expected : $source;
-		$dom           = Document::from_html( $source );
+		$dom           = Document::fromHtml( $source );
 		$actual_errors = [];
 		$sanitizer     = new AMP_Tag_And_Attribute_Sanitizer(
 			$dom,
@@ -2464,7 +3467,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		);
 		$this->assertEquals( wp_list_pluck( $expected_errors, 'code' ), wp_list_pluck( $actual_errors, 'code' ) );
 		foreach ( $expected_errors as $i => $expected_error ) {
-			$this->assertArraySubset( $expected_error, $actual_errors[ $i ] );
+			foreach ( array_keys( $expected_error ) as $key ) {
+				$this->assertArrayHasKey( $key, $actual_errors[ $i ] );
+				$this->assertEquals( $expected_error[ $key ], $actual_errors[ $i ][ $key ], "For key: $key" );
+			}
 		}
 	}
 
@@ -2474,10 +3480,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Tag_And_Attribute_Sanitizer::sanitize()
 	 */
 	public function test_sanitize_body_only() {
-		$source   = '<b>Hello</b><script>document.write("hi");</script><amp-sidebar></amp-sidebar>';
-		$expected = '<b>Hello</b><amp-sidebar></amp-sidebar>';
+		$source   = '<b>Hello</b><script>document.write("hi");</script><amp-sidebar layout="nodisplay"></amp-sidebar>';
+		$expected = '<b>Hello</b><amp-sidebar layout="nodisplay"></amp-sidebar>';
 
-		$dom           = Document::from_html( $source );
+		$dom           = Document::fromHtml( $source );
 		$actual_errors = [];
 		$sanitizer     = new AMP_Tag_And_Attribute_Sanitizer(
 			$dom,
@@ -2548,6 +3554,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 							'alt'    => 'None',
 						],
 						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'node_type'       => XML_ELEMENT_NODE,
 					],
 				],
 			],
@@ -2562,6 +3569,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 						'node_attributes' => [ 'class' => 'baz-invalid' ],
 						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'node_type'       => XML_ELEMENT_NODE,
 					],
 				],
 			],
@@ -2571,12 +3579,14 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'',
 				[
 					[
-						'node_name'       => 'amp-story-grid-layer',
-						'parent_name'     => 'body',
-						'code'            => AMP_Tag_And_Attribute_Sanitizer::MANDATORY_TAG_ANCESTOR,
-						'node_attributes' => [ 'class' => 'a-invalid' ],
-						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
-						'spec_name'       => 'amp-story-grid-layer',
+						'node_name'              => 'amp-story-grid-layer',
+						'parent_name'            => 'body',
+						'code'                   => AMP_Tag_And_Attribute_Sanitizer::MANDATORY_TAG_ANCESTOR,
+						'node_attributes'        => [ 'class' => 'a-invalid' ],
+						'type'                   => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'spec_name'              => 'amp-story-grid-layer',
+						'required_ancestor_name' => 'amp-story-page',
+						'node_type'              => XML_ELEMENT_NODE,
 					],
 				],
 			],
@@ -2591,6 +3601,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 						'node_attributes' => [ 'class' => 'foo-invalid' ],
 						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'node_type'       => XML_ELEMENT_NODE,
 					],
 				],
 			],
@@ -2605,6 +3616,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 						'node_attributes' => [],
 						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'node_type'       => XML_ELEMENT_NODE,
 					],
 				],
 			],
@@ -2630,6 +3642,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 						'node_attributes' => [ 'id' => 'invalid' ],
 						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'node_type'       => XML_ELEMENT_NODE,
 					],
 					[
 						'node_name'       => 'bazfoo',
@@ -2637,6 +3650,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 						'node_attributes' => [],
 						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'node_type'       => XML_ELEMENT_NODE,
 					],
 				],
 			],
@@ -2656,6 +3670,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 						'node_attributes' => [],
 						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'node_type'       => XML_ELEMENT_NODE,
 					],
 				],
 			],
@@ -2670,6 +3685,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 						'node_attributes' => [],
 						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'node_type'       => XML_ELEMENT_NODE,
 					],
 					[
 						'node_name'       => 'divs',
@@ -2677,6 +3693,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
 						'node_attributes' => [],
 						'type'            => AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE,
+						'node_type'       => XML_ELEMENT_NODE,
 					],
 				],
 			],
@@ -2713,23 +3730,5 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 		$this->assertEmpty( $expected_errors, 'There should be no expected validation errors remaining.' );
 		$this->assertEqualMarkup( $expected_content, AMP_DOM_Utils::get_content_from_dom( $dom ) );
-	}
-
-	/**
-	 * Assert markup is equal.
-	 *
-	 * @param string $expected Expected markup.
-	 * @param string $actual   Actual markup.
-	 */
-	public function assertEqualMarkup( $expected, $actual ) {
-		$actual   = preg_replace( '/\s+/', ' ', $actual );
-		$expected = preg_replace( '/\s+/', ' ', $expected );
-		$actual   = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $actual ) );
-		$expected = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $expected ) );
-
-		$this->assertEquals(
-			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $expected, -1, PREG_SPLIT_DELIM_CAPTURE ) ),
-			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $actual, -1, PREG_SPLIT_DELIM_CAPTURE ) )
-		);
 	}
 }

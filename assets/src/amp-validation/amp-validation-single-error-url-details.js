@@ -7,9 +7,10 @@ import domReady from '@wordpress/dom-ready';
  * Toggles the contents of a details element as an additional table tr.
  */
 class RowToggler {
-	constructor( tr, index ) {
+	constructor( tr, index, activeTermId ) {
 		this.tr = tr;
 		this.index = index;
+		this.activeTermId = activeTermId;
 
 		// Since we're adding additional rows, we need to override default .striped tables styles.
 		this.tr.classList.add( this.index % 2 ? 'odd' : 'even' );
@@ -33,6 +34,19 @@ class RowToggler {
 				} );
 			} );
 		}
+
+		this.maybeInitiallyOpenRow();
+	}
+
+	/**
+	 * If the term ID retrieved from the URL query param matches this row's term ID, expand the row on load.
+	 */
+	maybeInitiallyOpenRow() {
+		if ( ! this.activeTermId || this.tr.id !== `tag-${ this.activeTermId }` ) {
+			return;
+		}
+
+		this.toggle( this.tr.querySelector( '.single-url-detail-toggle' ) );
 	}
 
 	/**
@@ -71,7 +85,7 @@ class RowToggler {
 	 *
 	 * @param {Object} target The click event target.
 	 */
-	toggle = ( target ) => {
+	toggle( target ) {
 		if ( this.tr.classList.contains( 'expanded' ) ) {
 			this.onClose( target );
 		} else {
@@ -112,10 +126,10 @@ class RowToggler {
  * Sets up expandable details for errors when viewing a single URL error list.
  */
 class ErrorRows {
-	constructor() {
+	constructor( activeTermId ) {
 		this.rows = [ ...document.querySelectorAll( '.wp-list-table tr[id^="tag-"]' ) ]
 			.map( ( tr, index ) => {
-				const rowHandler = new RowToggler( tr, index );
+				const rowHandler = new RowToggler( tr, index, activeTermId );
 				rowHandler.init();
 				return rowHandler;
 			} )
@@ -144,7 +158,7 @@ class ErrorRows {
 			} );
 		};
 
-		window.addEventListener( 'click', ( event ) => {
+		global.addEventListener( 'click', ( event ) => {
 			if ( toggleButtons.includes( event.target ) ) {
 				onButtonClick( event.target );
 			}
@@ -153,5 +167,12 @@ class ErrorRows {
 }
 
 domReady( () => {
-	new ErrorRows().init();
+	let activeTermId = null;
+
+	const matches = window.location.hash.match( /^#tag-(\d+)/ );
+	if ( matches ) {
+		activeTermId = parseInt( matches[ 1 ] );
+	}
+
+	new ErrorRows( activeTermId ).init();
 } );

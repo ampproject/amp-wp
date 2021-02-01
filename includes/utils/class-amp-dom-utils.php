@@ -5,12 +5,15 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Dom\Document;
+use AmpProject\Dom\Document;
+use AmpProject\Tag;
 
 /**
  * Class AMP_DOM_Utils
  *
  * Functionality to simplify working with Dom\Documents and DOMElements.
+ *
+ * @internal
  */
 class AMP_DOM_Utils {
 
@@ -18,7 +21,8 @@ class AMP_DOM_Utils {
 	 * Attribute prefix for AMP-bind data attributes.
 	 *
 	 * @since 1.2.1
-	 * @deprecated Use Amp\AmpWP\Dom\Document::AMP_BIND_DATA_ATTR_PREFIX instead.
+	 * @deprecated Use AmpProject\Dom\Document::AMP_BIND_DATA_ATTR_PREFIX instead.
+	 * @internal
 	 * @var string
 	 */
 	const AMP_BIND_DATA_ATTR_PREFIX = Document::AMP_BIND_DATA_ATTR_PREFIX;
@@ -52,15 +56,16 @@ class AMP_DOM_Utils {
 	 *
 	 * @since 0.7
 	 * @see AMP_DOM_Utils::get_content_from_dom_node()
-	 * @deprecated Use Amp\AmpWP\Dom\Document::from_html( $html, $encoding ) instead.
+	 * @codeCoverageIgnore
+	 * @deprecated Use AmpProject\Dom\Document::fromHtml( $html, $encoding ) instead.
 	 *
 	 * @param string $document Valid HTML document to be represented by a Dom\Document.
 	 * @param string $encoding Optional. Encoding to use for the content.
 	 * @return Document|false Returns Dom\Document, or false if conversion failed.
 	 */
 	public static function get_dom( $document, $encoding = null ) {
-		_deprecated_function( __METHOD__, '1.5.0', 'Amp\AmpWP\Dom\Document::from_html()' );
-		return Document::from_html( $document, $encoding );
+		_deprecated_function( __METHOD__, '1.5.0', 'AmpProject\Dom\Document::fromHtml()' );
+		return Document::fromHtml( $document, $encoding );
 	}
 
 	/**
@@ -68,14 +73,15 @@ class AMP_DOM_Utils {
 	 *
 	 * @link https://github.com/ampproject/amphtml/blob/445d6e3be8a5063e2738c6f90fdcd57f2b6208be/validator/engine/htmlparser.js#L83-L100
 	 * @link https://www.w3.org/TR/html5/document-metadata.html
-	 * @deprecated Use Amp\AmpWP\Dom\Document->is_valid_head_node() instead.
+	 * @codeCoverageIgnore
+	 * @deprecated Use AmpProject\Dom\Document->isValidHeadNode() instead.
 	 *
 	 * @param DOMNode $node Node.
 	 * @return bool Whether valid head node.
 	 */
 	public static function is_valid_head_node( DOMNode $node ) {
-		_deprecated_function( __METHOD__, '1.5.0', 'Amp\AmpWP\Dom\Document->is_valid_head_node()' );
-		return Document::from_node( $node )->is_valid_head_node( $node );
+		_deprecated_function( __METHOD__, '1.5.0', 'AmpProject\Dom\Document->isValidHeadNode()' );
+		return Document::fromNode( $node )->isValidHeadNode( $node );
 	}
 
 	/**
@@ -87,7 +93,8 @@ class AMP_DOM_Utils {
 	 * @since 0.7
 	 * @see \AMP_DOM_Utils::convert_amp_bind_attributes()
 	 * @see \AMP_DOM_Utils::restore_amp_bind_attributes()
-	 * @deprecated Use Amp\AmpWP\Dom\Document::AMP_BIND_DATA_ATTR_PREFIX instead.
+	 * @codeCoverageIgnore
+	 * @deprecated Use AmpProject\Dom\Document::AMP_BIND_DATA_ATTR_PREFIX instead.
 	 * @link https://www.ampproject.org/docs/reference/components/amp-bind
 	 *
 	 * @return string HTML5 data-* attribute name prefix for AMP binding attributes.
@@ -106,7 +113,9 @@ class AMP_DOM_Utils {
 	 * This is a reciprocal function of AMP_DOM_Utils::restore_amp_bind_attributes().
 	 *
 	 * @since 0.7
-	 * @deprecated This is handled automatically via Amp\AmpWP\Dom\Document.
+	 * @codeCoverageIgnore
+	 * @deprecated This is handled automatically via AmpProject\Dom\Document.
+	 * @internal
 	 * @see \AMP_DOM_Utils::convert_amp_bind_attributes()
 	 * @link https://www.ampproject.org/docs/reference/components/amp-bind
 	 *
@@ -125,7 +134,9 @@ class AMP_DOM_Utils {
 	 *
 	 * @since 0.7
 	 * @see \AMP_DOM_Utils::convert_amp_bind_attributes()
-	 * @deprecated This is handled automatically via Amp\AmpWP\Dom\Document.
+	 * @codeCoverageIgnore
+	 * @deprecated This is handled automatically via AmpProject\Dom\Document.
+	 * @internal
 	 * @link https://www.ampproject.org/docs/reference/components/amp-bind
 	 *
 	 * @param string $html HTML with amp-bind attributes converted.
@@ -161,7 +172,7 @@ class AMP_DOM_Utils {
 		 */
 		$document = "<html><head></head><body>{$content}</body></html>";
 
-		return Document::from_html( $document, $encoding );
+		return Document::fromHtml( $document, $encoding );
 	}
 
 	/**
@@ -181,13 +192,13 @@ class AMP_DOM_Utils {
 		);
 	}
 
-
 	/**
 	 * Return valid HTML content extracted from the DOMNode passed as a parameter.
 	 *
 	 * @since 0.6
 	 * @see AMP_DOM_Utils::get_dom() Where the operations in this method are mirrored.
 	 * @see AMP_DOM_Utils::get_content_from_dom() Reciprocal function.
+	 * @codeCoverageIgnore
 	 * @deprecated Use Dom\Document->saveHtml( $node ) instead.
 	 *
 	 * @param Document   $dom  Represents an HTML document.
@@ -195,7 +206,7 @@ class AMP_DOM_Utils {
 	 * @return string Returns the HTML content represented in the DOMNode
 	 */
 	public static function get_content_from_dom_node( Document $dom, $node ) {
-		_deprecated_function( __METHOD__, '1.5.0', 'Amp\AmpWP\Dom\Document::saveHtml()' );
+		_deprecated_function( __METHOD__, '1.5.0', 'AmpProject\Dom\Document::saveHtml()' );
 		return $dom->saveHTML( $node );
 	}
 
@@ -278,10 +289,12 @@ class AMP_DOM_Utils {
 	}
 
 	/**
-	 * Forces HTML element closing tags given a Dom\Document and optional DOMElement
+	 * Forces HTML element closing tags given a Dom\Document and optional DOMElement.
 	 *
 	 * @since 0.2
+	 * @codeCoverageIgnore
 	 * @deprecated
+	 * @internal
 	 *
 	 * @param Document   $dom  Represents HTML document on which to force closing tags.
 	 * @param DOMElement $node Represents HTML element to start closing tags on.
@@ -302,7 +315,7 @@ class AMP_DOM_Utils {
 			/*
 			 * Ensure there is no text content to accidentally force a child
 			 */
-			$node->textContent = null;
+			$node->textContent = '';
 			return;
 		}
 
@@ -330,7 +343,7 @@ class AMP_DOM_Utils {
 	 * @return bool Returns true if a valid self-closing tag, false if not.
 	 */
 	private static function is_self_closing_tag( $tag ) {
-		return in_array( strtolower( $tag ), self::$self_closing_tags, true );
+		return in_array( strtolower( $tag ), Tag::SELF_CLOSING_TAGS, true );
 	}
 
 	/**
@@ -358,31 +371,22 @@ class AMP_DOM_Utils {
 	 * If the element does not have an ID, create one first.
 	 *
 	 * @since 1.4.0
+	 * @since 1.5.1 Deprecated for AmpProject\Dom\Document::getElementId()
+	 *
+	 * @deprecated Use AmpProject\Dom\Document::getElementId() instead.
 	 *
 	 * @param DOMElement $element Element to get the ID for.
-	 * @param string     $prefix  Optional. Defaults to '_amp_wp_id_'.
+	 * @param string     $prefix  Optional. Defaults to 'amp-wp-id'.
 	 * @return string ID to use.
 	 */
 	public static function get_element_id( $element, $prefix = 'amp-wp-id' ) {
-		static $index_counter = [];
+		_deprecated_function(
+			'AMP_DOM_Utils::get_element_id',
+			'1.5.1',
+			'Use AmpProject\Amp\Dom\Document::getElementId() instead'
+		);
 
-		if ( $element->hasAttribute( 'id' ) ) {
-			return $element->getAttribute( 'id' );
-		}
-
-		if ( ! array_key_exists( $prefix, $index_counter ) ) {
-			$index_counter[ $prefix ] = 2;
-			$element->setAttribute( 'id', $prefix );
-
-			return $prefix;
-		}
-
-		$id = "{$prefix}-{$index_counter[ $prefix ]}";
-		$index_counter[ $prefix ] ++;
-
-		$element->setAttribute( 'id', $id );
-
-		return $id;
+		return Document::fromNode( $element )->getElementId( $element, $prefix );
 	}
 
 	/**

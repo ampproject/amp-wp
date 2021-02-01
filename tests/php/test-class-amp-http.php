@@ -6,12 +6,17 @@
  * @since 1.0
  */
 
+use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+
 /**
  * Tests for AMP_HTTP.
  *
  * @covers AMP_HTTP
  */
 class Test_AMP_HTTP extends WP_UnitTestCase {
+
+	use AssertContainsCompatibility;
 
 	/**
 	 * Set up before class.
@@ -104,6 +109,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 	 * @covers \AMP_HTTP::send_server_timing()
 	 */
 	public function test_send_server_timing_positive_duration() {
+		$this->setExpectedDeprecated( 'AMP_HTTP::send_server_timing' );
 		AMP_HTTP::send_server_timing( 'name', 123, 'Description' );
 		$this->assertCount( 1, AMP_HTTP::$headers_sent );
 		$this->assertEquals( 'Server-Timing', AMP_HTTP::$headers_sent[0]['name'] );
@@ -121,6 +127,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 	 * @covers \AMP_HTTP::send_server_timing()
 	 */
 	public function test_send_server_timing_negative_duration() {
+		$this->setExpectedDeprecated( 'AMP_HTTP::send_server_timing' );
 		AMP_HTTP::send_server_timing( 'name', -microtime( true ) );
 		$this->assertCount( 1, AMP_HTTP::$headers_sent );
 		$this->assertEquals( 'Server-Timing', AMP_HTTP::$headers_sent[0]['name'] );
@@ -156,8 +163,8 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		foreach ( $all_query_vars as $key => $value ) {
 			$this->assertArrayHasKey( $key, $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$this->assertArrayHasKey( $key, $_REQUEST ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$this->assertContains( "$key=$value", $_SERVER['QUERY_STRING'] );
-			$this->assertContains( "$key=$value", $_SERVER['REQUEST_URI'] );
+			$this->assertStringContains( "$key=$value", $_SERVER['QUERY_STRING'] );
+			$this->assertStringContains( "$key=$value", $_SERVER['REQUEST_URI'] );
 		}
 
 		AMP_HTTP::$purged_amp_query_vars = [];
@@ -167,14 +174,14 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		foreach ( $bad_query_vars as $key => $value ) {
 			$this->assertArrayNotHasKey( $key, $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$this->assertArrayNotHasKey( $key, $_REQUEST ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$this->assertNotContains( "$key=$value", $_SERVER['QUERY_STRING'] );
-			$this->assertNotContains( "$key=$value", $_SERVER['REQUEST_URI'] );
+			$this->assertStringNotContains( "$key=$value", $_SERVER['QUERY_STRING'] );
+			$this->assertStringNotContains( "$key=$value", $_SERVER['REQUEST_URI'] );
 		}
 		foreach ( $ok_query_vars as $key => $value ) {
 			$this->assertArrayHasKey( $key, $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$this->assertArrayHasKey( $key, $_REQUEST ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$this->assertContains( "$key=$value", $_SERVER['QUERY_STRING'] );
-			$this->assertContains( "$key=$value", $_SERVER['REQUEST_URI'] );
+			$this->assertStringContains( "$key=$value", $_SERVER['QUERY_STRING'] );
+			$this->assertStringContains( "$key=$value", $_SERVER['REQUEST_URI'] );
 		}
 		// phpcs:enable WordPress.CSRF.NonceVerification.NoNonceVerification
 	}
@@ -412,7 +419,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 	 */
 	public function test_intercept_post_request_redirect() {
 
-		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$url = home_url( '', 'https' ) . ':443/?test=true#test';
 
 		add_filter( 'wp_doing_ajax', '__return_true' );
@@ -524,7 +531,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 			}
 		);
 
-		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
 		$post    = self::factory()->post->create_and_get();
 		$comment = self::factory()->comment->create_and_get(
 			[

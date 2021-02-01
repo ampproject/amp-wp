@@ -6,6 +6,9 @@
  * @since 1.4
  */
 
+use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
+
 /**
  * Tests for AMP_WordPress_TV_Embed_Handler.
  *
@@ -14,11 +17,17 @@
  */
 class Test_AMP_WordPress_TV_Embed_Handler extends WP_UnitTestCase {
 
+	use AssertContainsCompatibility;
+	use WithoutBlockPreRendering {
+		setUp as public prevent_block_pre_render;
+	}
+
 	/**
 	 * Set up.
 	 */
 	public function setUp() {
-		parent::setUp();
+		$this->prevent_block_pre_render();
+
 		add_filter( 'pre_http_request', [ $this, 'mock_http_request' ], 10, 3 );
 	}
 
@@ -40,7 +49,7 @@ class Test_AMP_WordPress_TV_Embed_Handler extends WP_UnitTestCase {
 		}
 		unset( $r );
 		return [
-			'body'          => '{"type":"video","version":"1.0","title":null,"width":500,"height":281,"html":"<iframe width=\'500\' height=\'281\' src=\'https:\\/\\/videopress.com\\/embed\\/yFCmLMGL?hd=0\' frameborder=\'0\' allowfullscreen><\\/iframe><script src=\'https:\\/\\/v0.wordpress.com\\/js\\/next\\/videopress-iframe.js?m=1435166243\'></script>"}', // phpcs:ignore
+			'body'          => '{"type":"video","version":"1.0","title":null,"width":500,"height":281,"html":"<iframe width=\'500\' height=\'281\' src=\'https:\\/\\/video.wordpress.com\\/embed\\/yFCmLMGL?hd=0\' frameborder=\'0\' allowfullscreen><\\/iframe><script src=\'https:\\/\\/v0.wordpress.com\\/js\\/next\\/videopress-iframe.js?m=1435166243\'></script>"}', // phpcs:ignore
 			'headers'       => [],
 			'response'      => [
 				'code'    => 200,
@@ -72,9 +81,9 @@ class Test_AMP_WordPress_TV_Embed_Handler extends WP_UnitTestCase {
 
 		$handler->register_embed();
 		$rendered = apply_filters( 'the_content', $wordpress_tv_block );
-		$this->assertContains( '<iframe', $rendered );
-		$this->assertContains( 'videopress.com/embed', $rendered );
-		$this->assertNotContains( '<script', $rendered );
+		$this->assertStringContains( '<iframe', $rendered );
+		$this->assertStringContains( 'video.wordpress.com/embed', $rendered );
+		$this->assertStringNotContains( '<script', $rendered );
 	}
 
 	/**

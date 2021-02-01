@@ -1,7 +1,7 @@
 {
   "root": true,
   "extends": [
-    "plugin:@wordpress/eslint-plugin/recommended",
+    "plugin:@wordpress/eslint-plugin/recommended-with-formatting",
     "plugin:import/recommended",
     "plugin:eslint-comments/recommended"
   ],
@@ -57,7 +57,7 @@
     "react/no-unused-prop-types": "error",
     "react/self-closing-comp": "error",
     "import/no-unresolved": [ "error", {
-      "ignore": [ "jquery", "amp-block-editor-data" ]
+      "ignore": [ "jquery", "amp-block-editor-data", "amp-settings", "amp-block-validation" ]
     } ],
     "import/order": [ "error", { "groups": [ "builtin", [ "external", "unknown" ], "internal", "parent", "sibling", "index" ] } ],
     "jsdoc/check-indentation": "error",
@@ -103,6 +103,25 @@
         "jest/no-hooks": "off",
         "jest/prefer-expect-assertions": "off",
         "jest/prefer-inline-snapshots": "off"
+      }
+    },
+    {
+      "files": [
+        "assets/src/mobile-redirection.js"
+      ],
+      "globals": {
+        "AMP_MOBILE_REDIRECTION": false,
+        "location": false,
+        "navigator": false,
+        "sessionStorage": false
+      }
+    },
+    {
+      "files": [
+        "assets/src/customizer/amp-customize-controls.js"
+      ],
+      "globals": {
+        "HTMLAnchorElement": false
       }
     }
   ]

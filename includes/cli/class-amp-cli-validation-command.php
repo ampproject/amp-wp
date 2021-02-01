@@ -7,11 +7,19 @@
  * @package AMP
  */
 
+use AmpProject\AmpWP\Admin\ReaderThemes;
+use AmpProject\AmpWP\Option;
+use AmpProject\AmpWP\Validation\URLValidationProvider;
+use AmpProject\AmpWP\Validation\ScannableURLProvider;
+use AmpProject\AmpWP\Validation\URLScanningContext;
+use WP_CLI\Utils;
+
 /**
  * Crawls the site for validation errors or resets the stored validation errors.
  *
  * @since 1.0
  * @since 1.3.0 Renamed subcommands.
+ * @internal
  */
 final class AMP_CLI_Validation_Command {
 
@@ -56,74 +64,25 @@ final class AMP_CLI_Validation_Command {
 	public $wp_cli_progress;
 
 	/**
-	 * The total number of validation errors, regardless of whether they were accepted.
+	 * URLValidationProvider instance.
 	 *
-	 * @var int
+	 * @var URLValidationProvider
 	 */
-	public $total_errors = 0;
+	private $url_validation_provider;
 
 	/**
-	 * The total number of unaccepted validation errors.
+	 * ScannableURLProvider instance.
 	 *
-	 * If an error has been accepted in the /wp-admin validation UI,
-	 * it won't count toward this.
-	 *
-	 * @var int
+	 * @var ScannableURLProvider
 	 */
-	public $unaccepted_errors = 0;
+	private $scannable_url_provider;
 
 	/**
-	 * The number of URLs crawled, regardless of whether they have validation errors.
-	 *
-	 * @var int
-	 */
-	public $number_crawled = 0;
-
-	/**
-	 * Whether to force crawling of URLs.
-	 *
-	 * By default, this script only crawls URLs that support AMP,
-	 * where the user has not opted-out of AMP for the URL.
-	 * For example, by un-checking 'Posts' in 'AMP Settings' > 'Supported Templates'.
-	 * Or un-checking 'Enable AMP' in the post's editor.
-	 *
-	 * @var int
-	 */
-	public $force_crawl_urls = false;
-
-	/**
-	 * A whitelist of conditionals to use for validation.
-	 *
-	 * Usually, this script will validate all of the templates that don't have AMP disabled.
-	 * But this allows validating based on only these conditionals.
-	 * This is set if the WP-CLI command has an --include argument.
+	 * Associative args passed to the command.
 	 *
 	 * @var array
 	 */
-	public $include_conditionals = [];
-
-	/**
-	 * The maximum number of URLs to validate for each type.
-	 *
-	 * Templates are each a separate type, like those for is_category() and is_tag().
-	 * Also, each post type is a separate type.
-	 * This value is overridden if the WP-CLI command has an --limit argument, like --limit=10.
-	 *
-	 * @var int
-	 */
-	public $limit_type_validate_count;
-
-	/**
-	 * The validation counts by type, like template or post type.
-	 *
-	 * @var array[][] {
-	 *     Validity by type.
-	 *
-	 *     @type int $valid The number of valid URLs for this type.
-	 *     @type int $total The total number of URLs for this type, valid or invalid.
-	 * }
-	 */
-	public $validity_by_type = [];
+	private $assoc_args;
 
 	/**
 	 * Crawl the entire site to get AMP validation results.
@@ -150,44 +109,16 @@ final class AMP_CLI_Validation_Command {
 	 * @param array $assoc_args Associative args.
 	 * @throws Exception If an error happens.
 	 */
-	public function run( $args, $assoc_args ) {
-		$this->include_conditionals      = [];
-		$this->force_crawl_urls          = false;
-		$this->limit_type_validate_count = (int) $assoc_args[ self::LIMIT_URLS_ARGUMENT ];
+	public function run( /** @noinspection PhpUnusedParameterInspection */ $args, $assoc_args ) {
+		$this->assoc_args = $assoc_args;
 
-		/*
-		 * Handle the argument and flag passed to the command: --include and --force.
-		 * If the self::INCLUDE_ARGUMENT is present, force crawling or URLs.
-		 * The WP-CLI command should indicate which templates are crawled, not the /wp-admin options.
-		 */
-		if ( ! empty( $assoc_args[ self::INCLUDE_ARGUMENT ] ) ) {
-			$this->include_conditionals = explode( ',', $assoc_args[ self::INCLUDE_ARGUMENT ] );
-			$this->force_crawl_urls     = true;
-		} elseif ( isset( $assoc_args[ self::FLAG_NAME_FORCE_VALIDATION ] ) ) {
-			$this->force_crawl_urls = true;
-		}
+		$scannable_url_provider  = $this->get_validation_url_provider();
+		$url_validation_provider = $this->get_validation_provider();
+		$urls                    = $scannable_url_provider->get_urls();
 
-		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-			if ( $this->force_crawl_urls ) {
-				/*
-				 * There is no theme support added programmatically or via options.
-				 * So make sure that theme support is present so that AMP_Validation_Manager::validate_url()
-				 * will use a canonical URL as the basis for obtaining validation results.
-				 */
-				add_theme_support( AMP_Theme_Support::SLUG );
-			} else {
-				WP_CLI::error(
-					sprintf(
-						'Your templates are currently in Reader mode, which does not allow crawling the site. Please pass the --%s flag in order to force crawling for validation.',
-						self::FLAG_NAME_FORCE_VALIDATION
-					)
-				);
-			}
-		}
-
-		$number_urls_to_crawl = $this->count_urls_to_validate();
+		$number_urls_to_crawl = count( $urls );
 		if ( ! $number_urls_to_crawl ) {
-			if ( ! empty( $this->include_conditionals ) ) {
+			if ( ! empty( Utils\get_flag_value( $this->assoc_args, self::INCLUDE_ARGUMENT, [] ) ) ) {
 				WP_CLI::error(
 					sprintf(
 						'The templates passed via the --%s argument did not match any URLs. You might try passing different templates to it.',
@@ -210,7 +141,9 @@ final class AMP_CLI_Validation_Command {
 			sprintf( 'Validating %d URLs...', $number_urls_to_crawl ),
 			$number_urls_to_crawl
 		);
-		$this->crawl_site();
+
+		$this->validate_urls( $urls );
+
 		$this->wp_cli_progress->finish();
 
 		$key_template_type = 'Template or content type';
@@ -218,7 +151,7 @@ final class AMP_CLI_Validation_Command {
 		$key_validity_rate = 'Validity Rate';
 
 		$table_validation_by_type = [];
-		foreach ( $this->validity_by_type as $type_name => $validity ) {
+		foreach ( $url_validation_provider->get_validity_by_type() as $type_name => $validity ) {
 			$table_validation_by_type[] = [
 				$key_template_type => $type_name,
 				$key_url_count     => $validity['total'],
@@ -234,9 +167,9 @@ final class AMP_CLI_Validation_Command {
 		WP_CLI::success(
 			sprintf(
 				'%3$d crawled URLs have invalid markup kept out of %2$d total with AMP validation issue(s); %1$d URLs were crawled.',
-				$this->number_crawled,
-				$this->total_errors,
-				$this->unaccepted_errors
+				$url_validation_provider->get_number_validated(),
+				$url_validation_provider->get_total_errors(),
+				$url_validation_provider->get_unaccepted_errors()
 			)
 		);
 
@@ -253,6 +186,116 @@ final class AMP_CLI_Validation_Command {
 			admin_url( 'edit.php' )
 		);
 		WP_CLI::line( sprintf( 'For more details, please see: %s', $url_more_details ) );
+	}
+
+	/**
+	 * Provides the ScannableURLProvider instance.
+	 *
+	 * @return ScannableURLProvider
+	 */
+	private function get_validation_url_provider() {
+		if ( ! is_null( $this->scannable_url_provider ) ) {
+			return $this->scannable_url_provider;
+		}
+
+		$include_conditionals      = Utils\get_flag_value( $this->assoc_args, self::INCLUDE_ARGUMENT, [] );
+		$force_crawl_urls          = Utils\get_flag_value( $this->assoc_args, self::FLAG_NAME_FORCE_VALIDATION, false );
+		$limit_type_validate_count = Utils\get_flag_value( $this->assoc_args, self::LIMIT_URLS_ARGUMENT, 100 );
+
+		/*
+		 * Handle the argument and flag passed to the command: --include and --force.
+		 * If the self::INCLUDE_ARGUMENT is present, force crawling of URLs.
+		 * The WP-CLI command should indicate which templates are crawled, not the /wp-admin options.
+		 */
+		if ( ! empty( $include_conditionals ) ) {
+			if ( is_string( $include_conditionals ) ) {
+				$include_conditionals = explode( ',', $include_conditionals );
+			}
+
+			$force_crawl_urls = true;
+		}
+
+		// Handle special case for Legacy Reader mode.
+		if (
+			AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option( Option::THEME_SUPPORT )
+			&&
+			ReaderThemes::DEFAULT_READER_THEME === AMP_Options_Manager::get_option( Option::READER_THEME )
+		) {
+			$allowed_templates = [
+				'is_singular',
+			];
+			if ( 'page' === get_option( 'show_on_front' ) ) {
+				$allowed_templates[] = 'is_home';
+				$allowed_templates[] = 'is_front_page';
+			}
+
+			$disallowed_templates = array_diff( $include_conditionals, $allowed_templates );
+			if ( ! empty( $disallowed_templates ) ) {
+				WP_CLI::error( sprintf( 'Templates not supported in legacy Reader mode with current configuration: %s', implode( ',', $disallowed_templates ) ) );
+			}
+
+			if ( empty( $include_conditionals ) ) {
+				$include_conditionals = $allowed_templates;
+			}
+		}
+
+		$this->scannable_url_provider = new ScannableURLProvider(
+			new URLScanningContext(
+				$limit_type_validate_count,
+				$include_conditionals,
+				$force_crawl_urls
+			)
+		);
+
+		return $this->scannable_url_provider;
+	}
+
+	/**
+	 * Provides the site scan instance.
+	 *
+	 * @return URLValidationProvider
+	 */
+	private function get_validation_provider() {
+		if ( ! is_null( $this->url_validation_provider ) ) {
+			return $this->url_validation_provider;
+		}
+
+		$this->url_validation_provider = new URLValidationProvider();
+
+		return $this->url_validation_provider;
+	}
+
+	/**
+	 * Validates the URLs.
+	 *
+	 * @param array $urls URLs to validate, or null to get URLs from the scannable URL provider.
+	 */
+	private function validate_urls( $urls = null ) {
+		$url_validation_provider = $this->get_validation_provider();
+
+		if ( ! $urls ) {
+			$scannable_url_provider = $this->get_validation_url_provider();
+			$urls                   = $scannable_url_provider->get_urls();
+		}
+
+		foreach ( $urls as $url ) {
+			$validity = $url_validation_provider->get_url_validation( $url['url'], $url['type'], true );
+
+			if ( $this->wp_cli_progress ) {
+				$this->wp_cli_progress->tick();
+			}
+
+			if ( is_wp_error( $validity ) ) {
+				WP_CLI::warning(
+					sprintf(
+						'Validate URL error (%1$s): %2$s URL: %3$s',
+						$validity['error']->get_error_code(),
+						$validity['error']->get_error_message(),
+						$url
+					)
+				);
+			}
+		}
 	}
 
 	/**
@@ -273,12 +316,12 @@ final class AMP_CLI_Validation_Command {
 	 * @param array $assoc_args Associative args.
 	 * @throws Exception If an error happens.
 	 */
-	public function reset( $args, $assoc_args ) {
+	public function reset( /** @noinspection PhpUnusedParameterInspection */ $args, $assoc_args ) {
 		global $wpdb;
 		WP_CLI::confirm( 'Are you sure you want to empty all amp_validated_url posts and amp_validation_error taxonomy terms?', $assoc_args );
 
 		// Delete all posts.
-		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = %s", AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) );
+		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = %s", AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$query = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = %s", AMP_Validated_URL_Post_Type::POST_TYPE_SLUG );
 		$posts = new WP_CLI\Iterators\Query( $query, 10000 );
 
@@ -295,7 +338,7 @@ final class AMP_CLI_Validation_Command {
 		$progress->finish();
 
 		// Delete all terms. Note that many terms should get deleted when their post counts go to zero above.
-		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( * ) FROM $wpdb->term_taxonomy WHERE taxonomy = %s", AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ) );
+		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( * ) FROM $wpdb->term_taxonomy WHERE taxonomy = %s", AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$query = $wpdb->prepare( "SELECT term_id FROM $wpdb->term_taxonomy WHERE taxonomy = %s", AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
 		$terms = new WP_CLI\Iterators\Query( $query, 10000 );
 
@@ -383,358 +426,5 @@ final class AMP_CLI_Validation_Command {
 		}
 
 		WP_CLI::line( wp_json_encode( $result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
-	}
-
-	/**
-	 * Gets the total number of URLs to validate.
-	 *
-	 * By default, this only counts AMP-enabled posts and terms.
-	 * But if $force_crawl_urls is true, it counts all of them, regardless of their AMP status.
-	 * It also uses $this->maximum_urls_to_validate_for_each_type,
-	 * which can be overridden with a command line argument.
-	 *
-	 * @return int The number of URLs to validate.
-	 */
-	private function count_urls_to_validate() {
-		/*
-		 * If the homepage is set to 'Your latest posts,' start the $total_count at 1.
-		 * Otherwise, it will probably be counted in the query for pages below.
-		 */
-		$total_count = 'posts' === get_option( 'show_on_front' ) && $this->is_template_supported( 'is_home' ) ? 1 : 0;
-
-		$amp_enabled_taxonomies = array_filter(
-			get_taxonomies( [ 'public' => true ] ),
-			[ $this, 'does_taxonomy_support_amp' ]
-		);
-
-		// Count all public taxonomy terms.
-		foreach ( $amp_enabled_taxonomies as $taxonomy ) {
-			$term_query = new WP_Term_Query(
-				[
-					'taxonomy' => $taxonomy,
-					'fields'   => 'ids',
-					'number'   => $this->limit_type_validate_count,
-				]
-			);
-
-			// If $term_query->terms is an empty array, passing it to count() will throw an error.
-			$total_count += ! empty( $term_query->terms ) ? count( $term_query->terms ) : 0;
-		}
-
-		// Count posts by type, like post, page, attachment, etc.
-		$public_post_types = get_post_types( [ 'public' => true ], 'names' );
-		foreach ( $public_post_types as $post_type ) {
-			$posts        = $this->get_posts_that_support_amp( $this->get_posts_by_type( $post_type ) );
-			$total_count += ! empty( $posts ) ? count( $posts ) : 0;
-		}
-
-		// Count author pages, like https://example.com/author/admin/.
-		$total_count += count( $this->get_author_page_urls() );
-
-		// Count a single example date page, like https://example.com/?year=2019.
-		if ( $this->get_date_page() ) {
-			$total_count++;
-		}
-
-		// Count a single example search page, like https://example.com/?s=example.
-		if ( $this->get_search_page() ) {
-			$total_count++;
-		}
-
-		return $total_count;
-	}
-
-	/**
-	 * Gets the posts IDs that support AMP.
-	 *
-	 * By default, this only gets the post IDs if they support AMP.
-	 * This means that 'Posts' isn't deselected in 'AMP Settings' > 'Supported Templates'.
-	 * And 'Enable AMP' isn't unchecked in the post's editor.
-	 * But if $force_crawl_urls is true, this simply returns all of the IDs.
-	 *
-	 * @param array $ids THe post IDs to check for AMP support.
-	 * @return array The post IDs that support AMP, or an empty array.
-	 */
-	private function get_posts_that_support_amp( $ids ) {
-		if ( ! $this->is_template_supported( 'is_singular' ) ) {
-			return [];
-		}
-
-		if ( $this->force_crawl_urls ) {
-			return $ids;
-		}
-
-		return array_filter(
-			$ids,
-			'post_supports_amp'
-		);
-	}
-
-	/**
-	 * Gets whether the taxonomy supports AMP.
-	 *
-	 * This only gets the term IDs if they support AMP.
-	 * If their taxonomy is unchecked in 'AMP Settings' > 'Supported Templates,' this does not return them.
-	 * For example, if 'Categories' is unchecked.
-	 * This can be overridden by passing the self::FLAG_NAME_FORCE_VALIDATION argument to the WP-CLI command.
-	 *
-	 * @param string $taxonomy The taxonomy.
-	 * @return boolean Whether the taxonomy supports AMP.
-	 */
-	private function does_taxonomy_support_amp( $taxonomy ) {
-		if ( 'post_tag' === $taxonomy ) {
-			$taxonomy = 'tag';
-		}
-		$taxonomy_key        = 'is_' . $taxonomy;
-		$custom_taxonomy_key = sprintf( 'is_tax[%s]', $taxonomy );
-		return $this->is_template_supported( $taxonomy_key ) || $this->is_template_supported( $custom_taxonomy_key );
-	}
-
-	/**
-	 * Gets whether the template is supported.
-	 *
-	 * If the user has passed an include argument to the WP-CLI command, use that to find if this template supports AMP.
-	 * For example, wp amp validation run --include=is_tag,is_category
-	 * would return true only if is_tag() or is_category().
-	 * But passing the self::FLAG_NAME_FORCE_VALIDATION argument to the WP-CLI command overrides this.
-	 *
-	 * @param string $template The template to check.
-	 * @return bool Whether the template is supported.
-	 */
-	private function is_template_supported( $template ) {
-		// If the --include argument is present in the WP-CLI command, this template conditional must be present in it.
-		if ( ! empty( $this->include_conditionals ) ) {
-			return in_array( $template, $this->include_conditionals, true );
-		}
-		if ( $this->force_crawl_urls ) {
-			return true;
-		}
-
-		$supportable_templates = AMP_Theme_Support::get_supportable_templates();
-
-		// Check whether this taxonomy's template is supported, including in the 'AMP Settings' > 'Supported Templates' UI.
-		return ! empty( $supportable_templates[ $template ]['supported'] );
-	}
-
-	/**
-	 * Gets the IDs of public, published posts.
-	 *
-	 * @param string   $post_type The post type.
-	 * @param int|null $offset The offset of the query (optional).
-	 * @param int|null $number The number of posts to query for (optional).
-	 * @return int[]   $post_ids The post IDs in an array.
-	 */
-	private function get_posts_by_type( $post_type, $offset = null, $number = null ) {
-		$args = [
-			'post_type'      => $post_type,
-			'posts_per_page' => is_int( $number ) ? $number : $this->limit_type_validate_count,
-			'post_status'    => 'publish',
-			'orderby'        => 'ID',
-			'order'          => 'DESC',
-			'fields'         => 'ids',
-		];
-		if ( is_int( $offset ) ) {
-			$args['offset'] = $offset;
-		}
-
-		// Attachment posts usually have the post_status of 'inherit,' so they can use the status of the post they're attached to.
-		if ( 'attachment' === $post_type ) {
-			$args['post_status'] = 'inherit';
-		}
-		$query = new WP_Query( $args );
-
-		return $query->posts;
-	}
-
-	/**
-	 * Gets the front-end links for taxonomy terms.
-	 * For example, https://example.org/?cat=2
-	 *
-	 * @param string     $taxonomy The name of the taxonomy, like 'category' or 'post_tag'.
-	 * @param int|string $offset The number at which to offset the query (optional).
-	 * @param int        $number The maximum amount of links to get (optional).
-	 * @return string[]  The term links, as an array of strings.
-	 */
-	private function get_taxonomy_links( $taxonomy, $offset = '', $number = 1 ) {
-		return array_map(
-			'get_term_link',
-			get_terms(
-				array_merge(
-					compact( 'taxonomy', 'offset', 'number' ),
-					[
-						'orderby' => 'id',
-					]
-				)
-			)
-		);
-	}
-
-	/**
-	 * Gets the author page URLs, like https://example.com/author/admin/.
-	 *
-	 * Accepts an $offset parameter, for the query of authors.
-	 * 0 is the first author in the query, and 1 is the second.
-	 *
-	 * @param int|string $offset The offset for the URL to query for, should be an int if passing an argument.
-	 * @param int|string $number The total number to query for, should be an int if passing an argument.
-	 * @return array The author page URLs, or an empty array.
-	 */
-	private function get_author_page_urls( $offset = '', $number = '' ) {
-		$author_page_urls = [];
-		if ( ! $this->is_template_supported( 'is_author' ) ) {
-			return $author_page_urls;
-		}
-
-		$number = ! empty( $number ) ? $number : $this->limit_type_validate_count;
-		foreach ( get_users( compact( 'offset', 'number' ) ) as $author ) {
-			$author_page_urls[] = get_author_posts_url( $author->ID, $author->user_nicename );
-		}
-
-		return $author_page_urls;
-	}
-
-	/**
-	 * Gets a single search page URL, like https://example.com/?s=example.
-	 *
-	 * @return string|null An example search page, or null.
-	 */
-	private function get_search_page() {
-		if ( ! $this->is_template_supported( 'is_search' ) ) {
-			return null;
-		}
-
-		return add_query_arg( 's', 'example', home_url( '/' ) );
-	}
-
-	/**
-	 * Gets a single date page URL, like https://example.com/?year=2018.
-	 *
-	 * @return string|null An example search page, or null.
-	 */
-	private function get_date_page() {
-		if ( ! $this->is_template_supported( 'is_date' ) ) {
-			return null;
-		}
-
-		return add_query_arg( 'year', gmdate( 'Y' ), home_url( '/' ) );
-	}
-
-	/**
-	 * Validates the URLs of the entire site.
-	 *
-	 * Includes the URLs of public, published posts, public taxonomies, and other templates.
-	 * This validates one of each type at a time,
-	 * and iterates until it reaches the maximum number of URLs for each type.
-	 */
-	private function crawl_site() {
-		/*
-		 * If 'Your homepage displays' is set to 'Your latest posts', validate the homepage.
-		 * It will not be part of the page validation below.
-		 */
-		if ( 'posts' === get_option( 'show_on_front' ) && $this->is_template_supported( 'is_home' ) ) {
-			$this->validate_and_store_url( home_url( '/' ), 'home' );
-		}
-
-		$amp_enabled_taxonomies = array_filter(
-			get_taxonomies( [ 'public' => true ] ),
-			[ $this, 'does_taxonomy_support_amp' ]
-		);
-		$public_post_types      = get_post_types( [ 'public' => true ], 'names' );
-
-		// Validate one URL of each template/content type, then another URL of each type on the next iteration.
-		for ( $i = 0; $i < $this->limit_type_validate_count; $i++ ) {
-			// Validate all public, published posts.
-			foreach ( $public_post_types as $post_type ) {
-				$post_ids = $this->get_posts_that_support_amp( $this->get_posts_by_type( $post_type, $i, 1 ) );
-				if ( ! empty( $post_ids[0] ) ) {
-					$this->validate_and_store_url( get_permalink( $post_ids[0] ), $post_type );
-				}
-			}
-
-			foreach ( $amp_enabled_taxonomies as $taxonomy ) {
-				$taxonomy_links = $this->get_taxonomy_links( $taxonomy, $i, 1 );
-				$link           = reset( $taxonomy_links );
-				if ( ! empty( $link ) ) {
-					$this->validate_and_store_url( $link, $taxonomy );
-				}
-			}
-
-			$author_page_urls = $this->get_author_page_urls( $i, 1 );
-			if ( ! empty( $author_page_urls[0] ) ) {
-				$this->validate_and_store_url( $author_page_urls[0], 'author' );
-			}
-		}
-
-		// Only validate 1 date and 1 search page.
-		$url = $this->get_date_page();
-		if ( $url ) {
-			$this->validate_and_store_url( $url, 'date' );
-		}
-		$url = $this->get_search_page();
-		if ( $url ) {
-			$this->validate_and_store_url( $url, 'search' );
-		}
-	}
-
-	/**
-	 * Validates the URL, stores the results, and increments the counts.
-	 *
-	 * @param string $url  The URL to validate.
-	 * @param string $type The type of template, post, or taxonomy.
-	 */
-	private function validate_and_store_url( $url, $type ) {
-		$validity = AMP_Validation_Manager::validate_url( $url );
-
-		/*
-		 * If the request to validate this returns a WP_Error, return.
-		 * One cause of an error is if the validation request results in a 404 response code.
-		 */
-		if ( is_wp_error( $validity ) ) {
-			WP_CLI::warning( sprintf( 'Validate URL error (%1$s): %2$s URL: %3$s', $validity->get_error_code(), $validity->get_error_message(), $url ) );
-			return;
-		}
-		if ( $this->wp_cli_progress ) {
-			$this->wp_cli_progress->tick();
-		}
-
-		$validation_errors = wp_list_pluck( $validity['results'], 'error' );
-		AMP_Validated_URL_Post_Type::store_validation_errors(
-			$validation_errors,
-			$validity['url'],
-			wp_array_slice_assoc( $validity, [ 'queried_object', 'stylesheets' ] )
-		);
-		$unaccepted_error_count = count(
-			array_filter(
-				$validation_errors,
-				static function( $error ) {
-					$validation_status = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error );
-					return (
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $validation_status['term_status']
-					&&
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS !== $validation_status['term_status']
-					);
-				}
-			)
-		);
-
-		if ( count( $validation_errors ) > 0 ) {
-			$this->total_errors++;
-		}
-		if ( $unaccepted_error_count > 0 ) {
-			$this->unaccepted_errors++;
-		}
-
-		$this->number_crawled++;
-
-		if ( ! isset( $this->validity_by_type[ $type ] ) ) {
-			$this->validity_by_type[ $type ] = [
-				'valid' => 0,
-				'total' => 0,
-			];
-		}
-		$this->validity_by_type[ $type ]['total']++;
-		if ( 0 === $unaccepted_error_count ) {
-			$this->validity_by_type[ $type ]['valid']++;
-		}
 	}
 }

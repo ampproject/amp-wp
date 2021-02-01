@@ -5,54 +5,96 @@
   "homepage": "https://github.com/ampproject/amp-wp",
   "license": "GPL-2.0-or-later",
   "require": {
-    "php": "^5.4 || ^7.0",
+    "php": "^5.6 || ^7.0 || ^8.0",
     "ext-curl": "*",
     "ext-date": "*",
     "ext-dom": "*",
     "ext-iconv": "*",
+    "ext-json": "*",
     "ext-libxml": "*",
     "ext-spl": "*",
-    "cweagans/composer-patches": "1.6.7",
+    "ampproject/amp-toolbox": "^0.1",
+    "cweagans/composer-patches": "1.7.0",
     "fasterimage/fasterimage": "1.5.0",
-    "sabberworm/php-css-parser": "8.3.0"
+    "sabberworm/php-css-parser": "dev-master#bfdd976"
   },
   "require-dev": {
-    "dealerdirect/phpcodesniffer-composer-installer": "0.6.2",
+    "automattic/vipwpcs": "^2.2",
+    "civicrm/composer-downloads-plugin": "^3.0",
+    "dealerdirect/phpcodesniffer-composer-installer": "0.7.1",
+    "google/cloud-storage": "^1.22",
     "mikey179/vfsstream": "1.6.8",
+    "mustache/mustache": "^2",
+    "php-stubs/wordpress-stubs": "^5.3.2",
     "phpcompatibility/phpcompatibility-wp": "2.1.0",
+    "phpdocumentor/reflection": "~3.0",
+    "phpunit/phpunit": "^5.7 || ^6.5 || ^7.5",
     "roave/security-advisories": "dev-master",
-    "sirbrillig/phpcs-variable-analysis": "2.6.2",
-    "wp-cli/wp-cli": "2.4.0",
-    "wp-coding-standards/wpcs": "2.2.0",
-    "xwp/wp-dev-lib": "1.4.0"
+    "sirbrillig/phpcs-variable-analysis": "2.10.2",
+    "wp-cli/export-command": "^2.0",
+    "wp-cli/extension-command": "^2.0",
+    "wp-cli/wp-cli": "^2.4",
+    "wp-coding-standards/wpcs": "2.3.0"
   },
   "suggest": {
     "ext-intl": "Enables use of idn_to_utf8() to convert punycode domains to UTF-8 for use with an AMP Cache.",
-    "ext-json": "Provides native implementation of json_encode()/json_decode().",
-    "ext-mbstring": "Used by PHP-CSS-Parser when working with stylesheets.",
-    "ext-zip": "Enables the use of ZipArchive to export AMP Stories."
+    "ext-mbstring": "Used by PHP-CSS-Parser when working with stylesheets."
   },
   "config": {
     "platform": {
-      "php": "5.4"
+      "php": "5.6"
     },
     "sort-packages": true
   },
   "extra": {
+    "downloads": {
+      "phpstan": {
+        "path": "vendor/bin/phpstan",
+        "type": "phar",
+        "url": "https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar"
+      }
+    },
     "patches": {
       "sabberworm/php-css-parser": {
-        "PHP-CSS-Parser: Fix parsing CSS selectors which contain commas <https://github.com/sabberworm/PHP-CSS-Parser/pull/138>": "https://github.com/sabberworm/PHP-CSS-Parser/commit/fa139f65c5b098ae652c970b25e6eb03fc495eb4.diff"
+        "1. Add additional validation for size unit <https://github.com/sabberworm/PHP-CSS-Parser/pull/193>": "https://github.com/sabberworm/PHP-CSS-Parser/compare/3bc5ded67d77a52b81608cfc97f23b1bb0678e2f%5E...468da3441945e9c1bf402a3340b1d8326723f7d9.patch",
+        "2. Validate name-start code points for identifier <https://github.com/sabberworm/PHP-CSS-Parser/pull/185>": "https://github.com/sabberworm/PHP-CSS-Parser/compare/d42b64793f2edaffeb663c63e9de79069cdc0831%5E...113df5d55e94e21c6402021dfa959924941d4c29.patch",
+        "3. Fix parsing CSS selectors which contain commas <https://github.com/westonruter/PHP-CSS-Parser/pull/1>": "https://github.com/westonruter/PHP-CSS-Parser/compare/master...10a2501c119abafced3e4014aa3c0a3453a86f67.patch"
       }
     }
   },
   "autoload": {
     "psr-4": {
-      "Amp\\AmpWP\\": "src/"
-    }
+      "AmpProject\\AmpWP\\": "src/"
+    },
+    "classmap": [
+      "includes/"
+    ],
+    "files": [
+      "back-compat/back-compat.php",
+      "includes/amp-helper-functions.php",
+      "includes/admin/functions.php",
+      "includes/deprecated.php"
+    ]
   },
   "autoload-dev": {
     "psr-4": {
-      "Amp\\AmpWP\\Tests\\": "tests/php/src/"
-    }
+      "AmpProject\\AmpWP\\Documentation\\": "docs/src/",
+      "AmpProject\\AmpWP\\Tests\\": "tests/php/src/"
+    },
+    "classmap": [
+      "tests/php/validation/"
+    ],
+    "files": [
+      "tests/php/register-wp-cli-commands.php",
+      "docs/includes/register-wp-cli-commands.php"
+    ]
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "scripts": {
+    "analyze": "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan --version; phpstan analyze --ansi; fi",
+    "pre-commit": [
+      "npm run lint:staged"
+    ]
   }
 }

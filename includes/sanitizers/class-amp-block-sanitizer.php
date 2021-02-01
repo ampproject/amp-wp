@@ -9,6 +9,8 @@
  * Class AMP_Block_Sanitizer
  *
  * Modifies elements created as blocks to match the blocks' AMP-specific configuration.
+ *
+ * @internal
  */
 class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 
@@ -41,26 +43,29 @@ class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 			$node = $nodes->item( $i );
 
 			// We are only looking for <figure> elements which have wp-block-embed as class.
-			$class = (string) $node->getAttribute( 'class' );
-			if ( false === strpos( $class, 'wp-block-embed' ) ) {
+			$classes = preg_split( '/\s+/', trim( $node->getAttribute( 'class' ) ) );
+
+			if ( ! in_array( 'wp-block-embed', $classes, true ) ) {
 				continue;
 			}
 
-			// Remove classes like wp-embed-aspect-16-9 since responsive layout is handled by AMP's layout system.
 			$responsive_width  = null;
 			$responsive_height = null;
-			$node->setAttribute(
-				'class',
-				preg_replace_callback(
-					'/(?<=^|\s)wp-embed-aspect-(?P<width>\d+)-(?P<height>\d+)(?=\s|$)/',
-					function ( $matches ) use ( &$responsive_width, &$responsive_height ) {
+
+			// Remove classes related to aspect ratios as the embed's responsiveness will be handled by AMP's layout system.
+			$classes = array_filter(
+				$classes,
+				static function ( $class ) use ( &$responsive_width, &$responsive_height ) {
+					if ( preg_match( '/^wp-embed-aspect-(?P<width>\d+)-(?P<height>\d+)$/', $class, $matches ) ) {
 						$responsive_width  = $matches['width'];
 						$responsive_height = $matches['height'];
-						return '';
-					},
-					$class
-				)
+						return false;
+					}
+					return 'wp-has-aspect-ratio' !== $class;
+				}
 			);
+
+			$node->setAttribute( 'class', implode( ' ', $classes ) );
 
 			// We're looking for <figure> elements that have one child node only.
 			if ( 1 !== count( $node->childNodes ) ) {
@@ -71,10 +76,11 @@ class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 			// @todo Should we consider just eliminating the .wp-block-embed__wrapper element since unnecessary?
 			// For visual parity with blocks in non-AMP pages, override the oEmbed's natural responsive dimensions with the aspect ratio specified in the wp-embed-aspect-* class name.
 			if ( $responsive_width && $responsive_height ) {
-				$amp_element = $this->dom->xpath->query( './div[ contains( @class, "wp-block-embed__wrapper" ) ]/*[ @layout = "responsive" ]', $node )->item( 0 );
+				$amp_element = $this->dom->xpath->query( './div[ contains( @class, "wp-block-embed__wrapper" ) ]/*[ @layout = "responsive" or @layout = "intrinsic"  ]', $node )->item( 0 );
 				if ( $amp_element instanceof DOMElement ) {
 					$amp_element->setAttribute( 'width', $responsive_width );
 					$amp_element->setAttribute( 'height', $responsive_height );
+					$amp_element->setAttribute( 'layout', 'responsive' );
 				}
 			}
 
@@ -92,6 +98,9 @@ class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 			$amp_el_found = false;
 
 			foreach ( $node->childNodes as $child_node ) {
+				if ( ! $child_node instanceof DOMElement ) {
+					continue;
+				}
 
 				// We are looking for child elements which start with 'amp-'.
 				if ( 0 !== strpos( $child_node->tagName, 'amp-' ) ) {
@@ -112,12 +121,11 @@ class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Sets necessary attributes to both parent and AMP element node.
 	 *
-	 * @param DOMNode $node AMP element node.
-	 * @param DOMNode $parent_node <figure> node.
-	 * @param array   $attributes Current attributes of the AMP element.
+	 * @param DOMElement $node AMP element node.
+	 * @param DOMElement $parent_node <figure> node.
+	 * @param array      $attributes Current attributes of the AMP element.
 	 */
-	protected function set_attributes( $node, $parent_node, $attributes ) {
-
+	protected function set_attributes( DOMElement $node, DOMElement $parent_node, $attributes ) {
 		if ( isset( $attributes['data-amp-layout'] ) ) {
 			$node->setAttribute( 'layout', $attributes['data-amp-layout'] );
 		}

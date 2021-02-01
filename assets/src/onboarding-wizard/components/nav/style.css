@@ -1,0 +1,32 @@
+/**
+ * Nav component.
+ */
+
+.amp-settings-nav__prev-next {
+	display: flex;
+}
+
+.amp-settings-nav__prev-next > * {
+	align-items: center;
+	display: flex;
+	height: 36px;
+}
+
+.amp-settings-nav__prev {
+	margin-right: 5px;
+}
+
+.amp-settings-nav__prev svg {
+	transform: rotate(180deg);
+	margin-left: 0;
+	margin-right: 0.5rem;
+}
+
+.amp-settings-nav__close {
+	align-items: center;
+	display: flex;
+}
+
+.amp-settings-nav__close svg {
+	margin-right: 0.5rem;
+}

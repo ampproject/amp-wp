@@ -1,23 +1,33 @@
-/* global _, jQuery */
+/* global jQuery */
 
-/* eslint no-magic-numbers: [ "error", { "ignore": [ 0, 1, 250] } ] */
+/**
+ * External dependencies
+ */
+import { isEqual } from 'lodash';
+
+/**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
 
 window.ampCustomizeControls = ( function( api, $ ) {
 	'use strict';
 
 	const component = {
+		nonAmpCustomizerLink: null,
 		data: {
-			queryVar: 'amp',
-			panelId: '',
-			ampUrl: '',
+			queryVar: '',
 			l10n: {
-				unavailableMessage: '',
-				unavailableLinkText: '',
+				ampVersionNotice: '',
+				rootPanelDescription: '',
+			},
+			optionSettings: [],
+			activeThemeSettingImports: {},
+			mimeTypeIcons: {
+				image: '',
+				document: '',
 			},
 		},
-		tooltipTimeout: 5000,
-		tooltipVisible: new api.Value( false ),
-		tooltipFocused: new api.Value( 0 ),
 	};
 
 	/**
@@ -29,317 +39,550 @@ window.ampCustomizeControls = ( function( api, $ ) {
 	component.boot = function boot( data ) {
 		component.data = data;
 
-		function initPanel() {
-			api.panel( component.data.panelId, component.panelReady );
+		component.updatePreviewNotice();
+		component.extendRootDescription();
+
+		$.ajaxPrefilter( component.injectAmpIntoAjaxRequests );
+		api.bind( 'ready', component.updateNonAmpCustomizeLink );
+		api.bind( 'ready', component.forceAmpPreviewUrl );
+		api.bind( 'ready', component.addOptionSettingNotices );
+		api.bind( 'ready', component.addNavMenuPanelNotice );
+		api.bind( 'ready', component.addActiveThemeSettingsImporting );
+	};
+
+	/**
+	 * Update preview notice.
+	 */
+	component.updatePreviewNotice = function updatePreviewNotice() {
+		const previewNotice = $( '#customize-info .preview-notice' );
+		previewNotice.html( component.data.l10n.ampVersionNotice ); // Contents have been sanitized with wp_kses_post().
+		component.nonAmpCustomizerLink = previewNotice.find( 'a[href]' )[ 0 ];
+	};
+
+	/**
+	 * Make sure the non-AMP Customizer link keeps referencing to the currently-previewed URL.
+	 */
+	component.updateNonAmpCustomizeLink = function updateNonAmpCustomizeLink() {
+		if ( ! ( component.nonAmpCustomizerLink instanceof HTMLAnchorElement ) ) {
+			return;
 		}
 
-		if ( api.state ) {
-			component.addState();
-			api.bind( 'ready', initPanel );
-		} else { // WP<4.9.
-			api.bind( 'ready', function() {
-				component.addState(); // Needed for WP<4.9.
-				initPanel();
-			} );
-		}
+		const update = () => {
+			const previewUrl = new URL( api.previewer.previewUrl() );
+			previewUrl.searchParams.delete( component.data.queryVar );
+
+			const customizeUrl = new URL( component.nonAmpCustomizerLink.href );
+			customizeUrl.searchParams.set( 'url', previewUrl );
+			component.nonAmpCustomizerLink.href = customizeUrl.href;
+		};
+
+		update();
+		api.previewer.previewUrl.bind( update );
 	};
 
 	/**
-	 * Add state for AMP.
-	 *
-	 * @return {void}
+	 * Add AMP-specific info to the root panel description.
 	 */
-	component.addState = function addState() {
-		api.state.add( 'ampEnabled', new api.Value( false ) );
-		api.state.add( 'ampAvailable', new api.Value( false ) );
-	};
+	component.extendRootDescription = function extendRootDescription() {
+		const panelDescription = $( '#customize-info .customize-panel-description' );
 
-	/**
-	 * Check if the URL is AMPified.
-	 *
-	 * @param {string} url URL.
-	 * @return {boolean} whether it is an AMP URL.
-	 */
-	component.isAmpUrl = function isAmpUrl( url ) {
-		const urlParser = document.createElement( 'a' ),
-			regexEndpoint = new RegExp( '\\/' + component.data.queryVar + '\\/?$' );
-
-		urlParser.href = url;
-		if ( ! _.isUndefined( wp.customize.utils.parseQueryString( urlParser.search.substr( 1 ) )[ component.data.queryVar ] ) ) {
-			return true;
-		}
-		return regexEndpoint.test( urlParser.pathname );
-	};
-
-	/**
-	 * Create an non-AMP version of a URL.
-	 *
-	 * @param {string} url URL.
-	 * @return {string} non-AMPified URL.
-	 */
-	component.unampifyUrl = function unampifyUrl( url ) {
-		const urlParser = document.createElement( 'a' ),
-			regexEndpoint = new RegExp( '\\/' + component.data.queryVar + '\\/?$' );
-
-		urlParser.href = url;
-		urlParser.pathname = urlParser.pathname.replace( regexEndpoint, '' );
-
-		if ( 1 < urlParser.search.length ) {
-			const params = window.wp.customize.utils.parseQueryString( urlParser.search.substr( 1 ) );
-			delete params[ component.data.queryVar ];
-			urlParser.search = $.param( params );
+		// Ensure the original description is in a paragraph (where normally it is not).
+		if ( panelDescription.find( 'p' ).length === 0 ) {
+			const originalParagraph = $( '<p></p>' );
+			originalParagraph.html( panelDescription.html() );
+			panelDescription.html( '' );
+			panelDescription.append( originalParagraph );
 		}
 
-		return urlParser.href;
+		const ampDescription = $( '<p>' + component.data.l10n.rootPanelDescription + '</p>' ); // Contents have been sanitized with wp_kses_post().
+		panelDescription.append( ampDescription );
 	};
 
 	/**
-	 * Create an AMP version of a URL.
+	 * i18n friendly version of basename()
 	 *
-	 * @param {string} url URL.
-	 * @return {string} AMPified URL.
+	 * This is a port of wp_basename() in PHP.
+	 *
+	 * @param {string} path Path.
+	 * @return {string} Basename.
 	 */
-	component.ampifyUrl = function ampifyUrl( url ) {
-		const urlParser = document.createElement( 'a' );
-		urlParser.href = component.unampifyUrl( url );
-		if ( urlParser.search.length ) {
-			urlParser.search += '&';
+	function wpBasename( path ) {
+		return decodeURIComponent(
+			encodeURIComponent( path )
+				.replace( /%(2F|5C)/g, '/' )
+				.replace( /^.*\//, '' ),
+		);
+	}
+
+	/**
+	 * Ensure UploadControl is updated when underlying setting is programmatically updated (not using media library).
+	 *
+	 * The newer MediaControl does update programmatically when the setting changes, so the control for the newer
+	 * Custom Logo will update their UI to show the image. Older controls like the Background Image will not however.
+	 *
+	 * @param {wp.customize.UploadControl} control
+	 * @param {Function} control.extended
+	 */
+	function populateUploadControl( control ) {
+		const value = control.setting();
+		if ( ! value || ( control.params.attachment && control.params.attachment.url === value ) ) {
+			return;
 		}
-		urlParser.search += component.data.queryVar + '=1';
-		return urlParser.href;
-	};
+		const url = new URL( value );
 
-	/**
-	 * Try to close the tooltip after a given timeout.
-	 *
-	 * @return {void}
-	 */
-	component.tryToCloseTooltip = function tryToCloseTooltip() {
-		clearTimeout( component.tooltipTimeoutId );
-		component.tooltipTimeoutId = setTimeout( function() {
-			if ( ! component.tooltipVisible.get() ) {
-				return;
-			}
-			if ( 0 < component.tooltipFocused.get() ) {
-				component.tryToCloseTooltip();
-			} else {
-				component.tooltipVisible.set( false );
-			}
-		}, component.tooltipTimeout );
-	};
-
-	/**
-	 * Make current URL AMPified if toggle is on.
-	 *
-	 * @param {string} url URL.
-	 * @return {string} AMPified URL.
-	 */
-	component.setCurrentAmpUrl = function setCurrentAmpUrl( url ) {
-		const enabled = api.state( 'ampEnabled' ).get();
-		if ( ! enabled && component.isAmpUrl( url ) ) {
-			return component.unampifyUrl( url );
-		} else if ( enabled && ! component.isAmpUrl( url ) ) {
-			return component.ampifyUrl( url );
+		// The following replicates PHP logic in WP_Customize_Media_Control::to_json().
+		const type = [ 'jpg', 'png', 'gif', 'bmp' ].includes( url.pathname.substr( -3 ) ) ? 'image' : 'document';
+		const attachment = {
+			id: 1,
+			url: url.href,
+			type,
+			icon: component.data.mimeTypeIcons[ type ],
+			title: wpBasename( url.pathname ),
+		};
+		if ( 'image' === type ) {
+			attachment.sizes = {
+				full: {
+					url: url.href,
+				},
+			};
 		}
-		return url;
-	};
 
-	/**
-	 * Swap to AMP version of URL in preview.
-	 *
-	 * @return {void}
-	 */
-	component.updatePreviewUrl = function updatePreviewUrl() {
-		api.previewer.previewUrl.set( component.setCurrentAmpUrl( api.previewer.previewUrl.get() ) );
-	};
+		// Make sure that the media frame is populated with the attachment.
+		if ( ! control.frame ) {
+			control.initFrame();
+		}
+		if ( ! control.frame.state() ) {
+			control.frame.setState( 'library' );
+		}
+		control.frame.state().get( 'selection' ).set( [ attachment ] );
 
-	/**
-	 * Enable AMP and navigate to the given URL.
-	 *
-	 * @param {string} url - URL.
-	 * @return {void}
-	 */
-	component.enableAndNavigateToUrl = function enableAndNavigateToUrl( url ) {
-		api.state( 'ampEnabled' ).set( true );
-		api.previewer.previewUrl.set( url );
-	};
-
-	/**
-	 * Update panel notifications.
-	 *
-	 * @return {void}
-	 */
-	component.updatePanelNotifications = function updatePanelNotifications() {
-		const panel = api.panel( component.data.panelId );
-		const containers = panel.sections().concat( [ panel ] );
-		if ( api.state( 'ampAvailable' ).get() ) {
-			_.each( containers, function( container ) {
-				container.notifications.remove( 'amp_unavailable' );
-			} );
+		// Call the select method so that the attachment param is updated.
+		if ( control.extended( api.BackgroundControl ) ) {
+			// Explicitly do not call BackgroundControl#select() because it sends an unnecessary custom-background-add ajax request.
+			api.UploadControl.prototype.select.call( control );
 		} else {
-			_.each( containers, function( container ) {
-				container.notifications.add( new api.Notification( 'amp_unavailable', {
-					message: component.data.l10n.unavailableMessage,
-					type: 'info',
-					linkText: component.data.l10n.unavailableLinkText,
-					url: component.data.ampUrl,
-					templateId: 'customize-amp-unavailable-notification',
-					render() {
-						const li = api.Notification.prototype.render.call( this );
-						li.find( 'a' ).on( 'click', function( event ) {
-							event.preventDefault();
-							component.enableAndNavigateToUrl( this.href );
-						} );
-						return li;
-					},
-				} ) );
+			control.select();
+		}
+
+		// Finally, render the control.
+		control.renderContent();
+	}
+
+	/**
+	 * Ensure HeaderControl is updated when underlying setting is programmatically updated (not using media library).
+	 *
+	 * The newer MediaControl does update programmatically when the setting changes, so the control for the newer
+	 * Custom Logo will update their UI to show the image. Older controls like the Header Image will not however.
+	 *
+	 * @param {wp.customize.HeaderControl} control
+	 */
+	function populateHeaderControl( control ) {
+		const headerImagedData = api( 'header_image_data' ).get();
+		if ( headerImagedData ) {
+			control.setImageFromURL(
+				headerImagedData.url,
+				headerImagedData.attachment_id,
+				headerImagedData.width,
+				headerImagedData.height,
+			);
+		}
+	}
+
+	/**
+	 * Controls which are dependent on the background_image being set.
+	 *
+	 * @type {string[]}
+	 */
+	const backgroundImageDependentControls = [
+		'background_position',
+		'background_size',
+		'background_repeat',
+		'background_attachment',
+	];
+
+	/**
+	 * Mapping of control ID to the setting value which indicates the checkbox should be unchecked.
+	 *
+	 * @type {Object}
+	 */
+	const checkboxControlElementValueMapping = {
+		display_header_text: 'blank',
+		background_attachment: 'fixed',
+		background_repeat: 'no-repeat',
+	};
+
+	/**
+	 * Handle special case of updating certain checkbox controls.
+	 *
+	 * Because of some "juggling" in WordPress core, programmatically updating the value (probably related to double
+	 * data binding of Element and Setting values) is not feasible. It is instead updated by directly manipulating the Element instance
+	 * as opposed to the underlying Setting that it syncs with.
+	 *
+	 * @param {wp.customize.Control} control Control.
+	 * @see https://github.com/WordPress/wordpress-develop/blob/5.4.2/src/js/_enqueues/wp/customize/controls.js#L8943-L9050
+	 */
+	function populateCheckboxControlWithSyncedElement( control ) {
+		if (
+			control.id in checkboxControlElementValueMapping &&
+			'element' in control &&
+			control.setting.id in component.data.activeThemeSettingImports
+		) {
+			control.element.set(
+				checkboxControlElementValueMapping[ control.id ] !== component.data.activeThemeSettingImports[ control.setting.id ],
+			);
+		}
+	}
+
+	/**
+	 * Mapping of control ID to additional related settings.
+	 *
+	 * @type {Object}
+	 */
+	const controlRelatedSettings = {
+		accent_hue_active: [ 'accent_hue' ],
+	};
+
+	/**
+	 * Populate settings which are related to controls but not directly link.
+	 *
+	 * A good example of such a control is the accent_hue setting which is linked to a hue control. The hue control
+	 * lacks a label so it is not listed among the importable settings. However, when the Primary Color control is set
+	 * to "Custom" then the hue control is displayed.
+	 *
+	 * @param {wp.customize.Control} control
+	 */
+	function populateRelatedSettings( control ) {
+		if ( control.id in controlRelatedSettings ) {
+			const settings = [];
+			for ( const settingId of controlRelatedSettings[ control.id ] ) {
+				const setting = api( settingId );
+				if ( setting ) {
+					settings.push( setting );
+				}
+			}
+			importSettings( settings );
+		}
+	}
+
+	/**
+	 * Import settings if available.
+	 *
+	 * @param {wp.customize.Setting[]} settings Settings collection.
+	 */
+	function importSettings( settings ) {
+		for ( const setting of settings ) {
+			if ( setting.id in component.data.activeThemeSettingImports ) {
+				setting.set( component.data.activeThemeSettingImports[ setting.id ] );
+			}
+		}
+	}
+
+	/**
+	 * Import settings for a control.
+	 *
+	 * @param {wp.customize.Control} control Control.
+	 * @param {Function} control.extended Control.
+	 */
+	function importControlSettings( control ) {
+		// Ensure all background settings are shown by ensuring custom preset is selected.
+		if ( backgroundImageDependentControls.includes( control.id ) ) {
+			const backgroundPreset = api( 'background_preset' );
+			if ( backgroundPreset ) {
+				backgroundPreset.set( 'custom' );
+			}
+		}
+
+		if ( control.id in checkboxControlElementValueMapping ) {
+			populateCheckboxControlWithSyncedElement( control );
+		} else {
+			importSettings( Object.values( control.settings ) );
+		}
+
+		populateRelatedSettings( control );
+
+		// Manually update the UI for controls that don't react to programmatic setting updates.
+		if ( control.extended( api.UploadControl ) ) {
+			populateUploadControl( /** @type {wp.customize.UploadControl} */ control );
+		} else if ( control.extended( api.HeaderControl ) ) {
+			populateHeaderControl( /** @type {wp.customize.HeaderControl} */ control );
+		}
+	}
+
+	/**
+	 * Section to contain the active theme settings import functionality.
+	 *
+	 * This section is somewhat of a hack in that it has contentContainer and it cannot expand. It has no controls.
+	 * It is implemented as a section so that it will be rendered in the root Customizer panel in the same way that
+	 * the Themes panel is.
+	 *
+	 * @class    AmpActiveThemeSettingsImportSection
+	 * @augments wp.customize.Section
+	 */
+	const AmpActiveThemeSettingsImportSection = api.Section.extend( {
+
+		/**
+		 * Force section to be contextually active.
+		 *
+		 * This overrides the section's normal method to force the section to be active since normally the section
+		 * becomes deactivated if it has no controls or none of the controls are active.
+		 *
+		 * @return {boolean} Active.
+		 */
+		isContextuallyActive() {
+			return true;
+		},
+
+		/**
+		 * Override the expand method to prevent the section from being erroneously expanded.
+		 */
+		expand() {},
+
+		/**
+		 * Get all sections other than this one, sorted by priority.
+		 *
+		 * @return {wp.customize.Section[]} Other sections.
+		 */
+		otherSections() {
+			const sections = [];
+			api.section.each( ( otherSection ) => {
+				if ( otherSection.id !== this.id ) {
+					sections.push( otherSection );
+				}
 			} );
+			sections.sort( ( a, b ) => {
+				return a.priority() - b.priority();
+			} );
+			return sections;
+		},
+
+		/**
+		 * Render details.
+		 */
+		renderDetails() {
+			const dl = this.headContainer.find( 'dl' );
+			for ( const otherSection of this.otherSections() ) {
+				const sectionControls = [];
+				for ( const control of otherSection.controls() ) {
+					if ( this.params.controls.has( control ) ) {
+						sectionControls.push( control );
+					}
+				}
+				if ( ! sectionControls.length ) {
+					continue;
+				}
+
+				let title;
+				switch ( otherSection.id ) {
+					case 'menu_locations':
+						title = __( 'Menu Locations', 'amp' );
+						break;
+					default:
+						title = otherSection.params.title;
+				}
+
+				const dt = $( '<dt></dt>' );
+				dt.text( title );
+				dl.append( dt );
+
+				for ( const control of sectionControls ) {
+					const dd = $( '<dd></dd>' );
+					const id = `amp-import-${ control.id }`;
+
+					const checkbox = $( '<input type=checkbox checked>' );
+					checkbox.attr( 'id', id );
+					checkbox.val( control.id );
+
+					const label = $( '<label></label>' );
+					label.attr( 'for', id );
+					label.html( control.params.label );
+
+					dd.append( checkbox );
+					dd.append( label );
+					dl.append( dd );
+				}
+			}
+		},
+
+		/**
+		 * Attach events.
+		 *
+		 * Override the parent class's normal events from being added to instead add the relevant event for the special section.
+		 */
+		attachEvents() {
+			this.headContainer.find( 'button' ).on( 'click', () => {
+				this.importSelectedSettings();
+			} );
+		},
+
+		/**
+		 * Import the selected settings.
+		 */
+		importSelectedSettings() {
+			const importSection = this;
+			let remainingCheckboxes = 0;
+
+			importSection.headContainer.find( 'input[type=checkbox]' ).each( function() {
+				const checkbox = $( this );
+				if ( ! checkbox.prop( 'checked' ) ) {
+					remainingCheckboxes++;
+					return;
+				}
+
+				const control = api.control( checkbox.val() );
+				importControlSettings( control );
+				checkbox.closest( 'dd' ).remove();
+			} );
+
+			// Remove any childless dt's.
+			importSection.headContainer.find( 'dt' ).each( function() {
+				const dt = $( this );
+				if ( ! dt.next( 'dd' ).length ) {
+					dt.remove();
+				}
+			} );
+
+			if ( 0 === remainingCheckboxes ) {
+				importSection.active( false );
+			}
+		},
+
+		/**
+		 * Set up the UI for the section.
+		 */
+		ready() {
+			api.Section.prototype.ready.call( this );
+
+			this.renderDetails();
+		},
+	} );
+
+	api.sectionConstructor.amp_active_theme_settings_import = AmpActiveThemeSettingsImportSection;
+
+	/**
+	 * Add ability to import settings from the active theme.
+	 */
+	component.addActiveThemeSettingsImporting = function addActiveThemeSettingsImporting() {
+		const differingSettings = new Set();
+		for ( const [ settingId, settingValue ] of Object.entries( component.data.activeThemeSettingImports ) ) {
+			const setting = api( settingId );
+			if ( setting && ! isEqual( setting(), settingValue ) ) {
+				differingSettings.add( settingId );
+			}
+		}
+
+		// Abort adding any UI if there are no settings to import.
+		if ( differingSettings.size === 0 ) {
+			return;
+		}
+
+		const controlsWithSettings = new Set();
+		api.control.each( ( control ) => {
+			for ( const setting of Object.values( control.settings ) ) {
+				if ( ! control.params.label ) {
+					continue;
+				}
+
+				if (
+					differingSettings.has( setting.id ) ||
+					(
+						control.id in controlRelatedSettings &&
+						controlRelatedSettings[ control.id ].find( ( settingId ) => differingSettings.has( settingId ) )
+					)
+				) {
+					controlsWithSettings.add( control );
+				}
+			}
+		} );
+
+		// In the very rare chance that there are settings without controls, abort.
+		if ( controlsWithSettings.size === 0 ) {
+			return;
+		}
+
+		const section = new AmpActiveThemeSettingsImportSection(
+			'amp_settings_import',
+			{
+				title: __( 'Primary Theme Settings', 'amp' ),
+				priority: -1,
+				controls: controlsWithSettings,
+			},
+		);
+
+		api.section.add( section );
+	};
+
+	/**
+	 * Rewrite Ajax requests to inject AMP query var.
+	 *
+	 * @param {Object} options Options.
+	 * @param {string} options.type Type.
+	 * @param {string} options.url URL.
+	 * @return {void}
+	 */
+	component.injectAmpIntoAjaxRequests = function injectAmpIntoAjaxRequests( options ) {
+		const url = new URL( options.url, window.location.href );
+		if ( ! url.searchParams.has( component.data.queryVar ) ) {
+			url.searchParams.append( component.data.queryVar, '1' );
+			options.url = url.href;
 		}
 	};
 
 	/**
-	 * Hook up all AMP preview interactions once panel is ready.
-	 *
-	 * @param {wp.customize.Panel} panel The AMP panel.
-	 * @return {void}
+	 * Persist the presence the amp=1 param when navigating in the preview, even if current page is not yet supported.
 	 */
-	component.panelReady = function panelReady( panel ) {
-		const ampToggleContainer = $( wp.template( 'customize-amp-enabled-toggle' )( {
-			message: component.data.l10n.unavailableMessage,
-			linkText: component.data.l10n.unavailableLinkText,
-			url: component.data.ampUrl,
-		} ) );
-		const checkbox = ampToggleContainer.find( 'input[type=checkbox]' );
-		const tooltip = ampToggleContainer.find( '.tooltip' );
-		const tooltipLink = tooltip.find( 'a' );
-
-		// AMP panel triggers the input toggle for AMP preview.
-		panel.expanded.bind( function( expanded ) {
-			if ( ! expanded ) {
-				return;
-			}
-			if ( api.state( 'ampAvailable' ).get() ) {
-				api.state( 'ampEnabled' ).set( panel.expanded.get() );
-			} else if ( ! panel.notifications ) {
-				/*
-				 * This is only done if panel notifications aren't supported.
-				 * If they are (as of 4.9) then a notification will be shown
-				 * in the panel and its sections when AMP is not available.
-				 */
-				setTimeout( function() {
-					component.tooltipVisible.set( true );
-				}, 250 );
-			}
-		} );
-
-		if ( panel.notifications ) {
-			api.state( 'ampAvailable' ).bind( component.updatePanelNotifications );
-			component.updatePanelNotifications();
-			api.section.bind( 'add', component.updatePanelNotifications );
-		}
-
-		// Enable AMP toggle if available and mobile device selected.
-		api.previewedDevice.bind( function( device ) {
-			if ( api.state( 'ampAvailable' ).get() ) {
-				api.state( 'ampEnabled' ).set( 'mobile' === device );
-			}
-		} );
-
-		// Message coming from previewer.
-		api.previewer.bind( 'amp-status', function( data ) {
-			api.state( 'ampAvailable' ).set( data.available );
-		} );
-		function setInitialAmpEnabledState( data ) {
-			api.state( 'ampEnabled' ).set( data.enabled );
-			api.previewer.unbind( 'amp-status', setInitialAmpEnabledState );
-		}
-		api.previewer.bind( 'amp-status', setInitialAmpEnabledState );
-
-		/*
-		 * Persist the presence or lack of the amp=1 param when navigating in the preview,
-		 * even if current page is not yet supported.
-		 */
+	component.forceAmpPreviewUrl = function forceAmpPreviewUrl() {
 		api.previewer.previewUrl.validate = ( function( prevValidate ) {
 			return function( value ) {
 				let val = prevValidate.call( this, value );
 				if ( val ) {
-					val = component.setCurrentAmpUrl( val );
+					const url = new URL( val );
+					if ( ! url.searchParams.has( component.data.queryVar ) ) {
+						url.searchParams.append( component.data.queryVar, '1' );
+						val = url.href;
+					}
 				}
 				return val;
 			};
 		}( api.previewer.previewUrl.validate ) );
+	};
 
-		// Listen for ampEnabled state changes.
-		api.state( 'ampEnabled' ).bind( function( enabled ) {
-			checkbox.prop( 'checked', enabled );
-			component.updatePreviewUrl();
-		} );
+	/**
+	 * Add notice to all settings for options.
+	 */
+	component.addOptionSettingNotices = function addOptionSettingNotices() {
+		for ( const settingId of component.data.optionSettings ) {
+			api( settingId, ( setting ) => {
+				const notification = new api.Notification(
+					'amp_option_setting',
+					{
+						type: 'info',
+						message: __( 'Also applies to non-AMP version of your site.', 'amp' ),
+					},
+				);
+				setting.notifications.add( notification.code, notification );
+			} );
+		}
+	};
 
-		// Listen for ampAvailable state changes.
-		api.state( 'ampAvailable' ).bind( function( available ) {
-			checkbox.toggleClass( 'disabled', ! available );
-
-			// Show the unavailable tooltip if AMP is enabled.
-			if ( api.state( 'ampEnabled' ).get() ) {
-				component.tooltipVisible.set( ! available );
+	/**
+	 * Add notice to the nav menus panel.
+	 */
+	component.addNavMenuPanelNotice = function addNavMenuPanelNotice() {
+		api.panel( 'nav_menus', ( panel ) => {
+			// Fix bug in WP where the Nav Menus panel lacks a notifications container.
+			if ( ! panel.notifications.container.length ) {
+				panel.notifications.container = $( '<div class="customize-control-notifications-container"></div>' );
+				panel.container.find( '.panel-meta:first' ).append( panel.notifications.container );
 			}
-		} );
 
-		// Adding checkbox toggle before device selection.
-		$( '.devices-wrapper' ).before( ampToggleContainer );
-
-		// User clicked link within tooltip, go to linked post in preview.
-		tooltipLink.on( 'click', function( event ) {
-			event.preventDefault();
-			component.enableAndNavigateToUrl( this.href );
-		} );
-
-		// Toggle visibility of tooltip based on tooltipVisible state.
-		component.tooltipVisible.bind( function( visible ) {
-			tooltip.attr( 'aria-hidden', visible ? 'false' : 'true' );
-			if ( visible ) {
-				$( document ).on( 'click.amp-toggle-outside', function( event ) {
-					if ( ! $.contains( ampToggleContainer[ 0 ], event.target ) ) {
-						component.tooltipVisible.set( false );
-					}
-				} );
-				tooltip.fadeIn();
-				component.tryToCloseTooltip();
-			} else {
-				tooltip.fadeOut();
-				component.tooltipFocused.set( 0 );
-				$( document ).off( 'click.amp-toggle-outside' );
-			}
-		} );
-
-		// Handle click on checkbox to either enable the AMP preview or show the tooltip.
-		checkbox.on( 'click', function() {
-			this.checked = ! this.checked; // Undo what we just did, since state is managed in ampAvailable change handler.
-			if ( api.state( 'ampAvailable' ).get() ) {
-				api.state( 'ampEnabled' ).set( ! api.state( 'ampEnabled' ).get() );
-			} else {
-				component.tooltipVisible.set( true );
-			}
-		} );
-
-		// Keep track of the user's state interacting with the tooltip.
-		tooltip.on( 'mouseenter', function() {
-			if ( ! api.state( 'ampAvailable' ).get() ) {
-				component.tooltipVisible.set( true );
-			}
-			component.tooltipFocused.set( component.tooltipFocused.get() + 1 );
-		} );
-		tooltip.on( 'mouseleave', function() {
-			component.tooltipFocused.set( component.tooltipFocused.get() - 1 );
-		} );
-		tooltipLink.on( 'focus', function() {
-			if ( ! api.state( 'ampAvailable' ).get() ) {
-				component.tooltipVisible.set( true );
-			}
-			component.tooltipFocused.set( component.tooltipFocused.get() + 1 );
-		} );
-		tooltipLink.on( 'blur', function() {
-			component.tooltipFocused.set( component.tooltipFocused.get() - 1 );
+			const notification = new api.Notification(
+				'amp_version',
+				{
+					type: 'info',
+					message: __( 'The menus here are shared with the non-AMP version of your site. Assign existing menus to menu locations in the Reader theme or create new AMP-specific menus.', 'amp' ),
+				},
+			);
+			panel.notifications.add( notification.code, notification );
 		} );
 	};
 

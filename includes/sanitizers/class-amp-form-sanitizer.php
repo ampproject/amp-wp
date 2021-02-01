@@ -6,12 +6,16 @@
  * @since 0.7
  */
 
+use AmpProject\DevMode;
+use AmpProject\Dom\Document;
+
 /**
  * Class AMP_Form_Sanitizer
  *
  * Strips and corrects attributes in forms.
  *
  * @since 0.7
+ * @internal
  */
 class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 
@@ -35,7 +39,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 		/**
 		 * Node list.
 		 *
-		 * @var DOMNodeList $node
+		 * @var DOMNodeList $nodes
 		 */
 		$nodes     = $this->dom->getElementsByTagName( self::$tag );
 		$num_nodes = $nodes->length;
@@ -46,7 +50,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node = $nodes->item( $i );
-			if ( ! $node instanceof DOMElement || $this->has_dev_mode_exemption( $node ) ) {
+			if ( ! $node instanceof DOMElement || DevMode::hasExemptionForNode( $node ) ) {
 				continue;
 			}
 
@@ -87,9 +91,6 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 					} else {
 						// Record that action was converted to action-xhr.
 						$action_url = add_query_arg( AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR, 1, $action_url );
-						if ( ! amp_is_canonical() ) {
-							$action_url = add_query_arg( amp_get_slug(), '', $action_url );
-						}
 					}
 
 					$node->setAttribute( 'action-xhr', $action_url );
@@ -120,38 +121,78 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Get the action URL for the form element.
 	 *
-	 * @param string $action_url Action URL.
+	 * @param string $action_url Action URL. May be empty string.
 	 * @return string Action URL.
 	 */
 	protected function get_action_url( $action_url ) {
-		/*
-		 * In HTML, the default action is just the current URL that the page is served from.
-		 * The action "specifies a server endpoint to handle the form input. The value must be an
-		 * https URL and must not be a link to a CDN".
-		 */
+		// In HTML, the default action is just the current URL that the page is served from.
+		// The action "specifies a server endpoint to handle the form input. The value must be an
+		// https URL and must not be a link to a CDN".
 		if ( ! $action_url ) {
-			$action_url = esc_url_raw( '//' . $_SERVER['HTTP_HOST'] . wp_unslash( $_SERVER['REQUEST_URI'] ) );
-		} elseif ( ! preg_match( '#^(https?:)?//#', $action_url ) ) {
-			// Handle relative URLs.
-			$schemeless_host = '//' . $_SERVER['HTTP_HOST'];
-			if ( '?' === $action_url[0] || '#' === $action_url[0] ) {
-				// For actions consisting of only a query or URL fragment, include the schemeless-host and the REQUEST URI of the current page.
-				$action_url = $schemeless_host . wp_unslash( $_SERVER['REQUEST_URI'] ) . $action_url;
-			} elseif ( '.' === $action_url[0] ) {
-				// For actions consisting of relative paths (e.g. '../'), prepend the schemeless-host and a trailing-slashed REQUEST URI.
-				$action_url = $schemeless_host . trailingslashit( wp_unslash( $_SERVER['REQUEST_URI'] ) ) . $action_url;
-			} else {
-				// Otherwise, when the action URL includes an absolute path, just append it to the schemeless-host.
-				$action_url = $schemeless_host . $action_url;
+			$action_url = amp_get_current_url();
+		}
+
+		$parsed_url = wp_parse_url( $action_url );
+
+		if (
+			// Ignore a malformed URL - it will be later sanitized.
+			false === $parsed_url
+			||
+			// Ignore HTTPS URLs, because there is nothing left to do.
+			( isset( $parsed_url['scheme'] ) && 'https' === $parsed_url['scheme'] )
+			||
+			// Ignore protocol-relative URLs, because there is also nothing left to do.
+			( ! isset( $parsed_url['scheme'] ) && isset( $parsed_url['host'] ) )
+		) {
+			return $action_url;
+		}
+
+		// Make URL protocol relative.
+		// @todo Why not just make this HTTPS since it is required for forms regardless? Well, for POST forms not GET ones. So maybe not.
+		$parsed_url['scheme'] = '//';
+
+		// Set an empty path if none is defined but there is a host.
+		if ( ! isset( $parsed_url['path'] ) && isset( $parsed_url['host'] ) ) {
+			$parsed_url['path'] = '';
+		}
+
+		if ( ! isset( $parsed_url['host'] ) ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$parsed_url['host'] = $_SERVER['HTTP_HOST'];
+		}
+
+		if ( ! isset( $parsed_url['path'] ) ) {
+			// If there is action URL path, use the one from the request.
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+			$parsed_url['path'] = trailingslashit( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+		} elseif ( '' !== $parsed_url['path'] && '/' !== $parsed_url['path'][0] ) {
+			// If the path is relative, append it to the current request path.
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+			$parsed_url['path'] = trailingslashit( wp_unslash( $_SERVER['REQUEST_URI'] ) ) . trailingslashit( $parsed_url['path'] );
+		}
+
+		// Rebuild the URL.
+		$action_url = $parsed_url['scheme'];
+		if ( isset( $parsed_url['user'] ) ) {
+			$action_url .= $parsed_url['user'];
+			if ( isset( $parsed_url['pass'] ) ) {
+				$action_url .= ':' . $parsed_url['pass'];
 			}
+			$action_url .= '@';
+		}
+		$action_url .= $parsed_url['host'];
+		if ( isset( $parsed_url['port'] ) ) {
+			$action_url .= ':' . $parsed_url['port'];
+		}
+		$action_url .= $parsed_url['path'];
+		if ( isset( $parsed_url['query'] ) ) {
+			$action_url .= '?' . $parsed_url['query'];
+		}
+		if ( isset( $parsed_url['fragment'] ) ) {
+			$action_url .= '#' . $parsed_url['fragment'];
 		}
 
-		// Make HTTP URLs protocol-less, since HTTPS is required for forms.
-		if ( 'http://' === strtolower( substr( $action_url, 0, 7 ) ) ) {
-			$action_url = substr( $action_url, 5 );
-		}
-
-		return $action_url;
+		return esc_url_raw( $action_url );
 	}
 
 	/**
@@ -163,23 +204,20 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param DOMElement $form The form node to check.
 	 */
 	public function ensure_response_message_elements( $form ) {
-		/**
-		 * Parent node.
-		 *
-		 * @var DOMElement $parent
-		 */
 		$elements = [
 			'submit-error'   => null,
 			'submit-success' => null,
 			'submitting'     => null,
 		];
 
-		$templates = $form->getElementsByTagName( 'template' );
-		for ( $i = $templates->length - 1; $i >= 0; $i-- ) {
-			$parent = $templates->item( $i )->parentNode;
-			foreach ( array_keys( $elements ) as $attribute ) {
-				if ( $parent->hasAttribute( $attribute ) ) {
-					$elements[ $attribute ] = $parent;
+		$templates = $this->dom->xpath->query( Document::XPATH_MUSTACHE_TEMPLATE_ELEMENTS_QUERY, $form );
+		foreach ( $templates as $template ) {
+			$parent = $template->parentNode;
+			if ( $parent instanceof DOMElement ) {
+				foreach ( array_keys( $elements ) as $attribute ) {
+					if ( $parent->hasAttribute( $attribute ) ) {
+						$elements[ $attribute ] = $parent;
+					}
 				}
 			}
 		}
@@ -198,6 +236,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 			} else {
 				$p = $this->dom->createElement( 'p' );
 				$p->setAttribute( 'class', '{{#redirecting}}amp-wp-form-redirecting{{/redirecting}}' );
+				// phpcs:ignore WordPressVIPMinimum.Security.Mustache.OutputNotation -- Sanitization applied via amp-mustache.
 				$p->appendChild( $this->dom->createTextNode( '{{#message}}{{{message}}}{{/message}}' ) );
 
 				// @todo The following paragraph should be eliminated!

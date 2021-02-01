@@ -1,4 +1,7 @@
 <?php
+
+use AmpProject\AmpWP\Tests\Helpers\StubSanitizer;
+
 /**
  * Tests for AMP_Content_Sanitizer class.
  *
@@ -55,7 +58,7 @@ class Test_AMP_Content_Sanitizer extends WP_UnitTestCase {
 		$source_html     = '<b>Hello</b>';
 		$expected_return = [ '<b>Hello</b>', [], [] ];
 
-		$actual_return = AMP_Content_Sanitizer::sanitize( $source_html, [ 'AMP_Test_Stub_Sanitizer' => [] ] );
+		$actual_return = AMP_Content_Sanitizer::sanitize( $source_html, [ StubSanitizer::class => [] ] );
 
 		$this->assertEquals( $expected_return, $actual_return );
 	}

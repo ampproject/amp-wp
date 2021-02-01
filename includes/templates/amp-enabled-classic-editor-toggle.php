@@ -13,9 +13,10 @@ if ( ! ( $this instanceof AMP_Post_Meta_Box ) ) {
 /**
  * Inherited template vars.
  *
- * @var array  $labels Labels for enabled or disabled.
- * @var string $status Enabled or disabled.
- * @var array  $errors Support errors.
+ * @var array  $labels         Labels for enabled or disabled.
+ * @var string $status         Enabled or disabled.
+ * @var array  $errors         Support errors.
+ * @var array  $error_messages AMP enabled error messages.
  */
 ?>
 <div class="misc-pub-section misc-amp-status">
@@ -29,17 +30,24 @@ if ( ! ( $this instanceof AMP_Post_Meta_Box ) ) {
 	<div id="amp-status-select" class="hide-if-js" data-amp-status="<?php echo esc_attr( $status ); ?>">
 		<?php if ( empty( $errors ) ) : ?>
 			<fieldset>
-				<input id="amp-status-enabled" type="radio" name="<?php echo esc_attr( self::STATUS_INPUT_NAME ); ?>" value="<?php echo esc_attr( self::ENABLED_STATUS ); ?>" <?php checked( self::ENABLED_STATUS, $status ); ?>>
+				<input id="amp-status-enabled" type="radio" name="<?php echo esc_attr( AMP_Post_Meta_Box::STATUS_INPUT_NAME ); ?>" value="<?php echo esc_attr( AMP_Post_Meta_Box::ENABLED_STATUS ); ?>" <?php checked( AMP_Post_Meta_Box::ENABLED_STATUS, $status ); ?>>
 				<label for="amp-status-enabled" class="selectit"><?php echo esc_html( $labels['enabled'] ); ?></label>
 				<br />
-				<input id="amp-status-disabled" type="radio" name="<?php echo esc_attr( self::STATUS_INPUT_NAME ); ?>" value="<?php echo esc_attr( self::DISABLED_STATUS ); ?>" <?php checked( self::DISABLED_STATUS, $status ); ?>>
+				<input id="amp-status-disabled" type="radio" name="<?php echo esc_attr( AMP_Post_Meta_Box::STATUS_INPUT_NAME ); ?>" value="<?php echo esc_attr( AMP_Post_Meta_Box::DISABLED_STATUS ); ?>" <?php checked( AMP_Post_Meta_Box::DISABLED_STATUS, $status ); ?>>
 				<label for="amp-status-disabled" class="selectit"><?php echo esc_html( $labels['disabled'] ); ?></label>
 				<br />
-				<?php wp_nonce_field( self::NONCE_ACTION, self::NONCE_NAME ); ?>
+				<?php wp_nonce_field( AMP_Post_Meta_Box::NONCE_ACTION, AMP_Post_Meta_Box::NONCE_NAME ); ?>
 			</fieldset>
 		<?php else : ?>
-			<div class="inline notice notice-warning notice-alt">
-				<p><?php echo implode( ' ', $error_messages ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p>
+			<div class="inline notice notice-info notice-alt">
+				<p>
+					<strong><?php esc_html_e( 'AMP Unavailable', 'amp' ); ?></strong>
+				</p>
+				<?php foreach ( $error_messages as $error_message ) : ?>
+					<p>
+						<?php echo $error_message; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					</p>
+				<?php endforeach; ?>
 			</div>
 		<?php endif; ?>
 		<div class="amp-status-actions">

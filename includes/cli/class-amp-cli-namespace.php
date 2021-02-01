@@ -13,6 +13,7 @@ use WP_CLI\Dispatcher\CommandNamespace;
  * Interacts with the AMP plugin.
  *
  * @since 1.3.0
+ * @internal
  */
 final class AMP_CLI_Namespace extends CommandNamespace {
 

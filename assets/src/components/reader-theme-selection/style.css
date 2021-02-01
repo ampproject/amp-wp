@@ -1,0 +1,31 @@
+.choose-reader-theme > p {
+	font-size: 1rem;
+	margin-bottom: 1.5rem;
+}
+
+.choose-reader-theme__grid {
+	display: grid;
+	grid-gap: 40px;
+}
+
+@media screen and (min-width: 600px) {
+
+	.choose-reader-theme__grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media screen and (min-width: 1100px) {
+
+	.choose-reader-theme__grid {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+}
+
+.choose-reader-theme__unavailable {
+	padding-top: 6rem;
+}
+
+.choose-reader-theme__unavailable label {
+	cursor: default;
+}

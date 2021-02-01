@@ -5,12 +5,14 @@
  * @package AMP
  */
 
-use Amp\AmpWP\Dom\Document;
+use AmpProject\Dom\Document;
 
 /**
  * Class AMP_Twitter_Embed_Handler
  *
- *  Much of this class is borrowed from Jetpack embeds
+ * Much of this class is borrowed from Jetpack embeds
+ *
+ * @internal
  */
 class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 
@@ -154,7 +156,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	private function create_amp_twitter_and_replace_node( Document $dom, DOMElement $node ) {
 		$tweet_id = $this->get_tweet_id( $node );
-		if ( ! $tweet_id ) {
+		if ( empty( $tweet_id ) ) {
 			return;
 		}
 
@@ -177,6 +179,11 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 			$attributes
 		);
 
+		/**
+		 * Placeholder element to append to the new node.
+		 *
+		 * @var DOMElement $placeholder
+		 */
 		$placeholder = $node->cloneNode( true );
 		$placeholder->setAttribute( 'placeholder', '' );
 
@@ -193,7 +200,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Extracts Tweet id.
 	 *
 	 * @param DOMElement $node The DOMNode to adjust and replace.
-	 * @return string Tweet ID.
+	 * @return string Tweet ID, or an empty string if not found.
 	 */
 	private function get_tweet_id( $node ) {
 		/**
@@ -206,7 +213,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 		/**
 		 * Anchor.
 		 *
-		 * @type DOMElement $anchor
+		 * @var DOMElement $anchor
 		 */
 		foreach ( $anchors as $anchor ) {
 			$found = preg_match( self::URL_PATTERN, $anchor->getAttribute( 'href' ), $matches );
@@ -215,7 +222,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 			}
 		}
 
-		return null;
+		return '';
 	}
 
 	/**
@@ -242,7 +249,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		// Handle case where script is immediately following.
 		$is_embed_script = (
-			$next_element_sibling
+			$next_element_sibling instanceof DOMElement
 			&&
 			'script' === strtolower( $next_element_sibling->nodeName )
 			&&

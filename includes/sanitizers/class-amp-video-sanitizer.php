@@ -5,12 +5,15 @@
  * @package AMP
  */
 
+use AmpProject\DevMode;
+
 /**
  * Class AMP_Video_Sanitizer
  *
- * @since 0.2
- *
  * Converts <video> tags to <amp-video>
+ *
+ * @since 0.2
+ * @internal
  */
 class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	use AMP_Noscript_Fallback;
@@ -70,7 +73,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			$node = $nodes->item( $i );
 
 			// Skip element if already inside of an AMP element as a noscript fallback, or if the element is in dev mode.
-			if ( $this->is_inside_amp_noscript( $node ) || $this->has_dev_mode_exemption( $node ) ) {
+			if ( $this->is_inside_amp_noscript( $node ) || DevMode::hasExemptionForNode( $node ) ) {
 				continue;
 			}
 
