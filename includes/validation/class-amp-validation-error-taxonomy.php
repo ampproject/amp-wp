@@ -1605,6 +1605,16 @@ class AMP_Validation_Error_Taxonomy {
 	public static function get_error_details_json( $term ) {
 		$json = json_decode( $term->description, true );
 
+		if ( isset( $_GET['post'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( (int) $_GET['post'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+			foreach ( $validation_errors as $error ) {
+				if ( isset( $error['data']['sources'], $error['term']->term_id ) && $error['term']->term_id === $term->term_id ) {
+					$json['sources'] = $error['data']['sources'];
+					break;
+				}
+			}
+		}
+
 		// Convert the numeric constant value of the node_type to its constant name.
 		$xml_reader_reflection_class = new ReflectionClass( 'XMLReader' );
 		$constants                   = $xml_reader_reflection_class->getConstants();

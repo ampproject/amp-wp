@@ -1534,36 +1534,51 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::get_error_details_json()
 	 */
 	public function test_get_error_details_json() {
+		$error            = $this->get_mock_error();
+		$error['sources'] = [
+			[
+				'type' => 'plugin',
+				'name' => 'bar',
+			],
+		];
+
 		$term = new WP_Term(
 			(object) [
-				'description' => wp_json_encode(
-					[
-						'node_type' => 1,
-					]
-				),
-				'term_group'  => 1,
+				'description' => wp_json_encode( $error ),
+				'term_group'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
 			]
 		);
 
-		$result = json_decode( AMP_Validation_Error_Taxonomy::get_error_details_json( $term ), true );
+		$_GET['post'] = AMP_Validated_URL_Post_Type::store_validation_errors( [ $error ], home_url( '/' ) );
 
+		$result = json_decode( AMP_Validation_Error_Taxonomy::get_error_details_json( $term ), true );
+		unset( $_GET['post'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		// Verify the name of the node type is used instead of its ID.
 		$this->assertEquals( 'ELEMENT', $result['node_type'] );
+		// Verify the status of the error is correctly set.
 		$this->assertEquals( true, $result['removed'] );
 		$this->assertEquals( false, $result['reviewed'] );
+
+		unset( $error['node_type'], $result['node_type'], $result['removed'], $result['reviewed'] );
+		// Verify the other contents of the stored validation error (including sources) are retrieved.
+		$this->assertEquals( $error, $result );
 
 		$term   = new WP_Term(
 			(object) [
 				'description' => wp_json_encode(
 					[
-						'node_type' => 2,
+						'node_type' => XML_ATTRIBUTE_NODE,
 					]
 				),
-				'term_group'  => 2,
+				'term_group'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
 			]
 		);
 		$result = json_decode( AMP_Validation_Error_Taxonomy::get_error_details_json( $term ), true );
 
+		// Verify the name of the node type is used instead of its ID.
 		$this->assertEquals( 'ATTRIBUTE', $result['node_type'] );
+		// Verify the status of the error is correctly set.
 		$this->assertEquals( false, $result['removed'] );
 		$this->assertEquals( true, $result['reviewed'] );
 	}
