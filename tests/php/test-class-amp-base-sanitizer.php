@@ -358,6 +358,73 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests remove_invalid_child with script text normalization.
+	 *
+	 * @covers AMP_Base_Sanitizer::remove_invalid_child()
+	 * @covers AMP_Base_Sanitizer::should_sanitize_validation_error()
+	 * @covers AMP_Base_Sanitizer::prepare_validation_error()
+	 */
+	public function test_remove_invalid_child_with_script_text_normalization() {
+		$dom        = new Document( '1.0', 'utf-8' );
+		$parent_tag = 'div';
+		$parent     = $dom->createElement( $parent_tag );
+		$dom->appendChild( $parent );
+		$child = $dom->createElement( 'script' );
+		ob_start();
+		?>
+		<script>
+			var exampleSingleQuotedNonce = 'd62af2ae67';
+			var exampleSingleQuotedUniqid = '60187a1866338';
+			var exampleDoubleQuotedNonce = "d62af2ae67";
+			var exampleDoubleQuotedUniqid = "60187a1866350";
+			var exampleDoubleQuotedStringWithEscapedChars = "599152239'\" \\ \\\\60187a1866359";
+			var exampleSingleQuotedStringWithEscapedChars = '908945391\'\" \\ \\\\60187a186635f';
+			var exampleRandomNumber1 = 980714337;
+			var exampleRandomNumber2 = -482244956 ;
+			var exampleRandomNumber3=482244956;
+			var exampleRandomNumber4=-482244956;
+			var exampleRandomFloat = 1612216856.418668;
+			var exampleRandomFloat2 = -1612216856.418682 ;
+			var exampleObject={
+				'foo':123,
+				'bar':"92y49234gb",
+				baz:-1234.245
+			};
+		</script>
+		<?php
+		$text = str_replace( [ '<script>', '</script>' ], '', ob_get_clean() );
+		$child->appendChild( $dom->createTextNode( $text ) );
+		$parent->appendChild( $child );
+
+		$expected_error = [
+			'code'            => AMP_Tag_And_Attribute_Sanitizer::DISALLOWED_TAG,
+			'node_name'       => $child->nodeName,
+			'parent_name'     => $parent_tag,
+			'sources'         => null,
+			'type'            => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
+			'node_type'       => XML_ELEMENT_NODE,
+			'node_attributes' => [],
+			'text'            => "\t\t\n\t\t\tvar exampleSingleQuotedNonce = __SINGLE_QUOTED_STRING__;\n\t\t\tvar exampleSingleQuotedUniqid = __SINGLE_QUOTED_STRING__;\n\t\t\tvar exampleDoubleQuotedNonce = __DOUBLE_QUOTED_STRING__;\n\t\t\tvar exampleDoubleQuotedUniqid = __DOUBLE_QUOTED_STRING__;\n\t\t\tvar exampleDoubleQuotedStringWithEscapedChars = __DOUBLE_QUOTED_STRING__;\n\t\t\tvar exampleSingleQuotedStringWithEscapedChars = '__INT__\\'\\__DOUBLE_QUOTED_STRING__92y49234gb\",\n\t\t\t\tbaz:__FLOAT__\n\t\t\t};\n\t\t\n\t\t",
+		];
+
+		$sanitizer = new AMP_Iframe_Sanitizer(
+			$dom,
+			[ 'validation_error_callback' => 'AMP_Validation_Manager::add_validation_error' ]
+		);
+
+		$sanitizer->remove_invalid_child( $child );
+		$this->assertNull( $parent->firstChild );
+		$this->assertCount( 1, AMP_Validation_Manager::$validation_results );
+		$this->assertEquals(
+			[
+				'error'     => $expected_error,
+				'sanitized' => true,
+			],
+			AMP_Validation_Manager::$validation_results[0]
+		);
+	}
+
+	/**
 	 * Tests remove_invalid_child.
 	 *
 	 * @covers AMP_Base_Sanitizer::remove_invalid_child()
