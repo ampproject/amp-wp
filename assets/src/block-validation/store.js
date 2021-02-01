@@ -16,12 +16,14 @@ import {
 export const BLOCK_VALIDATION_STORE_KEY = 'amp/block-validation';
 
 const SET_IS_FETCHING_ERRORS = 'SET_IS_FETCHING_ERRORS';
+const SET_IS_POST_DIRTY = 'SET_IS_POST_DIRTY';
 const SET_IS_SHOWING_REVIEWED = 'SET_IS_SHOWING_REVIEWED';
 const SET_REVIEW_LINK = 'SET_REVIEW_LINK';
 const SET_VALIDATION_ERRORS = 'SET_VALIDATION_ERRORS';
 
 export const INITIAL_STATE = {
 	ampCompatibilityBroken: false,
+	isPostDirty: false,
 	isFetchingErrors: false,
 	isShowingReviewed: false,
 	rawValidationErrors: [],
@@ -37,6 +39,9 @@ export function getStore( initialState ) {
 			switch ( action.type ) {
 				case SET_IS_FETCHING_ERRORS:
 					return { ...state, isFetchingErrors: action.isFetchingErrors };
+
+				case SET_IS_POST_DIRTY:
+					return { ...state, isPostDirty: action.isPostDirty };
 
 				case SET_IS_SHOWING_REVIEWED:
 					return { ...state, isShowingReviewed: action.isShowingReviewed };
@@ -72,6 +77,7 @@ export function getStore( initialState ) {
 		},
 		actions: {
 			setIsFetchingErrors: ( isFetchingErrors ) => ( { type: SET_IS_FETCHING_ERRORS, isFetchingErrors } ),
+			setIsPostDirty: ( isPostDirty ) => ( { type: SET_IS_POST_DIRTY, isPostDirty } ),
 			setIsShowingReviewed: ( isShowingReviewed ) => ( { type: SET_IS_SHOWING_REVIEWED, isShowingReviewed } ),
 			setReviewLink: ( reviewLink ) => ( { type: SET_REVIEW_LINK, reviewLink } ),
 			setValidationErrors: ( validationErrors ) => ( { type: SET_VALIDATION_ERRORS, validationErrors } ),
@@ -79,6 +85,7 @@ export function getStore( initialState ) {
 		selectors: {
 			getAMPCompatibilityBroken: ( { ampCompatibilityBroken } ) => ampCompatibilityBroken,
 			getIsFetchingErrors: ( { isFetchingErrors } ) => isFetchingErrors,
+			getIsPostDirty: ( { isPostDirty } ) => isPostDirty,
 			getIsShowingReviewed: ( { isShowingReviewed } ) => isShowingReviewed,
 			getReviewLink: ( { reviewLink } ) => reviewLink,
 			getReviewedValidationErrors: ( { reviewedValidationErrors } ) => reviewedValidationErrors,

@@ -29,12 +29,19 @@ export function Sidebar() {
 	const { setIsShowingReviewed } = useDispatch( BLOCK_VALIDATION_STORE_KEY );
 	const { savePost } = useDispatch( 'core/editor' );
 
-	const { ampCompatibilityBroken, isDirty, isFetchingErrors, isShowingReviewed, status, reviewLink } = useSelect( ( select ) => ( {
+	const {
+		ampCompatibilityBroken,
+		isEditedPostNew,
+		isFetchingErrors,
+		isPostDirty,
+		isShowingReviewed,
+		reviewLink,
+	} = useSelect( ( select ) => ( {
 		ampCompatibilityBroken: select( BLOCK_VALIDATION_STORE_KEY ).getAMPCompatibilityBroken(),
-		isDirty: select( 'core/editor' )?.isEditedPostDirty(),
+		isEditedPostNew: select( 'core/editor' )?.isEditedPostNew(),
 		isFetchingErrors: select( BLOCK_VALIDATION_STORE_KEY ).getIsFetchingErrors(),
+		isPostDirty: select( BLOCK_VALIDATION_STORE_KEY ).getIsPostDirty(),
 		isShowingReviewed: select( BLOCK_VALIDATION_STORE_KEY ).getIsShowingReviewed(),
-		status: select( 'core/editor' )?.getEditedPostAttribute( 'status' ),
 		reviewLink: select( BLOCK_VALIDATION_STORE_KEY ).getReviewLink(),
 	} ), [] );
 
@@ -74,7 +81,6 @@ export function Sidebar() {
 		}
 	}, [] );
 
-	const saved = 'auto-draft' !== status;
 	const forceRevalidate = () => savePost( { preview: true } );
 
 	return (
@@ -129,7 +135,7 @@ export function Sidebar() {
 			) }
 
 			{
-				! saved && 0 === validationErrors.length && (
+				isEditedPostNew && 0 === validationErrors.length && (
 					<PanelBody opened={ true }>
 						{ isFetchingErrors ? <Loading /> : (
 							<>
@@ -138,7 +144,7 @@ export function Sidebar() {
 										{ __( 'Validation issues will be checked for when the post is saved.', 'amp' ) }
 									</p>
 								</PanelRow>
-								{ isDirty && (
+								{ isPostDirty && (
 									<PanelRow>
 										<Button isSecondary onClick={ forceRevalidate }>
 											{ __( 'Save draft and validate now', 'amp' ) }
@@ -150,7 +156,7 @@ export function Sidebar() {
 					</PanelBody>
 				)
 			}
-			{ saved && validationErrors.length === 0 && (
+			{ ! isEditedPostNew && validationErrors.length === 0 && (
 				<PanelBody opened={ true }>
 					{ isFetchingErrors ? <Loading /> : (
 						<p>
@@ -160,7 +166,7 @@ export function Sidebar() {
 				</PanelBody>
 			) }
 
-			{ isDirty && saved && (
+			{ isPostDirty && ! isEditedPostNew && (
 				<PanelBody opened={ true }>
 					<PanelRow>
 						<p>
@@ -183,7 +189,7 @@ export function Sidebar() {
 						) ) }
 					</ul>
 				)
-					: saved && (
+					: ! isEditedPostNew && (
 						<PanelBody opened={ true }>
 							{ isFetchingErrors ? <Loading /> : (
 								<p>
