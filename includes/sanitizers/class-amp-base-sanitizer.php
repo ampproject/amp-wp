@@ -599,30 +599,28 @@ abstract class AMP_Base_Sanitizer {
 			$is_inline_style  = ( 'style' === $node->nodeName && ! $node->hasAttribute( 'amp-custom' ) && ! $node->hasAttribute( 'amp-keyframes' ) );
 			if ( $is_inline_script || $is_inline_style ) {
 				$text_content = $node->textContent;
-				if ( strlen( $text_content ) < 10000 ) {
-					if ( $is_inline_script ) {
-						// For inline scripts, normalize string and number literals to prevent nonces, random numbers, and timestamps
-						// from generating endless number of validation errors.
-						$error['text'] = preg_replace(
-							[
-								'/"[^"\\\\\n\r]*(?:\\\\.[^"\\\\\n\r]*)*"/s',
-								'/\'[^\'\\\\\n\r]*(?:\\\\.[^\'\\\\\n\r]*)*\'/s',
-								'/(\b|-)\d+\.\d+\b/',
-								'/(\b|-)\d+\b/',
-							],
-							[
-								'__DOUBLE_QUOTED_STRING__',
-								'__SINGLE_QUOTED_STRING__',
-								'__FLOAT__',
-								'__INT__',
-							],
-							$text_content
-						);
-					} elseif ( $is_inline_style ) {
-						// Include stylesheet text except for amp-custom and amp-keyframes since it is large and since it should
-						// already be detailed in the stylesheets metabox.
-						$error['text'] = $text_content;
-					}
+				if ( $is_inline_script ) {
+					// For inline scripts, normalize string and number literals to prevent nonces, random numbers, and timestamps
+					// from generating endless number of validation errors.
+					$error['text'] = preg_replace(
+						[
+							'/"[^"\\\\\n\r]*(?:\\\\.[^"\\\\\n\r]*)*"/s',
+							'/\'[^\'\\\\\n\r]*(?:\\\\.[^\'\\\\\n\r]*)*\'/s',
+							'/(\b|-)\d+\.\d+\b/',
+							'/(\b|-)\d+\b/',
+						],
+						[
+							'__DOUBLE_QUOTED_STRING__',
+							'__SINGLE_QUOTED_STRING__',
+							'__FLOAT__',
+							'__INT__',
+						],
+						$text_content
+					);
+				} elseif ( $is_inline_style ) {
+					// Include stylesheet text except for amp-custom and amp-keyframes since it is large and since it should
+					// already be detailed in the stylesheets metabox.
+					$error['text'] = $text_content;
 				}
 			}
 
