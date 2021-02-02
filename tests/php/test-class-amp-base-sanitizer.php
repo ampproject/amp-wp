@@ -381,6 +381,8 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 			var exampleSingleQuotedStringWithEscapedChars = '908945391\'" \\\' \\\\60187a186635f';
 			var exampleEmptyDoubleString = "";
 			var exampleEmptySingleString = '';
+			var exampleEscapedQuoteInSingleString = '\'';
+			var exampleEscapedQuoteInDoubleString = "\"";
 			var exampleRandomNumber1 = 980714337;
 			var exampleRandomNumber2 = -482244956 ;
 			var exampleRandomNumber3=482244956;
@@ -402,7 +404,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		</script>
 		<?php
 		$initial_text  = str_replace( [ '<script>', '</script>' ], '', ob_get_clean() );
-		$expected_text = "\t\t\n\t\t\tvar exampleSingleQuotedNonce = __SINGLE_QUOTED_STRING__;\n\t\t\tvar exampleSingleQuotedUniqid = __SINGLE_QUOTED_STRING__;\n\t\t\tvar exampleDoubleQuotedNonce = __DOUBLE_QUOTED_STRING__;\n\t\t\tvar exampleDoubleQuotedUniqid = __DOUBLE_QUOTED_STRING__;\n\t\t\tvar exampleDoubleQuotedStringWithEscapedChars = __DOUBLE_QUOTED_STRING__;\n\t\t\tvar exampleSingleQuotedStringWithEscapedChars = __SINGLE_QUOTED_STRING__;\n\t\t\tvar exampleEmptyDoubleString = __DOUBLE_QUOTED_STRING__;\n\t\t\tvar exampleEmptySingleString = __SINGLE_QUOTED_STRING__;\n\t\t\tvar exampleRandomNumber1 = __INT__;\n\t\t\tvar exampleRandomNumber2 = __INT__ ;\n\t\t\tvar exampleRandomNumber3=__INT__;\n\t\t\tvar exampleRandomNumber4=__INT__;\n\t\t\tvar exampleRandomFloat1 = __FLOAT__;\n\t\t\tvar exampleRandomFloat2 = __FLOAT__ ;\n\t\t\tvar singleQuotedStringWithSlashes = __SINGLE_QUOTED_STRING__;\n\t\t\tvar doubleQuotedStringWithSlashes = __DOUBLE_QUOTED_STRING__;\n\t\t\tvar exampleObject={\n\t\t\t\t__SINGLE_QUOTED_STRING__:__INT__,\n\t\t\t\t__SINGLE_QUOTED_STRING__:__DOUBLE_QUOTED_STRING__,\n\t\t\t\tbaz:__FLOAT__\n\t\t\t};\n\t\t\tvar exampleRandomObject = {__DOUBLE_QUOTED_STRING__:__DOUBLE_QUOTED_STRING__,__DOUBLE_QUOTED_STRING__:__DOUBLE_QUOTED_STRING__,__DOUBLE_QUOTED_STRING__:__INT__,__DOUBLE_QUOTED_STRING__:__FLOAT__};\n\t\t\n\t\t";
+		$expected_text = "\t\t\n\t\t\tvar exampleSingleQuotedNonce = __SINGLE_QUOTED_STRING__;\n\t\t\tvar exampleSingleQuotedUniqid = __SINGLE_QUOTED_STRING__;\n\t\t\tvar exampleDoubleQuotedNonce = __DOUBLE_QUOTED_STRING__;\n\t\t\tvar exampleDoubleQuotedUniqid = __DOUBLE_QUOTED_STRING__;\n\t\t\tvar exampleDoubleQuotedStringWithEscapedChars = __DOUBLE_QUOTED_STRING__;\n\t\t\tvar exampleSingleQuotedStringWithEscapedChars = __SINGLE_QUOTED_STRING__;\n\t\t\tvar exampleEmptyDoubleString = __DOUBLE_QUOTED_STRING__;\n\t\t\tvar exampleEmptySingleString = __SINGLE_QUOTED_STRING__;\n\t\t\tvar exampleEscapedQuoteInSingleString = __SINGLE_QUOTED_STRING__;\n\t\t\tvar exampleEscapedQuoteInDoubleString = __DOUBLE_QUOTED_STRING__;\n\t\t\tvar exampleRandomNumber1 = __INT__;\n\t\t\tvar exampleRandomNumber2 = __INT__ ;\n\t\t\tvar exampleRandomNumber3=__INT__;\n\t\t\tvar exampleRandomNumber4=__INT__;\n\t\t\tvar exampleRandomFloat1 = __FLOAT__;\n\t\t\tvar exampleRandomFloat2 = __FLOAT__ ;\n\t\t\tvar singleQuotedStringWithSlashes = __SINGLE_QUOTED_STRING__;\n\t\t\tvar doubleQuotedStringWithSlashes = __DOUBLE_QUOTED_STRING__;\n\t\t\tvar exampleObject={\n\t\t\t\t__SINGLE_QUOTED_STRING__:__INT__,\n\t\t\t\t__SINGLE_QUOTED_STRING__:__DOUBLE_QUOTED_STRING__,\n\t\t\t\tbaz:__FLOAT__\n\t\t\t};\n\t\t\tvar exampleRandomObject = {__DOUBLE_QUOTED_STRING__:__DOUBLE_QUOTED_STRING__,__DOUBLE_QUOTED_STRING__:__DOUBLE_QUOTED_STRING__,__DOUBLE_QUOTED_STRING__:__INT__,__DOUBLE_QUOTED_STRING__:__FLOAT__};\n\t\t\n\t\t";
 
 		$child->appendChild( $dom->createTextNode( $initial_text ) );
 		$parent->appendChild( $child );
@@ -429,7 +431,8 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		$actual_text = AMP_Validation_Manager::$validation_results[0]['error']['text'];
 		$this->assertEquals(
 			$expected_text,
-			$actual_text
+			$actual_text,
+			'Actual text: ' . wp_json_encode( $actual_text )
 		);
 
 		$this->assertEquals(

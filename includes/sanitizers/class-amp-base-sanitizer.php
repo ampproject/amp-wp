@@ -594,7 +594,7 @@ abstract class AMP_Base_Sanitizer {
 				}
 			}
 
-			// Capture element contents, if less than 10K bytes.
+			// Capture element contents.
 			$is_inline_script = ( 'script' === $node->nodeName && ! $node->hasAttribute( 'src' ) );
 			$is_inline_style  = ( 'style' === $node->nodeName && ! $node->hasAttribute( 'amp-custom' ) && ! $node->hasAttribute( 'amp-keyframes' ) );
 			if ( $is_inline_script || $is_inline_style ) {
@@ -604,6 +604,7 @@ abstract class AMP_Base_Sanitizer {
 					// from generating endless number of validation errors.
 					$error['text'] = preg_replace(
 						[
+							// Regex credit to <https://stackoverflow.com/a/5696141/93579>.
 							'/"[^"\\\\\n]*(?:\\\\.[^"\\\\\n]*)*"/s',
 							'/\'[^\'\\\\\n]*(?:\\\\.[^\'\\\\\n]*)*\'/s',
 							'/(\b|-)\d+\.\d+\b/',
