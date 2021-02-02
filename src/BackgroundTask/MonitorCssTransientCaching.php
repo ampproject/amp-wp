@@ -92,21 +92,21 @@ final class MonitorCssTransientCaching extends CronBasedBackgroundTask {
 	 * @todo This has arbitrary arguments to allow for testing, as we don't have dependency injection for services.
 	 *       With dependency injection, we could for example inject a Clock object and mock it for testing.
 	 *
-	 * @param DateTimeInterface $date            Optional. Date to use for timestamping the processing (for testing).
-	 * @param int               $transient_count Optional. Count of transients to use for the processing (for testing).
+	 * @param DateTimeInterface|string $date            Optional. Date to use for timestamping the processing (for testing). An empty string is provided during cron.
+	 * @param int|string               $transient_count Optional. Count of transients to use for the processing (for testing). An empty string is provided during cron.
 	 * @return void
 	 * @throws Exception If a date could not be instantiated.
 	 */
-	public function process( DateTimeInterface $date = null, $transient_count = null ) {
+	public function process( $date = '', $transient_count = '' ) {
 		if ( wp_using_ext_object_cache() || $this->is_css_transient_caching_disabled() ) {
 			return;
 		}
 
-		if ( null === $date ) {
+		if ( ! $date instanceof DateTimeInterface ) {
 			$date = new DateTimeImmutable();
 		}
 
-		if ( null === $transient_count ) {
+		if ( ! is_int( $transient_count ) ) {
 			$transient_count = $this->query_css_transient_count();
 		}
 
