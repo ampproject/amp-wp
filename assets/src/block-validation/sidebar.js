@@ -81,8 +81,6 @@ export function Sidebar() {
 		}
 	}, [] );
 
-	const forceRevalidate = () => savePost( { preview: true } );
-
 	return (
 		<div className="amp-sidebar">
 			{
@@ -146,7 +144,7 @@ export function Sidebar() {
 								</PanelRow>
 								{ isPostDirty && (
 									<PanelRow>
-										<Button isSecondary onClick={ forceRevalidate }>
+										<Button isSecondary onClick={ () => savePost( { isPreview: true } ) }>
 											{ __( 'Save draft and validate now', 'amp' ) }
 										</Button>
 									</PanelRow>
@@ -174,7 +172,7 @@ export function Sidebar() {
 						</p>
 					</PanelRow>
 					<PanelRow>
-						<Button isSecondary onClick={ forceRevalidate }>
+						<Button isSecondary onClick={ () => savePost( { isPreview: true } ) }>
 							{ __( 'Re-validate now', 'amp' ) }
 						</Button>
 					</PanelRow>
