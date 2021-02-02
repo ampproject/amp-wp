@@ -405,7 +405,7 @@ jobs:
 
       - name: Run tests
         if: ${{ matrix.coverage == false }}
-        run: vendor/bin/phpunit
+        run: vendor/bin/phpunit --debug
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
 
       - name: Run tests with coverage
