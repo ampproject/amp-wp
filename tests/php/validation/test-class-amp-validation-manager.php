@@ -1730,21 +1730,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 					'name'     => 'wp-includes',
 					'function' => version_compare( get_bloginfo( 'version' ), '5.5-alpha', '>' ) ? 'wp_filter_content_tags' : 'wp_make_content_images_responsive',
 				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'capital_P_dangit',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'do_shortcode',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'convert_smilies',
-				],
 			];
 		} elseif ( has_filter( 'the_content', 'do_blocks' ) ) {
 			$sources = [
@@ -1788,21 +1773,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 					'name'     => 'wp-includes',
 					'function' => 'wp_make_content_images_responsive',
 				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'capital_P_dangit',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'do_shortcode',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'convert_smilies',
-				],
 			];
 		} else {
 			$sources = [
@@ -1841,6 +1811,20 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 					'name'     => 'wp-includes',
 					'function' => 'wp_make_content_images_responsive',
 				],
+			];
+		}
+
+		if ( function_exists( 'wp_replace_insecure_home_url' ) ) {
+			$sources[] = [
+				'type'     => 'core',
+				'name'     => 'wp-includes',
+				'function' => 'wp_replace_insecure_home_url',
+			];
+		}
+
+		$sources = array_merge(
+			$sources,
+			[
 				[
 					'type'     => 'core',
 					'name'     => 'wp-includes',
@@ -1856,8 +1840,8 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 					'name'     => 'wp-includes',
 					'function' => 'convert_smilies',
 				],
-			];
-		}
+			]
+		);
 
 		foreach ( $sources as &$source ) {
 			$function = $source['function'];
