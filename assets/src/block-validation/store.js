@@ -53,9 +53,9 @@ export function getStore( initialState ) {
 					return {
 						...state,
 						ampCompatibilityBroken: Boolean(
-						action.validationErrors.filter( ( { status } ) =>
-							status === VALIDATION_ERROR_NEW_REJECTED_STATUS || status === VALIDATION_ERROR_ACK_REJECTED_STATUS,
-						)?.length,
+							action.validationErrors.filter( ( { status } ) =>
+								status === VALIDATION_ERROR_NEW_REJECTED_STATUS || status === VALIDATION_ERROR_ACK_REJECTED_STATUS,
+							)?.length,
 						),
 
 						reviewedValidationErrors: action.validationErrors
@@ -76,11 +76,26 @@ export function getStore( initialState ) {
 			}
 		},
 		actions: {
-			setIsFetchingErrors: ( isFetchingErrors ) => ( { type: SET_IS_FETCHING_ERRORS, isFetchingErrors } ),
-			setIsPostDirty: ( isPostDirty ) => ( { type: SET_IS_POST_DIRTY, isPostDirty } ),
-			setIsShowingReviewed: ( isShowingReviewed ) => ( { type: SET_IS_SHOWING_REVIEWED, isShowingReviewed } ),
-			setReviewLink: ( reviewLink ) => ( { type: SET_REVIEW_LINK, reviewLink } ),
-			setValidationErrors: ( validationErrors ) => ( { type: SET_VALIDATION_ERRORS, validationErrors } ),
+			setIsFetchingErrors: ( isFetchingErrors ) => ( {
+				type: SET_IS_FETCHING_ERRORS,
+				isFetchingErrors,
+			} ),
+			setIsPostDirty: ( isPostDirty ) => ( {
+				type: SET_IS_POST_DIRTY,
+				isPostDirty,
+			} ),
+			setIsShowingReviewed: ( isShowingReviewed ) => ( {
+				type: SET_IS_SHOWING_REVIEWED,
+				isShowingReviewed,
+			} ),
+			setReviewLink: ( reviewLink ) => ( {
+				type: SET_REVIEW_LINK,
+				reviewLink,
+			} ),
+			setValidationErrors: ( validationErrors ) => ( {
+				type: SET_VALIDATION_ERRORS,
+				validationErrors,
+			} ),
 		},
 		selectors: {
 			getAMPCompatibilityBroken: ( { ampCompatibilityBroken } ) => ampCompatibilityBroken,
