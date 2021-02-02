@@ -20,16 +20,20 @@ export function usePostDirtinessChanges() {
 		blocks,
 		getEditedPostContent,
 		isPostDirty,
-		isSavingPost,
+		isSavingOrPreviewingPost,
 	} = useSelect( ( select ) => ( {
 		blocks: select( 'core/editor' ).getBlocks(),
 		getEditedPostContent: select( 'core/editor' ).getEditedPostContent,
 		isPostDirty: select( BLOCK_VALIDATION_STORE_KEY ).getIsPostDirty(),
-		isSavingPost: select( 'core/editor' ).isSavingPost(),
+		isSavingOrPreviewingPost:
+			( select( 'core/editor' ).isSavingPost() && ! select( 'core/editor' ).isAutosavingPost() ) ||
+			select( 'core/editor' ).isPreviewingPost(),
 	} ), [] );
 
-	// Getting content is expensive, so we update it only if blocks list
-	// or the dirtiness state change.
+	/**
+	 * Getting content is expensive, so we update it only if blocks list
+	 * or the dirtiness state change.
+	 */
 	useEffect( () => {
 		if ( ! isPostDirty ) {
 			setContent( getEditedPostContent() );
@@ -37,7 +41,7 @@ export function usePostDirtinessChanges() {
 	}, [ blocks, getEditedPostContent, isPostDirty ] );
 
 	useEffect( () => {
-		if ( isSavingPost ) {
+		if ( isSavingOrPreviewingPost ) {
 			if ( isPostDirty ) {
 				setShouldUpdatePreviousContent( true );
 				setIsPostDirty( false );
@@ -56,12 +60,14 @@ export function usePostDirtinessChanges() {
 			return;
 		}
 
-		// Post is not considered dirty if there is no content or the content
-		// didn't change.
+		/**
+		 * Post is not considered dirty if there is no content or the content
+		 * didn't change.
+		 */
 		if ( ( ! previousContent && ! content ) || ( previousContent === content ) ) {
 			return;
 		}
 
 		setIsPostDirty( true );
-	}, [ content, getEditedPostContent, isPostDirty, isSavingPost, previousContent, setIsPostDirty, shouldUpdatePreviousContent ] );
+	}, [ content, getEditedPostContent, isPostDirty, isSavingOrPreviewingPost, previousContent, setIsPostDirty, shouldUpdatePreviousContent ] );
 }
