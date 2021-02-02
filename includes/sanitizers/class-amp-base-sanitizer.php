@@ -605,8 +605,8 @@ abstract class AMP_Base_Sanitizer {
 						// from generating endless number of validation errors.
 						$error['text'] = preg_replace(
 							[
-								'/"([^"\n\\\\]|\\\\(\\\\\\\\)*+.)*"/s',
-								'/\'([^\'\n\\\\]|\\\\(\\\\\\\\)*+.)*\'/s',
+								'/"[^"\\\\\n\r]*(?:\\\\.[^"\\\\\n\r]*)*"/s',
+								'/\'[^\'\\\\\n\r]*(?:\\\\.[^\'\\\\\n\r]*)*\'/s',
 								'/(\b|-)\d+\.\d+\b/',
 								'/(\b|-)\d+\b/',
 							],
