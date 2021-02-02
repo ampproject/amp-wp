@@ -595,16 +595,9 @@ abstract class AMP_Base_Sanitizer {
 			}
 
 			// Capture element contents.
-			if (
-				( 'script' === $node->nodeName && ! $node->hasAttribute( 'src' ) )
-				||
-				// Include stylesheet text except for amp-custom and amp-keyframes since it is large and since it should
-				// already be detailed in the stylesheets metabox.
-				( 'style' === $node->nodeName && ! $node->hasAttribute( 'amp-custom' ) && ! $node->hasAttribute( 'amp-keyframes' ) )
-			) {
-				$error['text'] = $node->textContent;
-
-				// Normalize string and number literals to prevent nonces, random numbers, and timestamps from generating endless number of validation errors.
+			if ( 'script' === $node->nodeName && ! $node->hasAttribute( 'src' ) ) {
+				// For inline scripts, normalize string and number literals to prevent nonces, random numbers, and timestamps
+				// from generating endless number of validation errors.
 				$error['text'] = preg_replace(
 					[
 						'/"([^"\n\\\\]|\\\\(\\\\\\\\)*+.)*"/s',
@@ -618,8 +611,12 @@ abstract class AMP_Base_Sanitizer {
 						'__FLOAT__',
 						'__INT__',
 					],
-					$error['text']
+					$node->textContent
 				);
+			} elseif ( 'style' === $node->nodeName && ! $node->hasAttribute( 'amp-custom' ) && ! $node->hasAttribute( 'amp-keyframes' ) ) {
+				// Include stylesheet text except for amp-custom and amp-keyframes since it is large and since it should
+				// already be detailed in the stylesheets metabox.
+				$error['text'] = $node->textContent;
 			}
 
 			// Suppress 'ver' param from enqueued scripts and styles.
