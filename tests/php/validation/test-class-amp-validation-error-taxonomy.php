@@ -1542,9 +1542,12 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 			],
 		];
 
-		$GLOBALS['post'] = AMP_Validated_URL_Post_Type::store_validation_errors( [ $error ], home_url( '/' ) );
+		$post_id         = AMP_Validated_URL_Post_Type::store_validation_errors( [ $error ], home_url( '/' ) );
+		$GLOBALS['post'] = get_post( $post_id );
+		$errors          = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $GLOBALS['post'] );
 
-		$result = json_decode( AMP_Validation_Error_Taxonomy::get_error_details_json( 0 ), true );
+		AMP_Validation_Error_Taxonomy::reset_validation_error_row_index();
+		$result = json_decode( AMP_Validation_Error_Taxonomy::get_error_details_json( $errors[0]['term'] ), true );
 
 		// Verify the name of the node type is used instead of its ID.
 		$this->assertEquals( 'ELEMENT', $result['node_type'] );
@@ -1561,9 +1564,12 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 		];
 
 		add_filter( 'amp_validation_error_sanitized', '__return_false' );
-		$GLOBALS['post'] = AMP_Validated_URL_Post_Type::store_validation_errors( [ $error ], home_url( '/' ) );
+		$post_id         = AMP_Validated_URL_Post_Type::store_validation_errors( [ $error ], home_url( '/' ) );
+		$GLOBALS['post'] = get_post( $post_id );
+		$errors          = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $GLOBALS['post'] );
 
-		$result = json_decode( AMP_Validation_Error_Taxonomy::get_error_details_json( 0 ), true );
+		AMP_Validation_Error_Taxonomy::reset_validation_error_row_index();
+		$result = json_decode( AMP_Validation_Error_Taxonomy::get_error_details_json( $errors[0]['term'] ), true );
 
 		// Verify the name of the node type is used instead of its ID.
 		$this->assertEquals( 'ATTRIBUTE', $result['node_type'] );

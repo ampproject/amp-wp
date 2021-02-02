@@ -210,6 +210,13 @@ class AMP_Validation_Error_Taxonomy {
 	const TRANSIENT_KEY_ERROR_INDEX_COUNTS = 'amp_error_index_counts';
 
 	/**
+	 * Current row index for the validated URL's validation error being displayed.
+	 *
+	 * @var int
+	 */
+	protected static $current_validation_error_row_index = 0;
+
+	/**
 	 * Whether the terms_clauses filter should apply to a term query for validation errors to limit to a given status.
 	 *
 	 * This is set to false when calling wp_count_terms() for the admin menu and for the views.
@@ -1595,26 +1602,48 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * Returns JSON-formatted error details for an error term.
+	 * Get the validation data and source info from the validated URL if available (as it should be).
 	 *
-	 * @param int $validation_error_index Index of the validation error row being rendered.
-	 * @return string Encoded JSON.
+	 * @param WP_Term $term Term.
+	 * @return array|null Validation data if successfully retrieved from the validated URL post, or else null.
 	 */
-	public static function get_error_details_json( $validation_error_index ) {
+	private static function get_current_validation_error_data_from_post( WP_Term $term ) {
 		$post = get_post();
-
 		if ( ! $post instanceof WP_Post || AMP_Validated_URL_Post_Type::POST_TYPE_SLUG !== $post->post_type ) {
-			return wp_json_encode( [] );
+			return null;
 		}
 
 		$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $post );
-
-		if ( ! isset( $validation_errors[ $validation_error_index ] ) ) {
-			return wp_json_encode( [] );
+		if ( ! isset( $validation_errors[ self::$current_validation_error_row_index ] ) ) {
+			return null;
 		}
 
-		$validation_error = $validation_errors[ $validation_error_index ];
-		$validation_data  = $validation_error['data'];
+		$validation_error = $validation_errors[ self::$current_validation_error_row_index ];
+		if ( $term->term_id !== $validation_error['term']->term_id ) {
+			return null;
+		}
+
+		return $validation_error['data'];
+	}
+
+	/**
+	 * Returns JSON-formatted error details for an error term.
+	 *
+	 * @param WP_Term $term Term.
+	 * @return string Encoded JSON.
+	 */
+	public static function get_error_details_json( WP_Term $term ) {
+		$validation_data = self::get_current_validation_error_data_from_post( $term );
+
+		// Fall back to obtaining the validation data from the term itself (without sources).
+		if ( null === $validation_data ) {
+			$validation_data = json_decode( $term->description, true );
+		}
+
+		// Total failure to obtain the validation data.
+		if ( ! is_array( $validation_data ) ) {
+			return wp_json_encode( [] );
+		}
 
 		// Convert the numeric constant value of the node_type to its constant name.
 		$xml_reader_reflection_class = new ReflectionClass( 'XMLReader' );
@@ -1626,11 +1655,17 @@ class AMP_Validation_Error_Taxonomy {
 			}
 		}
 
-		$term                        = $validation_error['term'];
 		$validation_data['removed']  = (bool) ( (int) $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
 		$validation_data['reviewed'] = (bool) ( (int) $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
 
 		return wp_json_encode( $validation_data );
+	}
+
+	/**
+	 * Reset the index for the current validation error being displayed.
+	 */
+	public static function reset_validation_error_row_index() {
+		self::$current_validation_error_row_index = 0;
 	}
 
 	/**
@@ -1642,8 +1677,6 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	public static function filter_tag_row_actions( $actions, WP_Term $tag ) {
 		global $pagenow;
-
-		static $row_index = 0;
 
 		$term_id = $tag->term_id;
 		$term    = get_term( $term_id ); // We don't want filter=display given by $tag.
@@ -1666,7 +1699,7 @@ class AMP_Validation_Error_Taxonomy {
 
 			$actions['copy'] = sprintf(
 				'<button type="button" class="single-url-detail-copy button-link" data-error-json="%s">%s</button>',
-				esc_attr( self::get_error_details_json( $row_index ) ),
+				esc_attr( self::get_error_details_json( $term ) ),
 				esc_html__( 'Copy to clipboard', 'amp' )
 			);
 		} elseif ( 'edit-tags.php' === $pagenow ) {
@@ -1698,7 +1731,7 @@ class AMP_Validation_Error_Taxonomy {
 
 		$actions = wp_array_slice_assoc( $actions, [ 'details', 'delete', 'copy' ] );
 
-		$row_index++;
+		self::$current_validation_error_row_index++;
 
 		return $actions;
 	}
