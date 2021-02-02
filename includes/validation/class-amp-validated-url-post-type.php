@@ -2812,7 +2812,10 @@ class AMP_Validated_URL_Post_Type {
 		<div id="url-post-filter" class="alignleft actions">
 			<?php AMP_Validation_Error_Taxonomy::render_error_type_filter(); ?>
 		</div>
-		<?php $wp_list_table->display(); ?>
+		<?php
+		AMP_Validation_Error_Taxonomy::reset_validation_error_row_index();
+		$wp_list_table->display();
+		?>
 
 		<?php
 		remove_filter( 'get_terms', $override_terms_in_occurrence_order );
