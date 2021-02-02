@@ -17,3 +17,6 @@ built
 /phpcs.xml
 /phpunit.xml
 /*.sql
+
+# Generated via bin/transform-readme.php
+/readme.txt

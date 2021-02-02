@@ -7,6 +7,7 @@ import {
 	getErrorMessages,
 	getAmpPreviewLink,
 	getAmpUrl,
+	getAmpBlocksInUse,
 } from '../selectors';
 
 describe( 'selectors', () => {
@@ -50,6 +51,15 @@ describe( 'selectors', () => {
 			const state = { ampPreviewLink: url };
 
 			expect( getAmpPreviewLink( state ) ).toStrictEqual( url );
+		} );
+	} );
+
+	describe( 'getAmpBlocksInUse', () => {
+		it( 'should return name of AMP blocks in post', () => {
+			const ampBlocksInUse = [ 'amp/amp-o2-player', 'amp/amp-ooyala-player', 'amp/amp-reach-player' ];
+			const state = { ampBlocksInUse };
+
+			expect( getAmpBlocksInUse( state ) ).toStrictEqual( ampBlocksInUse );
 		} );
 	} );
 } );

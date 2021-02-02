@@ -10,7 +10,6 @@ module.exports = function( grunt ) {
 		'assets',
 		'back-compat',
 		'includes',
-		'readme.txt',
 		'src',
 		'templates',
 		'vendor',
@@ -58,6 +57,7 @@ module.exports = function( grunt ) {
 					'!assets/js/amp-service-worker-runtime-precaching.js',
 					'assets/js/**/*.asset.php',
 					'assets/css/*.css',
+					'assets/css/*.css.map',
 				],
 			},
 			build: {
@@ -71,8 +71,8 @@ module.exports = function( grunt ) {
 				stdout: true,
 				stderr: true,
 			},
-			readme: {
-				command: './vendor/xwp/wp-dev-lib/scripts/generate-markdown-readme', // Generate the readme.md.
+			transform_readme: {
+				command: 'php bin/transform-readme.php',
 			},
 			verify_matching_versions: {
 				command: 'php bin/verify-version-consistency.php',
@@ -97,7 +97,7 @@ module.exports = function( grunt ) {
 				options: {
 					plugin_slug: 'amp',
 					build_dir: 'build',
-					assets_dir: 'wp-assets',
+					assets_dir: '.wordpress-org',
 				},
 			},
 		},
@@ -112,10 +112,6 @@ module.exports = function( grunt ) {
 	// Register tasks.
 	grunt.registerTask( 'default', [
 		'build',
-	] );
-
-	grunt.registerTask( 'readme', [
-		'shell:readme',
 	] );
 
 	grunt.registerTask( 'build', function() {
@@ -154,6 +150,9 @@ module.exports = function( grunt ) {
 				return true;
 			} );
 
+			grunt.task.run( 'shell:transform_readme' );
+			paths.push( 'readme.txt' );
+
 			paths.push( 'composer.*' ); // Copy in order to be able to do run composer_install.
 			paths.push( 'assets/js/**/*.js' );
 			paths.push( 'assets/js/**/*.asset.php' );
@@ -161,6 +160,7 @@ module.exports = function( grunt ) {
 
 			if ( 'development' === process.env.NODE_ENV ) {
 				paths.push( 'assets/js/**/*.js.map' );
+				paths.push( 'assets/css/*.css.map' );
 			}
 
 			grunt.config.set( 'copy', {
@@ -169,7 +169,7 @@ module.exports = function( grunt ) {
 					dest: 'build',
 					expand: true,
 					options: {
-						noProcess: [ '*/**', 'LICENSE' ], // That is, only process amp.php and readme.txt.
+						noProcess: [ '*/**', 'LICENSE' ], // That is, only process amp.php and README.md.
 						process( content, srcpath ) {
 							let matches, version, versionRegex;
 							if ( /amp\.php$/.test( srcpath ) ) {
@@ -192,7 +192,6 @@ module.exports = function( grunt ) {
 					},
 				},
 			} );
-			grunt.task.run( 'readme' );
 			grunt.task.run( 'copy' );
 			grunt.task.run( 'shell:composer_install' );
 

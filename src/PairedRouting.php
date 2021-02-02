@@ -391,12 +391,15 @@ final class PairedRouting implements Service, Registerable {
 				continue;
 			}
 
+			$paired_url_structure = $this->get_paired_url_structure();
+
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$old_path = wp_unslash( $_SERVER[ $var_name ] ); // Because of wp_magic_quotes().
-			$new_path = $this->get_paired_url_structure()->remove_endpoint( $old_path );
-			if ( $old_path === $new_path ) {
+			if ( ! $paired_url_structure->has_endpoint( $old_path ) ) {
 				continue;
 			}
+
+			$new_path = $paired_url_structure->remove_endpoint( $old_path );
 
 			$this->suspended_environment_variables[ $var_name ] = [ $old_path, $new_path ];
 
