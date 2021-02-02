@@ -58,9 +58,10 @@ export function maybeAddClientIdToValidationError( { validationError, source, cu
 /**
  * Custom hook managing state updates through effect hooks.
  *
- * Handling state through a context provider might be preferable in other circumstances, but in this case
- * using a store is necessary because React context is not passed down over slotfills, and we need multiple
- * components within multiple slotfills to have access to the same state.
+ * Handling state through a context provider might be preferable in other
+ * circumstances, but in this case using a store is necessary because React
+ * context is not passed down over slotfills, and we need multiple components
+ * within multiple slotfills to have access to the same state.
  */
 export function useValidationErrorStateUpdates() {
 	const [ blockOrderBeforeSave, setBlockOrderBeforeSave ] = useState( [] );
@@ -92,14 +93,20 @@ export function useValidationErrorStateUpdates() {
 		validationErrors: select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors(),
 	} ), [] );
 
-	// Set unmounted to true on unmount to prevent state updates after async functions.
+	/**
+	 * Set unmounted to true on unmount to prevent state updates after async
+	 * functions.
+	 */
 	useEffect( () => () => {
 		unmounted.current = true;
 	}, [] );
 
 	/**
-	 * Set flags when a post is being saved. Validation should not be triggered on autosaves
-	 * with an exception of an autosave initiated by a post preview request.
+	 * Set flags when a post is being saved.
+	 *
+	 * Validation should not be triggered on autosaves with an exception of an
+	 * autosave initiated by a post preview request (note that "Re-validate now"
+	 * button in the sidebar issues a post preview request).
 	 */
 	useEffect( () => {
 		if ( ! isSavingPost ) {
@@ -120,8 +127,8 @@ export function useValidationErrorStateUpdates() {
 	}, [ isAutosavingPost, isPreviewingPost, isSavingPost ] );
 
 	/**
-	 * Fetches validation errors for the current post's URL after the editor has loaded and following
-	 * subsequent saves.
+	 * Fetches validation errors for the current post's URL after the editor has
+	 * loaded and following subsequent saves.
 	 */
 	useEffect( () => {
 		if ( isSavingPost || ! shouldValidate ) {
@@ -162,7 +169,8 @@ export function useValidationErrorStateUpdates() {
 	}, [ currentPost.id, getClientIdsWithDescendants, hasRequestedPreview, isSavingPost, previewLink, setIsFetchingErrors, setReviewLink, setValidationErrors, shouldValidate ] );
 
 	/**
-	 * Runs an equality check when validation errors are received before running the heavier effect.
+	 * Runs an equality check when validation errors are received before running
+	 * the heavier effect.
 	 */
 	useEffect( () => {
 		if ( validationErrors && ! isEqual( previousValidationErrors, validationErrors ) ) {
@@ -170,7 +178,7 @@ export function useValidationErrorStateUpdates() {
 		}
 	}, [ previousValidationErrors, validationErrors ] );
 
-	/*
+	/**
 	 * Adds clientIds to the validation errors that are associated with blocks.
 	 */
 	useEffect( () => {
@@ -180,7 +188,10 @@ export function useValidationErrorStateUpdates() {
 			}
 
 			for ( const source of validationError.error.sources ) {
-				// The loop can finish if the validation error (which is passed by reference below) has obtained a clientId.
+				/**
+				 * The loop can finish if the validation error (which is passed
+				 * by reference below) has obtained a clientId.
+				 */
 				if ( 'clientId' in validationError ) {
 					break;
 				}
