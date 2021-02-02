@@ -606,12 +606,12 @@ abstract class AMP_Base_Sanitizer {
 
 				// Normalize string and number literals to prevent nonces, random numbers, and timestamps from generating endless number of validation errors.
 				$error['text'] = preg_replace(
-					'/"([^"\\\\]*+|\\\\(\\\\\\\\)*+.)+"/',
+					'/"([^"\n\\\\]|\\\\(\\\\\\\\)*+.)*"/s',
 					'__DOUBLE_QUOTED_STRING__',
 					$error['text']
 				);
 				$error['text'] = preg_replace(
-					'/\'([^\'\\\\]*+|\\\\(\\\\\\\\)*+.)+\'/',
+					'/\'([^\'\n\\\\]|\\\\(\\\\\\\\)*+.)*\'/s',
 					'__SINGLE_QUOTED_STRING__',
 					$error['text']
 				);
