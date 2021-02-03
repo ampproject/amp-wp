@@ -122,6 +122,7 @@
     "lint:css:fix": "npm run lint:css -- --fix",
     "lint:js": "wp-scripts lint-js",
     "lint:js:fix": "npm run lint:js -- --fix",
+    "lint:js:report": "npm run lint:js -- --output-file lint-js-report.json --format json .",
     "lint:php": "vendor/bin/phpcs",
     "lint:plugin-bootstrap": "vendor/bin/phpcs --runtime-set testVersion 5.2- amp.php",
     "lint:php:fix": "./bin/phpcbf.sh",
