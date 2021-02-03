@@ -426,6 +426,7 @@ jobs:
 
       - name: Run lib/optimizer tests
         run: |
+          echo "TEST_SKIP_PHPSTAN: $TEST_SKIP_PHPSTAN"
           export PATH="$(pwd)/vendor/bin:$PATH"
           composer --working-dir=lib/optimizer test
         env:
