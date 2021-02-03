@@ -48,7 +48,7 @@
     "@wordpress/blocks": "6.25.2",
     "@wordpress/browserslist-config": "3.0.0",
     "@wordpress/data": "4.26.2",
-    "@wordpress/dependency-extraction-webpack-plugin": "3.0.0",
+    "@wordpress/dependency-extraction-webpack-plugin": "3.0.1",
     "@wordpress/e2e-test-utils": "4.16.1",
     "@wordpress/edit-post": "3.26.2",
     "@wordpress/eslint-plugin": "8.0.0",
