@@ -336,7 +336,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: curl, date, dom, gd, iconv, json, libxml, mysql, spl
+          extensions: curl, date, dom, gd, iconv, json, libxml, mysql, spl, zip
           coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
           ini-values: pcov.directory=.
 
