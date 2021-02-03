@@ -49,13 +49,13 @@ if [[ $(php -r "echo PHP_VERSION;") == 8.0* ]]; then
 	DIFF=$(
 		cat <<-EOF
 diff --git a/composer.json b/composer.json
-index 5a150f830..f670267f8 100644
+index ba40f991b..a9ca6eb9c 100644
 --- a/composer.json
 +++ b/composer.json
 @@ -86,7 +86,17 @@
+       "tests/php/validation/"
      ],
      "files": [
-       "tests/php/register-wp-cli-commands.php",
 -      "docs/includes/register-wp-cli-commands.php"
 +      "docs/includes/register-wp-cli-commands.php",
 +      "${WP_TESTS_DIR}/includes/phpunit7/MockObject/Builder/NamespaceMatch.php",
@@ -70,7 +70,7 @@ index 5a150f830..f670267f8 100644
 +      "vendor/phpunit/phpunit/src/Framework/MockObject/MockMethod.php"
      ]
    },
-   "minimum-stability": "dev",
+   "repositories": [
 		EOF
 	)
 
