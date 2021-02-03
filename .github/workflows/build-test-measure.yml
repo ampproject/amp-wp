@@ -357,6 +357,7 @@ jobs:
 
       - name: Install Composer dependencies
         run: |
+          composer self-update --1
           composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
           composer --working-dir=lib/common install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
           composer --working-dir=lib/optimizer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
