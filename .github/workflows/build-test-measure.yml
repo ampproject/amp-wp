@@ -424,7 +424,7 @@ jobs:
         env:
           TEST_SKIP_PHPSTAN: ${{ matrix.php != '7.4' }}
 
-      - name: Run lib/common tests
+      - name: Run lib/optimizer tests
         run: |
           export PATH="$(pwd)/vendor/bin:$PATH"
           composer --working-dir=lib/optimizer test
