@@ -21,7 +21,6 @@ parameters:
 	autoload_files:
 		- %currentWorkingDirectory%/tests/php/static-analysis-stubs/wordpress-defines.php
 		- %currentWorkingDirectory%/vendor/php-stubs/wordpress-stubs/wordpress-stubs.php
-		- %currentWorkingDirectory%/tests/php/static-analysis-stubs/php-cli-tools.php
 		- %currentWorkingDirectory%/tests/php/static-analysis-stubs/wp-cli.php
 		- %currentWorkingDirectory%/tests/php/static-analysis-stubs/pwa.php
 		- %currentWorkingDirectory%/tests/php/static-analysis-stubs/twentyseventeen.php
