@@ -22,14 +22,14 @@ abstract class RecurringBackgroundTask extends CronBasedBackgroundTask {
 	public function register() {
 		parent::register();
 
-		add_action( 'admin_init', [ $this, 'schedule_event' ] );
+		add_action( 'admin_init', [ $this, 'schedule_event' ], 10, 0 );
 		add_action( $this->get_event_name(), [ $this, 'process' ] );
 	}
 
 	/**
 	 * Schedule the event.
 	 *
-	 * @param mixed[] ...$args Arguments passed to the function from the action hook.
+	 * @param mixed[] ...$args Arguments passed to the function from the action hook, which here is empty always since add_action().
 	 */
 	final public function schedule_event( ...$args ) {
 		if ( ! is_user_logged_in() ) {
