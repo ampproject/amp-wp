@@ -416,6 +416,7 @@ jobs:
       - name: Run tests
         if: ${{ matrix.coverage == false }}
         run: |
+          export PATH="$(pwd)/vendor/bin:$PATH"
           vendor/bin/phpunit
           composer --working-dir=lib/common test
           composer --working-dir=lib/optimizer test
