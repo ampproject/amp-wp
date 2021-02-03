@@ -109,7 +109,9 @@ jobs:
             ${{ runner.os }}-composer-
 
       - name: Install Composer dependencies
-        run: composer install --prefer-dist --optimize-autoloader --no-progress --no-interaction
+        run: |
+          composer self-update --1
+          composer install --prefer-dist --optimize-autoloader --no-progress --no-interaction
 
       - name: Validate composer.json
         run: composer --no-interaction validate --no-check-all
@@ -151,7 +153,9 @@ jobs:
             ${{ runner.os }}-composer-
 
       - name: Install Composer dependencies
-        run: composer install
+        run: |
+          composer self-update --1
+          composer install
 
       - name: Static Analysis (PHPStan)
         run: vendor/bin/phpstan analyse
@@ -239,7 +243,9 @@ jobs:
           CI: true
 
       - name: Install Composer dependencies
-        run: composer install --prefer-dist --optimize-autoloader --no-progress --no-interaction
+        run: |
+          composer self-update --1
+          composer install --prefer-dist --optimize-autoloader --no-progress --no-interaction
 
       - name: Build plugin
         run: |
@@ -472,7 +478,9 @@ jobs:
       - name: Install Composer dependencies
         # Scripts are not ignored as they are needed to apply patches for the
         # `sabberworm/php-css-parser` dependency.
-        run: composer install --prefer-dist --optimize-autoloader
+        run: |
+          composer self-update --1
+          composer install --prefer-dist --optimize-autoloader
 
       - name: Get npm cache directory
         id: npm-cache
