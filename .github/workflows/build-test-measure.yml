@@ -415,11 +415,21 @@ jobs:
 
       - name: Run tests
         if: ${{ matrix.coverage == false }}
+        run: vendor/bin/phpunit
+
+      - name: Run lib/common tests
         run: |
           export PATH="$(pwd)/vendor/bin:$PATH"
-          vendor/bin/phpunit
           composer --working-dir=lib/common test
+        env:
+          TEST_SKIP_PHPSTAN: ${{ matrix.php != '7.4' }}
+
+      - name: Run lib/common tests
+        run: |
+          export PATH="$(pwd)/vendor/bin:$PATH"
           composer --working-dir=lib/optimizer test
+        env:
+          TEST_SKIP_PHPSTAN: ${{ matrix.php != '7.4' }}
 
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
 
