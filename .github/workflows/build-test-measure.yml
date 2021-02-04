@@ -415,9 +415,11 @@ jobs:
 
       - name: Run tests
         if: ${{ matrix.coverage == false }}
+        working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
         run: vendor/bin/phpunit
 
       - name: Run lib/common tests
+        working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
         run: |
           export PATH="$(pwd)/vendor/bin:$PATH"
           composer --working-dir=lib/common test
@@ -425,14 +427,13 @@ jobs:
           TEST_SKIP_PHPSTAN: ${{ matrix.php != '7.4' }}
 
       - name: Run lib/optimizer tests
+        working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
         run: |
           echo "TEST_SKIP_PHPSTAN: $TEST_SKIP_PHPSTAN"
           export PATH="$(pwd)/vendor/bin:$PATH"
           composer --working-dir=lib/optimizer test
         env:
           TEST_SKIP_PHPSTAN: ${{ matrix.php != '7.4' }}
-
-        working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
 
       - name: Run tests with coverage
         if: ${{ matrix.coverage == true }}
