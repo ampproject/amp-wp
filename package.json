@@ -31,7 +31,7 @@
     "@wordpress/html-entities": "2.10.0",
     "@wordpress/i18n": "3.17.0",
     "@wordpress/icons": "2.9.1",
-    "@wordpress/is-shallow-equal": "3.0.0",
+    "@wordpress/is-shallow-equal": "3.0.1",
     "@wordpress/url": "2.21.2",
     "classnames": "2.2.6",
     "clipboard": "2.0.6",
