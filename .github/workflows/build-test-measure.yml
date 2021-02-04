@@ -94,7 +94,7 @@ jobs:
         with:
           php-version: '7.4'
           coverage: none
-          tools: cs2pr
+          tools: cs2pr, composer:v1
 
       - name: Get Composer Cache Directory
         id: composer-cache
@@ -110,7 +110,6 @@ jobs:
 
       - name: Install Composer dependencies
         run: |
-          composer self-update --1
           composer install --prefer-dist --optimize-autoloader --no-progress --no-interaction
 
       - name: Validate composer.json
@@ -139,6 +138,7 @@ jobs:
           # phpstan requires PHP 7.1+.
           php-version: 7.4
           extensions: dom, iconv, json, libxml, zip
+          tools: composer:v1
 
       - name: Get Composer Cache Directory
         id: composer-cache
@@ -154,7 +154,6 @@ jobs:
 
       - name: Install Composer dependencies
         run: |
-          composer self-update --1
           composer install
 
       - name: Static Analysis (PHPStan)
@@ -212,6 +211,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '7.4'
+          tools: composer:v1
 
       - name: Get Composer Cache Directory
         id: composer-cache
@@ -244,7 +244,6 @@ jobs:
 
       - name: Install Composer dependencies
         run: |
-          composer self-update --1
           composer install --prefer-dist --optimize-autoloader --no-progress --no-interaction
 
       - name: Build plugin
@@ -339,6 +338,7 @@ jobs:
           extensions: curl, date, dom, gd, iconv, json, libxml, mysql, spl, zip
           coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
           ini-values: pcov.directory=.
+          tools: composer:v1
 
       - name: Shutdown default MySQL service
         run: sudo service mysql stop
@@ -363,7 +363,6 @@ jobs:
 
       - name: Install Composer dependencies
         run: |
-          composer self-update --1
           composer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
           composer --working-dir=lib/common install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
           composer --working-dir=lib/optimizer install --prefer-dist --ignore-platform-reqs --no-progress --no-interaction
@@ -504,6 +503,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '7.4'
+          tools: composer:v1
 
       - name: Get Composer Cache Directory
         id: composer-cache
@@ -522,7 +522,6 @@ jobs:
         # Scripts are not ignored as they are needed to apply patches for the
         # `sabberworm/php-css-parser` dependency.
         run: |
-          composer self-update --1
           composer install --prefer-dist --optimize-autoloader
 
       - name: Get npm cache directory
