@@ -418,22 +418,29 @@ jobs:
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
         run: vendor/bin/phpunit
 
-      - name: Run lib/common tests
+      - name: Run lib/common and lib/optimizer tests
+        if: ${{ matrix.coverage == false }}
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
         run: |
           export PATH="$(pwd)/vendor/bin:$PATH"
-          composer --working-dir=lib/common test
-        env:
-          TEST_SKIP_PHPSTAN: ${{ matrix.php != '7.4' }}
+          echo "Common tests"
+          composer --working-dir=lib/common run-script unit
+          echo "Optimizer tests"
+          composer --working-dir=lib/optimizer run-script unit
 
-      - name: Run lib/optimizer tests
+      - name: Run lib/common and lib/optimizer linting
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
+        if: ${{ matrix.php == '7.4' }}
         run: |
-          echo "TEST_SKIP_PHPSTAN: $TEST_SKIP_PHPSTAN"
           export PATH="$(pwd)/vendor/bin:$PATH"
-          composer --working-dir=lib/optimizer test
-        env:
-          TEST_SKIP_PHPSTAN: ${{ matrix.php != '7.4' }}
+          echo "Linting lib/common"
+          composer --working-dir=lib/common run-script lint
+          composer --working-dir=lib/common run-script cs
+          composer --working-dir=lib/common run-script analyze
+          echo "Linting lib/optimizer"
+          composer --working-dir=lib/optimizer run-script lint
+          composer --working-dir=lib/optimizer run-script cs
+          composer --working-dir=lib/optimizer run-script analyze
 
       - name: Run tests with coverage
         if: ${{ matrix.coverage == true }}
