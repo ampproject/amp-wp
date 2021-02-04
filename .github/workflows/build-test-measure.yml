@@ -450,6 +450,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           extensions: dom, iconv, json, libxml
+          tools: phpunit:5.7.27
 
       - name: Get Composer Cache Directory
         id: composer-libs-cache
