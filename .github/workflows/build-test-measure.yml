@@ -449,8 +449,8 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: dom, iconv, json, libxml
-          tools: phpunit:5.7.27
+          extensions: dom, iconv, json, libxml, zip
+          tools: phpunit:5.7.27, composer:v1
 
       - name: Get Composer Cache Directory
         id: composer-libs-cache
@@ -466,7 +466,6 @@ jobs:
 
       - name: Install Composer dependencies
         run: |
-          composer self-update --1
           composer --working-dir=lib/common install
           composer --working-dir=lib/optimizer install
 
