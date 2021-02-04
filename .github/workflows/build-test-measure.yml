@@ -418,30 +418,6 @@ jobs:
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
         run: vendor/bin/phpunit
 
-      - name: Run lib/common and lib/optimizer tests
-        if: ${{ matrix.coverage == false }}
-        working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
-        run: |
-          export PATH="$(pwd)/vendor/bin:$PATH"
-          echo "Common tests"
-          composer --working-dir=lib/common run-script unit
-          echo "Optimizer tests"
-          composer --working-dir=lib/optimizer run-script unit
-
-      - name: Run lib/common and lib/optimizer linting
-        working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
-        if: ${{ matrix.php == '7.4' }}
-        run: |
-          export PATH="$(pwd)/vendor/bin:$PATH"
-          echo "Linting lib/common"
-          composer --working-dir=lib/common run-script lint
-          composer --working-dir=lib/common run-script cs
-          composer --working-dir=lib/common run-script analyze
-          echo "Linting lib/optimizer"
-          composer --working-dir=lib/optimizer run-script lint
-          composer --working-dir=lib/optimizer run-script cs
-          composer --working-dir=lib/optimizer run-script analyze
-
       - name: Run tests with coverage
         if: ${{ matrix.coverage == true }}
         run: |
@@ -453,6 +429,53 @@ jobs:
         if: ${{ matrix.external-http == true }}
         run: vendor/bin/phpunit --testsuite external-http
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/amp
+
+#-----------------------------------------------------------------------------------------------------------------------
+
+  test-libs:
+    name: "Library tests: PHP ${{ matrix.php }}"
+    runs-on: ubuntu-latest
+    env:
+      TEST_SKIP_PHPSTAN: ${{ matrix.php != '7.4' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['5.6', '7.4']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, iconv, json, libxml
+
+      - name: Get Composer Cache Directory
+        id: composer-libs-cache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Configure Composer cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.composer-libs-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-libs-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-libs-
+
+      - name: Install Composer dependencies
+        run: |
+          composer self-update --1
+          composer --working-dir=lib/common install
+          composer --working-dir=lib/optimizer install
+
+      - name: Run lib/common tests
+        run: |
+          composer --working-dir=lib/common test
+
+      - name: Run lib/optimizer tests
+        run: |
+          composer --working-dir=lib/optimizer test
 
 #-----------------------------------------------------------------------------------------------------------------------
 
