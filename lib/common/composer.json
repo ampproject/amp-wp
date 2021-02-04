@@ -53,9 +53,9 @@
     "lint": "if [ -z $TEST_SKIP_LINTING ]; then parallel-lint -j 10 --colors --exclude vendor .; fi",
     "test": [
       "@lint",
-      "@unit",
       "@cs",
-      "@analyze"
+      "@analyze",
+      "@unit"
     ],
     "analyze": "if [ -z $TEST_SKIP_PHPSTAN ]; then phpstan --version; phpstan analyze --ansi; fi",
     "unit": "if [ -z $TEST_SKIP_PHPUNIT ]; then phpunit --colors=always; fi"
