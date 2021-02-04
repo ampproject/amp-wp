@@ -218,7 +218,9 @@ final class Amp
             return $node->getAttribute(Attribute::HOST_SERVICE);
         }
 
-        self::bad();
+        if (false) {
+            self::bad();
+        }
 
         return '';
     }
