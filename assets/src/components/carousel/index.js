@@ -103,6 +103,7 @@ export function Carousel( {
 		setPageWidth( carouselListRef?.current?.clientWidth || 0 );
 	}, [ items.length, windowWidth ] );
 
+	const showCarouselNav = currentPage && items.length > 1;
 	const centeredItemIndex = [ ...( carouselListRef.current?.children || [] ) ].indexOf( currentPage );
 	const nextButtonDisabled = centeredItemIndex >= items.length - 1;
 	const prevButtonDisabled = centeredItemIndex <= 0;
@@ -124,7 +125,7 @@ export function Carousel( {
 					) ) }
 				</ul>
 			</div>
-			{ currentPage && (
+			{ showCarouselNav && (
 				<CarouselNav
 					currentPage={ currentPage }
 					centeredItemIndex={ centeredItemIndex }
