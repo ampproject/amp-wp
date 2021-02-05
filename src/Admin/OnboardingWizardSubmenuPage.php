@@ -9,13 +9,11 @@
 namespace AmpProject\AmpWP\Admin;
 
 use AMP_Options_Manager;
-use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Services;
 
