@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { USING_FALLBACK_READER_THEME, LEGACY_THEME_SLUG } from 'amp-settings';
+import { AMP_QUERY_VAR_CUSTOMIZED_LATE, USING_FALLBACK_READER_THEME, LEGACY_THEME_SLUG } from 'amp-settings';
 
 /**
  * Internal dependencies
@@ -222,18 +222,40 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 		return { filteredThemes: newFilteredThemes };
 	}, [ hideCurrentlyActiveTheme, themes ] );
 
+	/**
+	 * Separate available themes (both installed and installable) from those
+	 * that need to be installed manually.
+	 */
+	const { availableThemes, unavailableThemes } = useMemo(
+		() => ( filteredThemes || [] ).reduce(
+			( collections, theme ) => {
+				if ( ( AMP_QUERY_VAR_CUSTOMIZED_LATE && theme.slug !== LEGACY_THEME_SLUG ) || theme.availability === 'non-installable' ) {
+					collections.unavailableThemes.push( theme );
+				} else {
+					collections.availableThemes.push( theme );
+				}
+
+				return collections;
+			},
+			{ availableThemes: [], unavailableThemes: [] },
+		),
+		[ filteredThemes ],
+	);
+
 	return (
 		<ReaderThemes.Provider
 			value={
 				{
+					availableThemes,
 					currentTheme,
 					downloadedTheme,
 					downloadingTheme,
 					downloadingThemeError,
 					fetchingThemes,
-					themes: filteredThemes,
 					selectedTheme: selectedTheme || {},
+					themes: filteredThemes,
 					themesAPIError,
+					unavailableThemes,
 				}
 			}
 		>

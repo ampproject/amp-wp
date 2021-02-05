@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { AMP_QUERY_VAR, DEFAULT_AMP_QUERY_VAR, LEGACY_THEME_SLUG, AMP_QUERY_VAR_CUSTOMIZED_LATE } from 'amp-settings'; // From WP inline script.
+import { AMP_QUERY_VAR, DEFAULT_AMP_QUERY_VAR, AMP_QUERY_VAR_CUSTOMIZED_LATE } from 'amp-settings'; // From WP inline script.
 
 /**
  * WordPress dependencies
@@ -37,29 +37,11 @@ export function ReaderThemeCarousel() {
 	 */
 
 	/** @type {Theme[]} themes */
-	const { currentTheme, fetchingThemes, selectedTheme, themes } = useContext( ReaderThemes );
+	const { availableThemes, currentTheme, fetchingThemes, selectedTheme, themes, unavailableThemes } = useContext( ReaderThemes );
 	const [ includeUnavailableThemes, setIncludeUnavailableThemes ] = useState( false );
 
-	// Separate available themes (both installed and installable) from those that need to be installed manually.
-	const { hasUnavailableThemes, shownThemes } = useMemo(
-		() => ( themes || [] )
-			.reduce(
-				( collection, theme ) => {
-					if ( ( AMP_QUERY_VAR_CUSTOMIZED_LATE && theme.slug !== LEGACY_THEME_SLUG ) || theme.availability === 'non-installable' ) {
-						collection.hasUnavailableThemes = true;
-						if ( includeUnavailableThemes ) {
-							collection.shownThemes.push( theme );
-						}
-					} else {
-						collection.shownThemes.push( theme );
-					}
-
-					return collection;
-				},
-				{ shownThemes: [], hasUnavailableThemes: false },
-			),
-		[ includeUnavailableThemes, themes ],
-	);
+	const hasUnavailableThemes = unavailableThemes.length > 0;
+	const shownThemes = includeUnavailableThemes ? themes : availableThemes;
 
 	const isMobile = windowWidth < DEFAULT_MOBILE_BREAKPOINT;
 
@@ -74,7 +56,7 @@ export function ReaderThemeCarousel() {
 							name: theme.slug,
 							Item: () => (
 								<ThemeCard
-									disabled={ 'non-installable' === theme.availability }
+									disabled={ unavailableThemes.includes( theme ) }
 									ElementName="div"
 									screenshotUrl={ theme.screenshot_url }
 									{ ...theme }
@@ -106,7 +88,7 @@ export function ReaderThemeCarousel() {
 									return (
 										<ThemeCard
 											key={ `theme-card-${ theme.slug }` }
-											disabled={ 'non-installable' === theme.availability }
+											disabled={ unavailableThemes.includes( theme ) }
 											ElementName="div"
 											screenshotUrl={ theme.screenshot_url }
 											{ ...theme }
@@ -119,7 +101,7 @@ export function ReaderThemeCarousel() {
 				}
 			) );
 		},
-		[ isMobile, shownThemes ],
+		[ isMobile, shownThemes, unavailableThemes ],
 	);
 
 	const highlightedItemIndex = useMemo(
