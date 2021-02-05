@@ -13,7 +13,6 @@ use AMP_Theme_Support;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Services;
 
 /**
