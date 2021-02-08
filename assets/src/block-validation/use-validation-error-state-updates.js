@@ -84,7 +84,6 @@ export function useValidationErrorStateUpdates() {
 	} = useSelect( ( select ) => ( {
 		currentPostId: select( 'core/editor' ).getCurrentPostId(),
 		getBlock: select( 'core/block-editor' ).getBlock,
-		getBlocks: select( 'core/block-editor' ).getBlocks(),
 		getClientIdsWithDescendants: select( 'core/block-editor' ).getClientIdsWithDescendants,
 		isAutosavingPost: select( 'core/editor' ).isAutosavingPost(),
 		isPreviewingPost: select( 'core/editor' ).isPreviewingPost(),
