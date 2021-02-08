@@ -9,7 +9,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
  */
 import { BLOCK_VALIDATION_STORE_KEY } from './store';
 
-export function usePostDirtinessChanges() {
+export function usePostDirtyStateChanges() {
 	const [ content, setContent ] = useState();
 	const [ previousContent, setPreviousContent ] = useState();
 	const [ shouldUpdatePreviousContent, setShouldUpdatePreviousContent ] = useState( true );
