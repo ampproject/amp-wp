@@ -73,7 +73,7 @@ export function useValidationErrorStateUpdates() {
 	const { setIsFetchingErrors, setReviewLink, setValidationErrors } = useDispatch( BLOCK_VALIDATION_STORE_KEY );
 
 	const {
-		currentPost,
+		currentPostId,
 		getBlock,
 		getClientIdsWithDescendants,
 		isAutosavingPost,
@@ -82,10 +82,10 @@ export function useValidationErrorStateUpdates() {
 		previewLink,
 		validationErrors,
 	} = useSelect( ( select ) => ( {
-		getClientIdsWithDescendants: select( 'core/block-editor' ).getClientIdsWithDescendants,
-		currentPost: select( 'core/editor' ).getCurrentPost(),
+		currentPostId: select( 'core/editor' ).getCurrentPostId(),
 		getBlock: select( 'core/block-editor' ).getBlock,
 		getBlocks: select( 'core/block-editor' ).getBlocks(),
+		getClientIdsWithDescendants: select( 'core/block-editor' ).getClientIdsWithDescendants,
 		isAutosavingPost: select( 'core/editor' ).isAutosavingPost(),
 		isPreviewingPost: select( 'core/editor' ).isPreviewingPost(),
 		isSavingPost: select( 'core/editor' ).isSavingPost(),
@@ -155,7 +155,7 @@ export function useValidationErrorStateUpdates() {
 			setHasRequestedPreview( false );
 
 			const newValidation = await apiFetch( {
-				path: addQueryArgs( `/amp/v1/validate-post-url/${ currentPost.id }`, queryArgs ),
+				path: addQueryArgs( `/amp/v1/validate-post-url/${ currentPostId }`, queryArgs ),
 			} );
 
 			if ( true === unmounted.current ) {
@@ -166,7 +166,7 @@ export function useValidationErrorStateUpdates() {
 			setReviewLink( newValidation.review_link );
 			setIsFetchingErrors( false );
 		} )();
-	}, [ currentPost.id, getClientIdsWithDescendants, hasRequestedPreview, isSavingPost, previewLink, setIsFetchingErrors, setReviewLink, setValidationErrors, shouldValidate ] );
+	}, [ currentPostId, getClientIdsWithDescendants, hasRequestedPreview, isSavingPost, previewLink, setIsFetchingErrors, setReviewLink, setValidationErrors, shouldValidate ] );
 
 	/**
 	 * Runs an equality check when validation errors are received before running
@@ -201,7 +201,7 @@ export function useValidationErrorStateUpdates() {
 					source,
 					getBlock,
 					blockOrder: 0 < blockOrderBeforeSave.length ? blockOrderBeforeSave : getClientIdsWithDescendants(), // blockOrderBeforeSave may be empty on initial load.
-					currentPostId: currentPost.id,
+					currentPostId,
 				} );
 			}
 
@@ -209,5 +209,5 @@ export function useValidationErrorStateUpdates() {
 		} );
 
 		setValidationErrors( newValidationErrors );
-	}, [ blockOrderBeforeSave, currentPost.id, getBlock, getClientIdsWithDescendants, setValidationErrors, previousValidationErrors ] );
+	}, [ blockOrderBeforeSave, currentPostId, getBlock, getClientIdsWithDescendants, setValidationErrors, previousValidationErrors ] );
 }
