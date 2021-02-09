@@ -1,28 +1,22 @@
 /**
  * WordPress dependencies
  */
-import { useEffect, useState } from '@wordpress/element';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useDebounce } from '@wordpress/compose';
+import { useEffect, useState, useCallback, useRef } from '@wordpress/element';
+import { subscribe, useDispatch, useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import { BLOCK_VALIDATION_STORE_KEY } from './store';
 
+const DELAY_MS = 500;
+
 export function usePostDirtyStateChanges() {
 	const [ content, setContent ] = useState();
-	const [ previousContent, setPreviousContent ] = useState();
-	const [ shouldUpdatePreviousContent, setShouldUpdatePreviousContent ] = useState( true );
-
+	const subscription = useRef( null );
 	const { setIsPostDirty } = useDispatch( BLOCK_VALIDATION_STORE_KEY );
-
-	const {
-		blocks,
-		getEditedPostContent,
-		isPostDirty,
-		isSavingOrPreviewingPost,
-	} = useSelect( ( select ) => ( {
-		blocks: select( 'core/editor' ).getBlocks(),
+	const { getEditedPostContent, isPostDirty, isSavingOrPreviewingPost } = useSelect( ( select ) => ( {
 		getEditedPostContent: select( 'core/editor' ).getEditedPostContent,
 		isPostDirty: select( BLOCK_VALIDATION_STORE_KEY ).getIsPostDirty(),
 		isSavingOrPreviewingPost:
@@ -30,44 +24,60 @@ export function usePostDirtyStateChanges() {
 			select( 'core/editor' ).isPreviewingPost(),
 	} ), [] );
 
+	const maybeCancelSubscription = () => {
+		if ( subscription.current ) {
+			subscription.current();
+			subscription.current = null;
+		}
+	};
+
 	/**
-	 * Getting content is expensive, so we update it only if blocks list
-	 * or the dirtiness state change.
+	 * Post is no longer in a dirty state after save.
+	 *
+	 * We're using a separate effect for resetting the flag since the listener
+	 * gets unsubscribed from the store changes whenever post gets into a dirty
+	 * state.
+	 *
+	 * The following effect (indirectly) resubscribes the listener once the post
+	 * is no longer in a dirty state.
 	 */
 	useEffect( () => {
-		if ( ! isPostDirty ) {
-			setContent( getEditedPostContent() );
+		if ( isPostDirty && isSavingOrPreviewingPost ) {
+			setIsPostDirty( false );
 		}
-	}, [ blocks, getEditedPostContent, isPostDirty ] );
+	}, [ isPostDirty, isSavingOrPreviewingPost, setIsPostDirty ] );
 
+	/**
+	 * Whenever a fresh post content differs from the one that is stored in the
+	 * state, it's safe to assume that the post is in a dirty state.
+	 */
+	const listener = useCallback( () => {
+		const updatedContent = getEditedPostContent();
+
+		if ( content && updatedContent !== content ) {
+			setIsPostDirty( true );
+		}
+
+		setContent( updatedContent );
+	}, [ content, getEditedPostContent, setIsPostDirty ] );
+
+	/**
+	 * Debounce calls to the store listener for performance reasons.
+	 */
+	const debouncedListener = useDebounce( listener, DELAY_MS );
+
+	/**
+	 * Only subscribe to the store changes if the post is not in a dirty state.
+	 */
 	useEffect( () => {
-		if ( isSavingOrPreviewingPost ) {
-			if ( isPostDirty ) {
-				setShouldUpdatePreviousContent( true );
-				setIsPostDirty( false );
+		if ( ! isSavingOrPreviewingPost ) {
+			if ( isPostDirty && subscription.current ) {
+				maybeCancelSubscription();
+			} else if ( ! isPostDirty && ! subscription.current ) {
+				subscription.current = subscribe( debouncedListener );
 			}
-
-			return;
 		}
 
-		if ( shouldUpdatePreviousContent ) {
-			setPreviousContent( getEditedPostContent() );
-			setShouldUpdatePreviousContent( false );
-			return;
-		}
-
-		if ( isPostDirty ) {
-			return;
-		}
-
-		/**
-		 * Post is not considered dirty if there is no content or the content
-		 * didn't change.
-		 */
-		if ( ( ! previousContent && ! content ) || ( previousContent === content ) ) {
-			return;
-		}
-
-		setIsPostDirty( true );
-	}, [ content, getEditedPostContent, isPostDirty, isSavingOrPreviewingPost, previousContent, setIsPostDirty, shouldUpdatePreviousContent ] );
+		return maybeCancelSubscription;
+	}, [ debouncedListener, isPostDirty, isSavingOrPreviewingPost ] );
 }
