@@ -537,10 +537,10 @@ final class PairedRouting implements Service, Registerable {
 	 * When paired AMP URLs end in /amp/, on the blog index page a call to `the_posts_pagination()` will result in
 	 * unexpected links being added to the page. For example, `get_pagenum_link(2)` will result in `/blog/amp/page/2/`
 	 * instead of the expected `/blog/page/2/amp/`. And then, when on the 2nd page of results (`/blog/page/2/amp/`), a
-	 * call to `get_pagenum_link(3)` will result in an even more unexpected result of `/blog/page/2/amp/page/3/`
+	 * call to `get_pagenum_link(3)` will result in an even more unexpected link pointing to `/blog/page/2/amp/page/3/`
 	 * instead of `/blog/page/3/amp/`, whereas `get_pagenum_link(1)` will return `/blog/page/2/amp/` as opposed to the
 	 * expected `/blog/amp/`. Note that `get_pagenum_link()` is used as the `base` for `paginate_links()` in
-	 * `the_posts_pagination()`, and it uses as its base `remove_query_arg('paged')` which returns the `REQUEST_URI`.
+	 * `get_the_posts_pagination()`, and it uses as its base `remove_query_arg('paged')` which returns the `REQUEST_URI`.
 	 *
 	 * @see get_pagenum_link()
 	 * @see get_the_posts_pagination()
@@ -559,8 +559,8 @@ final class PairedRouting implements Service, Registerable {
 		$delimiter = ':';
 		$pattern   = $delimiter;
 
-		// If the current page is a paged request, then we need to first strip that out from the link.
-		if ( get_query_var( 'paged' ) ) {
+		// If the current page is a paged request (e.g. /page/2/), then we need to first strip that out from the link.
+		if ( is_paged() ) {
 			$pattern .= sprintf(
 				'/%s/%d',
 				preg_quote( $wp_rewrite->pagination_base, $delimiter ),
@@ -568,7 +568,11 @@ final class PairedRouting implements Service, Registerable {
 			);
 		}
 
-		// Now we remove the AMP path segment followed by the paged segments, if they are present.
+		// Now we remove the AMP path segment followed by any additional paged path segments, if they are present.
+		// This matches paths like:
+		// * /blog/amp/
+		// * /blog/amp/page/2/
+		// As well as allowing for the lack of a trailing slash and/or the presence of query args and/or a hash target.
 		$pattern .= sprintf(
 			'/%s((/%s/\d+)?/?(\?.*?)?(#.*)?)$',
 			preg_quote( amp_get_slug(), ':' ),
