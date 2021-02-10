@@ -474,7 +474,6 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 			$this->assertFalse( has_filter( 'get_pagenum_link', [ $this->instance, 'filter_get_pagenum_link' ] ) );
 		}
 		$this->assertFalse( has_action( 'wp_head', 'amp_add_amphtml_link' ) );
-		$this->assertEquals( $using_path_suffix, $this->instance->is_using_path_suffix() );
 	}
 
 	/** @covers ::add_paired_request_hooks() */
