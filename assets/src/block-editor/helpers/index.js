@@ -3,6 +3,7 @@
  */
 import PropTypes from 'prop-types';
 import { ReactElement } from 'react';
+import { isObject, isString } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -11,7 +12,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { SelectControl, ToggleControl, Notice, PanelBody } from '@wordpress/components';
 import { InspectorControls } from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
-import { cloneElement } from '@wordpress/element';
+import { cloneElement, isValidElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -89,6 +90,10 @@ const ampLayoutOptions = [
  * @return {Object} Modified block settings.
  */
 export const addAMPAttributes = ( settings, name ) => {
+	if ( ! isObject( settings ) || ! isString( name ) ) {
+		return settings;
+	}
+
 	// AMP Carousel settings.
 	if ( 'core/gallery' === name ) {
 		if ( ! settings.attributes ) {
@@ -139,6 +144,10 @@ export const addAMPAttributes = ( settings, name ) => {
  * @return {Object} Modified block settings.
  */
 export const removeAmpFitTextFromBlocks = ( settings, name ) => {
+	if ( ! isObject( settings ) || ! isString( name ) ) {
+		return settings;
+	}
+
 	if ( TEXT_BLOCKS.includes( name ) ) {
 		if ( ! settings.deprecated ) {
 			settings.deprecated = [];
@@ -220,7 +229,7 @@ export const removeAmpFitTextFromBlocks = ( settings, name ) => {
  * @return {ReactElement} Modified block if it is of `amp-fit-text` type, otherwise the  original element is returned.
  */
 export const removeClassFromAmpFitTextBlocks = ( element ) => {
-	if ( 'amp-fit-text' === element.type && undefined !== element.props.className ) {
+	if ( isValidElement( element ) && 'amp-fit-text' === element.type && undefined !== element.props.className ) {
 		const { className, ...props } = element.props;
 		props.className = null;
 		element = cloneElement( element, props );
@@ -266,6 +275,10 @@ export const getLayoutOptions = ( block ) => {
  * @return {Function} Edit function.
  */
 export const filterBlocksEdit = ( BlockEdit ) => {
+	if ( ! isObject( BlockEdit ) ) {
+		return BlockEdit;
+	}
+
 	const EnhancedBlockEdit = function( props ) {
 		const { attributes: { ampLayout }, name } = props;
 

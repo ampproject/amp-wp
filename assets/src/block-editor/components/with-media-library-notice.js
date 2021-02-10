@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { isObject } from 'lodash';
+
+/**
  * WordPress dependencies
  */
 import { dispatch } from '@wordpress/data';
@@ -21,6 +26,10 @@ const { wp } = window;
  * @return {Function} The wrapped component.
  */
 export default ( InitialMediaUpload, minImageDimensions ) => {
+	if ( ! isObject( InitialMediaUpload ) ) {
+		return InitialMediaUpload;
+	}
+
 	const { width: EXPECTED_WIDTH, height: EXPECTED_HEIGHT } = minImageDimensions;
 
 	/**

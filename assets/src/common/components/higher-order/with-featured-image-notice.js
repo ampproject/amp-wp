@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { isObject } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -23,6 +24,10 @@ import { validateFeaturedImage, getMinimumFeaturedImageDimensions } from '../../
  */
 export default createHigherOrderComponent(
 	( PostFeaturedImage ) => {
+		if ( ! isObject( PostFeaturedImage ) ) {
+			return PostFeaturedImage;
+		}
+
 		const withFeaturedImageNotice = ( props ) => {
 			const { media } = props;
 
