@@ -157,20 +157,21 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 				'wp-i18n',
 				'wp-plugins',
 				'wp-polyfill',
-				'wp-url',
 			],
 			$block_script->deps
 		);
 		$this->assertEquals( AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE, $block_script->handle );
 		$this->assertEquals( amp_get_asset_url( 'js/' . AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE . '.js' ), $block_script->src );
+
 		/**
 		 * @since 2.0.9
 		 * Values are now loaded using wp_inline_script()
 		 */
-		$data = $block_script->extra['before'][1];
-		$this->assertContains( 'ampBlockEditor', $data );
+		$before = implode( '', $block_script->extra['before'] );
+		$this->assertContains( 'ampBlockEditor', $before );
 		$expected_localized_values = [
-			'ampSlug',
+			'ampUrl',
+			'ampPreviewLink',
 			'errorMessages',
 			'hasThemeSupport',
 			'isStandardMode',
@@ -179,7 +180,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		];
 
 		foreach ( $expected_localized_values as $localized_value ) {
-			$this->assertContains( $localized_value, $data );
+			$this->assertContains( $localized_value, $before );
 		}
 		unset( $GLOBALS['post'], $GLOBALS['current_screen'] );
 	}
@@ -508,5 +509,31 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$this->assertNull( $this->instance->update_amp_enabled_rest_field( false, $post ) );
 
 		$this->assertEquals( AMP_Post_Meta_Box::DISABLED_STATUS, get_post_meta( $post->ID, AMP_Post_Meta_Box::STATUS_POST_META_KEY, true ) );
+	}
+
+	/** @covers ::get_amp_blocks_in_use() */
+	public function test_get_amp_blocks_in_use() {
+		global $post;
+
+		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
+			$this->markTestSkipped();
+		}
+
+		$post = self::factory()->post->create_and_get(
+			[
+				'post_content' => '
+					<!-- wp:amp/amp-mathml -->
+					<amp-mathml data-formula="$$ \cos(θ+φ)=\cos(θ)\cos(φ)−\sin(θ)\sin(φ) $$" layout="container" class="wp-block-amp-amp-mathml"></amp-mathml>
+					<!-- /wp:amp/amp-mathml -->
+
+					<!-- wp:amp/amp-timeago -->
+					<amp-timeago layout="fixed-height" class="wp-block-amp-amp-timeago alignnone" datetime="2020-11-02T15:43:00+00:00" locale="en" height="20">Monday 2 November 15:43</amp-timeago>
+					<!-- /wp:amp/amp-timeago -->
+				',
+			]
+		);
+
+		$result = $this->instance->get_amp_blocks_in_use();
+		$this->assertEquals( [ 'amp/amp-mathml', 'amp/amp-timeago' ], $result );
 	}
 }

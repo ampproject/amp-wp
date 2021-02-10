@@ -11,6 +11,7 @@ exports[`Nav matches snapshot 1`] = `
       className="amp-settings-nav__close"
     >
       <a
+        aria-describedby={null}
         className="components-button is-link"
         href="http://site.test/wp-admin"
       >
@@ -60,6 +61,7 @@ exports[`Nav matches snapshot 1`] = `
          
       </span>
       <button
+        aria-describedby={null}
         className="components-button is-primary"
         disabled={false}
         id="next-button"

@@ -5,9 +5,7 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Icon;
-use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\Services;
 
 /**
@@ -210,6 +208,13 @@ class AMP_Validation_Error_Taxonomy {
 	 * @var string
 	 */
 	const TRANSIENT_KEY_ERROR_INDEX_COUNTS = 'amp_error_index_counts';
+
+	/**
+	 * Current row index for the validated URL's validation error being displayed.
+	 *
+	 * @var int
+	 */
+	protected static $current_validation_error_row_index = 0;
 
 	/**
 	 * Whether the terms_clauses filter should apply to a term query for validation errors to limit to a given status.
@@ -1597,28 +1602,70 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
+	 * Get the validation data and source info from the validated URL if available (as it should be).
+	 *
+	 * @param WP_Term $term Term.
+	 * @return array|null Validation data if successfully retrieved from the validated URL post, or else null.
+	 */
+	private static function get_current_validation_error_data_from_post( WP_Term $term ) {
+		$post = get_post();
+		if ( ! $post instanceof WP_Post || AMP_Validated_URL_Post_Type::POST_TYPE_SLUG !== $post->post_type ) {
+			return null;
+		}
+
+		$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $post );
+		if ( ! isset( $validation_errors[ self::$current_validation_error_row_index ] ) ) {
+			return null;
+		}
+
+		$validation_error = $validation_errors[ self::$current_validation_error_row_index ];
+		if ( $term->term_id !== $validation_error['term']->term_id ) {
+			return null;
+		}
+
+		return $validation_error['data'];
+	}
+
+	/**
 	 * Returns JSON-formatted error details for an error term.
 	 *
-	 * @param WP_Term $term The term.
+	 * @param WP_Term $term Term.
 	 * @return string Encoded JSON.
 	 */
-	public static function get_error_details_json( $term ) {
-		$json = json_decode( $term->description, true );
+	public static function get_error_details_json( WP_Term $term ) {
+		$validation_data = self::get_current_validation_error_data_from_post( $term );
+
+		// Fall back to obtaining the validation data from the term itself (without sources).
+		if ( null === $validation_data ) {
+			$validation_data = json_decode( $term->description, true );
+		}
+
+		// Total failure to obtain the validation data.
+		if ( ! is_array( $validation_data ) ) {
+			return wp_json_encode( [] );
+		}
 
 		// Convert the numeric constant value of the node_type to its constant name.
 		$xml_reader_reflection_class = new ReflectionClass( 'XMLReader' );
 		$constants                   = $xml_reader_reflection_class->getConstants();
 		foreach ( $constants as $key => $value ) {
-			if ( $json['node_type'] === $value ) {
-				$json['node_type'] = $key;
+			if ( $validation_data['node_type'] === $value ) {
+				$validation_data['node_type'] = $key;
 				break;
 			}
 		}
 
-		$json['removed']  = (bool) ( (int) $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
-		$json['reviewed'] = (bool) ( (int) $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
+		$validation_data['removed']  = (bool) ( (int) $term->term_group & self::ACCEPTED_VALIDATION_ERROR_BIT_MASK );
+		$validation_data['reviewed'] = (bool) ( (int) $term->term_group & self::ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK );
 
-		return wp_json_encode( $json );
+		return wp_json_encode( $validation_data );
+	}
+
+	/**
+	 * Reset the index for the current validation error being displayed.
+	 */
+	public static function reset_validation_error_row_index() {
+		self::$current_validation_error_row_index = 0;
 	}
 
 	/**
@@ -1683,6 +1730,8 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		$actions = wp_array_slice_assoc( $actions, [ 'details', 'delete', 'copy' ] );
+
+		self::$current_validation_error_row_index++;
 
 		return $actions;
 	}

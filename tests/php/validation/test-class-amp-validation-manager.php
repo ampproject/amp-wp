@@ -333,7 +333,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$node = $admin_bar->get_node( 'amp' );
 		$this->assertInternalType( 'object', $node );
-		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-paired-browsing' ) );
 
 		/*
 		 * Admin bar item available in transitional mode.
@@ -344,7 +343,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$node = $admin_bar->get_node( 'amp' );
 		$this->assertInternalType( 'object', $node );
-		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-paired-browsing' ) );
 
 		// Admin bar item available in paired mode.
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
@@ -1732,21 +1730,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 					'name'     => 'wp-includes',
 					'function' => version_compare( get_bloginfo( 'version' ), '5.5-alpha', '>' ) ? 'wp_filter_content_tags' : 'wp_make_content_images_responsive',
 				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'capital_P_dangit',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'do_shortcode',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'convert_smilies',
-				],
 			];
 		} elseif ( has_filter( 'the_content', 'do_blocks' ) ) {
 			$sources = [
@@ -1790,21 +1773,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 					'name'     => 'wp-includes',
 					'function' => 'wp_make_content_images_responsive',
 				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'capital_P_dangit',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'do_shortcode',
-				],
-				[
-					'type'     => 'core',
-					'name'     => 'wp-includes',
-					'function' => 'convert_smilies',
-				],
 			];
 		} else {
 			$sources = [
@@ -1843,6 +1811,20 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 					'name'     => 'wp-includes',
 					'function' => 'wp_make_content_images_responsive',
 				],
+			];
+		}
+
+		if ( function_exists( 'wp_replace_insecure_home_url' ) ) {
+			$sources[] = [
+				'type'     => 'core',
+				'name'     => 'wp-includes',
+				'function' => 'wp_replace_insecure_home_url',
+			];
+		}
+
+		$sources = array_merge(
+			$sources,
+			[
 				[
 					'type'     => 'core',
 					'name'     => 'wp-includes',
@@ -1858,8 +1840,8 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 					'name'     => 'wp-includes',
 					'function' => 'convert_smilies',
 				],
-			];
-		}
+			]
+		);
 
 		foreach ( $sources as &$source ) {
 			$function = $source['function'];
@@ -2475,6 +2457,31 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$this->assertEquals( $previous_post_id, $r['post_id'] );
 		$this->assertEquals( $updated_validated_url, AMP_Validated_URL_Post_Type::get_url_from_post( $r['post_id'] ) );
 		remove_filter( 'pre_http_request', $filter );
+	}
+
+	/**
+	 * @covers AMP_Validation_Manager::serialize_validation_error_messages()
+	 * @covers AMP_Validation_Manager::unserialize_validation_error_messages()
+	 */
+	public function test_serialize_unserialize_validation_error_messages() {
+		$messages = [
+			'foo',
+			'bar',
+			'bar',
+			'baz',
+		];
+
+		$encoded_messages = AMP_Validation_Manager::serialize_validation_error_messages( $messages );
+		$this->assertTrue( is_string( $encoded_messages ) );
+		$this->assertStringContains( ':', $encoded_messages );
+
+		$decoded_messages = AMP_Validation_Manager::unserialize_validation_error_messages( $encoded_messages );
+		$this->assertTrue( is_array( $decoded_messages ) );
+		$this->assertCount( 3, $decoded_messages );
+		$this->assertEqualSets( array_unique( $messages ), $decoded_messages );
+
+		$decoded_messages = AMP_Validation_Manager::unserialize_validation_error_messages( 'badhash:badencoding' );
+		$this->assertNull( $decoded_messages );
 	}
 
 	/**

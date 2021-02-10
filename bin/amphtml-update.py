@@ -8,8 +8,8 @@ A bash script, amphtml-update.sh, is provided to automatically run this script. 
 
 from within a Linux environment such as VVV.
 
-See the Updating Allowed Tags and Attributes section of the Contributing guide
-https://github.com/ampproject/amp-wp/blob/develop/contributing.md#updating-allowed-tags-and-attributes.
+See the Updating Allowed Tags and Attributes section of the Engineering Guidelines
+https://github.com/ampproject/amp-wp/wiki/Engineering-Guidelines#updating-allowed-tags-and-attributes.
 
 Then have fun sanitizing your AMP posts!
 """
@@ -532,7 +532,7 @@ def GetTagRules(tag_spec):
 
 	if hasattr(tag_spec, 'also_requires_tag_warning') and len( tag_spec.also_requires_tag_warning ) != 0:
 		for also_requires_tag_warning in tag_spec.also_requires_tag_warning:
-			matches = re.search( r'(amp-\S+) extension .js script', also_requires_tag_warning )
+			matches = re.search( r'(amp-\S+) extension( \.js)? script', also_requires_tag_warning )
 			if not matches:
 				raise Exception( 'Unexpected also_requires_tag_warning format: ' + also_requires_tag_warning )
 			requires_extension_list.add(matches.group(1))

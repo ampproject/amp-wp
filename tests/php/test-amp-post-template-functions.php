@@ -22,7 +22,11 @@ class Test_AMP_Post_Template_Functions extends WP_UnitTestCase {
 	/** @covers ::amp_post_template_init_hooks() */
 	public function test_amp_post_template_init_hooks() {
 		amp_post_template_init_hooks();
-		$this->assertSame( 10, has_action( 'amp_post_template_head', 'noindex' ) );
+		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.7', '>=' ) ) {
+			$this->assertSame( 10, has_action( 'amp_post_template_head', 'wp_robots' ) );
+		} else {
+			$this->assertSame( 10, has_action( 'amp_post_template_head', 'noindex' ) );
+		}
 		$this->assertSame( 10, has_action( 'amp_post_template_head', 'amp_post_template_add_title' ) );
 		$this->assertSame( 10, has_action( 'amp_post_template_head', 'amp_post_template_add_canonical' ) );
 		$this->assertSame( 10, has_action( 'amp_post_template_head', 'amp_post_template_add_fonts' ) );

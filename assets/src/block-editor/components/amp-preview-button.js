@@ -11,7 +11,6 @@ import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { Component, createRef, renderToString } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -172,6 +171,9 @@ class AmpPreviewButton extends Component {
 		// https://github.com/WordPress/gutenberg/pull/8330
 		event.preventDefault();
 
+		/** @type {HTMLAnchorElement} target */
+		const { target } = event;
+
 		// Open up a Preview tab if needed. This is where we'll show the preview.
 		if ( ! this.previewWindow || this.previewWindow.closed ) {
 			this.previewWindow = window.open( '', this.getWindowTarget() );
@@ -185,7 +187,7 @@ class AmpPreviewButton extends Component {
 		// If we don't need to autosave the post before previewing, then we simply
 		// load the Preview URL in the Preview tab.
 		if ( ! this.props.isAutosaveable ) {
-			this.setPreviewWindowLink( event.target.href );
+			this.setPreviewWindowLink( target.href );
 			return;
 		}
 
@@ -253,7 +255,6 @@ export default compose( [
 	withSelect( ( select, { forcePreviewLink, forceIsAutosaveable } ) => {
 		const {
 			getCurrentPostId,
-			getCurrentPostAttribute,
 			getEditedPostAttribute,
 			isEditedPostSaveable,
 			isEditedPostAutosaveable,
@@ -261,20 +262,27 @@ export default compose( [
 		} = select( 'core/editor' );
 
 		const {
-			getAmpSlug,
+			getAmpUrl,
+			getAmpPreviewLink,
 			getErrorMessages,
 			isStandardMode,
 		} = select( 'amp/block-editor' );
 
-		const queryArgs = {};
-		queryArgs[ getAmpSlug() ] = 1;
+		const copyQueryArgs = ( source, destination ) => {
+			const sourceUrl = new URL( source );
+			const destinationUrl = new URL( destination );
+			for ( const [ key, value ] of sourceUrl.searchParams.entries() ) {
+				destinationUrl.searchParams.set( key, value );
+			}
+			return destinationUrl.href;
+		};
 
 		const initialPreviewLink = getEditedPostPreviewLink();
-		const previewLink = initialPreviewLink ? addQueryArgs( initialPreviewLink, queryArgs ) : undefined;
+		const previewLink = initialPreviewLink ? copyQueryArgs( initialPreviewLink, getAmpPreviewLink() ) : undefined;
 
 		return {
 			postId: getCurrentPostId(),
-			currentPostLink: addQueryArgs( getCurrentPostAttribute( 'link' ), queryArgs ),
+			currentPostLink: getAmpUrl(),
 			previewLink: forcePreviewLink !== undefined ? forcePreviewLink : previewLink,
 			isSaveable: isEditedPostSaveable(),
 			isAutosaveable: forceIsAutosaveable || isEditedPostAutosaveable(),

@@ -6,7 +6,7 @@ function amp_get_slug();
 
 Get the slug used in AMP for the query var, endpoint, and post type support.
 
-The return value can be overridden by previously defining a AMP_QUERY_VAR constant or by adding a &#039;amp_query_var&#039; filter, but *warning* this ability may be deprecated in the future. Normally the slug should be just &#039;amp&#039;.
+The return value can be overridden by previously defining a AMP_QUERY_VAR constant or by adding a 'amp_query_var' filter, but *warning* this ability may be deprecated in the future. Normally the slug should be just 'amp'.
 
 ### Return value
 
@@ -14,7 +14,7 @@ The return value can be overridden by previously defining a AMP_QUERY_VAR consta
 
 ### Source
 
-:link: [includes/amp-helper-functions.php:656](/includes/amp-helper-functions.php#L656-L667)
+:link: [includes/amp-helper-functions.php:649](/includes/amp-helper-functions.php#L649-L660)
 
 <details>
 <summary>Show Code</summary>

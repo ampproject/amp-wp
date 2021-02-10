@@ -129,7 +129,19 @@ class AMP_Link_Sanitizer extends AMP_Base_Sanitizer {
 			$this->process_element( $link, Attribute::HREF );
 		}
 
-		$form_query = $this->dom->xpath->query( '//form[ @action and translate( @method, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz") = "get" ]' );
+		$form_query = $this->dom->xpath->query(
+			'
+			//form[
+				@action
+				and
+				(
+					not( @method )
+					or
+					translate( @method, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz") = "get"
+				)
+			]
+			'
+		);
 		foreach ( $form_query as $form ) {
 			$this->process_element( $form, Attribute::ACTION );
 		}

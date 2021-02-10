@@ -5,7 +5,9 @@ import {
 	hasThemeSupport,
 	isStandardMode,
 	getErrorMessages,
-	getAmpSlug,
+	getAmpPreviewLink,
+	getAmpUrl,
+	getAmpBlocksInUse,
 } from '../selectors';
 
 describe( 'selectors', () => {
@@ -34,12 +36,30 @@ describe( 'selectors', () => {
 		} );
 	} );
 
-	describe( 'getAmpSlug', () => {
-		it( 'should return the AMP slug', () => {
-			const slug = 'amp';
-			const state = { ampSlug: slug };
+	describe( 'getAmpUrl', () => {
+		it( 'should return the paired AMP url', () => {
+			const url = 'https://example.com/?amp=1';
+			const state = { ampUrl: url };
 
-			expect( getAmpSlug( state ) ).toStrictEqual( slug );
+			expect( getAmpUrl( state ) ).toStrictEqual( url );
+		} );
+	} );
+
+	describe( 'getAmpPreviewLink', () => {
+		it( 'should return the AMP preview link', () => {
+			const url = 'https://example.com/?preview=true&amp=1';
+			const state = { ampPreviewLink: url };
+
+			expect( getAmpPreviewLink( state ) ).toStrictEqual( url );
+		} );
+	} );
+
+	describe( 'getAmpBlocksInUse', () => {
+		it( 'should return name of AMP blocks in post', () => {
+			const ampBlocksInUse = [ 'amp/amp-o2-player', 'amp/amp-ooyala-player', 'amp/amp-reach-player' ];
+			const state = { ampBlocksInUse };
+
+			expect( getAmpBlocksInUse( state ) ).toStrictEqual( ampBlocksInUse );
 		} );
 	} );
 } );

@@ -13,6 +13,7 @@ namespace PHPSTORM_META {
 			'admin.onboarding_wizard'           => \AmpProject\AmpWP\Admin\OnboardingWizardSubmenuPage::class,
 			'admin.options_menu'                => \AmpProject\AmpWP\Admin\OptionsMenu::class,
 			'admin.polyfills'                   => \AmpProject\AmpWP\Admin\Polyfills::class,
+			'admin.paired_browsing'             => \AmpProject\AmpWP\Admin\PairedBrowsing::class,
 			'amp_slug_customization_watcher'    => \AmpProject\AmpWP\AmpSlugCustomizationWatcher::class,
 			'css_transient_cache.ajax_handler'  => \AmpProject\AmpWP\Admin\ReenableCssTransientCachingAjaxAction::class,
 			'css_transient_cache.monitor'       => \AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching::class,
@@ -38,6 +39,8 @@ namespace PHPSTORM_META {
 			'url_validation_cron'               => \AmpProject\AmpWP\Validation\URLValidationCron::class,
 			'save_post_validation_event'        => \AmpProject\AmpWP\Validation\SavePostValidationEvent::class,
 			'background_task_deactivator'       => \AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator::class,
+			'paired_routing'                    => \AmpProject\AmpWP\PairedRouting::class,
+			'paired_url'                        => \AmpProject\AmpWP\PairedUrl::class,
 		] )
 	);
 

@@ -12,48 +12,40 @@ import { select } from '@wordpress/data';
 import { withFeaturedImageNotice } from '../common/components';
 import { getMinimumFeaturedImageDimensions } from '../common/helpers';
 import { withMediaLibraryNotice } from './components';
-import { addAMPAttributes, filterBlocksEdit, filterBlocksSave } from './helpers';
+import { addAMPAttributes, filterBlocksEdit, removeAmpFitTextFromBlocks, removeClassFromAmpFitTextBlocks } from './helpers';
 import './store';
 
 const {
 	isStandardMode,
+	getAmpBlocksInUse,
 } = select( 'amp/block-editor' );
 
 const plugins = require.context( './plugins', true, /.*\.js$/ );
 
 plugins.keys().forEach( ( modulePath ) => {
-	const { name, render, icon } = plugins( modulePath );
+	const { name, render, icon, onlyPaired = false } = plugins( modulePath );
+
+	if ( onlyPaired && isStandardMode() ) {
+		return;
+	}
 
 	registerPlugin( name, { icon, render } );
 } );
 
 addFilter( 'blocks.registerBlockType', 'ampEditorBlocks/addAttributes', addAMPAttributes );
-addFilter( 'blocks.getSaveElement', 'ampEditorBlocks/filterSave', filterBlocksSave );
+addFilter( 'blocks.registerBlockType', 'ampEditorBlocks/deprecateAmpFitText', removeAmpFitTextFromBlocks );
+addFilter( 'blocks.getSaveElement', 'ampEditorBlocks/deprecateAmpFitText/removeMiscAttrs', removeClassFromAmpFitTextBlocks );
 addFilter( 'editor.BlockEdit', 'ampEditorBlocks/filterEdit', filterBlocksEdit, 20 );
 addFilter( 'editor.PostFeaturedImage', 'ampEditorBlocks/withFeaturedImageNotice', withFeaturedImageNotice );
 addFilter( 'editor.MediaUpload', 'ampEditorBlocks/withMediaLibraryNotice', ( InitialMediaUpload ) => withMediaLibraryNotice( InitialMediaUpload, getMinimumFeaturedImageDimensions() ) );
 
-/*
- * If there's no theme support, unregister blocks that are only meant for AMP.
- */
-const AMP_DEPENDENT_BLOCKS = [
-	'amp/amp-brid-player',
-	'amp/amp-ima-video',
-	'amp/amp-jwplayer',
-	'amp/amp-mathml',
-	'amp/amp-o2-player',
-	'amp/amp-ooyala-player',
-	'amp/amp-reach-player',
-	'amp/amp-springboard-player',
-	'amp/amp-timeago',
-];
-
+const ampBlocksInUse = getAmpBlocksInUse();
 const blocks = require.context( './blocks', true, /(?<!test\/)index\.js$/ );
 
 blocks.keys().forEach( ( modulePath ) => {
 	const { name, settings } = blocks( modulePath );
 
-	const shouldRegister = isStandardMode() && AMP_DEPENDENT_BLOCKS.includes( name );
+	const shouldRegister = isStandardMode() && ampBlocksInUse.includes( name );
 
 	if ( shouldRegister ) {
 		registerBlockType( name, settings );

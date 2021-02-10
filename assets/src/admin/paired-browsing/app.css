@@ -152,7 +152,11 @@ iframe {
 	padding: 13px 16px;
 }
 
-.disconnect-overlay .dialog .dialog-buttons button {
+.disconnect-overlay .dialog .dialog-buttons .button {
+	display: inline-block;
+	text-decoration: none;
+	color: #000;
+	background: rgb(239, 239, 239);
 	margin: 5px;
 	border: none;
 	box-shadow: none;
@@ -188,8 +192,4 @@ iframe {
 	color: #0075c2;
 	height: auto;
 	width: auto;
-}
-
-.hidden {
-	display: none;
 }

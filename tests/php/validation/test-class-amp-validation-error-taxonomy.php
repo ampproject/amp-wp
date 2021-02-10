@@ -1534,37 +1534,49 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::get_error_details_json()
 	 */
 	public function test_get_error_details_json() {
-		$term = new WP_Term(
-			(object) [
-				'description' => wp_json_encode(
-					[
-						'node_type' => 1,
-					]
-				),
-				'term_group'  => 1,
-			]
-		);
+		$error            = $this->get_mock_error();
+		$error['sources'] = [
+			[
+				'type' => 'plugin',
+				'name' => 'bar',
+			],
+		];
 
-		$result = json_decode( AMP_Validation_Error_Taxonomy::get_error_details_json( $term ), true );
+		$post_id         = AMP_Validated_URL_Post_Type::store_validation_errors( [ $error ], home_url( '/' ) );
+		$GLOBALS['post'] = get_post( $post_id );
+		$errors          = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $GLOBALS['post'] );
 
+		AMP_Validation_Error_Taxonomy::reset_validation_error_row_index();
+		$result = json_decode( AMP_Validation_Error_Taxonomy::get_error_details_json( $errors[0]['term'] ), true );
+
+		// Verify the name of the node type is used instead of its ID.
 		$this->assertEquals( 'ELEMENT', $result['node_type'] );
+		// Verify the status of the error is correctly set.
 		$this->assertEquals( true, $result['removed'] );
 		$this->assertEquals( false, $result['reviewed'] );
 
-		$term   = new WP_Term(
-			(object) [
-				'description' => wp_json_encode(
-					[
-						'node_type' => 2,
-					]
-				),
-				'term_group'  => 2,
-			]
-		);
-		$result = json_decode( AMP_Validation_Error_Taxonomy::get_error_details_json( $term ), true );
+		unset( $error['node_type'], $result['node_type'], $result['removed'], $result['reviewed'] );
+		// Verify the other contents of the stored validation error (including sources) are retrieved.
+		$this->assertEquals( $error, $result );
 
+		$error = [
+			'node_type' => XML_ATTRIBUTE_NODE,
+		];
+
+		add_filter( 'amp_validation_error_sanitized', '__return_false' );
+		$post_id         = AMP_Validated_URL_Post_Type::store_validation_errors( [ $error ], home_url( '/' ) );
+		$GLOBALS['post'] = get_post( $post_id );
+		$errors          = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $GLOBALS['post'] );
+
+		AMP_Validation_Error_Taxonomy::reset_validation_error_row_index();
+		$result = json_decode( AMP_Validation_Error_Taxonomy::get_error_details_json( $errors[0]['term'] ), true );
+
+		// Verify the name of the node type is used instead of its ID.
 		$this->assertEquals( 'ATTRIBUTE', $result['node_type'] );
+		// Verify the status of the error is correctly set.
 		$this->assertEquals( false, $result['removed'] );
 		$this->assertEquals( true, $result['reviewed'] );
+
+		unset( $GLOBALS['post'] );
 	}
 }
