@@ -3,7 +3,7 @@
  */
 import PropTypes from 'prop-types';
 import { ReactElement } from 'react';
-import { isObject, isString } from 'lodash';
+import { isFunction, isObject, isString } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -275,7 +275,7 @@ export const getLayoutOptions = ( block ) => {
  * @return {Function} Edit function.
  */
 export const filterBlocksEdit = ( BlockEdit ) => {
-	if ( ! isObject( BlockEdit ) ) {
+	if ( ! isFunction( BlockEdit ) ) {
 		return BlockEdit;
 	}
 
