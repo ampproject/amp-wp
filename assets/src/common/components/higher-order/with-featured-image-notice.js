@@ -2,7 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { isObject } from 'lodash';
+import { isFunction } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -24,7 +24,7 @@ import { validateFeaturedImage, getMinimumFeaturedImageDimensions } from '../../
  */
 export default createHigherOrderComponent(
 	( PostFeaturedImage ) => {
-		if ( ! isObject( PostFeaturedImage ) ) {
+		if ( ! isFunction( PostFeaturedImage ) ) {
 			return PostFeaturedImage;
 		}
 
