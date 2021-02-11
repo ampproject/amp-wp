@@ -38,6 +38,7 @@ export function Carousel( {
 	const { windowWidth } = useWindowWidth();
 	const [ currentPage, originalSetCurrentPage ] = useState( null );
 	const [ pageWidth, setPageWidth ] = useState( 0 );
+	const [ showCarouselNav, setShowCarouselNav ] = useState( null );
 	const carouselListRef = useRef();
 
 	/**
@@ -103,7 +104,13 @@ export function Carousel( {
 		setPageWidth( carouselListRef?.current?.clientWidth || 0 );
 	}, [ items.length, windowWidth ] );
 
-	const showCarouselNav = currentPage && items.length > 1;
+	/**
+	 * Show the carousel navigation when there is more than one page.
+	 */
+	useEffect( () => {
+		setShowCarouselNav( items.length > 1 );
+	}, [ items.length ] );
+
 	const centeredItemIndex = [ ...( carouselListRef.current?.children || [] ) ].indexOf( currentPage );
 	const nextButtonDisabled = centeredItemIndex >= items.length - 1;
 	const prevButtonDisabled = centeredItemIndex <= 0;
