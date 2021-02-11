@@ -12,11 +12,11 @@ import { useContext, useMemo, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { CheckboxControl } from '@wordpress/components';
 import { ReaderThemes } from '../reader-themes-context-provider';
 import { Loading } from '../loading';
 import './style.css';
-import { AMPNotice, NOTICE_TYPE_WARNING } from '../amp-notice';
+import { AMPNotice, NOTICE_TYPE_INFO } from '../amp-notice';
+import { AMPSettingToggle } from '../amp-setting-toggle';
 import { ThemeCard } from '../theme-card';
 import { Carousel, DEFAULT_MOBILE_BREAKPOINT } from '../carousel';
 import { useWindowWidth } from '../../utils/use-window-width';
@@ -152,7 +152,7 @@ export function ReaderThemeCarousel() {
 			<div>
 				{
 					hasUnavailableThemes && (
-						<AMPNotice type={ NOTICE_TYPE_WARNING }>
+						<AMPNotice type={ NOTICE_TYPE_INFO }>
 							<p>
 								{ AMP_QUERY_VAR_CUSTOMIZED_LATE
 								/* dangerouslySetInnerHTML reason: Injection of code tags. */
@@ -174,8 +174,8 @@ export function ReaderThemeCarousel() {
 									: __( 'Some supported themes cannot be installed automatically on this site. To use, please install them manually or contact your hosting provider.', 'amp' )
 								}
 							</p>
-							<CheckboxControl
-								label={ __( 'Show unavailable themes', 'amp' ) }
+							<AMPSettingToggle
+								text={ __( 'Show unavailable themes', 'amp' ) }
 								onChange={ ( checked ) => {
 									setIncludeUnavailableThemes( checked );
 								} }
