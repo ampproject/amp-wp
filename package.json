@@ -43,7 +43,7 @@
   "devDependencies": {
     "@babel/core": "7.12.13",
     "@babel/plugin-proposal-class-properties": "7.12.13",
-    "@wordpress/babel-preset-default": "5.0.0",
+    "@wordpress/babel-preset-default": "5.0.1",
     "@wordpress/block-editor": "5.2.1",
     "@wordpress/blocks": "6.25.2",
     "@wordpress/browserslist-config": "3.0.0",
