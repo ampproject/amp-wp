@@ -41,13 +41,13 @@ describe( 'useValidationErrorStateUpdates', () => {
 
 	function setupUseSelect( overrides ) {
 		useSelect.mockImplementation( () => ( {
-			currentPost: { id: 1 },
-			getClientIdsWithDescendants: () => null,
+			currentPostId: 1,
 			getBlock: () => null,
-			getBlocks: () => [],
+			getClientIdsWithDescendants: () => null,
 			isAutosavingPost: false,
 			isPreviewingPost: false,
 			isSavingPost: false,
+			previewLink: '',
 			validationErrorsFromPost: require( './__data__/raw-validation-errors' ).rawValidationErrors,
 			...overrides,
 		} ) );
