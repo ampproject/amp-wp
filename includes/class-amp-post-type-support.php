@@ -124,7 +124,7 @@ class AMP_Post_Type_Support {
 		}
 		$errors = [];
 		
-		if ( ! isset($post->post_type) && !isset($post->ID) ) {
+		if ( ! isset( $post->post_type ) && ! isset( $post->ID ) ) {
 			$errors[] = 'post-type-support';
 			return $errors;
 		}
