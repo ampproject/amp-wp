@@ -123,7 +123,12 @@ class AMP_Post_Type_Support {
 			$post = get_post( $post );
 		}
 		$errors = [];
-
+		
+		if(!isset($post->post_type) && !isset($post->ID)){
+			$errors[] = 'post-type-support';
+			return $errors;
+		}
+		
 		if ( ! in_array( $post->post_type, self::get_supported_post_types(), true ) ) {
 			$errors[] = 'post-type-support';
 		}
