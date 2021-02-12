@@ -348,16 +348,7 @@ final class PairedRouting implements Service, Registerable {
 		add_action( 'parse_request', [ $this, 'restore_path_endpoint_in_environment' ] );
 
 		// Reserve the 'amp' slug for paired URL structures that use paths.
-		if (
-			in_array(
-				AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE ),
-				[
-					Option::PAIRED_URL_STRUCTURE_PATH_SUFFIX,
-					Option::PAIRED_URL_STRUCTURE_LEGACY_READER,
-				],
-				true
-			)
-		) {
+		if ( $this->is_using_path_suffix() ) {
 			// Note that the wp_unique_term_slug filter does not work in the same way. It will only be applied if there
 			// is actually a duplicate, whereas the wp_unique_post_slug filter applies regardless.
 			add_filter( 'wp_unique_post_slug', [ $this, 'filter_unique_post_slug' ], 10, 4 );
@@ -367,6 +358,22 @@ final class PairedRouting implements Service, Registerable {
 		add_action( 'wp', [ $this, 'add_paired_request_hooks' ] );
 
 		add_action( 'admin_notices', [ $this, 'add_permalink_settings_notice' ] );
+	}
+
+	/**
+	 * Determine whether the paired URL structure is using a path suffix (including the legacy Reader structure).
+	 *
+	 * @return bool
+	 */
+	public function is_using_path_suffix() {
+		return in_array(
+			AMP_Options_Manager::get_option( Option::PAIRED_URL_STRUCTURE ),
+			[
+				Option::PAIRED_URL_STRUCTURE_PATH_SUFFIX,
+				Option::PAIRED_URL_STRUCTURE_LEGACY_READER,
+			],
+			true
+		);
 	}
 
 	/**
@@ -514,9 +521,71 @@ final class PairedRouting implements Service, Registerable {
 		if ( $this->has_endpoint() ) {
 			add_filter( 'old_slug_redirect_url', [ $this, 'maybe_add_paired_endpoint' ], 1000 );
 			add_filter( 'redirect_canonical', [ $this, 'maybe_add_paired_endpoint' ], 1000 );
+
+			if ( $this->is_using_path_suffix() ) {
+				// Filter priority of 0 to purge /amp/ before other filters manipulate it.
+				add_filter( 'get_pagenum_link', [ $this, 'filter_get_pagenum_link' ], 0 );
+			}
 		} else {
 			add_action( 'wp_head', 'amp_add_amphtml_link' );
 		}
+	}
+
+	/**
+	 * Fix pagenum link when using a path suffix.
+	 *
+	 * When paired AMP URLs end in /amp/, on the blog index page a call to `the_posts_pagination()` will result in
+	 * unexpected links being added to the page. For example, `get_pagenum_link(2)` will result in `/blog/amp/page/2/`
+	 * instead of the expected `/blog/page/2/amp/`. And then, when on the 2nd page of results (`/blog/page/2/amp/`), a
+	 * call to `get_pagenum_link(3)` will result in an even more unexpected link pointing to `/blog/page/2/amp/page/3/`
+	 * instead of `/blog/page/3/amp/`, whereas `get_pagenum_link(1)` will return `/blog/page/2/amp/` as opposed to the
+	 * expected `/blog/amp/`. Note that `get_pagenum_link()` is used as the `base` for `paginate_links()` in
+	 * `get_the_posts_pagination()`, and it uses as its base `remove_query_arg('paged')` which returns the `REQUEST_URI`.
+	 *
+	 * @see get_pagenum_link()
+	 * @see get_the_posts_pagination()
+	 *
+	 * @param string $link Pagenum link.
+	 * @return string Fixed pagenum link.
+	 */
+	public function filter_get_pagenum_link( $link ) {
+		global $wp_rewrite;
+
+		// Only relevant when using permalinks.
+		if ( ! $wp_rewrite instanceof WP_Rewrite || ! $wp_rewrite->using_permalinks() ) {
+			return $link;
+		}
+
+		$delimiter = ':';
+		$pattern   = $delimiter;
+
+		// If the current page is a paged request (e.g. /page/2/), then we need to first strip that out from the link.
+		if ( is_paged() ) {
+			$pattern .= sprintf(
+				'/%s/%d',
+				preg_quote( $wp_rewrite->pagination_base, $delimiter ),
+				get_query_var( 'paged' )
+			);
+		}
+
+		// Now we remove the AMP path segment followed by any additional paged path segments, if they are present.
+		// This matches paths like:
+		// * /blog/amp/
+		// * /blog/amp/page/2/
+		// As well as allowing for the lack of a trailing slash and/or the presence of query args and/or a hash target.
+		$pattern .= sprintf(
+			'/%s((/%s/\d+)?/?(\?.*?)?(#.*)?)$',
+			preg_quote( amp_get_slug(), ':' ),
+			preg_quote( $wp_rewrite->pagination_base, ':' )
+		);
+
+		$pattern .= $delimiter;
+
+		return preg_replace(
+			$pattern,
+			'$1',
+			$link
+		);
 	}
 
 	/**

@@ -2112,6 +2112,7 @@ class AMP_Theme_Support {
 				$transformers,
 				[
 					Optimizer\Transformer\AmpRuntimeCss::class,
+					Optimizer\Transformer\PreloadHeroImage::class,
 					Optimizer\Transformer\ServerSideRendering::class,
 					Optimizer\Transformer\TransformedIdentifier::class,
 				]

@@ -18,7 +18,6 @@ use AMP_Theme_Support;
 use AmpProject\AmpWP\Tests\Fixture\DummyPairedUrlStructure;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
 use WP_Query;
-use WP_Rewrite;
 use Exception;
 
 /** @coversDefaultClass \AmpProject\AmpWP\PairedRouting */
@@ -429,14 +428,51 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$this->assertSame( $expected_slug, $actual_slug );
 	}
 
-	/** @covers ::add_paired_request_hooks() */
-	public function test_add_paired_request_hooks_when_does_have_endpoint() {
+	/** @return array */
+	public function get_data_for_test_add_paired_request_hooks_when_does_have_endpoint() {
+		return [
+			'query_var'           => [
+				Option::PAIRED_URL_STRUCTURE_QUERY_VAR,
+				false,
+			],
+			'legacy_transitional' => [
+				Option::PAIRED_URL_STRUCTURE_LEGACY_TRANSITIONAL,
+				false,
+			],
+			'path_suffix'         => [
+				Option::PAIRED_URL_STRUCTURE_PATH_SUFFIX,
+				true,
+			],
+			'legacy_reader'       => [
+				Option::PAIRED_URL_STRUCTURE_LEGACY_READER,
+				true,
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_data_for_test_add_paired_request_hooks_when_does_have_endpoint()
+	 * @covers ::add_paired_request_hooks()
+	 * @covers ::is_using_path_suffix()
+	 * @param string $structure
+	 * @param bool   $using_path_suffix
+	 */
+	public function test_add_paired_request_hooks_when_does_have_endpoint( $structure, $using_path_suffix ) {
+		$this->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
+		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, $structure );
+		$this->assertEquals( $using_path_suffix, $this->instance->is_using_path_suffix() );
 		$post = self::factory()->post->create();
+		remove_all_actions( 'wp' );
 		$this->go_to( amp_get_permalink( $post ) );
-		$this->instance->add_paired_request_hooks();
 		$this->assertTrue( $this->instance->has_endpoint() );
+		$this->instance->add_paired_request_hooks();
 		$this->assertEquals( 1000, has_filter( 'old_slug_redirect_url', [ $this->instance, 'maybe_add_paired_endpoint' ] ) );
 		$this->assertEquals( 1000, has_filter( 'redirect_canonical', [ $this->instance, 'maybe_add_paired_endpoint' ] ) );
+		if ( $using_path_suffix ) {
+			$this->assertEquals( 0, has_filter( 'get_pagenum_link', [ $this->instance, 'filter_get_pagenum_link' ] ) );
+		} else {
+			$this->assertFalse( has_filter( 'get_pagenum_link', [ $this->instance, 'filter_get_pagenum_link' ] ) );
+		}
 		$this->assertFalse( has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 	}
 
@@ -449,6 +485,71 @@ class PairedRoutingTest extends DependencyInjectedTestCase {
 		$this->assertEquals( 10, has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 		$this->assertFalse( has_filter( 'old_slug_redirect_url', [ $this->instance, 'maybe_add_paired_endpoint' ] ) );
 		$this->assertFalse( has_filter( 'redirect_canonical', [ $this->instance, 'maybe_add_paired_endpoint' ] ) );
+	}
+
+	/** @return array */
+	public function get_data_for_test_filter_get_pagenum_link() {
+		return [
+			'not_using_permalinks' => [
+				false,
+				0,
+			],
+			'on_page_1'            => [
+				true,
+				1,
+			],
+			'on_page_2'            => [
+				true,
+				2,
+			],
+			'on_page_3'            => [
+				true,
+				3,
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_data_for_test_filter_get_pagenum_link()
+	 * @covers ::filter_get_pagenum_link()
+	 * @param bool $using_permalinks
+	 * @param int  $paged
+	 */
+	public function test_filter_get_pagenum_link( $using_permalinks, $paged ) {
+		if ( $using_permalinks ) {
+			$this->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
+		} else {
+			$this->set_permalink_structure( '' );
+		}
+		AMP_Options_Manager::update_option( Option::PAIRED_URL_STRUCTURE, Option::PAIRED_URL_STRUCTURE_PATH_SUFFIX );
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+
+		self::factory()->post->create_many( 15 );
+		update_option( 'posts_per_page', 5 );
+
+		// Nothing is done if permalinks aren't being used.
+		if ( ! $using_permalinks ) {
+			$this->assertEquals( '/amp/', $this->instance->filter_get_pagenum_link( '/amp/' ) );
+			$this->assertEquals( '/amp/page/2/', $this->instance->filter_get_pagenum_link( '/amp/page/2/' ) );
+			return;
+		}
+
+		$_SERVER['REQUEST_URI'] = ( $paged > 1 ? "/page/$paged/" : '/' ) . user_trailingslashit( amp_get_slug(), 'amp' );
+		$this->instance->initialize_paired_request();
+		$this->go_to( $_SERVER['REQUEST_URI'] );
+		$this->assertFalse( is_404() );
+		$this->assertTrue( is_home() );
+
+		if ( $paged > 1 ) {
+			$this->assertTrue( is_paged() );
+			$this->assertEquals( $paged, get_query_var( 'paged' ) );
+			$this->assertEquals( '/', $this->instance->filter_get_pagenum_link( "/page/$paged/amp/" ) );
+			$this->assertEquals( '/page/2/', $this->instance->filter_get_pagenum_link( "/page/$paged/amp/page/2/" ) );
+		} else {
+			$this->assertFalse( is_paged() );
+			$this->assertEquals( '/', $this->instance->filter_get_pagenum_link( '/amp/' ) );
+			$this->assertEquals( '/page/2/', $this->instance->filter_get_pagenum_link( '/amp/page/2/' ) );
+		}
 	}
 
 	/** @covers ::add_permalink_settings_notice() */

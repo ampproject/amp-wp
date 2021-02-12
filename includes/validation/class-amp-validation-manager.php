@@ -72,10 +72,9 @@ class AMP_Validation_Manager {
 	/**
 	 * The errors encountered when validating.
 	 *
-	 * @var array[][] {
-	 *     @type array  $error     Error code.
-	 *     @type bool   $sanitized Whether sanitized.
-	 *     @type string $slug      Hash of the error.
+	 * @var array[] {
+	 *     @type array $error     Error data.
+	 *     @type bool  $sanitized Whether sanitized.
 	 * }
 	 */
 	public static $validation_results = [];

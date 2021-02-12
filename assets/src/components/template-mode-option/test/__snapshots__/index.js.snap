@@ -114,6 +114,7 @@ exports[`TemplateModeOption matches snapshot 1`] = `
       className="components-panel__body-title"
     >
       <button
+        aria-describedby={null}
         aria-expanded={false}
         className="components-button components-panel__body-toggle"
         onClick={[Function]}
@@ -126,10 +127,9 @@ exports[`TemplateModeOption matches snapshot 1`] = `
             aria-hidden={true}
             className="components-panel__arrow"
             focusable={false}
-            height={24}
             role="img"
+            size={24}
             viewBox="0 0 24 24"
-            width={24}
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
@@ -361,6 +361,7 @@ exports[`TemplateModeOption matches snapshot 2`] = `
       className="components-panel__body-title"
     >
       <button
+        aria-describedby={null}
         aria-expanded={true}
         className="components-button components-panel__body-toggle"
         onClick={[Function]}
@@ -373,10 +374,9 @@ exports[`TemplateModeOption matches snapshot 2`] = `
             aria-hidden={true}
             className="components-panel__arrow"
             focusable={false}
-            height={24}
             role="img"
+            size={24}
             viewBox="0 0 24 24"
-            width={24}
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
@@ -640,6 +640,7 @@ exports[`TemplateModeOption matches snapshot 3`] = `
       className="components-panel__body-title"
     >
       <button
+        aria-describedby={null}
         aria-expanded={true}
         className="components-button components-panel__body-toggle"
         onClick={[Function]}
@@ -652,10 +653,9 @@ exports[`TemplateModeOption matches snapshot 3`] = `
             aria-hidden={true}
             className="components-panel__arrow"
             focusable={false}
-            height={24}
             role="img"
+            size={24}
             viewBox="0 0 24 24"
-            width={24}
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
