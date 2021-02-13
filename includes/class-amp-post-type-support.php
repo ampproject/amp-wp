@@ -125,7 +125,7 @@ class AMP_Post_Type_Support {
 		$errors = [];
 		
 		if ( ! $post instanceof WP_Post ) {
-			$errors[] = 'post-type-support';
+			$errors[] = 'invalid-post';
 			return $errors;
 		}
 		
