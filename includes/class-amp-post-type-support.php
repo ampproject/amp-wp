@@ -124,7 +124,7 @@ class AMP_Post_Type_Support {
 		}
 		$errors = [];
 		
-		if ( ! isset( $post->post_type ) && ! isset( $post->ID ) ) {
+		if ( ! $post instanceof WP_Post ) {
 			$errors[] = 'post-type-support';
 			return $errors;
 		}
