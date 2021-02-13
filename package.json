@@ -55,7 +55,7 @@
     "@wordpress/hooks": "2.11.1",
     "@wordpress/jest-puppeteer-axe": "3.0.1",
     "@wordpress/plugins": "2.24.2",
-    "@wordpress/scripts": "13.0.1",
+    "@wordpress/scripts": "13.0.3",
     "babel-plugin-inline-react-svg": "1.1.2",
     "babel-plugin-transform-react-remove-prop-types": "0.4.24",
     "copy-webpack-plugin": "6.4.0",
