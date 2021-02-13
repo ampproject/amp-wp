@@ -105,5 +105,9 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 		$this->assertEquals( [ 'skip-post' ], AMP_Post_Type_Support::get_support_errors( $book_id ) );
 		remove_filter( 'amp_skip_post', '__return_true' );
 		$this->assertEmpty( AMP_Post_Type_Support::get_support_errors( $book_id ) );
+
+		// Invalid post.
+		$this->assertEquals( [ 'invalid-post' ], AMP_Post_Type_Support::get_support_errors( null ) );
+		$this->assertEmpty( AMP_Post_Type_Support::get_support_errors( $book_id ) );
 	}
 }
