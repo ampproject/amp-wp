@@ -108,6 +108,5 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 
 		// Invalid post.
 		$this->assertEquals( [ 'invalid-post' ], AMP_Post_Type_Support::get_support_errors( null ) );
-		$this->assertEmpty( AMP_Post_Type_Support::get_support_errors( $book_id ) );
 	}
 }
