@@ -66,31 +66,27 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param DOMElement $comment_form Comment form.
 	 */
 	protected function process_comment_form( $comment_form ) {
-		/**
-		 * Element.
-		 *
-		 * @var DOMElement $element
-		 */
-
-		/**
-		 * Named input elements.
-		 *
-		 * @var DOMElement[][] $form_fields
-		 */
 		$form_fields = [];
 		foreach ( $comment_form->getElementsByTagName( 'input' ) as $element ) {
+			/** @var DOMElement $element */
 			$name = $element->getAttribute( 'name' );
 			if ( $name ) {
 				$form_fields[ $name ][] = $element;
 			}
 		}
 		foreach ( $comment_form->getElementsByTagName( 'textarea' ) as $element ) {
+			/** @var DOMElement $element */
 			$name = $element->getAttribute( 'name' );
 			if ( $name ) {
 				$form_fields[ $name ][] = $element;
 			}
 		}
 
+		/**
+		 * Named input elements.
+		 *
+		 * @var DOMElement[][] $form_fields
+		 */
 		if ( empty( $form_fields['comment_post_ID'] ) ) {
 			return;
 		}

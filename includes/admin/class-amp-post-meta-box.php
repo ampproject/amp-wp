@@ -438,7 +438,10 @@ class AMP_Post_Meta_Box {
 		if ( in_array( 'skip-post', $errors, true ) ) {
 			$error_messages[] = __( 'A plugin or theme has disabled AMP support.', 'amp' );
 		}
-		if ( count( array_diff( $errors, [ 'post-type-support', 'skip-post', 'template_unsupported', 'no_matching_template' ] ) ) > 0 ) {
+		if ( in_array( 'invalid-post', $errors, true ) ) {
+			$error_messages[] = __( 'The post data could not be successfully retrieved.', 'amp' );
+		}
+		if ( count( array_diff( $errors, [ 'post-type-support', 'skip-post', 'template_unsupported', 'no_matching_template', 'invalid-post' ] ) ) > 0 ) {
 			$error_messages[] = __( 'Unavailable for an unknown reason.', 'amp' );
 		}
 
