@@ -74,15 +74,25 @@ describe( 'usePostDirtyStateChanges', () => {
 		act( () => {
 			dispatch( 'test/use-post-dirty-state-updates' ).change();
 		} );
+		expect( getEditedPostContent ).toHaveBeenCalledWith();
 		expect( select( BLOCK_VALIDATION_STORE_KEY ).getIsPostDirty() ).toBe( false );
 
 		// Change content - post should become dirty.
 		act( () => {
-			getEditedPostContent.mockReturnValue( 'changed' );
-
-			// Simulate store change.
+			getEditedPostContent.mockClear();
+			getEditedPostContent.mockReturnValue( 'foo' );
 			dispatch( 'test/use-post-dirty-state-updates' ).change();
 		} );
+		expect( getEditedPostContent ).toHaveBeenCalledWith();
+		expect( select( BLOCK_VALIDATION_STORE_KEY ).getIsPostDirty() ).toBe( true );
+
+		// Another content change should not trigger getEditedPostContent()
+		act( () => {
+			getEditedPostContent.mockClear();
+			getEditedPostContent.mockReturnValue( 'bar' );
+			dispatch( 'test/use-post-dirty-state-updates' ).change();
+		} );
+		expect( getEditedPostContent ).not.toHaveBeenCalledWith();
 		expect( select( BLOCK_VALIDATION_STORE_KEY ).getIsPostDirty() ).toBe( true );
 
 		// Save post - dirty state should get cleared.
@@ -95,5 +105,20 @@ describe( 'usePostDirtyStateChanges', () => {
 			renderComponentContainingHook();
 		} );
 		expect( select( BLOCK_VALIDATION_STORE_KEY ).getIsPostDirty() ).toBe( false );
+
+		// Change content - getEditedPostContent() should be called again
+		act( () => {
+			setupUseSelect( {
+				isSavingOrPreviewingPost: false,
+			} );
+			renderComponentContainingHook();
+		} );
+		act( () => {
+			getEditedPostContent.mockClear();
+			getEditedPostContent.mockReturnValue( 'baz' );
+			dispatch( 'test/use-post-dirty-state-updates' ).change();
+		} );
+		expect( getEditedPostContent ).toHaveBeenCalledWith();
+		expect( select( BLOCK_VALIDATION_STORE_KEY ).getIsPostDirty() ).toBe( true );
 	} );
 } );

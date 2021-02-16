@@ -77,19 +77,18 @@ export function usePostDirtyStateChanges() {
 	 * Only subscribe to the store changes if the post is not in a dirty state.
 	 */
 	useEffect( () => {
-		if ( ! isSavingOrPreviewingPost && ! isPostDirty && ! subscription.current ) {
+		if ( isPostDirty && subscription.current ) {
+			subscription.current();
+			subscription.current = null;
+		} else if ( ! isSavingOrPreviewingPost && ! isPostDirty && ! subscription.current ) {
 			subscription.current = subscribe( debouncedListener );
 		}
 
-		const maybeCancelSubscription = () => {
-			if ( isPostDirty && subscription.current ) {
+		return () => {
+			if ( subscription.current ) {
 				subscription.current();
 				subscription.current = null;
 			}
 		};
-
-		maybeCancelSubscription();
-
-		return maybeCancelSubscription;
 	}, [ debouncedListener, isPostDirty, isSavingOrPreviewingPost ] );
 }
