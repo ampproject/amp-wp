@@ -119,9 +119,15 @@ class AMP_Post_Type_Support {
 	 * @return array Error codes for why a given post does not have AMP support.
 	 */
 	public static function get_support_errors( $post ) {
-		if ( ! ( $post instanceof WP_Post ) ) {
+		if ( ! $post instanceof WP_Post ) {
 			$post = get_post( $post );
 		}
+
+		// If there's still not a valid post, then we have to abort.
+		if ( ! $post instanceof WP_Post ) {
+			return [ 'invalid-post' ];
+		}
+
 		$errors = [];
 
 		if ( ! in_array( $post->post_type, self::get_supported_post_types(), true ) ) {

@@ -68,7 +68,13 @@ jobs:
       - name: Validate package.json
         run: npm run lint:pkg-json
 
-      - name: Detect coding standard violations (ESLint)
+      - name: Detect ESLint coding standard violations
+        if: github.event.pull_request.head.repo.fork == true
+        run: npm run lint:js
+
+      - name: Generate ESLint coding standard violations report
+        # Prevent generating the ESLint report if run from a PR fork
+        if: github.event.pull_request.head.repo.fork == false
         run: npm run lint:js:report
         continue-on-error: true
 

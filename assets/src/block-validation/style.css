@@ -1,20 +1,10 @@
-.components-button[aria-label="AMP for WordPress"],
-.components-button[aria-label="AMP for WordPress"]:hover,
-.components-button[aria-label="AMP for WordPress"]:focus {
-	color: transparent;
-}
-
-.interface-pinned-items .components-button.has-icon[aria-label="AMP for WordPress"] {
-	padding: 0;
-	position: relative;
-}
-
 .amp-plugin-icon {
 	align-items: center;
 	display: flex;
 	height: 100%;
 	justify-content: center;
 	width: 100%;
+	position: relative;
 }
 
 .amp-toolbar-icon svg {
@@ -35,19 +25,15 @@
 	border: 2px solid transparent;
 	border-radius: 8px;
 	color: #fff;
-	display: inline-flex;
 	flex-shrink: 0;
 	font-size: 10px;
 	height: 16px;
 	justify-content: center;
 	width: 16px;
-}
-
-.amp-error-count-badge {
 	display: flex;
 	position: absolute;
-	right: 1px;
-	top: 2px;
+	right: -6px;
+	top: -5px;
 }
 
 .is-pressed .amp-error-count-badge {
