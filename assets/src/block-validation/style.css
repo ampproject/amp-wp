@@ -1,20 +1,10 @@
-.components-button[aria-label="AMP"],
-.components-button[aria-label="AMP"]:hover,
-.components-button[aria-label="AMP"]:focus {
-	color: transparent;
-}
-
-.interface-pinned-items .components-button.has-icon[aria-label="AMP"] {
-	padding: 0;
-	position: relative;
-}
-
 .amp-plugin-icon {
 	align-items: center;
 	display: flex;
 	height: 100%;
 	justify-content: center;
 	width: 100%;
+	position: relative;
 }
 
 .amp-toolbar-icon svg {
@@ -42,8 +32,8 @@
 	width: 16px;
 	display: flex;
 	position: absolute;
-	right: 1px;
-	top: 2px;
+	right: -6px;
+	top: -5px;
 }
 
 .is-pressed .amp-error-count-badge {
