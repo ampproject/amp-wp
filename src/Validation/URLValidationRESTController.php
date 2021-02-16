@@ -28,13 +28,6 @@ use WP_REST_Server;
 final class URLValidationRESTController extends WP_REST_Controller implements Delayed, Service, Registerable {
 
 	/**
-	 * The URL validation context in the editor.
-	 *
-	 * @var string
-	 */
-	const CONTEXT_EDITOR = 'amp-editor';
-
-	/**
 	 * URLValidationProvider instance.
 	 *
 	 * @var URLValidationProvider
@@ -85,14 +78,6 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 			'/validate-post-url/(?P<id>[\d]+)',
 			[
 				'args'   => [
-					'context'       => [
-						'description' => __( 'The request context.', 'amp' ),
-						'enum'        => [
-							self::CONTEXT_EDITOR,
-						],
-						'required'    => true,
-						'type'        => 'string',
-					],
 					'id'            => [
 						'description' => __( 'Unique identifier for the object.', 'amp' ),
 						'required'    => true,
@@ -208,14 +193,12 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 
 		$sources_type = [
 			'items' => [
-				'context' => [ self::CONTEXT_EDITOR ],
-				'type'    => 'object',
+				'type' => 'object',
 			],
 			'type'  => 'array',
 		];
 
 		$sources_type['items']['properties']['sources'] = $sources_type;
-		$sources_type['context']                        = [ self::CONTEXT_EDITOR ];
 
 		$this->schema = [
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
@@ -223,16 +206,13 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 			'type'       => 'object',
 			'properties' => [
 				'results'     => [
-					'context'     => [ self::CONTEXT_EDITOR ],
 					'description' => __( 'Validation errors for the post.', 'amp' ),
 					'readonly'    => true,
 					'type'        => 'array',
 					'items'       => [
-						'context'    => [ self::CONTEXT_EDITOR ],
 						'type'       => 'object',
 						'properties' => [
 							'error'       => [
-								'context'    => [ self::CONTEXT_EDITOR ],
 								'properties' => [
 									'code'            => [
 										'context' => [],
@@ -256,8 +236,7 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 									],
 									'sources'         => $sources_type,
 									'type'            => [
-										'context' => [ self::CONTEXT_EDITOR ],
-										'type'    => 'string',
+										'type' => 'string',
 									],
 								],
 								'type'       => 'object',
@@ -271,26 +250,22 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 								'type'    => 'boolean',
 							],
 							'status'      => [
-								'context' => [ self::CONTEXT_EDITOR ],
-								'type'    => 'integer',
+								'type' => 'integer',
 							],
 							'term_id'     => [
-								'context' => [ self::CONTEXT_EDITOR ],
-								'type'    => 'integer',
+								'type' => 'integer',
 							],
 							'term_status' => [
 								'context' => [],
 								'type'    => 'integer',
 							],
 							'title'       => [
-								'context' => [ self::CONTEXT_EDITOR ],
-								'type'    => 'string',
+								'type' => 'string',
 							],
 						],
 					],
 				],
 				'review_link' => [
-					'context'     => [ self::CONTEXT_EDITOR ],
 					'description' => __( 'The URL where validation errors can be reviewed.', 'amp' ),
 					'readonly'    => true,
 					'type'        => 'string',

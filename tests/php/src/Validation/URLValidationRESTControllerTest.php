@@ -87,7 +87,6 @@ class URLValidationRESTControllerTest extends WP_UnitTestCase {
 		);
 
 		$request = new WP_REST_Request( 'GET', 'amp/v1/validate-post-url/' . $id );
-		$request->set_url_params( [ 'context' => URLValidationRESTController::CONTEXT_EDITOR ] );
 
 		$response = $this->controller->validate_post_url( $request );
 		$data     = $response->get_data();
