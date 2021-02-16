@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { useDebounce } from '@wordpress/compose';
-import { useEffect, useState, useCallback, useRef } from '@wordpress/element';
+import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { subscribe, useDispatch, useSelect } from '@wordpress/data';
 
 /**
@@ -14,22 +14,20 @@ const DELAY_MS = 500;
 
 export function usePostDirtyStateChanges() {
 	const [ content, setContent ] = useState();
+	const [ updatedContent, setUpdatedContent ] = useState();
 	const subscription = useRef( null );
 	const { setIsPostDirty } = useDispatch( BLOCK_VALIDATION_STORE_KEY );
-	const { getEditedPostContent, isPostDirty, isSavingOrPreviewingPost } = useSelect( ( select ) => ( {
+	const {
+		getEditedPostContent,
+		isPostDirty,
+		isSavingOrPreviewingPost,
+	} = useSelect( ( select ) => ( {
 		getEditedPostContent: select( 'core/editor' ).getEditedPostContent,
 		isPostDirty: select( BLOCK_VALIDATION_STORE_KEY ).getIsPostDirty(),
 		isSavingOrPreviewingPost:
 			( select( 'core/editor' ).isSavingPost() && ! select( 'core/editor' ).isAutosavingPost() ) ||
 			select( 'core/editor' ).isPreviewingPost(),
 	} ), [] );
-
-	const maybeCancelSubscription = () => {
-		if ( subscription.current ) {
-			subscription.current();
-			subscription.current = null;
-		}
-	};
 
 	/**
 	 * Post is no longer in a dirty state after save.
@@ -51,15 +49,24 @@ export function usePostDirtyStateChanges() {
 	 * Whenever a fresh post content differs from the one that is stored in the
 	 * state, it's safe to assume that the post is in a dirty state.
 	 */
-	const listener = useCallback( () => {
-		const updatedContent = getEditedPostContent();
-
-		if ( content && updatedContent !== content ) {
-			setIsPostDirty( true );
+	useEffect( () => {
+		if ( ! content ) {
+			setContent( updatedContent );
+			return;
 		}
 
-		setContent( updatedContent );
-	}, [ content, getEditedPostContent, setIsPostDirty ] );
+		if ( updatedContent !== content ) {
+			setIsPostDirty( true );
+			setContent( updatedContent );
+		}
+	}, [ content, setIsPostDirty, updatedContent ] );
+
+	/**
+	 * Keep internal content state in sync with editor state.
+	 */
+	const listener = useCallback( () => {
+		setUpdatedContent( getEditedPostContent() );
+	}, [ getEditedPostContent ] );
 
 	/**
 	 * Debounce calls to the store listener for performance reasons.
@@ -70,13 +77,18 @@ export function usePostDirtyStateChanges() {
 	 * Only subscribe to the store changes if the post is not in a dirty state.
 	 */
 	useEffect( () => {
-		if ( ! isSavingOrPreviewingPost ) {
-			if ( isPostDirty && subscription.current ) {
-				maybeCancelSubscription();
-			} else if ( ! isPostDirty && ! subscription.current ) {
-				subscription.current = subscribe( debouncedListener );
-			}
+		if ( ! isSavingOrPreviewingPost && ! isPostDirty && ! subscription.current ) {
+			subscription.current = subscribe( debouncedListener );
 		}
+
+		const maybeCancelSubscription = () => {
+			if ( isPostDirty && subscription.current ) {
+				subscription.current();
+				subscription.current = null;
+			}
+		};
+
+		maybeCancelSubscription();
 
 		return maybeCancelSubscription;
 	}, [ debouncedListener, isPostDirty, isSavingOrPreviewingPost ] );
