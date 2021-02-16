@@ -9,7 +9,7 @@ import { isEqual } from 'lodash';
 import { useEffect, useRef, useState } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
-import { addQueryArgs, getQueryArg, isURL } from '@wordpress/url';
+import { getQueryArg, isURL } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -154,7 +154,9 @@ export function useValidationErrorStateUpdates() {
 			setHasRequestedPreview( false );
 
 			const newValidation = await apiFetch( {
-				path: addQueryArgs( `/amp/v1/validate-post-url/${ currentPostId }`, queryArgs ),
+				path: `/amp/v1/validate-post-url/${ currentPostId }`,
+				method: 'POST',
+				data: queryArgs,
 			} );
 
 			if ( true === unmounted.current ) {
