@@ -121,6 +121,7 @@ final class SavePostValidationEvent extends SingleScheduledBackgroundTask implem
 
 		$post = get_post( $id );
 
+		// @todo This needs to be limited to when the status is publish because otherwise the validation request will fail to be able to access the post, as the request is not authenticated.
 		if ( ! $post
 			||
 			wp_is_post_revision( $post )
