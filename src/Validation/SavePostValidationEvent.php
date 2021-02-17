@@ -11,6 +11,7 @@ namespace AmpProject\AmpWP\Validation;
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\SingleScheduledBackgroundTask;
 use AmpProject\AmpWP\DevTools\UserAccess;
+use AmpProject\AmpWP\Infrastructure\Conditional;
 
 /**
  * SavePostValidationEvent class.
@@ -19,7 +20,7 @@ use AmpProject\AmpWP\DevTools\UserAccess;
  *
  * @internal
  */
-final class SavePostValidationEvent extends SingleScheduledBackgroundTask {
+final class SavePostValidationEvent extends SingleScheduledBackgroundTask implements Conditional {
 
 	/**
 	 * Instance of URLValidationProvider
@@ -41,6 +42,15 @@ final class SavePostValidationEvent extends SingleScheduledBackgroundTask {
 	 * @var string
 	 */
 	const BACKGROUND_TASK_NAME = 'amp_single_post_validate';
+
+	/**
+	 * Check whether the service is currently needed.
+	 *
+	 * @return bool Whether needed.
+	 */
+	public static function is_needed() {
+		return URLValidationCron::is_needed();
+	}
 
 	/**
 	 * Class constructor.
