@@ -143,7 +143,7 @@ export function useValidationErrorStateUpdates() {
 			setBlockOrderBeforeSave( getClientIdsWithDescendants() );
 			setIsFetchingErrors( true );
 
-			const queryArgs = { context: 'amp-editor' };
+			const queryArgs = {};
 
 			if ( hasRequestedPreview ) {
 				queryArgs.preview_id = getQueryArg( previewLink, 'preview_id' );
