@@ -4,6 +4,7 @@ namespace AmpProject\AmpWP\Tests\Validation;
 
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\CronBasedBackgroundTask;
+use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
@@ -45,11 +46,22 @@ final class URLValidationCronTest extends WP_UnitTestCase {
 		$this->assertInstanceof( URLValidationCron::class, $this->test_instance );
 		$this->assertInstanceof( Service::class, $this->test_instance );
 		$this->assertInstanceof( Registerable::class, $this->test_instance );
+		$this->assertInstanceof( Conditional::class, $this->test_instance );
 
 		$this->test_instance->register();
 
 		$this->assertEquals( 10, has_action( 'admin_init', [ $this->test_instance, 'schedule_event' ] ) );
 		$this->assertEquals( 10, has_action( URLValidationCron::BACKGROUND_TASK_NAME, [ $this->test_instance, 'process' ] ) );
+	}
+
+	/** @covers ::is_needed() */
+	public function test_is_needed() {
+		$this->assertFalse( URLValidationCron::is_needed() );
+
+		add_filter( 'amp_temp_validation_cron_tasks_enabled', '__return_true' );
+		$this->assertTrue( URLValidationCron::is_needed() );
+
+		remove_filter( 'amp_temp_validation_cron_tasks_enabled', '__return_true' );
 	}
 
 	/** @covers ::schedule_event() */
