@@ -481,11 +481,8 @@ class AMP_Validated_URL_Post_Type {
 				$menu_name_label = get_post_type_object( self::POST_TYPE_SLUG )->labels->menu_name;
 				$submenu_item[0] = $menu_name_label;
 
-				// Display the count of new validation errors next to the label, if there are any.
-				$new_validation_error_url_count = self::get_validation_error_urls_count();
-				if ( 0 < $new_validation_error_url_count ) {
-					$submenu_item[0] .= ' <span class="awaiting-mod"><span class="new-validation-error-urls-count">' . esc_html( number_format_i18n( $new_validation_error_url_count ) ) . '</span></span>';
-				}
+				// Append markup to display a loading spinner while the unreviewed count is being fetched.
+				$submenu_item[0] .= ' <span class="awaiting-mod"><span id="new-validation-url-count" class="loading"></span></span>';
 				break;
 			}
 		}
@@ -498,7 +495,7 @@ class AMP_Validated_URL_Post_Type {
 	 *
 	 * @return int Count of new validation error URLs.
 	 */
-	protected static function get_validation_error_urls_count() {
+	public static function get_validation_error_urls_count() {
 		$count = get_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
 		if ( false !== $count ) {
 			// Handle case where integer stored in transient gets returned as string when persistent object cache is not
