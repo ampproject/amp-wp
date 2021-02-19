@@ -10,6 +10,7 @@ namespace AmpProject\AmpWP\Validation;
 
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\RecurringBackgroundTask;
+use AmpProject\AmpWP\Infrastructure\Conditional;
 
 /**
  * URLValidationCron class.
@@ -18,7 +19,7 @@ use AmpProject\AmpWP\BackgroundTask\RecurringBackgroundTask;
  *
  * @internal
  */
-final class URLValidationCron extends RecurringBackgroundTask {
+final class URLValidationCron extends RecurringBackgroundTask implements Conditional {
 
 	/**
 	 * ScannableURLProvider instance.
@@ -47,6 +48,33 @@ final class URLValidationCron extends RecurringBackgroundTask {
 	 * @var int
 	 */
 	const DEFAULT_SLEEP_TIME = 1;
+
+	/**
+	 * Check whether the service is currently needed.
+	 *
+	 * @return bool Whether needed.
+	 */
+	public static function is_needed() {
+		/**
+		 * Filters whether to enable URL validation cron tasks.
+		 *
+		 * This is a feature flag used to control whether the sample set of site URLs are scanned on a daily basis and
+		 * whether post permalinks are scheduled for immediate validation as soon as they are updated by a user who has
+		 * DevTools turned off. This conditional flag will be removed once Site Scanning is implemented, likely in v2.2.
+		 *
+		 * @link https://github.com/ampproject/amp-wp/issues/5750
+		 * @link https://github.com/ampproject/amp-wp/issues/4779
+		 * @link https://github.com/ampproject/amp-wp/issues/4795
+		 * @link https://github.com/ampproject/amp-wp/issues/4719
+		 * @link https://github.com/ampproject/amp-wp/issues/5671
+		 * @link https://github.com/ampproject/amp-wp/issues/5101
+		 * @link https://github.com/ampproject/amp-wp/issues?q=label%3A%22Site+Scanning%22
+		 *
+		 * @param bool $enabled Enabled.
+		 * @internal
+		 */
+		return apply_filters( 'amp_temp_validation_cron_tasks_enabled', false );
+	}
 
 	/**
 	 * Class constructor.
