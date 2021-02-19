@@ -8,6 +8,7 @@ namespace AmpProject\AmpWP\Tests\Validation;
 use AmpProject\AmpWP\BackgroundTask\BackgroundTaskDeactivator;
 use AmpProject\AmpWP\BackgroundTask\SingleScheduledBackgroundTask;
 use AmpProject\AmpWP\DevTools\UserAccess;
+use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
@@ -49,6 +50,17 @@ final class SavePostValidationEventTest extends WP_UnitTestCase {
 		$this->assertInstanceof( SavePostValidationEvent::class, $this->test_instance );
 		$this->assertInstanceof( Service::class, $this->test_instance );
 		$this->assertInstanceof( Registerable::class, $this->test_instance );
+		$this->assertInstanceof( Conditional::class, $this->test_instance );
+	}
+
+	/** @covers ::is_needed() */
+	public function test_is_needed() {
+		$this->assertFalse( SavePostValidationEvent::is_needed() );
+
+		add_filter( 'amp_temp_validation_cron_tasks_enabled', '__return_true' );
+		$this->assertTrue( SavePostValidationEvent::is_needed() );
+
+		remove_filter( 'amp_temp_validation_cron_tasks_enabled', '__return_true' );
 	}
 
 	/**
