@@ -75,7 +75,13 @@ class ValidationCountsRestControllerTest extends DependencyInjectedTestCase {
 		$request = new WP_REST_Request( 'GET', '/amp/v1/unreviewed-validation-counts' );
 
 		$response = rest_get_server()->dispatch( $request );
-		$this->assertEquals( [ 'validated_urls' => 0, 'errors' => 0 ], $response->get_data() );
+		$this->assertEquals(
+			[
+				'validated_urls' => 0,
+				'errors'         => 0,
+			],
+			$response->get_data()
+		);
 
 		AMP_Validated_URL_Post_Type::store_validation_errors(
 			[
@@ -87,7 +93,13 @@ class ValidationCountsRestControllerTest extends DependencyInjectedTestCase {
 		);
 
 		$response = rest_get_server()->dispatch( $request );
-		$this->assertEquals( [ 'validated_urls' => 1, 'errors' => 1 ], $response->get_data() );
+		$this->assertEquals(
+			[
+				'validated_urls' => 1,
+				'errors'         => 1,
+			],
+			$response->get_data()
+		);
 	}
 
 	/**
