@@ -36,6 +36,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	const { setAsyncError } = useAsyncError();
 	const { error, setError } = useContext( ErrorContext );
 
+	const [ templateModeWasOverridden, setTemplateModeWasOverridden ] = useState( false );
 	const [ themeWasOverridden, setThemeWasOverridden ] = useState( false );
 	const [ themes, setThemes ] = useState( null );
 	const [ fetchingThemes, setFetchingThemes ] = useState( false );
@@ -82,8 +83,21 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	const [ downloadingThemeError, setDownloadingThemeError ] = useState( null );
 
 	/**
-	 * If the currently selected theme is not installable, is the active theme, or unavailable for selection, set the
-	 * Reader theme to AMP Legacy.
+	 * If the currently selected Reader theme is the same as the active theme, change the template mode from Reader to Transitional.
+	 */
+	useEffect( () => {
+		if ( templateModeWasOverridden ) { // Only do this once.
+			return;
+		}
+
+		if ( 'reader' === originalOptions.theme_support && originalSelectedTheme.availability === 'active' ) {
+			updateOptions( { theme_support: 'transitional' } );
+			setTemplateModeWasOverridden( true );
+		}
+	}, [ originalOptions.theme_support, originalSelectedTheme.availability, templateModeWasOverridden, updateOptions ] );
+
+	/**
+	 * If the currently selected theme is not installable or unavailable for selection, set the Reader theme to AMP Legacy.
 	 */
 	useEffect( () => {
 		if ( themeWasOverridden ) { // Only do this once.
@@ -92,7 +106,6 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 
 		if (
 			selectedTheme.availability === 'non-installable' ||
-			originalSelectedTheme.availability === 'active' ||
 			USING_FALLBACK_READER_THEME
 		) {
 			updateOptions( { reader_theme: LEGACY_THEME_SLUG } );
