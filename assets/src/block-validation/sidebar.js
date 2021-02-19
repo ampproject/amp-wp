@@ -130,26 +130,18 @@ export function Sidebar() {
 				</PanelBody>
 			) }
 
-			{ isDraft && 0 === validationErrors.length && (
+			{ ! isPostDirty && isDraft && 0 === validationErrors.length && (
 				<PanelBody opened={ true }>
 					{ isFetchingErrors ? <Loading /> : (
-						<>
-							<PanelRow>
-								<p>
-									{ __( 'Validation issues will be checked for when the post is saved.', 'amp' ) }
-								</p>
-							</PanelRow>
-							{ isPostDirty && (
-								<PanelRow>
-									<Button isSecondary onClick={ () => savePost( { isPreview: true } ) }>
-										{ __( 'Save draft and validate now', 'amp' ) }
-									</Button>
-								</PanelRow>
-							) }
-						</>
+						<PanelRow>
+							<p>
+								{ __( 'Validation issues will be checked for when the post is saved.', 'amp' ) }
+							</p>
+						</PanelRow>
 					) }
 				</PanelBody>
 			) }
+
 			{ ! isDraft && validationErrors.length === 0 && (
 				<PanelBody opened={ true }>
 					{ isFetchingErrors ? <Loading /> : (
@@ -160,7 +152,7 @@ export function Sidebar() {
 				</PanelBody>
 			) }
 
-			{ isPostDirty && ! isDraft && (
+			{ ! isFetchingErrors && isPostDirty && (
 				<PanelBody opened={ true }>
 					<PanelRow>
 						<p>
@@ -168,9 +160,15 @@ export function Sidebar() {
 						</p>
 					</PanelRow>
 					<PanelRow>
-						<Button isSecondary onClick={ () => autosave( { isPreview: true } ) }>
-							{ __( 'Re-validate now', 'amp' ) }
-						</Button>
+						{ isDraft ? (
+							<Button isSecondary onClick={ () => savePost( { isPreview: true } ) }>
+								{ __( 'Save draft and validate now', 'amp' ) }
+							</Button>
+						) : (
+							<Button isSecondary onClick={ () => autosave( { isPreview: true } ) }>
+								{ __( 'Re-validate now', 'amp' ) }
+							</Button>
+						) }
 					</PanelRow>
 				</PanelBody>
 			) }
