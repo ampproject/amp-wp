@@ -113,6 +113,7 @@ export function useValidationErrorStateUpdates() {
 		}
 
 		if ( isPreviewingPost ) {
+			setIsFetchingErrors( true );
 			setShouldValidate( true );
 			setHasRequestedPreview( true );
 			return;
@@ -122,8 +123,9 @@ export function useValidationErrorStateUpdates() {
 			return;
 		}
 
+		setIsFetchingErrors( true );
 		setShouldValidate( true );
-	}, [ isAutosavingPost, isPreviewingPost, isSavingPost ] );
+	}, [ isAutosavingPost, isPreviewingPost, isSavingPost, setIsFetchingErrors ] );
 
 	/**
 	 * Fetches validation errors for the current post's URL after the editor has
@@ -141,7 +143,6 @@ export function useValidationErrorStateUpdates() {
 
 		( async () => {
 			setBlockOrderBeforeSave( getClientIdsWithDescendants() );
-			setIsFetchingErrors( true );
 
 			const queryArgs = {};
 

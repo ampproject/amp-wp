@@ -31,14 +31,14 @@ export function Sidebar() {
 
 	const {
 		ampCompatibilityBroken,
-		isDraft,
+		isAutoDraft,
 		isFetchingErrors,
 		isPostDirty,
 		isShowingReviewed,
 		reviewLink,
 	} = useSelect( ( select ) => ( {
 		ampCompatibilityBroken: select( BLOCK_VALIDATION_STORE_KEY ).getAMPCompatibilityBroken(),
-		isDraft: [ 'draft', 'auto-draft' ].indexOf( select( 'core/editor' )?.getEditedPostAttribute( 'status' ) ) !== -1,
+		isAutoDraft: select( 'core/editor' )?.getEditedPostAttribute( 'status' ) === 'auto-draft',
 		isFetchingErrors: select( BLOCK_VALIDATION_STORE_KEY ).getIsFetchingErrors(),
 		isPostDirty: select( BLOCK_VALIDATION_STORE_KEY ).getIsPostDirty(),
 		isShowingReviewed: select( BLOCK_VALIDATION_STORE_KEY ).getIsShowingReviewed(),
@@ -130,47 +130,45 @@ export function Sidebar() {
 				</PanelBody>
 			) }
 
-			{ ! isPostDirty && isDraft && 0 === validationErrors.length && (
+			{ isFetchingErrors ? (
 				<PanelBody opened={ true }>
-					{ isFetchingErrors ? <Loading /> : (
-						<PanelRow>
-							<p>
-								{ __( 'Validation issues will be checked for when the post is saved.', 'amp' ) }
-							</p>
-						</PanelRow>
+					<Loading />
+				</PanelBody>
+			) : (
+				<>
+					{ ! isPostDirty && validationErrors.length === 0 && (
+						<PanelBody opened={ true }>
+							<PanelRow>
+								<p>
+									{ isAutoDraft
+										? __( 'Validation issues will be checked for when the post is saved.', 'amp' )
+										: __( 'There are no AMP validation issues.', 'amp' ) }
+								</p>
+							</PanelRow>
+						</PanelBody>
 					) }
-				</PanelBody>
-			) }
 
-			{ ! isDraft && validationErrors.length === 0 && (
-				<PanelBody opened={ true }>
-					{ isFetchingErrors ? <Loading /> : (
-						<p>
-							{ __( 'There are no AMP validation issues.', 'amp' ) }
-						</p>
+					{ isPostDirty && (
+						<PanelBody opened={ true }>
+							<PanelRow>
+								<p>
+									{ __( 'The post content has been modified since the last AMP validation.', 'amp' ) }
+								</p>
+							</PanelRow>
+							<PanelRow>
+								{ isAutoDraft ? (
+									<Button isSecondary onClick={ () => savePost( { isPreview: true } ) }>
+										{ __( 'Save draft and validate now', 'amp' ) }
+									</Button>
+								) : (
+									<Button isSecondary onClick={ () => autosave( { isPreview: true } ) }>
+										{ __( 'Re-validate now', 'amp' ) }
+									</Button>
+								) }
+							</PanelRow>
+						</PanelBody>
 					) }
-				</PanelBody>
-			) }
-
-			{ ! isFetchingErrors && isPostDirty && (
-				<PanelBody opened={ true }>
-					<PanelRow>
-						<p>
-							{ __( 'The post content has been modified since the last AMP validation.', 'amp' ) }
-						</p>
-					</PanelRow>
-					<PanelRow>
-						{ isDraft ? (
-							<Button isSecondary onClick={ () => savePost( { isPreview: true } ) }>
-								{ __( 'Save draft and validate now', 'amp' ) }
-							</Button>
-						) : (
-							<Button isSecondary onClick={ () => autosave( { isPreview: true } ) }>
-								{ __( 'Re-validate now', 'amp' ) }
-							</Button>
-						) }
-					</PanelRow>
-				</PanelBody>
+				</>
 			) }
 
 			{ 0 < validationErrors.length && (
@@ -181,13 +179,11 @@ export function Sidebar() {
 						) ) }
 					</ul>
 				)
-					: ! isDraft && (
+					: ! isAutoDraft && (
 						<PanelBody opened={ true }>
-							{ isFetchingErrors ? <Loading /> : (
-								<p>
-									{ __( 'All AMP validation issues have been reviewed.', 'amp' ) }
-								</p>
-							) }
+							<p>
+								{ __( 'All AMP validation issues have been reviewed.', 'amp' ) }
+							</p>
 						</PanelBody>
 					)
 			) }
