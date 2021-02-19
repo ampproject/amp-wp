@@ -83,7 +83,8 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	const [ downloadingThemeError, setDownloadingThemeError ] = useState( null );
 
 	/**
-	 * If the currently selected Reader theme is the same as the active theme, change the template mode from Reader to Transitional.
+	 * If the currently selected Reader theme is the same as the active theme, change the template mode from Reader to
+	 * Transitional and also set the Reader theme to AMP Legacy.
 	 */
 	useEffect( () => {
 		if ( templateModeWasOverridden ) { // Only do this once.
@@ -91,7 +92,12 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 		}
 
 		if ( 'reader' === originalOptions.theme_support && originalSelectedTheme.availability === 'active' ) {
-			updateOptions( { theme_support: 'transitional' } );
+			updateOptions(
+				{
+					theme_support: 'transitional',
+					reader_theme: LEGACY_THEME_SLUG,
+				},
+			);
 			setTemplateModeWasOverridden( true );
 		}
 	}, [ originalOptions.theme_support, originalSelectedTheme.availability, templateModeWasOverridden, updateOptions ] );
