@@ -11,7 +11,6 @@ namespace AmpProject\AmpWP\Validation;
 use AMP_Validated_URL_Post_Type;
 use AMP_Validation_Error_Taxonomy;
 use AmpProject\AmpWP\DevTools\UserAccess;
-use AmpProject\AmpWP\Services;
 use WP_Error;
 use WP_REST_Controller;
 use AmpProject\AmpWP\Infrastructure\Delayed;
@@ -29,6 +28,7 @@ use WP_REST_Server;
  */
 final class ValidationCountsRestController extends WP_REST_Controller implements Delayed, Service, Registerable {
 
+	/** @var UserAccess DevTools User Access */
 	private $dev_tools_user_access;
 
 	/**
@@ -46,8 +46,8 @@ final class ValidationCountsRestController extends WP_REST_Controller implements
 	 * @param UserAccess $user_access Instance of UserAccess class.
 	 */
 	public function __construct( UserAccess $user_access ) {
-		$this->namespace = 'amp/v1';
-		$this->rest_base = 'unreviewed-validation-counts';
+		$this->namespace             = 'amp/v1';
+		$this->rest_base             = 'unreviewed-validation-counts';
 		$this->dev_tools_user_access = $user_access;
 	}
 
@@ -77,7 +77,17 @@ final class ValidationCountsRestController extends WP_REST_Controller implements
 	 * @return true|WP_Error True if the request has permission; WP_Error object otherwise.
 	 */
 	public function get_items_permissions_check( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		return $this->dev_tools_user_access->is_user_enabled();
+		$dev_tools_access = $this->dev_tools_user_access->is_user_enabled();
+
+		if ( ! $dev_tools_access ) {
+			return new WP_Error(
+				'amp_rest_no_dev_tools_access',
+				__( 'Sorry, you are not allowed to view unreviewed counts for validation errors.', 'amp' ),
+				[ 'status' => rest_authorization_required_code() ]
+			);
+		}
+
+		return true;
 	}
 
 	/**
@@ -87,12 +97,12 @@ final class ValidationCountsRestController extends WP_REST_Controller implements
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function get_items( $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		$unreviewed_validated_url_count = AMP_Validated_URL_Post_Type::get_validation_error_urls_count();
+		$unreviewed_validated_url_count    = AMP_Validated_URL_Post_Type::get_validation_error_urls_count();
 		$unreviewed_validation_error_count = AMP_Validation_Error_Taxonomy::get_validation_error_count(
 			[
 				'group' => [
 					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
 				],
 			]
 		);
@@ -120,11 +130,11 @@ final class ValidationCountsRestController extends WP_REST_Controller implements
 					'type'     => 'integer',
 					'readonly' => true,
 				],
-				'errors'     => [
+				'errors'          => [
 					'type'     => 'integer',
 					'readonly' => true,
-				]
-			]
+				],
+			],
 		];
 	}
 }

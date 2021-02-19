@@ -152,19 +152,9 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 			],
 		];
 
-		$invalid_url_post_id = AMP_Validated_URL_Post_Type::store_validation_errors(
-			[
-				[
-					'code' => 'hello',
-				],
-			],
-			get_permalink( self::factory()->post->create() )
-		);
-		$this->assertNotInstanceOf( 'WP_Error', $invalid_url_post_id );
-
 		AMP_Validated_URL_Post_Type::update_validated_url_menu_item();
 
-		$this->assertSame( 'Validated URLs <span class="awaiting-mod"><span class="new-validation-error-urls-count">1</span></span>', $submenu[ AMP_Options_Manager::OPTION_NAME ][2][0] );
+		$this->assertSame( 'Validated URLs <span class="awaiting-mod"><span id="new-validation-url-count" class="loading"></span></span>', $submenu[ AMP_Options_Manager::OPTION_NAME ][2][0] );
 
 		$submenu = $original_submenu;
 	}
