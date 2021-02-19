@@ -5,10 +5,8 @@
  * @package AMP
  */
 
-use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Admin\OptionsMenu;
 use AmpProject\AmpWP\Icon;
-use AmpProject\AmpWP\PluginRegistry;
 use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Services;
@@ -269,13 +267,6 @@ class AMP_Validated_URL_Post_Type {
 	 */
 	public static function add_admin_hooks() {
 		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_post_list_screen_scripts' ] );
-
-		$dev_tools_user_access = Services::get( 'dev_tools.user_access' );
-
-		if ( $dev_tools_user_access->is_user_enabled() ) {
-			add_filter( 'dashboard_glance_items', [ __CLASS__, 'filter_dashboard_glance_items' ] );
-			add_action( 'rightnow_end', [ __CLASS__, 'print_dashboard_glance_styles' ] );
-		}
 
 		// Edit post screen hooks.
 		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_edit_post_screen_scripts' ] );
@@ -2935,69 +2926,6 @@ class AMP_Validated_URL_Post_Type {
 			add_query_arg( rawurlencode_deep( $args ), admin_url() ),
 			self::NONCE_ACTION
 		);
-	}
-
-	/**
-	 * Filter At a Glance items add AMP Validation Errors.
-	 *
-	 * @param array $items At a glance items.
-	 * @return array Items.
-	 */
-	public static function filter_dashboard_glance_items( $items ) {
-		$count = self::get_validation_error_urls_count();
-
-		if ( 0 !== $count ) {
-			$items[] = sprintf(
-				'<a class="amp-validation-errors" href="%s">%s</a>',
-				esc_url(
-					admin_url(
-						add_query_arg(
-							[
-								'post_type' => self::POST_TYPE_SLUG,
-								AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => [
-									AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
-									AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
-								],
-							],
-							'edit.php'
-						)
-					)
-				),
-				esc_html(
-					sprintf(
-						/* translators: %s is the validation error count */
-						_n(
-							'%s URL w/ new AMP errors',
-							'%s URLs w/ new AMP errors',
-							$count,
-							'amp'
-						),
-						number_format_i18n( $count )
-					)
-				)
-			);
-		}
-		return $items;
-	}
-
-	/**
-	 * Print styles for the At a Glance widget.
-	 */
-	public static function print_dashboard_glance_styles() {
-		?>
-		<style>
-			#dashboard_right_now .amp-validation-errors {
-				color: #a00;
-			}
-			#dashboard_right_now .amp-validation-errors:before {
-				content: "\f534";
-			}
-			#dashboard_right_now .amp-validation-errors:hover {
-				color: #dc3232;
-				border: none;
-			}
-		</style>
-		<?php
 	}
 
 	/**
