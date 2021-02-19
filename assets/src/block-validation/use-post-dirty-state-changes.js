@@ -13,7 +13,7 @@ import { BLOCK_VALIDATION_STORE_KEY } from './store';
 const DELAY_MS = 500;
 
 export function usePostDirtyStateChanges() {
-	const [ content, setContent ] = useState();
+	const [ content, setContent ] = useState( null );
 	const [ updatedContent, setUpdatedContent ] = useState();
 	const subscription = useRef( null );
 	const { setIsPostDirty } = useDispatch( BLOCK_VALIDATION_STORE_KEY );
@@ -30,36 +30,49 @@ export function usePostDirtyStateChanges() {
 	} ), [] );
 
 	/**
+	 * Remove subscription when component is unmounted.
+	 */
+	useEffect( () => () => {
+		if ( subscription.current ) {
+			subscription.current();
+		}
+	}, [] );
+
+	/**
 	 * Post is no longer in a dirty state after save.
 	 *
 	 * We're using a separate effect for resetting the flag since the listener
 	 * gets unsubscribed from the store changes whenever post gets into a dirty
 	 * state.
-	 *
-	 * The following effect (indirectly) resubscribes the listener once the post
-	 * is no longer in a dirty state.
 	 */
 	useEffect( () => {
 		if ( isPostDirty && isSavingOrPreviewingPost ) {
 			setIsPostDirty( false );
+			setContent( null );
 		}
 	}, [ isPostDirty, isSavingOrPreviewingPost, setIsPostDirty ] );
 
 	/**
 	 * Whenever a fresh post content differs from the one that is stored in the
 	 * state, it's safe to assume that the post is in a dirty state.
+	 *
+	 * When the content is null, we're resetting both the `content` and the
+	 * `updatedContent`.
 	 */
 	useEffect( () => {
-		if ( ! content ) {
-			setContent( updatedContent );
+		if ( content === null ) {
+			const initialContent = getEditedPostContent();
+
+			setContent( initialContent );
+			setUpdatedContent( initialContent );
+
 			return;
 		}
 
 		if ( updatedContent !== content ) {
 			setIsPostDirty( true );
-			setContent( updatedContent );
 		}
-	}, [ content, setIsPostDirty, updatedContent ] );
+	}, [ content, getEditedPostContent, setIsPostDirty, updatedContent ] );
 
 	/**
 	 * Keep internal content state in sync with editor state.
@@ -83,12 +96,5 @@ export function usePostDirtyStateChanges() {
 		} else if ( ! isSavingOrPreviewingPost && ! isPostDirty && ! subscription.current ) {
 			subscription.current = subscribe( debouncedListener );
 		}
-
-		return () => {
-			if ( subscription.current ) {
-				subscription.current();
-				subscription.current = null;
-			}
-		};
 	}, [ debouncedListener, isPostDirty, isSavingOrPreviewingPost ] );
 }
