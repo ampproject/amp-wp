@@ -27,18 +27,18 @@ import { BLOCK_VALIDATION_STORE_KEY } from './store';
  */
 export function Sidebar() {
 	const { setIsShowingReviewed } = useDispatch( BLOCK_VALIDATION_STORE_KEY );
-	const { savePost } = useDispatch( 'core/editor' );
+	const { autosave, savePost } = useDispatch( 'core/editor' );
 
 	const {
 		ampCompatibilityBroken,
-		isEditedPostNew,
+		isDraft,
 		isFetchingErrors,
 		isPostDirty,
 		isShowingReviewed,
 		reviewLink,
 	} = useSelect( ( select ) => ( {
 		ampCompatibilityBroken: select( BLOCK_VALIDATION_STORE_KEY ).getAMPCompatibilityBroken(),
-		isEditedPostNew: select( 'core/editor' )?.isEditedPostNew(),
+		isDraft: [ 'draft', 'auto-draft' ].indexOf( select( 'core/editor' )?.getEditedPostAttribute( 'status' ) ) !== -1,
 		isFetchingErrors: select( BLOCK_VALIDATION_STORE_KEY ).getIsFetchingErrors(),
 		isPostDirty: select( BLOCK_VALIDATION_STORE_KEY ).getIsPostDirty(),
 		isShowingReviewed: select( BLOCK_VALIDATION_STORE_KEY ).getIsShowingReviewed(),
@@ -83,23 +83,21 @@ export function Sidebar() {
 
 	return (
 		<div className="amp-sidebar">
-			{
-				ampCompatibilityBroken && (
-					<div className="amp-sidebar__broken-container">
-						<div className="amp-sidebar__broken">
-							<div className="amp-sidebar__validation-errors-kept-icon">
-								<AMPValidationErrorsKeptIcon />
-							</div>
-							<div>
-								<h3>
-									{ __( 'Invalid markup kept', 'amp' ) }
-								</h3>
-								{ __( 'The permalink will not be served as valid AMP.', 'amp' ) }
-							</div>
+			{ ampCompatibilityBroken && (
+				<div className="amp-sidebar__broken-container">
+					<div className="amp-sidebar__broken">
+						<div className="amp-sidebar__validation-errors-kept-icon">
+							<AMPValidationErrorsKeptIcon />
+						</div>
+						<div>
+							<h3>
+								{ __( 'Invalid markup kept', 'amp' ) }
+							</h3>
+							{ __( 'The permalink will not be served as valid AMP.', 'amp' ) }
 						</div>
 					</div>
-				)
-			}
+				</div>
+			) }
 			{ 0 < validationErrors.length && (
 				<PanelBody opened={ true } className="amp-sidebar__description-panel">
 					<div className="amp-sidebar__validation-errors-icon">
@@ -132,29 +130,27 @@ export function Sidebar() {
 				</PanelBody>
 			) }
 
-			{
-				isEditedPostNew && 0 === validationErrors.length && (
-					<PanelBody opened={ true }>
-						{ isFetchingErrors ? <Loading /> : (
-							<>
+			{ isDraft && 0 === validationErrors.length && (
+				<PanelBody opened={ true }>
+					{ isFetchingErrors ? <Loading /> : (
+						<>
+							<PanelRow>
+								<p>
+									{ __( 'Validation issues will be checked for when the post is saved.', 'amp' ) }
+								</p>
+							</PanelRow>
+							{ isPostDirty && (
 								<PanelRow>
-									<p>
-										{ __( 'Validation issues will be checked for when the post is saved.', 'amp' ) }
-									</p>
+									<Button isSecondary onClick={ () => savePost( { isPreview: true } ) }>
+										{ __( 'Save draft and validate now', 'amp' ) }
+									</Button>
 								</PanelRow>
-								{ isPostDirty && (
-									<PanelRow>
-										<Button isSecondary onClick={ () => savePost( { isPreview: true } ) }>
-											{ __( 'Save draft and validate now', 'amp' ) }
-										</Button>
-									</PanelRow>
-								) }
-							</>
-						) }
-					</PanelBody>
-				)
-			}
-			{ ! isEditedPostNew && validationErrors.length === 0 && (
+							) }
+						</>
+					) }
+				</PanelBody>
+			) }
+			{ ! isDraft && validationErrors.length === 0 && (
 				<PanelBody opened={ true }>
 					{ isFetchingErrors ? <Loading /> : (
 						<p>
@@ -164,7 +160,7 @@ export function Sidebar() {
 				</PanelBody>
 			) }
 
-			{ isPostDirty && ! isEditedPostNew && (
+			{ isPostDirty && ! isDraft && (
 				<PanelBody opened={ true }>
 					<PanelRow>
 						<p>
@@ -172,7 +168,7 @@ export function Sidebar() {
 						</p>
 					</PanelRow>
 					<PanelRow>
-						<Button isSecondary onClick={ () => savePost( { isPreview: true } ) }>
+						<Button isSecondary onClick={ () => autosave( { isPreview: true } ) }>
 							{ __( 'Re-validate now', 'amp' ) }
 						</Button>
 					</PanelRow>
@@ -187,7 +183,7 @@ export function Sidebar() {
 						) ) }
 					</ul>
 				)
-					: ! isEditedPostNew && (
+					: ! isDraft && (
 						<PanelBody opened={ true }>
 							{ isFetchingErrors ? <Loading /> : (
 								<p>
