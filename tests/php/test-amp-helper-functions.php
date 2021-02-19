@@ -1123,12 +1123,16 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 	 * @covers ::amp_add_generator_metadata()
 	 */
 	public function test_amp_add_generator_metadata() {
+		if ( ! wp_get_theme( 'twentynineteen' )->exists() ) {
+			$this->markTestSkipped( 'Theme twentynineteen not installed.' );
+		}
 		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 
 		$get_generator_tag = static function() {
 			return get_echo( 'amp_add_generator_metadata' );
 		};
 
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
 		$output = $get_generator_tag();
 		$this->assertStringContains( 'mode=reader', $output );
 		$this->assertStringContains( 'theme=legacy', $output );
@@ -1154,6 +1158,12 @@ class Test_AMP_Helper_Functions extends DependencyInjectedTestCase {
 
 		$output = $get_generator_tag();
 		$this->assertStringContains( 'mode=standard', $output );
+		$this->assertStringNotContains( 'theme=', $output );
+
+		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::READER_MODE_SLUG );
+		switch_theme( 'twentynineteen' );
+		$output = $get_generator_tag();
+		$this->assertStringContains( 'mode=transitional', $output );
 		$this->assertStringNotContains( 'theme=', $output );
 	}
 
