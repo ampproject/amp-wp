@@ -13,7 +13,7 @@ use AmpProject\Tag;
  *
  * Functionality to simplify working with Dom\Documents and DOMElements.
  *
- * @internal
+ * @since 0.2
  */
 class AMP_DOM_Utils {
 
