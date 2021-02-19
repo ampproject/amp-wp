@@ -106,8 +106,8 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 			],
 
 			'Do not break the correct viewport tag'       => [
-				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">' . $amp_boilerplate . '</head><body></body></html>',
-				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">' . $amp_boilerplate . '</head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' . $amp_boilerplate . '</head><body></body></html>',
+				'<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">' . $amp_boilerplate . '</head><body></body></html>',
 			],
 
 			'Move charset and viewport tags from body to head' => [
@@ -230,5 +230,31 @@ class Test_AMP_Meta_Sanitizer extends WP_UnitTestCase {
 		$sanitizer->sanitize();
 
 		$this->assertEqualMarkup( $expected_content, $dom->saveHTML() );
+	}
+
+	/** @covers \AMP_Meta_Sanitizer::sanitize() */
+	public function test_initial_scale_removal() {
+		$html = '<html><head><meta name="viewport" content="width=device-width, initial-scale=1"></head></html>';
+
+		$dom       = Document::fromHtml( $html );
+		$sanitizer = new AMP_Meta_Sanitizer( $dom, [] );
+		$sanitizer->sanitize();
+		$this->assertEquals( 'width=device-width', $dom->viewport->getAttribute( 'content' ) );
+
+		$dom       = Document::fromHtml( $html );
+		$sanitizer = new AMP_Meta_Sanitizer( $dom, [ 'remove_initial_scale_viewport_property' => true ] );
+		$sanitizer->sanitize();
+		$this->assertEquals( 'width=device-width', $dom->viewport->getAttribute( 'content' ) );
+
+		$dom       = Document::fromHtml( $html );
+		$sanitizer = new AMP_Meta_Sanitizer( $dom, [ 'remove_initial_scale_viewport_property' => false ] );
+		$sanitizer->sanitize();
+		$this->assertEquals( 'width=device-width,initial-scale=1', $dom->viewport->getAttribute( 'content' ) );
+
+		$html      = '<html><head><meta name="viewport" content="width=device-width, initial-scale=2"></head></html>';
+		$dom       = Document::fromHtml( $html );
+		$sanitizer = new AMP_Meta_Sanitizer( $dom, [ 'remove_initial_scale_viewport_property' => true ] );
+		$sanitizer->sanitize();
+		$this->assertEquals( 'width=device-width,initial-scale=2', $dom->viewport->getAttribute( 'content' ) );
 	}
 }
