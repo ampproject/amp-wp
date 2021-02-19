@@ -159,7 +159,7 @@ export function ReaderThemeCarousel() {
 						{
 							sprintf(
 								/* translators: placeholder is the name of a WordPress theme. */
-								__( 'Your active theme “%s” is not available as a reader theme. If you wish to use it, Transitional mode may be the best option for you.', 'amp' ),
+								__( 'Your active theme “%s” is not listed below because it is AMP-compatible. If you wish to use it, Transitional mode is what you should choose.', 'amp' ),
 								currentTheme.name,
 							)
 						}
