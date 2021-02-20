@@ -35,7 +35,7 @@ final class ValidationCounts implements Service, Registerable, Conditional, Dela
 	 * @return string Registration action to use.
 	 */
 	public static function get_registration_action() {
-		return 'admin_init';
+		return 'admin_enqueue_scripts';
 	}
 
 	/**
@@ -52,7 +52,7 @@ final class ValidationCounts implements Service, Registerable, Conditional, Dela
 	 * Runs on instantiation.
 	 */
 	public function register() {
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
+		$this->enqueue_scripts();
 	}
 
 	/**
