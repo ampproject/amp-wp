@@ -69,7 +69,7 @@ final class ValidationCounts implements Service, Registerable, Conditional, Dela
 			amp_get_asset_url( 'js/' . self::ASSETS_HANDLE . '.js' ),
 			$dependencies,
 			$version,
-			false
+			true
 		);
 
 		wp_enqueue_style(
