@@ -36,7 +36,7 @@ function updateMenuItem( itemEl, count ) {
 /**
  * Updates the 'Validated URLs' and 'Error Index' menu items with their respective unreviewed count.
  *
- * @param {Object} counts Counts for menu items.
+ * @param {any} counts Counts for menu items.
  * @param {number} counts.validated_urls Unreviewed validated URLs count.
  * @param {number} counts.errors Unreviewed validation errors count.
  */
