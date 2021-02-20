@@ -54,7 +54,7 @@ class ValidationCountsTest extends WP_UnitTestCase {
 	 * @covers ::get_registration_action()
 	 */
 	public function test_get_registration_action() {
-		self::assertEquals( 'admin_init', ValidationCounts::get_registration_action() );
+		self::assertEquals( 'admin_enqueue_scripts', ValidationCounts::get_registration_action() );
 	}
 
 	/**
@@ -65,7 +65,8 @@ class ValidationCountsTest extends WP_UnitTestCase {
 	public function test_register() {
 		$this->instance->register();
 
-		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ $this->instance, 'enqueue_scripts' ] ) );
+		$this->assertTrue( wp_script_is( ValidationCounts::ASSETS_HANDLE ) );
+		$this->assertTrue( wp_style_is( ValidationCounts::ASSETS_HANDLE ) );
 	}
 
 	/**
