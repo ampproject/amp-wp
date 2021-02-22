@@ -6,6 +6,7 @@ import { isPlainObject } from 'lodash';
 /**
  * WordPress dependencies
  */
+import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import domReady from '@wordpress/dom-ready';
 
@@ -41,12 +42,6 @@ function updateMenuItem( itemEl, count ) {
  * @param {number} counts.errors Unreviewed validation errors count.
  */
 function updateMenuItemCounts( counts ) {
-	if ( ! isPlainObject( counts ) ) {
-		// eslint-disable-next-line no-console
-		console.error( '[AMP Plugin] An error occurred while retrieving unreviewed validation counts. Received: ' + JSON.stringify( counts ) );
-		counts = {};
-	}
-
 	const { validated_urls: newValidatedUrlCount, errors: newErrorCount } = counts;
 
 	const errorCountEl = document.getElementById( 'new-error-index-count' );
@@ -56,7 +51,43 @@ function updateMenuItemCounts( counts ) {
 	updateMenuItem( validatedUrlsCountEl, newValidatedUrlCount );
 }
 
-domReady( async () => {
-	const counts = await apiFetch( { path: '/amp/v1/unreviewed-validation-counts' } );
-	updateMenuItemCounts( counts );
+/**
+ * Fetches the validation counts only when the AMP submenu is open for the first time.
+ *
+ * @param {HTMLElement} root AMP submenu item.
+ */
+function createObserver( root ) {
+	// let hasIntersected = false;
+
+	const observer = new IntersectionObserver( ( entries ) => {
+		if ( ! entries[ 0 ].isIntersecting ) {
+			return;
+		}
+
+		observer.unobserve( entries[ 0 ].target );
+
+		apiFetch( { path: '/amp/v1/unreviewed-validation-counts' } ).then( ( counts ) => {
+			updateMenuItemCounts( counts );
+		} ).catch( ( error ) => {
+			updateMenuItemCounts( { validated_urls: 0, errors: 0 } );
+
+			const message = error?.message || __( 'An unknown error occurred while retrieving the validation counts', 'amp' );
+			// eslint-disable-next-line no-console
+			console.error( `[AMP Plugin] ${ message }` );
+		} );
+	}, { root } );
+
+	const target = root.querySelector( 'ul' );
+	observer.observe( target );
+}
+
+domReady( () => {
+	const ampMenuItem = document.getElementById( 'toplevel_page_amp-options' );
+
+	// Bail if the AMP submenu is not in the DOM.
+	if ( ! ampMenuItem ) {
+		return;
+	}
+
+	createObserver( ampMenuItem );
 } );
