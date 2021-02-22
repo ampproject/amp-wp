@@ -6,6 +6,7 @@ import { isEqual } from 'lodash';
 /**
  * WordPress dependencies
  */
+import { usePrevious } from '@wordpress/compose';
 import { useEffect, useRef, useState } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
@@ -67,7 +68,7 @@ export function useValidationErrorStateUpdates() {
 	const [ blockOrderBeforeSave, setBlockOrderBeforeSave ] = useState( [] );
 	const [ hasRequestedPreview, setHasRequestedPreview ] = useState( false );
 	const [ previousValidationErrors, setPreviousValidationErrors ] = useState( [] );
-	const [ shouldValidate, setShouldValidate ] = useState( true );
+	const [ shouldValidate, setShouldValidate ] = useState( false );
 	const unmounted = useRef( false );
 
 	const { setIsFetchingErrors, setReviewLink, setValidationErrors } = useDispatch( BLOCK_VALIDATION_STORE_KEY );
@@ -77,7 +78,7 @@ export function useValidationErrorStateUpdates() {
 		getBlock,
 		getClientIdsWithDescendants,
 		isAutosavingPost,
-		isCleanNewPost,
+		isEditedPostNew,
 		isPreviewingPost,
 		isSavingPost,
 		previewLink,
@@ -87,12 +88,14 @@ export function useValidationErrorStateUpdates() {
 		getBlock: select( 'core/block-editor' ).getBlock,
 		getClientIdsWithDescendants: select( 'core/block-editor' ).getClientIdsWithDescendants,
 		isAutosavingPost: select( 'core/editor' ).isAutosavingPost(),
-		isCleanNewPost: select( 'core/editor' ).isCleanNewPost(),
+		isEditedPostNew: select( 'core/editor' ).isEditedPostNew(),
 		isPreviewingPost: select( 'core/editor' ).isPreviewingPost(),
 		isSavingPost: select( 'core/editor' ).isSavingPost(),
 		previewLink: select( 'core/editor' ).getEditedPostPreviewLink(),
 		validationErrors: select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors(),
 	} ), [] );
+
+	const wasEditedPostNew = usePrevious( isEditedPostNew );
 
 	/**
 	 * Set unmounted to true on unmount to prevent state updates after async
@@ -101,6 +104,15 @@ export function useValidationErrorStateUpdates() {
 	useEffect( () => () => {
 		unmounted.current = true;
 	}, [] );
+
+	/**
+	 * Trigger validation whens editor loads only for existing posts.
+	 */
+	useEffect( () => {
+		if ( ! isEditedPostNew && ! wasEditedPostNew ) {
+			setShouldValidate( true );
+		}
+	}, [ isEditedPostNew, wasEditedPostNew ] );
 
 	/**
 	 * Set flags when a post is being saved.
@@ -115,7 +127,6 @@ export function useValidationErrorStateUpdates() {
 		}
 
 		if ( isPreviewingPost ) {
-			setIsFetchingErrors( true );
 			setShouldValidate( true );
 			setHasRequestedPreview( true );
 			return;
@@ -125,20 +136,25 @@ export function useValidationErrorStateUpdates() {
 			return;
 		}
 
-		setIsFetchingErrors( true );
 		setShouldValidate( true );
-	}, [ isAutosavingPost, isPreviewingPost, isSavingPost, setIsFetchingErrors ] );
+	}, [ isAutosavingPost, isPreviewingPost, isSavingPost ] );
 
 	/**
 	 * Fetches validation errors for the current post's URL after the editor has
 	 * loaded and following subsequent saves.
 	 */
 	useEffect( () => {
-		if ( isSavingPost || isCleanNewPost || ! shouldValidate ) {
+		if ( ! shouldValidate ) {
 			return;
 		}
 
-		// A preview link may not be available right after the saving a post.
+		// Indicate loading state as soon as post is started to be saved.
+		if ( isSavingPost ) {
+			setIsFetchingErrors( true );
+			return;
+		}
+
+		// A preview link may not be available right after saving a post.
 		if ( hasRequestedPreview && ! isURL( previewLink ) ) {
 			return;
 		}
@@ -170,7 +186,7 @@ export function useValidationErrorStateUpdates() {
 			setReviewLink( newValidation.review_link );
 			setIsFetchingErrors( false );
 		} )();
-	}, [ currentPostId, getClientIdsWithDescendants, hasRequestedPreview, isCleanNewPost, isSavingPost, previewLink, setIsFetchingErrors, setReviewLink, setValidationErrors, shouldValidate ] );
+	}, [ currentPostId, getClientIdsWithDescendants, hasRequestedPreview, isSavingPost, previewLink, setIsFetchingErrors, setReviewLink, setValidationErrors, shouldValidate ] );
 
 	/**
 	 * Runs an equality check when validation errors are received before running
