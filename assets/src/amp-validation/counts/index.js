@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import { isPlainObject } from 'lodash';
-
-/**
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
@@ -24,8 +19,6 @@ import './style.css';
  * @param {number} count Count to set.
  */
 function updateMenuItem( itemEl, count ) {
-	count = Math.abs( count );
-
 	if ( isNaN( count ) || count === 0 ) {
 		itemEl.parentNode.parentNode.removeChild( itemEl.parentNode );
 	} else {
@@ -37,7 +30,7 @@ function updateMenuItem( itemEl, count ) {
 /**
  * Updates the 'Validated URLs' and 'Error Index' menu items with their respective unreviewed count.
  *
- * @param {any} counts Counts for menu items.
+ * @param {Object} counts Counts for menu items.
  * @param {number} counts.validated_urls Unreviewed validated URLs count.
  * @param {number} counts.errors Unreviewed validation errors count.
  */
@@ -45,10 +38,14 @@ function updateMenuItemCounts( counts ) {
 	const { validated_urls: newValidatedUrlCount, errors: newErrorCount } = counts;
 
 	const errorCountEl = document.getElementById( 'new-error-index-count' );
-	const validatedUrlsCountEl = document.getElementById( 'new-validation-url-count' );
+	if ( errorCountEl ) {
+		updateMenuItem( errorCountEl, newErrorCount );
+	}
 
-	updateMenuItem( errorCountEl, newErrorCount );
-	updateMenuItem( validatedUrlsCountEl, newValidatedUrlCount );
+	const validatedUrlsCountEl = document.getElementById( 'new-validation-url-count' );
+	if ( validatedUrlsCountEl ) {
+		updateMenuItem( validatedUrlsCountEl, newValidatedUrlCount );
+	}
 }
 
 /**
