@@ -31,7 +31,7 @@ export function Sidebar() {
 
 	const {
 		ampCompatibilityBroken,
-		isCleanNewPost,
+		isEditedPostNew,
 		isDraft,
 		isFetchingErrors,
 		isPostDirty,
@@ -39,7 +39,7 @@ export function Sidebar() {
 		reviewLink,
 	} = useSelect( ( select ) => ( {
 		ampCompatibilityBroken: select( BLOCK_VALIDATION_STORE_KEY ).getAMPCompatibilityBroken(),
-		isCleanNewPost: select( 'core/editor' ).isCleanNewPost(),
+		isEditedPostNew: select( 'core/editor' ).isEditedPostNew(),
 		isDraft: [ 'draft', 'auto-draft' ].indexOf( select( 'core/editor' )?.getEditedPostAttribute( 'status' ) ) !== -1,
 		isFetchingErrors: select( BLOCK_VALIDATION_STORE_KEY ).getIsFetchingErrors(),
 		isPostDirty: select( BLOCK_VALIDATION_STORE_KEY ).getIsPostDirty(),
@@ -142,7 +142,7 @@ export function Sidebar() {
 						<PanelBody opened={ true }>
 							<PanelRow>
 								<p>
-									{ isCleanNewPost
+									{ isEditedPostNew
 										? __( 'Validation issues will be checked for when the post is saved.', 'amp' )
 										: __( 'There are no AMP validation issues.', 'amp' ) }
 								</p>
@@ -154,7 +154,9 @@ export function Sidebar() {
 						<PanelBody opened={ true }>
 							<PanelRow>
 								<p>
-									{ __( 'The post content has been modified since the last AMP validation.', 'amp' ) }
+									{ isEditedPostNew
+										? __( 'Validation issues will be checked for when the post is saved.', 'amp' )
+										: __( 'The post content has been modified since the last AMP validation.', 'amp' ) }
 								</p>
 							</PanelRow>
 							<PanelRow>
