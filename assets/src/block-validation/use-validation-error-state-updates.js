@@ -77,6 +77,7 @@ export function useValidationErrorStateUpdates() {
 		getBlock,
 		getClientIdsWithDescendants,
 		isAutosavingPost,
+		isCleanNewPost,
 		isPreviewingPost,
 		isSavingPost,
 		previewLink,
@@ -86,6 +87,7 @@ export function useValidationErrorStateUpdates() {
 		getBlock: select( 'core/block-editor' ).getBlock,
 		getClientIdsWithDescendants: select( 'core/block-editor' ).getClientIdsWithDescendants,
 		isAutosavingPost: select( 'core/editor' ).isAutosavingPost(),
+		isCleanNewPost: select( 'core/editor' ).isCleanNewPost(),
 		isPreviewingPost: select( 'core/editor' ).isPreviewingPost(),
 		isSavingPost: select( 'core/editor' ).isSavingPost(),
 		previewLink: select( 'core/editor' ).getEditedPostPreviewLink(),
@@ -132,7 +134,7 @@ export function useValidationErrorStateUpdates() {
 	 * loaded and following subsequent saves.
 	 */
 	useEffect( () => {
-		if ( isSavingPost || ! shouldValidate ) {
+		if ( isSavingPost || isCleanNewPost || ! shouldValidate ) {
 			return;
 		}
 
@@ -168,7 +170,7 @@ export function useValidationErrorStateUpdates() {
 			setReviewLink( newValidation.review_link );
 			setIsFetchingErrors( false );
 		} )();
-	}, [ currentPostId, getClientIdsWithDescendants, hasRequestedPreview, isSavingPost, previewLink, setIsFetchingErrors, setReviewLink, setValidationErrors, shouldValidate ] );
+	}, [ currentPostId, getClientIdsWithDescendants, hasRequestedPreview, isCleanNewPost, isSavingPost, previewLink, setIsFetchingErrors, setReviewLink, setValidationErrors, shouldValidate ] );
 
 	/**
 	 * Runs an equality check when validation errors are received before running
