@@ -114,6 +114,7 @@ exports[`TemplateModeOption matches snapshot 1`] = `
       className="components-panel__body-title"
     >
       <button
+        aria-describedby={null}
         aria-expanded={false}
         className="components-button components-panel__body-toggle"
         onClick={[Function]}
@@ -360,6 +361,7 @@ exports[`TemplateModeOption matches snapshot 2`] = `
       className="components-panel__body-title"
     >
       <button
+        aria-describedby={null}
         aria-expanded={true}
         className="components-button components-panel__body-toggle"
         onClick={[Function]}
@@ -638,6 +640,7 @@ exports[`TemplateModeOption matches snapshot 3`] = `
       className="components-panel__body-title"
     >
       <button
+        aria-describedby={null}
         aria-expanded={true}
         className="components-button components-panel__body-toggle"
         onClick={[Function]}

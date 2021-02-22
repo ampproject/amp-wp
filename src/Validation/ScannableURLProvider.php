@@ -159,7 +159,7 @@ final class ScannableURLProvider {
 
 		return array_filter(
 			$ids,
-			'post_supports_amp'
+			'amp_is_post_supported'
 		);
 	}
 

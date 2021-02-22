@@ -361,6 +361,11 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 			[ 'Unavailable for an unknown reason.' ],
 			$this->instance->get_error_messages( [ 'unknown-error' ] )
 		);
+
+		$this->assertEquals(
+			[ 'The post data could not be successfully retrieved.' ],
+			$this->instance->get_error_messages( [ 'invalid-post' ] )
+		);
 	}
 
 	/** @covers ::save_amp_status() */
