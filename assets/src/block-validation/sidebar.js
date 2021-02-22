@@ -31,14 +31,16 @@ export function Sidebar() {
 
 	const {
 		ampCompatibilityBroken,
-		isAutoDraft,
+		isCleanNewPost,
+		isDraft,
 		isFetchingErrors,
 		isPostDirty,
 		isShowingReviewed,
 		reviewLink,
 	} = useSelect( ( select ) => ( {
 		ampCompatibilityBroken: select( BLOCK_VALIDATION_STORE_KEY ).getAMPCompatibilityBroken(),
-		isAutoDraft: select( 'core/editor' )?.getEditedPostAttribute( 'status' ) === 'auto-draft',
+		isCleanNewPost: select( 'core/editor' ).isCleanNewPost(),
+		isDraft: [ 'draft', 'auto-draft' ].indexOf( select( 'core/editor' )?.getEditedPostAttribute( 'status' ) ) !== -1,
 		isFetchingErrors: select( BLOCK_VALIDATION_STORE_KEY ).getIsFetchingErrors(),
 		isPostDirty: select( BLOCK_VALIDATION_STORE_KEY ).getIsPostDirty(),
 		isShowingReviewed: select( BLOCK_VALIDATION_STORE_KEY ).getIsShowingReviewed(),
@@ -140,7 +142,7 @@ export function Sidebar() {
 						<PanelBody opened={ true }>
 							<PanelRow>
 								<p>
-									{ isAutoDraft
+									{ isCleanNewPost
 										? __( 'Validation issues will be checked for when the post is saved.', 'amp' )
 										: __( 'There are no AMP validation issues.', 'amp' ) }
 								</p>
@@ -156,7 +158,7 @@ export function Sidebar() {
 								</p>
 							</PanelRow>
 							<PanelRow>
-								{ isAutoDraft ? (
+								{ isDraft ? (
 									<Button isSecondary onClick={ () => savePost( { isPreview: true } ) }>
 										{ __( 'Save draft and validate now', 'amp' ) }
 									</Button>
@@ -179,7 +181,7 @@ export function Sidebar() {
 						) ) }
 					</ul>
 				)
-					: ! isAutoDraft && (
+					: ! isDraft && (
 						<PanelBody opened={ true }>
 							<p>
 								{ __( 'All AMP validation issues have been reviewed.', 'amp' ) }
