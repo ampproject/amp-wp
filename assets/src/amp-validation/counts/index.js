@@ -54,7 +54,11 @@ function updateMenuItemCounts( counts ) {
  * @param {HTMLElement} root AMP submenu item.
  */
 function createObserver( root ) {
-	// let hasIntersected = false;
+	// For IE11 IntersectionObserver is not available, so just hide the counts entirely.
+	if ( ! ( 'IntersectionObserver' in window ) ) {
+		updateMenuItemCounts( { validated_urls: 0, errors: 0 } );
+		return;
+	}
 
 	const observer = new IntersectionObserver( ( entries ) => {
 		if ( ! entries[ 0 ].isIntersecting ) {
