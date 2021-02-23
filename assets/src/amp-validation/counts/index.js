@@ -54,18 +54,20 @@ function updateMenuItemCounts( counts ) {
  * @param {HTMLElement} root AMP submenu item.
  */
 function createObserver( root ) {
-	// For IE11 IntersectionObserver is not available, so just hide the counts entirely.
+	// IntersectionObserver is not available in IE11, so just hide the counts entirely for that browser.
 	if ( ! ( 'IntersectionObserver' in window ) ) {
 		updateMenuItemCounts( { validated_urls: 0, errors: 0 } );
 		return;
 	}
 
-	const observer = new IntersectionObserver( ( entries ) => {
-		if ( ! entries[ 0 ].isIntersecting ) {
+	const target = root.querySelector( 'ul' );
+
+	const observer = new IntersectionObserver( ( [ entry ] ) => {
+		if ( ! entry || ! entry.isIntersecting ) {
 			return;
 		}
 
-		observer.unobserve( entries[ 0 ].target );
+		observer.unobserve( target );
 
 		apiFetch( { path: '/amp/v1/unreviewed-validation-counts' } ).then( ( counts ) => {
 			updateMenuItemCounts( counts );
@@ -78,7 +80,6 @@ function createObserver( root ) {
 		} );
 	}, { root } );
 
-	const target = root.querySelector( 'ul' );
 	observer.observe( target );
 }
 
