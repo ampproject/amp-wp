@@ -169,7 +169,7 @@ abstract class AMP_Base_Embed_Handler {
 		}
 
 		// Handle case where script is wrapped in paragraph by wpautop.
-		if ( $next_element_sibling instanceof DOMElement && 'p' === $next_element_sibling->nodeName ) {
+		if ( $next_element_sibling instanceof DOMElement && 'p' === $next_element_sibling->tagName ) {
 			$children_elements = array_values(
 				array_filter(
 					iterator_to_array( $next_element_sibling->childNodes ),
