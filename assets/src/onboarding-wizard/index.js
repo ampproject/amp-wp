@@ -67,7 +67,6 @@ export function Providers( { children } ) {
 								hasErrorBoundary={ true }
 								wpAjaxUrl={ wpAjaxUrl }
 								readerThemesRestPath={ READER_THEMES_REST_PATH }
-								hideCurrentlyActiveTheme={ true }
 								updatesNonce={ UPDATES_NONCE }
 							>
 								<TemplateModeOverrideContextProvider>
