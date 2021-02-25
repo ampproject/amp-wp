@@ -1,0 +1,59 @@
+.sidebar-notification {
+	position: relative;
+	overflow: hidden;
+	display: flex;
+	padding: 14px 18px;
+}
+
+.sidebar-notification.is-error::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	width: 5px;
+	background: #d64e21;
+}
+
+.sidebar-notification__icon {
+	align-items: center;
+	border-radius: 50%;
+	display: flex;
+	flex: 0 0 auto;
+	height: 24px;
+	justify-content: center;
+	margin: 4px 12px 0 0;
+	position: relative;
+	width: 24px;
+}
+
+.sidebar-notification__icon svg {
+	height: 100%;
+	width: 100%;
+}
+
+.sidebar-notification__content > p {
+	margin: 0;
+}
+
+.sidebar-notification__content > p + p {
+	margin-top: 4px;
+}
+
+/*
+ * Sidebar notifications container with light background.
+ */
+.sidebar-notifications-container.is-shady {
+	background: #f4f4f4;
+	padding: 18px 10px;
+	border-bottom: 1px solid #e3e4e7;
+}
+
+.sidebar-notifications-container.is-shady > .sidebar-notification {
+	background: #fff;
+	border-radius: 15px;
+}
+
+.sidebar-notifications-container.is-shady > .sidebar-notification + .sidebar-notification {
+	margin-top: 15px;
+}
