@@ -306,3 +306,30 @@
 .amp-error__kept-removed--removed > span {
 	background: #d2e5e5;
 }
+
+/*
+ * AMP status icon.
+ */
+.amp-status-icon path {
+	fill: #005af0;
+}
+
+.amp-status-icon::after {
+	content: "";
+	display: block;
+	position: absolute;
+	top: -3px;
+	right: -6px;
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	background: #bb522e;
+	opacity: 0;
+	transform: scale(0);
+	transition: opacity 120ms ease-out, transform 180ms ease-out;
+}
+
+.amp-status-icon.is-broken::after {
+	opacity: 1;
+	transform: none;
+}
