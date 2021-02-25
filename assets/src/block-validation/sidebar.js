@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { PanelBody, ToggleControl } from '@wordpress/components';
+import { Button, PanelBody } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
@@ -88,13 +88,14 @@ export function Sidebar() {
 
 			{ ( 0 < reviewedValidationErrors.length && 0 < unreviewedValidationErrors.length ) && (
 				<div className="amp-sidebar__options">
-					<ToggleControl
-						checked={ isShowingReviewed }
-						label={ __( 'Include reviewed issues', 'amp' ) }
-						onChange={ ( newIsShowingReviewed ) => {
-							setIsShowingReviewed( newIsShowingReviewed );
-						} }
-					/>
+					<Button
+						isLink
+						onClick={ () => setIsShowingReviewed( ! isShowingReviewed ) }
+					>
+						{ isShowingReviewed
+							? __( 'Hide reviewed issues', 'amp' )
+							: __( 'Show reviewed issues', 'amp' ) }
+					</Button>
 				</div>
 			) }
 		</div>
