@@ -19,8 +19,8 @@ class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Default width.
 	 *
 	 * Tumblr embeds for web have a fixed width of 540px.
-	 * See <https://tumblr.zendesk.com/hc/en-us/articles/226261028-Embed-pro-tips>.
 	 *
+	 * @link https://tumblr.zendesk.com/hc/en-us/articles/226261028-Embed-pro-tips
 	 * @var int
 	 */
 	protected $DEFAULT_WIDTH = 540;

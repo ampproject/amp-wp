@@ -7,6 +7,9 @@
  * @package  AMP
  */
 
+use AmpProject\Tag;
+use AmpProject\Attribute;
+
 /**
  * Class AMP_Base_Embed_Handler
  *
@@ -170,6 +173,7 @@ abstract class AMP_Base_Embed_Handler {
 
 		// Handle case where script is wrapped in paragraph by wpautop.
 		if ( $next_element_sibling instanceof DOMElement && 'p' === $next_element_sibling->tagName ) {
+			/** @var DOMElement[] $children_elements */
 			$children_elements = array_values(
 				array_filter(
 					iterator_to_array( $next_element_sibling->childNodes ),
@@ -181,9 +185,9 @@ abstract class AMP_Base_Embed_Handler {
 
 			if (
 				1 === count( $children_elements ) &&
-				'script' === $children_elements[0]->nodeName &&
+				Tag::SCRIPT === $children_elements[0]->tagName &&
 				(
-					( $base_src_url && false !== strpos( $children_elements[0]->getAttribute( 'src' ), $base_src_url ) ) ||
+					( $base_src_url && false !== strpos( $children_elements[0]->getAttribute( Attribute::SRC ), $base_src_url ) ) ||
 					( $content && false !== strpos( $children_elements[0]->textContent, $content ) )
 				)
 			) {
@@ -195,9 +199,9 @@ abstract class AMP_Base_Embed_Handler {
 		// Handle case where script is immediately following.
 		$is_embed_script = (
 			$next_element_sibling instanceof DOMElement &&
-			'script' === strtolower( $next_element_sibling->nodeName ) &&
+			Tag::SCRIPT === $next_element_sibling->tagName &&
 			(
-				( $base_src_url && false !== strpos( $next_element_sibling->getAttribute( 'src' ), $base_src_url ) ) ||
+				( $base_src_url && false !== strpos( $next_element_sibling->getAttribute( Attribute::SRC ), $base_src_url ) ) ||
 				( $content && false !== strpos( $next_element_sibling->textContent, $content ) )
 			)
 		);
