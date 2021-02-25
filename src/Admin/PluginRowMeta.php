@@ -49,8 +49,8 @@ final class PluginRowMeta implements Delayed, Service, Registerable {
 		}
 
 		$additional_meta = [
-			'<a href="https://wordpress.org/support/plugin/amp/reviews/#new-post" target="_blank">' . __( 'Review plugin', 'amp' ) . '</a>',
-			'<a href="https://wordpress.org/support/plugin/amp/#new-post" target="_blank">' . __( 'Get support', 'amp' ) . '</a>',
+			'<a href="https://wordpress.org/support/plugin/amp/" target="_blank" rel="noreferrer noopener">' . __( 'Contact support', 'amp' ) . '</a>',
+			'<a href="https://wordpress.org/support/plugin/amp/reviews/#new-post" target="_blank" rel="noreferrer noopener">' . __( 'Leave review', 'amp' ) . '</a>',
 		];
 
 		return array_merge( $meta, $additional_meta );
