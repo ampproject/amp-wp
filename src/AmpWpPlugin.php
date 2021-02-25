@@ -67,6 +67,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'admin.polyfills'                   => Admin\Polyfills::class,
 		'admin.paired_browsing'             => Admin\PairedBrowsing::class,
 		'admin.validation_counts'           => Admin\ValidationCounts::class,
+		'admin.plugin_row_meta'             => Admin\PluginRowMeta::class,
 		'amp_slug_customization_watcher'    => AmpSlugCustomizationWatcher::class,
 		'css_transient_cache.ajax_handler'  => Admin\ReenableCssTransientCachingAjaxAction::class,
 		'css_transient_cache.monitor'       => BackgroundTask\MonitorCssTransientCaching::class,
