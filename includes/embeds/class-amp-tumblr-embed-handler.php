@@ -52,7 +52,7 @@ class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param Document $dom DOM.
 	 */
 	public function sanitize_raw_embeds( Document $dom ) {
-		$nodes = $dom->xpath->query( sprintf( '//div[ @class = "tumblr-post" and starts-with( @data-href, "%s" ) ]', $this->base_embed_url ) );
+		$nodes = $dom->xpath->query( sprintf( '//div[ @class and contains( concat( " ", normalize-space( @class ), " " ), " tumblr-post " ) and starts-with( @data-href, "%s" ) ]', $this->base_embed_url ) );
 
 		if ( 0 === $nodes->length ) {
 			return;
