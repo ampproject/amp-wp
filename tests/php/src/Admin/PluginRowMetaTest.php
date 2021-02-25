@@ -55,6 +55,17 @@ class PluginRowMetaTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test ::register().
+	 *
+	 * @covers ::register()
+	 */
+	public function test_register() {
+		$this->instance->register();
+
+		self::assertEquals( 10, has_filter( 'plugin_row_meta', [ $this->instance, 'get_plugin_row_meta' ] ) );
+	}
+
+	/**
 	 * Test ::get_plugin_row_meta().
 	 *
 	 * @covers ::get_plugin_row_meta()
