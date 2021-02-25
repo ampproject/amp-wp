@@ -29,6 +29,7 @@ describe( 'AMPRevalidateNotification', () => {
 		useSelect.mockImplementation( () => ( {
 			hasActiveMetaboxes: false,
 			isDraft: false,
+			isFetchingErrors: false,
 			isPostDirty: false,
 			...overrides,
 		} ) );
@@ -49,6 +50,18 @@ describe( 'AMPRevalidateNotification', () => {
 
 	it( 'does not render revalidate message if post is not dirty', () => {
 		setupUseSelect();
+
+		act( () => {
+			render( <AMPRevalidateNotification />, container );
+		} );
+
+		expect( container.children ).toHaveLength( 0 );
+	} );
+
+	it( 'does not render when errors are being fetched', () => {
+		setupUseSelect( {
+			isFetchingErrors: true,
+		} );
 
 		act( () => {
 			render( <AMPRevalidateNotification />, container );
