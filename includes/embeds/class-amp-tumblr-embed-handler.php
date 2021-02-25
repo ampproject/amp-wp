@@ -54,7 +54,7 @@ class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function sanitize_raw_embeds( Document $dom ) {
 		$nodes = $dom->xpath->query( sprintf( '//div[ @class = "tumblr-post" and starts-with( @data-href, "%s" ) ]', $this->base_embed_url ) );
 
-		if ( $nodes->length === 0 ) {
+		if ( 0 === $nodes->length ) {
 			return;
 		}
 
@@ -67,7 +67,7 @@ class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 				'width'     => $this->args['width'],
 				'height'    => $this->args['height'],
 				'resizable' => '',
-				'sandbox'   => 'allow-scripts allow-popups allow-same-origin'
+				'sandbox'   => 'allow-scripts allow-popups allow-same-origin',
 			];
 
 			$amp_node = AMP_DOM_Utils::create_node(
@@ -77,13 +77,13 @@ class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 			);
 
 			// Add an overflow node to allow the amp-iframe to resize.
-			$overflow_node = AMP_DOM_Utils::create_node(
+			$overflow_node              = AMP_DOM_Utils::create_node(
 				$dom,
 				'div',
 				[
-					'overflow' => '',
-					'tabindex' => 0,
-					'role'     => 'button',
+					'overflow'   => '',
+					'tabindex'   => 0,
+					'role'       => 'button',
 					'aria-label' => esc_attr__( 'See more', 'amp' ),
 				]
 			);

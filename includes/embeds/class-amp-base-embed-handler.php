@@ -155,7 +155,7 @@ abstract class AMP_Base_Embed_Handler {
 	/**
 	 * Removes the node's nearest `<script>` sibling with a `src` attribute containing the base `src` URL provided.
 	 *
-	 * @since 1.6
+	 * @since 2.1
 	 *
 	 * @param DOMElement $node         The DOMNode to whose sibling is the script to be removed.
 	 * @param string     $base_src_url Script URL to match against.
