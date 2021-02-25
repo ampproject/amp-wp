@@ -215,26 +215,19 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	/**
 	 * Ampify cover block.
 	 *
-	 * This specifically fixes the layout of the block when a background video is assigned.
+	 * This ensures that the background img/video in a cover block has object-fit=cover and the appropriate object-position
+	 * attribute so that they will be carried over to to the amp-img/amp-video and propagated to the img/video in the
+	 * light shadow DOM.
 	 *
 	 * @see \AMP_Video_Sanitizer::filter_video_dimensions()
 	 *
 	 * @param string $block_content The block content about to be appended.
-	 * @param array  $block         The full block, including name and attributes.
 	 * @return string Filtered block content.
 	 */
-	public function ampify_cover_block( $block_content, $block ) {
-
-		// @todo Actually, this can be ignored in favor of supporting data-object-fit and data-object-position on all elements in the same way data-amp-object-fit and data-amp-object-position are supproted?
-
-		$block_content = preg_replace_callback(
-			'/(<(?:img|video))(\s[^>]+)>/',
+	public function ampify_cover_block( $block_content ) {
+		return preg_replace_callback(
+			'/(<(?:img|video))([^>]*class="[^"]*?wp-block-cover__(?:image|video)-background[^"]*?"[^>]*)>/',
 			static function ( $matches ) {
-				// Skip inner image and video blocks which aren't the background for the cover block.
-				if ( ! preg_match( '/ class="[^"]*?wp-block-cover__(?:image|video)-background[^"]*?"/', $matches[2] ) ) {
-					return $matches[0];
-				}
-
 				$replacement = $matches[1];
 
 				// The background image/video for the cover block by definition needs object-fit="cover" on the resulting amp-ing/amp-video.
@@ -258,38 +251,11 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 					$matches[2]
 				);
 
-				// Copy data-object-position as just object-position which AMP supports on amp-img and amp-video.
-				// This attribute was introduced in Gutenberg 9.8 via <https://github.com/WordPress/gutenberg/pull/25171>
-				// and specifically <https://github.com/WordPress/gutenberg/commit/c963e4c>.
-//				$replacement .= preg_replace(
-//					'/ data-(object-position="[^"]*?")/',
-//					'$0 $1',
-//					$matches[2]
-//				);
-
-
 				$replacement .= '>';
 				return $replacement;
 			},
 			$block_content
 		);
-
-		// @todo This could eliminate the inline style which only is containing the object-position style.
-		// @todo If using older version of Gutenberg in which the object position was exclusively defined in the style attribute, extract the position
-
-
-		if ( isset( $block['attrs']['backgroundType'] ) && 'video' === $block['attrs']['backgroundType'] ) {
-//			$block_content = preg_replace(
-//				'/(?<=<video\s)/',
-//				'layout="fill" object-fit="cover" ',
-//				$block_content
-//			);
-		}
-
-		// @todo How long has Gutenerg added the object-fit
-//		$block_content = preg_replace( '/\sdata-object-fit=/', 'object-fit=', $block_content );
-
-		return $block_content;
 	}
 
 	/**
