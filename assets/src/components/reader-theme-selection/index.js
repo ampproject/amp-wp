@@ -17,14 +17,13 @@ import { ReaderThemes } from '../reader-themes-context-provider';
 import { Loading } from '../loading';
 import './style.css';
 import { ThemeCard } from '../theme-card';
-import { ActiveThemeAlreadyReaderNotice } from '../amp-notice';
 import { ThemesAPIError } from '../themes-api-error';
 
 /**
  * Component for selecting a reader theme.
  */
 export function ReaderThemeSelection() {
-	const { currentTheme, fetchingThemes, themes } = useContext( ReaderThemes );
+	const { fetchingThemes, themes } = useContext( ReaderThemes );
 
 	// Separate available themes (both installed and installable) from those that need to be installed manually.
 	const { availableThemes, unavailableThemes } = useMemo(
@@ -54,7 +53,6 @@ export function ReaderThemeSelection() {
 					__( 'Select the theme template for mobile visitors', 'amp' )
 				}
 			</p>
-			<ActiveThemeAlreadyReaderNotice currentTheme={ currentTheme } />
 			<ThemesAPIError />
 			<div>
 				{ 0 < availableThemes.length && (
