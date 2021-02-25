@@ -151,4 +151,58 @@ abstract class AMP_Base_Embed_Handler {
 			$parent_node->parentNode->replaceChild( $node, $parent_node );
 		}
 	}
+
+	/**
+	 * Removes the node's nearest `<script>` sibling with a `src` attribute containing the base `src` URL provided.
+	 *
+	 * @since 1.6
+	 *
+	 * @param DOMElement $node         The DOMNode to whose sibling is the script to be removed.
+	 * @param string     $base_src_url Script URL to match against.
+	 * @param string     $content      Text content of node to match against.
+	 */
+	protected function maybe_remove_script_sibling( DOMElement $node, $base_src_url, $content = '' ) {
+		$next_element_sibling = $node->nextSibling;
+
+		while ( $next_element_sibling && ! ( $next_element_sibling instanceof DOMElement ) ) {
+			$next_element_sibling = $next_element_sibling->nextSibling;
+		}
+
+		// Handle case where script is wrapped in paragraph by wpautop.
+		if ( $next_element_sibling instanceof DOMElement && 'p' === $next_element_sibling->nodeName ) {
+			$children_elements = array_values(
+				array_filter(
+					iterator_to_array( $next_element_sibling->childNodes ),
+					static function ( DOMNode $child ) {
+						return $child instanceof DOMElement;
+					}
+				)
+			);
+
+			if (
+				1 === count( $children_elements ) &&
+				'script' === $children_elements[0]->nodeName &&
+				(
+					( $base_src_url && false !== strpos( $children_elements[0]->getAttribute( 'src' ), $base_src_url ) ) ||
+					( $content && false !== strpos( $children_elements[0]->textContent, $content ) )
+				)
+			) {
+				$next_element_sibling->parentNode->removeChild( $next_element_sibling );
+				return;
+			}
+		}
+
+		// Handle case where script is immediately following.
+		$is_embed_script = (
+			$next_element_sibling instanceof DOMElement &&
+			'script' === strtolower( $next_element_sibling->nodeName ) &&
+			(
+				( $base_src_url && false !== strpos( $next_element_sibling->getAttribute( 'src' ), $base_src_url ) ) ||
+				( $content && false !== strpos( $next_element_sibling->textContent, $content ) )
+			)
+		);
+		if ( $is_embed_script ) {
+			$next_element_sibling->parentNode->removeChild( $next_element_sibling );
+		}
+	}
 }
