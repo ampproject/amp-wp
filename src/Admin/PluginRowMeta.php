@@ -38,9 +38,9 @@ final class PluginRowMeta implements Delayed, Service, Registerable {
 	/**
 	 * Updates the plugin row meta with links to review plugin and get support.
 	 *
-	 * @param string[] $meta      An array of the plugin's metadata, including the version, author, author URI,
-	 * 							  and plugin URI.
-	 * @param string $plugin_file Path to the plugin file relative to the plugins directory.
+	 * @param string[] $meta        An array of the plugin's metadata, including the version, author, author URI,
+	 *                              and plugin URI.
+	 * @param string   $plugin_file Path to the plugin file relative to the plugins directory.
 	 * @return string[] Plugin row meta.
 	 */
 	public function get_plugin_row_meta( $meta, $plugin_file ) {
