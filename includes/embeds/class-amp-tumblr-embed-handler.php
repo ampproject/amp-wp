@@ -84,10 +84,10 @@ class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 					'overflow'   => '',
 					'tabindex'   => 0,
 					'role'       => 'button',
-					'aria-label' => esc_attr__( 'See more', 'amp' ),
+					'aria-label' => __( 'See more', 'amp' ),
 				]
 			);
-			$overflow_node->textContent = esc_html__( 'See more', 'amp' );
+			$overflow_node->textContent = __( 'See more', 'amp' );
 			$amp_node->appendChild( $overflow_node );
 
 			// Append the original link as a placeholder node.
@@ -103,4 +103,3 @@ class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 	}
 }
-
