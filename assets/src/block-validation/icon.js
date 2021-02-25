@@ -85,7 +85,7 @@ export function MoreMenuIcon() {
  */
 export function StatusIcon( { broken = false } ) {
 	return (
-		<div className={ `amp-status-icon ${ broken ? 'is-broken' : '' }` }>
+		<div className={ `amp-status-icon ${ broken ? 'amp-status-icon--broken' : '' }` }>
 			<AMPLogoIcon />
 		</div>
 	);

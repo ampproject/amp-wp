@@ -11,7 +11,7 @@ import { render } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { MoreMenuIcon, ToolbarIcon } from '../icon';
+import { MoreMenuIcon, ToolbarIcon, StatusIcon } from '../icon';
 
 let container;
 
@@ -92,5 +92,28 @@ describe( 'Icons', () => {
 
 		expect( container.querySelector( '.amp-toolbar-icon' ) ).not.toBeNull();
 		expect( container.querySelector( '.amp-toolbar-icon--has-badge' ) ).toBeNull();
+	} );
+
+	it( 'renders the StatusIcon', () => {
+		act( () => {
+			render(
+				<StatusIcon />,
+				container,
+			);
+		} );
+
+		expect( container.querySelector( '.amp-status-icon' ) ).not.toBeNull();
+		expect( container.querySelector( '.amp-status-icon--broken' ) ).toBeNull();
+	} );
+
+	it( 'renders the broken StatusIcon', () => {
+		act( () => {
+			render(
+				<StatusIcon broken={ true } />,
+				container,
+			);
+		} );
+
+		expect( container.querySelector( '.amp-status-icon--broken' ) ).not.toBeNull();
 	} );
 } );
