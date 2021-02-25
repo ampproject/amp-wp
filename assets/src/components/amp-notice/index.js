@@ -5,6 +5,11 @@ import PropTypes from 'prop-types';
 import classnames from 'classnames';
 
 /**
+ * WordPress dependencies
+ */
+import { __, sprintf } from '@wordpress/i18n';
+
+/**
  * Internal dependencies
  */
 import './style.css';
@@ -104,4 +109,35 @@ AMPNotice.propTypes = {
 	className: PropTypes.string,
 	size: PropTypes.oneOf( [ NOTICE_SIZE_LARGE, NOTICE_SIZE_SMALL ] ),
 	type: PropTypes.oneOf( [ NOTICE_TYPE_INFO, NOTICE_TYPE_SUCCESS, NOTICE_TYPE_ERROR, NOTICE_TYPE_WARNING ] ),
+};
+
+/**
+ * A warning, info, or success notice similar to those used in WP core.
+ *
+ * @param {Object} props Component props.
+ * @param {Object} props.currentTheme Current theme.
+ */
+export function ActiveThemeAlreadyReaderNotice( { currentTheme } ) {
+	return (
+		currentTheme && currentTheme.is_reader_theme && (
+			<AMPNotice>
+				<p>
+					{
+						sprintf(
+							/* translators: placeholder is the name of a WordPress theme. */
+							__( 'Your active theme “%s” is not listed below because it is already AMP-compatible. If you wish to use your active theme for both AMP and non-AMP pages, then Transitional template mode is what you should choose.', 'amp' ),
+							currentTheme.name,
+						)
+					}
+				</p>
+			</AMPNotice>
+		)
+	);
+}
+
+ActiveThemeAlreadyReaderNotice.propTypes = {
+	currentTheme: PropTypes.shape( {
+		name: PropTypes.string,
+		is_reader_theme: PropTypes.bool,
+	} ),
 };

@@ -16,7 +16,7 @@ import { CheckboxControl } from '@wordpress/components';
 import { ReaderThemes } from '../reader-themes-context-provider';
 import { Loading } from '../loading';
 import './style.css';
-import { AMPNotice, NOTICE_TYPE_WARNING } from '../amp-notice';
+import { ActiveThemeAlreadyReaderNotice, AMPNotice, NOTICE_TYPE_WARNING } from '../amp-notice';
 import { ThemeCard } from '../theme-card';
 import { Carousel, DEFAULT_MOBILE_BREAKPOINT } from '../carousel';
 import { useWindowWidth } from '../../utils/use-window-width';
@@ -153,19 +153,7 @@ export function ReaderThemeCarousel() {
 					__( 'Select the theme template for mobile visitors', 'amp' )
 				}
 			</p>
-			{ currentTheme && currentTheme.is_reader_theme && (
-				<AMPNotice>
-					<p>
-						{
-							sprintf(
-								/* translators: placeholder is the name of a WordPress theme. */
-								__( 'Your active theme “%s” is not listed below because it is AMP-compatible. If you wish to use it, Transitional mode is what you should choose.', 'amp' ),
-								currentTheme.name,
-							)
-						}
-					</p>
-				</AMPNotice>
-			) }
+			<ActiveThemeAlreadyReaderNotice currentTheme={ currentTheme } />
 			<ThemesAPIError />
 			<div>
 				{

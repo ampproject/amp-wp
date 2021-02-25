@@ -17,7 +17,7 @@ import { ReaderThemes } from '../reader-themes-context-provider';
 import { Loading } from '../loading';
 import './style.css';
 import { ThemeCard } from '../theme-card';
-import { AMPNotice } from '../amp-notice';
+import { ActiveThemeAlreadyReaderNotice } from '../amp-notice';
 import { ThemesAPIError } from '../themes-api-error';
 
 /**
@@ -54,19 +54,7 @@ export function ReaderThemeSelection() {
 					__( 'Select the theme template for mobile visitors', 'amp' )
 				}
 			</p>
-			{ currentTheme && currentTheme.is_reader_theme && (
-				<AMPNotice>
-					<p>
-						{
-							sprintf(
-								/* translators: placeholder is the name of a WordPress theme. */
-								__( 'Your active theme “%s” is not available as a reader theme. If you wish to use it, Transitional mode may be the best option for you.', 'amp' ),
-								currentTheme.name,
-							)
-						}
-					</p>
-				</AMPNotice>
-			) }
+			<ActiveThemeAlreadyReaderNotice currentTheme={ currentTheme } />
 			<ThemesAPIError />
 			<div>
 				{ 0 < availableThemes.length && (
