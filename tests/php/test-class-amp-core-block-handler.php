@@ -159,6 +159,7 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 	public function test_ampify_cover_block() {
 		$attachment_id = $this->get_video_attachment_id();
 
+		// @todo Add examples of Cover block from before 9.8 as well as after, as well as examples of both image and video blocks, including object-position.
 		$post_id = self::factory()->post->create(
 			[
 				'post_title'   => 'Cover Video',
@@ -177,7 +178,9 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 
 		$content = apply_filters( 'the_content', get_post( $post_id )->post_content );
 
-		$this->assertStringContains( '<video layout="fill" object-fit="cover"', $content );
+		// @todo Need to verify that these are only inside of the background image/video element.
+		$this->assertStringContains( 'layout="fill"', $content );
+		$this->assertStringContains( 'object-fit="cover"', $content );
 		$this->assertStringNotContains( 'width=', $content );
 		$this->assertStringNotContains( 'height=', $content );
 	}
