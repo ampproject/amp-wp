@@ -160,6 +160,10 @@ export function useValidationErrorStateUpdates() {
 		}
 
 		( async () => {
+			// The initial render is not related to `isSavingPost` flag change.
+			// Still, we're fetching the errors, so the `isFetchingErrors`
+			// flag should be set.
+			setIsFetchingErrors( true );
 			setBlockOrderBeforeSave( getClientIdsWithDescendants() );
 
 			const queryArgs = {};
