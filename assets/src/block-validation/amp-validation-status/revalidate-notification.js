@@ -21,12 +21,18 @@ export default function AMPRevalidateNotification() {
 	const {
 		hasActiveMetaboxes,
 		isDraft,
+		isFetchingErrors,
 		isPostDirty,
 	} = useSelect( ( select ) => ( {
 		hasActiveMetaboxes: select( 'core/edit-post' ).hasMetaBoxes(),
 		isDraft: [ 'draft', 'auto-draft' ].indexOf( select( 'core/editor' )?.getEditedPostAttribute( 'status' ) ) !== -1,
+		isFetchingErrors: select( BLOCK_VALIDATION_STORE_KEY ).getIsFetchingErrors(),
 		isPostDirty: select( BLOCK_VALIDATION_STORE_KEY ).getIsPostDirty(),
 	} ), [] );
+
+	if ( isFetchingErrors ) {
+		return null;
+	}
 
 	// For posts where meta boxes are present, it's impossible to tell
 	// if a meta box content has changed or not. Because of that, a dirty
