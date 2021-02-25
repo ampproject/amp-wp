@@ -149,8 +149,7 @@ export function ReaderThemeCarousel() {
 		<div className="reader-theme-selection">
 			<p>
 				{
-					// @todo Probably improve this text.
-					__( 'Select the theme template for mobile visitors', 'amp' )
+					__( 'Choose the theme to be used for AMP pages. This theme will normally be exclusively shown to mobile visitors when using Reader template mode.', 'amp' )
 				}
 			</p>
 			<ActiveThemeAlreadyReaderNotice currentTheme={ currentTheme } />
