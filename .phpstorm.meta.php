@@ -15,6 +15,7 @@ namespace PHPSTORM_META {
 			'admin.polyfills'                   => \AmpProject\AmpWP\Admin\Polyfills::class,
 			'admin.paired_browsing'             => \AmpProject\AmpWP\Admin\PairedBrowsing::class,
 			'admin.validation_counts'           => \AmpProject\AmpWP\Admin\ValidationCounts::class,
+			'admin.plugin_row_meta'             => \AmpProject\AmpWP\Admin\PluginRowMeta::class,
 			'amp_slug_customization_watcher'    => \AmpProject\AmpWP\AmpSlugCustomizationWatcher::class,
 			'css_transient_cache.ajax_handler'  => \AmpProject\AmpWP\Admin\ReenableCssTransientCachingAjaxAction::class,
 			'css_transient_cache.monitor'       => \AmpProject\AmpWP\BackgroundTask\MonitorCssTransientCaching::class,
