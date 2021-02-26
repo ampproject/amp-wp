@@ -8,7 +8,6 @@
  */
 
 use AmpProject\Tag;
-use AmpProject\Attribute;
 
 /**
  * Class AMP_Base_Embed_Handler
@@ -160,19 +159,28 @@ abstract class AMP_Base_Embed_Handler {
 	 *
 	 * @since 2.1
 	 *
-	 * @param DOMElement $node         The DOMNode to whose sibling is the script to be removed.
-	 * @param string     $base_src_url Script URL to match against.
-	 * @param string     $content      Text content of node to match against.
+	 * @param DOMElement $node           The DOMNode to whose sibling is the script to be removed.
+	 * @param callable   $match_callback Callback which is passed the script element to determine if it is a match.
 	 */
-	protected function maybe_remove_script_sibling( DOMElement $node, $base_src_url, $content = '' ) {
+	protected function maybe_remove_script_sibling( DOMElement $node, callable $match_callback ) {
 		$next_element_sibling = $node->nextSibling;
 
 		while ( $next_element_sibling && ! ( $next_element_sibling instanceof DOMElement ) ) {
 			$next_element_sibling = $next_element_sibling->nextSibling;
 		}
 
+		if ( ! $next_element_sibling instanceof DOMElement ) {
+			return;
+		}
+
+		// Handle case where script is immediately following.
+		if ( Tag::SCRIPT === $next_element_sibling->tagName && $match_callback( $next_element_sibling ) ) {
+			$next_element_sibling->parentNode->removeChild( $next_element_sibling );
+			return;
+		}
+
 		// Handle case where script is wrapped in paragraph by wpautop.
-		if ( $next_element_sibling instanceof DOMElement && 'p' === $next_element_sibling->tagName ) {
+		if ( 'p' === $next_element_sibling->tagName ) {
 			/** @var DOMElement[] $children_elements */
 			$children_elements = array_values(
 				array_filter(
@@ -183,30 +191,13 @@ abstract class AMP_Base_Embed_Handler {
 				)
 			);
 
-			if (
-				1 === count( $children_elements ) &&
-				Tag::SCRIPT === $children_elements[0]->tagName &&
-				(
-					( $base_src_url && false !== strpos( $children_elements[0]->getAttribute( Attribute::SRC ), $base_src_url ) ) ||
-					( $content && false !== strpos( $children_elements[0]->textContent, $content ) )
-				)
-			) {
-				$next_element_sibling->parentNode->removeChild( $next_element_sibling );
+			if ( 1 !== count( $children_elements ) ) {
 				return;
 			}
-		}
 
-		// Handle case where script is immediately following.
-		$is_embed_script = (
-			$next_element_sibling instanceof DOMElement &&
-			Tag::SCRIPT === $next_element_sibling->tagName &&
-			(
-				( $base_src_url && false !== strpos( $next_element_sibling->getAttribute( Attribute::SRC ), $base_src_url ) ) ||
-				( $content && false !== strpos( $next_element_sibling->textContent, $content ) )
-			)
-		);
-		if ( $is_embed_script ) {
-			$next_element_sibling->parentNode->removeChild( $next_element_sibling );
+			if ( Tag::SCRIPT === $children_elements[0]->tagName && $match_callback( $children_elements[0] ) ) {
+				$next_element_sibling->parentNode->removeChild( $next_element_sibling );
+			}
 		}
 	}
 }

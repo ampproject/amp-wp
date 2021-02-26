@@ -6,7 +6,9 @@
  * @since 0.7
  */
 
+use AmpProject\Attribute;
 use AmpProject\Dom\Document;
+use AmpProject\Tag;
 
 /**
  * Class AMP_Tumblr_Embed_Handler
@@ -97,7 +99,23 @@ class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 				$amp_node->appendChild( $placeholder_node );
 			}
 
-			$this->maybe_remove_script_sibling( $node, 'assets.tumblr.com/post.js' );
+			$this->maybe_remove_script_sibling(
+				$node,
+				static function ( DOMElement $script ) {
+					if ( ! $script->hasAttribute( Attribute::SRC ) ) {
+						return false;
+					}
+
+					$parsed_url = wp_parse_url( $script->getAttribute( Attribute::SRC ) );
+					return (
+					( isset( $parsed_url['host'], $parsed_url['path'] ) )
+					&&
+					'assets.tumblr.com' === $parsed_url['host']
+					&&
+					'/post.js' === $parsed_url['path']
+					);
+				}  
+			);
 
 			$node->parentNode->replaceChild( $amp_node, $node );
 		}
