@@ -79,9 +79,13 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 			[
 				'args'   => [
 					'id'            => [
-						'description' => __( 'Unique identifier for the object.', 'amp' ),
-						'required'    => true,
-						'type'        => 'integer',
+						'description'       => __( 'Unique identifier for the object.', 'amp' ),
+						'required'          => true,
+						'type'              => 'integer',
+						'validate_callback' => function ( $id ) {
+							// Ensure the ID refers to an actual post.
+							return null !== get_post( $id );
+						},
 					],
 					'preview_nonce' => [
 						'description' => __( 'Preview nonce string.', 'amp' ),
@@ -132,6 +136,14 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 		$url           = amp_get_permalink( $post_id );
 
 		if ( ! empty( $preview_nonce ) ) {
+			// Verify the preview nonce is valid.
+			if ( false === wp_verify_nonce( $preview_nonce, 'post_preview_' . $post_id ) ) {
+				return new WP_REST_Response(
+					[ 'error' => __( 'Sorry, you are not allowed to validate drafts.', 'amp' ) ],
+					403
+				);
+			}
+
 			$url = add_query_arg(
 				[
 					'preview'       => 1,
