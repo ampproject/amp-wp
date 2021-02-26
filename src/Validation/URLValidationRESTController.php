@@ -194,7 +194,7 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 			);
 		}
 
-		$validation_results = $this->url_validation_provider->get_url_validation( $url, get_post_type( $post_id ), true );
+		$validation_results = $this->url_validation_provider->get_url_validation( $url, get_post_type( $post_id ) );
 		if ( is_wp_error( $validation_results ) ) {
 			return $validation_results;
 		}

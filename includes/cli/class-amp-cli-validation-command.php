@@ -279,7 +279,7 @@ final class AMP_CLI_Validation_Command {
 		}
 
 		foreach ( $urls as $url ) {
-			$validity = $url_validation_provider->get_url_validation( $url['url'], $url['type'], true );
+			$validity = $url_validation_provider->get_url_validation( $url['url'], $url['type'] );
 
 			if ( $this->wp_cli_progress ) {
 				$this->wp_cli_progress->tick();
