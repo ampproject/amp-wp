@@ -8,7 +8,6 @@
 
 namespace AmpProject\AmpWP\Validation;
 
-use AMP_Validated_URL_Post_Type;
 use AMP_Validation_Error_Taxonomy;
 use AMP_Validation_Manager;
 use WP_Error;
@@ -97,6 +96,8 @@ final class URLValidationProvider {
 	/**
 	 * Validates a URL, stores the results, and increments the counts.
 	 *
+	 * @see AMP_Validation_Manager::validate_url_and_store()
+	 *
 	 * @param string $url  The URL to validate.
 	 * @param string $type The type of template, post, or taxonomy.
 	 * @return array|WP_Error Associative array containing validity result or a WP_Error on failure.
@@ -108,8 +109,7 @@ final class URLValidationProvider {
 		}
 
 		$this->update_state_from_validity( $validity, $type );
-		$post_id = $validity['post_id'];
-		return compact( 'validity', 'post_id' );
+		return $validity;
 	}
 
 	/**

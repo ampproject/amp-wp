@@ -194,17 +194,17 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 			);
 		}
 
-		$validation_results = $this->url_validation_provider->get_url_validation( $url, get_post_type( $post_id ) );
-		if ( is_wp_error( $validation_results ) ) {
-			return $validation_results;
+		$validity = $this->url_validation_provider->get_url_validation( $url, get_post_type( $post_id ) );
+		if ( is_wp_error( $validity ) ) {
+			return $validity;
 		}
 
 		$data = [
 			'results'     => [],
-			'review_link' => get_edit_post_link( $validation_results['post_id'], 'raw' ),
+			'review_link' => get_edit_post_link( $validity['post_id'], 'raw' ),
 		];
 
-		foreach ( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $validation_results['post_id'] ) as $result ) {
+		foreach ( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $validity['post_id'] ) as $result ) {
 
 			// Handle case where a validationError's `sources` are an object (with numeric keys).
 			// Note: this will no longer be an issue after https://github.com/ampproject/amp-wp/commit/bbb0e495a817a56b37554dfd721170712c92d7b8

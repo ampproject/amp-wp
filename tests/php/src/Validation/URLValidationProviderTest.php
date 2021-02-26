@@ -48,7 +48,8 @@ final class URLValidationProviderTest extends WP_UnitTestCase {
 		for ( $i = 0; $i < $number_of_posts; $i++ ) {
 			$permalink         = get_permalink( self::factory()->post->create() );
 			$post_permalinks[] = $permalink;
-			$this->url_validation_provider->get_url_validation( $permalink, 'post' );
+			$validity          = $this->url_validation_provider->get_url_validation( $permalink, 'post' );
+			$this->assertInternalType( 'array', $validity );
 		}
 
 		// All of the posts created should be present in the validated URLs.

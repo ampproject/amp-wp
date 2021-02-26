@@ -289,8 +289,8 @@ final class AMP_CLI_Validation_Command {
 				WP_CLI::warning(
 					sprintf(
 						'Validate URL error (%1$s): %2$s URL: %3$s',
-						$validity['error']->get_error_code(),
-						$validity['error']->get_error_message(),
+						$validity->get_error_code(),
+						$validity->get_error_message(),
 						$url
 					)
 				);
