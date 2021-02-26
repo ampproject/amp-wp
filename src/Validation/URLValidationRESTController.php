@@ -82,15 +82,40 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 						'description'       => __( 'Unique identifier for the object.', 'amp' ),
 						'required'          => true,
 						'type'              => 'integer',
-						'validate_callback' => function ( $id ) {
-							// Ensure the ID refers to an actual post.
-							return null !== get_post( $id );
+						'minimum'           => 1,
+						'validate_callback' => function ( $id, $request, $param ) {
+							// First enforce the schema to ensure $id is an integer greater than 0.
+							$validity = rest_validate_request_arg( $id, $request, $param );
+							if ( is_wp_error( $validity ) ) {
+								return $validity;
+							}
+
+							// Make sure the post exists.
+							$post = get_post( (int) $id );
+							if ( empty( $post ) ) {
+								return new WP_Error(
+									'rest_post_invalid_id',
+									__( 'Invalid post ID.', 'default' ),
+									[ 'status' => 404 ]
+								);
+							}
+
+							// Make sure AMP is supported for the post.
+							if ( ! amp_is_post_supported( $post ) ) {
+								return new WP_Error(
+									'amp_post_not_supported',
+									__( 'AMP is not supported on post.', 'amp' ),
+									[ 'status' => 403 ]
+								);
+							}
+							return true;
 						},
 					],
 					'preview_nonce' => [
 						'description' => __( 'Preview nonce string.', 'amp' ),
 						'required'    => false,
 						'type'        => 'string',
+						'pattern'     => '^[0-9a-f]+$', // Ensure hexadecimal hash string.
 					],
 				],
 				[
@@ -125,6 +150,19 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 	}
 
 	/**
+	 * Validate preview nonce.
+	 *
+	 * @see _show_post_preview()
+	 *
+	 * @param string $preview_nonce Preview nonce.
+	 * @param int    $post_id       Post ID.
+	 * @return bool Whether the preview nonce is valid.
+	 */
+	public function is_valid_preview_nonce( $preview_nonce, $post_id ) {
+		return false !== wp_verify_nonce( $preview_nonce, 'post_preview_' . $post_id );
+	}
+
+	/**
 	 * Returns validation information about a URL, validating the URL along the way.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -136,10 +174,10 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 		$url           = amp_get_permalink( $post_id );
 
 		if ( ! empty( $preview_nonce ) ) {
-			// Verify the preview nonce is valid.
-			if ( false === wp_verify_nonce( $preview_nonce, 'post_preview_' . $post_id ) ) {
+			// Verify the preview nonce is valid. Note this is not done in a validate_callback because at that point there won't be a validated id parameter.
+			if ( ! $this->is_valid_preview_nonce( $preview_nonce, $post_id ) ) {
 				return new WP_REST_Response(
-					[ 'error' => __( 'Sorry, you are not allowed to validate drafts.', 'amp' ) ],
+					[ 'error' => __( 'Sorry, you are not allowed to validate this post preview.', 'amp' ) ],
 					403
 				);
 			}
