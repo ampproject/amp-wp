@@ -72,31 +72,26 @@ class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 				'sandbox'   => 'allow-scripts allow-popups allow-same-origin',
 			];
 
-			$amp_node = AMP_DOM_Utils::create_node(
+			$amp_element = AMP_DOM_Utils::create_node(
 				$dom,
 				'amp-iframe',
 				$attributes
 			);
 
-			// Add an overflow node to allow the amp-iframe to resize.
-			$overflow_node              = AMP_DOM_Utils::create_node(
+			// Add an overflow element to allow the amp-iframe to be manually resized.
+			$overflow_element              = AMP_DOM_Utils::create_node(
 				$dom,
-				'div',
-				[
-					'overflow'   => '',
-					'tabindex'   => 0,
-					'role'       => 'button',
-					'aria-label' => __( 'See more', 'amp' ),
-				]
+				'button',
+				[ 'overflow' => '' ]
 			);
-			$overflow_node->textContent = __( 'See more', 'amp' );
-			$amp_node->appendChild( $overflow_node );
+			$overflow_element->textContent = __( 'See more', 'amp' );
+			$amp_element->appendChild( $overflow_element );
 
 			// Append the original link as a placeholder node.
-			if ( $node->firstChild instanceof DOMElement && 'a' === $node->firstChild->nodeName ) {
-				$placeholder_node = $node->firstChild;
-				$placeholder_node->setAttribute( 'placeholder', '' );
-				$amp_node->appendChild( $placeholder_node );
+			if ( $node->firstChild instanceof DOMElement && Tag::A === $node->firstChild->tagName ) {
+				$placeholder_element = $node->firstChild;
+				$placeholder_element->setAttribute( Attribute::PLACEHOLDER, '' );
+				$amp_element->appendChild( $placeholder_element );
 			}
 
 			$this->maybe_remove_script_sibling(
@@ -114,10 +109,10 @@ class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 					&&
 					'/post.js' === $parsed_url['path']
 					);
-				}  
+				}
 			);
 
-			$node->parentNode->replaceChild( $amp_node, $node );
+			$node->parentNode->replaceChild( $amp_element, $node );
 		}
 	}
 }
