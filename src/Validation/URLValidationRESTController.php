@@ -75,44 +75,18 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 	public function register() {
 		register_rest_route(
 			$this->namespace,
-			'/validate-post-url/(?P<id>[\d]+)',
+			'/validate-post-url',
 			[
 				'args'   => [
 					'id'            => [
-						'description'       => __( 'Unique identifier for the object.', 'amp' ),
+						'description'       => __( 'ID for AMP-enabled post.', 'amp' ),
 						'required'          => true,
 						'type'              => 'integer',
 						'minimum'           => 1,
-						'validate_callback' => function ( $id, $request, $param ) {
-							// First enforce the schema to ensure $id is an integer greater than 0.
-							$validity = rest_validate_request_arg( $id, $request, $param );
-							if ( is_wp_error( $validity ) ) {
-								return $validity;
-							}
-
-							// Make sure the post exists.
-							$post = get_post( (int) $id );
-							if ( empty( $post ) ) {
-								return new WP_Error(
-									'rest_post_invalid_id',
-									__( 'Invalid post ID.', 'default' ),
-									[ 'status' => 404 ]
-								);
-							}
-
-							// Make sure AMP is supported for the post.
-							if ( ! amp_is_post_supported( $post ) ) {
-								return new WP_Error(
-									'amp_post_not_supported',
-									__( 'AMP is not supported on post.', 'amp' ),
-									[ 'status' => 403 ]
-								);
-							}
-							return true;
-						},
+						'validate_callback' => [ $this, 'validate_post_id_param' ],
 					],
 					'preview_nonce' => [
-						'description' => __( 'Preview nonce string.', 'amp' ),
+						'description' => __( 'Preview nonce.', 'amp' ),
 						'required'    => false,
 						'type'        => 'string',
 						'pattern'     => '^[0-9a-f]+$', // Ensure hexadecimal hash string.
@@ -129,6 +103,42 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 		);
 
 		// @todo Additional endpoint to validate a URL (from a URL rather than a post ID).
+	}
+
+	/**
+	 * Validate post ID param.
+	 *
+	 * @param string|int      $id      Post ID.
+	 * @param WP_REST_Request $request REST request.
+	 * @param string          $param   Param name ('id').
+	 * @return true|WP_Error True on valid, WP_Error otherwise.
+	 */
+	public function validate_post_id_param( $id, $request, $param ) {
+		// First enforce the schema to ensure $id is an integer greater than 0.
+		$validity = rest_validate_request_arg( $id, $request, $param );
+		if ( is_wp_error( $validity ) ) {
+			return $validity;
+		}
+
+		// Make sure the post exists.
+		$post = get_post( (int) $id );
+		if ( empty( $post ) ) {
+			return new WP_Error(
+				'rest_post_invalid_id',
+				__( 'Invalid post ID.', 'default' ),
+				[ 'status' => 404 ]
+			);
+		}
+
+		// Make sure AMP is supported for the post.
+		if ( ! amp_is_post_supported( $post ) ) {
+			return new WP_Error(
+				'amp_post_not_supported',
+				__( 'AMP is not supported on post.', 'amp' ),
+				[ 'status' => 403 ]
+			);
+		}
+		return true;
 	}
 
 	/**

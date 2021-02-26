@@ -166,7 +166,9 @@ export function useValidationErrorStateUpdates() {
 			setIsFetchingErrors( true );
 			setBlockOrderBeforeSave( getClientIdsWithDescendants() );
 
-			const data = {};
+			const data = {
+				id: currentPostId,
+			};
 
 			if ( hasRequestedPreview ) {
 				data.preview_nonce = getQueryArg( previewLink, 'preview_nonce' );
@@ -176,7 +178,7 @@ export function useValidationErrorStateUpdates() {
 			setHasRequestedPreview( false );
 
 			const newValidation = await apiFetch( {
-				path: `/amp/v1/validate-post-url/${ currentPostId }`,
+				path: '/amp/v1/validate-post-url/',
 				method: 'POST',
 				data,
 			} );

@@ -8,12 +8,16 @@
 namespace AmpProject\AmpWP\Tests;
 
 use AmpProject\AmpWP\DevTools\UserAccess;
+use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\Tests\Helpers\ValidationRequestMocking;
 use AmpProject\AmpWP\Validation\URLValidationProvider;
 use AmpProject\AmpWP\Validation\URLValidationRESTController;
+use WP_Error;
 use WP_REST_Controller;
 use WP_REST_Request;
 use WP_UnitTestCase;
+use AMP_Options_Manager;
+use AMP_Theme_Support;
 
 /**
  * Tests for URLValidationRESTController.
@@ -66,28 +70,25 @@ class URLValidationRESTControllerTest extends WP_UnitTestCase {
 	public function test_register() {
 		$this->controller->register();
 
-		$this->assertContains( '/amp/v1/validate-post-url/(?P<id>[\d]+)', array_keys( rest_get_server()->get_routes() ) );
+		$this->assertContains( '/amp/v1/validate-post-url', array_keys( rest_get_server()->get_routes() ) );
 	}
 
 	/** @covers ::create_item_permissions_check() */
 	public function test_create_item_permissions_check() {
-		$post = self::factory()->post->create();
-
-		$this->assertWPError( $this->controller->create_item_permissions_check( new WP_REST_Request( 'POST', 'amp/v1/validate-post-url/' . $post ) ) );
+		$this->assertWPError( $this->controller->create_item_permissions_check( new WP_REST_Request( 'POST', '/amp/v1/validate-post-url/' ) ) );
 
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'author' ] ) );
-		$this->assertWPError( $this->controller->create_item_permissions_check( new WP_REST_Request( 'POST', 'amp/v1/validate-post-url/' . $post ) ) );
+		$this->assertWPError( $this->controller->create_item_permissions_check( new WP_REST_Request( 'POST', '/amp/v1/validate-post-url/' ) ) );
 
 		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 		$this->user_access->set_user_enabled( wp_get_current_user(), true );
-		$this->assertTrue( $this->controller->create_item_permissions_check( new WP_REST_Request( 'POST', 'amp/v1/validate-post-url/' . $post ) ) );
+		$this->assertTrue( $this->controller->create_item_permissions_check( new WP_REST_Request( 'POST', '/amp/v1/validate-post-url/' ) ) );
 	}
 
 	/** @covers ::is_valid_preview_nonce() */
 	public function test_is_valid_preview_nonce() {
 		$user_id = self::factory()->user->create( [ 'role' => 'author' ] );
 		$post_id = self::factory()->post->create( [ 'post_author' => $user_id ] );
-
 		wp_set_current_user( $user_id );
 
 		$this->assertFalse( $this->controller->is_valid_preview_nonce( 'bad', 1 ) );
@@ -96,75 +97,116 @@ class URLValidationRESTControllerTest extends WP_UnitTestCase {
 		$this->assertTrue( $this->controller->is_valid_preview_nonce( wp_create_nonce( 'post_preview_' . $post_id ), $post_id ) );
 	}
 
-	/** @covers ::validate_post_url() */
-	public function test_validate_post_url_published() {
-		$user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
-		$post_id = self::factory()->post->create();
-		wp_set_current_user( $user_id );
+	/** @return array */
+	public function get_data_for_test_validate_post_url() {
+		$post_id        = self::factory()->post->create();
+		$revision_id    = self::factory()->post->create( [ 'post_type' => 'revision' ] );
+		$admin_user_id  = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		$author_user_id = self::factory()->user->create( [ 'role' => 'author' ] );
 
-		$request = new WP_REST_Request(
-			'POST',
-			'amp/v1/validate-post-url/' . $post_id
-		);
-		$request->set_param( 'id', $post_id );
-
-		$response = $this->controller->validate_post_url( $request );
-		$data     = $response->get_data();
-
-		$this->assertEquals(
-			[
-				'results',
-				'review_link',
+		return [
+			'not_int'      => [
+				[ 'id' => 'foo' ],
+				$admin_user_id,
+				'rest_invalid_param',
 			],
-			array_keys( $data )
-		);
-
-		$this->assertNotEmpty( $data['review_link'] );
-		$this->assertEquals( 1, count( $data['results'] ) );
+			'too_small'    => [
+				[ 'id' => -1 ],
+				$admin_user_id,
+				'rest_invalid_param',
+			],
+			'empty_post'   => [
+				[ 'id' => 0 ],
+				$admin_user_id,
+				'rest_invalid_param',
+			],
+			'revision_id'  => [
+				[ 'id' => $revision_id ],
+				$admin_user_id,
+				'rest_invalid_param',
+			],
+			'as_author'    => [
+				[ 'id' => $post_id ],
+				$author_user_id,
+				'amp_rest_no_dev_tools',
+			],
+			'bad_preview1' => [
+				[
+					'id'            => $post_id,
+					'preview_nonce' => 'bad!!',
+				],
+				$admin_user_id,
+				'rest_invalid_param',
+			],
+			'bad_preview2' => [
+				[
+					'id'            => $post_id,
+					'preview_nonce' => wp_create_nonce( 'bad' ),
+				],
+				$admin_user_id,
+				'amp_post_preview_denied',
+			],
+			'post_id'      => [
+				[ 'id' => $post_id ],
+				$admin_user_id,
+				true,
+			],
+			'good_preview' => [
+				[
+					'id'            => $post_id,
+					'preview_nonce' => 'post_preview_%d',
+				],
+				$admin_user_id,
+				true,
+			],
+		];
 	}
 
-	/** @covers ::validate_post_url() */
-	public function test_validate_post_url_preview() {
-		$user_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
-		$post_id = self::factory()->post->create();
+	/**
+	 * @dataProvider get_data_for_test_validate_post_url()
+	 * @covers ::validate_post_url()
+	 * @covers ::validate_post_id_param()
+	 *
+	 * @param array        $params            Params.
+	 * @param int          $user_id           Current user ID.
+	 * @param true|string  $expected_validity Expected validity.
+	 */
+	public function test_validate_post_url( $params, $user_id, $expected_validity ) {
+		add_filter( 'amp_dev_tools_user_default_enabled', '__return_true' );
 		wp_set_current_user( $user_id );
 
-		// Ensure that a bad preview_nonce fails.
-		$request = new WP_REST_Request(
-			'POST',
-			'amp/v1/validate-post-url/' . $post_id
-		);
-		$request->set_param( 'preview_nonce', wp_create_nonce( 'bad' ) );
-		$response = $this->controller->validate_post_url( $request );
-		$this->assertTrue( is_wp_error( $response ) );
+		if ( isset( $params['id'], $params['preview_nonce'] ) && false !== strpos( $params['preview_nonce'], '%' ) ) {
+			$params['preview_nonce'] = wp_create_nonce( sprintf( $params['preview_nonce'], $params['id'] ) );
+		}
 
-		// Check valid post_preview.
-		$request = new WP_REST_Request(
-			'POST',
-			'amp/v1/validate-post-url/' . $post_id
-		);
-		$request->set_param( 'id', $post_id );
-		$preview_nonce = wp_create_nonce( 'post_preview_' . $post_id );
-		$this->assertTrue( $this->controller->is_valid_preview_nonce( $preview_nonce, $post_id ) );
-		$request->set_param( 'preview_nonce', $preview_nonce );
-		$response = $this->controller->validate_post_url( $request );
-		$this->assertFalse( is_wp_error( $response ) );
-		$data = $response->get_data();
+		$this->controller->register();
+		$request = new WP_REST_Request( 'POST', '/amp/v1/validate-post-url' );
+		$request->set_body_params( $params );
+		$response = rest_get_server()->dispatch( $request );
 
-		$this->assertEquals(
-			[
-				'results',
-				'review_link',
-			],
-			array_keys( $data )
-		);
+		if ( true === $expected_validity ) {
+			$this->assertFalse( $response->is_error() );
+			$data = $response->get_data();
 
-		$this->assertNotEmpty( $data['review_link'] );
-		$this->assertEquals( 1, count( $data['results'] ) );
-		foreach ( $data['results'] as $result ) {
-			$this->assertArrayHasKey( 'error', $result );
-			$this->assertArrayHasKey( 'sources', $result['error'] );
-			$this->assertArrayHasKey( 'sanitized', $result );
+			$this->assertEquals(
+				[
+					'results',
+					'review_link',
+				],
+				array_keys( $data )
+			);
+
+			$this->assertNotEmpty( $data['review_link'] );
+			$this->assertEquals( 1, count( $data['results'] ) );
+			foreach ( $data['results'] as $result ) {
+				$this->assertArrayHasKey( 'error', $result );
+				$this->assertArrayHasKey( 'sources', $result['error'] );
+				$this->assertArrayHasKey( 'sanitized', $result );
+			}
+		} else {
+			$this->assertTrue( $response->is_error() );
+			$error = $response->as_error();
+			$this->assertEquals( $expected_validity, $error->get_error_code() );
 		}
 	}
 
