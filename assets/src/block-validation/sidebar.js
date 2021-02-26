@@ -47,29 +47,18 @@ export function Sidebar() {
 		reviewLink: select( BLOCK_VALIDATION_STORE_KEY ).getReviewLink(),
 	} ), [] );
 
-	const { displayedErrors, reviewedValidationErrors, unreviewedValidationErrors, validationErrors } = useSelect( ( select ) => {
-		let updatedDisplayedErrors;
-
-		const updatedValidationErrors = select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors();
-		const updatedReviewedValidationErrors = select( BLOCK_VALIDATION_STORE_KEY ).getReviewedValidationErrors();
-		const updatedUnreviewedValidationErrors = select( BLOCK_VALIDATION_STORE_KEY ).getUnreviewedValidationErrors();
-
-		if ( isShowingReviewed ) {
-			updatedDisplayedErrors = updatedValidationErrors;
-		} else {
-			updatedDisplayedErrors = updatedUnreviewedValidationErrors;
-
-			// If there are no unreviewed errors, we show the reviewed errors.
-			if ( 0 === updatedDisplayedErrors.length ) {
-				updatedDisplayedErrors = updatedReviewedValidationErrors;
-			}
-		}
+	const {
+		displayedErrors,
+		hasReviewedValidationErrors,
+		validationErrors,
+	} = useSelect( ( select ) => {
+		const allErrors = select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors();
+		const unreviewedErrors = select( BLOCK_VALIDATION_STORE_KEY ).getUnreviewedValidationErrors();
 
 		return {
-			displayedErrors: updatedDisplayedErrors,
-			reviewedValidationErrors: updatedReviewedValidationErrors,
-			unreviewedValidationErrors: updatedUnreviewedValidationErrors,
-			validationErrors: updatedValidationErrors,
+			displayedErrors: isShowingReviewed ? allErrors : unreviewedErrors,
+			hasReviewedValidationErrors: select( BLOCK_VALIDATION_STORE_KEY ).getReviewedValidationErrors()?.length > 0,
+			validationErrors: allErrors,
 		};
 	}, [ isShowingReviewed ] );
 
@@ -118,7 +107,7 @@ export function Sidebar() {
 							) }
 						</p>
 					</div>
-					{ ( 0 < reviewedValidationErrors.length && 0 < unreviewedValidationErrors.length ) && (
+					{ hasReviewedValidationErrors && (
 						<div className="amp-sidebar__options">
 							<ToggleControl
 								checked={ isShowingReviewed }
