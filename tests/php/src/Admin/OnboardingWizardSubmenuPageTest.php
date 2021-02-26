@@ -134,10 +134,6 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 				'http://example.org/core-dev/src/wp-login.php',
 				'http://example.org/core-dev/src/wp-admin/admin.php?page=amp-options',
 			],
-			'customizer page'   => [
-				'http://example.org/core-dev/src/wp-admin/customize.php',
-				'http://example.org/core-dev/src/wp-admin/admin.php?page=amp-options',
-			],
 		];
 	}
 

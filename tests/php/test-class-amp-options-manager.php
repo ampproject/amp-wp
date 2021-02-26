@@ -761,6 +761,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 
 	/** @covers AMP_Options_Manager::insecure_connection_notice() */
 	public function test_insecure_connection_notice() {
+		$current_server_https = isset( $_SERVER['HTTPS'] ) ? $_SERVER['HTTPS'] : false;
 		$_SERVER['HTTPS'] = false;
 		$this->assertEmpty( get_echo( [ 'AMP_Options_Manager', 'insecure_connection_notice' ] ) );
 
@@ -778,6 +779,8 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		add_filter( 'site_url', $set_https_url );
 		set_current_screen( 'toplevel_page_' . AMP_Options_Manager::OPTION_NAME );
 		$this->assertEmpty( get_echo( [ 'AMP_Options_Manager', 'insecure_connection_notice' ] ) );
+
+		$_SERVER['HTTPS'] = $current_server_https;
 	}
 
 	/** @covers AMP_Options_Manager::reader_theme_fallback_notice() */
