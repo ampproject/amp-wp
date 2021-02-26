@@ -111,6 +111,7 @@ final class URLValidationProvider {
 			$url_post = AMP_Validated_URL_Post_Type::get_invalid_url_post( $url );
 
 			if ( $url_post && empty( AMP_Validated_URL_Post_Type::get_post_staleness( $url_post ) ) ) {
+				// @todo This $validity has no 'results' key like validate_url_and_store does, therefore will it be expected?
 				$validity    = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $url_post );
 				$revalidated = false;
 				$post_id     = $url_post->ID;

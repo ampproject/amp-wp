@@ -174,11 +174,13 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 		$url           = amp_get_permalink( $post_id );
 
 		if ( ! empty( $preview_nonce ) ) {
+
 			// Verify the preview nonce is valid. Note this is not done in a validate_callback because at that point there won't be a validated id parameter.
 			if ( ! $this->is_valid_preview_nonce( $preview_nonce, $post_id ) ) {
-				return new WP_REST_Response(
-					[ 'error' => __( 'Sorry, you are not allowed to validate this post preview.', 'amp' ) ],
-					403
+				return new WP_Error(
+					'amp_post_preview_denied',
+					__( 'Sorry, you are not allowed to validate this post preview.', 'amp' ),
+					[ 'status' => 403 ]
 				);
 			}
 

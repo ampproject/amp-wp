@@ -44,7 +44,14 @@ trait ValidationRequestMocking {
 			'results' => [
 				[
 					'error'     => [
-						'code' => 'foo',
+						'code'    => 'foo',
+						'sources' => [
+							[
+								'type' => 'plugin',
+								'name' => 'foo',
+								'file' => 'foo/foo.php',
+							],
+						],
 					],
 					'sanitized' => false,
 				],
