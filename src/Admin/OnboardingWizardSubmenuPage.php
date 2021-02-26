@@ -298,7 +298,7 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 		$referer                    = wp_get_referer();
 		$excluded_referer_basenames = [ 'customize.php', 'wp-login.php' ];
 
-		if ( $referer && ! in_array( wp_basename( parse_url( $referer, PHP_URL_PATH ) ), $excluded_referer_basenames, true ) ) {
+		if ( $referer && ! in_array( wp_basename( wp_parse_url( $referer, PHP_URL_PATH ) ), $excluded_referer_basenames, true ) ) {
 			return $referer;
 		}
 
