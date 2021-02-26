@@ -83,11 +83,6 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 						'required'    => true,
 						'type'        => 'integer',
 					],
-					'preview_id'    => [
-						'description' => __( 'Unique identifier for the preview.', 'amp' ),
-						'required'    => false,
-						'type'        => 'integer',
-					],
 					'preview_nonce' => [
 						'description' => __( 'Preview nonce string.', 'amp' ),
 						'required'    => false,
@@ -133,15 +128,14 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 	 */
 	public function validate_post_url( $request ) {
 		$post_id       = (int) $request['id'];
-		$preview_id    = (int) $request['preview_id'];
 		$preview_nonce = $request['preview_nonce'];
 		$url           = amp_get_permalink( $post_id );
 
-		if ( ! empty( $preview_id ) && ! empty( $preview_nonce ) ) {
+		if ( ! empty( $preview_nonce ) ) {
 			$url = add_query_arg(
 				[
 					'preview'       => 1,
-					'preview_id'    => $preview_id,
+					'preview_id'    => $post_id,
 					'preview_nonce' => $preview_nonce,
 				],
 				$url

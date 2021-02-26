@@ -166,11 +166,10 @@ export function useValidationErrorStateUpdates() {
 			setIsFetchingErrors( true );
 			setBlockOrderBeforeSave( getClientIdsWithDescendants() );
 
-			const queryArgs = {};
+			const data = {};
 
 			if ( hasRequestedPreview ) {
-				queryArgs.preview_id = getQueryArg( previewLink, 'preview_id' );
-				queryArgs.preview_nonce = getQueryArg( previewLink, 'preview_nonce' );
+				data.preview_nonce = getQueryArg( previewLink, 'preview_nonce' );
 			}
 
 			setShouldValidate( false );
@@ -179,7 +178,7 @@ export function useValidationErrorStateUpdates() {
 			const newValidation = await apiFetch( {
 				path: `/amp/v1/validate-post-url/${ currentPostId }`,
 				method: 'POST',
-				data: queryArgs,
+				data,
 			} );
 
 			if ( true === unmounted.current ) {
