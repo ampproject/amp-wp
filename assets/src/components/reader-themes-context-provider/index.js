@@ -252,6 +252,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 					fetchingThemes,
 					themes: filteredThemes,
 					selectedTheme: selectedTheme || {},
+					templateModeWasOverridden,
 					themesAPIError,
 				}
 			}
