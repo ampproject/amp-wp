@@ -7,6 +7,7 @@
 
 namespace AmpProject\AmpWP\Tests\Admin;
 
+use AMP_Options_Manager;
 use AmpProject\AmpWP\Admin\GoogleFonts;
 use AmpProject\AmpWP\Admin\OnboardingWizardSubmenuPage;
 use AmpProject\AmpWP\Admin\ReaderThemes;
@@ -59,7 +60,7 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 	/**
 	 * Tests OnboardingWizardSubmenuPage::register
 	 *
-	 * @covers ::register
+	 * @covers ::register()
 	 */
 	public function test_register() {
 		$this->page->register();
@@ -70,9 +71,9 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests OnboardingWizardSubmenuPage::override_title
+	 * Tests OnboardingWizardSubmenuPage::override_title()
 	 *
-	 * @covers ::override_title
+	 * @covers ::override_title()
 	 */
 	public function test_override_title() {
 		set_current_screen( 'index.php' );
@@ -85,9 +86,9 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests OnboardingWizardSubmenuPage::render
+	 * Tests OnboardingWizardSubmenuPage::render()
 	 *
-	 * @covers ::render
+	 * @covers ::render()
 	 */
 	public function test_render() {
 		ob_start();
@@ -98,9 +99,9 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests OnboardingWizardSubmenuPage::screen_handle
+	 * Tests OnboardingWizardSubmenuPage::screen_handle()
 	 *
-	 * @covers ::screen_handle
+	 * @covers ::screen_handle()
 	 */
 	public function test_screen_handle() {
 		$this->assertEquals( $this->page->screen_handle(), 'admin_page_amp-onboarding-wizard' );
@@ -109,7 +110,7 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 	/**
 	 * Tests OnboardingWizardSubmenuPage::enqueue_assets
 	 *
-	 * @covers ::enqueue_assets
+	 * @covers ::enqueue_assets()
 	 */
 	public function test_enqueue_assets() {
 		$handle = 'amp-onboarding-wizard';
@@ -117,5 +118,43 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 		$this->page->enqueue_assets( $this->page->screen_handle() );
 		$this->assertTrue( wp_script_is( $handle ) );
 		$this->assertTrue( wp_style_is( $handle ) );
+	}
+
+	public function get_referrer_links() {
+		return [
+			'tools page'        => [
+				'http://example.org/core-dev/src/wp-admin/tools.php',
+				'http://example.org/core-dev/src/wp-admin/tools.php',
+			],
+			'amp settings page' => [
+				'http://example.org/core-dev/src/wp-admin/admin.php?page=amp-options',
+				'http://example.org/core-dev/src/wp-admin/admin.php?page=amp-options',
+			],
+			'login page'        => [
+				'http://example.org/core-dev/src/wp-login.php',
+				'http://example.org/core-dev/src/wp-admin/admin.php?page=amp-options',
+			],
+			'customizer page'   => [
+				'http://example.org/core-dev/src/wp-admin/customize.php',
+				'http://example.org/core-dev/src/wp-admin/admin.php?page=amp-options',
+			],
+		];
+	}
+
+	/**
+	 * Tests OnboardingWizardSubmenuPage::get_close_link()
+	 *
+	 * @covers ::enqueue_assets()
+	 * @dataProvider get_referrer_links()
+	 *
+	 * @param string $referrer_link Referrer link.
+	 * @param string $expected_link Expected link.
+	 */
+	public function test_get_close_link( $referrer_link, $expected_link ) {
+		// Register an instance of the AMP menu page to ensure `menu_page_url()` returns the correct URL.
+		add_menu_page( 'AMP Settings', 'AMP', 'manage_options', AMP_Options_Manager::OPTION_NAME );
+
+		$_SERVER['HTTP_REFERER'] = $referrer_link;
+		$this->assertEquals( $this->page->get_close_link(), $expected_link );
 	}
 }

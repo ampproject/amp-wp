@@ -9,13 +9,11 @@
 namespace AmpProject\AmpWP\Admin;
 
 use AMP_Options_Manager;
-use AmpProject\AmpWP\AmpSlugCustomizationWatcher;
 use AmpProject\AmpWP\DevTools\UserAccess;
 use AmpProject\AmpWP\Infrastructure\Conditional;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
-use AmpProject\AmpWP\Option;
 use AmpProject\AmpWP\QueryVar;
 use AmpProject\AmpWP\Services;
 
@@ -217,7 +215,7 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 		$theme           = wp_get_theme();
 		$is_reader_theme = $this->reader_themes->theme_data_exists( get_stylesheet() );
 
-		$exit_link = menu_page_url( AMP_Options_Manager::OPTION_NAME, false );
+		$amp_settings_link = menu_page_url( AMP_Options_Manager::OPTION_NAME, false );
 
 		$setup_wizard_data = [
 			'AMP_OPTIONS_KEY'                    => AMP_Options_Manager::OPTION_NAME,
@@ -228,11 +226,11 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 			'APP_ROOT_ID'                        => self::APP_ROOT_ID,
 			'CUSTOMIZER_LINK'                    => add_query_arg(
 				[
-					'return' => rawurlencode( $exit_link ),
+					'return' => rawurlencode( $amp_settings_link ),
 				],
 				admin_url( 'customize.php' )
 			),
-			'CLOSE_LINK'                         => wp_get_referer() ?: $exit_link,
+			'CLOSE_LINK'                         => $this->get_close_link(),
 			// @todo As of June 2020, an upcoming WP release will allow this to be retrieved via REST.
 			'CURRENT_THEME'                      => [
 				'name'            => $theme->get( 'Name' ),
@@ -242,7 +240,7 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 				'url'             => $theme->get( 'ThemeURI' ),
 			],
 			'USING_FALLBACK_READER_THEME'        => $this->reader_themes->using_fallback_theme(),
-			'FINISH_LINK'                        => $exit_link,
+			'FINISH_LINK'                        => $amp_settings_link,
 			'OPTIONS_REST_PATH'                  => '/amp/v1/options',
 			'READER_THEMES_REST_PATH'            => '/amp/v1/reader-themes',
 			'UPDATES_NONCE'                      => wp_create_nonce( 'updates' ),
@@ -289,5 +287,22 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 		foreach ( $paths as $path ) {
 			$this->rest_preloader->add_preloaded_path( $path );
 		}
+	}
+
+	/**
+	 * Determine URL that should be used to close the Onboarding Wizard.
+	 *
+	 * @return string Close link.
+	 */
+	public function get_close_link() {
+		$referer                    = wp_get_referer();
+		$excluded_referer_basenames = [ 'customize.php', 'wp-login.php' ];
+
+		if ( $referer && ! in_array( wp_basename( parse_url( $referer, PHP_URL_PATH ) ), $excluded_referer_basenames, true ) ) {
+			return $referer;
+		}
+
+		// Default to the AMP Settings page if a referrer link could not be determined.
+		return menu_page_url( AMP_Options_Manager::OPTION_NAME, false );
 	}
 }
