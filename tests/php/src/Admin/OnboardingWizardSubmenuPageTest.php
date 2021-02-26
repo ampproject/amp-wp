@@ -123,16 +123,16 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 	public function get_referrer_links() {
 		return [
 			'tools page'        => [
-				'http://example.org/core-dev/src/wp-admin/tools.php',
-				'http://example.org/core-dev/src/wp-admin/tools.php',
+				admin_url( 'tools.php' ),
+				admin_url( 'tools.php' ),
 			],
 			'amp settings page' => [
-				'http://example.org/core-dev/src/wp-admin/admin.php?page=amp-options',
-				'http://example.org/core-dev/src/wp-admin/admin.php?page=amp-options',
+				admin_url( 'admin.php?page=amp-options' ),
+				admin_url( 'admin.php?page=amp-options' ),
 			],
 			'login page'        => [
-				'http://example.org/core-dev/src/wp-login.php',
-				'http://example.org/core-dev/src/wp-admin/admin.php?page=amp-options',
+				wp_login_url(),
+				admin_url( 'admin.php?page=amp-options' ),
 			],
 		];
 	}
@@ -147,7 +147,6 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 	 * @param string $expected_link Expected link.
 	 */
 	public function test_get_close_link( $referrer_link, $expected_link ) {
-		remove_all_filters('site_url');
 		// Register an instance of the AMP menu page to ensure `menu_page_url()` returns the correct URL.
 		add_menu_page( 'AMP Settings', 'AMP', 'manage_options', AMP_Options_Manager::OPTION_NAME );
 

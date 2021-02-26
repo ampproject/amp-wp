@@ -295,7 +295,7 @@ final class OnboardingWizardSubmenuPage implements Conditional, Delayed, Registe
 	 * @return string Close link.
 	 */
 	public function get_close_link() {
-		$referer                    = wp_get_referer();
+		$referer = wp_get_referer();
 
 		if ( $referer && 'wp-login.php' !== wp_basename( wp_parse_url( $referer, PHP_URL_PATH ) ) ) {
 			return $referer;

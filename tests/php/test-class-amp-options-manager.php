@@ -778,8 +778,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		add_filter( 'site_url', $set_https_url );
 		set_current_screen( 'toplevel_page_' . AMP_Options_Manager::OPTION_NAME );
 		$this->assertEmpty( get_echo( [ 'AMP_Options_Manager', 'insecure_connection_notice' ] ) );
-
-		unset( $_SERVER['HTTPS'] );
 	}
 
 	/** @covers AMP_Options_Manager::reader_theme_fallback_notice() */
