@@ -1916,6 +1916,9 @@ class AMP_Validation_Manager {
 	 * }
 	 */
 	public static function validate_url( $url ) {
+		if ( ! amp_is_canonical() && ! amp_has_paired_endpoint( $url ) ) {
+			$url = amp_add_paired_endpoint( $url );
+		}
 
 		$added_query_vars = [
 			self::VALIDATE_QUERY_VAR   => self::get_amp_validate_nonce(),
@@ -2040,9 +2043,6 @@ class AMP_Validation_Manager {
 	 * }
 	 */
 	public static function validate_url_and_store( $url, $post = null ) {
-		if ( ! amp_is_canonical() && ! amp_has_paired_endpoint( $url ) ) {
-			$url = amp_add_paired_endpoint( $url );
-		}
 		$validity = self::validate_url( $url );
 		if ( $validity instanceof WP_Error ) {
 			return $validity;
