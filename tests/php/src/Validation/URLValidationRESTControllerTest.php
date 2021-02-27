@@ -95,111 +95,102 @@ class URLValidationRESTControllerTest extends WP_UnitTestCase {
 
 	/** @return array */
 	public function get_data_for_test_validate_post_url() {
-		$data = [
-			'not_int'      => function () {
-				return [
-					[ 'id' => 'foo' ],
-					self::factory()->user->create( [ 'role' => 'administrator' ] ),
-					'rest_invalid_param',
-				];
-			},
+		return [
+			'not_int'      => [
+				[ 'id' => 'foo' ],
+				null,
+				'administrator',
+				'rest_invalid_param',
+			],
 
-			'too_small'    => function () {
-				return [
-					[ 'id' => - 1 ],
-					self::factory()->user->create( [ 'role' => 'administrator' ] ),
-					'rest_invalid_param',
-				];
-			},
+			'too_small'    => [
+				[ 'id' => - 1 ],
+				null,
+				'administrator',
+				'rest_invalid_param',
+			],
 
-			'empty_post'   => function () {
-				return [
-					[ 'id' => 0 ],
-					self::factory()->user->create( [ 'role' => 'administrator' ] ),
-					'rest_invalid_param',
-				];
-			},
+			'empty_post'   => [
+				[ 'id' => 0 ],
+				null,
+				'administrator',
+				'rest_invalid_param',
+			],
 
-			'revision_id'  => function () {
-				return [
-					[ 'id' => self::factory()->post->create( [ 'post_type' => 'revision' ] ) ],
-					self::factory()->user->create( [ 'role' => 'administrator' ] ),
-					'rest_invalid_param',
-				];
-			},
+			'revision_id'  => [
+				[ 'id' => '{{id}}' ],
+				'revision',
+				'administrator',
+				'rest_invalid_param',
+			],
 
-			'as_author'    => function () {
-				return [
-					[ 'id' => self::factory()->post->create( [ 'post_type' => 'post' ] ) ],
-					self::factory()->post->create( [ 'post_type' => 'revision' ] ),
-					'amp_rest_no_dev_tools',
-				];
-			},
+			'as_author'    => [
+				[ 'id' => '{{id}}' ],
+				'post',
+				'author',
+				'amp_rest_no_dev_tools',
+			],
 
-			'bad_preview1' => function () {
-				return [
-					[
-						'id'            => self::factory()->post->create( [ 'post_type' => 'post' ] ),
-						'preview_nonce' => 'bad!!',
-					],
-					self::factory()->user->create( [ 'role' => 'administrator' ] ),
-					version_compare( get_bloginfo( 'version' ), '5.2', '<' ) ? 'amp_post_preview_denied' : 'rest_invalid_param',
-				];
-			},
+			'bad_preview1' => [
+				[
+					'id'            => '{{id}}',
+					'preview_nonce' => 'bad!!',
+				],
+				'post',
+				'administrator',
+				version_compare( get_bloginfo( 'version' ), '5.2', '<' ) ? 'amp_post_preview_denied' : 'rest_invalid_param',
+			],
 
-			'bad_preview2' => function () {
-				return [
-					[
-						'id'            => self::factory()->post->create( [ 'post_type' => 'post' ] ),
-						'preview_nonce' => wp_create_nonce( 'bad' ),
-					],
-					self::factory()->user->create( [ 'role' => 'administrator' ] ),
-					'amp_post_preview_denied',
-				];
-			},
+			'bad_preview2' => [
+				[
+					'id'            => '{{id}}',
+					'preview_nonce' => wp_create_nonce( 'bad' ),
+				],
+				'post',
+				'administrator',
+				'amp_post_preview_denied',
+			],
 
-			'post_id'      => function () {
-				return [
-					[ 'id' => self::factory()->post->create( [ 'post_type' => 'post' ] ) ],
-					self::factory()->user->create( [ 'role' => 'administrator' ] ),
-					true,
-				];
-			},
+			'post_id'      => [
+				[ 'id' => '{{id}}' ],
+				'post',
+				'administrator',
+				true,
+			],
 
-			'good_preview' => function () {
-				return [
-					[
-						'id'            => self::factory()->post->create( [ 'post_type' => 'post' ] ),
-						'preview_nonce' => 'post_preview_%d',
-					],
-					self::factory()->user->create( [ 'role' => 'administrator' ] ),
-					true,
-				];
-			},
+			'good_preview' => [
+				[
+					'id'            => '{{id}}',
+					'preview_nonce' => '{{preview_nonce}}',
+				],
+				'post',
+				'administrator',
+				true,
+			],
 		];
-
-		return array_map(
-			static function ( $datum ) {
-				return [ $datum ];
-			},
-			$data
-		);
 	}
 
 	/**
 	 * @dataProvider get_data_for_test_validate_post_url()
 	 * @covers ::validate_post_url()
 	 * @covers ::validate_post_id_param()
-	 * @param callable $callback Callback with data.
+	 * @param array $params                  Params (template).
+	 * @param string|null $post_type         Post type.
+	 * @param string      $user_role         User role.
+	 * @param true|string $expected_validity Expected validity.
 	 */
-	public function test_validate_post_url( $callback ) {
-		list( $params, $user_id, $expected_validity ) = $callback();
-
+	public function test_validate_post_url( $params, $post_type, $user_role, $expected_validity ) {
 		add_filter( 'amp_dev_tools_user_default_enabled', '__return_true' );
+		$user_id = self::factory()->user->create( [ 'role' => $user_role ] );
+
 		wp_set_current_user( $user_id );
 
-		if ( isset( $params['id'], $params['preview_nonce'] ) && false !== strpos( $params['preview_nonce'], '%' ) ) {
-			$params['preview_nonce'] = wp_create_nonce( sprintf( $params['preview_nonce'], $params['id'] ) );
+		if ( isset( $params['id'] ) && '{{id}}' === $params['id'] && $post_type ) {
+			$params['id'] = self::factory()->post->create( compact( 'post_type' ) );
+		}
+
+		if ( isset( $params['id'], $params['preview_nonce'] ) && '{{preview_nonce}}' === $params['preview_nonce'] ) {
+			$params['preview_nonce'] = wp_create_nonce( 'post_preview_' . $params['id'] );
 		}
 
 		$this->controller->register();
