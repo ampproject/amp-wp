@@ -85,7 +85,7 @@ function ErrorSource( { clientId, blockTypeName, sources } ) {
 ErrorSource.propTypes = {
 	blockTypeName: PropTypes.string,
 	clientId: PropTypes.string,
-	sources: PropTypes.arrayOf( PropTypes.object ),
+	sources: PropTypes.arrayOf( PropTypes.object ).isRequired,
 };
 
 /**

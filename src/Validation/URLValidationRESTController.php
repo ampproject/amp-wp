@@ -224,6 +224,9 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 			// but is still required for validation errors stored in the database prior to that commit.
 			if ( isset( $result['data']['sources'] ) ) {
 				$result['data']['sources'] = array_values( $result['data']['sources'] );
+			} else {
+				// Make sure sources are always defined.
+				$result['data']['sources'] = [];
 			}
 
 			$data['results'][] = [

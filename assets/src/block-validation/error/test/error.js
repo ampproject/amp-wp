@@ -98,6 +98,7 @@ function createTestStoreAndBlocks() {
 				title: 'Invalid script: <code>jquery.js</code>',
 				error: {
 					type: 'js_error',
+					sources: [],
 				},
 			},
 			{
@@ -210,7 +211,7 @@ describe( 'Error', () => {
 				status={ status }
 				term_id={ 12 }
 				title="My test error"
-				error={ { type: 'js_error' } }
+				error={ { type: 'js_error', sources: [] } }
 			/>
 		),
 	] ) )( 'errors with associated blocks work correctly', ( status, ErrorComponent ) => {
@@ -247,7 +248,7 @@ describe( 'Error', () => {
 				status={ status }
 				term_id={ 12 }
 				title="My test error"
-				error={ { type: 'js_error' } }
+				error={ { type: 'js_error', sources: [] } }
 			/>
 		),
 	] ) )( 'errors with removed blocks work correctly', ( status, ErrorComponent ) => {
@@ -300,7 +301,7 @@ describe( 'ErrorTypeIcon', () => {
 					status={ 3 }
 					term_id={ 12 }
 					title="My test error"
-					error={ { type: errorType } }
+					error={ { type: errorType, sources: [] } }
 				/>,
 				container,
 			);
