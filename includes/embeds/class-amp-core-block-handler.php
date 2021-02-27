@@ -222,13 +222,14 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 * @see \AMP_Video_Sanitizer::filter_video_dimensions()
 	 *
 	 * @param string $block_content The block content about to be appended.
+	 * @param array  $block         The block data.
 	 * @return string Filtered block content.
 	 */
-	public function ampify_cover_block( $block_content ) {
+	public function ampify_cover_block( $block_content, $block ) {
 		return preg_replace_callback(
-			'/(<(?:img|video))([^>]*class="[^"]*?wp-block-cover__(?:image|video)-background[^"]*?"[^>]*)>/',
-			static function ( $matches ) {
-				$replacement = $matches[1];
+			'/<(?:img|video)(?= )[^>]* class="[^"]*?wp-block-cover__(?:image|video)-background[^"]*?"[^>]*(?=>)/',
+			static function ( $matches ) use ( $block ) {
+				$replacement = $matches[0];
 
 				// The background image/video for the cover block by definition needs object-fit="cover" on the resulting amp-ing/amp-video.
 				$replacement .= ' object-fit="cover"';
@@ -236,20 +237,19 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 				// Add the fill layout to skip the needlessly obtaining the dimensions.
 				$replacement .= ' layout="fill"';
 
-				// Extract the object-position from the style attribute to add to the img/video to be copied onto the amp-img/amp-video.
+				// Add object-position from the block attribute's to add to the img/video to be copied onto the amp-img/amp-video.
 				// The AMP runtime copies object-position attribute onto the underlying img/video for a given amp-img/amp-video.
 				// This is needed since the object-position property directly on an amp-img/amp-video will have no effect since
 				// since it is merely a wrapper for the underlying img/video element which actually supports the CSS property.
-				// Note that Gutenberg 9.8 also added a data-object-position attribute on the img/video via <https://github.com/WordPress/gutenberg/pull/25171>
-				// and specifically <https://github.com/WordPress/gutenberg/commit/c963e4c> which could be used instead
-				// of extracting the object-position from the style attribute, but this was not present in older versions.
-				// So this is why the object-position is being extracted from the style attribute instead of the
-				// data-object-position which may not exist.
-				$replacement .= preg_replace(
-					'/ style="[^"]*?object-position\s*:\s*([^";]+)[^"]*?"/',
-					'$0 object-position="$1"',
-					$matches[2]
-				);
+				if ( isset( $block['attrs']['focalPoint']['x'], $block['attrs']['focalPoint']['y'] ) ) {
+					// See logic in Gutenberg for writing focal point to object-position attr:
+					// <https://github.com/WordPress/gutenberg/blob/54c9066/packages/block-library/src/cover/save.js#L71>.
+					$replacement .= sprintf(
+						' object-position="%d%% %d%%"',
+						round( (float) $block['attrs']['focalPoint']['x'] * 100 ),
+						round( (float) $block['attrs']['focalPoint']['y'] * 100 )
+					);
+				}
 
 				$replacement .= '>';
 				return $replacement;
