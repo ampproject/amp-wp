@@ -109,7 +109,7 @@ export function Error( { clientId, error, status, term_id: termId, title } ) {
 Error.propTypes = {
 	clientId: PropTypes.string,
 	error: PropTypes.shape( {
-		sources: PropTypes.array.isRequired,
+		sources: PropTypes.arrayOf( PropTypes.object ),
 	} ).isRequired,
 	status: PropTypes.number.isRequired,
 	term_id: PropTypes.number.isRequired,
