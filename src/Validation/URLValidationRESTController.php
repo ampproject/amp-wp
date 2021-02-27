@@ -24,6 +24,7 @@ use WP_REST_Server;
  * URLValidationRESTController class.
  *
  * @since 2.1
+ * @internal
  */
 final class URLValidationRESTController extends WP_REST_Controller implements Delayed, Service, Registerable {
 
