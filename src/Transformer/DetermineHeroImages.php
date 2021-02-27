@@ -70,34 +70,21 @@ final class DetermineHeroImages implements Transformer {
 	public function transform( Document $document, ErrorCollection $errors ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		$hero_image_elements = [];
 
-		if ( count( $hero_image_elements ) < PreloadHeroImage::DATA_HERO_MAX ) {
-			$custom_header = $this->get_custom_header( $document );
-			if ( null !== $custom_header ) {
-				$hero_image_elements[] = $custom_header;
-			}
-		}
+		foreach ( [ 'custom_header', 'custom_logo', 'featured_image', 'cover_blocks' ] as $hero_image_source ) {
+			if ( count( $hero_image_elements ) < PreloadHeroImage::DATA_HERO_MAX ) {
+				$get_candidate_method = "get_{$hero_image_source}";
+				$candidates           = $this->$get_candidate_method( $document );
 
-		if ( count( $hero_image_elements ) < PreloadHeroImage::DATA_HERO_MAX ) {
-			$custom_logo = $this->get_custom_logo( $document );
-			if ( null !== $custom_logo ) {
-				$hero_image_elements[] = $custom_logo;
-			}
-		}
+				if ( null === $candidates ) {
+					continue;
+				}
 
-		if ( count( $hero_image_elements ) < PreloadHeroImage::DATA_HERO_MAX ) {
-			$featured_image = $this->get_featured_image( $document );
-			if ( null !== $featured_image ) {
-				$hero_image_elements[] = $featured_image;
+				if ( is_array( $candidates ) ) {
+					$hero_image_elements = array_merge( $hero_image_elements, array_filter( $candidates ) );
+				} else {
+					$hero_image_elements[] = $candidates;
+				}
 			}
-		}
-
-		if ( count( $hero_image_elements ) < PreloadHeroImage::DATA_HERO_MAX ) {
-			$hero_image_elements = array_merge(
-				$hero_image_elements,
-				array_filter(
-					$this->get_cover_blocks( $document )
-				)
-			);
 		}
 
 		$this->add_data_hero_candidate_attribute(
