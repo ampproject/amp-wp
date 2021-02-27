@@ -31,25 +31,25 @@ use DOMElement;
 final class DetermineHeroImages implements Transformer {
 
 	/**
-	 * XPath query to find the existing hero images (elements with data/hero attribute).
+	 * XPath query to find the custom logo.
 	 *
 	 * @var string
 	 */
-	const EXISTING_HERO_IMAGES_XPATH_QUERY = './/*[@data-hero]';
+	const CUSTOM_HEADER_XPATH_QUERY = ".//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-custom-header ' ) ]//*[ ( self::img or self::amp-img ) and not( @data-hero ) ]";
 
 	/**
 	 * XPath query to find the custom logo.
 	 *
 	 * @var string
 	 */
-	const CUSTOM_LOGO_XPATH_QUERY = ".//a[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo-link ' ) ]//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo ' ) ][ not( @data-hero ) ]";
+	const CUSTOM_LOGO_XPATH_QUERY = ".//a[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo-link ' ) ]//*[ ( self::img or self::amp-img ) and contains( concat( ' ', normalize-space( @class ), ' ' ), ' custom-logo ' ) ][ not( @data-hero ) ]";
 
 	/**
 	 * XPath query to find the featured image.
 	 *
 	 * @var string
 	 */
-	const FEATURED_IMAGE_XPATH_QUERY = ".//*[ contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-post-image ' ) ][ not( @data-hero ) ]";
+	const FEATURED_IMAGE_XPATH_QUERY = ".//*[ ( self::img or self::amp-img ) and contains( concat( ' ', normalize-space( @class ), ' ' ), ' wp-post-image ' ) ][ not( @data-hero ) ]";
 
 	/**
 	 * XPath query to find the cover blocks.
@@ -68,33 +68,30 @@ final class DetermineHeroImages implements Transformer {
 	 * @return void
 	 */
 	public function transform( Document $document, ErrorCollection $errors ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		$existing_hero_images_count = $document->xpath->query(
-			self::EXISTING_HERO_IMAGES_XPATH_QUERY,
-			$document->body
-		)->length;
-
-		$available_hero_image_slots = max(
-			PreloadHeroImage::DATA_HERO_MAX - $existing_hero_images_count,
-			0
-		);
-
 		$hero_image_elements = [];
 
-		if ( count( $hero_image_elements ) < $available_hero_image_slots ) {
+		if ( count( $hero_image_elements ) < PreloadHeroImage::DATA_HERO_MAX ) {
+			$custom_header = $this->get_custom_header( $document );
+			if ( null !== $custom_header ) {
+				$hero_image_elements[] = $custom_header;
+			}
+		}
+
+		if ( count( $hero_image_elements ) < PreloadHeroImage::DATA_HERO_MAX ) {
 			$custom_logo = $this->get_custom_logo( $document );
 			if ( null !== $custom_logo ) {
 				$hero_image_elements[] = $custom_logo;
 			}
 		}
 
-		if ( count( $hero_image_elements ) < $available_hero_image_slots ) {
+		if ( count( $hero_image_elements ) < PreloadHeroImage::DATA_HERO_MAX ) {
 			$featured_image = $this->get_featured_image( $document );
 			if ( null !== $featured_image ) {
 				$hero_image_elements[] = $featured_image;
 			}
 		}
 
-		if ( count( $hero_image_elements ) < $available_hero_image_slots ) {
+		if ( count( $hero_image_elements ) < PreloadHeroImage::DATA_HERO_MAX ) {
 			$hero_image_elements = array_merge(
 				$hero_image_elements,
 				array_filter(
@@ -103,9 +100,27 @@ final class DetermineHeroImages implements Transformer {
 			);
 		}
 
-		$this->add_data_hero_attribute(
-			array_slice( $hero_image_elements, 0, $available_hero_image_slots )
+		$this->add_data_hero_candidate_attribute(
+			array_slice( $hero_image_elements, 0, PreloadHeroImage::DATA_HERO_MAX )
 		);
+	}
+
+	/**
+	 * Retrieve the element that represents the custom header.
+	 *
+	 * @param Document $document Document to retrieve the custom header from.
+	 * @return DOMElement|null Element that represents the custom header, or null
+	 *                         if not found.
+	 */
+	private function get_custom_header( Document $document ) {
+		$elements = $document->xpath->query(
+			self::CUSTOM_HEADER_XPATH_QUERY,
+			$document->body
+		);
+
+		$custom_header = $elements->item( 0 );
+
+		return $custom_header instanceof DOMElement ? $custom_header : null;
 	}
 
 	/**
@@ -165,9 +180,9 @@ final class DetermineHeroImages implements Transformer {
 	 * @param DOMElement[] $hero_image_elements Elements that are viable hero
 	 *                                          images.
 	 */
-	private function add_data_hero_attribute( $hero_image_elements ) {
+	private function add_data_hero_candidate_attribute( $hero_image_elements ) {
 		foreach ( $hero_image_elements as $hero_image_element ) {
-			$hero_image_element->setAttribute( Attribute::DATA_HERO, null );
+			$hero_image_element->setAttribute( Attribute::DATA_HERO_CANDIDATE, null );
 		}
 	}
 }
