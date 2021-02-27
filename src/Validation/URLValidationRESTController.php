@@ -16,6 +16,7 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use WP_Error;
 use WP_REST_Controller;
+use WP_Post;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -123,7 +124,7 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 
 		// Make sure the post exists.
 		$post = get_post( (int) $id );
-		if ( empty( $post ) ) {
+		if ( ! $post instanceof WP_Post ) {
 			return new WP_Error(
 				'rest_post_invalid_id',
 				__( 'Invalid post ID.', 'default' ),
@@ -186,7 +187,8 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 
 		if ( ! empty( $preview_nonce ) ) {
 
-			// Verify the preview nonce is valid. Note this is not done in a validate_callback because at that point there won't be a validated id parameter.
+			// Verify that the preview nonce is valid. Note this is not done in a `validate_callback` because
+			// at that point there won't be a validated `id` parameter.
 			if ( ! $this->is_valid_preview_nonce( $preview_nonce, $post_id ) ) {
 				return new WP_Error(
 					'amp_post_preview_denied',
@@ -225,13 +227,10 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 			}
 
 			$data['results'][] = [
-				'error'       => $result['data'],
-				'forced'      => $result['forced'],
-				'sanitized'   => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $result['status'],
-				'status'      => $result['status'],
-				'term_id'     => $result['term']->term_id,
-				'term_status' => $result['term_status'],
-				'title'       => AMP_Validation_Error_Taxonomy::get_error_title_from_code( $result['data'] ),
+				'error'   => $result['data'],
+				'status'  => $result['status'],
+				'term_id' => $result['term']->term_id,
+				'title'   => AMP_Validation_Error_Taxonomy::get_error_title_from_code( $result['data'] ),
 			];
 		}
 
@@ -269,7 +268,7 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 					'items'       => [
 						'type'       => 'object',
 						'properties' => [
-							'error'       => [
+							'error'   => [
 								'properties' => [
 									'code'            => [
 										'context' => [],
@@ -298,25 +297,13 @@ final class URLValidationRESTController extends WP_REST_Controller implements De
 								],
 								'type'       => 'object',
 							],
-							'forced'      => [
-								'context' => [],
-								'type'    => 'boolean',
-							],
-							'sanitized'   => [
-								'context' => [],
-								'type'    => 'boolean',
-							],
-							'status'      => [
+							'status'  => [
 								'type' => 'integer',
 							],
-							'term_id'     => [
+							'term_id' => [
 								'type' => 'integer',
 							],
-							'term_status' => [
-								'context' => [],
-								'type'    => 'integer',
-							],
-							'title'       => [
+							'title'   => [
 								'type' => 'string',
 							],
 						],

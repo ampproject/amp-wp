@@ -180,11 +180,11 @@ BlockType.propTypes = {
 export function ErrorContent( {
 	blockType,
 	clientId,
+	error: { sources },
 	external,
 	removed,
 	status,
 	title,
-	error: { sources },
 } ) {
 	const blockTypeTitle = blockType?.title;
 	const blockTypeName = blockType?.name;
@@ -229,6 +229,9 @@ ErrorContent.propTypes = {
 		title: PropTypes.string,
 	} ),
 	clientId: PropTypes.string,
+	error: PropTypes.shape( {
+		sources: PropTypes.arrayOf( PropTypes.object ),
+	} ).isRequired,
 	external: PropTypes.bool,
 	removed: PropTypes.bool,
 	status: PropTypes.oneOf( [
@@ -238,7 +241,4 @@ ErrorContent.propTypes = {
 		VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
 	] ).isRequired,
 	title: PropTypes.string.isRequired,
-	error: PropTypes.shape( {
-		sources: PropTypes.arrayOf( PropTypes.object ),
-	} ).isRequired,
 };

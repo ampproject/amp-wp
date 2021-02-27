@@ -27,10 +27,12 @@ import { ErrorContent } from './error-content';
  *
  * @param {Object} args Component props.
  * @param {string} args.clientId
+ * @param {number} args.error
  * @param {number} args.status
  * @param {number} args.term_id
+ * @param {number} args.title
  */
-export function Error( { clientId, status, term_id: termId, ...props } ) {
+export function Error( { clientId, error, status, term_id: termId, title } ) {
 	const { selectBlock } = useDispatch( 'core/block-editor' );
 	const reviewLink = useSelect( ( select ) => select( BLOCK_VALIDATION_STORE_KEY ).getReviewLink() );
 	const reviewed = status === VALIDATION_ERROR_ACK_ACCEPTED_STATUS || status === VALIDATION_ERROR_ACK_REJECTED_STATUS;
@@ -64,17 +66,18 @@ export function Error( { clientId, status, term_id: termId, ...props } ) {
 			<PanelBody
 				className={ panelClassNames }
 				title={
-					<ErrorPanelTitle { ...props } blockType={ blockType } status={ status } />
+					<ErrorPanelTitle blockType={ blockType } error={ error } title={ title } status={ status } />
 				}
 				initialOpen={ false }
 			>
 				<ErrorContent
-					{ ...props }
-					clientId={ clientId }
 					blockType={ blockType }
+					clientId={ clientId }
+					error={ error }
 					external={ external }
 					removed={ removed }
 					status={ status }
+					title={ title }
 				/>
 
 				<div className="amp-error__actions">
@@ -105,6 +108,10 @@ export function Error( { clientId, status, term_id: termId, ...props } ) {
 }
 Error.propTypes = {
 	clientId: PropTypes.string,
+	error: PropTypes.shape( {
+		sources: PropTypes.array.isRequired,
+	} ).isRequired,
 	status: PropTypes.number.isRequired,
 	term_id: PropTypes.number.isRequired,
+	title: PropTypes.string.isRequired,
 };

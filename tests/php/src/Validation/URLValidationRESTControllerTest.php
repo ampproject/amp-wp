@@ -143,7 +143,7 @@ class URLValidationRESTControllerTest extends WP_UnitTestCase {
 						'preview_nonce' => 'bad!!',
 					],
 					self::factory()->user->create( [ 'role' => 'administrator' ] ),
-					'rest_invalid_param',
+					version_compare( get_bloginfo( 'version' ), '5.2', '<' ) ? 'amp_post_preview_denied' : 'rest_invalid_param',
 				];
 			},
 
@@ -224,7 +224,9 @@ class URLValidationRESTControllerTest extends WP_UnitTestCase {
 			foreach ( $data['results'] as $result ) {
 				$this->assertArrayHasKey( 'error', $result );
 				$this->assertArrayHasKey( 'sources', $result['error'] );
-				$this->assertArrayHasKey( 'sanitized', $result );
+				$this->assertArrayHasKey( 'status', $result );
+				$this->assertArrayHasKey( 'term_id', $result );
+				$this->assertArrayHasKey( 'title', $result );
 			}
 		} else {
 			$this->assertTrue( $response->is_error() );
