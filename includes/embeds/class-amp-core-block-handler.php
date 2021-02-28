@@ -227,7 +227,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function ampify_cover_block( $block_content, $block ) {
 		return preg_replace_callback(
-			'/<(?:img|video)(?= )[^>]*? class="[^"]*?wp-block-cover__(?:image|video)-background[^"]*?"[^>]*(?=>)/',
+			'#<(?:img|video)(?= )[^>]*? class="[^"]*?wp-block-cover__(?:image|video)-background[^"]*?"#',
 			static function ( $matches ) use ( $block ) {
 				$replacement = $matches[0];
 
