@@ -253,7 +253,8 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 
 				return $replacement;
 			},
-			$block_content
+			$block_content,
+			1
 		);
 	}
 
