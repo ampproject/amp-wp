@@ -222,12 +222,12 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 * @see \AMP_Video_Sanitizer::filter_video_dimensions()
 	 *
 	 * @param string $block_content The block content about to be appended.
-	 * @param array  $block         The block data.
+	 * @param array  $block         The full block, including name and attributes.
 	 * @return string Filtered block content.
 	 */
 	public function ampify_cover_block( $block_content, $block ) {
 		return preg_replace_callback(
-			'/<(?:img|video)(?= )[^>]* class="[^"]*?wp-block-cover__(?:image|video)-background[^"]*?"[^>]*(?=>)/',
+			'/<(?:img|video)(?= )[^>]*? class="[^"]*?wp-block-cover__(?:image|video)-background[^"]*?"[^>]*(?=>)/',
 			static function ( $matches ) use ( $block ) {
 				$replacement = $matches[0];
 
