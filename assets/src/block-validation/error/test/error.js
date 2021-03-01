@@ -266,10 +266,10 @@ describe( 'Error', () => {
 		expect( container.querySelectorAll( `.amp-error--${ newReviewed }` ) ).toHaveLength( 1 );
 		expect( container.querySelector( '.amp-error--removed' ) ).not.toBeNull();
 		expect( container.querySelector( '.amp-error__details-link' ) ).toBeNull();
-		expect( container.querySelector( `.amp-error--removed button` ) ).not.toBeNull();
+		expect( container.querySelector( '.amp-error--removed button' ) ).not.toBeNull();
 		expect( container.querySelector( '.amp-error__block-type-icon' ) ).toBeNull();
 
-		container.querySelector( `.amp-error--removed button` ).click();
+		container.querySelector( '.amp-error--removed button' ).click();
 		expect( container.querySelector( '.amp-error__details-link' ) ).not.toBeNull();
 		expect( container.querySelector( '.amp-error__select-block' ) ).toBeNull();
 	} );
