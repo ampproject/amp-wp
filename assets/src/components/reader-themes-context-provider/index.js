@@ -44,7 +44,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	const [ downloadedTheme, setDownloadedTheme ] = useState( false );
 	const [ themesAPIError, setThemesAPIError ] = useState( null );
 
-	const { editedOptions, originalOptions, updateOptions, savingOptions } = useContext( Options );
+	const { didSaveOptions, editedOptions, originalOptions, updateOptions, savingOptions } = useContext( Options );
 
 	const { reader_theme: originalReaderTheme } = originalOptions;
 	const { reader_theme: readerTheme, theme_support: themeSupport } = editedOptions;
@@ -87,7 +87,11 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	 * Transitional and also set the Reader theme to AMP Legacy.
 	 */
 	useEffect( () => {
-		if ( templateModeWasOverridden ) { // Only do this once.
+		if ( templateModeWasOverridden ) { // Recheck only if the options change.
+			if ( didSaveOptions ) {
+				setTemplateModeWasOverridden( false );
+			}
+
 			return;
 		}
 
@@ -100,7 +104,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 			);
 			setTemplateModeWasOverridden( true );
 		}
-	}, [ originalOptions.theme_support, originalSelectedTheme.availability, templateModeWasOverridden, updateOptions ] );
+	}, [ didSaveOptions, originalOptions.theme_support, originalSelectedTheme.availability, templateModeWasOverridden, updateOptions ] );
 
 	/**
 	 * If the currently selected theme is not installable or unavailable for selection, set the Reader theme to AMP Legacy.
