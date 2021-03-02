@@ -156,7 +156,7 @@
  * AMP drawer placeholder (loading state).
  */
 .amp .amp-drawer--placeholder {
-	height: var(--heading-height);
+	min-height: var(--heading-height);
 	animation: loading-fade 1.6s ease-in-out infinite;
 	background: var(--amp-settings-placeholder-background);
 }
