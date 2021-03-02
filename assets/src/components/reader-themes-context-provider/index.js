@@ -47,7 +47,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 
 	const { didSaveOptions, editedOptions, originalOptions, updateOptions, savingOptions } = useContext( Options );
 
-	const { reader_theme: originalReaderTheme } = originalOptions;
+	const { reader_theme: originalReaderTheme, theme_support: originalThemeSupport } = originalOptions;
 	const { reader_theme: readerTheme, theme_support: themeSupport } = editedOptions;
 
 	// This component sets state inside async functions. Use this ref to prevent state updates after unmount.
@@ -106,7 +106,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 			return;
 		}
 
-		if ( originalOptions.theme_support === READER && originalSelectedTheme.availability === 'active' ) {
+		if ( originalThemeSupport === READER && originalSelectedTheme.availability === 'active' ) {
 			updateOptions(
 				{
 					theme_support: TRANSITIONAL,
@@ -115,7 +115,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 			);
 			setTemplateModeWasOverridden( true );
 		}
-	}, [ didSaveOptions, originalOptions.theme_support, originalSelectedTheme.availability, templateModeWasOverridden, updateOptions ] );
+	}, [ didSaveOptions, originalThemeSupport, originalSelectedTheme.availability, templateModeWasOverridden, updateOptions ] );
 
 	/**
 	 * If the currently selected theme is not installable or unavailable for selection, set the Reader theme to AMP Legacy.
