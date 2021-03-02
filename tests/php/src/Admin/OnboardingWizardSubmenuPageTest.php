@@ -157,6 +157,9 @@ class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 		$this->options_menu->add_menu_items();
 
 		$_SERVER['HTTP_REFERER'] = $referrer_link;
-		$this->assertEquals( $expected_link, $this->onboarding_wizard_submenu_page->get_close_link() );
+		$this->assertEquals(
+			set_url_scheme( $expected_link ),
+			$this->onboarding_wizard_submenu_page->get_close_link()
+		);
 	}
 }
