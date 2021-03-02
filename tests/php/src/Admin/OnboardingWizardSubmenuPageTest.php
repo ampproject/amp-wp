@@ -152,7 +152,7 @@ class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 	/**
 	 * Tests OnboardingWizardSubmenuPage::get_close_link()
 	 *
-	 * @covers ::enqueue_assets()
+	 * @covers ::get_close_link()
 	 * @dataProvider get_referrer_links()
 	 *
 	 * @param callable $referrer_link_callback  Referrer link callback.
