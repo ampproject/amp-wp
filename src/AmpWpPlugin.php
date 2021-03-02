@@ -90,6 +90,7 @@ final class AmpWpPlugin extends ServiceBasedPlugin {
 		'server_timing'                     => Instrumentation\ServerTiming::class,
 		'site_health_integration'           => Admin\SiteHealth::class,
 		'validated_url_stylesheet_gc'       => BackgroundTask\ValidatedUrlStylesheetDataGarbageCollection::class,
+		'url_validation_rest_controller'    => Validation\URLValidationRESTController::class,
 		'url_validation_cron'               => URLValidationCron::class,
 		'save_post_validation_event'        => SavePostValidationEvent::class,
 		'background_task_deactivator'       => BackgroundTaskDeactivator::class,

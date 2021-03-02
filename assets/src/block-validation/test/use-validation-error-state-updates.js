@@ -7,31 +7,52 @@ import { act } from 'react-dom/test-utils';
  * WordPress dependencies
  */
 import { render } from '@wordpress/element';
-import { select } from '@wordpress/data';
+import { select, useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import { convertErrorSourcesToArray, maybeAddClientIdToValidationError, useValidationErrorStateUpdates } from '../use-validation-error-state-updates';
+import { maybeAddClientIdToValidationError, useValidationErrorStateUpdates } from '../use-validation-error-state-updates';
 import { BLOCK_VALIDATION_STORE_KEY, createStore } from '../store';
 
-jest.mock( '@wordpress/data/build/components/use-select', () => {
-	return () => ( {
-		blockOrder: [],
-		currentPost: { id: 1 },
-		getBlock: () => null,
-		getBlocks: () => [],
-		validationErrorsFromPost: require( './__data__/raw-validation-errors' ).rawValidationErrors,
-	} );
-} );
+// This allows us to tweak the returned value on each test
+jest.mock( '@wordpress/data/build/components/use-select', () => jest.fn() );
+
+jest.mock( '@wordpress/api-fetch', () => () => new Promise( ( resolve ) => {
+	resolve( { review_link: 'http://site.test/wp-admin', results: require( './__data__/raw-validation-errors' ).rawValidationErrors } );
+} ) );
 
 createStore( {
 	validationErrors: [],
 } );
 
-let container;
-
 describe( 'useValidationErrorStateUpdates', () => {
+	let container;
+
+	function ComponentContainingHook() {
+		useValidationErrorStateUpdates();
+
+		return null;
+	}
+
+	function renderComponentContainingHook() {
+		render( <ComponentContainingHook />, container );
+	}
+
+	function setupUseSelect( overrides ) {
+		useSelect.mockImplementation( () => ( {
+			currentPostId: 1,
+			getBlock: () => null,
+			getClientIdsWithDescendants: () => null,
+			isAutosavingPost: false,
+			isPreviewingPost: false,
+			isSavingPost: false,
+			previewLink: '',
+			validationErrorsFromPost: require( './__data__/raw-validation-errors' ).rawValidationErrors,
+			...overrides,
+		} ) );
+	}
+
 	beforeEach( () => {
 		container = document.createElement( 'div' );
 		document.body.appendChild( container );
@@ -42,46 +63,85 @@ describe( 'useValidationErrorStateUpdates', () => {
 		container = null;
 	} );
 
-	it( 'updates state', () => {
+	it( 'does not trigger validation on an autosave', async () => {
+		// Initial render should trigger validation.
+		setupUseSelect( {
+			isAutosavingPost: true,
+			isSavingPost: true,
+		} );
+		act( renderComponentContainingHook );
+
 		expect( select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors() ).toHaveLength( 0 );
 
-		function ComponentContainingHook() {
-			useValidationErrorStateUpdates();
+		// Wait for re-render that follows fetching results.
+		await ( () => () => new Promise( ( resolve ) => {
+			setTimeout( resolve );
+		} ) )();
 
-			return null;
-		}
+		expect( select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors() ).toHaveLength( 0 );
+	} );
 
-		act( () => {
-			render(
-				<ComponentContainingHook />,
-				container,
-			);
-		} );
+	it( 'triggers validation on a regular save', async () => {
+		setupUseSelect();
+		act( renderComponentContainingHook );
+
+		expect( select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors() ).toHaveLength( 0 );
+
+		// Wait for re-render that follows fetching results.
+		await ( () => () => new Promise( ( resolve ) => {
+			setTimeout( resolve );
+		} ) )();
 
 		expect( select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors() ).toHaveLength( 8 );
 	} );
-} );
 
-describe( 'convertValidationErrorSourcesToArray', () => {
-	it( 'converts an object to an array', () => {
-		const validationError = {
-			error: {
-				sources: {
-					0: 'error1',
-					1: 'error2',
-					3: 'error3',
-				},
-			},
-		};
+	it( 'triggers validation on a preview request', async () => {
+		// At this stage, internal flags should have been set.
+		setupUseSelect( {
+			isPreviewingPost: true,
+			isAutosavingPost: true,
+			isSavingPost: true,
+		} );
+		act( renderComponentContainingHook );
 
-		convertErrorSourcesToArray( validationError );
-		expect( validationError ).toMatchObject(
-			{
-				error: {
-					sources: [ 'error1', 'error2', 'error3' ],
-				},
-			},
-		);
+		// Wait for re-render that follows fetching results.
+		await ( () => () => new Promise( ( resolve ) => {
+			setTimeout( resolve );
+		} ) )();
+
+		expect( select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors() ).toHaveLength( 0 );
+
+		// When the post save is complete but the preview link is invalid, bail.
+		setupUseSelect( {
+			isPreviewingPost: false,
+			isAutosavingPost: false,
+			isSavingPost: false,
+			previewLink: 'invalid-url',
+		} );
+		act( renderComponentContainingHook );
+
+		// Wait for re-render that follows fetching results.
+		await ( () => () => new Promise( ( resolve ) => {
+			setTimeout( resolve );
+		} ) )();
+
+		expect( select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors() ).toHaveLength( 0 );
+
+		// When the preview link is correct, validation should be triggered.
+		setupUseSelect( {
+			isPreviewingPost: false,
+			isAutosavingPost: false,
+			isSavingPost: false,
+			previewLink: 'http://site.test/?p=1&preview=1&preview_id=1&preview_nonce=foobar',
+		} );
+		act( renderComponentContainingHook );
+
+		// Wait for re-render that follows fetching results.
+		await ( () => () => new Promise( ( resolve ) => {
+			setTimeout( resolve );
+		} ) )();
+
+		expect( select( BLOCK_VALIDATION_STORE_KEY ).getValidationErrors() ).toHaveLength( 8 );
 	} );
 } );
 

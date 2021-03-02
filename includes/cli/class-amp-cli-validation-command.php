@@ -279,7 +279,7 @@ final class AMP_CLI_Validation_Command {
 		}
 
 		foreach ( $urls as $url ) {
-			$validity = $url_validation_provider->get_url_validation( $url['url'], $url['type'], true );
+			$validity = $url_validation_provider->get_url_validation( $url['url'], $url['type'] );
 
 			if ( $this->wp_cli_progress ) {
 				$this->wp_cli_progress->tick();
@@ -289,9 +289,9 @@ final class AMP_CLI_Validation_Command {
 				WP_CLI::warning(
 					sprintf(
 						'Validate URL error (%1$s): %2$s URL: %3$s',
-						$validity['error']->get_error_code(),
-						$validity['error']->get_error_message(),
-						$url
+						$validity->get_error_code(),
+						$validity->get_error_message(),
+						$url['url']
 					)
 				);
 			}
@@ -422,7 +422,7 @@ final class AMP_CLI_Validation_Command {
 
 		$result = AMP_Validation_Manager::validate_url( $url );
 		if ( $result instanceof WP_Error ) {
-			WP_CLI::error( $result );
+			WP_CLI::error( $result->get_error_message() ? $result : $result->get_error_code() );
 		}
 
 		WP_CLI::line( wp_json_encode( $result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );

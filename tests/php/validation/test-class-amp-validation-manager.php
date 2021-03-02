@@ -14,7 +14,6 @@ use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
 use AmpProject\AmpWP\Tests\Helpers\HandleValidation;
 use AmpProject\AmpWP\Tests\Helpers\PrivateAccess;
-use AmpProject\AmpWP\Tests\Helpers\AssertRestApiField;
 use AmpProject\AmpWP\Tests\Helpers\WithoutBlockPreRendering;
 use AmpProject\Dom\Document;
 
@@ -29,7 +28,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 	use AssertContainsCompatibility;
 	use HandleValidation;
 	use PrivateAccess;
-	use AssertRestApiField;
 	use WithoutBlockPreRendering {
 		setUp as public prevent_block_pre_render;
 	}
@@ -157,8 +155,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 
 		$this->assertEquals( 10, has_action( 'edit_form_top', self::TESTED_CLASS . '::print_edit_form_validation_status' ) );
 		$this->assertEquals( 10, has_action( 'all_admin_notices', self::TESTED_CLASS . '::print_plugin_notice' ) );
-
-		$this->assertEquals( 10, has_action( 'rest_api_init', self::TESTED_CLASS . '::add_rest_api_fields' ) );
 
 		$this->assertEquals( 101, has_action( 'admin_bar_menu', [ self::TESTED_CLASS, 'add_admin_bar_menu_items' ] ) );
 
@@ -546,149 +542,6 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$this->assertInstanceOf( 'WP_Error', $results[ $post->ID ] );
 
 		unset( $GLOBALS['pagenow'] );
-	}
-
-	/**
-	 * Test add_rest_api_fields.
-	 *
-	 * @covers AMP_Validation_Manager::add_rest_api_fields()
-	 */
-	public function test_add_rest_api_fields() {
-
-		// Test in a transitional context.
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
-		AMP_Validation_Manager::add_rest_api_fields();
-		$this->assertRestApiFieldPresent(
-			AMP_Post_Type_Support::get_post_types_for_rest_api(),
-			AMP_Validation_Manager::VALIDITY_REST_FIELD_NAME,
-			[
-				'get_callback' => [ AMP_Validation_Manager::class, 'get_amp_validity_rest_field' ],
-				'schema'       => [
-					'description' => __( 'AMP validity status', 'amp' ),
-					'type'        => 'object',
-				],
-			]
-		);
-
-		// Test in a AMP-first (canonical) context.
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::STANDARD_MODE_SLUG );
-		AMP_Validation_Manager::add_rest_api_fields();
-		$this->assertRestApiFieldPresent(
-			AMP_Post_Type_Support::get_post_types_for_rest_api(),
-			AMP_Validation_Manager::VALIDITY_REST_FIELD_NAME,
-			[
-				'get_callback' => [ AMP_Validation_Manager::class, 'get_amp_validity_rest_field' ],
-				'schema'       => [
-					'description' => __( 'AMP validity status', 'amp' ),
-					'type'        => 'object',
-				],
-			]
-		);
-	}
-
-	/**
-	 * Test get_amp_validity_rest_field.
-	 *
-	 * @covers AMP_Validation_Manager::get_amp_validity_rest_field()
-	 * @covers AMP_Validation_Manager::validate_url()
-	 */
-	public function test_get_amp_validity_rest_field() {
-		AMP_Options_Manager::update_option( Option::THEME_SUPPORT, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
-		$this->accept_sanitization_by_default( false );
-		AMP_Validated_URL_Post_Type::register();
-		AMP_Validation_Error_Taxonomy::register();
-
-		$id = self::factory()->post->create();
-		$this->assertNull(
-			AMP_Validation_Manager::get_amp_validity_rest_field(
-				compact( 'id' ),
-				'',
-				new WP_REST_Request( 'GET' )
-			)
-		);
-
-		// Create an error custom post for the ID, so this will return the errors in the field.
-		$errors = [
-			[
-				'code' => 'test',
-			],
-		];
-		$this->create_custom_post(
-			$errors,
-			amp_get_permalink( $id )
-		);
-
-		// Make sure capability check is honored.
-		$this->assertNull(
-			AMP_Validation_Manager::get_amp_validity_rest_field(
-				compact( 'id' ),
-				'',
-				new WP_REST_Request( 'GET' )
-			)
-		);
-
-		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
-
-		// Make user preference is honored.
-		$service = $this->injector->make( UserAccess::class );
-		$service->set_user_enabled( wp_get_current_user()->ID, false );
-		$this->assertNull(
-			AMP_Validation_Manager::get_amp_validity_rest_field(
-				compact( 'id' ),
-				'',
-				new WP_REST_Request( 'GET' )
-			)
-		);
-		$service->set_user_enabled( wp_get_current_user()->ID, true );
-
-		// GET request.
-		$field = AMP_Validation_Manager::get_amp_validity_rest_field(
-			compact( 'id' ),
-			'',
-			new WP_REST_Request( 'GET' )
-		);
-		$this->assertArrayHasKey( 'results', $field );
-		$this->assertArrayHasKey( 'review_link', $field );
-
-		$this->assertEquals(
-			$field['results'],
-			array_map(
-				static function ( $error ) use ( $field ) {
-					return [
-						'sanitized'   => false,
-						'title'       => 'Unknown error (test)',
-						'error'       => $error,
-						'status'      => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
-						'term_status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
-						'forced'      => false,
-						'term_id'     => $field['results'][0]['term_id'],
-					];
-				},
-				$errors
-			)
-		);
-
-		// PUT request.
-		add_filter(
-			'pre_http_request',
-			static function() {
-				return [
-					'body'     => wp_json_encode( [ 'results' => [] ] ),
-					'response' => [
-						'code'    => 200,
-						'message' => 'ok',
-					],
-				];
-			}
-		);
-		$field = AMP_Validation_Manager::get_amp_validity_rest_field(
-			compact( 'id' ),
-			'',
-			new WP_REST_Request( 'PUT' )
-		);
-		$this->assertArrayHasKey( 'results', $field );
-		$this->assertArrayHasKey( 'review_link', $field );
-		$this->assertEmpty( $field['results'] );
 	}
 
 	/**
@@ -2566,6 +2419,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 		$expected_dependencies = [
 			'lodash',
 			'react',
+			'wp-api-fetch',
 			'wp-block-editor',
 			'wp-components',
 			'wp-compose',
@@ -2576,6 +2430,7 @@ class Test_AMP_Validation_Manager extends DependencyInjectedTestCase {
 			'wp-i18n',
 			'wp-plugins',
 			'wp-polyfill',
+			'wp-url',
 		];
 
 		$this->assertStringContains( 'js/amp-block-validation.js', $script->src );
