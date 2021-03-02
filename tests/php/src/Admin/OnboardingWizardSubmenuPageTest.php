@@ -120,17 +120,18 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 		$this->assertTrue( wp_style_is( $handle ) );
 	}
 
+	/** @return array */
 	public function get_referrer_links() {
 		return [
-			'tools page'        => [
+			'tools_page'        => [
 				admin_url( 'tools.php' ),
 				admin_url( 'tools.php' ),
 			],
-			'amp settings page' => [
+			'amp_settings_page' => [
 				admin_url( 'admin.php?page=amp-options' ),
 				admin_url( 'admin.php?page=amp-options' ),
 			],
-			'login page'        => [
+			'login_page'        => [
 				wp_login_url(),
 				admin_url( 'admin.php?page=amp-options' ),
 			],
@@ -151,6 +152,6 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 		add_menu_page( 'AMP Settings', 'AMP', 'manage_options', AMP_Options_Manager::OPTION_NAME );
 
 		$_SERVER['HTTP_REFERER'] = $referrer_link;
-		$this->assertEquals( $this->page->get_close_link(), $expected_link );
+		$this->assertEquals( $expected_link, $this->page->get_close_link() );
 	}
 }
