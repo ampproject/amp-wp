@@ -20,6 +20,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import '../css/variables.css';
+import '../css/animations.css';
 import '../css/elements.css';
 import '../css/core-components.css';
 import './style.css';

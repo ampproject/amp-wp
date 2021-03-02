@@ -151,3 +151,17 @@
 .amp .amp-drawer--handle-type-right .components-panel__body-title button {
 	border-left: 1px solid var(--amp-settings-color-border);
 }
+
+/*
+ * AMP drawer placeholder (loading state).
+ */
+.amp .amp-drawer--placeholder {
+	height: var(--heading-height);
+	animation: loading-fade 1.6s ease-in-out infinite;
+	background: var(--amp-settings-placeholder-background);
+}
+
+.amp .amp-drawer--placeholder > * {
+	opacity: 0;
+	visibility: hidden;
+}

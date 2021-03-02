@@ -36,7 +36,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	const { setAsyncError } = useAsyncError();
 	const { error, setError } = useContext( ErrorContext );
 
-	const [ templateModeWasOverridden, setTemplateModeWasOverridden ] = useState( false );
+	const [ templateModeWasOverridden, setTemplateModeWasOverridden ] = useState(); // Undefined to signal initial unstable state.
 	const [ themeWasOverridden, setThemeWasOverridden ] = useState( false );
 	const [ themes, setThemes ] = useState( null );
 	const [ fetchingThemes, setFetchingThemes ] = useState( false );
@@ -87,7 +87,17 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 	 * Transitional and also set the Reader theme to AMP Legacy.
 	 */
 	useEffect( () => {
-		if ( templateModeWasOverridden ) { // Recheck only if the options change.
+		/**
+		 * Wait for the `originalSelectedTheme` to become available before setting up the initial flag state.
+		 */
+		if ( templateModeWasOverridden === undefined && originalSelectedTheme.availability ) {
+			setTemplateModeWasOverridden( false );
+		}
+
+		/**
+		 * Recheck the flag if and only if the options have been saved.
+		 */
+		if ( templateModeWasOverridden ) {
 			if ( didSaveOptions ) {
 				setTemplateModeWasOverridden( false );
 			}

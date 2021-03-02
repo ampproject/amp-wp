@@ -101,15 +101,24 @@ function getReaderNotice( selected ) {
  * @param {boolean} props.focusReaderThemes Whether the reader themes drawer should be opened and focused.
  */
 export function TemplateModes( { focusReaderThemes } ) {
-	const { editedOptions } = useContext( Options );
+	const { editedOptions, originalOptions } = useContext( Options );
 	const { selectedTheme, templateModeWasOverridden } = useContext( ReaderThemes );
 
 	const { theme_support: themeSupport } = editedOptions;
+	const { theme_support: originalThemeSupport } = originalOptions;
 
 	const { readerNoticeSmall, readerNoticeLarge } = useMemo(
 		() => getReaderNotice( READER === themeSupport ),
 		[ themeSupport ],
 	);
+
+	/**
+	 * Prevent a flash of unconfigured content when loading.
+	 *
+	 * If the original mode is READER, there is a chance that it will get overridden right away.
+	 * In such a case we should wait for the `templateModeWasOverridden` flag to become stable.
+	 */
+	const isLoading = originalThemeSupport === READER && templateModeWasOverridden === undefined;
 
 	return (
 		<section className="template-modes" id="template-modes">
@@ -127,6 +136,7 @@ export function TemplateModes( { focusReaderThemes } ) {
 				initialOpen={ false }
 				mode={ STANDARD }
 				labelExtra={ ( IS_CORE_THEME || 'object' === typeof THEME_SUPPORT_ARGS ) ? <RecommendedNotice /> : null }
+				isLoading={ isLoading }
 			>
 				{
 					// Plugin is not configured; active theme has built-in support or has declared theme support without the paired flag.
@@ -145,6 +155,7 @@ export function TemplateModes( { focusReaderThemes } ) {
 				initialOpen={ false }
 				mode={ TRANSITIONAL }
 				labelExtra={ ( IS_CORE_THEME || 'object' === typeof THEME_SUPPORT_ARGS ) ? <RecommendedNotice /> : null }
+				isLoading={ isLoading }
 			>
 				{
 					// Plugin is not configured; active theme has built-in support or has declared theme support with the paired flag.
@@ -163,10 +174,11 @@ export function TemplateModes( { focusReaderThemes } ) {
 				initialOpen={ false }
 				mode={ READER }
 				labelExtra={ readerNoticeSmall }
+				isLoading={ isLoading }
 			>
 				{ readerNoticeLarge }
 			</TemplateModeOption>
-			{ READER === themeSupport && (
+			{ ( ! isLoading && READER === themeSupport ) && (
 				<AMPDrawer
 					selected={ true }
 					heading={ (
