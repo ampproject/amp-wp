@@ -7,16 +7,13 @@
 
 namespace AmpProject\AmpWP\Tests\Admin;
 
-use AMP_Options_Manager;
-use AmpProject\AmpWP\Admin\GoogleFonts;
 use AmpProject\AmpWP\Admin\OnboardingWizardSubmenuPage;
-use AmpProject\AmpWP\Admin\ReaderThemes;
-use AmpProject\AmpWP\Admin\RESTPreloader;
+use AmpProject\AmpWP\Admin\OptionsMenu;
 use AmpProject\AmpWP\Infrastructure\Delayed;
 use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
+use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
-use WP_UnitTestCase;
 
 /**
  * Tests for OnboardingWizardSubmenuPage class.
@@ -27,7 +24,7 @@ use WP_UnitTestCase;
  *
  * @coversDefaultClass \AmpProject\AmpWP\Admin\OnboardingWizardSubmenuPage
  */
-class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
+class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 
 	use AssertContainsCompatibility;
 
@@ -36,7 +33,12 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 	 *
 	 * @var OnboardingWizardSubmenuPage
 	 */
-	private $page;
+	private $onboarding_wizard_submenu_page;
+
+	/**
+	 * @var OptionsMenu
+	 */
+	private $options_menu;
 
 	/**
 	 * Setup.
@@ -46,15 +48,17 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
-		$this->page = new OnboardingWizardSubmenuPage( new GoogleFonts(), new ReaderThemes(), new RESTPreloader() );
+		$this->onboarding_wizard_submenu_page = $this->injector->make( OnboardingWizardSubmenuPage::class );
+
+		$this->options_menu = $this->injector->make( OptionsMenu::class );
 	}
 
 	/** @covers ::__construct() */
 	public function test__construct() {
-		$this->assertInstanceOf( OnboardingWizardSubmenuPage::class, $this->page );
-		$this->assertInstanceOf( Delayed::class, $this->page );
-		$this->assertInstanceOf( Service::class, $this->page );
-		$this->assertInstanceOf( Registerable::class, $this->page );
+		$this->assertInstanceOf( OnboardingWizardSubmenuPage::class, $this->onboarding_wizard_submenu_page );
+		$this->assertInstanceOf( Delayed::class, $this->onboarding_wizard_submenu_page );
+		$this->assertInstanceOf( Service::class, $this->onboarding_wizard_submenu_page );
+		$this->assertInstanceOf( Registerable::class, $this->onboarding_wizard_submenu_page );
 	}
 
 	/**
@@ -63,11 +67,11 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 	 * @covers ::register()
 	 */
 	public function test_register() {
-		$this->page->register();
+		$this->onboarding_wizard_submenu_page->register();
 
-		$this->assertEquals( 10, has_action( 'admin_head-admin_page_amp-onboarding-wizard', [ $this->page, 'override_template' ] ) );
-		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ $this->page, 'enqueue_assets' ] ) );
-		$this->assertEquals( 10, add_filter( 'admin_title', [ $this->page, 'override_title' ] ) );
+		$this->assertEquals( 10, has_action( 'admin_head-admin_page_amp-onboarding-wizard', [ $this->onboarding_wizard_submenu_page, 'override_template' ] ) );
+		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ $this->onboarding_wizard_submenu_page, 'enqueue_assets' ] ) );
+		$this->assertEquals( 10, add_filter( 'admin_title', [ $this->onboarding_wizard_submenu_page, 'override_title' ] ) );
 	}
 
 	/**
@@ -78,11 +82,11 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 	public function test_override_title() {
 		set_current_screen( 'index.php' );
 
-		$this->assertEquals( 'Index - WordPress', $this->page->override_title( 'Index - WordPress' ) );
+		$this->assertEquals( 'Index - WordPress', $this->onboarding_wizard_submenu_page->override_title( 'Index - WordPress' ) );
 
-		set_current_screen( $this->page->screen_handle() );
+		set_current_screen( $this->onboarding_wizard_submenu_page->screen_handle() );
 
-		$this->assertEquals( 'AMP Onboarding Wizard - WordPress', $this->page->override_title( ' - WordPress' ) );
+		$this->assertEquals( 'AMP Onboarding Wizard - WordPress', $this->onboarding_wizard_submenu_page->override_title( ' - WordPress' ) );
 	}
 
 	/**
@@ -91,9 +95,11 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 	 * @covers ::render()
 	 */
 	public function test_render() {
+		set_current_screen( 'admin_page_amp-onboarding-wizard' );
+
 		ob_start();
 
-		$this->page->render();
+		$this->onboarding_wizard_submenu_page->render();
 
 		$this->assertStringContains( '<div class="amp" id="amp-onboarding-wizard"></div>', ob_get_clean() );
 	}
@@ -104,7 +110,7 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 	 * @covers ::screen_handle()
 	 */
 	public function test_screen_handle() {
-		$this->assertEquals( $this->page->screen_handle(), 'admin_page_amp-onboarding-wizard' );
+		$this->assertEquals( $this->onboarding_wizard_submenu_page->screen_handle(), 'admin_page_amp-onboarding-wizard' );
 	}
 
 	/**
@@ -115,7 +121,7 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 	public function test_enqueue_assets() {
 		$handle = 'amp-onboarding-wizard';
 
-		$this->page->enqueue_assets( $this->page->screen_handle() );
+		$this->onboarding_wizard_submenu_page->enqueue_assets( $this->onboarding_wizard_submenu_page->screen_handle() );
 		$this->assertTrue( wp_script_is( $handle ) );
 		$this->assertTrue( wp_style_is( $handle ) );
 	}
@@ -148,10 +154,9 @@ class OnboardingWizardSubmenuPageTest extends WP_UnitTestCase {
 	 * @param string $expected_link Expected link.
 	 */
 	public function test_get_close_link( $referrer_link, $expected_link ) {
-		// Register an instance of the AMP menu page to ensure `menu_page_url()` returns the correct URL.
-		add_menu_page( 'AMP Settings', 'AMP', 'manage_options', AMP_Options_Manager::OPTION_NAME );
+		$this->options_menu->add_menu_items();
 
 		$_SERVER['HTTP_REFERER'] = $referrer_link;
-		$this->assertEquals( $expected_link, $this->page->get_close_link() );
+		$this->assertEquals( $expected_link, $this->onboarding_wizard_submenu_page->get_close_link() );
 	}
 }
