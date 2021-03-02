@@ -14,6 +14,7 @@ use AmpProject\AmpWP\Infrastructure\Registerable;
 use AmpProject\AmpWP\Infrastructure\Service;
 use AmpProject\AmpWP\Tests\DependencyInjectedTestCase;
 use AmpProject\AmpWP\Tests\Helpers\AssertContainsCompatibility;
+use AMP_Options_Manager;
 
 /**
  * Tests for OnboardingWizardSubmenuPage class.
@@ -130,16 +131,20 @@ class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 	public function get_referrer_links() {
 		return [
 			'tools_page'        => [
-				admin_url( 'tools.php' ),
-				admin_url( 'tools.php' ),
+				static function () {
+					return admin_url( 'tools.php' );
+				},
+				true,
 			],
 			'amp_settings_page' => [
-				admin_url( 'admin.php?page=amp-options' ),
-				admin_url( 'admin.php?page=amp-options' ),
+				static function () {
+					return admin_url( 'admin.php?page=amp-options' );
+				},
+				true,
 			],
 			'login_page'        => [
-				wp_login_url(),
-				admin_url( 'admin.php?page=amp-options' ),
+				'wp_login_url',
+				false,
 			],
 		];
 	}
@@ -150,15 +155,17 @@ class OnboardingWizardSubmenuPageTest extends DependencyInjectedTestCase {
 	 * @covers ::enqueue_assets()
 	 * @dataProvider get_referrer_links()
 	 *
-	 * @param string $referrer_link Referrer link.
-	 * @param string $expected_link Expected link.
+	 * @param callable $referrer_link_callback  Referrer link callback.
+	 * @param bool     $expected_referrer_close Whether the close link is expected to be the referrer.
 	 */
-	public function test_get_close_link( $referrer_link, $expected_link ) {
+	public function test_get_close_link( $referrer_link_callback, $expected_referrer_close ) {
 		$this->options_menu->add_menu_items();
 
-		$_SERVER['HTTP_REFERER'] = $referrer_link;
+		$referrer                = $referrer_link_callback();
+		$_SERVER['HTTP_REFERER'] = $referrer;
+
 		$this->assertEquals(
-			set_url_scheme( $expected_link ),
+			$expected_referrer_close ? $referrer : menu_page_url( AMP_Options_Manager::OPTION_NAME, false ),
 			$this->onboarding_wizard_submenu_page->get_close_link()
 		);
 	}
