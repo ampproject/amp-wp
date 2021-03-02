@@ -17,6 +17,7 @@ import { USING_FALLBACK_READER_THEME, LEGACY_THEME_SLUG } from 'amp-settings';
 import { useAsyncError } from '../../utils/use-async-error';
 import { Options } from '../options-context-provider';
 import { ErrorContext } from '../error-context-provider';
+import { READER, TRANSITIONAL } from '../../common/constants';
 
 export const ReaderThemes = createContext();
 
@@ -105,10 +106,10 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 			return;
 		}
 
-		if ( 'reader' === originalOptions.theme_support && originalSelectedTheme.availability === 'active' ) {
+		if ( originalOptions.theme_support === READER && originalSelectedTheme.availability === 'active' ) {
 			updateOptions(
 				{
-					theme_support: 'transitional',
+					theme_support: TRANSITIONAL,
 					reader_theme: LEGACY_THEME_SLUG,
 				},
 			);
@@ -201,7 +202,7 @@ export function ReaderThemesContextProvider( { wpAjaxUrl, children, currentTheme
 			return;
 		}
 
-		if ( 'reader' !== themeSupport ) {
+		if ( READER !== themeSupport ) {
 			return;
 		}
 
