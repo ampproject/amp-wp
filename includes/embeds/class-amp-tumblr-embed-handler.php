@@ -112,7 +112,7 @@ class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 					$parsed_url = wp_parse_url( $script->getAttribute( Attribute::SRC ) );
 
 					return (
-						( isset( $parsed_url['host'], $parsed_url['path'] ) )
+						isset( $parsed_url['host'], $parsed_url['path'] )
 						&&
 						'assets.tumblr.com' === $parsed_url['host']
 						&&
