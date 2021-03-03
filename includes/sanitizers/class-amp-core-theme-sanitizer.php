@@ -2233,11 +2233,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public static function add_twentytwentyone_amp_iframe_button_fix() {
 		add_action(
-				'wp_enqueue_scripts',
-				static function () {
-					$style = 'button[overflow]:hover { background-color: var(--global--color-background); }';
-					wp_add_inline_style( 'twenty-twenty-one-style', $style );
-				}
+			'wp_enqueue_scripts',
+			static function () {
+				$style = 'button[overflow]:hover { background-color: var(--global--color-background); }';
+				wp_add_inline_style( 'twenty-twenty-one-style', $style );
+			}
 		);
 	}
 
