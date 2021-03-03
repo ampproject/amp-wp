@@ -89,6 +89,7 @@ class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 				'button',
 				[
 					'overflow' => '',
+					'type'     => 'button',
 				]
 			);
 			$overflow_element->textContent = __( 'See more', 'amp' );
