@@ -54,7 +54,12 @@ class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param Document $dom DOM.
 	 */
 	public function sanitize_raw_embeds( Document $dom ) {
-		$nodes = $dom->xpath->query( sprintf( '//div[ @class and contains( concat( " ", normalize-space( @class ), " " ), " tumblr-post " ) and starts-with( @data-href, "%s" ) ]', $this->base_embed_url ) );
+		$nodes = $dom->xpath->query(
+			sprintf(
+				'//div[ @class and @data-href and contains( concat( " ", normalize-space( @class ), " " ), " tumblr-post " ) and starts-with( @data-href, "%s" ) ]',
+				$this->base_embed_url
+			)
+		);
 
 		if ( 0 === $nodes->length ) {
 			return;
@@ -105,12 +110,13 @@ class AMP_Tumblr_Embed_Handler extends AMP_Base_Embed_Handler {
 					}
 
 					$parsed_url = wp_parse_url( $script->getAttribute( Attribute::SRC ) );
+
 					return (
-					( isset( $parsed_url['host'], $parsed_url['path'] ) )
-					&&
-					'assets.tumblr.com' === $parsed_url['host']
-					&&
-					'/post.js' === $parsed_url['path']
+						( isset( $parsed_url['host'], $parsed_url['path'] ) )
+						&&
+						'assets.tumblr.com' === $parsed_url['host']
+						&&
+						'/post.js' === $parsed_url['path']
 					);
 				}
 			);
