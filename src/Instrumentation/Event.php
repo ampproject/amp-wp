@@ -103,7 +103,7 @@ class Event {
 	 * @return string Sanitized key.
 	 */
 	private function sanitize_key( $key ) {
-		return preg_replace( '/\W+/', '_', $key );
+		return preg_replace( '/[^a-zA-Z0-9_-]+/', '_', $key );
 	}
 
 	/**
