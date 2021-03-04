@@ -112,7 +112,7 @@ class AMP_Tumblr_Embed_Handler_Test extends WP_UnitTestCase {
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEqualMarkup( $expected, $content );
 
-		if ( $url ) {
+		if ( $url && function_exists( 'do_blocks' ) ) {
 			$embed_block = "<!-- wp:embed {\"url\":\"{$url}\",\"type\":\"rich\",\"providerNameSlug\":\"tumblr\",\"responsive\":true} -->\n<figure class=\"wp-block-embed is-type-rich is-provider-tumblr wp-block-embed-tumblr\"><div class=\"wp-block-embed__wrapper\">\n{$url}\n</div></figure>\n<!-- /wp:embed -->";
 			$content     = apply_filters( 'the_content', $embed_block );
 			$dom         = AMP_DOM_Utils::get_dom_from_content( $content );
